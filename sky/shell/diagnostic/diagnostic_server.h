@@ -5,7 +5,6 @@
 #ifndef SKY_ENGINE_CORE_DIAGNOSTIC_DIAGNOSTIC_SERVER_H_
 #define SKY_ENGINE_CORE_DIAGNOSTIC_DIAGNOSTIC_SERVER_H_
 
-#include "base/memory/weak_ptr.h"
 #include "dart/runtime/include/dart_api.h"
 
 namespace sky {

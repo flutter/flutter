@@ -4,7 +4,8 @@
 
 #include "sky/shell/gpu/direct/ganesh_canvas.h"
 
-#include "base/logging.h"
+#include "lib/ftl/arraysize.h"
+#include "lib/ftl/logging.h"
 #include "third_party/skia/include/gpu/gl/GrGLInterface.h"
 
 namespace sky {
@@ -55,7 +56,7 @@ bool GaneshCanvas::SelectPixelConfig(GrPixelConfig* config) {
 }
 
 SkCanvas* GaneshCanvas::GetCanvas(int32_t fbo, const SkISize& size) {
-  DCHECK(IsValid());
+  FTL_DCHECK(IsValid());
 
   if (sk_surface_ && sk_surface_->width() == size.width() &&
       sk_surface_->height() == size.height())
@@ -64,16 +65,16 @@ SkCanvas* GaneshCanvas::GetCanvas(int32_t fbo, const SkISize& size) {
   GrBackendRenderTargetDesc desc;
   desc.fWidth = size.width();
   desc.fHeight = size.height();
-  CHECK(SelectPixelConfig(&desc.fConfig));
+  FTL_CHECK(SelectPixelConfig(&desc.fConfig));
   desc.fStencilBits = 8;
   desc.fOrigin = kBottomLeft_GrSurfaceOrigin;
   desc.fRenderTargetHandle = fbo;
 
   sk_sp<GrRenderTarget> target(
       gr_context_->textureProvider()->wrapBackendRenderTarget(desc));
-  DCHECK(target);
+  FTL_DCHECK(target);
   sk_surface_ = SkSurface::MakeRenderTargetDirect(target.get(), nullptr);
-  DCHECK(sk_surface_);
+  FTL_DCHECK(sk_surface_);
   return sk_surface_->getCanvas();
 }
 

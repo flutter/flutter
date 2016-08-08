@@ -4,9 +4,9 @@
 
 #include "sky/shell/tracing_controller.h"
 
-#include "base/threading/platform_thread.h"
 #include "base/trace_event/trace_event.h"
 #include "dart/runtime/include/dart_tools_api.h"
+#include "lib/ftl/logging.h"
 #include "sky/engine/core/script/dart_init.h"
 #include "sky/engine/wtf/MakeUnique.h"
 #include "sky/shell/shell.h"
@@ -18,11 +18,9 @@ namespace shell {
 
 TracingController::TracingController()
     : picture_tracing_enabled_(false), tracing_active_(false) {
-  auto start = [this]() { StartTracing(); };
-  auto stop = [this]() { StopTracing(); };
-
   blink::SetEmbedderTracingCallbacks(
-      WTF::MakeUnique<blink::EmbedderTracingCallbacks>(start, stop));
+      WTF::MakeUnique<blink::EmbedderTracingCallbacks>(
+          [this]() { StartTracing(); }, [this]() { StopTracing(); }));
 }
 
 TracingController::~TracingController() {
@@ -86,7 +84,7 @@ static void BaseTraceEventCallback(base::TraceTicks timestamp,
       // discrete begin-end pairs. This greatly simplifies things. We dont have
       // to track the second timestamp to pass to the Dart timeline event
       // because we never see a Dart_Timeline_Event_Duration event.
-      DCHECK(false) << "Unknown trace event phase";
+      FTL_DCHECK(false) << "Unknown trace event phase";
       return;
   }
 
@@ -145,43 +143,30 @@ static void BaseTraceEventCallback(base::TraceTicks timestamp,
   }
 }
 
-static void TraceThreadMetadataToObservatory() {
-  const char* name = base::PlatformThread::GetName();
-  if (name == nullptr) {
-    return;
-  }
-  Dart_SetThreadName(name);
-}
-
 static void AddTraceMetadata() {
-  Shell::Shared().gpu_task_runner()->PostTask(
-      FROM_HERE, base::Bind(&TraceThreadMetadataToObservatory));
-  Shell::Shared().ui_task_runner()->PostTask(
-      FROM_HERE, base::Bind(&TraceThreadMetadataToObservatory));
-  Shell::Shared().io_task_runner()->PostTask(
-      FROM_HERE, base::Bind(&TraceThreadMetadataToObservatory));
+  Shell::Shared().gpu_ftl_task_runner()->PostTask(
+      []() { Dart_SetThreadName("gpu_thread"); });
+  Shell::Shared().ui_ftl_task_runner()->PostTask(
+      []() { Dart_SetThreadName("ui_thread"); });
+  Shell::Shared().io_ftl_task_runner()->PostTask(
+      []() { Dart_SetThreadName("io_thread"); });
 }
 
 void TracingController::StartTracing() {
-  if (tracing_active_) {
+  if (tracing_active_)
     return;
-  }
-
   tracing_active_ = true;
-
   StartBaseTracing();
-
   AddTraceMetadata();
 }
 
 void TracingController::StartBaseTracing() {
-  namespace TE = base::trace_event;
-  auto config =
-      TE::TraceConfig("*,disabled-by-default-skia", TE::RECORD_CONTINUOUSLY);
+  auto config = base::trace_event::TraceConfig(
+      "*,disabled-by-default-skia", base::trace_event::RECORD_CONTINUOUSLY);
 
-  auto log = TE::TraceLog::GetInstance();
+  auto log = base::trace_event::TraceLog::GetInstance();
 
-  log->SetEnabled(config, TE::TraceLog::MONITORING_MODE);
+  log->SetEnabled(config, base::trace_event::TraceLog::MONITORING_MODE);
   log->SetEventCallbackEnabled(config, &BaseTraceEventCallback);
 }
 
@@ -196,15 +181,14 @@ void TracingController::StopTracing() {
 }
 
 void TracingController::StopBaseTracing() {
-  auto log = base::trace_event::TraceLog::GetInstance();
-
-  log->SetDisabled();
-  log->SetEventCallbackDisabled();
+  auto trace_log = base::trace_event::TraceLog::GetInstance();
+  trace_log->SetDisabled();
+  trace_log->SetEventCallbackDisabled();
 }
 
-base::FilePath TracingController::TracePathWithExtension(
-    base::FilePath dir,
-    std::string extension) const {
+std::string TracingController::TracePathWithExtension(
+    const std::string& directory,
+    const std::string& extension) const {
   base::Time::Exploded exploded;
   base::Time now = base::Time::Now();
 
@@ -212,20 +196,20 @@ base::FilePath TracingController::TracePathWithExtension(
 
   std::stringstream stream;
   // Example: trace_2015-10-08_at_11.38.25.121_.extension
-  stream << "trace_" << exploded.year << "-" << exploded.month << "-"
-         << exploded.day_of_month << "_at_" << exploded.hour << "."
+  stream << directory << "/trace_" << exploded.year << "-" << exploded.month
+         << "-" << exploded.day_of_month << "_at_" << exploded.hour << "."
          << exploded.minute << "." << exploded.second << "."
          << exploded.millisecond << "." << extension;
-  return dir.Append(stream.str());
+  return stream.str();
 }
 
-base::FilePath TracingController::PictureTracingPathForCurrentTime() const {
+std::string TracingController::PictureTracingPathForCurrentTime() const {
   return PictureTracingPathForCurrentTime(traces_base_path_);
 }
 
-base::FilePath TracingController::PictureTracingPathForCurrentTime(
-    base::FilePath dir) const {
-  return TracePathWithExtension(dir, "skp");
+std::string TracingController::PictureTracingPathForCurrentTime(
+    const std::string& directory) const {
+  return TracePathWithExtension(directory, "skp");
 }
 
 }  // namespace shell

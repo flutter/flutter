@@ -50,9 +50,8 @@ void InitializeTracing() {
   base::FilePath path;
   bool result = ::PathService::Get(base::DIR_ANDROID_APP_DATA, &path);
   DCHECK(result);
-  sky::shell::Shell::Shared()
-      .tracing_controller()
-      .set_traces_base_path(path);
+  sky::shell::Shell::Shared().tracing_controller().set_traces_base_path(
+      path.AsUTF8Unsafe());
 }
 
 }  // namespace
@@ -84,9 +83,11 @@ static void Init(JNIEnv* env,
   InitializeTracing();
 }
 
-static void RecordStartTimestamp(JNIEnv* env, jclass jcaller,
-    jlong initTimeMillis) {
-  int64_t initTimeMicros = static_cast<int64_t>(initTimeMillis) * static_cast<int64_t>(1000);
+static void RecordStartTimestamp(JNIEnv* env,
+                                 jclass jcaller,
+                                 jlong initTimeMillis) {
+  int64_t initTimeMicros =
+      static_cast<int64_t>(initTimeMillis) * static_cast<int64_t>(1000);
   blink::engine_main_enter_ts = Dart_TimelineGetMicros() - initTimeMicros;
 }
 

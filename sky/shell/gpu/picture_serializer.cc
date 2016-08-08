@@ -27,8 +27,8 @@ SkData* PngPixelSerializer::onEncode(const SkPixmap& pixmap) {
                                     SkImageEncoder::kDefaultQuality);
 }
 
-void SerializePicture(const base::FilePath& file_name, SkPicture* picture) {
-  SkFILEWStream stream(file_name.AsUTF8Unsafe().c_str());
+void SerializePicture(const std::string& path, SkPicture* picture) {
+  SkFILEWStream stream(path.c_str());
   PngPixelSerializer serializer;
   picture->serialize(&stream, &serializer);
 }

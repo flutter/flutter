@@ -5,7 +5,8 @@
 #ifndef SKY_SHELL_GPU_PICTURE_SERIALIZER_H_
 #define SKY_SHELL_GPU_PICTURE_SERIALIZER_H_
 
-#include "base/files/file_path.h"
+#include <string>
+
 #include "third_party/skia/include/core/SkPicture.h"
 #include "third_party/skia/include/core/SkPixelSerializer.h"
 
@@ -17,7 +18,7 @@ class PngPixelSerializer : public SkPixelSerializer {
   SkData* onEncode(const SkPixmap& pixmap) override;
 };
 
-void SerializePicture(const base::FilePath& file_name, SkPicture*);
+void SerializePicture(const std::string& path, SkPicture* picture);
 
 }  // namespace sky
 

@@ -4,15 +4,18 @@
 
 #include "sky/shell/platform_view_service_protocol.h"
 
+#include <string.h>
+
 #include <string>
 
-#include "base/strings/string_util.h"
 #include "sky/shell/shell.h"
 
 namespace sky {
 namespace shell {
-
 namespace {
+
+constexpr char kViewIdPrefx[] = "_flutterView/";
+constexpr size_t kViewIdPrefxLength = sizeof(kViewIdPrefx) - 1;
 
 static intptr_t KeyIndex(const char** param_keys,
                          intptr_t num_params,
@@ -39,8 +42,7 @@ static const char* ValueForKey(const char** param_keys,
   return param_values[index];
 }
 
-static bool ErrorMissingParameter(const char** json_object,
-                                  const char* name) {
+static bool ErrorMissingParameter(const char** json_object, const char* name) {
   const intptr_t kInvalidParams = -32602;
   std::stringstream response;
   response << "{\"code\":" << std::to_string(kInvalidParams) << ",";
@@ -63,8 +65,7 @@ static bool ErrorBadParameter(const char** json_object,
   return false;
 }
 
-static bool ErrorUnknownView(const char** json_object,
-                             const char* view_id) {
+static bool ErrorUnknownView(const char** json_object, const char* view_id) {
   const intptr_t kInvalidParams = -32602;
   std::stringstream response;
   response << "{\"code\":" << std::to_string(kInvalidParams) << ",";
@@ -74,8 +75,7 @@ static bool ErrorUnknownView(const char** json_object,
   return false;
 }
 
-static bool ErrorIsolateSpawn(const char** json_object,
-                              const char* view_id) {
+static bool ErrorIsolateSpawn(const char** json_object, const char* view_id) {
   const intptr_t kInvalidParams = -32602;
   std::stringstream response;
   response << "{\"code\":" << std::to_string(kInvalidParams) << ",";
@@ -86,18 +86,15 @@ static bool ErrorIsolateSpawn(const char** json_object,
   return false;
 }
 
-} // namespace
-
+}  // namespace
 
 void PlatformViewServiceProtocol::RegisterHook(bool running_precompiled_code) {
   if (running_precompiled_code) {
     return;
   }
-  Dart_RegisterRootServiceRequestCallback(kRunInViewExtensionName,
-                                          &RunInView,
+  Dart_RegisterRootServiceRequestCallback(kRunInViewExtensionName, &RunInView,
                                           nullptr);
-  Dart_RegisterRootServiceRequestCallback(kListViewsExtensionName,
-                                          &ListViews,
+  Dart_RegisterRootServiceRequestCallback(kListViewsExtensionName, &ListViews,
                                           nullptr);
 }
 
@@ -121,7 +118,7 @@ bool PlatformViewServiceProtocol::RunInView(const char* method,
   if (view_id == NULL) {
     return ErrorMissingParameter(json_object, "viewId");
   }
-  if (!base::StartsWithASCII(view_id, "_flutterView/", true)) {
+  if (strncmp(view_id, kViewIdPrefx, kViewIdPrefxLength) != 0) {
     return ErrorBadParameter(json_object, "viewId", view_id);
   }
   if (asset_directory == NULL) {
@@ -136,19 +133,15 @@ bool PlatformViewServiceProtocol::RunInView(const char* method,
 
   // Convert the actual flutter view hex id into a number.
   uintptr_t view_id_as_num =
-      std::stoull((view_id + strlen("_flutterView/")), nullptr, 16);
+      std::stoull((view_id + kViewIdPrefxLength), nullptr, 16);
 
   // Ask the Shell to run this script in the specified view. This will run a
   // task on the UI thread before returning.
   Shell& shell = Shell::Shared();
   bool view_existed = false;
   Dart_Port main_port = ILLEGAL_PORT;
-  shell.RunInPlatformView(view_id_as_num,
-                          main_script,
-                          packages_file,
-                          asset_directory,
-                          &view_existed,
-                          &main_port);
+  shell.RunInPlatformView(view_id_as_num, main_script, packages_file,
+                          asset_directory, &view_existed, &main_port);
 
   if (!view_existed) {
     // If the view did not exist this request has definitely failed.
@@ -159,12 +152,11 @@ bool PlatformViewServiceProtocol::RunInView(const char* method,
   } else {
     // The view existed and the isolate was created. Success.
     std::stringstream response;
-    response << "{\"type\":\"Success\",";
-    response << "\"viewId\": \"_flutterView/";
-    response << "0x" << std::hex << view_id;
-    response << "\",";
-    response << "\"isolateId\": \"isolates/" << std::dec << main_port << "\"";
-    response << "}";
+    response << "{\"type\":\"Success\","
+             << "\"viewId\": \"" << kViewIdPrefx << "0x" << std::hex << view_id
+             << "\","
+             << "\"isolateId\": \"isolates/" << std::dec << main_port << "\""
+             << "}";
     *json_object = strdup(response.str().c_str());
     return true;
   }
@@ -201,11 +193,10 @@ bool PlatformViewServiceProtocol::ListViews(const char* method,
     } else {
       prefix_comma = true;
     }
-    response << "{\"type\":\"FlutterView\", \"id\": \"_flutterView/";
-    response << "0x" << std::hex << view_id;
-    response << "\",";
-    response << "\"isolateId\": \"isolates/" << std::dec << isolate_id << "\"";
-    response << "}";
+    response << "{\"type\":\"FlutterView\", \"id\": \"" << kViewIdPrefx << "0x"
+             << std::hex << view_id << "\","
+             << "\"isolateId\": \"isolates/" << std::dec << isolate_id << "\""
+             << "}";
   }
   response << "]}";
   // Copy the response.

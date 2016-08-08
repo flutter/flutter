@@ -110,11 +110,8 @@ void FlutterInit(int argc, const char* argv[]) {
 - (void)setupTracing {
   NSArray* paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory,
                                                        NSUserDomainMask, YES);
-  base::FilePath tracesPath =
-      base::FilePath::FromUTF8Unsafe([paths.firstObject UTF8String]);
-
   sky::shell::Shell::Shared().tracing_controller().set_traces_base_path(
-      tracesPath);
+      [paths.firstObject UTF8String]);
 }
 
 - (void)setupNotificationCenterObservers {

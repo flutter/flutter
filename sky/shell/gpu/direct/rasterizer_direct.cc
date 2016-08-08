@@ -4,7 +4,7 @@
 
 #include "sky/shell/gpu/direct/rasterizer_direct.h"
 
-#include "base/trace_event/trace_event.h"
+#include "glue/trace_event.h"
 #include "mojo/public/cpp/system/data_pipe.h"
 #include "sky/engine/wtf/PassRefPtr.h"
 #include "sky/engine/wtf/RefPtr.h"
@@ -143,7 +143,7 @@ void RasterizerDirect::Draw(uint64_t layer_tree_ptr,
   const auto& tracingController = Shell::Shared().tracing_controller();
 
   if (frameExceededThreshold || tracingController.picture_tracing_enabled()) {
-    base::FilePath path = tracingController.PictureTracingPathForCurrentTime();
+    std::string path = tracingController.PictureTracingPathForCurrentTime();
 
     SkPictureRecorder recoder;
     recoder.beginRecording(SkRect::MakeWH(size.width(), size.height()));

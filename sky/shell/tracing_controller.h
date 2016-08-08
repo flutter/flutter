@@ -5,8 +5,9 @@
 #ifndef __SKY_SHELL_TRACING_CONTROLLER__
 #define __SKY_SHELL_TRACING_CONTROLLER__
 
-#include "base/macros.h"
-#include "base/files/file.h"
+#include <string>
+
+#include "lib/ftl/macros.h"
 
 namespace sky {
 namespace shell {
@@ -26,14 +27,14 @@ class TracingController {
   // tracing controller should be used.
   static void StartBaseTracing();
 
-  base::FilePath PictureTracingPathForCurrentTime() const;
-
-  base::FilePath PictureTracingPathForCurrentTime(base::FilePath dir) const;
+  std::string PictureTracingPathForCurrentTime() const;
+  std::string PictureTracingPathForCurrentTime(
+      const std::string& directory) const;
 
   bool tracing_active() const { return tracing_active_; }
 
-  void set_traces_base_path(const base::FilePath& base_path) {
-    traces_base_path_ = base_path;
+  void set_traces_base_path(std::string base_path) {
+    traces_base_path_ = std::move(base_path);
   }
 
   void set_picture_tracing_enabled(bool enabled) {
@@ -43,17 +44,18 @@ class TracingController {
   bool picture_tracing_enabled() const { return picture_tracing_enabled_; }
 
  private:
-  base::FilePath traces_base_path_;
+  std::string traces_base_path_;
   bool picture_tracing_enabled_;
   bool tracing_active_;
 
   void StopBaseTracing();
 
-  base::FilePath TracePathWithExtension(base::FilePath dir,
-                                        std::string extension) const;
+  std::string TracePathWithExtension(const std::string& directory,
+                                     const std::string& extension) const;
 
-  DISALLOW_COPY_AND_ASSIGN(TracingController);
+  FTL_DISALLOW_COPY_AND_ASSIGN(TracingController);
 };
+
 }  // namespace shell
 }  // namespace sky
 

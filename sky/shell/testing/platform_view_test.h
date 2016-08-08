@@ -5,7 +5,7 @@
 #ifndef SKY_SHELL_TESTING_PLATFORM_VIEW_TEST_H_
 #define SKY_SHELL_TESTING_PLATFORM_VIEW_TEST_H_
 
-#include "base/macros.h"
+#include "lib/ftl/macros.h"
 #include "sky/shell/platform_view.h"
 
 namespace sky {
@@ -32,7 +32,7 @@ class PlatformViewTest : public PlatformView {
  private:
   base::WeakPtrFactory<PlatformViewTest> weak_factory_;
 
-  DISALLOW_COPY_AND_ASSIGN(PlatformViewTest);
+  FTL_DISALLOW_COPY_AND_ASSIGN(PlatformViewTest);
 };
 
 }  // namespace shell
