@@ -1,0 +1,31 @@
+diff -rupN ./man/Makefile ../cups-1.5.3-patched/man/Makefile
+--- ./man/Makefile	2014-01-31 20:19:55.000000000 +0400
++++ ../cups-1.5.3-patched/man/Makefile	2014-01-31 20:21:56.449781676 +0400
+@@ -69,6 +69,12 @@ MAN8	=	cupsaccept.$(MAN8EXT) \
+ 
+ LANGUAGES=de fr
+ 
++# Man pages build may fail. We don't need those in instrumented builds anyway.
++MAN1 =
++MAN5 =
++MAN7 =
++MAN8 =
++
+ #
+ # Make everything...
+ #
+diff -rupN ./man/Makefile.l10n ../cups-1.5.3-patched/man/Makefile.l10n
+--- ./man/Makefile.l10n	2014-01-31 20:19:55.000000000 +0400
++++ ../cups-1.5.3-patched/man/Makefile.l10n	2014-01-31 20:22:13.889535988 +0400
+@@ -57,6 +57,11 @@ MAN8	=	cupsaccept.$(MAN8EXT) \
+ 		lpmove.$(MAN8EXT) \
+ 		lpc.$(MAN8EXT)
+ 
++# Man pages build may fail. We don't need those in instrumented builds anyway.
++MAN1 =
++MAN5 =
++MAN7 =
++MAN8 =
+ 
+ #
+ # Make everything...

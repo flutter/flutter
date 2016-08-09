@@ -1,0 +1,8 @@
+In file included from base_class_must_define_virtual_trace.cpp:5:
+./base_class_must_define_virtual_trace.h:12:1: warning: [blink-gc] Left-most base class 'PartBase' of derived class 'PartDerived' must define a virtual trace method.
+class PartBase {
+^
+./base_class_must_define_virtual_trace.h:23:1: warning: [blink-gc] Left-most base class 'HeapBase' of derived class 'HeapDerived' must define a virtual trace method.
+class HeapBase : public GarbageCollected<HeapBase> {
+^
+2 warnings generated.

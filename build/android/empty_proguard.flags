@@ -1,0 +1,1 @@
+# Used for apk targets that do not need proguard. See build/java_apk.gypi.

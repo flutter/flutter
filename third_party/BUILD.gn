@@ -1,0 +1,43 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+if (is_android) {
+  import("//build/config/android/config.gni")
+}
+
+declare_args() {
+  # Uses system libjpeg. If true, overrides use_libjpeg_turbo.
+  use_system_libjpeg = false
+
+  # Uses libjpeg_turbo as the jpeg implementation. Has no effect if
+  # use_system_libjpeg is set.
+  use_libjpeg_turbo = true
+}
+
+config("system_libjpeg_config") {
+  defines = [ "USE_SYSTEM_LIBJPEG" ]
+}
+
+config("libjpeg_turbo_config") {
+  defines = [ "USE_LIBJPEG_TURBO" ]
+}
+
+# This is a meta target that forwards to the system's libjpeg,
+# third_party/libjpeg, or third_party/libjpeg_turbo depending on the build args
+# declared in this file.
+group("jpeg") {
+  if (use_system_libjpeg) {
+    libs = [ "jpeg" ]
+    public_configs = [ ":system_libjpeg_config" ]
+  } else if (use_libjpeg_turbo) {
+    deps = [
+      "//third_party/libjpeg_turbo:libjpeg",
+    ]
+    public_configs = [ ":libjpeg_turbo_config" ]
+  } else {
+    deps = [
+      "//third_party/libjpeg:libjpeg",
+    ]
+  }
+}

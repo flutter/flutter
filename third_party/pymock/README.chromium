@@ -1,0 +1,10 @@
+Name: mock
+URL: http://pypi.python.org/pypi/mock
+Version: 1.0.1
+Security Critical: no
+License: BSD
+License File: LICENSE.txt
+Description:
+Python mock library, currently used by native_client_sdk.  This is the
+same mock library that is now part of python 3.3 where it is know as
+unittest.mock.

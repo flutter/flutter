@@ -1,0 +1,11 @@
+Name: Robolectric 
+URL: http://robolectric.org
+Version: 2.4
+License: Apache 2.0 
+License File: NOT_SHIPPED
+Security Critical: no
+License Android Compatible: yes
+Description: Robolectric is a unit test framework for Android. To update the
+robolectric jars, go to robolectric.org/download and follow link to
+robolectric-X.X.X-jar-with-dependencies.jar.
+Local Modifications: None

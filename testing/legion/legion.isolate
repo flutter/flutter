@@ -1,0 +1,25 @@
+# Copyright 2015 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+{
+  'variables': {
+    'files': [
+      '__init__.py',
+      'common_lib.py',
+      'jsonrpclib.py',
+      'legion_test_case.py',
+      'legion.isolate',
+      'process.py',
+      'rpc_methods.py',
+      'rpc_server.py',
+      'run_task.py',
+      'ssl_util.py',
+      'task_controller.py',
+      'task_registration_server.py',
+      'test_controller.py',
+      'SimpleJSONRPCServer.py',
+      '../../tools/swarming_client/',
+    ],
+  },
+}

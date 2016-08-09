@@ -1,0 +1,14 @@
+In file included from class_multiple_trace_bases.cpp:5:
+./class_multiple_trace_bases.h:22:1: warning: [blink-gc] Class 'Derived' requires a trace method.
+class Derived : public Base, public Mixin {
+^
+./class_multiple_trace_bases.h:22:17: note: [blink-gc] Untraced base class 'Base' declared here:
+class Derived : public Base, public Mixin {
+                ^
+./class_multiple_trace_bases.h:22:30: note: [blink-gc] Untraced base class 'Mixin' declared here:
+class Derived : public Base, public Mixin {
+                             ^
+./class_multiple_trace_bases.h:22:1: warning: [blink-gc] Class 'Derived' which inherits from GarbageCollectedMixin must locally declare and override trace(Visitor*)
+class Derived : public Base, public Mixin {
+^
+2 warnings generated.

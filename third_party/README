@@ -1,0 +1,44 @@
+This directory contains the Flutter engine's third-party dependencies,
+except for:
+
+  //base, which is required to be at the root of the repository, and
+  which is pulled in as part of the build system.
+
+  //dart, which is also at the root of the repository, and which is
+  also pulled in as part of the build system. We plan to eventually
+  merge the Dart and Flutter repositories so it is not conceptually a
+  "third_party" package.
+
+  //mojo, which contains our local copy of the Mojo SDK. Mojo is part
+  of the same overall project as Flutter, and they used to be in the
+  same repository.
+
+There are other third_party directories in the fully expanded
+repository (as it stands after you've run the build system). The
+following are brought in by our dependencies:
+
+  //base/third_party
+  //dart/runtime/observatory/web/third_party
+  //dart/runtime/third_party
+  //dart/third_party
+  //mojo/public/third_party
+  //third_party/android_tools/ndk/sources/third_party
+  //third_party/skia/platform_tools/android/third_party
+  //third_party/skia/third_party
+  //third_party/tcmalloc/vendor/src/third_party
+
+The following are historical and will be moved to //third_party in due
+course:
+
+  //tools/android/asan/third_party
+  //tools/valgrind/asan/third_party
+  //buildtools/third_party
+
+To help build some of the third_party tools, we have build files in
+the following directories:
+
+  //build/secondary/third_party
+  //dart/build/secondary/third_party
+
+The latter are not actual third-party packages, they are tools for
+building the third-party packages.

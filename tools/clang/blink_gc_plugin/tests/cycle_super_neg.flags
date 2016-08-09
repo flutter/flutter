@@ -1,0 +1,1 @@
+-Xclang -plugin-arg-blink-gc-plugin -Xclang dump-graph

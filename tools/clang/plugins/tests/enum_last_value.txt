@@ -1,0 +1,7 @@
+enum_last_value.cpp:11:3: warning: [chromium-style] _LAST/Last constants of enum types must have the maximal value for any constant of that type.
+  kBadOneLast = kBadOneGreen
+  ^
+enum_last_value.cpp:20:3: warning: [chromium-style] _LAST/Last constants of enum types must have the maximal value for any constant of that type.
+  BAD_TWO_LAST = BAD_TWO_GREEN
+  ^
+2 warnings generated.

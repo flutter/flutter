@@ -1,0 +1,156 @@
+Copyright 2014 The Chromium Authors. All rights reserved.
+Use of this useless file is governed by a BSD-style license that can be
+found in the LICENSE file.
+
+
+This file is used for making non-code changes to trigger buildbot cycles. Make
+any modification below this line.
+
+======================================================================
+
+Let's make a story. Add zero+ sentences for every commit:
+
+CHÄPTER 1:
+It was a dark and blinky night; the rain fell in torrents -- except at
+occasional intervals, when it was checked by a violent gust of wind which
+swept up the streets (for it is in London that our scene lies), rattling along
+the housetops, and fiercely agitating the scanty flame of the lamps that
+struggled against the elements. A hooded figure emerged.
+
+It was a Domo-Kun.
+
+"What took you so long?", inquired his wife.
+
+Silence. Oblivious to his silence, she continued, "Did Mr. Usagi enjoy the
+waffles you brought him?" "You know him, he's not one to forego a waffle,
+no matter how burnt," he snickered.
+
+The pause was filled with the sound of compile errors.
+
+CHAPTER 2:
+The jelly was as dark as night, and just as runny.
+The Domo-Kun shuddered, remembering the way Mr. Usagi had speared his waffles
+with his fork, watching the runny jelly spread and pool across his plate,
+like the blood of a dying fawn. "It reminds me of that time --" he started, as
+his wife cut in quickly: "-- please. I can't bear to hear it.". A flury of
+images coming from the past flowed through his mind.
+
+"You recall what happened on Mulholland drive?" The ceiling fan rotated slowly
+overhead, barely disturbing the thick cigarette smoke. No doubt was left about
+when the fan was last cleaned.
+
+There was a poignant pause.
+
+CHAPTER 3:
+Mr. Usagi felt that something wasn't right. Shortly after the Domo-Kun left he
+began feeling sick. He thought out loud to himself, "No, he wouldn't have done
+that to me." He considered that perhaps he shouldn't have pushed so hard.
+Perhaps he shouldn't have been so cold and sarcastic, after the unimaginable
+horror that had occurred just the week before.
+
+Next time, there won't be any sushi. Why sushi with waffles anyway?  It's like
+adorning breakfast cereal with halibut -- shameful.
+
+CHAPTER 4:
+The taste of stale sushi in his mouth the next morning was unbearable. He
+wondered where the sushi came from as he attempted to wash the taste away with
+a bottle of 3000¥ sake. He tries to recall the cook's face.  Purple? Probably.
+
+CHAPTER 5:
+Many tears later, Mr. Usagi would laugh at the memory of the earnest,
+well-intentioned Domo-Kun. Another day in the life. That is when he realized that
+life goes on.
+
+TRUISMS (1978-1983)
+JENNY HOLZER
+A LITTLE KNOWLEDGE CAN GO A LONG WAY
+A LOT OF PROFESSIONALS ARE CRACKPOTS
+A MAN CAN'T KNOW WHAT IT IS TO BE A MOTHER
+A NAME MEANS A LOT JUST BY ITSELF
+A POSITIVE ATTITUDE MEANS ALL THE DIFFERENCE IN THE WORLD
+A RELAXED MAN IS NOT NECESSARILY A BETTER MAN
+NO ONE SHOULD EVER USE SVN
+AN INFLEXIBLE POSITION SOMETIMES IS A SIGN OF PARALYSIS
+IT IS MANS FATE TO OUTSMART HIMSELF
+BEING SURE OF YOURSELF MEANS YOU'RE A FOOL
+AM NOT
+ARE TOO
+IF AT FIRST YOU DON'T SUCCEED: TRY, EXCEPT, FINALLY
+AND THEN, TIME LEAPT BACKWARDS
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAaaaaaaaaaaaaaaaaaaaaaaaaaaaahhhh LOT
+I'm really tempted to change something above the line.
+Reeccciiiipppppeeeeeesssssss!!!!!!!!!
+PEOPLE SAY "FAILURE IS NOT AN OPTION", BUT FAILURE IS ALWAYS AN OPTION.
+WHAT GOES UP MUST HAVE A NON-ZERO VELOCITY
+
+I can feel the heat closing in, feel them out there making their moves...
+What could possibly go wrong? We've already ate our cake.
+
+Stand Still. Pause Clocks. We can make the World Stop.
+WUBWUBWUBWUBWUB
+
+I want a 1917 build and you will give me what I want.
+
+This sentence is false.
+
+Beauty is in the eyes of a Beholder.
+
+I'm the best at space.
+
+The first time Yossarian saw the chaplain, he fell madly in love with him.
+*
+*
+*
+Give not thyself up, then, to fire, lest it invert thee, deaden thee; as for
+the time it did me. There is a wisdom that is woe; but there is a woe that is
+madness. And there is a Catskill eagle in some souls that can alike dive down
+into the blackest gorges, and soar out of them again and become invisible in
+the sunny spaces. And even if he for ever flies within the gorge, that gorge
+is in the mountains; so that even in his lowest swoop the mountain eagle is
+still higher than other birds upon the plain, even though they soar.
+*
+*
+*
+
+I'm here to commit lines and drop rhymes
+*
+This is a line to test and try uploading a cl.
+
+And lo, in the year 2014, there was verily an attempt to upgrade to GCC 4.8 on
+the Android bots, and it was good. Except on one bot, where it was bad. And
+lo, the change was reverted, and GCC went back to 4.6, where code is slower
+and less optimized. And verily did it break the build, because artifacts had
+been created with 4.8, and alignment was no longer the same, and a great
+sadness descended upon the Android GN buildbot, and it did refuseth to build
+any more. But the sheriffs thought to themselves: Placebo! Let us clobber the
+bot, and perhaps it will rebuild with GCC 4.6, which hath worked for many many
+seasons. And so they modified the whitespace file with these immortal lines,
+and visited it upon the bots, that great destruction might be wrought upon
+their outdated binaries. In clobberus, veritas.
+
+As the git approaches, light begins to shine through the SCM thrice again...
+However, the git, is, after all, quite stupid.
+
+Suddenly Domo-Kun found itself in a room filled with dazzling mirrors.
+
+A herd of wild gits appears!  Time for CQ :D
+And one more for sizes.py...
+
+Sigh.
+
+It was love at first sight.  The moment Yossarian first laid eyes on the chaplain, he fell madly in love with him.
+
+Cool whitespace change for git-cl land
+
+Oh god the bots are red! I'm blind! Mmmm, cronuts.
+
+If you stand on your head, you will get footprints in your hair.
+
+sigh
+sigher
+pick up cls
+
+In the BUILD we trust.
+^_^
+
+In the masters we don't.

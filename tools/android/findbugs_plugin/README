@@ -1,0 +1,15 @@
+This is the FindBugs plugin for chrome on android.
+
+Currently it detects:
+- synchronized method
+- synchronized 'this'
+
+We don't want the synchronized method and synchronized 'this' to be
+used, the exception is the synchronized method defined in Android
+API.
+
+The plugin jar file was prebuilt and checked in, to rebuild the
+plugin, you need ant, and run below command, the new jar file will
+be in lib directory.
+
+ant install

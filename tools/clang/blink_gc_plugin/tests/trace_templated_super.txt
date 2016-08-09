@@ -1,0 +1,7 @@
+trace_templated_super.cpp:23:1: warning: [blink-gc] Class 'Sub<blink::HeapObject>' has untraced fields that require tracing.
+template<typename T>
+^
+./trace_templated_super.h:35:5: note: [blink-gc] Untraced field 'm_obj' declared here:
+    Member<HeapObject> m_obj;
+    ^
+1 warning generated.

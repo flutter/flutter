@@ -1,0 +1,109 @@
+body {
+  background-color: #ffffff;
+  color: black;
+  margin-right: 1in;
+  margin-left: 1in;
+}
+
+
+h1, h2, h3, h4, h5, h6 {
+  color: #3366ff;
+  font-family: sans-serif;
+}
+@media print {
+  /* Darker version for printing */
+  h1, h2, h3, h4, h5, h6 {
+    color: #000080;
+    font-family: helvetica, sans-serif;
+  }
+}
+
+h1 { 
+  text-align: center;
+  font-size: 18pt;
+}
+h2 {
+  margin-left: -0.5in;
+}
+h3 {
+  margin-left: -0.25in;
+}
+h4 {
+  margin-left: -0.125in;
+}
+hr {
+  margin-left: -1in;
+}
+
+/* Definition lists: definition term bold */
+dt {
+  font-weight: bold;
+}
+
+address {
+  text-align: right;
+}
+/* Use the <code> tag for bits of code and <var> for variables and objects. */
+code,pre,samp,var {
+  color: #006000;
+}
+/* Use the <file> tag for file and directory paths and names. */
+file {
+  color: #905050;
+  font-family: monospace;
+}
+/* Use the <kbd> tag for stuff the user should type. */
+kbd {
+  color: #600000;
+}
+div.note p {
+  float: right;
+  width: 3in;
+  margin-right: 0%;
+  padding: 1px;
+  border: 2px solid #6060a0;
+  background-color: #fffff0;
+}
+
+UL.nobullets {
+  list-style-type: none;
+  list-style-image: none;
+  margin-left: -1em;
+}
+
+/* pretty printing styles.  See prettify.js */
+.str { color: #080; }
+.kwd { color: #008; }
+.com { color: #800; }
+.typ { color: #606; }
+.lit { color: #066; }
+.pun { color: #660; }
+.pln { color: #000; }
+.tag { color: #008; }
+.atn { color: #606; }
+.atv { color: #080; }
+pre.prettyprint { padding: 2px; border: 1px solid #888; }
+
+.embsrc { background: #eee; }
+
+@media print {
+  .str { color: #060; }
+  .kwd { color: #006; font-weight: bold; }
+  .com { color: #600; font-style: italic; }
+  .typ { color: #404; font-weight: bold; }
+  .lit { color: #044; }
+  .pun { color: #440; }
+  .pln { color: #000; }
+  .tag { color: #006; font-weight: bold; }
+  .atn { color: #404; }
+  .atv { color: #060; }
+}
+
+/* Table Column Headers */
+.hdr { 
+  color: #006; 
+  font-weight: bold; 
+  background-color: #dddddd; }
+.hdr2 { 
+  color: #006; 
+  background-color: #eeeeee; }

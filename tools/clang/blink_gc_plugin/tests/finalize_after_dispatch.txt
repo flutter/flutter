@@ -1,0 +1,17 @@
+In file included from finalize_after_dispatch.cpp:5:
+./finalize_after_dispatch.h:12:1: warning: [blink-gc] Class 'NeedsFinalize' is missing manual finalize dispatch.
+class NeedsFinalize : public GarbageCollectedFinalized<NeedsFinalize> {
+^
+./finalize_after_dispatch.h:19:1: warning: [blink-gc] Class 'NeedsDispatch' is missing manual trace dispatch.
+class NeedsDispatch : public GarbageCollectedFinalized<NeedsDispatch> {
+^
+./finalize_after_dispatch.h:26:1: warning: [blink-gc] Class 'NeedsFinalizedBase' requires finalization.
+class NeedsFinalizedBase : public GarbageCollected<NeedsFinalizedBase> {
+^
+./finalize_after_dispatch.h:30:5: note: [blink-gc] User-declared finalizer declared here:
+    void finalizeGarbageCollectedObject() { };
+    ^
+finalize_after_dispatch.cpp:30:1: warning: [blink-gc] Missing dispatch to class 'D' in manual finalize dispatch.
+void A::finalizeGarbageCollectedObject()
+^
+4 warnings generated.

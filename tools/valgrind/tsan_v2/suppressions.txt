@@ -1,0 +1,2 @@
+# This file is deprecated; please add new suppressions to
+# build/sanitizers/tsan_suppressions.cc.

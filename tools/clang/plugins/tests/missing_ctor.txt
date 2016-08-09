@@ -1,0 +1,15 @@
+In file included from missing_ctor.cpp:5:
+./missing_ctor.h:25:1: warning: [chromium-style] Complex class/struct needs an explicit out-of-line constructor.
+class MissingCtorsArentOKInHeader {
+^
+./missing_ctor.h:25:1: warning: [chromium-style] Complex class/struct needs an explicit out-of-line destructor.
+./missing_ctor.h:51:3: warning: [chromium-style] Complex constructor has an inlined body.
+  ExplicitlyDefaultedInlineAlsoWarns() = default;
+  ^
+./missing_ctor.h:53:3: warning: [chromium-style] Complex constructor has an inlined body.
+  ExplicitlyDefaultedInlineAlsoWarns(
+  ^
+./missing_ctor.h:52:3: warning: [chromium-style] Complex destructor has an inline body.
+  ~ExplicitlyDefaultedInlineAlsoWarns() = default;
+  ^
+5 warnings generated.

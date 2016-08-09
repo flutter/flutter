@@ -1,0 +1,19 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+config("iccjpeg_config") {
+  include_dirs = [ "." ]
+}
+
+source_set("iccjpeg") {
+  sources = [
+    "iccjpeg.c",
+    "iccjpeg.h",
+  ]
+
+  public_configs = [ ":iccjpeg_config" ]
+  deps = [
+    "//third_party:jpeg",
+  ]
+}

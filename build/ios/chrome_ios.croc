@@ -1,0 +1,71 @@
+# -*- python -*-
+# Crocodile config file for Chromium iOS.
+#
+# Note that Chromium iOS also uses the config file at src/build/common.croc.
+#
+# See src/tools/code_coverage/example.croc for more info on config files.
+
+{
+  # List of rules, applied in order
+  'rules' : [
+    # Specify inclusions before exclusions, since rules are in order.
+
+    # Exclude everything to negate whatever is in src/build/common.croc
+    {
+      'regexp' : '.*',
+      'include' : 0,
+    },
+
+    # Include all directories (but not the files in the directories).
+    # This is a workaround for how croc.py walks the directory tree. See the
+    # TODO in the AddFiles method of src/tools/code_coverage/croc.py
+    {
+      'regexp' : '.*/$',
+      'include' : 1,
+    },
+
+    # Include any file with an 'ios' directory in the path.
+    {
+      'regexp' : '.*/ios/.*',
+      'include' : 1,
+      'add_if_missing' : 1,
+    },
+    
+    # Include any file that ends with _ios.
+    {
+      'regexp' : '.*_ios\\.(c|cc|m|mm)$',
+      'include' : 1,
+      'add_if_missing' : 1,
+    },
+
+    # Include any file that ends with _ios_unittest (and label it a test).
+    {
+      'regexp' : '.*_ios_unittest\\.(c|cc|m|mm)$',
+      'include' : 1,
+      'add_if_missing' : 1,
+      'group' : 'test',
+    },
+
+    # Don't scan for executable lines in uninstrumented header files
+    {
+      'regexp' : '.*\\.(h|hpp)$',
+      'add_if_missing' : 0,
+    },
+
+    # Don't measure coverage of perftests.
+    {
+      'regexp' : '.*perftest\\.(c|cc|m|mm)$',
+      'include' : 0,
+    },
+
+    # Languages
+    {
+      'regexp' : '.*\\.m$',
+      'language' : 'ObjC',
+    },
+    {
+      'regexp' : '.*\\.mm$',
+      'language' : 'ObjC++',
+    },
+  ],
+}

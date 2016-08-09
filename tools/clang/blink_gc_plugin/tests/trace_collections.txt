@@ -1,0 +1,52 @@
+trace_collections.cpp:9:1: warning: [blink-gc] Class 'HeapObject' has untraced fields that require tracing.
+void HeapObject::trace(Visitor* visitor)
+^
+./trace_collections.h:16:5: note: [blink-gc] Untraced field 'm_heapVector' declared here:
+    HeapVector<Member<HeapObject> > m_heapVector;
+    ^
+./trace_collections.h:17:5: note: [blink-gc] Untraced field 'm_wtfVector' declared here:
+    Vector<Member<HeapObject>, 0, HeapAllocator> m_wtfVector;
+    ^
+./trace_collections.h:19:5: note: [blink-gc] Untraced field 'm_heapDeque' declared here:
+    HeapDeque<Member<HeapObject> > m_heapDeque;
+    ^
+./trace_collections.h:20:5: note: [blink-gc] Untraced field 'm_wtfDeque' declared here:
+    Deque<Member<HeapObject>, 0, HeapAllocator> m_wtfDeque;
+    ^
+./trace_collections.h:22:5: note: [blink-gc] Untraced field 'm_heapSet' declared here:
+    HeapHashSet<Member<HeapObject> > m_heapSet;
+    ^
+./trace_collections.h:23:5: note: [blink-gc] Untraced field 'm_wtfSet' declared here:
+    HashSet<Member<HeapObject>, void, HeapAllocator> m_wtfSet;
+    ^
+./trace_collections.h:25:5: note: [blink-gc] Untraced field 'm_heapListSet' declared here:
+    HeapListHashSet<Member<HeapObject> > m_heapListSet;
+    ^
+./trace_collections.h:26:5: note: [blink-gc] Untraced field 'm_wtfListSet' declared here:
+    ListHashSet<Member<HeapObject>, void, HeapAllocator> m_wtfListSet;
+    ^
+./trace_collections.h:28:5: note: [blink-gc] Untraced field 'm_heapLinkedSet' declared here:
+    HeapLinkedHashSet<Member<HeapObject> > m_heapLinkedSet;
+    ^
+./trace_collections.h:29:5: note: [blink-gc] Untraced field 'm_wtfLinkedSet' declared here:
+    LinkedHashSet<Member<HeapObject>, void, HeapAllocator> m_wtfLinkedSet;
+    ^
+./trace_collections.h:31:5: note: [blink-gc] Untraced field 'm_heapCountedSet' declared here:
+    HeapHashCountedSet<Member<HeapObject> > m_heapCountedSet;
+    ^
+./trace_collections.h:32:5: note: [blink-gc] Untraced field 'm_wtfCountedSet' declared here:
+    HashCountedSet<Member<HeapObject>, void, HeapAllocator> m_wtfCountedSet;
+    ^
+./trace_collections.h:34:5: note: [blink-gc] Untraced field 'm_heapMapKey' declared here:
+    HeapHashMap<int, Member<HeapObject> > m_heapMapKey;
+    ^
+./trace_collections.h:35:5: note: [blink-gc] Untraced field 'm_heapMapVal' declared here:
+    HeapHashMap<Member<HeapObject>, int > m_heapMapVal;
+    ^
+./trace_collections.h:36:5: note: [blink-gc] Untraced field 'm_wtfMapKey' declared here:
+    HashMap<int, Member<HeapObject>, void, void, void, HeapAllocator>
+    ^
+./trace_collections.h:38:5: note: [blink-gc] Untraced field 'm_wtfMapVal' declared here:
+    HashMap<Member<HeapObject>, int, void, void, void, HeapAllocator>
+    ^
+1 warning generated.

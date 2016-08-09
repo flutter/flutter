@@ -1,0 +1,47 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+config("libpng_public") {
+  include_dirs = [ "." ]
+}
+
+source_set("libpng") {
+  public_configs = [ ":libpng_public" ]
+
+  defines = []
+
+  sources = [
+    "png.c",
+    "pngerror.c",
+    "pngget.c",
+    "pngmem.c",
+    "pngpread.c",
+    "pngread.c",
+    "pngrio.c",
+    "pngrtran.c",
+    "pngrutil.c",
+    "pngset.c",
+    "pngtrans.c",
+    "pngwio.c",
+    "pngwrite.c",
+    "pngwtran.c",
+    "pngwutil.c",
+  ]
+
+  if ((is_ios && !use_ios_simulator) || (is_android && current_cpu == "arm")) {
+    sources += [
+      "arm/arm_init.c",
+      "arm/filter_neon.S",
+      "arm/filter_neon_intrinsics.c",
+    ]
+
+    defines += [
+      "PNG_ARM_NEON_OPT=2"
+    ]
+  }
+
+  deps = [
+    "//third_party/zlib",
+  ]
+}

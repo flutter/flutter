@@ -1,0 +1,25 @@
+Name: libjpeg
+URL: http://www.ijg.org/
+Version: 6b
+License: Custom license
+Security Critical: yes
+License Android Compatible: yes
+
+Description:
+This contains a copy of libjpeg-6b.
+
+The project files does not incldue from the distribution:
+  jidctred.c : downsampling
+  jdtrans.c : decoder transcoder
+
+Also not included are files obviously not needed:
+  jmemdos.c
+  jmemname.c
+along with all of the frontend files for doing utility programs.
+
+We added a new file jpeglibmangler.h and included it from jpeglib.h that changes
+the names of all externally visible functions to chromium_ijg_* so that we can
+avoid conflicts that arise when system libraries attempt to use our libjpeg.
+
+Also patch in google.jdmarker.patch to better handle multiple SOS CSi values and
+their ordering.

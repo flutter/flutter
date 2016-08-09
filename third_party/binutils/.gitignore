@@ -1,0 +1,8 @@
+binutils-*
+*-chroot-*
+output-*
+Linux_ia32/*stamp*
+Linux_ia32/*tar.bz2
+Linux_x64/*stamp*
+Linux_x64/*tar.bz2
+*/Release

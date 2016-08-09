@@ -1,0 +1,4 @@
+# Fails http://crbug.com/256911
+MessageCenterImplTest.PopupTimersControllerResetTimer
+MessageCenterImplTest.PopupTimersControllerStartMultipleTimers
+MessageCenterImplTest.PopupTimersControllerStartMultipleTimersPause

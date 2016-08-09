@@ -1,0 +1,6 @@
+# Very slow under Valgrind, (see <http://crbug.com/37289>).
+KeygenHandlerTest.SmokeTest
+
+# These tests fail under Valgrind on Mac, see http://crbug.com/62314
+SSLClientSocketTest.*
+HTTPSRequestTest.*

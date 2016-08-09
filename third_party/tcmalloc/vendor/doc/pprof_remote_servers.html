@@ -1,0 +1,260 @@
+<HTML>
+
+<HEAD>
+<title>pprof and Remote Servers</title>
+</HEAD>
+
+<BODY>
+
+<h1><code>pprof</code> and Remote Servers</h1>
+
+<p>In mid-2006, we added an experimental facility to <A
+HREF="cpu_profiler.html">pprof</A>, the tool that analyzes CPU and
+heap profiles.  This facility allows you to collect profile
+information from running applications.  It makes it easy to collect
+profile information without having to stop the program first, and
+without having to log into the machine where the application is
+running.  This is meant to be used on webservers, but will work on any
+application that can be modified to accept TCP connections on a port
+of its choosing, and to respond to HTTP requests on that port.</p>
+
+<p>We do not currently have infrastructure, such as apache modules,
+that you can pop into a webserver or other application to get the
+necessary functionality "for free."  However, it's easy to generate
+the necessary data, which should allow the interested developer to add
+the necessary support into his or her applications.</p>
+
+<p>To use <code>pprof</code> in this experimental "server" mode, you
+give the script a host and port it should query, replacing the normal
+commandline arguments of application + profile file:</p>
+<pre>
+   % pprof internalweb.mycompany.com:80
+</pre>
+
+<p>The host must be listening on that port, and be able to accept HTTP/1.0
+requests -- sent via <code>wget</code> and <code>curl</code> -- for
+several urls.  The following sections list the urls that
+<code>pprof</code> can send, and the responses it expects in
+return.</p>
+
+<p>Here are examples that pprof will recognize, when you give them
+on the commandline, are urls.  In general, you
+specify the host and a port (the port-number is required), and put
+the service-name at the end of the url.:</p>
+<blockquote><pre>
+http://myhost:80/pprof/heap            # retrieves a heap profile
+http://myhost:8008/pprof/profile       # retrieves a CPU profile
+http://myhost:80                       # retrieves a CPU profile (the default)
+http://myhost:8080/                    # retrieves a CPU profile (the default)
+myhost:8088/pprof/growth               # "http://" is optional, but port is not
+http://myhost:80/myservice/pprof/heap  # /pprof/heap just has to come at the end
+http://myhost:80/pprof/pmuprofile      # CPU profile using performance counters
+</pre></blockquote>
+
+<h2> <code><b>/pprof/heap</b></code> </h2>
+
+<p><code>pprof</code> asks for the url <code>/pprof/heap</code> to
+get heap information.  The actual url is controlled via the variable
+<code>HEAP_PAGE</code> in the <code>pprof</code> script, so you
+can change it if you'd like.</p>
+
+<p>There are two ways to get this data.  The first is to call</p>
+<pre>
+    MallocExtension::instance()->GetHeapSample(&output);
+</pre>
+<p>and have the server send <code>output</code> back as an HTTP
+response to <code>pprof</code>.  <code>MallocExtension</code> is
+defined in the header file <code>gperftools/malloc_extension.h</code>.</p>
+
+<p>Note this will only only work if the binary is being run with
+sampling turned on (which is not the default).  To do this, set the
+environment variable <code>TCMALLOC_SAMPLE_PARAMETER</code> to a
+positive value, such as 524288, before running.</p>
+
+<p>The other way is to call <code>HeapProfileStart(filename)</code>
+(from <code>heap-profiler.h</code>), continue to do work, and then,
+some number of seconds later, call <code>GetHeapProfile()</code>
+(followed by <code>HeapProfilerStop()</code>).  The server can send
+the output of <code>GetHeapProfile</code> back as the HTTP response to
+pprof.  (Note you must <code>free()</code> this data after using it.)
+This is similar to how <A HREF="#profile">profile requests</A> are
+handled, below.  This technique does not require the application to
+run with sampling turned on.</p>
+
+<p>Here's an example of what the output should look like:</p>
+<pre>
+heap profile:   1923: 127923432 [  1923: 127923432] @ heap_v2/524288
+     1:      312 [     1:      312] @ 0x2aaaabaf5ccc 0x2aaaaba4cd2c 0x2aaaac08c09a
+   928: 122586016 [   928: 122586016] @ 0x2aaaabaf682c 0x400680 0x400bdd 0x2aaaab1c368a 0x2aaaab1c8f77 0x2aaaab1c0396 0x2aaaab1c86ed 0x4007ff 0x2aaaaca62afa
+     1:       16 [     1:       16] @ 0x2aaaabaf5ccc 0x2aaaabb04bac 0x2aaaabc1b262 0x2aaaabc21496 0x2aaaabc214bb
+[...]
+</pre>
+
+
+<p> Older code may produce "version 1" heap profiles which look like this:<p/>
+<pre>
+heap profile:  14933: 791700132 [ 14933: 791700132] @ heap
+     1:   848688 [     1:   848688] @ 0xa4b142 0x7f5bfc 0x87065e 0x4056e9 0x4125f8 0x42b4f1 0x45b1ba 0x463248 0x460871 0x45cb7c 0x5f1744 0x607cee 0x5f4a5e 0x40080f 0x2aaaabad7afa
+     1:  1048576 [     1:  1048576] @ 0xa4a9b2 0x7fd025 0x4ca6d8 0x4ca814 0x4caa88 0x2aaaab104cf0 0x404e20 0x4125f8 0x42b4f1 0x45b1ba 0x463248 0x460871 0x45cb7c 0x5f1744 0x607cee 0x5f4a5e 0x40080f 0x2aaaabad7afa
+  2942: 388629374 [  2942: 388629374] @ 0xa4b142 0x4006a0 0x400bed 0x5f0cfa 0x5f1744 0x607cee 0x5f4a5e 0x40080f 0x2aaaabad7afa
+[...]
+</pre>
+<p>pprof accepts both old and new heap profiles and automatically
+detects which one you are using.</p>
+
+<h2> <code><b>/pprof/growth</b></code> </h2>
+
+<p><code>pprof</code> asks for the url <code>/pprof/growth</code> to
+get heap-profiling delta (growth) information.  The actual url is
+controlled via the variable <code>GROWTH_PAGE</code> in the
+<code>pprof</code> script, so you can change it if you'd like.</p>
+
+<p>The server should respond by calling</p>
+<pre>
+    MallocExtension::instance()->GetHeapGrowthStacks(&output);
+</pre>
+<p>and sending <code>output</code> back as an HTTP response to
+<code>pprof</code>.  <code>MallocExtension</code> is defined in the
+header file <code>gperftools/malloc_extension.h</code>.</p>
+
+<p>Here's an example, from an actual Google webserver, of what the
+output should look like:</p>
+<pre>
+heap profile:    741: 812122112 [   741: 812122112] @ growth
+     1:  1572864 [     1:  1572864] @ 0x87da564 0x87db8a3 0x84787a4 0x846e851 0x836d12f 0x834cd1c 0x8349ba5 0x10a3177 0x8349961
+     1:  1048576 [     1:  1048576] @ 0x87d92e8 0x87d9213 0x87d9178 0x87d94d3 0x87da9da 0x8a364ff 0x8a437e7 0x8ab7d23 0x8ab7da9 0x8ac7454 0x8348465 0x10a3161 0x8349961
+[...]
+</pre>
+
+
+<h2> <A NAME="profile"><code><b>/pprof/profile</b></code></A> </h2>
+
+<p><code>pprof</code> asks for the url
+<code>/pprof/profile?seconds=XX</code> to get cpu-profiling
+information.  The actual url is controlled via the variable
+<code>PROFILE_PAGE</code> in the <code>pprof</code> script, so you can
+change it if you'd like.</p>
+
+<p>The server should respond by calling
+<code>ProfilerStart(filename)</code>, continuing to do its work, and
+then, XX seconds later, calling <code>ProfilerStop()</code>.  (These
+functions are declared in <code>gperftools/profiler.h</code>.)  The
+application is responsible for picking a unique filename for
+<code>ProfilerStart()</code>.  After calling
+<code>ProfilerStop()</code>, the server should read the contents of
+<code>filename</code> and send them back as an HTTP response to
+<code>pprof</code>.</p>
+
+<p>Obviously, to get useful profile information the application must
+continue to run in the XX seconds that the profiler is running.  Thus,
+the profile start-stop calls should be done in a separate thread, or
+be otherwise non-blocking.</p>
+
+<p>The profiler output file is binary, but near the end of it, it
+should have lines of text somewhat like this:</p>
+<pre>
+01016000-01017000 rw-p 00015000 03:01 59314      /lib/ld-2.2.2.so
+</pre>
+
+<h2> <code><b>/pprof/pmuprofile</b></code> </h2>
+
+<code>pprof</code> asks for a url of the form
+<code>/pprof/pmuprofile?event=hw_event:unit_mask&period=nnn&seconds=xxx</code> 
+to get cpu-profiling information.  The actual url is controlled via the variable
+<code>PMUPROFILE_PAGE</code> in the <code>pprof</code> script, so you can
+change it if you'd like.</p> 
+
+<p>
+This is similar to pprof, but is meant to be used with your CPU's hardware 
+performance counters. The server could be implemented on top of a library 
+such as <a href="http://perfmon2.sourceforge.net/">
+<code>libpfm</code></a>. It should collect a sample every nnn occurences 
+of the event and stop the sampling after xxx seconds. Much of the code 
+for <code>/pprof/profile</code> can be reused for this purpose.
+</p>
+
+<p>The server side routines (the equivalent of
+ProfilerStart/ProfilerStart) are not available as part of perftools,
+so this URL is unlikely to be that useful.</p>
+
+<h2> <code><b>/pprof/contention</b></code> </h2>
+
+<p>This is intended to be able to profile (thread) lock contention in
+addition to CPU and memory use.  It's not yet usable.</p>
+
+
+<h2> <code><b>/pprof/cmdline</b></code> </h2>
+
+<p><code>pprof</code> asks for the url <code>/pprof/cmdline</code> to
+figure out what application it's profiling.  The actual url is
+controlled via the variable <code>PROGRAM_NAME_PAGE</code> in the
+<code>pprof</code> script, so you can change it if you'd like.</p>
+
+<p>The server should respond by reading the contents of
+<code>/proc/self/cmdline</code>, converting all internal NUL (\0)
+characters to newlines, and sending the result back as an HTTP
+response to <code>pprof</code>.</p>
+
+<p>Here's an example return value:<p>
+<pre>
+/root/server/custom_webserver
+80
+--configfile=/root/server/ws.config
+</pre>
+
+
+<h2> <code><b>/pprof/symbol</b></code> </h2>
+
+<p><code>pprof</code> asks for the url <code>/pprof/symbol</code> to
+map from hex addresses to variable names.  The actual url is
+controlled via the variable <code>SYMBOL_PAGE</code> in the
+<code>pprof</code> script, so you can change it if you'd like.</p>
+
+<p>When the server receives a GET request for
+<code>/pprof/symbol</code>, it should return a line formatted like
+so:</p>
+<pre>
+   num_symbols: ###
+</pre>
+<p>where <code>###</code> is the number of symbols found in the
+binary.  (For now, the only important distinction is whether the value
+is 0, which it is for executables that lack debug information, or
+not-0).</p>
+
+<p>This is perhaps the hardest request to write code for, because in
+addition to the GET request for this url, the server must accept POST
+requests.  This means that after the HTTP headers, pprof will pass in
+a list of hex addresses connected by <code>+</code>, like so:</p>
+<pre>
+   curl -d '0x0824d061+0x0824d1cf' http://remote_host:80/pprof/symbol
+</pre>
+
+<p>The server should read the POST data, which will be in one line,
+and for each hex value, should write one line of output to the output
+stream, like so:</p>
+<pre>
+&lt;hex address&gt;&lt;tab&gt;&lt;function name&gt;
+</pre>
+<p>For instance:</p>
+<pre>
+0x08b2dabd    _Update
+</pre>
+
+<p>The other reason this is the most difficult request to implement,
+is that the application will have to figure out for itself how to map
+from address to function name.  One possibility is to run <code>nm -C
+-n &lt;program name&gt;</code> to get the mappings at
+program-compile-time.  Another, at least on Linux, is to call out to
+addr2line for every <code>pprof/symbol</code> call, for instance
+<code>addr2line -Cfse /proc/<getpid>/exe 0x12345678 0x876543210</code>
+(presumably with some caching!)</p>
+
+<p><code>pprof</code> itself does just this for local profiles (not
+ones that talk to remote servers); look at the subroutine
+<code>GetProcedureBoundaries</code>.</p>
+
+
+<hr>
+Last modified: Mon Jun 12 21:30:14 PDT 2006
+</body>
+</html>

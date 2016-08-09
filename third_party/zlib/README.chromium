@@ -1,0 +1,37 @@
+Name: zlib
+URL: http://zlib.net/
+Version: 1.2.5
+Security Critical: yes
+License: Custom license
+License Android Compatible: yes
+
+Description:
+General purpose compression library
+
+Local Modifications:
+A few minor changes, all marked with "Google":
+- Added #ifdefs to avoid compile warnings when NO_GZCOMPRESS is defined.
+- Removed use of strerror for WinCE in gzio.c.
+- Added 'int z_errno' global for WinCE, to which 'errno' is defined in zutil.h.
+- Added 'mozzconf.h' to mangle the function names.
+- Added logic in zlib.h to undef our earlier mangles when defaulting to 64 bit offset versions of API.
+The 'google.patch' file represents our changes from the original zlib-1.2.5.
+
+A more significant change to support mixed-source data compression. See
+crbug.com/139744 and mixed-source.patch.
+
+Integrated Intel SIMD optimisations from: https://github.com/jtkukunas/zlib/
+and modified to accomodate the older version and existing changes in tree.
+
+This introduces new files: simd_stub.c, crc_folding.c, fill_window_sse.c and
+x86.[ch]. All but the latter are built into a static library to allow the
+compiler to use the desired instructions only when valid. The latter version is
+only built on x86 (32-bit and 64-bit) systems with it's functionality stubbed
+on the others.
+
+Other changes to accomodate:
+- fill_window() implementation calls into _sse() variant when supported and the
+  original implementation renamed to _c()
+- read_buf was moved from local to ZLIB_INTERNAL for fill_window_sse.c to use
+- INSERT_STRING macro was made a function, insert_string() and an implementation using CRC instruction added
+- some crc funcionality moved into crc32.c

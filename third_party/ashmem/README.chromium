@@ -1,0 +1,6 @@
+Name: Android
+URL: http://source.android.com
+Description: Android shared memory implementation. Only applies to OS_ANDROID.
+Version: 7203eb2a8a29a7b721a48cd291700f38f3da1456
+Security Critical: yes
+License: Apache 2.0

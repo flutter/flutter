@@ -1,0 +1,29 @@
+# Times out. See http://crbug.com/134313
+URLRequestTestHTTP.GetTest_ManyCookies
+
+# Dr. Memory hits an assertion:
+# https://github.com/DynamoRIO/drmemory/issues/422
+HttpAuthTest.*
+HttpAuthHandlerFactoryTest.*
+X509CertificateTest.*
+
+# Too many uninits and too slow. TODO(timurrrr): investigate uninits
+ProxyResolverV8Test.*
+
+# Slow
+CookieMonsterTest.GarbageCollectionTriggers
+
+# Flaky, see http://crbug.com/108422
+SSLClientSocketTest.*
+
+# DrM-i#1465
+URLRequestTest.ResolveShortcutTest
+
+# Crashes, http://crbug.com/369840
+ProxyResolverV8TracingTest.MultipleResolvers
+
+# http://crbug.com/400521
+HttpServerTest.RequestWithTooLargeBody
+
+# http://crbug.com/504198
+DiskCacheEntryTest.ExternalAsyncIONoBuffer

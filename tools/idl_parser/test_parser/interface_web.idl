@@ -1,0 +1,371 @@
+/* Copyright (c) 2013 The Chromium Authors. All rights reserved.
+   Use of this source code is governed by a BSD-style license that can be
+  found in the LICENSE file. */
+
+/* Test Interface productions
+
+Run with --test to generate an AST and verify that all comments accurately
+reflect the state of the Nodes.
+
+BUILD Type(Name)
+This comment signals that a node of type <Type> is created with the
+name <Name>.
+
+ERROR Error String
+This comment signals that a error of <Error String> is generated.  The error
+is not assigned to a node, but are expected in order.
+
+PROP Key=Value
+This comment signals that a property has been set on the Node such that
+<Key> = <Value>.
+
+TREE
+Type(Name)
+  Type(Name)
+  Type(Name)
+    Type(Name)
+    ...
+This comment signals that a tree of nodes matching the BUILD comment
+symatics should exist.  This is an exact match.
+*/
+
+
+/* TREE
+ *Interface(MyIFace)
+ */
+interface MyIFace { };
+
+/* TREE
+ *Interface(MyIFaceInherit)
+ *  Inherit(Foo)
+ */
+interface MyIFaceInherit : Foo {};
+
+/* TREE
+ *Interface(MyIFacePartial)
+ */
+partial interface MyIFacePartial { };
+
+/* ERROR Unexpected ":" after identifier "MyIFaceInherit". */
+partial interface MyIFaceInherit : Foo {};
+
+/* TREE
+ *Interface(MyIFaceMissingArgument)
+ *  Operation(foo)
+ *    Arguments()
+ *      Argument(arg)
+ *        Type()
+ *          PrimitiveType(DOMString)
+ *      Error(Missing argument.)
+ *    Type()
+ *      PrimitiveType(void)
+ */
+interface MyIFaceMissingArgument {
+  void foo(DOMString arg, );
+};
+
+/* TREE
+ *Error(Unexpected keyword "double" after keyword "readonly".)
+ */
+interface MyIFaceMissingAttribute {
+  readonly double foo;
+};
+
+/* TREE
+ *Interface(MyIFaceContainsUnresolvedConflictDiff)
+ *  Operation(foo)
+ *    Arguments()
+ *    Type()
+ *      PrimitiveType(DOMString)
+ *  Error(Unexpected "<" after ";".)
+ */
+interface MyIFaceContainsUnresolvedConflictDiff {
+    DOMString foo();
+<<<<<< ours
+    DOMString bar();
+    iterable<long>;
+======
+>>>>>> theirs
+};
+
+/* TREE
+ *Interface(MyIFaceBig)
+ *  Const(setString)
+ *    PrimitiveType(DOMString)
+ *    Value(NULL)
+ */
+interface MyIFaceBig {
+  const DOMString? setString = null;
+};
+
+/* TREE
+ *Interface(MyIfaceEmptySequenceDefalutValue)
+ *  Operation(foo)
+ *    Arguments()
+ *      Argument(arg)
+ *        Type()
+ *          Sequence()
+ *            Type()
+ *              PrimitiveType(DOMString)
+ *        Default()
+ *    Type()
+ *      PrimitiveType(void)
+ */
+interface MyIfaceEmptySequenceDefalutValue {
+  void foo(optional sequence<DOMString> arg = []);
+};
+
+/* TREE
+ *Interface(MyIFaceBig2)
+ *  Const(nullValue)
+ *    PrimitiveType(DOMString)
+ *    Value(NULL)
+ *  Const(longValue)
+ *    PrimitiveType(long)
+ *    Value(123)
+ *  Const(longValue2)
+ *    PrimitiveType(long long)
+ *    Value(123)
+ *  Attribute(myString)
+ *    Type()
+ *      PrimitiveType(DOMString)
+ *  Attribute(readOnlyString)
+ *    Type()
+ *      PrimitiveType(DOMString)
+ *  Attribute(staticString)
+ *    Type()
+ *      PrimitiveType(DOMString)
+ *  Operation(myFunction)
+ *    Arguments()
+ *      Argument(myLong)
+ *        Type()
+ *          PrimitiveType(long long)
+ *    Type()
+ *      PrimitiveType(void)
+ *  Operation(staticFunction)
+ *    Arguments()
+ *      Argument(myLong)
+ *        Type()
+ *          PrimitiveType(long long)
+ *    Type()
+ *      PrimitiveType(void)
+ */
+interface MyIFaceBig2 {
+  const DOMString? nullValue = null;
+  const long longValue = 123;
+  const long long longValue2 = 123;
+  attribute DOMString myString;
+  readonly attribute DOMString readOnlyString;
+  static attribute DOMString staticString;
+  void myFunction(long long myLong);
+  static void staticFunction(long long myLong);
+};
+
+
+/* TREE
+ *Interface(MyIFaceSpecials)
+ *  Operation(set)
+ *    Arguments()
+ *      Argument(property)
+ *        Type()
+ *          PrimitiveType(DOMString)
+ *    Type()
+ *      PrimitiveType(void)
+ *  Operation(_unnamed_)
+ *    Arguments()
+ *      Argument(property)
+ *        Type()
+ *          PrimitiveType(DOMString)
+ *    Type()
+ *      PrimitiveType(double)
+ *  Operation(GetFiveSix)
+ *    Arguments()
+ *      Argument(arg)
+ *        Type()
+ *          Typeref(SomeType)
+ *    Type()
+ *      PrimitiveType(long long)
+ *      Array(5)
+ *        Array(6)
+ */
+interface MyIFaceSpecials {
+  setter creator void set(DOMString property);
+  getter double (DOMString property);
+  long long [5][6] GetFiveSix(SomeType arg);
+};
+
+/* TREE
+ *Interface(MyIFaceStringifiers)
+ *  Stringifier()
+ *  Stringifier()
+ *    Operation(_unnamed_)
+ *      Arguments()
+ *      Type()
+ *        PrimitiveType(DOMString)
+ *  Stringifier()
+ *    Operation(namedStringifier)
+ *      Arguments()
+ *      Type()
+ *        PrimitiveType(DOMString)
+ *  Stringifier()
+ *    Attribute(stringValue)
+ *      Type()
+ *        PrimitiveType(DOMString)
+ */
+interface MyIFaceStringifiers {
+  stringifier;
+  stringifier DOMString ();
+  stringifier DOMString namedStringifier();
+  stringifier attribute DOMString stringValue;
+};
+
+/* TREE
+ *Interface(MyExtendedAttributeInterface)
+ *  Operation(method)
+ *    Arguments()
+ *    Type()
+ *      PrimitiveType(void)
+ *    ExtAttributes()
+ *      ExtAttribute(Attr)
+ *      ExtAttribute(MethodIdentList)
+ *  ExtAttributes()
+ *    ExtAttribute(MyExtendedAttribute)
+ *    ExtAttribute(MyExtendedIdentListAttribute)
+ */
+[MyExtendedAttribute,
+ MyExtendedIdentListAttribute=(Foo, Bar, Baz)]
+interface MyExtendedAttributeInterface {
+  [Attr, MethodIdentList=(Foo, Bar)] void method();
+};
+
+/* TREE
+ *Interface(MyIfacePromise)
+ *  Operation(method1)
+ *    Arguments()
+ *    Type()
+ *      Promise(Promise)
+ *        Type()
+ *          PrimitiveType(void)
+ *  Operation(method2)
+ *    Arguments()
+ *    Type()
+ *      Promise(Promise)
+ *        Type()
+ *          PrimitiveType(long)
+ *  Operation(method3)
+ *    Arguments()
+ *    Type()
+ *      Promise(Promise)
+ *        Type()
+ *          Any()
+ *  Operation(method4)
+ *    Arguments()
+ *    Type()
+ *      Promise(Promise)
+ *        Type()
+ *          Any()
+ */
+interface MyIfacePromise {
+  Promise<void> method1();
+  Promise<long> method2();
+  Promise<any> method3();
+  Promise method4();
+};
+
+/* TREE
+ *Interface(MyIfaceIterable)
+ *  Iterable()
+ *    Type()
+ *      PrimitiveType(long)
+ *  Iterable()
+ *    Type()
+ *      PrimitiveType(double)
+ *    Type()
+ *      PrimitiveType(DOMString)
+ *  LegacyIterable()
+ *    Type()
+ *      PrimitiveType(boolean)
+ */
+interface MyIfaceIterable {
+  iterable<long>;
+  iterable<double, DOMString>;
+  legacyiterable<boolean>;
+};
+
+/* TREE
+ *Interface(MyIfaceMaplike)
+ *  Maplike()
+ *    Type()
+ *      PrimitiveType(long)
+ *    Type()
+ *      PrimitiveType(DOMString)
+ *  Maplike()
+ *    Type()
+ *      PrimitiveType(double)
+ *    Type()
+ *      PrimitiveType(boolean)
+ */
+interface MyIfaceMaplike {
+  readonly maplike<long, DOMString>;
+  maplike<double, boolean>;
+};
+
+/* TREE
+ *Interface(MyIfaceSetlike)
+ *  Setlike()
+ *    Type()
+ *      PrimitiveType(long)
+ *  Setlike()
+ *    Type()
+ *      PrimitiveType(double)
+ */
+interface MyIfaceSetlike {
+  readonly setlike<long>;
+  setlike<double>;
+};
+
+/* TREE
+ *Interface(MyIfaceSerializer)
+ *  Serializer()
+ *  Serializer()
+ *    Operation(toJSON)
+ *      Arguments()
+ *      Type()
+ *        Any()
+ *  Serializer()
+ *  Serializer()
+ *    Map()
+ *  Serializer()
+ *    Map()
+ *  Serializer()
+ *    Map()
+ *  Serializer()
+ *    Map()
+ *  Serializer()
+ *    Map()
+ *  Serializer()
+ *    Map()
+ *  Serializer()
+ *    Map()
+ *  Serializer()
+ *    List()
+ *  Serializer()
+ *    List()
+ *  Serializer()
+ *    List()
+ */
+interface MyIfaceSerializer {
+  serializer;
+  serializer any toJSON();
+  serializer = name;
+  serializer = {};
+  serializer = { getter };
+  serializer = { attribute };
+  serializer = { inherit, attribute };
+  serializer = { inherit };
+  serializer = { inherit, name1, name2 };
+  serializer = { name1, name2 };
+  serializer = [];
+  serializer = [getter];
+  serializer = [name1, name2];
+};

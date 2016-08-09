@@ -1,0 +1,322 @@
+.\"
+.\" Copyright (c) 2006 Niels Provos <provos@citi.umich.edu>
+.\" All rights reserved.
+.\"
+.\" Redistribution and use in source and binary forms, with or without
+.\" modification, are permitted provided that the following conditions
+.\" are met:
+.\"
+.\" 1. Redistributions of source code must retain the above copyright
+.\"    notice, this list of conditions and the following disclaimer.
+.\" 2. Redistributions in binary form must reproduce the above copyright
+.\"    notice, this list of conditions and the following disclaimer in the
+.\"    documentation and/or other materials provided with the distribution.
+.\" 3. The name of the author may not be used to endorse or promote products
+.\"    derived from this software without specific prior written permission.
+.\"
+.\" THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES,
+.\" INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+.\" AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL
+.\" THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+.\" EXEMPLARY, OR CONSEQUENTIAL  DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+.\" PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+.\" OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+.\" WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+.\" OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+.\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+.\"
+.Dd October 7, 2006
+.Dt EVDNS 3
+.Os
+.Sh NAME
+.Nm evdns_init
+.Nm evdns_shutdown
+.Nm evdns_err_to_string
+.Nm evdns_nameserver_add
+.Nm evdns_count_nameservers
+.Nm evdns_clear_nameservers_and_suspend
+.Nm evdns_resume
+.Nm evdns_nameserver_ip_add
+.Nm evdns_resolve_ipv4
+.Nm evdns_resolve_reverse
+.Nm evdns_resolv_conf_parse
+.Nm evdns_config_windows_nameservers
+.Nm evdns_search_clear
+.Nm evdns_search_add
+.Nm evdns_search_ndots_set
+.Nm evdns_set_log_fn
+.Nd asynchronous functions for DNS resolution.
+.Sh SYNOPSIS
+.Fd #include <sys/time.h>
+.Fd #include <event.h>
+.Fd #include <evdns.h>
+.Ft int
+.Fn evdns_init
+.Ft void
+.Fn evdns_shutdown "int fail_requests"
+.Ft "const char *"
+.Fn evdns_err_to_string "int err"
+.Ft int
+.Fn evdns_nameserver_add "unsigned long int address"
+.Ft int
+.Fn evdns_count_nameservers
+.Ft int
+.Fn evdns_clear_nameservers_and_suspend
+.Ft int
+.Fn evdns_resume
+.Ft int
+.Fn evdns_nameserver_ip_add(const char *ip_as_string);
+.Ft int
+.Fn evdns_resolve_ipv4 "const char *name" "int flags" "evdns_callback_type callback" "void *ptr"
+.Ft int
+.Fn evdns_resolve_reverse "struct in_addr *in" "int flags" "evdns_callback_type callback" "void *ptr"
+.Ft int
+.Fn evdns_resolv_conf_parse "int flags" "const char *"
+.Ft void
+.Fn evdns_search_clear
+.Ft void
+.Fn evdns_search_add "const char *domain"
+.Ft void
+.Fn evdns_search_ndots_set "const int ndots"
+.Ft void
+.Fn evdns_set_log_fn "evdns_debug_log_fn_type fn"
+.Ft int
+.Fn evdns_config_windows_nameservers
+.Sh DESCRIPTION
+Welcome, gentle reader
+.Pp
+Async DNS lookups are really a whole lot harder than they should be,
+mostly stemming from the fact that the libc resolver has never been
+very good at them. Before you use this library you should see if libc
+can do the job for you with the modern async call getaddrinfo_a
+(see http://www.imperialviolet.org/page25.html#e498). Otherwise,
+please continue.
+.Pp
+This code is based on libevent and you must call event_init before
+any of the APIs in this file. You must also seed the OpenSSL random
+source if you are using OpenSSL for ids (see below).
+.Pp
+This library is designed to be included and shipped with your source
+code. You statically link with it. You should also test for the
+existence of strtok_r and define HAVE_STRTOK_R if you have it.
+.Pp
+The DNS protocol requires a good source of id numbers and these
+numbers should be unpredictable for spoofing reasons. There are
+three methods for generating them here and you must define exactly
+one of them. In increasing order of preference:
+.Pp
+.Bl -tag -width "DNS_USE_GETTIMEOFDAY_FOR_ID" -compact -offset indent
+.It DNS_USE_GETTIMEOFDAY_FOR_ID
+Using the bottom 16 bits of the usec result from gettimeofday. This
+is a pretty poor solution but should work anywhere.
+.It DNS_USE_CPU_CLOCK_FOR_ID
+Using the bottom 16 bits of the nsec result from the CPU's time
+counter. This is better, but may not work everywhere. Requires
+POSIX realtime support and you'll need to link against -lrt on
+glibc systems at least.
+.It DNS_USE_OPENSSL_FOR_ID
+Uses the OpenSSL RAND_bytes call to generate the data. You must
+have seeded the pool before making any calls to this library.
+.El
+.Pp
+The library keeps track of the state of nameservers and will avoid
+them when they go down. Otherwise it will round robin between them.
+.Pp
+Quick start guide:
+  #include "evdns.h"
+  void callback(int result, char type, int count, int ttl,
+	 void *addresses, void *arg);
+  evdns_resolv_conf_parse(DNS_OPTIONS_ALL, "/etc/resolv.conf");
+  evdns_resolve("www.hostname.com", 0, callback, NULL);
+.Pp
+When the lookup is complete the callback function is called. The
+first argument will be one of the DNS_ERR_* defines in evdns.h.
+Hopefully it will be DNS_ERR_NONE, in which case type will be
+DNS_IPv4_A, count will be the number of IP addresses, ttl is the time
+which the data can be cached for (in seconds), addresses will point
+to an array of uint32_t's and arg will be whatever you passed to
+evdns_resolve.
+.Pp
+Searching:
+.Pp
+In order for this library to be a good replacement for glibc's resolver it
+supports searching. This involves setting a list of default domains, in
+which names will be queried for. The number of dots in the query name
+determines the order in which this list is used.
+.Pp
+Searching appears to be a single lookup from the point of view of the API,
+although many DNS queries may be generated from a single call to
+evdns_resolve. Searching can also drastically slow down the resolution
+of names.
+.Pp
+To disable searching:
+.Bl -enum -compact -offset indent
+.It
+Never set it up. If you never call
+.Fn evdns_resolv_conf_parse,
+.Fn evdns_init,
+or
+.Fn evdns_search_add
+then no searching will occur.
+.It
+If you do call
+.Fn evdns_resolv_conf_parse
+then don't pass
+.Va DNS_OPTION_SEARCH
+(or
+.Va DNS_OPTIONS_ALL,
+which implies it).
+.It
+When calling
+.Fn evdns_resolve,
+pass the
+.Va DNS_QUERY_NO_SEARCH
+flag.
+.El
+.Pp
+The order of searches depends on the number of dots in the name. If the
+number is greater than the ndots setting then the names is first tried
+globally. Otherwise each search domain is appended in turn.
+.Pp
+The ndots setting can either be set from a resolv.conf, or by calling
+evdns_search_ndots_set.
+.Pp
+For example, with ndots set to 1 (the default) and a search domain list of
+["myhome.net"]:
+ Query: www
+ Order: www.myhome.net, www.
+.Pp
+ Query: www.abc
+ Order: www.abc., www.abc.myhome.net
+.Pp
+.Sh API reference
+.Pp
+.Bl -tag -width 0123456
+.It Ft int Fn evdns_init
+Initializes support for non-blocking name resolution by calling
+.Fn evdns_resolv_conf_parse
+on UNIX and
+.Fn evdns_config_windows_nameservers
+on Windows.
+.It Ft int Fn evdns_nameserver_add "unsigned long int address"
+Add a nameserver. The address should be an IP address in
+network byte order. The type of address is chosen so that
+it matches in_addr.s_addr.
+Returns non-zero on error.
+.It Ft int Fn evdns_nameserver_ip_add "const char *ip_as_string"
+This wraps the above function by parsing a string as an IP
+address and adds it as a nameserver.
+Returns non-zero on error
+.It Ft int Fn evdns_resolve "const char *name" "int flags" "evdns_callback_type callback" "void *ptr"
+Resolve a name. The name parameter should be a DNS name.
+The flags parameter should be 0, or DNS_QUERY_NO_SEARCH
+which disables searching for this query. (see defn of
+searching above).
+.Pp
+The callback argument is a function which is called when
+this query completes and ptr is an argument which is passed
+to that callback function.
+.Pp
+Returns non-zero on error
+.It Ft void Fn evdns_search_clear
+Clears the list of search domains
+.It Ft void Fn evdns_search_add "const char *domain"
+Add a domain to the list of search domains
+.It Ft void Fn evdns_search_ndots_set "int ndots"
+Set the number of dots which, when found in a name, causes
+the first query to be without any search domain.
+.It Ft int Fn evdns_count_nameservers "void"
+Return the number of configured nameservers (not necessarily the
+number of running nameservers).  This is useful for double-checking
+whether our calls to the various nameserver configuration functions
+have been successful.
+.It Ft int Fn evdns_clear_nameservers_and_suspend "void"
+Remove all currently configured nameservers, and suspend all pending
+resolves.  Resolves will not necessarily be re-attempted until
+evdns_resume() is called.
+.It Ft int Fn evdns_resume "void"
+Re-attempt resolves left in limbo after an earlier call to
+evdns_clear_nameservers_and_suspend().
+.It Ft int Fn evdns_config_windows_nameservers "void"
+Attempt to configure a set of nameservers based on platform settings on
+a win32 host.  Preferentially tries to use GetNetworkParams; if that fails,
+looks in the registry.  Returns 0 on success, nonzero on failure.
+.It Ft int Fn evdns_resolv_conf_parse "int flags" "const char *filename"
+Parse a resolv.conf like file from the given filename.
+.Pp
+See the man page for resolv.conf for the format of this file.
+The flags argument determines what information is parsed from
+this file:
+.Bl -tag -width "DNS_OPTION_NAMESERVERS" -offset indent -compact -nested
+.It DNS_OPTION_SEARCH
+domain, search and ndots options
+.It DNS_OPTION_NAMESERVERS
+nameserver lines
+.It DNS_OPTION_MISC
+timeout and attempts options
+.It DNS_OPTIONS_ALL
+all of the above
+.El
+.Pp
+The following directives are not parsed from the file:
+  sortlist, rotate, no-check-names, inet6, debug
+.Pp
+Returns non-zero on error:
+.Bl -tag -width "0" -offset indent -compact -nested
+.It 0
+no errors
+.It 1
+failed to open file
+.It 2
+failed to stat file
+.It 3
+file too large
+.It 4
+out of memory
+.It 5
+short read from file
+.El
+.El
+.Sh Internals:
+Requests are kept in two queues. The first is the inflight queue. In
+this queue requests have an allocated transaction id and nameserver.
+They will soon be transmitted if they haven't already been.
+.Pp
+The second is the waiting queue. The size of the inflight ring is
+limited and all other requests wait in waiting queue for space. This
+bounds the number of concurrent requests so that we don't flood the
+nameserver. Several algorithms require a full walk of the inflight
+queue and so bounding its size keeps thing going nicely under huge
+(many thousands of requests) loads.
+.Pp
+If a nameserver loses too many requests it is considered down and we
+try not to use it. After a while we send a probe to that nameserver
+(a lookup for google.com) and, if it replies, we consider it working
+again. If the nameserver fails a probe we wait longer to try again
+with the next probe.
+.Sh SEE ALSO
+.Xr event 3 ,
+.Xr gethostbyname 3 ,
+.Xr resolv.conf 5
+.Sh HISTORY
+The
+.Nm evdns
+API was developed by Adam Langley on top of the
+.Nm libevent
+API.
+The code was integrate into
+.Nm Tor
+by Nick Mathewson and finally put into
+.Nm libevent
+itself by Niels Provos.
+.Sh AUTHORS
+The
+.Nm evdns
+API and code was written by Adam Langley with significant
+contributions by Nick Mathewson.
+.Sh BUGS
+This documentation is neither complete nor authoritative.
+If you are in doubt about the usage of this API then
+check the source code to find out how it works, write
+up the missing piece of documentation and send it to
+me for inclusion in this man page.

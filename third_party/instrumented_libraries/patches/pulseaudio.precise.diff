@@ -1,0 +1,16 @@
+diff -rupN ./src/modules/bluetooth/sbc/sbc_primitives_mmx.h ../pulseaudio-1.1-patched/src/modules/bluetooth/sbc/sbc_primitives_mmx.h
+--- ./src/modules/bluetooth/sbc/sbc_primitives_mmx.h	2011-10-20 16:54:16.000000000 +0400
++++ ../pulseaudio-1.1-patched/src/modules/bluetooth/sbc/sbc_primitives_mmx.h	2014-01-30 16:57:43.113946495 +0400
+@@ -29,8 +29,11 @@
+ 
+ #include "sbc_primitives.h"
+ 
++// The inline asm causes errors in clang builds. We don't want inline asm in
++// instrumented builds anyway.
+ #if defined(__GNUC__) && (defined(__i386__) || defined(__amd64__)) && \
+-		!defined(SBC_HIGH_PRECISION) && (SCALE_OUT_BITS == 15)
++		!defined(SBC_HIGH_PRECISION) && (SCALE_OUT_BITS == 15) && \
++		!defined(__clang__)
+ 
+ #define SBC_BUILD_WITH_MMX_SUPPORT
+ 

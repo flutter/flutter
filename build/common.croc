@@ -1,0 +1,127 @@
+# -*- python -*-
+# Crocodile config file for Chromium - settings common to all platforms
+#
+# This should be speicified before the platform-specific config, for example:
+#       croc -c chrome_common.croc -c linux/chrome_linux.croc
+
+{
+  # List of root directories, applied in order
+  'roots' : [
+    # Sub-paths we specifically care about and want to call out
+    {
+      'root' : '_/src',
+      'altname' : 'CHROMIUM',
+    },
+  ],
+
+  # List of rules, applied in order
+  # Note that any 'include':0 rules here will be overridden by the 'include':1
+  # rules in the platform-specific configs.
+  'rules' : [
+    # Don't scan for executable lines in uninstrumented C++ header files
+    {
+      'regexp' : '.*\\.(h|hpp)$',
+      'add_if_missing' : 0,
+    },
+
+    # Groups
+    {
+      'regexp' : '',
+      'group' : 'source',
+    },
+    {
+      'regexp' : '.*_(test|unittest|uitest|browsertest)\\.',
+      'group' : 'test',
+    },
+
+    # Languages
+    {
+      'regexp' : '.*\\.(c|h)$',
+      'language' : 'C',
+    },
+    {
+      'regexp' : '.*\\.(cc|cpp|hpp)$',
+      'language' : 'C++',
+    },
+
+    # Files/paths to include.  Specify these before the excludes, since rules
+    # are in order.
+    {
+      'regexp' : '^CHROMIUM/(base|media|net|printing|remoting|chrome|content|webkit/glue|native_client)/',
+      'include' : 1,
+    },
+    # Don't include subversion or mercurial SCM dirs
+    {
+      'regexp' : '.*/(\\.svn|\\.hg)/',
+      'include' : 0,
+    },
+    # Don't include output dirs
+    {
+      'regexp' : '.*/(Debug|Release|out|xcodebuild)/',
+      'include' : 0,
+    },
+    # Don't include third-party source
+    {
+      'regexp' : '.*/third_party/',
+      'include' : 0,
+    },
+    # We don't run the V8 test suite, so we don't care about V8 coverage.
+    {
+      'regexp' : '.*/v8/',
+      'include' : 0,
+    },
+  ],
+
+  # Paths to add source from
+  'add_files' : [
+    'CHROMIUM'
+  ],
+
+  # Statistics to print
+  'print_stats' : [
+    {
+      'stat' : 'files_executable',
+      'format' : '*RESULT FilesKnown: files_executable= %d files',
+    },
+    {
+      'stat' : 'files_instrumented',
+      'format' : '*RESULT FilesInstrumented: files_instrumented= %d files',
+    },
+    {
+      'stat' : '100.0 * files_instrumented / files_executable',
+      'format' : '*RESULT FilesInstrumentedPercent: files_instrumented_percent= %g percent',
+    },
+    {
+      'stat' : 'lines_executable',
+      'format' : '*RESULT LinesKnown: lines_known= %d lines',
+    },
+    {
+      'stat' : 'lines_instrumented',
+      'format' : '*RESULT LinesInstrumented: lines_instrumented= %d lines',
+    },
+    {
+      'stat' : 'lines_covered',
+      'format' : '*RESULT LinesCoveredSource: lines_covered_source= %d lines',
+      'group' : 'source',
+    },
+    {
+      'stat' : 'lines_covered',
+      'format' : '*RESULT LinesCoveredTest: lines_covered_test= %d lines',
+      'group' : 'test',
+    },
+    {
+      'stat' : '100.0 * lines_covered / lines_executable',
+      'format' : '*RESULT PercentCovered: percent_covered= %g percent',
+    },
+    {
+      'stat' : '100.0 * lines_covered / lines_executable',
+      'format' : '*RESULT PercentCoveredSource: percent_covered_source= %g percent',
+      'group' : 'source',
+    },
+    {
+      'stat' : '100.0 * lines_covered / lines_executable',
+      'format' : '*RESULT PercentCoveredTest: percent_covered_test= %g percent',
+      'group' : 'test',
+    },
+  ],
+}

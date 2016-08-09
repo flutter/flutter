@@ -1,0 +1,14 @@
+In file included from raw_ptr_to_gc_managed_class.cpp:5:
+./raw_ptr_to_gc_managed_class.h:14:1: warning: [blink-gc] Class 'PartObject' contains invalid fields.
+class PartObject {
+^
+./raw_ptr_to_gc_managed_class.h:17:5: note: [blink-gc] Raw pointer field 'm_obj' to a GC managed class declared here:
+    RawPtr<HeapObject> m_obj;
+    ^
+./raw_ptr_to_gc_managed_class.h:20:1: warning: [blink-gc] Class 'HeapObject' contains invalid fields.
+class HeapObject : public GarbageCollected<HeapObject> {
+^
+./raw_ptr_to_gc_managed_class.h:25:5: note: [blink-gc] Raw pointer field 'm_objs' to a GC managed class declared here:
+    HeapVector<HeapObject*> m_objs;
+    ^
+2 warnings generated.

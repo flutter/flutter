@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Copyright (c) 2012 The Chromium Authors. All rights reserved.
+  Use of this source code is governed by a BSD-style license that can be
+  found in the LICENSE file.
+-->
+
+<!--
+Documentation: http://findbugs.sourceforge.net/manual/filter.html
+In particular, ~ at the start of a string means it's a regex.
+-->
+<FindBugsFilter>
+  <!-- Skip the generated resource classes (including nested classes). -->
+  <Match>
+    <Class name="~.*\.R(\$\w+)?" />
+  </Match>
+  <Match>
+    <Class name="~org\.chromium\..*\.Manifest(\$\w+)?" />
+  </Match>
+  <Bug pattern="DM_STRING_CTOR" />
+  <!-- Ignore "reliance on default String encoding" warnings, as we're not multi-platform -->
+  <Bug pattern="DM_DEFAULT_ENCODING" />
+</FindBugsFilter>

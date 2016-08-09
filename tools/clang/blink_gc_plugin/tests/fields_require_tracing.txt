@@ -1,0 +1,22 @@
+fields_require_tracing.cpp:9:1: warning: [blink-gc] Class 'PartObject' has untraced fields that require tracing.
+void PartObject::trace(Visitor* visitor) {
+^
+./fields_require_tracing.h:29:5: note: [blink-gc] Untraced field 'm_obj1' declared here:
+    Member<HeapObject> m_obj1;
+    ^
+./fields_require_tracing.h:31:5: note: [blink-gc] Untraced field 'm_obj3' declared here:
+    Member<HeapObject> m_obj3;
+    ^
+fields_require_tracing.cpp:16:1: warning: [blink-gc] Class 'PartBObject' has untraced fields that require tracing.
+void PartBObject::trace(Visitor* visitor) {
+^
+./fields_require_tracing.h:20:5: note: [blink-gc] Untraced field 'm_set' declared here:
+    HeapHashSet<PartBObject> m_set;
+    ^
+fields_require_tracing.cpp:21:1: warning: [blink-gc] Class 'HeapObject' has untraced fields that require tracing.
+void HeapObject::trace(Visitor* visitor) {
+^
+./fields_require_tracing.h:40:5: note: [blink-gc] Untraced field 'm_part' declared here:
+    PartObject m_part;
+    ^
+3 warnings generated.

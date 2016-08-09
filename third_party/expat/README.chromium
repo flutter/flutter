@@ -1,0 +1,45 @@
+Name: Expat XML Parser
+Short Name: expat
+URL: http://sourceforge.net/projects/expat/
+Version: 2.1.0
+License: MIT
+License File: files/COPYING
+Security Critical: yes
+
+Description:
+  This is Expat XML parser - very lightweight C library for parsing XML.
+  Expat is distributed under an MIT license detailed in files/COPYING.
+
+  We include it here because libjingle depends on it.
+
+Local Modifications:
+  Removed files that Chromium didn't need:
+    lib/expat*.dsp
+    lib/Makefile.MPW
+    amiga/*
+    bcb5/*
+    conftools/*
+    doc/*
+    examples/*
+    tests/*
+    vms/*
+    win32/*
+    xmlwf/*
+    configure
+    configure.in
+    Makefile.in
+    expat.dsw
+    expat.dsw
+    expat_config.h.in
+  Edited:
+    lib/winconfig.h (see winconfig.h.original for unmodified version)
+      * Added check on line 1751 of xmltok_impl.c to patch a
+        bug with the handling of utf-8 characters that leads to a crash.
+    lib/xmltok_impl.c (see xmltok_imp.c.original for unmodified version)
+      * Prevent a compiler warning when compiling with
+        WIN32_LEAN_AND_MEAN predefined.
+    lib/xmlparse.c (see xmlparse.c.original for unmodified version)
+      * Apply https://hg.mozilla.org/releases/mozilla-esr31/rev/2f3e78643f5c
+        to prevent an integer overflow.
+  Added files:
+    lib/expat_config.h (a generated config file)

@@ -1,0 +1,12 @@
+diff -rupN ./configure ../zlib-1.2.3.4.dfsg-patched/configure
+--- ./configure	2009-12-24 18:09:43.000000000 +0300
++++ ../zlib-1.2.3.4.dfsg-patched/configure	2014-06-03 17:53:45.082074669 +0400
+@@ -72,6 +72,8 @@ cflags=${CFLAGS-"-O3"}
+ # to force the asm version use: CFLAGS="-O3 -DASMV" ./configure
+ case "$cc" in
+   *gcc*) gcc=1 ;;
++  # Use the version script for clang builds as well.
++  *clang*) gcc=1 ;;
+ esac
+ 
+ if test "$gcc" -eq 1 && ($cc -c $cflags $test.c) 2>/dev/null; then

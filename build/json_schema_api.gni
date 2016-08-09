@@ -1,0 +1,242 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Defines a static library corresponding to the output of schema compiler tools
+# over a set of extensions API schemas (IDL or JSON format.) The library target
+# has implicit hard dependencies on all schema files listed by the invoker and
+# is itself a hard dependency.
+#
+# Invocations of this template may use the following variables:
+#
+# sources [required] A list of schema files to be compiled.
+#
+# root_namespace [required]
+#     A Python string substituion pattern used to generate the C++
+#     namespace for each API. Use %(namespace)s to replace with the API
+#     namespace, like "toplevel::%(namespace)s_api".
+#
+# schema_include_rules [optional]
+#     A list of paths to include when searching for referenced objects,
+#     with the namespace separated by a :.
+#     Example:
+#       [ '/foo/bar:Foo::Bar::%(namespace)s' ]
+#
+# schemas [optional, default = false]
+#   Boolean indicating if the schema files should be generated.
+#
+# bundle [optional, default = false]
+#   Boolean indicating if the schema bundle files should be generated.
+#
+# bundle_registration [optional, default = false]
+#   Boolean indicating if the API registration bundle files should be generated.
+#
+# impl_dir [required if bundle_registration = true, otherwise unused]
+#   The path containing C++ implementations of API functions. This path is
+#   used as the root path when looking for {schema}/{schema}_api.h headers
+#   when generating API registration bundles. Such headers, if found, are
+#   automatically included by the generated code.
+#
+# uncompiled_sources [optional, only used when bundle = true or
+#     bundle_registration = true]
+#   A list of schema files which should not be compiled, but which should still
+#   be processed for API bundle generation.
+#
+# deps [optional]
+#   If any deps are specified they will be inherited by the static library
+#   target.
+#
+# generate_static_library [optional, defaults to false]
+#   Produces a static library instead of a source_set.
+#
+# The generated library target also inherits the visibility and output_name
+# of its invoker.
+
+template("json_schema_api") {
+  assert(defined(invoker.sources),
+         "\"sources\" must be defined for the $target_name template.")
+  assert(defined(invoker.root_namespace),
+         "\"root_namespace\" must be defined for the $target_name template.")
+
+  schemas = defined(invoker.schemas) && invoker.schemas
+  bundle = defined(invoker.bundle) && invoker.bundle
+  bundle_registration =
+      defined(invoker.bundle_registration) && invoker.bundle_registration
+
+  schema_include_rules = ""
+  if (defined(invoker.schema_include_rules)) {
+    schema_include_rules = invoker.schema_include_rules
+  }
+
+  # Keep a copy of the target_name here since it will be trampled
+  # in nested targets.
+  target_visibility = [ ":$target_name" ]
+
+  generated_config_name = target_name + "_generated_config"
+  config(generated_config_name) {
+    include_dirs = [ root_gen_dir ]
+    visibility = target_visibility
+  }
+
+  root_namespace = invoker.root_namespace
+
+  compiler_root = "//tools/json_schema_compiler"
+  compiler_script = "$compiler_root/compiler.py"
+  compiler_sources = [
+    "$compiler_root/cc_generator.py",
+    "$compiler_root/code.py",
+    "$compiler_root/compiler.py",
+    "$compiler_root/cpp_generator.py",
+    "$compiler_root/cpp_type_generator.py",
+    "$compiler_root/cpp_util.py",
+    "$compiler_root/h_generator.py",
+    "$compiler_root/idl_schema.py",
+    "$compiler_root/model.py",
+    "$compiler_root/util_cc_helper.py",
+  ]
+
+  if (schemas) {
+    schema_generator_name = target_name + "_schema_generator"
+    action_foreach(schema_generator_name) {
+      script = compiler_script
+      sources = invoker.sources
+      inputs = compiler_sources
+      outputs = [
+        "$target_gen_dir/{{source_name_part}}.cc",
+        "$target_gen_dir/{{source_name_part}}.h",
+      ]
+      args = [
+        "{{source}}",
+        "--root=" + rebase_path("//", root_build_dir),
+        "--destdir=" + rebase_path(root_gen_dir, root_build_dir),
+        "--namespace=$root_namespace",
+        "--generator=cpp",
+        "--include-rules=$schema_include_rules",
+      ]
+
+      if (defined(invoker.visibility)) {
+        # If visibility is restricted, add our own target to it.
+        visibility = invoker.visibility + target_visibility
+      }
+    }
+  }
+
+  if (bundle) {
+    uncompiled_sources = []
+    if (defined(invoker.uncompiled_sources)) {
+      uncompiled_sources = invoker.uncompiled_sources
+    }
+
+    bundle_generator_schema_name = target_name + "_bundle_generator_schema"
+    action(bundle_generator_schema_name) {
+      script = compiler_script
+      inputs = compiler_sources + invoker.sources + uncompiled_sources
+      outputs = [
+        "$target_gen_dir/generated_schemas.cc",
+        "$target_gen_dir/generated_schemas.h",
+      ]
+      args = [
+               "--root=" + rebase_path("//", root_build_dir),
+               "--destdir=" + rebase_path(root_gen_dir, root_build_dir),
+               "--namespace=$root_namespace",
+               "--generator=cpp-bundle-schema",
+               "--include-rules=$schema_include_rules",
+             ] + rebase_path(invoker.sources, root_build_dir) +
+             rebase_path(uncompiled_sources, root_build_dir)
+    }
+  }
+
+  if (bundle_registration) {
+    uncompiled_sources = []
+    if (defined(invoker.uncompiled_sources)) {
+      uncompiled_sources = invoker.uncompiled_sources
+    }
+
+    assert(defined(invoker.impl_dir),
+           "\"impl_dir\" must be defined for the $target_name template.")
+
+    # Child directory inside the generated file tree.
+    gen_child_dir = rebase_path(invoker.impl_dir, "//")
+
+    bundle_generator_registration_name =
+        target_name + "_bundle_generator_registration"
+    action(bundle_generator_registration_name) {
+      script = compiler_script
+      inputs = compiler_sources + invoker.sources + uncompiled_sources
+      outputs = [
+        "$root_gen_dir/$gen_child_dir/generated_api_registration.cc",
+        "$root_gen_dir/$gen_child_dir/generated_api_registration.h",
+      ]
+      args = [
+               "--root=" + rebase_path("//", root_build_dir),
+               "--destdir=" + rebase_path(root_gen_dir, root_build_dir),
+               "--namespace=$root_namespace",
+               "--generator=cpp-bundle-registration",
+               "--impl-dir=$gen_child_dir",
+               "--include-rules=$schema_include_rules",
+             ] + rebase_path(invoker.sources, root_build_dir) +
+             rebase_path(uncompiled_sources, root_build_dir)
+    }
+  }
+
+  # Compute the contents of the library/source set.
+  lib_sources = invoker.sources
+  lib_deps = []
+  lib_public_deps = []
+  lib_extra_configs = []
+
+  if (schemas) {
+    lib_sources += get_target_outputs(":$schema_generator_name")
+    lib_public_deps += [ ":$schema_generator_name" ]
+    lib_deps += [ "//tools/json_schema_compiler:generated_api_util" ]
+    lib_extra_configs += [ "//build/config/compiler:no_size_t_to_int_warning" ]
+  }
+
+  if (bundle) {
+    lib_sources += get_target_outputs(":$bundle_generator_schema_name")
+    lib_deps += [ ":$bundle_generator_schema_name" ]
+  }
+
+  if (bundle_registration) {
+    lib_sources += get_target_outputs(":$bundle_generator_registration_name")
+    lib_deps += [ ":$bundle_generator_registration_name" ]
+  }
+
+  if (defined(invoker.deps)) {
+    lib_deps += invoker.deps
+  }
+
+  # Generate either a static library or a source set.
+  if (defined(invoker.generate_static_library) &&
+      invoker.generate_static_library) {
+    static_library(target_name) {
+      sources = lib_sources
+      deps = lib_deps
+      public_deps = lib_public_deps
+      configs += lib_extra_configs
+      public_configs = [ ":$generated_config_name" ]
+
+      if (defined(invoker.visibility)) {
+        visibility = invoker.visibility
+      }
+      if (defined(invoker.output_name)) {
+        output_name = invoker.output_name
+      }
+    }
+  } else {
+    source_set(target_name) {
+      sources = lib_sources
+      deps = lib_deps
+      public_deps = lib_public_deps
+      configs += lib_extra_configs
+      public_configs = [ ":$generated_config_name" ]
+
+      if (defined(invoker.visibility)) {
+        visibility = invoker.visibility
+      }
+      if (defined(invoker.output_name)) {
+        output_name = invoker.output_name
+      }
+    }
+  }
+}

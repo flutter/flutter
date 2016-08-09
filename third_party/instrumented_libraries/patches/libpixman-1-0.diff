@@ -1,0 +1,23 @@
+--- pixman-0.30.2/configure.ac.orig	2014-08-19 15:53:39.376032738 +0400
++++ pixman-0.30.2/configure.ac	2014-08-19 15:53:55.264181469 +0400
+@@ -844,12 +844,13 @@ if test x$have_gettimeofday = xyes && te
+    AC_DEFINE(HAVE_GETTIMEOFDAY, 1, [Whether we have gettimeofday()])
+ fi
+
+-dnl =====================================
+-dnl Check for missing sqrtf() as, e.g., for Solaris 9
+-
+-AC_SEARCH_LIBS([sqrtf], [m], [],
+-               [AC_DEFINE([sqrtf], [sqrt],
+-                          [Define to sqrt if you do not have the `sqrtf' function.])])
++# Not needed for Clang Linux builds. Fixes http://crbug.com/404526.
++#dnl =====================================
++#dnl Check for missing sqrtf() as, e.g., for Solaris 9
++#
++#AC_SEARCH_LIBS([sqrtf], [m], [],
++#               [AC_DEFINE([sqrtf], [sqrt],
++#                          [Define to sqrt if you do not have the `sqrtf' function.])])
+
+ dnl =====================================
+ dnl Thread local storage
+

@@ -1,0 +1,15 @@
+diff -rupN ./gtk/gtkmenushell.h ../gtk+2.0-2.24.23-patched/gtk/gtkmenushell.h
+--- ./gtk/gtkmenushell.h	2014-03-06 08:56:42.000000000 +0400
++++ ../gtk+2.0-2.24.23-patched/gtk/gtkmenushell.h	2014-09-30 23:37:46.908364552 +0400
+@@ -136,6 +136,11 @@ void     _gtk_menu_shell_set_keyboard_mo
+                                             gboolean      keyboard_mode);
+ gboolean _gtk_menu_shell_get_keyboard_mode (GtkMenuShell *menu_shell);
+ 
++// https://bugs.launchpad.net/bugs/945135
++gboolean ubuntu_gtk_menu_shell_activate_mnemonic (GtkMenuShell *shell,
++                                                  GtkWidget *item);
++gboolean ubuntu_gtk_menu_shell_activate_first (GtkMenuShell *menu_shell,
++                                               gboolean search_sensitive);
+ G_END_DECLS
+ 
+ #endif /* __GTK_MENU_SHELL_H__ */

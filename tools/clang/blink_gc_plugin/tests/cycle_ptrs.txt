@@ -1,0 +1,8 @@
+
+Found a potentially leaking cycle starting from a GC root:
+./cycle_ptrs.h:49:5: blink::E (m_a) => blink::A
+./cycle_ptrs.h:26:5: blink::A (m_b) => blink::B
+./cycle_ptrs.h:34:5: blink::B (m_c) => blink::C
+./cycle_ptrs.h:39:5: blink::C (m_d) => blink::D
+./cycle_ptrs.h:44:5: blink::D (m_es) => blink::E
+

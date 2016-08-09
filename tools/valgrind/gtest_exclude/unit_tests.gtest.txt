@@ -1,0 +1,39 @@
+# Hangs sometimes; see http://crbug.com/22146
+VisitedLinkEventsTest.Coalescense
+# Hangs sometimes; see http://crbug.com/22160
+VisitedLinkRelayTest.Basics
+# Hangs (or takes forever?) reliably on bots; see http://crbug.com/23580
+RenderViewTest.ImeComposition
+# Hangs sometimes; see http://crbug.com/52844
+PredictorTest.MassiveConcurrentLookupTest
+# Pure virtual method called: see http://crbug.com/50950
+ConnectionTesterTest.RunAllTests
+
+# Following tests fail under valgrind because libjingle has hardcoded
+# timeouts for P2P connections, and it makes these tests fail under valgrind.
+# TODO(sergeyu): Remove hardcoded timeouts from libjingle.
+P2PTransportImplTest.Create
+P2PTransportImplTest.ConnectUdp
+P2PTransportImplTest.ConnectTcp
+P2PTransportImplTest.SendDataUdp
+P2PTransportImplTest.SendDataTcp
+
+# Failing on CrOS, see http://crbug.com/79657
+SignedSettingsTest.StorePolicyNoPolicyData
+
+# Flaky and not very interesting under Valgrind http://crbug.com/93027
+ProcessWatcherTest.ImmediateTermination
+
+# Timing out all over the place. Disabling for now. http://crbug.com/149715
+ExtensionWebRequestTest.*
+# Timing out all over the place. Disabling for now. http://crbug.com/149882
+NativeMessagingTest.*
+
+# Failing, see http://crbug.com/408443
+SyncFileSystemServiceTest.SimpleLocalSyncFlow
+
+# Timing out all over the place. Disabling for now. http://crbug.com/164589
+StorageInfoProviderTest.*
+
+# Failing on CrOS, see http://crbug.com/408013
+ProxyConfigServiceImplTest.*

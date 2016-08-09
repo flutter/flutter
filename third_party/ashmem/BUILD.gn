@@ -1,0 +1,12 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+assert(is_android)
+
+source_set("ashmem") {
+  sources = [
+    "ashmem-dev.c",
+    "ashmem.h",
+  ]
+}

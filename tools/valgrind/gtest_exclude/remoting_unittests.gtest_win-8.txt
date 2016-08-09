@@ -1,0 +1,2 @@
+# Fails natively as well: http://crbug.com/251517
+RdpClientTest.Basic

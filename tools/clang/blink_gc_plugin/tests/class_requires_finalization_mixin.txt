@@ -1,0 +1,8 @@
+In file included from class_requires_finalization_mixin.cpp:5:
+./class_requires_finalization_mixin.h:30:1: warning: [blink-gc] Class 'NeedsFinalizer' requires finalization.
+class NeedsFinalizer
+^
+./class_requires_finalization_mixin.h:32:7: note: [blink-gc] Base class 'MixinFinalizable' requiring finalization declared here:
+    , public MixinFinalizable {
+      ^
+1 warning generated.

@@ -1,0 +1,33 @@
+// Copyright 2016 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+[DartPackage="mojo_services"]
+module mojo.ui;
+
+// A view token is an opaque transferable reference to a view.
+//
+// The ViewManager provides each view with a unique view token when
+// it is registered.  The token can subsequently be passed to other
+// applications and may be used to add the view as a child of some
+// other view or to set it as the root of a view tree.
+//
+// View tokens should be kept secret and should only be shared with
+// the view's intended container.
+//
+// TODO(jeffbrown): This implementation is a temporary placeholder until
+// we extend Mojo to provide a way to create tokens which cannot be forged.
+struct ViewToken {
+  uint32 value;
+};
+
+// A view owner provides access to the view's token and keeps the
+// view alive.  When the view owner is closed, the view will be
+// unregistered from the view manager.
+//
+// This interface is only intended to be implemented by the view manager
+// to obtain the desired ownership semantics.
+interface ViewOwner {
+  // Gets the |ViewToken| associated with the view.
+  GetToken() => (ViewToken token);
+};

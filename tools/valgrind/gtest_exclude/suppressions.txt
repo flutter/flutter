@@ -1,0 +1,39 @@
+{
+   Test DiskCacheBackendTest.InvalidEntryEnumeration leaks.
+   Memcheck:Leak
+   fun:_Znwj
+   fun:_ZN10disk_cache12StorageBlockINS_12RankingsNodeEE12AllocateDataEv
+   fun:_ZN10disk_cache12StorageBlockINS_12RankingsNodeEE4LoadEv
+   fun:_ZN10disk_cache9EntryImpl15LoadNodeAddressEv
+   fun:_ZN10disk_cache11BackendImpl8NewEntryENS_4AddrEPPNS_9EntryImplEPb
+   fun:_ZN10disk_cache11BackendImpl10MatchEntryERKSsjb
+   fun:_ZN10disk_cache11BackendImpl9OpenEntryERKSsPPNS_5EntryE
+   fun:_ZN49DiskCacheBackendTest_InvalidEntryEnumeration_Test8TestBodyEv
+   fun:_ZN7testing4Test3RunEv
+}
+{
+   Test DiskCacheBackendTest.InvalidEntryRead leaks.
+   Memcheck:Leak
+   fun:_Znwj
+   fun:_ZN10disk_cache11BackendImpl8NewEntryENS_4AddrEPPNS_9EntryImplEPb
+   fun:_ZN10disk_cache11BackendImpl10MatchEntryERKSsjb
+   fun:_ZN10disk_cache11BackendImpl9OpenEntryERKSsPPNS_5EntryE
+   fun:_ZN42DiskCacheBackendTest_InvalidEntryRead_Test8TestBodyEv
+   fun:_ZN7testing4Test3RunEv
+}
+{
+   Test DiskCacheBackendTest.InvalidEntryWithLoad leaks.
+   Memcheck:Leak
+   fun:_Znwj
+   fun:_ZN10disk_cache11BackendImpl11CreateEntryERKSsPPNS_5EntryE
+   fun:_ZN46DiskCacheBackendTest_InvalidEntryWithLoad_Test8TestBodyEv
+   fun:_ZN7testing4Test3RunEv
+}
+{
+   Test FlipNetworkTransactionTest.WriteError Bug 29004
+   Memcheck:Leak
+   fun:_Znw*
+   ...
+   fun:_ZN3net26FlipNetworkTransactionTest17TransactionHelperERKNS_15HttpRequestInfoEPNS_17DelayedSocketDataE
+   fun:_ZN3net42FlipNetworkTransactionTest_WriteError_Test8TestBodyEv
+}

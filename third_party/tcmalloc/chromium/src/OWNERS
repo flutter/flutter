@@ -1,0 +1,4 @@
+per-file heap-profile*=dmikurube@chromium.org
+per-file heap-profile*=glider@chromium.org
+per-file deep-heap-profile*=dmikurube@chromium.org
+per-file deep-heap-profile*=glider@chromium.org

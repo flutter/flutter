@@ -1,0 +1,11 @@
+[see also]
+Further documentation for
+.B pprof
+is maintained as a web page called
+.B cpu_profiler.html
+and is likely installed at one of the following locations:
+.IP
+.B /usr/share/gperftools/cpu_profiler.html
+.br
+.B /usr/local/share/gperftools/cpu_profiler.html
+.PP

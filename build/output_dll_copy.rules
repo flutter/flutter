@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<VisualStudioToolFile
+	Name="Output DLL copy"
+	Version="8.00"
+	>
+	<Rules>
+		<CustomBuildRule
+			Name="Output DLL copy"
+			CommandLine="xcopy /R /C /Y $(InputPath) $(OutDir)"
+			Outputs="$(OutDir)\$(InputFileName)"
+			FileExtensions="*.dll"
+			>
+			<Properties>
+			</Properties>
+		</CustomBuildRule>
+	</Rules>
+</VisualStudioToolFile>

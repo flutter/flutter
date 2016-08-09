@@ -1,0 +1,265 @@
+IMPORTANT NOTE FOR 64-BIT USERS
+-------------------------------
+There are known issues with some perftools functionality on x86_64
+systems.  See 64-BIT ISSUES, below.
+
+
+TCMALLOC
+--------
+Just link in -ltcmalloc or -ltcmalloc_minimal to get the advantages of
+tcmalloc -- a replacement for malloc and new.  See below for some
+environment variables you can use with tcmalloc, as well.
+
+tcmalloc functionality is available on all systems we've tested; see
+INSTALL for more details.  See README_windows.txt for instructions on
+using tcmalloc on Windows.
+
+NOTE: When compiling with programs with gcc, that you plan to link
+with libtcmalloc, it's safest to pass in the flags
+
+ -fno-builtin-malloc -fno-builtin-calloc -fno-builtin-realloc -fno-builtin-free
+
+when compiling.  gcc makes some optimizations assuming it is using its
+own, built-in malloc; that assumption obviously isn't true with
+tcmalloc.  In practice, we haven't seen any problems with this, but
+the expected risk is highest for users who register their own malloc
+hooks with tcmalloc (using gperftools/malloc_hook.h).  The risk is
+lowest for folks who use tcmalloc_minimal (or, of course, who pass in
+the above flags :-) ).
+
+
+HEAP PROFILER
+-------------
+See doc/heap-profiler.html for information about how to use tcmalloc's
+heap profiler and analyze its output.
+
+As a quick-start, do the following after installing this package:
+
+1) Link your executable with -ltcmalloc
+2) Run your executable with the HEAPPROFILE environment var set:
+     $ HEAPPROFILE=/tmp/heapprof <path/to/binary> [binary args]
+3) Run pprof to analyze the heap usage
+     $ pprof <path/to/binary> /tmp/heapprof.0045.heap  # run 'ls' to see options
+     $ pprof --gv <path/to/binary> /tmp/heapprof.0045.heap
+
+You can also use LD_PRELOAD to heap-profile an executable that you
+didn't compile.
+
+There are other environment variables, besides HEAPPROFILE, you can
+set to adjust the heap-profiler behavior; c.f. "ENVIRONMENT VARIABLES"
+below.
+
+The heap profiler is available on all unix-based systems we've tested;
+see INSTALL for more details.  It is not currently available on Windows.
+
+
+HEAP CHECKER
+------------
+See doc/heap-checker.html for information about how to use tcmalloc's
+heap checker.
+
+In order to catch all heap leaks, tcmalloc must be linked *last* into
+your executable.  The heap checker may mischaracterize some memory
+accesses in libraries listed after it on the link line.  For instance,
+it may report these libraries as leaking memory when they're not.
+(See the source code for more details.)
+
+Here's a quick-start for how to use:
+
+As a quick-start, do the following after installing this package:
+
+1) Link your executable with -ltcmalloc
+2) Run your executable with the HEAPCHECK environment var set:
+     $ HEAPCHECK=1 <path/to/binary> [binary args]
+
+Other values for HEAPCHECK: normal (equivalent to "1"), strict, draconian
+
+You can also use LD_PRELOAD to heap-check an executable that you
+didn't compile.
+
+The heap checker is only available on Linux at this time; see INSTALL
+for more details.
+
+
+CPU PROFILER
+------------
+See doc/cpu-profiler.html for information about how to use the CPU
+profiler and analyze its output.
+
+As a quick-start, do the following after installing this package:
+
+1) Link your executable with -lprofiler
+2) Run your executable with the CPUPROFILE environment var set:
+     $ CPUPROFILE=/tmp/prof.out <path/to/binary> [binary args]
+3) Run pprof to analyze the CPU usage
+     $ pprof <path/to/binary> /tmp/prof.out      # -pg-like text output
+     $ pprof --gv <path/to/binary> /tmp/prof.out # really cool graphical output
+
+There are other environment variables, besides CPUPROFILE, you can set
+to adjust the cpu-profiler behavior; cf "ENVIRONMENT VARIABLES" below.
+
+The CPU profiler is available on all unix-based systems we've tested;
+see INSTALL for more details.  It is not currently available on Windows.
+
+NOTE: CPU profiling doesn't work after fork (unless you immediately
+      do an exec()-like call afterwards).  Furthermore, if you do
+      fork, and the child calls exit(), it may corrupt the profile
+      data.  You can use _exit() to work around this.  We hope to have
+      a fix for both problems in the next release of perftools
+      (hopefully perftools 1.2).
+
+
+EVERYTHING IN ONE
+-----------------
+If you want the CPU profiler, heap profiler, and heap leak-checker to
+all be available for your application, you can do:
+   gcc -o myapp ... -lprofiler -ltcmalloc
+
+However, if you have a reason to use the static versions of the
+library, this two-library linking won't work:
+   gcc -o myapp ... /usr/lib/libprofiler.a /usr/lib/libtcmalloc.a  # errors!
+
+Instead, use the special libtcmalloc_and_profiler library, which we
+make for just this purpose:
+   gcc -o myapp ... /usr/lib/libtcmalloc_and_profiler.a
+
+
+CONFIGURATION OPTIONS
+---------------------
+For advanced users, there are several flags you can pass to
+'./configure' that tweak tcmalloc performace.  (These are in addition
+to the environment variables you can set at runtime to affect
+tcmalloc, described below.)  See the INSTALL file for details.
+
+
+ENVIRONMENT VARIABLES
+---------------------
+The cpu profiler, heap checker, and heap profiler will lie dormant,
+using no memory or CPU, until you turn them on.  (Thus, there's no
+harm in linking -lprofiler into every application, and also -ltcmalloc
+assuming you're ok using the non-libc malloc library.)
+
+The easiest way to turn them on is by setting the appropriate
+environment variables.  We have several variables that let you
+enable/disable features as well as tweak parameters.
+
+Here are some of the most important variables:
+
+HEAPPROFILE=<pre> -- turns on heap profiling and dumps data using this prefix
+HEAPCHECK=<type>  -- turns on heap checking with strictness 'type'
+CPUPROFILE=<file> -- turns on cpu profiling and dumps data to this file.
+PROFILESELECTED=1 -- if set, cpu-profiler will only profile regions of code
+                     surrounded with ProfilerEnable()/ProfilerDisable().
+PROFILEFREQUENCY=x-- how many interrupts/second the cpu-profiler samples.
+
+TCMALLOC_DEBUG=<level> -- the higher level, the more messages malloc emits
+MALLOCSTATS=<level>    -- prints memory-use stats at program-exit
+
+For a full list of variables, see the documentation pages:
+   doc/cpuprofile.html
+   doc/heapprofile.html
+   doc/heap_checker.html
+
+
+COMPILING ON NON-LINUX SYSTEMS
+------------------------------
+
+Perftools was developed and tested on x86 Linux systems, and it works
+in its full generality only on those systems.  However, we've
+successfully ported much of the tcmalloc library to FreeBSD, Solaris
+x86, and Darwin (Mac OS X) x86 and ppc; and we've ported the basic
+functionality in tcmalloc_minimal to Windows.  See INSTALL for details.
+See README_windows.txt for details on the Windows port.
+
+
+PERFORMANCE
+-----------
+
+If you're interested in some third-party comparisons of tcmalloc to
+other malloc libraries, here are a few web pages that have been
+brought to our attention.  The first discusses the effect of using
+various malloc libraries on OpenLDAP.  The second compares tcmalloc to
+win32's malloc.
+  http://www.highlandsun.com/hyc/malloc/
+  http://gaiacrtn.free.fr/articles/win32perftools.html
+
+It's possible to build tcmalloc in a way that trades off faster
+performance (particularly for deletes) at the cost of more memory
+fragmentation (that is, more unusable memory on your system).  See the
+INSTALL file for details.
+
+
+OLD SYSTEM ISSUES
+-----------------
+
+When compiling perftools on some old systems, like RedHat 8, you may
+get an error like this:
+    ___tls_get_addr: symbol not found
+
+This means that you have a system where some parts are updated enough
+to support Thread Local Storage, but others are not.  The perftools
+configure script can't always detect this kind of case, leading to
+that error.  To fix it, just comment out (or delete) the line
+   #define HAVE_TLS 1
+in your config.h file before building.
+
+
+64-BIT ISSUES
+-------------
+
+There are two issues that can cause program hangs or crashes on x86_64
+64-bit systems, which use the libunwind library to get stack-traces.
+Neither issue should affect the core tcmalloc library; they both
+affect the perftools tools such as cpu-profiler, heap-checker, and
+heap-profiler.
+
+1) Some libc's -- at least glibc 2.4 on x86_64 -- have a bug where the
+libc function dl_iterate_phdr() acquires its locks in the wrong
+order.  This bug should not affect tcmalloc, but may cause occasional
+deadlock with the cpu-profiler, heap-profiler, and heap-checker.
+Its likeliness increases the more dlopen() commands an executable has.
+Most executables don't have any, though several library routines like
+getgrgid() call dlopen() behind the scenes.
+
+2) On x86-64 64-bit systems, while tcmalloc itself works fine, the
+cpu-profiler tool is unreliable: it will sometimes work, but sometimes
+cause a segfault.  I'll explain the problem first, and then some
+workarounds.
+
+Note that this only affects the cpu-profiler, which is a
+gperftools feature you must turn on manually by setting the
+CPUPROFILE environment variable.  If you do not turn on cpu-profiling,
+you shouldn't see any crashes due to perftools.
+
+The gory details: The underlying problem is in the backtrace()
+function, which is a built-in function in libc.
+Backtracing is fairly straightforward in the normal case, but can run
+into problems when having to backtrace across a signal frame.
+Unfortunately, the cpu-profiler uses signals in order to register a
+profiling event, so every backtrace that the profiler does crosses a
+signal frame.
+
+In our experience, the only time there is trouble is when the signal
+fires in the middle of pthread_mutex_lock.  pthread_mutex_lock is
+called quite a bit from system libraries, particularly at program
+startup and when creating a new thread.
+
+The solution: The dwarf debugging format has support for 'cfi
+annotations', which make it easy to recognize a signal frame.  Some OS
+distributions, such as Fedora and gentoo 2007.0, already have added
+cfi annotations to their libc.  A future version of libunwind should
+recognize these annotations; these systems should not see any
+crashses.
+
+Workarounds: If you see problems with crashes when running the
+cpu-profiler, consider inserting ProfilerStart()/ProfilerStop() into
+your code, rather than setting CPUPROFILE.  This will profile only
+those sections of the codebase.  Though we haven't done much testing,
+in theory this should reduce the chance of crashes by limiting the
+signal generation to only a small part of the codebase.  Ideally, you
+would not use ProfilerStart()/ProfilerStop() around code that spawns
+new threads, or is otherwise likely to cause a call to
+pthread_mutex_lock!
+
+---
+17 May 2011

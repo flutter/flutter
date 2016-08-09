@@ -1,0 +1,2 @@
+apk-based runner for Chromium unit test bundles. This is a simple wrapper APK
+that should include a single gtest native library.

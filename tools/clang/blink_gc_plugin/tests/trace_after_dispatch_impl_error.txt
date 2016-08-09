@@ -1,0 +1,34 @@
+trace_after_dispatch_impl_error.cpp:10:1: warning: [blink-gc] Missing dispatch to class 'TraceAfterDispatchInlinedDerived' in manual trace dispatch.
+inline void TraceAfterDispatchInlinedBase::traceImpl(
+^
+trace_after_dispatch_impl_error.cpp:35:1: warning: [blink-gc] Missing dispatch to class 'TraceAfterDispatchExternDerived' in manual trace dispatch.
+inline void TraceAfterDispatchExternBase::traceImpl(VisitorDispatcher visitor) {
+^
+In file included from trace_after_dispatch_impl_error.cpp:5:
+./trace_after_dispatch_impl_error.h:39:3: warning: [blink-gc] Class 'TraceAfterDispatchInlinedBase' has untraced fields that require tracing.
+  void traceAfterDispatchImpl(VisitorDispatcher visitor) {
+  ^
+./trace_after_dispatch_impl_error.h:44:3: note: [blink-gc] Untraced field 'x_base_' declared here:
+  Member<X> x_base_;
+  ^
+./trace_after_dispatch_impl_error.h:58:3: warning: [blink-gc] Base class 'TraceAfterDispatchInlinedBase' of derived class 'TraceAfterDispatchInlinedDerived' requires tracing.
+  void traceAfterDispatchImpl(VisitorDispatcher visitor) {
+  ^
+./trace_after_dispatch_impl_error.h:58:3: warning: [blink-gc] Class 'TraceAfterDispatchInlinedDerived' has untraced fields that require tracing.
+./trace_after_dispatch_impl_error.h:62:3: note: [blink-gc] Untraced field 'x_derived_' declared here:
+  Member<X> x_derived_;
+  ^
+trace_after_dispatch_impl_error.cpp:55:1: warning: [blink-gc] Class 'TraceAfterDispatchExternBase' has untraced fields that require tracing.
+inline void TraceAfterDispatchExternBase::traceAfterDispatchImpl(
+^
+./trace_after_dispatch_impl_error.h:84:3: note: [blink-gc] Untraced field 'x_base_' declared here:
+  Member<X> x_base_;
+  ^
+trace_after_dispatch_impl_error.cpp:70:1: warning: [blink-gc] Base class 'TraceAfterDispatchExternBase' of derived class 'TraceAfterDispatchExternDerived' requires tracing.
+inline void TraceAfterDispatchExternDerived::traceAfterDispatchImpl(
+^
+trace_after_dispatch_impl_error.cpp:70:1: warning: [blink-gc] Class 'TraceAfterDispatchExternDerived' has untraced fields that require tracing.
+./trace_after_dispatch_impl_error.h:98:3: note: [blink-gc] Untraced field 'x_derived_' declared here:
+  Member<X> x_derived_;
+  ^
+8 warnings generated.

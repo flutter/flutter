@@ -1,0 +1,5 @@
+In file included from virtual_bodies.cpp:5:
+./virtual_bodies.h:23:36: warning: [chromium-style] virtual methods with non-empty bodies shouldn't be declared inline.
+  virtual bool ComplainAboutThis() { return true; }
+                                   ^
+1 warning generated.

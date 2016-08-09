@@ -1,0 +1,8 @@
+In file included from class_requires_trace_method_tmpl.cpp:5:
+./class_requires_trace_method_tmpl.h:27:1: warning: [blink-gc] Class 'TemplatedObject<blink::PartObjectB>' requires a trace method.
+class TemplatedObject {
+^
+./class_requires_trace_method_tmpl.h:29:5: note: [blink-gc] Untraced field 'm_part' declared here:
+    T m_part;
+    ^
+1 warning generated.

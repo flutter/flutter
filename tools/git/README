@@ -1,0 +1,16 @@
+This directory contains some helpful Git tools.
+
+post-checkout and post-merge
+============================
+These hooks warn you about DEPS modifications so you will remember
+to run "gclient sync".
+
+To install these Git hooks, create symlinks like so:
+  ln -s $(pwd)/post-checkout $(git rev-parse --git-dir)/hooks
+  ln -s $(pwd)/post-merge    $(git rev-parse --git-dir)/hooks
+
+
+git-graph
+=========
+Create a graph of the recent history of occurences of a grep
+expression in the project.

@@ -1,0 +1,20 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//build/config/android/rules.gni")
+
+# GYP: //third_party/junit.gyp:hamcrest_jar
+java_prebuilt("hamcrest") {
+  jar_path = "src/lib/hamcrest-core-1.1.jar"
+}
+
+# GYP: //third_party/junit.gyp:junit_jar
+java_library("junit") {
+  chromium_code = false
+  testonly = true
+  deps = [
+    ":hamcrest",
+  ]
+  DEPRECATED_java_in_dir = "src/src/main/java"
+}

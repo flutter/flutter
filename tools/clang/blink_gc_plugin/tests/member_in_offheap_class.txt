@@ -1,0 +1,17 @@
+In file included from member_in_offheap_class.cpp:5:
+./member_in_offheap_class.h:14:1: warning: [blink-gc] Class 'OffHeapObject' contains invalid fields.
+class OffHeapObject {
+^
+./member_in_offheap_class.h:18:5: note: [blink-gc] Member field 'm_obj' in unmanaged class declared here:
+    Member<HeapObject> m_obj; // Must not contain Member.
+    ^
+./member_in_offheap_class.h:22:1: warning: [blink-gc] Class 'StackObject' contains invalid fields.
+class StackObject {
+^
+./member_in_offheap_class.h:26:5: note: [blink-gc] Member field 'm_memberOff' to non-GC managed class declared here:
+    Member<OffHeapObject> m_memberOff; // NOT OK
+    ^
+./member_in_offheap_class.h:27:5: note: [blink-gc] Member field 'm_heapVectorMemberOff' to non-GC managed class declared here:
+    HeapVector<Member<OffHeapObject>> m_heapVectorMemberOff; // NOT OK
+    ^
+2 warnings generated.

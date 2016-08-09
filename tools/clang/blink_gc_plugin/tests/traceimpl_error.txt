@@ -1,0 +1,20 @@
+In file included from traceimpl_error.cpp:5:
+./traceimpl_error.h:23:3: warning: [blink-gc] Class 'TraceImplInlinedWithUntracedMember' has untraced fields that require tracing.
+  void traceImpl(VisitorDispatcher visitor) {
+  ^
+./traceimpl_error.h:28:3: note: [blink-gc] Untraced field 'x_' declared here:
+  Member<X> x_;
+  ^
+./traceimpl_error.h:53:3: warning: [blink-gc] Base class 'Base' of derived class 'TraceImplInlineWithUntracedBase' requires tracing.
+  void traceImpl(VisitorDispatcher visitor) {
+  ^
+traceimpl_error.cpp:14:1: warning: [blink-gc] Class 'TraceImplExternWithUntracedMember' has untraced fields that require tracing.
+inline void TraceImplExternWithUntracedMember::traceImpl(
+^
+./traceimpl_error.h:40:3: note: [blink-gc] Untraced field 'x_' declared here:
+  Member<X> x_;
+  ^
+traceimpl_error.cpp:24:1: warning: [blink-gc] Base class 'Base' of derived class 'TraceImplExternWithUntracedBase' requires tracing.
+inline void TraceImplExternWithUntracedBase::traceImpl(
+^
+4 warnings generated.

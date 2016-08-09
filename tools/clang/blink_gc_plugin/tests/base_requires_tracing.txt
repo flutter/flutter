@@ -1,0 +1,4 @@
+base_requires_tracing.cpp:11:1: warning: [blink-gc] Base class 'B' of derived class 'C' requires tracing.
+void C::trace(Visitor* visitor) {
+^
+1 warning generated.

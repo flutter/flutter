@@ -1,0 +1,54 @@
+# Copyright 2016 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+config("glfw_config") {
+  include_dirs = [ "//third_party/glfw/include" ]
+}
+
+source_set("glfw") {
+  sources = [
+    "src/context.c",
+    "src/glx_context.c",
+    "src/glx_context.h",
+    "src/init.c",
+    "src/input.c",
+    "src/internal.h",
+    "src/linux_joystick.c",
+    "src/linux_joystick.h",
+    "src/monitor.c",
+    "src/posix_time.c",
+    "src/posix_time.h",
+    "src/posix_tls.c",
+    "src/posix_tls.h",
+    "src/vulkan.c",
+    "src/window.c",
+    "src/x11_init.c",
+    "src/x11_monitor.c",
+    "src/x11_platform.h",
+    "src/x11_window.c",
+    "src/xkb_unicode.c",
+    "src/xkb_unicode.h",
+  ]
+
+  configs -= [ "//build/config/compiler:chromium_code" ]
+  configs += [ "//build/config/compiler:no_chromium_code" ]
+
+  configs += [
+    "//build/config/linux:x11",
+    "//build/config/linux:xrandr",
+    "//build/config/linux:xinerama",
+  ]
+
+  public_configs = [ ":glfw_config" ]
+
+  defines = [
+    "_GLFW_USE_OPENGL",
+    "_GLFW_X11",
+    "_GLFW_GLX",
+  ]
+
+  deps = [
+    "//third_party/mesa:mesa_headers",
+  ]
+}

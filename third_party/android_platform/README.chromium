@@ -1,0 +1,53 @@
+Name: Android Platform engineering tools
+Short Name: android platform development
+URL: https://android.googlesource.com/platform/development
+Version: 0
+Date: 2014/05/02
+Revision: 1b10ec4
+License: Apache 2.0
+License File: NOT_SHIPPED
+Security Critical: no
+
+Description:
+Android Platform engineering tools, specifically stack symbolization scripts
+and a jar containing the AOSP framework to compile the Android WebView
+glue layer against. The AOSP framework is built from the Android release tag
+after which it is named, and the jar can be built by invoking make on the
+android_system_stubs target.
+
+Also includes a ported copy of the Android relocation packing tool source,
+along with the files required to build it in the chromium tree.
+
+Local Modifications:
+Only picked the few scripts needed by chrome.
+
+The scripts have been modified to better suit Chromium development. Changes
+include, but are not limited to, the following:
+Added memoization of addr2line and objdump.
+Added option to change the amount of symbolization done.
+Updated output directories to use environment variable.
+When calling addr2line, check the symbol is a file that looks like it contains
+    symbols.
+Added support for parsing LOG(FATAL) and DCHECK errors and their
+    stack traces, as emitted by src/base/debug/stack_trace_android.cc
+Added support for finding symbols when library is loaded directly from the APK.
+Changed the toolchain to remove references to 4.6 toolchains.
+Added support for arch=x64 as an alias to arch=x86_64
+Added debug logging and --verbose parameter.
+
+Android relocation packing tool details:
+    Copy sources from AOSP bionic/tools/relocation_packer
+    Remove scripts that regenerate golden test data (not relevant here)
+    Create a nativehelper/ScopedFd.h to satisfy inclusion from main.cc
+    Create gyp build
+    Create gn build (currently packer only; no unit tests)
+    List of bionic changes currently included:
+      Refresh: https://android-review.googlesource.com/#/c/143878/
+      Refresh: https://android-review.googlesource.com/#/c/147620/
+               https://android-review.googlesource.com/#/c/147745/
+               https://android-review.googlesource.com/#/c/148073/
+      Refresh: https://android-review.googlesource.com/#/c/151901/
+               https://android-review.googlesource.com/#/c/149300/
+               https://android-review.googlesource.com/#/c/148822/
+               https://android-review.googlesource.com/#/c/148492/
+               https://android-review.googlesource.com/#/c/148175/

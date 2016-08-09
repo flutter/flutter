@@ -1,0 +1,36 @@
+Name: Android Test runner script
+URL: http://source.android.com
+Version: 3.1.4
+License: Apache Version 2.0
+License File: NOT_SHIPPED
+Security Critical: no
+
+Description:
+This package is the scripts used to run the unit test for Android and from
+Android Gingerbread.
+
+Local Modifications:
+1. Added |silent_log| argument to |StartInstrumentation| so that output can be
+  suppressed.
+2. Changed error message handling in |StartInstrumentation| from |shortMsg| to
+  |longMsg| to provide more information when debugging.
+3. Applied the patch file patch.diff to fix a race condition and subproccess
+   bugs in run_command.py.
+4. Fixed a bug where wait_time wasn't properly respected in
+    _WaitForShellCommandContents.
+5. Added option to specify the ADB binary that should be used instead of always
+  using the ADB in the environment path.
+
+Here is the detail steps
+1. Checkout Android source code
+
+$ repo init -u git://android.git.kernel.org/platform/manifest.git -b gingerbread
+$ repo sync
+$ cd development
+$ git reset --hard 76f63551d36b1de63c63f357e5f0646ed8c306bb
+
+2. Copy the related files from
+   <android_gingerbread_tree>/development/testrunner/
+
+More information can be found in
+http://source.android.com/source/downloading.html

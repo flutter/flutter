@@ -1,0 +1,5 @@
+In file included from pure_virtual_trace.cpp:5:
+./pure_virtual_trace.h:14:5: warning: [blink-gc] Garbage collected class 'A' is not permitted to declare a pure-virtual trace method.
+    virtual void trace(Visitor*) = 0;
+    ^
+1 warning generated.

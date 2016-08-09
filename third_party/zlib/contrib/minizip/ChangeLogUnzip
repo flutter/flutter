@@ -1,0 +1,67 @@
+Change in 1.01e (12 feb 05)
+- Fix in zipOpen2 for globalcomment (Rolf Kalbermatter)
+- Fix possible memory leak in unzip.c (Zoran Stevanovic)
+
+Change in 1.01b (20 may 04)
+- Integrate patch from Debian package (submited by Mark Brown)
+- Add tools mztools from Xavier Roche
+
+Change in 1.01 (8 may 04)
+- fix buffer overrun risk in unzip.c (Xavier Roche)
+- fix a minor buffer insecurity in minizip.c (Mike Whittaker)
+
+Change in 1.00: (10 sept 03)
+- rename to 1.00
+- cosmetic code change
+
+Change in 0.22: (19 May 03)
+- crypting support (unless you define NOCRYPT)
+- append file in existing zipfile
+
+Change in 0.21: (10 Mar 03)
+- bug fixes
+
+Change in 0.17: (27 Jan 02)
+- bug fixes
+
+Change in 0.16: (19 Jan 02)
+- Support of ioapi for virtualize zip file access
+
+Change in 0.15: (19 Mar 98)
+- fix memory leak in minizip.c
+
+Change in 0.14: (10 Mar 98)
+- fix bugs in minizip.c sample for zipping big file
+- fix problem in month in date handling
+- fix bug in unzlocal_GetCurrentFileInfoInternal in unzip.c for
+    comment handling
+
+Change in 0.13: (6 Mar 98)
+- fix bugs in zip.c
+- add real minizip sample
+
+Change in 0.12: (4 Mar 98)
+- add zip.c and zip.h for creates .zip file
+- fix change_file_date in miniunz.c for Unix (Jean-loup Gailly)
+- fix miniunz.c for file without specific record for directory
+
+Change in 0.11: (3 Mar 98)
+- fix bug in unzGetCurrentFileInfo for get extra field and comment
+- enhance miniunz sample, remove the bad unztst.c sample
+
+Change in 0.10: (2 Mar 98)
+- fix bug in unzReadCurrentFile
+- rename unzip* to unz* function and structure
+- remove Windows-like hungary notation variable name
+- modify some structure in unzip.h
+- add somes comment in source
+- remove unzipGetcCurrentFile function
+- replace ZUNZEXPORT by ZEXPORT
+- add unzGetLocalExtrafield for get the local extrafield info
+- add a new sample, miniunz.c
+
+Change in 0.4: (25 Feb 98)
+- suppress the type unzipFileInZip.
+  Only on file in the zipfile can be open at the same time
+- fix somes typo in code
+- added tm_unz structure in unzip_file_info (date/time in readable format)

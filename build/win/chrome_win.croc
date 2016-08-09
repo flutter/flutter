@@ -1,0 +1,26 @@
+# -*- python -*-
+# Crocodile config file for Chromium windows
+
+{
+  # List of rules, applied in order
+  'rules' : [
+    # Specify inclusions before exclusions, since rules are in order.
+
+    # Don't include chromeos, posix, or linux specific files
+    {
+      'regexp' : '.*(_|/)(chromeos|linux|posix)(\\.|_)',
+      'include' : 0,
+    },
+    # Don't include ChromeOS dirs
+    {
+      'regexp' : '.*/chromeos/',
+      'include' : 0,
+    },
+
+    # Groups
+    {
+      'regexp' : '.*_test_win\\.',
+      'group' : 'test',
+    },
+  ],
+}

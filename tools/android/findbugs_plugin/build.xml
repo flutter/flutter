@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Copyright (c) 2012 The Chromium Authors. All rights reserved.
+  Use of this source code is governed by a BSD-style license that can be
+  found in the LICENSE file.
+-->
+
+<project name="findbugs_plugin" basedir=".">
+
+  <description>
+    Build findbugs_plugin for Chromium Android
+  </description>
+  <property name="src.dir" location="src" />
+  <property name="lib.dir" location="../../../third_party/findbugs/lib" />
+  <property name="bin.dir" location="lib" />
+  <property name="intermediate.dir" location="intermediate" />
+  <property name="jar.name" value="chromiumPlugin.jar" />
+
+  <path id="classpath.id">
+    <fileset dir="${lib.dir}">
+      <include name="**/*.jar" />
+    </fileset>
+  </path>
+
+  <target name="makedir">
+    <mkdir dir="${intermediate.dir}" />
+    <mkdir dir="${bin.dir}" />
+  </target>
+
+  <target name="findbugs_plugin_classes" depends="makedir">
+    <javac srcdir="${src.dir}" destdir="${intermediate.dir}"
+        classpathref="classpath.id" includeantruntime="false" />
+  </target>
+
+  <target name="copy_xml_files" depends="makedir">
+    <copy file="messages.xml" todir="${intermediate.dir}" />
+    <copy file="findbugs.xml" todir="${intermediate.dir}" />
+  </target>
+
+  <target name="findbugs_plugin_jar" depends="findbugs_plugin_classes, copy_xml_files">
+    <jar destfile="${bin.dir}/${jar.name}" basedir="${intermediate.dir}">
+    </jar>
+  </target>
+
+  <target name="install" depends="findbugs_plugin_jar">
+    <delete dir="${intermediate.dir}" />
+  </target>
+</project>

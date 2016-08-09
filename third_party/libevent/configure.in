@@ -1,0 +1,395 @@
+dnl configure.in for libevent
+dnl Dug Song <dugsong@monkey.org>
+AC_INIT(event.c)
+
+AM_INIT_AUTOMAKE(libevent,1.4.13-stable)
+AM_CONFIG_HEADER(config.h)
+dnl AM_MAINTAINER_MODE
+
+dnl Initialize prefix.
+if test "$prefix" = "NONE"; then
+   prefix="/usr/local"
+fi
+
+dnl Checks for programs.
+AC_PROG_CC
+AC_PROG_INSTALL
+AC_PROG_LN_S
+
+AC_PROG_GCC_TRADITIONAL
+if test "$GCC" = yes ; then
+        CFLAGS="$CFLAGS -Wall"
+        # And disable the strict-aliasing optimization, since it breaks
+        # our sockaddr-handling code in strange ways.
+        CFLAGS="$CFLAGS -fno-strict-aliasing"
+fi
+
+AC_ARG_ENABLE(gcc-warnings,
+     AS_HELP_STRING(--enable-gcc-warnings, enable verbose warnings with GCC))
+
+AC_PROG_LIBTOOL
+
+dnl   Uncomment "AC_DISABLE_SHARED" to make shared librraries not get
+dnl   built by default.  You can also turn shared libs on and off from 
+dnl   the command line with --enable-shared and --disable-shared.
+dnl AC_DISABLE_SHARED
+AC_SUBST(LIBTOOL_DEPS)
+
+dnl Checks for libraries.
+AC_CHECK_LIB(socket, socket)
+AC_CHECK_LIB(resolv, inet_aton)
+AC_CHECK_LIB(rt, clock_gettime)
+AC_CHECK_LIB(nsl, inet_ntoa)
+
+dnl Checks for header files.
+AC_HEADER_STDC
+AC_CHECK_HEADERS(fcntl.h stdarg.h inttypes.h stdint.h poll.h signal.h unistd.h sys/epoll.h sys/time.h sys/queue.h sys/event.h sys/param.h sys/ioctl.h sys/select.h sys/devpoll.h port.h netinet/in6.h sys/socket.h)
+if test "x$ac_cv_header_sys_queue_h" = "xyes"; then
+	AC_MSG_CHECKING(for TAILQ_FOREACH in sys/queue.h)
+	AC_EGREP_CPP(yes,
+[
+#include <sys/queue.h>
+#ifdef TAILQ_FOREACH
+ yes
+#endif
+],	[AC_MSG_RESULT(yes)
+	 AC_DEFINE(HAVE_TAILQFOREACH, 1,
+		[Define if TAILQ_FOREACH is defined in <sys/queue.h>])],
+	AC_MSG_RESULT(no)
+	)
+fi
+
+if test "x$ac_cv_header_sys_time_h" = "xyes"; then
+	AC_MSG_CHECKING(for timeradd in sys/time.h)
+	AC_EGREP_CPP(yes,
+[
+#include <sys/time.h>
+#ifdef timeradd
+ yes
+#endif
+],	[ AC_DEFINE(HAVE_TIMERADD, 1,
+		[Define if timeradd is defined in <sys/time.h>])
+	  AC_MSG_RESULT(yes)] ,AC_MSG_RESULT(no)
+)
+fi
+
+if test "x$ac_cv_header_sys_time_h" = "xyes"; then
+	AC_MSG_CHECKING(for timercmp in sys/time.h)
+	AC_EGREP_CPP(yes,
+[
+#include <sys/time.h>
+#ifdef timercmp
+ yes
+#endif
+],	[ AC_DEFINE(HAVE_TIMERCMP, 1,
+		[Define if timercmp is defined in <sys/time.h>])
+	  AC_MSG_RESULT(yes)] ,AC_MSG_RESULT(no)
+)
+fi
+
+if test "x$ac_cv_header_sys_time_h" = "xyes"; then
+	AC_MSG_CHECKING(for timerclear in sys/time.h)
+	AC_EGREP_CPP(yes,
+[
+#include <sys/time.h>
+#ifdef timerclear
+ yes
+#endif
+],	[ AC_DEFINE(HAVE_TIMERCLEAR, 1,
+		[Define if timerclear is defined in <sys/time.h>])
+	  AC_MSG_RESULT(yes)] ,AC_MSG_RESULT(no)
+)
+fi
+
+if test "x$ac_cv_header_sys_time_h" = "xyes"; then
+	AC_MSG_CHECKING(for timerisset in sys/time.h)
+	AC_EGREP_CPP(yes,
+[
+#include <sys/time.h>
+#ifdef timerisset
+ yes
+#endif
+],	[ AC_DEFINE(HAVE_TIMERISSET, 1,
+		[Define if timerisset is defined in <sys/time.h>])
+	  AC_MSG_RESULT(yes)] ,AC_MSG_RESULT(no)
+)
+fi
+
+dnl - check if the macro WIN32 is defined on this compiler.
+dnl - (this is how we check for a windows version of GCC)
+AC_MSG_CHECKING(for WIN32)
+AC_TRY_COMPILE(,
+	[
+#ifndef WIN32
+die horribly
+#endif
+	],
+	bwin32=true; AC_MSG_RESULT(yes),
+	bwin32=false; AC_MSG_RESULT(no),
+)
+
+AM_CONDITIONAL(BUILD_WIN32, test x$bwin32 = xtrue)
+
+dnl Checks for typedefs, structures, and compiler characteristics.
+AC_C_CONST
+AC_C_INLINE
+AC_HEADER_TIME
+
+dnl Checks for library functions.
+AC_CHECK_FUNCS(gettimeofday vasprintf fcntl clock_gettime strtok_r strsep getaddrinfo getnameinfo strlcpy inet_ntop signal sigaction strtoll issetugid geteuid getegid)
+
+AC_CHECK_SIZEOF(long)
+
+if test "x$ac_cv_func_clock_gettime" = "xyes"; then
+   AC_DEFINE(DNS_USE_CPU_CLOCK_FOR_ID, 1, [Define if clock_gettime is available in libc])
+else
+   AC_DEFINE(DNS_USE_GETTIMEOFDAY_FOR_ID, 1, [Define is no secure id variant is available])
+fi
+
+AC_MSG_CHECKING(for F_SETFD in fcntl.h)
+AC_EGREP_CPP(yes,
+[
+#define _GNU_SOURCE
+#include <fcntl.h>
+#ifdef F_SETFD
+yes
+#endif
+],	[ AC_DEFINE(HAVE_SETFD, 1,
+	      [Define if F_SETFD is defined in <fcntl.h>])
+	  AC_MSG_RESULT(yes) ], AC_MSG_RESULT(no))
+
+needsignal=no
+haveselect=no
+AC_CHECK_FUNCS(select, [haveselect=yes], )
+if test "x$haveselect" = "xyes" ; then
+	AC_LIBOBJ(select)
+	needsignal=yes
+fi
+
+havepoll=no
+AC_CHECK_FUNCS(poll, [havepoll=yes], )
+if test "x$havepoll" = "xyes" ; then
+	AC_LIBOBJ(poll)
+	needsignal=yes
+fi
+
+haveepoll=no
+AC_CHECK_FUNCS(epoll_ctl, [haveepoll=yes], )
+if test "x$haveepoll" = "xyes" ; then
+	AC_DEFINE(HAVE_EPOLL, 1,
+		[Define if your system supports the epoll system calls])
+	AC_LIBOBJ(epoll)
+	needsignal=yes
+fi
+
+havedevpoll=no
+if test "x$ac_cv_header_sys_devpoll_h" = "xyes"; then
+	AC_DEFINE(HAVE_DEVPOLL, 1,
+		    [Define if /dev/poll is available])
+        AC_LIBOBJ(devpoll)
+fi
+
+havekqueue=no
+if test "x$ac_cv_header_sys_event_h" = "xyes"; then
+	AC_CHECK_FUNCS(kqueue, [havekqueue=yes], )
+	if test "x$havekqueue" = "xyes" ; then
+		AC_MSG_CHECKING(for working kqueue)
+		AC_TRY_RUN(
+#include <sys/types.h>
+#include <sys/time.h>
+#include <sys/event.h>
+#include <stdio.h>
+#include <unistd.h>
+#include <fcntl.h>
+
+int
+main(int argc, char **argv)
+{
+	int kq;
+	int n;
+	int fd[[2]];
+	struct kevent ev;
+	struct timespec ts;
+	char buf[[8000]];
+
+	if (pipe(fd) == -1)
+		exit(1);
+	if (fcntl(fd[[1]], F_SETFL, O_NONBLOCK) == -1)
+		exit(1);
+
+	while ((n = write(fd[[1]], buf, sizeof(buf))) == sizeof(buf))
+		;
+
+        if ((kq = kqueue()) == -1)
+		exit(1);
+
+	ev.ident = fd[[1]];
+	ev.filter = EVFILT_WRITE;
+	ev.flags = EV_ADD | EV_ENABLE;
+	n = kevent(kq, &ev, 1, NULL, 0, NULL);
+	if (n == -1)
+		exit(1);
+	
+	read(fd[[0]], buf, sizeof(buf));
+
+	ts.tv_sec = 0;
+	ts.tv_nsec = 0;
+	n = kevent(kq, NULL, 0, &ev, 1, &ts);
+	if (n == -1 || n == 0)
+		exit(1);
+
+	exit(0);
+}, [AC_MSG_RESULT(yes)
+    AC_DEFINE(HAVE_WORKING_KQUEUE, 1,
+		[Define if kqueue works correctly with pipes])
+    AC_LIBOBJ(kqueue)], AC_MSG_RESULT(no), AC_MSG_RESULT(no))
+	fi
+fi
+
+haveepollsyscall=no
+if test "x$ac_cv_header_sys_epoll_h" = "xyes"; then
+	if test "x$haveepoll" = "xno" ; then
+		AC_MSG_CHECKING(for epoll system call)
+		AC_TRY_RUN(
+#include <stdint.h>
+#include <sys/param.h>
+#include <sys/types.h>
+#include <sys/syscall.h>
+#include <sys/epoll.h>
+#include <unistd.h>
+
+int
+epoll_create(int size)
+{
+	return (syscall(__NR_epoll_create, size));
+}
+
+int
+main(int argc, char **argv)
+{
+	int epfd;
+
+	epfd = epoll_create(256);
+	exit (epfd == -1 ? 1 : 0);
+}, [AC_MSG_RESULT(yes)
+    AC_DEFINE(HAVE_EPOLL, 1,
+	[Define if your system supports the epoll system calls])
+    needsignal=yes
+    AC_LIBOBJ(epoll_sub)
+    AC_LIBOBJ(epoll)], AC_MSG_RESULT(no), AC_MSG_RESULT(no))
+	fi
+fi
+
+haveeventports=no
+AC_CHECK_FUNCS(port_create, [haveeventports=yes], )
+if test "x$haveeventports" = "xyes" ; then
+	AC_DEFINE(HAVE_EVENT_PORTS, 1,
+		[Define if your system supports event ports])
+	AC_LIBOBJ(evport)
+	needsignal=yes
+fi
+if test "x$bwin32" = "xtrue"; then
+	needsignal=yes
+fi
+if test "x$bwin32" = "xtrue"; then
+	needsignal=yes
+fi
+if test "x$needsignal" = "xyes" ; then
+	AC_LIBOBJ(signal)
+fi
+
+AC_TYPE_PID_T
+AC_TYPE_SIZE_T
+AC_CHECK_TYPES([uint64_t, uint32_t, uint16_t, uint8_t], , ,
+[#ifdef HAVE_STDINT_H
+#include <stdint.h>
+#elif defined(HAVE_INTTYPES_H)
+#include <inttypes.h>
+#endif
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif])
+AC_CHECK_TYPES([fd_mask], , ,
+[#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SELECT_H
+#include <select.h>
+#endif])
+
+AC_CHECK_SIZEOF(long long)
+AC_CHECK_SIZEOF(int)
+AC_CHECK_SIZEOF(short)
+AC_CHECK_TYPES([struct in6_addr], , ,
+[#ifdef WIN32
+#include <winsock2.h>
+#else
+#include <sys/types.h>
+#include <netinet/in.h>
+#include <sys/socket.h>
+#endif
+#ifdef HAVE_NETINET_IN6_H
+#include <netinet/in6.h>
+#endif])
+
+AC_MSG_CHECKING([for socklen_t])
+AC_TRY_COMPILE([
+ #include <sys/types.h>
+ #include <sys/socket.h>],
+  [socklen_t x;],
+  AC_MSG_RESULT([yes]),
+  [AC_MSG_RESULT([no])
+  AC_DEFINE(socklen_t, unsigned int,
+	[Define to unsigned int if you dont have it])]
+)
+
+AC_MSG_CHECKING([whether our compiler supports __func__])
+AC_TRY_COMPILE([],
+ [ const char *cp = __func__; ],
+ AC_MSG_RESULT([yes]),
+ AC_MSG_RESULT([no])
+ AC_MSG_CHECKING([whether our compiler supports __FUNCTION__])
+ AC_TRY_COMPILE([],
+   [ const char *cp = __FUNCTION__; ],
+   AC_MSG_RESULT([yes])
+   AC_DEFINE(__func__, __FUNCTION__,
+         [Define to appropriate substitue if compiler doesnt have __func__]),
+   AC_MSG_RESULT([no])
+   AC_DEFINE(__func__, __FILE__,
+         [Define to appropriate substitue if compiler doesnt have __func__])))
+
+
+# Add some more warnings which we use in development but not in the
+# released versions.  (Some relevant gcc versions can't handle these.)
+if test x$enable_gcc_warnings = xyes; then
+
+  AC_COMPILE_IFELSE(AC_LANG_PROGRAM([], [
+#if !defined(__GNUC__) || (__GNUC__ < 4)
+#error
+#endif]), have_gcc4=yes, have_gcc4=no)
+
+  AC_COMPILE_IFELSE(AC_LANG_PROGRAM([], [
+#if !defined(__GNUC__) || (__GNUC__ < 4) || (__GNUC__ == 4 && __GNUC_MINOR__ < 2)
+#error
+#endif]), have_gcc42=yes, have_gcc42=no)
+
+  CFLAGS="$CFLAGS -W -Wfloat-equal -Wundef -Wpointer-arith -Wstrict-prototypes -Wmissing-prototypes -Wwrite-strings -Wredundant-decls -Wchar-subscripts -Wcomment -Wformat=2 -Wwrite-strings -Wmissing-declarations -Wredundant-decls -Wnested-externs -Wbad-function-cast -Wswitch-enum -Werror"
+  CFLAGS="$CFLAGS -Wno-unused-parameter -Wno-sign-compare -Wstrict-aliasing"
+
+  if test x$have_gcc4 = xyes ; then 
+    # These warnings break gcc 3.3.5 and work on gcc 4.0.2
+    CFLAGS="$CFLAGS -Winit-self -Wmissing-field-initializers -Wdeclaration-after-statement"
+    #CFLAGS="$CFLAGS -Wold-style-definition"
+  fi
+
+  if test x$have_gcc42 = xyes ; then 
+    # These warnings break gcc 4.0.2 and work on gcc 4.2
+    CFLAGS="$CFLAGS -Waddress -Wnormalized=id -Woverride-init"
+  fi
+
+##This will break the world on some 64-bit architectures
+# CFLAGS="$CFLAGS -Winline"
+
+fi
+
+AC_OUTPUT(Makefile test/Makefile sample/Makefile)

@@ -1,0 +1,71 @@
+# http://crbug.com/93245
+GeolocationGatewayDataProviderCommonTest.*
+GeolocationWifiDataProviderCommonTest.*
+
+# Fail/crash, see http://crbug.com/151939
+WebDragDestTest.URL
+WebDragDestTest.Data
+WebDragSourceMacTest.DragInvalidlyEscapedBookmarklet
+
+# Fail, see http://crbug.com/153007
+MacSandboxTest.ClipboardAccess
+
+# mach_override assertion, see http://crbug.com/162728
+BlobURLRequestJobTest.*
+
+# Fail, see http://crbug.com/159234
+WebContentsVideoCaptureDeviceTest.BadFramesGoodFrames
+WebContentsVideoCaptureDeviceTest.DeviceRestart
+WebContentsVideoCaptureDeviceTest.GoesThroughAllTheMotions
+
+# Hang at arbitrary point, can't tell where exactly, see http://crbug.com/163314
+RenderWidgetHostViewMacTest.*
+RenderViewHostTest.*
+DeviceMotionEventPumpTest.*
+
+# Flaky, see http://crbug.com/227278
+WebContentsVideoCaptureDeviceTest.WebContentsDestroyed
+
+# Speculative disable of hanging tests. http://crbug.com/241919
+VideoCaptureControllerTest.*
+VideoCaptureHostTest.*
+
+# Hangs under Valgrind, see http://crbug.com/244257
+SmoothScrollGestureControllerTest.Tick
+
+# http://crbug.com/247163
+VideoCaptureManagerTest.CloseWithoutStop
+VideoCaptureManagerTest.CreateAndClose
+VideoCaptureManagerTest.StartUsingId
+
+# http://crbug.com/247601
+FontSerializationTest.StyledFonts
+MacSandboxTest.FontLoadingTest
+VideoCaptureManagerTest.CreateAndAbort
+VideoCaptureManagerTest.ManipulateDeviceAndCheckCapabilities
+VideoCaptureManagerTest.StartDeviceAndGetDeviceFormatInUse
+
+# http://crbug.com/280583
+DesktopCaptureDeviceTest.ScreenResolutionChangeVariableResolution
+DesktopCaptureDeviceTest.Capture
+
+# http://crbug.com/303709
+GamepadProviderTest.PollingAccess
+GamepadProviderTest.UserGesture
+
+# 'impossible' happend. http://crbug.com/365715, crbug.com/51716
+AppCacheRequestHandlerTest.*
+AppCacheResponseTest.*
+AppCacheStorageImplTest.*
+AppCacheStorageImplTest.*
+AppCacheUpdateJobTest.AlreadyChecking
+AppCacheUpdateJobTest.ManifestMissingMimeTypeTest
+
+# http://crbug.com/391513
+GamepadServiceTest.*
+
+# http://crbug.com/412903
+HostVarTrackerTest.DeleteObjectVarWithInstance
+
+# http://crbug.com/417582
+OneWriterSeqLockTest.ManyThreads

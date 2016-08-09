@@ -1,0 +1,8 @@
+In file included from warn_only.cpp:5:
+./warn_only.h:13:3: warning: [chromium-style] Complex constructor has an inlined body.
+  InlineCtors() {}
+  ^
+./warn_only.h:14:3: warning: [chromium-style] Complex destructor has an inline body.
+  ~InlineCtors() {}
+  ^
+2 warnings generated.

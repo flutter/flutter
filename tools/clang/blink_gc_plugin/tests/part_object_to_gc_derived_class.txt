@@ -1,0 +1,8 @@
+In file included from part_object_to_gc_derived_class.cpp:5:
+./part_object_to_gc_derived_class.h:14:1: warning: [blink-gc] Class 'B' contains invalid fields.
+class B : public GarbageCollected<B> {
+^
+./part_object_to_gc_derived_class.h:18:5: note: [blink-gc] Part-object field 'm_a' to a GC derived class declared here:
+    A m_a;
+    ^
+1 warning generated.

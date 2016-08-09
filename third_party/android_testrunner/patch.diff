@@ -1,0 +1,104 @@
+diff --git a/third_party/android_testrunner/run_command.py b/third_party/android_testrunner/run_command.py
+index d398daa..6b84156 100644
+--- a/third_party/android_testrunner/run_command.py
++++ b/third_party/android_testrunner/run_command.py
+@@ -19,6 +19,7 @@
+ import os
+ import signal
+ import subprocess
++import tempfile
+ import threading
+ import time
+ 
+@@ -80,31 +81,36 @@ def RunOnce(cmd, timeout_time=None, return_output=True, stdin_input=None):
+   """
+   start_time = time.time()
+   so = []
+-  pid = []
+   global _abort_on_error, error_occurred
+   error_occurred = False
+ 
++  if return_output:
++    output_dest = tempfile.TemporaryFile(bufsize=0)
++  else:
++    # None means direct to stdout
++    output_dest = None
++  if stdin_input:
++    stdin_dest = subprocess.PIPE
++  else:
++    stdin_dest = None
++  pipe = subprocess.Popen(
++      cmd,
++      executable='/bin/bash',
++      stdin=stdin_dest,
++      stdout=output_dest,
++      stderr=subprocess.STDOUT,
++      shell=True, close_fds=True,
++      preexec_fn=lambda: signal.signal(signal.SIGPIPE, signal.SIG_DFL))
++
+   def Run():
+     global error_occurred
+-    if return_output:
+-      output_dest = subprocess.PIPE
+-    else:
+-      # None means direct to stdout
+-      output_dest = None
+-    if stdin_input:
+-      stdin_dest = subprocess.PIPE
+-    else:
+-      stdin_dest = None
+-    pipe = subprocess.Popen(
+-        cmd,
+-        executable='/bin/bash',
+-        stdin=stdin_dest,
+-        stdout=output_dest,
+-        stderr=subprocess.STDOUT,
+-        shell=True)
+-    pid.append(pipe.pid)
+     try:
+-      output = pipe.communicate(input=stdin_input)[0]
++      pipe.communicate(input=stdin_input)
++      output = None
++      if return_output:
++        output_dest.seek(0)
++        output = output_dest.read()
++        output_dest.close()
+       if output is not None and len(output) > 0:
+         so.append(output)
+     except OSError, e:
+@@ -119,27 +125,17 @@ def RunOnce(cmd, timeout_time=None, return_output=True, stdin_input=None):
+ 
+   t = threading.Thread(target=Run)
+   t.start()
+-
+-  break_loop = False
+-  while not break_loop:
+-    if not t.isAlive():
+-      break_loop = True
+-
+-    # Check the timeout
+-    if (not break_loop and timeout_time is not None
+-        and time.time() > start_time + timeout_time):
+-      try:
+-        os.kill(pid[0], signal.SIGKILL)
+-      except OSError:
+-        # process already dead. No action required.
+-        pass
+-
++  t.join(timeout_time)
++  if t.isAlive():
++    try:
++      pipe.kill()
++    except OSError:
++      # Can't kill a dead process.
++      pass
++    finally:
+       logger.SilentLog("about to raise a timeout for: %s" % cmd)
+       raise errors.WaitForResponseTimedOutError
+-    if not break_loop:
+-      time.sleep(0.1)
+ 
+-  t.join()
+   output = "".join(so)
+   if _abort_on_error and error_occurred:
+     raise errors.AbortError(msg=output)

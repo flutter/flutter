@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+  <!-- Copyright (c) 2012 The Chromium Authors. All rights reserved. Use of
+       this source code is governed by a BSD-style license that can be found
+       in the LICENSE file. -->
+  <!-- package name must be unique so suffix with "tests" so package loader
+       doesn't ignore this. -->
+  <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:tools="http://schemas.android.com/tools"
+      package="org.chromium.mojo.tests">
+
+    <uses-sdk android:minSdkVersion="14" android:targetSdkVersion="21" />
+
+    <uses-permission android:name="android.permission.INJECT_EVENTS"
+        tools:ignore="ProtectedPermissions"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.RUN_INSTRUMENTATION" />
+
+    <!-- We add an application tag here just so that we can indicate that this
+         package needs to link against the android.test library, which is
+         needed when building test cases. -->
+    <application>
+        <uses-library android:name="android.test.runner" />
+    </application>
+
+    <instrumentation android:name="android.test.InstrumentationTestRunner"
+        android:targetPackage="org.chromium.mojo.tests"
+        android:label="Tests for org.chromium.mojo"/>
+
+</manifest>

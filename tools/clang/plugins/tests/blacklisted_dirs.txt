@@ -1,0 +1,9 @@
+/src/chromium/src/myheader.h:2:21: warning: [chromium-style] Overriding method must be marked with 'override' or 'final'.
+  virtual void foo();  // Should warn about missing 'override'.
+                    ^
+                     override
+/src/chrome-breakpad/src/myheader.h:124:21: warning: [chromium-style] Overriding method must be marked with 'override' or 'final'.
+  virtual void foo();  // Should warn about missing 'override'.
+                    ^
+                     override
+2 warnings generated.

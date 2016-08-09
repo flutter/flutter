@@ -1,0 +1,83 @@
+# Copyright (c) 2013 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//build/config/sysroot.gni")
+
+# Defines a config specifying the result of running pkg-config for the given
+# packages. Put the package names you want to query in the "packages" variable
+# inside the template invocation.
+#
+# You can also add defines via the "defines" variable. This can be useful to
+# add this to the config to pass defines that the library expects to get by
+# users of its headers.
+#
+# Example:
+#   pkg_config("mything") {
+#     packages = [ "mything1", "mything2" ]
+#     defines = [ "ENABLE_AWESOME" ]
+#   }
+#
+# You can also use "extra args" to filter out results (see pkg-config.py):
+#   extra_args = [ "-v, "foo" ]
+# To ignore libs and ldflags (only cflags/defines will be set, which is useful
+# when doing manual dynamic linking), set:
+#   ignore_libs = true
+
+declare_args() {
+  # A pkg-config wrapper to call instead of trying to find and call the right
+  # pkg-config directly. Wrappers like this are common in cross-compilation
+  # environments.
+  # Leaving it blank defaults to searching PATH for 'pkg-config' and relying on
+  # the sysroot mechanism to find the right .pc files.
+  pkg_config = ""
+}
+
+pkg_config_script = "//build/config/linux/pkg-config.py"
+
+# Define the args we pass to the pkg-config script for other build files that
+# need to invoke it manually.
+if (sysroot != "") {
+  # Pass the sysroot if we're using one (it requires the CPU arch also).
+  pkg_config_args = [
+    "-s",
+    sysroot,
+    "-a",
+    current_cpu,
+  ]
+} else if (pkg_config != "") {
+  pkg_config_args = [
+    "-p",
+    pkg_config,
+  ]
+} else {
+  pkg_config_args = []
+}
+
+template("pkg_config") {
+  assert(defined(invoker.packages),
+         "Variable |packages| must be defined to be a list in pkg_config.")
+  config(target_name) {
+    args = pkg_config_args + invoker.packages
+    if (defined(invoker.extra_args)) {
+      args += invoker.extra_args
+    }
+
+    pkgresult = exec_script(pkg_config_script, args, "value")
+    include_dirs = pkgresult[0]
+    cflags = pkgresult[1]
+
+    if (!defined(invoker.ignore_libs) || !invoker.ignore_libs) {
+      libs = pkgresult[2]
+      lib_dirs = pkgresult[3]
+      ldflags = pkgresult[4]
+    }
+
+    if (defined(invoker.defines)) {
+      defines = invoker.defines
+    }
+    if (defined(invoker.visibility)) {
+      visibility = invoker.visibility
+    }
+  }
+}

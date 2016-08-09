@@ -1,0 +1,62 @@
+Name: libxml
+URL: http://xmlsoft.org
+Version: 2.7.7
+License: MIT
+License File: src/Copyright
+Security Critical: yes
+
+Description:
+The src/ directory contains a partial snapshot of the libxml library
+with the patches in the patches/ directories applied.
+See the files in that directory for discussion of their effects.
+
+Current version: 2.7.7.
+
+Modifications:
+- Converted to utf-8 with: vim +"argdo write ++enc=utf-8" *.c
+- Import XPath fix http://git.gnome.org/browse/libxml2/commit/?id=91d19754d46acd4a639a8b9e31f50f31c78f8c9c
+- Import follow-on for above commit: http://git.gnome.org/browse/libxml2/commit/?id=ea90b894146030c214a7df6d8375310174f134b9
+- Import additional XPath fix http://git.gnome.org/browse/libxml2/commit/?id=df83c17e5a2646bd923f75e5e507bc80d73c9722
+- Import follow-on fix for above commit: http://git.gnome.org/browse/libxml2/commit/?id=fec31bcd452e77c10579467ca87a785b41115de6
+- And a follow-on fix to the previous two fixes, committed upstream: http://git.gnome.org/browse/libxml2/commit/?id=f5048b3e71fc30ad096970b8df6e7af073bae4cb (slightly differently, but we can drop our local fix on the next roll).
+- Add a fix for handling of unknown namespaces, commit upstream is pending.
+- Add fixes for ending the parse properly if a SAX callback calls xmlStopParser(), commit upstream is pending.
+- Add fix for entities, commit upstream is http://git.gnome.org/browse/libxml2/commit/?id=5bd3c061823a8499b27422aee04ea20aae24f03e
+- Import UTF-8 fix from upstream: http://git.gnome.org/browse/libxml2/commit/?id=0795348aeb86648723bc391e4d02e20631c10bca
+- Import XPath fix http://git.gnome.org/browse/libxml2/commit/xpath.c?id=2ddecc23862bab1a9a9e51e097aefc92ec305e28
+- Merge clang warning fix http://git.gnome.org/browse/libxml2/commit/?id=aae48e64dfbf2b46b157a4c1857e30645116388f
+- Add a fix for proper escaping of xpointer expressions, commit upstream is pending.
+- Add helper classes in chromium/libxml_utils.cc and chromium/include/libxml/libxml_utils.h.
+- Add a tweak to limit problems caused by excessive strings and buffers.
+- Change the xmlNs struct a little bit, so it looks like it has no children
+  if treated as a generic xmlNode object.
+- Fix pretty harmless use-after-free in generate-id function.
+- Merge a clang warning fix http://git.gnome.org/browse/libxml2/commit/?id=713434d2309da469d64b35e163ea6556dadccada
+- Import attribute normalization fix http://git.gnome.org/browse/libxml2/commit/?id=6a36fbe3b3e001a8a840b5c1fdd81cefc9947f0d
+- Merge a redundant comparison fix http://git.gnome.org/browse/libxml2/commit/?id=2af19f985b911b6dc6ada478ba8d201d2ddc9309
+- Merge a redundant comparisons fix https://git.gnome.org/browse/libxml2/commit/?id=eea38159be421dbafbee38f40e239f91734bc713
+- Merge XML_PARSER_EOF checks https://git.gnome.org/browse/libxml2/commit/?id=48b4cdde3483e054af8ea02e0cd7ee467b0e9a50 and https://git.gnome.org/browse/libxml2/commit/?id=e50ba8164eee06461c73cd8abb9b46aa0be81869
+- Prevent snprintf from being defined as _snprintf on VS 2015.
+- Make ucrt of Win10 SDK not define POSIX error codes.
+- Delete/disable nanoftp and nanohttp.
+
+To import a new snapshot of libxml:
+
+- Visit http://xmlsoft.org/downloads.html and download the latest source
+  distribution.
+- Copy the files into this directory, omitting files which have been omitted
+  here.  E.g.:  for i in $(find . -type f); do cp ../libxml-newver/$i $i; done
+  This should clobber all local changes to this directory.
+- Apply the patches in patches/ and fix any problems.
+  UPDATE THOSE PATCHES OR EVAN WILL HUNT YOU DOWN.
+- On a Linux system,
+    $ cd linux
+    $ ../configure --without-iconv --without-ftp --without-http
+  to generate config.h and include/libxml/xmlversion.h for Linux.
+- On a Mac,
+    $ cd mac
+    $ ../configure --without-iconv --without-ftp --without-http
+  to generate config.h and include/libxml/xmlversion.h for Macs.
+- On Windows, run build/generate-win32-headers.bat to re-generate config.h and
+  include/libxml/xmlversion.h for Windows builds.
+- Update this README to reflect the new version number.

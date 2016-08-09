@@ -1,0 +1,16 @@
+Change 'LoadLibrary' to 'LoadLibraryA' (used with 'const char*' as an
+argument)
+
+Index: libxml/xmlmodule.c
+===================================================================
+--- libxml.orig/xmlmodule.c	2010-07-09 14:17:46.959288280 -0700
++++ libxml/xmlmodule.c	2010-07-09 14:17:55.419051003 -0700
+@@ -300,7 +300,7 @@
+ static void *
+ xmlModulePlatformOpen(const char *name)
+ {
+-    return LoadLibrary(name);
++    return LoadLibraryA(name);
+ }
+ 
+ /*

@@ -1,0 +1,67 @@
+# Copyright 2015 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//build/config/sanitizers/sanitizers.gni")
+
+prebuilt_available =
+    is_msan && (msan_track_origins == 0 || msan_track_origins == 2)
+
+group("deps") {
+  if (use_prebuilt_instrumented_libraries) {
+    assert(prebuilt_available,
+           "Prebuilt instrumented libraries are only available when " +
+               "is_msan = true and msan_track_origins = {0, 2}")
+    deps = [
+      ":prebuilt",
+    ]
+  }
+}
+
+if (prebuilt_available) {
+  group("prebuilt") {
+    visibility = [ ":deps" ]
+    public_configs = [ ":prebuilt_link_helper" ]
+    deps = [
+      ":extract_prebuilt_instrumented_libraries",
+    ]
+  }
+
+  if (is_msan) {
+    sanitizer_type = "msan"
+    if (msan_track_origins == 0) {
+      archive_prefix = "msan-no-origins"
+    } else if (msan_track_origins == 2) {
+      archive_prefix = "msan-chained-origins"
+    }
+  }
+
+  # TODO(GYP): scripts/download_binaries.py uses GYP_DEFINES to decide whether
+  # to download the archives extracted here.
+  # Note: This requires a clobber whenever Ubuntu version changes.
+  action("extract_prebuilt_instrumented_libraries") {
+    visibility = [ ":prebuilt" ]
+    script = "scripts/unpack_binaries.py"
+    depfile = "$target_out_dir/$archive_prefix.d"
+    args = [
+      archive_prefix,
+      rebase_path("binaries"),
+      rebase_path(root_build_dir + "/instrumented_libraries_prebuilt"),
+      rebase_path(target_out_dir, root_build_dir),
+    ]
+    outputs = [
+      "$target_out_dir/$archive_prefix.txt",
+    ]
+  }
+
+  config("prebuilt_link_helper") {
+    visibility = [ ":prebuilt" ]
+    ldflags = [
+      # Add a relative RPATH entry to Chromium binaries. This puts instrumented
+      # DSOs before system-installed versions in library search path.
+      "-Wl,-R,\$ORIGIN/instrumented_libraries_prebuilt/$sanitizer_type/lib",
+      "-Wl,-z,origin",
+    ]
+  }
+}
+# TODO(GYP): Support building instrumented libraries from source.

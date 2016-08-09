@@ -1,0 +1,5 @@
+# Death tests are not supported with apks.
+BeginFrameObserverBaseTest.OnBeginFrameImplementation
+BeginFrameSourceBaseTest.ObserverManipulation
+BeginFrameSourceMultiplexerTest.SourcesManipulation
+BeginFrameSourceMultiplexerTest.MinimumIntervalNegativeFails

@@ -1,0 +1,12 @@
+#!/bin/bash
+#
+# Copyright (c) 2013 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+optional_url=$1
+
+adb shell am start \
+  -a android.intent.action.VIEW \
+  -n org.chromium.android_webview.shell/.AwShellActivity \
+  ${optional_url:+-d "$optional_url"}

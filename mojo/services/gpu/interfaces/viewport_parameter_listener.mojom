@@ -1,0 +1,12 @@
+// Copyright 2014 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+module mojo;
+
+interface ViewportParameterListener {
+  // These parameters describe the refresh rate of the viewport. The viewport
+  // refreshes every |interval| time ticks. The phase of the refresh is
+  // indicated by |timebase|, which is synchronized with MojoGetTimeTicksNow.
+  OnVSyncParametersUpdated(int64 timebase, int64 interval);
+};

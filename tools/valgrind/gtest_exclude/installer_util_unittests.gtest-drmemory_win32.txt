@@ -1,0 +1,6 @@
+# https://crbug.com/460584
+CopyTreeWorkItemTest.NewNameAndCopyTest
+
+# https://crbug.com/504069
+InstallUtilTest.IsPerUserInstall
+SystemLevelChrome/DefaultBrowserBeaconTest.All/0

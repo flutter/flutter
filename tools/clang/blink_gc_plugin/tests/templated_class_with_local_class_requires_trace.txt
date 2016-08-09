@@ -1,0 +1,20 @@
+In file included from templated_class_with_local_class_requires_trace.cpp:5:
+./templated_class_with_local_class_requires_trace.h:22:1: warning: [blink-gc] Class 'TemplatedObject<blink::HeapObject>' contains invalid fields.
+class TemplatedObject final
+^
+./templated_class_with_local_class_requires_trace.h:46:5: note: [blink-gc] OwnPtr field 'm_ownRef' to a GC managed class declared here:
+    OwnPtr<T> m_ownRef;
+    ^
+./templated_class_with_local_class_requires_trace.h:32:5: warning: [blink-gc] Class 'Local' contains invalid fields.
+    class Local final : public GarbageCollected<Local> {
+    ^
+./templated_class_with_local_class_requires_trace.h:41:9: note: [blink-gc] OwnPtr field 'm_object' to a GC managed class declared here:
+        OwnPtr<HeapObject> m_object;
+        ^
+./templated_class_with_local_class_requires_trace.h:32:5: warning: [blink-gc] Class 'Local' requires finalization.
+    class Local final : public GarbageCollected<Local> {
+    ^
+./templated_class_with_local_class_requires_trace.h:41:9: note: [blink-gc] Field 'm_object' requiring finalization declared here:
+        OwnPtr<HeapObject> m_object;
+        ^
+3 warnings generated.

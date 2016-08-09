@@ -1,0 +1,19 @@
+{
+  "compile_targets": [
+    "all"
+  ],
+  "gtest_tests": [
+    "base_unittests",
+    "views_unittests",
+    "wm_unittests",
+    "aura_unittests",
+    "ash_unittests",
+    "compositor_unittests",
+    "content_browsertests",
+    "events_unittests",
+    "ui_touch_selection_unittests",
+    "sbox_integration_tests",
+    "sbox_validation_tests",
+    "sbox_unittests"
+  ]
+}

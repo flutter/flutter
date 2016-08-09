@@ -1,0 +1,21 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+relocation_packing_supported = target_cpu == "arm" || target_cpu == "arm64"
+
+if (relocation_packing_supported) {
+  relocation_packer_target = "//tools/relocation_packer($host_toolchain)"
+  relocation_packer_dir =
+      get_label_info("$relocation_packer_target", "root_out_dir")
+  relocation_packer_exe = "${relocation_packer_dir}/relocation_packer"
+
+  if (target_cpu == "arm") {
+    relocations_have_addends = 0
+  } else if (target_cpu == "arm64") {
+    relocations_have_addends = 1
+  }
+} else {
+  relocations_have_addends = 0
+  relocation_packer_exe = ""
+}

@@ -1,0 +1,5 @@
+# The rules in this file are only applied at compile time.
+# Because the Chrome buildsystem does not automatically touch the files
+# mentioned here, changing this file requires clobbering all ASan bots.
+#
+# Please think twice before you add or remove these rules.

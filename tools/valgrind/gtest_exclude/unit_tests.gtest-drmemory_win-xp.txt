@@ -1,0 +1,7 @@
+# Crashing (!) since forever, needs analysis.
+BookmarkNodeDataTest.*
+
+# https://github.com/DynamoRIO/drmemory/issues/842
+# Fails assertion.  App data corrupted by DrMemory?
+JsonSchemaTest.TestType
+JsonSchemaTest.TestNumber

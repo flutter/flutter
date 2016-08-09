@@ -1,0 +1,9 @@
+# Crashes: http://crbug.com/383054
+BrowserAccessibilityManagerWinTest.TestAccessibleHWND
+
+# http://crbug.com/391513
+GamepadServiceTest.ConnectionsTest
+
+# http://crbug.com/418748
+DownloadFile/DownloadFileTestWithRename.RenameWithErrorRetry/0
+DownloadFile/DownloadFileTestWithRename.RenameWithErrorRetry/1

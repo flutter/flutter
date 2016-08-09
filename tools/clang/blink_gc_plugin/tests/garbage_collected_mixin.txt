@@ -1,0 +1,10 @@
+garbage_collected_mixin.cpp:9:1: warning: [blink-gc] Class 'Mixin' has untraced fields that require tracing.
+void Mixin::trace(Visitor* visitor)
+^
+./garbage_collected_mixin.h:16:5: note: [blink-gc] Untraced field 'm_self' declared here:
+    Member<Mixin> m_self;
+    ^
+garbage_collected_mixin.cpp:14:1: warning: [blink-gc] Base class 'Mixin' of derived class 'HeapObject' requires tracing.
+void HeapObject::trace(Visitor* visitor)
+^
+2 warnings generated.

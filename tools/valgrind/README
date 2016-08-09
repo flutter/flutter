@@ -1,0 +1,10 @@
+Historically this directory has been a home for Valgrind and ThreadSanitizer.
+Since then other memory tools used in Chromium started squatting here and the
+name became confusing.
+We're replacing tools/valgrind with tools/memory/ new tools should go there.
+
+Attention: ThreadSanitizer v1 has been retired and files in this dir
+should not be used anymore. Please refer to
+http://dev.chromium.org/developers/testing/threadsanitizer-tsan-v2
+for the instructions on using ThreadSanitizer v2.
+Namely, the suppressions now reside in base/debug/tsan_suppressions.cc

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  Copyright (c) 2012 The Chromium Authors. All rights reserved.
+  Use of this source code is governed by a BSD-style license that can be
+  found in the LICENSE file.
+-->
+
+<MessageCollection xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="messagecollection.xsd">
+
+        <Plugin>
+                <ShortDescription>Chromium FindBugs Plugin </ShortDescription>
+                <Details>Adds style checks enforced in the chromium project.</Details>
+        </Plugin>
+
+        <Detector class="org.chromium.tools.findbugs.plugin.SynchronizedThisDetector">
+                <Details>
+                          <![CDATA[
+                        Shouldn't use synchronized(this).
+                              ]]>
+                </Details>
+
+        </Detector>
+
+        <BugPattern type="CHROMIUM_SYNCHRONIZED_THIS">
+                <ShortDescription>Shouldn't use synchronized(this)</ShortDescription>
+                <LongDescription>Shouldn't use synchronized(this), please narrow down the synchronization scope.</LongDescription>
+                <Details>
+<![CDATA[
+<p>Shouldn't use synchronized(this), please narrow down the synchronization scope.</p>
+]]>
+                </Details>
+        </BugPattern>
+
+        <Detector class="org.chromium.tools.findbugs.plugin.SynchronizedMethodDetector">
+                <Details>
+                          <![CDATA[
+                        Shouldn't use synchronized method.
+                              ]]>
+                </Details>
+
+        </Detector>
+
+        <BugPattern type="CHROMIUM_SYNCHRONIZED_METHOD">
+                <ShortDescription>Shouldn't use synchronized method</ShortDescription>
+                <LongDescription>Shouldn't use synchronized method, please narrow down the synchronization scope.</LongDescription>
+                <Details>
+<![CDATA[
+<p>Shouldn't use synchronized method, please narrow down the synchronization scope.</p>
+]]>
+                </Details>
+        </BugPattern>
+
+        <BugCode abbrev="CHROMIUM">CHROMIUM</BugCode>
+</MessageCollection>

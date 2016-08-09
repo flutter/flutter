@@ -1,0 +1,345 @@
+# Makefile for libxml2, specific for Windows, BCB6 and Borland make.
+#
+# Take a look at the beginning and modify the variables to suit your 
+# environment. Having done that, you can do a
+#
+# make [all]     to build the libxml and the accompanying utilities.
+# make clean     to remove all compiler output files and return to a
+#                 clean state.
+# make rebuild   to rebuild everything from scratch. This basically does
+#                 a 'nmake clean' and then a 'nmake all'.
+# make install   to install the library and its header files.
+#
+# August 2003, Eric Zurcher <Eric.Zurcher@csiro.au>
+# based on the MSVC version of
+# March 2002, Igor Zlatkovic <igor@zlatkovic.com>
+#
+
+# There should never be a need to modify anything below this line.
+# ----------------------------------------------------------------
+
+AUTOCONF = .\config.bcb
+!include $(AUTOCONF)
+
+!if !$d(BCB)
+BCB = $(MAKEDIR)\..
+!endif
+.autodepend
+
+# Names of various input and output components.
+XML_NAME = xml2
+XML_BASENAME = lib$(XML_NAME)
+XML_SO = $(XML_BASENAME).dll
+XML_IMP = $(XML_BASENAME).lib
+XML_DEF = $(XML_BASENAME).def
+XML_A = $(XML_BASENAME)_a.lib
+DUMMY = dir.exists
+
+# Place where we let the compiler put its intermediate trash.
+BINDIR = bin.bcb
+XML_INTDIR = int.bcb
+XML_INTDIR_A = int.a.bcb
+UTILS_INTDIR = int.utils.bcb
+
+# The preprocessor and its options.
+CPP = cpp32.exe -P- -DWIN32
+CPPFLAGS = -I"$(XML_SRCDIR)\include"
+!if "$(WITH_THREADS)" != "no"
+CPPFLAGS = $(CPPFLAGS) -D_REENTRANT -D__MT__
+!endif
+
+# The compiler and its options.
+CC = bcc32.exe
+CFLAGS = -q -DWIN32 -D_NO_VCL -D_WINDOWS -D_MBCS -DEILSEQ=2 -w-
+CFLAGS = $(CFLAGS) -I"$(XML_SRCDIR)" -I"$(XML_SRCDIR)\include" -I"$(INCPREFIX)" -I"$(INCLUDE)"
+!if "$(WITH_THREADS)" != "no"
+CFLAGS = $(CFLAGS) -D_REENTRANT -tWM
+!endif
+!if "$(DYNRUNTIME)" == "1"
+CFLAGS = $(CFLAGS) -tWR
+!endif
+!if "$(WITH_THREADS)" == "yes" || "$(WITH_THREADS)" == "ctls"
+CFLAGS = $(CFLAGS) -DHAVE_WIN32_THREADS -DHAVE_COMPILER_TLS
+!else if "$(WITH_THREADS)" == "native"
+CFLAGS = $(CFLAGS) -DHAVE_WIN32_THREADS
+!else if "$(WITH_THREADS)" == "posix"
+CFLAGS = $(CFLAGS) -DHAVE_PTHREAD_H
+!endif
+!if "$(WITH_ZLIB)" == "1"
+CFLAGS = $(CFLAGS) -DHAVE_ZLIB_H
+!endif
+
+# The linker and its options.
+LD = ilink32.exe
+LDFLAGS = -q -U$(LIBXML_MAJOR_VERSION).$(LIBXML_MINOR_VERSION)
+LDFLAGS = $(LDFLAGS) -L"$(BINDIR);$(LIBPREFIX);$(LIB);$(BCB)\lib;$(BCB)\lib\PSdk"
+LIBS = import32.lib
+!if "$(WITH_THREADS)" != "no" && "$(DYNRUNTIME)" == "1"
+LIBS = $(LIBS) cw32mti.lib
+!elif "$(WITH_THREADS)" != "no"
+LIBS = $(LIBS) cw32mt.lib
+!elif "$(DYNRUNTIME)" == "1"
+LIBS = $(LIBS) cw32i.lib
+!else
+LIBS = $(LIBS) cw32.lib
+!endif
+!if "$(WITH_FTP)" == "1" || "$(WITH_HTTP)" == "1"
+LIBS = $(LIBS) wsock32.lib ws2_32.lib
+!endif 
+!if "$(WITH_ICONV)" == "1"
+LIBS = $(LIBS) iconvomf.lib
+!endif 
+!if "$(WITH_ZLIB)" == "1"
+LIBS = $(LIBS) zlibomf.lib
+!endif
+!if "$(WITH_THREADS)" == "posix"
+LIBS = $(LIBS) pthreadVC.lib
+!endif
+!if "$(WITH_MODULES)" == "1"
+LIBS = $(LIBS) kernel32.lib
+!endif
+
+# The archiver and its options.
+AR = tlib.exe
+ARFLAGS = /P64 /0
+
+# Optimisation and debug symbols.
+!if "$(DEBUG)" == "1"
+CFLAGS = $(CFLAGS) -D_DEBUG -Od -v
+LDFLAGS = $(LDFLAGS) -v
+!else
+CFLAGS = $(CFLAGS) -DNDEBUG -O2 
+LDFLAGS = $(LDFLAGS)
+!endif
+
+# Libxml object files.
+XML_OBJS = $(XML_INTDIR)\c14n.obj\
+	$(XML_INTDIR)\catalog.obj\
+	$(XML_INTDIR)\chvalid.obj\
+	$(XML_INTDIR)\debugXML.obj\
+	$(XML_INTDIR)\dict.obj\
+	$(XML_INTDIR)\DOCBparser.obj\
+	$(XML_INTDIR)\encoding.obj\
+	$(XML_INTDIR)\entities.obj\
+	$(XML_INTDIR)\error.obj\
+	$(XML_INTDIR)\globals.obj\
+	$(XML_INTDIR)\hash.obj\
+	$(XML_INTDIR)\HTMLparser.obj\
+	$(XML_INTDIR)\HTMLtree.obj\
+	$(XML_INTDIR)\legacy.obj\
+	$(XML_INTDIR)\list.obj\
+	$(XML_INTDIR)\nanoftp.obj\
+	$(XML_INTDIR)\nanohttp.obj\
+	$(XML_INTDIR)\parser.obj\
+	$(XML_INTDIR)\parserInternals.obj\
+	$(XML_INTDIR)\pattern.obj\
+	$(XML_INTDIR)\relaxng.obj\
+	$(XML_INTDIR)\SAX.obj\
+	$(XML_INTDIR)\SAX2.obj\
+	$(XML_INTDIR)\schematron.obj\
+	$(XML_INTDIR)\threads.obj\
+	$(XML_INTDIR)\tree.obj\
+	$(XML_INTDIR)\uri.obj\
+	$(XML_INTDIR)\valid.obj\
+	$(XML_INTDIR)\xinclude.obj\
+	$(XML_INTDIR)\xlink.obj\
+	$(XML_INTDIR)\xmlIO.obj\
+	$(XML_INTDIR)\xmlmemory.obj\
+	$(XML_INTDIR)\xmlreader.obj\
+	$(XML_INTDIR)\xmlregexp.obj\
+	$(XML_INTDIR)\xmlmodule.obj\
+	$(XML_INTDIR)\xmlsave.obj\
+	$(XML_INTDIR)\xmlschemas.obj\
+	$(XML_INTDIR)\xmlschemastypes.obj\
+	$(XML_INTDIR)\xmlunicode.obj\
+	$(XML_INTDIR)\xmlwriter.obj\
+	$(XML_INTDIR)\xpath.obj\
+	$(XML_INTDIR)\xpointer.obj\
+	$(XML_INTDIR)\xmlstring.obj
+
+# Static libxml object files.
+XML_OBJS_A = $(XML_INTDIR_A)\c14n.obj\
+	$(XML_INTDIR_A)\catalog.obj\
+	$(XML_INTDIR_A)\chvalid.obj\
+	$(XML_INTDIR_A)\debugXML.obj\
+	$(XML_INTDIR_A)\dict.obj\
+	$(XML_INTDIR_A)\DOCBparser.obj\
+	$(XML_INTDIR_A)\encoding.obj\
+	$(XML_INTDIR_A)\entities.obj\
+	$(XML_INTDIR_A)\error.obj\
+	$(XML_INTDIR_A)\globals.obj\
+	$(XML_INTDIR_A)\hash.obj\
+	$(XML_INTDIR_A)\HTMLparser.obj\
+	$(XML_INTDIR_A)\HTMLtree.obj\
+	$(XML_INTDIR_A)\legacy.obj\
+	$(XML_INTDIR_A)\list.obj\
+	$(XML_INTDIR_A)\nanoftp.obj\
+	$(XML_INTDIR_A)\nanohttp.obj\
+	$(XML_INTDIR_A)\parser.obj\
+	$(XML_INTDIR_A)\parserInternals.obj\
+	$(XML_INTDIR_A)\pattern.obj\
+	$(XML_INTDIR_A)\relaxng.obj\
+	$(XML_INTDIR_A)\SAX.obj\
+	$(XML_INTDIR_A)\SAX2.obj\
+	$(XML_INTDIR_A)\schematron.obj\
+	$(XML_INTDIR_A)\threads.obj\
+	$(XML_INTDIR_A)\tree.obj\
+	$(XML_INTDIR_A)\uri.obj\
+	$(XML_INTDIR_A)\valid.obj\
+	$(XML_INTDIR_A)\xinclude.obj\
+	$(XML_INTDIR_A)\xlink.obj\
+	$(XML_INTDIR_A)\xmlIO.obj\
+	$(XML_INTDIR_A)\xmlmemory.obj\
+	$(XML_INTDIR_A)\xmlreader.obj\
+	$(XML_INTDIR_A)\xmlregexp.obj\
+	$(XML_INTDIR_A)\xmlmodule.obj\
+	$(XML_INTDIR_A)\xmlsave.obj\
+	$(XML_INTDIR_A)\xmlschemas.obj\
+	$(XML_INTDIR_A)\xmlschemastypes.obj\
+	$(XML_INTDIR_A)\xmlunicode.obj\
+	$(XML_INTDIR_A)\xmlwriter.obj\
+	$(XML_INTDIR_A)\xpath.obj\
+	$(XML_INTDIR_A)\xpointer.obj\
+	$(XML_INTDIR_A)\xmlstring.obj
+
+# Xmllint and friends executables.
+UTILS = $(BINDIR)\xmllint.exe\
+	$(BINDIR)\xmlcatalog.exe\
+	$(BINDIR)\testAutomata.exe\
+	$(BINDIR)\testC14N.exe\
+	$(BINDIR)\testDocbook.exe\
+	$(BINDIR)\testHTML.exe\
+	$(BINDIR)\testReader.exe\
+	$(BINDIR)\testRelax.exe\
+	$(BINDIR)\testRegexp.exe\
+	$(BINDIR)\testModule.exe\
+	$(BINDIR)\testSAX.exe\
+	$(BINDIR)\testSchemas.exe\
+	$(BINDIR)\testURI.exe\
+	$(BINDIR)\testXPath.exe\
+	$(BINDIR)\runtest.exe\
+	$(BINDIR)\runsuite.exe\
+	$(BINDIR)\testapi.exe
+
+
+!if "$(WITH_THREADS)" == "yes" || "$(WITH_THREADS)" == "ctls" || "$(WITH_THREADS)" == "native"
+UTILS = $(UTILS) $(BINDIR)\testThreadsWin32.exe
+!else if "$(WITH_THREADS)" == "posix"
+UTILS = $(UTILS) $(BINDIR)\testThreads.exe
+!endif
+
+
+all : libxml libxmla utils
+
+libxml : $(BINDIR)\$(XML_SO) 
+
+libxmla : $(BINDIR)\$(XML_A)
+
+utils : $(UTILS)
+
+clean :
+	if exist $(XML_INTDIR) rmdir /S /Q $(XML_INTDIR)
+	if exist $(XML_INTDIR_A) rmdir /S /Q $(XML_INTDIR_A)
+	if exist $(UTILS_INTDIR) rmdir /S /Q $(UTILS_INTDIR)
+	if exist $(BINDIR) rmdir /S /Q $(BINDIR)
+
+distclean : clean
+	if exist config.* del config.*
+	if exist Makefile del Makefile
+
+rebuild : clean all
+
+install-libs : all
+	if not exist "$(INCPREFIX)\libxml" mkdir "$(INCPREFIX)\libxml"
+	if not exist "$(BINPREFIX)" mkdir "$(BINPREFIX)"
+	if not exist "$(LIBPREFIX)" mkdir "$(LIBPREFIX)"
+	copy $(XML_SRCDIR)\include\libxml\*.h "$(INCPREFIX)\libxml"
+	copy $(BINDIR)\$(XML_SO) "$(SOPREFIX)"
+	copy $(BINDIR)\$(XML_A) "$(LIBPREFIX)"
+	copy $(BINDIR)\$(XML_IMP) "$(LIBPREFIX)"
+	copy $(BINDIR)\*.exe "$(BINPREFIX)"
+
+install : install-libs
+	copy $(BINDIR)\*.exe "$(BINPREFIX)"
+
+install-dist : install-libs
+	copy $(BINDIR)\xml*.exe "$(BINPREFIX)"
+
+# This is a target for me, to make a binary distribution. Not for the public use,
+# keep your hands off :-)
+BDVERSION = $(LIBXML_MAJOR_VERSION).$(LIBXML_MINOR_VERSION).$(LIBXML_MICRO_VERSION)
+BDPREFIX = $(XML_BASENAME)-$(BDVERSION).win32
+bindist : all
+	$(MAKE) /nologo PREFIX=$(BDPREFIX) SOPREFIX=$(BDPREFIX)\bin install-dist
+	cscript //NoLogo configure.js genreadme $(XML_BASENAME) $(BDVERSION) $(BDPREFIX)\readme.txt
+
+
+# Makes the output directory.
+$(BINDIR)\$(DUMMY) :
+	if not exist $(BINDIR) mkdir $(BINDIR)
+	touch $(BINDIR)\$(DUMMY)
+
+# Makes the libxml intermediate directory.
+$(XML_INTDIR)\$(DUMMY) :
+	if not exist $(XML_INTDIR) mkdir $(XML_INTDIR)
+	touch $(XML_INTDIR)\$(DUMMY)
+
+# Makes the static libxml intermediate directory.
+$(XML_INTDIR_A)\$(DUMMY) :
+	if not exist $(XML_INTDIR_A) mkdir $(XML_INTDIR_A)
+	touch $(XML_INTDIR_A)\$(DUMMY)
+
+# An implicit rule for libxml compilation.
+{$(XML_SRCDIR)}.c{$(XML_INTDIR)}.obj:
+	$(CC) $(CFLAGS) -n$(XML_INTDIR) -c $<
+
+# An implicit rule for static libxml compilation.
+{$(XML_SRCDIR)}.c{$(XML_INTDIR_A)}.obj:
+	$(CC) $(CFLAGS) -DLIBXML_STATIC -n$(XML_INTDIR_A)\ -c $<
+
+# Compiles libxml source. Uses the implicit rule for commands.
+$(XML_OBJS) : $(XML_INTDIR)\$(DUMMY)
+
+# Compiles static libxml source. Uses the implicit rule for commands.
+$(XML_OBJS_A) : $(XML_INTDIR_A)\$(DUMMY) 
+
+#def4bcb.exe : def4bcb.c
+
+# Creates the export definition file (DEF) for libxml.
+#$(XML_INTDIR)\$(XML_DEF) : $(XML_INTDIR)\$(DUMMY) $(XML_DEF).src def4bcb.exe
+#	$(CPP) $(CPPFLAGS) -o $(XML_INTDIR)\$(XML_DEF).tmp $(XML_DEF).src
+#	def4bcb -msnames < $(XML_INTDIR)\$(XML_DEF).tmp > $(XML_INTDIR)\$(XML_DEF)
+
+# Creates the libxml shared object.
+$(BINDIR)\$(XML_SO) : $(BINDIR)\$(DUMMY) $(XML_OBJS)
+	$(LD) $(LDFLAGS) -Tpd -Gi c0d32.obj $(XML_OBJS),$(BINDIR)\$(XML_SO),,$(LIBS)
+
+#$(BINDIR)\$(XML_SO) : $(BINDIR)\$(DUMMY) $(XML_OBJS) $(XML_INTDIR)\$(XML_DEF)
+#	$(LD) $(LDFLAGS) -Tpd -Gi c0d32.obj $(XML_OBJS),$(BINDIR)\$(XML_SO),,$(LIBS),$(XML_INTDIR)\$(XML_DEF)
+
+# Creates the libxml archive.
+$(BINDIR)\$(XML_A) : $(BINDIR)\$(DUMMY) $(XML_OBJS_A)
+	$(AR) $(BINDIR)\$(XML_A) $(ARFLAGS) /u $(XML_OBJS_A)
+
+# Makes the utils intermediate directory.
+$(UTILS_INTDIR)\$(DUMMY) :
+	if not exist $(UTILS_INTDIR) mkdir $(UTILS_INTDIR)
+	touch $(UTILS_INTDIR)\$(DUMMY)
+
+# An implicit rule for xmllint and friends.
+!if "$(STATIC)" == "1"
+{$(UTILS_SRCDIR)}.c{$(BINDIR)}.exe:
+	$(CC) -DLIBXML_STATIC -w -tWC $(CFLAGS) -o$(UTILS_INTDIR)\$&.obj -c $< 
+	$(LD) $(LDFLAGS) c0x32.obj $(UTILS_INTDIR)\$&.obj,$@,,$(LIBS) $(XML_A)
+!else
+{$(UTILS_SRCDIR)}.c{$(BINDIR)}.exe:
+	$(CC) $(CFLAGS) -tWC -o$(UTILS_INTDIR)\$&.obj -c $< 
+	$(LD) $(LDFLAGS) c0x32.obj $(UTILS_INTDIR)\$&.obj $(XML_IMP),$@,,$(LIBS) 
+!endif
+
+# Builds xmllint and friends. Uses the implicit rule for commands.
+$(UTILS) : $(UTILS_INTDIR)\$(DUMMY) $(BINDIR)\$(DUMMY) $(BINDIR)\$(XML_SO) $(BINDIR)\$(XML_A)
+
+# Source dependences should be autogenerated somehow here, but how to
+# do it? I have no clue.
+

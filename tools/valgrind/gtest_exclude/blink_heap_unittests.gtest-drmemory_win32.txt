@@ -1,0 +1,5 @@
+# crbug.com/396172: flaky under Dr. Memory
+HeapTest.ThreadedWeakness
+
+# crbug.com/420699: Crash under Dr. Memory
+HeapTest.CheckAndMarkPointer

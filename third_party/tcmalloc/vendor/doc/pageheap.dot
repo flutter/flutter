@@ -1,0 +1,29 @@
+digraph PageHeap {
+rankdir=LR
+node [shape=box, width=0.3, height=0.3]
+nodesep=.05
+
+heap [shape=record, height=3, label="<f0>1 page|<f1>2 pages|<f2>3 pages|...|<f255>255 pages|<frest>rest"]
+O0 [shape=record, label=""]
+O1 [shape=record, label=""]
+O2 [shape=record, label="{|}"]
+O3 [shape=record, label="{|}"]
+O4 [shape=record, label="{||}"]
+O5 [shape=record, label="{||}"]
+O6 [shape=record, label="{|...|}"]
+O7 [shape=record, label="{|...|}"]
+O8 [shape=record, label="{|.....|}"]
+O9 [shape=record, label="{|.....|}"]
+sep1 [shape=plaintext, label="..."]
+sep2 [shape=plaintext, label="..."]
+sep3 [shape=plaintext, label="..."]
+sep4 [shape=plaintext, label="..."]
+sep5 [shape=plaintext, label="..."]
+
+heap:f0 -> O0 -> O1 -> sep1
+heap:f1 -> O2 -> O3 -> sep2
+heap:f2 -> O4 -> O5 -> sep3
+heap:f255 -> O6 -> O7 -> sep4
+heap:frest -> O8 -> O9 -> sep5
+
+}

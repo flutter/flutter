@@ -1,0 +1,13 @@
+destructor_eagerly_finalized.cpp:26:5: warning: [blink-gc] Finalizer '~HeapObjectEagerFinalizedAlso' accesses eagerly finalized field 'm_heapObjectFinalized'.
+    m_heapObjectFinalized->foo();
+    ^
+./destructor_eagerly_finalized.h:41:5: note: [blink-gc] Field 'm_heapObjectFinalized' having eagerly finalized value, declared here:
+    Member<HeapObjectEagerFinalized> m_heapObjectFinalized;
+    ^
+destructor_eagerly_finalized.cpp:27:5: warning: [blink-gc] Finalizer '~HeapObjectEagerFinalizedAlso' accesses eagerly finalized field 'm_heapVector'.
+    m_heapVector[0]->foo();
+    ^
+./destructor_eagerly_finalized.h:42:5: note: [blink-gc] Field 'm_heapVector' having eagerly finalized value, declared here:
+    HeapVector<Member<HeapObjectEagerFinalized>> m_heapVector;
+    ^
+2 warnings generated.

@@ -1,0 +1,22 @@
+#!/bin/bash
+# Copyright (c) 2010 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+script=$(readlink $0)
+source $(dirname ${script:-$0})/git-utils.sh
+
+old_ref=$1  # Previous HEAD.
+new_ref=$2  # Current HEAD.
+branch_switch=$3  # Whether we switched branches.
+
+if [ $old_ref == $new_ref ]; then
+    if ! git diff-index --quiet HEAD $(git rev-parse --show-cdup)DEPS; then
+        warn "DEPS has local modifications; do you need to re-run gclient sync?"
+    fi
+else
+    if git diff-tree $old_ref $new_ref | grep -qs $'\tDEPS$'; then
+        warn "DEPS has changed; you probably need to re-run gclient sync."
+    fi
+fi
+

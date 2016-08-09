@@ -1,0 +1,5 @@
+In file included from traceimpl_dependent_scope.cpp:5:
+./traceimpl_dependent_scope.h:55:3: warning: [blink-gc] Base class 'Base<int>' of derived class 'DerivedMissingTrace<int>' requires tracing.
+  void traceImpl(VisitorDispatcher visitor) {
+  ^
+1 warning generated.

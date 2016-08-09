@@ -1,0 +1,43 @@
+# Copyright 2015 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+if (current_cpu == "mipsel") {
+  declare_args() {
+    # MIPS arch variant. Possible values are:
+    #   "r1"
+    #   "r2"
+    #   "r6"
+    mips_arch_variant = "r1"
+
+    # MIPS DSP ASE revision. Possible values are:
+    #   0: unavailable
+    #   1: revision 1
+    #   2: revision 2
+    mips_dsp_rev = 0
+
+    # MIPS floating-point ABI. Possible values are:
+    #   "hard": sets the GCC -mhard-float option.
+    #   "soft": sets the GCC -msoft-float option.
+    mips_float_abi = "hard"
+
+    # MIPS32 floating-point register width. Possible values are:
+    #   "fp32": sets the GCC -mfp32 option.
+    #   "fp64": sets the GCC -mfp64 option.
+    #   "fpxx": sets the GCC -mfpxx option.
+    mips_fpu_mode = "fp32"
+  }
+} else if (current_cpu == "mips64el") {
+  # MIPS arch variant. Possible values are:
+  #   "r2"
+  #   "r6"
+  if (is_android) {
+    declare_args() {
+      mips_arch_variant = "r6"
+    }
+  } else {
+    declare_args() {
+      mips_arch_variant = "r2"
+    }
+  }
+}

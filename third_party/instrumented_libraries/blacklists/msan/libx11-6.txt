@@ -1,0 +1,2 @@
+# https://bugs.freedesktop.org/show_bug.cgi?id=81236
+fun:XIconifyWindow

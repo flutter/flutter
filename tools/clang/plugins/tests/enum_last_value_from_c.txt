@@ -1,0 +1,4 @@
+enum_last_value_from_c.c:11:3: warning: [chromium-style] _LAST/Last constants of enum types must have the maximal value for any constant of that type.
+  kBadOneLast = kBadOneGreen
+  ^
+1 warning generated.

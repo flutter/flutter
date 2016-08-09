@@ -1,0 +1,13 @@
+diff -rupN ./src/fcpat.c ../fontconfig-2.11.0-patched/src/fcpat.c
+--- ./src/fcpat.c	2013-10-11 07:10:18.000000000 +0400
++++ ../fontconfig-2.11.0-patched/src/fcpat.c	2014-09-30 22:14:55.818360071 +0400
+@@ -33,6 +33,9 @@ FcPatternCreate (void)
+     p = (FcPattern *) malloc (sizeof (FcPattern));
+     if (!p)
+ 	return 0;
++    // Silence Valgrind/MemorySanitizer. There is uninitialized padding at the
++    // end of this structure. When serialized to file, this will cause a report.
++    memset(p, 0, sizeof(*p));
+     p->num = 0;
+     p->size = 0;
+     p->elts_offset = FcPtrToOffset (p, NULL);

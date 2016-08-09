@@ -1,0 +1,36 @@
+# Copyright (c) 2013 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+if (is_linux) {
+  config("expat_config") {
+    libs = [ "expat" ]
+  }
+
+  group("expat") {
+    public_configs = [ ":expat_config" ]
+  }
+} else {
+  config("expat_config") {
+    include_dirs = [ "files/lib" ]
+    defines = [ "XML_STATIC" ]
+  }
+
+  static_library("expat") {
+    sources = [
+      "files/lib/expat.h",
+      "files/lib/xmlparse.c",
+      "files/lib/xmlrole.c",
+      "files/lib/xmltok.c",
+    ]
+
+    public_configs = [ ":expat_config" ]
+
+    defines = [ "_LIB" ]
+    if (is_win) {
+      defines += [ "COMPILED_FROM_DSP" ]
+    } else {
+      defines += [ "HAVE_EXPAT_CONFIG_H" ]
+    }
+  }
+}

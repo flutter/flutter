@@ -1,0 +1,14 @@
+In file included from left_most_gc_base.cpp:5:
+./left_most_gc_base.h:15:1: warning: [blink-gc] Class 'Right' must derive its GC base in the left-most position.
+class Right : public A, public B, public GarbageCollected<Right> { };  // Error
+^
+./left_most_gc_base.h:18:1: warning: [blink-gc] Class 'DerivedRight' must derive its GC base in the left-most position.
+class DerivedRight : public Right, public Left { };  // Error
+^
+./left_most_gc_base.h:12:1: warning: [blink-gc] Left-most base class 'A' of derived class 'IllFormed' must be polymorphic.
+class A { };
+^
+./left_most_gc_base.h:26:1: warning: [blink-gc] Class 'IllFormed' must derive its GC base in the left-most position.
+class IllFormed : public A, public C { }; // Error
+^
+4 warnings generated.

@@ -1,0 +1,34 @@
+# These test fail due to mmap Valgrind failures, see http://crbug.com/66677
+CollectedCookiesTest.DoubleDisplay
+CollectedCookiesTest.NavigateAway
+InfoBarsUITest.TestInfoBarsCloseOnNewTheme
+FastShutdown.SlowTermination
+MouseLeaveTest.TestOnMouseOut
+NotificationsPermissionTest.TestNoUserGestureInfobar
+NotificationsPermissionTest.TestUserGestureInfobar
+
+# These test fail due to timeout or limited buildslave support;
+# http://crbug.com/67301
+BrowserFocusTest.InterstitialFocus
+BrowserFocusTest.FindFocusTest
+BrowserFocusTest.FocusTraversalOnInterstitial
+
+# Don't run FLAKY or FAILS tests under Valgrind and TSan
+# as they tend to generate too many reports, see http://crbug.com/67959
+# NB: Can't use FAILS_/FLAKY_ as it will be turned into *.* by chrome_tests.py!
+*.FLAKY*
+*.FAILS*
+
+# Fails under Valgrind, see http://crbug.com/68068
+DevToolsSanityTest.TestPauseWhenScriptIsRunning
+
+# These tests time out under Valgrind, see http://crbug.com/163880
+BrowserFocusTest.FocusOnReload
+CommandsApiTest.Basic
+ExtensionApiTest.NotificationsHasPermissionManifest
+ExtensionCrashRecoveryTest.ReloadTabsWithBackgroundPage
+ExtensionCrashRecoveryTest.TwoExtensionsCrashBothAtOnce
+ExtensionCrashRecoveryTest.TwoExtensionsCrashFirst
+ExtensionCrashRecoveryTest.TwoExtensionsOneByOne
+FullscreenControllerInteractiveTest.TestTabExitsMouseLockOnNavigation
+OmniboxViewTest.Escape

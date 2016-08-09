@@ -1,0 +1,56 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//build/config/android/rules.gni")
+
+sun_tools_jar_path = "$root_gen_dir/sun_tools_jar/tools.jar"
+
+action("find_sun_tools_jar") {
+  script = "//build/android/gyp/find_sun_tools_jar.py"
+  depfile = "$target_gen_dir/$target_name.d"
+  outputs = [
+    depfile,
+    sun_tools_jar_path,
+  ]
+  args = [
+    "--depfile",
+    rebase_path(depfile, root_build_dir),
+    "--output",
+    rebase_path(sun_tools_jar_path, root_build_dir),
+  ]
+}
+
+java_prebuilt("sun_tools_java") {
+  jar_path = sun_tools_jar_path
+  jar_dep = ":find_sun_tools_jar"
+}
+
+action("cpplib_stripped") {
+  _strip_bin = "${android_tool_prefix}strip"
+  _soname = "libc++_shared.so"
+  _input_so = "${android_libcpp_root}/libs/${android_app_abi}/${_soname}"
+  _output_so = "${root_out_dir}/lib.stripped/${_soname}"
+
+  script = "//build/gn_run_binary.py"
+  inputs = [
+    _strip_bin,
+  ]
+  sources = [
+    _input_so,
+  ]
+  outputs = [
+    _output_so,
+  ]
+
+  _rebased_strip_bin = rebase_path(_strip_bin, root_out_dir)
+  _rebased_input_so = rebase_path(_input_so, root_out_dir)
+  _rebased_output_so = rebase_path(_output_so, root_out_dir)
+  args = [
+    _rebased_strip_bin,
+    "--strip-unneeded",
+    "-o",
+    _rebased_output_so,
+    _rebased_input_so,
+  ]
+}
