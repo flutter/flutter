@@ -1,3 +1,0 @@
-# crbug.com/437847
-AutoConnectHandlerTest.ReconnectOnCertPatternResolved
-NetworkConnectionHandlerTest.ConnectWithCertificateSuccess

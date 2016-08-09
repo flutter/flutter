@@ -1,1 +1,0 @@
--Xclang -plugin-arg-find-bad-constructs -Xclang check-base-classes

@@ -1,1 +1,0 @@
-gs://chrome-chromoting-test-data/integration_tests/input/test_accounts.json

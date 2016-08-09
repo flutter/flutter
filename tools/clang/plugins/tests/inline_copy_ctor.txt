@@ -1,5 +1,0 @@
-In file included from inline_copy_ctor.cpp:5:
-./inline_copy_ctor.h:5:1: warning: [chromium-style] Complex class/struct needs an explicit out-of-line copy constructor.
-struct C {
-^
-1 warning generated.

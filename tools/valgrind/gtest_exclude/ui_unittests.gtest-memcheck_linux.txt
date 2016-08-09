@@ -1,2 +1,0 @@
-# http://crbug.com/431708
-TouchExplorationTest.TwoFingerTapAndHold

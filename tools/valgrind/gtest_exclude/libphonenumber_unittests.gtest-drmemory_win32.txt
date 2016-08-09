@@ -1,3 +1,0 @@
-# fail in native run
-PhoneNumberMatcherTest.MatchesWithStrictGroupingLeniency
-PhoneNumberMatcherTest.MatchesWithExactGroupingLeniency
