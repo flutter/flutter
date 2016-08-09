@@ -8,7 +8,7 @@ import subprocess
 import sys
 import os
 
-SRC_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+SRC_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 def get_out_dir(args):
     if args.target_os is not None:
@@ -144,7 +144,21 @@ def parse_args(args):
 
 def main(argv):
   args = parse_args(argv)
-  command = ['gn', 'gen', '--check']
+
+  if sys.platform.startswith(('cygwin', 'win')):
+    subdir = 'win'
+  elif sys.platform == 'darwin':
+    subdir = 'mac'
+  elif sys.platform.startswith('linux'):
+     subdir = 'linux64'
+  else:
+    raise Error('Unknown platform: ' + sys.platform)
+
+  command = [
+    '%s/buildtools/%s/gn' % (SRC_ROOT, subdir),
+    'gen',
+    '--check'
+  ]
   gn_args = to_command_line(to_gn_args(args))
   out_dir = get_out_dir(args)
   print "gn gen --check in %s" % out_dir

@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef GLUE_BASE_TASK_RUNNER_H_
-#define GLUE_BASE_TASK_RUNNER_H_
+#ifndef FLUTTER_GLU_BASE_TASK_RUNNER_H_
+#define FLUTTER_GLU_BASE_TASK_RUNNER_H_
 
 #include "base/memory/ref_counted.h"
 #include "lib/ftl/tasks/task_runner.h"
@@ -30,4 +30,4 @@ class TaskRunnerAdaptor : public ftl::TaskRunner {
 
 }  // namespace glue
 
-#endif  // GLUE_BASE_TASK_RUNNER_H_
+#endif  // FLUTTER_GLU_BASE_TASK_RUNNER_H_

@@ -2,15 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLOW_LAYERS_LAYER_H_
-#define FLOW_LAYERS_LAYER_H_
+#ifndef FLUTTER_FLOW_LAYERS_LAYER_H_
+#define FLUTTER_FLOW_LAYERS_LAYER_H_
 
 #include <memory>
 #include <vector>
 
-#include "flow/instrumentation.h"
-#include "flow/raster_cache.h"
-#include "glue/trace_event.h"
+#include "flutter/flow/instrumentation.h"
+#include "flutter/flow/raster_cache.h"
+#include "flutter/glue/trace_event.h"
 #include "lib/ftl/logging.h"
 #include "lib/ftl/macros.h"
 #include "third_party/skia/include/core/SkCanvas.h"
@@ -85,4 +85,4 @@ class Layer {
 
 }  // namespace flow
 
-#endif  // FLOW_LAYERS_LAYER_H_
+#endif  // FLUTTER_FLOW_LAYERS_LAYER_H_

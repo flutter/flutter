@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLOW_LAYERS_CLIP_PATH_LAYER_H_
-#define FLOW_LAYERS_CLIP_PATH_LAYER_H_
+#ifndef FLUTTER_FLOW_LAYERS_CLIP_PATH_LAYER_H_
+#define FLUTTER_FLOW_LAYERS_CLIP_PATH_LAYER_H_
 
-#include "flow/layers/container_layer.h"
+#include "flutter/flow/layers/container_layer.h"
 
 namespace flow {
 
@@ -28,4 +28,4 @@ class ClipPathLayer : public ContainerLayer {
 
 }  // namespace flow
 
-#endif  // FLOW_LAYERS_CLIP_PATH_LAYER_H_
+#endif  // FLUTTER_FLOW_LAYERS_CLIP_PATH_LAYER_H_

@@ -23,12 +23,12 @@ dart_pkg("sky_services") {
 
   deps = [
     ":copy_sky_services_license",
-    "//sky/services/activity:interfaces",
-    "//sky/services/editing:interfaces",
-    "//sky/services/media:interfaces",
-    "//sky/services/platform:interfaces",
-    "//sky/services/pointer:interfaces",
-    "//sky/services/raw_keyboard:interfaces",
-    "//sky/services/semantics:interfaces",
+    "//flutter/services/activity:interfaces",
+    "//flutter/services/editing:interfaces",
+    "//flutter/services/media:interfaces",
+    "//flutter/services/platform:interfaces",
+    "//flutter/services/pointer:interfaces",
+    "//flutter/services/raw_keyboard:interfaces",
+    "//flutter/services/semantics:interfaces",
   ]
 }

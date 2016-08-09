@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef GLUE_DATA_PIPE_FILES_H_
-#define GLUE_DATA_PIPE_FILES_H_
+#ifndef FLUTTER_GLU_DATA_PIPE_FILES_H_
+#define FLUTTER_GLU_DATA_PIPE_FILES_H_
 
 #include <stdio.h>
 
@@ -35,4 +35,4 @@ void CopyFromFileDescriptor(
 
 }  // namespace glue
 
-#endif  // GLUE_DATA_PIPE_FILES_H_
+#endif  // FLUTTER_GLU_DATA_PIPE_FILES_H_

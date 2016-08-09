@@ -3,16 +3,16 @@
 # found in the LICENSE file.
 
 # This target will be built if no target is specified when invoking ninja.
-group("default") {
+group("flutter") {
   testonly = true
   deps = [
-    "//sky",
+    "//flutter/sky",
   ]
 
   if (is_ios) {
     deps += [
-      "//sky/services/dynamic:sdk_lib_archive",
-      "//sky/shell:flutter_framework",
+      "//flutter/services/dynamic:sdk_lib_archive",
+      "//flutter/sky/shell:flutter_framework",
     ]
   }
 }
@@ -21,6 +21,6 @@ group("dist") {
   testonly = true
 
   deps = [
-    "//sky/dist",
+    "//flutter/sky/dist",
   ]
 }

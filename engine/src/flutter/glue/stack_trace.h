@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef GLUE_STACK_TRACE_H_
-#define GLUE_STACK_TRACE_H_
+#ifndef FLUTTER_GLU_STACK_TRACE_H_
+#define FLUTTER_GLU_STACK_TRACE_H_
 
 namespace glue {
 
@@ -11,4 +11,4 @@ void PrintStackTrace();
 
 }  // namespace glue
 
-#endif  // GLUE_STACK_TRACE_H_
+#endif  // FLUTTER_GLU_STACK_TRACE_H_

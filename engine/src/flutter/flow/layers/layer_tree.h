@@ -2,15 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLOW_LAYERS_LAYER_TREE_H_
-#define FLOW_LAYERS_LAYER_TREE_H_
+#ifndef FLUTTER_FLOW_LAYERS_LAYER_TREE_H_
+#define FLUTTER_FLOW_LAYERS_LAYER_TREE_H_
 
 #include <stdint.h>
 
 #include <memory>
 
-#include "flow/compositor_context.h"
-#include "flow/layers/layer.h"
+#include "flutter/flow/compositor_context.h"
+#include "flutter/flow/layers/layer.h"
 #include "lib/ftl/macros.h"
 #include "lib/ftl/time/time_delta.h"
 #include "third_party/skia/include/core/SkSize.h"
@@ -75,4 +75,4 @@ class LayerTree {
 
 }  // namespace flow
 
-#endif  // FLOW_LAYERS_LAYER_TREE_H_
+#endif  // FLUTTER_FLOW_LAYERS_LAYER_TREE_H_

@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLOW_RASTER_CACHE_H_
-#define FLOW_RASTER_CACHE_H_
+#ifndef FLUTTER_FLOW_RASTER_CACHE_H_
+#define FLUTTER_FLOW_RASTER_CACHE_H_
 
 #include <memory>
 #include <unordered_map>
 
-#include "flow/instrumentation.h"
+#include "flutter/flow/instrumentation.h"
 #include "lib/ftl/macros.h"
 #include "third_party/skia/include/core/SkImage.h"
 #include "third_party/skia/include/core/SkSize.h"
@@ -48,4 +48,4 @@ class RasterCache {
 
 }  // namespace flow
 
-#endif  // FLOW_RASTER_CACHE_H_
+#endif  // FLUTTER_FLOW_RASTER_CACHE_H_

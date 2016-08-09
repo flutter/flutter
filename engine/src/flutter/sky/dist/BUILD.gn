@@ -13,8 +13,8 @@ copy("sky_shell") {
     ]
 
     deps = [
-      "//sky/shell",
-      "//sky/shell/platform/mojo",
+      "//flutter/sky/shell",
+      "//flutter/sky/shell/platform/mojo",
     ]
   } else if (is_mac) {
     sources = [
@@ -22,7 +22,7 @@ copy("sky_shell") {
     ]
 
     deps = [
-      "//sky/shell",
+      "//flutter/sky/shell",
     ]
   } else if (!is_ios) {
     sources = [
@@ -33,9 +33,9 @@ copy("sky_shell") {
     ]
 
     deps = [
-      "//sky/shell",
-      "//sky/shell/platform/mojo",
-      "//sky/shell/platform/mojo",
+      "//flutter/sky/shell",
+      "//flutter/sky/shell/platform/mojo",
+      "//flutter/sky/shell/platform/mojo",
       "//third_party/icu:icudata",
     ]
   } else {
@@ -44,12 +44,12 @@ copy("sky_shell") {
   }
 
   sky_snapshot_dir =
-      get_label_info("//sky/tools/sky_snapshot($host_toolchain)", "root_out_dir")
+      get_label_info("//flutter/sky/tools/sky_snapshot($host_toolchain)", "root_out_dir")
 
   sources += [ "$sky_snapshot_dir/sky_snapshot" ]
 
   deps += [
-    "//sky/tools/sky_snapshot($host_toolchain)",
+    "//flutter/sky/tools/sky_snapshot($host_toolchain)",
   ]
 
   outputs = [ "$root_dist_dir/shell/{{source_file_part}}" ]
@@ -57,7 +57,7 @@ copy("sky_shell") {
 
 if (is_android) {
   action("sky_engine") {
-    script = "//sky/tools/dist_dart_pkg.py"
+    script = "//flutter/sky/tools/dist_dart_pkg.py"
 
     source = "$root_gen_dir/dart-pkg/sky_engine"
     dest = "$root_dist_dir/packages/sky_engine"
@@ -73,12 +73,12 @@ if (is_android) {
     ]
 
     deps = [
-      "//sky/packages/sky_engine",
+      "//flutter/sky/packages/sky_engine",
     ]
   }
 
   action("sky_services") {
-    script = "//sky/tools/dist_dart_pkg.py"
+    script = "//flutter/sky/tools/dist_dart_pkg.py"
 
     source = "$root_gen_dir/dart-pkg/sky_services"
     dest = "$root_dist_dir/packages/sky_services"
@@ -94,7 +94,7 @@ if (is_android) {
     ]
 
     deps = [
-      "//sky/packages/sky_services",
+      "//flutter/sky/packages/sky_services",
     ]
   }
 }

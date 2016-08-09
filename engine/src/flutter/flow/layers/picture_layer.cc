@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flow/layers/picture_layer.h"
+#include "flutter/flow/layers/picture_layer.h"
 
-#include "flow/raster_cache.h"
+#include "flutter/flow/raster_cache.h"
 #include "lib/ftl/logging.h"
 
 namespace flow {

@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flow/layers/layer_tree.h"
+#include "flutter/flow/layers/layer_tree.h"
 
-#include "glue/trace_event.h"
-#include "flow/layers/layer.h"
+#include "flutter/glue/trace_event.h"
+#include "flutter/flow/layers/layer.h"
 
 namespace flow {
 
