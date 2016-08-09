@@ -238,6 +238,8 @@ abstract class WidgetsBinding extends BindingBase implements GestureBinding, Ren
 
   @override
   void reassembleApplication() {
+    _needToReportFirstFrame = true;
+    preventThisFrameFromBeingReportedAsFirstFrame();
     buildOwner.reassemble(renderViewElement);
     super.reassembleApplication();
   }
