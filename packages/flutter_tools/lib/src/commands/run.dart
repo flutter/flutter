@@ -87,11 +87,13 @@ class RunCommand extends RunCommandBase {
   String get usagePath {
     Device device = deviceForCommand;
 
+    String command = argResults['hot'] ? 'hotrun' : name;
+
     if (device == null)
-      return name;
+      return command;
 
     // Return 'run/ios'.
-    return '$name/${getNameForTargetPlatform(device.platform)}';
+    return '$command/${getNameForTargetPlatform(device.platform)}';
   }
 
   @override
