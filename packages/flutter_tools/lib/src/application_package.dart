@@ -8,7 +8,9 @@ import 'package:path/path.dart' as path;
 import 'package:xml/xml.dart' as xml;
 
 import 'android/gradle.dart';
+import 'base/process.dart';
 import 'build_info.dart';
+import 'globals.dart';
 import 'ios/plist_utils.dart';
 
 abstract class ApplicationPackage {
@@ -48,6 +50,35 @@ class AndroidApk extends ApplicationPackage {
     assert(launchActivity != null);
   }
 
+  /// Creates a new AndroidApk from an existing APK.
+  factory AndroidApk.fromApk(String applicationBinary) {
+    String aaptPath = androidSdk?.latestVersion?.aaptPath;
+    if (aaptPath == null) {
+      printError('Unable to locate the Android SDK; please run \'flutter doctor\'.');
+      return null;
+    }
+
+    List<String> aaptArgs = <String>[aaptPath, 'dump', 'badging', applicationBinary];
+    ApkManifestData data = ApkManifestData.parseFromAaptBadging(runCheckedSync(aaptArgs));
+
+    if (data == null) {
+      printError('Unable to read manifest info from $applicationBinary.');
+      return null;
+    }
+
+    if (data.packageName == null || data.launchableActivityName == null) {
+      printError('Unable to read manifest info from $applicationBinary.');
+      return null;
+    }
+
+    return new AndroidApk(
+      buildDir: 'build',
+      id: data.packageName,
+      apkPath: applicationBinary,
+      launchActivity: '${data.packageName}/${data.launchableActivityName}'
+    );
+  }
+
   /// Creates a new AndroidApk based on the information in the Android manifest.
   factory AndroidApk.fromCurrentDirectory() {
     String manifestPath;
@@ -70,23 +101,24 @@ class AndroidApk extends ApplicationPackage {
     Iterable<xml.XmlElement> manifests = document.findElements('manifest');
     if (manifests.isEmpty)
       return null;
-    String id = manifests.first.getAttribute('package');
+    String packageId = manifests.first.getAttribute('package');
 
     String launchActivity;
     for (xml.XmlElement category in document.findAllElements('category')) {
       if (category.getAttribute('android:name') == 'android.intent.category.LAUNCHER') {
         xml.XmlElement activity = category.parent.parent;
         String activityName = activity.getAttribute('android:name');
-        launchActivity = "$id/$activityName";
+        launchActivity = "$packageId/$activityName";
         break;
       }
     }
-    if (id == null || launchActivity == null)
+
+    if (packageId == null || launchActivity == null)
       return null;
 
     return new AndroidApk(
       buildDir: 'build',
-      id: id,
+      id: packageId,
       apkPath: apkPath,
       launchActivity: launchActivity
     );
@@ -134,11 +166,15 @@ class IOSApp extends ApplicationPackage {
   }
 }
 
-ApplicationPackage getApplicationPackageForPlatform(TargetPlatform platform) {
+ApplicationPackage getApplicationPackageForPlatform(TargetPlatform platform, {
+  String applicationBinary
+}) {
   switch (platform) {
     case TargetPlatform.android_arm:
     case TargetPlatform.android_x64:
     case TargetPlatform.android_x86:
+      if (applicationBinary != null)
+        return new AndroidApk.fromApk(applicationBinary);
       return new AndroidApk.fromCurrentDirectory();
     case TargetPlatform.ios:
       return new IOSApp.fromCurrentDirectory();
@@ -172,4 +208,53 @@ class ApplicationPackageStore {
     }
     return null;
   }
+}
+
+class ApkManifestData {
+  ApkManifestData._(this._data);
+
+  static ApkManifestData parseFromAaptBadging(String data) {
+    if (data == null || data.trim().isEmpty)
+      return null;
+
+    // package: name='io.flutter.gallery' versionCode='1' versionName='0.0.1' platformBuildVersionName='NMR1'
+    // launchable-activity: name='org.domokit.sky.shell.SkyActivity'  label='' icon=''
+    Map<String, Map<String, String>> map = <String, Map<String, String>>{};
+
+    for (String line in data.split('\n')) {
+      int index = line.indexOf(':');
+      if (index != -1) {
+        String name = line.substring(0, index);
+        line = line.substring(index + 1).trim();
+
+        Map<String, String> entries = <String, String>{};
+        map[name] = entries;
+
+        for (String entry in line.split(' ')) {
+          entry = entry.trim();
+          if (entry.isNotEmpty && entry.contains('=')) {
+            int split = entry.indexOf('=');
+            String key = entry.substring(0, split);
+            String value = entry.substring(split + 1);
+            if (value.startsWith("'") && value.endsWith("'"))
+              value = value.substring(1, value.length - 1);
+            entries[key] = value;
+          }
+        }
+      }
+    }
+
+    return new ApkManifestData._(map);
+  }
+
+  final Map<String, Map<String, String>> _data;
+
+  String get packageName => _data['package'] == null ? null : _data['package']['name'];
+
+  String get launchableActivityName {
+    return _data['launchable-activity'] == null ? null : _data['launchable-activity']['name'];
+  }
+
+  @override
+  String toString() => _data.toString();
 }

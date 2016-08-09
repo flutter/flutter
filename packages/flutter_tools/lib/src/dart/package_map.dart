@@ -23,6 +23,8 @@ class PackageMap {
     _globalPackagesPath = value;
   }
 
+  static bool get isUsingCustomPackagesPath => _globalPackagesPath != null;
+
   static String _globalPackagesPath;
 
   final String packagesPath;

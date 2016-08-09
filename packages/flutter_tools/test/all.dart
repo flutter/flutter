@@ -15,6 +15,7 @@ import 'analyze_duplicate_names_test.dart' as analyze_duplicate_names_test;
 import 'analyze_test.dart' as analyze_test;
 import 'android_device_test.dart' as android_device_test;
 import 'android_sdk_test.dart' as android_sdk_test;
+import 'application_package_test.dart' as application_package_test;
 import 'base_utils_test.dart' as base_utils_test;
 import 'config_test.dart' as config_test;
 import 'context_test.dart' as context_test;
@@ -44,6 +45,7 @@ void main() {
   analyze_test.main();
   android_device_test.main();
   android_sdk_test.main();
+  application_package_test.main();
   base_utils_test.main();
   config_test.main();
   context_test.main();

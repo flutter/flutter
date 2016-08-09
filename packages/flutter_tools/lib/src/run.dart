@@ -23,7 +23,8 @@ class RunAndStayResident extends ResidentRunner {
     DebuggingOptions debuggingOptions,
     bool usesTerminalUI: true,
     this.traceStartup: false,
-    this.benchmark: false
+    this.benchmark: false,
+    this.applicationBinary
   }) : super(device,
              target: target,
              debuggingOptions: debuggingOptions,
@@ -32,8 +33,9 @@ class RunAndStayResident extends ResidentRunner {
   ApplicationPackage _package;
   String _mainPath;
   LaunchResult _result;
-  bool traceStartup;
-  bool benchmark;
+  final bool traceStartup;
+  final bool benchmark;
+  final String applicationBinary;
 
   @override
   Future<int> run({
@@ -105,7 +107,7 @@ class RunAndStayResident extends ResidentRunner {
       return 1;
     }
 
-    _package = getApplicationPackageForPlatform(device.platform);
+    _package = getApplicationPackageForPlatform(device.platform, applicationBinary: applicationBinary);
 
     if (_package == null) {
       String message = 'No application found for ${device.platform}.';
