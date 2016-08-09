@@ -23,7 +23,7 @@ source_set("skia") {
     "//mojo/public/c/gpu",
     "//mojo/public/c/gpu:MGL",
     "//mojo/services/geometry/interfaces",
-    "//skia",
+    "//flutter/skia",
   ]
 }
 
@@ -35,6 +35,6 @@ source_set("skia_bindings") {
   deps = [
     "//mojo/public/c/gpu",
     "//mojo/public/c/gpu:GLES2",
-    "//skia",
+    "//flutter/skia",
   ]
 }
