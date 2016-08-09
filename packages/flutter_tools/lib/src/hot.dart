@@ -333,6 +333,7 @@ class HotRunner extends ResidentRunner {
       await _launchFromDevFS(_package, _mainPath);
       restartStatus.stop(showElapsedTime: true);
     }
+    flutterUsage.sendEvent('hot', 'restart');
   }
 
   /// Returns [true] if the reload was successful.
@@ -365,7 +366,10 @@ class HotRunner extends ResidentRunner {
       reloadStatus.stop(showElapsedTime: true);
       if (!_printReloadReport(reloadReport)) {
         // Reload failed.
+        flutterUsage.sendEvent('hot', 'reload-reject');
         return false;
+      } else {
+        flutterUsage.sendEvent('hot', 'reload');
       }
     } catch (errorMessage) {
       reloadStatus.stop(showElapsedTime: true);
