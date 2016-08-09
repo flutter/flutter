@@ -154,6 +154,11 @@ class Tracing {
 /// Download the startup trace information from the given observatory client and
 /// store it to build/start_up_info.json.
 Future<Null> downloadStartupTrace(Observatory observatory) async {
+  File traceInfoFile = new File('build/start_up_info.json');
+
+  if (await traceInfoFile.exists())
+    await traceInfoFile.delete();
+
   Tracing tracing = new Tracing(observatory);
 
   Map<String, dynamic> timeline = await tracing.stopTracingAndDownloadTimeline(
@@ -173,16 +178,13 @@ Future<Null> downloadStartupTrace(Observatory observatory) async {
   int firstFrameTimestampMicros = extractInstantEventTimestamp(kFirstUsefulFrameEventName);
 
   if (engineEnterTimestampMicros == null) {
-    printError('Engine start event is missing in the timeline. Cannot compute startup time.');
-    return null;
+    throw 'Engine start event is missing in the timeline. Cannot compute startup time.';
   }
 
   if (firstFrameTimestampMicros == null) {
-    printError('First frame event is missing in the timeline. Cannot compute startup time.');
-    return null;
+    throw 'First frame event is missing in the timeline. Cannot compute startup time.';
   }
 
-  File traceInfoFile = new File('build/start_up_info.json');
   int timeToFirstFrameMicros = firstFrameTimestampMicros - engineEnterTimestampMicros;
   Map<String, dynamic> traceInfo = <String, dynamic>{
     'engineEnterTimestampMicros': engineEnterTimestampMicros,
