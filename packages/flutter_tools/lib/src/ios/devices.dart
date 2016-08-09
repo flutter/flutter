@@ -68,6 +68,9 @@ class IOSDevice extends Device {
   String get pusherPath => _pusherPath;
 
   @override
+  bool get supportsHotMode => true;
+
+  @override
   final String name;
 
   _IOSDeviceLogReader _logReader;
