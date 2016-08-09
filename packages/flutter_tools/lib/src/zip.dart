@@ -50,6 +50,13 @@ class _ZipToolBuilder extends ZipBuilder {
 
   @override
   void createZip(File outFile, Directory zipBuildDir) {
+    // If there are no assets, then create an empty zip file.
+    if (entries.isEmpty) {
+      List<int> zipData = new ZipEncoder().encode(new Archive());
+      outFile.writeAsBytesSync(zipData);
+      return;
+    }
+
     if (outFile.existsSync())
       outFile.deleteSync();
 
