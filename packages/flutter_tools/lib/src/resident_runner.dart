@@ -31,7 +31,11 @@ abstract class ResidentRunner {
   StreamSubscription<String> _loggingSubscription;
 
   /// Start the app and keep the process running during its lifetime.
-  Future<int> run({ Completer<int> observatoryPortCompleter, String route });
+  Future<int> run({
+    Completer<int> observatoryPortCompleter,
+    String route,
+    bool shouldBuild: true
+  });
 
   Future<bool> restart();
 
