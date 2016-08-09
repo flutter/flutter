@@ -31,7 +31,7 @@ Getting the code and configuring your environment
 solutions = [
   {
     "managed": False,
-    "name": "src",
+    "name": "src/flutter",
     "url": "git@github.com:<your_name_here>/engine.git",
     "custom_deps": {},
     "deps_file": "DEPS",
@@ -74,7 +74,7 @@ dependency_overrides:
 Run the following steps, from the `src` directory created in the steps above:
 
  * `gclient sync` to update your dependencies.
- * `./sky/tools/gn --android --unoptimized` to prepare your build files.
+ * `./flutter/tools/gn --android --unoptimized` to prepare your build files.
  * `ninja -C out/android_debug_unopt` to actually build the Android binary.
 
 This builds a debug-enabled ("unoptimized") binary configured to run Dart in
@@ -116,7 +116,7 @@ to test the engine.
 
 * Make sure you have Xcode 7.3.0+ installed.
 * `gclient sync` to update dependencies.
-* `./sky/tools/gn --ios --unoptimized` to prepare build files.
+* `./flutter/tools/gn --ios --unoptimized` to prepare build files.
   * For a discussion on the various flags and modes, [read this discussion](https://github.com/flutter/flutter/wiki/Flutter's-modes).
 * `ninja -C out/ios_debug_unopt` to build iOS artifacts.
 
@@ -131,7 +131,7 @@ Once the artifacts are built, you can start using them in your application by fo
 ### Desktop (Mac and Linux), for tests
 
  * `gclient sync` to update your dependencies.
- * `./sky/tools/gn` to prepare your build files.
+ * `./flutter/tools/gn` to prepare your build files.
  * `ninja -C out/host_debug_unopt` to build a desktop unoptimized binary.
 
 To run the tests, you'll also need to clone [the main Flutter repository](https://github.com/flutter/flutter).
@@ -150,13 +150,13 @@ git fetch upstream
 git rebase upstream/master
 gclient sync
 
-sky/tools/gn --unoptimized --runtime-mode=debug
-sky/tools/gn --android --unoptimized --runtime-mode=debug
-sky/tools/gn --android --unoptimized --runtime-mode=profile
-sky/tools/gn --android --unoptimized --runtime-mode=release
-sky/tools/gn --android --runtime-mode=debug
-sky/tools/gn --android --runtime-mode=profile
-sky/tools/gn --android --runtime-mode=release
+flutter/tools/gn --unoptimized --runtime-mode=debug
+flutter/tools/gn --android --unoptimized --runtime-mode=debug
+flutter/tools/gn --android --unoptimized --runtime-mode=profile
+flutter/tools/gn --android --unoptimized --runtime-mode=release
+flutter/tools/gn --android --runtime-mode=debug
+flutter/tools/gn --android --runtime-mode=profile
+flutter/tools/gn --android --runtime-mode=release
 
 cd out
 ls | xargs -n 1 ninja -C
