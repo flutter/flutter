@@ -8,7 +8,7 @@ import subprocess
 import sys
 import os
 
-SRC_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+SRC_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 def get_out_dir(args):
     if args.target_os is not None:
