@@ -275,7 +275,7 @@ Future<int> startApp(
       Observatory observatory = await Observatory.connect(result.observatoryPort);
       await downloadStartupTrace(observatory);
     } catch (error) {
-      printError('Error connecting to observatory: $error');
+      printError('Error downloading trace from observatory: $error');
       return 1;
     }
   }

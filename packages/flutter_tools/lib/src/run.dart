@@ -188,7 +188,12 @@ class RunAndStayResident extends ResidentRunner {
 
     if (serviceProtocol != null && traceStartup) {
       printStatus('Downloading startup trace info...');
-      await downloadStartupTrace(serviceProtocol);
+      try {
+        await downloadStartupTrace(serviceProtocol);
+      } catch(error) {
+        printError(error);
+        return 2;
+      }
       appFinished();
     } else {
       setupTerminal();

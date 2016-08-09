@@ -216,6 +216,9 @@ class IOSDevice extends Device {
       // the port picked and scrape that later.
     }
 
+    if (platformArgs['trace-startup'] ?? false)
+      launchArguments.add('--trace-startup');
+
     List<String> launchCommand = <String>[
       '/usr/bin/env',
       'ios-deploy',
