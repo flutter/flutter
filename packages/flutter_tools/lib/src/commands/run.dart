@@ -25,7 +25,6 @@ import '../base/os.dart';
 abstract class RunCommandBase extends FlutterCommand {
   RunCommandBase() {
     addBuildModeFlags(defaultToRelease: false);
-
     argParser.addFlag('trace-startup',
         negatable: true,
         defaultsTo: false,
@@ -59,6 +58,9 @@ class RunCommand extends RunCommandBase {
     argParser.addFlag('build',
         defaultsTo: true,
         help: 'If necessary, build the app before running.');
+    argParser.addOption('use-application-binary',
+        hide: true,
+        help: 'Specify a pre-built application binary to use when running.');
     usesPubOption();
 
     // Option to enable hot reloading.
@@ -172,7 +174,8 @@ class RunCommand extends RunCommandBase {
         target: targetFile,
         debuggingOptions: options,
         traceStartup: traceStartup,
-        benchmark: argResults['benchmark']
+        benchmark: argResults['benchmark'],
+        applicationBinary: argResults['use-application-binary']
       );
     }
 

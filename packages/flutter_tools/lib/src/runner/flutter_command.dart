@@ -185,11 +185,14 @@ abstract class FlutterCommand extends Command {
   Validator commandValidator;
 
   bool _commandValidator() {
-    if (!FileSystemEntity.isFileSync('pubspec.yaml')) {
-      printError('Error: No pubspec.yaml file found.\n'
-        'This command should be run from the root of your Flutter project.\n'
-        'Do not run this command from the root of your git clone of Flutter.');
-      return false;
+    if (!PackageMap.isUsingCustomPackagesPath) {
+      // Don't expect a pubspec.yaml file if the user passed in an explicit .packages file path.
+      if (!FileSystemEntity.isFileSync('pubspec.yaml')) {
+        printError('Error: No pubspec.yaml file found.\n'
+          'This command should be run from the root of your Flutter project.\n'
+          'Do not run this command from the root of your git clone of Flutter.');
+        return false;
+      }
     }
 
     if (_usesTargetOption) {
