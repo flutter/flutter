@@ -267,6 +267,13 @@ class Observatory {
     }).then((dynamic result) => new Response(result));
   }
 
+  Future<Response> flutterEvictAsset(String isolateId, String assetPath) {
+    return peer.sendRequest('ext.flutter.evict', <String, dynamic>{
+      'isolateId': isolateId,
+      'value': assetPath
+    }).then((dynamic result) => new Response(result));
+  }
+
   Future<Response> flutterExit(String isolateId) {
     return peer
       .sendRequest('ext.flutter.exit', <String, dynamic>{ 'isolateId': isolateId })

@@ -27,6 +27,7 @@ class DevFSEntry {
 
   final String devicePath;
   final AssetBundleEntry bundleEntry;
+  String get assetPath => bundleEntry.archivePath;
 
   final File file;
   FileStat _fileStat;
@@ -70,6 +71,8 @@ class DevFSEntry {
   }
 
   bool get _isSourceEntry => file == null;
+
+  bool get _isAssetEntry => bundleEntry != null;
 
   Future<List<int>> contentsAsBytes() async {
     if (_isSourceEntry)
@@ -246,6 +249,7 @@ class DevFS {
   final Map<String, DevFSEntry> _entries = <String, DevFSEntry>{};
   final Set<DevFSEntry> _dirtyEntries = new Set<DevFSEntry>();
   final Set<DevFSEntry> _deletedEntries = new Set<DevFSEntry>();
+  final Set<DevFSEntry> dirtyAssetEntries = new Set<DevFSEntry>();
 
   final List<Future<Response>> _pendingOperations = new List<Future<Response>>();
 
@@ -276,6 +280,8 @@ class DevFS {
     _dirtyEntries.clear();
     // Clear the deleted entries list.
     _deletedEntries.clear();
+    // Clear the dirty asset entries.
+    dirtyAssetEntries.clear();
   }
 
   Future<dynamic> update({ DevFSProgressReporter progressReporter,
@@ -422,8 +428,11 @@ class DevFS {
     }
     bool needsWrite = entry.isModified;
     if (needsWrite) {
-      if (_dirtyEntries.add(entry))
+      if (_dirtyEntries.add(entry)) {
         _bytes += entry.size;
+        if (entry._isAssetEntry)
+          dirtyAssetEntries.add(entry);
+      }
     }
   }
 

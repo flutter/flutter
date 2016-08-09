@@ -272,6 +272,21 @@ class HotRunner extends ResidentRunner {
     return true;
   }
 
+  Future<Null> _evictDirtyAssets() async {
+    if (_devFS == null) {
+      return;
+    }
+    if (_devFS.dirtyAssetEntries.length == 0) {
+      return;
+    }
+    if (serviceProtocol.firstIsolateId == null)
+      throw 'Application isolate not found';
+    for (DevFSEntry entry in _devFS.dirtyAssetEntries) {
+      await serviceProtocol.flutterEvictAsset(serviceProtocol.firstIsolateId,
+                                              entry.assetPath);
+    }
+  }
+
   Future<Null> _cleanupDevFS() async {
     if (_devFS != null) {
       // Cleanup the devFS.
@@ -384,6 +399,7 @@ class HotRunner extends ResidentRunner {
       printError('Hot reload failed:\n$errorMessage');
       return false;
     }
+    await _evictDirtyAssets();
     Status reassembleStatus =
         logger.startProgress('Reassembling application...');
     try {
