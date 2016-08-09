@@ -65,9 +65,12 @@ class AssetBundle {
     return stat.modified.isAfter(_lastBuildTimestamp);
   }
 
-  Future<int> build({String manifestPath: defaultManifestPath,
-                     String workingDirPath: defaultWorkingDirPath,
-                     bool includeRobotoFonts: true}) async {
+  Future<int> build({
+    String manifestPath: defaultManifestPath,
+    String workingDirPath: defaultWorkingDirPath,
+    bool includeRobotoFonts: true,
+    bool reportLicensedPackages: false
+  }) async {
     Object manifest = _loadFlutterYamlManifest(manifestPath);
     if (manifest == null) {
       // No manifest file found for this application.
@@ -134,16 +137,16 @@ class AssetBundle {
     if (fontManifest != null)
       entries.add(fontManifest);
 
-    // TODO(ianh): Only do the following line if we've changed packages
-    entries.add(await _obtainLicenses(packageMap, assetBasePath));
+    // TODO(ianh): Only do the following line if we've changed packages or if our LICENSE file changed
+    entries.add(await _obtainLicenses(packageMap, assetBasePath, reportPackages: reportLicensedPackages));
 
     return 0;
   }
 
   void dump() {
-    print('Dumping AssetBundle:');
+    printTrace('Dumping AssetBundle:');
     for (AssetBundleEntry entry in entries) {
-      print(entry.archivePath);
+      printTrace(entry.archivePath);
     }
   }
 }
@@ -219,15 +222,24 @@ final String _licenseSeparator = '\n' + ('-' * 80) + '\n';
 /// Returns a AssetBundleEntry representing the license file.
 Future<AssetBundleEntry> _obtainLicenses(
   PackageMap packageMap,
-  String assetBase
+  String assetBase,
+  { bool reportPackages }
 ) async {
-  // Read the LICENSE file from each package in the .packages file,
-  // splitting each one into each component license (so that we can
-  // de-dupe if possible).
-  // For the sky_engine package we assume each license starts with
-  // package names. For the other packages we assume that each
-  // license is raw.
+  // Read the LICENSE file from each package in the .packages file, splitting
+  // each one into each component license (so that we can de-dupe if possible).
+  //
+  // Individual licenses inside each LICENSE file should be separated by 80
+  // hyphens on their own on a line.
+  //
+  // If a LICENSE file contains more than one component license, then each
+  // component license must start with the names of the packages to which the
+  // component license applies, with each package name on its own line, and the
+  // list of package names separated from the actual license text by a blank
+  // line. (The packages need not match the names of the pub package. For
+  // example, a package might itself contain code from multiple third-party
+  // sources, and might need to include a license for each one.)
   final Map<String, Set<String>> packageLicenses = <String, Set<String>>{};
+  final Set<String> allPackages = new Set<String>();
   for (String packageName in packageMap.map.keys) {
     final Uri package = packageMap.map[packageName];
     if (package != null && package.scheme == 'file') {
@@ -238,7 +250,7 @@ Future<AssetBundleEntry> _obtainLicenses(
         for (String rawLicense in rawLicenses) {
           List<String> packageNames;
           String licenseText;
-          if (packageName == 'sky_engine') {
+          if (rawLicenses.length > 1) {
             final int split = rawLicense.indexOf('\n\n');
             if (split >= 0) {
               packageNames = rawLicense.substring(0, split).split('\n');
@@ -251,9 +263,16 @@ Future<AssetBundleEntry> _obtainLicenses(
           }
           packageLicenses.putIfAbsent(licenseText, () => new Set<String>())
             ..addAll(packageNames);
+          allPackages.addAll(packageNames);
         }
       }
     }
+  }
+
+  if (reportPackages) {
+    final List<String> allPackagesList = allPackages.toList()..sort();
+    printStatus('Licenses were found for the following packages:');
+    printStatus(allPackagesList.join(', '));
   }
 
   final List<String> combinedLicensesList = packageLicenses.keys.map(

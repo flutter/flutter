@@ -77,7 +77,8 @@ Future<int> build({
   String privateKeyPath: defaultPrivateKeyPath,
   String workingDirPath: defaultWorkingDirPath,
   bool precompiledSnapshot: false,
-  bool includeRobotoFonts: true
+  bool includeRobotoFonts: true,
+  bool reportLicensedPackages: false
 }) async {
   File snapshotFile;
 
@@ -105,7 +106,8 @@ Future<int> build({
     outputPath: outputPath,
     privateKeyPath: privateKeyPath,
     workingDirPath: workingDirPath,
-    includeRobotoFonts: includeRobotoFonts
+    includeRobotoFonts: includeRobotoFonts,
+    reportLicensedPackages: reportLicensedPackages
   );
 }
 
@@ -115,15 +117,19 @@ Future<int> assemble({
   String outputPath: defaultFlxOutputPath,
   String privateKeyPath: defaultPrivateKeyPath,
   String workingDirPath: defaultWorkingDirPath,
-  bool includeRobotoFonts: true
+  bool includeRobotoFonts: true,
+  bool reportLicensedPackages: false
 }) async {
   printTrace('Building $outputPath');
 
   // Build the asset bundle.
   AssetBundle assetBundle = new AssetBundle();
-  int result = await assetBundle.build(manifestPath: manifestPath,
-                                       workingDirPath: workingDirPath,
-                                       includeRobotoFonts: includeRobotoFonts);
+  int result = await assetBundle.build(
+    manifestPath: manifestPath,
+    workingDirPath: workingDirPath,
+    includeRobotoFonts: includeRobotoFonts,
+    reportLicensedPackages: reportLicensedPackages
+  );
   if (result != 0) {
     return result;
   }
