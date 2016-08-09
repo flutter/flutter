@@ -206,6 +206,12 @@ class _ImageState extends State<Image> {
   }
 
   @override
+  void reassemble() {
+    _resolveImage();
+    super.reassemble();
+  }
+
+  @override
   void dispose() {
     _imageStream.removeListener(_handleImageChanged);
     super.dispose();
