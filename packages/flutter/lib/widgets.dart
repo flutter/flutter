@@ -50,6 +50,7 @@ export 'src/widgets/scrollable_grid.dart';
 export 'src/widgets/scrollable_list.dart';
 export 'src/widgets/scrollable.dart';
 export 'src/widgets/semantics_debugger.dart';
+export 'src/widgets/size_changed_layout_notifier.dart';
 export 'src/widgets/status_transitions.dart';
 export 'src/widgets/table.dart';
 export 'src/widgets/text_selection.dart';
