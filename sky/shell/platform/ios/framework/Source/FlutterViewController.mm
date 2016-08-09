@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#import "sky/shell/platform/ios/framework/Headers/FlutterViewController.h"
+#import "flutter/sky/shell/platform/ios/framework/Headers/FlutterViewController.h"
 
 #include "base/bind.h"
 #include "base/mac/scoped_block.h"
