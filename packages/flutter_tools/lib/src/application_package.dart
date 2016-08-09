@@ -14,14 +14,10 @@ import 'globals.dart';
 import 'ios/plist_utils.dart';
 
 abstract class ApplicationPackage {
-  /// Path to the package's root folder.
-  final String rootPath;
-
   /// Package ID from the Android Manifest or equivalent.
   final String id;
 
-  ApplicationPackage({this.rootPath, this.id}) {
-    assert(rootPath != null);
+  ApplicationPackage({ this.id }) {
     assert(id != null);
   }
 
@@ -41,11 +37,10 @@ class AndroidApk extends ApplicationPackage {
   final String launchActivity;
 
   AndroidApk({
-    String buildDir,
     String id,
     this.apkPath,
     this.launchActivity
-  }) : super(rootPath: buildDir, id: id) {
+  }) : super(id: id) {
     assert(apkPath != null);
     assert(launchActivity != null);
   }
@@ -72,7 +67,6 @@ class AndroidApk extends ApplicationPackage {
     }
 
     return new AndroidApk(
-      buildDir: 'build',
       id: data.packageName,
       apkPath: applicationBinary,
       launchActivity: '${data.packageName}/${data.launchableActivityName}'
@@ -117,7 +111,6 @@ class AndroidApk extends ApplicationPackage {
       return null;
 
     return new AndroidApk(
-      buildDir: 'build',
       id: packageId,
       apkPath: apkPath,
       launchActivity: launchActivity
@@ -132,9 +125,9 @@ class IOSApp extends ApplicationPackage {
   static final String kBundleName = 'Runner.app';
 
   IOSApp({
-    String projectDir,
+    this.appDirectory,
     String projectBundleId
-  }) : super(rootPath: projectDir, id: projectBundleId);
+  }) : super(id: projectBundleId);
 
   factory IOSApp.fromCurrentDirectory() {
     if (getCurrentHostPlatform() != HostPlatform.darwin_x64)
@@ -146,7 +139,7 @@ class IOSApp extends ApplicationPackage {
       return null;
 
     return new IOSApp(
-      projectDir: path.join('ios'),
+      appDirectory: path.join('ios'),
       projectBundleId: value
     );
   }
@@ -157,12 +150,14 @@ class IOSApp extends ApplicationPackage {
   @override
   String get displayName => id;
 
+  final String appDirectory;
+
   String get simulatorBundlePath => _buildAppPath('iphonesimulator');
 
   String get deviceBundlePath => _buildAppPath('iphoneos');
 
   String _buildAppPath(String type) {
-    return path.join(rootPath, 'build', 'Release-$type', kBundleName);
+    return path.join(appDirectory, 'build', 'Release-$type', kBundleName);
   }
 }
 

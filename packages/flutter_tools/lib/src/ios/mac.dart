@@ -98,7 +98,7 @@ bool _xcodeVersionCheckValid(int major, int minor) {
 }
 
 Future<XcodeBuildResult> buildXcodeProject({
-  ApplicationPackage app,
+  IOSApp app,
   BuildMode mode,
   String target: flx.defaultMainPath,
   bool buildForDevice,
@@ -113,7 +113,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   // Before the build, all service definitions must be updated and the dylibs
   // copied over to a location that is suitable for Xcodebuild to find them.
 
-  await _addServicesToBundle(new Directory(app.rootPath));
+  await _addServicesToBundle(new Directory(app.appDirectory));
 
   List<String> commands = <String>[
     '/usr/bin/env',
@@ -125,13 +125,13 @@ Future<XcodeBuildResult> buildXcodeProject({
     'ONLY_ACTIVE_ARCH=YES',
   ];
 
-  List<FileSystemEntity> contents = new Directory(app.rootPath).listSync();
+  List<FileSystemEntity> contents = new Directory(app.appDirectory).listSync();
   for (FileSystemEntity entity in contents) {
     if (path.extension(entity.path) == '.xcworkspace') {
       commands.addAll(<String>[
         '-workspace', path.basename(entity.path),
         '-scheme', path.basenameWithoutExtension(entity.path),
-        "BUILD_DIR=${path.absolute(app.rootPath, 'build')}",
+        "BUILD_DIR=${path.absolute(app.appDirectory, 'build')}",
       ]);
       break;
     }
@@ -154,7 +154,7 @@ Future<XcodeBuildResult> buildXcodeProject({
 
   RunResult result = await runAsync(
     commands,
-    workingDirectory: app.rootPath,
+    workingDirectory: app.appDirectory,
     allowReentrantFlutter: true
   );
 
@@ -170,7 +170,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     Match match = regexp.firstMatch(result.stdout);
     String outputDir;
     if (match != null)
-      outputDir = path.join(app.rootPath, match.group(1));
+      outputDir = path.join(app.appDirectory, match.group(1));
     return new XcodeBuildResult(true, outputDir);
   }
 }
