@@ -76,12 +76,17 @@ class HotRunner extends ResidentRunner {
   }
 
   @override
-  Future<int> run({ Completer<int> observatoryPortCompleter, String route }) {
+  Future<int> run({
+    Completer<int> observatoryPortCompleter,
+    String route,
+    bool shouldBuild: true
+  }) {
     // Don't let uncaught errors kill the process.
     return runZoned(() {
       return _run(
         observatoryPortCompleter: observatoryPortCompleter,
-        route: route
+        route: route,
+        shouldBuild: shouldBuild
       );
     }, onError: (dynamic error, StackTrace stackTrace) {
       printError('Exception from flutter run: $error', stackTrace);
@@ -90,7 +95,8 @@ class HotRunner extends ResidentRunner {
 
   Future<int> _run({
     Completer<int> observatoryPortCompleter,
-    String route
+    String route,
+    bool shouldBuild: true
   }) async {
     _mainPath = findMainDartFile(target);
     if (!FileSystemEntity.isFileSync(_mainPath)) {
@@ -113,7 +119,7 @@ class HotRunner extends ResidentRunner {
     }
 
     // TODO(devoncarew): We shouldn't have to do type checks here.
-    if (device is AndroidDevice) {
+    if (shouldBuild && device is AndroidDevice) {
       printTrace('Running build command.');
 
       int result = await buildApk(

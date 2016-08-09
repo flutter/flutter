@@ -56,6 +56,9 @@ class RunCommand extends RunCommandBase {
         help: 'Start in a paused mode and wait for a debugger to connect.');
     argParser.addOption('debug-port',
         help: 'Listen to the given port for a debug connection (defaults to $kDefaultObservatoryPort).');
+    argParser.addFlag('build',
+        defaultsTo: true,
+        help: 'If necessary, build the app before running.');
     usesPubOption();
 
     // Option to enable hot reloading.
@@ -171,7 +174,7 @@ class RunCommand extends RunCommandBase {
       );
     }
 
-    return runner.run(route: route);
+    return runner.run(route: route, shouldBuild: argResults['build']);
   }
 }
 
