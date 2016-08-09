@@ -5,7 +5,6 @@
 #ifndef SKY_SHELL_UI_ENGINE_H_
 #define SKY_SHELL_UI_ENGINE_H_
 
-#include "base/files/file_path.h"
 #include "flutter/assets/zip_asset_store.h"
 #include "lib/ftl/macros.h"
 #include "lib/ftl/memory/weak_ptr.h"

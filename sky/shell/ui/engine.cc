@@ -4,20 +4,20 @@
 
 #include "sky/shell/ui/engine.h"
 
-#include "base/files/file_path.h"
-#include "base/files/file_util.h"
-#include "base/time/time.h"
-#include "base/trace_event/trace_event.h"
+#include <unistd.h>
+
 #include "flutter/assets/directory_asset_bundle.h"
 #include "flutter/assets/zip_asset_bundle.h"
+#include "flutter/tonic/dart_library_provider_files.h"
 #include "glue/movable_wrapper.h"
+#include "glue/trace_event.h"
+#include "lib/ftl/files/path.h"
 #include "mojo/public/cpp/application/connect.h"
 #include "sky/engine/bindings/mojo_services.h"
 #include "sky/engine/core/script/dart_init.h"
 #include "sky/engine/core/script/ui_dart_state.h"
 #include "sky/engine/public/platform/Platform.h"
 #include "sky/engine/public/web/Sky.h"
-#include "sky/shell/dart/dart_library_provider_files.h"
 #include "sky/shell/shell.h"
 #include "sky/shell/ui/animator.h"
 #include "sky/shell/ui/flutter_font_selector.h"
@@ -28,6 +28,22 @@
 namespace sky {
 namespace shell {
 namespace {
+
+bool PathExists(const std::string& path) {
+  return access(path.c_str(), R_OK) == 0;
+}
+
+std::string FindPackagesPath(const std::string& main_dart) {
+  std::string directory = files::GetDirectoryName(main_dart);
+  std::string packages_path = directory + "/.packages";
+  if (!PathExists(packages_path)) {
+    directory = files::GetDirectoryName(directory);
+    packages_path = directory + "/.packages";
+    if (!PathExists(packages_path))
+      packages_path = std::string();
+  }
+  return packages_path;
+}
 
 PlatformImpl* g_platform_impl = nullptr;
 
@@ -72,17 +88,9 @@ void Engine::RunFromSource(const std::string& main,
   // Assets.
   ConfigureDirectoryAssetBundle(assets_directory);
   // .packages.
-  base::FilePath packages_path = base::FilePath(std::string(packages));
-  if (packages_path.empty()) {
-    base::FilePath main_dir = base::FilePath(main).DirName();
-    packages_path = main_dir.Append(FILE_PATH_LITERAL(".packages"));
-    if (!base::PathExists(packages_path)) {
-      packages_path = main_dir.Append(base::FilePath::kParentDirectory)
-                          .Append(FILE_PATH_LITERAL(".packages"));
-      if (!base::PathExists(packages_path))
-        packages_path = base::FilePath();
-    }
-  }
+  std::string packages_path = packages;
+  if (packages_path.empty())
+    packages_path = FindPackagesPath(main);
   DartLibraryProviderFiles* provider = new DartLibraryProviderFiles();
   dart_library_provider_.reset(provider);
   if (!packages_path.empty())
@@ -231,27 +239,19 @@ void Engine::RunFromFile(const mojo::String& main,
                          const mojo::String& packages,
                          const mojo::String& bundle) {
   TRACE_EVENT0("flutter", "Engine::RunFromFile");
-  std::string main_str(main);
+  std::string main_dart(main);
   if (bundle.size() != 0) {
     // The specification of an FLX bundle is optional.
     ConfigureZipAssetBundle(bundle);
   }
-  base::FilePath packages_path = base::FilePath(std::string(packages));
-  if (packages_path.empty()) {
-    base::FilePath main_dir = base::FilePath(main_str).DirName();
-    packages_path = main_dir.Append(FILE_PATH_LITERAL(".packages"));
-    if (!base::PathExists(packages_path)) {
-      packages_path = main_dir.Append(base::FilePath::kParentDirectory)
-                          .Append(FILE_PATH_LITERAL(".packages"));
-      if (!base::PathExists(packages_path))
-        packages_path = base::FilePath();
-    }
-  }
+  std::string packages_path = packages;
+  if (packages_path.empty())
+    packages_path = FindPackagesPath(main_dart);
   DartLibraryProviderFiles* provider = new DartLibraryProviderFiles();
   dart_library_provider_.reset(provider);
   if (!packages_path.empty())
     provider->LoadPackagesMap(packages_path);
-  RunFromLibrary(main_str);
+  RunFromLibrary(main_dart);
 }
 
 void Engine::RunFromBundle(const mojo::String& script_uri,

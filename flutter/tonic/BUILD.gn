@@ -16,6 +16,8 @@ source_set("tonic") {
     "dart_library_loader.h",
     "dart_library_provider.cc",
     "dart_library_provider.h",
+    "dart_library_provider_files.cc",
+    "dart_library_provider_files.h",
     "dart_snapshot_loader.cc",
     "dart_snapshot_loader.h",
     "dart_state.cc",
@@ -23,8 +25,11 @@ source_set("tonic") {
   ]
 
   deps = [
+    "//base",
     "//dart/runtime/bin:embedded_dart_io",
     "//glue",
+    "//lib/tonic/parsers",
+    "//mojo/data_pipe_utils",
     "//mojo/public/cpp/system",
   ]
 

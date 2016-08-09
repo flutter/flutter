@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sky/shell/dart/dart_library_provider_files.h"
+#include "flutter/tonic/dart_library_provider_files.h"
 
 #include "base/bind.h"
 #include "base/files/file_util.h"
@@ -64,8 +64,8 @@ DartLibraryProviderFiles::DartLibraryProviderFiles() {}
 
 DartLibraryProviderFiles::~DartLibraryProviderFiles() {}
 
-void DartLibraryProviderFiles::LoadPackagesMap(const base::FilePath& packages) {
-  packages_ = packages;
+void DartLibraryProviderFiles::LoadPackagesMap(const std::string& packages) {
+  packages_ = base::FilePath(packages);
   std::string packages_source;
   if (!base::ReadFileToString(base::MakeAbsoluteFilePath(packages_),
                               &packages_source)) {

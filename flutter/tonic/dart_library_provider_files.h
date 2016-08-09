@@ -18,7 +18,7 @@ class DartLibraryProviderFiles : public blink::DartLibraryProvider {
   DartLibraryProviderFiles();
   ~DartLibraryProviderFiles() override;
 
-  void LoadPackagesMap(const base::FilePath& packages);
+  void LoadPackagesMap(const std::string& packages);
 
  protected:
   // |DartLibraryProvider| implementation:
