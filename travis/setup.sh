@@ -6,10 +6,10 @@ set -ex
 PATH="$HOME/depot_tools:$PATH"
 
 cd ..
-mv engine src
-mkdir engine
-mv src engine
-cd engine/src
+mv engine flutter
+mkdir src
+mv flutter src
+cd src
 
-mv travis/gclient ../.gclient
+mv flutter/travis/gclient ../.gclient
 gclient sync
