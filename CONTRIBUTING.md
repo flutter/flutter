@@ -43,8 +43,9 @@ target_os = ["android"]
 
  * `cd engine` (Change to the directory in which you put the `.gclient` file.)
  * `gclient sync` This will fetch all the source code that Flutter depends on. Avoid interrupting this script, it can leave your repository in an inconsistent state that is tedious to clean up.
- * `cd src` (Change to the directory that `gclient sync` created in your `engine` directory.)
- * `git remote add upstream git@github.com:flutter/engine.git` (So that you fetch from the master repository, not your clone, when running `git fetch` et al.)
+ * `cd src/flutter` (Change to the `flutter` directory of the `src` directory that `gclient sync` created in your `engine` directory.)
+ * `git remote add upstream git@github.com:flutter/engine.git` (So that you fetch from the master `flutter/engine` repository, not your clone, when running `git fetch` et al.)
+ * `cd ..` (Return to the `src` directory that `gclient sync` created in your `engine` directory.)
  * Run `./tools/android/download_android_tools.py` to add Android dependencies to your tree. You will need to run this command again if you ever run `git clean -xdf`, since that deletes these dependencies. (`git clean -df` is fine since it skips these `.gitignore`d files.)
  * Add `.../engine/src/third_party/android_tools/sdk/platform-tools` to your path so that you can run the `adb` tool more easily. This is also required by the `flutter` tool, which is used to run Flutter apps.
  * Make sure you are still in the `src` directory that the `gclient sync` step created earlier.
@@ -172,6 +173,7 @@ We gladly accept contributions via GitHub pull requests.
 
 To start working on a patch:
 
+ * Make sure you are in the `engine/src/flutter` directory.
  * `git fetch upstream`
  * `git checkout upstream/master -b name_of_your_branch`
  * Hack away. Please peruse our
