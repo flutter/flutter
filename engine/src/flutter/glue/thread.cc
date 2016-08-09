@@ -16,14 +16,14 @@ class Thread::ThreadImpl : public base::Thread {
   ThreadImpl(std::string name) : base::Thread(std::move(name)) {}
 };
 
-Thread::Thread(std::string name) : impl_(new ThreadImpl(name)) {
-  task_runner_ = ftl::MakeRefCounted<TaskRunnerAdaptor>(impl_->task_runner());
-}
+Thread::Thread(std::string name) : impl_(new ThreadImpl(name)) {}
 
 Thread::~Thread() {}
 
 bool Thread::Start() {
-  return impl_->Start();
+  bool result = impl_->Start();
+  task_runner_ = ftl::MakeRefCounted<TaskRunnerAdaptor>(impl_->task_runner());
+  return result;
 }
 
 }  // namespace glue
