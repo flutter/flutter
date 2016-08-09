@@ -13,7 +13,7 @@ PlatformViewTest::PlatformViewTest() : weak_factory_(this) {}
 
 PlatformViewTest::~PlatformViewTest() = default;
 
-base::WeakPtr<sky::shell::PlatformView> PlatformViewTest::GetWeakViewPtr() {
+ftl::WeakPtr<PlatformView> PlatformViewTest::GetWeakViewPtr() {
   return weak_factory_.GetWeakPtr();
 }
 

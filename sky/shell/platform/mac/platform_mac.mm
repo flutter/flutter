@@ -107,7 +107,7 @@ class EmbedderState {
   base::AtExitManager exit_manager_;
   std::unique_ptr<base::MessageLoopForUI> embedder_message_loop_;
 
-  DISALLOW_COPY_AND_ASSIGN(EmbedderState);
+  FTL_DISALLOW_COPY_AND_ASSIGN(EmbedderState);
 };
 
 void PlatformMacMain(int argc, const char* argv[], std::string icu_data_path) {

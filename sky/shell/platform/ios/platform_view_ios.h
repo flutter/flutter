@@ -7,9 +7,9 @@
 
 #include <memory>
 
-#include "base/macros.h"
 #include "base/mac/scoped_nsobject.h"
-#include "base/memory/weak_ptr.h"
+#include "lib/ftl/macros.h"
+#include "lib/ftl/memory/weak_ptr.h"
 #include "sky/shell/platform_view.h"
 
 @class CAEAGLLayer;
@@ -25,7 +25,7 @@ class PlatformViewIOS : public PlatformView {
 
   ~PlatformViewIOS() override;
 
-  base::WeakPtr<sky::shell::PlatformView> GetWeakViewPtr() override;
+  ftl::WeakPtr<sky::shell::PlatformView> GetWeakViewPtr() override;
 
   uint64_t DefaultFramebuffer() const override;
 
@@ -37,9 +37,9 @@ class PlatformViewIOS : public PlatformView {
 
  private:
   std::unique_ptr<IOSGLContext> context_;
-  base::WeakPtrFactory<PlatformViewIOS> weak_factory_;
+  ftl::WeakPtrFactory<PlatformViewIOS> weak_factory_;
 
-  DISALLOW_COPY_AND_ASSIGN(PlatformViewIOS);
+  FTL_DISALLOW_COPY_AND_ASSIGN(PlatformViewIOS);
 };
 
 }  // namespace shell

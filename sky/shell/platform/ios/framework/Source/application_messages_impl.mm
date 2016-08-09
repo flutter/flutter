@@ -15,7 +15,7 @@ ApplicationMessagesImpl::ApplicationMessagesImpl() : weak_factory_(this) {
 ApplicationMessagesImpl::~ApplicationMessagesImpl() {
 }
 
-base::WeakPtr<ApplicationMessagesImpl> ApplicationMessagesImpl::GetWeakPtr() {
+ftl::WeakPtr<ApplicationMessagesImpl> ApplicationMessagesImpl::GetWeakPtr() {
   return weak_factory_.GetWeakPtr();
 }
 

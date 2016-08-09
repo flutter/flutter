@@ -4,13 +4,13 @@
 
 #include "sky/shell/ui/engine.h"
 
-#include "base/bind.h"
 #include "base/files/file_path.h"
 #include "base/files/file_util.h"
 #include "base/time/time.h"
 #include "base/trace_event/trace_event.h"
 #include "flutter/assets/directory_asset_bundle.h"
 #include "flutter/assets/zip_asset_bundle.h"
+#include "glue/movable_wrapper.h"
 #include "mojo/public/cpp/application/connect.h"
 #include "sky/engine/bindings/mojo_services.h"
 #include "sky/engine/core/script/dart_init.h"
@@ -47,7 +47,7 @@ Engine::Engine(const Config& config, rasterizer::RasterizerPtr rasterizer)
 
 Engine::~Engine() {}
 
-base::WeakPtr<Engine> Engine::GetWeakPtr() {
+ftl::WeakPtr<Engine> Engine::GetWeakPtr() {
   return weak_factory_.GetWeakPtr();
 }
 
@@ -101,18 +101,18 @@ void Engine::ConnectToEngine(mojo::InterfaceRequest<SkyEngine> request) {
   binding_.Bind(request.Pass());
 }
 
-void Engine::OnOutputSurfaceCreated(const base::Closure& gpu_continuation) {
-  config_.gpu_task_runner->PostTask(FROM_HERE, gpu_continuation);
+void Engine::OnOutputSurfaceCreated(const ftl::Closure& gpu_continuation) {
+  config_.gpu_task_runner->PostTask(gpu_continuation);
   have_surface_ = true;
   StartAnimatorIfPossible();
   if (sky_view_)
     ScheduleFrame();
 }
 
-void Engine::OnOutputSurfaceDestroyed(const base::Closure& gpu_continuation) {
+void Engine::OnOutputSurfaceDestroyed(const ftl::Closure& gpu_continuation) {
   have_surface_ = false;
   StopAnimator();
-  config_.gpu_task_runner->PostTask(FROM_HERE, gpu_continuation);
+  config_.gpu_task_runner->PostTask(gpu_continuation);
 }
 
 void Engine::SetServices(ServicesDataPtr services) {
@@ -259,10 +259,10 @@ void Engine::RunFromBundle(const mojo::String& script_uri,
   TRACE_EVENT0("flutter", "Engine::RunFromBundle");
 
   ConfigureZipAssetBundle(path);
-
-  root_bundle_->GetAsStream(blink::kSnapshotAssetKey,
-                            base::Bind(&Engine::RunFromSnapshotStream,
-                                       weak_factory_.GetWeakPtr(), script_uri));
+  mojo::DataPipe pipe;
+  asset_store_->GetAsStream(blink::kSnapshotAssetKey,
+                            std::move(pipe.producer_handle));
+  RunFromSnapshotStream(script_uri, std::move(pipe.consumer_handle));
 }
 
 void Engine::RunFromBundleAndSnapshot(const mojo::String& script_uri,
@@ -273,9 +273,10 @@ void Engine::RunFromBundleAndSnapshot(const mojo::String& script_uri,
   ConfigureZipAssetBundle(bundle_path);
 
   asset_store_->AddOverlayFile(blink::kSnapshotAssetKey, snapshot_path);
-  root_bundle_->GetAsStream(blink::kSnapshotAssetKey,
-                            base::Bind(&Engine::RunFromSnapshotStream,
-                                       weak_factory_.GetWeakPtr(), script_uri));
+  mojo::DataPipe pipe;
+  asset_store_->GetAsStream(blink::kSnapshotAssetKey,
+                            std::move(pipe.producer_handle));
+  RunFromSnapshotStream(script_uri, std::move(pipe.consumer_handle));
 }
 
 void Engine::PushRoute(const mojo::String& route) {
@@ -322,15 +323,15 @@ void Engine::DidCreateMainIsolate(Dart_Isolate isolate) {
 
 void Engine::DidCreateSecondaryIsolate(Dart_Isolate isolate) {
   mojo::ServiceProviderPtr services_from_embedder;
-  mojo::InterfaceRequest<mojo::ServiceProvider> request =
-      mojo::GetProxy(&services_from_embedder);
-  base::Closure closure =
-      base::Bind(&Engine::BindToServiceProvider, weak_factory_.GetWeakPtr(),
-                 base::Passed(&request));
+  auto request = glue::WrapMovable(mojo::GetProxy(&services_from_embedder));
+  ftl::WeakPtr<Engine> engine = weak_factory_.GetWeakPtr();
   blink::Platform::current()->GetUITaskRunner()->PostTask(
-      [closure]() { closure.Run(); });
-  blink::MojoServices::Create(isolate, nullptr, services_from_embedder.Pass(),
-                              nullptr);
+      [engine, request]() mutable {
+        if (engine)
+          engine->BindToServiceProvider(request.Unwrap());
+      });
+  blink::MojoServices::Create(isolate, nullptr,
+                              std::move(services_from_embedder), nullptr);
 }
 
 void Engine::BindToServiceProvider(

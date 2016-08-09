@@ -5,7 +5,9 @@
 #ifndef SKY_SHELL_PLATFORM_MAC_VIEW_SERVICE_PROVIDER_H_
 #define SKY_SHELL_PLATFORM_MAC_VIEW_SERVICE_PROVIDER_H_
 
-#include "base/bind.h"
+#include <functional>
+
+#include "lib/ftl/macros.h"
 #include "mojo/public/cpp/bindings/strong_binding.h"
 #include "mojo/public/interfaces/application/service_provider.mojom.h"
 #include "sky/engine/wtf/Assertions.h"
@@ -18,9 +20,9 @@
 namespace sky {
 namespace shell {
 
-typedef base::Callback<
-    void(mojo::InterfaceRequest<flutter::platform::ApplicationMessages>)
-  > AppMesssagesConnector;
+typedef std::function<void(
+    mojo::InterfaceRequest<flutter::platform::ApplicationMessages>)>
+    AppMesssagesConnector;
 
 class ViewServiceProvider : public mojo::ServiceProvider {
  public:
@@ -35,7 +37,7 @@ class ViewServiceProvider : public mojo::ServiceProvider {
   mojo::StrongBinding<mojo::ServiceProvider> binding_;
   AppMesssagesConnector connect_to_app_messages_;
 
-  DISALLOW_COPY_AND_ASSIGN(ViewServiceProvider);
+  FTL_DISALLOW_COPY_AND_ASSIGN(ViewServiceProvider);
 };
 
 }  // namespace shell

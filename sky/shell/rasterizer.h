@@ -7,10 +7,10 @@
 
 #include <memory>
 
-#include "base/callback.h"
-#include "base/memory/weak_ptr.h"
-#include "base/synchronization/waitable_event.h"
 #include "flow/layers/layer_tree.h"
+#include "lib/ftl/memory/weak_ptr.h"
+#include "lib/ftl/synchronization/waitable_event.h"
+#include "lib/ftl/functional/closure.h"
 #include "mojo/public/cpp/bindings/binding.h"
 #include "sky/services/rasterizer/rasterizer.mojom.h"
 
@@ -27,12 +27,13 @@ class Rasterizer : public rasterizer::Rasterizer {
       mojo::InterfaceRequest<rasterizer::Rasterizer> request) = 0;
 
   virtual void Setup(PlatformView* platform_view,
-                     base::Closure rasterizer_continuation,
-                     base::WaitableEvent* setup_completion_event) = 0;
+                     ftl::Closure rasterizer_continuation,
+                     ftl::AutoResetWaitableEvent* setup_completion_event) = 0;
 
-  virtual void Teardown(base::WaitableEvent* teardown_completion_event) = 0;
+  virtual void Teardown(
+      ftl::AutoResetWaitableEvent* teardown_completion_event) = 0;
 
-  virtual base::WeakPtr<sky::shell::Rasterizer> GetWeakRasterizerPtr() = 0;
+  virtual ftl::WeakPtr<Rasterizer> GetWeakRasterizerPtr() = 0;
 
   virtual flow::LayerTree* GetLastLayerTree() = 0;
 

@@ -5,9 +5,9 @@
 #ifndef SKY_SHELL_GPU_DIRECT_RASTERIZER_DIRECT_H_
 #define SKY_SHELL_GPU_DIRECT_RASTERIZER_DIRECT_H_
 
-#include "base/memory/weak_ptr.h"
-#include "base/synchronization/waitable_event.h"
 #include "flow/compositor_context.h"
+#include "lib/ftl/memory/weak_ptr.h"
+#include "lib/ftl/synchronization/waitable_event.h"
 #include "sky/shell/gpu/direct/ganesh_canvas.h"
 #include "sky/shell/rasterizer.h"
 
@@ -26,14 +26,15 @@ class RasterizerDirect : public Rasterizer {
 
   // sky::shell::Rasterizer override.
   void Setup(PlatformView* platform_view,
-             base::Closure continuation,
-             base::WaitableEvent* setup_completion_event) override;
+             ftl::Closure continuation,
+             ftl::AutoResetWaitableEvent* setup_completion_event) override;
 
   // sky::shell::Rasterizer override.
-  void Teardown(base::WaitableEvent* teardown_completion_event) override;
+  void Teardown(
+      ftl::AutoResetWaitableEvent* teardown_completion_event) override;
 
   // sky::shell::Rasterizer override.
-  base::WeakPtr<sky::shell::Rasterizer> GetWeakRasterizerPtr() override;
+  ftl::WeakPtr<sky::shell::Rasterizer> GetWeakRasterizerPtr() override;
 
   // sky::shell::Rasterizer override.
   flow::LayerTree* GetLastLayerTree() override;
@@ -44,12 +45,12 @@ class RasterizerDirect : public Rasterizer {
   mojo::Binding<rasterizer::Rasterizer> binding_;
   std::unique_ptr<flow::LayerTree> last_layer_tree_;
   PlatformView* platform_view_;
-  base::WeakPtrFactory<RasterizerDirect> weak_factory_;
+  ftl::WeakPtrFactory<RasterizerDirect> weak_factory_;
 
   // sky::services::rasterizer::Rasterizer (from rasterizer.mojom) override.
   void Draw(uint64_t layer_tree_ptr, const DrawCallback& callback) override;
 
-  DISALLOW_COPY_AND_ASSIGN(RasterizerDirect);
+  FTL_DISALLOW_COPY_AND_ASSIGN(RasterizerDirect);
 };
 
 }  // namespace shell

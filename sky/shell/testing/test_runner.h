@@ -8,8 +8,8 @@
 #include <memory>
 #include <string>
 
-#include "base/macros.h"
-#include "base/memory/weak_ptr.h"
+#include "lib/ftl/macros.h"
+#include "lib/ftl/memory/weak_ptr.h"
 #include "mojo/public/cpp/bindings/binding_set.h"
 #include "sky/services/engine/sky_engine.mojom.h"
 
@@ -35,9 +35,9 @@ class TestRunner {
 
   std::unique_ptr<PlatformView> platform_view_;
   SkyEnginePtr sky_engine_;
-  base::WeakPtrFactory<TestRunner> weak_ptr_factory_;
+  ftl::WeakPtrFactory<TestRunner> weak_ptr_factory_;
 
-  DISALLOW_COPY_AND_ASSIGN(TestRunner);
+  FTL_DISALLOW_COPY_AND_ASSIGN(TestRunner);
 };
 
 }  // namespace shell

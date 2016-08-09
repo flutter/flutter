@@ -40,7 +40,7 @@ RasterizerMojo::~RasterizerMojo() {
   Shell::Shared().PurgeRasterizers();
 }
 
-base::WeakPtr<Rasterizer> RasterizerMojo::GetWeakRasterizerPtr() {
+ftl::WeakPtr<Rasterizer> RasterizerMojo::GetWeakRasterizerPtr() {
   return weak_factory_.GetWeakPtr();
 }
 
@@ -57,14 +57,16 @@ void RasterizerMojo::Init(mojo::ApplicationConnectorPtr connector,
   scene_ = scene.Pass();
 }
 
-void RasterizerMojo::Setup(PlatformView* platform_view,
-                           base::Closure rasterizer_continuation,
-                           base::WaitableEvent* setup_completion_event) {
+void RasterizerMojo::Setup(
+    PlatformView* platform_view,
+    ftl::Closure rasterizer_continuation,
+    ftl::AutoResetWaitableEvent* setup_completion_event) {
   setup_completion_event->Signal();
-  rasterizer_continuation.Run();
+  rasterizer_continuation();
 }
 
-void RasterizerMojo::Teardown(base::WaitableEvent* teardown_completion_event) {
+void RasterizerMojo::Teardown(
+    ftl::AutoResetWaitableEvent* teardown_completion_event) {
   teardown_completion_event->Signal();
 }
 

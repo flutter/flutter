@@ -5,9 +5,8 @@
 #ifndef SKY_SHELL_PLATFORM_ANDROID_PLATFORM_VIEW_ANDROID_H_
 #define SKY_SHELL_PLATFORM_ANDROID_PLATFORM_VIEW_ANDROID_H_
 
-#include "base/macros.h"
 #include "base/android/jni_android.h"
-#include "base/synchronization/waitable_event.h"
+#include "lib/ftl/memory/weak_ptr.h"
 #include "sky/shell/platform_view.h"
 
 namespace sky {
@@ -33,7 +32,7 @@ class PlatformViewAndroid : public PlatformView {
   void SurfaceDestroyed(JNIEnv* env, jobject obj);
 
   // sky::shell::PlatformView override
-  base::WeakPtr<sky::shell::PlatformView> GetWeakViewPtr() override;
+  ftl::WeakPtr<sky::shell::PlatformView> GetWeakViewPtr() override;
 
   // sky::shell::PlatformView override
   uint64_t DefaultFramebuffer() const override;
@@ -55,9 +54,9 @@ class PlatformViewAndroid : public PlatformView {
 
  private:
   std::unique_ptr<AndroidGLContext> context_;
-  base::WeakPtrFactory<PlatformViewAndroid> weak_factory_;
+  ftl::WeakPtrFactory<PlatformViewAndroid> weak_factory_;
 
-  DISALLOW_COPY_AND_ASSIGN(PlatformViewAndroid);
+  FTL_DISALLOW_COPY_AND_ASSIGN(PlatformViewAndroid);
 };
 
 }  // namespace shell

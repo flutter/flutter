@@ -5,8 +5,8 @@
 #ifndef SKY_SHELL_GPU_MOJO_RASTERIZER_MOJO_H_
 #define SKY_SHELL_GPU_MOJO_RASTERIZER_MOJO_H_
 
-#include "base/memory/weak_ptr.h"
 #include "flow/compositor_context.h"
+#include "lib/ftl/memory/weak_ptr.h"
 #include "mojo/gpu/gl_context.h"
 #include "mojo/public/interfaces/application/application_connector.mojom.h"
 #include "mojo/services/gfx/composition/interfaces/scenes.mojom.h"
@@ -32,14 +32,15 @@ class RasterizerMojo : public Rasterizer {
 
   // sky::shell::rasterizer::Rasterizer override
   void Setup(PlatformView* platform_view,
-             base::Closure rasterizer_continuation,
-             base::WaitableEvent* setup_completion_event) override;
+             ftl::Closure rasterizer_continuation,
+             ftl::AutoResetWaitableEvent* setup_completion_event) override;
 
   // sky::shell::rasterizer::Rasterizer override
-  void Teardown(base::WaitableEvent* teardown_completion_event) override;
+  void Teardown(
+      ftl::AutoResetWaitableEvent* teardown_completion_event) override;
 
   // sky::shell::rasterizer::Rasterizer override
-  base::WeakPtr<Rasterizer> GetWeakRasterizerPtr() override;
+  ftl::WeakPtr<Rasterizer> GetWeakRasterizerPtr() override;
 
   // sky::shell::rasterizer::Rasterizer override
   flow::LayerTree* GetLastLayerTree() override;
@@ -60,11 +61,11 @@ class RasterizerMojo : public Rasterizer {
   std::unique_ptr<GLState> gl_state_;
   flow::CompositorContext compositor_context_;
   std::unique_ptr<flow::LayerTree> last_layer_tree_;
-  base::WeakPtrFactory<RasterizerMojo> weak_factory_;
+  ftl::WeakPtrFactory<RasterizerMojo> weak_factory_;
 
   void Draw(uint64_t layer_tree_ptr, const DrawCallback& callback) override;
 
-  DISALLOW_COPY_AND_ASSIGN(RasterizerMojo);
+  FTL_DISALLOW_COPY_AND_ASSIGN(RasterizerMojo);
 };
 
 }  // namespace shell

@@ -21,7 +21,7 @@ class PlatformViewGLFW : public PlatformView {
  private:
   gfx::AcceleratedWidget window_;
 
-  DISALLOW_COPY_AND_ASSIGN(PlatformViewGLFW);
+  FTL_DISALLOW_COPY_AND_ASSIGN(PlatformViewGLFW);
 };
 
 }  // namespace shell

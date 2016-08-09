@@ -7,6 +7,7 @@
 
 #include "base/files/file_path.h"
 #include "flutter/tonic/dart_library_provider.h"
+#include "lib/ftl/macros.h"
 #include "lib/tonic/parsers/packages_map.h"
 
 namespace sky {
@@ -32,7 +33,7 @@ class DartLibraryProviderFiles : public blink::DartLibraryProvider {
   base::FilePath packages_;
   tonic::PackagesMap packages_map_;
 
-  DISALLOW_COPY_AND_ASSIGN(DartLibraryProviderFiles);
+  FTL_DISALLOW_COPY_AND_ASSIGN(DartLibraryProviderFiles);
 };
 
 }  // namespace shell

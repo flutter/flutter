@@ -103,7 +103,7 @@ void DiagnosticServer::HandleSkiaPictureRequest(Dart_Handle send_port) {
 }
 
 void DiagnosticServer::SkiaPictureTask(Dart_Port port_id) {
-  std::vector<base::WeakPtr<Rasterizer>> rasterizers;
+  std::vector<ftl::WeakPtr<Rasterizer>> rasterizers;
   Shell::Shared().GetRasterizers(&rasterizers);
   if (rasterizers.size() != 1) {
     SendNull(port_id);

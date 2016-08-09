@@ -7,7 +7,7 @@
 
 #include <map>
 
-#include "base/macros.h"
+#include "lib/ftl/macros.h"
 #include "mojo/services/input_events/interfaces/input_events.mojom.h"
 #include "sky/services/pointer/pointer.mojom.h"
 
@@ -28,7 +28,7 @@ class PointerConverterMojo {
 
   std::map<int, std::pair<float, float>> pointer_positions_;
 
-  DISALLOW_COPY_AND_ASSIGN(PointerConverterMojo);
+  FTL_DISALLOW_COPY_AND_ASSIGN(PointerConverterMojo);
 };
 
 }  // namespace shell

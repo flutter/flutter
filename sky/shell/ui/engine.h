@@ -6,13 +6,13 @@
 #define SKY_SHELL_UI_ENGINE_H_
 
 #include "base/files/file_path.h"
-#include "base/macros.h"
-#include "base/memory/weak_ptr.h"
-#include "base/single_thread_task_runner.h"
 #include "flutter/assets/zip_asset_store.h"
+#include "lib/ftl/macros.h"
+#include "lib/ftl/memory/weak_ptr.h"
+#include "lib/ftl/tasks/task_runner.h"
 #include "mojo/public/cpp/application/service_provider_impl.h"
-#include "mojo/public/cpp/bindings/binding.h"
 #include "mojo/public/cpp/bindings/binding_set.h"
+#include "mojo/public/cpp/bindings/binding.h"
 #include "mojo/public/cpp/system/data_pipe.h"
 #include "mojo/public/cpp/system/handle.h"
 #include "mojo/public/interfaces/application/service_provider.mojom.h"
@@ -38,13 +38,13 @@ class Engine : public UIDelegate,
     Config();
     ~Config();
 
-    scoped_refptr<base::SingleThreadTaskRunner> gpu_task_runner;
+    ftl::RefPtr<ftl::TaskRunner> gpu_task_runner;
   };
 
   explicit Engine(const Config& config, rasterizer::RasterizerPtr rasterizer);
   ~Engine() override;
 
-  base::WeakPtr<Engine> GetWeakPtr();
+  ftl::WeakPtr<Engine> GetWeakPtr();
 
   static void Init();
 
@@ -59,8 +59,8 @@ class Engine : public UIDelegate,
  private:
   // UIDelegate implementation:
   void ConnectToEngine(mojo::InterfaceRequest<SkyEngine> request) override;
-  void OnOutputSurfaceCreated(const base::Closure& gpu_continuation) override;
-  void OnOutputSurfaceDestroyed(const base::Closure& gpu_continuation) override;
+  void OnOutputSurfaceCreated(const ftl::Closure& gpu_continuation) override;
+  void OnOutputSurfaceDestroyed(const ftl::Closure& gpu_continuation) override;
 
   // SkyEngine implementation:
   void SetServices(ServicesDataPtr services) override;
@@ -127,9 +127,9 @@ class Engine : public UIDelegate,
   bool activity_running_;
   bool have_surface_;
 
-  base::WeakPtrFactory<Engine> weak_factory_;
+  ftl::WeakPtrFactory<Engine> weak_factory_;
 
-  DISALLOW_COPY_AND_ASSIGN(Engine);
+  FTL_DISALLOW_COPY_AND_ASSIGN(Engine);
 };
 
 }  // namespace shell

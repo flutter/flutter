@@ -7,7 +7,7 @@
 
 #include <vector>
 
-#include "base/macros.h"
+#include "lib/ftl/macros.h"
 #include "mojo/public/cpp/bindings/binding_set.h"
 #include "mojo/public/cpp/bindings/strong_binding.h"
 #include "mojo/public/interfaces/application/application_connector.mojom.h"
@@ -69,7 +69,7 @@ class ViewImpl : public mojo::ui::ViewListener,
 
   PointerConverterMojo pointer_converter_;
 
-  DISALLOW_COPY_AND_ASSIGN(ViewImpl);
+  FTL_DISALLOW_COPY_AND_ASSIGN(ViewImpl);
 };
 
 }  // namespace shell

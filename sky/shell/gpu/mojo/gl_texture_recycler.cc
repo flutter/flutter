@@ -82,7 +82,7 @@ mojo::gfx::composition::ResourcePtr GLTextureRecycler::BindTextureResource(
 }
 
 void GLTextureRecycler::ReleaseTexture(GLRecycledTextureInfo texture_info,
-                                bool recyclable) {
+                                       bool recyclable) {
   DCHECK(bound_textures_);
   bound_textures_--;
   if (recyclable && recycled_textures_.size() < max_recycled_textures_) {
@@ -93,7 +93,7 @@ void GLTextureRecycler::ReleaseTexture(GLRecycledTextureInfo texture_info,
 }
 
 GLTextureRecycler::GLTextureReleaser::GLTextureReleaser(
-    const base::WeakPtr<GLTextureRecycler>& provider,
+    const ftl::WeakPtr<GLTextureRecycler>& provider,
     GLRecycledTextureInfo info)
     : provider_(provider), texture_info_(std::move(info)), binding_(this) {}
 

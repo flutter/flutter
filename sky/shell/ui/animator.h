@@ -59,7 +59,7 @@ class Animator {
 
   base::WeakPtrFactory<Animator> weak_factory_;
 
-  DISALLOW_COPY_AND_ASSIGN(Animator);
+  FTL_DISALLOW_COPY_AND_ASSIGN(Animator);
 };
 
 }  // namespace shell

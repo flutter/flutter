@@ -20,7 +20,7 @@ PlatformViewMac::PlatformViewMac(NSOpenGLView* gl_view)
 
 PlatformViewMac::~PlatformViewMac() = default;
 
-base::WeakPtr<sky::shell::PlatformView> PlatformViewMac::GetWeakViewPtr() {
+ftl::WeakPtr<sky::shell::PlatformView> PlatformViewMac::GetWeakViewPtr() {
   return weak_factory_.GetWeakPtr();
 }
 

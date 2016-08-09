@@ -5,12 +5,13 @@
 #ifndef SKY_SHELL_PLATFORM_MOJO_PLATFORM_VIEW_MOJO_H_
 #define SKY_SHELL_PLATFORM_MOJO_PLATFORM_VIEW_MOJO_H_
 
-#include "base/macros.h"
+#include <utility>
+
+#include "lib/ftl/macros.h"
+#include "lib/ftl/memory/weak_ptr.h"
 #include "mojo/public/interfaces/application/application_connector.mojom.h"
 #include "mojo/services/gfx/composition/interfaces/scenes.mojom.h"
 #include "sky/shell/platform_view.h"
-
-#include <utility>
 
 namespace sky {
 namespace shell {
@@ -25,7 +26,7 @@ class PlatformViewMojo : public PlatformView {
                       mojo::gfx::composition::ScenePtr scene);
 
   // sky::shell::PlatformView override
-  base::WeakPtr<sky::shell::PlatformView> GetWeakViewPtr() override;
+  ftl::WeakPtr<PlatformView> GetWeakViewPtr() override;
 
   // sky::shell::PlatformView override
   uint64_t DefaultFramebuffer() const override;
@@ -40,9 +41,9 @@ class PlatformViewMojo : public PlatformView {
   bool SwapBuffers() override;
 
  private:
-  base::WeakPtrFactory<PlatformViewMojo> weak_factory_;
+  ftl::WeakPtrFactory<PlatformViewMojo> weak_factory_;
 
-  DISALLOW_COPY_AND_ASSIGN(PlatformViewMojo);
+  FTL_DISALLOW_COPY_AND_ASSIGN(PlatformViewMojo);
 };
 
 }  // namespace shell

@@ -31,7 +31,7 @@ std::unique_ptr<Rasterizer> Rasterizer::Create() {
 }
 
 // sky::shell::Rasterizer override.
-base::WeakPtr<Rasterizer> RasterizerDirect::GetWeakRasterizerPtr() {
+ftl::WeakPtr<Rasterizer> RasterizerDirect::GetWeakRasterizerPtr() {
   return weak_factory_.GetWeakPtr();
 }
 
@@ -44,9 +44,10 @@ void RasterizerDirect::ConnectToRasterizer(
 }
 
 // sky::shell::Rasterizer override.
-void RasterizerDirect::Setup(PlatformView* platform_view,
-                             base::Closure continuation,
-                             base::WaitableEvent* setup_completion_event) {
+void RasterizerDirect::Setup(
+    PlatformView* platform_view,
+    ftl::Closure continuation,
+    ftl::AutoResetWaitableEvent* setup_completion_event) {
   CHECK(platform_view) << "Must be able to acquire the view.";
 
   // The context needs to be made current before the GrGL interface can be
@@ -66,14 +67,14 @@ void RasterizerDirect::Setup(PlatformView* platform_view,
     LOG(ERROR) << "WARNING: Flutter will be unable to render to the display";
   }
 
-  continuation.Run();
+  continuation();
 
   setup_completion_event->Signal();
 }
 
 // sky::shell::Rasterizer override.
 void RasterizerDirect::Teardown(
-    base::WaitableEvent* teardown_completion_event) {
+    ftl::AutoResetWaitableEvent* teardown_completion_event) {
   platform_view_ = nullptr;
   last_layer_tree_.reset();
   compositor_context_.OnGrContextDestroyed();

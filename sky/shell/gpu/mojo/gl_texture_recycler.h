@@ -8,9 +8,10 @@
 #include <deque>
 #include <memory>
 
-#include "base/callback.h"
-#include "base/macros.h"
-#include "base/memory/weak_ptr.h"
+#include "base/memory/ref_counted.h"
+#include "lib/ftl/functional/closure.h"
+#include "lib/ftl/macros.h"
+#include "lib/ftl/memory/weak_ptr.h"
 #include "mojo/public/cpp/bindings/strong_binding.h"
 #include "mojo/services/gfx/composition/interfaces/resources.mojom.h"
 
@@ -29,7 +30,7 @@ namespace shell {
 class GLTextureRecycler {
  public:
   GLTextureRecycler(scoped_refptr<mojo::GLContext> gl_context,
-             uint32_t max_recycled_textures = 3u);
+                    uint32_t max_recycled_textures = 3u);
   ~GLTextureRecycler();
 
   // Obtains a texture of the specified size.
@@ -51,7 +52,7 @@ class GLTextureRecycler {
   // migrating to image pipes.
   class GLTextureReleaser : mojo::gfx::composition::MailboxTextureCallback {
    public:
-    GLTextureReleaser(const base::WeakPtr<GLTextureRecycler>& provider,
+    GLTextureReleaser(const ftl::WeakPtr<GLTextureRecycler>& provider,
                       GLRecycledTextureInfo info);
     ~GLTextureReleaser() override;
 
@@ -61,7 +62,7 @@ class GLTextureRecycler {
     void OnMailboxTextureReleased() override;
     void Release(bool recyclable);
 
-    base::WeakPtr<GLTextureRecycler> provider_;
+    ftl::WeakPtr<GLTextureRecycler> provider_;
     GLRecycledTextureInfo texture_info_;
     mojo::StrongBinding<mojo::gfx::composition::MailboxTextureCallback>
         binding_;
@@ -75,9 +76,9 @@ class GLTextureRecycler {
   std::deque<GLRecycledTextureInfo> recycled_textures_;
   uint32_t bound_textures_ = 0u;
 
-  base::WeakPtrFactory<GLTextureRecycler> weak_factory_;
+  ftl::WeakPtrFactory<GLTextureRecycler> weak_factory_;
 
-  DISALLOW_COPY_AND_ASSIGN(GLTextureRecycler);
+  FTL_DISALLOW_COPY_AND_ASSIGN(GLTextureRecycler);
 };
 
 }  // namespace shell

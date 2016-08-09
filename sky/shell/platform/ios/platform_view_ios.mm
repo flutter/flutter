@@ -266,7 +266,7 @@ class IOSGLContext {
     return true;
   }
 
-  DISALLOW_COPY_AND_ASSIGN(IOSGLContext);
+  FTL_DISALLOW_COPY_AND_ASSIGN(IOSGLContext);
 };
 
 PlatformViewIOS::PlatformViewIOS(CAEAGLLayer* layer)
@@ -275,7 +275,7 @@ PlatformViewIOS::PlatformViewIOS(CAEAGLLayer* layer)
 
 PlatformViewIOS::~PlatformViewIOS() = default;
 
-base::WeakPtr<sky::shell::PlatformView> PlatformViewIOS::GetWeakViewPtr() {
+ftl::WeakPtr<sky::shell::PlatformView> PlatformViewIOS::GetWeakViewPtr() {
   return weak_factory_.GetWeakPtr();
 }
 

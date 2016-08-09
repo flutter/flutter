@@ -16,6 +16,10 @@
 #include "sky/shell/switches.h"
 #include "sky/shell/ui_delegate.h"
 
+static void IgnoreRequest(
+    mojo::InterfaceRequest<flutter::platform::ApplicationMessages>) {
+}
+
 static void DynamicServiceResolve(const mojo::String& service_name,
                                   mojo::ScopedMessagePipeHandle handle) {}
 
@@ -83,7 +87,7 @@ static inline pointer::PointerType EventTypeFromNSEventPhase(
                                           base::Bind(DynamicServiceResolve));
 
   mojo::ServiceProviderPtr view_service_provider;
-  new sky::shell::ViewServiceProvider(sky::shell::AppMesssagesConnector(),
+  new sky::shell::ViewServiceProvider(IgnoreRequest,
                                       mojo::GetProxy(&view_service_provider));
 
   sky::ServicesDataPtr services = sky::ServicesData::New();

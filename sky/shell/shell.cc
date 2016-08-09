@@ -19,6 +19,7 @@
 #include "base/trace_event/trace_event.h"
 #include "dart/runtime/include/dart_tools_api.h"
 #include "glue/task_runner_adaptor.h"
+#include "lib/ftl/files/unique_fd.h"
 #include "mojo/message_pump/message_pump_mojo.h"
 #include "skia/ext/event_tracer_impl.h"
 #include "sky/engine/core/script/dart_init.h"
@@ -38,11 +39,11 @@ scoped_ptr<base::MessagePump> CreateMessagePumpMojo() {
   return make_scoped_ptr(new mojo::common::MessagePumpMojo);
 }
 
-bool IsInvalid(const base::WeakPtr<Rasterizer>& rasterizer) {
+bool IsInvalid(const ftl::WeakPtr<Rasterizer>& rasterizer) {
   return !rasterizer;
 }
 
-bool IsViewInvalid(const base::WeakPtr<PlatformView>& platform_view) {
+bool IsViewInvalid(const ftl::WeakPtr<PlatformView>& platform_view) {
   return !platform_view;
 }
 
@@ -85,25 +86,20 @@ Shell::Shell() {
 
   gpu_thread_.reset(new base::Thread("gpu_thread"));
   gpu_thread_->StartWithOptions(options);
-  gpu_task_runner_ = gpu_thread_->message_loop()->task_runner();
-  gpu_ftl_task_runner_ =
-      ftl::MakeRefCounted<glue::TaskRunnerAdaptor>(gpu_task_runner_);
-  gpu_task_runner_->PostTask(
-      FROM_HERE, base::Bind(&Shell::InitGpuThread, base::Unretained(this)));
+  gpu_ftl_task_runner_ = ftl::MakeRefCounted<glue::TaskRunnerAdaptor>(
+      gpu_thread_->message_loop()->task_runner());
+  gpu_ftl_task_runner_->PostTask([this]() { InitGpuThread(); });
 
   ui_thread_.reset(new base::Thread("ui_thread"));
   ui_thread_->StartWithOptions(options);
-  ui_task_runner_ = ui_thread_->message_loop()->task_runner();
-  ui_ftl_task_runner_ =
-      ftl::MakeRefCounted<glue::TaskRunnerAdaptor>(ui_task_runner_);
-  ui_task_runner_->PostTask(
-      FROM_HERE, base::Bind(&Shell::InitUIThread, base::Unretained(this)));
+  ui_ftl_task_runner_ = ftl::MakeRefCounted<glue::TaskRunnerAdaptor>(
+      ui_thread_->message_loop()->task_runner());
+  ui_ftl_task_runner_->PostTask([this]() { InitUIThread(); });
 
   io_thread_.reset(new base::Thread("io_thread"));
   io_thread_->StartWithOptions(options);
-  io_task_runner_ = io_thread_->message_loop()->task_runner();
-  io_ftl_task_runner_ =
-      ftl::MakeRefCounted<glue::TaskRunnerAdaptor>(io_task_runner_);
+  io_ftl_task_runner_ = ftl::MakeRefCounted<glue::TaskRunnerAdaptor>(
+      io_thread_->message_loop()->task_runner());
 
   blink::SetServiceIsolateHook(ServiceIsolateHook);
   blink::SetRegisterNativeServiceProtocolExtensionHook(
@@ -115,19 +111,17 @@ Shell::~Shell() {}
 void Shell::InitStandalone(std::string icu_data_path) {
   TRACE_EVENT0("flutter", "Shell::InitStandalone");
 
-  int file_descriptor =
-      icu_data_path.size() != 0
-          ? HANDLE_EINTR(::open(icu_data_path.data(), O_RDONLY))
-          : -1;
-
-  if (file_descriptor == -1) {
+  ftl::UniqueFD icu_fd(
+      icu_data_path.empty() ? -1 : HANDLE_EINTR(::open(icu_data_path.c_str(),
+                                                       O_RDONLY)));
+  if (icu_fd.get() == -1) {
     // If the embedder did not specify a valid file, fallback to looking through
     // internal search paths.
-    CHECK(base::i18n::InitializeICU());
+    FTL_CHECK(base::i18n::InitializeICU());
   } else {
-    auto region = base::MemoryMappedFile::Region::kWholeFile;
-    CHECK(base::i18n::InitializeICUWithFileDescriptor(file_descriptor, region));
-    IGNORE_EINTR(::close(file_descriptor));
+    FTL_CHECK(base::i18n::InitializeICUWithFileDescriptor(
+        icu_fd.get(), base::MemoryMappedFile::Region::kWholeFile));
+    icu_fd.reset();
   }
 
   base::CommandLine& command_line = *base::CommandLine::ForCurrentProcess();
@@ -145,8 +139,9 @@ void Shell::InitStandalone(std::string icu_data_path) {
     if (stream >> port) {
       settings.observatory_port = port;
     } else {
-      LOG(INFO) << "Observatory port specified was malformed. Will default to "
-                << settings.observatory_port;
+      FTL_LOG(INFO)
+          << "Observatory port specified was malformed. Will default to "
+          << settings.observatory_port;
     }
   }
   settings.start_paused = command_line.HasSwitch(switches::kStartPaused);
@@ -180,13 +175,13 @@ void Shell::Init() {
   InitSkiaEventTracer();
 #endif
 
-  DCHECK(!g_shell);
+  FTL_DCHECK(!g_shell);
   g_shell = new Shell();
-  g_shell->ui_task_runner()->PostTask(FROM_HERE, base::Bind(&Engine::Init));
+  g_shell->ui_ftl_task_runner()->PostTask(Engine::Init);
 }
 
 Shell& Shell::Shared() {
-  DCHECK(g_shell);
+  FTL_DCHECK(g_shell);
   return *g_shell;
 }
 
@@ -202,61 +197,58 @@ void Shell::InitUIThread() {
   ui_thread_checker_.reset(new base::ThreadChecker());
 }
 
-void Shell::AddRasterizer(const base::WeakPtr<Rasterizer>& rasterizer) {
-  DCHECK(gpu_thread_checker_ && gpu_thread_checker_->CalledOnValidThread());
+void Shell::AddRasterizer(const ftl::WeakPtr<Rasterizer>& rasterizer) {
+  FTL_DCHECK(gpu_thread_checker_ && gpu_thread_checker_->CalledOnValidThread());
   rasterizers_.push_back(rasterizer);
 }
 
 void Shell::PurgeRasterizers() {
-  DCHECK(gpu_thread_checker_ && gpu_thread_checker_->CalledOnValidThread());
+  FTL_DCHECK(gpu_thread_checker_ && gpu_thread_checker_->CalledOnValidThread());
   rasterizers_.erase(
       std::remove_if(rasterizers_.begin(), rasterizers_.end(), IsInvalid),
       rasterizers_.end());
 }
 
-void Shell::GetRasterizers(
-    std::vector<base::WeakPtr<Rasterizer>>* rasterizers) {
-  DCHECK(gpu_thread_checker_ && gpu_thread_checker_->CalledOnValidThread());
+void Shell::GetRasterizers(std::vector<ftl::WeakPtr<Rasterizer>>* rasterizers) {
+  FTL_DCHECK(gpu_thread_checker_ && gpu_thread_checker_->CalledOnValidThread());
   *rasterizers = rasterizers_;
 }
 
-void Shell::AddPlatformView(const base::WeakPtr<PlatformView>& platform_view) {
-  DCHECK(ui_thread_checker_ && ui_thread_checker_->CalledOnValidThread());
+void Shell::AddPlatformView(const ftl::WeakPtr<PlatformView>& platform_view) {
+  FTL_DCHECK(ui_thread_checker_ && ui_thread_checker_->CalledOnValidThread());
   if (platform_view) {
     platform_views_.push_back(platform_view);
   }
 }
 
 void Shell::PurgePlatformViews() {
-  DCHECK(ui_thread_checker_ && ui_thread_checker_->CalledOnValidThread());
+  FTL_DCHECK(ui_thread_checker_ && ui_thread_checker_->CalledOnValidThread());
   platform_views_.erase(std::remove_if(platform_views_.begin(),
                                        platform_views_.end(), IsViewInvalid),
                         platform_views_.end());
 }
 
 void Shell::GetPlatformViews(
-    std::vector<base::WeakPtr<PlatformView>>* platform_views) {
-  DCHECK(ui_thread_checker_ && ui_thread_checker_->CalledOnValidThread());
+    std::vector<ftl::WeakPtr<PlatformView>>* platform_views) {
+  FTL_DCHECK(ui_thread_checker_ && ui_thread_checker_->CalledOnValidThread());
   *platform_views = platform_views_;
 }
 
 void Shell::WaitForPlatformViewIds(
     std::vector<PlatformViewInfo>* platform_view_ids) {
-  base::WaitableEvent latch(false, false);
+  ftl::AutoResetWaitableEvent latch;
 
-  ui_task_runner()->PostTask(
-      FROM_HERE,
-      base::Bind(&Shell::WaitForPlatformViewsIdsUIThread,
-                 base::Unretained(this), base::Unretained(platform_view_ids),
-                 base::Unretained(&latch)));
+  ui_ftl_task_runner()->PostTask([this, platform_view_ids, &latch]() {
+    WaitForPlatformViewsIdsUIThread(platform_view_ids, &latch);
+  });
 
   latch.Wait();
 }
 
 void Shell::WaitForPlatformViewsIdsUIThread(
     std::vector<PlatformViewInfo>* platform_view_ids,
-    base::WaitableEvent* latch) {
-  std::vector<base::WeakPtr<PlatformView>> platform_views;
+    ftl::AutoResetWaitableEvent* latch) {
+  std::vector<ftl::WeakPtr<PlatformView>> platform_views;
   GetPlatformViews(&platform_views);
   for (auto it = platform_views.begin(); it != platform_views.end(); it++) {
     PlatformView* view = it->get();
@@ -278,25 +270,20 @@ void Shell::RunInPlatformView(uintptr_t view_id,
                               const char* asset_directory,
                               bool* view_existed,
                               int64_t* dart_isolate_id) {
-  base::WaitableEvent latch(false, false);
-  DCHECK(view_id != 0);
-  DCHECK(main_script);
-  DCHECK(packages_file);
-  DCHECK(asset_directory);
-  DCHECK(view_existed);
+  ftl::AutoResetWaitableEvent latch;
+  FTL_DCHECK(view_id != 0);
+  FTL_DCHECK(main_script);
+  FTL_DCHECK(packages_file);
+  FTL_DCHECK(asset_directory);
+  FTL_DCHECK(view_existed);
 
-  ui_task_runner()->PostTask(
-      FROM_HERE,
-      base::Bind(&Shell::RunInPlatformViewUIThread,
-                 base::Unretained(this),
-                 view_id,
-                 std::string(main_script),
-                 std::string(packages_file),
-                 std::string(asset_directory),
-                 base::Unretained(view_existed),
-                 base::Unretained(dart_isolate_id),
-                 base::Unretained(&latch)));
-
+  ui_ftl_task_runner()->PostTask([this, view_id, main_script, packages_file,
+                                  asset_directory, view_existed,
+                                  dart_isolate_id, &latch]() {
+    RunInPlatformViewUIThread(view_id, main_script, packages_file,
+                              asset_directory, view_existed, dart_isolate_id,
+                              &latch);
+  });
   latch.Wait();
 }
 
@@ -306,8 +293,8 @@ void Shell::RunInPlatformViewUIThread(uintptr_t view_id,
                                       const std::string& assets_directory,
                                       bool* view_existed,
                                       int64_t* dart_isolate_id,
-                                      base::WaitableEvent* latch) {
-  DCHECK(ui_thread_checker_ && ui_thread_checker_->CalledOnValidThread());
+                                      ftl::AutoResetWaitableEvent* latch) {
+  FTL_DCHECK(ui_thread_checker_ && ui_thread_checker_->CalledOnValidThread());
 
   *view_existed = false;
 

@@ -7,13 +7,12 @@
 
 #include <memory>
 
-#include "base/macros.h"
-#include "base/memory/weak_ptr.h"
-#include "base/synchronization/waitable_event.h"
-#include "base/threading/thread_local_storage.h"
+#include "lib/ftl/macros.h"
+#include "lib/ftl/memory/weak_ptr.h"
+#include "lib/ftl/synchronization/waitable_event.h"
 #include "sky/shell/shell.h"
-#include "sky/shell/ui/engine.h"
 #include "sky/shell/ui_delegate.h"
+#include "sky/shell/ui/engine.h"
 #include "third_party/skia/include/core/SkSize.h"
 #include "third_party/skia/include/gpu/GrContext.h"
 
@@ -29,9 +28,9 @@ class PlatformView {
 
     ~Config();
 
-    base::WeakPtr<UIDelegate> ui_delegate;
+    ftl::WeakPtr<UIDelegate> ui_delegate;
     Rasterizer* rasterizer;
-    scoped_refptr<base::SingleThreadTaskRunner> ui_task_runner;
+    ftl::RefPtr<ftl::TaskRunner> ui_task_runner;
   };
 
   struct SurfaceConfig {
@@ -51,11 +50,11 @@ class PlatformView {
 
   void NotifyCreated();
 
-  void NotifyCreated(base::Closure continuation);
+  void NotifyCreated(ftl::Closure continuation);
 
   void NotifyDestroyed();
 
-  virtual base::WeakPtr<sky::shell::PlatformView> GetWeakViewPtr() = 0;
+  virtual ftl::WeakPtr<sky::shell::PlatformView> GetWeakViewPtr() = 0;
 
   virtual uint64_t DefaultFramebuffer() const = 0;
 
@@ -82,10 +81,11 @@ class PlatformView {
 
   explicit PlatformView();
 
-  void SetupResourceContextOnIOThreadPerform(base::WaitableEvent* event);
+  void SetupResourceContextOnIOThreadPerform(
+      ftl::AutoResetWaitableEvent* event);
 
  private:
-  DISALLOW_COPY_AND_ASSIGN(PlatformView);
+  FTL_DISALLOW_COPY_AND_ASSIGN(PlatformView);
 };
 
 }  // namespace shell

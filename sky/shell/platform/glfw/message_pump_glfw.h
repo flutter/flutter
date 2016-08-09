@@ -30,7 +30,7 @@ class MessagePumpGLFW : public base::MessagePump {
   bool should_quit_;
   base::TimeTicks delayed_work_time_;
 
-  DISALLOW_COPY_AND_ASSIGN(MessagePumpGLFW);
+  FTL_DISALLOW_COPY_AND_ASSIGN(MessagePumpGLFW);
 };
 
 }  // namespace shell

@@ -5,9 +5,9 @@
 #ifndef SKY_SHELL_PLATFORM_MAC_PLATFORM_VIEW_MAC_H_
 #define SKY_SHELL_PLATFORM_MAC_PLATFORM_VIEW_MAC_H_
 
-#include "base/memory/weak_ptr.h"
-#include "sky/shell/platform_view.h"
 #include "base/mac/scoped_nsobject.h"
+#include "lib/ftl/memory/weak_ptr.h"
+#include "sky/shell/platform_view.h"
 
 @class NSOpenGLView;
 @class NSOpenGLContext;
@@ -21,7 +21,7 @@ class PlatformViewMac : public PlatformView {
 
   ~PlatformViewMac() override;
 
-  base::WeakPtr<sky::shell::PlatformView> GetWeakViewPtr() override;
+  ftl::WeakPtr<PlatformView> GetWeakViewPtr() override;
 
   uint64_t DefaultFramebuffer() const override;
 
@@ -34,11 +34,11 @@ class PlatformViewMac : public PlatformView {
  private:
   base::scoped_nsobject<NSOpenGLView> opengl_view_;
   base::scoped_nsobject<NSOpenGLContext> resource_loading_context_;
-  base::WeakPtrFactory<PlatformViewMac> weak_factory_;
+  ftl::WeakPtrFactory<PlatformViewMac> weak_factory_;
 
   bool IsValid() const;
 
-  DISALLOW_COPY_AND_ASSIGN(PlatformViewMac);
+  FTL_DISALLOW_COPY_AND_ASSIGN(PlatformViewMac);
 };
 
 }  // namespace shell

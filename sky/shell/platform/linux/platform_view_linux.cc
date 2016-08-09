@@ -13,7 +13,7 @@ PlatformViewLinux::PlatformViewLinux(const Config& config,
 
 PlatformViewLinux::~PlatformViewLinux() {}
 
-base::WeakPtr<sky::shell::PlatformView> PlatformViewLinux::GetWeakViewPtr() {
+ftl::WeakPtr<PlatformView> PlatformViewLinux::GetWeakViewPtr() {
   return weak_factory_.GetWeakPtr();
 }
 

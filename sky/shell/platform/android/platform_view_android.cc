@@ -86,10 +86,9 @@ EGLResult<EGLSurface> CreatePBufferSurface(EGLDisplay display,
   return {surface != EGL_NO_SURFACE, surface};
 }
 
-EGLResult<EGLSurface> CreateContext(
-    EGLDisplay display,
-    EGLConfig config,
-    EGLContext share = EGL_NO_CONTEXT) {
+EGLResult<EGLSurface> CreateContext(EGLDisplay display,
+                                    EGLConfig config,
+                                    EGLContext share = EGL_NO_CONTEXT) {
   EGLint attributes[] = {EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE};
 
   EGLContext context = eglCreateContext(display, config, share, attributes);
@@ -156,8 +155,7 @@ void InitGlobal() {
   std::tie(success, g_resource_surface) =
       CreatePBufferSurface(g_display, resource_egl_config);
   if (!success) {
-    DLOG(INFO)
-        << "Could not create the pbuffer surface for resource loading.";
+    DLOG(INFO) << "Could not create the pbuffer surface for resource loading.";
     LogLastEGLError();
     return;
   }
@@ -199,7 +197,7 @@ class AndroidNativeWindow {
  private:
   Handle window_;
 
-  DISALLOW_COPY_AND_ASSIGN(AndroidNativeWindow);
+  FTL_DISALLOW_COPY_AND_ASSIGN(AndroidNativeWindow);
 };
 
 class AndroidGLContext {
@@ -242,8 +240,8 @@ class AndroidGLContext {
 
     // Create a context for the configuration.
 
-    std::tie(success, context_) = CreateContext(g_display, config_,
-                                                g_resource_context);
+    std::tie(success, context_) =
+        CreateContext(g_display, config_, g_resource_context);
 
     if (!success) {
       DLOG(INFO) << "Could not create the main rendering context";
@@ -343,7 +341,7 @@ class AndroidGLContext {
     return {surface != EGL_NO_SURFACE, surface};
   }
 
-  DISALLOW_COPY_AND_ASSIGN(AndroidGLContext);
+  FTL_DISALLOW_COPY_AND_ASSIGN(AndroidGLContext);
 };
 
 static jlong Attach(JNIEnv* env, jclass clazz, jint skyEngineHandle) {
@@ -402,7 +400,7 @@ void PlatformViewAndroid::SurfaceDestroyed(JNIEnv* env, jobject obj) {
   context_ = nullptr;
 }
 
-base::WeakPtr<sky::shell::PlatformView> PlatformViewAndroid::GetWeakViewPtr() {
+ftl::WeakPtr<sky::shell::PlatformView> PlatformViewAndroid::GetWeakViewPtr() {
   return weak_factory_.GetWeakPtr();
 }
 

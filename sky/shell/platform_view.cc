@@ -4,11 +4,10 @@
 
 #include "sky/shell/platform_view.h"
 
-#include "base/bind_helpers.h"
-#include "base/bind.h"
-#include "base/location.h"
-#include "base/single_thread_task_runner.h"
+#include <utility>
+
 #include "flutter/lib/ui/painting/resource_context.h"
+#include "glue/movable_wrapper.h"
 #include "sky/shell/rasterizer.h"
 #include "third_party/skia/include/gpu/gl/GrGLInterface.h"
 
@@ -25,84 +24,99 @@ PlatformView::PlatformView()
 
   // Create the engine for this platform view.
   Engine::Config engine_config;
-  engine_config.gpu_task_runner = shell.gpu_task_runner();
+  engine_config.gpu_task_runner =
+      ftl::RefPtr<ftl::TaskRunner>(shell.gpu_ftl_task_runner());
 
+  ftl::WeakPtr<Rasterizer> rasterizer_impl =
+      rasterizer_->GetWeakRasterizerPtr();
   rasterizer::RasterizerPtr rasterizer;
-  mojo::InterfaceRequest<rasterizer::Rasterizer> request =
-      mojo::GetProxy(&rasterizer);
+  auto request = glue::WrapMovable(mojo::GetProxy(&rasterizer));
 
-  shell.gpu_task_runner()->PostTask(
-      FROM_HERE,
-      base::Bind(&Rasterizer::ConnectToRasterizer,
-                 rasterizer_->GetWeakRasterizerPtr(), base::Passed(&request)));
+  shell.gpu_ftl_task_runner()->PostTask([rasterizer_impl, request]() mutable {
+    if (rasterizer_impl)
+      rasterizer_impl->ConnectToRasterizer(request.Unwrap());
+  });
 
   engine_.reset(new Engine(engine_config, rasterizer.Pass()));
 
   // Setup the platform config.
-  config_.ui_task_runner = shell.ui_task_runner();
+  config_.ui_task_runner =
+      ftl::RefPtr<ftl::TaskRunner>(shell.ui_ftl_task_runner());
   config_.ui_delegate = engine_->GetWeakPtr();
   config_.rasterizer = rasterizer_.get();
 }
 
 PlatformView::~PlatformView() {
   Shell& shell = Shell::Shared();
-  // Purge dead PlatformViews.
-  shell.ui_task_runner()->PostTask(
-      FROM_HERE,
-      base::Bind(&Shell::PurgePlatformViews, base::Unretained(&shell)));
-  shell.gpu_task_runner()->DeleteSoon(FROM_HERE, rasterizer_.release());
-  shell.ui_task_runner()->DeleteSoon(FROM_HERE, engine_.release());
+
+  shell.ui_ftl_task_runner()->PostTask(
+      []() { Shell::Shared().PurgePlatformViews(); });
+
+  Rasterizer* rasterizer = rasterizer_.release();
+  shell.gpu_ftl_task_runner()->PostTask([rasterizer]() { delete rasterizer; });
+
+  Engine* engine = engine_.release();
+  shell.ui_ftl_task_runner()->PostTask([engine]() { delete engine; });
 }
 
 void PlatformView::ConnectToEngine(mojo::InterfaceRequest<SkyEngine> request) {
+  ftl::WeakPtr<UIDelegate> ui_delegate = config_.ui_delegate;
+  auto wrapped_request = glue::WrapMovable(std::move(request));
+  config_.ui_task_runner->PostTask([ui_delegate, wrapped_request]() mutable {
+    if (ui_delegate)
+      ui_delegate->ConnectToEngine(wrapped_request.Unwrap());
+  });
+  ftl::WeakPtr<PlatformView> view = GetWeakViewPtr();
   config_.ui_task_runner->PostTask(
-      FROM_HERE, base::Bind(&UIDelegate::ConnectToEngine, config_.ui_delegate,
-                            base::Passed(&request)));
-  Shell& shell = Shell::Shared();
-  shell.ui_task_runner()->PostTask(
-      FROM_HERE, base::Bind(&Shell::AddPlatformView, base::Unretained(&shell),
-                            GetWeakViewPtr()));
+      [view]() { Shell::Shared().AddPlatformView(view); });
 }
 
 void PlatformView::NotifyCreated() {
-  PlatformView::NotifyCreated(base::Bind(&base::DoNothing));
+  PlatformView::NotifyCreated([]() {});
 }
 
-void PlatformView::NotifyCreated(base::Closure rasterizer_continuation) {
+void PlatformView::NotifyCreated(ftl::Closure rasterizer_continuation) {
   CHECK(config_.rasterizer != nullptr);
 
-  auto delegate = config_.ui_delegate;
   auto rasterizer = config_.rasterizer->GetWeakRasterizerPtr();
 
-  base::WaitableEvent latch(false, false);
+  ftl::AutoResetWaitableEvent latch;
+  auto delegate_continuation = [rasterizer, this, rasterizer_continuation,
+                                &latch]() {
+    if (rasterizer)
+      rasterizer->Setup(this, rasterizer_continuation, &latch);
+    // TODO(abarth): We should signal the latch if the rasterizer is gone.
+  };
 
-  auto delegate_continuation =
-      base::Bind(&Rasterizer::Setup,  // method
-                 rasterizer,          // target
-                 base::Unretained(this), rasterizer_continuation,
-                 base::Unretained(&latch));
-
-  config_.ui_task_runner->PostTask(
-      FROM_HERE, base::Bind(&UIDelegate::OnOutputSurfaceCreated, delegate,
-                            delegate_continuation));
+  auto delegate = config_.ui_delegate;
+  config_.ui_task_runner->PostTask([delegate, delegate_continuation]() {
+    if (delegate)
+      delegate->OnOutputSurfaceCreated(delegate_continuation);
+    // TODO(abarth): We should signal the latch if the delegate is gone.
+  });
 
   latch.Wait();
 }
 
 void PlatformView::NotifyDestroyed() {
-  CHECK(config_.rasterizer != nullptr);
+  FTL_CHECK(config_.rasterizer != nullptr);
 
   auto delegate = config_.ui_delegate;
   auto rasterizer = config_.rasterizer->GetWeakRasterizerPtr();
 
-  base::WaitableEvent latch(false, false);
+  ftl::AutoResetWaitableEvent latch;
 
-  auto delegate_continuation =
-      base::Bind(&Rasterizer::Teardown, rasterizer, base::Unretained(&latch));
+  auto delegate_continuation = [rasterizer, &latch]() {
+    if (rasterizer)
+      rasterizer->Teardown(&latch);
+    // TODO(abarth): We should signal the latch if the rasterizer is gone.
+  };
 
-  config_.ui_task_runner->PostTask(
-      FROM_HERE, base::Bind(&UIDelegate::OnOutputSurfaceDestroyed, delegate,
-                            delegate_continuation));
+  config_.ui_task_runner->PostTask([delegate, delegate_continuation]() {
+    if (delegate)
+      delegate->OnOutputSurfaceDestroyed(delegate_continuation);
+    // TODO(abarth): We should signal the latch if the delegate is gone.
+  });
 
   latch.Wait();
 }
@@ -116,17 +130,16 @@ void PlatformView::Resize(const SkISize& size) {
 }
 
 void PlatformView::SetupResourceContextOnIOThread() {
-  base::WaitableEvent latch(false, false);
+  ftl::AutoResetWaitableEvent latch;
 
-  Shell::Shared().io_task_runner()->PostTask(
-      FROM_HERE,
-      base::Bind(&PlatformView::SetupResourceContextOnIOThreadPerform,
-                 base::Unretained(this), base::Unretained(&latch)));
+  Shell::Shared().io_ftl_task_runner()->PostTask(
+      [this, &latch]() { SetupResourceContextOnIOThreadPerform(&latch); });
+
   latch.Wait();
 }
 
 void PlatformView::SetupResourceContextOnIOThreadPerform(
-    base::WaitableEvent* latch) {
+    ftl::AutoResetWaitableEvent* latch) {
   if (blink::ResourceContext::Get() != nullptr) {
     // The resource context was already setup. This could happen if platforms
     // try to setup a context multiple times, or, if there are multiple platform

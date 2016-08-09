@@ -5,13 +5,11 @@
 #ifndef SKY_SHELL_SHELL_H_
 #define SKY_SHELL_SHELL_H_
 
-#include "base/macros.h"
-#include "base/memory/ref_counted.h"
-#include "base/memory/weak_ptr.h"
-#include "base/message_loop/message_loop.h"
-#include "base/synchronization/waitable_event.h"
 #include "base/threading/thread.h"
+#include "lib/ftl/macros.h"
 #include "lib/ftl/memory/ref_ptr.h"
+#include "lib/ftl/memory/weak_ptr.h"
+#include "lib/ftl/synchronization/waitable_event.h"
 #include "lib/ftl/tasks/task_runner.h"
 #include "sky/shell/tracing_controller.h"
 
@@ -33,18 +31,6 @@ class Shell {
 
   static Shell& Shared();
 
-  base::SingleThreadTaskRunner* gpu_task_runner() const {
-    return gpu_task_runner_.get();
-  }
-
-  base::SingleThreadTaskRunner* ui_task_runner() const {
-    return ui_task_runner_.get();
-  }
-
-  base::SingleThreadTaskRunner* io_task_runner() const {
-    return io_task_runner_.get();
-  }
-
   ftl::TaskRunner* gpu_ftl_task_runner() const {
     return gpu_ftl_task_runner_.get();
   }
@@ -61,17 +47,17 @@ class Shell {
 
   // Maintain a list of rasterizers.
   // These APIs must only be accessed on the GPU thread.
-  void AddRasterizer(const base::WeakPtr<Rasterizer>& rasterizer);
+  void AddRasterizer(const ftl::WeakPtr<Rasterizer>& rasterizer);
   void PurgeRasterizers();
-  void GetRasterizers(std::vector<base::WeakPtr<Rasterizer>>* rasterizer);
+  void GetRasterizers(std::vector<ftl::WeakPtr<Rasterizer>>* rasterizer);
 
   // List of PlatformViews.
 
   // These APIs must only be accessed on UI thread.
-  void AddPlatformView(const base::WeakPtr<PlatformView>& platform_view);
+  void AddPlatformView(const ftl::WeakPtr<PlatformView>& platform_view);
   void PurgePlatformViews();
   void GetPlatformViews(
-      std::vector<base::WeakPtr<PlatformView>>* platform_views);
+      std::vector<ftl::WeakPtr<PlatformView>>* platform_views);
 
   struct PlatformViewInfo {
     uintptr_t view_id;
@@ -99,7 +85,7 @@ class Shell {
 
   void WaitForPlatformViewsIdsUIThread(
       std::vector<PlatformViewInfo>* platform_views,
-      base::WaitableEvent* latch);
+      ftl::AutoResetWaitableEvent* latch);
 
   void RunInPlatformViewUIThread(uintptr_t view_id,
                                  const std::string& main,
@@ -107,15 +93,11 @@ class Shell {
                                  const std::string& assets_directory,
                                  bool* view_existed,
                                  int64_t* dart_isolate_id,
-                                 base::WaitableEvent* latch);
+                                 ftl::AutoResetWaitableEvent* latch);
 
   std::unique_ptr<base::Thread> gpu_thread_;
   std::unique_ptr<base::Thread> ui_thread_;
   std::unique_ptr<base::Thread> io_thread_;
-
-  scoped_refptr<base::SingleThreadTaskRunner> gpu_task_runner_;
-  scoped_refptr<base::SingleThreadTaskRunner> ui_task_runner_;
-  scoped_refptr<base::SingleThreadTaskRunner> io_task_runner_;
 
   ftl::RefPtr<ftl::TaskRunner> gpu_ftl_task_runner_;
   ftl::RefPtr<ftl::TaskRunner> ui_ftl_task_runner_;
@@ -126,10 +108,10 @@ class Shell {
 
   TracingController tracing_controller_;
 
-  std::vector<base::WeakPtr<Rasterizer>> rasterizers_;
-  std::vector<base::WeakPtr<PlatformView>> platform_views_;
+  std::vector<ftl::WeakPtr<Rasterizer>> rasterizers_;
+  std::vector<ftl::WeakPtr<PlatformView>> platform_views_;
 
-  DISALLOW_COPY_AND_ASSIGN(Shell);
+  FTL_DISALLOW_COPY_AND_ASSIGN(Shell);
 };
 
 }  // namespace shell

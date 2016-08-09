@@ -6,6 +6,7 @@
 #define SKY_SHELL_TESTING_PLATFORM_VIEW_TEST_H_
 
 #include "lib/ftl/macros.h"
+#include "lib/ftl/memory/weak_ptr.h"
 #include "sky/shell/platform_view.h"
 
 namespace sky {
@@ -19,7 +20,7 @@ class PlatformViewTest : public PlatformView {
 
   ~PlatformViewTest();
 
-  base::WeakPtr<sky::shell::PlatformView> GetWeakViewPtr() override;
+  ftl::WeakPtr<sky::shell::PlatformView> GetWeakViewPtr() override;
 
   uint64_t DefaultFramebuffer() const override;
 
@@ -30,7 +31,7 @@ class PlatformViewTest : public PlatformView {
   bool SwapBuffers() override;
 
  private:
-  base::WeakPtrFactory<PlatformViewTest> weak_factory_;
+  ftl::WeakPtrFactory<PlatformViewTest> weak_factory_;
 
   FTL_DISALLOW_COPY_AND_ASSIGN(PlatformViewTest);
 };

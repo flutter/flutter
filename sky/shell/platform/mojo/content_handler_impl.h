@@ -5,7 +5,7 @@
 #ifndef SKY_SHELL_PLATFORM_MOJO_CONTENT_HANDLER_IMPL_H_
 #define SKY_SHELL_PLATFORM_MOJO_CONTENT_HANDLER_IMPL_H_
 
-#include "base/macros.h"
+#include "lib/ftl/macros.h"
 #include "mojo/public/cpp/bindings/strong_binding.h"
 #include "mojo/services/content_handler/interfaces/content_handler.mojom.h"
 
@@ -24,7 +24,7 @@ class ContentHandlerImpl : public mojo::ContentHandler {
                         mojo::URLResponsePtr response) override;
 
   mojo::StrongBinding<mojo::ContentHandler> binding_;
-  DISALLOW_COPY_AND_ASSIGN(ContentHandlerImpl);
+  FTL_DISALLOW_COPY_AND_ASSIGN(ContentHandlerImpl);
 };
 
 }  // namespace shell

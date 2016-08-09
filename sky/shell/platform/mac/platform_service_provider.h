@@ -5,7 +5,7 @@
 #ifndef SKY_SHELL_PLATFORM_MAC_PLATFORM_SERVICE_PROVIDER_H_
 #define SKY_SHELL_PLATFORM_MAC_PLATFORM_SERVICE_PROVIDER_H_
 
-#include "base/macros.h"
+#include "lib/ftl/macros.h"
 #include "base/callback.h"
 #include "mojo/public/cpp/bindings/strong_binding.h"
 #include "mojo/public/interfaces/application/service_provider.mojom.h"
@@ -30,7 +30,7 @@ class PlatformServiceProvider : public mojo::ServiceProvider {
   DynamicServiceProviderCallback dynamic_service_provider_;
   mojo::StrongBinding<mojo::ServiceProvider> binding_;
 
-  DISALLOW_COPY_AND_ASSIGN(PlatformServiceProvider);
+  FTL_DISALLOW_COPY_AND_ASSIGN(PlatformServiceProvider);
 };
 
 }  // namespace shell

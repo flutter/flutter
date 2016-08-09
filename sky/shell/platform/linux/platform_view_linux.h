@@ -12,12 +12,13 @@ namespace shell {
 
 class PlatformViewLinux : public PlatformView {
  public:
-  explicit PlatformViewLinux(const Config& config, SurfaceConfig surface_config);
+  explicit PlatformViewLinux(const Config& config,
+                             SurfaceConfig surface_config);
 
   ~PlatformViewLinux() override;
 
   // sky::shell::PlatformView override
-  base::WeakPtr<sky::shell::PlatformView> GetWeakViewPtr() override;
+  ftl::WeakPtr<PlatformView> GetWeakViewPtr() override;
 
   // sky::shell::PlatformView override
   uint64_t DefaultFramebuffer() const override;
@@ -29,9 +30,9 @@ class PlatformViewLinux : public PlatformView {
   bool SwapBuffers() override;
 
  private:
-  base::WeakPtrFactory<PlatformViewLinux> weak_factory_;
+  ftl::WeakPtrFactory<PlatformViewLinux> weak_factory_;
 
-  DISALLOW_COPY_AND_ASSIGN(PlatformViewLinux);
+  FTL_DISALLOW_COPY_AND_ASSIGN(PlatformViewLinux);
 };
 
 }  // namespace shell

@@ -62,7 +62,7 @@ class MojoApp : public mojo::ApplicationImplBase {
 
   mojo::TracingImpl tracing_;
 
-  DISALLOW_COPY_AND_ASSIGN(MojoApp);
+  FTL_DISALLOW_COPY_AND_ASSIGN(MojoApp);
 };
 
 }  // namespace shell

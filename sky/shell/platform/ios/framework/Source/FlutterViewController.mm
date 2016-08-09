@@ -216,10 +216,14 @@ static void DynamicServiceResolve(void* baton,
   new sky::shell::PlatformServiceProvider(serviceProviderProxy.Pass(),
                                           serviceResolutionCallback);
 
+  ftl::WeakPtr<sky::shell::ApplicationMessagesImpl> appplication_messages_impl
+      = _appMessageReceiver.GetWeakPtr();
   mojo::ServiceProviderPtr viewServiceProvider;
-  new sky::shell::ViewServiceProvider(
-      base::Bind(&sky::shell::ApplicationMessagesImpl::AddBinding,
-                 _appMessageReceiver.GetWeakPtr()),
+  new sky::shell::ViewServiceProvider([appplication_messages_impl](
+      mojo::InterfaceRequest<flutter::platform::ApplicationMessages> request) {
+        if (appplication_messages_impl)
+          appplication_messages_impl->AddBinding(std::move(request));
+      },
       mojo::GetProxy(&viewServiceProvider));
 
   DCHECK(!_dartServices.is_bound());

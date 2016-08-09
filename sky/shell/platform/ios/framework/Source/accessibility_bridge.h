@@ -9,7 +9,7 @@
 #include <set>
 #include <unordered_map>
 
-#include "base/macros.h"
+#include "lib/ftl/macros.h"
 #include "mojo/public/cpp/bindings/array.h"
 #include "mojo/public/cpp/bindings/strong_binding.h"
 #include "mojo/public/interfaces/application/service_provider.mojom.h"
@@ -71,7 +71,7 @@ class AccessibilityBridge final : public semantics::SemanticsListener {
 
   mojo::Binding<semantics::SemanticsListener> binding_;
 
-  DISALLOW_COPY_AND_ASSIGN(AccessibilityBridge);
+  FTL_DISALLOW_COPY_AND_ASSIGN(AccessibilityBridge);
 };
 
 }  // namespace shell

@@ -52,7 +52,7 @@ class WindowImpl : public mojo::ServiceProvider,
   mojo::BindingSet<raw_keyboard::RawKeyboardService> raw_keyboard_bindings_;
   std::vector<raw_keyboard::RawKeyboardListenerPtr> raw_keyboard_listeners_;
 
-  DISALLOW_COPY_AND_ASSIGN(WindowImpl);
+  FTL_DISALLOW_COPY_AND_ASSIGN(WindowImpl);
 };
 
 }  // namespace shell
