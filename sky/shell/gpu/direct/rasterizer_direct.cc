@@ -2,15 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sky/shell/gpu/direct/rasterizer_direct.h"
+#include "flutter/sky/shell/gpu/direct/rasterizer_direct.h"
 
-#include "glue/trace_event.h"
+#include "flutter/glue/trace_event.h"
 #include "mojo/public/cpp/system/data_pipe.h"
-#include "sky/engine/wtf/PassRefPtr.h"
-#include "sky/engine/wtf/RefPtr.h"
-#include "sky/shell/gpu/picture_serializer.h"
-#include "sky/shell/platform_view.h"
-#include "sky/shell/shell.h"
+#include "flutter/sky/engine/wtf/PassRefPtr.h"
+#include "flutter/sky/engine/wtf/RefPtr.h"
+#include "flutter/sky/shell/gpu/picture_serializer.h"
+#include "flutter/sky/shell/platform_view.h"
+#include "flutter/sky/shell/shell.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkPicture.h"
 

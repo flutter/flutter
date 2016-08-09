@@ -28,12 +28,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/engine/platform/Decimal.h"
+#include "flutter/sky/engine/platform/Decimal.h"
 
 #include <float.h>
 #include <gtest/gtest.h>
-#include "sky/engine/wtf/MathExtras.h"
-#include "sky/engine/wtf/text/CString.h"
+#include "flutter/sky/engine/wtf/MathExtras.h"
+#include "flutter/sky/engine/wtf/text/CString.h"
 
 namespace blink {
 

@@ -21,8 +21,8 @@
 #ifndef SKY_ENGINE_WTF_REFCOUNTEDLEAKCOUNTER_H_
 #define SKY_ENGINE_WTF_REFCOUNTEDLEAKCOUNTER_H_
 
-#include "sky/engine/wtf/Assertions.h"
-#include "sky/engine/wtf/WTFExport.h"
+#include "flutter/sky/engine/wtf/Assertions.h"
+#include "flutter/sky/engine/wtf/WTFExport.h"
 
 namespace WTF {
 

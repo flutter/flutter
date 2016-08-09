@@ -28,13 +28,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/engine/platform/PurgeableVector.h"
+#include "flutter/sky/engine/platform/PurgeableVector.h"
 
-#include "sky/engine/public/platform/Platform.h"
-#include "sky/engine/public/platform/WebDiscardableMemory.h"
-#include "sky/engine/wtf/Assertions.h"
-#include "sky/engine/wtf/OwnPtr.h"
-#include "sky/engine/wtf/PassOwnPtr.h"
+#include "flutter/sky/engine/public/platform/Platform.h"
+#include "flutter/sky/engine/public/platform/WebDiscardableMemory.h"
+#include "flutter/sky/engine/wtf/Assertions.h"
+#include "flutter/sky/engine/wtf/OwnPtr.h"
+#include "flutter/sky/engine/wtf/PassOwnPtr.h"
 
 #include <cstring>
 

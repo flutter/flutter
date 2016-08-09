@@ -32,7 +32,7 @@
 
 #include <stdint.h>
 
-#include "sky/engine/wtf/WTFExport.h"
+#include "flutter/sky/engine/wtf/WTFExport.h"
 
 namespace WTF {
 

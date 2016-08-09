@@ -27,10 +27,10 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/engine/core/rendering/line/LineWidth.h"
+#include "flutter/sky/engine/core/rendering/line/LineWidth.h"
 
-#include "sky/engine/core/rendering/RenderBlock.h"
-#include "sky/engine/core/rendering/RenderParagraph.h"
+#include "flutter/sky/engine/core/rendering/RenderBlock.h"
+#include "flutter/sky/engine/core/rendering/RenderParagraph.h"
 
 namespace blink {
 

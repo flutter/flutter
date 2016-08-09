@@ -25,7 +25,7 @@
 
 
 #include <gtest/gtest.h>
-#include "sky/engine/wtf/text/CString.h"
+#include "flutter/sky/engine/wtf/text/CString.h"
 
 namespace {
 

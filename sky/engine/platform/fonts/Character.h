@@ -31,12 +31,12 @@
 #ifndef SKY_ENGINE_PLATFORM_FONTS_CHARACTER_H_
 #define SKY_ENGINE_PLATFORM_FONTS_CHARACTER_H_
 
-#include "sky/engine/platform/PlatformExport.h"
-#include "sky/engine/platform/text/TextDirection.h"
-#include "sky/engine/platform/text/TextPath.h"
-#include "sky/engine/wtf/HashSet.h"
-#include "sky/engine/wtf/text/WTFString.h"
-#include "sky/engine/wtf/unicode/CharacterNames.h"
+#include "flutter/sky/engine/platform/PlatformExport.h"
+#include "flutter/sky/engine/platform/text/TextDirection.h"
+#include "flutter/sky/engine/platform/text/TextPath.h"
+#include "flutter/sky/engine/wtf/HashSet.h"
+#include "flutter/sky/engine/wtf/text/WTFString.h"
+#include "flutter/sky/engine/wtf/unicode/CharacterNames.h"
 
 namespace blink {
 

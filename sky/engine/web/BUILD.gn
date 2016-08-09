@@ -5,14 +5,14 @@
 source_set("web") {
   deps = [
     "//mojo/message_pump",
-    "//sky/engine/core",
-    "//sky/engine/platform",
+    "//flutter/sky/engine/core",
+    "//flutter/sky/engine/platform",
   ]
 
   configs += [
-    "//sky/engine:config",
-    "//sky/engine:inside_blink",
-    "//sky/engine:non_test_config",
+    "//flutter/sky/engine:config",
+    "//flutter/sky/engine:inside_blink",
+    "//flutter/sky/engine:non_test_config",
   ]
 
   sources = [

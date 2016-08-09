@@ -22,9 +22,9 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/engine/platform/geometry/FloatBoxTestHelpers.h"
+#include "flutter/sky/engine/platform/geometry/FloatBoxTestHelpers.h"
 
-#include "sky/engine/platform/geometry/FloatBox.h"
+#include "flutter/sky/engine/platform/geometry/FloatBox.h"
 const static float kTestEpsilon = 1e-6;
 
 void blink::PrintTo(const FloatBox& box, ::std::ostream* os)

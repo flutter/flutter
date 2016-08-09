@@ -28,12 +28,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/engine/platform/graphics/DrawLooperBuilder.h"
+#include "flutter/sky/engine/platform/graphics/DrawLooperBuilder.h"
 
-#include "sky/engine/platform/geometry/FloatSize.h"
-#include "sky/engine/platform/graphics/Color.h"
-#include "sky/engine/platform/graphics/skia/SkiaUtils.h"
-#include "sky/engine/wtf/RefPtr.h"
+#include "flutter/sky/engine/platform/geometry/FloatSize.h"
+#include "flutter/sky/engine/platform/graphics/Color.h"
+#include "flutter/sky/engine/platform/graphics/skia/SkiaUtils.h"
+#include "flutter/sky/engine/wtf/RefPtr.h"
 #include "third_party/skia/include/core/SkColor.h"
 #include "third_party/skia/include/core/SkColorFilter.h"
 #include "third_party/skia/include/core/SkDrawLooper.h"

@@ -26,10 +26,10 @@
 #ifndef SKY_ENGINE_PLATFORM_FONTS_FONTSELECTOR_H_
 #define SKY_ENGINE_PLATFORM_FONTS_FONTSELECTOR_H_
 
-#include "sky/engine/platform/fonts/FontCacheClient.h"
-#include "sky/engine/wtf/Forward.h"
-#include "sky/engine/wtf/PassRefPtr.h"
-#include "sky/engine/wtf/text/AtomicString.h"
+#include "flutter/sky/engine/platform/fonts/FontCacheClient.h"
+#include "flutter/sky/engine/wtf/Forward.h"
+#include "flutter/sky/engine/wtf/PassRefPtr.h"
+#include "flutter/sky/engine/wtf/text/AtomicString.h"
 
 namespace blink {
 

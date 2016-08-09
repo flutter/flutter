@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sky/shell/gpu/mojo/gl_texture_recycler.h"
+#include "flutter/sky/shell/gpu/mojo/gl_texture_recycler.h"
 
 #ifndef GL_GLEXT_PROTOTYPES
 #define GL_GLEXT_PROTOTYPES

@@ -27,12 +27,12 @@
 #define SKY_ENGINE_CORE_RENDERING_PAINTINFO_H_
 
 #include <limits>
-#include "sky/engine/platform/geometry/IntRect.h"
-#include "sky/engine/platform/geometry/LayoutRect.h"
-#include "sky/engine/platform/graphics/GraphicsContext.h"
-#include "sky/engine/platform/transforms/AffineTransform.h"
-#include "sky/engine/wtf/HashMap.h"
-#include "sky/engine/wtf/ListHashSet.h"
+#include "flutter/sky/engine/platform/geometry/IntRect.h"
+#include "flutter/sky/engine/platform/geometry/LayoutRect.h"
+#include "flutter/sky/engine/platform/graphics/GraphicsContext.h"
+#include "flutter/sky/engine/platform/transforms/AffineTransform.h"
+#include "flutter/sky/engine/wtf/HashMap.h"
+#include "flutter/sky/engine/wtf/ListHashSet.h"
 
 namespace blink {
 

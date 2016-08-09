@@ -22,10 +22,10 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/engine/wtf/text/TextPosition.h"
+#include "flutter/sky/engine/wtf/text/TextPosition.h"
 
-#include "sky/engine/wtf/PassOwnPtr.h"
-#include "sky/engine/wtf/StdLibExtras.h"
+#include "flutter/sky/engine/wtf/PassOwnPtr.h"
+#include "flutter/sky/engine/wtf/StdLibExtras.h"
 
 namespace WTF {
 

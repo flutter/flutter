@@ -12,8 +12,8 @@
 #include "flutter/lib/jni/dart_jni.h"
 #include "mojo/android/system/base_run_loop.h"
 #include "mojo/android/system/core_impl.h"
-#include "sky/shell/platform/android/flutter_main.h"
-#include "sky/shell/platform/android/platform_view_android.h"
+#include "flutter/sky/shell/platform/android/flutter_main.h"
+#include "flutter/sky/shell/platform/android/platform_view_android.h"
 
 namespace {
 

@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sky/shell/platform/glfw/window_impl.h"
+#include "flutter/sky/shell/platform/glfw/window_impl.h"
 
 #include <GLFW/glfw3.h>
 
-#include "sky/shell/platform/glfw/platform_view_glfw.h"
-#include "sky/shell/shell.h"
+#include "flutter/sky/shell/platform/glfw/platform_view_glfw.h"
+#include "flutter/sky/shell/shell.h"
 
 namespace sky {
 namespace shell {

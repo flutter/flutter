@@ -2,20 +2,20 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sky/shell/diagnostic/diagnostic_server.h"
+#include "flutter/sky/shell/diagnostic/diagnostic_server.h"
 
 #include "dart/runtime/include/dart_api.h"
 #include "dart/runtime/include/dart_native_api.h"
-#include "flow/compositor_context.h"
+#include "flutter/flow/compositor_context.h"
 #include "lib/ftl/logging.h"
 #include "lib/tonic/dart_binding_macros.h"
 #include "lib/tonic/dart_library_natives.h"
 #include "lib/tonic/logging/dart_invoke.h"
-#include "sky/engine/core/script/embedder_resources.h"
-#include "sky/shell/gpu/picture_serializer.h"
-#include "sky/shell/rasterizer.h"
-#include "sky/shell/shell.h"
-#include "sky/shell/ui/engine.h"
+#include "flutter/sky/engine/core/script/embedder_resources.h"
+#include "flutter/sky/shell/gpu/picture_serializer.h"
+#include "flutter/sky/shell/rasterizer.h"
+#include "flutter/sky/shell/shell.h"
+#include "flutter/sky/shell/ui/engine.h"
 #include "third_party/skia/include/core/SkStream.h"
 
 namespace mojo {

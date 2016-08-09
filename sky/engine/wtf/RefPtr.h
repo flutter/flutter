@@ -24,9 +24,9 @@
 #define SKY_ENGINE_WTF_REFPTR_H_
 
 #include <algorithm>
-#include "sky/engine/wtf/HashTableDeletedValueType.h"
-#include "sky/engine/wtf/PassRefPtr.h"
-#include "sky/engine/wtf/RawPtr.h"
+#include "flutter/sky/engine/wtf/HashTableDeletedValueType.h"
+#include "flutter/sky/engine/wtf/PassRefPtr.h"
+#include "flutter/sky/engine/wtf/RawPtr.h"
 
 namespace WTF {
 

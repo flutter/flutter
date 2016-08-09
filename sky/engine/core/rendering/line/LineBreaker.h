@@ -23,9 +23,9 @@
 #ifndef SKY_ENGINE_CORE_RENDERING_LINE_LINEBREAKER_H_
 #define SKY_ENGINE_CORE_RENDERING_LINE_LINEBREAKER_H_
 
-#include "sky/engine/core/rendering/InlineIterator.h"
-#include "sky/engine/core/rendering/line/LineInfo.h"
-#include "sky/engine/wtf/Vector.h"
+#include "flutter/sky/engine/core/rendering/InlineIterator.h"
+#include "flutter/sky/engine/core/rendering/line/LineInfo.h"
+#include "flutter/sky/engine/wtf/Vector.h"
 
 namespace blink {
 

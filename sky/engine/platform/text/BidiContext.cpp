@@ -19,10 +19,10 @@
  *
  */
 
-#include "sky/engine/platform/text/BidiContext.h"
+#include "flutter/sky/engine/platform/text/BidiContext.h"
 
-#include "sky/engine/wtf/StdLibExtras.h"
-#include "sky/engine/wtf/Vector.h"
+#include "flutter/sky/engine/wtf/StdLibExtras.h"
+#include "flutter/sky/engine/wtf/Vector.h"
 
 namespace blink {
 

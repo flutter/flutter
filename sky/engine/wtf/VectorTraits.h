@@ -22,9 +22,9 @@
 #define SKY_ENGINE_WTF_VECTORTRAITS_H_
 
 #include <utility>
-#include "sky/engine/wtf/OwnPtr.h"
-#include "sky/engine/wtf/RefPtr.h"
-#include "sky/engine/wtf/TypeTraits.h"
+#include "flutter/sky/engine/wtf/OwnPtr.h"
+#include "flutter/sky/engine/wtf/RefPtr.h"
+#include "flutter/sky/engine/wtf/TypeTraits.h"
 
 using std::pair;
 

@@ -32,12 +32,12 @@
  * file.
  */
 
-#include "sky/engine/wtf/dtoa.h"
+#include "flutter/sky/engine/wtf/dtoa.h"
 
-#include "sky/engine/wtf/CPU.h"
-#include "sky/engine/wtf/MathExtras.h"
-#include "sky/engine/wtf/ThreadingPrimitives.h"
-#include "sky/engine/wtf/Vector.h"
+#include "flutter/sky/engine/wtf/CPU.h"
+#include "flutter/sky/engine/wtf/MathExtras.h"
+#include "flutter/sky/engine/wtf/ThreadingPrimitives.h"
+#include "flutter/sky/engine/wtf/Vector.h"
 
 namespace WTF {
 

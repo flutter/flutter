@@ -26,10 +26,10 @@
 #ifndef SKY_ENGINE_WTF_TEXT_TEXTENCODING_H_
 #define SKY_ENGINE_WTF_TEXT_TEXTENCODING_H_
 
-#include "sky/engine/wtf/Forward.h"
-#include "sky/engine/wtf/WTFExport.h"
-#include "sky/engine/wtf/text/TextCodec.h"
-#include "sky/engine/wtf/unicode/Unicode.h"
+#include "flutter/sky/engine/wtf/Forward.h"
+#include "flutter/sky/engine/wtf/WTFExport.h"
+#include "flutter/sky/engine/wtf/text/TextCodec.h"
+#include "flutter/sky/engine/wtf/unicode/Unicode.h"
 
 namespace WTF {
 

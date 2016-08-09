@@ -31,9 +31,9 @@
 #ifndef SKY_ENGINE_PLATFORM_GEOMETRY_LAYOUTSIZE_H_
 #define SKY_ENGINE_PLATFORM_GEOMETRY_LAYOUTSIZE_H_
 
-#include "sky/engine/platform/LayoutUnit.h"
-#include "sky/engine/platform/geometry/FloatSize.h"
-#include "sky/engine/platform/geometry/IntSize.h"
+#include "flutter/sky/engine/platform/LayoutUnit.h"
+#include "flutter/sky/engine/platform/geometry/FloatSize.h"
+#include "flutter/sky/engine/platform/geometry/IntSize.h"
 
 namespace blink {
 

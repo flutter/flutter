@@ -29,11 +29,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/engine/platform/fonts/harfbuzz/HarfBuzzFace.h"
+#include "flutter/sky/engine/platform/fonts/harfbuzz/HarfBuzzFace.h"
 
-#include "sky/engine/platform/fonts/FontPlatformData.h"
-#include "sky/engine/platform/fonts/SimpleFontData.h"
-#include "sky/engine/platform/fonts/harfbuzz/HarfBuzzShaper.h"
+#include "flutter/sky/engine/platform/fonts/FontPlatformData.h"
+#include "flutter/sky/engine/platform/fonts/SimpleFontData.h"
+#include "flutter/sky/engine/platform/fonts/harfbuzz/HarfBuzzShaper.h"
 #include "third_party/skia/include/core/SkPaint.h"
 #include "third_party/skia/include/core/SkPath.h"
 #include "third_party/skia/include/core/SkPoint.h"
@@ -42,7 +42,7 @@
 #include "third_party/skia/include/private/SkFixed.h"
 
 #include "hb.h"
-#include "sky/engine/wtf/HashMap.h"
+#include "flutter/sky/engine/wtf/HashMap.h"
 
 namespace blink {
 

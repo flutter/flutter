@@ -29,11 +29,11 @@
 #ifndef SKY_ENGINE_WTF_UNICODE_COLLATOR_H_
 #define SKY_ENGINE_WTF_UNICODE_COLLATOR_H_
 
-#include "sky/engine/wtf/FastAllocBase.h"
-#include "sky/engine/wtf/Noncopyable.h"
-#include "sky/engine/wtf/PassOwnPtr.h"
-#include "sky/engine/wtf/WTFExport.h"
-#include "sky/engine/wtf/unicode/Unicode.h"
+#include "flutter/sky/engine/wtf/FastAllocBase.h"
+#include "flutter/sky/engine/wtf/Noncopyable.h"
+#include "flutter/sky/engine/wtf/PassOwnPtr.h"
+#include "flutter/sky/engine/wtf/WTFExport.h"
+#include "flutter/sky/engine/wtf/unicode/Unicode.h"
 
 struct UCollator;
 

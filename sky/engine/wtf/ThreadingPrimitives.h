@@ -31,11 +31,11 @@
 #ifndef SKY_ENGINE_WTF_THREADINGPRIMITIVES_H_
 #define SKY_ENGINE_WTF_THREADINGPRIMITIVES_H_
 
-#include "sky/engine/wtf/Assertions.h"
-#include "sky/engine/wtf/FastAllocBase.h"
-#include "sky/engine/wtf/Locker.h"
-#include "sky/engine/wtf/Noncopyable.h"
-#include "sky/engine/wtf/WTFExport.h"
+#include "flutter/sky/engine/wtf/Assertions.h"
+#include "flutter/sky/engine/wtf/FastAllocBase.h"
+#include "flutter/sky/engine/wtf/Locker.h"
+#include "flutter/sky/engine/wtf/Noncopyable.h"
+#include "flutter/sky/engine/wtf/WTFExport.h"
 
 #if USE(PTHREADS)
 #include <pthread.h>

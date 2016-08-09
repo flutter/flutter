@@ -25,10 +25,10 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/engine/platform/geometry/RoundedRect.h"
+#include "flutter/sky/engine/platform/geometry/RoundedRect.h"
 
 #include <algorithm>
-#include "sky/engine/wtf/Assertions.h"
+#include "flutter/sky/engine/wtf/Assertions.h"
 
 namespace blink {
 

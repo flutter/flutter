@@ -23,9 +23,9 @@
 #ifndef SKY_ENGINE_CORE_RENDERING_RENDERINLINE_H_
 #define SKY_ENGINE_CORE_RENDERING_RENDERINLINE_H_
 
-#include "sky/engine/core/rendering/InlineFlowBox.h"
-#include "sky/engine/core/rendering/RenderBoxModelObject.h"
-#include "sky/engine/core/rendering/RenderLineBoxList.h"
+#include "flutter/sky/engine/core/rendering/InlineFlowBox.h"
+#include "flutter/sky/engine/core/rendering/RenderBoxModelObject.h"
+#include "flutter/sky/engine/core/rendering/RenderLineBoxList.h"
 
 namespace blink {
 

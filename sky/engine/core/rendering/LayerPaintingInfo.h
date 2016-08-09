@@ -45,8 +45,8 @@
 #ifndef SKY_ENGINE_CORE_RENDERING_LAYERPAINTINGINFO_H_
 #define SKY_ENGINE_CORE_RENDERING_LAYERPAINTINGINFO_H_
 
-#include "sky/engine/core/rendering/PaintInfo.h"
-#include "sky/engine/platform/geometry/LayoutRect.h"
+#include "flutter/sky/engine/core/rendering/PaintInfo.h"
+#include "flutter/sky/engine/platform/geometry/LayoutRect.h"
 
 namespace blink {
 

@@ -31,7 +31,7 @@
 #ifndef SKY_ENGINE_CORE_RENDERING_RENDERLAYERSTACKINGNODEITERATOR_H_
 #define SKY_ENGINE_CORE_RENDERING_RENDERLAYERSTACKINGNODEITERATOR_H_
 
-#include "sky/engine/wtf/Noncopyable.h"
+#include "flutter/sky/engine/wtf/Noncopyable.h"
 
 namespace blink {
 

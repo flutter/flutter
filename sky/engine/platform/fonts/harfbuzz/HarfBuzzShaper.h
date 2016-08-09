@@ -32,14 +32,14 @@
 #define SKY_ENGINE_PLATFORM_FONTS_HARFBUZZ_HARFBUZZSHAPER_H_
 
 #include "hb.h"
-#include "sky/engine/platform/geometry/FloatBoxExtent.h"
-#include "sky/engine/platform/geometry/FloatPoint.h"
-#include "sky/engine/platform/text/TextRun.h"
-#include "sky/engine/wtf/HashSet.h"
-#include "sky/engine/wtf/OwnPtr.h"
-#include "sky/engine/wtf/PassOwnPtr.h"
-#include "sky/engine/wtf/Vector.h"
-#include "sky/engine/wtf/unicode/CharacterNames.h"
+#include "flutter/sky/engine/platform/geometry/FloatBoxExtent.h"
+#include "flutter/sky/engine/platform/geometry/FloatPoint.h"
+#include "flutter/sky/engine/platform/text/TextRun.h"
+#include "flutter/sky/engine/wtf/HashSet.h"
+#include "flutter/sky/engine/wtf/OwnPtr.h"
+#include "flutter/sky/engine/wtf/PassOwnPtr.h"
+#include "flutter/sky/engine/wtf/Vector.h"
+#include "flutter/sky/engine/wtf/unicode/CharacterNames.h"
 
 #include <unicode/uscript.h>
 

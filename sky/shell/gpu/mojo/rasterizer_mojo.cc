@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sky/shell/gpu/mojo/rasterizer_mojo.h"
+#include "flutter/sky/shell/gpu/mojo/rasterizer_mojo.h"
 
 #include <MGL/mgl_echo.h>
 
-#include "glue/trace_event.h"
+#include "flutter/glue/trace_event.h"
 #include "mojo/gpu/gl_texture.h"
 #include "mojo/skia/ganesh_texture_surface.h"
-#include "sky/shell/shell.h"
+#include "flutter/sky/shell/shell.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 
 namespace sky {

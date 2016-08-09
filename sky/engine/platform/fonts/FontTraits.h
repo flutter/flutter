@@ -27,7 +27,7 @@
 #ifndef SKY_ENGINE_PLATFORM_FONTS_FONTTRAITS_H_
 #define SKY_ENGINE_PLATFORM_FONTS_FONTTRAITS_H_
 
-#include "sky/engine/wtf/Assertions.h"
+#include "flutter/sky/engine/wtf/Assertions.h"
 
 namespace blink {
 

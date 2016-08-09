@@ -28,9 +28,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/engine/core/rendering/SubtreeLayoutScope.h"
+#include "flutter/sky/engine/core/rendering/SubtreeLayoutScope.h"
 
-#include "sky/engine/core/rendering/RenderObject.h"
+#include "flutter/sky/engine/core/rendering/RenderObject.h"
 
 namespace blink {
 

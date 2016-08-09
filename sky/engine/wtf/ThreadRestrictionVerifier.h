@@ -31,11 +31,11 @@
 #ifndef SKY_ENGINE_WTF_THREADRESTRICTIONVERIFIER_H_
 #define SKY_ENGINE_WTF_THREADRESTRICTIONVERIFIER_H_
 
-#include "sky/engine/wtf/Assertions.h"
+#include "flutter/sky/engine/wtf/Assertions.h"
 
 #if ENABLE(ASSERT)
 
-#include "sky/engine/wtf/Threading.h"
+#include "flutter/sky/engine/wtf/Threading.h"
 
 namespace WTF {
 

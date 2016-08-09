@@ -24,10 +24,10 @@
 #include <string.h> // For memset.
 #include <limits>
 #include <utility>
-#include "sky/engine/wtf/HashFunctions.h"
-#include "sky/engine/wtf/HashTableDeletedValueType.h"
-#include "sky/engine/wtf/StdLibExtras.h"
-#include "sky/engine/wtf/TypeTraits.h"
+#include "flutter/sky/engine/wtf/HashFunctions.h"
+#include "flutter/sky/engine/wtf/HashTableDeletedValueType.h"
+#include "flutter/sky/engine/wtf/StdLibExtras.h"
+#include "flutter/sky/engine/wtf/TypeTraits.h"
 
 namespace WTF {
 

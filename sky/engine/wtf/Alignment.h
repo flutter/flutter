@@ -24,7 +24,7 @@
 #include <algorithm>
 #include <cstddef>
 #include <stdint.h>
-#include "sky/engine/wtf/Compiler.h"
+#include "flutter/sky/engine/wtf/Compiler.h"
 
 namespace WTF {
 

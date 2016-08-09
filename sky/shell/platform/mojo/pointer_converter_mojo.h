@@ -9,7 +9,7 @@
 
 #include "lib/ftl/macros.h"
 #include "mojo/services/input_events/interfaces/input_events.mojom.h"
-#include "sky/services/pointer/pointer.mojom.h"
+#include "flutter/services/pointer/pointer.mojom.h"
 
 namespace sky {
 namespace shell {

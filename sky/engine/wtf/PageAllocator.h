@@ -32,9 +32,9 @@
 #define SKY_ENGINE_WTF_PAGEALLOCATOR_H_
 
 #include <stdint.h>
-#include "sky/engine/wtf/Assertions.h"
-#include "sky/engine/wtf/CPU.h"
-#include "sky/engine/wtf/WTFExport.h"
+#include "flutter/sky/engine/wtf/Assertions.h"
+#include "flutter/sky/engine/wtf/CPU.h"
+#include "flutter/sky/engine/wtf/WTFExport.h"
 
 namespace WTF {
 

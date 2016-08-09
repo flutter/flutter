@@ -28,7 +28,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/engine/wtf/text/AtomicString.h"
+#include "flutter/sky/engine/wtf/text/AtomicString.h"
 
 #include <gtest/gtest.h>
 

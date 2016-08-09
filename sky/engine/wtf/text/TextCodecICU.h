@@ -28,8 +28,8 @@
 #define SKY_ENGINE_WTF_TEXT_TEXTCODECICU_H_
 
 #include <unicode/utypes.h>
-#include "sky/engine/wtf/text/TextCodec.h"
-#include "sky/engine/wtf/text/TextEncoding.h"
+#include "flutter/sky/engine/wtf/text/TextCodec.h"
+#include "flutter/sky/engine/wtf/text/TextEncoding.h"
 
 typedef struct UConverter UConverter;
 

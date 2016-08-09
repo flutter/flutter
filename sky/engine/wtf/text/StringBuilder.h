@@ -27,9 +27,9 @@
 #ifndef SKY_ENGINE_WTF_TEXT_STRINGBUILDER_H_
 #define SKY_ENGINE_WTF_TEXT_STRINGBUILDER_H_
 
-#include "sky/engine/wtf/WTFExport.h"
-#include "sky/engine/wtf/text/AtomicString.h"
-#include "sky/engine/wtf/text/WTFString.h"
+#include "flutter/sky/engine/wtf/WTFExport.h"
+#include "flutter/sky/engine/wtf/text/AtomicString.h"
+#include "flutter/sky/engine/wtf/text/WTFString.h"
 
 namespace WTF {
 

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sky/shell/shell.h"
+#include "flutter/sky/shell/shell.h"
 
 #include <fcntl.h>
 #include <memory>
@@ -18,16 +18,16 @@
 #include "base/single_thread_task_runner.h"
 #include "base/trace_event/trace_event.h"
 #include "dart/runtime/include/dart_tools_api.h"
-#include "glue/task_runner_adaptor.h"
+#include "flutter/glue/task_runner_adaptor.h"
 #include "lib/ftl/files/unique_fd.h"
 #include "mojo/message_pump/message_pump_mojo.h"
-#include "skia/ext/event_tracer_impl.h"
-#include "sky/engine/core/script/dart_init.h"
-#include "sky/engine/public/platform/sky_settings.h"
-#include "sky/shell/diagnostic/diagnostic_server.h"
-#include "sky/shell/platform_view_service_protocol.h"
-#include "sky/shell/switches.h"
-#include "sky/shell/ui/engine.h"
+#include "flutter/skia/ext/event_tracer_impl.h"
+#include "flutter/sky/engine/core/script/dart_init.h"
+#include "flutter/sky/engine/public/platform/sky_settings.h"
+#include "flutter/sky/shell/diagnostic/diagnostic_server.h"
+#include "flutter/sky/shell/platform_view_service_protocol.h"
+#include "flutter/sky/shell/switches.h"
+#include "flutter/sky/shell/ui/engine.h"
 
 namespace sky {
 namespace shell {

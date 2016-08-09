@@ -5,9 +5,9 @@
 #ifndef SKY_ENGINE_WTF_REFVECTOR_H_
 #define SKY_ENGINE_WTF_REFVECTOR_H_
 
-#include "sky/engine/wtf/RefCounted.h"
-#include "sky/engine/wtf/RefPtr.h"
-#include "sky/engine/wtf/Vector.h"
+#include "flutter/sky/engine/wtf/RefCounted.h"
+#include "flutter/sky/engine/wtf/RefPtr.h"
+#include "flutter/sky/engine/wtf/Vector.h"
 
 namespace blink {
 

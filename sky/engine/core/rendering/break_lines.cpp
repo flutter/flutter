@@ -24,12 +24,12 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/engine/core/rendering/break_lines.h"
+#include "flutter/sky/engine/core/rendering/break_lines.h"
 
-#include "sky/engine/platform/text/TextBreakIterator.h"
-#include "sky/engine/wtf/ASCIICType.h"
-#include "sky/engine/wtf/StdLibExtras.h"
-#include "sky/engine/wtf/unicode/CharacterNames.h"
+#include "flutter/sky/engine/platform/text/TextBreakIterator.h"
+#include "flutter/sky/engine/wtf/ASCIICType.h"
+#include "flutter/sky/engine/wtf/StdLibExtras.h"
+#include "flutter/sky/engine/wtf/unicode/CharacterNames.h"
 
 namespace blink {
 

@@ -23,12 +23,12 @@
 #ifndef SKY_ENGINE_WTF_UNICODE_UNICODE_H_
 #define SKY_ENGINE_WTF_UNICODE_UNICODE_H_
 
-#include "sky/engine/wtf/Assertions.h"
+#include "flutter/sky/engine/wtf/Assertions.h"
 
 // Define platform neutral 8 bit character type (L is for Latin-1).
 typedef unsigned char LChar;
 
-#include "sky/engine/wtf/unicode/icu/UnicodeIcu.h"
+#include "flutter/sky/engine/wtf/unicode/icu/UnicodeIcu.h"
 
 COMPILE_ASSERT(sizeof(UChar) == 2, UCharIsTwoBytes);
 

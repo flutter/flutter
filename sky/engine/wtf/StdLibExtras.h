@@ -26,9 +26,9 @@
 #ifndef SKY_ENGINE_WTF_STDLIBEXTRAS_H_
 #define SKY_ENGINE_WTF_STDLIBEXTRAS_H_
 
-#include "sky/engine/wtf/Assertions.h"
-#include "sky/engine/wtf/CPU.h"
-#include "sky/engine/wtf/CheckedArithmetic.h"
+#include "flutter/sky/engine/wtf/Assertions.h"
+#include "flutter/sky/engine/wtf/CPU.h"
+#include "flutter/sky/engine/wtf/CheckedArithmetic.h"
 
 // Use this to declare and define a static local variable (static T;) so that
 //  it is leaked so that its destructors are not called at exit.

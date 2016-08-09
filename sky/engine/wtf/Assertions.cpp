@@ -31,12 +31,12 @@
 // we need to place this directive before any data or functions are defined.
 #pragma GCC diagnostic ignored "-Wmissing-format-attribute"
 
-#include "sky/engine/wtf/Assertions.h"
+#include "flutter/sky/engine/wtf/Assertions.h"
 
-#include "glue/stack_trace.h"
-#include "sky/engine/wtf/Compiler.h"
-#include "sky/engine/wtf/OwnPtr.h"
-#include "sky/engine/wtf/PassOwnPtr.h"
+#include "flutter/glue/stack_trace.h"
+#include "flutter/sky/engine/wtf/Compiler.h"
+#include "flutter/sky/engine/wtf/OwnPtr.h"
+#include "flutter/sky/engine/wtf/PassOwnPtr.h"
 
 #include <stdarg.h>
 #include <stdio.h>

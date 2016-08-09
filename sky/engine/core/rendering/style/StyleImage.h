@@ -24,12 +24,12 @@
 #ifndef SKY_ENGINE_CORE_RENDERING_STYLE_STYLEIMAGE_H_
 #define SKY_ENGINE_CORE_RENDERING_STYLE_STYLEIMAGE_H_
 
-#include "sky/engine/platform/geometry/IntSize.h"
-#include "sky/engine/platform/geometry/LayoutSize.h"
-#include "sky/engine/platform/graphics/Image.h"
-#include "sky/engine/wtf/PassRefPtr.h"
-#include "sky/engine/wtf/RefCounted.h"
-#include "sky/engine/wtf/RefPtr.h"
+#include "flutter/sky/engine/platform/geometry/IntSize.h"
+#include "flutter/sky/engine/platform/geometry/LayoutSize.h"
+#include "flutter/sky/engine/platform/graphics/Image.h"
+#include "flutter/sky/engine/wtf/PassRefPtr.h"
+#include "flutter/sky/engine/wtf/RefCounted.h"
+#include "flutter/sky/engine/wtf/RefPtr.h"
 
 namespace blink {
 

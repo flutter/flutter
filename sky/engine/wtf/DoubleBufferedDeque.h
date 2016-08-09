@@ -5,8 +5,8 @@
 #ifndef SKY_ENGINE_WTF_DOUBLEBUFFEREDDEQUE_H_
 #define SKY_ENGINE_WTF_DOUBLEBUFFEREDDEQUE_H_
 
-#include "sky/engine/wtf/Deque.h"
-#include "sky/engine/wtf/Noncopyable.h"
+#include "flutter/sky/engine/wtf/Deque.h"
+#include "flutter/sky/engine/wtf/Noncopyable.h"
 
 namespace WTF {
 

@@ -33,8 +33,8 @@
 
 #include <string.h>
 #include <unistd.h>
-#include "sky/engine/public/platform/WebCString.h"
-#include "sky/engine/public/platform/linux/WebFallbackFont.h"
+#include "flutter/sky/engine/public/platform/WebCString.h"
+#include "flutter/sky/engine/public/platform/linux/WebFallbackFont.h"
 
 namespace blink {
 

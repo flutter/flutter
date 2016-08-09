@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sky/engine/bindings/dart_mojo_internal.h"
+#include "flutter/sky/engine/bindings/dart_mojo_internal.h"
 
 #include "dart/runtime/include/dart_api.h"
 #include "lib/tonic/logging/dart_error.h"

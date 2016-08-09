@@ -179,20 +179,20 @@ component("wtf") {
   ]
 
   configs += [
-    "//sky/engine:config",
-    "//sky/engine:non_test_config",
+    "//flutter/sky/engine:config",
+    "//flutter/sky/engine:non_test_config",
   ]
 
   defines = [ "WTF_IMPLEMENTATION=1" ]
 
-  direct_dependent_configs = [ "//sky/engine:features" ]
+  direct_dependent_configs = [ "//flutter/sky/engine:features" ]
 
   public_deps = [
     "//lib/ftl",
   ]
 
   deps = [
-    "//glue",
+    "//flutter/glue",
     "//third_party/icu",
   ]
 
@@ -234,7 +234,7 @@ test("unittests") {
     "text/WTFStringTest.cpp",
   ]
 
-  configs += [ "//sky/engine:config" ]
+  configs += [ "//flutter/sky/engine:config" ]
 
   deps = [
     ":test_support",
@@ -264,8 +264,8 @@ component("test_support") {
   defines = [ "WTF_UNITTEST_HELPERS_IMPLEMENTATION=1" ]
 
   configs += [
-    "//sky/engine:config",
-    "//sky/engine:non_test_config",
+    "//flutter/sky/engine:config",
+    "//flutter/sky/engine:non_test_config",
   ]
 
   deps = [

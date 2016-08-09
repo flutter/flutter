@@ -27,8 +27,8 @@
 #ifndef SKY_ENGINE_PLATFORM_GEOMETRY_ROUNDEDRECT_H_
 #define SKY_ENGINE_PLATFORM_GEOMETRY_ROUNDEDRECT_H_
 
-#include "sky/engine/platform/geometry/FloatQuad.h"
-#include "sky/engine/platform/geometry/IntRect.h"
+#include "flutter/sky/engine/platform/geometry/FloatQuad.h"
+#include "flutter/sky/engine/platform/geometry/IntRect.h"
 
 namespace blink {
 

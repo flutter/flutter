@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sky/engine/core/script/dart_controller.h"
+#include "flutter/sky/engine/core/script/dart_controller.h"
 
 #include "dart/runtime/include/dart_tools_api.h"
 #include "flutter/tonic/dart_debugger.h"
@@ -11,7 +11,7 @@
 #include "flutter/tonic/dart_library_loader.h"
 #include "flutter/tonic/dart_snapshot_loader.h"
 #include "flutter/tonic/dart_state.h"
-#include "glue/trace_event.h"
+#include "flutter/glue/trace_event.h"
 #include "lib/tonic/dart_class_library.h"
 #include "lib/tonic/dart_message_handler.h"
 #include "lib/tonic/dart_wrappable.h"
@@ -20,15 +20,15 @@
 #include "lib/tonic/scopes/dart_api_scope.h"
 #include "lib/tonic/scopes/dart_isolate_scope.h"
 #include "mojo/public/cpp/system/data_pipe.h"
-#include "sky/engine/bindings/dart_mojo_internal.h"
-#include "sky/engine/bindings/dart_runtime_hooks.h"
-#include "sky/engine/bindings/dart_ui.h"
-#include "sky/engine/core/script/dart_init.h"
-#include "sky/engine/core/script/dart_service_isolate.h"
-#include "sky/engine/core/script/ui_dart_state.h"
-#include "sky/engine/public/platform/Platform.h"
-#include "sky/engine/public/platform/sky_settings.h"
-#include "sky/engine/wtf/MakeUnique.h"
+#include "flutter/sky/engine/bindings/dart_mojo_internal.h"
+#include "flutter/sky/engine/bindings/dart_runtime_hooks.h"
+#include "flutter/sky/engine/bindings/dart_ui.h"
+#include "flutter/sky/engine/core/script/dart_init.h"
+#include "flutter/sky/engine/core/script/dart_service_isolate.h"
+#include "flutter/sky/engine/core/script/ui_dart_state.h"
+#include "flutter/sky/engine/public/platform/Platform.h"
+#include "flutter/sky/engine/public/platform/sky_settings.h"
+#include "flutter/sky/engine/wtf/MakeUnique.h"
 
 #ifdef OS_ANDROID
 #include "flutter/lib/jni/dart_jni.h"

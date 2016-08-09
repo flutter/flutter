@@ -28,20 +28,20 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/engine/public/web/Sky.h"
+#include "flutter/sky/engine/public/web/Sky.h"
 
 #include "base/message_loop/message_loop.h"
-#include "glue/trace_event.h"
+#include "flutter/glue/trace_event.h"
 #include "lib/tonic/dart_microtask_queue.h"
 #include "mojo/message_pump/message_pump_mojo.h"
-#include "sky/engine/core/Init.h"
-#include "sky/engine/core/script/dart_init.h"
-#include "sky/engine/public/platform/Platform.h"
-#include "sky/engine/wtf/Assertions.h"
-#include "sky/engine/wtf/MainThread.h"
-#include "sky/engine/wtf/text/AtomicString.h"
-#include "sky/engine/wtf/text/TextEncoding.h"
-#include "sky/engine/wtf/WTF.h"
+#include "flutter/sky/engine/core/Init.h"
+#include "flutter/sky/engine/core/script/dart_init.h"
+#include "flutter/sky/engine/public/platform/Platform.h"
+#include "flutter/sky/engine/wtf/Assertions.h"
+#include "flutter/sky/engine/wtf/MainThread.h"
+#include "flutter/sky/engine/wtf/text/AtomicString.h"
+#include "flutter/sky/engine/wtf/text/TextEncoding.h"
+#include "flutter/sky/engine/wtf/WTF.h"
 
 namespace blink {
 

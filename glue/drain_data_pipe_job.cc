@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "glue/drain_data_pipe_job.h"
+#include "flutter/glue/drain_data_pipe_job.h"
 
 #include <utility>
 

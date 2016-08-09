@@ -7,7 +7,7 @@
 
 #include <memory>
 
-#include "sky/shell/platform_view.h"
+#include "flutter/sky/shell/platform_view.h"
 #include "dart/runtime/include/dart_tools_api.h"
 
 namespace sky {

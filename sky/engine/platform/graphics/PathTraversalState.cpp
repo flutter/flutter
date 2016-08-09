@@ -17,10 +17,10 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#include "sky/engine/platform/graphics/PathTraversalState.h"
+#include "flutter/sky/engine/platform/graphics/PathTraversalState.h"
 
-#include "sky/engine/wtf/MathExtras.h"
-#include "sky/engine/wtf/Vector.h"
+#include "flutter/sky/engine/wtf/MathExtras.h"
+#include "flutter/sky/engine/wtf/Vector.h"
 
 namespace blink {
 

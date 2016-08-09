@@ -11,7 +11,7 @@
 #include "lib/ftl/memory/weak_ptr.h"
 #include "lib/ftl/synchronization/waitable_event.h"
 #include "lib/ftl/tasks/task_runner.h"
-#include "sky/shell/tracing_controller.h"
+#include "flutter/sky/shell/tracing_controller.h"
 
 namespace sky {
 namespace shell {

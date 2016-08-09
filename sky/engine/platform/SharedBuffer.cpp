@@ -24,16 +24,16 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/engine/platform/SharedBuffer.h"
+#include "flutter/sky/engine/platform/SharedBuffer.h"
 
-#include "sky/engine/public/platform/Platform.h"
-#include "sky/engine/wtf/unicode/UTF8.h"
-#include "sky/engine/wtf/unicode/Unicode.h"
+#include "flutter/sky/engine/public/platform/Platform.h"
+#include "flutter/sky/engine/wtf/unicode/UTF8.h"
+#include "flutter/sky/engine/wtf/unicode/Unicode.h"
 
 #undef SHARED_BUFFER_STATS
 
 #ifdef SHARED_BUFFER_STATS
-#include "sky/engine/wtf/DataLog.h"
+#include "flutter/sky/engine/wtf/DataLog.h"
 #endif
 
 namespace blink {

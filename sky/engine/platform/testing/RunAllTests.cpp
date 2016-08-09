@@ -31,10 +31,10 @@
 
 #include <string.h>
 #include "base/test/test_suite.h"
-#include "sky/engine/platform/Partitions.h"
-#include "sky/engine/platform/TestingPlatformSupport.h"
-#include "sky/engine/wtf/MainThread.h"
-#include "sky/engine/wtf/WTF.h"
+#include "flutter/sky/engine/platform/Partitions.h"
+#include "flutter/sky/engine/platform/TestingPlatformSupport.h"
+#include "flutter/sky/engine/wtf/MainThread.h"
+#include "flutter/sky/engine/wtf/WTF.h"
 
 int main(int argc, char** argv)
 {

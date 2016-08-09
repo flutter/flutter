@@ -31,7 +31,7 @@
 #include <string.h>
 
 #include "lib/ftl/macros.h"
-#include "sky/engine/wtf/Assertions.h"
+#include "flutter/sky/engine/wtf/Assertions.h"
 
 #define UNIMPLEMENTED ASSERT_NOT_REACHED
 #define UNREACHABLE ASSERT_NOT_REACHED

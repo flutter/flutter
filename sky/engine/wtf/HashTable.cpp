@@ -17,8 +17,8 @@
     Boston, MA 02110-1301, USA.
 */
 
-#include "sky/engine/wtf/DataLog.h"
-#include "sky/engine/wtf/HashTable.h"
+#include "flutter/sky/engine/wtf/DataLog.h"
+#include "flutter/sky/engine/wtf/HashTable.h"
 
 namespace WTF {
 

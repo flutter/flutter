@@ -26,15 +26,15 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/engine/wtf/unicode/Collator.h"
+#include "flutter/sky/engine/wtf/unicode/Collator.h"
 
 #include <stdlib.h>
 #include <string.h>
 #include <unicode/ucol.h>
-#include "sky/engine/wtf/Assertions.h"
-#include "sky/engine/wtf/StringExtras.h"
-#include "sky/engine/wtf/Threading.h"
-#include "sky/engine/wtf/ThreadingPrimitives.h"
+#include "flutter/sky/engine/wtf/Assertions.h"
+#include "flutter/sky/engine/wtf/StringExtras.h"
+#include "flutter/sky/engine/wtf/Threading.h"
+#include "flutter/sky/engine/wtf/ThreadingPrimitives.h"
 
 namespace WTF {
 

@@ -25,9 +25,9 @@
 #ifndef SKY_ENGINE_CORE_RENDERING_STYLE_BORDERDATA_H_
 #define SKY_ENGINE_CORE_RENDERING_STYLE_BORDERDATA_H_
 
-#include "sky/engine/core/rendering/style/BorderValue.h"
-#include "sky/engine/platform/LengthSize.h"
-#include "sky/engine/platform/geometry/IntRect.h"
+#include "flutter/sky/engine/core/rendering/style/BorderValue.h"
+#include "flutter/sky/engine/platform/LengthSize.h"
+#include "flutter/sky/engine/platform/geometry/IntRect.h"
 
 namespace blink {
 

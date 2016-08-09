@@ -23,12 +23,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/engine/wtf/text/TextCodecUTF8.h"
+#include "flutter/sky/engine/wtf/text/TextCodecUTF8.h"
 
-#include "sky/engine/wtf/text/CString.h"
-#include "sky/engine/wtf/text/StringBuffer.h"
-#include "sky/engine/wtf/text/TextCodecASCIIFastPath.h"
-#include "sky/engine/wtf/unicode/CharacterNames.h"
+#include "flutter/sky/engine/wtf/text/CString.h"
+#include "flutter/sky/engine/wtf/text/StringBuffer.h"
+#include "flutter/sky/engine/wtf/text/TextCodecASCIIFastPath.h"
+#include "flutter/sky/engine/wtf/unicode/CharacterNames.h"
 
 using namespace WTF;
 using namespace WTF::Unicode;

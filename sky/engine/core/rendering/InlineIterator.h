@@ -23,12 +23,12 @@
 #ifndef SKY_ENGINE_CORE_RENDERING_INLINEITERATOR_H_
 #define SKY_ENGINE_CORE_RENDERING_INLINEITERATOR_H_
 
-#include "sky/engine/core/rendering/BidiRun.h"
-#include "sky/engine/core/rendering/RenderInline.h"
-#include "sky/engine/core/rendering/RenderParagraph.h"
-#include "sky/engine/core/rendering/RenderText.h"
-#include "sky/engine/core/rendering/line/TrailingObjects.h"
-#include "sky/engine/wtf/StdLibExtras.h"
+#include "flutter/sky/engine/core/rendering/BidiRun.h"
+#include "flutter/sky/engine/core/rendering/RenderInline.h"
+#include "flutter/sky/engine/core/rendering/RenderParagraph.h"
+#include "flutter/sky/engine/core/rendering/RenderText.h"
+#include "flutter/sky/engine/core/rendering/line/TrailingObjects.h"
+#include "flutter/sky/engine/wtf/StdLibExtras.h"
 
 namespace blink {
 

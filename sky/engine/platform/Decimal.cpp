@@ -28,11 +28,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/engine/platform/Decimal.h"
+#include "flutter/sky/engine/platform/Decimal.h"
 
-#include "sky/engine/wtf/MathExtras.h"
-#include "sky/engine/wtf/Noncopyable.h"
-#include "sky/engine/wtf/text/StringBuilder.h"
+#include "flutter/sky/engine/wtf/MathExtras.h"
+#include "flutter/sky/engine/wtf/Noncopyable.h"
+#include "flutter/sky/engine/wtf/text/StringBuilder.h"
 
 #include <float.h>
 #include <algorithm>

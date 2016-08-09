@@ -31,8 +31,8 @@
 #ifndef SKY_ENGINE_PLATFORM_TEXT_QUOTEDPRINTABLE_H_
 #define SKY_ENGINE_PLATFORM_TEXT_QUOTEDPRINTABLE_H_
 
-#include "sky/engine/platform/PlatformExport.h"
-#include "sky/engine/wtf/Vector.h"
+#include "flutter/sky/engine/platform/PlatformExport.h"
+#include "flutter/sky/engine/wtf/Vector.h"
 
 namespace blink {
 

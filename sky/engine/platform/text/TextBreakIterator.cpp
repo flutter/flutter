@@ -19,7 +19,7 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#include "sky/engine/platform/text/TextBreakIterator.h"
+#include "flutter/sky/engine/platform/text/TextBreakIterator.h"
 
 namespace blink {
 

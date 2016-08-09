@@ -34,8 +34,8 @@
 // Deque doesn't actually use Vector.
 
 #include <iterator>
-#include "sky/engine/wtf/PassTraits.h"
-#include "sky/engine/wtf/Vector.h"
+#include "flutter/sky/engine/wtf/PassTraits.h"
+#include "flutter/sky/engine/wtf/Vector.h"
 
 namespace WTF {
     template<typename T, size_t inlineCapacity, typename Allocator> class DequeIteratorBase;

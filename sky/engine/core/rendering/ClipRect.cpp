@@ -23,9 +23,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/engine/core/rendering/ClipRect.h"
+#include "flutter/sky/engine/core/rendering/ClipRect.h"
 
-#include "sky/engine/core/rendering/HitTestLocation.h"
+#include "flutter/sky/engine/core/rendering/HitTestLocation.h"
 
 namespace blink {
 

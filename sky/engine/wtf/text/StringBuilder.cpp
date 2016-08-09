@@ -24,11 +24,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/engine/wtf/text/StringBuilder.h"
+#include "flutter/sky/engine/wtf/text/StringBuilder.h"
 
-#include "sky/engine/wtf/dtoa.h"
-#include "sky/engine/wtf/text/IntegerToStringConversion.h"
-#include "sky/engine/wtf/text/WTFString.h"
+#include "flutter/sky/engine/wtf/dtoa.h"
+#include "flutter/sky/engine/wtf/text/IntegerToStringConversion.h"
+#include "flutter/sky/engine/wtf/text/WTFString.h"
 
 namespace WTF {
 

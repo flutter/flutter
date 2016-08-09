@@ -28,14 +28,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/engine/wtf/PartitionAlloc.h"
+#include "flutter/sky/engine/wtf/PartitionAlloc.h"
 
 #include <gtest/gtest.h>
 #include <stdlib.h>
 #include <string.h>
-#include "sky/engine/wtf/BitwiseOperations.h"
-#include "sky/engine/wtf/OwnPtr.h"
-#include "sky/engine/wtf/PassOwnPtr.h"
+#include "flutter/sky/engine/wtf/BitwiseOperations.h"
+#include "flutter/sky/engine/wtf/OwnPtr.h"
+#include "flutter/sky/engine/wtf/PassOwnPtr.h"
 
 #if OS(POSIX)
 #include <sys/mman.h>

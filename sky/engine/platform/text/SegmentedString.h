@@ -20,11 +20,11 @@
 #ifndef SKY_ENGINE_PLATFORM_TEXT_SEGMENTEDSTRING_H_
 #define SKY_ENGINE_PLATFORM_TEXT_SEGMENTEDSTRING_H_
 
-#include "sky/engine/platform/PlatformExport.h"
-#include "sky/engine/wtf/Deque.h"
-#include "sky/engine/wtf/text/StringBuilder.h"
-#include "sky/engine/wtf/text/TextPosition.h"
-#include "sky/engine/wtf/text/WTFString.h"
+#include "flutter/sky/engine/platform/PlatformExport.h"
+#include "flutter/sky/engine/wtf/Deque.h"
+#include "flutter/sky/engine/wtf/text/StringBuilder.h"
+#include "flutter/sky/engine/wtf/text/TextPosition.h"
+#include "flutter/sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
 

@@ -5,7 +5,7 @@
 #ifndef SKY_ENGINE_CORE_RENDERING_STYLE_STYLEDIFFERENCE_H_
 #define SKY_ENGINE_CORE_RENDERING_STYLE_STYLEDIFFERENCE_H_
 
-#include "sky/engine/wtf/Assertions.h"
+#include "flutter/sky/engine/wtf/Assertions.h"
 
 namespace blink {
 

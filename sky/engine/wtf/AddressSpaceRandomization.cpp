@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sky/engine/wtf/AddressSpaceRandomization.h"
+#include "flutter/sky/engine/wtf/AddressSpaceRandomization.h"
 
-#include "sky/engine/wtf/PageAllocator.h"
-#include "sky/engine/wtf/SpinLock.h"
+#include "flutter/sky/engine/wtf/PageAllocator.h"
+#include "flutter/sky/engine/wtf/SpinLock.h"
 
 namespace WTF {
 

@@ -96,12 +96,12 @@
 // - Better checking for wild pointers in free().
 // - Better freelist masking function to guarantee fault on 32-bit.
 
-#include "sky/engine/wtf/Assertions.h"
-#include "sky/engine/wtf/BitwiseOperations.h"
-#include "sky/engine/wtf/ByteSwap.h"
-#include "sky/engine/wtf/CPU.h"
-#include "sky/engine/wtf/PageAllocator.h"
-#include "sky/engine/wtf/SpinLock.h"
+#include "flutter/sky/engine/wtf/Assertions.h"
+#include "flutter/sky/engine/wtf/BitwiseOperations.h"
+#include "flutter/sky/engine/wtf/ByteSwap.h"
+#include "flutter/sky/engine/wtf/CPU.h"
+#include "flutter/sky/engine/wtf/PageAllocator.h"
+#include "flutter/sky/engine/wtf/SpinLock.h"
 
 #include <limits.h>
 

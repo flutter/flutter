@@ -5,8 +5,8 @@
 #ifndef SKY_ENGINE_CORE_RENDERING_STYLE_DATAEQUIVALENCY_H_
 #define SKY_ENGINE_CORE_RENDERING_STYLE_DATAEQUIVALENCY_H_
 
-#include "sky/engine/wtf/OwnPtr.h"
-#include "sky/engine/wtf/RefPtr.h"
+#include "flutter/sky/engine/wtf/OwnPtr.h"
+#include "flutter/sky/engine/wtf/RefPtr.h"
 
 namespace blink {
 

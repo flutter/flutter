@@ -5,7 +5,7 @@
 #ifndef SKY_SHELL_PLATFORM_MAC_PLATFORM_MAC_H_
 #define SKY_SHELL_PLATFORM_MAC_PLATFORM_MAC_H_
 
-#include "sky/services/engine/sky_engine.mojom.h"
+#include "flutter/services/engine/sky_engine.mojom.h"
 
 namespace sky {
 namespace shell {

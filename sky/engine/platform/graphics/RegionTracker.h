@@ -31,8 +31,8 @@
 #ifndef SKY_ENGINE_PLATFORM_GRAPHICS_REGIONTRACKER_H_
 #define SKY_ENGINE_PLATFORM_GRAPHICS_REGIONTRACKER_H_
 
-#include "sky/engine/platform/PlatformExport.h"
-#include "sky/engine/platform/geometry/IntRect.h"
+#include "flutter/sky/engine/platform/PlatformExport.h"
+#include "flutter/sky/engine/platform/geometry/IntRect.h"
 #include "third_party/skia/include/core/SkBitmap.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkPaint.h"

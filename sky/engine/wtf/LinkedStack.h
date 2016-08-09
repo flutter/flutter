@@ -31,8 +31,8 @@
 #ifndef SKY_ENGINE_WTF_LINKEDSTACK_H_
 #define SKY_ENGINE_WTF_LINKEDSTACK_H_
 
-#include "sky/engine/wtf/FastAllocBase.h"
-#include "sky/engine/wtf/OwnPtr.h"
+#include "flutter/sky/engine/wtf/FastAllocBase.h"
+#include "flutter/sky/engine/wtf/OwnPtr.h"
 
 namespace WTF {
 

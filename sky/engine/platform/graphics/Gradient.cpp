@@ -25,11 +25,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/engine/platform/graphics/Gradient.h"
+#include "flutter/sky/engine/platform/graphics/Gradient.h"
 
-#include "sky/engine/platform/geometry/FloatRect.h"
-#include "sky/engine/platform/graphics/GraphicsContext.h"
-#include "sky/engine/platform/graphics/skia/SkiaUtils.h"
+#include "flutter/sky/engine/platform/geometry/FloatRect.h"
+#include "flutter/sky/engine/platform/graphics/GraphicsContext.h"
+#include "flutter/sky/engine/platform/graphics/skia/SkiaUtils.h"
 #include "third_party/skia/include/core/SkColor.h"
 #include "third_party/skia/include/core/SkShader.h"
 #include "third_party/skia/include/effects/SkGradientShader.h"

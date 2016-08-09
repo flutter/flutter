@@ -29,14 +29,14 @@
  */
 
 
-#include "sky/engine/wtf/text/TextCodecUTF8.h"
+#include "flutter/sky/engine/wtf/text/TextCodecUTF8.h"
 
 #include <gtest/gtest.h>
-#include "sky/engine/wtf/OwnPtr.h"
-#include "sky/engine/wtf/text/TextCodec.h"
-#include "sky/engine/wtf/text/TextEncoding.h"
-#include "sky/engine/wtf/text/TextEncodingRegistry.h"
-#include "sky/engine/wtf/text/WTFString.h"
+#include "flutter/sky/engine/wtf/OwnPtr.h"
+#include "flutter/sky/engine/wtf/text/TextCodec.h"
+#include "flutter/sky/engine/wtf/text/TextEncoding.h"
+#include "flutter/sky/engine/wtf/text/TextEncodingRegistry.h"
+#include "flutter/sky/engine/wtf/text/WTFString.h"
 
 namespace WTF {
 

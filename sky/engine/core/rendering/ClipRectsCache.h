@@ -5,7 +5,7 @@
 #ifndef SKY_ENGINE_CORE_RENDERING_CLIPRECTSCACHE_H_
 #define SKY_ENGINE_CORE_RENDERING_CLIPRECTSCACHE_H_
 
-#include "sky/engine/core/rendering/ClipRects.h"
+#include "flutter/sky/engine/core/rendering/ClipRects.h"
 
 namespace blink {
 

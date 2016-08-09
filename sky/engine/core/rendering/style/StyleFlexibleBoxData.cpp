@@ -23,9 +23,9 @@
  *
  */
 
-#include "sky/engine/core/rendering/style/StyleFlexibleBoxData.h"
+#include "flutter/sky/engine/core/rendering/style/StyleFlexibleBoxData.h"
 
-#include "sky/engine/core/rendering/style/RenderStyle.h"
+#include "flutter/sky/engine/core/rendering/style/RenderStyle.h"
 
 namespace blink {
 

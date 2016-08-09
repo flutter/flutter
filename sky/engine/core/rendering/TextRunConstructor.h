@@ -36,10 +36,10 @@
 #ifndef SKY_ENGINE_CORE_RENDERING_TEXTRUNCONSTRUCTOR_H_
 #define SKY_ENGINE_CORE_RENDERING_TEXTRUNCONSTRUCTOR_H_
 
-#include "sky/engine/platform/text/TextDirection.h"
-#include "sky/engine/platform/text/TextRun.h"
-#include "sky/engine/wtf/text/WTFString.h"
-#include "sky/engine/wtf/unicode/Unicode.h"
+#include "flutter/sky/engine/platform/text/TextDirection.h"
+#include "flutter/sky/engine/platform/text/TextRun.h"
+#include "flutter/sky/engine/wtf/text/WTFString.h"
+#include "flutter/sky/engine/wtf/unicode/Unicode.h"
 
 namespace blink {
 

@@ -31,7 +31,7 @@
 #ifndef SKY_ENGINE_PLATFORM_HEAP_HANDLE_H_
 #define SKY_ENGINE_PLATFORM_HEAP_HANDLE_H_
 
-#include "sky/engine/wtf/StdLibExtras.h"
+#include "flutter/sky/engine/wtf/StdLibExtras.h"
 
 //
 // STACK_ALLOCATED(): Use if the object is only stack allocated.

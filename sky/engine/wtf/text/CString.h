@@ -27,9 +27,9 @@
 #define SKY_ENGINE_WTF_TEXT_CSTRING_H_
 
 #include <string>
-#include "sky/engine/wtf/RefCounted.h"
-#include "sky/engine/wtf/RefPtr.h"
-#include "sky/engine/wtf/WTFExport.h"
+#include "flutter/sky/engine/wtf/RefCounted.h"
+#include "flutter/sky/engine/wtf/RefPtr.h"
+#include "flutter/sky/engine/wtf/WTFExport.h"
 
 namespace WTF {
 

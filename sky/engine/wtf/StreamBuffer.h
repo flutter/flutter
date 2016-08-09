@@ -31,8 +31,8 @@
 #ifndef SKY_ENGINE_WTF_STREAMBUFFER_H_
 #define SKY_ENGINE_WTF_STREAMBUFFER_H_
 
-#include "sky/engine/wtf/Deque.h"
-#include "sky/engine/wtf/PassOwnPtr.h"
+#include "flutter/sky/engine/wtf/Deque.h"
+#include "flutter/sky/engine/wtf/PassOwnPtr.h"
 
 namespace WTF {
 

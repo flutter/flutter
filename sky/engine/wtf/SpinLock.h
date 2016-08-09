@@ -36,7 +36,7 @@
 // the standard CPU primitive of atomic increment and decrement of an int at
 // a given memory address.
 
-#include "sky/engine/wtf/Atomics.h"
+#include "flutter/sky/engine/wtf/Atomics.h"
 
 namespace WTF {
 

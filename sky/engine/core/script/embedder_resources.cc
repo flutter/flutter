@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sky/engine/core/script/embedder_resources.h"
+#include "flutter/sky/engine/core/script/embedder_resources.h"
 
 #include <string.h>
 

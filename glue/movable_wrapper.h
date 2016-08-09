@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef GLUE_MOVABLE_WRAPPER_H_
-#define GLUE_MOVABLE_WRAPPER_H_
+#ifndef FLUTTER_GLU_MOVABLE_WRAPPER_H_
+#define FLUTTER_GLU_MOVABLE_WRAPPER_H_
 
 #include <utility>
 
@@ -34,4 +34,4 @@ MovableWrapper<T> WrapMovable(T object) {
 
 }  // namespace glue
 
-#endif  // GLUE_MOVABLE_WRAPPER_H_
+#endif  // FLUTTER_GLU_MOVABLE_WRAPPER_H_

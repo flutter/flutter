@@ -11,7 +11,7 @@
 #include "lib/tonic/logging/dart_error.h"
 #include "lib/tonic/dart_library_natives.h"
 #include "lib/ftl/logging.h"
-#include "sky/engine/core/script/embedder_resources.h"
+#include "flutter/sky/engine/core/script/embedder_resources.h"
 
 #define RETURN_ERROR_HANDLE(handle) \
   if (Dart_IsError(handle)) {       \

@@ -5,14 +5,14 @@
 #ifndef SKY_SHELL_GPU_MOJO_RASTERIZER_MOJO_H_
 #define SKY_SHELL_GPU_MOJO_RASTERIZER_MOJO_H_
 
-#include "flow/compositor_context.h"
+#include "flutter/flow/compositor_context.h"
 #include "lib/ftl/memory/weak_ptr.h"
 #include "mojo/gpu/gl_context.h"
 #include "mojo/public/interfaces/application/application_connector.mojom.h"
 #include "mojo/services/gfx/composition/interfaces/scenes.mojom.h"
 #include "mojo/skia/ganesh_context.h"
-#include "sky/shell/gpu/mojo/gl_texture_recycler.h"
-#include "sky/shell/rasterizer.h"
+#include "flutter/sky/shell/gpu/mojo/gl_texture_recycler.h"
+#include "flutter/sky/shell/rasterizer.h"
 
 namespace sky {
 namespace shell {

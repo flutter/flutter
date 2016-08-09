@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef GLUE_DRAIN_DATA_PIPE_JOB_H_
-#define GLUE_DRAIN_DATA_PIPE_JOB_H_
+#ifndef FLUTTER_GLU_DRAIN_DATA_PIPE_JOB_H_
+#define FLUTTER_GLU_DRAIN_DATA_PIPE_JOB_H_
 
 #include <functional>
 #include <memory>
@@ -32,4 +32,4 @@ class DrainDataPipeJob {
 
 }  // namespace glue
 
-#endif  // GLUE_DRAIN_DATA_PIPE_JOB_H_
+#endif  // FLUTTER_GLU_DRAIN_DATA_PIPE_JOB_H_

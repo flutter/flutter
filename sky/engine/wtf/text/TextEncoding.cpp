@@ -25,14 +25,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/engine/wtf/text/TextEncoding.h"
+#include "flutter/sky/engine/wtf/text/TextEncoding.h"
 
 #include <unicode/unorm.h>
-#include "sky/engine/wtf/OwnPtr.h"
-#include "sky/engine/wtf/StdLibExtras.h"
-#include "sky/engine/wtf/text/CString.h"
-#include "sky/engine/wtf/text/TextEncodingRegistry.h"
-#include "sky/engine/wtf/text/WTFString.h"
+#include "flutter/sky/engine/wtf/OwnPtr.h"
+#include "flutter/sky/engine/wtf/StdLibExtras.h"
+#include "flutter/sky/engine/wtf/text/CString.h"
+#include "flutter/sky/engine/wtf/text/TextEncodingRegistry.h"
+#include "flutter/sky/engine/wtf/text/WTFString.h"
 
 namespace WTF {
 

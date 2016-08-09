@@ -7,12 +7,12 @@
 
 #include <memory>
 
-#include "flow/layers/layer_tree.h"
+#include "flutter/flow/layers/layer_tree.h"
 #include "lib/ftl/memory/weak_ptr.h"
 #include "lib/ftl/synchronization/waitable_event.h"
 #include "lib/ftl/functional/closure.h"
 #include "mojo/public/cpp/bindings/binding.h"
-#include "sky/services/rasterizer/rasterizer.mojom.h"
+#include "flutter/services/rasterizer/rasterizer.mojom.h"
 
 namespace sky {
 namespace shell {

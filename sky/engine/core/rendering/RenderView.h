@@ -22,8 +22,8 @@
 #ifndef SKY_ENGINE_CORE_RENDERING_RENDERVIEW_H_
 #define SKY_ENGINE_CORE_RENDERING_RENDERVIEW_H_
 
-#include "sky/engine/core/rendering/RenderFlexibleBox.h"
-#include "sky/engine/wtf/OwnPtr.h"
+#include "flutter/sky/engine/core/rendering/RenderFlexibleBox.h"
+#include "flutter/sky/engine/wtf/OwnPtr.h"
 
 namespace blink {
 

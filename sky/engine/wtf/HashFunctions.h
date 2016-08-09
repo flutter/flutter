@@ -22,9 +22,9 @@
 #define SKY_ENGINE_WTF_HASHFUNCTIONS_H_
 
 #include <stdint.h>
-#include "sky/engine/wtf/OwnPtr.h"
-#include "sky/engine/wtf/RefPtr.h"
-#include "sky/engine/wtf/StdLibExtras.h"
+#include "flutter/sky/engine/wtf/OwnPtr.h"
+#include "flutter/sky/engine/wtf/RefPtr.h"
+#include "flutter/sky/engine/wtf/StdLibExtras.h"
 
 namespace WTF {
 

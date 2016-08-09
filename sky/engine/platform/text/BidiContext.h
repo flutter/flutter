@@ -22,12 +22,12 @@
 #ifndef SKY_ENGINE_PLATFORM_TEXT_BIDICONTEXT_H_
 #define SKY_ENGINE_PLATFORM_TEXT_BIDICONTEXT_H_
 
-#include "sky/engine/platform/PlatformExport.h"
-#include "sky/engine/wtf/Assertions.h"
-#include "sky/engine/wtf/PassRefPtr.h"
-#include "sky/engine/wtf/RefCounted.h"
-#include "sky/engine/wtf/RefPtr.h"
-#include "sky/engine/wtf/unicode/Unicode.h"
+#include "flutter/sky/engine/platform/PlatformExport.h"
+#include "flutter/sky/engine/wtf/Assertions.h"
+#include "flutter/sky/engine/wtf/PassRefPtr.h"
+#include "flutter/sky/engine/wtf/RefCounted.h"
+#include "flutter/sky/engine/wtf/RefPtr.h"
+#include "flutter/sky/engine/wtf/unicode/Unicode.h"
 
 namespace blink {
 

@@ -22,8 +22,8 @@
 #ifndef SKY_ENGINE_WTF_TEXT_INTEGERTOSTRINGCONVERSION_H_
 #define SKY_ENGINE_WTF_TEXT_INTEGERTOSTRINGCONVERSION_H_
 
-#include "sky/engine/wtf/text/StringBuilder.h"
-#include "sky/engine/wtf/text/StringImpl.h"
+#include "flutter/sky/engine/wtf/text/StringBuilder.h"
+#include "flutter/sky/engine/wtf/text/StringImpl.h"
 
 namespace WTF {
 

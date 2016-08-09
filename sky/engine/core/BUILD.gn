@@ -2,18 +2,18 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-import("//sky/engine/core/core.gni")
+import("//flutter/sky/engine/core/core.gni")
 import("//mojo/dart/embedder/embedder.gni")
 
-visibility = [ "//sky/engine/*", "//sky/shell/*" ]
+visibility = [ "//flutter/sky/engine/*", "//flutter/sky/shell/*" ]
 
 source_set("libraries") {
   public_deps = [
     "//base",
-    "//flow",
+    "//flutter/flow",
     "//flutter/lib/ui",
     "//flutter/tonic",
-    "//glue",
+    "//flutter/glue",
     "//lib/ftl",
     "//lib/tonic",
     "//mojo/application",
@@ -24,8 +24,8 @@ source_set("libraries") {
     "//mojo/public/cpp/utility",
     "//mojo/public/interfaces/application",
     "//mojo/public/platform/dart:mojo_internal_impl",
-    "//skia",
-    "//sky/engine/wtf",
+    "//flutter/skia",
+    "//flutter/sky/engine/wtf",
     "//third_party/iccjpeg",
     "//third_party/libpng",
     "//third_party/qcms",
@@ -42,14 +42,14 @@ source_set("libraries") {
 source_set("prerequisites") {
   deps = [
     ":libraries",
-    "//sky/engine/platform",
+    "//flutter/sky/engine/platform",
   ]
 
   forward_dependent_configs_from = [ ":libraries" ]
 
   direct_dependent_configs = [
-    "//sky/engine:config",
-    "//sky/engine:inside_blink",
+    "//flutter/sky/engine:config",
+    "//flutter/sky/engine:inside_blink",
     "//build/config/compiler:wexit_time_destructors",
   ]
 }
@@ -81,10 +81,10 @@ static_library("core") {
     "//dart/runtime/vm:libdart_platform",
     "//flutter/assets",
     "//mojo/services/navigation/interfaces",
-    "//sky/engine/bindings",
-    "//sky/engine/platform",
-    "//sky/services/engine:interfaces",
-    "//sky/services/pointer:interfaces",
+    "//flutter/sky/engine/bindings",
+    "//flutter/sky/engine/platform",
+    "//flutter/services/engine:interfaces",
+    "//flutter/services/pointer:interfaces",
   ]
 
   if (!flutter_product_mode) {
@@ -107,6 +107,6 @@ static_library("core") {
 
   # core and core_generated are really the same thing.
   allow_circular_includes_from = [
-    "//sky/engine/bindings",
+    "//flutter/sky/engine/bindings",
   ]
 }

@@ -31,7 +31,7 @@
 #ifndef SKY_ENGINE_PUBLIC_PLATFORM_WEBBLENDMODE_H_
 #define SKY_ENGINE_PUBLIC_PLATFORM_WEBBLENDMODE_H_
 
-#include "sky/engine/public/platform/WebCommon.h"
+#include "flutter/sky/engine/public/platform/WebCommon.h"
 
 namespace blink {
 

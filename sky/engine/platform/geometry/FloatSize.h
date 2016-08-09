@@ -28,8 +28,8 @@
 #ifndef SKY_ENGINE_PLATFORM_GEOMETRY_FLOATSIZE_H_
 #define SKY_ENGINE_PLATFORM_GEOMETRY_FLOATSIZE_H_
 
-#include "sky/engine/platform/geometry/IntPoint.h"
-#include "sky/engine/wtf/MathExtras.h"
+#include "flutter/sky/engine/platform/geometry/IntPoint.h"
+#include "flutter/sky/engine/wtf/MathExtras.h"
 
 namespace blink {
 

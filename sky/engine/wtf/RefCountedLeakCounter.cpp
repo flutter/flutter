@@ -18,12 +18,12 @@
  *
  */
 
-#include "sky/engine/wtf/Assertions.h"
-#include "sky/engine/wtf/RefCountedLeakCounter.h"
+#include "flutter/sky/engine/wtf/Assertions.h"
+#include "flutter/sky/engine/wtf/RefCountedLeakCounter.h"
 
 #if ENABLE(ASSERT)
-#include "sky/engine/wtf/Atomics.h"
-#include "sky/engine/wtf/HashCountedSet.h"
+#include "flutter/sky/engine/wtf/Atomics.h"
+#include "flutter/sky/engine/wtf/HashCountedSet.h"
 #endif
 
 namespace WTF {

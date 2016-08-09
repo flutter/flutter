@@ -26,8 +26,8 @@
 // Tests for the Font class.
 
 
-#include "sky/engine/platform/fonts/Character.h"
-#include "sky/engine/platform/fonts/Font.h"
+#include "flutter/sky/engine/platform/fonts/Character.h"
+#include "flutter/sky/engine/platform/fonts/Font.h"
 
 #include <gtest/gtest.h>
 

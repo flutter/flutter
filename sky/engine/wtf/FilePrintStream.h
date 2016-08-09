@@ -27,8 +27,8 @@
 #define SKY_ENGINE_WTF_FILEPRINTSTREAM_H_
 
 #include <stdio.h>
-#include "sky/engine/wtf/PassOwnPtr.h"
-#include "sky/engine/wtf/PrintStream.h"
+#include "flutter/sky/engine/wtf/PassOwnPtr.h"
+#include "flutter/sky/engine/wtf/PrintStream.h"
 
 namespace WTF {
 

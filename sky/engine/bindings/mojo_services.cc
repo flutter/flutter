@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sky/engine/bindings/mojo_services.h"
+#include "flutter/sky/engine/bindings/mojo_services.h"
 
 #include "lib/tonic/converter/dart_converter.h"
 #include "lib/tonic/logging/dart_error.h"
@@ -10,7 +10,7 @@
 #include "flutter/tonic/dart_state.h"
 #include "mojo/public/cpp/application/connect.h"
 #include "mojo/public/cpp/bindings/array.h"
-#include "sky/engine/bindings/flutter_dart_state.h"
+#include "flutter/sky/engine/bindings/flutter_dart_state.h"
 
 namespace blink {
 namespace {

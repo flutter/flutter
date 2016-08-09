@@ -25,8 +25,8 @@
 #ifndef SKY_ENGINE_PLATFORM_FONTS_OPENTYPE_OPENTYPETYPES_H_
 #define SKY_ENGINE_PLATFORM_FONTS_OPENTYPE_OPENTYPETYPES_H_
 
-#include "sky/engine/platform/SharedBuffer.h"
-#include "sky/engine/wtf/ByteOrder.h"
+#include "flutter/sky/engine/platform/SharedBuffer.h"
+#include "flutter/sky/engine/wtf/ByteOrder.h"
 
 namespace blink {
 namespace OpenType {

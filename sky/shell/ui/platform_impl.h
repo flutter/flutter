@@ -6,7 +6,7 @@
 #define SKY_SHELL_UI_PLATFORM_IMPL_H_
 
 #include "lib/ftl/macros.h"
-#include "sky/engine/public/platform/Platform.h"
+#include "flutter/sky/engine/public/platform/Platform.h"
 
 namespace sky {
 namespace shell {

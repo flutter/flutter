@@ -25,9 +25,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/engine/platform/graphics/Pattern.h"
+#include "flutter/sky/engine/platform/graphics/Pattern.h"
 
-#include "sky/engine/platform/graphics/skia/SkiaUtils.h"
+#include "flutter/sky/engine/platform/graphics/skia/SkiaUtils.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 
 namespace blink {

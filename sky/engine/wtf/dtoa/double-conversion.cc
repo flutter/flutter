@@ -32,11 +32,11 @@
 #include "double-conversion.h"
 
 #include "bignum-dtoa.h"
-#include "sky/engine/wtf/dtoa/double.h"
+#include "flutter/sky/engine/wtf/dtoa/double.h"
 #include "fast-dtoa.h"
 #include "fixed-dtoa.h"
-#include "sky/engine/wtf/dtoa/strtod.h"
-#include "sky/engine/wtf/dtoa/utils.h"
+#include "flutter/sky/engine/wtf/dtoa/strtod.h"
+#include "flutter/sky/engine/wtf/dtoa/utils.h"
 
 namespace WTF {
 

@@ -26,7 +26,7 @@
 #ifndef SKY_ENGINE_WTF_TEMPORARYCHANGE_H_
 #define SKY_ENGINE_WTF_TEMPORARYCHANGE_H_
 
-#include "sky/engine/wtf/Noncopyable.h"
+#include "flutter/sky/engine/wtf/Noncopyable.h"
 
 namespace WTF {
 

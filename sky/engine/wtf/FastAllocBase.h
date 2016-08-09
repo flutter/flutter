@@ -47,9 +47,9 @@
 //    };
 //
 
-#include "sky/engine/wtf/Assertions.h"
-#include "sky/engine/wtf/FastMalloc.h"
-#include "sky/engine/wtf/StdLibExtras.h"
+#include "flutter/sky/engine/wtf/Assertions.h"
+#include "flutter/sky/engine/wtf/FastMalloc.h"
+#include "flutter/sky/engine/wtf/StdLibExtras.h"
 
 #define WTF_MAKE_FAST_ALLOCATED \
 public: \

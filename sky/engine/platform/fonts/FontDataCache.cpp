@@ -28,9 +28,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/engine/platform/fonts/FontDataCache.h"
+#include "flutter/sky/engine/platform/fonts/FontDataCache.h"
 
-#include "sky/engine/platform/fonts/SimpleFontData.h"
+#include "flutter/sky/engine/platform/fonts/SimpleFontData.h"
 
 using namespace WTF;
 

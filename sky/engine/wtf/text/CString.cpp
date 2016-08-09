@@ -24,11 +24,11 @@
  */
 
 
-#include "sky/engine/wtf/text/CString.h"
+#include "flutter/sky/engine/wtf/text/CString.h"
 
 #include <string.h>
-#include "sky/engine/wtf/PartitionAlloc.h"
-#include "sky/engine/wtf/WTF.h"
+#include "flutter/sky/engine/wtf/PartitionAlloc.h"
+#include "flutter/sky/engine/wtf/WTF.h"
 
 using namespace std;
 

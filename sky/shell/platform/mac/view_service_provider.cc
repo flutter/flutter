@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sky/shell/platform/mac/view_service_provider.h"
+#include "flutter/sky/shell/platform/mac/view_service_provider.h"
 
 #include <utility>
 

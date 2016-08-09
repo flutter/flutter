@@ -1,0 +1,71 @@
+# Copyright 2016 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//mojo/public/tools/bindings/mojom.gni")
+
+mojom("interfaces") {
+  sources = [
+    "app_messages.mojom",
+    "haptic_feedback.mojom",
+    "path_provider.mojom",
+    "system_chrome.mojom",
+    "system_sound.mojom",
+    "url_launcher.mojom",
+  ]
+}
+
+if (is_android) {
+  import("//build/config/android/config.gni")
+  import("//build/config/android/rules.gni")
+
+  android_library("platform_lib") {
+    java_files = [
+      "src/org/domokit/platform/HapticFeedbackImpl.java",
+      "src/org/domokit/platform/PathProviderImpl.java",
+      "src/org/domokit/platform/SystemChromeImpl.java",
+      "src/org/domokit/platform/SystemSoundImpl.java",
+      "src/org/domokit/platform/UrlLauncherImpl.java",
+    ]
+
+    deps = [
+      "//base:base_java",
+      "//mojo/public/java:bindings",
+      "//mojo/public/java:system",
+      "//flutter/services/common:common_lib",
+      ":interfaces_java",
+    ]
+  }
+}
+
+if (is_ios) {
+  source_set("platform_lib") {
+    sources = [
+      "ios/haptic_feedback_impl.h",
+      "ios/haptic_feedback_impl.mm",
+      "ios/path_provider_impl.h",
+      "ios/path_provider_impl.mm",
+      "ios/system_chrome_impl.h",
+      "ios/system_chrome_impl.mm",
+      "ios/system_sound_impl.h",
+      "ios/system_sound_impl.mm",
+      "ios/url_launcher_impl.h",
+      "ios/url_launcher_impl.mm",
+    ]
+    deps = [
+      "//base:base",
+      "//mojo/public/cpp/bindings:utility",
+      "//mojo/public/cpp/application",
+      ":interfaces",
+    ]
+  }
+}
+
+group("platform") {
+  deps = [
+    ":interfaces"
+  ]
+  if (is_android || is_ios) {
+    deps += [ ":platform_lib" ]
+  }
+}

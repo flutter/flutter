@@ -31,9 +31,9 @@
 #ifndef SKY_ENGINE_PLATFORM_GEOMETRY_LAYOUTPOINT_H_
 #define SKY_ENGINE_PLATFORM_GEOMETRY_LAYOUTPOINT_H_
 
-#include "sky/engine/platform/geometry/FloatPoint.h"
-#include "sky/engine/platform/geometry/LayoutSize.h"
-#include "sky/engine/wtf/MathExtras.h"
+#include "flutter/sky/engine/platform/geometry/FloatPoint.h"
+#include "flutter/sky/engine/platform/geometry/LayoutSize.h"
+#include "flutter/sky/engine/wtf/MathExtras.h"
 
 namespace blink {
 

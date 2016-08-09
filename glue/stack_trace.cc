@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "glue/stack_trace.h"
+#include "flutter/glue/stack_trace.h"
 
 #include "base/debug/stack_trace.h"
 

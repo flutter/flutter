@@ -7,7 +7,7 @@
 
 #include "dart/runtime/include/dart_api.h"
 #include "lib/ftl/functional/closure.h"
-#include "sky/engine/wtf/OperatingSystem.h"
+#include "flutter/sky/engine/wtf/OperatingSystem.h"
 
 #include <memory>
 #include <string>

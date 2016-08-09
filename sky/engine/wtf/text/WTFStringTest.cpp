@@ -26,9 +26,9 @@
 
 #include <gtest/gtest.h>
 #include <limits>
-#include "sky/engine/wtf/MathExtras.h"
-#include "sky/engine/wtf/text/CString.h"
-#include "sky/engine/wtf/text/WTFString.h"
+#include "flutter/sky/engine/wtf/MathExtras.h"
+#include "flutter/sky/engine/wtf/text/CString.h"
+#include "flutter/sky/engine/wtf/text/WTFString.h"
 
 namespace {
 

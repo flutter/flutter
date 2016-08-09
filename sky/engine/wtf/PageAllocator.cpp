@@ -28,10 +28,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/engine/wtf/PageAllocator.h"
+#include "flutter/sky/engine/wtf/PageAllocator.h"
 
-#include "sky/engine/wtf/AddressSpaceRandomization.h"
-#include "sky/engine/wtf/Assertions.h"
+#include "flutter/sky/engine/wtf/AddressSpaceRandomization.h"
+#include "flutter/sky/engine/wtf/Assertions.h"
 
 #include <limits.h>
 

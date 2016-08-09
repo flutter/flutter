@@ -26,7 +26,7 @@
 #ifndef SKY_ENGINE_WTF_TEXT_TEXTCODECUTF16_H_
 #define SKY_ENGINE_WTF_TEXT_TEXTCODECUTF16_H_
 
-#include "sky/engine/wtf/text/TextCodec.h"
+#include "flutter/sky/engine/wtf/text/TextCodec.h"
 
 namespace WTF {
 

@@ -30,9 +30,9 @@
 #ifndef SKY_ENGINE_CORE_RENDERING_STYLE_SHAPEVALUE_H_
 #define SKY_ENGINE_CORE_RENDERING_STYLE_SHAPEVALUE_H_
 
-#include "sky/engine/core/rendering/style/RenderStyleConstants.h"
-#include "sky/engine/core/rendering/style/StyleImage.h"
-#include "sky/engine/wtf/PassRefPtr.h"
+#include "flutter/sky/engine/core/rendering/style/RenderStyleConstants.h"
+#include "flutter/sky/engine/core/rendering/style/StyleImage.h"
+#include "flutter/sky/engine/wtf/PassRefPtr.h"
 
 namespace blink {
 

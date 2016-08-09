@@ -27,8 +27,8 @@
 #ifndef SKY_ENGINE_PLATFORM_GEOMETRY_INTSIZE_H_
 #define SKY_ENGINE_PLATFORM_GEOMETRY_INTSIZE_H_
 
-#include "sky/engine/platform/PlatformExport.h"
-#include "sky/engine/public/platform/WebCommon.h"
+#include "flutter/sky/engine/platform/PlatformExport.h"
+#include "flutter/sky/engine/public/platform/WebCommon.h"
 
 namespace blink {
 

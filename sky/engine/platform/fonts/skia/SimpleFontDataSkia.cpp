@@ -28,14 +28,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/engine/platform/fonts/SimpleFontData.h"
+#include "flutter/sky/engine/platform/fonts/SimpleFontData.h"
 
 #include <unicode/normlzr.h>
-#include "sky/engine/platform/fonts/FontDescription.h"
-#include "sky/engine/platform/fonts/GlyphPage.h"
-#include "sky/engine/platform/fonts/VDMXParser.h"
-#include "sky/engine/platform/geometry/FloatRect.h"
-#include "sky/engine/wtf/unicode/Unicode.h"
+#include "flutter/sky/engine/platform/fonts/FontDescription.h"
+#include "flutter/sky/engine/platform/fonts/GlyphPage.h"
+#include "flutter/sky/engine/platform/fonts/VDMXParser.h"
+#include "flutter/sky/engine/platform/geometry/FloatRect.h"
+#include "flutter/sky/engine/wtf/unicode/Unicode.h"
 #include "third_party/skia/include/core/SkPaint.h"
 #include "third_party/skia/include/core/SkPath.h"
 #include "third_party/skia/include/core/SkTypeface.h"

@@ -26,8 +26,8 @@
 #ifndef SKY_ENGINE_CORE_RENDERING_VERTICALPOSITIONCACHE_H_
 #define SKY_ENGINE_CORE_RENDERING_VERTICALPOSITIONCACHE_H_
 
-#include "sky/engine/platform/fonts/FontBaseline.h"
-#include "sky/engine/wtf/HashMap.h"
+#include "flutter/sky/engine/platform/fonts/FontBaseline.h"
+#include "flutter/sky/engine/wtf/HashMap.h"
 
 namespace blink {
 

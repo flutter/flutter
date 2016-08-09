@@ -29,9 +29,9 @@
  */
 
 
-#include "sky/engine/platform/graphics/RegionTracker.h"
+#include "flutter/sky/engine/platform/graphics/RegionTracker.h"
 
-#include "sky/engine/platform/graphics/GraphicsContext.h"
+#include "flutter/sky/engine/platform/graphics/GraphicsContext.h"
 #include "third_party/skia/include/core/SkColorFilter.h"
 #include "third_party/skia/include/core/SkShader.h"
 

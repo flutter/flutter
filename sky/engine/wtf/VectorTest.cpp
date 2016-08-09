@@ -25,11 +25,11 @@
 
 
 #include <gtest/gtest.h>
-#include "sky/engine/wtf/HashSet.h"
-#include "sky/engine/wtf/OwnPtr.h"
-#include "sky/engine/wtf/PassOwnPtr.h"
-#include "sky/engine/wtf/Vector.h"
-#include "sky/engine/wtf/text/WTFString.h"
+#include "flutter/sky/engine/wtf/HashSet.h"
+#include "flutter/sky/engine/wtf/OwnPtr.h"
+#include "flutter/sky/engine/wtf/PassOwnPtr.h"
+#include "flutter/sky/engine/wtf/Vector.h"
+#include "flutter/sky/engine/wtf/text/WTFString.h"
 
 namespace {
 

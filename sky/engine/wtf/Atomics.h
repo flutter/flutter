@@ -30,8 +30,8 @@
 #ifndef SKY_ENGINE_WTF_ATOMICS_H_
 #define SKY_ENGINE_WTF_ATOMICS_H_
 
-#include "sky/engine/wtf/Assertions.h"
-#include "sky/engine/wtf/CPU.h"
+#include "flutter/sky/engine/wtf/Assertions.h"
+#include "flutter/sky/engine/wtf/CPU.h"
 
 #include <stdint.h>
 

@@ -28,13 +28,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/engine/platform/text/UnicodeUtilities.h"
+#include "flutter/sky/engine/platform/text/UnicodeUtilities.h"
 
 #include <gtest/gtest.h>
 #include <unicode/uchar.h>
-#include "sky/engine/wtf/Vector.h"
-#include "sky/engine/wtf/text/WTFString.h"
-#include "sky/engine/wtf/unicode/CharacterNames.h"
+#include "flutter/sky/engine/wtf/Vector.h"
+#include "flutter/sky/engine/wtf/text/WTFString.h"
+#include "flutter/sky/engine/wtf/unicode/CharacterNames.h"
 
 using namespace blink;
 

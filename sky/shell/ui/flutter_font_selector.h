@@ -9,9 +9,9 @@
 #include <vector>
 
 #include "flutter/assets/zip_asset_store.h"
-#include "sky/engine/platform/fonts/FontCacheKey.h"
-#include "sky/engine/platform/fonts/FontSelector.h"
-#include "sky/engine/platform/fonts/SimpleFontData.h"
+#include "flutter/sky/engine/platform/fonts/FontCacheKey.h"
+#include "flutter/sky/engine/platform/fonts/FontSelector.h"
+#include "flutter/sky/engine/platform/fonts/SimpleFontData.h"
 
 namespace sky {
 namespace shell {

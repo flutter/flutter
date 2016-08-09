@@ -5,8 +5,8 @@
 import("//flutter/lib/jni/dart_jni.gni")
 import("//flutter/lib/ui/dart_ui.gni")
 import("//mojo/dart/packages/mojo/sdk_ext_sources.gni")
-import("//sky/engine/bindings/bindings.gni")
-import("//sky/engine/core/core.gni")
+import("//flutter/sky/engine/bindings/bindings.gni")
+import("//flutter/sky/engine/core/core.gni")
 
 source_set("bindings") {
   sources = [
@@ -38,10 +38,10 @@ source_set("bindings") {
     "//mojo/public/cpp/system",
     "//mojo/public/interfaces/application",
     "//mojo/public/platform/dart:mojo_internal_impl",
-    "//sky/engine/core:prerequisites",
-    "//sky/engine/platform:platform",
-    "//sky/engine/wtf",
-    "//sky/services/engine:interfaces",
+    "//flutter/sky/engine/core:prerequisites",
+    "//flutter/sky/engine/platform:platform",
+    "//flutter/sky/engine/wtf",
+    "//flutter/services/engine:interfaces",
   ]
 
   if (is_android) {

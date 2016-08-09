@@ -23,10 +23,10 @@
 #ifndef SKY_ENGINE_CORE_RENDERING_RENDERTHEME_H_
 #define SKY_ENGINE_CORE_RENDERING_RENDERTHEME_H_
 
-#include "sky/engine/core/rendering/RenderObject.h"
-#include "sky/engine/wtf/PassRefPtr.h"
-#include "sky/engine/wtf/RefCounted.h"
-#include "sky/engine/wtf/text/WTFString.h"
+#include "flutter/sky/engine/core/rendering/RenderObject.h"
+#include "flutter/sky/engine/wtf/PassRefPtr.h"
+#include "flutter/sky/engine/wtf/RefCounted.h"
+#include "flutter/sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
 

@@ -25,12 +25,12 @@
 #ifndef SKY_ENGINE_CORE_RENDERING_STYLE_STYLEINHERITEDDATA_H_
 #define SKY_ENGINE_CORE_RENDERING_STYLE_STYLEINHERITEDDATA_H_
 
-#include "sky/engine/platform/Length.h"
-#include "sky/engine/platform/fonts/Font.h"
-#include "sky/engine/platform/graphics/Color.h"
-#include "sky/engine/wtf/PassRefPtr.h"
-#include "sky/engine/wtf/RefCounted.h"
-#include "sky/engine/wtf/RefPtr.h"
+#include "flutter/sky/engine/platform/Length.h"
+#include "flutter/sky/engine/platform/fonts/Font.h"
+#include "flutter/sky/engine/platform/graphics/Color.h"
+#include "flutter/sky/engine/wtf/PassRefPtr.h"
+#include "flutter/sky/engine/wtf/RefCounted.h"
+#include "flutter/sky/engine/wtf/RefPtr.h"
 
 namespace blink {
 

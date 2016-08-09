@@ -28,7 +28,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/engine/platform/Partitions.h"
+#include "flutter/sky/engine/platform/Partitions.h"
 
 namespace blink {
 

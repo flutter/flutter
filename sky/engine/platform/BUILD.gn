@@ -3,7 +3,7 @@
 # found in the LICENSE file.
 
 import("//build/config/ui.gni")
-import("//sky/engine/config.gni")
+import("//flutter/sky/engine/config.gni")
 import("//testing/test.gni")
 
 source_set("platform") {
@@ -283,8 +283,8 @@ source_set("platform") {
   }
 
   configs += [
-    "//sky/engine:config",
-    "//sky/engine:non_test_config",
+    "//flutter/sky/engine:config",
+    "//flutter/sky/engine:non_test_config",
   ]
 
   defines = [
@@ -303,13 +303,13 @@ source_set("platform") {
     "//mojo/public/cpp/system",
     "//mojo/public/cpp/utility",
     "//mojo/services/network/interfaces",
-    "//skia",
-    "//sky/engine/wtf",
+    "//flutter/skia",
+    "//flutter/sky/engine/wtf",
     "//third_party/harfbuzz-ng",
   ]
 
   forward_dependent_configs_from = [
-    "//skia",
+    "//flutter/skia",
   ]
 
   if (is_android) {
@@ -356,18 +356,18 @@ test("platform_unittests") {
     "transforms/TransformationMatrixTest.cpp",
   ]
 
-  configs += [ "//sky/engine:config" ]
+  configs += [ "//flutter/sky/engine:config" ]
 
   deps = [
     ":platform",
     "//base",
     "//base/allocator",
     "//base/test:test_support",
-    "//skia",
+    "//flutter/skia",
     "//testing/gmock",
     "//testing/gtest",
-    "//sky/engine/wtf",
-    "//sky/engine/wtf:test_support",
+    "//flutter/sky/engine/wtf",
+    "//flutter/sky/engine/wtf:test_support",
   ]
 
   # TODO(abarth): This is a lie - this test is not embedded in an environment

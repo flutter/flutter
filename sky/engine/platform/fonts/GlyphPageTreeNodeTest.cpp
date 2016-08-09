@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sky/engine/platform/fonts/GlyphPageTreeNode.h"
+#include "flutter/sky/engine/platform/fonts/GlyphPageTreeNode.h"
 
 #include <gtest/gtest.h>
-#include "sky/engine/platform/fonts/SegmentedFontData.h"
-#include "sky/engine/platform/fonts/SimpleFontData.h"
+#include "flutter/sky/engine/platform/fonts/SegmentedFontData.h"
+#include "flutter/sky/engine/platform/fonts/SimpleFontData.h"
 
 namespace blink {
 

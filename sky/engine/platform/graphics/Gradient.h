@@ -29,15 +29,15 @@
 #ifndef SKY_ENGINE_PLATFORM_GRAPHICS_GRADIENT_H_
 #define SKY_ENGINE_PLATFORM_GRAPHICS_GRADIENT_H_
 
-#include "sky/engine/platform/PlatformExport.h"
-#include "sky/engine/platform/geometry/FloatPoint.h"
-#include "sky/engine/platform/graphics/Color.h"
-#include "sky/engine/platform/graphics/GraphicsTypes.h"
-#include "sky/engine/platform/transforms/AffineTransform.h"
-#include "sky/engine/wtf/PassRefPtr.h"
-#include "sky/engine/wtf/RefCounted.h"
-#include "sky/engine/wtf/RefPtr.h"
-#include "sky/engine/wtf/Vector.h"
+#include "flutter/sky/engine/platform/PlatformExport.h"
+#include "flutter/sky/engine/platform/geometry/FloatPoint.h"
+#include "flutter/sky/engine/platform/graphics/Color.h"
+#include "flutter/sky/engine/platform/graphics/GraphicsTypes.h"
+#include "flutter/sky/engine/platform/transforms/AffineTransform.h"
+#include "flutter/sky/engine/wtf/PassRefPtr.h"
+#include "flutter/sky/engine/wtf/RefCounted.h"
+#include "flutter/sky/engine/wtf/RefPtr.h"
+#include "flutter/sky/engine/wtf/Vector.h"
 
 class SkShader;
 

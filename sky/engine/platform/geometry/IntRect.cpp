@@ -23,10 +23,10 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/engine/platform/geometry/IntRect.h"
+#include "flutter/sky/engine/platform/geometry/IntRect.h"
 
-#include "sky/engine/platform/geometry/FloatRect.h"
-#include "sky/engine/platform/geometry/LayoutRect.h"
+#include "flutter/sky/engine/platform/geometry/FloatRect.h"
+#include "flutter/sky/engine/platform/geometry/LayoutRect.h"
 #include "third_party/skia/include/core/SkRect.h"
 
 #include <algorithm>

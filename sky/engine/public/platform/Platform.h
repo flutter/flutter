@@ -33,8 +33,8 @@
 
 #include <string>
 
-#include "sky/engine/public/platform/WebCommon.h"
-#include "sky/engine/public/platform/WebVector.h"
+#include "flutter/sky/engine/public/platform/WebCommon.h"
+#include "flutter/sky/engine/public/platform/WebVector.h"
 
 namespace ftl {
 class TaskRunner;

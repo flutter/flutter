@@ -2,16 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sky/shell/platform/glfw/init_glfw.h"
+#include "flutter/sky/shell/platform/glfw/init_glfw.h"
 
 #include <GLFW/glfw3.h>
 #include <memory>
 #include <string>
 
 #include "base/command_line.h"
-#include "sky/shell/platform/glfw/platform_view_glfw.h"
-#include "sky/shell/platform/glfw/window_impl.h"
-#include "sky/shell/switches.h"
+#include "flutter/sky/shell/platform/glfw/platform_view_glfw.h"
+#include "flutter/sky/shell/platform/glfw/window_impl.h"
+#include "flutter/sky/shell/switches.h"
 #include "ui/gl/gl_surface.h"
 
 namespace sky {

@@ -29,8 +29,8 @@
  */
 
 #include "gtest/gtest.h"
-#include "sky/engine/wtf/MainThread.h"
-#include "sky/engine/wtf/WTF.h"
+#include "flutter/sky/engine/wtf/MainThread.h"
+#include "flutter/sky/engine/wtf/WTF.h"
 
 int main(int argc, char** argv) {
   WTF::initialize();

@@ -5,7 +5,7 @@
  */
 
 
-#include "sky/engine/wtf/text/StringBuffer.h"
+#include "flutter/sky/engine/wtf/text/StringBuffer.h"
 
 #include <gtest/gtest.h>
 

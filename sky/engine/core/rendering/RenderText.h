@@ -25,11 +25,11 @@
 
 #include <vector>
 
-#include "sky/engine/core/rendering/RenderObject.h"
-#include "sky/engine/platform/LengthFunctions.h"
-#include "sky/engine/platform/text/TextPath.h"
-#include "sky/engine/wtf/Forward.h"
-#include "sky/engine/wtf/PassRefPtr.h"
+#include "flutter/sky/engine/core/rendering/RenderObject.h"
+#include "flutter/sky/engine/platform/LengthFunctions.h"
+#include "flutter/sky/engine/platform/text/TextPath.h"
+#include "flutter/sky/engine/wtf/Forward.h"
+#include "flutter/sky/engine/wtf/PassRefPtr.h"
 
 namespace blink {
 class InlineTextBox;

@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sky/shell/tracing_controller.h"
+#include "flutter/sky/shell/tracing_controller.h"
 
 #include "base/trace_event/trace_event.h"
 #include "dart/runtime/include/dart_tools_api.h"
 #include "lib/ftl/logging.h"
-#include "sky/engine/core/script/dart_init.h"
-#include "sky/engine/wtf/MakeUnique.h"
-#include "sky/shell/shell.h"
+#include "flutter/sky/engine/core/script/dart_init.h"
+#include "flutter/sky/engine/wtf/MakeUnique.h"
+#include "flutter/sky/shell/shell.h"
 
 #include <string>
 

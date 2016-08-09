@@ -27,11 +27,11 @@
 #ifndef SKY_ENGINE_PLATFORM_ANIMATION_KEYFRAMEVALUELIST_H_
 #define SKY_ENGINE_PLATFORM_ANIMATION_KEYFRAMEVALUELIST_H_
 
-#include "sky/engine/platform/animation/AnimationValue.h"
+#include "flutter/sky/engine/platform/animation/AnimationValue.h"
 
-#include "sky/engine/wtf/OwnPtr.h"
-#include "sky/engine/wtf/PassOwnPtr.h"
-#include "sky/engine/wtf/Vector.h"
+#include "flutter/sky/engine/wtf/OwnPtr.h"
+#include "flutter/sky/engine/wtf/PassOwnPtr.h"
+#include "flutter/sky/engine/wtf/Vector.h"
 
 namespace blink {
 

@@ -5,11 +5,11 @@
 #ifndef SKY_SHELL_GPU_DIRECT_RASTERIZER_DIRECT_H_
 #define SKY_SHELL_GPU_DIRECT_RASTERIZER_DIRECT_H_
 
-#include "flow/compositor_context.h"
+#include "flutter/flow/compositor_context.h"
 #include "lib/ftl/memory/weak_ptr.h"
 #include "lib/ftl/synchronization/waitable_event.h"
-#include "sky/shell/gpu/direct/ganesh_canvas.h"
-#include "sky/shell/rasterizer.h"
+#include "flutter/sky/shell/gpu/direct/ganesh_canvas.h"
+#include "flutter/sky/shell/rasterizer.h"
 
 namespace sky {
 namespace shell {

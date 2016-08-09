@@ -34,7 +34,7 @@
 #include <stdint.h>
 #include <algorithm>
 
-#include "sky/engine/wtf/HashTableDeletedValueType.h"
+#include "flutter/sky/engine/wtf/HashTableDeletedValueType.h"
 
 // RawPtr is a simple wrapper for a raw pointer that provides the
 // interface (get, clear) of other pointer types such as RefPtr,

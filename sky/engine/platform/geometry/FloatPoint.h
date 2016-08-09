@@ -28,9 +28,9 @@
 #define SKY_ENGINE_PLATFORM_GEOMETRY_FLOATPOINT_H_
 
 #include <algorithm>
-#include "sky/engine/platform/geometry/FloatSize.h"
-#include "sky/engine/platform/geometry/IntPoint.h"
-#include "sky/engine/wtf/MathExtras.h"
+#include "flutter/sky/engine/platform/geometry/FloatSize.h"
+#include "flutter/sky/engine/platform/geometry/IntPoint.h"
+#include "flutter/sky/engine/wtf/MathExtras.h"
 
 struct SkPoint;
 

@@ -26,7 +26,7 @@
 #ifndef SKY_ENGINE_WTF_ENUMCLASS_H_
 #define SKY_ENGINE_WTF_ENUMCLASS_H_
 
-#include "sky/engine/wtf/Compiler.h"
+#include "flutter/sky/engine/wtf/Compiler.h"
 
 namespace WTF {
 

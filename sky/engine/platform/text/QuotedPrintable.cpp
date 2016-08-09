@@ -28,9 +28,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/engine/platform/text/QuotedPrintable.h"
+#include "flutter/sky/engine/platform/text/QuotedPrintable.h"
 
-#include "sky/engine/wtf/ASCIICType.h"
+#include "flutter/sky/engine/wtf/ASCIICType.h"
 
 namespace blink {
 

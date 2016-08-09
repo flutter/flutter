@@ -24,8 +24,8 @@
 #ifndef SKY_ENGINE_CORE_RENDERING_LINE_LINELAYOUTSTATE_H_
 #define SKY_ENGINE_CORE_RENDERING_LINE_LINELAYOUTSTATE_H_
 
-#include "sky/engine/core/rendering/RenderParagraph.h"
-#include "sky/engine/platform/geometry/LayoutRect.h"
+#include "flutter/sky/engine/core/rendering/RenderParagraph.h"
+#include "flutter/sky/engine/platform/geometry/LayoutRect.h"
 
 namespace blink {
 

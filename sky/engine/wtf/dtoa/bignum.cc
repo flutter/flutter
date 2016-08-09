@@ -26,8 +26,8 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-#include "sky/engine/wtf/dtoa/bignum.h"
-#include "sky/engine/wtf/dtoa/utils.h"
+#include "flutter/sky/engine/wtf/dtoa/bignum.h"
+#include "flutter/sky/engine/wtf/dtoa/utils.h"
 
 namespace WTF {
 

@@ -27,9 +27,9 @@
 #ifndef SKY_ENGINE_CORE_RENDERING_RENDERGEOMETRYMAPSTEP_H_
 #define SKY_ENGINE_CORE_RENDERING_RENDERGEOMETRYMAPSTEP_H_
 
-#include "sky/engine/platform/geometry/LayoutSize.h"
-#include "sky/engine/platform/transforms/TransformationMatrix.h"
-#include "sky/engine/wtf/OwnPtr.h"
+#include "flutter/sky/engine/platform/geometry/LayoutSize.h"
+#include "flutter/sky/engine/platform/transforms/TransformationMatrix.h"
+#include "flutter/sky/engine/wtf/OwnPtr.h"
 
 namespace blink {
 

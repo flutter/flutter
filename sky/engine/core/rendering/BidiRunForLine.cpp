@@ -21,9 +21,9 @@
  *
  */
 
-#include "sky/engine/core/rendering/BidiRunForLine.h"
+#include "flutter/sky/engine/core/rendering/BidiRunForLine.h"
 
-#include "sky/engine/core/rendering/InlineIterator.h"
+#include "flutter/sky/engine/core/rendering/InlineIterator.h"
 
 namespace blink {
 

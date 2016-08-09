@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sky/shell/platform/mojo/content_handler_impl.h"
+#include "flutter/sky/shell/platform/mojo/content_handler_impl.h"
 
-#include "sky/shell/platform/mojo/application_impl.h"
+#include "flutter/sky/shell/platform/mojo/application_impl.h"
 
 namespace sky {
 namespace shell {

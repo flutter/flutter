@@ -19,13 +19,13 @@
  *
  */
 
-#include "sky/engine/core/rendering/style/StyleRareNonInheritedData.h"
+#include "flutter/sky/engine/core/rendering/style/StyleRareNonInheritedData.h"
 
-#include "sky/engine/core/rendering/style/DataEquivalency.h"
-#include "sky/engine/core/rendering/style/RenderStyle.h"
-#include "sky/engine/core/rendering/style/ShadowList.h"
-#include "sky/engine/core/rendering/style/StyleFilterData.h"
-#include "sky/engine/core/rendering/style/StyleTransformData.h"
+#include "flutter/sky/engine/core/rendering/style/DataEquivalency.h"
+#include "flutter/sky/engine/core/rendering/style/RenderStyle.h"
+#include "flutter/sky/engine/core/rendering/style/ShadowList.h"
+#include "flutter/sky/engine/core/rendering/style/StyleFilterData.h"
+#include "flutter/sky/engine/core/rendering/style/StyleTransformData.h"
 
 namespace blink {
 

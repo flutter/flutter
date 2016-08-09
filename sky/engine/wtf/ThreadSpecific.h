@@ -42,11 +42,11 @@
 #ifndef SKY_ENGINE_WTF_THREADSPECIFIC_H_
 #define SKY_ENGINE_WTF_THREADSPECIFIC_H_
 
-#include "sky/engine/wtf/FastMalloc.h"
-#include "sky/engine/wtf/Noncopyable.h"
-#include "sky/engine/wtf/StdLibExtras.h"
-#include "sky/engine/wtf/WTF.h"
-#include "sky/engine/wtf/WTFExport.h"
+#include "flutter/sky/engine/wtf/FastMalloc.h"
+#include "flutter/sky/engine/wtf/Noncopyable.h"
+#include "flutter/sky/engine/wtf/StdLibExtras.h"
+#include "flutter/sky/engine/wtf/WTF.h"
+#include "flutter/sky/engine/wtf/WTFExport.h"
 
 #if USE(PTHREADS)
 #include <pthread.h>

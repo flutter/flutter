@@ -31,9 +31,9 @@
 #ifndef SKY_ENGINE_WTF_TEXT_STRINGUTF8ADAPTOR_H_
 #define SKY_ENGINE_WTF_TEXT_STRINGUTF8ADAPTOR_H_
 
-#include "sky/engine/wtf/text/CString.h"
-#include "sky/engine/wtf/text/TextEncoding.h"
-#include "sky/engine/wtf/text/WTFString.h"
+#include "flutter/sky/engine/wtf/text/CString.h"
+#include "flutter/sky/engine/wtf/text/TextEncoding.h"
+#include "flutter/sky/engine/wtf/text/WTFString.h"
 
 namespace WTF {
 

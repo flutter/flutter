@@ -10,9 +10,9 @@
 #include "lib/ftl/macros.h"
 #include "lib/ftl/memory/weak_ptr.h"
 #include "lib/ftl/synchronization/waitable_event.h"
-#include "sky/shell/shell.h"
-#include "sky/shell/ui_delegate.h"
-#include "sky/shell/ui/engine.h"
+#include "flutter/sky/shell/shell.h"
+#include "flutter/sky/shell/ui_delegate.h"
+#include "flutter/sky/shell/ui/engine.h"
 #include "third_party/skia/include/core/SkSize.h"
 #include "third_party/skia/include/gpu/GrContext.h"
 

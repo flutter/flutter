@@ -25,7 +25,7 @@
 
 
 #include <gtest/gtest.h>
-#include "sky/engine/wtf/CheckedArithmetic.h"
+#include "flutter/sky/engine/wtf/CheckedArithmetic.h"
 
 namespace {
 

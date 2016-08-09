@@ -7,7 +7,7 @@
 
 #include "lib/ftl/macros.h"
 #include "lib/ftl/memory/weak_ptr.h"
-#include "sky/shell/platform_view.h"
+#include "flutter/sky/shell/platform_view.h"
 
 namespace sky {
 namespace shell {

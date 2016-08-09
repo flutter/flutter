@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sky/shell/platform/android/flutter_main.h"
+#include "flutter/sky/shell/platform/android/flutter_main.h"
 
 #include "base/android/jni_android.h"
 #include "base/android/jni_array.h"
@@ -21,8 +21,8 @@
 #include "jni/FlutterMain_jni.h"
 #include "mojo/edk/embedder/embedder.h"
 #include "mojo/edk/embedder/simple_platform_support.h"
-#include "sky/shell/shell.h"
-#include "sky/engine/core/start_up.h"
+#include "flutter/sky/shell/shell.h"
+#include "flutter/sky/engine/core/start_up.h"
 #include "dart/runtime/include/dart_tools_api.h"
 
 using base::LazyInstance;

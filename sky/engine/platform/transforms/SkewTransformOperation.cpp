@@ -19,9 +19,9 @@
  *
  */
 
-#include "sky/engine/platform/transforms/SkewTransformOperation.h"
+#include "flutter/sky/engine/platform/transforms/SkewTransformOperation.h"
 
-#include "sky/engine/platform/animation/AnimationUtilities.h"
+#include "flutter/sky/engine/platform/animation/AnimationUtilities.h"
 
 namespace blink {
 

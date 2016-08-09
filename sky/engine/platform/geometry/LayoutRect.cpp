@@ -28,12 +28,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/engine/platform/geometry/LayoutRect.h"
+#include "flutter/sky/engine/platform/geometry/LayoutRect.h"
 
 #include <stdio.h>
 #include <algorithm>
-#include "sky/engine/platform/LayoutUnit.h"
-#include "sky/engine/platform/geometry/FloatRect.h"
+#include "flutter/sky/engine/platform/LayoutUnit.h"
+#include "flutter/sky/engine/platform/geometry/FloatRect.h"
 
 namespace blink {
 

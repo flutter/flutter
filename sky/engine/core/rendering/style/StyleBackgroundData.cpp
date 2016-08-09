@@ -19,10 +19,10 @@
  *
  */
 
-#include "sky/engine/core/rendering/style/StyleBackgroundData.h"
+#include "flutter/sky/engine/core/rendering/style/StyleBackgroundData.h"
 
-#include "sky/engine/core/rendering/style/RenderStyle.h"
-#include "sky/engine/core/rendering/style/RenderStyleConstants.h"
+#include "flutter/sky/engine/core/rendering/style/RenderStyle.h"
+#include "flutter/sky/engine/core/rendering/style/RenderStyleConstants.h"
 
 namespace blink {
 

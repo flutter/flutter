@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLOW_OPEN_GL_H_
-#define FLOW_OPEN_GL_H_
+#ifndef FLUTTER_FLOW_OPEN_GL_H_
+#define FLUTTER_FLOW_OPEN_GL_H_
 
 #include "lib/ftl/build_config.h"
 
@@ -29,4 +29,4 @@
 
 #endif
 
-#endif  // FLOW_OPEN_GL_H_
+#endif  // FLUTTER_FLOW_OPEN_GL_H_

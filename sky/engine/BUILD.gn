@@ -10,7 +10,7 @@ if (is_posix) {
   import("//build/config/gcc/gcc_version.gni")
 }
 
-visibility = [ "//sky/*" ]
+visibility = [ "//flutter/sky/*" ]
 
 # features ---------------------------------------------------------------------
 
@@ -48,8 +48,8 @@ config("non_test_config") {
 
 group("engine") {
   deps = [
-    "//sky/engine/platform",
-    "//sky/engine/public/sky",
-    "//sky/engine/web",
+    "//flutter/sky/engine/platform",
+    "//flutter/sky/engine/public/sky",
+    "//flutter/sky/engine/web",
   ]
 }

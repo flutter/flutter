@@ -41,11 +41,11 @@
  * version of this file under any of the LGPL, the MPL or the GPL.
  */
 
-#include "sky/engine/core/rendering/RenderLayerStackingNode.h"
+#include "flutter/sky/engine/core/rendering/RenderLayerStackingNode.h"
 
-#include "sky/engine/core/rendering/RenderLayer.h"
-#include "sky/engine/core/rendering/RenderView.h"
-#include "sky/engine/public/platform/Platform.h"
+#include "flutter/sky/engine/core/rendering/RenderLayer.h"
+#include "flutter/sky/engine/core/rendering/RenderView.h"
+#include "flutter/sky/engine/public/platform/Platform.h"
 
 namespace blink {
 

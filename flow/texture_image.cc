@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flow/open_gl.h"
-#include "flow/texture_image.h"
-#include "glue/trace_event.h"
+#include "flutter/flow/open_gl.h"
+#include "flutter/flow/texture_image.h"
+#include "flutter/glue/trace_event.h"
 #include "third_party/skia/include/gpu/gl/GrGLTypes.h"
 
 namespace flow {

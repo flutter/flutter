@@ -27,11 +27,11 @@
 #ifndef SKY_ENGINE_WTF_TEXT_TEXTCODEC_H_
 #define SKY_ENGINE_WTF_TEXT_TEXTCODEC_H_
 
-#include "sky/engine/wtf/Forward.h"
-#include "sky/engine/wtf/Noncopyable.h"
-#include "sky/engine/wtf/PassOwnPtr.h"
-#include "sky/engine/wtf/text/WTFString.h"
-#include "sky/engine/wtf/unicode/Unicode.h"
+#include "flutter/sky/engine/wtf/Forward.h"
+#include "flutter/sky/engine/wtf/Noncopyable.h"
+#include "flutter/sky/engine/wtf/PassOwnPtr.h"
+#include "flutter/sky/engine/wtf/text/WTFString.h"
+#include "flutter/sky/engine/wtf/unicode/Unicode.h"
 
 namespace WTF {
 

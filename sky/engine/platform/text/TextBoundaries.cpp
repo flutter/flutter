@@ -24,10 +24,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/engine/platform/text/TextBoundaries.h"
+#include "flutter/sky/engine/platform/text/TextBoundaries.h"
 
-#include "sky/engine/platform/text/TextBreakIterator.h"
-#include "sky/engine/wtf/text/StringImpl.h"
+#include "flutter/sky/engine/platform/text/TextBreakIterator.h"
+#include "flutter/sky/engine/wtf/text/StringImpl.h"
 
 using namespace WTF;
 using namespace Unicode;

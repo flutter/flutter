@@ -25,8 +25,8 @@
 #ifndef SKY_ENGINE_CORE_RENDERING_STYLE_SHADOWDATA_H_
 #define SKY_ENGINE_CORE_RENDERING_STYLE_SHADOWDATA_H_
 
-#include "sky/engine/platform/geometry/FloatPoint.h"
-#include "sky/engine/platform/graphics/Color.h"
+#include "flutter/sky/engine/platform/geometry/FloatPoint.h"
+#include "flutter/sky/engine/platform/graphics/Color.h"
 
 namespace blink {
 

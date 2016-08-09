@@ -31,8 +31,8 @@
 #ifndef SKY_ENGINE_CORE_RENDERING_RENDERFLEXIBLEBOX_H_
 #define SKY_ENGINE_CORE_RENDERING_RENDERFLEXIBLEBOX_H_
 
-#include "sky/engine/core/rendering/OrderIterator.h"
-#include "sky/engine/core/rendering/RenderBlock.h"
+#include "flutter/sky/engine/core/rendering/OrderIterator.h"
+#include "flutter/sky/engine/core/rendering/RenderBlock.h"
 
 namespace blink {
 

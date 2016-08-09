@@ -30,11 +30,11 @@
 #ifndef SKY_ENGINE_WTF_THREADSAFEREFCOUNTED_H_
 #define SKY_ENGINE_WTF_THREADSAFEREFCOUNTED_H_
 
-#include "sky/engine/wtf/Atomics.h"
-#include "sky/engine/wtf/DynamicAnnotations.h"
-#include "sky/engine/wtf/FastAllocBase.h"
-#include "sky/engine/wtf/Noncopyable.h"
-#include "sky/engine/wtf/WTFExport.h"
+#include "flutter/sky/engine/wtf/Atomics.h"
+#include "flutter/sky/engine/wtf/DynamicAnnotations.h"
+#include "flutter/sky/engine/wtf/FastAllocBase.h"
+#include "flutter/sky/engine/wtf/Noncopyable.h"
+#include "flutter/sky/engine/wtf/WTFExport.h"
 
 namespace WTF {
 

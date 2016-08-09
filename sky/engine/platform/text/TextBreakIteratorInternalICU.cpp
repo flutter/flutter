@@ -19,12 +19,12 @@
  *
  */
 
-#include "sky/engine/platform/text/TextBreakIteratorInternalICU.h"
+#include "flutter/sky/engine/platform/text/TextBreakIteratorInternalICU.h"
 
-#include "sky/engine/platform/Language.h"
-#include "sky/engine/wtf/StdLibExtras.h"
-#include "sky/engine/wtf/text/CString.h"
-#include "sky/engine/wtf/text/WTFString.h"
+#include "flutter/sky/engine/platform/Language.h"
+#include "flutter/sky/engine/wtf/StdLibExtras.h"
+#include "flutter/sky/engine/wtf/text/CString.h"
+#include "flutter/sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
 

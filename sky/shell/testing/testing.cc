@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sky/shell/testing/testing.h"
+#include "flutter/sky/shell/testing/testing.h"
 
 #include "base/command_line.h"
-#include "sky/shell/switches.h"
-#include "sky/shell/testing/test_runner.h"
+#include "flutter/sky/shell/switches.h"
+#include "flutter/sky/shell/testing/test_runner.h"
 
 namespace sky {
 namespace shell {

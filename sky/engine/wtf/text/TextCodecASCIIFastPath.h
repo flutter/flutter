@@ -27,7 +27,7 @@
 #ifndef SKY_ENGINE_WTF_TEXT_TEXTCODECASCIIFASTPATH_H_
 #define SKY_ENGINE_WTF_TEXT_TEXTCODECASCIIFASTPATH_H_
 
-#include "sky/engine/wtf/text/ASCIIFastPath.h"
+#include "flutter/sky/engine/wtf/text/ASCIIFastPath.h"
 
 namespace WTF {
 

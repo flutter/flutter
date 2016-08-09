@@ -29,8 +29,8 @@
 #ifndef SKY_ENGINE_WTF_PASSTRAITS_H_
 #define SKY_ENGINE_WTF_PASSTRAITS_H_
 
-#include "sky/engine/wtf/OwnPtr.h"
-#include "sky/engine/wtf/RefPtr.h"
+#include "flutter/sky/engine/wtf/OwnPtr.h"
+#include "flutter/sky/engine/wtf/RefPtr.h"
 
 // The PassTraits template exists to help optimize (or make possible) use
 // of WTF data structures with WTF smart pointers that have a Pass

@@ -28,10 +28,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/engine/platform/fonts/FontPlatformData.h"
+#include "flutter/sky/engine/platform/fonts/FontPlatformData.h"
 
-#include "sky/engine/platform/fonts/harfbuzz/HarfBuzzFace.h"
-#include "sky/engine/wtf/text/WTFString.h"
+#include "flutter/sky/engine/platform/fonts/harfbuzz/HarfBuzzFace.h"
+#include "flutter/sky/engine/wtf/text/WTFString.h"
 #include "third_party/skia/include/core/SkTypeface.h"
 
 namespace blink {

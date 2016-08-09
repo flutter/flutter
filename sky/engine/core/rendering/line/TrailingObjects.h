@@ -24,7 +24,7 @@
 #ifndef SKY_ENGINE_CORE_RENDERING_LINE_TRAILINGOBJECTS_H_
 #define SKY_ENGINE_CORE_RENDERING_LINE_TRAILINGOBJECTS_H_
 
-#include "sky/engine/wtf/Vector.h"
+#include "flutter/sky/engine/wtf/Vector.h"
 
 namespace blink {
 

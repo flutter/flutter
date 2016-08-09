@@ -27,10 +27,10 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/engine/platform/fonts/FontDescription.h"
+#include "flutter/sky/engine/platform/fonts/FontDescription.h"
 
-#include "sky/engine/wtf/text/AtomicStringHash.h"
-#include "sky/engine/wtf/text/StringHash.h"
+#include "flutter/sky/engine/wtf/text/AtomicStringHash.h"
+#include "flutter/sky/engine/wtf/text/StringHash.h"
 
 namespace blink {
 

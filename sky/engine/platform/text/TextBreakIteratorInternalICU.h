@@ -21,7 +21,7 @@
 #ifndef SKY_ENGINE_PLATFORM_TEXT_TEXTBREAKITERATORINTERNALICU_H_
 #define SKY_ENGINE_PLATFORM_TEXT_TEXTBREAKITERATORINTERNALICU_H_
 
-#include "sky/engine/platform/PlatformExport.h"
+#include "flutter/sky/engine/platform/PlatformExport.h"
 
 // FIXME: Now that this handles locales for ICU, not just for text breaking,
 // this file and the various implementation files should be renamed.

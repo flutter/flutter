@@ -25,7 +25,7 @@
 #ifndef SKY_ENGINE_CORE_RENDERING_STYLE_OUTLINEVALUE_H_
 #define SKY_ENGINE_CORE_RENDERING_STYLE_OUTLINEVALUE_H_
 
-#include "sky/engine/core/rendering/style/BorderValue.h"
+#include "flutter/sky/engine/core/rendering/style/BorderValue.h"
 
 namespace blink {
 

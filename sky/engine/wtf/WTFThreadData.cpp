@@ -24,9 +24,9 @@
  *
  */
 
-#include "sky/engine/wtf/WTFThreadData.h"
+#include "flutter/sky/engine/wtf/WTFThreadData.h"
 
-#include "sky/engine/wtf/text/TextCodecICU.h"
+#include "flutter/sky/engine/wtf/text/TextCodecICU.h"
 
 namespace WTF {
 

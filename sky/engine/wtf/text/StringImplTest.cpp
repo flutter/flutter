@@ -25,8 +25,8 @@
 
 
 #include <gtest/gtest.h>
-#include "sky/engine/wtf/text/StringImpl.h"
-#include "sky/engine/wtf/text/WTFString.h"
+#include "flutter/sky/engine/wtf/text/StringImpl.h"
+#include "flutter/sky/engine/wtf/text/WTFString.h"
 
 namespace {
 

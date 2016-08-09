@@ -29,10 +29,10 @@
 #include <stdarg.h>
 #include <limits.h>
 
-#include "sky/engine/wtf/dtoa/strtod.h"
-#include "sky/engine/wtf/dtoa/bignum.h"
+#include "flutter/sky/engine/wtf/dtoa/strtod.h"
+#include "flutter/sky/engine/wtf/dtoa/bignum.h"
 #include "cached-powers.h"
-#include "sky/engine/wtf/dtoa/double.h"
+#include "flutter/sky/engine/wtf/dtoa/double.h"
 
 namespace WTF {
 

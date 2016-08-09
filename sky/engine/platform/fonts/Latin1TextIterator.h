@@ -22,7 +22,7 @@
 #ifndef SKY_ENGINE_PLATFORM_FONTS_LATIN1TEXTITERATOR_H_
 #define SKY_ENGINE_PLATFORM_FONTS_LATIN1TEXTITERATOR_H_
 
-#include "sky/engine/wtf/text/WTFString.h"
+#include "flutter/sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
 

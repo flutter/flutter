@@ -2,27 +2,27 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-import("//sky/engine/bindings/bindings.gni")
+import("//flutter/sky/engine/bindings/bindings.gni")
 
 group("sky") {
   testonly = true
 
   deps = [
-    "//sky/engine/platform:platform_unittests($host_toolchain)",
-    "//sky/engine/wtf:unittests($host_toolchain)",
-    "//sky/packages",
-    "//sky/shell",
+    "//flutter/sky/engine/platform:platform_unittests($host_toolchain)",
+    "//flutter/sky/engine/wtf:unittests($host_toolchain)",
+    "//flutter/sky/packages",
+    "//flutter/sky/shell",
   ]
 
   if (dart_host_toolchain == host_toolchain) {
-    deps += [ "//sky/tools/sky_snapshot($dart_host_toolchain)" ]
+    deps += [ "//flutter/sky/tools/sky_snapshot($dart_host_toolchain)" ]
   }
 
   if (is_linux || is_android) {
-    deps += [ "//sky/shell/platform/mojo" ]
+    deps += [ "//flutter/sky/shell/platform/mojo" ]
   }
 
   if (is_android) {
-    deps += [ "//sky/services/activity" ]
+    deps += [ "//flutter/services/activity" ]
   }
 }

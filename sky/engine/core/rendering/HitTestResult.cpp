@@ -19,10 +19,10 @@
  *
 */
 
-#include "sky/engine/core/rendering/HitTestResult.h"
+#include "flutter/sky/engine/core/rendering/HitTestResult.h"
 
-#include "sky/engine/core/rendering/RenderBox.h"
-#include "sky/engine/core/rendering/RenderObject.h"
+#include "flutter/sky/engine/core/rendering/RenderBox.h"
+#include "flutter/sky/engine/core/rendering/RenderObject.h"
 
 namespace blink {
 

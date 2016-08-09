@@ -22,8 +22,8 @@
 #ifndef SKY_ENGINE_PLATFORM_TEXT_BIDICHARACTERRUN_H_
 #define SKY_ENGINE_PLATFORM_TEXT_BIDICHARACTERRUN_H_
 
-#include "sky/engine/platform/text/BidiContext.h"
-#include "sky/engine/platform/text/TextDirection.h"
+#include "flutter/sky/engine/platform/text/BidiContext.h"
+#include "flutter/sky/engine/platform/text/TextDirection.h"
 
 namespace blink {
 

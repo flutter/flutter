@@ -32,9 +32,9 @@
 #define SKY_ENGINE_PLATFORM_DECIMAL_H_
 
 #include <stdint.h>
-#include "sky/engine/platform/PlatformExport.h"
-#include "sky/engine/wtf/Assertions.h"
-#include "sky/engine/wtf/text/WTFString.h"
+#include "flutter/sky/engine/platform/PlatformExport.h"
+#include "flutter/sky/engine/wtf/Assertions.h"
+#include "flutter/sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
 

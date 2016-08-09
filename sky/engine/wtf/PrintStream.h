@@ -27,10 +27,10 @@
 #define SKY_ENGINE_WTF_PRINTSTREAM_H_
 
 #include <stdarg.h>
-#include "sky/engine/wtf/FastAllocBase.h"
-#include "sky/engine/wtf/Noncopyable.h"
-#include "sky/engine/wtf/StdLibExtras.h"
-#include "sky/engine/wtf/WTFExport.h"
+#include "flutter/sky/engine/wtf/FastAllocBase.h"
+#include "flutter/sky/engine/wtf/Noncopyable.h"
+#include "flutter/sky/engine/wtf/StdLibExtras.h"
+#include "flutter/sky/engine/wtf/WTFExport.h"
 
 namespace WTF {
 

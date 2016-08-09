@@ -17,7 +17,7 @@
     Boston, MA 02110-1301, USA.
 */
 
-#include "sky/engine/core/rendering/PointerEventsHitRules.h"
+#include "flutter/sky/engine/core/rendering/PointerEventsHitRules.h"
 
 namespace blink {
 

@@ -28,13 +28,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/engine/platform/animation/TimingFunction.h"
+#include "flutter/sky/engine/platform/animation/TimingFunction.h"
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <sstream>
 #include <string>
-#include "sky/engine/wtf/text/WTFString.h"
+#include "flutter/sky/engine/wtf/text/WTFString.h"
 
 // Macro is only used to allow the use of streams.
 // Can be removed if a pretty failure message isn't needed.

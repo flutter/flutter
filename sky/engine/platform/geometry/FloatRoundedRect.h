@@ -30,9 +30,9 @@
 #ifndef SKY_ENGINE_PLATFORM_GEOMETRY_FLOATROUNDEDRECT_H_
 #define SKY_ENGINE_PLATFORM_GEOMETRY_FLOATROUNDEDRECT_H_
 
-#include "sky/engine/platform/geometry/FloatRect.h"
-#include "sky/engine/platform/geometry/FloatSize.h"
-#include "sky/engine/platform/geometry/RoundedRect.h"
+#include "flutter/sky/engine/platform/geometry/FloatRect.h"
+#include "flutter/sky/engine/platform/geometry/FloatSize.h"
+#include "flutter/sky/engine/platform/geometry/RoundedRect.h"
 
 namespace blink {
 

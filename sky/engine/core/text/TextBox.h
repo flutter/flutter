@@ -7,7 +7,7 @@
 
 #include "dart/runtime/include/dart_api.h"
 #include "lib/tonic/converter/dart_converter.h"
-#include "sky/engine/platform/text/TextDirection.h"
+#include "flutter/sky/engine/platform/text/TextDirection.h"
 #include "third_party/skia/include/core/SkRect.h"
 
 namespace blink {

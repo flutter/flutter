@@ -5,25 +5,25 @@
 source_set("sky") {
   deps = [
     "//base",
-    "//flow",
+    "//flutter/flow",
     "//flutter/lib/ui",
-    "//glue",
+    "//flutter/glue",
     "//lib/ftl/",
     "//mojo/public/cpp/system",
     "//mojo/services/network/interfaces",
-    "//skia",
-    "//sky/engine/bindings",
-    "//sky/engine/core",
-    "//sky/engine/platform",
-    "//sky/engine/wtf",
-    "//sky/services/engine:interfaces",
-    "//sky/services/pointer:interfaces",
+    "//flutter/skia",
+    "//flutter/sky/engine/bindings",
+    "//flutter/sky/engine/core",
+    "//flutter/sky/engine/platform",
+    "//flutter/sky/engine/wtf",
+    "//flutter/services/engine:interfaces",
+    "//flutter/services/pointer:interfaces",
   ]
 
   configs += [
-    "//sky/engine:config",
-    "//sky/engine:inside_blink",
-    "//sky/engine:non_test_config",
+    "//flutter/sky/engine:config",
+    "//flutter/sky/engine:inside_blink",
+    "//flutter/sky/engine:non_test_config",
   ]
 
   sources = [

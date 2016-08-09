@@ -19,9 +19,9 @@
  *
  */
 
-#include "sky/engine/core/rendering/style/FillLayer.h"
+#include "flutter/sky/engine/core/rendering/style/FillLayer.h"
 
-#include "sky/engine/core/rendering/style/DataEquivalency.h"
+#include "flutter/sky/engine/core/rendering/style/DataEquivalency.h"
 
 namespace blink {
 

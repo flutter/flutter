@@ -27,9 +27,9 @@
 #ifndef SKY_ENGINE_PLATFORM_GEOMETRY_INTPOINT_H_
 #define SKY_ENGINE_PLATFORM_GEOMETRY_INTPOINT_H_
 
-#include "sky/engine/platform/geometry/IntSize.h"
-#include "sky/engine/wtf/MathExtras.h"
-#include "sky/engine/wtf/VectorTraits.h"
+#include "flutter/sky/engine/platform/geometry/IntSize.h"
+#include "flutter/sky/engine/wtf/MathExtras.h"
+#include "flutter/sky/engine/wtf/VectorTraits.h"
 
 namespace blink {
 

@@ -33,12 +33,12 @@
 #ifndef SKY_ENGINE_PLATFORM_GRAPHICS_SKIA_SKIAUTILS_H_
 #define SKY_ENGINE_PLATFORM_GRAPHICS_SKIA_SKIAUTILS_H_
 
-#include "sky/engine/platform/PlatformExport.h"
-#include "sky/engine/platform/geometry/FloatRect.h"
-#include "sky/engine/platform/graphics/Color.h"
-#include "sky/engine/platform/graphics/GraphicsTypes.h"
-#include "sky/engine/platform/transforms/AffineTransform.h"
-#include "sky/engine/wtf/MathExtras.h"
+#include "flutter/sky/engine/platform/PlatformExport.h"
+#include "flutter/sky/engine/platform/geometry/FloatRect.h"
+#include "flutter/sky/engine/platform/graphics/Color.h"
+#include "flutter/sky/engine/platform/graphics/GraphicsTypes.h"
+#include "flutter/sky/engine/platform/transforms/AffineTransform.h"
+#include "flutter/sky/engine/wtf/MathExtras.h"
 #include "third_party/skia/include/core/SkMatrix.h"
 #include "third_party/skia/include/core/SkPaint.h"
 #include "third_party/skia/include/core/SkPath.h"

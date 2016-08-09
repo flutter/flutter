@@ -27,8 +27,8 @@
 #ifndef SKY_ENGINE_PLATFORM_GEOMETRY_FLOATRECT_H_
 #define SKY_ENGINE_PLATFORM_GEOMETRY_FLOATRECT_H_
 
-#include "sky/engine/platform/geometry/FloatPoint.h"
-#include "sky/engine/wtf/Vector.h"
+#include "flutter/sky/engine/platform/geometry/FloatPoint.h"
+#include "flutter/sky/engine/wtf/Vector.h"
 #include "third_party/skia/include/core/SkRect.h"
 
 namespace blink {

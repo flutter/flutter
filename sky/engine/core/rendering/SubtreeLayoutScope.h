@@ -31,7 +31,7 @@
 #ifndef SKY_ENGINE_CORE_RENDERING_SUBTREELAYOUTSCOPE_H_
 #define SKY_ENGINE_CORE_RENDERING_SUBTREELAYOUTSCOPE_H_
 
-#include "sky/engine/wtf/HashSet.h"
+#include "flutter/sky/engine/wtf/HashSet.h"
 
 // This is the way to mark a subtree as needing layout during layout,
 // e.g. for the purposes of doing a multipass layout.

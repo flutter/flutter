@@ -21,10 +21,10 @@
  *
  */
 
-#include "sky/engine/platform/text/BidiCharacterRun.h"
+#include "flutter/sky/engine/platform/text/BidiCharacterRun.h"
 
-#include "sky/engine/platform/Partitions.h"
-#include "sky/engine/wtf/RefCountedLeakCounter.h"
+#include "flutter/sky/engine/platform/Partitions.h"
+#include "flutter/sky/engine/wtf/RefCountedLeakCounter.h"
 
 using namespace WTF;
 

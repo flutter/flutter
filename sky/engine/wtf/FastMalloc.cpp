@@ -28,11 +28,11 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "sky/engine/wtf/FastMalloc.h"
+#include "flutter/sky/engine/wtf/FastMalloc.h"
 
 #include <string.h>
-#include "sky/engine/wtf/PartitionAlloc.h"
-#include "sky/engine/wtf/SpinLock.h"
+#include "flutter/sky/engine/wtf/PartitionAlloc.h"
+#include "flutter/sky/engine/wtf/SpinLock.h"
 
 namespace WTF {
 

@@ -5,9 +5,9 @@
 #ifndef SKY_SHELL_PLATFORM_IOS_FRAMEWORK_SOURCE_FLUTTERDARTPROJECT_INTERNAL_H_
 #define SKY_SHELL_PLATFORM_IOS_FRAMEWORK_SOURCE_FLUTTERDARTPROJECT_INTERNAL_H_
 
-#include "sky/shell/platform/ios/framework/Headers/FlutterDartProject.h"
+#include "flutter/sky/shell/platform/ios/framework/Headers/FlutterDartProject.h"
 
-#include "sky/services/engine/sky_engine.mojom.h"
+#include "flutter/services/engine/sky_engine.mojom.h"
 
 enum VMType {
   // An invalid VM configuration.

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sky/shell/platform/android/platform_view_android.h"
+#include "flutter/sky/shell/platform/android/platform_view_android.h"
 
 #include <EGL/egl.h>
 
@@ -15,9 +15,9 @@
 #include "base/location.h"
 #include "base/trace_event/trace_event.h"
 #include "jni/FlutterView_jni.h"
-#include "sky/engine/core/script/dart_service_isolate.h"
-#include "sky/engine/wtf/MakeUnique.h"
-#include "sky/shell/shell.h"
+#include "flutter/sky/engine/core/script/dart_service_isolate.h"
+#include "flutter/sky/engine/wtf/MakeUnique.h"
+#include "flutter/sky/shell/shell.h"
 
 namespace sky {
 namespace shell {

@@ -29,7 +29,7 @@
 #include <string.h>
 
 #ifndef WTFString_h
-#include "sky/engine/wtf/text/AtomicString.h"
+#include "flutter/sky/engine/wtf/text/AtomicString.h"
 #endif
 
 // This macro is helpful for testing how many intermediate Strings are created while evaluating an
@@ -436,5 +436,5 @@ PassRefPtr<StringImpl> makeString(StringType1 string1, StringType2 string2)
 
 } // namespace WTF
 
-#include "sky/engine/wtf/text/StringOperators.h"
+#include "flutter/sky/engine/wtf/text/StringOperators.h"
 #endif  // SKY_ENGINE_WTF_TEXT_STRINGCONCATENATE_H_

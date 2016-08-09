@@ -23,13 +23,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/engine/wtf/text/StringStatics.h"
+#include "flutter/sky/engine/wtf/text/StringStatics.h"
 
-#include "sky/engine/wtf/DynamicAnnotations.h"
-#include "sky/engine/wtf/MainThread.h"
-#include "sky/engine/wtf/StaticConstructors.h"
-#include "sky/engine/wtf/text/AtomicString.h"
-#include "sky/engine/wtf/text/StringImpl.h"
+#include "flutter/sky/engine/wtf/DynamicAnnotations.h"
+#include "flutter/sky/engine/wtf/MainThread.h"
+#include "flutter/sky/engine/wtf/StaticConstructors.h"
+#include "flutter/sky/engine/wtf/text/AtomicString.h"
+#include "flutter/sky/engine/wtf/text/StringImpl.h"
 
 namespace WTF {
 

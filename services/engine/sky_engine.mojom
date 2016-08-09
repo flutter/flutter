@@ -1,0 +1,60 @@
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+module sky;
+
+import "mojo/public/interfaces/application/service_provider.mojom";
+import "mojo/public/interfaces/application/shell.mojom";
+import "mojo/services/asset_bundle/interfaces/asset_bundle.mojom";
+import "mojo/services/gfx/composition/interfaces/scheduling.mojom";
+import "mojo/services/ui/views/interfaces/views.mojom";
+import "flutter/services/engine/input_event.mojom";
+import "flutter/services/pointer/pointer.mojom";
+
+enum AppLifecycleState {
+  PAUSED,
+  RESUMED,
+};
+
+struct ViewportMetrics {
+  float device_pixel_ratio = 1.0;
+  int32 physical_width;
+  int32 physical_height;
+  int32 physical_padding_top;
+  int32 physical_padding_right;
+  int32 physical_padding_bottom;
+  int32 physical_padding_left;
+  uint32 scene_version;
+};
+
+struct ServicesData {
+  mojo.Shell? shell;
+  mojo.ServiceProvider? incoming_services;
+  mojo.ServiceProvider&? outgoing_services;
+  mojo.ui.View? view;
+  mojo.ServiceProvider? view_services;
+  mojo.gfx.composition.FrameScheduler? frame_scheduler;
+};
+
+[ServiceName="sky::SkyEngine"]
+interface SkyEngine {
+  SetServices(ServicesData services);
+
+  OnAppLifecycleStateChanged(AppLifecycleState state);
+
+  OnViewportMetricsChanged(ViewportMetrics metrics);
+  OnLocaleChanged(string language_code, string country_code);
+  OnPointerPacket(pointer.PointerPacket packet);
+
+  PushRoute(string route);
+  PopRoute();
+
+  RunFromFile(string main, string packages, string bundle_path);
+  RunFromPrecompiledSnapshot(string bundle_path);
+  RunFromBundle(string script_uri, string bundle_path);
+
+  // Run the app from a bundle, but obtain the snapshot from snapshot_path
+  // instead of using the snapshot within the bundle.
+  RunFromBundleAndSnapshot(string script_uri, string bundle_path, string snapshot_path);
+};

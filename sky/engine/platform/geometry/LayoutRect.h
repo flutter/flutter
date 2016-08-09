@@ -31,10 +31,10 @@
 #ifndef SKY_ENGINE_PLATFORM_GEOMETRY_LAYOUTRECT_H_
 #define SKY_ENGINE_PLATFORM_GEOMETRY_LAYOUTRECT_H_
 
-#include "sky/engine/platform/geometry/IntRect.h"
-#include "sky/engine/platform/geometry/LayoutBoxExtent.h"
-#include "sky/engine/platform/geometry/LayoutPoint.h"
-#include "sky/engine/wtf/Vector.h"
+#include "flutter/sky/engine/platform/geometry/IntRect.h"
+#include "flutter/sky/engine/platform/geometry/LayoutBoxExtent.h"
+#include "flutter/sky/engine/platform/geometry/LayoutPoint.h"
+#include "flutter/sky/engine/wtf/Vector.h"
 
 namespace blink {
 

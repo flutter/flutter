@@ -27,12 +27,12 @@
 #ifndef SKY_ENGINE_PLATFORM_SHAREDBUFFER_H_
 #define SKY_ENGINE_PLATFORM_SHAREDBUFFER_H_
 
-#include "sky/engine/platform/PlatformExport.h"
-#include "sky/engine/platform/PurgeableVector.h"
-#include "sky/engine/wtf/Forward.h"
-#include "sky/engine/wtf/OwnPtr.h"
-#include "sky/engine/wtf/RefCounted.h"
-#include "sky/engine/wtf/text/WTFString.h"
+#include "flutter/sky/engine/platform/PlatformExport.h"
+#include "flutter/sky/engine/platform/PurgeableVector.h"
+#include "flutter/sky/engine/wtf/Forward.h"
+#include "flutter/sky/engine/wtf/OwnPtr.h"
+#include "flutter/sky/engine/wtf/RefCounted.h"
+#include "flutter/sky/engine/wtf/text/WTFString.h"
 #include "third_party/skia/include/core/SkData.h"
 
 namespace blink {

@@ -28,10 +28,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/engine/platform/geometry/RoundedRect.h"
+#include "flutter/sky/engine/platform/geometry/RoundedRect.h"
 
 #include <gtest/gtest.h>
-#include "sky/engine/platform/geometry/IntRect.h"
+#include "flutter/sky/engine/platform/geometry/IntRect.h"
 
 using namespace blink;
 

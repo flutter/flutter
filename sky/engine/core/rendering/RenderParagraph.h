@@ -5,8 +5,8 @@
 #ifndef SKY_ENGINE_CORE_RENDERING_RENDERPARAGRAPH_H_
 #define SKY_ENGINE_CORE_RENDERING_RENDERPARAGRAPH_H_
 
-#include "sky/engine/core/rendering/RenderBlock.h"
-#include "sky/engine/core/rendering/line/TrailingObjects.h"
+#include "flutter/sky/engine/core/rendering/RenderBlock.h"
+#include "flutter/sky/engine/core/rendering/line/TrailingObjects.h"
 
 namespace blink {
 

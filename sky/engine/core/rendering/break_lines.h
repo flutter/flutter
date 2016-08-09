@@ -21,7 +21,7 @@
 #ifndef SKY_ENGINE_CORE_RENDERING_BREAK_LINES_H_
 #define SKY_ENGINE_CORE_RENDERING_BREAK_LINES_H_
 
-#include "sky/engine/wtf/unicode/Unicode.h"
+#include "flutter/sky/engine/wtf/unicode/Unicode.h"
 
 namespace blink {
 

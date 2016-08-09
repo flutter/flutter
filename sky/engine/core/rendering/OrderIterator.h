@@ -32,7 +32,7 @@
 #define SKY_ENGINE_CORE_RENDERING_ORDERITERATOR_H_
 
 #include <set>
-#include "sky/engine/wtf/Noncopyable.h"
+#include "flutter/sky/engine/wtf/Noncopyable.h"
 
 namespace blink {
 

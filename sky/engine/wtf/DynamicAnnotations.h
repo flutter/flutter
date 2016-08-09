@@ -48,8 +48,8 @@
  * See http://code.google.com/p/data-race-test/wiki/DynamicAnnotations for more information.
  */
 
-#include "sky/engine/wtf/OperatingSystem.h"
-#include "sky/engine/wtf/WTFExport.h"
+#include "flutter/sky/engine/wtf/OperatingSystem.h"
+#include "flutter/sky/engine/wtf/WTFExport.h"
 
 #if USE(DYNAMIC_ANNOTATIONS)
 /* Tell data race detector that we're not interested in reports on the given address range. */

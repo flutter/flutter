@@ -29,7 +29,7 @@
 #ifndef SKY_ENGINE_PLATFORM_TEXT_TEXTRUNITERATOR_H_
 #define SKY_ENGINE_PLATFORM_TEXT_TEXTRUNITERATOR_H_
 
-#include "sky/engine/platform/text/TextRun.h"
+#include "flutter/sky/engine/platform/text/TextRun.h"
 
 namespace blink {
 

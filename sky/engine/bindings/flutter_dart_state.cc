@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sky/engine/bindings/flutter_dart_state.h"
+#include "flutter/sky/engine/bindings/flutter_dart_state.h"
 
 #include "lib/tonic/converter/dart_converter.h"
-#include "sky/engine/bindings/mojo_services.h"
+#include "flutter/sky/engine/bindings/mojo_services.h"
 
 #ifdef OS_ANDROID
 #include "flutter/lib/jni/dart_jni.h"

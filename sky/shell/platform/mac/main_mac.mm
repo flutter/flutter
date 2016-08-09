@@ -7,10 +7,10 @@
 #include "base/bind.h"
 #include "base/command_line.h"
 #include "base/message_loop/message_loop.h"
-#include "sky/shell/platform/mac/platform_mac.h"
-#include "sky/shell/platform/mac/sky_application.h"
-#include "sky/shell/switches.h"
-#include "sky/shell/testing/testing.h"
+#include "flutter/sky/shell/platform/mac/platform_mac.h"
+#include "flutter/sky/shell/platform/mac/sky_application.h"
+#include "flutter/sky/shell/switches.h"
+#include "flutter/sky/shell/testing/testing.h"
 
 namespace sky {
 namespace shell {

@@ -7,7 +7,7 @@
 
 #include "lib/ftl/functional/closure.h"
 #include "mojo/public/cpp/bindings/interface_request.h"
-#include "sky/services/engine/sky_engine.mojom.h"
+#include "flutter/services/engine/sky_engine.mojom.h"
 
 namespace sky {
 namespace shell {

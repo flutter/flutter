@@ -28,7 +28,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/engine/platform/text/SegmentedString.h"
+#include "flutter/sky/engine/platform/text/SegmentedString.h"
 
 #include <gtest/gtest.h>
 

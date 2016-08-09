@@ -10,7 +10,7 @@
 #include "mojo/public/cpp/application/service_provider_impl.h"
 #include "mojo/public/interfaces/application/service_provider.mojom.h"
 #include "mojo/services/asset_bundle/interfaces/asset_bundle.mojom.h"
-#include "sky/services/engine/sky_engine.mojom.h"
+#include "flutter/services/engine/sky_engine.mojom.h"
 
 namespace mojo {
 class ApplicationConnection;

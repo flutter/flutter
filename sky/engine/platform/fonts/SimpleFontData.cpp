@@ -27,9 +27,9 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/engine/platform/fonts/SimpleFontData.h"
+#include "flutter/sky/engine/platform/fonts/SimpleFontData.h"
 
-#include "sky/engine/wtf/MathExtras.h"
+#include "flutter/sky/engine/wtf/MathExtras.h"
 
 namespace blink {
 

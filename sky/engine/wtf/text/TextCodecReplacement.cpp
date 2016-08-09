@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sky/engine/wtf/text/TextCodecReplacement.h"
+#include "flutter/sky/engine/wtf/text/TextCodecReplacement.h"
 
-#include "sky/engine/wtf/PassOwnPtr.h"
-#include "sky/engine/wtf/text/WTFString.h"
-#include "sky/engine/wtf/unicode/CharacterNames.h"
+#include "flutter/sky/engine/wtf/PassOwnPtr.h"
+#include "flutter/sky/engine/wtf/text/WTFString.h"
+#include "flutter/sky/engine/wtf/unicode/CharacterNames.h"
 
 namespace WTF {
 

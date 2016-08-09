@@ -28,11 +28,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/engine/platform/PurgeableVector.h"
+#include "flutter/sky/engine/platform/PurgeableVector.h"
 
-#include "sky/engine/platform/TestingPlatformSupport.h"
-#include "sky/engine/public/platform/WebDiscardableMemory.h"
-#include "sky/engine/wtf/Vector.h"
+#include "flutter/sky/engine/platform/TestingPlatformSupport.h"
+#include "flutter/sky/engine/public/platform/WebDiscardableMemory.h"
+#include "flutter/sky/engine/wtf/Vector.h"
 
 #include <algorithm>
 #include <cstdlib>

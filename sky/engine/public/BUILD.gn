@@ -6,7 +6,7 @@ import("//tools/grit/grit_rule.gni")
 
 group("test_support") {
   deps = [
-    "//sky/engine/web:test_support",
+    "//flutter/sky/engine/web:test_support",
   ]
 }
 

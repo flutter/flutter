@@ -7,8 +7,8 @@
 
 #include "flutter/lib/ui/painting/canvas.h"
 #include "lib/tonic/dart_wrappable.h"
-#include "sky/engine/core/rendering/RenderView.h"
-#include "sky/engine/core/text/TextBox.h"
+#include "flutter/sky/engine/core/rendering/RenderView.h"
+#include "flutter/sky/engine/core/text/TextBox.h"
 
 namespace tonic {
 class DartLibraryNatives;

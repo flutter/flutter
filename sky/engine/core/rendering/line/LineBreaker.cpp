@@ -20,9 +20,9 @@
  *
  */
 
-#include "sky/engine/core/rendering/line/LineBreaker.h"
+#include "flutter/sky/engine/core/rendering/line/LineBreaker.h"
 
-#include "sky/engine/core/rendering/line/BreakingContextInlineHeaders.h"
+#include "flutter/sky/engine/core/rendering/line/BreakingContextInlineHeaders.h"
 
 namespace blink {
 

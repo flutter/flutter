@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SERVICES_ICU_CONSTANTS_H_
-#define SERVICES_ICU_CONSTANTS_H_
+#ifndef FLUTTER_SERVICES_ICU_CONSTANTS_H_
+#define FLUTTER_SERVICES_ICU_CONSTANTS_H_
 
 #include <stddef.h>
 
@@ -16,4 +16,4 @@ extern const size_t kDataSize;
 }  // namespace icu
 }  // namespace mojo
 
-#endif  // SERVICES_ICU_CONSTANTS_H_
+#endif  // FLUTTER_SERVICES_ICU_CONSTANTS_H_

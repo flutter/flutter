@@ -28,10 +28,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/engine/core/rendering/style/ShadowList.h"
+#include "flutter/sky/engine/core/rendering/style/ShadowList.h"
 
-#include "sky/engine/platform/geometry/FloatRect.h"
-#include "sky/engine/wtf/OwnPtr.h"
+#include "flutter/sky/engine/platform/geometry/FloatRect.h"
+#include "flutter/sky/engine/wtf/OwnPtr.h"
 
 namespace blink {
 

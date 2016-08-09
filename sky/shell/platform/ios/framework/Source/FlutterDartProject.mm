@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sky/shell/platform/ios/framework/Source/FlutterDartProject_Internal.h"
+#include "flutter/sky/shell/platform/ios/framework/Source/FlutterDartProject_Internal.h"
 
 #include "base/command_line.h"
 #include "dart/runtime/include/dart_api.h"
-#include "sky/shell/platform/ios/framework/Source/FlutterDartSource.h"
-#include "sky/shell/switches.h"
+#include "flutter/sky/shell/platform/ios/framework/Source/FlutterDartSource.h"
+#include "flutter/sky/shell/switches.h"
 
 static NSURL* URLForSwitch(const char* name) {
   auto cmd = *base::CommandLine::ForCurrentProcess();

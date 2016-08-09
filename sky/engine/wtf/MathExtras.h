@@ -30,8 +30,8 @@
 #include <cstddef>
 #include <limits>
 
-#include "sky/engine/wtf/CPU.h"
-#include "sky/engine/wtf/OperatingSystem.h"
+#include "flutter/sky/engine/wtf/CPU.h"
+#include "flutter/sky/engine/wtf/OperatingSystem.h"
 
 const double piDouble = M_PI;
 const float piFloat = static_cast<float>(M_PI);

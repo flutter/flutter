@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sky/engine/public/sky/sky_view_client.h"
+#include "flutter/sky/engine/public/sky/sky_view_client.h"
 
 namespace blink {
 

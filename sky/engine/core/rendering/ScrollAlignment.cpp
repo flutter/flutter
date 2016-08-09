@@ -41,9 +41,9 @@
  * version of this file under any of the LGPL, the MPL or the GPL.
  */
 
-#include "sky/engine/core/rendering/ScrollAlignment.h"
+#include "flutter/sky/engine/core/rendering/ScrollAlignment.h"
 
-#include "sky/engine/platform/geometry/LayoutRect.h"
+#include "flutter/sky/engine/platform/geometry/LayoutRect.h"
 
 namespace blink {
 

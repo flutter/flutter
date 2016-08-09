@@ -19,9 +19,9 @@
  *
  */
 
-#include "sky/engine/wtf/TypeTraits.h"
+#include "flutter/sky/engine/wtf/TypeTraits.h"
 
-#include "sky/engine/wtf/Assertions.h"
+#include "flutter/sky/engine/wtf/Assertions.h"
 
 namespace WTF {
 

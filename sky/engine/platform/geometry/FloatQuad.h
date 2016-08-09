@@ -29,9 +29,9 @@
 #ifndef SKY_ENGINE_PLATFORM_GEOMETRY_FLOATQUAD_H_
 #define SKY_ENGINE_PLATFORM_GEOMETRY_FLOATQUAD_H_
 
-#include "sky/engine/platform/geometry/FloatPoint.h"
-#include "sky/engine/platform/geometry/FloatRect.h"
-#include "sky/engine/platform/geometry/IntRect.h"
+#include "flutter/sky/engine/platform/geometry/FloatPoint.h"
+#include "flutter/sky/engine/platform/geometry/FloatRect.h"
+#include "flutter/sky/engine/platform/geometry/IntRect.h"
 
 namespace blink {
 

@@ -3,7 +3,7 @@
 # found in the LICENSE file.
 
 import("//mojo/dart/packages/mojo/sdk_ext_sources.gni")
-import("//sky/engine/config.gni")
+import("//flutter/sky/engine/config.gni")
 
 bindings_output_dir = "$root_gen_dir/sky/bindings"
 

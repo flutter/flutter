@@ -21,7 +21,7 @@
 #ifndef SKY_ENGINE_CORE_RENDERING_RENDEROVERFLOW_H_
 #define SKY_ENGINE_CORE_RENDERING_RENDEROVERFLOW_H_
 
-#include "sky/engine/platform/geometry/LayoutRect.h"
+#include "flutter/sky/engine/platform/geometry/LayoutRect.h"
 
 namespace blink
 {

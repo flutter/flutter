@@ -25,7 +25,7 @@
  */
 
 
-#include "sky/engine/wtf/DynamicAnnotations.h"
+#include "flutter/sky/engine/wtf/DynamicAnnotations.h"
 
 #if USE(DYNAMIC_ANNOTATIONS) && !USE(DYNAMIC_ANNOTATIONS_NOIMPL)
 

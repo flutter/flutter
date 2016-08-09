@@ -26,11 +26,11 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "sky/engine/platform/graphics/StrokeData.h"
+#include "flutter/sky/engine/platform/graphics/StrokeData.h"
 
-#include "sky/engine/platform/graphics/skia/SkiaUtils.h"
-#include "sky/engine/wtf/OwnPtr.h"
-#include "sky/engine/wtf/PassOwnPtr.h"
+#include "flutter/sky/engine/platform/graphics/skia/SkiaUtils.h"
+#include "flutter/sky/engine/wtf/OwnPtr.h"
+#include "flutter/sky/engine/wtf/PassOwnPtr.h"
 
 namespace blink {
 

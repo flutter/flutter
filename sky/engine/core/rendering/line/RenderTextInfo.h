@@ -23,7 +23,7 @@
 #ifndef SKY_ENGINE_CORE_RENDERING_LINE_RENDERTEXTINFO_H_
 #define SKY_ENGINE_CORE_RENDERING_LINE_RENDERTEXTINFO_H_
 
-#include "sky/engine/platform/text/TextBreakIterator.h"
+#include "flutter/sky/engine/platform/text/TextBreakIterator.h"
 
 namespace blink {
 

@@ -24,17 +24,17 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/engine/wtf/text/TextCodecICU.h"
+#include "flutter/sky/engine/wtf/text/TextCodecICU.h"
 
 #include <unicode/ucnv.h>
 #include <unicode/ucnv_cb.h>
-#include "sky/engine/wtf/Assertions.h"
-#include "sky/engine/wtf/StringExtras.h"
-#include "sky/engine/wtf/Threading.h"
-#include "sky/engine/wtf/WTFThreadData.h"
-#include "sky/engine/wtf/text/CString.h"
-#include "sky/engine/wtf/text/StringBuilder.h"
-#include "sky/engine/wtf/unicode/CharacterNames.h"
+#include "flutter/sky/engine/wtf/Assertions.h"
+#include "flutter/sky/engine/wtf/StringExtras.h"
+#include "flutter/sky/engine/wtf/Threading.h"
+#include "flutter/sky/engine/wtf/WTFThreadData.h"
+#include "flutter/sky/engine/wtf/text/CString.h"
+#include "flutter/sky/engine/wtf/text/StringBuilder.h"
+#include "flutter/sky/engine/wtf/unicode/CharacterNames.h"
 
 using std::min;
 

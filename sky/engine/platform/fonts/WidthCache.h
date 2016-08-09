@@ -26,13 +26,13 @@
 #ifndef SKY_ENGINE_PLATFORM_FONTS_WIDTHCACHE_H_
 #define SKY_ENGINE_PLATFORM_FONTS_WIDTHCACHE_H_
 
-#include "sky/engine/platform/geometry/IntRectExtent.h"
-#include "sky/engine/platform/text/TextRun.h"
-#include "sky/engine/wtf/Forward.h"
-#include "sky/engine/wtf/HashFunctions.h"
-#include "sky/engine/wtf/HashSet.h"
-#include "sky/engine/wtf/HashTableDeletedValueType.h"
-#include "sky/engine/wtf/StringHasher.h"
+#include "flutter/sky/engine/platform/geometry/IntRectExtent.h"
+#include "flutter/sky/engine/platform/text/TextRun.h"
+#include "flutter/sky/engine/wtf/Forward.h"
+#include "flutter/sky/engine/wtf/HashFunctions.h"
+#include "flutter/sky/engine/wtf/HashSet.h"
+#include "flutter/sky/engine/wtf/HashTableDeletedValueType.h"
+#include "flutter/sky/engine/wtf/StringHasher.h"
 
 namespace blink {
 

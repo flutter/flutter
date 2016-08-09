@@ -28,11 +28,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/engine/platform/fonts/harfbuzz/HarfBuzzFace.h"
+#include "flutter/sky/engine/platform/fonts/harfbuzz/HarfBuzzFace.h"
 
 #include "hb-ot.h"
 #include "hb.h"
-#include "sky/engine/platform/fonts/FontPlatformData.h"
+#include "flutter/sky/engine/platform/fonts/FontPlatformData.h"
 
 namespace blink {
 

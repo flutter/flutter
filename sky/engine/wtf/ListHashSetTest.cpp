@@ -25,11 +25,11 @@
 
 
 #include <gtest/gtest.h>
-#include "sky/engine/wtf/LinkedHashSet.h"
-#include "sky/engine/wtf/ListHashSet.h"
-#include "sky/engine/wtf/PassRefPtr.h"
-#include "sky/engine/wtf/RefCounted.h"
-#include "sky/engine/wtf/RefPtr.h"
+#include "flutter/sky/engine/wtf/LinkedHashSet.h"
+#include "flutter/sky/engine/wtf/ListHashSet.h"
+#include "flutter/sky/engine/wtf/PassRefPtr.h"
+#include "flutter/sky/engine/wtf/RefCounted.h"
+#include "flutter/sky/engine/wtf/RefPtr.h"
 
 namespace {
 

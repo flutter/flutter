@@ -19,9 +19,9 @@
  *
  */
 
-#include "sky/engine/core/rendering/style/ShadowData.h"
+#include "flutter/sky/engine/core/rendering/style/ShadowData.h"
 
-#include "sky/engine/platform/animation/AnimationUtilities.h"
+#include "flutter/sky/engine/platform/animation/AnimationUtilities.h"
 
 namespace blink {
 

@@ -24,9 +24,9 @@
 #ifndef SKY_ENGINE_CORE_RENDERING_BIDIRUN_H_
 #define SKY_ENGINE_CORE_RENDERING_BIDIRUN_H_
 
-#include "sky/engine/core/rendering/RenderText.h"
-#include "sky/engine/platform/text/BidiResolver.h"
-#include "sky/engine/wtf/StdLibExtras.h"
+#include "flutter/sky/engine/core/rendering/RenderText.h"
+#include "flutter/sky/engine/platform/text/BidiResolver.h"
+#include "flutter/sky/engine/wtf/StdLibExtras.h"
 
 namespace blink {
 

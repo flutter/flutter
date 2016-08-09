@@ -28,12 +28,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/engine/platform/fonts/VDMXParser.h"
+#include "flutter/sky/engine/platform/fonts/VDMXParser.h"
 
 #include <stdlib.h>
 #include <string.h>
 
-#include "sky/engine/wtf/ByteOrder.h"
+#include "flutter/sky/engine/wtf/ByteOrder.h"
 
 // Buffer helper class
 //

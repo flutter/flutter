@@ -31,10 +31,10 @@
 #ifndef SKY_ENGINE_PLATFORM_FONTS_FONTDATACACHE_H_
 #define SKY_ENGINE_PLATFORM_FONTS_FONTDATACACHE_H_
 
-#include "sky/engine/platform/fonts/FontCache.h"
-#include "sky/engine/platform/fonts/FontPlatformData.h"
-#include "sky/engine/wtf/HashMap.h"
-#include "sky/engine/wtf/ListHashSet.h"
+#include "flutter/sky/engine/platform/fonts/FontCache.h"
+#include "flutter/sky/engine/platform/fonts/FontPlatformData.h"
+#include "flutter/sky/engine/wtf/HashMap.h"
+#include "flutter/sky/engine/wtf/ListHashSet.h"
 
 namespace blink {
 

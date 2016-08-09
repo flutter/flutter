@@ -7,7 +7,7 @@
 
 #include <stdint.h>
 #include <limits>
-#include "sky/engine/wtf/CPU.h"
+#include "flutter/sky/engine/wtf/CPU.h"
 
 ALWAYS_INLINE int32_t saturatedAddition(int32_t a, int32_t b)
 {

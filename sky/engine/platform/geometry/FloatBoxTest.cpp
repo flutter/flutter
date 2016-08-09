@@ -22,9 +22,9 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/engine/platform/geometry/FloatBox.h"
+#include "flutter/sky/engine/platform/geometry/FloatBox.h"
 
-#include "sky/engine/platform/geometry/FloatBoxTestHelpers.h"
+#include "flutter/sky/engine/platform/geometry/FloatBoxTestHelpers.h"
 
 #include <gtest/gtest.h>
 

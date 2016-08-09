@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sky/shell/platform/glfw/platform_view_glfw.h"
+#include "flutter/sky/shell/platform/glfw/platform_view_glfw.h"
 
-#include "sky/shell/gpu/direct/surface_notifications_direct.h"
+#include "flutter/sky/shell/gpu/direct/surface_notifications_direct.h"
 
 namespace sky {
 namespace shell {

@@ -24,7 +24,7 @@
 #ifndef SKY_ENGINE_CORE_RENDERING_LINE_LINEINFO_H_
 #define SKY_ENGINE_CORE_RENDERING_LINE_LINEINFO_H_
 
-#include "sky/engine/core/rendering/line/LineWidth.h"
+#include "flutter/sky/engine/core/rendering/line/LineWidth.h"
 
 namespace blink {
 

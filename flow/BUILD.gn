@@ -44,10 +44,10 @@ source_set("flow") {
   ]
 
   deps = [
-    "//glue",
+    "//flutter/glue",
     "//lib/ftl",
     "//mojo/services/gfx/composition/interfaces",
     "//mojo/skia",
-    "//skia",
+    "//flutter/skia",
   ]
 }

@@ -9,7 +9,7 @@
 #include "lib/ftl/time/time_point.h"
 #include "mojo/services/gfx/composition/interfaces/scheduling.mojom.h"
 #include "mojo/services/vsync/interfaces/vsync.mojom.h"
-#include "sky/shell/ui/engine.h"
+#include "flutter/sky/shell/ui/engine.h"
 
 namespace sky {
 namespace shell {

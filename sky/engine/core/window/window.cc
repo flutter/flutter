@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sky/engine/core/window/window.h"
+#include "flutter/sky/engine/core/window/window.h"
 
 #include "flutter/lib/ui/compositing/scene.h"
 #include "lib/tonic/converter/dart_converter.h"
 #include "lib/tonic/logging/dart_invoke.h"
 #include "lib/tonic/dart_library_natives.h"
-#include "sky/engine/core/script/ui_dart_state.h"
+#include "flutter/sky/engine/core/script/ui_dart_state.h"
 
 using tonic::DartInvokeField;
 using tonic::StdStringToDart;

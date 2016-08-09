@@ -33,13 +33,13 @@
 
 #include <stdint.h>
 #include <limits>
-#include "sky/engine/wtf/CPU.h"
+#include "flutter/sky/engine/wtf/CPU.h"
 
 #if CPU(ARM) && COMPILER(GCC) && __OPTIMIZE__
 
 // If we're building ARM on GCC we replace the C++ versions with some
 // native ARM assembly for speed.
-#include "sky/engine/wtf/asm/SaturatedArithmeticARM.h"
+#include "flutter/sky/engine/wtf/asm/SaturatedArithmeticARM.h"
 
 #else
 

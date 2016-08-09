@@ -5,7 +5,7 @@
 #ifndef SKY_ENGINE_PLATFORM_GRAPHICS_IMAGEFILTER_H_
 #define SKY_ENGINE_PLATFORM_GRAPHICS_IMAGEFILTER_H_
 
-#include "sky/engine/platform/geometry/FloatRect.h"
+#include "flutter/sky/engine/platform/geometry/FloatRect.h"
 
 class SkImageFilter;
 

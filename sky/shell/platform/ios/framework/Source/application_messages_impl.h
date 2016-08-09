@@ -9,9 +9,9 @@
 
 #include "lib/ftl/memory/weak_ptr.h"
 #include "mojo/public/cpp/bindings/binding_set.h"
-#include "sky/services/platform/app_messages.mojom.h"
-#include "sky/shell/platform/ios/framework/Headers/FlutterAsyncMessageListener.h"
-#include "sky/shell/platform/ios/framework/Headers/FlutterMessageListener.h"
+#include "flutter/services/platform/app_messages.mojom.h"
+#include "flutter/sky/shell/platform/ios/framework/Headers/FlutterAsyncMessageListener.h"
+#include "flutter/sky/shell/platform/ios/framework/Headers/FlutterMessageListener.h"
 
 namespace sky {
 namespace shell {

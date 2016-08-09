@@ -31,7 +31,7 @@
 #define SKY_ENGINE_WTF_THREADING_H_
 
 #include <stdint.h>
-#include "sky/engine/wtf/WTFExport.h"
+#include "flutter/sky/engine/wtf/WTFExport.h"
 
 // For portability, we do not use thread-safe statics natively supported by some compilers (e.g. gcc).
 #define AtomicallyInitializedStatic(T, name) \

@@ -30,7 +30,7 @@
 
 #include "cached-powers.h"
 #include "diy-fp.h"
-#include "sky/engine/wtf/dtoa/double.h"
+#include "flutter/sky/engine/wtf/dtoa/double.h"
 
 namespace WTF {
 

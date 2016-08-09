@@ -32,7 +32,7 @@
 #define SKY_ENGINE_WTF_TESTING_WTFTESTHELPERS_H_
 
 #include <iosfwd> // NOLINT
-#include "sky/engine/wtf/text/WTFString.h"
+#include "flutter/sky/engine/wtf/text/WTFString.h"
 #include "wtf/testing/WTFUnitTestHelpersExport.h"
 
 namespace WTF {

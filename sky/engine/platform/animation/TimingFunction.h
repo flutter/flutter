@@ -26,15 +26,15 @@
 #define SKY_ENGINE_PLATFORM_ANIMATION_TIMINGFUNCTION_H_
 
 #include <algorithm>
-#include "sky/engine/platform/animation/AnimationUtilities.h"
-#include "sky/engine/platform/animation/UnitBezier.h"
-#include "sky/engine/wtf/OwnPtr.h"
-#include "sky/engine/wtf/PassOwnPtr.h"
-#include "sky/engine/wtf/PassRefPtr.h"
-#include "sky/engine/wtf/RefCounted.h"
-#include "sky/engine/wtf/StdLibExtras.h"
-#include "sky/engine/wtf/text/StringBuilder.h"
-#include "sky/engine/wtf/text/WTFString.h"
+#include "flutter/sky/engine/platform/animation/AnimationUtilities.h"
+#include "flutter/sky/engine/platform/animation/UnitBezier.h"
+#include "flutter/sky/engine/wtf/OwnPtr.h"
+#include "flutter/sky/engine/wtf/PassOwnPtr.h"
+#include "flutter/sky/engine/wtf/PassRefPtr.h"
+#include "flutter/sky/engine/wtf/RefCounted.h"
+#include "flutter/sky/engine/wtf/StdLibExtras.h"
+#include "flutter/sky/engine/wtf/text/StringBuilder.h"
+#include "flutter/sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
 

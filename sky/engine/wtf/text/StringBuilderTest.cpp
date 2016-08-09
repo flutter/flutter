@@ -31,11 +31,11 @@
 
 
 #include <gtest/gtest.h>
-#include "sky/engine/wtf/Assertions.h"
-#include "sky/engine/wtf/text/CString.h"
-#include "sky/engine/wtf/text/StringBuilder.h"
-#include "sky/engine/wtf/text/WTFString.h"
-#include "sky/engine/wtf/unicode/CharacterNames.h"
+#include "flutter/sky/engine/wtf/Assertions.h"
+#include "flutter/sky/engine/wtf/text/CString.h"
+#include "flutter/sky/engine/wtf/text/StringBuilder.h"
+#include "flutter/sky/engine/wtf/text/WTFString.h"
+#include "flutter/sky/engine/wtf/unicode/CharacterNames.h"
 
 namespace WTF {
 

@@ -26,7 +26,7 @@
 #ifndef SKY_ENGINE_CORE_RENDERING_CLIPRECTS_H_
 #define SKY_ENGINE_CORE_RENDERING_CLIPRECTS_H_
 
-#include "sky/engine/core/rendering/ClipRect.h"
+#include "flutter/sky/engine/core/rendering/ClipRect.h"
 
 namespace blink {
 

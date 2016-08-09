@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sky/shell/platform/mac/platform_mac.h"
+#include "flutter/sky/shell/platform/mac/platform_mac.h"
 
 #include <Foundation/Foundation.h>
 
@@ -18,12 +18,12 @@
 #include "dart/runtime/include/dart_tools_api.h"
 #include "mojo/edk/embedder/embedder.h"
 #include "mojo/edk/embedder/simple_platform_support.h"
-#include "sky/engine/core/start_up.h"
-#include "sky/engine/wtf/MakeUnique.h"
-#include "sky/shell/shell.h"
-#include "sky/shell/switches.h"
-#include "sky/shell/tracing_controller.h"
-#include "sky/shell/ui_delegate.h"
+#include "flutter/sky/engine/core/start_up.h"
+#include "flutter/sky/engine/wtf/MakeUnique.h"
+#include "flutter/sky/shell/shell.h"
+#include "flutter/sky/shell/switches.h"
+#include "flutter/sky/shell/tracing_controller.h"
+#include "flutter/sky/shell/ui_delegate.h"
 
 namespace sky {
 namespace shell {

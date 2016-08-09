@@ -32,7 +32,7 @@
 
 #include <ios> // NOLINT
 #include <ostream> // NOLINT
-#include "sky/engine/wtf/text/WTFString.h"
+#include "flutter/sky/engine/wtf/text/WTFString.h"
 
 namespace WTF {
 

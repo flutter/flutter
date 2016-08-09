@@ -20,8 +20,8 @@
 #ifndef SKY_ENGINE_CORE_RENDERING_POINTEREVENTSHITRULES_H_
 #define SKY_ENGINE_CORE_RENDERING_POINTEREVENTSHITRULES_H_
 
-#include "sky/engine/core/rendering/HitTestRequest.h"
-#include "sky/engine/core/rendering/style/RenderStyleConstants.h"
+#include "flutter/sky/engine/core/rendering/HitTestRequest.h"
+#include "flutter/sky/engine/core/rendering/style/RenderStyleConstants.h"
 
 namespace blink {
 

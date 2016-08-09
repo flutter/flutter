@@ -5,9 +5,9 @@
 #ifndef SKY_ENGINE_CORE_SCRIPT_UI_DART_STATE_H_
 #define SKY_ENGINE_CORE_SCRIPT_UI_DART_STATE_H_
 
-#include "sky/engine/bindings/flutter_dart_state.h"
-#include "sky/engine/platform/fonts/FontSelector.h"
-#include "sky/engine/wtf/RefPtr.h"
+#include "flutter/sky/engine/bindings/flutter_dart_state.h"
+#include "flutter/sky/engine/platform/fonts/FontSelector.h"
+#include "flutter/sky/engine/wtf/RefPtr.h"
 
 namespace blink {
 class Window;

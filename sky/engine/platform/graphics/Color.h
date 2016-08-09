@@ -26,10 +26,10 @@
 #ifndef SKY_ENGINE_PLATFORM_GRAPHICS_COLOR_H_
 #define SKY_ENGINE_PLATFORM_GRAPHICS_COLOR_H_
 
-#include "sky/engine/platform/animation/AnimationUtilities.h"
-#include "sky/engine/wtf/FastAllocBase.h"
-#include "sky/engine/wtf/Forward.h"
-#include "sky/engine/wtf/unicode/Unicode.h"
+#include "flutter/sky/engine/platform/animation/AnimationUtilities.h"
+#include "flutter/sky/engine/wtf/FastAllocBase.h"
+#include "flutter/sky/engine/wtf/Forward.h"
+#include "flutter/sky/engine/wtf/unicode/Unicode.h"
 
 namespace blink {
 

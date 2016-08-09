@@ -26,7 +26,7 @@
 #ifndef SKY_ENGINE_PLATFORM_GRAPHICS_IMAGEOBSERVER_H_
 #define SKY_ENGINE_PLATFORM_GRAPHICS_IMAGEOBSERVER_H_
 
-#include "sky/engine/platform/PlatformExport.h"
+#include "flutter/sky/engine/platform/PlatformExport.h"
 
 namespace blink {
 

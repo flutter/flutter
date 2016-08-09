@@ -19,19 +19,19 @@
  *
  */
 
-#include "sky/engine/platform/text/TextBreakIterator.h"
+#include "flutter/sky/engine/platform/text/TextBreakIterator.h"
 
 #include <unicode/rbbi.h>
 #include <unicode/ubrk.h>
-#include "sky/engine/platform/text/TextBreakIteratorInternalICU.h"
-#include "sky/engine/wtf/Assertions.h"
-#include "sky/engine/wtf/HashMap.h"
-#include "sky/engine/wtf/PassOwnPtr.h"
-#include "sky/engine/wtf/ThreadSpecific.h"
-#include "sky/engine/wtf/ThreadingPrimitives.h"
-#include "sky/engine/wtf/text/AtomicString.h"
-#include "sky/engine/wtf/text/CString.h"
-#include "sky/engine/wtf/text/WTFString.h"
+#include "flutter/sky/engine/platform/text/TextBreakIteratorInternalICU.h"
+#include "flutter/sky/engine/wtf/Assertions.h"
+#include "flutter/sky/engine/wtf/HashMap.h"
+#include "flutter/sky/engine/wtf/PassOwnPtr.h"
+#include "flutter/sky/engine/wtf/ThreadSpecific.h"
+#include "flutter/sky/engine/wtf/ThreadingPrimitives.h"
+#include "flutter/sky/engine/wtf/text/AtomicString.h"
+#include "flutter/sky/engine/wtf/text/CString.h"
+#include "flutter/sky/engine/wtf/text/WTFString.h"
 
 using namespace WTF;
 

@@ -27,8 +27,8 @@
 #ifndef SKY_ENGINE_WTF_PASSOWNPTR_H_
 #define SKY_ENGINE_WTF_PASSOWNPTR_H_
 
-#include "sky/engine/wtf/NullPtr.h"
-#include "sky/engine/wtf/OwnPtrCommon.h"
+#include "flutter/sky/engine/wtf/NullPtr.h"
+#include "flutter/sky/engine/wtf/OwnPtrCommon.h"
 
 namespace WTF {
 

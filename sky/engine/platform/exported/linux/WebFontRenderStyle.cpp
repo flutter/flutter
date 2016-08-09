@@ -28,9 +28,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/engine/public/platform/linux/WebFontRenderStyle.h"
+#include "flutter/sky/engine/public/platform/linux/WebFontRenderStyle.h"
 
-#include "sky/engine/platform/fonts/FontRenderStyle.h"
+#include "flutter/sky/engine/platform/fonts/FontRenderStyle.h"
 
 using blink::FontRenderStyle;
 

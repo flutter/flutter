@@ -23,10 +23,10 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/engine/platform/graphics/GradientGeneratedImage.h"
+#include "flutter/sky/engine/platform/graphics/GradientGeneratedImage.h"
 
-#include "sky/engine/platform/geometry/FloatRect.h"
-#include "sky/engine/platform/graphics/GraphicsContextStateSaver.h"
+#include "flutter/sky/engine/platform/geometry/FloatRect.h"
+#include "flutter/sky/engine/platform/graphics/GraphicsContextStateSaver.h"
 
 namespace blink {
 

@@ -26,8 +26,8 @@
 #ifndef SKY_ENGINE_PLATFORM_GRAPHICS_COLORSPACE_H_
 #define SKY_ENGINE_PLATFORM_GRAPHICS_COLORSPACE_H_
 
-#include "sky/engine/platform/PlatformExport.h"
-#include "sky/engine/platform/graphics/Color.h"
+#include "flutter/sky/engine/platform/PlatformExport.h"
+#include "flutter/sky/engine/platform/graphics/Color.h"
 
 namespace blink {
 

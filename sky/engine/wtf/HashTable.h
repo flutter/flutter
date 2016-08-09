@@ -20,17 +20,17 @@
 #ifndef SKY_ENGINE_WTF_HASHTABLE_H_
 #define SKY_ENGINE_WTF_HASHTABLE_H_
 
-#include "sky/engine/wtf/Alignment.h"
-#include "sky/engine/wtf/Assertions.h"
-#include "sky/engine/wtf/DefaultAllocator.h"
-#include "sky/engine/wtf/HashTraits.h"
-#include "sky/engine/wtf/WTF.h"
+#include "flutter/sky/engine/wtf/Alignment.h"
+#include "flutter/sky/engine/wtf/Assertions.h"
+#include "flutter/sky/engine/wtf/DefaultAllocator.h"
+#include "flutter/sky/engine/wtf/HashTraits.h"
+#include "flutter/sky/engine/wtf/WTF.h"
 
 #define DUMP_HASHTABLE_STATS 0
 #define DUMP_HASHTABLE_STATS_PER_TABLE 0
 
 #if DUMP_HASHTABLE_STATS_PER_TABLE
-#include "sky/engine/wtf/DataLog.h"
+#include "flutter/sky/engine/wtf/DataLog.h"
 #endif
 
 #if DUMP_HASHTABLE_STATS
@@ -1249,6 +1249,6 @@ namespace WTF {
 
 } // namespace WTF
 
-#include "sky/engine/wtf/HashIterators.h"
+#include "flutter/sky/engine/wtf/HashIterators.h"
 
 #endif  // SKY_ENGINE_WTF_HASHTABLE_H_

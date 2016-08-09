@@ -11,7 +11,7 @@
 #include "lib/ftl/memory/weak_ptr.h"
 #include "mojo/public/interfaces/application/application_connector.mojom.h"
 #include "mojo/services/gfx/composition/interfaces/scenes.mojom.h"
-#include "sky/shell/platform_view.h"
+#include "flutter/sky/shell/platform_view.h"
 
 namespace sky {
 namespace shell {

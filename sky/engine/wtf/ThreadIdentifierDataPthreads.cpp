@@ -28,10 +28,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/engine/wtf/ThreadIdentifierDataPthreads.h"
+#include "flutter/sky/engine/wtf/ThreadIdentifierDataPthreads.h"
 
-#include "sky/engine/wtf/Assertions.h"
-#include "sky/engine/wtf/WTF.h"
+#include "flutter/sky/engine/wtf/Assertions.h"
+#include "flutter/sky/engine/wtf/WTF.h"
 
 #include <limits.h>
 

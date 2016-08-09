@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sky/shell/platform/mojo/view_impl.h"
+#include "flutter/sky/shell/platform/mojo/view_impl.h"
 
 #include "mojo/public/cpp/application/connect.h"
 #include "mojo/services/gfx/composition/interfaces/scheduling.mojom.h"
-#include "sky/shell/shell.h"
+#include "flutter/sky/shell/shell.h"
 
 namespace sky {
 namespace shell {

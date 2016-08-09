@@ -21,11 +21,11 @@
 #ifndef SKY_ENGINE_WTF_PASSREFPTR_H_
 #define SKY_ENGINE_WTF_PASSREFPTR_H_
 
-#include "sky/engine/wtf/Assertions.h"
-#include "sky/engine/wtf/Compiler.h"
-#include "sky/engine/wtf/NullPtr.h"
-#include "sky/engine/wtf/RawPtr.h"
-#include "sky/engine/wtf/TypeTraits.h"
+#include "flutter/sky/engine/wtf/Assertions.h"
+#include "flutter/sky/engine/wtf/Compiler.h"
+#include "flutter/sky/engine/wtf/NullPtr.h"
+#include "flutter/sky/engine/wtf/RawPtr.h"
+#include "flutter/sky/engine/wtf/TypeTraits.h"
 
 namespace WTF {
 

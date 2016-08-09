@@ -26,7 +26,7 @@
 #ifndef SKY_ENGINE_PLATFORM_GRAPHICS_SKIA_SKSIZEHASH_H_
 #define SKY_ENGINE_PLATFORM_GRAPHICS_SKIA_SKSIZEHASH_H_
 
-#include "sky/engine/wtf/HashMap.h"
+#include "flutter/sky/engine/wtf/HashMap.h"
 #include "third_party/skia/include/core/SkScalar.h"
 #include "third_party/skia/include/core/SkSize.h"
 

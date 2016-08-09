@@ -24,13 +24,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/engine/platform/geometry/FloatSize.h"
+#include "flutter/sky/engine/platform/geometry/FloatSize.h"
 
 #include <math.h>
 #include <limits>
-#include "sky/engine/platform/FloatConversion.h"
-#include "sky/engine/platform/geometry/IntSize.h"
-#include "sky/engine/platform/geometry/LayoutSize.h"
+#include "flutter/sky/engine/platform/FloatConversion.h"
+#include "flutter/sky/engine/platform/geometry/IntSize.h"
+#include "flutter/sky/engine/platform/geometry/LayoutSize.h"
 
 namespace blink {
 

@@ -31,11 +31,11 @@
 #ifndef SKY_ENGINE_PUBLIC_PLATFORM_WEBCSTRING_H_
 #define SKY_ENGINE_PUBLIC_PLATFORM_WEBCSTRING_H_
 
-#include "sky/engine/public/platform/WebCommon.h"
-#include "sky/engine/public/platform/WebPrivatePtr.h"
+#include "flutter/sky/engine/public/platform/WebCommon.h"
+#include "flutter/sky/engine/public/platform/WebPrivatePtr.h"
 
 #if INSIDE_BLINK
-#include "sky/engine/wtf/Forward.h"
+#include "flutter/sky/engine/wtf/Forward.h"
 #endif
 #if !INSIDE_BLINK || defined(UNIT_TEST)
 #include <string>

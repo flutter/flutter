@@ -20,7 +20,7 @@
  *
  */
 
-#include "sky/engine/platform/text/SurrogatePairAwareTextIterator.h"
+#include "flutter/sky/engine/platform/text/SurrogatePairAwareTextIterator.h"
 
 #include <unicode/unorm.h>
 

@@ -33,9 +33,9 @@
 #include <gtest/gtest.h>
 #include <sstream>
 #include <string>
-#include "sky/engine/wtf/StdLibExtras.h"
-#include "sky/engine/wtf/text/CString.h"
-#include "sky/engine/wtf/text/WTFString.h"
+#include "flutter/sky/engine/wtf/StdLibExtras.h"
+#include "flutter/sky/engine/wtf/text/CString.h"
+#include "flutter/sky/engine/wtf/text/WTFString.h"
 
 using namespace WTF;
 

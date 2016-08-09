@@ -26,12 +26,12 @@
 #ifndef SKY_ENGINE_PLATFORM_ANIMATION_ANIMATIONUTILITIES_H_
 #define SKY_ENGINE_PLATFORM_ANIMATION_ANIMATIONUTILITIES_H_
 
-#include "sky/engine/platform/LayoutUnit.h"
-#include "sky/engine/platform/PlatformExport.h"
-#include "sky/engine/platform/geometry/FloatPoint.h"
-#include "sky/engine/platform/geometry/IntPoint.h"
-#include "sky/engine/wtf/MathExtras.h"
-#include "sky/engine/wtf/TypeTraits.h"
+#include "flutter/sky/engine/platform/LayoutUnit.h"
+#include "flutter/sky/engine/platform/PlatformExport.h"
+#include "flutter/sky/engine/platform/geometry/FloatPoint.h"
+#include "flutter/sky/engine/platform/geometry/IntPoint.h"
+#include "flutter/sky/engine/wtf/MathExtras.h"
+#include "flutter/sky/engine/wtf/TypeTraits.h"
 
 namespace blink {
 

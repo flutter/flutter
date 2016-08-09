@@ -19,9 +19,9 @@
  *
  */
 
-#include "sky/engine/core/rendering/style/StyleInheritedData.h"
+#include "flutter/sky/engine/core/rendering/style/StyleInheritedData.h"
 
-#include "sky/engine/core/rendering/style/RenderStyle.h"
+#include "flutter/sky/engine/core/rendering/style/RenderStyle.h"
 
 namespace blink {
 

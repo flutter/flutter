@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "glue/data_pipe_utils.h"
+#include "flutter/glue/data_pipe_utils.h"
 
 #include <stdio.h>
 #include <unistd.h>

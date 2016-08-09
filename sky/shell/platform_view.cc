@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sky/shell/platform_view.h"
+#include "flutter/sky/shell/platform_view.h"
 
 #include <utility>
 
 #include "flutter/lib/ui/painting/resource_context.h"
-#include "glue/movable_wrapper.h"
-#include "sky/shell/rasterizer.h"
+#include "flutter/glue/movable_wrapper.h"
+#include "flutter/sky/shell/rasterizer.h"
 #include "third_party/skia/include/gpu/gl/GrGLInterface.h"
 
 namespace sky {

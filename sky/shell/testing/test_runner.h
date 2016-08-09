@@ -11,7 +11,7 @@
 #include "lib/ftl/macros.h"
 #include "lib/ftl/memory/weak_ptr.h"
 #include "mojo/public/cpp/bindings/binding_set.h"
-#include "sky/services/engine/sky_engine.mojom.h"
+#include "flutter/services/engine/sky_engine.mojom.h"
 
 namespace sky {
 namespace shell {

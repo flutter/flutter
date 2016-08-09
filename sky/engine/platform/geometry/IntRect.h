@@ -26,10 +26,10 @@
 #ifndef SKY_ENGINE_PLATFORM_GEOMETRY_INTRECT_H_
 #define SKY_ENGINE_PLATFORM_GEOMETRY_INTRECT_H_
 
-#include "sky/engine/platform/geometry/IntPoint.h"
-#include "sky/engine/wtf/FastAllocBase.h"
-#include "sky/engine/wtf/Vector.h"
-#include "sky/engine/wtf/VectorTraits.h"
+#include "flutter/sky/engine/platform/geometry/IntPoint.h"
+#include "flutter/sky/engine/wtf/FastAllocBase.h"
+#include "flutter/sky/engine/wtf/Vector.h"
+#include "flutter/sky/engine/wtf/VectorTraits.h"
 
 struct SkRect;
 struct SkIRect;

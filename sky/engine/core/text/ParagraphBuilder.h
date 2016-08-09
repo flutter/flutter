@@ -7,7 +7,7 @@
 
 #include "lib/tonic/dart_wrappable.h"
 #include "lib/tonic/typed_data/int32_list.h"
-#include "sky/engine/core/text/Paragraph.h"
+#include "flutter/sky/engine/core/text/Paragraph.h"
 
 namespace tonic {
 class DartLibraryNatives;

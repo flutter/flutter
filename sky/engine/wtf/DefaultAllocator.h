@@ -35,10 +35,10 @@
 // traced, garbage collected heap. It uses FastMalloc for collections,
 // but uses the partition allocator for the backing store of the collections.
 
-#include "sky/engine/wtf/Assertions.h"
-#include "sky/engine/wtf/FastAllocBase.h"
-#include "sky/engine/wtf/PartitionAlloc.h"
-#include "sky/engine/wtf/WTF.h"
+#include "flutter/sky/engine/wtf/Assertions.h"
+#include "flutter/sky/engine/wtf/FastAllocBase.h"
+#include "flutter/sky/engine/wtf/PartitionAlloc.h"
+#include "flutter/sky/engine/wtf/WTF.h"
 
 #include <string.h>
 

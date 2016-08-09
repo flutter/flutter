@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sky/shell/platform_view_service_protocol.h"
+#include "flutter/sky/shell/platform_view_service_protocol.h"
 
 #include <string.h>
 
 #include <string>
 
-#include "sky/shell/shell.h"
+#include "flutter/sky/shell/shell.h"
 
 namespace sky {
 namespace shell {

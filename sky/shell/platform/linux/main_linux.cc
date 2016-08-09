@@ -10,13 +10,13 @@
 #include "base/message_loop/message_loop.h"
 #include "mojo/edk/embedder/embedder.h"
 #include "mojo/edk/embedder/simple_platform_support.h"
-#include "sky/shell/shell.h"
-#include "sky/shell/switches.h"
-#include "sky/shell/testing/testing.h"
+#include "flutter/sky/shell/shell.h"
+#include "flutter/sky/shell/switches.h"
+#include "flutter/sky/shell/testing/testing.h"
 
 #if defined(USE_GLFW)
-#include "sky/shell/platform/glfw/init_glfw.h"
-#include "sky/shell/platform/glfw/message_pump_glfw.h"
+#include "flutter/sky/shell/platform/glfw/init_glfw.h"
+#include "flutter/sky/shell/platform/glfw/message_pump_glfw.h"
 #endif
 
 namespace {

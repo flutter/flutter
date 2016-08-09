@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sky/engine/public/platform/sky_settings.h"
+#include "flutter/sky/engine/public/platform/sky_settings.h"
 
 #include <memory>
 

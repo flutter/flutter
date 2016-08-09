@@ -28,11 +28,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/engine/platform/fonts/Character.h"
+#include "flutter/sky/engine/platform/fonts/Character.h"
 
-#include "sky/engine/platform/fonts/FontPlatformFeatures.h"
-#include "sky/engine/wtf/StdLibExtras.h"
-#include "sky/engine/wtf/text/StringBuilder.h"
+#include "flutter/sky/engine/platform/fonts/FontPlatformFeatures.h"
+#include "flutter/sky/engine/wtf/StdLibExtras.h"
+#include "flutter/sky/engine/wtf/text/StringBuilder.h"
 
 using namespace WTF;
 using namespace Unicode;

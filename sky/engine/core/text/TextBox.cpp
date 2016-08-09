@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sky/engine/core/text/TextBox.h"
+#include "flutter/sky/engine/core/text/TextBox.h"
 
 #include "lib/ftl/logging.h"
 #include "lib/tonic/dart_class_library.h"
 #include "lib/tonic/logging/dart_error.h"
-#include "sky/engine/core/script/ui_dart_state.h"
+#include "flutter/sky/engine/core/script/ui_dart_state.h"
 
 using namespace blink;
 

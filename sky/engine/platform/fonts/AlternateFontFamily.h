@@ -31,8 +31,8 @@
 #ifndef SKY_ENGINE_PLATFORM_FONTS_ALTERNATEFONTFAMILY_H_
 #define SKY_ENGINE_PLATFORM_FONTS_ALTERNATEFONTFAMILY_H_
 
-#include "sky/engine/platform/fonts/FontDescription.h"
-#include "sky/engine/wtf/text/AtomicString.h"
+#include "flutter/sky/engine/platform/fonts/FontDescription.h"
+#include "flutter/sky/engine/wtf/text/AtomicString.h"
 
 namespace blink {
 

@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sky/shell/ui/animator.h"
+#include "flutter/sky/shell/ui/animator.h"
 
 #include "base/bind.h"
 #include "base/message_loop/message_loop.h"
 #include "base/trace_event/trace_event.h"
-#include "sky/services/rasterizer/rasterizer.mojom.h"
+#include "flutter/services/rasterizer/rasterizer.mojom.h"
 
 namespace sky {
 namespace shell {

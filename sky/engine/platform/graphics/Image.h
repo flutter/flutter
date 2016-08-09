@@ -27,16 +27,16 @@
 #ifndef SKY_ENGINE_PLATFORM_GRAPHICS_IMAGE_H_
 #define SKY_ENGINE_PLATFORM_GRAPHICS_IMAGE_H_
 
-#include "sky/engine/platform/PlatformExport.h"
-#include "sky/engine/platform/geometry/IntRect.h"
-#include "sky/engine/platform/graphics/Color.h"
-#include "sky/engine/platform/graphics/GraphicsTypes.h"
-#include "sky/engine/platform/graphics/ImageOrientation.h"
-#include "sky/engine/wtf/Assertions.h"
-#include "sky/engine/wtf/PassRefPtr.h"
-#include "sky/engine/wtf/RefCounted.h"
-#include "sky/engine/wtf/RefPtr.h"
-#include "sky/engine/wtf/text/WTFString.h"
+#include "flutter/sky/engine/platform/PlatformExport.h"
+#include "flutter/sky/engine/platform/geometry/IntRect.h"
+#include "flutter/sky/engine/platform/graphics/Color.h"
+#include "flutter/sky/engine/platform/graphics/GraphicsTypes.h"
+#include "flutter/sky/engine/platform/graphics/ImageOrientation.h"
+#include "flutter/sky/engine/wtf/Assertions.h"
+#include "flutter/sky/engine/wtf/PassRefPtr.h"
+#include "flutter/sky/engine/wtf/RefCounted.h"
+#include "flutter/sky/engine/wtf/RefPtr.h"
+#include "flutter/sky/engine/wtf/text/WTFString.h"
 #include "third_party/skia/include/core/SkXfermode.h"
 
 namespace blink {

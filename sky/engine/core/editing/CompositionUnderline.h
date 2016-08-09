@@ -26,7 +26,7 @@
 #ifndef SKY_ENGINE_CORE_EDITING_COMPOSITIONUNDERLINE_H_
 #define SKY_ENGINE_CORE_EDITING_COMPOSITIONUNDERLINE_H_
 
-#include "sky/engine/platform/graphics/Color.h"
+#include "flutter/sky/engine/platform/graphics/Color.h"
 
 namespace blink {
 

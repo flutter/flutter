@@ -24,11 +24,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/engine/wtf/unicode/UTF8.h"
+#include "flutter/sky/engine/wtf/unicode/UTF8.h"
 
-#include "sky/engine/wtf/ASCIICType.h"
-#include "sky/engine/wtf/StringHasher.h"
-#include "sky/engine/wtf/unicode/CharacterNames.h"
+#include "flutter/sky/engine/wtf/ASCIICType.h"
+#include "flutter/sky/engine/wtf/StringHasher.h"
+#include "flutter/sky/engine/wtf/unicode/CharacterNames.h"
 
 namespace WTF {
 namespace Unicode {

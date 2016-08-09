@@ -21,7 +21,7 @@
 #ifndef SKY_ENGINE_WTF_NONCOPYABLE_H_
 #define SKY_ENGINE_WTF_NONCOPYABLE_H_
 
-#include "sky/engine/wtf/Compiler.h"
+#include "flutter/sky/engine/wtf/Compiler.h"
 
 #define WTF_MAKE_NONCOPYABLE(ClassName) \
     private: \

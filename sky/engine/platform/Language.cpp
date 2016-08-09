@@ -23,10 +23,10 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/engine/platform/Language.h"
+#include "flutter/sky/engine/platform/Language.h"
 
-#include "sky/engine/public/platform/Platform.h"
-#include "sky/engine/wtf/text/WTFString.h"
+#include "flutter/sky/engine/public/platform/Platform.h"
+#include "flutter/sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
 

@@ -21,10 +21,10 @@
 #ifndef SKY_ENGINE_WTF_TEXT_ATOMICSTRING_H_
 #define SKY_ENGINE_WTF_TEXT_ATOMICSTRING_H_
 
-#include "sky/engine/wtf/HashTableDeletedValueType.h"
-#include "sky/engine/wtf/WTFExport.h"
-#include "sky/engine/wtf/text/CString.h"
-#include "sky/engine/wtf/text/WTFString.h"
+#include "flutter/sky/engine/wtf/HashTableDeletedValueType.h"
+#include "flutter/sky/engine/wtf/WTFExport.h"
+#include "flutter/sky/engine/wtf/text/CString.h"
+#include "flutter/sky/engine/wtf/text/WTFString.h"
 
 namespace WTF {
 
@@ -244,5 +244,5 @@ using WTF::nullAtom;
 using WTF::emptyAtom;
 using WTF::starAtom;
 
-#include "sky/engine/wtf/text/StringConcatenate.h"
+#include "flutter/sky/engine/wtf/text/StringConcatenate.h"
 #endif  // SKY_ENGINE_WTF_TEXT_ATOMICSTRING_H_

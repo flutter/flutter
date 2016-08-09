@@ -7,9 +7,9 @@ import("//mojo/dart/embedder/embedder.gni")
 
 dart_embedder_resources("generate_sky_embedder_diagnostic_server_resources_cc") {
   inputs = [
-    "//sky/shell/diagnostic/diagnostic_server.dart"
+    "//flutter/sky/shell/diagnostic/diagnostic_server.dart"
   ]
-  root_prefix = "//sky/shell/diagnostic/"
+  root_prefix = "//flutter/sky/shell/diagnostic/"
   output = "$target_gen_dir/sky_embedder_diagnostic_server_resources.cc"
   table_name = "sky_embedder_diagnostic_server"
 }
@@ -51,11 +51,11 @@ source_set("common") {
     "//base",
     "//build/config/sanitizers:deps",
     "//dart/runtime:libdart",
-    "//flow",
+    "//flutter/flow",
     "//flutter/assets",
     "//flutter/lib/ui",
     "//flutter/tonic",
-    "//glue",
+    "//flutter/glue",
     "//lib/ftl",
     "//lib/tonic",
     "//mojo/common",
@@ -68,17 +68,17 @@ source_set("common") {
     "//mojo/services/gfx/composition/interfaces",
     "//mojo/services/navigation/interfaces",
     "//mojo/services/vsync/interfaces",
-    "//skia",
-    "//sky/engine",
-    "//sky/engine/bindings",
-    "//sky/engine/core:core",
-    "//sky/engine/wtf",
-    "//sky/services/editing:interfaces",
-    "//sky/services/engine:interfaces",
-    "//sky/services/platform",
-    "//sky/services/pointer:interfaces",
-    "//sky/services/rasterizer:interfaces",
-    "//sky/services/semantics:interfaces",
+    "//flutter/skia",
+    "//flutter/sky/engine",
+    "//flutter/sky/engine/bindings",
+    "//flutter/sky/engine/core:core",
+    "//flutter/sky/engine/wtf",
+    "//flutter/services/editing:interfaces",
+    "//flutter/services/engine:interfaces",
+    "//flutter/services/platform",
+    "//flutter/services/pointer:interfaces",
+    "//flutter/services/rasterizer:interfaces",
+    "//flutter/services/semantics:interfaces",
   ]
 }
 
@@ -191,23 +191,23 @@ if (is_android) {
       "//mojo/services/network/interfaces:interfaces_java",
       "//mojo/services/sensors/interfaces:interfaces_java",
       "//mojo/services/vsync/interfaces:interfaces_java",
-      "//services/sensors:sensors_lib",
-      "//sky/services/activity:activity_lib",
-      "//sky/services/activity:interfaces_java",
-      "//sky/services/common:common_lib",
-      "//sky/services/editing:editing_lib",
-      "//sky/services/editing:interfaces_java",
-      "//sky/services/engine:interfaces_java",
-      "//sky/services/media:interfaces_java",
-      "//sky/services/media:media_lib",
-      "//sky/services/oknet",
-      "//sky/services/platform:interfaces_java",
-      "//sky/services/platform:platform_lib",
-      "//sky/services/pointer:interfaces_java",
-      "//sky/services/raw_keyboard:interfaces_java",
-      "//sky/services/raw_keyboard:raw_keyboard_lib",
-      "//sky/services/semantics:interfaces_java",
-      "//sky/services/vsync:vsync_lib",
+      "//flutter/services/sensors:sensors_lib",
+      "//flutter/services/activity:activity_lib",
+      "//flutter/services/activity:interfaces_java",
+      "//flutter/services/common:common_lib",
+      "//flutter/services/editing:editing_lib",
+      "//flutter/services/editing:interfaces_java",
+      "//flutter/services/engine:interfaces_java",
+      "//flutter/services/media:interfaces_java",
+      "//flutter/services/media:media_lib",
+      "//flutter/services/oknet",
+      "//flutter/services/platform:interfaces_java",
+      "//flutter/services/platform:platform_lib",
+      "//flutter/services/pointer:interfaces_java",
+      "//flutter/services/raw_keyboard:interfaces_java",
+      "//flutter/services/raw_keyboard:raw_keyboard_lib",
+      "//flutter/services/semantics:interfaces_java",
+      "//flutter/services/vsync:vsync_lib",
     ]
   }
 
@@ -289,14 +289,14 @@ if (is_android) {
     deps = [
       "//mojo/edk/base_edk",
       "//mojo/edk/system",
-      "//skia",
-      "//sky/services/activity",
-      "//sky/services/dynamic:embedder",
-      "//sky/services/editing",
-      "//sky/services/media",
-      "//sky/services/ns_net",
-      "//sky/services/semantics",
-      "//sky/services/vsync",
+      "//flutter/skia",
+      "//flutter/services/activity",
+      "//flutter/services/dynamic:embedder",
+      "//flutter/services/editing",
+      "//flutter/services/media",
+      "//flutter/services/ns_net",
+      "//flutter/services/semantics",
+      "//flutter/services/vsync",
       ":common",
       ":gpu_direct",
     ]
@@ -328,7 +328,7 @@ if (is_android) {
 
     action("framework_install_name") {
       stamp_file = "$root_out_dir/flutter_install_name_stamp"
-      script = "//sky/tools/change_install_name.py"
+      script = "//flutter/sky/tools/change_install_name.py"
 
       inputs = [ "$framework_dir/Flutter" ]
       outputs = [ stamp_file ]
@@ -414,18 +414,18 @@ if (is_android) {
 
     if (use_glfw) {
       sources += [
-        "//sky/shell/platform/glfw/init_glfw.cc",
-        "//sky/shell/platform/glfw/init_glfw.h",
-        "//sky/shell/platform/glfw/message_pump_glfw.cc",
-        "//sky/shell/platform/glfw/message_pump_glfw.h",
-        "//sky/shell/platform/glfw/platform_view_glfw.cc",
-        "//sky/shell/platform/glfw/platform_view_glfw.h",
-        "//sky/shell/platform/glfw/window_impl.cc",
-        "//sky/shell/platform/glfw/window_impl.h",
+        "//flutter/sky/shell/platform/glfw/init_glfw.cc",
+        "//flutter/sky/shell/platform/glfw/init_glfw.h",
+        "//flutter/sky/shell/platform/glfw/message_pump_glfw.cc",
+        "//flutter/sky/shell/platform/glfw/message_pump_glfw.h",
+        "//flutter/sky/shell/platform/glfw/platform_view_glfw.cc",
+        "//flutter/sky/shell/platform/glfw/platform_view_glfw.h",
+        "//flutter/sky/shell/platform/glfw/window_impl.cc",
+        "//flutter/sky/shell/platform/glfw/window_impl.h",
       ]
 
       deps += [
-        "//sky/services/raw_keyboard:interfaces",
+        "//flutter/services/raw_keyboard:interfaces",
         "//third_party/glfw",
         "//ui/gl",
       ]
@@ -459,8 +459,8 @@ if (is_android) {
       "//mojo/common",
       "//mojo/edk/base_edk",
       "//mojo/edk/system",
-      "//sky/services/ns_net",
-      "//sky/services/vsync",
+      "//flutter/services/ns_net",
+      "//flutter/services/vsync",
       ":common",
       ":gpu_direct",
       ":testing",

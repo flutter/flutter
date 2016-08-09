@@ -24,13 +24,13 @@
 #define SKY_ENGINE_WTF_TEXT_STRINGIMPL_H_
 
 #include <limits.h>
-#include "sky/engine/wtf/ASCIICType.h"
-#include "sky/engine/wtf/Forward.h"
-#include "sky/engine/wtf/HashMap.h"
-#include "sky/engine/wtf/StringHasher.h"
-#include "sky/engine/wtf/Vector.h"
-#include "sky/engine/wtf/WTFExport.h"
-#include "sky/engine/wtf/unicode/Unicode.h"
+#include "flutter/sky/engine/wtf/ASCIICType.h"
+#include "flutter/sky/engine/wtf/Forward.h"
+#include "flutter/sky/engine/wtf/HashMap.h"
+#include "flutter/sky/engine/wtf/StringHasher.h"
+#include "flutter/sky/engine/wtf/Vector.h"
+#include "flutter/sky/engine/wtf/WTFExport.h"
+#include "flutter/sky/engine/wtf/unicode/Unicode.h"
 
 namespace WTF {
 

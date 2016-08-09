@@ -1,0 +1,41 @@
+# Copyright 2016 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+source_set("tonic") {
+  sources = [
+    "dart_debugger.cc",
+    "dart_debugger.h",
+    "dart_dependency_catcher.cc",
+    "dart_dependency_catcher.h",
+    "dart_io.cc",
+    "dart_io.h",
+    "dart_isolate_reloader.cc",
+    "dart_isolate_reloader.h",
+    "dart_library_loader.cc",
+    "dart_library_loader.h",
+    "dart_library_provider.cc",
+    "dart_library_provider.h",
+    "dart_library_provider_files.cc",
+    "dart_library_provider_files.h",
+    "dart_snapshot_loader.cc",
+    "dart_snapshot_loader.h",
+    "dart_state.cc",
+    "dart_state.h",
+  ]
+
+  deps = [
+    "//base",
+    "//dart/runtime/bin:embedded_dart_io",
+    "//flutter/glue",
+    "//lib/tonic/parsers",
+    "//mojo/data_pipe_utils",
+    "//mojo/public/cpp/system",
+  ]
+
+  public_deps = [
+    "//dart/runtime:libdart",
+    "//dart/runtime/vm:libdart_platform",
+    "//lib/tonic",
+  ]
+}

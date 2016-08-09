@@ -31,9 +31,9 @@
 #ifndef SKY_ENGINE_PLATFORM_GEOMETRY_LAYOUTBOXEXTENT_H_
 #define SKY_ENGINE_PLATFORM_GEOMETRY_LAYOUTBOXEXTENT_H_
 
-#include "sky/engine/platform/LayoutUnit.h"
-#include "sky/engine/platform/PlatformExport.h"
-#include "sky/engine/platform/text/TextDirection.h"
+#include "flutter/sky/engine/platform/LayoutUnit.h"
+#include "flutter/sky/engine/platform/PlatformExport.h"
+#include "flutter/sky/engine/platform/text/TextDirection.h"
 
 namespace blink {
 

@@ -25,7 +25,7 @@
 
 
 #include <gtest/gtest.h>
-#include "sky/engine/wtf/StringHasher.h"
+#include "flutter/sky/engine/wtf/StringHasher.h"
 
 namespace {
 

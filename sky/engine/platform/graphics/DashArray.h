@@ -26,7 +26,7 @@
 #ifndef SKY_ENGINE_PLATFORM_GRAPHICS_DASHARRAY_H_
 #define SKY_ENGINE_PLATFORM_GRAPHICS_DASHARRAY_H_
 
-#include "sky/engine/wtf/Vector.h"
+#include "flutter/sky/engine/wtf/Vector.h"
 
 typedef float DashArrayElement;
 

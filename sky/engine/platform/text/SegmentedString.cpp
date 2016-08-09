@@ -17,7 +17,7 @@
     Boston, MA 02110-1301, USA.
 */
 
-#include "sky/engine/platform/text/SegmentedString.h"
+#include "flutter/sky/engine/platform/text/SegmentedString.h"
 
 namespace blink {
 

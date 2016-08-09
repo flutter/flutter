@@ -26,8 +26,8 @@
 #ifndef SKY_ENGINE_PLATFORM_TEXT_TEXTBOUNDARIES_H_
 #define SKY_ENGINE_PLATFORM_TEXT_TEXTBOUNDARIES_H_
 
-#include "sky/engine/platform/PlatformExport.h"
-#include "sky/engine/wtf/unicode/Unicode.h"
+#include "flutter/sky/engine/platform/PlatformExport.h"
+#include "flutter/sky/engine/wtf/unicode/Unicode.h"
 
 namespace blink {
 

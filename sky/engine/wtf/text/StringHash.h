@@ -22,9 +22,9 @@
 #ifndef SKY_ENGINE_WTF_TEXT_STRINGHASH_H_
 #define SKY_ENGINE_WTF_TEXT_STRINGHASH_H_
 
-#include "sky/engine/wtf/HashTraits.h"
-#include "sky/engine/wtf/StringHasher.h"
-#include "sky/engine/wtf/text/AtomicString.h"
+#include "flutter/sky/engine/wtf/HashTraits.h"
+#include "flutter/sky/engine/wtf/StringHasher.h"
+#include "flutter/sky/engine/wtf/text/AtomicString.h"
 
 namespace WTF {
 

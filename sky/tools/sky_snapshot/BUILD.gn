@@ -13,7 +13,7 @@ executable("sky_snapshot") {
     "//lib/ftl",
     "//lib/tonic/converter",
     "//lib/tonic/file_loader",
-    "//sky/engine/bindings:snapshot_cc",
+    "//flutter/sky/engine/bindings:snapshot_cc",
   ]
 
   if (!is_ios && !is_mac) {

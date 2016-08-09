@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sky/shell/platform/mojo/platform_view_mojo.h"
+#include "flutter/sky/shell/platform/mojo/platform_view_mojo.h"
 
-#include "glue/movable_wrapper.h"
-#include "sky/shell/gpu/mojo/rasterizer_mojo.h"
+#include "flutter/glue/movable_wrapper.h"
+#include "flutter/sky/shell/gpu/mojo/rasterizer_mojo.h"
 
 namespace sky {
 namespace shell {

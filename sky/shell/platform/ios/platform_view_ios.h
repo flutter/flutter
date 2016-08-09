@@ -10,7 +10,7 @@
 #include "base/mac/scoped_nsobject.h"
 #include "lib/ftl/macros.h"
 #include "lib/ftl/memory/weak_ptr.h"
-#include "sky/shell/platform_view.h"
+#include "flutter/sky/shell/platform_view.h"
 
 @class CAEAGLLayer;
 

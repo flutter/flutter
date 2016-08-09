@@ -29,22 +29,22 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/engine/platform/fonts/harfbuzz/HarfBuzzShaper.h"
+#include "flutter/sky/engine/platform/fonts/harfbuzz/HarfBuzzShaper.h"
 
 #include <unicode/normlzr.h>
 #include <unicode/uchar.h>
 #include <unicode/uscript.h>
 #include "hb.h"
-#include "sky/engine/platform/LayoutUnit.h"
-#include "sky/engine/platform/fonts/Character.h"
-#include "sky/engine/platform/fonts/Font.h"
-#include "sky/engine/platform/fonts/GlyphBuffer.h"
-#include "sky/engine/platform/fonts/harfbuzz/HarfBuzzFace.h"
-#include "sky/engine/platform/text/SurrogatePairAwareTextIterator.h"
-#include "sky/engine/platform/text/TextBreakIterator.h"
-#include "sky/engine/wtf/Compiler.h"
-#include "sky/engine/wtf/MathExtras.h"
-#include "sky/engine/wtf/unicode/Unicode.h"
+#include "flutter/sky/engine/platform/LayoutUnit.h"
+#include "flutter/sky/engine/platform/fonts/Character.h"
+#include "flutter/sky/engine/platform/fonts/Font.h"
+#include "flutter/sky/engine/platform/fonts/GlyphBuffer.h"
+#include "flutter/sky/engine/platform/fonts/harfbuzz/HarfBuzzFace.h"
+#include "flutter/sky/engine/platform/text/SurrogatePairAwareTextIterator.h"
+#include "flutter/sky/engine/platform/text/TextBreakIterator.h"
+#include "flutter/sky/engine/wtf/Compiler.h"
+#include "flutter/sky/engine/wtf/MathExtras.h"
+#include "flutter/sky/engine/wtf/unicode/Unicode.h"
 
 #include <list>
 #include <map>

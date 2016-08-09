@@ -1,0 +1,62 @@
+# Copyright 2015 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//mojo/public/tools/bindings/mojom.gni")
+
+group("media") {
+  deps = [
+    ":interfaces",
+  ]
+
+  if (is_android || is_ios) {
+    deps += [ ":media_lib" ]
+  }
+}
+
+mojom("interfaces") {
+  sources = [
+    "media.mojom",
+  ]
+}
+
+if (is_android) {
+  import("//build/config/android/config.gni")
+  import("//build/config/android/rules.gni")
+
+  android_library("media_lib") {
+    java_files = [
+      "src/org/domokit/media/MediaPlayerImpl.java",
+      "src/org/domokit/media/MediaServiceImpl.java",
+      "src/org/domokit/media/SoundPoolImpl.java",
+    ]
+
+    deps = [
+      "//base:base_java",
+      "//mojo/java",
+      "//mojo/public/java:bindings",
+      "//mojo/public/java:system",
+      "//flutter/services/common:common_lib",
+      ":interfaces_java",
+    ]
+  }
+} else if (is_ios) {
+  source_set("media_lib") {
+    sources = [
+      "ios/media_player_impl.h",
+      "ios/media_player_impl.mm",
+      "ios/media_service_impl.h",
+      "ios/media_service_impl.mm",
+      "ios/sound_pool_impl.h",
+      "ios/sound_pool_impl.mm",
+    ]
+
+    deps = [
+      ":interfaces",
+      "//base:base",
+      "//mojo/data_pipe_utils",
+      "//mojo/public/cpp/bindings:utility",
+      "//mojo/public/cpp/application",
+    ]
+  }
+}

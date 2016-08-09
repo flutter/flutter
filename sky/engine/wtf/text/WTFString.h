@@ -26,11 +26,11 @@
 // on systems without case-sensitive file systems.
 #include <string>
 
-#include "sky/engine/wtf/HashTableDeletedValueType.h"
-#include "sky/engine/wtf/WTFExport.h"
-#include "sky/engine/wtf/text/ASCIIFastPath.h"
-#include "sky/engine/wtf/text/StringImpl.h"
-#include "sky/engine/wtf/text/StringView.h"
+#include "flutter/sky/engine/wtf/HashTableDeletedValueType.h"
+#include "flutter/sky/engine/wtf/WTFExport.h"
+#include "flutter/sky/engine/wtf/text/ASCIIFastPath.h"
+#include "flutter/sky/engine/wtf/text/StringImpl.h"
+#include "flutter/sky/engine/wtf/text/StringView.h"
 
 namespace WTF {
 
@@ -669,5 +669,5 @@ using WTF::isAllSpecialCharacters;
 using WTF::isSpaceOrNewline;
 using WTF::reverseFind;
 
-#include "sky/engine/wtf/text/AtomicString.h"
+#include "flutter/sky/engine/wtf/text/AtomicString.h"
 #endif  // SKY_ENGINE_WTF_TEXT_WTFSTRING_H_

@@ -21,9 +21,9 @@
  *
  */
 
-#include "sky/engine/core/rendering/line/TrailingObjects.h"
+#include "flutter/sky/engine/core/rendering/line/TrailingObjects.h"
 
-#include "sky/engine/core/rendering/InlineIterator.h"
+#include "flutter/sky/engine/core/rendering/InlineIterator.h"
 
 namespace blink {
 

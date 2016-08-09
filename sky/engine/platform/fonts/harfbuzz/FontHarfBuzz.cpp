@@ -28,19 +28,19 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/engine/platform/fonts/Font.h"
+#include "flutter/sky/engine/platform/fonts/Font.h"
 
-#include "sky/engine/platform/fonts/FontPlatformFeatures.h"
-#include "sky/engine/platform/fonts/GlyphBuffer.h"
-#include "sky/engine/platform/fonts/SimpleFontData.h"
-#include "sky/engine/platform/fonts/harfbuzz/HarfBuzzShaper.h"
-#include "sky/engine/platform/geometry/FloatRect.h"
-#include "sky/engine/platform/graphics/GraphicsContext.h"
+#include "flutter/sky/engine/platform/fonts/FontPlatformFeatures.h"
+#include "flutter/sky/engine/platform/fonts/GlyphBuffer.h"
+#include "flutter/sky/engine/platform/fonts/SimpleFontData.h"
+#include "flutter/sky/engine/platform/fonts/harfbuzz/HarfBuzzShaper.h"
+#include "flutter/sky/engine/platform/geometry/FloatRect.h"
+#include "flutter/sky/engine/platform/graphics/GraphicsContext.h"
 
 #include "third_party/skia/include/core/SkPaint.h"
 #include "third_party/skia/include/private/SkTemplates.h"
 
-#include "sky/engine/wtf/unicode/Unicode.h"
+#include "flutter/sky/engine/wtf/unicode/Unicode.h"
 
 #include <algorithm>
 

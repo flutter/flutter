@@ -5,7 +5,7 @@
 #ifndef SKY_SHELL_PLATFORM_LINUX_PLATFORM_VIEW_LINUX_H_
 #define SKY_SHELL_PLATFORM_LINUX_PLATFORM_VIEW_LINUX_H_
 
-#include "sky/shell/platform_view.h"
+#include "flutter/sky/shell/platform_view.h"
 
 namespace sky {
 namespace shell {

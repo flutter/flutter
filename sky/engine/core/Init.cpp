@@ -28,11 +28,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/engine/core/Init.h"
+#include "flutter/sky/engine/core/Init.h"
 
-#include "sky/engine/platform/Partitions.h"
-#include "sky/engine/wtf/text/StringImpl.h"
-#include "sky/engine/wtf/text/StringStatics.h"
+#include "flutter/sky/engine/platform/Partitions.h"
+#include "flutter/sky/engine/wtf/text/StringImpl.h"
+#include "flutter/sky/engine/wtf/text/StringStatics.h"
 
 namespace blink {
 

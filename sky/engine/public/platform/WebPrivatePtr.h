@@ -31,12 +31,12 @@
 #ifndef SKY_ENGINE_PUBLIC_PLATFORM_WEBPRIVATEPTR_H_
 #define SKY_ENGINE_PUBLIC_PLATFORM_WEBPRIVATEPTR_H_
 
-#include "sky/engine/public/platform/WebCommon.h"
+#include "flutter/sky/engine/public/platform/WebCommon.h"
 
 #if INSIDE_BLINK
-#include "sky/engine/platform/heap/Handle.h"
-#include "sky/engine/wtf/PassRefPtr.h"
-#include "sky/engine/wtf/TypeTraits.h"
+#include "flutter/sky/engine/platform/heap/Handle.h"
+#include "flutter/sky/engine/wtf/PassRefPtr.h"
+#include "flutter/sky/engine/wtf/TypeTraits.h"
 #endif
 
 namespace blink {

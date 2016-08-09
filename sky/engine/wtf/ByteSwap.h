@@ -31,8 +31,8 @@
 #ifndef SKY_ENGINE_WTF_BYTESWAP_H_
 #define SKY_ENGINE_WTF_BYTESWAP_H_
 
-#include "sky/engine/wtf/CPU.h"
-#include "sky/engine/wtf/Compiler.h"
+#include "flutter/sky/engine/wtf/CPU.h"
+#include "flutter/sky/engine/wtf/Compiler.h"
 
 #include <stdint.h>
 

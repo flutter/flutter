@@ -28,10 +28,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/engine/platform/text/BidiTextRun.h"
+#include "flutter/sky/engine/platform/text/BidiTextRun.h"
 
-#include "sky/engine/platform/text/BidiResolver.h"
-#include "sky/engine/platform/text/TextRunIterator.h"
+#include "flutter/sky/engine/platform/text/BidiResolver.h"
+#include "flutter/sky/engine/platform/text/TextRunIterator.h"
 
 namespace blink {
 

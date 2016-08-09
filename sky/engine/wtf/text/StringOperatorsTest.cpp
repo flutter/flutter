@@ -29,7 +29,7 @@
 static int wtfStringCopyCount;
 
 #include <gtest/gtest.h>
-#include "sky/engine/wtf/text/WTFString.h"
+#include "flutter/sky/engine/wtf/text/WTFString.h"
 
 namespace {
 

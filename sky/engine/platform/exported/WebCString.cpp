@@ -29,10 +29,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/engine/public/platform/WebCString.h"
+#include "flutter/sky/engine/public/platform/WebCString.h"
 
 #include <string.h>
-#include "sky/engine/wtf/text/CString.h"
+#include "flutter/sky/engine/wtf/text/CString.h"
 
 namespace blink {
 

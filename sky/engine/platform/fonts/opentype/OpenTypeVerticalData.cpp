@@ -22,14 +22,14 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/engine/platform/fonts/opentype/OpenTypeVerticalData.h"
+#include "flutter/sky/engine/platform/fonts/opentype/OpenTypeVerticalData.h"
 
-#include "sky/engine/platform/SharedBuffer.h"
-#include "sky/engine/platform/fonts/SimpleFontData.h"
-#include "sky/engine/platform/fonts/GlyphPage.h"
-#include "sky/engine/platform/fonts/opentype/OpenTypeTypes.h"
-#include "sky/engine/platform/geometry/FloatRect.h"
-#include "sky/engine/wtf/RefPtr.h"
+#include "flutter/sky/engine/platform/SharedBuffer.h"
+#include "flutter/sky/engine/platform/fonts/SimpleFontData.h"
+#include "flutter/sky/engine/platform/fonts/GlyphPage.h"
+#include "flutter/sky/engine/platform/fonts/opentype/OpenTypeTypes.h"
+#include "flutter/sky/engine/platform/geometry/FloatRect.h"
+#include "flutter/sky/engine/wtf/RefPtr.h"
 
 namespace blink {
 namespace OpenType {

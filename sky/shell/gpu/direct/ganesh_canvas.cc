@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sky/shell/gpu/direct/ganesh_canvas.h"
+#include "flutter/sky/shell/gpu/direct/ganesh_canvas.h"
 
 #include "lib/ftl/arraysize.h"
 #include "lib/ftl/logging.h"

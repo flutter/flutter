@@ -2,15 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sky/engine/public/sky/sky_view.h"
+#include "flutter/sky/engine/public/sky/sky_view.h"
 
 #include "flutter/lib/ui/compositing/scene.h"
-#include "glue/trace_event.h"
-#include "sky/engine/core/script/dart_controller.h"
-#include "sky/engine/core/script/ui_dart_state.h"
-#include "sky/engine/core/window/window.h"
-#include "sky/engine/public/sky/sky_view_client.h"
-#include "sky/engine/wtf/MakeUnique.h"
+#include "flutter/glue/trace_event.h"
+#include "flutter/sky/engine/core/script/dart_controller.h"
+#include "flutter/sky/engine/core/script/ui_dart_state.h"
+#include "flutter/sky/engine/core/window/window.h"
+#include "flutter/sky/engine/public/sky/sky_view_client.h"
+#include "flutter/sky/engine/wtf/MakeUnique.h"
 
 namespace blink {
 

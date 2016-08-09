@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef GLUE_THREAD_H_
-#define GLUE_THREAD_H_
+#ifndef FLUTTER_GLU_THREAD_H_
+#define FLUTTER_GLU_THREAD_H_
 
 #include <memory>
 
@@ -31,4 +31,4 @@ class Thread {
 
 }  // namespace glue
 
-#endif  // GLUE_THREAD_H_
+#endif  // FLUTTER_GLU_THREAD_H_

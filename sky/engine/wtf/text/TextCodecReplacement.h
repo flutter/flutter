@@ -5,8 +5,8 @@
 #ifndef SKY_ENGINE_WTF_TEXT_TEXTCODECREPLACEMENT_H_
 #define SKY_ENGINE_WTF_TEXT_TEXTCODECREPLACEMENT_H_
 
-#include "sky/engine/wtf/text/TextCodec.h"
-#include "sky/engine/wtf/text/TextCodecUTF8.h"
+#include "flutter/sky/engine/wtf/text/TextCodec.h"
+#include "flutter/sky/engine/wtf/text/TextCodecUTF8.h"
 
 namespace WTF {
 

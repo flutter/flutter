@@ -30,9 +30,9 @@
 #ifndef SKY_ENGINE_PLATFORM_FONTS_GLYPHBUFFER_H_
 #define SKY_ENGINE_PLATFORM_FONTS_GLYPHBUFFER_H_
 
-#include "sky/engine/platform/fonts/Glyph.h"
-#include "sky/engine/platform/geometry/FloatSize.h"
-#include "sky/engine/wtf/Vector.h"
+#include "flutter/sky/engine/platform/fonts/Glyph.h"
+#include "flutter/sky/engine/platform/geometry/FloatSize.h"
+#include "flutter/sky/engine/wtf/Vector.h"
 
 namespace blink {
 

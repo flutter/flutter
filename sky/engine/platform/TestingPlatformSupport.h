@@ -31,9 +31,9 @@
 #ifndef SKY_ENGINE_PLATFORM_TESTINGPLATFORMSUPPORT_H_
 #define SKY_ENGINE_PLATFORM_TESTINGPLATFORMSUPPORT_H_
 
-#include "sky/engine/public/platform/Platform.h"
-#include "sky/engine/public/platform/WebDiscardableMemory.h"
-#include "sky/engine/wtf/Vector.h"
+#include "flutter/sky/engine/public/platform/Platform.h"
+#include "flutter/sky/engine/public/platform/WebDiscardableMemory.h"
+#include "flutter/sky/engine/wtf/Vector.h"
 
 namespace blink {
 

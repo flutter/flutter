@@ -28,10 +28,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/engine/wtf/WTF.h"
+#include "flutter/sky/engine/wtf/WTF.h"
 
-#include "sky/engine/wtf/DefaultAllocator.h"
-#include "sky/engine/wtf/FastMalloc.h"
+#include "flutter/sky/engine/wtf/DefaultAllocator.h"
+#include "flutter/sky/engine/wtf/FastMalloc.h"
 
 namespace WTF {
 

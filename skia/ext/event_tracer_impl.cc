@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 #include "base/trace_event/trace_event.h"
-#include "skia/ext/event_tracer_impl.h"
+#include "flutter/skia/ext/event_tracer_impl.h"
 #include "third_party/skia/include/utils/SkEventTracer.h"
 
 namespace skia {

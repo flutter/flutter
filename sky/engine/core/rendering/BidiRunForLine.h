@@ -24,8 +24,8 @@
 #ifndef SKY_ENGINE_CORE_RENDERING_BIDIRUNFORLINE_H_
 #define SKY_ENGINE_CORE_RENDERING_BIDIRUNFORLINE_H_
 
-#include "sky/engine/core/rendering/line/TrailingObjects.h"
-#include "sky/engine/platform/text/BidiResolver.h"
+#include "flutter/sky/engine/core/rendering/line/TrailingObjects.h"
+#include "flutter/sky/engine/platform/text/BidiResolver.h"
 
 namespace blink {
 

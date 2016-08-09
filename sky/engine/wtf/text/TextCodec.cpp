@@ -24,9 +24,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/engine/wtf/text/TextCodec.h"
+#include "flutter/sky/engine/wtf/text/TextCodec.h"
 
-#include "sky/engine/wtf/StringExtras.h"
+#include "flutter/sky/engine/wtf/StringExtras.h"
 
 namespace WTF {
 

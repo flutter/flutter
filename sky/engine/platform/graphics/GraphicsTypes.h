@@ -26,10 +26,10 @@
 #ifndef SKY_ENGINE_PLATFORM_GRAPHICS_GRAPHICSTYPES_H_
 #define SKY_ENGINE_PLATFORM_GRAPHICS_GRAPHICSTYPES_H_
 
-#include "sky/engine/platform/PlatformExport.h"
-#include "sky/engine/public/platform/WebBlendMode.h"
-#include "sky/engine/wtf/Forward.h"
-#include "sky/engine/wtf/OperatingSystem.h"
+#include "flutter/sky/engine/platform/PlatformExport.h"
+#include "flutter/sky/engine/public/platform/WebBlendMode.h"
+#include "flutter/sky/engine/wtf/Forward.h"
+#include "flutter/sky/engine/wtf/OperatingSystem.h"
 #include "third_party/skia/include/core/SkPaint.h"
 #include "third_party/skia/include/core/SkPath.h"
 

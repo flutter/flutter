@@ -24,9 +24,9 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/engine/platform/graphics/ImageOrientation.h"
+#include "flutter/sky/engine/platform/graphics/ImageOrientation.h"
 
-#include "sky/engine/platform/transforms/AffineTransform.h"
+#include "flutter/sky/engine/platform/transforms/AffineTransform.h"
 
 namespace blink {
 

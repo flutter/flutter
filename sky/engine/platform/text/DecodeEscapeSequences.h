@@ -30,10 +30,10 @@
 #ifndef SKY_ENGINE_PLATFORM_TEXT_DECODEESCAPESEQUENCES_H_
 #define SKY_ENGINE_PLATFORM_TEXT_DECODEESCAPESEQUENCES_H_
 
-#include "sky/engine/wtf/ASCIICType.h"
-#include "sky/engine/wtf/Assertions.h"
-#include "sky/engine/wtf/text/StringBuilder.h"
-#include "sky/engine/wtf/text/TextEncoding.h"
+#include "flutter/sky/engine/wtf/ASCIICType.h"
+#include "flutter/sky/engine/wtf/Assertions.h"
+#include "flutter/sky/engine/wtf/text/StringBuilder.h"
+#include "flutter/sky/engine/wtf/text/TextEncoding.h"
 
 namespace blink {
 

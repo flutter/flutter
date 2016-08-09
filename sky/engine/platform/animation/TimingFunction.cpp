@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sky/engine/platform/animation/TimingFunction.h"
+#include "flutter/sky/engine/platform/animation/TimingFunction.h"
 
-#include "sky/engine/wtf/MathExtras.h"
+#include "flutter/sky/engine/wtf/MathExtras.h"
 
 namespace blink {
 

@@ -29,7 +29,7 @@
 #ifndef SKY_ENGINE_WTF_CPU_H_
 #define SKY_ENGINE_WTF_CPU_H_
 
-#include "sky/engine/wtf/Compiler.h"
+#include "flutter/sky/engine/wtf/Compiler.h"
 
 /* CPU() - the target CPU architecture */
 #define CPU(WTF_FEATURE) (defined WTF_CPU_##WTF_FEATURE  && WTF_CPU_##WTF_FEATURE)

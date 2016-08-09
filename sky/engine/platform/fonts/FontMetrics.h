@@ -20,8 +20,8 @@
 #ifndef SKY_ENGINE_PLATFORM_FONTS_FONTMETRICS_H_
 #define SKY_ENGINE_PLATFORM_FONTS_FONTMETRICS_H_
 
-#include "sky/engine/platform/fonts/FontBaseline.h"
-#include "sky/engine/wtf/MathExtras.h"
+#include "flutter/sky/engine/platform/fonts/FontBaseline.h"
+#include "flutter/sky/engine/wtf/MathExtras.h"
 
 namespace blink {
 

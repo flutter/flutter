@@ -24,10 +24,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/engine/platform/graphics/GraphicsTypes.h"
+#include "flutter/sky/engine/platform/graphics/GraphicsTypes.h"
 
-#include "sky/engine/wtf/Assertions.h"
-#include "sky/engine/wtf/text/WTFString.h"
+#include "flutter/sky/engine/wtf/Assertions.h"
+#include "flutter/sky/engine/wtf/text/WTFString.h"
 
 namespace blink {
 

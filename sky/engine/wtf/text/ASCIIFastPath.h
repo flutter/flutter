@@ -23,10 +23,10 @@
 #define SKY_ENGINE_WTF_TEXT_ASCIIFASTPATH_H_
 
 #include <stdint.h>
-#include "sky/engine/wtf/Alignment.h"
-#include "sky/engine/wtf/CPU.h"
-#include "sky/engine/wtf/StdLibExtras.h"
-#include "sky/engine/wtf/unicode/Unicode.h"
+#include "flutter/sky/engine/wtf/Alignment.h"
+#include "flutter/sky/engine/wtf/CPU.h"
+#include "flutter/sky/engine/wtf/StdLibExtras.h"
+#include "flutter/sky/engine/wtf/unicode/Unicode.h"
 
 namespace WTF {
 

@@ -7,9 +7,9 @@
 
 #include "lib/ftl/time/time_point.h"
 #include "lib/tonic/dart_persistent_value.h"
-#include "sky/engine/wtf/text/WTFString.h"
-#include "sky/services/engine/sky_engine.mojom.h"
-#include "sky/services/pointer/pointer.mojom.h"
+#include "flutter/sky/engine/wtf/text/WTFString.h"
+#include "flutter/services/engine/sky_engine.mojom.h"
+#include "flutter/services/pointer/pointer.mojom.h"
 
 namespace tonic {
 class DartLibraryNatives;

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sky/engine/bindings/dart_runtime_hooks.h"
+#include "flutter/sky/engine/bindings/dart_runtime_hooks.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -20,8 +20,8 @@
 #include "lib/tonic/logging/dart_invoke.h"
 #include "lib/tonic/scopes/dart_api_scope.h"
 #include "lib/tonic/scopes/dart_isolate_scope.h"
-#include "sky/engine/core/script/ui_dart_state.h"
-#include "sky/engine/wtf/text/WTFString.h"
+#include "flutter/sky/engine/core/script/ui_dart_state.h"
+#include "flutter/sky/engine/wtf/text/WTFString.h"
 
 #if defined(OS_ANDROID)
 #include <android/log.h>
