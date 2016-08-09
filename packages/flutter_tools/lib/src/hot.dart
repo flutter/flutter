@@ -254,12 +254,15 @@ class HotRunner extends ResidentRunner {
       await bundle.build();
       bundleStatus.stop(showElapsedTime: true);
     }
-    Status devFSStatus = logger.startProgress('Syncing files on device...');
+    Status devFSStatus = logger.startProgress('Syncing files to device...');
     await _devFS.update(progressReporter: progressReporter,
                         bundle: bundle,
                         bundleDirty: rebuildBundle);
     devFSStatus.stop(showElapsedTime: true);
-    printStatus('Synced ${getSizeAsMB(_devFS.bytes)} MB');
+    if (progressReporter != null)
+      printStatus('Synced ${getSizeAsMB(_devFS.bytes)}.');
+    else
+      printTrace('Synced ${getSizeAsMB(_devFS.bytes)}.');
     return true;
   }
 
@@ -339,14 +342,13 @@ class HotRunner extends ResidentRunner {
   bool _printReloadReport(Map<String, dynamic> reloadReport) {
     if (!reloadReport['success']) {
       printError('Hot reload was rejected:');
-      for (Map<String, dynamic> notice in reloadReport['details']['notices']) {
+      for (Map<String, dynamic> notice in reloadReport['details']['notices'])
         printError('${notice['message']}');
-      }
       return false;
     }
     int loadedLibraryCount = reloadReport['details']['loadedLibraryCount'];
     int finalLibraryCount = reloadReport['details']['finalLibraryCount'];
-    printStatus('Reloaded $loadedLibraryCount out of $finalLibraryCount libraries.');
+    printStatus('Reloaded $loadedLibraryCount of $finalLibraryCount libraries.');
     return true;
   }
 
@@ -358,7 +360,7 @@ class HotRunner extends ResidentRunner {
       throw 'Application isolate not found';
     if (_devFS != null)
       await _updateDevFS();
-    Status reloadStatus = logger.startProgress('Performing hot reload');
+    Status reloadStatus = logger.startProgress('Performing hot reload...');
     try {
       Map<String, dynamic> reloadReport =
           await serviceProtocol.reloadSources(serviceProtocol.firstIsolateId);
@@ -373,7 +375,7 @@ class HotRunner extends ResidentRunner {
       return false;
     }
     Status reassembleStatus =
-        logger.startProgress('Reassembling application');
+        logger.startProgress('Reassembling application...');
     try {
       await serviceProtocol.flutterReassemble(serviceProtocol.firstIsolateId);
     } catch (_) {
