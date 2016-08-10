@@ -1,3 +1,4 @@
 To update the sky_engine LICENSE file, run:
+  pub get &&
   gclient sync &&
-  dart lib/main.dart ../.. > ../../sky/packages/sky_engine/LICENSE
+  dart lib/main.dart ../.. > ../../flutter/sky/packages/sky_engine/LICENSE

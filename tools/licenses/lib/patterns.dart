@@ -81,8 +81,10 @@ final List<RegExp> copyrightStatementPatterns = <RegExp>[
   new RegExp(r'^Written by .+', caseSensitive: false),
   new RegExp(r'^Based on$', caseSensitive: false),
   new RegExp(r"^based on (?:code in )?['`][^'`]+['`]$", caseSensitive: false),
+  new RegExp(r"^Based on .+, written by .+, [0-9]+\.$", caseSensitive: false),
   new RegExp(r'^(?:Based on the )?x86 SIMD extension for IJG JPEG library(?: - version [0-9.]+|,)?$'),
   new RegExp(r'^This software originally derived from .+\.$'),
+  new RegExp(r'^Derived from .+, which was$'),
   new RegExp(r'^ *This is part of .+, a .+ library\.$'),
   new RegExp(r'^This file is part of [^ ]+\.$'),
   new RegExp(r'^(?:Modification )?[Dd]eveloped [-0-9]+ by .+\.$', caseSensitive: false),
@@ -90,6 +92,7 @@ final List<RegExp> copyrightStatementPatterns = <RegExp>[
   new RegExp(r'^(?:[^ ]+ )?Modifications:$', caseSensitive: false),
   new RegExp(r'^ *Modifications for', caseSensitive: false),
   new RegExp(r'^ *Modifications of', caseSensitive: false),
+  new RegExp(r'^Last changed in .+$', caseSensitive: false),
   new RegExp(r'[-_a-zA-Z0-9()]+ function provided freely by .+'), // TODO(ianh): file a bug on analyzer about what happens if you omit this comma
   new RegExp(r'^.+ optimized code \(C\) COPYRIGHT .+$', caseSensitive: false),
   new RegExp(r'^\(Royal Institute of Technology, Stockholm, Sweden\)\.$'),

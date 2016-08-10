@@ -68,9 +68,6 @@ Thumbs.db
 /examples/**/packages
 /examples/**/pubspec.lock
 /mojo/common/dart/packages
-/sky/packages/**/packages
-/sky/packages/sky_services/lib/
-/sky/tools/pubspec_maintenance/packages/
-/sky/tools/pubspec_maintenance/pubspec.lock
 /mojo/dart/packages/**/packages/
 /mojo/dart/packages/**/pubspec.lock
+/tools/licenses/packages/

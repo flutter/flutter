@@ -969,6 +969,7 @@ class RepositoryDirectory extends RepositoryEntry implements LicenseSource {
 
   bool shouldRecurse(fs.IoNode entry) {
     return entry.name != '.git' &&
+           entry.name != '.github' &&
            entry.name != '.gitignore' &&
            entry.name != 'test' &&
            entry.name != 'test.disabled' &&
@@ -1442,16 +1443,6 @@ class RepositoryAndroidNdkDirectory extends RepositoryDirectory {
   }
 }
 
-class RepositoryExpatDirectory extends RepositoryDirectory {
-  RepositoryExpatDirectory(RepositoryDirectory parent, fs.Directory io) : super(parent, io);
-
-  @override
-  bool get isLicenseRootException => true;
-
-  @override
-  bool get subdirectoriesAreLicenseRoots => true;
-}
-
 class RepositoryAndroidToolsDirectory extends RepositoryDirectory {
   RepositoryAndroidToolsDirectory(RepositoryDirectory parent, fs.Directory io) : super(parent, io);
 
@@ -1475,6 +1466,16 @@ class RepositoryAndroidPlatformDirectory extends RepositoryDirectory {
         && entry.name != 'development' // not linked in
         && super.shouldRecurse(entry);
   }
+}
+
+class RepositoryExpatDirectory extends RepositoryDirectory {
+  RepositoryExpatDirectory(RepositoryDirectory parent, fs.Directory io) : super(parent, io);
+
+  @override
+  bool get isLicenseRootException => true;
+
+  @override
+  bool get subdirectoriesAreLicenseRoots => true;
 }
 
 class RepositoryFreetypeBuildsDirectory extends RepositoryDirectory {
@@ -1612,6 +1613,7 @@ class RepositorySkiaThirdPartyDirectory extends RepositoryGenericThirdPartyDirec
   bool shouldRecurse(fs.IoNode entry) {
     return entry.name != 'giflib' // contains nothing that ends up in the binary executable
         && entry.name != 'freetype' // we use our own version
+        && entry.name != 'lua' // not linked in
         && super.shouldRecurse(entry);
   }
 
@@ -1635,6 +1637,7 @@ class RepositorySkiaDirectory extends RepositoryDirectory {
   @override
   bool shouldRecurse(fs.IoNode entry) {
     return entry.name != 'platform_tools' // contains nothing that ends up in the binary executable
+        && entry.name != 'tools' // contains nothing that ends up in the binary executable
         && super.shouldRecurse(entry);
   }
 
@@ -1742,13 +1745,35 @@ class RepositoryBaseDirectory extends RepositoryDirectory {
   }
 }
 
+class RepositoryBoringSSLSourceDirectory extends RepositoryDirectory {
+  RepositoryBoringSSLSourceDirectory(RepositoryDirectory parent, fs.Directory io) : super(parent, io);
+
+  @override
+  bool shouldRecurse(fs.IoNode entry) {
+    return entry.name != 'fuzz' // testing tools, not shipped
+        && super.shouldRecurse(entry);
+  }
+}
+
+class RepositoryBoringSSLDirectory extends RepositoryDirectory {
+  RepositoryBoringSSLDirectory(RepositoryDirectory parent, fs.Directory io) : super(parent, io);
+
+  @override
+  RepositoryDirectory createSubdirectory(fs.Directory entry) {
+    if (entry.name == 'src')
+      return new RepositoryBoringSSLSourceDirectory(this, entry);
+    return super.createSubdirectory(entry);
+  }
+}
+
 class RepositoryDartThirdPartyDirectory extends RepositoryGenericThirdPartyDirectory {
   RepositoryDartThirdPartyDirectory(RepositoryDirectory parent, fs.Directory io) : super(parent, io);
 
   @override
-  bool shouldRecurse(fs.IoNode entry) {
-    return entry.name != 'boringssl' // we are going to build without it at a minimum until https://github.com/dart-lang/sdk/issues/26944 is resolved
-        && super.shouldRecurse(entry);
+  RepositoryDirectory createSubdirectory(fs.Directory entry) {
+    if (entry.name == 'boringssl')
+      return new RepositoryBoringSSLDirectory(this, entry);
+    return super.createSubdirectory(entry);
   }
 }
 
@@ -1850,8 +1875,8 @@ class RepositoryRoot extends RepositoryDirectory {
       return new RepositoryDartDirectory(this, entry);
     if (entry.name == 'mojo')
       return new RepositoryMojoDirectory(this, entry);
-    if (entry.name == 'sky')
-      return new RepositoryExcludeSubpathDirectory(this, entry, const <String>['packages', 'sky_engine', 'LICENSE']); // that's the output of this script!
+    if (entry.name == 'flutter')
+      return new RepositoryExcludeSubpathDirectory(this, entry, const <String>['sky', 'packages', 'sky_engine', 'LICENSE']); // that's the output of this script!
     return super.createSubdirectory(entry);
   }
 }

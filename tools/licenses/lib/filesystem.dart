@@ -47,7 +47,6 @@ FileType identifyFile(String name, Reader reader) {
   if ((path.split(name).reversed.take(6).toList().reversed.join('/') == 'third_party/icu/source/extra/uconv/README') || // This specific ICU README isn't in UTF-8.
       (path.split(name).reversed.take(6).toList().reversed.join('/') == 'third_party/icu/source/samples/uresb/sr.txt') || // This specific sample contains non-UTF-8 data (unlike other sr.txt files).
       (path.split(name).reversed.take(4).toList().reversed.join('/') == 'freetype-android/src/builds/detect.mk') || // This specific sample contains non-UTF-8 data (unlike other .mk files).
-      (path.split(name).reversed.take(5).toList().reversed.join('/') == 'third_party/skia/src/sfnt/SkOTTable_name.cpp') || // This specific make file contains a single non-UTF-8 character in a comment
       (path.split(name).reversed.take(5).toList().reversed.join('/') == 'third_party/freetype-android/src/docs/FTL.TXT')) // This file has a copyright symbol in Latin1 in it
     return FileType.latin1Text;
   if (path.split(name).reversed.take(6).toList().reversed.join('/') == 'dart/runtime/tests/vm/dart/bad_snapshot' || // Not any particular format
@@ -84,18 +83,6 @@ FileType identifyFile(String name, Reader reader) {
     case 'bool_set': // has latin1 in a person's name in a comment
     case 'mmx_blendtmp.h': // author name in comment contains latin1 (mesa)
     case 'calling_convention.txt': // contains a soft hyphen instead of a real hyphen for some reason (mesa)
-    // Boring SSL files - have latin1 in comments
-    case 'aes-586.pl':
-    case 'rc4-x86_64.pl':
-    case 'sha1-586.pl':
-    case 'sha512-586.pl':
-    case 'sha256-586.pl':
-    case 'ghash-x86_64.pl':
-    case 'ghash-x86.pl':
-    case 'ghash-armv4.pl':
-    case 'ghashv8-armx.pl':
-    case 'ghashv8-armx32.S':
-    case 'ghashv8-armx64.S':
     // Character encoding data files
     case 'danish-ISO-8859-1.txt':
     case 'eucJP.txt':
@@ -184,6 +171,7 @@ FileType identifyFile(String name, Reader reader) {
     case '.apk': return FileType.zip; // Android Package
     case '.crx': return FileType.binary; // Chrome extension
     case '.keystore': return FileType.binary;
+    case '.icc': return FileType.binary;
     // Archives
     case '.zip': return FileType.zip; // ZIP
     case '.tar': return FileType.tar; // Tar
