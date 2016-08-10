@@ -2,7 +2,9 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-executable("sky_snapshot") {
+executable("snapshotter") {
+  output_name = "sky_snapshot"
+
   sources = [
     "main.cc",
   ]
