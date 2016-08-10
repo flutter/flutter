@@ -339,25 +339,30 @@ class AppDomain extends Domain {
       );
     }
 
+    bool supportsRestart = hotMode ? device.supportsHotMode : device.supportsRestart;
+
     AppInstance app = new AppInstance(_getNextAppId(), runner);
     _apps.add(app);
     _sendAppEvent(app, 'start', <String, dynamic>{
       'deviceId': deviceId,
       'directory': projectDirectory,
-      'supportsRestart': device.supportsRestart && hotMode
+      'supportsRestart': supportsRestart
     });
 
-    Completer<int> observatoryPortCompleter;
+    Completer<DebugConnectionInfo> connectionInfoCompleter;
 
     if (options.debuggingEnabled) {
-      observatoryPortCompleter = new Completer<int>();
-      observatoryPortCompleter.future.then((int port) {
-        _sendAppEvent(app, 'debugPort', <String, dynamic>{ 'port': port });
+      connectionInfoCompleter = new Completer<DebugConnectionInfo>();
+      connectionInfoCompleter.future.then((DebugConnectionInfo info) {
+        Map<String, dynamic> params = <String, dynamic>{ 'port': info.port };
+        if (info.baseUri != null)
+          params['baseUri'] = info.baseUri;
+        _sendAppEvent(app, 'debugPort', params);
       });
     }
 
     app._runInZone(this, () {
-      runner.run(observatoryPortCompleter: observatoryPortCompleter, route: route).then((_) {
+      runner.run(connectionInfoCompleter: connectionInfoCompleter, route: route).then((_) {
         _sendAppEvent(app, 'stop');
       }).catchError((dynamic error) {
         _sendAppEvent(app, 'stop', <String, dynamic>{ 'error' : error.toString() });
@@ -371,7 +376,7 @@ class AppDomain extends Domain {
       'appId': app.id,
       'deviceId': deviceId,
       'directory': projectDirectory,
-      'supportsRestart': device.supportsRestart
+      'supportsRestart': supportsRestart
     };
   }
 

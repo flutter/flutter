@@ -32,7 +32,7 @@ abstract class ResidentRunner {
 
   /// Start the app and keep the process running during its lifetime.
   Future<int> run({
-    Completer<int> observatoryPortCompleter,
+    Completer<DebugConnectionInfo> connectionInfoCompleter,
     String route,
     bool shouldBuild: true
   });
@@ -207,4 +207,11 @@ String getMissingPackageHintForPlatform(TargetPlatform platform) {
     default:
       return null;
   }
+}
+
+class DebugConnectionInfo {
+  DebugConnectionInfo(this.port, { this.baseUri });
+
+  final int port;
+  final String baseUri;
 }
