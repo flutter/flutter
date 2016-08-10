@@ -169,14 +169,3 @@ sky_core_files = [
   "window/window.cc",
   "window/window.h",
 ]
-
-core_dart_files = get_path_info([
-                                  "dart/hash_codes.dart",
-                                  "dart/hooks.dart",
-                                  "dart/lerp.dart",
-                                  "dart/mojo_services.dart",
-                                  "dart/natives.dart",
-                                  "dart/text.dart",
-                                  "dart/window.dart",
-                                ],
-                                "abspath")

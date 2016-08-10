@@ -5,8 +5,6 @@
 import("//mojo/dart/packages/mojo/sdk_ext_sources.gni")
 import("//flutter/sky/engine/config.gni")
 
-bindings_output_dir = "$root_gen_dir/sky/bindings"
-
 dart_host_toolchain = host_toolchain
 
 # During precompilation, a 64 bit Dart VM cannot generate code for a 32 bit

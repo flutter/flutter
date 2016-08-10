@@ -64,7 +64,7 @@ dart_sdk_lib_copy("typed_data") {
 }
 
 copy("copy_dart_ui") {
-  sources = core_dart_files + dart_ui_files
+  sources = dart_ui_files
 
   outputs = [
     "$root_gen_dir/dart-pkg/sky_engine/dart_ui/{{source_file_part}}",

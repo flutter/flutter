@@ -2,12 +2,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-import("//flutter/lib/jni/dart_jni.gni")
-import("//flutter/lib/ui/dart_ui.gni")
-import("//mojo/dart/packages/mojo/sdk_ext_sources.gni")
-import("//flutter/sky/engine/bindings/bindings.gni")
-import("//flutter/sky/engine/core/core.gni")
-
 source_set("bindings") {
   sources = [
     "dart_mojo_internal.cc",
@@ -54,7 +48,7 @@ source_set("bindings") {
   # snapshotter.
   if (!is_ios || use_ios_simulator) {
     deps += [
-      ":snapshot_cc",
+      "//flutter/lib/snapshot",
     ]
   }
 
@@ -62,110 +56,5 @@ source_set("bindings") {
     "..",
     "$root_build_dir",
     rebase_path("//dart/runtime"),
-  ]
-}
-
-action("generate_snapshot_bin") {
-  deps = [
-    "//dart/runtime/bin:gen_snapshot($dart_host_toolchain)",
-    ":generate_dart_ui",
-    ":generate_dart_jni",
-  ]
-  inputs = [
-    "//dart/runtime/tools/create_snapshot_bin.py",
-    "snapshot.dart",
-  ] + dart_jni_files
-    + rebase_path(dart_mojo_internal_sdk_sources,
-                  "",
-                  "//mojo/dart/packages/mojo")
-  vm_isolate_snapshot = "$target_gen_dir/vm_isolate_snapshot.bin"
-  isolate_snapshot = "$target_gen_dir/isolate_snapshot.bin"
-  outputs = [
-    vm_isolate_snapshot,
-    isolate_snapshot,
-  ]
-
-  dart_mojo_internal_path =
-      rebase_path("//mojo/dart/packages/mojo/sdk_ext/internal.dart")
-  # TODO(abarth): Make rebased_dart_ui_path match rebased_dart_jni_path once
-  # dart:ui is fully migrated to //flutter/lib/ui.
-  rebased_dart_ui_path = rebase_path("$bindings_output_dir/dart_ui/ui.dart")
-  rebased_dart_jni_path = rebase_path(dart_jni_path)
-
-  gen_snapshot_dir =
-      get_label_info("//dart/runtime/bin:gen_snapshot($dart_host_toolchain)",
-                     "root_out_dir")
-  script = "//dart/runtime/tools/create_snapshot_bin.py"
-
-  args = [
-    "--executable",
-    rebase_path("$gen_snapshot_dir/gen_snapshot"),
-    "--package_root",
-    rebase_path("$root_gen_dir"),
-    "--script",
-    rebase_path("snapshot.dart"),
-    "--vm_output_bin",
-    rebase_path(vm_isolate_snapshot, root_build_dir),
-    "--output_bin",
-    rebase_path(isolate_snapshot, root_build_dir),
-    "--target_os",
-    target_os,
-    "--url_mapping=dart:mojo.internal,$dart_mojo_internal_path",
-    "--url_mapping=dart:ui,$rebased_dart_ui_path",
-    "--url_mapping=dart:jni,$rebased_dart_jni_path",
-  ]
-}
-
-action("generate_snapshot_file") {
-  deps = [
-    ":generate_snapshot_bin",
-  ]
-  inputs = [
-    "//dart/runtime/tools/create_snapshot_file.py",
-    "snapshot.c.tmpl",
-    "$target_gen_dir/vm_isolate_snapshot.bin",
-    "$target_gen_dir/isolate_snapshot.bin",
-  ]
-  output = "$target_gen_dir/snapshot.c"
-  outputs = [
-    output,
-  ]
-
-  script = "//dart/runtime/tools/create_snapshot_file.py"
-  args = [
-    "--vm_input_bin",
-    rebase_path("$target_gen_dir/vm_isolate_snapshot.bin"),
-    "--input_bin",
-    rebase_path("$target_gen_dir/isolate_snapshot.bin"),
-    "--input_cc",
-    rebase_path("snapshot.c.tmpl"),
-    "--output",
-    rebase_path(output),
-  ]
-}
-
-source_set("snapshot_cc") {
-  sources = [
-    "$target_gen_dir/snapshot.c",
-  ]
-
-  deps = [
-    ":generate_snapshot_file",
-  ]
-}
-
-copy("generate_dart_ui") {
-  sources = core_dart_files + dart_ui_files
-
-  outputs = [
-    "$bindings_output_dir/dart_ui/{{source_file_part}}",
-  ]
-}
-
-copy("generate_dart_jni") {
-  sources = dart_jni_files
-
-  outputs = [
-    "$bindings_output_dir/dart_jni/{{source_file_part}}",
   ]
 }

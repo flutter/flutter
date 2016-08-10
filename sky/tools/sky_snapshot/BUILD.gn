@@ -10,10 +10,10 @@ executable("sky_snapshot") {
   deps = [
     "//dart/runtime:libdart",
     "//dart/runtime/vm:libdart_platform",
+    "//flutter/lib/snapshot",
     "//lib/ftl",
     "//lib/tonic/converter",
     "//lib/tonic/file_loader",
-    "//flutter/sky/engine/bindings:snapshot_cc",
   ]
 
   if (!is_ios && !is_mac) {

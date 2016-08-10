@@ -5,8 +5,15 @@
 dart_ui_files = [
   "//flutter/lib/ui/compositing.dart",
   "//flutter/lib/ui/geometry.dart",
+  "//flutter/lib/ui/hash_codes.dart",
+  "//flutter/lib/ui/hooks.dart",
+  "//flutter/lib/ui/lerp.dart",
+  "//flutter/lib/ui/mojo_services.dart",
+  "//flutter/lib/ui/natives.dart",
   "//flutter/lib/ui/painting.dart",
+  "//flutter/lib/ui/text.dart",
   "//flutter/lib/ui/ui.dart",
+  "//flutter/lib/ui/window.dart",
 ]
 
 dart_ui_path = "//flutter/lib/ui/ui.dart"
