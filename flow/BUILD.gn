@@ -6,6 +6,8 @@ source_set("flow") {
   sources = [
     "compositor_context.cc",
     "compositor_context.h",
+    "gl_connection.cc",
+    "gl_connection.h",
     "instrumentation.cc",
     "instrumentation.h",
     "layers/backdrop_filter_layer.cc",

@@ -7,6 +7,7 @@
 #include "lib/ftl/arraysize.h"
 #include "lib/ftl/logging.h"
 #include "third_party/skia/include/gpu/gl/GrGLInterface.h"
+#include "flutter/flow/gl_connection.h"
 
 namespace sky {
 namespace shell {
@@ -31,6 +32,22 @@ bool GaneshCanvas::SetupGrGLInterface() {
   gr_context_ = sk_sp<GrContext>(GrContext::Create(
       kOpenGL_GrBackend,
       reinterpret_cast<GrBackendContext>(GrGLCreateNativeInterface())));
+
+#ifndef NDEBUG
+  // In debug mode, always log the GL connection description.
+  {
+    flow::GLConnection connection;
+    FTL_LOG(INFO) << connection.Description();
+  }
+#else
+  // In release mode, log the GL connection description in case of gr_context
+  // setup failure.
+  if (gr_context_ == nullptr) {
+    flow::GLConnection connection;
+    FTL_LOG(INFO) << "Failed to setup GL context. Aborting.";
+    FTL_LOG(INFO) << connection.Description();
+  }
+#endif
 
   if (!gr_context_)
     return false;
