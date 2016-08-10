@@ -88,15 +88,23 @@ class _ZipToolBuilder extends ZipBuilder {
     }
   }
 
+  static const List<String> _kNoCompressFileExtensions = const <String>['.png', '.jpg'];
+
+  bool isAssetCompressed(AssetBundleEntry entry) {
+    return !_kNoCompressFileExtensions.any(
+        (String extension) => entry.archivePath.endsWith(extension)
+    );
+  }
+
   Iterable<String> _getCompressedNames() {
     return entries
-      .where((AssetBundleEntry entry) => !entry.isStringEntry)
+      .where(isAssetCompressed)
       .map((AssetBundleEntry entry) => entry.archivePath);
   }
 
   Iterable<String> _getStoredNames() {
     return entries
-      .where((AssetBundleEntry entry) => entry.isStringEntry)
+      .where((AssetBundleEntry entry) => !isAssetCompressed(entry))
       .map((AssetBundleEntry entry) => entry.archivePath);
   }
 }
