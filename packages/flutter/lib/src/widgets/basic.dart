@@ -1394,6 +1394,7 @@ class Stack extends MultiChildRenderObjectWidget {
   Stack({
     Key key,
     this.alignment: FractionalOffset.topLeft,
+    this.overflow: Overflow.clip,
     List<Widget> children: _emptyWidgetList
   }) : super(key: key, children: children);
 
@@ -1405,12 +1406,25 @@ class Stack extends MultiChildRenderObjectWidget {
   /// each non-positioned child will be located at the same global coordinate.
   final FractionalOffset alignment;
 
+  /// Whether overflowing children should be clipped. See [Overflow].
+  ///
+  /// Some children in a stack might overflow its box. When this flag is set to
+  /// [Overflow.clipped], children cannot paint outside of the stack's box.
+  final Overflow overflow;
+
   @override
-  RenderStack createRenderObject(BuildContext context) => new RenderStack(alignment: alignment);
+  RenderStack createRenderObject(BuildContext context) {
+    return new RenderStack(
+      alignment: alignment,
+      overflow: overflow
+    );
+  }
 
   @override
   void updateRenderObject(BuildContext context, RenderStack renderObject) {
-    renderObject.alignment = alignment;
+    renderObject
+      ..alignment = alignment
+      ..overflow = overflow;
   }
 }
 

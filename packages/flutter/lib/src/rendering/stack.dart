@@ -199,6 +199,15 @@ class StackParentData extends ContainerBoxParentDataMixin<RenderBox> {
   }
 }
 
+/// Whether overflowing children should be clipped, or their overflows be
+/// visible.
+enum Overflow {
+  /// Children's overflows will be visible.
+  visible,
+  /// Children's overflows will be clipped.
+  clip
+}
+
 /// Implements the stack layout algorithm
 ///
 /// In a stack layout, the children are positioned on top of each other in the
@@ -244,8 +253,11 @@ class RenderStack extends RenderBox
   /// top left corners.
   RenderStack({
     List<RenderBox> children,
-    FractionalOffset alignment: FractionalOffset.topLeft
-  }) : _alignment = alignment {
+    FractionalOffset alignment: FractionalOffset.topLeft,
+    Overflow overflow: Overflow.clip
+  }) : _alignment = alignment,
+       _overflow = overflow {
+    assert(overflow != null);
     addAll(children);
   }
 
@@ -255,6 +267,20 @@ class RenderStack extends RenderBox
   void setupParentData(RenderBox child) {
     if (child.parentData is! StackParentData)
       child.parentData = new StackParentData();
+  }
+
+  /// Whether overflowing children should be clipped. See [Overflow].
+  ///
+  /// Some children in a stack might overflow its box. When this flag is set to
+  /// [Overflow.clipped], children cannot paint outside of the stack's box.
+  Overflow get overflow => _overflow;
+  Overflow _overflow;
+  set overflow (Overflow value) {
+    assert(value != null);
+    if (_overflow != value) {
+      _overflow = value;
+      markNeedsPaint();
+    }
   }
 
   /// How to align the non-positioned children in the stack.
@@ -409,7 +435,7 @@ class RenderStack extends RenderBox
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (_hasVisualOverflow) {
+    if (_overflow == Overflow.clip && _hasVisualOverflow) {
       context.pushClipRect(needsCompositing, offset, Point.origin & size, paintStack);
     } else {
       paintStack(context, offset);
