@@ -78,6 +78,15 @@ String getSizeAsMB(int bytesLength) {
   return '${(bytesLength / (1024 * 1024)).toStringAsFixed(1)}MB';
 }
 
+String getElapsedAsSeconds(Duration duration) {
+  double seconds = duration.inMilliseconds / Duration.MILLISECONDS_PER_SECOND;
+  return '${seconds.toStringAsFixed(2)} seconds';
+}
+
+String getElapsedAsMilliseconds(Duration duration) {
+  return '${duration.inMilliseconds} ms';
+}
+
 /// Return a relative path if [fullPath] is contained by the cwd, else return an
 /// absolute path.
 String getDisplayPath(String fullPath) {
