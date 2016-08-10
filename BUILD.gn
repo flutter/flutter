@@ -6,8 +6,10 @@ group("flutter") {
   testonly = true
 
   deps = [
+    "//flutter/assets",
     "//flutter/flow",
     "//flutter/glue",
+    "//flutter/snapshotter",
   ]
 
   if (!is_fuchsia) {

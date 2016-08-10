@@ -2,8 +2,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-import("//mojo/public/mojo_application.gni")
-
 source_set("assets") {
   sources = [
     "directory_asset_bundle.cc",
