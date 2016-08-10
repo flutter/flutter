@@ -4,12 +4,36 @@
 
 #include "flutter/flow/layers/child_scene_layer.h"
 
-#include "mojo/skia/type_converters.h"
-
 namespace flow {
+namespace {
+
+mojo::TransformPtr GetTransformFromSkMatrix(const SkMatrix& input) {
+  // Expand 3x3 to 4x4.
+  auto output = mojo::Transform::New();
+  output->matrix.resize(16u);
+  output->matrix[0] = input[0];
+  output->matrix[1] = input[1];
+  output->matrix[2] = 0.f;
+  output->matrix[3] = input[2];
+  output->matrix[4] = input[3];
+  output->matrix[5] = input[4];
+  output->matrix[6] = 0.f;
+  output->matrix[7] = input[5];
+  output->matrix[8] = 0.f;
+  output->matrix[9] = 0.f;
+  output->matrix[10] = 1.f;
+  output->matrix[11] = 0.f;
+  output->matrix[12] = input[6];
+  output->matrix[13] = input[7];
+  output->matrix[14] = 0.f;
+  output->matrix[15] = input[8];
+  return output.Pass();
+}
 
 // TODO(abarth): We need to figure out how to allocate these ids sensibly.
 static uint32_t next_id = 10;
+
+}  // namespace
 
 ChildSceneLayer::ChildSceneLayer() : device_pixel_ratio_(1.0f) {}
 
@@ -42,7 +66,7 @@ void ChildSceneLayer::UpdateScene(mojo::gfx::composition::SceneUpdate* update,
   child_node->content_clip = mojo::RectF::New();
   child_node->content_clip->width = physical_size_.width();
   child_node->content_clip->height = physical_size_.height();
-  child_node->content_transform = mojo::Transform::From(transform_);
+  child_node->content_transform = GetTransformFromSkMatrix(transform_);
   update->nodes.insert(id, child_node.Pass());
   container->child_node_ids.push_back(id);
 }

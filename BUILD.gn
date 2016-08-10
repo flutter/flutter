@@ -2,11 +2,11 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-# This target will be built if no target is specified when invoking ninja.
 group("flutter") {
   testonly = true
 
   deps = [
+    "//flutter/flow",
     "//flutter/glue",
   ]
 

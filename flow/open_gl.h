@@ -7,19 +7,19 @@
 
 #include "lib/ftl/build_config.h"
 
-#if OS_IOS
+#if defined(OS_IOS)
 
 #include <OpenGLES/ES2/gl.h>
 
-#elif OS_MACOSX
+#elif defined(OS_MACOSX)
 
 #include <OpenGL/gl.h>
 
-#elif OS_ANDROID
+#elif defined(OS_ANDROID) || defined(OS_FUCHSIA)
 
 #include <GLES2/gl2.h>
 
-#elif OS_LINUX
+#elif defined(OS_LINUX)
 
 #include <GL/gl.h>
 

@@ -47,9 +47,17 @@ source_set("flow") {
 
   deps = [
     "//flutter/glue",
+    "//flutter/skia",
     "//lib/ftl",
     "//mojo/services/gfx/composition/interfaces",
-    "//mojo/skia",
-    "//flutter/skia",
   ]
+
+  if (is_fuchsia) {
+    # TODO(abarth): In principle, we should add "//mojo/public/c/gpu" as a
+    # dependency, but that doesn't work currently because GPU support on Fuchsia
+    # is still a work in progress.
+    include_dirs = [
+      "//mojo/public/c/gpu",
+    ]
+  }
 }
