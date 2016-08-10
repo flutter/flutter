@@ -19,9 +19,15 @@ source_set("glue") {
   ]
 
   deps = [
-    "//base",
     "//lib/ftl",
-    "//mojo/data_pipe_utils",
     "//mojo/public/cpp/environment",
+    "//mojo/public/cpp/system",
   ]
+
+  if (!is_fuchsia) {
+    deps += [
+      "//base",
+      "//mojo/data_pipe_utils",
+    ]
+  }
 }
