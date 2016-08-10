@@ -376,7 +376,6 @@ void PlatformViewAndroid::Detach(JNIEnv* env, jobject obj) {
 void PlatformViewAndroid::SurfaceCreated(JNIEnv* env,
                                          jobject obj,
                                          jobject jsurface) {
-  base::android::ScopedJavaLocalRef<jobject> protector(env, jsurface);
   // Note: This ensures that any local references used by
   // ANativeWindow_fromSurface are released immediately. This is needed as a
   // workaround for https://code.google.com/p/android/issues/detail?id=68174
