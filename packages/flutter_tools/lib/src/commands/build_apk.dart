@@ -267,9 +267,9 @@ Future<_ApkComponents> _findApkComponents(
 
     components.icuData = new File('$enginePath/third_party/icu/android/icudtl.dat');
     components.jars = <File>[
-      new File('$buildDir/gen/sky/shell/shell/classes.dex.jar')
+      new File('$buildDir/gen/flutter/sky/shell/shell/classes.dex.jar')
     ];
-    components.libSkyShell = new File('$buildDir/gen/sky/shell/shell/shell/libs/$abiDir/libsky_shell.so');
+    components.libSkyShell = new File('$buildDir/gen/flutter/sky/shell/shell/shell/libs/$abiDir/libsky_shell.so');
     components.debugKeystore = new File('$enginePath/build/android/ant/chromium-debug.keystore');
   } else {
     Directory artifacts = tools.getEngineArtifactsDirectory(platform, buildMode);
