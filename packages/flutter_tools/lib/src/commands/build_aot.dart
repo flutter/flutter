@@ -121,7 +121,7 @@ Future<String> _buildAotSnapshot(
 
   String engineSrc = tools.engineSrcPath;
   if (engineSrc != null) {
-    entryPointsDir  = path.join(engineSrc, 'sky', 'engine', 'bindings');
+    entryPointsDir  = path.join(engineSrc, 'flutter', 'sky', 'engine', 'bindings');
     dartEntryPointsDir = path.join(engineSrc, 'dart', 'runtime', 'bin');
     String engineOut = tools.getEngineArtifactsDirectory(platform, buildMode).path;
     if (platform == TargetPlatform.ios) {
