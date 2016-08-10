@@ -18,7 +18,7 @@ executable("snapshotter") {
     "//lib/tonic/file_loader",
   ]
 
-  if (!is_ios && !is_mac) {
+  if (!is_ios && !is_mac && !is_fuchsia) {
     ldflags = [
       # libgcc_s is not a DT_NEEDED library; it normally gets loaded implicitly.
       # This flag ensures that rpath is referenced when searching for

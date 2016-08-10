@@ -3,7 +3,6 @@
 # found in the LICENSE file.
 
 import("//mojo/dart/packages/mojo/sdk_ext_sources.gni")
-import("//flutter/sky/engine/config.gni")
 
 dart_host_toolchain = host_toolchain
 
