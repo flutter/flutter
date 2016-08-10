@@ -4,6 +4,8 @@
 
 root_dist_dir = "$root_build_dir/dist"
 
+if (!is_ios) {
+
 copy("sky_shell") {
   if (is_android) {
     sources = [
@@ -24,7 +26,7 @@ copy("sky_shell") {
     deps = [
       "//flutter/sky/shell",
     ]
-  } else if (!is_ios) {
+  } else {
     sources = [
       "$root_build_dir/flutter.mojo",
       "$root_build_dir/icudtl.dat",
@@ -38,13 +40,12 @@ copy("sky_shell") {
       "//flutter/sky/shell/platform/mojo",
       "//third_party/icu:icudata",
     ]
-  } else {
-    sources = []
-    deps = []
   }
 
   outputs = [ "$root_dist_dir/shell/{{source_file_part}}" ]
 }
+
+}  # if (!is_ios)
 
 if (is_android) {
   action("sky_engine") {
