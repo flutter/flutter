@@ -2,6 +2,16 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+if (is_fuchsia) {
+
+group("skia") {
+  # TODO(abarth): Switch the non-Fuchsia build over to using Skia's BUILD.gn
+  # files as well.
+  public_deps = [ "//third_party/skia" ]
+}
+
+} else {
+
 import("//build/config/features.gni")
 import("//build/config/ui.gni")
 import("//testing/test.gni")
@@ -553,3 +563,5 @@ source_set("skia_opts") {
 
   visibility = [ ":skia" ]
 }
+
+}  # if (is_fuchsia)
