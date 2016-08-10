@@ -11,6 +11,14 @@
 #include <string>
 #include <set>
 
+#ifdef major
+#undef major
+#endif
+
+#ifdef minor
+#undef minor
+#endif
+
 namespace flow {
 
 class GLConnection {
