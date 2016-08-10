@@ -2,8 +2,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-root_dist_dir = "$root_build_dir/dist"
-
 if (!is_ios) {
 
 copy("sky_shell") {
@@ -42,7 +40,7 @@ copy("sky_shell") {
     ]
   }
 
-  outputs = [ "$root_dist_dir/shell/{{source_file_part}}" ]
+  outputs = [ "$root_build_dir/dist/shell/{{source_file_part}}" ]
 }
 
 }  # if (!is_ios)
@@ -52,7 +50,7 @@ if (is_android) {
     script = "//flutter/sky/tools/dist_dart_pkg.py"
 
     source = "$root_gen_dir/dart-pkg/sky_engine"
-    dest = "$root_dist_dir/packages/sky_engine"
+    dest = "$root_build_dir/dist/packages/sky_engine"
 
     inputs = [ source ]
     outputs = [ dest ]
@@ -73,7 +71,7 @@ if (is_android) {
     script = "//flutter/sky/tools/dist_dart_pkg.py"
 
     source = "$root_gen_dir/dart-pkg/sky_services"
-    dest = "$root_dist_dir/packages/sky_services"
+    dest = "$root_build_dir/dist/packages/sky_services"
 
     inputs = [ source ]
     outputs = [ dest ]
