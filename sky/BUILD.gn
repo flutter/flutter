@@ -15,7 +15,7 @@ group("sky") {
   ]
 
   if (dart_host_toolchain == host_toolchain) {
-    deps += [ "//flutter/sky/tools/sky_snapshot($dart_host_toolchain)" ]
+    deps += [ "//flutter/snapshotter($dart_host_toolchain)" ]
   }
 
   if (is_linux || is_android) {

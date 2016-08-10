@@ -26,7 +26,6 @@ extern const uint8_t kDartVmIsolateSnapshotBuffer[];
 extern const uint8_t kDartIsolateSnapshotBuffer[];
 }
 
-namespace sky_snapshot {
 namespace {
 
 using tonic::ToDart;
@@ -233,8 +232,7 @@ int CreateSnapshot(const ftl::CommandLine& command_line) {
 }
 
 }  // namespace
-}  // namespace sky_snapshot
 
 int main(int argc, const char* argv[]) {
-  return sky_snapshot::CreateSnapshot(ftl::CommandLineFromArgcArgv(argc, argv));
+  return CreateSnapshot(ftl::CommandLineFromArgcArgv(argc, argv));
 }

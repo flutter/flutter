@@ -43,15 +43,6 @@ copy("sky_shell") {
     deps = []
   }
 
-  sky_snapshot_dir =
-      get_label_info("//flutter/sky/tools/sky_snapshot($host_toolchain)", "root_out_dir")
-
-  sources += [ "$sky_snapshot_dir/sky_snapshot" ]
-
-  deps += [
-    "//flutter/sky/tools/sky_snapshot($host_toolchain)",
-  ]
-
   outputs = [ "$root_dist_dir/shell/{{source_file_part}}" ]
 }
 
