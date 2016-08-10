@@ -29,7 +29,7 @@ class DrainDataPipeJob::JobImpl : public DataPipeDrainer::Client {
 
   std::vector<char> buffer_;
   ResultCallback callback_;
-  mojo::common::DataPipeDrainer drainer_;
+  DataPipeDrainer drainer_;
 
   FTL_DISALLOW_COPY_AND_ASSIGN(JobImpl);
 };
