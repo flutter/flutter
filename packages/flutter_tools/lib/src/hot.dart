@@ -29,6 +29,41 @@ String getDevFSLoaderScript() {
                                  'loader_app.dart'));
 }
 
+class FirstFrameTimer {
+  FirstFrameTimer(this.serviceProtocol);
+
+  void start() {
+    stopwatch.reset();
+    stopwatch.start();
+    _subscription = serviceProtocol.onExtensionEvent.listen(_onExtensionEvent);
+  }
+
+  /// Returns a Future which completes after the first frame event is received.
+  Future<Null> firstFrame() => _completer.future;
+
+  void _onExtensionEvent(Event event) {
+    if (event.extensionKind == 'Flutter.FirstFrame')
+      _stop();
+  }
+
+  void _stop() {
+    _subscription?.cancel();
+    _subscription = null;
+    stopwatch.stop();
+    _completer.complete(null);
+  }
+
+  Duration get elapsed {
+    assert(!stopwatch.isRunning);
+    return stopwatch.elapsed;
+  }
+
+  final Observatory serviceProtocol;
+  final Stopwatch stopwatch = new Stopwatch();
+  final Completer<Null> _completer = new Completer<Null>();
+  StreamSubscription<Event> _subscription;
+}
+
 class HotRunner extends ResidentRunner {
   HotRunner(
     Device device, {
@@ -347,16 +382,21 @@ class HotRunner extends ResidentRunner {
   }
 
   Future<Null> _restartFromSources() async {
+    FirstFrameTimer firstFrameTimer = new FirstFrameTimer(serviceProtocol);
+    firstFrameTimer.start();
     if (_devFS == null) {
-      Status restartStatus = logger.startProgress('Restarting application...');
       await _launchFromDisk(_package, _mainPath);
-      restartStatus.stop(showElapsedTime: true);
     } else {
       await _updateDevFS();
-      Status restartStatus = logger.startProgress('Restarting application...');
       await _launchFromDevFS(_package, _mainPath);
-      restartStatus.stop(showElapsedTime: true);
     }
+    Status restartStatus =
+        logger.startProgress('Waiting for application to start...');
+    // Wait for the first frame to be rendered.
+    await firstFrameTimer.firstFrame();
+    restartStatus.stop(showElapsedTime: true);
+    printStatus('Restart time: '
+                '${getElapsedAsMilliseconds(firstFrameTimer.elapsed)}');
     flutterUsage.sendEvent('hot', 'restart');
   }
 
@@ -380,6 +420,8 @@ class HotRunner extends ResidentRunner {
   Future<bool> _reloadSources() async {
     if (serviceProtocol.firstIsolateId == null)
       throw 'Application isolate not found';
+    FirstFrameTimer firstFrameTimer = new FirstFrameTimer(serviceProtocol);
+    firstFrameTimer.start();
     if (_devFS != null)
       await _updateDevFS();
     Status reloadStatus = logger.startProgress('Performing hot reload...');
@@ -410,6 +452,9 @@ class HotRunner extends ResidentRunner {
       return false;
     }
     reassembleStatus.stop(showElapsedTime: true);
+    await firstFrameTimer.firstFrame();
+    printStatus('Hot reload time: '
+                '${getElapsedAsMilliseconds(firstFrameTimer.elapsed)}');
     return true;
   }
 
