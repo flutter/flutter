@@ -52,7 +52,7 @@ deps = {
    # and not have to specific specific hashes.
 
   'src/lib/ftl':
-   Var('fuchsia_git') + '/ftl' + '@' + '340d72d47ef4b5e740fc924cd1ada3565770f691',
+   Var('fuchsia_git') + '/ftl' + '@' + '0bb3a02301c8a88b494e58c6636fa509525adaa8',
 
   'src/lib/tonic':
    Var('fuchsia_git') + '/tonic' + '@' + '25b9fe6c5dfb0925794e754b7dc80d9c320e5082',
