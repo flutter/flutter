@@ -12,7 +12,7 @@ import 'base/logger.dart';
 import 'dart/package_map.dart';
 import 'asset.dart';
 import 'globals.dart';
-import 'observatory.dart';
+import 'vmservice.dart';
 
 typedef void DevFSProgressReporter(int progress, int max);
 
@@ -108,7 +108,7 @@ abstract class DevFSOperations {
 /// An implementation of [DevFSOperations] that speaks to the
 /// service protocol.
 class ServiceProtocolDevFSOperations implements DevFSOperations {
-  final Observatory serviceProtocol;
+  final VMService serviceProtocol;
 
   ServiceProtocolDevFSOperations(this.serviceProtocol);
 
@@ -165,7 +165,7 @@ class ServiceProtocolDevFSOperations implements DevFSOperations {
 }
 
 class _DevFSHttpWriter {
-  _DevFSHttpWriter(this.fsName, Observatory serviceProtocol)
+  _DevFSHttpWriter(this.fsName, VMService serviceProtocol)
       : httpAddress = serviceProtocol.httpAddress;
 
   final String fsName;
@@ -230,7 +230,7 @@ class _DevFSHttpWriter {
 
 class DevFS {
   /// Create a [DevFS] named [fsName] for the local files in [directory].
-  DevFS(Observatory serviceProtocol,
+  DevFS(VMService serviceProtocol,
         String fsName,
         this.rootDirectory)
     : _operations = new ServiceProtocolDevFSOperations(serviceProtocol),

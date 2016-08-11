@@ -10,7 +10,7 @@ import '../base/common.dart';
 import '../base/utils.dart';
 import '../cache.dart';
 import '../globals.dart';
-import '../observatory.dart';
+import '../vmservice.dart';
 import '../runner/flutter_command.dart';
 
 // Names of some of the Timeline events we care about.
@@ -98,10 +98,10 @@ class Tracing {
   Tracing(this.observatory);
 
   static Future<Tracing> connect(int port) {
-    return Observatory.connect(port).then((Observatory observatory) => new Tracing(observatory));
+    return VMService.connect(port).then((VMService observatory) => new Tracing(observatory));
   }
 
-  final Observatory observatory;
+  final VMService observatory;
 
   Future<Null> startTracing() async {
     await observatory.setVMTimelineFlags(<String>['Compiler', 'Dart', 'Embedder', 'GC']);
@@ -153,7 +153,7 @@ class Tracing {
 
 /// Download the startup trace information from the given observatory client and
 /// store it to build/start_up_info.json.
-Future<Null> downloadStartupTrace(Observatory observatory) async {
+Future<Null> downloadStartupTrace(VMService observatory) async {
   File traceInfoFile = new File('build/start_up_info.json');
 
   if (await traceInfoFile.exists())

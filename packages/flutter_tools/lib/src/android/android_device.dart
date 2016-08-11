@@ -16,7 +16,7 @@ import '../build_info.dart';
 import '../device.dart';
 import '../flx.dart' as flx;
 import '../globals.dart';
-import '../observatory.dart';
+import '../vmservice.dart';
 import '../protocol_discovery.dart';
 import 'adb.dart';
 import 'android.dart';
@@ -421,7 +421,7 @@ class AndroidDevice extends Device {
     ApplicationPackage package,
     LaunchResult result, {
     String mainPath,
-    Observatory observatory
+    VMService observatory
   }) async {
     Directory tempDir = await Directory.systemTemp.createTemp('flutter_tools');
 
