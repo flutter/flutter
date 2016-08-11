@@ -57,56 +57,78 @@ void SceneBuilder::RegisterNatives(tonic::DartLibraryNatives* natives) {
 }
 
 SceneBuilder::SceneBuilder()
-    : m_currentLayer(nullptr), m_currentRasterizerTracingThreshold(0) {}
+    : m_currentLayer(nullptr), m_currentRasterizerTracingThreshold(0) {
+  m_cullRects.push(SkRect::MakeLargest());
+}
 
 SceneBuilder::~SceneBuilder() {}
 
 void SceneBuilder::pushTransform(const tonic::Float64List& matrix4) {
   SkMatrix sk_matrix = ToSkMatrix(matrix4);
+  SkMatrix inverse_sk_matrix;
+  SkRect cullRect;
+  if (sk_matrix.invert(&inverse_sk_matrix))
+    inverse_sk_matrix.mapRect(&cullRect, m_cullRects.top());
+  else
+    cullRect = SkRect::MakeLargest();
+
   std::unique_ptr<flow::TransformLayer> layer(new flow::TransformLayer());
   layer->set_transform(sk_matrix);
-  addLayer(std::move(layer));
+  addLayer(std::move(layer), cullRect);
 }
 
 void SceneBuilder::pushClipRect(double left,
                                 double right,
                                 double top,
                                 double bottom) {
+  const SkRect clipRect = SkRect::MakeLTRB(left, top, right, bottom);
+  SkRect cullRect;
+  if (!cullRect.intersect(clipRect, m_cullRects.top()))
+    cullRect = SkRect::MakeEmpty();
+
   std::unique_ptr<flow::ClipRectLayer> layer(new flow::ClipRectLayer());
-  layer->set_clip_rect(SkRect::MakeLTRB(left, top, right, bottom));
-  addLayer(std::move(layer));
+  layer->set_clip_rect(clipRect);
+  addLayer(std::move(layer), cullRect);
 }
 
 void SceneBuilder::pushClipRRect(const RRect& rrect) {
+  SkRect cullRect;
+  if (!cullRect.intersect(rrect.sk_rrect.rect(), m_cullRects.top()))
+    cullRect = SkRect::MakeEmpty();
+
   std::unique_ptr<flow::ClipRRectLayer> layer(new flow::ClipRRectLayer());
   layer->set_clip_rrect(rrect.sk_rrect);
-  addLayer(std::move(layer));
+  addLayer(std::move(layer), cullRect);
 }
 
 void SceneBuilder::pushClipPath(const CanvasPath* path) {
+  SkRect cullRect;
+  if (!cullRect.intersect(path->path().getBounds(), m_cullRects.top()))
+    cullRect = SkRect::MakeEmpty();
+
   std::unique_ptr<flow::ClipPathLayer> layer(new flow::ClipPathLayer());
   layer->set_clip_path(path->path());
-  addLayer(std::move(layer));
+  addLayer(std::move(layer), cullRect);
 }
 
 void SceneBuilder::pushOpacity(int alpha) {
   std::unique_ptr<flow::OpacityLayer> layer(new flow::OpacityLayer());
   layer->set_alpha(alpha);
-  addLayer(std::move(layer));
+  addLayer(std::move(layer), m_cullRects.top());
 }
 
 void SceneBuilder::pushColorFilter(int color, int transferMode) {
   std::unique_ptr<flow::ColorFilterLayer> layer(new flow::ColorFilterLayer());
   layer->set_color(static_cast<SkColor>(color));
   layer->set_transfer_mode(static_cast<SkXfermode::Mode>(transferMode));
-  addLayer(std::move(layer));
+  addLayer(std::move(layer), m_cullRects.top());
 }
 
 void SceneBuilder::pushBackdropFilter(ImageFilter* filter) {
   std::unique_ptr<flow::BackdropFilterLayer> layer(
       new flow::BackdropFilterLayer());
   layer->set_filter(filter->filter());
-  addLayer(std::move(layer));
+  addLayer(std::move(layer), m_cullRects.top());
 }
 
 void SceneBuilder::pushShaderMask(Shader* shader,
@@ -120,11 +142,14 @@ void SceneBuilder::pushShaderMask(Shader* shader,
   layer->set_mask_rect(SkRect::MakeLTRB(maskRectLeft, maskRectTop,
                                         maskRectRight, maskRectBottom));
   layer->set_transfer_mode(static_cast<SkXfermode::Mode>(transferMode));
-  addLayer(std::move(layer));
+  addLayer(std::move(layer), m_cullRects.top());
 }
 
-void SceneBuilder::addLayer(std::unique_ptr<flow::ContainerLayer> layer) {
+void SceneBuilder::addLayer(std::unique_ptr<flow::ContainerLayer> layer, const SkRect& cullRect) {
   DCHECK(layer);
+
+  m_cullRects.push(cullRect);
+
   if (!m_rootLayer) {
     DCHECK(!m_currentLayer);
     m_rootLayer = std::move(layer);
@@ -141,6 +166,7 @@ void SceneBuilder::addLayer(std::unique_ptr<flow::ContainerLayer> layer) {
 void SceneBuilder::pop() {
   if (!m_currentLayer)
     return;
+  m_cullRects.pop();
   m_currentLayer = m_currentLayer->parent();
 }
 
@@ -150,6 +176,12 @@ void SceneBuilder::addPicture(double dx,
                               int hints) {
   if (!m_currentLayer)
     return;
+
+  SkRect pictureRect = picture->picture()->cullRect();
+  pictureRect.offset(dx, dy);
+  if (!SkRect::Intersects(pictureRect, m_cullRects.top()))
+    return;
+
   std::unique_ptr<flow::PictureLayer> layer(new flow::PictureLayer());
   layer->set_offset(SkPoint::Make(dx, dy));
   layer->set_picture(picture->picture());
