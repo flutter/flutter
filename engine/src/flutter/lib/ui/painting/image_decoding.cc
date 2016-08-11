@@ -5,23 +5,21 @@
 #include "flutter/lib/ui/painting/image_decoding.h"
 
 #include "flutter/flow/texture_image.h"
-#include "flutter/lib/ui/painting/image.h"
-#include "flutter/lib/ui/painting/resource_context.h"
 #include "flutter/glue/drain_data_pipe_job.h"
 #include "flutter/glue/movable_wrapper.h"
 #include "flutter/glue/trace_event.h"
+#include "flutter/lib/ui/painting/image.h"
+#include "flutter/lib/ui/painting/resource_context.h"
+#include "flutter/tonic/dart_state.h"
 #include "lib/ftl/tasks/task_runner.h"
 #include "lib/tonic/dart_persistent_value.h"
 #include "lib/tonic/logging/dart_invoke.h"
 #include "lib/tonic/mojo_converter.h"
 #include "lib/tonic/typed_data/uint8_list.h"
-#include "flutter/sky/engine/public/platform/Platform.h"
-#include "flutter/sky/engine/wtf/PassOwnPtr.h"
 #include "third_party/skia/include/core/SkImageGenerator.h"
 
 using tonic::DartInvoke;
 using tonic::DartPersistentValue;
-using tonic::DartState;
 using tonic::ToDart;
 
 namespace blink {
@@ -60,7 +58,7 @@ sk_sp<SkImage> DecodeImage(std::vector<char> buffer) {
 }
 
 void InvokeImageCallback(sk_sp<SkImage> image,
-                         PassOwnPtr<DartPersistentValue> callback) {
+                         std::unique_ptr<DartPersistentValue> callback) {
   tonic::DartState* dart_state = callback->dart_state().get();
   if (!dart_state)
     return;
@@ -74,11 +72,14 @@ void InvokeImageCallback(sk_sp<SkImage> image,
   }
 }
 
-void DecodeImageAndInvokeImageCallback(PassOwnPtr<DartPersistentValue> callback,
-                                       std::vector<char> buffer) {
+void DecodeImageAndInvokeImageCallback(
+    ftl::RefPtr<ftl::TaskRunner> task_runner,
+    glue::MovableWrapper<std::unique_ptr<DartPersistentValue>> callback,
+    std::vector<char> buffer) {
   sk_sp<SkImage> image = DecodeImage(std::move(buffer));
-  Platform::current()->GetUITaskRunner()->PostTask(
-      [callback, image]() { InvokeImageCallback(image, callback); });
+  task_runner->PostTask([callback, image]() mutable {
+    InvokeImageCallback(image, callback.Unwrap());
+  });
 }
 
 void DecodeImageFromDataPipe(Dart_NativeArguments args) {
@@ -98,16 +99,21 @@ void DecodeImageFromDataPipe(Dart_NativeArguments args) {
     return;
   }
 
-  PassOwnPtr<DartPersistentValue> callback =
-      adoptPtr(new DartPersistentValue(DartState::Current(), callback_handle));
+  DartState* dart_state = DartState::Current();
+  ftl::RefPtr<ftl::TaskRunner> task_runner = dart_state->ui_task_runner();
 
-  Platform::current()->GetIOTaskRunner()->PostTask(
-      [callback, consumer]() mutable {
+  auto callback = glue::WrapMovable(std::unique_ptr<DartPersistentValue>(
+      new DartPersistentValue(dart_state, callback_handle)));
+
+  dart_state->io_task_runner()->PostTask(
+      [task_runner, callback, consumer]() mutable {
         glue::DrainDataPipeJob* job = nullptr;
         job = new glue::DrainDataPipeJob(
-            consumer.Unwrap(), [callback, job](std::vector<char> buffer) {
+            consumer.Unwrap(),
+            [task_runner, callback, job](std::vector<char> buffer) {
               delete job;
-              DecodeImageAndInvokeImageCallback(callback, std::move(buffer));
+              DecodeImageAndInvokeImageCallback(task_runner, callback,
+                                                std::move(buffer));
             });
       });
 }
@@ -127,16 +133,22 @@ void DecodeImageFromList(Dart_NativeArguments args) {
     Dart_ThrowException(ToDart("Callback must be a function"));
     return;
   }
-  PassOwnPtr<DartPersistentValue> callback =
-      adoptPtr(new DartPersistentValue(DartState::Current(), callback_handle));
+
+  DartState* dart_state = DartState::Current();
+  ftl::RefPtr<ftl::TaskRunner> task_runner = dart_state->ui_task_runner();
+
+  auto callback = glue::WrapMovable(std::unique_ptr<DartPersistentValue>(
+      new DartPersistentValue(dart_state, callback_handle)));
 
   const char* bytes = reinterpret_cast<const char*>(list.data());
-  PassOwnPtr<std::vector<char>> buffer =
-      adoptPtr(new std::vector<char>(bytes, bytes + list.num_elements()));
+  auto buffer = glue::WrapMovable(std::unique_ptr<std::vector<char>>(
+      new std::vector<char>(bytes, bytes + list.num_elements())));
 
-  Platform::current()->GetIOTaskRunner()->PostTask([callback, buffer]() {
-    DecodeImageAndInvokeImageCallback(callback, std::move(*buffer));
-  });
+  dart_state->io_task_runner()->PostTask(
+      [task_runner, callback, buffer]() mutable {
+        DecodeImageAndInvokeImageCallback(task_runner, callback,
+                                          std::move(*buffer.Unwrap()));
+      });
 }
 
 }  // namespace

@@ -145,13 +145,14 @@ void SceneBuilder::pushShaderMask(Shader* shader,
   addLayer(std::move(layer), m_cullRects.top());
 }
 
-void SceneBuilder::addLayer(std::unique_ptr<flow::ContainerLayer> layer, const SkRect& cullRect) {
-  DCHECK(layer);
+void SceneBuilder::addLayer(std::unique_ptr<flow::ContainerLayer> layer,
+                            const SkRect& cullRect) {
+  FTL_DCHECK(layer);
 
   m_cullRects.push(cullRect);
 
   if (!m_rootLayer) {
-    DCHECK(!m_currentLayer);
+    FTL_DCHECK(!m_currentLayer);
     m_rootLayer = std::move(layer);
     m_currentLayer = m_rootLayer.get();
     return;

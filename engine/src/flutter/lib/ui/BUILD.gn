@@ -41,15 +41,10 @@ source_set("ui") {
   ]
 
   deps = [
-    "//base",
     "//flutter/flow",
-    "//flutter/tonic",
     "//flutter/glue",
-    "//lib/tonic",
     "//flutter/skia",
-
-    # For image_decoding:
-    "//flutter/sky/engine/platform",
-    "//flutter/sky/engine/wtf",
+    "//flutter/tonic",
+    "//lib/tonic",
   ]
 }
