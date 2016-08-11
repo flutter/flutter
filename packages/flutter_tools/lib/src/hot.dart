@@ -383,7 +383,7 @@ class HotRunner extends ResidentRunner {
   @override
   Future<bool> restart({ bool fullRestart: false }) async {
     if (fullRestart) {
-      _restartFromSources();
+      await _restartFromSources();
       return true;
     } else {
       return _reloadSources();
