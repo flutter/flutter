@@ -5,18 +5,21 @@
 #include "flutter/sky/engine/core/script/ui_dart_state.h"
 
 #include "flutter/sky/engine/core/window/window.h"
+#include "flutter/sky/engine/public/platform/Platform.h"
 
 namespace blink {
 
 UIDartState::UIDartState(IsolateClient* isolate_client,
                          const std::string& url,
                          std::unique_ptr<Window> window)
-    : FlutterDartState(isolate_client, url),
-      window_(std::move(window)) {
+    : FlutterDartState(isolate_client, url), window_(std::move(window)) {
+  ui_task_runner_ =
+      ftl::RefPtr<ftl::TaskRunner>(Platform::current()->GetUITaskRunner());
+  io_task_runner_ =
+      ftl::RefPtr<ftl::TaskRunner>(Platform::current()->GetIOTaskRunner());
 }
 
-UIDartState::~UIDartState() {
-}
+UIDartState::~UIDartState() {}
 
 UIDartState* UIDartState::Current() {
   return static_cast<UIDartState*>(DartState::Current());

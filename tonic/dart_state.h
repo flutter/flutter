@@ -5,7 +5,10 @@
 #ifndef FLUTTER_TONIC_DART_STATE_H_
 #define FLUTTER_TONIC_DART_STATE_H_
 
+#include <utility>
+
 #include "dart/runtime/include/dart_api.h"
+#include "lib/ftl/tasks/task_runner.h"
 #include "lib/tonic/dart_persistent_value.h"
 #include "lib/tonic/dart_state.h"
 #include "lib/tonic/scopes/dart_api_scope.h"
@@ -21,7 +24,17 @@ class DartState : public tonic::DartState {
   static DartState* From(Dart_Isolate isolate);
   static DartState* Current();
 
+  const ftl::RefPtr<ftl::TaskRunner>& ui_task_runner() {
+    return ui_task_runner_;
+  }
+  const ftl::RefPtr<ftl::TaskRunner>& io_task_runner() {
+    return io_task_runner_;
+  }
+
  protected:
+  ftl::RefPtr<ftl::TaskRunner> ui_task_runner_;
+  ftl::RefPtr<ftl::TaskRunner> io_task_runner_;
+
   FTL_DISALLOW_COPY_AND_ASSIGN(DartState);
 };
 
