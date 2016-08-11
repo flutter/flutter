@@ -1223,7 +1223,7 @@ TEST_F(FontCollectionItemizeTest, itemize_emojiSelection_withFE0E) {
     EXPECT_EQ(2, runs[0].end);
     EXPECT_EQ(kNoGlyphFont, getFontPath(runs[0]));
 
-    // U+26FA U+FE0E is specified but ColorTextMixedEmojiFont has a variation sequence U+26FA U+FE0F
+    // U+26FA U+FE0E is specified but ColorTextMixedEmojiFont has a variation sequence U+26F9 U+FE0F
     // in its cmap, so ColorTextMixedEmojiFont should be selected instaed of ColorEmojiFont.
     itemize(collection.get(), "U+26FA U+FE0E", kDefaultFontStyle, &runs);
     ASSERT_EQ(1U, runs.size());
@@ -1305,9 +1305,9 @@ TEST_F(FontCollectionItemizeTest, itemize_emojiSelection_withFE0F) {
     EXPECT_EQ(2, runs[0].end);
     EXPECT_EQ(kNoGlyphFont, getFontPath(runs[0]));
 
-    // U+26F8 U+FE0F is specified but ColorTextMixedEmojiFont has a variation sequence U+26F8 U+FE0F
+    // U+26F9 U+FE0F is specified but ColorTextMixedEmojiFont has a variation sequence U+26F9 U+FE0F
     // in its cmap, so ColorTextMixedEmojiFont should be selected instaed of ColorEmojiFont.
-    itemize(collection.get(), "U+26F8 U+FE0F", kDefaultFontStyle, &runs);
+    itemize(collection.get(), "U+26F9 U+FE0F", kDefaultFontStyle, &runs);
     ASSERT_EQ(1U, runs.size());
     EXPECT_EQ(0, runs[0].start);
     EXPECT_EQ(2, runs[0].end);
@@ -1395,11 +1395,5 @@ TEST_F(FontCollectionItemizeTest, itemize_genderBalancedEmoji) {
     ASSERT_EQ(1U, runs.size());
     EXPECT_EQ(0, runs[0].start);
     EXPECT_EQ(4, runs[0].end);
-    EXPECT_EQ(kColorEmojiFont, getFontPath(runs[0]));
-
-    itemize(collection.get(), "U+26F9 U+200D U+2695", kDefaultFontStyle, &runs);
-    ASSERT_EQ(1U, runs.size());
-    EXPECT_EQ(0, runs[0].start);
-    EXPECT_EQ(3, runs[0].end);
     EXPECT_EQ(kColorEmojiFont, getFontPath(runs[0]));
 }
