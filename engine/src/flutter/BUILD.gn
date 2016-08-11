@@ -5,15 +5,16 @@
 group("flutter") {
   testonly = true
 
-  deps = [
-    "//flutter/assets",
-    "//flutter/flow",
-    "//flutter/glue",
-    "//flutter/snapshotter",
-  ]
-
-  if (!is_fuchsia) {
-    deps += [
+  if (is_fuchsia) {
+    # TODO(abarth) Remove this specific list once Fuchsia can build everything.
+    deps = [
+      "//flutter/snapshotter",
+      "//flutter/assets",
+      "//flutter/flow",
+      "//flutter/glue",
+    ]
+  } else {
+    deps = [
       "//flutter/sky",
     ]
   }
