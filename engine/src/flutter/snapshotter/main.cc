@@ -35,6 +35,7 @@ constexpr char kPackages[] = "packages";
 constexpr char kSnapshot[] = "snapshot";
 constexpr char kDepfile[] = "depfile";
 constexpr char kBuildOutput[] = "build-output";
+constexpr char kPrintDeps[] = "print-deps";
 
 const char* kDartArgs[] = {
     // clang-format off
@@ -181,20 +182,21 @@ int CreateSnapshot(const ftl::CommandLine& command_line) {
   }
 
   std::string main_dart = args[0];
-
+  const bool print_deps_mode = command_line.HasOption(kPrintDeps, nullptr);
   std::string snapshot;
-  if (!command_line.GetOptionValue(kSnapshot, &snapshot)) {
-    std::cerr << "error: Need --" << kSnapshot << "." << std::endl;
-    return 1;
-  }
-
   std::string depfile;
   std::string build_output;
-  if (command_line.GetOptionValue(kDepfile, &depfile) &&
-      !command_line.GetOptionValue(kBuildOutput, &build_output)) {
-    std::cerr << "error: Need --" << kBuildOutput << " if --" << kDepfile
-              << " is specified." << std::endl;
-    return 1;
+  if (!print_deps_mode) {
+    if (!command_line.GetOptionValue(kSnapshot, &snapshot)) {
+      std::cerr << "error: Need --" << kSnapshot << "." << std::endl;
+      return 1;
+    }
+    if (command_line.GetOptionValue(kDepfile, &depfile) &&
+        !command_line.GetOptionValue(kBuildOutput, &build_output)) {
+      std::cerr << "error: Need --" << kBuildOutput << " if --" << kDepfile
+                << " is specified." << std::endl;
+      return 1;
+    }
   }
 
   InitDartVM();
@@ -212,20 +214,30 @@ int CreateSnapshot(const ftl::CommandLine& command_line) {
   DART_CHECK_VALID(Dart_LoadScript(ToDart(main_dart), Dart_Null(),
                                    ToDart(loader.Fetch(main_dart)), 0, 0));
 
-  std::vector<char> snapshot_blob = CreateSnapshot();
+  if (print_deps_mode) {
+    // The script has been loaded, print out the minimal dependencies to run.
+    for (const auto& dep : loader.url_dependencies()) {
+      std::string file = dep;
+      FTL_DCHECK(!file.empty());
+      std::cout << file << "\n";
+    }
+  } else {
+    // The script has been loaded, generate a snapshot.
+    std::vector<char> snapshot_blob = CreateSnapshot();
 
-  if (!snapshot.empty() &&
-      !files::WriteFile(snapshot, snapshot_blob.data(), snapshot_blob.size())) {
-    std::cerr << "error: Failed to write snapshot to '" << snapshot << "'."
-              << std::endl;
-    return 1;
-  }
+    if (!snapshot.empty() &&
+        !files::WriteFile(snapshot, snapshot_blob.data(), snapshot_blob.size())) {
+      std::cerr << "error: Failed to write snapshot to '" << snapshot << "'."
+                << std::endl;
+      return 1;
+    }
 
-  if (!depfile.empty() &&
-      !WriteDepfile(depfile, build_output, loader.dependencies())) {
-    std::cerr << "error: Failed to write depfile to '" << depfile << "'."
-              << std::endl;
-    return 1;
+    if (!depfile.empty() &&
+        !WriteDepfile(depfile, build_output, loader.dependencies())) {
+      std::cerr << "error: Failed to write depfile to '" << depfile << "'."
+                << std::endl;
+      return 1;
+    }
   }
 
   return 0;
