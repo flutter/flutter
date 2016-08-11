@@ -587,18 +587,17 @@ void InitDartVM() {
 
   {
     TRACE_EVENT0("flutter", "Dart_Initialize");
-    char* init_error = Dart_Initialize(
-        reinterpret_cast<uint8_t*>(DART_SYMBOL(kDartVmIsolateSnapshotBuffer)),
-        PrecompiledInstructionsSymbolIfPresent(),
-        PrecompiledDataSnapshotSymbolIfPresent(), IsolateCreateCallback,
-        nullptr,  // Isolate interrupt callback.
-        nullptr, IsolateShutdownCallback, ThreadExitCallback,
-        // File IO callbacks.
-        nullptr, nullptr, nullptr, nullptr,
-        // Entroy source
-        nullptr,
-        // VM service assets archive
-        GetVMServiceAssetsArchiveCallback);
+    Dart_InitializeParams params = {};
+    params.version = DART_INITIALIZE_PARAMS_CURRENT_VERSION;
+    params.vm_isolate_snapshot =
+        reinterpret_cast<uint8_t*>(DART_SYMBOL(kDartVmIsolateSnapshotBuffer));
+    params.instructions_snapshot = PrecompiledInstructionsSymbolIfPresent();
+    params.data_snapshot = PrecompiledDataSnapshotSymbolIfPresent();
+    params.create = IsolateCreateCallback;
+    params.shutdown = IsolateShutdownCallback;
+    params.thread_exit = ThreadExitCallback;
+    params.get_service_assets = GetVMServiceAssetsArchiveCallback;
+    char* init_error = Dart_Initialize(&params);
     if (init_error != nullptr)
       FTL_LOG(FATAL) << "Error while initializing the Dart VM: " << init_error;
     free(init_error);

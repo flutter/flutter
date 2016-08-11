@@ -86,9 +86,10 @@ class DartScope {
 
 void InitDartVM() {
   FTL_CHECK(Dart_SetVMFlags(arraysize(kDartArgs), kDartArgs));
-  char* error = Dart_Initialize(
-      kDartVmIsolateSnapshotBuffer, nullptr, nullptr, nullptr, nullptr, nullptr,
-      nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
+  Dart_InitializeParams params = {};
+  params.version = DART_INITIALIZE_PARAMS_CURRENT_VERSION;
+  params.vm_isolate_snapshot = kDartVmIsolateSnapshotBuffer;
+  char* error = Dart_Initialize(&params);
   if (error)
     FTL_LOG(FATAL) << error;
 }
