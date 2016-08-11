@@ -681,7 +681,18 @@ class ScaffoldState extends State<Scaffold> {
     }
 
     final List<LayoutId> children = new List<LayoutId>();
-    _addIfNonNull(children, config.body, _ScaffoldSlot.body);
+
+    Widget body;
+    if (config.appBarBehavior != AppBarBehavior.anchor) {
+      body = new NotificationListener<ScrollNotification>(
+        onNotification: _handleScrollNotification,
+        child: config.body
+      );
+    } else {
+      body = config.body;
+    }
+    _addIfNonNull(children, body, _ScaffoldSlot.body);
+
     if (config.appBarBehavior == AppBarBehavior.anchor) {
       final double expandedHeight = (config.appBar?.expandedHeight ?? 0.0) + padding.top;
       final Widget appBar = new ConstrainedBox(
@@ -728,27 +739,15 @@ class ScaffoldState extends State<Scaffold> {
       ));
     }
 
-    Widget application;
-
-    if (config.appBarBehavior != AppBarBehavior.anchor) {
-      application = new NotificationListener<ScrollNotification>(
-        onNotification: _handleScrollNotification,
-        child: new CustomMultiChildLayout(
-          children: children,
-          delegate: new _ScaffoldLayout(
-            padding: EdgeInsets.zero,
-            appBarBehavior: config.appBarBehavior
-          )
-        )
-      );
-    } else {
-      application = new CustomMultiChildLayout(
-        children: children,
-        delegate: new _ScaffoldLayout(
-          padding: padding
-        )
-      );
-    }
+    EdgeInsets appPadding = (config.appBarBehavior != AppBarBehavior.anchor) ?
+        EdgeInsets.zero : padding;
+    Widget application = new CustomMultiChildLayout(
+      children: children,
+      delegate: new _ScaffoldLayout(
+        padding: appPadding,
+        appBarBehavior: config.appBarBehavior
+      )
+    );
 
     return new Material(child: application);
   }
