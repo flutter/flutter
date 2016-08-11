@@ -8,6 +8,15 @@ import 'package:flutter/widgets.dart';
 
 import '../rendering/rendering_tester.dart';
 
+class TestPaintingContext implements PaintingContext {
+  final List<Invocation> invocations = <Invocation>[];
+
+  @override
+    void noSuchMethod(Invocation invocation) {
+      invocations.add(invocation);
+    }
+}
+
 void main() {
   testWidgets('Can construct an empty Stack', (WidgetTester tester) async {
     await tester.pumpWidget(new Stack());
@@ -253,4 +262,58 @@ void main() {
     expect(renderBox.size.height, equals(12.0));
   });
 
+  testWidgets('Stack clip test', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new Center(
+        child: new Stack(
+          children: <Widget>[
+            new Container(
+              width: 100.0,
+              height: 100.0
+            ),
+            new Positioned(
+              top: 0.0,
+              left: 0.0,
+              child: new Container(
+                width: 200.0,
+                height: 200.0
+              )
+            )
+          ]
+        )
+      )
+    );
+
+    RenderBox box = tester.renderObject(find.byType(Stack));
+    TestPaintingContext context = new TestPaintingContext();
+    box.paint(context, Offset.zero);
+    expect(context.invocations.first.memberName, equals(#pushClipRect));
+
+    await tester.pumpWidget(
+      new Center(
+        child: new Stack(
+          overflow: Overflow.visible,
+          children: <Widget>[
+            new Container(
+              width: 100.0,
+              height: 100.0
+            ),
+            new Positioned(
+              top: 0.0,
+              left: 0.0,
+              child: new Container(
+                width: 200.0,
+                height: 200.0
+              )
+            )
+          ]
+        )
+      )
+    );
+
+    box = tester.renderObject(find.byType(Stack));
+    context = new TestPaintingContext();
+    box.paint(context, Offset.zero);
+    expect(context.invocations.first.memberName, equals(#paintChild));
+  });
 }
