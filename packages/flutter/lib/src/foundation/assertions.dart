@@ -326,3 +326,17 @@ class FlutterError extends AssertionError {
       onError(details);
   }
 }
+
+/// Dump the current stack to the console using [debugPrint] and
+/// [FlutterError.defaultStackFilter].
+///
+/// The current stack is obtained using [StackTrace.current].
+///
+/// The `maxFrames` argument can be given to limit the stack to the given number
+/// of lines. By default, all non-filtered stack lines are shown.
+void debugPrintStack({ int maxFrames }) {
+  List<String> lines = StackTrace.current.toString().trimRight().split('\n');
+  if (maxFrames != null)
+    lines = lines.take(maxFrames);
+  debugPrint(FlutterError.defaultStackFilter(lines).join('\n'));
+}

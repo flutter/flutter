@@ -6,7 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
 void main() {
-  testWidgets('Scroll notifcation basics', (WidgetTester tester) async {
+  testWidgets('Scroll notification basics', (WidgetTester tester) async {
     ScrollNotification notification;
 
     await tester.pumpWidget(new NotificationListener<ScrollNotification>(
@@ -48,7 +48,7 @@ void main() {
     expect(notification.dragEndDetails.velocity, equals(Velocity.zero));
   });
 
-  testWidgets('Scroll notifcation depth', (WidgetTester tester) async {
+  testWidgets('Scroll notification depth', (WidgetTester tester) async {
     final List<ScrollNotificationKind> depth0Kinds = <ScrollNotificationKind>[];
     final List<ScrollNotificationKind> depth1Kinds = <ScrollNotificationKind>[];
     final List<int> depth0Values = <int>[];

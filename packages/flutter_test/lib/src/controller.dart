@@ -264,13 +264,29 @@ class WidgetController {
   ///
   /// If the middle of the widget is not exposed, this might send
   /// events to another object.
-  Future<Null> fling(Finder finder, Offset offset, double velocity, { int pointer: 1 }) {
-    return flingFrom(getCenter(finder), offset, velocity, pointer: pointer);
+  ///
+  /// This can pump frames. See [flingFrom] for a discussion of how the
+  /// `offset`, `velocity` and `frameInterval` arguments affect this.
+  Future<Null> fling(Finder finder, Offset offset, double velocity, { int pointer: 1, Duration frameInterval: const Duration(milliseconds: 16) }) {
+    return flingFrom(getCenter(finder), offset, velocity, pointer: pointer, frameInterval: frameInterval);
   }
 
   /// Attempts a fling gesture starting from the given location,
   /// moving the given distance, reaching the given velocity.
-  Future<Null> flingFrom(Point startLocation, Offset offset, double velocity, { int pointer: 1 }) {
+  ///
+  /// Exactly 50 pointer events are synthesized.
+  ///
+  /// The offset and velocity control the interval between each pointer event.
+  /// For example, if the offset is 200 pixels, and the velocity is 800 pixels
+  /// per second, the pointer events will be sent for each increment of 4 pixels
+  /// (200/50), over 250ms (200/800), meaning events will be sent every 1.25ms
+  /// (250/200).
+  ///
+  /// To make tests more realistic, frames may be pumped during this time (using
+  /// calls to [pump]). If the total duration is longer than `frameInterval`,
+  /// then one frame is pumped each time that amount of time elapses while
+  /// sending events, or each time an event is synthesised, whichever is rarer.
+  Future<Null> flingFrom(Point startLocation, Offset offset, double velocity, { int pointer: 1, Duration frameInterval: const Duration(milliseconds: 16) }) {
     return TestAsyncUtils.guard(() async {
       assert(offset.distance > 0.0);
       assert(velocity != 0.0);   // velocity is pixels/second
@@ -279,16 +295,31 @@ class WidgetController {
       const int kMoveCount = 50; // Needs to be >= kHistorySize, see _LeastSquaresVelocityTrackerStrategy
       final double timeStampDelta = 1000.0 * offset.distance / (kMoveCount * velocity);
       double timeStamp = 0.0;
+      double lastTimeStamp = timeStamp;
       await sendEventToBinding(p.down(startLocation, timeStamp: new Duration(milliseconds: timeStamp.round())), result);
-      for (int i = 0; i <= kMoveCount; i++) {
+      for (int i = 0; i <= kMoveCount; i += 1) {
         final Point location = startLocation + Offset.lerp(Offset.zero, offset, i / kMoveCount);
         await sendEventToBinding(p.move(location, timeStamp: new Duration(milliseconds: timeStamp.round())), result);
         timeStamp += timeStampDelta;
+        if (timeStamp - lastTimeStamp > frameInterval.inMilliseconds) {
+          await pump(new Duration(milliseconds: (timeStamp - lastTimeStamp).truncate()));
+          lastTimeStamp = timeStamp;
+        }
       }
       await sendEventToBinding(p.up(timeStamp: new Duration(milliseconds: timeStamp.round())), result);
       return null;
     });
   }
+
+  /// Called to indicate that time should advance.
+  ///
+  /// This is invoked by [flingFrom], for instance, so that the sequence of
+  /// pointer events occurs over time.
+  ///
+  /// The default implementation does nothing.
+  ///
+  /// The [WidgetTester] subclass implements this by deferring to the [binding].
+  Future<Null> pump(Duration duration) => new Future<Null>.value(null);
 
   /// Attempts to drag the given widget by the given offset, by
   /// starting a drag in the middle of the widget.

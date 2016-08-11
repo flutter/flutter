@@ -1090,9 +1090,12 @@ class _TabBarViewState<T> extends PageableListState<TabBarView<T>> implements Ta
 
   @override
   ExtentScrollBehavior get scrollBehavior {
-    _boundedBehavior ??= new BoundedBehavior();
+    _boundedBehavior ??= new BoundedBehavior(platform: platform);
     return _boundedBehavior;
   }
+
+  @override
+  TargetPlatform get platform => Theme.of(context).platform;
 
   void _initSelection(TabBarSelectionState<T> selection) {
     _selection = selection;

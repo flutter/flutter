@@ -23,15 +23,6 @@ const TextStyle _errorTextStyle = const TextStyle(
   decorationStyle: TextDecorationStyle.double
 );
 
-/// The visual and interaction design for overscroll.
-enum OverscrollStyle {
-  /// Overscrolls are clamped and indicated with a glow.
-  glow,
-
-  /// Overscrolls are not clamped and indicated with elastic physics.
-  bounce
-}
-
 /// An application that uses material design.
 ///
 /// A convenience widget that wraps a number of widgets that are commonly
@@ -60,7 +51,6 @@ class MaterialApp extends StatefulWidget {
     this.theme,
     this.home,
     this.routes: const <String, WidgetBuilder>{},
-    this.overscrollStyle,
     this.onGenerateRoute,
     this.onLocaleChanged,
     this.debugShowMaterialGrid: false,
@@ -112,11 +102,6 @@ class MaterialApp extends StatefulWidget {
   /// build the page instead.
   final Map<String, WidgetBuilder> routes;
 
-  /// The visual and interaction design for overscroll.
-  ///
-  /// Defaults to being adapted to the current [TargetPlatform].
-  final OverscrollStyle overscrollStyle;
-
   /// The route generator callback used when the app is navigated to a
   /// named route.
   final RouteFactory onGenerateRoute;
@@ -158,13 +143,34 @@ class MaterialApp extends StatefulWidget {
   _MaterialAppState createState() => new _MaterialAppState();
 }
 
-class _IndicatorScrollConfigurationDelegate extends ScrollConfigurationDelegate {
+class _ScrollLikeCupertinoDelegate extends ScrollConfigurationDelegate {
+  const _ScrollLikeCupertinoDelegate();
+
   @override
-  Widget wrapScrollWidget(Widget scrollWidget) => new OverscrollIndicator(child: scrollWidget);
+  TargetPlatform get platform => TargetPlatform.iOS;
+
+  @override
+  ExtentScrollBehavior createScrollBehavior() => new OverscrollWhenScrollableBehavior(platform: TargetPlatform.iOS);
+
+  @override
+  bool updateShouldNotify(ScrollConfigurationDelegate old) => false;
 }
 
-final ScrollConfigurationDelegate _glowScroll = new _IndicatorScrollConfigurationDelegate();
-final ScrollConfigurationDelegate _bounceScroll = new ScrollConfigurationDelegate();
+class _ScrollLikeMountainViewDelegate extends ScrollConfigurationDelegate {
+  const _ScrollLikeMountainViewDelegate();
+
+  @override
+  TargetPlatform get platform => TargetPlatform.android;
+
+  @override
+  ExtentScrollBehavior createScrollBehavior() => new OverscrollWhenScrollableBehavior(platform: TargetPlatform.android);
+
+  @override
+  Widget wrapScrollWidget(Widget scrollWidget) => new OverscrollIndicator(child: scrollWidget);
+
+  @override
+  bool updateShouldNotify(ScrollConfigurationDelegate old) => false;
+}
 
 class _MaterialAppState extends State<MaterialApp> {
   HeroController _heroController;
@@ -195,19 +201,11 @@ class _MaterialAppState extends State<MaterialApp> {
   }
 
   ScrollConfigurationDelegate _getScrollDelegate(TargetPlatform platform) {
-    if (config.overscrollStyle != null) {
-      switch (config.overscrollStyle) {
-        case OverscrollStyle.glow:
-          return _glowScroll;
-        case OverscrollStyle.bounce:
-          return _bounceScroll;
-      }
-    }
     switch (platform) {
       case TargetPlatform.android:
-        return _glowScroll;
+        return const _ScrollLikeMountainViewDelegate();
       case TargetPlatform.iOS:
-        return _bounceScroll;
+        return const _ScrollLikeCupertinoDelegate();
     }
     return null;
   }

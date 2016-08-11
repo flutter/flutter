@@ -205,6 +205,7 @@ class _InputState extends State<Input> {
         selectionColor: themeData.textSelectionColor,
         selectionHandleBuilder: buildTextSelectionHandle,
         selectionToolbarBuilder: buildTextSelectionToolbar,
+        platform: Theme.of(context).platform,
         keyboardType: config.keyboardType,
         onChanged: onChanged,
         onSubmitted: onSubmitted

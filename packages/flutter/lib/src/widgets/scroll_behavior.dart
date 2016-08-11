@@ -4,21 +4,49 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/physics.dart';
 import 'package:meta/meta.dart';
 
-const double _kScrollDrag = 0.025;
+export 'package:flutter/foundation.dart' show TargetPlatform;
+
+const double _kScrollDragMountainView = 0.025;
+const double _kScrollDragCupertino = 0.125;
+final SpringDescription _kScrollSpring = new SpringDescription.withDampingRatio(mass: 0.5, springConstant: 100.0, ratio: 1.1);
+
+Simulation _createScrollSimulation(double position, double velocity, double minScrollOffset, double maxScrollOffset, double scrollDrag) {
+  return new ScrollSimulation(position, velocity, minScrollOffset, maxScrollOffset, _kScrollSpring, scrollDrag);
+}
+
+Simulation _createSnapScrollSimulation(double startOffset, double endOffset, double startVelocity, double endVelocity) {
+  return new FrictionSimulation.through(startOffset, endOffset, startVelocity, endVelocity);
+}
 
 // TODO(hansmuller): Simplify these classes. We're no longer using the ScrollBehavior<T, U>
 // base class directly. Only LazyBlock uses BoundedBehavior's updateExtents minScrollOffset
 // parameter; simpler to move that into ExtentScrollBehavior.  All of the classes should
-// be called FooScrollBehavior.
+// be called FooScrollBehavior. See https://github.com/flutter/flutter/issues/5281
 
 /// An interface for controlling the behavior of scrollable widgets.
 ///
 /// The type argument T is the type that describes the scroll offset.
 /// The type argument U is the type that describes the scroll velocity.
 abstract class ScrollBehavior<T, U> {
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
+  ///
+  /// The [platform] must not be null.
+  const ScrollBehavior({
+    @required this.platform
+  });
+
+  /// The platform for which physics constants should be approximated.
+  ///
+  /// This is what makes flings go further on iOS than Android.
+  ///
+  /// Must not be null.
+  final TargetPlatform platform;
+
   /// Returns a simulation that propels the scrollOffset.
   ///
   /// This function is called when a drag gesture ends.
@@ -40,6 +68,19 @@ abstract class ScrollBehavior<T, U> {
 
   /// Whether this scroll behavior currently permits scrolling
   bool get isScrollable => true;
+
+  /// The scroll drag constant to use for physics simulations created by this
+  /// ScrollBehavior.
+  double get scrollDrag {
+    assert(platform != null);
+    switch (platform) {
+      case TargetPlatform.android:
+        return _kScrollDragMountainView;
+      case TargetPlatform.iOS:
+        return _kScrollDragCupertino;
+    }
+    return null;
+  }
 
   @override
   String toString() {
@@ -64,8 +105,15 @@ abstract class ExtentScrollBehavior extends ScrollBehavior<double, double> {
   /// Creates a scroll behavior for a scrollable widget with linear extent.
   /// We start with an INFINITE contentExtent so that we don't accidentally
   /// clamp a scrollOffset until we receive an accurate value in updateExtents.
-  ExtentScrollBehavior({ double contentExtent: double.INFINITY, double containerExtent: 0.0 })
-    : _contentExtent = contentExtent, _containerExtent = containerExtent;
+  ///
+  /// The extents and the [platform] must not be null.
+  ExtentScrollBehavior({
+    double contentExtent: double.INFINITY,
+    double containerExtent: 0.0,
+    @required TargetPlatform platform
+  }) : _contentExtent = contentExtent,
+       _containerExtent = containerExtent,
+       super(platform: platform);
 
   /// The linear extent of the content inside the scrollable widget.
   double get contentExtent => _contentExtent;
@@ -115,9 +163,14 @@ class BoundedBehavior extends ExtentScrollBehavior {
   BoundedBehavior({
     double contentExtent: double.INFINITY,
     double containerExtent: 0.0,
-    double minScrollOffset: 0.0
+    double minScrollOffset: 0.0,
+    @required TargetPlatform platform
   }) : _minScrollOffset = minScrollOffset,
-       super(contentExtent: contentExtent, containerExtent: containerExtent);
+       super(
+         contentExtent: contentExtent,
+         containerExtent: containerExtent,
+         platform: platform
+       );
 
   double _minScrollOffset;
 
@@ -151,25 +204,23 @@ class BoundedBehavior extends ExtentScrollBehavior {
   }
 }
 
-Simulation _createScrollSimulation(double position, double velocity, double minScrollOffset, double maxScrollOffset) {
-  final SpringDescription spring = new SpringDescription.withDampingRatio(mass: 1.0, springConstant: 170.0, ratio: 1.1);
-  return new ScrollSimulation(position, velocity, minScrollOffset, maxScrollOffset, spring, _kScrollDrag);
-}
-
-Simulation _createSnapScrollSimulation(double startOffset, double endOffset, double startVelocity, double endVelocity) {
-  return new FrictionSimulation.through(startOffset, endOffset, startVelocity, endVelocity);
-}
-
-/// A scroll behavior that does not prevent the user from exeeding scroll bounds.
+/// A scroll behavior that does not prevent the user from exceeding scroll bounds.
 class UnboundedBehavior extends ExtentScrollBehavior {
   /// Creates a scroll behavior with no scrolling limits.
-  UnboundedBehavior({ double contentExtent: double.INFINITY, double containerExtent: 0.0 })
-    : super(contentExtent: contentExtent, containerExtent: containerExtent);
+  UnboundedBehavior({
+    double contentExtent: double.INFINITY,
+    double containerExtent: 0.0,
+    @required TargetPlatform platform
+  }) : super(
+    contentExtent: contentExtent,
+    containerExtent: containerExtent,
+    platform: platform
+  );
 
   @override
   Simulation createScrollSimulation(double position, double velocity) {
     return new BoundedFrictionSimulation(
-      _kScrollDrag, position, velocity, double.NEGATIVE_INFINITY, double.INFINITY
+      scrollDrag, position, velocity, double.NEGATIVE_INFINITY, double.INFINITY
     );
   }
 
@@ -193,12 +244,21 @@ class UnboundedBehavior extends ExtentScrollBehavior {
 /// A scroll behavior that lets the user scroll beyond the scroll bounds with some resistance.
 class OverscrollBehavior extends BoundedBehavior {
   /// Creates a scroll behavior that resists, but does not prevent, scrolling beyond its limits.
-  OverscrollBehavior({ double contentExtent: double.INFINITY, double containerExtent: 0.0, double minScrollOffset: 0.0 })
-    : super(contentExtent: contentExtent, containerExtent: containerExtent, minScrollOffset: minScrollOffset);
+  OverscrollBehavior({
+    double contentExtent: double.INFINITY,
+    double containerExtent: 0.0,
+    double minScrollOffset: 0.0,
+    @required TargetPlatform platform
+  }) : super(
+    contentExtent: contentExtent,
+    containerExtent: containerExtent,
+    minScrollOffset: minScrollOffset,
+    platform: platform
+  );
 
   @override
   Simulation createScrollSimulation(double position, double velocity) {
-    return _createScrollSimulation(position, velocity, minScrollOffset, maxScrollOffset);
+    return _createScrollSimulation(position, velocity, minScrollOffset, maxScrollOffset, scrollDrag);
   }
 
   @override
@@ -227,8 +287,17 @@ class OverscrollBehavior extends BoundedBehavior {
 /// A scroll behavior that lets the user scroll beyond the scroll bounds only when the bounds are disjoint.
 class OverscrollWhenScrollableBehavior extends OverscrollBehavior {
   /// Creates a scroll behavior that allows overscrolling only when some amount of scrolling is already possible.
-  OverscrollWhenScrollableBehavior({ double contentExtent: double.INFINITY, double containerExtent: 0.0, double minScrollOffset: 0.0 })
-    : super(contentExtent: contentExtent, containerExtent: containerExtent, minScrollOffset: minScrollOffset);
+  OverscrollWhenScrollableBehavior({
+    double contentExtent: double.INFINITY,
+    double containerExtent: 0.0,
+    double minScrollOffset: 0.0,
+    @required TargetPlatform platform
+  }) : super(
+    contentExtent: contentExtent,
+    containerExtent: containerExtent,
+    minScrollOffset: minScrollOffset,
+    platform: platform
+  );
 
   @override
   bool get isScrollable => contentExtent > containerExtent;

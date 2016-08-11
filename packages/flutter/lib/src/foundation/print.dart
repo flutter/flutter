@@ -160,10 +160,3 @@ Iterable<String> debugWordWrap(String message, int width) sync* {
     }
   }
 }
-
-/// Dump the current stack to the console using [debugPrint].
-///
-/// The current stack is obtained using [StackTrace.current].
-void debugPrintStack() {
-  debugPrint(StackTrace.current.toString());
-}

@@ -10,7 +10,8 @@ void main() {
   BoundedBehavior behavior = new BoundedBehavior(
     contentExtent: 150.0,
     containerExtent: 75.0,
-    minScrollOffset: -100.0
+    minScrollOffset: -100.0,
+    platform: TargetPlatform.iOS
   );
     expect(behavior.minScrollOffset, equals(-100.0));
     expect(behavior.maxScrollOffset, equals(-25.0));
