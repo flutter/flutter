@@ -40,10 +40,7 @@ source_set("platform") {
     "animation/UnitBezier.h",
     "exported/Platform.cpp",
     "exported/sky_settings.cc",
-    "exported/WebCString.cpp",
     "exported/WebCommon.cpp",
-    "exported/linux/WebFontInfo.cpp",
-    "exported/linux/WebFontRenderStyle.cpp",
     "fonts/AlternateFontFamily.h",
     "fonts/Character.cpp",
     "fonts/Character.h",
@@ -316,7 +313,6 @@ source_set("platform") {
     # Add in some Linux files also shared with Android.
     set_sources_assignment_filter([])
     sources += [
-      "exported/linux/WebFontRenderStyle.cpp",
       "fonts/linux/FontPlatformDataLinux.cpp",
     ]
     set_sources_assignment_filter(sources_assignment_filter)

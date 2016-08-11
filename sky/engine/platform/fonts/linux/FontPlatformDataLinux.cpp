@@ -32,7 +32,6 @@
 
 #include "flutter/sky/engine/platform/fonts/FontPlatformData.h"
 #include "flutter/sky/engine/platform/graphics/GraphicsContext.h"
-#include "flutter/sky/engine/public/platform/linux/WebFontRenderStyle.h"
 #include "third_party/skia/include/core/SkTypeface.h"
 
 namespace blink {
@@ -43,90 +42,87 @@ static bool useSkiaBitmaps = true;
 static bool useSkiaAntiAlias = true;
 static bool useSkiaSubpixelRendering = false;
 
-void FontPlatformData::setHinting(SkPaint::Hinting hinting)
-{
-    skiaHinting = hinting;
+void FontPlatformData::setHinting(SkPaint::Hinting hinting) {
+  skiaHinting = hinting;
 }
 
-void FontPlatformData::setAutoHint(bool useAutoHint)
-{
-    useSkiaAutoHint = useAutoHint;
+void FontPlatformData::setAutoHint(bool useAutoHint) {
+  useSkiaAutoHint = useAutoHint;
 }
 
-void FontPlatformData::setUseBitmaps(bool useBitmaps)
-{
-    useSkiaBitmaps = useBitmaps;
+void FontPlatformData::setUseBitmaps(bool useBitmaps) {
+  useSkiaBitmaps = useBitmaps;
 }
 
-void FontPlatformData::setAntiAlias(bool useAntiAlias)
-{
-    useSkiaAntiAlias = useAntiAlias;
+void FontPlatformData::setAntiAlias(bool useAntiAlias) {
+  useSkiaAntiAlias = useAntiAlias;
 }
 
-void FontPlatformData::setSubpixelRendering(bool useSubpixelRendering)
-{
-    useSkiaSubpixelRendering = useSubpixelRendering;
+void FontPlatformData::setSubpixelRendering(bool useSubpixelRendering) {
+  useSkiaSubpixelRendering = useSubpixelRendering;
 }
 
-void FontPlatformData::setupPaint(SkPaint* paint, GraphicsContext* context)
-    const
-{
-    paint->setAntiAlias(m_style.useAntiAlias);
-    paint->setHinting(static_cast<SkPaint::Hinting>(m_style.hintStyle));
-    paint->setEmbeddedBitmapText(m_style.useBitmaps);
-    paint->setAutohinted(m_style.useAutoHint);
-    if (m_style.useAntiAlias)
-        paint->setLCDRenderText(m_style.useSubpixelRendering);
+void FontPlatformData::setupPaint(SkPaint* paint,
+                                  GraphicsContext* context) const {
+  paint->setAntiAlias(m_style.useAntiAlias);
+  paint->setHinting(static_cast<SkPaint::Hinting>(m_style.hintStyle));
+  paint->setEmbeddedBitmapText(m_style.useBitmaps);
+  paint->setAutohinted(m_style.useAutoHint);
+  if (m_style.useAntiAlias)
+    paint->setLCDRenderText(m_style.useSubpixelRendering);
 
-    // Do not enable subpixel text on low-dpi if full hinting is requested.
-    bool useSubpixelText = paint->getHinting() != SkPaint::kFull_Hinting
-        || (context && context->deviceScaleFactor() > 1.0f);
+  // Do not enable subpixel text on low-dpi if full hinting is requested.
+  bool useSubpixelText = paint->getHinting() != SkPaint::kFull_Hinting ||
+                         (context && context->deviceScaleFactor() > 1.0f);
 
-    // TestRunner specifically toggles the subpixel positioning flag.
-    if (useSubpixelText)
-        paint->setSubpixelText(true);
-    else
-        paint->setSubpixelText(m_style.useSubpixelPositioning);
+  // TestRunner specifically toggles the subpixel positioning flag.
+  if (useSubpixelText)
+    paint->setSubpixelText(true);
+  else
+    paint->setSubpixelText(m_style.useSubpixelPositioning);
 
-    const float ts = m_textSize >= 0 ? m_textSize : 12;
-    paint->setTextSize(SkFloatToScalar(ts));
-    paint->setTypeface(m_typeface);
-    paint->setFakeBoldText(m_syntheticBold);
-    paint->setTextSkewX(m_syntheticItalic ? -SK_Scalar1 / 4 : 0);
+  const float ts = m_textSize >= 0 ? m_textSize : 12;
+  paint->setTextSize(SkFloatToScalar(ts));
+  paint->setTypeface(m_typeface);
+  paint->setFakeBoldText(m_syntheticBold);
+  paint->setTextSkewX(m_syntheticItalic ? -SK_Scalar1 / 4 : 0);
 }
 
-void FontPlatformData::querySystemForRenderStyle(bool useSkiaSubpixelPositioning)
-{
-    WebFontRenderStyle style;
-    style.setDefaults();
-    style.toFontRenderStyle(&m_style);
+void FontPlatformData::querySystemForRenderStyle(
+    bool useSkiaSubpixelPositioning) {
+  m_style.useBitmaps = 2;
+  m_style.useAutoHint = 2;
+  m_style.useHinting = 2;
+  m_style.hintStyle = 0;
+  m_style.useAntiAlias = 2;
+  m_style.useSubpixelRendering = 2;
+  m_style.useSubpixelPositioning = 2;
 
-    // Fix FontRenderStyle::NoPreference to actual styles.
-    if (m_style.useAntiAlias == FontRenderStyle::NoPreference)
-        m_style.useAntiAlias = useSkiaAntiAlias;
+  // Fix FontRenderStyle::NoPreference to actual styles.
+  if (m_style.useAntiAlias == FontRenderStyle::NoPreference)
+    m_style.useAntiAlias = useSkiaAntiAlias;
 
-    if (!m_style.useHinting)
-        m_style.hintStyle = SkPaint::kNo_Hinting;
-    else if (m_style.useHinting == FontRenderStyle::NoPreference)
-        m_style.hintStyle = skiaHinting;
+  if (!m_style.useHinting)
+    m_style.hintStyle = SkPaint::kNo_Hinting;
+  else if (m_style.useHinting == FontRenderStyle::NoPreference)
+    m_style.hintStyle = skiaHinting;
 
-    if (m_style.useBitmaps == FontRenderStyle::NoPreference)
-        m_style.useBitmaps = useSkiaBitmaps;
-    if (m_style.useAutoHint == FontRenderStyle::NoPreference)
-        m_style.useAutoHint = useSkiaAutoHint;
-    if (m_style.useAntiAlias == FontRenderStyle::NoPreference)
-        m_style.useAntiAlias = useSkiaAntiAlias;
-    if (m_style.useSubpixelRendering == FontRenderStyle::NoPreference)
-        m_style.useSubpixelRendering = useSkiaSubpixelRendering;
+  if (m_style.useBitmaps == FontRenderStyle::NoPreference)
+    m_style.useBitmaps = useSkiaBitmaps;
+  if (m_style.useAutoHint == FontRenderStyle::NoPreference)
+    m_style.useAutoHint = useSkiaAutoHint;
+  if (m_style.useAntiAlias == FontRenderStyle::NoPreference)
+    m_style.useAntiAlias = useSkiaAntiAlias;
+  if (m_style.useSubpixelRendering == FontRenderStyle::NoPreference)
+    m_style.useSubpixelRendering = useSkiaSubpixelRendering;
 
-    // TestRunner specifically toggles the subpixel positioning flag.
-    if (m_style.useSubpixelPositioning == FontRenderStyle::NoPreference)
-        m_style.useSubpixelPositioning = useSkiaSubpixelPositioning;
+  // TestRunner specifically toggles the subpixel positioning flag.
+  if (m_style.useSubpixelPositioning == FontRenderStyle::NoPreference)
+    m_style.useSubpixelPositioning = useSkiaSubpixelPositioning;
 }
 
-bool FontPlatformData::defaultUseSubpixelPositioning()
-{
-    return FontDescription::subpixelPositioning();
+bool FontPlatformData::defaultUseSubpixelPositioning() {
+  return FontDescription::subpixelPositioning();
 }
 
-} // namespace blink
+}  // namespace blink

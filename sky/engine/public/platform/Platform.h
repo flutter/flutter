@@ -34,7 +34,6 @@
 #include <string>
 
 #include "flutter/sky/engine/public/platform/WebCommon.h"
-#include "flutter/sky/engine/public/platform/WebVector.h"
 
 namespace ftl {
 class TaskRunner;

@@ -14,14 +14,8 @@ source_set("platform_headers") {
   public = [
     "platform/Platform.h",
     "platform/WebBlendMode.h",
-    "platform/WebCString.h",
     "platform/WebCommon.h",
     "platform/WebDiscardableMemory.h",
-    "platform/WebPrivatePtr.h",
-    "platform/WebVector.h",
-    "platform/linux/WebFallbackFont.h",
-    "platform/linux/WebFontInfo.h",
-    "platform/linux/WebFontRenderStyle.h",
   ]
 }
 
