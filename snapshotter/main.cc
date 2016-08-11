@@ -94,7 +94,6 @@ void InitDartVM() {
 }
 
 Dart_Isolate CreateDartIsolate() {
-  FTL_CHECK(kDartIsolateSnapshotBuffer);
   char* error = nullptr;
   Dart_Isolate isolate =
       Dart_CreateIsolate("dart:snapshot", "main", kDartIsolateSnapshotBuffer,
