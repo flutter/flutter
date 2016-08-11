@@ -37,7 +37,7 @@ abstract class ResidentRunner {
     bool shouldBuild: true
   });
 
-  Future<bool> restart();
+  Future<bool> restart({ bool fullRestart: false });
 
   Future<Null> stop() async {
     await stopEchoingDeviceLog();

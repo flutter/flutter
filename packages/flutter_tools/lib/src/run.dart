@@ -58,7 +58,7 @@ class RunAndStayResident extends ResidentRunner {
   }
 
   @override
-  Future<bool> restart() async {
+  Future<bool> restart({ bool fullRestart: false }) async {
     if (serviceProtocol == null) {
       printError('Debugging is not enabled.');
       return false;

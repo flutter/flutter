@@ -381,7 +381,14 @@ class HotRunner extends ResidentRunner {
   }
 
   @override
-  Future<bool> restart() => _reloadSources();
+  Future<bool> restart({ bool fullRestart: false }) async {
+    if (fullRestart) {
+      _restartFromSources();
+      return true;
+    } else {
+      return _reloadSources();
+    }
+  }
 
   Future<bool> _reloadSources() async {
     if (serviceProtocol.firstIsolateId == null)
