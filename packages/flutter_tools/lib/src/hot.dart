@@ -20,7 +20,7 @@ import 'dart/package_map.dart';
 import 'device.dart';
 import 'globals.dart';
 import 'devfs.dart';
-import 'observatory.dart';
+import 'vmservice.dart';
 import 'resident_runner.dart';
 import 'toolchain.dart';
 import 'view.dart';
@@ -108,7 +108,7 @@ class FirstFrameTimer {
     return stopwatch.elapsed;
   }
 
-  final Observatory serviceProtocol;
+  final VMService serviceProtocol;
   final Stopwatch stopwatch = new Stopwatch();
   final Completer<Null> _completer = new Completer<Null>();
   StreamSubscription<Event> _subscription;

@@ -5,7 +5,7 @@
 import 'dart:async';
 
 import 'globals.dart';
-import 'observatory.dart';
+import 'vmservice.dart';
 
 /// Peered to a Android/iOS FlutterView widget on a device.
 class FlutterView {
@@ -41,7 +41,7 @@ class FlutterView {
 class ViewManager {
   ViewManager(this.serviceProtocol);
 
-  final Observatory serviceProtocol;
+  final VMService serviceProtocol;
 
   Future<Null> refresh() async {
     List<Map<String, String>> viewList = await serviceProtocol.getViewList();

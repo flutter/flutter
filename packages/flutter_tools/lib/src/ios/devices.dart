@@ -12,7 +12,7 @@ import '../base/process.dart';
 import '../build_info.dart';
 import '../device.dart';
 import '../globals.dart';
-import '../observatory.dart';
+import '../vmservice.dart';
 import '../protocol_discovery.dart';
 import 'mac.dart';
 
@@ -328,7 +328,7 @@ class IOSDevice extends Device {
     ApplicationPackage package,
     LaunchResult result, {
     String mainPath,
-    Observatory observatory
+    VMService observatory
   }) async {
     throw 'unsupported';
   }

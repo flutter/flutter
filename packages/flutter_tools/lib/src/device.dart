@@ -13,7 +13,7 @@ import 'base/os.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
 import 'globals.dart';
-import 'observatory.dart';
+import 'vmservice.dart';
 import 'ios/devices.dart';
 import 'ios/simulators.dart';
 
@@ -209,7 +209,7 @@ abstract class Device {
     ApplicationPackage package,
     LaunchResult result, {
     String mainPath,
-    Observatory observatory
+    VMService observatory
   }) async {
     throw 'unsupported';
   }

@@ -11,7 +11,7 @@ import 'base/logger.dart';
 import 'build_info.dart';
 import 'device.dart';
 import 'globals.dart';
-import 'observatory.dart';
+import 'vmservice.dart';
 import 'view.dart';
 
 // Shared code between different resident application runners.
@@ -28,7 +28,7 @@ abstract class ResidentRunner {
   final bool usesTerminalUI;
   final Completer<int> _finished = new Completer<int>();
 
-  Observatory serviceProtocol;
+  VMService serviceProtocol;
   ViewManager viewManager;
   StreamSubscription<String> _loggingSubscription;
 
@@ -89,7 +89,7 @@ abstract class ResidentRunner {
     if (!debuggingOptions.debuggingEnabled) {
       return new Future<Null>.error('Error the service protocol is not enabled.');
     }
-    serviceProtocol = await Observatory.connect(port);
+    serviceProtocol = await VMService.connect(port);
     printTrace('Connected to service protocol on port $port');
     serviceProtocol.populateIsolateInfo();
     serviceProtocol.onExtensionEvent.listen((Event event) {

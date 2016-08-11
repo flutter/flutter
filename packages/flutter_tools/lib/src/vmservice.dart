@@ -12,8 +12,8 @@ import 'package:web_socket_channel/io.dart';
 import 'globals.dart';
 
 // TODO(johnmccutchan): Rename this class to ServiceProtocol or VmService.
-class Observatory {
-  Observatory._(this.peer, this.port, this.httpAddress) {
+class VMService {
+  VMService._(this.peer, this.port, this.httpAddress) {
     peer.registerMethod('streamNotify', (rpc.Parameters event) {
       _handleStreamNotify(event.asMap);
     });
@@ -28,13 +28,13 @@ class Observatory {
     });
   }
 
-  static Future<Observatory> connect(int port) async {
+  static Future<VMService> connect(int port) async {
     Uri uri = new Uri(scheme: 'ws', host: '127.0.0.1', port: port, path: 'ws');
     WebSocket ws = await WebSocket.connect(uri.toString());
     rpc.Peer peer = new rpc.Peer(new IOWebSocketChannel(ws));
     peer.listen();
     Uri httpAddress = new Uri(scheme: 'http', host: '127.0.0.1', port: port);
-    return new Observatory._(peer, port, httpAddress);
+    return new VMService._(peer, port, httpAddress);
   }
   final Uri httpAddress;
   final rpc.Peer peer;

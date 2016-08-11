@@ -13,7 +13,7 @@ import 'commands/install.dart';
 import 'commands/trace.dart';
 import 'device.dart';
 import 'globals.dart';
-import 'observatory.dart';
+import 'vmservice.dart';
 import 'resident_runner.dart';
 
 class RunAndStayResident extends ResidentRunner {

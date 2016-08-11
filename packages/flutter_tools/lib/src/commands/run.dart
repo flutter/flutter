@@ -13,7 +13,7 @@ import '../cache.dart';
 import '../device.dart';
 import '../globals.dart';
 import '../hot.dart';
-import '../observatory.dart';
+import '../vmservice.dart';
 import '../resident_runner.dart';
 import '../run.dart';
 import '../runner/flutter_command.dart';
@@ -275,7 +275,7 @@ Future<int> startApp(
     printError('Error running application on ${device.name}.');
   } else if (traceStartup) {
     try {
-      Observatory observatory = await Observatory.connect(result.observatoryPort);
+      VMService observatory = await VMService.connect(result.observatoryPort);
       await downloadStartupTrace(observatory);
     } catch (error) {
       printError('Error downloading trace from observatory: $error');
