@@ -2,49 +2,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-if (!is_ios) {
-
-copy("sky_shell") {
-  if (is_android) {
-    sources = [
-      "$root_build_dir/apks/SkyShell.apk",
-      "$root_build_dir/flutter.mojo",
-      "$root_build_dir/symbols/libflutter_library.so",
-    ]
-
-    deps = [
-      "//flutter/sky/shell",
-      "//flutter/sky/shell/platform/mojo",
-    ]
-  } else if (is_mac) {
-    sources = [
-      "$root_build_dir/SkyShell.app",
-    ]
-
-    deps = [
-      "//flutter/sky/shell",
-    ]
-  } else {
-    sources = [
-      "$root_build_dir/flutter.mojo",
-      "$root_build_dir/icudtl.dat",
-      "$root_build_dir/sky_shell",
-      "$root_build_dir/symbols/libflutter_library.so",
-    ]
-
-    deps = [
-      "//flutter/sky/shell",
-      "//flutter/sky/shell/platform/mojo",
-      "//flutter/sky/shell/platform/mojo",
-      "//third_party/icu:icudata",
-    ]
-  }
-
-  outputs = [ "$root_build_dir/dist/shell/{{source_file_part}}" ]
-}
-
-}  # if (!is_ios)
-
 if (is_android) {
   action("sky_engine") {
     script = "//flutter/sky/tools/dist_dart_pkg.py"
@@ -90,17 +47,10 @@ if (is_android) {
 }
 
 group("dist") {
-  deps = []
-
-  if (!flutter_aot && !is_ios) {
-    deps += [ ":sky_shell" ]
-  }
-
   if (is_android) {
-    deps += [
+    deps = [
       ":sky_engine",
       ":sky_services",
-      "//build/android/ant:keystore",
     ]
   }
 }
