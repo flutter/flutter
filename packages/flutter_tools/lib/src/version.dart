@@ -48,7 +48,7 @@ class FlutterVersion {
   String _frameworkAge;
   String get frameworkAge => _frameworkAge;
 
-  String get dartSdkVersion => Cache.dartSdkVersion;
+  String get dartSdkVersion => Cache.dartSdkVersion.split(' ')[0];
 
   String get engineRevision => Cache.engineRevision;
   String get engineRevisionShort => _shortGitRevision(engineRevision);
@@ -59,7 +59,7 @@ class FlutterVersion {
   String toString() {
     String from = 'Flutter on channel $channel (from ${repositoryUrl == null ? 'unknown source' : repositoryUrl})';
     String flutterText = 'Framework revision $frameworkRevisionShort ($frameworkAge); engine revision $engineRevisionShort';
-    String dartSdkText = 'Dart version $dartSdkVersion';
+    String dartSdkText = 'Flutter tools using Dart version $dartSdkVersion';
 
     return '$from\n$flutterText\n$dartSdkText';
   }
