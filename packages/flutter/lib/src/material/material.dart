@@ -656,5 +656,4 @@ class _InkHighlight extends InkFeature implements InkHighlight {
       _paintHighlight(canvas, rect.shift(originOffset), paint);
     }
   }
-
 }
