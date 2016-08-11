@@ -263,6 +263,19 @@ source_set("platform") {
     "transforms/TranslateTransformOperation.h",
   ]
 
+  deps = [
+    "//mojo/application",
+    "//mojo/environment:chromium",
+    "//mojo/public/c/system",
+    "//mojo/public/cpp/bindings",
+    "//mojo/public/cpp/system",
+    "//mojo/public/cpp/utility",
+    "//mojo/services/network/interfaces",
+    "//flutter/skia",
+    "//flutter/sky/engine/wtf",
+    "//third_party/harfbuzz-ng",
+  ]
+
   if (!is_mac) {
     sources += [
       "fonts/opentype/OpenTypeVerticalData.cpp",
@@ -275,6 +288,7 @@ source_set("platform") {
   }
 
   if (is_ios) {
+    deps += [ "//base" ]
     sources += [ "fonts/apple/FontCacheIOS.mm" ]
   }
 
@@ -293,20 +307,6 @@ source_set("platform") {
   ]
 
   include_dirs = [ "$root_build_dir" ]
-
-  deps = [
-    "//base:base",
-    "//mojo/application",
-    "//mojo/environment:chromium",
-    "//mojo/public/c/system",
-    "//mojo/public/cpp/bindings",
-    "//mojo/public/cpp/system",
-    "//mojo/public/cpp/utility",
-    "//mojo/services/network/interfaces",
-    "//flutter/skia",
-    "//flutter/sky/engine/wtf",
-    "//third_party/harfbuzz-ng",
-  ]
 
   forward_dependent_configs_from = [
     "//flutter/skia",
@@ -367,7 +367,6 @@ test("platform_unittests") {
     "//testing/gmock",
     "//testing/gtest",
     "//flutter/sky/engine/wtf",
-    "//flutter/sky/engine/wtf:test_support",
   ]
 
   # TODO(abarth): This is a lie - this test is not embedded in an environment

@@ -2,9 +2,16 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-import("//testing/test.gni")
+config("clang_warnings") {
+  if (is_clang) {
+    cflags = [
+      "-Wno-for-loop-analysis",
+      "-Wno-shift-negative-value",
+    ]
+  }
+}
 
-component("wtf") {
+source_set("wtf") {
   sources = [
     "ASCIICType.h",
     "AddressSpaceRandomization.cpp",
@@ -179,32 +186,32 @@ component("wtf") {
   ]
 
   configs += [
+    ":clang_warnings",
     "//flutter/sky/engine:config",
     "//flutter/sky/engine:non_test_config",
   ]
 
-  defines = [ "WTF_IMPLEMENTATION=1" ]
-
-  direct_dependent_configs = [ "//flutter/sky/engine:features" ]
+  public_configs = [
+    "//third_party/icu:icu_config",
+    "//flutter/sky/engine:features",
+  ]
 
   public_deps = [
     "//lib/ftl",
+    "//third_party/icu",
   ]
 
   deps = [
     "//flutter/glue",
-    "//third_party/icu",
   ]
-
-  forward_dependent_configs_from = [ "//third_party/icu" ]
 
   if (is_android) {
     libs = [ "log" ]
   }
 }
 
-test("unittests") {
-  output_name = "sky_wtf_unittests"
+executable("unittests") {
+  output_name = "flutter_wtf_unittests"
 
   sources = [
     "CheckedArithmeticTest.cpp",
@@ -220,8 +227,9 @@ test("unittests") {
     "StringExtrasTest.cpp",
     "StringHasherTest.cpp",
     "TemporaryChangeTest.cpp",
-    "VectorTest.cpp",
     "testing/RunAllTests.cpp",
+    "testing/WTFTestHelpers.cpp",
+    "testing/WTFTestHelpers.h",
     "testing/WTFTestHelpersTest.cpp",
     "text/AtomicStringTest.cpp",
     "text/CStringTest.cpp",
@@ -232,43 +240,27 @@ test("unittests") {
     "text/TextCodecReplacementTest.cpp",
     "text/TextCodecUTF8Test.cpp",
     "text/WTFStringTest.cpp",
+    "VectorTest.cpp",
   ]
 
-  configs += [ "//flutter/sky/engine:config" ]
+  configs += [
+    ":clang_warnings",
+    "//flutter/sky/engine:config",
+  ]
 
   deps = [
-    ":test_support",
     ":wtf",
     "//third_party/gtest",
   ]
 
-  # TODO(abarth): This is a lie - this test is not embedded in an environment
-  # that injects the system thunks, so system calls don't actually work. This
-  # just tricks the linker into thinking that an implementation of these calls
-  # will be injected at runtime so the link succeeds.
-  deps += [
-    "//mojo/public/cpp/environment:standalone",
-    "//mojo/public/platform/native:system",
-  ]
-}
-
-component("test_support") {
-  output_name = "wtf_test_support"
-
-  sources = [
-    "testing/WTFTestHelpers.cpp",
-    "testing/WTFTestHelpers.h",
-    "testing/WTFUnitTestHelpersExport.h",
-  ]
-
-  defines = [ "WTF_UNITTEST_HELPERS_IMPLEMENTATION=1" ]
-
-  configs += [
-    "//flutter/sky/engine:config",
-    "//flutter/sky/engine:non_test_config",
-  ]
-
-  deps = [
-    ":wtf",
-  ]
+  if (!is_fuchsia) {
+    # TODO(abarth): This is a lie - this test is not embedded in an environment
+    # that injects the system thunks, so system calls don't actually work. This
+    # just tricks the linker into thinking that an implementation of these calls
+    # will be injected at runtime so the link succeeds.
+    deps += [
+      "//mojo/public/cpp/environment:standalone",
+      "//mojo/public/platform/native:system",
+    ]
+  }
 }

@@ -28,18 +28,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #ifndef SKY_ENGINE_WTF_WTFEXPORT_H_
 #define SKY_ENGINE_WTF_WTFEXPORT_H_
 
-#if !defined(WTF_IMPLEMENTATION)
-#define WTF_IMPLEMENTATION 0
-#endif
-
-#if defined(COMPONENT_BUILD)
-#define WTF_EXPORT __attribute__((visibility("default")))
-#else // defined(COMPONENT_BUILD)
 #define WTF_EXPORT
-#endif
 
 #endif  // SKY_ENGINE_WTF_WTFEXPORT_H_

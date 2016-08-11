@@ -3,12 +3,6 @@
 # found in the LICENSE file.
 
 import("config.gni")
-if (is_clang) {
-  import("//build/config/clang/clang.gni")
-}
-if (is_posix) {
-  import("//build/config/gcc/gcc_version.gni")
-}
 
 visibility = [ "//flutter/sky/*" ]
 
@@ -46,10 +40,14 @@ config("non_test_config") {
   }
 }
 
+if (!is_fuchsia) {
+
 group("engine") {
   deps = [
     "//flutter/sky/engine/platform",
     "//flutter/sky/engine/public/sky",
     "//flutter/sky/engine/web",
   ]
+}
+
 }

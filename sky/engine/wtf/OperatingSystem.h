@@ -50,6 +50,10 @@
 #define WTF_OS_LINUX 1
 #endif
 
+#ifdef __Fuchsia__
+#define WTF_OS_FUCHSIA 1
+#endif
+
 /* Always OS(POSIX) */
 #define WTF_OS_POSIX 1
 
