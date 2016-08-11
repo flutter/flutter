@@ -15,8 +15,9 @@ import 'cache.dart';
 import 'commands/build_apk.dart';
 import 'commands/install.dart';
 import 'device.dart';
-import 'globals.dart';
 import 'devfs.dart';
+import 'globals.dart';
+import 'isolate_tracker.dart';
 import 'observatory.dart';
 import 'resident_runner.dart';
 
@@ -81,6 +82,7 @@ class HotRunner extends ResidentRunner {
   ApplicationPackage _package;
   String _mainPath;
   String _projectRootPath;
+  IsolateTracker _isolateTracker;
   final AssetBundle bundle = new AssetBundle();
   final File pipe;
 
@@ -217,6 +219,8 @@ class HotRunner extends ResidentRunner {
       observatoryPortCompleter.complete(result.observatoryPort);
 
     await connectToServiceProtocol(result.observatoryPort);
+    _isolateTracker = new IsolateTracker(serviceProtocol);
+    await _isolateTracker.start();
 
     if (device.needsDevFS) {
       _loaderShowMessage('Connecting...', progress: 0);
@@ -340,17 +344,15 @@ class HotRunner extends ResidentRunner {
     Completer<Null> completer = new Completer<Null>();
     StreamSubscription<Event> subscription =
        serviceProtocol.onIsolateEvent.listen((Event event) {
-     if (event.kind == 'IsolateStart') {
-       printTrace('Isolate is spawned.');
-     } else if (event.kind == 'IsolateRunnable') {
-       printTrace('Isolate is runnable.');
+     if (event.kind == 'IsolateRunnable') {
        completer.complete(null);
      }
     });
-    await serviceProtocol.runInView(viewId,
-                                   entryPath,
-                                   packagesPath,
-                                   assetsDirectoryPath);
+    Response response = await serviceProtocol.runInView(viewId,
+                                                        entryPath,
+                                                        packagesPath,
+                                                        assetsDirectoryPath);
+    _isolateTracker.viewIsolateId = response.response['isolateId'];
     await completer.future;
     await subscription.cancel();
   }
@@ -474,6 +476,8 @@ class HotRunner extends ResidentRunner {
 
   @override
   Future<Null> cleanupAtFinish() async {
+    if (_isolateTracker != null)
+      await _isolateTracker.stop();
     await _cleanupDevFS();
     await stopEchoingDeviceLog();
   }

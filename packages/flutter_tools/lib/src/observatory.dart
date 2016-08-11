@@ -57,6 +57,7 @@ class Observatory {
   Stream<Event> get onExtensionEvent => onEvent('Extension');
   // IsolateStart, IsolateRunnable, IsolateExit, IsolateUpdate, ServiceExtensionAdded
   Stream<Event> get onIsolateEvent => onEvent('Isolate');
+  Stream<Event> get onDebugEvent => onEvent('Debug');
   Stream<Event> get onTimelineEvent => onEvent('Timeline');
 
   // Listen for a specific event name.
@@ -134,18 +135,18 @@ class Observatory {
     return views[0]['id'];
   }
 
-  Future<Null> runInView(String viewId,
-                         String main,
-                         String packages,
-                         String assetsDirectory) async {
-    await peer.sendRequest('_flutter.runInView',
-                           <String, dynamic> {
-                             'viewId': viewId,
-                             'mainScript': main,
-                             'packagesFile': packages,
-                             'assetDirectory': assetsDirectory
-                           });
-    return null;
+  Future<Response> runInView(String viewId,
+                             String main,
+                             String packages,
+                             String assetsDirectory) async {
+    dynamic result = await peer.sendRequest('_flutter.runInView',
+                                            <String, dynamic> {
+                                             'viewId': viewId,
+                                             'mainScript': main,
+                                             'packagesFile': packages,
+                                             'assetDirectory': assetsDirectory
+                                            });
+    return new Response(result);
   }
 
   Future<Response> clearVMTimeline() => sendRequest('_clearVMTimeline');
