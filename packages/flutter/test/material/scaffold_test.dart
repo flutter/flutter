@@ -76,4 +76,56 @@ void main() {
 
     expect(tester.binding.transientCallbackCount, greaterThan(0));
   });
+
+  testWidgets('Drawer scrolling', (WidgetTester tester) async {
+    GlobalKey<ScrollableState<Scrollable>> drawerKey =
+        new GlobalKey<ScrollableState<Scrollable>>(debugLabel: 'drawer');
+    Key appBarKey = new Key('appBar');
+    const double appBarHeight = 256.0;
+
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Scaffold(
+          appBarBehavior: AppBarBehavior.under,
+          appBar: new AppBar(
+            key: appBarKey,
+            expandedHeight: appBarHeight,
+            title: new Text('Title'),
+            flexibleSpace: new FlexibleSpaceBar(title: new Text('Title')),
+          ),
+          drawer: new Drawer(
+            child: new Block(
+              scrollableKey: drawerKey,
+              children: new List<Widget>.generate(10,
+                (int index) => new SizedBox(height: 100.0, child: new Text('D$index'))
+              )
+            )
+          ),
+          body: new Block(
+            padding: const EdgeInsets.only(top: appBarHeight),
+            children: new List<Widget>.generate(10,
+              (int index) => new SizedBox(height: 100.0, child: new Text('B$index'))
+            ),
+          ),
+        )
+      )
+    );
+
+    ScaffoldState state = tester.firstState(find.byType(Scaffold));
+    state.openDrawer();
+
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(drawerKey.currentState.scrollOffset, equals(0));
+
+    const double scrollDelta = 80.0;
+    await tester.scroll(find.byKey(drawerKey), const Offset(0.0, -scrollDelta));
+    await tester.pump();
+
+    expect(drawerKey.currentState.scrollOffset, equals(scrollDelta));
+
+    RenderBox renderBox = tester.renderObject(find.byKey(appBarKey));
+    expect(renderBox.size.height, equals(appBarHeight));
+  });
 }
