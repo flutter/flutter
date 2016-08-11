@@ -139,6 +139,9 @@ class MockUsage implements Usage {
   void sendEvent(String category, String parameter) { }
 
   @override
+  void sendTiming(String category, String variableName, Duration duration) { }
+
+  @override
   UsageTimer startTimer(String event) => new _MockUsageTimer(event);
 
   @override

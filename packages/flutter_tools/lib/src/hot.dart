@@ -473,6 +473,7 @@ class HotRunner extends ResidentRunner {
     printStatus('Restart time: '
                 '${getElapsedAsMilliseconds(firstFrameTimer.elapsed)}');
     flutterUsage.sendEvent('hot', 'restart');
+    flutterUsage.sendTiming('hot', 'restart', firstFrameTimer.elapsed);
   }
 
   /// Returns [true] if the reload was successful.
@@ -537,6 +538,7 @@ class HotRunner extends ResidentRunner {
     await firstFrameTimer.firstFrame();
     printStatus('Hot reload time: '
                 '${getElapsedAsMilliseconds(firstFrameTimer.elapsed)}');
+    flutterUsage.sendTiming('hot', 'reload', firstFrameTimer.elapsed);
     return true;
   }
 

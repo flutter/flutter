@@ -70,6 +70,10 @@ class Usage {
       _analytics.sendEvent(category, parameter);
   }
 
+  void sendTiming(String category, String variableName, Duration duration) {
+    _analytics.sendTiming(variableName, duration.inMilliseconds, category: category);
+  }
+
   UsageTimer startTimer(String event) {
     if (suppressAnalytics)
       return new _MockUsageTimer();
