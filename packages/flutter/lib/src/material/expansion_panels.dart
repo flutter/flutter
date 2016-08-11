@@ -151,12 +151,14 @@ class ExpansionPanelList extends StatelessWidget {
           child: new Column(
             children: <Widget>[
               header,
-              new _AnimatedCrossFade(
+              new AnimatedCrossFade(
                 firstChild: new Container(height: 0.0),
                 secondChild: children[i].body,
-                crossFadeState: _isChildExpanded(i) ? _CrossFadeState.showSecond : _CrossFadeState.showFirst,
+                firstCurve: new Interval(0.0, 0.6, curve: Curves.fastOutSlowIn),
+                secondCurve: new Interval(0.4, 1.0, curve: Curves.fastOutSlowIn),
+                sizeCurve: Curves.fastOutSlowIn,
+                crossFadeState: _isChildExpanded(i) ? CrossFadeState.showSecond : CrossFadeState.showFirst,
                 duration: animationDuration,
-                curve: Curves.fastOutSlowIn
               )
             ]
           )
@@ -170,136 +172,6 @@ class ExpansionPanelList extends StatelessWidget {
     return new MergeableMaterial(
       hasDividers: true,
       children: items
-    );
-  }
-}
-
-// The child that is shown will fade in, and while the other will fade out.
-enum _CrossFadeState {
-  showFirst,
-  showSecond
-}
-
-// A widget that cross-fades between two children and animates its bottom while
-// clipping the children.
-class _AnimatedCrossFade extends StatefulWidget {
-  _AnimatedCrossFade({
-    Key key,
-    this.firstChild,
-    this.secondChild,
-    this.crossFadeState,
-    this.duration,
-    this.curve
-  }) : super(key: key);
-
-  final Widget firstChild;
-  final Widget secondChild;
-  final _CrossFadeState crossFadeState;
-  final Duration duration;
-  final Curve curve;
-
-  @override
-  _AnimatedCrossFadeState createState() => new _AnimatedCrossFadeState();
-}
-
-class _AnimatedCrossFadeState extends State<_AnimatedCrossFade> {
-  AnimationController _controller;
-  Animation<double> _firstAnimation;
-  Animation<double> _secondAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = new AnimationController(duration: config.duration);
-    _firstAnimation = new Tween<double>(
-      begin: 1.0,
-      end: 0.0
-    ).animate(
-      new CurvedAnimation(
-        parent: _controller,
-        curve: new Interval(0.0, 0.6, curve: config.curve)
-      )
-    );
-    _secondAnimation = new CurvedAnimation(
-      parent: _controller,
-      curve: new Interval(0.4, 1.0, curve: config.curve.flipped)
-    );
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  void didUpdateConfig(_AnimatedCrossFade oldConfig) {
-    super.didUpdateConfig(oldConfig);
-    if (config.crossFadeState != oldConfig.crossFadeState) {
-      switch (config.crossFadeState) {
-        case _CrossFadeState.showFirst:
-          _controller.reverse();
-          break;
-        case _CrossFadeState.showSecond:
-          _controller.forward();
-          break;
-      }
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    Stack stack;
-
-    if (_controller.status == AnimationStatus.completed ||
-        _controller.status == AnimationStatus.forward) {
-      stack = new Stack(
-        overflow: Overflow.visible,
-        children: <Widget>[
-          new FadeTransition(
-            opacity: _secondAnimation,
-            child: config.secondChild
-          ),
-          new Positioned(
-            left: 0.0,
-            top: 0.0,
-            right: 0.0,
-            child: new FadeTransition(
-              opacity: _firstAnimation,
-              child: config.firstChild
-            )
-          )
-        ]
-      );
-    } else {
-      stack = new Stack(
-        overflow: Overflow.visible,
-        children: <Widget>[
-          new FadeTransition(
-            opacity: _firstAnimation,
-            child: config.firstChild
-          ),
-          new Positioned(
-            left: 0.0,
-            top: 0.0,
-            right: 0.0,
-            child: new FadeTransition(
-              opacity: _secondAnimation,
-              child: config.secondChild
-            )
-          )
-        ]
-      );
-    }
-
-    return new ClipRect(
-      child: new AnimatedSize(
-        key: new ValueKey<Key>(config.key),
-        alignment: FractionalOffset.topCenter,
-        duration: config.duration,
-        curve: config.curve,
-        child: stack
-      )
     );
   }
 }
