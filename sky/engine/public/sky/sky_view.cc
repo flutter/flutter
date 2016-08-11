@@ -18,8 +18,7 @@ std::unique_ptr<SkyView> SkyView::Create(SkyViewClient* client) {
   return std::unique_ptr<SkyView>(new SkyView(client));
 }
 
-SkyView::SkyView(SkyViewClient* client)
-    : client_(client) {}
+SkyView::SkyView(SkyViewClient* client) : client_(client) {}
 
 SkyView::~SkyView() {}
 
@@ -67,19 +66,6 @@ void SkyView::CreateView(const std::string& script_uri) {
   GetWindow()->UpdateLocale(language_code_, country_code_);
 }
 
-void SkyView::RunFromLibrary(const std::string& name,
-                             DartLibraryProvider* library_provider) {
-  dart_controller_->RunFromLibrary(name, library_provider);
-}
-
-void SkyView::RunFromPrecompiledSnapshot() {
-  dart_controller_->RunFromPrecompiledSnapshot();
-}
-
-void SkyView::RunFromSnapshot(mojo::ScopedDataPipeConsumerHandle snapshot) {
-  dart_controller_->RunFromSnapshot(snapshot.Pass());
-}
-
 void SkyView::BeginFrame(ftl::TimePoint frame_time) {
   GetWindow()->BeginFrame(frame_time);
 }
@@ -122,6 +108,5 @@ Dart_Port SkyView::GetMainPort() {
   }
   return dart_controller_->dart_state()->main_port();
 }
-
 
 }  // namespace blink

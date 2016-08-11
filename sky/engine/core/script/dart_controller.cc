@@ -4,22 +4,10 @@
 
 #include "flutter/sky/engine/core/script/dart_controller.h"
 
+#include <utility>
+
 #include "dart/runtime/include/dart_tools_api.h"
-#include "flutter/tonic/dart_debugger.h"
-#include "flutter/tonic/dart_dependency_catcher.h"
-#include "flutter/tonic/dart_io.h"
-#include "flutter/tonic/dart_library_loader.h"
-#include "flutter/tonic/dart_snapshot_loader.h"
-#include "flutter/tonic/dart_state.h"
 #include "flutter/glue/trace_event.h"
-#include "lib/tonic/dart_class_library.h"
-#include "lib/tonic/dart_message_handler.h"
-#include "lib/tonic/dart_wrappable.h"
-#include "lib/tonic/logging/dart_error.h"
-#include "lib/tonic/logging/dart_invoke.h"
-#include "lib/tonic/scopes/dart_api_scope.h"
-#include "lib/tonic/scopes/dart_isolate_scope.h"
-#include "mojo/public/cpp/system/data_pipe.h"
 #include "flutter/sky/engine/bindings/dart_mojo_internal.h"
 #include "flutter/sky/engine/bindings/dart_runtime_hooks.h"
 #include "flutter/sky/engine/bindings/dart_ui.h"
@@ -29,6 +17,20 @@
 #include "flutter/sky/engine/public/platform/Platform.h"
 #include "flutter/sky/engine/public/platform/sky_settings.h"
 #include "flutter/sky/engine/wtf/MakeUnique.h"
+#include "flutter/tonic/dart_debugger.h"
+#include "flutter/tonic/dart_io.h"
+#include "flutter/tonic/dart_state.h"
+#include "lib/ftl/files/directory.h"
+#include "lib/ftl/files/path.h"
+#include "lib/tonic/dart_class_library.h"
+#include "lib/tonic/dart_message_handler.h"
+#include "lib/tonic/dart_wrappable.h"
+#include "lib/tonic/file_loader/file_loader.h"
+#include "lib/tonic/logging/dart_error.h"
+#include "lib/tonic/logging/dart_invoke.h"
+#include "lib/tonic/scopes/dart_api_scope.h"
+#include "lib/tonic/scopes/dart_isolate_scope.h"
+#include "mojo/public/cpp/system/data_pipe.h"
 
 #ifdef OS_ANDROID
 #include "flutter/lib/jni/dart_jni.h"
@@ -38,6 +40,16 @@ using tonic::LogIfError;
 using tonic::ToDart;
 
 namespace blink {
+namespace {
+
+// TODO(abarth): Consider adding this to //lib/ftl.
+std::string ResolvePath(std::string path) {
+  if (!path.empty() && path[0] == '/')
+    return path;
+  return files::SimplifyPath(files::GetCurrentDirectory() + "/" + path);
+}
+
+}  // namespace
 
 DartController::DartController() : ui_dart_state_(nullptr) {}
 
@@ -53,6 +65,9 @@ DartController::~DartController() {
 }
 
 bool DartController::SendStartMessage(Dart_Handle root_library) {
+  if (LogIfError(root_library))
+    return true;
+
   {
     // Temporarily exit the isolate while we make it runnable.
     Dart_Isolate isolate = dart_state()->isolate();
@@ -93,67 +108,30 @@ bool DartController::SendStartMessage(Dart_Handle root_library) {
   return LogIfError(result);
 }
 
-void DartController::DidLoadMainLibrary(std::string name) {
-  FTL_DCHECK(Dart_CurrentIsolate() == dart_state()->isolate());
-  tonic::DartApiScope dart_api_scope;
-
-  FTL_CHECK(!LogIfError(Dart_FinalizeLoading(true)));
-
-  Dart_Handle library = Dart_LookupLibrary(ToDart(name));
-  if (LogIfError(library))
-    exit(1);
-  if (SendStartMessage(library))
-    exit(1);
-}
-
-void DartController::DidLoadSnapshot() {
-  TRACE_EVENT0("flutter", "DartController::DidLoadSnapshot");
-
-  FTL_DCHECK(Dart_CurrentIsolate() == nullptr);
-  snapshot_loader_ = nullptr;
-
-  Dart_Isolate isolate = dart_state()->isolate();
-  tonic::DartIsolateScope isolate_scope(isolate);
-  tonic::DartApiScope dart_api_scope;
-  Dart_Handle library = Dart_RootLibrary();
-  if (LogIfError(library))
-    exit(1);
-  if (SendStartMessage(library))
-    exit(1);
-}
-
 void DartController::RunFromPrecompiledSnapshot() {
-  DidLoadSnapshot();
+  TRACE_EVENT0("flutter", "DartController::RunFromPrecompiledSnapshot");
+  FTL_DCHECK(Dart_CurrentIsolate() == nullptr);
+  tonic::DartState::Scope scope(dart_state());
+  if (SendStartMessage(Dart_RootLibrary()))
+    exit(1);
 }
 
-void DartController::RunFromSnapshot(
-    mojo::ScopedDataPipeConsumerHandle snapshot) {
-  snapshot_loader_ = WTF::MakeUnique<DartSnapshotLoader>(dart_state());
-  snapshot_loader_->LoadSnapshot(snapshot.Pass(),
-                                 [this]() { DidLoadSnapshot(); });
-}
-
-void DartController::RunFromSnapshotBuffer(const uint8_t* buffer, size_t size) {
-  DartState::Scope scope(dart_state());
+void DartController::RunFromSnapshot(const uint8_t* buffer, size_t size) {
+  tonic::DartState::Scope scope(dart_state());
   LogIfError(Dart_LoadScriptFromSnapshot(buffer, size));
-  Dart_Handle library = Dart_RootLibrary();
-  if (LogIfError(library))
-    exit(1);
-  if (SendStartMessage(library))
+  if (SendStartMessage(Dart_RootLibrary()))
     exit(1);
 }
 
-void DartController::RunFromLibrary(std::string name,
-                                    DartLibraryProvider* library_provider) {
-  DartState::Scope scope(dart_state());
-
-  DartLibraryLoader& loader = dart_state()->library_loader();
-  loader.set_library_provider(library_provider);
-
-  DartDependencyCatcher dependency_catcher(loader);
-  loader.LoadScript(name);
-  loader.WaitForDependencies(dependency_catcher.dependencies(),
-                             [this, name]() { DidLoadMainLibrary(name); });
+void DartController::RunFromSource(const std::string& main,
+                                   const std::string& packages) {
+  tonic::DartState::Scope scope(dart_state());
+  tonic::FileLoader& loader = dart_state()->file_loader();
+  if (!packages.empty() && !loader.LoadPackagesMap(ResolvePath(packages)))
+    FTL_LOG(WARNING) << "Failed to load package map: " << packages;
+  LogIfError(loader.LoadScript(main));
+  if (SendStartMessage(Dart_RootLibrary()))
+    exit(1);
 }
 
 void DartController::CreateIsolateFor(std::unique_ptr<UIDartState> state) {
@@ -164,15 +142,15 @@ void DartController::CreateIsolateFor(std::unique_ptr<UIDartState> state) {
       nullptr, static_cast<DartState*>(state.get()), &error);
   FTL_CHECK(isolate) << error;
   ui_dart_state_ = state.release();
-  auto& message_handler = dart_state()->message_handler();
   FTL_DCHECK(Platform::current());
-  message_handler.Initialize(
+  dart_state()->message_handler().Initialize(
       ftl::RefPtr<ftl::TaskRunner>(Platform::current()->GetUITaskRunner()));
 
   Dart_SetShouldPauseOnStart(SkySettings::Get().start_paused);
 
   ui_dart_state_->SetIsolate(isolate);
-  FTL_CHECK(!LogIfError(Dart_SetLibraryTagHandler(DartLibraryTagHandler)));
+  FTL_CHECK(!LogIfError(
+      Dart_SetLibraryTagHandler(tonic::DartState::HandleLibraryTag)));
 
   {
     tonic::DartApiScope dart_api_scope;

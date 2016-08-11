@@ -6,6 +6,13 @@
 #define SKY_SHELL_UI_ENGINE_H_
 
 #include "flutter/assets/zip_asset_store.h"
+#include "flutter/glue/drain_data_pipe_job.h"
+#include "flutter/services/engine/sky_engine.mojom.h"
+#include "flutter/services/rasterizer/rasterizer.mojom.h"
+#include "flutter/sky/engine/public/sky/sky_view_client.h"
+#include "flutter/sky/engine/public/sky/sky_view.h"
+#include "flutter/sky/shell/rasterizer.h"
+#include "flutter/sky/shell/ui_delegate.h"
 #include "lib/ftl/macros.h"
 #include "lib/ftl/memory/weak_ptr.h"
 #include "lib/ftl/tasks/task_runner.h"
@@ -16,12 +23,6 @@
 #include "mojo/public/cpp/system/handle.h"
 #include "mojo/public/interfaces/application/service_provider.mojom.h"
 #include "mojo/services/asset_bundle/interfaces/asset_bundle.mojom.h"
-#include "flutter/sky/engine/public/sky/sky_view_client.h"
-#include "flutter/sky/engine/public/sky/sky_view.h"
-#include "flutter/services/engine/sky_engine.mojom.h"
-#include "flutter/services/rasterizer/rasterizer.mojom.h"
-#include "flutter/sky/shell/rasterizer.h"
-#include "flutter/sky/shell/ui_delegate.h"
 #include "third_party/skia/include/core/SkPicture.h"
 
 namespace sky {
@@ -51,7 +52,7 @@ class Engine : public UIDelegate,
 
   void RunFromSource(const std::string& main,
                      const std::string& packages,
-                     const std::string& assets_directory);
+                     const std::string& bundle);
 
   Dart_Port GetUIIsolateMainPort();
 
@@ -91,7 +92,6 @@ class Engine : public UIDelegate,
   void BindToServiceProvider(
       mojo::InterfaceRequest<mojo::ServiceProvider> request);
 
-  void RunFromLibrary(const std::string& name);
   void RunFromSnapshotStream(const std::string& script_uri,
                              mojo::ScopedDataPipeConsumerHandle snapshot);
 
@@ -100,8 +100,9 @@ class Engine : public UIDelegate,
   void StopAnimator();
   void StartAnimatorIfPossible();
 
-  void ConfigureZipAssetBundle(const mojo::String& path);
+  void ConfigureZipAssetBundle(const std::string& path);
   void ConfigureDirectoryAssetBundle(const std::string& path);
+  void ConfigureView(const std::string& script_uri);
 
   Config config_;
   std::unique_ptr<Animator> animator_;
@@ -112,8 +113,9 @@ class Engine : public UIDelegate,
   mojo::BindingSet<mojo::ServiceProvider> service_provider_bindings_;
 
   mojo::asset_bundle::AssetBundlePtr root_bundle_;
-  std::unique_ptr<blink::DartLibraryProvider> dart_library_provider_;
   std::unique_ptr<blink::SkyView> sky_view_;
+
+  std::unique_ptr<glue::DrainDataPipeJob> snapshot_drainer_;
 
   std::string initial_route_;
   ViewportMetricsPtr viewport_metrics_;

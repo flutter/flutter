@@ -116,16 +116,7 @@ tonic::FileLoader& GetLoader() {
 Dart_Handle HandleLibraryTag(Dart_LibraryTag tag,
                              Dart_Handle library,
                              Dart_Handle url) {
-  FTL_CHECK(Dart_IsLibrary(library));
-  FTL_CHECK(Dart_IsString(url));
-  tonic::FileLoader& loader = GetLoader();
-  if (tag == Dart_kCanonicalizeUrl)
-    return loader.CanonicalizeURL(library, url);
-  if (tag == Dart_kImportTag)
-    return loader.Import(url);
-  if (tag == Dart_kSourceTag)
-    return loader.Source(library, url);
-  return Dart_NewApiError("Unknown library tag.");
+  return GetLoader().HandleLibraryTag(tag, library, url);
 }
 
 std::vector<char> CreateSnapshot() {

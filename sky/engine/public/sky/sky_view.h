@@ -43,11 +43,7 @@ class SkyView : public WindowClient, public IsolateClient {
   void BeginFrame(ftl::TimePoint frame_time);
 
   void CreateView(const std::string& script_uri);
-
-  void RunFromLibrary(const std::string& name,
-                      DartLibraryProvider* library_provider);
-  void RunFromPrecompiledSnapshot();
-  void RunFromSnapshot(mojo::ScopedDataPipeConsumerHandle snapshot);
+  DartController* dart_controller() const { return dart_controller_.get(); }
 
   void HandlePointerPacket(const pointer::PointerPacketPtr& packet);
 

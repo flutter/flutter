@@ -6,14 +6,16 @@
 
 #include <unistd.h>
 
+#include <utility>
+
 #include "flutter/assets/directory_asset_bundle.h"
 #include "flutter/assets/zip_asset_bundle.h"
-#include "flutter/tonic/dart_library_provider_files.h"
 #include "flutter/glue/movable_wrapper.h"
 #include "flutter/glue/trace_event.h"
 #include "lib/ftl/files/path.h"
 #include "mojo/public/cpp/application/connect.h"
 #include "flutter/sky/engine/bindings/mojo_services.h"
+#include "flutter/sky/engine/core/script/dart_controller.h"
 #include "flutter/sky/engine/core/script/dart_init.h"
 #include "flutter/sky/engine/core/script/ui_dart_state.h"
 #include "flutter/sky/engine/public/platform/Platform.h"
@@ -83,25 +85,20 @@ void Engine::BeginFrame(ftl::TimePoint frame_time) {
 
 void Engine::RunFromSource(const std::string& main,
                            const std::string& packages,
-                           const std::string& assets_directory) {
+                           const std::string& bundle) {
   TRACE_EVENT0("flutter", "Engine::RunFromSource");
-  // Assets.
-  ConfigureDirectoryAssetBundle(assets_directory);
-  // .packages.
   std::string packages_path = packages;
   if (packages_path.empty())
     packages_path = FindPackagesPath(main);
-  DartLibraryProviderFiles* provider = new DartLibraryProviderFiles();
-  dart_library_provider_.reset(provider);
-  if (!packages_path.empty())
-    provider->LoadPackagesMap(packages_path);
-  RunFromLibrary(main);
+  if (!bundle.empty())
+    ConfigureDirectoryAssetBundle(bundle);
+  ConfigureView(main);
+  sky_view_->dart_controller()->RunFromSource(main, packages_path);
 }
 
 Dart_Port Engine::GetUIIsolateMainPort() {
-  if (!sky_view_) {
+  if (!sky_view_)
     return ILLEGAL_PORT;
-  }
   return sky_view_->GetMainPort();
 }
 
@@ -183,34 +180,24 @@ void Engine::OnPointerPacket(pointer::PointerPacketPtr packet) {
     sky_view_->HandlePointerPacket(packet);
 }
 
-void Engine::RunFromLibrary(const std::string& name) {
-  TRACE_EVENT0("flutter", "Engine::RunFromLibrary");
-  sky_view_ = blink::SkyView::Create(this);
-  sky_view_->CreateView(name);
-  sky_view_->RunFromLibrary(name, dart_library_provider_.get());
-  sky_view_->SetViewportMetrics(viewport_metrics_);
-  sky_view_->SetLocale(language_code_, country_code_);
-  if (!initial_route_.empty())
-    sky_view_->PushRoute(initial_route_);
-}
-
 void Engine::RunFromSnapshotStream(
     const std::string& script_uri,
     mojo::ScopedDataPipeConsumerHandle snapshot) {
   TRACE_EVENT0("flutter", "Engine::RunFromSnapshotStream");
-  sky_view_ = blink::SkyView::Create(this);
-  sky_view_->CreateView(script_uri);
-  sky_view_->RunFromSnapshot(snapshot.Pass());
-  sky_view_->SetViewportMetrics(viewport_metrics_);
-  sky_view_->SetLocale(language_code_, country_code_);
-  if (!initial_route_.empty())
-    sky_view_->PushRoute(initial_route_);
+  ConfigureView(script_uri);
+  snapshot_drainer_.reset(new glue::DrainDataPipeJob(
+      std::move(snapshot), [this](std::vector<char> snapshot) {
+        FTL_DCHECK(sky_view_);
+        FTL_DCHECK(sky_view_->dart_controller());
+        sky_view_->dart_controller()->RunFromSnapshot(
+            reinterpret_cast<uint8_t*>(snapshot.data()), snapshot.size());
+      }));
 }
 
-void Engine::ConfigureZipAssetBundle(const mojo::String& path) {
+void Engine::ConfigureZipAssetBundle(const std::string& path) {
   asset_store_ = ftl::MakeRefCounted<blink::ZipAssetStore>(
-      path.get(), ftl::RefPtr<ftl::TaskRunner>(
-                      blink::Platform::current()->GetIOTaskRunner()));
+      path, ftl::RefPtr<ftl::TaskRunner>(
+                blink::Platform::current()->GetIOTaskRunner()));
   new blink::ZipAssetBundle(mojo::GetProxy(&root_bundle_), asset_store_);
 }
 
@@ -221,43 +208,32 @@ void Engine::ConfigureDirectoryAssetBundle(const std::string& path) {
           blink::Platform::current()->GetIOTaskRunner()));
 }
 
-void Engine::RunFromPrecompiledSnapshot(const mojo::String& bundle_path) {
-  TRACE_EVENT0("flutter", "Engine::RunFromPrecompiledSnapshot");
-
-  ConfigureZipAssetBundle(bundle_path);
-
+void Engine::ConfigureView(const std::string& script_uri) {
+  snapshot_drainer_.reset();
   sky_view_ = blink::SkyView::Create(this);
-  sky_view_->CreateView("http://localhost");
-  sky_view_->RunFromPrecompiledSnapshot();
+  sky_view_->CreateView(std::move(script_uri));
   sky_view_->SetViewportMetrics(viewport_metrics_);
   sky_view_->SetLocale(language_code_, country_code_);
   if (!initial_route_.empty())
     sky_view_->PushRoute(initial_route_);
 }
 
+void Engine::RunFromPrecompiledSnapshot(const mojo::String& bundle_path) {
+  TRACE_EVENT0("flutter", "Engine::RunFromPrecompiledSnapshot");
+  ConfigureZipAssetBundle(bundle_path.get());
+  ConfigureView("http://localhost");
+  sky_view_->dart_controller()->RunFromPrecompiledSnapshot();
+}
+
 void Engine::RunFromFile(const mojo::String& main,
                          const mojo::String& packages,
                          const mojo::String& bundle) {
-  TRACE_EVENT0("flutter", "Engine::RunFromFile");
-  std::string main_dart(main);
-  if (bundle.size() != 0) {
-    // The specification of an FLX bundle is optional.
-    ConfigureZipAssetBundle(bundle);
-  }
-  std::string packages_path = packages;
-  if (packages_path.empty())
-    packages_path = FindPackagesPath(main_dart);
-  DartLibraryProviderFiles* provider = new DartLibraryProviderFiles();
-  dart_library_provider_.reset(provider);
-  if (!packages_path.empty())
-    provider->LoadPackagesMap(packages_path);
-  RunFromLibrary(main_dart);
+  RunFromSource(main, packages, bundle);
 }
 
 void Engine::RunFromBundle(const mojo::String& script_uri,
                            const mojo::String& path) {
   TRACE_EVENT0("flutter", "Engine::RunFromBundle");
-
   ConfigureZipAssetBundle(path);
   mojo::DataPipe pipe;
   asset_store_->GetAsStream(blink::kSnapshotAssetKey,

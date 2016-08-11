@@ -67,9 +67,6 @@ void SetServiceIsolateHook(ServiceIsolateHook hook);
 void SetRegisterNativeServiceProtocolExtensionHook(
     RegisterNativeServiceProtocolExtensionHook hook);
 
-Dart_Handle DartLibraryTagHandler(Dart_LibraryTag tag,
-                                  Dart_Handle library,
-                                  Dart_Handle url);
 }  // namespace blink
 
 #endif  // SKY_ENGINE_CORE_SCRIPT_DART_INIT_H_

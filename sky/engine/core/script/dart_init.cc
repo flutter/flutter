@@ -16,10 +16,7 @@
 #include "dart/runtime/include/dart_mirrors_api.h"
 #include "flutter/assets/zip_asset_store.h"
 #include "flutter/tonic/dart_debugger.h"
-#include "flutter/tonic/dart_dependency_catcher.h"
 #include "flutter/tonic/dart_io.h"
-#include "flutter/tonic/dart_library_loader.h"
-#include "flutter/tonic/dart_snapshot_loader.h"
 #include "flutter/tonic/dart_state.h"
 #include "flutter/glue/trace_event.h"
 #include "lib/ftl/files/eintr_wrapper.h"
@@ -69,12 +66,6 @@ extern const uint8_t* observatory_assets_archive;
 namespace blink {
 
 const char kSnapshotAssetKey[] = "snapshot_blob.bin";
-
-Dart_Handle DartLibraryTagHandler(Dart_LibraryTag tag,
-                                  Dart_Handle library,
-                                  Dart_Handle url) {
-  return DartLibraryLoader::HandleLibraryTag(tag, library, url);
-}
 
 namespace {
 
@@ -192,7 +183,8 @@ Dart_Isolate ServiceIsolateCreateCallback(const char* script_uri,
   FTL_CHECK(isolate) << error;
   dart_state->SetIsolate(isolate);
   FTL_CHECK(Dart_IsServiceIsolate(isolate));
-  FTL_CHECK(!LogIfError(Dart_SetLibraryTagHandler(DartLibraryTagHandler)));
+  FTL_CHECK(!LogIfError(
+      Dart_SetLibraryTagHandler(tonic::DartState::HandleLibraryTag)));
   {
     tonic::DartApiScope dart_api_scope;
     DartIO::InitForIsolate();
@@ -205,8 +197,8 @@ Dart_Isolate ServiceIsolateCreateCallback(const char* script_uri,
       const intptr_t port = settings.observatory_port;
       const bool disable_websocket_origin_check = false;
       const bool service_isolate_booted = DartServiceIsolate::Startup(
-          ip, port, DartLibraryTagHandler, IsRunningPrecompiledCode(),
-          disable_websocket_origin_check, error);
+          ip, port, tonic::DartState::HandleLibraryTag,
+          IsRunningPrecompiledCode(), disable_websocket_origin_check, error);
       FTL_CHECK(service_isolate_booted) << error;
     }
 
@@ -260,8 +252,8 @@ Dart_Isolate IsolateCreateCallback(const char* script_uri,
       nullptr, dart_state, error);
   FTL_CHECK(isolate) << error;
   dart_state->SetIsolate(isolate);
-
-  FTL_CHECK(!LogIfError(Dart_SetLibraryTagHandler(DartLibraryTagHandler)));
+  FTL_CHECK(!LogIfError(
+      Dart_SetLibraryTagHandler(tonic::DartState::HandleLibraryTag)));
 
   {
     tonic::DartApiScope dart_api_scope;

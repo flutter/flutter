@@ -13,8 +13,6 @@
 
 namespace blink {
 class UIDartState;
-class DartLibraryProvider;
-class DartSnapshotLoader;
 
 class DartController {
  public:
@@ -23,26 +21,20 @@ class DartController {
 
   static void InitVM();
 
-  void RunFromLibrary(std::string name, DartLibraryProvider* library_provider);
   void RunFromPrecompiledSnapshot();
-  void RunFromSnapshot(mojo::ScopedDataPipeConsumerHandle snapshot);
-  void RunFromSnapshotBuffer(const uint8_t* buffer, size_t size);
+  void RunFromSnapshot(const uint8_t* buffer, size_t size);
+  void RunFromSource(const std::string& main, const std::string& packages);
 
   void CreateIsolateFor(std::unique_ptr<UIDartState> ui_dart_state);
-  void Shutdown();
 
   UIDartState* dart_state() const { return ui_dart_state_; }
 
  private:
-  void DidLoadMainLibrary(std::string url);
-  void DidLoadSnapshot();
   bool SendStartMessage(Dart_Handle root_library);
 
   // The DartState associated with the main isolate.  This will be deleted
   // during isolate shutdown.
   UIDartState* ui_dart_state_;
-
-  std::unique_ptr<DartSnapshotLoader> snapshot_loader_;
 
   FTL_DISALLOW_COPY_AND_ASSIGN(DartController);
 };
