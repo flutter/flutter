@@ -286,13 +286,16 @@ class DevFS {
 
   Future<dynamic> update({ DevFSProgressReporter progressReporter,
                            AssetBundle bundle,
-                           bool bundleDirty: false }) async {
+                           bool bundleDirty: false,
+                           Set<String> fileFilter}) async {
     _reset();
     printTrace('DevFS: Starting sync from $rootDirectory');
     Status status;
     status = logger.startProgress('Scanning project files...');
     Directory directory = rootDirectory;
-    await _scanDirectory(directory, recursive: true);
+    await _scanDirectory(directory,
+                         recursive: true,
+                         fileFilter: fileFilter);
     status.stop(showElapsedTime: true);
 
     status = logger.startProgress('Scanning package files...');
@@ -310,7 +313,8 @@ class DevFS {
         bool packageExists =
             await _scanDirectory(directory,
                                  directoryName: 'packages/$packageName',
-                                 recursive: true);
+                                 recursive: true,
+                                 fileFilter: fileFilter);
         if (packageExists) {
           sb ??= new StringBuffer();
           sb.writeln('$packageName:packages/$packageName');
@@ -440,7 +444,7 @@ class DevFS {
     List<String> ignoredPrefixes = <String>['android/',
                                             'build/',
                                             'ios/',
-                                            'packages/analyzer'];
+                                            '.pub/'];
     for (String ignoredPrefix in ignoredPrefixes) {
       if (devicePath.startsWith(ignoredPrefix))
         return true;
@@ -451,7 +455,8 @@ class DevFS {
   Future<bool> _scanDirectory(Directory directory,
                               {String directoryName,
                                bool recursive: false,
-                               bool ignoreDotFiles: true}) async {
+                               bool ignoreDotFiles: true,
+                               Set<String> fileFilter}) async {
     String prefix = directoryName;
     if (prefix == null) {
       prefix = path.relative(directory.path, from: rootDirectory.path);
@@ -472,6 +477,15 @@ class DevFS {
         }
         final String devicePath =
             path.join(prefix, path.relative(file.path, from: directory.path));
+        if ((fileFilter != null) &&
+            !fileFilter.contains(devicePath)) {
+          // Skip files that are not included in the filter.
+          continue;
+        }
+        if (ignoreDotFiles && devicePath.startsWith('.')) {
+          // Skip directories that start with a dot.
+          continue;
+        }
         if (!_shouldIgnore(devicePath))
           _scanFile(devicePath, file);
       }

@@ -21,6 +21,7 @@ import 'config_test.dart' as config_test;
 import 'context_test.dart' as context_test;
 import 'create_test.dart' as create_test;
 import 'daemon_test.dart' as daemon_test;
+import 'devfs_test.dart' as devfs_test;
 import 'device_test.dart' as device_test;
 // import 'devices_test.dart' as devices_test;
 import 'drive_test.dart' as drive_test;
@@ -51,6 +52,7 @@ void main() {
   context_test.main();
   create_test.main();
   daemon_test.main();
+  devfs_test.main();
   device_test.main();
   // devices_test.main(); // https://github.com/flutter/flutter/issues/4480
   drive_test.main();

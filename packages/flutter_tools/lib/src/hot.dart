@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:path/path.dart' as path;
@@ -10,15 +11,18 @@ import 'package:path/path.dart' as path;
 import 'application_package.dart';
 import 'asset.dart';
 import 'base/logger.dart';
+import 'base/process.dart';
 import 'base/utils.dart';
 import 'cache.dart';
 import 'commands/build_apk.dart';
 import 'commands/install.dart';
+import 'dart/package_map.dart';
 import 'device.dart';
 import 'globals.dart';
 import 'devfs.dart';
 import 'observatory.dart';
 import 'resident_runner.dart';
+import 'toolchain.dart';
 
 String getDevFSLoaderScript() {
   return path.absolute(path.join(Cache.flutterRoot,
@@ -28,6 +32,51 @@ String getDevFSLoaderScript() {
                                  'loader',
                                  'loader_app.dart'));
 }
+
+class StartupDependencySetBuilder {
+  StartupDependencySetBuilder(this.mainScriptPath,
+                              this.projectRootPath);
+
+  final String mainScriptPath;
+  final String projectRootPath;
+
+  Set<String> build() {
+    final String skySnapshotPath =
+        ToolConfiguration.instance.getHostToolPath(HostTool.SkySnapshot);
+
+    final List<String> args = <String>[
+      skySnapshotPath,
+      '--packages=${path.absolute(PackageMap.globalPackagesPath)}',
+      '--print-deps',
+      mainScriptPath
+    ];
+
+    String output;
+    try {
+      output = runCheckedSync(args);
+    } catch (e) {
+      return null;
+    }
+
+    final List<String> lines = LineSplitter.split(output).toList();
+    final Set<String> minimalDependencies = new Set<String>();
+    for (String line in lines) {
+      // We need to convert the uris so that they are relative to the project
+      // root and tweak package: uris so that they reflect their devFS location.
+      if (line.startsWith('package:')) {
+        // Swap out package: for packages/ because we place all package sources
+        // under packages/.
+        line = line.replaceFirst('package:', 'packages/');
+      } else {
+        // Ensure paths are relative to the project root.
+        line = path.relative(line, from: projectRootPath);
+      }
+      minimalDependencies.add(line);
+    }
+    return minimalDependencies;
+  }
+}
+
 
 class FirstFrameTimer {
   FirstFrameTimer(this.serviceProtocol);
@@ -81,6 +130,7 @@ class HotRunner extends ResidentRunner {
   ApplicationPackage _package;
   String _mainPath;
   String _projectRootPath;
+  Set<String> _startupDependencies;
   final AssetBundle bundle = new AssetBundle();
   final File pipe;
 
@@ -194,7 +244,8 @@ class HotRunner extends ResidentRunner {
       printStatus('Launching ${getDisplayPath(_mainPath)} on ${device.name}...');
     }
 
-    LaunchResult result = await device.startApp(
+    // Start the loader.
+    Future<LaunchResult> futureResult = device.startApp(
       _package,
       debuggingOptions.buildMode,
       mainPath: device.needsDevFS ? getDevFSLoaderScript() : _mainPath,
@@ -202,6 +253,17 @@ class HotRunner extends ResidentRunner {
       platformArgs: platformArgs,
       route: route
     );
+
+    // In parallel, compute the minimal dependency set.
+    StartupDependencySetBuilder startupDependencySetBuilder =
+        new StartupDependencySetBuilder(_mainPath, _projectRootPath);
+    _startupDependencies = startupDependencySetBuilder.build();
+    if (_startupDependencies == null) {
+      printError('Error determining the set of Dart sources necessary to start '
+                 'the application. Initial file upload may take a long time.');
+    }
+
+    LaunchResult result = await futureResult;
 
     if (!result.started) {
       if (device.needsDevFS) {
@@ -242,6 +304,10 @@ class HotRunner extends ResidentRunner {
     setupTerminal();
 
     registerSignalHandlers();
+
+    printStatus('Finishing file synchronization...');
+    // Finish the file sync now.
+    await _updateDevFS();
 
     return await waitForAppToFinish();
   }
@@ -298,8 +364,11 @@ class HotRunner extends ResidentRunner {
     Status devFSStatus = logger.startProgress('Syncing files to device...');
     await _devFS.update(progressReporter: progressReporter,
                         bundle: bundle,
-                        bundleDirty: rebuildBundle);
+                        bundleDirty: rebuildBundle,
+                        fileFilter: _startupDependencies);
     devFSStatus.stop(showElapsedTime: true);
+    // Clear the minimal set after the first sync.
+    _startupDependencies = null;
     if (progressReporter != null)
       printStatus('Synced ${getSizeAsMB(_devFS.bytes)}.');
     else
