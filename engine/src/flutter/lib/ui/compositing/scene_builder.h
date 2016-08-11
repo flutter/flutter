@@ -5,8 +5,8 @@
 #ifndef FLUTTER_LIB_UI_COMPOSITING_SCENE_BUILDER_H_
 #define FLUTTER_LIB_UI_COMPOSITING_SCENE_BUILDER_H_
 
+#include <stack>
 #include <stdint.h>
-
 #include <memory>
 
 #include "flutter/flow/layers/container_layer.h"
@@ -70,11 +70,12 @@ class SceneBuilder : public ftl::RefCountedThreadSafe<SceneBuilder>,
  private:
   explicit SceneBuilder();
 
-  void addLayer(std::unique_ptr<flow::ContainerLayer> layer);
+  void addLayer(std::unique_ptr<flow::ContainerLayer> layer, const SkRect& cullRect);
 
   std::unique_ptr<flow::ContainerLayer> m_rootLayer;
   flow::ContainerLayer* m_currentLayer;
   int32_t m_currentRasterizerTracingThreshold;
+  std::stack<SkRect> m_cullRects;
 };
 
 }  // namespace blink
