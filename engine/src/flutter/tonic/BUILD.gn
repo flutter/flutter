@@ -6,31 +6,15 @@ source_set("tonic") {
   sources = [
     "dart_debugger.cc",
     "dart_debugger.h",
-    "dart_dependency_catcher.cc",
-    "dart_dependency_catcher.h",
     "dart_io.cc",
     "dart_io.h",
-    "dart_isolate_reloader.cc",
-    "dart_isolate_reloader.h",
-    "dart_library_loader.cc",
-    "dart_library_loader.h",
-    "dart_library_provider.cc",
-    "dart_library_provider.h",
-    "dart_library_provider_files.cc",
-    "dart_library_provider_files.h",
-    "dart_snapshot_loader.cc",
-    "dart_snapshot_loader.h",
     "dart_state.cc",
     "dart_state.h",
   ]
 
   deps = [
-    "//base",
     "//dart/runtime/bin:embedded_dart_io",
-    "//flutter/glue",
-    "//lib/tonic/parsers",
-    "//mojo/data_pipe_utils",
-    "//mojo/public/cpp/system",
+    "//lib/ftl",
   ]
 
   public_deps = [

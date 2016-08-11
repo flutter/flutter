@@ -4,13 +4,9 @@
 
 #include "flutter/tonic/dart_state.h"
 
-#include "lib/tonic/converter/dart_converter.h"
-#include "flutter/tonic/dart_library_loader.h"
-
 namespace blink {
 
-DartState::DartState()
-    : library_loader_(new DartLibraryLoader(this)) {}
+DartState::DartState() {}
 
 DartState::~DartState() {}
 
