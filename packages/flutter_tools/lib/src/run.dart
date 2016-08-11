@@ -39,7 +39,7 @@ class RunAndStayResident extends ResidentRunner {
 
   @override
   Future<int> run({
-    Completer<int> observatoryPortCompleter,
+    Completer<DebugConnectionInfo> connectionInfoCompleter,
     String route,
     bool shouldBuild: true
   }) {
@@ -48,7 +48,7 @@ class RunAndStayResident extends ResidentRunner {
       return _run(
         traceStartup: traceStartup,
         benchmark: benchmark,
-        observatoryPortCompleter: observatoryPortCompleter,
+        connectionInfoCompleter: connectionInfoCompleter,
         route: route,
         shouldBuild: shouldBuild
       );
@@ -58,7 +58,7 @@ class RunAndStayResident extends ResidentRunner {
   }
 
   @override
-  Future<bool> restart() async {
+  Future<bool> restart({ bool fullRestart: false }) async {
     if (serviceProtocol == null) {
       printError('Debugging is not enabled.');
       return false;
@@ -94,7 +94,7 @@ class RunAndStayResident extends ResidentRunner {
   Future<int> _run({
     bool traceStartup: false,
     bool benchmark: false,
-    Completer<int> observatoryPortCompleter,
+    Completer<DebugConnectionInfo> connectionInfoCompleter,
     String route,
     bool shouldBuild: true
   }) async {
@@ -175,8 +175,8 @@ class RunAndStayResident extends ResidentRunner {
 
     startTime.stop();
 
-    if (observatoryPortCompleter != null && _result.hasObservatory)
-      observatoryPortCompleter.complete(_result.observatoryPort);
+    if (connectionInfoCompleter != null && _result.hasObservatory)
+      connectionInfoCompleter.complete(new DebugConnectionInfo(_result.observatoryPort));
 
     // Connect to observatory.
     if (debuggingOptions.debuggingEnabled) {

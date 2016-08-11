@@ -162,14 +162,14 @@ class HotRunner extends ResidentRunner {
 
   @override
   Future<int> run({
-    Completer<int> observatoryPortCompleter,
+    Completer<DebugConnectionInfo> connectionInfoCompleter,
     String route,
     bool shouldBuild: true
   }) {
     // Don't let uncaught errors kill the process.
     return runZoned(() {
       return _run(
-        observatoryPortCompleter: observatoryPortCompleter,
+        connectionInfoCompleter: connectionInfoCompleter,
         route: route,
         shouldBuild: shouldBuild
       );
@@ -179,7 +179,7 @@ class HotRunner extends ResidentRunner {
   }
 
   Future<int> _run({
-    Completer<int> observatoryPortCompleter,
+    Completer<DebugConnectionInfo> connectionInfoCompleter,
     String route,
     bool shouldBuild: true
   }) async {
@@ -275,19 +275,28 @@ class HotRunner extends ResidentRunner {
       return 2;
     }
 
-    if (observatoryPortCompleter != null && result.hasObservatory)
-      observatoryPortCompleter.complete(result.observatoryPort);
-
     await connectToServiceProtocol(result.observatoryPort);
 
     if (device.needsDevFS) {
+      try {
+        Uri baseUri = await _initDevFS();
+        if (connectionInfoCompleter != null) {
+          connectionInfoCompleter.complete(
+            new DebugConnectionInfo(result.observatoryPort, baseUri: baseUri.toString())
+          );
+        }
+      } catch (error) {
+        printError('Error initializing DevFS: $error');
+        return 3;
+      }
       _loaderShowMessage('Connecting...', progress: 0);
-      bool result = await _updateDevFS(
+      bool devfsResult = await _updateDevFS(
         progressReporter: (int progress, int max) {
-          _loaderShowMessage('Syncing files to device...', progress: progress, max: max);
+          if (progress % 10 == 0)
+            _loaderShowMessage('Syncing files to device...', progress: progress, max: max);
         }
       );
-      if (!result) {
+      if (!devfsResult) {
         _loaderShowMessage('Failed.');
         printError('Could not perform initial file synchronization.');
         return 3;
@@ -295,6 +304,9 @@ class HotRunner extends ResidentRunner {
       printStatus('Running ${getDisplayPath(_mainPath)} on ${device.name}...');
       _loaderShowMessage('Launching...');
       await _launchFromDevFS(_package, _mainPath);
+    } else {
+      if (connectionInfoCompleter != null)
+        connectionInfoCompleter.complete(new DebugConnectionInfo(result.observatoryPort));
     }
 
     _startReadingFromControlPipe();
@@ -339,22 +351,16 @@ class HotRunner extends ResidentRunner {
   }
 
   DevFS _devFS;
+
+  Future<Uri> _initDevFS() {
+    String fsName = path.basename(_projectRootPath);
+    _devFS = new DevFS(serviceProtocol,
+                       fsName,
+                       new Directory(_projectRootPath));
+    return _devFS.create();
+  }
+
   Future<bool> _updateDevFS({ DevFSProgressReporter progressReporter }) async {
-    if (_devFS == null) {
-      String fsName = path.basename(_projectRootPath);
-      _devFS = new DevFS(serviceProtocol,
-                         fsName,
-                         new Directory(_projectRootPath));
-
-      try {
-        await _devFS.create();
-      } catch (error) {
-        _devFS = null;
-        printError('Error initializing DevFS: $error');
-        return false;
-      }
-    }
-
     final bool rebuildBundle = bundle.needsBuild();
     if (rebuildBundle) {
       Status bundleStatus = logger.startProgress('Updating assets...');
@@ -484,7 +490,14 @@ class HotRunner extends ResidentRunner {
   }
 
   @override
-  Future<bool> restart() => _reloadSources();
+  Future<bool> restart({ bool fullRestart: false }) async {
+    if (fullRestart) {
+      await _restartFromSources();
+      return true;
+    } else {
+      return _reloadSources();
+    }
+  }
 
   Future<bool> _reloadSources() async {
     if (serviceProtocol.firstIsolateId == null)
