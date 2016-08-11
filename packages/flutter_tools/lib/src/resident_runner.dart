@@ -12,6 +12,7 @@ import 'build_info.dart';
 import 'device.dart';
 import 'globals.dart';
 import 'observatory.dart';
+import 'view.dart';
 
 // Shared code between different resident application runners.
 abstract class ResidentRunner {
@@ -28,6 +29,7 @@ abstract class ResidentRunner {
   final Completer<int> _finished = new Completer<int>();
 
   Observatory serviceProtocol;
+  ViewManager viewManager;
   StreamSubscription<String> _loggingSubscription;
 
   /// Start the app and keep the process running during its lifetime.
@@ -96,6 +98,11 @@ abstract class ResidentRunner {
     serviceProtocol.onIsolateEvent.listen((Event event) {
       printTrace(event.toString());
     });
+
+    // Setup view manager and refresh the view list.
+    viewManager = new ViewManager(serviceProtocol);
+    await viewManager.refresh();
+
     // Listen for service protocol connection to close.
     serviceProtocol.done.whenComplete(() {
       appFinished();

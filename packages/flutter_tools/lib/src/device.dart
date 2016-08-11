@@ -192,9 +192,6 @@ abstract class Device {
   /// Does this device implement support for hot reloading / restarting?
   bool get supportsHotMode => false;
 
-  /// Does this device need a DevFS to support hot mode?
-  bool get needsDevFS => true;
-
   /// Run from a file. Necessary for hot mode.
   Future<bool> runFromFile(ApplicationPackage package,
                            String scriptUri,

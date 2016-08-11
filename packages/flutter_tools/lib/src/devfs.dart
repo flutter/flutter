@@ -365,8 +365,12 @@ class DevFS {
     if (_dirtyEntries.length > 0) {
       status = logger.startProgress('Updating files...');
       if (_httpWriter != null) {
-        await _httpWriter.write(_dirtyEntries,
-                                progressReporter: progressReporter);
+        try {
+          await _httpWriter.write(_dirtyEntries,
+                                  progressReporter: progressReporter);
+        } catch (e) {
+          printError("Could not update files on device: $e");
+        }
       } else {
         // Make service protocol requests for each.
         for (DevFSEntry entry in _dirtyEntries) {

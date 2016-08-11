@@ -128,9 +128,14 @@ class Observatory {
     }
   }
 
-  Future<String> getFirstViewId() async {
+  Future<List<Map<String, String>>> getViewList() async {
     Map<String, dynamic> response = await peer.sendRequest('_flutter.listViews');
     List<Map<String, String>> views = response['views'];
+    return views;
+  }
+
+  Future<String> getFirstViewId() async {
+    List<Map<String, String>> views = await getViewList();
     return views[0]['id'];
   }
 
