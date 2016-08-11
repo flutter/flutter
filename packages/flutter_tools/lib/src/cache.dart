@@ -80,9 +80,7 @@ class Cache {
 
   static String get dartSdkVersion {
     if (_dartSdkVersion == null) {
-      File versionFile = new File(path.join(flutterRoot, 'bin', 'cache', 'dart-sdk.version'));
-      if (versionFile.existsSync())
-        _dartSdkVersion = versionFile.readAsStringSync().trim();
+      _dartSdkVersion = Platform.version;
     }
     return _dartSdkVersion;
   }

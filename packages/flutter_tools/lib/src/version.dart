@@ -59,7 +59,7 @@ class FlutterVersion {
   String toString() {
     String from = 'Flutter on channel $channel (from ${repositoryUrl == null ? 'unknown source' : repositoryUrl})';
     String flutterText = 'Framework revision $frameworkRevisionShort ($frameworkAge); engine revision $engineRevisionShort';
-    String dartSdkText = 'Dart SDK $dartSdkVersion';
+    String dartSdkText = 'Dart version $dartSdkVersion';
 
     return '$from\n$flutterText\n$dartSdkText';
   }
