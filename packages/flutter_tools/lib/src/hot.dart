@@ -23,6 +23,7 @@ import 'devfs.dart';
 import 'observatory.dart';
 import 'resident_runner.dart';
 import 'toolchain.dart';
+import 'view.dart';
 
 String getDevFSLoaderScript() {
   return path.absolute(path.join(Cache.flutterRoot,
@@ -238,17 +239,13 @@ class HotRunner extends ResidentRunner {
 
     await startEchoingDeviceLog();
 
-    if (device.needsDevFS) {
-      printStatus('Launching loader on ${device.name}...');
-    } else {
-      printStatus('Launching ${getDisplayPath(_mainPath)} on ${device.name}...');
-    }
+    printStatus('Launching loader on ${device.name}...');
 
     // Start the loader.
     Future<LaunchResult> futureResult = device.startApp(
       _package,
       debuggingOptions.buildMode,
-      mainPath: device.needsDevFS ? getDevFSLoaderScript() : _mainPath,
+      mainPath: getDevFSLoaderScript(),
       debuggingOptions: debuggingOptions,
       platformArgs: platformArgs,
       route: route
@@ -266,48 +263,43 @@ class HotRunner extends ResidentRunner {
     LaunchResult result = await futureResult;
 
     if (!result.started) {
-      if (device.needsDevFS) {
-        printError('Error launching DevFS loader on ${device.name}.');
-      } else {
-        printError('Error launching ${getDisplayPath(_mainPath)} on ${device.name}.');
-      }
+      printError('Error launching DevFS loader on ${device.name}.');
       await stopEchoingDeviceLog();
       return 2;
     }
 
     await connectToServiceProtocol(result.observatoryPort);
 
-    if (device.needsDevFS) {
-      try {
-        Uri baseUri = await _initDevFS();
-        if (connectionInfoCompleter != null) {
-          connectionInfoCompleter.complete(
-            new DebugConnectionInfo(result.observatoryPort, baseUri: baseUri.toString())
-          );
-        }
-      } catch (error) {
-        printError('Error initializing DevFS: $error');
-        return 3;
+    try {
+      Uri baseUri = await _initDevFS();
+      if (connectionInfoCompleter != null) {
+        connectionInfoCompleter.complete(
+          new DebugConnectionInfo(result.observatoryPort, baseUri: baseUri.toString())
+        );
       }
-      _loaderShowMessage('Connecting...', progress: 0);
-      bool devfsResult = await _updateDevFS(
-        progressReporter: (int progress, int max) {
-          if (progress % 10 == 0)
-            _loaderShowMessage('Syncing files to device...', progress: progress, max: max);
-        }
-      );
-      if (!devfsResult) {
-        _loaderShowMessage('Failed.');
-        printError('Could not perform initial file synchronization.');
-        return 3;
-      }
-      printStatus('Running ${getDisplayPath(_mainPath)} on ${device.name}...');
-      _loaderShowMessage('Launching...');
-      await _launchFromDevFS(_package, _mainPath);
-    } else {
-      if (connectionInfoCompleter != null)
-        connectionInfoCompleter.complete(new DebugConnectionInfo(result.observatoryPort));
+    } catch (error) {
+      printError('Error initializing DevFS: $error');
+      return 3;
     }
+    _loaderShowMessage('Connecting...', progress: 0);
+    bool devfsResult = await _updateDevFS(
+      progressReporter: (int progress, int max) {
+        if (progress % 10 == 0)
+          _loaderShowMessage('Syncing files to device...', progress: progress, max: max);
+      }
+    );
+    if (!devfsResult) {
+      _loaderShowMessage('Failed.');
+      printError('Could not perform initial file synchronization.');
+      return 3;
+    }
+
+    await viewManager.refresh();
+    printStatus('Connected to view: ${viewManager.mainView}');
+
+    printStatus('Running ${getDisplayPath(_mainPath)} on ${device.name}...');
+    _loaderShowMessage('Launching...');
+    await _launchFromDevFS(_package, _mainPath);
 
     _startReadingFromControlPipe();
 
@@ -383,9 +375,6 @@ class HotRunner extends ResidentRunner {
   }
 
   Future<Null> _evictDirtyAssets() async {
-    if (_devFS == null) {
-      return;
-    }
     if (_devFS.dirtyAssetEntries.length == 0) {
       return;
     }
@@ -408,26 +397,8 @@ class HotRunner extends ResidentRunner {
   Future<Null> _launchInView(String entryPath,
                              String packagesPath,
                              String assetsDirectoryPath) async {
-    String viewId = await serviceProtocol.getFirstViewId();
-    // When this completer completes the isolate is running.
-    // TODO(johnmccutchan): Have the framework send an event after the first
-    // frame is rendered and use that instead of 'runnable'.
-    Completer<Null> completer = new Completer<Null>();
-    StreamSubscription<Event> subscription =
-       serviceProtocol.onIsolateEvent.listen((Event event) {
-     if (event.kind == 'IsolateStart') {
-       printTrace('Isolate is spawned.');
-     } else if (event.kind == 'IsolateRunnable') {
-       printTrace('Isolate is runnable.');
-       completer.complete(null);
-     }
-    });
-    await serviceProtocol.runInView(viewId,
-                                   entryPath,
-                                   packagesPath,
-                                   assetsDirectoryPath);
-    await completer.future;
-    await subscription.cancel();
+    FlutterView view = viewManager.mainView;
+    return view.runFromSource(entryPath, packagesPath, assetsDirectoryPath);
   }
 
   Future<Null> _launchFromDevFS(ApplicationPackage package,
@@ -444,27 +415,11 @@ class HotRunner extends ResidentRunner {
                         deviceAssetsDirectoryPath);
   }
 
-  Future<Null> _launchFromDisk(ApplicationPackage package,
-                               String mainScript) async {
-    Uri baseUri = new Uri.directory(_projectRootPath);
-    String entryPath = path.relative(mainScript, from: _projectRootPath);
-    String diskEntryPath = baseUri.resolve(entryPath).toFilePath();
-    String diskPackagesPath = baseUri.resolve('.packages').toFilePath();
-    String diskAssetsDirectoryPath = baseUri.resolve('build/flx').toFilePath();
-    await _launchInView(diskEntryPath,
-                        diskPackagesPath,
-                        diskAssetsDirectoryPath);
-  }
-
   Future<Null> _restartFromSources() async {
     FirstFrameTimer firstFrameTimer = new FirstFrameTimer(serviceProtocol);
     firstFrameTimer.start();
-    if (_devFS == null) {
-      await _launchFromDisk(_package, _mainPath);
-    } else {
-      await _updateDevFS();
-      await _launchFromDevFS(_package, _mainPath);
-    }
+    await _updateDevFS();
+    await _launchFromDevFS(_package, _mainPath);
     Status restartStatus =
         logger.startProgress('Waiting for application to start...');
     // Wait for the first frame to be rendered.
