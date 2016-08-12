@@ -143,7 +143,7 @@ class RunCommand extends RunCommandBase {
         return 1;
       }
     } else {
-      if (argResults['control-pipe']) {
+      if (argResults['control-pipe'] != null) {
         printError('--control-pipe requires --hot');
         return 1;
       }
