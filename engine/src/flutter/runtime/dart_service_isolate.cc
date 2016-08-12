@@ -31,7 +31,7 @@ static const char* kServiceIsolateScript = "vmservice_io.dart";
 
 namespace mojo {
 namespace dart {
-extern ResourcesEntry __sky_embedder_service_isolate_resources_[];
+extern ResourcesEntry __flutter_embedded_service_isolate_resources_[];
 }
 }
 
@@ -104,7 +104,7 @@ bool DartServiceIsolate::Startup(std::string server_ip,
 
   if (!g_resources) {
     g_resources = new EmbedderResources(
-        &mojo::dart::__sky_embedder_service_isolate_resources_[0]);
+        &mojo::dart::__flutter_embedded_service_isolate_resources_[0]);
   }
 
   Dart_Handle result;
