@@ -91,7 +91,7 @@ def to_gn_args(args):
     use_dbc = args.target_os == 'ios' and not args.simulator and args.runtime_mode == 'debug'
     gn_args['dart_experimental_interpreter'] = use_dbc
 
-    gn_args['flutter_product_mode'] = (gn_args['dart_runtime_mode'] == 'release')
+    gn_args['flutter_runtime_mode'] = args.runtime_mode
 
     if args.target_sysroot:
       gn_args['target_sysroot'] = args.target_sysroot
