@@ -106,8 +106,8 @@ Future<Null> main(List<String> args) async {
 
       flutterUsage.sendException(error, chain);
 
-      if (Platform.environment.containsKey('FLUTTER_DEV') || isRunningOnBot) {
-        // If we're working on the tools themselves, just print the stack trace.
+      if (isRunningOnBot) {
+        // Print the stack trace on the bots - don't write a crash report.
         stderr.writeln('$error');
         stderr.writeln(chain.terse.toString());
       } else {

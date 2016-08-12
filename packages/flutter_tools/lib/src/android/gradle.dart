@@ -130,15 +130,20 @@ Future<int> buildGradleProject(BuildMode buildMode) async {
     }
 
     // Run 'gradle wrapper'.
-    Status status = logger.startProgress('Running \'gradle wrapper\'...');
-    int exitcode = await runCommandAndStreamOutput(
-      <String>[gradle, 'wrapper'],
-      workingDirectory: 'android',
-      allowReentrantFlutter: true
-    );
-    status.stop(showElapsedTime: true);
-    if (exitcode != 0)
-      return exitcode;
+    try {
+      Status status = logger.startProgress('Running \'gradle wrapper\'...');
+      int exitcode = await runCommandAndStreamOutput(
+        <String>[gradle, 'wrapper'],
+        workingDirectory: 'android',
+        allowReentrantFlutter: true
+      );
+      status.stop(showElapsedTime: true);
+      if (exitcode != 0)
+        return exitcode;
+    } catch (error) {
+      printError('$error');
+      return 1;
+    }
 
     gradlew = locateProjectGradlew();
     if (gradlew == null) {
