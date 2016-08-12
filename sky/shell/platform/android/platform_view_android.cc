@@ -14,10 +14,9 @@
 #include "base/bind.h"
 #include "base/location.h"
 #include "base/trace_event/trace_event.h"
-#include "jni/FlutterView_jni.h"
-#include "flutter/sky/engine/core/script/dart_service_isolate.h"
-#include "flutter/sky/engine/wtf/MakeUnique.h"
+#include "flutter/runtime/dart_service_isolate.h"
 #include "flutter/sky/shell/shell.h"
+#include "jni/FlutterView_jni.h"
 
 namespace sky {
 namespace shell {
@@ -382,7 +381,8 @@ void PlatformViewAndroid::SurfaceCreated(JNIEnv* env,
   {
     base::android::ScopedJavaLocalFrame scoped_local_reference_frame(env);
     ANativeWindow* window = ANativeWindow_fromSurface(env, jsurface);
-    auto context = WTF::MakeUnique<AndroidGLContext>(window, surface_config_);
+    std::unique_ptr<AndroidGLContext> context(
+        new AndroidGLContext(window, surface_config_));
     if (context->IsValid()) {
       context_ = std::move(context);
     }

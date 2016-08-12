@@ -2,6 +2,12 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("config.gni")
+
+config("flutter_config") {
+  defines = feature_defines_list
+}
+
 source_set("common") {
   sources = [
     "settings.cc",
@@ -12,5 +18,9 @@ source_set("common") {
 
   deps = [
     "//lib/ftl",
+  ]
+
+  public_configs = [
+    ":flutter_config"
   ]
 }

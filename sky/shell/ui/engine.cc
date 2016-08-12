@@ -13,11 +13,9 @@
 #include "flutter/common/threads.h"
 #include "flutter/glue/movable_wrapper.h"
 #include "flutter/glue/trace_event.h"
-#include "flutter/sky/engine/bindings/mojo_services.h"
-#include "flutter/sky/engine/core/script/dart_controller.h"
-#include "flutter/sky/engine/core/script/dart_init.h"
-#include "flutter/sky/engine/core/script/ui_dart_state.h"
-#include "flutter/sky/engine/public/platform/Platform.h"
+#include "flutter/lib/ui/mojo_services.h"
+#include "flutter/runtime/dart_controller.h"
+#include "flutter/runtime/dart_init.h"
 #include "flutter/sky/engine/public/web/Sky.h"
 #include "flutter/sky/shell/ui/animator.h"
 #include "flutter/sky/shell/ui/flutter_font_selector.h"
@@ -75,6 +73,7 @@ void Engine::Init() {
   DCHECK(!g_platform_impl);
   g_platform_impl = new PlatformImpl();
   blink::initialize(g_platform_impl);
+  blink::InitDartVM();
 }
 
 void Engine::BeginFrame(ftl::TimePoint frame_time) {

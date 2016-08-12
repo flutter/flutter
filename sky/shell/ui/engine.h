@@ -7,10 +7,10 @@
 
 #include "flutter/assets/zip_asset_store.h"
 #include "flutter/glue/drain_data_pipe_job.h"
+#include "flutter/runtime/sky_view_client.h"
+#include "flutter/runtime/sky_view.h"
 #include "flutter/services/engine/sky_engine.mojom.h"
 #include "flutter/services/rasterizer/rasterizer.mojom.h"
-#include "flutter/sky/engine/public/sky/sky_view_client.h"
-#include "flutter/sky/engine/public/sky/sky_view.h"
 #include "flutter/sky/shell/ui_delegate.h"
 #include "lib/ftl/macros.h"
 #include "lib/ftl/memory/weak_ptr.h"

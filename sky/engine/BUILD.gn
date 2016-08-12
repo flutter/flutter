@@ -2,16 +2,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-import("config.gni")
-
-visibility = [ "//flutter/sky/*" ]
-
-# features ---------------------------------------------------------------------
-
-config("features") {
-  defines = feature_defines_list
-}
-
 # inside_blink -----------------------------------------------------------------
 
 config("inside_blink") {
@@ -43,10 +33,11 @@ config("non_test_config") {
 if (!is_fuchsia) {
 
 group("engine") {
-  deps = [
+  public_deps = [
+    "//flutter/sky/engine/core",
     "//flutter/sky/engine/platform",
-    "//flutter/sky/engine/public/sky",
     "//flutter/sky/engine/web",
+    "//flutter/sky/engine/wtf",
   ]
 }
 

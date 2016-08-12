@@ -13,17 +13,17 @@
 #include "base/files/file_path.h"
 #include "base/lazy_instance.h"
 #include "base/logging.h"
-#include "lib/ftl/macros.h"
 #include "base/message_loop/message_loop.h"
 #include "base/path_service.h"
 #include "base/run_loop.h"
 #include "base/threading/simple_thread.h"
+#include "dart/runtime/include/dart_tools_api.h"
+#include "flutter/runtime/start_up.h"
+#include "flutter/sky/shell/shell.h"
 #include "jni/FlutterMain_jni.h"
+#include "lib/ftl/macros.h"
 #include "mojo/edk/embedder/embedder.h"
 #include "mojo/edk/embedder/simple_platform_support.h"
-#include "flutter/sky/shell/shell.h"
-#include "flutter/sky/engine/core/start_up.h"
-#include "dart/runtime/include/dart_tools_api.h"
 
 using base::LazyInstance;
 

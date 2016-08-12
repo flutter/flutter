@@ -3,7 +3,6 @@
 # found in the LICENSE file.
 
 import("//build/config/ui.gni")
-import("//flutter/sky/engine/config.gni")
 import("//testing/test.gni")
 
 source_set("platform") {
@@ -213,6 +212,7 @@ source_set("platform") {
     "text/SurrogatePairAwareTextIterator.h",
     "text/TextBoundaries.cpp",
     "text/TextBoundaries.h",
+    "text/TextBox.h",
     "text/TextBreakIterator.cpp",
     "text/TextBreakIterator.h",
     "text/TextBreakIteratorICU.cpp",

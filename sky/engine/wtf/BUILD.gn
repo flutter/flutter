@@ -192,8 +192,8 @@ source_set("wtf") {
   ]
 
   public_configs = [
+    "//flutter/common:flutter_config",
     "//third_party/icu:icu_config",
-    "//flutter/sky/engine:features",
   ]
 
   public_deps = [

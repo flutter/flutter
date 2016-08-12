@@ -27,7 +27,6 @@ mojo_native_application("mojo") {
     "//flutter/services/icu",
     "//flutter/services/raw_keyboard:interfaces",
     "//flutter/skia",
-    "//flutter/sky/engine/public/sky",
     "//flutter/sky/engine/web",
     "//flutter/sky/shell:common",
     "//flutter/sky/shell:gpu_mojo",

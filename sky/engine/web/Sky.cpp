@@ -35,7 +35,6 @@
 #include "lib/tonic/dart_microtask_queue.h"
 #include "mojo/message_pump/message_pump_mojo.h"
 #include "flutter/sky/engine/core/Init.h"
-#include "flutter/sky/engine/core/script/dart_init.h"
 #include "flutter/sky/engine/public/platform/Platform.h"
 #include "flutter/sky/engine/wtf/Assertions.h"
 #include "flutter/sky/engine/wtf/MainThread.h"
@@ -126,8 +125,6 @@ void initialize(Platform* platform) {
   // the initialization thread-safe, but given that so many code paths use
   // this, initializing this lazily probably doesn't buy us much.
   WTF::UTF8Encoding();
-
-  InitDartVM();
 
   addMessageLoopObservers();
 }

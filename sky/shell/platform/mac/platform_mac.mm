@@ -7,6 +7,7 @@
 #include <Foundation/Foundation.h>
 
 #include <asl.h>
+
 #include "base/at_exit.h"
 #include "base/command_line.h"
 #include "base/i18n/icu_util.h"
@@ -16,14 +17,14 @@
 #include "base/message_loop/message_loop.h"
 #include "base/trace_event/trace_event.h"
 #include "dart/runtime/include/dart_tools_api.h"
-#include "mojo/edk/embedder/embedder.h"
-#include "mojo/edk/embedder/simple_platform_support.h"
-#include "flutter/sky/engine/core/start_up.h"
+#include "flutter/runtime/start_up.h"
 #include "flutter/sky/engine/wtf/MakeUnique.h"
 #include "flutter/sky/shell/shell.h"
 #include "flutter/sky/shell/switches.h"
 #include "flutter/sky/shell/tracing_controller.h"
 #include "flutter/sky/shell/ui_delegate.h"
+#include "mojo/edk/embedder/embedder.h"
+#include "mojo/edk/embedder/simple_platform_support.h"
 
 namespace sky {
 namespace shell {

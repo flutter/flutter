@@ -4,15 +4,14 @@
 
 #include "flutter/sky/shell/tracing_controller.h"
 
+#include <string>
+
 #include "base/trace_event/trace_event.h"
 #include "dart/runtime/include/dart_tools_api.h"
 #include "flutter/common/threads.h"
-#include "flutter/sky/engine/core/script/dart_init.h"
-#include "flutter/sky/engine/wtf/MakeUnique.h"
+#include "flutter/runtime/dart_init.h"
 #include "flutter/sky/shell/shell.h"
 #include "lib/ftl/logging.h"
-
-#include <string>
 
 namespace sky {
 namespace shell {
@@ -20,8 +19,9 @@ namespace shell {
 TracingController::TracingController()
     : picture_tracing_enabled_(false), tracing_active_(false) {
   blink::SetEmbedderTracingCallbacks(
-      WTF::MakeUnique<blink::EmbedderTracingCallbacks>(
-          [this]() { StartTracing(); }, [this]() { StopTracing(); }));
+      std::unique_ptr<blink::EmbedderTracingCallbacks>(
+          new blink::EmbedderTracingCallbacks([this]() { StartTracing(); },
+                                              [this]() { StopTracing(); })));
 }
 
 TracingController::~TracingController() {

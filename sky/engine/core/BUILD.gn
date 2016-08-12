@@ -13,9 +13,6 @@ source_set("libraries") {
     "//flutter/common",
     "//flutter/flow",
     "//flutter/glue",
-    "//flutter/lib/io",
-    "//flutter/lib/mojo",
-    "//flutter/lib/ui",
     "//flutter/skia",
     "//flutter/sky/engine/wtf",
     "//lib/ftl",
@@ -84,7 +81,6 @@ static_library("core") {
     "//dart/runtime/vm:libdart_platform",
     "//flutter/assets",
     "//mojo/services/navigation/interfaces",
-    "//flutter/sky/engine/bindings",
     "//flutter/sky/engine/platform",
     "//flutter/services/engine:interfaces",
     "//flutter/services/pointer:interfaces",
@@ -107,9 +103,4 @@ static_library("core") {
   ]
 
   forward_dependent_configs_from = [ ":libraries" ]
-
-  # core and core_generated are really the same thing.
-  allow_circular_includes_from = [
-    "//flutter/sky/engine/bindings",
-  ]
 }

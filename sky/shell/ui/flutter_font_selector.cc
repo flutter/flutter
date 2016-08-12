@@ -5,7 +5,7 @@
 #include "base/json/json_reader.h"
 #include "base/values.h"
 #include "flutter/assets/zip_asset_store.h"
-#include "flutter/sky/engine/core/script/ui_dart_state.h"
+#include "flutter/lib/ui/ui_dart_state.h"
 #include "flutter/sky/engine/platform/fonts/FontData.h"
 #include "flutter/sky/engine/platform/fonts/FontFaceCreationParams.h"
 #include "flutter/sky/engine/platform/fonts/SimpleFontData.h"

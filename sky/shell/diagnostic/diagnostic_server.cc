@@ -8,7 +8,7 @@
 #include "dart/runtime/include/dart_native_api.h"
 #include "flutter/common/threads.h"
 #include "flutter/flow/compositor_context.h"
-#include "flutter/sky/engine/core/script/embedder_resources.h"
+#include "flutter/runtime/embedder_resources.h"
 #include "flutter/sky/shell/gpu/picture_serializer.h"
 #include "flutter/sky/shell/rasterizer.h"
 #include "flutter/sky/shell/shell.h"
