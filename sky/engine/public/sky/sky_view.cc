@@ -55,8 +55,9 @@ void SkyView::CreateView(const std::string& script_uri) {
   DCHECK(!dart_controller_);
 
   dart_controller_ = WTF::MakeUnique<DartController>();
-  dart_controller_->CreateIsolateFor(WTF::MakeUnique<UIDartState>(
-      this, script_uri, WTF::MakeUnique<Window>(this)));
+  dart_controller_->CreateIsolateFor(
+      script_uri,
+      WTF::MakeUnique<UIDartState>(this, WTF::MakeUnique<Window>(this)));
 
   UIDartState* dart_state = dart_controller_->dart_state();
   DartState::Scope scope(dart_state);

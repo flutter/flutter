@@ -4,10 +4,6 @@
 
 source_set("bindings") {
   sources = [
-    "dart_mojo_internal.cc",
-    "dart_mojo_internal.h",
-    "dart_runtime_hooks.cc",
-    "dart_runtime_hooks.h",
     "dart_ui.cc",
     "dart_ui.h",
     "flutter_dart_state.cc",
@@ -16,14 +12,14 @@ source_set("bindings") {
     "mojo_services.h",
   ]
 
-  defines = [ "DART_IO_SECURE_SOCKET_DISABLED" ]
-
   deps = [
-    "//base",
     "//dart/runtime:libdart",
-    "//dart/runtime/bin:embedded_dart_io",
     "//flutter/assets",
     "//flutter/lib/ui",
+    "//flutter/services/engine:interfaces",
+    "//flutter/sky/engine/core:prerequisites",
+    "//flutter/sky/engine/platform:platform",
+    "//flutter/sky/engine/wtf",
     "//lib/tonic",
     "//mojo/public/c/system",
     "//mojo/public/cpp/application",
@@ -31,10 +27,6 @@ source_set("bindings") {
     "//mojo/public/cpp/system",
     "//mojo/public/interfaces/application",
     "//mojo/public/platform/dart:mojo_internal_impl",
-    "//flutter/sky/engine/core:prerequisites",
-    "//flutter/sky/engine/platform:platform",
-    "//flutter/sky/engine/wtf",
-    "//flutter/services/engine:interfaces",
   ]
 
   if (is_android) {

@@ -25,7 +25,8 @@ class DartController {
   void RunFromSnapshot(const uint8_t* buffer, size_t size);
   void RunFromSource(const std::string& main, const std::string& packages);
 
-  void CreateIsolateFor(std::unique_ptr<UIDartState> ui_dart_state);
+  void CreateIsolateFor(const std::string& script_uri,
+                        std::unique_ptr<UIDartState> ui_dart_state);
 
   UIDartState* dart_state() const { return ui_dart_state_; }
 

@@ -11,8 +11,8 @@
 #include "flutter/common/threads.h"
 #include "flutter/glue/trace_event.h"
 #include "flutter/lib/io/dart_io.h"
-#include "flutter/sky/engine/bindings/dart_mojo_internal.h"
-#include "flutter/sky/engine/bindings/dart_runtime_hooks.h"
+#include "flutter/lib/mojo/dart_mojo_internal.h"
+#include "flutter/lib/ui/dart_runtime_hooks.h"
 #include "flutter/sky/engine/bindings/dart_ui.h"
 #include "flutter/sky/engine/core/script/dart_init.h"
 #include "flutter/sky/engine/core/script/dart_service_isolate.h"
@@ -135,10 +135,11 @@ void DartController::RunFromSource(const std::string& main,
     exit(1);
 }
 
-void DartController::CreateIsolateFor(std::unique_ptr<UIDartState> state) {
+void DartController::CreateIsolateFor(const std::string& script_uri,
+                                      std::unique_ptr<UIDartState> state) {
   char* error = nullptr;
   Dart_Isolate isolate = Dart_CreateIsolate(
-      state->url().c_str(), "main",
+      script_uri.c_str(), "main",
       reinterpret_cast<uint8_t*>(DART_SYMBOL(kDartIsolateSnapshotBuffer)),
       nullptr, static_cast<tonic::DartState*>(state.get()), &error);
   FTL_CHECK(isolate) << error;
@@ -157,8 +158,7 @@ void DartController::CreateIsolateFor(std::unique_ptr<UIDartState> state) {
     DartIO::InitForIsolate();
     DartUI::InitForIsolate();
     DartMojoInternal::InitForIsolate();
-    DartRuntimeHooks::Install(DartRuntimeHooks::MainIsolate,
-                              ui_dart_state_->url().c_str());
+    DartRuntimeHooks::Install(DartRuntimeHooks::MainIsolate, script_uri);
 
     dart_state()->class_library().add_provider(
         "ui",

@@ -20,8 +20,9 @@ void _setupHooks() {
 }
 
 void _scheduleMicrotask(void callback()) native "ScheduleMicrotask";
-String _getBaseURLString() native "GetBaseURLString";
-Uri _getBaseURL() => Uri.parse(_getBaseURLString());
+
+String _baseURL;
+Uri _getBaseURL() => Uri.parse(_baseURL);
 
 // Required for gen_snapshot to work correctly.
 int _isolateId;

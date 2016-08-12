@@ -14,8 +14,7 @@ class Window;
 
 class UIDartState : public FlutterDartState {
  public:
-  UIDartState(IsolateClient* isolate_client, const std::string& url,
-              std::unique_ptr<Window> window);
+  UIDartState(IsolateClient* isolate_client, std::unique_ptr<Window> window);
   ~UIDartState() override;
 
   Window* window() const { return window_.get(); }
@@ -32,4 +31,4 @@ class UIDartState : public FlutterDartState {
 
 }  // namespace blink
 
-#endif // SKY_ENGINE_CORE_SCRIPT_UI_DART_STATE_H_
+#endif  // SKY_ENGINE_CORE_SCRIPT_UI_DART_STATE_H_

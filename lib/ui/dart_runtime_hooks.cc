@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/sky/engine/bindings/dart_runtime_hooks.h"
+#include "flutter/lib/ui/dart_runtime_hooks.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -11,8 +11,6 @@
 #include "dart/runtime/bin/embedded_dart_io.h"
 #include "dart/runtime/include/dart_api.h"
 #include "dart/runtime/include/dart_tools_api.h"
-#include "flutter/sky/engine/core/script/ui_dart_state.h"
-#include "flutter/sky/engine/wtf/text/WTFString.h"
 #include "lib/ftl/logging.h"
 #include "lib/tonic/converter/dart_converter.h"
 #include "lib/tonic/dart_library_natives.h"
@@ -47,8 +45,7 @@ namespace blink {
 // the Mojo embedder dart, such as printing, and file I/O.
 #define BUILTIN_NATIVE_LIST(V) \
   V(Logger_PrintString, 1)     \
-  V(ScheduleMicrotask, 1)      \
-  V(GetBaseURLString, 0)
+  V(ScheduleMicrotask, 1)
 
 BUILTIN_NATIVE_LIST(DECLARE_FUNCTION);
 
@@ -93,7 +90,9 @@ static void InitDartInternal(Dart_Handle builtin_library,
   }
 }
 
-static void InitDartCore(Dart_Handle builtin) {
+static void InitDartCore(Dart_Handle builtin, const std::string& script_uri) {
+  DART_CHECK_VALID(
+      Dart_SetField(builtin, ToDart("_baseURL"), ToDart(script_uri)));
   Dart_Handle get_base_url = GetClosure(builtin, "_getGetBaseURLClosure");
   Dart_Handle core_library = Dart_LookupLibrary(ToDart("dart:core"));
   DART_CHECK_VALID(
@@ -136,7 +135,7 @@ void DartRuntimeHooks::Install(IsolateType isolate_type,
   Dart_Handle builtin = Dart_LookupLibrary(ToDart("dart:ui"));
   DART_CHECK_VALID(builtin);
   InitDartInternal(builtin, isolate_type);
-  InitDartCore(builtin);
+  InitDartCore(builtin, script_uri);
   InitDartAsync(builtin, isolate_type);
   InitDartIo(script_uri);
 }
@@ -177,10 +176,6 @@ void ScheduleMicrotask(Dart_NativeArguments args) {
   if (LogIfError(closure) || !Dart_IsClosure(closure))
     return;
   tonic::DartMicrotaskQueue::ScheduleMicrotask(closure);
-}
-
-void GetBaseURLString(Dart_NativeArguments args) {
-  Dart_SetReturnValue(args, ToDart(UIDartState::Current()->url()));
 }
 
 }  // namespace blink

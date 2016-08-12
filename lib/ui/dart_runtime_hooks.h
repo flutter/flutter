@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SKY_ENGINE_BINDINGS_DART_RUNTIME_HOOKS_H_
-#define SKY_ENGINE_BINDINGS_DART_RUNTIME_HOOKS_H_
+#ifndef FLUTTER_LIB_UI_DART_RUNTIME_HOOKS_H_
+#define FLUTTER_LIB_UI_DART_RUNTIME_HOOKS_H_
 
 #include "dart/runtime/include/dart_api.h"
 #include "lib/tonic/dart_library_natives.h"
@@ -27,4 +27,4 @@ class DartRuntimeHooks {
 
 }  // namespace blink
 
-#endif  // SKY_ENGINE_BINDINGS_DART_RUNTIME_HOOKS_H_
+#endif  // FLUTTER_LIB_UI_DART_RUNTIME_HOOKS_H_

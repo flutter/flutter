@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SKY_ENGINE_BINDINGS_DART_MOJO_INTERNAL_H_
-#define SKY_ENGINE_BINDINGS_DART_MOJO_INTERNAL_H_
+#ifndef FLUTTER_LIB_MOJO_DART_MOJO_INTERNAL_H_
+#define FLUTTER_LIB_MOJO_DART_MOJO_INTERNAL_H_
 
 #include "lib/ftl/macros.h"
 #include "mojo/public/cpp/system/handle.h"
@@ -22,4 +22,4 @@ class DartMojoInternal {
 
 }  // namespace blink
 
-#endif  // SKY_ENGINE_BINDINGS_DART_MOJO_INTERNAL_H_
+#endif  // FLUTTER_LIB_MOJO_DART_MOJO_INTERNAL_H_

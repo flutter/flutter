@@ -18,8 +18,8 @@
 #include "flutter/common/settings.h"
 #include "flutter/glue/trace_event.h"
 #include "flutter/lib/io/dart_io.h"
-#include "flutter/sky/engine/bindings/dart_mojo_internal.h"
-#include "flutter/sky/engine/bindings/dart_runtime_hooks.h"
+#include "flutter/lib/mojo/dart_mojo_internal.h"
+#include "flutter/lib/ui/dart_runtime_hooks.h"
 #include "flutter/sky/engine/bindings/dart_ui.h"
 #include "flutter/sky/engine/core/script/dart_service_isolate.h"
 #include "flutter/sky/engine/core/script/ui_dart_state.h"
@@ -190,7 +190,7 @@ Dart_Isolate ServiceIsolateCreateCallback(const char* script_uri,
     DartIO::InitForIsolate();
     DartUI::InitForIsolate();
     DartMojoInternal::InitForIsolate();
-    DartRuntimeHooks::Install(DartRuntimeHooks::SecondaryIsolate, "");
+    DartRuntimeHooks::Install(DartRuntimeHooks::SecondaryIsolate, script_uri);
     const Settings& settings = Settings::Get();
     if (settings.enable_observatory) {
       std::string ip = "127.0.0.1";

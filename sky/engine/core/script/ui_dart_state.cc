@@ -10,9 +10,8 @@
 namespace blink {
 
 UIDartState::UIDartState(IsolateClient* isolate_client,
-                         const std::string& url,
                          std::unique_ptr<Window> window)
-    : FlutterDartState(isolate_client, url), window_(std::move(window)) {}
+    : FlutterDartState(isolate_client), window_(std::move(window)) {}
 
 UIDartState::~UIDartState() {}
 

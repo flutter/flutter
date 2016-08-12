@@ -33,7 +33,6 @@ class FlutterDartState : public tonic::DartState {
   void DidSetIsolate() override;
 
   IsolateClient* isolate_client() { return isolate_client_; }
-  const std::string& url() const { return url_; }
 
   static FlutterDartState* Current();
 
@@ -47,11 +46,10 @@ class FlutterDartState : public tonic::DartState {
 #endif
 
  protected:
-  FlutterDartState(IsolateClient* isolate_client, const std::string& url);
+  FlutterDartState(IsolateClient* isolate_client);
 
  private:
   IsolateClient* isolate_client_;
-  std::string url_;
 
   Dart_Port main_port_;
 

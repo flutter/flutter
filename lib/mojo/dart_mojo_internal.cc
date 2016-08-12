@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/sky/engine/bindings/dart_mojo_internal.h"
+#include "flutter/lib/mojo/dart_mojo_internal.h"
 
 #include "dart/runtime/include/dart_api.h"
-#include "lib/tonic/logging/dart_error.h"
 #include "lib/ftl/logging.h"
 #include "lib/tonic/converter/dart_converter.h"
+#include "lib/tonic/logging/dart_error.h"
 #include "mojo/public/platform/dart/mojo_natives.h"
 
 using tonic::LogIfError;

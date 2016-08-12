@@ -17,9 +17,8 @@ namespace blink {
 
 IsolateClient::~IsolateClient() {}
 
-FlutterDartState::FlutterDartState(IsolateClient* isolate_client,
-                                   const std::string& url)
-    : isolate_client_(isolate_client), url_(url), main_port_(ILLEGAL_PORT) {
+FlutterDartState::FlutterDartState(IsolateClient* isolate_client)
+    : isolate_client_(isolate_client), main_port_(ILLEGAL_PORT) {
 #ifdef OS_ANDROID
   jni_data_.reset(new DartJniIsolateData());
 #endif
@@ -34,7 +33,7 @@ FlutterDartState::~FlutterDartState() {
 }
 
 FlutterDartState* FlutterDartState::CreateForChildIsolate() {
-  return new FlutterDartState(isolate_client_, url_);
+  return new FlutterDartState(isolate_client_);
 }
 
 FlutterDartState* FlutterDartState::Current() {
