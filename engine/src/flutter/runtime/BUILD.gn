@@ -1,0 +1,56 @@
+# Copyright 2016 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+source_set("runtime") {
+  sources = [
+    "dart_controller.cc",
+    "dart_controller.h",
+    "dart_init.cc",
+    "dart_init.h",
+    "dart_service_isolate.cc",
+    "dart_service_isolate.h",
+    "embedder_resources.cc",
+    "embedder_resources.h",
+    "sky_view.cc",
+    "sky_view_client.cc",
+    "sky_view_client.h",
+    "sky_view.h",
+    "start_up.cc",
+    "start_up.h",
+  ]
+
+  deps = [
+    "//dart/runtime:libdart",
+    "//dart/runtime/bin:embedded_dart_io",
+    "//flutter/assets",
+    "//flutter/common",
+    "//flutter/flow",
+    "//flutter/glue",
+    "//flutter/lib/io",
+    "//flutter/lib/mojo",
+    "//flutter/lib/ui",
+    "//flutter/services/engine:interfaces",
+    "//flutter/services/pointer:interfaces",
+    "//flutter/skia",
+    "//lib/ftl",
+    "//lib/tonic",
+    "//lib/tonic/debugger",
+    "//mojo/public/platform/dart:mojo_internal_impl",
+  ]
+
+  if (is_android) {
+    deps += [
+      "//flutter/lib/jni",
+    ]
+  }
+
+  # On iOS (device), precompiled snapshots contain the instruction buffer.
+  # Generation of the same requires all application specific script code to be
+  # specified up front. In such cases, there can be no generic snapshot.
+  if (!is_ios || use_ios_simulator) {
+    deps += [
+      "//flutter/lib/snapshot",
+    ]
+  }
+}

@@ -1,0 +1,3 @@
+dart:jni,JniObject,JniObject.
+dart:jni,JniFloat,JniFloat.
+dart:jni,JniFloat,get:value

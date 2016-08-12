@@ -10,6 +10,10 @@ source_set("ui") {
     "compositing/scene.h",
     "dart_runtime_hooks.cc",
     "dart_runtime_hooks.h",
+    "dart_ui.cc",
+    "dart_ui.h",
+    "mojo_services.cc",
+    "mojo_services.h",
     "painting/canvas.cc",
     "painting/canvas.h",
     "painting/gradient.cc",
@@ -40,6 +44,16 @@ source_set("ui") {
     "painting/rrect.h",
     "painting/shader.cc",
     "painting/shader.h",
+    "text/paragraph_builder.cc",
+    "text/paragraph_builder.h",
+    "text/paragraph.cc",
+    "text/paragraph.h",
+    "text/text_box.cc",
+    "text/text_box.h",
+    "ui_dart_state.cc",
+    "ui_dart_state.h",
+    "window/window.cc",
+    "window/window.h",
   ]
 
   deps = [
@@ -47,8 +61,22 @@ source_set("ui") {
     "//flutter/common",
     "//flutter/flow",
     "//flutter/glue",
+    "//flutter/services/engine:interfaces",
+    "//flutter/services/pointer:interfaces",
     "//flutter/skia",
+    "//flutter/sky/engine",
     "//lib/tonic",
     "//lib/tonic/mojo",
+    "//mojo/public/cpp/application",
+    "//mojo/public/cpp/bindings",
+    "//mojo/public/interfaces/application",
+    "//mojo/services/asset_bundle/interfaces",
   ]
+
+  if (is_android) {
+    deps += [
+      # TODO(abarth): In principle, these libraries should be fully independent.
+      "//flutter/lib/jni",
+    ]
+  }
 }
