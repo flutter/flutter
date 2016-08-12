@@ -17,27 +17,30 @@ declare_args() {
   # Enable asserts, even in release builds.
   sky_asserts_always_on = false
 
-  # Experimental support for the Dart VM.
-  sky_use_dart = false
-
-  # Default to strict mode in debug builds.
-  if (is_debug) {
-    sky_dart_strict_mode = true
-  } else {
-    sky_dart_strict_mode = false
-  }
-
   # Enable ahead-of-time compilation on platforms where AOT is optional.
   flutter_aot = false
 
-  # Set if the Dart runtime is being built in product mode, which excludes
-  # development features such as the debugger.
-  flutter_product_mode = false
+  # The runtime mode ("debug", "profile", or "release")
+  flutter_runtime_mode = "debug"
 }
 
 # feature_defines_list ---------------------------------------------------------
 
-feature_defines_list = []
+feature_defines_list = [
+  "FLUTTER_RUNTIME_MODE_DEBUG=1",
+  "FLUTTER_RUNTIME_MODE_PROFILE=2",
+  "FLUTTER_RUNTIME_MODE_RELEASE=3",
+]
+
+if (flutter_runtime_mode == "debug") {
+  feature_defines_list += [ "FLUTTER_RUNTIME_MODE=1" ]
+} else if (flutter_runtime_mode == "profile") {
+  feature_defines_list += [ "FLUTTER_RUNTIME_MODE=2" ]
+} else if (flutter_runtime_mode == "release") {
+  feature_defines_list += [ "FLUTTER_RUNTIME_MODE=3" ]
+} else {
+  feature_defines_list += [ "FLUTTER_RUNTIME_MODE=0" ]
+}
 
 if (is_debug) {
   # TODO(GYP) this should also be set when release_valgrind_build is set,
@@ -54,18 +57,6 @@ if (sky_asserts_always_on) {
   feature_defines_list += [ "ENABLE_ASSERT=1" ]
 }
 
-if (sky_dart_strict_mode) {
-  feature_defines_list += [ "ENABLE_DART_STRICT=1" ]
-}
-
-if (sky_use_dart) {
-  feature_defines_list += [ "WTF_USE_DART=1" ]
-}
-
 if (flutter_aot) {
   feature_defines_list += [ "FLUTTER_AOT=1" ]
-}
-
-if (flutter_product_mode) {
-  feature_defines_list += [ "FLUTTER_PRODUCT_MODE=1" ]
 }

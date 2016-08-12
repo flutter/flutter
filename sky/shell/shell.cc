@@ -175,7 +175,7 @@ void Shell::InitStandalone(std::string icu_data_path) {
 void Shell::Init() {
   base::DiscardableMemoryAllocator::SetInstance(&g_discardable.Get());
 
-#ifndef FLUTTER_PRODUCT_MODE
+#if FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_RELEASE
   InitSkiaEventTracer();
 #endif
 

@@ -50,7 +50,7 @@ using tonic::ToDart;
 namespace dart {
 namespace observatory {
 
-#if !FLUTTER_PRODUCT_MODE
+#if FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_RELEASE
 
 // These two symbols are defined in |observatory_archive.cc| which is generated
 // by the |//dart/runtime/observatory:archive_observatory| rule. Both of these
@@ -58,7 +58,7 @@ namespace observatory {
 extern unsigned int observatory_assets_archive_len;
 extern const uint8_t* observatory_assets_archive;
 
-#endif  // !FLUTTER_PRODUCT_MODE
+#endif  // FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_RELEASE
 
 }  // namespace observatory
 }  // namespace dart
@@ -164,14 +164,14 @@ bool IsServiceIsolateURL(const char* url_name) {
          String(url_name) == DART_VM_SERVICE_ISOLATE_NAME;
 }
 
-#ifdef FLUTTER_PRODUCT_MODE
+#if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_RELEASE
 
 Dart_Isolate ServiceIsolateCreateCallback(const char* script_uri,
                                           char** error) {
   return nullptr;
 }
 
-#else  // FLUTTER_PRODUCT_MODE
+#else  // FLUTTER_RUNTIME_MODE
 
 Dart_Isolate ServiceIsolateCreateCallback(const char* script_uri,
                                           char** error) {
@@ -216,7 +216,7 @@ Dart_Isolate ServiceIsolateCreateCallback(const char* script_uri,
   return isolate;
 }
 
-#endif  // FLUTTER_PRODUCT_MODE
+#endif  // FLUTTER_RUNTIME_MODE
 
 Dart_Isolate IsolateCreateCallback(const char* script_uri,
                                    const char* main,
@@ -287,13 +287,13 @@ Dart_Isolate IsolateCreateCallback(const char* script_uri,
 }
 
 Dart_Handle GetVMServiceAssetsArchiveCallback() {
-#if FLUTTER_PRODUCT_MODE
+#if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_RELEASE
   return nullptr;
-#else   // FLUTTER_PRODUCT_MODE
+#else   // FLUTTER_RUNTIME_MODE
   return tonic::DartConverter<tonic::Uint8List>::ToDart(
       ::dart::observatory::observatory_assets_archive,
       ::dart::observatory::observatory_assets_archive_len);
-#endif  // FLUTTER_PRODUCT_MODE
+#endif  // FLUTTER_RUNTIME_MODE
 }
 
 static const char kStdoutStreamId[] = "Stdout";
@@ -503,7 +503,7 @@ static bool ShouldEnableCheckedMode() {
     return false;
   }
 
-#if ENABLE(DART_STRICT)
+#if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
   return true;
 #else
   return Settings::Get().enable_dart_checked_mode;
@@ -557,7 +557,7 @@ void InitDartVM() {
 
   FTL_CHECK(Dart_SetVMFlags(args.size(), args.data()));
 
-#ifndef FLUTTER_PRODUCT_MODE
+#if FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_RELEASE
   {
     TRACE_EVENT0("flutter", "DartDebugger::InitDebugger");
     // This should be called before calling Dart_Initialize.

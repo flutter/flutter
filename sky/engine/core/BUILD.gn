@@ -90,8 +90,8 @@ static_library("core") {
     "//flutter/services/pointer:interfaces",
   ]
 
-  if (!flutter_product_mode) {
-    # Only include observatory assets in non-product modes.
+  if (flutter_runtime_mode != "release") {
+    # Only include observatory assets in non-release modes.
     deps += [
       "//dart/runtime/observatory:embedded_observatory_archive",
     ]
