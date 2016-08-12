@@ -60,8 +60,14 @@ class FlutterVersion {
     String from = 'Flutter on channel $channel (from ${repositoryUrl == null ? 'unknown source' : repositoryUrl})';
     String flutterText = 'Framework revision $frameworkRevisionShort ($frameworkAge); engine revision $engineRevisionShort';
     String dartSdkText = 'Flutter tools using Dart version $dartSdkVersion';
+    String frameworkCommit = 'Last commit on framework: $frameworkCommitDate';
 
-    return '$from\n$flutterText\n$dartSdkText';
+    return '$from\n$flutterText\n$frameworkCommit\n$dartSdkText';
+  }
+
+  /// A date String describing the last framework commit.
+  static String get frameworkCommitDate {
+    return _runSync('git', <String>['log', '-n', '1', '--pretty=format:%ad', '--date=format:%Y-%m-%d %H:%M:%S'], Cache.flutterRoot);
   }
 
   static FlutterVersion getVersion([String flutterRoot]) {
