@@ -117,12 +117,13 @@ Future<String> _buildAotSnapshot(
     return null;
   }
 
-  String entryPointsDir, dartEntryPointsDir, genSnapshot;
+  String entryPointsDir, dartEntryPointsDir, snapshotterDir, genSnapshot;
 
   String engineSrc = tools.engineSrcPath;
   if (engineSrc != null) {
     entryPointsDir  = path.join(engineSrc, 'flutter', 'sky', 'engine', 'bindings');
     dartEntryPointsDir = path.join(engineSrc, 'dart', 'runtime', 'bin');
+    snapshotterDir = path.join(engineSrc, 'flutter', 'lib', 'snapshot');
     String engineOut = tools.getEngineArtifactsDirectory(platform, buildMode).path;
     if (platform == TargetPlatform.ios) {
       genSnapshot = path.join(engineOut, 'clang_x64', 'gen_snapshot');
@@ -134,6 +135,7 @@ Future<String> _buildAotSnapshot(
     String artifactsDir = tools.getEngineArtifactsDirectory(platform, buildMode).path;
     entryPointsDir = artifactsDir;
     dartEntryPointsDir = entryPointsDir;
+    snapshotterDir = entryPointsDir;
     if (platform == TargetPlatform.ios) {
       genSnapshot = path.join(artifactsDir, 'gen_snapshot');
     } else {
@@ -194,7 +196,7 @@ Future<String> _buildAotSnapshot(
       ]);
       break;
     case TargetPlatform.ios:
-      snapshotDartIOS = path.join(entryPointsDir, 'snapshot.dart');
+      snapshotDartIOS = path.join(snapshotterDir, 'snapshot.dart');
       assembly = path.join(outputDir.path, 'snapshot_assembly.S');
       filePaths.addAll(<String>[
         snapshotDartIOS,
