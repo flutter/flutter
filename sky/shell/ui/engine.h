@@ -11,7 +11,6 @@
 #include "flutter/services/rasterizer/rasterizer.mojom.h"
 #include "flutter/sky/engine/public/sky/sky_view_client.h"
 #include "flutter/sky/engine/public/sky/sky_view.h"
-#include "flutter/sky/shell/rasterizer.h"
 #include "flutter/sky/shell/ui_delegate.h"
 #include "lib/ftl/macros.h"
 #include "lib/ftl/memory/weak_ptr.h"

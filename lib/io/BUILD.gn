@@ -2,20 +2,16 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-source_set("tonic") {
+source_set("io") {
   sources = [
-    "dart_state.cc",
-    "dart_state.h",
+    "dart_io.cc",
+    "dart_io.h",
   ]
 
   deps = [
+    "//dart/runtime:libdart",
     "//dart/runtime/bin:embedded_dart_io",
     "//lib/ftl",
-  ]
-
-  public_deps = [
-    "//dart/runtime:libdart",
-    "//dart/runtime/vm:libdart_platform",
-    "//lib/tonic",
+    "//lib/tonic/converter",
   ]
 }

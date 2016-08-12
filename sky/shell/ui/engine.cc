@@ -20,7 +20,6 @@
 #include "flutter/sky/engine/core/script/ui_dart_state.h"
 #include "flutter/sky/engine/public/platform/Platform.h"
 #include "flutter/sky/engine/public/web/Sky.h"
-#include "flutter/sky/shell/shell.h"
 #include "flutter/sky/shell/ui/animator.h"
 #include "flutter/sky/shell/ui/flutter_font_selector.h"
 #include "flutter/sky/shell/ui/platform_impl.h"

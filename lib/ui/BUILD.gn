@@ -46,5 +46,6 @@ source_set("ui") {
     "//flutter/skia",
     "//flutter/tonic",
     "//lib/tonic",
+    "//lib/tonic/mojo",
   ]
 }

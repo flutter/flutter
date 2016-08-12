@@ -15,22 +15,8 @@
 #include "dart/runtime/bin/embedded_dart_io.h"
 #include "dart/runtime/include/dart_mirrors_api.h"
 #include "flutter/assets/zip_asset_store.h"
-#include "flutter/tonic/dart_debugger.h"
-#include "flutter/tonic/dart_io.h"
-#include "flutter/tonic/dart_state.h"
 #include "flutter/glue/trace_event.h"
-#include "lib/ftl/files/eintr_wrapper.h"
-#include "lib/ftl/files/unique_fd.h"
-#include "lib/ftl/logging.h"
-#include "lib/ftl/time/time_delta.h"
-#include "lib/tonic/dart_class_library.h"
-#include "lib/tonic/dart_wrappable.h"
-#include "lib/tonic/logging/dart_error.h"
-#include "lib/tonic/logging/dart_invoke.h"
-#include "lib/tonic/scopes/dart_api_scope.h"
-#include "lib/tonic/scopes/dart_isolate_scope.h"
-#include "lib/tonic/typed_data/uint8_list.h"
-#include "mojo/public/platform/dart/dart_handle_watcher.h"
+#include "flutter/lib/io/dart_io.h"
 #include "flutter/sky/engine/bindings/dart_mojo_internal.h"
 #include "flutter/sky/engine/bindings/dart_runtime_hooks.h"
 #include "flutter/sky/engine/bindings/dart_ui.h"
@@ -39,6 +25,20 @@
 #include "flutter/sky/engine/core/start_up.h"
 #include "flutter/sky/engine/public/platform/sky_settings.h"
 #include "flutter/sky/engine/wtf/MakeUnique.h"
+#include "flutter/tonic/dart_state.h"
+#include "lib/ftl/files/eintr_wrapper.h"
+#include "lib/ftl/files/unique_fd.h"
+#include "lib/ftl/logging.h"
+#include "lib/ftl/time/time_delta.h"
+#include "lib/tonic/dart_class_library.h"
+#include "lib/tonic/dart_wrappable.h"
+#include "lib/tonic/debugger/dart_debugger.h"
+#include "lib/tonic/logging/dart_error.h"
+#include "lib/tonic/logging/dart_invoke.h"
+#include "lib/tonic/scopes/dart_api_scope.h"
+#include "lib/tonic/scopes/dart_isolate_scope.h"
+#include "lib/tonic/typed_data/uint8_list.h"
+#include "mojo/public/platform/dart/dart_handle_watcher.h"
 
 #ifdef OS_ANDROID
 #include "flutter/lib/jni/dart_jni.h"
@@ -561,7 +561,7 @@ void InitDartVM() {
   {
     TRACE_EVENT0("flutter", "DartDebugger::InitDebugger");
     // This should be called before calling Dart_Initialize.
-    DartDebugger::InitDebugger();
+    tonic::DartDebugger::InitDebugger();
   }
 #endif
 

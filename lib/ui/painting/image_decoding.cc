@@ -14,7 +14,7 @@
 #include "lib/ftl/tasks/task_runner.h"
 #include "lib/tonic/dart_persistent_value.h"
 #include "lib/tonic/logging/dart_invoke.h"
-#include "lib/tonic/mojo_converter.h"
+#include "lib/tonic/mojo/mojo_converter.h"
 #include "lib/tonic/typed_data/uint8_list.h"
 #include "third_party/skia/include/core/SkImageGenerator.h"
 
