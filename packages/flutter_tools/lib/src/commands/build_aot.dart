@@ -121,7 +121,7 @@ Future<String> _buildAotSnapshot(
 
   String engineSrc = tools.engineSrcPath;
   if (engineSrc != null) {
-    entryPointsDir  = path.join(engineSrc, 'flutter', 'sky', 'engine', 'bindings');
+    entryPointsDir  = path.join(engineSrc, 'flutter', 'runtime');
     dartEntryPointsDir = path.join(engineSrc, 'dart', 'runtime', 'bin');
     snapshotterDir = path.join(engineSrc, 'flutter', 'lib', 'snapshot');
     String engineOut = tools.getEngineArtifactsDirectory(platform, buildMode).path;
