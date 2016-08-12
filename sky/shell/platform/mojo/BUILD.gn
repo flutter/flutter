@@ -23,7 +23,14 @@ mojo_native_application("mojo") {
   ]
 
   deps = [
-    "//flutter/tonic",
+    "//flutter/common",
+    "//flutter/services/icu",
+    "//flutter/services/raw_keyboard:interfaces",
+    "//flutter/skia",
+    "//flutter/sky/engine/public/sky",
+    "//flutter/sky/engine/web",
+    "//flutter/sky/shell:common",
+    "//flutter/sky/shell:gpu_mojo",
     "//mojo/application",
     "//mojo/common:tracing_impl",
     "//mojo/common",
@@ -36,13 +43,6 @@ mojo_native_application("mojo") {
     "//mojo/services/input_events/interfaces",
     "//mojo/services/ui/input/interfaces",
     "//mojo/services/ui/views/interfaces",
-    "//flutter/services/icu",
-    "//flutter/skia",
-    "//flutter/sky/engine/public/sky",
-    "//flutter/sky/engine/web",
-    "//flutter/services/raw_keyboard:interfaces",
-    "//flutter/sky/shell:common",
-    "//flutter/sky/shell:gpu_mojo",
     "//third_party/icu",
   ]
 

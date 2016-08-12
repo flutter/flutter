@@ -39,7 +39,6 @@ source_set("platform") {
     "animation/TimingFunction.h",
     "animation/UnitBezier.h",
     "exported/Platform.cpp",
-    "exported/sky_settings.cc",
     "exported/WebCommon.cpp",
     "fonts/AlternateFontFamily.h",
     "fonts/Character.cpp",

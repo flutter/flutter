@@ -31,18 +31,6 @@ class Shell {
 
   static Shell& Shared();
 
-  ftl::TaskRunner* gpu_ftl_task_runner() const {
-    return gpu_ftl_task_runner_.get();
-  }
-
-  ftl::TaskRunner* ui_ftl_task_runner() const {
-    return ui_ftl_task_runner_.get();
-  }
-
-  ftl::TaskRunner* io_ftl_task_runner() const {
-    return io_ftl_task_runner_.get();
-  }
-
   TracingController& tracing_controller();
 
   // Maintain a list of rasterizers.
@@ -98,10 +86,6 @@ class Shell {
   std::unique_ptr<base::Thread> gpu_thread_;
   std::unique_ptr<base::Thread> ui_thread_;
   std::unique_ptr<base::Thread> io_thread_;
-
-  ftl::RefPtr<ftl::TaskRunner> gpu_ftl_task_runner_;
-  ftl::RefPtr<ftl::TaskRunner> ui_ftl_task_runner_;
-  ftl::RefPtr<ftl::TaskRunner> io_ftl_task_runner_;
 
   std::unique_ptr<base::ThreadChecker> gpu_thread_checker_;
   std::unique_ptr<base::ThreadChecker> ui_thread_checker_;

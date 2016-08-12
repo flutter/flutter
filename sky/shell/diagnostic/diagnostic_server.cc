@@ -6,16 +6,17 @@
 
 #include "dart/runtime/include/dart_api.h"
 #include "dart/runtime/include/dart_native_api.h"
+#include "flutter/common/threads.h"
 #include "flutter/flow/compositor_context.h"
-#include "lib/ftl/logging.h"
-#include "lib/tonic/dart_binding_macros.h"
-#include "lib/tonic/dart_library_natives.h"
-#include "lib/tonic/logging/dart_invoke.h"
 #include "flutter/sky/engine/core/script/embedder_resources.h"
 #include "flutter/sky/shell/gpu/picture_serializer.h"
 #include "flutter/sky/shell/rasterizer.h"
 #include "flutter/sky/shell/shell.h"
 #include "flutter/sky/shell/ui/engine.h"
+#include "lib/ftl/logging.h"
+#include "lib/tonic/dart_binding_macros.h"
+#include "lib/tonic/dart_library_natives.h"
+#include "lib/tonic/logging/dart_invoke.h"
 #include "third_party/skia/include/core/SkStream.h"
 
 namespace mojo {
@@ -98,8 +99,7 @@ void DiagnosticServer::HandleSkiaPictureRequest(Dart_Handle send_port) {
   Dart_Port port_id;
   FTL_CHECK(!LogIfError(Dart_SendPortGetId(send_port, &port_id)));
 
-  Shell::Shared().gpu_ftl_task_runner()->PostTask(
-      [port_id]() { SkiaPictureTask(port_id); });
+  blink::Threads::Gpu()->PostTask([port_id]() { SkiaPictureTask(port_id); });
 }
 
 void DiagnosticServer::SkiaPictureTask(Dart_Port port_id) {

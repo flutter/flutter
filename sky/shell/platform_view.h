@@ -30,7 +30,6 @@ class PlatformView {
 
     ftl::WeakPtr<UIDelegate> ui_delegate;
     Rasterizer* rasterizer;
-    ftl::RefPtr<ftl::TaskRunner> ui_task_runner;
   };
 
   struct SurfaceConfig {

@@ -15,6 +15,7 @@
 #include "dart/runtime/bin/embedded_dart_io.h"
 #include "dart/runtime/include/dart_mirrors_api.h"
 #include "flutter/assets/zip_asset_store.h"
+#include "flutter/common/settings.h"
 #include "flutter/glue/trace_event.h"
 #include "flutter/lib/io/dart_io.h"
 #include "flutter/sky/engine/bindings/dart_mojo_internal.h"
@@ -23,14 +24,13 @@
 #include "flutter/sky/engine/core/script/dart_service_isolate.h"
 #include "flutter/sky/engine/core/script/ui_dart_state.h"
 #include "flutter/sky/engine/core/start_up.h"
-#include "flutter/sky/engine/public/platform/sky_settings.h"
 #include "flutter/sky/engine/wtf/MakeUnique.h"
-#include "flutter/tonic/dart_state.h"
 #include "lib/ftl/files/eintr_wrapper.h"
 #include "lib/ftl/files/unique_fd.h"
 #include "lib/ftl/logging.h"
 #include "lib/ftl/time/time_delta.h"
 #include "lib/tonic/dart_class_library.h"
+#include "lib/tonic/dart_state.h"
 #include "lib/tonic/dart_wrappable.h"
 #include "lib/tonic/debugger/dart_debugger.h"
 #include "lib/tonic/logging/dart_error.h"
@@ -120,7 +120,7 @@ RegisterNativeServiceProtocolExtensionHook
     g_register_native_service_protocol_extensions_hook = nullptr;
 
 void IsolateShutdownCallback(void* callback_data) {
-  DartState* dart_state = static_cast<DartState*>(callback_data);
+  tonic::DartState* dart_state = static_cast<tonic::DartState*>(callback_data);
   delete dart_state;
 }
 
@@ -175,7 +175,7 @@ Dart_Isolate ServiceIsolateCreateCallback(const char* script_uri,
 
 Dart_Isolate ServiceIsolateCreateCallback(const char* script_uri,
                                           char** error) {
-  DartState* dart_state = new DartState();
+  tonic::DartState* dart_state = new tonic::DartState();
   Dart_Isolate isolate = Dart_CreateIsolate(
       script_uri, "main",
       reinterpret_cast<const uint8_t*>(DART_SYMBOL(kDartIsolateSnapshotBuffer)),
@@ -191,7 +191,7 @@ Dart_Isolate ServiceIsolateCreateCallback(const char* script_uri,
     DartUI::InitForIsolate();
     DartMojoInternal::InitForIsolate();
     DartRuntimeHooks::Install(DartRuntimeHooks::SecondaryIsolate, "");
-    const SkySettings& settings = SkySettings::Get();
+    const Settings& settings = Settings::Get();
     if (settings.enable_observatory) {
       std::string ip = "127.0.0.1";
       const intptr_t port = settings.observatory_port;
@@ -402,7 +402,7 @@ void* _DartSymbolLookup(const char* symbol_name) {
       return symbol_asset.mapping;
     }
 
-    const std::string& aot_snapshot_path = SkySettings::Get().aot_snapshot_path;
+    const std::string& aot_snapshot_path = Settings::Get().aot_snapshot_path;
     FTL_CHECK(!aot_snapshot_path.empty());
 
     std::string asset_path = aot_snapshot_path + "/" + symbol_asset.file_name;
@@ -506,14 +506,14 @@ static bool ShouldEnableCheckedMode() {
 #if ENABLE(DART_STRICT)
   return true;
 #else
-  return SkySettings::Get().enable_dart_checked_mode;
+  return Settings::Get().enable_dart_checked_mode;
 #endif
 }
 
 void InitDartVM() {
   TRACE_EVENT0("flutter", __func__);
 
-  const SkySettings& settings = SkySettings::Get();
+  const Settings& settings = Settings::Get();
 
   {
     TRACE_EVENT0("flutter", "dart::bin::BootstrapDartIo");

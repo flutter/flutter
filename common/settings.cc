@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/sky/engine/public/platform/sky_settings.h"
+#include "flutter/common/settings.h"
 
 #include <memory>
 
@@ -11,19 +11,19 @@
 namespace blink {
 namespace {
 
-SkySettings* g_settings = nullptr;
+Settings* g_settings = nullptr;
 
 }  // namespace
 
-const SkySettings& SkySettings::Get() {
+const Settings& Settings::Get() {
   FTL_CHECK(g_settings);
   return *g_settings;
 }
 
-void SkySettings::Set(const SkySettings& settings) {
+void Settings::Set(const Settings& settings) {
   FTL_CHECK(!g_settings);
-  g_settings = new SkySettings();
+  g_settings = new Settings();
   *g_settings = settings;
 }
 
-} // namespace blink
+}  // namespace blink

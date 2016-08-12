@@ -19,9 +19,6 @@ class PlatformImpl : public blink::Platform {
   // blink::Platform methods:
   std::string defaultLocale() override;
 
-  ftl::TaskRunner* GetUITaskRunner() override;
-  ftl::TaskRunner* GetIOTaskRunner() override;
-
  private:
   FTL_DISALLOW_COPY_AND_ASSIGN(PlatformImpl);
 };

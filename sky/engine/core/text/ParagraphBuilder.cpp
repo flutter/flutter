@@ -4,11 +4,7 @@
 
 #include "flutter/sky/engine/core/text/ParagraphBuilder.h"
 
-#include "lib/tonic/dart_args.h"
-#include "lib/tonic/dart_binding_macros.h"
-#include "lib/tonic/dart_library_natives.h"
-#include "lib/ftl/tasks/task_runner.h"
-#include "lib/tonic/converter/dart_converter.h"
+#include "flutter/common/threads.h"
 #include "flutter/sky/engine/core/rendering/RenderInline.h"
 #include "flutter/sky/engine/core/rendering/RenderParagraph.h"
 #include "flutter/sky/engine/core/rendering/RenderText.h"
@@ -16,6 +12,11 @@
 #include "flutter/sky/engine/core/script/ui_dart_state.h"
 #include "flutter/sky/engine/platform/text/LocaleToScriptMapping.h"
 #include "flutter/sky/engine/public/platform/Platform.h"
+#include "lib/ftl/tasks/task_runner.h"
+#include "lib/tonic/converter/dart_converter.h"
+#include "lib/tonic/dart_args.h"
+#include "lib/tonic/dart_binding_macros.h"
+#include "lib/tonic/dart_library_natives.h"
 
 namespace blink {
 namespace {
@@ -137,7 +138,7 @@ ParagraphBuilder::ParagraphBuilder() {
 
 ParagraphBuilder::~ParagraphBuilder() {
   PassOwnPtr<RenderView> renderView = m_renderView.release();
-  Platform::current()->GetUITaskRunner()->PostTask(
+  Threads::UI()->PostTask(
       [renderView]() { /* renderView's destructor runs. */ });
 }
 

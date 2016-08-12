@@ -13,7 +13,7 @@ group("flutter") {
       "//flutter/glue",
       "//flutter/lib/ui",
       "//flutter/snapshotter",
-      "//flutter/tonic",
+      "//lib/tonic",
     ]
   } else {
     deps = [

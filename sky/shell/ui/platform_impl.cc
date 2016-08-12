@@ -17,13 +17,5 @@ std::string PlatformImpl::defaultLocale() {
   return "en-US";
 }
 
-ftl::TaskRunner* PlatformImpl::GetUITaskRunner() {
-  return Shell::Shared().ui_ftl_task_runner();
-}
-
-ftl::TaskRunner* PlatformImpl::GetIOTaskRunner() {
-  return Shell::Shared().io_ftl_task_runner();
-}
-
 }  // namespace shell
 }  // namespace sky

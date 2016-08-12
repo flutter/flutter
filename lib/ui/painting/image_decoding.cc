@@ -4,15 +4,15 @@
 
 #include "flutter/lib/ui/painting/image_decoding.h"
 
+#include "flutter/common/threads.h"
 #include "flutter/flow/texture_image.h"
 #include "flutter/glue/drain_data_pipe_job.h"
 #include "flutter/glue/movable_wrapper.h"
 #include "flutter/glue/trace_event.h"
 #include "flutter/lib/ui/painting/image.h"
 #include "flutter/lib/ui/painting/resource_context.h"
-#include "flutter/tonic/dart_state.h"
-#include "lib/ftl/tasks/task_runner.h"
 #include "lib/tonic/dart_persistent_value.h"
+#include "lib/tonic/dart_state.h"
 #include "lib/tonic/logging/dart_invoke.h"
 #include "lib/tonic/mojo/mojo_converter.h"
 #include "lib/tonic/typed_data/uint8_list.h"
@@ -73,11 +73,10 @@ void InvokeImageCallback(sk_sp<SkImage> image,
 }
 
 void DecodeImageAndInvokeImageCallback(
-    ftl::RefPtr<ftl::TaskRunner> task_runner,
     glue::MovableWrapper<std::unique_ptr<DartPersistentValue>> callback,
     std::vector<char> buffer) {
   sk_sp<SkImage> image = DecodeImage(std::move(buffer));
-  task_runner->PostTask([callback, image]() mutable {
+  Threads::UI()->PostTask([callback, image]() mutable {
     InvokeImageCallback(image, callback.Unwrap());
   });
 }
@@ -99,23 +98,17 @@ void DecodeImageFromDataPipe(Dart_NativeArguments args) {
     return;
   }
 
-  DartState* dart_state = DartState::Current();
-  ftl::RefPtr<ftl::TaskRunner> task_runner = dart_state->ui_task_runner();
-
   auto callback = glue::WrapMovable(std::unique_ptr<DartPersistentValue>(
-      new DartPersistentValue(dart_state, callback_handle)));
+      new DartPersistentValue(tonic::DartState::Current(), callback_handle)));
 
-  dart_state->io_task_runner()->PostTask(
-      [task_runner, callback, consumer]() mutable {
-        glue::DrainDataPipeJob* job = nullptr;
-        job = new glue::DrainDataPipeJob(
-            consumer.Unwrap(),
-            [task_runner, callback, job](std::vector<char> buffer) {
-              delete job;
-              DecodeImageAndInvokeImageCallback(task_runner, callback,
-                                                std::move(buffer));
-            });
-      });
+  Threads::IO()->PostTask([callback, consumer]() mutable {
+    glue::DrainDataPipeJob* job = nullptr;
+    job = new glue::DrainDataPipeJob(
+        consumer.Unwrap(), [callback, job](std::vector<char> buffer) {
+          delete job;
+          DecodeImageAndInvokeImageCallback(callback, std::move(buffer));
+        });
+  });
 }
 
 void DecodeImageFromList(Dart_NativeArguments args) {
@@ -134,21 +127,16 @@ void DecodeImageFromList(Dart_NativeArguments args) {
     return;
   }
 
-  DartState* dart_state = DartState::Current();
-  ftl::RefPtr<ftl::TaskRunner> task_runner = dart_state->ui_task_runner();
-
   auto callback = glue::WrapMovable(std::unique_ptr<DartPersistentValue>(
-      new DartPersistentValue(dart_state, callback_handle)));
+      new DartPersistentValue(tonic::DartState::Current(), callback_handle)));
 
   const char* bytes = reinterpret_cast<const char*>(list.data());
   auto buffer = glue::WrapMovable(std::unique_ptr<std::vector<char>>(
       new std::vector<char>(bytes, bytes + list.num_elements())));
 
-  dart_state->io_task_runner()->PostTask(
-      [task_runner, callback, buffer]() mutable {
-        DecodeImageAndInvokeImageCallback(task_runner, callback,
-                                          std::move(*buffer.Unwrap()));
-      });
+  Threads::IO()->PostTask([callback, buffer]() mutable {
+    DecodeImageAndInvokeImageCallback(callback, std::move(*buffer.Unwrap()));
+  });
 }
 
 }  // namespace

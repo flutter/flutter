@@ -6,10 +6,11 @@
 
 #include "base/trace_event/trace_event.h"
 #include "dart/runtime/include/dart_tools_api.h"
-#include "lib/ftl/logging.h"
+#include "flutter/common/threads.h"
 #include "flutter/sky/engine/core/script/dart_init.h"
 #include "flutter/sky/engine/wtf/MakeUnique.h"
 #include "flutter/sky/shell/shell.h"
+#include "lib/ftl/logging.h"
 
 #include <string>
 
@@ -144,12 +145,9 @@ static void BaseTraceEventCallback(base::TraceTicks timestamp,
 }
 
 static void AddTraceMetadata() {
-  Shell::Shared().gpu_ftl_task_runner()->PostTask(
-      []() { Dart_SetThreadName("gpu_thread"); });
-  Shell::Shared().ui_ftl_task_runner()->PostTask(
-      []() { Dart_SetThreadName("ui_thread"); });
-  Shell::Shared().io_ftl_task_runner()->PostTask(
-      []() { Dart_SetThreadName("io_thread"); });
+  blink::Threads::Gpu()->PostTask([]() { Dart_SetThreadName("gpu_thread"); });
+  blink::Threads::UI()->PostTask([]() { Dart_SetThreadName("ui_thread"); });
+  blink::Threads::IO()->PostTask([]() { Dart_SetThreadName("io_thread"); });
 }
 
 void TracingController::StartTracing() {

@@ -35,10 +35,6 @@
 
 #include "flutter/sky/engine/public/platform/WebCommon.h"
 
-namespace ftl {
-class TaskRunner;
-}
-
 namespace blink {
 class WebDiscardableMemory;
 
@@ -64,9 +60,6 @@ class Platform {
 
   // Returns a value such as "en-US".
   virtual std::string defaultLocale() { return std::string(); }
-
-  virtual ftl::TaskRunner* GetUITaskRunner() { return nullptr; }
-  virtual ftl::TaskRunner* GetIOTaskRunner() { return nullptr; }
 
  protected:
   virtual ~Platform() {}

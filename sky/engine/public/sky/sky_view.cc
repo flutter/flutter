@@ -12,6 +12,8 @@
 #include "flutter/sky/engine/public/sky/sky_view_client.h"
 #include "flutter/sky/engine/wtf/MakeUnique.h"
 
+using tonic::DartState;
+
 namespace blink {
 
 std::unique_ptr<SkyView> SkyView::Create(SkyViewClient* client) {

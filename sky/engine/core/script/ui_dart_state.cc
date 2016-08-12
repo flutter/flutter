@@ -12,12 +12,7 @@ namespace blink {
 UIDartState::UIDartState(IsolateClient* isolate_client,
                          const std::string& url,
                          std::unique_ptr<Window> window)
-    : FlutterDartState(isolate_client, url), window_(std::move(window)) {
-  ui_task_runner_ =
-      ftl::RefPtr<ftl::TaskRunner>(Platform::current()->GetUITaskRunner());
-  io_task_runner_ =
-      ftl::RefPtr<ftl::TaskRunner>(Platform::current()->GetIOTaskRunner());
-}
+    : FlutterDartState(isolate_client, url), window_(std::move(window)) {}
 
 UIDartState::~UIDartState() {}
 

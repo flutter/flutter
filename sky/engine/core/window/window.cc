@@ -11,6 +11,7 @@
 #include "flutter/sky/engine/core/script/ui_dart_state.h"
 
 using tonic::DartInvokeField;
+using tonic::DartState;
 using tonic::StdStringToDart;
 using tonic::ToDart;
 

@@ -18,16 +18,17 @@
 #include "base/single_thread_task_runner.h"
 #include "base/trace_event/trace_event.h"
 #include "dart/runtime/include/dart_tools_api.h"
+#include "flutter/common/settings.h"
+#include "flutter/common/threads.h"
 #include "flutter/glue/task_runner_adaptor.h"
-#include "lib/ftl/files/unique_fd.h"
-#include "mojo/message_pump/message_pump_mojo.h"
 #include "flutter/skia/ext/event_tracer_impl.h"
 #include "flutter/sky/engine/core/script/dart_init.h"
-#include "flutter/sky/engine/public/platform/sky_settings.h"
 #include "flutter/sky/shell/diagnostic/diagnostic_server.h"
 #include "flutter/sky/shell/platform_view_service_protocol.h"
 #include "flutter/sky/shell/switches.h"
 #include "flutter/sky/shell/ui/engine.h"
+#include "lib/ftl/files/unique_fd.h"
+#include "mojo/message_pump/message_pump_mojo.h"
 
 namespace sky {
 namespace shell {
@@ -70,7 +71,7 @@ base::LazyInstance<NonDiscardableMemoryAllocator> g_discardable;
 
 void ServiceIsolateHook(bool running_precompiled) {
   if (!running_precompiled) {
-    const blink::SkySettings& settings = blink::SkySettings::Get();
+    const blink::Settings& settings = blink::Settings::Get();
     if (settings.enable_observatory)
       DiagnosticServer::Start();
   }
@@ -86,20 +87,23 @@ Shell::Shell() {
 
   gpu_thread_.reset(new base::Thread("gpu_thread"));
   gpu_thread_->StartWithOptions(options);
-  gpu_ftl_task_runner_ = ftl::MakeRefCounted<glue::TaskRunnerAdaptor>(
-      gpu_thread_->message_loop()->task_runner());
-  gpu_ftl_task_runner_->PostTask([this]() { InitGpuThread(); });
 
   ui_thread_.reset(new base::Thread("ui_thread"));
   ui_thread_->StartWithOptions(options);
-  ui_ftl_task_runner_ = ftl::MakeRefCounted<glue::TaskRunnerAdaptor>(
-      ui_thread_->message_loop()->task_runner());
-  ui_ftl_task_runner_->PostTask([this]() { InitUIThread(); });
 
   io_thread_.reset(new base::Thread("io_thread"));
   io_thread_->StartWithOptions(options);
-  io_ftl_task_runner_ = ftl::MakeRefCounted<glue::TaskRunnerAdaptor>(
-      io_thread_->message_loop()->task_runner());
+
+  blink::Threads threads(ftl::MakeRefCounted<glue::TaskRunnerAdaptor>(
+                             gpu_thread_->message_loop()->task_runner()),
+                         ftl::MakeRefCounted<glue::TaskRunnerAdaptor>(
+                             ui_thread_->message_loop()->task_runner()),
+                         ftl::MakeRefCounted<glue::TaskRunnerAdaptor>(
+                             io_thread_->message_loop()->task_runner()));
+  blink::Threads::Set(threads);
+
+  blink::Threads::Gpu()->PostTask([this]() { InitGpuThread(); });
+  blink::Threads::UI()->PostTask([this]() { InitUIThread(); });
 
   blink::SetServiceIsolateHook(ServiceIsolateHook);
   blink::SetRegisterNativeServiceProtocolExtensionHook(
@@ -126,7 +130,7 @@ void Shell::InitStandalone(std::string icu_data_path) {
 
   base::CommandLine& command_line = *base::CommandLine::ForCurrentProcess();
 
-  blink::SkySettings settings;
+  blink::Settings settings;
   // Enable Observatory
   settings.enable_observatory =
       !command_line.HasSwitch(switches::kNonInteractive);
@@ -163,7 +167,7 @@ void Shell::InitStandalone(std::string icu_data_path) {
       settings.dart_flags.push_back(*it);
   }
 
-  blink::SkySettings::Set(settings);
+  blink::Settings::Set(settings);
 
   Init();
 }
@@ -177,7 +181,7 @@ void Shell::Init() {
 
   FTL_DCHECK(!g_shell);
   g_shell = new Shell();
-  g_shell->ui_ftl_task_runner()->PostTask(Engine::Init);
+  blink::Threads::UI()->PostTask(Engine::Init);
 }
 
 Shell& Shell::Shared() {
@@ -238,7 +242,7 @@ void Shell::WaitForPlatformViewIds(
     std::vector<PlatformViewInfo>* platform_view_ids) {
   ftl::AutoResetWaitableEvent latch;
 
-  ui_ftl_task_runner()->PostTask([this, platform_view_ids, &latch]() {
+  blink::Threads::UI()->PostTask([this, platform_view_ids, &latch]() {
     WaitForPlatformViewsIdsUIThread(platform_view_ids, &latch);
   });
 
@@ -277,7 +281,7 @@ void Shell::RunInPlatformView(uintptr_t view_id,
   FTL_DCHECK(asset_directory);
   FTL_DCHECK(view_existed);
 
-  ui_ftl_task_runner()->PostTask([this, view_id, main_script, packages_file,
+  blink::Threads::UI()->PostTask([this, view_id, main_script, packages_file,
                                   asset_directory, view_existed,
                                   dart_isolate_id, &latch]() {
     RunInPlatformViewUIThread(view_id, main_script, packages_file,

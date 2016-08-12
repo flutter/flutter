@@ -14,7 +14,6 @@
 #include "flutter/sky/shell/ui_delegate.h"
 #include "lib/ftl/macros.h"
 #include "lib/ftl/memory/weak_ptr.h"
-#include "lib/ftl/tasks/task_runner.h"
 #include "mojo/public/cpp/application/service_provider_impl.h"
 #include "mojo/public/cpp/bindings/binding_set.h"
 #include "mojo/public/cpp/bindings/binding.h"
@@ -36,8 +35,6 @@ class Engine : public UIDelegate,
   struct Config {
     Config();
     ~Config();
-
-    ftl::RefPtr<ftl::TaskRunner> gpu_task_runner;
   };
 
   explicit Engine(const Config& config, rasterizer::RasterizerPtr rasterizer);

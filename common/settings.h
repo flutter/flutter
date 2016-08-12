@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SKY_ENGINE_PUBLIC_PLATFORM_SKY_SETTINGS_H_
-#define SKY_ENGINE_PUBLIC_PLATFORM_SKY_SETTINGS_H_
+#ifndef FLUTTER_COMMON_SETTINGS_H_
+#define FLUTTER_COMMON_SETTINGS_H_
 
 #include <stdint.h>
 
@@ -12,7 +12,7 @@
 
 namespace blink {
 
-struct SkySettings {
+struct Settings {
   bool enable_observatory = false;
   // Port on target will be auto selected by the OS. A message will be printed
   // on the target with the port after it has been selected.
@@ -24,10 +24,10 @@ struct SkySettings {
   std::string temp_directory_path;
   std::vector<std::string> dart_flags;
 
-  static const SkySettings& Get();
-  static void Set(const SkySettings& settings);
+  static const Settings& Get();
+  static void Set(const Settings& settings);
 };
 
 }  // namespace blink
 
-#endif  // SKY_ENGINE_PUBLIC_PLATFORM_SKY_SETTINGS_H_
+#endif  // FLUTTER_COMMON_SETTINGS_H_

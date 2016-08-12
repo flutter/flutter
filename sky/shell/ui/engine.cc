@@ -10,10 +10,9 @@
 
 #include "flutter/assets/directory_asset_bundle.h"
 #include "flutter/assets/zip_asset_bundle.h"
+#include "flutter/common/threads.h"
 #include "flutter/glue/movable_wrapper.h"
 #include "flutter/glue/trace_event.h"
-#include "lib/ftl/files/path.h"
-#include "mojo/public/cpp/application/connect.h"
 #include "flutter/sky/engine/bindings/mojo_services.h"
 #include "flutter/sky/engine/core/script/dart_controller.h"
 #include "flutter/sky/engine/core/script/dart_init.h"
@@ -23,6 +22,8 @@
 #include "flutter/sky/shell/ui/animator.h"
 #include "flutter/sky/shell/ui/flutter_font_selector.h"
 #include "flutter/sky/shell/ui/platform_impl.h"
+#include "lib/ftl/files/path.h"
+#include "mojo/public/cpp/application/connect.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkPictureRecorder.h"
 
@@ -106,7 +107,7 @@ void Engine::ConnectToEngine(mojo::InterfaceRequest<SkyEngine> request) {
 }
 
 void Engine::OnOutputSurfaceCreated(const ftl::Closure& gpu_continuation) {
-  config_.gpu_task_runner->PostTask(gpu_continuation);
+  blink::Threads::Gpu()->PostTask(gpu_continuation);
   have_surface_ = true;
   StartAnimatorIfPossible();
   if (sky_view_)
@@ -116,7 +117,7 @@ void Engine::OnOutputSurfaceCreated(const ftl::Closure& gpu_continuation) {
 void Engine::OnOutputSurfaceDestroyed(const ftl::Closure& gpu_continuation) {
   have_surface_ = false;
   StopAnimator();
-  config_.gpu_task_runner->PostTask(gpu_continuation);
+  blink::Threads::Gpu()->PostTask(gpu_continuation);
 }
 
 void Engine::SetServices(ServicesDataPtr services) {
@@ -194,17 +195,14 @@ void Engine::RunFromSnapshotStream(
 }
 
 void Engine::ConfigureZipAssetBundle(const std::string& path) {
-  asset_store_ = ftl::MakeRefCounted<blink::ZipAssetStore>(
-      path, ftl::RefPtr<ftl::TaskRunner>(
-                blink::Platform::current()->GetIOTaskRunner()));
+  asset_store_ =
+      ftl::MakeRefCounted<blink::ZipAssetStore>(path, blink::Threads::IO());
   new blink::ZipAssetBundle(mojo::GetProxy(&root_bundle_), asset_store_);
 }
 
 void Engine::ConfigureDirectoryAssetBundle(const std::string& path) {
-  new blink::DirectoryAssetBundle(
-      mojo::GetProxy(&root_bundle_), path,
-      ftl::RefPtr<ftl::TaskRunner>(
-          blink::Platform::current()->GetIOTaskRunner()));
+  new blink::DirectoryAssetBundle(mojo::GetProxy(&root_bundle_), path,
+                                  blink::Threads::IO());
 }
 
 void Engine::ConfigureView(const std::string& script_uri) {
@@ -300,11 +298,10 @@ void Engine::DidCreateSecondaryIsolate(Dart_Isolate isolate) {
   mojo::ServiceProviderPtr services_from_embedder;
   auto request = glue::WrapMovable(mojo::GetProxy(&services_from_embedder));
   ftl::WeakPtr<Engine> engine = weak_factory_.GetWeakPtr();
-  blink::Platform::current()->GetUITaskRunner()->PostTask(
-      [engine, request]() mutable {
-        if (engine)
-          engine->BindToServiceProvider(request.Unwrap());
-      });
+  blink::Threads::UI()->PostTask([engine, request]() mutable {
+    if (engine)
+      engine->BindToServiceProvider(request.Unwrap());
+  });
   blink::MojoServices::Create(isolate, nullptr,
                               std::move(services_from_embedder), nullptr);
 }

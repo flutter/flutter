@@ -7,6 +7,8 @@
 #include <utility>
 
 #include "dart/runtime/include/dart_tools_api.h"
+#include "flutter/common/settings.h"
+#include "flutter/common/threads.h"
 #include "flutter/glue/trace_event.h"
 #include "flutter/lib/io/dart_io.h"
 #include "flutter/sky/engine/bindings/dart_mojo_internal.h"
@@ -16,13 +18,12 @@
 #include "flutter/sky/engine/core/script/dart_service_isolate.h"
 #include "flutter/sky/engine/core/script/ui_dart_state.h"
 #include "flutter/sky/engine/public/platform/Platform.h"
-#include "flutter/sky/engine/public/platform/sky_settings.h"
 #include "flutter/sky/engine/wtf/MakeUnique.h"
-#include "flutter/tonic/dart_state.h"
 #include "lib/ftl/files/directory.h"
 #include "lib/ftl/files/path.h"
 #include "lib/tonic/dart_class_library.h"
 #include "lib/tonic/dart_message_handler.h"
+#include "lib/tonic/dart_state.h"
 #include "lib/tonic/dart_wrappable.h"
 #include "lib/tonic/debugger/dart_debugger.h"
 #include "lib/tonic/file_loader/file_loader.h"
@@ -139,14 +140,13 @@ void DartController::CreateIsolateFor(std::unique_ptr<UIDartState> state) {
   Dart_Isolate isolate = Dart_CreateIsolate(
       state->url().c_str(), "main",
       reinterpret_cast<uint8_t*>(DART_SYMBOL(kDartIsolateSnapshotBuffer)),
-      nullptr, static_cast<DartState*>(state.get()), &error);
+      nullptr, static_cast<tonic::DartState*>(state.get()), &error);
   FTL_CHECK(isolate) << error;
   ui_dart_state_ = state.release();
   FTL_DCHECK(Platform::current());
-  dart_state()->message_handler().Initialize(
-      ftl::RefPtr<ftl::TaskRunner>(Platform::current()->GetUITaskRunner()));
+  dart_state()->message_handler().Initialize(blink::Threads::UI());
 
-  Dart_SetShouldPauseOnStart(SkySettings::Get().start_paused);
+  Dart_SetShouldPauseOnStart(Settings::Get().start_paused);
 
   ui_dart_state_->SetIsolate(isolate);
   FTL_CHECK(!LogIfError(

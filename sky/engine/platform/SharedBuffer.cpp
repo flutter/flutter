@@ -26,9 +26,10 @@
 
 #include "flutter/sky/engine/platform/SharedBuffer.h"
 
+#include "flutter/common/threads.h"
 #include "flutter/sky/engine/public/platform/Platform.h"
-#include "flutter/sky/engine/wtf/unicode/UTF8.h"
 #include "flutter/sky/engine/wtf/unicode/Unicode.h"
+#include "flutter/sky/engine/wtf/unicode/UTF8.h"
 
 #undef SHARED_BUFFER_STATS
 
@@ -116,7 +117,7 @@ static void didCreateSharedBuffer(SharedBuffer* buffer) {
   MutexLocker locker(statsMutex());
   liveBuffers().add(buffer);
 
-  Platform::current()->GetUITaskRunner()->PostTask(printStats);
+  Threads::UI()->PostTask(printStats);
 }
 
 static void willDestroySharedBuffer(SharedBuffer* buffer) {

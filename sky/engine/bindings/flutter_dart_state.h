@@ -8,9 +8,9 @@
 #include <string>
 
 #include "dart/runtime/include/dart_api.h"
-#include "flutter/tonic/dart_state.h"
 #include "lib/ftl/build_config.h"
 #include "lib/tonic/dart_persistent_value.h"
+#include "lib/tonic/dart_state.h"
 
 namespace blink {
 
@@ -25,7 +25,7 @@ class IsolateClient {
   virtual ~IsolateClient();
 };
 
-class FlutterDartState : public DartState {
+class FlutterDartState : public tonic::DartState {
  public:
   FlutterDartState* CreateForChildIsolate();
   ~FlutterDartState() override;
@@ -37,9 +37,7 @@ class FlutterDartState : public DartState {
 
   static FlutterDartState* Current();
 
-  Dart_Port main_port() const {
-    return main_port_;
-  }
+  Dart_Port main_port() const { return main_port_; }
 
   void set_mojo_services(std::unique_ptr<MojoServices> mojo_services);
   MojoServices* mojo_services();

@@ -4,13 +4,15 @@
 
 #include "flutter/sky/engine/bindings/mojo_services.h"
 
+#include "flutter/sky/engine/bindings/flutter_dart_state.h"
 #include "lib/tonic/converter/dart_converter.h"
-#include "lib/tonic/logging/dart_error.h"
 #include "lib/tonic/dart_library_natives.h"
-#include "flutter/tonic/dart_state.h"
+#include "lib/tonic/dart_state.h"
+#include "lib/tonic/logging/dart_error.h"
 #include "mojo/public/cpp/application/connect.h"
 #include "mojo/public/cpp/bindings/array.h"
-#include "flutter/sky/engine/bindings/flutter_dart_state.h"
+
+using tonic::DartState;
 
 namespace blink {
 namespace {
