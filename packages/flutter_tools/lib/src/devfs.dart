@@ -306,18 +306,26 @@ class DevFS {
 
       for (String packageName in packageMap.map.keys) {
         Uri uri = packageMap.map[packageName];
-        // Ignore self-references.
-        if (uri.toString() == 'lib/')
-          continue;
+        // This project's own package.
+        final bool isProjectPackage = uri.toString() == 'lib/';
+        final String directoryName =
+            isProjectPackage ? 'lib' : 'packages/$packageName';
+        // If this is the project's package, we need to pass both
+        // package:<package_name> and lib/ as paths to be checked against
+        // the filter because we must support both package: imports and relative
+        // path imports within the project's own code.
+        final String packagesDirectoryName =
+            isProjectPackage ? 'packages/$packageName' : null;
         Directory directory = new Directory.fromUri(uri);
         bool packageExists =
             await _scanDirectory(directory,
-                                 directoryName: 'packages/$packageName',
+                                 directoryName: directoryName,
                                  recursive: true,
+                                 packagesDirectoryName: packagesDirectoryName,
                                  fileFilter: fileFilter);
         if (packageExists) {
           sb ??= new StringBuffer();
-          sb.writeln('$packageName:packages/$packageName');
+          sb.writeln('$packageName:$directoryName');
         }
       }
     }
@@ -460,6 +468,7 @@ class DevFS {
                               {String directoryName,
                                bool recursive: false,
                                bool ignoreDotFiles: true,
+                               String packagesDirectoryName,
                                Set<String> fileFilter}) async {
     String prefix = directoryName;
     if (prefix == null) {
@@ -479,10 +488,26 @@ class DevFS {
           // Skip dot files.
           continue;
         }
-        final String devicePath =
-            path.join(prefix, path.relative(file.path, from: directory.path));
+        final String relativePath =
+            path.relative(file.path, from: directory.path);
+        final String devicePath = path.join(prefix, relativePath);
+        bool filtered = false;
         if ((fileFilter != null) &&
             !fileFilter.contains(devicePath)) {
+          if (packagesDirectoryName != null) {
+            // Double check the filter for packages/packagename/
+            final String packagesDevicePath =
+                path.join(packagesDirectoryName, relativePath);
+            if (!fileFilter.contains(packagesDevicePath)) {
+              // File was not in the filter set.
+              filtered = true;
+            }
+          } else {
+            // File was not in the filter set.
+            filtered = true;
+          }
+        }
+        if (filtered) {
           // Skip files that are not included in the filter.
           continue;
         }
