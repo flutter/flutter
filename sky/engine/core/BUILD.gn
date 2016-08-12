@@ -3,7 +3,6 @@
 # found in the LICENSE file.
 
 import("//flutter/sky/engine/core/core.gni")
-import("//mojo/dart/embedder/embedder.gni")
 
 visibility = [ "//flutter/sky/engine/*", "//flutter/sky/shell/*" ]
 
@@ -54,26 +53,10 @@ source_set("prerequisites") {
   ]
 }
 
-vmservice_sources_gypi =
-  exec_script("//build/gypi_to_gn.py",
-      [ rebase_path("//dart/runtime/bin/vmservice/vmservice_sources.gypi") ],
-      "scope",
-      [ rebase_path("//dart/runtime/bin/vmservice/vmservice_sources.gypi") ])
-
-dart_embedder_resources("generate_sky_embedder_service_isolate_resources_cc") {
-  inputs = rebase_path(vmservice_sources_gypi.sources,
-                       "",
-                       "//dart/runtime/bin/vmservice")
-  root_prefix = "//dart/runtime/bin/"
-  output = "$target_gen_dir/sky_embedder_service_isolate_resources.cc"
-  table_name = "sky_embedder_service_isolate"
-}
-
 static_library("core") {
   output_name = "sky_core"
 
   deps = [
-    ":generate_sky_embedder_service_isolate_resources_cc",
     ":libraries",
     ":prerequisites",
     "//dart/runtime:libdart",
@@ -94,13 +77,6 @@ static_library("core") {
   }
 
   sources = sky_core_files
-
-  sources += [ "$target_gen_dir/sky_embedder_service_isolate_resources.cc" ]
-
-  include_dirs = [
-    # Needed for dart_mirrors_api.h in dart_controller.cc
-    rebase_path("//dart/runtime"),
-  ]
 
   forward_dependent_configs_from = [ ":libraries" ]
 }
