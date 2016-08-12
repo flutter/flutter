@@ -41,10 +41,10 @@ source_set("ui") {
   ]
 
   deps = [
+    "//flutter/common",
     "//flutter/flow",
     "//flutter/glue",
     "//flutter/skia",
-    "//flutter/tonic",
     "//lib/tonic",
     "//lib/tonic/mojo",
   ]
