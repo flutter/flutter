@@ -172,15 +172,12 @@ class Window {
   /// graphical operations, call the [endRecording] function on the
   /// [PictureRecorder] to obtain the final [Picture] that represents
   /// the issued graphical operations.
-  /// 
+  ///
   /// Next, create a [SceneBuilder], and add the [Picture] to it using
   /// [SceneBuilder.addPicture]. With the [SceneBuilder.build] method
   /// you can then obtain a [Scene] object, which you can display to
   /// the user via this [render] function.
   void render(Scene scene) native "Window_render";
-
-  /// Flushes pending real-time events, executing their callbacks.
-  void flushRealTimeEvents() native "Scheduler_FlushRealTimeEvents";
 }
 
 /// The [Window] singleton. This object exposes the size of the display, the
