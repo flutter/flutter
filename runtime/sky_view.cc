@@ -51,7 +51,7 @@ void SkyView::PopRoute() {
 }
 
 void SkyView::CreateView(const std::string& script_uri) {
-  DCHECK(!dart_controller_);
+  FTL_DCHECK(!dart_controller_);
 
   dart_controller_.reset(new DartController());
   std::unique_ptr<Window> window(new Window(this));

@@ -29,6 +29,7 @@
 #include "flutter/lib/ui/ui_dart_state.h"
 #include "flutter/runtime/dart_service_isolate.h"
 #include "flutter/runtime/start_up.h"
+#include "lib/ftl/arraysize.h"
 #include "lib/ftl/files/eintr_wrapper.h"
 #include "lib/ftl/files/unique_fd.h"
 #include "lib/ftl/logging.h"
@@ -44,7 +45,7 @@
 #include "lib/tonic/typed_data/uint8_list.h"
 #include "mojo/public/platform/dart/dart_handle_watcher.h"
 
-#ifdef OS_ANDROID
+#if defined(OS_ANDROID)
 #include "flutter/lib/jni/dart_jni.h"
 #endif
 
@@ -159,7 +160,7 @@ bool DartFileModifiedCallback(const char* source_url, int64_t since_ms) {
 }
 
 void ThreadExitCallback() {
-#ifdef OS_ANDROID
+#if defined(OS_ANDROID)
   DartJni::OnThreadExit();
 #endif
 }
@@ -271,7 +272,7 @@ Dart_Isolate IsolateCreateCallback(const char* script_uri,
     dart_state->class_library().add_provider("ui",
                                              std::move(ui_class_provider));
 
-#ifdef OS_ANDROID
+#if defined(OS_ANDROID)
     DartJni::InitForIsolate();
     std::unique_ptr<DartClassProvider> jni_class_provider(
         new DartClassProvider(dart_state, "dart:jni"));
@@ -325,7 +326,7 @@ static void ServiceStreamCancelCallback(const char* stream_id) {
   }
 }
 
-#ifdef OS_ANDROID
+#if defined(OS_ANDROID)
 
 DartJniIsolateData* GetDartJniDataForCurrentIsolate() {
   return UIDartState::Current()->jni_data();
@@ -499,7 +500,7 @@ void SetServiceIsolateHook(ServiceIsolateHook hook) {
 
 void SetRegisterNativeServiceProtocolExtensionHook(
     RegisterNativeServiceProtocolExtensionHook hook) {
-  CHECK(!g_service_isolate_initialized);
+  FTL_CHECK(!g_service_isolate_initialized);
   g_register_native_service_protocol_extensions_hook = hook;
 }
 
@@ -583,7 +584,7 @@ void InitDartVM() {
 #endif
 
   DartUI::InitForGlobal();
-#ifdef OS_ANDROID
+#if defined(OS_ANDROID)
   DartJni::InitForGlobal(GetDartJniDataForCurrentIsolate);
 #endif
 
