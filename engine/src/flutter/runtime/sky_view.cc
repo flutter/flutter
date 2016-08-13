@@ -55,11 +55,11 @@ void SkyView::CreateView(const std::string& script_uri) {
 
   dart_controller_.reset(new DartController());
   std::unique_ptr<Window> window(new Window(this));
-  std::unique_ptr<UIDartState> dart_state(
-      new UIDartState(this, std::move(window)));
-  dart_controller_->CreateIsolateFor(script_uri, std::move(dart_state));
+  dart_controller_->CreateIsolateFor(script_uri, std::unique_ptr<UIDartState>(
+      new UIDartState(this, std::move(window))));
 
-  DartState::Scope scope(dart_state.get());
+  UIDartState* dart_state = dart_controller_->dart_state();
+  DartState::Scope scope(dart_state);
   dart_state->window()->DidCreateIsolate();
   client_->DidCreateMainIsolate(dart_state->isolate());
 
