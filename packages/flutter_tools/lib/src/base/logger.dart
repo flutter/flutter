@@ -6,6 +6,8 @@ import 'dart:async';
 import 'dart:convert' show ASCII;
 import 'dart:io';
 
+import 'package:stack_trace/stack_trace.dart';
+
 final AnsiTerminal terminal = new AnsiTerminal();
 
 abstract class Logger {
@@ -55,7 +57,7 @@ class StdoutLogger extends Logger {
 
     stderr.writeln(message);
     if (stackTrace != null)
-      stderr.writeln(stackTrace);
+      stderr.writeln(new Chain.forTrace(stackTrace).terse.toString());
   }
 
   @override
