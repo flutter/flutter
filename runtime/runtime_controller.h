@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_RUNTIME_SKY_VIEW_H_
-#define FLUTTER_RUNTIME_SKY_VIEW_H_
+#ifndef FLUTTER_RUNTIME_RUNTIME_CONTROLLER_H_
+#define FLUTTER_RUNTIME_RUNTIME_CONTROLLER_H_
 
 #include <memory>
 
@@ -18,14 +18,17 @@ namespace blink {
 class DartController;
 class DartLibraryProvider;
 class Scene;
-class SkyViewClient;
+class RuntimeDelegate;
 class View;
 class Window;
 
-class SkyView : public WindowClient, public IsolateClient {
+class RuntimeController : public WindowClient, public IsolateClient {
  public:
-  static std::unique_ptr<SkyView> Create(SkyViewClient* client);
-  ~SkyView();
+  static std::unique_ptr<RuntimeController> Create(RuntimeDelegate* client);
+  ~RuntimeController();
+
+  void CreateDartController(const std::string& script_uri);
+  DartController* dart_controller() const { return dart_controller_.get(); }
 
   void SetViewportMetrics(const sky::ViewportMetricsPtr& metrics);
   void SetLocale(const std::string& language_code,
@@ -35,9 +38,6 @@ class SkyView : public WindowClient, public IsolateClient {
 
   void BeginFrame(ftl::TimePoint frame_time);
 
-  void CreateView(const std::string& script_uri);
-  DartController* dart_controller() const { return dart_controller_.get(); }
-
   void HandlePointerPacket(const pointer::PointerPacketPtr& packet);
 
   void OnAppLifecycleStateChanged(sky::AppLifecycleState state);
@@ -45,25 +45,24 @@ class SkyView : public WindowClient, public IsolateClient {
   Dart_Port GetMainPort();
 
  private:
-  explicit SkyView(SkyViewClient* client);
+  explicit RuntimeController(RuntimeDelegate* client);
 
   Window* GetWindow();
 
   void ScheduleFrame() override;
-  void FlushRealTimeEvents() override;
   void Render(Scene* scene) override;
 
   void DidCreateSecondaryIsolate(Dart_Isolate isolate) override;
 
-  SkyViewClient* client_;
+  RuntimeDelegate* client_;
   sky::ViewportMetricsPtr viewport_metrics_;
   std::string language_code_;
   std::string country_code_;
   std::unique_ptr<DartController> dart_controller_;
 
-  FTL_DISALLOW_COPY_AND_ASSIGN(SkyView);
+  FTL_DISALLOW_COPY_AND_ASSIGN(RuntimeController);
 };
 
 }  // namespace blink
 
-#endif  // FLUTTER_RUNTIME_SKY_VIEW_H_
+#endif  // FLUTTER_RUNTIME_RUNTIME_CONTROLLER_H_

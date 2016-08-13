@@ -22,7 +22,6 @@ class Animator {
   ~Animator();
 
   void RequestFrame();
-  void FlushRealTimeEvents();
 
   void Render(std::unique_ptr<flow::LayerTree> layer_tree);
 

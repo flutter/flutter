@@ -7,8 +7,8 @@
 
 #include "flutter/assets/zip_asset_store.h"
 #include "flutter/glue/drain_data_pipe_job.h"
-#include "flutter/runtime/sky_view_client.h"
-#include "flutter/runtime/sky_view.h"
+#include "flutter/runtime/runtime_delegate.h"
+#include "flutter/runtime/runtime_controller.h"
 #include "flutter/services/engine/sky_engine.mojom.h"
 #include "flutter/services/rasterizer/rasterizer.mojom.h"
 #include "flutter/sky/shell/ui_delegate.h"
@@ -30,7 +30,7 @@ class Animator;
 
 class Engine : public UIDelegate,
                public SkyEngine,
-               public blink::SkyViewClient {
+               public blink::RuntimeDelegate {
  public:
   struct Config {
     Config();
@@ -78,9 +78,8 @@ class Engine : public UIDelegate,
   void PopRoute() override;
   void OnAppLifecycleStateChanged(sky::AppLifecycleState state) override;
 
-  // SkyViewClient methods:
+  // RuntimeDelegate methods:
   void ScheduleFrame() override;
-  void FlushRealTimeEvents() override;
   void Render(std::unique_ptr<flow::LayerTree> layer_tree) override;
   void DidCreateMainIsolate(Dart_Isolate isolate) override;
   void DidCreateSecondaryIsolate(Dart_Isolate isolate) override;
@@ -98,7 +97,7 @@ class Engine : public UIDelegate,
 
   void ConfigureZipAssetBundle(const std::string& path);
   void ConfigureDirectoryAssetBundle(const std::string& path);
-  void ConfigureView(const std::string& script_uri);
+  void ConfigureRuntime(const std::string& script_uri);
 
   Config config_;
   std::unique_ptr<Animator> animator_;
@@ -109,7 +108,7 @@ class Engine : public UIDelegate,
   mojo::BindingSet<mojo::ServiceProvider> service_provider_bindings_;
 
   mojo::asset_bundle::AssetBundlePtr root_bundle_;
-  std::unique_ptr<blink::SkyView> sky_view_;
+  std::unique_ptr<blink::RuntimeController> runtime_;
 
   std::unique_ptr<glue::DrainDataPipeJob> snapshot_drainer_;
 

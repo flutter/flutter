@@ -54,14 +54,6 @@ void Animator::RequestFrame() {
   }
 }
 
-void Animator::FlushRealTimeEvents() {
-  if (outstanding_requests_ > 0)
-    rasterizer_.WaitForIncomingResponseWithTimeout(0);
-
-  if (engine_requested_frame_ && vsync_provider_)
-    vsync_provider_.WaitForIncomingResponseWithTimeout(0);
-}
-
 void Animator::Stop() {
   paused_ = true;
 }

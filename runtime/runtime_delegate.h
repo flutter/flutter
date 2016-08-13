@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_RUNTIME_SKY_VIEW_CLIENT_H_
-#define FLUTTER_RUNTIME_SKY_VIEW_CLIENT_H_
+#ifndef FLUTTER_RUNTIME_RUNTIME_DELEGATE_H_
+#define FLUTTER_RUNTIME_RUNTIME_DELEGATE_H_
 
 #include <memory>
 
@@ -12,19 +12,18 @@
 
 namespace blink {
 
-class SkyViewClient {
+class RuntimeDelegate {
  public:
   virtual void ScheduleFrame() = 0;
-  virtual void FlushRealTimeEvents() = 0;
   virtual void Render(std::unique_ptr<flow::LayerTree> layer_tree) = 0;
 
-  virtual void DidCreateMainIsolate(Dart_Isolate isolate) = 0;
-  virtual void DidCreateSecondaryIsolate(Dart_Isolate isolate) = 0;
+  virtual void DidCreateMainIsolate(Dart_Isolate isolate);
+  virtual void DidCreateSecondaryIsolate(Dart_Isolate isolate);
 
  protected:
-  virtual ~SkyViewClient();
+  virtual ~RuntimeDelegate();
 };
 
 }  // namespace blink
 
-#endif  // FLUTTER_RUNTIME_SKY_VIEW_CLIENT_H_
+#endif  // FLUTTER_RUNTIME_RUNTIME_DELEGATE_H_

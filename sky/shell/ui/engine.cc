@@ -78,8 +78,8 @@ void Engine::Init() {
 
 void Engine::BeginFrame(ftl::TimePoint frame_time) {
   TRACE_EVENT0("flutter", "Engine::BeginFrame");
-  if (sky_view_)
-    sky_view_->BeginFrame(frame_time);
+  if (runtime_)
+    runtime_->BeginFrame(frame_time);
 }
 
 void Engine::RunFromSource(const std::string& main,
@@ -91,14 +91,14 @@ void Engine::RunFromSource(const std::string& main,
     packages_path = FindPackagesPath(main);
   if (!bundle.empty())
     ConfigureDirectoryAssetBundle(bundle);
-  ConfigureView(main);
-  sky_view_->dart_controller()->RunFromSource(main, packages_path);
+  ConfigureRuntime(main);
+  runtime_->dart_controller()->RunFromSource(main, packages_path);
 }
 
 Dart_Port Engine::GetUIIsolateMainPort() {
-  if (!sky_view_)
+  if (!runtime_)
     return ILLEGAL_PORT;
-  return sky_view_->GetMainPort();
+  return runtime_->GetMainPort();
 }
 
 void Engine::ConnectToEngine(mojo::InterfaceRequest<SkyEngine> request) {
@@ -109,7 +109,7 @@ void Engine::OnOutputSurfaceCreated(const ftl::Closure& gpu_continuation) {
   blink::Threads::Gpu()->PostTask(gpu_continuation);
   have_surface_ = true;
   StartAnimatorIfPossible();
-  if (sky_view_)
+  if (runtime_)
     ScheduleFrame();
 }
 
@@ -154,16 +154,16 @@ void Engine::SetServices(ServicesDataPtr services) {
 
 void Engine::OnViewportMetricsChanged(ViewportMetricsPtr metrics) {
   viewport_metrics_ = metrics.Pass();
-  if (sky_view_)
-    sky_view_->SetViewportMetrics(viewport_metrics_);
+  if (runtime_)
+    runtime_->SetViewportMetrics(viewport_metrics_);
 }
 
 void Engine::OnLocaleChanged(const mojo::String& language_code,
                              const mojo::String& country_code) {
   language_code_ = language_code;
   country_code_ = country_code;
-  if (sky_view_)
-    sky_view_->SetLocale(language_code_, country_code_);
+  if (runtime_)
+    runtime_->SetLocale(language_code_, country_code_);
 }
 
 void Engine::OnPointerPacket(pointer::PointerPacketPtr packet) {
@@ -175,20 +175,20 @@ void Engine::OnPointerPacket(pointer::PointerPacketPtr packet) {
     (*it)->y /= viewport_metrics_->device_pixel_ratio;
   }
 
-  if (sky_view_)
-    sky_view_->HandlePointerPacket(packet);
+  if (runtime_)
+    runtime_->HandlePointerPacket(packet);
 }
 
 void Engine::RunFromSnapshotStream(
     const std::string& script_uri,
     mojo::ScopedDataPipeConsumerHandle snapshot) {
   TRACE_EVENT0("flutter", "Engine::RunFromSnapshotStream");
-  ConfigureView(script_uri);
+  ConfigureRuntime(script_uri);
   snapshot_drainer_.reset(new glue::DrainDataPipeJob(
       std::move(snapshot), [this](std::vector<char> snapshot) {
-        FTL_DCHECK(sky_view_);
-        FTL_DCHECK(sky_view_->dart_controller());
-        sky_view_->dart_controller()->RunFromSnapshot(
+        FTL_DCHECK(runtime_);
+        FTL_DCHECK(runtime_->dart_controller());
+        runtime_->dart_controller()->RunFromSnapshot(
             reinterpret_cast<uint8_t*>(snapshot.data()), snapshot.size());
       }));
 }
@@ -204,21 +204,21 @@ void Engine::ConfigureDirectoryAssetBundle(const std::string& path) {
                                   blink::Threads::IO());
 }
 
-void Engine::ConfigureView(const std::string& script_uri) {
+void Engine::ConfigureRuntime(const std::string& script_uri) {
   snapshot_drainer_.reset();
-  sky_view_ = blink::SkyView::Create(this);
-  sky_view_->CreateView(std::move(script_uri));
-  sky_view_->SetViewportMetrics(viewport_metrics_);
-  sky_view_->SetLocale(language_code_, country_code_);
+  runtime_ = blink::RuntimeController::Create(this);
+  runtime_->CreateDartController(std::move(script_uri));
+  runtime_->SetViewportMetrics(viewport_metrics_);
+  runtime_->SetLocale(language_code_, country_code_);
   if (!initial_route_.empty())
-    sky_view_->PushRoute(initial_route_);
+    runtime_->PushRoute(initial_route_);
 }
 
 void Engine::RunFromPrecompiledSnapshot(const mojo::String& bundle_path) {
   TRACE_EVENT0("flutter", "Engine::RunFromPrecompiledSnapshot");
   ConfigureZipAssetBundle(bundle_path.get());
-  ConfigureView("http://localhost");
-  sky_view_->dart_controller()->RunFromPrecompiledSnapshot();
+  ConfigureRuntime("http://localhost");
+  runtime_->dart_controller()->RunFromPrecompiledSnapshot();
 }
 
 void Engine::RunFromFile(const mojo::String& main,
@@ -252,15 +252,15 @@ void Engine::RunFromBundleAndSnapshot(const mojo::String& script_uri,
 }
 
 void Engine::PushRoute(const mojo::String& route) {
-  if (sky_view_)
-    sky_view_->PushRoute(route);
+  if (runtime_)
+    runtime_->PushRoute(route);
   else
     initial_route_ = route;
 }
 
 void Engine::PopRoute() {
-  if (sky_view_)
-    sky_view_->PopRoute();
+  if (runtime_)
+    runtime_->PopRoute();
 }
 
 void Engine::OnAppLifecycleStateChanged(sky::AppLifecycleState state) {
@@ -276,8 +276,8 @@ void Engine::OnAppLifecycleStateChanged(sky::AppLifecycleState state) {
       break;
   }
 
-  if (sky_view_)
-    sky_view_->OnAppLifecycleStateChanged(state);
+  if (runtime_)
+    runtime_->OnAppLifecycleStateChanged(state);
 }
 
 void Engine::DidCreateMainIsolate(Dart_Isolate isolate) {
@@ -322,10 +322,6 @@ void Engine::StartAnimatorIfPossible() {
 
 void Engine::ScheduleFrame() {
   animator_->RequestFrame();
-}
-
-void Engine::FlushRealTimeEvents() {
-  animator_->FlushRealTimeEvents();
 }
 
 void Engine::Render(std::unique_ptr<flow::LayerTree> layer_tree) {
