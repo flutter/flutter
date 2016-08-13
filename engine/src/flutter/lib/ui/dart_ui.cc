@@ -18,11 +18,15 @@
 #include "flutter/lib/ui/painting/path.h"
 #include "flutter/lib/ui/painting/picture_recorder.h"
 #include "flutter/lib/ui/painting/picture.h"
-#include "flutter/lib/ui/text/paragraph_builder.h"
-#include "flutter/lib/ui/text/paragraph.h"
 #include "flutter/lib/ui/window/window.h"
+#include "lib/ftl/build_config.h"
 #include "lib/tonic/converter/dart_converter.h"
 #include "lib/tonic/logging/dart_error.h"
+
+#if !defined(OS_FUCHSIA)
+#include "flutter/lib/ui/text/paragraph_builder.h"
+#include "flutter/lib/ui/text/paragraph.h"
+#endif
 
 using tonic::ToDart;
 
@@ -56,8 +60,10 @@ void DartUI::InitForGlobal() {
     ImageShader::RegisterNatives(g_natives);
     MaskFilter::RegisterNatives(g_natives);
     MojoServices::RegisterNatives(g_natives);
+#if !defined(OS_FUCHSIA)
     Paragraph::RegisterNatives(g_natives);
     ParagraphBuilder::RegisterNatives(g_natives);
+#endif
     Picture::RegisterNatives(g_natives);
     PictureRecorder::RegisterNatives(g_natives);
     Scene::RegisterNatives(g_natives);
@@ -67,7 +73,7 @@ void DartUI::InitForGlobal() {
 }
 
 void DartUI::InitForIsolate() {
-  DCHECK(g_natives);
+  FTL_DCHECK(g_natives);
   DART_CHECK_VALID(Dart_SetNativeResolver(Dart_LookupLibrary(ToDart("dart:ui")),
                                           GetNativeFunction, GetSymbol));
 }

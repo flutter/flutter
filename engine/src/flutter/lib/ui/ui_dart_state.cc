@@ -6,11 +6,14 @@
 
 #include "flutter/lib/ui/mojo_services.h"
 #include "flutter/lib/ui/window/window.h"
-#include "flutter/sky/engine/platform/fonts/FontSelector.h"
 #include "lib/tonic/converter/dart_converter.h"
 
-#ifdef OS_ANDROID
+#if defined(OS_ANDROID)
 #include "flutter/lib/jni/dart_jni.h"
+#endif
+
+#if !defined(OS_FUCHSIA)
+#include "flutter/sky/engine/platform/fonts/FontSelector.h"
 #endif
 
 using tonic::ToDart;
@@ -59,11 +62,13 @@ MojoServices* UIDartState::mojo_services() {
   return mojo_services_.get();
 }
 
-#ifdef OS_ANDROID
+#if defined(OS_ANDROID)
 DartJniIsolateData* UIDartState::jni_data() {
   return jni_data_.get();
 }
-#endif
+#endif  // defined(OS_ANDROID)
+
+#if !defined(OS_FUCHSIA)
 
 void UIDartState::set_font_selector(PassRefPtr<FontSelector> selector) {
   font_selector_ = selector;
@@ -72,5 +77,7 @@ void UIDartState::set_font_selector(PassRefPtr<FontSelector> selector) {
 PassRefPtr<FontSelector> UIDartState::font_selector() {
   return font_selector_;
 }
+
+#endif  // !defined(OS_FUCHSIA)
 
 }  // namespace blink

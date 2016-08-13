@@ -2,21 +2,33 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-import("//mojo/dart/embedder/embedder.gni")
-
 vmservice_sources_gypi =
   exec_script("//build/gypi_to_gn.py",
       [ rebase_path("//dart/runtime/bin/vmservice/vmservice_sources.gypi") ],
       "scope",
       [ rebase_path("//dart/runtime/bin/vmservice/vmservice_sources.gypi") ])
 
-dart_embedder_resources("gen_embedded_resources_cc") {
+action("gen_embedded_resources_cc") {
+  script = "//dart/runtime/tools/create_resources.py"
+  output_file = "$target_gen_dir/embedded_resources.cc"
+  outputs = [ output_file ]
+
   inputs = rebase_path(vmservice_sources_gypi.sources,
                        "",
                        "//dart/runtime/bin/vmservice")
-  root_prefix = "//dart/runtime/bin/"
-  output = "$target_gen_dir/embedded_resources.cc"
-  table_name = "flutter_embedded_service_isolate"
+
+  args = [
+    "--output",
+    rebase_path(output_file),
+    "--outer_namespace",
+    "mojo",  # TODO(abarth): Change namespace.
+    "--inner_namespace",
+    "dart",  # TODO(abarth): Change namespace.
+    "--table_name",
+    "flutter_embedded_service_isolate",
+    "--root_prefix",
+    rebase_path("//dart/runtime/bin/"),
+  ] + rebase_path(inputs)
 }
 
 source_set("embedded_resources_cc") {
