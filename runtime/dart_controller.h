@@ -18,8 +18,6 @@ class DartController {
   DartController();
   ~DartController();
 
-  static void InitVM();
-
   void RunFromPrecompiledSnapshot();
   void RunFromSnapshot(const uint8_t* buffer, size_t size);
   void RunFromSource(const std::string& main, const std::string& packages);

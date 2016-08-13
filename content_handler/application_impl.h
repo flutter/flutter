@@ -5,12 +5,17 @@
 #ifndef FLUTTER_CONTENT_HANDLER_APPLICATION_IMPL_H_
 #define FLUTTER_CONTENT_HANDLER_APPLICATION_IMPL_H_
 
+#include <memory>
+
+#include "flutter/glue/drain_data_pipe_job.h"
+#include "lib/ftl/macros.h"
 #include "mojo/public/cpp/bindings/strong_binding.h"
 #include "mojo/public/interfaces/application/application.mojom.h"
 #include "mojo/public/interfaces/application/shell.mojom.h"
 #include "mojo/services/content_handler/interfaces/content_handler.mojom.h"
 
 namespace flutter_content_handler {
+class RuntimeHolder;
 
 class ApplicationImpl : public mojo::Application {
  public:
@@ -29,10 +34,18 @@ class ApplicationImpl : public mojo::Application {
       mojo::InterfaceRequest<mojo::ServiceProvider> services) override;
   void RequestQuit() override;
 
+  void StartRuntimeIfReady();
+
   mojo::StrongBinding<mojo::Application> binding_;
-  mojo::URLResponsePtr initial_response_;
-  std::string url_;
+  std::unique_ptr<glue::DrainDataPipeJob> drainer_;
+
+  std::vector<char> snapshot_;
   mojo::ShellPtr shell_;
+  std::string url_;
+
+  std::unique_ptr<RuntimeHolder> runtime_holder_;
+
+  FTL_DISALLOW_COPY_AND_ASSIGN(ApplicationImpl);
 };
 
 }  // namespace flutter_content_handler

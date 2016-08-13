@@ -39,8 +39,8 @@ class App : public mojo::ApplicationImplBase {
     ftl::RefPtr<ftl::TaskRunner> gpu_task_runner;
     gpu_thread_ = mtl::CreateThread(&gpu_task_runner);
 
-    ftl::RefPtr<ftl::TaskRunner> ui_task_runner;
-    ui_thread_ = mtl::CreateThread(&ui_task_runner);
+    ftl::RefPtr<ftl::TaskRunner> ui_task_runner(
+        mtl::MessageLoop::GetCurrent()->task_runner());
 
     ftl::RefPtr<ftl::TaskRunner> io_task_runner;
     io_thread_ = mtl::CreateThread(&io_task_runner);
