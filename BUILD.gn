@@ -8,6 +8,7 @@ group("flutter") {
   if (is_fuchsia) {
     # TODO(abarth) Remove this specific list once Fuchsia can build everything.
     deps = [
+      "//flutter/content_handler",
       "//flutter/flow",
       "//flutter/runtime",
       "//flutter/snapshotter",

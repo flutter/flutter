@@ -1,0 +1,37 @@
+# Copyright 2016 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+assert(is_fuchsia)
+
+executable("content_handler") {
+  output_name = "flutter_content_handler"
+
+  sources = [
+    "application_impl.cc",
+    "application_impl.h",
+    "content_handler_impl.cc",
+    "content_handler_impl.h",
+    "main.cc",
+  ]
+
+  deps = [
+    "//dart/runtime:libdart",
+    "//dart/runtime/vm:libdart_platform",
+    "//flutter/common",
+    "//flutter/runtime",
+    "//lib/ftl",
+    "//lib/mtl",
+    "//mojo/public/cpp/application",
+    "//mojo/public/cpp/bindings",
+    "//mojo/public/cpp/system",
+    "//mojo/public/cpp/utility",
+    "//mojo/public/interfaces/application",
+    "//mojo/services/content_handler/interfaces",
+    "//mojo/system",
+
+    # TODO(abarth): We shouldn't need to depend on libdart_builtin but we fail
+    # to link otherwise.
+    "//dart/runtime/bin:libdart_builtin",
+  ]
+}

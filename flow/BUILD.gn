@@ -6,8 +6,6 @@ source_set("flow") {
   sources = [
     "compositor_context.cc",
     "compositor_context.h",
-    "gl_connection.cc",
-    "gl_connection.h",
     "instrumentation.cc",
     "instrumentation.h",
     "layers/backdrop_filter_layer.cc",
@@ -38,10 +36,10 @@ source_set("flow") {
     "layers/shader_mask_layer.h",
     "layers/transform_layer.cc",
     "layers/transform_layer.h",
-    "open_gl.h",
     "raster_cache.cc",
     "raster_cache.h",
-    "texture_image.cc",
+    "bitmap_image.cc",
+    "bitmap_image.h",
     "texture_image.h",
   ]
 
@@ -53,11 +51,15 @@ source_set("flow") {
   ]
 
   if (is_fuchsia) {
-    # TODO(abarth): In principle, we should add "//mojo/public/c/gpu" as a
-    # dependency, but that doesn't work currently because GPU support on Fuchsia
-    # is still a work in progress.
-    include_dirs = [
-      "//mojo/public/c/gpu",
+    sources += [
+      "texture_image_none.cc",
+    ]
+  } else {
+    sources += [
+      "gl_connection.cc",
+      "gl_connection.h",
+      "open_gl.h",
+      "texture_image_gles2.cc",
     ]
   }
 }
