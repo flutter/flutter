@@ -5,6 +5,7 @@
 #include "flutter/lib/ui/painting/image_decoding.h"
 
 #include "flutter/common/threads.h"
+#include "flutter/flow/bitmap_image.h"
 #include "flutter/flow/texture_image.h"
 #include "flutter/glue/drain_data_pipe_job.h"
 #include "flutter/glue/movable_wrapper.h"
@@ -28,29 +29,24 @@ namespace {
 sk_sp<SkImage> DecodeImage(std::vector<char> buffer) {
   TRACE_EVENT0("blink", "DecodeImage");
 
-  if (buffer.empty()) {
+  if (buffer.empty())
     return nullptr;
-  }
 
   sk_sp<SkData> sk_data = SkData::MakeWithoutCopy(buffer.data(), buffer.size());
 
-  if (sk_data == nullptr) {
+  if (sk_data == nullptr)
     return nullptr;
-  }
 
   std::unique_ptr<SkImageGenerator> generator(
       SkImageGenerator::NewFromEncoded(sk_data.get()));
 
-  if (generator == nullptr) {
+  if (generator == nullptr)
     return nullptr;
-  }
-
-  GrContext* context = ResourceContext::Get();
 
   // First, try to create a texture image from the generator.
-  if (sk_sp<SkImage> image = flow::TextureImageCreate(context, *generator)) {
+  GrContext* context = ResourceContext::Get();
+  if (sk_sp<SkImage> image = flow::TextureImageCreate(context, *generator))
     return image;
-  }
 
   // The, as a fallback, try to create a regular Skia managed image. These
   // don't require a context ready.

@@ -30,6 +30,7 @@
 #include "flutter/runtime/dart_service_isolate.h"
 #include "flutter/runtime/start_up.h"
 #include "lib/ftl/arraysize.h"
+#include "lib/ftl/build_config.h"
 #include "lib/ftl/files/eintr_wrapper.h"
 #include "lib/ftl/files/unique_fd.h"
 #include "lib/ftl/logging.h"
@@ -295,7 +296,7 @@ Dart_Isolate IsolateCreateCallback(const char* script_uri,
 }
 
 Dart_Handle GetVMServiceAssetsArchiveCallback() {
-#if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_RELEASE
+#if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_RELEASE || defined(OS_FUCHSIA)
   return nullptr;
 #else   // FLUTTER_RUNTIME_MODE
   return tonic::DartConverter<tonic::Uint8List>::ToDart(

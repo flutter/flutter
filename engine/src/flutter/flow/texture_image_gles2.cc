@@ -2,8 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/flow/open_gl.h"
 #include "flutter/flow/texture_image.h"
+
+#include "flutter/flow/open_gl.h"
 #include "flutter/glue/trace_event.h"
 #include "third_party/skia/include/gpu/gl/GrGLTypes.h"
 
@@ -76,9 +77,8 @@ static sk_sp<SkImage> TextureImageCreate(GrContext* context,
   TRACE_EVENT2("flutter", __func__, "width", size.width(), "height",
                size.height());
 
-  if (context == nullptr) {
+  if (!context)
     return nullptr;
-  }
 
   GLuint handle = GL_NONE;
 
@@ -178,16 +178,6 @@ static sk_sp<SkImage> TextureImageCreate(GrContext* context,
       dataFormat,                                           // data format
       reinterpret_cast<const uint8_t*>(bitmap.getPixels())  // data
       );
-}
-
-sk_sp<SkImage> BitmapImageCreate(SkImageGenerator& generator) {
-  SkBitmap bitmap;
-
-  if (generator.tryGenerateBitmap(&bitmap)) {
-    return SkImage::MakeFromBitmap(bitmap);
-  }
-
-  return nullptr;
 }
 
 sk_sp<SkImage> TextureImageCreate(GrContext* context,
