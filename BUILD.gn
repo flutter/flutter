@@ -12,6 +12,7 @@ group("flutter") {
       "//flutter/flow",
       "//flutter/runtime",
       "//flutter/snapshotter",
+      "//flutter/snapshotter($host_toolchain)",
     ]
   } else {
     deps = [

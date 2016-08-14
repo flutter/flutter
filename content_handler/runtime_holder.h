@@ -8,6 +8,7 @@
 #include "flutter/flow/layers/layer_tree.h"
 #include "flutter/runtime/runtime_controller.h"
 #include "flutter/runtime/runtime_delegate.h"
+#include "flutter/services/engine/sky_engine.mojom.h"
 #include "lib/ftl/functional/closure.h"
 #include "lib/ftl/macros.h"
 #include "lib/ftl/memory/weak_ptr.h"
@@ -43,6 +44,7 @@ class RuntimeHolder : public blink::RuntimeDelegate {
   mojo::FramebufferProviderPtr framebuffer_provider_;
   std::unique_ptr<Rasterizer> rasterizer_;
   std::unique_ptr<blink::RuntimeController> runtime_;
+  sky::ViewportMetricsPtr viewport_metrics_;
 
   bool runtime_requested_frame_ = false;
   bool did_defer_frame_request_ = false;

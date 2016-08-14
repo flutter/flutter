@@ -28,26 +28,19 @@ class App : public mojo::ApplicationImplBase {
  public:
   App() {}
 
-  ~App() override {
-    io_thread_.join();
-    ui_thread_.join();
-    gpu_thread_.join();
-  }
+  ~App() override {}
 
   // Overridden from ApplicationDelegate:
   void OnInitialize() override {
-    ftl::RefPtr<ftl::TaskRunner> gpu_task_runner;
-    gpu_thread_ = mtl::CreateThread(&gpu_task_runner);
-
     ftl::RefPtr<ftl::TaskRunner> ui_task_runner(
         mtl::MessageLoop::GetCurrent()->task_runner());
 
-    ftl::RefPtr<ftl::TaskRunner> io_task_runner;
-    io_thread_ = mtl::CreateThread(&io_task_runner);
-
-    blink::Threads::Set(blink::Threads(std::move(gpu_task_runner),
-                                       std::move(ui_task_runner),
-                                       std::move(io_task_runner)));
+    // TODO(abarth): Currently we're using one thread for everything, but we
+    // should use separate threads for GPU, UI, and IO tasks. However, there
+    // appears to be some issue with running multiple message loops at the same
+    // time, potentially related to TLS.
+    blink::Threads::Set(
+        blink::Threads(ui_task_runner, ui_task_runner, ui_task_runner));
     blink::Settings::Set(blink::Settings());
     blink::InitDartVM();
   }
@@ -63,10 +56,6 @@ class App : public mojo::ApplicationImplBase {
   }
 
  private:
-  std::thread gpu_thread_;
-  std::thread ui_thread_;
-  std::thread io_thread_;
-
   FTL_DISALLOW_COPY_AND_ASSIGN(App);
 };
 

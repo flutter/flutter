@@ -9,6 +9,7 @@
 #include "apps/dart_content_handler/zip/unzipper.h"
 #include "flutter/content_handler/runtime_holder.h"
 #include "lib/ftl/logging.h"
+#include "lib/mtl/data_pipe/vector.h"
 #include "mojo/public/cpp/application/connect.h"
 
 namespace flutter_content_handler {
@@ -27,11 +28,20 @@ ApplicationImpl::ApplicationImpl(
     mojo::InterfaceRequest<mojo::Application> application,
     mojo::URLResponsePtr response)
     : binding_(this, std::move(application)) {
-  drainer_.reset(new glue::DrainDataPipeJob(
-      std::move(response->body), [this](std::vector<char> bundle) {
-        snapshot_ = ExtractSnapshot(std::move(bundle));
-        StartRuntimeIfReady();
-      }));
+  // TODO(abarth): Currently we block the UI thread to drain the response body,
+  // but we should do that work asynchronously instead. However, there when I
+  // tried draining the data pipe asynchronously, the drain didn't complete.
+  // We'll need to investigate why in more detail.
+  std::vector<char> bundle;
+  bool result = mtl::BlockingCopyToVector(std::move(response->body), &bundle);
+  if (!result) {
+    FTL_LOG(ERROR) << "Failed to receive bundle.";
+    return;
+  }
+  snapshot_ = ExtractSnapshot(std::move(bundle));
+  // TODO(abarth): In principle, we should call StartRuntimeIfReady() here but
+  // because we're draining the data pipe synchronously, we know that we can't
+  // possibly be ready yet because we haven't received the Initialize() message.
 }
 
 ApplicationImpl::~ApplicationImpl() {}

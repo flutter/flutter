@@ -25,7 +25,8 @@ constexpr ftl::TimeDelta kTargetFrameInterval =
 
 }  // namespace
 
-RuntimeHolder::RuntimeHolder() : weak_factory_(this) {}
+RuntimeHolder::RuntimeHolder()
+    : viewport_metrics_(sky::ViewportMetrics::New()), weak_factory_(this) {}
 
 RuntimeHolder::~RuntimeHolder() {
   blink::Threads::Gpu()->PostTask(
@@ -45,12 +46,13 @@ void RuntimeHolder::Init(mojo::ApplicationConnectorPtr connector) {
     if (self)
       self->DidCreateFramebuffer(std::move(framebuffer), std::move(info));
   }));
-  runtime_ = blink::RuntimeController::Create(this);
 }
 
 void RuntimeHolder::Run(const std::string& script_uri,
                         std::vector<char> snapshot) {
+  runtime_ = blink::RuntimeController::Create(this);
   runtime_->CreateDartController(script_uri);
+  runtime_->SetViewportMetrics(viewport_metrics_);
   runtime_->dart_controller()->RunFromSnapshot(
       reinterpret_cast<const uint8_t*>(snapshot.data()), snapshot.size());
 }
@@ -90,10 +92,10 @@ void RuntimeHolder::Render(std::unique_ptr<flow::LayerTree> layer_tree) {
 void RuntimeHolder::DidCreateFramebuffer(
     mojo::InterfaceHandle<mojo::Framebuffer> framebuffer,
     mojo::FramebufferInfoPtr info) {
-  auto viewport_metrics = sky::ViewportMetrics::New();
-  viewport_metrics->physical_width = info->size->width;
-  viewport_metrics->physical_height = info->size->height;
-  runtime_->SetViewportMetrics(viewport_metrics);
+  viewport_metrics_->physical_width = info->size->width;
+  viewport_metrics_->physical_height = info->size->height;
+  if (runtime_)
+    runtime_->SetViewportMetrics(viewport_metrics_);
 
   blink::Threads::Gpu()->PostTask(ftl::MakeCopyable([
     rasterizer = rasterizer_.get(), framebuffer = std::move(framebuffer),
