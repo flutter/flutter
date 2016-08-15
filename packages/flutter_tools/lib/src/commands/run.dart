@@ -237,13 +237,9 @@ Future<int> startApp(
   if (stop) {
     if (package != null) {
       printTrace("Stopping app '${package.name}' on ${device.name}.");
-      // We don't wait for the stop command to complete.
-      device.stopApp(package);
+      await device.stopApp(package);
     }
   }
-
-  // Allow any stop commands from above to start work.
-  await new Future<Duration>.delayed(Duration.ZERO);
 
   // TODO(devoncarew): This fails for ios devices - we haven't built yet.
   if (install && device is AndroidDevice) {
