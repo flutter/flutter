@@ -386,7 +386,7 @@ class HeroParty {
       assert(from != null || to != null);
       assert(to == null || to.sourceStates.length == 1);
       assert(to == null || to.currentTurns.floor() == to.currentTurns);
-      HeroState targetState = to?.sourceStates.elementAt(0);
+      HeroState targetState = to != null ? to.sourceStates.elementAt(0) : null;
       Set<HeroState> sourceStates = from?.sourceStates ?? new HashSet<HeroState>();
       sourceStates.remove(targetState);
       Rect sourceRect = from?.currentRect ?? to.currentRect.center & Size.zero;
