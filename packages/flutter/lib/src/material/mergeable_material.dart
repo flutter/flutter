@@ -506,6 +506,10 @@ class _MergeableMaterialState extends State<MergeableMaterial> {
 
         slices.add(
           new Material(
+            // Since slices live in different Material widgets, the parent
+            // hierarchy can change and lead to the slice being rebuilt. Using
+            // a global key solves the issue.
+            key: new _MergeableMaterialSliceKey(_children[i].key),
             type: MaterialType.transparency,
             child: slice.child
           )
@@ -537,6 +541,23 @@ class _MergeableMaterialState extends State<MergeableMaterial> {
       children: widgets
     );
   }
+}
+
+class _MergeableMaterialSliceKey extends GlobalKey {
+  const _MergeableMaterialSliceKey(this.value) : super.constructor();
+
+  final LocalKey value;
+
+  @override
+  bool operator ==(dynamic other) {
+    if (other is! _MergeableMaterialSliceKey)
+      return false;
+    final _MergeableMaterialSliceKey typedOther = other;
+    return value == typedOther.value;
+  }
+
+  @override
+  int get hashCode => value.hashCode;
 }
 
 class _MergeableMaterialBlockBody extends BlockBody {
