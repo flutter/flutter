@@ -7,7 +7,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('UserAccuntsDrawerHeader test', (WidgetTester tester) async {
+  testWidgets('UserAccountsDrawerHeader test', (WidgetTester tester) async {
     final Key avatarA = new Key('A');
     final Key avatarC = new Key('C');
     final Key avatarD = new Key('D');

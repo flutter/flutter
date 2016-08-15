@@ -21,7 +21,7 @@ ImageConfiguration createLocalImageConfiguration(BuildContext context, { Size si
   return new ImageConfiguration(
     bundle: DefaultAssetBundle.of(context),
     devicePixelRatio: MediaQuery.of(context).devicePixelRatio,
-    // TODO(ianh): provide the locale,
+    // TODO(ianh): provide the locale
     size: size,
     platform: Platform.operatingSystem
   );

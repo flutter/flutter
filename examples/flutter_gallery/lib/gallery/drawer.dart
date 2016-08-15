@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -14,6 +16,69 @@ class LinkTextSpan extends TextSpan {
       UrlLauncher.launch(url);
     }
   );
+}
+
+class GalleryDrawerHeader extends StatefulWidget {
+  const GalleryDrawerHeader({ Key key }) : super(key: key);
+
+  @override
+  _GalleryDrawerHeaderState createState() => new _GalleryDrawerHeaderState();
+}
+
+class _GalleryDrawerHeaderState extends State<GalleryDrawerHeader> {
+  bool _logoHasName = true;
+  bool _logoHorizontal = true;
+  Map<int, Color> _swatch = Colors.blue;
+
+  @override
+  Widget build(BuildContext context) {
+    final double systemTopPadding = MediaQuery.of(context).padding.top;
+
+    return new DrawerHeader(
+      decoration: new FlutterLogoDecoration(
+        margin: new EdgeInsets.fromLTRB(12.0, 12.0 + systemTopPadding, 12.0, 12.0),
+        style: _logoHasName ? _logoHorizontal ? FlutterLogoStyle.horizontal
+                                              : FlutterLogoStyle.stacked
+                                              : FlutterLogoStyle.markOnly,
+        swatch: _swatch,
+      ),
+      duration: const Duration(milliseconds: 750),
+      child: new GestureDetector(
+        onLongPress: () {
+          setState(() {
+            _logoHorizontal = !_logoHorizontal;
+            if (!_logoHasName)
+              _logoHasName = true;
+          });
+        },
+        onTap: () {
+          setState(() {
+            _logoHasName = !_logoHasName;
+          });
+        },
+        onDoubleTap: () {
+          setState(() {
+            final List<Map<int, Color>> options = <Map<int, Color>>[];
+            if (_swatch != Colors.blue)
+              options.addAll(<Map<int, Color>>[Colors.blue, Colors.blue, Colors.blue, Colors.blue, Colors.blue, Colors.blue, Colors.blue]);
+            if (_swatch != Colors.amber)
+              options.addAll(<Map<int, Color>>[Colors.amber, Colors.amber, Colors.amber]);
+            if (_swatch != Colors.red)
+              options.addAll(<Map<int, Color>>[Colors.red, Colors.red, Colors.red]);
+            if (_swatch != Colors.indigo)
+              options.addAll(<Map<int, Color>>[Colors.indigo, Colors.indigo, Colors.indigo]);
+            if (_swatch != Colors.pink)
+              options.addAll(<Map<int, Color>>[Colors.pink]);
+            if (_swatch != Colors.purple)
+              options.addAll(<Map<int, Color>>[Colors.purple]);
+            if (_swatch != Colors.cyan)
+              options.addAll(<Map<int, Color>>[Colors.cyan]);
+            _swatch = options[new math.Random().nextInt(options.length)];
+          });
+        }
+      )
+    );
+  }
 }
 
 class GalleryDrawer extends StatelessWidget {
@@ -41,24 +106,14 @@ class GalleryDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    ThemeData themeData = Theme.of(context);
-    TextStyle aboutTextStyle = themeData.textTheme.body2;
-    TextStyle aboutLinkStyle = themeData.textTheme.body2.copyWith(color: themeData.accentColor);
+    final ThemeData themeData = Theme.of(context);
+    final TextStyle aboutTextStyle = themeData.textTheme.body2;
+    final TextStyle aboutLinkStyle = themeData.textTheme.body2.copyWith(color: themeData.accentColor);
 
     return new Drawer(
       child: new Block(
         children: <Widget>[
-          new DrawerHeader(
-            child: new Center(
-              child: new Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: new Image.asset(
-                 'packages/flutter_gallery_assets/drawer_logo.png',
-                  fit: ImageFit.contain
-                )
-              )
-            )
-          ),
+          new GalleryDrawerHeader(),
           new DrawerItem(
             icon: new Icon(Icons.brightness_5),
             onPressed: () { onThemeChanged(true); },
@@ -119,8 +174,9 @@ class GalleryDrawer extends StatelessWidget {
             )
           ),
           new AboutDrawerItem(
+            icon: new FlutterLogo(),
             applicationVersion: '2016 Q3 Preview',
-            applicationIcon: new AssetImage('packages/flutter_gallery_assets/about_logo.png'),
+            applicationIcon: new FlutterLogo(),
             applicationLegalese: '© 2016 The Chromium Authors',
             aboutBoxChildren: <Widget>[
               new Padding(

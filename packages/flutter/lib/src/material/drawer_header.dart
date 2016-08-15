@@ -10,8 +10,8 @@ import 'theme.dart';
 const double _kDrawerHeaderHeight = 160.0 + 1.0; // bottom edge
 
 /// The top-most region of a material design drawer. The header's [child]
-/// widget is placed inside of a [Container] whose [decoration] can be passed as
-/// an argument.
+/// widget, if any, is placed inside a [Container] whose [decoration] can be
+/// passed as an argument, inset by the given [padding].
 ///
 /// Part of the material design [Drawer].
 ///
@@ -20,9 +20,10 @@ const double _kDrawerHeaderHeight = 160.0 + 1.0; // bottom edge
 /// See also:
 ///
 ///  * [Drawer]
+///  * [UserAccountsDrawerHeader], a variant of [DrawerHeader] that is
+///    specialized for showing user accounts.
 ///  * [DrawerItem]
 ///  * <https://www.google.com/design/spec/patterns/navigation-drawer.html>
-
 class DrawerHeader extends StatelessWidget {
   /// Creates a material design drawer header.
   ///
@@ -30,15 +31,35 @@ class DrawerHeader extends StatelessWidget {
   const DrawerHeader({
     Key key,
     this.decoration,
+    this.padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
+    this.duration: const Duration(milliseconds: 250),
+    this.curve: Curves.fastOutSlowIn,
     this.child
   }) : super(key: key);
 
   /// Decoration for the main drawer header [Container]; useful for applying
   /// backgrounds.
-  final BoxDecoration decoration;
+  ///
+  /// This decoration will extend under the system status bar.
+  ///
+  /// If this is changed, it will be animated according to [duration] and [curve].
+  final Decoration decoration;
 
-  /// A widget that extends behind the system status bar and is placed inside a
-  /// [Container].
+  /// The padding by which to inset [child].
+  ///
+  /// The [DrawerHeader] additionally offsets the child by the height of the
+  /// system status bar.
+  ///
+  /// If the child is null, the padding has no effect.
+  final EdgeInsets padding;
+
+  /// The duration for animations of the [decoration].
+  final Duration duration;
+
+  /// The curve for animations of the [decoration].
+  final Curve curve;
+
+  /// A widget to be placed inside the drawer header, inset by the [padding].
   final Widget child;
 
   @override
@@ -56,15 +77,12 @@ class DrawerHeader extends StatelessWidget {
           )
         )
       ),
-      child: new Container(
-        padding: new EdgeInsets.only(
-          top: 16.0 + statusBarHeight,
-          left: 16.0,
-          right: 16.0,
-          bottom: 8.0
-        ),
+      child: new AnimatedContainer(
+        padding: padding + new EdgeInsets.only(top: statusBarHeight),
         decoration: decoration,
-        child: new DefaultTextStyle(
+        duration: duration,
+        curve: curve,
+        child: child == null ? null : new DefaultTextStyle(
           style: Theme.of(context).textTheme.body2,
           child: child
         )

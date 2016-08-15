@@ -114,6 +114,10 @@ abstract class BoxPainter {
   /// However, when its size changes, it could continue using those
   /// same instances, since the previous resources would no longer be
   /// relevant and thus losing them would not be an issue.
+  ///
+  /// Implementations should paint their decorations on the canvas in a
+  /// rectangle whose top left corner is at the given `offset` and whose size is
+  /// given by `configuration.size`.
   void paint(Canvas canvas, Offset offset, ImageConfiguration configuration);
 
   /// Callback that is invoked if an asynchronously-loading resource used by the
