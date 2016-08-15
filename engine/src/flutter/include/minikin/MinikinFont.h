@@ -33,7 +33,7 @@ namespace minikin {
 class HyphenEdit {
 public:
     HyphenEdit() : hyphen(0) { }
-    HyphenEdit(uint32_t hyphenInt) : hyphen(hyphenInt) { }
+    HyphenEdit(uint32_t hyphenInt) : hyphen(hyphenInt) { }  // NOLINT(implicit)
     bool hasHyphen() const { return hyphen != 0; }
     bool operator==(const HyphenEdit &other) const { return hyphen == other.hyphen; }
 private:
@@ -99,7 +99,7 @@ typedef void (*MinikinDestroyFunc) (void* data);
 
 class MinikinFont : public MinikinRefCounted {
 public:
-    MinikinFont(int32_t uniqueId) : mUniqueId(uniqueId) {}
+    explicit MinikinFont(int32_t uniqueId) : mUniqueId(uniqueId) {}
 
     virtual ~MinikinFont();
 

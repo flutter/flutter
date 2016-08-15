@@ -52,7 +52,7 @@ class HbBlob {
 public:
     // Takes ownership of hb_blob_t object, caller is no longer
     // responsible for calling hb_blob_destroy().
-    HbBlob(hb_blob_t* blob) : mBlob(blob) {
+    explicit HbBlob(hb_blob_t* blob) : mBlob(blob) {
     }
 
     ~HbBlob() {

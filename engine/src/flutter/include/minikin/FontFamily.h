@@ -37,7 +37,7 @@ class FontStyle {
 public:
     FontStyle() : FontStyle(0 /* variant */, 4 /* weight */, false /* italic */) {}
     FontStyle(int weight, bool italic) : FontStyle(0 /* variant */, weight, italic) {}
-    FontStyle(uint32_t langListId)
+    FontStyle(uint32_t langListId)  // NOLINT(implicit)
             : FontStyle(langListId, 0 /* variant */, 4 /* weight */, false /* italic */) {}
 
     FontStyle(int variant, int weight, bool italic);
@@ -102,7 +102,7 @@ class FontFamily : public MinikinRefCounted {
 public:
     FontFamily();
 
-    FontFamily(int variant);
+    explicit FontFamily(int variant);
 
     FontFamily(uint32_t langId, int variant)
         : mLangId(langId),

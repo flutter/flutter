@@ -42,7 +42,7 @@ private:
 template <typename T>
 class MinikinAutoUnref {
 public:
-    MinikinAutoUnref(T* obj) : mObj(obj) {
+    explicit MinikinAutoUnref(T* obj) : mObj(obj) {
     }
     ~MinikinAutoUnref() {
         mObj->Unref();
