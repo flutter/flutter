@@ -1014,4 +1014,116 @@ void main() {
     matches(getBorderRadius(tester, 0), RadiusType.Round, RadiusType.Round);
     matches(getBorderRadius(tester, 1), RadiusType.Round, RadiusType.Round);
   });
+
+  bool isDivider(Widget widget) {
+    final DecoratedBox box = widget;
+
+    return box.decoration == new BoxDecoration(
+      border: new Border(
+        bottom: new BorderSide(color: const Color(0x1F000000))
+      )
+    );
+  }
+
+  testWidgets('MergeableMaterial dividers', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new Scaffold(
+        body: new ScrollableViewport(
+          child: new MergeableMaterial(
+            hasDividers: true,
+            children: <MergeableMaterialItem>[
+              new MaterialSlice(
+                key: new ValueKey<String>('A'),
+                child: new SizedBox(
+                  width: 100.0,
+                  height: 100.0
+                )
+              ),
+              new MaterialSlice(
+                key: new ValueKey<String>('B'),
+                child: new SizedBox(
+                  width: 100.0,
+                  height: 100.0
+                )
+              ),
+              new MaterialSlice(
+                key: new ValueKey<String>('C'),
+                child: new SizedBox(
+                  width: 100.0,
+                  height: 100.0
+                )
+              ),
+              new MaterialSlice(
+                key: new ValueKey<String>('D'),
+                child: new SizedBox(
+                  width: 100.0,
+                  height: 100.0
+                )
+              )
+            ]
+          )
+        )
+      )
+    );
+
+    List<Widget> boxes = tester.widgetList(find.byType(DecoratedBox)).toList();
+    int offset = 3;
+
+    expect(isDivider(boxes[offset]), isTrue);
+    expect(isDivider(boxes[offset + 1]), isTrue);
+    expect(isDivider(boxes[offset + 2]), isTrue);
+    expect(isDivider(boxes[offset + 3]), isFalse);
+
+    await tester.pumpWidget(
+      new Scaffold(
+        body: new ScrollableViewport(
+          child: new MergeableMaterial(
+            hasDividers: true,
+            children: <MergeableMaterialItem>[
+              new MaterialSlice(
+                key: new ValueKey<String>('A'),
+                child: new SizedBox(
+                  width: 100.0,
+                  height: 100.0
+                )
+              ),
+              new MaterialSlice(
+                key: new ValueKey<String>('B'),
+                child: new SizedBox(
+                  width: 100.0,
+                  height: 100.0
+                )
+              ),
+              new MaterialGap(
+                key: new ValueKey<String>('x')
+              ),
+              new MaterialSlice(
+                key: new ValueKey<String>('C'),
+                child: new SizedBox(
+                  width: 100.0,
+                  height: 100.0
+                )
+              ),
+              new MaterialSlice(
+                key: new ValueKey<String>('D'),
+                child: new SizedBox(
+                  width: 100.0,
+                  height: 100.0
+                )
+              )
+            ]
+          )
+        )
+      )
+    );
+
+    boxes = tester.widgetList(find.byType(DecoratedBox)).toList();
+    offset = 3;
+
+    expect(isDivider(boxes[offset]), isTrue);
+    expect(isDivider(boxes[offset + 1]), isFalse);
+    // offset + 2 is gap
+    expect(isDivider(boxes[offset + 3]), isTrue);
+    expect(isDivider(boxes[offset + 4]), isFalse);
+  });
 }
