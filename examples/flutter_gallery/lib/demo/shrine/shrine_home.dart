@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:collection' show HashSet;
 
 import 'package:flutter/material.dart';
 
@@ -305,7 +304,6 @@ class _ShrineHomeState extends State<ShrineHome> {
   void showOrderPage(Product product) {
     final Order order = _shoppingCart[product] ?? new Order(product: product);
     final Completer<Order> completer = new Completer<Order>();
-    final Key productKey = new ObjectKey(product);
     Navigator.push(context, new ShrineOrderRoute(
       order: order,
       completer: completer,
