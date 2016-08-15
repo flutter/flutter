@@ -160,14 +160,14 @@ abstract class FlutterCommand extends Command {
       }
     }
 
+    // Populate the cache.
+    await cache.updateAll();
+
     if (shouldRunPub) {
       int exitCode = await pubGet();
       if (exitCode != 0)
         return exitCode;
     }
-
-    // Populate the cache.
-    await cache.updateAll();
 
     if (flutterUsage.isFirstRun)
       flutterUsage.printUsage();
