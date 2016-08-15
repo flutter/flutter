@@ -40,7 +40,7 @@ class OrderItem extends StatelessWidget {
                 width: 248.0,
                 height: 248.0,
                 child: new Hero(
-                  tag: productHeroTag,
+                  tag: product.tag,
                   child: new Image.asset(product.imageAsset, fit: ImageFit.contain)
                 )
               )

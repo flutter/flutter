@@ -4,8 +4,6 @@
 
 import 'dart:ui' show hashValues;
 
-const String productHeroTag = 'Product';
-
 class Vendor {
   const Vendor({
     this.name,
@@ -48,6 +46,7 @@ class Product {
   final double price;
   final Vendor vendor;
 
+  String get tag => name; // Unique value for Heroes
   String get priceString => '\$${price.floor()}';
 
   bool isValid() {
