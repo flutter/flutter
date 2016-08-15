@@ -190,4 +190,37 @@ void main() {
     expect(didTap, isTrue);
 
   });
+
+  testWidgets('Empty', (WidgetTester tester) async {
+    bool didTap = false;
+    await tester.pumpWidget(
+      new Center(
+        child: new GestureDetector(
+          onTap: () {
+            didTap = true;
+          },
+        )
+      )
+    );
+    expect(didTap, isFalse);
+    await tester.tapAt(new Point(10.0, 10.0));
+    expect(didTap, isTrue);
+  });
+
+  testWidgets('Only container', (WidgetTester tester) async {
+    bool didTap = false;
+    await tester.pumpWidget(
+      new Center(
+        child: new GestureDetector(
+          onTap: () {
+            didTap = true;
+          },
+          child: new Container(),
+        )
+      )
+    );
+    expect(didTap, isFalse);
+    await tester.tapAt(new Point(10.0, 10.0));
+    expect(didTap, isFalse);
+  });
 }

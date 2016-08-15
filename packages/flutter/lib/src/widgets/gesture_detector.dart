@@ -40,6 +40,9 @@ typedef GestureRecognizer GestureRecognizerFactory(GestureRecognizer recognizer)
 ///
 /// Attempts to recognize gestures that correspond to its non-null callbacks.
 ///
+/// If this widget has a child, it defers to that child for its sizing behavior.
+/// If it does not have a child, it grows to fit the parent instead.
+///
 /// GestureDetector also listens for accessibility events and maps
 /// them to the callbacks. To ignore accessibility events, set
 /// [excludeFromSemantics] to true.

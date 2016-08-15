@@ -1713,6 +1713,10 @@ typedef void PointerUpEventListener(PointerUpEvent event);
 typedef void PointerCancelEventListener(PointerCancelEvent event);
 
 /// Calls callbacks in response to pointer events.
+///
+/// If it has a child, defers to the child for sizing behavior.
+///
+/// If it does not have a child, grows to fit the parent-provided constraints.
 class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
   /// Creates a render object that forwards point events to callbacks.
   ///
@@ -1732,11 +1736,18 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
   /// Called when a pointer that triggered an [onPointerDown] changes position.
   PointerMoveEventListener onPointerMove;
 
-  /// Called when a pointer that triggered an [onPointerDown] is no longer in contact with the screen.
+  /// Called when a pointer that triggered an [onPointerDown] is no longer in
+  /// contact with the screen.
   PointerUpEventListener onPointerUp;
 
-  /// Called when the input from a pointer that triggered an [onPointerDown] is no longer directed towards this receiver.
+  /// Called when the input from a pointer that triggered an [onPointerDown] is
+  /// no longer directed towards this receiver.
   PointerCancelEventListener onPointerCancel;
+
+  @override
+  void performResize() {
+    size = constraints.biggest;
+  }
 
   @override
   void handleEvent(PointerEvent event, HitTestEntry entry) {
