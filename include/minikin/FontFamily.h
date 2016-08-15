@@ -65,10 +65,10 @@ private:
 // so it can be efficiently copied, embedded in other objects, etc.
 class FontStyle {
 public:
-    FontStyle(int weight = 4, bool italic = false) {
+    explicit FontStyle(int weight = 4, bool italic = false) {
         bits = (weight & kWeightMask) | (italic ? kItalicMask : 0);
     }
-    FontStyle(FontLanguage lang, int variant = 0, int weight = 4, bool italic = false) {
+    explicit FontStyle(FontLanguage lang, int variant = 0, int weight = 4, bool italic = false) {
         bits = (weight & kWeightMask) | (italic ? kItalicMask : 0)
                 | (variant << kVariantShift) | (lang.bits() << kLangShift);
     }
