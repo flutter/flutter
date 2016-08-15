@@ -42,12 +42,14 @@ const Map<int, Color> _kDefaultSwatch = const <int, Color>{
 class FlutterLogoDecoration extends Decoration {
   /// Creates a decoration that knows how to paint Flutter's logo.
   ///
-  /// The [swatch] controls the color used. The [style] controls whether and
-  /// where to draw the "Flutter" label.
+  /// The [swatch] controls the color used for the logo. The [style] controls
+  /// whether and where to draw the "Flutter" label. If one is shown, the
+  /// [textColor] controls the color of the label.
   ///
-  /// The [swatch] and [style] arguments must not be null.
+  /// The [swatch], [textColor], and [style] arguments must not be null.
   const FlutterLogoDecoration({
     this.swatch: _kDefaultSwatch,
+    this.textColor: const Color(0xFF616161),
     FlutterLogoStyle style: FlutterLogoStyle.markOnly,
     this.margin: EdgeInsets.zero,
   }) : style = style,
@@ -55,7 +57,7 @@ class FlutterLogoDecoration extends Decoration {
        // (see https://github.com/dart-lang/sdk/issues/26980 for details about that ignore statement)
        _opacity = 1.0;
 
-  FlutterLogoDecoration._(this.swatch, this.style, this._position, this._opacity, this.margin);
+  FlutterLogoDecoration._(this.swatch, this.textColor, this.style, this._position, this._opacity, this.margin);
 
   /// The colors to use to paint the logo. This map should contain at least two
   /// values, one for 400 and one for 900.
@@ -71,6 +73,12 @@ class FlutterLogoDecoration extends Decoration {
   /// [Colors.pink], [Colors.purple], or [Colors.cyan] swatches can be used.
   /// These are Flutter's tertiary colors.
   final Map<int, Color> swatch;
+
+  /// The color used to paint the "Flutter" text on the logo, if [style] is
+  /// [FlutterLogoStyle.horizontal] or [FlutterLogoStyle.stacked]. The
+  /// appropriate color is `const Color(0xFF616161)` (a medium gray), against a
+  /// white background.
+  final Color textColor;
 
   /// Whether and where to draw the "Flutter" text. By default, only the logo
   /// itself is drawn.
@@ -93,6 +101,7 @@ class FlutterLogoDecoration extends Decoration {
     assert(swatch != null
         && swatch[_lightShade] != null
         && swatch[_darkShade] != null
+        && textColor != null
         && style != null
         && _position != null
         && _position.isFinite
@@ -119,6 +128,7 @@ class FlutterLogoDecoration extends Decoration {
     if (a == null) {
       return new FlutterLogoDecoration._(
         b.swatch,
+        b.textColor,
         b.style,
         b._position,
         b._opacity * t.clamp(0.0, 1.0),
@@ -128,6 +138,7 @@ class FlutterLogoDecoration extends Decoration {
     if (b == null) {
       return new FlutterLogoDecoration._(
         a.swatch,
+        a.textColor,
         a.style,
         a._position,
         a._opacity * (1.0 - t).clamp(0.0, 1.0),
@@ -136,6 +147,7 @@ class FlutterLogoDecoration extends Decoration {
     }
     return new FlutterLogoDecoration._(
       _lerpSwatch(a.swatch, b.swatch, t),
+      Color.lerp(a.textColor, b.textColor, t),
       t < 0.5 ? a.style : b.style,
       a._position + (b._position - a._position) * t,
       (a._opacity + (b._opacity - a._opacity) * t).clamp(0.0, 1.0),
@@ -190,6 +202,7 @@ class FlutterLogoDecoration extends Decoration {
     final FlutterLogoDecoration typedOther = other;
     return swatch[_lightShade] == typedOther.swatch[_lightShade]
         && swatch[_darkShade] == typedOther.swatch[_darkShade]
+        && textColor == typedOther.textColor
         && _position == typedOther._position
         && _opacity == typedOther._opacity;
   }
@@ -200,6 +213,7 @@ class FlutterLogoDecoration extends Decoration {
     return hashValues(
       swatch[_lightShade],
       swatch[_darkShade],
+      textColor,
       _position,
       _opacity
     );
@@ -210,7 +224,7 @@ class FlutterLogoDecoration extends Decoration {
     final String extra = _inTransition ? ', transition $_position:$_opacity' : '';
     if (swatch == null)
       return '$prefix$runtimeType(null, $style$extra)';
-    return '$prefix$runtimeType(${swatch[_lightShade]}/${swatch[_darkShade]}, $style$extra)';
+    return '$prefix$runtimeType(${swatch[_lightShade]}/${swatch[_darkShade]} on $textColor, $style$extra)';
   }
 }
 
@@ -219,6 +233,7 @@ class FlutterLogoDecoration extends Decoration {
 class _FlutterLogoPainter extends BoxPainter {
   _FlutterLogoPainter(this._config) : super(null) {
     assert(_config != null);
+    assert(_config.debugAssertValid());
     _prepareText();
   }
 
@@ -234,7 +249,7 @@ class _FlutterLogoPainter extends BoxPainter {
       text: new TextSpan(
         text: kLabel,
         style: new TextStyle(
-          color: const Color(0xFF616161),
+          color: _config.textColor,
           fontFamily: 'Roboto',
           fontSize: 100.0 * 350.0 / 247.0, // 247 is the height of the F when the fontSize is 350, assuming device pixel ratio 1.0
           fontWeight: FontWeight.w300,
@@ -251,8 +266,6 @@ class _FlutterLogoPainter extends BoxPainter {
   // values in the SVG files exported from the original artwork source.
 
   void _paintLogo(Canvas canvas, Rect rect) {
-    assert(rect.width.truncate() == rect.height.truncate());
-
     // Our points are in a coordinate space that's 166 pixels wide and 202 pixels high.
     // First, transform the rectangle so that our coordinate space is a square 202 pixels
     // to a side, with the top left at the origin.
