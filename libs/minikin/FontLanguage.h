@@ -98,7 +98,7 @@ private:
 // An immutable list of languages.
 class FontLanguages {
 public:
-    FontLanguages(std::vector<FontLanguage>&& languages);
+    explicit FontLanguages(std::vector<FontLanguage>&& languages);
     FontLanguages() : mUnionOfSubScriptBits(0), mIsAllTheSameLanguage(false) {}
     FontLanguages(FontLanguages&&) = default;
 
