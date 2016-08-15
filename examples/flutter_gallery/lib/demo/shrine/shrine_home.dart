@@ -265,8 +265,7 @@ class ProductItem extends StatelessWidget {
                 height: 144.0,
                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
                 child: new Hero(
-                    tag: productHeroTag,
-                    key: new ObjectKey(product),
+                    tag: product.tag,
                     child: new Image.asset(product.imageAsset, fit: ImageFit.contain)
                   )
                 ),
@@ -307,11 +306,8 @@ class _ShrineHomeState extends State<ShrineHome> {
     final Order order = _shoppingCart[product] ?? new Order(product: product);
     final Completer<Order> completer = new Completer<Order>();
     final Key productKey = new ObjectKey(product);
-    final Set<Key> mostValuableKeys = new HashSet<Key>();
-    mostValuableKeys.add(productKey);
     Navigator.push(context, new ShrineOrderRoute(
       order: order,
-      settings: new RouteSettings(mostValuableKeys: mostValuableKeys),
       completer: completer,
       builder: (BuildContext context) {
         return new OrderPage(

@@ -386,8 +386,8 @@ class HeroParty {
       assert(from != null || to != null);
       assert(to == null || to.sourceStates.length == 1);
       assert(to == null || to.currentTurns.floor() == to.currentTurns);
-      HeroState targetState = to != null ? to.sourceStates.elementAt(0) : null;
-      Set<HeroState> sourceStates = from != null ? from.sourceStates : new HashSet<HeroState>();
+      HeroState targetState = to?.sourceStates.elementAt(0);
+      Set<HeroState> sourceStates = from?.sourceStates ?? new HashSet<HeroState>();
       sourceStates.remove(targetState);
       Rect sourceRect = from?.currentRect ?? to.currentRect.center & Size.zero;
       Rect targetRect = to?.currentRect ?? from.currentRect.center & Size.zero;
@@ -545,7 +545,7 @@ class HeroController extends NavigatorObserver {
 
   void _updateQuest(Duration timeStamp) {
     if (navigator == null) {
-      // The navigator has been removed for this end-of-frame callback was called.
+      // The navigator was removed before this end-of-frame callback was called.
       return;
     }
     Set<Key> mostValuableKeys = _getMostValuableKeys();
