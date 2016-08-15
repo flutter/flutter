@@ -18,7 +18,7 @@ the [Flutter Setup](https://flutter.io/setup/) guide.
 * `flutter upgrade`
 * `flutter run --release`
 
-The `flutter run --release` command both builds and installed the Flutter app.
+The `flutter run --release` command both builds and installs the Flutter app.
 
 ## Icon
 
