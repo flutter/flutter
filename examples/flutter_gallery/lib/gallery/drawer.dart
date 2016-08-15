@@ -19,7 +19,9 @@ class LinkTextSpan extends TextSpan {
 }
 
 class GalleryDrawerHeader extends StatefulWidget {
-  const GalleryDrawerHeader({ Key key }) : super(key: key);
+  const GalleryDrawerHeader({ Key key, this.light }) : super(key: key);
+
+  final bool light;
 
   @override
   _GalleryDrawerHeaderState createState() => new _GalleryDrawerHeaderState();
@@ -41,6 +43,7 @@ class _GalleryDrawerHeaderState extends State<GalleryDrawerHeader> {
                                               : FlutterLogoStyle.stacked
                                               : FlutterLogoStyle.markOnly,
         swatch: _swatch,
+        textColor: config.light ? const Color(0xFF616161) : const Color(0xFF9E9E9E),
       ),
       duration: const Duration(milliseconds: 750),
       child: new GestureDetector(
@@ -113,7 +116,7 @@ class GalleryDrawer extends StatelessWidget {
     return new Drawer(
       child: new Block(
         children: <Widget>[
-          new GalleryDrawerHeader(),
+          new GalleryDrawerHeader(light: useLightTheme),
           new DrawerItem(
             icon: new Icon(Icons.brightness_5),
             onPressed: () { onThemeChanged(true); },
