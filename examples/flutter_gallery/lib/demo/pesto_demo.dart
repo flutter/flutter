@@ -10,8 +10,8 @@ const String _kUserName = 'Jonathan';
 const String _kUserEmail = 'jonathan@example.com';
 const String _kUserImage = 'packages/flutter_gallery_assets/pesto/avatar.jpg';
 
-final String _kSmallLogoImage = 'packages/flutter_gallery_assets/pesto/logo_small.png';
-final String _kMediumLogoImage = 'packages/flutter_gallery_assets/pesto/logo_medium.png';
+const String _kSmallLogoImage = 'packages/flutter_gallery_assets/pesto/logo_small.png';
+const String _kMediumLogoImage = 'packages/flutter_gallery_assets/pesto/logo_medium.png';
 
 final ThemeData _kTheme = new ThemeData(
   brightness: Brightness.light,
