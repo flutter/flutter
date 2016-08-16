@@ -242,6 +242,7 @@ abstract class RenderToggleable extends RenderConstrainedBox implements Semantic
 
   @override
   void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
+    assert(debugHandleEvent(event, entry));
     if (event is PointerDownEvent && isInteractive)
       _tap.addPointer(event);
   }

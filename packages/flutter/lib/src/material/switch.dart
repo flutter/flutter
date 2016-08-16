@@ -286,6 +286,7 @@ class _RenderSwitch extends RenderToggleable {
 
   @override
   void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
+    assert(debugHandleEvent(event, entry));
     if (event is PointerDownEvent && onChanged != null)
       _drag.addPointer(event);
     super.handleEvent(event, entry);

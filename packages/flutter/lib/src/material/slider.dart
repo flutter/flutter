@@ -326,6 +326,7 @@ class _RenderSlider extends RenderConstrainedBox implements SemanticActionHandle
 
   @override
   void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
+    assert(debugHandleEvent(event, entry));
     if (event is PointerDownEvent && isInteractive)
       _drag.addPointer(event);
   }
