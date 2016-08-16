@@ -4,6 +4,7 @@
 
 #include "flutter/services/icu/icu.h"
 
+#include "lib/ftl/build_config.h"
 #include "mojo/public/cpp/application/connect.h"
 #include "mojo/services/icu_data/interfaces/icu_data.mojom.h"
 #include "flutter/services/icu/constants.h"
