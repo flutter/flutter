@@ -4,8 +4,8 @@
 
 #include "flutter/sky/shell/ui/engine.h"
 
+#include <sys/stat.h>
 #include <unistd.h>
-
 #include <utility>
 
 #include "flutter/assets/directory_asset_bundle.h"
@@ -90,7 +90,7 @@ void Engine::RunFromSource(const std::string& main,
   if (packages_path.empty())
     packages_path = FindPackagesPath(main);
   if (!bundle.empty())
-    ConfigureZipAssetBundle(bundle);
+    ConfigureAssetBundle(bundle);
   ConfigureRuntime(main);
   runtime_->dart_controller()->RunFromSource(main, packages_path);
 }
@@ -200,15 +200,28 @@ void Engine::RunFromSnapshotStream(
       }));
 }
 
-void Engine::ConfigureZipAssetBundle(const std::string& path) {
-  asset_store_ =
-      ftl::MakeRefCounted<blink::ZipAssetStore>(path, blink::Threads::IO());
-  new blink::ZipAssetBundle(mojo::GetProxy(&root_bundle_), asset_store_);
-}
+void Engine::ConfigureAssetBundle(const std::string& path) {
+  struct stat stat_result = {0};
 
-void Engine::ConfigureDirectoryAssetBundle(const std::string& path) {
-  new blink::DirectoryAssetBundle(mojo::GetProxy(&root_bundle_), path,
-                                  blink::Threads::IO());
+  if (::stat(path.c_str(), &stat_result) != 0) {
+    LOG(INFO) << "Could not configure asset bundle at path: " << path;
+    return;
+  }
+
+  if (S_ISDIR(stat_result.st_mode)) {
+    // Directory asset bundle.
+    new blink::DirectoryAssetBundle(mojo::GetProxy(&root_bundle_), path,
+                                    blink::Threads::IO());
+    return;
+  }
+
+  if (S_ISREG(stat_result.st_mode)) {
+    // Zip asset bundle.
+    asset_store_ =
+        ftl::MakeRefCounted<blink::ZipAssetStore>(path, blink::Threads::IO());
+    new blink::ZipAssetBundle(mojo::GetProxy(&root_bundle_), asset_store_);
+    return;
+  }
 }
 
 void Engine::ConfigureRuntime(const std::string& script_uri) {
@@ -223,7 +236,7 @@ void Engine::ConfigureRuntime(const std::string& script_uri) {
 
 void Engine::RunFromPrecompiledSnapshot(const mojo::String& bundle_path) {
   TRACE_EVENT0("flutter", "Engine::RunFromPrecompiledSnapshot");
-  ConfigureZipAssetBundle(bundle_path.get());
+  ConfigureAssetBundle(bundle_path.get());
   ConfigureRuntime("http://localhost");
   runtime_->dart_controller()->RunFromPrecompiledSnapshot();
 }
@@ -237,7 +250,7 @@ void Engine::RunFromFile(const mojo::String& main,
 void Engine::RunFromBundle(const mojo::String& script_uri,
                            const mojo::String& path) {
   TRACE_EVENT0("flutter", "Engine::RunFromBundle");
-  ConfigureZipAssetBundle(path);
+  ConfigureAssetBundle(path);
   mojo::DataPipe pipe;
   asset_store_->GetAsStream(blink::kSnapshotAssetKey,
                             std::move(pipe.producer_handle));
@@ -249,7 +262,7 @@ void Engine::RunFromBundleAndSnapshot(const mojo::String& script_uri,
                                       const mojo::String& snapshot_path) {
   TRACE_EVENT0("flutter", "Engine::RunFromBundleAndSnapshot");
 
-  ConfigureZipAssetBundle(bundle_path);
+  ConfigureAssetBundle(bundle_path);
 
   asset_store_->AddOverlayFile(blink::kSnapshotAssetKey, snapshot_path);
   mojo::DataPipe pipe;

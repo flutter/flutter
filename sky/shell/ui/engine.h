@@ -95,8 +95,7 @@ class Engine : public UIDelegate,
   void StopAnimator();
   void StartAnimatorIfPossible();
 
-  void ConfigureZipAssetBundle(const std::string& path);
-  void ConfigureDirectoryAssetBundle(const std::string& path);
+  void ConfigureAssetBundle(const std::string& path);
   void ConfigureRuntime(const std::string& script_uri);
 
   Config config_;
