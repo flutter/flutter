@@ -24,23 +24,34 @@
 namespace flutter_content_handler {
 namespace {
 
+void QuitMessageLoop() {
+  mtl::MessageLoop::GetCurrent()->QuitNow();
+}
+
 class App : public mojo::ApplicationImplBase {
  public:
   App() {}
-
-  ~App() override {}
+  ~App() override {
+    if (initialized_)
+      StopThreads();
+  }
 
   // Overridden from ApplicationDelegate:
   void OnInitialize() override {
+    FTL_DCHECK(!initialized_);
+    initialized_ = true;
+
+    ftl::RefPtr<ftl::TaskRunner> gpu_task_runner;
+    gpu_thread_ = mtl::CreateThread(&gpu_task_runner);
+
     ftl::RefPtr<ftl::TaskRunner> ui_task_runner(
         mtl::MessageLoop::GetCurrent()->task_runner());
 
-    // TODO(abarth): Currently we're using one thread for everything, but we
-    // should use separate threads for GPU, UI, and IO tasks. However, there
-    // appears to be some issue with running multiple message loops at the same
-    // time, potentially related to TLS.
+    ftl::RefPtr<ftl::TaskRunner> io_task_runner;
+    io_thread_ = mtl::CreateThread(&io_task_runner);
+
     blink::Threads::Set(
-        blink::Threads(ui_task_runner, ui_task_runner, ui_task_runner));
+        blink::Threads(gpu_task_runner, ui_task_runner, io_task_runner));
     blink::Settings::Set(blink::Settings());
     blink::InitDartVM();
   }
@@ -56,6 +67,18 @@ class App : public mojo::ApplicationImplBase {
   }
 
  private:
+  void StopThreads() {
+    FTL_DCHECK(initialized_);
+    blink::Threads::Gpu()->PostTask(QuitMessageLoop);
+    blink::Threads::IO()->PostTask(QuitMessageLoop);
+    gpu_thread_.join();
+    io_thread_.join();
+  }
+
+  bool initialized_ = false;
+  std::thread gpu_thread_;
+  std::thread io_thread_;
+
   FTL_DISALLOW_COPY_AND_ASSIGN(App);
 };
 
