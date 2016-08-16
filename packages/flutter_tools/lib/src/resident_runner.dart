@@ -43,6 +43,7 @@ abstract class ResidentRunner {
 
   Future<Null> stop() async {
     await stopEchoingDeviceLog();
+    await preStop();
     return stopApp();
   }
 
@@ -127,7 +128,7 @@ abstract class ResidentRunner {
       return true;
     } else if (lower == 'q' || character == AnsiTerminal.KEY_F10) {
       // F10, exit
-      await stopApp();
+      await stop();
       return true;
     }
 
@@ -171,15 +172,16 @@ abstract class ResidentRunner {
     return exitCode;
   }
 
-  Future<Null> stopApp() {
+  Future<Null> preStop() async { }
+
+  Future<Null> stopApp() async {
     if (serviceProtocol != null && !serviceProtocol.isClosed) {
       if (serviceProtocol.isolates.isNotEmpty) {
         serviceProtocol.flutterExit(serviceProtocol.firstIsolateId);
-        return new Future<Null>.delayed(new Duration(milliseconds: 100));
+        await new Future<Null>.delayed(new Duration(milliseconds: 100));
       }
     }
     appFinished();
-    return new Future<Null>.value();
   }
 
   /// Called when a signal has requested we exit.

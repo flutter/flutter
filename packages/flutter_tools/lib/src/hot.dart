@@ -295,7 +295,7 @@ class HotRunner extends ResidentRunner {
     }
 
     await viewManager.refresh();
-    printStatus('Connected to view: ${viewManager.mainView}');
+    printStatus('Connected to view \'${viewManager.mainView}\'.');
 
     printStatus('Running ${getDisplayPath(_mainPath)} on ${device.name}...');
     _loaderShowMessage('Launching...');
@@ -313,7 +313,7 @@ class HotRunner extends ResidentRunner {
     // Finish the file sync now.
     await _updateDevFS();
 
-    return await waitForAppToFinish();
+    return waitForAppToFinish();
   }
 
   @override
@@ -375,9 +375,8 @@ class HotRunner extends ResidentRunner {
   }
 
   Future<Null> _evictDirtyAssets() async {
-    if (_devFS.dirtyAssetEntries.length == 0) {
+    if (_devFS.dirtyAssetEntries.length == 0)
       return;
-    }
     if (serviceProtocol.firstIsolateId == null)
       throw 'Application isolate not found';
     for (DevFSEntry entry in _devFS.dirtyAssetEntries) {
@@ -388,8 +387,12 @@ class HotRunner extends ResidentRunner {
 
   Future<Null> _cleanupDevFS() async {
     if (_devFS != null) {
-      // Cleanup the devFS.
-      await _devFS.destroy();
+      // Cleanup the devFS; don't wait indefinitely, and ignore any errors.
+      await _devFS.destroy()
+        .timeout(new Duration(milliseconds: 250))
+        .catchError((dynamic error) {
+          printTrace('$error');
+        });
     }
     _devFS = null;
   }
@@ -499,9 +502,8 @@ class HotRunner extends ResidentRunner {
 
   @override
   void printHelp() {
-    printStatus('Type "h" or F1 for this help message. Type "q", F10, or ctrl-c to quit.', emphasis: true);
-    printStatus('Type "r" or F5 to perform a hot reload of the app.', emphasis: true);
-    printStatus('Type "R" to restart the app', emphasis: true);
+    printStatus('Type "h" or F1 for this help message; type "q", F10, or ctrl-c to quit.', emphasis: true);
+    printStatus('Type "r" or F5 to perform a hot reload of the app, and "R" to restart the app.', emphasis: true);
     printStatus('Type "w" to print the widget hierarchy of the app, and "t" for the render tree.', emphasis: true);
   }
 
@@ -510,6 +512,9 @@ class HotRunner extends ResidentRunner {
     await stopEchoingDeviceLog();
     await stopApp();
   }
+
+  @override
+  Future<Null> preStop() => _cleanupDevFS();
 
   @override
   Future<Null> cleanupAtFinish() async {
