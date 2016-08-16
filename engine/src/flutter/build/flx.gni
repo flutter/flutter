@@ -1,0 +1,68 @@
+# Copyright 2016 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+template("flx") {
+  if (defined(invoker.output_name)) {
+    bundle_name = invoker.output_name
+  } else {
+    bundle_name = "${target_name}.flx"
+  }
+
+  bundle_path = "$root_out_dir/$bundle_name"
+  snapshot_path = "$target_gen_dir/${target_name}_snapshot.bin"
+  depfile_path = "${snapshot_path}.d"
+
+  main_dart = invoker.main_dart
+
+  if (defined(invoker.packages)) {
+    packages_path = invoker.packages
+  } else {
+    main_dir = get_path_info(main_dart, "dir")
+    package_dir = get_path_info(main_dir, "dir")
+    packages_path = "$package_dir/.packages"
+  }
+
+  sky_snapshot_label = "//flutter/snapshotter($host_toolchain)"
+  sky_snapshot_dir = get_label_info(sky_snapshot_label, "root_out_dir")
+  sky_snapshot = "$sky_snapshot_dir/sky_snapshot"
+
+  action(target_name) {
+    depfile = depfile_path
+
+    inputs = [
+      main_dart,
+      packages_path,
+    ]
+
+    outputs = [
+      bundle_path,
+      snapshot_path,
+    ]
+
+    if (defined(invoker.sources)) {
+      sources = invoker.sources
+    }
+
+    script = "//flutter/build/package.py"
+
+    args = [
+      "--snapshotter", rebase_path(sky_snapshot),
+      "--main-dart", rebase_path(main_dart),
+      "--packages", rebase_path(packages_path),
+      "--bundle", rebase_path(bundle_path),
+      "--bundle-header", "#!mojo mojo:flutter_content_handler",
+      "--snapshot", rebase_path(snapshot_path),
+      "--depfile", rebase_path(depfile_path),
+      "--build-output", rebase_path(bundle_path, root_build_dir),
+    ]
+
+    deps = [
+      sky_snapshot_label,
+    ]
+
+    if (defined(invoker.deps)) {
+      deps += invoker.deps
+    }
+  }
+}
