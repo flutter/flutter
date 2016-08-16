@@ -213,7 +213,7 @@ class RunAndStayResident extends ResidentRunner {
       stop();
     }
 
-    return await waitForAppToFinish();
+    return waitForAppToFinish();
   }
 
   @override
