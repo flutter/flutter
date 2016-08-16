@@ -336,7 +336,7 @@ class FlutterEngine {
       }
     }
 
-    Status summaryStatus = logger.startProgress('Building SDK summary...');
+    Status summaryStatus = logger.startProgress('Building Dart SDK summary...');
     try {
       String skyEnginePath = path.join(pkgDir.path, kSkyEngine);
       String skyServicesPath = path.join(pkgDir.path, kSkyServices);
