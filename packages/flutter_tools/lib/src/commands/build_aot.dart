@@ -167,7 +167,7 @@ Future<String> _buildAotSnapshot(
   String skyEnginePkg = _getSdkExtensionPath(packageMap, 'sky_engine');
   String uiPath = path.join(skyEnginePkg, 'dart_ui', 'ui.dart');
   String jniPath = path.join(skyEnginePkg, 'dart_jni', 'jni.dart');
-  String vmServicePath = path.join(skyEnginePkg, 'sdk_ext', 'dart', 'runtime', 'bin', 'vmservice', 'vmservice_io.dart');
+  String vmServicePath = path.join(skyEnginePkg, 'sdk_ext', 'vmservice_io.dart');
 
   List<String> filePaths = <String>[
     genSnapshot,
