@@ -160,7 +160,8 @@ abstract class FlutterCommand extends Command {
       }
     }
 
-    // Populate the cache.
+    // Populate the cache. We call this before pub get below so that the sky_engine
+    // package is available in the flutter cache for pub to find.
     await cache.updateAll();
 
     if (shouldRunPub) {
