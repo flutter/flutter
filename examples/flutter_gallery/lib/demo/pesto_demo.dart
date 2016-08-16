@@ -9,11 +9,9 @@ import 'package:flutter/material.dart';
 const String _kUserName = 'Jonathan';
 const String _kUserEmail = 'jonathan@example.com';
 const String _kUserImage = 'packages/flutter_gallery_assets/pesto/avatar.jpg';
-// Map of logo images keyed by the minimum height their container needs to be.
-final Map<double, String> _kLogoImages = <double, String>{
-  0.0: 'packages/flutter_gallery_assets/pesto/logo_small.png',
-  70.0: 'packages/flutter_gallery_assets/pesto/logo_medium.png'
-};
+
+final String _kSmallLogoImage = 'packages/flutter_gallery_assets/pesto/logo_small.png';
+final String _kMediumLogoImage = 'packages/flutter_gallery_assets/pesto/logo_medium.png';
 
 final ThemeData _kTheme = new ThemeData(
   brightness: Brightness.light,
@@ -94,20 +92,18 @@ class _PestoDemoState extends State<PestoDemo> {
       flexibleSpace: new LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
           final Size size = constraints.biggest;
-          double appBarHeight = size.height - statusBarHeight;
-          double bestHeight = _kLogoImages.keys.lastWhere(
-            (double height) => appBarHeight >= height
-          );
+          final double appBarHeight = size.height - statusBarHeight;
+          final String logo = appBarHeight >= 70.0 ? _kMediumLogoImage : _kSmallLogoImage;
           // Extra padding. Calculated to give about 16px on the bottom for the
           // `small` logo at its native size, and 30px for the `medium`.
-          double extraPadding = min(0.19 * appBarHeight + 5.4, 40.0);
+          final double extraPadding = min(0.19 * appBarHeight + 5.4, 40.0);
           return new Padding(
             padding: new EdgeInsets.only(
               top: statusBarHeight + 0.5 * extraPadding,
               bottom: extraPadding
             ),
             child: new Center(
-              child: new Image.asset(_kLogoImages[bestHeight], fit: ImageFit.scaleDown)
+              child: new Image.asset(logo, fit: ImageFit.scaleDown)
             )
           );
         }

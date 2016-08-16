@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter_gallery/main.dart' as flutter_gallery_main;
+import 'package:flutter_gallery/gallery/app.dart';
 
 Finder byTooltip(WidgetTester tester, String message) {
   return find.byWidgetPredicate((Widget widget) {
@@ -17,14 +17,13 @@ Finder findNavigationMenuButton(WidgetTester tester) {
 }
 
 void main() {
-  TestWidgetsFlutterBinding binding =
-      TestWidgetsFlutterBinding.ensureInitialized();
-  if (binding is LiveTestWidgetsFlutterBinding) binding.allowAllFrames = true;
+  TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
+  if (binding is LiveTestWidgetsFlutterBinding)
+    binding.allowAllFrames = true;
 
   // Regression test for https://github.com/flutter/flutter/pull/5168
   testWidgets('Pesto route management', (WidgetTester tester) async {
-    flutter_gallery_main
-        .main(); // builds the app and schedules a frame but doesn't trigger one
+    await tester.pumpWidget(new GalleryApp());
     await tester.pump(); // see https://github.com/flutter/flutter/issues/1865
     await tester.pump(); // triggers a frame
 
@@ -51,5 +50,66 @@ void main() {
     await tapDrawerItem('Return to Gallery');
 
     expect(find.text('Flutter Gallery'), findsOneWidget);
+  });
+
+  testWidgets('Pesto route management', (WidgetTester tester) async {
+    await tester.pumpWidget(new GalleryApp());
+    await tester.pump(); // see https://github.com/flutter/flutter/issues/1865
+    await tester.pump(); // triggers a frame
+
+    expect(find.text('Pesto'), findsOneWidget);
+    await tester.tap(find.text('Pesto'));
+    await tester.pump(); // Launch pesto
+    await tester.pump(const Duration(seconds: 1)); // transition is complete
+
+    Future<Null> tapDrawerItem(String title) async {
+      await tester.tap(findNavigationMenuButton(tester));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1)); // drawer opening animation
+      await tester.tap(find.text(title));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1)); // drawer closing animation
+      await tester.pump(); // maybe open a new page
+      return tester.pump(const Duration(seconds: 1)); // new page transition
+    }
+    await tapDrawerItem('Home');
+    await tapDrawerItem('Favorites');
+    await tapDrawerItem('Home');
+    await tapDrawerItem('Favorites');
+    await tapDrawerItem('Home');
+    await tapDrawerItem('Return to Gallery');
+
+    expect(find.text('Flutter Gallery'), findsOneWidget);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/pull/5168
+  testWidgets('Pesto appbar heroics', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      // The bug only manifests itself when the screen's orientation is portait
+      new Center(
+        child: new SizedBox(
+          width: 400.0,
+          height: 800.0,
+          child: new GalleryApp()
+        )
+      )
+    );
+    await tester.pump(); // see https://github.com/flutter/flutter/issues/1865
+    await tester.pump(); // triggers a frame
+
+    await tester.tap(find.text('Pesto'));
+    await tester.pump(); // Launch pesto
+    await tester.pump(const Duration(seconds: 1)); // transition is complete
+
+    await tester.tap(find.text('Pesto Bruchetta'));
+    await tester.pump(); // Launch the recipe page
+    await tester.pump(const Duration(seconds: 1)); // transition is complete
+
+    await tester.scroll(find.text('Pesto Bruchetta'), const Offset(0.0, -300.0));
+    await tester.pump();
+
+    Navigator.pop(find.byType(Scaffold).evaluate().single);
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1)); // transition is complete
   });
 }
