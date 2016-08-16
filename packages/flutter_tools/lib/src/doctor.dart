@@ -202,9 +202,10 @@ class _FlutterValidator extends DoctorValidator {
     messages.add(new ValidationMessage('Flutter at ${version.flutterRoot}'));
     messages.add(new ValidationMessage(
       'Framework revision ${version.frameworkRevisionShort} '
-      '(${version.frameworkAge}), '
-      'engine revision ${version.engineRevisionShort}'
+      '(${version.frameworkAge}), ${version.frameworkDate}'
     ));
+    messages.add(new ValidationMessage('Engine revision ${version.engineRevisionShort}'));
+    messages.add(new ValidationMessage('Tools Dart version ${version.dartSdkVersion}'));
 
     if (Platform.isWindows) {
       valid = ValidationType.missing;
