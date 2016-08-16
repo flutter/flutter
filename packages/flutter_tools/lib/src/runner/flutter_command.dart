@@ -160,14 +160,15 @@ abstract class FlutterCommand extends Command {
       }
     }
 
+    // Populate the cache. We call this before pub get below so that the sky_engine
+    // package is available in the flutter cache for pub to find.
+    await cache.updateAll();
+
     if (shouldRunPub) {
       int exitCode = await pubGet();
       if (exitCode != 0)
         return exitCode;
     }
-
-    // Populate the cache.
-    await cache.updateAll();
 
     if (flutterUsage.isFirstRun)
       flutterUsage.printUsage();
