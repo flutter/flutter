@@ -17,6 +17,7 @@ class ShrinePage extends StatefulWidget {
   ShrinePage({
     Key key,
     this.scaffoldKey,
+    this.scrollableKey,
     this.body,
     this.floatingActionButton,
     this.products,
@@ -27,6 +28,7 @@ class ShrinePage extends StatefulWidget {
   }
 
   final GlobalKey<ScaffoldState> scaffoldKey;
+  final GlobalKey<ScrollableState> scrollableKey;
   final Widget body;
   final Widget floatingActionButton;
   final List<Product> products;
@@ -86,6 +88,7 @@ class ShrinePageState extends State<ShrinePage> {
     final ShrineTheme theme = ShrineTheme.of(context);
     return new Scaffold(
       key: config.scaffoldKey,
+      scrollableKey: config.scrollableKey,
       appBar: new AppBar(
         elevation: _appBarElevation,
         backgroundColor: theme.appBarBackgroundColor,

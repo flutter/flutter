@@ -3,9 +3,11 @@
 // found in the LICENSE file.
 
 import 'package:flutter/widgets.dart';
+import 'package:flutter/rendering.dart';  // TBD remove this
 
 import 'gallery/app.dart';
 
 void main() {
+debugPaintSizeEnabled = false;
   runApp(new GalleryApp());
 }

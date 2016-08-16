@@ -133,7 +133,8 @@ class GridListDemo extends StatefulWidget {
 }
 
 class GridListDemoState extends State<GridListDemo> {
-  GridDemoTileStyle tileStyle = GridDemoTileStyle.twoLine;
+  static final GlobalKey<ScrollableState> _scrollableKey = new GlobalKey<ScrollableState>();
+  GridDemoTileStyle _tileStyle = GridDemoTileStyle.twoLine;
 
   List<Photo> photos = <Photo>[
     new Photo(
@@ -200,7 +201,7 @@ class GridListDemoState extends State<GridListDemo> {
 
   void changeTileStyle(GridDemoTileStyle value) {
     setState(() {
-      tileStyle = value;
+      _tileStyle = value;
     });
   }
 
@@ -211,6 +212,7 @@ class GridListDemoState extends State<GridListDemo> {
   Widget build(BuildContext context) {
     final Orientation orientation = MediaQuery.of(context).orientation;
     return new Scaffold(
+      scrollableKey: _scrollableKey,
       appBar: new AppBar(
         title: new Text('Grid list'),
         actions: <Widget>[
@@ -237,6 +239,7 @@ class GridListDemoState extends State<GridListDemo> {
         children: <Widget>[
           new Flexible(
             child: new ScrollableGrid(
+              scrollableKey: _scrollableKey,
               delegate: new FixedColumnCountGridDelegate(
                 columnCount: (orientation == Orientation.portrait) ? 2 : 3,
                 rowSpacing: 4.0,
@@ -247,7 +250,7 @@ class GridListDemoState extends State<GridListDemo> {
               children: photos.map((Photo photo) {
                 return new GridDemoPhotoItem(
                   photo: photo,
-                  tileStyle: tileStyle,
+                  tileStyle: _tileStyle,
                   onBannerTap: (Photo photo) {
                     setState(() {
                       photo.isFavorite = !photo.isFavorite;
