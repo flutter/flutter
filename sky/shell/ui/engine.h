@@ -92,8 +92,6 @@ class Engine : public UIDelegate,
   void RunFromSnapshotStream(const std::string& script_uri,
                              mojo::ScopedDataPipeConsumerHandle snapshot);
 
-  void SetupAssetBundle(const mojo::String& bundle_path);
-
   void StopAnimator();
   void StartAnimatorIfPossible();
 

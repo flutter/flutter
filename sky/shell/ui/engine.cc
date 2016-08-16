@@ -90,7 +90,7 @@ void Engine::RunFromSource(const std::string& main,
   if (packages_path.empty())
     packages_path = FindPackagesPath(main);
   if (!bundle.empty())
-    ConfigureDirectoryAssetBundle(bundle);
+    ConfigureZipAssetBundle(bundle);
   ConfigureRuntime(main);
   runtime_->dart_controller()->RunFromSource(main, packages_path);
 }
