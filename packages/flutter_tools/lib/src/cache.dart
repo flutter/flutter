@@ -246,7 +246,7 @@ class FlutterEngine {
 
   final Cache cache;
 
-  List<String> _getPackageDirs() => const <String>[kSkyEngine, 'sky_services'];
+  List<String> _getPackageDirs() => const <String>[kSkyEngine, kSkyServices];
 
   List<String> _getEngineDirs() {
     List<String> dirs = <String>[
@@ -340,9 +340,8 @@ class FlutterEngine {
     try {
       String skyEnginePath = path.join(pkgDir.path, kSkyEngine);
       String skyServicesPath = path.join(pkgDir.path, kSkyServices);
-      if (!new File(path.join(skyEnginePath, kSdkBundle)).existsSync()) {
+      if (!new File(path.join(skyEnginePath, kSdkBundle)).existsSync())
         buildSkyEngineSdkSummary(skyEnginePath, skyServicesPath, kSdkBundle);
-      }
     } finally {
       summaryStatus.stop(showElapsedTime: true);
     }
