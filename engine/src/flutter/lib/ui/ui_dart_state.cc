@@ -47,7 +47,7 @@ UIDartState* UIDartState::CreateForChildIsolate() {
 
 void UIDartState::DidSetIsolate() {
   main_port_ = Dart_GetMainPortId();
-  DartApiScope api_scope;
+  tonic::DartApiScope api_scope;
   Dart_Handle debug_name = Dart_DebugName();
   if (Dart_IsString(debug_name)) {
     debug_name_ = tonic::StdStringFromDart(debug_name);
