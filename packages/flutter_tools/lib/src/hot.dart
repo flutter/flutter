@@ -390,7 +390,7 @@ class HotRunner extends ResidentRunner {
       // Cleanup the devFS; don't wait indefinitely, and ignore any errors.
       await _devFS.destroy()
         .timeout(new Duration(milliseconds: 250))
-        .catchError((error) {
+        .catchError((dynamic error) {
           printTrace('$error');
         });
     }
@@ -513,6 +513,7 @@ class HotRunner extends ResidentRunner {
     await stopApp();
   }
 
+  @override
   Future<Null> preStop() => _cleanupDevFS();
 
   @override
