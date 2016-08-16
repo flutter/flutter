@@ -48,7 +48,7 @@ Color debugPaintLayerBordersColor = const Color(0xFFFF9800);
 ///
 /// For details on how to support this in your [RenderBox] subclass, see
 /// [RenderBox.debugHandleEvent].
-bool debugPaintPointersEnabled = true;
+bool debugPaintPointersEnabled = false;
 
 /// The color to use when reporting pointers for [debugPaintPointersEnabled].
 int debugPaintPointersColorValue = 0x00BBBB;
