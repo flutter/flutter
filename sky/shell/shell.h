@@ -50,6 +50,7 @@ class Shell {
   struct PlatformViewInfo {
     uintptr_t view_id;
     int64_t isolate_id;
+    std::string isolate_name;
   };
 
   // These APIs can be called from any thread.
@@ -63,7 +64,8 @@ class Shell {
                          const char* packages_file,
                          const char* asset_directory,
                          bool* view_existed,
-                         int64_t* dart_isolate_id);
+                         int64_t* dart_isolate_id,
+                         std::string* isolate_name);
 
  private:
   Shell();
@@ -81,6 +83,7 @@ class Shell {
                                  const std::string& assets_directory,
                                  bool* view_existed,
                                  int64_t* dart_isolate_id,
+                                 std::string* isolate_name,
                                  ftl::AutoResetWaitableEvent* latch);
 
   std::unique_ptr<base::Thread> gpu_thread_;

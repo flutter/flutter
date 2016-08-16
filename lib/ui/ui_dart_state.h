@@ -39,7 +39,7 @@ class UIDartState : public tonic::DartState {
 
   IsolateClient* isolate_client() { return isolate_client_; }
   Dart_Port main_port() const { return main_port_; }
-
+  const std::string& debug_name() const { return debug_name_; }
   Window* window() const { return window_.get(); }
 
   void set_mojo_services(std::unique_ptr<MojoServices> mojo_services);
@@ -59,6 +59,7 @@ class UIDartState : public tonic::DartState {
 
   IsolateClient* isolate_client_;
   Dart_Port main_port_;
+  std::string debug_name_;
   std::unique_ptr<MojoServices> mojo_services_;
   std::unique_ptr<Window> window_;
 

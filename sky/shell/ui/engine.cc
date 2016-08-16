@@ -101,6 +101,13 @@ Dart_Port Engine::GetUIIsolateMainPort() {
   return runtime_->GetMainPort();
 }
 
+std::string Engine::GetUIIsolateName() {
+  if (!runtime_) {
+    return "";
+  }
+  return runtime_->GetIsolateName();
+}
+
 void Engine::ConnectToEngine(mojo::InterfaceRequest<SkyEngine> request) {
   binding_.Bind(request.Pass());
 }

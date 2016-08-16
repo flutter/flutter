@@ -263,6 +263,7 @@ void Shell::WaitForPlatformViewsIdsUIThread(
     PlatformViewInfo info;
     info.view_id = reinterpret_cast<uintptr_t>(view);
     info.isolate_id = view->engine().GetUIIsolateMainPort();
+    info.isolate_name = view->engine().GetUIIsolateName();
     platform_view_ids->push_back(info);
   }
   latch->Signal();
@@ -273,7 +274,8 @@ void Shell::RunInPlatformView(uintptr_t view_id,
                               const char* packages_file,
                               const char* asset_directory,
                               bool* view_existed,
-                              int64_t* dart_isolate_id) {
+                              int64_t* dart_isolate_id,
+                              std::string* isolate_name) {
   ftl::AutoResetWaitableEvent latch;
   FTL_DCHECK(view_id != 0);
   FTL_DCHECK(main_script);
@@ -283,10 +285,10 @@ void Shell::RunInPlatformView(uintptr_t view_id,
 
   blink::Threads::UI()->PostTask([this, view_id, main_script, packages_file,
                                   asset_directory, view_existed,
-                                  dart_isolate_id, &latch]() {
+                                  dart_isolate_id, isolate_name, &latch]() {
     RunInPlatformViewUIThread(view_id, main_script, packages_file,
                               asset_directory, view_existed, dart_isolate_id,
-                              &latch);
+                              isolate_name, &latch);
   });
   latch.Wait();
 }
@@ -297,6 +299,7 @@ void Shell::RunInPlatformViewUIThread(uintptr_t view_id,
                                       const std::string& assets_directory,
                                       bool* view_existed,
                                       int64_t* dart_isolate_id,
+                                      std::string* isolate_name,
                                       ftl::AutoResetWaitableEvent* latch) {
   FTL_DCHECK(ui_thread_checker_ && ui_thread_checker_->CalledOnValidThread());
 
@@ -308,6 +311,7 @@ void Shell::RunInPlatformViewUIThread(uintptr_t view_id,
       *view_existed = true;
       view->engine().RunFromSource(main, packages, assets_directory);
       *dart_isolate_id = view->engine().GetUIIsolateMainPort();
+      *isolate_name = view->engine().GetUIIsolateName();
       break;
     }
   }

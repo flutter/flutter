@@ -52,6 +52,8 @@ class Engine : public UIDelegate,
 
   Dart_Port GetUIIsolateMainPort();
 
+  std::string GetUIIsolateName();
+
  private:
   // UIDelegate implementation:
   void ConnectToEngine(mojo::InterfaceRequest<SkyEngine> request) override;

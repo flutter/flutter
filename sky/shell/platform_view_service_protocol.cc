@@ -86,6 +86,24 @@ static bool ErrorIsolateSpawn(const char** json_object, const char* view_id) {
   return false;
 }
 
+static void AppendIsolateRef(std::stringstream* stream,
+                             int64_t main_port,
+                             const std::string name) {
+  *stream << "{\"type\":\"@Isolate\",\"fixedId\":true,\"id\":\"isolates/";
+  *stream << main_port << "\",\"name\":\"" << name << "\",";
+  *stream << "\"number\":\"" << main_port << "\"}";
+}
+
+static void AppendFlutterView(std::stringstream* stream,
+                              uintptr_t view_id,
+                              int64_t isolate_id,
+                              const std::string isolate_name) {
+  *stream << "{\"type\":\"FlutterView\", \"id\": \"" << kViewIdPrefx << "0x"
+          << std::hex << view_id << std::dec << "\"," << "\"isolate\":";
+  AppendIsolateRef(stream, isolate_id, isolate_name);
+  *stream << "}";
+}
+
 }  // namespace
 
 void PlatformViewServiceProtocol::RegisterHook(bool running_precompiled_code) {
@@ -140,8 +158,12 @@ bool PlatformViewServiceProtocol::RunInView(const char* method,
   Shell& shell = Shell::Shared();
   bool view_existed = false;
   Dart_Port main_port = ILLEGAL_PORT;
+  std::string isolate_name;
   shell.RunInPlatformView(view_id_as_num, main_script, packages_file,
-                          asset_directory, &view_existed, &main_port);
+                          asset_directory,
+                          &view_existed,
+                          &main_port,
+                          &isolate_name);
 
   if (!view_existed) {
     // If the view did not exist this request has definitely failed.
@@ -153,10 +175,9 @@ bool PlatformViewServiceProtocol::RunInView(const char* method,
     // The view existed and the isolate was created. Success.
     std::stringstream response;
     response << "{\"type\":\"Success\","
-             << "\"viewId\": \"" << kViewIdPrefx << "0x" << std::hex << view_id
-             << "\","
-             << "\"isolateId\": \"isolates/" << std::dec << main_port << "\""
-             << "}";
+             << "\"view\":";
+    AppendFlutterView(&response, view_id_as_num, main_port, isolate_name);
+    response << "}";
     *json_object = strdup(response.str().c_str());
     return true;
   }
@@ -185,6 +206,7 @@ bool PlatformViewServiceProtocol::ListViews(const char* method,
   for (auto it = platform_views.begin(); it != platform_views.end(); it++) {
     uintptr_t view_id = it->view_id;
     int64_t isolate_id = it->isolate_id;
+    const std::string& isolate_name = it->isolate_name;
     if (!view_id) {
       continue;
     }
@@ -193,10 +215,7 @@ bool PlatformViewServiceProtocol::ListViews(const char* method,
     } else {
       prefix_comma = true;
     }
-    response << "{\"type\":\"FlutterView\", \"id\": \"" << kViewIdPrefx << "0x"
-             << std::hex << view_id << "\","
-             << "\"isolateId\": \"isolates/" << std::dec << isolate_id << "\""
-             << "}";
+    AppendFlutterView(&response, view_id, isolate_id, isolate_name);
   }
   response << "]}";
   // Copy the response.
