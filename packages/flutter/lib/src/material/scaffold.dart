@@ -57,9 +57,14 @@ enum _ScaffoldSlot {
 }
 
 class _ScaffoldLayout extends MultiChildLayoutDelegate {
-  _ScaffoldLayout({ this.padding, this.appBarBehavior: AppBarBehavior.anchor });
+  _ScaffoldLayout({
+    this.padding,
+    this.statusBarHeight,
+    this.appBarBehavior: AppBarBehavior.anchor
+  });
 
   final EdgeInsets padding;
+  final double statusBarHeight;
   final AppBarBehavior appBarBehavior;
 
   @override
@@ -123,7 +128,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     }
 
     if (hasChild(_ScaffoldSlot.statusBar)) {
-      layoutChild(_ScaffoldSlot.statusBar, fullWidthConstraints);
+      layoutChild(_ScaffoldSlot.statusBar, fullWidthConstraints.tighten(height: statusBarHeight));
       positionChild(_ScaffoldSlot.statusBar, Offset.zero);
     }
 
@@ -752,8 +757,7 @@ class ScaffoldState extends State<Scaffold> {
         id: _ScaffoldSlot.statusBar,
         child: new GestureDetector(
           behavior: HitTestBehavior.opaque,
-          onTap: _handleStatusBarTap,
-          child: new SizedBox(height: padding.top)
+          onTap: _handleStatusBarTap
         )
       ));
     }
@@ -773,6 +777,7 @@ class ScaffoldState extends State<Scaffold> {
       children: children,
       delegate: new _ScaffoldLayout(
         padding: appPadding,
+        statusBarHeight: padding.top,
         appBarBehavior: config.appBarBehavior
       )
     );
