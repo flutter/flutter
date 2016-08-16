@@ -209,6 +209,7 @@ class RenderEditableLine extends RenderBox {
 
   @override
   void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
+    assert(debugHandleEvent(event, entry));
     if (event is PointerDownEvent && onSelectionChanged != null) {
       _tap.addPointer(event);
       _longPress.addPointer(event);

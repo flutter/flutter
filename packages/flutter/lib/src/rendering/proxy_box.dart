@@ -1771,6 +1771,7 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
 
   @override
   void handleEvent(PointerEvent event, HitTestEntry entry) {
+    assert(debugHandleEvent(event, entry));
     if (onPointerDown != null && event is PointerDownEvent)
       return onPointerDown(event);
     if (onPointerMove != null && event is PointerMoveEvent)

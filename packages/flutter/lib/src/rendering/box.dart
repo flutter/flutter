@@ -1255,16 +1255,46 @@ abstract class RenderBox extends RenderObject {
   @override
   Rect get paintBounds => Point.origin & size;
 
-  int _debugActivePointers = 0;
-
   /// Override this method to handle pointer events that hit this render object.
   ///
   /// For [RenderBox] objects, the `entry` argument is a [BoxHitTestEntry]. From this
   /// object you can determine the [PointerDownEvent]'s position in local coordinates.
   /// (This is useful because [PointerEvent.position] is in global coordinates.)
+  ///
+  /// If you override this, consider calling [debugHandleEvent] as follows, so
+  /// that you can support [debugPaintPointersEnabled]:
+  ///
+  /// ```dart
+  /// @override
+  /// void handleEvent(PointerEvent event, HitTestEntry entry) {
+  ///   assert(debugHandleEvent(event, entry));
+  ///   // ... handle the event ...
+  /// }
+  /// ```
+  // TODO(ianh): Fix the type of the argument here once https://github.com/dart-lang/sdk/issues/25232 is fixed
   @override
   void handleEvent(PointerEvent event, HitTestEntry entry) {
     super.handleEvent(event, entry);
+  }
+
+  int _debugActivePointers = 0;
+
+  /// Implements the [debugPaintPointersEnabled] debugging feature.
+  ///
+  /// [RenderBox] subclasses that implement [handleEvent] should call
+  /// [debugHandleEvent] from their [handleEvent] method, as follows:
+  ///
+  /// ```dart
+  /// @override
+  /// void handleEvent(PointerEvent event, HitTestEntry entry) {
+  ///   assert(debugHandleEvent(event, entry));
+  ///   // ... handle the event ...
+  /// }
+  /// ```
+  ///
+  /// If you call this for a [PointerDownEvent], make sure you also call it for
+  /// the corresponding [PointerUpEvent] or [PointerCancelEvent].
+  bool debugHandleEvent(PointerEvent event, HitTestEntry entry) {
     assert(() {
       if (debugPaintPointersEnabled) {
         if (event is PointerDownEvent) {
@@ -1276,6 +1306,7 @@ abstract class RenderBox extends RenderObject {
       }
       return true;
     });
+    return true;
   }
 
   @override
@@ -1338,9 +1369,13 @@ abstract class RenderBox extends RenderObject {
     });
   }
 
-  /// In debug mode, paints a rectangle if this render box has received more pointer downs than pointer up events.
+  /// In debug mode, paints a rectangle if this render box has counted more
+  /// pointer downs than pointer up events.
   ///
   /// Called for every [RenderBox] when [debugPaintPointersEnabled] is true.
+  ///
+  /// By default, events are not counted. For details on how to ensure that
+  /// events are counted for your class, see [debugHandleEvent].
   @protected
   void debugPaintPointers(PaintingContext context, Offset offset) {
     assert(() {

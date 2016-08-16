@@ -132,6 +132,7 @@ class RenderParagraph extends RenderBox {
 
   @override
   void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
+    assert(debugHandleEvent(event, entry));
     if (event is! PointerDownEvent)
       return;
     _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);

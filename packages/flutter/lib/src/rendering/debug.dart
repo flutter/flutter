@@ -42,10 +42,15 @@ bool debugPaintLayerBordersEnabled = false;
 /// The color to use when painting Layer borders.
 Color debugPaintLayerBordersColor = const Color(0xFFFF9800);
 
-/// Causes RenderBox objects to flash while they are being tapped.
-bool debugPaintPointersEnabled = false;
+/// Causes objects like [RenderPointerListener] to flash while they are being
+/// tapped. This can be useful to see how large the hit box is, e.g. when
+/// debugging buttons that are harder to hit than expected.
+///
+/// For details on how to support this in your [RenderBox] subclass, see
+/// [RenderBox.debugHandleEvent].
+bool debugPaintPointersEnabled = true;
 
-/// The color to use when reporting pointers.
+/// The color to use when reporting pointers for [debugPaintPointersEnabled].
 int debugPaintPointersColorValue = 0x00BBBB;
 
 /// Overlay a rotating set of colors when repainting layers in checked mode.
