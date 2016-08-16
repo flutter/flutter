@@ -44,6 +44,8 @@ class RuntimeController : public WindowClient, public IsolateClient {
 
   Dart_Port GetMainPort();
 
+  std::string GetIsolateName();
+
  private:
   explicit RuntimeController(RuntimeDelegate* client);
 

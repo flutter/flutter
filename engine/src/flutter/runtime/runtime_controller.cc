@@ -113,4 +113,15 @@ Dart_Port RuntimeController::GetMainPort() {
   return dart_controller_->dart_state()->main_port();
 }
 
+std::string RuntimeController::GetIsolateName() {
+  if (!dart_controller_) {
+    return "";
+  }
+  if (!dart_controller_->dart_state()) {
+    return "";
+  }
+  return dart_controller_->dart_state()->debug_name();
+}
+
+
 }  // namespace blink
