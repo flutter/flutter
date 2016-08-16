@@ -103,8 +103,8 @@ abstract class Route<T> {
   /// route), then [isCurrent] will also be true.
   ///
   /// If a later route is entirely opaque, then the route will be active but not
-  /// rendered. In particular, it's possible for a route to be active but for
-  /// stateful widgets within the route to not be instantiated.
+  /// rendered. It is even possible for the route to be active but for the stateful
+  /// widgets within the route to not be instatiated. See [ModalRoute.maintainState].
   bool get isActive {
     if (_navigator == null)
       return false;
@@ -118,7 +118,7 @@ class RouteSettings {
   /// Creates data used to construct routes.
   const RouteSettings({
     this.name,
-    this.isInitialRoute: false
+    this.isInitialRoute: false,
   });
 
   /// The name of the route (e.g., "/settings").

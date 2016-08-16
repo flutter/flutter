@@ -201,6 +201,63 @@ abstract class WidgetsBinding extends BindingBase implements GestureBinding, Ren
 
   bool _buildingDirtyElements = false;
 
+  /// Pump the build and rendering pipeline to generate a frame.
+  ///
+  /// This method is called by [handleBeginFrame], which itself is called
+  /// automatically by the engine when when it is time to lay out and paint a
+  /// frame.
+  ///
+  /// Each frame consists of the following phases:
+  ///
+  /// 1. The animation phase: The [handleBeginFrame] method, which is registered
+  /// with [ui.window.onBeginFrame], invokes all the transient frame callbacks
+  /// registered with [scheduleFrameCallback] and [addFrameCallback], in
+  /// registration order. This includes all the [Ticker] instances that are
+  /// driving [AnimationController] objects, which means all of the active
+  /// [Animation] objects tick at this point.
+  ///
+  /// [handleBeginFrame] then invokes all the persistent frame callbacks, of which
+  /// the most notable is this method, [beginFrame], which proceeds as follows:
+  ///
+  /// 2. The build phase: All the dirty [Element]s in the widget tree are
+  /// rebuilt (see [State.build]). See [State.setState] for further details on
+  /// marking a widget dirty for building. See [BuildOwner] for more information
+  /// on this step.
+  ///
+  /// 3. The layout phase: All the dirty [RenderObject]s in the system are laid
+  /// out (see [RenderObject.performLayout]). See [RenderObject.markNeedsLayout]
+  /// for further details on marking an object dirty for layout.
+  ///
+  /// 4. The compositing bits phase: The compositing bits on any dirty
+  /// [RenderObject] objects are updated. See
+  /// [RenderObject.markNeedsCompositingBitsUpdate].
+  ///
+  /// 5. The paint phase: All the dirty [RenderObject]s in the system are
+  /// repainted (see [RenderObject.paint]). This generates the [Layer] tree. See
+  /// [RenderObject.markNeedsPaint] for further details on marking an object
+  /// dirty for paint.
+  ///
+  /// 6. The compositing phase: The layer tree is turned into a [ui.Scene] and
+  /// sent to the GPU.
+  ///
+  /// 7. The semantics phase: All the dirty [RenderObject]s in the system have
+  /// their semantics updated (see [RenderObject.semanticAnnotator]). This
+  /// generates the [SemanticsNode] tree. See
+  /// [RenderObject.markNeedsSemanticsUpdate] for further details on marking an
+  /// object dirty for semantics.
+  ///
+  /// For more details on steps 3-7, see [PipelineOwner].
+  ///
+  /// 8. The finalization phase in the widgets layer: The widgets tree is
+  /// finalized. This causes [State.dispose] to be invoked on any objects that
+  /// were removed from the widgets tree this frame. See
+  /// [BuildOwner.finalizeTree] for more details.
+  ///
+  /// 9. The finalization phase in the scheduler layer: After [beginFrame]
+  /// returns, [handleBeginFrame] then invokes post-frame callbacks (registered
+  /// with [addPostFrameCallback].
+  //
+  // When editing the above, also update rendering/binding.dart's copy.
   @override
   void beginFrame() {
     assert(!_buildingDirtyElements);
@@ -210,6 +267,7 @@ abstract class WidgetsBinding extends BindingBase implements GestureBinding, Ren
     super.beginFrame();
     buildOwner.finalizeTree();
     // TODO(ianh): Following code should not be included in release mode, only profile and debug modes.
+    // See https://github.com/dart-lang/sdk/issues/27192
     if (_needToReportFirstFrame) {
       if (_thisFrameWasUseful) {
         developer.Timeline.instantSync('Widgets completed first useful frame');
@@ -298,7 +356,8 @@ class RenderObjectToWidgetAdapter<T extends RenderObject> extends RenderObjectWi
   @override
   void updateRenderObject(BuildContext context, RenderObject renderObject) { }
 
-  /// Inflate this widget and actually set the resulting [RenderObject] as the child of [container].
+  /// Inflate this widget and actually set the resulting [RenderObject] as the
+  /// child of [container].
   ///
   /// If `element` is null, this function will create a new element. Otherwise,
   /// the given element will be updated with this widget.

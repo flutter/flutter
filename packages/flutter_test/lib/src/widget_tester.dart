@@ -204,7 +204,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher {
       )?.target;
       if (innerTarget == null)
         return null;
-      final Element innerTargetElement = collectAllElementsFrom(binding.renderViewElement)
+      final Element innerTargetElement = collectAllElementsFrom(binding.renderViewElement, skipOffstage: true)
         .lastWhere((Element element) => element.renderObject == innerTarget);
       final List<Element> candidates = <Element>[];
       innerTargetElement.visitAncestorElements((Element element) {

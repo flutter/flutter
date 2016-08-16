@@ -422,14 +422,14 @@ class RenderPositionedBox extends RenderAligningShiftedBox {
 /// ignoring the child's dimensions.
 ///
 /// For example, if you wanted a box to always render 50 pixels high, regardless
-/// of where it was rendered, you would wrap it in a RenderOverflow with
-/// minHeight and maxHeight set to 50.0. Generally speaking, to avoid confusing
-/// behavior around hit testing, a RenderOverflowBox should usually be wrapped
-/// in a RenderClipRect.
+/// of where it was rendered, you would wrap it in a
+/// RenderConstrainedOverflowBox with minHeight and maxHeight set to 50.0.
+/// Generally speaking, to avoid confusing behavior around hit testing, a
+/// RenderConstrainedOverflowBox should usually be wrapped in a RenderClipRect.
 ///
-/// The child is positioned at the top left of the box. To position a smaller
+/// The child is positioned according to [alignment]. To position a smaller
 /// child inside a larger parent, use [RenderPositionedBox] and
-/// [RenderConstrainedBox] rather than RenderOverflowBox.
+/// [RenderConstrainedBox] rather than RenderConstrainedOverflowBox.
 class RenderConstrainedOverflowBox extends RenderAligningShiftedBox {
   /// Creates a render object that lets its child overflow itself.
   RenderConstrainedOverflowBox({

@@ -148,12 +148,17 @@ class _CupertinoBackGestureController extends NavigationGestureController {
 ///
 /// [MaterialApp] creates material page routes for entries in the
 /// [MaterialApp.routes] map.
+///
+/// By default, when a modal route is replaced by another, the previous route
+/// remains in memory. To free all the resources when this is not necessary, set
+/// [maintainState] to false.
 class MaterialPageRoute<T> extends PageRoute<T> {
   /// Creates a page route for use in a material design app.
   MaterialPageRoute({
     this.builder,
     Completer<T> completer,
-    RouteSettings settings: const RouteSettings()
+    RouteSettings settings: const RouteSettings(),
+    this.maintainState: true,
   }) : super(completer: completer, settings: settings) {
     assert(builder != null);
     assert(opaque);
@@ -161,6 +166,9 @@ class MaterialPageRoute<T> extends PageRoute<T> {
 
   /// Builds the primary contents of the route.
   final WidgetBuilder builder;
+
+  @override
+  final bool maintainState;
 
   @override
   Duration get transitionDuration => const Duration(milliseconds: 300);

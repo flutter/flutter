@@ -59,20 +59,20 @@ void main() {
 
     // the initial setup.
 
-    expect(find.byKey(firstKey), isOnStage);
+    expect(find.byKey(firstKey), isOnstage);
     expect(find.byKey(firstKey), isInCard);
     expect(find.byKey(secondKey), findsNothing);
 
     await tester.tap(find.text('two'));
     await tester.pump(); // begin navigation
 
-    // at this stage, the second route is off-stage, so that we can form the
+    // at this stage, the second route is offstage, so that we can form the
     // hero party.
 
-    expect(find.byKey(firstKey), isOnStage);
+    expect(find.byKey(firstKey), isOnstage);
     expect(find.byKey(firstKey), isInCard);
-    expect(find.byKey(secondKey), isOffStage);
-    expect(find.byKey(secondKey), isInCard);
+    expect(find.byKey(secondKey, skipOffstage: false), isOffstage);
+    expect(find.byKey(secondKey, skipOffstage: false), isInCard);
 
     await tester.pump();
 
@@ -80,7 +80,7 @@ void main() {
     // seeing them at t=16ms. The original page no longer contains the hero.
 
     expect(find.byKey(firstKey), findsNothing);
-    expect(find.byKey(secondKey), isOnStage);
+    expect(find.byKey(secondKey), isOnstage);
     expect(find.byKey(secondKey), isNotInCard);
 
     await tester.pump();
@@ -88,16 +88,17 @@ void main() {
     // t=32ms for the journey. Surely they are still at it.
 
     expect(find.byKey(firstKey), findsNothing);
-    expect(find.byKey(secondKey), isOnStage);
+    expect(find.byKey(secondKey), isOnstage);
     expect(find.byKey(secondKey), isNotInCard);
 
     await tester.pump(new Duration(seconds: 1));
 
     // t=1.032s for the journey. The journey has ended (it ends this frame, in
-    // fact). The hero should now be in the new page, on-stage.
+    // fact). The hero should now be in the new page, onstage. The original
+    // widget will be back as well now (though not visible).
 
     expect(find.byKey(firstKey), findsNothing);
-    expect(find.byKey(secondKey), isOnStage);
+    expect(find.byKey(secondKey), isOnstage);
     expect(find.byKey(secondKey), isInCard);
 
     await tester.pump();
@@ -105,7 +106,7 @@ void main() {
     // Should not change anything.
 
     expect(find.byKey(firstKey), findsNothing);
-    expect(find.byKey(secondKey), isOnStage);
+    expect(find.byKey(secondKey), isOnstage);
     expect(find.byKey(secondKey), isInCard);
 
     // Now move on to view 3
@@ -113,13 +114,13 @@ void main() {
     await tester.tap(find.text('three'));
     await tester.pump(); // begin navigation
 
-    // at this stage, the second route is off-stage, so that we can form the
+    // at this stage, the second route is offstage, so that we can form the
     // hero party.
 
-    expect(find.byKey(secondKey), isOnStage);
+    expect(find.byKey(secondKey), isOnstage);
     expect(find.byKey(secondKey), isInCard);
-    expect(find.byKey(thirdKey), isOffStage);
-    expect(find.byKey(thirdKey), isInCard);
+    expect(find.byKey(thirdKey, skipOffstage: false), isOffstage);
+    expect(find.byKey(thirdKey, skipOffstage: false), isInCard);
 
     await tester.pump();
 
@@ -127,7 +128,7 @@ void main() {
     // seeing them at t=16ms. The original page no longer contains the hero.
 
     expect(find.byKey(secondKey), findsNothing);
-    expect(find.byKey(thirdKey), isOnStage);
+    expect(find.byKey(thirdKey), isOnstage);
     expect(find.byKey(thirdKey), isNotInCard);
 
     await tester.pump();
@@ -135,16 +136,16 @@ void main() {
     // t=32ms for the journey. Surely they are still at it.
 
     expect(find.byKey(secondKey), findsNothing);
-    expect(find.byKey(thirdKey), isOnStage);
+    expect(find.byKey(thirdKey), isOnstage);
     expect(find.byKey(thirdKey), isNotInCard);
 
     await tester.pump(new Duration(seconds: 1));
 
     // t=1.032s for the journey. The journey has ended (it ends this frame, in
-    // fact). The hero should now be in the new page, on-stage.
+    // fact). The hero should now be in the new page, onstage.
 
     expect(find.byKey(secondKey), findsNothing);
-    expect(find.byKey(thirdKey), isOnStage);
+    expect(find.byKey(thirdKey), isOnstage);
     expect(find.byKey(thirdKey), isInCard);
 
     await tester.pump();
@@ -152,7 +153,7 @@ void main() {
     // Should not change anything.
 
     expect(find.byKey(secondKey), findsNothing);
-    expect(find.byKey(thirdKey), isOnStage);
+    expect(find.byKey(thirdKey), isOnstage);
     expect(find.byKey(thirdKey), isInCard);
   });
 
@@ -187,8 +188,8 @@ void main() {
 
     final Duration duration = const Duration(milliseconds: 300);
     final Curve curve = Curves.fastOutSlowIn;
-    final double initialHeight = tester.getSize(find.byKey(firstKey)).height;
-    final double finalHeight = tester.getSize(find.byKey(secondKey)).height;
+    final double initialHeight = tester.getSize(find.byKey(firstKey, skipOffstage: false)).height;
+    final double finalHeight = tester.getSize(find.byKey(secondKey, skipOffstage: false)).height;
     final double deltaHeight = finalHeight - initialHeight;
     final double epsilon = 0.001;
 
@@ -267,18 +268,18 @@ void main() {
     navigator.pushNamed('/next');
 
     expect(log, isEmpty);
-    await tester.tap(find.text('foo'));
+    await tester.tap(find.text('foo', skipOffstage: false));
     expect(log, isEmpty);
 
     await tester.pump(new Duration(milliseconds: 10));
-    await tester.tap(find.text('foo'));
+    await tester.tap(find.text('foo', skipOffstage: false));
     expect(log, isEmpty);
-    await tester.tap(find.text('bar'));
+    await tester.tap(find.text('bar', skipOffstage: false));
     expect(log, isEmpty);
 
     await tester.pump(new Duration(milliseconds: 10));
     expect(find.text('foo'), findsNothing);
-    await tester.tap(find.text('bar'));
+    await tester.tap(find.text('bar', skipOffstage: false));
     expect(log, isEmpty);
 
     await tester.pump(new Duration(seconds: 1));

@@ -148,7 +148,53 @@ abstract class RendererBinding extends BindingBase implements SchedulerBinding, 
 
   /// Pump the rendering pipeline to generate a frame.
   ///
-  /// Called automatically by the engine when it is time to lay out and paint a frame.
+  /// This method is called by [handleBeginFrame], which itself is called
+  /// automatically by the engine when when it is time to lay out and paint a
+  /// frame.
+  ///
+  /// Each frame consists of the following phases:
+  ///
+  /// 1. The animation phase: The [handleBeginFrame] method, which is registered
+  /// with [ui.window.onBeginFrame], invokes all the transient frame callbacks
+  /// registered with [scheduleFrameCallback] and [addFrameCallback], in
+  /// registration order. This includes all the [Ticker] instances that are
+  /// driving [AnimationController] objects, which means all of the active
+  /// [Animation] objects tick at this point.
+  ///
+  /// [handleBeginFrame] then invokes all the persistent frame callbacks, of which
+  /// the most notable is this method, [beginFrame], which proceeds as follows:
+  ///
+  /// 2. The layout phase: All the dirty [RenderObject]s in the system are laid
+  /// out (see [RenderObject.performLayout]). See [RenderObject.markNeedsLayout]
+  /// for further details on marking an object dirty for layout.
+  ///
+  /// 3. The compositing bits phase: The compositing bits on any dirty
+  /// [RenderObject] objects are updated. See
+  /// [RenderObject.markNeedsCompositingBitsUpdate].
+  ///
+  /// 4. The paint phase: All the dirty [RenderObject]s in the system are
+  /// repainted (see [RenderObject.paint]). This generates the [Layer] tree. See
+  /// [RenderObject.markNeedsPaint] for further details on marking an object
+  /// dirty for paint.
+  ///
+  /// 5. The compositing phase: The layer tree is turned into a [ui.Scene] and
+  /// sent to the GPU.
+  ///
+  /// 6. The semantics phase: All the dirty [RenderObject]s in the system have
+  /// their semantics updated (see [RenderObject.semanticAnnotator]). This
+  /// generates the [SemanticsNode] tree. See
+  /// [RenderObject.markNeedsSemanticsUpdate] for further details on marking an
+  /// object dirty for semantics.
+  ///
+  /// For more details on steps 2-6, see [PipelineOwner].
+  ///
+  /// 7. The finalization phase: After [beginFrame] returns, [handleBeginFrame]
+  /// then invokes post-frame callbacks (registered with [addPostFrameCallback].
+  ///
+  /// Some bindings (for example, the [WidgetsBinding]) add extra steps to this
+  /// list.
+  //
+  // When editing the above, also update widgets/binding.dart's copy.
   void beginFrame() {
     assert(renderView != null);
     pipelineOwner.flushLayout();
