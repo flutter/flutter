@@ -65,6 +65,14 @@ abstract class ResidentRunner {
       await cleanupAfterSignal();
       exit(0);
     });
+    ProcessSignal.SIGUSR1.watch().listen((ProcessSignal signal) async {
+      printStatus('Caught SIGUSR1');
+      await restart(fullRestart: false);
+    });
+    ProcessSignal.SIGUSR2.watch().listen((ProcessSignal signal) async {
+      printStatus('Caught SIGUSR2');
+      await restart(fullRestart: true);
+    });
   }
 
   Future<Null> startEchoingDeviceLog() async {
