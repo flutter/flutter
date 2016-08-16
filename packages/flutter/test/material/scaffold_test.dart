@@ -128,4 +128,72 @@ void main() {
     RenderBox renderBox = tester.renderObject(find.byKey(appBarKey));
     expect(renderBox.size.height, equals(appBarHeight));
   });
+
+  testWidgets('Tapping the status bar scrolls to top on iOS', (WidgetTester tester) async {
+    final GlobalKey<ScrollableState> scrollableKey = new GlobalKey<ScrollableState>();
+    final Key appBarKey = new UniqueKey();
+
+    await tester.pumpWidget(
+      new MaterialApp(
+        theme: new ThemeData(platform: TargetPlatform.iOS),
+        home: new MediaQuery(
+          data: new MediaQueryData(padding: const EdgeInsets.only(top: 25.0)), // status bar
+          child: new Scaffold(
+            scrollableKey: scrollableKey,
+            appBar: new AppBar(
+              key: appBarKey,
+              title: new Text('Title')
+            ),
+            body: new Block(
+              scrollableKey: scrollableKey,
+              initialScrollOffset: 500.0,
+              children: new List<Widget>.generate(20,
+                (int index) => new SizedBox(height: 100.0, child: new Text('$index'))
+              )
+            )
+          )
+        )
+      )
+    );
+
+    expect(scrollableKey.currentState.scrollOffset, equals(500.0));
+    await tester.tapAt(const Point(100.0, 10.0));
+    await tester.pump();
+    await tester.pump(new Duration(seconds: 1));
+    expect(scrollableKey.currentState.scrollOffset, equals(0.0));
+  });
+
+  testWidgets('Tapping the status bar does not scroll to top on Android', (WidgetTester tester) async {
+    final GlobalKey<ScrollableState> scrollableKey = new GlobalKey<ScrollableState>();
+    final Key appBarKey = new UniqueKey();
+
+    await tester.pumpWidget(
+      new MaterialApp(
+        theme: new ThemeData(platform: TargetPlatform.android),
+        home: new MediaQuery(
+          data: new MediaQueryData(padding: const EdgeInsets.only(top: 25.0)), // status bar
+          child: new Scaffold(
+            scrollableKey: scrollableKey,
+            appBar: new AppBar(
+              key: appBarKey,
+              title: new Text('Title')
+            ),
+            body: new Block(
+              scrollableKey: scrollableKey,
+              initialScrollOffset: 500.0,
+              children: new List<Widget>.generate(20,
+                (int index) => new SizedBox(height: 100.0, child: new Text('$index'))
+              )
+            )
+          )
+        )
+      )
+    );
+
+    expect(scrollableKey.currentState.scrollOffset, equals(500.0));
+    await tester.tapAt(const Point(100.0, 10.0));
+    await tester.pump();
+    await tester.pump(new Duration(seconds: 1));
+    expect(scrollableKey.currentState.scrollOffset, equals(500.0));
+  });
 }

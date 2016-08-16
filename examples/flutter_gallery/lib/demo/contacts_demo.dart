@@ -80,7 +80,8 @@ class ContactsDemo extends StatefulWidget {
 }
 
 class ContactsDemoState extends State<ContactsDemo> {
-  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+  static final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+  static final GlobalKey<ScrollableState> _scrollableKey = new GlobalKey<ScrollableState>();
   final double _appBarHeight = 256.0;
   AppBarBehavior _appBarBehavior = AppBarBehavior.under;
 
@@ -94,6 +95,7 @@ class ContactsDemoState extends State<ContactsDemo> {
       ),
       child: new Scaffold(
         key: _scaffoldKey,
+        scrollableKey: _scrollableKey,
         appBarBehavior: _appBarBehavior,
         appBar: new AppBar(
           expandedHeight: _appBarHeight,
@@ -151,6 +153,7 @@ class ContactsDemoState extends State<ContactsDemo> {
         ),
         body: new Block(
           padding: new EdgeInsets.only(top: _appBarHeight + statusBarHeight),
+          scrollableKey: _scrollableKey,
           children: <Widget>[
             new _ContactCategory(
               icon: Icons.call,

@@ -16,6 +16,7 @@ import 'icon_button.dart';
 import 'icons.dart';
 import 'material.dart';
 import 'snack_bar.dart';
+import 'theme.dart';
 
 const double _kFloatingActionButtonMargin = 16.0; // TODO(hmuller): should be device dependent
 const Duration _kFloatingActionButtonSegue = const Duration(milliseconds: 200);
@@ -52,12 +53,18 @@ enum _ScaffoldSlot {
   snackBar,
   floatingActionButton,
   drawer,
+  statusBar,
 }
 
 class _ScaffoldLayout extends MultiChildLayoutDelegate {
-  _ScaffoldLayout({ this.padding, this.appBarBehavior: AppBarBehavior.anchor });
+  _ScaffoldLayout({
+    this.padding,
+    this.statusBarHeight,
+    this.appBarBehavior: AppBarBehavior.anchor
+  });
 
   final EdgeInsets padding;
+  final double statusBarHeight;
   final AppBarBehavior appBarBehavior;
 
   @override
@@ -118,6 +125,11 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
       if (bottomSheetSize.height > 0.0)
         fabY = math.min(fabY, contentBottom - bottomSheetSize.height - fabSize.height / 2.0);
       positionChild(_ScaffoldSlot.floatingActionButton, new Offset(fabX, fabY));
+    }
+
+    if (hasChild(_ScaffoldSlot.statusBar)) {
+      layoutChild(_ScaffoldSlot.statusBar, fullWidthConstraints.tighten(height: statusBarHeight));
+      positionChild(_ScaffoldSlot.statusBar, Offset.zero);
     }
 
     if (hasChild(_ScaffoldSlot.drawer)) {
@@ -270,9 +282,7 @@ class Scaffold extends StatefulWidget {
     this.scrollableKey,
     this.appBarBehavior: AppBarBehavior.anchor,
     this.resizeToAvoidBottomPadding: true
-  }) : super(key: key) {
-    assert(scrollableKey != null ? (appBarBehavior != AppBarBehavior.anchor) : true);
-  }
+  }) : super(key: key);
 
   /// An app bar to display at the top of the scaffold.
   final AppBar appBar;
@@ -298,7 +308,7 @@ class Scaffold extends StatefulWidget {
   ///
   /// Used to control scroll-linked effects, such as the collapse of the
   /// [appBar].
-  final Key scrollableKey;
+  final GlobalKey<ScrollableState> scrollableKey;
 
   /// How the [appBar] should respond to scrolling.
   ///
@@ -663,6 +673,19 @@ class ScaffoldState extends State<Scaffold> {
     return appBar;
   }
 
+  // On iOS, tapping the status bar scrolls the app's primary scrollable to the top.
+  void _handleStatusBarTap() {
+    ScrollableState scrollable = config.scrollableKey?.currentState;
+    if (scrollable == null || scrollable.scrollBehavior is! ExtentScrollBehavior)
+      return;
+
+    ExtentScrollBehavior behavior = scrollable.scrollBehavior;
+    scrollable.scrollTo(
+      behavior.minScrollOffset,
+      duration: const Duration(milliseconds: 300)
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     EdgeInsets padding = MediaQuery.of(context).padding;
@@ -729,6 +752,16 @@ class ScaffoldState extends State<Scaffold> {
       )
     ));
 
+    if (Theme.of(context).platform == TargetPlatform.iOS) {
+      children.add(new LayoutId(
+        id: _ScaffoldSlot.statusBar,
+        child: new GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: _handleStatusBarTap
+        )
+      ));
+    }
+
     if (config.drawer != null) {
       children.add(new LayoutId(
         id: _ScaffoldSlot.drawer,
@@ -739,12 +772,12 @@ class ScaffoldState extends State<Scaffold> {
       ));
     }
 
-    EdgeInsets appPadding = (config.appBarBehavior != AppBarBehavior.anchor) ?
-        EdgeInsets.zero : padding;
+    EdgeInsets appPadding = (config.appBarBehavior != AppBarBehavior.anchor) ? EdgeInsets.zero : padding;
     Widget application = new CustomMultiChildLayout(
       children: children,
       delegate: new _ScaffoldLayout(
         padding: appPadding,
+        statusBarHeight: padding.top,
         appBarBehavior: config.appBarBehavior
       )
     );

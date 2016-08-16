@@ -51,6 +51,8 @@ class PestoDemo extends StatefulWidget {
 
 class _PestoDemoState extends State<PestoDemo> {
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+  static final GlobalKey<ScrollableState> _homeScrollableKey = new GlobalKey<ScrollableState>();
+  static final GlobalKey<ScrollableState> _favoritesScrollableKey = new GlobalKey<ScrollableState>();
   final TextStyle favoritesMessageStyle = _textStyle(16.0);
   final TextStyle userStyle = _textStyle(12.0, FontWeight.bold);
   final TextStyle emailStyle = _textStyle(12.0).copyWith(color: Colors.black54);
@@ -61,6 +63,7 @@ class _PestoDemoState extends State<PestoDemo> {
       data: _kTheme,
       child: new Scaffold(
         key: _scaffoldKey,
+        scrollableKey: config.showFavorites ? _favoritesScrollableKey : _homeScrollableKey,
         appBarBehavior: AppBarBehavior.under,
         appBar: _buildAppBar(context),
         drawer: _buildDrawer(context),
@@ -180,6 +183,7 @@ class _PestoDemoState extends State<PestoDemo> {
     }
 
     return new ScrollableGrid(
+      scrollableKey: config.showFavorites ? _favoritesScrollableKey : _homeScrollableKey,
       delegate: new MaxTileWidthGridDelegate(
         maxTileWidth: 500.0,
         rowSpacing: 8.0,
@@ -282,7 +286,8 @@ class _RecipePage extends StatefulWidget {
 }
 
 class _RecipePageState extends State<_RecipePage> {
-  static final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+  final GlobalKey<ScrollableState> _scrollableKey = new GlobalKey<ScrollableState>();
   final TextStyle menuItemStyle = _textStyle(15.0).copyWith(color: Colors.black54, height: 24.0/15.0);
 
   double _getAppBarHeight(BuildContext context) => MediaQuery.of(context).size.height * 0.3;
@@ -291,6 +296,7 @@ class _RecipePageState extends State<_RecipePage> {
   Widget build(BuildContext context) {
     return new Scaffold(
       key: _scaffoldKey,
+      scrollableKey: _scrollableKey,
       appBarBehavior: AppBarBehavior.scroll,
       appBar: new AppBar(
         expandedHeight: _getAppBarHeight(context),
@@ -347,6 +353,7 @@ class _RecipePageState extends State<_RecipePage> {
         new ClampOverscrolls(
           value: true,
           child: new ScrollableViewport(
+            scrollableKey: _scrollableKey,
             child: new RepaintBoundary(
               child: new Padding(
                 padding: new EdgeInsets.only(top: appBarHeight),

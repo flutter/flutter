@@ -137,6 +137,7 @@ class OrderPage extends StatefulWidget {
 /// order to the shopping cart.
 class _OrderPageState extends State<OrderPage> {
   static final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>(debugLabel: 'Order page');
+  static final GlobalKey<ScrollableState> scrollableKey = new GlobalKey<ScrollableState>();
 
   Order get currentOrder => ShrineOrderRoute.of(context).order;
 
@@ -162,6 +163,7 @@ class _OrderPageState extends State<OrderPage> {
   Widget build(BuildContext context) {
     return new ShrinePage(
       scaffoldKey: scaffoldKey,
+      scrollableKey: scrollableKey,
       products: config.products,
       shoppingCart: config.shoppingCart,
       floatingActionButton: new FloatingActionButton(
@@ -180,6 +182,7 @@ class _OrderPageState extends State<OrderPage> {
         )
       ),
       body: new Block(
+        scrollableKey: scrollableKey,
         children: <Widget>[
           new OrderItem(
             product: config.order.product,
