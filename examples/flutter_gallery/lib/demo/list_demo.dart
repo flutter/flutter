@@ -14,7 +14,8 @@ class ListDemo extends StatefulWidget {
 }
 
 class ListDemoState extends State<ListDemo> {
-  final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
+  static final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
+  static final GlobalKey<ScrollableState> _scrollableKey = new GlobalKey<ScrollableState>();
 
   PersistentBottomSheetController<Null> _bottomSheet;
   MaterialListType _itemType = MaterialListType.threeLine;
@@ -171,6 +172,7 @@ class ListDemoState extends State<ListDemo> {
 
     return new Scaffold(
       key: scaffoldKey,
+      scrollableKey: _scrollableKey,
       appBar: new AppBar(
         title: new Text('Scrolling list\n$itemTypeText$layoutText'),
         actions: <Widget>[
@@ -193,6 +195,7 @@ class ListDemoState extends State<ListDemo> {
       ),
       body: new Scrollbar(
         child: new MaterialList(
+          scrollableKey: _scrollableKey,
           type: _itemType,
           padding: new EdgeInsets.symmetric(vertical: _dense ? 4.0 : 8.0),
           children: listItems

@@ -97,7 +97,8 @@ class GalleryHome extends StatefulWidget {
 }
 
 class GalleryHomeState extends State<GalleryHome> {
-  final Key _homeKey = new ValueKey<String>("Gallery Home");
+  static final Key _homeKey = new ValueKey<String>("Gallery Home");
+  static final GlobalKey<ScrollableState> _scrollableKey = new GlobalKey<ScrollableState>();
   final List<Widget> _listItems = <Widget>[];
 
   @override
@@ -135,6 +136,7 @@ class GalleryHomeState extends State<GalleryHome> {
   Widget build(BuildContext context) {
     return new Scaffold(
       key: _homeKey,
+      scrollableKey: _scrollableKey,
       drawer: new GalleryDrawer(
         useLightTheme: config.useLightTheme,
         onThemeChanged: config.onThemeChanged,
@@ -157,7 +159,10 @@ class GalleryHomeState extends State<GalleryHome> {
         )
       ),
       appBarBehavior: AppBarBehavior.under,
-      body: new Block(children: _listItems)
+      body: new Block(
+       scrollableKey: _scrollableKey,
+       children: _listItems
+      )
     );
   }
 }

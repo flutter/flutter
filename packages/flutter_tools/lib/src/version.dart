@@ -48,6 +48,8 @@ class FlutterVersion {
   String _frameworkAge;
   String get frameworkAge => _frameworkAge;
 
+  String get frameworkDate => frameworkCommitDate;
+
   String get dartSdkVersion => Cache.dartSdkVersion.split(' ')[0];
 
   String get engineRevision => Cache.engineRevision;
@@ -57,12 +59,17 @@ class FlutterVersion {
 
   @override
   String toString() {
-    String from = 'Flutter on channel $channel (from ${repositoryUrl == null ? 'unknown source' : repositoryUrl})';
-    String flutterText = 'Framework revision $frameworkRevisionShort ($frameworkAge); engine revision $engineRevisionShort';
-    String dartSdkText = 'Flutter tools using Dart version $dartSdkVersion';
-    String frameworkCommit = 'Last commit on framework: $frameworkCommitDate';
+    String flutterText = 'Flutter • channel $channel • ${repositoryUrl == null ? 'unknown source' : repositoryUrl}';
+    String frameworkText = 'Framework • revision $frameworkRevisionShort ($frameworkAge) • $frameworkCommitDate';
+    String engineText = 'Engine • revision $engineRevisionShort';
+    String toolsText = 'Tools • Dart $dartSdkVersion';
 
-    return '$from\n$flutterText\n$frameworkCommit\n$dartSdkText';
+    // Flutter • channel master • https://github.com/flutter/flutter.git
+    // Framework • revision 2259c59be8 • 19 minutes ago • 2016-08-15 22:51:40
+    // Engine • revision fe509b0d96
+    // Tools • Dart 1.19.0-dev.5.0
+
+    return '$flutterText\n$frameworkText\n$engineText\n$toolsText';
   }
 
   /// A date String describing the last framework commit.

@@ -264,9 +264,9 @@ class DevFS {
     return _baseUri;
   }
 
-  Future<dynamic> destroy() async {
+  Future<dynamic> destroy() {
     printTrace('DevFS: Deleted filesystem on the device ($_baseUri)');
-    return await _operations.destroy(fsName);
+    return _operations.destroy(fsName);
   }
 
   void _reset() {

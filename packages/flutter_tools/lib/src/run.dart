@@ -137,12 +137,8 @@ class RunAndStayResident extends ResidentRunner {
     // TODO(devoncarew): Move this into the device.startApp() impls.
     if (_package != null) {
       printTrace("Stopping app '${_package.name}' on ${device.name}.");
-      // We don't wait for the stop command to complete.
-      device.stopApp(_package);
+      await device.stopApp(_package);
     }
-
-    // Allow any stop commands from above to start work.
-    await new Future<Duration>.delayed(Duration.ZERO);
 
     // TODO(devoncarew): This fails for ios devices - we haven't built yet.
     if (device is AndroidDevice) {
@@ -217,7 +213,7 @@ class RunAndStayResident extends ResidentRunner {
       stop();
     }
 
-    return await waitForAppToFinish();
+    return waitForAppToFinish();
   }
 
   @override
