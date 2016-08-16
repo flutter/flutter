@@ -668,7 +668,7 @@ class ScaffoldState extends State<Scaffold> {
     return appBar;
   }
 
-  // On IOS, tapping the status bar scrolls the app's primary scrollable to the top.
+  // On iOS, tapping the status bar scrolls the app's primary scrollable to the top.
   void _handleStatusBarTap() {
     ScrollableState scrollable = config.scrollableKey?.currentState;
     if (scrollable == null || scrollable.scrollBehavior is! ExtentScrollBehavior)

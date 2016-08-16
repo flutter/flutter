@@ -129,7 +129,7 @@ void main() {
     expect(renderBox.size.height, equals(appBarHeight));
   });
 
-  testWidgets('Tapping the status bar scrolls to top on IOS', (WidgetTester tester) async {
+  testWidgets('Tapping the status bar scrolls to top on iOS', (WidgetTester tester) async {
     final GlobalKey<ScrollableState> scrollableKey = new GlobalKey<ScrollableState>();
     final Key appBarKey = new UniqueKey();
 
