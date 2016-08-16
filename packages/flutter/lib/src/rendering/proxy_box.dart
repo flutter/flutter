@@ -881,13 +881,11 @@ abstract class _RenderCustomClip<T> extends RenderProxyBox {
       return;
     CustomClipper<T> oldClipper = _clipper;
     _clipper = newClipper;
-    if (newClipper == null) {
-      assert(oldClipper != null);
-      markNeedsPaint();
-      markNeedsSemanticsUpdate(onlyChanges: true);
-    } else if (oldClipper == null ||
+    assert(newClipper != null || oldClipper != null);
+    if (newClipper == null || oldClipper == null ||
         oldClipper.runtimeType != oldClipper.runtimeType ||
         newClipper.shouldRepaint(oldClipper)) {
+      _clip = null;
       markNeedsPaint();
       markNeedsSemanticsUpdate(onlyChanges: true);
     }
@@ -898,12 +896,20 @@ abstract class _RenderCustomClip<T> extends RenderProxyBox {
 
   @override
   void performLayout() {
+    final Size oldSize = hasSize ? size : null;
     super.performLayout();
-    _clip = _clipper?.getClip(size) ?? _defaultClip;
+    if (oldSize != size)
+      _clip = null;
+  }
+
+  void _updateClip() {
+    _clip ??= _clipper?.getClip(size) ?? _defaultClip;
   }
 
   @override
-  Rect describeApproximatePaintClip(RenderObject child) => _clipper?.getApproximateClipRect(size) ?? Point.origin & size;
+  Rect describeApproximatePaintClip(RenderObject child) {
+    return _clipper?.getApproximateClipRect(size) ?? Point.origin & size;
+  }
 }
 
 /// Clips its child using a rectangle.
@@ -927,8 +933,8 @@ class RenderClipRect extends _RenderCustomClip<Rect> {
   @override
   bool hitTest(HitTestResult result, { Point position }) {
     if (_clipper != null) {
-      Rect clipRect = _clip;
-      if (!clipRect.contains(position))
+      assert(_clip != null);
+      if (!_clip.contains(position))
         return false;
     }
     return super.hitTest(result, position: position);
@@ -936,8 +942,10 @@ class RenderClipRect extends _RenderCustomClip<Rect> {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (child != null)
+    if (child != null) {
+      _updateClip();
       context.pushClipRect(needsCompositing, offset, _clip, super.paint);
+    }
   }
 }
 
@@ -974,6 +982,7 @@ class RenderClipRRect extends RenderProxyBox {
 
   // TODO(ianh): either convert this to the CustomClipper world, or
   // TODO(ianh): implement describeApproximatePaintClip for this class
+  // TODO(ianh): implement hit testing for this class
 
   @override
   void paint(PaintingContext context, Offset offset) {
@@ -1016,11 +1025,11 @@ class RenderClipOval extends _RenderCustomClip<Rect> {
 
   @override
   bool hitTest(HitTestResult result, { Point position }) {
-    Rect clipBounds = _clip;
-    Point center = clipBounds.center;
+    assert(_clip != null);
+    Point center = _clip.center;
     // convert the position to an offset from the center of the unit circle
-    Offset offset = new Offset((position.x - center.x) / clipBounds.width,
-                               (position.y - center.y) / clipBounds.height);
+    Offset offset = new Offset((position.x - center.x) / _clip.width,
+                               (position.y - center.y) / _clip.height);
     // check if the point is outside the unit circle
     if (offset.distanceSquared > 0.25) // x^2 + y^2 > r^2
       return false;
@@ -1030,8 +1039,8 @@ class RenderClipOval extends _RenderCustomClip<Rect> {
   @override
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
-      Rect clipBounds = _clip;
-      context.pushClipPath(needsCompositing, offset, clipBounds, _getClipPath(clipBounds), super.paint);
+      _updateClip();
+      context.pushClipPath(needsCompositing, offset, _clip, _getClipPath(_clip), super.paint);
     }
   }
 }
@@ -1064,15 +1073,20 @@ class RenderClipPath extends _RenderCustomClip<Path> {
 
   @override
   bool hitTest(HitTestResult result, { Point position }) {
-    if (_clip == null || !_clip.contains(position))
-      return false;
+    if (_clipper != null) {
+      assert(_clip != null);
+      if (!_clip.contains(position))
+        return false;
+    }
     return super.hitTest(result, position: position);
   }
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (child != null)
+    if (child != null) {
+      _updateClip();
       context.pushClipPath(needsCompositing, offset, Point.origin & size, _clip, super.paint);
+    }
   }
 }
 
