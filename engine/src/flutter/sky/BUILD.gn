@@ -18,10 +18,6 @@ group("sky") {
     deps += [ "//flutter/snapshotter($dart_host_toolchain)" ]
   }
 
-  if (is_linux || is_android) {
-    deps += [ "//flutter/sky/shell/platform/mojo" ]
-  }
-
   if (is_android) {
     deps += [ "//flutter/services/activity" ]
   }
