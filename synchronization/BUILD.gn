@@ -4,11 +4,14 @@
 
 source_set("synchronization") {
   sources = [
+    "pipeline.cc",
+    "pipeline.h",
     "semaphore.cc",
     "semaphore.h",
   ]
 
   deps = [
+    "//flutter/glue",
     "//lib/ftl",
   ]
 }
