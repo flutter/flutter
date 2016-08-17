@@ -152,7 +152,7 @@ class _TabsDemoState extends State<TabsDemo> {
         body: new TabBarView<_Page>(
           children: _allPages.keys.map((_Page page) {
             return new ScrollableList(
-              scrollableKey: _selectedPage.scrollableKey,
+              scrollableKey: page.scrollableKey,
               padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
               itemExtent: _CardDataItem.height,
               children: _allPages[page].map((_CardData data) {
