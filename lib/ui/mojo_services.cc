@@ -22,27 +22,45 @@ MojoServices* GetMojoServices() {
 }
 
 void DartTakeRootBundle(Dart_NativeArguments args) {
-  Dart_SetIntegerReturnValue(args, GetMojoServices()->TakeRootBundle());
+  int handle = MOJO_HANDLE_INVALID;
+  if (MojoServices* services = GetMojoServices())
+    handle = services->TakeRootBundle();
+  Dart_SetIntegerReturnValue(args, handle);
 }
 
 void DartTakeIncomingServices(Dart_NativeArguments args) {
-  Dart_SetIntegerReturnValue(args, GetMojoServices()->TakeIncomingServices());
+  int handle = MOJO_HANDLE_INVALID;
+  if (MojoServices* services = GetMojoServices())
+    handle = services->TakeIncomingServices();
+  Dart_SetIntegerReturnValue(args, handle);
 }
 
 void DartTakeOutgoingServices(Dart_NativeArguments args) {
-  Dart_SetIntegerReturnValue(args, GetMojoServices()->TakeOutgoingServices());
+  int handle = MOJO_HANDLE_INVALID;
+  if (MojoServices* services = GetMojoServices())
+    handle = services->TakeOutgoingServices();
+  Dart_SetIntegerReturnValue(args, handle);
 }
 
 void DartTakeShell(Dart_NativeArguments args) {
-  Dart_SetIntegerReturnValue(args, GetMojoServices()->TakeShell());
+  int handle = MOJO_HANDLE_INVALID;
+  if (MojoServices* services = GetMojoServices())
+    handle = services->TakeShell();
+  Dart_SetIntegerReturnValue(args, handle);
 }
 
 void DartTakeView(Dart_NativeArguments args) {
-  Dart_SetIntegerReturnValue(args, GetMojoServices()->TakeView());
+  int handle = MOJO_HANDLE_INVALID;
+  if (MojoServices* services = GetMojoServices())
+    handle = services->TakeView();
+  Dart_SetIntegerReturnValue(args, handle);
 }
 
 void DartTakeViewServices(Dart_NativeArguments args) {
-  Dart_SetIntegerReturnValue(args, GetMojoServices()->TakeViewServices());
+  int handle = MOJO_HANDLE_INVALID;
+  if (MojoServices* services = GetMojoServices())
+    handle = services->TakeViewServices();
+  Dart_SetIntegerReturnValue(args, handle);
 }
 
 }  // namespace

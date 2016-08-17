@@ -23,7 +23,10 @@
 #include "lib/tonic/converter/dart_converter.h"
 #include "lib/tonic/logging/dart_error.h"
 
-#if !defined(OS_FUCHSIA)
+#if defined(OS_FUCHSIA)
+#include "flutter/lib/ui/text/paragraph_builder_stub.h"
+#include "flutter/lib/ui/text/paragraph_stub.h"
+#else
 #include "flutter/lib/ui/text/paragraph_builder.h"
 #include "flutter/lib/ui/text/paragraph.h"
 #endif
@@ -60,10 +63,8 @@ void DartUI::InitForGlobal() {
     ImageShader::RegisterNatives(g_natives);
     MaskFilter::RegisterNatives(g_natives);
     MojoServices::RegisterNatives(g_natives);
-#if !defined(OS_FUCHSIA)
     Paragraph::RegisterNatives(g_natives);
     ParagraphBuilder::RegisterNatives(g_natives);
-#endif
     Picture::RegisterNatives(g_natives);
     PictureRecorder::RegisterNatives(g_natives);
     Scene::RegisterNatives(g_natives);

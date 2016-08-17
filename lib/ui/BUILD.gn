@@ -66,7 +66,14 @@ source_set("ui") {
     "//mojo/services/asset_bundle/interfaces",
   ]
 
-  if (!is_fuchsia) {
+  if (is_fuchsia) {
+    sources += [
+      "text/paragraph_builder_stub.cc",
+      "text/paragraph_builder_stub.h",
+      "text/paragraph_stub.cc",
+      "text/paragraph_stub.h",
+    ]
+  } else {
     sources += [
       "text/paragraph_builder.cc",
       "text/paragraph_builder.h",
