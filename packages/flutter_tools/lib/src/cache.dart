@@ -5,6 +5,8 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter_tools/src/dart/pub.dart';
+import 'package:flutter_tools/src/dart/summary.dart';
 import 'package:path/path.dart' as path;
 
 import 'base/context.dart';
@@ -234,13 +236,17 @@ class MaterialFonts {
 }
 
 class FlutterEngine {
+
   FlutterEngine(this.cache);
 
   static const String kName = 'engine';
+  static const String kSkyEngine = 'sky_engine';
+  static const String kSkyServices = 'sky_services';
+  static const String kSdkBundle = 'sdk.ds';
 
   final Cache cache;
 
-  List<String> _getPackageDirs() => <String>['sky_engine', 'sky_services'];
+  List<String> _getPackageDirs() => const <String>[kSkyEngine, kSkyServices];
 
   List<String> _getEngineDirs() {
     List<String> dirs = <String>[
@@ -295,6 +301,9 @@ class FlutterEngine {
         return false;
     }
 
+    if (!new File(path.join(pkgDir.path, kSkyEngine, kSdkBundle)).existsSync())
+      return false;
+
     Directory engineDir = cache.getArtifactDirectory(kName);
     for (String dirName in _getEngineDirs()) {
       Directory dir = new Directory(path.join(engineDir.path, dirName));
@@ -319,10 +328,22 @@ class FlutterEngine {
 
     Directory pkgDir = cache.getCacheDir('pkg');
     for (String pkgName in _getPackageDirs()) {
-      Directory dir = new Directory(path.join(pkgDir.path, pkgName));
+      String pkgPath = path.join(pkgDir.path, pkgName);
+      Directory dir = new Directory(pkgPath);
       if (!dir.existsSync() || allDirty) {
         await _downloadItem('Downloading package $pkgName...', url + pkgName + '.zip', pkgDir);
+        await pubGet(directory: pkgPath);
       }
+    }
+
+    Status summaryStatus = logger.startProgress('Building Dart SDK summary...');
+    try {
+      String skyEnginePath = path.join(pkgDir.path, kSkyEngine);
+      String skyServicesPath = path.join(pkgDir.path, kSkyServices);
+      if (!new File(path.join(skyEnginePath, kSdkBundle)).existsSync())
+        buildSkyEngineSdkSummary(skyEnginePath, skyServicesPath, kSdkBundle);
+    } finally {
+      summaryStatus.stop(showElapsedTime: true);
     }
 
     Directory engineDir = cache.getArtifactDirectory(kName);
