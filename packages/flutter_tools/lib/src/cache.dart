@@ -220,10 +220,12 @@ class MaterialFonts {
   Future<Null> download() {
     Status status = logger.startProgress('Downloading Material fonts...');
 
+    Directory fontsDir = cache.getArtifactDirectory(kName);
+    if (fontsDir.existsSync())
+      fontsDir.deleteSync(recursive: true);
+
     return Cache._downloadFileToCache(
-      Uri.parse(cache.getVersionFor(kName)),
-      cache.getArtifactDirectory(kName),
-      true
+      Uri.parse(cache.getVersionFor(kName)), fontsDir, true
     ).then((_) {
       cache.setStampFor(kName, cache.getVersionFor(kName));
       status.stop(showElapsedTime: true);
@@ -315,28 +317,27 @@ class FlutterEngine {
     String engineVersion = cache.getVersionFor(kName);
     String url = 'https://storage.googleapis.com/flutter_infra/flutter/$engineVersion/';
 
-    bool allDirty = engineVersion != cache.getStampFor(kName);
-
     Directory pkgDir = cache.getCacheDir('pkg');
     for (String pkgName in _getPackageDirs()) {
       Directory dir = new Directory(path.join(pkgDir.path, pkgName));
-      if (!dir.existsSync() || allDirty) {
-        await _downloadItem('Downloading package $pkgName...', url + pkgName + '.zip', pkgDir);
-      }
+      if (dir.existsSync())
+        dir.deleteSync(recursive: true);
+      await _downloadItem('Downloading package $pkgName...', url + pkgName + '.zip', pkgDir);
     }
 
     Directory engineDir = cache.getArtifactDirectory(kName);
+    if (engineDir.existsSync())
+      engineDir.deleteSync(recursive: true);
+
     for (String dirName in _getEngineDirs()) {
       Directory dir = new Directory(path.join(engineDir.path, dirName));
-      if (!dir.existsSync() || allDirty) {
-        await _downloadItem('Downloading engine artifacts $dirName...',
-          url + dirName + '/artifacts.zip', dir);
-        File frameworkZip = new File(path.join(dir.path, 'Flutter.framework.zip'));
-        if (frameworkZip.existsSync()) {
-          Directory framework = new Directory(path.join(dir.path, 'Flutter.framework'));
-          framework.createSync();
-          os.unzip(frameworkZip, framework);
-        }
+      await _downloadItem('Downloading engine artifacts $dirName...',
+        url + dirName + '/artifacts.zip', dir);
+      File frameworkZip = new File(path.join(dir.path, 'Flutter.framework.zip'));
+      if (frameworkZip.existsSync()) {
+        Directory framework = new Directory(path.join(dir.path, 'Flutter.framework'));
+        framework.createSync();
+        os.unzip(frameworkZip, framework);
       }
     }
 
@@ -344,10 +345,8 @@ class FlutterEngine {
       String cacheDir = toolsDir[0];
       String urlPath = toolsDir[1];
       Directory dir = new Directory(path.join(engineDir.path, cacheDir));
-      if (!dir.existsSync() || allDirty) {
-        await _downloadItem('Downloading $cacheDir tools...', url + urlPath, dir);
-        _makeFilesExecutable(dir);
-      }
+      await _downloadItem('Downloading $cacheDir tools...', url + urlPath, dir);
+      _makeFilesExecutable(dir);
     }
 
     cache.setStampFor(kName, cache.getVersionFor(kName));
