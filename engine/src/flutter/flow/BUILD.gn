@@ -46,6 +46,7 @@ source_set("flow") {
   deps = [
     "//flutter/glue",
     "//flutter/skia",
+    "//flutter/synchronization",
     "//lib/ftl",
     "//mojo/services/gfx/composition/interfaces",
   ]
