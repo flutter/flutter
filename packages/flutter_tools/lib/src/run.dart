@@ -59,17 +59,17 @@ class RunAndStayResident extends ResidentRunner {
 
   @override
   Future<bool> restart({ bool fullRestart: false }) async {
-    if (serviceProtocol == null) {
+    if (vmService == null) {
       printError('Debugging is not enabled.');
       return false;
     } else {
       Status status = logger.startProgress('Re-starting application...');
 
-      Future<Event> extensionAddedEvent;
+      Future<ServiceEvent> extensionAddedEvent;
 
       if (device.restartSendsFrameworkInitEvent) {
-        extensionAddedEvent = serviceProtocol.onExtensionEvent
-          .where((Event event) => event.extensionKind == 'Flutter.FrameworkInitialization')
+        extensionAddedEvent = vmService.onExtensionEvent
+          .where((ServiceEvent event) => event.extensionKind == 'Flutter.FrameworkInitialization')
           .first;
       }
 
@@ -77,7 +77,7 @@ class RunAndStayResident extends ResidentRunner {
         _package,
         _result,
         mainPath: _mainPath,
-        observatory: serviceProtocol
+        observatory: vmService
       );
 
       status.stop(showElapsedTime: true);
@@ -178,16 +178,20 @@ class RunAndStayResident extends ResidentRunner {
     if (debuggingOptions.debuggingEnabled) {
       await connectToServiceProtocol(_result.observatoryPort);
 
-      if (benchmark)
-        await serviceProtocol.waitFirstIsolate;
+      if (benchmark) {
+        await vmService.getVM();
+      }
     }
 
     printStatus('Application running.');
 
-    if (serviceProtocol != null && traceStartup) {
+    await vmService.vm.refreshViews();
+    printStatus('Connected to view \'${vmService.vm.mainView}\'.');
+
+    if (vmService != null && traceStartup) {
       printStatus('Downloading startup trace info...');
       try {
-        await downloadStartupTrace(serviceProtocol);
+        await downloadStartupTrace(vmService);
       } catch(error) {
         printError(error);
         return 2;

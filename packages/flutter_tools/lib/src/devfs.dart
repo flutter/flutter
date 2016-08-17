@@ -106,22 +106,22 @@ abstract class DevFSOperations {
 }
 
 /// An implementation of [DevFSOperations] that speaks to the
-/// service protocol.
+/// vm service.
 class ServiceProtocolDevFSOperations implements DevFSOperations {
-  final VMService serviceProtocol;
+  final VMService vmService;
 
-  ServiceProtocolDevFSOperations(this.serviceProtocol);
+  ServiceProtocolDevFSOperations(this.vmService);
 
   @override
   Future<Uri> create(String fsName) async {
-    Response response = await serviceProtocol.createDevFS(fsName);
+    Map<String, dynamic> response = await vmService.vm.createDevFS(fsName);
     return Uri.parse(response['uri']);
   }
 
   @override
   Future<dynamic> destroy(String fsName) async {
-    await serviceProtocol.sendRequest('_deleteDevFS',
-                                      <String, dynamic> { 'fsName': fsName });
+    await vmService.vm.invokeRpcRaw('_deleteDevFS',
+                                    <String, dynamic> { 'fsName': fsName });
   }
 
   @override
@@ -134,12 +134,12 @@ class ServiceProtocolDevFSOperations implements DevFSOperations {
     }
     String fileContents = BASE64.encode(bytes);
     try {
-      return await serviceProtocol.sendRequest('_writeDevFSFile',
-                                               <String, dynamic> {
-                                                  'fsName': fsName,
-                                                  'path': entry.devicePath,
-                                                  'fileContents': fileContents
-                                               });
+      return await vmService.vm.invokeRpcRaw('_writeDevFSFile',
+                                             <String, dynamic> {
+                                                'fsName': fsName,
+                                                'path': entry.devicePath,
+                                                'fileContents': fileContents
+                                             });
     } catch (e) {
       printTrace('DevFS: Failed to write ${entry.devicePath}: $e');
     }
@@ -155,12 +155,12 @@ class ServiceProtocolDevFSOperations implements DevFSOperations {
                               String devicePath,
                               String contents) async {
     String fileContents = BASE64.encode(UTF8.encode(contents));
-    return await serviceProtocol.sendRequest('_writeDevFSFile',
-                                             <String, dynamic> {
-                                                'fsName': fsName,
-                                                'path': devicePath,
-                                                'fileContents': fileContents
-                                             });
+    return await vmService.vm.invokeRpcRaw('_writeDevFSFile',
+                                           <String, dynamic> {
+                                              'fsName': fsName,
+                                              'path': devicePath,
+                                              'fileContents': fileContents
+                                           });
   }
 }
 
@@ -251,7 +251,8 @@ class DevFS {
   final Set<DevFSEntry> _deletedEntries = new Set<DevFSEntry>();
   final Set<DevFSEntry> dirtyAssetEntries = new Set<DevFSEntry>();
 
-  final List<Future<Response>> _pendingOperations = new List<Future<Response>>();
+  final List<Future<Map<String, dynamic>>> _pendingOperations =
+      new List<Future<Map<String, dynamic>>>();
 
   int _bytes = 0;
   int get bytes => _bytes;
@@ -358,7 +359,8 @@ class DevFS {
     if (_deletedEntries.length > 0) {
       status = logger.startProgress('Removing deleted files...');
       for (DevFSEntry entry in _deletedEntries) {
-        Future<Response> operation = _operations.deleteFile(fsName, entry);
+        Future<Map<String, dynamic>> operation =
+            _operations.deleteFile(fsName, entry);
         if (operation != null)
           _pendingOperations.add(operation);
       }
@@ -382,7 +384,8 @@ class DevFS {
       } else {
         // Make service protocol requests for each.
         for (DevFSEntry entry in _dirtyEntries) {
-          Future<Response> operation = _operations.writeFile(fsName, entry);
+          Future<Map<String, dynamic>> operation =
+              _operations.writeFile(fsName, entry);
           if (operation != null)
             _pendingOperations.add(operation);
         }

@@ -23,7 +23,6 @@ import 'devfs.dart';
 import 'vmservice.dart';
 import 'resident_runner.dart';
 import 'toolchain.dart';
-import 'view.dart';
 
 String getDevFSLoaderScript() {
   return path.absolute(path.join(Cache.flutterRoot,
@@ -80,18 +79,18 @@ class StartupDependencySetBuilder {
 
 
 class FirstFrameTimer {
-  FirstFrameTimer(this.serviceProtocol);
+  FirstFrameTimer(this.vmService);
 
   void start() {
     stopwatch.reset();
     stopwatch.start();
-    _subscription = serviceProtocol.onExtensionEvent.listen(_onExtensionEvent);
+    _subscription = vmService.onExtensionEvent.listen(_onExtensionEvent);
   }
 
   /// Returns a Future which completes after the first frame event is received.
   Future<Null> firstFrame() => _completer.future;
 
-  void _onExtensionEvent(Event event) {
+  void _onExtensionEvent(ServiceEvent event) {
     if (event.extensionKind == 'Flutter.FirstFrame')
       _stop();
   }
@@ -108,10 +107,10 @@ class FirstFrameTimer {
     return stopwatch.elapsed;
   }
 
-  final VMService serviceProtocol;
+  final VMService vmService;
   final Stopwatch stopwatch = new Stopwatch();
   final Completer<Null> _completer = new Completer<Null>();
-  StreamSubscription<Event> _subscription;
+  StreamSubscription<ServiceEvent> _subscription;
 }
 
 class HotRunner extends ResidentRunner {
@@ -294,8 +293,8 @@ class HotRunner extends ResidentRunner {
       return 3;
     }
 
-    await viewManager.refresh();
-    printStatus('Connected to view \'${viewManager.mainView}\'.');
+    await vmService.vm.refreshViews();
+    printStatus('Connected to view \'${vmService.vm.mainView}\'.');
 
     printStatus('Running ${getDisplayPath(_mainPath)} on ${device.name}...');
     _loaderShowMessage('Launching...');
@@ -332,13 +331,13 @@ class HotRunner extends ResidentRunner {
   }
 
   void _loaderShowMessage(String message, { int progress, int max }) {
-    serviceProtocol.flutterLoaderShowMessage(serviceProtocol.firstIsolateId, message);
+    currentView.uiIsolate.flutterLoaderShowMessage(message);
     if (progress != null) {
-      serviceProtocol.flutterLoaderSetProgress(serviceProtocol.firstIsolateId, progress.toDouble());
-      serviceProtocol.flutterLoaderSetProgressMax(serviceProtocol.firstIsolateId, max?.toDouble() ?? 0.0);
+      currentView.uiIsolate.flutterLoaderSetProgress(progress.toDouble());
+      currentView.uiIsolate.flutterLoaderSetProgressMax(max?.toDouble() ?? 0.0);
     } else {
-      serviceProtocol.flutterLoaderSetProgress(serviceProtocol.firstIsolateId, 0.0);
-      serviceProtocol.flutterLoaderSetProgressMax(serviceProtocol.firstIsolateId, -1.0);
+      currentView.uiIsolate.flutterLoaderSetProgress(0.0);
+      currentView.uiIsolate.flutterLoaderSetProgressMax(-1.0);
     }
   }
 
@@ -346,7 +345,7 @@ class HotRunner extends ResidentRunner {
 
   Future<Uri> _initDevFS() {
     String fsName = path.basename(_projectRootPath);
-    _devFS = new DevFS(serviceProtocol,
+    _devFS = new DevFS(vmService,
                        fsName,
                        new Directory(_projectRootPath));
     return _devFS.create();
@@ -377,11 +376,10 @@ class HotRunner extends ResidentRunner {
   Future<Null> _evictDirtyAssets() async {
     if (_devFS.dirtyAssetEntries.length == 0)
       return;
-    if (serviceProtocol.firstIsolateId == null)
+    if (currentView.uiIsolate == null)
       throw 'Application isolate not found';
     for (DevFSEntry entry in _devFS.dirtyAssetEntries) {
-      await serviceProtocol.flutterEvictAsset(serviceProtocol.firstIsolateId,
-                                              entry.assetPath);
+      await currentView.uiIsolate.flutterEvictAsset(entry.assetPath);
     }
   }
 
@@ -400,7 +398,7 @@ class HotRunner extends ResidentRunner {
   Future<Null> _launchInView(String entryPath,
                              String packagesPath,
                              String assetsDirectoryPath) async {
-    FlutterView view = viewManager.mainView;
+    FlutterView view = vmService.vm.mainView;
     return view.runFromSource(entryPath, packagesPath, assetsDirectoryPath);
   }
 
@@ -419,7 +417,7 @@ class HotRunner extends ResidentRunner {
   }
 
   Future<Null> _restartFromSources() async {
-    FirstFrameTimer firstFrameTimer = new FirstFrameTimer(serviceProtocol);
+    FirstFrameTimer firstFrameTimer = new FirstFrameTimer(vmService);
     firstFrameTimer.start();
     await _updateDevFS();
     await _launchFromDevFS(_package, _mainPath);
@@ -459,16 +457,16 @@ class HotRunner extends ResidentRunner {
   }
 
   Future<bool> _reloadSources() async {
-    if (serviceProtocol.firstIsolateId == null)
+    if (currentView.uiIsolate == null)
       throw 'Application isolate not found';
-    FirstFrameTimer firstFrameTimer = new FirstFrameTimer(serviceProtocol);
+    FirstFrameTimer firstFrameTimer = new FirstFrameTimer(vmService);
     firstFrameTimer.start();
     if (_devFS != null)
       await _updateDevFS();
     Status reloadStatus = logger.startProgress('Performing hot reload...');
     try {
       Map<String, dynamic> reloadReport =
-          await serviceProtocol.reloadSources(serviceProtocol.firstIsolateId);
+          await currentView.uiIsolate.reloadSources();
       reloadStatus.stop(showElapsedTime: true);
       if (!_printReloadReport(reloadReport)) {
         // Reload failed.
@@ -477,16 +475,16 @@ class HotRunner extends ResidentRunner {
       } else {
         flutterUsage.sendEvent('hot', 'reload');
       }
-    } catch (errorMessage) {
+    } catch (errorMessage, st) {
       reloadStatus.stop(showElapsedTime: true);
-      printError('Hot reload failed:\n$errorMessage');
+      printError('Hot reload failed:\n$errorMessage\n$st');
       return false;
     }
     await _evictDirtyAssets();
     Status reassembleStatus =
         logger.startProgress('Reassembling application...');
     try {
-      await serviceProtocol.flutterReassemble(serviceProtocol.firstIsolateId);
+      await currentView.uiIsolate.flutterReassemble();
     } catch (_) {
       reassembleStatus.stop(showElapsedTime: true);
       printError('Reassembling application failed.');

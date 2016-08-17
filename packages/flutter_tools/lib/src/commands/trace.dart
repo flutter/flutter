@@ -95,40 +95,39 @@ class TraceCommand extends FlutterCommand {
 }
 
 class Tracing {
-  Tracing(this.observatory);
+  Tracing(this.vmService);
 
   static Future<Tracing> connect(int port) {
     return VMService.connect(port).then((VMService observatory) => new Tracing(observatory));
   }
 
-  final VMService observatory;
+  final VMService vmService;
 
   Future<Null> startTracing() async {
-    await observatory.setVMTimelineFlags(<String>['Compiler', 'Dart', 'Embedder', 'GC']);
-    await observatory.clearVMTimeline();
+    await vmService.vm.setVMTimelineFlags(<String>['Compiler', 'Dart', 'Embedder', 'GC']);
+    await vmService.vm.clearVMTimeline();
   }
 
   /// Stops tracing; optionally wait for first frame.
   Future<Map<String, dynamic>> stopTracingAndDownloadTimeline({
     bool waitForFirstFrame: false
   }) async {
-    Response timeline;
+    Map<String, dynamic> timeline;
 
     if (!waitForFirstFrame) {
       // Stop tracing immediately and get the timeline
-      await observatory.setVMTimelineFlags(<String>[]);
-      timeline = await observatory.getVMTimeline();
+      await vmService.vm.setVMTimelineFlags(<String>[]);
+      timeline = await vmService.vm.getVMTimeline();
     } else {
       Completer<Null> whenFirstFrameRendered = new Completer<Null>();
 
-      observatory.onTimelineEvent.listen((Event timelineEvent) {
-        List<Map<String, dynamic>> events = timelineEvent['timelineEvents'];
+      vmService.onTimelineEvent.listen((ServiceEvent timelineEvent) {
+        List<Map<String, dynamic>> events = timelineEvent.timelineEvents;
         for (Map<String, dynamic> event in events) {
           if (event['name'] == kFirstUsefulFrameEventName)
             whenFirstFrameRendered.complete();
         }
       });
-      await observatory.streamListen('Timeline');
 
       await whenFirstFrameRendered.future.timeout(
         const Duration(seconds: 10),
@@ -142,12 +141,12 @@ class Tracing {
         }
       );
 
-      timeline = await observatory.getVMTimeline();
+      timeline = await vmService.vm.getVMTimeline();
 
-      await observatory.setVMTimelineFlags(<String>[]);
+      await vmService.vm.setVMTimelineFlags(<String>[]);
     }
 
-    return timeline.response;
+    return timeline;
   }
 }
 

@@ -12,7 +12,6 @@ import 'build_info.dart';
 import 'device.dart';
 import 'globals.dart';
 import 'vmservice.dart';
-import 'view.dart';
 
 // Shared code between different resident application runners.
 abstract class ResidentRunner {
@@ -28,8 +27,8 @@ abstract class ResidentRunner {
   final bool usesTerminalUI;
   final Completer<int> _finished = new Completer<int>();
 
-  VMService serviceProtocol;
-  ViewManager viewManager;
+  VMService vmService;
+  FlutterView currentView;
   StreamSubscription<String> _loggingSubscription;
 
   /// Start the app and keep the process running during its lifetime.
@@ -48,11 +47,11 @@ abstract class ResidentRunner {
   }
 
   Future<Null> _debugDumpApp() async {
-    await serviceProtocol.flutterDebugDumpApp(serviceProtocol.firstIsolateId);
+    await currentView.uiIsolate.flutterDebugDumpApp();
   }
 
   Future<Null> _debugDumpRenderTree() async {
-    await serviceProtocol.flutterDebugDumpRenderTree(serviceProtocol.firstIsolateId);
+    await currentView.uiIsolate.flutterDebugDumpRenderTree();
   }
 
   void registerSignalHandlers() {
@@ -90,22 +89,23 @@ abstract class ResidentRunner {
     if (!debuggingOptions.debuggingEnabled) {
       return new Future<Null>.error('Error the service protocol is not enabled.');
     }
-    serviceProtocol = await VMService.connect(port);
+    vmService = await VMService.connect(port);
     printTrace('Connected to service protocol on port $port');
-    serviceProtocol.populateIsolateInfo();
-    serviceProtocol.onExtensionEvent.listen((Event event) {
+    await vmService.getVM();
+    vmService.onExtensionEvent.listen((ServiceEvent event) {
       printTrace(event.toString());
     });
-    serviceProtocol.onIsolateEvent.listen((Event event) {
+    vmService.onIsolateEvent.listen((ServiceEvent event) {
       printTrace(event.toString());
     });
 
-    // Setup view manager and refresh the view list.
-    viewManager = new ViewManager(serviceProtocol);
-    await viewManager.refresh();
+    // Refresh the view list.
+    await vmService.vm.refreshViews();
+    currentView = vmService.vm.mainView;
+    assert(currentView != null);
 
     // Listen for service protocol connection to close.
-    serviceProtocol.done.whenComplete(() {
+    vmService.done.whenComplete(() {
       appFinished();
     });
   }
@@ -175,9 +175,10 @@ abstract class ResidentRunner {
   Future<Null> preStop() async { }
 
   Future<Null> stopApp() async {
-    if (serviceProtocol != null && !serviceProtocol.isClosed) {
-      if (serviceProtocol.isolates.isNotEmpty) {
-        serviceProtocol.flutterExit(serviceProtocol.firstIsolateId);
+    if (vmService != null && !vmService.isClosed) {
+      if ((currentView != null) && (currentView.uiIsolate != null)) {
+        // TODO(johnmccutchan): Wait for the exit command to complete.
+        currentView.uiIsolate.flutterExit();
         await new Future<Null>.delayed(new Duration(milliseconds: 100));
       }
     }
