@@ -74,16 +74,14 @@ class _ZipToolBuilder extends ZipBuilder {
     if (_getCompressedNames().isNotEmpty) {
       runCheckedSync(
         <String>['zip', '-q', outFile.absolute.path]..addAll(_getCompressedNames()),
-        workingDirectory: zipBuildDir.path,
-        truncateCommand: true
+        workingDirectory: zipBuildDir.path
       );
     }
 
     if (_getStoredNames().isNotEmpty) {
       runCheckedSync(
         <String>['zip', '-q', '-0', outFile.absolute.path]..addAll(_getStoredNames()),
-        workingDirectory: zipBuildDir.path,
-        truncateCommand: true
+        workingDirectory: zipBuildDir.path
       );
     }
   }

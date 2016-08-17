@@ -22,7 +22,7 @@ Future<Process> runCommand(List<String> cmd, {
   String workingDirectory,
   bool allowReentrantFlutter: false
 }) async {
-  printTrace(cmd.join(' '));
+  _traceCommand(cmd, workingDirectory: workingDirectory);
   String executable = cmd[0];
   List<String> arguments = cmd.length > 1 ? cmd.sublist(1) : <String>[];
   Process process = await Process.start(
@@ -86,7 +86,7 @@ Future<Null> runAndKill(List<String> cmd, Duration timeout) {
 }
 
 Future<Process> runDetached(List<String> cmd) {
-  printTrace(cmd.join(' '));
+  _traceCommand(cmd);
   Future<Process> proc = Process.start(
     cmd[0], cmd.getRange(1, cmd.length).toList(),
     mode: ProcessStartMode.DETACHED
@@ -98,7 +98,7 @@ Future<RunResult> runAsync(List<String> cmd, {
   String workingDirectory,
   bool allowReentrantFlutter: false
 }) async {
-  printTrace(cmd.join(' '));
+  _traceCommand(cmd, workingDirectory: workingDirectory);
   ProcessResult results = await Process.run(
     cmd[0],
     cmd.getRange(1, cmd.length).toList(),
@@ -111,7 +111,7 @@ Future<RunResult> runAsync(List<String> cmd, {
 }
 
 bool exitsHappy(List<String> cli) {
-  printTrace(cli.join(' '));
+  _traceCommand(cli);
   try {
     return Process.runSync(cli.first, cli.sublist(1)).exitCode == 0;
   } catch (error) {
@@ -124,16 +124,14 @@ bool exitsHappy(List<String> cli) {
 /// Throws an error if cmd exits with a non-zero value.
 String runCheckedSync(List<String> cmd, {
   String workingDirectory,
-  bool allowReentrantFlutter: false,
-  bool truncateCommand: false
+  bool allowReentrantFlutter: false
 }) {
   return _runWithLoggingSync(
     cmd,
     workingDirectory: workingDirectory,
     allowReentrantFlutter: allowReentrantFlutter,
     checked: true,
-    noisyErrors: true,
-    truncateCommand: truncateCommand
+    noisyErrors: true
   );
 }
 
@@ -149,17 +147,24 @@ String runSync(List<String> cmd, {
   );
 }
 
+void _traceCommand(List<String> args, { String workingDirectory }) {
+  final int kMaxArgsLength = 1024;
+  String argsText = args.join(' ');
+  if (argsText.length > kMaxArgsLength)
+    argsText = argsText.substring(0, kMaxArgsLength) + '…';
+  if (workingDirectory == null)
+    printTrace(argsText);
+  else
+    printTrace("[$workingDirectory${Platform.pathSeparator}] $argsText");
+}
+
 String _runWithLoggingSync(List<String> cmd, {
   bool checked: false,
   bool noisyErrors: false,
   String workingDirectory,
-  bool allowReentrantFlutter: false,
-  bool truncateCommand: false
+  bool allowReentrantFlutter: false
 }) {
-  String cmdText = cmd.join(' ');
-  if (truncateCommand && cmdText.length > 160)
-    cmdText = cmdText.substring(0, 160) + '…';
-  printTrace(cmdText);
+  _traceCommand(cmd, workingDirectory: workingDirectory);
   ProcessResult results = Process.runSync(
     cmd[0],
     cmd.getRange(1, cmd.length).toList(),
