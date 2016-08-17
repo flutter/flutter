@@ -57,6 +57,9 @@ deps = {
   'src/lib/tonic':
    Var('fuchsia_git') + '/tonic' + '@' + 'f2cae52e8b3712c799752227b7de8cf6fc6e5244',
 
+  'src/mojo/public':
+   Var('fuchsia_git') + '/mojo/public' + '@' + Var('mojo_sdk_revision'),
+
   'src/third_party/gtest':
    Var('fuchsia_git') + '/third_party/gtest' + '@' + 'c00f82917331efbbd27124b537e4ccc915a02b72',
 
@@ -96,10 +99,6 @@ deps = {
    Var('chromium_git') +
    '/external/github.com/dart-lang/root_certificates' + '@' +
    Var('dart_root_certificates_revision'),
-
-  'src/mojo/public':
-   Var('chromium_git') + '/external/github.com/domokit/mojo_sdk' + '@' +
-   Var('mojo_sdk_revision'),
 
   'src/third_party/skia':
    Var('chromium_git') + '/skia.git' + '@' +  Var('skia_revision'),
