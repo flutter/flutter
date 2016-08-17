@@ -82,6 +82,7 @@ class MergeableMaterial extends StatefulWidget {
     Key key,
     this.mainAxis: Axis.vertical,
     this.elevation: 2,
+    this.hasDividers: false,
     this.children: const <MergeableMaterialItem>[]
   }) : super(key: key);
 
@@ -93,6 +94,9 @@ class MergeableMaterial extends StatefulWidget {
 
   /// The elevation of all the [Material] slices.
   final int elevation;
+
+  /// Whether connected pieces of [MaterialSlice] have dividers between them.
+  final bool hasDividers;
 
   @override
   String toString() {
@@ -234,6 +238,21 @@ class _MergeableMaterialState extends State<MergeableMaterial> {
     return false;
   }
 
+  void _removeEmptyGaps() {
+    int j = 0;
+
+    while (j < _children.length) {
+      if (
+        _children[j] is MaterialGap &&
+        _animationTuples[_children[j].key].controller.status == AnimationStatus.dismissed
+      ) {
+        _removeChild(j);
+      } else {
+        j += 1;
+      }
+    }
+  }
+
   @override
   void didUpdateConfig(MergeableMaterial oldConfig) {
     super.didUpdateConfig(oldConfig);
@@ -253,17 +272,7 @@ class _MergeableMaterialState extends State<MergeableMaterial> {
 
     assert(_debugGapsAreValid(newChildren));
 
-    while (j < _children.length) {
-      if (_children[j] is MaterialGap &&
-          _animationTuples[_children[j].key].controller.status
-          == AnimationStatus.dismissed) {
-        _removeChild(j);
-      } else {
-        j += 1;
-      }
-    }
-
-    j = 0;
+    _removeEmptyGaps();
 
     while (i < newChildren.length && j < _children.length) {
       if (newOnly.contains(newChildren[i].key) ||
@@ -471,10 +480,37 @@ class _MergeableMaterialState extends State<MergeableMaterial> {
     );
   }
 
+  List<Widget> _divideSlices(BuildContext context, List<Widget> slices, List<Key> keys) {
+    if (config.hasDividers) {
+      List<Widget> divided = <Widget>[];
+
+      for (int i = 0; i < slices.length; i += 1) {
+        divided.add(
+          new DecoratedBox(
+            key: keys[i],
+            decoration: i != slices.length - 1 ? new BoxDecoration(
+              border: new Border(
+                bottom: new BorderSide(color: Theme.of(context).dividerColor)
+              )
+            ) : new BoxDecoration(),
+            child: slices[i]
+          )
+        );
+      }
+
+      return divided;
+    } else {
+      return slices;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    _removeEmptyGaps();
+
     final List<Widget> widgets = <Widget>[];
     List<Widget> slices = <Widget>[];
+    List<Key> keys = <Key>[];
     int i;
 
     for (i = 0; i < _children.length; i += 1) {
@@ -489,11 +525,12 @@ class _MergeableMaterialState extends State<MergeableMaterial> {
             ),
             child: new BlockBody(
               mainAxis: config.mainAxis,
-              children: slices
+              children: _divideSlices(context, slices, keys)
             )
           )
         );
         slices = <Widget>[];
+        keys = <Key>[];
 
         widgets.add(
           new SizedBox(
@@ -506,14 +543,11 @@ class _MergeableMaterialState extends State<MergeableMaterial> {
 
         slices.add(
           new Material(
-            // Since slices live in different Material widgets, the parent
-            // hierarchy can change and lead to the slice being rebuilt. Using
-            // a global key solves the issue.
-            key: new _MergeableMaterialSliceKey(_children[i].key),
             type: MaterialType.transparency,
             child: slice.child
           )
         );
+        keys.add(new _MergeableMaterialSliceKey(_children[i].key));
       }
     }
 
@@ -527,11 +561,12 @@ class _MergeableMaterialState extends State<MergeableMaterial> {
           ),
           child: new BlockBody(
             mainAxis: config.mainAxis,
-            children: slices
+            children: _divideSlices(context, slices, keys)
           )
         )
       );
       slices = <Widget>[];
+      keys = <Key>[];
     }
 
     return new _MergeableMaterialBlockBody(
@@ -543,6 +578,8 @@ class _MergeableMaterialState extends State<MergeableMaterial> {
   }
 }
 
+// The parent hierarchy can change and lead to the slice being
+// rebuilt. Usinga global key solves the issue.
 class _MergeableMaterialSliceKey extends GlobalKey {
   const _MergeableMaterialSliceKey(this.value) : super.constructor();
 
@@ -558,6 +595,11 @@ class _MergeableMaterialSliceKey extends GlobalKey {
 
   @override
   int get hashCode => value.hashCode;
+
+  @override
+  String toString() {
+    return '_MergeableMaterialSliceKey($value)';
+  }
 }
 
 class _MergeableMaterialBlockBody extends BlockBody {
