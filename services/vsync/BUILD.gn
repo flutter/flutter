@@ -5,14 +5,11 @@
 import("//mojo/public/tools/bindings/mojom.gni")
 
 group("vsync") {
-  deps = []
-
-  if (is_android || is_ios || is_mac) {
-    deps += [ ":vsync_lib" ]
-  }
+  deps = [ ":vsync_lib" ]
 }
 
 if (is_android) {
+  # Choreographer backed VSync
   import("//build/config/android/config.gni")
   import("//build/config/android/rules.gni")
 
@@ -26,25 +23,44 @@ if (is_android) {
       "//mojo/services/vsync/interfaces:interfaces_java",
     ]
   }
-}
-
-if (is_ios || is_mac) {
+} else if  (is_ios) {
+  # DisplayLink backed VSync
   source_set("vsync_lib") {
-
-    if (is_ios) {
-      sources = [
-        "ios/vsync_provider_ios_impl.h",
-        "ios/vsync_provider_ios_impl.mm",
-      ]
-    }
-
-    if (is_mac) {
-      sources = [
-        "mac/vsync_provider_mac_impl.h",
-        "mac/vsync_provider_mac_impl.cc",
-      ]
-    }
+    sources = [
+      "ios/vsync_provider_ios_impl.h",
+      "ios/vsync_provider_ios_impl.mm",
+    ]
     
+    deps = [
+      "//base:base",
+      "//mojo/public/cpp/application",
+      "//mojo/public/cpp/bindings:utility",
+      "//mojo/services/vsync/interfaces",
+    ]
+  }
+} else if (is_mac) {
+  # CVDisplayLink backed VSync
+  source_set("vsync_lib") {
+    sources = [
+      "mac/vsync_provider_mac_impl.h",
+      "mac/vsync_provider_mac_impl.cc",
+    ]
+
+    deps = [
+      "//base:base",
+      "//mojo/public/cpp/application",
+      "//mojo/public/cpp/bindings:utility",
+      "//mojo/services/vsync/interfaces",
+    ]
+  }
+} else {
+  # Fallback VSync (avoid if at all possible)
+  source_set("vsync_lib") {
+    sources = [
+      "fallback/vsync_provider_fallback_impl.h",
+      "fallback/vsync_provider_fallback_impl.cc",
+    ]
+
     deps = [
       "//base:base",
       "//mojo/public/cpp/application",
