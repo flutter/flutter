@@ -20,7 +20,6 @@ import '../runner/flutter_command.dart';
 import 'build_apk.dart';
 import 'install.dart';
 import 'trace.dart';
-import '../base/os.dart';
 
 abstract class RunCommandBase extends FlutterCommand {
   RunCommandBase() {
@@ -69,10 +68,9 @@ class RunCommand extends RunCommandBase {
                       defaultsTo: false,
                       help: 'Run with support for hot reloading.');
 
-    // Option to enable control over a named pipe.
-    argParser.addOption('control-pipe',
-                        hide: true,
-                        help: 'Specify a named pipe to receive commands on.');
+    // Option to write the pid to a file.
+    argParser.addOption('pid-file',
+                        help: 'Specify a file to write the process id to.');
 
 
     // Hidden option to enable a benchmarking mode. This will run the given
@@ -142,23 +140,13 @@ class RunCommand extends RunCommandBase {
         printError('Hot mode is not supported by this device.');
         return 1;
       }
-    } else {
-      if (argResults['control-pipe'] != null) {
-        printError('--control-pipe requires --hot');
-        return 1;
-      }
     }
 
-    String pipePath = argResults['control-pipe'];
-    File pipe;
-    if (pipePath != null) {
-      try {
-        // Attempt to create the pipe.
-        os.makePipe(pipePath);
-      } catch (_) { /* ignore */ }
-      pipe = new File(pipePath);
+    String pidFile = argResults['pid-file'];
+    if (pidFile != null) {
+      // Write our pid to the file.
+      new File(pidFile).writeAsStringSync(pid.toString());
     }
-
     ResidentRunner runner;
 
     if (argResults['hot']) {
@@ -166,7 +154,6 @@ class RunCommand extends RunCommandBase {
         deviceForCommand,
         target: targetFile,
         debuggingOptions: options,
-        pipe: pipe
       );
     } else {
       runner = new RunAndStayResident(

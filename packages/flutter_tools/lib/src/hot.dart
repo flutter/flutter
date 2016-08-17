@@ -118,8 +118,7 @@ class HotRunner extends ResidentRunner {
     Device device, {
     String target,
     DebuggingOptions debuggingOptions,
-    bool usesTerminalUI: true,
-    this.pipe
+    bool usesTerminalUI: true
   }) : super(device,
              target: target,
              debuggingOptions: debuggingOptions,
@@ -132,33 +131,6 @@ class HotRunner extends ResidentRunner {
   String _projectRootPath;
   Set<String> _startupDependencies;
   final AssetBundle bundle = new AssetBundle();
-  final File pipe;
-
-  Future<String> _readFromControlPipe() async {
-    final Stream<List<int>> stream = pipe.openRead();
-    final List<int> bytes = await stream.first;
-    final String string = new String.fromCharCodes(bytes).trim();
-    return string;
-  }
-
-  Future<Null> _startReadingFromControlPipe() async {
-    if (pipe == null)
-      return;
-
-    while (true) {
-      // This loop will only exit if _readFromControlPipe throws an exception.
-      // If no exception is thrown this will keep the flutter command running
-      // until it is explicitly stopped via some other mechanism, for example,
-      // ctrl+c or sending "q" to the control pipe.
-      String result = await _readFromControlPipe();
-      printStatus('Control pipe received "$result"');
-      await processTerminalInput(result);
-      if (result.toLowerCase() == 'q') {
-        printStatus("Finished reading from control pipe");
-        break;
-      }
-    }
-  }
 
   @override
   Future<int> run({
@@ -299,8 +271,6 @@ class HotRunner extends ResidentRunner {
     printStatus('Running ${getDisplayPath(_mainPath)} on ${device.name}...');
     _loaderShowMessage('Launching...');
     await _launchFromDevFS(_package, _mainPath);
-
-    _startReadingFromControlPipe();
 
     printStatus('Application running.');
 
