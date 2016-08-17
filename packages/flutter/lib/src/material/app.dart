@@ -157,10 +157,10 @@ class _ScrollLikeCupertinoDelegate extends ScrollConfigurationDelegate {
 }
 
 class _ScrollLikeMountainViewDelegate extends ScrollConfigurationDelegate {
-  const _ScrollLikeMountainViewDelegate();
+  const _ScrollLikeMountainViewDelegate(this.platform);
 
   @override
-  TargetPlatform get platform => TargetPlatform.android;
+  final TargetPlatform platform;
 
   @override
   ExtentScrollBehavior createScrollBehavior() => new OverscrollWhenScrollableBehavior(platform: TargetPlatform.android);
@@ -203,7 +203,9 @@ class _MaterialAppState extends State<MaterialApp> {
   ScrollConfigurationDelegate _getScrollDelegate(TargetPlatform platform) {
     switch (platform) {
       case TargetPlatform.android:
-        return const _ScrollLikeMountainViewDelegate();
+        return const _ScrollLikeMountainViewDelegate(TargetPlatform.android);
+      case TargetPlatform.fuchsia:
+        return const _ScrollLikeMountainViewDelegate(TargetPlatform.fuchsia);
       case TargetPlatform.iOS:
         return const _ScrollLikeCupertinoDelegate();
     }

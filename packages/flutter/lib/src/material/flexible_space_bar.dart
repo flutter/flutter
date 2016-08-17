@@ -64,6 +64,7 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
     assert(theme.platform != null);
     switch (theme.platform) {
       case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
         return false;
       case TargetPlatform.iOS:
         return true;

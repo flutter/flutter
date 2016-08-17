@@ -254,6 +254,7 @@ class AppBar extends StatelessWidget {
     assert(themeData.platform != null);
     switch (themeData.platform) {
       case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
         return false;
       case TargetPlatform.iOS:
         return true;
