@@ -11,6 +11,7 @@ import 'icon_theme.dart';
 import 'icon_theme_data.dart';
 import 'icons.dart';
 import 'ink_well.dart';
+import 'material.dart';
 import 'theme.dart';
 import 'tooltip.dart';
 
@@ -123,15 +124,20 @@ class IconButton extends StatelessWidget {
       child: new LimitedBox(
         maxWidth: size,
         maxHeight: size,
-        child: new Align(
-          alignment: alignment,
-          child: new IconTheme.merge(
-            context: context,
-            data: new IconThemeData(
-              size: size,
-              color: currentColor
-            ),
-            child: icon
+        child: new ConstrainedBox(
+          constraints: new BoxConstraints.loose(
+            const Size.square(kDefaultSplashRadius * 2.0)
+          ),
+          child: new Align(
+            alignment: alignment,
+            child: new IconTheme.merge(
+              context: context,
+              data: new IconThemeData(
+                size: size,
+                color: currentColor
+              ),
+              child: icon
+            )
           )
         )
       )

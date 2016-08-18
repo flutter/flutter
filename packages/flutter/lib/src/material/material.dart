@@ -288,7 +288,7 @@ class _MaterialState extends State<Material> {
 const Duration _kHighlightFadeDuration = const Duration(milliseconds: 200);
 const Duration _kUnconfirmedSplashDuration = const Duration(seconds: 1);
 
-const double _kDefaultSplashRadius = 35.0; // logical pixels
+const double kDefaultSplashRadius = 35.0; // logical pixels
 const double _kSplashConfirmedVelocity = 1.0; // logical pixels per millisecond
 const double _kSplashInitialSize = 0.0; // logical pixels
 
@@ -326,7 +326,7 @@ class _RenderInkFeatures extends RenderProxyBox implements MaterialInkController
       radius = _getSplashTargetSize(size, position);
     } else {
       assert(rectCallback == null);
-      radius = _kDefaultSplashRadius;
+      radius = kDefaultSplashRadius;
     }
     _InkSplash splash = new _InkSplash(
       renderer: this,
@@ -639,7 +639,7 @@ class _InkHighlight extends InkFeature implements InkHighlight {
     if (shape == BoxShape.rectangle)
       canvas.drawRect(rect, paint);
     else
-      canvas.drawCircle(rect.center, _kDefaultSplashRadius, paint);
+      canvas.drawCircle(rect.center, kDefaultSplashRadius, paint);
   }
 
   @override
