@@ -886,6 +886,7 @@ class FlutterView extends ServiceObject {
                              packagesPath,
                              assetsDirectoryPath);
     await completer.future;
+    await owner.vm.refreshViews();
     await subscription.cancel();
   }
 
