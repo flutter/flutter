@@ -169,6 +169,7 @@ class _RecipeGridPageState extends State<RecipeGridPage> {
           ),
           new DrawerItem(
             child: new Text('Home'),
+            icon: new Icon(Icons.home),
             selected: !showFavorites,
             onPressed: () {
               Navigator.popUntil(context, ModalRoute.withName('/pesto'));
@@ -176,6 +177,7 @@ class _RecipeGridPageState extends State<RecipeGridPage> {
           ),
           new DrawerItem(
             child: new Text('Favorites'),
+            icon: new Icon(Icons.favorite),
             selected: showFavorites,
             onPressed: () {
               if (showFavorites)
@@ -187,6 +189,7 @@ class _RecipeGridPageState extends State<RecipeGridPage> {
           new Divider(),
           new DrawerItem(
             child: new Text('Return to Gallery'),
+            icon: new Icon(Icons.arrow_back),
             onPressed: () {
               Navigator.popUntil(context, ModalRoute.withName('/'));
             }
