@@ -11,6 +11,9 @@ enum TargetPlatform {
   /// Android: <https://www.android.com/>
   android,
 
+  /// Fuchsia: <https://fuchsia.googlesource.com/>
+  fuchsia,
+
   /// iOS: <http://www.apple.com/ios/>
   iOS,
 }
@@ -30,6 +33,8 @@ TargetPlatform get defaultTargetPlatform {
     result = TargetPlatform.iOS;
   } else if (Platform.isAndroid || Platform.isLinux) {
     result = TargetPlatform.android;
+  } else if (Platform.operatingSystem == "fuchsia") {
+    result = TargetPlatform.fuchsia;
   }
   assert(() {
     if (Platform.environment.containsKey('FLUTTER_TEST'))

@@ -75,6 +75,7 @@ abstract class ScrollBehavior<T, U> {
     assert(platform != null);
     switch (platform) {
       case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
         return _kScrollDragMountainView;
       case TargetPlatform.iOS:
         return _kScrollDragCupertino;
