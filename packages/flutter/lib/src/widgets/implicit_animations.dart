@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
+import 'package:vector_math/vector_math_64.dart';
+
 import 'basic.dart';
 import 'container.dart';
 import 'framework.dart';
-
-import 'package:meta/meta.dart';
-import 'package:vector_math/vector_math_64.dart';
 
 /// An interpolation between two [BoxConstraint]s.
 class BoxConstraintsTween extends Tween<BoxConstraints> {

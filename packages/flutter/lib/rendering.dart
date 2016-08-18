@@ -22,6 +22,7 @@
 /// initialized with those features.
 library rendering;
 
+export 'src/rendering/animated_size.dart';
 export 'src/rendering/auto_layout.dart';
 export 'src/rendering/binding.dart';
 export 'src/rendering/block.dart';
