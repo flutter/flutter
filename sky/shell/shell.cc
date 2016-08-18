@@ -154,10 +154,16 @@ void Shell::InitStandalone(std::string icu_data_path) {
   settings.trace_startup = command_line.HasSwitch(switches::kTraceStartup);
   settings.aot_snapshot_path =
       command_line.GetSwitchValueASCII(switches::kAotSnapshotPath);
-  if (command_line.HasSwitch(switches::kCacheDirPath)) {
-    settings.temp_directory_path =
-        command_line.GetSwitchValueASCII(switches::kCacheDirPath);
-  }
+  settings.aot_isolate_snapshot_file_name =
+      command_line.GetSwitchValueASCII(switches::kAotIsolateSnapshot);
+  settings.aot_vm_isolate_snapshot_file_name =
+      command_line.GetSwitchValueASCII(switches::kAotVmIsolateSnapshot);
+  settings.aot_instructions_blob_file_name =
+      command_line.GetSwitchValueASCII(switches::kAotInstructionsBlob);
+  settings.aot_rodata_blob_file_name =
+      command_line.GetSwitchValueASCII(switches::kAotRodataBlob);
+  settings.temp_directory_path =
+      command_line.GetSwitchValueASCII(switches::kCacheDirPath);
 
   if (command_line.HasSwitch(switches::kDartFlags)) {
     std::stringstream stream(

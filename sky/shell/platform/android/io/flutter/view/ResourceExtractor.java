@@ -19,8 +19,8 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 
@@ -137,14 +137,21 @@ class ResourceExtractor {
         mResources = new HashSet<String>();
     }
 
-    void addResources(List<String> resources) {
-        mResources.addAll(resources);
+    ResourceExtractor addResource(String resource) {
+        mResources.add(resource);
+        return this;
     }
 
-    void start() {
+    ResourceExtractor addResources(Collection<String> resources) {
+        mResources.addAll(resources);
+        return this;
+    }
+
+    ResourceExtractor start() {
         assert mExtractTask == null;
         mExtractTask = new ExtractTask();
         mExtractTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        return this;
     }
 
     void waitForCompletion() {

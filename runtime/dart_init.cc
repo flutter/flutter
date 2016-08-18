@@ -339,10 +339,10 @@ DartJniIsolateData* GetDartJniDataForCurrentIsolate() {
 
 #if DART_ALLOW_DYNAMIC_RESOLUTION
 
-const char* kDartVmIsolateSnapshotBufferName = "kDartVmIsolateSnapshotBuffer";
-const char* kDartIsolateSnapshotBufferName = "kDartIsolateSnapshotBuffer";
-const char* kInstructionsSnapshotName = "kInstructionsSnapshot";
-const char* kDataSnapshotName = "kDataSnapshot";
+constexpr char kDartVmIsolateSnapshotBufferName[] = "kDartVmIsolateSnapshotBuffer";
+constexpr char kDartIsolateSnapshotBufferName[] = "kDartIsolateSnapshotBuffer";
+constexpr char kInstructionsSnapshotName[] = "kInstructionsSnapshot";
+constexpr char kDataSnapshotName[] = "kDataSnapshot";
 
 #if OS(IOS)
 
@@ -390,14 +390,19 @@ struct SymbolAsset {
   const char* symbol_name;
   const char* file_name;
   bool is_executable;
+  size_t settings_offset;
   void* mapping;
 };
 
 static SymbolAsset g_symbol_assets[] = {
-    {kDartVmIsolateSnapshotBufferName, "snapshot_aot_vmisolate", false},
-    {kDartIsolateSnapshotBufferName, "snapshot_aot_isolate", false},
-    {kInstructionsSnapshotName, "snapshot_aot_instr", true},
-    {kDataSnapshotName, "snapshot_aot_rodata", false},
+    {kDartVmIsolateSnapshotBufferName, "snapshot_aot_vmisolate", false,
+     offsetof(Settings, aot_vm_isolate_snapshot_file_name)},
+    {kDartIsolateSnapshotBufferName, "snapshot_aot_isolate", false,
+     offsetof(Settings, aot_isolate_snapshot_file_name)},
+    {kInstructionsSnapshotName, "snapshot_aot_instr", true,
+     offsetof(Settings, aot_instructions_blob_file_name)},
+    {kDataSnapshotName, "snapshot_aot_rodata", false,
+     offsetof(Settings, aot_rodata_blob_file_name)},
 };
 
 // Resolve a precompiled snapshot symbol by mapping the corresponding asset
@@ -411,10 +416,17 @@ void* _DartSymbolLookup(const char* symbol_name) {
       return symbol_asset.mapping;
     }
 
-    const std::string& aot_snapshot_path = Settings::Get().aot_snapshot_path;
+    const Settings& settings = Settings::Get();
+    const std::string& aot_snapshot_path = settings.aot_snapshot_path;
     FTL_CHECK(!aot_snapshot_path.empty());
 
-    std::string asset_path = aot_snapshot_path + "/" + symbol_asset.file_name;
+    const char* file_name = symbol_asset.file_name;
+    const std::string* settings_override = reinterpret_cast<const std::string*>(
+        reinterpret_cast<const uint8_t*>(&settings) + symbol_asset.settings_offset);
+    if (!settings_override->empty())
+      file_name = settings_override->c_str();
+
+    std::string asset_path = aot_snapshot_path + "/" + file_name;
     struct stat info;
     if (stat(asset_path.c_str(), &info) < 0)
       return nullptr;
