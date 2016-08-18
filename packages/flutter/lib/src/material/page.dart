@@ -18,7 +18,7 @@ class _MaterialPageTransition extends AnimatedWidget {
     this.child
   }) : super(
     key: key,
-    animation: _kMaterialPageTransitionTween.animate(new CurvedAnimation(parent: animation, curve: Curves.fastOutSlowIn))
+    animation: _kMaterialPageTransitionTween.animate(animation)
   );
 
   final Widget child;
@@ -67,7 +67,7 @@ class MaterialPageRoute<T> extends PageRoute<T> {
   Animation<double> createAnimation() {
     return new CurvedAnimation(
       parent: super.createAnimation(),
-      curve: Curves.easeOut
+      curve: Curves.fastOutSlowIn
     );
   }
 
