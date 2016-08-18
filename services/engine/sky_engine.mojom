@@ -7,7 +7,6 @@ module sky;
 import "mojo/public/interfaces/application/service_provider.mojom";
 import "mojo/public/interfaces/application/shell.mojom";
 import "mojo/services/asset_bundle/interfaces/asset_bundle.mojom";
-import "mojo/services/gfx/composition/interfaces/scheduling.mojom";
 import "mojo/services/ui/views/interfaces/views.mojom";
 import "flutter/services/engine/input_event.mojom";
 import "flutter/services/pointer/pointer.mojom";
@@ -34,7 +33,6 @@ struct ServicesData {
   mojo.ServiceProvider&? outgoing_services;
   mojo.ui.View? view;
   mojo.ServiceProvider? view_services;
-  mojo.gfx.composition.FrameScheduler? frame_scheduler;
 };
 
 [ServiceName="sky::SkyEngine"]

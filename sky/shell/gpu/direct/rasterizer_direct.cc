@@ -4,13 +4,17 @@
 
 #include "flutter/sky/shell/gpu/direct/rasterizer_direct.h"
 
+#include <string>
+#include <utility>
+
+#include "flutter/common/threads.h"
 #include "flutter/glue/trace_event.h"
-#include "mojo/public/cpp/system/data_pipe.h"
 #include "flutter/sky/engine/wtf/PassRefPtr.h"
 #include "flutter/sky/engine/wtf/RefPtr.h"
 #include "flutter/sky/shell/gpu/picture_serializer.h"
 #include "flutter/sky/shell/platform_view.h"
 #include "flutter/sky/shell/shell.h"
+#include "mojo/public/cpp/system/data_pipe.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkPicture.h"
 
@@ -18,7 +22,11 @@ namespace sky {
 namespace shell {
 
 RasterizerDirect::RasterizerDirect()
-    : binding_(this), platform_view_(nullptr), weak_factory_(this) {}
+    : platform_view_(nullptr), weak_factory_(this) {
+  auto weak_ptr = weak_factory_.GetWeakPtr();
+  blink::Threads::Gpu()->PostTask(
+      [weak_ptr]() { Shell::Shared().AddRasterizer(weak_ptr); });
+}
 
 RasterizerDirect::~RasterizerDirect() {
   weak_factory_.InvalidateWeakPtrs();
@@ -33,14 +41,6 @@ std::unique_ptr<Rasterizer> Rasterizer::Create() {
 // sky::shell::Rasterizer override.
 ftl::WeakPtr<Rasterizer> RasterizerDirect::GetWeakRasterizerPtr() {
   return weak_factory_.GetWeakPtr();
-}
-
-// sky::shell::Rasterizer override.
-void RasterizerDirect::ConnectToRasterizer(
-    mojo::InterfaceRequest<rasterizer::Rasterizer> request) {
-  binding_.Bind(request.Pass());
-
-  Shell::Shared().AddRasterizer(GetWeakRasterizerPtr());
 }
 
 // sky::shell::Rasterizer override.
@@ -86,17 +86,38 @@ flow::LayerTree* RasterizerDirect::GetLastLayerTree() {
   return last_layer_tree_.get();
 }
 
-void RasterizerDirect::Draw(uint64_t layer_tree_ptr,
-                            const DrawCallback& callback) {
+void RasterizerDirect::Draw(
+    ftl::RefPtr<flutter::Pipeline<flow::LayerTree>> pipeline) {
   TRACE_EVENT0("flutter", "RasterizerDirect::Draw");
 
   if (platform_view_ == nullptr) {
-    callback.Run();
     return;
   }
 
-  std::unique_ptr<flow::LayerTree> layer_tree(
-      reinterpret_cast<flow::LayerTree*>(layer_tree_ptr));
+  flutter::Pipeline<flow::LayerTree>::Consumer consumer =
+      std::bind(&RasterizerDirect::DoDraw, this, std::placeholders::_1);
+
+  // Consume as many pipeline items as possible. But yield the event loop
+  // between successive tries.
+  switch (pipeline->Consume(consumer)) {
+    case flutter::PipelineConsumeResult::MoreAvailable: {
+      auto weak_this = weak_factory_.GetWeakPtr();
+      blink::Threads::Gpu()->PostTask([weak_this, pipeline]() {
+        if (weak_this) {
+          weak_this->Draw(pipeline);
+        }
+      });
+    } break;
+    default:
+      break;
+  }
+}
+
+void RasterizerDirect::DoDraw(std::unique_ptr<flow::LayerTree> layer_tree) {
+  // There is no way for the compositor to know how long the layer tree
+  // construction took. Fortunately, the layer tree does. Grab that time
+  // for instrumentation.
+  compositor_context_.engine_time().SetLapTime(layer_tree->construction_time());
 
   SkISize size = layer_tree->frame_size();
   if (platform_view_->GetSize() != size) {
@@ -104,14 +125,8 @@ void RasterizerDirect::Draw(uint64_t layer_tree_ptr,
   }
 
   if (!platform_view_->ContextMakeCurrent() || !layer_tree->root_layer()) {
-    callback.Run();
     return;
   }
-
-  // There is no way for the compositor to know how long the layer tree
-  // construction took. Fortunately, the layer tree does. Grab that time
-  // for instrumentation.
-  compositor_context_.engine_time().SetLapTime(layer_tree->construction_time());
 
   {
     SkCanvas* canvas = ganesh_canvas_.GetCanvas(
@@ -158,8 +173,6 @@ void RasterizerDirect::Draw(uint64_t layer_tree_ptr,
     sk_sp<SkPicture> picture = recoder.finishRecordingAsPicture();
     SerializePicture(path, picture.get());
   }
-
-  callback.Run();
 
   last_layer_tree_ = std::move(layer_tree);
 }

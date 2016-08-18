@@ -6,6 +6,7 @@
 #define SYNCHRONIZATION_PIPELINE_H_
 
 #include "lib/ftl/macros.h"
+#include "lib/ftl/memory/ref_counted.h"
 #include "lib/ftl/synchronization/mutex.h"
 #include "lib/ftl/functional/closure.h"
 #include "flutter/synchronization/semaphore.h"
@@ -24,7 +25,7 @@ enum class PipelineConsumeResult {
 };
 
 template <class R>
-class Pipeline {
+class Pipeline : public ftl::RefCountedThreadSafe<Pipeline<R>> {
  public:
   using Resource = R;
   using ResourcePtr = std::unique_ptr<Resource>;

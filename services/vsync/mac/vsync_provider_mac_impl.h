@@ -28,9 +28,8 @@ class VsyncProviderMacImpl : public ::vsync::VSyncProvider {
   mojo::StrongBinding<::vsync::VSyncProvider> binding_;
   void* opaque_;
   std::vector<::vsync::VSyncProvider::AwaitVSyncCallback> pending_callbacks_;
-  bool trace_level_;
 
-  static void OnDisplayLink(void *thiz);
+  static void OnDisplayLink(void* thiz);
   void OnDisplayLink();
 
   DISALLOW_COPY_AND_ASSIGN(VsyncProviderMacImpl);

@@ -21,20 +21,7 @@ PlatformView::Config::~Config() = default;
 
 PlatformView::PlatformView()
     : rasterizer_(Rasterizer::Create()), size_(SkISize::Make(0, 0)) {
-  // Create the engine for this platform view.
-  Engine::Config engine_config;
-
-  ftl::WeakPtr<Rasterizer> rasterizer_impl =
-      rasterizer_->GetWeakRasterizerPtr();
-  rasterizer::RasterizerPtr rasterizer;
-  auto request = glue::WrapMovable(mojo::GetProxy(&rasterizer));
-
-  blink::Threads::Gpu()->PostTask([rasterizer_impl, request]() mutable {
-    if (rasterizer_impl)
-      rasterizer_impl->ConnectToRasterizer(request.Unwrap());
-  });
-
-  engine_.reset(new Engine(engine_config, rasterizer.Pass()));
+  engine_.reset(new Engine(rasterizer_.get()));
 
   // Setup the platform config.
   config_.ui_delegate = engine_->GetWeakPtr();

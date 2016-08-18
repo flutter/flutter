@@ -21,10 +21,6 @@ class RasterizerDirect : public Rasterizer {
   ~RasterizerDirect() override;
 
   // sky::shell::Rasterizer override.
-  void ConnectToRasterizer(
-      mojo::InterfaceRequest<rasterizer::Rasterizer> request) override;
-
-  // sky::shell::Rasterizer override.
   void Setup(PlatformView* platform_view,
              ftl::Closure continuation,
              ftl::AutoResetWaitableEvent* setup_completion_event) override;
@@ -39,16 +35,17 @@ class RasterizerDirect : public Rasterizer {
   // sky::shell::Rasterizer override.
   flow::LayerTree* GetLastLayerTree() override;
 
+  // sky::shell::Rasterizer override.
+  void Draw(ftl::RefPtr<flutter::Pipeline<flow::LayerTree>> pipeline) override;
+
  private:
   GaneshCanvas ganesh_canvas_;
   flow::CompositorContext compositor_context_;
-  mojo::Binding<rasterizer::Rasterizer> binding_;
   std::unique_ptr<flow::LayerTree> last_layer_tree_;
   PlatformView* platform_view_;
   ftl::WeakPtrFactory<RasterizerDirect> weak_factory_;
 
-  // sky::services::rasterizer::Rasterizer (from rasterizer.mojom) override.
-  void Draw(uint64_t layer_tree_ptr, const DrawCallback& callback) override;
+  void DoDraw(std::unique_ptr<flow::LayerTree> tree);
 
   FTL_DISALLOW_COPY_AND_ASSIGN(RasterizerDirect);
 };

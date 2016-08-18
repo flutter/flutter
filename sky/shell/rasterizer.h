@@ -8,23 +8,20 @@
 #include <memory>
 
 #include "flutter/flow/layers/layer_tree.h"
+#include "flutter/synchronization/pipeline.h"
+#include "lib/ftl/functional/closure.h"
 #include "lib/ftl/memory/weak_ptr.h"
 #include "lib/ftl/synchronization/waitable_event.h"
-#include "lib/ftl/functional/closure.h"
 #include "mojo/public/cpp/bindings/binding.h"
-#include "flutter/services/rasterizer/rasterizer.mojom.h"
 
 namespace sky {
 namespace shell {
 
 class PlatformView;
 
-class Rasterizer : public rasterizer::Rasterizer {
+class Rasterizer {
  public:
-  ~Rasterizer() override;
-
-  virtual void ConnectToRasterizer(
-      mojo::InterfaceRequest<rasterizer::Rasterizer> request) = 0;
+  virtual ~Rasterizer();
 
   virtual void Setup(PlatformView* platform_view,
                      ftl::Closure rasterizer_continuation,
@@ -36,6 +33,9 @@ class Rasterizer : public rasterizer::Rasterizer {
   virtual ftl::WeakPtr<Rasterizer> GetWeakRasterizerPtr() = 0;
 
   virtual flow::LayerTree* GetLastLayerTree() = 0;
+
+  virtual void Draw(
+      ftl::RefPtr<flutter::Pipeline<flow::LayerTree>> pipeline) = 0;
 
   // Implemented by each GPU backend.
   static std::unique_ptr<Rasterizer> Create();

@@ -27,7 +27,6 @@ static inline uint64_t CurrentTimeMicroseconds() {
 @implementation VSyncClient {
   CADisplayLink* _displayLink;
   std::vector<::vsync::VSyncProvider::AwaitVSyncCallback> _pendingCallbacks;
-  BOOL _traceLevel;
 }
 
 - (instancetype)init {
@@ -51,7 +50,7 @@ static inline uint64_t CurrentTimeMicroseconds() {
 }
 
 - (void)onDisplayLink:(CADisplayLink*)link {
-  TRACE_COUNTER1("vsync", "PlatformVSync", _traceLevel = !_traceLevel);
+  TRACE_EVENT_INSTANT0("flutter", "PlatformVSync", TRACE_EVENT_SCOPE_PROCESS);
   _displayLink.paused = YES;
   uint64_t micros = CurrentTimeMicroseconds();
   for (const auto& callback : _pendingCallbacks) {

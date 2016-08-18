@@ -49,13 +49,8 @@ PlatformImpl* g_platform_impl = nullptr;
 
 }  // namespace
 
-Engine::Config::Config() {}
-
-Engine::Config::~Config() {}
-
-Engine::Engine(const Config& config, rasterizer::RasterizerPtr rasterizer)
-    : config_(config),
-      animator_(new Animator(config, rasterizer.Pass(), this)),
+Engine::Engine(Rasterizer* rasterizer)
+    : animator_(new Animator(rasterizer, this)),
       binding_(this),
       activity_running_(false),
       have_surface_(false),
@@ -136,27 +131,19 @@ void Engine::SetServices(ServicesDataPtr services) {
         incoming_services_.get());
   }
 
-  if (services_->frame_scheduler) {
-    animator_->Reset();
-    animator_->set_frame_scheduler(services_->frame_scheduler.Pass());
+  vsync::VSyncProviderPtr vsync_provider;
+  if (services_->shell) {
+    // We bind and unbind our Shell here, since this is the only place we use
+    // it in this class.
+    auto shell = mojo::ShellPtr::Create(services_->shell.Pass());
+    mojo::ConnectToService(shell.get(), "mojo:vsync",
+                           mojo::GetProxy(&vsync_provider));
+    services_->shell = shell.Pass();
   } else {
-#if defined(OS_ANDROID) || defined(OS_IOS) || defined(OS_MACOSX)
-    vsync::VSyncProviderPtr vsync_provider;
-    if (services_->shell) {
-      // We bind and unbind our Shell here, since this is the only place we use
-      // it in this class.
-      auto shell = mojo::ShellPtr::Create(services_->shell.Pass());
-      mojo::ConnectToService(shell.get(), "mojo:vsync",
-                             mojo::GetProxy(&vsync_provider));
-      services_->shell = shell.Pass();
-    } else {
-      mojo::ConnectToService(incoming_services_.get(),
-                             mojo::GetProxy(&vsync_provider));
-    }
-    animator_->Reset();
-    animator_->set_vsync_provider(vsync_provider.Pass());
-#endif
+    mojo::ConnectToService(incoming_services_.get(),
+                           mojo::GetProxy(&vsync_provider));
   }
+  animator_->set_vsync_provider(vsync_provider.Pass());
 }
 
 void Engine::OnViewportMetricsChanged(ViewportMetricsPtr metrics) {

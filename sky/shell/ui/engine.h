@@ -7,16 +7,16 @@
 
 #include "flutter/assets/zip_asset_store.h"
 #include "flutter/glue/drain_data_pipe_job.h"
-#include "flutter/runtime/runtime_delegate.h"
 #include "flutter/runtime/runtime_controller.h"
+#include "flutter/runtime/runtime_delegate.h"
 #include "flutter/services/engine/sky_engine.mojom.h"
-#include "flutter/services/rasterizer/rasterizer.mojom.h"
+#include "flutter/sky/shell/rasterizer.h"
 #include "flutter/sky/shell/ui_delegate.h"
 #include "lib/ftl/macros.h"
 #include "lib/ftl/memory/weak_ptr.h"
 #include "mojo/public/cpp/application/service_provider_impl.h"
-#include "mojo/public/cpp/bindings/binding_set.h"
 #include "mojo/public/cpp/bindings/binding.h"
+#include "mojo/public/cpp/bindings/binding_set.h"
 #include "mojo/public/cpp/system/data_pipe.h"
 #include "mojo/public/cpp/system/handle.h"
 #include "mojo/public/interfaces/application/service_provider.mojom.h"
@@ -32,12 +32,8 @@ class Engine : public UIDelegate,
                public SkyEngine,
                public blink::RuntimeDelegate {
  public:
-  struct Config {
-    Config();
-    ~Config();
-  };
+  explicit Engine(Rasterizer* rasterizer);
 
-  explicit Engine(const Config& config, rasterizer::RasterizerPtr rasterizer);
   ~Engine() override;
 
   ftl::WeakPtr<Engine> GetWeakPtr();
@@ -98,7 +94,6 @@ class Engine : public UIDelegate,
   void ConfigureAssetBundle(const std::string& path);
   void ConfigureRuntime(const std::string& script_uri);
 
-  Config config_;
   std::unique_ptr<Animator> animator_;
 
   ServicesDataPtr services_;

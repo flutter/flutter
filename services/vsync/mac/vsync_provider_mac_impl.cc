@@ -16,7 +16,7 @@ namespace vsync {
 
 VsyncProviderMacImpl::VsyncProviderMacImpl(
     mojo::InterfaceRequest<::vsync::VSyncProvider> request)
-    : binding_(this, request.Pass()), opaque_(nullptr), trace_level_(false) {
+    : binding_(this, request.Pass()), opaque_(nullptr) {
   // Create the link.
   CVDisplayLinkRef link = nullptr;
   CVDisplayLinkCreateWithActiveCGDisplays(&link);
@@ -53,8 +53,8 @@ void VsyncProviderMacImpl::OnDisplayLink(void* thiz) {
 }
 
 void VsyncProviderMacImpl::OnDisplayLink() {
-  TRACE_COUNTER1("vsync", "PlatformVSync", trace_level_ = !trace_level_);
-
+  TRACE_EVENT_INSTANT1("flutter", "PlatformVSync", TRACE_EVENT_SCOPE_PROCESS,
+                       "items", pending_callbacks_.size());
   // Stop the link.
   CVDisplayLinkStop(link_);
 

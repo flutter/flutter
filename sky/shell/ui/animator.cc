@@ -7,151 +7,102 @@
 #include "base/bind.h"
 #include "base/message_loop/message_loop.h"
 #include "base/trace_event/trace_event.h"
-#include "flutter/services/rasterizer/rasterizer.mojom.h"
+#include "flutter/common/threads.h"
 
 namespace sky {
 namespace shell {
 
-const int kPipelineDepth = 3;
-
-Animator::Animator(const Engine::Config& config,
-                   rasterizer::RasterizerPtr rasterizer,
-                   Engine* engine)
-    : config_(config),
-      rasterizer_(rasterizer.Pass()),
+Animator::Animator(Rasterizer* rasterizer, Engine* engine)
+    : rasterizer_(rasterizer),
       engine_(engine),
-      outstanding_requests_(0),
-      did_defer_frame_request_(false),
-      engine_requested_frame_(false),
+      layer_tree_pipeline_(ftl::MakeRefCounted<LayerTreePipeline>(3)),
+      pending_frame_semaphore_(1),
       paused_(false),
-      is_ready_to_draw_(false),
       weak_factory_(this) {}
 
-Animator::~Animator() {}
-
-void Animator::RequestFrame() {
-  if (engine_requested_frame_)
-    return;
-  TRACE_EVENT_ASYNC_BEGIN0("flutter", "Frame request pending", this);
-  engine_requested_frame_ = true;
-
-  DCHECK(!did_defer_frame_request_);
-  outstanding_requests_++;
-  TRACE_COUNTER1("flutter", "outstanding_requests_", outstanding_requests_);
-  if (outstanding_requests_ >= kPipelineDepth) {
-    TRACE_EVENT_INSTANT1("flutter", "Frame request deferred",
-                         TRACE_EVENT_SCOPE_THREAD, "outstanding_requests_",
-                         outstanding_requests_);
-    did_defer_frame_request_ = true;
-    return;
-  }
-
-  if (!AwaitVSync()) {
-    base::MessageLoop::current()->PostDelayedTask(
-        FROM_HERE,
-        base::Bind(&Animator::BeginFrame, weak_factory_.GetWeakPtr(), 0),
-        base::TimeDelta::FromMilliseconds(16));
-  }
-}
+Animator::~Animator() = default;
 
 void Animator::Stop() {
   paused_ = true;
 }
 
 void Animator::Start() {
-  Reset();
+  if (!paused_) {
+    return;
+  }
+
+  paused_ = false;
   RequestFrame();
 }
 
-void Animator::Animate(mojo::gfx::composition::FrameInfoPtr frame_info) {
-  BeginFrame(frame_info->frame_time);
-}
-
 void Animator::BeginFrame(int64_t time_stamp) {
-  TRACE_EVENT_ASYNC_END0("flutter", "Frame request pending", this);
-  DCHECK(engine_requested_frame_);
-  DCHECK(outstanding_requests_ > 0);
-  DCHECK(outstanding_requests_ <= kPipelineDepth) << outstanding_requests_;
+  pending_frame_semaphore_.Signal();
 
-  engine_requested_frame_ = false;
+  LayerTreePipeline::Producer producer = [this]() {
+    renderable_tree_.reset();
+    engine_->BeginFrame(ftl::TimePoint::Now());
+    return std::move(renderable_tree_);
+  };
 
-  if (paused_) {
-    OnFrameComplete();
+  if (!layer_tree_pipeline_->Produce(producer)) {
+    TRACE_EVENT_INSTANT0("flutter", "ConsumerSlowDefer",
+                         TRACE_EVENT_SCOPE_PROCESS);
+    RequestFrame();
     return;
   }
 
-  begin_time_ = ftl::TimePoint::Now();
-  ftl::TimePoint frame_time =
-      time_stamp
-          ? ftl::TimePoint() + ftl::TimeDelta::FromMicroseconds(time_stamp)
-          : begin_time_;
+  auto weak_rasterizer = rasterizer_->GetWeakRasterizerPtr();
+  auto pipeline = layer_tree_pipeline_;
 
-  is_ready_to_draw_ = true;
-  engine_->BeginFrame(frame_time);
-  bool was_ready_to_draw = is_ready_to_draw_;
-  is_ready_to_draw_ = false;
-
-  // If we were still ready to draw when done with the frame, that means we
-  // didn't draw anything this frame and we should acknowledge the frame
-  // ourselves instead of waiting for the rasterizer to acknowledge it.
-  if (was_ready_to_draw)
-    OnFrameComplete();
+  blink::Threads::Gpu()->PostTask([weak_rasterizer, pipeline]() {
+    if (!weak_rasterizer) {
+      return;
+    }
+    weak_rasterizer->Draw(pipeline);
+  });
 }
 
 void Animator::Render(std::unique_ptr<flow::LayerTree> layer_tree) {
-  if (!is_ready_to_draw_)
-    return;  // Only draw once per frame.
-  is_ready_to_draw_ = false;
-
-  layer_tree->set_construction_time(ftl::TimePoint::Now() - begin_time_);
-
-  // TODO(abarth): Doesn't this leak if OnFrameComplete never runs?
-  rasterizer_->Draw(
-      reinterpret_cast<uint64_t>(layer_tree.release()),
-      base::Bind(&Animator::OnFrameComplete, weak_factory_.GetWeakPtr()));
+  renderable_tree_ = std::move(layer_tree);
 }
 
-void Animator::OnFrameComplete() {
-  DCHECK(outstanding_requests_ > 0);
-  --outstanding_requests_;
-  TRACE_COUNTER1("flutter", "outstanding_requests_", outstanding_requests_);
-  if (paused_)
+void Animator::RequestFrame() {
+  if (paused_) {
     return;
-
-  if (did_defer_frame_request_) {
-    did_defer_frame_request_ = false;
-
-    if (!AwaitVSync())
-      BeginFrame(0);
   }
-}
 
-bool Animator::AwaitVSync() {
-  if (frame_scheduler_) {
-    frame_scheduler_->ScheduleFrame(
-        base::Bind(&Animator::Animate, weak_factory_.GetWeakPtr()));
-    return true;
-  } else if (vsync_provider_) {
-    vsync_provider_->AwaitVSync(
-        base::Bind(&Animator::BeginFrame, weak_factory_.GetWeakPtr()));
-    return true;
+  if (!pending_frame_semaphore_.TryWait()) {
+    // Multiple calls to Animator::RequestFrame will still result in a single
+    // request to the VSyncProvider.
+    return;
   }
-  return false;
-}
 
-void Animator::Reset() {
-  weak_factory_.InvalidateWeakPtrs();
+  // The AwaitVSync is going to call us back at the next VSync. However, we want
+  // to be reasonably certain that the UI thread is not in the middle of a
+  // particularly expensive callout. We post the AwaitVSync to run right after
+  // an idle. This does NOT provide a guarantee that the UI thread has not
+  // started an expensive operation right after posting this message however.
+  // To support that, we need edge triggered wakes on VSync.
 
-  outstanding_requests_ = 0;
-  TRACE_COUNTER1("flutter", "outstanding_requests_", outstanding_requests_);
-  did_defer_frame_request_ = false;
-  engine_requested_frame_ = false;
-  paused_ = false;
+  auto weak = weak_factory_.GetWeakPtr();
+
+  blink::Threads::UI()->PostTask([weak]() {
+    if (!weak) {
+      return;
+    }
+
+    TRACE_EVENT_INSTANT0("flutter", "RequestFrame", TRACE_EVENT_SCOPE_PROCESS);
+
+    DCHECK(weak->vsync_provider_)
+        << "A VSync provider must be present to schedule a frame.";
+
+    weak->vsync_provider_->AwaitVSync(base::Bind(&Animator::BeginFrame, weak));
+  });
 }
 
 void Animator::set_vsync_provider(vsync::VSyncProviderPtr vsync_provider) {
-  DCHECK(!engine_requested_frame_);
   vsync_provider_ = vsync_provider.Pass();
+  RequestFrame();
 }
 
 }  // namespace shell
