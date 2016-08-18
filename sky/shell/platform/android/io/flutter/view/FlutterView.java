@@ -404,7 +404,8 @@ public class FlutterView extends SurfaceView
         Pair<SkyEngine.Proxy, InterfaceRequest<SkyEngine>> engine =
                 SkyEngine.MANAGER.getInterfaceRequest(core);
         mSkyEngine = engine.first;
-        mNativePlatformView = nativeAttach(engine.second.passHandle().releaseNativeHandle());
+        mNativePlatformView =
+            nativeAttach(engine.second.passHandle().releaseNativeHandle(), this);
     }
 
     private void preRun() {
@@ -472,13 +473,36 @@ public class FlutterView extends SurfaceView
         postRun();
     }
 
-    public void runFromFile(String main, String packageRoot) {
-        preRun();
-        mSkyEngine.runFromFile(main, packageRoot, "");
-        postRun();
+    public void runFromSource(final String main,
+                              final String packages,
+                              final String assetsDirectory) {
+        Runnable runnable = new Runnable() {
+            public void run() {
+                preRun();
+                mSkyEngine.runFromFile(main,
+                                       packages,
+                                       assetsDirectory);
+                postRun();
+                synchronized (this) {
+                    notify();
+                }
+            }
+        };
+
+        try {
+            synchronized (runnable) {
+                // Post to the Android UI thread and wait for the response.
+                post(runnable);
+                runnable.wait();
+            }
+        } catch (InterruptedException e) {
+            Log.e(TAG, "Thread got interrupted waiting for " +
+                       "RunFromSourceRunnable to finish", e);
+        }
     }
 
-    private static native long nativeAttach(int inputObserverHandle);
+    private static native long nativeAttach(int skyEngineHandle,
+                                            FlutterView view);
     private static native int nativeGetObservatoryPort();
     private static native void nativeDetach(long nativePlatformViewAndroid);
     private static native void nativeSurfaceCreated(long nativePlatformViewAndroid,

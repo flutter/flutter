@@ -75,17 +75,6 @@ static bool ErrorUnknownView(const char** json_object, const char* view_id) {
   return false;
 }
 
-static bool ErrorIsolateSpawn(const char** json_object, const char* view_id) {
-  const intptr_t kInvalidParams = -32602;
-  std::stringstream response;
-  response << "{\"code\":" << std::to_string(kInvalidParams) << ",";
-  response << "\"message\":\"Invalid params\",";
-  response << "\"data\": {\"details\": \"view " << view_id;
-  response << " did not spawn an isolate\"}}";
-  *json_object = strdup(response.str().c_str());
-  return false;
-}
-
 static void AppendIsolateRef(std::stringstream* stream,
                              int64_t main_port,
                              const std::string name) {
@@ -99,8 +88,12 @@ static void AppendFlutterView(std::stringstream* stream,
                               int64_t isolate_id,
                               const std::string isolate_name) {
   *stream << "{\"type\":\"FlutterView\", \"id\": \"" << kViewIdPrefx << "0x"
-          << std::hex << view_id << std::dec << "\"," << "\"isolate\":";
-  AppendIsolateRef(stream, isolate_id, isolate_name);
+          << std::hex << view_id << std::dec;
+  if (isolate_id != ILLEGAL_PORT) {
+      // Append the isolate (if it exists).
+      *stream << "\"," << "\"isolate\":";
+      AppendIsolateRef(stream, isolate_id, isolate_name);
+  }
   *stream << "}";
 }
 
@@ -168,9 +161,6 @@ bool PlatformViewServiceProtocol::RunInView(const char* method,
   if (!view_existed) {
     // If the view did not exist this request has definitely failed.
     return ErrorUnknownView(json_object, view_id);
-  } else if (main_port == ILLEGAL_PORT) {
-    // We did not create an isolate.
-    return ErrorIsolateSpawn(json_object, view_id);
   } else {
     // The view existed and the isolate was created. Success.
     std::stringstream response;

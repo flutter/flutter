@@ -33,5 +33,10 @@ bool PlatformViewTest::SwapBuffers() {
   return false;
 }
 
+void PlatformViewTest::RunFromSource(const std::string& main,
+                                     const std::string& packages,
+                                     const std::string& assets_directory) {
+}
+
 }  // namespace shell
 }  // namespace sky

@@ -6,6 +6,7 @@
 #define SKY_SHELL_PLATFORM_ANDROID_PLATFORM_VIEW_ANDROID_H_
 
 #include "base/android/jni_android.h"
+#include "base/android/jni_weak_ref.h"
 #include "lib/ftl/memory/weak_ptr.h"
 #include "flutter/sky/shell/platform_view.h"
 
@@ -52,9 +53,18 @@ class PlatformViewAndroid : public PlatformView {
   // sky::shell::PlatformView override
   virtual void Resize(const SkISize& size);
 
+  virtual void RunFromSource(const std::string& main,
+                             const std::string& packages,
+                             const std::string& assets_directory);
+
+  void set_flutter_view(const JavaObjectWeakGlobalRef& flutter_view) {
+    flutter_view_ = flutter_view;
+  }
+
  private:
   std::unique_ptr<AndroidGLContext> context_;
   ftl::WeakPtrFactory<PlatformViewAndroid> weak_factory_;
+  JavaObjectWeakGlobalRef flutter_view_;
 
   FTL_DISALLOW_COPY_AND_ASSIGN(PlatformViewAndroid);
 };

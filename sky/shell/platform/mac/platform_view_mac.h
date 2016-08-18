@@ -31,6 +31,10 @@ class PlatformViewMac : public PlatformView {
 
   bool SwapBuffers() override;
 
+  void RunFromSource(const std::string& main,
+                     const std::string& packages,
+                     const std::string& assets_directory) override;
+
  private:
   base::scoped_nsobject<NSOpenGLView> opengl_view_;
   base::scoped_nsobject<NSOpenGLContext> resource_loading_context_;

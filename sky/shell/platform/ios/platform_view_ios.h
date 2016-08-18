@@ -35,6 +35,10 @@ class PlatformViewIOS : public PlatformView {
 
   bool SwapBuffers() override;
 
+  void RunFromSource(const std::string& main,
+                     const std::string& packages,
+                     const std::string& assets_directory) override;
+
  private:
   std::unique_ptr<IOSGLContext> context_;
   ftl::WeakPtrFactory<PlatformViewIOS> weak_factory_;

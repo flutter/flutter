@@ -74,5 +74,13 @@ bool PlatformViewMac::IsValid() const {
   return true;
 }
 
+void PlatformViewMac::RunFromSource(const std::string& main,
+                                    const std::string& packages,
+                                    const std::string& assets_directory) {
+  // TODO(johnmccutchan): Call to the Mac UI thread so that services work
+  // properly like we do in PlatformViewAndroid.
+  engine().RunFromSource(main, packages, assets_directory);
+}
+
 }  // namespace shell
 }  // namespace sky

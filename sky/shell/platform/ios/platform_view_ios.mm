@@ -296,5 +296,13 @@ bool PlatformViewIOS::SwapBuffers() {
   return context_ != nullptr ? context_->PresentRenderBuffer() : false;
 }
 
+void PlatformViewIOS::RunFromSource(const std::string& main,
+                                    const std::string& packages,
+                                    const std::string& assets_directory) {
+  // TODO(johnmccutchan): Call to the iOS UI thread so that services work
+  // properly like we do in PlatformViewAndroid.
+  engine().RunFromSource(main, packages, assets_directory);
+}
+
 }  // namespace shell
 }  // namespace sky

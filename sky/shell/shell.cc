@@ -309,7 +309,7 @@ void Shell::RunInPlatformViewUIThread(uintptr_t view_id,
     PlatformView* view = it->get();
     if (reinterpret_cast<uintptr_t>(view) == view_id) {
       *view_existed = true;
-      view->engine().RunFromSource(main, packages, assets_directory);
+      view->RunFromSource(main, packages, assets_directory);
       *dart_isolate_id = view->engine().GetUIIsolateMainPort();
       *isolate_name = view->engine().GetUIIsolateName();
       break;

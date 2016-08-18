@@ -69,6 +69,10 @@ class PlatformView {
 
   Engine& engine() { return *engine_; }
 
+  virtual void RunFromSource(const std::string& main,
+                             const std::string& packages,
+                             const std::string& assets_directory) = 0;
+
  protected:
   Config config_;
   SurfaceConfig surface_config_;
