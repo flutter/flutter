@@ -95,22 +95,6 @@ source_set("gpu_direct") {
   ]
 }
 
-source_set("gpu_mojo") {
-  sources = [
-    "gpu/mojo/gl_texture_recycler.cc",
-    "gpu/mojo/gl_texture_recycler.h",
-    "gpu/mojo/rasterizer_mojo.cc",
-    "gpu/mojo/rasterizer_mojo.h",
-  ]
-
-  deps = [
-    "//mojo/gpu",
-    "//mojo/public/c/gpu",
-    "//mojo/skia",
-    ":common",
-  ]
-}
-
 if (is_linux || is_mac) {
 
   source_set("testing") {
