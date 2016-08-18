@@ -73,6 +73,10 @@ source_set("ui") {
       "text/paragraph_stub.cc",
       "text/paragraph_stub.h",
     ]
+
+    deps += [
+      "//flutter/sky/engine/wtf",
+    ]
   } else {
     sources += [
       "text/paragraph_builder.cc",
