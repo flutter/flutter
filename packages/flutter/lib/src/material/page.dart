@@ -64,6 +64,14 @@ class MaterialPageRoute<T> extends PageRoute<T> {
   bool canTransitionFrom(TransitionRoute<dynamic> nextRoute) => false;
 
   @override
+  Animation<double> createAnimation() {
+    return new CurvedAnimation(
+      parent: super.createAnimation(),
+      curve: Curves.easeOut
+    );
+  }
+
+  @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> forwardAnimation) {
     Widget result = builder(context);
     assert(() {
