@@ -18,7 +18,10 @@ namespace blink {
 
 #if DART_ALLOW_DYNAMIC_RESOLUTION
 
-extern const char* kDartIsolateSnapshotBufferName;
+extern const char kDartVmIsolateSnapshotBufferName[];
+extern const char kDartIsolateSnapshotBufferName[];
+extern const char kInstructionsSnapshotName[];
+extern const char kDataSnapshotName[];
 
 void* _DartSymbolLookup(const char* symbol_name);
 
