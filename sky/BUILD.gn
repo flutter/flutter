@@ -8,7 +8,6 @@ group("sky") {
   testonly = true
 
   deps = [
-    "//flutter/sky/engine/platform:platform_unittests($host_toolchain)",
     "//flutter/sky/engine/wtf:unittests($host_toolchain)",
     "//flutter/sky/packages",
     "//flutter/sky/shell",

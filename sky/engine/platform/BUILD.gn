@@ -2,9 +2,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-import("//build/config/ui.gni")
-import("//testing/test.gni")
-
 source_set("platform") {
   sources = [
     "CalculationValue.h",
@@ -260,16 +257,13 @@ source_set("platform") {
   ]
 
   deps = [
-    "//mojo/application",
-    "//mojo/environment:chromium",
-    "//mojo/public/c/system",
-    "//mojo/public/cpp/bindings",
-    "//mojo/public/cpp/system",
-    "//mojo/public/cpp/utility",
-    "//mojo/services/network/interfaces",
+    "//third_party/harfbuzz-ng",
+  ]
+
+  public_deps = [
+    "//flutter/common",
     "//flutter/skia",
     "//flutter/sky/engine/wtf",
-    "//third_party/harfbuzz-ng",
   ]
 
   if (!is_mac) {
@@ -304,10 +298,6 @@ source_set("platform") {
 
   include_dirs = [ "$root_build_dir" ]
 
-  forward_dependent_configs_from = [
-    "//flutter/skia",
-  ]
-
   if (is_android) {
     # Add in some Linux files also shared with Android.
     set_sources_assignment_filter([])
@@ -320,57 +310,4 @@ source_set("platform") {
   if (is_linux) {
     direct_dependent_configs = [ "//build/config/linux:fontconfig" ]
   }
-}
-
-test("platform_unittests") {
-  output_name = "sky_platform_unittests"
-
-  sources = [
-    "DecimalTest.cpp",
-    "LayoutUnitTest.cpp",
-    "PurgeableVectorTest.cpp",
-    "TestingPlatformSupport.cpp",
-    "TestingPlatformSupport.h",
-    "animation/TimingFunctionTest.cpp",
-    "animation/UnitBezierTest.cpp",
-    "fonts/FontCacheTest.cpp",
-    "fonts/FontDescriptionTest.cpp",
-    "fonts/FontTest.cpp",
-    "fonts/GlyphPageTreeNodeTest.cpp",
-    "fonts/android/FontCacheAndroidTest.cpp",
-    "geometry/FloatBoxTest.cpp",
-    "geometry/FloatBoxTestHelpers.cpp",
-    "geometry/FloatRoundedRectTest.cpp",
-    "geometry/RegionTest.cpp",
-    "geometry/RoundedRectTest.cpp",
-    "testing/RunAllTests.cpp",
-    "text/BidiResolverTest.cpp",
-    "text/SegmentedStringTest.cpp",
-    "text/UnicodeUtilitiesTest.cpp",
-    "transforms/TransformOperationsTest.cpp",
-    "transforms/TransformationMatrixTest.cpp",
-  ]
-
-  configs += [ "//flutter/sky/engine:config" ]
-
-  deps = [
-    ":platform",
-    "//base",
-    "//base/allocator",
-    "//base/test:test_support",
-    "//flutter/skia",
-    "//testing/gmock",
-    "//testing/gtest",
-    "//flutter/sky/engine/wtf",
-  ]
-
-  # TODO(abarth): This is a lie - this test is not embedded in an environment
-  # that injects the system thunks, so system calls don't actually work. This
-  # just tricks the linker into thinking that an implementation of these calls
-  # will be injected at runtime so the link succeeds.
-  deps += [ "//mojo/public/platform/native:system" ]
-
-  defines = [ "INSIDE_BLINK" ]
-
-  include_dirs = [ "$root_build_dir" ]
 }
