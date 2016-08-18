@@ -105,12 +105,6 @@ class GalleryHomeState extends State<GalleryHome> {
   void initState() {
     super.initState();
 
-    // The first item in the list just exists to occupy the space behind
-    // the flexible app bar. As it's scrolled out of the way, the app bar's
-    // height will shrink.
-    final double statusBarHeight = (MediaQuery.of(context)?.padding ?? EdgeInsets.zero).top;
-    _listItems.add(new SizedBox(height: _kFlexibleSpaceMaxHeight + statusBarHeight));
-
     final ThemeData themeData = Theme.of(context);
     final TextStyle headerStyle = themeData.textTheme.body2.copyWith(color: themeData.accentColor);
     String category;
@@ -134,6 +128,7 @@ class GalleryHomeState extends State<GalleryHome> {
 
   @override
   Widget build(BuildContext context) {
+    final double statusBarHeight = MediaQuery.of(context).padding.top;
     return new Scaffold(
       key: _homeKey,
       scrollableKey: _scrollableKey,
@@ -159,8 +154,12 @@ class GalleryHomeState extends State<GalleryHome> {
         )
       ),
       appBarBehavior: AppBarBehavior.under,
+      // The block's padding just exists to occupy the space behind the flexible app bar.
+      // As the block's padded region is scrolled upwards, the app bar's height will
+      // shrink keep it above the block content's and over the padded region.
       body: new Block(
        scrollableKey: _scrollableKey,
+       padding: new EdgeInsets.only(top: _kFlexibleSpaceMaxHeight + statusBarHeight),
        children: _listItems
       )
     );
