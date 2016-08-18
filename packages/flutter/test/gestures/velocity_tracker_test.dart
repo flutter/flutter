@@ -54,6 +54,8 @@ void main() {
     expect(velocity1, equals(new Velocity(pixelsPerSecond: new Offset(7.0, 0.0))));
     expect(velocity1, isNot(equals(velocity2)));
     expect(velocity2 - velocity1, equals(new Velocity(pixelsPerSecond: new Offset(5.0, 0.0))));
+    expect((-velocity1).pixelsPerSecond, new Offset(-7.0, 0.0));
+    expect(velocity1 + velocity2, equals(new Velocity(pixelsPerSecond: new Offset(19.0, 0.0))));
     expect(velocity1.hashCode, isNot(equals(velocity2.hashCode)));
     expect(velocity1, hasOneLineDescription);
   });

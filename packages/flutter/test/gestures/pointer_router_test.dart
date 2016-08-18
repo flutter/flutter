@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 
 void main() {
@@ -116,5 +117,36 @@ void main() {
       'global 1',
       'global 2',
     ]));
+  });
+
+  test('Exceptions do not stop pointer routing', () {
+    List<String> log = <String>[];
+    PointerRouter router = new PointerRouter();
+    router.addRoute(2, (PointerEvent event) {
+      log.add('per-pointer 1');
+    });
+    router.addRoute(2, (PointerEvent event) {
+      log.add('per-pointer 2');
+      throw "Having a bad day!";
+    });
+    router.addRoute(2, (PointerEvent event) {
+      log.add('per-pointer 3');
+    });
+
+    FlutterExceptionHandler previousErrorHandler = FlutterError.onError;
+    FlutterError.onError = (FlutterErrorDetails details) {
+      log.add('error report');
+    };
+
+    TestPointer pointer2 = new TestPointer(2);
+    router.route(pointer2.down(Point.origin));
+    expect(log, equals(<String>[
+      'per-pointer 1',
+      'per-pointer 2',
+      'error report',
+      'per-pointer 3',
+    ]));
+
+    FlutterError.onError = previousErrorHandler;
   });
 }
