@@ -99,20 +99,17 @@ class GalleryHome extends StatefulWidget {
 class GalleryHomeState extends State<GalleryHome> {
   static final Key _homeKey = new ValueKey<String>("Gallery Home");
   static final GlobalKey<ScrollableState> _scrollableKey = new GlobalKey<ScrollableState>();
-  final List<Widget> _listItems = <Widget>[];
 
-  @override
-  void initState() {
-    super.initState();
-
+  List<Widget> _galleryListItems() {
+    final List<Widget> listItems = <Widget>[];
     final ThemeData themeData = Theme.of(context);
     final TextStyle headerStyle = themeData.textTheme.body2.copyWith(color: themeData.accentColor);
     String category;
     for (GalleryItem galleryItem in kAllGalleryItems) {
       if (category != galleryItem.category) {
         if (category != null)
-          _listItems.add(new Divider());
-        _listItems.add(
+          listItems.add(new Divider());
+        listItems.add(
           new Container(
             height: 48.0,
             padding: const EdgeInsets.only(left: 16.0),
@@ -122,8 +119,9 @@ class GalleryHomeState extends State<GalleryHome> {
         );
         category = galleryItem.category;
       }
-      _listItems.add(galleryItem);
+      listItems.add(galleryItem);
     }
+    return listItems;
   }
 
   @override
@@ -160,7 +158,7 @@ class GalleryHomeState extends State<GalleryHome> {
       body: new Block(
        scrollableKey: _scrollableKey,
        padding: new EdgeInsets.only(top: _kFlexibleSpaceMaxHeight + statusBarHeight),
-       children: _listItems
+       children: _galleryListItems()
       )
     );
   }
