@@ -43,24 +43,35 @@ void Animator::Start() {
 void Animator::BeginFrame(int64_t time_stamp) {
   pending_frame_semaphore_.Signal();
 
-  LayerTreePipeline::Producer producer = [this]() {
-    renderable_tree_.reset();
-    ftl::Stopwatch stopwatch;
-    stopwatch.Start();
-    engine_->BeginFrame(ftl::TimePoint::Now());
-    if (renderable_tree_) {
-      renderable_tree_->set_construction_time(stopwatch.Elapsed());
-    }
-    return std::move(renderable_tree_);
-  };
+  if (!producer_continuation_) {
+    // We may already have a valid pipeline continuation in case a previous
+    // begin frame did not result in an Animation::Render. Simply reuse that
+    // instead of asking the pipeline for a fresh continuation.
+    producer_continuation_ = layer_tree_pipeline_->Produce();
 
-  if (!layer_tree_pipeline_->Produce(producer)) {
-    TRACE_EVENT_INSTANT0("flutter", "ConsumerSlowDefer",
-                         TRACE_EVENT_SCOPE_PROCESS);
-    RequestFrame();
-    return;
+    if (!producer_continuation_) {
+      // If we still don't have valid continuation, the pipeline is currently
+      // full because the consumer is being too slow. Try again at the next
+      // frame interval.
+      TRACE_EVENT_INSTANT0("flutter", "ConsumerSlowDefer",
+                           TRACE_EVENT_SCOPE_PROCESS);
+      RequestFrame();
+      return;
+    }
   }
 
+  // We have acquired a valid continuation from the pipeline and are ready
+  // to service potential frame.
+  DCHECK(producer_continuation_);
+
+  engine_->BeginFrame(ftl::TimePoint::Now());
+}
+
+void Animator::Render(std::unique_ptr<flow::LayerTree> layer_tree) {
+  // Commit the pending continuation.
+  producer_continuation_.Complete(std::move(layer_tree));
+
+  // Notify the rasterizer that the pipeline has items it may consume.
   auto weak_rasterizer = rasterizer_->GetWeakRasterizerPtr();
   auto pipeline = layer_tree_pipeline_;
 
@@ -70,10 +81,6 @@ void Animator::BeginFrame(int64_t time_stamp) {
     }
     weak_rasterizer->Draw(pipeline);
   });
-}
-
-void Animator::Render(std::unique_ptr<flow::LayerTree> layer_tree) {
-  renderable_tree_ = std::move(layer_tree);
 }
 
 void Animator::RequestFrame() {

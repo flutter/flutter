@@ -30,39 +30,60 @@ class Pipeline : public ftl::RefCountedThreadSafe<Pipeline<R>> {
   using Resource = R;
   using ResourcePtr = std::unique_ptr<Resource>;
 
+  /// Denotes a spot in the pipeline reserved for the producer to finish
+  /// preparing a completed pipeline resource.
+  class ProducerContinuation {
+   public:
+    ProducerContinuation() = default;
+
+    ProducerContinuation(ProducerContinuation&& other)
+        : continuation_(other.continuation_) {
+      other.continuation_ = nullptr;
+    }
+
+    ProducerContinuation& operator=(ProducerContinuation&& other) {
+      std::swap(continuation_, other.continuation_);
+      return *this;
+    }
+
+    ~ProducerContinuation() {
+      if (continuation_) {
+        continuation_(nullptr);
+      }
+    }
+
+    void Complete(ResourcePtr resource) {
+      if (continuation_) {
+        continuation_(std::move(resource));
+        continuation_ = nullptr;
+      }
+    }
+
+    operator bool() const { return continuation_ != nullptr; }
+
+   private:
+    friend class Pipeline;
+
+    std::function<void(ResourcePtr)> continuation_;
+
+    ProducerContinuation(std::function<void(ResourcePtr)> continuation)
+        : continuation_(continuation) {}
+
+    FTL_DISALLOW_COPY_AND_ASSIGN(ProducerContinuation);
+  };
+
   explicit Pipeline(uint32_t depth) : empty_(depth), available_(0) {}
 
-  ~Pipeline() {}
+  ~Pipeline() = default;
 
   bool IsValid() const { return empty_.IsValid() && available_.IsValid(); }
 
-  using Producer = std::function<ResourcePtr(void)>;
-
-  FTL_WARN_UNUSED_RESULT
-  bool Produce(Producer producer) {
-    if (producer == nullptr) {
-      return false;
-    }
-
+  ProducerContinuation Produce() {
     if (!empty_.TryWait()) {
-      return false;
+      return {};
     }
 
-    ResourcePtr resource;
-
-    {
-      TRACE_EVENT0("flutter", "PipelineProduce");
-      resource = producer();
-    }
-
-    {
-      ftl::MutexLocker lock(&queue_mutex_);
-      queue_.emplace(std::move(resource));
-    }
-
-    available_.Signal();
-
-    return true;
+    return {std::bind(&Pipeline::ProducerCommit, this, std::placeholders::_1)};
   }
 
   using Consumer = std::function<void(ResourcePtr)>;
@@ -103,6 +124,16 @@ class Pipeline : public ftl::RefCountedThreadSafe<Pipeline<R>> {
   Semaphore available_;
   ftl::Mutex queue_mutex_;
   std::queue<ResourcePtr> queue_;
+
+  void ProducerCommit(ResourcePtr resource) {
+    {
+      ftl::MutexLocker lock(&queue_mutex_);
+      queue_.emplace(std::move(resource));
+    }
+
+    // Ensure the queue mutex is not held as that would be a pessimization.
+    available_.Signal();
+  }
 
   FTL_DISALLOW_COPY_AND_ASSIGN(Pipeline);
 };

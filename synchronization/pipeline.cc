@@ -3,9 +3,3 @@
 // found in the LICENSE file.
 
 #include "flutter/synchronization/pipeline.h"
-
-namespace flutter {
-
-//
-
-}  // namespace flutter

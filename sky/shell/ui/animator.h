@@ -47,7 +47,7 @@ class Animator {
   vsync::VSyncProviderPtr fallback_vsync_provider_;
   ftl::RefPtr<LayerTreePipeline> layer_tree_pipeline_;
   flutter::Semaphore pending_frame_semaphore_;
-  std::unique_ptr<flow::LayerTree> renderable_tree_;
+  LayerTreePipeline::ProducerContinuation producer_continuation_;
   bool paused_;
 
   base::WeakPtrFactory<Animator> weak_factory_;
