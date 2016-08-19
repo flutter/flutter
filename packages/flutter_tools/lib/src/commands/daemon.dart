@@ -565,19 +565,18 @@ class NotifyingLogger extends Logger {
   }
 
   @override
-  void printStatus(String message, { bool emphasis: false, bool newline: true }) {
+  void printRaw(String message, { bool emphasis: false, bool newline: true }) {
     _messageController.add(new LogMessage('status', message));
+  }
+
+  @override
+  void printStatus(String message, { bool emphasis: false, bool newline: true }) {
+    printRaw(message, emphasis: emphasis, newline: newline);
   }
 
   @override
   void printTrace(String message) {
     // This is a lot of traffic to send over the wire.
-  }
-
-  @override
-  Status startProgress(String message) {
-    printStatus(message);
-    return new Status();
   }
 }
 
@@ -635,24 +634,44 @@ class _AppRunLogger extends Logger {
   }
 
   @override
-  void printStatus(String message, { bool emphasis: false, bool newline: true }) {
+  void printRaw(String message, { bool emphasis: false, bool newline: true }) {
     _sendLogEvent(<String, dynamic>{ 'log': message });
+  }
+
+  @override
+  void printStatus(String message, { bool emphasis: false, bool newline: true }) {
+    printRaw(message, emphasis: emphasis, newline: newline);
   }
 
   @override
   void printTrace(String message) { }
 
+  int _currentProgressId;
+
+  @override
+  Status newProgress(String message) {
+    return new NullStatus(this);
+  }
+
   @override
   Status startProgress(String message) {
-    int id = _nextProgressId++;
-
+    _currentProgressId = _nextProgressId++;
     _sendLogEvent(<String, dynamic>{
       'log': message,
       'progress': true,
-      'id': id.toString()
+      'id': _currentProgressId.toString()
     });
+    return super.startProgress(message);
+  }
 
-    return new _AppLoggerStatus(this, id);
+  @override
+  void stopProgress() {
+    super.stopProgress();
+    _sendLogEvent(<String, dynamic>{
+      'progress': true,
+      'id': _currentProgressId.toString(),
+      'finished': true
+    });
   }
 
   void close() {
@@ -664,31 +683,6 @@ class _AppRunLogger extends Logger {
       printStatus('event sent after app closed: $event');
     else
       domain._sendAppEvent(app, 'log', event);
-  }
-}
-
-class _AppLoggerStatus implements Status {
-  _AppLoggerStatus(this.logger, this.id);
-
-  final _AppRunLogger logger;
-  final int id;
-
-  @override
-  void stop({ bool showElapsedTime: false }) {
-    _sendFinished();
-  }
-
-  @override
-  void cancel() {
-    _sendFinished();
-  }
-
-  void _sendFinished() {
-    logger._sendLogEvent(<String, dynamic>{
-      'progress': true,
-      'id': id.toString(),
-      'finished': true
-    });
   }
 }
 

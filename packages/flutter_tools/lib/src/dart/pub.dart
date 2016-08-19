@@ -51,7 +51,7 @@ Future<int> pubGet({
       <String>[sdkBinaryName('pub'), '--verbosity=warning', command, '--no-package-symlinks', '--no-precompile'],
       workingDirectory: directory
     );
-    status.stop(showElapsedTime: true);
+    status.stop();
     if (code != 0)
       return code;
   }

@@ -62,7 +62,7 @@ class BuildAotCommand extends BuildSubCommand {
       outputPath: argResults['output-dir'],
       interpreter: argResults['interpreter']
     );
-    status.stop(showElapsedTime: true);
+    status.stop();
 
     if (outputPath == null)
       return 1;

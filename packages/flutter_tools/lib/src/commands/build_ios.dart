@@ -62,7 +62,7 @@ class BuildIOSCommand extends BuildSubCommand {
       buildForDevice: !forSimulator,
       codesign: shouldCodesign
     );
-    status.stop(showElapsedTime: true);
+    status.stop();
 
     if (!result.success) {
       printError('Encountered error while building for $logTarget.');

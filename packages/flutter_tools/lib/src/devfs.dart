@@ -297,7 +297,7 @@ class DevFS {
     await _scanDirectory(directory,
                          recursive: true,
                          fileFilter: fileFilter);
-    status.stop(showElapsedTime: true);
+    status.stop();
 
     status = logger.startProgress('Scanning package files...');
     String packagesFilePath = path.join(rootDirectory.path, kPackagesFileName);
@@ -330,7 +330,7 @@ class DevFS {
         }
       }
     }
-    status.stop(showElapsedTime: true);
+    status.stop();
     if (bundle != null) {
       status = logger.startProgress('Scanning asset files...');
       // Synchronize asset bundle.
@@ -340,7 +340,7 @@ class DevFS {
         final String devicePath = path.join('build/flx', entry.archivePath);
         _scanBundleEntry(devicePath, entry, bundleDirty);
       }
-      status.stop(showElapsedTime: true);
+      status.stop();
     }
     // Handle deletions.
     status = logger.startProgress('Scanning for deleted files...');
@@ -354,7 +354,7 @@ class DevFS {
     for (int i = 0; i < toRemove.length; i++) {
       _entries.remove(toRemove[i]);
     }
-    status.stop(showElapsedTime: true);
+    status.stop();
 
     if (_deletedEntries.length > 0) {
       status = logger.startProgress('Removing deleted files...');
@@ -367,7 +367,7 @@ class DevFS {
       await Future.wait(_pendingOperations);
       _pendingOperations.clear();
       _deletedEntries.clear();
-      status.stop(showElapsedTime: true);
+      status.stop();
     } else {
       printStatus("No files to remove.");
     }
@@ -401,7 +401,7 @@ class DevFS {
         _pendingOperations.clear();
       }
       _dirtyEntries.clear();
-      status.stop(showElapsedTime: true);
+      status.stop();
     } else {
       printStatus("No files to update.");
     }

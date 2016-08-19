@@ -15,6 +15,30 @@ import 'device.dart';
 import 'globals.dart';
 import 'vmservice.dart';
 import 'resident_runner.dart';
+import 'cli/command.dart';
+
+class RestartCommand extends RunnerCommand {
+  RestartCommand(ResidentRunner runner) : super(runner, 'restart', null);
+
+  @override
+  Future<Null> run(List<String> args) async {
+    if (args.length != 0) {
+      logger.printStatus("'$name' expects no arguments");
+      return;
+    }
+    RunAndStayResident rrunner = runner;
+    await rrunner.restart();
+  }
+
+  @override
+  String helpShort = 'Restart the flutter application';
+
+  @override
+  String helpLong =
+      'Restart the current flutter app.\n'
+      '\n'
+      'Syntax: restart\n';
+}
 
 class RunAndStayResident extends ResidentRunner {
   RunAndStayResident(
@@ -80,7 +104,7 @@ class RunAndStayResident extends ResidentRunner {
         observatory: vmService
       );
 
-      status.stop(showElapsedTime: true);
+      status.stop();
 
       if (restartResult && extensionAddedEvent != null) {
         // TODO(devoncarew): We should restore the route here.
@@ -223,14 +247,24 @@ class RunAndStayResident extends ResidentRunner {
   }
 
   @override
-  Future<Null> handleTerminalCommand(String code) async {
-    String lower = code.toLowerCase();
-    if (lower == 'r' || code == AnsiTerminal.KEY_F5) {
-      if (device.supportsRestart) {
-        // F5, restart
-        await restart();
-      }
+  List<Command> buildCommandList() {
+    List<Command> cmds = <Command>[];
+    cmds.add(new HelpCommand(this));
+    cmds.add(new PrintCommand(this));
+    cmds.add(new QuitCommand(this));
+    if (device.supportsRestart) {
+      cmds.add(new RestartCommand(this)..alias = 'r');
     }
+    return cmds;
+  }
+
+  @override
+  void addHotKeys(RootCommand root) {
+    root.addHotKey('[F1]', terminal.keyF1, 'help');
+    if (device.supportsRestart) {
+      root.addHotKey('[F5]', terminal.keyF5, 'restart');
+    }
+    root.addHotKey('[F10]', terminal.keyF10, 'quit');
   }
 
   @override
@@ -245,10 +279,10 @@ class RunAndStayResident extends ResidentRunner {
   }
 
   @override
-  void printHelp() {
+  void printHelpSummary() {
     String restartText = device.supportsRestart ? ', "r" or F5 to restart the app,' : '';
     printStatus('Type "h" or F1 for help$restartText and "q", F10, or ctrl-c to quit.');
-    printStatus('Type "w" to print the widget hierarchy of the app, and "t" for the render tree.');
+    printStatus('Type "p w" to print the widget hierarchy of the app, and "p t" for the render tree.');
   }
 }
 

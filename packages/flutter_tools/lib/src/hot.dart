@@ -23,6 +23,53 @@ import 'devfs.dart';
 import 'vmservice.dart';
 import 'resident_runner.dart';
 import 'toolchain.dart';
+import 'cli/command.dart';
+
+class ReloadCommand extends RunnerCommand {
+  ReloadCommand(ResidentRunner runner) : super(runner, 'reload', null);
+
+  @override
+  Future<Null> run(List<String> args) async {
+    if (args.length != 0) {
+      logger.printStatus("'$name' expects no arguments");
+      return;
+    }
+    HotRunner hrunner = runner;
+    await hrunner.reloadSources();
+  }
+
+  @override
+  String helpShort = 'Reload the source for the flutter application';
+
+  @override
+  String helpLong =
+      'Reload the source for the flutter app.\n'
+      '\n'
+      'Syntax: reload\n';
+}
+
+class RestartCommand extends RunnerCommand {
+  RestartCommand(ResidentRunner runner) : super(runner, 'restart', null);
+
+  @override
+  Future<Null> run(List<String> args) async {
+    if (args.length != 0) {
+      logger.printStatus("'$name' expects no arguments");
+      return;
+    }
+    HotRunner hrunner = runner;
+    await hrunner.restartFromSources();
+  }
+
+  @override
+  String helpShort = 'Restart the flutter application';
+
+  @override
+  String helpLong =
+      'Restart the current flutter app.\n'
+      '\n'
+      'Syntax: restart\n';
+}
 
 String getDevFSLoaderScript() {
   return path.absolute(path.join(Cache.flutterRoot,
@@ -274,30 +321,34 @@ class HotRunner extends ResidentRunner {
 
     printStatus('Application running.');
 
-    setupTerminal();
-
     registerSignalHandlers();
 
     printStatus('Finishing file synchronization...');
     // Finish the file sync now.
     await _updateDevFS();
 
+    setupTerminal();
+
     return waitForAppToFinish();
   }
 
   @override
-  Future<Null> handleTerminalCommand(String code) async {
-    final String lower = code.toLowerCase();
-    if ((lower == 'r') || (code == AnsiTerminal.KEY_F5)) {
-      // F5, restart
-      if ((code == 'r') || (code == AnsiTerminal.KEY_F5)) {
-        // lower-case 'r'
-        await _reloadSources();
-      } else {
-        // upper-case 'R'.
-        await _restartFromSources();
-      }
-    }
+  List<Command> buildCommandList() {
+    List<Command> cmds = <Command>[];
+    cmds.add(new HelpCommand(this));
+    cmds.add(new PrintCommand(this));
+    cmds.add(new QuitCommand(this));
+    cmds.add(new ReloadCommand(this)..alias = 'r');
+    cmds.add(new RestartCommand(this)..alias = 'R');
+    return cmds;
+  }
+
+  @override
+  void addHotKeys(RootCommand root) {
+    root.addHotKey('[F1]', terminal.keyF1, 'help');
+    root.addHotKey('[F5]', terminal.keyF5, 'reload');
+    root.addHotKey('[F6]', terminal.keyF6, 'restart');
+    root.addHotKey('[F10]', terminal.keyF10, 'quit');
   }
 
   void _loaderShowMessage(String message, { int progress, int max }) {
@@ -326,14 +377,15 @@ class HotRunner extends ResidentRunner {
     if (rebuildBundle) {
       Status bundleStatus = logger.startProgress('Updating assets...');
       await bundle.build();
-      bundleStatus.stop(showElapsedTime: true);
+      bundleStatus.stop();
     }
-    Status devFSStatus = logger.startProgress('Syncing files to device...');
+    // TODO(turnidge): Make this indicate Status if we decide to
+    // implement nested Status objects.
+    logger.printStatus('Syncing files to device...');
     await _devFS.update(progressReporter: progressReporter,
                         bundle: bundle,
                         bundleDirty: rebuildBundle,
                         fileFilter: _startupDependencies);
-    devFSStatus.stop(showElapsedTime: true);
     // Clear the minimal set after the first sync.
     _startupDependencies = null;
     if (progressReporter != null)
@@ -386,7 +438,7 @@ class HotRunner extends ResidentRunner {
                         deviceAssetsDirectoryPath);
   }
 
-  Future<Null> _restartFromSources() async {
+  Future<Null> restartFromSources() async {
     FirstFrameTimer firstFrameTimer = new FirstFrameTimer(vmService);
     firstFrameTimer.start();
     await _updateDevFS();
@@ -395,7 +447,7 @@ class HotRunner extends ResidentRunner {
         logger.startProgress('Waiting for application to start...');
     // Wait for the first frame to be rendered.
     await firstFrameTimer.firstFrame();
-    restartStatus.stop(showElapsedTime: true);
+    restartStatus.stop();
     printStatus('Restart time: '
                 '${getElapsedAsMilliseconds(firstFrameTimer.elapsed)}');
     flutterUsage.sendEvent('hot', 'restart');
@@ -419,14 +471,14 @@ class HotRunner extends ResidentRunner {
   @override
   Future<bool> restart({ bool fullRestart: false }) async {
     if (fullRestart) {
-      await _restartFromSources();
+      await restartFromSources();
       return true;
     } else {
-      return _reloadSources();
+      return reloadSources();
     }
   }
 
-  Future<bool> _reloadSources() async {
+  Future<bool> reloadSources() async {
     if (currentView.uiIsolate == null)
       throw 'Application isolate not found';
     FirstFrameTimer firstFrameTimer = new FirstFrameTimer(vmService);
@@ -437,7 +489,7 @@ class HotRunner extends ResidentRunner {
     try {
       Map<String, dynamic> reloadReport =
           await currentView.uiIsolate.reloadSources();
-      reloadStatus.stop(showElapsedTime: true);
+      reloadStatus.stop();
       if (!_printReloadReport(reloadReport)) {
         // Reload failed.
         flutterUsage.sendEvent('hot', 'reload-reject');
@@ -446,7 +498,7 @@ class HotRunner extends ResidentRunner {
         flutterUsage.sendEvent('hot', 'reload');
       }
     } catch (errorMessage, st) {
-      reloadStatus.stop(showElapsedTime: true);
+      reloadStatus.stop();
       printError('Hot reload failed:\n$errorMessage\n$st');
       return false;
     }
@@ -456,11 +508,11 @@ class HotRunner extends ResidentRunner {
     try {
       await currentView.uiIsolate.flutterReassemble();
     } catch (_) {
-      reassembleStatus.stop(showElapsedTime: true);
+      reassembleStatus.stop();
       printError('Reassembling application failed.');
       return false;
     }
-    reassembleStatus.stop(showElapsedTime: true);
+    reassembleStatus.stop();
     await firstFrameTimer.firstFrame();
     printStatus('Hot reload time: '
                 '${getElapsedAsMilliseconds(firstFrameTimer.elapsed)}');
@@ -469,10 +521,13 @@ class HotRunner extends ResidentRunner {
   }
 
   @override
-  void printHelp() {
-    printStatus('Type "h" or F1 for this help message; type "q", F10, or ctrl-c to quit.', emphasis: true);
-    printStatus('Type "r" or F5 to perform a hot reload of the app, and "R" to restart the app.', emphasis: true);
-    printStatus('Type "w" to print the widget hierarchy of the app, and "t" for the render tree.', emphasis: true);
+  void printHelpSummary() {
+    printStatus('Type "h" or F1 for help; type "q", F10, or ctrl-c to quit.',
+                emphasis: true);
+    printStatus('Type "r" or F5 to perform a hot reload of the app, '
+                'and "R" to restart the app.', emphasis: true);
+    printStatus('Type "p w" to print the widget hierarchy of the app, '
+                'and "p t" for the render tree.', emphasis: true);
   }
 
   @override
