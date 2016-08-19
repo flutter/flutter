@@ -114,6 +114,10 @@ void RasterizerDirect::Draw(
 }
 
 void RasterizerDirect::DoDraw(std::unique_ptr<flow::LayerTree> layer_tree) {
+  if (layer_tree == nullptr) {
+    return;
+  }
+
   // There is no way for the compositor to know how long the layer tree
   // construction took. Fortunately, the layer tree does. Grab that time
   // for instrumentation.
