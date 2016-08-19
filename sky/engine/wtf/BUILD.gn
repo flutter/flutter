@@ -253,7 +253,9 @@ executable("unittests") {
     "//third_party/gtest",
   ]
 
-  if (!is_fuchsia) {
+  if (is_fuchsia) {
+    deps += [ "//mojo/system" ]
+  } else {
     # TODO(abarth): This is a lie - this test is not embedded in an environment
     # that injects the system thunks, so system calls don't actually work. This
     # just tricks the linker into thinking that an implementation of these calls
