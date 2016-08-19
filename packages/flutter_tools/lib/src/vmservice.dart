@@ -770,22 +770,25 @@ class Isolate extends ServiceObjectOwner {
 
   // Loader page extension methods.
 
-  Future<Map<String, dynamic>> flutterLoaderShowMessage(String message) {
-    return invokeRpcRaw('ext.flutter.loaderShowMessage', <String, dynamic> {
+  void flutterLoaderShowMessage(String message) {
+    // Invoke loaderShowMessage; ignore any returned errors.
+    invokeRpcRaw('ext.flutter.loaderShowMessage', <String, dynamic> {
       'value': message
-    });
+    }).catchError((dynamic error) => null);
   }
 
-  Future<Map<String, dynamic>> flutterLoaderSetProgress(double progress) {
-    return invokeRpcRaw('ext.flutter.loaderSetProgress', <String, dynamic>{
+  void flutterLoaderSetProgress(double progress) {
+    // Invoke loaderSetProgress; ignore any returned errors.
+    invokeRpcRaw('ext.flutter.loaderSetProgress', <String, dynamic>{
       'loaderSetProgress': progress
-    });
+    }).catchError((dynamic error) => null);
   }
 
-  Future<Map<String, dynamic>> flutterLoaderSetProgressMax(double max) {
-    return invokeRpcRaw('ext.flutter.loaderSetProgressMax', <String, dynamic>{
+  void flutterLoaderSetProgressMax(double max) {
+    // Invoke loaderSetProgressMax; ignore any returned errors.
+    invokeRpcRaw('ext.flutter.loaderSetProgressMax', <String, dynamic>{
       'loaderSetProgressMax': max
-    });
+    }).catchError((dynamic error) => null);
   }
 
   /// Causes the application to pick up any changed code.
