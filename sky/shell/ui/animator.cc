@@ -106,6 +106,10 @@ void Animator::RequestFrame() {
 
 void Animator::set_vsync_provider(vsync::VSyncProviderPtr vsync_provider) {
   vsync_provider_ = vsync_provider.Pass();
+
+  // We may be waiting on a VSync signal from the old VSync provider.
+  pending_frame_semaphore_.Signal();
+
   RequestFrame();
 }
 
