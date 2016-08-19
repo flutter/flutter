@@ -18,8 +18,11 @@ class _MaterialPageTransition extends AnimatedWidget {
     this.child
   }) : super(
     key: key,
-    animation: _kMaterialPageTransitionTween.animate(animation)
-  );
+    animation: _kMaterialPageTransitionTween.animate(new CurvedAnimation(
+      parent: animation, // The route's linear 0.0 - 1.0 animation.
+      curve: Curves.fastOutSlowIn
+    )
+  ));
 
   final Widget child;
 
@@ -62,14 +65,6 @@ class MaterialPageRoute<T> extends PageRoute<T> {
 
   @override
   bool canTransitionFrom(TransitionRoute<dynamic> nextRoute) => false;
-
-  @override
-  Animation<double> createAnimation() {
-    return new CurvedAnimation(
-      parent: super.createAnimation(),
-      curve: Curves.fastOutSlowIn
-    );
-  }
 
   @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> forwardAnimation) {
