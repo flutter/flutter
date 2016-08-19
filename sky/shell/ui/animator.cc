@@ -8,6 +8,7 @@
 #include "base/message_loop/message_loop.h"
 #include "base/trace_event/trace_event.h"
 #include "flutter/common/threads.h"
+#include "lib/ftl/time/stopwatch.h"
 
 namespace sky {
 namespace shell {
@@ -44,7 +45,12 @@ void Animator::BeginFrame(int64_t time_stamp) {
 
   LayerTreePipeline::Producer producer = [this]() {
     renderable_tree_.reset();
+    ftl::Stopwatch stopwatch;
+    stopwatch.Start();
     engine_->BeginFrame(ftl::TimePoint::Now());
+    if (renderable_tree_) {
+      renderable_tree_->set_construction_time(stopwatch.Elapsed());
+    }
     return std::move(renderable_tree_);
   };
 
