@@ -97,9 +97,6 @@ void Animator::RequestFrame() {
 
     TRACE_EVENT_INSTANT0("flutter", "RequestFrame", TRACE_EVENT_SCOPE_PROCESS);
 
-    DCHECK(weak->vsync_provider_)
-        << "A VSync provider must be present to schedule a frame.";
-
     weak->AwaitVSync(base::Bind(&Animator::BeginFrame, weak));
   });
 }
