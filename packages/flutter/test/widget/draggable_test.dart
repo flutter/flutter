@@ -835,7 +835,7 @@ void main() {
                 }
               ),
               new DragTarget<ExtendedDragTargetData>(
-                builder: (BuildContext context, List<ExtendedDragTargetData> data, List<ExtendedDragTargetData> rejects) {
+                builder: (BuildContext context, List<ExtendedDragTargetData> data, List<dynamic> rejects) {
                   return new IgnorePointer(
                     child: new Container(
                       height: 100.0,
