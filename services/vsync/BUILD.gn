@@ -4,8 +4,22 @@
 
 import("//mojo/public/tools/bindings/mojom.gni")
 
+source_set("vsync_lib_fallback") {
+  sources = [
+    "fallback/vsync_provider_fallback_impl.h",
+    "fallback/vsync_provider_fallback_impl.cc",
+  ]
+
+  deps = [
+    "//base:base",
+    "//mojo/public/cpp/application",
+    "//mojo/public/cpp/bindings:utility",
+    "//mojo/services/vsync/interfaces",
+  ]
+}
+
 group("vsync") {
-  deps = [ ":vsync_lib" ]
+  deps = [ ":vsync_lib", ":vsync_lib_fallback" ]
 }
 
 if (is_android) {
@@ -54,18 +68,7 @@ if (is_android) {
     ]
   }
 } else {
-  # Fallback VSync (avoid if at all possible)
-  source_set("vsync_lib") {
-    sources = [
-      "fallback/vsync_provider_fallback_impl.h",
-      "fallback/vsync_provider_fallback_impl.cc",
-    ]
-
-    deps = [
-      "//base:base",
-      "//mojo/public/cpp/application",
-      "//mojo/public/cpp/bindings:utility",
-      "//mojo/services/vsync/interfaces",
-    ]
+  group("vsync_lib") {
+    # Empty, will use fallbacks by default.
   }
 }

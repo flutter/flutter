@@ -46,9 +46,8 @@ source_set("common") {
   ]
 
   public_deps = [
-    ":generate_sky_embedder_diagnostic_server_resources_cc",
-    "//base:i18n",
     "//base",
+    "//base:i18n",
     "//build/config/sanitizers:deps",
     "//dart/runtime:libdart",
     "//flutter/assets",
@@ -57,16 +56,17 @@ source_set("common") {
     "//flutter/glue",
     "//flutter/lib/ui",
     "//flutter/runtime",
-    "//flutter/synchronization",
     "//flutter/services/editing:interfaces",
     "//flutter/services/engine:interfaces",
     "//flutter/services/platform",
     "//flutter/services/pointer:interfaces",
     "//flutter/services/semantics:interfaces",
+    "//flutter/services/vsync:vsync_lib_fallback",
     "//flutter/skia",
     "//flutter/sky/engine",
     "//flutter/sky/engine/core:core",
     "//flutter/sky/engine/wtf",
+    "//flutter/synchronization",
     "//lib/ftl",
     "//lib/tonic",
     "//mojo/common",
@@ -79,6 +79,7 @@ source_set("common") {
     "//mojo/services/gfx/composition/interfaces",
     "//mojo/services/navigation/interfaces",
     "//mojo/services/vsync/interfaces",
+    ":generate_sky_embedder_diagnostic_server_resources_cc",
   ]
 }
 

@@ -13,6 +13,7 @@
 #include "lib/ftl/memory/ref_ptr.h"
 #include "lib/ftl/time/time_point.h"
 #include "mojo/services/vsync/interfaces/vsync.mojom.h"
+#include "flutter/services/vsync/fallback/vsync_provider_fallback_impl.h"
 
 namespace sky {
 namespace shell {
@@ -38,9 +39,12 @@ class Animator {
 
   void BeginFrame(int64_t time_stamp);
 
+  void AwaitVSync(const vsync::VSyncProvider::AwaitVSyncCallback& callback);
+
   Rasterizer* rasterizer_;
   Engine* engine_;
   vsync::VSyncProviderPtr vsync_provider_;
+  vsync::VSyncProviderPtr fallback_vsync_provider_;
   ftl::RefPtr<LayerTreePipeline> layer_tree_pipeline_;
   flutter::Semaphore pending_frame_semaphore_;
   std::unique_ptr<flow::LayerTree> renderable_tree_;

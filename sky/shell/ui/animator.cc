@@ -18,7 +18,11 @@ Animator::Animator(Rasterizer* rasterizer, Engine* engine)
       layer_tree_pipeline_(ftl::MakeRefCounted<LayerTreePipeline>(3)),
       pending_frame_semaphore_(1),
       paused_(false),
-      weak_factory_(this) {}
+      weak_factory_(this) {
+  new services::vsync::VsyncProviderFallbackImpl(
+      mojo::InterfaceRequest<::vsync::VSyncProvider>(
+          mojo::GetProxy(&fallback_vsync_provider_)));
+}
 
 Animator::~Animator() = default;
 
@@ -96,13 +100,26 @@ void Animator::RequestFrame() {
     DCHECK(weak->vsync_provider_)
         << "A VSync provider must be present to schedule a frame.";
 
-    weak->vsync_provider_->AwaitVSync(base::Bind(&Animator::BeginFrame, weak));
+    weak->AwaitVSync(base::Bind(&Animator::BeginFrame, weak));
   });
 }
 
 void Animator::set_vsync_provider(vsync::VSyncProviderPtr vsync_provider) {
   vsync_provider_ = vsync_provider.Pass();
   RequestFrame();
+}
+
+void Animator::AwaitVSync(
+    const vsync::VSyncProvider::AwaitVSyncCallback& callback) {
+  // First, try the platform provided VSync provider.
+  if (vsync_provider_) {
+    vsync_provider_->AwaitVSync(callback);
+    return;
+  }
+
+  // Then, use the fallback provider if the platform cannot reliably supply
+  // VSync signals to us.
+  return fallback_vsync_provider_->AwaitVSync(callback);
 }
 
 }  // namespace shell
