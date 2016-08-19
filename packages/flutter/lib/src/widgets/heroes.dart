@@ -106,9 +106,9 @@ class Hero extends StatefulWidget {
         assert(() {
           if (result.containsKey(tag)) {
             new FlutterError(
-              'There are multiple heroes that share the same tag within the same subtree.\n'
+              'There are multiple heroes that share the same tag within a subtree.\n'
               'Within each subtree for which heroes are to be animated (typically a PageRoute subtree), '
-              'either each Hero must have a unique non-null tag.\n'
+              'each Hero must have a unique non-null tag.\n'
               'In this case, multiple heroes had the tag "$tag".'
             );
           }
