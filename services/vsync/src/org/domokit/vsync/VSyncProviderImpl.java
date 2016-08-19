@@ -6,6 +6,7 @@ package org.domokit.vsync;
 
 import android.view.Choreographer;
 
+import org.chromium.base.TraceEvent;
 import org.chromium.mojo.system.MessagePipeHandle;
 import org.chromium.mojo.system.MojoException;
 import org.chromium.mojom.vsync.VSyncProvider;
@@ -41,6 +42,7 @@ public class VSyncProviderImpl implements VSyncProvider, Choreographer.FrameCall
 
     @Override
     public void doFrame(long frameTimeNanos) {
+        TraceEvent.instant("PlatformVSync");
         long frameTimeMicros = frameTimeNanos / 1000;
         for (AwaitVSyncResponse callback : mCallbacks) {
             callback.call(frameTimeMicros);
