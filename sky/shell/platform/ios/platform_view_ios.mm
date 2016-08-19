@@ -7,6 +7,9 @@
 #include "base/mac/scoped_nsautorelease_pool.h"
 #include "base/trace_event/trace_event.h"
 #include "flutter/sky/engine/wtf/MakeUnique.h"
+#include "flutter/sky/shell/platform/mac/view_service_provider.h"
+#include "lib/ftl/synchronization/waitable_event.h"
+#include "mojo/public/cpp/application/connect.h"
 
 #import <OpenGLES/ES2/gl.h>
 #import <OpenGLES/ES2/glext.h>
@@ -271,11 +274,89 @@ class IOSGLContext {
 
 PlatformViewIOS::PlatformViewIOS(CAEAGLLayer* layer)
     : context_(WTF::MakeUnique<IOSGLContext>(surface_config_, layer)),
+      dynamic_service_loader_([[FlutterDynamicServiceLoader alloc] init]),
       weak_factory_(this) {}
 
 PlatformViewIOS::~PlatformViewIOS() = default;
 
-ftl::WeakPtr<sky::shell::PlatformView> PlatformViewIOS::GetWeakViewPtr() {
+SkyEnginePtr& PlatformViewIOS::engineProxy() {
+  return engine_;
+}
+
+flutter::platform::ApplicationMessagesPtr& PlatformViewIOS::AppMessageSender() {
+  return app_message_sender_;
+}
+
+sky::shell::ApplicationMessagesImpl& PlatformViewIOS::AppMessageReceiver() {
+  return app_message_receiver_;
+}
+
+void PlatformViewIOS::ToggleAccessibility(UIView* view, bool enable) {
+  if (enable) {
+    if (!accessibility_bridge_ && dart_services_.get() != nullptr) {
+      accessibility_bridge_.reset(
+          new sky::shell::AccessibilityBridge(view, dart_services_.get()));
+    }
+  } else {
+    accessibility_bridge_ = nullptr;
+  }
+}
+
+static void DynamicServiceResolve(void* baton,
+                                  const mojo::String& service_name,
+                                  mojo::ScopedMessagePipeHandle handle) {
+  base::mac::ScopedNSAutoreleasePool pool;
+  auto loader = reinterpret_cast<FlutterDynamicServiceLoader*>(baton);
+  [loader resolveService:@(service_name.data()) handle:handle.Pass()];
+}
+
+void PlatformViewIOS::ConnectToEngineAndSetupServices() {
+  ConnectToEngine(mojo::GetProxy(&engine_));
+
+  mojo::ServiceProviderPtr service_provider;
+
+  auto service_provider_proxy = mojo::GetProxy(&service_provider);
+
+  auto service_resolution_callback = base::Bind(
+      &DynamicServiceResolve,
+      base::Unretained(reinterpret_cast<void*>(dynamic_service_loader_.get())));
+
+  new PlatformServiceProvider(service_provider_proxy.Pass(),
+                              service_resolution_callback);
+
+  ftl::WeakPtr<ApplicationMessagesImpl> appplication_messages_impl =
+      app_message_receiver_.GetWeakPtr();
+
+  mojo::ServiceProviderPtr viewServiceProvider;
+
+  new ViewServiceProvider(
+      [appplication_messages_impl](
+          mojo::InterfaceRequest<flutter::platform::ApplicationMessages>
+              request) {
+        if (appplication_messages_impl)
+          appplication_messages_impl->AddBinding(std::move(request));
+      },
+      mojo::GetProxy(&viewServiceProvider));
+
+  sky::ServicesDataPtr services = sky::ServicesData::New();
+  services->incoming_services = service_provider.Pass();
+  services->outgoing_services = mojo::GetProxy(&dart_services_);
+  services->view_services = viewServiceProvider.Pass();
+  engine_->SetServices(services.Pass());
+
+  mojo::ConnectToService(dart_services_.get(),
+                         mojo::GetProxy(&app_message_sender_));
+}
+
+void PlatformViewIOS::SetupAndLoadFromSource(
+    const std::string& main,
+    const std::string& packages,
+    const std::string& assets_directory) {
+  ConnectToEngineAndSetupServices();
+  engine_->RunFromFile(main, packages, assets_directory);
+}
+
+ftl::WeakPtr<PlatformView> PlatformViewIOS::GetWeakViewPtr() {
   return weak_factory_.GetWeakPtr();
 }
 
@@ -299,9 +380,15 @@ bool PlatformViewIOS::SwapBuffers() {
 void PlatformViewIOS::RunFromSource(const std::string& main,
                                     const std::string& packages,
                                     const std::string& assets_directory) {
-  // TODO(johnmccutchan): Call to the iOS UI thread so that services work
-  // properly like we do in PlatformViewAndroid.
-  engine().RunFromSource(main, packages, assets_directory);
+  auto latch = new ftl::ManualResetWaitableEvent();
+
+  dispatch_async(dispatch_get_main_queue(), ^{
+    SetupAndLoadFromSource(main, packages, assets_directory);
+    latch->Signal();
+  });
+
+  latch->Wait();
+  delete latch;
 }
 
 }  // namespace shell

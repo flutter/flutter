@@ -4,32 +4,15 @@
 
 #import "flutter/sky/shell/platform/ios/framework/Headers/FlutterViewController.h"
 
-#include "base/bind.h"
 #include "base/mac/scoped_block.h"
-#include "base/mac/scoped_nsautorelease_pool.h"
 #include "base/mac/scoped_nsobject.h"
 #include "base/strings/sys_string_conversions.h"
-#include "base/trace_event/trace_event.h"
-#include "dart/runtime/include/dart_api.h"
-#include "mojo/public/cpp/application/connect.h"
-#include "mojo/public/interfaces/application/service_provider.mojom.h"
-#include "flutter/sky/engine/wtf/MakeUnique.h"
-#include "flutter/services/engine/sky_engine.mojom.h"
-#include "flutter/services/platform/app_messages.mojom.h"
 #include "flutter/services/platform/ios/system_chrome_impl.h"
-#include "flutter/services/semantics/semantics.mojom.h"
-#include "flutter/sky/shell/platform/ios/framework/Source/accessibility_bridge.h"
-#include "flutter/sky/shell/platform/ios/framework/Source/application_messages_impl.h"
+#include "flutter/sky/engine/wtf/MakeUnique.h"
 #include "flutter/sky/shell/platform/ios/framework/Source/flutter_touch_mapper.h"
 #include "flutter/sky/shell/platform/ios/framework/Source/FlutterDartProject_Internal.h"
-#include "flutter/sky/shell/platform/ios/framework/Source/FlutterDynamicServiceLoader.h"
-#include "flutter/sky/shell/platform/ios/framework/Source/FlutterView.h"
 #include "flutter/sky/shell/platform/ios/platform_view_ios.h"
 #include "flutter/sky/shell/platform/mac/platform_mac.h"
-#include "flutter/sky/shell/platform/mac/platform_service_provider.h"
-#include "flutter/sky/shell/platform/mac/view_service_provider.h"
-#include "flutter/sky/shell/platform_view.h"
-#include "flutter/sky/shell/shell.h"
 
 @interface FlutterViewController ()<UIAlertViewDelegate>
 @end
@@ -44,15 +27,10 @@ void FlutterInit(int argc, const char* argv[]) {
   base::scoped_nsprotocol<FlutterDartProject*> _dartProject;
   UIInterfaceOrientationMask _orientationPreferences;
   UIStatusBarStyle _statusBarStyle;
-  base::scoped_nsprotocol<FlutterDynamicServiceLoader*> _dynamicServiceLoader;
   sky::ViewportMetricsPtr _viewportMetrics;
   sky::shell::TouchMapper _touchMapper;
   std::unique_ptr<sky::shell::PlatformViewIOS> _platformView;
-  sky::SkyEnginePtr _engine;
-  mojo::ServiceProviderPtr _dartServices;
-  std::unique_ptr<sky::shell::AccessibilityBridge> _accessibilityBridge;
-  flutter::platform::ApplicationMessagesPtr _appMessageSender;
-  sky::shell::ApplicationMessagesImpl _appMessageReceiver;
+
   BOOL _initialized;
 }
 
@@ -94,7 +72,6 @@ void FlutterInit(int argc, const char* argv[]) {
 
   _orientationPreferences = UIInterfaceOrientationMaskAll;
   _statusBarStyle = UIStatusBarStyleDefault;
-  _dynamicServiceLoader.reset([[FlutterDynamicServiceLoader alloc] init]);
   _viewportMetrics = sky::ViewportMetrics::New();
   _platformView = WTF::MakeUnique<sky::shell::PlatformViewIOS>(
       reinterpret_cast<CAEAGLLayer*>(self.view.layer));
@@ -167,15 +144,13 @@ void FlutterInit(int argc, const char* argv[]) {
 - (void)connectToEngineAndLoad {
   TRACE_EVENT0("flutter", "connectToEngineAndLoad");
 
-  _platformView->ConnectToEngine(mojo::GetProxy(&_engine));
-
-  [self setupPlatformServiceProvider];
+  _platformView->ConnectToEngineAndSetupServices();
 
   // We ask the VM to check what it supports.
   const enum VMType type =
       Dart_IsPrecompiledRuntime() ? VMTypePrecompilation : VMTypeInterpreter;
 
-  [_dartProject launchInEngine:_engine
+  [_dartProject launchInEngine:_platformView->engineProxy()
                 embedderVMType:type
                         result:^(BOOL success, NSString* message) {
                           if (!success) {
@@ -189,49 +164,6 @@ void FlutterInit(int argc, const char* argv[]) {
                             [alert release];
                           }
                         }];
-
-  DCHECK(_dartServices);
-  mojo::ConnectToService(_dartServices.get(),
-                         mojo::GetProxy(&_appMessageSender));
-}
-
-static void DynamicServiceResolve(void* baton,
-                                  const mojo::String& service_name,
-                                  mojo::ScopedMessagePipeHandle handle) {
-  base::mac::ScopedNSAutoreleasePool pool;
-  auto loader = reinterpret_cast<FlutterDynamicServiceLoader*>(baton);
-  [loader resolveService:@(service_name.data()) handle:handle.Pass()];
-}
-
-- (void)setupPlatformServiceProvider {
-  mojo::ServiceProviderPtr serviceProvider;
-
-  auto serviceProviderProxy = mojo::GetProxy(&serviceProvider);
-  // TODO(eseidel): this unretained reference might not be safe since
-  // the engine could outlive this controller
-  auto serviceResolutionCallback = base::Bind(
-      &DynamicServiceResolve,
-      base::Unretained(reinterpret_cast<void*>(_dynamicServiceLoader.get())));
-
-  new sky::shell::PlatformServiceProvider(serviceProviderProxy.Pass(),
-                                          serviceResolutionCallback);
-
-  ftl::WeakPtr<sky::shell::ApplicationMessagesImpl> appplication_messages_impl
-      = _appMessageReceiver.GetWeakPtr();
-  mojo::ServiceProviderPtr viewServiceProvider;
-  new sky::shell::ViewServiceProvider([appplication_messages_impl](
-      mojo::InterfaceRequest<flutter::platform::ApplicationMessages> request) {
-        if (appplication_messages_impl)
-          appplication_messages_impl->AddBinding(std::move(request));
-      },
-      mojo::GetProxy(&viewServiceProvider));
-
-  DCHECK(!_dartServices.is_bound());
-  sky::ServicesDataPtr services = sky::ServicesData::New();
-  services->incoming_services = serviceProvider.Pass();
-  services->outgoing_services = mojo::GetProxy(&_dartServices);
-  services->view_services = viewServiceProvider.Pass();
-  _engine->SetServices(services.Pass());
 }
 
 #pragma mark - Loading the view
@@ -250,14 +182,16 @@ static void DynamicServiceResolve(void* baton,
 #pragma mark - Application lifecycle notifications
 
 - (void)applicationBecameActive:(NSNotification*)notification {
-  if (_engine) {
-    _engine->OnAppLifecycleStateChanged(sky::AppLifecycleState::RESUMED);
+  auto& engine = _platformView->engineProxy();
+  if (engine) {
+    engine->OnAppLifecycleStateChanged(sky::AppLifecycleState::RESUMED);
   }
 }
 
 - (void)applicationWillResignActive:(NSNotification*)notification {
-  if (_engine) {
-    _engine->OnAppLifecycleStateChanged(sky::AppLifecycleState::PAUSED);
+  auto& engine = _platformView->engineProxy();
+  if (engine) {
+    engine->OnAppLifecycleStateChanged(sky::AppLifecycleState::PAUSED);
   }
 }
 
@@ -348,7 +282,7 @@ static inline PointerTypeMapperPhase PointerTypePhaseFromUITouchPhase(
     pointer_packet->pointers.push_back(pointer_data.Pass());
   }
 
-  _engine->OnPointerPacket(pointer_packet.Pass());
+  _platformView->engineProxy()->OnPointerPacket(pointer_packet.Pass());
 }
 
 - (void)touchesBegan:(NSSet*)touches withEvent:(UIEvent*)event {
@@ -379,9 +313,9 @@ static inline PointerTypeMapperPhase PointerTypePhaseFromUITouchPhase(
   _viewportMetrics->physical_padding_top =
       [UIApplication sharedApplication].statusBarFrame.size.height * scale;
 
-  _engine->OnViewportMetricsChanged(_viewportMetrics.Clone());
+  _platformView->engineProxy()->OnViewportMetricsChanged(
+      _viewportMetrics.Clone());
 }
-
 
 #pragma mark - Keyboard events
 
@@ -391,12 +325,14 @@ static inline PointerTypeMapperPhase PointerTypePhaseFromUITouchPhase(
       [[info objectForKey:UIKeyboardFrameBeginUserInfoKey] CGRectValue]);
   CGFloat scale = [UIScreen mainScreen].scale;
   _viewportMetrics->physical_padding_bottom = bottom * scale;
-  _engine->OnViewportMetricsChanged(_viewportMetrics.Clone());
+  _platformView->engineProxy()->OnViewportMetricsChanged(
+      _viewportMetrics.Clone());
 }
 
 - (void)keyboardWillBeHidden:(NSNotification*)notification {
   _viewportMetrics->physical_padding_bottom = 0.0;
-  _engine->OnViewportMetricsChanged(_viewportMetrics.Clone());
+  _platformView->engineProxy()->OnViewportMetricsChanged(
+      _viewportMetrics.Clone());
 }
 
 #pragma mark - Orientation updates
@@ -441,14 +377,7 @@ static inline PointerTypeMapperPhase PointerTypePhaseFromUITouchPhase(
 #else
   bool enable = UIAccessibilityIsVoiceOverRunning();
 #endif
-  if (enable) {
-    if (!_accessibilityBridge && _dartServices.get() != nullptr) {
-      _accessibilityBridge.reset(
-          new sky::shell::AccessibilityBridge(self.view, _dartServices.get()));
-    }
-  } else {
-    _accessibilityBridge = nullptr;
-  }
+  _platformView->ToggleAccessibility(self.view, enable);
 }
 
 #pragma mark - Locale updates
@@ -457,7 +386,8 @@ static inline PointerTypeMapperPhase PointerTypePhaseFromUITouchPhase(
   NSLocale* currentLocale = [NSLocale currentLocale];
   NSString* languageCode = [currentLocale objectForKey:NSLocaleLanguageCode];
   NSString* countryCode = [currentLocale objectForKey:NSLocaleCountryCode];
-  _engine->OnLocaleChanged(languageCode.UTF8String, countryCode.UTF8String);
+  _platformView->engineProxy()->OnLocaleChanged(languageCode.UTF8String,
+                                                countryCode.UTF8String);
 }
 
 #pragma mark - Surface creation and teardown updates
@@ -523,8 +453,9 @@ static inline PointerTypeMapperPhase PointerTypePhaseFromUITouchPhase(
 - (void)sendString:(NSString*)message withMessageName:(NSString*)messageName {
   NSAssert(message, @"The message must not be null");
   NSAssert(messageName, @"The messageName must not be null");
-  _appMessageSender->SendString(messageName.UTF8String, message.UTF8String,
-                                [](const mojo::String& response) {});
+  _platformView->AppMessageSender()->SendString(
+      messageName.UTF8String, message.UTF8String,
+      [](const mojo::String& response) {});
 }
 
 - (void)sendString:(NSString*)message
@@ -535,7 +466,7 @@ static inline PointerTypeMapperPhase PointerTypePhaseFromUITouchPhase(
   NSAssert(callback, @"The callback must not be null");
   base::mac::ScopedBlock<void (^)(NSString*)> callback_ptr(
       callback, base::scoped_policy::RETAIN);
-  _appMessageSender->SendString(
+  _platformView->AppMessageSender()->SendString(
       messageName.UTF8String, message.UTF8String,
       [callback_ptr](const mojo::String& response) {
         callback_ptr.get()(base::SysUTF8ToNSString(response));
@@ -546,14 +477,16 @@ static inline PointerTypeMapperPhase PointerTypePhaseFromUITouchPhase(
   NSAssert(listener, @"The listener must not be null");
   NSString* messageName = listener.messageName;
   NSAssert(messageName, @"The messageName must not be null");
-  _appMessageReceiver.SetMessageListener(messageName.UTF8String, listener);
+  _platformView->AppMessageReceiver().SetMessageListener(messageName.UTF8String,
+                                                         listener);
 }
 
 - (void)removeMessageListener:(NSObject<FlutterMessageListener>*)listener {
   NSAssert(listener, @"The listener must not be null");
   NSString* messageName = listener.messageName;
   NSAssert(messageName, @"The messageName must not be null");
-  _appMessageReceiver.SetMessageListener(messageName.UTF8String, nil);
+  _platformView->AppMessageReceiver().SetMessageListener(messageName.UTF8String,
+                                                         nil);
 }
 
 - (void)addAsyncMessageListener:
@@ -561,7 +494,8 @@ static inline PointerTypeMapperPhase PointerTypePhaseFromUITouchPhase(
   NSAssert(listener, @"The listener must not be null");
   NSString* messageName = listener.messageName;
   NSAssert(messageName, @"The messageName must not be null");
-  _appMessageReceiver.SetAsyncMessageListener(messageName.UTF8String, listener);
+  _platformView->AppMessageReceiver().SetAsyncMessageListener(
+      messageName.UTF8String, listener);
 }
 
 - (void)removeAsyncMessageListener:
@@ -569,7 +503,8 @@ static inline PointerTypeMapperPhase PointerTypePhaseFromUITouchPhase(
   NSAssert(listener, @"The listener must not be null");
   NSString* messageName = listener.messageName;
   NSAssert(messageName, @"The messageName must not be null");
-  _appMessageReceiver.SetAsyncMessageListener(messageName.UTF8String, nil);
+  _platformView->AppMessageReceiver().SetAsyncMessageListener(
+      messageName.UTF8String, nil);
 }
 
 @end

@@ -3,25 +3,10 @@
 // found in the LICENSE file.
 
 #import "sky_window.h"
-#include "base/command_line.h"
+
 #include "base/time/time.h"
-#include "mojo/public/cpp/bindings/interface_request.h"
-#include "flutter/services/engine/input_event.mojom.h"
 #include "flutter/services/pointer/pointer.mojom.h"
-#include "flutter/sky/shell/platform/mac/platform_mac.h"
 #include "flutter/sky/shell/platform/mac/platform_view_mac.h"
-#include "flutter/sky/shell/platform/mac/platform_service_provider.h"
-#include "flutter/sky/shell/platform/mac/view_service_provider.h"
-#include "flutter/sky/shell/shell.h"
-#include "flutter/sky/shell/switches.h"
-#include "flutter/sky/shell/ui_delegate.h"
-
-static void IgnoreRequest(
-    mojo::InterfaceRequest<flutter::platform::ApplicationMessages>) {
-}
-
-static void DynamicServiceResolve(const mojo::String& service_name,
-                                  mojo::ScopedMessagePipeHandle handle) {}
 
 @interface SkyWindow ()<NSWindowDelegate>
 
@@ -53,7 +38,6 @@ static inline pointer::PointerType EventTypeFromNSEventPhase(
 }
 
 @implementation SkyWindow {
-  sky::SkyEnginePtr _sky_engine;
   std::unique_ptr<sky::shell::PlatformViewMac> _platform_view;
 }
 
@@ -80,44 +64,7 @@ static inline pointer::PointerType EventTypeFromNSEventPhase(
 // TODO(eseidel): This does not belong in sky_window!
 // Probably belongs in NSApplicationDelegate didFinishLaunching.
 - (void)setupAndLoadDart {
-  _platform_view->ConnectToEngine(mojo::GetProxy(&_sky_engine));
-
-  mojo::ServiceProviderPtr service_provider;
-  new sky::shell::PlatformServiceProvider(mojo::GetProxy(&service_provider),
-                                          base::Bind(DynamicServiceResolve));
-
-  mojo::ServiceProviderPtr view_service_provider;
-  new sky::shell::ViewServiceProvider(IgnoreRequest,
-                                      mojo::GetProxy(&view_service_provider));
-
-  sky::ServicesDataPtr services = sky::ServicesData::New();
-  services->incoming_services = service_provider.Pass();
-  services->view_services = view_service_provider.Pass();
-  _sky_engine->SetServices(services.Pass());
-
-  if (sky::shell::AttemptLaunchFromCommandLineSwitches(_sky_engine)) {
-    // This attempts launching from an FLX bundle that does not contain a
-    // dart snapshot.
-    return;
-  }
-
-  base::CommandLine& command_line = *base::CommandLine::ForCurrentProcess();
-
-  std::string bundle_path =
-      command_line.GetSwitchValueASCII(sky::shell::switches::kFLX);
-  if (!bundle_path.empty()) {
-    std::string script_uri = std::string("file://") + bundle_path;
-    _sky_engine->RunFromBundle(script_uri, bundle_path);
-    return;
-  }
-
-  auto args = command_line.GetArgs();
-  if (args.size() > 0) {
-    auto packages =
-        command_line.GetSwitchValueASCII(sky::shell::switches::kPackages);
-    _sky_engine->RunFromFile(args[0], packages, "");
-    return;
-  }
+  _platform_view->SetupAndLoadDart();
 }
 
 - (void)windowDidResize:(NSNotification*)notification {
@@ -132,7 +79,8 @@ static inline pointer::PointerType EventTypeFromNSEventPhase(
   metrics->physical_width = size.width;
   metrics->physical_height = size.height;
   metrics->device_pixel_ratio = 1.0;
-  _sky_engine->OnViewportMetricsChanged(metrics.Pass());
+
+  _platform_view->engineProxy()->OnViewportMetricsChanged(metrics.Pass());
 }
 
 - (void)setupSurfaceIfNecessary {
@@ -181,7 +129,7 @@ static inline pointer::PointerType EventTypeFromNSEventPhase(
 
   auto pointer_packet = pointer::PointerPacket::New();
   pointer_packet->pointers.push_back(pointer_data.Pass());
-  _sky_engine->OnPointerPacket(pointer_packet.Pass());
+  _platform_view->engineProxy()->OnPointerPacket(pointer_packet.Pass());
 }
 
 - (void)mouseDown:(NSEvent*)event {

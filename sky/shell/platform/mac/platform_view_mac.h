@@ -21,6 +21,10 @@ class PlatformViewMac : public PlatformView {
 
   ~PlatformViewMac() override;
 
+  void SetupAndLoadDart();
+
+  SkyEnginePtr& engineProxy();
+
   ftl::WeakPtr<PlatformView> GetWeakViewPtr() override;
 
   uint64_t DefaultFramebuffer() const override;
@@ -38,9 +42,16 @@ class PlatformViewMac : public PlatformView {
  private:
   base::scoped_nsobject<NSOpenGLView> opengl_view_;
   base::scoped_nsobject<NSOpenGLContext> resource_loading_context_;
+  sky::SkyEnginePtr sky_engine_;
   ftl::WeakPtrFactory<PlatformViewMac> weak_factory_;
 
   bool IsValid() const;
+
+  void ConnectToEngineAndSetupServices();
+
+  void SetupAndLoadFromSource(const std::string& main,
+                              const std::string& packages,
+                              const std::string& assets_directory);
 
   FTL_DISALLOW_COPY_AND_ASSIGN(PlatformViewMac);
 };
