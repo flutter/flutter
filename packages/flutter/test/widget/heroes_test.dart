@@ -177,6 +177,46 @@ void main() {
     await tester.pump(new Duration(seconds: 1));
   });
 
+  testWidgets('Heroes animation is fastOutSlowIn', (WidgetTester tester) async {
+    await tester.pumpWidget(new MaterialApp(routes: routes));
+    await tester.tap(find.text('two'));
+    await tester.pump(); // begin navigation
+
+    // Expect the height of the secondKey Hero to vary from 100 to 150
+    // over duration and according to curve.
+
+    final Duration duration = const Duration(milliseconds: 300);
+    final Curve curve = Curves.fastOutSlowIn;
+    final double initialHeight = tester.getSize(find.byKey(firstKey)).height;
+    final double finalHeight = tester.getSize(find.byKey(secondKey)).height;
+    final double deltaHeight = finalHeight - initialHeight;
+    final double epsilon = 0.001;
+
+    await tester.pump(duration * 0.25);
+    expect(
+      tester.getSize(find.byKey(secondKey)).height,
+      closeTo(curve.transform(0.25) * deltaHeight + initialHeight, epsilon)
+    );
+
+    await tester.pump(duration * 0.25);
+    expect(
+      tester.getSize(find.byKey(secondKey)).height,
+      closeTo(curve.transform(0.50) * deltaHeight + initialHeight, epsilon)
+    );
+
+    await tester.pump(duration * 0.25);
+    expect(
+      tester.getSize(find.byKey(secondKey)).height,
+      closeTo(curve.transform(0.75) * deltaHeight + initialHeight, epsilon)
+    );
+
+    await tester.pump(duration * 0.25);
+    expect(
+      tester.getSize(find.byKey(secondKey)).height,
+      closeTo(curve.transform(1.0) * deltaHeight + initialHeight, epsilon)
+    );
+  });
+
   testWidgets('Heroes are not interactive', (WidgetTester tester) async {
     List<String> log = <String>[];
 
@@ -246,5 +286,4 @@ void main() {
     await tester.tap(find.text('bar'));
     expect(log, equals(<String>['bar']));
   });
-
 }
