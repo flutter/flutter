@@ -6,12 +6,12 @@ import 'package:flutter/material.dart';
 
 import 'stock_data.dart';
 import 'stock_arrow.dart';
-import 'stock_row.dart';
 
-class StockSymbolView extends StatelessWidget {
-  StockSymbolView({ this.stock });
+class _StockSymbolView extends StatelessWidget {
+  _StockSymbolView({ this.stock, this.arrow });
 
   final Stock stock;
+  final Widget arrow;
 
   @override
   Widget build(BuildContext context) {
@@ -31,12 +31,7 @@ class StockSymbolView extends StatelessWidget {
                 '${stock.symbol}',
                 style: Theme.of(context).textTheme.display2
               ),
-              new Hero(
-                key: new ObjectKey(stock),
-                tag: StockRowPartKind.arrow,
-                turns: 2,
-                child: new StockArrow(percentChange: stock.percentChange)
-              ),
+              arrow,
             ],
             mainAxisAlignment: MainAxisAlignment.spaceBetween
           ),
@@ -82,7 +77,16 @@ class StockSymbolPage extends StatelessWidget {
         children: <Widget>[
           new Container(
             margin: new EdgeInsets.all(20.0),
-            child: new Card(child: new StockSymbolView(stock: stock))
+            child: new Card(
+              child: new _StockSymbolView(
+                stock: stock,
+                arrow: new Hero(
+                  tag: stock,
+                  turns: 2,
+                  child: new StockArrow(percentChange: stock.percentChange)
+                )
+              )
+            )
           )
         ]
       )
@@ -102,7 +106,10 @@ class StockSymbolBottomSheet extends StatelessWidget {
       decoration: new BoxDecoration(
         border: new Border(top: new BorderSide(color: Colors.black26))
       ),
-      child: new StockSymbolView(stock: stock)
+      child: new _StockSymbolView(
+        stock: stock,
+        arrow: new StockArrow(percentChange: stock.percentChange)
+      )
    );
   }
 }

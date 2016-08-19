@@ -136,7 +136,7 @@ class OrderPage extends StatefulWidget {
 /// arranged in two columns. Enables the user to specify a quantity and add an
 /// order to the shopping cart.
 class _OrderPageState extends State<OrderPage> {
-  static final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>(debugLabel: 'Order page');
+  static final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>(debugLabel: 'Shrine Order');
   static final GlobalKey<ScrollableState> scrollableKey = new GlobalKey<ScrollableState>();
 
   Order get currentOrder => ShrineOrderRoute.of(context).order;
