@@ -3,9 +3,11 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:args/command_runner.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/dart/sdk.dart';
@@ -20,6 +22,7 @@ void main() {
     Directory temp;
 
     setUp(() {
+      Cache.disableLocking();
       temp = Directory.systemTemp.createTempSync('flutter_tools');
     });
 
@@ -32,8 +35,35 @@ void main() {
       return _createAndAnalyzeProject(temp, <String>[]);
     });
 
-    testUsingContext('project with-driver-test', () async {
-      return _createAndAnalyzeProject(temp, <String>['--with-driver-test']);
+    // Verify content and formatting
+    testUsingContext('content', () async {
+      Cache.flutterRoot = '../..';
+
+      CreateCommand command = new CreateCommand();
+      CommandRunner runner = createTestCommandRunner(command);
+
+      int code = await runner.run(<String>['create', '--no-pub', temp.path]);
+      expect(code, 0);
+
+      expectExists(String relPath) {
+        expect(FileSystemEntity.isFileSync('${temp.path}/$relPath'), true);
+      }
+      expectExists('lib/main.dart');
+      await for (var file in temp.list(recursive: true)) {
+        if (file.path.endsWith('.dart')) {
+          var original= (file as File).readAsStringSync();
+
+          Process process = await Process.start(
+              sdkBinaryName('dartfmt'),
+              [file.path],
+              workingDirectory: temp.path,
+          );
+          String formatted =
+            await process.stdout.transform(UTF8.decoder).join();
+
+          expect(original, formatted, reason: file.path);
+        }
+      }
     });
 
     // Verify that we can regenerate over an existing project.
