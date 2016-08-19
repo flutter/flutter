@@ -19,6 +19,8 @@ analyzer:
     strong_mode_down_cast_composite: ignore
     # we allow having TODOs in the code
     todo: ignore
+  exclude:
+    - 'bin/**'
 
 linter:
   rules:
