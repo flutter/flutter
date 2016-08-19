@@ -5,6 +5,9 @@ application. On iOS, the iOS and Flutter components are built with Xcode. On
 Android, the Android and Flutter components are built with Android Studio or
 gradle.
 
+You can read more about
+[accessing platform and third-party services in Flutter](https://flutter.io/platform-services/).
+
 ## iOS
 
 ### Configure
