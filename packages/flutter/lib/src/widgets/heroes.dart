@@ -447,7 +447,7 @@ class HeroController extends NavigatorObserver {
       if (previousRoute is PageRoute<dynamic>) // could be null
         _from = previousRoute;
       _to = route;
-      _animation = route.animation;
+      _animation = new CurvedAnimation(parent: route.animation, curve: Curves.fastOutSlowIn);
       _checkForHeroQuest();
     }
   }
@@ -461,7 +461,7 @@ class HeroController extends NavigatorObserver {
       if (previousRoute is PageRoute<dynamic>) {
         _to = previousRoute;
         _from = route;
-        _animation = route.animation;
+        _animation = new CurvedAnimation(parent: route.animation, curve: Curves.fastOutSlowIn);
         _checkForHeroQuest();
       }
     }
