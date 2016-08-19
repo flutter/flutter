@@ -111,7 +111,6 @@ class RouteSettings {
   /// Creates data used to construct routes.
   const RouteSettings({
     this.name,
-    this.mostValuableKeys,
     this.isInitialRoute: false
   });
 
@@ -120,29 +119,13 @@ class RouteSettings {
   /// If null, the route is anonymous.
   final String name;
 
-  /// The set of keys that are most relevant for constructoring [Hero]
-  /// transitions. For example, if the current route contains a list of music
-  /// albums and the user triggered this navigation by tapping one of the
-  /// albums, the most valuable album cover is the one associated with the album
-  /// the user tapped and is the one that should heroically transition when
-  /// opening the details page for that album.
-  final Set<Key> mostValuableKeys;
-
   /// Whether this route is the very first route being pushed onto this [Navigator].
   ///
   /// The initial route typically skips any entrance transition to speed startup.
   final bool isInitialRoute;
 
   @override
-  String toString() {
-    String result = '"$name"';
-    if (mostValuableKeys != null && mostValuableKeys.isNotEmpty) {
-      result += '; keys:';
-      for (Key key in mostValuableKeys)
-        result += ' $key';
-    }
-    return result;
-  }
+  String toString() => '"$name"';
 }
 
 /// Creates a route for the given route settings.
@@ -211,10 +194,9 @@ class Navigator extends StatefulWidget {
   /// Push a named route onto the navigator that most tightly encloses the given context.
   ///
   /// The route name will be passed to that navigator's [onGenerateRoute]
-  /// callback. The returned route will be pushed into the navigator. The set of
-  /// most valuable keys will be used to construct an appropriate [Hero] transition.
-  static void pushNamed(BuildContext context, String routeName, { Set<Key> mostValuableKeys }) {
-    Navigator.of(context).pushNamed(routeName, mostValuableKeys: mostValuableKeys);
+  /// callback. The returned route will be pushed into the navigator.
+  static void pushNamed(BuildContext context, String routeName) {
+    Navigator.of(context).pushNamed(routeName);
   }
 
   /// Push a route onto the navigator that most tightly encloses the given context.
@@ -265,10 +247,10 @@ class Navigator extends StatefulWidget {
 
   /// Executes a simple transaction that both pops the current route off and
   /// pushes a named route into the navigator that most tightly encloses the given context.
-  static void popAndPushNamed(BuildContext context, String routeName, { Set<Key> mostValuableKeys }) {
+  static void popAndPushNamed(BuildContext context, String routeName) {
     Navigator.of(context)
       ..pop()
-      ..pushNamed(routeName, mostValuableKeys: mostValuableKeys);
+      ..pushNamed(routeName);
   }
 
   static NavigatorState of(BuildContext context) {
@@ -340,13 +322,10 @@ class NavigatorState extends State<Navigator> {
 
   bool _debugLocked = false; // used to prevent re-entrant calls to push, pop, and friends
 
-  void pushNamed(String name, { Set<Key> mostValuableKeys }) {
+  void pushNamed(String name) {
     assert(!_debugLocked);
     assert(name != null);
-    RouteSettings settings = new RouteSettings(
-      name: name,
-      mostValuableKeys: mostValuableKeys
-    );
+    RouteSettings settings = new RouteSettings(name: name);
     Route<dynamic> route = config.onGenerateRoute(settings);
     if (route == null) {
       assert(config.onUnknownRoute != null);

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:collection';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
@@ -21,11 +19,10 @@ class Photo {
   final String caption;
 
   bool isFavorite;
+  String get tag => assetName; // Assuming that all asset names are unique.
 
   bool get isValid => assetName != null && title != null && caption != null && isFavorite != null;
 }
-
-const String photoHeroTag = 'Photo';
 
 typedef void BannerTapCallback(Photo photo);
 
@@ -46,21 +43,14 @@ class GridDemoPhotoItem extends StatelessWidget {
   final BannerTapCallback onBannerTap; // User taps on the photo's header or footer.
 
   void showPhoto(BuildContext context) {
-    Key photoKey = new Key(photo.assetName);
-    Set<Key> mostValuableKeys = new HashSet<Key>();
-    mostValuableKeys.add(photoKey);
-
     Navigator.push(context, new MaterialPageRoute<Null>(
-      settings: new RouteSettings(
-        mostValuableKeys: mostValuableKeys
-      ),
       builder: (BuildContext context) {
         return new Scaffold(
           appBar: new AppBar(
             title: new Text(photo.title)
           ),
           body: new Hero(
-            tag: photoHeroTag,
+            tag: photo.tag,
             child: new Image.asset(photo.assetName, fit: ImageFit.cover)
           )
         );
@@ -74,7 +64,7 @@ class GridDemoPhotoItem extends StatelessWidget {
       onTap: () { showPhoto(context); },
       child: new Hero(
         key: new Key(photo.assetName),
-        tag: photoHeroTag,
+        tag: photo.tag,
         child: new Image.asset(photo.assetName, fit: ImageFit.cover)
       )
     );

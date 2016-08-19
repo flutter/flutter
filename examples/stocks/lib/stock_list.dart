@@ -8,9 +8,8 @@ import 'stock_data.dart';
 import 'stock_row.dart';
 
 class StockList extends StatelessWidget {
-  StockList({ Key key, this.keySalt, this.stocks, this.onOpen, this.onShow, this.onAction }) : super(key: key);
+  StockList({ Key key, this.stocks, this.onOpen, this.onShow, this.onAction }) : super(key: key);
 
-  final Object keySalt;
   final List<Stock> stocks;
   final StockRowActionCallback onOpen;
   final StockRowActionCallback onShow;
@@ -23,7 +22,6 @@ class StockList extends StatelessWidget {
       itemExtent: StockRow.kHeight,
       children: stocks.map((Stock stock) {
         return new StockRow(
-          keySalt: keySalt,
           stock: stock,
           onPressed: onOpen,
           onDoubleTap: onShow,

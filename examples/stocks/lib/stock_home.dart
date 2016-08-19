@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:collection';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart' show debugDumpRenderTree, debugDumpLayerTree, debugDumpSemanticsTree;
 import 'package:flutter/scheduler.dart' show timeDilation;
@@ -245,7 +243,7 @@ class StockHomeState extends State<StockHome> {
     return stocks.where((Stock stock) => stock.symbol.contains(regexp));
   }
 
-  void _buyStock(Stock stock, Key arrowKey) {
+  void _buyStock(Stock stock) {
     setState(() {
       stock.percentChange = 100.0 * (1.0 / stock.lastSale);
       stock.lastSale += 1.0;
@@ -255,7 +253,7 @@ class StockHomeState extends State<StockHome> {
       action: new SnackBarAction(
         label: "BUY MORE",
         onPressed: () {
-          _buyStock(stock, arrowKey);
+          _buyStock(stock);
         }
       )
     ));
@@ -263,15 +261,12 @@ class StockHomeState extends State<StockHome> {
 
   Widget _buildStockList(BuildContext context, Iterable<Stock> stocks, StockHomeTab tab) {
     return new StockList(
-      keySalt: tab,
       stocks: stocks.toList(),
       onAction: _buyStock,
-      onOpen: (Stock stock, Key arrowKey) {
-        Set<Key> mostValuableKeys = new HashSet<Key>();
-        mostValuableKeys.add(arrowKey);
-        Navigator.pushNamed(context, '/stock/${stock.symbol}', mostValuableKeys: mostValuableKeys);
+      onOpen: (Stock stock) {
+        Navigator.pushNamed(context, '/stock/${stock.symbol}');
       },
-      onShow: (Stock stock, Key arrowKey) {
+      onShow: (Stock stock) {
         _scaffoldKey.currentState.showBottomSheet((BuildContext context) => new StockSymbolBottomSheet(stock: stock));
       }
     );

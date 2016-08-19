@@ -292,7 +292,7 @@ class ShrineHome extends StatefulWidget {
 }
 
 class _ShrineHomeState extends State<ShrineHome> {
-  static final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>(debugLabel: 'Order page');
+  static final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>(debugLabel: 'Shrine Home');
   static final GlobalKey<ScrollableState> scrollableKey = new GlobalKey<ScrollableState>();
   static final GridDelegate gridDelegate = new ShrineGridDelegate();
 

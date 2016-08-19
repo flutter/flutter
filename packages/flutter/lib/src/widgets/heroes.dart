@@ -20,14 +20,9 @@ import 'transitions.dart';
 // album's details view. In this context, a screen is a navigator ModalRoute.
 
 // To get this effect, all you have to do is wrap each hero on each route with a
-// Hero widget, and give each hero a tag. Tag must either be unique within the
-// current route's widget subtree, or all the Heroes with that tag on a
-// particular route must have a key. When the app transitions from one route to
-// another, each tag present is animated. When there's exactly one hero with
-// that tag, that hero will be animated for that tag. When there are multiple
-// heroes in a route with the same tag, then whichever hero has a key that
-// matches one of the keys in the "most important key" list given to the
-// navigator when the route was pushed will be animated. If a hero is only
+// Hero widget, and give each hero a tag. The tag must either be unique within the
+// current route's widget subtree. When the app transitions from one route to
+// another, each hero is animated to its new location. If a hero is only
 // present on one of the routes and not the other, then it will be made to
 // appear or disappear as needed.
 
@@ -96,57 +91,35 @@ class Hero extends StatefulWidget {
   final int turns;
 
   /// If true, the hero will always animate, even if it has no matching hero to
-  /// animate to or from. (This only applies if the hero is relevant; if there
-  /// are multiple heroes with the same tag, only the one whose key matches the
-  /// "most valuable keys" will be used.)
+  /// animate to or from.
   final bool alwaysAnimate;
 
-  static Map<Object, HeroHandle> of(BuildContext context, Set<Key> mostValuableKeys) {
-    mostValuableKeys ??= new HashSet<Key>();
-    assert(!mostValuableKeys.contains(null));
-    // first we collect ALL the heroes, sorted by their tags
-    Map<Object, Map<Key, HeroState>> heroes = <Object, Map<Key, HeroState>>{};
+  /// Return a hero tag to HeroState map of all of the heroes within the given subtree.
+  static Map<Object, HeroHandle> of(BuildContext context) {
+    final Map<Object, HeroHandle> result = <Object, HeroHandle>{};
     void visitor(Element element) {
       if (element.widget is Hero) {
         StatefulElement hero = element;
         Hero heroWidget = element.widget;
         Object tag = heroWidget.tag;
         assert(tag != null);
-        Key key = heroWidget.key;
-        final Map<Key, HeroState> tagHeroes = heroes.putIfAbsent(tag, () => <Key, HeroState>{});
         assert(() {
-          if (tagHeroes.containsKey(key)) {
+          if (result.containsKey(tag)) {
             new FlutterError(
-              'There are multiple heroes that share the same key within the same subtree.\n'
+              'There are multiple heroes that share the same tag within the same subtree.\n'
               'Within each subtree for which heroes are to be animated (typically a PageRoute subtree), '
-              'either each Hero must have a unique tag, or, all the heroes with a particular tag must '
-              'have different keys.\n'
-              'In this case, the tag "$tag" had multiple heroes with the key "$key".'
+              'either each Hero must have a unique non-null tag.\n'
+              'In this case, multiple heroes had the tag "$tag".'
             );
           }
           return true;
         });
-        tagHeroes[key] = hero.state;
+        HeroState heroState = hero.state;
+        result[tag] = heroState;
       }
       element.visitChildren(visitor);
     }
     context.visitChildElements(visitor);
-    // next, for each tag, we're going to decide on the one hero we care about for that tag
-    Map<Object, HeroHandle> result = <Object, HeroHandle>{};
-    for (Object tag in heroes.keys) {
-      assert(tag != null);
-      if (heroes[tag].length == 1) {
-        result[tag] = heroes[tag].values.first;
-      } else {
-        assert(heroes[tag].length > 1);
-        assert(!heroes[tag].containsKey(null));
-        assert(heroes[tag].keys.where((Key key) => mostValuableKeys.contains(key)).length <= 1);
-        Key mostValuableKey = mostValuableKeys.firstWhere((Key key) => heroes[tag].containsKey(key), orElse: () => null);
-        if (mostValuableKey != null)
-          result[tag] = heroes[tag][mostValuableKey];
-      }
-    }
-    assert(!result.containsKey(null));
     return result;
   }
 
@@ -532,27 +505,15 @@ class HeroController extends NavigatorObserver {
     return entry;
   }
 
-  Set<Key> _getMostValuableKeys() {
-    assert(_from != null);
-    assert(_to != null);
-    Set<Key> result = new HashSet<Key>();
-    if (_from.settings.mostValuableKeys != null)
-      result.addAll(_from.settings.mostValuableKeys);
-    if (_to.settings.mostValuableKeys != null)
-      result.addAll(_to.settings.mostValuableKeys);
-    return result;
-  }
-
   void _updateQuest(Duration timeStamp) {
     if (navigator == null) {
       // The navigator was removed before this end-of-frame callback was called.
       return;
     }
-    Set<Key> mostValuableKeys = _getMostValuableKeys();
     Map<Object, HeroHandle> heroesFrom = _party.isEmpty ?
-        Hero.of(_from.subtreeContext, mostValuableKeys) : _party.getHeroesToAnimate();
+        Hero.of(_from.subtreeContext) : _party.getHeroesToAnimate();
 
-    Map<Object, HeroHandle> heroesTo = Hero.of(_to.subtreeContext, mostValuableKeys);
+    Map<Object, HeroHandle> heroesTo = Hero.of(_to.subtreeContext);
     _to.offstage = false;
 
     Animation<double> animation = _animation;
