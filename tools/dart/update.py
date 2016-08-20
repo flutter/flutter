@@ -22,6 +22,7 @@ SDK_URL_BASE = ('http://gsdview.appspot.com/dart-archive/channels/stable/raw/'
 
 LINUX_64_SDK = 'dartsdk-linux-x64-release.zip'
 MACOS_64_SDK = 'dartsdk-macos-x64-release.zip'
+WINDOWS_64_SDK = 'dartsdk-windows-x64-release.zip'
 
 # Path constants. (All of these should be absolute paths.)
 THIS_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -54,6 +55,9 @@ def main():
   elif sys.platform.startswith('darwin'):
     sdk_url = SDK_URL_BASE + MACOS_64_SDK
     output_file = os.path.join(DART_SDK_DIR, MACOS_64_SDK)
+  elif sys.platform.startswith('win'):
+    sdk_url = SDK_URL_BASE + WINDOWS_64_SDK
+    output_file = os.path.join(DART_SDK_DIR, WINDOWS_64_SDK)
   else:
     print "Platform not supported"
     return 1
