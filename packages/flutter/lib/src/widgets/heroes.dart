@@ -447,7 +447,7 @@ class HeroController extends NavigatorObserver {
       if (previousRoute is PageRoute<dynamic>) // could be null
         _from = previousRoute;
       _to = route;
-      _animation = new CurvedAnimation(parent: route.animation, curve: Curves.fastOutSlowIn);
+      _animation = route.animation;
       _checkForHeroQuest();
     }
   }
@@ -461,7 +461,7 @@ class HeroController extends NavigatorObserver {
       if (previousRoute is PageRoute<dynamic>) {
         _to = previousRoute;
         _from = route;
-        _animation = new CurvedAnimation(parent: route.animation, curve: Curves.fastOutSlowIn);
+        _animation = route.animation;
         _checkForHeroQuest();
       }
     }
@@ -516,19 +516,18 @@ class HeroController extends NavigatorObserver {
     Map<Object, HeroHandle> heroesTo = Hero.of(_to.subtreeContext);
     _to.offstage = false;
 
-    Animation<double> animation = _animation;
+    Animation<double> animation = _animation; // The route's animation.
     Curve curve = Curves.fastOutSlowIn;
     if (animation.status == AnimationStatus.reverse) {
       animation = new ReverseAnimation(animation);
       curve = new Interval(animation.value, 1.0, curve: curve);
     }
+    animation = new CurvedAnimation(parent: animation, curve: curve);
 
     _party.animate(heroesFrom, heroesTo, _getAnimationArea(navigator.context));
     _removeHeroesFromOverlay();
-    _party.setAnimation(new CurvedAnimation(
-      parent: animation,
-      curve: curve
-    ));
+    _party.setAnimation(animation);
+
     for (_HeroQuestState hero in _party._heroes) {
       hero.overlayEntry = _addHeroToOverlay(
         (BuildContext context) => hero.build(navigator.context, animation),
