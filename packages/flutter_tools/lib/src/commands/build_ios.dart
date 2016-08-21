@@ -8,6 +8,7 @@ import 'package:path/path.dart' as path;
 
 import '../application_package.dart';
 import '../base/logger.dart';
+import '../base/utils.dart';
 import '../build_info.dart';
 import '../globals.dart';
 import '../ios/mac.dart';
@@ -49,6 +50,11 @@ class BuildIOSCommand extends BuildSubCommand {
     if (!forSimulator && !shouldCodesign) {
       printStatus('Warning: Building for device with codesigning disabled. You will '
         'have to manually codesign before deploying to device.');
+    }
+
+    if (forSimulator && !isEmulatorBuildMode(getBuildMode())) {
+      printError('${toTitleCase(getModeName(getBuildMode()))} mode is not supported for emulators.');
+      return 1;
     }
 
     String logTarget = forSimulator ? 'simulator' : 'device';
