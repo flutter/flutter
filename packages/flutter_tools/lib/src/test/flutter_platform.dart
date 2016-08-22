@@ -21,7 +21,8 @@ import 'coverage_collector.dart';
 
 final String _kSkyShell = Platform.environment['SKY_SHELL'];
 const String _kHost = '127.0.0.1';
-const String _kPath = '/runner';
+const String _kRunnerPath = '/runner';
+const String _kShutdownPath = '/shutdown';
 
 String shellPath;
 
@@ -33,20 +34,24 @@ void installHook() {
 
 class _ServerInfo {
   final String url;
+  final String shutdownUrl;
   final Future<WebSocket> socket;
   final HttpServer server;
 
-  _ServerInfo(this.server, this.url, this.socket);
+  _ServerInfo(this.server, this.url, this.shutdownUrl, this.socket);
 }
 
 Future<_ServerInfo> _startServer() async {
   HttpServer server = await HttpServer.bind(_kHost, 0);
   Completer<WebSocket> socket = new Completer<WebSocket>();
   server.listen((HttpRequest request) {
-    if (request.uri.path == _kPath)
+    if (request.uri.path == _kRunnerPath)
       socket.complete(WebSocketTransformer.upgrade(request));
+    else if (!socket.isCompleted && request.uri.path == _kShutdownPath)
+      socket.completeError('Failed to start test');
   });
-  return new _ServerInfo(server, 'ws://$_kHost:${server.port}$_kPath', socket.future);
+  return new _ServerInfo(server, 'ws://$_kHost:${server.port}$_kRunnerPath',
+      'ws://$_kHost:${server.port}$_kShutdownPath', socket.future);
 }
 
 Future<Process> _startProcess(String mainPath, { String packages, int observatoryPort }) {
@@ -171,6 +176,10 @@ void main() {
         dirToDelete.deleteSync(recursive: true);
       }
     }
+
+    process.exitCode.then((_) {
+      WebSocket.connect(info.shutdownUrl);
+    });
 
     try {
       WebSocket socket = await info.socket;
