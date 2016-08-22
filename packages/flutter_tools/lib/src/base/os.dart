@@ -62,7 +62,7 @@ class _PosixUtils extends OperatingSystemUtils {
     if (result.exitCode != 0)
       return null;
     String path = result.stdout.trim().split('\n').first.trim();
-    return new File(new File(path).resolveSymbolicLinksSync());
+    return new File(path);
   }
 
   // unzip -o -q zipfile -d dest
