@@ -103,8 +103,6 @@
     _services = [[NSMutableDictionary alloc] init];
 
     [self populateServiceDefinitions];
-
-    LOG(INFO) << _services.count << " custom service definitions registered";
   }
 
   return self;
@@ -126,8 +124,6 @@
                                       ofType:@"json"];
 
   if (definitionsPath.length == 0) {
-    LOG(INFO) << "Could not find the service definitions manifest. No custom "
-                 "services will be available.";
     return;
   }
 
