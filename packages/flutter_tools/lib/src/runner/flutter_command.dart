@@ -83,7 +83,7 @@ abstract class FlutterCommand extends Command {
       help: 'Build a release version of your app${defaultToRelease ? ' (default mode)' : ''}.');
   }
 
-  void set defaultBuildMode(BuildMode buildMode) {
+  set defaultBuildMode(BuildMode buildMode) {
     _defaultBuildMode = buildMode;
   }
 
