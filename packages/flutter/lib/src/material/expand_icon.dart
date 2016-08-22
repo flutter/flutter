@@ -23,13 +23,21 @@ class ExpandIcon extends StatefulWidget {
   /// triggered when the icon is pressed.
   ExpandIcon({
     Key key,
+    this.isExpanded: false,
     this.size: 24.0,
     @required this.onPressed,
     this.padding: const EdgeInsets.all(8.0)
   }) : super(key: key) {
+    assert(this.isExpanded != null);
     assert(this.size != null);
     assert(this.padding != null);
   }
+
+  /// Whether the icon is in an expanded state.
+  ///
+  /// Rebuilding the widget with a different [isExpanded] value will trigger
+  /// the animation, but will not trigger the [onPressed] callback.
+  final bool isExpanded;
 
   /// The size of the icon.
   ///
@@ -37,7 +45,7 @@ class ExpandIcon extends StatefulWidget {
   final double size;
 
   /// The callback triggered when the icon is pressed and the state changes
-  /// between expanded and collapsed.
+  /// between expanded and collapsed. The value passed to the current state.
   ///
   /// If this is set to null, the button will be disabled.
   final ValueChanged<bool> onPressed;
@@ -55,7 +63,6 @@ class ExpandIcon extends StatefulWidget {
 class _ExpandIconState extends State<ExpandIcon> {
   AnimationController _controller;
   Animation<double> _iconTurns;
-  bool _isExpanded = false;
 
   @override
   void initState() {
@@ -75,17 +82,20 @@ class _ExpandIconState extends State<ExpandIcon> {
     super.dispose();
   }
 
-  void _handlePressed() {
-    setState(() {
-      _isExpanded = !_isExpanded;
-      if (_isExpanded)
+  @override
+  void didUpdateConfig(ExpandIcon oldConfig) {
+    if (config.isExpanded != oldConfig.isExpanded) {
+      if (config.isExpanded) {
         _controller.forward();
-      else
+      } else {
         _controller.reverse();
-    });
+      }
+    }
+  }
 
+  void _handlePressed() {
     if (config.onPressed != null)
-      config.onPressed(_isExpanded);
+      config.onPressed(config.isExpanded);
   }
 
   @override

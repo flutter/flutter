@@ -43,4 +43,36 @@ void main() {
     IconTheme iconTheme = tester.firstWidget(find.byType(IconTheme));
     expect(iconTheme.data.color, equals(Colors.black26));
   });
+
+  testWidgets('ExpandIcon test isExpanded does not trigger callback', (WidgetTester tester) async {
+    bool expanded = false;
+
+    await tester.pumpWidget(
+      new Material(
+        child: new Center(
+          child: new ExpandIcon(
+            isExpanded: false,
+            onPressed: (bool isExpanded) {
+              expanded = !expanded;
+            }
+          )
+        )
+      )
+    );
+
+    await tester.pumpWidget(
+      new Material(
+        child: new Center(
+          child: new ExpandIcon(
+            isExpanded: true,
+            onPressed: (bool isExpanded) {
+              expanded = !expanded;
+            }
+          )
+        )
+      )
+    );
+
+    expect(expanded, isFalse);
+  });
 }
