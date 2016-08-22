@@ -17,7 +17,15 @@ import 'build.dart';
 class BuildIOSCommand extends BuildSubCommand {
   BuildIOSCommand() {
     usesTargetOption();
-    addBuildModeFlags();
+    argParser.addFlag('debug',
+      negatable: false,
+      help: 'Build a debug version of your app (default mode for iOS simulator builds).');
+    argParser.addFlag('profile',
+      negatable: false,
+      help: 'Build a version of your app specialized for performance profiling.');
+    argParser.addFlag('release',
+      negatable: false,
+      help: 'Build a release version of your app (default mode for device builds).');
     argParser.addFlag('simulator', help: 'Build for the iOS simulator instead of the device.');
     argParser.addFlag('codesign', negatable: true, defaultsTo: true,
         help: 'Codesign the application bundle (only available on device builds).');
@@ -31,6 +39,9 @@ class BuildIOSCommand extends BuildSubCommand {
 
   @override
   Future<int> runInProject() async {
+    bool forSimulator = argResults['simulator'];
+    defaultBuildMode = forSimulator ? BuildMode.debug : BuildMode.release;
+
     await super.runInProject();
     if (getCurrentHostPlatform() != HostPlatform.darwin_x64) {
       printError('Building for iOS is only supported on the Mac.');
@@ -44,7 +55,6 @@ class BuildIOSCommand extends BuildSubCommand {
       return 1;
     }
 
-    bool forSimulator = argResults['simulator'];
     bool shouldCodesign = argResults['codesign'];
 
     if (!forSimulator && !shouldCodesign) {

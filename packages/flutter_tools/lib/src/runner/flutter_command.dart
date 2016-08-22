@@ -70,7 +70,7 @@ abstract class FlutterCommand extends Command {
   }
 
   void addBuildModeFlags({ bool defaultToRelease: true }) {
-    _defaultBuildMode = defaultToRelease ? BuildMode.release : BuildMode.debug;
+    defaultBuildMode = defaultToRelease ? BuildMode.release : BuildMode.debug;
 
     argParser.addFlag('debug',
       negatable: false,
@@ -82,6 +82,8 @@ abstract class FlutterCommand extends Command {
       negatable: false,
       help: 'Build a release version of your app${defaultToRelease ? ' (default mode)' : ''}.');
   }
+
+  void set defaultBuildMode(BuildMode buildMode) => _defaultBuildMode = buildMode;
 
   BuildMode getBuildMode() {
     List<bool> modeFlags = <bool>[argResults['debug'], argResults['profile'], argResults['release']];
