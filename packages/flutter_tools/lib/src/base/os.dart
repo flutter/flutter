@@ -54,15 +54,15 @@ class _PosixUtils extends OperatingSystemUtils {
     return Process.runSync('chmod', <String>['a+x', file.path]);
   }
 
-  /// Return the path (with symlinks resolved) to the given executable, or `null`
-  /// if `which` was not able to locate the binary.
+  /// Return the path to the given executable, or `null` if `which` was not able
+  /// to locate the binary.
   @override
   File which(String execName) {
     ProcessResult result = Process.runSync('which', <String>[execName]);
     if (result.exitCode != 0)
       return null;
     String path = result.stdout.trim().split('\n').first.trim();
-    return new File(new File(path).resolveSymbolicLinksSync());
+    return new File(path);
   }
 
   // unzip -o -q zipfile -d dest
