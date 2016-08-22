@@ -111,7 +111,7 @@ class GalleryDrawer extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData themeData = Theme.of(context);
     final TextStyle aboutTextStyle = themeData.textTheme.body2;
-    final TextStyle aboutLinkStyle = themeData.textTheme.body2.copyWith(color: themeData.accentColor);
+    final TextStyle linkStyle = themeData.textTheme.body2.copyWith(color: themeData.accentColor);
 
     return new Drawer(
       child: new Block(
@@ -176,6 +176,20 @@ class GalleryDrawer extends StatelessWidget {
               ]
             )
           ),
+          new DrawerItem(
+            icon: new Icon(Icons.report),
+            child: new RichText(
+              text: new TextSpan(
+                children: <TextSpan>[
+                  new LinkTextSpan(
+                    text: "File an issue",
+                    style: linkStyle,
+                    url: 'https://github.com/flutter/flutter/issues/new'
+                  )
+                ]
+              )
+            )
+          ),
           new AboutDrawerItem(
             icon: new FlutterLogo(),
             applicationVersion: '2016 Q3 Preview',
@@ -196,7 +210,7 @@ class GalleryDrawer extends StatelessWidget {
                         "animations, layouts, and more. Learn more about Flutter at "
                       ),
                       new LinkTextSpan(
-                        style: aboutLinkStyle,
+                        style: linkStyle,
                         url: 'https://flutter.io'
                       ),
                       new TextSpan(
@@ -204,7 +218,7 @@ class GalleryDrawer extends StatelessWidget {
                         text: ".\n\nTo see the source code for this app, please visit the "
                       ),
                       new LinkTextSpan(
-                        style: aboutLinkStyle,
+                        style: linkStyle,
                         url: 'https://goo.gl/iv1p4G',
                         text: 'flutter github repo'
                       ),
