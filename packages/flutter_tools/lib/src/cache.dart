@@ -62,10 +62,11 @@ class Cache {
         locked = true;
       } on FileSystemException {
         if (!printed) {
-          printStatus('Waiting to be able to obtain lock of Flutter binary artifacts directory...');
+          printTrace('Waiting to be able to obtain lock of Flutter binary artifacts directory: ${_lock.path}');
+          printStatus('Waiting for another flutter command to release the startup lock...');
           printed = true;
         }
-        await new Future/*<Null>*/.delayed(const Duration(milliseconds: 50));
+        await new Future<Null>.delayed(const Duration(milliseconds: 50));
       }
     }
   }
