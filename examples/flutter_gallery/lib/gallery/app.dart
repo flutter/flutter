@@ -37,19 +37,37 @@ class GalleryAppState extends State<GalleryApp> {
 
   @override
   Widget build(BuildContext context) {
+    // In checked mode, show the default "slow mode" banner, otherwise show
+    // the "preview" banner.
+    bool showPreviewBanner = true;
+    assert(() {
+      showPreviewBanner = false;
+      return true;
+    });
+
+    Widget home = new GalleryHome(
+      useLightTheme: _useLightTheme,
+      onThemeChanged: (bool value) { setState(() { _useLightTheme = value; }); },
+      showPerformanceOverlay: _showPerformanceOverlay,
+      onShowPerformanceOverlayChanged: (bool value) { setState(() { _showPerformanceOverlay = value; }); },
+      timeDilation: timeDilation,
+      onTimeDilationChanged: (double value) { setState(() { timeDilation = value; }); }
+    );
+
+    if (showPreviewBanner) {
+      home = new Banner(
+        message: 'PREVIEW',
+        location: BannerLocation.topRight,
+        child: home
+      );
+    }
+
     return new MaterialApp(
       title: 'Flutter Gallery',
       theme: _useLightTheme ? _kGalleryLightTheme : _kGalleryDarkTheme,
       showPerformanceOverlay: _showPerformanceOverlay,
       routes: _kRoutes,
-      home: new GalleryHome(
-        useLightTheme: _useLightTheme,
-        onThemeChanged: (bool value) { setState(() { _useLightTheme = value; }); },
-        showPerformanceOverlay: _showPerformanceOverlay,
-        onShowPerformanceOverlayChanged: (bool value) { setState(() { _showPerformanceOverlay = value; }); },
-        timeDilation: timeDilation,
-        onTimeDilationChanged: (double value) { setState(() { timeDilation = value; }); }
-      )
+      home: home
     );
   }
 }
