@@ -7,7 +7,6 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:args/command_runner.dart';
-import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/dart/sdk.dart';
@@ -48,17 +47,17 @@ void main() {
       int code = await runner.run(<String>['create', '--no-pub', temp.path]);
       expect(code, 0);
 
-      expectExists(String relPath) {
+      void expectExists(String relPath) {
         expect(FileSystemEntity.isFileSync('${temp.path}/$relPath'), true);
       }
       expectExists('lib/main.dart');
-      await for (var file in temp.list(recursive: true)) {
-        if (file.path.endsWith('.dart')) {
-          var original= (file as File).readAsStringSync();
+      await for (FileSystemEntity file in temp.list(recursive: true)) {
+        if (file is File && file.path.endsWith('.dart')) {
+          String original= file.readAsStringSync();
 
           Process process = await Process.start(
               sdkBinaryName('dartfmt'),
-              [file.path],
+              <String>[file.path],
               workingDirectory: temp.path,
           );
           String formatted =
