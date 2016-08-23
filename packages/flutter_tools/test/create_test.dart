@@ -22,7 +22,6 @@ void main() {
     Directory temp;
 
     setUp(() {
-      Cache.disableLocking();
       temp = Directory.systemTemp.createTempSync('flutter_tools');
     });
 
@@ -33,6 +32,10 @@ void main() {
     // Verify that we create a project that is well-formed.
     testUsingContext('project', () async {
       return _createAndAnalyzeProject(temp, <String>[]);
+    });
+
+    testUsingContext('project with-driver-test', () async {
+      return _createAndAnalyzeProject(temp, <String>['--with-driver-test']);
     });
 
     // Verify content and formatting
