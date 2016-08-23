@@ -454,7 +454,7 @@ class ScaffoldState extends State<Scaffold> {
 
   // PERSISTENT BOTTOM SHEET API
 
-  List<Widget> _dismissedBottomSheets;
+  final List<Widget> _dismissedBottomSheets = <Widget>[];
   PersistentBottomSheetController<dynamic> _currentBottomSheet;
 
   /// Shows a persistent material design bottom sheet.
@@ -491,9 +491,11 @@ class ScaffoldState extends State<Scaffold> {
         assert(_currentBottomSheet._widget == bottomSheet);
         assert(bottomSheetKey.currentState != null);
         bottomSheetKey.currentState.close();
-        _dismissedBottomSheets ??= <Widget>[];
-        _dismissedBottomSheets.add(bottomSheet);
-        _currentBottomSheet = null;
+        if (controller.status != AnimationStatus.dismissed)
+          _dismissedBottomSheets.add(bottomSheet);
+        setState(() {
+          _currentBottomSheet = null;
+        });
         completer.complete();
       }
     );
@@ -505,10 +507,11 @@ class ScaffoldState extends State<Scaffold> {
         entry.remove();
       },
       onDismissed: () {
-        assert(_dismissedBottomSheets != null);
-        setState(() {
-          _dismissedBottomSheets.remove(bottomSheet);
-        });
+        if (_dismissedBottomSheets.contains(bottomSheet)) {
+          setState(() {
+            _dismissedBottomSheets.remove(bottomSheet);
+          });
+        }
       },
       builder: builder
     );
@@ -728,10 +731,9 @@ class ScaffoldState extends State<Scaffold> {
     }
     // Otherwise the AppBar will be part of a [app bar, body] Stack. See AppBarBehavior.scroll below.
 
-    if (_currentBottomSheet != null ||
-        (_dismissedBottomSheets != null && _dismissedBottomSheets.isNotEmpty)) {
+    if (_currentBottomSheet != null || _dismissedBottomSheets.isNotEmpty) {
       final List<Widget> bottomSheets = <Widget>[];
-      if (_dismissedBottomSheets != null && _dismissedBottomSheets.isNotEmpty)
+      if (_dismissedBottomSheets.isNotEmpty)
         bottomSheets.addAll(_dismissedBottomSheets);
       if (_currentBottomSheet != null)
         bottomSheets.add(_currentBottomSheet._widget);
