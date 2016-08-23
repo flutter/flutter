@@ -10,23 +10,24 @@ namespace sky {
 namespace shell {
 namespace switches {
 
+const char kAotInstructionsBlob[] = "instructions-blob";
+const char kAotIsolateSnapshot[] = "isolate-snapshot";
+const char kAotRodataBlob[] = "rodata-blob";
+const char kAotSnapshotPath[] = "aot-snapshot-path";
+const char kAotVmIsolateSnapshot[] = "vm-isolate-snapshot";
+const char kCacheDirPath[] = "cache-dir-path";
+const char kDartFlags[] = "dart-flags";
+const char kDeviceObservatoryPort[] = "observatory-port";
 const char kEnableCheckedMode[] = "enable-checked-mode";
+const char kEndlessTraceBuffer[] = "endless-trace-buffer";
 const char kFLX[] = "flx";
 const char kHelp[] = "help";
-const char kNonInteractive[] = "non-interactive";
 const char kMainDartFile[] = "dart-main";
+const char kNonInteractive[] = "non-interactive";
+const char kNoRedirectToSyslog[] = "no-redirect-to-syslog";
 const char kPackages[] = "packages";
 const char kStartPaused[] = "start-paused";
 const char kTraceStartup[] = "trace-startup";
-const char kDeviceObservatoryPort[] = "observatory-port";
-const char kAotSnapshotPath[] = "aot-snapshot-path";
-const char kAotIsolateSnapshot[] = "isolate-snapshot";
-const char kAotVmIsolateSnapshot[] = "vm-isolate-snapshot";
-const char kAotInstructionsBlob[] = "instructions-blob";
-const char kAotRodataBlob[] = "rodata-blob";
-const char kNoRedirectToSyslog[] = "no-redirect-to-syslog";
-const char kCacheDirPath[] = "cache-dir-path";
-const char kDartFlags[] = "dart-flags";
 
 void PrintUsage(const std::string& executable_name) {
   // clang-format off

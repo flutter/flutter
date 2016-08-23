@@ -11,23 +11,24 @@ namespace sky {
 namespace shell {
 namespace switches {
 
+extern const char kAotInstructionsBlob[];
+extern const char kAotIsolateSnapshot[];
+extern const char kAotRodataBlob[];
+extern const char kAotSnapshotPath[];
+extern const char kAotVmIsolateSnapshot[];
+extern const char kCacheDirPath[];
+extern const char kDartFlags[];
+extern const char kDeviceObservatoryPort[];
 extern const char kEnableCheckedMode[];
+extern const char kEndlessTraceBuffer[];
 extern const char kFLX[];
 extern const char kHelp[];
-extern const char kNonInteractive[];
 extern const char kMainDartFile[];
+extern const char kNonInteractive[];
+extern const char kNoRedirectToSyslog[];
 extern const char kPackages[];
 extern const char kStartPaused[];
 extern const char kTraceStartup[];
-extern const char kDeviceObservatoryPort[];
-extern const char kAotSnapshotPath[];
-extern const char kAotIsolateSnapshot[];
-extern const char kAotVmIsolateSnapshot[];
-extern const char kAotInstructionsBlob[];
-extern const char kAotRodataBlob[];
-extern const char kNoRedirectToSyslog[];
-extern const char kCacheDirPath[];
-extern const char kDartFlags[];
 
 void PrintUsage(const std::string& executable_name);
 
