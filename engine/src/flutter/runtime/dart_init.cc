@@ -115,6 +115,9 @@ static const char* kDartStartPausedArgs[]{
 
 static const char* kDartTraceStartupArgs[]{
     "--timeline_streams=Compiler,Dart,Embedder,GC",
+};
+
+static const char* kDartEndlessTraceBufferArgs[]{
     "--timeline_recorder=endless",
 };
 
@@ -339,7 +342,8 @@ DartJniIsolateData* GetDartJniDataForCurrentIsolate() {
 
 #if DART_ALLOW_DYNAMIC_RESOLUTION
 
-constexpr char kDartVmIsolateSnapshotBufferName[] = "kDartVmIsolateSnapshotBuffer";
+constexpr char kDartVmIsolateSnapshotBufferName[] =
+    "kDartVmIsolateSnapshotBuffer";
 constexpr char kDartIsolateSnapshotBufferName[] = "kDartIsolateSnapshotBuffer";
 constexpr char kInstructionsSnapshotName[] = "kInstructionsSnapshot";
 constexpr char kDataSnapshotName[] = "kDataSnapshot";
@@ -422,7 +426,8 @@ void* _DartSymbolLookup(const char* symbol_name) {
 
     const char* file_name = symbol_asset.file_name;
     const std::string* settings_override = reinterpret_cast<const std::string*>(
-        reinterpret_cast<const uint8_t*>(&settings) + symbol_asset.settings_offset);
+        reinterpret_cast<const uint8_t*>(&settings) +
+        symbol_asset.settings_offset);
     if (!settings_override->empty())
       file_name = settings_override->c_str();
 
@@ -580,8 +585,16 @@ void InitDartVM() {
   if (settings.start_paused)
     PushBackAll(&args, kDartStartPausedArgs, arraysize(kDartStartPausedArgs));
 
-  if (settings.trace_startup)
+  if (settings.endless_trace_buffer || settings.trace_startup) {
+    // If we are tracing startup, make sure the trace buffer is endless so we
+    // don't lose early traces.
+    PushBackAll(&args, kDartEndlessTraceBufferArgs,
+                arraysize(kDartEndlessTraceBufferArgs));
+  }
+
+  if (settings.trace_startup) {
     PushBackAll(&args, kDartTraceStartupArgs, arraysize(kDartTraceStartupArgs));
+  }
 
   for (size_t i = 0; i < settings.dart_flags.size(); i++)
     args.push_back(settings.dart_flags[i].c_str());

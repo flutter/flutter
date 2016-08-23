@@ -20,6 +20,7 @@ struct Settings {
   bool start_paused = false;
   bool enable_dart_checked_mode = false;
   bool trace_startup = false;
+  bool endless_trace_buffer = false;
   std::string aot_snapshot_path;
   std::string aot_isolate_snapshot_file_name;
   std::string aot_vm_isolate_snapshot_file_name;
