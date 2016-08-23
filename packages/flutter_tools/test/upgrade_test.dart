@@ -2,8 +2,21 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
+
+import 'package:args/command_runner.dart';
+import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/base/context.dart';
+import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/commands/upgrade.dart';
+import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/doctor.dart';
+import 'package:path/path.dart' show join;
 import 'package:test/test.dart';
+
+import 'src/common.dart';
+import 'src/context.dart';
 
 void main() {
   group('upgrade', () {
@@ -23,6 +36,41 @@ void main() {
     test('regex doesn\'t match', () {
       expect(_match('Updating 79cfe1e..5046107'), false);
       expect(_match('229 files changed, 6179 insertions(+), 3065 deletions(-)'), false);
+    });
+
+    group('findProjectRoot', () {
+      Directory temp;
+
+      setUp(() async {
+        Cache.disableLocking();
+        context[Logger] ??= new BufferLogger();
+        context[Doctor] = new Doctor();
+        context[DeviceManager] = new MockDeviceManager();
+
+        temp = Directory.systemTemp.createTempSync('flutter_tools');
+        Cache.flutterRoot = '../..';
+        CreateCommand command = new CreateCommand();
+        CommandRunner runner = createTestCommandRunner(command);
+        int code = await runner.run(<String>['create', '--no-pub', temp.path]);
+        expect(code, 0);
+      });
+
+      tearDown(() {
+        temp.deleteSync(recursive: true);
+      });
+
+      test('in project', () {
+        expect(UpgradeCommand.findProjectRoot(temp.path), temp.path);
+        expect(
+            UpgradeCommand.findProjectRoot(join(temp.path, 'lib')), temp.path);
+      });
+
+      test('outside project', () {
+        expect(UpgradeCommand.findProjectRoot(temp.parent.path), null);
+        expect(UpgradeCommand.findProjectRoot(Cache.flutterRoot), null);
+        expect(UpgradeCommand.findProjectRoot(
+            join(Cache.flutterRoot, 'examples', 'hello_world')), null);
+      });
     });
   });
 }
