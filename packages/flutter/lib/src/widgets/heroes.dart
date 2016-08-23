@@ -62,12 +62,12 @@ class _HeroManifest {
   });
   final GlobalKey key;
   final Widget config;
-  final Set<HeroState> sourceStates;
+  final Set<_HeroState> sourceStates;
   final Rect currentRect;
   final double currentTurns;
 }
 
-abstract class HeroHandle {
+abstract class _HeroHandle {
   bool get alwaysAnimate;
   _HeroManifest _takeChild(Animation<double> currentAnimation);
 }
@@ -94,9 +94,9 @@ class Hero extends StatefulWidget {
   /// animate to or from.
   final bool alwaysAnimate;
 
-  /// Return a hero tag to HeroState map of all of the heroes within the given subtree.
-  static Map<Object, HeroHandle> of(BuildContext context) {
-    final Map<Object, HeroHandle> result = <Object, HeroHandle>{};
+  /// Return a hero tag to _HeroState map of all of the heroes within the given subtree.
+  static Map<Object, _HeroHandle> _of(BuildContext context) {
+    final Map<Object, _HeroHandle> result = <Object, _HeroHandle>{};
     void visitor(Element element) {
       if (element.widget is Hero) {
         StatefulElement hero = element;
@@ -114,7 +114,7 @@ class Hero extends StatefulWidget {
           }
           return true;
         });
-        HeroState heroState = hero.state;
+        _HeroState heroState = hero.state;
         result[tag] = heroState;
       }
       element.visitChildren(visitor);
@@ -124,11 +124,10 @@ class Hero extends StatefulWidget {
   }
 
   @override
-  HeroState createState() => new HeroState();
+  _HeroState createState() => new _HeroState();
 }
 
-class HeroState extends State<Hero> implements HeroHandle {
-
+class _HeroState extends State<Hero> implements _HeroHandle {
   GlobalKey _key = new GlobalKey();
   Size _placeholderSize;
   VoidCallback _disposeCallback;
@@ -154,7 +153,7 @@ class HeroState extends State<Hero> implements HeroHandle {
     _HeroManifest result = new _HeroManifest(
       key: _key, // might be null, e.g. if the hero is returning to us
       config: config,
-      sourceStates: new HashSet<HeroState>.from(<HeroState>[this]),
+      sourceStates: new HashSet<_HeroState>.from(<_HeroState>[this]),
       currentRect: heroArea,
       currentTurns: config.turns.toDouble()
     );
@@ -166,6 +165,7 @@ class HeroState extends State<Hero> implements HeroHandle {
   void _setChild(GlobalKey value) {
     assert(_key == null);
     assert(_placeholderSize != null);
+    assert(value != null);
     assert(mounted);
     setState(() {
       _key = value;
@@ -175,7 +175,7 @@ class HeroState extends State<Hero> implements HeroHandle {
 
   void _resetChild() {
     if (mounted)
-      _setChild(null);
+      _setChild(new GlobalKey());
   }
 
   @override
@@ -196,11 +196,10 @@ class HeroState extends State<Hero> implements HeroHandle {
       child: config.child
     );
   }
-
 }
 
 
-class _HeroQuestState implements HeroHandle {
+class _HeroQuestState implements _HeroHandle {
   _HeroQuestState({
     this.tag,
     this.key,
@@ -214,10 +213,8 @@ class _HeroQuestState implements HeroHandle {
     this.currentTurns
   }) {
     assert(tag != null);
-
-    for (HeroState state in sourceStates)
+    for (_HeroState state in sourceStates)
       state._disposeCallback = () => sourceStates.remove(state);
-
     if (targetState != null)
       targetState._disposeCallback = _handleTargetStateDispose;
   }
@@ -225,11 +222,11 @@ class _HeroQuestState implements HeroHandle {
   final Object tag;
   final GlobalKey key;
   final Widget child;
-  final Set<HeroState> sourceStates;
+  final Set<_HeroState> sourceStates;
   final Rect animationArea;
   Rect targetRect;
   int targetTurns;
-  HeroState targetState;
+  _HeroState targetState;
   final RectTween currentRect;
   final Tween<double> currentTurns;
 
@@ -245,13 +242,11 @@ class _HeroQuestState implements HeroHandle {
   _HeroManifest _takeChild(Animation<double> currentAnimation) {
     assert(!taken);
     _taken = true;
-    Set<HeroState> states = sourceStates;
+    Set<_HeroState> states = sourceStates;
     if (targetState != null)
-      states = states.union(new HashSet<HeroState>.from(<HeroState>[targetState]));
-
-    for (HeroState state in states)
+      states = states.union(new HashSet<_HeroState>.from(<_HeroState>[targetState]));
+    for (_HeroState state in states)
       state._disposeCallback = null;
-
     return new _HeroManifest(
       key: key,
       config: child,
@@ -287,10 +282,8 @@ class _HeroQuestState implements HeroHandle {
   @mustCallSuper
   void dispose() {
     overlayEntry = null;
-
-    for (HeroState state in sourceStates)
+    for (_HeroState state in sourceStates)
       state._disposeCallback = null;
-
     if (targetState != null)
       targetState._disposeCallback = null;
   }
@@ -298,15 +291,15 @@ class _HeroQuestState implements HeroHandle {
 
 class _HeroMatch {
   const _HeroMatch(this.from, this.to, this.tag);
-  final HeroHandle from;
-  final HeroHandle to;
+  final _HeroHandle from;
+  final _HeroHandle to;
   final Object tag;
 }
 
 typedef RectTween CreateRectTween(Rect begin, Rect end);
 
-class HeroParty {
-  HeroParty({ this.onQuestFinished, this.createRectTween });
+class _HeroParty {
+  _HeroParty({ this.onQuestFinished, this.createRectTween });
 
   final VoidCallback onQuestFinished;
   final CreateRectTween createRectTween;
@@ -314,8 +307,8 @@ class HeroParty {
   List<_HeroQuestState> _heroes = <_HeroQuestState>[];
   bool get isEmpty => _heroes.isEmpty;
 
-  Map<Object, HeroHandle> getHeroesToAnimate() {
-    Map<Object, HeroHandle> result = new Map<Object, HeroHandle>();
+  Map<Object, _HeroHandle> getHeroesToAnimate() {
+    Map<Object, _HeroHandle> result = new Map<Object, _HeroHandle>();
     for (_HeroQuestState hero in _heroes)
       result[hero.tag] = hero;
     assert(!result.containsKey(null));
@@ -333,7 +326,7 @@ class HeroParty {
     return new Tween<double>(begin: begin, end: end);
   }
 
-  void animate(Map<Object, HeroHandle> heroesFrom, Map<Object, HeroHandle> heroesTo, Rect animationArea) {
+  void animate(Map<Object, _HeroHandle> heroesFrom, Map<Object, _HeroHandle> heroesTo, Rect animationArea) {
     assert(!heroesFrom.containsKey(null));
     assert(!heroesTo.containsKey(null));
 
@@ -354,13 +347,13 @@ class HeroParty {
           (heroPair.to == null && !heroPair.from.alwaysAnimate))
         continue;
       _HeroManifest from = heroPair.from?._takeChild(_currentAnimation);
-      assert(heroPair.to == null || heroPair.to is HeroState);
+      assert(heroPair.to == null || heroPair.to is _HeroState);
       _HeroManifest to = heroPair.to?._takeChild(_currentAnimation);
       assert(from != null || to != null);
       assert(to == null || to.sourceStates.length == 1);
       assert(to == null || to.currentTurns.floor() == to.currentTurns);
-      HeroState targetState = to != null ? to.sourceStates.elementAt(0) : null;
-      Set<HeroState> sourceStates = from?.sourceStates ?? new HashSet<HeroState>();
+      _HeroState targetState = to != null ? to.sourceStates.elementAt(0) : null;
+      Set<_HeroState> sourceStates = from?.sourceStates ?? new HashSet<_HeroState>();
       sourceStates.remove(targetState);
       Rect sourceRect = from?.currentRect ?? to.currentRect.center & Size.zero;
       Rect targetRect = to?.currentRect ?? from.currentRect.center & Size.zero;
@@ -408,7 +401,7 @@ class HeroParty {
       for (_HeroQuestState hero in _heroes) {
         if (hero.targetState != null)
           hero.targetState._setChild(hero.key);
-        for (HeroState source in hero.sourceStates)
+        for (_HeroState source in hero.sourceStates)
           source._resetChild();
         hero.dispose();
       }
@@ -425,13 +418,13 @@ class HeroParty {
 
 class HeroController extends NavigatorObserver {
   HeroController({ CreateRectTween createRectTween }) {
-    _party = new HeroParty(
+    _party = new _HeroParty(
       onQuestFinished: _handleQuestFinished,
       createRectTween: createRectTween
     );
   }
 
-  HeroParty _party;
+  _HeroParty _party;
   Animation<double> _animation;
   PageRoute<dynamic> _from;
   PageRoute<dynamic> _to;
@@ -510,10 +503,10 @@ class HeroController extends NavigatorObserver {
       // The navigator was removed before this end-of-frame callback was called.
       return;
     }
-    Map<Object, HeroHandle> heroesFrom = _party.isEmpty ?
-        Hero.of(_from.subtreeContext) : _party.getHeroesToAnimate();
+    Map<Object, _HeroHandle> heroesFrom = _party.isEmpty ?
+        Hero._of(_from.subtreeContext) : _party.getHeroesToAnimate();
 
-    Map<Object, HeroHandle> heroesTo = Hero.of(_to.subtreeContext);
+    Map<Object, _HeroHandle> heroesTo = Hero._of(_to.subtreeContext);
     _to.offstage = false;
 
     Animation<double> animation = _animation; // The route's animation.
