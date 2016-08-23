@@ -100,12 +100,14 @@ static void AppendFlutterView(std::stringstream* stream,
 }  // namespace
 
 void PlatformViewServiceProtocol::RegisterHook(bool running_precompiled_code) {
+  // Listing of FlutterViews.
+  Dart_RegisterRootServiceRequestCallback(kListViewsExtensionName, &ListViews,
+                                          nullptr);
+  // The following set of service protocol extensions require debug build
   if (running_precompiled_code) {
     return;
   }
   Dart_RegisterRootServiceRequestCallback(kRunInViewExtensionName, &RunInView,
-                                          nullptr);
-  Dart_RegisterRootServiceRequestCallback(kListViewsExtensionName, &ListViews,
                                           nullptr);
 }
 
