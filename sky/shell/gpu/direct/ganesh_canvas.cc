@@ -33,21 +33,11 @@ bool GaneshCanvas::SetupGrGLInterface() {
       kOpenGL_GrBackend,
       reinterpret_cast<GrBackendContext>(GrGLCreateNativeInterface())));
 
-#ifndef NDEBUG
-  // In debug mode, always log the GL connection description.
-  {
-    flow::GLConnection connection;
-    FTL_LOG(INFO) << connection.Description();
-  }
-#else
-  // In release mode, log the GL connection description in case of gr_context
-  // setup failure.
   if (gr_context_ == nullptr) {
     flow::GLConnection connection;
     FTL_LOG(INFO) << "Failed to setup GL context. Aborting.";
     FTL_LOG(INFO) << connection.Description();
   }
-#endif
 
   if (!gr_context_)
     return false;
