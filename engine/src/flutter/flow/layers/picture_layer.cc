@@ -30,7 +30,8 @@ void PictureLayer::Paint(PaintContext& context) {
   context.canvas.translate(offset_.x(), offset_.y());
 
   if (image_) {
-    context.canvas.drawImage(image_.get(), 0, 0);
+    context.canvas.drawImageRect(image_.get(), picture_->cullRect(), nullptr,
+                                 SkCanvas::kFast_SrcRectConstraint);
   } else {
     context.canvas.drawPicture(picture_.get());
   }
