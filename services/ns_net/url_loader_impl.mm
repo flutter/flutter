@@ -11,85 +11,96 @@
 
 #import <Foundation/Foundation.h>
 
-@interface URLLoaderConnectionDelegate : NSObject<NSURLConnectionDataDelegate>
+static mojo::URLResponsePtr MojoErrorResponse(NSURL* url, NSString* message) {
+  mojo::URLResponsePtr response = mojo::URLResponse::New();
+  response->url = url.absoluteString.UTF8String;
+  response->error = mojo::NetworkError::New();
+  response->error->description = message.UTF8String;
+  return response;
+}
 
-@property(nonatomic) mojo::URLLoaderImpl::StartCallback startCallback;
-@property(nonatomic, retain) NSURLRequest* originalRequest;
+static mojo::URLResponsePtr MojoNetworkResponse(
+    NSURL* url,
+    NSHTTPURLResponse* response,
+    mojo::ScopedDataPipeConsumerHandle response_data) {
+  mojo::URLResponsePtr mojo_response = mojo::URLResponse::New();
+  mojo_response->status_code = static_cast<uint32_t>(response.statusCode);
+  mojo_response->url = url.absoluteString.UTF8String;
+
+  NSDictionary* headers = response.allHeaderFields;
+
+  if (headers.count > 0) {
+    mojo_response->headers = mojo::Array<mojo::HttpHeaderPtr>::New(0);
+
+    for (NSString* key in headers.allKeys) {
+      auto mojo_header = mojo::HttpHeader::New();
+
+      mojo_header->name = key.UTF8String;
+      mojo_header->value = [headers[key] UTF8String];
+
+      mojo_response->headers.push_back(mojo_header.Pass());
+    }
+  }
+
+  mojo_response->body = response_data.Pass();
+
+  return mojo_response;
+}
+
+@interface URLLoaderConnectionDelegate : NSObject<NSURLConnectionDataDelegate>
 
 @end
 
 @implementation URLLoaderConnectionDelegate {
-  mojo::URLResponsePtr _response;
-  mojo::ScopedDataPipeProducerHandle _producer;
+  mojo::DataPipe _pipe;
+  mojo::URLLoader::StartCallback _startCallback;
 }
 
-@synthesize startCallback = _startCallback;
-@synthesize originalRequest = _originalRequest;
+- (instancetype)initWithStartCallback:
+    (mojo::URLLoader::StartCallback)startCallback {
+  self = [super init];
+  if (self) {
+    _startCallback = startCallback;
+  }
+  return self;
+}
+
+- (void)invokeStartCallback:(mojo::URLResponsePtr)response {
+  if (!_startCallback.is_null()) {
+    _startCallback.Run(response.Pass());
+    _startCallback.reset();
+  }
+}
 
 - (void)connection:(NSURLConnection*)connection
-didReceiveResponse:(NSHTTPURLResponse*)response {
-  _response = mojo::URLResponse::New();
-  _response->status_code = response.statusCode;
-  _response->url =
-      mojo::String(self.originalRequest.URL.absoluteString.UTF8String);
-  NSUInteger headerCount = response.allHeaderFields.count;
-  if (headerCount > 0) {
-    _response->headers = mojo::Array<mojo::HttpHeaderPtr>::New(0);
-    [response.allHeaderFields enumerateKeysAndObjectsUsingBlock:^(
-                                  NSString* key, NSString* value, BOOL* stop) {
-      auto header = mojo::HttpHeader::New();
-      header->name = key.UTF8String;
-      header->value = value.UTF8String;
-      _response->headers.push_back(header.Pass());
-    }];
-  }
-  mojo::DataPipe pipe;
-  _response->body = pipe.consumer_handle.Pass();
-  _producer = pipe.producer_handle.Pass();
+    didReceiveResponse:(NSHTTPURLResponse*)response {
+  auto mojo_response = MojoNetworkResponse(
+      connection.originalRequest.URL, response, _pipe.consumer_handle.Pass());
+  [self invokeStartCallback:mojo_response.Pass()];
 }
 
 - (void)connection:(NSURLConnection*)connection didReceiveData:(NSData*)data {
-  if (!_startCallback.is_null()) {
-    DCHECK(_response);
-    _startCallback.Run(_response.Pass());
-    _startCallback.reset();
-    _response.reset();
-  }
   uint32_t length = data.length;
   // TODO(eseidel): This can't work. The data pipe could be full, we need to
   // write an async writter for filling the pipe and use it here.
-  MojoResult result = WriteDataRaw(_producer.get(), data.bytes, &length,
-                                   MOJO_WRITE_DATA_FLAG_ALL_OR_NONE);
+  MojoResult result = WriteDataRaw(_pipe.producer_handle.get(), data.bytes,
+                                   &length, MOJO_WRITE_DATA_FLAG_ALL_OR_NONE);
   // FIXME(csg): Handle buffers in case of failures
   DCHECK(result == MOJO_RESULT_OK);
   DCHECK(length == data.length);
 }
 
 - (void)connectionDidFinishLoading:(NSURLConnection*)connection {
-  DCHECK(_response.is_null());
-  DCHECK(_startCallback.is_null());
-  _producer.reset();
+  _pipe.producer_handle.reset();
 }
 
 - (void)connection:(NSURLConnection*)connection
-  didFailWithError:(NSError*)error {
-  if (!_startCallback.is_null()) {
-    if (_response.is_null()) {
-      _response = mojo::URLResponse::New();
-      _response->url =
-          mojo::String(self.originalRequest.URL.absoluteString.UTF8String);
-    }
-
-    _response->error = mojo::NetworkError::New();
-    _response->error->description =
-        mojo::String(error.localizedDescription.UTF8String);
-
-    _startCallback.Run(_response.Pass());
-    _startCallback.reset();
-  }
-
-  _response.reset();
-  _producer.reset();
+    didFailWithError:(NSError*)error {
+  // We are not going to be sending any more data.
+  _pipe.producer_handle.reset();
+  auto mojo_error_response = MojoErrorResponse(connection.originalRequest.URL,
+                                               error.localizedDescription);
+  [self invokeStartCallback:mojo_error_response.Pass()];
 }
 
 - (NSCachedURLResponse*)connection:(NSURLConnection*)connection
@@ -98,10 +109,13 @@ didReceiveResponse:(NSHTTPURLResponse*)response {
 }
 
 - (void)dealloc {
-  [_originalRequest release];
-  DCHECK(_response.is_null());
-  DCHECK(_startCallback.is_null());
-  _producer.reset();
+  if (!_startCallback.is_null()) {
+    mojo::URLResponsePtr cancelled = mojo::URLResponse::New();
+    cancelled->error = mojo::NetworkError::New();
+    cancelled->error->description = "Cancelled";
+    _startCallback.Run(cancelled.Pass());
+  }
+
   [super dealloc];
 }
 
@@ -161,10 +175,12 @@ class AsyncNSDataDrainer : common::DataPipeDrainer::Client {
 };
 
 URLLoaderImpl::URLLoaderImpl(InterfaceRequest<URLLoader> request)
-    : binding_(this, request.Pass()), pending_connection_(nullptr) {}
+    : binding_(this, request.Pass()), weak_factory_(this) {}
 
 URLLoaderImpl::~URLLoaderImpl() {
-  [(id)pending_connection_ release];
+  [pending_connection_.get() cancel];
+  [pending_connection_.get() unscheduleFromRunLoop:[NSRunLoop mainRunLoop]
+                                           forMode:NSRunLoopCommonModes];
 }
 
 void URLLoaderImpl::Start(URLRequestPtr request,
@@ -176,7 +192,7 @@ void URLLoaderImpl::Start(URLRequestPtr request,
 
     request_data_drainer_->StartWithCompletionCallback(
         request->body[0].Pass(),  // handle
-        base::Bind(&URLLoaderImpl::StartNow, base::Unretained(this),
+        base::Bind(&URLLoaderImpl::StartNow, weak_factory_.GetWeakPtr(),
                    base::Passed(&request), callback));
   } else {
     StartNow(request.Pass(), callback, nullptr);
@@ -190,45 +206,44 @@ void URLLoaderImpl::StartNow(URLRequestPtr request,
 
   request_data_drainer_.reset();
 
-  NSURL* url = [NSURL URLWithString:@(request->url.data())];
-  NSMutableURLRequest* req = [NSMutableURLRequest requestWithURL:url];
+  // Create the URL Request.
 
-  req.HTTPMethod = @(request->method.data());
-  req.HTTPBody = body_data;  // by copy
+  NSURL* url = [NSURL URLWithString:@(request->url.data())];
+  NSMutableURLRequest* url_request = [NSMutableURLRequest requestWithURL:url];
+
+  url_request.HTTPMethod = @(request->method.data());
+  url_request.HTTPBody = body_data;  // by copy
 
   for (const auto& header : request->headers) {
-    NSString* name = @(header->name.data());
-    NSString* value = @(header->value.data());
-    [req addValue:value forHTTPHeaderField:name];
+    [url_request addValue:@(header->value.data())
+        forHTTPHeaderField:@(header->name.data())];
   };
 
-  URLLoaderConnectionDelegate* delegate =
-      [[URLLoaderConnectionDelegate alloc] init];
+  // Create the connection and its delegate.
 
-  NSURLConnection* connection =
-      [[NSURLConnection alloc] initWithRequest:req
-                                      delegate:delegate
-                              startImmediately:NO];
+  connection_delegate_.reset(
+      [[URLLoaderConnectionDelegate alloc] initWithStartCallback:callback]);
 
-  delegate.startCallback = callback;
-  delegate.originalRequest = req;
+  pending_connection_.reset([[NSURLConnection alloc]
+       initWithRequest:url_request
+              delegate:connection_delegate_
+      startImmediately:NO]);
 
-  [delegate release];
+  // Schedule the connection on the main run loop.
 
-  [connection scheduleInRunLoop:[NSRunLoop mainRunLoop]
-                        forMode:NSRunLoopCommonModes];
-  [connection start];
+  [pending_connection_ scheduleInRunLoop:[NSRunLoop mainRunLoop]
+                                 forMode:NSRunLoopCommonModes];
 
-  pending_connection_ = connection;
+  // Start the connection.
+
+  [pending_connection_ start];
 }
 
 void URLLoaderImpl::FollowRedirect(const FollowRedirectCallback& callback) {
-  base::mac::ScopedNSAutoreleasePool pool;
   DCHECK(false);
 }
 
 void URLLoaderImpl::QueryStatus(const QueryStatusCallback& callback) {
-  base::mac::ScopedNSAutoreleasePool pool;
   DCHECK(false);
 }
 
