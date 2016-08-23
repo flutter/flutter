@@ -762,6 +762,10 @@ abstract class State<T extends StatefulWidget> {
   /// setState(() { _myState = newValue });
   /// ```
   ///
+  /// The provided callback is immediately called synchronously. It must not
+  /// return a future (the callback cannot be `async`), since then it would be
+  /// unclear when the state was actually being set.
+  ///
   /// Calling [setState] notifies the framework that the internal state of this
   /// object has changed in a way that might impact the user interface in this
   /// subtree, which causes the framework to schedule a [build] for this [State]
@@ -771,11 +775,29 @@ abstract class State<T extends StatefulWidget> {
   /// framework might not schedule a [build] and the user interface for this
   /// subtree might not be updated to reflect the new state.
   ///
+  /// Generally it is recommended that the `setState` method only be used to
+  /// wrap the actual changes to the state, not any computation that might be
+  /// associated with the change. For example, here a value used by the [build]
+  /// function is incremented, and then the change is written to disk, but only
+  /// the increment is wrapped in the `setState`:
+  ///
+  /// ```dart
+  /// Future<Null> _incrementCounter() async {
+  ///   setState(() {
+  ///     _counter++;
+  ///   });
+  ///   final String dir = await PathProvider.getApplicationDocumentsDirectory();
+  ///   await new File('$dir/counter.txt').writeAsString('$_counter');
+  ///   return null;
+  /// }
+  /// ```
+  ///
   /// It is an error to call this method after the framework calls [dispose].
   /// You can determine whether it is legal to call this method by checking
   /// whether the [mounted] property is true.
   @protected
   void setState(VoidCallback fn) {
+    assert(fn != null);
     assert(() {
       if (_debugLifecycleState == _StateLifecycle.defunct) {
         throw new FlutterError(
