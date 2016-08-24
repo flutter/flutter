@@ -445,18 +445,9 @@ class HotRunner extends ResidentRunner {
       } else {
         flutterUsage.sendEvent('hot', 'reload');
       }
-    } catch (error, st) {
-      int errorCode = error['code'];
-      if (errorCode == Isolate.kIsolateReloadBarred) {
-        printError('Unable to hot reload app due to an unrecoverable error in '
-                   'the source code. Please address the error and then '
-                   'Use "R" to restart the app.');
-        flutterUsage.sendEvent('hot', 'reload-barred');
-        return false;
-      }
-      String errorMessage = error['message'];
+    } catch (errorMessage, st) {
       reloadStatus.stop(showElapsedTime: true);
-      printError('Hot reload failed:\ncode = $errorCode\nmessage = $errorMessage\n$st');
+      printError('Hot reload failed:\n$errorMessage\n$st');
       return false;
     }
     await _evictDirtyAssets();
