@@ -12,6 +12,208 @@ import 'build_info.dart';
 import 'device.dart';
 import 'globals.dart';
 import 'vmservice.dart';
+import 'cli/command.dart';
+import 'cli/commandline.dart';
+
+abstract class RunnerCommand extends Command {
+  final ResidentRunner runner;
+
+  RunnerCommand(this.runner, String name, List<Command> children)
+      : super(name, children);
+
+  String get helpShort;
+  String get helpLong;
+}
+
+int _sortCommands(Command a, Command b) => a.name.compareTo(b.name);
+
+class HelpCommand extends RunnerCommand {
+  HelpCommand(ResidentRunner runner) : super(runner, 'help', null);
+
+  String _nameAndAlias(Command cmd) {
+    if (cmd.alias == null) {
+      return cmd.fullName;
+    } else {
+      return '${cmd.fullName}, ${cmd.alias}';
+    }
+  }
+
+  @override
+  Future<Null> run(List<String> args) async {
+    if (args.length == 0) {
+      // Print list of all top-level commands.
+      List<Command> commands = runner.cmd.matchCommand(<String>[], false);
+      commands.sort(_sortCommands);
+      logger.printStatus('Commands:\n', emphasis: true);
+      for (Command command in commands) {
+        RunnerCommand rcommand = command;
+        logger.printStatus('${_nameAndAlias(command).padRight(12)} '
+                           '- ${rcommand.helpShort}');
+      }
+      logger.printStatus("\nHotkeys:", emphasis: true);
+      logger.printStatus(
+          "\n"
+          "[TAB]        - complete a command (try 'p[TAB][TAB]')\n"
+          "[Up Arrow]   - history previous\n"
+          "[Down Arrow] - history next\n"
+          "[^L]         - clear screen");
+      List<HotKey> keys = runner._commandLine.rootCommand.hotKeys;
+      for (int i = 0; i < keys.length; i++) {
+        HotKey key = keys[i];
+        logger.printStatus(
+            "${key.userName.padRight(12)} - '${key.expansion}'");
+      }
+      logger.printStatus(
+          "\nFor more information on a specific command type "
+          "'help <command>'\n"
+          "Command prefixes are accepted (e.g. 'h' for 'help')\n");
+    } else {
+      // Print any matching commands.
+      List<Command> commands = runner.cmd.matchCommand(args, true);
+      commands.sort(_sortCommands);
+      if (commands.isEmpty) {
+        String line = args.join(' ');
+        logger.printStatus("No command matches '$line'");
+        return;
+      }
+      logger.printStatus('');
+      for (Command command in commands) {
+        RunnerCommand rcommand = command;
+        logger.printStatus(_nameAndAlias(command), emphasis: true);
+        logger.printStatus(rcommand.helpLong);
+
+        List<String> newArgs = <String>[];
+        newArgs.addAll(args.take(args.length - 1));
+        newArgs.add(command.name);
+        newArgs.add('');
+        List<Command> subCommands = runner.cmd.matchCommand(newArgs, false);
+        subCommands.remove(command);
+        if (subCommands.isNotEmpty) {
+          subCommands.sort(_sortCommands);
+          logger.printStatus('Subcommands:\n');
+          for (Command subCommand in subCommands) {
+            RunnerCommand rSubCommand = subCommand;
+            logger.printStatus('    ${subCommand.fullName.padRight(16)} '
+                      '- ${rSubCommand.helpShort}');
+          }
+          logger.printStatus('');
+        }
+      }
+    }
+  }
+
+  @override
+  Future<List<String>> complete(List<String> args) {
+    List<Command> commands = runner.cmd.matchCommand(args, false);
+    List<String> result = commands.map((Command cmd) => '${cmd.fullName} ');
+    return new Future<List<String>>.value(result);
+  }
+
+  @override
+  String helpShort = 'List commands or provide details about a specific command';
+
+  @override
+  String helpLong =
+      'List commands or provide details about a specific command.\n'
+      '\n'
+      'Syntax: help            - Show a list of all commands\n'
+      '        help <command>  - Help for a specific command\n';
+}
+
+class PrintCommand extends RunnerCommand {
+  PrintCommand(ResidentRunner runner) : super(runner, 'print', null);
+
+  final List<List<dynamic>> options = <List<dynamic>>[
+      <dynamic>[ 'rendertree',
+                 (ResidentRunner runner) => runner._debugDumpRenderTree() ],
+      <dynamic>[ 'widgets',
+                 (ResidentRunner runner) => runner._debugDumpApp() ],
+  ];
+
+  @override
+  Future<Null> run(List<String> args) async {
+    if (args.length != 1) {
+      logger.printStatus("'$name' expects one argument");
+      return;
+    } else if (args.length == 1) {
+      String name = args[0].trim();
+      for (int i = 0; i < options.length; i++) {
+        if (options[i][0].startsWith(name)) {
+          await options[i][1](runner);
+          return;
+        }
+      }
+      logger.printStatus("unrecognized option: '$name'");
+    }
+  }
+
+  @override
+  Future<List<String>> complete(List<String> args) async {
+    if (args.length != 1) {
+      return <String>[args.join('')];
+    }
+    List<String> result = <String>[];
+    String prefix = args[0];
+    for (List<dynamic> option in options) {
+      if (option[0].startsWith(prefix)) {
+        result.add('${option[0]}');
+      }
+    }
+    return result;
+  }
+
+  @override
+  String helpShort = 'Print information about a flutter application';
+
+  @override
+  String helpLong =
+      'Print information about a flutter application.\n'
+      '\n'
+      'Syntax: print <option>\n'
+      '\n'
+      'Options:\n'
+      '  print rendertree      # Print the render tree\n'
+      '  print widgets         # Print the widget hierarchy\n';
+}
+
+class QuitCommand extends RunnerCommand {
+  QuitCommand(ResidentRunner runner) : super(runner, 'quit', null);
+
+  @override
+  Future<Null> run(List<String> args) async {
+    if (args.length != 0) {
+      logger.printStatus("'$name' expects no arguments");
+      return;
+    }
+    await runner.stop();
+  }
+
+  @override
+  String helpShort = 'Quit the flutter application';
+
+  @override
+  String helpLong =
+      'Quit the application.\n'
+      '\n'
+      'Syntax: quit\n';
+}
+
+class _CommandLineNotifier implements Hider {
+  _CommandLineNotifier(this.commandLine);
+
+  CommandLine commandLine;
+
+  @override
+  void hide() {
+    commandLine.hide();
+  }
+
+  @override
+  void show() {
+    commandLine.show();
+  }
+}
+
 
 // Shared code between different resident application runners.
 abstract class ResidentRunner {
@@ -30,6 +232,8 @@ abstract class ResidentRunner {
   VMService vmService;
   FlutterView currentView;
   StreamSubscription<String> _loggingSubscription;
+  RootCommand cmd;
+  CommandLine _commandLine;
 
   /// Start the app and keep the process running during its lifetime.
   Future<int> run({
@@ -75,10 +279,7 @@ abstract class ResidentRunner {
       printStatus('Caught SIGUSR1');
       await restart(fullRestart: false);
     });
-    ProcessSignal.SIGUSR2.watch().listen((ProcessSignal signal) async {
-      printStatus('Caught SIGUSR2');
-      await restart(fullRestart: true);
-    });
+    // TODO(turnidge): Use SIGWINCH to notify _commandline of window changes.
   }
 
   Future<Null> startEchoingDeviceLog() async {
@@ -124,59 +325,48 @@ abstract class ResidentRunner {
     });
   }
 
-  /// Returns [true] if the input has been handled by this function.
-  Future<bool> _commonTerminalInputHandler(String character) async {
-    final String lower = character.toLowerCase();
-
-    printStatus(''); // the key the user tapped might be on this line
-
-    if (lower == 'h' || lower == '?' || character == AnsiTerminal.KEY_F1) {
-      // F1, help
-      printHelp();
-      return true;
-    } else if (lower == 'w') {
-      await _debugDumpApp();
-      return true;
-    } else if (lower == 't') {
-      await _debugDumpRenderTree();
-      return true;
-    } else if (lower == 'q' || character == AnsiTerminal.KEY_F10) {
-      // F10, exit
-      await stop();
-      return true;
-    }
-
-    return false;
+  List<Command> buildCommandList() {
+    List<Command> cmds = <Command>[];
+    cmds.add(new HelpCommand(this));
+    cmds.add(new PrintCommand(this));
+    cmds.add(new QuitCommand(this));
+    return cmds;
   }
 
-  Future<Null> processTerminalInput(String command) async {
-    bool handled = await _commonTerminalInputHandler(command);
-    if (!handled)
-      await handleTerminalCommand(command);
+  void addHotKeys(RootCommand root) {
+    root.addHotKey('[F1]', terminal.keyF1, 'help');
+    root.addHotKey('[F10]', terminal.keyF10, 'quit');
   }
 
   void appFinished() {
     if (_finished.isCompleted)
       return;
-    printStatus('Application finished.');
     _resetTerminal();
     _finished.complete(0);
+    printStatus('Application finished.');
   }
 
   void _resetTerminal() {
-    if (usesTerminalUI)
-      terminal.singleCharMode = false;
+    if (usesTerminalUI) {
+      if (_commandLine != null) {
+        logger.commandLine = null;
+        CommandLine commandLine = _commandLine;
+        _commandLine = null;
+        commandLine.hide();
+        commandLine.quit();
+      }
+    }
   }
 
   void setupTerminal() {
     if (usesTerminalUI) {
       if (!logger.quiet)
-        printHelp();
+        printHelpSummary();
 
-      terminal.singleCharMode = true;
-      terminal.onCharInput.listen((String code) {
-        processTerminalInput(code);
-      });
+      cmd = new RootCommand(buildCommandList());
+      addHotKeys(cmd);
+      _commandLine = new CommandLine(cmd, terminal, prompt: '(flutter) ');
+      logger.commandLine = new _CommandLineNotifier(_commandLine);
     }
   }
 
@@ -204,9 +394,7 @@ abstract class ResidentRunner {
   /// Called right before we exit.
   Future<Null> cleanupAtFinish();
   /// Called to print help to the terminal.
-  void printHelp();
-  /// Called when the runner should handle a terminal command.
-  Future<Null> handleTerminalCommand(String code);
+  void printHelpSummary();
 }
 
 /// Given the value of the --target option, return the path of the Dart file

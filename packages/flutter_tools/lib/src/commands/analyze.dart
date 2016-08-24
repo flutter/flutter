@@ -336,10 +336,10 @@ class AnalyzeCommand extends FlutterCommand {
       analyzedPaths.clear();
       analysisTimer = new Stopwatch()..start();
     } else {
-      analysisStatus?.stop(showElapsedTime: true);
+      analysisStatus?.stop();
       analysisTimer.stop();
 
-      logger.printStatus(terminal.clearScreen(), newline: false);
+      logger.printStatus(terminal.clearScreen, newline: false);
 
       // Remove errors for deleted files, sort, and print errors.
       final List<AnalysisError> errors = <AnalysisError>[];

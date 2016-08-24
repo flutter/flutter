@@ -133,7 +133,7 @@ class DriveCommand extends RunCommandBase {
         'Missing packages directory; running `pub get` (to work around https://github.com/dart-lang/test/issues/327):'
       );
       await runAsync(<String>[sdkBinaryName('pub'), 'get', '--no-precompile']);
-      status.stop(showElapsedTime: true);
+      status.stop();
     }
 
     Cache.releaseLockEarly();

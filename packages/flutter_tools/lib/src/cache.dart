@@ -230,7 +230,7 @@ class MaterialFonts {
       Uri.parse(cache.getVersionFor(kName)), fontsDir, true
     ).then((_) {
       cache.setStampFor(kName, cache.getVersionFor(kName));
-      status.stop(showElapsedTime: true);
+      status.stop();
     }).whenComplete(() {
       status.cancel();
     });
@@ -345,7 +345,7 @@ class FlutterEngine {
       String skyServicesPath = path.join(pkgDir.path, kSkyServices);
       buildSkyEngineSdkSummary(skyEnginePath, skyServicesPath, kSdkBundle);
     } finally {
-      summaryStatus.stop(showElapsedTime: true);
+      summaryStatus.stop();
     }
 
     Directory engineDir = cache.getArtifactDirectory(kName);
@@ -388,7 +388,7 @@ class FlutterEngine {
   Future<Null> _downloadItem(String message, String url, Directory dest) {
     Status status = logger.startProgress(message);
     return Cache._downloadFileToCache(Uri.parse(url), dest, true).then((_) {
-      status.stop(showElapsedTime: true);
+      status.stop();
     }).whenComplete(() {
       status.cancel();
     });

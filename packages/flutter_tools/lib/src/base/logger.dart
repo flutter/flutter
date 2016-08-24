@@ -3,12 +3,21 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert' show ASCII;
+import 'dart:convert' show UTF8;
 import 'dart:io';
 
 import 'package:stack_trace/stack_trace.dart';
 
 final AnsiTerminal terminal = new AnsiTerminal();
+
+/// The Hider class is used to inform an active command line when
+/// logging is occuring so that it can hide the status line and then
+/// show it.  This is used to implement command lines and status
+/// lines.
+abstract class Hider {
+  void hide();
+  void show();
+}
 
 abstract class Logger {
   bool get isVerbose => false;
@@ -24,67 +33,157 @@ abstract class Logger {
   /// fail in some way.
   void printError(String message, [StackTrace stackTrace]);
 
-  /// Display normal output of the command. This should be used for things like
+  /// Display normal output. This should be used for things like
   /// progress messages, success messages, or just normal command output.
-  void printStatus(String message, { bool emphasis: false, bool newline: true });
+  void printStatus(String message,
+                   { bool emphasis: false, bool newline: true }) {
+    hideStatusLine();
+    printRaw(message, emphasis: emphasis, newline: newline);
+    showStatusLine();
+  }
+
+  /// Display output without saving the status line.  Most people will
+  /// not call this directly.
+  void printRaw(String message, { bool emphasis: false, bool newline: true });
 
   /// Use this for verbose tracing output. Users can turn this output on in order
   /// to help diagnose issues with the toolchain or with their setup.
   void printTrace(String message);
 
-  /// Start an indeterminate progress display.
-  Status startProgress(String message);
-
   /// Flush any buffered output.
   void flush() { }
+
+  Hider commandLine;
+  Status _activeStatus;
+
+  /// Overridein subclasses to implement progress reports.
+  Status newProgress(String message) {
+    return new DumbStatus(this, message);
+  }
+
+  Status startProgress(String message) {
+    assert(_activeStatus == null);
+    commandLine?.hide();
+    _activeStatus = newProgress(message);
+    _activeStatus.start();
+
+    return _activeStatus;
+  }
+
+  void stopProgress() {
+    _activeStatus = null;
+    commandLine?.show();
+  }
+
+  void hideStatusLine() {
+    if (_activeStatus != null) {
+      _activeStatus?.hide();
+    } else {
+      commandLine?.hide();
+    }
+  }
+
+  void showStatusLine() {
+    if (_activeStatus != null) {
+      _activeStatus?.show();
+    } else {
+      commandLine?.show();
+    }
+  }
 }
 
-class Status {
-  void stop({ bool showElapsedTime: false }) { }
-  void cancel() { }
+abstract class Status implements Hider {
+  Status(this.logger);
+
+  final Logger logger;
+
+  bool _done = false;
+  bool get done => _done;
+
+  bool _canceled = false;
+  bool get canceled => _canceled;
+
+  int ticks = 0;
+  Timer _timer;
+
+  // Overridden in subclasses.
+  @override
+  void hide() {}
+
+  @override
+  void show() {}
+
+  void refresh();
+
+  void start() {
+    refresh();
+    _timer = new Timer.periodic(new Duration(milliseconds: 100),
+                                _timerCallback);
+  }
+
+  void _timerCallback(Timer timer) {
+    ticks++;
+    refresh();
+  }
+
+  void stop() {
+    if (_done)
+      return;
+    _done = true;
+    refresh();
+    _timer.cancel();
+    logger.stopProgress();
+  }
+
+  void cancel() {
+    if (_done)
+      return;
+    _done = true;
+    _canceled = true;
+    refresh();
+    _timer.cancel();
+    logger.stopProgress();
+  }
 }
 
 class StdoutLogger extends Logger {
-  Status _status;
-
   @override
   bool get isVerbose => false;
 
   @override
   void printError(String message, [StackTrace stackTrace]) {
-    _status?.cancel();
-    _status = null;
-
+    hideStatusLine();
     stderr.writeln(message);
     if (stackTrace != null)
       stderr.writeln(new Chain.forTrace(stackTrace).terse.toString());
+
+    showStatusLine();
+  }
+
+  @override
+  void printRaw(String message, { bool emphasis: false, bool newline: true }) {
+    if (newline)
+      stdout.writeln(emphasis ? terminal.toBold(message) : message);
+    else
+      stdout.write(emphasis ? terminal.toBold(message) : message);
   }
 
   @override
   void printStatus(String message, { bool emphasis: false, bool newline: true }) {
-    _status?.cancel();
-    _status = null;
-
-    if (newline)
-      stdout.writeln(emphasis ? terminal.writeBold(message) : message);
-    else
-      stdout.write(emphasis ? terminal.writeBold(message) : message);
+    hideStatusLine();
+    printRaw(message, emphasis: emphasis, newline: newline);
+    showStatusLine();
   }
 
   @override
   void printTrace(String message) { }
 
   @override
-  Status startProgress(String message) {
-    _status?.cancel();
-    _status = null;
-
+  Status newProgress(String message) {
     if (supportsColor) {
-      _status = new _AnsiStatus(message);
-      return _status;
+      return new _AnsiStatus(this, message);
     } else {
-      printStatus(message);
-      return new Status();
+      return new DumbStatus(this, message);
     }
   }
 
@@ -108,7 +207,7 @@ class BufferLogger extends Logger {
   void printError(String message, [StackTrace stackTrace]) => _error.writeln(message);
 
   @override
-  void printStatus(String message, { bool emphasis: false, bool newline: true }) {
+  void printRaw(String message, { bool emphasis: false, bool newline: true }) {
     if (newline)
       _status.writeln(message);
     else
@@ -116,13 +215,12 @@ class BufferLogger extends Logger {
   }
 
   @override
-  void printTrace(String message) => _trace.writeln(message);
+  void printStatus(String message, { bool emphasis: false, bool newline: true }) {
+    printRaw(message, emphasis: emphasis, newline: newline);
+  }
 
   @override
-  Status startProgress(String message) {
-    printStatus(message);
-    return new Status();
-  }
+  void printTrace(String message) => _trace.writeln(message);
 
   @override
   void flush() { }
@@ -141,22 +239,21 @@ class VerboseLogger extends Logger {
   }
 
   @override
-  void printStatus(String message, { bool emphasis: false, bool newline: true }) {
+  void printRaw(String message, { bool emphasis: false, bool newline: true }) {
     // TODO(ianh): We ignore newline and emphasis here.
     _emit();
     lastMessage = new _LogMessage(_LogType.status, message);
   }
 
   @override
-  void printTrace(String message) {
-    _emit();
-    lastMessage = new _LogMessage(_LogType.trace, message);
+  void printStatus(String message, { bool emphasis: false, bool newline: true }) {
+    printRaw(message, emphasis: emphasis, newline: newline);
   }
 
   @override
-  Status startProgress(String message) {
-    printStatus(message);
-    return new Status();
+  void printTrace(String message) {
+    _emit();
+    lastMessage = new _LogMessage(_LogType.trace, message);
   }
 
   @override
@@ -192,98 +289,224 @@ class _LogMessage {
     String prefix = '${millis.toString().padLeft(4)} ms • ';
     String indent = ''.padLeft(prefix.length);
     if (millis >= 100)
-      prefix = terminal.writeBold(prefix.substring(0, prefix.length - 3)) + ' • ';
+      prefix = terminal.toBold(prefix.substring(0, prefix.length - 3)) + ' • ';
     String indentMessage = message.replaceAll('\n', '\n$indent');
 
     if (type == _LogType.error) {
-      stderr.writeln(prefix + terminal.writeBold(indentMessage));
+      stderr.writeln(prefix + terminal.toBold(indentMessage));
       if (stackTrace != null)
         stderr.writeln(indent + stackTrace.toString().replaceAll('\n', '\n$indent'));
     } else if (type == _LogType.status) {
-      print(prefix + terminal.writeBold(indentMessage));
+      print(prefix + terminal.toBold(indentMessage));
     } else {
       print(prefix + indentMessage);
     }
   }
 }
 
+String _tputGetSequence(String capName, { String orElse }) {
+  if (AnsiTerminal._testMode)
+    return '[$capName]';
+
+  if (Platform.isWindows)
+    return orElse;
+
+  ProcessResult result =
+      Process.runSync('tput',  <String>['$capName'], stdoutEncoding:UTF8);
+  if (result.exitCode != 0)
+    return orElse;
+
+  return result.stdout;
+}
+
 class AnsiTerminal {
   AnsiTerminal() {
     // TODO(devoncarew): This detection does not work for Windows.
     String term = Platform.environment['TERM'];
+    // TODO(turnidge): Switch users of 'supportsColor' to 'isDumb' instead.
     supportsColor = term != null && term != 'dumb';
   }
 
-  static const String KEY_F1  = '\u001BOP';
-  static const String KEY_F5  = '\u001B[15~';
-  static const String KEY_F10 = '\u001B[21~';
+  // Used during development to see all special characters in output.
+  static final bool _testMode = false;
 
-  static const String _bold  = '\u001B[1m';
-  static const String _reset = '\u001B[0m';
-  static const String _clear = '\u001B[2J\u001B[H';
+  bool get isDumb {
+    return (cursorBack == null ||
+            cursorForward == null ||
+            cursorUp == null ||
+            cursorDown == null ||
+            clearEOL == null ||
+            clearScreen == null);
+  }
+
+  // Function keys.
+  final String keyF1  = _tputGetSequence('kf1',  orElse: '\u001BOP');
+  final String keyF5  = _tputGetSequence('kf5',  orElse: '\u001B[15~');
+  final String keyF6  = _tputGetSequence('kf6',  orElse: '\u001B[17~');
+  final String keyF10 = _tputGetSequence('kf10', orElse: '\u001B[21~');
+
+  // Back one character.
+  final String cursorBack = _tputGetSequence('cub1');
+
+  // Forward one character.
+  final String cursorForward = _tputGetSequence('cuf1');
+
+  // Up one character.
+  final String cursorUp = _tputGetSequence('cuu1');
+
+  // Down one character.
+  final String cursorDown = _tputGetSequence('cud1');
+
+  // Clear to end of line.
+  final String clearEOL = _tputGetSequence('el');
+
+  // Clear screen and home cursor.
+  final String clearScreen = _tputGetSequence('clear', orElse: '\n\n');
+
+  // Enter bold text mode.
+  final String boldText = _tputGetSequence('bold', orElse: '');
+
+  // Exit text attributes.
+  final String resetText = _tputGetSequence('sgr0', orElse: '');
+
+  int get cols => stdout.terminalColumns;
 
   bool supportsColor;
 
-  String writeBold(String str) => supportsColor ? '$_bold$str$_reset' : str;
-
-  String clearScreen() => supportsColor ? _clear : '\n\n';
-
-  set singleCharMode(bool value) {
-    stdin.lineMode = !value;
-  }
-
-  /// Return keystrokes from the console.
-  ///
-  /// Useful when the console is in [singleCharMode].
-  Stream<String> get onCharInput => stdin.transform(ASCII.decoder);
+  // Convenience method for bolding text.
+  String toBold(String str) => '$boldText$str$resetText';
 }
 
 class _AnsiStatus extends Status {
-  _AnsiStatus(this.message) {
+  _AnsiStatus(Logger logger, this.message) : super(logger) {
     stopwatch = new Stopwatch()..start();
-
-    stdout.write('${message.padRight(51)}     ');
-    stdout.write('${_progress[0]}');
-
-    timer = new Timer.periodic(new Duration(milliseconds: 100), _callback);
   }
 
-  static final List<String> _progress = <String>['-', r'\', '|', r'/', '-', r'\', '|', '/'];
+  static final List<String> _progress =
+      <String>['-', r'\', '|', r'/', '-', r'\', '|', '/'];
 
   final String message;
   Stopwatch stopwatch;
-  Timer timer;
-  int index = 1;
-  bool live = true;
+  String _currentLine;
+  bool _shown = true;
 
-  void _callback(Timer timer) {
-    stdout.write('\b${_progress[index]}');
-    index = ++index % _progress.length;
-  }
-
-  @override
-  void stop({ bool showElapsedTime: false }) {
-    if (!live)
+  void _hide() {
+    if (!_shown)
       return;
-    live = false;
 
-    if (showElapsedTime) {
-      double seconds = stopwatch.elapsedMilliseconds / 1000.0;
-      print('\b\b\b\b${seconds.toStringAsFixed(1)}s');
-    } else {
-      print('\b ');
+    _shown = false;
+    if (_currentLine != null) {
+      for (int i = 0; i < _currentLine.length; i += 1) {
+        stdout.write(terminal.cursorBack);
+      }
     }
+  }
 
-    timer.cancel();
+  void _show() {
+    if (_shown)
+      return;
+
+    _shown = true;
+    if (done) {
+      double seconds = stopwatch.elapsedMilliseconds / 1000.0;
+      String secondsStr = seconds.toStringAsFixed(1);
+      String canceledStr = canceled ? ' [canceled]' : '';
+      _currentLine =
+          '${message.padRight(51)}     ${secondsStr}s$canceledStr\n';
+    } else {
+      int index = ticks % _progress.length;
+      _currentLine = '${message.padRight(51)}     ${_progress[index]}';
+    }
+    stdout.write(_currentLine);
   }
 
   @override
-  void cancel() {
-    if (!live)
-      return;
-    live = false;
-
-    print('\b ');
-    timer.cancel();
+  void hide() {
+    _hide();
   }
+
+  @override
+  void show() {
+    _show();
+  }
+
+  @override
+  void refresh() {
+    if (!_shown)
+      return;
+
+    _hide();
+    _show();
+  }
+}
+
+class DumbStatus extends Status {
+  DumbStatus(Logger logger, this.message) : super(logger) {
+    stopwatch = new Stopwatch()..start();
+  }
+
+  final String message;
+  Stopwatch stopwatch;
+
+  bool _first = true;
+  bool _shown = true;
+
+  void _writeSeconds() {
+    double seconds = stopwatch.elapsedMilliseconds / 1000.0;
+    String secondsStr = seconds.toStringAsFixed(1);
+    String canceledStr = canceled ? ' [canceled]' : '';
+    logger.printRaw(' ${secondsStr}s$canceledStr',
+                    newline: true);
+  }
+
+  void _write() {
+    logger.printRaw('${message.padRight(51)}     ',
+                    newline: false);
+    if (done)
+      _writeSeconds();
+  }
+
+  void _update() {
+    if (done)
+      _writeSeconds();
+  }
+
+  @override
+  void hide() {
+    if (!_shown)
+      return;
+
+    _shown = false;
+
+    // Give the log message a fresh line.
+    logger.printRaw('', newline: true);
+  }
+
+  @override
+  void show() {
+    _shown = true;
+
+    // Rewrite the entire status line.
+    _write();
+  }
+
+  @override
+  void refresh() {
+    if (!_shown)
+      return;
+
+    if (_first) {
+      _first = false;
+      _write();
+    } else {
+      _update();
+    }
+  }
+}
+
+class NullStatus extends Status {
+  NullStatus(Logger logger) : super(logger);
+
+  @override
+  void refresh() {}
 }

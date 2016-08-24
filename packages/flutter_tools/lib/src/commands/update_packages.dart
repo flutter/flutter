@@ -45,7 +45,7 @@ class UpdatePackagesCommand extends FlutterCommand {
     new File(path.join(coverageDir, 'lcov.info'))
       ..createSync(recursive: true)
       ..writeAsBytesSync(data, flush: true);
-    status.stop(showElapsedTime: true);
+    status.stop();
   }
 
   @override
