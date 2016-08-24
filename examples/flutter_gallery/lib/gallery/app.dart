@@ -26,9 +26,14 @@ final ThemeData _kGalleryDarkTheme = new ThemeData(
 );
 
 class GalleryApp extends StatefulWidget {
-  GalleryApp({this.updateUrlFetcher, Key key}) : super(key: key);
+  GalleryApp({
+    this.updateUrlFetcher,
+    this.enablePerformanceOverlay: true,
+    Key key}
+  ) : super(key: key);
 
   final UpdateUrlFetcher updateUrlFetcher;
+  final bool enablePerformanceOverlay;
 
   @override
   GalleryAppState createState() => new GalleryAppState();
@@ -56,11 +61,11 @@ class GalleryAppState extends State<GalleryApp> {
         });
       },
       showPerformanceOverlay: _showPerformanceOverlay,
-      onShowPerformanceOverlayChanged: (bool value) {
+      onShowPerformanceOverlayChanged: config.enablePerformanceOverlay ? (bool value) {
         setState(() {
           _showPerformanceOverlay = value;
         });
-      },
+      } : null,
       timeDilation: timeDilation,
       onTimeDilationChanged: (double value) {
         setState(() {
