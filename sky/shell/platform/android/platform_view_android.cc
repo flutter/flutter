@@ -378,7 +378,7 @@ PlatformViewAndroid::PlatformViewAndroid()
 PlatformViewAndroid::~PlatformViewAndroid() = default;
 
 void PlatformViewAndroid::Detach(JNIEnv* env, jobject obj) {
-  // Note: |this| has been destroyed at this point.
+  delete this;
 }
 
 void PlatformViewAndroid::SurfaceCreated(JNIEnv* env,
