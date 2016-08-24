@@ -6,15 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_gallery/gallery/app.dart';
 
-// Example of an updateUrlFetcher that only prompts once a day
-DateTime lastUpdateCheck;
 Future<String> mockUpdateUrlFetcher() {
-  if (lastUpdateCheck != null &&
-      new DateTime.now().difference(lastUpdateCheck) < new Duration(days: 1)) {
-    return null; // We already checked for updates recently
-  }
-  lastUpdateCheck = new DateTime.now();
-
   // A real implementation would connect to the network to retrieve this value
   return new Future<String>.value('http://www.example.com/');
 }

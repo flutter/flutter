@@ -28,7 +28,15 @@ class UpdaterState extends State<Updater> {
     _checkForUpdates();
   }
 
+  static DateTime _lastUpdateCheck;
   Future<Null> _checkForUpdates() async {
+    // Only prompt once a day
+    if (_lastUpdateCheck != null &&
+        new DateTime.now().difference(_lastUpdateCheck) < new Duration(days: 1)) {
+      return; // We already checked for updates recently
+    }
+    _lastUpdateCheck = new DateTime.now();
+
     String updateUrl = await config.updateUrlFetcher();
     if (updateUrl != null) {
       bool wantsUpdate = await showDialog(context: context, child: _buildDialog());
