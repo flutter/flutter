@@ -51,7 +51,7 @@ void main() {
         expect(FileSystemEntity.isFileSync('${temp.path}/$relPath'), true);
       }
       expectExists('lib/main.dart');
-      await for (FileSystemEntity file in temp.list(recursive: true)) {
+      for (FileSystemEntity file in temp.listSync(recursive: true)) {
         if (file is File && file.path.endsWith('.dart')) {
           String original= file.readAsStringSync();
 
