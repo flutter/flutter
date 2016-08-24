@@ -155,8 +155,13 @@ class Tracing {
 Future<Null> downloadStartupTrace(VMService observatory) async {
   File traceInfoFile = new File('build/start_up_info.json');
 
+  // Delete old startup data, if any.
   if (await traceInfoFile.exists())
     await traceInfoFile.delete();
+
+  // Create "build" directory, if missing.
+  if (!(await traceInfoFile.parent.exists()))
+    await traceInfoFile.parent.create();
 
   Tracing tracing = new Tracing(observatory);
 
