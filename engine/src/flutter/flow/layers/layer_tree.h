@@ -20,6 +20,7 @@ namespace flow {
 class LayerTree {
  public:
   LayerTree();
+
   ~LayerTree();
 
   void Raster(CompositorContext::ScopedFrame& frame);
@@ -41,6 +42,7 @@ class LayerTree {
   void set_frame_size(const SkISize& frame_size) { frame_size_ = frame_size; }
 
   uint32_t scene_version() const { return scene_version_; }
+
   void set_scene_version(uint32_t scene_version) {
     scene_version_ = scene_version;
   }
