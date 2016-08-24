@@ -26,7 +26,7 @@ vars = {
 
   # Note: When updating the Dart revision, ensure that all entries that are
   # dependencies of dart are also updated
-  'dart_revision': 'cfdd6ee5cc6a7af56ead91190af8f8dcc33e82ea',
+  'dart_revision': 'd8eb5ffb573b28135a21ea2c7340f69c7578f831',
   'dart_boringssl_revision': '8d343b44bbab829d1a28fdef650ca95f7db4412e',
   'dart_observatory_packages_revision': 'a01235b5b71df27b602dae4676d0bf771cbe7fa2',
   'dart_root_certificates_revision': 'aed07942ce98507d2be28cbd29e879525410c7fc',
@@ -55,7 +55,7 @@ deps = {
    Var('fuchsia_git') + '/ftl' + '@' + '0bb3a02301c8a88b494e58c6636fa509525adaa8',
 
   'src/lib/tonic':
-   Var('fuchsia_git') + '/tonic' + '@' + 'f2cae52e8b3712c799752227b7de8cf6fc6e5244',
+   Var('fuchsia_git') + '/tonic' + '@' + 'c20972bdaee4c0ad19b062cea8d945b1b22c8c6b',
 
   'src/mojo/public':
    Var('fuchsia_git') + '/mojo/public' + '@' + Var('mojo_sdk_revision'),
