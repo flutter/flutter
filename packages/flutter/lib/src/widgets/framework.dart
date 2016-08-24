@@ -1283,11 +1283,6 @@ class BuildOwner {
         int dirtyCount = _dirtyElements.length;
         int index = 0;
         while (index < dirtyCount) {
-          assert(() {
-            if (debugPrintRebuildDirtyWidgets)
-              debugPrint('Rebuilding ${_dirtyElements[index].widget}');
-            return true;
-          });
           _dirtyElements[index].rebuild();
           index += 1;
           if (dirtyCount < _dirtyElements.length) {
@@ -1295,7 +1290,7 @@ class BuildOwner {
             dirtyCount = _dirtyElements.length;
           }
         }
-        assert(!_dirtyElements.any((BuildableElement element) => element.dirty));
+        assert(!_dirtyElements.any((BuildableElement element) => element._active && element.dirty));
       }, building: true);
     } finally {
       _dirtyElements.clear();
@@ -1913,10 +1908,13 @@ abstract class BuildableElement extends Element {
   /// changed.
   void rebuild() {
     assert(_debugLifecycleState != _ElementLifecycle.initial);
-    if (!_active || !_dirty) {
-      _dirty = false;
+    if (!_active || !_dirty)
       return;
-    }
+    assert(() {
+      if (debugPrintRebuildDirtyWidgets)
+        debugPrint('Rebuilding $this');
+      return true;
+    });
     assert(_debugLifecycleState == _ElementLifecycle.active);
     assert(owner._debugStateLocked);
     BuildableElement debugPreviousBuildTarget;
@@ -2179,7 +2177,6 @@ class StatefulElement extends ComponentElement {
         'that all the resources used by the widget are fully released.'
       );
     });
-    assert(!dirty); // See BuildableElement.unmount for why this is important.
     _state._element = null;
     _state = null;
   }
