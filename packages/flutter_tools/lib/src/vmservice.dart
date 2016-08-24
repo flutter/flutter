@@ -749,12 +749,18 @@ class Isolate extends ServiceObjectOwner {
     _upgradeCollection(map, this);
   }
 
+  static final int kIsolateReloadBarred = 1005;
+
   Future<Map<String, dynamic>> reloadSources() async {
     try {
       Map<String, dynamic> response = await invokeRpcRaw('_reloadSources');
       return response;
-    } catch (e) {
-      return new Future<Map<String, dynamic>>.error(e.data['details']);
+    } on rpc.RpcException catch(e) {
+      return new Future<Map<String, dynamic>>.error(<String, dynamic>{
+        'code': e.code,
+        'message': e.message,
+        'data': e.data,
+      });
     }
   }
 
