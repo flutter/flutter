@@ -45,6 +45,7 @@ class Animator {
   Engine* engine_;
   vsync::VSyncProviderPtr vsync_provider_;
   vsync::VSyncProviderPtr fallback_vsync_provider_;
+  ftl::TimePoint last_begin_frame_time_;
   ftl::RefPtr<LayerTreePipeline> layer_tree_pipeline_;
   flutter::Semaphore pending_frame_semaphore_;
   LayerTreePipeline::ProducerContinuation producer_continuation_;

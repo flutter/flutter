@@ -64,10 +64,17 @@ void Animator::BeginFrame(int64_t time_stamp) {
   // to service potential frame.
   DCHECK(producer_continuation_);
 
-  engine_->BeginFrame(ftl::TimePoint::Now());
+  last_begin_frame_time_ = ftl::TimePoint::Now();
+  engine_->BeginFrame(last_begin_frame_time_);
 }
 
 void Animator::Render(std::unique_ptr<flow::LayerTree> layer_tree) {
+  if (layer_tree) {
+    // Note the frame time for instrumentation.
+    layer_tree->set_construction_time(ftl::TimePoint::Now() -
+                                      last_begin_frame_time_);
+  }
+
   // Commit the pending continuation.
   producer_continuation_.Complete(std::move(layer_tree));
 
