@@ -113,127 +113,143 @@ class GalleryDrawer extends StatelessWidget {
     final TextStyle aboutTextStyle = themeData.textTheme.body2;
     final TextStyle linkStyle = themeData.textTheme.body2.copyWith(color: themeData.accentColor);
 
-    return new Drawer(
-      child: new Block(
+    List<Widget> drawerItems = <Widget>[
+      new GalleryDrawerHeader(light: useLightTheme),
+      new DrawerItem(
+        icon: new Icon(Icons.brightness_5),
+        onPressed: () { onThemeChanged(true); },
+        selected: useLightTheme,
+        child: new Row(
+          children: <Widget>[
+            new Flexible(child: new Text('Light')),
+            new Radio<bool>(
+              value: true,
+              groupValue: useLightTheme,
+              onChanged: onThemeChanged
+            )
+          ]
+        )
+      ),
+      new DrawerItem(
+        icon: new Icon(Icons.brightness_7),
+        onPressed: () { onThemeChanged(false); },
+        selected: useLightTheme,
+        child: new Row(
+          children: <Widget>[
+            new Flexible(child: new Text('Dark')),
+            new Radio<bool>(
+              value: false,
+              groupValue: useLightTheme,
+              onChanged: onThemeChanged
+            )
+          ]
+        )
+      ),
+      new Divider(),
+      new DrawerItem(
+        icon: new Icon(Icons.hourglass_empty),
+        selected: timeDilation != 1.0,
+        onPressed: () { onTimeDilationChanged(timeDilation != 1.0 ? 1.0 : 20.0); },
+        child: new Row(
+          children: <Widget>[
+            new Flexible(child: new Text('Animate Slowly')),
+            new Checkbox(
+              value: timeDilation != 1.0,
+              onChanged: (bool value) { onTimeDilationChanged(value ? 20.0 : 1.0); }
+            )
+          ]
+        )
+      )
+    ];
+    if (onShowPerformanceOverlayChanged != null)
+    drawerItems.add(new DrawerItem(
+      icon: new Icon(Icons.assessment),
+      onPressed: () { onShowPerformanceOverlayChanged(!showPerformanceOverlay); },
+      selected: showPerformanceOverlay,
+      child: new Row(
         children: <Widget>[
-          new GalleryDrawerHeader(light: useLightTheme),
-          new DrawerItem(
-            icon: new Icon(Icons.brightness_5),
-            onPressed: () { onThemeChanged(true); },
-            selected: useLightTheme,
-            child: new Row(
-              children: <Widget>[
-                new Flexible(child: new Text('Light')),
-                new Radio<bool>(
-                  value: true,
-                  groupValue: useLightTheme,
-                  onChanged: onThemeChanged
-                )
-              ]
-            )
-          ),
-          new DrawerItem(
-            icon: new Icon(Icons.brightness_7),
-            onPressed: () { onThemeChanged(false); },
-            selected: useLightTheme,
-            child: new Row(
-              children: <Widget>[
-                new Flexible(child: new Text('Dark')),
-                new Radio<bool>(
-                  value: false,
-                  groupValue: useLightTheme,
-                  onChanged: onThemeChanged
-                )
-              ]
-            )
-          ),
-          new Divider(),
-          new DrawerItem(
-            icon: new Icon(Icons.hourglass_empty),
-            selected: timeDilation != 1.0,
-            onPressed: () { onTimeDilationChanged(timeDilation != 1.0 ? 1.0 : 20.0); },
-            child: new Row(
-              children: <Widget>[
-                new Flexible(child: new Text('Animate Slowly')),
-                new Checkbox(
-                  value: timeDilation != 1.0,
-                  onChanged: (bool value) { onTimeDilationChanged(value ? 20.0 : 1.0); }
-                )
-              ]
-            )
-          ),
-          onShowPerformanceOverlayChanged == null ? new Container(height: 0.0) : new DrawerItem(
-            icon: new Icon(Icons.assessment),
-            onPressed: () { onShowPerformanceOverlayChanged(!showPerformanceOverlay); },
-            selected: showPerformanceOverlay,
-            child: new Row(
-              children: <Widget>[
-                new Flexible(child: new Text('Performance Overlay')),
-                new Checkbox(
-                  value: showPerformanceOverlay,
-                  onChanged: (bool value) { onShowPerformanceOverlayChanged(!showPerformanceOverlay); }
-                )
-              ]
-            )
-          ),
-          new DrawerItem(
-            icon: new Icon(Icons.report),
+          new Flexible(child: new Text('Performance Overlay')),
+          new Checkbox(
+            value: showPerformanceOverlay,
+            onChanged: (bool value) { onShowPerformanceOverlayChanged(!showPerformanceOverlay); }
+          )
+        ]
+      ),
+    ));
+    drawerItems.addAll(<Widget>[
+      new DrawerItem(
+        icon: new Icon(Icons.message),
+        onPressed: () {
+          // show snack bar
+          Scaffold.of(context).showSnackBar(new SnackBar(
+            content: new Text("Pesto requires your attention"),
+            action:
+              new SnackBarAction(onPressed: () {
+                print("Pressed");
+              }),
+          ));
+        },
+        child: new Text("Simulate remote notification"),
+      ),
+      new DrawerItem(
+        icon: new Icon(Icons.report),
+        child: new RichText(
+          text: new TextSpan(
+            children: <TextSpan>[
+              new LinkTextSpan(
+                text: "File an issue",
+                style: linkStyle,
+                url: 'https://github.com/flutter/flutter/issues/new'
+              )
+            ]
+          )
+        )
+      ),
+      new AboutDrawerItem(
+        icon: new FlutterLogo(),
+        applicationVersion: '2016 Q3 Preview',
+        applicationIcon: new FlutterLogo(),
+        applicationLegalese: '© 2016 The Chromium Authors',
+        aboutBoxChildren: <Widget>[
+          new Padding(
+            padding: const EdgeInsets.only(top: 24.0),
             child: new RichText(
               text: new TextSpan(
                 children: <TextSpan>[
+                  new TextSpan(
+                    style: aboutTextStyle,
+                    text: "Flutter is an early-stage, open-source project to help "
+                    "developers build high-performance, high-fidelity, mobile "
+                    "apps for iOS and Android from a single codebase. This "
+                    "gallery is a preview of Flutter's many widgets, behaviors, "
+                    "animations, layouts, and more. Learn more about Flutter at "
+                  ),
                   new LinkTextSpan(
-                    text: "File an issue",
                     style: linkStyle,
-                    url: 'https://github.com/flutter/flutter/issues/new'
+                    url: 'https://flutter.io'
+                  ),
+                  new TextSpan(
+                    style: aboutTextStyle,
+                    text: ".\n\nTo see the source code for this app, please visit the "
+                  ),
+                  new LinkTextSpan(
+                    style: linkStyle,
+                    url: 'https://goo.gl/iv1p4G',
+                    text: 'flutter github repo'
+                  ),
+                  new TextSpan(
+                    style: aboutTextStyle,
+                    text: "."
                   )
                 ]
               )
             )
-          ),
-          new AboutDrawerItem(
-            icon: new FlutterLogo(),
-            applicationVersion: '2016 Q3 Preview',
-            applicationIcon: new FlutterLogo(),
-            applicationLegalese: '© 2016 The Chromium Authors',
-            aboutBoxChildren: <Widget>[
-              new Padding(
-                padding: const EdgeInsets.only(top: 24.0),
-                child: new RichText(
-                  text: new TextSpan(
-                    children: <TextSpan>[
-                      new TextSpan(
-                        style: aboutTextStyle,
-                        text: "Flutter is an early-stage, open-source project to help "
-                        "developers build high-performance, high-fidelity, mobile "
-                        "apps for iOS and Android from a single codebase. This "
-                        "gallery is a preview of Flutter's many widgets, behaviors, "
-                        "animations, layouts, and more. Learn more about Flutter at "
-                      ),
-                      new LinkTextSpan(
-                        style: linkStyle,
-                        url: 'https://flutter.io'
-                      ),
-                      new TextSpan(
-                        style: aboutTextStyle,
-                        text: ".\n\nTo see the source code for this app, please visit the "
-                      ),
-                      new LinkTextSpan(
-                        style: linkStyle,
-                        url: 'https://goo.gl/iv1p4G',
-                        text: 'flutter github repo'
-                      ),
-                      new TextSpan(
-                        style: aboutTextStyle,
-                        text: "."
-                      )
-                    ]
-                  )
-                )
-              )
-            ]
           )
         ]
       )
+    ]);
+    return new Drawer(
+      child: new Block(children: drawerItems)
     );
   }
 }
