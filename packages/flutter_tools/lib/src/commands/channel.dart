@@ -37,15 +37,8 @@ class ChannelCommand extends FlutterCommand {
   }
 
   Future<int> _listChannels() async {
-    String currentBranch;
-    await runCommandAndStreamOutput(
-      <String>['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
-      workingDirectory: Cache.flutterRoot,
-      mapFunction: (String line) {
-        currentBranch = line;
-        return null;
-      },
-    );
+    String currentBranch = runSync(['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
+        workingDirectory: Cache.flutterRoot);
 
     printStatus('Flutter channels:');
     return runCommandAndStreamOutput(

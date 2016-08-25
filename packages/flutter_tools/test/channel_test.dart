@@ -8,6 +8,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/channel.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/globals.dart';
 import 'package:test/test.dart';
 
 import 'src/common.dart';
@@ -15,26 +16,11 @@ import 'src/context.dart';
 
 void main() {
   group('channel', () {
-    Logger oldLogger;
-    BufferLogger logger;
-
-    setUp(() {
-      Cache.disableLocking();
-      logger = new BufferLogger();
-      Cache.flutterRoot = '../..';
-      context[DeviceManager] = new MockDeviceManager();
-      oldLogger = context[Logger];
-      context[Logger] = logger;
-    });
-
-    tearDown(() {
-      context[Logger] = oldLogger;
-    });
-
-    test('list', () async {
+    testUsingContext('list', () async {
       ChannelCommand command = new ChannelCommand();
       CommandRunner runner = createTestCommandRunner(command);
       expect(await runner.run(<String>['channel']), 0);
+      BufferLogger logger = context[Logger];
       expect(logger.errorText, hasLength(0));
       expect(logger.statusText, contains('channels'));
       expect(logger.statusText, contains('master'));
