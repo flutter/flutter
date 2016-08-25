@@ -26,6 +26,7 @@ import 'devfs_test.dart' as devfs_test;
 import 'device_test.dart' as device_test;
 // import 'devices_test.dart' as devices_test;
 import 'drive_test.dart' as drive_test;
+import 'format_test.dart' as format_test;
 import 'install_test.dart' as install_test;
 import 'listen_test.dart' as listen_test;
 import 'logs_test.dart' as logs_test;
@@ -58,6 +59,7 @@ void main() {
   device_test.main();
   // devices_test.main(); // https://github.com/flutter/flutter/issues/4480
   drive_test.main();
+  format_test.main();
   install_test.main();
   listen_test.main();
   logs_test.main();
