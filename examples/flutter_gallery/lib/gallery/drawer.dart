@@ -162,7 +162,7 @@ class GalleryDrawer extends StatelessWidget {
               ]
             )
           ),
-          new DrawerItem(
+          onShowPerformanceOverlayChanged == null ? new Container(height: 0.0) : new DrawerItem(
             icon: new Icon(Icons.assessment),
             onPressed: () { onShowPerformanceOverlayChanged(!showPerformanceOverlay); },
             selected: showPerformanceOverlay,

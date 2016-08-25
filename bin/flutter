@@ -58,5 +58,5 @@ if [ $EXIT_CODE != 253 ]; then
 fi
 
 set -e
-"$DART" --snapshot="$SNAPSHOT_PATH" --package="$FLUTTER_TOOLS_DIR/.packages" "$SCRIPT_PATH"
+"$DART" --snapshot="$SNAPSHOT_PATH" --packages="$FLUTTER_TOOLS_DIR/.packages" "$SCRIPT_PATH"
 "$DART" "$SNAPSHOT_PATH" "$@"

@@ -110,4 +110,33 @@ void main() {
     expect(find.text('BottomSheet'), findsNothing);
   });
 
+  testWidgets('Verify that dragging past the bottom dismisses a persistent BottomSheet', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/5528
+    GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
+
+    await tester.pumpWidget(new MaterialApp(
+      home: new Scaffold(
+        key: scaffoldKey,
+        body: new Center(child: new Text('body'))
+      )
+    ));
+
+    scaffoldKey.currentState.showBottomSheet((BuildContext context) {
+      return new Container(
+        margin: new EdgeInsets.all(40.0),
+        child: new Text('BottomSheet')
+      );
+    });
+
+    await tester.pump(); // bottom sheet show animation starts
+    await tester.pump(new Duration(seconds: 1)); // animation done
+    expect(find.text('BottomSheet'), findsOneWidget);
+
+    await tester.fling(find.text('BottomSheet'), const Offset(0.0, 400.0), 1000.0);
+    await tester.pump(); // drain the microtask queue (Future completion callback)
+    await tester.pump(); // bottom sheet dismiss animation starts
+    await tester.pump(new Duration(seconds: 1)); // animation done
+
+    expect(find.text('BottomSheet'), findsNothing);
+  });
 }

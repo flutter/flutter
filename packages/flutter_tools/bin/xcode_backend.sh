@@ -65,6 +65,7 @@ BuildApp() {
 
   AssertExists ${target_path}
 
+  local build_dir=${SYMROOT:-build}
   local local_engine_flag=""
   if [[ -n "$LOCAL_ENGINE" ]]; then
     local_engine_flag="--local-engine=$LOCAL_ENGINE"
@@ -79,6 +80,7 @@ BuildApp() {
     fi
 
     RunCommand ${FLUTTER_ROOT}/bin/flutter --suppress-analytics build aot \
+      --output-dir=${build_dir}/aot                                       \
       --target-platform=ios                                               \
       --target=${target_path}                                             \
       ${aot_flags}                                                        \
@@ -89,7 +91,7 @@ BuildApp() {
       exit -1
     fi
 
-    RunCommand cp build/aot/app.dylib ${derived_dir}/app.dylib
+    RunCommand cp ${build_dir}/aot/app.dylib ${derived_dir}/app.dylib
   else
     RunCommand eval "$(echo \"static const int Moo = 88;\" | xcrun clang -x c --shared -o ${derived_dir}/app.dylib -)"
   fi
@@ -102,6 +104,9 @@ BuildApp() {
   RunCommand ${FLUTTER_ROOT}/bin/flutter --suppress-analytics build flx \
     --target=${target_path}                                             \
     --output-file=${derived_dir}/app.flx                                \
+    --snapshot=${build_dir}/snapshot_blob.bin                           \
+    --depfile=${build_dir}/snapshot_blob.bin.d                          \
+    --working-dir=${build_dir}/flx                                      \
     ${precompilation_flag}                                              \
     ${local_engine_flag}                                                \
 

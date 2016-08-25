@@ -80,7 +80,6 @@ class GalleryHome extends StatefulWidget {
   }) : super(key: key) {
     assert(onThemeChanged != null);
     assert(onTimeDilationChanged != null);
-    assert(onShowPerformanceOverlayChanged != null);
   }
 
   final bool useLightTheme;

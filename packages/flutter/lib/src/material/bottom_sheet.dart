@@ -108,11 +108,13 @@ class _BottomSheetState extends State<BottomSheet> {
       return;
     if (details.velocity.pixelsPerSecond.dy > _kMinFlingVelocity) {
       double flingVelocity = -details.velocity.pixelsPerSecond.dy / _childHeight;
-      config.animationController.fling(velocity: flingVelocity);
+      if (config.animationController.value > 0.0)
+        config.animationController.fling(velocity: flingVelocity);
       if (flingVelocity < 0.0)
         config.onClosing();
     } else if (config.animationController.value < _kCloseProgressThreshold) {
-      config.animationController.fling(velocity: -1.0);
+      if (config.animationController.value > 0.0)
+        config.animationController.fling(velocity: -1.0);
       config.onClosing();
     } else {
       config.animationController.forward();
