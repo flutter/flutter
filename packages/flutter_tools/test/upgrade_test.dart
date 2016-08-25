@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:io';
 
 import 'package:args/command_runner.dart';
@@ -45,7 +46,7 @@ void main() {
         temp.deleteSync(recursive: true);
       });
 
-      createProject() async {
+      Future<Null> createProject() async {
         CreateCommand command = new CreateCommand();
         CommandRunner runner = createTestCommandRunner(command);
         int code = await runner.run(<String>['create', '--no-pub', temp.path]);
