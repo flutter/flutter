@@ -37,7 +37,8 @@ class ChannelCommand extends FlutterCommand {
   }
 
   Future<int> _listChannels() async {
-    String currentBranch = runSync(['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
+    String currentBranch = runSync(
+        <String>['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
         workingDirectory: Cache.flutterRoot);
 
     printStatus('Flutter channels:');
