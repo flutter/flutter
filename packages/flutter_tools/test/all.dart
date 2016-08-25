@@ -17,6 +17,7 @@ import 'android_device_test.dart' as android_device_test;
 import 'android_sdk_test.dart' as android_sdk_test;
 import 'application_package_test.dart' as application_package_test;
 import 'base_utils_test.dart' as base_utils_test;
+import 'channel_test.dart' as channel_test;
 import 'config_test.dart' as config_test;
 import 'context_test.dart' as context_test;
 import 'create_test.dart' as create_test;
@@ -48,6 +49,7 @@ void main() {
   android_sdk_test.main();
   application_package_test.main();
   base_utils_test.main();
+  channel_test.main();
   config_test.main();
   context_test.main();
   create_test.main();
