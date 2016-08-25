@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:args/command_runner.dart';
@@ -34,6 +35,37 @@ void main() {
 
     testUsingContext('project with-driver-test', () async {
       return _createAndAnalyzeProject(temp, <String>['--with-driver-test']);
+    });
+
+    // Verify content and formatting
+    testUsingContext('content', () async {
+      Cache.flutterRoot = '../..';
+
+      CreateCommand command = new CreateCommand();
+      CommandRunner runner = createTestCommandRunner(command);
+
+      int code = await runner.run(<String>['create', '--no-pub', temp.path]);
+      expect(code, 0);
+
+      void expectExists(String relPath) {
+        expect(FileSystemEntity.isFileSync('${temp.path}/$relPath'), true);
+      }
+      expectExists('lib/main.dart');
+      for (FileSystemEntity file in temp.listSync(recursive: true)) {
+        if (file is File && file.path.endsWith('.dart')) {
+          String original= file.readAsStringSync();
+
+          Process process = await Process.start(
+              sdkBinaryName('dartfmt'),
+              <String>[file.path],
+              workingDirectory: temp.path,
+          );
+          String formatted =
+            await process.stdout.transform(UTF8.decoder).join();
+
+          expect(original, formatted, reason: file.path);
+        }
+      }
     });
 
     // Verify that we can regenerate over an existing project.

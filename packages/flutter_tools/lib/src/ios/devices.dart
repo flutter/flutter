@@ -231,7 +231,7 @@ class IOSDevice extends Device {
 
     if (launchArguments.length > 0) {
       launchCommand.add('--args');
-      launchCommand.add('"${launchArguments.join(" ")}"');
+      launchCommand.add('${launchArguments.join(" ")}');
     }
 
     int installationResult = -1;
