@@ -19,7 +19,7 @@ class PackagesCommand extends FlutterCommand {
   final String name = 'packages';
 
   @override
-  List<String> get aliases => const ['pub'];
+  List<String> get aliases => const <String>['pub'];
 
   @override
   final String description = 'Commands for managing Flutter packages.';
