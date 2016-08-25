@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import '../build_info.dart';
 import '../flx.dart';
 import '../globals.dart';
 import 'build.dart';
@@ -20,7 +21,7 @@ class BuildFlxCommand extends BuildSubCommand {
     argParser.addOption('output-file', abbr: 'o', defaultsTo: defaultFlxOutputPath);
     argParser.addOption('snapshot', defaultsTo: defaultSnapshotPath);
     argParser.addOption('depfile', defaultsTo: defaultDepfilePath);
-    argParser.addOption('working-dir', defaultsTo: defaultWorkingDirPath);
+    argParser.addOption('working-dir', defaultsTo: getAssetBuildDirectory());
     argParser.addFlag('include-roboto-fonts', defaultsTo: true);
     argParser.addFlag('report-licensed-packages', help: 'Whether to report the names of all the packages that are included in the application\'s LICENSE file.', defaultsTo: false);
     usesPubOption();

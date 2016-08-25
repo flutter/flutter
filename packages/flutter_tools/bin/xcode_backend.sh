@@ -65,7 +65,7 @@ BuildApp() {
 
   AssertExists ${target_path}
 
-  local build_dir=${SYMROOT:-build}
+  local build_dir=${FLUTTER_BUILD_DIR:-build}
   local local_engine_flag=""
   if [[ -n "$LOCAL_ENGINE" ]]; then
     local_engine_flag="--local-engine=$LOCAL_ENGINE"

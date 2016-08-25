@@ -11,6 +11,7 @@ import 'asset.dart';
 import 'base/file_system.dart' show ensureDirectoryExists;
 import 'base/process.dart';
 import 'dart/package_map.dart';
+import 'build_info.dart';
 import 'globals.dart';
 import 'toolchain.dart';
 import 'zip.dart';
@@ -18,11 +19,10 @@ import 'zip.dart';
 const String defaultMainPath = 'lib/main.dart';
 const String defaultAssetBasePath = '.';
 const String defaultManifestPath = 'flutter.yaml';
-const String defaultFlxOutputPath = 'build/app.flx';
-const String defaultSnapshotPath = 'build/snapshot_blob.bin';
-const String defaultDepfilePath = 'build/snapshot_blob.bin.d';
+String get defaultFlxOutputPath => path.join(getBuildDirectory(), 'app.flx');
+String get defaultSnapshotPath => path.join(getBuildDirectory(), 'snapshot_blob.bin');
+String get defaultDepfilePath => path.join(getBuildDirectory(), 'snapshot_blob.bin.d');
 const String defaultPrivateKeyPath = 'privatekey.der';
-const String defaultWorkingDirPath = 'build/flx';
 
 const String _kSnapshotKey = 'snapshot_blob.bin';
 
@@ -47,7 +47,7 @@ Future<int> createSnapshot({
   return runCommandAndStreamOutput(args);
 }
 
-/// Build the flx in the build/ directory and return `localBundlePath` on success.
+/// Build the flx in the build directory and return `localBundlePath` on success.
 ///
 /// Return `null` on failure.
 Future<String> buildFlx({
@@ -56,30 +56,32 @@ Future<String> buildFlx({
   bool includeRobotoFonts: true
 }) async {
   int result;
-  String localBundlePath = path.join('build', 'app.flx');
-  String localSnapshotPath = path.join('build', 'snapshot_blob.bin');
   result = await build(
-    snapshotPath: localSnapshotPath,
-    outputPath: localBundlePath,
+    snapshotPath: defaultSnapshotPath,
+    outputPath: defaultFlxOutputPath,
     mainPath: mainPath,
     precompiledSnapshot: precompiledSnapshot,
     includeRobotoFonts: includeRobotoFonts
   );
-  return result == 0 ? localBundlePath : null;
+  return result == 0 ? defaultFlxOutputPath : null;
 }
 
 Future<int> build({
   String mainPath: defaultMainPath,
   String manifestPath: defaultManifestPath,
-  String outputPath: defaultFlxOutputPath,
-  String snapshotPath: defaultSnapshotPath,
-  String depfilePath: defaultDepfilePath,
+  String outputPath,
+  String snapshotPath,
+  String depfilePath,
   String privateKeyPath: defaultPrivateKeyPath,
-  String workingDirPath: defaultWorkingDirPath,
+  String workingDirPath,
   bool precompiledSnapshot: false,
   bool includeRobotoFonts: true,
   bool reportLicensedPackages: false
 }) async {
+  outputPath ??= defaultFlxOutputPath;
+  snapshotPath ??= defaultSnapshotPath;
+  depfilePath ??= defaultDepfilePath;
+  workingDirPath ??= getAssetBuildDirectory();
   File snapshotFile;
 
   if (!precompiledSnapshot) {
@@ -114,12 +116,14 @@ Future<int> build({
 Future<int> assemble({
   String manifestPath,
   File snapshotFile,
-  String outputPath: defaultFlxOutputPath,
+  String outputPath,
   String privateKeyPath: defaultPrivateKeyPath,
-  String workingDirPath: defaultWorkingDirPath,
+  String workingDirPath,
   bool includeRobotoFonts: true,
   bool reportLicensedPackages: false
 }) async {
+  outputPath ??= defaultFlxOutputPath;
+  workingDirPath ??= getAssetBuildDirectory();
   printTrace('Building $outputPath');
 
   // Build the asset bundle.

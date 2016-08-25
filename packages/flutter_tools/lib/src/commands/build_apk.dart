@@ -26,7 +26,6 @@ import 'build.dart';
 export '../android/android_device.dart' show AndroidDevice;
 
 const String _kDefaultAndroidManifestPath = 'android/AndroidManifest.xml';
-const String _kDefaultOutputPath = 'build/app.apk';
 const String _kDefaultResourcesPath = 'android/res';
 const String _kDefaultAssetsPath = 'android/assets';
 
@@ -38,6 +37,9 @@ const String _kDebugKeystoreKeyAlias = "chromiumdebugkey";
 
 // Password for the Chromium debug keystore
 const String _kDebugKeystorePassword = "chromium";
+
+// Default APK output path.
+String get _defaultOutputPath => path.join(getAndroidBuildDirectory(), 'app.apk');
 
 /// Copies files into a new directory structure.
 class _AssetBuilder {
@@ -174,7 +176,7 @@ class BuildApkCommand extends BuildSubCommand {
       help: 'Resources directory path.');
     argParser.addOption('output-file',
       abbr: 'o',
-      defaultsTo: _kDefaultOutputPath,
+      defaultsTo: _defaultOutputPath,
       help: 'Output APK file.');
     argParser.addOption('flx',
       abbr: 'f',
@@ -443,12 +445,14 @@ Future<int> buildAndroid(
   bool force: false,
   String manifest: _kDefaultAndroidManifestPath,
   String resources,
-  String outputFile: _kDefaultOutputPath,
+  String outputFile,
   String target,
   String flxPath,
   String aotPath,
   ApkKeystoreInfo keystore
 }) async {
+  outputFile ??= _defaultOutputPath;
+
   // Validate that we can find an android sdk.
   if (androidSdk == null) {
     printError('No Android SDK found. Try setting the ANDROID_HOME environment variable.');

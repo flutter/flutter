@@ -9,6 +9,7 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 
 import 'base/logger.dart';
+import 'build_info.dart';
 import 'dart/package_map.dart';
 import 'asset.dart';
 import 'globals.dart';
@@ -335,9 +336,10 @@ class DevFS {
       status = logger.startProgress('Scanning asset files...');
       // Synchronize asset bundle.
       for (AssetBundleEntry entry in bundle.entries) {
-        // We write the assets into 'build/flx' so that they are in the
-        // same location in DevFS and the iOS simulator.
-        final String devicePath = path.join('build/flx', entry.archivePath);
+        // We write the assets into the AssetBundle working dir so that they
+        // are in the same location in DevFS and the iOS simulator.
+        final String devicePath =
+            path.join(getAssetBuildDirectory(), entry.archivePath);
         _scanBundleEntry(devicePath, entry, bundleDirty);
       }
       status.stop(showElapsedTime: true);
@@ -457,7 +459,7 @@ class DevFS {
 
   bool _shouldIgnore(String devicePath) {
     List<String> ignoredPrefixes = <String>['android/',
-                                            'build/',
+                                            getBuildDirectory(),
                                             'ios/',
                                             '.pub/'];
     for (String ignoredPrefix in ignoredPrefixes) {
