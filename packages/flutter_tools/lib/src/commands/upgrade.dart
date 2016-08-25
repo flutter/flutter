@@ -5,7 +5,7 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:path/path.dart' show join;
+import 'package:path/path.dart' as path;
 
 import '../base/process.dart';
 import '../dart/pub.dart';
@@ -94,23 +94,15 @@ class UpgradeCommand extends FlutterCommand {
   /// Find and return the project root directory relative to the specified
   /// directory or the current working directory if none specified.
   /// Return `null` if the project root could not be found
-  /// or if the project root is inside the flutter repository.
+  /// or if the project root is the flutter repository root.
   static String findProjectRoot([String directory]) {
     directory ??= Directory.current.path;
-    if (directory.startsWith(Cache.flutterRoot)) {
-      if (directory.length == Cache.flutterRoot.length ||
-          directory[Cache.flutterRoot.length] == Platform.pathSeparator) {
-        return null;
-      }
-    }
     while (true) {
-      if (FileSystemEntity.isFileSync(join(directory, 'pubspec.yaml'))) {
+      if (FileSystemEntity.isFileSync(path.join(directory, 'pubspec.yaml')))
         return directory;
-      }
       String parent = FileSystemEntity.parentOf(directory);
-      if (directory == parent) {
+      if (directory == parent)
         return null;
-      }
       directory = parent;
     }
   }

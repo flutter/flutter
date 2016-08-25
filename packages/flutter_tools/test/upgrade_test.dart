@@ -6,13 +6,9 @@ import 'dart:io';
 
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/cache.dart';
-import 'package:flutter_tools/src/base/context.dart';
-import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/commands/upgrade.dart';
-import 'package:flutter_tools/src/device.dart';
-import 'package:flutter_tools/src/doctor.dart';
-import 'package:path/path.dart' show join;
+import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 
 import 'src/common.dart';
@@ -23,53 +19,67 @@ void main() {
     bool _match(String line) => UpgradeCommand.matchesGitLine(line);
 
     test('regex match', () {
-      expect(_match(' .../flutter_gallery/lib/demo/buttons_demo.dart    | 10 +--'), true);
-      expect(_match(' dev/benchmarks/complex_layout/lib/main.dart        |  24 +-'), true);
+      expect(
+          _match(' .../flutter_gallery/lib/demo/buttons_demo.dart    | 10 +--'),
+          true);
+      expect(
+          _match(
+              ' dev/benchmarks/complex_layout/lib/main.dart        |  24 +-'),
+          true);
 
-      expect(_match(' rename {packages/flutter/doc => dev/docs}/styles.html (92%)'), true);
+      expect(
+          _match(
+              ' rename {packages/flutter/doc => dev/docs}/styles.html (92%)'),
+          true);
       expect(_match(' delete mode 100644 doc/index.html'), true);
-      expect(_match(' create mode 100644 examples/flutter_gallery/lib/gallery/demo.dart'), true);
+      expect(
+          _match(
+              ' create mode 100644 examples/flutter_gallery/lib/gallery/demo.dart'),
+          true);
 
       expect(_match('Fast-forward'), true);
     });
 
     test('regex doesn\'t match', () {
       expect(_match('Updating 79cfe1e..5046107'), false);
-      expect(_match('229 files changed, 6179 insertions(+), 3065 deletions(-)'), false);
+      expect(_match('229 files changed, 6179 insertions(+), 3065 deletions(-)'),
+          false);
     });
 
     group('findProjectRoot', () {
       Directory temp;
 
       setUp(() async {
-        Cache.disableLocking();
-        context[Logger] ??= new BufferLogger();
-        context[Doctor] = new Doctor();
-        context[DeviceManager] = new MockDeviceManager();
-
         temp = Directory.systemTemp.createTempSync('flutter_tools');
-        Cache.flutterRoot = '../..';
-        CreateCommand command = new CreateCommand();
-        CommandRunner runner = createTestCommandRunner(command);
-        int code = await runner.run(<String>['create', '--no-pub', temp.path]);
-        expect(code, 0);
       });
 
       tearDown(() {
         temp.deleteSync(recursive: true);
       });
 
-      test('in project', () {
-        expect(UpgradeCommand.findProjectRoot(temp.path), temp.path);
-        expect(
-            UpgradeCommand.findProjectRoot(join(temp.path, 'lib')), temp.path);
+      createProject() async {
+        CreateCommand command = new CreateCommand();
+        CommandRunner runner = createTestCommandRunner(command);
+        int code = await runner.run(<String>['create', '--no-pub', temp.path]);
+        expect(code, 0);
+      }
+
+      testUsingContext('in project', () async {
+        await createProject();
+
+        String proj = temp.path;
+        expect(UpgradeCommand.findProjectRoot(proj), proj);
+        expect(UpgradeCommand.findProjectRoot(path.join(proj, 'lib')), proj);
+
+        String hello = path.join(Cache.flutterRoot, 'examples', 'hello_world');
+        expect(UpgradeCommand.findProjectRoot(hello), hello);
+        expect(UpgradeCommand.findProjectRoot(path.join(hello, 'lib')), hello);
       });
 
-      test('outside project', () {
+      testUsingContext('outside project', () async {
+        await createProject();
         expect(UpgradeCommand.findProjectRoot(temp.parent.path), null);
         expect(UpgradeCommand.findProjectRoot(Cache.flutterRoot), null);
-        expect(UpgradeCommand.findProjectRoot(
-            join(Cache.flutterRoot, 'examples', 'hello_world')), null);
       });
     });
   });
