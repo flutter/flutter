@@ -15,7 +15,7 @@ import '../globals.dart';
 import '../resident_runner.dart';
 import '../runner/flutter_command.dart';
 
-const String _kDefaultBundlePath = 'build/app.flx';
+String get _defaultBundlePath => path.join(getBuildDirectory(), 'app.flx');
 
 class RunMojoCommand extends FlutterCommand {
   RunMojoCommand({ this.hidden: false }) {
@@ -140,7 +140,7 @@ class RunMojoCommand extends FlutterCommand {
 
     String targetApp = argResults['app'];
     if (targetApp == null) {
-      targetApp = _kDefaultBundlePath;
+      targetApp = _defaultBundlePath;
 
       String mainPath = findMainDartFile(argResults['target']);
 

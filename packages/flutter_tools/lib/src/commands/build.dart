@@ -7,6 +7,7 @@ import 'dart:io';
 
 import 'package:meta/meta.dart';
 
+import '../build_info.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
 import '../base/utils.dart';
@@ -66,7 +67,7 @@ class BuildCleanCommand extends FlutterCommand {
 
   @override
   Future<int> runInProject() async {
-    Directory buildDir = new Directory('build');
+    Directory buildDir = new Directory(getBuildDirectory());
     printStatus("Deleting '${buildDir.path}${Platform.pathSeparator}'.");
 
     if (!buildDir.existsSync())

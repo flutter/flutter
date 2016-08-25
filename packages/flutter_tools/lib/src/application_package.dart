@@ -83,7 +83,7 @@ class AndroidApk extends ApplicationPackage {
       apkPath = gradleAppOut;
     } else {
       manifestPath = path.join('android', 'AndroidManifest.xml');
-      apkPath = path.join('build', 'app.apk');
+      apkPath = path.join(getAndroidBuildDirectory(), 'app.apk');
     }
 
     if (!FileSystemEntity.isFileSync(manifestPath))
@@ -157,7 +157,7 @@ class IOSApp extends ApplicationPackage {
   String get deviceBundlePath => _buildAppPath('iphoneos');
 
   String _buildAppPath(String type) {
-    return path.join(appDirectory, 'build', 'Release-$type', kBundleName);
+    return path.join(getIosBuildDirectory(), 'Release-$type', kBundleName);
   }
 }
 

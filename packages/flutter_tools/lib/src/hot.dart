@@ -13,6 +13,7 @@ import 'asset.dart';
 import 'base/logger.dart';
 import 'base/process.dart';
 import 'base/utils.dart';
+import 'build_info.dart';
 import 'cache.dart';
 import 'commands/build_apk.dart';
 import 'commands/install.dart';
@@ -380,7 +381,7 @@ class HotRunner extends ResidentRunner {
     String devicePackagesPath =
         _devFS.baseUri.resolve('.packages').toFilePath();
     String deviceAssetsDirectoryPath =
-        _devFS.baseUri.resolve('build/flx').toFilePath();
+        _devFS.baseUri.resolve(getAssetBuildDirectory()).toFilePath();
     await _launchInView(deviceEntryPath,
                         devicePackagesPath,
                         deviceAssetsDirectoryPath);

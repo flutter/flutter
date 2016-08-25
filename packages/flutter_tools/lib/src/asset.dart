@@ -10,6 +10,7 @@ import 'package:json_schema/json_schema.dart';
 import 'package:path/path.dart' as path;
 import 'package:yaml/yaml.dart';
 
+import 'build_info.dart';
 import 'cache.dart';
 import 'dart/package_map.dart';
 import 'globals.dart';
@@ -48,7 +49,6 @@ class AssetBundle {
   final Set<AssetBundleEntry> entries = new Set<AssetBundleEntry>();
 
   static const String defaultManifestPath = 'flutter.yaml';
-  static const String defaultWorkingDirPath = 'build/flx';
   static const String _kFontSetMaterial = 'material';
   static const String _kFontSetRoboto = 'roboto';
 
@@ -67,10 +67,11 @@ class AssetBundle {
 
   Future<int> build({
     String manifestPath: defaultManifestPath,
-    String workingDirPath: defaultWorkingDirPath,
+    String workingDirPath,
     bool includeRobotoFonts: true,
     bool reportLicensedPackages: false
   }) async {
+    workingDirPath ??= getAssetBuildDirectory();
     Object manifest = _loadFlutterYamlManifest(manifestPath);
     if (manifest == null) {
       // No manifest file found for this application.
@@ -94,7 +95,7 @@ class AssetBundle {
       packageMap,
       manifestDescriptor,
       assetBasePath,
-      excludeDirs: <String>[workingDirPath, path.join(assetBasePath, 'build')]
+      excludeDirs: <String>[workingDirPath, getBuildDirectory()]
     );
 
     if (assetVariants == null)

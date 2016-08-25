@@ -476,7 +476,7 @@ class IOSSimulator extends Device {
 
     // Prepare launch arguments.
     List<String> args = <String>[
-      "--flx=${path.absolute(path.join('build', 'app.flx'))}",
+      "--flx=${path.absolute(path.join(getBuildDirectory(), 'app.flx'))}",
       "--dart-main=${path.absolute(mainPath)}",
       "--packages=${path.absolute('.packages')}",
     ];

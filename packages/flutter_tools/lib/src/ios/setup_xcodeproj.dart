@@ -28,6 +28,11 @@ void updateXcodeGeneratedProperties(String projectPath, BuildMode mode, String t
   // The runtime mode for the current build.
   localsBuffer.writeln('FLUTTER_BUILD_MODE=${getModeName(mode)}');
 
+  // The build outputs directory, relative to FLUTTER_APPLICATION_PATH.
+  localsBuffer.writeln('FLUTTER_BUILD_DIR=${getBuildDirectory()}');
+
+  localsBuffer.writeln('SYMROOT=\${SOURCE_ROOT}/../${getIosBuildDirectory()}');
+
   String flutterFrameworkDir = path.normalize(tools.getEngineArtifactsDirectory(TargetPlatform.ios, mode).path);
   localsBuffer.writeln('FLUTTER_FRAMEWORK_DIR=$flutterFrameworkDir');
 

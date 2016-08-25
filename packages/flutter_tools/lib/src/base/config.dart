@@ -19,6 +19,8 @@ class Config {
   static Config get instance => context[Config] ?? (context[Config] = new Config());
 
   File _configFile;
+  String get configPath => _configFile.path;
+
   Map<String, dynamic> _values = <String, dynamic>{};
 
   Iterable<String> get keys => _values.keys;

@@ -4,6 +4,8 @@
 
 import 'dart:io';
 
+import 'package:path/path.dart' as path;
+
 import 'base/utils.dart';
 import 'globals.dart';
 
@@ -112,4 +114,35 @@ HostPlatform getCurrentHostPlatform() {
   printError('Unsupported host platform, defaulting to Linux');
 
   return HostPlatform.linux_x64;
+}
+
+/// Returns the top-level build output directory.
+String getBuildDirectory() {
+  String buildDir = config.getValue('build-dir') ?? 'build';
+  if (path.isAbsolute(buildDir)) {
+    throw new Exception(
+        'build-dir config setting in ${config.configPath} must be relative');
+  }
+  return buildDir;
+}
+
+/// Returns the Android build output directory.
+String getAndroidBuildDirectory() {
+  // TODO(cbracken) move to android subdir.
+  return getBuildDirectory();
+}
+
+/// Returns the AOT build output directory.
+String getAotBuildDirectory() {
+  return path.join(getBuildDirectory(), 'aot');
+}
+
+/// Returns the asset build output directory.
+String getAssetBuildDirectory() {
+  return path.join(getBuildDirectory(), 'flx');
+}
+
+/// Returns the iOS build output directory.
+String getIosBuildDirectory() {
+  return path.join(getBuildDirectory(), 'ios');
 }
