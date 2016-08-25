@@ -45,14 +45,6 @@ class GalleryAppState extends State<GalleryApp> {
 
   @override
   Widget build(BuildContext context) {
-    // In checked mode, show the default "slow mode" banner, otherwise show
-    // the "preview" banner.
-    bool showPreviewBanner = true;
-    assert(() {
-      showPreviewBanner = false;
-      return true;
-    });
-
     Widget home = new GalleryHome(
       useLightTheme: _useLightTheme,
       onThemeChanged: (bool value) {
@@ -74,18 +66,12 @@ class GalleryAppState extends State<GalleryApp> {
       },
     );
 
-    if (showPreviewBanner)
-      home = new Banner(
-        message: 'PREVIEW',
-        location: BannerLocation.topRight,
-        child: home,
-      );
-
-    if (config.updateUrlFetcher != null)
+    if (config.updateUrlFetcher != null) {
       home = new Updater(
         updateUrlFetcher: config.updateUrlFetcher,
         child: home,
       );
+    }
 
     return new MaterialApp(
       title: 'Flutter Gallery',

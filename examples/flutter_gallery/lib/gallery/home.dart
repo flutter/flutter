@@ -99,6 +99,23 @@ class GalleryHomeState extends State<GalleryHome> {
   static final Key _homeKey = new ValueKey<String>("Gallery Home");
   static final GlobalKey<ScrollableState> _scrollableKey = new GlobalKey<ScrollableState>();
 
+  final AnimationController _controller = new AnimationController(
+    duration: const Duration(milliseconds: 600),
+    debugLabel: "preview banner"
+  );
+
+  @override
+  void initState() {
+    super.initState();
+    _controller.forward();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
   List<Widget> _galleryListItems() {
     final List<Widget> listItems = <Widget>[];
     final ThemeData themeData = Theme.of(context);
@@ -126,7 +143,7 @@ class GalleryHomeState extends State<GalleryHome> {
   @override
   Widget build(BuildContext context) {
     final double statusBarHeight = MediaQuery.of(context).padding.top;
-    return new Scaffold(
+    Widget home = new Scaffold(
       key: _homeKey,
       scrollableKey: _scrollableKey,
       drawer: new GalleryDrawer(
@@ -160,5 +177,30 @@ class GalleryHomeState extends State<GalleryHome> {
        children: _galleryListItems()
       )
     );
+
+    // In checked mode our MaterialApp will show the default "slow mode" banner.
+    // Otherwise show the "preview" banner.
+    bool showPreviewBanner = true;
+    assert(() {
+      showPreviewBanner = false;
+      return true;
+    });
+
+    if (showPreviewBanner) {
+      home = new Stack(
+        children: <Widget>[
+          home,
+          new FadeTransition(
+            opacity: new CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+            child: new Banner(
+              message: 'PREVIEW',
+              location: BannerLocation.topRight,
+            )
+          ),
+        ]
+      );
+    }
+
+    return home;
   }
 }
