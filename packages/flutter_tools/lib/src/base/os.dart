@@ -150,3 +150,18 @@ Future<bool> _isPortAvailable(int port) async {
     return false;
   }
 }
+
+/// Find and return the project root directory relative to the specified
+/// directory or the current working directory if none specified.
+/// Return `null` if the project root could not be found
+/// or if the project root is the flutter repository root.
+String findProjectRoot([String directory]) {
+  directory ??= Directory.current.path;
+  while (true) {
+    if (FileSystemEntity.isFileSync(path.join(directory, 'pubspec.yaml')))
+      return directory;
+    String parent = FileSystemEntity.parentOf(directory);
+    if (directory == parent) return null;
+    directory = parent;
+  }
+}
