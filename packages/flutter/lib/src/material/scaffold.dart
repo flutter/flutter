@@ -22,6 +22,8 @@ const double _kFloatingActionButtonMargin = 16.0; // TODO(hmuller): should be de
 const Duration _kFloatingActionButtonSegue = const Duration(milliseconds: 200);
 final Tween<double> _kFloatingActionButtonTurnTween = new Tween<double>(begin: -0.125, end: 0.0);
 
+const double _kBackGestureWidth = 20.0;
+
 /// The Scaffold's appbar is the toolbar, bottom, and the "flexible space"
 /// that's stacked behind them. The Scaffold's appBarBehavior defines how
 /// its layout responds to scrolling the application's body.
@@ -689,6 +691,34 @@ class ScaffoldState extends State<Scaffold> {
     );
   }
 
+  // IOS-specific back gesture.
+
+  final GlobalKey _backGestureKey = new GlobalKey();
+  NavigationGestureController _backGestureController;
+
+  bool _shouldHandleBackGesture() {
+    return Theme.of(context).platform == TargetPlatform.iOS && Navigator.canPop(context);
+  }
+
+  void _handleDragStart(DragStartDetails details) {
+    _backGestureController = Navigator.of(context).startPopGesture();
+  }
+
+  void _handleDragUpdate(DragUpdateDetails details) {
+    final RenderBox box = context.findRenderObject();
+    _backGestureController?.dragUpdate(details.primaryDelta / box.size.width);
+  }
+
+  void _handleDragEnd(DragEndDetails details) {
+    _backGestureController?.dragEnd();
+    _backGestureController = null;
+  }
+
+  void _handleDragCancel() {
+    _backGestureController?.dragEnd();
+    _backGestureController = null;
+  }
+
   @override
   Widget build(BuildContext context) {
     EdgeInsets padding = MediaQuery.of(context).padding;
@@ -770,6 +800,24 @@ class ScaffoldState extends State<Scaffold> {
         child: new DrawerController(
           key: _drawerKey,
           child: config.drawer
+        )
+      ));
+    } else if (_shouldHandleBackGesture()) {
+      // Add a gesture for navigating back.
+      children.add(new LayoutId(
+        id: _ScaffoldSlot.drawer,
+        child: new Align(
+          alignment: FractionalOffset.centerLeft,
+          child: new GestureDetector(
+            key: _backGestureKey,
+            onHorizontalDragStart: _handleDragStart,
+            onHorizontalDragUpdate: _handleDragUpdate,
+            onHorizontalDragEnd: _handleDragEnd,
+            onHorizontalDragCancel: _handleDragCancel,
+            behavior: HitTestBehavior.translucent,
+            excludeFromSemantics: true,
+            child: new Container(width: _kBackGestureWidth)
+          )
         )
       ));
     }

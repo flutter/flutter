@@ -533,3 +533,75 @@ class TrainHoppingAnimation extends Animation<double>
     return '$currentTrain\u27A9$runtimeType(no next)';
   }
 }
+
+/// An interface for combining multiple Animations. Subclasses need only
+/// implement the `value` getter to control how the child animations are
+/// combined. Can be chained to combine more than 2 animations.
+///
+/// For example, to create an animation that is the sum of two others, subclass
+/// this class and define `T get value = first.value + second.value;`
+abstract class CompoundAnimation<T> extends Animation<T>
+  with AnimationLazyListenerMixin, AnimationLocalListenersMixin, AnimationLocalStatusListenersMixin {
+  /// Creates a CompoundAnimation. Both arguments must be non-null. Either can
+  /// be a CompoundAnimation itself to combine multiple animations.
+  CompoundAnimation({
+    this.first,
+    this.next,
+  }) {
+    assert(first != null);
+    assert(next != null);
+  }
+
+  /// The first sub-animation. Its status takes precedence if neither are
+  /// animating.
+  final Animation<T> first;
+
+  /// The second sub-animation.
+  final Animation<T> next;
+
+  @override
+  void didStartListening() {
+    first.addListener(_maybeNotifyListeners);
+    first.addStatusListener(_maybeNotifyStatusListeners);
+    next.addListener(_maybeNotifyListeners);
+    next.addStatusListener(_maybeNotifyStatusListeners);
+  }
+
+  @override
+  void didStopListening() {
+    first.removeListener(_maybeNotifyListeners);
+    first.removeStatusListener(_maybeNotifyStatusListeners);
+    next.removeListener(_maybeNotifyListeners);
+    next.removeStatusListener(_maybeNotifyStatusListeners);
+  }
+
+  @override
+  AnimationStatus get status {
+    // If one of the sub-animations is moving, use that status. Otherwise,
+    // default to `first`.
+    if (next.status == AnimationStatus.forward || next.status == AnimationStatus.reverse)
+      return next.status;
+    return first.status;
+  }
+
+  @override
+  String toString() {
+    return '$runtimeType($first, $next)';
+  }
+
+  AnimationStatus _lastStatus;
+  void _maybeNotifyStatusListeners(AnimationStatus _) {
+    if (this.status != _lastStatus) {
+      _lastStatus = this.status;
+      notifyStatusListeners(this.status);
+    }
+  }
+
+  T _lastValue;
+  void _maybeNotifyListeners() {
+    if (this.value != _lastValue) {
+      _lastValue = this.value;
+      notifyListeners();
+    }
+  }
+}

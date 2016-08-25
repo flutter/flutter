@@ -49,7 +49,7 @@ Future<int> runCommandAndStreamOutput(List<String> cmd, {
     workingDirectory: workingDirectory,
     allowReentrantFlutter: allowReentrantFlutter
   );
-  process.stdout
+  StreamSubscription<String> subscription = process.stdout
     .transform(UTF8.decoder)
     .transform(const LineSplitter())
     .where((String line) => filter == null ? true : filter.hasMatch(line))
@@ -74,6 +74,11 @@ Future<int> runCommandAndStreamOutput(List<String> cmd, {
       if (line != null)
         printError('$prefix$line');
     });
+
+  // Wait for stdout to be fully processed
+  // because process.exitCode may complete first causing flaky tests.
+  await subscription.asFuture();
+
   return await process.exitCode;
 }
 

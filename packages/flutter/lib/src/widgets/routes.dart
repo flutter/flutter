@@ -109,6 +109,9 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   /// forward transition.
   Animation<double> get animation => _animation;
   Animation<double> _animation;
+
+  @protected
+  AnimationController get controller => _controller;
   AnimationController _controller;
 
   /// Called to create the animation controller that will drive the transitions to

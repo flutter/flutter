@@ -467,8 +467,21 @@ class HeroController extends NavigatorObserver {
     }
   }
 
+  // Disable Hero animations while a user gesture is controlling the navigation.
+  bool _questsEnabled = true;
+
+  @override
+  void didStartUserGesture() {
+    _questsEnabled = false;
+  }
+
+  @override
+  void didStopUserGesture() {
+    _questsEnabled = true;
+  }
+
   void _checkForHeroQuest() {
-    if (_from != null && _to != null && _from != _to) {
+    if (_from != null && _to != null && _from != _to && _questsEnabled) {
       _to.offstage = _to.animation.status != AnimationStatus.completed;
       WidgetsBinding.instance.addPostFrameCallback(_updateQuest);
     }

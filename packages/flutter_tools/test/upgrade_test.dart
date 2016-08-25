@@ -2,8 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+import 'dart:io';
+
+import 'package:args/command_runner.dart';
+import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/commands/upgrade.dart';
+import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
+
+import 'src/common.dart';
+import 'src/context.dart';
 
 void main() {
   group('upgrade', () {
@@ -23,6 +33,43 @@ void main() {
     test('regex doesn\'t match', () {
       expect(_match('Updating 79cfe1e..5046107'), false);
       expect(_match('229 files changed, 6179 insertions(+), 3065 deletions(-)'), false);
+    });
+
+    group('findProjectRoot', () {
+      Directory temp;
+
+      setUp(() async {
+        temp = Directory.systemTemp.createTempSync('flutter_tools');
+      });
+
+      tearDown(() {
+        temp.deleteSync(recursive: true);
+      });
+
+      Future<Null> createProject() async {
+        CreateCommand command = new CreateCommand();
+        CommandRunner runner = createTestCommandRunner(command);
+        int code = await runner.run(<String>['create', '--no-pub', temp.path]);
+        expect(code, 0);
+      }
+
+      testUsingContext('in project', () async {
+        await createProject();
+
+        String proj = temp.path;
+        expect(UpgradeCommand.findProjectRoot(proj), proj);
+        expect(UpgradeCommand.findProjectRoot(path.join(proj, 'lib')), proj);
+
+        String hello = path.join(Cache.flutterRoot, 'examples', 'hello_world');
+        expect(UpgradeCommand.findProjectRoot(hello), hello);
+        expect(UpgradeCommand.findProjectRoot(path.join(hello, 'lib')), hello);
+      });
+
+      testUsingContext('outside project', () async {
+        await createProject();
+        expect(UpgradeCommand.findProjectRoot(temp.parent.path), null);
+        expect(UpgradeCommand.findProjectRoot(Cache.flutterRoot), null);
+      });
     });
   });
 }
