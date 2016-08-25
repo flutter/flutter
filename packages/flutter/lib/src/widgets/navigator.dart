@@ -80,6 +80,13 @@ abstract class Route<T> {
   /// is replaced, or if the navigator itself is disposed).
   void dispose() { }
 
+  // If the route's transition can be popped via a user gesture (e.g. the iOS
+  // back gesture), this should return a controller object that can be used
+  // to control the transition animation's progress.
+  NavigationGestureController startPopGesture(NavigatorState navigator) {
+    return null;
+  }
+
   /// Whether this route is the top-most route on the navigator.
   ///
   /// If this is true, then [isActive] is also true.
@@ -142,6 +149,39 @@ class NavigatorObserver {
 
   /// The [Navigator] popped the given route.
   void didPop(Route<dynamic> route, Route<dynamic> previousRoute) { }
+
+  /// The [Navigator] is being controlled by a user gesture. Used for the
+  /// iOS back gesture.
+  void didStartUserGesture() { }
+
+  /// User gesture is no longer controlling the [Navigator].
+  void didStopUserGesture() { }
+}
+
+// An interface to be implemented by the Route, allowing its transition
+// animation to be controlled by a drag.
+abstract class NavigationGestureController {
+  NavigationGestureController(this._navigator) {
+    // Disable Hero transitions until the gesture is complete.
+    _navigator.didStartUserGesture();
+  }
+
+  // Must be called when the gesture is done.
+  void dispose() {
+    _navigator.didStopUserGesture();
+    _navigator = null;
+  }
+
+  // The drag gesture has changed by [fractionalDelta]. The total range of the
+  // drag should be 0.0 to 1.0.
+  void dragUpdate(double fractionalDelta);
+
+  // The drag gesture has ended.
+  void dragEnd();
+
+  @protected
+  NavigatorState get navigator => _navigator;
+  NavigatorState _navigator;
 }
 
 /// Signature for the [Navigator.popUntil] predicate argument.
@@ -458,6 +498,27 @@ class NavigatorState extends State<Navigator> {
   bool canPop() {
     assert(_history.length > 0);
     return _history.length > 1 || _history[0].willHandlePopInternally;
+  }
+
+  NavigationGestureController startPopGesture() {
+    if (canPop())
+      return _history.last.startPopGesture(this);
+    return null;
+  }
+
+  // TODO(mpcomplete): remove this bool when we fix
+  // https://github.com/flutter/flutter/issues/5577
+  bool _userGestureInProgress = false;
+  bool get userGestureInProgress => _userGestureInProgress;
+
+  void didStartUserGesture() {
+    _userGestureInProgress = true;
+    config.observer?.didStartUserGesture();
+  }
+
+  void didStopUserGesture() {
+    _userGestureInProgress = false;
+    config.observer?.didStopUserGesture();
   }
 
   final Set<int> _activePointers = new Set<int>();
