@@ -148,10 +148,7 @@ String runSync(List<String> cmd, {
 }
 
 void _traceCommand(List<String> args, { String workingDirectory }) {
-  final int kMaxArgsLength = 1024;
   String argsText = args.join(' ');
-  if (argsText.length > kMaxArgsLength)
-    argsText = argsText.substring(0, kMaxArgsLength) + '…';
   if (workingDirectory == null)
     printTrace(argsText);
   else
