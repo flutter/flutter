@@ -29,6 +29,29 @@ class ValueInherited extends InheritedWidget {
   bool updateShouldNotify(ValueInherited oldWidget) => value != oldWidget.value;
 }
 
+class ExpectFail extends StatefulWidget {
+  ExpectFail(this.onError);
+  final VoidCallback onError;
+
+  @override
+  ExpectFailState createState() => new ExpectFailState();
+}
+
+class ExpectFailState extends State<ExpectFail> {
+  @override
+  void initState() {
+    super.initState();
+    try {
+      context.inheritFromWidgetOfExactType(TestInherited); // should fail
+    } catch (e) {
+      config.onError();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) => new Container();
+}
+
 void main() {
   testWidgets('Inherited notifies dependents', (WidgetTester tester) async {
     List<TestInherited> log = <TestInherited>[];
@@ -436,5 +459,17 @@ void main() {
       )
     );
     expect(buildCount, equals(2));
+  });
+
+  testWidgets('initState() dependency on Inherited asserts', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/5491
+    bool exceptionCaught = false;
+
+    TestInherited parent = new TestInherited(child: new ExpectFail(() {
+      exceptionCaught = true;
+    }));
+    await tester.pumpWidget(parent);
+
+    expect(exceptionCaught, isTrue);
   });
 }
