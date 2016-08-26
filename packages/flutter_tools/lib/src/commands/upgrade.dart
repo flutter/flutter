@@ -3,10 +3,8 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
 
-import 'package:path/path.dart' as path;
-
+import '../base/os.dart';
 import '../base/process.dart';
 import '../dart/pub.dart';
 import '../cache.dart';
@@ -89,21 +87,5 @@ class UpgradeCommand extends FlutterCommand {
     return _gitDiffRegex.hasMatch(line)
       || _gitChangedRegex.hasMatch(line)
       || line == 'Fast-forward';
-  }
-
-  /// Find and return the project root directory relative to the specified
-  /// directory or the current working directory if none specified.
-  /// Return `null` if the project root could not be found
-  /// or if the project root is the flutter repository root.
-  static String findProjectRoot([String directory]) {
-    directory ??= Directory.current.path;
-    while (true) {
-      if (FileSystemEntity.isFileSync(path.join(directory, 'pubspec.yaml')))
-        return directory;
-      String parent = FileSystemEntity.parentOf(directory);
-      if (directory == parent)
-        return null;
-      directory = parent;
-    }
   }
 }

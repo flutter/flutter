@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:args/command_runner.dart';
+import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/commands/upgrade.dart';
@@ -57,18 +58,18 @@ void main() {
         await createProject();
 
         String proj = temp.path;
-        expect(UpgradeCommand.findProjectRoot(proj), proj);
-        expect(UpgradeCommand.findProjectRoot(path.join(proj, 'lib')), proj);
+        expect(findProjectRoot(proj), proj);
+        expect(findProjectRoot(path.join(proj, 'lib')), proj);
 
         String hello = path.join(Cache.flutterRoot, 'examples', 'hello_world');
-        expect(UpgradeCommand.findProjectRoot(hello), hello);
-        expect(UpgradeCommand.findProjectRoot(path.join(hello, 'lib')), hello);
+        expect(findProjectRoot(hello), hello);
+        expect(findProjectRoot(path.join(hello, 'lib')), hello);
       });
 
       testUsingContext('outside project', () async {
         await createProject();
-        expect(UpgradeCommand.findProjectRoot(temp.parent.path), null);
-        expect(UpgradeCommand.findProjectRoot(Cache.flutterRoot), null);
+        expect(findProjectRoot(temp.parent.path), null);
+        expect(findProjectRoot(Cache.flutterRoot), null);
       });
     });
   });
