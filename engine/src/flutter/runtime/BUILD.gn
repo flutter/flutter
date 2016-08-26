@@ -70,9 +70,14 @@ source_set("runtime") {
     "//flutter/skia",
     "//lib/ftl",
     "//lib/tonic",
-    "//lib/tonic/debugger",
     "//mojo/public/platform/dart:mojo_internal_impl",
   ]
+
+  if (flutter_runtime_mode != "release") {
+    deps += [
+      "//lib/tonic/debugger",
+    ]
+  }
 
   if (is_android) {
     deps += [
