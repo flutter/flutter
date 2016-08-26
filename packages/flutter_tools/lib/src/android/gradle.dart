@@ -112,7 +112,7 @@ Future<int> buildGradleProject(BuildMode buildMode) async {
     String gradle = locateSystemGradle();
     if (gradle == null) {
       printError(
-        'Unable to locate gradle. Please configure the path to gradle using \'flutter config --gradle\'.'
+        'Unable to locate gradle. Please configure the path to gradle using \'flutter config --gradle-dir\'.'
       );
       return 1;
     } else {
