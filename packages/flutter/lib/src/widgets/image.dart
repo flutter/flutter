@@ -234,8 +234,14 @@ class _ImageState extends State<Image> {
 
   @override
   Widget build(BuildContext context) {
+    // This one-time initialization could have been done in initState() since
+    // changes to the inherited widgets that _resolveImage depends on, notably
+    // DefaultAssetBundle, are handle by the dependenciesChanged() method. We're
+    // doing it here instead to avoid the assert that disallows references to
+    // inherited widgets at initState() time.
     if (_imageStream == null)
       _resolveImage();
+
     return new RawImage(
       image: _imageInfo?.image,
       width: config.width,

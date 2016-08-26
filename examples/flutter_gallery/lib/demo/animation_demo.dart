@@ -121,9 +121,6 @@ class _PointDemoState extends State<_PointDemo> {
   @override
   void initState() {
     super.initState();
-    final Size screenSize = MediaQuery.of(context).size;
-    _begin = new Point(screenSize.width * 0.5, screenSize.height * 0.2);
-    _end = new Point(screenSize.width * 0.1, screenSize.height * 0.4);
     _animation = new CurvedAnimation(parent: config.controller, curve: Curves.ease);
   }
 
@@ -179,6 +176,10 @@ class _PointDemoState extends State<_PointDemo> {
 
   @override
   Widget build(BuildContext context) {
+    final Size screenSize = MediaQuery.of(context).size;
+    _begin = new Point(screenSize.width * 0.5, screenSize.height * 0.2);
+    _end = new Point(screenSize.width * 0.1, screenSize.height * 0.4);
+
     final MaterialPointArcTween arc = new MaterialPointArcTween(begin: _begin, end: _end);
     return new RawGestureDetector(
       behavior: _dragTarget == null ? HitTestBehavior.deferToChild : HitTestBehavior.opaque,
@@ -281,15 +282,6 @@ class _RectangleDemoState extends State<_RectangleDemo> {
   @override
   void initState() {
     super.initState();
-    final Size screenSize = MediaQuery.of(context).size;
-    _begin = new Rect.fromLTWH(
-      screenSize.width * 0.5, screenSize.height * 0.2,
-      screenSize.width * 0.4, screenSize.height * 0.2
-    );
-    _end = new Rect.fromLTWH(
-      screenSize.width * 0.1, screenSize.height * 0.4,
-      screenSize.width * 0.3, screenSize.height * 0.3
-    );
     _animation = new CurvedAnimation(parent: config.controller, curve: Curves.ease);
   }
 
@@ -344,6 +336,16 @@ class _RectangleDemoState extends State<_RectangleDemo> {
 
   @override
   Widget build(BuildContext context) {
+    final Size screenSize = MediaQuery.of(context).size;
+    _begin = new Rect.fromLTWH(
+      screenSize.width * 0.5, screenSize.height * 0.2,
+      screenSize.width * 0.4, screenSize.height * 0.2
+    );
+    _end = new Rect.fromLTWH(
+      screenSize.width * 0.1, screenSize.height * 0.4,
+      screenSize.width * 0.3, screenSize.height * 0.3
+    );
+
     final MaterialRectArcTween arc = new MaterialRectArcTween(begin: _begin, end: _end);
     return new RawGestureDetector(
       behavior: _dragTarget == null ? HitTestBehavior.deferToChild : HitTestBehavior.opaque,
