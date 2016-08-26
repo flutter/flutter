@@ -5,6 +5,9 @@
 /// The height of the toolbar component of the [AppBar].
 const double kToolbarHeight = 56.0;
 
+/// The height of the bottom navigation bar.
+const double kBottomNavigationBarHeight = 60.0;
+
 /// The height of a tab bar containing text.
 const double kTextTabBarHeight = 48.0;
 
