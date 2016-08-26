@@ -188,12 +188,6 @@ class _ImageState extends State<Image> {
   ImageInfo _imageInfo;
 
   @override
-  void initState() {
-    super.initState();
-    _resolveImage();
-  }
-
-  @override
   void didUpdateConfig(Image oldConfig) {
     if (config.image != oldConfig.image)
       _resolveImage();
@@ -240,6 +234,8 @@ class _ImageState extends State<Image> {
 
   @override
   Widget build(BuildContext context) {
+    if (_imageStream == null)
+      _resolveImage();
     return new RawImage(
       image: _imageInfo?.image,
       width: config.width,

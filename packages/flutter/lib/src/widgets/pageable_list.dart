@@ -256,12 +256,6 @@ abstract class PageableState<T extends Pageable> extends ScrollableState<T> {
   }
 
   @override
-  void initState() {
-    super.initState();
-    _updateScrollBehavior();
-  }
-
-  @override
   void didUpdateConfig(Pageable oldConfig) {
     super.didUpdateConfig(oldConfig);
 

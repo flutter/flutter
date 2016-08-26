@@ -768,19 +768,20 @@ class _TabBarState<T> extends ScrollableState<TabBar<T>> implements TabBarSelect
   bool _valueIsChanging = false;
   int _lastSelectedIndex = -1;
 
-  void _initSelection(TabBarSelectionState<T> selection) {
+  void _initSelection(TabBarSelectionState<T> newSelection) {
+    if (_selection == newSelection)
+      return;
     _selection?.unregisterAnimationListener(this);
-    _selection = selection;
+    _selection = newSelection;
     _selection?.registerAnimationListener(this);
+    if (_selection != null)
+      _lastSelectedIndex = _selection.index;
   }
 
   @override
   void initState() {
     super.initState();
     scrollBehavior.isScrollable = config.isScrollable;
-    _initSelection(TabBarSelection.of(context));
-    if (_selection != null)
-      _lastSelectedIndex = _selection.index;
   }
 
   @override
@@ -990,8 +991,7 @@ class _TabBarState<T> extends ScrollableState<TabBar<T>> implements TabBarSelect
   @override
   Widget buildContent(BuildContext context) {
     TabBarSelectionState<T> newSelection = TabBarSelection.of(context);
-    if (_selection != newSelection)
-      _initSelection(newSelection);
+    _initSelection(newSelection);
 
     assert(config.labels.isNotEmpty);
     assert(Material.of(context) != null);
@@ -1097,18 +1097,14 @@ class _TabBarViewState<T> extends PageableListState<TabBarView<T>> implements Ta
   @override
   TargetPlatform get platform => Theme.of(context).platform;
 
-  void _initSelection(TabBarSelectionState<T> selection) {
-    _selection = selection;
-    if (_selection != null) {
-      _selection.registerAnimationListener(this);
+  void _initSelection(TabBarSelectionState<T> newSelection) {
+    if (_selection == newSelection)
+      return;
+    _selection?.unregisterAnimationListener(this);
+    _selection = newSelection;
+    _selection?.registerAnimationListener(this);
+    if (_selection != null)
       _updateItemsAndScrollBehavior();
-    }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _initSelection(TabBarSelection.of(context));
   }
 
   @override
@@ -1243,8 +1239,7 @@ class _TabBarViewState<T> extends PageableListState<TabBarView<T>> implements Ta
   @override
   Widget buildContent(BuildContext context) {
     TabBarSelectionState<T> newSelection = TabBarSelection.of(context);
-    if (_selection != newSelection)
-      _initSelection(newSelection);
+    _initSelection(newSelection);
     return new PageViewport(
       itemsWrap: config.itemsWrap,
       mainAxis: config.scrollDirection,

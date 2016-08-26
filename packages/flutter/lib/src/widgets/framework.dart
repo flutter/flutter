@@ -1706,7 +1706,7 @@ abstract class Element implements BuildContext {
   void _updateInheritance() {
     assert(_active);
     _inheritedWidgets = _parent?._inheritedWidgets;
-  }
+   }
 
   @override
   Widget ancestorWidgetOfExactType(Type targetType) {
@@ -2182,6 +2182,18 @@ class StatefulElement extends ComponentElement {
     assert(!dirty); // See BuildableElement.unmount for why this is important.
     _state._element = null;
     _state = null;
+  }
+
+  @override
+  InheritedWidget inheritFromWidgetOfExactType(Type targetType) {
+    assert(() {
+      if (state._debugLifecycleState == _StateLifecycle.ready)
+        return true;
+      throw new FlutterError(
+        'inheritFromWidgetOfExactType($targetType) was called before ${_state.runtimeType}.initState() completed.'
+      );
+    });
+    return super.inheritFromWidgetOfExactType(targetType);
   }
 
   @override

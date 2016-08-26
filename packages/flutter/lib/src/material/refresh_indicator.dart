@@ -157,25 +157,12 @@ class RefreshIndicatorState extends State<RefreshIndicator> {
     _sizeFactor = new Tween<double>(begin: 0.0, end: _kDragSizeFactorLimit).animate(_sizeController);
     _scaleFactor = new Tween<double>(begin: 1.0, end: 0.0).animate(_scaleController);
 
-    final ThemeData theme = Theme.of(context);
-
     // The "value" of the circular progress indicator during a drag.
     _value = new Tween<double>(
       begin: 0.0,
       end: 0.75
     )
     .animate(_sizeController);
-
-    // Fully opaque when we've reached config.displacement.
-    _valueColor = new ColorTween(
-      begin: (config.color ?? theme.accentColor).withOpacity(0.0),
-      end: (config.color ?? theme.accentColor).withOpacity(1.0)
-    )
-    .animate(new CurvedAnimation(
-      parent: _sizeController,
-      curve: new Interval(0.0, 1.0 / _kDragSizeFactorLimit)
-    ));
-
   }
 
   @override
@@ -346,8 +333,20 @@ class RefreshIndicatorState extends State<RefreshIndicator> {
 
   @override
   Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
     final bool showIndeterminateIndicator =
       _mode == _RefreshIndicatorMode.refresh || _mode == _RefreshIndicatorMode.dismiss;
+
+    // Fully opaque when we've reached config.displacement.
+    _valueColor = new ColorTween(
+      begin: (config.color ?? theme.accentColor).withOpacity(0.0),
+      end: (config.color ?? theme.accentColor).withOpacity(1.0)
+    )
+    .animate(new CurvedAnimation(
+      parent: _sizeController,
+      curve: new Interval(0.0, 1.0 / _kDragSizeFactorLimit)
+    ));
+
     return new Listener(
       onPointerDown: _handlePointerDown,
       onPointerMove: _handlePointerMove,
