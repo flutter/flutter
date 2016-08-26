@@ -156,9 +156,10 @@ Future<bool> _isPortAvailable(int port) async {
 /// Return `null` if the project root could not be found
 /// or if the project root is the flutter repository root.
 String findProjectRoot([String directory]) {
+  const String kProjectRootSentinel = 'pubspec.yaml';
   directory ??= Directory.current.path;
   while (true) {
-    if (FileSystemEntity.isFileSync(path.join(directory, 'pubspec.yaml')))
+    if (FileSystemEntity.isFileSync(path.join(directory, kProjectRootSentinel)))
       return directory;
     String parent = FileSystemEntity.parentOf(directory);
     if (directory == parent) return null;
