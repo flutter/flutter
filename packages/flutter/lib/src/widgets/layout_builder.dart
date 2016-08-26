@@ -48,17 +48,35 @@ class LayoutBuilder extends RenderObjectWidget {
 
   @override
   _RenderLayoutBuilder createRenderObject(BuildContext context) => new _RenderLayoutBuilder();
+
+  // updateRenderObject is redundant with the logic in the LayoutBuilderElement below.
 }
 
-class _RenderLayoutBuilder extends RenderBox with RenderObjectWithChildMixin<RenderBox> {
-  _RenderLayoutBuilder({ LayoutCallback callback }) : _callback = callback;
+typedef Widget _LayoutBuildCallback(BoxConstraints constraints);
+typedef void _LayoutUpdateCallback(Widget built);
 
-  LayoutCallback get callback => _callback;
-  LayoutCallback _callback;
-  set callback(LayoutCallback value) {
-    if (value == _callback)
+class _RenderLayoutBuilder extends RenderBox with RenderObjectWithChildMixin<RenderBox> {
+  _RenderLayoutBuilder({
+    _LayoutBuildCallback layoutBuildCallback,
+    _LayoutUpdateCallback layoutUpdateCallback,
+  }) : _layoutBuildCallback = layoutBuildCallback,
+       _layoutUpdateCallback = layoutUpdateCallback;
+
+  _LayoutBuildCallback get layoutBuildCallback => _layoutBuildCallback;
+  _LayoutBuildCallback _layoutBuildCallback;
+  set layoutBuildCallback(_LayoutBuildCallback value) {
+    if (value == _layoutBuildCallback)
       return;
-    _callback = value;
+    _layoutBuildCallback = value;
+    markNeedsLayout();
+  }
+
+  _LayoutUpdateCallback get layoutUpdateCallback => _layoutUpdateCallback;
+  _LayoutUpdateCallback _layoutUpdateCallback;
+  set layoutUpdateCallback(_LayoutUpdateCallback value) {
+    if (value == _layoutUpdateCallback)
+      return;
+    _layoutUpdateCallback = value;
     markNeedsLayout();
   }
 
@@ -102,8 +120,13 @@ class _RenderLayoutBuilder extends RenderBox with RenderObjectWithChildMixin<Ren
 
   @override
   void performLayout() {
-    if (callback != null)
-      invokeLayoutCallback(callback);
+    Widget built;
+    assert(layoutBuildCallback != null);
+    assert(layoutUpdateCallback != null);
+    built = layoutBuildCallback(constraints);
+    enableMutationsToDirtySubtrees(() {
+      layoutUpdateCallback(built);
+    });
     if (child != null) {
       child.layout(constraints, parentUsesSize: true);
       size = constraints.constrain(child.size);
@@ -124,6 +147,7 @@ class _RenderLayoutBuilder extends RenderBox with RenderObjectWithChildMixin<Ren
   }
 }
 
+// TODO(ianh): move this class up to just below its widget.
 class _LayoutBuilderElement extends RenderObjectElement {
   _LayoutBuilderElement(LayoutBuilder widget) : super(widget);
 
@@ -144,7 +168,8 @@ class _LayoutBuilderElement extends RenderObjectElement {
   @override
   void mount(Element parent, dynamic newSlot) {
     super.mount(parent, newSlot); // Creates the renderObject.
-    renderObject.callback = _layout; // The _child will be built during layout.
+    renderObject.layoutBuildCallback = _callBuild;
+    renderObject.layoutUpdateCallback = _callUpdate;
   }
 
   @override
@@ -152,7 +177,8 @@ class _LayoutBuilderElement extends RenderObjectElement {
     assert(widget != newWidget);
     super.update(newWidget);
     assert(widget == newWidget);
-    renderObject.callback = _layout;
+    renderObject.layoutBuildCallback = _callBuild;
+    renderObject.layoutUpdateCallback = _callUpdate;
     renderObject.markNeedsLayout();
   }
 
@@ -161,28 +187,39 @@ class _LayoutBuilderElement extends RenderObjectElement {
     // This gets called if markNeedsBuild() is called on us.
     // That might happen if, e.g., our builder uses Inherited widgets.
     renderObject.markNeedsLayout();
-    super.performRebuild(); // calls widget.updateRenderObject
+    super.performRebuild(); // Calls widget.updateRenderObject (a no-op in this case).
   }
 
   @override
   void unmount() {
-    renderObject.callback = null;
+    renderObject.layoutBuildCallback = null;
+    renderObject.layoutUpdateCallback = null;
     super.unmount();
   }
 
-  void _layout(BoxConstraints constraints) {
-    if (widget.builder == null)
-      return;
-    owner.lockState(() {
-      Widget built;
-      try {
-        built = widget.builder(this, constraints);
-        debugWidgetBuilderValue(widget, built);
-      } catch (e, stack) {
-        _debugReportException('building $widget', e, stack);
-        built = new ErrorWidget(e);
-      }
+  Widget _callBuild(BoxConstraints constraints) {
+    Widget built;
+    if (widget.builder != null) {
+      owner.lockState(() {
+        try {
+          built = widget.builder(this, constraints);
+          debugWidgetBuilderValue(widget, built);
+        } catch (e, stack) {
+          _debugReportException('building $widget', e, stack);
+          built = new ErrorWidget(e);
+        }
+      });
+    }
+    return built;
+  }
 
+  void _callUpdate(Widget built) {
+    owner.lockState(() {
+      if (widget.builder == null) {
+        if (_child != null)
+          _child = updateChild(_child, null, null);
+        return;
+      }
       try {
         _child = updateChild(_child, built, null);
         assert(_child != null);
