@@ -2,6 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//flutter/common/config.gni")
 import("//flutter/sky/engine/core/core.gni")
 
 visibility = [ "//flutter/sky/engine/*", "//flutter/sky/shell/*" ]
