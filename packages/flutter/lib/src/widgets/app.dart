@@ -109,13 +109,13 @@ class WidgetsApp extends StatefulWidget {
 }
 
 class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserver {
-  GlobalObjectKey _navigator;
+  GlobalObjectKey<NavigatorState> _navigator;
   LocaleQueryData _localeData;
 
   @override
   void initState() {
     super.initState();
-    _navigator = new GlobalObjectKey(this);
+    _navigator = new GlobalObjectKey<NavigatorState>(this);
     didChangeLocale(ui.window.locale);
     WidgetsBinding.instance.addObserver(this);
   }

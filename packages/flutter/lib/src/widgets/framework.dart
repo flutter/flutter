@@ -272,6 +272,7 @@ abstract class GlobalKey<T extends State<StatefulWidget>> extends Key {
 ///
 /// The debug label is useful for documentation and for debugging. The label
 /// does not affect the key's identity.
+@optionalTypeArgs
 class LabeledGlobalKey<T extends State<StatefulWidget>> extends GlobalKey<T> {
   /// Creates a global key with a debugging label.
   ///
@@ -288,7 +289,8 @@ class LabeledGlobalKey<T extends State<StatefulWidget>> extends GlobalKey<T> {
 ///
 /// Used to tie the identity of a widget to the identity of an object used to
 /// generate that widget.
-class GlobalObjectKey extends GlobalKey {
+@optionalTypeArgs
+class GlobalObjectKey<T extends State<StatefulWidget>> extends GlobalKey<T> {
   /// Creates a global key that uses [identical] on [value] for its [operator==].
   const GlobalObjectKey(this.value) : super.constructor();
 
@@ -297,9 +299,9 @@ class GlobalObjectKey extends GlobalKey {
 
   @override
   bool operator ==(dynamic other) {
-    if (other is! GlobalObjectKey)
+    if (other is! GlobalObjectKey<T>)
       return false;
-    final GlobalObjectKey typedOther = other;
+    final GlobalObjectKey<T> typedOther = other;
     return identical(value, typedOther.value);
   }
 
