@@ -16,7 +16,6 @@ source_set("libraries") {
     "//flutter/sky/engine/wtf",
     "//lib/ftl",
     "//lib/tonic",
-    "//lib/tonic/debugger",
     "//mojo/application",
     "//mojo/data_pipe_utils",
     "//mojo/public/c/system",
@@ -30,6 +29,12 @@ source_set("libraries") {
     "//third_party/qcms",
     "//third_party/zlib",
   ]
+
+  if (flutter_runtime_mode != "release") {
+    public_deps += [
+      "//lib/tonic/debugger",
+    ]
+  }
 
   if (is_android) {
     public_deps += [
