@@ -238,8 +238,8 @@ class _ImageState extends State<Image> {
     // changes to the inherited widgets that _resolveImage depends on, notably
     // DefaultAssetBundle, are handle by the dependenciesChanged() method. We're
     // doing it here instead to avoid the assert that disallows references to
-    // inherited widgets at initState() time. We've found that assert to be a reliable
-    // source of real bugs, and is therefore worth this minor inconvenience here.
+    // inherited widgets at initState() time. We've found that assert to be a
+    // reliable source of real bugs, and that it is worth this minor inconvenience.
     if (_imageStream == null)
       _resolveImage();
 
