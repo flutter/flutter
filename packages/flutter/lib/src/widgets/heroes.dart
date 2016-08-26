@@ -5,6 +5,7 @@
 import 'dart:collection';
 
 import 'package:meta/meta.dart';
+import 'package:flutter/foundation.dart';
 
 import 'basic.dart';
 import 'binding.dart';
@@ -424,10 +425,15 @@ class HeroController extends NavigatorObserver {
     );
   }
 
+  // The current party, if they're on a quest.
   _HeroParty _party;
-  Animation<double> _animation;
+
+  // The settings used to prepare the next quest.
+  // These members are only non-null between the didPush/didPop call and the
+  // corresponding _updateQuest call.
   PageRoute<dynamic> _from;
   PageRoute<dynamic> _to;
+  Animation<double> _animation;
 
   final List<OverlayEntry> _overlayEntries = new List<OverlayEntry>();
 
@@ -451,9 +457,9 @@ class HeroController extends NavigatorObserver {
     assert(route != null);
     if (route is PageRoute<dynamic>) {
       assert(route.animation != null);
-      if (previousRoute is PageRoute<dynamic>) {
-        _to = previousRoute;
+      if (route.animation.status != AnimationStatus.dismissed && previousRoute is PageRoute<dynamic>) {
         _from = route;
+        _to = previousRoute;
         _animation = route.animation;
         _checkForHeroQuest();
       }
@@ -475,16 +481,17 @@ class HeroController extends NavigatorObserver {
 
   void _checkForHeroQuest() {
     if (_from != null && _to != null && _from != _to && _questsEnabled) {
+      assert(_animation != null);
       _to.offstage = _to.animation.status != AnimationStatus.completed;
       WidgetsBinding.instance.addPostFrameCallback(_updateQuest);
+    } else {
+      // this isn't a valid quest
+      _clearPendingHeroQuest();
     }
   }
 
   void _handleQuestFinished() {
     _removeHeroesFromOverlay();
-    _from = null;
-    _to = null;
-    _animation = null;
   }
 
   Rect _getAnimationArea(BuildContext context) {
@@ -514,8 +521,11 @@ class HeroController extends NavigatorObserver {
   void _updateQuest(Duration timeStamp) {
     if (navigator == null) {
       // The navigator was removed before this end-of-frame callback was called.
+      _clearPendingHeroQuest();
       return;
     }
+    assert(_from.subtreeContext != null);
+    assert(_to.subtreeContext != null);
     Map<Object, _HeroHandle> heroesFrom = _party.isEmpty ?
         Hero._of(_from.subtreeContext) : _party.getHeroesToAnimate();
 
@@ -541,5 +551,13 @@ class HeroController extends NavigatorObserver {
         navigator.overlay
       );
     }
+
+    _clearPendingHeroQuest();
+  }
+
+  void _clearPendingHeroQuest() {
+    _from = null;
+    _to = null;
+    _animation = null;
   }
 }
