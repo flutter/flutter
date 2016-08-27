@@ -251,7 +251,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
 
   @override
   void dispose() {
-    _controller.stop();
+    _controller.dispose();
     super.dispose();
   }
 
