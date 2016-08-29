@@ -62,6 +62,8 @@ class PlatformViewAndroid : public PlatformView {
   }
 
  private:
+  void ReleaseSurface();
+
   std::unique_ptr<AndroidGLContext> context_;
   ftl::WeakPtrFactory<PlatformViewAndroid> weak_factory_;
   JavaObjectWeakGlobalRef flutter_view_;
