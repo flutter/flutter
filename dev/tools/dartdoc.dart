@@ -13,7 +13,7 @@ const String kDocRoot = 'dev/docs/doc';
 /// This script expects to run with the cwd as the root of the flutter repo. It
 /// will generate documentation for the packages in `//packages/` and write the
 /// documentation to `//dev/docs/doc/api/`.
-/// 
+///
 /// This script also updates the index.html file so that it can be placed
 /// at the root of docs.flutter.io. We are keeping the files inside of
 /// docs.flutter.io/flutter for now, so we need to manipulate paths
@@ -52,7 +52,7 @@ dependencies:
   if (code != 0)
     exit(code);
 
-  // Generate the documentation; we require dartdoc >= 0.9.4.
+  // Generate the documentation.
   List<String> args = <String>[
     'global', 'run', 'dartdoc',
     '--header', 'styles.html',
