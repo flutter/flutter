@@ -22,6 +22,9 @@ const double _kFloatingActionButtonMargin = 16.0; // TODO(hmuller): should be de
 const Duration _kFloatingActionButtonSegue = const Duration(milliseconds: 200);
 final Tween<double> _kFloatingActionButtonTurnTween = new Tween<double>(begin: -0.125, end: 0.0);
 
+// iOS back gesture is in development. This flag will go away when it's ready
+// to ship.
+const bool _kBackGestureEnabled = false;
 const double _kBackGestureWidth = 20.0;
 
 /// The Scaffold's appbar is the toolbar, bottom, and the "flexible space"
@@ -697,7 +700,9 @@ class ScaffoldState extends State<Scaffold> {
   NavigationGestureController _backGestureController;
 
   bool _shouldHandleBackGesture() {
-    return Theme.of(context).platform == TargetPlatform.iOS && Navigator.canPop(context);
+    return _kBackGestureEnabled &&
+      Theme.of(context).platform == TargetPlatform.iOS &&
+      Navigator.canPop(context);
   }
 
   void _handleDragStart(DragStartDetails details) {
