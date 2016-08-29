@@ -504,6 +504,12 @@ abstract class SchedulerBinding extends BindingBase {
 
     Timeline.finishSync();
 
+    assert(() {
+      if (debugPrintEndFrameBanner)
+        debugPrint('━━━━━━━┫ End of Frame ┣━━━━━━━');
+      return true;
+    });
+
     // All frame-related callbacks have been executed. Run lower-priority tasks.
     _runTasks();
   }

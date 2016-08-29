@@ -286,4 +286,64 @@ void main() {
     await tester.tap(find.text('bar'));
     expect(log, equals(<String>['bar']));
   });
+
+  testWidgets('Popping on first frame does not cause hero observer to crash', (WidgetTester tester) async {
+    await tester.pumpWidget(new MaterialApp(
+      onGenerateRoute: (RouteSettings settings) {
+        return new MaterialPageRoute<Null>(
+          settings: settings,
+          builder: (BuildContext context) => new Hero(tag: 'test', child: new Container()),
+        );
+      },
+    ));
+    await tester.pump();
+
+    Finder heroes = find.byType(Hero);
+    expect(heroes, findsOneWidget);
+
+    Navigator.pushNamed(heroes.evaluate().first, 'test');
+    await tester.pump(); // adds the new page to the tree...
+
+    Navigator.pop(heroes.evaluate().first);
+    await tester.pump(); // ...and removes it straight away (since it's already at 0.0)
+
+    // this is verifying that there's no crash
+
+    // TODO(ianh): once https://github.com/flutter/flutter/issues/5631 is fixed, remove this line:
+    await tester.pump(const Duration(hours: 1));
+  });
+
+  testWidgets('Overlapping starting and ending a hero transition works ok', (WidgetTester tester) async {
+    await tester.pumpWidget(new MaterialApp(
+      onGenerateRoute: (RouteSettings settings) {
+        return new MaterialPageRoute<Null>(
+          settings: settings,
+          builder: (BuildContext context) => new Hero(tag: 'test', child: new Container()),
+        );
+      },
+    ));
+    await tester.pump();
+
+    Finder heroes = find.byType(Hero);
+    expect(heroes, findsOneWidget);
+
+    Navigator.pushNamed(heroes.evaluate().first, 'test');
+    await tester.pump();
+    await tester.pump(const Duration(hours: 1));
+
+    Navigator.pushNamed(heroes.evaluate().first, 'test');
+    await tester.pump();
+    await tester.pump(const Duration(hours: 1));
+
+    Navigator.pop(heroes.evaluate().first);
+    await tester.pump();
+    Navigator.pop(heroes.evaluate().first);
+    await tester.pump(const Duration(hours: 1)); // so the first transition is finished, but the second hasn't started
+    await tester.pump();
+
+    // this is verifying that there's no crash
+
+    // TODO(ianh): once https://github.com/flutter/flutter/issues/5631 is fixed, remove this line:
+    await tester.pump(const Duration(hours: 1));
+  });
 }
