@@ -4,10 +4,12 @@
 
 #include "flutter/sky/shell/platform/android/platform_view_android.h"
 
-#include <EGL/egl.h>
-
 #include <android/input.h>
 #include <android/native_window_jni.h>
+#include <EGL/egl.h>
+#include <sys/resource.h>
+#include <sys/time.h>
+#include <sys/types.h>
 
 #include <utility>
 
@@ -15,6 +17,7 @@
 #include "base/bind.h"
 #include "base/location.h"
 #include "base/trace_event/trace_event.h"
+#include "flutter/common/threads.h"
 #include "flutter/runtime/dart_service_isolate.h"
 #include "flutter/sky/shell/shell.h"
 #include "jni/FlutterView_jni.h"
@@ -41,7 +44,6 @@ void LogLastEGLError() {
   { #a, a }
 
   const EGLNameErrorPair pairs[] = {
-
       _EGL_ERROR_DESC(EGL_SUCCESS),
       _EGL_ERROR_DESC(EGL_NOT_INITIALIZED),
       _EGL_ERROR_DESC(EGL_BAD_ACCESS),
@@ -57,7 +59,6 @@ void LogLastEGLError() {
       _EGL_ERROR_DESC(EGL_BAD_NATIVE_PIXMAP),
       _EGL_ERROR_DESC(EGL_BAD_NATIVE_WINDOW),
       _EGL_ERROR_DESC(EGL_CONTEXT_LOST),
-
   };
 
 #undef _EGL_ERROR_DESC
@@ -367,8 +368,7 @@ bool PlatformViewAndroid::Register(JNIEnv* env) {
   return RegisterNativesImpl(env);
 }
 
-PlatformViewAndroid::PlatformViewAndroid()
-    : weak_factory_(this) {
+PlatformViewAndroid::PlatformViewAndroid() : weak_factory_(this) {
   // If this is the first PlatformView, then intiialize EGL and set up
   // the resource context.
   if (g_display == EGL_NO_DISPLAY)
@@ -401,6 +401,16 @@ void PlatformViewAndroid::SurfaceCreated(JNIEnv* env,
   NotifyCreated();
 
   SetupResourceContextOnIOThread();
+
+  UpdateThreadPriorities();
+}
+
+void PlatformViewAndroid::UpdateThreadPriorities() {
+  blink::Threads::Gpu()->PostTask(
+      []() { ::setpriority(PRIO_PROCESS, gettid(), -2); });
+
+  blink::Threads::UI()->PostTask(
+      []() { ::setpriority(PRIO_PROCESS, gettid(), -1); });
 }
 
 void PlatformViewAndroid::SurfaceDestroyed(JNIEnv* env, jobject obj) {
@@ -465,8 +475,7 @@ void PlatformViewAndroid::RunFromSource(const std::string& main,
 
     // Grab the runFromSource method id.
     jmethodID run_from_source_method_id = env->GetMethodID(
-        flutter_view_class,
-        "runFromSource",
+        flutter_view_class, "runFromSource",
         "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V");
     FTL_CHECK(run_from_source_method_id);
 
@@ -477,11 +486,8 @@ void PlatformViewAndroid::RunFromSource(const std::string& main,
     FTL_CHECK(java_packages);
     jstring java_assets_directory = env->NewStringUTF(assets_directory.c_str());
     FTL_CHECK(java_assets_directory);
-    env->CallVoidMethod(local_flutter_view.obj(),
-                        run_from_source_method_id,
-                        java_main,
-                        java_packages,
-                        java_assets_directory);
+    env->CallVoidMethod(local_flutter_view.obj(), run_from_source_method_id,
+                        java_main, java_packages, java_assets_directory);
   }
 
   // Detaching from the VM deletes any stray local references.

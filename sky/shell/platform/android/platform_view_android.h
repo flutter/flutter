@@ -66,6 +66,8 @@ class PlatformViewAndroid : public PlatformView {
   ftl::WeakPtrFactory<PlatformViewAndroid> weak_factory_;
   JavaObjectWeakGlobalRef flutter_view_;
 
+  void UpdateThreadPriorities();
+
   FTL_DISALLOW_COPY_AND_ASSIGN(PlatformViewAndroid);
 };
 
