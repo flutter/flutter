@@ -221,6 +221,71 @@ void main() {
     expect(imageProvider._configuration.devicePixelRatio, 10.0);
   });
 
+  testWidgets('Verify ImageProvider configuration inheritance again', (WidgetTester tester) async {
+    final GlobalKey mediaQueryKey1 = new GlobalKey(debugLabel: 'mediaQueryKey1');
+    final GlobalKey mediaQueryKey2 = new GlobalKey(debugLabel: 'mediaQueryKey2');
+    final GlobalKey imageKey = new GlobalKey(debugLabel: 'image');
+    final TestImageProvider imageProvider = new TestImageProvider();
+
+    // This is just a variation on the previous test.  In this version the location
+    // of the Image changes and the MediaQuery widgets do not.
+    await tester.pumpWidget(
+      new Row(
+        children: <Widget> [
+          new MediaQuery(
+            key: mediaQueryKey2,
+            data: new MediaQueryData(
+              devicePixelRatio: 5.0,
+              padding: EdgeInsets.zero,
+            ),
+            child: new Image(
+              key: imageKey,
+              image: imageProvider
+            )
+          ),
+          new MediaQuery(
+            key: mediaQueryKey1,
+            data: new MediaQueryData(
+              devicePixelRatio: 10.0,
+              padding: EdgeInsets.zero,
+            ),
+            child: new Container(width: 100.0)
+          )
+        ]
+      )
+    );
+
+    expect(imageProvider._configuration.devicePixelRatio, 5.0);
+
+    await tester.pumpWidget(
+      new Row(
+        children: <Widget> [
+          new MediaQuery(
+            key: mediaQueryKey2,
+            data: new MediaQueryData(
+              devicePixelRatio: 5.0,
+              padding: EdgeInsets.zero,
+            ),
+            child: new Container(width: 100.0)
+          ),
+          new MediaQuery(
+            key: mediaQueryKey1,
+            data: new MediaQueryData(
+              devicePixelRatio: 10.0,
+              padding: EdgeInsets.zero,
+            ),
+            child: new Image(
+              key: imageKey,
+              image: imageProvider
+            )
+          )
+        ]
+      )
+    );
+
+    expect(imageProvider._configuration.devicePixelRatio, 10.0);
+  });
+
 }
 
 class TestImageProvider extends ImageProvider<TestImageProvider> {

@@ -199,7 +199,6 @@ class _ImageState extends State<Image> {
     // in case the InheritedWidget ancestors it depends on have changed.
     _imageStream?.removeListener(_handleImageChanged);
     _imageStream = null;
-    _imageInfo = null;
     super.deactivate();
   }
 
