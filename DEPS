@@ -22,7 +22,7 @@ vars = {
   'fuchsia_git': 'https://fuchsia.googlesource.com',
   'mojo_sdk_revision': '6b5fb1227c742f5ecc077486ebc029f2711c61fa',
   'base_revision': '672b04e54b937ec899429a6bd5409c5a6300d151',
-  'skia_revision': 'd1bdd1fcbd308afb9903f39d231742f5c951cf07',
+  'skia_revision': '5561e3ddbbf6c3e051075ada4a11ddc70760f03d',
 
   # Note: When updating the Dart revision, ensure that all entries that are
   # dependencies of dart are also updated
