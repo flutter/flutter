@@ -9,6 +9,8 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 
 const String kDocRoot = 'dev/docs/doc';
+
+// We peg to this version to work around a bug affecting Flutter in 0.9.7+2.
 const String kDartdocVersion = '0.9.7+1';
 
 /// This script expects to run with the cwd as the root of the flutter repo. It
