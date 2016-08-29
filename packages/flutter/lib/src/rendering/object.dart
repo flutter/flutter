@@ -2126,22 +2126,22 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
 
   // HIT TESTING
 
-  // RenderObject subclasses are expected to have a method like the
-  // following (with the signature being whatever passes for coordinates
-  // for this particular class):
+  // RenderObject subclasses are expected to have a method like the following
+  // (with the signature being whatever passes for coordinates for this
+  // particular class):
+  //
   // bool hitTest(HitTestResult result, { Point position }) {
-  //   // If (x,y) is not inside this node, then return false. (You
-  //   // can assume that the given coordinate is inside your
-  //   // dimensions. You only need to check this if you're an
-  //   // irregular shape, e.g. if you have a hole.)
+  //   // If the given position is not inside this node, then return false.
   //   // Otherwise:
-  //   // For each child that intersects x,y, in z-order starting from the top,
-  //   // call hitTest() for that child, passing it /result/, and the coordinates
-  //   // converted to the child's coordinate origin, and stop at the first child
-  //   // that returns true.
+  //   // For each child that intersects the position, in z-order starting from
+  //   // the top, call hitTest() for that child, passing it /result/, and the
+  //   // coordinates converted to the child's coordinate origin, and stop at
+  //   // the first child that returns true.
   //   // Then, add yourself to /result/, and return true.
   // }
-  // You must not add yourself to /result/ if you return false.
+  //
+  // If you add yourself to /result/ and still return false, then that means you
+  // will see events but so will objects below you.
 
 
   /// Returns a human understandable name.
