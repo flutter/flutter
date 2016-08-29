@@ -163,14 +163,79 @@ void main() {
     expect(renderImage.image, isNotNull);
   });
 
+  testWidgets('Verify ImageProvider configuration inheritance', (WidgetTester tester) async {
+    final GlobalKey mediaQueryKey1 = new GlobalKey(debugLabel: 'mediaQueryKey1');
+    final GlobalKey mediaQueryKey2 = new GlobalKey(debugLabel: 'mediaQueryKey2');
+    final GlobalKey imageKey = new GlobalKey(debugLabel: 'image');
+    final TestImageProvider imageProvider = new TestImageProvider();
+
+    // Of the two nested MediaQuery objects, the innermost one,
+    // mediaQuery2, should define the configuration of the imageProvider.
+    await tester.pumpWidget(
+      new MediaQuery(
+        key: mediaQueryKey1,
+        data: new MediaQueryData(
+          devicePixelRatio: 10.0,
+          padding: EdgeInsets.zero,
+        ),
+        child: new MediaQuery(
+          key: mediaQueryKey2,
+          data: new MediaQueryData(
+            devicePixelRatio: 5.0,
+            padding: EdgeInsets.zero,
+          ),
+          child: new Image(
+            key: imageKey,
+            image: imageProvider
+          ),
+        )
+      )
+    );
+
+    expect(imageProvider._configuration.devicePixelRatio, 5.0);
+
+    // This is the same widget hierarchy as before except that the
+    // two MediaQuery objects have exchanged places. The imageProvider
+    // should be resolved again, with the new innermost MediaQuery.
+    await tester.pumpWidget(
+      new MediaQuery(
+        key: mediaQueryKey2,
+        data: new MediaQueryData(
+          devicePixelRatio: 5.0,
+          padding: EdgeInsets.zero,
+        ),
+        child: new MediaQuery(
+          key: mediaQueryKey1,
+          data: new MediaQueryData(
+            devicePixelRatio: 10.0,
+            padding: EdgeInsets.zero,
+          ),
+          child: new Image(
+            key: imageKey,
+            image: imageProvider
+          ),
+        )
+      )
+    );
+
+    expect(imageProvider._configuration.devicePixelRatio, 10.0);
+  });
+
 }
 
 class TestImageProvider extends ImageProvider<TestImageProvider> {
   final Completer<ImageInfo> _completer = new Completer<ImageInfo>();
+  ImageConfiguration _configuration;
 
   @override
   Future<TestImageProvider> obtainKey(ImageConfiguration configuration) {
     return new SynchronousFuture<TestImageProvider>(this);
+  }
+
+  @override
+  ImageStream resolve(ImageConfiguration configuration) {
+    _configuration = configuration;
+    return super.resolve(configuration);
   }
 
   @override

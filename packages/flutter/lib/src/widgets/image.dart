@@ -194,6 +194,16 @@ class _ImageState extends State<Image> {
   }
 
   @override
+  void deactivate() {
+    // If this image is activated again then force _imageStream to be recreated,
+    // in case the InheritedWidget ancestors it depends on have changed.
+    _imageStream?.removeListener(_handleImageChanged);
+    _imageStream = null;
+    _imageInfo = null;
+    super.deactivate();
+  }
+
+  @override
   void dependenciesChanged() {
     _resolveImage();
     super.dependenciesChanged();
@@ -203,12 +213,6 @@ class _ImageState extends State<Image> {
   void reassemble() {
     _resolveImage();
     super.reassemble();
-  }
-
-  @override
-  void dispose() {
-    _imageStream.removeListener(_handleImageChanged);
-    super.dispose();
   }
 
   void _resolveImage() {
