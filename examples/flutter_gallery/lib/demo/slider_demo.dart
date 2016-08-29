@@ -22,32 +22,46 @@ class _SliderDemoState extends State<SliderDemo> {
       body: new Column(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: <Widget>[
-          new Center(
-            child: new Slider(
-              value: _value,
-              min: 0.0,
-              max: 100.0,
-              onChanged: (double value) {
-                setState(() {
-                  _value = value;
-                });
-              }
-            )
+          new Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget> [
+              new Slider(
+                value: _value,
+                min: 0.0,
+                max: 100.0,
+                onChanged: (double value) {
+                  setState(() {
+                    _value = value;
+                  });
+                }
+              ),
+              new Text('Continuous'),
+            ]
           ),
-          new Center(child: new Slider(value: 0.25, onChanged: null)),
-          new Center(
-            child: new Slider(
-              value: _discreteValue,
-              min: 0.0,
-              max: 100.0,
-              divisions: 5,
-              label: '${_discreteValue.round()}',
-              onChanged: (double value) {
-                setState(() {
-                  _discreteValue = value;
-                });
-              }
-            )
+          new Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget> [
+              new Slider(value: 0.25, onChanged: null),
+              new Text('Disabled'),
+            ]
+          ),
+          new Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget> [
+              new Slider(
+                value: _discreteValue,
+                min: 0.0,
+                max: 100.0,
+                divisions: 5,
+                label: '${_discreteValue.round()}',
+                onChanged: (double value) {
+                  setState(() {
+                    _discreteValue = value;
+                  });
+                }
+              ),
+              new Text('Discrete'),
+            ]
           ),
         ]
       )
