@@ -6,7 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 
 void main() {
-  testWidgets('Navigator.push works within a PopupMenuButton ', (WidgetTester tester) async {
+  testWidgets('Navigator.push works within a PopupMenuButton', (WidgetTester tester) async {
     await tester.pumpWidget(
       new MaterialApp(
         routes: <String, WidgetBuilder> {
@@ -46,9 +46,9 @@ void main() {
     expect(find.text('Next'), findsNothing);
 
     await tester.tap(find.text('One'));
-
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 1)); // finish the menu animation
+    await tester.pump(); // return the future
+    await tester.pump(); // start the navigation
+    await tester.pump(const Duration(seconds: 1)); // end the navigation
 
     expect(find.text('One'), findsNothing);
     expect(find.text('Next'), findsOneWidget);

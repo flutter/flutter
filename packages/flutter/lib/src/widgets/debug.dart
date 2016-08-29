@@ -11,6 +11,12 @@ import 'table.dart';
 /// Log the dirty widgets that are built each frame.
 bool debugPrintRebuildDirtyWidgets = false;
 
+/// Log when widgets with global keys are deactivated and log when they are
+/// reactivated (retaken).
+///
+/// This can help track down framework bugs relating to the [GlobalKey] logic.
+bool debugPrintGlobalKeyedWidgetLifecycle = false;
+
 Key _firstNonUniqueKey(Iterable<Widget> widgets) {
   Set<Key> keySet = new HashSet<Key>();
   for (Widget widget in widgets) {

@@ -15,7 +15,7 @@ void main() {
     // viewport incoming constraints are tight 800x600
     // viewport is vertical by default
     RenderBox root = new RenderViewport(
-      child: new RenderOffStage(
+      child: new RenderOffstage(
         child: new RenderCustomPaint(
           painter: new TestCallbackPainter(
             onPaint: () { painted = true; }

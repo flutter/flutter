@@ -32,7 +32,7 @@ export 'package:flutter/gestures.dart' show
 /// the proxy box with its child. However, RenderProxyBox is a useful base class
 /// for render objects that wish to mimic most, but not all, of the properties
 /// of their child.
-class RenderProxyBox extends RenderBox with RenderObjectWithChildMixin<RenderBox> {
+class RenderProxyBox extends RenderBox with RenderObjectWithChildMixin<RenderBox>, RenderProxyBoxMixin {
   /// Creates a proxy render box.
   ///
   /// Proxy render boxes are rarely created directly because they simply proxy
@@ -41,7 +41,15 @@ class RenderProxyBox extends RenderBox with RenderObjectWithChildMixin<RenderBox
   RenderProxyBox([RenderBox child = null]) {
     this.child = child;
   }
+}
 
+/// Implementation of [RenderProxyBox].
+///
+/// This class can be used as a mixin for situations where the proxying behavior
+/// of [RenderProxyBox] is desired but inheriting from [RenderProxyBox] is
+/// impractical (e.g. because you want to mix in other classes as well).
+// TODO(ianh): Remove this class once https://github.com/dart-lang/sdk/issues/15101 is fixed
+abstract class RenderProxyBoxMixin implements RenderBox, RenderObjectWithChildMixin<RenderBox> {
   @override
   double computeMinIntrinsicWidth(double height) {
     if (child != null)
@@ -2016,9 +2024,9 @@ class RenderIgnorePointer extends RenderProxyBox {
 /// Lays the child out as if it was in the tree, but without painting anything,
 /// without making the child available for hit testing, and without taking any
 /// room in the parent.
-class RenderOffStage extends RenderProxyBox {
-  /// Creates an off-stage render object.
-  RenderOffStage({
+class RenderOffstage extends RenderProxyBox {
+  /// Creates an offstage render object.
+  RenderOffstage({
     bool offstage: true,
     RenderBox child
   }) : _offstage = offstage, super(child) {

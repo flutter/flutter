@@ -27,7 +27,10 @@ class CommonFinders {
   /// Example:
   ///
   ///     expect(tester, hasWidget(find.text('Back')));
-  Finder text(String text) => new _TextFinder(text);
+  ///
+  /// If the `skipOffstage` argument is true (the default), then this skips
+  /// nodes that are [Offstage] or that are from inactive [Route]s.
+  Finder text(String text, { bool skipOffstage: true }) => new _TextFinder(text, skipOffstage: skipOffstage);
 
   /// Looks for widgets that contain a [Text] descendant with `text`
   /// in it.
@@ -41,8 +44,11 @@ class CommonFinders {
   ///
   ///     // You can find and tap on it like this:
   ///     tester.tap(find.widgetWithText(Button, 'Update'));
-  Finder widgetWithText(Type widgetType, String text) {
-    return new _WidgetWithTextFinder(widgetType, text);
+  ///
+  /// If the `skipOffstage` argument is true (the default), then this skips
+  /// nodes that are [Offstage] or that are from inactive [Route]s.
+  Finder widgetWithText(Type widgetType, String text, { bool skipOffstage: true }) {
+    return new _WidgetWithTextFinder(widgetType, text, skipOffstage: skipOffstage);
   }
 
   /// Finds widgets by searching for one with a particular [Key].
@@ -50,7 +56,10 @@ class CommonFinders {
   /// Example:
   ///
   ///     expect(tester, hasWidget(find.byKey(backKey)));
-  Finder byKey(Key key) => new _KeyFinder(key);
+  ///
+  /// If the `skipOffstage` argument is true (the default), then this skips
+  /// nodes that are [Offstage] or that are from inactive [Route]s.
+  Finder byKey(Key key, { bool skipOffstage: true }) => new _KeyFinder(key, skipOffstage: skipOffstage);
 
   /// Finds widgets by searching for widgets with a particular type.
   ///
@@ -63,7 +72,10 @@ class CommonFinders {
   /// Example:
   ///
   ///     expect(tester, hasWidget(find.byType(IconButton)));
-  Finder byType(Type type) => new _WidgetTypeFinder(type);
+  ///
+  /// If the `skipOffstage` argument is true (the default), then this skips
+  /// nodes that are [Offstage] or that are from inactive [Route]s.
+  Finder byType(Type type, { bool skipOffstage: true }) => new _WidgetTypeFinder(type, skipOffstage: skipOffstage);
 
   /// Finds widgets by searching for elements with a particular type.
   ///
@@ -76,7 +88,10 @@ class CommonFinders {
   /// Example:
   ///
   ///     expect(tester, hasWidget(find.byElementType(SingleChildRenderObjectElement)));
-  Finder byElementType(Type type) => new _ElementTypeFinder(type);
+  ///
+  /// If the `skipOffstage` argument is true (the default), then this skips
+  /// nodes that are [Offstage] or that are from inactive [Route]s.
+  Finder byElementType(Type type, { bool skipOffstage: true }) => new _ElementTypeFinder(type, skipOffstage: skipOffstage);
 
   /// Finds widgets whose current widget is the instance given by the
   /// argument.
@@ -90,7 +105,10 @@ class CommonFinders {
   ///
   ///     // You can find and tap on it like this:
   ///     tester.tap(find.byConfig(myButton));
-  Finder byConfig(Widget config) => new _ConfigFinder(config);
+  ///
+  /// If the `skipOffstage` argument is true (the default), then this skips
+  /// nodes that are [Offstage] or that are from inactive [Route]s.
+  Finder byConfig(Widget config, { bool skipOffstage: true }) => new _ConfigFinder(config, skipOffstage: skipOffstage);
 
   /// Finds widgets using a widget predicate.
   ///
@@ -99,8 +117,11 @@ class CommonFinders {
   ///     expect(tester, hasWidget(find.byWidgetPredicate(
   ///       (Widget widget) => widget is Tooltip && widget.message == 'Back'
   ///     )));
-  Finder byWidgetPredicate(WidgetPredicate predicate) {
-    return new _WidgetPredicateFinder(predicate);
+  ///
+  /// If the `skipOffstage` argument is true (the default), then this skips
+  /// nodes that are [Offstage] or that are from inactive [Route]s.
+  Finder byWidgetPredicate(WidgetPredicate predicate, { bool skipOffstage: true }) {
+    return new _WidgetPredicateFinder(predicate, skipOffstage: skipOffstage);
   }
 
   /// Finds widgets using an element predicate.
@@ -113,14 +134,21 @@ class CommonFinders {
   ///       // (contrast with byElementType, which only returns exact matches)
   ///       (Element element) => element is SingleChildRenderObjectElement
   ///     )));
-  Finder byElementPredicate(ElementPredicate predicate) {
-    return new _ElementPredicateFinder(predicate);
+  ///
+  /// If the `skipOffstage` argument is true (the default), then this skips
+  /// nodes that are [Offstage] or that are from inactive [Route]s.
+  Finder byElementPredicate(ElementPredicate predicate, { bool skipOffstage: true }) {
+    return new _ElementPredicateFinder(predicate, skipOffstage: skipOffstage);
   }
 }
 
 /// Searches a widget tree and returns nodes that match a particular
 /// pattern.
 abstract class Finder {
+  /// Initialises a Finder. Used by subclasses to initialize the [skipOffstage]
+  /// property.
+  Finder({ this.skipOffstage: true });
+
   /// Describes what the finder is looking for. The description should be
   /// a brief English noun phrase describing the finder's pattern.
   String get description;
@@ -134,11 +162,19 @@ abstract class Finder {
   /// function, consider extending [MatchFinder] instead.
   Iterable<Element> apply(Iterable<Element> candidates);
 
-  // Right now this is hard-coded to just grab the elements from the binding.
-  //
-  // One could imagine a world where CommonFinders and Finder can be configured
-  // to work from a specific subtree, but we'll implement that when it's needed.
-  static Iterable<Element> get _allElements => collectAllElementsFrom(WidgetsBinding.instance.renderViewElement);
+  /// Whether this finder skips nodes that are offstage.
+  ///
+  /// If this is true, then the elements are walked using
+  /// [Element.visitChildrenForSemantics]. This skips offstage children of
+  /// [Offstage] widgets, as well as children of inactive [Route]s.
+  final bool skipOffstage;
+
+  Iterable<Element> get _allElements {
+    return collectAllElementsFrom(
+      WidgetsBinding.instance.renderViewElement,
+      skipOffstage: skipOffstage
+    );
+  }
 
   Iterable<Element> _cachedResult;
 
@@ -171,21 +207,26 @@ abstract class Finder {
 
   @override
   String toString() {
+    final String additional = skipOffstage ? ' (ignoring offstage widgets)' : '';
     final List<Element> widgets = evaluate().toList();
     final int count = widgets.length;
     if (count == 0)
-      return 'zero widgets with $description';
+      return 'zero widgets with $description$additional';
     if (count == 1)
-      return 'exactly one widget with $description: ${widgets.single}';
+      return 'exactly one widget with $description$additional: ${widgets.single}';
     if (count < 4)
-      return '$count widgets with $description: $widgets';
-    return '$count widgets with $description: ${widgets[0]}, ${widgets[1]}, ${widgets[2]}, ...';
+      return '$count widgets with $description$additional: $widgets';
+    return '$count widgets with $description$additional: ${widgets[0]}, ${widgets[1]}, ${widgets[2]}, ...';
   }
 }
 
 /// Searches a widget tree and returns nodes that match a particular
 /// pattern.
 abstract class MatchFinder extends Finder {
+  /// Initialises a predicate-based Finder. Used by subclasses to initialize the
+  /// [skipOffstage] property.
+  MatchFinder({ bool skipOffstage: true }) : super(skipOffstage: skipOffstage);
+
   /// Returns true if the given element matches the pattern.
   ///
   /// When implementing your own MatchFinder, this is the main method to override.
@@ -198,7 +239,7 @@ abstract class MatchFinder extends Finder {
 }
 
 class _TextFinder extends MatchFinder {
-  _TextFinder(this.text);
+  _TextFinder(this.text, { bool skipOffstage: true }) : super(skipOffstage: skipOffstage);
 
   final String text;
 
@@ -215,7 +256,7 @@ class _TextFinder extends MatchFinder {
 }
 
 class _WidgetWithTextFinder extends Finder {
-  _WidgetWithTextFinder(this.widgetType, this.text);
+  _WidgetWithTextFinder(this.widgetType, this.text, { bool skipOffstage: true }) : super(skipOffstage: skipOffstage);
 
   final Type widgetType;
   final String text;
@@ -249,7 +290,7 @@ class _WidgetWithTextFinder extends Finder {
 }
 
 class _KeyFinder extends MatchFinder {
-  _KeyFinder(this.key);
+  _KeyFinder(this.key, { bool skipOffstage: true }) : super(skipOffstage: skipOffstage);
 
   final Key key;
 
@@ -263,7 +304,7 @@ class _KeyFinder extends MatchFinder {
 }
 
 class _WidgetTypeFinder extends MatchFinder {
-  _WidgetTypeFinder(this.widgetType);
+  _WidgetTypeFinder(this.widgetType, { bool skipOffstage: true }) : super(skipOffstage: skipOffstage);
 
   final Type widgetType;
 
@@ -277,7 +318,7 @@ class _WidgetTypeFinder extends MatchFinder {
 }
 
 class _ElementTypeFinder extends MatchFinder {
-  _ElementTypeFinder(this.elementType);
+  _ElementTypeFinder(this.elementType, { bool skipOffstage: true }) : super(skipOffstage: skipOffstage);
 
   final Type elementType;
 
@@ -291,7 +332,7 @@ class _ElementTypeFinder extends MatchFinder {
 }
 
 class _ConfigFinder extends MatchFinder {
-  _ConfigFinder(this.config);
+  _ConfigFinder(this.config, { bool skipOffstage: true }) : super(skipOffstage: skipOffstage);
 
   final Widget config;
 
@@ -305,7 +346,7 @@ class _ConfigFinder extends MatchFinder {
 }
 
 class _WidgetPredicateFinder extends MatchFinder {
-  _WidgetPredicateFinder(this.predicate);
+  _WidgetPredicateFinder(this.predicate, { bool skipOffstage: true }) : super(skipOffstage: skipOffstage);
 
   final WidgetPredicate predicate;
 
@@ -319,7 +360,7 @@ class _WidgetPredicateFinder extends MatchFinder {
 }
 
 class _ElementPredicateFinder extends MatchFinder {
-  _ElementPredicateFinder(this.predicate);
+  _ElementPredicateFinder(this.predicate, { bool skipOffstage: true }) : super(skipOffstage: skipOffstage);
 
   final ElementPredicate predicate;
 

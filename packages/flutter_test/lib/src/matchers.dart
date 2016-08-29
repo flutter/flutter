@@ -36,12 +36,19 @@ const Matcher findsOneWidget = const _FindsWidgetMatcher(1, 1);
 Matcher findsNWidgets(int n) => new _FindsWidgetMatcher(n, n);
 
 /// Asserts that the [Finder] locates the a single widget that has at
-/// least one [OffStage] widget ancestor.
-const Matcher isOffStage = const _IsOffStage();
+/// least one [Offstage] widget ancestor.
+///
+/// It's important to use a full finder, since by default finders exclude
+/// offstage widgets.
+///
+/// Example:
+///
+///     expect(find.text('Save', skipOffstage: false), isOffstage);
+const Matcher isOffstage = const _IsOffstage();
 
 /// Asserts that the [Finder] locates the a single widget that has no
-/// [OffStage] widget ancestors.
-const Matcher isOnStage = const _IsOnStage();
+/// [Offstage] widget ancestors.
+const Matcher isOnstage = const _IsOnstage();
 
 /// Asserts that the [Finder] locates the a single widget that has at
 /// least one [Card] widget ancestor.
@@ -54,7 +61,8 @@ const Matcher isNotInCard = const _IsNotInCard();
 /// Asserts that an object's toString() is a plausible one-line description.
 ///
 /// Specifically, this matcher checks that the string does not contains newline
-/// characters and does not have leading or trailing whitespace.
+/// characters, and does not have leading or trailing whitespace, and is not
+/// empty.
 const Matcher hasOneLineDescription = const _HasOneLineDescription();
 
 class _FindsWidgetMatcher extends Matcher {
@@ -66,18 +74,17 @@ class _FindsWidgetMatcher extends Matcher {
   @override
   bool matches(Finder finder, Map<dynamic, dynamic> matchState) {
     assert(min != null || max != null);
+    assert(min == null || max == null || min <= max);
     matchState[Finder] = finder;
+    int count = 0;
+    Iterator<Element> iterator = finder.evaluate().iterator;
     if (min != null) {
-      int count = 0;
-      Iterator<Element> iterator = finder.evaluate().iterator;
       while (count < min && iterator.moveNext())
         count += 1;
       if (count < min)
         return false;
     }
     if (max != null) {
-      int count = 0;
-      Iterator<Element> iterator = finder.evaluate().iterator;
       while (count <= max && iterator.moveNext())
         count += 1;
       if (count > max)
@@ -137,9 +144,11 @@ class _FindsWidgetMatcher extends Matcher {
 }
 
 bool _hasAncestorMatching(Finder finder, bool predicate(Widget widget)) {
-  expect(finder, findsOneWidget);
+  Iterable<Element> nodes = finder.evaluate();
+  if (nodes.length != 1)
+    return false;
   bool result = false;
-  finder.evaluate().single.visitAncestorElements((Element ancestor) {
+  nodes.single.visitAncestorElements((Element ancestor) {
     if (predicate(ancestor.widget)) {
       result = true;
       return false;
@@ -153,16 +162,15 @@ bool _hasAncestorOfType(Finder finder, Type targetType) {
   return _hasAncestorMatching(finder, (Widget widget) => widget.runtimeType == targetType);
 }
 
-class _IsOffStage extends Matcher {
-  const _IsOffStage();
+class _IsOffstage extends Matcher {
+  const _IsOffstage();
 
   @override
   bool matches(Finder finder, Map<dynamic, dynamic> matchState) {
     return _hasAncestorMatching(finder, (Widget widget) {
-      if (widget.runtimeType != OffStage)
-        return false;
-      OffStage offstage = widget;
-      return offstage.offstage;
+      if (widget is Offstage)
+        return widget.offstage;
+      return false;
     });
   }
 
@@ -170,18 +178,19 @@ class _IsOffStage extends Matcher {
   Description describe(Description description) => description.add('offstage');
 }
 
-class _IsOnStage extends Matcher {
-  const _IsOnStage();
+class _IsOnstage extends Matcher {
+  const _IsOnstage();
 
   @override
   bool matches(Finder finder, Map<dynamic, dynamic> matchState) {
-    expect(finder, findsOneWidget);
+    Iterable<Element> nodes = finder.evaluate();
+    if (nodes.length != 1)
+      return false;
     bool result = true;
-    finder.evaluate().single.visitAncestorElements((Element ancestor) {
+    nodes.single.visitAncestorElements((Element ancestor) {
       Widget widget = ancestor.widget;
-      if (widget.runtimeType == OffStage) {
-        OffStage offstage = widget;
-        result = !offstage.offstage;
+      if (widget is Offstage) {
+        result = !widget.offstage;
         return false;
       }
       return true;
@@ -219,9 +228,9 @@ class _HasOneLineDescription extends Matcher {
   @override
   bool matches(Object object, Map<dynamic, dynamic> matchState) {
     String description = object.toString();
-    return description.isNotEmpty &&
-        !description.contains('\n') &&
-        description.trim() == description;
+    return description.isNotEmpty
+        && !description.contains('\n')
+        && description.trim() == description;
   }
 
   @override

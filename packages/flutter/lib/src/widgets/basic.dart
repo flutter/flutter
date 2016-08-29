@@ -1077,9 +1077,9 @@ class SizedOverflowBox extends SingleChildRenderObjectWidget {
 /// A widget that lays the child out as if it was in the tree, but without painting anything,
 /// without making the child available for hit testing, and without taking any
 /// room in the parent.
-class OffStage extends SingleChildRenderObjectWidget {
+class Offstage extends SingleChildRenderObjectWidget {
   /// Creates a widget that visually hides its child.
-  OffStage({ Key key, this.offstage: true, Widget child })
+  Offstage({ Key key, this.offstage: true, Widget child })
     : super(key: key, child: child) {
     assert(offstage != null);
   }
@@ -1094,10 +1094,10 @@ class OffStage extends SingleChildRenderObjectWidget {
   final bool offstage;
 
   @override
-  RenderOffStage createRenderObject(BuildContext context) => new RenderOffStage(offstage: offstage);
+  RenderOffstage createRenderObject(BuildContext context) => new RenderOffstage(offstage: offstage);
 
   @override
-  void updateRenderObject(BuildContext context, RenderOffStage renderObject) {
+  void updateRenderObject(BuildContext context, RenderOffstage renderObject) {
     renderObject.offstage = offstage;
   }
 
@@ -1105,6 +1105,22 @@ class OffStage extends SingleChildRenderObjectWidget {
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     description.add('offstage: $offstage');
+  }
+
+  @override
+  _OffstageElement createElement() => new _OffstageElement(this);
+}
+
+class _OffstageElement extends SingleChildRenderObjectElement {
+  _OffstageElement(Offstage widget) : super(widget);
+
+  @override
+  Offstage get widget => super.widget;
+
+  @override
+  void visitChildrenForSemantics(ElementVisitor visitor) {
+    if (!widget.offstage)
+      super.visitChildrenForSemantics(visitor);
   }
 }
 
@@ -2645,6 +2661,14 @@ class IgnorePointer extends SingleChildRenderObjectWidget {
     renderObject
       ..ignoring = ignoring
       ..ignoringSemantics = ignoringSemantics;
+  }
+
+  @override
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('ignoring: $ignoring');
+    if (ignoringSemantics != null)
+      description.add('ignoringSemantics: $ignoringSemantics');
   }
 }
 

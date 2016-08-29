@@ -12,7 +12,7 @@ import 'package:mojo_services/mojo/gfx/composition/scene_token.mojom.dart' as mo
 
 import 'debug.dart';
 
-/// A composited layer
+/// A composited layer.
 ///
 /// During painting, the render tree generates a tree of composited layers that
 /// are uploaded into the engine and displayed by the compositor. This class is
