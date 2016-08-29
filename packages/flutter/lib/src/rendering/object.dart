@@ -1337,7 +1337,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       if (owner != null) {
         assert(() {
           if (debugPrintMarkNeedsLayoutStacks)
-            debugPrintStack();
+            debugPrintStack(label: 'markNeedsLayout() called for $this');
           return true;
         });
         owner._nodesNeedingLayout.add(this);
@@ -1790,7 +1790,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     if (isRepaintBoundary) {
       assert(() {
         if (debugPrintMarkNeedsPaintStacks)
-          debugPrintStack();
+          debugPrintStack(label: 'markNeedsPaint() called for $this');
         return true;
       });
       // If we always have our own layer, then we can just repaint

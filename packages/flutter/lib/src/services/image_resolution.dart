@@ -110,7 +110,7 @@ class AssetImage extends AssetBundleImageProvider {
         if (completer != null) {
           // We already returned from this function, which means we are in the
           // asynchronous mode. Pass the value to the completer. The completer's
-          // function is what we returned.
+          // future is what we returned.
           completer.complete(key);
         } else {
           // We haven't yet returned, so we must have been called synchronously

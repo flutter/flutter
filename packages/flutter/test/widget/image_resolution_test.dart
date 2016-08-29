@@ -62,7 +62,7 @@ class TestAssetBundle extends CachingAssetBundle {
         pipe = new TestMojoDataPipeConsumer(4.0);
         break;
     }
-    return (new Completer<mojo.MojoDataPipeConsumer>()..complete(pipe)).future;
+    return new SynchronousFuture<mojo.MojoDataPipeConsumer>(pipe);
   }
 
   @override
@@ -80,8 +80,20 @@ class TestAssetImage extends AssetImage {
   TestAssetImage(String name) : super(name);
 
   @override
+  Future<ImageInfo> loadAsync(AssetBundleImageKey key) {
+    ImageInfo result;
+    key.bundle.load(key.name).then((mojo.MojoDataPipeConsumer dataPipe) {
+      decodeImage(dataPipe).then((ui.Image image) {
+        result = new ImageInfo(image: image, scale: getScale(key));
+      });
+    });
+    assert(result != null);
+    return new SynchronousFuture<ImageInfo>(result);
+  }
+
+  @override
   Future<ui.Image> decodeImage(TestMojoDataPipeConsumer pipe) {
-    return new Future<ui.Image>.value(new TestImage(pipe.scale));
+    return new SynchronousFuture<ui.Image>(new TestImage(pipe.scale));
   }
 }
 

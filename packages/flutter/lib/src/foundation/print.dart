@@ -16,7 +16,7 @@ typedef void DebugPrintCallback(String message, { int wrapWidth });
 ///
 /// By default, this function very crudely attempts to throttle the rate at
 /// which messages are sent to avoid data loss on Android. This means that
-/// interleaving calls to this function (directly or indirectly via
+/// interleaving calls to this function (directly or indirectly via, e.g.,
 /// [debugDumpRenderTree] or [debugDumpApp]) and to the Dart [print] method can
 /// result in out-of-order messages in the logs.
 ///

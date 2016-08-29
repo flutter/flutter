@@ -1419,6 +1419,8 @@ class BuildOwner {
     assert(element.owner == this);
     assert(element._inDirtyList == _dirtyElements.contains(element));
     assert(() {
+      if (debugPrintScheduleBuildForStacks)
+        debugPrintStack(label: 'scheduleBuildFor() called for $element${_dirtyElements.contains(element) ? " (ALREADY IN LIST)" : ""}');
       if (element._inDirtyList) {
         throw new FlutterError(
           'scheduleBuildFor() called for a widget for which a build was already scheduled.\n'
@@ -1426,8 +1428,13 @@ class BuildOwner {
           '  $element\n'
           'The current dirty list consists of:\n'
           '  $_dirtyElements\n'
-          'This should not be possible and probably indicates a bug in the widgets framework. '
-          'Please report it: https://github.com/flutter/flutter/issues/new'
+          'This usually indicates that a widget was rebuilt outside the build phase (thus '
+          'marking the element as clean even though it is still in the dirty list). '
+          'This should not be possible and is probably caused by a bug in the widgets framework. '
+          'Please report it: https://github.com/flutter/flutter/issues/new\n'
+          'To debug this issue, consider setting the debugPrintScheduleBuildForStacks and '
+          'debugPrintBuildDirtyElements flags to true and looking for a call to scheduleBuildFor '
+          'for a widget that is labeled "ALREADY IN LIST".'
         );
       }
       if (!element.dirty) {
@@ -1450,6 +1457,11 @@ class BuildOwner {
     }
     _dirtyElements.add(element);
     element._inDirtyList = true;
+    assert(() {
+      if (debugPrintScheduleBuildForStacks)
+        debugPrint('...dirty list is now: $_dirtyElements');
+      return true;
+    });
   }
 
   int _debugStateLockLevel = 0;
@@ -1507,6 +1519,8 @@ class BuildOwner {
     assert(_debugStateLockLevel >= 0);
     assert(!_debugBuilding);
     assert(() {
+      if (debugPrintBuildScope)
+        debugPrint('buildScope called with context $context; dirty list is: $_dirtyElements');
       _debugStateLockLevel += 1;
       _debugBuilding = true;
       return true;
@@ -1543,6 +1557,8 @@ class BuildOwner {
       assert(() {
         _debugBuilding = false;
         _debugStateLockLevel -= 1;
+        if (debugPrintBuildScope)
+          debugPrint('buildScope finished');
         return true;
       });
     }
@@ -2138,6 +2154,9 @@ abstract class BuildableElement extends Element {
   // should be adding the element back into the list when it's reactivated.
   bool _inDirtyList = false;
 
+  // Whether we've already built or not. Set in [rebuild].
+  bool _debugBuiltOnce = false;
+
   // We let widget authors call setState from initState, didUpdateConfig, and
   // build even when state is locked because its convenient and a no-op anyway.
   // This flag ensures that this convenience is only allowed on the element
@@ -2194,16 +2213,22 @@ abstract class BuildableElement extends Element {
     owner.scheduleBuildFor(this);
   }
 
-  /// Called by the binding when scheduleBuild() has been called to mark this
-  /// element dirty, and, in components, by update() when the widget has
-  /// changed.
+  /// Called by the binding when [BuildOwner.scheduleBuildFor] has been called
+  /// to mark this element dirty, and, in components, by [mount] when the
+  /// element is first built and by [update] when the widget has changed.
   void rebuild() {
     assert(_debugLifecycleState != _ElementLifecycle.initial);
     if (!_active || !_dirty)
       return;
     assert(() {
-      if (debugPrintRebuildDirtyWidgets)
-        debugPrint('Rebuilding $this');
+      if (debugPrintRebuildDirtyWidgets) {
+        if (!_debugBuiltOnce) {
+          debugPrint('Building $this');
+          _debugBuiltOnce = true;
+        } else {
+          debugPrint('Rebuilding $this');
+        }
+      }
       return true;
     });
     assert(_debugLifecycleState == _ElementLifecycle.active);
@@ -2304,12 +2329,12 @@ abstract class ComponentElement extends BuildableElement {
     rebuild();
   }
 
-  /// Calls the build() method of the [StatelessWidget] object (for
+  /// Calls the `build` method of the [StatelessWidget] object (for
   /// stateless widgets) or the [State] object (for stateful widgets) and
   /// then updates the widget tree.
   ///
-  /// Called automatically during mount() to generate the first build, and by
-  /// rebuild() when the element needs updating.
+  /// Called automatically during [mount] to generate the first build, and by
+  /// [rebuild] when the element needs updating.
   @override
   void performRebuild() {
     assert(_debugSetAllowIgnoredCallsToMarkNeedsBuild(true));

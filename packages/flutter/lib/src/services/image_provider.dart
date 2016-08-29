@@ -99,26 +99,31 @@ class ImageConfiguration {
       if (hasArguments)
         result.write(', ');
       result.write('bundle: $bundle');
+      hasArguments = true;
     }
     if (devicePixelRatio != null) {
       if (hasArguments)
         result.write(', ');
       result.write('devicePixelRatio: $devicePixelRatio');
+      hasArguments = true;
     }
     if (locale != null) {
       if (hasArguments)
         result.write(', ');
       result.write('locale: $locale');
+      hasArguments = true;
     }
     if (size != null) {
       if (hasArguments)
         result.write(', ');
       result.write('size: $size');
+      hasArguments = true;
     }
     if (platform != null) {
       if (hasArguments)
         result.write(', ');
       result.write('platform: $platform');
+      hasArguments = true;
     }
     result.write(')');
     return result.toString();
@@ -219,10 +224,12 @@ abstract class DataPipeImageProvider<T> extends ImageProvider<T> {
   /// const constructors so that they can be used in const expressions.
   const DataPipeImageProvider();
 
+  /// Converts a key into an [ImageStreamCompleter], and begins fetching the
+  /// image using [loadAsync].
   @override
   ImageStreamCompleter load(T key) {
     return new OneFrameImageStreamCompleter(
-      _loadAsync(key),
+      loadAsync(key),
       informationCollector: (StringBuffer information) {
         information.writeln('Image provider: $this');
         information.write('Image key: $key');
@@ -230,7 +237,12 @@ abstract class DataPipeImageProvider<T> extends ImageProvider<T> {
     );
   }
 
-  Future<ImageInfo> _loadAsync(T key) async {
+  /// Fetches the image from the data pipe, decodes it, and returns a
+  /// corresponding [ImageInfo] object.
+  ///
+  /// This function is used by [load].
+  @protected
+  Future<ImageInfo> loadAsync(T key) async {
     final mojo.MojoDataPipeConsumer dataPipe = await loadDataPipe(key);
     if (dataPipe == null)
       throw 'Unable to read data';
@@ -367,7 +379,7 @@ abstract class AssetBundleImageProvider extends DataPipeImageProvider<AssetBundl
   Future<AssetBundleImageKey> obtainKey(ImageConfiguration configuration);
 
   @override
-  Future<mojo.MojoDataPipeConsumer> loadDataPipe(AssetBundleImageKey key) async {
+  Future<mojo.MojoDataPipeConsumer> loadDataPipe(AssetBundleImageKey key) {
     return key.bundle.load(key.name);
   }
 

@@ -155,12 +155,27 @@ abstract class CachingAssetBundle extends AssetBundle {
     assert(parser != null);
     if (_structuredDataCache.containsKey(key))
       return _structuredDataCache[key];
-    final Completer<dynamic> completer = new Completer<dynamic>();
-    _structuredDataCache[key] = completer.future;
-    completer.complete(loadString(key, cache: false).then/*<dynamic>*/(parser));
-    completer.future.then((dynamic value) {
-      _structuredDataCache[key] = new SynchronousFuture<dynamic>(value);
+    Completer<dynamic> completer;
+    Future<dynamic> result;
+    loadString(key, cache: false).then(parser).then((dynamic value) {
+      result = new SynchronousFuture<dynamic>(value);
+      _structuredDataCache[key] = result;
+      if (completer != null) {
+        // We already returned from the loadStructuredData function, which means
+        // we are in the asynchronous mode. Pass the value to the completer. The
+        // completer's future is what we returned.
+        completer.complete(value);
+      }
     });
+    if (result != null) {
+      // The code above ran synchronously, and came up with an answer.
+      // Return the SynchronousFuture that we created above.
+      return result;
+    }
+    // The code above hasn't yet run its "then" handler yet. Let's prepare a
+    // completer for it to use when it does run.
+    completer = new Completer<dynamic>();
+    _structuredDataCache[key] = completer.future;
     return completer.future;
   }
 

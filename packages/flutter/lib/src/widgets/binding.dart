@@ -321,23 +321,19 @@ abstract class WidgetsBinding extends BindingBase implements GestureBinding, Ren
   /// This is initialized the first time [runApp] is called.
   Element get renderViewElement => _renderViewElement;
   Element _renderViewElement;
-  void _runApp(Widget app) {
+
+  /// Takes a widget and attaches it to the [renderViewElement], creating it if
+  /// necessary.
+  ///
+  /// This is called by [runApp] to configure the widget tree.
+  ///
+  /// See also [RenderObjectToWidgetAdapter.attachToRenderTree].
+  void attachRootWidget(Widget rootWidget) {
     _renderViewElement = new RenderObjectToWidgetAdapter<RenderBox>(
       container: renderView,
       debugShortDescription: '[root]',
-      child: app
+      child: rootWidget
     ).attachToRenderTree(buildOwner, renderViewElement);
-    assert(() {
-      if (debugPrintBeginFrameBanner)
-        debugPrint('━━━━━━━┫ Begin Warm-Up Frame ┣━━━━━━━');
-      return true;
-    });
-    beginFrame();
-    assert(() {
-      if (debugPrintEndFrameBanner)
-        debugPrint('━━━━━━━┫ End of Warm-Up Frame ┣━━━━━━━');
-      return true;
-    });
   }
 
   @override
@@ -352,18 +348,32 @@ abstract class WidgetsBinding extends BindingBase implements GestureBinding, Ren
 /// Inflate the given widget and attach it to the screen.
 ///
 /// Initializes the binding using [WidgetsFlutterBinding] if necessary.
+///
+/// See also:
+///
+/// * [WidgetsBinding.attachRootWidget], which creates the root widget for the
+///   widget hierarchy.
+/// * [RenderObjectToWidgetAdapter.attachToRenderTree], which creates the root
+///   element for the element hierarchy.
+/// * [WidgetsBinding.handleBeginFrame], which pumps the widget pipeline to
+///   ensure the widget, element, and render trees are all built.
 void runApp(Widget app) {
-  WidgetsFlutterBinding.ensureInitialized()._runApp(app);
+  WidgetsFlutterBinding.ensureInitialized()
+    ..attachRootWidget(app)
+    ..handleBeginFrame(null);
 }
 
 /// Print a string representation of the currently running app.
 void debugDumpApp() {
   assert(WidgetsBinding.instance != null);
-  assert(WidgetsBinding.instance.renderViewElement != null);
   String mode = 'RELEASE MODE';
   assert(() { mode = 'CHECKED MODE'; return true; });
   debugPrint('${WidgetsBinding.instance.runtimeType} - $mode');
-  debugPrint(WidgetsBinding.instance.renderViewElement.toStringDeep());
+  if (WidgetsBinding.instance.renderViewElement != null) {
+    debugPrint(WidgetsBinding.instance.renderViewElement.toStringDeep());
+  } else {
+    debugPrint('<no tree currently mounted>');
+  }
 }
 
 /// A bridge from a [RenderObject] to an [Element] tree.
@@ -406,7 +416,7 @@ class RenderObjectToWidgetAdapter<T extends RenderObject> extends RenderObjectWi
   /// child of [container].
   ///
   /// If `element` is null, this function will create a new element. Otherwise,
-  /// the given element will be updated with this widget.
+  /// the given element will have an update scheduled to switch to this widget.
   ///
   /// Used by [runApp] to bootstrap applications.
   RenderObjectToWidgetElement<T> attachToRenderTree(BuildOwner owner, [RenderObjectToWidgetElement<T> element]) {
@@ -420,9 +430,8 @@ class RenderObjectToWidgetAdapter<T extends RenderObject> extends RenderObjectWi
         element.mount(null, null);
       });
     } else {
-      owner.buildScope(element, () {
-        element.update(this);
-      });
+      element._newWidget = this;
+      element.markNeedsBuild();
     }
     return element;
   }
@@ -474,6 +483,20 @@ class RenderObjectToWidgetElement<T extends RenderObject> extends RootRenderObje
     super.update(newWidget);
     assert(widget == newWidget);
     _rebuild();
+  }
+
+  // When we are assigned a new widget, we store it here
+  // until we are ready to update to it.
+  Widget _newWidget;
+
+  @override
+  void performRebuild() {
+    assert(_newWidget != null);
+    final Widget newWidget = _newWidget;
+    _newWidget = null;
+    super.performRebuild();
+    update(newWidget);
+    assert(_newWidget == null);
   }
 
   void _rebuild() {

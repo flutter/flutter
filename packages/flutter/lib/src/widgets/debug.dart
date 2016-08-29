@@ -9,7 +9,38 @@ import 'framework.dart';
 import 'table.dart';
 
 /// Log the dirty widgets that are built each frame.
+///
+/// Combined with [debugPrintBuildScope] or [debugPrintBeginFrameBanner], this
+/// allows you to distinguish builds triggered by the initial mounting of a
+/// widget tree (e.g. in a call to [runApp]) from the regular builds triggered
+/// by the pipeline (see [WidgetsBinding.beginFrame].
+///
+/// Combined with [debugPrintScheduleBuildForStacks], this lets you watch a
+/// widget's dirty/clean lifecycle.
 bool debugPrintRebuildDirtyWidgets = false;
+
+/// Log all calls to [BuildOwner.buildScope].
+///
+/// Combined with [debugPrintScheduleBuildForStacks], this allows you to track
+/// when a [State.setState] call gets serviced.
+///
+/// Combined with [debugPrintRebuildDirtyWidgets] or
+/// [debugPrintBeginFrameBanner], this allows you to distinguish builds
+/// triggered by the initial mounting of a widget tree (e.g. in a call to
+/// [runApp]) from the regular builds triggered by the pipeline (see
+/// [WidgetsBinding.beginFrame].
+bool debugPrintBuildScope = false;
+
+/// Log the call stacks that mark widgets as needing to be rebuilt.
+///
+/// This is called whenever [BuildOwner.scheduleBuildFor] adds an element to the
+/// dirty list. Typically this is as a result of [Element.markNeedsBuild] being
+/// called, which itself is usually a result of [State.setState] being called.
+///
+/// To see when a widget is rebuilt, see [debugPrintRebuildDirtyWidgets].
+///
+/// To see when the dirty list is flushed, see [debugPrintBuildDirtyElements].
+bool debugPrintScheduleBuildForStacks = false;
 
 /// Log when widgets with global keys are deactivated and log when they are
 /// reactivated (retaken).
