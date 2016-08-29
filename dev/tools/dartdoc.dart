@@ -10,9 +10,6 @@ import 'package:path/path.dart' as path;
 
 const String kDocRoot = 'dev/docs/doc';
 
-// We peg to this version to work around a bug affecting Flutter in 0.9.7+2.
-const String kDartdocVersion = '0.9.7+1';
-
 /// This script expects to run with the cwd as the root of the flutter repo. It
 /// will generate documentation for the packages in `//packages/` and write the
 /// documentation to `//dev/docs/doc/api/`.
@@ -52,14 +49,6 @@ dependencies:
   printStream(process.stdout);
   printStream(process.stderr);
   int code = await process.exitCode;
-  if (code != 0)
-    exit(code);
-
-  // Install dartdoc.
-  process = await Process.start('pub', <String>['global', 'activate', 'dartdoc', kDartdocVersion]);
-  printStream(process.stdout);
-  printStream(process.stderr);
-  code = await process.exitCode;
   if (code != 0)
     exit(code);
 
