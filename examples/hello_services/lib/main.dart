@@ -52,7 +52,7 @@ class _HelloServicesState extends State<HelloServices> {
     final Map<String, dynamic> reply = await HostMessages.sendJSON('getLocation', message);
     // If the widget was removed from the tree while the message was in flight,
     // we want to discard the reply rather than calling setState to update our
-    // non-existant appearance.
+    // non-existent appearance.
     if (!mounted)
       return;
     setState(() {

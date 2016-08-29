@@ -55,7 +55,7 @@ void main() {
   // Regression test for https://github.com/flutter/flutter/pull/5168
   testWidgets('Pesto appbar heroics', (WidgetTester tester) async {
     await tester.pumpWidget(
-      // The bug only manifests itself when the screen's orientation is portait
+      // The bug only manifests itself when the screen's orientation is portrait
       new Center(
         child: new SizedBox(
           width: 400.0,
