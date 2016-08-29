@@ -121,7 +121,7 @@ class _PointDemoState extends State<_PointDemo> {
   @override
   void initState() {
     super.initState();
-    _animation = new CurvedAnimation(parent: config.controller, curve: Curves.ease);
+    _animation = new CurvedAnimation(parent: config.controller, curve: Curves.fastOutSlowIn);
   }
 
   @override
@@ -282,7 +282,7 @@ class _RectangleDemoState extends State<_RectangleDemo> {
   @override
   void initState() {
     super.initState();
-    _animation = new CurvedAnimation(parent: config.controller, curve: Curves.ease);
+    _animation = new CurvedAnimation(parent: config.controller, curve: Curves.fastOutSlowIn);
   }
 
   @override

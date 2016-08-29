@@ -151,11 +151,11 @@ class _MergeableMaterialState extends State<MergeableMaterial> {
 
     final CurvedAnimation startAnimation = new CurvedAnimation(
       parent: controller,
-      curve: Curves.ease
+      curve: Curves.fastOutSlowIn
     );
     final CurvedAnimation endAnimation = new CurvedAnimation(
       parent: controller,
-      curve: Curves.ease
+      curve: Curves.fastOutSlowIn
     );
 
     startAnimation.addListener(_handleTick);
@@ -163,8 +163,7 @@ class _MergeableMaterialState extends State<MergeableMaterial> {
 
     final CurvedAnimation gapAnimation = new CurvedAnimation(
       parent: controller,
-      curve: Curves.ease,
-      reverseCurve: Curves.ease
+      curve: Curves.fastOutSlowIn
     );
 
     gapAnimation.addListener(_handleTick);

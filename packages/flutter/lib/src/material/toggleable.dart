@@ -54,7 +54,7 @@ abstract class RenderToggleable extends RenderConstrainedBox implements Semantic
     _reactionController = new AnimationController(duration: kRadialReactionDuration);
     _reaction = new CurvedAnimation(
       parent: _reactionController,
-      curve: Curves.ease
+      curve: Curves.fastOutSlowIn
     )..addListener(markNeedsPaint);
   }
 

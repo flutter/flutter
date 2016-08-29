@@ -106,7 +106,7 @@ class _ScrollbarState extends State<Scrollbar> {
   @override
   void initState() {
     super.initState();
-    _opacity = new CurvedAnimation(parent: _fade, curve: Curves.ease);
+    _opacity = new CurvedAnimation(parent: _fade, curve: Curves.fastOutSlowIn);
   }
 
   @override

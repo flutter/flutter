@@ -94,7 +94,7 @@ class Input extends StatefulWidget {
 }
 
 const Duration _kTransitionDuration = const Duration(milliseconds: 200);
-const Curve _kTransitionCurve = Curves.ease;
+const Curve _kTransitionCurve = Curves.fastOutSlowIn;
 
 class _InputState extends State<Input> {
   GlobalKey<RawInputLineState> _rawInputLineKey = new GlobalKey<RawInputLineState>();

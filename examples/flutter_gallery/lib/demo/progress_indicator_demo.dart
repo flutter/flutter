@@ -24,8 +24,8 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> {
 
     _animation = new CurvedAnimation(
       parent: _controller,
-      curve: new Interval(0.0, 0.9, curve: Curves.ease),
-      reverseCurve: Curves.ease
+      curve: new Interval(0.0, 0.9, curve: Curves.fastOutSlowIn),
+      reverseCurve: Curves.fastOutSlowIn
     )..addStatusListener((AnimationStatus status) {
       if (status == AnimationStatus.dismissed)
         _controller.forward();
