@@ -352,10 +352,6 @@ public:
     void applyDeviceScaleFactor(float deviceScaleFactor) { scale(deviceScaleFactor, deviceScaleFactor); }
     // ---------- End transformation methods -----------------
 
-    // URL drawing
-    void setURLFragmentForRect(const String& name, const IntRect&);
-    void addURLTargetAtPoint(const String& name, const IntPoint&);
-
     static void adjustLineToPixelBoundaries(FloatPoint& p1, FloatPoint& p2, float strokeWidth, StrokeStyle);
 
     void preparePaintForDrawRectToRect(

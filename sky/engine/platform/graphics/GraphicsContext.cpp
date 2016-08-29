@@ -1227,24 +1227,6 @@ void GraphicsContext::scale(float x, float y)
     m_canvas->scale(WebCoreFloatToSkScalar(x), WebCoreFloatToSkScalar(y));
 }
 
-void GraphicsContext::setURLFragmentForRect(const String& destName, const IntRect& rect)
-{
-    if (contextDisabled())
-        return;
-
-    SkAutoDataUnref skDestName(SkData::NewWithCString(destName.utf8().data()));
-    SkAnnotateLinkToDestination(m_canvas, rect, skDestName.get());
-}
-
-void GraphicsContext::addURLTargetAtPoint(const String& name, const IntPoint& pos)
-{
-    if (contextDisabled())
-        return;
-
-    SkAutoDataUnref nameData(SkData::NewWithCString(name.utf8().data()));
-    SkAnnotateNamedDestination(m_canvas, SkPoint::Make(pos.x(), pos.y()), nameData);
-}
-
 AffineTransform GraphicsContext::getCTM() const
 {
     if (contextDisabled())

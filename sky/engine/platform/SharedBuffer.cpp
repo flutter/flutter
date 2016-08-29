@@ -351,7 +351,7 @@ sk_sp<SkData> SharedBuffer::getAsSkData() const {
     // Don't return the incomplete SkData.
     return nullptr;
   }
-  return sk_sp<SkData>(SkData::NewFromMalloc(buffer, bufferLength));
+  return SkData::MakeFromMalloc(buffer, bufferLength);
 }
 
 bool SharedBuffer::lock() {

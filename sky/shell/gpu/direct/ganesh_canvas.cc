@@ -77,10 +77,8 @@ SkCanvas* GaneshCanvas::GetCanvas(int32_t fbo, const SkISize& size) {
   desc.fOrigin = kBottomLeft_GrSurfaceOrigin;
   desc.fRenderTargetHandle = fbo;
 
-  sk_sp<GrRenderTarget> target(
-      gr_context_->textureProvider()->wrapBackendRenderTarget(desc));
-  FTL_DCHECK(target);
-  sk_surface_ = SkSurface::MakeRenderTargetDirect(target.get(), nullptr);
+  sk_surface_ =
+      SkSurface::MakeFromBackendRenderTarget(gr_context_.get(), desc, nullptr);
   FTL_DCHECK(sk_surface_);
   return sk_surface_->getCanvas();
 }

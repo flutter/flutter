@@ -275,13 +275,11 @@ component("skia") {
 
     "//third_party/skia/include/images/SkMovie.h",
     "//third_party/skia/include/ports/SkTypeface_win.h",
-    "//third_party/skia/src/fonts/SkFontMgr_fontconfig.cpp",
     "//third_party/skia/src/fonts/SkFontMgr_indirect.cpp",
     "//third_party/skia/src/fonts/SkRemotableFontMgr.cpp",
     "//third_party/skia/src/ports/SkDiscardableMemory_none.cpp",
     "//third_party/skia/src/ports/SkFontConfigInterface_direct_factory.cpp",
     "//third_party/skia/src/ports/SkFontConfigInterface_direct.cpp",
-    "//third_party/skia/src/ports/SkFontHost_fontconfig.cpp",
     "//third_party/skia/src/ports/SkFontHost_FreeType_common.cpp",
     "//third_party/skia/src/ports/SkFontHost_FreeType_common.h",
     "//third_party/skia/src/ports/SkFontHost_FreeType.cpp",
@@ -290,6 +288,7 @@ component("skia") {
     "//third_party/skia/src/ports/SkFontMgr_android_factory.cpp",
     "//third_party/skia/src/ports/SkFontMgr_android_parser.cpp",
     "//third_party/skia/src/ports/SkFontMgr_android.cpp",
+    "//third_party/skia/src/ports/SkFontMgr_fontconfig.cpp",
     "//third_party/skia/src/ports/SkFontMgr_win_dw.cpp",
     "//third_party/skia/src/ports/SkGlobalInitialization_default.cpp",
     "//third_party/skia/src/ports/SkImageEncoder_none.cpp",
@@ -343,7 +342,6 @@ component("skia") {
     "//third_party/skia/src/utils/SkInterpolator.cpp",
     "//third_party/skia/src/utils/SkLayer.cpp",
     "//third_party/skia/src/utils/SkMeshUtils.cpp",
-    "//third_party/skia/src/utils/SkNinePatch.cpp",
     "//third_party/skia/src/utils/SkOSFile.cpp",
     "//third_party/skia/src/utils/SkParsePath.cpp",
 
@@ -436,10 +434,9 @@ component("skia") {
 
   if (!is_linux) {
     sources -= [
-      "//third_party/skia/src/fonts/SkFontMgr_fontconfig.cpp",
-      "//third_party/skia/src/ports/SkFontConfigInterface_direct.cpp",
       "//third_party/skia/src/ports/SkFontConfigInterface_direct_factory.cpp",
-      "//third_party/skia/src/ports/SkFontHost_fontconfig.cpp",
+      "//third_party/skia/src/ports/SkFontConfigInterface_direct.cpp",
+      "//third_party/skia/src/ports/SkFontMgr_fontconfig.cpp",
     ]
   }
 
@@ -509,7 +506,8 @@ source_set("skia_opts") {
 
   if (current_cpu == "x86" || current_cpu == "x64") {
     sources = gypi_skia_opts.sse2_sources + gypi_skia_opts.ssse3_sources +
-              gypi_skia_opts.sse41_sources + gypi_skia_opts.avx_sources
+              gypi_skia_opts.sse41_sources + gypi_skia_opts.sse42_sources +
+              gypi_skia_opts.avx_sources
     cflags += [ "-msse4.1" ]
   } else if (current_cpu == "arm") {
     # The assembly uses the frame pointer register (r7 in Thumb/r11 in
