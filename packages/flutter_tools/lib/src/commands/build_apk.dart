@@ -181,6 +181,10 @@ class BuildApkCommand extends BuildSubCommand {
     argParser.addOption('flx',
       abbr: 'f',
       help: 'Path to the FLX file. If this is not provided, an FLX will be built.');
+    argParser.addOption('target-arch',
+      defaultsTo: 'arm',
+      allowed: <String>['arm', 'x86', 'x64'],
+      help: 'Architecture of the target device.');
     argParser.addOption('aot-path',
       help: 'Path to the ahead-of-time compiled snapshot directory.\n'
             'If this is not provided, an AOT snapshot will be built.');
@@ -203,19 +207,42 @@ class BuildApkCommand extends BuildSubCommand {
     'debugging and a quick development cycle. \'release\' builds don\'t support debugging and are\n'
     'suitable for deploying to app stores.';
 
+  TargetPlatform _getTargetPlatform(String targetArch) {
+    switch (targetArch) {
+      case 'arm':
+        return TargetPlatform.android_arm;
+      case 'x86':
+        return TargetPlatform.android_x86;
+      case 'x64':
+        return TargetPlatform.android_x64;
+      default:
+        throw new Exception('Unrecognized target architecture: $targetArch');
+    }
+  }
+
   @override
   Future<int> runInProject() async {
     await super.runInProject();
+
+    TargetPlatform targetPlatform = _getTargetPlatform(argResults['target-arch']);
+    if (targetPlatform != TargetPlatform.android_arm && getBuildMode() != BuildMode.debug) {
+      printError('Profile and release builds are only supported on ARM targets.');
+      return 1;
+    }
+
     if (isProjectUsingGradle()) {
+      if (targetPlatform != TargetPlatform.android_arm) {
+        printError('Gradle builds only support ARM targets.');
+        return 1;
+      }
       return await buildAndroidWithGradle(
         TargetPlatform.android_arm,
         getBuildMode(),
         target: targetFile
       );
     } else {
-      // TODO(devoncarew): This command should take an arg for the output type (arm / x64).
       return await buildAndroid(
-        TargetPlatform.android_arm,
+        targetPlatform,
         getBuildMode(),
         force: true,
         manifest: argResults['manifest'],
