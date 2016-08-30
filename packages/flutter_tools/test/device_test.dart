@@ -3,8 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'package:flutter_tools/src/application_package.dart';
-import 'package:flutter_tools/src/build_info.dart';
+
 import 'package:flutter_tools/src/device.dart';
 import 'package:test/test.dart';
 
@@ -26,7 +25,7 @@ void main() {
       _MockDevice device3 = new _MockDevice('iPod touch', '82564b38861a9a5');
       List<Device> devices = <Device>[device1, device2, device3];
 
-      expectDevice(String id, Device expected) async {
+      Future<Null> expectDevice(String id, Device expected) async {
         expect(await deviceManager.getDeviceById(id, devices), expected);
       }
       expectDevice('01abfc49119c410e', device2);
@@ -40,9 +39,11 @@ void main() {
 }
 
 class _MockDevice extends Device {
+  @override
   final String name;
 
   _MockDevice(this.name, String id) : super(id);
 
-  noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+  @override
+  void noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
