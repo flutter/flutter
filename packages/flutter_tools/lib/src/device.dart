@@ -39,13 +39,14 @@ class DeviceManager {
   /// `null`.
   ///
   /// This does a case insentitive compare with `deviceId`.
-  Future<Device> getDeviceById(String deviceId) async {
+  Future<Device> getDeviceById(String deviceId, [List<Device> devices]) async {
     deviceId = deviceId.toLowerCase();
-    List<Device> devices = await getAllConnectedDevices();
+    devices ??= await getAllConnectedDevices();
     Device device = devices.firstWhere(
-      (Device device) => device.id.toLowerCase() == deviceId,
-      orElse: () => null
-    );
+        (Device device) =>
+            device.id.toLowerCase() == deviceId ||
+            device.name.toLowerCase() == deviceId,
+        orElse: () => null);
 
     if (device != null)
       return device;
