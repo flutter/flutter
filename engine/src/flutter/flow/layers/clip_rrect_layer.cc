@@ -21,7 +21,7 @@ void ClipRRectLayer::Paint(PaintContext& context) {
   TRACE_EVENT0("flutter", "ClipRRectLayer::Paint");
   SkAutoCanvasRestore save(&context.canvas, false);
   context.canvas.saveLayer(&paint_bounds(), nullptr);
-  context.canvas.clipRRect(clip_rrect_);
+  context.canvas.clipRRect(clip_rrect_, SkRegion::kIntersect_Op, true);
   PaintChildren(context);
 }
 
