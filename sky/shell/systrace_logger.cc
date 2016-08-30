@@ -13,7 +13,7 @@
 namespace sky {
 namespace shell {
 
-static const size_t kBufferSize = 256;
+static const int kBufferSize = 256;
 
 SystraceLogger::SystraceLogger()
     : trace_fd_(HANDLE_EINTR(
