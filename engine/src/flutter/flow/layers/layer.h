@@ -41,7 +41,7 @@ class Layer {
   virtual ~Layer();
 
   struct PrerollContext {
-    RasterCache& raster_cache;
+    RasterCache* raster_cache;
     GrContext* gr_context;
     SkRect child_paint_bounds;
   };
