@@ -164,6 +164,7 @@ void RasterizerDirect::DoDraw(std::unique_ptr<flow::LayerTree> layer_tree) {
 
   if (frameExceededThreshold || tracingController.picture_tracing_enabled()) {
     std::string path = tracingController.PictureTracingPathForCurrentTime();
+    LOG(INFO) << "Frame threshold exceeded. Capturing SKP to " << path;
 
     SkPictureRecorder recoder;
     recoder.beginRecording(SkRect::MakeWH(size.width(), size.height()));
