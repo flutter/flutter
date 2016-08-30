@@ -523,17 +523,10 @@ void SetRegisterNativeServiceProtocolExtensionHook(
 }
 
 static bool ShouldEnableCheckedMode() {
-  if (IsRunningPrecompiledCode()) {
-    // Checked mode is never enabled during precompilation. Even snapshot
-    // generation disables checked mode arguments.
-    return false;
-  }
-
-#if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
-  return true;
-#else
-  return Settings::Get().enable_dart_checked_mode;
-#endif
+  // Checked mode is never enabled during precompilation. Even snapshot
+  // generation disables checked mode arguments.
+  return IsRunningPrecompiledCode() ? false
+                                    : Settings::Get().enable_dart_checked_mode;
 }
 
 void PushBackAll(std::vector<const char*>* args,
