@@ -31,6 +31,8 @@ source_set("common") {
     "shell.h",
     "switches.cc",
     "switches.h",
+    "systrace_logger.cc",
+    "systrace_logger.h",
     "tracing_controller.cc",
     "tracing_controller.h",
     "ui/animator.cc",
