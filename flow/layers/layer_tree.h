@@ -23,7 +23,8 @@ class LayerTree {
 
   ~LayerTree();
 
-  void Raster(CompositorContext::ScopedFrame& frame);
+  void Raster(CompositorContext::ScopedFrame& frame,
+              bool ignore_raster_cache = false);
 
   // TODO(abarth): Integrate scene updates with the rasterization pass so that
   // we can draw on top of child scenes (and so that we can apply clips and

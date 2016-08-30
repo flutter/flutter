@@ -166,16 +166,16 @@ void RasterizerDirect::DoDraw(std::unique_ptr<flow::LayerTree> layer_tree) {
     std::string path = tracingController.PictureTracingPathForCurrentTime();
     LOG(INFO) << "Frame threshold exceeded. Capturing SKP to " << path;
 
-    SkPictureRecorder recoder;
-    recoder.beginRecording(SkRect::MakeWH(size.width(), size.height()));
+    SkPictureRecorder recorder;
+    recorder.beginRecording(SkRect::MakeWH(size.width(), size.height()));
 
     {
       auto frame = compositor_context_.AcquireFrame(
-          nullptr, *recoder.getRecordingCanvas(), false);
-      layer_tree->Raster(frame);
+          nullptr, *recorder.getRecordingCanvas(), false);
+      layer_tree->Raster(frame, true);
     }
 
-    sk_sp<SkPicture> picture = recoder.finishRecordingAsPicture();
+    sk_sp<SkPicture> picture = recorder.finishRecordingAsPicture();
     SerializePicture(path, picture.get());
   }
 
