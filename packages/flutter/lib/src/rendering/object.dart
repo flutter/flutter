@@ -880,6 +880,24 @@ class PipelineOwner {
     }
   }
 
+  // This flag is used to allow the kinds of mutations performed by GlobalKey
+  // reparenting while a LayoutBuilder is being rebuilt and in so doing tries to
+  // move a node from another LayoutBuilder subtree that hasn't been updated
+  // yet. To set this, call enableMutationsToDirtySubtrees().
+  bool _debugAllowMutationsToDirtySubtrees = false;
+
+  // See RenderObject.enableMutationsToDirtySubtrees
+  void _enableMutationsToDirtySubtrees(VoidCallback callback) {
+    assert(_debugDoingLayout);
+    bool oldState = _debugAllowMutationsToDirtySubtrees;
+    _debugAllowMutationsToDirtySubtrees = true;
+    try {
+      callback();
+    } finally {
+      _debugAllowMutationsToDirtySubtrees = oldState;
+    }
+  }
+
   List<RenderObject> _nodesNeedingCompositingBitsUpdate = <RenderObject>[];
   /// Updates the [needsCompositing] bits.
   ///
@@ -1171,6 +1189,10 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       RenderObject node = this;
       while (true) {
         if (node._doingThisLayoutWithCallback) {
+          result = true;
+          break;
+        }
+        if (owner != null && owner._debugAllowMutationsToDirtySubtrees && node._needsLayout) {
           result = true;
           break;
         }
@@ -1585,7 +1607,14 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   VoidCallback _performLayout = _doNothing;
 
   /// Allows this render object to mutate its child list during layout and
-  /// calls callback.
+  /// calls `callback`.
+  ///
+  /// Calling this function disables a number of assertions that are intended to
+  /// catch likely bugs. As such, using this function is generally discouraged.
+  ///
+  /// This function can only be called during layout.
+  ///
+  /// See also [enableMutationsToDirtySubtrees].
   @protected
   void invokeLayoutCallback(LayoutCallback callback) {
     assert(_debugMutationsLocked);
@@ -1594,6 +1623,33 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     _doingThisLayoutWithCallback = true;
     try {
       callback(constraints);
+    } finally {
+      _doingThisLayoutWithCallback = false;
+    }
+  }
+
+  /// Allows mutations to be made to dirty nodes in the render tree owned by the
+  /// same [PipelineOwner] as this object. The `callback` argument is invoked
+  /// synchronously, and the mutations are allowed only during that callback's
+  /// execution.
+  ///
+  /// This exists to enable [GlobalKey] reparenting during the processing of
+  /// delayed builds as caused by [LayoutBuilder]. Calling this function
+  /// disables a number of assertions that are intended to catch likely bugs. As
+  /// such, using this function is generally discouraged.
+  ///
+  /// This function can only be called during layout.
+  ///
+  /// See also [invokeLayoutCallback].
+  @protected
+  void enableMutationsToDirtySubtrees(VoidCallback callback) {
+    assert(owner != null);
+    assert(_debugMutationsLocked);
+    assert(_debugDoingThisLayout);
+    assert(!_doingThisLayoutWithCallback);
+    _doingThisLayoutWithCallback = true;
+    try {
+      owner._enableMutationsToDirtySubtrees(callback);
     } finally {
       _doingThisLayoutWithCallback = false;
     }
