@@ -93,6 +93,67 @@ void main() {
     expect(find.text('Overlay'), findsNothing);
 
     expect(Navigator.canPop(containerKey1.currentContext), isFalse);
+  });
 
+  testWidgets('Check back gesture works on iOS', (WidgetTester tester) async {
+    GlobalKey containerKey1 = new GlobalKey();
+    GlobalKey containerKey2 = new GlobalKey();
+    final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      '/': (_) => new Scaffold(key: containerKey1, body: new Text('Home')),
+      '/settings': (_) => new Scaffold(key: containerKey2, body: new Text('Settings')),
+    };
+
+    await tester.pumpWidget(new MaterialApp(
+      routes: routes,
+      theme: new ThemeData(platform: TargetPlatform.iOS),
+    ));
+
+    Navigator.pushNamed(containerKey1.currentContext, '/settings');
+
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(find.text('Home'), findsNothing);
+    expect(find.text('Settings'), isOnstage);
+
+    // Drag from left edge to invoke the gesture.
+    TestGesture gesture = await tester.startGesture(new Point(5.0, 100.0));
+    await gesture.moveBy(new Offset(50.0, 0.0));
+    await tester.pump();
+
+    // TODO(mpcomplete): back gesture disabled. Home should be onstage when
+    // it is reenabled.
+    expect(find.text('Home'), findsNothing);
+    expect(find.text('Settings'), isOnstage);
+  });
+
+  testWidgets('Check back gesture does nothing on android', (WidgetTester tester) async {
+    GlobalKey containerKey1 = new GlobalKey();
+    GlobalKey containerKey2 = new GlobalKey();
+    final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      '/': (_) => new Scaffold(key: containerKey1, body: new Text('Home')),
+      '/settings': (_) => new Scaffold(key: containerKey2, body: new Text('Settings')),
+    };
+
+    await tester.pumpWidget(new MaterialApp(
+      routes: routes,
+      theme: new ThemeData(platform: TargetPlatform.android),
+    ));
+
+    Navigator.pushNamed(containerKey1.currentContext, '/settings');
+
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(find.text('Home'), findsNothing);
+    expect(find.text('Settings'), isOnstage);
+
+    // Drag from left edge to invoke the gesture.
+    TestGesture gesture = await tester.startGesture(new Point(5.0, 100.0));
+    await gesture.moveBy(new Offset(50.0, 0.0));
+    await tester.pump();
+
+    expect(find.text('Home'), findsNothing);
+    expect(find.text('Settings'), isOnstage);
   });
 }
