@@ -4,6 +4,7 @@
 
 import 'package:flutter_test/flutter_test.dart' hide TypeMatcher;
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 
 class TestTransition extends AnimatedWidget {
   TestTransition({
@@ -26,7 +27,7 @@ class TestTransition extends AnimatedWidget {
 }
 
 class TestRoute<T> extends PageRoute<T> {
-  TestRoute({ this.child, RouteSettings settings}) : super(settings: settings);
+  TestRoute({ this.child, RouteSettings settings }) : super(settings: settings);
 
   final Widget child;
 
@@ -35,6 +36,9 @@ class TestRoute<T> extends PageRoute<T> {
 
   @override
   Color get barrierColor => null;
+
+  @override
+  bool get maintainState => false;
 
   @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> forwardAnimation) {
@@ -50,21 +54,21 @@ void main() {
 
     GlobalKey insideKey = new GlobalKey();
 
-    String state() {
+    String state({ bool skipOffstage: true }) {
       String result = '';
-      if (tester.any(find.text('A')))
+      if (tester.any(find.text('A', skipOffstage: skipOffstage)))
         result += 'A';
-      if (tester.any(find.text('B')))
+      if (tester.any(find.text('B', skipOffstage: skipOffstage)))
         result += 'B';
-      if (tester.any(find.text('C')))
+      if (tester.any(find.text('C', skipOffstage: skipOffstage)))
         result += 'C';
-      if (tester.any(find.text('D')))
+      if (tester.any(find.text('D', skipOffstage: skipOffstage)))
         result += 'D';
-      if (tester.any(find.text('E')))
+      if (tester.any(find.text('E', skipOffstage: skipOffstage)))
         result += 'E';
-      if (tester.any(find.text('F')))
+      if (tester.any(find.text('F', skipOffstage: skipOffstage)))
         result += 'F';
-      if (tester.any(find.text('G')))
+      if (tester.any(find.text('G', skipOffstage: skipOffstage)))
         result += 'G';
       return result;
     }
@@ -112,7 +116,8 @@ void main() {
     navigator.pushNamed('/2');
     expect(state(), equals('BC')); // transition 1->2 is not yet built
     await tester.pump();
-    expect(state(), equals('BCE')); // transition 1->2 is at 0.0
+    expect(state(), equals('BC')); // transition 1->2 is at 0.0
+    expect(state(skipOffstage: false), equals('BCE')); // E is offstage
 
     await tester.pump(kFourTenthsOfTheTransitionDuration);
     expect(state(), equals('BCE')); // transition 1->2 is at 0.4
@@ -122,7 +127,7 @@ void main() {
 
     await tester.pump(kFourTenthsOfTheTransitionDuration);
     expect(state(), equals('E')); // transition 1->2 is at 1.0
-
+    expect(state(skipOffstage: false), equals('E')); // B and C are gone, the route is inactive with maintainState=false
 
     navigator.pop();
     expect(state(), equals('E')); // transition 1<-2 is at 1.0, just reversed
@@ -135,10 +140,12 @@ void main() {
     navigator.pushNamed('/3');
     expect(state(), equals('BDE')); // transition 1<-2 is at 0.6
     await tester.pump();
-    expect(state(), equals('BDEF')); // transition 1<-2 is at 0.6, 1->3 is at 0.0
+    expect(state(), equals('BDE')); // transition 1<-2 is at 0.6, 1->3 is at 0.0
+    expect(state(skipOffstage: false), equals('BDEF')); // F is offstage since we're at 0.0
 
     await tester.pump(kFourTenthsOfTheTransitionDuration);
     expect(state(), equals('BCEF')); // transition 1<-2 is at 0.2, 1->3 is at 0.4
+    expect(state(skipOffstage: false), equals('BCEF')); // nothing secret going on here
 
     await tester.pump(kFourTenthsOfTheTransitionDuration);
     expect(state(), equals('BDF')); // transition 1<-2 is done, 1->3 is at 0.8
@@ -157,7 +164,8 @@ void main() {
     navigator.pushNamed('/4');
     expect(state(), equals('BCF')); // transition 1<-3 is at 0.2, 1->4 is not yet built
     await tester.pump();
-    expect(state(), equals('BCFG')); // transition 1<-3 is at 0.2, 1->4 is at 0.0
+    expect(state(), equals('BCF')); // transition 1<-3 is at 0.2, 1->4 is at 0.0
+    expect(state(skipOffstage: false), equals('BCFG')); // G is offstage
 
     await tester.pump(kFourTenthsOfTheTransitionDuration);
     expect(state(), equals('BCG')); // transition 1<-3 is done, 1->4 is at 0.4
@@ -167,6 +175,7 @@ void main() {
 
     await tester.pump(kFourTenthsOfTheTransitionDuration);
     expect(state(), equals('G')); // transition 1->4 is done
+    expect(state(skipOffstage: false), equals('G')); // route 1 is not around any more
 
   });
 }

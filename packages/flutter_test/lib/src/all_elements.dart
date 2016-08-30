@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
+
 import 'package:flutter/widgets.dart';
 
 /// Provides an iterable that efficiently returns all the elements
@@ -15,13 +17,18 @@ import 'package:flutter/widgets.dart';
 /// The same applies to any iterable obtained indirectly through this
 /// one, for example the results of calling `where` on this iterable
 /// are also cached.
-Iterable<Element> collectAllElementsFrom(Element rootElement) {
-  return new CachingIterable<Element>(new _DepthFirstChildIterator(rootElement));
+Iterable<Element> collectAllElementsFrom(Element rootElement, {
+  @required bool skipOffstage
+}) {
+  return new CachingIterable<Element>(new _DepthFirstChildIterator(rootElement, skipOffstage));
 }
 
 class _DepthFirstChildIterator implements Iterator<Element> {
-  _DepthFirstChildIterator(Element rootElement)
-      : _stack = _reverseChildrenOf(rootElement).toList();
+  _DepthFirstChildIterator(Element rootElement, bool skipOffstage)
+    : skipOffstage = skipOffstage,
+      _stack = _reverseChildrenOf(rootElement, skipOffstage).toList();
+
+  final bool skipOffstage;
 
   Element _current;
 
@@ -37,14 +44,18 @@ class _DepthFirstChildIterator implements Iterator<Element> {
 
     _current = _stack.removeLast();
     // Stack children in reverse order to traverse first branch first
-    _stack.addAll(_reverseChildrenOf(_current));
+    _stack.addAll(_reverseChildrenOf(_current, skipOffstage));
 
     return true;
   }
 
-  static Iterable<Element> _reverseChildrenOf(Element element) {
+  static Iterable<Element> _reverseChildrenOf(Element element, bool skipOffstage) {
     final List<Element> children = <Element>[];
-    element.visitChildren(children.add);
+    if (skipOffstage) {
+      element.visitChildrenForSemantics(children.add);
+    } else {
+      element.visitChildren(children.add);
+    }
     return children.reversed;
   }
 }

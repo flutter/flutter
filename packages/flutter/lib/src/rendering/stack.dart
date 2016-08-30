@@ -199,13 +199,13 @@ class StackParentData extends ContainerBoxParentDataMixin<RenderBox> {
   }
 }
 
-/// Whether overflowing children should be clipped, or their overflows be
+/// Whether overflowing children should be clipped, or their overflow be
 /// visible.
 enum Overflow {
-  /// Children's overflows will be visible.
+  /// Overflowing children will be visible.
   visible,
-  /// Children's overflows will be clipped.
-  clip
+  /// Overflowing children will be clipped to the bounds of their parent.
+  clip,
 }
 
 /// Implements the stack layout algorithm

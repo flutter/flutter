@@ -20,7 +20,7 @@ const Color _kTransparent = const Color(0x00000000);
 /// A route that displays widgets in the [Navigator]'s [Overlay].
 abstract class OverlayRoute<T> extends Route<T> {
   /// Subclasses should override this getter to return the builders for the overlay.
-  List<WidgetBuilder> get builders;
+  Iterable<OverlayEntry> createOverlayEntries();
 
   /// The entries this route has placed in the overlay.
   @override
@@ -30,8 +30,7 @@ abstract class OverlayRoute<T> extends Route<T> {
   @override
   void install(OverlayEntry insertionPoint) {
     assert(_overlayEntries.isEmpty);
-    for (WidgetBuilder builder in builders)
-      _overlayEntries.add(new OverlayEntry(builder: builder));
+    _overlayEntries.addAll(createOverlayEntries());
     navigator.overlay?.insertAll(_overlayEntries, above: insertionPoint);
   }
 
@@ -415,7 +414,7 @@ class _ModalScopeState extends State<_ModalScope> {
   Widget build(BuildContext context) {
     return new Focus(
       key: config.route.focusKey,
-      child: new OffStage(
+      child: new Offstage(
         offstage: config.route.offstage,
         child: new IgnorePointer(
           ignoring: config.route.animation?.status == AnimationStatus.reverse,
@@ -577,6 +576,13 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// be transparent.
   Color get barrierColor;
 
+  /// Whether the route should remain in memory when it is inactive. If this is
+  /// true, then the route is maintained, so that any futures it is holding from
+  /// the next route will properly resolve when the next route pops. If this is
+  /// not necessary, this can be set to false to allow the framework to entirely
+  /// discard the route's widget hierarchy when it is not visible.
+  bool get maintainState;
+
 
   // The API for _ModalScope and HeroController
 
@@ -654,10 +660,10 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   }
 
   @override
-  List<WidgetBuilder> get builders => <WidgetBuilder>[
-    _buildModalBarrier,
-    _buildModalScope
-  ];
+  Iterable<OverlayEntry> createOverlayEntries() sync* {
+    yield new OverlayEntry(builder: _buildModalBarrier);
+    yield new OverlayEntry(builder: _buildModalScope, maintainState: maintainState);
+  }
 
   @override
   String toString() => '$runtimeType($settings, animation: $_animation)';
@@ -670,6 +676,9 @@ abstract class PopupRoute<T> extends ModalRoute<T> {
 
   @override
   bool get opaque => false;
+
+  @override
+  bool get maintainState => true;
 
   @override
   void didChangeNext(Route<dynamic> nextRoute) {

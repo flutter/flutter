@@ -2,17 +2,37 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
-import 'package:test/test.dart';
+
+class TestScrollConfigurationDelegate extends ScrollConfigurationDelegate {
+  TestScrollConfigurationDelegate(this.flag);
+
+  final bool flag;
+
+  @override
+  TargetPlatform get platform => defaultTargetPlatform;
+
+  @override
+  ExtentScrollBehavior createScrollBehavior() {
+    return flag
+      ? new BoundedBehavior(platform: platform)
+      : new UnboundedBehavior(platform: platform);
+  }
+
+  @override
+  bool updateShouldNotify(TestScrollConfigurationDelegate old)  => flag != old.flag;
+}
 
 void main() {
   test('BoundedBehavior min scroll offset', () {
-  BoundedBehavior behavior = new BoundedBehavior(
-    contentExtent: 150.0,
-    containerExtent: 75.0,
-    minScrollOffset: -100.0,
-    platform: TargetPlatform.iOS
-  );
+    BoundedBehavior behavior = new BoundedBehavior(
+      contentExtent: 150.0,
+      containerExtent: 75.0,
+      minScrollOffset: -100.0,
+      platform: TargetPlatform.iOS
+    );
+
     expect(behavior.minScrollOffset, equals(-100.0));
     expect(behavior.maxScrollOffset, equals(-25.0));
 
@@ -34,5 +54,52 @@ void main() {
     expect(behavior.minScrollOffset, equals(50.0));
     expect(behavior.maxScrollOffset, equals(125.0));
     expect(scrollOffset, equals(50.0));
+  });
+
+  testWidgets('Inherited ScrollConfiguration changed', (WidgetTester tester) async {
+    final GlobalKey scrollableKey = new GlobalKey(debugLabel: 'scrollable');
+    TestScrollConfigurationDelegate delegate;
+    ExtentScrollBehavior behavior;
+
+    await tester.pumpWidget(
+      new ScrollConfiguration(
+        delegate: new TestScrollConfigurationDelegate(true),
+        child: new ScrollableViewport(
+          scrollableKey: scrollableKey,
+          child: new Builder(
+            builder: (BuildContext context) {
+              delegate = ScrollConfiguration.of(context);
+              behavior = Scrollable.of(context).scrollBehavior;
+              return new Container(height: 1000.0);
+            }
+          )
+        )
+      )
+    );
+
+    expect(delegate, isNotNull);
+    expect(delegate.flag, isTrue);
+    expect(behavior, new isInstanceOf<BoundedBehavior>());
+
+    // Same Scrollable, different ScrollConfiguration
+    await tester.pumpWidget(
+      new ScrollConfiguration(
+        delegate: new TestScrollConfigurationDelegate(false),
+        child: new ScrollableViewport(
+          scrollableKey: scrollableKey,
+          child: new Builder(
+            builder: (BuildContext context) {
+              delegate = ScrollConfiguration.of(context);
+              behavior = Scrollable.of(context).scrollBehavior;
+              return new Container(height: 1000.0);
+            }
+          )
+        )
+      )
+    );
+
+    expect(delegate, isNotNull);
+    expect(delegate.flag, isFalse);
+    expect(behavior, new isInstanceOf<UnboundedBehavior>());
   });
 }

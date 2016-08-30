@@ -327,4 +327,45 @@ void main() {
     await tester.pump();
     expect(log, isEmpty);
   });
+
+  testWidgets('Reparenting with multiple moves', (WidgetTester tester) async {
+    final GlobalKey key1 = new GlobalKey();
+    final GlobalKey key2 = new GlobalKey();
+    final GlobalKey key3 = new GlobalKey();
+
+    await tester.pumpWidget(
+      new Row(
+        children: <Widget>[
+          new StateMarker(
+            key: key1,
+            child: new StateMarker(
+              key: key2,
+              child: new StateMarker(
+                key: key3,
+                child: new StateMarker(child: new Container(width: 100.0))
+              )
+            )
+          )
+        ]
+      )
+    );
+
+    await tester.pumpWidget(
+      new Row(
+        children: <Widget>[
+          new StateMarker(
+            key: key2,
+            child: new StateMarker(child: new Container(width: 100.0))
+          ),
+          new StateMarker(
+            key: key1,
+            child: new StateMarker(
+              key: key3,
+              child: new StateMarker(child: new Container(width: 100.0))
+            )
+          ),
+        ]
+      )
+    );
+  });
 }

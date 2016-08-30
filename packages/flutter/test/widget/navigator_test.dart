@@ -69,33 +69,51 @@ class ThirdWidget extends StatelessWidget {
 void main() {
   testWidgets('Can navigator navigate to and from a stateful widget', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-      '/': (BuildContext context) => new FirstWidget(),
-      '/second': (BuildContext context) => new SecondWidget(),
+      '/': (BuildContext context) => new FirstWidget(), // X
+      '/second': (BuildContext context) => new SecondWidget(), // Y
     };
 
     await tester.pumpWidget(new MaterialApp(routes: routes));
-
     expect(find.text('X'), findsOneWidget);
-    expect(find.text('Y'), findsNothing);
+    expect(find.text('Y', skipOffstage: false), findsNothing);
 
     await tester.tap(find.text('X'));
-    await tester.pump(const Duration(milliseconds: 10));
+    await tester.pump();
+    expect(find.text('X'), findsOneWidget);
+    expect(find.text('Y', skipOffstage: false), isOffstage);
 
+    await tester.pump(const Duration(milliseconds: 10));
     expect(find.text('X'), findsOneWidget);
     expect(find.text('Y'), findsOneWidget);
 
     await tester.pump(const Duration(milliseconds: 10));
+    expect(find.text('X'), findsOneWidget);
+    expect(find.text('Y'), findsOneWidget);
+
     await tester.pump(const Duration(milliseconds: 10));
+    expect(find.text('X'), findsOneWidget);
+    expect(find.text('Y'), findsOneWidget);
+
     await tester.pump(const Duration(seconds: 1));
+    expect(find.text('X'), findsNothing);
+    expect(find.text('X', skipOffstage: false), findsOneWidget);
+    expect(find.text('Y'), findsOneWidget);
 
     await tester.tap(find.text('Y'));
-    await tester.pump(const Duration(milliseconds: 10));
-    await tester.pump(const Duration(milliseconds: 10));
-    await tester.pump(const Duration(milliseconds: 10));
-    await tester.pump(const Duration(seconds: 1));
+    expect(find.text('X'), findsNothing);
+    expect(find.text('Y'), findsOneWidget);
 
+    await tester.pump();
     expect(find.text('X'), findsOneWidget);
-    expect(find.text('Y'), findsNothing);
+    expect(find.text('Y'), findsOneWidget);
+
+    await tester.pump(const Duration(milliseconds: 10));
+    expect(find.text('X'), findsOneWidget);
+    expect(find.text('Y'), findsOneWidget);
+
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.text('X'), findsOneWidget);
+    expect(find.text('Y', skipOffstage: false), findsNothing);
   });
 
   testWidgets('Navigator.of fails gracefully when not found in context', (WidgetTester tester) async {

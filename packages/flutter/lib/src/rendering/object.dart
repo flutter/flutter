@@ -1956,26 +1956,24 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   /// Mark this node as needing an update to its semantics
   /// description.
   ///
-  /// If the change did not involve a removal or addition of
-  /// semantics, only the change of semantics (e.g. isChecked changing
-  /// from true to false, as opposed to isChecked changing from being
-  /// true to not being changed at all), then you can pass the
-  /// onlyChanges argument with the value true to reduce the cost. If
-  /// semantics are being added or removed, more work needs to be done
-  /// to update the semantics tree. If you pass 'onlyChanges: true'
-  /// but this node, which previously had a SemanticsNode, no longer
-  /// has one, or previously did not set any semantics, but now does,
-  /// or previously had a child that returned annotators, but no
-  /// longer does, or other such combinations, then you will either
-  /// assert during the subsequent call to [flushSemantics()] or you
-  /// will have out-of-date information in the semantics tree.
+  /// If the change did not involve a removal or addition of semantics, only the
+  /// change of semantics (e.g. isChecked changing from true to false, as
+  /// opposed to isChecked changing from being true to not being changed at
+  /// all), then you can pass the onlyChanges argument with the value true to
+  /// reduce the cost. If semantics are being added or removed, more work needs
+  /// to be done to update the semantics tree. If you pass 'onlyChanges: true'
+  /// but this node, which previously had a SemanticsNode, no longer has one, or
+  /// previously did not set any semantics, but now does, or previously had a
+  /// child that returned annotators, but no longer does, or other such
+  /// combinations, then you will either assert during the subsequent call to
+  /// [PipelineOwner.flushSemantics()] or you will have out-of-date information
+  /// in the semantics tree.
   ///
-  /// If the geometry might have changed in any way, then again, more
-  /// work needs to be done to update the semantics tree (to deal with
-  /// clips). You can pass the noGeometry argument to avoid this work
-  /// in the case where only the labels or flags changed. If you pass
-  /// 'noGeometry: true' when the geometry did change, the semantic
-  /// tree will be out of date.
+  /// If the geometry might have changed in any way, then again, more work needs
+  /// to be done to update the semantics tree (to deal with clips). You can pass
+  /// the noGeometry argument to avoid this work in the case where only the
+  /// labels or flags changed. If you pass 'noGeometry: true' when the geometry
+  /// did change, the semantic tree will be out of date.
   void markNeedsSemanticsUpdate({ bool onlyChanges: false, bool noGeometry: false }) {
     assert(!attached || !owner._debugDoingSemantics);
     if ((attached && owner._semanticsOwner == null) || (_needsSemanticsUpdate && onlyChanges && (_needsSemanticsGeometryUpdate || noGeometry)))
@@ -2089,31 +2087,30 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     visitChildren(visitor);
   }
 
-  /// Returns functions that will annotate a SemanticsNode with the
-  /// semantics of this RenderObject.
+  /// Returns a function that will annotate a [SemanticsNode] with the semantics
+  /// of this [RenderObject].
   ///
-  /// To annotate a SemanticsNode for this node, return all the
-  /// annotators provided by the superclass, plus an annotator that
-  /// adds the annotations. When the behavior of the annotators would
+  /// To annotate a SemanticsNode for this node, return an annotator that
+  /// adds the annotations. When the behavior of the annotator would
   /// change (e.g. the box is now checked rather than unchecked), call
-  /// [markNeedsSemanticsUpdate()] to indicate to the rendering system
+  /// [markNeedsSemanticsUpdate] to indicate to the rendering system
   /// that the semantics tree needs to be rebuilt.
   ///
   /// To introduce a new SemanticsNode, set hasSemantics to true for
-  /// this object. The functions returned by this function will be used
+  /// this object. The function returned by this function will be used
   /// to annotate the SemanticsNode for this object.
   ///
   /// Semantic annotations are persistent. Values set in one pass will
   /// still be set in the next pass. Therefore it is important to
-  /// explicitly set fields to false once they are no longer true --
+  /// explicitly set fields to false once they are no longer true;
   /// setting them to true when they are to be enabled, and not
   /// setting them at all when they are not, will mean they remain set
   /// once enabled once and will never get unset.
   ///
-  /// If the number of annotators you return will change from zero to
-  /// non-zero, and hasSemantics isn't true, then the associated call
-  /// to markNeedsSemanticsUpdate() must not have 'onlyChanges' set, as
-  /// it is possible that the node should be entirely removed.
+  /// If the value return will change from null to non-null (or vice versa), and
+  /// [hasSemantics] isn't true, then the associated call to
+  /// [markNeedsSemanticsUpdate] must not have `onlyChanges` set, as it is
+  /// possible that the node should be entirely removed.
   SemanticAnnotator get semanticAnnotator => null;
 
 
@@ -2126,22 +2123,22 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
 
   // HIT TESTING
 
-  // RenderObject subclasses are expected to have a method like the
-  // following (with the signature being whatever passes for coordinates
-  // for this particular class):
+  // RenderObject subclasses are expected to have a method like the following
+  // (with the signature being whatever passes for coordinates for this
+  // particular class):
+  //
   // bool hitTest(HitTestResult result, { Point position }) {
-  //   // If (x,y) is not inside this node, then return false. (You
-  //   // can assume that the given coordinate is inside your
-  //   // dimensions. You only need to check this if you're an
-  //   // irregular shape, e.g. if you have a hole.)
+  //   // If the given position is not inside this node, then return false.
   //   // Otherwise:
-  //   // For each child that intersects x,y, in z-order starting from the top,
-  //   // call hitTest() for that child, passing it /result/, and the coordinates
-  //   // converted to the child's coordinate origin, and stop at the first child
-  //   // that returns true.
+  //   // For each child that intersects the position, in z-order starting from
+  //   // the top, call hitTest() for that child, passing it /result/, and the
+  //   // coordinates converted to the child's coordinate origin, and stop at
+  //   // the first child that returns true.
   //   // Then, add yourself to /result/, and return true.
   // }
-  // You must not add yourself to /result/ if you return false.
+  //
+  // If you add yourself to /result/ and still return false, then that means you
+  // will see events but so will objects below you.
 
 
   /// Returns a human understandable name.
@@ -2245,6 +2242,12 @@ abstract class RenderObjectWithChildMixin<ChildType extends RenderObject> implem
     super.detach();
     if (_child != null)
       _child.detach();
+  }
+
+  @override
+  void redepthChildren() {
+    if (_child != null)
+      redepthChild(_child);
   }
 
   @override

@@ -48,6 +48,7 @@ class MaterialApp extends StatefulWidget {
   MaterialApp({
     Key key,
     this.title,
+    this.color,
     this.theme,
     this.home,
     this.routes: const <String, WidgetBuilder>{},
@@ -84,6 +85,13 @@ class MaterialApp extends StatefulWidget {
   /// must be given in [routes], or the [onGenerateRoute] callback
   /// must be able to build a widget for that route.
   final Widget home;
+
+  /// The primary color to use for the application in the operating system
+  /// interface.
+  ///
+  /// For example, on Android this is the color used for the application in the
+  /// application switcher.
+  final Color color;
 
   /// The application's top-level routing table.
   ///
@@ -221,7 +229,8 @@ class _MaterialAppState extends State<MaterialApp> {
         key: new GlobalObjectKey(this),
         title: config.title,
         textStyle: _errorTextStyle,
-        color: theme?.primaryColor ?? Colors.blue[500], // blue[500] is the primary color of the default theme
+        // blue[500] is the primary color of the default theme
+        color: config.color ?? theme?.primaryColor ?? Colors.blue[500],
         navigatorObserver: _heroController,
         onGenerateRoute: _onGenerateRoute,
         onLocaleChanged: config.onLocaleChanged,
