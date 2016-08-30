@@ -82,7 +82,7 @@ class MockDeviceManager implements DeviceManager {
   Future<List<Device>> getAllConnectedDevices() => new Future<List<Device>>.value(devices);
 
   @override
-  Future<Device> getDeviceById(String deviceId) {
+  Future<Device> getDeviceById(String deviceId, [List<Device> _]) {
     Device device = devices.firstWhere((Device device) => device.id == deviceId, orElse: () => null);
     return new Future<Device>.value(device);
   }
