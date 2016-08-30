@@ -41,7 +41,7 @@ class Animator {
 
   void AwaitVSync(const vsync::VSyncProvider::AwaitVSyncCallback& callback);
 
-  Rasterizer* rasterizer_;
+  ftl::WeakPtr<Rasterizer> rasterizer_;
   Engine* engine_;
   vsync::VSyncProviderPtr vsync_provider_;
   vsync::VSyncProviderPtr fallback_vsync_provider_;

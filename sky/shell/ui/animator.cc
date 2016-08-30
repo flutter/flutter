@@ -14,7 +14,7 @@ namespace sky {
 namespace shell {
 
 Animator::Animator(Rasterizer* rasterizer, Engine* engine)
-    : rasterizer_(rasterizer),
+    : rasterizer_(rasterizer->GetWeakRasterizerPtr()),
       engine_(engine),
       layer_tree_pipeline_(ftl::MakeRefCounted<LayerTreePipeline>(3)),
       pending_frame_semaphore_(1),
@@ -79,7 +79,7 @@ void Animator::Render(std::unique_ptr<flow::LayerTree> layer_tree) {
   producer_continuation_.Complete(std::move(layer_tree));
 
   // Notify the rasterizer that the pipeline has items it may consume.
-  auto weak_rasterizer = rasterizer_->GetWeakRasterizerPtr();
+  auto weak_rasterizer(rasterizer_);
   auto pipeline = layer_tree_pipeline_;
 
   blink::Threads::Gpu()->PostTask([weak_rasterizer, pipeline]() {
