@@ -127,17 +127,38 @@ class _RecipeGridPageState extends State<RecipeGridPage> {
         builder: (BuildContext context, BoxConstraints constraints) {
           final Size size = constraints.biggest;
           final double appBarHeight = size.height - statusBarHeight;
-          final String logo = appBarHeight >= 70.0 ? _kMediumLogoImage : _kSmallLogoImage;
           // Extra padding. Calculated to give about 16px on the bottom for the
           // `small` logo at its native size, and 30px for the `medium`.
           final double extraPadding = min(0.19 * appBarHeight + 5.4, 40.0);
+          final double t = (appBarHeight - kToolBarHeight) / (_kAppBarHeight - kToolBarHeight);
+          const double kOverlap = 0.28;
+          const Interval interval = const Interval(0.5 - kOverlap, 0.5 + kOverlap);
+
           return new Padding(
             padding: new EdgeInsets.only(
               top: statusBarHeight + 0.5 * extraPadding,
               bottom: extraPadding
             ),
             child: new Center(
-              child: new Image.asset(logo, fit: ImageFit.scaleDown)
+              child: new Stack(
+                alignment: FractionalOffset.center,
+                children: <Widget>[
+                  new Opacity(
+                    opacity: new Tween<double>(
+                      begin: 1.0,
+                      end: 0.0
+                    ).lerp(interval.transform(t)),
+                    child: new Image.asset(_kSmallLogoImage, fit: ImageFit.scaleDown)
+                  ),
+                  new Opacity(
+                    opacity: new Tween<double>(
+                      begin: 0.0,
+                      end: 1.0
+                    ).lerp(interval.transform(t)),
+                    child: new Image.asset(_kMediumLogoImage, fit: ImageFit.scaleDown)
+                  )
+                ]
+              )
             )
           );
         }
