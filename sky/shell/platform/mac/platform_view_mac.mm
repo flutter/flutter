@@ -28,7 +28,12 @@ PlatformViewMac::PlatformViewMac(NSOpenGLView* gl_view)
       resource_loading_context_([[NSOpenGLContext alloc]
           initWithFormat:gl_view.pixelFormat
             shareContext:gl_view.openGLContext]),
-      weak_factory_(this) {}
+      weak_factory_(this) {
+  NSArray* paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory,
+                                                       NSUserDomainMask, YES);
+  sky::shell::Shell::Shared().tracing_controller().set_traces_base_path(
+      [paths.firstObject UTF8String]);
+}
 
 PlatformViewMac::~PlatformViewMac() = default;
 

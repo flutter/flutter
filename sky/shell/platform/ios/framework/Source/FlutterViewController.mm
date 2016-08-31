@@ -77,18 +77,9 @@ void FlutterInit(int argc, const char* argv[]) {
       reinterpret_cast<CAEAGLLayer*>(self.view.layer));
   _platformView->SetupResourceContextOnIOThread();
 
-  [self setupTracing];
-
   [self setupNotificationCenterObservers];
 
   [self connectToEngineAndLoad];
-}
-
-- (void)setupTracing {
-  NSArray* paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory,
-                                                       NSUserDomainMask, YES);
-  sky::shell::Shell::Shared().tracing_controller().set_traces_base_path(
-      [paths.firstObject UTF8String]);
 }
 
 - (void)setupNotificationCenterObservers {

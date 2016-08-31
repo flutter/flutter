@@ -275,7 +275,12 @@ class IOSGLContext {
 PlatformViewIOS::PlatformViewIOS(CAEAGLLayer* layer)
     : context_(WTF::MakeUnique<IOSGLContext>(surface_config_, layer)),
       dynamic_service_loader_([[FlutterDynamicServiceLoader alloc] init]),
-      weak_factory_(this) {}
+      weak_factory_(this) {
+  NSArray* paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory,
+                                                       NSUserDomainMask, YES);
+  sky::shell::Shell::Shared().tracing_controller().set_traces_base_path(
+      [paths.firstObject UTF8String]);
+}
 
 PlatformViewIOS::~PlatformViewIOS() = default;
 
