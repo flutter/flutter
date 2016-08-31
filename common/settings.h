@@ -18,7 +18,6 @@ struct Settings {
   // on the target with the port after it has been selected.
   uint32_t observatory_port = 0;
   bool start_paused = false;
-  bool enable_dart_checked_mode = false;
   bool trace_startup = false;
   bool endless_trace_buffer = false;
   std::string aot_snapshot_path;

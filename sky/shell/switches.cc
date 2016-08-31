@@ -18,7 +18,6 @@ const char kAotVmIsolateSnapshot[] = "vm-isolate-snapshot";
 const char kCacheDirPath[] = "cache-dir-path";
 const char kDartFlags[] = "dart-flags";
 const char kDeviceObservatoryPort[] = "observatory-port";
-const char kEnableCheckedMode[] = "enable-checked-mode";
 const char kEndlessTraceBuffer[] = "endless-trace-buffer";
 const char kFLX[] = "flx";
 const char kHelp[] = "help";
@@ -32,7 +31,6 @@ const char kTraceStartup[] = "trace-startup";
 void PrintUsage(const std::string& executable_name) {
   // clang-format off
   std::cerr << "Usage: " << executable_name
-            << " --" << kEnableCheckedMode
             << " --" << kNonInteractive
             << " --" << kStartPaused
             << " --" << kTraceStartup

@@ -19,7 +19,6 @@ extern const char kAotVmIsolateSnapshot[];
 extern const char kCacheDirPath[];
 extern const char kDartFlags[];
 extern const char kDeviceObservatoryPort[];
-extern const char kEnableCheckedMode[];
 extern const char kEndlessTraceBuffer[];
 extern const char kFLX[];
 extern const char kHelp[];

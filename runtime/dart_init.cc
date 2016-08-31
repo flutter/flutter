@@ -522,13 +522,6 @@ void SetRegisterNativeServiceProtocolExtensionHook(
   g_register_native_service_protocol_extensions_hook = hook;
 }
 
-static bool ShouldEnableCheckedMode() {
-  // Checked mode is never enabled during precompilation. Even snapshot
-  // generation disables checked mode arguments.
-  return IsRunningPrecompiledCode() ? false
-                                    : Settings::Get().enable_dart_checked_mode;
-}
-
 void PushBackAll(std::vector<const char*>* args,
                  const char** argv,
                  size_t argc) {
@@ -572,8 +565,11 @@ void InitDartVM() {
                 arraysize(kDartPrecompilationArgs));
   }
 
-  if (ShouldEnableCheckedMode())
+  if (!IsRunningPrecompiledCode()) {
+    // Enable checked mode if we are not running precompiled code. We run non-
+    // precompiled code only in the debug product mode.
     PushBackAll(&args, kDartCheckedModeArgs, arraysize(kDartCheckedModeArgs));
+  }
 
   if (settings.start_paused)
     PushBackAll(&args, kDartStartPausedArgs, arraysize(kDartStartPausedArgs));

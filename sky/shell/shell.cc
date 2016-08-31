@@ -149,8 +149,6 @@ void Shell::InitStandalone(std::string icu_data_path) {
     }
   }
   settings.start_paused = command_line.HasSwitch(switches::kStartPaused);
-  settings.enable_dart_checked_mode =
-      command_line.HasSwitch(switches::kEnableCheckedMode);
   settings.endless_trace_buffer =
       command_line.HasSwitch(switches::kEndlessTraceBuffer);
   settings.trace_startup = command_line.HasSwitch(switches::kTraceStartup);
