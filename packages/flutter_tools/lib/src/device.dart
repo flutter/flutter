@@ -35,13 +35,11 @@ class DeviceManager {
 
   bool get hasSpecifiedDeviceId => specifiedDeviceId != null;
 
-  /// Return the device with the matching ID; else, complete the Future with
-  /// `null`.
-  ///
-  /// This does a case insentitive compare with `deviceId`.
-  Future<Device> getDeviceById(String deviceId, [List<Device> devices]) async {
+  /// Return the devices with a name or id matching [deviceId].
+  /// This does a case insentitive compare with [deviceId].
+  Future<List<Device>> getDevicesById(String deviceId) async {
     deviceId = deviceId.toLowerCase();
-    devices ??= await getAllConnectedDevices();
+    List<Device> devices = await getAllConnectedDevices();
     Device device = devices.firstWhere(
         (Device device) =>
             device.id.toLowerCase() == deviceId ||
@@ -49,15 +47,13 @@ class DeviceManager {
         orElse: () => null);
 
     if (device != null)
-      return device;
+      return <Device>[device];
 
-    // Match on a close id / name.
-    devices = devices.where((Device device) {
+    // Match on a id or name starting with [deviceId].
+    return devices.where((Device device) {
       return (device.id.toLowerCase().startsWith(deviceId) ||
         device.name.toLowerCase().startsWith(deviceId));
     }).toList();
-
-    return devices.length == 1 ? devices.first : null;
   }
 
   /// Return the list of connected devices, filtered by any user-specified device id.
@@ -65,8 +61,7 @@ class DeviceManager {
     if (specifiedDeviceId == null) {
       return getAllConnectedDevices();
     } else {
-      Device device = await getDeviceById(specifiedDeviceId);
-      return device == null ? <Device>[] : <Device>[device];
+      return getDevicesById(specifiedDeviceId);
     }
   }
 

@@ -19,23 +19,34 @@ void main() {
     });
 
     testUsingContext('getDeviceById', () async {
-      DeviceManager deviceManager = new DeviceManager();
       _MockDevice device1 = new _MockDevice('Nexus 5', '0553790d0a4e726f');
       _MockDevice device2 = new _MockDevice('Nexus 5X', '01abfc49119c410e');
       _MockDevice device3 = new _MockDevice('iPod touch', '82564b38861a9a5');
       List<Device> devices = <Device>[device1, device2, device3];
+      DeviceManager deviceManager = new TestDeviceManager(devices);
 
-      Future<Null> expectDevice(String id, Device expected) async {
-        expect(await deviceManager.getDeviceById(id, devices), expected);
+      Future<Null> expectDevice(String id, List<Device> expected) async {
+        expect(await deviceManager.getDevicesById(id), expected);
       }
-      expectDevice('01abfc49119c410e', device2);
-      expectDevice('Nexus 5X', device2);
-      expectDevice('0553790d0a4e726f', device1);
-      expectDevice('Nexus 5', device1);
-      expectDevice('0553790', device1);
-      expectDevice('Nexus', null);
+      expectDevice('01abfc49119c410e', <Device>[device2]);
+      expectDevice('Nexus 5X', <Device>[device2]);
+      expectDevice('0553790d0a4e726f', <Device>[device1]);
+      expectDevice('Nexus 5', <Device>[device1]);
+      expectDevice('0553790', <Device>[device1]);
+      expectDevice('Nexus', <Device>[device1, device2]);
     });
   });
+}
+
+class TestDeviceManager extends DeviceManager {
+  final List<Device> allDevices;
+
+  TestDeviceManager(this.allDevices);
+
+  @override
+  Future<List<Device>> getAllConnectedDevices() async {
+    return allDevices;
+  }
 }
 
 class _MockDevice extends Device {

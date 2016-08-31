@@ -205,11 +205,21 @@ void restoreTargetDeviceFinder() {
 }
 
 Future<Device> findTargetDevice() async {
+  List<Device> devices = await deviceManager.getDevices();
+
   if (deviceManager.hasSpecifiedDeviceId) {
-    return deviceManager.getDeviceById(deviceManager.specifiedDeviceId);
+    if (devices.isEmpty) {
+      printStatus("No devices found with name or id matching '${deviceManager.specifiedDeviceId}'");
+      return null;
+    }
+    if (devices.length > 1) {
+      printStatus("Found ${devices.length} devices with name or id matching '${deviceManager.specifiedDeviceId}':");
+      Device.printDevices(devices);
+      return null;
+    }
+    return devices.first;
   }
 
-  List<Device> devices = await deviceManager.getAllConnectedDevices();
 
   if (os.isMacOS) {
     // On Mac we look for the iOS Simulator. If available, we use that. Then
