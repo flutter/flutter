@@ -25,7 +25,7 @@ class VMService {
   static Future<VMService> connect(int port) async {
     Uri uri = new Uri(scheme: 'ws', host: '127.0.0.1', port: port, path: 'ws');
     WebSocket ws = await WebSocket.connect(uri.toString());
-    rpc.Peer peer = new rpc.Peer(new IOWebSocketChannel(ws));
+    rpc.Peer peer = new rpc.Peer(new IOWebSocketChannel(ws).cast());
     peer.listen();
     Uri httpAddress = new Uri(scheme: 'http', host: '127.0.0.1', port: port);
     return new VMService._(peer, port, httpAddress);

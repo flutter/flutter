@@ -15,7 +15,6 @@ import 'package:analyzer/src/dart/sdk/sdk.dart'; // ignore: implementation_impor
 import 'package:analyzer/src/generated/engine.dart'; // ignore: implementation_imports
 import 'package:analyzer/src/generated/error.dart'; // ignore: implementation_imports
 import 'package:analyzer/src/generated/java_io.dart'; // ignore: implementation_imports
-import 'package:analyzer/src/generated/sdk_io.dart'; // ignore: implementation_imports
 import 'package:analyzer/src/generated/source.dart'; // ignore: implementation_imports
 import 'package:analyzer/src/generated/source_io.dart'; // ignore: implementation_imports
 import 'package:analyzer/src/task/options.dart'; // ignore: implementation_imports
@@ -111,7 +110,8 @@ class AnalysisDriver {
       resolvers.add(new DartUriResolver(sdk));
     } else {
       // Fall back to a standard SDK if no embedder is found.
-      DirectoryBasedDartSdk sdk = new DirectoryBasedDartSdk(new JavaFile(sdkDir));
+      FolderBasedDartSdk sdk = new FolderBasedDartSdk(PhysicalResourceProvider.INSTANCE,
+          PhysicalResourceProvider.INSTANCE.getFolder(sdkDir));
       sdk.analysisOptions = context.analysisOptions;
 
       resolvers.add(new DartUriResolver(sdk));
