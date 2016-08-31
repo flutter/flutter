@@ -36,9 +36,6 @@ public class SkyActivity extends Activity {
         // Android applications can generate intents with extra data and that
         // there are many security-sensitive args in the binary.
         ArrayList<String> args = new ArrayList<String>();
-        if (intent.getBooleanExtra("enable-checked-mode", false)) {
-            args.add("--enable-checked-mode");
-        }
         if (intent.getBooleanExtra("trace-startup", false)) {
             args.add("--trace-startup");
         }
