@@ -16,6 +16,9 @@ class FormatCommand extends FlutterCommand {
   final String name = 'format';
 
   @override
+  List<String> get aliases => const <String>['dartfmt'];
+
+  @override
   final String description = 'Format one or more dart files.';
 
   @override
@@ -28,6 +31,10 @@ class FormatCommand extends FlutterCommand {
   Future<int> runInProject() async {
     if (argResults.rest.isEmpty) {
       printStatus('No files specified to be formatted.');
+      printStatus('');
+      printStatus('To format all files in the current directory tree:');
+      printStatus('${runner.executableName} $name .');
+      printStatus('');
       printStatus(usage);
       return 1;
     }
