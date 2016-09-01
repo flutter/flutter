@@ -137,7 +137,8 @@ abstract class FlutterCommand extends Command {
       List<Device> devices = await deviceManager.getDevices();
 
       if (devices.isEmpty && deviceManager.hasSpecifiedDeviceId) {
-        printError("No device found with id '${deviceManager.specifiedDeviceId}'.");
+        printStatus("No devices found with name or id "
+            "matching '${deviceManager.specifiedDeviceId}'");
         return 1;
       } else if (devices.isEmpty) {
         printStatus('No connected devices.');
@@ -153,10 +154,15 @@ abstract class FlutterCommand extends Command {
         printStatus('No supported devices connected.');
         return 1;
       } else if (devices.length > 1) {
-        printStatus("More than one device connected; please specify a device with "
-          "the '-d <deviceId>' flag.");
+        if (deviceManager.hasSpecifiedDeviceId) {
+          printStatus("Found ${devices.length} devices with name or id matching "
+              "'${deviceManager.specifiedDeviceId}':");
+        } else {
+          printStatus("More than one device connected; please specify a device with "
+              "the '-d <deviceId>' flag.");
+          devices = await deviceManager.getAllConnectedDevices();
+        }
         printStatus('');
-        devices = await deviceManager.getAllConnectedDevices();
         Device.printDevices(devices);
         return 1;
       } else {
