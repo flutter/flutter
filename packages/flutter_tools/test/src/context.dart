@@ -83,7 +83,7 @@ class MockDeviceManager implements DeviceManager {
 
   @override
   Future<List<Device>> getDevicesById(String deviceId) async {
-    return devices.where((Device device) => device.id == deviceId);
+    return devices.where((Device device) => device.id == deviceId).toList();
   }
 
   @override
