@@ -519,8 +519,9 @@ source_set("skia_opts") {
       sources = gypi_skia_opts.none_sources
     }
   } else if (current_cpu == "arm64") {
-    # TODO(1841): NEON sources are not currently used on arm64.
-    sources = gypi_skia_opts.armv7_sources + gypi_skia_opts.neon_sources
+    sources = gypi_skia_opts.armv7_sources
+      + gypi_skia_opts.neon_sources
+      + gypi_skia_opts.crc32_sources
   } else if (current_cpu == "mipsel") {
     cflags += [ "-fomit-frame-pointer" ]
 
