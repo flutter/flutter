@@ -12,18 +12,21 @@ class _ContactCategory extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ThemeData themeData = Theme.of(context);
     return new Container(
       padding: const EdgeInsets.symmetric(vertical: 16.0),
       decoration: new BoxDecoration(
-        border: new Border(bottom: new BorderSide(color: Theme.of(context).dividerColor))
+        border: new Border(bottom: new BorderSide(color: themeData.dividerColor))
       ),
       child: new DefaultTextStyle(
         style: Theme.of(context).textTheme.subhead,
         child: new Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            new SizedBox(
+            new Container(
+              padding: const EdgeInsets.symmetric(vertical: 20.0),
               width: 72.0,
-              child: new Icon(icon, color: Theme.of(context).primaryColor)
+              child: new Icon(icon, color: themeData.primaryColor)
             ),
             new Flexible(child: new Column(children: children))
           ]
@@ -45,8 +48,9 @@ class _ContactItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ThemeData themeData = Theme.of(context);
     List<Widget> columnChildren = lines.sublist(0, lines.length - 1).map((String line) => new Text(line)).toList();
-    columnChildren.add(new Text(lines.last, style: Theme.of(context).textTheme.caption));
+    columnChildren.add(new Text(lines.last, style: themeData.textTheme.caption));
 
     List<Widget> rowChildren = <Widget>[
       new Flexible(
@@ -59,7 +63,11 @@ class _ContactItem extends StatelessWidget {
     if (icon != null) {
       rowChildren.add(new SizedBox(
         width: 72.0,
-        child: new IconButton(icon: new Icon(icon), onPressed: onPressed)
+        child: new IconButton(
+          icon: new Icon(icon),
+          color: themeData.primaryColor,
+          onPressed: onPressed
+        )
       ));
     }
     return new Padding(
