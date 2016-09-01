@@ -98,7 +98,11 @@ class _RecipeGridPageState extends State<RecipeGridPage> {
         drawer: buildDrawer(context),
         floatingActionButton: new FloatingActionButton(
           child: new Icon(Icons.edit),
-          onPressed: () { }
+          onPressed: () {
+            scaffoldKey.currentState.showSnackBar(new SnackBar(
+              content: new Text('Not supported.')
+            ));
+          }
         ),
         body: buildBody(context, statusBarHeight)
       )

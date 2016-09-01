@@ -162,17 +162,10 @@ class GalleryDrawer extends StatelessWidget {
 
     final Widget fileAnIssueItem = new DrawerItem(
       icon: new Icon(Icons.report),
-      child: new RichText(
-        text: new TextSpan(
-          children: <TextSpan>[
-            new LinkTextSpan(
-              text: "File an issue",
-              style: linkStyle,
-              url: 'https://github.com/flutter/flutter/issues/new'
-            )
-          ]
-        )
-      )
+      onPressed: () {
+        UrlLauncher.launch('https://github.com/flutter/flutter/issues/new');
+      },
+      child: new Text('File an issue')
     );
 
     final Widget aboutItem = new AboutDrawerItem(
