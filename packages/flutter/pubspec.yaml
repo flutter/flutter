@@ -7,7 +7,7 @@ homepage: http://flutter.io
 dependencies:
   collection: '>=1.9.1 <2.0.0'
   intl: '>=0.14.0 <0.15.0'
-  meta: ^1.0.2
+  meta: ^1.0.3
   vector_math: '>=2.0.3 <3.0.0'
 
   sky_engine:
