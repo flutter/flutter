@@ -103,6 +103,12 @@ final List<GalleryItem> kAllGalleryItems = <GalleryItem>[
     buildRoute: (BuildContext context) => new TwoLevelListDemo()
   ),
   new GalleryItem(
+    title: 'Expansion panels',
+    subtitle: 'A list of expanding panels',
+    routeName: ExpasionPanelsDemo.routeName,
+    buildRoute: (BuildContext context) => new ExpasionPanelsDemo()
+  ),
+  new GalleryItem(
     title: 'Floating action button',
     subtitle: 'Demos action button transitions',
     routeName: TabsFabDemo.routeName,
