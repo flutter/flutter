@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:convert' show JSON;
 import 'dart:io';
 
@@ -10,6 +11,7 @@ import 'package:path/path.dart' as path;
 import 'android/android_workflow.dart';
 import 'base/context.dart';
 import 'base/os.dart';
+import 'device.dart';
 import 'globals.dart';
 import 'ios/ios_workflow.dart';
 import 'version.dart';
@@ -38,6 +40,7 @@ class Doctor {
       _validators.add(_iosWorkflow);
 
     _validators.add(new AtomValidator());
+    _validators.add(new DeviceValidator());
   }
 
   static void initGlobal() {
@@ -59,15 +62,17 @@ class Doctor {
   }
 
   /// Print a summary of the state of the tooling, as well as how to get more info.
-  void summary() => printStatus(summaryText);
+  Future<Null> summary() async {
+    printStatus(await summaryText);
+  }
 
-  String get summaryText {
+  Future<String> get summaryText async {
     StringBuffer buffer = new StringBuffer();
 
     bool allGood = true;
 
     for (DoctorValidator validator in _validators) {
-      ValidationResult result = validator.validate();
+      ValidationResult result = await validator.validate();
       buffer.write('${result.leadingBox} ${validator.title} is ');
       if (result.type == ValidationType.missing)
         buffer.write('not installed.');
@@ -94,7 +99,7 @@ class Doctor {
   }
 
   /// Print verbose information about the state of installed tooling.
-  bool diagnose() {
+  Future<bool> diagnose() async {
     bool firstLine = true;
     bool doctorResult = true;
 
@@ -103,7 +108,7 @@ class Doctor {
         printStatus('');
       firstLine = false;
 
-      ValidationResult result = validator.validate();
+      ValidationResult result = await validator.validate();
 
       if (result.type == ValidationType.missing)
         doctorResult = false;
@@ -155,7 +160,7 @@ abstract class DoctorValidator {
 
   final String title;
 
-  ValidationResult validate();
+  Future<ValidationResult> validate();
 }
 
 class ValidationResult {
@@ -193,7 +198,7 @@ class _FlutterValidator extends DoctorValidator {
   _FlutterValidator() : super('Flutter');
 
   @override
-  ValidationResult validate() {
+  Future<ValidationResult> validate() async {
     List<ValidationMessage> messages = <ValidationMessage>[];
     ValidationType valid = ValidationType.installed;
 
@@ -239,7 +244,7 @@ class AtomValidator extends DoctorValidator {
   }
 
   @override
-  ValidationResult validate() {
+  Future<ValidationResult> validate() async {
     List<ValidationMessage> messages = <ValidationMessage>[];
 
     int installCount = 0;
@@ -289,5 +294,22 @@ class AtomValidator extends DoctorValidator {
   bool hasPackage(String packageName) {
     String packagePath = path.join(_getAtomHomePath(), 'packages', packageName);
     return FileSystemEntity.isDirectorySync(packagePath);
+  }
+}
+
+class DeviceValidator extends DoctorValidator {
+  DeviceValidator() : super('Connected devices');
+
+  @override
+  Future<ValidationResult> validate() async {
+    List<Device> devices = await deviceManager.getAllConnectedDevices();
+    List<ValidationMessage> messages;
+    if (devices.isEmpty) {
+      messages = <ValidationMessage>[new ValidationMessage('None')];
+    } else {
+      messages = Device.descriptions(devices)
+          .map((String msg) => new ValidationMessage(msg)).toList();
+    }
+    return new ValidationResult(ValidationType.installed, messages);
   }
 }

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:io';
 
 import '../base/os.dart';
@@ -22,7 +23,7 @@ class AndroidWorkflow extends DoctorValidator implements Workflow {
   bool get canLaunchDevices => androidSdk != null && androidSdk.validateSdkWellFormed().isEmpty;
 
   @override
-  ValidationResult validate() {
+  Future<ValidationResult> validate() async {
     List<ValidationMessage> messages = <ValidationMessage>[];
     ValidationType type = ValidationType.missing;
     String sdkVersionText;

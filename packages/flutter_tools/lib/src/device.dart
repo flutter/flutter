@@ -241,7 +241,7 @@ abstract class Device {
   @override
   String toString() => name;
 
-  static void printDevices(List<Device> devices) {
+  static Iterable<String> descriptions(List<Device> devices) {
     int nameWidth = 0;
     int idWidth = 0;
 
@@ -250,12 +250,16 @@ abstract class Device {
       idWidth = math.max(idWidth, device.id.length);
     }
 
-    for (Device device in devices) {
+    return devices.map((Device device) {
       String supportIndicator = device.isSupported() ? '' : ' (unsupported)';
-      printStatus('${device.name.padRight(nameWidth)} • '
-        '${device.id.padRight(idWidth)} • '
-        '${getNameForTargetPlatform(device.platform)}$supportIndicator');
-    }
+      return '${device.name.padRight(nameWidth)} • '
+          '${device.id.padRight(idWidth)} • '
+          '${getNameForTargetPlatform(device.platform)}$supportIndicator';
+    });
+  }
+
+  static void printDevices(List<Device> devices) {
+    descriptions(devices).forEach((String msg) => printStatus(msg));
   }
 }
 
