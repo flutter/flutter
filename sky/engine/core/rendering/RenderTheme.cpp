@@ -27,7 +27,6 @@
 #include "flutter/sky/engine/platform/FloatConversion.h"
 #include "flutter/sky/engine/platform/fonts/FontSelector.h"
 #include "flutter/sky/engine/platform/graphics/GraphicsContextStateSaver.h"
-#include "flutter/sky/engine/platform/text/StringTruncator.h"
 #include "flutter/sky/engine/public/platform/Platform.h"
 #include "flutter/sky/engine/wtf/text/StringBuilder.h"
 
