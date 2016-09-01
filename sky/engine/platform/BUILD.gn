@@ -91,14 +91,12 @@ source_set("platform") {
     "fonts/WidthCache.h",
     "fonts/WidthIterator.cpp",
     "fonts/WidthIterator.h",
-    "fonts/android/FontCacheAndroid.cpp",
     "fonts/harfbuzz/FontHarfBuzz.cpp",
     "fonts/harfbuzz/HarfBuzzFace.cpp",
     "fonts/harfbuzz/HarfBuzzFace.h",
     "fonts/harfbuzz/HarfBuzzFaceSkia.cpp",
     "fonts/harfbuzz/HarfBuzzShaper.cpp",
     "fonts/harfbuzz/HarfBuzzShaper.h",
-    "fonts/linux/FontCacheLinux.cpp",
     "fonts/linux/FontPlatformDataLinux.cpp",
     "fonts/opentype/OpenTypeTypes.h",
     "fonts/skia/FontCacheSkia.cpp",
@@ -271,6 +269,24 @@ source_set("platform") {
 
   if (is_mac && !is_ios) {
     sources += [ "fonts/apple/FontCacheMac.cpp" ]
+  }
+
+  if (is_android) {
+    sources += [
+      "fonts/android/FontCacheAndroid.cpp",
+    ]
+  }
+
+  if (is_linux && !is_android) {
+    sources += [
+      "fonts/linux/FontCacheLinux.cpp",
+    ]
+  }
+
+  if (is_fuchsia) {
+    sources += [
+      "fonts/fuchsia/FontCacheFuchsia.cpp",
+    ]
   }
 
   configs += [

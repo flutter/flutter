@@ -18,6 +18,10 @@ config("config") {
     ".",
     "$root_out_dir",
   ]
+
+  cflags = [
+    "-Wno-inconsistent-missing-override",
+  ]
 }
 
 # The follow configs apply to all targets except for unit tests, which rely on
@@ -30,8 +34,6 @@ config("non_test_config") {
   }
 }
 
-if (!is_fuchsia) {
-
 group("engine") {
   public_deps = [
     "//flutter/sky/engine/core",
@@ -39,6 +41,4 @@ group("engine") {
     "//flutter/sky/engine/web",
     "//flutter/sky/engine/wtf",
   ]
-}
-
 }

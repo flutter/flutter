@@ -3,8 +3,11 @@
 # found in the LICENSE file.
 
 source_set("web") {
+  sources = [
+    "Sky.cpp",
+  ]
+
   deps = [
-    "//mojo/message_pump",
     "//flutter/sky/engine/core",
     "//flutter/sky/engine/platform",
   ]
@@ -15,7 +18,9 @@ source_set("web") {
     "//flutter/sky/engine:non_test_config",
   ]
 
-  sources = [
-    "Sky.cpp",
-  ]
+  if (!is_fuchsia) {
+    deps += [
+      "//mojo/message_pump",
+    ]
+  }
 }

@@ -58,6 +58,7 @@ source_set("ui") {
     "//flutter/services/engine:interfaces",
     "//flutter/services/pointer:interfaces",
     "//flutter/skia",
+    "//flutter/sky/engine",
     "//lib/tonic",
     "//lib/tonic/mojo",
     "//mojo/public/cpp/application",
@@ -73,10 +74,6 @@ source_set("ui") {
       "text/paragraph_stub.cc",
       "text/paragraph_stub.h",
     ]
-
-    deps += [
-      "//flutter/sky/engine/wtf",
-    ]
   } else {
     sources += [
       "text/paragraph_builder.cc",
@@ -85,10 +82,6 @@ source_set("ui") {
       "text/paragraph.h",
       "text/text_box.cc",
       "text/text_box.h",
-    ]
-
-    deps += [
-      "//flutter/sky/engine",
     ]
   }
 

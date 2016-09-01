@@ -7,9 +7,34 @@ import("//flutter/sky/engine/core/core.gni")
 
 visibility = [ "//flutter/sky/engine/*", "//flutter/sky/shell/*" ]
 
-source_set("libraries") {
+static_library("core") {
+  output_name = "sky_core"
+
+  deps = [
+    "//dart/runtime:libdart",
+    "//dart/runtime/bin:embedded_dart_io",
+    "//dart/runtime/vm:libdart_platform",
+    "//flutter/assets",
+    "//flutter/sky/engine/platform",
+    "//flutter/services/engine:interfaces",
+    "//flutter/services/pointer:interfaces",
+  ]
+
+  if (flutter_runtime_mode != "release" && !is_fuchsia) {
+    # Only include observatory assets in non-release modes.
+    deps += [
+      "//dart/runtime/observatory:embedded_observatory_archive",
+    ]
+  }
+
+  configs += [
+    "//flutter/sky/engine:config",
+    "//flutter/sky/engine:inside_blink",
+  ]
+
+  sources = sky_core_files
+
   public_deps = [
-    "//base",
     "//flutter/common",
     "//flutter/flow",
     "//flutter/glue",
@@ -17,19 +42,17 @@ source_set("libraries") {
     "//flutter/sky/engine/wtf",
     "//lib/ftl",
     "//lib/tonic",
-    "//mojo/application",
-    "//mojo/data_pipe_utils",
-    "//mojo/public/c/system",
-    "//mojo/public/cpp/bindings",
-    "//mojo/public/cpp/system",
-    "//mojo/public/cpp/utility",
-    "//mojo/public/interfaces/application",
-    "//mojo/public/platform/dart:mojo_internal_impl",
     "//third_party/iccjpeg",
     "//third_party/libpng",
     "//third_party/qcms",
     "//third_party/zlib",
   ]
+
+  if (!is_fuchsia) {
+    public_deps += [
+      "//base",
+    ]
+  }
 
   if (flutter_runtime_mode != "release") {
     public_deps += [
@@ -42,47 +65,4 @@ source_set("libraries") {
       "//flutter/lib/jni",
     ]
   }
-}
-
-source_set("prerequisites") {
-  deps = [
-    ":libraries",
-    "//flutter/sky/engine/platform",
-  ]
-
-  forward_dependent_configs_from = [ ":libraries" ]
-
-  direct_dependent_configs = [
-    "//flutter/sky/engine:config",
-    "//flutter/sky/engine:inside_blink",
-    "//build/config/compiler:wexit_time_destructors",
-  ]
-}
-
-static_library("core") {
-  output_name = "sky_core"
-
-  deps = [
-    ":libraries",
-    ":prerequisites",
-    "//dart/runtime:libdart",
-    "//dart/runtime/bin:embedded_dart_io",
-    "//dart/runtime/vm:libdart_platform",
-    "//flutter/assets",
-    "//mojo/services/navigation/interfaces",
-    "//flutter/sky/engine/platform",
-    "//flutter/services/engine:interfaces",
-    "//flutter/services/pointer:interfaces",
-  ]
-
-  if (flutter_runtime_mode != "release") {
-    # Only include observatory assets in non-release modes.
-    deps += [
-      "//dart/runtime/observatory:embedded_observatory_archive",
-    ]
-  }
-
-  sources = sky_core_files
-
-  forward_dependent_configs_from = [ ":libraries" ]
 }

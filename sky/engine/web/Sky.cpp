@@ -30,10 +30,7 @@
 
 #include "flutter/sky/engine/public/web/Sky.h"
 
-#include "base/message_loop/message_loop.h"
 #include "flutter/glue/trace_event.h"
-#include "lib/tonic/dart_microtask_queue.h"
-#include "mojo/message_pump/message_pump_mojo.h"
 #include "flutter/sky/engine/core/Init.h"
 #include "flutter/sky/engine/public/platform/Platform.h"
 #include "flutter/sky/engine/wtf/Assertions.h"
@@ -41,10 +38,21 @@
 #include "flutter/sky/engine/wtf/text/AtomicString.h"
 #include "flutter/sky/engine/wtf/text/TextEncoding.h"
 #include "flutter/sky/engine/wtf/WTF.h"
+#include "lib/ftl/build_config.h"
+#include "lib/tonic/dart_microtask_queue.h"
+
+#if !defined(OS_FUCHSIA)
+
+#include "base/message_loop/message_loop.h"
+#include "mojo/message_pump/message_pump_mojo.h"
+
+#endif  // !defined(OS_FUCHSIA)
 
 namespace blink {
 
 namespace {
+
+#if !defined(OS_FUCHSIA)
 
 void willProcessTask() {}
 
@@ -96,6 +104,8 @@ void removeMessageLoopObservers() {
   s_signalObserver = 0;
 }
 
+#endif  // !defined(OS_FUCHSIA)
+
 }  // namespace
 
 // Make sure we are not re-initialized in the same address space.
@@ -126,11 +136,15 @@ void initialize(Platform* platform) {
   // this, initializing this lazily probably doesn't buy us much.
   WTF::UTF8Encoding();
 
+#if !defined(OS_FUCHSIA)
   addMessageLoopObservers();
+#endif
 }
 
 void shutdown() {
+#if !defined(OS_FUCHSIA)
   removeMessageLoopObservers();
+#endif
 
   // FIXME: Shutdown dart?
 

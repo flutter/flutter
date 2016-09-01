@@ -71,6 +71,7 @@ source_set("common") {
     "//flutter/synchronization",
     "//lib/ftl",
     "//lib/tonic",
+    "//mojo/application",
     "//mojo/common",
     "//mojo/data_pipe_utils",
     "//mojo/message_pump",
