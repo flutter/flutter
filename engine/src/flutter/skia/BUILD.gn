@@ -91,13 +91,11 @@ gypi_skia_opts =
 # External-facing config for dependent code.
 config("skia_config") {
   include_dirs = [
-    "config",
-    "ext",
     "//third_party/skia/include/c",
     "//third_party/skia/include/client/android",
-    "//third_party/skia/include/config",
     "//third_party/skia/include/core",
     "//third_party/skia/include/effects",
+    "//third_party/skia/include/gpu",
     "//third_party/skia/include/images",
     "//third_party/skia/include/lazy",
     "//third_party/skia/include/pathops",
@@ -105,52 +103,15 @@ config("skia_config") {
     "//third_party/skia/include/pipe",
     "//third_party/skia/include/ports",
     "//third_party/skia/include/utils",
-  ]
-
-  defines = gypi_skia_defines.skia_for_chromium_defines
-
-  defines += [ "SK_SUPPORT_LEGACY_SHADERBITMAPTYPE" ]
-
-  if (component_mode == "shared_library") {
-    defines += [
-      "SKIA_DLL",
-      "GR_GL_IGNORE_ES3_MSAA=0",
-    ]
-  }
-
-  include_dirs += [
-    "//third_party/skia/include/gpu",
-    "//third_party/skia/src/gpu",
-  ]
-  defines += [ "SK_SUPPORT_GPU=1" ]
-
-  if (is_android) {
-    defines += [
-      "SK_BUILD_FOR_ANDROID",
-      "USE_CHROMIUM_SKIA",
-    ]
-  }
-
-  if (is_mac) {
-    defines += [ "SK_BUILD_FOR_MAC" ]
-  }
-
-  if (is_ios) {
-    defines += [ "SK_BUILD_FOR_IOS" ]
-  }
-
-  defines += [
-    "SK_HAS_JPEG_LIBRARY",
-    "SK_HAS_PNG_LIBRARY",
+    "config",
+    "ext",
   ]
 }
 
 # Internal-facing config for Skia library code.
 config("skia_library_config") {
-  # These include directories are only included for Skia code and are not
-  # exported to dependents. It's not clear if this is on purpose, but this
-  # matches the GYP build.
   include_dirs = [
+    "config",
     "//third_party/skia/include/private",
     "//third_party/skia/include/codec",
     "//third_party/skia/src/codec",
@@ -162,18 +123,45 @@ config("skia_library_config") {
     "//third_party/skia/src/ports",
     "//third_party/skia/src/sfnt",
     "//third_party/skia/src/utils",
+    "//third_party/skia/src/gpu",
   ]
+
   if (is_mac || is_ios) {
     include_dirs += [ "//third_party/skia/include/utils/mac" ]
   }
+
   if (is_mac) {
     include_dirs += [ "//third_party/skia/include/utils/ios" ]
   }
 
-  defines = []
+  defines = gypi_skia_defines.skia_for_chromium_defines
+
+  defines += [ "SK_SUPPORT_GPU=1" ]
+
+  # Supported codecs.
+  defines += [
+    "SK_HAS_JPEG_LIBRARY",
+    "SK_HAS_PNG_LIBRARY",
+  ]
+
+  if (is_mac) {
+    defines += [ "SK_BUILD_FOR_MAC" ]
+  }
+
+  if (is_ios) {
+    defines += [ "SK_BUILD_FOR_IOS" ]
+  }
+
+  if (is_android) {
+    defines += [ "SK_BUILD_FOR_ANDROID" ]
+  }
 
   if (component_mode == "shared_library") {
-    defines += [ "SKIA_IMPLEMENTATION=1" ]
+    defines += [
+      "SKIA_IMPLEMENTATION=1",
+      "SKIA_DLL",
+      "GR_GL_IGNORE_ES3_MSAA=0",
+    ]
   }
 
   if (current_cpu == "arm") {
