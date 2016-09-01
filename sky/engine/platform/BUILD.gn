@@ -257,7 +257,7 @@ source_set("platform") {
   ]
 
   deps = [
-    "//third_party/harfbuzz-ng",
+    "//third_party/harfbuzz",
   ]
 
   public_deps = [
