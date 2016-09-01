@@ -24,7 +24,7 @@ class _ContactCategory extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             new Container(
-              padding: const EdgeInsets.symmetric(vertical: 20.0),
+              padding: const EdgeInsets.symmetric(vertical: 24.0),
               width: 72.0,
               child: new Icon(icon, color: themeData.primaryColor)
             ),
@@ -208,7 +208,7 @@ class ContactsDemoState extends State<ContactsDemo> {
               ]
             ),
             new _ContactCategory(
-              icon: Icons.email,
+              icon: Icons.contact_mail,
               children: <Widget>[
                 new _ContactItem(
                   icon: Icons.email,
