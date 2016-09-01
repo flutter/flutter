@@ -8,6 +8,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
@@ -142,9 +143,12 @@ public class ExampleActivity extends Activity {
             return null;
         }
 
-        LocationManager locationManager =
-            (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        Location location = locationManager.getLastKnownLocation(locationProvider);
+        String permission = "android.permission.ACCESS_FINE_LOCATION";
+        Location location = null;
+        if (checkCallingOrSelfPermission(permission) == PackageManager.PERMISSION_GRANTED) {
+            LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+            location = locationManager.getLastKnownLocation(locationProvider);
+        }
 
         JSONObject reply = new JSONObject();
         try {
