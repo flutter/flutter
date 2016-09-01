@@ -25,7 +25,7 @@ final List<String> demoTitles = <String>[
   // Demos
   // 'Pesto', TODO(hansmuller): restore when Pesto has a back button.
   'Shrine',
-  'Contacts',
+  'Contact profile',
   // Components
   'Buttons',
   'Cards',

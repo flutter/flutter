@@ -59,7 +59,7 @@ final List<GalleryItem> kAllGalleryItems = <GalleryItem>[
     buildRoute: (BuildContext context) => new ShrineDemo()
   ),
   new GalleryItem(
-    title: 'Contacts',
+    title: 'Contact profile',
     category: 'Demos',
     subtitle: 'Highlights the flexible appbar',
     routeName: ContactsDemo.routeName,
