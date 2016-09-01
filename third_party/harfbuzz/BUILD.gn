@@ -33,15 +33,15 @@ if (use_system_harfbuzz) {
   pkg_config("harfbuzz_pkgconfig") {
     packages = [ "harfbuzz" ]
   }
-  group("harfbuzz-ng") {
+  group("harfbuzz") {
     public_configs = [ ":harfbuzz_pkgconfig" ]
   }
 } else {
-  config("harfbuzz-ng_config") {
+  config("harfbuzz_config") {
     include_dirs = [ "src" ]
   }
 
-  static_library("harfbuzz-ng") {
+  static_library("harfbuzz") {
     sources = [
       "src/hb-atomic-private.hh",
       "src/hb-blob.cc",
@@ -144,7 +144,7 @@ if (use_system_harfbuzz) {
 
     configs -= [ "//build/config/compiler:chromium_code" ]
     configs += [ "//build/config/compiler:no_chromium_code" ]
-    public_configs = [ ":harfbuzz-ng_config" ]
+    public_configs = [ ":harfbuzz_config" ]
 
     deps = [
       "//third_party/icu:icuuc",
