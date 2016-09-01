@@ -22,37 +22,6 @@ void main() {
     binding.allowAllFrames = true;
 
   // Regression test for https://github.com/flutter/flutter/pull/5168
-  testWidgets('Pesto route management', (WidgetTester tester) async {
-    await tester.pumpWidget(new GalleryApp());
-    await tester.pump(); // see https://github.com/flutter/flutter/issues/1865
-    await tester.pump(); // triggers a frame
-
-    expect(find.text('Pesto'), findsOneWidget);
-    await tester.tap(find.text('Pesto'));
-    await tester.pump(); // Launch pesto
-    await tester.pump(const Duration(seconds: 1)); // transition is complete
-
-    Future<Null> tapDrawerItem(String title) async {
-      await tester.tap(findNavigationMenuButton(tester));
-      await tester.pump();
-      await tester.pump(const Duration(seconds: 1)); // drawer opening animation
-      await tester.tap(find.text(title));
-      await tester.pump();
-      await tester.pump(const Duration(seconds: 1)); // drawer closing animation
-      await tester.pump(); // maybe open a new page
-      return tester.pump(const Duration(seconds: 1)); // new page transition
-    }
-    await tapDrawerItem('Home');
-    await tapDrawerItem('Favorites');
-    await tapDrawerItem('Home');
-    await tapDrawerItem('Favorites');
-    await tapDrawerItem('Home');
-    await tapDrawerItem('Return to Gallery');
-
-    expect(find.text('Flutter Gallery'), findsOneWidget);
-  });
-
-  // Regression test for https://github.com/flutter/flutter/pull/5168
   testWidgets('Pesto appbar heroics', (WidgetTester tester) async {
     await tester.pumpWidget(
       // The bug only manifests itself when the screen's orientation is portrait
