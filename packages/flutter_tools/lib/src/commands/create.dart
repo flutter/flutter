@@ -117,7 +117,7 @@ class CreateCommand extends FlutterCommand {
     // Run doctor; tell the user the next steps.
     if (doctor.canLaunchAnything) {
       // Let them know a summary of the state of their tooling.
-      doctor.summary();
+      await doctor.summary();
 
       printStatus('''
 All done! In order to run your application, type:
@@ -131,7 +131,7 @@ All done! In order to run your application, type:
       printStatus('');
 
       // Give the user more detailed analysis.
-      doctor.diagnose();
+      await doctor.diagnose();
       printStatus('');
       printStatus("After installing components, run 'flutter doctor' in order to "
         "re-validate your setup.");

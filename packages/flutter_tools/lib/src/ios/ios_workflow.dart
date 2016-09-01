@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:io';
 
 import '../base/os.dart';
@@ -29,7 +30,7 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
   bool get hasIDeviceId => exitsHappy(<String>['idevice_id', '-h']);
 
   @override
-  ValidationResult validate() {
+  Future<ValidationResult> validate() async {
     List<ValidationMessage> messages = <ValidationMessage>[];
     int installCount = 0;
     String xcodeVersionInfo;

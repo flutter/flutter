@@ -88,7 +88,7 @@ class SetupCommand extends FlutterCommand {
 
     // run doctor
     printStatus('\nFlutter doctor:');
-    bool goodInstall = doctor.diagnose();
+    bool goodInstall = await doctor.diagnose();
 
     // Validate that flutter is available on the path.
     if (os.which('flutter') == null) {
