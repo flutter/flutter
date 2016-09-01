@@ -57,8 +57,7 @@ Future<Null> performTest(WidgetTester tester, bool maintainState) async {
   expect(find.text('10'), findsNothing);
   expect(find.text('100'), findsNothing);
 
-  ScrollableState targetState = tester.state(find.byType(Scrollable));
-  targetState.scrollTo(1000.0);
+  tester.state/*<ScrollableState>*/(find.byType(Scrollable)).scrollTo(1000.0);
   await tester.pump(new Duration(seconds: 1));
 
   // we're 600 pixels high, each item is 100 pixels high, scroll position is

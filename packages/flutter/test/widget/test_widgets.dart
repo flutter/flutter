@@ -54,6 +54,5 @@ class FlipWidgetState extends State<FlipWidget> {
 }
 
 void flipStatefulWidget(WidgetTester tester) {
-  FlipWidgetState state = tester.state(find.byType(FlipWidget));
-  state.flip();
+  tester.state/*<FlipWidgetState>*/(find.byType(FlipWidget)).flip();
 }
