@@ -288,8 +288,8 @@ component("skia") {
     "//third_party/skia/src/ports/SkFontMgr_android_factory.cpp",
     "//third_party/skia/src/ports/SkFontMgr_android_parser.cpp",
     "//third_party/skia/src/ports/SkFontMgr_android.cpp",
-    "//third_party/skia/src/ports/SkFontMgr_fontconfig.cpp",
-    "//third_party/skia/src/ports/SkFontMgr_fontconfig_factory.cpp",
+    "//third_party/skia/src/ports/SkFontMgr_FontConfigInterface.cpp",
+    "//third_party/skia/src/ports/SkFontMgr_FontConfigInterface_factory.cpp",
     "//third_party/skia/src/ports/SkFontMgr_win_dw.cpp",
     "//third_party/skia/src/ports/SkGlobalInitialization_default.cpp",
     "//third_party/skia/src/ports/SkImageEncoder_none.cpp",
@@ -437,8 +437,8 @@ component("skia") {
     sources -= [
       "//third_party/skia/src/ports/SkFontConfigInterface_direct_factory.cpp",
       "//third_party/skia/src/ports/SkFontConfigInterface_direct.cpp",
-      "//third_party/skia/src/ports/SkFontMgr_fontconfig.cpp",
-      "//third_party/skia/src/ports/SkFontMgr_fontconfig_factory.cpp",
+      "//third_party/skia/src/ports/SkFontMgr_FontConfigInterface.cpp",
+      "//third_party/skia/src/ports/SkFontMgr_FontConfigInterface_factory.cpp",
     ]
   }
 
