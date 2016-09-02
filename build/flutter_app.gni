@@ -1,0 +1,99 @@
+# Copyright 2016 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+assert(is_fuchsia)
+
+import("//build/dart/dart_package.gni")
+
+# Defines a Flutter application
+#
+# Parameters
+#
+#   main_dart (required)
+#     Name of the Dart file containing the main function.
+#
+#   package_name (optional)
+#     Name of the Dart package.
+#
+#   output_name (optional)
+#     Name of output to generate. Defaults to $target_name.flx.
+#
+#   deps (optional)
+#     List of Dart packages the application depends on.
+template("flutter_app") {
+  assert(defined(invoker.main_dart), "Must define main_dart")
+
+  dart_package_name = target_name + "_dart_package"
+
+  dart_package(dart_package_name) {
+    forward_variables_from(invoker, [ "deps" ])
+    if (defined(invoker.package_name)) {
+      package_name = invoker.package_name
+    } else {
+      infer_package_name = true
+    }
+  }
+
+  if (defined(invoker.output_name)) {
+    bundle_name = invoker.output_name
+  } else {
+    bundle_name = "${target_name}.flx"
+  }
+
+  flutter_snapshot_label = "//flutter/snapshotter($host_toolchain)"
+  flutter_snapshot_dir = get_label_info(flutter_snapshot_label, "root_out_dir")
+  flutter_snapshot = "$flutter_snapshot_dir/sky_snapshot"
+
+  bundle_path = "$root_out_dir/$bundle_name"
+  snapshot_path = "$target_gen_dir/${target_name}_snapshot.bin"
+  depfile_path = "${snapshot_path}.d"
+
+  main_dart = invoker.main_dart
+
+  action(target_name) {
+    depfile = depfile_path
+
+    inputs = [
+      main_dart,
+    ]
+
+    outputs = [
+      bundle_path,
+      snapshot_path,
+    ]
+
+    if (defined(invoker.sources)) {
+      sources = invoker.sources
+    }
+
+    script = "//flutter/build/package.py"
+
+    args = [
+      "--snapshotter",
+      rebase_path(flutter_snapshot),
+      "--main-dart",
+      rebase_path(main_dart),
+      "--packages",
+      rebase_path("$target_gen_dir/.packages"),
+      "--bundle",
+      rebase_path(bundle_path),
+      "--bundle-header",
+      "#!mojo mojo:flutter_content_handler",
+      "--snapshot",
+      rebase_path(snapshot_path),
+      "--depfile",
+      rebase_path(depfile_path),
+      "--build-output",
+      rebase_path(bundle_path, root_build_dir),
+    ]
+
+    deps = [
+      flutter_snapshot_label,
+    ]
+
+    if (defined(invoker.deps)) {
+      deps += invoker.deps
+    }
+  }
+}
