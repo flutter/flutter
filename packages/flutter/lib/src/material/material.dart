@@ -264,7 +264,7 @@ class _MaterialState extends State<Material> {
     }
     if (config.type != MaterialType.transparency) {
       contents = new AnimatedContainer(
-        curve: Curves.ease,
+        curve: Curves.fastOutSlowIn,
         duration: kThemeChangeDuration,
         decoration: new BoxDecoration(
           borderRadius: kMaterialEdges[config.type],
