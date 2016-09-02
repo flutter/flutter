@@ -6,7 +6,6 @@ import("//base/android/linker/config.gni")
 import("//build/config/android/config.gni")
 import("//build/config/android/internal_rules.gni")
 import("//third_party/android_platform/config.gni")
-import("//tools/grit/grit_rule.gni")
 
 assert(is_android)
 

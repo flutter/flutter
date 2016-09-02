@@ -3,7 +3,6 @@
 # found in the LICENSE file.
 
 import("//build/config/android/config.gni")
-import("//build/config/chrome_build.gni")
 if (current_cpu == "arm") {
   import("//build/config/arm.gni")
 }
@@ -402,18 +401,6 @@ config("compiler") {
         "_LARGEFILE64_SOURCE",
       ]
     }
-
-    # Omit unwind support in official builds to save space. We can use breakpad
-    # for these builds.
-    if (is_chrome_branded && is_official_build) {
-      cflags += [
-        "-fno-unwind-tables",
-        "-fno-asynchronous-unwind-tables",
-      ]
-      defines += [ "NO_UNWIND_TABLES" ]
-    } else {
-      cflags += [ "-funwind-tables" ]
-    }
   }
 
   if (enable_profiling && !is_debug) {
@@ -486,13 +473,6 @@ config("compiler") {
       # TODO(brettw) common.gypi has this only for target toolset.
       ldflags += [ "-Wl,--icf=all" ]
     }
-
-    # TODO(thestig): Make this flag work with GN.
-    #if (!is_official_build && !is_chromeos && !(is_asan || is_lsan || is_tsan || is_msan)) {
-    #  ldflags += [
-    #    "-Wl,--detect-odr-violations",
-    #  ]
-    #}
   }
 
   if (linux_use_bundled_binutils) {
@@ -940,7 +920,7 @@ config("chromium_code") {
       "__STDC_FORMAT_MACROS",
     ]
 
-    if (!using_sanitizer && (!is_linux || !is_clang || is_official_build)) {
+    if (!using_sanitizer && (!is_linux || !is_clang)) {
       # _FORTIFY_SOURCE isn't really supported by Clang now, see
       # http://llvm.org/bugs/show_bug.cgi?id=16821.
       # It seems to work fine with Ubuntu 12 headers though, so use it in
@@ -1183,21 +1163,6 @@ config("optimize_max") {
     # Favor speed over size, /O2 must be before the common flags. The GYP
     # build also specifies /Ot, /Oi, and /GF, but these are implied by /O2.
     cflags = [ "/O2" ] + common_optimize_on_cflags
-    if (is_official_build) {
-      # TODO(GYP): TODO(dpranke): Should these only be on in an official
-      # build, or on all the time? For now we'll require official build so
-      # that the compile is clean.
-      cflags += [
-        "/GL",  # Whole program optimization.
-
-        # Disable Warning 4702 ("Unreachable code") for the WPO/PGO builds.
-        # Probably anything that this would catch that wouldn't be caught in a
-        # normal build isn't going to actually be a bug, so the incremental
-        # value of C4702 for PGO builds is likely very small.
-        "/wd4702",
-      ]
-      ldflags += [ "/LTCG" ]
-    }
   } else {
     cflags = [ "-O2" ] + common_optimize_on_cflags
   }

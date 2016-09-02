@@ -2,7 +2,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-import("//build/config/chrome_build.gni")
 import("//build/config/linux/pkg_config.gni")
 import("//build/config/ui.gni")
 
@@ -163,33 +162,6 @@ if (use_system_harfbuzz) {
         "src/hb-coretext.h",
       ]
       defines += [ "HAVE_CORETEXT" ]
-    }
-
-    # When without -fvisibility=hidden for pango to use the harfbuzz
-    # in the tree, all symbols pango needs must be included, or
-    # pango uses mixed versions of harfbuzz and leads to crash.
-    # See crbug.com/462689.
-    if (is_linux && use_pango && !is_chromeos && !is_official_build &&
-        current_cpu != "arm") {
-      configs -= [ "//build/config/gcc:symbol_visibility_hidden" ]
-      configs += [ "//build/config/linux:freetype2" ]
-      sources += [
-        "src/hb-ft.cc",
-        "src/hb-ft.h",
-        "src/hb-glib.cc",
-        "src/hb-glib.h",
-      ]
-    }
-
-    # See also chrome/browser/ui/libgtk2ui/BUILD.gn which pulls this.
-    config("pangoft2_link_hack") {
-      if (is_linux && use_pango && !is_chromeos && !is_official_build &&
-          current_cpu != "arm" && !is_component_build) {
-        # These symbols are referenced from libpangoft2, which will be
-        # dynamically linked later.
-        ldflags =
-            [ "-Wl,-uhb_ft_face_create_cached,-uhb_glib_get_unicode_funcs" ]
-      }
     }
   }
 }
