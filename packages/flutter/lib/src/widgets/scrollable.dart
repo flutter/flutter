@@ -373,6 +373,7 @@ class ScrollableState<T extends Scrollable> extends State<T> {
   }
 
   void _handleAnimationStatusChanged(AnimationStatus status) {
+    // this is not called when stop() is called on the controller
     setState(() {
       if (!_controller.isAnimating)
         _simulation = null;
@@ -454,7 +455,8 @@ class ScrollableState<T extends Scrollable> extends State<T> {
   /// If there are no in-progress scrolling physics, this function scrolls to
   /// the given offset instead.
   void didUpdateScrollBehavior(double newScrollOffset) {
-    setState(() { /* The scroll behavior is part of our build state. */ });
+    // This does not call setState, because if anything below actually
+    // changes our build, it will itself independently trigger a frame.
     assert(_controller.isAnimating || _simulation == null);
     if (_numberOfInProgressScrolls > 0) {
       if (_simulation != null) {
@@ -583,16 +585,16 @@ class ScrollableState<T extends Scrollable> extends State<T> {
   }
 
   void _handleDragDown(_) {
-    _stop();
+    setState(() {
+      _stop();
+    });
   }
 
   void _stop() {
     assert(mounted);
     assert(_controller.isAnimating || _simulation == null);
-    setState(() {
-      _controller.stop();
-      _simulation = null;
-    });
+    _controller.stop(); // this does not trigger a status notification
+    _simulation = null;
   }
 
   void _handleDragStart(DragStartDetails details) {
