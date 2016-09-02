@@ -64,7 +64,6 @@ def to_gn_args(args):
           # Always use AOT on iOS devices until the interpreter stabilizes
           aot = True
     else:
-      gn_args['use_aura'] = False
       gn_args['use_system_harfbuzz'] = False
       aot = False
 

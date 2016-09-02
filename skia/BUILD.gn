@@ -13,8 +13,8 @@ group("skia") {
 } else {
 
 import("//build/config/features.gni")
-import("//build/config/ui.gni")
 import("//testing/test.gni")
+
 if (current_cpu == "arm" || current_cpu == "arm64") {
   import("//build/config/arm.gni")
 }
@@ -465,9 +465,6 @@ component("skia") {
       "//build/config/linux:fontconfig",
       "//build/config/linux:freetype2",
     ]
-    if (use_pango) {
-      configs += [ "//build/config/linux:pangocairo" ]
-    }
     deps += [ "//third_party/icu:icuuc" ]
   }
 
