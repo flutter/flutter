@@ -54,4 +54,28 @@ void main() {
     expect(box.size.width, equals(150.0));
     expect(box.size.height, equals(150.0));
   });
+
+  testWidgets('AnimatedCrossFade test showSecond', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new Center(
+        child: new AnimatedCrossFade(
+          firstChild: new SizedBox(
+            width: 100.0,
+            height: 100.0
+          ),
+          secondChild: new SizedBox(
+            width: 200.0,
+            height: 200.0
+          ),
+          duration: const Duration(milliseconds: 200),
+          crossFadeState: CrossFadeState.showSecond
+        )
+      )
+    );
+
+    expect(find.byType(FadeTransition), findsNWidgets(2));
+    RenderBox box = tester.renderObject(find.byType(AnimatedCrossFade));
+    expect(box.size.width, equals(200.0));
+    expect(box.size.height, equals(200.0));
+  });
 }
