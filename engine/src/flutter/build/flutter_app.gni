@@ -75,7 +75,7 @@ template("flutter_app") {
       "--main-dart",
       rebase_path(main_dart),
       "--packages",
-      rebase_path("$target_gen_dir/.packages"),
+      rebase_path("$target_gen_dir/$dart_package_name.packages"),
       "--bundle",
       rebase_path(bundle_path),
       "--bundle-header",
@@ -89,6 +89,7 @@ template("flutter_app") {
     ]
 
     deps = [
+      ":$dart_package_name",
       flutter_snapshot_label,
     ]
 
