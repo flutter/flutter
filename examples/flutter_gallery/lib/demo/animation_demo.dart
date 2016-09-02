@@ -74,6 +74,7 @@ class _PointDemoPainter extends CustomPainter {
       drawPoint(canvas, arc.center, Colors.grey[400]);
 
     paint
+      ..isAntiAlias = false // Work-around for github.com/flutter/flutter/issues/5720
       ..color = Colors.green[500].withOpacity(0.25)
       ..strokeWidth = 4.0
       ..style = PaintingStyle.stroke;

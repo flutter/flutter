@@ -41,8 +41,8 @@ typedef double SnapOffsetCallback(double scrollOffset, Size containerSize);
 
 /// A base class for scrollable widgets.
 ///
-/// Commonly used subclasses include [ScrollableList], [ScrollableGrid], and
-/// [ScrollableViewport].
+/// Commonly used classes that are based on Scrollable include [ScrollableList],
+/// [ScrollableGrid], and [ScrollableViewport].
 ///
 /// Widgets that subclass [Scrollable] typically use state objects that subclass
 /// [ScrollableState].
