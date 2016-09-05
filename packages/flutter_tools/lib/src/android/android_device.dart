@@ -62,7 +62,20 @@ class AndroidDevice extends Device {
 
       List<String> propCommand = adbCommandForDevice(<String>['shell', 'getprop']);
       printTrace(propCommand.join(' '));
-      ProcessResult result = Process.runSync(propCommand.first, propCommand.sublist(1));
+      ProcessResult result;
+
+      try {
+        // We pass an encoding of ASCII so that we don't try and interpret the
+        // `adb shell getprop` result as UTF8.
+        result = Process.runSync(
+          propCommand.first,
+          propCommand.sublist(1),
+          stdoutEncoding: ASCII
+        );
+      } catch (error) {
+        printError('Error retrieving device properties for $name: $error');
+      }
+
       if (result.exitCode == 0) {
         RegExp propertyExp = new RegExp(r'\[(.*?)\]: \[(.*?)\]');
         for (Match match in propertyExp.allMatches(result.stdout))
