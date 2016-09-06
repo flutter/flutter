@@ -77,14 +77,14 @@ void main() {
       expect(cmd.inRepo(<String>[Cache.flutterRoot]), isTrue);
       expect(cmd.inRepo(<String>[path.join(Cache.flutterRoot, 'foo')]), isTrue);
       // Relative paths
-      var oldWorkingDirectory = path.current;
+      String oldWorkingDirectory = path.current;
       try {
         Directory.current = Cache.flutterRoot;
-        expect(cmd.inRepo(['.']), isTrue);
-        expect(cmd.inRepo(['foo']), isTrue);
+        expect(cmd.inRepo(<String>['.']), isTrue);
+        expect(cmd.inRepo(<String>['foo']), isTrue);
         Directory.current = tempDir.path;
-        expect(cmd.inRepo(['.']), isFalse);
-        expect(cmd.inRepo(['foo']), isFalse);
+        expect(cmd.inRepo(<String>['.']), isFalse);
+        expect(cmd.inRepo(<String>['foo']), isFalse);
       } finally {
         Directory.current = oldWorkingDirectory;
       }
