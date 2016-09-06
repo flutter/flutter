@@ -84,6 +84,21 @@ class AnalyzeCommand extends FlutterCommand {
     return true;
   }
 
+  /// Return `true` if [fileList] contains a path that resides inside the Flutter repository.
+  /// If [fileList] is empty, then return `true` if the current directory resides inside the Flutter repository.
+  bool inRepo(List<String> fileList) {
+    if (fileList == null || fileList.isEmpty)
+      fileList = <String>[path.current];
+    String root = path.normalize(path.absolute(Cache.flutterRoot));
+    String prefix = root + Platform.pathSeparator;
+    for (String file in fileList) {
+      file = path.normalize(path.absolute(file));
+      if (file == root || file.startsWith(prefix))
+        return true;
+    }
+    return false;
+  }
+
   bool get _isBenchmarking => argResults['benchmark'];
 
   Future<int> _analyzeOnce() async {
@@ -106,7 +121,7 @@ class AnalyzeCommand extends FlutterCommand {
 
     bool currentDirectory = argResults['current-directory'] && (argResults.wasParsed('current-directory') || dartFiles.isEmpty);
     bool currentPackage = argResults['current-package'] && (argResults.wasParsed('current-package') || dartFiles.isEmpty);
-    bool flutterRepo = argResults['flutter-repo'];
+    bool flutterRepo = argResults['flutter-repo'] || inRepo(argResults.rest);
 
     //TODO (pq): revisit package and directory defaults
 

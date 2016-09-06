@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter_tools/src/base/os.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/analyze.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/dart/sdk.dart';
@@ -66,6 +67,30 @@ void main() {
       expect(errorCount, 2);
     }, overrides: <Type, dynamic>{
       OperatingSystemUtils: os
+    });
+
+    testUsingContext('inRepo', () {
+      AnalyzeCommand cmd = new AnalyzeCommand();
+      // Absolute paths
+      expect(cmd.inRepo(<String>[tempDir.path]), isFalse);
+      expect(cmd.inRepo(<String>[path.join(tempDir.path, 'foo')]), isFalse);
+      expect(cmd.inRepo(<String>[Cache.flutterRoot]), isTrue);
+      expect(cmd.inRepo(<String>[path.join(Cache.flutterRoot, 'foo')]), isTrue);
+      // Relative paths
+      var oldWorkingDirectory = path.current;
+      try {
+        Directory.current = Cache.flutterRoot;
+        expect(cmd.inRepo(['.']), isTrue);
+        expect(cmd.inRepo(['foo']), isTrue);
+        Directory.current = tempDir.path;
+        expect(cmd.inRepo(['.']), isFalse);
+        expect(cmd.inRepo(['foo']), isFalse);
+      } finally {
+        Directory.current = oldWorkingDirectory;
+      }
+      // Ensure no exceptions
+      cmd.inRepo(null);
+      cmd.inRepo(<String>[]);
     });
   });
 }
