@@ -138,7 +138,7 @@ class _TooltipState extends State<Tooltip> {
         padding: config.padding,
         animation: new CurvedAnimation(
           parent: _controller,
-          curve: Curves.ease
+          curve: Curves.fastOutSlowIn
         ),
         target: target,
         verticalOffset: config.verticalOffset,

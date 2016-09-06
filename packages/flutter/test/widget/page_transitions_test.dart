@@ -121,9 +121,8 @@ void main() {
     await gesture.moveBy(new Offset(50.0, 0.0));
     await tester.pump();
 
-    // TODO(mpcomplete): back gesture disabled. Home should be onstage when
-    // it is reenabled.
-    expect(find.text('Home'), findsNothing);
+    // Home is now visible.
+    expect(find.text('Home'), isOnstage);
     expect(find.text('Settings'), isOnstage);
   });
 

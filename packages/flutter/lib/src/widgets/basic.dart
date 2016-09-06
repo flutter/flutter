@@ -2063,6 +2063,21 @@ class Flow extends MultiChildRenderObjectWidget {
 /// which is less verbose and integrates with [DefaultTextStyle] for default
 /// styling.
 ///
+/// Example:
+///
+/// ```dart
+/// new RichText(
+///   text: new TextSpan(
+///     text: 'Hello ',
+///     style: DefaultTextStyle.of(context).style,
+///     children: <TextSpan>[
+///       new TextSpan(text: 'bold', style: new TextStyle(fontWeight: FontWeight.bold)),
+///       new TextSpan(text: ' world!'),
+///     ],
+///   ),
+/// ),
+/// ```
+///
 /// See also:
 ///
 ///  * [Text]

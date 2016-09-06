@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+import 'package:meta/meta.dart';
 import 'package:test/test.dart' as test_package;
 
 import 'all_elements.dart';
@@ -154,10 +155,10 @@ class WidgetTester extends WidgetController implements HitTestDispatcher {
 
   /// Renders the UI from the given [widget].
   ///
-  /// Calls [runApp] with the given widget, then triggers a frame sequence and
-  /// flushes microtasks, by calling [pump] with the same duration (if any).
-  /// The supplied [EnginePhase] is the final phase reached during the pump pass;
-  /// if not supplied, the whole pass is executed.
+  /// Calls [runApp] with the given widget, then triggers a frame and flushes
+  /// microtasks, by calling [pump] with the same `duration` (if any). The
+  /// supplied [EnginePhase] is the final phase reached during the pump pass; if
+  /// not supplied, the whole pass is executed.
   Future<Null> pumpWidget(Widget widget, [
     Duration duration,
     EnginePhase phase = EnginePhase.sendSemanticsTree
@@ -168,7 +169,11 @@ class WidgetTester extends WidgetController implements HitTestDispatcher {
     });
   }
 
-  /// Triggers a sequence of frames for [duration] amount of time.
+  /// Triggers a frame after `duration` amount of time.
+  ///
+  /// This makes the framework act as if the application had janked (missed
+  /// frames) for `duration` amount of time, and then received a v-sync signal
+  /// to paint the application.
   ///
   /// This is a convenience function that just calls
   /// [TestWidgetsFlutterBinding.pump].
@@ -178,6 +183,40 @@ class WidgetTester extends WidgetController implements HitTestDispatcher {
     EnginePhase phase = EnginePhase.sendSemanticsTree
   ]) {
     return TestAsyncUtils.guard(() => binding.pump(duration, phase));
+  }
+
+  /// Repeatedly calls [pump] with the given `duration` until there are no
+  /// longer any transient callbacks scheduled. If no transient callbacks are
+  /// scheduled when the function is called, it returns without calling [pump].
+  ///
+  /// This essentially waits for all animations to have completed.
+  ///
+  /// This function will never return (and the test will hang and eventually
+  /// time out and fail) if there is an infinite animation in progress (for
+  /// example, if there is an indeterminate progress indicator spinning).
+  ///
+  /// If the function returns, it returns the number of pumps that it performed.
+  ///
+  /// In general, it is better practice to figure out exactly why each frame is
+  /// needed, and then to [pump] exactly as many frames as necessary. This will
+  /// help catch regressions where, for instance, an animation is being started
+  /// one frame later than it should.
+  ///
+  /// Alternatively, one can check that the return value from this function
+  /// matches the expected number of pumps.
+  Future<int> pumpUntilNoTransientCallbacks([
+    @required Duration duration,
+    EnginePhase phase = EnginePhase.sendSemanticsTree
+  ]) {
+    assert(duration != null);
+    assert(duration > Duration.ZERO);
+    int count = 0;
+    return TestAsyncUtils.guard(() async {
+      while (binding.transientCallbackCount > 0) {
+        await binding.pump(duration, phase);
+        count += 1;
+      }
+    }).then/*<int>*/((Null _) => count);
   }
 
   @override

@@ -26,7 +26,7 @@ class TextStyleItem extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           new SizedBox(
-            width: 64.0,
+            width: 72.0,
             child: new Text(name, style: nameStyle)
           ),
           new Flexible(
