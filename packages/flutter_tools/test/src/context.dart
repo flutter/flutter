@@ -82,9 +82,8 @@ class MockDeviceManager implements DeviceManager {
   Future<List<Device>> getAllConnectedDevices() => new Future<List<Device>>.value(devices);
 
   @override
-  Future<Device> getDeviceById(String deviceId, [List<Device> _]) {
-    Device device = devices.firstWhere((Device device) => device.id == deviceId, orElse: () => null);
-    return new Future<Device>.value(device);
+  Future<List<Device>> getDevicesById(String deviceId) async {
+    return devices.where((Device device) => device.id == deviceId).toList();
   }
 
   @override
@@ -92,8 +91,7 @@ class MockDeviceManager implements DeviceManager {
     if (specifiedDeviceId == null) {
       return getAllConnectedDevices();
     } else {
-      Device device = await getDeviceById(specifiedDeviceId);
-      return device == null ? <Device>[] : <Device>[device];
+      return getDevicesById(specifiedDeviceId);
     }
   }
 

@@ -1188,10 +1188,10 @@ class _TabBarViewState<T> extends PageableListState<TabBarView<T>> implements Ta
 
     if (selectedIndex < previousSelectedIndex) {
       _updateItemsFromChildren(selectedIndex, previousSelectedIndex);
-      scrollTo(new CurveTween(curve: Curves.ease.flipped).evaluate(new ReverseAnimation(animation)));
+      scrollTo(new CurveTween(curve: Curves.fastOutSlowIn.flipped).evaluate(new ReverseAnimation(animation)));
     } else {
       _updateItemsFromChildren(previousSelectedIndex, selectedIndex);
-      scrollTo(new CurveTween(curve: Curves.ease).evaluate(animation));
+      scrollTo(new CurveTween(curve: Curves.fastOutSlowIn).evaluate(animation));
     }
   }
 
@@ -1296,7 +1296,7 @@ class TabPageSelector<T> extends StatelessWidget {
     final Color color = Theme.of(context).accentColor;
     final ColorTween selectedColor = new ColorTween(begin: Colors.transparent, end: color);
     final ColorTween previousColor = new ColorTween(begin: color, end: Colors.transparent);
-    Animation<double> animation = new CurvedAnimation(parent: selection.animation, curve: Curves.ease);
+    Animation<double> animation = new CurvedAnimation(parent: selection.animation, curve: Curves.fastOutSlowIn);
     return new AnimatedBuilder(
       animation: animation,
       builder: (BuildContext context, Widget child) {

@@ -25,7 +25,7 @@ final List<String> demoTitles = <String>[
   // Demos
   // 'Pesto', TODO(hansmuller): restore when Pesto has a back button.
   'Shrine',
-  'Contacts',
+  'Contact profile',
   // Components
   'Buttons',
   'Cards',
@@ -33,6 +33,7 @@ final List<String> demoTitles = <String>[
   'Date picker',
   'Dialog',
   'Expand/collapse list control',
+  'Expansion panels',
   'Floating action button',
   'Grid',
   'Icons',

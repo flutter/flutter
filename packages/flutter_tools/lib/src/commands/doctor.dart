@@ -19,7 +19,7 @@ class DoctorCommand extends FlutterCommand {
 
   @override
   Future<int> runInProject() async {
-    doctor.diagnose();
+    await doctor.diagnose();
     return 0;
   }
 }

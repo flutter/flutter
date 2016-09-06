@@ -416,7 +416,7 @@ class _DialState extends State<_Dial> {
     _thetaTween = new Tween<double>(begin: _getThetaForTime(config.selectedTime));
     _theta = _thetaTween.animate(new CurvedAnimation(
       parent: _thetaController,
-      curve: Curves.ease
+      curve: Curves.fastOutSlowIn
     ))..addListener(() => setState(() { }));
   }
 

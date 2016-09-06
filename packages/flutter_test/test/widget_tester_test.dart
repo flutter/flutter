@@ -68,6 +68,37 @@ void main() {
       expect(message, contains('Actual: ?:<exactly one widget with text "foo" (ignoring offstage widgets): Text("foo")>\n'));
       expect(message, contains('Which: means one was found but none were expected\n'));
     });
+
+    testWidgets('pumping', (WidgetTester tester) async {
+      await tester.pumpWidget(new Text('foo'));
+      int count;
+
+      AnimationController test = new AnimationController(duration: const Duration(milliseconds: 5100));
+      count = await tester.pumpUntilNoTransientCallbacks(const Duration(seconds: 1));
+      expect(count, 0);
+
+      test.forward(from: 0.0);
+      count = await tester.pumpUntilNoTransientCallbacks(const Duration(seconds: 1));
+      // 1 frame at t=0, starting the animation
+      // 1 frame at t=1
+      // 1 frame at t=2
+      // 1 frame at t=3
+      // 1 frame at t=4
+      // 1 frame at t=5
+      // 1 frame at t=6, ending the animation
+      expect(count, 7);
+
+      test.forward(from: 0.0);
+      await tester.pump(); // starts the animation
+      count = await tester.pumpUntilNoTransientCallbacks(const Duration(seconds: 1));
+      expect(count, 6);
+
+      test.forward(from: 0.0);
+      await tester.pump(); // starts the animation
+      await tester.pump(); // has no effect
+      count = await tester.pumpUntilNoTransientCallbacks(const Duration(seconds: 1));
+      expect(count, 6);
+    });
   });
 
 }

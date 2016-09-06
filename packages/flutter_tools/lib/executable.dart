@@ -116,26 +116,26 @@ Future<Null> main(List<String> args) async {
         // Print the stack trace on the bots - don't write a crash report.
         stderr.writeln('$error');
         stderr.writeln(chain.terse.toString());
+        _exit(1);
       } else {
         if (error is String)
           stderr.writeln('Oops; flutter has exited unexpectedly: "$error".');
         else
           stderr.writeln('Oops; flutter has exited unexpectedly.');
 
-        File file = _createCrashReport(args, error, chain);
-
-        stderr.writeln(
-          'Crash report written to ${file.path};\n'
-          'please let us know at https://github.com/flutter/flutter/issues.'
-        );
+        _createCrashReport(args, error, chain).then((File file) {
+          stderr.writeln(
+              'Crash report written to ${file.path};\n'
+              'please let us know at https://github.com/flutter/flutter/issues.'
+          );
+          _exit(1);
+        });
       }
-
-      _exit(1);
     }
   });
 }
 
-File _createCrashReport(List<String> args, dynamic error, Chain chain) {
+Future<File> _createCrashReport(List<String> args, dynamic error, Chain chain) async {
   File crashFile = getUniqueFile(Directory.current, 'flutter', 'log');
 
   StringBuffer buffer = new StringBuffer();
@@ -150,21 +150,21 @@ File _createCrashReport(List<String> args, dynamic error, Chain chain) {
   buffer.writeln('```\n${chain.terse}```\n');
 
   buffer.writeln('## flutter doctor\n');
-  buffer.writeln('```\n${_doctorText()}```');
+  buffer.writeln('```\n${await _doctorText()}```');
 
   crashFile.writeAsStringSync(buffer.toString());
 
   return crashFile;
 }
 
-String _doctorText() {
+Future<String> _doctorText() async {
   try {
     BufferLogger logger = new BufferLogger();
     AppContext appContext = new AppContext();
 
     appContext[Logger] = logger;
 
-    appContext.runInZone(() => doctor.diagnose());
+    await appContext.runInZone(() => doctor.diagnose());
 
     return logger.statusText;
   } catch (error, trace) {

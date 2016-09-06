@@ -131,7 +131,7 @@ Future<XcodeBuildResult> buildXcodeProject({
       commands.addAll(<String>[
         '-workspace', path.basename(entity.path),
         '-scheme', path.basenameWithoutExtension(entity.path),
-        "BUILD_DIR=${path.absolute(app.appDirectory, 'build')}",
+        "BUILD_DIR=${path.absolute(getIosBuildDirectory())}",
       ]);
       break;
     }
