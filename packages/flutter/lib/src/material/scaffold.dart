@@ -710,12 +710,13 @@ class ScaffoldState extends State<Scaffold> {
   }
 
   void _handleDragEnd(DragEndDetails details) {
-    _backGestureController?.dragEnd();
+    final RenderBox box = context.findRenderObject();
+    _backGestureController?.dragEnd(details.velocity.pixelsPerSecond.dx / box.size.width);
     _backGestureController = null;
   }
 
   void _handleDragCancel() {
-    _backGestureController?.dragEnd();
+    _backGestureController?.dragEnd(0.0);
     _backGestureController = null;
   }
 
