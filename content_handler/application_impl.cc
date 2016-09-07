@@ -13,16 +13,6 @@
 #include "mojo/public/cpp/application/connect.h"
 
 namespace flutter_content_handler {
-namespace {
-
-constexpr char kSnapshotKey[] = "snapshot_blob.bin";
-
-std::vector<char> ExtractSnapshot(std::vector<char> bundle) {
-  zip::Unzipper unzipper(std::move(bundle));
-  return unzipper.Extract(kSnapshotKey);
-}
-
-}  // namespace
 
 ApplicationImpl::ApplicationImpl(
     mojo::InterfaceRequest<mojo::Application> application,
@@ -32,13 +22,11 @@ ApplicationImpl::ApplicationImpl(
   // but we should do that work asynchronously instead. However, there when I
   // tried draining the data pipe asynchronously, the drain didn't complete.
   // We'll need to investigate why in more detail.
-  std::vector<char> bundle;
-  bool result = mtl::BlockingCopyToVector(std::move(response->body), &bundle);
+  bool result = mtl::BlockingCopyToVector(std::move(response->body), &bundle_);
   if (!result) {
     FTL_LOG(ERROR) << "Failed to receive bundle.";
     return;
   }
-  snapshot_ = ExtractSnapshot(std::move(bundle));
   // TODO(abarth): In principle, we should call StartRuntimeIfReady() here but
   // because we're draining the data pipe synchronously, we know that we can't
   // possibly be ready yet because we haven't received the Initialize() message.
@@ -69,9 +57,9 @@ void ApplicationImpl::RequestQuit() {
 }
 
 void ApplicationImpl::StartRuntimeIfReady() {
-  if (!runtime_holder_ || snapshot_.empty())
+  if (!runtime_holder_ || bundle_.empty())
     return;
-  runtime_holder_->Run(url_, std::move(snapshot_));
+  runtime_holder_->Run(url_, std::move(bundle_));
 }
 
 }  // namespace flutter_content_handler

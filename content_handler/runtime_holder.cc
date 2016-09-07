@@ -6,19 +6,23 @@
 
 #include <utility>
 
+#include "flutter/assets/zip_asset_bundle.h"
 #include "flutter/common/threads.h"
 #include "flutter/content_handler/rasterizer.h"
+#include "flutter/lib/ui/mojo_services.h"
 #include "flutter/runtime/dart_controller.h"
 #include "flutter/services/engine/sky_engine.mojom.h"
 #include "lib/ftl/functional/make_copyable.h"
 #include "lib/ftl/functional/make_runnable.h"
 #include "lib/ftl/logging.h"
 #include "lib/ftl/time/time_delta.h"
+#include "lib/zip/create_unzipper.h"
 #include "mojo/public/cpp/application/connect.h"
 
 namespace flutter_content_handler {
 namespace {
 
+constexpr char kSnapshotKey[] = "snapshot_blob.bin";
 constexpr int kPipelineDepth = 3;
 constexpr ftl::TimeDelta kTargetFrameInterval =
     ftl::TimeDelta::FromMilliseconds(16);
@@ -49,12 +53,20 @@ void RuntimeHolder::Init(mojo::ApplicationConnectorPtr connector) {
 }
 
 void RuntimeHolder::Run(const std::string& script_uri,
-                        std::vector<char> snapshot) {
+                        std::vector<char> bundle) {
+  InitRootBundle(std::move(bundle));
+
+  std::vector<uint8_t> snapshot;
+  if (!asset_store_->GetAsBuffer(kSnapshotKey, &snapshot)) {
+    FTL_LOG(ERROR) << "Unable to load snapshot from root bundle.";
+    return;
+  }
+
   runtime_ = blink::RuntimeController::Create(this);
   runtime_->CreateDartController(script_uri);
   runtime_->SetViewportMetrics(viewport_metrics_);
-  runtime_->dart_controller()->RunFromSnapshot(
-      reinterpret_cast<const uint8_t*>(snapshot.data()), snapshot.size());
+  runtime_->dart_controller()->RunFromSnapshot(snapshot.data(),
+                                               snapshot.size());
 }
 
 void RuntimeHolder::ScheduleFrame() {
@@ -87,6 +99,30 @@ void RuntimeHolder::Render(std::unique_ptr<flow::LayerTree> layer_tree) {
         self->OnFrameComplete();
     });
   }));
+}
+
+void RuntimeHolder::DidCreateMainIsolate(Dart_Isolate isolate) {
+  blink::MojoServices::Create(isolate, nullptr, nullptr,
+                              std::move(root_bundle_));
+}
+
+void RuntimeHolder::InitRootBundle(std::vector<char> bundle) {
+  root_bundle_data_ = std::move(bundle);
+  asset_store_ = ftl::MakeRefCounted<blink::ZipAssetStore>(
+      GetUnzipperProviderForRootBundle(), blink::Threads::IO());
+  new blink::ZipAssetBundle(mojo::GetProxy(&root_bundle_), asset_store_);
+}
+
+blink::UnzipperProvider RuntimeHolder::GetUnzipperProviderForRootBundle() {
+  return [self = GetWeakPtr()]() {
+    if (!self)
+      return zip::UniqueUnzipper();
+    // TODO(abarth): The lifetimes aren't quite right here. The unzipper we
+    // create here might be passed off to an UnzipJob that runs on a background
+    // thread. The UnzipJob might outlive this object and be referencing a dead
+    // root_bundle_data_.
+    return zip::CreateUnzipper(&self->root_bundle_data_);
+  };
 }
 
 void RuntimeHolder::DidCreateFramebuffer(

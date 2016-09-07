@@ -293,9 +293,9 @@ void Engine::DidCreateMainIsolate(Dart_Isolate isolate) {
   service_provider_bindings_.AddBinding(
       &service_provider_impl_, mojo::GetProxy(&services_from_embedder));
 
-  blink::MojoServices::Create(isolate, services_.Pass(),
-                              services_from_embedder.Pass(),
-                              root_bundle_.Pass());
+  blink::MojoServices::Create(isolate, std::move(services_),
+                              std::move(services_from_embedder),
+                              std::move(root_bundle_));
 
   if (asset_store_)
     FlutterFontSelector::Install(asset_store_);

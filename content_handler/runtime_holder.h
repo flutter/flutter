@@ -5,6 +5,8 @@
 #ifndef FLUTTER_CONTENT_HANDLER_RUNTIME_HOLDER_H_
 #define FLUTTER_CONTENT_HANDLER_RUNTIME_HOLDER_H_
 
+#include "flutter/assets/unzipper_provider.h"
+#include "flutter/assets/zip_asset_store.h"
 #include "flutter/flow/layers/layer_tree.h"
 #include "flutter/runtime/runtime_controller.h"
 #include "flutter/runtime/runtime_delegate.h"
@@ -13,6 +15,7 @@
 #include "lib/ftl/macros.h"
 #include "lib/ftl/memory/weak_ptr.h"
 #include "mojo/public/interfaces/application/application_connector.mojom.h"
+#include "mojo/services/asset_bundle/interfaces/asset_bundle.mojom.h"
 #include "mojo/services/framebuffer/interfaces/framebuffer.mojom.h"
 
 namespace flutter_content_handler {
@@ -24,14 +27,18 @@ class RuntimeHolder : public blink::RuntimeDelegate {
   ~RuntimeHolder();
 
   void Init(mojo::ApplicationConnectorPtr connector);
-  void Run(const std::string& script_uri, std::vector<char> snapshot);
+  void Run(const std::string& script_uri, std::vector<char> bundle);
 
  private:
   // |blink::RuntimeDelegate| implementation:
   void ScheduleFrame() override;
   void Render(std::unique_ptr<flow::LayerTree> layer_tree) override;
+  void DidCreateMainIsolate(Dart_Isolate isolate) override;
 
   ftl::WeakPtr<RuntimeHolder> GetWeakPtr();
+
+  void InitRootBundle(std::vector<char> bundle);
+  blink::UnzipperProvider GetUnzipperProviderForRootBundle();
 
   void DidCreateFramebuffer(
       mojo::InterfaceHandle<mojo::Framebuffer> framebuffer,
@@ -40,6 +47,10 @@ class RuntimeHolder : public blink::RuntimeDelegate {
   void ScheduleDelayedFrame();
   void BeginFrame();
   void OnFrameComplete();
+
+  std::vector<char> root_bundle_data_;
+  ftl::RefPtr<blink::ZipAssetStore> asset_store_;
+  mojo::asset_bundle::AssetBundlePtr root_bundle_;
 
   mojo::FramebufferProviderPtr framebuffer_provider_;
   std::unique_ptr<Rasterizer> rasterizer_;

@@ -39,7 +39,7 @@ class ApplicationImpl : public mojo::Application {
   mojo::StrongBinding<mojo::Application> binding_;
   std::unique_ptr<glue::DrainDataPipeJob> drainer_;
 
-  std::vector<char> snapshot_;
+  std::vector<char> bundle_;
   mojo::ShellPtr shell_;
   std::string url_;
 
