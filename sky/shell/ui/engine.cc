@@ -335,14 +335,16 @@ void Engine::ScheduleFrame() {
 void Engine::Render(std::unique_ptr<flow::LayerTree> layer_tree) {
   if (!layer_tree)
     return;
-  if (viewport_metrics_) {
-    layer_tree->set_scene_version(viewport_metrics_->scene_version);
-    layer_tree->set_frame_size(SkISize::Make(
-        viewport_metrics_->physical_width, viewport_metrics_->physical_height));
-  } else {
-    layer_tree->set_scene_version(0);
-    layer_tree->set_frame_size(SkISize::Make(0, 0));
-  }
+  if (!viewport_metrics_)
+    return;
+
+  SkISize frame_size = SkISize::Make(
+      viewport_metrics_->physical_width, viewport_metrics_->physical_height);
+  if (frame_size.isEmpty())
+    return;
+
+  layer_tree->set_scene_version(viewport_metrics_->scene_version);
+  layer_tree->set_frame_size(frame_size);
   animator_->Render(std::move(layer_tree));
 }
 
