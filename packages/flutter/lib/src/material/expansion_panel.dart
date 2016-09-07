@@ -24,7 +24,7 @@ typedef void ExpansionPanelCallback(int panelIndex, bool isExpanded);
 /// [ExpansionPanel] needs to rebuild.
 typedef Widget ExpansionPanelHeaderBuilder(BuildContext context, bool isExpanded);
 
-/// A Material expansion panel. It has a header and a body and can be either
+/// A material expansion panel. It has a header and a body and can be either
 /// expanded or collapsed. The body of the panel is only visible when it is
 /// expanded.
 ///
@@ -63,7 +63,7 @@ class ExpansionPanel {
   final bool isExpanded;
 }
 
-/// A Material expansion panel list that lays out its children and animates
+/// A material expansion panel list that lays out its children and animates
 /// expansions.
 ///
 /// See also:
