@@ -57,6 +57,9 @@ deps = {
   'src/lib/tonic':
    Var('fuchsia_git') + '/tonic' + '@' + 'c20972bdaee4c0ad19b062cea8d945b1b22c8c6b',
 
+  'src/lib/zip':
+   Var('fuchsia_git') + '/zip' + '@' + '10bf6fd40feb2f8b18f9bc0abdc03f3cc06d4f37',
+
   'src/mojo/public':
    Var('fuchsia_git') + '/mojo/public' + '@' + Var('mojo_sdk_revision'),
 

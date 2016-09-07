@@ -6,10 +6,10 @@
 
 #include <utility>
 
-#include "apps/dart_content_handler/zip/unzipper.h"
 #include "flutter/content_handler/runtime_holder.h"
 #include "lib/ftl/logging.h"
 #include "lib/mtl/data_pipe/vector.h"
+#include "lib/zip/unzipper.h"
 #include "mojo/public/cpp/application/connect.h"
 
 namespace flutter_content_handler {

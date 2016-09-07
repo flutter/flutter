@@ -32,6 +32,7 @@ executable("content_handler") {
     "//flutter/services/pointer:interfaces",
     "//lib/ftl",
     "//lib/mtl",
+    "//lib/zip",
     "//mojo/public/cpp/application",
     "//mojo/public/cpp/bindings",
     "//mojo/public/cpp/system",
@@ -41,9 +42,6 @@ executable("content_handler") {
     "//mojo/services/framebuffer/interfaces",
     "//mojo/system",
     "//third_party/skia",
-
-    # TODO(abarth): Move this zip library more sensible for re-use.
-    "//apps/dart_content_handler/zip",
 
     # TODO(abarth): We shouldn't need to depend on libdart_builtin but we fail
     # to link otherwise.
