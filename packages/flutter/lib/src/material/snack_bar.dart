@@ -152,7 +152,7 @@ class SnackBar extends StatelessWidget {
     if (action != null)
       children.add(action);
     CurvedAnimation heightAnimation = new CurvedAnimation(parent: animation, curve: _snackBarHeightCurve);
-    CurvedAnimation fadeAnimation = new CurvedAnimation(parent: animation, curve: _snackBarFadeCurve, reverseCurve: const Step(0.0));
+    CurvedAnimation fadeAnimation = new CurvedAnimation(parent: animation, curve: _snackBarFadeCurve, reverseCurve: const Threshold(0.0));
     ThemeData theme = Theme.of(context);
     return new ClipRect(
       child: new AnimatedBuilder(

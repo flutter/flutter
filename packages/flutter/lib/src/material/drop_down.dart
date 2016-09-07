@@ -125,7 +125,7 @@ class _DropDownMenuState<T> extends State<_DropDownMenu<T>> {
     _resize = new CurvedAnimation(
       parent: config.route.animation,
       curve: const Interval(0.25, 0.5),
-      reverseCurve: const Step(0.0)
+      reverseCurve: const Threshold(0.0)
     );
   }
 
@@ -145,7 +145,7 @@ class _DropDownMenuState<T> extends State<_DropDownMenu<T>> {
     for (int itemIndex = 0; itemIndex < route.items.length; ++itemIndex) {
       CurvedAnimation opacity;
       if (itemIndex == route.selectedIndex) {
-        opacity = new CurvedAnimation(parent: route.animation, curve: const Step(0.0));
+        opacity = new CurvedAnimation(parent: route.animation, curve: const Threshold(0.0));
       } else {
         final double start = (0.5 + (itemIndex + 1) * unit).clamp(0.0, 1.0);
         final double end = (start + 1.5 * unit).clamp(0.0, 1.0);
