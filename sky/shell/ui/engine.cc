@@ -9,6 +9,7 @@
 #include <utility>
 
 #include "flutter/assets/directory_asset_bundle.h"
+#include "flutter/assets/unzipper_provider.h"
 #include "flutter/assets/zip_asset_bundle.h"
 #include "flutter/common/threads.h"
 #include "flutter/glue/movable_wrapper.h"
@@ -204,8 +205,8 @@ void Engine::ConfigureAssetBundle(const std::string& path) {
 
   if (S_ISREG(stat_result.st_mode)) {
     // Zip asset bundle.
-    asset_store_ =
-        ftl::MakeRefCounted<blink::ZipAssetStore>(path, blink::Threads::IO());
+    asset_store_ = ftl::MakeRefCounted<blink::ZipAssetStore>(
+        blink::GetUnzipperProviderForPath(path), blink::Threads::IO());
     new blink::ZipAssetBundle(mojo::GetProxy(&root_bundle_), asset_store_);
     return;
   }

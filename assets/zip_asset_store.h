@@ -8,6 +8,7 @@
 #include <map>
 #include <vector>
 
+#include "flutter/assets/unzipper_provider.h"
 #include "lib/ftl/macros.h"
 #include "lib/ftl/memory/ref_counted.h"
 #include "lib/ftl/tasks/task_runner.h"
@@ -17,7 +18,8 @@ namespace blink {
 
 class ZipAssetStore : public ftl::RefCountedThreadSafe<ZipAssetStore> {
  public:
-  ZipAssetStore(std::string zip_path, ftl::RefPtr<ftl::TaskRunner> task_runner);
+  ZipAssetStore(UnzipperProvider unzipper_provider,
+                ftl::RefPtr<ftl::TaskRunner> task_runner);
   ~ZipAssetStore();
 
   // Serve this asset from another file instead of using the ZIP contents.
@@ -28,7 +30,7 @@ class ZipAssetStore : public ftl::RefCountedThreadSafe<ZipAssetStore> {
   bool GetAsBuffer(const std::string& asset_name, std::vector<uint8_t>* data);
 
  private:
-  const std::string zip_path_;
+  UnzipperProvider unzipper_provider_;
   ftl::RefPtr<ftl::TaskRunner> task_runner_;
   std::map<std::string, std::string> overlay_files_;
 

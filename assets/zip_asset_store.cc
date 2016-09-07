@@ -9,18 +9,19 @@
 
 #include <utility>
 
-#include "flutter/assets/unique_unzipper.h"
 #include "flutter/assets/unzip_job.h"
 #include "flutter/glue/data_pipe_utils.h"
 #include "lib/ftl/files/eintr_wrapper.h"
 #include "lib/ftl/files/unique_fd.h"
+#include "lib/zip/unique_unzipper.h"
 #include "third_party/zlib/contrib/minizip/unzip.h"
 
 namespace blink {
 
-ZipAssetStore::ZipAssetStore(std::string zip_path,
+ZipAssetStore::ZipAssetStore(UnzipperProvider unzipper_provider,
                              ftl::RefPtr<ftl::TaskRunner> task_runner)
-    : zip_path_(std::move(zip_path)), task_runner_(std::move(task_runner)) {}
+    : unzipper_provider_(std::move(unzipper_provider)),
+      task_runner_(std::move(task_runner)) {}
 
 ZipAssetStore::~ZipAssetStore() {}
 
@@ -40,32 +41,34 @@ void ZipAssetStore::GetAsStream(const std::string& asset_name,
     glue::CopyFromFileDescriptor(std::move(fd), std::move(producer),
                                  task_runner_.get(), [](bool ignored) {});
   } else {
-    new UnzipJob(zip_path_, asset_name, std::move(producer), task_runner_);
+    zip::UniqueUnzipper unzipper = unzipper_provider_();
+    if (!unzipper.is_valid())
+      return;
+    new UnzipJob(std::move(unzipper), asset_name, std::move(producer),
+                 task_runner_);
   }
 }
 
 bool ZipAssetStore::GetAsBuffer(const std::string& asset_name,
                                 std::vector<uint8_t>* data) {
-  UniqueUnzipper zip_file(unzOpen2(zip_path_.c_str(), nullptr));
-  if (!zip_file.is_valid()) {
-    FTL_LOG(ERROR) << "Unable to open ZIP file: " << zip_path_;
+  zip::UniqueUnzipper unzipper = unzipper_provider_();
+  if (!unzipper.is_valid())
     return false;
-  }
 
-  int result = unzLocateFile(zip_file.get(), asset_name.c_str(), 0);
+  int result = unzLocateFile(unzipper.get(), asset_name.c_str(), 0);
   if (result != UNZ_OK) {
     return false;
   }
 
   unz_file_info file_info;
-  result = unzGetCurrentFileInfo(zip_file.get(), &file_info, nullptr, 0,
+  result = unzGetCurrentFileInfo(unzipper.get(), &file_info, nullptr, 0,
                                  nullptr, 0, nullptr, 0);
   if (result != UNZ_OK) {
     FTL_LOG(WARNING) << "unzGetCurrentFileInfo failed, error=" << result;
     return false;
   }
 
-  result = unzOpenCurrentFile(zip_file.get());
+  result = unzOpenCurrentFile(unzipper.get());
   if (result != UNZ_OK) {
     FTL_LOG(WARNING) << "unzOpenCurrentFile failed, error=" << result;
     return false;
@@ -75,7 +78,7 @@ bool ZipAssetStore::GetAsBuffer(const std::string& asset_name,
   int total_read = 0;
   while (total_read < static_cast<int>(data->size())) {
     int bytes_read = unzReadCurrentFile(
-        zip_file.get(), data->data() + total_read, data->size() - total_read);
+        unzipper.get(), data->data() + total_read, data->size() - total_read);
     if (bytes_read <= 0)
       return false;
     total_read += bytes_read;
