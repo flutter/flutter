@@ -177,7 +177,7 @@ abstract class NavigationGestureController {
   void dragUpdate(double fractionalDelta);
 
   // The drag gesture has ended with a horizontal motion of
-  // [fractionalVelocity] as a percentage of screen width per second.
+  // [fractionalVelocity] as a fraction of screen width per second.
   void dragEnd(double fractionalVelocity);
 
   @protected
