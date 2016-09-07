@@ -112,11 +112,11 @@ class Interval extends Curve {
 }
 
 /// A curve that is 0.0 until it hits the threshold, then it jumps to 1.0.
-class Step extends Curve {
-  /// Creates a step cruve.
+class Threshold extends Curve {
+  /// Creates a threshold curve.
   ///
   /// The [threshold] argument must not be null.
-  const Step(this.threshold);
+  const Threshold(this.threshold);
 
   /// The value before which the curve is 0.0 and after which the curve is 1.0.
   ///
