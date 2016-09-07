@@ -218,7 +218,7 @@ class AnalyzeCommand extends FlutterCommand {
     options.dartSdkPath = argResults['dart-sdk'];
     options.packageMap = packages;
     options.analysisOptionsFile = flutterRepo
-      ? path.join(Cache.flutterRoot, '.analysis_options')
+      ? path.join(Cache.flutterRoot, '.analysis_options_flutter_analyze')
       : path.join(Cache.flutterRoot, 'packages', 'flutter_tools', 'flutter_analysis_options');
     AnalysisDriver analyzer = new AnalysisDriver(options);
 
@@ -258,14 +258,14 @@ class AnalyzeCommand extends FlutterCommand {
       _writeBenchmark(stopwatch, errorCount, membersMissingDocumentation);
 
     if (errorCount > 0) {
-      if (membersMissingDocumentation > 0 && argResults['flutter-repo'])
+      if (membersMissingDocumentation > 0 && flutterRepo)
         printError('[lint] $membersMissingDocumentation public ${ membersMissingDocumentation == 1 ? "member lacks" : "members lack" } documentation (ran in ${elapsed}s)');
       else
         print('(Ran in ${elapsed}s)');
       return 1; // we consider any level of error to be an error exit (we don't report different levels)
     }
     if (argResults['congratulate']) {
-      if (membersMissingDocumentation > 0 && argResults['flutter-repo']) {
+      if (membersMissingDocumentation > 0 && flutterRepo) {
         printStatus('No analyzer warnings! (ran in ${elapsed}s; $membersMissingDocumentation public ${ membersMissingDocumentation == 1 ? "member lacks" : "members lack" } documentation)');
       } else {
         printStatus('No analyzer warnings! (ran in ${elapsed}s)');

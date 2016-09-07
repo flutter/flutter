@@ -1,9 +1,10 @@
 # Specify analysis options.
 
-# This file contains the analysis options used by Flutter editors, such as Atom.
-# It is very similar to .analysis_options_flutter_analyze;
+# This file contains the analysis options used by 'flutter analyze'.
+# It is very similar to .analysis_options;
 # the only difference (currently) is the public_member_api_docs option,
-# which triggers too many messages to be used in editors.
+# which is turned on and programmatically reduced to a single output line
+# indicating the # of violations for that rule.
 
 analyzer:
   language:
@@ -58,7 +59,7 @@ linter:
     - package_api_docs
     - package_prefixed_library_names
     - prefer_is_not_empty
-    # - public_member_api_docs
+    - public_member_api_docs
     - slash_for_doc_comments
     - sort_constructors_first
     - sort_unnamed_constructors_first
