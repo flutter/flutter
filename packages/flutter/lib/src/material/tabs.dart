@@ -7,6 +7,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 import 'package:meta/meta.dart';
 
@@ -968,11 +969,18 @@ class _TabBarState<T> extends ScrollableState<TabBar<T>> implements TabBarSelect
   }
 
   void _layoutChanged(Size tabBarSize, List<double> tabWidths) {
-    setState(() {
-      _tabBarSize = tabBarSize;
-      _tabWidths = tabWidths;
-      _indicatorRect = _selection != null ? _tabIndicatorRect(_selection.index) : Rect.zero;
-      _updateScrollBehavior();
+    // This is bad. We should use a LayoutBuilder or CustomMultiChildLayout or some such.
+    // As designed today, tabs are always lagging one frame behind, taking two frames
+    // to handle a layout change.
+    _tabBarSize = tabBarSize;
+    _tabWidths = tabWidths;
+    _indicatorRect = _selection != null ? _tabIndicatorRect(_selection.index) : Rect.zero;
+    _updateScrollBehavior();
+    SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
+      setState(() {
+        // the changes were made at layout time
+        // TODO(ianh): remove this setState: https://github.com/flutter/flutter/issues/5749
+      });
     });
   }
 

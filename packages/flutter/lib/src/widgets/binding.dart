@@ -10,6 +10,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
+import 'package:meta/meta.dart';
 
 import 'app.dart';
 import 'framework.dart';
@@ -191,15 +192,41 @@ abstract class WidgetsBinding extends BindingBase implements GestureBinding, Ren
   }
 
   void _handleBuildScheduled() {
-    // If we're in the process of building dirty elements, we're know that any
-    // builds that are scheduled will be run this frame, which means we don't
-    // need to schedule another frame.
-    if (_buildingDirtyElements)
-      return;
+    // If we're in the process of building dirty elements, then changes
+    // should not trigger a new frame.
+    assert(() {
+      if (debugBuildingDirtyElements) {
+        throw new FlutterError(
+          'Build scheduled during frame.\n'
+          'While the widget tree was being built, laid out, and painted, '
+          'a new frame was scheduled to rebuild the widget tree. '
+          'This might be because setState() was called from a layout or '
+          'paint callback. '
+          'If a change is needed to the widget tree, it should be applied '
+          'as the tree is being built. Scheduling a change for the subsequent '
+          'frame instead results in an interface that lags behind by one frame. '
+          'If this was done to make your build dependent on a size measured at '
+          'layout time, consider using a LayoutBuilder, CustomSingleChildLayout, '
+          'or CustomMultiChildLayout. If, on the other hand, the one frame delay '
+          'is the desired effect, for example because this is an '
+          'animation, consider scheduling the frame in a post-frame callback '
+          'using SchedulerBinding.addPostFrameCallback or '
+          'using an AnimationController to trigger the animation.'
+        );
+      }
+      return true;
+    });
     scheduleFrame();
   }
 
-  bool _buildingDirtyElements = false;
+  /// Whether we are currently in a frame. This is used to verify
+  /// that frames are not scheduled redundantly.
+  ///
+  /// This is public so that test frameworks can change it.
+  ///
+  /// This flag is not used in release builds.
+  @protected
+  bool debugBuildingDirtyElements = false;
 
   /// Pump the build and rendering pipeline to generate a frame.
   ///
@@ -260,12 +287,21 @@ abstract class WidgetsBinding extends BindingBase implements GestureBinding, Ren
   // When editing the above, also update rendering/binding.dart's copy.
   @override
   void beginFrame() {
-    assert(!_buildingDirtyElements);
-    _buildingDirtyElements = true;
-    buildOwner.buildDirtyElements();
-    _buildingDirtyElements = false;
-    super.beginFrame();
-    buildOwner.finalizeTree();
+    assert(!debugBuildingDirtyElements);
+    assert(() {
+      debugBuildingDirtyElements = true;
+      return true;
+    });
+    try {
+      buildOwner.buildScope(renderViewElement);
+      super.beginFrame();
+      buildOwner.finalizeTree();
+    } finally {
+      assert(() {
+        debugBuildingDirtyElements = false;
+        return true;
+      });
+    }
     // TODO(ianh): Following code should not be included in release mode, only profile and debug modes.
     // See https://github.com/dart-lang/sdk/issues/27192
     if (_needToReportFirstFrame) {
@@ -291,7 +327,17 @@ abstract class WidgetsBinding extends BindingBase implements GestureBinding, Ren
       debugShortDescription: '[root]',
       child: app
     ).attachToRenderTree(buildOwner, renderViewElement);
+    assert(() {
+      if (debugPrintBeginFrameBanner)
+        debugPrint('━━━━━━━┫ Begin Warm-Up Frame ┣━━━━━━━');
+      return true;
+    });
     beginFrame();
+    assert(() {
+      if (debugPrintEndFrameBanner)
+        debugPrint('━━━━━━━┫ End of Warm-Up Frame ┣━━━━━━━');
+      return true;
+    });
   }
 
   @override
@@ -364,15 +410,20 @@ class RenderObjectToWidgetAdapter<T extends RenderObject> extends RenderObjectWi
   ///
   /// Used by [runApp] to bootstrap applications.
   RenderObjectToWidgetElement<T> attachToRenderTree(BuildOwner owner, [RenderObjectToWidgetElement<T> element]) {
-    owner.lockState(() {
-      if (element == null) {
+    if (element == null) {
+      owner.lockState(() {
         element = createElement();
+        assert(element != null);
         element.assignOwner(owner);
+      });
+      owner.buildScope(element, () {
         element.mount(null, null);
-      } else {
+      });
+    } else {
+      owner.buildScope(element, () {
         element.update(this);
-      }
-    }, building: true);
+      });
+    }
     return element;
   }
 

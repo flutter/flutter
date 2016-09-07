@@ -38,7 +38,7 @@ class OffscreenWidgetTree {
   }
 
   void pumpFrame() {
-    buildOwner.buildDirtyElements();
+    buildOwner.buildScope(root);
     pipelineOwner.flushLayout();
     pipelineOwner.flushCompositingBits();
     pipelineOwner.flushPaint();

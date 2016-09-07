@@ -30,7 +30,7 @@ Future<Null> main() async {
     watch.start();
     while (watch.elapsed < kBenchmarkTime) {
       appState.markNeedsBuild();
-      buildOwner.buildDirtyElements();
+      buildOwner.buildScope(WidgetsBinding.instance.renderViewElement);
       iterations += 1;
     }
     watch.stop();

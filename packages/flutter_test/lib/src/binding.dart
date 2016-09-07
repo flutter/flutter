@@ -22,9 +22,12 @@ import 'stack_manipulation.dart';
 
 /// Phases that can be reached by [WidgetTester.pumpWidget] and
 /// [TestWidgetsFlutterBinding.pump].
+///
+/// See [WidgetsBinding.beginFrame] for a more detailed description of some of
+/// these phases.
 // TODO(ianh): Merge with near-identical code in the rendering test code.
 enum EnginePhase {
-  /// The build phase in the widgets library. See [BuildOwner.buildDirtyElements].
+  /// The build phase in the widgets library. See [BuildOwner.buildScope].
   build,
 
   /// The layout phase in the rendering library. See [PipelineOwner.flushLayout].
@@ -396,6 +399,9 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
 ///
 /// This binding controls time, allowing tests to verify long
 /// animation sequences without having to execute them in real time.
+///
+/// This class assumes it is always run in checked mode (since tests are always
+/// run in checked mode).
 class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   @override
   void initInstances() {
@@ -447,26 +453,31 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   @override
   void beginFrame() {
     assert(inTest);
-    buildOwner.buildDirtyElements();
-    if (_phase == EnginePhase.build)
-      return;
-    assert(renderView != null);
-    pipelineOwner.flushLayout();
-    if (_phase == EnginePhase.layout)
-      return;
-    pipelineOwner.flushCompositingBits();
-    if (_phase == EnginePhase.compositingBits)
-      return;
-    pipelineOwner.flushPaint();
-    if (_phase == EnginePhase.paint)
-      return;
-    renderView.compositeFrame(); // this sends the bits to the GPU
-    if (_phase == EnginePhase.composite)
-      return;
-    pipelineOwner.flushSemantics();
-    if (_phase == EnginePhase.flushSemantics)
-      return;
-    buildOwner.finalizeTree();
+    try {
+      debugBuildingDirtyElements = true;
+      buildOwner.buildScope(renderViewElement);
+      if (_phase == EnginePhase.build)
+        return;
+      assert(renderView != null);
+      pipelineOwner.flushLayout();
+      if (_phase == EnginePhase.layout)
+        return;
+      pipelineOwner.flushCompositingBits();
+      if (_phase == EnginePhase.compositingBits)
+        return;
+      pipelineOwner.flushPaint();
+      if (_phase == EnginePhase.paint)
+        return;
+      renderView.compositeFrame(); // this sends the bits to the GPU
+      if (_phase == EnginePhase.composite)
+        return;
+      pipelineOwner.flushSemantics();
+      if (_phase == EnginePhase.flushSemantics)
+        return;
+    } finally {
+      buildOwner.finalizeTree();
+      debugBuildingDirtyElements = false;
+    }
   }
 
   @override
