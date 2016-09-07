@@ -176,8 +176,9 @@ abstract class NavigationGestureController {
   // drag should be 0.0 to 1.0.
   void dragUpdate(double fractionalDelta);
 
-  // The drag gesture has ended.
-  void dragEnd();
+  // The drag gesture has ended with a horizontal motion of
+  // [fractionalVelocity] as a percentage of screen width per second.
+  void dragEnd(double fractionalVelocity);
 
   @protected
   NavigatorState get navigator => _navigator;
