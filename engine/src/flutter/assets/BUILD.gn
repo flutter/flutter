@@ -6,10 +6,10 @@ source_set("assets") {
   sources = [
     "directory_asset_bundle.cc",
     "directory_asset_bundle.h",
-    "unique_unzipper.cc",
-    "unique_unzipper.h",
     "unzip_job.cc",
     "unzip_job.h",
+    "unzipper_provider.cc",
+    "unzipper_provider.h",
     "zip_asset_bundle.cc",
     "zip_asset_bundle.h",
     "zip_asset_store.cc",
@@ -19,6 +19,7 @@ source_set("assets") {
   deps = [
     "//flutter/glue",
     "//lib/ftl",
+    "//lib/zip",
     "//mojo/public/cpp/bindings:callback",
     "//mojo/public/cpp/system",
     "//mojo/public/cpp/bindings:utility",

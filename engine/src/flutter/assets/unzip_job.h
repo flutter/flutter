@@ -8,10 +8,10 @@
 #include <map>
 #include <vector>
 
-#include "flutter/assets/unique_unzipper.h"
 #include "lib/ftl/macros.h"
 #include "lib/ftl/memory/ref_counted.h"
 #include "lib/ftl/tasks/task_runner.h"
+#include "lib/zip/unique_unzipper.h"
 #include "mojo/public/cpp/environment/async_waiter.h"
 #include "mojo/services/asset_bundle/interfaces/asset_bundle.mojom.h"
 
@@ -19,7 +19,7 @@ namespace blink {
 
 class UnzipJob {
  public:
-  UnzipJob(std::string zip_path,
+  UnzipJob(zip::UniqueUnzipper unzipper,
            std::string asset_name,
            mojo::ScopedDataPipeProducerHandle producer,
            ftl::RefPtr<ftl::TaskRunner> task_runner);
@@ -30,11 +30,10 @@ class UnzipJob {
   void OnHandleReady(MojoResult result);
   static void WaitComplete(void* context, MojoResult result);
 
-  const std::string zip_path_;
+  zip::UniqueUnzipper unzipper_;
   const std::string asset_name_;
   mojo::ScopedDataPipeProducerHandle producer_;
   ftl::RefPtr<ftl::TaskRunner> task_runner_;
-  UniqueUnzipper zip_file_;
 
   const MojoAsyncWaiter* waiter_;
   MojoAsyncWaitID wait_id_;

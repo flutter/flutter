@@ -19,6 +19,7 @@
 
 #include "dart/runtime/bin/embedded_dart_io.h"
 #include "dart/runtime/include/dart_mirrors_api.h"
+#include "flutter/assets/unzipper_provider.h"
 #include "flutter/assets/zip_asset_store.h"
 #include "flutter/common/settings.h"
 #include "flutter/glue/trace_event.h"
@@ -247,8 +248,9 @@ Dart_Isolate IsolateCreateCallback(const char* script_uri,
     FTL_CHECK(uri.find(kFileUriPrefix) == 0u);
     std::string bundle_path(script_uri + strlen(kFileUriPrefix));
     ftl::RefPtr<ZipAssetStore> zip_asset_store =
-        ftl::MakeRefCounted<ZipAssetStore>(std::move(bundle_path),
-                                           ftl::RefPtr<ftl::TaskRunner>());
+        ftl::MakeRefCounted<ZipAssetStore>(
+            GetUnzipperProviderForPath(std::move(bundle_path)),
+            ftl::RefPtr<ftl::TaskRunner>());
     FTL_CHECK(zip_asset_store->GetAsBuffer(kSnapshotAssetKey, &snapshot_data));
   }
 

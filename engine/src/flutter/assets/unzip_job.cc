@@ -11,31 +11,24 @@
 
 namespace blink {
 
-UnzipJob::UnzipJob(std::string zip_path,
+UnzipJob::UnzipJob(zip::UniqueUnzipper unzipper,
                    std::string asset_name,
                    mojo::ScopedDataPipeProducerHandle producer,
                    ftl::RefPtr<ftl::TaskRunner> task_runner)
-    : zip_path_(std::move(zip_path)),
+    : unzipper_(std::move(unzipper)),
       asset_name_(std::move(asset_name)),
       producer_(std::move(producer)),
       task_runner_(std::move(task_runner)),
       waiter_(mojo::Environment::GetDefaultAsyncWaiter()),
       wait_id_(0) {
+  FTL_DCHECK(unzipper_.is_valid());
   task_runner_->PostTask([this]() { Start(); });
 }
 
 UnzipJob::~UnzipJob() {}
 
 void UnzipJob::Start() {
-  zip_file_.reset(unzOpen2(zip_path_.c_str(), nullptr));
-
-  if (!zip_file_.is_valid()) {
-    FTL_LOG(ERROR) << "Unable to open ZIP file: " << zip_path_;
-    delete this;
-    return;
-  }
-
-  int result = unzLocateFile(zip_file_.get(), asset_name_.c_str(), 0);
+  int result = unzLocateFile(unzipper_.get(), asset_name_.c_str(), 0);
   if (result != UNZ_OK) {
     FTL_LOG(WARNING) << "Requested asset '" << asset_name_
                      << "' does not exist.";
@@ -43,7 +36,7 @@ void UnzipJob::Start() {
     return;
   }
 
-  result = unzOpenCurrentFile(zip_file_.get());
+  result = unzOpenCurrentFile(unzipper_.get());
   if (result != UNZ_OK) {
     FTL_LOG(WARNING) << "unzOpenCurrentFile failed, error=" << result;
     delete this;
@@ -61,7 +54,7 @@ void UnzipJob::OnHandleReady(MojoResult result) {
                                      MOJO_WRITE_DATA_FLAG_NONE);
     if (result == MOJO_RESULT_OK) {
       FTL_DCHECK(size < static_cast<uint32_t>(std::numeric_limits<int>::max()));
-      ssize_t bytes_read = unzReadCurrentFile(zip_file_.get(), buffer, size);
+      ssize_t bytes_read = unzReadCurrentFile(unzipper_.get(), buffer, size);
       result = mojo::EndWriteDataRaw(producer_.get(),
                                      std::max<ssize_t>(0l, bytes_read));
       if (bytes_read < 0) {
