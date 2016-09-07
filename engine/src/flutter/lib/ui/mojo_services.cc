@@ -81,18 +81,19 @@ void MojoServices::Create(Dart_Isolate isolate,
                           mojo::ServiceProviderPtr incoming_services,
                           mojo::asset_bundle::AssetBundlePtr root_bundle) {
   UIDartState* state = static_cast<UIDartState*>(DartState::From(isolate));
-  state->set_mojo_services(std::unique_ptr<MojoServices>(new MojoServices(
-      services.Pass(), incoming_services.Pass(), root_bundle.Pass())));
+  state->set_mojo_services(std::unique_ptr<MojoServices>(
+      new MojoServices(std::move(services), std::move(incoming_services),
+                       std::move(root_bundle))));
 }
 
 MojoServices::MojoServices(sky::ServicesDataPtr services,
                            mojo::ServiceProviderPtr incoming_services,
                            mojo::asset_bundle::AssetBundlePtr root_bundle)
-    : services_(services.Pass()),
-      root_bundle_(root_bundle.Pass()),
-      incoming_services_(incoming_services.Pass()) {
+    : services_(std::move(services)),
+      root_bundle_(std::move(root_bundle)),
+      incoming_services_(std::move(incoming_services)) {
   if (services_ && services_->outgoing_services.is_pending()) {
-    outgoing_services_ = services_->outgoing_services.Pass();
+    outgoing_services_ = std::move(services_->outgoing_services);
   } else {
     outgoing_services_ = GetProxy(&services_from_dart_);
   }
