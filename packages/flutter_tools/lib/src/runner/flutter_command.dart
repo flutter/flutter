@@ -141,7 +141,7 @@ abstract class FlutterCommand extends Command {
             "matching '${deviceManager.specifiedDeviceId}'");
         return 1;
       } else if (devices.isEmpty) {
-        printStatus('No connected devices.');
+        printNoConnectedDevices();
         return 1;
       }
 
@@ -190,6 +190,10 @@ abstract class FlutterCommand extends Command {
       flutterUsage.sendCommand(usagePath);
 
     return await runInProject();
+  }
+
+  void printNoConnectedDevices() {
+    printStatus('No connected devices.');
   }
 
   // This is a field so that you can modify the value for testing.
