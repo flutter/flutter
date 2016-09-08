@@ -220,6 +220,9 @@ config("skia_library_config") {
     cflags = [
       # Skia uses routines deprecated in iOS 7 and above
       "-Wno-deprecated-declarations",
+      # Clang incorrectly defines this even though the crc32 instruction is
+      # unavailable https://github.com/lionheart/openradar-mirror/issues/7653
+      "-U__ARM_FEATURE_CRC32",
     ]
 
     libs = [ "ImageIO.framework" ]
