@@ -13,6 +13,7 @@ import '../cache.dart';
 import '../device.dart';
 import '../globals.dart';
 import '../hot.dart';
+import '../ios/mac.dart';
 import '../vmservice.dart';
 import '../resident_runner.dart';
 import '../run.dart';
@@ -96,6 +97,18 @@ class RunCommand extends RunCommandBase {
 
     // Return 'run/ios'.
     return '$command/${getNameForTargetPlatform(device.platform)}';
+  }
+
+  @override
+  void printNoConnectedDevices() {
+    super.printNoConnectedDevices();
+    if (getCurrentHostPlatform() == HostPlatform.darwin_x64 &&
+        XCode.instance.isInstalledAndMeetsVersionCheck) {
+      printStatus('');
+      printStatus('To run on a simulator, launch it first:');
+      printStatus('open -a Simulator.app');
+      printStatus('');
+    }
   }
 
   @override
