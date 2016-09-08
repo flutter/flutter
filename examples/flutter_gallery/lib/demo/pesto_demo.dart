@@ -327,7 +327,7 @@ class _RecipePageState extends State<RecipePage> {
       scrollableKey: _scrollableKey,
       appBarBehavior: AppBarBehavior.scroll,
       appBar: new AppBar(
-        heroTag: 'nohero',
+        heroTag: null,
         expandedHeight: _getAppBarHeight(context),
         backgroundColor: Colors.transparent,
         elevation: 0,
