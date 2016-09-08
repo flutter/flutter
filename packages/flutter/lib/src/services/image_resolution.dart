@@ -144,7 +144,7 @@ class AssetImage extends AssetBundleImageProvider {
     // TODO(ianh): JSON decoding really shouldn't be on the main thread.
     final Map<dynamic, dynamic> parsedManifest = JSON.decode(json);
     // TODO(ianh): convert that data structure to the right types.
-    return new SynchronousFuture<Map<dynamic, dynamic>>(parsedManifest); // ignore: return_of_invalid_type, #5771
+    return new SynchronousFuture<Map<dynamic, dynamic>>(parsedManifest); // ignore: return_of_invalid_type, https://github.com/flutter/flutter/issues/5771
   }
 
   String _chooseVariant(String main, ImageConfiguration config, List<String> candidates) {
