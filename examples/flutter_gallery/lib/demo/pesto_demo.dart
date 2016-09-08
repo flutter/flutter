@@ -327,6 +327,7 @@ class _RecipePageState extends State<RecipePage> {
       scrollableKey: _scrollableKey,
       appBarBehavior: AppBarBehavior.scroll,
       appBar: new AppBar(
+        heroTag: 'nohero',
         expandedHeight: _getAppBarHeight(context),
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -346,9 +347,6 @@ class _RecipePageState extends State<RecipePage> {
             ]
           )
         ],
-        // This empty space keeps the app bar from moving until the screen is
-        // scrolled at least _getAppBarHeight().
-        flexibleSpace: new Container()
       ),
       body: _buildContainer(context)
     );
