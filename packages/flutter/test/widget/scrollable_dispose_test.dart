@@ -20,8 +20,7 @@ void main() {
     await tester.fling(find.byType(Scrollable), new Offset(0.0, -200.0), 1000.0);
     await tester.pump();
 
-    FlipWidgetState flipWidget = tester.state(find.byType(FlipWidget));
-    flipWidget.flip();
+    tester.state/*<FlipWidgetState>*/(find.byType(FlipWidget)).flip();
     await tester.pump(new Duration(hours: 5));
   });
 }

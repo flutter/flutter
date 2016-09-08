@@ -66,8 +66,7 @@ void main() {
       })
     ));
     frame += 1;
-    SizeChangerState state = tester.state(find.byType(SizeChanger));
-    state.trigger();
+    tester.state/*<SizeChangerState>*/(find.byType(SizeChanger)).trigger();
     await tester.pump();
   });
 }
