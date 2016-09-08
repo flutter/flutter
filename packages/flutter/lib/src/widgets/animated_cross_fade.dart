@@ -106,6 +106,8 @@ class _AnimatedCrossFadeState extends State<AnimatedCrossFade> {
   void initState() {
     super.initState();
     _controller = new AnimationController(duration: config.duration);
+    if (config.crossFadeState == CrossFadeState.showSecond)
+      _controller.value = 1.0;
     _firstAnimation = _initAnimation(config.firstCurve, true);
     _secondAnimation = _initAnimation(config.secondCurve, false);
   }

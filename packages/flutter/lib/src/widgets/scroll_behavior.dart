@@ -66,7 +66,7 @@ abstract class ScrollBehavior<T, U> {
   /// from the given offset by the given delta.
   T applyCurve(T scrollOffset, T scrollDelta) => scrollOffset;
 
-  /// Whether this scroll behavior currently permits scrolling
+  /// Whether this scroll behavior currently permits scrolling.
   bool get isScrollable => true;
 
   /// The scroll drag constant to use for physics simulations created by this

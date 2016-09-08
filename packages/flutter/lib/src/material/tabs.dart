@@ -7,6 +7,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 import 'package:meta/meta.dart';
 
@@ -968,11 +969,18 @@ class _TabBarState<T> extends ScrollableState<TabBar<T>> implements TabBarSelect
   }
 
   void _layoutChanged(Size tabBarSize, List<double> tabWidths) {
-    setState(() {
-      _tabBarSize = tabBarSize;
-      _tabWidths = tabWidths;
-      _indicatorRect = _selection != null ? _tabIndicatorRect(_selection.index) : Rect.zero;
-      _updateScrollBehavior();
+    // This is bad. We should use a LayoutBuilder or CustomMultiChildLayout or some such.
+    // As designed today, tabs are always lagging one frame behind, taking two frames
+    // to handle a layout change.
+    _tabBarSize = tabBarSize;
+    _tabWidths = tabWidths;
+    _indicatorRect = _selection != null ? _tabIndicatorRect(_selection.index) : Rect.zero;
+    _updateScrollBehavior();
+    SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
+      setState(() {
+        // the changes were made at layout time
+        // TODO(ianh): remove this setState: https://github.com/flutter/flutter/issues/5749
+      });
     });
   }
 
@@ -1188,10 +1196,10 @@ class _TabBarViewState<T> extends PageableListState<TabBarView<T>> implements Ta
 
     if (selectedIndex < previousSelectedIndex) {
       _updateItemsFromChildren(selectedIndex, previousSelectedIndex);
-      scrollTo(new CurveTween(curve: Curves.ease.flipped).evaluate(new ReverseAnimation(animation)));
+      scrollTo(new CurveTween(curve: Curves.fastOutSlowIn.flipped).evaluate(new ReverseAnimation(animation)));
     } else {
       _updateItemsFromChildren(previousSelectedIndex, selectedIndex);
-      scrollTo(new CurveTween(curve: Curves.ease).evaluate(animation));
+      scrollTo(new CurveTween(curve: Curves.fastOutSlowIn).evaluate(animation));
     }
   }
 
@@ -1296,7 +1304,7 @@ class TabPageSelector<T> extends StatelessWidget {
     final Color color = Theme.of(context).accentColor;
     final ColorTween selectedColor = new ColorTween(begin: Colors.transparent, end: color);
     final ColorTween previousColor = new ColorTween(begin: color, end: Colors.transparent);
-    Animation<double> animation = new CurvedAnimation(parent: selection.animation, curve: Curves.ease);
+    Animation<double> animation = new CurvedAnimation(parent: selection.animation, curve: Curves.fastOutSlowIn);
     return new AnimatedBuilder(
       animation: animation,
       builder: (BuildContext context, Widget child) {

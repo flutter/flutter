@@ -121,9 +121,8 @@ void main() {
     await gesture.moveBy(new Offset(50.0, 0.0));
     await tester.pump();
 
-    // TODO(mpcomplete): back gesture disabled. Home should be onstage when
-    // it is reenabled.
-    expect(find.text('Home'), findsNothing);
+    // Home is now visible.
+    expect(find.text('Home'), isOnstage);
     expect(find.text('Settings'), isOnstage);
   });
 
@@ -155,5 +154,136 @@ void main() {
 
     expect(find.text('Home'), findsNothing);
     expect(find.text('Settings'), isOnstage);
+  });
+
+  testWidgets('Check page transition positioning on iOS', (WidgetTester tester) async {
+    GlobalKey containerKey1 = new GlobalKey();
+    GlobalKey containerKey2 = new GlobalKey();
+    final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      '/': (_) => new Scaffold(key: containerKey1, body: new Text('Home')),
+      '/settings': (_) => new Scaffold(key: containerKey2, body: new Text('Settings')),
+    };
+
+    await tester.pumpWidget(new MaterialApp(
+      routes: routes,
+      theme: new ThemeData(platform: TargetPlatform.iOS),
+    ));
+
+    Navigator.pushNamed(containerKey1.currentContext, '/settings');
+
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 16));
+
+    expect(find.text('Home'), isOnstage);
+    expect(find.text('Settings'), isOnstage);
+
+    // Home page is staying in place.
+    Point homeOffset = tester.getTopLeft(find.text('Home'));
+    expect(homeOffset.x, 0.0);
+    expect(homeOffset.y, 0.0);
+
+    // Settings page is sliding up from the bottom.
+    Point settingsOffset = tester.getTopLeft(find.text('Settings'));
+    expect(settingsOffset.x, 0.0);
+    expect(settingsOffset.y, greaterThan(0.0));
+
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(find.text('Home'), findsNothing);
+    expect(find.text('Settings'), isOnstage);
+
+    // Settings page is in position.
+    settingsOffset = tester.getTopLeft(find.text('Settings'));
+    expect(settingsOffset.x, 0.0);
+    expect(settingsOffset.y, 0.0);
+
+    Navigator.pop(containerKey1.currentContext);
+
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 16));
+
+    // Home page is staying in place.
+    homeOffset = tester.getTopLeft(find.text('Home'));
+    expect(homeOffset.x, 0.0);
+    expect(homeOffset.y, 0.0);
+
+    // Settings page is sliding down off the bottom.
+    settingsOffset = tester.getTopLeft(find.text('Settings'));
+    expect(settingsOffset.x, 0.0);
+    expect(settingsOffset.y, greaterThan(0.0));
+
+    await tester.pump(const Duration(seconds: 1));
+  });
+
+  testWidgets('Check back gesture disables Heroes', (WidgetTester tester) async {
+    GlobalKey containerKey1 = new GlobalKey();
+    GlobalKey containerKey2 = new GlobalKey();
+    const String kHeroTag = 'hero';
+    final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      '/': (_) => new Scaffold(
+        key: containerKey1,
+        body: new Container(
+          decoration: new BoxDecoration(backgroundColor: const Color(0xff00ffff)),
+          child: new Hero(
+            tag: kHeroTag,
+            child: new Text('Home')
+          )
+        )
+      ),
+      '/settings': (_) => new Scaffold(
+        key: containerKey2,
+        body: new Container(
+          padding: const EdgeInsets.all(100.0),
+          decoration: new BoxDecoration(backgroundColor: const Color(0xffff00ff)),
+          child: new Hero(
+            tag: kHeroTag,
+            child: new Text('Settings')
+          )
+        )
+      ),
+    };
+
+    await tester.pumpWidget(new MaterialApp(
+      routes: routes,
+      theme: new ThemeData(platform: TargetPlatform.iOS),
+    ));
+
+    Navigator.pushNamed(containerKey1.currentContext, '/settings');
+
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 16));
+
+    expect(find.text('Settings'), isOnstage);
+
+    // Settings text is heroing to its new location
+    Point settingsOffset = tester.getTopLeft(find.text('Settings'));
+    expect(settingsOffset.x, greaterThan(0.0));
+    expect(settingsOffset.x, lessThan(100.0));
+    expect(settingsOffset.y, greaterThan(0.0));
+    expect(settingsOffset.y, lessThan(100.0));
+
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(find.text('Home'), findsNothing);
+    expect(find.text('Settings'), isOnstage);
+
+    // Drag from left edge to invoke the gesture.
+    TestGesture gesture = await tester.startGesture(new Point(5.0, 100.0));
+    await gesture.moveBy(new Offset(50.0, 0.0));
+    await tester.pump();
+
+    // Home is now visible.
+    expect(find.text('Home'), isOnstage);
+    expect(find.text('Settings'), isOnstage);
+
+    // Home page is sliding in from the left, no heroes.
+    Point homeOffset = tester.getTopLeft(find.text('Home'));
+    expect(homeOffset.x, lessThan(0.0));
+    expect(homeOffset.y, 0.0);
+
+    // Settings page is sliding off to the right, no heroes.
+    settingsOffset = tester.getTopLeft(find.text('Settings'));
+    expect(settingsOffset.x, greaterThan(100.0));
+    expect(settingsOffset.y, 100.0);
   });
 }

@@ -693,7 +693,7 @@ class _SortArrowState extends State<_SortArrow> {
       parent: _opacityController = new AnimationController(
         duration: config.duration
       ),
-      curve: Curves.ease
+      curve: Curves.fastOutSlowIn
     )
     ..addListener(_rebuild);
     _opacityController.value = config.visible ? 1.0 : 0.0;

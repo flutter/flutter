@@ -84,6 +84,21 @@ class AnalyzeCommand extends FlutterCommand {
     return true;
   }
 
+  /// Return `true` if [fileList] contains a path that resides inside the Flutter repository.
+  /// If [fileList] is empty, then return `true` if the current directory resides inside the Flutter repository.
+  bool inRepo(List<String> fileList) {
+    if (fileList == null || fileList.isEmpty)
+      fileList = <String>[path.current];
+    String root = path.normalize(path.absolute(Cache.flutterRoot));
+    String prefix = root + Platform.pathSeparator;
+    for (String file in fileList) {
+      file = path.normalize(path.absolute(file));
+      if (file == root || file.startsWith(prefix))
+        return true;
+    }
+    return false;
+  }
+
   bool get _isBenchmarking => argResults['benchmark'];
 
   Future<int> _analyzeOnce() async {
@@ -106,7 +121,7 @@ class AnalyzeCommand extends FlutterCommand {
 
     bool currentDirectory = argResults['current-directory'] && (argResults.wasParsed('current-directory') || dartFiles.isEmpty);
     bool currentPackage = argResults['current-package'] && (argResults.wasParsed('current-package') || dartFiles.isEmpty);
-    bool flutterRepo = argResults['flutter-repo'];
+    bool flutterRepo = argResults['flutter-repo'] || inRepo(argResults.rest);
 
     //TODO (pq): revisit package and directory defaults
 
@@ -202,7 +217,9 @@ class AnalyzeCommand extends FlutterCommand {
     DriverOptions options = new DriverOptions();
     options.dartSdkPath = argResults['dart-sdk'];
     options.packageMap = packages;
-    options.analysisOptionsFile = path.join(Cache.flutterRoot, 'packages', 'flutter_tools', 'flutter_analysis_options');
+    options.analysisOptionsFile = flutterRepo
+      ? path.join(Cache.flutterRoot, '.analysis_options_flutter_analyze')
+      : path.join(Cache.flutterRoot, 'packages', 'flutter_tools', 'flutter_analysis_options');
     AnalysisDriver analyzer = new AnalysisDriver(options);
 
     // TODO(pq): consider error handling
@@ -241,14 +258,14 @@ class AnalyzeCommand extends FlutterCommand {
       _writeBenchmark(stopwatch, errorCount, membersMissingDocumentation);
 
     if (errorCount > 0) {
-      if (membersMissingDocumentation > 0 && argResults['flutter-repo'])
+      if (membersMissingDocumentation > 0 && flutterRepo)
         printError('[lint] $membersMissingDocumentation public ${ membersMissingDocumentation == 1 ? "member lacks" : "members lack" } documentation (ran in ${elapsed}s)');
       else
         print('(Ran in ${elapsed}s)');
       return 1; // we consider any level of error to be an error exit (we don't report different levels)
     }
     if (argResults['congratulate']) {
-      if (membersMissingDocumentation > 0 && argResults['flutter-repo']) {
+      if (membersMissingDocumentation > 0 && flutterRepo) {
         printStatus('No analyzer warnings! (ran in ${elapsed}s; $membersMissingDocumentation public ${ membersMissingDocumentation == 1 ? "member lacks" : "members lack" } documentation)');
       } else {
         printStatus('No analyzer warnings! (ran in ${elapsed}s)');

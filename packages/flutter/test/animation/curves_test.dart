@@ -25,8 +25,8 @@ void main() {
     expect(flippedEase, hasOneLineDescription);
   });
 
-  test('Step has a step', () {
-    Curve step = new Step(0.25);
+  test('Threshold has a threshold', () {
+    Curve step = new Threshold(0.25);
     expect(step.transform(0.0), 0.0);
     expect(step.transform(0.24), 0.0);
     expect(step.transform(0.25), 1.0);

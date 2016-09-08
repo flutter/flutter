@@ -71,9 +71,10 @@ class _PointDemoPainter extends CustomPainter {
     final Paint paint = new Paint();
 
     if (arc.center != null)
-      drawPoint(canvas, arc.center, Colors.blue[400]);
+      drawPoint(canvas, arc.center, Colors.grey[400]);
 
     paint
+      ..isAntiAlias = false // Work-around for github.com/flutter/flutter/issues/5720
       ..color = Colors.green[500].withOpacity(0.25)
       ..strokeWidth = 4.0
       ..style = PaintingStyle.stroke;
@@ -115,13 +116,14 @@ class _PointDemoState extends State<_PointDemo> {
 
   CurvedAnimation _animation;
   _DragTarget _dragTarget;
+  Size _screenSize;
   Point _begin;
   Point _end;
 
   @override
   void initState() {
     super.initState();
-    _animation = new CurvedAnimation(parent: config.controller, curve: Curves.ease);
+    _animation = new CurvedAnimation(parent: config.controller, curve: Curves.fastOutSlowIn);
   }
 
   @override
@@ -177,8 +179,11 @@ class _PointDemoState extends State<_PointDemo> {
   @override
   Widget build(BuildContext context) {
     final Size screenSize = MediaQuery.of(context).size;
-    _begin = new Point(screenSize.width * 0.5, screenSize.height * 0.2);
-    _end = new Point(screenSize.width * 0.1, screenSize.height * 0.4);
+    if (_screenSize == null || _screenSize != screenSize) {
+      _screenSize = screenSize;
+      _begin = new Point(screenSize.width * 0.5, screenSize.height * 0.2);
+      _end = new Point(screenSize.width * 0.1, screenSize.height * 0.4);
+    }
 
     final MaterialPointArcTween arc = new MaterialPointArcTween(begin: _begin, end: _end);
     return new RawGestureDetector(
@@ -276,13 +281,14 @@ class _RectangleDemoState extends State<_RectangleDemo> {
 
   CurvedAnimation _animation;
   _DragTarget _dragTarget;
+  Size _screenSize;
   Rect _begin;
   Rect _end;
 
   @override
   void initState() {
     super.initState();
-    _animation = new CurvedAnimation(parent: config.controller, curve: Curves.ease);
+    _animation = new CurvedAnimation(parent: config.controller, curve: Curves.fastOutSlowIn);
   }
 
   @override
@@ -337,14 +343,17 @@ class _RectangleDemoState extends State<_RectangleDemo> {
   @override
   Widget build(BuildContext context) {
     final Size screenSize = MediaQuery.of(context).size;
-    _begin = new Rect.fromLTWH(
-      screenSize.width * 0.5, screenSize.height * 0.2,
-      screenSize.width * 0.4, screenSize.height * 0.2
-    );
-    _end = new Rect.fromLTWH(
-      screenSize.width * 0.1, screenSize.height * 0.4,
-      screenSize.width * 0.3, screenSize.height * 0.3
-    );
+    if (_screenSize == null || _screenSize != screenSize) {
+      _screenSize = screenSize;
+      _begin = new Rect.fromLTWH(
+        screenSize.width * 0.5, screenSize.height * 0.2,
+        screenSize.width * 0.4, screenSize.height * 0.2
+      );
+      _end = new Rect.fromLTWH(
+        screenSize.width * 0.1, screenSize.height * 0.4,
+        screenSize.width * 0.3, screenSize.height * 0.3
+      );
+    }
 
     final MaterialRectArcTween arc = new MaterialRectArcTween(begin: _begin, end: _end);
     return new RawGestureDetector(

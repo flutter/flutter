@@ -281,7 +281,7 @@ class AppBar extends StatelessWidget {
 
     final double toolBarOpacity = _toolBarOpacity(size.height, statusBarHeight);
     if (toolBarOpacity != 1.0) {
-      final double opacity = const Interval(0.25, 1.0, curve: Curves.ease).transform(toolBarOpacity);
+      final double opacity = const Interval(0.25, 1.0, curve: Curves.fastOutSlowIn).transform(toolBarOpacity);
       if (centerStyle?.color != null)
         centerStyle = centerStyle.copyWith(color: centerStyle.color.withOpacity(opacity));
       if (sideStyle?.color != null)
@@ -357,7 +357,7 @@ class AppBar extends StatelessWidget {
           appBar,
           bottomOpacity == 1.0 ? bottom : new Opacity(
             child: bottom,
-            opacity: const Interval(0.25, 1.0, curve: Curves.ease).transform(bottomOpacity)
+            opacity: const Interval(0.25, 1.0, curve: Curves.fastOutSlowIn).transform(bottomOpacity)
           )
         ]
       );

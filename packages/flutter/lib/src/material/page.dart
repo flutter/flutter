@@ -8,6 +8,8 @@ import 'package:flutter/widgets.dart';
 import 'material.dart';
 import 'theme.dart';
 
+const double _kMinFlingVelocity = 1.0;  // screen width per second
+
 // Used for Android and Fuchsia.
 class _MountainViewPageTransition extends AnimatedWidget {
   static final FractionalOffsetTween _kTween = new FractionalOffsetTween(
@@ -54,7 +56,7 @@ class _CupertinoPageTransition extends AnimatedWidget {
     key: key,
     animation: _kTween.animate(new CurvedAnimation(
       parent: animation,
-      curve: new _CupertinoTransitionCurve()
+      curve: new _CupertinoTransitionCurve(null)
     )
   ));
 
@@ -84,16 +86,33 @@ class AnimationMean extends CompoundAnimation<double> {
   double get value => (first.value + next.value) / 2.0;
 }
 
-// Custom curve for iOS page transitions. The halfway point is when the page
-// is fully on-screen. 0.0 is fully off-screen to the right. 1.0 is off-screen
-// to the left.
+// Custom curve for iOS page transitions.
 class _CupertinoTransitionCurve extends Curve {
-  _CupertinoTransitionCurve();
+  _CupertinoTransitionCurve(this.curve);
+
+  Curve curve;
 
   @override
   double transform(double t) {
-    if (t > 0.5)
-      return (t - 0.5) / 3.0 + 0.5;
+    // The input [t] is the average of the current and next route's animation.
+    // This means t=0.5 represents when the route is fully onscreen. At
+    // t > 0.5, it is partially offscreen to the left (which happens when there
+    // is another route on top). At t < 0.5, the route is to the right.
+    // We divide the range into two halves, each with a different transition,
+    // and scale each half to the range [0.0, 1.0] before applying curves so that
+    // each half goes through the full range of the curve.
+    if (t > 0.5) {
+      // Route is to the left of center.
+      t = (t - 0.5) * 2.0;
+      if (curve != null)
+        t = curve.transform(t);
+      t = t / 3.0;
+      t = t / 2.0 + 0.5;
+    } else {
+      // Route is to the right of center.
+      if (curve != null)
+        t = curve.transform(t * 2.0) / 2.0;
+    }
     return t;
   }
 }
@@ -124,18 +143,23 @@ class _CupertinoBackGestureController extends NavigationGestureController {
   }
 
   @override
-  void dragEnd() {
-    if (controller.value <= 0.5) {
-      navigator.pop();
+  void dragEnd(double velocity) {
+    if (velocity.abs() >= _kMinFlingVelocity) {
+      controller.fling(velocity: -velocity);
+    } else if (controller.value <= 0.5) {
+      controller.fling(velocity: -1.0);
     } else {
-      controller.forward();
+      controller.fling(velocity: 1.0);
     }
+
     // Don't end the gesture until the transition completes.
     handleStatusChanged(controller.status);
     controller?.addStatusListener(handleStatusChanged);
   }
 
   void handleStatusChanged(AnimationStatus status) {
+    if (status == AnimationStatus.dismissed)
+      navigator.pop();
     if (status == AnimationStatus.dismissed || status == AnimationStatus.completed)
       dispose();
   }
@@ -145,9 +169,6 @@ class _CupertinoBackGestureController extends NavigationGestureController {
 ///
 /// The entrance transition for the page slides the page upwards and fades it
 /// in. The exit transition is the same, but in reverse.
-///
-/// [MaterialApp] creates material page routes for entries in the
-/// [MaterialApp.routes] map.
 ///
 /// By default, when a modal route is replaced by another, the previous route
 /// remains in memory. To free all the resources when this is not necessary, set
@@ -217,28 +238,18 @@ class MaterialPageRoute<T> extends PageRoute<T> {
 
   @override
   Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> forwardAnimation, Widget child) {
-    // TODO(mpcomplete): This hack prevents the previousRoute from animating
-    // when we pop(). Remove once we fix this bug:
-    // https://github.com/flutter/flutter/issues/5577
-    if (!Navigator.of(context).userGestureInProgress)
-      forwardAnimation = kAlwaysDismissedAnimation;
-
-    ThemeData theme = Theme.of(context);
-    switch (theme.platform) {
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.android:
-        return new _MountainViewPageTransition(
-          animation: animation,
-          child: child
-        );
-      case TargetPlatform.iOS:
-        return new _CupertinoPageTransition(
-          animation: new AnimationMean(left: animation, right: forwardAnimation),
-          child: child
-        );
+    if (Theme.of(context).platform == TargetPlatform.iOS &&
+        Navigator.of(context).userGestureInProgress) {
+      return new _CupertinoPageTransition(
+        animation: new AnimationMean(left: animation, right: forwardAnimation),
+        child: child
+      );
+    } else {
+      return new _MountainViewPageTransition(
+        animation: animation,
+        child: child
+      );
     }
-
-    return null;
   }
 
   @override

@@ -550,6 +550,25 @@ abstract class RenderBox extends RenderObject {
   /// Do not override this method. Instead, implement [computeMinIntrinsicWidth].
   @mustCallSuper
   double getMinIntrinsicWidth(double height) {
+    assert(() {
+      if (height == null) {
+        throw new FlutterError(
+          'The height argument to getMinIntrinsicWidth was null.\n'
+          'The argument to getMinIntrinsicWidth must not be negative or null. '
+          'If you do not have a specific height in mind, then pass double.INFINITY instead.'
+        );
+      }
+      if (height < 0.0) {
+        throw new FlutterError(
+          'The height argument to getMinIntrinsicWidth was negative.\n'
+          'The argument to getMinIntrinsicWidth must not be negative or null. '
+          'If you perform computations on another height before passing it to '
+          'getMinIntrinsicWidth, consider using math.max() or double.clamp() '
+          'to force the value into the valid range.'
+        );
+      }
+      return true;
+    });
     return _computeIntrinsicDimension(_IntrinsicDimension.minWidth, height, computeMinIntrinsicWidth);
   }
 
@@ -569,6 +588,8 @@ abstract class RenderBox extends RenderObject {
   /// If the layout algorithm is strictly height-in-width-out, or is
   /// height-in-width-out when the width is unconstrained, then the height
   /// argument is the height to use.
+  ///
+  /// The `height` argument will never be negative or null. It may be infinite.
   ///
   /// If this algorithm depends on the intrinsic dimensions of a child, the
   /// intrinsic dimensions of that child should be obtained using the functions
@@ -640,6 +661,11 @@ abstract class RenderBox extends RenderObject {
   /// decreases the preferred height. The preferred height is the value that
   /// would be returned by [getMinIntrinsicHeight] for that width.
   ///
+  /// The height argument may give a specific height to assume. The given height
+  /// can be infinite, meaning that the intrinsic width in an unconstrained
+  /// environment is being requested. The given height should never be negative
+  /// or null.
+  ///
   /// This function should only be called on one's children. Calling this
   /// function couples the child with the parent so that when the child's layout
   /// changes, the parent is notified (via [markNeedsLayout]).
@@ -651,6 +677,25 @@ abstract class RenderBox extends RenderObject {
   /// [computeMaxIntrinsicWidth].
   @mustCallSuper
   double getMaxIntrinsicWidth(double height) {
+    assert(() {
+      if (height == null) {
+        throw new FlutterError(
+          'The height argument to getMaxIntrinsicWidth was null.\n'
+          'The argument to getMaxIntrinsicWidth must not be negative or null. '
+          'If you do not have a specific height in mind, then pass double.INFINITY instead.'
+        );
+      }
+      if (height < 0.0) {
+        throw new FlutterError(
+          'The height argument to getMaxIntrinsicWidth was negative.\n'
+          'The argument to getMaxIntrinsicWidth must not be negative or null. '
+          'If you perform computations on another height before passing it to '
+          'getMaxIntrinsicWidth, consider using math.max() or double.clamp() '
+          'to force the value into the valid range.'
+        );
+      }
+      return true;
+    });
     return _computeIntrinsicDimension(_IntrinsicDimension.maxWidth, height, computeMaxIntrinsicWidth);
   }
 
@@ -669,6 +714,8 @@ abstract class RenderBox extends RenderObject {
   /// Otherwise, the height argument should be ignored, and the returned value
   /// should be equal to or bigger than the value returned by
   /// [computeMinIntrinsicWidth].
+  ///
+  /// The `height` argument will never be negative or null. It may be infinite.
   ///
   /// The value returned by this method might not match the size that the object
   /// would actually take. For example, a [RenderBox] subclass that always
@@ -706,6 +753,25 @@ abstract class RenderBox extends RenderObject {
   /// [computeMinIntrinsicHeight].
   @mustCallSuper
   double getMinIntrinsicHeight(double width) {
+    assert(() {
+      if (width == null) {
+        throw new FlutterError(
+          'The width argument to getMinIntrinsicHeight was null.\n'
+          'The argument to getMinIntrinsicHeight must not be negative or null. '
+          'If you do not have a specific width in mind, then pass double.INFINITY instead.'
+        );
+      }
+      if (width < 0.0) {
+        throw new FlutterError(
+          'The width argument to getMinIntrinsicHeight was negative.\n'
+          'The argument to getMinIntrinsicHeight must not be negative or null. '
+          'If you perform computations on another width before passing it to '
+          'getMinIntrinsicHeight, consider using math.max() or double.clamp() '
+          'to force the value into the valid range.'
+        );
+      }
+      return true;
+    });
     return _computeIntrinsicDimension(_IntrinsicDimension.minHeight, width, computeMinIntrinsicHeight);
   }
 
@@ -726,6 +792,8 @@ abstract class RenderBox extends RenderObject {
   /// width-in-height-out when the height is unconstrained, then the width
   /// argument is the width to use.
   ///
+  /// The `width` argument will never be negative or null. It may be infinite.
+  ///
   /// If this algorithm depends on the intrinsic dimensions of a child, the
   /// intrinsic dimensions of that child should be obtained using the functions
   /// whose names start with `get`, not `compute`.
@@ -742,6 +810,11 @@ abstract class RenderBox extends RenderObject {
   /// decreases the preferred width. The preferred width is the value that
   /// would be returned by [getMinIntrinsicWidth] for that height.
   ///
+  /// The width argument may give a specific width to assume. The given width
+  /// can be infinite, meaning that the intrinsic height in an unconstrained
+  /// environment is being requested. The given width should never be negative
+  /// or null.
+  ///
   /// This function should only be called on one's children. Calling this
   /// function couples the child with the parent so that when the child's layout
   /// changes, the parent is notified (via [markNeedsLayout]).
@@ -753,6 +826,25 @@ abstract class RenderBox extends RenderObject {
   /// [computeMaxIntrinsicHeight].
   @mustCallSuper
   double getMaxIntrinsicHeight(double width) {
+    assert(() {
+      if (width == null) {
+        throw new FlutterError(
+          'The width argument to getMaxIntrinsicHeight was null.\n'
+          'The argument to getMaxIntrinsicHeight must not be negative or null. '
+          'If you do not have a specific width in mind, then pass double.INFINITY instead.'
+        );
+      }
+      if (width < 0.0) {
+        throw new FlutterError(
+          'The width argument to getMaxIntrinsicHeight was negative.\n'
+          'The argument to getMaxIntrinsicHeight must not be negative or null. '
+          'If you perform computations on another width before passing it to '
+          'getMaxIntrinsicHeight, consider using math.max() or double.clamp() '
+          'to force the value into the valid range.'
+        );
+      }
+      return true;
+    });
     return _computeIntrinsicDimension(_IntrinsicDimension.maxHeight, width, computeMaxIntrinsicHeight);
   }
 
@@ -771,6 +863,8 @@ abstract class RenderBox extends RenderObject {
   /// Otherwise, the width argument should be ignored, and the returned value
   /// should be equal to or bigger than the value returned by
   /// [computeMinIntrinsicHeight].
+  ///
+  /// The `width` argument will never be negative or null. It may be infinite.
   ///
   /// The value returned by this method might not match the size that the object
   /// would actually take. For example, a [RenderBox] subclass that always

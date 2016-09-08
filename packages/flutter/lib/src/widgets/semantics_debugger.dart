@@ -5,6 +5,8 @@
 import 'dart:collection';
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/rendering.dart';
 import 'package:sky_services/semantics/semantics.mojom.dart' as mojom;
 
@@ -53,8 +55,17 @@ class _SemanticsDebuggerState extends State<SemanticsDebugger> {
   }
 
   void _update() {
-    setState(() {
-      // the generation of the _SemanticsDebuggerListener has changed
+    SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
+      // We want the update to take effect next frame, so to make that
+      // explicit we call setState() in a post-frame callback.
+      if (mounted) {
+        // If we got disposed this frame, we will still get an update,
+        // because the inactive list is flushed after the semantics updates
+        // are transmitted to the semantics clients.
+        setState(() {
+          // The generation of the _SemanticsDebuggerListener has changed.
+        });
+      }
     });
   }
 

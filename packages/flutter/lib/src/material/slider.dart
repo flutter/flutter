@@ -213,7 +213,7 @@ class _RenderSlider extends RenderConstrainedBox implements SemanticActionHandle
     _reactionController = new AnimationController(duration: kRadialReactionDuration);
     _reaction = new CurvedAnimation(
       parent: _reactionController,
-      curve: Curves.ease
+      curve: Curves.fastOutSlowIn
     )..addListener(markNeedsPaint);
     _position = new AnimationController(
       value: value,
@@ -229,7 +229,7 @@ class _RenderSlider extends RenderConstrainedBox implements SemanticActionHandle
       return;
     _value = newValue;
     if (divisions != null)
-      _position.animateTo(newValue, curve: Curves.ease);
+      _position.animateTo(newValue, curve: Curves.fastOutSlowIn);
     else
       _position.value = newValue;
   }

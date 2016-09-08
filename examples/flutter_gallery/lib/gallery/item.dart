@@ -59,7 +59,7 @@ final List<GalleryItem> kAllGalleryItems = <GalleryItem>[
     buildRoute: (BuildContext context) => new ShrineDemo()
   ),
   new GalleryItem(
-    title: 'Contacts',
+    title: 'Contact profile',
     category: 'Demos',
     subtitle: 'Highlights the flexible appbar',
     routeName: ContactsDemo.routeName,
@@ -101,6 +101,12 @@ final List<GalleryItem> kAllGalleryItems = <GalleryItem>[
     subtitle: 'A list with one level of sublists',
     routeName: TwoLevelListDemo.routeName,
     buildRoute: (BuildContext context) => new TwoLevelListDemo()
+  ),
+  new GalleryItem(
+    title: 'Expansion panels',
+    subtitle: 'A list of expanding panels',
+    routeName: ExpasionPanelsDemo.routeName,
+    buildRoute: (BuildContext context) => new ExpasionPanelsDemo()
   ),
   new GalleryItem(
     title: 'Floating action button',
