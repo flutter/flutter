@@ -38,14 +38,14 @@ namespace blink {
 // Must be called on the thread that will be the main WebKit thread before
 // using any other WebKit APIs. The provided Platform; must be
 // non-null and must remain valid until the current thread calls shutdown.
-BLINK_EXPORT void initialize(Platform*);
+BLINK_EXPORT void InitEngine(Platform*);
 
 // Once shutdown, the Platform passed to initialize will no longer
 // be accessed. No other WebKit objects should be in use when this function is
 // called. Any background threads created by WebKit are promised to be
 // terminated by the time this function returns.
-BLINK_EXPORT void shutdown();
+BLINK_EXPORT void ShutdownEngine();
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // SKY_ENGINE_PUBLIC_WEB_SKY_H_

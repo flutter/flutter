@@ -10,7 +10,7 @@
 #include "flutter/common/settings.h"
 #include "flutter/common/threads.h"
 #include "flutter/content_handler/content_handler_impl.h"
-#include "flutter/runtime/dart_init.h"
+#include "flutter/runtime/runtime_init.h"
 #include "lib/ftl/macros.h"
 #include "lib/ftl/tasks/task_runner.h"
 #include "lib/mtl/tasks/message_loop.h"
@@ -53,7 +53,7 @@ class App : public mojo::ApplicationImplBase {
     blink::Threads::Set(
         blink::Threads(gpu_task_runner, ui_task_runner, io_task_runner));
     blink::Settings::Set(blink::Settings());
-    blink::InitDartVM();
+    blink::InitRuntime();
   }
 
   bool OnAcceptConnection(

@@ -2,16 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SKY_SHELL_UI_PLATFORM_IMPL_H_
-#define SKY_SHELL_UI_PLATFORM_IMPL_H_
+#ifndef FLUTTER_RUNTIME_PLATFORM_IMPL_H_
+#define FLUTTER_RUNTIME_PLATFORM_IMPL_H_
 
 #include "lib/ftl/macros.h"
 #include "flutter/sky/engine/public/platform/Platform.h"
 
-namespace sky {
-namespace shell {
+namespace blink {
 
-class PlatformImpl : public blink::Platform {
+class PlatformImpl : public Platform {
  public:
   explicit PlatformImpl();
   ~PlatformImpl() override;
@@ -23,7 +22,6 @@ class PlatformImpl : public blink::Platform {
   FTL_DISALLOW_COPY_AND_ASSIGN(PlatformImpl);
 };
 
-}  // namespace shell
-}  // namespace sky
+}  // namespace blink
 
-#endif  // SKY_SHELL_UI_PLATFORM_IMPL_H_
+#endif  // FLUTTER_RUNTIME_PLATFORM_IMPL_H_

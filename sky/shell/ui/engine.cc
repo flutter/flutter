@@ -17,10 +17,10 @@
 #include "flutter/lib/ui/mojo_services.h"
 #include "flutter/runtime/dart_controller.h"
 #include "flutter/runtime/dart_init.h"
+#include "flutter/runtime/runtime_init.h"
 #include "flutter/sky/engine/public/web/Sky.h"
 #include "flutter/sky/shell/ui/animator.h"
 #include "flutter/sky/shell/ui/flutter_font_selector.h"
-#include "flutter/sky/shell/ui/platform_impl.h"
 #include "lib/ftl/files/path.h"
 #include "mojo/public/cpp/application/connect.h"
 #include "third_party/skia/include/core/SkCanvas.h"
@@ -46,8 +46,6 @@ std::string FindPackagesPath(const std::string& main_dart) {
   return packages_path;
 }
 
-PlatformImpl* g_platform_impl = nullptr;
-
 }  // namespace
 
 Engine::Engine(Rasterizer* rasterizer)
@@ -64,12 +62,7 @@ ftl::WeakPtr<Engine> Engine::GetWeakPtr() {
 }
 
 void Engine::Init() {
-  TRACE_EVENT0("flutter", "Engine::Init");
-
-  DCHECK(!g_platform_impl);
-  g_platform_impl = new PlatformImpl();
-  blink::initialize(g_platform_impl);
-  blink::InitDartVM();
+  blink::InitRuntime();
 }
 
 void Engine::BeginFrame(ftl::TimePoint frame_time) {

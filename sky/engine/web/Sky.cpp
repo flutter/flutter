@@ -112,8 +112,8 @@ void removeMessageLoopObservers() {
 // Doing so may cause hard to reproduce crashes.
 static bool s_webKitInitialized = false;
 
-void initialize(Platform* platform) {
-  TRACE_EVENT0("flutter", "blink::initialize");
+void InitEngine(Platform* platform) {
+  TRACE_EVENT0("flutter", "InitEngine");
 
   ASSERT(!s_webKitInitialized);
   s_webKitInitialized = true;
@@ -141,7 +141,7 @@ void initialize(Platform* platform) {
 #endif
 }
 
-void shutdown() {
+void ShutdownEngine() {
 #if !defined(OS_FUCHSIA)
   removeMessageLoopObservers();
 #endif

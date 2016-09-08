@@ -40,8 +40,6 @@ source_set("common") {
     "ui/engine.h",
     "ui/flutter_font_selector.cc",
     "ui/flutter_font_selector.h",
-    "ui/platform_impl.cc",
-    "ui/platform_impl.h",
     "ui_delegate.cc",
     "ui_delegate.h",
   ]
