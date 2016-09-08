@@ -1,13 +1,16 @@
 # Specify analysis options.
 #
-# Note that until there is a default "all-in" lint rule-set we need
-# to opt-in to all desired lints (https://github.com/dart-lang/sdk/issues/25843).
-# For a list of lints, see: http://dart-lang.github.io/linter/lints/
+# Until there are meta linter rules, each desired lint must be explicitly enabled.
+# See: https://github.com/dart-lang/linter/issues/288
 #
-# This file is the .analysis_options file used by "flutter analyze".
-# It isn't named that because otherwise editors like Atom would try
-# to use it, and that wouldn't work because it enables things that
-# need to be silenced, in particular, public_member_api_docs.
+# For a list of lints, see: http://dart-lang.github.io/linter/lints/
+# See the configuration guide for more
+# https://github.com/dart-lang/sdk/tree/master/pkg/analyzer#configuring-the-analyzer
+#
+# This file is the .analysis_options file used by "flutter analyze"
+# when analyzing code outside the flutter repository.
+# It isn't named that because otherwise editors like Atom
+# would use it when analyzing the flutter tool itself.
 #
 # When editing, make sure you keep /.analysis_options consistent.
 
@@ -17,61 +20,69 @@ analyzer:
     enableSuperMixins: true
   strong-mode: true
   errors:
-    # we allow overriding fields (if they use super, ideally...)
+    # allow overriding fields (if they use super, ideally...)
     strong_mode_invalid_field_override: ignore
-    # we allow type narrowing
+    # allow type narrowing
     strong_mode_invalid_method_override: ignore
     strong_mode_static_type_error: ignore
     strong_mode_down_cast_composite: ignore
-    # we allow having TODOs in the code
+    # allow having TODOs in the code
     todo: ignore
 
 linter:
   rules:
-    # these are in the same order as http://dart-lang.github.io/linter/lints/
-    # to make maintenance easier
+    # these rules are documented on and in the same order as
+    # the Dart Lint rules page to make maintenance easier
+    # http://dart-lang.github.io/linter/lints/
 
-    # # error rules
+    # === error rules ===
     - avoid_empty_else
+    - cancel_subscriptions
+    - close_sinks
     # - comment_references # blocked on https://github.com/dart-lang/dartdoc/issues/1153
     - control_flow_in_finally
     - empty_statements
     - hash_and_equals
-    - iterable_contains_unrelated_type
+    # - invariant_booleans
+    # - iterable_contains_unrelated_type
+    # - list_remove_unrelated_typ
+    # - literal_only_boolean_expressionse
     - test_types_in_equals
     - throw_in_finally
     - unrelated_type_equality_checks
+    - valid_regexps
 
-    # style rules
-    - always_declare_return_types
-    - always_specify_types
-    - annotate_overrides
-    - avoid_as
+    # === style rules ===
+    # - always_declare_return_types
+    # - always_specify_types
+    # - annotate_overrides
+    # - avoid_as
     - avoid_init_to_null
     - avoid_return_types_on_setters
     - await_only_futures
     - camel_case_types
     # - constant_identifier_names # https://github.com/dart-lang/linter/issues/204
-    - control_flow_in_finally
     - empty_constructor_bodies
     - implementation_imports
     - library_names
     - library_prefixes
     - non_constant_identifier_names
-    - one_member_abstracts
-    # - overridden_fields # the analyzer code itself violates this right now :-)
+    # - one_member_abstracts
+    # - only_throw_errors
+    # - overriden_fields
     - package_api_docs
     - package_prefixed_library_names
     - prefer_is_not_empty
-    - public_member_api_docs
+    # - public_member_api_docs
     - slash_for_doc_comments
-    - sort_constructors_first
-    - sort_unnamed_constructors_first
+    # - sort_constructors_first
+    # - sort_unnamed_constructors_first
     - super_goes_last
     # - type_annotate_public_apis # subset of always_specify_types
     - type_init_formals
+    # - unawaited_futures
     - unnecessary_brace_in_string_interp
     - unnecessary_getters_setters
 
-    # pub rules
+    # === pub rules ===
     - package_names
