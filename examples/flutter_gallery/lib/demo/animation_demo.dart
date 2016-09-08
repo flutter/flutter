@@ -189,7 +189,7 @@ class _PointDemoState extends State<_PointDemo> {
     return new RawGestureDetector(
       behavior: _dragTarget == null ? HitTestBehavior.deferToChild : HitTestBehavior.opaque,
       gestures: <Type, GestureRecognizerFactory>{
-        ImmediateMultiDragGestureRecognizer: (ImmediateMultiDragGestureRecognizer recognizer) {
+        ImmediateMultiDragGestureRecognizer: (ImmediateMultiDragGestureRecognizer recognizer) { // ignore: map_value_type_not_assignable, #5771
           return (recognizer ??= new ImmediateMultiDragGestureRecognizer())
             ..onStart = _handleOnStart;
         }
@@ -359,7 +359,7 @@ class _RectangleDemoState extends State<_RectangleDemo> {
     return new RawGestureDetector(
       behavior: _dragTarget == null ? HitTestBehavior.deferToChild : HitTestBehavior.opaque,
       gestures: <Type, GestureRecognizerFactory>{
-        ImmediateMultiDragGestureRecognizer: (ImmediateMultiDragGestureRecognizer recognizer) {
+        ImmediateMultiDragGestureRecognizer: (ImmediateMultiDragGestureRecognizer recognizer) { // ignore: map_value_type_not_assignable, #5771
           return (recognizer ??= new ImmediateMultiDragGestureRecognizer())
             ..onStart = _handleOnStart;
         }

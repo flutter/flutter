@@ -223,7 +223,7 @@ class GestureDetector extends StatelessWidget {
     Map<Type, GestureRecognizerFactory> gestures = <Type, GestureRecognizerFactory>{};
 
     if (onTapDown != null || onTapUp != null || onTap != null || onTapCancel != null) {
-      gestures[TapGestureRecognizer] = (TapGestureRecognizer recognizer) {
+      gestures[TapGestureRecognizer] = (TapGestureRecognizer recognizer) { // ignore: invalid_assignment, #5771
         return (recognizer ??= new TapGestureRecognizer())
           ..onTapDown = onTapDown
           ..onTapUp = onTapUp
@@ -233,14 +233,14 @@ class GestureDetector extends StatelessWidget {
     }
 
     if (onDoubleTap != null) {
-      gestures[DoubleTapGestureRecognizer] = (DoubleTapGestureRecognizer recognizer) {
+      gestures[DoubleTapGestureRecognizer] = (DoubleTapGestureRecognizer recognizer) { // ignore: invalid_assignment, #5771
         return (recognizer ??= new DoubleTapGestureRecognizer())
           ..onDoubleTap = onDoubleTap;
       };
     }
 
     if (onLongPress != null) {
-      gestures[LongPressGestureRecognizer] = (LongPressGestureRecognizer recognizer) {
+      gestures[LongPressGestureRecognizer] = (LongPressGestureRecognizer recognizer) { // ignore: invalid_assignment, #5771
         return (recognizer ??= new LongPressGestureRecognizer())
           ..onLongPress = onLongPress;
       };
@@ -251,7 +251,7 @@ class GestureDetector extends StatelessWidget {
         onVerticalDragUpdate != null ||
         onVerticalDragEnd != null ||
         onVerticalDragCancel != null) {
-      gestures[VerticalDragGestureRecognizer] = (VerticalDragGestureRecognizer recognizer) {
+      gestures[VerticalDragGestureRecognizer] = (VerticalDragGestureRecognizer recognizer) { // ignore: invalid_assignment, #5771
         return (recognizer ??= new VerticalDragGestureRecognizer())
           ..onDown = onVerticalDragDown
           ..onStart = onVerticalDragStart
@@ -266,7 +266,7 @@ class GestureDetector extends StatelessWidget {
         onHorizontalDragUpdate != null ||
         onHorizontalDragEnd != null ||
         onHorizontalDragCancel != null) {
-      gestures[HorizontalDragGestureRecognizer] = (HorizontalDragGestureRecognizer recognizer) {
+      gestures[HorizontalDragGestureRecognizer] = (HorizontalDragGestureRecognizer recognizer) { // ignore: invalid_assignment, #5771
         return (recognizer ??= new HorizontalDragGestureRecognizer())
           ..onDown = onHorizontalDragDown
           ..onStart = onHorizontalDragStart
@@ -281,7 +281,7 @@ class GestureDetector extends StatelessWidget {
         onPanUpdate != null ||
         onPanEnd != null ||
         onPanCancel != null) {
-      gestures[PanGestureRecognizer] = (PanGestureRecognizer recognizer) {
+      gestures[PanGestureRecognizer] = (PanGestureRecognizer recognizer) { // ignore: invalid_assignment, #5771
         return (recognizer ??= new PanGestureRecognizer())
           ..onDown = onPanDown
           ..onStart = onPanStart
@@ -292,7 +292,7 @@ class GestureDetector extends StatelessWidget {
     }
 
     if (onScaleStart != null || onScaleUpdate != null || onScaleEnd != null) {
-      gestures[ScaleGestureRecognizer] = (ScaleGestureRecognizer recognizer) {
+      gestures[ScaleGestureRecognizer] = (ScaleGestureRecognizer recognizer) { // ignore: invalid_assignment, #5771
         return (recognizer ??= new ScaleGestureRecognizer())
           ..onStart = onScaleStart
           ..onUpdate = onScaleUpdate

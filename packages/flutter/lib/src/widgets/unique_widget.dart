@@ -26,6 +26,6 @@ abstract class UniqueWidget<T extends State> extends StatefulWidget {
   /// Might be null if the widget is not currently in the tree.
   T get currentState {
     GlobalKey globalKey = key;
-    return globalKey.currentState;
+    return globalKey.currentState; //ignore: return_of_invalid_type, #5771
   }
 }
