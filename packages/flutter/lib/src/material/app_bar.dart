@@ -14,8 +14,7 @@ import 'tabs.dart';
 import 'theme.dart';
 import 'typography.dart';
 
-const Object _kDefaultHeroTag = const Object();
-const Object _kUnspecifiedArgument = const Object();
+final Object _kDefaultHeroTag = new Object();
 
 /// A widget that can appear at the bottom of an [AppBar]. The [Scaffold] uses
 /// the bottom widget's [bottomHeight] to handle layout for
@@ -92,7 +91,7 @@ class AppBar extends StatelessWidget {
     this.textTheme,
     this.padding: EdgeInsets.zero,
     this.centerTitle,
-    this.heroTag: _kDefaultHeroTag,
+    this.heroTag,
     double expandedHeight,
     double collapsedHeight
   }) : _expandedHeight = expandedHeight,
@@ -199,7 +198,7 @@ class AppBar extends StatelessWidget {
     Brightness brightness,
     TextTheme textTheme,
     EdgeInsets padding,
-    Object heroTag: _kUnspecifiedArgument,
+    Object heroTag,
     double expandedHeight,
     double collapsedHeight
   }) {
@@ -216,7 +215,7 @@ class AppBar extends StatelessWidget {
       iconTheme: iconTheme ?? this.iconTheme,
       textTheme: textTheme ?? this.textTheme,
       padding: padding ?? this.padding,
-      heroTag: heroTag != _kUnspecifiedArgument ? heroTag : this.heroTag,
+      heroTag: heroTag ?? this.heroTag,
       expandedHeight: expandedHeight ?? this._expandedHeight,
       collapsedHeight: collapsedHeight ?? this._collapsedHeight
     );
@@ -398,26 +397,20 @@ class AppBar extends StatelessWidget {
       );
     }
 
-    Widget child = new _AppBarExpandedHeight(
-      expandedHeight: expandedHeight,
-      child: new Material(
-        color: backgroundColor ?? themeData.primaryColor,
-        elevation: elevation,
-        child: new Align(
-          alignment: FractionalOffset.topCenter,
-          child: appBar
+    return new Hero(
+      tag: heroTag ?? _kDefaultHeroTag,
+      child: new _AppBarExpandedHeight(
+        expandedHeight: expandedHeight,
+        child: new Material(
+          color: backgroundColor ?? themeData.primaryColor,
+          elevation: elevation,
+          child: new Align(
+            alignment: FractionalOffset.topCenter,
+            child: appBar
+          )
         )
       )
     );
-
-    if (heroTag != null) {
-      return new Hero(
-        tag: heroTag,
-        child: child
-      );
-    }
-
-    return child;
   }
 
   @override
