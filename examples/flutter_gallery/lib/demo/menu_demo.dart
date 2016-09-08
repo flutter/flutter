@@ -140,7 +140,7 @@ class MenuDemoState extends State<MenuDemo> {
                     title: new Text('Get link')
                   )
                 ),
-                new PopupMenuDivider(),
+                new PopupMenuDivider(), // ignore: list_element_type_not_assignable, https://github.com/flutter/flutter/issues/5771
                 new PopupMenuItem<String>(
                   value: 'Remove',
                   child: new ListItem(

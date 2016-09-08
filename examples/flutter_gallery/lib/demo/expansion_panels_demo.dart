@@ -185,7 +185,7 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
         value: 'Caribbean cruise',
         hint: 'Change trip name',
         valueToString: (String value) => value,
-        builder: (DemoItem<String> item) {
+        builder: (DemoItem<String> item) { // ignore: argument_type_not_assignable, https://github.com/flutter/flutter/issues/5771
           void close() {
             setState(() {
               item.isExpanded = false;
@@ -216,7 +216,7 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
         value: _Location.Bahamas,
         hint: 'Select location',
         valueToString: (_Location location) => location.toString().split(".")[1],
-        builder: (DemoItem<_Location> item) {
+        builder: (DemoItem<_Location> item) { // ignore: argument_type_not_assignable, https://github.com/flutter/flutter/issues/5771
           void close() {
             setState(() {
               item.isExpanded = false;
@@ -278,7 +278,7 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
         value: 80.0,
         hint: 'Select amount of sun',
         valueToString: (double amount) => '${amount.round()}',
-        builder: (DemoItem<double> item) {
+        builder: (DemoItem<double> item) { // ignore: argument_type_not_assignable, https://github.com/flutter/flutter/issues/5771
           void close() {
             setState(() {
               item.isExpanded = false;

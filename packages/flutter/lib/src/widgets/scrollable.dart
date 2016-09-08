@@ -695,7 +695,7 @@ class ScrollableState<T extends Scrollable> extends State<T> {
       switch (config.scrollDirection) {
         case Axis.vertical:
           return <Type, GestureRecognizerFactory>{
-            VerticalDragGestureRecognizer: (VerticalDragGestureRecognizer recognizer) {
+            VerticalDragGestureRecognizer: (VerticalDragGestureRecognizer recognizer) {  // ignore: map_value_type_not_assignable, https://github.com/flutter/flutter/issues/5771
               return (recognizer ??= new VerticalDragGestureRecognizer())
                 ..onDown = _handleDragDown
                 ..onStart = _handleDragStart
@@ -705,7 +705,7 @@ class ScrollableState<T extends Scrollable> extends State<T> {
           };
         case Axis.horizontal:
           return <Type, GestureRecognizerFactory>{
-            HorizontalDragGestureRecognizer: (HorizontalDragGestureRecognizer recognizer) {
+            HorizontalDragGestureRecognizer: (HorizontalDragGestureRecognizer recognizer) {  // ignore: map_value_type_not_assignable, https://github.com/flutter/flutter/issues/5771
               return (recognizer ??= new HorizontalDragGestureRecognizer())
                 ..onDown = _handleDragDown
                 ..onStart = _handleDragStart

@@ -2,7 +2,7 @@ name: stocks
 dependencies:
   flutter:
     path: ../../packages/flutter
-  intl: '>=0.12.4+2 <0.13.0'
+  intl: '>=0.12.4+2 <0.14.0'
 
 dev_dependencies:
   flutter_test:

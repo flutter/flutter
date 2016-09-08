@@ -1,6 +1,6 @@
 name: flutter_gallery
 dependencies:
-  intl: '>=0.12.4+2 <0.13.0'
+  intl: '>=0.12.4+2 <0.14.0'
   collection: '>=1.4.0 <2.0.0'
   string_scanner: ^1.0.0
 

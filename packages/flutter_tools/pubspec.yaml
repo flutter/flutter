@@ -22,7 +22,7 @@ dependencies:
   json_schema: 1.0.3
 
   linter: ^0.1.21
-  meta: ^0.12.0
+  meta: ^1.0.0
   mustache4dart: ^1.0.0
   package_config: '>=0.1.5 <2.0.0'
   path: ^1.3.0
@@ -36,13 +36,13 @@ dependencies:
   # We depend on very specific internal implementation details of the
   # 'test' package, which change between versions, so here we pin it
   # precisely.
-  test: 0.12.15+1
+  test: 0.12.15+4
 
   # Pinned in flutter_test as well.
-  analyzer: 0.27.5-alpha.0
+  analyzer: 0.28.2-alpha.0
 
 dev_dependencies:
-  mockito: ^0.11.0
+  mockito: ^1.0.0
 
 # Exclude this package from the hosted API docs.
 dartdoc:

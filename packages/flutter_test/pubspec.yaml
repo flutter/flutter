@@ -5,12 +5,12 @@ dependencies:
   # The flutter tools depend on very specific internal implementation
   # details of the 'test' package, which change between versions, so
   # here we pin it precisely to avoid version skew across our packages.
-  test: 0.12.15+1
+  test: 0.12.15+4
 
   # We don't actually depend on 'analyzer', but 'test' and 'flutter_tools' do.
   # We pin the version of analyzer we depend on to avoid version skew across our
   # packages.
-  analyzer: 0.27.5-alpha.0 
+  analyzer: 0.28.2-alpha.0
 
   flutter:
     path: ../flutter

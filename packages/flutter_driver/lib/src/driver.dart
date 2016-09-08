@@ -367,8 +367,8 @@ Future<VMServiceClientConnection> _waitAndConnect(String url) async {
       ws1 = await WebSocket.connect(uri.toString());
       ws2 = await WebSocket.connect(uri.toString());
       return new VMServiceClientConnection(
-        new VMServiceClient(new IOWebSocketChannel(ws1)),
-        new rpc.Peer(new IOWebSocketChannel(ws2))..listen()
+        new VMServiceClient(new IOWebSocketChannel(ws1).cast()),
+        new rpc.Peer(new IOWebSocketChannel(ws2).cast())..listen()
       );
     } catch(e) {
       if (ws1 != null)

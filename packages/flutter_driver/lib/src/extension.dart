@@ -60,14 +60,14 @@ class FlutterDriverExtension {
 
   FlutterDriverExtension() {
     _commandHandlers.addAll(<String, CommandHandlerCallback>{
-      'get_health': getHealth,
-      'tap': tap,
-      'get_text': getText,
-      'scroll': scroll,
-      'scrollIntoView': scrollIntoView,
-      'setInputText': _setInputText,
-      'submitInputText': _submitInputText,
-      'waitFor': waitFor,
+      'get_health': getHealth, // ignore: map_value_type_not_assignable, #5771
+      'tap': tap, // ignore: map_value_type_not_assignable, #5771
+      'get_text': getText, // ignore: map_value_type_not_assignable, #5771
+      'scroll': scroll, // ignore: map_value_type_not_assignable, #5771
+      'scrollIntoView': scrollIntoView, // ignore: map_value_type_not_assignable, #5771
+      'setInputText': _setInputText, // ignore: map_value_type_not_assignable, #5771
+      'submitInputText': _submitInputText, // ignore: map_value_type_not_assignable, #5771
+      'waitFor': waitFor, // ignore: map_value_type_not_assignable, #5771
     });
 
     _commandDeserializers.addAll(<String, CommandDeserializerCallback>{
