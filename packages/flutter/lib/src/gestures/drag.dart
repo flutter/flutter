@@ -28,6 +28,8 @@ class DragDownDetails {
 }
 
 /// Signature for when a pointer has contacted the screen and might begin to move.
+///
+/// See [DragGestureRecognizer.onDown].
 typedef void GestureDragDownCallback(DragDownDetails details);
 
 /// Details for [GestureDragStartCallback].
@@ -44,6 +46,8 @@ class DragStartDetails {
 }
 
 /// Signature for when a pointer has contacted the screen and has begun to move.
+///
+/// See [DragGestureRecognizer.onStart].
 typedef void GestureDragStartCallback(DragStartDetails details);
 
 /// Details for [GestureDragUpdateCallback].
@@ -87,6 +91,8 @@ class DragUpdateDetails {
 
 /// Signature for when a pointer that is in contact with the screen and moving
 /// has moved again.
+///
+/// See [DragGestureRecognizer.onUpdate].
 typedef void GestureDragUpdateCallback(DragUpdateDetails details);
 
 /// Details for [GestureDragEndCallback].
@@ -107,10 +113,14 @@ class DragEndDetails {
 ///
 /// The velocity at which the pointer was moving when it stopped contacting
 /// the screen is available in the `details`.
+///
+/// See [DragGestureRecognizer.onEnd].
 typedef void GestureDragEndCallback(DragEndDetails details);
 
 /// Signature for when the pointer that previously triggered a
 /// [GestureDragDownCallback] did not complete.
+///
+/// See [DragGestureRecognizer.onCancel].
 typedef void GestureDragCancelCallback();
 
 bool _isFlingGesture(Velocity velocity) {

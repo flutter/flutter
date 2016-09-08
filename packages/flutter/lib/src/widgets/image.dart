@@ -156,7 +156,6 @@ class Image extends StatefulWidget {
 
   /// Whether to continue showing the old image (true), or briefly show nothing
   /// (false), when the image provider changes.
-  // TODO(ianh): Find a better name.
   final bool gaplessPlayback;
 
   @override

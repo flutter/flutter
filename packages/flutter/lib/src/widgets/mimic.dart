@@ -83,7 +83,7 @@ class MimicOverlayEntry {
   void dispose() {
     _targetKey = null;
     _curve = null;
-    _controller?.stop();
+    _controller?.dispose();
     _controller = null;
     _handle.stopMimic();
     _handle = null;

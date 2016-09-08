@@ -156,7 +156,7 @@ abstract class AnimatedWidgetBaseState<T extends ImplicitlyAnimatedWidget> exten
 
   @override
   void dispose() {
-    _controller.stop();
+    _controller.dispose();
     super.dispose();
   }
 

@@ -334,6 +334,11 @@ class PositionedTransition extends AnimatedWidget {
 ///
 /// * [PositionedTransition]
 class RelativePositionedTransition extends AnimatedWidget {
+  /// Create an animated version of [Positioned].
+  ///
+  /// Each frame, the [Positioned] widget will be configured to represent the
+  /// current value of the [rect] argument assuming that the stack has the given
+  /// [size]. Both [rect] and [size] must be non-null.
   RelativePositionedTransition({
     Key key,
     @required Animation<Rect> rect,
@@ -342,6 +347,8 @@ class RelativePositionedTransition extends AnimatedWidget {
   }) : super(key: key, animation: rect);
 
   /// The animation that controls the child's size and position.
+  ///
+  /// See also [size].
   Animation<Rect> get rect => animation;
 
   /// The [Positioned] widget's offsets are relative to a box of this

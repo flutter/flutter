@@ -80,9 +80,10 @@ abstract class Route<T> {
   /// is replaced, or if the navigator itself is disposed).
   void dispose() { }
 
-  // If the route's transition can be popped via a user gesture (e.g. the iOS
-  // back gesture), this should return a controller object that can be used
-  // to control the transition animation's progress.
+  /// If the route's transition can be popped via a user gesture (e.g. the iOS
+  /// back gesture), this should return a controller object that can be used to
+  /// control the transition animation's progress. Otherwise, it should return
+  /// null.
   NavigationGestureController startPopGesture(NavigatorState navigator) {
     return null;
   }
@@ -158,15 +159,28 @@ class NavigatorObserver {
   void didStopUserGesture() { }
 }
 
-// An interface to be implemented by the Route, allowing its transition
-// animation to be controlled by a drag.
+/// Interface describing an object returned by the [Route.startPopGesture]
+/// method, allowing the route's transition animations to be controlled by a
+/// drag or other user gesture.
 abstract class NavigationGestureController {
+  /// Configures the NavigationGestureController and tells the given [Navigator] that
+  /// a gesture has started.
   NavigationGestureController(this._navigator) {
     // Disable Hero transitions until the gesture is complete.
     _navigator.didStartUserGesture();
   }
 
-  // Must be called when the gesture is done.
+  /// The navigator that this object is controlling.
+  @protected
+  NavigatorState get navigator => _navigator;
+  NavigatorState _navigator;
+
+  /// Release the resources used by this object. The object is no longer usable
+  /// after this method is called.
+  ///
+  /// Must be called when the gesture is done.
+  ///
+  /// Calling this method notifies the navigator that the gesture has completed.
   void dispose() {
     _navigator.didStopUserGesture();
     _navigator = null;
@@ -179,10 +193,6 @@ abstract class NavigationGestureController {
   // The drag gesture has ended with a horizontal motion of
   // [fractionalVelocity] as a fraction of screen width per second.
   void dragEnd(double fractionalVelocity);
-
-  @protected
-  NavigatorState get navigator => _navigator;
-  NavigatorState _navigator;
 }
 
 /// Signature for the [Navigator.popUntil] predicate argument.
@@ -363,6 +373,8 @@ class NavigatorState extends State<Navigator> {
 
   bool _debugLocked = false; // used to prevent re-entrant calls to push, pop, and friends
 
+  /// Looks up the route with the given name using [Navigator.onGenerateRoute],
+  /// and then [push]es that route.
   void pushNamed(String name) {
     assert(!_debugLocked);
     assert(name != null);
@@ -376,6 +388,15 @@ class NavigatorState extends State<Navigator> {
     push(route);
   }
 
+  /// Adds the given route to the navigator's history, and transitions to it.
+  ///
+  /// The new route and the previous route (if any) are notified (see
+  /// [Route.didPush] and [Route.didChangeNext]). If the [Navigator] has an
+  /// [Navigator.observer], it will be notified as well (see
+  /// [NavigatorObserver.didPush]).
+  ///
+  /// Ongoing gestures within the current route are canceled when a new route is
+  /// pushed.
   void push(Route<dynamic> route) {
     assert(!_debugLocked);
     assert(() { _debugLocked = true; return true; });
@@ -396,6 +417,14 @@ class NavigatorState extends State<Navigator> {
     _cancelActivePointers();
   }
 
+  /// Replaces a route that is not currently visible with a new route.
+  ///
+  /// The new route and the route below the new route (if any) are notified
+  /// (see [Route.didReplace] and [Route.didChangeNext]). The navigator observer
+  /// is not notified. The old route is disposed (see [Route.dispose]).
+  ///
+  /// This can be useful in combination with [removeRouteBelow] when building a
+  /// non-linear user experience.
   void replace({ Route<dynamic> oldRoute, Route<dynamic> newRoute }) {
     assert(!_debugLocked);
     assert(oldRoute != null);
@@ -425,17 +454,29 @@ class NavigatorState extends State<Navigator> {
       oldRoute._navigator = null;
     });
     assert(() { _debugLocked = false; return true; });
-    _cancelActivePointers();
   }
 
-  void replaceRouteBefore({ Route<dynamic> anchorRoute, Route<dynamic> newRoute }) {
+  /// Replaces a route that is not currently visible with a new route.
+  ///
+  /// The route to be removed is the one below the given `anchorRoute`. That
+  /// route must not be the first route in the history.
+  ///
+  /// In every other way, this acts the same as [replace].
+  void replaceRouteBelow({ Route<dynamic> anchorRoute, Route<dynamic> newRoute }) {
     assert(anchorRoute != null);
     assert(anchorRoute._navigator == this);
     assert(_history.indexOf(anchorRoute) > 0);
     replace(oldRoute: _history[_history.indexOf(anchorRoute)-1], newRoute: newRoute);
   }
 
-  void removeRouteBefore(Route<dynamic> anchorRoute) {
+  /// Removes the route below the given `anchorRoute`. The route to be removed
+  /// must not currently be visible. The `anchorRoute` must not be the first
+  /// route in the history.
+  ///
+  /// The removed route is disposed (see [Route.dispose]). The route prior to
+  /// the removed route, if any, is notified (see [Route.didChangeNext]). The
+  /// navigator observer is not notified.
+  void removeRouteBelow(Route<dynamic> anchorRoute) {
     assert(!_debugLocked);
     assert(() { _debugLocked = true; return true; });
     assert(anchorRoute._navigator == this);
@@ -453,9 +494,21 @@ class NavigatorState extends State<Navigator> {
       targetRoute._navigator = null;
     });
     assert(() { _debugLocked = false; return true; });
-    _cancelActivePointers();
   }
 
+  /// Removes the top route in the [Navigator]'s history.
+  ///
+  /// If an argument is provided, that argument will be the return value of the
+  /// route (see [Route.didPop]).
+  ///
+  /// If there are any routes left on the history, the top remaining route is
+  /// notified (see [Route.didPopNext]), and the method returns true. In that
+  /// case, if the [Navigator] has an [Navigator.observer], it will be notified
+  /// as well (see [NavigatorObserver.didPop]). Otherwise, if the popped route
+  /// was the last route, the method returns false.
+  ///
+  /// Ongoing gestures within the current route are canceled when a route is
+  /// popped.
   bool pop([dynamic result]) {
     assert(!_debugLocked);
     assert(() { _debugLocked = true; return true; });
@@ -487,6 +540,7 @@ class NavigatorState extends State<Navigator> {
     return true;
   }
 
+  /// Repeatedly calls [pop] until the given `predicate` returns true.
   void popUntil(RoutePredicate predicate) {
     while (!predicate(_history.last))
       pop();
@@ -533,8 +587,7 @@ class NavigatorState extends State<Navigator> {
   }
 
   void _cancelActivePointers() {
-    // This mechanism is far from perfect. See the issue below for more details:
-    // https://github.com/flutter/flutter/issues/4770
+    // TODO(abarth): This mechanism is far from perfect. See https://github.com/flutter/flutter/issues/4770
     RenderAbsorbPointer absorber = _overlayKey.currentContext?.ancestorRenderObjectOfType(const TypeMatcher<RenderAbsorbPointer>());
     setState(() {
       absorber?.absorbing = true;

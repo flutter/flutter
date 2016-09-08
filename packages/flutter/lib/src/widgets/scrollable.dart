@@ -780,9 +780,21 @@ class ScrollNotification extends Notification {
   /// The scrollable that scrolled.
   final ScrollableState scrollable;
 
+  /// The details from the underlying [DragGestureRecognizer] gesture, if the
+  /// notification ultimately came from a [DragGestureRecognizer.onStart]
+  /// handler; otherwise null.
   DragStartDetails get dragStartDetails => kind == ScrollNotificationKind.started ? _details : null;
+
+  /// The details from the underlying [DragGestureRecognizer] gesture, if the
+  /// notification ultimately came from a [DragGestureRecognizer.onUpdate]
+  /// handler; otherwise null.
   DragUpdateDetails get dragUpdateDetails => kind == ScrollNotificationKind.updated ? _details : null;
+
+  /// The details from the underlying [DragGestureRecognizer] gesture, if the
+  /// notification ultimately came from a [DragGestureRecognizer.onEnd]
+  /// handler; otherwise null.
   DragEndDetails get dragEndDetails => kind == ScrollNotificationKind.ended ? _details : null;
+
   final dynamic _details;
 
   /// The number of scrollable widgets that have already received this
