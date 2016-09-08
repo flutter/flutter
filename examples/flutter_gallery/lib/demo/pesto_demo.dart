@@ -317,6 +317,7 @@ class _RecipePageState extends State<RecipePage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
   final GlobalKey<ScrollableState> _scrollableKey = new GlobalKey<ScrollableState>();
   final TextStyle menuItemStyle = new PestoStyle(fontSize: 15.0, color: Colors.black54, height: 24.0/15.0);
+  final Object _disableHeroTransition = new Object();
 
   double _getAppBarHeight(BuildContext context) => MediaQuery.of(context).size.height * 0.3;
 
@@ -327,6 +328,7 @@ class _RecipePageState extends State<RecipePage> {
       scrollableKey: _scrollableKey,
       appBarBehavior: AppBarBehavior.scroll,
       appBar: new AppBar(
+        heroTag: _disableHeroTransition,
         expandedHeight: _getAppBarHeight(context),
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -346,9 +348,6 @@ class _RecipePageState extends State<RecipePage> {
             ]
           )
         ],
-        // This empty space keeps the app bar from moving until the screen is
-        // scrolled at least _getAppBarHeight().
-        flexibleSpace: new Container()
       ),
       body: _buildContainer(context)
     );
