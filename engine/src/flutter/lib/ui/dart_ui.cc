@@ -18,18 +18,12 @@
 #include "flutter/lib/ui/painting/path.h"
 #include "flutter/lib/ui/painting/picture_recorder.h"
 #include "flutter/lib/ui/painting/picture.h"
+#include "flutter/lib/ui/text/paragraph_builder.h"
+#include "flutter/lib/ui/text/paragraph.h"
 #include "flutter/lib/ui/window/window.h"
 #include "lib/ftl/build_config.h"
 #include "lib/tonic/converter/dart_converter.h"
 #include "lib/tonic/logging/dart_error.h"
-
-#if defined(OS_FUCHSIA)
-#include "flutter/lib/ui/text/paragraph_builder_stub.h"
-#include "flutter/lib/ui/text/paragraph_stub.h"
-#else
-#include "flutter/lib/ui/text/paragraph_builder.h"
-#include "flutter/lib/ui/text/paragraph.h"
-#endif
 
 using tonic::ToDart;
 
