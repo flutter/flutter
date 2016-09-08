@@ -215,6 +215,7 @@ class AppBar extends StatelessWidget {
       iconTheme: iconTheme ?? this.iconTheme,
       textTheme: textTheme ?? this.textTheme,
       padding: padding ?? this.padding,
+      centerTitle: centerTitle ?? this.centerTitle,
       heroTag: heroTag ?? this.heroTag,
       expandedHeight: expandedHeight ?? this._expandedHeight,
       collapsedHeight: collapsedHeight ?? this._collapsedHeight
@@ -308,16 +309,18 @@ class AppBar extends StatelessWidget {
         child: leading
       ));
     }
+
     toolBarRow.add(new Flexible(
-      child: new Align(
-        // TODO(abarth): In RTL this should be aligned to the right.
-        alignment: FractionalOffset.centerLeft,
-        child: new Padding(
-          padding: new EdgeInsets.only(left: 8.0),
-          child: effectiveCenterTitle ? null : centerWidget
+      child: new Padding(
+        padding: new EdgeInsets.symmetric(horizontal: 8.0),
+        child: new Align(
+          // TODO(abarth): In RTL, when !centerTitle, use FractionalOffset.centerRight
+          alignment: effectiveCenterTitle ? FractionalOffset.center : FractionalOffset.centerLeft,
+          child: centerWidget
         )
       )
     ));
+
     if (actions != null)
       toolBarRow.addAll(actions);
 
@@ -325,17 +328,6 @@ class AppBar extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 8.0),
       child: new Row(children: toolBarRow)
     );
-
-    if (effectiveCenterTitle && centerWidget != null) {
-      toolBar = new Stack(
-        children: <Widget>[
-          // TODO(abarth): If there isn't enough room, we should move the title
-          // off center rather than overlap the actions.
-          new Center(child: centerWidget),
-          toolBar
-        ]
-      );
-    }
 
     Widget appBar = new SizedBox(
       height: kToolBarHeight,
