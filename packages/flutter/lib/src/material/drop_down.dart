@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 import 'package:meta/meta.dart';
 
@@ -125,7 +126,7 @@ class _DropDownMenuState<T> extends State<_DropDownMenu<T>> {
     _resize = new CurvedAnimation(
       parent: config.route.animation,
       curve: const Interval(0.25, 0.5),
-      reverseCurve: const Step(0.0)
+      reverseCurve: const Threshold(0.0)
     );
   }
 
@@ -145,7 +146,7 @@ class _DropDownMenuState<T> extends State<_DropDownMenu<T>> {
     for (int itemIndex = 0; itemIndex < route.items.length; ++itemIndex) {
       CurvedAnimation opacity;
       if (itemIndex == route.selectedIndex) {
-        opacity = new CurvedAnimation(parent: route.animation, curve: const Step(0.0));
+        opacity = new CurvedAnimation(parent: route.animation, curve: const Threshold(0.0));
       } else {
         final double start = (0.5 + (itemIndex + 1) * unit).clamp(0.0, 1.0);
         final double end = (start + 1.5 * unit).clamp(0.0, 1.0);
@@ -249,7 +250,11 @@ class _DropDownMenuRouteLayout<T> extends SingleChildLayoutDelegate {
     if (route.initialLayout) {
       route.initialLayout = false;
       final double scrollOffset = selectedItemOffset - (buttonTop - top);
-      scrollableKey.currentState.scrollTo(scrollOffset);
+      SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
+        // TODO(ianh): Compute and set this during layout instead of being
+        // lagged by one frame. https://github.com/flutter/flutter/issues/5751
+        scrollableKey.currentState.scrollTo(scrollOffset);
+      });
     }
 
     return new Offset(buttonRect.left, top);

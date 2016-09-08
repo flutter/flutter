@@ -1410,12 +1410,16 @@ class BuildOwner {
   final _InactiveElements _inactiveElements = new _InactiveElements();
 
   final List<BuildableElement> _dirtyElements = <BuildableElement>[];
+  bool _scheduledFlushDirtyElements = false;
 
   /// Adds an element to the dirty elements list so that it will be rebuilt
-  /// when [buildDirtyElements] is called.
+  /// when [WidgetsBinding.beginFrame] calls [buildScope].
   void scheduleBuildFor(BuildableElement element) {
+    assert(element != null);
+    assert(element.owner == this);
+    assert(element._inDirtyList == _dirtyElements.contains(element));
     assert(() {
-      if (_dirtyElements.contains(element)) {
+      if (element._inDirtyList) {
         throw new FlutterError(
           'scheduleBuildFor() called for a widget for which a build was already scheduled.\n'
           'The method was called for the following element:\n'
@@ -1440,9 +1444,12 @@ class BuildOwner {
       }
       return true;
     });
-    if (_dirtyElements.isEmpty && onBuildScheduled != null)
+    if (!_scheduledFlushDirtyElements && onBuildScheduled != null) {
+      _scheduledFlushDirtyElements = true;
       onBuildScheduled();
+    }
     _dirtyElements.add(element);
+    element._inDirtyList = true;
   }
 
   int _debugStateLockLevel = 0;
@@ -1450,24 +1457,15 @@ class BuildOwner {
   bool _debugBuilding = false;
   BuildableElement _debugCurrentBuildTarget;
 
-  /// Establishes a scope in which calls to [State.setState] are forbidden.
+  /// Establishes a scope in which calls to [State.setState] are forbidden, and
+  /// calls the given `callback`.
   ///
-  /// This mechanism prevents build functions from transitively requiring other
-  /// build functions to run, potentially causing infinite loops.
-  ///
-  /// If the building argument is true, then this function enables additional
-  /// asserts that check invariants that should apply during building.
-  ///
-  /// The context argument is used to describe the scope in case an exception is
-  /// caught while invoking the callback.
-  void lockState(void callback(), { bool building: false }) {
-    bool debugPreviouslyBuilding;
+  /// This mechanism is used to ensure that, for instance, [State.dispose] does
+  /// not call [State.setState].
+  void lockState(void callback()) {
+    assert(callback != null);
     assert(_debugStateLockLevel >= 0);
     assert(() {
-      if (building) {
-        debugPreviouslyBuilding = _debugBuilding;
-        _debugBuilding = true;
-      }
       _debugStateLockLevel += 1;
       return true;
     });
@@ -1476,10 +1474,75 @@ class BuildOwner {
     } finally {
       assert(() {
         _debugStateLockLevel -= 1;
-        if (building) {
-          assert(_debugBuilding);
-          _debugBuilding = debugPreviouslyBuilding;
+        return true;
+      });
+    }
+    assert(_debugStateLockLevel >= 0);
+  }
+
+  /// Establishes a scope for updating the widget tree, and calls the given
+  /// `callback`, if any. Then, builds all the elements that were marked as
+  /// dirty using [scheduleBuildFor], in depth order.
+  ///
+  /// This mechanism prevents build functions from transitively requiring other
+  /// build functions to run, potentially causing infinite loops.
+  ///
+  /// The dirty list is processed after `callback` returns, building all the
+  /// elements that were marked as dirty using [scheduleBuildFor], in depth
+  /// order. If elements are marked as dirty while this method is running, they
+  /// must be deeper than the `context` node, and deeper than any
+  /// previously-built node in this pass.
+  ///
+  /// To flush the current dirty list without performing any other work, this
+  /// function can be called with no callback. This is what the framework does
+  /// each frame, in [WidgetsBinding.beginFrame].
+  ///
+  /// Only one [buildScope] can be active at a time.
+  ///
+  /// A [buildScope] implies a [lockState] scope as well.
+  void buildScope(Element context, [VoidCallback callback]) {
+    if (callback == null && _dirtyElements.isEmpty)
+      return;
+    assert(context != null);
+    assert(_debugStateLockLevel >= 0);
+    assert(!_debugBuilding);
+    assert(() {
+      _debugStateLockLevel += 1;
+      _debugBuilding = true;
+      return true;
+    });
+    Timeline.startSync('Build');
+    try {
+      _scheduledFlushDirtyElements = true;
+      if (callback != null)
+        callback();
+      _dirtyElements.sort(_elementSort);
+      int dirtyCount = _dirtyElements.length;
+      int index = 0;
+      while (index < dirtyCount) {
+        assert(_dirtyElements[index] != null);
+        assert(_dirtyElements[index]._inDirtyList);
+        assert(!_dirtyElements[index]._active || _dirtyElements[index]._debugIsInScope(context));
+        _dirtyElements[index].rebuild();
+        index += 1;
+        if (dirtyCount < _dirtyElements.length) {
+          _dirtyElements.sort(_elementSort);
+          dirtyCount = _dirtyElements.length;
         }
+      }
+    } finally {
+      assert(!_dirtyElements.any((BuildableElement element) => element._active && element.dirty));
+      for (BuildableElement element in _dirtyElements) {
+        assert(element._inDirtyList);
+        element._inDirtyList = false;
+      }
+      _dirtyElements.clear();
+      _scheduledFlushDirtyElements = false;
+      Timeline.finishSync();
+      assert(_debugBuilding);
+      assert(() {
+        _debugBuilding = false;
+        _debugStateLockLevel -= 1;
         return true;
       });
     }
@@ -1496,36 +1559,6 @@ class BuildOwner {
     if (a.dirty && !b.dirty)
       return 1;
     return 0;
-  }
-
-  /// Builds all the elements that were marked as dirty using
-  /// [scheduleBuildFor], in depth order. If elements are marked as dirty while
-  /// this runs, they must be deeper than the algorithm has yet reached.
-  ///
-  /// This is called by [WidgetsBinding.beginFrame].
-  void buildDirtyElements() {
-    if (_dirtyElements.isEmpty)
-      return;
-    Timeline.startSync('Build');
-    try {
-      lockState(() {
-        _dirtyElements.sort(_elementSort);
-        int dirtyCount = _dirtyElements.length;
-        int index = 0;
-        while (index < dirtyCount) {
-          _dirtyElements[index].rebuild();
-          index += 1;
-          if (dirtyCount < _dirtyElements.length) {
-            _dirtyElements.sort(_elementSort);
-            dirtyCount = _dirtyElements.length;
-          }
-        }
-        assert(!_dirtyElements.any((BuildableElement element) => element._active && element.dirty));
-      }, building: true);
-    } finally {
-      _dirtyElements.clear();
-      Timeline.finishSync();
-    }
   }
 
   /// Complete the element build pass by unmounting any elements that are no
@@ -1605,6 +1638,15 @@ abstract class Element implements BuildContext {
     visitChildren((Element child) {
       child._reassemble();
     });
+  }
+
+  bool _debugIsInScope(Element target) {
+    assert(target != null);
+    if (target == this)
+      return true;
+    if (_parent != null)
+      return _parent._debugIsInScope(target);
+    return false;
   }
 
   RenderObject get renderObject {
@@ -1875,6 +1917,7 @@ abstract class Element implements BuildContext {
     });
     assert(_debugLifecycleState == _ElementLifecycle.inactive);
     assert(widget != null);
+    assert(owner != null);
     assert(depth != null);
     assert(!_active);
     _active = true;
@@ -2091,6 +2134,10 @@ abstract class BuildableElement extends Element {
   bool get dirty => _dirty;
   bool _dirty = true;
 
+  // Whether this is in owner._dirtyElements. This is used to know whether we
+  // should be adding the element back into the list when it's reactivated.
+  bool _inDirtyList = false;
+
   // We let widget authors call setState from initState, didUpdateConfig, and
   // build even when state is locked because its convenient and a no-op anyway.
   // This flag ensures that this convenience is only allowed on the element
@@ -2124,15 +2171,7 @@ abstract class BuildableElement extends Element {
           // a current build target when we're building.
           return true;
         }
-        bool foundTarget = false;
-        visitAncestorElements((Element element) {
-          if (element == owner._debugCurrentBuildTarget) {
-            foundTarget = true;
-            return false;
-          }
-          return true;
-        });
-        if (foundTarget)
+        if (_debugIsInScope(owner._debugCurrentBuildTarget))
           return true;
       }
       if (owner._debugStateLocked && (!_debugAllowIgnoredCallsToMarkNeedsBuild || !dirty)) {
@@ -2212,7 +2251,9 @@ abstract class BuildableElement extends Element {
   void activate() {
     final bool shouldRebuild = ((_dependencies != null && _dependencies.length > 0) || _hadUnsatisfiedDependencies);
     super.activate(); // clears _dependencies, and sets active to true
-    if (shouldRebuild) {
+    if (_dirty && !_inDirtyList) {
+      owner.scheduleBuildFor(this);
+    } else if (shouldRebuild) {
       assert(_active); // otherwise markNeedsBuild is a no-op
       markNeedsBuild();
     }
@@ -2904,7 +2945,7 @@ abstract class RootRenderObjectElement extends RenderObjectElement {
   /// The [WidgetsBinding] introduces the primary owner,
   /// [WidgetsBinding.buildOwner], and assigns it to the widget tree in the call
   /// to [runApp]. The binding is responsible for driving the build pipeline by
-  /// calling the build owner's [BuildOwner.buildDirtyElements] method. See
+  /// calling the build owner's [BuildOwner.buildScope] method. See
   /// [WidgetsBinding.beginFrame].
   void assignOwner(BuildOwner owner) {
     _owner = owner;

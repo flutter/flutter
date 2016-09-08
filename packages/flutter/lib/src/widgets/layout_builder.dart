@@ -176,9 +176,9 @@ class _LayoutBuilderElement extends RenderObjectElement {
   }
 
   void _layout(BoxConstraints constraints) {
-    Widget built;
-    if (widget.builder != null) {
-      owner.lockState(() {
+    owner.buildScope(this, () {
+      Widget built;
+      if (widget.builder != null) {
         try {
           built = widget.builder(this, constraints);
           debugWidgetBuilderValue(widget, built);
@@ -186,13 +186,6 @@ class _LayoutBuilderElement extends RenderObjectElement {
           _debugReportException('building $widget', e, stack);
           built = new ErrorWidget(e);
         }
-      });
-    }
-    owner.lockState(() {
-      if (widget.builder == null) {
-        if (_child != null)
-          _child = updateChild(_child, null, null);
-        return;
       }
       try {
         _child = updateChild(_child, built, null);
@@ -202,7 +195,7 @@ class _LayoutBuilderElement extends RenderObjectElement {
         built = new ErrorWidget(e);
         _child = updateChild(null, built, slot);
       }
-    }, building: true);
+    });
   }
 
   @override

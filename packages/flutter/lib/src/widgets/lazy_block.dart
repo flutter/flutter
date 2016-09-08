@@ -629,11 +629,11 @@ class _LazyBlockElement extends RenderObjectElement {
       while (currentLogicalIndex > 0 && currentLogicalOffset > startLogicalOffset) {
         currentLogicalIndex -= 1;
         Element newElement;
-        owner.lockState(() {
+        owner.buildScope(this, () {
           Widget newWidget = _callBuilder(builder, currentLogicalIndex, requireNonNull: true);
           newWidget = new RepaintBoundary.wrap(newWidget, currentLogicalIndex);
           newElement = inflateWidget(newWidget, null);
-        }, building: true);
+        });
         newChildren.add(newElement);
         RenderBox child = block.firstChild;
         assert(child == newChildren.last.renderObject);
@@ -698,14 +698,14 @@ class _LazyBlockElement extends RenderObjectElement {
       if (physicalIndex >= _children.length) {
         assert(physicalIndex == _children.length);
         Element newElement;
-        owner.lockState(() {
+        owner.buildScope(this, () {
           Widget newWidget = _callBuilder(builder, currentLogicalIndex);
           if (newWidget == null)
             return;
           newWidget = new RepaintBoundary.wrap(newWidget, currentLogicalIndex);
           Element previousChild = _children.isEmpty ? null : _children.last;
           newElement = inflateWidget(newWidget, previousChild);
-        }, building: true);
+        });
         if (newElement == null)
           break;
         _children.add(newElement);
