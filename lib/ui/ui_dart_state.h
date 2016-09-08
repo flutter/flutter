@@ -6,13 +6,10 @@
 #define FLUTTER_LIB_UI_UI_DART_STATE_H_
 
 #include "dart/runtime/include/dart_api.h"
+#include "flutter/sky/engine/wtf/RefPtr.h"
 #include "lib/ftl/build_config.h"
 #include "lib/tonic/dart_persistent_value.h"
 #include "lib/tonic/dart_state.h"
-
-#if !defined(OS_FUCHSIA)
-#include "flutter/sky/engine/wtf/RefPtr.h"
-#endif
 
 namespace blink {
 class FontSelector;
@@ -49,10 +46,8 @@ class UIDartState : public tonic::DartState {
   DartJniIsolateData* jni_data();
 #endif
 
-#if !defined(OS_FUCHSIA)
   void set_font_selector(PassRefPtr<FontSelector> selector);
   PassRefPtr<FontSelector> font_selector();
-#endif
 
  private:
   void DidSetIsolate() override;
@@ -62,13 +57,10 @@ class UIDartState : public tonic::DartState {
   std::string debug_name_;
   std::unique_ptr<MojoServices> mojo_services_;
   std::unique_ptr<Window> window_;
+  RefPtr<FontSelector> font_selector_;
 
 #if defined(OS_ANDROID)
   std::unique_ptr<DartJniIsolateData> jni_data_;
-#endif
-
-#if !defined(OS_FUCHSIA)
-  RefPtr<FontSelector> font_selector_;
 #endif
 };
 

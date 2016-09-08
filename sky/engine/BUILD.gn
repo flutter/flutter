@@ -35,6 +35,10 @@ config("non_test_config") {
 }
 
 group("engine") {
+  public_configs = [
+    ":config",
+  ]
+
   public_deps = [
     "//flutter/sky/engine/core",
     "//flutter/sky/engine/platform",
