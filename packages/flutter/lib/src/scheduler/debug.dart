@@ -5,10 +5,12 @@
 /// Print a banner at the beginning of each frame.
 ///
 /// Frames triggered by the engine and handler by the scheduler binding will
-/// have a banner saying "Begin Frame" and giving the time stamp of the frame.
+/// have a banner giving the frame number and the time stamp of the frame.
 ///
 /// Frames triggered eagerly by the widget framework (e.g. when calling
-/// [runApp]) will have a label saying "Begin Warm-Up Frame".
+/// [runApp]) will have a label saying "warm-up frame" instead of the time stamp
+/// (the time stamp sent to frame callbacks in that case is the time of the last
+/// frame, or 0:00 if it is the first frame).
 ///
 /// To include a banner at the end of each frame as well, to distinguish
 /// intra-frame output from inter-frame output, set [debugPrintEndFrameBanner]

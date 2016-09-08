@@ -597,7 +597,6 @@ void main() {
       )
     );
 
-    await tester.pump();
     expect(box.size.height, equals(300));
 
     matches(getBorderRadius(tester, 0), RadiusType.Round, RadiusType.Round);

@@ -40,6 +40,7 @@ void main() {
     box = tester.renderObject(find.byType(ExpansionPanelList));
     expect(box.size.height, equals(oldHeight));
 
+    // now expand the child panel
     await tester.pumpWidget(
       new ScrollableViewport(
         child: new ExpansionPanelList(
@@ -53,13 +54,15 @@ void main() {
                 return new Text(isExpanded ? 'B' : 'A');
               },
               body: new SizedBox(height: 100.0),
-              isExpanded: true
+              isExpanded: true // this is the addition
             )
           ]
         )
       )
     );
+
     await tester.pump(const Duration(milliseconds: 200));
+
 
     expect(find.text('A'), findsNothing);
     expect(find.text('B'), findsOneWidget);

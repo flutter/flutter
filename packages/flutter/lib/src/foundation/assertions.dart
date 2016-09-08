@@ -334,7 +334,11 @@ class FlutterError extends AssertionError {
 ///
 /// The `maxFrames` argument can be given to limit the stack to the given number
 /// of lines. By default, all non-filtered stack lines are shown.
-void debugPrintStack({ int maxFrames }) {
+///
+/// The `label` argument, if present, will be printed before the stack.
+void debugPrintStack({ String label, int maxFrames }) {
+  if (label != null)
+    debugPrint(label);
   List<String> lines = StackTrace.current.toString().trimRight().split('\n');
   if (maxFrames != null)
     lines = lines.take(maxFrames);
