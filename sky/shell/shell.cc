@@ -71,7 +71,9 @@ base::LazyInstance<NonDiscardableMemoryAllocator> g_discardable;
 
 void ServiceIsolateHook(bool running_precompiled) {
   if (!running_precompiled) {
-    DiagnosticServer::Start();
+    const blink::Settings& settings = blink::Settings::Get();
+    if (settings.enable_observatory)
+      DiagnosticServer::Start();
   }
 }
 
@@ -129,7 +131,9 @@ void Shell::InitStandalone(std::string icu_data_path) {
   base::CommandLine& command_line = *base::CommandLine::ForCurrentProcess();
 
   blink::Settings settings;
-
+  // Enable Observatory
+  settings.enable_observatory =
+      !command_line.HasSwitch(switches::kDisableObservatory);
   // Set Observatory Port
   if (command_line.HasSwitch(switches::kDeviceObservatoryPort)) {
     auto port_string =
