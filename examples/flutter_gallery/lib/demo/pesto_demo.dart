@@ -15,9 +15,6 @@ class PestoDemo extends StatelessWidget {
   Widget build(BuildContext context) => new PestoHome();
 }
 
-const String _kUserName = 'Jonathan';
-const String _kUserEmail = 'jonathan@example.com';
-const String _kUserImage = 'packages/flutter_gallery_assets/pesto/avatar.jpg';
 const String _kSmallLogoImage = 'packages/flutter_gallery_assets/pesto/logo_small.png';
 const String _kMediumLogoImage = 'packages/flutter_gallery_assets/pesto/logo_medium.png';
 const double _kAppBarHeight = 128.0;
@@ -79,11 +76,6 @@ class RecipeGridPage extends StatefulWidget {
 
 class _RecipeGridPageState extends State<RecipeGridPage> {
   final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
-  final TextStyle favoritesMessageStyle = const PestoStyle(fontSize: 16.0);
-  final TextStyle userStyle = const PestoStyle(fontWeight: FontWeight.bold);
-  final TextStyle emailStyle = const PestoStyle(color: Colors.black54);
-
-  bool showFavorites = false;
 
   @override
   Widget build(BuildContext context) {
@@ -95,7 +87,6 @@ class _RecipeGridPageState extends State<RecipeGridPage> {
         scrollableKey: config.scrollableKey,
         appBarBehavior: AppBarBehavior.under,
         appBar: buildAppBar(context, statusBarHeight),
-        drawer: buildDrawer(context),
         floatingActionButton: new FloatingActionButton(
           child: new Icon(Icons.edit),
           onPressed: () {
@@ -145,73 +136,8 @@ class _RecipeGridPageState extends State<RecipeGridPage> {
     );
   }
 
-  Widget buildDrawer(BuildContext context) {
-    return new Drawer(
-      child: new Block(
-        children: <Widget>[
-          new DrawerHeader(
-            child: new Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                new Container(
-                  decoration: new BoxDecoration(
-                    border: new Border.all(color: _kTheme.primaryColor, width: 2.0),
-                    shape: BoxShape.circle
-                  ),
-                  width: 72.0,
-                  height: 72.0,
-                  padding: const EdgeInsets.all(2.0),
-                  margin: const EdgeInsets.only(bottom: 16.0),
-                  child: new ClipOval(
-                    child: new Image.asset(_kUserImage, fit: ImageFit.contain)
-                  )
-                ),
-                new Text(_kUserName, style: userStyle),
-                new Text(_kUserEmail, style: emailStyle)
-              ]
-            )
-          ),
-          new DrawerItem(
-            child: new Text('Home'),
-            icon: new Icon(Icons.home),
-            selected: !showFavorites,
-            onPressed: () {
-              Navigator.popUntil(context, ModalRoute.withName('/pesto'));
-            }
-          ),
-          new DrawerItem(
-            child: new Text('Favorites'),
-            icon: new Icon(Icons.favorite),
-            selected: showFavorites,
-            onPressed: () {
-              if (showFavorites)
-                Navigator.pop(context);
-              else
-                showFavoritesPage(context);
-            }
-          ),
-          new Divider(),
-          new DrawerItem(
-            child: new Text('Return to Gallery'),
-            icon: new Icon(Icons.arrow_back),
-            onPressed: () {
-              Navigator.popUntil(context, ModalRoute.withName('/'));
-            }
-          ),
-        ]
-      )
-    );
-  }
-
   Widget buildBody(BuildContext context, double statusBarHeight) {
     final EdgeInsets padding = new EdgeInsets.fromLTRB(8.0, 8.0 + _kAppBarHeight + statusBarHeight, 8.0, 8.0);
-
-    if (config.recipes.isEmpty) {
-      return new Padding(
-        padding: padding,
-        child: new Text('Save your favorite recipes to see them here.', style: favoritesMessageStyle)
-      );
-    }
 
     return new ScrollableGrid(
       scrollableKey: config.scrollableKey,

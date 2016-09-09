@@ -23,7 +23,7 @@ final List<String> demoCategories = <String>[
 // kAllGalleryItems.map((GalleryItem item) => item.title).toList();
 final List<String> demoTitles = <String>[
   // Demos
-  // 'Pesto', TODO(hansmuller): restore when Pesto has a back button.
+  'Pesto',
   'Shrine',
   'Contact profile',
   // Components
