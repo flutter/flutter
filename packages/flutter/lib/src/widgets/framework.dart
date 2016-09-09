@@ -2508,7 +2508,7 @@ class StatefulElement extends ComponentElement {
         "inheritFromWidgetOfExactType($targetType) was called before ${_state.runtimeType}.initState() completed.\n"
         "When an inherited widget changes, for example if the value of Theme.of() changes, "
         "its dependent widgets are rebuilt. If the dependent widget's reference to "
-        "the inherited widget is in an constructor or an initState() method, "
+        "the inherited widget is in a constructor or an initState() method, "
         "then the rebuilt dependent widget will not reflect the changes in the "
         "inherited widget.\n"
         "Typically references to to inherited widgets should occur in widget build() methods.\n"

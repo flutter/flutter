@@ -950,6 +950,18 @@ class PipelineOwner {
     }
   }
 
+  /// The object that is managing semantics for this pipeline owner, if any.
+  ///
+  /// An owner is created by [addSemanticsListener] the first time a listener is
+  /// added.
+  ///
+  /// The owner is valid for as long as there are listeners. Once the last
+  /// listener is removed (by calling [SemanticsOwner.removeListener] on the
+  /// [semanticsOwner]), the [semanticsOwner] field will revert to null, and the
+  /// previous owner will be disposed.
+  ///
+  /// When [semanticsOwner] is null, the [PipelineOwner] skips all steps
+  /// relating to semantics.
   SemanticsOwner get semanticsOwner => _semanticsOwner;
   SemanticsOwner _semanticsOwner;
   bool _debugDoingSemantics = false;

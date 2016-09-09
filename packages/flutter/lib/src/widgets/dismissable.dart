@@ -134,8 +134,8 @@ class _DismissableState extends State<Dismissable> {
 
   @override
   void dispose() {
-    _moveController?.stop();
-    _resizeController?.stop();
+    _moveController.dispose();
+    _resizeController?.dispose();
     super.dispose();
   }
 

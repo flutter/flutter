@@ -33,7 +33,7 @@ enum CrossFadeState {
 /// animation crops overflowing children during the animation by aligning their
 /// top edge, which means that the bottom will be clipped.
 class AnimatedCrossFade extends StatefulWidget {
-  /// Creates a cross fade animation widget.
+  /// Creates a cross-fade animation widget.
   ///
   /// The [duration] of the animation is the same for all components (fade in,
   /// fade out, and size), and you can pass [Interval]s instead of [Curve]s in
@@ -54,17 +54,14 @@ class AnimatedCrossFade extends StatefulWidget {
   }
 
   /// The child that is visible when [crossFadeState] is [showFirst]. It fades
-  /// out when transitioning from [showFirst] to [showSecond] and fades in
-  /// otherwise.
+  /// out when transitioning from [showFirst] to [showSecond] and vice versa.
   final Widget firstChild;
 
   /// The child that is visible when [crossFadeState] is [showSecond]. It fades
-  /// in when transitioning from [showFirst] to [showSecond] and fades out
-  /// otherwise.
+  /// in when transitioning from [showFirst] to [showSecond] and vice versa.
   final Widget secondChild;
 
-  /// This field identifies the child that will be shown when the animation has
-  /// completed.
+  /// The child that will be shown when the animation has completed.
   final CrossFadeState crossFadeState;
 
   /// The duration of the whole orchestrated animation.
@@ -90,6 +87,16 @@ class _AnimatedCrossFadeState extends State<AnimatedCrossFade> {
   Animation<double> _firstAnimation;
   Animation<double> _secondAnimation;
 
+  @override
+  void initState() {
+    super.initState();
+    _controller = new AnimationController(duration: config.duration);
+    if (config.crossFadeState == CrossFadeState.showSecond)
+      _controller.value = 1.0;
+    _firstAnimation = _initAnimation(config.firstCurve, true);
+    _secondAnimation = _initAnimation(config.secondCurve, false);
+  }
+
   Animation<double> _initAnimation(Curve curve, bool inverted) {
     final CurvedAnimation animation = new CurvedAnimation(
       parent: _controller,
@@ -103,16 +110,6 @@ class _AnimatedCrossFadeState extends State<AnimatedCrossFade> {
   }
 
   @override
-  void initState() {
-    super.initState();
-    _controller = new AnimationController(duration: config.duration);
-    if (config.crossFadeState == CrossFadeState.showSecond)
-      _controller.value = 1.0;
-    _firstAnimation = _initAnimation(config.firstCurve, true);
-    _secondAnimation = _initAnimation(config.secondCurve, false);
-  }
-
-  @override
   void dispose() {
     _controller.dispose();
     super.dispose();
@@ -121,7 +118,12 @@ class _AnimatedCrossFadeState extends State<AnimatedCrossFade> {
   @override
   void didUpdateConfig(AnimatedCrossFade oldConfig) {
     super.didUpdateConfig(oldConfig);
-
+    if (config.duration != oldConfig.duration)
+      _controller.duration = config.duration;
+    if (config.firstCurve != oldConfig.firstCurve)
+      _firstAnimation = _initAnimation(config.firstCurve, true);
+    if (config.secondCurve != oldConfig.secondCurve)
+      _secondAnimation = _initAnimation(config.secondCurve, false);
     if (config.crossFadeState != oldConfig.crossFadeState) {
       switch (config.crossFadeState) {
         case CrossFadeState.showFirst:
@@ -131,15 +133,6 @@ class _AnimatedCrossFadeState extends State<AnimatedCrossFade> {
           _controller.forward();
           break;
       }
-    }
-
-    if (config.duration != oldConfig.duration)
-      _controller.duration = config.duration;
-    if (config.firstCurve != oldConfig.firstCurve) {
-      _firstAnimation = _initAnimation(config.firstCurve, true);
-    }
-    if (config.secondCurve != oldConfig.secondCurve) {
-      _secondAnimation = _initAnimation(config.secondCurve, false);
     }
   }
 

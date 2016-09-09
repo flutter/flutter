@@ -52,83 +52,6 @@ class LayoutBuilder extends RenderObjectWidget {
   // updateRenderObject is redundant with the logic in the LayoutBuilderElement below.
 }
 
-class _RenderLayoutBuilder extends RenderBox with RenderObjectWithChildMixin<RenderBox> {
-  _RenderLayoutBuilder({
-    LayoutCallback callback,
-  }) : _callback = callback;
-
-  LayoutCallback get callback => _callback;
-  LayoutCallback _callback;
-  set callback(LayoutCallback value) {
-    if (value == _callback)
-      return;
-    _callback = value;
-    markNeedsLayout();
-  }
-
-  bool _debugThrowIfNotCheckingIntrinsics() {
-    assert(() {
-      if (!RenderObject.debugCheckingIntrinsics) {
-        throw new FlutterError(
-          'LayoutBuilder does not support returning intrinsic dimensions.\n'
-          'Calculating the intrinsic dimensions would require running the layout callback speculatively, '
-          'which might mutate the live render object tree.'
-        );
-      }
-      return true;
-    });
-    return true;
-  }
-
-  @override
-  double computeMinIntrinsicWidth(double height) {
-    assert(_debugThrowIfNotCheckingIntrinsics());
-    return 0.0;
-  }
-
-  @override
-  double computeMaxIntrinsicWidth(double height) {
-    assert(_debugThrowIfNotCheckingIntrinsics());
-    return 0.0;
-  }
-
-  @override
-  double computeMinIntrinsicHeight(double width) {
-    assert(_debugThrowIfNotCheckingIntrinsics());
-    return 0.0;
-  }
-
-  @override
-  double computeMaxIntrinsicHeight(double width) {
-    assert(_debugThrowIfNotCheckingIntrinsics());
-    return 0.0;
-  }
-
-  @override
-  void performLayout() {
-    assert(callback != null);
-    invokeLayoutCallback(callback);
-    if (child != null) {
-      child.layout(constraints, parentUsesSize: true);
-      size = constraints.constrain(child.size);
-    } else {
-      size = constraints.biggest;
-    }
-  }
-
-  @override
-  bool hitTestChildren(HitTestResult result, { Point position }) {
-    return child?.hitTest(result, position: position) ?? false;
-  }
-
-  @override
-  void paint(PaintingContext context, Offset offset) {
-    if (child != null)
-      context.paintChild(child, offset);
-  }
-}
-
-// TODO(ianh): move this class up to just below its widget.
 class _LayoutBuilderElement extends RenderObjectElement {
   _LayoutBuilderElement(LayoutBuilder widget) : super(widget);
 
@@ -217,6 +140,82 @@ class _LayoutBuilderElement extends RenderObjectElement {
     assert(renderObject.child == child);
     renderObject.child = null;
     assert(renderObject == this.renderObject);
+  }
+}
+
+class _RenderLayoutBuilder extends RenderBox with RenderObjectWithChildMixin<RenderBox> {
+  _RenderLayoutBuilder({
+    LayoutCallback callback,
+  }) : _callback = callback;
+
+  LayoutCallback get callback => _callback;
+  LayoutCallback _callback;
+  set callback(LayoutCallback value) {
+    if (value == _callback)
+      return;
+    _callback = value;
+    markNeedsLayout();
+  }
+
+  bool _debugThrowIfNotCheckingIntrinsics() {
+    assert(() {
+      if (!RenderObject.debugCheckingIntrinsics) {
+        throw new FlutterError(
+          'LayoutBuilder does not support returning intrinsic dimensions.\n'
+          'Calculating the intrinsic dimensions would require running the layout callback speculatively, '
+          'which might mutate the live render object tree.'
+        );
+      }
+      return true;
+    });
+    return true;
+  }
+
+  @override
+  double computeMinIntrinsicWidth(double height) {
+    assert(_debugThrowIfNotCheckingIntrinsics());
+    return 0.0;
+  }
+
+  @override
+  double computeMaxIntrinsicWidth(double height) {
+    assert(_debugThrowIfNotCheckingIntrinsics());
+    return 0.0;
+  }
+
+  @override
+  double computeMinIntrinsicHeight(double width) {
+    assert(_debugThrowIfNotCheckingIntrinsics());
+    return 0.0;
+  }
+
+  @override
+  double computeMaxIntrinsicHeight(double width) {
+    assert(_debugThrowIfNotCheckingIntrinsics());
+    return 0.0;
+  }
+
+  @override
+  void performLayout() {
+    assert(callback != null);
+    invokeLayoutCallback(callback);
+    if (child != null) {
+      child.layout(constraints, parentUsesSize: true);
+      size = constraints.constrain(child.size);
+    } else {
+      size = constraints.biggest;
+    }
+  }
+
+  @override
+  bool hitTestChildren(HitTestResult result, { Point position }) {
+    return child?.hitTest(result, position: position) ?? false;
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    if (child != null)
+      context.paintChild(child, offset);
   }
 }
 
