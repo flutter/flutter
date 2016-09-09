@@ -75,15 +75,21 @@ class OverscrollDemoState extends State<OverscrollDemo> {
     );
     switch(_type) {
       case IndicatorType.overscroll:
-        body = new OverscrollIndicator(child: body);
+        body = new OverscrollIndicator(
+          edge: OverscrollIndicatorEdge.both,
+          child: body
+        );
         break;
       case IndicatorType.refresh:
-        body = new RefreshIndicator(
-          key: _refreshIndicatorKey,
-          child: body,
-          refresh: refresh,
-          scrollableKey: _scrollableKey,
-          location: RefreshIndicatorLocation.top
+        body = new OverscrollIndicator(
+          edge: OverscrollIndicatorEdge.trailing,
+          child: new RefreshIndicator(
+            key: _refreshIndicatorKey,
+            child: body,
+            refresh: refresh,
+            scrollableKey: _scrollableKey,
+            location: RefreshIndicatorLocation.top
+          )
         );
         break;
     }

@@ -9,6 +9,25 @@ import 'package:flutter/widgets.dart';
 
 import 'theme.dart';
 
+/// Specifies at which ends of the scrollable the [OverscrollIndicator]
+/// should appear.
+enum OverscrollIndicatorEdge {
+  /// The top and bottom of the scrollable if its scroll-direction is vertical
+  /// or the left and right if its scroll-direction is horizontal.
+  both,
+
+  /// Only the top of the scrollable if its scroll-direction is vertical,
+  /// or only the left if its scroll-direction is horizontal.
+  leading,
+
+  /// Only the bottom of the scrollable if its scroll-direction is vertical,
+  /// or only the right if its scroll-direction is horizontal.
+  trailing,
+
+  /// The overscroll indicator should not appear at all.
+  none,
+}
+
 const double _kMinIndicatorExtent = 0.0;
 const double _kMaxIndicatorExtent = 64.0;
 const double _kMinIndicatorOpacity = 0.0;
@@ -50,7 +69,7 @@ class _Painter extends CustomPainter {
     final double width = size.width;
     final double height = size.height;
 
-    switch(scrollDirection) {
+    switch (scrollDirection) {
       case Axis.vertical:
         final double radius = width * _kSizeToRadius;
         final double centerX = width / 2.0;
@@ -97,15 +116,20 @@ class OverscrollIndicator extends StatefulWidget {
   OverscrollIndicator({
     Key key,
     this.scrollableKey,
+    this.edge: OverscrollIndicatorEdge.both,
     this.child
   }) : super(key: key) {
     assert(child != null);
+    assert(edge != null);
   }
 
   /// Identifies the [Scrollable] descendant of child that the overscroll
   /// indicator will track. Can be null if there's only one [Scrollable]
   /// descendant.
   final Key scrollableKey;
+
+  /// Where the scroll indicator should appear.
+  final OverscrollIndicatorEdge edge;
 
   /// The overscroll indicator will be stacked on top of this child. The
   /// indicator will appear when child's [Scrollable] descendant is
@@ -167,10 +191,12 @@ class _OverscrollIndicatorState extends State<OverscrollIndicator> {
       // Hide the indicator as soon as user starts scrolling in the reverse direction of overscroll.
       if (_isReverseScroll(value)) {
         _hide(_kNormalHideDuration);
-      } else {
+      } else if (_isMatchingOverscrollEdge(value)) {
         // Changing the animation's value causes an implicit setState().
         _dragPosition = details?.globalPosition ?? Point.origin;
         _extentAnimation.value = value < _minScrollOffset ? _minScrollOffset - value : value - _maxScrollOffset;
+      } else {
+        _hide(_kNormalHideDuration);
       }
     }
     _updateState(scrollable);
@@ -194,6 +220,20 @@ class _OverscrollIndicatorState extends State<OverscrollIndicator> {
       ((scrollOffset - _scrollOffset).abs() > kPixelScrollTolerance.distance);
   }
 
+  bool _isMatchingOverscrollEdge(double scrollOffset) {
+    switch (config.edge) {
+      case OverscrollIndicatorEdge.both:
+        return true;
+      case OverscrollIndicatorEdge.leading:
+        return scrollOffset < _minScrollOffset;
+      case OverscrollIndicatorEdge.trailing:
+        return scrollOffset > _maxScrollOffset;
+      case OverscrollIndicatorEdge.none:
+        return false;
+    }
+    return false;
+  }
+
   bool _isReverseScroll(double scrollOffset) {
     final double delta = _scrollOffset - scrollOffset;
     return scrollOffset < _minScrollOffset ? delta < 0.0 : delta > 0.0;
@@ -208,7 +248,7 @@ class _OverscrollIndicatorState extends State<OverscrollIndicator> {
     }
 
     final ScrollableState scrollable = notification.scrollable;
-    switch(notification.kind) {
+    switch (notification.kind) {
       case ScrollNotificationKind.started:
         _onScrollStarted(scrollable);
         break;
