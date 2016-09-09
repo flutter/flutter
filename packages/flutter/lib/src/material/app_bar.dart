@@ -66,7 +66,7 @@ class _ToolBarLayout extends MultiChildLayoutDelegate {
       double titleX = kTitleLeft;
 
       // If the centered title will not fit between the leading and actions
-      // widgets, then justify it with the wider one.
+      // widgets, then align its left or right edge with the adjacent boundary.
       if (centerTitle) {
         titleX = (size.width - titleSize.width) / 2.0;
         if (titleX + titleSize.width > size.width - actionsWidth)
