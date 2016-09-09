@@ -7,9 +7,9 @@
 # See the configuration guide for more
 # https://github.com/dart-lang/sdk/tree/master/pkg/analyzer#configuring-the-analyzer
 #
-# This file is the .analysis_options file used by "flutter analyze"
+# This file contains the analysis options used by "flutter analyze"
 # when analyzing code outside the flutter repository.
-# It isn't named that because otherwise editors like Atom
+# It isn't named '.analysis_options' because otherwise editors like Atom
 # would use it when analyzing the flutter tool itself.
 #
 # When editing, make sure you keep /.analysis_options consistent.
@@ -45,8 +45,8 @@ linter:
     - hash_and_equals
     # - invariant_booleans
     # - iterable_contains_unrelated_type
-    # - list_remove_unrelated_typ
-    # - literal_only_boolean_expressionse
+    # - list_remove_unrelated_type
+    # - literal_only_boolean_expressions
     - test_types_in_equals
     - throw_in_finally
     - unrelated_type_equality_checks
@@ -69,7 +69,7 @@ linter:
     - non_constant_identifier_names
     # - one_member_abstracts
     # - only_throw_errors
-    # - overriden_fields
+    # - overridden_fields
     - package_api_docs
     - package_prefixed_library_names
     - prefer_is_not_empty
