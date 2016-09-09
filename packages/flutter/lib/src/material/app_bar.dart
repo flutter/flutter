@@ -39,7 +39,7 @@ class _ToolBarLayout extends MultiChildLayoutDelegate {
   // space bewteen the leading and actions widgets).
   final bool centerTitle;
 
-  static const double kLeadingWidth = 24.0;
+  static const double kLeadingWidth = 40.0; // Same size as an IconButton
   static const double kTitleLeft = 64.0; // The AppBar pads left and right an additional 8.0.
 
   @override
