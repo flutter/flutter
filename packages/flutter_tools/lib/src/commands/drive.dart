@@ -6,7 +6,6 @@ import 'dart:async';
 import 'dart:io' as io;
 
 import 'package:path/path.dart' as path;
-import 'package:test/src/executable.dart' as executable; // ignore: implementation_imports
 
 import '../android/android_device.dart' show AndroidDevice;
 import '../application_package.dart';
@@ -17,6 +16,7 @@ import '../base/os.dart';
 import '../base/process.dart';
 import '../build_info.dart';
 import '../cache.dart';
+import '../dart/package_map.dart';
 import '../dart/sdk.dart';
 import '../device.dart';
 import '../globals.dart';
@@ -126,13 +126,11 @@ class DriveCommand extends RunCommandBase {
       printStatus('Will connect to already running application instance.');
     }
 
-    // Check for the existance of a `packages/` directory; pub test does not yet
-    // support running without symlinks.
-    if (!new io.Directory('packages').existsSync()) {
-      Status status = logger.startProgress(
-        'Missing packages directory; running `pub get` (to work around https://github.com/dart-lang/test/issues/327):'
-      );
-      await runAsync(<String>[sdkBinaryName('pub'), 'get', '--no-precompile']);
+    // Check for the existence of a `.packages` file.
+    PackageMap.globalPackagesPath = path.normalize(path.absolute(PackageMap.globalPackagesPath));
+    if (!new io.File(PackageMap.globalPackagesPath).existsSync()) {
+      Status status = logger.startProgress('Missing .packages file; running `pub get`:');
+      await runAsync(<String>[sdkBinaryName('pub'), 'get', '--no-precompile', '--no-packages-dir']);
       status.stop(showElapsedTime: true);
     }
 
@@ -335,9 +333,15 @@ void restoreTestRunner() {
 
 Future<int> runTests(List<String> testArgs) async {
   printTrace('Running driver tests.');
-  List<String> args = testArgs.toList()..add('-rexpanded');
-  await executable.main(args);
-  return io.exitCode;
+
+  List<String> args = testArgs.toList()
+    ..add('--packages=${PackageMap.globalPackagesPath}')
+    ..add('-rexpanded');
+  String dartVmPath = path.join(dartSdkPath, 'bin', 'dart');
+  io.Process driver = await io.Process.start(dartVmPath, args);
+  driver.stdout.listen(io.stdout.add);
+  driver.stderr.listen(io.stderr.add);
+  return await driver.exitCode;
 }
 
 
