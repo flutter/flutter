@@ -46,14 +46,14 @@ final List<GalleryItem> kAllGalleryItems = <GalleryItem>[
   // Demos
   new GalleryItem(
     title: 'Pesto',
-    subtitle: 'A simple recipe browser',
+    subtitle: 'Simple recipe browser',
     category: 'Demos',
     routeName: PestoDemo.routeName,
     buildRoute: (BuildContext context) => new PestoDemo()
   ),
   new GalleryItem(
     title: 'Shrine',
-    subtitle:'A basic shopping app',
+    subtitle:'Basic shopping app',
     category: 'Demos',
     routeName: ShrineDemo.routeName,
     buildRoute: (BuildContext context) => new ShrineDemo()
@@ -61,7 +61,7 @@ final List<GalleryItem> kAllGalleryItems = <GalleryItem>[
   new GalleryItem(
     title: 'Contact profile',
     category: 'Demos',
-    subtitle: 'Highlights the flexible appbar',
+    subtitle: 'Address book entry with a flexible appbar',
     routeName: ContactsDemo.routeName,
     buildRoute: (BuildContext context) => new ContactsDemo()
   ),
@@ -80,13 +80,13 @@ final List<GalleryItem> kAllGalleryItems = <GalleryItem>[
   ),
   new GalleryItem(
     title: 'Chips',
-    subtitle: 'A label with an optional delete button and avatar',
+    subtitle: 'Label with an optional delete button and avatar',
     routeName: ChipDemo.routeName,
     buildRoute: (BuildContext context) => new ChipDemo()
   ),
   new GalleryItem(
     title: 'Date picker',
-    subtitle: 'Choose month, day, and year',
+    subtitle: 'Calendar date selection widget',
     routeName: DatePickerDemo.routeName,
     buildRoute: (BuildContext context) => new DatePickerDemo()
   ),
@@ -98,19 +98,19 @@ final List<GalleryItem> kAllGalleryItems = <GalleryItem>[
   ),
   new GalleryItem(
     title: 'Expand/collapse list control',
-    subtitle: 'A list with one level of sublists',
+    subtitle: 'List with one level of sublists',
     routeName: TwoLevelListDemo.routeName,
     buildRoute: (BuildContext context) => new TwoLevelListDemo()
   ),
   new GalleryItem(
     title: 'Expansion panels',
-    subtitle: 'A list of expanding panels',
+    subtitle: 'List of expanding panels',
     routeName: ExpasionPanelsDemo.routeName,
     buildRoute: (BuildContext context) => new ExpasionPanelsDemo()
   ),
   new GalleryItem(
     title: 'Floating action button',
-    subtitle: 'Demos action button transitions',
+    subtitle: 'Action buttons with transitions',
     routeName: TabsFabDemo.routeName,
     buildRoute: (BuildContext context) => new TabsFabDemo()
   ),
@@ -128,13 +128,13 @@ final List<GalleryItem> kAllGalleryItems = <GalleryItem>[
   ),
   new GalleryItem(
     title: 'Leave-behind list items',
-    subtitle: 'Drag items to expose hidden actions',
+    subtitle: 'List items with hidden actions',
     routeName: LeaveBehindDemo.routeName,
     buildRoute: (BuildContext context) => new LeaveBehindDemo()
   ),
   new GalleryItem(
     title: 'List',
-    subtitle: 'All the layout variations for scrollable lists',
+    subtitle: 'Layout variations for scrollable lists',
     routeName: ListDemo.routeName,
     buildRoute: (BuildContext context) => new ListDemo()
   ),
@@ -146,7 +146,7 @@ final List<GalleryItem> kAllGalleryItems = <GalleryItem>[
   ),
   new GalleryItem(
     title: 'Modal bottom sheet',
-    subtitle: 'A modal sheet that slides up from the bottom',
+    subtitle: 'Modal sheet that slides up from the bottom',
     routeName: ModalBottomSheetDemo.routeName,
     buildRoute: (BuildContext context) => new ModalBottomSheetDemo()
   ),
@@ -158,13 +158,13 @@ final List<GalleryItem> kAllGalleryItems = <GalleryItem>[
   ),
   new GalleryItem(
     title: 'Page selector',
-    subtitle: 'A pageable list and other widgets',
+    subtitle: 'Pageable list with indicator',
     routeName: PageSelectorDemo.routeName,
     buildRoute: (BuildContext context) => new PageSelectorDemo()
   ),
   new GalleryItem(
     title: 'Persistent bottom sheet',
-    subtitle: 'A sheet that slides up from the bottom',
+    subtitle: 'Sheet that slides up from the bottom',
     routeName: PersistentBottomSheetDemo.routeName,
     buildRoute: (BuildContext context) => new PersistentBottomSheetDemo()
   ),
@@ -176,7 +176,7 @@ final List<GalleryItem> kAllGalleryItems = <GalleryItem>[
   ),
   new GalleryItem(
     title: 'Scrollable tabs',
-    subtitle: 'A tab bar that scrolls',
+    subtitle: 'Tab bar that scrolls',
     routeName: ScrollableTabsDemo.routeName,
     buildRoute: (BuildContext context) => new ScrollableTabsDemo()
   ),
@@ -188,7 +188,7 @@ final List<GalleryItem> kAllGalleryItems = <GalleryItem>[
   ),
   new GalleryItem(
     title: 'Sliders',
-    subtitle: 'Select a value by dragging the slider thumb',
+    subtitle: 'Widgets that select a value by dragging the slider thumb',
     routeName: SliderDemo.routeName,
     buildRoute: (BuildContext context) => new SliderDemo()
   ),
@@ -206,19 +206,19 @@ final List<GalleryItem> kAllGalleryItems = <GalleryItem>[
   ),
   new GalleryItem(
     title: 'Text fields',
-    subtitle: 'A Single line of editable text',
+    subtitle: 'Single line of editable text and numbers',
     routeName: TextFieldDemo.routeName,
     buildRoute: (BuildContext context) => new TextFieldDemo()
   ),
   new GalleryItem(
     title: 'Time picker',
-    subtitle: 'Choose a hours and minutes',
+    subtitle: 'Hour and minute selection widget',
     routeName: TimePickerDemo.routeName,
     buildRoute: (BuildContext context) => new TimePickerDemo()
   ),
   new GalleryItem(
     title: 'Tooltips',
-    subtitle: 'Display a short message on long-press',
+    subtitle: 'Short message displayed after a long-press',
     routeName: TooltipDemo.routeName,
     buildRoute: (BuildContext context) => new TooltipDemo()
   ),
