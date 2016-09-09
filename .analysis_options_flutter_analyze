@@ -1,7 +1,14 @@
 # Specify analysis options.
-
-# This file contains the analysis options used by 'flutter analyze'.
-# It is very similar to .analysis_options;
+#
+# Until there are meta linter rules, each desired lint must be explicitly enabled.
+# See: https://github.com/dart-lang/linter/issues/288
+#
+# For a list of lints, see: http://dart-lang.github.io/linter/lints/
+# See the configuration guide for more
+# https://github.com/dart-lang/sdk/tree/master/pkg/analyzer#configuring-the-analyzer
+#
+# This file contains the analysis options used by 'flutter analyze' when analyzing
+# the flutter repository. It is very similar to .analysis_options;
 # the only difference (currently) is the public_member_api_docs option,
 # which is turned on and programmatically reduced to a single output line
 # indicating the # of violations for that rule.
@@ -12,25 +19,26 @@ analyzer:
     enableSuperMixins: true
   strong-mode: true
   errors:
-    # we allow overriding fields (if they use super, ideally...)
+    # allow overriding fields (if they use super, ideally...)
     strong_mode_invalid_field_override: ignore
-    # we allow type narrowing
+    # allow type narrowing
     strong_mode_invalid_method_override: ignore
     strong_mode_static_type_error: ignore
     strong_mode_down_cast_composite: ignore
-    # we allow having TODOs in the code
+    # allow having TODOs in the code
     todo: ignore
   exclude:
     - 'bin/**'
 
 linter:
   rules:
-    # these are in the same order as http://dart-lang.github.io/linter/lints/
-    # to make maintenance easier
+    # these rules are documented on and in the same order as
+    # the Dart Lint rules page to make maintenance easier
+    # http://dart-lang.github.io/linter/lints/
 
-    # error rules
+    # === error rules ===
     - avoid_empty_else
-    # - comment_references
+    # - comment_references # blocked on https://github.com/dart-lang/dartdoc/issues/1153
     - control_flow_in_finally
     - hash_and_equals
     # - iterable_contains_unrelated_type
@@ -38,7 +46,7 @@ linter:
     - throw_in_finally
     - unrelated_type_equality_checks
 
-    # style rules
+    # === style rules ===
     - always_declare_return_types
     - always_specify_types
     - annotate_overrides
@@ -47,7 +55,7 @@ linter:
     - avoid_return_types_on_setters
     - await_only_futures
     - camel_case_types
-    # - constant_identifier_names
+    # - constant_identifier_names # https://github.com/dart-lang/linter/issues/204
     - control_flow_in_finally
     - empty_constructor_bodies
     - implementation_imports
@@ -55,7 +63,7 @@ linter:
     - library_prefixes
     - non_constant_identifier_names
     - one_member_abstracts
-    # - overriden_field
+    # - overridden_fields
     - package_api_docs
     - package_prefixed_library_names
     - prefer_is_not_empty
@@ -69,5 +77,5 @@ linter:
     - unnecessary_brace_in_string_interp
     - unnecessary_getters_setters
 
-    # pub rules
+    # === pub rules ===
     - package_names
