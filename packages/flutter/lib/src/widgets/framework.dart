@@ -1537,15 +1537,25 @@ class BuildOwner {
         assert(_dirtyElements[index] != null);
         assert(_dirtyElements[index]._inDirtyList);
         assert(!_dirtyElements[index]._active || _dirtyElements[index]._debugIsInScope(context));
-        _dirtyElements[index].rebuild();
+        try {
+          _dirtyElements[index].rebuild();
+        } catch (e, stack) {
+          _debugReportException(
+            'while rebuilding dirty elements', e, stack,
+            informationCollector: (StringBuffer information) {
+              information.writeln('The element being rebuilt at the time was index $index of $dirtyCount:');
+              information.write('  ${_dirtyElements[index]}');
+            }
+          );
+        }
         index += 1;
         if (dirtyCount < _dirtyElements.length) {
           _dirtyElements.sort(_elementSort);
           dirtyCount = _dirtyElements.length;
         }
       }
-    } finally {
       assert(!_dirtyElements.any((BuildableElement element) => element._active && element.dirty));
+    } finally {
       for (BuildableElement element in _dirtyElements) {
         assert(element._inDirtyList);
         element._inDirtyList = false;
@@ -3149,11 +3159,14 @@ class MultiChildRenderObjectElement extends RenderObjectElement {
   }
 }
 
-void _debugReportException(String context, dynamic exception, StackTrace stack) {
+void _debugReportException(String context, dynamic exception, StackTrace stack, {
+  InformationCollector informationCollector
+}) {
   FlutterError.reportError(new FlutterErrorDetails(
     exception: exception,
     stack: stack,
     library: 'widgets library',
-    context: context
+    context: context,
+    informationCollector: informationCollector,
   ));
 }
