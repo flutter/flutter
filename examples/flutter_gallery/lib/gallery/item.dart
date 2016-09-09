@@ -86,7 +86,7 @@ final List<GalleryItem> kAllGalleryItems = <GalleryItem>[
   ),
   new GalleryItem(
     title: 'Date picker',
-    subtitle: 'Calendar date selection widget',
+    subtitle: 'Date selection widget',
     routeName: DatePickerDemo.routeName,
     buildRoute: (BuildContext context) => new DatePickerDemo()
   ),
