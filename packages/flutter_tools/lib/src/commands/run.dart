@@ -65,8 +65,8 @@ class RunCommand extends RunCommandBase {
 
     // Option to enable hot reloading.
     argParser.addFlag('hot',
-                      negatable: false,
-                      defaultsTo: false,
+                      negatable: true,
+                      defaultsTo: true,
                       help: 'Run with support for hot reloading.');
 
     // Option to write the pid to a file.
@@ -90,7 +90,7 @@ class RunCommand extends RunCommandBase {
   String get usagePath {
     Device device = deviceForCommand;
 
-    String command = argResults['hot'] ? 'hotrun' : name;
+    String command = shouldUseHotMode() ? 'hotrun' : name;
 
     if (device == null)
       return command;
@@ -109,6 +109,10 @@ class RunCommand extends RunCommandBase {
       printStatus('open -a Simulator.app');
       printStatus('');
     }
+  }
+
+  bool shouldUseHotMode() {
+    return argResults['hot'] && (getBuildMode() == BuildMode.debug);
   }
 
   @override
@@ -143,16 +147,14 @@ class RunCommand extends RunCommandBase {
 
     Cache.releaseLockEarly();
 
-    // Do some early error checks for hot mode.
-    bool hotMode = argResults['hot'];
+    // Enable hot mode by default if ``--no-hot` was not passed and we are in
+    // debug mode.
+    final bool hotMode = shouldUseHotMode();
 
     if (hotMode) {
-      if (getBuildMode() != BuildMode.debug) {
-        printError('Hot mode only works with debug builds.');
-        return 1;
-      }
       if (!deviceForCommand.supportsHotMode) {
-        printError('Hot mode is not supported by this device.');
+        printError('Hot mode is not supported by this device. '
+                   'Run with --no-hot.');
         return 1;
       }
     }
@@ -164,7 +166,7 @@ class RunCommand extends RunCommandBase {
     }
     ResidentRunner runner;
 
-    if (argResults['hot']) {
+    if (hotMode) {
       runner = new HotRunner(
         deviceForCommand,
         target: targetFile,
