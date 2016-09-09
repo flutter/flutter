@@ -11,9 +11,7 @@ import '../android/android_device.dart' show AndroidDevice;
 import '../application_package.dart';
 import '../base/file_system.dart';
 import '../base/common.dart';
-import '../base/logger.dart';
 import '../base/os.dart';
-import '../base/process.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../dart/package_map.dart';
@@ -47,6 +45,7 @@ import 'run.dart';
 /// exit code.
 class DriveCommand extends RunCommandBase {
   DriveCommand() {
+    usesPubOption();
     argParser.addFlag(
       'keep-app-running',
       negatable: true,
@@ -124,14 +123,6 @@ class DriveCommand extends RunCommandBase {
       }
     } else {
       printStatus('Will connect to already running application instance.');
-    }
-
-    // Check for the existence of a `.packages` file.
-    PackageMap.globalPackagesPath = path.normalize(path.absolute(PackageMap.globalPackagesPath));
-    if (!new io.File(PackageMap.globalPackagesPath).existsSync()) {
-      Status status = logger.startProgress('Missing .packages file; running `pub get`:');
-      await runAsync(<String>[sdkBinaryName('pub'), 'get', '--no-precompile', '--no-packages-dir']);
-      status.stop(showElapsedTime: true);
     }
 
     Cache.releaseLockEarly();
@@ -334,6 +325,7 @@ void restoreTestRunner() {
 Future<int> runTests(List<String> testArgs) async {
   printTrace('Running driver tests.');
 
+  PackageMap.globalPackagesPath = path.normalize(path.absolute(PackageMap.globalPackagesPath));
   List<String> args = testArgs.toList()
     ..add('--packages=${PackageMap.globalPackagesPath}')
     ..add('-rexpanded');
