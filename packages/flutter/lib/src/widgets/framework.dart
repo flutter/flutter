@@ -545,12 +545,12 @@ abstract class StatefulWidget extends Widget {
 
 /// Tracks the lifecycle of [State] objects when asserts are enabled.
 enum _StateLifecycle {
-  /// The [State] object has been created but [State.initState] has not yet been
-  /// called.
+  /// The [State] object has been created. [State.initState] is called at this
+  /// time.
   created,
 
   /// The [State.initState] method has been called but the [State] object is
-  /// not yet ready to build.
+  /// not yet ready to build. [State.dependenciesChanged] is called at this time.
   initialized,
 
   /// The [State] object is ready to build and [State.dispose] has not yet been
@@ -594,6 +594,11 @@ typedef void StateSetter(VoidCallback fn);
 ///    [BuildContext] or the widget, which are available as the [context] and
 ///    [config] properties, respectively, when the [initState] method is
 ///    called.
+///  * The framework calls [dependenciesChanged]. Subclasses of [State] should
+///    override [dependenciesChanged] to perform initialization involving
+///    [InheritedWidget]s. If [BuildContext.inheritFromWidgetOfExactType] is
+///    called, the [dependenciesChanged] method will be called again if the
+///    inherited widgets subsequently change or if the widget moves in the tree.
 ///  * At this point, the [State] object is fully initialized and the framework
 ///    might call its [build] method any number of times to obtain a
 ///    description of the user interface for this subtree. [State] objects can
@@ -704,13 +709,17 @@ abstract class State<T extends StatefulWidget> {
   /// The framework will call this method exactly once for each [State] object
   /// it creates.
   ///
+  /// You cannot use [BuildContext.inheritFromWidgetOfExactType] from this
+  /// method. However, [dependenciesChanged] will be called immediately
+  /// following this method, and [BuildContext.inheritFromWidgetOfExactType] can
+  /// be used there.
+  ///
   /// If you override this, make sure your method starts with a call to
   /// super.initState().
   @protected
   @mustCallSuper
   void initState() {
     assert(_debugLifecycleState == _StateLifecycle.created);
-    assert(() { _debugLifecycleState = _StateLifecycle.initialized; return true; });
   }
 
   /// Called whenever the configuration changes.
@@ -804,7 +813,7 @@ abstract class State<T extends StatefulWidget> {
       if (_debugLifecycleState == _StateLifecycle.defunct) {
         throw new FlutterError(
           'setState() called after dispose(): $this\n'
-          'This error happens if you call setState() on State object for a widget that '
+          'This error happens if you call setState() on a State object for a widget that '
           'no longer appears in the widget tree (e.g., whose parent widget no longer '
           'includes the widget in its build). This error can occur when code calls '
           'setState() from a timer or an animation callback. The preferred solution is '
@@ -812,11 +821,10 @@ abstract class State<T extends StatefulWidget> {
           'callback. Another solution is to check the "mounted" property of this '
           'object before calling setState() to ensure the object is still in the '
           'tree.\n'
-          '\n'
           'This error might indicate a memory leak if setState() is being called '
           'because another object is retaining a reference to this State object '
           'after it has been removed from the tree. To avoid memory leaks, '
-          'consider breaking the reference to this object during dipose().'
+          'consider breaking the reference to this object during dispose().'
         );
       }
       return true;
@@ -920,6 +928,9 @@ abstract class State<T extends StatefulWidget> {
   /// For example, if the previous call to [build] referenced an
   /// [InheritedWidget] that later changed, the framework would call this
   /// method to notify this object about the change.
+  ///
+  /// This method is also called immediately after [initState]. It is safe to
+  /// call [BuildContext.inheritFromWidgetOfExactType] from this method.
   ///
   /// Subclasses rarely override this method because the framework always
   /// calls [build] after a dependency changes. Some subclasses do override
@@ -2278,20 +2289,18 @@ abstract class BuildableElement extends Element {
   @override
   void dependenciesChanged() {
     super.dependenciesChanged();
-    assert(_active);
+    assert(_active); // otherwise markNeedsBuild is a no-op
     markNeedsBuild();
   }
 
   @override
   void activate() {
-    final bool shouldRebuild = ((_dependencies != null && _dependencies.length > 0) || _hadUnsatisfiedDependencies);
+    final bool hadDependencies = ((_dependencies != null && _dependencies.length > 0) || _hadUnsatisfiedDependencies);
     super.activate(); // clears _dependencies, and sets active to true
-    if (_dirty && !_inDirtyList) {
+    if (_dirty && !_inDirtyList)
       owner.scheduleBuildFor(this);
-    } else if (shouldRebuild) {
-      assert(_active); // otherwise markNeedsBuild is a no-op
-      markNeedsBuild();
-    }
+    if (hadDependencies)
+      dependenciesChanged();
   }
 
   @override
@@ -2444,15 +2453,8 @@ class StatefulElement extends ComponentElement {
     } finally {
       _debugSetAllowIgnoredCallsToMarkNeedsBuild(false);
     }
-    assert(() {
-      if (_state._debugLifecycleState == _StateLifecycle.initialized)
-        return true;
-      throw new FlutterError(
-        '${_state.runtimeType}.initState failed to call super.initState.\n'
-        'initState() implementations must always call their superclass initState() method, to ensure '
-        'that the entire widget is initialized correctly.'
-      );
-    });
+    assert(() { _state._debugLifecycleState = _StateLifecycle.initialized; return true; });
+    _state.dependenciesChanged();
     assert(() { _state._debugLifecycleState = _StateLifecycle.ready; return true; });
     super._firstBuild();
   }
@@ -2512,17 +2514,40 @@ class StatefulElement extends ComponentElement {
   @override
   InheritedWidget inheritFromWidgetOfExactType(Type targetType) {
     assert(() {
-      if (state._debugLifecycleState == _StateLifecycle.ready)
-        return true;
-      throw new FlutterError(
-        "inheritFromWidgetOfExactType($targetType) was called before ${_state.runtimeType}.initState() completed.\n"
-        "When an inherited widget changes, for example if the value of Theme.of() changes, "
-        "its dependent widgets are rebuilt. If the dependent widget's reference to "
-        "the inherited widget is in a constructor or an initState() method, "
-        "then the rebuilt dependent widget will not reflect the changes in the "
-        "inherited widget.\n"
-        "Typically references to to inherited widgets should occur in widget build() methods.\n"
-      );
+      if (state._debugLifecycleState == _StateLifecycle.created) {
+        throw new FlutterError(
+          'inheritFromWidgetOfExactType($targetType) was called before ${_state.runtimeType}.initState() completed.\n'
+          'When an inherited widget changes, for example if the value of Theme.of() changes, '
+          'its dependent widgets are rebuilt. If the dependent widget\'s reference to '
+          'the inherited widget is in a constructor or an initState() method, '
+          'then the rebuilt dependent widget will not reflect the changes in the '
+          'inherited widget.\n'
+          'Typically references to to inherited widgets should occur in widget build() methods. Alternatively, '
+          'initialization based on inherited widgets can be placed in the dependenciesChanged method, which '
+          'is called after initState and whenever the dependencies change thereafter.'
+        );
+      }
+      if (state._debugLifecycleState == _StateLifecycle.defunct) {
+        throw new FlutterError(
+          'inheritFromWidgetOfExactType($targetType) called after dispose(): $this\n'
+          'This error happens if you call inheritFromWidgetOfExactType() on the '
+          'BuildContext for a widget that no longer appears in the widget tree '
+          '(e.g., whose parent widget no longer includes the widget in its '
+          'build). This error can occur when code calls '
+          'inheritFromWidgetOfExactType() from a timer or an animation callback. '
+          'The preferred solution is to cancel the timer or stop listening to the '
+          'animation in the dispose() callback. Another solution is to check the '
+          '"mounted" property of this object before calling '
+          'inheritFromWidgetOfExactType() to ensure the object is still in the '
+          'tree.\n'
+          'This error might indicate a memory leak if '
+          'inheritFromWidgetOfExactType() is being called because another object '
+          'is retaining a reference to this State object after it has been '
+          'removed from the tree. To avoid memory leaks, consider breaking the '
+          'reference to this object during dispose().'
+        );
+      }
+      return true;
     });
     return super.inheritFromWidgetOfExactType(targetType);
   }

@@ -780,16 +780,13 @@ class _TabBarState<T> extends ScrollableState<TabBar<T>> implements TabBarSelect
   }
 
   @override
-  void initState() {
-    super.initState();
-    scrollBehavior.isScrollable = config.isScrollable;
-  }
-
-  @override
   void didUpdateConfig(TabBar<T> oldConfig) {
     super.didUpdateConfig(oldConfig);
-    if (!config.isScrollable)
-      scrollTo(0.0);
+    if (config.isScrollable != oldConfig.isScrollable) {
+      scrollBehavior.isScrollable = config.isScrollable;
+      if (!config.isScrollable)
+        scrollTo(0.0);
+    }
   }
 
   @override
@@ -921,7 +918,10 @@ class _TabBarState<T> extends ScrollableState<TabBar<T>> implements TabBarSelect
   }
 
   @override
-  ScrollBehavior<double, double> createScrollBehavior() => new _TabsScrollBehavior();
+  ScrollBehavior<double, double> createScrollBehavior() {
+    return new _TabsScrollBehavior()
+      ..isScrollable = config.isScrollable;
+  }
 
   @override
   _TabsScrollBehavior get scrollBehavior => super.scrollBehavior;
