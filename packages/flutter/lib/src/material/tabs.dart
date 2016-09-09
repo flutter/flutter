@@ -977,10 +977,12 @@ class _TabBarState<T> extends ScrollableState<TabBar<T>> implements TabBarSelect
     _indicatorRect = _selection != null ? _tabIndicatorRect(_selection.index) : Rect.zero;
     _updateScrollBehavior();
     SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
-      setState(() {
-        // the changes were made at layout time
-        // TODO(ianh): remove this setState: https://github.com/flutter/flutter/issues/5749
-      });
+      if (mounted) {
+        setState(() {
+          // the changes were made at layout time
+          // TODO(ianh): remove this setState: https://github.com/flutter/flutter/issues/5749
+        });
+      }
     });
   }
 
