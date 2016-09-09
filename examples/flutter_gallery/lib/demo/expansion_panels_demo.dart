@@ -10,15 +10,6 @@ enum _Location {
   Bermuda
 }
 
-const TextStyle text54 = const TextStyle(
-  color: Colors.black54,
-  fontSize: 15.0
-);
-const TextStyle text87 = const TextStyle(
-  color: Colors.black87,
-  fontSize: 15.0
-);
-
 typedef Widget DemoItemBodyBuilder(DemoItem<dynamic> item);
 typedef String ValueToString<T>(T value);
 
@@ -49,13 +40,16 @@ class DualHeaderWithHint extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final TextTheme textTheme = theme.textTheme;
+
     return new Row(
       children: <Widget>[
         new Flexible(
           flex: 2,
           child: new Container(
             margin: const EdgeInsets.only(left: 24.0),
-            child: new Text(name, style: text87)
+            child: new Text(name, style: textTheme.body1.copyWith(fontSize: 15.0))
           )
         ),
         new Flexible(
@@ -63,8 +57,8 @@ class DualHeaderWithHint extends StatelessWidget {
           child: new Container(
             margin: const EdgeInsets.only(left: 24.0),
             child: _crossFade(
-              new Text(value, style: text54),
-              new Text(hint, style: text54),
+              new Text(value, style: textTheme.caption.copyWith(fontSize: 15.0)),
+              new Text(hint, style: textTheme.caption.copyWith(fontSize: 15.0)),
               showHint
             )
           )
@@ -89,6 +83,9 @@ class CollapsibleBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final TextTheme textTheme = theme.textTheme;
+
     return new Column(
       children: <Widget>[
         new Container(
@@ -99,7 +96,7 @@ class CollapsibleBody extends StatelessWidget {
           ) - margin,
           child: new Center(
             child: new DefaultTextStyle(
-              style: text54,
+              style: textTheme.caption.copyWith(fontSize: 15.0),
               child: child
             )
           )
