@@ -61,9 +61,10 @@ Future<Process> _startProcess(String mainPath, { String packages, int observator
   if (observatoryPort != null) {
     arguments.add('--observatory-port=$observatoryPort');
   } else {
-    arguments.add('--non-interactive');
+    arguments.add('--disable-observatory');
   }
   arguments.addAll(<String>[
+    '--non-interactive',
     '--enable-checked-mode',
     '--packages=$packages',
     mainPath
