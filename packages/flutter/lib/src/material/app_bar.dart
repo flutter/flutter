@@ -24,6 +24,65 @@ abstract class AppBarBottomWidget extends Widget {
   double get bottomHeight;
 }
 
+enum _ToolBarSlot {
+  leading,
+  title,
+  actions,
+}
+
+class _ToolBarLayout extends MultiChildLayoutDelegate {
+  _ToolBarLayout({ this.centerTitle });
+
+  // If false the title should be left or right justified within the space bewteen
+  // the leading and actions widgets, depending on the locale's writing direction.
+  // If true the title is centered within the toolbar (not within the horizontal
+  // space bewteen the leading and actions widgets).
+  final bool centerTitle;
+
+  static const double kLeadingWidth = 24.0;
+  static const double kTitleLeft = 64.0; // The AppBar pads left and right an additional 8.0.
+
+  @override
+  void performLayout(Size size) {
+    double actionsWidth = 0.0;
+
+    if (hasChild(_ToolBarSlot.leading)) {
+      final BoxConstraints constraints = new BoxConstraints.tight(new Size(kLeadingWidth, size.height));
+      layoutChild(_ToolBarSlot.leading, constraints);
+      positionChild(_ToolBarSlot.leading, Offset.zero);
+    }
+
+    if (hasChild(_ToolBarSlot.actions)) {
+      final BoxConstraints constraints = new BoxConstraints.loose(size);
+      actionsWidth = layoutChild(_ToolBarSlot.actions, constraints).width;
+      positionChild(_ToolBarSlot.actions, new Offset(size.width - actionsWidth, 0.0));
+    }
+
+    if (hasChild(_ToolBarSlot.title)) {
+      final double maxWidth = size.width - kTitleLeft - actionsWidth;
+      final BoxConstraints constraints = new BoxConstraints.loose(size).copyWith(maxWidth: maxWidth);
+      final Size titleSize = layoutChild(_ToolBarSlot.title, constraints);
+      final double titleY = (size.height - titleSize.height) / 2.0;
+      double titleX = kTitleLeft;
+
+      // If the centered title will not fit between the leading and actions
+      // widgets, then align its left or right edge with the adjacent boundary.
+      if (centerTitle) {
+        titleX = (size.width - titleSize.width) / 2.0;
+        if (titleX + titleSize.width > size.width - actionsWidth)
+          titleX = size.width - actionsWidth - titleSize.width;
+        else if (titleX < kTitleLeft)
+          titleX = kTitleLeft;
+      }
+
+      positionChild(_ToolBarSlot.title, new Offset(titleX, titleY));
+    }
+  }
+
+  @override
+  bool shouldRelayout(_ToolBarLayout oldDelegate) => centerTitle != oldDelegate.centerTitle;
+}
+
 // TODO(eseidel) Toolbar needs to change size based on orientation:
 // http://www.google.com/design/spec/layout/structure.html#structure-app-bar
 // Mobile Landscape: 48dp
@@ -215,6 +274,7 @@ class AppBar extends StatelessWidget {
       iconTheme: iconTheme ?? this.iconTheme,
       textTheme: textTheme ?? this.textTheme,
       padding: padding ?? this.padding,
+      centerTitle: centerTitle ?? this.centerTitle,
       heroTag: heroTag ?? this.heroTag,
       expandedHeight: expandedHeight ?? this._expandedHeight,
       collapsedHeight: collapsedHeight ?? this._collapsedHeight
@@ -272,8 +332,6 @@ class AppBar extends StatelessWidget {
     TextStyle centerStyle = textTheme?.title ?? themeData.primaryTextTheme.title;
     TextStyle sideStyle = textTheme?.body1 ?? themeData.primaryTextTheme.body1;
 
-    final bool effectiveCenterTitle = _getEffectiveCenterTitle(themeData);
-
     Brightness brightness = this.brightness ?? themeData.primaryColorBrightness;
     SystemChrome.setSystemUIOverlayStyle(brightness == Brightness.dark
       ? mojom.SystemUiOverlayStyle.light
@@ -291,51 +349,49 @@ class AppBar extends StatelessWidget {
       );
     }
 
-    Widget centerWidget;
-    if (title != null) {
-      centerWidget = new DefaultTextStyle(
-        style: centerStyle,
-        softWrap: false,
-        overflow: TextOverflow.ellipsis,
-        child: title
+    final List<Widget> toolBarChildren = <Widget>[];
+    if (leading != null) {
+      toolBarChildren.add(
+        new LayoutId(
+          id: _ToolBarSlot.leading,
+          child: leading
+        )
       );
     }
-
-    final List<Widget> toolBarRow = <Widget>[];
-    if (leading != null) {
-      toolBarRow.add(new Padding(
-        padding: new EdgeInsets.only(right: 16.0),
-        child: leading
-      ));
-    }
-    toolBarRow.add(new Flexible(
-      child: new Align(
-        // TODO(abarth): In RTL this should be aligned to the right.
-        alignment: FractionalOffset.centerLeft,
-        child: new Padding(
-          padding: new EdgeInsets.only(left: 8.0),
-          child: effectiveCenterTitle ? null : centerWidget
+    if (title != null) {
+      toolBarChildren.add(
+        new LayoutId(
+          id: _ToolBarSlot.title,
+          child: new DefaultTextStyle(
+            style: centerStyle,
+            softWrap: false,
+            overflow: TextOverflow.ellipsis,
+            child: title
+          )
         )
-      )
-    ));
-    if (actions != null)
-      toolBarRow.addAll(actions);
+      );
+    }
+    if (actions != null && actions.isNotEmpty) {
+      toolBarChildren.add(
+        new LayoutId(
+          id: _ToolBarSlot.actions,
+          child: new Row(
+            mainAxisSize: MainAxisSize.min,
+            children: actions
+          )
+        )
+      );
+    }
 
     Widget toolBar = new Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8.0),
-      child: new Row(children: toolBarRow)
+      child: new CustomMultiChildLayout(
+        delegate: new _ToolBarLayout(
+          centerTitle: _getEffectiveCenterTitle(themeData)
+        ),
+        children: toolBarChildren
+      )
     );
-
-    if (effectiveCenterTitle && centerWidget != null) {
-      toolBar = new Stack(
-        children: <Widget>[
-          // TODO(abarth): If there isn't enough room, we should move the title
-          // off center rather than overlap the actions.
-          new Center(child: centerWidget),
-          toolBar
-        ]
-      );
-    }
 
     Widget appBar = new SizedBox(
       height: kToolBarHeight,
