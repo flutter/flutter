@@ -203,14 +203,15 @@ Dart_Isolate ServiceIsolateCreateCallback(const char* script_uri,
     DartMojoInternal::InitForIsolate();
     DartRuntimeHooks::Install(DartRuntimeHooks::SecondaryIsolate, script_uri);
     const Settings& settings = Settings::Get();
-
-    std::string ip = "127.0.0.1";
-    const intptr_t port = settings.observatory_port;
-    const bool disable_websocket_origin_check = false;
-    const bool service_isolate_booted = DartServiceIsolate::Startup(
-        ip, port, tonic::DartState::HandleLibraryTag,
-        IsRunningPrecompiledCode(), disable_websocket_origin_check, error);
-    FTL_CHECK(service_isolate_booted) << error;
+    if (settings.enable_observatory) {
+      std::string ip = "127.0.0.1";
+      const intptr_t port = settings.observatory_port;
+      const bool disable_websocket_origin_check = false;
+      const bool service_isolate_booted = DartServiceIsolate::Startup(
+          ip, port, tonic::DartState::HandleLibraryTag,
+          IsRunningPrecompiledCode(), disable_websocket_origin_check, error);
+      FTL_CHECK(service_isolate_booted) << error;
+    }
 
     if (g_service_isolate_hook)
       g_service_isolate_hook(IsRunningPrecompiledCode());
