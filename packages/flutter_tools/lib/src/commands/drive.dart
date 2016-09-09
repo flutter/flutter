@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io' as io;
 
 import 'package:path/path.dart' as path;
 
@@ -12,6 +11,7 @@ import '../application_package.dart';
 import '../base/file_system.dart';
 import '../base/common.dart';
 import '../base/os.dart';
+import '../base/process.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../dart/package_map.dart';
@@ -330,10 +330,7 @@ Future<int> runTests(List<String> testArgs) async {
     ..add('--packages=${PackageMap.globalPackagesPath}')
     ..add('-rexpanded');
   String dartVmPath = path.join(dartSdkPath, 'bin', 'dart');
-  io.Process driver = await io.Process.start(dartVmPath, args);
-  driver.stdout.listen(io.stdout.add);
-  driver.stderr.listen(io.stderr.add);
-  return await driver.exitCode;
+  return await runCommandAndStreamOutput(<String>[dartVmPath]..addAll(args));
 }
 
 
