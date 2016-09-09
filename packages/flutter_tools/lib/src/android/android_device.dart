@@ -64,12 +64,12 @@ class AndroidDevice extends Device {
       printTrace(propCommand.join(' '));
 
       try {
-        // We pass an encoding of ASCII so that we don't try and interpret the
+        // We pass an encoding of LATIN1 so that we don't try and interpret the
         // `adb shell getprop` result as UTF8.
         ProcessResult result = Process.runSync(
           propCommand.first,
           propCommand.sublist(1),
-          stdoutEncoding: ASCII
+          stdoutEncoding: LATIN1
         );
         if (result.exitCode == 0) {
           _properties = parseAdbDeviceProperties(result.stdout);
