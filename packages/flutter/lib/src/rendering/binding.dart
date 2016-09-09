@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
+import 'package:meta/meta.dart';
 import 'package:mojo/core.dart' as core;
 import 'package:sky_services/semantics/semantics.mojom.dart' as mojom;
 
@@ -195,6 +196,7 @@ abstract class RendererBinding extends BindingBase implements SchedulerBinding, 
   /// list.
   //
   // When editing the above, also update widgets/binding.dart's copy.
+  @protected
   void beginFrame() {
     assert(renderView != null);
     pipelineOwner.flushLayout();
@@ -208,7 +210,7 @@ abstract class RendererBinding extends BindingBase implements SchedulerBinding, 
   void reassembleApplication() {
     super.reassembleApplication();
     pipelineOwner.reassemble();
-    beginFrame();
+    handleBeginFrame(null);
   }
 
   @override

@@ -491,11 +491,14 @@ class RenderObjectToWidgetElement<T extends RenderObject> extends RootRenderObje
 
   @override
   void performRebuild() {
-    assert(_newWidget != null);
-    final Widget newWidget = _newWidget;
-    _newWidget = null;
+    if (_newWidget != null) {
+      // _newWidget can be null if, for instance, we were rebuilt
+      // due to a reassemble.
+      final Widget newWidget = _newWidget;
+      _newWidget = null;
+      update(newWidget);
+    }
     super.performRebuild();
-    update(newWidget);
     assert(_newWidget == null);
   }
 
