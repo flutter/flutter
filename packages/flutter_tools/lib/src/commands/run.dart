@@ -169,6 +169,7 @@ class RunCommand extends RunCommandBase {
         deviceForCommand,
         target: targetFile,
         debuggingOptions: options,
+        benchmarkMode: argResults['benchmark'],
       );
     } else {
       runner = new RunAndStayResident(
