@@ -2,14 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "base/json/json_reader.h"
-#include "base/values.h"
+#include "flutter/sky/shell/ui/flutter_font_selector.h"
+
 #include "flutter/assets/zip_asset_store.h"
 #include "flutter/lib/ui/ui_dart_state.h"
 #include "flutter/sky/engine/platform/fonts/FontData.h"
 #include "flutter/sky/engine/platform/fonts/FontFaceCreationParams.h"
 #include "flutter/sky/engine/platform/fonts/SimpleFontData.h"
-#include "flutter/sky/shell/ui/flutter_font_selector.h"
+#include "lib/ftl/arraysize.h"
+#include "third_party/rapidjson/rapidjson/document.h"
 #include "third_party/skia/include/core/SkStream.h"
 #include "third_party/skia/include/core/SkTypeface.h"
 #include "third_party/skia/include/ports/SkFontMgr.h"
@@ -17,11 +18,6 @@
 namespace sky {
 namespace shell {
 
-using base::DictionaryValue;
-using base::JSONReader;
-using base::ListValue;
-using base::StringValue;
-using base::Value;
 using blink::FontCacheKey;
 using blink::FontData;
 using blink::FontDescription;
@@ -123,50 +119,52 @@ void FlutterFontSelector::parseFontManifest() {
   if (!asset_store_->GetAsBuffer(kFontManifestAssetPath, &font_manifest_data))
     return;
 
-  base::StringPiece font_manifest_str(
-      reinterpret_cast<const char*>(font_manifest_data.data()),
-      font_manifest_data.size());
-  scoped_ptr<Value> font_manifest_json = JSONReader::Read(font_manifest_str);
-  if (font_manifest_json == nullptr)
+  rapidjson::Document document;
+  document.Parse(reinterpret_cast<const char*>(font_manifest_data.data()),
+                 font_manifest_data.size());
+
+  if (document.HasParseError())
     return;
 
-  ListValue* family_list;
-  if (!font_manifest_json->GetAsList(&family_list))
+  if (!document.IsArray())
     return;
 
-  for (auto family : *family_list) {
-    DictionaryValue* family_dict;
-    if (!family->GetAsDictionary(&family_dict))
-      continue;
-    std::string family_name;
-    if (!family_dict->GetString("family", &family_name))
+  for (auto& family : document.GetArray()) {
+    if (!family.IsObject())
       continue;
 
-    ListValue* font_list;
-    if (!family_dict->GetList("fonts", &font_list))
+    auto family_name = family.FindMember("family");
+    if (family_name == family.MemberEnd() || !family_name->value.IsString())
       continue;
 
-    AtomicString family_key = AtomicString::fromUTF8(family_name.c_str());
+    auto font_list = family.FindMember("fonts");
+    if (font_list == family.MemberEnd() || !font_list->value.IsArray())
+      continue;
+
+    AtomicString family_key =
+        AtomicString::fromUTF8(family_name->value.GetString());
     auto set_result =
         font_family_map_.set(family_key, std::vector<FlutterFontAttributes>());
     std::vector<FlutterFontAttributes>& family_assets =
         set_result.storedValue->value;
 
-    for (Value* list_entry : *font_list) {
-      DictionaryValue* font_dict;
-      if (!list_entry->GetAsDictionary(&font_dict))
+    for (auto& list_entry : font_list->value.GetArray()) {
+      if (!list_entry.IsObject())
         continue;
 
-      std::string asset_path;
-      if (!font_dict->GetString("asset", &asset_path))
+      auto asset_path = list_entry.FindMember("asset");
+      if (asset_path == list_entry.MemberEnd() || !asset_path->value.IsString())
         continue;
 
-      FlutterFontAttributes attributes(asset_path);
-      font_dict->GetInteger("weight", &attributes.weight);
+      FlutterFontAttributes attributes(asset_path->value.GetString());
 
-      std::string style;
-      if (font_dict->GetString("style", &style)) {
-        if (style == "italic")
+      auto weight = list_entry.FindMember("weight");
+      if (weight != list_entry.MemberEnd() && weight->value.IsInt())
+        attributes.weight = weight->value.GetInt();
+
+      auto style = list_entry.FindMember("style");
+      if (style != list_entry.MemberEnd() && style->value.IsString()) {
+        if (std::string(style->value.GetString()) == "italic")
           attributes.style = FontStyle::FontStyleItalic;
       }
 
