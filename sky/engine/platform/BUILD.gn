@@ -286,6 +286,14 @@ source_set("platform") {
   if (is_fuchsia) {
     sources += [
       "fonts/fuchsia/FontCacheFuchsia.cpp",
+      "fonts/fuchsia/FontCacheFuchsia.h",
+    ]
+
+    deps += [
+      "//mojo/public/cpp/bindings",
+      "//mojo/public/cpp/system",
+      "//mojo/services/ui/fonts/interfaces",
+      "//mojo/system",
     ]
   }
 

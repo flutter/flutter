@@ -50,6 +50,8 @@
 
 namespace blink {
 
+#if !OS(FUCHSIA)
+
 static int toSkiaWeight(FontWeight weight)
 {
     switch (weight) {
@@ -101,6 +103,8 @@ static SkFontStyle toSkiaFontStyle(const FontDescription& fontDescription)
                        toSkiaWidth(fontDescription.stretch()),
                        toSkiaSlant(fontDescription.style()));
 }
+
+#endif  // !OS(FUCHSIA)
 
 void FontCache::platformInit()
 {
@@ -194,6 +198,7 @@ PassRefPtr<SimpleFontData> FontCache::getLastResortFallbackFont(const FontDescri
     return fontDataFromFontPlatformData(fontPlatformData, shouldRetain);
 }
 
+#if !OS(FUCHSIA)
 sk_sp<SkTypeface> FontCache::createTypeface(const FontDescription& fontDescription, const FontFaceCreationParams& creationParams, CString& name)
 {
 #if !OS(WIN) && !OS(ANDROID)
@@ -220,6 +225,7 @@ sk_sp<SkTypeface> FontCache::createTypeface(const FontDescription& fontDescripti
 
     return SkTypeface::MakeFromName(name.data(), style);
 }
+#endif
 
 #if !OS(WIN)
 FontPlatformData* FontCache::createFontPlatformData(const FontDescription& fontDescription, const FontFaceCreationParams& creationParams, float fontSize)
