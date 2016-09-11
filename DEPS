@@ -66,6 +66,9 @@ deps = {
   'src/third_party/gtest':
    Var('fuchsia_git') + '/third_party/gtest' + '@' + 'c00f82917331efbbd27124b537e4ccc915a02b72',
 
+  'src/third_party/rapidjson':
+   Var('fuchsia_git') + '/third_party/rapidjson' + '@' + '9defbb0209a534ffeb3a2b79d5ee440a77407292',
+
    # Chromium-style
    #
    # As part of integrating with Fuchsia, we should eventually remove all these
