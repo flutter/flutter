@@ -4,6 +4,7 @@
 
 #include "flutter/content_handler/framebuffer_skia.h"
 
+#include <magenta/process.h>
 #include <magenta/syscalls.h>
 
 #include <utility>
@@ -21,7 +22,7 @@ struct BackingStoreInfo {
 
 void DidReleaseSurface(void* pixels, void* context) {
   BackingStoreInfo* info = static_cast<BackingStoreInfo*>(context);
-  mx_process_vm_unmap(0, info->buffer, info->size);
+  mx_process_unmap_vm(mx_process_self(), info->buffer, info->size);
   mx_handle_close(info->vmo);
   delete info;
 }
@@ -48,8 +49,8 @@ void FramebufferSkia::Bind(mojo::InterfaceHandle<mojo::Framebuffer> framebuffer,
   size_t size = row_bytes * info_->size->height;
 
   mx_status_t status =
-      mx_process_vm_map(0, info_->vmo.get().value(), 0, size, &buffer,
-                        MX_VM_FLAG_PERM_READ | MX_VM_FLAG_PERM_WRITE);
+      mx_process_map_vm(mx_process_self(), info_->vmo.get().value(), 0, size,
+                        &buffer, MX_VM_FLAG_PERM_READ | MX_VM_FLAG_PERM_WRITE);
 
   if (status < 0) {
     FTL_LOG(ERROR) << "Cannot map framebuffer (status=" << status << ")";

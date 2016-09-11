@@ -5,6 +5,7 @@
 #include "flutter/sky/engine/platform/fonts/fuchsia/FontCacheFuchsia.h"
 
 #include <limits>
+#include <magenta/process.h>
 #include <magenta/syscalls.h>
 #include <utility>
 
@@ -57,7 +58,8 @@ mojo::FontSlant ToMojoSlant(FontStyle style) {
 }
 
 void UnmapMemory(const void* buffer, void* context) {
-  mx_process_unmap_vm(0, reinterpret_cast<uintptr_t>(buffer), 0);
+  mx_process_unmap_vm(mx_process_self(), reinterpret_cast<uintptr_t>(buffer),
+                      0);
 }
 
 sk_sp<SkData> MakeSkDataFromVMO(mx_handle_t vmo) {
@@ -66,7 +68,8 @@ sk_sp<SkData> MakeSkDataFromVMO(mx_handle_t vmo) {
   if (status != NO_ERROR || size > std::numeric_limits<mx_size_t>::max())
     return nullptr;
   uintptr_t buffer = 0;
-  status = mx_process_vm_map(0, vmo, 0, size, &buffer, MX_VM_FLAG_PERM_READ);
+  status = mx_process_map_vm(mx_process_self(), vmo, 0, size, &buffer,
+                             MX_VM_FLAG_PERM_READ);
   if (status != NO_ERROR)
     return nullptr;
   return SkData::MakeWithProc(reinterpret_cast<void*>(buffer), size,
