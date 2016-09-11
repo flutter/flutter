@@ -19,7 +19,8 @@
 
 #include <stdint.h>
 #include <sys/types.h>
-#include <UniquePtr.h>
+
+#include <memory>
 
 // ---------------------------------------------------------------------------
 
@@ -79,8 +80,8 @@ private:
     static int CountLeadingZeros(element x);
 
     uint32_t mMaxVal;
-    UniquePtr<uint32_t[]> mIndices;
-    UniquePtr<element[]> mBitmaps;
+    std::unique_ptr<uint32_t[]> mIndices;
+    std::unique_ptr<element[]> mBitmaps;
     uint32_t mZeroPageIndex;
 };
 
