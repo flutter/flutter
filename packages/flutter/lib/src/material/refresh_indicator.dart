@@ -331,6 +331,18 @@ class RefreshIndicatorState extends State<RefreshIndicator> {
     }
   }
 
+  ScrollableEdge get _clampOverscrollsEdge {
+    switch (config.location) {
+      case RefreshIndicatorLocation.top:
+        return ScrollableEdge.leading;
+      case RefreshIndicatorLocation.bottom:
+        return ScrollableEdge.trailing;
+      case RefreshIndicatorLocation.both:
+        return ScrollableEdge.both;
+    }
+    return ScrollableEdge.none;
+  }
+
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
@@ -353,9 +365,10 @@ class RefreshIndicatorState extends State<RefreshIndicator> {
       onPointerUp: _handlePointerUp,
       child: new Stack(
         children: <Widget>[
-          new ClampOverscrolls(
+          new ClampOverscrolls.inherit(
+            context: context,
+            edge: _clampOverscrollsEdge,
             child: config.child,
-            value: true
           ),
           new Positioned(
             top: _isIndicatorAtTop ? 0.0 : null,

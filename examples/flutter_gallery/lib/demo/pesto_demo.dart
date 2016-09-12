@@ -304,7 +304,7 @@ class _RecipePageState extends State<RecipePage> {
           )
         ),
         new ClampOverscrolls(
-          value: true,
+          edge: ScrollableEdge.both,
           child: new ScrollableViewport(
             scrollableKey: _scrollableKey,
             child: new RepaintBoundary(

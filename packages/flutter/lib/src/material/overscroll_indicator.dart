@@ -9,25 +9,6 @@ import 'package:flutter/widgets.dart';
 
 import 'theme.dart';
 
-/// Specifies at which ends of the scrollable the [OverscrollIndicator]
-/// should appear.
-enum OverscrollIndicatorEdge {
-  /// The top and bottom of the scrollable if its scroll-direction is vertical
-  /// or the left and right if its scroll-direction is horizontal.
-  both,
-
-  /// Only the top of the scrollable if its scroll-direction is vertical,
-  /// or only the left if its scroll-direction is horizontal.
-  leading,
-
-  /// Only the bottom of the scrollable if its scroll-direction is vertical,
-  /// or only the right if its scroll-direction is horizontal.
-  trailing,
-
-  /// The overscroll indicator should not appear at all.
-  none,
-}
-
 const double _kMinIndicatorExtent = 0.0;
 const double _kMaxIndicatorExtent = 64.0;
 const double _kMinIndicatorOpacity = 0.0;
@@ -116,7 +97,7 @@ class OverscrollIndicator extends StatefulWidget {
   OverscrollIndicator({
     Key key,
     this.scrollableKey,
-    this.edge: OverscrollIndicatorEdge.both,
+    this.edge: ScrollableEdge.both,
     this.child
   }) : super(key: key) {
     assert(child != null);
@@ -129,7 +110,7 @@ class OverscrollIndicator extends StatefulWidget {
   final Key scrollableKey;
 
   /// Where the scroll indicator should appear.
-  final OverscrollIndicatorEdge edge;
+  final ScrollableEdge edge;
 
   /// The overscroll indicator will be stacked on top of this child. The
   /// indicator will appear when child's [Scrollable] descendant is
@@ -222,13 +203,13 @@ class _OverscrollIndicatorState extends State<OverscrollIndicator> {
 
   bool _isMatchingOverscrollEdge(double scrollOffset) {
     switch (config.edge) {
-      case OverscrollIndicatorEdge.both:
+      case ScrollableEdge.both:
         return true;
-      case OverscrollIndicatorEdge.leading:
+      case ScrollableEdge.leading:
         return scrollOffset < _minScrollOffset;
-      case OverscrollIndicatorEdge.trailing:
+      case ScrollableEdge.trailing:
         return scrollOffset > _maxScrollOffset;
-      case OverscrollIndicatorEdge.none:
+      case ScrollableEdge.none:
         return false;
     }
     return false;
@@ -296,9 +277,10 @@ class _OverscrollIndicatorState extends State<OverscrollIndicator> {
             child: child
           );
         },
-        child: new ClampOverscrolls(
+        child: new ClampOverscrolls.inherit(
+          context: context,
+          edge: config.edge,
           child: config.child,
-          value: true
         )
       )
     );
