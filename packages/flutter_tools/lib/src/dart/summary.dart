@@ -90,18 +90,7 @@ Future<Null> buildUnlinkedForPackages(String flutterPath) async {
   // Build in packages/.
   //
   Folder packagesFolder = flutterFolder.getChildAssumingFolder('packages');
-  await _buildUnlinkedForPackage(
-      manager, packagesFolder.getChildAssumingFolder('flutter'));
-  await _buildUnlinkedForPackage(
-      manager, packagesFolder.getChildAssumingFolder('flutter_driver'));
-  await _buildUnlinkedForPackage(
-      manager, packagesFolder.getChildAssumingFolder('flutter_markdown'));
-  await _buildUnlinkedForPackage(
-      manager, packagesFolder.getChildAssumingFolder('flutter_sprites'));
-  await _buildUnlinkedForPackage(
-      manager, packagesFolder.getChildAssumingFolder('flutter_test'));
-  await _buildUnlinkedForPackage(
-      manager, packagesFolder.getChildAssumingFolder('playfair'));
+  await _buildUnlinkedForDirectChildren(manager, packagesFolder);
 
   //
   // Build in bin/cache/pkg/.
@@ -110,8 +99,16 @@ Future<Null> buildUnlinkedForPackages(String flutterPath) async {
       .getChildAssumingFolder('bin')
       .getChildAssumingFolder('cache')
       .getChildAssumingFolder('pkg');
-  await _buildUnlinkedForPackage(
-      manager, pkgFolder.getChildAssumingFolder('sky_services'));
+  await _buildUnlinkedForDirectChildren(manager, pkgFolder);
+}
+
+Future<Null> _buildUnlinkedForDirectChildren(
+    PubSummaryManager manager, Folder packagesFolder) async {
+  for (Resource child in packagesFolder.getChildren()) {
+    if (child is Folder) {
+      await _buildUnlinkedForPackage(manager, child);
+    }
+  }
 }
 
 Future<Null> _buildUnlinkedForPackage(
