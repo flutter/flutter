@@ -348,15 +348,14 @@ class ScrollableState<T extends Scrollable> extends State<T> {
   /// Scroll behaviors control where the boundaries of the scrollable are placed
   /// and how the scrolling physics should behave near those boundaries and
   /// after the user stops directly manipulating the scrollable.
-  ExtentScrollBehavior get scrollBehavior {
-    return _scrollBehavior ??= createScrollBehavior();
-  }
+  ExtentScrollBehavior get scrollBehavior => _scrollBehavior;
   ExtentScrollBehavior _scrollBehavior;
 
   /// Use the value returned by [ScrollConfiguration.createScrollBehavior].
   /// If this widget doesn't have a ScrollConfiguration ancestor,
   /// or its createScrollBehavior callback is null, then return a new instance
   /// of [OverscrollWhenScrollableBehavior].
+  @protected
   ExtentScrollBehavior createScrollBehavior() {
     return ScrollConfiguration.of(context)?.createScrollBehavior();
   }
