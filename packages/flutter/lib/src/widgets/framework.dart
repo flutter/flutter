@@ -973,9 +973,15 @@ abstract class State<T extends StatefulWidget> {
   }
 }
 
-abstract class _ProxyWidget extends Widget {
-  const _ProxyWidget({ Key key, this.child }) : super(key: key);
+/// A widget that has exactly one child widget.
+///
+/// Useful as a base class for other widgets, such as [InheritedWidget] and
+/// [ParentDataWidget].
+abstract class ProxyWidget extends Widget {
+  /// Creates a widget that has exactly one child widget.
+  const ProxyWidget({ Key key, this.child }) : super(key: key);
 
+  /// The widget below this widget in the tree.
   final Widget child;
 }
 
@@ -989,7 +995,7 @@ abstract class _ProxyWidget extends Widget {
 /// A [ParentDataWidget] is specific to a particular kind of [RenderObject], and
 /// thus also to a particular [RenderObjectWidget] class. That class is `T`, the
 /// [ParentDataWidget] type argument.
-abstract class ParentDataWidget<T extends RenderObjectWidget> extends _ProxyWidget {
+abstract class ParentDataWidget<T extends RenderObjectWidget> extends ProxyWidget {
   const ParentDataWidget({ Key key, Widget child })
     : super(key: key, child: child);
 
@@ -1046,7 +1052,7 @@ abstract class ParentDataWidget<T extends RenderObjectWidget> extends _ProxyWidg
 ///
 /// Inherited widgets, when referenced in this way, will cause the consumer to
 /// rebuild when the inherited widget itself changes state.
-abstract class InheritedWidget extends _ProxyWidget {
+abstract class InheritedWidget extends ProxyWidget {
   const InheritedWidget({ Key key, Widget child })
     : super(key: key, child: child);
 
@@ -1640,6 +1646,7 @@ class BuildOwner {
 /// Elements can, in principle, have children. Only subclasses of
 /// RenderObjectElement are allowed to have more than one child.
 abstract class Element implements BuildContext {
+  /// Creates an element that instantiates the given widget.
   Element(Widget widget) : _widget = widget {
     assert(widget != null);
   }
@@ -2162,9 +2169,9 @@ class ErrorWidget extends LeafRenderObjectWidget {
   }
 }
 
-/// Base class for instantiations of widgets that have builders and can be
-/// marked dirty.
+/// An [Element] that can be marked dirty and rebuilt.
 abstract class BuildableElement extends Element {
+  /// Creates an element that instantiates the given widget.
   BuildableElement(Widget widget) : super(widget);
 
   /// Returns true if the element has been marked as needing rebuilding.
@@ -2324,9 +2331,12 @@ typedef Widget IndexedWidgetBuilder(BuildContext context, int index);
 // See ComponentElement._builder.
 Widget _buildNothing(BuildContext context) => null;
 
-/// Base class for the instantiation of [StatelessWidget], [StatefulWidget],
-/// and [_ProxyWidget] widgets.
+/// An [Element] that composes other [Element]s.
+///
+/// Rather than creating a [RenderObject] directly, a [ComponentElement] creates
+/// [RenderObject]s indirectly by creating other [Element]s.
 abstract class ComponentElement extends BuildableElement {
+  /// Creates an element that instantiates the given widget.
   ComponentElement(Widget widget) : super(widget);
 
   // Initializing this field with _buildNothing helps the compiler prove that
@@ -2566,13 +2576,15 @@ class StatefulElement extends ComponentElement {
   }
 }
 
-abstract class _ProxyElement extends ComponentElement {
-  _ProxyElement(_ProxyWidget widget) : super(widget) {
+/// A base class for elements that instantiate [ProxyElement]s.
+abstract class ProxyElement extends ComponentElement {
+  /// Creates an element that instantiates the given widget.
+  ProxyElement(ProxyWidget widget) : super(widget) {
     _builder = _build;
   }
 
   @override
-  _ProxyWidget get widget => super.widget;
+  ProxyWidget get widget => super.widget;
 
   Widget _build(BuildContext context) => widget.child;
 
@@ -2583,8 +2595,8 @@ abstract class _ProxyElement extends ComponentElement {
   }
 
   @override
-  void update(_ProxyWidget newWidget) {
-    _ProxyWidget oldWidget = widget;
+  void update(ProxyWidget newWidget) {
+    ProxyWidget oldWidget = widget;
     assert(widget != null);
     assert(widget != newWidget);
     super.update(newWidget);
@@ -2595,11 +2607,11 @@ abstract class _ProxyElement extends ComponentElement {
   }
 
   @protected
-  void notifyClients(_ProxyWidget oldWidget);
+  void notifyClients(ProxyWidget oldWidget);
 }
 
 /// Base class for instantiations of [ParentDataWidget] subclasses.
-class ParentDataElement<T extends RenderObjectWidget> extends _ProxyElement {
+class ParentDataElement<T extends RenderObjectWidget> extends ProxyElement {
   ParentDataElement(ParentDataWidget<T> widget) : super(widget);
 
   @override
@@ -2650,7 +2662,7 @@ class ParentDataElement<T extends RenderObjectWidget> extends _ProxyElement {
 }
 
 /// Base class for instantiations of [InheritedWidget] subclasses.
-class InheritedElement extends _ProxyElement {
+class InheritedElement extends ProxyElement {
   InheritedElement(InheritedWidget widget) : super(widget);
 
   @override
