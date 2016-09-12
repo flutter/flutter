@@ -40,6 +40,8 @@ source_set("embedded_resources_cc") {
 
 source_set("runtime") {
   sources = [
+    "asset_font_selector.cc",
+    "asset_font_selector.h",
     "dart_controller.cc",
     "dart_controller.h",
     "dart_init.cc",
@@ -74,9 +76,11 @@ source_set("runtime") {
     "//flutter/services/engine:interfaces",
     "//flutter/services/pointer:interfaces",
     "//flutter/skia",
+    "//flutter/sky/engine/platform",
     "//lib/ftl",
     "//lib/tonic",
     "//mojo/public/platform/dart:mojo_internal_impl",
+    "//third_party/rapidjson",
   ]
 
   if (flutter_runtime_mode != "release") {
