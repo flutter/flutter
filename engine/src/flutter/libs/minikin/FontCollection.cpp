@@ -219,7 +219,7 @@ uint32_t FontCollection::calcCoverageScore(uint32_t ch, uint32_t vs, FontFamily*
         const FontLanguages& langs = FontLanguageListCache::getById(fontFamily->langId());
         bool hasEmojiFlag = false;
         for (size_t i = 0; i < langs.size(); ++i) {
-            if (langs[i].hasEmojiFlag()) {
+            if (langs[i].getEmojiStyle() == FontLanguage::EMSTYLE_EMOJI) {
                 hasEmojiFlag = true;
                 break;
             }

@@ -33,4 +33,11 @@ static void BM_FontLanguage_en_Latn_US(benchmark::State& state) {
 }
 BENCHMARK(BM_FontLanguage_en_Latn_US);
 
+static void BM_FontLanguage_en_Latn_US_u_em_emoji(benchmark::State& state) {
+    while (state.KeepRunning()) {
+        FontLanguage language("en-Latn-US-u-em-emoji", 21);
+    }
+}
+BENCHMARK(BM_FontLanguage_en_Latn_US_u_em_emoji);
+
 }  // namespace minikin

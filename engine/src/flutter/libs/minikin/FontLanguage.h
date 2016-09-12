@@ -34,14 +34,25 @@ class FontLanguages;
 // font rendering.
 struct FontLanguage {
 public:
+    enum EmojiStyle : uint8_t {
+        EMSTYLE_EMPTY = 0,
+        EMSTYLE_DEFAULT = 1,
+        EMSTYLE_EMOJI = 2,
+        EMSTYLE_TEXT = 3,
+    };
     // Default constructor creates the unsupported language.
-    FontLanguage() : mScript(0ul), mLanguage(0ul), mSubScriptBits(0ul) {}
+    FontLanguage()
+            : mScript(0ul),
+            mLanguage(0ul),
+            mSubScriptBits(0ul),
+            mEmojiStyle(EMSTYLE_EMPTY) {}
 
     // Parse from string
     FontLanguage(const char* buf, size_t length);
 
     bool operator==(const FontLanguage other) const {
-        return !isUnsupported() && isEqualScript(other) && mLanguage == other.mLanguage;
+        return !isUnsupported() && isEqualScript(other) && mLanguage == other.mLanguage &&
+                mEmojiStyle == other.mEmojiStyle;
     }
 
     bool operator!=(const FontLanguage other) const {
@@ -49,7 +60,7 @@ public:
     }
 
     bool isUnsupported() const { return mLanguage == 0ul; }
-    bool hasEmojiFlag() const { return mSubScriptBits & kEmojiFlag; }
+    EmojiStyle getEmojiStyle() const { return mEmojiStyle; }
 
     bool isEqualScript(const FontLanguage& other) const;
 
@@ -64,7 +75,9 @@ public:
     // 0 = no match, 1 = script match, 2 = script and primary language match.
     int calcScoreFor(const FontLanguages& supported) const;
 
-    uint64_t getIdentifier() const { return (uint64_t)mScript << 32 | (uint64_t)mLanguage; }
+    uint64_t getIdentifier() const {
+        return (uint64_t)mScript << 32 | (uint64_t)mEmojiStyle << 24 | (uint64_t)mLanguage;
+    }
 
 private:
     friend class FontLanguages;  // for FontLanguages constructor
@@ -73,20 +86,21 @@ private:
     uint32_t mScript;
 
     // ISO 639-1 or ISO 639-2 compliant language code.
-    // The two or three letter language code is packed into 32 bit integer.
+    // The two or three letter language code is packed into 24 bit integer.
     // mLanguage = 0 means the FontLanguage is unsupported.
     uint32_t mLanguage;
 
-    // For faster comparing, use 8 bits for specific scripts.
+    // For faster comparing, use 7 bits for specific scripts.
     static const uint8_t kBopomofoFlag = 1u;
-    static const uint8_t kEmojiFlag = 1u << 1;
-    static const uint8_t kHanFlag = 1u << 2;
-    static const uint8_t kHangulFlag = 1u << 3;
-    static const uint8_t kHiraganaFlag = 1u << 4;
-    static const uint8_t kKatakanaFlag = 1u << 5;
-    static const uint8_t kSimplifiedChineseFlag = 1u << 6;
-    static const uint8_t kTraditionalChineseFlag = 1u << 7;
+    static const uint8_t kHanFlag = 1u << 1;
+    static const uint8_t kHangulFlag = 1u << 2;
+    static const uint8_t kHiraganaFlag = 1u << 3;
+    static const uint8_t kKatakanaFlag = 1u << 4;
+    static const uint8_t kSimplifiedChineseFlag = 1u << 5;
+    static const uint8_t kTraditionalChineseFlag = 1u << 6;
     uint8_t mSubScriptBits;
+
+    EmojiStyle mEmojiStyle;
 
     static uint8_t scriptToSubScriptBits(uint32_t script);
 
