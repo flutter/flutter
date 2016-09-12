@@ -119,7 +119,8 @@ class HotRunner extends ResidentRunner {
     Device device, {
     String target,
     DebuggingOptions debuggingOptions,
-    bool usesTerminalUI: true
+    bool usesTerminalUI: true,
+    this.benchmarkMode: false,
   }) : super(device,
              target: target,
              debuggingOptions: debuggingOptions,
@@ -132,6 +133,8 @@ class HotRunner extends ResidentRunner {
   String _projectRootPath;
   Set<String> _startupDependencies;
   final AssetBundle bundle = new AssetBundle();
+  final bool benchmarkMode;
+  final Map<String, int> benchmarkData = new Map<String, int>();
 
   @override
   Future<int> run({
@@ -283,6 +286,25 @@ class HotRunner extends ResidentRunner {
     // Finish the file sync now.
     await _updateDevFS();
 
+    if (benchmarkMode) {
+      // We are running in benchmark mode.
+      printStatus('Running in benchmark mode.');
+      // Measure time to perform a hot restart.
+      printStatus('Benchmarking hot restart');
+      await restart(fullRestart: true);
+      await vmService.vm.refreshViews();
+      // TODO(johnmccutchan): Modify script entry point.
+      printStatus('Benchmarking hot reload');
+      // Measure time to perform a hot reload.
+      await restart(fullRestart: false);
+      printStatus('Benchmark completed. Exiting application.');
+      await _cleanupDevFS();
+      await stopEchoingDeviceLog();
+      await stopApp();
+      File benchmarkOutput = new File('hot_benchmark.json');
+      benchmarkOutput.writeAsStringSync(toPrettyJson(benchmarkData));
+    }
+
     return waitForAppToFinish();
   }
 
@@ -399,6 +421,10 @@ class HotRunner extends ResidentRunner {
     restartStatus.stop(showElapsedTime: true);
     printStatus('Restart time: '
                 '${getElapsedAsMilliseconds(firstFrameTimer.elapsed)}');
+    if (benchmarkMode) {
+      benchmarkData['hotRestartMillisecondsToFrame'] =
+          firstFrameTimer.elapsed.inMilliseconds;
+    }
     flutterUsage.sendEvent('hot', 'restart');
     flutterUsage.sendTiming('hot', 'restart', firstFrameTimer.elapsed);
   }
@@ -474,6 +500,10 @@ class HotRunner extends ResidentRunner {
     await firstFrameTimer.firstFrame();
     printStatus('Hot reload time: '
                 '${getElapsedAsMilliseconds(firstFrameTimer.elapsed)}');
+    if (benchmarkMode) {
+      benchmarkData['hotReloadMillisecondsToFrame'] =
+          firstFrameTimer.elapsed.inMilliseconds;
+    }
     flutterUsage.sendTiming('hot', 'reload', firstFrameTimer.elapsed);
     return true;
   }
