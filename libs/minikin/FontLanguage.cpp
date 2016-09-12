@@ -18,7 +18,9 @@
 
 #include "FontLanguage.h"
 
+#include <algorithm>
 #include <hb.h>
+#include <string.h>
 #include <unicode/uloc.h>
 
 namespace minikin {
@@ -26,6 +28,18 @@ namespace minikin {
 #define SCRIPT_TAG(c1, c2, c3, c4) \
         (((uint32_t)(c1)) << 24 | ((uint32_t)(c2)) << 16 | ((uint32_t)(c3)) <<  8 | \
          ((uint32_t)(c4)))
+
+// Check if a language code supports emoji according to its subtag
+static bool isEmojiSubtag(const char* buf, size_t bufLen, const char* subtag, size_t subtagLen) {
+    if (bufLen < subtagLen) {
+        return false;
+    }
+    if (strncmp(buf, subtag, subtagLen) != 0) {
+        return false;  // no match between two strings
+    }
+    return (bufLen == subtagLen || buf[subtagLen] == '\0' ||
+            buf[subtagLen] == '-' || buf[subtagLen] == '_');
+}
 
 // Parse BCP 47 language identifier into internal structure
 FontLanguage::FontLanguage(const char* buf, size_t length) : FontLanguage() {
@@ -53,8 +67,34 @@ FontLanguage::FontLanguage(const char* buf, size_t length) : FontLanguage() {
             mScript = SCRIPT_TAG(buf[i], buf[i + 1], buf[i + 2], buf[i + 3]);
         }
     }
-
     mSubScriptBits = scriptToSubScriptBits(mScript);
+
+    if (mScript == SCRIPT_TAG('Z', 's', 'y', 'e')) {
+        mEmojiStyle = EMSTYLE_EMOJI;
+    } else if (mScript == SCRIPT_TAG('Z', 's', 'y', 'm')) {
+        mEmojiStyle = EMSTYLE_TEXT;
+    }
+    // 10 is the length of "-u-em-text", which is the shortest emoji subtag,
+    // unnecessary comparison can be avoided if total length is smaller than 10.
+    const size_t kMinSubtagLength = 10;
+    if (length < kMinSubtagLength) {
+        return;
+    }
+
+    static const char kPrefix[] = "-u-em-";
+    const char *pos = std::search(buf, buf + length, kPrefix, kPrefix + strlen(kPrefix));
+    if (pos == buf + length) {
+        return;
+    }
+    pos += strlen(kPrefix);
+    const size_t remainingLength = length - (pos - buf);
+    if (isEmojiSubtag(pos, remainingLength, "emoji", 5)){
+        mEmojiStyle = EMSTYLE_EMOJI;
+    } else if (isEmojiSubtag(pos, remainingLength, "text", 4)){
+        mEmojiStyle = EMSTYLE_TEXT;
+    } else if (isEmojiSubtag(pos, remainingLength, "default", 7)){
+        mEmojiStyle = EMSTYLE_DEFAULT;
+    }
 }
 
 //static
@@ -94,9 +134,6 @@ uint8_t FontLanguage::scriptToSubScriptBits(uint32_t script) {
             break;
         case SCRIPT_TAG('K', 'o', 'r', 'e'):
             subScriptBits = kHanFlag | kHangulFlag;
-            break;
-        case SCRIPT_TAG('Z', 's', 'y', 'e'):
-            subScriptBits = kEmojiFlag;
             break;
     }
     return subScriptBits;

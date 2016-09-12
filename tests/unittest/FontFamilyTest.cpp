@@ -269,15 +269,128 @@ TEST_F(FontLanguagesTest, repeatedLanguageTests) {
 
 TEST_F(FontLanguagesTest, undEmojiTests) {
     FontLanguage emoji = createFontLanguage("und-Zsye");
-    EXPECT_TRUE(emoji.hasEmojiFlag());
+    EXPECT_EQ(FontLanguage::EMSTYLE_EMOJI, emoji.getEmojiStyle());
 
     FontLanguage und = createFontLanguage("und");
-    EXPECT_FALSE(und.hasEmojiFlag());
+    EXPECT_EQ(FontLanguage::EMSTYLE_EMPTY, und.getEmojiStyle());
     EXPECT_FALSE(emoji == und);
 
     FontLanguage undExample = createFontLanguage("und-example");
-    EXPECT_FALSE(undExample.hasEmojiFlag());
+    EXPECT_EQ(FontLanguage::EMSTYLE_EMPTY, undExample.getEmojiStyle());
     EXPECT_FALSE(emoji == undExample);
+}
+
+TEST_F(FontLanguagesTest, subtagEmojiTest) {
+    std::string subtagEmojiStrings[] = {
+        // Duplicate subtag case.
+        "und-Latn-u-em-emoji-u-em-text",
+
+        // Strings that contain language.
+        "und-u-em-emoji",
+        "en-u-em-emoji",
+
+        // Strings that contain the script.
+        "und-Jpan-u-em-emoji",
+        "en-Latn-u-em-emoji",
+        "und-Zsym-u-em-emoji",
+        "und-Zsye-u-em-emoji",
+        "en-Zsym-u-em-emoji",
+        "en-Zsye-u-em-emoji",
+
+        // Strings that contain the county.
+        "und-US-u-em-emoji",
+        "en-US-u-em-emoji",
+        "und-Latn-US-u-em-emoji",
+        "en-Zsym-US-u-em-emoji",
+        "en-Zsye-US-u-em-emoji",
+    };
+
+    for (auto subtagEmojiString : subtagEmojiStrings) {
+        SCOPED_TRACE("Test for \"" + subtagEmojiString + "\"");
+        FontLanguage subtagEmoji = createFontLanguage(subtagEmojiString);
+        EXPECT_EQ(FontLanguage::EMSTYLE_EMOJI, subtagEmoji.getEmojiStyle());
+    }
+}
+
+TEST_F(FontLanguagesTest, subtagTextTest) {
+    std::string subtagTextStrings[] = {
+        // Duplicate subtag case.
+        "und-Latn-u-em-text-u-em-emoji",
+
+        // Strings that contain language.
+        "und-u-em-text",
+        "en-u-em-text",
+
+        // Strings that contain the script.
+        "und-Latn-u-em-text",
+        "en-Jpan-u-em-text",
+        "und-Zsym-u-em-text",
+        "und-Zsye-u-em-text",
+        "en-Zsym-u-em-text",
+        "en-Zsye-u-em-text",
+
+        // Strings that contain the county.
+        "und-US-u-em-text",
+        "en-US-u-em-text",
+        "und-Latn-US-u-em-text",
+        "en-Zsym-US-u-em-text",
+        "en-Zsye-US-u-em-text",
+    };
+
+    for (auto subtagTextString : subtagTextStrings) {
+        SCOPED_TRACE("Test for \"" + subtagTextString + "\"");
+        FontLanguage subtagText = createFontLanguage(subtagTextString);
+        EXPECT_EQ(FontLanguage::EMSTYLE_TEXT, subtagText.getEmojiStyle());
+    }
+}
+
+// TODO: add more "und" language cases whose language and script are
+//       unexpectedly translated to en-Latn by ICU.
+TEST_F(FontLanguagesTest, subtagDefaultTest) {
+    std::string subtagDefaultStrings[] = {
+        // Duplicate subtag case.
+        "en-Latn-u-em-default-u-em-emoji",
+        "en-Latn-u-em-default-u-em-text",
+
+        // Strings that contain language.
+        "und-u-em-default",
+        "en-u-em-default",
+
+        // Strings that contain the script.
+        "en-Latn-u-em-default",
+        "en-Zsym-u-em-default",
+        "en-Zsye-u-em-default",
+
+        // Strings that contain the county.
+        "en-US-u-em-default",
+        "en-Latn-US-u-em-default",
+        "en-Zsym-US-u-em-default",
+        "en-Zsye-US-u-em-default",
+    };
+
+    for (auto subtagDefaultString : subtagDefaultStrings) {
+        SCOPED_TRACE("Test for \"" + subtagDefaultString + "\"");
+        FontLanguage subtagDefault = createFontLanguage(subtagDefaultString);
+        EXPECT_EQ(FontLanguage::EMSTYLE_DEFAULT, subtagDefault.getEmojiStyle());
+    }
+}
+
+TEST_F(FontLanguagesTest, subtagEmptyTest) {
+    std::string subtagEmptyStrings[] = {
+        "und",
+        "jp",
+        "en-US",
+        "en-Latn",
+        "en-Latn-US",
+        "en-Latn-US-u-em",
+        "en-Latn-US-u-em-defaultemoji",
+    };
+
+    for (auto subtagEmptyString : subtagEmptyStrings) {
+        SCOPED_TRACE("Test for \"" + subtagEmptyString + "\"");
+        FontLanguage subtagEmpty = createFontLanguage(subtagEmptyString);
+        EXPECT_EQ(FontLanguage::EMSTYLE_EMPTY, subtagEmpty.getEmojiStyle());
+    }
 }
 
 TEST_F(FontLanguagesTest, registerLanguageListTest) {

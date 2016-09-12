@@ -161,7 +161,7 @@ FontStyle FontFamily::getStyle(size_t index) const {
 bool FontFamily::isColorEmojiFamily() const {
     const FontLanguages& languageList = FontLanguageListCache::getById(mLangId);
     for (size_t i = 0; i < languageList.size(); ++i) {
-        if (languageList[i].hasEmojiFlag()) {
+        if (languageList[i].getEmojiStyle() == FontLanguage::EMSTYLE_EMOJI) {
             return true;
         }
     }
