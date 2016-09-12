@@ -794,6 +794,7 @@ class ConstrainedBox extends SingleChildRenderObjectWidget {
     Widget child
   }) : super(key: key, child: child) {
     assert(constraints != null);
+    assert(constraints.debugAssertIsValid());
   }
 
   /// The additional constraints to impose on the child.

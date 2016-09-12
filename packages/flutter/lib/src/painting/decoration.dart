@@ -33,9 +33,9 @@ abstract class Decoration {
   ///
   /// This is intended to be used as follows:
   /// ```dart
-  ///   assert(myDecoration.debugAssertValid());
+  ///   assert(myDecoration.debugAssertIsValid());
   /// ```
-  bool debugAssertValid() => true;
+  bool debugAssertIsValid() => true;
 
   /// Returns the insets to apply when using this decoration on a box
   /// that has contents, so that the contents do not overlap the edges

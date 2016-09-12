@@ -97,7 +97,7 @@ class FlutterLogoDecoration extends Decoration {
   bool get _inTransition => _opacity != 1.0 || (_position != -1.0 && _position != 0.0 && _position != 1.0);
 
   @override
-  bool debugAssertValid() {
+  bool debugAssertIsValid() {
     assert(swatch != null
         && swatch[_lightShade] != null
         && swatch[_darkShade] != null
@@ -121,8 +121,8 @@ class FlutterLogoDecoration extends Decoration {
   ///
   /// See also [Decoration.lerp].
   static FlutterLogoDecoration lerp(FlutterLogoDecoration a, FlutterLogoDecoration b, double t) {
-    assert(a == null || a.debugAssertValid());
-    assert(b == null || b.debugAssertValid());
+    assert(a == null || a.debugAssertIsValid());
+    assert(b == null || b.debugAssertIsValid());
     if (a == null && b == null)
       return null;
     if (a == null) {
@@ -166,19 +166,19 @@ class FlutterLogoDecoration extends Decoration {
 
   @override
   FlutterLogoDecoration lerpFrom(Decoration a, double t) {
-    assert(debugAssertValid());
+    assert(debugAssertIsValid());
     if (a is! FlutterLogoDecoration)
       return lerp(null, this, t);
-    assert(a.debugAssertValid);
+    assert(a.debugAssertIsValid);
     return lerp(a, this, t);
   }
 
   @override
   FlutterLogoDecoration lerpTo(Decoration b, double t) {
-    assert(debugAssertValid());
+    assert(debugAssertIsValid());
     if (b is! FlutterLogoDecoration)
       return lerp(this, null, t);
-    assert(b.debugAssertValid());
+    assert(b.debugAssertIsValid());
     return lerp(this, b, t);
   }
 
@@ -188,13 +188,13 @@ class FlutterLogoDecoration extends Decoration {
 
   @override
   BoxPainter createBoxPainter([VoidCallback onChanged]) {
-    assert(debugAssertValid());
+    assert(debugAssertIsValid());
     return new _FlutterLogoPainter(this);
   }
 
   @override
   bool operator ==(dynamic other) {
-    assert(debugAssertValid());
+    assert(debugAssertIsValid());
     if (identical(this, other))
       return true;
     if (other is! FlutterLogoDecoration)
@@ -209,7 +209,7 @@ class FlutterLogoDecoration extends Decoration {
 
   @override
   int get hashCode {
-    assert(debugAssertValid());
+    assert(debugAssertIsValid());
     return hashValues(
       swatch[_lightShade],
       swatch[_darkShade],
@@ -233,7 +233,7 @@ class FlutterLogoDecoration extends Decoration {
 class _FlutterLogoPainter extends BoxPainter {
   _FlutterLogoPainter(this._config) : super(null) {
     assert(_config != null);
-    assert(_config.debugAssertValid());
+    assert(_config.debugAssertIsValid());
     _prepareText();
   }
 
