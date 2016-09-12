@@ -46,6 +46,7 @@ IMPLEMENT_WRAPPERTYPEINFO(ui, Canvas);
   V(Canvas, drawDRRect)             \
   V(Canvas, drawOval)               \
   V(Canvas, drawCircle)             \
+  V(Canvas, drawArc)                \
   V(Canvas, drawPath)               \
   V(Canvas, drawImage)              \
   V(Canvas, drawImageRect)          \
@@ -240,6 +241,24 @@ void Canvas::drawCircle(double x,
   if (!canvas_)
     return;
   canvas_->drawCircle(x, y, radius, *paint.paint());
+}
+
+void Canvas::drawArc(double left,
+             double top,
+             double right,
+             double bottom,
+             double startAngle,
+             double sweepAngle,
+             bool useCenter,
+             const Paint& paint,
+             const PaintData& paint_data) {
+  if (!canvas_)
+    return;
+  canvas_->drawArc(SkRect::MakeLTRB(left, top, right, bottom),
+                   startAngle * 180.0 / M_PI,
+                   sweepAngle* 180.0 / M_PI,
+                   useCenter,
+                   *paint.paint());
 }
 
 void Canvas::drawPath(const CanvasPath* path,

@@ -1297,6 +1297,30 @@ class Canvas extends NativeFieldWrapperClass2 {
                    List<dynamic> paintObjects,
                    ByteData paintData) native "Canvas_drawCircle";
 
+  /// Draw an arc scaled to fit inside the given rectangle. It starts from
+  /// startAngle radians around the oval up to startAngle + sweepAngle
+  /// radians around the oval, with zero radians being the point on
+  /// the right hand side of the oval that crosses the horizontal line
+  /// that intersects the center of the rectangle and with positive
+  /// angles going clockwise around the oval. If useCenter is true, the arc is
+  /// closed back to the center, forming a circle sector. Otherwise, the arc is
+  /// not closed, forming a circle segment.
+  ///
+  /// This method is optimized for drawing arcs and should be faster than [Path.arcTo].
+  void drawArc(Rect rect, double startAngle, double sweepAngle, bool useCenter, Paint paint) {
+    _drawArc(rect.left, rect.top, rect.right, rect.bottom, startAngle,
+             sweepAngle, useCenter, paint._objects, paint._data);
+  }
+  void _drawArc(double left,
+                double top,
+                double right,
+                double bottom,
+                double startAngle,
+                double sweepAngle,
+                bool useCenter,
+                List<dynamic> paintObjects,
+                ByteData paintData) native "Canvas_drawArc";
+
   /// Draws the given [Path] with the given [Paint]. Whether this shape is
   /// filled or stroked (or both) is controlled by [Paint.style]. If the path is
   /// filled, then subpaths within it are implicitly closed (see [Path.close]).

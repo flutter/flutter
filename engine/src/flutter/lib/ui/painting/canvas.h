@@ -100,6 +100,15 @@ class Canvas : public ftl::RefCountedThreadSafe<Canvas>,
                   double radius,
                   const Paint& paint,
                   const PaintData& paint_data);
+  void drawArc(double left,
+               double top,
+               double right,
+               double bottom,
+               double startAngle,
+               double sweepAngle,
+               bool useCenter,
+               const Paint& paint,
+               const PaintData& paint_data);
   void drawPath(const CanvasPath* path,
                 const Paint& paint,
                 const PaintData& paint_data);
