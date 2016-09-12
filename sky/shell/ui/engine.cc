@@ -15,12 +15,12 @@
 #include "flutter/glue/movable_wrapper.h"
 #include "flutter/glue/trace_event.h"
 #include "flutter/lib/ui/mojo_services.h"
+#include "flutter/runtime/asset_font_selector.h"
 #include "flutter/runtime/dart_controller.h"
 #include "flutter/runtime/dart_init.h"
 #include "flutter/runtime/runtime_init.h"
 #include "flutter/sky/engine/public/web/Sky.h"
 #include "flutter/sky/shell/ui/animator.h"
-#include "flutter/sky/shell/ui/flutter_font_selector.h"
 #include "lib/ftl/files/path.h"
 #include "mojo/public/cpp/application/connect.h"
 #include "third_party/skia/include/core/SkCanvas.h"
@@ -291,7 +291,7 @@ void Engine::DidCreateMainIsolate(Dart_Isolate isolate) {
                               std::move(root_bundle_));
 
   if (asset_store_)
-    FlutterFontSelector::Install(asset_store_);
+    blink::AssetFontSelector::Install(asset_store_);
 }
 
 void Engine::DidCreateSecondaryIsolate(Dart_Isolate isolate) {
@@ -331,8 +331,8 @@ void Engine::Render(std::unique_ptr<flow::LayerTree> layer_tree) {
   if (!viewport_metrics_)
     return;
 
-  SkISize frame_size = SkISize::Make(
-      viewport_metrics_->physical_width, viewport_metrics_->physical_height);
+  SkISize frame_size = SkISize::Make(viewport_metrics_->physical_width,
+                                     viewport_metrics_->physical_height);
   if (frame_size.isEmpty())
     return;
 

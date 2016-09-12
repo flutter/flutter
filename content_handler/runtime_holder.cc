@@ -10,6 +10,7 @@
 #include "flutter/common/threads.h"
 #include "flutter/content_handler/rasterizer.h"
 #include "flutter/lib/ui/mojo_services.h"
+#include "flutter/runtime/asset_font_selector.h"
 #include "flutter/runtime/dart_controller.h"
 #include "flutter/services/engine/sky_engine.mojom.h"
 #include "lib/ftl/functional/make_copyable.h"
@@ -104,6 +105,9 @@ void RuntimeHolder::Render(std::unique_ptr<flow::LayerTree> layer_tree) {
 void RuntimeHolder::DidCreateMainIsolate(Dart_Isolate isolate) {
   blink::MojoServices::Create(isolate, nullptr, nullptr,
                               std::move(root_bundle_));
+
+  if (asset_store_)
+    blink::AssetFontSelector::Install(asset_store_);
 }
 
 void RuntimeHolder::InitRootBundle(std::vector<char> bundle) {

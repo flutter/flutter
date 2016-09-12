@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SKY_SHELL_UI_FLUTTER_FONT_SELECTOR_H_
-#define SKY_SHELL_UI_FLUTTER_FONT_SELECTOR_H_
+#ifndef FLUTTER_RUNTIME_ASSET_FONT_SELECTOR_H_
+#define FLUTTER_RUNTIME_ASSET_FONT_SELECTOR_H_
 
 #include <unordered_map>
 #include <vector>
@@ -13,24 +13,22 @@
 #include "flutter/sky/engine/platform/fonts/FontSelector.h"
 #include "flutter/sky/engine/platform/fonts/SimpleFontData.h"
 
-namespace sky {
-namespace shell {
+namespace blink {
 
 // A FontSelector implementation that resolves custon font names to assets
 // loaded from the FLX.
-class FlutterFontSelector : public blink::FontSelector {
+class AssetFontSelector : public FontSelector {
  public:
   struct FlutterFontAttributes;
 
-  ~FlutterFontSelector() override;
+  ~AssetFontSelector() override;
 
-  static void Install(ftl::RefPtr<blink::ZipAssetStore> asset_store);
+  static void Install(ftl::RefPtr<ZipAssetStore> asset_store);
 
-  PassRefPtr<blink::FontData> getFontData(
-      const blink::FontDescription& font_description,
-      const AtomicString& family_name) override;
+  PassRefPtr<FontData> getFontData(const FontDescription& font_description,
+                                   const AtomicString& family_name) override;
 
-  void willUseFontData(const blink::FontDescription& font_description,
+  void willUseFontData(const FontDescription& font_description,
                        const AtomicString& family,
                        UChar32 character) override;
 
@@ -41,31 +39,29 @@ class FlutterFontSelector : public blink::FontSelector {
  private:
   struct TypefaceAsset;
 
-  FlutterFontSelector(ftl::RefPtr<blink::ZipAssetStore> asset_store);
+  explicit AssetFontSelector(ftl::RefPtr<ZipAssetStore> asset_store);
 
   void parseFontManifest();
 
-  sk_sp<SkTypeface> getTypefaceAsset(
-      const blink::FontDescription& font_description,
-      const AtomicString& family_name);
+  sk_sp<SkTypeface> getTypefaceAsset(const FontDescription& font_description,
+                                     const AtomicString& family_name);
 
-  ftl::RefPtr<blink::ZipAssetStore> asset_store_;
+  ftl::RefPtr<ZipAssetStore> asset_store_;
 
   HashMap<AtomicString, std::vector<FlutterFontAttributes>> font_family_map_;
 
   std::unordered_map<std::string, std::unique_ptr<TypefaceAsset>>
       typeface_cache_;
 
-  typedef HashMap<blink::FontCacheKey,
-                  RefPtr<blink::SimpleFontData>,
-                  blink::FontCacheKeyHash,
-                  blink::FontCacheKeyTraits>
+  typedef HashMap<FontCacheKey,
+                  RefPtr<SimpleFontData>,
+                  FontCacheKeyHash,
+                  FontCacheKeyTraits>
       FontPlatformDataCache;
 
   FontPlatformDataCache font_platform_data_cache_;
 };
 
-}  // namespace shell
-}  // namespace sky
+}  // namespace blink
 
-#endif  // SKY_SHELL_UI_FLUTTER_FONT_SELECTOR_H_
+#endif  // FLUTTER_RUNTIME_ASSET_FONT_SELECTOR_H_
