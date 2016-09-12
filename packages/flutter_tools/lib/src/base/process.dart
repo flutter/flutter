@@ -78,6 +78,7 @@ Future<int> runCommandAndStreamOutput(List<String> cmd, {
   // Wait for stdout to be fully processed
   // because process.exitCode may complete first causing flaky tests.
   await subscription.asFuture();
+  subscription.cancel();
 
   return await process.exitCode;
 }

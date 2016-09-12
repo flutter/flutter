@@ -39,7 +39,7 @@ linter:
     # === error rules ===
     - avoid_empty_else
     # - comment_references # blocked on https://github.com/dart-lang/dartdoc/issues/1153
-    # - cancel_subscriptions # https://github.com/flutter/flutter/issues/5788
+    - cancel_subscriptions
     # - close_sinks # https://github.com/flutter/flutter/issues/5789
     - control_flow_in_finally
     - empty_statements
