@@ -13,4 +13,4 @@ dev_dependencies:
     path: ../flutter_test
 
 environment:
-  sdk: '>=1.16.0 <2.0.0'
+  sdk: '>=1.19.0 <2.0.0'
