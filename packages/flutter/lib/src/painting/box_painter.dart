@@ -1045,10 +1045,10 @@ class BoxDecoration extends Decoration {
   });
 
   @override
-  bool debugAssertValid() {
+  bool debugAssertIsValid() {
     assert(shape != BoxShape.circle ||
            borderRadius == null); // Can't have a border radius if you're a circle.
-    return super.debugAssertValid();
+    return super.debugAssertIsValid();
   }
 
   /// The color to fill in the background of the box.

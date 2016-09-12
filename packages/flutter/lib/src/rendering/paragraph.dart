@@ -35,7 +35,7 @@ class RenderParagraph extends RenderBox {
        _overflow = overflow,
        _textPainter = new TextPainter(text: text, textAlign: textAlign) {
     assert(text != null);
-    assert(text.debugAssertValid());
+    assert(text.debugAssertIsValid());
     assert(overflow != null);
     assert(softWrap != null);
   }

@@ -34,7 +34,7 @@ class TextPainter {
     TextSpan text,
     TextAlign textAlign
   }) : _text = text, _textAlign = textAlign {
-    assert(text == null || text.debugAssertValid());
+    assert(text == null || text.debugAssertIsValid());
   }
 
   ui.Paragraph _paragraph;
@@ -44,7 +44,7 @@ class TextPainter {
   TextSpan get text => _text;
   TextSpan _text;
   set text(TextSpan value) {
-    assert(value == null || value.debugAssertValid());
+    assert(value == null || value.debugAssertIsValid());
     if (_text == value)
       return;
     _text = value;

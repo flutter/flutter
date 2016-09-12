@@ -94,7 +94,8 @@ class Container extends StatelessWidget {
        super(key: key) {
     assert(margin == null || margin.isNonNegative);
     assert(padding == null || padding.isNonNegative);
-    assert(decoration == null || decoration.debugAssertValid());
+    assert(decoration == null || decoration.debugAssertIsValid());
+    assert(constraints == null || constraints.debugAssertIsValid());
   }
 
   /// The child contained by the container.
