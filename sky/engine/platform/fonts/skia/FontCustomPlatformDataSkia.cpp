@@ -60,7 +60,7 @@ PassOwnPtr<FontCustomPlatformData> FontCustomPlatformData::create(SharedBuffer* 
 {
     ASSERT_ARG(buffer, buffer);
 
-    SkMemoryStream* stream = new SkMemoryStream(buffer->getAsSkData().get());
+    SkMemoryStream* stream = new SkMemoryStream(buffer->getAsSkData());
     sk_sp<SkTypeface> typeface = SkTypeface::MakeFromStream(stream);
     if (!typeface)
         return nullptr;
