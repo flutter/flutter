@@ -7,6 +7,7 @@ import 'dart:async';
 import '../base/os.dart';
 import '../base/process.dart';
 import '../dart/pub.dart';
+import '../dart/summary.dart';
 import '../cache.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
@@ -40,6 +41,8 @@ class UpgradeCommand extends FlutterCommand {
       workingDirectory: Cache.flutterRoot,
       mapFunction: (String line) => matchesGitLine(line) ? null : line
     );
+
+    await buildUnlinkedForPackages(Cache.flutterRoot);
 
     if (code != 0)
       return code;
