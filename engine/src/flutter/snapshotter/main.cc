@@ -213,6 +213,8 @@ int CreateSnapshot(const ftl::CommandLine& command_line) {
       std::cout << file << "\n";
     }
   } else {
+    DART_CHECK_VALID(Dart_FinalizeLoading(false));
+
     // The script has been loaded, generate a snapshot.
     std::vector<char> snapshot_blob = CreateSnapshot();
 
