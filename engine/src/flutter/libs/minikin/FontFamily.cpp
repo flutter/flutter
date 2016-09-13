@@ -34,7 +34,6 @@
 #include <minikin/AnalyzeStyle.h>
 #include <minikin/CmapCoverage.h>
 #include <minikin/FontFamily.h>
-#include <UniquePtr.h>
 
 using std::vector;
 
