@@ -222,56 +222,6 @@ class SimControl {
     return getDevices().where((SimDevice device) => device.isBooted).toList();
   }
 
-  StreamController<List<SimDevice>> _trackDevicesControler;
-
-  /// Listens to changes in the set of connected devices. The implementation
-  /// currently uses polling. Callers should be careful to call cancel() on any
-  /// stream subscription when finished.
-  ///
-  /// TODO(devoncarew): We could investigate using the usbmuxd protocol directly.
-  Stream<List<SimDevice>> trackDevices() {
-    if (_trackDevicesControler == null) {
-      Timer timer;
-      Set<String> deviceIds = new Set<String>();
-      _trackDevicesControler = new StreamController<List<SimDevice>>.broadcast(
-        onListen: () {
-          timer = new Timer.periodic(new Duration(seconds: 4), (Timer timer) {
-            List<SimDevice> devices = getConnectedDevices();
-            if (_updateDeviceIds(devices, deviceIds))
-              _trackDevicesControler.add(devices);
-          });
-        }, onCancel: () {
-          timer?.cancel();
-          deviceIds.clear();
-        }
-      );
-    }
-
-    return _trackDevicesControler.stream;
-  }
-
-  /// Update the cached set of device IDs and return whether there were any changes.
-  bool _updateDeviceIds(List<SimDevice> devices, Set<String> deviceIds) {
-    Set<String> newIds = new Set<String>.from(devices.map((SimDevice device) => device.udid));
-
-    bool changed = false;
-
-    for (String id in newIds) {
-      if (!deviceIds.contains(id))
-        changed = true;
-    }
-
-    for (String id in deviceIds) {
-      if (!newIds.contains(id))
-        changed = true;
-    }
-
-    deviceIds.clear();
-    deviceIds.addAll(newIds);
-
-    return changed;
-  }
-
   bool _isAnyConnected() => getConnectedDevices().isNotEmpty;
 
   bool isInstalled(String appId) {
