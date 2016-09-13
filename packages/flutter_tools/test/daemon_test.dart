@@ -42,6 +42,7 @@ void main() {
     tearDown(() {
       if (daemon != null)
         return daemon.shutdown();
+      notifyingLogger.dispose();
     });
 
     _testUsingContext('daemon.version', () async {
@@ -57,6 +58,8 @@ void main() {
       expect(response['id'], 0);
       expect(response['result'], isNotEmpty);
       expect(response['result'] is String, true);
+      responses.close();
+      commands.close();
     });
 
     _testUsingContext('daemon.logMessage', () {
@@ -77,6 +80,8 @@ void main() {
         Map<String, String> logMessage = response['params'];
         expect(logMessage['level'], 'error');
         expect(logMessage['message'], 'daemon.logMessage test');
+        responses.close();
+        commands.close();
       });
     });
 
@@ -90,6 +95,8 @@ void main() {
       );
       commands.add(<String, dynamic>{'id': 0, 'method': 'daemon.shutdown'});
       return daemon.onExit.then((int code) {
+        responses.close();
+        commands.close();
         expect(code, 0);
       });
     });
@@ -111,6 +118,8 @@ void main() {
       Map<String, dynamic> response = await responses.stream.where(_notEvent).first;
       expect(response['id'], 0);
       expect(response['error'], contains('deviceId is required'));
+      responses.close();
+      commands.close();
     });
 
     _testUsingContext('daemon.restart', () async {
@@ -130,6 +139,8 @@ void main() {
       Map<String, dynamic> response = await responses.stream.where(_notEvent).first;
       expect(response['id'], 0);
       expect(response['error'], contains('appId is required'));
+      responses.close();
+      commands.close();
     });
 
     _testUsingContext('daemon.stop', () async {
@@ -149,6 +160,8 @@ void main() {
       Map<String, dynamic> response = await responses.stream.where(_notEvent).first;
       expect(response['id'], 0);
       expect(response['error'], contains('appId is required'));
+      responses.close();
+      commands.close();
     });
 
     _testUsingContext('device.getDevices', () async {
@@ -163,6 +176,8 @@ void main() {
       Map<String, dynamic> response = await responses.stream.where(_notEvent).first;
       expect(response['id'], 0);
       expect(response['result'], isList);
+      responses.close();
+      commands.close();
     });
   });
 }
