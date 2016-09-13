@@ -490,7 +490,8 @@ private:
     size_t mRunCount;
     bool mIsRtl;
 
-    DISALLOW_COPY_AND_ASSIGN(BidiText);
+    BidiText(const BidiText&) = delete;
+    void operator=(const BidiText&) = delete;
 };
 
 BidiText::Iter::Iter(UBiDi* bidi, size_t start, size_t end, size_t runIndex, size_t runCount,
