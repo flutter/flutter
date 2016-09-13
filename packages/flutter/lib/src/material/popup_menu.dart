@@ -216,7 +216,7 @@ class CheckedPopupMenuItem<T> extends PopupMenuItem<T> {
   _CheckedPopupMenuItemState<T> createState() => new _CheckedPopupMenuItemState<T>();
 }
 
-class _CheckedPopupMenuItemState<T> extends _PopupMenuItemState<CheckedPopupMenuItem<T>> {
+class _CheckedPopupMenuItemState<T> extends _PopupMenuItemState<CheckedPopupMenuItem<T>> with SingleTickerProviderStateMixin {
   static const Duration _kFadeDuration = const Duration(milliseconds: 150);
   AnimationController _controller;
   Animation<double> get _opacity => _controller.view;
@@ -224,7 +224,7 @@ class _CheckedPopupMenuItemState<T> extends _PopupMenuItemState<CheckedPopupMenu
   @override
   void initState() {
     super.initState();
-    _controller = new AnimationController(duration: _kFadeDuration)
+    _controller = new AnimationController(duration: _kFadeDuration, vsync: this)
       ..value = config.checked ? 1.0 : 0.0
       ..addListener(() => setState(() { /* animation changed */ }));
   }

@@ -206,7 +206,7 @@ class IsolateExampleWidget extends StatefulWidget {
 }
 
 // Main application state.
-class IsolateExampleState extends State<StatefulWidget> {
+class IsolateExampleState extends State<StatefulWidget> with SingleTickerProviderStateMixin {
 
   String _status = 'Idle';
   String _label = 'Start';
@@ -219,7 +219,8 @@ class IsolateExampleState extends State<StatefulWidget> {
   void initState() {
     super.initState();
     _animation = new AnimationController(
-      duration: const Duration(milliseconds: 3600)
+      duration: const Duration(milliseconds: 3600),
+      vsync: this,
     )..repeat();
     _calculationManager = new CalculationManager(
       onProgressListener: _handleProgressUpdate,

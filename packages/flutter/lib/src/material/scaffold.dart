@@ -169,10 +169,9 @@ class _FloatingActionButtonTransition extends StatefulWidget {
   _FloatingActionButtonTransitionState createState() => new _FloatingActionButtonTransitionState();
 }
 
-class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTransition> {
-  final AnimationController _previousController = new AnimationController(duration: _kFloatingActionButtonSegue);
-  final AnimationController _currentController = new AnimationController(duration: _kFloatingActionButtonSegue);
-
+class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTransition> with TickerProviderStateMixin {
+  AnimationController _previousController;
+  AnimationController _currentController;
   CurvedAnimation _previousAnimation;
   CurvedAnimation _currentAnimation;
   Widget _previousChild;
@@ -180,21 +179,29 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
   @override
   void initState() {
     super.initState();
-    // If we start out with a child, have the child appear fully visible instead
-    // of animating in.
-    if (config.child != null)
-      _currentController.value = 1.0;
 
+    _previousController = new AnimationController(
+      duration: _kFloatingActionButtonSegue,
+      vsync: this,
+    )..addStatusListener(_handleAnimationStatusChanged);
     _previousAnimation = new CurvedAnimation(
       parent: _previousController,
       curve: Curves.easeIn
+    );
+
+    _currentController = new AnimationController(
+      duration: _kFloatingActionButtonSegue,
+      vsync: this,
     );
     _currentAnimation = new CurvedAnimation(
       parent: _currentController,
       curve: Curves.easeIn
     );
 
-    _previousController.addStatusListener(_handleAnimationStatusChanged);
+    // If we start out with a child, have the child appear fully visible instead
+    // of animating in.
+    if (config.child != null)
+      _currentController.value = 1.0;
   }
 
   @override
@@ -357,7 +364,7 @@ class Scaffold extends StatefulWidget {
 ///
 /// Can display [SnackBar]s and [BottomSheet]s. Retrieve a [ScaffoldState] from
 /// the current [BuildContext] using [Scaffold.of].
-class ScaffoldState extends State<Scaffold> {
+class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
 
   static final Object _kScaffoldStorageIdentifier = new Object();
 
@@ -401,7 +408,7 @@ class ScaffoldState extends State<Scaffold> {
   /// will be added to a queue and displayed after the earlier snack bars have
   /// closed.
   ScaffoldFeatureController<SnackBar, Null> showSnackBar(SnackBar snackbar) {
-    _snackBarController ??= SnackBar.createAnimationController()
+    _snackBarController ??= SnackBar.createAnimationController(vsync: this)
       ..addStatusListener(_handleSnackBarStatusChange);
     if (_snackBars.isEmpty) {
       assert(_snackBarController.isDismissed);
@@ -475,7 +482,7 @@ class ScaffoldState extends State<Scaffold> {
 
   // PERSISTENT BOTTOM SHEET API
 
-  final List<Widget> _dismissedBottomSheets = <Widget>[];
+  final List<_PersistentBottomSheet> _dismissedBottomSheets = <_PersistentBottomSheet>[];
   PersistentBottomSheetController<dynamic> _currentBottomSheet;
 
   /// Shows a persistent material design bottom sheet.
@@ -504,7 +511,7 @@ class ScaffoldState extends State<Scaffold> {
     }
     Completer<dynamic/*=T*/> completer = new Completer<dynamic/*=T*/>();
     GlobalKey<_PersistentBottomSheetState> bottomSheetKey = new GlobalKey<_PersistentBottomSheetState>();
-    AnimationController controller = BottomSheet.createAnimationController()
+    AnimationController controller = BottomSheet.createAnimationController(this)
       ..forward();
     _PersistentBottomSheet bottomSheet;
     LocalHistoryEntry entry = new LocalHistoryEntry(
@@ -554,7 +561,7 @@ class ScaffoldState extends State<Scaffold> {
   @override
   void initState() {
     super.initState();
-    _appBarController = new AnimationController();
+    _appBarController = new AnimationController(vsync: this);
     // Use an explicit identifier to guard against the possibility that the
     // Scaffold's key is recreated by the Widget that creates the Scaffold.
     List<double> scrollValues = PageStorage.of(context)?.readState(context,
@@ -569,11 +576,15 @@ class ScaffoldState extends State<Scaffold> {
 
   @override
   void dispose() {
-    _appBarController.stop();
-    _snackBarController?.stop();
+    _appBarController.dispose();
+    _snackBarController?.dispose();
     _snackBarController = null;
     _snackBarTimer?.cancel();
     _snackBarTimer = null;
+    for (_PersistentBottomSheet bottomSheet in _dismissedBottomSheets)
+      bottomSheet.animationController.dispose();
+    if (_currentBottomSheet != null)
+      _currentBottomSheet._widget.animationController.dispose();
     PageStorage.of(context)?.writeState(context, <double>[_scrollOffset, _scrollOffsetDelta],
       identifier: _kScaffoldStorageIdentifier
     );

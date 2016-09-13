@@ -35,7 +35,7 @@ const double _kInnerRadius = 5.0;
 ///  * [Slider]
 ///  * [Switch]
 ///  * <https://www.google.com/design/spec/components/selection-controls.html#selection-controls-radio-button>
-class Radio<T> extends StatelessWidget {
+class Radio<T> extends StatefulWidget {
   /// Creates a material design radio button.
   ///
   /// The radio button itself does not maintain any state. Instead, when the state
@@ -77,7 +77,12 @@ class Radio<T> extends StatelessWidget {
   /// Defaults to accent color of the current [Theme].
   final Color activeColor;
 
-  bool get _enabled => onChanged != null;
+  @override
+  _RadioState<T> createState() => new _RadioState<T>();
+}
+
+class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin {
+  bool get _enabled => config.onChanged != null;
 
   Color _getInactiveColor(ThemeData themeData) {
     return _enabled ? themeData.unselectedWidgetColor : themeData.disabledColor;
@@ -85,7 +90,7 @@ class Radio<T> extends StatelessWidget {
 
   void _handleChanged(bool selected) {
     if (selected)
-      onChanged(value);
+      config.onChanged(config.value);
   }
 
   @override
@@ -93,12 +98,13 @@ class Radio<T> extends StatelessWidget {
     assert(debugCheckHasMaterial(context));
     ThemeData themeData = Theme.of(context);
     return new Semantics(
-      checked: value == groupValue,
+      checked: config.value == config.groupValue,
       child: new _RadioRenderObjectWidget(
-        selected: value == groupValue,
-        activeColor: activeColor ?? themeData.accentColor,
+        selected: config.value == config.groupValue,
+        activeColor: config.activeColor ?? themeData.accentColor,
         inactiveColor: _getInactiveColor(themeData),
-        onChanged: _enabled ? _handleChanged : null
+        onChanged: _enabled ? _handleChanged : null,
+        vsync: this,
       )
     );
   }
@@ -107,27 +113,31 @@ class Radio<T> extends StatelessWidget {
 class _RadioRenderObjectWidget extends LeafRenderObjectWidget {
   _RadioRenderObjectWidget({
     Key key,
-    this.selected,
-    this.activeColor,
-    this.inactiveColor,
-    this.onChanged
+    @required this.selected,
+    @required this.activeColor,
+    @required this.inactiveColor,
+    this.onChanged,
+    @required this.vsync,
   }) : super(key: key) {
     assert(selected != null);
     assert(activeColor != null);
     assert(inactiveColor != null);
+    assert(vsync != null);
   }
 
   final bool selected;
   final Color inactiveColor;
   final Color activeColor;
   final ValueChanged<bool> onChanged;
+  final TickerProvider vsync;
 
   @override
   _RenderRadio createRenderObject(BuildContext context) => new _RenderRadio(
     value: selected,
     activeColor: activeColor,
     inactiveColor: inactiveColor,
-    onChanged: onChanged
+    onChanged: onChanged,
+    vsync: vsync,
   );
 
   @override
@@ -136,7 +146,8 @@ class _RadioRenderObjectWidget extends LeafRenderObjectWidget {
       ..value = selected
       ..activeColor = activeColor
       ..inactiveColor = inactiveColor
-      ..onChanged = onChanged;
+      ..onChanged = onChanged
+      ..vsync = vsync;
   }
 }
 
@@ -145,13 +156,15 @@ class _RenderRadio extends RenderToggleable {
     bool value,
     Color activeColor,
     Color inactiveColor,
-    ValueChanged<bool> onChanged
+    ValueChanged<bool> onChanged,
+    @required TickerProvider vsync,
   }): super(
     value: value,
     activeColor: activeColor,
     inactiveColor: inactiveColor,
     onChanged: onChanged,
-    size: const Size(2 * kRadialReactionRadius, 2 * kRadialReactionRadius)
+    size: const Size(2 * kRadialReactionRadius, 2 * kRadialReactionRadius),
+    vsync: vsync,
   );
 
   @override

@@ -18,6 +18,7 @@ import 'notification_listener.dart';
 import 'page_storage.dart';
 import 'scroll_behavior.dart';
 import 'scroll_configuration.dart';
+import 'ticker_provider.dart';
 
 /// Identifies one or both limits of a [Scrollable] in terms of its scrollDirection.
 enum ScrollableEdge {
@@ -262,11 +263,11 @@ class Scrollable extends StatefulWidget {
 /// terms of the [pixelOffsetToScrollOffset] and
 /// [scrollOffsetToPixelOffset] methods.
 @optionalTypeArgs
-class ScrollableState<T extends Scrollable> extends State<T> {
+class ScrollableState<T extends Scrollable> extends State<T> with SingleTickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    _controller = new AnimationController.unbounded()
+    _controller = new AnimationController.unbounded(vsync: this)
       ..addListener(_handleAnimationChanged)
       ..addStatusListener(_handleAnimationStatusChanged);
     _scrollOffset = PageStorage.of(context)?.readState(context) ?? config.initialScrollOffset ?? 0.0;

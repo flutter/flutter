@@ -393,11 +393,14 @@ class _RectangleDemoState extends State<_RectangleDemo> {
 typedef Widget _DemoBuilder(_ArcDemo demo);
 
 class _ArcDemo {
-  _ArcDemo(String _title, this.builder) : title = _title, key = new GlobalKey(debugLabel: _title);
+  _ArcDemo(String _title, this.builder, TickerProvider vsync)
+    : title = _title,
+      controller = new AnimationController(duration: const Duration(milliseconds: 500), vsync: vsync),
+      key = new GlobalKey(debugLabel: _title);
 
-  final AnimationController controller = new AnimationController(duration: const Duration(milliseconds: 500));
   final String title;
   final _DemoBuilder builder;
+  final AnimationController controller;
   final GlobalKey key;
 }
 
@@ -410,23 +413,29 @@ class AnimationDemo extends StatefulWidget {
   _AnimationDemoState createState() => new _AnimationDemoState();
 }
 
-class _AnimationDemoState extends State<AnimationDemo> {
+class _AnimationDemoState extends State<AnimationDemo> with TickerProviderStateMixin {
   static final GlobalKey<TabBarSelectionState<_ArcDemo>> _tabsKey = new GlobalKey<TabBarSelectionState<_ArcDemo>>();
 
-  static final List<_ArcDemo> _allDemos = <_ArcDemo>[
-    new _ArcDemo('POINT', (_ArcDemo demo) {
-      return new _PointDemo(
-        key: demo.key,
-        controller: demo.controller
-      );
-    }),
-    new _ArcDemo('RECTANGLE', (_ArcDemo demo) {
-      return new _RectangleDemo(
-        key: demo.key,
-        controller: demo.controller
-      );
-    })
-  ];
+  List<_ArcDemo> _allDemos;
+
+  @override
+  void initState() {
+    super.initState();
+    _allDemos = <_ArcDemo>[
+      new _ArcDemo('POINT', (_ArcDemo demo) {
+        return new _PointDemo(
+          key: demo.key,
+          controller: demo.controller
+        );
+      }, this),
+      new _ArcDemo('RECTANGLE', (_ArcDemo demo) {
+        return new _RectangleDemo(
+          key: demo.key,
+          controller: demo.controller
+        );
+      }, this),
+    ];
+  }
 
   Future<Null> _play() async {
     _ArcDemo demo = _tabsKey.currentState.value;

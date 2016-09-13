@@ -9,6 +9,7 @@ import 'basic.dart';
 import 'container.dart';
 import 'framework.dart';
 import 'text.dart';
+import 'ticker_provider.dart';
 
 /// An interpolation between two [BoxConstraint]s.
 class BoxConstraintsTween extends Tween<BoxConstraints> {
@@ -114,7 +115,7 @@ typedef Tween<T> TweenConstructor<T>(T targetValue);
 typedef Tween<T> TweenVisitor<T>(Tween<T> tween, T targetValue, TweenConstructor<T> constructor);
 
 /// A base class for widgets with implicit animations.
-abstract class AnimatedWidgetBaseState<T extends ImplicitlyAnimatedWidget> extends State<T> {
+abstract class AnimatedWidgetBaseState<T extends ImplicitlyAnimatedWidget> extends State<T> with SingleTickerProviderStateMixin {
   AnimationController _controller;
 
   /// The animation driving this widget's implicit animations.
@@ -126,7 +127,8 @@ abstract class AnimatedWidgetBaseState<T extends ImplicitlyAnimatedWidget> exten
     super.initState();
     _controller = new AnimationController(
       duration: config.duration,
-      debugLabel: '${config.toStringShort()}'
+      debugLabel: '${config.toStringShort()}',
+      vsync: this,
     )..addListener(_handleAnimationChanged);
     _updateCurve();
     _constructTweens();

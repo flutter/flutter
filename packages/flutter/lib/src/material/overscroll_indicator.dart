@@ -121,13 +121,9 @@ class OverscrollIndicator extends StatefulWidget {
   _OverscrollIndicatorState createState() => new _OverscrollIndicatorState();
 }
 
-class _OverscrollIndicatorState extends State<OverscrollIndicator> {
-  final AnimationController _extentAnimation = new AnimationController(
-    lowerBound: _kMinIndicatorExtent,
-    upperBound: _kMaxIndicatorExtent,
-    duration: _kNormalHideDuration
-  );
+class _OverscrollIndicatorState extends State<OverscrollIndicator> with SingleTickerProviderStateMixin {
 
+  AnimationController _extentAnimation;
   bool _scrollUnderway = false;
   Timer _hideTimer;
   Axis _scrollDirection;
@@ -135,6 +131,17 @@ class _OverscrollIndicatorState extends State<OverscrollIndicator> {
   double _minScrollOffset;
   double _maxScrollOffset;
   Point _dragPosition;
+
+  @override
+  void initState() {
+    super.initState();
+    _extentAnimation = new AnimationController(
+      lowerBound: _kMinIndicatorExtent,
+      upperBound: _kMaxIndicatorExtent,
+      duration: _kNormalHideDuration,
+      vsync: this,
+    );
+  }
 
   void _hide([Duration duration=_kTimeoutHideDuration]) {
     _scrollUnderway = false;

@@ -142,7 +142,7 @@ class TwoLevelSublist extends StatefulWidget {
   _TwoLevelSublistState createState() => new _TwoLevelSublistState();
 }
 
-class _TwoLevelSublistState extends State<TwoLevelSublist> {
+class _TwoLevelSublistState extends State<TwoLevelSublist> with SingleTickerProviderStateMixin {
   AnimationController _controller;
   CurvedAnimation _easeOutAnimation;
   CurvedAnimation _easeInAnimation;
@@ -157,7 +157,7 @@ class _TwoLevelSublistState extends State<TwoLevelSublist> {
   @override
   void initState() {
     super.initState();
-    _controller = new AnimationController(duration: _kExpand);
+    _controller = new AnimationController(duration: _kExpand, vsync: this);
     _easeOutAnimation = new CurvedAnimation(parent: _controller, curve: Curves.easeOut);
     _easeInAnimation = new CurvedAnimation(parent: _controller, curve: Curves.easeIn);
     _borderColor = new ColorTween(begin: Colors.transparent);
@@ -173,7 +173,7 @@ class _TwoLevelSublistState extends State<TwoLevelSublist> {
 
   @override
   void dispose() {
-    _controller.stop();
+    _controller.dispose();
     super.dispose();
   }
 
@@ -243,8 +243,8 @@ class _TwoLevelSublistState extends State<TwoLevelSublist> {
       ..end = config.backgroundColor ?? Colors.transparent;
 
     return new AnimatedBuilder(
-        animation: _controller.view,
-        builder: buildList
+      animation: _controller.view,
+      builder: buildList
     );
   }
 }

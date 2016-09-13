@@ -21,6 +21,7 @@ void main() {
       new Center(
         child: new AnimatedSize(
           duration: const Duration(milliseconds: 200),
+          vsync: tester,
           child: new SizedBox(
             width: 100.0,
             height: 100.0
@@ -37,6 +38,7 @@ void main() {
       new Center(
         child: new AnimatedSize(
           duration: new Duration(milliseconds: 200),
+          vsync: tester,
           child: new SizedBox(
             width: 200.0,
             height: 200.0
@@ -63,6 +65,7 @@ void main() {
       new Center(
         child: new AnimatedSize(
           duration: new Duration(milliseconds: 200),
+          vsync: tester,
           child: new SizedBox(
             width: 100.0,
             height: 100.0
@@ -94,6 +97,7 @@ void main() {
           height: 100.0,
           child: new AnimatedSize(
             duration: const Duration(milliseconds: 200),
+            vsync: tester,
             child: new SizedBox(
               width: 100.0,
               height: 100.0
@@ -114,6 +118,7 @@ void main() {
           height: 100.0,
           child: new AnimatedSize(
             duration: const Duration(milliseconds: 200),
+            vsync: tester,
             child: new SizedBox(
               width: 200.0,
               height: 200.0
@@ -134,6 +139,7 @@ void main() {
       new Center(
         child: new AnimatedSize(
           duration: const Duration(milliseconds: 200),
+          vsync: tester,
           child: new AnimatedContainer(
             duration: const Duration(milliseconds: 100),
             width: 100.0,
@@ -151,6 +157,7 @@ void main() {
       new Center(
         child: new AnimatedSize(
           duration: const Duration(milliseconds: 200),
+          vsync: tester,
           child: new AnimatedContainer(
             duration: const Duration(milliseconds: 100),
             width: 200.0,

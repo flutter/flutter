@@ -5,8 +5,9 @@
 import 'dart:async';
 import 'dart:ui' as ui show lerpDouble;
 
-import 'package:flutter/scheduler.dart';
 import 'package:flutter/physics.dart';
+import 'package:flutter/scheduler.dart';
+import 'package:meta/meta.dart';
 
 import 'animation.dart';
 import 'curves.dart';
@@ -19,7 +20,7 @@ enum _AnimationDirection {
   forward,
 
   /// The animation is running backwards, from end to beginning.
-  reverse
+  reverse,
 }
 
 /// A controller for an animation.
@@ -40,29 +41,33 @@ class AnimationController extends Animation<double>
 
   /// Creates an animation controller.
   ///
-  /// * value is the initial value of the animation.
-  /// * duration is the length of time this animation should last.
-  /// * debugLabel is a string to help identify this animation during debugging (used by toString).
-  /// * lowerBound is the smallest value this animation can obtain and the value at which this animation is deemed to be dismissed.
-  /// * upperBound is the largest value this animation can obtain and the value at which this animation is deemed to be completed.
+  /// * [value] is the initial value of the animation.
+  /// * [duration] is the length of time this animation should last.
+  /// * [debugLabel] is a string to help identify this animation during debugging (used by [toString]).
+  /// * [lowerBound] is the smallest value this animation can obtain and the value at which this animation is deemed to be dismissed.
+  /// * [upperBound] is the largest value this animation can obtain and the value at which this animation is deemed to be completed.
+  /// * `vsync` is the [TickerProvider] for the current context. It can be changed by calling [resync].
   AnimationController({
     double value,
     this.duration,
     this.debugLabel,
     this.lowerBound: 0.0,
-    this.upperBound: 1.0
+    this.upperBound: 1.0,
+    @required TickerProvider vsync,
   }) {
     assert(upperBound >= lowerBound);
+    assert(vsync != null);
     _direction = _AnimationDirection.forward;
-    _ticker = new Ticker(_tick);
+    _ticker = vsync.createTicker(_tick);
     _internalSetValue(value ?? lowerBound);
   }
 
   /// Creates an animation controller with no upper or lower bound for its value.
   ///
-  /// * value is the initial value of the animation.
-  /// * duration is the length of time this animation should last.
-  /// * debugLabel is a string to help identify this animation during debugging (used by toString).
+  /// * [value] is the initial value of the animation.
+  /// * [duration] is the length of time this animation should last.
+  /// * [debugLabel] is a string to help identify this animation during debugging (used by [toString]).
+  /// * `vsync` is the [TickerProvider] for the current context. It can be changed by calling [resync].
   ///
   /// This constructor is most useful for animations that will be driven using a
   /// physics simulation, especially when the physics simulation has no
@@ -70,12 +75,14 @@ class AnimationController extends Animation<double>
   AnimationController.unbounded({
     double value: 0.0,
     this.duration,
-    this.debugLabel
+    this.debugLabel,
+    @required TickerProvider vsync,
   }) : lowerBound = double.NEGATIVE_INFINITY,
        upperBound = double.INFINITY {
     assert(value != null);
+    assert(vsync != null);
     _direction = _AnimationDirection.forward;
-    _ticker = new Ticker(_tick);
+    _ticker = vsync.createTicker(_tick);
     _internalSetValue(value);
   }
 
@@ -98,6 +105,14 @@ class AnimationController extends Animation<double>
   Duration duration;
 
   Ticker _ticker;
+
+  /// Recreates the [Ticker] with the new [TickerProvider].
+  void resync(TickerProvider vsync) {
+    Ticker oldTicker = _ticker;
+    _ticker = vsync.createTicker(_tick);
+    _ticker.absorbTicker(oldTicker);
+  }
+
   Simulation _simulation;
 
   /// The current value of the animation.
@@ -145,7 +160,12 @@ class AnimationController extends Animation<double>
   Duration _lastElapsedDuration;
 
   /// Whether this animation is currently animating in either the forward or reverse direction.
-  bool get isAnimating => _ticker.isTicking;
+  ///
+  /// This is separate from whether it is actively ticking. An animation
+  /// controller's ticker might get muted, in which case the animation
+  /// controller's callbacks will no longer fire even though time is continuing
+  /// to pass. See [Ticker.muted] and [TickerMode].
+  bool get isAnimating => _ticker.isActive;
 
   _AnimationDirection _direction;
 
@@ -239,16 +259,21 @@ class AnimationController extends Animation<double>
   }
 
   /// Stops running this animation.
+  ///
+  /// This does not trigger any notifications. The animation stops in its
+  /// current state.
   void stop() {
     _simulation = null;
     _lastElapsedDuration = null;
     _ticker.stop();
   }
 
-  /// Stops running this animation.
+  /// Release the resources used by this object. The object is no longer usable
+  /// after this method is called.
   @override
   void dispose() {
-    stop();
+    _ticker.dispose();
+    super.dispose();
   }
 
   AnimationStatus _lastReportedStatus = AnimationStatus.dismissed;
@@ -277,9 +302,10 @@ class AnimationController extends Animation<double>
   @override
   String toStringDetails() {
     String paused = isAnimating ? '' : '; paused';
+    String silenced = _ticker.muted ? '; silenced' : '';
     String label = debugLabel == null ? '' : '; for $debugLabel';
     String more = '${super.toStringDetails()} ${value.toStringAsFixed(3)}';
-    return '$more$paused$label';
+    return '$more$paused$silenced$label';
   }
 }
 

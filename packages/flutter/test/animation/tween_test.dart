@@ -6,19 +6,25 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/animation.dart';
 import 'package:flutter/widgets.dart';
 
+import 'animation_tester.dart';
+
 void main() {
   test('Can chain tweens', () {
     Tween<double> tween = new Tween<double>(begin: 0.30, end: 0.50);
     expect(tween, hasOneLineDescription);
     Animatable<double> chain = tween.chain(new Tween<double>(begin: 0.50, end: 1.0));
-    AnimationController controller = new AnimationController();
+    AnimationController controller = new AnimationController(
+      vsync: const TestVSync(),
+    );
     expect(chain.evaluate(controller), 0.40);
     expect(chain, hasOneLineDescription);
   });
 
   test('Can animated tweens', () {
     Tween<double> tween = new Tween<double>(begin: 0.30, end: 0.50);
-    AnimationController controller = new AnimationController();
+    AnimationController controller = new AnimationController(
+      vsync: const TestVSync(),
+    );
     Animation<double> animation = tween.animate(controller);
     controller.value = 0.50;
     expect(animation.value, 0.40);

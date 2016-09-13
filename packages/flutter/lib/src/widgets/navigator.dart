@@ -10,6 +10,7 @@ import 'binding.dart';
 import 'focus.dart';
 import 'framework.dart';
 import 'overlay.dart';
+import 'ticker_provider.dart';
 
 /// An abstraction for an entry managed by a [Navigator].
 ///
@@ -325,7 +326,7 @@ class Navigator extends StatefulWidget {
 }
 
 /// The state for a [Navigator] widget.
-class NavigatorState extends State<Navigator> {
+class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   final GlobalKey<OverlayState> _overlayKey = new GlobalKey<OverlayState>();
   final List<Route<dynamic>> _history = new List<Route<dynamic>>();
 

@@ -28,14 +28,16 @@ class MimicableHandle {
 
 /// An overlay entry that is mimicking another widget.
 class MimicOverlayEntry {
-  MimicOverlayEntry._(this._handle) {
-    _overlayEntry = new OverlayEntry(builder: _build);
+  MimicOverlayEntry._(this._handle, this._overlay) {
     _initialGlobalBounds = _handle.globalBounds;
+    _overlayEntry = new OverlayEntry(builder: _build);
+    _overlay.insert(_overlayEntry);
   }
 
   Rect _initialGlobalBounds;
 
   MimicableHandle _handle;
+  OverlayState _overlay;
   OverlayEntry _overlayEntry;
 
   // Animation state
@@ -63,7 +65,8 @@ class MimicOverlayEntry {
     _curve = curve;
     // TODO(abarth): Support changing the animation target when in flight.
     assert(_controller == null);
-    _controller = new AnimationController(duration: duration)
+    // TODO(ianh): Need to get a TickerProvider that's tied to the Overlay's TickerMode.
+    _controller = new AnimationController(duration: duration, vsync: _overlay)
       ..addListener(_overlayEntry.markNeedsBuild);
     return _controller.forward();
   }
@@ -214,9 +217,7 @@ class MimicableState extends State<Mimicable> {
   /// placed in the enclosing overlay.
   MimicOverlayEntry liftToOverlay() {
     OverlayState overlay = Overlay.of(context, debugRequiredFor: config);
-    MimicOverlayEntry entry = new MimicOverlayEntry._(startMimic());
-    overlay.insert(entry._overlayEntry);
-    return entry;
+    return new MimicOverlayEntry._(startMimic(), overlay);
   }
 
   void _stopMimic() {

@@ -8,7 +8,8 @@ class NavigationIconView {
   NavigationIconView({
     Icon icon,
     Widget title,
-    Color color
+    Color color,
+    TickerProvider vsync,
   }) : _icon = icon,
        _color = color,
        destinationLabel = new DestinationLabel(
@@ -17,13 +18,14 @@ class NavigationIconView {
          backgroundColor: color
        ),
        controller = new AnimationController(
-         duration: kThemeAnimationDuration
+         duration: kThemeAnimationDuration,
+         vsync: vsync,
        ) {
-         _animation = new CurvedAnimation(
-           parent: controller,
-           curve: new Interval(0.5, 1.0, curve: Curves.fastOutSlowIn)
-         );
-       }
+    _animation = new CurvedAnimation(
+      parent: controller,
+      curve: new Interval(0.5, 1.0, curve: Curves.fastOutSlowIn)
+    );
+  }
 
   final Icon _icon;
   final Color _color;
@@ -61,7 +63,7 @@ class BottomNavigationDemo extends StatefulWidget {
   _BottomNavigationDemoState createState() => new _BottomNavigationDemoState();
 }
 
-class _BottomNavigationDemoState extends State<BottomNavigationDemo> {
+class _BottomNavigationDemoState extends State<BottomNavigationDemo> with TickerProviderStateMixin {
   int _currentIndex = 0;
   BottomNavigationBarType _type = BottomNavigationBarType.shifting;
   List<NavigationIconView> _navigationViews;
@@ -73,22 +75,26 @@ class _BottomNavigationDemoState extends State<BottomNavigationDemo> {
       new NavigationIconView(
         icon: new Icon(Icons.access_alarm),
         title: new Text('Alarm'),
-        color: Colors.deepPurple[500]
+        color: Colors.deepPurple[500],
+        vsync: this,
       ),
       new NavigationIconView(
         icon: new Icon(Icons.cloud),
         title: new Text('Cloud'),
-        color: Colors.teal[500]
+        color: Colors.teal[500],
+        vsync: this,
       ),
       new NavigationIconView(
         icon: new Icon(Icons.favorite),
         title: new Text('Favorites'),
-        color: Colors.indigo[500]
+        color: Colors.indigo[500],
+        vsync: this,
       ),
       new NavigationIconView(
         icon: new Icon(Icons.event_available),
         title: new Text('Event'),
-        color: Colors.pink[500]
+        color: Colors.pink[500],
+        vsync: this,
       )
     ];
 
@@ -124,14 +130,12 @@ class _BottomNavigationDemoState extends State<BottomNavigationDemo> {
       return aValue.compareTo(bValue);
     });
 
-    return new Stack(
-      children: transitions
-    );
+    return new Stack(children: transitions);
   }
 
   @override
   Widget build(BuildContext context) {
-    BottomNavigationBar botNavBar = new BottomNavigationBar(
+    final BottomNavigationBar botNavBar = new BottomNavigationBar(
       labels: _navigationViews.map(
         (NavigationIconView navigationView) => navigationView.destinationLabel
       ).toList(),
@@ -159,18 +163,18 @@ class _BottomNavigationDemoState extends State<BottomNavigationDemo> {
             itemBuilder: (BuildContext context) => <PopupMenuItem<BottomNavigationBarType>>[
               new PopupMenuItem<BottomNavigationBarType>(
                 value: BottomNavigationBarType.fixed,
-                child: new Text('Fixed')
+                child: new Text('Fixed'),
               ),
               new PopupMenuItem<BottomNavigationBarType>(
                 value: BottomNavigationBarType.shifting,
-                child: new Text('Shifting')
+                child: new Text('Shifting'),
               )
             ]
           )
         ]
       ),
       body: _buildBody(),
-      bottomNavigationBar: botNavBar
+      bottomNavigationBar: botNavBar,
     );
   }
 }

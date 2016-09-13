@@ -6,6 +6,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/animation.dart';
 import 'package:flutter/widgets.dart';
 
+import 'animation_tester.dart';
+
 void main() {
   setUp(() {
     WidgetsFlutterBinding.ensureInitialized();
@@ -14,7 +16,8 @@ void main() {
 
   test('Can set value during status callback', () {
     AnimationController controller = new AnimationController(
-      duration: const Duration(milliseconds: 100)
+      duration: const Duration(milliseconds: 100),
+      vsync: const TestVSync(),
     );
     bool didComplete = false;
     bool didDismiss = false;
@@ -45,7 +48,8 @@ void main() {
 
   test('Receives status callbacks for forward and reverse', () {
     AnimationController controller = new AnimationController(
-      duration: const Duration(milliseconds: 100)
+      duration: const Duration(milliseconds: 100),
+      vsync: const TestVSync(),
     );
     List<double> valueLog = <double>[];
     List<AnimationStatus> log = <AnimationStatus>[];
@@ -107,7 +111,8 @@ void main() {
 
   test('Forward and reverse from values', () {
     AnimationController controller = new AnimationController(
-      duration: const Duration(milliseconds: 100)
+      duration: const Duration(milliseconds: 100),
+      vsync: const TestVSync(),
     );
     List<double> valueLog = <double>[];
     List<AnimationStatus> statusLog = <AnimationStatus>[];
@@ -134,7 +139,8 @@ void main() {
 
   test('Forward only from value', () {
     AnimationController controller = new AnimationController(
-      duration: const Duration(milliseconds: 100)
+      duration: const Duration(milliseconds: 100),
+      vsync: const TestVSync(),
     );
     List<double> valueLog = <double>[];
     List<AnimationStatus> statusLog = <AnimationStatus>[];
@@ -154,7 +160,8 @@ void main() {
 
   test('Can fling to upper and lower bounds', () {
     AnimationController controller = new AnimationController(
-      duration: const Duration(milliseconds: 100)
+      duration: const Duration(milliseconds: 100),
+      vsync: const TestVSync(),
     );
 
     controller.fling();
@@ -166,7 +173,8 @@ void main() {
     AnimationController largeRangeController = new AnimationController(
       duration: const Duration(milliseconds: 100),
       lowerBound: -30.0,
-      upperBound: 45.0
+      upperBound: 45.0,
+      vsync: const TestVSync(),
     );
 
     largeRangeController.fling();
@@ -182,7 +190,8 @@ void main() {
 
   test('lastElapsedDuration control test', () {
     AnimationController controller = new AnimationController(
-      duration: const Duration(milliseconds: 100)
+      duration: const Duration(milliseconds: 100),
+      vsync: const TestVSync(),
     );
     controller.forward();
     WidgetsBinding.instance.handleBeginFrame(const Duration(milliseconds: 20));
@@ -194,7 +203,8 @@ void main() {
 
   test('toString control test', () {
     AnimationController controller = new AnimationController(
-      duration: const Duration(milliseconds: 100)
+      duration: const Duration(milliseconds: 100),
+      vsync: const TestVSync(),
     );
     expect(controller.toString(), hasOneLineDescription);
     controller.forward();

@@ -32,7 +32,7 @@ import 'toggleable.dart';
 ///  * [Radio]
 ///  * [Slider]
 ///  * <https://www.google.com/design/spec/components/selection-controls.html#selection-controls-switch>
-class Switch extends StatelessWidget {
+class Switch extends StatefulWidget {
   /// Creates a material design switch.
   ///
   /// The switch itself does not maintain any state. Instead, when the state of
@@ -75,17 +75,30 @@ class Switch extends StatelessWidget {
   final ImageProvider inactiveThumbImage;
 
   @override
+  _SwitchState createState() => new _SwitchState();
+
+  @override
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('value: ${value ? "on" : "off"}');
+    if (onChanged == null)
+      description.add('disabled');
+  }
+}
+
+class _SwitchState extends State<Switch> with TickerProviderStateMixin {
+  @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     final ThemeData themeData = Theme.of(context);
     final bool isDark = themeData.brightness == Brightness.dark;
 
-    final Color activeThumbColor = activeColor ?? themeData.accentColor;
+    final Color activeThumbColor = config.activeColor ?? themeData.accentColor;
     final Color activeTrackColor = activeThumbColor.withAlpha(0x80);
 
     Color inactiveThumbColor;
     Color inactiveTrackColor;
-    if (onChanged != null) {
+    if (config.onChanged != null) {
       inactiveThumbColor = isDark ? Colors.grey[400] : Colors.grey[50];
       inactiveTrackColor = isDark ? Colors.white30 : Colors.black26;
     } else {
@@ -94,24 +107,17 @@ class Switch extends StatelessWidget {
     }
 
     return new _SwitchRenderObjectWidget(
-      value: value,
+      value: config.value,
       activeColor: activeThumbColor,
       inactiveColor: inactiveThumbColor,
-      activeThumbImage: activeThumbImage,
-      inactiveThumbImage: inactiveThumbImage,
+      activeThumbImage: config.activeThumbImage,
+      inactiveThumbImage: config.inactiveThumbImage,
       activeTrackColor: activeTrackColor,
       inactiveTrackColor: inactiveTrackColor,
       configuration: createLocalImageConfiguration(context),
-      onChanged: onChanged
+      onChanged: config.onChanged,
+      vsync: this,
     );
-  }
-
-  @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('value: ${value ? "on" : "off"}');
-    if (onChanged == null)
-      description.add('disabled');
   }
 }
 
@@ -126,7 +132,8 @@ class _SwitchRenderObjectWidget extends LeafRenderObjectWidget {
     this.activeTrackColor,
     this.inactiveTrackColor,
     this.configuration,
-    this.onChanged
+    this.onChanged,
+    this.vsync,
   }) : super(key: key);
 
   final bool value;
@@ -138,6 +145,7 @@ class _SwitchRenderObjectWidget extends LeafRenderObjectWidget {
   final Color inactiveTrackColor;
   final ImageConfiguration configuration;
   final ValueChanged<bool> onChanged;
+  final TickerProvider vsync;
 
   @override
   _RenderSwitch createRenderObject(BuildContext context) => new _RenderSwitch(
@@ -149,7 +157,8 @@ class _SwitchRenderObjectWidget extends LeafRenderObjectWidget {
     activeTrackColor: activeTrackColor,
     inactiveTrackColor: inactiveTrackColor,
     configuration: configuration,
-    onChanged: onChanged
+    onChanged: onChanged,
+    vsync: vsync,
   );
 
   @override
@@ -163,7 +172,8 @@ class _SwitchRenderObjectWidget extends LeafRenderObjectWidget {
       ..activeTrackColor = activeTrackColor
       ..inactiveTrackColor = inactiveTrackColor
       ..configuration = configuration
-      ..onChanged = onChanged;
+      ..onChanged = onChanged
+      ..vsync = vsync;
   }
 }
 
@@ -184,7 +194,8 @@ class _RenderSwitch extends RenderToggleable {
     Color activeTrackColor,
     Color inactiveTrackColor,
     ImageConfiguration configuration,
-    ValueChanged<bool> onChanged
+    ValueChanged<bool> onChanged,
+    @required TickerProvider vsync,
   }) : _activeThumbImage = activeThumbImage,
        _inactiveThumbImage = inactiveThumbImage,
        _activeTrackColor = activeTrackColor,
@@ -195,7 +206,8 @@ class _RenderSwitch extends RenderToggleable {
          activeColor: activeColor,
          inactiveColor: inactiveColor,
          onChanged: onChanged,
-         size: const Size(_kSwitchWidth, _kSwitchHeight)
+         size: const Size(_kSwitchWidth, _kSwitchHeight),
+         vsync: vsync,
        ) {
     _drag = new HorizontalDragGestureRecognizer()
       ..onStart = _handleDragStart

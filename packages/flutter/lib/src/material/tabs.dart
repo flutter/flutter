@@ -523,26 +523,27 @@ class TabBarSelection<T> extends StatefulWidget {
 ///
 /// Subclasses of [TabBarSelection] typically use [State] objects that extend
 /// this class.
-class TabBarSelectionState<T> extends State<TabBarSelection<T>> {
+class TabBarSelectionState<T> extends State<TabBarSelection<T>> with SingleTickerProviderStateMixin {
+
+  // Both the TabBar and TabBarView classes access _controller because they
+  // alternately drive selection progress between tabs.
+  AnimationController _controller;
 
   /// An animation that updates as the selected tab changes.
   Animation<double> get animation => _controller.view;
 
-  // Both the TabBar and TabBarView classes access _controller because they
-  // alternately drive selection progress between tabs.
-  final AnimationController _controller = new AnimationController(duration: _kTabBarScroll, value: 1.0);
   final Map<T, int> _valueToIndex = new Map<T, int>();
-
-  void _initValueToIndex() {
-    _valueToIndex.clear();
-    int index = 0;
-    for(T value in values)
-      _valueToIndex[value] = index++;
-  }
 
   @override
   void initState() {
     super.initState();
+
+    _controller = new AnimationController(
+      duration: _kTabBarScroll,
+      value: 1.0,
+      vsync: this,
+    );
+
     _value = config.value ?? PageStorage.of(context)?.readState(context) ?? values.first;
 
     // If the selection's values have changed since the selected value was saved with
@@ -559,6 +560,13 @@ class TabBarSelectionState<T> extends State<TabBarSelection<T>> {
     super.didUpdateConfig(oldConfig);
     if (values != oldConfig.values)
       _initValueToIndex();
+  }
+
+  void _initValueToIndex() {
+    _valueToIndex.clear();
+    int index = 0;
+    for (T value in values)
+      _valueToIndex[value] = index++;
   }
 
   void _writeValue() {
