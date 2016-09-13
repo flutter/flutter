@@ -13,8 +13,6 @@ import 'package:flutter/http.dart' as http;
 import 'package:mojo/core.dart' as core;
 import 'package:mojo_services/mojo/asset_bundle/asset_bundle.mojom.dart' as mojom;
 
-import 'shell.dart';
-
 /// A collection of resources used by the application.
 ///
 /// Asset bundles contain resources, such as images and strings, that can be
@@ -86,12 +84,18 @@ class NetworkAssetBundle extends AssetBundle {
 
   @override
   Future<core.MojoDataPipeConsumer> load(String key) async {
-    return await http.readDataPipe(_urlFromKey(key));
+    http.Response response = await http.get(_urlFromKey(key));
+    if (response.statusCode == 200)
+      return null;
+    core.MojoDataPipe pipe = new core.MojoDataPipe();
+    core.DataPipeFiller.fillHandle(pipe.producer, response.bodyBytes.buffer.asByteData());
+    return pipe.consumer;
   }
 
   @override
   Future<String> loadString(String key, { bool cache: true }) async {
-    return (await http.get(_urlFromKey(key))).body;
+    http.Response response = await http.get(_urlFromKey(key));
+    return response.statusCode == 200 ? response.body : null;
   }
 
   /// Retrieve a string from the asset bundle, parse it with the given function,
@@ -190,22 +194,6 @@ abstract class CachingAssetBundle extends AssetBundle {
 class MojoAssetBundle extends CachingAssetBundle {
   /// Creates an [AssetBundle] interface around the given [mojom.AssetBundleProxy] Mojo service.
   MojoAssetBundle(this._bundle);
-
-  /// Retrieves the asset bundle located at the given URL, unpacks it, and provides it contents.
-  factory MojoAssetBundle.fromNetwork(String relativeUrl) {
-    final mojom.AssetBundleProxy bundle = new mojom.AssetBundleProxy.unbound();
-    _fetchAndUnpackBundleAsychronously(relativeUrl, bundle);
-    return new MojoAssetBundle(bundle);
-  }
-
-  static Future<Null> _fetchAndUnpackBundleAsychronously(String relativeUrl, mojom.AssetBundleProxy bundle) async {
-    final core.MojoDataPipeConsumer bundleData = await http.readDataPipe(Uri.base.resolve(relativeUrl));
-    final mojom.AssetUnpackerProxy unpacker = shell.connectToApplicationService(
-      'mojo:asset_bundle', mojom.AssetUnpacker.connectToService
-    );
-    unpacker.unpackZipStream(bundleData, bundle);
-    unpacker.close();
-  }
 
   mojom.AssetBundleProxy _bundle;
 
