@@ -109,7 +109,7 @@ class OverscrollIndicator extends StatefulWidget {
   /// descendant.
   final Key scrollableKey;
 
-  /// Where the scroll indicator should appear.
+  /// Where the overscroll indicator should appear.
   final ScrollableEdge edge;
 
   /// The overscroll indicator will be stacked on top of this child. The
