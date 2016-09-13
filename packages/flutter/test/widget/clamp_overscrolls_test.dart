@@ -5,8 +5,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
-import 'test_widgets.dart';
-
 // Assuming that the test container is 800x600. The height of the
 // viewport's contents is 650.0, the top and bottom text children
 // are 100 pixels high and top/left edge of both widgets are visible.
@@ -44,8 +42,7 @@ void main() {
       final RenderBox textBox = tester.renderObject(find.text(target));
       final Point widgetOrigin = textBox.localToGlobal(Point.origin);
       await tester.pump(const Duration(seconds: 1)); // Allow overscroll to settle
-
-      return new Future.value(widgetOrigin);
+      return new Future<Point>.value(widgetOrigin);
     }
 
     await tester.pumpWidget(buildFrame(ScrollableEdge.none));
