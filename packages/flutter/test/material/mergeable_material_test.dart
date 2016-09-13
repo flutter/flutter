@@ -1014,12 +1014,14 @@ void main() {
     matches(getBorderRadius(tester, 1), RadiusType.Round, RadiusType.Round);
   });
 
-  bool isDivider(Widget widget) {
+  bool isDivider(Widget widget, bool top, bool bottom) {
     final DecoratedBox box = widget;
+    final BorderSide side = new BorderSide(color: const Color(0x1F000000), width: 0.5);
 
     return box.decoration == new BoxDecoration(
       border: new Border(
-        bottom: new BorderSide(color: const Color(0x1F000000))
+        top: top ? side : BorderSide.none,
+        bottom: bottom ? side : BorderSide.none
       )
     );
   }
@@ -1068,10 +1070,10 @@ void main() {
     List<Widget> boxes = tester.widgetList(find.byType(DecoratedBox)).toList();
     int offset = 3;
 
-    expect(isDivider(boxes[offset]), isTrue);
-    expect(isDivider(boxes[offset + 1]), isTrue);
-    expect(isDivider(boxes[offset + 2]), isTrue);
-    expect(isDivider(boxes[offset + 3]), isFalse);
+    expect(isDivider(boxes[offset], false, true), isTrue);
+    expect(isDivider(boxes[offset + 1], true, true), isTrue);
+    expect(isDivider(boxes[offset + 2], true, true), isTrue);
+    expect(isDivider(boxes[offset + 3], true, false), isTrue);
 
     await tester.pumpWidget(
       new Scaffold(
@@ -1116,13 +1118,16 @@ void main() {
       )
     );
 
+    // Wait for dividers to shrink.
+    await tester.pump(const Duration(milliseconds: 200));
+
     boxes = tester.widgetList(find.byType(DecoratedBox)).toList();
     offset = 3;
 
-    expect(isDivider(boxes[offset]), isTrue);
-    expect(isDivider(boxes[offset + 1]), isFalse);
+    expect(isDivider(boxes[offset], false, true), isTrue);
+    expect(isDivider(boxes[offset + 1], true, false), isTrue);
     // offset + 2 is gap
-    expect(isDivider(boxes[offset + 3]), isTrue);
-    expect(isDivider(boxes[offset + 4]), isFalse);
+    expect(isDivider(boxes[offset + 3], false, true), isTrue);
+    expect(isDivider(boxes[offset + 4], true, false), isTrue);
   });
 }
