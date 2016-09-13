@@ -319,7 +319,7 @@ TextBlobPtr Font::buildTextBlob(const GlyphBuffer& glyphBuffer, float initialAdv
     bool success = glyphBuffer.hasOffsets() ?
         buildTextBlobInternal<true>(glyphBuffer, advance, builder) :
         buildTextBlobInternal<false>(glyphBuffer, advance, builder);
-    return success ? TextBlobPtr(builder.build()) : nullptr;
+    return success ? TextBlobPtr(builder.make()) : nullptr;
 }
 
 
