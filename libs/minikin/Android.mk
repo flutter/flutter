@@ -109,7 +109,7 @@ LOCAL_MODULE_TAGS := optional
 LOCAL_EXPORT_C_INCLUDE_DIRS := frameworks/minikin/include
 LOCAL_C_INCLUDES := $(minikin_c_includes)
 LOCAL_CPPFLAGS += -Werror -Wall -Wextra $(enable_race_detection)
-LOCAL_SHARED_LIBRARIES := liblog libicuuc-host
+LOCAL_SHARED_LIBRARIES := liblog libicuuc
 
 LOCAL_SRC_FILES := Hyphenator.cpp
 
