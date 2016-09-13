@@ -28,7 +28,7 @@ LOCAL_STATIC_LIBRARIES := libminikin_host
 
 LOCAL_SHARED_LIBRARIES := \
     liblog \
-    libicuuc-host
+    libicuuc
 
 LOCAL_SRC_FILES += \
     HyphTool.cpp
