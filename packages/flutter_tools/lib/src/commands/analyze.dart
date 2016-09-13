@@ -636,7 +636,11 @@ class AnalysisServer {
     _errorsController.add(new FileAnalysisErrors(file, errors));
   }
 
-  Future<bool> dispose() async => _process?.kill();
+  Future<bool> dispose() async {
+    await _analyzingController.close();
+    await _errorsController.close();
+    return _process?.kill();
+  }
 }
 
 class FileAnalysisErrors {

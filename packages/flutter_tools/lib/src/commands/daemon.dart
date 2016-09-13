@@ -100,7 +100,10 @@ class Daemon {
     // Start listening.
     commandStream.listen(
       (Map<String, dynamic> request) => _handleRequest(request),
-      onDone: () => _onExitCompleter.complete(0)
+      onDone: () {
+        if (!_onExitCompleter.isCompleted)
+            _onExitCompleter.complete(0);
+      }
     );
   }
 
@@ -578,6 +581,10 @@ class NotifyingLogger extends Logger {
   Status startProgress(String message) {
     printStatus(message);
     return new Status();
+  }
+
+  void dispose() {
+    _messageController.close();
   }
 }
 

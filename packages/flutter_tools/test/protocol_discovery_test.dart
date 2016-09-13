@@ -48,6 +48,7 @@ void main() {
       expect(await nextPort, 52584);
 
       discoverer.cancel();
+      logReader.dispose();
     });
   });
 }
