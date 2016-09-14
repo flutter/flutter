@@ -511,14 +511,24 @@ class ScrollableState<T extends Scrollable> extends State<T> {
     updateGestureDetector();
   }
 
-  /// Fling the scroll offset with the given velocity in logical pixels/second.
+  /// If [scrollVelocity] is greater than [PixelScrollTolerance.velocity] then
+  /// fling the scroll offset with the given velocity in logical pixels/second.
+  /// Otherwise, if this scrollable is overscrolled or a snapOffsetCallback was given,
+  /// then animate the scroll offset to its final value with [settleScrollOffset].
   ///
   /// Calling this function starts a physics-based animation of the scroll
   /// offset with the given value as the initial velocity. The physics
   /// simulation is determined by the scroll behavior.
   Future<Null> fling(double scrollVelocity) {
-    if (scrollVelocity.abs() > kPixelScrollTolerance.velocity || !_controller.isAnimating)
+    if (scrollVelocity.abs() > kPixelScrollTolerance.velocity)
       return _startToEndAnimation(scrollVelocity);
+
+    // If scroll animation isn't underway already and we're overscrolled or we're
+    // going to have to snap the scroll offset, then animate the scroll offset to its
+    // final value.
+    if (!_controller.isAnimating && (shouldSnapScrollOffset || !_scrollOffsetIsInBounds(scrollOffset)))
+      return settleScrollOffset();
+
     return new Future<Null>.value();
   }
 
