@@ -34,6 +34,7 @@ void _setupHooks() {
   assert(() {
     // In debug mode, register the schedule frame extension.
     developer.registerExtension('ext.ui.window.scheduleFrame', _scheduleFrame);
+    return true;
   });
 }
 
