@@ -264,17 +264,17 @@ Int32List _encodeTextStyle(Color color,
 class TextStyle {
   /// Creates a new TextStyle object.
   ///
-  /// * [color] The color to use when painting the text.
-  /// * [decoration] The decorations to paint near the text (e.g., an underline).
-  /// * [decorationColor] The color in which to paint the text decorations.
-  /// * [decorationStyle] The style in which to paint the text decorations (e.g., dashed).
-  /// * [fontWeight] The typeface thickness to use when painting the text (e.g., bold).
-  /// * [fontStyle] The typeface variant to use when drawing the letters (e.g., italics).
-  /// * [fontFamily] The name of the font to use when painting the text (e.g., Roboto).
-  /// * [fontSize] The size of gyphs (in logical pixels) to use when painting the text.
-  /// * [letterSpacing] The amount of space (in logical pixels) to add between each letter.
-  /// * [wordSpacing] The amount of space (in logical pixels) to add at each sequence of white-space (i.e. between each word).
-  /// * [height] The height of this text span, as a multiple of the font size.
+  /// * `color`: The color to use when painting the text.
+  /// * `decoration`: The decorations to paint near the text (e.g., an underline).
+  /// * `decorationColor`: The color in which to paint the text decorations.
+  /// * `decorationStyle`: The style in which to paint the text decorations (e.g., dashed).
+  /// * `fontWeight`: The typeface thickness to use when painting the text (e.g., bold).
+  /// * `fontStyle`: The typeface variant to use when drawing the letters (e.g., italics).
+  /// * `fontFamily`: The name of the font to use when painting the text (e.g., Roboto).
+  /// * `fontSize`: The size of glyphs (in logical pixels) to use when painting the text.
+  /// * `letterSpacing`: The amount of space (in logical pixels) to add between each letter.
+  /// * `wordSpacing`: The amount of space (in logical pixels) to add at each sequence of white-space (i.e. between each word).
+  /// * `height`: The height of this text span, as a multiple of the font size.
   TextStyle({
     Color color,
     TextDecoration decoration,
@@ -354,12 +354,17 @@ class TextStyle {
 // The encoded array buffer has 3 elements.
 //
 //  - Element 0: A bit field where the ith bit indicates wheter the ith element
-//    has a non-null value. Bit 3 indicates whether |lineHeight| is non-null.
-//    Bit 0 is unused.
+//    has a non-null value. Bit 6 indicates whether |fontFamily| is non-null.
+//    Bit 7 indicates whether |fontSize| is non-null. Bit 8 indicates whether
+//    |lineHeight| is non-null. Bit 0 is unused.
 //
 //  - Element 1: The enum index of the |textAlign|.
 //
 //  - Element 2: The enum index of the |textBaseline|.
+//
+//  - Element 3: The index of the |fontWeight|.
+//
+//  - Element 4: The enum index of the |fontStyle|.
 //
 Int32List _encodeParagraphStyle(TextAlign textAlign,
                                 TextBaseline textBaseline,
@@ -404,9 +409,13 @@ Int32List _encodeParagraphStyle(TextAlign textAlign,
 class ParagraphStyle {
   /// Creates a new ParagraphStyle object.
   ///
-  /// * [textAlign] .
-  /// * [textBaseline] .
-  /// * [lineHeight] .
+  /// * `textAlign`: The alignment of the text within the lines of the paragraph.
+  /// * `textBaseline`: The primary baseline along which different fonts should be aligned.
+  /// * `fontWeight`: The typeface thickness to use when painting the text (e.g., bold).
+  /// * `fontStyle`: The typeface variant to use when drawing the letters (e.g., italics).
+  /// * `fontFamily`: The name of the font to use when painting the text (e.g., Roboto).
+  /// * `fontSize`: The size of glyphs (in logical pixels) to use when painting the text.
+  /// * `lineHeight`: The minimum height of the line boxes, as a multiple of the font size.
   ParagraphStyle({
     TextAlign textAlign,
     TextBaseline textBaseline,
@@ -454,8 +463,8 @@ class ParagraphStyle {
     return 'ParagraphStyle('
              'textAlign: ${   _encoded[0] & 0x002 == 0x002 ? TextAlign.values[_encoded[1]]    : "unspecified"}, '
              'textBaseline: ${_encoded[0] & 0x004 == 0x004 ? TextBaseline.values[_encoded[2]] : "unspecified"}, '
-             'fontWeight: ${  _encoded[0] & 0x008 == 0x008 ? FontWeight.values[_encoded[5]]   : "unspecified"}, '
-             'fontStyle: ${   _encoded[0] & 0x010 == 0x010 ? FontStyle.values[_encoded[6]]    : "unspecified"}, '
+             'fontWeight: ${  _encoded[0] & 0x008 == 0x008 ? FontWeight.values[_encoded[3]]   : "unspecified"}, '
+             'fontStyle: ${   _encoded[0] & 0x010 == 0x010 ? FontStyle.values[_encoded[4]]    : "unspecified"}, '
              'fontFamily: ${  _encoded[0] & 0x020 == 0x020 ? _fontFamily                      : "unspecified"}, '
              'fontSize: ${    _encoded[0] & 0x040 == 0x040 ? _fontSize                        : "unspecified"}, '
              'lineHeight: ${  _encoded[0] & 0x080 == 0x080 ? "${_lineHeight}x"                : "unspecified"}'
