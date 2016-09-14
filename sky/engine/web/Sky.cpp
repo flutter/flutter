@@ -41,31 +41,41 @@
 #include "lib/ftl/build_config.h"
 #include "lib/tonic/dart_microtask_queue.h"
 
-#if !defined(OS_FUCHSIA)
+#if defined(OS_FUCHSIA)
+
+#include "lib/mtl/tasks/message_loop.h"
+
+#else  // defined(OS_FUCHSIA)
 
 #include "base/message_loop/message_loop.h"
 #include "mojo/message_pump/message_pump_mojo.h"
 
-#endif  // !defined(OS_FUCHSIA)
+#endif  // defined(OS_FUCHSIA)
 
 namespace blink {
 
 namespace {
-
-#if !defined(OS_FUCHSIA)
-
-void willProcessTask() {}
 
 void didProcessTask() {
   tonic::DartMicrotaskQueue::RunMicrotasks();
   // FIXME: Report memory usage to dart?
 }
 
+#if defined(OS_FUCHSIA)
+
+void addMessageLoopObservers() {
+  mtl::MessageLoop::GetCurrent()->SetAfterTaskCallback(didProcessTask);
+}
+
+void removeMessageLoopObservers() {
+  mtl::MessageLoop::GetCurrent()->ClearAfterTaskCallback();
+}
+
+#else  // defined(OS_FUCHSIA)
+
 class TaskObserver : public base::MessageLoop::TaskObserver {
  public:
-  void WillProcessTask(const base::PendingTask& pending_task) override {
-    willProcessTask();
-  }
+  void WillProcessTask(const base::PendingTask& pending_task) override {}
   void DidProcessTask(const base::PendingTask& pending_task) override {
     didProcessTask();
   }
@@ -73,7 +83,7 @@ class TaskObserver : public base::MessageLoop::TaskObserver {
 
 class SignalObserver : public mojo::common::MessagePumpMojo::Observer {
  public:
-  void WillSignalHandler() override { willProcessTask(); }
+  void WillSignalHandler() override {}
   void DidSignalHandler() override { didProcessTask(); }
 };
 
@@ -104,7 +114,7 @@ void removeMessageLoopObservers() {
   s_signalObserver = 0;
 }
 
-#endif  // !defined(OS_FUCHSIA)
+#endif  // defined(OS_FUCHSIA)
 
 }  // namespace
 
@@ -136,15 +146,11 @@ void InitEngine(Platform* platform) {
   // this, initializing this lazily probably doesn't buy us much.
   WTF::UTF8Encoding();
 
-#if !defined(OS_FUCHSIA)
   addMessageLoopObservers();
-#endif
 }
 
 void ShutdownEngine() {
-#if !defined(OS_FUCHSIA)
   removeMessageLoopObservers();
-#endif
 
   // FIXME: Shutdown dart?
 

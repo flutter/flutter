@@ -18,7 +18,11 @@ source_set("web") {
     "//flutter/sky/engine:non_test_config",
   ]
 
-  if (!is_fuchsia) {
+  if (is_fuchsia) {
+    deps += [
+      "//lib/mtl/tasks",
+    ]
+  } else {
     deps += [
       "//mojo/message_pump",
     ]
