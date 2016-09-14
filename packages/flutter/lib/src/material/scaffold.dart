@@ -609,10 +609,9 @@ class ScaffoldState extends State<Scaffold> {
     if ((scrollable.config.scrollDirection == Axis.vertical) &&
         (config.scrollableKey == null || config.scrollableKey == scrollable.config.key)) {
       double newScrollOffset = scrollable.scrollOffset;
-      if (ClampOverscrolls.of(scrollable.context)) {
-        ExtentScrollBehavior limits = scrollable.scrollBehavior;
-        newScrollOffset = newScrollOffset.clamp(limits.minScrollOffset, limits.maxScrollOffset);
-      }
+      final ClampOverscrolls clampOverscrolls = ClampOverscrolls.of(context);
+      if (clampOverscrolls != null)
+        newScrollOffset = clampOverscrolls.clampScrollOffset(scrollable);
       if (_scrollOffset != newScrollOffset) {
         setState(() {
           _scrollOffsetDelta = _scrollOffset - newScrollOffset;

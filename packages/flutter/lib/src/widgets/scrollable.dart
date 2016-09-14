@@ -19,6 +19,24 @@ import 'page_storage.dart';
 import 'scroll_behavior.dart';
 import 'scroll_configuration.dart';
 
+/// Identifies one or both limits of a [Scrollable] in terms of its scrollDirection.
+enum ScrollableEdge {
+  /// The top and bottom of the scrollable if its scrollDirection is vertical
+  /// or the left and right if its scrollDirection is horizontal.
+  both,
+
+  /// Only the top of the scrollable if its scrollDirection is vertical,
+  /// or only the left if its scrollDirection is horizontal.
+  leading,
+
+  /// Only the bottom of the scrollable if its scroll-direction is vertical,
+  /// or only the right if its scrollDirection is horizontal.
+  trailing,
+
+  /// The overscroll indicator should not appear at all.
+  none,
+}
+
 /// The accuracy to which scrolling is computed.
 final Tolerance kPixelScrollTolerance = new Tolerance(
   // TODO(ianh): Handle the case of the device pixel ratio changing.

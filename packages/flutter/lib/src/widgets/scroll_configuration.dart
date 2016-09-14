@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+/// Copyright 2016 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -28,7 +28,7 @@ abstract class ScrollConfigurationDelegate {
   /// Scrollable they create. It can be used to add widgets that wrap the
   /// Scrollable, like scrollbars or overscroll indicators. By default the
   /// [scrollWidget] parameter is returned unchanged.
-  Widget wrapScrollWidget(Widget scrollWidget) => scrollWidget;
+  Widget wrapScrollWidget(BuildContext context, Widget scrollWidget) => scrollWidget;
 
   /// Overrides should return true if this ScrollConfigurationDelegate differs
   /// from the provided old delegate in a way that requires rebuilding its
@@ -87,7 +87,7 @@ class ScrollConfiguration extends InheritedWidget {
 
   /// A utility function that calls [ScrollConfigurationDelegate.wrapScrollWidget].
   static Widget wrap(BuildContext context, Widget scrollWidget) {
-    return ScrollConfiguration.of(context).wrapScrollWidget(scrollWidget);
+    return ScrollConfiguration.of(context).wrapScrollWidget(context, scrollWidget);
   }
 
   @override

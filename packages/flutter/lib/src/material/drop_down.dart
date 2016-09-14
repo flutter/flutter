@@ -89,7 +89,9 @@ class _DropDownScrollConfigurationDelegate extends ScrollConfigurationDelegate {
   ExtentScrollBehavior createScrollBehavior() => new OverscrollWhenScrollableBehavior(platform: platform);
 
   @override
-  Widget wrapScrollWidget(Widget scrollWidget) => new ClampOverscrolls(value: true, child: scrollWidget);
+  Widget wrapScrollWidget(BuildContext context, Widget scrollWidget) {
+    return new ClampOverscrolls(edge: ScrollableEdge.both, child: scrollWidget);
+  }
 
   @override
   bool updateShouldNotify(ScrollConfigurationDelegate old) => platform != old.platform;
