@@ -523,7 +523,7 @@ class ScrollableState<T extends Scrollable> extends State<T> {
     if (scrollVelocity.abs() > kPixelScrollTolerance.velocity)
       return _startToEndAnimation(scrollVelocity);
 
-    // If scroll animation isn't underway already and we're overscrolled or we're
+    // If a scroll animation isn't underway already and we're overscrolled or we're
     // going to have to snap the scroll offset, then animate the scroll offset to its
     // final value.
     if (!_controller.isAnimating && (shouldSnapScrollOffset || !_scrollOffsetIsInBounds(scrollOffset)))
