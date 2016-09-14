@@ -513,8 +513,8 @@ class ScrollableState<T extends Scrollable> extends State<T> {
 
   /// If [scrollVelocity] is greater than [PixelScrollTolerance.velocity] then
   /// fling the scroll offset with the given velocity in logical pixels/second.
-  /// Otherwise, if this scrollable is overscrolled or a snapOffsetCallback was given,
-  /// animate the scroll offset to its final value with [settleScrollOffset].
+  /// Otherwise, if this scrollable is overscrolled or a [snapOffsetCallback]
+  /// was given, animate the scroll offset to its final value with [settleScrollOffset].
   ///
   /// Calling this function starts a physics-based animation of the scroll
   /// offset with the given value as the initial velocity. The physics
