@@ -334,17 +334,17 @@ class TextStyle {
 
   String toString() {
     return 'TextStyle(${_encoded[0]}|'
-             'color: ${          _encoded[0] & 0x001 == 0x001 ? new Color(_encoded[1])                  : "unspecified"}, '
-             'decoration: ${     _encoded[0] & 0x002 == 0x002 ? new TextDecoration._(_encoded[2])       : "unspecified"}, '
-             'decorationColor: ${_encoded[0] & 0x004 == 0x004 ? new Color(_encoded[3])                  : "unspecified"}, '
-             'decorationStyle: ${_encoded[0] & 0x008 == 0x008 ? TextDecorationStyle.values[_encoded[4]] : "unspecified"}, '
-             'fontWeight: ${     _encoded[0] & 0x010 == 0x010 ? FontWeight.values[_encoded[5]]          : "unspecified"}, '
-             'fontStyle: ${      _encoded[0] & 0x020 == 0x020 ? FontStyle.values[_encoded[6]]           : "unspecified"}, '
-             'fontFamily: ${     _encoded[0] & 0x040 == 0x040 ? _fontFamily                             : "unspecified"}, '
-             'fontSize: ${       _encoded[0] & 0x080 == 0x080 ? _fontSize                               : "unspecified"}, '
-             'letterSpacing: ${  _encoded[0] & 0x100 == 0x100 ? "${_letterSpacing}x"                    : "unspecified"}, '
-             'wordSpacing: ${    _encoded[0] & 0x200 == 0x200 ? "${_wordSpacing}x"                      : "unspecified"}, '
-             'height: ${         _encoded[0] & 0x400 == 0x400 ? "${_height}x"                           : "unspecified"}'
+             'color: ${          _encoded[0] & 0x002 == 0x002 ? new Color(_encoded[1])                  : "unspecified"}, '
+             'decoration: ${     _encoded[0] & 0x004 == 0x003 ? new TextDecoration._(_encoded[2])       : "unspecified"}, '
+             'decorationColor: ${_encoded[0] & 0x008 == 0x008 ? new Color(_encoded[3])                  : "unspecified"}, '
+             'decorationStyle: ${_encoded[0] & 0x010 == 0x010 ? TextDecorationStyle.values[_encoded[4]] : "unspecified"}, '
+             'fontWeight: ${     _encoded[0] & 0x020 == 0x020 ? FontWeight.values[_encoded[5]]          : "unspecified"}, '
+             'fontStyle: ${      _encoded[0] & 0x040 == 0x040 ? FontStyle.values[_encoded[6]]           : "unspecified"}, '
+             'fontFamily: ${     _encoded[0] & 0x080 == 0x080 ? _fontFamily                             : "unspecified"}, '
+             'fontSize: ${       _encoded[0] & 0x100 == 0x100 ? _fontSize                               : "unspecified"}, '
+             'letterSpacing: ${  _encoded[0] & 0x200 == 0x200 ? "${_letterSpacing}x"                    : "unspecified"}, '
+             'wordSpacing: ${    _encoded[0] & 0x400 == 0x400 ? "${_wordSpacing}x"                      : "unspecified"}, '
+             'height: ${         _encoded[0] & 0x800 == 0x800 ? "${_height}x"                           : "unspecified"}'
            ')';
   }
 }
@@ -452,13 +452,13 @@ class ParagraphStyle {
 
   String toString() {
     return 'ParagraphStyle('
-             'textAlign: ${   _encoded[0] & 0x001 == 0x001 ? TextAlign.values[_encoded[1]]    : "unspecified"}, '
-             'textBaseline: ${_encoded[0] & 0x002 == 0x002 ? TextBaseline.values[_encoded[2]] : "unspecified"}, '
-             'fontWeight: ${  _encoded[0] & 0x002 == 0x002 ? FontWeight.values[_encoded[5]]   : "unspecified"}, '
-             'fontStyle: ${   _encoded[0] & 0x004 == 0x004 ? FontStyle.values[_encoded[6]]    : "unspecified"}, '
-             'fontFamily: ${  _encoded[0] & 0x008 == 0x008 ? _fontFamily                      : "unspecified"}, '
-             'fontSize: ${    _encoded[0] & 0x010 == 0x010 ? _fontSize                        : "unspecified"}, '
-             'lineHeight: ${  _encoded[0] & 0x020 == 0x020 ? "${_lineHeight}x"                : "unspecified"}'
+             'textAlign: ${   _encoded[0] & 0x002 == 0x002 ? TextAlign.values[_encoded[1]]    : "unspecified"}, '
+             'textBaseline: ${_encoded[0] & 0x004 == 0x004 ? TextBaseline.values[_encoded[2]] : "unspecified"}, '
+             'fontWeight: ${  _encoded[0] & 0x008 == 0x008 ? FontWeight.values[_encoded[5]]   : "unspecified"}, '
+             'fontStyle: ${   _encoded[0] & 0x010 == 0x010 ? FontStyle.values[_encoded[6]]    : "unspecified"}, '
+             'fontFamily: ${  _encoded[0] & 0x020 == 0x020 ? _fontFamily                      : "unspecified"}, '
+             'fontSize: ${    _encoded[0] & 0x040 == 0x040 ? _fontSize                        : "unspecified"}, '
+             'lineHeight: ${  _encoded[0] & 0x080 == 0x080 ? "${_lineHeight}x"                : "unspecified"}'
            ')';
   }
 }
