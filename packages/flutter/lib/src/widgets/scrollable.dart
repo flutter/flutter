@@ -287,12 +287,11 @@ class ScrollableState<T extends Scrollable> extends State<T> {
   @override
   void dependenciesChanged() {
     _scrollBehavior = createScrollBehavior();
-    final double updatedOffset = _scrollBehavior.updateExtents(
+    didUpdateScrollBehavior(_scrollBehavior.updateExtents(
       contentExtent: _contentExtent,
       containerExtent: _containerExtent,
       scrollOffset: scrollOffset
-    );
-    didUpdateScrollBehavior(updatedOffset);
+    ));
     super.dependenciesChanged();
   }
 
