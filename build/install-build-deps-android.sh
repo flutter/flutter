@@ -8,10 +8,6 @@
 # items requiring sudo privileges.
 # See http://code.google.com/p/chromium/wiki/AndroidBuildInstructions
 
-# This script installs the sun-java6 packages (bin, jre and jdk). Sun requires
-# a license agreement, so upon installation it will prompt the user. To get
-# past the curses-based dialog press TAB <ret> TAB <ret> to agree.
-
 args="$@"
 if test "$1" = "--skip-sdk-packages"; then
   skip_inst_sdk_packages=1
@@ -27,7 +23,7 @@ fi
 
 # Install first the default Linux build deps.
 "$(dirname "${BASH_SOURCE[0]}")/install-build-deps.sh" \
-  --no-syms --lib32 --no-arm --no-chromeos-fonts --no-nacl --no-prompt "${args}"
+  --no-syms --lib32 --no-arm --no-prompt "${args}"
 
 lsb_release=$(lsb_release --codename --short)
 
@@ -60,35 +56,41 @@ else
   sudo apt-get -y install libncurses5:i386 libstdc++6:i386 zlib1g:i386
 fi
 
-sudo apt-get -y install ant
+if [[ $lsb_release == "xenial" ]]; then
+  sudo apt-get -y install openjdk-8-jre openjdk-8-jdk
+  sudo update-java-alternatives -s java-1.8.0-openjdk-amd64
+  sudo apt-get -y install ant
+else
+  sudo apt-get -y install ant
 
-# Install openjdk and openjre 7 stuff
-sudo apt-get -y install openjdk-7-jre openjdk-7-jdk
+  # Install openjdk and openjre 7 stuff
+  sudo apt-get -y install openjdk-7-jre openjdk-7-jdk
 
-# Switch version of Java to openjdk 7.
-# Some Java plugins (e.g. for firefox, mozilla) are not required to build, and
-# thus are treated only as warnings. Any errors in updating java alternatives
-# which are not '*-javaplugin.so' will cause errors and stop the script from
-# completing successfully.
-if ! sudo update-java-alternatives -s java-1.7.0-openjdk-amd64 \
-           >& "${TEMPDIR}"/update-java-alternatives.out
-then
-  # Check that there are the expected javaplugin.so errors for the update
-  if grep 'javaplugin.so' "${TEMPDIR}"/update-java-alternatives.out >& \
-      /dev/null
+  # Switch version of Java to openjdk 7.
+  # Some Java plugins (e.g. for firefox, mozilla) are not required to build, and
+  # thus are treated only as warnings. Any errors in updating java alternatives
+  # which are not '*-javaplugin.so' will cause errors and stop the script from
+  # completing successfully.
+  if ! sudo update-java-alternatives -s java-1.7.0-openjdk-amd64 \
+             >& "${TEMPDIR}"/update-java-alternatives.out
   then
-    # Print as warnings all the javaplugin.so errors
-    echo 'WARNING: java-6-sun has no alternatives for the following plugins:'
-    grep 'javaplugin.so' "${TEMPDIR}"/update-java-alternatives.out
-  fi
-  # Check if there are any errors that are not javaplugin.so
-  if grep -v 'javaplugin.so' "${TEMPDIR}"/update-java-alternatives.out \
-      >& /dev/null
-  then
-    # If there are non-javaplugin.so errors, treat as errors and exit
-    echo 'ERRORS: Failed to update alternatives for java-6-sun:'
-    grep -v 'javaplugin.so' "${TEMPDIR}"/update-java-alternatives.out
-    exit 1
+    # Check that there are the expected javaplugin.so errors for the update
+    if grep 'javaplugin.so' "${TEMPDIR}"/update-java-alternatives.out >& \
+        /dev/null
+    then
+      # Print as warnings all the javaplugin.so errors
+      echo 'WARNING: java has no alternatives for the following plugins:'
+      grep 'javaplugin.so' "${TEMPDIR}"/update-java-alternatives.out
+    fi
+    # Check if there are any errors that are not javaplugin.so
+    if grep -v 'javaplugin.so' "${TEMPDIR}"/update-java-alternatives.out \
+        >& /dev/null
+    then
+      # If there are non-javaplugin.so errors, treat as errors and exit
+      echo 'ERRORS: Failed to update alternatives for java:'
+      grep -v 'javaplugin.so' "${TEMPDIR}"/update-java-alternatives.out
+      exit 1
+    fi
   fi
 fi
 

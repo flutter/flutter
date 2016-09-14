@@ -14,10 +14,6 @@ usage() {
   echo "--[no-]syms: enable or disable installation of debugging symbols"
   echo "--lib32: enable installation of 32-bit libraries, e.g. for V8 snapshot"
   echo "--[no-]arm: enable or disable installation of arm cross toolchain"
-  echo "--[no-]chromeos-fonts: enable or disable installation of Chrome OS"\
-       "fonts"
-  echo "--[no-]nacl: enable or disable installation of prerequisites for"\
-       "building standalone NaCl and all its toolchains"
   echo "--no-prompt: silently select standard options/defaults"
   echo "--quick-check: quickly try to determine if dependencies are installed"
   echo "               (this avoids interactive prompts and sudo commands,"
@@ -36,9 +32,8 @@ package_exists() {
 # These default to on because (some) bots need them and it keeps things
 # simple for the bot setup if all bots just run the script in its default
 # mode.  Developers who don't want stuff they don't need installed on their
-# own workstations can pass --no-arm --no-nacl when running the script.
+# own workstations can pass --no-arm when running the script.
 do_inst_arm=1
-do_inst_nacl=1
 
 while test "$1" != ""
 do
@@ -48,10 +43,6 @@ do
   --lib32)                  do_inst_lib32=1;;
   --arm)                    do_inst_arm=1;;
   --no-arm)                 do_inst_arm=0;;
-  --chromeos-fonts)         do_inst_chromeos_fonts=1;;
-  --no-chromeos-fonts)      do_inst_chromeos_fonts=0;;
-  --nacl)                   do_inst_nacl=1;;
-  --no-nacl)                do_inst_nacl=0;;
   --no-prompt)              do_default=1
                             do_quietly="-qq --assume-yes"
     ;;
@@ -74,12 +65,13 @@ fi
 
 distro=$(lsb_release --id --short)
 codename=$(lsb_release --codename --short)
-ubuntu_codenames="(precise|trusty|utopic|vivid)"
+ubuntu_codenames="(precise|trusty|utopic|vivid|xenial)"
 debian_codenames="(stretch)"
 if [ 0 -eq "${do_unsupported-0}" ] && [ 0 -eq "${do_quick_check-0}" ] ; then
   if [[ ! $codename =~ $ubuntu_codenames && ! $codename =~ $debian_codenames ]]; then
     echo "ERROR: Only Ubuntu 12.04 (precise), 14.04 (trusty), " \
-      "14.10 (utopic) and 15.04 (vivid), and Debian Testing (stretch) are currently supported" >&2
+      "14.10 (utopic), 15.04 (vivid), and 16.04 (xenial), " \
+      "and Debian Testing (stretch) are currently supported" >&2
     exit 1
   fi
 
@@ -95,20 +87,9 @@ if [ "x$(id -u)" != x0 ] && [ 0 -eq "${do_quick_check-0}" ]; then
   echo
 fi
 
-# Packages needed for chromeos only
-chromeos_dev_list="libbluetooth-dev libxkbcommon-dev realpath"
-
 # Packages needed for development
-if [[ $distro = Debian ]] ; then
-  # Debian-specific package names
-  dev_list="apache2-bin fonts-indic fonts-lyx"
-else
-  # Ubuntu-specific package names
-  dev_list="apache2.2-bin ttf-indic-fonts xfonts-mathml language-pack-da
-            language-pack-fr language-pack-he language-pack-zh-hant"
-fi
-dev_list="$dev_list bison cdbs curl dpkg-dev elfutils devscripts fakeroot
-          flex fonts-thai-tlwg g++ git-core git-svn gperf libapache2-mod-php5
+dev_list="bison cdbs curl dpkg-dev elfutils devscripts fakeroot
+          flex g++ git-core git-svn gperf
           libasound2-dev libbrlapi-dev libav-tools
           libbz2-dev libcairo2-dev libcap-dev libcups2-dev libcurl4-gnutls-dev
           libdrm-dev libelf-dev libexif-dev libgconf2-dev libglib2.0-dev
@@ -116,20 +97,9 @@ dev_list="$dev_list bison cdbs curl dpkg-dev elfutils devscripts fakeroot
           libnspr4-dev libnss3-dev libpam0g-dev libpci-dev libpulse-dev
           libsctp-dev libspeechd-dev libsqlite3-dev libssl-dev libudev-dev
           libwww-perl libxslt1-dev libxss-dev libxt-dev libxtst-dev openbox
-          patch perl php5-cgi pkg-config python python-cherrypy3 python-crypto
+          patch perl pkg-config python python-cherrypy3 python-crypto
           python-dev python-numpy python-opencv python-openssl python-psutil
-          python-yaml rpm ruby subversion ttf-dejavu-core
-          ttf-kochi-gothic ttf-kochi-mincho wdiff zip
-          $chromeos_dev_list"
-
-# 64-bit systems need a minimum set of 32-bit compat packages for the pre-built
-# NaCl binaries.
-if file /sbin/init | grep -q 'ELF 64-bit'; then
-  dev_list="${dev_list} libc6-i386 lib32gcc1 lib32stdc++6"
-fi
-
-# Run-time libraries required by chromeos only
-chromeos_lib_list="libpulse0 libbz2-1.0"
+          python-yaml rpm ruby subversion wdiff zip"
 
 # Full list of required run-time libraries
 lib_list="libatk1.0-0 libc6 libasound2 libcairo2 libcap2 libcups2 libexpat1
@@ -138,7 +108,7 @@ lib_list="libatk1.0-0 libc6 libasound2 libcairo2 libcap2 libcups2 libexpat1
           libpng12-0 libspeechd2 libstdc++6 libsqlite3-0 libx11-6
           libxau6 libxcb1 libxcomposite1 libxcursor1 libxdamage1 libxdmcp6
           libxext6 libxfixes3 libxi6 libxinerama1 libxrandr2 libxrender1
-          libxtst6 zlib1g $chromeos_lib_list"
+          libxtst6 zlib1g"
 
 # Debugging symbols for all of the run-time libraries
 dbg_list="libatk1.0-dbg libc6-dbg libcairo2-dbg libfontconfig1-dbg
@@ -177,18 +147,6 @@ if [ "x$codename" = "xtrusty" ]; then
               gcc-4.8-multilib-arm-linux-gnueabihf"
 fi
 
-# Packages to build NaCl, its toolchains, and its ports.
-naclports_list="ant autoconf bison cmake gawk intltool xutils-dev xsltproc"
-nacl_list="g++-mingw-w64-i686 lib32z1-dev
-           libasound2:i386 libcap2:i386 libelf-dev:i386 libexif12:i386
-           libfontconfig1:i386 libgconf-2-4:i386 libglib2.0-0:i386 libgpm2:i386
-           libgtk2.0-0:i386 libncurses5:i386 lib32ncurses5-dev
-           libnss3:i386 libpango1.0-0:i386
-           libssl1.0.0:i386 libtinfo-dev libtinfo-dev:i386 libtool
-           libxcomposite1:i386 libxcursor1:i386 libxdamage1:i386 libxi6:i386
-           libxrandr2:i386 libxss1:i386 libxtst6:i386 texinfo xvfb
-           ${naclports_list}"
-
 # Find the proper version of libgbm-dev. We can't just install libgbm-dev as
 # it depends on mesa, and only one version of mesa can exists on the system.
 # Hence we must match the same version or this entire script will fail.
@@ -202,14 +160,8 @@ done
 dev_list="${dev_list} libgbm-dev${mesa_variant}
           libgles2-mesa-dev${mesa_variant} libgl1-mesa-dev${mesa_variant}
           mesa-common-dev${mesa_variant}"
-nacl_list="${nacl_list} libgl1-mesa-glx${mesa_variant}:i386"
 
 # Some package names have changed over time
-if package_exists ttf-mscorefonts-installer; then
-  dev_list="${dev_list} ttf-mscorefonts-installer"
-else
-  dev_list="${dev_list} msttcorefonts"
-fi
 if package_exists libnspr4-dbg; then
   dbg_list="${dbg_list} libnspr4-dbg libnss3-dbg"
   lib_list="${lib_list} libnspr4 libnss3"
@@ -224,10 +176,8 @@ else
 fi
 if package_exists libudev1; then
   dev_list="${dev_list} libudev1"
-  nacl_list="${nacl_list} libudev1:i386"
 else
   dev_list="${dev_list} libudev0"
-  nacl_list="${nacl_list} libudev0:i386"
 fi
 if package_exists libbrlapi0.6; then
   dev_list="${dev_list} libbrlapi0.6"
@@ -327,18 +277,11 @@ else
   arm_list=
 fi
 
-if test "$do_inst_nacl" = "1"; then
-  echo "Including NaCl, NaCl toolchain, NaCl ports dependencies."
-else
-  echo "Skipping NaCl, NaCl toolchain, NaCl ports dependencies."
-  nacl_list=
-fi
-
 # The `sort -r -s -t: -k2` sorts all the :i386 packages to the front, to avoid
 # confusing dpkg-query (crbug.com/446172).
 packages="$(
   echo "${dev_list} ${lib_list} ${dbg_list} ${lib32_list} ${arm_list}"\
-       "${nacl_list}" | tr " " "\n" | sort -u | sort -r -s -t: -k2 | tr "\n" " "
+       | tr " " "\n" | sort -u | sort -r -s -t: -k2 | tr "\n" " "
 )"
 
 if [ 1 -eq "${do_quick_check-0}" ] ; then
@@ -377,7 +320,7 @@ if [ 1 -eq "${do_quick_check-0}" ] ; then
   exit 0
 fi
 
-if test "$do_inst_lib32" = "1" || test "$do_inst_nacl" = "1"; then
+if test "$do_inst_lib32" = "1"; then
   if [[ ! $codename =~ (precise) ]]; then
     sudo dpkg --add-architecture i386
   fi
@@ -424,28 +367,6 @@ else
   exit 100
 fi
 
-# Install the Chrome OS default fonts. This must go after running
-# apt-get, since install-chromeos-fonts depends on curl.
-if test "$do_inst_chromeos_fonts" != "0"; then
-  echo
-  echo "Installing Chrome OS fonts."
-  dir=`echo $0 | sed -r -e 's/\/[^/]+$//'`
-  if ! sudo $dir/linux/install-chromeos-fonts.py; then
-    echo "ERROR: The installation of the Chrome OS default fonts failed."
-    if [ `stat -f -c %T $dir` == "nfs" ]; then
-      echo "The reason is that your repo is installed on a remote file system."
-    else
-      echo "This is expected if your repo is installed on a remote file system."
-    fi
-    echo "It is recommended to install your repo on a local file system."
-    echo "You can skip the installation of the Chrome OS default founts with"
-    echo "the command line option: --no-chromeos-fonts."
-    exit 1
-  fi
-else
-  echo "Skipping installation of Chrome OS fonts."
-fi
-
 # $1 - target name
 # $2 - link name
 create_library_symlink() {
@@ -461,17 +382,3 @@ create_library_symlink() {
     sudo ln -fs $target $linkname
   fi
 }
-
-if test "$do_inst_nacl" = "1"; then
-  echo "Installing symbolic links for NaCl."
-  # naclports needs to cross build python for i386, but libssl1.0.0:i386
-  # only contains libcrypto.so.1.0.0 and not the symlink needed for
-  # linking (libcrypto.so).
-  create_library_symlink /lib/i386-linux-gnu/libcrypto.so.1.0.0 \
-      /usr/lib/i386-linux-gnu/libcrypto.so
-
-  create_library_symlink /lib/i386-linux-gnu/libssl.so.1.0.0 \
-      /usr/lib/i386-linux-gnu/libssl.so
-else
-  echo "Skipping symbolic links for NaCl."
-fi
