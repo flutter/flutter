@@ -4,7 +4,7 @@
 
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:sky_services/flutter/platform/system_chrome.mojom.dart' as mojom;
+import 'package:flutter.services.flutter/platform/system_chrome.mojom.dart' as mojom;
 
 void main() {
   testWidgets('SystemChrome overlay style test', (WidgetTester tester) async {

@@ -5,8 +5,8 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter.services.platform/app_messages.mojom.dart' as mojom;
 import 'package:mojo/core.dart' as core;
-import 'package:sky_services/flutter/platform/app_messages.mojom.dart' as mojom;
 
 import 'shell.dart';
 

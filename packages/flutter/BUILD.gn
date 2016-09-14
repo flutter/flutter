@@ -1,0 +1,24 @@
+# Copyright 2016 The Fuchsia Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//build/dart/dart_package.gni")
+
+dart_package("flutter") {
+  package_name = "flutter"
+
+  source_dir = "lib"
+
+  deps = [
+    "//mojo/dart/packages/mojo",
+    "//mojo/services/asset_bundle/interfaces:interfaces_dart",
+    "//mojo/public/interfaces/network:network_dart",
+    "//apps/network/mojo/services/network/interfaces:interfaces_dart",
+    "//flutter/sky/packages/sky_services",
+    "//third_party/dart-pkg/pub/collection",
+    "//third_party/dart-pkg/pub/crypto",
+    "//third_party/dart-pkg/pub/intl",
+    "//third_party/dart-pkg/pub/meta",
+    "//third_party/dart-pkg/pub/vector_math",
+  ]
+}

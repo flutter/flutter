@@ -6,9 +6,9 @@ import 'dart:ui' as ui show ImageFilter, Picture, SceneBuilder;
 import 'dart:ui' show Offset;
 
 import 'package:flutter/painting.dart';
-import 'package:vector_math/vector_math_64.dart';
 import 'package:meta/meta.dart';
-import 'package:mojo_services/mojo/gfx/composition/scene_token.mojom.dart' as mojom;
+import 'package:mojo.services.gfx.composition.interfaces/scene_token.mojom.dart' as mojom;
+import 'package:vector_math/vector_math_64.dart';
 
 import 'debug.dart';
 

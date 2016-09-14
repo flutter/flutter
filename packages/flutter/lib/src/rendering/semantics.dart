@@ -5,10 +5,10 @@
 import 'dart:math' as math;
 import 'dart:ui' show Rect;
 
+import 'package:flutter.services.semantics/semantics.mojom.dart' as mojom;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:meta/meta.dart';
-import 'package:sky_services/semantics/semantics.mojom.dart' as mojom;
 import 'package:vector_math/vector_math_64.dart';
 
 import 'node.dart';

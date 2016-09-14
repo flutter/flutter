@@ -4,13 +4,13 @@
 
 import 'dart:ui' as ui show window;
 
+import 'package:flutter.services.semantics/semantics.mojom.dart' as mojom;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:meta/meta.dart';
 import 'package:mojo/core.dart' as core;
-import 'package:sky_services/semantics/semantics.mojom.dart' as mojom;
 
 import 'box.dart';
 import 'debug.dart';

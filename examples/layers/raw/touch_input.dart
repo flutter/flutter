@@ -8,9 +8,9 @@
 import 'dart:ui' as ui;
 import 'dart:typed_data';
 
+import 'package:flutter.services.pointer/pointer.mojom.dart';
 import 'package:mojo/bindings.dart' as bindings;
 import 'package:mojo/core.dart' as core;
-import 'package:sky_services/pointer/pointer.mojom.dart';
 
 ui.Color color;
 

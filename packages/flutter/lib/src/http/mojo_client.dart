@@ -6,14 +6,14 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:apps.network.mojo.services.network.interfaces/network_service.mojom.dart' as mojom;
+import 'package:apps.network.mojo.services.network.interfaces/url_loader.mojom.dart' as mojom;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:mojo.public.interfaces.network/http_header.mojom.dart' as mojom;
+import 'package:mojo.public.interfaces.network/url_request.mojom.dart' as mojom;
+import 'package:mojo.public.interfaces.network/url_response.mojom.dart' as mojom;
 import 'package:mojo/core.dart' as mojo;
-import 'package:mojo/mojo/http_header.mojom.dart' as mojom;
-import 'package:mojo/mojo/url_request.mojom.dart' as mojom;
-import 'package:mojo/mojo/url_response.mojom.dart' as mojom;
-import 'package:mojo_services/mojo/network_service.mojom.dart' as mojom;
-import 'package:mojo_services/mojo/url_loader.mojom.dart' as mojom;
 
 import 'response.dart';
 

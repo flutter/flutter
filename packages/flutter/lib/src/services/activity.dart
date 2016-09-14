@@ -4,11 +4,11 @@
 
 import 'dart:ui';
 
-import 'package:sky_services/activity/activity.mojom.dart';
+import 'package:flutter.services.activity/activity.mojom.dart';
 
 import 'shell.dart';
 
-export 'package:sky_services/activity/activity.mojom.dart' show Activity, Intent, ComponentName, StringExtra;
+export 'package:flutter.services.activity/activity.mojom.dart' show Activity, Intent, ComponentName, StringExtra;
 
 
 // Dart wrapper around Activity mojo service available in Flutter on Android.

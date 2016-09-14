@@ -4,11 +4,11 @@
 
 import 'dart:ui' as ui;
 
+import 'package:mojo.public.interfaces.application/service_provider.mojom.dart' as mojom;
+import 'package:mojo.public.interfaces.application/shell.mojom.dart' as mojom;
 import 'package:mojo/application.dart';
 import 'package:mojo/bindings.dart' as bindings;
 import 'package:mojo/core.dart' as core;
-import 'package:mojo/mojo/service_provider.mojom.dart' as mojom;
-import 'package:mojo/mojo/shell.mojom.dart' as mojom;
 
 /// Signature for connecting to services. The generated mojom.dart code has
 /// static functions that match this signature on the interface objects. For

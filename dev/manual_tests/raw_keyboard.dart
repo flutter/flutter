@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-import 'package:sky_services/sky/input_event.mojom.dart' as mojom;
+import 'package:flutter.services.engine/input_event.mojom.dart' as mojom;
 
 GlobalKey _key = new GlobalKey();
 
