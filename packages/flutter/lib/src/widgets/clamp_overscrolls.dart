@@ -25,7 +25,7 @@ class ClampOverscrolls extends InheritedWidget {
   /// The [edge] and [child] arguments must not be null.
   ClampOverscrolls({
     Key key,
-    @required this.edge: ScrollableEdge.none,
+    this.edge: ScrollableEdge.none,
     @required Widget child,
   }) : super(key: key, child: child) {
     assert(edge != null);
