@@ -279,7 +279,6 @@ class _TableElement extends RenderObjectElement {
   @override
   bool detachChild(Element child) {
     _detachedChildren.add(child);
-    deactivateChild(child);
     return true;
   }
 }

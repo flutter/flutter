@@ -511,6 +511,18 @@ class _LazyBlockElement extends RenderObjectElement {
   }
 
   @override
+  void detachChild(Element child) {
+    assert(() {
+      // TODO(ianh): implement detachChild for LazyBlock
+      throw new FlutterError(
+        'LazyBlock does not yet support GlobalKey reparenting of its children.\n'
+        'As a temporary workaround, wrap the child with the GlobalKey in a '
+        'Container or other harmless child.'
+      );
+    });
+  }
+
+  @override
   void mount(Element parent, dynamic newSlot) {
     super.mount(parent, newSlot);
     renderObject
@@ -585,7 +597,7 @@ class _LazyBlockElement extends RenderObjectElement {
   void performRebuild() {
     IndexedWidgetBuilder builder = widget.delegate.buildItem;
     List<Widget> widgets = <Widget>[];
-    for (int i = 0; i < _children.length; ++i) {
+    for (int i = 0; i < _children.length; i += 1) {
       int logicalIndex = _firstChildLogicalIndex + i;
       Widget childWidget = _callBuilder(builder, logicalIndex);
       if (childWidget == null)

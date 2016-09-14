@@ -472,6 +472,12 @@ class RenderObjectToWidgetElement<T extends RenderObject> extends RootRenderObje
   }
 
   @override
+  void detachChild(Element child) {
+    assert(child == _child);
+    _child = null;
+  }
+
+  @override
   void mount(Element parent, dynamic newSlot) {
     assert(parent == null);
     super.mount(parent, newSlot);
