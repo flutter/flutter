@@ -274,8 +274,6 @@ class ScrollableState<T extends Scrollable> extends State<T> {
 
   Simulation _simulation; // if we're flinging, then this is the animation with which we're doing it
   AnimationController _controller;
-  double _contentExtent;
-  double _containerExtent;
 
   @override
   void dispose() {
@@ -287,12 +285,7 @@ class ScrollableState<T extends Scrollable> extends State<T> {
   @override
   void dependenciesChanged() {
     _scrollBehavior = createScrollBehavior();
-    final double updatedOffset = _scrollBehavior.updateExtents(
-      contentExtent: _contentExtent,
-      containerExtent: _containerExtent,
-      scrollOffset: scrollOffset
-    );
-    didUpdateScrollBehavior(updatedOffset);
+    didUpdateScrollBehavior(scrollOffset);
     super.dependenciesChanged();
   }
 
@@ -502,8 +495,6 @@ class ScrollableState<T extends Scrollable> extends State<T> {
   ///     [didUpdateScrollBehavior].
   ///  3. Updating this object's gesture detector with [updateGestureDetector].
   void handleExtentsChanged(double contentExtent, double containerExtent) {
-    _contentExtent = contentExtent;
-    _containerExtent = containerExtent;
     didUpdateScrollBehavior(scrollBehavior.updateExtents(
       contentExtent: contentExtent,
       containerExtent: containerExtent,

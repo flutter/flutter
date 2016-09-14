@@ -80,8 +80,6 @@ void main() {
     expect(delegate, isNotNull);
     expect(delegate.flag, isTrue);
     expect(behavior, new isInstanceOf<BoundedBehavior>());
-    expect(behavior.containerExtent, equals(600.0));
-    expect(behavior.contentExtent, equals(1000.0));
 
     // Same Scrollable, different ScrollConfiguration
     await tester.pumpWidget(
@@ -103,8 +101,5 @@ void main() {
     expect(delegate, isNotNull);
     expect(delegate.flag, isFalse);
     expect(behavior, new isInstanceOf<UnboundedBehavior>());
-    // Regression test for https://github.com/flutter/flutter/issues/5856
-    expect(behavior.containerExtent, equals(600.0));
-    expect(behavior.contentExtent, equals(1000.0));
   });
 }
