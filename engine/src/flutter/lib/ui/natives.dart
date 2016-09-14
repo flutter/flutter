@@ -13,10 +13,28 @@ class _Logger {
   static void _printString(String s) native "Logger_PrintString";
 }
 
+// A service protocol extension to schedule a frame to be rendered into the
+// window.
+Future<developer.ServiceExtensionResponse> _scheduleFrame(
+    String method,
+    Map<String, String> parameters
+    ) async {
+  // Schedule the frame.
+  window.scheduleFrame();
+  // Always succeed.
+  return new developer.ServiceExtensionResponse.result(JSON.encode({
+    'type': 'Success',
+  }));
+}
+
 void _setupHooks() {
   // Wire up timer implementation that is driven by MojoHandleWatcher.
   VMLibraryHooks.eventHandlerSendData = MojoHandleWatcher.timer;
   VMLibraryHooks.timerMillisecondClock = MojoCoreNatives.timerMillisecondClock;
+  assert(() {
+    // In debug mode, register the schedule frame extension.
+    developer.registerExtension('ext.ui.window.scheduleFrame', _scheduleFrame);
+  });
 }
 
 void _scheduleMicrotask(void callback()) native "ScheduleMicrotask";
