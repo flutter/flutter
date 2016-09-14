@@ -72,10 +72,9 @@ void main() {
 
     RenderBox tip = tester.renderObject(find.text('TIP')).parent.parent.parent.parent.parent;
 
-    // See "_applyFloatingPointHack"
     Point tipInGlobal = tip.localToGlobal(tip.size.topLeft(Point.origin));
-    expect(tipInGlobal.x.floor(), 284);
-    expect(tipInGlobal.y.floor(), 20);
+    expect(tipInGlobal.x, 284.5);
+    expect(tipInGlobal.y, 20.0);
   });
 
   testWidgets('Does tooltip end up in the right place - top left', (WidgetTester tester) async {
