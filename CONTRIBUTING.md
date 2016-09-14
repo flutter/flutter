@@ -141,15 +141,16 @@ to the main Flutter repository for detailed instructions.
 
 ### Building all the builds that matter on Linux and Android
 
-The following script will update all the builds that matter if you're developing on Linux and testing on Android:
+The following script will update all the builds that matter if you're developing on Linux and testing on Android and created the `.gclient` file in `~/dev/engine`:
 
 ```bash
 set -ex
 
-cd ~/dev/engine/src
+cd ~/dev/engine/src/flutter
 git fetch upstream
 git rebase upstream/master
 gclient sync
+cd ..
 
 flutter/tools/gn --unoptimized --runtime-mode=debug
 flutter/tools/gn --android --unoptimized --runtime-mode=debug
