@@ -27,9 +27,6 @@ abstract class FlutterCommand extends Command {
   @override
   FlutterCommandRunner get runner => super.runner;
 
-  /// Whether this command requires a (single) Flutter target device to be connected.
-  bool get requiresDevice => false;
-
   /// Whether this command only applies to Android devices.
   bool get androidOnly => false;
 
@@ -129,13 +126,6 @@ abstract class FlutterCommand extends Command {
   /// Perform the command and return a [Future] that completes with
   /// an exit code indicating whether execution was successful.
   Future<int> runCmd() async {
-    // Ensure at least one toolchain is installed and validate devices.
-    if (requiresDevice) {
-      _deviceForCommand = await findTargetDevice(androidOnly: androidOnly);
-      if (_deviceForCommand == null)
-        return 1;
-    }
-
     // Populate the cache. We call this before pub get below so that the sky_engine
     // package is available in the flutter cache for pub to find.
     await cache.updateAll();
@@ -240,11 +230,6 @@ abstract class FlutterCommand extends Command {
 
     return true;
   }
-
-  // This is calculated in run() if the command has [requiresDevice] specified.
-  Device _deviceForCommand;
-
-  Device get deviceForCommand => _deviceForCommand;
 
   ApplicationPackageStore applicationPackages;
 }

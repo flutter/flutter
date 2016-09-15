@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter_tools/src/device.dart';
 import 'package:path/path.dart' as path;
 
 import '../base/utils.dart';
@@ -27,8 +28,15 @@ class ScreenshotCommand extends FlutterCommand {
   @override
   final List<String> aliases = <String>['pic'];
 
+  Device deviceForCommand;
+
   @override
-  bool get requiresDevice => true;
+  Future<int> runCmd() async {
+    deviceForCommand = await findTargetDevice(androidOnly: androidOnly);
+    if (deviceForCommand == null)
+      return 1;
+    return super.runCmd();
+  }
 
   @override
   Future<int> runInProject() async {

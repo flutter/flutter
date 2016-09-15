@@ -29,12 +29,14 @@ class ListenCommand extends RunCommandBase {
   /// Only run once. Used for testing.
   final bool singleRun;
 
-  @override
-  bool get requiresDevice => true;
+  Device deviceForCommand;
 
   @override
   Future<int> runCmd() async {
     if (!commandValidator())
+      return 1;
+    deviceForCommand = await findTargetDevice(androidOnly: androidOnly);
+    if (deviceForCommand == null)
       return 1;
     return super.runCmd();
   }

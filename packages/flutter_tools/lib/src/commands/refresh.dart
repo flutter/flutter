@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter_tools/src/device.dart';
 import 'package:path/path.dart' as path;
 
 import '../android/android_device.dart';
@@ -32,12 +33,14 @@ class RefreshCommand extends FlutterCommand {
   @override
   bool get androidOnly => true;
 
-  @override
-  bool get requiresDevice => true;
+  Device deviceForCommand;
 
   @override
   Future<int> runCmd() async {
     if (!commandValidator())
+      return 1;
+    deviceForCommand = await findTargetDevice(androidOnly: androidOnly);
+    if (deviceForCommand == null)
       return 1;
     return super.runCmd();
   }

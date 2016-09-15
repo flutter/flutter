@@ -83,8 +83,7 @@ class RunCommand extends RunCommandBase {
     argParser.addFlag('benchmark', negatable: false, hide: true);
   }
 
-  @override
-  bool get requiresDevice => true;
+  Device deviceForCommand;
 
   @override
   String get usagePath {
@@ -118,6 +117,9 @@ class RunCommand extends RunCommandBase {
   @override
   Future<int> runCmd() async {
     if (!commandValidator())
+      return 1;
+    deviceForCommand = await findTargetDevice(androidOnly: androidOnly);
+    if (deviceForCommand == null)
       return 1;
     return super.runCmd();
   }

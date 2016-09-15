@@ -17,12 +17,14 @@ class StopCommand extends FlutterCommand {
   @override
   final String description = 'Stop your Flutter app on an attached device.';
 
-  @override
-  bool get requiresDevice => true;
+  Device deviceForCommand;
 
   @override
   Future<int> runCmd() async {
     if (!commandValidator())
+      return 1;
+    deviceForCommand = await findTargetDevice(androidOnly: androidOnly);
+    if (deviceForCommand == null)
       return 1;
     return super.runCmd();
   }
