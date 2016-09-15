@@ -35,6 +35,8 @@ void Rasterizer::Draw(std::unique_ptr<flow::LayerTree> layer_tree,
   layer_tree->Raster(frame);
   canvas->flush();
 
+  framebuffer_.ConvertToCorrectPixelFormatIfNeeded();
+
   framebuffer_.get()->Flush(ftl::MakeRunnable(std::move(callback)));
 }
 

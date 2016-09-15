@@ -88,4 +88,25 @@ void FramebufferSkia::Bind(mojo::InterfaceHandle<mojo::Framebuffer> framebuffer,
       backing_store_info);
 }
 
+void FramebufferSkia::ConvertToCorrectPixelFormatIfNeeded() {
+  if (info_->format == mojo::FramebufferFormat::ARGB_8888) {
+    // we need to convert from RGBA to ARGB
+    SkPixmap bufferPixmap;
+
+    if (surface_->peekPixels(&bufferPixmap)) {
+      uint8_t* buffer = reinterpret_cast<uint8_t*>(bufferPixmap.writable_addr());
+      size_t buffer_size = bufferPixmap.getSafeSize();
+      uint8_t src_r;
+      for (size_t i = 0; i < buffer_size; i++) {
+        src_r = buffer[0];
+        buffer[0] /* A */ = buffer[3];
+        buffer[3] /* B */ = buffer[2];
+        buffer[2] /* G */ = buffer[1];
+        buffer[1] /* R */ = src_r;
+        i +=4;
+      }
+    }
+  }
+}
+
 }  // namespace flutter_content_handler
