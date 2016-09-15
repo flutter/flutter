@@ -153,7 +153,7 @@ class DataCell {
   /// Creates an object to hold the data for a cell in a [DataTable].
   ///
   /// The first argument is the widget to show for the cell, typically
-  /// a [Text] or [DropDownButton] widget; this becomes the [widget]
+  /// a [Text] or [DropdownButton] widget; this becomes the [widget]
   /// property and must not be null.
   ///
   /// If the cell has no data, then a [Text] widget with placeholder
@@ -170,7 +170,7 @@ class DataCell {
 
   /// The data for the row.
   ///
-  /// Typically a [Text] widget or a [DropDownButton] widget.
+  /// Typically a [Text] widget or a [DropdownButton] widget.
   ///
   /// If the cell has no data, then a [Text] widget with placeholder
   /// text should be provided instead, and [placeholder] should be set
@@ -470,7 +470,7 @@ class DataTable extends StatelessWidget {
           data: new IconThemeData(
             color: isLightTheme ? Colors.black54 : Colors.white70
           ),
-          child: new DropDownButtonHideUnderline(child: label)
+          child: new DropdownButtonHideUnderline(child: label)
         )
       )
     );

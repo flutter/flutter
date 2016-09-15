@@ -56,7 +56,7 @@ new FlatButton(
 String dropdownValue;
 
 // Drop down button with string values.
-new DropDownButton<String>(
+new DropdownButton<String>(
   value: dropdownValue,
   onChanged: (String newValue) {
     // null indicates the user didn't select a
@@ -68,7 +68,7 @@ new DropDownButton<String>(
   },
   items: <String>['One', 'Two', 'Free', 'Four']
     .map((String value) {
-      return new DropDownMenuItem<String>(
+      return new DropdownMenuItem<String>(
         value: value,
         child: new Text(value));
     })

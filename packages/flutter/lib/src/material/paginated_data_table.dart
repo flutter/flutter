@@ -307,8 +307,8 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
     if (config.onRowsPerPageChanged != null) {
       List<Widget> availableRowsPerPage = config.availableRowsPerPage
         .where((int value) => value <= _rowCount)
-        .map/*<DropDownMenuItem<int>>*/((int value) {
-          return new DropDownMenuItem<int>(
+        .map/*<DropdownMenuItem<int>>*/((int value) {
+          return new DropdownMenuItem<int>(
             value: value,
             child: new Text('$value')
           );
@@ -316,8 +316,8 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
         .toList();
       footerWidgets.addAll(<Widget>[
         new Text('Rows per page:'),
-        new DropDownButtonHideUnderline(
-          child: new DropDownButton<int>(
+        new DropdownButtonHideUnderline(
+          child: new DropdownButton<int>(
             items: availableRowsPerPage,
             value: config.rowsPerPage,
             onChanged: config.onRowsPerPageChanged,
