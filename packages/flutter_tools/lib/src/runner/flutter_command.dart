@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:args/command_runner.dart';
+import 'package:meta/meta.dart';
 
 import '../application_package.dart';
 import '../build_info.dart';
@@ -128,6 +129,7 @@ abstract class FlutterCommand extends Command {
   /// Subclasses should override this method to perform verification
   /// then call this method to execute the command
   /// rather than calling [runCmd] directly.
+  @mustCallSuper
   Future<int> verifyThenRunCmd() async {
     // Populate the cache. We call this before pub get below so that the sky_engine
     // package is available in the flutter cache for pub to find.

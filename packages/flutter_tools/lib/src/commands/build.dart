@@ -45,6 +45,14 @@ class BuildCommand extends FlutterCommand {
 abstract class BuildSubCommand extends FlutterCommand {
   @override
   @mustCallSuper
+  Future<int> verifyThenRunCmd() async {
+    if (!commandValidator())
+      return 1;
+    return super.verifyThenRunCmd();
+  }
+
+  @override
+  @mustCallSuper
   Future<int> runCmd() async {
     if (isRunningOnBot) {
       File dotPackages = new File('.packages');

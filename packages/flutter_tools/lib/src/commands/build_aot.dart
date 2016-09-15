@@ -42,13 +42,6 @@ class BuildAotCommand extends BuildSubCommand {
   final String description = "Build an ahead-of-time compiled snapshot of your app's Dart code.";
 
   @override
-  Future<int> verifyThenRunCmd() async {
-    if (!commandValidator())
-      return 1;
-    return super.verifyThenRunCmd();
-  }
-
-  @override
   Future<int> runCmd() async {
     await super.runCmd();
     String targetPlatform = argResults['target-platform'];

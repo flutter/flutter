@@ -221,13 +221,6 @@ class BuildApkCommand extends BuildSubCommand {
   }
 
   @override
-  Future<int> verifyThenRunCmd() async {
-    if (!commandValidator())
-      return 1;
-    return super.verifyThenRunCmd();
-  }
-
-  @override
   Future<int> runCmd() async {
     await super.runCmd();
 

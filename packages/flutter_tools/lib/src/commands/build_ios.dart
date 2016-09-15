@@ -38,13 +38,6 @@ class BuildIOSCommand extends BuildSubCommand {
   final String description = 'Build an iOS application bundle (Mac OS X host only).';
 
   @override
-  Future<int> verifyThenRunCmd() async {
-    if (!commandValidator())
-      return 1;
-    return super.verifyThenRunCmd();
-  }
-
-  @override
   Future<int> runCmd() async {
     bool forSimulator = argResults['simulator'];
     defaultBuildMode = forSimulator ? BuildMode.debug : BuildMode.release;
