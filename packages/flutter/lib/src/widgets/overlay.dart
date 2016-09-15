@@ -438,9 +438,10 @@ class _TheatreElement extends RenderObjectElement {
     if (child == _onstage) {
       _onstage = null;
     } else {
+      assert(_offstage.contains(child));
+      assert(!_detachedOffstageChildren.contains(child));
       _detachedOffstageChildren.add(child);
     }
-    deactivateChild(child);
     return true;
   }
 

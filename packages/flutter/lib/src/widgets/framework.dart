@@ -1143,6 +1143,13 @@ class _InactiveElements {
 
   void _unmount(Element element) {
     assert(element._debugLifecycleState == _ElementLifecycle.inactive);
+    assert(() {
+      if (debugPrintGlobalKeyedWidgetLifecycle) {
+        if (element.widget.key is GlobalKey)
+          debugPrint('Discarding $element from inactive elements list.');
+      }
+      return true;
+    });
     element.unmount();
     assert(element._debugLifecycleState == _ElementLifecycle.defunct);
     element.visitChildren((Element child) {
@@ -1720,7 +1727,15 @@ abstract class Element implements BuildContext {
     visitChildren(visitor);
   }
 
-  bool detachChild(Element child) => false;
+  /// Remove the given child.
+  ///
+  /// This updates the child model such that [visitChildren] does not walk that
+  /// child anymore.
+  ///
+  /// The element must have already been deactivated when this is called,
+  /// meaning that its parent should be null.
+  @protected
+  void detachChild(Element child);
 
   /// This method is the core of the system.
   ///
@@ -1868,11 +1883,14 @@ abstract class Element implements BuildContext {
       return null;
     assert(() {
       if (debugPrintGlobalKeyedWidgetLifecycle)
-        debugPrint('Attempting to take $element from ${element._parent ?? "inactive elements list"} to put in $this');
+        debugPrint('Attempting to take $element from ${element._parent ?? "inactive elements list"} to put in $this.');
       return true;
     });
-    if (element._parent != null && !element._parent.detachChild(element))
-      return null;
+    final Element parent = element._parent;
+    if (parent != null) {
+      parent.deactivateChild(element);
+      parent.detachChild(element);
+    }
     assert(element._parent == null);
     owner._inactiveElements.remove(element);
     return element;
@@ -1930,6 +1948,11 @@ abstract class Element implements BuildContext {
   void _activateWithParent(Element parent, dynamic newSlot) {
     assert(_debugLifecycleState == _ElementLifecycle.inactive);
     _parent = parent;
+    assert(() {
+      if (debugPrintGlobalKeyedWidgetLifecycle)
+        debugPrint('Reactivating $this (now child of $_parent).');
+      return true;
+    });
     _updateDepth(_parent.depth);
     _activateRecursively(this);
     attachRenderObject(newSlot);
@@ -1947,11 +1970,6 @@ abstract class Element implements BuildContext {
   /// instead of being unmounted (see [unmount]).
   @mustCallSuper
   void activate() {
-    assert(() {
-      if (debugPrintGlobalKeyedWidgetLifecycle)
-        debugPrint('Reactivating $this (child of $_parent).');
-      return true;
-    });
     assert(_debugLifecycleState == _ElementLifecycle.inactive);
     assert(widget != null);
     assert(owner != null);
@@ -2387,11 +2405,9 @@ abstract class ComponentElement extends BuildableElement {
   }
 
   @override
-  bool detachChild(Element child) {
+  void detachChild(Element child) {
     assert(child == _child);
-    deactivateChild(_child);
     _child = null;
-    return true;
   }
 }
 
@@ -3027,6 +3043,11 @@ class LeafRenderObjectElement extends RenderObjectElement {
   LeafRenderObjectElement(LeafRenderObjectWidget widget): super(widget);
 
   @override
+  void detachChild(Element child) {
+    assert(false);
+  }
+
+  @override
   void insertChildRenderObject(RenderObject child, dynamic slot) {
     assert(false);
   }
@@ -3064,11 +3085,9 @@ class SingleChildRenderObjectElement extends RenderObjectElement {
   }
 
   @override
-  bool detachChild(Element child) {
+  void detachChild(Element child) {
     assert(child == _child);
-    deactivateChild(_child);
     _child = null;
-    return true;
   }
 
   @override
@@ -3157,10 +3176,10 @@ class MultiChildRenderObjectElement extends RenderObjectElement {
   }
 
   @override
-  bool detachChild(Element child) {
+  void detachChild(Element child) {
+    assert(_children.contains(child));
+    assert(!_detachedChildren.contains(child));
     _detachedChildren.add(child);
-    deactivateChild(child);
-    return true;
   }
 
   @override

@@ -70,6 +70,12 @@ class _LayoutBuilderElement extends RenderObjectElement {
   }
 
   @override
+  void detachChild(Element child) {
+    assert(child == _child);
+    _child = null;
+  }
+
+  @override
   void mount(Element parent, dynamic newSlot) {
     super.mount(parent, newSlot); // Creates the renderObject.
     renderObject.callback = _layout;
