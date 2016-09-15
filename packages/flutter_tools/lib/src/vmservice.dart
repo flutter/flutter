@@ -7,6 +7,7 @@ import 'dart:convert' show BASE64;
 import 'dart:io';
 
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
+import 'package:json_rpc_2/error_code.dart' as rpc_error_code;
 import 'package:web_socket_channel/io.dart';
 
 import 'globals.dart';
@@ -766,12 +767,28 @@ class Isolate extends ServiceObjectOwner {
 
   // Flutter extension methods.
 
+  // Invoke a flutter extension method, if the flutter extension is not
+  // available, returns null.
+  Future<Map<String, dynamic>> invokeFlutterExtensionRpcRaw(
+      String method, [Map<String, dynamic> params]) async {
+    try {
+      return await invokeRpcRaw(method, params);
+    } catch (e) {
+      // If an application is not using the framework
+      if (_isMethodNotFoundException(e))
+        return null;
+      rethrow;
+    }
+  }
+
+  // Debug dump extension methods.
+
   Future<Map<String, dynamic>> flutterDebugDumpApp() {
-    return invokeRpcRaw('ext.flutter.debugDumpApp');
+    return invokeFlutterExtensionRpcRaw('ext.flutter.debugDumpApp');
   }
 
   Future<Map<String, dynamic>> flutterDebugDumpRenderTree() {
-    return invokeRpcRaw('ext.flutter.debugDumpRenderTree');
+    return invokeFlutterExtensionRpcRaw('ext.flutter.debugDumpRenderTree');
   }
 
   // Loader page extension methods.
@@ -797,20 +814,36 @@ class Isolate extends ServiceObjectOwner {
     }).catchError((dynamic error) => null);
   }
 
-  /// Causes the application to pick up any changed code.
-  Future<Map<String, dynamic>> flutterReassemble() {
-    return invokeRpcRaw('ext.flutter.reassemble');
+  static bool _isMethodNotFoundException(dynamic e) {
+    return (e is rpc.RpcException) &&
+           (e.code == rpc_error_code.METHOD_NOT_FOUND);
   }
 
-  Future<Map<String, dynamic>> flutterEvictAsset(String assetPath) {
-    return invokeRpcRaw('ext.flutter.evict', <String, dynamic>{
-      'value': assetPath
-    });
+  // Reload related extension methods.
+  Future<Map<String, dynamic>> flutterReassemble() async {
+    return await invokeFlutterExtensionRpcRaw('ext.flutter.reassemble');
   }
 
-  Future<Map<String, dynamic>> flutterExit() {
-    return invokeRpcRaw('ext.flutter.exit').timeout(
-        const Duration(seconds: 2), onTimeout: () => null);
+  Future<bool> flutterFrameworkPresent() async {
+    return (await invokeFlutterExtensionRpcRaw('ext.flutter.frameworkPresent') != null);
+  }
+
+  Future<Map<String, dynamic>> uiWindowScheduleFrame() async {
+    return await invokeFlutterExtensionRpcRaw('ext.ui.window.scheduleFrame');
+  }
+
+  Future<Map<String, dynamic>> flutterEvictAsset(String assetPath) async {
+    return await invokeFlutterExtensionRpcRaw('ext.flutter.evict',
+        <String, dynamic>{
+          'value': assetPath
+        }
+    );
+  }
+
+  // Application control extension methods.
+  Future<Map<String, dynamic>> flutterExit() async {
+    return await invokeFlutterExtensionRpcRaw('ext.flutter.exit').timeout(
+          const Duration(seconds: 2), onTimeout: () => null);
   }
 }
 
