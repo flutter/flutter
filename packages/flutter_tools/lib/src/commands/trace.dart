@@ -46,9 +46,6 @@ class TraceCommand extends FlutterCommand {
     'with --start and later with --stop.';
 
   @override
-  bool get requiresDevice => true;
-
-  @override
   Future<int> runCmd() async {
     if (!commandValidator())
       return 1;
