@@ -53,12 +53,13 @@ void Window::UpdateWindowMetrics(const sky::ViewportMetricsPtr& metrics) {
   DartInvokeField(
       library_.value(), "_updateWindowMetrics",
       {
-          ToDart(metrics->device_pixel_ratio), ToDart(metrics->physical_width),
-          ToDart(metrics->physical_height),
-          ToDart(metrics->physical_padding_top),
-          ToDart(metrics->physical_padding_right),
-          ToDart(metrics->physical_padding_bottom),
-          ToDart(metrics->physical_padding_left),
+          ToDart(metrics->device_pixel_ratio),
+          ToDart(static_cast<double>(metrics->physical_width)),
+          ToDart(static_cast<double>(metrics->physical_height)),
+          ToDart(static_cast<double>(metrics->physical_padding_top)),
+          ToDart(static_cast<double>(metrics->physical_padding_right)),
+          ToDart(static_cast<double>(metrics->physical_padding_bottom)),
+          ToDart(static_cast<double>(metrics->physical_padding_left)),
       });
 }
 
