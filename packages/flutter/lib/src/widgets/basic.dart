@@ -1517,6 +1517,19 @@ class Positioned extends ParentDataWidget<Stack> {
        bottom = null,
        super(key: key, child: child);
 
+  /// Creates a Positioned object with [left], [top], [right], and [bottom] set
+  /// to 0.0 unless a value for them is passed.
+  Positioned.stretch({
+    Key key,
+    Widget child,
+    this.left: 0.0,
+    this.top: 0.0,
+    this.right: 0.0,
+    this.bottom: 0.0
+  }) : width = null,
+       height = null,
+       super(key: key, child: child);
+
   /// The distance that the child's left edge is inset from the left of the stack.
   ///
   /// Only two out of the three horizontal values ([left], [right], [width]) can be
