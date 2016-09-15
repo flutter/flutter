@@ -64,8 +64,8 @@ void main() {
     expect(find.text('Account Balance'), findsNothing);
 
     // drag the drawer out
-    Point left = new Point(0.0, ui.window.size.height / 2.0);
-    Point right = new Point(ui.window.size.width, left.y);
+    Point left = new Point(0.0, ui.window.physicalSize.height / 2.0);
+    Point right = new Point(ui.window.physicalSize.width, left.y);
     TestGesture gesture = await tester.startGesture(left);
     await tester.pump();
     await gesture.moveTo(right);

@@ -40,7 +40,7 @@ abstract class GestureBinding extends BindingBase implements HitTestable, HitTes
       0
     );
     final PointerPacket packet = PointerPacket.deserialize(message);
-    _pendingPointerEvents.addAll(PointerEventConverter.expand(packet.pointers));
+    _pendingPointerEvents.addAll(PointerEventConverter.expand(packet.pointers, ui.window.devicePixelRatio));
     _flushPointerEventQueue();
   }
 

@@ -123,9 +123,10 @@ abstract class RendererBinding extends BindingBase implements SchedulerBinding, 
   /// this to force the display into 800x600 when a test is run on the device
   /// using `flutter run`.
   ViewConfiguration createViewConfiguration() {
+    final double devicePixelRatio = ui.window.devicePixelRatio;
     return new ViewConfiguration(
-      size: ui.window.size,
-      devicePixelRatio: ui.window.devicePixelRatio
+      size: ui.window.physicalSize / devicePixelRatio,
+      devicePixelRatio: devicePixelRatio
     );
   }
 

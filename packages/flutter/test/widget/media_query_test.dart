@@ -20,6 +20,6 @@ void main() {
       )
     );
 
-    expect(size, equals(ui.window.size));
+    expect(size, equals(ui.window.physicalSize / ui.window.devicePixelRatio));
   });
 }

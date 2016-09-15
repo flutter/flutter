@@ -49,7 +49,7 @@ class TextStyle {
   /// The amount of space (in logical pixels) to add at each sequence of white-space (i.e. between each word).
   final double wordSpacing;
 
-  /// The baseline to use for aligning the text.
+  /// The common baseline that should be aligned between this text span and its parent text span, or, for the root text spans, with the line box.
   final TextBaseline textBaseline;
 
   /// The height of this text span, as a multiple of the font size.
@@ -213,6 +213,7 @@ class TextStyle {
       decorationStyle: decorationStyle,
       fontWeight: fontWeight,
       fontStyle: fontStyle,
+      textBaseline: textBaseline,
       fontFamily: fontFamily,
       fontSize: fontSize,
       letterSpacing: letterSpacing,
@@ -225,7 +226,6 @@ class TextStyle {
   ui.ParagraphStyle getParagraphStyle({ TextAlign textAlign }) {
     return new ui.ParagraphStyle(
       textAlign: textAlign,
-      textBaseline: textBaseline,
       fontWeight: fontWeight,
       fontStyle: fontStyle,
       fontFamily: fontFamily,
