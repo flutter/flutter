@@ -343,7 +343,7 @@ class TextStyle {
   int get hashCode => hashValues(hashList(_encoded), _fontFamily, _fontSize, _letterSpacing, _wordSpacing, _height);
 
   String toString() {
-    return 'TextStyle(${_encoded[0]}|'
+    return 'TextStyle('
              'color: ${          _encoded[0] & 0x0002 == 0x0002 ? new Color(_encoded[1])                  : "unspecified"}, '
              'decoration: ${     _encoded[0] & 0x0004 == 0x0004 ? new TextDecoration._(_encoded[2])       : "unspecified"}, '
              'decorationColor: ${_encoded[0] & 0x0008 == 0x0008 ? new Color(_encoded[3])                  : "unspecified"}, '
