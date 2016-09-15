@@ -13,7 +13,7 @@ void _updateWindowMetrics(double devicePixelRatio,
                           double left) {
   window
     .._devicePixelRatio = devicePixelRatio
-    .._size = new Size(width, height)
+    .._physicalSize = new Size(width, height)
     .._padding = new WindowPadding._(
       top: top, right: right, bottom: bottom, left: left);
   if (window.onMetricsChanged != null)

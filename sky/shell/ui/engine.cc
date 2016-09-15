@@ -156,13 +156,6 @@ void Engine::OnLocaleChanged(const mojo::String& language_code,
 
 void Engine::OnPointerPacket(pointer::PointerPacketPtr packet) {
   TRACE_EVENT0("flutter", "Engine::OnPointerPacket");
-
-  // Convert the pointers' x and y coordinates to logical pixels.
-  for (auto it = packet->pointers.begin(); it != packet->pointers.end(); ++it) {
-    (*it)->x /= viewport_metrics_->device_pixel_ratio;
-    (*it)->y /= viewport_metrics_->device_pixel_ratio;
-  }
-
   if (runtime_)
     runtime_->HandlePointerPacket(packet);
 }

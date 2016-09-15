@@ -180,10 +180,10 @@ enum TextDecorationStyle {
 
 // This encoding must match the C++ version of ParagraphBuilder::pushStyle.
 //
-// The encoded array buffer has 7 elements.
+// The encoded array buffer has 8 elements.
 //
 //  - Element 0: A bit field where the ith bit indicates wheter the ith element
-//    has a non-null value. Bits 7 to 11 indicate whether |fontFamily|,
+//    has a non-null value. Bits 8 to 12 indicate whether |fontFamily|,
 //    |fontSize|, |letterSpacing|, |wordSpacing|, and |height| are non-null,
 //    respectively. Bit 0 is unused.
 //
@@ -201,18 +201,21 @@ enum TextDecorationStyle {
 //
 //  - Element 6: The enum index of the |fontStyle|.
 //
+//  - Element 7: The enum index of the |textBaseline|.
+//
 Int32List _encodeTextStyle(Color color,
                            TextDecoration decoration,
                            Color decorationColor,
                            TextDecorationStyle decorationStyle,
                            FontWeight fontWeight,
                            FontStyle fontStyle,
+                           TextBaseline textBaseline,
                            String fontFamily,
                            double fontSize,
                            double letterSpacing,
                            double wordSpacing,
                            double height) {
-  Int32List result = new Int32List(7);
+  Int32List result = new Int32List(8);
   if (color != null) {
     result[0] |= 1 << 1;
     result[1] = color.value;
@@ -237,24 +240,28 @@ Int32List _encodeTextStyle(Color color,
     result[0] |= 1 << 6;
     result[6] = fontStyle.index;
   }
-  if (fontFamily != null) {
+  if (textBaseline != null) {
     result[0] |= 1 << 7;
-    // Passed separately to native.
+    result[7] = textBaseline.index;
   }
-  if (fontSize != null) {
+  if (fontFamily != null) {
     result[0] |= 1 << 8;
     // Passed separately to native.
   }
-  if (letterSpacing != null) {
+  if (fontSize != null) {
     result[0] |= 1 << 9;
     // Passed separately to native.
   }
-  if (wordSpacing != null) {
+  if (letterSpacing != null) {
     result[0] |= 1 << 10;
     // Passed separately to native.
   }
-  if (height != null) {
+  if (wordSpacing != null) {
     result[0] |= 1 << 11;
+    // Passed separately to native.
+  }
+  if (height != null) {
+    result[0] |= 1 << 12;
     // Passed separately to native.
   }
   return result;
@@ -274,6 +281,7 @@ class TextStyle {
   /// * `fontSize`: The size of glyphs (in logical pixels) to use when painting the text.
   /// * `letterSpacing`: The amount of space (in logical pixels) to add between each letter.
   /// * `wordSpacing`: The amount of space (in logical pixels) to add at each sequence of white-space (i.e. between each word).
+  /// * `textBaseline`: The common baseline that should be aligned between this text span and its parent text span, or, for the root text spans, with the line box.
   /// * `height`: The height of this text span, as a multiple of the font size.
   TextStyle({
     Color color,
@@ -282,6 +290,7 @@ class TextStyle {
     TextDecorationStyle decorationStyle,
     FontWeight fontWeight,
     FontStyle fontStyle,
+    TextBaseline textBaseline,
     String fontFamily,
     double fontSize,
     double letterSpacing,
@@ -293,6 +302,7 @@ class TextStyle {
                                    decorationStyle,
                                    fontWeight,
                                    fontStyle,
+                                   textBaseline,
                                    fontFamily,
                                    fontSize,
                                    letterSpacing,
@@ -334,24 +344,25 @@ class TextStyle {
 
   String toString() {
     return 'TextStyle(${_encoded[0]}|'
-             'color: ${          _encoded[0] & 0x002 == 0x002 ? new Color(_encoded[1])                  : "unspecified"}, '
-             'decoration: ${     _encoded[0] & 0x004 == 0x003 ? new TextDecoration._(_encoded[2])       : "unspecified"}, '
-             'decorationColor: ${_encoded[0] & 0x008 == 0x008 ? new Color(_encoded[3])                  : "unspecified"}, '
-             'decorationStyle: ${_encoded[0] & 0x010 == 0x010 ? TextDecorationStyle.values[_encoded[4]] : "unspecified"}, '
-             'fontWeight: ${     _encoded[0] & 0x020 == 0x020 ? FontWeight.values[_encoded[5]]          : "unspecified"}, '
-             'fontStyle: ${      _encoded[0] & 0x040 == 0x040 ? FontStyle.values[_encoded[6]]           : "unspecified"}, '
-             'fontFamily: ${     _encoded[0] & 0x080 == 0x080 ? _fontFamily                             : "unspecified"}, '
-             'fontSize: ${       _encoded[0] & 0x100 == 0x100 ? _fontSize                               : "unspecified"}, '
-             'letterSpacing: ${  _encoded[0] & 0x200 == 0x200 ? "${_letterSpacing}x"                    : "unspecified"}, '
-             'wordSpacing: ${    _encoded[0] & 0x400 == 0x400 ? "${_wordSpacing}x"                      : "unspecified"}, '
-             'height: ${         _encoded[0] & 0x800 == 0x800 ? "${_height}x"                           : "unspecified"}'
+             'color: ${          _encoded[0] & 0x0002 == 0x0002 ? new Color(_encoded[1])                  : "unspecified"}, '
+             'decoration: ${     _encoded[0] & 0x0004 == 0x0004 ? new TextDecoration._(_encoded[2])       : "unspecified"}, '
+             'decorationColor: ${_encoded[0] & 0x0008 == 0x0008 ? new Color(_encoded[3])                  : "unspecified"}, '
+             'decorationStyle: ${_encoded[0] & 0x0010 == 0x0010 ? TextDecorationStyle.values[_encoded[4]] : "unspecified"}, '
+             'fontWeight: ${     _encoded[0] & 0x0020 == 0x0020 ? FontWeight.values[_encoded[5]]          : "unspecified"}, '
+             'fontStyle: ${      _encoded[0] & 0x0040 == 0x0040 ? FontStyle.values[_encoded[6]]           : "unspecified"}, '
+             'textBaseline: ${   _encoded[0] & 0x0080 == 0x0080 ? TextBaseline.values[_encoded[7]]        : "unspecified"}, '
+             'fontFamily: ${     _encoded[0] & 0x0100 == 0x0100 ? _fontFamily                             : "unspecified"}, '
+             'fontSize: ${       _encoded[0] & 0x0200 == 0x0200 ? _fontSize                               : "unspecified"}, '
+             'letterSpacing: ${  _encoded[0] & 0x0400 == 0x0400 ? "${_letterSpacing}x"                    : "unspecified"}, '
+             'wordSpacing: ${    _encoded[0] & 0x0800 == 0x0800 ? "${_wordSpacing}x"                      : "unspecified"}, '
+             'height: ${         _encoded[0] & 0x1000 == 0x1000 ? "${_height}x"                           : "unspecified"}'
            ')';
   }
 }
 
 // This encoding must match the C++ version ParagraphBuilder::build.
 //
-// The encoded array buffer has 3 elements.
+// The encoded array buffer has 4 elements.
 //
 //  - Element 0: A bit field where the ith bit indicates wheter the ith element
 //    has a non-null value. Bit 6 indicates whether |fontFamily| is non-null.
@@ -360,46 +371,39 @@ class TextStyle {
 //
 //  - Element 1: The enum index of the |textAlign|.
 //
-//  - Element 2: The enum index of the |textBaseline|.
+//  - Element 2: The index of the |fontWeight|.
 //
-//  - Element 3: The index of the |fontWeight|.
-//
-//  - Element 4: The enum index of the |fontStyle|.
+//  - Element 3: The enum index of the |fontStyle|.
 //
 Int32List _encodeParagraphStyle(TextAlign textAlign,
-                                TextBaseline textBaseline,
                                 FontWeight fontWeight,
                                 FontStyle fontStyle,
                                 String fontFamily,
                                 double fontSize,
                                 double lineHeight) {
-  Int32List result = new Int32List(5);
+  Int32List result = new Int32List(4);
   if (textAlign != null) {
     result[0] |= 1 << 1;
     result[1] = textAlign.index;
   }
-  if (textBaseline != null) {
-    result[0] |= 1 << 2;
-    result[2] = textBaseline.index;
-  }
   if (fontWeight != null) {
-    result[0] |= 1 << 3;
+    result[0] |= 1 << 2;
     result[3] = fontWeight.index;
   }
   if (fontStyle != null) {
-    result[0] |= 1 << 4;
+    result[0] |= 1 << 3;
     result[4] = fontStyle.index;
   }
   if (fontFamily != null) {
-    result[0] |= 1 << 5;
+    result[0] |= 1 << 4;
     // Passed separately to native.
   }
   if (fontSize != null) {
-    result[0] |= 1 << 6;
+    result[0] |= 1 << 5;
     // Passed separately to native.
   }
   if (lineHeight != null) {
-    result[0] |= 1 << 7;
+    result[0] |= 1 << 6;
     // Passed separately to native.
   }
   return result;
@@ -410,7 +414,6 @@ class ParagraphStyle {
   /// Creates a new ParagraphStyle object.
   ///
   /// * `textAlign`: The alignment of the text within the lines of the paragraph.
-  /// * `textBaseline`: The primary baseline along which different fonts should be aligned.
   /// * `fontWeight`: The typeface thickness to use when painting the text (e.g., bold).
   /// * `fontStyle`: The typeface variant to use when drawing the letters (e.g., italics).
   /// * `fontFamily`: The name of the font to use when painting the text (e.g., Roboto).
@@ -418,14 +421,12 @@ class ParagraphStyle {
   /// * `lineHeight`: The minimum height of the line boxes, as a multiple of the font size.
   ParagraphStyle({
     TextAlign textAlign,
-    TextBaseline textBaseline,
     FontWeight fontWeight,
     FontStyle fontStyle,
     String fontFamily,
     double fontSize,
     double lineHeight
   }) : _encoded = _encodeParagraphStyle(textAlign,
-                                        textBaseline,
                                         fontWeight,
                                         fontStyle,
                                         fontFamily,
@@ -461,13 +462,12 @@ class ParagraphStyle {
 
   String toString() {
     return 'ParagraphStyle('
-             'textAlign: ${   _encoded[0] & 0x002 == 0x002 ? TextAlign.values[_encoded[1]]    : "unspecified"}, '
-             'textBaseline: ${_encoded[0] & 0x004 == 0x004 ? TextBaseline.values[_encoded[2]] : "unspecified"}, '
-             'fontWeight: ${  _encoded[0] & 0x008 == 0x008 ? FontWeight.values[_encoded[3]]   : "unspecified"}, '
-             'fontStyle: ${   _encoded[0] & 0x010 == 0x010 ? FontStyle.values[_encoded[4]]    : "unspecified"}, '
-             'fontFamily: ${  _encoded[0] & 0x020 == 0x020 ? _fontFamily                      : "unspecified"}, '
-             'fontSize: ${    _encoded[0] & 0x040 == 0x040 ? _fontSize                        : "unspecified"}, '
-             'lineHeight: ${  _encoded[0] & 0x080 == 0x080 ? "${_lineHeight}x"                : "unspecified"}'
+             'textAlign: ${   _encoded[0] & 0x02 == 0x02 ? TextAlign.values[_encoded[1]]    : "unspecified"}, '
+             'fontWeight: ${  _encoded[0] & 0x04 == 0x04 ? FontWeight.values[_encoded[2]]   : "unspecified"}, '
+             'fontStyle: ${   _encoded[0] & 0x08 == 0x08 ? FontStyle.values[_encoded[3]]    : "unspecified"}, '
+             'fontFamily: ${  _encoded[0] & 0x10 == 0x10 ? _fontFamily                      : "unspecified"}, '
+             'fontSize: ${    _encoded[0] & 0x20 == 0x20 ? _fontSize                        : "unspecified"}, '
+             'lineHeight: ${  _encoded[0] & 0x40 == 0x40 ? "${_lineHeight}x"                : "unspecified"}'
            ')';
   }
 }
