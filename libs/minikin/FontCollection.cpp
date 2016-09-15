@@ -234,22 +234,24 @@ uint32_t FontCollection::calcCoverageScore(uint32_t ch, uint32_t vs, FontFamily*
     return 1;
 }
 
-// Calculates font scores based on the script matching and primary langauge matching.
+// Calculate font scores based on the script matching, subtag matching and primary langauge matching.
 //
-// If the font's script doesn't support the requested script, the font gets a score of 0. If the
-// font's script supports the requested script and the font has the same primary language as the
-// requested one, the font gets a score of 2. If the font's script supports the requested script
-// but the primary language is different from the requested one, the font gets a score of 1.
+// 1. If only the font's language matches or there is no matches between requested font and
+//    supported font, then the font obtains a score of 0.
+// 2. Without a match in language, considering subtag may change font's EmojiStyle over script,
+//    a match in subtag gets a score of 2 and a match in scripts gains a score of 1.
+// 3. Regarding to two elements matchings, language-and-subtag matching has a score of 4, while
+//    language-and-script obtains a socre of 3 with the same reason above.
 //
 // If two languages in the requested list have the same language score, the font matching with
 // higher priority language gets a higher score. For example, in the case the user requested
 // language list is "ja-Jpan,en-Latn". The score of for the font of "ja-Jpan" gets a higher score
 // than the font of "en-Latn".
 //
-// To achieve the above two conditions, the language score is determined as follows:
-//   LanguageScore = s(0) * 3^(m - 1) + s(1) * 3^(m - 2) + ... + s(m - 2) * 3 + s(m - 1)
+// To achieve score calculation with priorities, the language score is determined as follows:
+//   LanguageScore = s(0) * 5^(m - 1) + s(1) * 5^(m - 2) + ... + s(m - 2) * 5 + s(m - 1)
 // Here, m is the maximum number of languages to be compared, and s(i) is the i-th language's
-// matching score. The possible values of s(i) are 0, 1 and 2.
+// matching score. The possible values of s(i) are 0, 1, 2, 3 and 4.
 uint32_t FontCollection::calcLanguageMatchingScore(
         uint32_t userLangListId, const FontFamily& fontFamily) {
     const FontLanguages& langList = FontLanguageListCache::getById(userLangListId);
@@ -258,7 +260,7 @@ uint32_t FontCollection::calcLanguageMatchingScore(
     const size_t maxCompareNum = std::min(langList.size(), FONT_LANGUAGES_LIMIT);
     uint32_t score = 0;
     for (size_t i = 0; i < maxCompareNum; ++i) {
-        score = score * 3u + langList[i].calcScoreFor(fontLanguages);
+        score = score * 5u + langList[i].calcScoreFor(fontLanguages);
     }
     return score;
 }
