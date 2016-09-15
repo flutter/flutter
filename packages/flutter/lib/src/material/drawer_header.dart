@@ -65,14 +65,15 @@ class DrawerHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
+    final ThemeData theme = Theme.of(context);
     final double statusBarHeight = MediaQuery.of(context).padding.top;
     return new Container(
       height: statusBarHeight + _kDrawerHeaderHeight,
       margin: const EdgeInsets.only(bottom: 8.0),
       decoration: new BoxDecoration(
-        border: const Border(
-          bottom: const BorderSide(
-            color: const Color(0xFFD1D9E1),
+        border: new Border(
+          bottom: new BorderSide(
+            color: theme.dividerColor,
             width: 1.0
           )
         )
@@ -83,7 +84,7 @@ class DrawerHeader extends StatelessWidget {
         duration: duration,
         curve: curve,
         child: child == null ? null : new DefaultTextStyle(
-          style: Theme.of(context).textTheme.body2,
+          style: theme.textTheme.body2,
           child: child
         )
       )
