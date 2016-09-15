@@ -32,7 +32,7 @@ class ScreenshotCommand extends FlutterCommand {
 
   @override
   Future<int> runCmd() async {
-    deviceForCommand = await findTargetDevice(androidOnly: androidOnly);
+    deviceForCommand = await findTargetDevice();
     if (deviceForCommand == null)
       return 1;
     return super.runCmd();

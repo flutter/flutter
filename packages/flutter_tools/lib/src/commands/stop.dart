@@ -23,7 +23,7 @@ class StopCommand extends FlutterCommand {
   Future<int> runCmd() async {
     if (!commandValidator())
       return 1;
-    deviceForCommand = await findTargetDevice(androidOnly: androidOnly);
+    deviceForCommand = await findTargetDevice();
     if (deviceForCommand == null)
       return 1;
     return super.runCmd();

@@ -30,16 +30,13 @@ class RefreshCommand extends FlutterCommand {
     );
   }
 
-  @override
-  bool get androidOnly => true;
-
   Device deviceForCommand;
 
   @override
   Future<int> runCmd() async {
     if (!commandValidator())
       return 1;
-    deviceForCommand = await findTargetDevice(androidOnly: androidOnly);
+    deviceForCommand = await findTargetDevice(androidOnly: true);
     if (deviceForCommand == null)
       return 1;
     return super.runCmd();

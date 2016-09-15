@@ -27,9 +27,6 @@ abstract class FlutterCommand extends Command {
   @override
   FlutterCommandRunner get runner => super.runner;
 
-  /// Whether this command only applies to Android devices.
-  bool get androidOnly => false;
-
   /// Whether this command uses the 'target' option.
   bool _usesTargetOption = false;
 
