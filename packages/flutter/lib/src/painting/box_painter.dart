@@ -16,6 +16,129 @@ import 'image_fit.dart';
 
 export 'edge_insets.dart' show EdgeInsets;
 
+/// The shape to use when rendering a BoxDecoration.
+enum BoxShape {
+  /// An axis-aligned, 2D rectangle. May have rounded corners (described by a
+  /// [BorderRadius]). The edges of the rectangle will match the edges of the box
+  /// into which the [BoxDecoration] is painted.
+  rectangle,
+
+  /// A circle centered in the middle of the box into which the [BoxDecoration]
+  /// is painted. The diameter of the circle is the shortest dimension of the
+  /// box, either the width or the height, such that the circle touches the
+  /// edges of the box.
+  circle,
+}
+
+/// An immutable set of radii for each corner of a rectangle.
+///
+/// Used by [BoxDecoration] when the shape is a [BoxShape.rectangle].
+class BorderRadius {
+  /// Creates a border radius where all radii are [radius].
+  const BorderRadius.all(Radius radius) : this.only(
+    topLeft: radius,
+    topRight: radius,
+    bottomRight: radius,
+    bottomLeft: radius
+  );
+
+  /// Creates a border radius where all radii are [Radius.circular(radius)].
+  BorderRadius.circular(double radius) : this.all(
+    new Radius.circular(radius)
+  );
+
+  /// Creates a vertically symmetric border radius where the top and bottom
+  /// sides of the rectangle have the same radii.
+  const BorderRadius.vertical({
+    Radius top: Radius.zero,
+    Radius bottom: Radius.zero
+  }) : this.only(
+    topLeft: top,
+    topRight: top,
+    bottomRight: bottom,
+    bottomLeft: bottom
+  );
+
+  /// Creates a horizontally symmetrical border radius where the left and right
+  /// sides of the rectangle have the same radii.
+  const BorderRadius.horizontal({
+    Radius left: Radius.zero,
+    Radius right: Radius.zero
+  }) : this.only(
+    topLeft: left,
+    topRight: right,
+    bottomRight: right,
+    bottomLeft: left
+  );
+
+  /// Creates a border radius with only the given non-zero values. The other
+  /// corners will be right angles.
+  const BorderRadius.only({
+    this.topLeft: Radius.zero,
+    this.topRight: Radius.zero,
+    this.bottomRight: Radius.zero,
+    this.bottomLeft: Radius.zero
+  });
+
+  /// A border radius with all zero radii.
+  static const BorderRadius zero = const BorderRadius.all(Radius.zero);
+
+  /// The top-left [Radius].
+  final Radius topLeft;
+  /// The top-right [Radius].
+  final Radius topRight;
+  /// The bottom-right [Radius].
+  final Radius bottomRight;
+  /// The bottom-left [Radius].
+  final Radius bottomLeft;
+
+  /// Linearly interpolates between two [BorderRadius] objects.
+  ///
+  /// If either is null, this function interpolates from [BorderRadius.zero].
+  static BorderRadius lerp(BorderRadius a, BorderRadius b, double t) {
+    if (a == null && b == null)
+      return null;
+    return new BorderRadius.only(
+      topLeft: Radius.lerp(a.topLeft, b.topLeft, t),
+      topRight: Radius.lerp(a.topRight, b.topRight, t),
+      bottomRight: Radius.lerp(a.bottomRight, b.bottomRight, t),
+      bottomLeft: Radius.lerp(a.bottomLeft, b.bottomLeft, t)
+    );
+  }
+
+  /// Creates a [RRect] from the current border radius and a [Rect].
+  RRect toRRect(Rect rect) {
+    return new RRect.fromRectAndCorners(
+      rect,
+      topLeft: topLeft,
+      topRight: topRight,
+      bottomRight: bottomRight,
+      bottomLeft: bottomLeft
+    );
+  }
+
+  @override
+  bool operator ==(dynamic other) {
+    if (identical(this, other))
+      return true;
+    if (other is! BorderRadius)
+      return false;
+    final BorderRadius typedOther = other;
+    return topLeft == typedOther.topLeft &&
+           topRight == typedOther.topRight &&
+           bottomRight == typedOther.bottomRight &&
+           bottomLeft == typedOther.bottomLeft;
+  }
+
+  @override
+  int get hashCode => hashValues(topLeft, topRight, bottomRight, bottomLeft);
+
+  @override
+  String toString() {
+    return 'BorderRadius($topLeft, $topRight, $bottomRight, $bottomLeft)';
+  }
+}
+
 /// The style of line to draw for a [BorderSide] in a [Border].
 enum BorderStyle {
   /// Skip the border.
@@ -898,128 +1021,6 @@ class BackgroundImage {
 
   @override
   String toString() => 'BackgroundImage($image, $fit, $repeat)';
-}
-
-/// The shape to use when rendering a BoxDecoration.
-enum BoxShape {
-  /// An axis-aligned, 2D rectangle. May have rounded corners. The edges of the
-  /// rectangle will match the edges of the box into which the BoxDecoration is
-  /// painted.
-  rectangle,
-
-  /// A circle centered in the middle of the box into which the BoxDecoration is
-  /// painted. The diameter of the circle is the shortest dimension of the box,
-  /// either the width or the height, such that the circle touches the edges of
-  /// the box.
-  circle
-}
-
-/// An immutable set of radii for each corner of a rectangle. Only used with
-/// [BoxShape.rectangle].
-class BorderRadius {
-  /// Creates a border radius where all radii are [radius].
-  const BorderRadius.all(Radius radius) : this.only(
-    topLeft: radius,
-    topRight: radius,
-    bottomRight: radius,
-    bottomLeft: radius
-  );
-
-  /// Creates a border radius where all radii are [Radius.circular(radius)].
-  BorderRadius.circular(double radius) : this.all(
-    new Radius.circular(radius)
-  );
-
-  /// Creates a vertically symmetric border radius where the top and bottom
-  /// sides of the rectangle have the same radii.
-  const BorderRadius.vertical({
-    Radius top: Radius.zero,
-    Radius bottom: Radius.zero
-  }) : this.only(
-    topLeft: top,
-    topRight: top,
-    bottomRight: bottom,
-    bottomLeft: bottom
-  );
-
-  /// Creates a horizontally symmetrical border radius where the left and right
-  /// sides of the rectangle have the same radii.
-  const BorderRadius.horizontal({
-    Radius left: Radius.zero,
-    Radius right: Radius.zero
-  }) : this.only(
-    topLeft: left,
-    topRight: right,
-    bottomRight: right,
-    bottomLeft: left
-  );
-
-  /// Creates a border radius with only the given non-zero values. The other
-  /// corners will be right angles.
-  const BorderRadius.only({
-    this.topLeft: Radius.zero,
-    this.topRight: Radius.zero,
-    this.bottomRight: Radius.zero,
-    this.bottomLeft: Radius.zero
-  });
-
-  /// A border radius with all zero radii.
-  static const BorderRadius zero = const BorderRadius.all(Radius.zero);
-
-  /// The top-left [Radius].
-  final Radius topLeft;
-  /// The top-right [Radius].
-  final Radius topRight;
-  /// The bottom-right [Radius].
-  final Radius bottomRight;
-  /// The bottom-left [Radius].
-  final Radius bottomLeft;
-
-  /// Linearly interpolates between two [BorderRadius] objects.
-  ///
-  /// If either is null, this function interpolates from [BorderRadius.zero].
-  static BorderRadius lerp(BorderRadius a, BorderRadius b, double t) {
-    if (a == null && b == null)
-      return null;
-    return new BorderRadius.only(
-      topLeft: Radius.lerp(a.topLeft, b.topLeft, t),
-      topRight: Radius.lerp(a.topRight, b.topRight, t),
-      bottomRight: Radius.lerp(a.bottomRight, b.bottomRight, t),
-      bottomLeft: Radius.lerp(a.bottomLeft, b.bottomLeft, t)
-    );
-  }
-
-  /// Creates a [RRect] from the current border radius and a [Rect].
-  RRect toRRect(Rect rect) {
-    return new RRect.fromRectAndCorners(
-      rect,
-      topLeft: topLeft,
-      topRight: topRight,
-      bottomRight: bottomRight,
-      bottomLeft: bottomLeft
-    );
-  }
-
-  @override
-  bool operator ==(dynamic other) {
-    if (identical(this, other))
-      return true;
-    if (other is! BorderRadius)
-      return false;
-    final BorderRadius typedOther = other;
-    return topLeft == typedOther.topLeft &&
-           topRight == typedOther.topRight &&
-           bottomRight == typedOther.bottomRight &&
-           bottomLeft == typedOther.bottomLeft;
-  }
-
-  @override
-  int get hashCode => hashValues(topLeft, topRight, bottomRight, bottomLeft);
-
-  @override
-  String toString() {
-    return 'BorderRadius($topLeft, $topRight, $bottomRight, $bottomLeft)';
-  }
 }
 
 /// An immutable description of how to paint a box.
