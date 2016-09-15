@@ -147,7 +147,7 @@ void ParagraphBuilder::pushStyle(tonic::Int32List& encoded,
                                  double letterSpacing,
                                  double wordSpacing,
                                  double height) {
-  FTL_DCHECK(encoded.num_elements() == 7);
+  FTL_DCHECK(encoded.num_elements() == 8);
   RefPtr<RenderStyle> style = RenderStyle::create();
   style->inheritFrom(m_currentRenderObject->style());
 
@@ -241,7 +241,7 @@ ftl::RefPtr<Paragraph> ParagraphBuilder::build(tonic::Int32List& encoded,
                                                const std::string& fontFamily,
                                                double fontSize,
                                                double lineHeight) {
-  FTL_DCHECK(encoded.num_elements() == 5);
+  FTL_DCHECK(encoded.num_elements() == 4);
   int32_t mask = encoded[0];
 
   if (mask) {
