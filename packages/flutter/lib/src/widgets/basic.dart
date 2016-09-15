@@ -20,7 +20,7 @@ export 'package:flutter/rendering.dart' show
     CustomClipper,
     CustomPainter,
     FixedColumnCountGridDelegate,
-    FlexDirection,
+    Axis,
     FlowDelegate,
     FlowPaintingContext,
     FractionalOffsetTween,
@@ -1823,7 +1823,7 @@ class Flex extends MultiChildRenderObjectWidget {
   /// [CrossAxisAlignment.baseline], then [textBaseline] must not be null.
   Flex({
     Key key,
-    this.direction: FlexDirection.horizontal,
+    this.direction: Axis.horizontal,
     this.mainAxisAlignment: MainAxisAlignment.start,
     this.mainAxisSize: MainAxisSize.max,
     this.crossAxisAlignment: CrossAxisAlignment.center,
@@ -1838,7 +1838,7 @@ class Flex extends MultiChildRenderObjectWidget {
   }
 
   /// The direction to use as the main axis.
-  final FlexDirection direction;
+  final Axis direction;
 
   /// How the children should be placed along the main axis.
   final MainAxisAlignment mainAxisAlignment;
@@ -1902,7 +1902,7 @@ class Row extends Flex {
   }) : super(
     children: children,
     key: key,
-    direction: FlexDirection.horizontal,
+    direction: Axis.horizontal,
     mainAxisAlignment: mainAxisAlignment,
     mainAxisSize: mainAxisSize,
     crossAxisAlignment: crossAxisAlignment,
@@ -1930,7 +1930,7 @@ class Column extends Flex {
   }) : super(
     children: children,
     key: key,
-    direction: FlexDirection.vertical,
+    direction: Axis.vertical,
     mainAxisAlignment: mainAxisAlignment,
     mainAxisSize: mainAxisSize,
     crossAxisAlignment: crossAxisAlignment,
