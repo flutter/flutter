@@ -27,9 +27,9 @@ import 'virtual_viewport.dart';
 ///
 /// See also:
 ///
-///  * [ScrollableLazyList]
-///  * [LazyBlock]
-///  * [ScrollableViewport]
+///  * [ScrollableLazyList].
+///  * [LazyBlock].
+///  * [ScrollableViewport].
 class ScrollableList extends StatelessWidget {
   /// Creats a scrollable list of children that have equal size.
   ///
@@ -377,9 +377,9 @@ class _VirtualListViewportElement extends VirtualViewportElement {
 ///
 /// See also:
 ///
-///  * [LazyListViewport]
-///  * [LazyBlockViewport]
-///  * [GridViewport]
+///  * [LazyListViewport].
+///  * [LazyBlockViewport].
+///  * [GridViewport].
 class ListViewport extends _VirtualListViewport with VirtualViewportFromIterable {
   /// Creates a virtual viewport onto a list of equally sized children.
   ///
@@ -420,8 +420,8 @@ class ListViewport extends _VirtualListViewport with VirtualViewportFromIterable
 ///
 /// See also:
 ///
-///  * [ScrollableList]
-///  * [LazyBlock]
+///  * [ScrollableList].
+///  * [LazyBlock].
 class ScrollableLazyList extends StatelessWidget {
   /// Creates an infinite scrollable list of children that have equal size.
   ///
@@ -579,8 +579,8 @@ class ScrollableLazyList extends StatelessWidget {
 ///
 /// See also:
 ///
-///  * [ListViewport]
-///  * [LazyBlockViewport]
+///  * [ListViewport].
+///  * [LazyBlockViewport].
 class LazyListViewport extends _VirtualListViewport with VirtualViewportFromBuilder {
   /// Creates a virtual viewport onto an extremely large or infinite list of equally sized children.
   ///

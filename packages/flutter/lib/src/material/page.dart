@@ -76,16 +76,6 @@ class _CupertinoPageTransition extends AnimatedWidget {
   }
 }
 
-class AnimationMean extends CompoundAnimation<double> {
-  AnimationMean({
-    Animation<double> left,
-    Animation<double> right,
-  }) : super(first: left, next: right);
-
-  @override
-  double get value => (first.value + next.value) / 2.0;
-}
-
 // Custom curve for iOS page transitions.
 class _CupertinoTransitionCurve extends Curve {
   _CupertinoTransitionCurve(this.curve);
@@ -204,21 +194,21 @@ class MaterialPageRoute<T> extends PageRoute<T> {
 
   @override
   void dispose() {
+    _backGestureController?.dispose();
     super.dispose();
-    backGestureController?.dispose();
   }
 
-  _CupertinoBackGestureController backGestureController;
+  _CupertinoBackGestureController _backGestureController;
 
   @override
   NavigationGestureController startPopGesture(NavigatorState navigator) {
-    assert(backGestureController == null);
-    backGestureController = new _CupertinoBackGestureController(
+    assert(_backGestureController == null);
+    _backGestureController = new _CupertinoBackGestureController(
       navigator: navigator,
       controller: controller,
-      onDisposed: () { backGestureController = null; }
+      onDisposed: () { _backGestureController = null; }
     );
-    return backGestureController;
+    return _backGestureController;
   }
 
   @override

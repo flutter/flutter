@@ -205,8 +205,8 @@ class BackdropFilter extends SingleChildRenderObjectWidget {
 ///
 /// See also:
 ///
-///  * [CustomPainter]
-///  * [Canvas]
+///  * [CustomPainter].
+///  * [Canvas].
 class CustomPaint extends SingleChildRenderObjectWidget {
   /// Creates a widget that delegates its painting.
   CustomPaint({ Key key, this.painter, this.foregroundPainter, Widget child })
@@ -540,11 +540,11 @@ class Padding extends SingleChildRenderObjectWidget {
 ///
 /// See also:
 ///
-///  * [CustomSingleChildLayout]
-///  * [Center] (which is the same as [Align] but with the [alignment] always
-///    set to [FractionalOffset.center])
-///  * [FractionallySizedBox] (which sizes its child based on a fraction of its own
-///    size and positions the child according to a [FractionalOffset] value)
+///  * [CustomSingleChildLayout].
+///  * [Center], which is the same as [Align] but with the [alignment] always
+///    set to [FractionalOffset.center].
+///  * [FractionallySizedBox], which sizes its child based on a fraction of its own
+///    size and positions the child according to a [FractionalOffset] value.
 class Align extends SingleChildRenderObjectWidget {
   /// Creates an alignment widget.
   ///

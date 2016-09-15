@@ -797,7 +797,7 @@ enum ScrollNotificationKind {
 ///
 /// See also:
 ///
-/// * [NotificationListener]
+/// * [NotificationListener].
 class ScrollNotification extends Notification {
   /// Creates a notification about scrolling.
   ScrollNotification({ this.scrollable, this.kind, dynamic details }) : _details = details {
@@ -991,9 +991,9 @@ class ScrollableViewport extends StatelessWidget {
 ///
 /// See also:
 ///
-///  * [ScrollableViewport], if you only have one child
-///  * [ScrollableList], if all your children are the same height
-///  * [LazyBlock], if you have children with varying heights
+///  * [ScrollableViewport], if you only have one child.
+///  * [ScrollableList], if all your children are the same height.
+///  * [LazyBlock], if you have children with varying heights.
 class Block extends StatelessWidget {
   /// Creates a scrollable array of children.
   Block({

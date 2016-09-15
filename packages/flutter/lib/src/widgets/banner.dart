@@ -128,7 +128,7 @@ class BannerPainter extends CustomPainter {
 ///
 /// See also:
 ///
-///  * [CheckedModeBanner]
+///  * [CheckedModeBanner].
 class Banner extends StatelessWidget {
   /// Creates a banner.
   ///

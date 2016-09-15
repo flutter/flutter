@@ -13,7 +13,7 @@ import 'package:meta/meta.dart';
 // vertical or horizontal.
 const double _kOnAxisDelta = 2.0;
 
-/// A Tween that animates a point along a circular arc.
+/// A [Tween] that animates a [Point] along a circular arc.
 ///
 /// The arc's radius is related to the bounding box that contains the [begin]
 /// and [end] points. If the bounding box is taller than it is wide, then the
@@ -21,14 +21,23 @@ const double _kOnAxisDelta = 2.0;
 /// Otherwise the center of the circle will be aligned with the begin point.
 /// The arc's sweep is always less than or equal to 90 degrees.
 ///
+/// Unlike those of most Tweens, the [begin] and [end] members of a
+/// [MaterialPointArcTween] are immutable.
+///
 /// See also:
 ///
 /// * [MaterialRectArcTween]
 class MaterialPointArcTween extends Tween<Point> {
+  /// Creates a [Tween] for animating [Point]s along a circular arc.
+  ///
+  /// The [begin] and [end] points are required, cannot be null, and are
+  /// immutable.
   MaterialPointArcTween({
     @required Point begin,
     @required Point end
   }) : super(begin: begin, end: end) {
+    assert(begin != null);
+    assert(end != null);
     // An explanation with a diagram can be found at https://goo.gl/vMSdRg
     final Offset delta = end - begin;
     final double deltaX = delta.dx.abs();
@@ -151,20 +160,29 @@ const List<_Diagonal> _allDiagonals = const <_Diagonal>[
   const _Diagonal(_CornerId.bottomLeft, _CornerId.topRight),
 ];
 
-/// A Tween that animates a rectangle from [begin] to [end].
+/// A [Tween] that animates a [Rect] from [begin] to [end].
 ///
 /// The rectangle corners whose diagonal is closest to the overall direction of
 /// the animation follow arcs defined with [MaterialPointArcTween].
 ///
+/// Unlike those of most Tweens, the [begin] and [end] members of a
+/// [MaterialPointArcTween] are immutable.
+///
 /// See also:
 ///
-/// * [RectTween] (linear rectangle interpolation)
-/// * [MaterialPointArcTween]
+/// * [MaterialPointArcTween]. the analogue for [Point] interporation.
+/// * [RectTween], which does a linear rectangle interpolation.
 class MaterialRectArcTween extends RectTween {
+  /// Creates a [Tween] for animating [Rect]s along a circular arc.
+  ///
+  /// The [begin] and [end] points are required, cannot be null, and are
+  /// immutable.
   MaterialRectArcTween({
     @required Rect begin,
     @required Rect end
   }) : super(begin: begin, end: end) {
+    assert(begin != null);
+    assert(end != null);
     final Offset centersVector = end.center - begin.center;
     _diagonal = maxBy(_allDiagonals, (_Diagonal d) => _diagonalSupport(centersVector, d));
     _beginArc = new MaterialPointArcTween(
