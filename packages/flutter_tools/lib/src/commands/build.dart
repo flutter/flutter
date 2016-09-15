@@ -32,6 +32,13 @@ class BuildCommand extends FlutterCommand {
   final String description = 'Flutter build commands.';
 
   @override
+  Future<int> runCmd() async {
+    if (!commandValidator())
+      return 1;
+    return super.runCmd();
+  }
+
+  @override
   Future<int> runInProject() => new Future<int>.value(0);
 }
 
@@ -64,6 +71,13 @@ class BuildCleanCommand extends FlutterCommand {
 
   @override
   final String description = 'Delete the build/ directory.';
+
+  @override
+  Future<int> runCmd() async {
+    if (!commandValidator())
+      return 1;
+    return super.runCmd();
+  }
 
   @override
   Future<int> runInProject() async {

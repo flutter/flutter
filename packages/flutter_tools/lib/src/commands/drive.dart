@@ -86,6 +86,13 @@ class DriveCommand extends RunCommandBase {
   int get debugPort => int.parse(argResults['debug-port']);
 
   @override
+  Future<int> runCmd() async {
+    if (!commandValidator())
+      return 1;
+    return super.runCmd();
+  }
+
+  @override
   Future<int> runInProject() async {
     String testFile = _getTestFile();
     if (testFile == null) {

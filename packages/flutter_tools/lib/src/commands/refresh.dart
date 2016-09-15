@@ -36,6 +36,13 @@ class RefreshCommand extends FlutterCommand {
   bool get requiresDevice => true;
 
   @override
+  Future<int> runCmd() async {
+    if (!commandValidator())
+      return 1;
+    return super.runCmd();
+  }
+
+  @override
   Future<int> runInProject() async {
     Directory tempDir = await Directory.systemTemp.createTemp('flutter_tools');
     try {

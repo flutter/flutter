@@ -25,6 +25,13 @@ class PackagesCommand extends FlutterCommand {
   final String description = 'Commands for managing Flutter packages.';
 
   @override
+  Future<int> runCmd() async {
+    if (!commandValidator())
+      return 1;
+    return super.runCmd();
+  }
+
+  @override
   Future<int> runInProject() => new Future<int>.value(0);
 }
 
@@ -40,9 +47,6 @@ class PackagesGetCommand extends FlutterCommand {
   @override
   String get description =>
       (upgrade ? 'Upgrade' : 'Get') + ' packages in a Flutter project.';
-
-  @override
-  bool get requiresProjectRoot => false;
 
   @override
   String get invocation =>

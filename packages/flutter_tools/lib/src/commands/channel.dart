@@ -20,9 +20,6 @@ class ChannelCommand extends FlutterCommand {
   String get invocation => '${runner.executableName} $name [<channel-name>]';
 
   @override
-  bool get requiresProjectRoot => false;
-
-  @override
   Future<int> runInProject() async {
     switch (argResults.rest.length) {
       case 0:

@@ -38,9 +38,6 @@ class DaemonCommand extends FlutterCommand {
   final String description = 'Run a persistent, JSON-RPC based server to communicate with devices.';
 
   @override
-  bool get requiresProjectRoot => false;
-
-  @override
   final bool hidden;
 
   @override

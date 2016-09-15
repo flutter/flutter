@@ -21,6 +21,13 @@ class InstallCommand extends FlutterCommand {
   bool get requiresDevice => true;
 
   @override
+  Future<int> runCmd() async {
+    if (!commandValidator())
+      return 1;
+    return super.runCmd();
+  }
+
+  @override
   Future<int> runInProject() async {
     Device device = deviceForCommand;
     ApplicationPackage package = applicationPackages.getPackageForPlatform(device.platform);

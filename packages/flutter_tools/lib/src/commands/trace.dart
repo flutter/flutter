@@ -49,6 +49,13 @@ class TraceCommand extends FlutterCommand {
   bool get requiresDevice => true;
 
   @override
+  Future<int> runCmd() async {
+    if (!commandValidator())
+      return 1;
+    return super.runCmd();
+  }
+
+  @override
   Future<int> runInProject() async {
     int observatoryPort = int.parse(argResults['debug-port']);
 

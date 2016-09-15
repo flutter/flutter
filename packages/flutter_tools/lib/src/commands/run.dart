@@ -116,6 +116,13 @@ class RunCommand extends RunCommandBase {
   }
 
   @override
+  Future<int> runCmd() async {
+    if (!commandValidator())
+      return 1;
+    return super.runCmd();
+  }
+
+  @override
   Future<int> runInProject() async {
     int debugPort;
 

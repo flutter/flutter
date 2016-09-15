@@ -17,9 +17,6 @@ class DevicesCommand extends FlutterCommand {
   final String description = 'List all connected devices.';
 
   @override
-  bool get requiresProjectRoot => false;
-
-  @override
   Future<int> runInProject() async {
     if (!doctor.canListAnything) {
       printError("Unable to locate a development device; please run 'flutter doctor' for "

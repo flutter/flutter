@@ -31,9 +31,6 @@ class SetupCommand extends FlutterCommand {
   final bool hidden;
 
   @override
-  bool get requiresProjectRoot => false;
-
-  @override
   Future<int> runInProject() async {
     printStatus('Running Flutter setup...');
 

@@ -42,9 +42,6 @@ class RunMojoCommand extends FlutterCommand {
   @override
   final bool hidden;
 
-  @override
-  bool get requiresProjectRoot => false;
-
   // TODO(abarth): Why not use path.absolute?
   String _makePathAbsolute(String relativePath) {
     File file = new File(relativePath);

@@ -27,9 +27,6 @@ abstract class FlutterCommand extends Command {
   @override
   FlutterCommandRunner get runner => super.runner;
 
-  /// Whether this command needs to be run from the root of a project.
-  bool get requiresProjectRoot => true;
-
   /// Whether this command requires a (single) Flutter target device to be connected.
   bool get requiresDevice => false;
 
@@ -132,9 +129,6 @@ abstract class FlutterCommand extends Command {
   /// Perform the command and return a [Future] that completes with
   /// an exit code indicating whether execution was successful.
   Future<int> runCmd() async {
-    if (requiresProjectRoot && !commandValidator())
-      return 1;
-
     // Ensure at least one toolchain is installed and validate devices.
     if (requiresDevice) {
       _deviceForCommand = await findTargetDevice(androidOnly: androidOnly);

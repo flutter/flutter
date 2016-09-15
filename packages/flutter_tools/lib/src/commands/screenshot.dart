@@ -28,9 +28,6 @@ class ScreenshotCommand extends FlutterCommand {
   final List<String> aliases = <String>['pic'];
 
   @override
-  bool get requiresProjectRoot => false;
-
-  @override
   bool get requiresDevice => true;
 
   @override

@@ -21,6 +21,13 @@ class StopCommand extends FlutterCommand {
   bool get requiresDevice => true;
 
   @override
+  Future<int> runCmd() async {
+    if (!commandValidator())
+      return 1;
+    return super.runCmd();
+  }
+
+  @override
   Future<int> runInProject() async {
     Device device = deviceForCommand;
     ApplicationPackage app = applicationPackages.getPackageForPlatform(device.platform);

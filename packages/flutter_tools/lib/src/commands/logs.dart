@@ -26,9 +26,6 @@ class LogsCommand extends FlutterCommand {
   final String description = 'Show log output for running Flutter apps.';
 
   @override
-  bool get requiresProjectRoot => false;
-
-  @override
   bool get requiresDevice => true;
 
   @override
