@@ -38,8 +38,8 @@ dependencies:
   # precisely.
   test: 0.12.15+4
 
-  # Pinned in flutter_test as well.
-  analyzer: 0.28.2-alpha.0
+  # Version from the vended Dart SDK as defined in `dependency_overrides`.
+  analyzer: any
 
 dev_dependencies:
   mockito: ^1.0.0
@@ -47,3 +47,7 @@ dev_dependencies:
 # Exclude this package from the hosted API docs.
 dartdoc:
   nodoc: true
+
+dependency_overrides:
+  analyzer:
+    path: ../../bin/cache/dart-sdk/lib/analyzer
