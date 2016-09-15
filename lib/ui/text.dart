@@ -388,11 +388,11 @@ Int32List _encodeParagraphStyle(TextAlign textAlign,
   }
   if (fontWeight != null) {
     result[0] |= 1 << 2;
-    result[3] = fontWeight.index;
+    result[2] = fontWeight.index;
   }
   if (fontStyle != null) {
     result[0] |= 1 << 3;
-    result[4] = fontStyle.index;
+    result[3] = fontStyle.index;
   }
   if (fontFamily != null) {
     result[0] |= 1 << 4;
