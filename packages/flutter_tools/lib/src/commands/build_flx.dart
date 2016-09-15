@@ -38,15 +38,15 @@ class BuildFlxCommand extends BuildSubCommand {
     'they are used by some Flutter Android and iOS runtimes.';
 
   @override
-  Future<int> runCmd() async {
+  Future<int> verifyThenRunCmd() async {
     if (!commandValidator())
       return 1;
-    return super.runCmd();
+    return super.verifyThenRunCmd();
   }
 
   @override
-  Future<int> runInProject() async {
-    await super.runInProject();
+  Future<int> runCmd() async {
+    await super.runCmd();
     String outputPath = argResults['output-file'];
 
     return await build(

@@ -41,7 +41,7 @@ class DaemonCommand extends FlutterCommand {
   final bool hidden;
 
   @override
-  Future<int> runInProject() {
+  Future<int> runCmd() {
     printStatus('Starting device daemon...');
 
     AppContext appContext = new AppContext();

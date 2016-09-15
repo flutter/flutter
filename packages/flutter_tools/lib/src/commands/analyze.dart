@@ -60,7 +60,7 @@ class AnalyzeCommand extends FlutterCommand {
   }
 
   @override
-  Future<int> runInProject() => argResults['watch'] ? _analyzeWatch() : _analyzeOnce();
+  Future<int> runCmd() => argResults['watch'] ? _analyzeWatch() : _analyzeOnce();
 
   List<String> flutterRootComponents;
   bool isFlutterLibrary(String filename) {

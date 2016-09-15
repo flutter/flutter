@@ -46,7 +46,7 @@ class UpdatePackagesCommand extends FlutterCommand {
   }
 
   @override
-  Future<int> runInProject() async {
+  Future<int> runCmd() async {
     try {
       final Stopwatch timer = new Stopwatch()..start();
       int count = 0;

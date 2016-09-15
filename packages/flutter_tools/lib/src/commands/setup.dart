@@ -31,7 +31,7 @@ class SetupCommand extends FlutterCommand {
   final bool hidden;
 
   @override
-  Future<int> runInProject() async {
+  Future<int> runCmd() async {
     printStatus('Running Flutter setup...');
 
     // setup brew on mac

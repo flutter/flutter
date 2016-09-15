@@ -46,14 +46,14 @@ class TraceCommand extends FlutterCommand {
     'with --start and later with --stop.';
 
   @override
-  Future<int> runCmd() async {
+  Future<int> verifyThenRunCmd() async {
     if (!commandValidator())
       return 1;
-    return super.runCmd();
+    return super.verifyThenRunCmd();
   }
 
   @override
-  Future<int> runInProject() async {
+  Future<int> runCmd() async {
     int observatoryPort = int.parse(argResults['debug-port']);
 
     Tracing tracing;

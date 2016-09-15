@@ -46,7 +46,7 @@ class ConfigCommand extends FlutterCommand {
   String get usagePath => null;
 
   @override
-  Future<int> runInProject() async {
+  Future<int> runCmd() async {
     if (argResults.wasParsed('analytics')) {
       bool value = argResults['analytics'];
       flutterUsage.enabled = value;

@@ -21,7 +21,7 @@ class UpgradeCommand extends FlutterCommand {
   final String description = 'Upgrade your copy of Flutter.';
 
   @override
-  Future<int> runInProject() async {
+  Future<int> runCmd() async {
     try {
       runCheckedSync(<String>[
         'git', 'rev-parse', '@{u}'
