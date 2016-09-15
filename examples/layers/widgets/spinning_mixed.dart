@@ -93,7 +93,7 @@ void main() {
   RenderProxyBox proxy = new RenderProxyBox();
   attachWidgetTreeToRenderTree(proxy);
 
-  RenderFlex flexRoot = new RenderFlex(direction: FlexDirection.vertical);
+  RenderFlex flexRoot = new RenderFlex(direction: Axis.vertical);
   addFlexChildSolidColor(flexRoot, const Color(0xFFFF00FF), flex: 1);
   flexRoot.add(proxy);
   addFlexChildSolidColor(flexRoot, const Color(0xFF0000FF), flex: 1);

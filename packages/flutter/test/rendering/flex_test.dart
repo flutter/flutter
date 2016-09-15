@@ -24,7 +24,7 @@ void main() {
       additionalConstraints: const BoxConstraints.expand()
     );
     RenderFlex flex = new RenderFlex(
-      direction: FlexDirection.vertical,
+      direction: Axis.vertical,
       children: <RenderBox>[
         new RenderConstrainedBox(additionalConstraints: new BoxConstraints.tightFor(height: 200.0)),
         flexible,
@@ -46,7 +46,7 @@ void main() {
       additionalConstraints: const BoxConstraints.expand()
     );
     RenderFlex flex = new RenderFlex(
-      direction: FlexDirection.horizontal,
+      direction: Axis.horizontal,
       children: <RenderBox>[
         new RenderConstrainedBox(additionalConstraints: new BoxConstraints.tightFor(width: 200.0)),
         flexible,
@@ -65,7 +65,7 @@ void main() {
 
   test('Vertical Flipped Constraints', () {
     RenderFlex flex = new RenderFlex(
-      direction: FlexDirection.vertical,
+      direction: Axis.vertical,
       children: <RenderBox>[
         new RenderAspectRatio(aspectRatio: 1.0),
       ]
@@ -81,7 +81,7 @@ void main() {
   test('Defaults', () {
     RenderFlex flex = new RenderFlex();
     expect(flex.crossAxisAlignment, equals(CrossAxisAlignment.center));
-    expect(flex.direction, equals(FlexDirection.horizontal));
+    expect(flex.direction, equals(Axis.horizontal));
   });
 
   test('Parent data', () {
@@ -129,7 +129,7 @@ void main() {
     expect(box2.size.width, equals(100.0));
     expect(box2.size.height, equals(100.0));
 
-    flex.direction = FlexDirection.vertical;
+    flex.direction = Axis.vertical;
     pumpFrame();
     expect(box1.size.width, equals(100.0));
     expect(box1.size.height, equals(0.0));
@@ -157,7 +157,7 @@ void main() {
     expect(getOffset(box3).dx, equals(350.0));
     expect(box3.size.width, equals(100.0));
 
-    flex.direction = FlexDirection.vertical;
+    flex.direction = Axis.vertical;
     pumpFrame();
     expect(getOffset(box1).dy, equals(25.0));
     expect(box1.size.height, equals(100.0));
