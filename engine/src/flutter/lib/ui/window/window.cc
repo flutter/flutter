@@ -50,17 +50,15 @@ void Window::UpdateWindowMetrics(const sky::ViewportMetricsPtr& metrics) {
   if (!dart_state)
     return;
   tonic::DartState::Scope scope(dart_state);
-  double device_pixel_ratio = metrics->device_pixel_ratio;
   DartInvokeField(
       library_.value(), "_updateWindowMetrics",
       {
-          ToDart(device_pixel_ratio),
-          ToDart(metrics->physical_width / device_pixel_ratio),
-          ToDart(metrics->physical_height / device_pixel_ratio),
-          ToDart(metrics->physical_padding_top / device_pixel_ratio),
-          ToDart(metrics->physical_padding_right / device_pixel_ratio),
-          ToDart(metrics->physical_padding_bottom / device_pixel_ratio),
-          ToDart(metrics->physical_padding_left / device_pixel_ratio),
+          ToDart(metrics->device_pixel_ratio), ToDart(metrics->physical_width),
+          ToDart(metrics->physical_height),
+          ToDart(metrics->physical_padding_top),
+          ToDart(metrics->physical_padding_right),
+          ToDart(metrics->physical_padding_bottom),
+          ToDart(metrics->physical_padding_left),
       });
 }
 

@@ -19,10 +19,3 @@ class MojoServices {
   static int takeView() native "MojoServices_takeView";
   static int takeViewServices() native "MojoServices_takeViewServices";
 }
-
-// TODO(abarth): Remove these once clients have migrated to [MojoServices].
-int takeRootBundleHandle() => MojoServices.takeRootBundle();
-int takeServicesProvidedByEmbedder() => MojoServices.takeIncomingServices();
-int takeServicesProvidedToEmbedder() => MojoServices.takeOutgoingServices();
-int takeShellProxyHandle() => MojoServices.takeShell();
-int takeViewHandle() => MojoServices.takeView();

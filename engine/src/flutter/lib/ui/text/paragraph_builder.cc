@@ -70,11 +70,12 @@ const int tsTextDecorationColorIndex = 3;
 const int tsTextDecorationStyleIndex = 4;
 const int tsFontWeightIndex = 5;
 const int tsFontStyleIndex = 6;
-const int tsFontFamilyIndex = 7;
-const int tsFontSizeIndex = 8;
-const int tsLetterSpacingIndex = 9;
-const int tsWordSpacingIndex = 10;
-const int tsHeightIndex = 11;
+const int tsTextBaselineIndex = 7;
+const int tsFontFamilyIndex = 8;
+const int tsFontSizeIndex = 9;
+const int tsLetterSpacingIndex = 10;
+const int tsWordSpacingIndex = 11;
+const int tsHeightIndex = 12;
 
 const int tsColorMask = 1 << tsColorIndex;
 const int tsTextDecorationMask = 1 << tsTextDecorationIndex;
@@ -82,6 +83,7 @@ const int tsTextDecorationColorMask = 1 << tsTextDecorationColorIndex;
 const int tsTextDecorationStyleMask = 1 << tsTextDecorationStyleIndex;
 const int tsFontWeightMask = 1 << tsFontWeightIndex;
 const int tsFontStyleMask = 1 << tsFontStyleIndex;
+const int tsTextBaselineMask = 1 << tsTextBaselineIndex;
 const int tsFontFamilyMask = 1 << tsFontFamilyIndex;
 const int tsFontSizeMask = 1 << tsFontSizeIndex;
 const int tsLetterSpacingMask = 1 << tsLetterSpacingIndex;
@@ -91,15 +93,13 @@ const int tsHeightMask = 1 << tsHeightIndex;
 // ParagraphStyle
 
 const int psTextAlignIndex = 1;
-const int psTextBaselineIndex = 2;
-const int psFontWeightIndex = 3;
-const int psFontStyleIndex = 4;
-const int psFontFamilyIndex = 5;
-const int psFontSizeIndex = 6;
-const int psLineHeightIndex = 7;
+const int psFontWeightIndex = 2;
+const int psFontStyleIndex = 3;
+const int psFontFamilyIndex = 4;
+const int psFontSizeIndex = 5;
+const int psLineHeightIndex = 6;
 
 const int psTextAlignMask = 1 << psTextAlignIndex;
-const int psTextBaselineMask = 1 << psTextBaselineIndex;
 const int psFontWeightMask = 1 << psFontWeightIndex;
 const int psFontStyleMask = 1 << psFontStyleIndex;
 const int psFontFamilyMask = 1 << psFontFamilyIndex;
@@ -169,6 +169,11 @@ void ParagraphBuilder::pushStyle(tonic::Int32List& encoded,
   if (mask & tsTextDecorationStyleMask)
     style->setTextDecorationStyle(
         static_cast<TextDecorationStyle>(encoded[tsTextDecorationStyleIndex]));
+
+  if (mask & tsTextBaselineMask) {
+    // TODO(abarth): Implement TextBaseline. The CSS version of this
+    // property wasn't wired up either.
+  }
 
   if (mask & (tsFontWeightMask | tsFontStyleMask | tsFontFamilyMask |
               tsFontSizeMask | tsLetterSpacingMask | tsWordSpacingMask)) {
@@ -244,11 +249,6 @@ ftl::RefPtr<Paragraph> ParagraphBuilder::build(tonic::Int32List& encoded,
 
     if (mask & psTextAlignMask)
       style->setTextAlign(static_cast<ETextAlign>(encoded[psTextAlignIndex]));
-
-    if (mask & psTextBaselineMask) {
-      // TODO(abarth): Implement TextBaseline. The CSS version of this
-      // property wasn't wired up either.
-    }
 
     if (mask & (psFontWeightMask | psFontStyleMask | psFontFamilyMask |
                 psFontSizeMask)) {

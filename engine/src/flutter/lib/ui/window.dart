@@ -39,11 +39,19 @@ enum AppLifecycleState {
 class WindowPadding {
   const WindowPadding._({ this.left, this.top, this.right, this.bottom });
 
+  /// The distance from the left edge to the first unobscured pixel, in physical pixels.
   final double left;
+
+  /// The distance from the top edge to the first unobscured pixel, in physical pixels.
   final double top;
+
+  /// The distance from the right edge to the first unobscured pixel, in physical pixels.
   final double right;
+
+  /// The distance from the bottom edge to the first unobscured pixel, in physical pixels.
   final double bottom;
 
+  /// A window padding that has zeros for each edge.
   static const WindowPadding zero = const WindowPadding._(left: 0.0, top: 0.0, right: 0.0, bottom: 0.0);
 }
 
@@ -100,25 +108,20 @@ class Window {
   double _devicePixelRatio = 1.0;
 
   /// The dimensions of the rectangle into which the application will be drawn,
-  /// in logical pixels.
-  ///
-  /// Logical pixels are roughly the same visual size across devices. Physical
-  /// pixels are the size of the actual hardware pixels on the device. The
-  /// number of physical pixels per logical pixel is described by the
-  /// [devicePixelRatio].
-  Size get size => _size;
-  Size _size = Size.zero;
+  /// in physical pixels.
+  Size get physicalSize => _physicalSize;
+  Size _physicalSize = Size.zero;
 
-  /// The number of pixels on each side of the display rectangle into which the
-  /// application can render, but over which the operating system will likely
-  /// place system UI (such as the Android system notification area), or which
-  /// might be rendered outside of the physical display (e.g. overscan regions
-  /// on television screens).
+  /// The number of physical pixels on each side of the display rectangle into
+  /// which the application can render, but over which the operating system will
+  /// likely place system UI (such as the Android system notification area), or
+  /// which might be rendered outside of the physical display (e.g. overscan
+  /// regions on television screens).
   WindowPadding get padding => _padding;
   WindowPadding _padding = WindowPadding.zero;
 
-  /// A callback that is invoked whenever the [devicePixelRatio], [size], or
-  /// [padding] values change.
+  /// A callback that is invoked whenever the [devicePixelRatio],
+  /// [physicalSize], or [padding] values change.
   VoidCallback onMetricsChanged;
 
   /// The system-reported locale. This establishes the language and formatting
@@ -136,8 +139,8 @@ class Window {
 
   /// A callback that is invoked to notify the application that it is an
   /// appropriate time to provide a scene using the [SceneBuilder] API and the
-  /// [render()] method. When possible, this is driven by the hardware VSync
-  /// signal. This is only called if [scheduleFrame()] has been called since the
+  /// [render] method. When possible, this is driven by the hardware VSync
+  /// signal. This is only called if [scheduleFrame] has been called since the
   /// last time this callback was invoked.
   FrameCallback onBeginFrame;
 
