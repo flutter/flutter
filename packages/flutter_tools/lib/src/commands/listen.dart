@@ -29,14 +29,14 @@ class ListenCommand extends RunCommandBase {
   /// Only run once. Used for testing.
   final bool singleRun;
 
-  Device deviceForCommand;
+  Device device;
 
   @override
   Future<int> verifyThenRunCmd() async {
     if (!commandValidator())
       return 1;
-    deviceForCommand = await findTargetDevice();
-    if (deviceForCommand == null)
+    device = await findTargetDevice();
+    if (device == null)
       return 1;
     return super.verifyThenRunCmd();
   }
@@ -70,7 +70,7 @@ class ListenCommand extends RunCommandBase {
         printStatus('Re-running app...');
 
       result = await startApp(
-        deviceForCommand,
+        device,
         target: targetFile,
         install: firstTime,
         stop: true,

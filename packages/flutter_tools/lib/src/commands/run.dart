@@ -83,12 +83,10 @@ class RunCommand extends RunCommandBase {
     argParser.addFlag('benchmark', negatable: false, hide: true);
   }
 
-  Device deviceForCommand;
+  Device device;
 
   @override
   String get usagePath {
-    Device device = deviceForCommand;
-
     String command = shouldUseHotMode() ? 'hotrun' : name;
 
     if (device == null)
@@ -118,8 +116,8 @@ class RunCommand extends RunCommandBase {
   Future<int> verifyThenRunCmd() async {
     if (!commandValidator())
       return 1;
-    deviceForCommand = await findTargetDevice();
-    if (deviceForCommand == null)
+    device = await findTargetDevice();
+    if (device == null)
       return 1;
     return super.verifyThenRunCmd();
   }
@@ -137,7 +135,7 @@ class RunCommand extends RunCommandBase {
       }
     }
 
-    if (deviceForCommand.isLocalEmulator && !isEmulatorBuildMode(getBuildMode())) {
+    if (device.isLocalEmulator && !isEmulatorBuildMode(getBuildMode())) {
       printError('${toTitleCase(getModeName(getBuildMode()))} mode is not supported for emulators.');
       return 1;
     }
@@ -161,7 +159,7 @@ class RunCommand extends RunCommandBase {
     final bool hotMode = shouldUseHotMode();
 
     if (hotMode) {
-      if (!deviceForCommand.supportsHotMode) {
+      if (!device.supportsHotMode) {
         printError('Hot mode is not supported by this device. '
                    'Run with --no-hot.');
         return 1;
@@ -177,14 +175,14 @@ class RunCommand extends RunCommandBase {
 
     if (hotMode) {
       runner = new HotRunner(
-        deviceForCommand,
+        device,
         target: targetFile,
         debuggingOptions: options,
         benchmarkMode: argResults['benchmark'],
       );
     } else {
       runner = new RunAndStayResident(
-        deviceForCommand,
+        device,
         target: targetFile,
         debuggingOptions: options,
         traceStartup: traceStartup,

@@ -28,20 +28,20 @@ class ScreenshotCommand extends FlutterCommand {
   @override
   final List<String> aliases = <String>['pic'];
 
-  Device deviceForCommand;
+  Device device;
 
   @override
   Future<int> verifyThenRunCmd() async {
-    deviceForCommand = await findTargetDevice();
-    if (deviceForCommand == null)
+    device = await findTargetDevice();
+    if (device == null)
       return 1;
     return super.verifyThenRunCmd();
   }
 
   @override
   Future<int> runCmd() async {
-    if (!deviceForCommand.supportsScreenshot) {
-      printError('Screenshot not supported for ${deviceForCommand.name}.');
+    if (!device.supportsScreenshot) {
+      printError('Screenshot not supported for ${device.name}.');
       return 1;
     }
 
@@ -54,7 +54,7 @@ class ScreenshotCommand extends FlutterCommand {
     }
 
     try {
-      bool result = await deviceForCommand.takeScreenshot(outputFile);
+      bool result = await device.takeScreenshot(outputFile);
 
       if (result) {
         int sizeKB = outputFile.lengthSync() ~/ 1000;

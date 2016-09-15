@@ -30,14 +30,14 @@ class RefreshCommand extends FlutterCommand {
     );
   }
 
-  Device deviceForCommand;
+  Device device;
 
   @override
   Future<int> verifyThenRunCmd() async {
     if (!commandValidator())
       return 1;
-    deviceForCommand = await findTargetDevice(androidOnly: true);
-    if (deviceForCommand == null)
+    device = await findTargetDevice(androidOnly: true);
+    if (device == null)
       return 1;
     return super.verifyThenRunCmd();
   }
@@ -56,8 +56,6 @@ class RefreshCommand extends FlutterCommand {
 
       Cache.releaseLockEarly();
 
-      AndroidDevice device = deviceForCommand;
-
       String activity = argResults['activity'];
       if (activity == null) {
         AndroidApk apk = applicationPackages.getPackageForPlatform(device.platform);
@@ -69,7 +67,9 @@ class RefreshCommand extends FlutterCommand {
         }
       }
 
-      bool success = await device.refreshSnapshot(activity, snapshotPath);
+      AndroidDevice androidDevice = device;
+
+      bool success = await androidDevice.refreshSnapshot(activity, snapshotPath);
       if (!success) {
         printError('Error refreshing snapshot on $device.');
         return 1;
