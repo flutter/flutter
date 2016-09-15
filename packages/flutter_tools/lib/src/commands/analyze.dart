@@ -218,8 +218,8 @@ class AnalyzeCommand extends FlutterCommand {
     options.dartSdkPath = argResults['dart-sdk'];
     options.packageMap = packages;
     options.analysisOptionsFile = flutterRepo
-      ? path.join(Cache.flutterRoot, '.analysis_options_flutter_analyze')
-      : path.join(Cache.flutterRoot, 'packages', 'flutter_tools', 'flutter_analysis_options');
+      ? path.join(Cache.flutterRoot, '.analysis_options_repo')
+      : path.join(Cache.flutterRoot, '.analysis_options_user');
     AnalysisDriver analyzer = new AnalysisDriver(options);
 
     // TODO(pq): consider error handling
