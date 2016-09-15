@@ -3,6 +3,9 @@
 .idea
 .packages
 .pub/
+linked_*.ds
+unlinked.ds
+unlinked_spec.ds
 build/
 packages
 pubspec.lock
