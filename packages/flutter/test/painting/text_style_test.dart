@@ -91,16 +91,16 @@ void main() {
 
     ui.TextStyle ts5 = s5.textStyle;
     expect(ts5, equals(new ui.TextStyle(fontWeight: FontWeight.w700, fontSize: 12.0, height: 123.0)));
-    expect(ts5.toString(), 'TextStyle(2336|color: unspecified, decoration: unspecified, decorationColor: unspecified, decorationStyle: unspecified, fontWeight: FontWeight.w700, fontStyle: unspecified, fontFamily: unspecified, fontSize: 12.0, letterSpacing: unspecified, wordSpacing: unspecified, height: 123.0x)');
+    expect(ts5.toString(), 'TextStyle(color: unspecified, decoration: unspecified, decorationColor: unspecified, decorationStyle: unspecified, fontWeight: FontWeight.w700, fontStyle: unspecified, textBaseline: unspecified, fontFamily: unspecified, fontSize: 12.0, letterSpacing: unspecified, wordSpacing: unspecified, height: 123.0x)');
     ui.TextStyle ts2 = s2.textStyle;
     expect(ts2, equals(new ui.TextStyle(color: const Color(0xFF00FF00), fontWeight: FontWeight.w800, fontSize: 10.0, height: 100.0)));
-    expect(ts2.toString(), 'TextStyle(2338|color: Color(0xff00ff00), decoration: unspecified, decorationColor: unspecified, decorationStyle: unspecified, fontWeight: FontWeight.w800, fontStyle: unspecified, fontFamily: unspecified, fontSize: 10.0, letterSpacing: unspecified, wordSpacing: unspecified, height: 100.0x)');
+    expect(ts2.toString(), 'TextStyle(color: Color(0xff00ff00), decoration: unspecified, decorationColor: unspecified, decorationStyle: unspecified, fontWeight: FontWeight.w800, fontStyle: unspecified, textBaseline: unspecified, fontFamily: unspecified, fontSize: 10.0, letterSpacing: unspecified, wordSpacing: unspecified, height: 100.0x)');
 
     ui.ParagraphStyle ps2 = s2.getParagraphStyle(textAlign: TextAlign.center);
     expect(ps2, equals(new ui.ParagraphStyle(textAlign: TextAlign.center, fontWeight: FontWeight.w800, fontSize: 10.0, lineHeight: 100.0)));
-    expect(ps2.toString(), 'ParagraphStyle(textAlign: TextAlign.center, textBaseline: unspecified, fontWeight: FontWeight.w800, fontStyle: unspecified, fontFamily: unspecified, fontSize: 10.0, lineHeight: 100.0x)');
+    expect(ps2.toString(), 'ParagraphStyle(textAlign: TextAlign.center, fontWeight: FontWeight.w800, fontStyle: unspecified, fontFamily: unspecified, fontSize: 10.0, lineHeight: 100.0x)');
     ui.ParagraphStyle ps5 = s5.getParagraphStyle();
     expect(ps5, equals(new ui.ParagraphStyle(fontWeight: FontWeight.w700, fontSize: 12.0, lineHeight: 123.0)));
-    expect(ps5.toString(), 'ParagraphStyle(textAlign: unspecified, textBaseline: unspecified, fontWeight: FontWeight.w700, fontStyle: unspecified, fontFamily: unspecified, fontSize: 12.0, lineHeight: 123.0x)');
+    expect(ps5.toString(), 'ParagraphStyle(textAlign: unspecified, fontWeight: FontWeight.w700, fontStyle: unspecified, fontFamily: unspecified, fontSize: 12.0, lineHeight: 123.0x)');
   });
 }

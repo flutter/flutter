@@ -171,8 +171,8 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   @override
   void debugFillDescription(List<String> description) {
     // call to ${super.debugFillDescription(prefix)} is omitted because the root superclasses don't include any interesting information for this class
-    description.add('window size: ${ui.window.size} (in device pixels)');
-    description.add('device pixel ratio: ${ui.window.devicePixelRatio} (device pixels per logical pixel)');
+    description.add('window size: ${ui.window.physicalSize} (in physical pixels)');
+    description.add('device pixel ratio: ${ui.window.devicePixelRatio} (physical pixels per logical pixel)');
     description.add('configuration: $configuration (in logical pixels)');
   }
 }

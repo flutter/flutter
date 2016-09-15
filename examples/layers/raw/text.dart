@@ -15,7 +15,10 @@ ui.Picture paint(ui.Rect paintBounds) {
   ui.PictureRecorder recorder = new ui.PictureRecorder();
   ui.Canvas canvas = new ui.Canvas(recorder, paintBounds);
 
-  canvas.translate(ui.window.size.width / 2.0, ui.window.size.height / 2.0);
+  final double devicePixelRatio = ui.window.devicePixelRatio;
+  final ui.Size logicalSize = ui.window.physicalSize / devicePixelRatio;
+
+  canvas.translate(logicalSize.width / 2.0, logicalSize.height / 2.0);
   canvas.drawRect(new ui.Rect.fromLTRB(-100.0, -100.0, 100.0, 100.0),
                   new ui.Paint()..color = const ui.Color.fromARGB(255, 0, 255, 0));
 
@@ -41,7 +44,7 @@ ui.Scene composite(ui.Picture picture, ui.Rect paintBounds) {
 }
 
 void beginFrame(Duration timeStamp) {
-  ui.Rect paintBounds = ui.Point.origin & ui.window.size;
+  ui.Rect paintBounds = ui.Point.origin & (ui.window.physicalSize / ui.window.devicePixelRatio);
   ui.Picture picture = paint(paintBounds);
   ui.Scene scene = composite(picture, paintBounds);
   ui.window.render(scene);

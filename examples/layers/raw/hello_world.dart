@@ -9,8 +9,7 @@ import 'dart:ui' as ui;
 
 void beginFrame(Duration timeStamp) {
   final double devicePixelRatio = ui.window.devicePixelRatio;
-  // TODO(abarth): ui.window.size should be in physical units.
-  final ui.Size logicalSize = ui.window.size;
+  final ui.Size logicalSize = ui.window.physicalSize / devicePixelRatio;
 
   final ui.ParagraphBuilder paragraphBuilder = new ui.ParagraphBuilder()
     ..addText('Hello, world.');

@@ -35,9 +35,9 @@ class MediaQueryData {
 
   /// Creates data for a media query based on the given window.
   MediaQueryData.fromWindow(ui.Window window)
-    : size = window.size,
+    : size = window.physicalSize / window.devicePixelRatio,
       devicePixelRatio = window.devicePixelRatio,
-      padding = new EdgeInsets.fromWindowPadding(window.padding);
+      padding = new EdgeInsets.fromWindowPadding(window.padding, window.devicePixelRatio);
 
   /// The size of the media in logical pixel (e.g, the size of the screen).
   ///

@@ -724,8 +724,8 @@ class TestViewConfiguration extends ViewConfiguration {
       super(size: size);
 
   static Matrix4 _getMatrix(Size size, double devicePixelRatio) {
-    final double actualWidth = ui.window.size.width * devicePixelRatio;
-    final double actualHeight = ui.window.size.height * devicePixelRatio;
+    final double actualWidth = ui.window.physicalSize.width;
+    final double actualHeight = ui.window.physicalSize.height;
     final double desiredWidth = size.width;
     final double desiredHeight = size.height;
     double scale, shiftX, shiftY;

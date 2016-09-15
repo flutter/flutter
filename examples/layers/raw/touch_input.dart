@@ -71,7 +71,7 @@ ui.Scene composite(ui.Picture picture, ui.Rect paintBounds) {
 }
 
 void beginFrame(Duration timeStamp) {
-  ui.Rect paintBounds = ui.Point.origin & ui.window.size;
+  ui.Rect paintBounds = ui.Point.origin & (ui.window.physicalSize / ui.window.devicePixelRatio);
   // First, record a picture with our painting commands.
   ui.Picture picture = paint(paintBounds);
   // Second, include that picture in a scene graph.
