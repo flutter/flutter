@@ -4,7 +4,7 @@
 
 import 'dart:ui' as ui show ImageFilter;
 
-import 'package:flutter/animation.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:meta/meta.dart';
 import 'package:vector_math/vector_math_64.dart';
@@ -1490,10 +1490,10 @@ class RenderFractionalTranslation extends RenderProxyBox {
 abstract class CustomPainter {
   /// Creates a custom painter.
   ///
-  /// The painter will repaint whenever the [repaint] animation ticks.
-  const CustomPainter({ Animation<dynamic> repaint }) : _repaint = repaint;
+  /// The painter will repaint whenever [repaint] notifies its listeners.
+  const CustomPainter({ Listenable repaint }) : _repaint = repaint;
 
-  final Animation<dynamic> _repaint;
+  final Listenable _repaint;
 
   /// Called whenever the object needs to paint. The given [Canvas] has its
   /// coordinate space configured such that the origin is at the top left of the

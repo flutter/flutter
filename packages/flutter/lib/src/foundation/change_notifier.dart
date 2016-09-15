@@ -6,13 +6,15 @@ import 'package:meta/meta.dart';
 
 import 'assertions.dart';
 import 'basic_types.dart';
+import 'listenable.dart';
 
-/// Abstract class that can be extended or mixed in that provides
-/// a change notification API using [VoidCallback] for notifications.
-abstract class ChangeNotifier {
+/// A class that can be extended or mixed in that provides a change notification
+/// API using [VoidCallback] for notifications.
+class ChangeNotifier extends Listenable {
   List<VoidCallback> _listeners;
 
   /// Register a closure to be called when the object changes.
+  @override
   void addListener(VoidCallback listener) {
     _listeners ??= <VoidCallback>[];
     _listeners.add(listener);
@@ -20,6 +22,7 @@ abstract class ChangeNotifier {
 
   /// Remove a previously registered closure from the list of closures that are
   /// notified when the object changes.
+  @override
   void removeListener(VoidCallback listener) {
     _listeners?.remove(listener);
   }

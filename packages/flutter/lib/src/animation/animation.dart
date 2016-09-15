@@ -4,6 +4,8 @@
 
 import 'dart:ui' show VoidCallback;
 
+import 'package:flutter/foundation.dart';
+
 /// The status of an animation
 enum AnimationStatus {
   /// The animation is stopped at the beginning
@@ -36,7 +38,7 @@ typedef void AnimationStatusListener(AnimationStatus status);
 ///
 /// To create a new animation that you can run forward and backward, consider
 /// using [AnimationController].
-abstract class Animation<T> {
+abstract class Animation<T> extends Listenable {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
   const Animation();
@@ -46,11 +48,13 @@ abstract class Animation<T> {
   /// Calls the listener every time the value of the animation changes.
   ///
   /// Listeners can be removed with [removeListener].
+  @override
   void addListener(VoidCallback listener);
 
   /// Stop calling the listener every time the value of the animation changes.
   ///
   /// Listeners can be added with [addListener].
+  @override
   void removeListener(VoidCallback listener);
 
   /// Calls listener every time the status of the animation changes.

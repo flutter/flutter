@@ -426,6 +426,12 @@ class _DialState extends State<_Dial> {
       _animateTo(_getThetaForTime(config.selectedTime));
   }
 
+  @override
+  void dispose() {
+    _thetaController.dispose();
+    super.dispose();
+  }
+
   Tween<double> _thetaTween;
   Animation<double> _theta;
   AnimationController _thetaController;
