@@ -12,7 +12,7 @@ import 'shrine_page.dart';
 import 'shrine_theme.dart';
 import 'shrine_types.dart';
 
-const double unitSize = kToolBarHeight;
+const double unitSize = kToolbarHeight;
 
 final List<Product> _products = new List<Product>.from(allProducts());
 final Map<Product, Order> _shoppingCart = <Product, Order>{};

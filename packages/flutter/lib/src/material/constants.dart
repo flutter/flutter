@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// The height of the tool bar component of the [AppBar].
-const double kToolBarHeight = 56.0;
+/// The height of the toolbar component of the [AppBar].
+const double kToolbarHeight = 56.0;
 
 /// The height of a tab bar containing text.
 const double kTextTabBarHeight = 48.0;

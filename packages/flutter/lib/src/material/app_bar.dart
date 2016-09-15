@@ -24,14 +24,14 @@ abstract class AppBarBottomWidget extends Widget {
   double get bottomHeight;
 }
 
-enum _ToolBarSlot {
+enum _ToolbarSlot {
   leading,
   title,
   actions,
 }
 
-class _ToolBarLayout extends MultiChildLayoutDelegate {
-  _ToolBarLayout({ this.centerTitle });
+class _ToolbarLayout extends MultiChildLayoutDelegate {
+  _ToolbarLayout({ this.centerTitle });
 
   // If false the title should be left or right justified within the space bewteen
   // the leading and actions widgets, depending on the locale's writing direction.
@@ -46,22 +46,22 @@ class _ToolBarLayout extends MultiChildLayoutDelegate {
   void performLayout(Size size) {
     double actionsWidth = 0.0;
 
-    if (hasChild(_ToolBarSlot.leading)) {
+    if (hasChild(_ToolbarSlot.leading)) {
       final BoxConstraints constraints = new BoxConstraints.tight(new Size(kLeadingWidth, size.height));
-      layoutChild(_ToolBarSlot.leading, constraints);
-      positionChild(_ToolBarSlot.leading, Offset.zero);
+      layoutChild(_ToolbarSlot.leading, constraints);
+      positionChild(_ToolbarSlot.leading, Offset.zero);
     }
 
-    if (hasChild(_ToolBarSlot.actions)) {
+    if (hasChild(_ToolbarSlot.actions)) {
       final BoxConstraints constraints = new BoxConstraints.loose(size);
-      actionsWidth = layoutChild(_ToolBarSlot.actions, constraints).width;
-      positionChild(_ToolBarSlot.actions, new Offset(size.width - actionsWidth, 0.0));
+      actionsWidth = layoutChild(_ToolbarSlot.actions, constraints).width;
+      positionChild(_ToolbarSlot.actions, new Offset(size.width - actionsWidth, 0.0));
     }
 
-    if (hasChild(_ToolBarSlot.title)) {
+    if (hasChild(_ToolbarSlot.title)) {
       final double maxWidth = size.width - kTitleLeft - actionsWidth;
       final BoxConstraints constraints = new BoxConstraints.loose(size).copyWith(maxWidth: maxWidth);
-      final Size titleSize = layoutChild(_ToolBarSlot.title, constraints);
+      final Size titleSize = layoutChild(_ToolbarSlot.title, constraints);
       final double titleY = (size.height - titleSize.height) / 2.0;
       double titleX = kTitleLeft;
 
@@ -75,12 +75,12 @@ class _ToolBarLayout extends MultiChildLayoutDelegate {
           titleX = kTitleLeft;
       }
 
-      positionChild(_ToolBarSlot.title, new Offset(titleX, titleY));
+      positionChild(_ToolbarSlot.title, new Offset(titleX, titleY));
     }
   }
 
   @override
-  bool shouldRelayout(_ToolBarLayout oldDelegate) => centerTitle != oldDelegate.centerTitle;
+  bool shouldRelayout(_ToolbarLayout oldDelegate) => centerTitle != oldDelegate.centerTitle;
 }
 
 // TODO(eseidel) Toolbar needs to change size based on orientation:
@@ -287,7 +287,7 @@ class AppBar extends StatelessWidget {
     );
   }
 
-  double get _toolBarHeight => kToolBarHeight;
+  double get _toolbarHeight => kToolbarHeight;
 
   /// The height of the bottom widget. The [Scaffold] uses this value to control
   /// the size of the app bar when its appBarBehavior is [AppBarBehavior.scroll]
@@ -300,16 +300,16 @@ class AppBar extends StatelessWidget {
   /// enough to accommodate whatever that widget contains.
   ///
   /// See also [getExpandedHeightFor].
-  double get expandedHeight => _expandedHeight ?? (_toolBarHeight + bottomHeight);
+  double get expandedHeight => _expandedHeight ?? (_toolbarHeight + bottomHeight);
 
   /// By default, the height of the toolbar and the bottom widget (if any).
   /// If the height of the app bar is constrained to be less than this value
   /// then the toolbar and bottom widget are scrolled upwards, out of view.
-  double get collapsedHeight => _collapsedHeight ?? (_toolBarHeight + bottomHeight);
+  double get collapsedHeight => _collapsedHeight ?? (_toolbarHeight + bottomHeight);
 
   // Defines the opacity of the toolbar's text and icons.
-  double _toolBarOpacity(double appBarHeight, double statusBarHeight) {
-    return ((appBarHeight - bottomHeight - statusBarHeight) / _toolBarHeight).clamp(0.0, 1.0);
+  double _toolbarOpacity(double appBarHeight, double statusBarHeight) {
+    return ((appBarHeight - bottomHeight - statusBarHeight) / _toolbarHeight).clamp(0.0, 1.0);
   }
 
   double _bottomOpacity(double appBarHeight, double statusBarHeight) {
@@ -345,9 +345,9 @@ class AppBar extends StatelessWidget {
       ? mojom.SystemUiOverlayStyle.light
       : mojom.SystemUiOverlayStyle.dark);
 
-    final double toolBarOpacity = _toolBarOpacity(size.height, statusBarHeight);
-    if (toolBarOpacity != 1.0) {
-      final double opacity = const Interval(0.25, 1.0, curve: Curves.fastOutSlowIn).transform(toolBarOpacity);
+    final double toolbarOpacity = _toolbarOpacity(size.height, statusBarHeight);
+    if (toolbarOpacity != 1.0) {
+      final double opacity = const Interval(0.25, 1.0, curve: Curves.fastOutSlowIn).transform(toolbarOpacity);
       if (centerStyle?.color != null)
         centerStyle = centerStyle.copyWith(color: centerStyle.color.withOpacity(opacity));
       if (sideStyle?.color != null)
@@ -357,19 +357,19 @@ class AppBar extends StatelessWidget {
       );
     }
 
-    final List<Widget> toolBarChildren = <Widget>[];
+    final List<Widget> toolbarChildren = <Widget>[];
     if (leading != null) {
-      toolBarChildren.add(
+      toolbarChildren.add(
         new LayoutId(
-          id: _ToolBarSlot.leading,
+          id: _ToolbarSlot.leading,
           child: leading
         )
       );
     }
     if (title != null) {
-      toolBarChildren.add(
+      toolbarChildren.add(
         new LayoutId(
-          id: _ToolBarSlot.title,
+          id: _ToolbarSlot.title,
           child: new DefaultTextStyle(
             style: centerStyle,
             softWrap: false,
@@ -380,9 +380,9 @@ class AppBar extends StatelessWidget {
       );
     }
     if (actions != null && actions.isNotEmpty) {
-      toolBarChildren.add(
+      toolbarChildren.add(
         new LayoutId(
-          id: _ToolBarSlot.actions,
+          id: _ToolbarSlot.actions,
           child: new Row(
             mainAxisSize: MainAxisSize.min,
             children: actions
@@ -391,24 +391,24 @@ class AppBar extends StatelessWidget {
       );
     }
 
-    Widget toolBar = new Padding(
+    Widget toolbar = new Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8.0),
       child: new CustomMultiChildLayout(
-        delegate: new _ToolBarLayout(
+        delegate: new _ToolbarLayout(
           centerTitle: _getEffectiveCenterTitle(themeData)
         ),
-        children: toolBarChildren
+        children: toolbarChildren
       )
     );
 
     Widget appBar = new SizedBox(
-      height: kToolBarHeight,
+      height: kToolbarHeight,
       child: new IconTheme.merge(
         context: context,
         data: appBarIconTheme,
         child: new DefaultTextStyle(
           style: sideStyle,
-          child: toolBar
+          child: toolbar
         )
       )
     );
