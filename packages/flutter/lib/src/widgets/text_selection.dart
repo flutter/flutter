@@ -41,7 +41,7 @@ enum TextSelectionHandleType {
 /// Builds a selection handle of the given type.
 typedef Widget TextSelectionHandleBuilder(BuildContext context, TextSelectionHandleType type);
 
-/// Builds a tool bar near a text selection.
+/// Builds a toolbar near a text selection.
 ///
 /// Typically displays buttons for copying and pasting text.
 // TODO(mpcomplete): A single position is probably insufficient.
@@ -110,9 +110,9 @@ class TextSelectionOverlay implements TextSelectionDelegate {
   /// selected.
   final TextSelectionHandleBuilder handleBuilder;
 
-  /// Builds a tool bar to display near the selection.
+  /// Builds a toolbar to display near the selection.
   ///
-  /// The tool bar typically contains buttons for copying and pasting text.
+  /// The toolbar typically contains buttons for copying and pasting text.
   final TextSelectionToolbarBuilder toolbarBuilder;
 
   /// Controls the fade-in animations.
