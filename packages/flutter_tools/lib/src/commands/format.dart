@@ -25,7 +25,7 @@ class FormatCommand extends FlutterCommand {
   String get invocation => "${runner.executableName} $name <one or more paths>";
 
   @override
-  Future<int> runCmd() async {
+  Future<int> runCommand() async {
     if (argResults.rest.isEmpty) {
       printStatus('No files specified to be formatted.');
       printStatus('');

@@ -124,7 +124,7 @@ class RunMojoCommand extends FlutterCommand {
   }
 
   @override
-  Future<int> runCmd() async {
+  Future<int> runCommand() async {
     if ((argResults['mojo-path'] == null && argResults['devtools-path'] == null) || (argResults['mojo-path'] != null && argResults['devtools-path'] != null)) {
       printError('Must specify either --mojo-path or --devtools-path.');
       return 1;

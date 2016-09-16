@@ -45,7 +45,7 @@ class CreateCommand extends FlutterCommand {
   String get invocation => "${runner.executableName} $name <output directory>";
 
   @override
-  Future<int> runCmd() async {
+  Future<int> runCommand() async {
     if (argResults.rest.isEmpty) {
       printStatus('No option specified for the output directory.');
       printStatus(usage);

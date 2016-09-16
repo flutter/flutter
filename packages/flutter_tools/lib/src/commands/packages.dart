@@ -25,14 +25,14 @@ class PackagesCommand extends FlutterCommand {
   final String description = 'Commands for managing Flutter packages.';
 
   @override
-  Future<int> verifyThenRunCmd() async {
+  Future<int> verifyThenRunCommand() async {
     if (!commandValidator())
       return 1;
-    return super.verifyThenRunCmd();
+    return super.verifyThenRunCommand();
   }
 
   @override
-  Future<int> runCmd() => new Future<int>.value(0);
+  Future<int> runCommand() => new Future<int>.value(0);
 }
 
 class PackagesGetCommand extends FlutterCommand {
@@ -53,7 +53,7 @@ class PackagesGetCommand extends FlutterCommand {
       "${runner.executableName} packages $name [<target directory>]";
 
   @override
-  Future<int> runCmd() async {
+  Future<int> runCommand() async {
     if (argResults.rest.length > 1) {
       printStatus('Too many arguments.');
       printStatus(usage);

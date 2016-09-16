@@ -33,17 +33,17 @@ class RefreshCommand extends FlutterCommand {
   Device device;
 
   @override
-  Future<int> verifyThenRunCmd() async {
+  Future<int> verifyThenRunCommand() async {
     if (!commandValidator())
       return 1;
     device = await findTargetDevice(androidOnly: true);
     if (device == null)
       return 1;
-    return super.verifyThenRunCmd();
+    return super.verifyThenRunCommand();
   }
 
   @override
-  Future<int> runCmd() async {
+  Future<int> runCommand() async {
     Directory tempDir = await Directory.systemTemp.createTemp('flutter_tools');
     try {
       String snapshotPath = path.join(tempDir.path, 'snapshot_blob.bin');

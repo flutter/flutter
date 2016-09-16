@@ -103,8 +103,8 @@ abstract class FlutterCommand extends Command {
   /// Runs this command.
   ///
   /// Rather than overriding this method, subclasses should override
-  /// [verifyThenRunCmd] to perform any verification
-  /// and [runCmd] to execute the command
+  /// [verifyThenRunCommand] to perform any verification
+  /// and [runCommand] to execute the command
   /// so that this method can record and report the overall time to analytics.
   @override
   Future<int> run() {
@@ -114,7 +114,7 @@ abstract class FlutterCommand extends Command {
     if (flutterUsage.isFirstRun)
       flutterUsage.printUsage();
 
-    return verifyThenRunCmd().then((int exitCode) {
+    return verifyThenRunCommand().then((int exitCode) {
       int ms = stopwatch.elapsedMilliseconds;
       printTrace("'flutter $name' took ${ms}ms; exiting with code $exitCode.");
       analyticsTimer?.finish();
@@ -122,15 +122,15 @@ abstract class FlutterCommand extends Command {
     });
   }
 
-  /// Perform validation then call [runCmd] to execute the command.
+  /// Perform validation then call [runCommand] to execute the command.
   /// Return a [Future] that completes with an exit code
   /// indicating whether execution was successful.
   ///
   /// Subclasses should override this method to perform verification
   /// then call this method to execute the command
-  /// rather than calling [runCmd] directly.
+  /// rather than calling [runCommand] directly.
   @mustCallSuper
-  Future<int> verifyThenRunCmd() async {
+  Future<int> verifyThenRunCommand() async {
     // Populate the cache. We call this before pub get below so that the sky_engine
     // package is available in the flutter cache for pub to find.
     await cache.updateAll();
@@ -147,11 +147,11 @@ abstract class FlutterCommand extends Command {
     if (commandPath != null)
       flutterUsage.sendCommand(usagePath);
 
-    return await runCmd();
+    return await runCommand();
   }
 
   /// Subclasses must implement this to execute the command.
-  Future<int> runCmd();
+  Future<int> runCommand();
 
   /// Find and return the target [Device] based upon currently connected
   /// devices and criteria entered by the user on the command line.

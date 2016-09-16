@@ -27,14 +27,14 @@ class SkiaCommand extends FlutterCommand {
   final String description = 'Retrieve the last frame rendered by a Flutter app as a Skia picture.';
 
   @override
-  Future<int> verifyThenRunCmd() async {
+  Future<int> verifyThenRunCommand() async {
     if (!commandValidator())
       return 1;
-    return super.verifyThenRunCmd();
+    return super.verifyThenRunCommand();
   }
 
   @override
-  Future<int> runCmd() async {
+  Future<int> runCommand() async {
     File outputFile;
     Uri skiaserveUri;
     if (argResults['output-file'] != null) {

@@ -20,7 +20,7 @@ class ChannelCommand extends FlutterCommand {
   String get invocation => '${runner.executableName} $name [<channel-name>]';
 
   @override
-  Future<int> runCmd() async {
+  Future<int> runCommand() async {
     switch (argResults.rest.length) {
       case 0:
         return await _listChannels();

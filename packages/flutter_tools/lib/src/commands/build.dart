@@ -32,28 +32,28 @@ class BuildCommand extends FlutterCommand {
   final String description = 'Flutter build commands.';
 
   @override
-  Future<int> verifyThenRunCmd() async {
+  Future<int> verifyThenRunCommand() async {
     if (!commandValidator())
       return 1;
-    return super.verifyThenRunCmd();
+    return super.verifyThenRunCommand();
   }
 
   @override
-  Future<int> runCmd() => new Future<int>.value(0);
+  Future<int> runCommand() => new Future<int>.value(0);
 }
 
 abstract class BuildSubCommand extends FlutterCommand {
   @override
   @mustCallSuper
-  Future<int> verifyThenRunCmd() async {
+  Future<int> verifyThenRunCommand() async {
     if (!commandValidator())
       return 1;
-    return super.verifyThenRunCmd();
+    return super.verifyThenRunCommand();
   }
 
   @override
   @mustCallSuper
-  Future<int> runCmd() async {
+  Future<int> runCommand() async {
     if (isRunningOnBot) {
       File dotPackages = new File('.packages');
       printStatus('Contents of .packages:');
@@ -81,14 +81,14 @@ class BuildCleanCommand extends FlutterCommand {
   final String description = 'Delete the build/ directory.';
 
   @override
-  Future<int> verifyThenRunCmd() async {
+  Future<int> verifyThenRunCommand() async {
     if (!commandValidator())
       return 1;
-    return super.verifyThenRunCmd();
+    return super.verifyThenRunCommand();
   }
 
   @override
-  Future<int> runCmd() async {
+  Future<int> runCommand() async {
     Directory buildDir = new Directory(getBuildDirectory());
     printStatus("Deleting '${buildDir.path}${Platform.pathSeparator}'.");
 

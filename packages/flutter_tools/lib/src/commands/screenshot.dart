@@ -31,15 +31,15 @@ class ScreenshotCommand extends FlutterCommand {
   Device device;
 
   @override
-  Future<int> verifyThenRunCmd() async {
+  Future<int> verifyThenRunCommand() async {
     device = await findTargetDevice();
     if (device == null)
       return 1;
-    return super.verifyThenRunCmd();
+    return super.verifyThenRunCommand();
   }
 
   @override
-  Future<int> runCmd() async {
+  Future<int> runCommand() async {
     if (!device.supportsScreenshot) {
       printError('Screenshot not supported for ${device.name}.');
       return 1;

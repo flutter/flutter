@@ -221,8 +221,8 @@ class BuildApkCommand extends BuildSubCommand {
   }
 
   @override
-  Future<int> runCmd() async {
-    await super.runCmd();
+  Future<int> runCommand() async {
+    await super.runCommand();
 
     TargetPlatform targetPlatform = _getTargetPlatform(argResults['target-arch']);
     if (targetPlatform != TargetPlatform.android_arm && getBuildMode() != BuildMode.debug) {

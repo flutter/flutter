@@ -144,7 +144,7 @@ class TestCommand extends FlutterCommand {
   }
 
   @override
-  Future<int> runCmd() async {
+  Future<int> runCommand() async {
     List<String> testArgs = argResults.rest.map((String testPath) => path.absolute(testPath)).toList();
 
     if (!commandValidator())
