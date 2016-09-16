@@ -179,8 +179,15 @@ class AnalyzeCommand extends FlutterCommand {
           .where((String line) => !line.startsWith(new RegExp(r'^ *#')))
           .forEach((String line) {
             int colon = line.indexOf(':');
-            if (colon > 0)
-              dependencies.add(line.substring(0, colon), path.normalize(path.absolute(directory.path, path.fromUri(line.substring(colon+1)))), dotPackagesPath);
+            if (colon > 0) {
+              String packageName = line.substring(0, colon);
+              String packagePath = path.fromUri(line.substring(colon+1));
+              // Ensure that we only add the `analyzer` package defined in the vended SDK (and referred to with a local path directive).
+              // Analyzer package versions reached via transitive dependencies (e.g., via `test`) are ignored since they would produce
+              // spurious conflicts.
+              if (packageName != 'analyzer' || packagePath.startsWith('..'))
+                dependencies.add(packageName, path.normalize(path.absolute(directory.path, path.fromUri(packagePath))), dotPackagesPath);
+            }
           });
       }
     }
