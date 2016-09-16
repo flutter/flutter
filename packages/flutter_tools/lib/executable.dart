@@ -85,7 +85,7 @@ Future<Null> main(List<String> args) async {
     ..addCommand(new UpdatePackagesCommand(hidden: !verboseHelp))
     ..addCommand(new UpgradeCommand());
 
-  return Chain.capture(() async {
+  return Chain.capture/*<Future<Null>>*/(() async {
     // Initialize globals.
     context[Logger] = new StdoutLogger();
     context[DeviceManager] = new DeviceManager();
