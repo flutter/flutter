@@ -17,6 +17,7 @@ import android.graphics.Rect;
 import android.os.Build;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.Surface;
@@ -115,15 +116,25 @@ public class FlutterView extends SurfaceView
         attach();
         assert mNativePlatformView != 0;
 
-        mSurfaceCallback = new SurfaceHolder.Callback() {
-            @Override
-            public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-            }
+        int color = 0xFF000000;
+        TypedValue typedValue = new TypedValue();
+        context.getTheme().resolveAttribute(android.R.attr.colorBackground, typedValue, true);
+        if (typedValue.type >= TypedValue.TYPE_FIRST_COLOR_INT && typedValue.type <= TypedValue.TYPE_LAST_COLOR_INT)
+          color = typedValue.data;
+        // TODO(abarth): Consider letting the developer override this color.
+        final int backgroundColor = color;
 
+        mSurfaceCallback = new SurfaceHolder.Callback() {
             @Override
             public void surfaceCreated(SurfaceHolder holder) {
                 assert mNativePlatformView != 0;
                 nativeSurfaceCreated(mNativePlatformView, holder.getSurface());
+            }
+
+            @Override
+            public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+                assert mNativePlatformView != 0;
+                nativeSurfaceChanged(mNativePlatformView, backgroundColor);
             }
 
             @Override
@@ -513,6 +524,7 @@ public class FlutterView extends SurfaceView
     private static native void nativeDetach(long nativePlatformViewAndroid);
     private static native void nativeSurfaceCreated(long nativePlatformViewAndroid,
                                                     Surface surface);
+    private static native void nativeSurfaceChanged(long nativePlatformViewAndroid, int backgroundColor);
     private static native void nativeSurfaceDestroyed(long nativePlatformViewAndroid);
     private static native Bitmap nativeGetBitmap(long nativePlatformViewAndroid);
 

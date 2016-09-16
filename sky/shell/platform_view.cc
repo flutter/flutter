@@ -56,23 +56,17 @@ void PlatformView::NotifyCreated() {
 }
 
 void PlatformView::NotifyCreated(ftl::Closure rasterizer_continuation) {
-  CHECK(config_.rasterizer != nullptr);
-
-  auto rasterizer = config_.rasterizer->GetWeakRasterizerPtr();
+  FTL_CHECK(config_.rasterizer);
 
   ftl::AutoResetWaitableEvent latch;
-  auto delegate_continuation = [rasterizer, this, rasterizer_continuation,
-                                &latch]() {
-    if (rasterizer)
-      rasterizer->Setup(this, rasterizer_continuation, &latch);
-    // TODO(abarth): We should signal the latch if the rasterizer is gone.
+
+  auto delegate_continuation = [this, rasterizer_continuation, &latch]() {
+    config_.rasterizer->Setup(this, rasterizer_continuation, &latch);
   };
 
   auto delegate = config_.ui_delegate;
   blink::Threads::UI()->PostTask([delegate, delegate_continuation]() {
-    if (delegate)
-      delegate->OnOutputSurfaceCreated(delegate_continuation);
-    // TODO(abarth): We should signal the latch if the delegate is gone.
+    delegate->OnOutputSurfaceCreated(delegate_continuation);
   });
 
   latch.Wait();

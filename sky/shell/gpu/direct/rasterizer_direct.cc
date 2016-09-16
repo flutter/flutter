@@ -48,7 +48,7 @@ void RasterizerDirect::Setup(
     PlatformView* platform_view,
     ftl::Closure continuation,
     ftl::AutoResetWaitableEvent* setup_completion_event) {
-  CHECK(platform_view) << "Must be able to acquire the view.";
+  FTL_CHECK(platform_view) << "Must be able to acquire the view.";
 
   // The context needs to be made current before the GrGL interface can be
   // setup.
@@ -56,20 +56,29 @@ void RasterizerDirect::Setup(
   if (success) {
     success = ganesh_canvas_.SetupGrGLInterface();
     if (!success)
-      LOG(ERROR) << "Could not create the GL interface";
+      FTL_LOG(ERROR) << "Could not create the GL interface";
   } else {
-    LOG(ERROR) << "Could not make the context current for initial GL setup";
+    FTL_LOG(ERROR) << "Could not make the context current for initial GL setup";
   }
 
   if (success) {
     platform_view_ = platform_view;
   } else {
-    LOG(ERROR) << "WARNING: Flutter will be unable to render to the display";
+    FTL_LOG(ERROR)
+        << "WARNING: Flutter will be unable to render to the display";
   }
 
   continuation();
 
   setup_completion_event->Signal();
+}
+
+void RasterizerDirect::Clear(SkColor color) {
+  SkCanvas* canvas = ganesh_canvas_.GetCanvas(
+      platform_view_->DefaultFramebuffer(), platform_view_->GetSize());
+  canvas->clear(color);
+  canvas->flush();
+  platform_view_->SwapBuffers();
 }
 
 // sky::shell::Rasterizer override.
@@ -90,9 +99,8 @@ void RasterizerDirect::Draw(
     ftl::RefPtr<flutter::Pipeline<flow::LayerTree>> pipeline) {
   TRACE_EVENT0("flutter", "RasterizerDirect::Draw");
 
-  if (platform_view_ == nullptr) {
+  if (!platform_view_)
     return;
-  }
 
   flutter::Pipeline<flow::LayerTree>::Consumer consumer =
       std::bind(&RasterizerDirect::DoDraw, this, std::placeholders::_1);
@@ -107,14 +115,15 @@ void RasterizerDirect::Draw(
           weak_this->Draw(pipeline);
         }
       });
-    } break;
+      break;
+    }
     default:
       break;
   }
 }
 
 void RasterizerDirect::DoDraw(std::unique_ptr<flow::LayerTree> layer_tree) {
-  if (layer_tree == nullptr) {
+  if (!layer_tree) {
     return;
   }
 

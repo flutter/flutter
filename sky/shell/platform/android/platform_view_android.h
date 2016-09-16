@@ -31,6 +31,9 @@ class PlatformViewAndroid : public PlatformView {
   void SurfaceCreated(JNIEnv* env, jobject obj, jobject jsurface);
 
   // Called from Java
+  void SurfaceChanged(JNIEnv* env, jobject obj, jint backgroundColor);
+
+  // Called from Java
   void SurfaceDestroyed(JNIEnv* env, jobject obj);
 
   // Called from Java

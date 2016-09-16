@@ -400,11 +400,14 @@ void PlatformViewAndroid::SurfaceCreated(JNIEnv* env,
     }
     ANativeWindow_release(window);
   }
+}
 
-  NotifyCreated();
-
+void PlatformViewAndroid::SurfaceChanged(JNIEnv* env,
+                                         jobject obj,
+                                         jint backgroundColor) {
+  NotifyCreated(
+      [this, backgroundColor] { config_.rasterizer->Clear(backgroundColor); });
   SetupResourceContextOnIOThread();
-
   UpdateThreadPriorities();
 }
 

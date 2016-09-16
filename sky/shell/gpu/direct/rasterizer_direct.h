@@ -20,22 +20,19 @@ class RasterizerDirect : public Rasterizer {
 
   ~RasterizerDirect() override;
 
-  // sky::shell::Rasterizer override.
   void Setup(PlatformView* platform_view,
              ftl::Closure continuation,
              ftl::AutoResetWaitableEvent* setup_completion_event) override;
 
-  // sky::shell::Rasterizer override.
+  void Clear(SkColor color) override;
+
   void Teardown(
       ftl::AutoResetWaitableEvent* teardown_completion_event) override;
 
-  // sky::shell::Rasterizer override.
   ftl::WeakPtr<sky::shell::Rasterizer> GetWeakRasterizerPtr() override;
 
-  // sky::shell::Rasterizer override.
   flow::LayerTree* GetLastLayerTree() override;
 
-  // sky::shell::Rasterizer override.
   void Draw(ftl::RefPtr<flutter::Pipeline<flow::LayerTree>> pipeline) override;
 
  private:

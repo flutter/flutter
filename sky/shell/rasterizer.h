@@ -27,6 +27,8 @@ class Rasterizer {
                      ftl::Closure rasterizer_continuation,
                      ftl::AutoResetWaitableEvent* setup_completion_event) = 0;
 
+  virtual void Clear(SkColor color) = 0;
+
   virtual void Teardown(
       ftl::AutoResetWaitableEvent* teardown_completion_event) = 0;
 
