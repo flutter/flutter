@@ -120,7 +120,7 @@ class _RecipeGridPageState extends State<RecipeGridPage> {
           final Size size = constraints.biggest;
           final double appBarHeight = size.height - statusBarHeight;
           final double extraPadding = new Tween<double>(begin: 10.0, end: 24.0).lerp(
-            ((appBarHeight - kToolBarHeight) / _kAppBarHeight).clamp(0.0, 1.0)
+            ((appBarHeight - kToolbarHeight) / _kAppBarHeight).clamp(0.0, 1.0)
           );
           final double logoHeight = appBarHeight - 1.5 * extraPadding;
           return new Padding(
