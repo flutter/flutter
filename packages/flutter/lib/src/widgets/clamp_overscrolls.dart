@@ -83,9 +83,10 @@ class ClampOverscrolls extends InheritedWidget {
   /// constraints are applied.
   final ScrollableEdge edge;
 
-  /// Return the [scrollable]'s scrollOffset clamped  according to [edge].
-  double clampScrollOffset(ScrollableState scrollable) {
-    final double scrollOffset = scrollable.scrollOffset;
+  /// Return the [newScrollOffset] clamped  according to [edge] and [scrollable]'s
+  /// scroll behavior. The value of [newScrollOffset] defaults to `scrollable.scrollOffset`.
+  double clampScrollOffset(ScrollableState scrollable, [double newScrollOffset]) {
+    final double scrollOffset = newScrollOffset ?? scrollable.scrollOffset;
     final double minScrollOffset = scrollable.scrollBehavior.minScrollOffset;
     final double maxScrollOffset = scrollable.scrollBehavior.maxScrollOffset;
     switch (edge) {
@@ -104,29 +105,6 @@ class ClampOverscrolls extends InheritedWidget {
   /// The closest instance of this class that encloses the given context.
   static ClampOverscrolls of(BuildContext context) {
     return context.inheritFromWidgetOfExactType(ClampOverscrolls);
-  }
-
-  /// Clamps the new viewport's scroll offset according to the value of
-  /// `ClampOverscrolls.of(context).edge`.
-  ///
-  /// The clamped overscroll edge is reset to [ScrollableEdge.none] for the viewport's
-  /// descendants.
-  ///
-  /// This utility function is typically used by [Scrollable.builder] callbacks.
-  static Widget buildViewport(BuildContext context, ScrollableState state, ViewportBuilder builder) {
-    // TODO(ianh): minScrollOffset and maxScrollOffset are typically determined
-    // by the container and content size. But we don't know those until we
-    // layout the viewport, which happens after build phase. We need to rethink
-    // this.
-    final ClampOverscrolls clampOverscrolls = ClampOverscrolls.of(context);
-    if (clampOverscrolls == null)
-      return builder(context, state, state.scrollOffset);
-
-    final double clampedScrollOffset = clampOverscrolls.clampScrollOffset(state);
-    Widget viewport = builder(context, state, clampedScrollOffset);
-    if (clampOverscrolls.edge != ScrollableEdge.none)
-      viewport = new ClampOverscrolls(edge: ScrollableEdge.none, child: viewport);
-    return viewport;
   }
 
   @override

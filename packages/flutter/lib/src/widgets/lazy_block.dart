@@ -8,7 +8,6 @@ import 'package:flutter/rendering.dart';
 import 'package:meta/meta.dart';
 
 import 'basic.dart';
-import 'clamp_overscrolls.dart';
 import 'framework.dart';
 import 'scroll_configuration.dart';
 import 'scrollable.dart';
@@ -259,9 +258,9 @@ class LazyBlock extends StatelessWidget {
   /// See [LazyBlockDelegate] for details.
   final LazyBlockDelegate delegate;
 
-  Widget _buildViewport(BuildContext context, ScrollableState state, double scrollOffset) {
+  Widget _buildViewport(BuildContext context, ScrollableState state) {
     return new LazyBlockViewport(
-      startOffset: scrollOffset,
+      startOffset: state.scrollOffset,
       mainAxis: scrollDirection,
       padding: padding,
       onExtentsChanged: (int firstIndex, int lastIndex, double firstStartOffset, double lastEndOffset, double minScrollOffset, double containerExtent) {
@@ -278,10 +277,6 @@ class LazyBlock extends StatelessWidget {
     );
   }
 
-  Widget _buildContent(BuildContext context, ScrollableState state) {
-    return ClampOverscrolls.buildViewport(context, state, _buildViewport);
-  }
-
   @override
   Widget build(BuildContext context) {
     final Widget result = new Scrollable(
@@ -292,7 +287,7 @@ class LazyBlock extends StatelessWidget {
       onScroll: onScroll,
       onScrollEnd: onScrollEnd,
       snapOffsetCallback: snapOffsetCallback,
-      builder: _buildContent
+      builder: _buildViewport
     );
     return ScrollConfiguration.wrap(context, result);
   }
