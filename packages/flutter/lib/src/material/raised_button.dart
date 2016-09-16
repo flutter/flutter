@@ -29,7 +29,7 @@ import 'theme.dart';
 /// See also:
 ///
 ///  * [FlatButton]
-///  * [DropDownButton]
+///  * [DropdownButton]
 ///  * [FloatingActionButton]
 ///  * <https://www.google.com/design/spec/components/buttons.html>
 class RaisedButton extends StatelessWidget {

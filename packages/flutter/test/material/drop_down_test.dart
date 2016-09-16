@@ -8,15 +8,15 @@ import 'package:flutter/material.dart';
 void main() {
   testWidgets('Drop down screen edges', (WidgetTester tester) async {
     int value = 4;
-    List<DropDownMenuItem<int>> items = <DropDownMenuItem<int>>[];
+    List<DropdownMenuItem<int>> items = <DropdownMenuItem<int>>[];
     for (int i = 0; i < 20; ++i)
-      items.add(new DropDownMenuItem<int>(value: i, child: new Text('$i')));
+      items.add(new DropdownMenuItem<int>(value: i, child: new Text('$i')));
 
     void handleChanged(int newValue) {
       value = newValue;
     }
 
-    DropDownButton<int> button = new DropDownButton<int>(
+    DropdownButton<int> button = new DropdownButton<int>(
       value: value,
       onChanged: handleChanged,
       items: items

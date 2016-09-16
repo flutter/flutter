@@ -73,16 +73,16 @@ class OrderItem extends StatelessWidget {
                   new SizedBox(height: 16.0),
                   new Padding(
                     padding: const EdgeInsets.only(top: 8.0, bottom: 8.0, right: 88.0),
-                    child: new DropDownButtonHideUnderline(
+                    child: new DropdownButtonHideUnderline(
                       child: new Container(
                         decoration: new BoxDecoration(
                           border: new Border.all(
                             color: const Color(0xFFD9D9D9)
                           )
                         ),
-                        child: new DropDownButton<int>(
+                        child: new DropdownButton<int>(
                           items: <int>[0, 1, 2, 3, 4, 5].map((int value) {
-                            return new DropDownMenuItem<int>(
+                            return new DropdownMenuItem<int>(
                               value: value,
                               child: new Padding(
                                 padding: const EdgeInsets.only(left: 8.0),
