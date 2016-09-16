@@ -20,7 +20,7 @@ export 'package:flutter/rendering.dart' show
     CustomClipper,
     CustomPainter,
     FixedColumnCountGridDelegate,
-    Axis,
+    FlexFit,
     FlowDelegate,
     FlowPaintingContext,
     FractionalOffsetTween,
@@ -1949,23 +1949,44 @@ class Flexible extends ParentDataWidget<Flex> {
   Flexible({
     Key key,
     this.flex: 1,
+    this.fit: FlexFit.tight,
     @required Widget child
   }) : super(key: key, child: child);
 
   /// The flex factor to use for this child
   ///
-  /// If null, the child is inflexible and determines its own size. If non-null,
-  /// the child is flexible and its extent in the main axis is determined by
-  /// dividing the free space (after placing the inflexible children)
-  /// according to the flex factors of the flexible children.
+  /// If null or zero, the child is inflexible and determines its own size. If
+  /// non-zero, the amount of space the child's can occupy in the main axis is
+  /// determined by dividing the free space (after placing the inflexible
+  /// children) according to the flex factors of the flexible children.
   final int flex;
+
+  /// How a flexible child is inscribed into the available space.
+  ///
+  /// If [flex] is non-zero, the [fit] determines whether the child fills the
+  /// space the parent makes available during layout. If the fit is
+  /// [FlexFit.tight], the child is required to fill the available space. If the
+  /// fit is [FlexFit.loose], the child can be at most as large as the available
+  /// space (but is allowed to be smaller).
+  final FlexFit fit;
 
   @override
   void applyParentData(RenderObject renderObject) {
     assert(renderObject.parentData is FlexParentData);
     final FlexParentData parentData = renderObject.parentData;
+    bool needsLayout = false;
+
     if (parentData.flex != flex) {
       parentData.flex = flex;
+      needsLayout = true;
+    }
+
+    if (parentData.fit != fit) {
+      parentData.fit = fit;
+      needsLayout = true;
+    }
+
+    if (needsLayout) {
       AbstractNode targetParent = renderObject.parent;
       if (targetParent is RenderObject)
         targetParent.markNeedsLayout();

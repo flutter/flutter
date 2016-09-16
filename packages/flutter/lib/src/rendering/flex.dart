@@ -7,15 +7,34 @@ import 'dart:math' as math;
 import 'box.dart';
 import 'object.dart';
 
+/// How the child is inscribed into the available space.
+enum FlexFit {
+  /// The child is forced to fill the available space.
+  tight,
+
+  /// The child can be at most as large as the available space (but is
+  /// allowed to be smaller).
+  loose,
+}
+
 /// Parent data for use with [RenderFlex].
 class FlexParentData extends ContainerBoxParentDataMixin<RenderBox> {
   /// The flex factor to use for this child
   ///
-  /// If null, the child is inflexible and determines its own size. If non-null,
-  /// the child is flexible and its extent in the main axis is determined by
-  /// dividing the free space (after placing the inflexible children)
-  /// according to the flex factors of the flexible children.
+  /// If null or zero, the child is inflexible and determines its own size. If
+  /// non-zero, the amount of space the child's can occupy in the main axis is
+  /// determined by dividing the free space (after placing the inflexible
+  /// children) according to the flex factors of the flexible children.
   int flex;
+
+  /// How a flexible child is inscribed into the available space.
+  ///
+  /// If [flex] is non-zero, the [fit] determines whether the child fills the
+  /// space the parent makes available during layout. If the fit is
+  /// [FlexFit.tight], the child is required to fill the available space. If the
+  /// fit is [FlexFit.loose], the child can be at most as large as the available
+  /// space (but is allowed to be smaller).
+  FlexFit fit;
 
   @override
   String toString() => '${super.toString()}; flex=$flex';
@@ -85,7 +104,8 @@ typedef double _ChildSizingFunction(RenderBox child, double extent);
 /// children. Otherwise, the flex expands to the maximum max-axis size and the
 /// remaining space along is divided among the flexible children according to
 /// their flex factors. Any remaining free space (i.e., if there aren't any
-/// flexible children) is allocated according to the [mainAxisAlignment] property.
+/// flexible children or some of the flexible children have a loose fit) is
+/// allocated according to the [mainAxisAlignment] property.
 ///
 /// In the cross axis, children determine their own size. The flex then sizes
 /// its cross axis to fix the largest of its children. The children are then
@@ -297,7 +317,12 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
 
   int _getFlex(RenderBox child) {
     final FlexParentData childParentData = child.parentData;
-    return childParentData.flex != null ? childParentData.flex : 0;
+    return childParentData.flex ?? 0;
+  }
+
+  FlexFit _getFit(RenderBox child) {
+    final FlexParentData childParentData = child.parentData;
+    return childParentData.fit ?? FlexFit.tight;
   }
 
   double _getCrossSize(RenderBox child) {
@@ -326,7 +351,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     while (child != null) {
       final FlexParentData childParentData = child.parentData;
       totalChildren++;
-      int flex = _getFlex(child);
+      final int flex = _getFlex(child);
       if (flex > 0) {
         assert(() {
           final String identity = _direction == Axis.horizontal ? 'row' : 'column';
@@ -420,43 +445,53 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     _overflow = math.max(0.0, allocatedSize - (canFlex ? maxMainSize : 0.0));
 
     // Distribute free space to flexible children, and determine baseline.
-    double freeSpace = math.max(0.0, (canFlex ? availableSize : 0.0) - allocatedSize);
+    final double freeSpace = math.max(0.0, (canFlex ? availableSize : 0.0) - allocatedSize);
     double maxBaselineDistance = 0.0;
     double usedSpace = 0.0;
     if (totalFlex > 0 || crossAxisAlignment == CrossAxisAlignment.baseline) {
-      double spacePerFlex = totalFlex > 0 ? (freeSpace / totalFlex) : 0.0;
+      final double spacePerFlex = totalFlex > 0 ? (freeSpace / totalFlex) : 0.0;
       child = firstChild;
       while (child != null) {
-        int flex = _getFlex(child);
+        final int flex = _getFlex(child);
         if (flex > 0) {
-          double spaceForChild = spacePerFlex * flex;
+          final double maxChildExtent = spacePerFlex * flex;
+          double minChildExtent;
+          switch (_getFit(child)) {
+            case FlexFit.tight:
+              minChildExtent = maxChildExtent;
+              break;
+            case FlexFit.loose:
+              minChildExtent = 0.0;
+              break;
+          }
+          assert(minChildExtent != null);
           BoxConstraints innerConstraints;
           if (crossAxisAlignment == CrossAxisAlignment.stretch) {
             switch (_direction) {
               case Axis.horizontal:
-                innerConstraints = new BoxConstraints(minWidth: spaceForChild,
-                                                      maxWidth: spaceForChild,
+                innerConstraints = new BoxConstraints(minWidth: minChildExtent,
+                                                      maxWidth: maxChildExtent,
                                                       minHeight: constraints.maxHeight,
                                                       maxHeight: constraints.maxHeight);
                 break;
               case Axis.vertical:
                 innerConstraints = new BoxConstraints(minWidth: constraints.maxWidth,
                                                       maxWidth: constraints.maxWidth,
-                                                      minHeight: spaceForChild,
-                                                      maxHeight: spaceForChild);
+                                                      minHeight: minChildExtent,
+                                                      maxHeight: maxChildExtent);
                 break;
             }
           } else {
             switch (_direction) {
               case Axis.horizontal:
-                innerConstraints = new BoxConstraints(minWidth: spaceForChild,
-                                                      maxWidth: spaceForChild,
+                innerConstraints = new BoxConstraints(minWidth: minChildExtent,
+                                                      maxWidth: maxChildExtent,
                                                       maxHeight: constraints.maxHeight);
                 break;
               case Axis.vertical:
                 innerConstraints = new BoxConstraints(maxWidth: constraints.maxWidth,
-                                                      minHeight: spaceForChild,
-                                                      maxHeight: spaceForChild);
+                                                      minHeight: minChildExtent,
+                                                      maxHeight: maxChildExtent);
                 break;
             }
           }
