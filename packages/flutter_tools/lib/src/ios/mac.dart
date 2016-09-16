@@ -163,7 +163,7 @@ Future<XcodeBuildResult> buildXcodeProject({
       printStatus(result.stderr);
     if (result.stdout.isNotEmpty)
       printStatus(result.stdout);
-    return new XcodeBuildResult(false);
+    return new XcodeBuildResult(false, stdout: result.stdout, stderr: result.stderr);
   } else {
     // Look for 'clean build/Release-iphoneos/Runner.app'.
     RegExp regexp = new RegExp(r' clean (\S*\.app)$', multiLine: true);
@@ -171,15 +171,44 @@ Future<XcodeBuildResult> buildXcodeProject({
     String outputDir;
     if (match != null)
       outputDir = path.join(app.appDirectory, match.group(1));
-    return new XcodeBuildResult(true, outputDir);
+    return new XcodeBuildResult(true, output: outputDir);
+  }
+}
+
+void diagnoseXcodeBuildFailure(XcodeBuildResult result) {
+  File plistFile = new File('ios/Runner/Info.plist');
+  if (plistFile.existsSync()) {
+    String plistContent = plistFile.readAsStringSync();
+    if (plistContent.contains('com.yourcompany')) {
+      printError('');
+      printError('It appears that your application still contains the default identifier.');
+      printError("Try replacing 'com.yourcompany' with your signing id");
+      printError('in ${plistFile.absolute.path}');
+      return;
+    }
+  }
+  if (result.stdout?.contains('Code Sign error') == true) {
+    printError('');
+    printError('It appears that there was a problem signing your application prior to installation on the device.');
+    printError('');
+    if (plistFile.existsSync()) {
+      printError('Verify that the CFBundleIdentifier in the Info.plist file is your signing id');
+      printError('  ${plistFile.absolute.path}');
+      printError('');
+    }
+    printError("Try launching XCode and selecting 'Product > Build' to fix the problem:");
+    printError("  open ios/Runner.xcodeproj");
+    return;
   }
 }
 
 class XcodeBuildResult {
-  XcodeBuildResult(this.success, [this.output]);
+  XcodeBuildResult(this.success, {this.output, this.stdout, this.stderr});
 
   final bool success;
   final String output;
+  final String stdout;
+  final String stderr;
 }
 
 final RegExp _xcodeVersionRegExp = new RegExp(r'Xcode (\d+)\..*');
