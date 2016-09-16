@@ -15,10 +15,7 @@ class DoctorCommand extends FlutterCommand {
   final String description = 'Show information about the installed tooling.';
 
   @override
-  bool get requiresProjectRoot => false;
-
-  @override
-  Future<int> runInProject() async {
+  Future<int> runCommand() async {
     await doctor.diagnose();
     return 0;
   }

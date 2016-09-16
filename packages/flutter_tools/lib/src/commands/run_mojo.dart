@@ -42,9 +42,6 @@ class RunMojoCommand extends FlutterCommand {
   @override
   final bool hidden;
 
-  @override
-  bool get requiresProjectRoot => false;
-
   // TODO(abarth): Why not use path.absolute?
   String _makePathAbsolute(String relativePath) {
     File file = new File(relativePath);
@@ -127,7 +124,7 @@ class RunMojoCommand extends FlutterCommand {
   }
 
   @override
-  Future<int> runInProject() async {
+  Future<int> runCommand() async {
     if ((argResults['mojo-path'] == null && argResults['devtools-path'] == null) || (argResults['mojo-path'] != null && argResults['devtools-path'] != null)) {
       printError('Must specify either --mojo-path or --devtools-path.');
       return 1;

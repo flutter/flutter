@@ -60,10 +60,7 @@ class AnalyzeCommand extends FlutterCommand {
   }
 
   @override
-  bool get requiresProjectRoot => false;
-
-  @override
-  Future<int> runInProject() => argResults['watch'] ? _analyzeWatch() : _analyzeOnce();
+  Future<int> runCommand() => argResults['watch'] ? _analyzeWatch() : _analyzeOnce();
 
   List<String> flutterRootComponents;
   bool isFlutterLibrary(String filename) {

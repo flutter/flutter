@@ -22,13 +22,10 @@ class FormatCommand extends FlutterCommand {
   final String description = 'Format one or more dart files.';
 
   @override
-  bool get requiresProjectRoot => false;
-
-  @override
   String get invocation => "${runner.executableName} $name <one or more paths>";
 
   @override
-  Future<int> runInProject() async {
+  Future<int> runCommand() async {
     if (argResults.rest.isEmpty) {
       printStatus('No files specified to be formatted.');
       printStatus('');

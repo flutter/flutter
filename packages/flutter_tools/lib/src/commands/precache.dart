@@ -20,10 +20,7 @@ class PrecacheCommand extends FlutterCommand {
   final String description = 'Populates the Flutter tool\'s cache of binary artifacts.';
 
   @override
-  bool get requiresProjectRoot => false;
-
-  @override
-  Future<int> runInProject() async {
+  Future<int> runCommand() async {
     if (argResults['all-platforms'])
       cache.includeAllPlatforms = true;
 

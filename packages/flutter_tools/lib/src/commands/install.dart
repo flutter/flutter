@@ -17,12 +17,20 @@ class InstallCommand extends FlutterCommand {
   @override
   final String description = 'Install a Flutter app on an attached device.';
 
-  @override
-  bool get requiresDevice => true;
+  Device device;
 
   @override
-  Future<int> runInProject() async {
-    Device device = deviceForCommand;
+  Future<int> verifyThenRunCommand() async {
+    if (!commandValidator())
+      return 1;
+    device = await findTargetDevice();
+    if (device == null)
+      return 1;
+    return super.verifyThenRunCommand();
+  }
+
+  @override
+  Future<int> runCommand() async {
     ApplicationPackage package = applicationPackages.getPackageForPlatform(device.platform);
 
     Cache.releaseLockEarly();

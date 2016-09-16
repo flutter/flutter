@@ -32,9 +32,6 @@ class UpdatePackagesCommand extends FlutterCommand {
   @override
   final bool hidden;
 
-  @override
-  bool get requiresProjectRoot => false;
-
   Future<Null> _downloadCoverageData() async {
     Status status = logger.startProgress("Downloading lcov data for package:flutter...");
     final List<int> data = await fetchUrl(Uri.parse('https://storage.googleapis.com/flutter_infra/flutter/coverage/lcov.info'));
@@ -49,7 +46,7 @@ class UpdatePackagesCommand extends FlutterCommand {
   }
 
   @override
-  Future<int> runInProject() async {
+  Future<int> runCommand() async {
     try {
       final Stopwatch timer = new Stopwatch()..start();
       int count = 0;

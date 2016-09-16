@@ -41,15 +41,12 @@ class ConfigCommand extends FlutterCommand {
       'Analytics reporting is currently ${flutterUsage.enabled ? 'enabled' : 'disabled'}.';
   }
 
-  @override
-  bool get requiresProjectRoot => false;
-
   /// Return `null` to disable tracking of the `config` command.
   @override
   String get usagePath => null;
 
   @override
-  Future<int> runInProject() async {
+  Future<int> runCommand() async {
     if (argResults.wasParsed('analytics')) {
       bool value = argResults['analytics'];
       flutterUsage.enabled = value;

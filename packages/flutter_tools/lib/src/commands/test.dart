@@ -45,9 +45,6 @@ class TestCommand extends FlutterCommand {
   String get description => 'Run Flutter unit tests for the current project.';
 
   @override
-  bool get requiresProjectRoot => false;
-
-  @override
   Validator commandValidator = () {
     if (!FileSystemEntity.isFileSync('pubspec.yaml')) {
       printError(
@@ -147,7 +144,7 @@ class TestCommand extends FlutterCommand {
   }
 
   @override
-  Future<int> runInProject() async {
+  Future<int> runCommand() async {
     List<String> testArgs = argResults.rest.map((String testPath) => path.absolute(testPath)).toList();
 
     if (!commandValidator())
