@@ -349,9 +349,9 @@ class TypeMatcher<T> {
 ///
 /// See also:
 ///
-///  * [StatelessWidget]
-///  * [StatefulWidget]
-///  * [InheritedWidget]
+///  * [StatelessWidget].
+///  * [StatefulWidget].
+///  * [InheritedWidget].
 abstract class Widget {
   /// Initializes [key] for subclasses.
   const Widget({ this.key });
@@ -429,7 +429,7 @@ abstract class Widget {
 ///
 /// See also:
 ///
-///  * [StatefulWidget]
+///  * [StatefulWidget].
 abstract class StatelessWidget extends Widget {
   /// Initializes [key] for subclasses.
   const StatelessWidget({ Key key }) : super(key: key);
@@ -510,8 +510,8 @@ abstract class StatelessWidget extends Widget {
 ///
 /// See also:
 ///
-///  * [State]
-///  * [StatelessWidget]
+///  * [State].
+///  * [StatelessWidget].
 abstract class StatefulWidget extends Widget {
   /// Initializes [key] for subclasses.
   const StatefulWidget({ Key key }) : super(key: key);
@@ -641,8 +641,8 @@ typedef void StateSetter(VoidCallback fn);
 ///
 /// See also:
 ///
-///  * [StatefulWidget]
-///  * [StatelessWidget]
+///  * [StatefulWidget].
+///  * [StatelessWidget].
 @optionalTypeArgs
 abstract class State<T extends StatefulWidget> {
   /// The current configuration.
@@ -758,8 +758,8 @@ abstract class State<T extends StatefulWidget> {
   ///
   /// See also:
   ///
-  /// * [BindingBase.reassembleApplication]
-  /// * [Image], which uses this to reload images
+  /// * [BindingBase.reassembleApplication].
+  /// * [Image], which uses this to reload images.
   @protected
   @mustCallSuper
   void reassemble() { }

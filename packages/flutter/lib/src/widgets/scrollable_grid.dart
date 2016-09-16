@@ -20,9 +20,9 @@ import 'virtual_viewport.dart';
 ///
 /// See also:
 ///
-///  * [CustomGrid]
-///  * [ScrollableList]
-///  * [ScrollableViewport]
+///  * [CustomGrid].
+///  * [ScrollableList].
+///  * [ScrollableViewport].
 class ScrollableGrid extends StatelessWidget {
   /// Creates a vertically scrollable grid.
   ///
@@ -119,8 +119,8 @@ class ScrollableGrid extends StatelessWidget {
 ///
 /// See also:
 ///
-///  * [ListViewport]
-///  * [LazyListViewport]
+///  * [ListViewport].
+///  * [LazyListViewport].
 class GridViewport extends VirtualViewportFromIterable {
   /// Creates a virtual viewport onto a grid of widgets.
   ///

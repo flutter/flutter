@@ -295,7 +295,7 @@ class RelativeRectTween extends Tween<RelativeRect> {
 ///
 /// See also:
 ///
-/// * [RelativePositionedTransition]
+/// * [RelativePositionedTransition].
 class PositionedTransition extends AnimatedWidget {
   /// Creates a transition for [Positioned].
   ///
@@ -332,7 +332,7 @@ class PositionedTransition extends AnimatedWidget {
 ///
 /// See also:
 ///
-/// * [PositionedTransition]
+/// * [PositionedTransition].
 class RelativePositionedTransition extends AnimatedWidget {
   /// Create an animated version of [Positioned].
   ///

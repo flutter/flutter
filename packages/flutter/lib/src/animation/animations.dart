@@ -605,3 +605,21 @@ abstract class CompoundAnimation<T> extends Animation<T>
     }
   }
 }
+
+/// An animation of [double]s that tracks the mean of two other animations.
+///
+/// The [status] of this animation is the status of the `right` animation if it is
+/// moving, and the `left` animation otherwise.
+///
+/// The [value] of this animation is the [double] that represents the mean value
+/// of the values of the `left` and `right` animations.
+class AnimationMean extends CompoundAnimation<double> {
+  /// Creates an animation that tracks the mean of two other animations.
+  AnimationMean({
+    Animation<double> left,
+    Animation<double> right,
+  }) : super(first: left, next: right);
+
+  @override
+  double get value => (first.value + next.value) / 2.0;
+}

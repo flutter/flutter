@@ -12,10 +12,17 @@ import 'dart:ui' show lerpDouble;
 ///
 /// All [MergeableMaterialItem] objects need a [LocalKey].
 abstract class MergeableMaterialItem {
-  MergeableMaterialItem(this.key) {
-    assert(key != null);
-  }
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
+  ///
+  /// The argument is the [key], which must not be null.
+  const MergeableMaterialItem(this.key);
 
+  /// The key for this item of the list.
+  ///
+  /// The key is used to match parts of the mergeable material from frame to
+  /// frame so that state is maintained appropriately even as slices are added
+  /// or removed.
   final LocalKey key;
 }
 
@@ -29,7 +36,9 @@ class MaterialSlice extends MergeableMaterialItem {
   MaterialSlice({
     @required LocalKey key,
     this.child
-  }) : super(key);
+  }) : super(key) {
+    assert(key != null);
+  }
 
   /// The contents of this slice.
   final Widget child;
@@ -48,7 +57,9 @@ class MaterialGap extends MergeableMaterialItem {
   MaterialGap({
     @required LocalKey key,
     this.size: 16.0
-  }) : super(key);
+  }) : super(key) {
+    assert(key != null);
+  }
 
   /// The main axis extent of this gap. For example, if the [MergableMaterial]
   /// is vertical, then this is the height of the gap.
@@ -128,7 +139,7 @@ class _AnimationTuple {
 class _MergeableMaterialState extends State<MergeableMaterial> {
   List<MergeableMaterialItem> _children;
   final Map<LocalKey, _AnimationTuple> _animationTuples =
-      new Map<LocalKey, _AnimationTuple>();
+      <LocalKey, _AnimationTuple>{};
 
   @override
   void initState() {

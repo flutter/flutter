@@ -239,6 +239,12 @@ class AppBar extends StatelessWidget {
   final double _expandedHeight;
   final double _collapsedHeight;
 
+  /// Returns the [expandedHeight] of the [AppBar] nearest to the given
+  /// [BuildContext].
+  ///
+  /// Calling this function sets up an inheritance relationship, so that the
+  /// widget corresponding to the given [BuildContext] will rebuild whenever
+  /// that height changes.
   static double getExpandedHeightFor(BuildContext context) {
     _AppBarExpandedHeight marker = context.inheritFromWidgetOfExactType(_AppBarExpandedHeight);
     return marker?.expandedHeight ?? 0.0;
@@ -292,6 +298,8 @@ class AppBar extends StatelessWidget {
   /// The [Scaffold] gives its app bar this height initially. If a
   /// [flexibleSpace] widget is specified this height should be big
   /// enough to accommodate whatever that widget contains.
+  ///
+  /// See also [getExpandedHeightFor].
   double get expandedHeight => _expandedHeight ?? (_toolBarHeight + bottomHeight);
 
   /// By default, the height of the toolbar and the bottom widget (if any).
