@@ -2,9 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:math';
-
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 
 class PestoDemo extends StatelessWidget {
   PestoDemo({ Key key }) : super(key: key);
@@ -51,7 +50,8 @@ class PestoStyle extends TextStyle {
     double fontSize: 12.0,
     FontWeight fontWeight,
     Color color: Colors.black87,
-    double height
+    double letterSpacing,
+    double height,
   }) : super(
     inherit: false,
     color: color,
@@ -59,7 +59,8 @@ class PestoStyle extends TextStyle {
     fontSize: fontSize,
     fontWeight: fontWeight,
     textBaseline: TextBaseline.alphabetic,
-    height: height
+    letterSpacing: letterSpacing,
+    height: height,
   );
 }
 
@@ -118,17 +119,17 @@ class _RecipeGridPageState extends State<RecipeGridPage> {
         builder: (BuildContext context, BoxConstraints constraints) {
           final Size size = constraints.biggest;
           final double appBarHeight = size.height - statusBarHeight;
-          final String logo = appBarHeight >= 70.0 ? _kMediumLogoImage : _kSmallLogoImage;
-          // Extra padding. Calculated to give about 16px on the bottom for the
-          // `small` logo at its native size, and 30px for the `medium`.
-          final double extraPadding = min(0.19 * appBarHeight + 5.4, 40.0);
+          final double extraPadding = new Tween<double>(begin: 10.0, end: 24.0).lerp(
+            ((appBarHeight - kToolBarHeight) / _kAppBarHeight).clamp(0.0, 1.0)
+          );
+          final double logoHeight = appBarHeight - 1.5 * extraPadding;
           return new Padding(
             padding: new EdgeInsets.only(
               top: statusBarHeight + 0.5 * extraPadding,
               bottom: extraPadding
             ),
             child: new Center(
-              child: new Image.asset(logo, fit: ImageFit.scaleDown)
+              child: new PestoLogo(showText: appBarHeight >= 70.0, height: logoHeight)
             )
           );
         }
@@ -173,6 +174,94 @@ class _RecipeGridPageState extends State<RecipeGridPage> {
         );
       }
     ));
+  }
+}
+
+class PestoLogo extends StatefulWidget {
+  PestoLogo({this.showText, this.height});
+
+  final bool showText;
+  final double height;
+
+  @override
+  _PestoLogoState createState() => new _PestoLogoState();
+}
+
+class _PestoLogoState extends State<PestoLogo> {
+  // Native sizes for logo and its image/text components.
+  static const double kLogoHeight = 162.0;
+  static const double kLogoWidth = 220.0;
+  static const double kImageHeight = 108.0;
+  static const double kTextHeight = 48.0;
+  final TextStyle titleStyle = const PestoStyle(fontSize: kTextHeight, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 3.0);
+  final Rect textRect = new Rect.fromLTWH(0.0, kImageHeight, kLogoWidth, kTextHeight);
+
+  AnimationController _controller;
+  Animation<double> _textOpacity;
+  Animation<Rect> _imageRect;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = new AnimationController(duration: const Duration(milliseconds: 200))
+      ..value = config.showText ? 1.0 : 0.0;
+    _textOpacity = new CurvedAnimation(parent: _controller.view, curve: const Interval(0.3, 1.0, curve: Curves.easeInOut));
+    _imageRect = new RectTween(
+      begin: new Rect.fromLTWH(0.0, 0.0, kLogoWidth, kLogoHeight),
+      end: new Rect.fromLTWH(0.0, 0.0, kLogoWidth, kImageHeight)
+    ).animate(
+      new CurvedAnimation(parent: _controller.view, curve: const Interval(0.0, 0.9, curve: Curves.easeInOut))
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  void didUpdateConfig(PestoLogo oldConfig) {
+    if (config.showText != oldConfig.showText) {
+      if (config.showText)
+        _controller.forward();
+      else
+        _controller.reverse();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return new Transform(
+      transform: new Matrix4.identity()
+                   ..scale(config.height / kLogoHeight),
+      alignment: FractionalOffset.topCenter,
+      child: new SizedBox(
+        width: kLogoWidth,
+        child: new Stack(
+          overflow: Overflow.visible,
+          children: <Widget>[
+            new AnimatedBuilder(
+              animation: _imageRect,
+              builder: (BuildContext context, Widget child) {
+                return new Positioned.fromRect(
+                  rect: _imageRect.value,
+                  child: child
+                );
+              },
+              child: new Image.asset(_kSmallLogoImage, fit: ImageFit.contain)
+            ),
+            new Positioned.fromRect(
+              rect: textRect,
+              child: new FadeTransition(
+                opacity: _textOpacity,
+                child: new Text('PESTO', style: titleStyle, textAlign: TextAlign.center),
+              )
+            )
+          ]
+        )
+      )
+    );
   }
 }
 
