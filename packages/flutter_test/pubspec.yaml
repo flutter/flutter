@@ -10,7 +10,7 @@ dependencies:
   # We don't actually depend on 'analyzer', but 'test' and 'flutter_tools' do.
   # Like 'flutter_tools', we use the version of the analyzer in the vended Dart
   # SDK as defined in the `dependency_overrides` below.
-  analyzer: any 
+  analyzer: any
 
   flutter:
     path: ../flutter

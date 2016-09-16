@@ -13,10 +13,15 @@ dependencies:
   path: ^1.3.0
   stack_trace: ^1.4.0
   vm_service_client: '^0.2.0'
-
-  # See packages/flutter_test/pubspec.yaml for why we're pinning this version
-  analyzer: 0.28.2-alpha.0
+  
+  # Pulled in via dependency_override below.
+  analyzer: any
 
 dev_dependencies:
-  # See packages/flutter_test/pubspec.yaml for why we're pinning this version
+  # See packages/flutter_test/pubspec.yaml for why we're pinning this version.
   test: 0.12.15+4
+
+# See packages/flutter_test/pubspec.yaml for why we're using an override.
+dependency_overrides:
+  analyzer:
+    path: ../../bin/cache/dart-sdk/lib/analyzer

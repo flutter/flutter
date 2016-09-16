@@ -188,9 +188,8 @@ class AnalyzeCommand extends FlutterCommand {
               // Ensure that we only add the `analyzer` package defined in the vended SDK (and referred to with a local path directive).
               // Analyzer package versions reached via transitive dependencies (e.g., via `test`) are ignored since they would produce
               // spurious conflicts.
-              if (packageName != 'analyzer' || packagePath.startsWith('..')) {
+              if (packageName != 'analyzer' || packagePath.startsWith('..'))
                 dependencies.add(packageName, path.normalize(path.absolute(directory.path, path.fromUri(packagePath))), dotPackagesPath);
-              }
             }
           });
       }
