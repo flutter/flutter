@@ -702,7 +702,7 @@ class ScrollableState<T extends Scrollable> extends State<T> {
     _numberOfInProgressScrolls -= 1;
     if (_numberOfInProgressScrolls == 0) {
       _simulation = null;
-      if (_scrollUnderway) {
+      if (_scrollUnderway && mounted) {
         // If the scroll hasn't already stopped because we've hit a clamped
         // edge, then rebuild the Scrollable with the IgnorePointer widget
         // turned off.
