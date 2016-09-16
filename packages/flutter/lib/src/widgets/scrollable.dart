@@ -422,8 +422,10 @@ class ScrollableState<T extends Scrollable> extends State<T> {
   void _handleAnimationStatusChanged(AnimationStatus status) {
     // this is not called when stop() is called on the controller
     setState(() {
-      if (!_controller.isAnimating)
+      if (!_controller.isAnimating) {
         _simulation = null;
+        _scrollUnderway = false;
+      }
     });
   }
 
@@ -704,8 +706,8 @@ class ScrollableState<T extends Scrollable> extends State<T> {
       _simulation = null;
       if (_scrollUnderway && mounted) {
         // If the scroll hasn't already stopped because we've hit a clamped
-        // edge, then rebuild the Scrollable with the IgnorePointer widget
-        // turned off.
+        // edge or the controller stopped animating, then rebuild the Scrollable
+        // with the IgnorePointer widget turned off.
         setState(() {
           _scrollUnderway = false;
         });
