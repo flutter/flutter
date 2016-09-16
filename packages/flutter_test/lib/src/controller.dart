@@ -74,7 +74,7 @@ class WidgetController {
   /// * Use [firstWidget] if you expect to match several but only want the first.
   Iterable<Widget/*=T*/> widgetList/*<T extends Widget>*/(Finder finder) {
     TestAsyncUtils.guardSync();
-    return finder.evaluate().map((Element element) => element.widget);
+    return finder.evaluate().map/*<T>*/((Element element) => element.widget);
   }
 
 
@@ -219,7 +219,7 @@ class WidgetController {
   /// * Use [firstRenderObject] if you expect to match several but only want the first.
   Iterable<RenderObject/*=T*/> renderObjectList/*<T extends RenderObject>*/(Finder finder) {
     TestAsyncUtils.guardSync();
-    return finder.evaluate().map((Element element) => element.renderObject);
+    return finder.evaluate().map/*<T>*/((Element element) => element.renderObject);
   }
 
 
