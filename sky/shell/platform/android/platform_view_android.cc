@@ -18,9 +18,11 @@
 #include "base/location.h"
 #include "base/trace_event/trace_event.h"
 #include "flutter/common/threads.h"
+#include "flutter/flow/compositor_context.h"
 #include "flutter/runtime/dart_service_isolate.h"
 #include "flutter/sky/shell/shell.h"
 #include "jni/FlutterView_jni.h"
+#include "third_party/skia/include/core/SkSurface.h"
 
 namespace sky {
 namespace shell {
@@ -499,6 +501,108 @@ void PlatformViewAndroid::RunFromSource(const std::string& main,
 
   // Detaching from the VM deletes any stray local references.
   base::android::DetachFromVM();
+}
+
+base::android::ScopedJavaLocalRef<jobject> PlatformViewAndroid::GetBitmap(
+    JNIEnv* env, jobject obj) {
+  // Render the last frame to an array of pixels on the GPU thread.
+  // The pixels will be returned as a global JNI reference to an int array.
+  ftl::AutoResetWaitableEvent latch;
+  jobject pixels_ref = nullptr;
+  SkISize frame_size;
+  blink::Threads::Gpu()->PostTask([this, &latch, &pixels_ref, &frame_size]() {
+    GetBitmapGpuTask(&latch, &pixels_ref, &frame_size);
+  });
+
+  latch.Wait();
+
+  // Convert the pixel array to an Android bitmap.
+  if (pixels_ref == nullptr)
+    return base::android::ScopedJavaLocalRef<jobject>();
+
+  base::android::ScopedJavaGlobalRef<jobject> pixels(env, pixels_ref);
+
+  jclass bitmap_class = env->FindClass("android/graphics/Bitmap");
+  FTL_CHECK(bitmap_class);
+
+  jmethodID create_bitmap = env->GetStaticMethodID(
+      bitmap_class, "createBitmap",
+      "([IIILandroid/graphics/Bitmap$Config;)Landroid/graphics/Bitmap;");
+  FTL_CHECK(create_bitmap);
+
+  jclass bitmap_config_class = env->FindClass("android/graphics/Bitmap$Config");
+  FTL_CHECK(bitmap_config_class);
+
+  jmethodID bitmap_config_value_of = env->GetStaticMethodID(
+      bitmap_config_class, "valueOf",
+      "(Ljava/lang/String;)Landroid/graphics/Bitmap$Config;");
+  FTL_CHECK(bitmap_config_value_of);
+
+  jstring argb = env->NewStringUTF("ARGB_8888");
+  FTL_CHECK(argb);
+
+  jobject bitmap_config = env->CallStaticObjectMethod(
+      bitmap_config_class, bitmap_config_value_of, argb);
+  FTL_CHECK(bitmap_config);
+
+  jobject bitmap = env->CallStaticObjectMethod(
+      bitmap_class, create_bitmap,
+      pixels.obj(), frame_size.width(), frame_size.height(), bitmap_config);
+
+  return base::android::ScopedJavaLocalRef<jobject>(env, bitmap);
+}
+
+void PlatformViewAndroid::GetBitmapGpuTask(
+    ftl::AutoResetWaitableEvent* latch,
+    jobject* pixels_out,
+    SkISize* size_out) {
+  flow::LayerTree* layer_tree = rasterizer_->GetLastLayerTree();
+  if (layer_tree == nullptr)
+    return;
+
+  JNIEnv* env = base::android::AttachCurrentThread();
+  FTL_CHECK(env);
+
+  const SkISize& frame_size = layer_tree->frame_size();
+  jsize pixels_size = frame_size.width() * frame_size.height();
+  jintArray pixels_array = env->NewIntArray(pixels_size);
+  FTL_CHECK(pixels_array);
+
+  jint* pixels = env->GetIntArrayElements(pixels_array, nullptr);
+  FTL_CHECK(pixels);
+
+  SkImageInfo image_info = SkImageInfo::Make(
+      frame_size.width(), frame_size.height(), kRGBA_8888_SkColorType,
+      kPremul_SkAlphaType);
+
+  sk_sp<SkSurface> surface = SkSurface::MakeRasterDirect(
+      image_info, pixels, frame_size.width() * sizeof(jint));
+
+  flow::CompositorContext compositor_context;
+  SkCanvas* canvas = surface->getCanvas();
+  flow::CompositorContext::ScopedFrame frame =
+      compositor_context.AcquireFrame(nullptr, *canvas, false);
+
+  canvas->clear(SK_ColorBLACK);
+  layer_tree->Raster(frame);
+  canvas->flush();
+
+  // Our configuration of Skia does not support rendering to the
+  // BitmapConfig.ARGB_8888 format expected by android.graphics.Bitmap.
+  // Convert from kRGBA_8888 to kBGRA_8888 (equivalent to ARGB_8888).
+  for (int i = 0; i < pixels_size; i++) {
+    uint8_t* bytes = reinterpret_cast<uint8_t*>(pixels + i);
+    std::swap(bytes[0], bytes[2]);
+  }
+
+  env->ReleaseIntArrayElements(pixels_array, pixels, 0);
+
+  *pixels_out = env->NewGlobalRef(pixels_array);
+  *size_out = frame_size;
+
+  base::android::DetachFromVM();
+
+  latch->Signal();
 }
 
 }  // namespace shell

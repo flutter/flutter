@@ -12,6 +12,7 @@ import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
 import android.opengl.Matrix;
+import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.os.Build;
 import android.util.AttributeSet;
@@ -501,6 +502,11 @@ public class FlutterView extends SurfaceView
         }
     }
 
+    /** Return the most recent frame as a bitmap. */
+    public Bitmap getBitmap() {
+        return nativeGetBitmap(mNativePlatformView);
+    }
+
     private static native long nativeAttach(int skyEngineHandle,
                                             FlutterView view);
     private static native int nativeGetObservatoryPort();
@@ -508,6 +514,7 @@ public class FlutterView extends SurfaceView
     private static native void nativeSurfaceCreated(long nativePlatformViewAndroid,
                                                     Surface surface);
     private static native void nativeSurfaceDestroyed(long nativePlatformViewAndroid);
+    private static native Bitmap nativeGetBitmap(long nativePlatformViewAndroid);
 
 
     // ACCESSIBILITY

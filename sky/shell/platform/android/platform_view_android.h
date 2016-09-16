@@ -8,6 +8,7 @@
 #include "base/android/jni_android.h"
 #include "base/android/jni_weak_ref.h"
 #include "lib/ftl/memory/weak_ptr.h"
+#include "lib/ftl/synchronization/waitable_event.h"
 #include "flutter/sky/shell/platform_view.h"
 
 namespace sky {
@@ -31,6 +32,10 @@ class PlatformViewAndroid : public PlatformView {
 
   // Called from Java
   void SurfaceDestroyed(JNIEnv* env, jobject obj);
+
+  // Called from Java
+  base::android::ScopedJavaLocalRef<jobject> GetBitmap(JNIEnv* env,
+                                                       jobject obj);
 
   // sky::shell::PlatformView override
   ftl::WeakPtr<sky::shell::PlatformView> GetWeakViewPtr() override;
@@ -63,6 +68,10 @@ class PlatformViewAndroid : public PlatformView {
 
  private:
   void ReleaseSurface();
+
+  void GetBitmapGpuTask(ftl::AutoResetWaitableEvent* latch,
+                        jobject* pixels_out,
+                        SkISize* size_out);
 
   std::unique_ptr<AndroidGLContext> context_;
   ftl::WeakPtrFactory<PlatformViewAndroid> weak_factory_;
