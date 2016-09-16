@@ -20,6 +20,7 @@
 vars = {
   'chromium_git': 'https://chromium.googlesource.com',
   'fuchsia_git': 'https://fuchsia.googlesource.com',
+  'github_git': 'https://github.com',
   'mojo_sdk_revision': '6b5fb1227c742f5ecc077486ebc029f2711c61fa',
   'base_revision': '672b04e54b937ec899429a6bd5409c5a6300d151',
   'skia_revision': '5561e3ddbbf6c3e051075ada4a11ddc70760f03d',
@@ -114,6 +115,10 @@ deps = {
 
   'src/third_party/libjpeg_turbo':
    Var('chromium_git') + '/chromium/deps/libjpeg_turbo.git' + '@' + '7260e4d8b8e1e40b17f03fafdf1cd83296900f76',
+
+   # Headers for Vulkan 1.0
+   'src/third_party/vulkan':
+   Var('github_git') + '/KhronosGroup/Vulkan-Docs.git' + '@' + 'e29c2489e238509c41aeb8c7bce9d669a496344b',
 }
 
 deps_os = {
