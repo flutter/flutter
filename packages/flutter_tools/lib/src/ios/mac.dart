@@ -181,7 +181,7 @@ void diagnoseXcodeBuildFailure(XcodeBuildResult result) {
     String plistContent = plistFile.readAsStringSync();
     if (plistContent.contains('com.yourcompany')) {
       printError('');
-      printError('It appears that your application still contains the default identifier.');
+      printError('It appears that your application still contains the default signing identifier.');
       printError("Try replacing 'com.yourcompany' with your signing id");
       printError('in ${plistFile.absolute.path}');
       return;
