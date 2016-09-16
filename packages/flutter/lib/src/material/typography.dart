@@ -27,8 +27,29 @@ import 'colors.dart';
 ///  * [ThemeData]
 ///  * <http://www.google.com/design/spec/style/typography.html>
 class TextTheme {
-
-  const TextTheme._(this.display4, this.display3, this.display2, this.display1, this.headline, this.title, this.subhead, this.body2, this.body1, this.caption, this.button);
+  /// Create a text theme that uses the given values.
+  ///
+  /// Rather than creating a new text theme, consider using [Typography.black]
+  /// or [Typography.white], which implement the typography styles in the
+  /// material design specification:
+  ///
+  /// <https://material.google.com/style/typography.html#typography-styles>
+  ///
+  /// If you do decide to create your own text theme, consider using one of
+  /// those predefined themes as a starting point for [copyWith] or [apply].
+  const TextTheme({
+    this.display4,
+    this.display3,
+    this.display2,
+    this.display1,
+    this.headline,
+    this.title,
+    this.subhead,
+    this.body2,
+    this.body1,
+    this.caption,
+    this.button
+  });
 
   const TextTheme._black()
     : display4 = const TextStyle(fontFamily: 'Roboto', inherit: false, fontSize: 112.0, fontWeight: FontWeight.w100, color: Colors.black54, textBaseline: TextBaseline.alphabetic),
@@ -93,20 +114,141 @@ class TextTheme {
   /// Used for text on [RaisedButton] and [FlatButton].
   final TextStyle button;
 
+  /// Creates a copy of this text theme but with the given fields replaced with
+  /// the new values.
+  ///
+  /// Consider using [Typography.black] or [Typography.white], which implement
+  /// the typography styles in the material design specification, as a starting
+  /// point.
+  TextTheme copyWith({
+    TextStyle display4,
+    TextStyle display3,
+    TextStyle display2,
+    TextStyle display1,
+    TextStyle headline,
+    TextStyle title,
+    TextStyle subhead,
+    TextStyle body2,
+    TextStyle body1,
+    TextStyle caption,
+    TextStyle button
+  }) {
+    return new TextTheme(
+      display4: display4 ?? this.display4,
+      display3: display3 ?? this.display3,
+      display2: display2 ?? this.display2,
+      display1: display1 ?? this.display1,
+      headline: headline ?? this.headline,
+      title: title ?? this.title,
+      subhead: subhead ?? this.subhead,
+      body2: body2 ?? this.body2,
+      body1: body1 ?? this.body1,
+      caption: caption ?? this.caption,
+      button: button ?? this.button
+    );
+  }
+
+  /// Creates a copy of this text theme but with the given field replaced in
+  /// each of the individual text styles.
+  ///
+  /// The `displayColor` is applied to [display4], [display3], [display2],
+  /// [display1], and [caption]. The `bodyColor` is applied to the remaining
+  /// text styles.
+  ///
+  /// Consider using [Typography.black] or [Typography.white], which implement
+  /// the typography styles in the material design specification, as a starting
+  /// point.
+  TextTheme apply({
+    String fontFamily,
+    double fontSizeFactor: 1.0,
+    double fontSizeDelta: 0.0,
+    Color displayColor,
+    Color bodyColor
+  }) {
+    return new TextTheme(
+      display4: display4.apply(
+        color: displayColor,
+        fontFamily: fontFamily,
+        fontSizeFactor: fontSizeFactor,
+        fontSizeDelta: fontSizeDelta
+      ),
+      display3: display3.apply(
+        color: displayColor,
+        fontFamily: fontFamily,
+        fontSizeFactor: fontSizeFactor,
+        fontSizeDelta: fontSizeDelta
+      ),
+      display2: display2.apply(
+        color: displayColor,
+        fontFamily: fontFamily,
+        fontSizeFactor: fontSizeFactor,
+        fontSizeDelta: fontSizeDelta
+      ),
+      display1: display1.apply(
+        color: displayColor,
+        fontFamily: fontFamily,
+        fontSizeFactor: fontSizeFactor,
+        fontSizeDelta: fontSizeDelta
+      ),
+      headline: headline.apply(
+        color: bodyColor,
+        fontFamily: fontFamily,
+        fontSizeFactor: fontSizeFactor,
+        fontSizeDelta: fontSizeDelta
+      ),
+      title: title.apply(
+        color: bodyColor,
+        fontFamily: fontFamily,
+        fontSizeFactor: fontSizeFactor,
+        fontSizeDelta: fontSizeDelta
+      ),
+      subhead: subhead.apply(
+        color: bodyColor,
+        fontFamily: fontFamily,
+        fontSizeFactor: fontSizeFactor,
+        fontSizeDelta: fontSizeDelta
+      ),
+      body2: body2.apply(
+        color: bodyColor,
+        fontFamily: fontFamily,
+        fontSizeFactor: fontSizeFactor,
+        fontSizeDelta: fontSizeDelta
+      ),
+      body1: body1.apply(
+        color: bodyColor,
+        fontFamily: fontFamily,
+        fontSizeFactor: fontSizeFactor,
+        fontSizeDelta: fontSizeDelta
+      ),
+      caption: caption.apply(
+        color: displayColor,
+        fontFamily: fontFamily,
+        fontSizeFactor: fontSizeFactor,
+        fontSizeDelta: fontSizeDelta
+      ),
+      button: button.apply(
+        color: bodyColor,
+        fontFamily: fontFamily,
+        fontSizeFactor: fontSizeFactor,
+        fontSizeDelta: fontSizeDelta
+      ),
+    );
+  }
+
   /// Linearly interpolate between two text themes.
   static TextTheme lerp(TextTheme begin, TextTheme end, double t) {
-    return new TextTheme._(
-      TextStyle.lerp(begin.display4, end.display4, t),
-      TextStyle.lerp(begin.display3, end.display3, t),
-      TextStyle.lerp(begin.display2, end.display2, t),
-      TextStyle.lerp(begin.display1, end.display1, t),
-      TextStyle.lerp(begin.headline, end.headline, t),
-      TextStyle.lerp(begin.title, end.title, t),
-      TextStyle.lerp(begin.subhead, end.subhead, t),
-      TextStyle.lerp(begin.body2, end.body2, t),
-      TextStyle.lerp(begin.body1, end.body1, t),
-      TextStyle.lerp(begin.caption, end.caption, t),
-      TextStyle.lerp(begin.button, end.button, t)
+    return new TextTheme(
+      display4: TextStyle.lerp(begin.display4, end.display4, t),
+      display3: TextStyle.lerp(begin.display3, end.display3, t),
+      display2: TextStyle.lerp(begin.display2, end.display2, t),
+      display1: TextStyle.lerp(begin.display1, end.display1, t),
+      headline: TextStyle.lerp(begin.headline, end.headline, t),
+      title: TextStyle.lerp(begin.title, end.title, t),
+      subhead: TextStyle.lerp(begin.subhead, end.subhead, t),
+      body2: TextStyle.lerp(begin.body2, end.body2, t),
+      body1: TextStyle.lerp(begin.body1, end.body1, t),
+      caption: TextStyle.lerp(begin.caption, end.caption, t),
+      button: TextStyle.lerp(begin.button, end.button, t)
     );
   }
 }
