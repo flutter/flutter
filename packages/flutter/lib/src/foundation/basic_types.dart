@@ -243,21 +243,3 @@ class _LazyListIterator<E> implements Iterator<E> {
     return true;
   }
 }
-
-// COLLECTION UTILITIES
-
-typedef dynamic KeyFunc<T>(T input);
-
-/// Select the element for which the key function returns the maximum value.
-dynamic/*=T*/ maxBy/*<T>*/(Iterable<dynamic/*=T*/> input, KeyFunc/*<T>*/ keyFunc) {
-  dynamic/*=T*/ maxValue;
-  dynamic maxKey;
-  for (dynamic/*=T*/ value in input) {
-    dynamic key = keyFunc(value);
-    if (maxKey == null || key > maxKey) {
-      maxValue = value;
-      maxKey = key;
-    }
-  }
-  return maxValue;
-}
