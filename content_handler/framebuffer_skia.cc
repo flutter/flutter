@@ -94,17 +94,11 @@ void FramebufferSkia::ConvertToCorrectPixelFormatIfNeeded() {
     SkPixmap bufferPixmap;
 
     if (surface_->peekPixels(&bufferPixmap)) {
-      uint8_t* buffer = reinterpret_cast<uint8_t*>(bufferPixmap.writable_addr());
+      uint8_t* buffer =
+          reinterpret_cast<uint8_t*>(bufferPixmap.writable_addr());
       size_t buffer_size = bufferPixmap.getSafeSize();
-      uint8_t src_r;
-      for (size_t i = 0; i < buffer_size; i++) {
-        src_r = buffer[0];
-        buffer[0] /* A */ = buffer[3];
-        buffer[3] /* B */ = buffer[2];
-        buffer[2] /* G */ = buffer[1];
-        buffer[1] /* R */ = src_r;
-        i +=4;
-      }
+      for (size_t i = 0; i < buffer_size; i += 4)
+        std::swap(buffer[i + 0], buffer[i + 2]);
     }
   }
 }
