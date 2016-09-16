@@ -347,6 +347,11 @@ abstract class WidgetsBinding extends BindingBase implements GestureBinding, Ren
 
 /// Inflate the given widget and attach it to the screen.
 ///
+/// The widget is given constraints during layout that force it to fill the
+/// entire screen. If you wish to align your widget to one side of the screen
+/// (e.g., the top), consider using the [Align] widget. If you wish to center
+/// your widget, you can also use the [Center] widget
+///
 /// Initializes the binding using [WidgetsFlutterBinding] if necessary.
 ///
 /// See also:
