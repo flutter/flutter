@@ -9,11 +9,8 @@ import 'dart:ui' as ui;
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/http.dart' as http;
 import 'package:mojo/core.dart' as core;
 import 'package:mojo_services/mojo/asset_bundle/asset_bundle.mojom.dart' as mojom;
-
-import 'shell.dart';
 
 /// A collection of resources used by the application.
 ///
@@ -69,48 +66,6 @@ abstract class AssetBundle {
 
   @override
   String toString() => '$runtimeType@$hashCode()';
-}
-
-/// An [AssetBundle] that loads resources over the network.
-///
-/// This asset bundle does not cache any resources, though the underlying
-/// network stack may implement some level of caching itself.
-class NetworkAssetBundle extends AssetBundle {
-  /// Creates an network asset bundle that resolves asset keys as URLs relative
-  /// to the given base URL.
-  NetworkAssetBundle(Uri baseUrl) : _baseUrl = baseUrl;
-
-  final Uri _baseUrl;
-
-  String _urlFromKey(String key) => _baseUrl.resolve(key).toString();
-
-  @override
-  Future<core.MojoDataPipeConsumer> load(String key) async {
-    return await http.readDataPipe(_urlFromKey(key));
-  }
-
-  @override
-  Future<String> loadString(String key, { bool cache: true }) async {
-    return (await http.get(_urlFromKey(key))).body;
-  }
-
-  /// Retrieve a string from the asset bundle, parse it with the given function,
-  /// and return the function's result.
-  ///
-  /// The result is not cached. The parser is run each time the resource is
-  /// fetched.
-  @override
-  Future<dynamic> loadStructuredData(String key, Future<dynamic> parser(String value)) async {
-    assert(key != null);
-    assert(parser != null);
-    return parser(await loadString(key));
-  }
-
-  // TODO(ianh): Once the underlying network logic learns about caching, we
-  // should implement evict().
-
-  @override
-  String toString() => '$runtimeType@$hashCode($_baseUrl)';
 }
 
 /// An [AssetBundle] that permanently caches string and structured resources
@@ -191,22 +146,6 @@ class MojoAssetBundle extends CachingAssetBundle {
   /// Creates an [AssetBundle] interface around the given [mojom.AssetBundleProxy] Mojo service.
   MojoAssetBundle(this._bundle);
 
-  /// Retrieves the asset bundle located at the given URL, unpacks it, and provides it contents.
-  factory MojoAssetBundle.fromNetwork(String relativeUrl) {
-    final mojom.AssetBundleProxy bundle = new mojom.AssetBundleProxy.unbound();
-    _fetchAndUnpackBundleAsychronously(relativeUrl, bundle);
-    return new MojoAssetBundle(bundle);
-  }
-
-  static Future<Null> _fetchAndUnpackBundleAsychronously(String relativeUrl, mojom.AssetBundleProxy bundle) async {
-    final core.MojoDataPipeConsumer bundleData = await http.readDataPipe(Uri.base.resolve(relativeUrl));
-    final mojom.AssetUnpackerProxy unpacker = shell.connectToApplicationService(
-      'mojo:asset_bundle', mojom.AssetUnpacker.connectToService
-    );
-    unpacker.unpackZipStream(bundleData, bundle);
-    unpacker.close();
-  }
-
   mojom.AssetBundleProxy _bundle;
 
   @override
@@ -237,9 +176,8 @@ AssetBundle _initRootBundle() {
           context: 'while initialising the root bundle'
         ));
       }
-      return true;
+      return false;
     });
-    return new NetworkAssetBundle(Uri.base);
   }
   core.MojoHandle handle = new core.MojoHandle(h);
   return new MojoAssetBundle(new mojom.AssetBundleProxy.fromHandle(handle));
