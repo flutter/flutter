@@ -26,8 +26,10 @@ previous run for a given device, then you can skip this step by passing
 ADB_LOCAL_PATH = 'third_party/android_tools/sdk/platform-tools/adb'
 
 def _get_flutter_root():
-    return os.path.abspath(os.path.join(
-        __file__, os.pardir, os.pardir, os.pardir))
+    path = os.path.dirname(os.path.abspath(__file__))
+    while os.path.basename(path) != 'src':
+        path = os.path.dirname(path)
+    return path
 
 
 def _find_package_pid(adb_path, package):
