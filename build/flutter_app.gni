@@ -27,7 +27,7 @@ template("flutter_app") {
   dart_package_name = target_name + "_dart_package"
 
   dart_package(dart_package_name) {
-    forward_variables_from(invoker, [ "deps" ])
+    forward_variables_from(invoker, [ "deps", "source_dir" ])
     if (defined(invoker.package_name)) {
       package_name = invoker.package_name
     } else {
