@@ -649,8 +649,8 @@ class TabBarSelectionState<T> extends State<TabBarSelection<T>> {
 
   /// Calls listener methods every time the value or status of the selection animation changes.
   ///
-  /// Listeners can be removed with [unregisterAnimationListener].
-  void registerAnimationListener(TabBarSelectionAnimationListener listener) {
+  /// Listeners can be removed with [removeAnimationListener].
+  void addAnimationListener(TabBarSelectionAnimationListener listener) {
     _animationListeners.add(listener);
     _controller
       ..addStatusListener(listener.handleStatusChange)
@@ -659,8 +659,8 @@ class TabBarSelectionState<T> extends State<TabBarSelection<T>> {
 
   /// Stop calling listener methods every time the value or status of the animation changes.
   ///
-  /// Listeners can be added with [registerAnimationListener].
-  void unregisterAnimationListener(TabBarSelectionAnimationListener listener) {
+  /// Listeners can be added with [addAnimationListener].
+  void removeAnimationListener(TabBarSelectionAnimationListener listener) {
     _animationListeners.remove(listener);
     _controller
       ..removeStatusListener(listener.handleStatusChange)
@@ -672,7 +672,7 @@ class TabBarSelectionState<T> extends State<TabBarSelection<T>> {
     _controller.stop();
     for (TabBarSelectionAnimationListener listener in _animationListeners.toList()) {
       listener.handleSelectionDeactivate();
-      unregisterAnimationListener(listener);
+      removeAnimationListener(listener);
     }
     assert(_animationListeners.isEmpty);
     _writeValue();
@@ -772,9 +772,9 @@ class _TabBarState<T> extends ScrollableState<TabBar<T>> implements TabBarSelect
   void _initSelection(TabBarSelectionState<T> newSelection) {
     if (_selection == newSelection)
       return;
-    _selection?.unregisterAnimationListener(this);
+    _selection?.removeAnimationListener(this);
     _selection = newSelection;
-    _selection?.registerAnimationListener(this);
+    _selection?.addAnimationListener(this);
     if (_selection != null)
       _lastSelectedIndex = _selection.index;
   }
@@ -791,7 +791,7 @@ class _TabBarState<T> extends ScrollableState<TabBar<T>> implements TabBarSelect
 
   @override
   void dispose() {
-    _selection?.unregisterAnimationListener(this);
+    _selection?.removeAnimationListener(this);
     super.dispose();
   }
 
@@ -1110,9 +1110,9 @@ class _TabBarViewState<T> extends PageableListState<TabBarView<T>> implements Ta
   void _initSelection(TabBarSelectionState<T> newSelection) {
     if (_selection == newSelection)
       return;
-    _selection?.unregisterAnimationListener(this);
+    _selection?.removeAnimationListener(this);
     _selection = newSelection;
-    _selection?.registerAnimationListener(this);
+    _selection?.addAnimationListener(this);
     if (_selection != null)
       _updateItemsAndScrollBehavior();
   }
@@ -1126,7 +1126,7 @@ class _TabBarViewState<T> extends PageableListState<TabBarView<T>> implements Ta
 
   @override
   void dispose() {
-    _selection?.unregisterAnimationListener(this);
+    _selection?.removeAnimationListener(this);
     super.dispose();
   }
 
