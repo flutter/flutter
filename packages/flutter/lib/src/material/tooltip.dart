@@ -265,7 +265,7 @@ class _TooltipOverlay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new Positioned.stretch(
+    return new Positioned.fill(
       child: new IgnorePointer(
         child: new CustomSingleChildLayout(
           delegate: new _TooltipPositionDelegate(

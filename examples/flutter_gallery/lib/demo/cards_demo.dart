@@ -61,7 +61,7 @@ class TravelDestinationItem extends StatelessWidget {
               height: 184.0,
               child: new Stack(
                 children: <Widget>[
-                  new Positioned.stretch(
+                  new Positioned.fill(
                     child: new Image.asset(
                       destination.assetName,
                       fit: ImageFit.cover

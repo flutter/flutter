@@ -1519,7 +1519,7 @@ class Positioned extends ParentDataWidget<Stack> {
 
   /// Creates a Positioned object with [left], [top], [right], and [bottom] set
   /// to 0.0 unless a value for them is passed.
-  Positioned.stretch({
+  Positioned.fill({
     Key key,
     Widget child,
     this.left: 0.0,
