@@ -103,8 +103,8 @@ class TextStyle {
   /// Creates a copy of this text style but with the numeric fields multiplied
   /// by the given factors and then incremented by the given deltas.
   ///
-  /// For example, `style.apply(fontSizeFactor: 2.0, fontSizeDelta: 1.0)` would return
-  /// a [TextStyle] whose [fontSize] is `style.fontSize * 2.0 + 1.0`.
+  /// For example, `style.apply(fontSizeFactor: 2.0, fontSizeDelta: 1.0)` would
+  /// return a [TextStyle] whose [fontSize] is `style.fontSize * 2.0 + 1.0`.
   ///
   /// For the [fontWeight], the delta is applied to the [FontWeight] enum index
   /// values, so that for instance `style.apply(fontWeightDelta: -2)` when
@@ -116,8 +116,10 @@ class TextStyle {
   /// If the underlying values are null, then the corresponding factors and/or
   /// deltas must not be specified.
   ///
-  /// The non-numeric fields are copied verbatim.
+  /// The non-numeric fields can be controlled using the cooresponding arguments.
   TextStyle apply({
+    Color color,
+    String fontFamily,
     double fontSizeFactor: 1.0,
     double fontSizeDelta: 0.0,
     int fontWeightDelta: 0,
@@ -144,8 +146,8 @@ class TextStyle {
     assert(heightFactor != null || (heightFactor == 1.0 && heightDelta == 0.0));
     return new TextStyle(
       inherit: inherit,
-      color: color,
-      fontFamily: fontFamily,
+      color: color ?? this.color,
+      fontFamily: fontFamily ?? this.fontFamily,
       fontSize: fontSize == null ? null : fontSize * fontSizeFactor + fontSizeDelta,
       fontWeight: fontWeight == null ? null : FontWeight.values[(fontWeight.index + fontWeightDelta).clamp(0, FontWeight.values.length - 1)],
       fontStyle: fontStyle,
