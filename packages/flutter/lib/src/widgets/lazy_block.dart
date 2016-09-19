@@ -272,6 +272,7 @@ class LazyBlock extends StatelessWidget {
           minScrollOffset: minScrollOffset,
           scrollOffset: state.scrollOffset
         ));
+        state.updateGestureDetector();
       },
       delegate: delegate
     );
