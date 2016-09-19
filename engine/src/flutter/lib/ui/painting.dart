@@ -225,12 +225,6 @@ enum PaintingStyle {
   /// of the given size being painted. The line drawn on the edge will
   /// be the width given by the [Paint.strokeWidth] property.
   stroke,
-
-  /// Apply the [Paint] to the inside of the shape and the edge of the
-  /// shape at the same time. The resulting drawing is similar to what
-  /// would be achieved by inflating the shape by half the stroke
-  /// width (as given by [Paint.strokeWidth]), and then using [fill].
-  strokeAndFill,
 }
 
 // If we actually run on big endian machines, we'll need to do something smarter
@@ -362,9 +356,8 @@ class Paint {
   }
 
   /// How wide to make edges drawn when [style] is set to
-  /// [PaintingStyle.stroke] or [PaintingStyle.strokeAndFill]. The
-  /// width is given in logical pixels measured in the direction
-  /// orthogonal to the direction of the path.
+  /// [PaintingStyle.stroke]. The width is given in logical pixels measured in
+  /// the direction orthogonal to the direction of the path.
   ///
   /// Defaults to 0.0, which correspond to a hairline width.
   double get strokeWidth {
@@ -377,8 +370,7 @@ class Paint {
   }
 
   /// The kind of finish to place on the end of lines drawn when
-  /// [style] is set to [PaintingStyle.stroke] or
-  /// [PaintingStyle.strokeAndFill].
+  /// [style] is set to [PaintingStyle.stroke].
   ///
   /// Defaults to [StrokeCap.butt], i.e. no caps.
   StrokeCap get strokeCap {
@@ -473,7 +465,7 @@ class Paint {
     StringBuffer result = new StringBuffer();
     String semicolon = '';
     result.write('Paint(');
-    if (style == PaintingStyle.stroke || style == PaintingStyle.strokeAndFill) {
+    if (style == PaintingStyle.stroke) {
       result.write('$style');
       if (strokeWidth != 0.0)
         result.write(' $strokeWidth');
@@ -557,12 +549,6 @@ enum PathFillType {
 
   /// The interior is defined by an odd number of edge crossings.
   evenOdd,
-
-  /// The interior is defined as the exterior region calculated by [winding].
-  inverseWinding,
-
-  /// The interior is defined as the exterior region calculated by [evenOdd].
-  inverseEvenOdd,
 }
 
 /// A complex, one-dimensional subset of a plane.
