@@ -38,7 +38,7 @@ class GridTile extends StatelessWidget {
       return child;
 
     final List<Widget> children = <Widget>[
-      new Positioned.stretch(
+      new Positioned.fill(
         child: child
       )
     ];
