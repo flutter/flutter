@@ -18,6 +18,7 @@ import 'media_query.dart';
 import 'navigator.dart';
 import 'performance_overlay.dart';
 import 'semantics_debugger.dart';
+import 'text.dart';
 import 'title.dart';
 
 /// Signature for a function that is called when the operating system changes the current locale.
@@ -183,7 +184,7 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
       )
     );
     if (config.textStyle != null) {
-      new DefaultTextStyle(
+      result = new DefaultTextStyle(
         style: config.textStyle,
         child: result
       );
