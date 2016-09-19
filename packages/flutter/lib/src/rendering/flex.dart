@@ -40,16 +40,29 @@ class FlexParentData extends ContainerBoxParentDataMixin<RenderBox> {
   String toString() => '${super.toString()}; flex=$flex';
 }
 
-/// The incoming constraint parameter that defines how much space is available
-/// along the main axis in a flex layout. Flex layouts allocate the difference
-/// between the available space and the sum of the sizes of the children
-/// which are not flexible to the layout's flexible children and the space
-/// around the children. See [Row], [Column], [MainAxisAlignment], [Flexible].
+/// How much space space should be occupied in the main axis.
+///
+/// During a flex layout, available space along the main axis is allocated to
+/// children. After allocating space, there might be some remaining free space.
+/// This value controls whether to maximize or minimize the amount of free
+/// space, subject to the incoming layout contraints.
+///
+/// See [Row], [Column], [MainAxisAlignment], [Flexible].
 enum MainAxisSize {
-  /// The available space is defined by the incoming constraint's min parameter.
+  /// Minimize the amount of free space along the main axis, subject to the
+  /// incoming layout constraints.
+  ///
+  /// If the incoming layout constraints have a large enough
+  /// [BoxConstraints.minWidth] or [BoxConstraints.minHeight], there might still
+  /// be a non-zero amount of free space.
   min,
 
-  /// The available space is defined by the incoming constraint's max parameter.
+  /// Maximize the amount of free space along the main axis, subject to the
+  /// incoming layout constraints.
+  ///
+  /// If the incoming layout constraints have a small enough
+  /// [BoxConstraints.maxWidth] or [BoxConstraints.maxHeight], there might still
+  /// be no free space.
   max,
 }
 
@@ -152,7 +165,16 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     }
   }
 
-  /// The limit used to compute free space along the main axis.
+  /// How much space space should be occupied in the main axis.
+  ///
+  /// After allocating space to children, there might be some remaining free
+  /// space. This value controls whether to maximize or minimize the amount of
+  /// free space, subject to the incoming layout contraints.
+  ///
+  /// If some children have a non-zero flex factors (and none have a fit of
+  /// [FlexFit.loose]), they will expand to consume all the available space and
+  /// there will be no remaining free space to maximize or minimize, making this
+  /// value irrelevant to the final layout.
   MainAxisSize get mainAxisSize => _mainAxisSize;
   MainAxisSize _mainAxisSize;
   set mainAxisSize (MainAxisSize value) {
@@ -339,11 +361,8 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     int totalFlex = 0;
     int totalChildren = 0;
     assert(constraints != null);
-    final bool isHorizontal = _direction == Axis.horizontal;
-    final double minMainSize = isHorizontal ? constraints.minWidth : constraints.minHeight;
-    final double maxMainSize = isHorizontal ? constraints.maxWidth : constraints.maxHeight;
-    final double availableSize = mainAxisSize == MainAxisSize.max ? maxMainSize : minMainSize;
-    final bool canFlex = availableSize < double.INFINITY;
+    final double maxMainSize = _direction == Axis.horizontal ? constraints.maxWidth : constraints.maxHeight;
+    final bool canFlex = maxMainSize < double.INFINITY;
 
     double crossSize = 0.0;
     double allocatedSize = 0.0; // Sum of the sizes of the the non-flexible children.
@@ -359,7 +378,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
           final String dimension = _direction == Axis.horizontal ? 'width' : 'height';
           String error, message;
           String addendum = '';
-          if (availableSize == double.INFINITY) {
+          if (maxMainSize == double.INFINITY) {
             error = 'RenderFlex children have non-zero flex but incoming $dimension constraints are unbounded.';
             message = 'When a $identity is in a parent that does not provide a finite $dimension constraint, for example '
                       'if it is in a $axis scrollable, it will try to shrink-wrap its children along the $axis '
@@ -445,9 +464,8 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     _overflow = math.max(0.0, allocatedSize - (canFlex ? maxMainSize : 0.0));
 
     // Distribute free space to flexible children, and determine baseline.
-    final double freeSpace = math.max(0.0, (canFlex ? availableSize : 0.0) - allocatedSize);
+    final double freeSpace = math.max(0.0, (canFlex ? maxMainSize : 0.0) - allocatedSize);
     double maxBaselineDistance = 0.0;
-    double usedSpace = 0.0;
     if (totalFlex > 0 || crossAxisAlignment == CrossAxisAlignment.baseline) {
       final double spacePerFlex = totalFlex > 0 ? (freeSpace / totalFlex) : 0.0;
       child = firstChild;
@@ -496,7 +514,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
             }
           }
           child.layout(innerConstraints, parentUsesSize: true);
-          usedSpace += _getMainSize(child);
+          allocatedSize += _getMainSize(child);
           crossSize = math.max(crossSize, _getCrossSize(child));
         }
         if (crossAxisAlignment == CrossAxisAlignment.baseline) {
@@ -521,21 +539,21 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     if (canFlex) {
       final bool isMainAxisSizeMax = mainAxisSize == MainAxisSize.max;
       final double preferredSize = isMainAxisSizeMax ? maxMainSize : allocatedSize;
-      remainingSpace = math.max(0.0, freeSpace - usedSpace);
       switch (_direction) {
         case Axis.horizontal:
           size = constraints.constrain(new Size(preferredSize, crossSize));
+          remainingSpace = math.max(0.0, size.width - allocatedSize);
           crossSize = size.height;
-          assert(isMainAxisSizeMax ? size.width == maxMainSize : size.width >= minMainSize);
+          assert(isMainAxisSizeMax ? size.width == maxMainSize : size.width >= constraints.minWidth);
           break;
         case Axis.vertical:
           size = constraints.constrain(new Size(crossSize, preferredSize));
+          remainingSpace = math.max(0.0, size.height - allocatedSize);
           crossSize = size.width;
-          assert(isMainAxisSizeMax ? size.height == maxMainSize : size.height >= minMainSize);
+          assert(isMainAxisSizeMax ? size.height == maxMainSize : size.height >= constraints.minHeight);
           break;
       }
     } else {
-      assert(mainAxisSize == MainAxisSize.max);
       leadingSpace = 0.0;
       betweenSpace = 0.0;
       switch (_direction) {
