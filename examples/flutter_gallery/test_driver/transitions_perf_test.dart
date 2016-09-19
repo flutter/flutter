@@ -27,6 +27,7 @@ final List<String> demoTitles = <String>[
   'Shrine',
   'Contact profile',
   // Components
+  'Bottom navigation',
   'Buttons',
   'Cards',
   'Chips',
