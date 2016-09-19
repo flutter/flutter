@@ -1856,15 +1856,16 @@ class Flex extends MultiChildRenderObjectWidget {
   /// How the children should be placed along the main axis.
   final MainAxisAlignment mainAxisAlignment;
 
-  /// The limit that defines how much space is available along the main axis.
+  /// How much space space should be occupied in the main axis.
   ///
-  /// By default the size of this widget will be as big as the incoming
-  /// max constraint. In other words it will become as big as possible
-  /// along its main axis by growing [Flexible] children and inserting
-  /// space between children per the [mainAxisAlignment] parameter.
-  /// If mainAxisSize is [MainAxisSize.min] then this widget's size along
-  /// the main axis will be as small as possible. This version of the layout
-  /// is sometimes referred to as "shrink wrapping".
+  /// After allocating space to children, there might be some remaining free
+  /// space. This value controls whether to maximize or minimize the amount of
+  /// free space, subject to the incoming layout contraints.
+  ///
+  /// If some children have a non-zero flex factors (and none have a fit of
+  /// [FlexFit.loose]), they will expand to consume all the available space and
+  /// there will be no remaining free space to maximize or minimize, making this
+  /// value irrelevant to the final layout.
   final MainAxisSize mainAxisSize;
 
   /// How the children should be placed along the cross axis.
