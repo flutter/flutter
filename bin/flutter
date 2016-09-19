@@ -41,7 +41,25 @@ DART="$DART_SDK_PATH/bin/dart"
 
     echo Building flutter tool...
     FLUTTER_DIR="$FLUTTER_ROOT/packages/flutter"
-    (cd "$FLUTTER_TOOLS_DIR"; "../../bin/cache/dart-sdk/bin/pub" get --verbosity=warning)
+
+    # Capture pub output for filtering expected analyzer dependency warning.
+    PUB_OUT=`({(cd "$FLUTTER_TOOLS_DIR"; "../../bin/cache/dart-sdk/bin/pub" get --verbosity=warning)} 2>&1)`
+    ISSUE_COUNT=`(grep -o "Warning:\|Error:" <<< $PUB_OUT | wc -l)`
+    if [ $ISSUE_COUNT -gt 0 ]; then
+      # Filter out expected analyzer warning.
+      if [ $ISSUE_COUNT -eq 1 ]; then
+        if grep -q "dart-sdk/lib/analyzer" <<< $PUB_OUT; then
+          # But only of overridden dependencies.
+          if grep -q -v "overridden dependencies" <<< $PUB_OUT; then
+            echo $PUB_OUT
+          fi
+        # If there's more than one issue, display them all.  
+        else
+          echo $PUB_OUT
+        fi
+      fi
+    fi
+
     "$DART" --snapshot="$SNAPSHOT_PATH" --packages="$FLUTTER_TOOLS_DIR/.packages" "$SCRIPT_PATH"
     echo $REVISION > "$STAMP_PATH"
   fi
