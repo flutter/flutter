@@ -69,6 +69,9 @@ abstract class InkSplash {
 
   /// Free up the resources associated with this reaction.
   void dispose();
+
+  /// The default radius of an ink splash in logical pixels.
+  static const double defaultRadius = 35.0;
 }
 
 /// A visual emphasis on a part of a [Material] receiving user interaction.
@@ -288,7 +291,6 @@ class _MaterialState extends State<Material> {
 const Duration _kHighlightFadeDuration = const Duration(milliseconds: 200);
 const Duration _kUnconfirmedSplashDuration = const Duration(seconds: 1);
 
-const double kDefaultSplashRadius = 35.0; // logical pixels
 const double _kSplashConfirmedVelocity = 1.0; // logical pixels per millisecond
 const double _kSplashInitialSize = 0.0; // logical pixels
 
@@ -326,10 +328,10 @@ class _RenderInkFeatures extends RenderProxyBox implements MaterialInkController
       radius = _getSplashTargetSize(size, position);
     } else {
       assert(rectCallback == null);
-      radius = kDefaultSplashRadius;
+      radius = InkSplash.defaultRadius;
     }
     _InkSplash splash = new _InkSplash(
-      renderer: this,
+      controller: this,
       referenceBox: referenceBox,
       position: position,
       color: color,
@@ -359,7 +361,7 @@ class _RenderInkFeatures extends RenderProxyBox implements MaterialInkController
     VoidCallback onRemoved
   }) {
     _InkHighlight highlight = new _InkHighlight(
-      renderer: this,
+      controller: this,
       referenceBox: referenceBox,
       color: color,
       shape: shape,
@@ -373,7 +375,7 @@ class _RenderInkFeatures extends RenderProxyBox implements MaterialInkController
   @override
   void addInkFeature(InkFeature feature) {
     assert(!feature._debugDisposed);
-    assert(feature.renderer == this);
+    assert(feature._controller == this);
     assert(!_inkFeatures.contains(feature));
     _inkFeatures.add(feature);
     markNeedsPaint();
@@ -418,18 +420,18 @@ class _InkFeatures extends SingleChildRenderObjectWidget {
 
 /// A visual reaction on a piece of [Material].
 ///
-/// Typically used with [MaterialInkController].
+/// To add an ink feature to a piece of [Material], obtain the
+/// [MaterialInkController] via [Material.of] and call
+/// [MaterialInkController.addInkFeature].
 abstract class InkFeature {
-  /// To add an ink feature to a piece of Material, obtain the
-  /// [MaterialInkController] via [Material.of] and call
-  /// [MaterialInkController.addInkFeature].
+  /// Initializes fields for subclasses.
   InkFeature({
-    this.renderer,
+    MaterialInkController controller,
     this.referenceBox,
     this.onRemoved
-  });
+  }) : _controller = controller;
 
-  final _RenderInkFeatures renderer;
+  _RenderInkFeatures _controller;
 
   /// The render box whose visual position defines the frame of reference for this ink feature.
   final RenderBox referenceBox;
@@ -443,7 +445,7 @@ abstract class InkFeature {
   void dispose() {
     assert(!_debugDisposed);
     assert(() { _debugDisposed = true; return true; });
-    renderer._removeFeature(this);
+    _controller._removeFeature(this);
     if (onRemoved != null)
       onRemoved();
   }
@@ -454,7 +456,7 @@ abstract class InkFeature {
     // find the chain of renderers from us to the feature's referenceBox
     List<RenderBox> descendants = <RenderBox>[referenceBox];
     RenderBox node = referenceBox;
-    while (node != renderer) {
+    while (node != _controller) {
       node = node.parent;
       assert(node != null);
       descendants.add(node);
@@ -479,7 +481,7 @@ abstract class InkFeature {
 
 class _InkSplash extends InkFeature implements InkSplash {
   _InkSplash({
-    _RenderInkFeatures renderer,
+    _RenderInkFeatures controller,
     RenderBox referenceBox,
     this.position,
     this.color,
@@ -487,9 +489,9 @@ class _InkSplash extends InkFeature implements InkSplash {
     this.clipCallback,
     this.repositionToReferenceBox,
     VoidCallback onRemoved
-  }) : super(renderer: renderer, referenceBox: referenceBox, onRemoved: onRemoved) {
+  }) : super(controller: controller, referenceBox: referenceBox, onRemoved: onRemoved) {
     _radiusController = new AnimationController(duration: _kUnconfirmedSplashDuration)
-      ..addListener(renderer.markNeedsPaint)
+      ..addListener(controller.markNeedsPaint)
       ..forward();
     _radius = new Tween<double>(
       begin: _kSplashInitialSize,
@@ -497,7 +499,7 @@ class _InkSplash extends InkFeature implements InkSplash {
     ).animate(_radiusController);
 
     _alphaController = new AnimationController(duration: _kHighlightFadeDuration)
-      ..addListener(renderer.markNeedsPaint)
+      ..addListener(controller.markNeedsPaint)
       ..addStatusListener(_handleAlphaStatusChanged);
     _alpha = new IntTween(
       begin: color.alpha,
@@ -571,16 +573,16 @@ class _InkSplash extends InkFeature implements InkSplash {
 
 class _InkHighlight extends InkFeature implements InkHighlight {
   _InkHighlight({
-    _RenderInkFeatures renderer,
+    _RenderInkFeatures controller,
     RenderBox referenceBox,
     this.rectCallback,
     Color color,
     this.shape,
     VoidCallback onRemoved
   }) : _color = color,
-       super(renderer: renderer, referenceBox: referenceBox, onRemoved: onRemoved) {
+       super(controller: controller, referenceBox: referenceBox, onRemoved: onRemoved) {
     _alphaController = new AnimationController(duration: _kHighlightFadeDuration)
-      ..addListener(renderer.markNeedsPaint)
+      ..addListener(controller.markNeedsPaint)
       ..addStatusListener(_handleAlphaStatusChanged)
       ..forward();
     _alpha = new IntTween(
@@ -600,7 +602,7 @@ class _InkHighlight extends InkFeature implements InkHighlight {
     if (value == _color)
       return;
     _color = value;
-    renderer.markNeedsPaint();
+    _controller.markNeedsPaint();
   }
 
   final BoxShape shape;
@@ -639,7 +641,7 @@ class _InkHighlight extends InkFeature implements InkHighlight {
     if (shape == BoxShape.rectangle)
       canvas.drawRect(rect, paint);
     else
-      canvas.drawCircle(rect.center, kDefaultSplashRadius, paint);
+      canvas.drawCircle(rect.center, InkSplash.defaultRadius, paint);
   }
 
   @override

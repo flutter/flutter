@@ -1159,7 +1159,7 @@ abstract class SingleChildRenderObjectWidget extends RenderObjectWidget {
 /// storage for that child list, it doesn't actually provide the updating
 /// logic.)
 abstract class MultiChildRenderObjectWidget extends RenderObjectWidget {
-  /// Initializes this object's fields for its subclasses.
+  /// Initializes fields for subclasses.
   ///
   /// The [children] argument must not be null and must not contain any null
   /// objects.
