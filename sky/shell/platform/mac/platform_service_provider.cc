@@ -19,8 +19,6 @@
 #include "flutter/services/vsync/mac/vsync_provider_mac_impl.h"
 #endif  // TARGET_OS_IPHONE
 
-#include "flutter/services/ns_net/network_service_impl.h"
-
 namespace sky {
 namespace shell {
 
@@ -34,11 +32,6 @@ PlatformServiceProvider::~PlatformServiceProvider() {}
 void PlatformServiceProvider::ConnectToService(
     const mojo::String& service_name,
     mojo::ScopedMessagePipeHandle client_handle) {
-  if (service_name == mojo::NetworkService::Name_) {
-    new mojo::NetworkServiceImpl(
-        mojo::InterfaceRequest<mojo::NetworkService>(client_handle.Pass()));
-    return;
-  }
 #if TARGET_OS_IPHONE
   if (service_name == ::media::MediaPlayer::Name_) {
     new sky::services::media::MediaPlayerImpl(

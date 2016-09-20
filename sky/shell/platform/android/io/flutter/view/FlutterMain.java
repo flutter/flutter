@@ -43,13 +43,11 @@ import org.chromium.mojom.flutter.platform.SystemChrome;
 import org.chromium.mojom.flutter.platform.SystemSound;
 import org.chromium.mojom.flutter.platform.UrlLauncher;
 import org.chromium.mojom.media.MediaService;
-import org.chromium.mojom.mojo.NetworkService;
 import org.chromium.mojom.sensors.SensorService;
 import org.chromium.mojom.vsync.VSyncProvider;
 import org.domokit.activity.ActivityImpl;
 import org.domokit.editing.ClipboardImpl;
 import org.domokit.media.MediaServiceImpl;
-import org.domokit.oknet.NetworkServiceImpl;
 import org.domokit.platform.HapticFeedbackImpl;
 import org.domokit.platform.PathProviderImpl;
 import org.domokit.platform.SystemChromeImpl;
@@ -221,13 +219,6 @@ public class FlutterMain {
             @Override
             public Binding connectToService(FlutterView view, Core core, MessagePipeHandle pipe) {
                 return MediaService.MANAGER.bind(new MediaServiceImpl(view.getContext(), core), pipe);
-            }
-        });
-
-        registry.register(NetworkService.MANAGER.getName(), new ServiceFactory() {
-            @Override
-            public Binding connectToService(FlutterView view, Core core, MessagePipeHandle pipe) {
-                return NetworkService.MANAGER.bind(new NetworkServiceImpl(view.getContext(), core), pipe);
             }
         });
 
