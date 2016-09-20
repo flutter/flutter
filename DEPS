@@ -27,9 +27,10 @@ vars = {
 
   # Note: When updating the Dart revision, ensure that all entries that are
   # dependencies of dart are also updated
-  'dart_revision': '4b328e442f08c08dcb7a7750f9d0b7f38d4bc3c8',
+  'dart_revision': '43231d9ff416e301206239b76ad645ca38f34116',
+  'dart_boringssl_gen_revision': 'e3a1b341a3890ab10d372dc2fe6d1c6798828293',
   'dart_boringssl_revision': '8d343b44bbab829d1a28fdef650ca95f7db4412e',
-  'dart_observatory_packages_revision': 'a01235b5b71df27b602dae4676d0bf771cbe7fa2',
+  'dart_observatory_packages_revision': '26aad88f1c1915d39bbcbff3cad589e2402fdcf1',
   'dart_root_certificates_revision': 'aed07942ce98507d2be28cbd29e879525410c7fc',
 
   'buildtools_revision': '565d04e8741429fb1b4f26d102f2c6c3b849edeb',
@@ -94,8 +95,11 @@ deps = {
   'src/dart':
     Var('chromium_git') + '/external/github.com/dart-lang/sdk.git' + '@' + Var('dart_revision'),
 
-  'src/dart/third_party/boringssl/src':
-   'https://boringssl.googlesource.com/boringssl.git@' + Var('dart_boringssl_revision'),
+  'src/third_party/boringssl':
+    Var('github_git') + '/dart-lang/boringssl_gen.git' + '@' + Var('dart_boringssl_gen_revision'),
+
+  'src/third_party/boringssl/src':
+   'https://boringssl.googlesource.com/boringssl.git' + '@' + Var('dart_boringssl_revision'),
 
   'src/dart/third_party/observatory_pub_packages':
    Var('chromium_git') +
