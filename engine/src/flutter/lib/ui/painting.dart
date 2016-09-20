@@ -19,8 +19,36 @@ class Color {
   const Color(int value) : value = value & 0xFFFFFFFF;
 
   /// Construct a color from the lower 8 bits of four integers.
+  ///
+  /// * `a` is the alpha value, with 0 being transparent and 255 being fully
+  ///   opaque.
+  /// * `r` is [red], from 0 to 255.
+  /// * `g` is [red], from 0 to 255.
+  /// * `b` is [red], from 0 to 255.
+  ///
+  /// Out of range values are brought into range using modulo 255.
+  ///
+  /// See also [fromARGB], which takes the alpha value as a floating point
+  /// value.
   const Color.fromARGB(int a, int r, int g, int b) :
     value = ((((a & 0xff) << 24) |
+                ((r & 0xff) << 16) |
+                ((g & 0xff) << 8) |
+                ((b & 0xff) << 0)) & 0xFFFFFFFF);
+
+  /// Create a color from red, green, blue, and opacity, similar to `rgba()` in CSS.
+  ///
+  /// * `r` is [red], from 0 to 255.
+  /// * `g` is [red], from 0 to 255.
+  /// * `b` is [red], from 0 to 255.
+  /// * `opacity` is alpha channel of this color as a double, with 0.0 being
+  ///   transparent and 1.0 being fully opaque.
+  ///
+  /// Out of range values are brought into range using modulo 255.
+  ///
+  /// See also [fromARGB], which takes the opacity as an integer value.
+  const Color.fromRGBO(int r, int g, int b, double opacity) :
+    value = (((((opacity * 0xff ~/ 1) & 0xff) << 24) |
                 ((r & 0xff) << 16) |
                 ((g & 0xff) << 8) |
                 ((b & 0xff) << 0)) & 0xFFFFFFFF);
@@ -34,9 +62,15 @@ class Color {
   final int value;
 
   /// The alpha channel of this color in an 8 bit value.
+  ///
+  /// A value of 0 means this color is fully transparent. A value of 255 means
+  /// this color is fully opaque.
   int get alpha => (0xff000000 & value) >> 24;
 
   /// The alpha channel of this color as a double.
+  ///
+  /// A value of 0.0 means this color is fully transparent. A value of 1.0 means
+  /// this color is fully opaque.
   double get opacity => alpha / 0xFF;
 
   /// The red channel of this color in an 8 bit value.
