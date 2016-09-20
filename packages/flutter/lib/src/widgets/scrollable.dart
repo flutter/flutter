@@ -429,17 +429,22 @@ class ScrollableState<T extends Scrollable> extends State<T> {
     });
   }
 
-  void _setScrollOffset(double newScrollOffset, { DragUpdateDetails details }) {
+  void _setScrollOffset(double newScrollOffset, { DragUpdateDetails details, bool didUpdateRenderer: false }) {
     if (_scrollOffset == newScrollOffset)
       return;
-
     final ClampOverscrolls clampOverscrolls = ClampOverscrolls.of(context);
     final double clampedScrollOffset = clampOverscrolls?.clampScrollOffset(this, newScrollOffset) ?? newScrollOffset;
-    setState(() {
+    if (didUpdateRenderer) {
       _virtualScrollOffset = newScrollOffset;
       _scrollUnderway = _scrollOffset != clampedScrollOffset;
       _scrollOffset = clampedScrollOffset;
-    });
+    } else {
+      setState(() {
+        _virtualScrollOffset = newScrollOffset;
+        _scrollUnderway = _scrollOffset != clampedScrollOffset;
+        _scrollOffset = clampedScrollOffset;
+      });
+    }
     PageStorage.of(context)?.writeState(context, _scrollOffset);
     _startScroll();
     dispatchOnScroll();
@@ -466,25 +471,37 @@ class ScrollableState<T extends Scrollable> extends State<T> {
 
   /// Scroll this widget to the given scroll offset.
   ///
-  /// If a non-null [duration] is provided, the widget will animate to the new
+  /// If a non-null `duration` is provided, the widget will animate to the new
   /// scroll offset over the given duration with the given curve.
   ///
   /// This function does not accept a zero duration. To jump-scroll to
   /// the new offset, do not provide a duration, rather than providing
   /// a zero duration.
   ///
+  /// The `curve`, if provided, is used to curve the animation. It is only used
+  /// if there is a `duration` and the new scroll offset is not the same as the
+  /// current scroll offset.
+  ///
+  /// The `details`, on the other hand, are only used if there is no duration.
+  ///
+  /// `didUpdateRenderer` should be set to true if this is being called during
+  /// layout, but before paint, after the scroll offset was synchronously
+  /// updated. It causes the [Scrollable] to avoid calling [setState], since
+  /// there's no need to schedule another build in that case.
+  ///
   /// The returned [Future] completes when the scrolling animation is complete.
   Future<Null> scrollTo(double newScrollOffset, {
     Duration duration,
     Curve curve: Curves.ease,
-    DragUpdateDetails details
+    DragUpdateDetails details,
+    bool didUpdateRenderer: false
   }) {
     if (newScrollOffset == _scrollOffset)
       return new Future<Null>.value();
 
     if (duration == null) {
       _stop();
-      _setScrollOffset(newScrollOffset, details: details);
+      _setScrollOffset(newScrollOffset, details: details, didUpdateRenderer: didUpdateRenderer);
       return new Future<Null>.value();
     }
 
@@ -509,8 +526,13 @@ class ScrollableState<T extends Scrollable> extends State<T> {
   /// the current velocity when updating the physics.
   ///
   /// If there are no in-progress scrolling physics, this function scrolls to
-  /// the given offset instead.
-  void didUpdateScrollBehavior(double newScrollOffset) {
+  /// the given offset with no animation.
+  ///
+  /// `didUpdateRenderer` should be set to true if this is being called during
+  /// layout, but before paint, after the scroll offset was synchronously
+  /// updated. It causes the [Scrollable] to avoid calling [setState], since
+  /// there's no need to schedule another build in that case.
+  void didUpdateScrollBehavior(double newScrollOffset, { bool didUpdateRenderer: false}) {
     // This does not call setState, because if anything below actually
     // changes our build, it will itself independently trigger a frame.
     assert(_controller.isAnimating || _simulation == null);
@@ -521,7 +543,7 @@ class ScrollableState<T extends Scrollable> extends State<T> {
       }
       return;
     }
-    scrollTo(newScrollOffset);
+    scrollTo(newScrollOffset, didUpdateRenderer: didUpdateRenderer);
   }
 
   /// Updates the scroll behavior for the new content and container extent.
@@ -540,7 +562,7 @@ class ScrollableState<T extends Scrollable> extends State<T> {
       contentExtent: contentExtent,
       containerExtent: containerExtent,
       scrollOffset: scrollOffset
-    ));
+    ), didUpdateRenderer: true);
     updateGestureDetector();
   }
 
