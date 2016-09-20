@@ -83,7 +83,7 @@ class _TaskRunner {
     } on TimeoutException catch (_) {
       return new TaskResult.failure('Task timed out after $taskTimeout');
     } finally {
-      forceQuitRunningProcesses();
+      await forceQuitRunningProcesses();
       _closeKeepAlivePort();
     }
   }
