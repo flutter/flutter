@@ -83,7 +83,7 @@ class ScrollableGrid extends StatelessWidget {
 
   Widget _buildViewport(BuildContext context, ScrollableState state, double scrollOffset) {
     return new GridViewport(
-      startOffset: scrollOffset,
+      scrollOffset: scrollOffset,
       delegate: delegate,
       onExtentsChanged: state.handleExtentsChanged,
       children: children
@@ -126,7 +126,7 @@ class GridViewport extends VirtualViewportFromIterable {
   ///
   /// The [delegate] argument must not be null.
   GridViewport({
-    this.startOffset,
+    this.scrollOffset,
     this.delegate,
     this.onExtentsChanged,
     this.children
@@ -134,8 +134,15 @@ class GridViewport extends VirtualViewportFromIterable {
     assert(delegate != null);
   }
 
+  /// The [startOffset] without taking the [padding] into account.
+  final double scrollOffset;
+
   @override
-  final double startOffset;
+  double get startOffset {
+    if (delegate == null)
+      return scrollOffset;
+    return scrollOffset - delegate.padding.top;
+  }
 
   /// The delegate that controls the layout of the children.
   final GridDelegate delegate;
