@@ -8,6 +8,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/http.dart' as http;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -109,6 +110,13 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   @override
   void initInstances() {
     timeDilation = 1.0; // just in case the developer has artificially changed it for development
+    http.Client.clientOverride = () {
+      return new http.MockClient((http.Request request){
+        return new Future<http.Response>.value(
+          new http.Response("Mocked: Unavailable.", 404, request: request)
+        );
+      });
+    };
     super.initInstances();
   }
 
