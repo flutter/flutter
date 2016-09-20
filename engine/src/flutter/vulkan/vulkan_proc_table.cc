@@ -70,7 +70,6 @@ bool VulkanProcTable::AcquireProcs() {
   ACQUIRE_PROC(enumeratePhysicalDevices, "vkEnumeratePhysicalDevices");
   ACQUIRE_PROC(createDevice, "vkCreateDevice");
   ACQUIRE_PROC(destroyDevice, "vkDestroyDevice");
-  ACQUIRE_PROC(createAndroidSurfaceKHR, "vkCreateAndroidSurfaceKHR");
   ACQUIRE_PROC(getDeviceQueue, "vkGetDeviceQueue");
   ACQUIRE_PROC(getPhysicalDeviceSurfaceCapabilitiesKHR,
                "vkGetPhysicalDeviceSurfaceCapabilitiesKHR");
@@ -81,8 +80,8 @@ bool VulkanProcTable::AcquireProcs() {
   ACQUIRE_PROC(getPhysicalDeviceSurfacePresentModesKHR,
                "vkGetPhysicalDeviceSurfacePresentModesKHR");
   ACQUIRE_PROC(destroySurfaceKHR, "vkDestroySurfaceKHR");
-  ACQUIRE_PROC(createCommandPool, "createCommandPool");
-  ACQUIRE_PROC(destroyCommandPool, "destroyCommandPool");
+  ACQUIRE_PROC(createCommandPool, "vkCreateCommandPool");
+  ACQUIRE_PROC(destroyCommandPool, "vkDestroyCommandPool");
   ACQUIRE_PROC(createSemaphore, "vkCreateSemaphore");
   ACQUIRE_PROC(destroySemaphore, "vkDestroySemaphore");
   ACQUIRE_PROC(allocateCommandBuffers, "vkAllocateCommandBuffers");
@@ -90,6 +89,10 @@ bool VulkanProcTable::AcquireProcs() {
   ACQUIRE_PROC(createFence, "vkCreateFence");
   ACQUIRE_PROC(destroyFence, "vkDestroyFence");
   ACQUIRE_PROC(waitForFences, "vkWaitForFences");
+
+#if OS_ANDROID
+  ACQUIRE_PROC(createAndroidSurfaceKHR, "vkCreateAndroidSurfaceKHR");
+#endif  // OS_ANDROID
 
 #undef ACQUIRE_PROC
 

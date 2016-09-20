@@ -6,7 +6,12 @@
 
 namespace vulkan {
 
-VulkanWindow::VulkanWindow(void* native_window) : valid_(false) {
+VulkanWindow::VulkanWindow(std::unique_ptr<VulkanSurface> platform_surface)
+    : valid_(false), platform_surface_(std::move(platform_surface)) {
+  if (platform_surface_ == nullptr || !platform_surface_->IsValid()) {
+    return;
+  }
+
   if (!vk.IsValid()) {
     return;
   }
@@ -15,7 +20,7 @@ VulkanWindow::VulkanWindow(void* native_window) : valid_(false) {
     return;
   }
 
-  if (!CreateSurface(native_window)) {
+  if (!CreateSurface()) {
     return;
   }
 
@@ -64,7 +69,7 @@ bool VulkanWindow::CreateInstance() {
   };
 
   const char* extensions[] = {
-      VK_KHR_SURFACE_EXTENSION_NAME, VK_KHR_ANDROID_SURFACE_EXTENSION_NAME,
+      VK_KHR_SURFACE_EXTENSION_NAME, platform_surface_->ExtensionName(),
   };
 
   const VkInstanceCreateInfo create_info = {
@@ -89,22 +94,14 @@ bool VulkanWindow::CreateInstance() {
   return true;
 }
 
-bool VulkanWindow::CreateSurface(void* native_window) {
+bool VulkanWindow::CreateSurface() {
   if (!instance_) {
     return false;
   }
 
-  const VkAndroidSurfaceCreateInfoKHR create_info = {
-      .sType = VK_STRUCTURE_TYPE_ANDROID_SURFACE_CREATE_INFO_KHR,
-      .pNext = nullptr,
-      .flags = 0,
-      .window = native_window,
-  };
+  VkSurfaceKHR surface = platform_surface_->CreateSurfaceHandle(vk, instance_);
 
-  VkSurfaceKHR surface = VK_NULL_HANDLE;
-
-  if (vk.createAndroidSurfaceKHR(instance_, &create_info, nullptr, &surface) !=
-      VK_SUCCESS) {
+  if (surface == VK_NULL_HANDLE) {
     return false;
   }
 

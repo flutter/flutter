@@ -45,7 +45,6 @@ class VulkanProcTable {
   Proc<PFN_vkEnumeratePhysicalDevices> enumeratePhysicalDevices;
   Proc<PFN_vkCreateDevice> createDevice;
   Proc<PFN_vkDestroyDevice> destroyDevice;
-  Proc<PFN_vkCreateAndroidSurfaceKHR> createAndroidSurfaceKHR;
   Proc<PFN_vkGetDeviceQueue> getDeviceQueue;
   Proc<PFN_vkGetPhysicalDeviceSurfaceCapabilitiesKHR>
       getPhysicalDeviceSurfaceCapabilitiesKHR;
@@ -66,6 +65,10 @@ class VulkanProcTable {
   Proc<PFN_vkCreateFence> createFence;
   Proc<PFN_vkDestroyFence> destroyFence;
   Proc<PFN_vkWaitForFences> waitForFences;
+
+#if OS_ANDROID
+  Proc<PFN_vkCreateAndroidSurfaceKHR> createAndroidSurfaceKHR;
+#endif  // OS_ANDROID
 
  private:
   bool valid_;
