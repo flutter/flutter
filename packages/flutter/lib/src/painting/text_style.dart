@@ -35,6 +35,10 @@ class TextStyle {
   final String fontFamily;
 
   /// The size of gyphs (in logical pixels) to use when painting the text.
+  ///
+  /// During painting, the [fontSize] is multiplied by the current
+  /// `textScaleFactor` to let users make it easier to read text by increasing
+  /// its size.
   final double fontSize;
 
   /// The typeface thickness to use when painting the text (e.g., bold).
@@ -207,7 +211,7 @@ class TextStyle {
   }
 
   /// The style information for text runs, encoded for use by `dart:ui`.
-  ui.TextStyle get textStyle {
+  ui.TextStyle getTextStyle({ double textScaleFactor: 1.0 }) {
     return new ui.TextStyle(
       color: color,
       decoration: decoration,
@@ -217,7 +221,7 @@ class TextStyle {
       fontStyle: fontStyle,
       textBaseline: textBaseline,
       fontFamily: fontFamily,
-      fontSize: fontSize,
+      fontSize: fontSize == null ? null : fontSize * textScaleFactor,
       letterSpacing: letterSpacing,
       wordSpacing: wordSpacing,
       height: height
@@ -225,13 +229,13 @@ class TextStyle {
   }
 
   /// The style information for paragraphs, encoded for use by `dart:ui`.
-  ui.ParagraphStyle getParagraphStyle({ TextAlign textAlign }) {
+  ui.ParagraphStyle getParagraphStyle({ TextAlign textAlign, double textScaleFactor: 1.0 }) {
     return new ui.ParagraphStyle(
       textAlign: textAlign,
       fontWeight: fontWeight,
       fontStyle: fontStyle,
       fontFamily: fontFamily,
-      fontSize: fontSize,
+      fontSize: fontSize == null ? null : fontSize * textScaleFactor,
       lineHeight: height
     );
   }

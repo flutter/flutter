@@ -44,11 +44,12 @@ class RenderEditableLine extends RenderBox {
     Color cursorColor,
     bool showCursor: false,
     Color selectionColor,
+    double textScaleFactor: 1.0,
     TextSelection selection,
     this.onSelectionChanged,
     Offset paintOffset: Offset.zero,
     this.onPaintOffsetUpdateNeeded
-  }) : _textPainter = new TextPainter(text: text),
+  }) : _textPainter = new TextPainter(text: text, textScaleFactor: textScaleFactor),
        _cursorColor = cursorColor,
        _showCursor = showCursor,
        _selection = selection,
@@ -109,6 +110,19 @@ class RenderEditableLine extends RenderBox {
       return;
     _selectionColor = value;
     markNeedsPaint();
+  }
+
+  /// The number of font pixels for each logical pixel.
+  ///
+  /// For example, if the text scale factor is 1.5, text will be 50% larger than
+  /// the specified font size.
+  double get textScaleFactor => _textPainter.textScaleFactor;
+  set textScaleFactor(double value) {
+    assert(value != null);
+    if (_textPainter.textScaleFactor == value)
+      return;
+    _textPainter.textScaleFactor = value;
+    markNeedsLayout();
   }
 
   List<ui.TextBox> _selectionRects;
@@ -181,7 +195,7 @@ class RenderEditableLine extends RenderBox {
   double get _preferredHeight {
     if (_layoutTemplate == null) {
       ui.ParagraphBuilder builder = new ui.ParagraphBuilder()
-        ..pushStyle(text.style.textStyle)
+        ..pushStyle(text.style.getTextStyle(textScaleFactor: textScaleFactor))
         ..addText(_kZeroWidthSpace);
       // TODO(abarth): ParagraphBuilder#build's argument should be optional.
       // TODO(abarth): These min/max values should be the default for ui.Paragraph.

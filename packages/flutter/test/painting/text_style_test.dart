@@ -89,10 +89,10 @@ void main() {
     expect(s5.height, 123.0);
     expect(s5.color, isNull);
 
-    ui.TextStyle ts5 = s5.textStyle;
+    ui.TextStyle ts5 = s5.getTextStyle();
     expect(ts5, equals(new ui.TextStyle(fontWeight: FontWeight.w700, fontSize: 12.0, height: 123.0)));
     expect(ts5.toString(), 'TextStyle(color: unspecified, decoration: unspecified, decorationColor: unspecified, decorationStyle: unspecified, fontWeight: FontWeight.w700, fontStyle: unspecified, textBaseline: unspecified, fontFamily: unspecified, fontSize: 12.0, letterSpacing: unspecified, wordSpacing: unspecified, height: 123.0x)');
-    ui.TextStyle ts2 = s2.textStyle;
+    ui.TextStyle ts2 = s2.getTextStyle();
     expect(ts2, equals(new ui.TextStyle(color: const Color(0xFF00FF00), fontWeight: FontWeight.w800, fontSize: 10.0, height: 100.0)));
     expect(ts2.toString(), 'TextStyle(color: Color(0xff00ff00), decoration: unspecified, decorationColor: unspecified, decorationStyle: unspecified, fontWeight: FontWeight.w800, fontStyle: unspecified, textBaseline: unspecified, fontFamily: unspecified, fontSize: 10.0, letterSpacing: unspecified, wordSpacing: unspecified, height: 100.0x)');
 

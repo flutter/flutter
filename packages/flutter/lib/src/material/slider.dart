@@ -251,6 +251,8 @@ class _RenderSlider extends RenderConstrainedBox implements SemanticActionHandle
     _label = newLabel;
     additionalConstraints = _getAdditionalConstraints(_label);
     if (newLabel != null) {
+      // TODO(abarth): Handle textScaleFactor.
+      // https://github.com/flutter/flutter/issues/5938
       _labelPainter
         ..text = new TextSpan(
           style: Typography.white.body1.copyWith(fontSize: 10.0),
