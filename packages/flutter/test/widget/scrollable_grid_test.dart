@@ -22,7 +22,7 @@ void main() {
             columnCount: 1,
             padding: padding
           ),
-          children: new List.generate(10, (int index) {
+          children: new List<Widget>.generate(10, (int index) {
             return new Text('$index', key: new ValueKey<int>(index));
           })
         )
