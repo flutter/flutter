@@ -744,7 +744,7 @@ class _LazyBlockElement extends RenderObjectElement {
     // we don't need.
 
     _underflow = currentLogicalOffset < endLogicalOffset;
-    if (currentLogicalOffset < endLogicalOffset) {
+    if (_underflow) {
       // The last element is visible. We can scroll as far as they want, there's
       // nothing more to paint.
       _startOffsetUpperLimit = double.INFINITY;
