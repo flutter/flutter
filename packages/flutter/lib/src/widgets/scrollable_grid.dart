@@ -134,7 +134,7 @@ class GridViewport extends VirtualViewportFromIterable {
     assert(delegate != null);
   }
 
-  /// The [startOffset] without taking the [padding] into account.
+  /// The [startOffset] without taking the [delegate]'s padding into account.
   final double scrollOffset;
 
   @override
