@@ -996,6 +996,8 @@ abstract class ProxyWidget extends Widget {
 /// thus also to a particular [RenderObjectWidget] class. That class is `T`, the
 /// [ParentDataWidget] type argument.
 abstract class ParentDataWidget<T extends RenderObjectWidget> extends ProxyWidget {
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
   const ParentDataWidget({ Key key, Widget child })
     : super(key: key, child: child);
 
@@ -1041,6 +1043,24 @@ abstract class ParentDataWidget<T extends RenderObjectWidget> extends ProxyWidge
     return result;
   }
 
+  /// Write the data from this widget into the given render object's parent data.
+  ///
+  /// The framework calls this function whenever it detects that the
+  /// [RenderObject] associated with the [child] has outdated
+  /// [RenderObject.parentData]. For example, if the render object was recently
+  /// inserted into the render tree, the render object's parent data might not
+  /// match the data in this widget.
+  ///
+  /// Subclasses are expected to override this function to copy data from their
+  /// fields into the [RenderObject.parentData] field of the given render
+  /// object. The render object's parent is guaranteed to have been created by a
+  /// widget of type `T`, which usually means that this function can assume that
+  /// the render object's parent data object inherits from a particular class.
+  ///
+  /// If this function modifies data that can change the parent's layout or
+  /// painting, this function is responsible for calling
+  /// [RenderObject.markNeedsLayout] or [RenderObject.markNeedsPaint] on the
+  /// parent, as appropriate.
   @protected
   void applyParentData(RenderObject renderObject);
 }
@@ -1053,12 +1073,26 @@ abstract class ParentDataWidget<T extends RenderObjectWidget> extends ProxyWidge
 /// Inherited widgets, when referenced in this way, will cause the consumer to
 /// rebuild when the inherited widget itself changes state.
 abstract class InheritedWidget extends ProxyWidget {
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
   const InheritedWidget({ Key key, Widget child })
     : super(key: key, child: child);
 
   @override
   InheritedElement createElement() => new InheritedElement(this);
 
+  /// Whether the framework should notify widgets that inherit from this widget.
+  ///
+  /// When this widget is rebuilt, sometimes we need to rebuild the widgets that
+  /// inherit from this widget but sometimes we do not. For example, if the data
+  /// held by this widget is the same as the data held by `oldWidget`, then then
+  /// we do not need to rebuild the widgets that inherited the data held by
+  /// `oldWidget`.
+  ///
+  /// The framework distinguishes these cases by calling this function with the
+  /// widget that previously occupied this location in the tree as an argument.
+  /// The given widget is guaranteed to have the same [runtimeType] as this
+  /// object.
   @protected
   bool updateShouldNotify(InheritedWidget oldWidget);
 }
@@ -1067,6 +1101,8 @@ abstract class InheritedWidget extends ProxyWidget {
 /// which wrap [RenderObject]s, which provide the actual rendering of the
 /// application.
 abstract class RenderObjectWidget extends Widget {
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
   const RenderObjectWidget({ Key key }) : super(key: key);
 
   /// RenderObjectWidgets always inflate to a [RenderObjectElement] subclass.
@@ -1085,6 +1121,9 @@ abstract class RenderObjectWidget extends Widget {
   @protected
   void updateRenderObject(BuildContext context, RenderObject renderObject) { }
 
+  /// A render object previously associated with this widget has been removed
+  /// from the tree. The given [RenderObject] will be of the same type as
+  /// returned by this object's [createRenderObject].
   @protected
   void didUnmountRenderObject(RenderObject renderObject) { }
 }
@@ -1092,6 +1131,8 @@ abstract class RenderObjectWidget extends Widget {
 /// A superclass for RenderObjectWidgets that configure RenderObject subclasses
 /// that have no children.
 abstract class LeafRenderObjectWidget extends RenderObjectWidget {
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
   const LeafRenderObjectWidget({ Key key }) : super(key: key);
 
   @override
@@ -1102,6 +1143,8 @@ abstract class LeafRenderObjectWidget extends RenderObjectWidget {
 /// that have a single child slot. (This superclass only provides the storage
 /// for that child, it doesn't actually provide the updating logic.)
 abstract class SingleChildRenderObjectWidget extends RenderObjectWidget {
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
   const SingleChildRenderObjectWidget({ Key key, this.child }) : super(key: key);
 
   /// The widget below this widget in the tree.
@@ -1116,6 +1159,10 @@ abstract class SingleChildRenderObjectWidget extends RenderObjectWidget {
 /// storage for that child list, it doesn't actually provide the updating
 /// logic.)
 abstract class MultiChildRenderObjectWidget extends RenderObjectWidget {
+  /// Initializes this object's fields for its subclasses.
+  ///
+  /// The [children] argument must not be null and must not contain any null
+  /// objects.
   MultiChildRenderObjectWidget({ Key key, this.children })
     : super(key: key) {
     assert(children != null);
@@ -1425,6 +1472,7 @@ abstract class BuildContext {
 /// [RootRenderObjectElement.assignOwner] method on the root element of the
 /// widget tree.
 class BuildOwner {
+  /// Creates an object that manages widgets.
   BuildOwner({ this.onBuildScheduled });
 
   /// Called on each build pass when the first buildable element is marked
@@ -1700,6 +1748,11 @@ abstract class Element implements BuildContext {
     return false;
   }
 
+  /// The render object at (or below) this location in the tree.
+  ///
+  /// If this object is a [RenderObjectElement], the render object is the one at
+  /// this location in the tree. Otherwise, this getter will walk down the tree
+  /// until it finds a [RenderObjectElement].
   RenderObject get renderObject {
     RenderObject result;
     void visit(Element element) {
@@ -1867,6 +1920,12 @@ abstract class Element implements BuildContext {
     }
   }
 
+  /// Remove [renderObject] from the render tree.
+  ///
+  /// The default implementation of this function simply calls
+  /// [detachRenderObject] recursively on its children. The
+  /// [RenderObjectElement.detachRenderObject] override does the actual work of
+  /// removing [renderObject] from the render tree.
   void detachRenderObject() {
     visitChildren((Element child) {
       child.detachRenderObject();
@@ -1874,6 +1933,12 @@ abstract class Element implements BuildContext {
     _slot = null;
   }
 
+  /// Add [renderObject] to the render tree at the location specified by [slot].
+  ///
+  /// The default implementation of this function simply calls
+  /// [attachRenderObject] recursively on its children. The
+  /// [RenderObjectElement.attachRenderObject] override does the actual work of
+  /// adding [renderObject] to the render tree.
   void attachRenderObject(dynamic newSlot) {
     assert(_slot == null);
     visitChildren((Element child) {
