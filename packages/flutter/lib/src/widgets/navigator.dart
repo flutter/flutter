@@ -151,8 +151,9 @@ class NavigatorObserver {
   /// The [Navigator] popped the given route.
   void didPop(Route<dynamic> route, Route<dynamic> previousRoute) { }
 
-  /// The [Navigator] is being controlled by a user gesture. Used for the
-  /// iOS back gesture.
+  /// The [Navigator] is being controlled by a user gesture.
+  ///
+  /// Used for the iOS back gesture.
   void didStartUserGesture() { }
 
   /// User gesture is no longer controlling the [Navigator].
@@ -186,12 +187,12 @@ abstract class NavigationGestureController {
     _navigator = null;
   }
 
-  // The drag gesture has changed by [fractionalDelta]. The total range of the
-  // drag should be 0.0 to 1.0.
+  /// The drag gesture has changed by [fractionalDelta]. The total range of the
+  /// drag should be 0.0 to 1.0.
   void dragUpdate(double fractionalDelta);
 
-  // The drag gesture has ended with a horizontal motion of
-  // [fractionalVelocity] as a fraction of screen width per second.
+  /// The drag gesture has ended with a horizontal motion of
+  /// [fractionalVelocity] as a fraction of screen width per second.
   void dragEnd(double fractionalVelocity);
 }
 
@@ -304,6 +305,7 @@ class Navigator extends StatefulWidget {
       ..pushNamed(routeName);
   }
 
+  /// The state from the closest instance of this class that encloses the given context.
   static NavigatorState of(BuildContext context) {
     NavigatorState navigator = context.ancestorStateOfType(const TypeMatcher<NavigatorState>());
     assert(() {
@@ -555,22 +557,28 @@ class NavigatorState extends State<Navigator> {
     return _history.length > 1 || _history[0].willHandlePopInternally;
   }
 
+  /// Starts a gesture that results in popping the navigator.
   NavigationGestureController startPopGesture() {
     if (canPop())
       return _history.last.startPopGesture(this);
     return null;
   }
 
+  /// Whether a gesture controlled by a [NavigationGestureController] is currently in progress.
+  bool get userGestureInProgress => _userGestureInProgress;
   // TODO(mpcomplete): remove this bool when we fix
   // https://github.com/flutter/flutter/issues/5577
   bool _userGestureInProgress = false;
-  bool get userGestureInProgress => _userGestureInProgress;
 
+  /// The navigator is being controlled by a user gesture.
+  ///
+  /// Used for the iOS back gesture.
   void didStartUserGesture() {
     _userGestureInProgress = true;
     config.observer?.didStartUserGesture();
   }
 
+  /// A user gesture is no longer controlling the navigator.
   void didStopUserGesture() {
     _userGestureInProgress = false;
     config.observer?.didStopUserGesture();

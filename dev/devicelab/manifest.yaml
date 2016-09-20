@@ -103,6 +103,12 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["has-android-device"]
 
+  hot_mode_dev_cycle__benchmark:
+    description: >
+      Measures the performance of Dart VM hot patching feature.
+    stage: devicelab
+    required_agent_capabilities: ["has-android-device"]
+
 
   # iOS on-device tests
 

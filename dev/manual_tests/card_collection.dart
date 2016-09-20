@@ -363,7 +363,7 @@ class CardCollectionState extends State<CardCollection> {
     // size of the background,card Stack will be based only on the card. The
     // Viewport ensures that when the card's resize animation occurs, the
     // background (text and icons) will just be clipped, not resized.
-    Widget background = new Positioned.stretch(
+    Widget background = new Positioned.fill(
       child: new Container(
         margin: const EdgeInsets.all(4.0),
         child: new Viewport(
