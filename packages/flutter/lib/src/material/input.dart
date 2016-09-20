@@ -112,9 +112,9 @@ class _InputState extends State<Input> {
     bool focused = focusContext != null && Focus.at(focusContext, autofocus: config.autofocus);
     if (_formData == null)
       _formData = _FormFieldData.maybeCreate(context, this);
-    InputValue value = config.value ?? _formData?.value ?? InputValue.empty;
-    ValueChanged<InputValue> onChanged = config.onChanged ?? _formData?.onChanged;
-    ValueChanged<InputValue> onSubmitted = config.onSubmitted ?? _formData?.onSubmitted;
+    InputValue value =  _formData?.value ?? config.value ?? InputValue.empty;
+    ValueChanged<InputValue> onChanged = _formData?.onChanged ?? config.onChanged;
+    ValueChanged<InputValue> onSubmitted = _formData?.onSubmitted ?? config.onSubmitted;
     String errorText = config.errorText;
 
     if (errorText == null && config.formField != null && config.formField.validator != null)
@@ -260,9 +260,10 @@ class _InputState extends State<Input> {
 class _FormFieldData {
   _FormFieldData(this.inputState) {
     assert(field != null);
+    value = inputState.config.value ?? new InputValue();
   }
 
-  InputValue value = new InputValue();
+  InputValue value;
   final _InputState inputState;
   FormField<String> get field => inputState.config.formField;
 
