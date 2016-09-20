@@ -14,7 +14,7 @@ import 'material.dart';
 import 'text_selection.dart';
 import 'theme.dart';
 
-export 'package:sky_services/editing/editing.mojom.dart' show KeyboardType;
+export 'package:flutter.services.editing/editing.mojom.dart' show KeyboardType;
 
 /// A material design text input field.
 ///

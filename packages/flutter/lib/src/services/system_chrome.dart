@@ -4,13 +4,13 @@
 
 import 'dart:async';
 
-import 'package:sky_services/flutter/platform/system_chrome.mojom.dart' as mojom;
-import 'package:sky_services/flutter/platform/system_chrome.mojom.dart'
+import 'package:flutter.services.platform/system_chrome.mojom.dart' as mojom;
+import 'package:flutter.services.platform/system_chrome.mojom.dart'
     show DeviceOrientation, SystemUiOverlay, SystemUiOverlayStyle;
 
 import 'shell.dart';
 
-export 'package:sky_services/flutter/platform/system_chrome.mojom.dart'
+export 'package:flutter.services.platform/system_chrome.mojom.dart'
     show DeviceOrientation, SystemUiOverlay, SystemUiOverlayStyle;
 
 mojom.SystemChromeProxy _initSystemChromeProxy() {

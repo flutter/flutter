@@ -4,10 +4,10 @@
 
 import 'dart:async';
 
+import 'package:flutter.services.editing/editing.mojom.dart' as mojom;
 import 'package:flutter/rendering.dart' show RenderEditableLine, SelectionChangedHandler;
 import 'package:flutter/services.dart';
 import 'package:meta/meta.dart';
-import 'package:sky_services/editing/editing.mojom.dart' as mojom;
 
 import 'basic.dart';
 import 'focus.dart';
@@ -18,7 +18,7 @@ import 'scrollable.dart';
 import 'text_selection.dart';
 
 export 'package:flutter/painting.dart' show TextSelection;
-export 'package:sky_services/editing/editing.mojom.dart' show KeyboardType;
+export 'package:flutter.services.editing/editing.mojom.dart' show KeyboardType;
 
 const Duration _kCursorBlinkHalfPeriod = const Duration(milliseconds: 500);
 

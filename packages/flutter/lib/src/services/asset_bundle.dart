@@ -10,8 +10,8 @@ import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/http.dart' as http;
+import 'package:mojo.services.asset_bundle.interfaces/asset_bundle.mojom.dart' as mojom;
 import 'package:mojo/core.dart' as core;
-import 'package:mojo_services/mojo/asset_bundle/asset_bundle.mojom.dart' as mojom;
 
 import 'shell.dart';
 

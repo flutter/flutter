@@ -4,11 +4,11 @@
 
 import 'dart:async';
 
-import 'package:sky_services/media/media.mojom.dart' as mojom;
+import 'package:flutter.services.media/media.mojom.dart' as mojom;
+import 'package:flutter/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/http.dart' as http;
 
 // All of these sounds are marked as public domain at soundbible.
 const String chimes = "http://soundbible.com/grab.php?id=2030&type=wav";

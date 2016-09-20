@@ -4,7 +4,7 @@
 
 import 'dart:async';
 
-import 'package:sky_services/flutter/platform/haptic_feedback.mojom.dart' as mojom;
+import 'package:flutter.services.platform/haptic_feedback.mojom.dart' as mojom;
 
 import 'shell.dart';
 

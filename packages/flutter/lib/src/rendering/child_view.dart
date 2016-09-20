@@ -7,16 +7,16 @@ import 'dart:collection';
 import 'dart:ui' as ui;
 
 import 'package:flutter/services.dart';
-import 'package:mojo_services/mojo/gfx/composition/scene_token.mojom.dart' as mojom;
-import 'package:mojo_services/mojo/ui/view_containers.mojom.dart' as mojom;
-import 'package:mojo_services/mojo/ui/view_provider.mojom.dart' as mojom;
-import 'package:mojo_services/mojo/ui/view_properties.mojom.dart' as mojom;
-import 'package:mojo_services/mojo/ui/view_token.mojom.dart' as mojom;
-import 'package:mojo_services/mojo/ui/views.mojom.dart' as mojom;
-import 'package:mojo_services/mojo/geometry.mojom.dart' as mojom;
+import 'package:mojo.public.interfaces.application/service_provider.mojom.dart' as mojom;
+import 'package:mojo.services.geometry.interfaces/geometry.mojom.dart' as mojom;
+import 'package:mojo.services.gfx.composition.interfaces/scene_token.mojom.dart' as mojom;
+import 'package:mojo.services.ui.views.interfaces/view_containers.mojom.dart' as mojom;
+import 'package:mojo.services.ui.views.interfaces/view_properties.mojom.dart' as mojom;
+import 'package:mojo.services.ui.views.interfaces/view_provider.mojom.dart' as mojom;
+import 'package:mojo.services.ui.views.interfaces/view_token.mojom.dart' as mojom;
+import 'package:mojo.services.ui.views.interfaces/views.mojom.dart' as mojom;
 import 'package:mojo/application.dart';
 import 'package:mojo/core.dart' as core;
-import 'package:mojo/mojo/service_provider.mojom.dart' as mojom;
 
 import 'box.dart';
 import 'object.dart';

@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter.services.flutter/platform/system_chrome.mojom.dart' as mojom;
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:sky_services/flutter/platform/system_chrome.mojom.dart' as mojom;
 
 import 'constants.dart';
 import 'icon_theme.dart';
