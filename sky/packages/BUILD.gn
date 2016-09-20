@@ -8,5 +8,6 @@ group("packages") {
   deps = [
     "//flutter/sky/packages/sky_engine",
     "//flutter/sky/packages/sky_services",
+    "//flutter/sky/packages/flutter_services",
   ]
 }

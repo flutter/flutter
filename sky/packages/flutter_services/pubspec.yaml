@@ -1,0 +1,11 @@
+name: flutter_services
+version: 0.0.1
+author: Flutter Authors <flutter-dev@googlegroups.com>
+description: Services exported from the Flutter engine
+homepage: http://flutter.io
+dependencies:
+  sky_services:
+    path:
+      ../sky_services
+environment:
+  sdk: '>=1.8.0 <2.0.0'
