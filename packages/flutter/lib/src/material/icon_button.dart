@@ -126,7 +126,7 @@ class IconButton extends StatelessWidget {
         maxHeight: size,
         child: new ConstrainedBox(
           constraints: new BoxConstraints.loose(
-            const Size.square(kDefaultSplashRadius * 2.0)
+            const Size.square(InkSplash.defaultRadius * 2.0)
           ),
           child: new Align(
             alignment: alignment,

@@ -20,8 +20,8 @@ void main() {
     );
 
     RenderBox box = tester.renderObject(find.byType(IconButton));
-    expect(box.size.width, equals(kDefaultSplashRadius * 2.0));
-    expect(box.size.height, equals(kDefaultSplashRadius * 2.0));
+    expect(box.size.width, equals(InkSplash.defaultRadius * 2.0));
+    expect(box.size.height, equals(InkSplash.defaultRadius * 2.0));
   });
 
   testWidgets('IconButton AppBar size', (WidgetTester tester) async {
