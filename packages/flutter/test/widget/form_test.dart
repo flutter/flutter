@@ -4,7 +4,7 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
-import 'package:sky_services/editing/editing.mojom.dart' as mojom;
+import 'package:flutter_services/editing.dart' as mojom;
 
 class MockKeyboard extends mojom.KeyboardProxy {
   MockKeyboard() : super.unbound();

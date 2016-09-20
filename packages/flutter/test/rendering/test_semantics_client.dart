@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/rendering.dart';
-import 'package:sky_services/semantics/semantics.mojom.dart' as mojom;
+import 'package:flutter_services/semantics.dart' as mojom;
 
 class TestSemanticsClient {
   TestSemanticsClient(PipelineOwner pipelineOwner) {

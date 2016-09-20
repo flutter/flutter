@@ -4,7 +4,7 @@
 
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:sky_services/flutter/platform/system_chrome.mojom.dart' as mojom;
+import 'package:flutter_services/platform/system_chrome.dart' as mojom;
 
 import 'constants.dart';
 import 'icon_theme.dart';

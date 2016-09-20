@@ -4,7 +4,7 @@
 
 import 'dart:async';
 
-import 'package:sky_services/media/media.mojom.dart' as mojom;
+import 'package:flutter_services/media.dart' as mojom;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';

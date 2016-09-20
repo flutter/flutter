@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:sky_services/semantics/semantics.mojom.dart' as mojom;
+import 'package:flutter_services/semantics.dart' as mojom;
 
 import '../rendering/test_semantics_client.dart';
 

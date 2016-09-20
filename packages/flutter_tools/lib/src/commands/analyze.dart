@@ -203,12 +203,6 @@ class AnalyzeCommand extends FlutterCommand {
     }
     Map<String, String> packages = dependencies.asPackageMap();
 
-    // override the sky_engine and sky_services packages if the user is using a local build
-    if (tools.engineBuildPath != null) {
-      packages['sky_engine'] = path.join(tools.engineBuildPath, 'gen/dart-pkg/sky_engine/lib');
-      packages['sky_services'] = path.join(tools.engineBuildPath, 'gen/dart-pkg/sky_services/lib');
-    }
-
     Cache.releaseLockEarly();
 
     if (argResults['preamble']) {

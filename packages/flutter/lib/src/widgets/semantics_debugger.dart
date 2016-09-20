@@ -8,7 +8,7 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/rendering.dart';
-import 'package:sky_services/semantics/semantics.mojom.dart' as mojom;
+import 'package:flutter_services/semantics.dart' as mojom;
 
 import 'basic.dart';
 import 'binding.dart';

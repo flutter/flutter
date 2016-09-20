@@ -10,7 +10,7 @@ import 'dart:ui' as ui show window;
 import 'package:flutter/foundation.dart';
 import 'package:mojo/bindings.dart' as mojo_bindings;
 import 'package:mojo/core.dart' as mojo_core;
-import 'package:sky_services/pointer/pointer.mojom.dart';
+import 'package:flutter_services/pointer.dart';
 
 import 'arena.dart';
 import 'converter.dart';
