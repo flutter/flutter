@@ -119,9 +119,8 @@ class _RecipeGridPageState extends State<RecipeGridPage> {
         builder: (BuildContext context, BoxConstraints constraints) {
           final Size size = constraints.biggest;
           final double appBarHeight = size.height - statusBarHeight;
-          final double extraPadding = new Tween<double>(begin: 10.0, end: 24.0).lerp(
-            ((appBarHeight - kToolbarHeight) / _kAppBarHeight).clamp(0.0, 1.0)
-          );
+          final double t = (appBarHeight - kToolbarHeight) / (_kAppBarHeight - kToolbarHeight);
+          final double extraPadding = new Tween<double>(begin: 10.0, end: 24.0).lerp(t);
           final double logoHeight = appBarHeight - 1.5 * extraPadding;
           return new Padding(
             padding: new EdgeInsets.only(
@@ -129,7 +128,7 @@ class _RecipeGridPageState extends State<RecipeGridPage> {
               bottom: extraPadding
             ),
             child: new Center(
-              child: new PestoLogo(showText: appBarHeight >= 70.0, height: logoHeight)
+              child: new PestoLogo(height: logoHeight, t: t)
             )
           );
         }
@@ -178,10 +177,10 @@ class _RecipeGridPageState extends State<RecipeGridPage> {
 }
 
 class PestoLogo extends StatefulWidget {
-  PestoLogo({this.showText, this.height});
+  PestoLogo({this.height, this.t});
 
-  final bool showText;
   final double height;
+  final double t;
 
   @override
   _PestoLogoState createState() => new _PestoLogoState();
@@ -195,66 +194,30 @@ class _PestoLogoState extends State<PestoLogo> {
   static const double kTextHeight = 48.0;
   final TextStyle titleStyle = const PestoStyle(fontSize: kTextHeight, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 3.0);
   final Rect textRect = new Rect.fromLTWH(0.0, kImageHeight, kLogoWidth, kTextHeight);
-
-  AnimationController _controller;
-  Animation<double> _textOpacity;
-  Animation<Rect> _imageRect;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = new AnimationController(duration: const Duration(milliseconds: 200))
-      ..value = config.showText ? 1.0 : 0.0;
-    _textOpacity = new CurvedAnimation(parent: _controller.view, curve: const Interval(0.3, 1.0, curve: Curves.easeInOut));
-    _imageRect = new RectTween(
-      begin: new Rect.fromLTWH(0.0, 0.0, kLogoWidth, kLogoHeight),
-      end: new Rect.fromLTWH(0.0, 0.0, kLogoWidth, kImageHeight)
-    ).animate(
-      new CurvedAnimation(parent: _controller.view, curve: const Interval(0.0, 0.9, curve: Curves.easeInOut))
-    );
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  void didUpdateConfig(PestoLogo oldConfig) {
-    if (config.showText != oldConfig.showText) {
-      if (config.showText)
-        _controller.forward();
-      else
-        _controller.reverse();
-    }
-  }
+  final Curve _textOpacity = const Interval(0.3, 1.0, curve: Curves.easeInOut);
+  final RectTween _imageRectTween = new RectTween(
+    begin: new Rect.fromLTWH(0.0, 0.0, kLogoWidth, kLogoHeight),
+    end: new Rect.fromLTWH(0.0, 0.0, kLogoWidth, kImageHeight)
+  );
 
   @override
   Widget build(BuildContext context) {
     return new Transform(
-      transform: new Matrix4.identity()
-                   ..scale(config.height / kLogoHeight),
+      transform: new Matrix4.identity()..scale(config.height / kLogoHeight),
       alignment: FractionalOffset.topCenter,
       child: new SizedBox(
         width: kLogoWidth,
         child: new Stack(
           overflow: Overflow.visible,
           children: <Widget>[
-            new AnimatedBuilder(
-              animation: _imageRect,
-              builder: (BuildContext context, Widget child) {
-                return new Positioned.fromRect(
-                  rect: _imageRect.value,
-                  child: child
-                );
-              },
+            new Positioned.fromRect(
+              rect: _imageRectTween.lerp(config.t),
               child: new Image.asset(_kSmallLogoImage, fit: ImageFit.contain)
             ),
             new Positioned.fromRect(
               rect: textRect,
-              child: new FadeTransition(
-                opacity: _textOpacity,
+              child: new Opacity(
+                opacity: _textOpacity.transform(config.t),
                 child: new Text('PESTO', style: titleStyle, textAlign: TextAlign.center),
               )
             )
