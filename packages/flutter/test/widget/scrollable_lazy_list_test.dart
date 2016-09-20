@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
@@ -85,6 +86,11 @@ void main() {
       ),
       right: new Text('Not Today')
     );
+    Completer<Null> scrollTo(double newScrollOffset) {
+      Completer<Null> completer = new Completer<Null>();
+      scrollableKey.currentState.scrollTo(newScrollOffset).whenComplete(completer.complete);
+      return completer;
+    }
 
     await tester.pumpWidget(testWidget);
 
@@ -92,13 +98,14 @@ void main() {
 
     callbackTracker.clear();
 
-    // ignore: unawaited_futures
-    scrollableKey.currentState.scrollTo(400.0);
+    Completer<Null> completer = scrollTo(400.0);
+    expect(completer.isCompleted, isFalse);
     // now only 3 should fit, numbered 2-4.
 
     await tester.pumpWidget(testWidget);
 
     expect(callbackTracker, equals(<int>[2, 3, 4]));
+    expect(completer.isCompleted, isTrue);
 
     callbackTracker.clear();
   });
@@ -135,6 +142,11 @@ void main() {
       ),
       right: new Text('Not Today')
     );
+    Completer<Null> scrollTo(double newScrollOffset) {
+      Completer<Null> completer = new Completer<Null>();
+      scrollableKey.currentState.scrollTo(newScrollOffset).whenComplete(completer.complete);
+      return completer;
+    }
 
     await tester.pumpWidget(testWidget);
 
@@ -142,13 +154,14 @@ void main() {
 
     callbackTracker.clear();
 
-    // ignore: unawaited_futures
-    scrollableKey.currentState.scrollTo(400.0);
+    Completer<Null> completer = scrollTo(400.0);
+    expect(completer.isCompleted, isFalse);
     // now only 4 should fit, numbered 2-5.
 
     await tester.pumpWidget(testWidget);
 
     expect(callbackTracker, equals(<int>[2, 3, 4, 5]));
+    expect(completer.isCompleted, isTrue);
 
     callbackTracker.clear();
   });
@@ -176,27 +189,35 @@ void main() {
       itemExtent: 300.0,
       itemCount: 10
     );
+    Completer<Null> scrollTo(double newScrollOffset) {
+      Completer<Null> completer = new Completer<Null>();
+      scrollableKey.currentState.scrollTo(newScrollOffset).whenComplete(completer.complete);
+      return completer;
+    }
 
     await tester.pumpWidget(testWidget);
     expect(callbackTracker, equals(<int>[0, 1]));
     callbackTracker.clear();
 
-    // ignore: unawaited_futures
-    scrollableKey.currentState.scrollTo(150.0);
+    Completer<Null> completer = scrollTo(150.0);
+    expect(completer.isCompleted, isFalse);
     await tester.pumpWidget(testWidget);
     expect(callbackTracker, equals(<int>[0, 1, 2]));
+    expect(completer.isCompleted, isTrue);
     callbackTracker.clear();
 
-    // ignore: unawaited_futures
-    scrollableKey.currentState.scrollTo(600.0);
+    completer = scrollTo(600.0);
+    expect(completer.isCompleted, isFalse);
     await tester.pumpWidget(testWidget);
     expect(callbackTracker, equals(<int>[2, 3]));
+    expect(completer.isCompleted, isTrue);
     callbackTracker.clear();
 
-    // ignore: unawaited_futures
-    scrollableKey.currentState.scrollTo(750.0);
+    completer = scrollTo(750.0);
+    expect(completer.isCompleted, isFalse);
     await tester.pumpWidget(testWidget);
     expect(callbackTracker, equals(<int>[2, 3, 4]));
+    expect(completer.isCompleted, isTrue);
     callbackTracker.clear();
   });
 

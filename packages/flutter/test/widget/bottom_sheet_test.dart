@@ -9,7 +9,7 @@ import 'package:flutter/widgets.dart';
 void main() {
   testWidgets('Verify that a tap dismisses a modal BottomSheet', (WidgetTester tester) async {
     BuildContext savedContext;
-    bool showBottomSheetThenCalled = false;
+    bool showBottomSheetThenCalled;
 
     await tester.pumpWidget(new MaterialApp(
       home: new Builder(
@@ -23,6 +23,7 @@ void main() {
     await tester.pump();
     expect(find.text('BottomSheet'), findsNothing);
 
+    showBottomSheetThenCalled = false;
     // ignore: unawaited_futures
     showModalBottomSheet/*<Null>*/(
       context: savedContext,
@@ -45,15 +46,24 @@ void main() {
     await tester.pump(new Duration(seconds: 1)); // frame after the animation (sheet has been removed)
     expect(find.text('BottomSheet'), findsNothing);
 
+    showBottomSheetThenCalled = false;
     // ignore: unawaited_futures
-    showModalBottomSheet/*<Null>*/(context: savedContext, builder: (BuildContext context) => new Text('BottomSheet'));
+    showModalBottomSheet/*<Null>*/(
+      context: savedContext,
+      builder: (BuildContext context) => new Text('BottomSheet'),
+    ).then((Null result) {
+      expectSync(result, isNull);
+      showBottomSheetThenCalled = true;
+    });
     await tester.pump(); // bottom sheet show animation starts
     await tester.pump(new Duration(seconds: 1)); // animation done
     expect(find.text('BottomSheet'), findsOneWidget);
+    expect(showBottomSheetThenCalled, isFalse);
 
     // Tap above the the bottom sheet to dismiss it
     await tester.tapAt(new Point(20.0, 20.0));
     await tester.pump(); // bottom sheet dismiss animation starts
+    expect(showBottomSheetThenCalled, isTrue);
     await tester.pump(new Duration(seconds: 1)); // animation done
     await tester.pump(new Duration(seconds: 1)); // rebuild frame
     expect(find.text('BottomSheet'), findsNothing);

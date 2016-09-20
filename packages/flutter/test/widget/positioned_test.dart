@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -53,23 +54,31 @@ void main() {
       )
     ); // t=0
     recordMetrics();
-    // ignore: unawaited_futures
-    controller.forward();
+    Completer<Null> completer = new Completer<Null>();
+    controller.forward().whenComplete(completer.complete);
+    expect(completer.isCompleted, isFalse);
     await tester.pump(); // t=0 again
+    expect(completer.isCompleted, isFalse);
     recordMetrics();
     await tester.pump(const Duration(seconds: 1)); // t=1
+    expect(completer.isCompleted, isFalse);
     recordMetrics();
     await tester.pump(const Duration(seconds: 1)); // t=2
+    expect(completer.isCompleted, isFalse);
     recordMetrics();
     await tester.pump(const Duration(seconds: 3)); // t=5
+    expect(completer.isCompleted, isFalse);
     recordMetrics();
     await tester.pump(const Duration(seconds: 5)); // t=10
+    expect(completer.isCompleted, isFalse);
     recordMetrics();
 
     expect(sizes, equals(<Size>[const Size(10.0, 10.0), const Size(10.0, 10.0), const Size(10.0, 10.0), const Size(10.0, 10.0), const Size(10.0, 10.0), const Size(10.0, 10.0)]));
     expect(positions, equals(<Offset>[const Offset(10.0, 10.0), const Offset(10.0, 10.0), const Offset(17.0, 17.0), const Offset(24.0, 24.0), const Offset(45.0, 45.0), const Offset(80.0, 80.0)]));
 
     controller.stop();
+    await tester.pump();
+    expect(completer.isCompleted, isTrue);
   });
 
 }

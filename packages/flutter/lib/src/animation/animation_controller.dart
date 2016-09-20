@@ -154,6 +154,7 @@ class AnimationController extends Animation<double>
   AnimationStatus _status;
 
   /// Starts running this animation forwards (towards the end).
+  /// Returns a [Future] that completes when the animation is complete.
   Future<Null> forward({ double from }) {
     _direction = _AnimationDirection.forward;
     if (from != null)
@@ -162,6 +163,7 @@ class AnimationController extends Animation<double>
   }
 
   /// Starts running this animation in reverse (towards the beginning).
+  /// Returns a [Future] that completes when the animation is complete.
   Future<Null> reverse({ double from }) {
     _direction = _AnimationDirection.reverse;
     if (from != null)
@@ -170,6 +172,7 @@ class AnimationController extends Animation<double>
   }
 
   /// Drives the animation from its current value to target.
+  /// Returns a [Future] that completes when the animation is complete.
   Future<Null> animateTo(double target, { Duration duration, Curve curve: Curves.linear }) {
     Duration simulationDuration = duration;
     if (simulationDuration == null) {
