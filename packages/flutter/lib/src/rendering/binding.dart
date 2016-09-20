@@ -26,7 +26,11 @@ abstract class RendererBinding extends BindingBase implements SchedulerBinding, 
   void initInstances() {
     super.initInstances();
     _instance = this;
-    _pipelineOwner = new PipelineOwner(onNeedVisualUpdate: ensureVisualUpdate);
+    _pipelineOwner = new PipelineOwner(
+      onNeedVisualUpdate: ensureVisualUpdate,
+      onScheduleInitialSemantics: _scheduleInitialSemantics,
+      onClearSemantics: _clearSemantics,
+    );
     ui.window.onMetricsChanged = handleMetricsChanged;
     initRenderView();
     initSemantics();
@@ -96,12 +100,12 @@ abstract class RendererBinding extends BindingBase implements SchedulerBinding, 
   PipelineOwner _pipelineOwner;
 
   /// The render tree that's attached to the output surface.
-  RenderView get renderView => _pipelineOwner.rootRenderObject;
+  RenderView get renderView => _pipelineOwner.rootNode;
   /// Sets the given [RenderView] object (which must not be null), and its tree, to
   /// be the new render tree to display. The previous tree, if any, is detached.
   set renderView(RenderView value) {
     assert(value != null);
-    _pipelineOwner.rootRenderObject = value;
+    _pipelineOwner.rootNode = value;
   }
 
   /// Called when the system metrics change.
@@ -210,7 +214,7 @@ abstract class RendererBinding extends BindingBase implements SchedulerBinding, 
   @override
   void reassembleApplication() {
     super.reassembleApplication();
-    pipelineOwner.reassemble();
+    renderView.reassemble();
     handleBeginFrame(null);
   }
 
@@ -228,6 +232,14 @@ abstract class RendererBinding extends BindingBase implements SchedulerBinding, 
       child.visitChildren(visitor);
     };
     instance?.renderView?.visitChildren(visitor);
+  }
+
+  void _scheduleInitialSemantics() {
+    renderView.scheduleInitialSemantics();
+  }
+
+  void _clearSemantics() {
+    renderView.clearSemantics();
   }
 }
 

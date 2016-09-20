@@ -76,6 +76,9 @@ class AbstractNode {
   ///
   /// Typically called only from the parent's attach(), and to mark the root of
   /// a tree attached.
+  ///
+  /// Subclasses with children should attach all their children to the same
+  /// [owner] whenever this method is called.
   @mustCallSuper
   void attach(Object owner) {
     assert(owner != null);
@@ -87,6 +90,9 @@ class AbstractNode {
   ///
   /// Typically called only from the parent's detach(), and to mark the root of
   /// a tree detached.
+  ///
+  /// Subclasses with children should detach all their children whenever this
+  /// method is called.
   @mustCallSuper
   void detach() {
     assert(_owner != null);
