@@ -326,6 +326,17 @@ class _RecipePageState extends State<RecipePage> {
             ]
           )
         ],
+        flexibleSpace: new FlexibleSpaceBar(
+          background: new DecoratedBox(
+            decoration: new BoxDecoration(
+              gradient: new LinearGradient(
+                begin: const FractionalOffset(0.5, 0.0),
+                end: const FractionalOffset(0.5, 0.40),
+                colors: <Color>[const Color(0x60000000), const Color(0x00000000)]
+              )
+            )
+          )
+        ),
       ),
       body: _buildContainer(context)
     );
