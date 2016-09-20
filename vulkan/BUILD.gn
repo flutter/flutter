@@ -11,6 +11,10 @@ source_set("vulkan") {
     "vulkan_interface.h",
     "vulkan_proc_table.cc",
     "vulkan_proc_table.h",
+    "vulkan_surface.cc",
+    "vulkan_surface.h",
+    "vulkan_surface_android.cc",
+    "vulkan_surface_android.h",
     "vulkan_window.cc",
     "vulkan_window.h",
   ]

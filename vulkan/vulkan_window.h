@@ -13,12 +13,13 @@
 #include "vulkan_handle.h"
 #include "vulkan_proc_table.h"
 #include "vulkan_backbuffer.h"
+#include "vulkan_surface.h"
 
 namespace vulkan {
 
 class VulkanWindow {
  public:
-  VulkanWindow(void* native_window);
+  VulkanWindow(std::unique_ptr<VulkanSurface> platform_surface);
 
   ~VulkanWindow();
 
@@ -28,6 +29,7 @@ class VulkanWindow {
   bool valid_;
   VulkanProcTable vk;
   VulkanHandle<VkInstance> instance_;
+  std::unique_ptr<VulkanSurface> platform_surface_;
   VulkanHandle<VkSurfaceKHR> surface_;
   VulkanHandle<VkPhysicalDevice> physical_device_;
   VulkanHandle<VkDevice> device_;
@@ -38,7 +40,7 @@ class VulkanWindow {
 
   bool CreateInstance();
 
-  bool CreateSurface(void* native_window);
+  bool CreateSurface();
 
   bool SelectPhysicalDevice();
 
