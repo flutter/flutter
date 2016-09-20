@@ -53,7 +53,7 @@ void main() {
   });
 
 
-  testWidgets('Underflowing LazyBlock contentExtent should track additional children ', (WidgetTester tester) async {
+  testWidgets('Underflowing LazyBlock contentExtent should track additional children', (WidgetTester tester) async {
     await tester.pumpWidget(new LazyBlock(
       delegate: new LazyBlockChildren(
         children: <Widget>[
@@ -154,5 +154,38 @@ void main() {
     OverscrollWhenScrollableBehavior scrollBehavior = scrollable.scrollBehavior;
     expect(scrollBehavior.contentExtent, equals(700.0));
   });
+
+  testWidgets('Overflowing LazyBlock should become scrollable', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/5920
+    // When a LazyBlock's viewport hasn't overflowed, scrolling is disabled.
+    // When children are added that cause it to overflow, scrolling should
+    // be enabled.
+
+    await tester.pumpWidget(new LazyBlock(
+      delegate: new LazyBlockChildren(
+        children: <Widget>[
+          new SizedBox(height: 100.0, child: new Text('100')),
+        ]
+      )
+    ));
+
+    StatefulElement statefulElement = tester.element(find.byType(Scrollable));
+    ScrollableState scrollable = statefulElement.state;
+    OverscrollWhenScrollableBehavior scrollBehavior = scrollable.scrollBehavior;
+    expect(scrollBehavior.isScrollable, isFalse);
+
+    await tester.pumpWidget(new LazyBlock(
+      delegate: new LazyBlockChildren(
+        children: <Widget>[
+          new SizedBox(height: 100.0, child: new Text('100')),
+          new SizedBox(height: 200.0, child: new Text('200')),
+          new SizedBox(height: 400.0, child: new Text('400')),
+        ]
+      )
+    ));
+
+    expect(scrollBehavior.isScrollable, isTrue);
+  });
+
 
 }
