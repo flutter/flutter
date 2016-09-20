@@ -8,6 +8,7 @@ import 'dart:io';
 import 'application_package.dart';
 import 'base/logger.dart';
 import 'base/utils.dart';
+import 'build_info.dart';
 import 'commands/build_apk.dart';
 import 'commands/install.dart';
 import 'commands/trace.dart';
@@ -184,6 +185,8 @@ class RunAndStayResident extends ResidentRunner {
     }
 
     printStatus('Application running.');
+    if (debuggingOptions.buildMode == BuildMode.release)
+      return 0;
 
     if (vmService != null) {
       await vmService.vm.refreshViews();
