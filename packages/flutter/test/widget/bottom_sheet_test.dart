@@ -24,7 +24,6 @@ void main() {
     expect(find.text('BottomSheet'), findsNothing);
 
     showBottomSheetThenCalled = false;
-    // ignore: unawaited_futures
     showModalBottomSheet/*<Null>*/(
       context: savedContext,
       builder: (BuildContext context) => new Text('BottomSheet')
@@ -47,7 +46,6 @@ void main() {
     expect(find.text('BottomSheet'), findsNothing);
 
     showBottomSheetThenCalled = false;
-    // ignore: unawaited_futures
     showModalBottomSheet/*<Null>*/(
       context: savedContext,
       builder: (BuildContext context) => new Text('BottomSheet'),
@@ -83,7 +81,6 @@ void main() {
     expect(showBottomSheetThenCalled, isFalse);
     expect(find.text('BottomSheet'), findsNothing);
 
-    // ignore: unawaited_futures
     scaffoldKey.currentState.showBottomSheet((BuildContext context) {
       return new Container(
         margin: new EdgeInsets.all(40.0),
