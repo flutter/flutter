@@ -34,6 +34,7 @@ Future<Map<String, dynamic>> runTask(String taskName) async {
 
   bool runnerFinished = false;
 
+  // ignore: unawaited_futures
   runner.exitCode.then((_) {
     runnerFinished = true;
   });

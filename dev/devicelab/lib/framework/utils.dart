@@ -166,6 +166,7 @@ Future<Process> startProcess(String executable, List<String> arguments,
   ProcessInfo procInfo = new ProcessInfo(command, proc);
   _runningProcesses.add(procInfo);
 
+  // ignore: unawaited_futures
   proc.exitCode.then((_) {
     _runningProcesses.remove(procInfo);
   });
