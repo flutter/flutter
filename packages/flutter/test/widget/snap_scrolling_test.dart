@@ -60,6 +60,7 @@ void main() {
 
     Duration dt = const Duration(seconds: 2);
 
+    // ignore: unawaited_futures
     fling(1000.0);
     await tester.pump(); // Start the scheduler at 0.0
     await tester.pump(dt);
@@ -69,6 +70,7 @@ void main() {
     await tester.pump();
     expect(scrollOffset, 0.0);
 
+    // ignore: unawaited_futures
     fling(2000.0);
     await tester.pump();
     await tester.pump(dt);
@@ -78,6 +80,7 @@ void main() {
     await tester.pump();
     expect(scrollOffset, 400.0);
 
+    // ignore: unawaited_futures
     fling(-800.0);
     await tester.pump();
     await tester.pump(dt);
@@ -87,6 +90,7 @@ void main() {
     await tester.pump();
     expect(scrollOffset, 800.0);
 
+    // ignore: unawaited_futures
     fling(-2000.0);
     await tester.pump();
     await tester.pump(dt);
@@ -97,6 +101,7 @@ void main() {
     expect(scrollOffset, 800.0);
 
     bool completed = false;
+    // ignore: unawaited_futures
     fling(-2000.0).then((_) {
       completed = true;
       expectSync(scrollOffset, closeTo(200.0, 1.0));

@@ -57,6 +57,7 @@ Future<Null> performTest(WidgetTester tester, bool maintainState) async {
   expect(find.text('10'), findsNothing);
   expect(find.text('100'), findsNothing);
 
+  // ignore: unawaited_futures
   tester.state/*<ScrollableState>*/(find.byType(Scrollable)).scrollTo(1000.0);
   await tester.pump(new Duration(seconds: 1));
 

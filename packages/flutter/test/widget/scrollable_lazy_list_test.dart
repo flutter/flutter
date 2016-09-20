@@ -92,6 +92,7 @@ void main() {
 
     callbackTracker.clear();
 
+    // ignore: unawaited_futures
     scrollableKey.currentState.scrollTo(400.0);
     // now only 3 should fit, numbered 2-4.
 
@@ -141,6 +142,7 @@ void main() {
 
     callbackTracker.clear();
 
+    // ignore: unawaited_futures
     scrollableKey.currentState.scrollTo(400.0);
     // now only 4 should fit, numbered 2-5.
 
@@ -179,16 +181,19 @@ void main() {
     expect(callbackTracker, equals(<int>[0, 1]));
     callbackTracker.clear();
 
+    // ignore: unawaited_futures
     scrollableKey.currentState.scrollTo(150.0);
     await tester.pumpWidget(testWidget);
     expect(callbackTracker, equals(<int>[0, 1, 2]));
     callbackTracker.clear();
 
+    // ignore: unawaited_futures
     scrollableKey.currentState.scrollTo(600.0);
     await tester.pumpWidget(testWidget);
     expect(callbackTracker, equals(<int>[2, 3]));
     callbackTracker.clear();
 
+    // ignore: unawaited_futures
     scrollableKey.currentState.scrollTo(750.0);
     await tester.pumpWidget(testWidget);
     expect(callbackTracker, equals(<int>[2, 3, 4]));

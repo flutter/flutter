@@ -47,6 +47,7 @@ void main() {
     await tester.pumpWidget(_buildScroller(key: scrollKey, log: log));
 
     expect(log, equals(<String>[]));
+    // ignore: unawaited_futures
     scrollKey.currentState.scrollTo(100.0, duration: const Duration(seconds: 1));
     expect(log, equals(<String>['scrollstart']));
     await tester.pump(const Duration(milliseconds: 100));
@@ -63,6 +64,7 @@ void main() {
     await tester.pumpWidget(_buildScroller(key: scrollKey, log: log));
 
     expect(log, equals(<String>[]));
+    // ignore: unawaited_futures
     scrollKey.currentState.scrollTo(100.0);
     expect(log, equals(<String>['scrollstart', 'scroll', 'scrollend']));
   });
@@ -73,12 +75,14 @@ void main() {
     await tester.pumpWidget(_buildScroller(key: scrollKey, log: log));
 
     expect(log, equals(<String>[]));
+    // ignore: unawaited_futures
     scrollKey.currentState.scrollTo(100.0, duration: const Duration(seconds: 1));
     expect(log, equals(<String>['scrollstart']));
     await tester.pump(const Duration(milliseconds: 100));
     expect(log, equals(<String>['scrollstart']));
     await tester.pump(const Duration(milliseconds: 100));
     expect(log, equals(<String>['scrollstart', 'scroll']));
+    // ignore: unawaited_futures
     scrollKey.currentState.scrollTo(100.0);
     expect(log, equals(<String>['scrollstart', 'scroll', 'scroll']));
     await tester.pump(const Duration(milliseconds: 100));
@@ -93,12 +97,14 @@ void main() {
     await tester.pumpWidget(_buildScroller(key: scrollKey, log: log));
 
     expect(log, equals(<String>[]));
+    // ignore: unawaited_futures
     scrollKey.currentState.scrollTo(100.0, duration: const Duration(seconds: 1));
     expect(log, equals(<String>['scrollstart']));
     await tester.pump(const Duration(milliseconds: 100));
     expect(log, equals(<String>['scrollstart']));
     await tester.pump(const Duration(milliseconds: 100));
     expect(log, equals(<String>['scrollstart', 'scroll']));
+    // ignore: unawaited_futures
     scrollKey.currentState.scrollTo(100.0, duration: const Duration(seconds: 1));
     expect(log, equals(<String>['scrollstart', 'scroll']));
     await tester.pump(const Duration(milliseconds: 100));

@@ -53,6 +53,7 @@ void main() {
       )
     ); // t=0
     recordMetrics();
+    // ignore: unawaited_futures
     controller.forward();
     await tester.pump(); // t=0 again
     recordMetrics();
