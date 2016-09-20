@@ -35,8 +35,6 @@ namespace blink {
 
 void FontCache::getFontForCharacter(UChar32,
                                     const char*,
-                                    FontCache::PlatformFallbackFont*) {
-  FTL_LOG(INFO) << "Font fallbacks unimplemented on Mac.";
-}
+                                    FontCache::PlatformFallbackFont*) {}
 
 }  // namespace  blink
