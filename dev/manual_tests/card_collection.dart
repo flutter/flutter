@@ -316,7 +316,7 @@ class CardCollectionState extends State<CardCollection> {
                 }
               )
             )
-          : new DefaultTextStyle.inherit(
+          : new DefaultTextStyle.merge(
               context: context,
               style: cardLabelStyle.copyWith(
                 fontSize: _varyFontSizes ? 5.0 + index : null
