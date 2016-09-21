@@ -12,7 +12,7 @@ import 'media_query.dart';
 class DefaultTextStyle extends InheritedWidget {
   /// Creates a default text style for the given subtree.
   ///
-  /// Consider using [DefaultTextStyle.inherit] to inherit styling information
+  /// Consider using [DefaultTextStyle.merge] to inherit styling information
   /// from a the current default text style for a given [BuildContext].
   DefaultTextStyle({
     Key key,
@@ -43,7 +43,7 @@ class DefaultTextStyle extends InheritedWidget {
   /// for the given [BuildContext] and, if non-null, the given [textAlign]
   /// replaces the [textAlign] from the default text style for the given
   /// [BuildContext].
-  factory DefaultTextStyle.inherit({
+  factory DefaultTextStyle.merge({
     Key key,
     @required BuildContext context,
     TextStyle style,
