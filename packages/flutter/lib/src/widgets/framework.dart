@@ -1487,6 +1487,25 @@ class BuildOwner {
 
   final List<BuildableElement> _dirtyElements = <BuildableElement>[];
   bool _scheduledFlushDirtyElements = false;
+  bool _dirtyElementsNeedsResorting; // null means we're not in a buildScope
+
+  /// Flags the dirty elements list as needing resorting.
+  ///
+  /// This should only be called while a [buildScope] is actively rebuilding the
+  /// widget tree.
+  void markNeedsToResortDirtyElements() {
+    assert(() {
+      if (_dirtyElementsNeedsResorting == null) {
+        throw new FlutterError(
+          'markNeedsToResortDirtyElements() called inappropriately.\n'
+          'The markNeedsToResortDirtyElements() method should only be called while the '
+          'buildScope() method is actively rebuilding the widget tree.'
+        );
+      }
+      return true;
+    });
+    _dirtyElementsNeedsResorting = true;
+  }
 
   /// Adds an element to the dirty elements list so that it will be rebuilt
   /// when [WidgetsBinding.beginFrame] calls [buildScope].
@@ -1607,6 +1626,7 @@ class BuildOwner {
       if (callback != null)
         callback();
       _dirtyElements.sort(_elementSort);
+      _dirtyElementsNeedsResorting = false;
       int dirtyCount = _dirtyElements.length;
       int index = 0;
       while (index < dirtyCount) {
@@ -1625,12 +1645,33 @@ class BuildOwner {
           );
         }
         index += 1;
-        if (dirtyCount < _dirtyElements.length) {
+        if (dirtyCount < _dirtyElements.length || _dirtyElementsNeedsResorting) {
           _dirtyElements.sort(_elementSort);
+          _dirtyElementsNeedsResorting = false;
           dirtyCount = _dirtyElements.length;
+          while (index > 0 && _dirtyElements[index - 1].dirty) {
+            // It is possible for previously dirty but inactive widgets to move right in the list.
+            // We therefore have to move the index left in the list to account for this.
+            // We don't know how many could have moved. However, we do know that the only possible
+            // change to the list is that nodes that were previously to the left of the index have
+            // now moved to be to the right of the right-most cleaned node, and we do know that
+            // all the clean nodes were to the left of the index. So we move the index left
+            // until just after the right-most clean node.
+            index -= 1;
+          }
         }
       }
-      assert(!_dirtyElements.any((BuildableElement element) => element._active && element.dirty));
+      assert(() {
+        if (_dirtyElements.any((BuildableElement element) => element._active && element.dirty)) {
+          throw new FlutterError(
+            'buildScope missed some dirty elements.\n'
+            'This probably indicates that the dirty list should have been resorted but was not.\n'
+            'The list of dirty elements at the end of the buildScope call was:\n'
+            '  $_dirtyElements'
+          );
+        }
+        return true;
+      });
     } finally {
       for (BuildableElement element in _dirtyElements) {
         assert(element._inDirtyList);
@@ -1638,6 +1679,7 @@ class BuildOwner {
       }
       _dirtyElements.clear();
       _scheduledFlushDirtyElements = false;
+      _dirtyElementsNeedsResorting = null;
       Timeline.finishSync();
       assert(_debugBuilding);
       assert(() {
@@ -2515,8 +2557,13 @@ abstract class BuildableElement extends Element {
   void activate() {
     final bool hadDependencies = ((_dependencies != null && _dependencies.length > 0) || _hadUnsatisfiedDependencies);
     super.activate(); // clears _dependencies, and sets active to true
-    if (_dirty && !_inDirtyList)
-      owner.scheduleBuildFor(this);
+    if (_dirty) {
+      if (_inDirtyList) {
+        owner.markNeedsToResortDirtyElements();
+      } else {
+        owner.scheduleBuildFor(this);
+      }
+    }
     if (hadDependencies)
       dependenciesChanged();
   }
