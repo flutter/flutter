@@ -460,7 +460,7 @@ class ScrollableState<T extends Scrollable> extends State<T> {
     Curve curve: Curves.ease,
     DragUpdateDetails details
   }) {
-    double newScrollOffset = scrollBehavior.applyCurve(_virtualScrollOffset, scrollDelta);
+    double newScrollOffset = scrollBehavior.applyCurve(virtualScrollOffset, scrollDelta);
     return scrollTo(newScrollOffset, duration: duration, curve: curve, details: details);
   }
 
@@ -492,7 +492,7 @@ class ScrollableState<T extends Scrollable> extends State<T> {
 
   Future<Null> _animateTo(double newScrollOffset, Duration duration, Curve curve) {
     _stop();
-    _controller.value = scrollOffset;
+    _controller.value = virtualScrollOffset;
     _startScroll();
     return _controller.animateTo(newScrollOffset, duration: duration, curve: curve).then((Null _) {
       _endScroll();
@@ -612,7 +612,7 @@ class ScrollableState<T extends Scrollable> extends State<T> {
     final double snapVelocity = scrollVelocity.abs() * (snappedScrollOffset - scrollOffset).sign;
     final double endVelocity = pixelOffsetToScrollOffset(kPixelScrollTolerance.velocity).abs() * (scrollVelocity < 0.0 ? -1.0 : 1.0);
     Simulation toSnapSimulation = scrollBehavior.createSnapScrollSimulation(
-      scrollOffset, snappedScrollOffset, snapVelocity, endVelocity
+      virtualScrollOffset, snappedScrollOffset, snapVelocity, endVelocity
     );
     if (toSnapSimulation == null)
       return null;
@@ -623,7 +623,7 @@ class ScrollableState<T extends Scrollable> extends State<T> {
   }
 
   Simulation _createFlingSimulation(double scrollVelocity) {
-    final Simulation simulation = scrollBehavior.createScrollSimulation(scrollOffset, scrollVelocity);
+    final Simulation simulation = scrollBehavior.createScrollSimulation(virtualScrollOffset, scrollVelocity);
     if (simulation != null) {
       final double endVelocity = pixelOffsetToScrollOffset(kPixelScrollTolerance.velocity).abs();
       final double endDistance = pixelOffsetToScrollOffset(kPixelScrollTolerance.distance).abs();
