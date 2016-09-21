@@ -286,4 +286,50 @@ void main() {
     expect(settingsOffset.x, greaterThan(100.0));
     expect(settingsOffset.y, 100.0);
   });
+
+  testWidgets('Check back gesture doesnt start during transitions', (WidgetTester tester) async {
+    GlobalKey containerKey1 = new GlobalKey();
+    GlobalKey containerKey2 = new GlobalKey();
+    final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      '/': (_) => new Scaffold(key: containerKey1, body: new Text('Home')),
+      '/settings': (_) => new Scaffold(key: containerKey2, body: new Text('Settings')),
+    };
+
+    await tester.pumpWidget(new MaterialApp(
+      routes: routes,
+      theme: new ThemeData(platform: TargetPlatform.iOS),
+    ));
+
+    Navigator.pushNamed(containerKey1.currentContext, '/settings');
+
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    // We are mid-transition, both pages are on stage.
+    expect(find.text('Home'), isOnstage);
+    expect(find.text('Settings'), isOnstage);
+
+    // Drag from left edge to invoke the gesture. (near bottom so we grab
+    // the Settings page as it comes up).
+    TestGesture gesture = await tester.startGesture(new Point(5.0, 550.0));
+    await gesture.moveBy(new Offset(500.0, 0.0));
+    await gesture.up();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 1000));
+
+    // The original forward navigation should have completed, instead of the
+    // back gesture, since we were mid transition.
+    expect(find.text('Home'), findsNothing);
+    expect(find.text('Settings'), isOnstage);
+
+    // Try again now that we're settled.
+    gesture = await tester.startGesture(new Point(5.0, 550.0));
+    await gesture.moveBy(new Offset(500.0, 0.0));
+    await gesture.up();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 1000));
+
+    expect(find.text('Home'), isOnstage);
+    expect(find.text('Settings'), findsNothing);
+  });
 }
