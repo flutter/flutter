@@ -38,7 +38,7 @@ Thumbs.db
 /third_party/android_tools/
 /third_party/angle/
 /third_party/appurify-python/
-/third_party/boringssl/src/
+/third_party/boringssl/
 /third_party/colorama/
 /third_party/colorama/src/
 /third_party/dart-sdk/
