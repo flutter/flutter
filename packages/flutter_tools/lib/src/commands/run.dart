@@ -45,7 +45,7 @@ class RunCommand extends RunCommandBase {
   @override
   final String description = 'Run your Flutter app on an attached device.';
 
-  RunCommand() {
+  RunCommand({bool verboseHelp: false}) {
     argParser.addFlag('full-restart',
         defaultsTo: true,
         help: 'Stop any currently running application process before running the app.');
@@ -59,7 +59,7 @@ class RunCommand extends RunCommandBase {
         defaultsTo: true,
         help: 'If necessary, build the app before running.');
     argParser.addOption('use-application-binary',
-        hide: true,
+        hide: !verboseHelp,
         help: 'Specify a pre-built application binary to use when running.');
     usesPubOption();
 
@@ -80,7 +80,7 @@ class RunCommand extends RunCommandBase {
     // application, measure the startup time and the app restart time, write the
     // results out to 'refresh_benchmark.json', and exit. This flag is intended
     // for use in generating automated flutter benchmarks.
-    argParser.addFlag('benchmark', negatable: false, hide: true);
+    argParser.addFlag('benchmark', negatable: false, hide: !verboseHelp);
   }
 
   Device device;
