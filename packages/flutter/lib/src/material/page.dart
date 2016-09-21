@@ -202,6 +202,8 @@ class MaterialPageRoute<T> extends PageRoute<T> {
 
   @override
   NavigationGestureController startPopGesture(NavigatorState navigator) {
+    if (controller.status != AnimationStatus.completed)
+      return null;
     assert(_backGestureController == null);
     _backGestureController = new _CupertinoBackGestureController(
       navigator: navigator,
