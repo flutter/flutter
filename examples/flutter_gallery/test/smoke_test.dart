@@ -82,7 +82,7 @@ void main() {
       await tester.scroll(findGalleryItemByRouteName(tester, routeName), new Offset(0.0, scrollDeltas[i]));
       await tester.pump(); // start the scroll
       await tester.pump(const Duration(milliseconds: 500)); // wait for overscroll to timeout, if necessary
-      await tester.pump(const Duration(milliseconds: 2000)); // wait for overscroll to fade away, if necessary
+      await tester.pump(const Duration(seconds: 3)); // wait for overscroll to fade away, if necessary
       tester.binding.debugAssertNoTransientCallbacks('A transient callback was still active after leaving route $routeName');
     }
 
