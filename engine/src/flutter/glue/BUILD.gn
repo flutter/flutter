@@ -29,6 +29,10 @@ source_set("glue") {
     deps += [
       "//lib/mtl",
     ]
+
+    public_deps = [
+      "//mojo/services/tracing/cpp",
+    ]
   } else {
     sources += [
       "drain_data_pipe_job_base.cc",
