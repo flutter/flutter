@@ -128,7 +128,7 @@ class _RecipeGridPageState extends State<RecipeGridPage> {
               bottom: extraPadding
             ),
             child: new Center(
-              child: new PestoLogo(height: logoHeight, t: t)
+              child: new PestoLogo(height: logoHeight, t: t.clamp(0.0, 1.0))
             )
           );
         }
@@ -193,7 +193,10 @@ class _PestoLogoState extends State<PestoLogo> {
   static const double kImageHeight = 108.0;
   static const double kTextHeight = 48.0;
   final TextStyle titleStyle = const PestoStyle(fontSize: kTextHeight, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 3.0);
-  final Rect textRect = new Rect.fromLTWH(0.0, kImageHeight, kLogoWidth, kTextHeight);
+  final RectTween _textRectTween = new RectTween(
+    begin: new Rect.fromLTWH(0.0, kLogoHeight, kLogoWidth, kTextHeight),
+    end: new Rect.fromLTWH(0.0, kImageHeight, kLogoWidth, kTextHeight)
+  );
   final Curve _textOpacity = const Interval(0.3, 1.0, curve: Curves.easeInOut);
   final RectTween _imageRectTween = new RectTween(
     begin: new Rect.fromLTWH(0.0, 0.0, kLogoWidth, kLogoHeight),
@@ -215,7 +218,7 @@ class _PestoLogoState extends State<PestoLogo> {
               child: new Image.asset(_kSmallLogoImage, fit: ImageFit.contain)
             ),
             new Positioned.fromRect(
-              rect: textRect,
+              rect: _textRectTween.lerp(config.t),
               child: new Opacity(
                 opacity: _textOpacity.transform(config.t),
                 child: new Text('PESTO', style: titleStyle, textAlign: TextAlign.center),
