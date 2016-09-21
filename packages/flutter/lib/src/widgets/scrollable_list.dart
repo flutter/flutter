@@ -7,7 +7,6 @@ import 'dart:math' as math;
 import 'package:flutter/rendering.dart';
 import 'package:meta/meta.dart';
 
-import 'clamp_overscrolls.dart';
 import 'framework.dart';
 import 'scroll_configuration.dart';
 import 'scrollable.dart';
@@ -126,12 +125,12 @@ class ScrollableList extends StatelessWidget {
   /// The children, some of which might be materialized.
   final Iterable<Widget> children;
 
-  Widget _buildViewport(BuildContext context, ScrollableState state, double scrollOffset) {
+  Widget _buildViewport(BuildContext context, ScrollableState state) {
     return new ListViewport(
       onExtentsChanged: (double contentExtent, double containerExtent) {
         state.handleExtentsChanged(itemsWrap ? double.INFINITY : contentExtent, containerExtent);
       },
-      scrollOffset: scrollOffset,
+      scrollOffset: state.scrollOffset,
       mainAxis: scrollDirection,
       anchor: scrollAnchor,
       itemExtent: itemExtent,
@@ -139,10 +138,6 @@ class ScrollableList extends StatelessWidget {
       padding: padding,
       children: children
     );
-  }
-
-  Widget _buildContent(BuildContext context, ScrollableState state) {
-    return ClampOverscrolls.buildViewport(context, state, _buildViewport);
   }
 
   @override
@@ -156,7 +151,7 @@ class ScrollableList extends StatelessWidget {
       onScroll: onScroll,
       onScrollEnd: onScrollEnd,
       snapOffsetCallback: snapOffsetCallback,
-      builder: _buildContent
+      builder: _buildViewport
     );
     return ScrollConfiguration.wrap(context, result);
   }
@@ -529,10 +524,10 @@ class ScrollableLazyList extends StatelessWidget {
   /// The amount of space by which to inset the children inside the viewport.
   final EdgeInsets padding;
 
-  Widget _buildViewport(BuildContext context, ScrollableState state, double scrollOffset) {
+  Widget _buildViewport(BuildContext context, ScrollableState state) {
     return new LazyListViewport(
       onExtentsChanged: state.handleExtentsChanged,
-      scrollOffset: scrollOffset,
+      scrollOffset: state.scrollOffset,
       mainAxis: scrollDirection,
       anchor: scrollAnchor,
       itemExtent: itemExtent,
@@ -540,10 +535,6 @@ class ScrollableLazyList extends StatelessWidget {
       itemBuilder: itemBuilder,
       padding: padding
     );
-  }
-
-  Widget _buildContent(BuildContext context, ScrollableState state) {
-    return ClampOverscrolls.buildViewport(context, state, _buildViewport);
   }
 
   @override
@@ -557,7 +548,7 @@ class ScrollableLazyList extends StatelessWidget {
       onScroll: onScroll,
       onScrollEnd: onScrollEnd,
       snapOffsetCallback: snapOffsetCallback,
-      builder: _buildContent
+      builder: _buildViewport
     );
     return ScrollConfiguration.wrap(context, result);
   }

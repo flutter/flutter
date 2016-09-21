@@ -45,6 +45,9 @@ void main() {
       return new Future<Point>.value(widgetOrigin);
     }
 
+    // Each of the blocks below test overscrolling the top and bottom
+    // with a value for ClampOverscrolls.edge.
+
     await tester.pumpWidget(buildFrame(ScrollableEdge.none));
     Point origin = await locationAfterScroll('top', const Offset(0.0, 400.0));
     expect(origin.y, greaterThan(0.0));
@@ -69,5 +72,78 @@ void main() {
     expect(origin.y, greaterThan(0.0));
     origin = await locationAfterScroll('bottom', const Offset(0.0, -400.0));
     expect(origin.y, equals(500.0));
+  });
+
+  testWidgets('ClampOverscrolls affects scrollOffset not virtualScrollOffset', (WidgetTester tester) async {
+
+    // ClampOverscrolls.edge == ScrollableEdge.none
+
+    await tester.pumpWidget(buildFrame(ScrollableEdge.none));
+    StatefulElement statefulElement = tester.element(find.byType(Scrollable));
+    ScrollableState scrollable = statefulElement.state;
+
+    await tester.scrollAt(tester.getTopLeft(find.text('top')), const Offset(0.0, 400.0));
+    await tester.pump();
+    expect(scrollable.scrollOffset, lessThan(0.0));
+    expect(scrollable.virtualScrollOffset, equals(scrollable.scrollOffset));
+    await tester.pump(const Duration(seconds: 1)); // Allow overscroll to settle
+
+    await tester.scrollAt(tester.getTopLeft(find.text('bottom')), const Offset(0.0, -400.0));
+    await tester.pump();
+    expect(scrollable.scrollOffset, greaterThan(0.0));
+    expect(scrollable.virtualScrollOffset, equals(scrollable.scrollOffset));
+    await tester.pump(const Duration(seconds: 1)); // Allow overscroll to settle
+
+    // ClampOverscrolls.edge == ScrollableEdge.both
+
+    await tester.pumpWidget(buildFrame(ScrollableEdge.both));
+    statefulElement = tester.element(find.byType(Scrollable));
+    scrollable = statefulElement.state;
+
+    await tester.scrollAt(tester.getTopLeft(find.text('top')), const Offset(0.0, 400.0));
+    await tester.pump();
+    expect(scrollable.scrollOffset, equals(0.0));
+    expect(scrollable.virtualScrollOffset, lessThan(0.0));
+    await tester.pump(const Duration(seconds: 1)); // Allow overscroll to settle
+
+    await tester.scrollAt(tester.getTopLeft(find.text('bottom')), const Offset(0.0, -400.0));
+    await tester.pump();
+    expect(scrollable.scrollOffset, equals(50.0));
+    expect(scrollable.virtualScrollOffset, greaterThan(50.0));
+
+    // ClampOverscrolls.edge == ScrollableEdge.leading
+
+    await tester.pumpWidget(buildFrame(ScrollableEdge.leading));
+    statefulElement = tester.element(find.byType(Scrollable));
+    scrollable = statefulElement.state;
+
+    await tester.scrollAt(tester.getTopLeft(find.text('top')), const Offset(0.0, 400.0));
+    await tester.pump();
+    expect(scrollable.scrollOffset, equals(0.0));
+    expect(scrollable.virtualScrollOffset, lessThan(0.0));
+    await tester.pump(const Duration(seconds: 1)); // Allow overscroll to settle
+
+    await tester.scrollAt(tester.getTopLeft(find.text('bottom')), const Offset(0.0, -400.0));
+    await tester.pump();
+    expect(scrollable.scrollOffset, greaterThan(0.0));
+    expect(scrollable.virtualScrollOffset, equals(scrollable.scrollOffset));
+
+    // ClampOverscrolls.edge == ScrollableEdge.trailing
+
+    await tester.pumpWidget(buildFrame(ScrollableEdge.trailing));
+    statefulElement = tester.element(find.byType(Scrollable));
+    scrollable = statefulElement.state;
+
+    await tester.scrollAt(tester.getTopLeft(find.text('top')), const Offset(0.0, 400.0));
+    await tester.pump();
+    expect(scrollable.scrollOffset, lessThan(0.0));
+    expect(scrollable.virtualScrollOffset, equals(scrollable.scrollOffset));
+    expect(scrollable.virtualScrollOffset, equals(scrollable.scrollOffset));
+    await tester.pump(const Duration(seconds: 1)); // Allow overscroll to settle
+
+    await tester.scrollAt(tester.getTopLeft(find.text('bottom')), const Offset(0.0, -400.0));
+    await tester.pump();
+    expect(scrollable.scrollOffset, equals(50.0));
+    expect(scrollable.virtualScrollOffset, greaterThan(50.0));
   });
 }

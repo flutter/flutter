@@ -151,7 +151,7 @@ class _OverscrollIndicatorState extends State<OverscrollIndicator> {
       return;
     final ExtentScrollBehavior scrollBehavior = scrollable.scrollBehavior;
     _scrollDirection = scrollable.config.scrollDirection;
-    _scrollOffset = scrollable.scrollOffset;
+    _scrollOffset = scrollable.virtualScrollOffset;
     _minScrollOffset = scrollBehavior.minScrollOffset;
     _maxScrollOffset = scrollBehavior.maxScrollOffset;
   }
@@ -166,7 +166,7 @@ class _OverscrollIndicatorState extends State<OverscrollIndicator> {
     if (!_scrollUnderway) // The hide timer has run.
       return;
 
-    final double value = scrollable.scrollOffset;
+    final double value = scrollable.virtualScrollOffset;
     if (_isOverscroll(value)) {
       _refreshHideTimer();
       // Hide the indicator as soon as user starts scrolling in the reverse direction of overscroll.

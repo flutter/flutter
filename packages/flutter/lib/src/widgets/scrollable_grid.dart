@@ -8,7 +8,6 @@ import 'package:collection/collection.dart' show lowerBound;
 import 'package:flutter/rendering.dart';
 import 'package:meta/meta.dart';
 
-import 'clamp_overscrolls.dart';
 import 'framework.dart';
 import 'scroll_configuration.dart';
 import 'scrollable.dart';
@@ -81,17 +80,13 @@ class ScrollableGrid extends StatelessWidget {
   /// The children that will be placed in the grid.
   final Iterable<Widget> children;
 
-  Widget _buildViewport(BuildContext context, ScrollableState state, double scrollOffset) {
+  Widget _buildViewport(BuildContext context, ScrollableState state) {
     return new GridViewport(
-      scrollOffset: scrollOffset,
+      scrollOffset: state.scrollOffset,
       delegate: delegate,
       onExtentsChanged: state.handleExtentsChanged,
       children: children
     );
-  }
-
-  Widget _buildContent(BuildContext context, ScrollableState state) {
-    return ClampOverscrolls.buildViewport(context, state, _buildViewport);
   }
 
   @override
@@ -107,7 +102,7 @@ class ScrollableGrid extends StatelessWidget {
       onScroll: onScroll,
       onScrollEnd: onScrollEnd,
       snapOffsetCallback: snapOffsetCallback,
-      builder: _buildContent
+      builder: _buildViewport,
     );
     return ScrollConfiguration.wrap(context, result);
   }
