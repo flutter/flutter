@@ -10,6 +10,7 @@ class MockKeyboard extends mojom.KeyboardProxy {
   MockKeyboard() : super.unbound();
 
   mojom.KeyboardClient client;
+  mojom.EditingState currentState;
 
   @override
   void setClient(mojom.KeyboardClientStub client, mojom.KeyboardConfiguration configuraiton) {
@@ -23,7 +24,10 @@ class MockKeyboard extends mojom.KeyboardProxy {
   void hide() {}
 
   @override
-  void setEditingState(mojom.EditingState state) {}
+  void setEditingState(mojom.EditingState state) {
+    currentState = state;
+  }
+
 }
 
 void main() {
@@ -43,7 +47,6 @@ void main() {
   }
 
   testWidgets('Setter callback is called', (WidgetTester tester) async {
-    GlobalKey inputKey = new GlobalKey();
     String fieldValue;
 
     Widget builder() {
@@ -51,9 +54,8 @@ void main() {
         child: new Material(
           child: new Form(
             child: new Input(
-              key: inputKey,
               formField: new FormField<String>(
-                setter: (String val) { fieldValue = val; }
+                setter: (String value) { fieldValue = value; }
               )
             )
           )
@@ -63,12 +65,12 @@ void main() {
 
     await tester.pumpWidget(builder());
 
-    Future<Null> checkText(String testValue) {
-      enterText(testValue);
+    expect(fieldValue, isNull);
 
-      // Check that the FormField's setter was called.
+    Future<Null> checkText(String testValue) async {
+      enterText(testValue);
+      // pump'ing is unnecessary because callback happens regardless of frames
       expect(fieldValue, equals(testValue));
-      return tester.pumpWidget(builder());
     }
 
     await checkText('Test');
@@ -98,11 +100,9 @@ void main() {
 
     Future<Null> checkErrorText(String testValue) async {
       enterText(testValue);
-      await tester.pumpWidget(builder());
-
+      await tester.pump();
       // Check for a new Text widget with our error text.
       expect(find.text(errorText(testValue)), findsOneWidget);
-      return null;
     }
 
     await checkErrorText('Test');
@@ -128,7 +128,7 @@ void main() {
                   new Input(
                     key: inputKey,
                     formField: new FormField<String>(
-                      setter: (String val) { fieldValue = val; }
+                      setter: (String value) { fieldValue = value; }
                     )
                   ),
                   new Input(
@@ -150,7 +150,7 @@ void main() {
 
     Future<Null> checkErrorText(String testValue) async {
       enterText(testValue);
-      await tester.pumpWidget(builder());
+      await tester.pump();
 
       expect(fieldValue, equals(testValue));
 
@@ -161,5 +161,43 @@ void main() {
 
     await checkErrorText('Test');
     await checkErrorText('');
+  });
+
+  testWidgets('Provide initial value to input', (WidgetTester tester) async {
+    String initialValue = 'hello';
+    String currentValue;
+
+    Widget builder() {
+      return new Center(
+          child: new Material(
+              child: new Form(
+                  child: new Input(
+                      value: new InputValue(text: initialValue),
+                      formField: new FormField<String>(
+                          setter: (String value) { currentValue = value; }
+                      )
+                  )
+              )
+          )
+      );
+    }
+
+    await tester.pumpWidget(builder());
+
+    // initial value should be loaded into keyboard editing state
+    expect(mockKeyboard.currentState, isNotNull);
+    expect(mockKeyboard.currentState.text, equals(initialValue));
+
+    // initial value should also be visible in the raw input line
+    RawInputLineState editableText = tester.state(find.byType(RawInputLine));
+    expect(editableText.config.value.text, equals(initialValue));
+
+    // sanity check, make sure we can still edit the text and everything updates
+    expect(currentValue, isNull);
+    enterText('world');
+    expect(currentValue, equals('world'));
+    await tester.pump();
+    expect(editableText.config.value.text, equals('world'));
+
   });
 }
