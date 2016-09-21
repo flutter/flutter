@@ -197,7 +197,7 @@ class _PestoLogoState extends State<PestoLogo> {
     begin: new Rect.fromLTWH(0.0, kLogoHeight, kLogoWidth, kTextHeight),
     end: new Rect.fromLTWH(0.0, kImageHeight, kLogoWidth, kTextHeight)
   );
-  final Curve _textOpacity = const Interval(0.3, 1.0, curve: Curves.easeInOut);
+  final Curve _textOpacity = const Interval(0.4, 1.0, curve: Curves.easeInOut);
   final RectTween _imageRectTween = new RectTween(
     begin: new Rect.fromLTWH(0.0, 0.0, kLogoWidth, kLogoHeight),
     end: new Rect.fromLTWH(0.0, 0.0, kLogoWidth, kImageHeight)
