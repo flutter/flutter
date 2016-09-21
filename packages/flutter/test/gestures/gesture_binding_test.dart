@@ -7,7 +7,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:mojo/bindings.dart' as mojo_bindings;
-import 'package:sky_services/pointer/pointer.mojom.dart';
+import 'package:flutter_services/pointer.dart';
 import 'package:test/test.dart';
 
 typedef void HandleEventCallback(PointerEvent event);

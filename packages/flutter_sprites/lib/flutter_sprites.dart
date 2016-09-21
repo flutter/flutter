@@ -19,7 +19,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:meta/meta.dart';
 import 'package:mojo/core.dart';
-import 'package:sky_services/media/media.mojom.dart';
+import 'package:flutter_services/media.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 part 'src/action.dart';

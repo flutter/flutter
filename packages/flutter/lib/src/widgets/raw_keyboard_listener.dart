@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/services.dart';
-import 'package:sky_services/raw_keyboard/raw_keyboard.mojom.dart' as mojom;
-import 'package:sky_services/sky/input_event.mojom.dart' as mojom;
+import 'package:flutter_services/raw_keyboard.dart' as mojom;
+import 'package:flutter_services/input_event.dart' as mojom;
 
 import 'basic.dart';
 import 'framework.dart';

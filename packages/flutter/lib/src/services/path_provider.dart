@@ -5,7 +5,7 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:sky_services/flutter/platform/path_provider.mojom.dart' as mojom;
+import 'package:flutter_services/platform/path_provider.dart' as mojom;
 
 import 'shell.dart';
 

@@ -11,7 +11,7 @@ import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/http.dart' as http;
 import 'package:mojo/core.dart' as core;
-import 'package:mojo_services/mojo/asset_bundle/asset_bundle.mojom.dart' as mojom;
+import 'package:flutter_services/mojo/asset_bundle/asset_bundle.dart' as mojom;
 
 /// A collection of resources used by the application.
 ///

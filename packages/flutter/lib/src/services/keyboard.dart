@@ -4,11 +4,11 @@
 
 import 'dart:async';
 
-import 'package:sky_services/editing/editing.mojom.dart' as mojom;
+import 'package:flutter_services/editing.dart' as mojom;
 
 import 'shell.dart';
 
-export 'package:sky_services/editing/editing.mojom.dart' show KeyboardType;
+export 'package:flutter_services/editing.dart' show KeyboardType;
 
 /// An interface to the system's keyboard.
 ///
