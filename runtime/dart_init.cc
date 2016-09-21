@@ -36,10 +36,13 @@
 #include "lib/ftl/files/unique_fd.h"
 #include "lib/ftl/logging.h"
 #include "lib/ftl/time/time_delta.h"
+#include "lib/tonic/converter/dart_converter.h"
 #include "lib/tonic/dart_class_library.h"
 #include "lib/tonic/dart_state.h"
+#include "lib/tonic/dart_sticky_error.h"
 #include "lib/tonic/dart_wrappable.h"
 #include "lib/tonic/debugger/dart_debugger.h"
+#include "lib/tonic/file_loader/file_loader.h"
 #include "lib/tonic/logging/dart_error.h"
 #include "lib/tonic/logging/dart_invoke.h"
 #include "lib/tonic/scopes/dart_api_scope.h"
@@ -131,6 +134,14 @@ RegisterNativeServiceProtocolExtensionHook
     g_register_native_service_protocol_extensions_hook = nullptr;
 
 void IsolateShutdownCallback(void* callback_data) {
+  if (tonic::DartStickyError::IsSet()) {
+    tonic::DartApiScope api_scope;
+    FTL_LOG(ERROR) << "Isolate "
+                   << tonic::StdStringFromDart(Dart_DebugName())
+                   << " exited with an error";
+    Dart_Handle sticky_error = Dart_GetStickyError();
+    FTL_CHECK(LogIfError(sticky_error));
+  }
   tonic::DartState* dart_state = static_cast<tonic::DartState*>(callback_data);
   delete dart_state;
 }
@@ -173,6 +184,16 @@ void ThreadExitCallback() {
 bool IsServiceIsolateURL(const char* url_name) {
   return url_name != nullptr &&
          std::string(url_name) == DART_VM_SERVICE_ISOLATE_NAME;
+}
+
+static bool StringEndsWith(const std::string& string,
+                           const std::string& ending) {
+  if (ending.size() > string.size())
+    return false;
+
+  return string.compare(string.size() - ending.size(),
+                        ending.size(),
+                        ending) == 0;
 }
 
 #if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_RELEASE
@@ -242,16 +263,23 @@ Dart_Isolate IsolateCreateCallback(const char* script_uri,
     return ServiceIsolateCreateCallback(script_uri, error);
   }
 
+  // Assert that entry script URI starts with file://
+  std::string entry_uri = script_uri;
+  FTL_CHECK(entry_uri.find(kFileUriPrefix) == 0u);
+  // Entry script path (file:// is stripped).
+  std::string entry_path(script_uri + strlen(kFileUriPrefix));
+  // Are we running a .dart source file?
+  const bool running_from_source = StringEndsWith(entry_path, ".dart");
+
   std::vector<uint8_t> snapshot_data;
-  if (!IsRunningPrecompiledCode()) {
-    std::string uri = script_uri;
-    FTL_CHECK(uri.find(kFileUriPrefix) == 0u);
-    std::string bundle_path(script_uri + strlen(kFileUriPrefix));
+  if (!IsRunningPrecompiledCode() && !running_from_source) {
+    // Attempt to copy the snapshot from the asset bundle.
+    const std::string& bundle_path = entry_path;
     ftl::RefPtr<ZipAssetStore> zip_asset_store =
         ftl::MakeRefCounted<ZipAssetStore>(
             GetUnzipperProviderForPath(std::move(bundle_path)),
             ftl::RefPtr<ftl::TaskRunner>());
-    FTL_CHECK(zip_asset_store->GetAsBuffer(kSnapshotAssetKey, &snapshot_data));
+    zip_asset_store->GetAsBuffer(kSnapshotAssetKey, &snapshot_data);
   }
 
   UIDartState* parent_dart_state = static_cast<UIDartState*>(callback_data);
@@ -287,8 +315,20 @@ Dart_Isolate IsolateCreateCallback(const char* script_uri,
 #endif
 
     if (!snapshot_data.empty()) {
+      // We are running from a script snapshot.
       FTL_CHECK(!LogIfError(Dart_LoadScriptFromSnapshot(snapshot_data.data(),
                                                         snapshot_data.size())));
+    } else {
+      // Forward the .packages configuration from the parent isolate to the
+      // child isolate.
+      tonic::FileLoader& parent_loader = parent_dart_state->file_loader();
+      const std::string& packages = parent_loader.packages();
+      tonic::FileLoader& loader = dart_state->file_loader();
+      if (!packages.empty() && !loader.LoadPackagesMap(packages)) {
+        FTL_LOG(WARNING) << "Failed to load package map: " << packages;
+      }
+      // We are running from source.
+      FTL_CHECK(!LogIfError(loader.LoadScript(entry_path)));
     }
 
     dart_state->isolate_client()->DidCreateSecondaryIsolate(isolate);
