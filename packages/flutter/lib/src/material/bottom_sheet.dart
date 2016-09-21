@@ -10,6 +10,7 @@ import 'colors.dart';
 import 'material.dart';
 
 const Duration _kBottomSheetDuration = const Duration(milliseconds: 200);
+const double _kMinFlingVelocity = 700.0;
 const double _kCloseProgressThreshold = 0.5;
 const Color _kTransparent = const Color(0x00000000);
 const Color _kBarrierColor = Colors.black54;
@@ -105,7 +106,7 @@ class _BottomSheetState extends State<BottomSheet> {
   void _handleDragEnd(DragEndDetails details) {
     if (_dismissUnderway)
       return;
-    if (details.velocity.pixelsPerSecond.dy > kPixelScrollTolerance.velocity) {
+    if (details.velocity.pixelsPerSecond.dy > _kMinFlingVelocity) {
       double flingVelocity = -details.velocity.pixelsPerSecond.dy / _childHeight;
       if (config.animationController.value > 0.0)
         config.animationController.fling(velocity: flingVelocity);
