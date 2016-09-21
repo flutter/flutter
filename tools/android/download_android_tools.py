@@ -93,6 +93,10 @@ def UpdateTools(tools_name):
     f.write('%s\n' % version)
 
 def main():
+  if "TRAVIS" in os.environ:
+    print 'Skipping Android tools on Travis.'
+    return
+
   UpdateTools('sdk')
   UpdateTools('ndk')
 
