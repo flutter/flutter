@@ -14,7 +14,7 @@ Things you will need
  * Python (used by many of our tools, including 'gclient').
  * curl (used by `gclient sync`).
 
-You do not need [Dart](https://www.dartlang.org/downloads/linux.html) installed, as a Dart tool chain is automatically downloaded as part of the "getting the code" step. Similarly for the Android SDK, it's downloaded by the build step below where you run `download_android_tools.py`.
+You do not need [Dart](https://www.dartlang.org/downloads/linux.html) installed, as a Dart tool chain is automatically downloaded as part of the "getting the code" step. Similarly for the Android SDK, it's downloaded by the `gclient sync` step below.
 
 Getting the code and configuring your environment
 -------------------------------------------------
@@ -46,7 +46,6 @@ target_os = ["android"]
  * `cd src/flutter` (Change to the `flutter` directory of the `src` directory that `gclient sync` created in your `engine` directory.)
  * `git remote add upstream git@github.com:flutter/engine.git` (So that you fetch from the master `flutter/engine` repository, not your clone, when running `git fetch` et al.)
  * `cd ..` (Return to the `src` directory that `gclient sync` created in your `engine` directory.)
- * Run `./tools/android/download_android_tools.py` to add Android dependencies to your tree. You will need to run this command again if you ever run `git clean -xdf`, since that deletes these dependencies. (`git clean -df` is fine since it skips these `.gitignore`d files.)
  * Add `.../engine/src/third_party/android_tools/sdk/platform-tools` to your path so that you can run the `adb` tool more easily. This is also required by the `flutter` tool, which is used to run Flutter apps.
  * Make sure you are still in the `src` directory that the `gclient sync` step created earlier.
  * If you're on Linux, run `sudo ./build/install-build-deps-android.sh`

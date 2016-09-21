@@ -161,6 +161,14 @@ hooks = [
     ],
   },
   {
+    'name': 'download_android_tools',
+    'pattern': '.',
+    'action': [
+        'python',
+        'src/tools/android/download_android_tools.py',
+    ],
+  },
+  {
     # Pull clang if needed or requested via GYP_DEFINES.
     'name': 'clang',
     'pattern': '.',
