@@ -47,8 +47,9 @@ import 'src/runner/flutter_command_runner.dart';
 ///
 /// This function is intended to be used from the `flutter` command line tool.
 Future<Null> main(List<String> args) async {
-  bool help = args.contains('-h') || args.contains('--help') || (args.isNotEmpty && args.first == 'help');
   bool verbose = args.contains('-v') || args.contains('--verbose');
+  bool help = args.contains('-h') || args.contains('--help') ||
+      (args.isNotEmpty && args.first == 'help') || (args.length == 1 && verbose);
   bool verboseHelp = help && verbose;
 
   if (verboseHelp) {
