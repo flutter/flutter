@@ -1751,7 +1751,7 @@ class BuildOwner {
 ///  * At this point, the element is considered "defunct" and will not be
 ///    incorporated into the tree in the future.
 abstract class Element implements BuildContext {
-  /// Creates an element that instantiates the given widget.
+  /// Creates an element that uses the given widget as its configuration.
   ///
   /// Typically called by an override of [Widget.createElement].
   Element(Widget widget) : _widget = widget {
@@ -2349,17 +2349,18 @@ abstract class Element implements BuildContext {
   }
 }
 
-/// A widget that renders an exception's message. This widget is used when a
-/// build function fails, to help with determining where the problem lies.
-/// Exceptions are also logged to the console, which you can read using `flutter
-/// logs`. The console will also include additional information such as the
-/// stack trace for the exception.
+/// A widget that renders an exception's message.
+///
+/// This widget is used when a build function fails, to help with determining
+/// where the problem lies. Exceptions are also logged to the console, which you
+/// can read using `flutter logs`. The console will also include additional
+/// information such as the stack trace for the exception.
 class ErrorWidget extends LeafRenderObjectWidget {
-  ErrorWidget(
-    Object exception
-  ) : message = _stringify(exception),
+  /// Creates a widget that displays the given error message.
+  ErrorWidget(Object exception) : message = _stringify(exception),
       super(key: new UniqueKey());
 
+  /// The message to display.
   final String message;
 
   static String _stringify(Object exception) {
@@ -2381,7 +2382,7 @@ class ErrorWidget extends LeafRenderObjectWidget {
 
 /// An [Element] that can be marked dirty and rebuilt.
 abstract class BuildableElement extends Element {
-  /// Creates an element that instantiates the given widget.
+  /// Creates an element that uses the given widget as its configuration.
   BuildableElement(Widget widget) : super(widget);
 
   /// Returns true if the element has been marked as needing rebuilding.
@@ -2535,7 +2536,10 @@ abstract class BuildableElement extends Element {
   }
 }
 
+/// Signature for a function that creates a widget.
 typedef Widget WidgetBuilder(BuildContext context);
+
+/// Signature for a function that creates a widget for a given index, e.g., in a list.
 typedef Widget IndexedWidgetBuilder(BuildContext context, int index);
 
 // See ComponentElement._builder.
@@ -2546,7 +2550,7 @@ Widget _buildNothing(BuildContext context) => null;
 /// Rather than creating a [RenderObject] directly, a [ComponentElement] creates
 /// [RenderObject]s indirectly by creating other [Element]s.
 abstract class ComponentElement extends BuildableElement {
-  /// Creates an element that instantiates the given widget.
+  /// Creates an element that uses the given widget as its configuration.
   ComponentElement(Widget widget) : super(widget);
 
   // Initializing this field with _buildNothing helps the compiler prove that
@@ -2613,8 +2617,9 @@ abstract class ComponentElement extends BuildableElement {
   }
 }
 
-/// Instantiation of [StatelessWidget]s.
+/// An element that uses a [StatelessWidget] as its configuration.
 class StatelessElement extends ComponentElement {
+  /// Creates an element that uses the given widget as its configuration.
   StatelessElement(StatelessWidget widget) : super(widget) {
     _builder = widget.build;
   }
@@ -2638,8 +2643,9 @@ class StatelessElement extends ComponentElement {
   }
 }
 
-/// Instantiation of [StatefulWidget]s.
+/// An element that uses a [StatefulWidget] as its configuration.
 class StatefulElement extends ComponentElement {
+  /// Creates an element that uses the given widget as its configuration.
   StatefulElement(StatefulWidget widget)
     : _state = widget.createState(), super(widget) {
     assert(_state._debugTypesAreRight(widget));
@@ -2652,6 +2658,11 @@ class StatefulElement extends ComponentElement {
     assert(_state._debugLifecycleState == _StateLifecycle.created);
   }
 
+  /// The [State] instance associated with this location in the tree.
+  ///
+  /// There is a one-to-one relationship between [State] objects and the
+  /// [StatefulElement] objects that hold them. The [State] objects are created
+  /// by [StatefulElement] in [mount].
   State<StatefulWidget> get state => _state;
   State<StatefulWidget> _state;
 
@@ -2784,9 +2795,9 @@ class StatefulElement extends ComponentElement {
   }
 }
 
-/// A base class for elements that instantiate [ProxyElement]s.
+/// An element that uses a [ProxyElement] as its configuration.
 abstract class ProxyElement extends ComponentElement {
-  /// Creates an element that instantiates the given widget.
+  /// Initializes fields for subclasses.
   ProxyElement(ProxyWidget widget) : super(widget) {
     _builder = _build;
   }
@@ -2814,12 +2825,17 @@ abstract class ProxyElement extends ComponentElement {
     rebuild();
   }
 
+  /// Notify other objects that the wiget associated with this element has changed.
+  ///
+  /// Called during [update] after changing the widget associated with this
+  /// element but before rebuilding this element.
   @protected
   void notifyClients(ProxyWidget oldWidget);
 }
 
-/// Base class for instantiations of [ParentDataWidget] subclasses.
+/// An element that uses a [ParentDataWidget] as its configuration.
 class ParentDataElement<T extends RenderObjectWidget> extends ProxyElement {
+  /// Creates an element that uses the given widget as its configuration.
   ParentDataElement(ParentDataWidget<T> widget) : super(widget);
 
   @override
@@ -2855,22 +2871,24 @@ class ParentDataElement<T extends RenderObjectWidget> extends ProxyElement {
     super.mount(parent, slot);
   }
 
+  void _notifyChildren(Element child) {
+    if (child is RenderObjectElement) {
+      child._updateParentData(widget);
+    } else {
+      assert(child is! ParentDataElement<RenderObjectWidget>);
+      child.visitChildren(_notifyChildren);
+    }
+  }
+
   @override
   void notifyClients(ParentDataWidget<T> oldWidget) {
-    void notifyChildren(Element child) {
-      if (child is RenderObjectElement) {
-        child._updateParentData(widget);
-      } else {
-        assert(child is! ParentDataElement<RenderObjectWidget>);
-        child.visitChildren(notifyChildren);
-      }
-    }
-    visitChildren(notifyChildren);
+    visitChildren(_notifyChildren);
   }
 }
 
-/// Base class for instantiations of [InheritedWidget] subclasses.
+/// An element that uses a [InheritedWidget] as its configuration.
 class InheritedElement extends ProxyElement {
+  /// Creates an element that uses the given widget as its configuration.
   InheritedElement(InheritedWidget widget) : super(widget);
 
   @override
@@ -2928,8 +2946,9 @@ class InheritedElement extends ProxyElement {
   }
 }
 
-/// Base class for instantiations of [RenderObjectWidget] subclasses.
+/// An element that uses a [RenderObjectWidget] as its configuration.
 abstract class RenderObjectElement extends BuildableElement {
+  /// Creates an element that uses the given widget as its configuration.
   RenderObjectElement(RenderObjectWidget widget) : super(widget);
 
   @override
@@ -2988,10 +3007,23 @@ abstract class RenderObjectElement extends BuildableElement {
     _dirty = false;
   }
 
-  /// Utility function for subclasses that have one or more lists of children.
+  /// Updates the children of this element to use new widgets.
+  ///
   /// Attempts to update the given old children list using the given new
   /// widgets, removing obsolete elements and introducing new ones as necessary,
   /// and then returns the new child list.
+  ///
+  /// During this function the `oldChildren` list must not be modified. If the
+  /// caller wishes to remove elements from `oldChildren` re-entrantly while
+  /// this function is on the stack, the caller can supply a `detachedChildren`
+  /// argument, which can be modified while this function is on the stack.
+  /// Whenever this function reads from `oldChildren`, this function first
+  /// checks whether the child is in `detachedChildren`. If it is, the function
+  /// acts as if the child was not in `oldChildren`.
+  ///
+  /// This function is a convienence wrapper around [updateChild], which updates
+  /// each individual child. When calling [updateChild], this function uses the
+  /// previous element as the `newSlot` argument.
   @protected
   List<Element> updateChildren(List<Element> oldChildren, List<Widget> newWidgets, { Set<Element> detachedChildren }) {
     assert(oldChildren != null);
@@ -3193,12 +3225,29 @@ abstract class RenderObjectElement extends BuildableElement {
     _slot = null;
   }
 
+  /// Insert the given child into [renderObject] at the given slot.
+  ///
+  /// The semantics of `slot` are determined by this element. For example, if
+  /// this element has a single child, the slot should always be null. If this
+  /// element has a list of children, the previous sibling is a convenient value
+  /// for the slot.
   @protected
   void insertChildRenderObject(RenderObject child, dynamic slot);
 
+  /// Move the given child to the given slot.
+  ///
+  /// The given child is guaranteed to have [renderObject] as its parent.
+  ///
+  /// The semantics of `slot` are determined by this element. For example, if
+  /// this element has a single child, the slot should always be null. If this
+  /// element has a list of children, the previous sibling is a convenient value
+  /// for the slot.
   @protected
   void moveChildRenderObject(RenderObject child, dynamic slot);
 
+  /// Remove the given child from [renderObject].
+  ///
+  /// The given child is guaranteed to have [renderObject] as its parent.
   @protected
   void removeChildRenderObject(RenderObject child);
 
@@ -3210,11 +3259,12 @@ abstract class RenderObjectElement extends BuildableElement {
   }
 }
 
-/// Instantiation of RenderObjectWidgets at the root of the tree.
+/// The element at the root of the tree.
 ///
 /// Only root elements may have their owner set explicitly. All other
 /// elements inherit their owner from their parent.
 abstract class RootRenderObjectElement extends RenderObjectElement {
+  /// Initializes fields for subclasses.
   RootRenderObjectElement(RenderObjectWidget widget): super(widget);
 
   /// Set the owner of the element. The owner will be propagated to all the
@@ -3240,10 +3290,9 @@ abstract class RootRenderObjectElement extends RenderObjectElement {
   }
 }
 
-/// Instantiation of [RenderObjectWidget]s that have no children.
-///
-/// Such widgets are expected to inherit from [LeafRenderObjectWidget].
+/// An element that uses a [LeafRenderObjectWidget] as its configuration.
 class LeafRenderObjectElement extends RenderObjectElement {
+  /// Creates an element that uses the given widget as its configuration.
   LeafRenderObjectElement(LeafRenderObjectWidget widget): super(widget);
 
   @override
@@ -3267,7 +3316,7 @@ class LeafRenderObjectElement extends RenderObjectElement {
   }
 }
 
-/// Instantiation of [RenderObjectWidget]s that have up to one child.
+/// An element that uses a [SingleChildRenderObjectWidget] as its configuration.
 ///
 /// The child is optional.
 ///
@@ -3275,6 +3324,7 @@ class LeafRenderObjectElement extends RenderObjectElement {
 /// RenderObjects use the [RenderObjectWithChildMixin] mixin. Such widgets are
 /// expected to inherit from [SingleChildRenderObjectWidget].
 class SingleChildRenderObjectElement extends RenderObjectElement {
+  /// Creates an element that uses the given widget as its configuration.
   SingleChildRenderObjectElement(SingleChildRenderObjectWidget widget) : super(widget);
 
   @override
@@ -3329,13 +3379,14 @@ class SingleChildRenderObjectElement extends RenderObjectElement {
   }
 }
 
-/// Instantiation of [RenderObjectWidget]s that can have a list of children.
+/// An element that uses a [MultiChildRenderObjectWidget] as its configuration.
 ///
 /// This element subclass can be used for RenderObjectWidgets whose
 /// RenderObjects use the [ContainerRenderObjectMixin] mixin with a parent data
 /// type that implements [ContainerParentDataMixin<RenderObject>]. Such widgets
 /// are expected to inherit from [MultiChildRenderObjectWidget].
 class MultiChildRenderObjectElement extends RenderObjectElement {
+  /// Creates an element that uses the given widget as its configuration.
   MultiChildRenderObjectElement(MultiChildRenderObjectWidget widget) : super(widget) {
     assert(!debugChildrenHaveDuplicateKeys(widget, widget.children));
   }
