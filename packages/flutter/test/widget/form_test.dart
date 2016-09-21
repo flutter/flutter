@@ -25,7 +25,7 @@ class MockKeyboard extends mojom.KeyboardProxy {
 
   @override
   void setEditingState(mojom.EditingState state) {
-    this.currentState = state;
+    currentState = state;
   }
 
 }
@@ -55,7 +55,7 @@ void main() {
           child: new Form(
             child: new Input(
               formField: new FormField<String>(
-                setter: (String val) { fieldValue = val; }
+                setter: (String value) { fieldValue = value; }
               )
             )
           )
@@ -128,7 +128,7 @@ void main() {
                   new Input(
                     key: inputKey,
                     formField: new FormField<String>(
-                      setter: (String val) { fieldValue = val; }
+                      setter: (String value) { fieldValue = value; }
                     )
                   ),
                   new Input(
@@ -164,7 +164,7 @@ void main() {
   });
 
   testWidgets('Provide initial value to input', (WidgetTester tester) async {
-    String initial = 'hello';
+    String initialValue = 'hello';
     String currentValue;
 
     Widget builder() {
@@ -172,9 +172,9 @@ void main() {
           child: new Material(
               child: new Form(
                   child: new Input(
-                      value: new InputValue(text: initial),
+                      value: new InputValue(text: initialValue),
                       formField: new FormField<String>(
-                          setter: (String val) { currentValue = val; }
+                          setter: (String value) { currentValue = value; }
                       )
                   )
               )
@@ -186,11 +186,11 @@ void main() {
 
     // initial value should be loaded into keyboard editing state
     expect(mockKeyboard.currentState, isNotNull);
-    expect(mockKeyboard.currentState.text, equals(initial));
+    expect(mockKeyboard.currentState.text, equals(initialValue));
 
     // initial value should also be visible in the raw input line
     RawInputLineState editableText = tester.state(find.byType(RawInputLine));
-    expect(editableText.config.value.text, equals(initial));
+    expect(editableText.config.value.text, equals(initialValue));
 
     // sanity check, make sure we can still edit the text and everything updates
     expect(currentValue, isNull);
