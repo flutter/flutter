@@ -36,7 +36,6 @@ executable("content_handler") {
     "//lib/ftl",
     "//lib/mtl",
     "//lib/zip",
-    "//mojo/public/c",
     "//mojo/public/cpp/application",
     "//mojo/public/cpp/bindings",
     "//mojo/public/cpp/system",
@@ -44,7 +43,6 @@ executable("content_handler") {
     "//mojo/services/asset_bundle/interfaces",
     "//mojo/services/content_handler/interfaces",
     "//mojo/services/framebuffer/interfaces",
-    "//mojo/services/tracing/cpp",
     "//mojo/system",
     "//third_party/skia",
 
