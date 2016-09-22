@@ -6,7 +6,6 @@
 library flutter_sprites;
 
 import 'dart:async';
-import 'dart:collection';
 import 'dart:convert';
 import 'dart:math' as math;
 import 'dart:typed_data';
@@ -18,8 +17,6 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:meta/meta.dart';
-import 'package:mojo/core.dart';
-import 'package:flutter_services/media.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 part 'src/action.dart';
@@ -35,7 +32,6 @@ part 'src/node.dart';
 part 'src/node3d.dart';
 part 'src/node_with_size.dart';
 part 'src/particle_system.dart';
-part 'src/sound.dart';
 part 'src/sprite.dart';
 part 'src/sprite_box.dart';
 part 'src/sprite_widget.dart';
