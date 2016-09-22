@@ -15,11 +15,13 @@
         <screen android:screenSize="small" android:screenDensity="mdpi" />
         <screen android:screenSize="small" android:screenDensity="hdpi" />
         <screen android:screenSize="small" android:screenDensity="xhdpi" />
+        <screen android:screenSize="small" android:screenDensity="480" />
         <!-- all normal size screens -->
         <screen android:screenSize="normal" android:screenDensity="ldpi" />
         <screen android:screenSize="normal" android:screenDensity="mdpi" />
         <screen android:screenSize="normal" android:screenDensity="hdpi" />
         <screen android:screenSize="normal" android:screenDensity="xhdpi" />
+        <screen android:screenSize="normal" android:screenDensity="480" />
     </compatible-screens>
 
     <application android:icon="@mipmap/ic_launcher" android:label="Gallery" android:name="org.domokit.sky.shell.SkyApplication">
