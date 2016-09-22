@@ -171,7 +171,7 @@ void main() {
 
     // Fling-scroll the TabBar to the left
     expect(tester.getCenter(find.text('HHHHHH')).x, lessThan(700.0));
-    await tester.fling(find.byKey(tabBarKey), const Offset(-20.0, 0.0), 1000.0);
+    await tester.fling(find.byKey(tabBarKey), const Offset(-200.0, 0.0), 10000.0);
     await tester.pump();
     await tester.pump(const Duration(seconds: 1)); // finish the scroll animation
     expect(tester.getCenter(find.text('HHHHHH')).x, lessThan(500.0));
@@ -267,7 +267,7 @@ void main() {
 
     // Fling to the left, switch from the 'LEFT' tab to the 'RIGHT'
     Point flingStart = tester.getCenter(find.text('LEFT CHILD'));
-    await tester.flingFrom(flingStart, new Offset(-200.0, 0.0), 1000.0);
+    await tester.flingFrom(flingStart, new Offset(-200.0, 0.0), 10000.0);
     await tester.pump();
     await tester.pump(const Duration(seconds: 1)); // finish the scroll animation
     expect(selection.value, equals('RIGHT'));
@@ -276,7 +276,7 @@ void main() {
 
     // Fling to the right, switch back to the 'LEFT' tab
     flingStart = tester.getCenter(find.text('RIGHT CHILD'));
-    await tester.flingFrom(flingStart, new Offset(200.0, 0.0), 1000.0);
+    await tester.flingFrom(flingStart, new Offset(200.0, 0.0), 10000.0);
     await tester.pump();
     await tester.pump(const Duration(seconds: 1)); // finish the scroll animation
     expect(selection.value, equals('LEFT'));
@@ -301,7 +301,7 @@ void main() {
     // a change to the selected tab, everything should just settle back to
     // to where it started.
     Point flingStart = tester.getCenter(find.text('LEFT CHILD'));
-    await tester.flingFrom(flingStart, new Offset(-200.0, 0.0), -1000.0);
+    await tester.flingFrom(flingStart, new Offset(-200.0, 0.0), -10000.0);
     await tester.pump();
     await tester.pump(const Duration(seconds: 1)); // finish the scroll animation
     expect(selection.value, equals('LEFT'));
