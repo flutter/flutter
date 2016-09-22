@@ -4,7 +4,7 @@
 
 import 'dart:async';
 
-import 'package:sky_services/flutter/platform/url_launcher.mojom.dart' as mojom;
+import 'package:flutter_services/platform/url_launcher.dart' as mojom;
 import 'shell.dart';
 
 mojom.UrlLauncherProxy _initUrlLauncherProxy() {

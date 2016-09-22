@@ -315,15 +315,17 @@ void main() {
             }
           ),
           new Container(height: 400.0),
-          new HorizontalDraggable<int>(
+          new Draggable<int>(
             data: 1,
             child: new Text('H'),
-            feedback: new Text('Dragging')
+            feedback: new Text('Dragging'),
+            affinity: Axis.horizontal,
           ),
-          new VerticalDraggable<int>(
+          new Draggable<int>(
             data: 2,
             child: new Text('V'),
-            feedback: new Text('Dragging')
+            feedback: new Text('Dragging'),
+            affinity: Axis.vertical,
           ),
           new Container(height: 500.0),
           new Container(height: 500.0),
@@ -420,15 +422,17 @@ void main() {
             }
           ),
           new Container(width: 400.0),
-          new HorizontalDraggable<int>(
+          new Draggable<int>(
             data: 1,
             child: new Text('H'),
-            feedback: new Text('Dragging')
+            feedback: new Text('Dragging'),
+            affinity: Axis.horizontal,
           ),
-          new VerticalDraggable<int>(
+          new Draggable<int>(
             data: 2,
             child: new Text('V'),
-            feedback: new Text('Dragging')
+            feedback: new Text('Dragging'),
+            affinity: Axis.vertical,
           ),
           new Container(width: 500.0),
           new Container(width: 500.0),

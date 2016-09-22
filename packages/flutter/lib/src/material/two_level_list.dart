@@ -16,22 +16,61 @@ import 'theme_data.dart';
 
 const Duration _kExpand = const Duration(milliseconds: 200);
 
+/// An item in a [TwoLevelList] or a [TwoLevelSublist].
+///
+/// A two-level list item is similar to a [ListItem], but a two-level list item
+/// automatically sizes itself to fit properly within its ancestor
+/// [TwoLevelList].
+///
+/// See also:
+///
+///  * [TwoLevelList]
+///  * [TwoLevelSublist]
+///  * [ListItem]
 class TwoLevelListItem extends StatelessWidget {
+  /// Creates an item in a two-level list.
   TwoLevelListItem({
     Key key,
     this.leading,
     this.title,
     this.trailing,
+    this.enabled: true,
     this.onTap,
     this.onLongPress
   }) : super(key: key) {
     assert(title != null);
   }
 
+  /// A widget to display before the title.
+  ///
+  /// Typically a [CircleAvatar] widget.
   final Widget leading;
+
+  /// The primary content of the list item.
+  ///
+  /// Typically a [Text] widget.
   final Widget title;
+
+  /// A widget to display after the title.
+  ///
+  /// Typically an [Icon] widget.
   final Widget trailing;
+
+  /// Whether this list item is interactive.
+  ///
+  /// If `false`, this list item is styled with the disabled color from the
+  /// current [Theme] and the [onTap] and [onLongPress] callbacks are
+  /// inoperative.
+  final bool enabled;
+
+  /// Called when the user taps this list item.
+  ///
+  /// Inoperative if [enabled] is false.
   final GestureTapCallback onTap;
+
+  /// Called when the user long-presses on this list item.
+  ///
+  /// Inoperative if [enabled] is false.
   final GestureLongPressCallback onLongPress;
 
   @override
@@ -45,6 +84,7 @@ class TwoLevelListItem extends StatelessWidget {
         leading: leading,
         title: title,
         trailing: trailing,
+        enabled: enabled,
         onTap: onTap,
         onLongPress: onLongPress
       )
@@ -52,7 +92,18 @@ class TwoLevelListItem extends StatelessWidget {
   }
 }
 
+/// An item in a [TwoLevelList] that can expand and collapse.
+///
+/// A two-level sublist is similar to a [ListItem], but the trailing widget is
+/// a button that expands or collapses a sublist of items.
+///
+/// See also:
+///
+///  * [TwoLevelList]
+///  * [TwoLevelListItem]
+///  * [ListItem]
 class TwoLevelSublist extends StatefulWidget {
+  /// Creates an item in a two-level list that can expland and collapse.
   TwoLevelSublist({
     Key key,
     this.leading,
@@ -62,10 +113,29 @@ class TwoLevelSublist extends StatefulWidget {
     this.children
   }) : super(key: key);
 
+  /// A widget to display before the title.
+  ///
+  /// Typically a [CircleAvatar] widget.
   final Widget leading;
+
+  /// The primary content of the list item.
+  ///
+  /// Typically a [Text] widget.
   final Widget title;
+
+  /// Called when the sublist expands or collapses.
+  ///
+  /// When the sublist starts expanding, this function is called with the value
+  /// `true`. When the sublist starts collapsing, this function is called with
+  /// the value `false`.
   final ValueChanged<bool> onOpenChanged;
+
+  /// The widgets that are displayed when the sublist expands.
+  ///
+  /// Typically [TwoLevelListItem] widgets.
   final List<Widget> children;
+
+  /// The color to display behind the sublist when expanded.
   final Color backgroundColor;
 
   @override
@@ -179,14 +249,25 @@ class _TwoLevelSublistState extends State<TwoLevelSublist> {
   }
 }
 
+/// A scrollable list of items that can expand and collapse.
+///
+/// See also:
+///
+///  * [TwoLevelSublist]
+///  * [TwoLevelListItem]
 class TwoLevelList extends StatelessWidget {
+  /// Creates a scrollable list of items that can expand and collapse.
+  ///
+  /// The [type] argument must not be null.
   TwoLevelList({
     Key key,
     this.scrollableKey,
     this.children,
     this.type: MaterialListType.twoLine,
     this.padding
-  }) : super(key: key);
+  }) : super(key: key) {
+    assert(type != null);
+  }
 
   /// The widgets to display in this list.
   ///

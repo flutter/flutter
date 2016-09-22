@@ -242,13 +242,14 @@ class FlutterEngine {
   FlutterEngine(this.cache);
 
   static const String kName = 'engine';
+  static const String kFlutterServices = 'flutter_services';
   static const String kSkyEngine = 'sky_engine';
   static const String kSkyServices = 'sky_services';
   static const String kSdkBundle = 'sdk.ds';
 
   final Cache cache;
 
-  List<String> _getPackageDirs() => const <String>[kSkyEngine, kSkyServices];
+  List<String> _getPackageDirs() => const <String>[kSkyEngine, kSkyServices, kFlutterServices];
 
   List<String> _getEngineDirs() {
     List<String> dirs = <String>[
@@ -341,9 +342,9 @@ class FlutterEngine {
 
     Status summaryStatus = logger.startProgress('Building Dart SDK summary...');
     try {
+      String flutterServicesPath = path.join(pkgDir.path, kFlutterServices);
       String skyEnginePath = path.join(pkgDir.path, kSkyEngine);
-      String skyServicesPath = path.join(pkgDir.path, kSkyServices);
-      buildSkyEngineSdkSummary(skyEnginePath, skyServicesPath, kSdkBundle);
+      buildSkyEngineSdkSummary(skyEnginePath, flutterServicesPath, kSdkBundle);
     } finally {
       summaryStatus.stop(showElapsedTime: true);
     }

@@ -8,6 +8,7 @@ import 'package:vector_math/vector_math_64.dart';
 import 'basic.dart';
 import 'container.dart';
 import 'framework.dart';
+import 'text.dart';
 
 /// An interpolation between two [BoxConstraint]s.
 class BoxConstraintsTween extends Tween<BoxConstraints> {

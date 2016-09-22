@@ -4,12 +4,12 @@
 
 import 'dart:async';
 
-import 'package:sky_services/flutter/platform/system_sound.mojom.dart' as mojom;
-import 'package:sky_services/flutter/platform/system_sound.mojom.dart' show SystemSoundType;
+import 'package:flutter_services/platform/system_sound.dart' as mojom;
+import 'package:flutter_services/platform/system_sound.dart' show SystemSoundType;
 
 import 'shell.dart';
 
-export 'package:sky_services/flutter/platform/system_sound.mojom.dart' show SystemSoundType;
+export 'package:flutter_services/platform/system_sound.dart' show SystemSoundType;
 
 mojom.SystemSoundProxy _initSystemSoundProxy() {
   return shell.connectToApplicationService('mojo:flutter_platform', mojom.SystemSound.connectToService);

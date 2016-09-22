@@ -301,6 +301,8 @@ List<TextPainter> _initPainters(TextTheme textTheme, List<String> labels) {
   List<TextPainter> painters = new List<TextPainter>(labels.length);
   for (int i = 0; i < painters.length; ++i) {
     String label = labels[i];
+    // TODO(abarth): Handle textScaleFactor.
+    // https://github.com/flutter/flutter/issues/5939
     painters[i] = new TextPainter(
       text: new TextSpan(style: style, text: label)
     )..layout();

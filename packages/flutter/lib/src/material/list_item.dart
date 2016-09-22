@@ -76,7 +76,7 @@ class ListItem extends StatelessWidget {
 
   /// Whether this list item is interactive.
   ///
-  /// If false, this list item is styled with the disabled color from the
+  /// If `false`, this list item is styled with the disabled color from the
   /// current [Theme] and the [onTap] and [onLongPress] callbacks are
   /// inoperative.
   final bool enabled;

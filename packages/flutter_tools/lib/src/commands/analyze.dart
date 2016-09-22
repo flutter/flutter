@@ -23,7 +23,7 @@ bool isDartFile(FileSystemEntity entry) => entry is File && entry.path.endsWith(
 typedef bool FileFilter(FileSystemEntity entity);
 
 class AnalyzeCommand extends FlutterCommand {
-  AnalyzeCommand() {
+  AnalyzeCommand({bool verboseHelp: false}) {
     argParser.addFlag('flutter-repo', help: 'Include all the examples and tests from the Flutter repository.', defaultsTo: false);
     argParser.addFlag('current-directory', help: 'Include all the Dart files in the current directory, if any.', defaultsTo: true);
     argParser.addFlag('current-package', help: 'Include the lib/main.dart file from the current directory, if any.', defaultsTo: true);
@@ -32,10 +32,10 @@ class AnalyzeCommand extends FlutterCommand {
     argParser.addFlag('congratulate', help: 'Show output even when there are no errors, warnings, hints, or lints.', defaultsTo: true);
     argParser.addFlag('watch', help: 'Run analysis continuously, watching the filesystem for changes.', negatable: false);
     argParser.addOption('write', valueHelp: 'file', help: 'Also output the results to a file. This is useful with --watch if you want a file to always contain the latest results.');
-    argParser.addOption('dart-sdk', valueHelp: 'path-to-sdk', help: 'The path to the Dart SDK.', hide: true);
+    argParser.addOption('dart-sdk', valueHelp: 'path-to-sdk', help: 'The path to the Dart SDK.', hide: !verboseHelp);
 
     // Hidden option to enable a benchmarking mode.
-    argParser.addFlag('benchmark', negatable: false, hide: true);
+    argParser.addFlag('benchmark', negatable: false, hide: !verboseHelp);
 
     usesPubOption();
   }
@@ -202,12 +202,6 @@ class AnalyzeCommand extends FlutterCommand {
       return 1;
     }
     Map<String, String> packages = dependencies.asPackageMap();
-
-    // override the sky_engine and sky_services packages if the user is using a local build
-    if (tools.engineBuildPath != null) {
-      packages['sky_engine'] = path.join(tools.engineBuildPath, 'gen/dart-pkg/sky_engine/lib');
-      packages['sky_services'] = path.join(tools.engineBuildPath, 'gen/dart-pkg/sky_services/lib');
-    }
 
     Cache.releaseLockEarly();
 

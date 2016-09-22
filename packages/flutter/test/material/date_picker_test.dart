@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('tap-select an day', (WidgetTester tester) async {
+  testWidgets('tap-select a day', (WidgetTester tester) async {
     Key _datePickerKey = new UniqueKey();
     DateTime _selectedDate = new DateTime(2016, DateTime.JULY, 26);
 

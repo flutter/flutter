@@ -10,10 +10,15 @@ dependencies:
   meta: ^1.0.3
   vector_math: '>=2.0.3 <3.0.0'
 
+  # async and http_parser can be removed when we move to using dart-lang/http
+  # directly.
+  async: "^1.10.0"
+  http_parser: ">=0.0.1 <4.0.0"
+
+  flutter_services:
+    path: ../../bin/cache/pkg/flutter_services
   sky_engine:
     path: ../../bin/cache/pkg/sky_engine
-  sky_services:
-    path: ../../bin/cache/pkg/sky_services
 
 dev_dependencies:
   flutter_test:

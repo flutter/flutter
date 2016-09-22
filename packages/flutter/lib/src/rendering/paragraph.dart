@@ -29,15 +29,17 @@ class RenderParagraph extends RenderBox {
   /// The [text], [overflow], and [softWrap] arguments must not be null.
   RenderParagraph(TextSpan text, {
     TextAlign textAlign,
+    bool softWrap: true,
     TextOverflow overflow: TextOverflow.clip,
-    bool softWrap: true
+    double textScaleFactor: 1.0
   }) : _softWrap = softWrap,
        _overflow = overflow,
-       _textPainter = new TextPainter(text: text, textAlign: textAlign) {
+       _textPainter = new TextPainter(text: text, textAlign: textAlign, textScaleFactor: textScaleFactor) {
     assert(text != null);
     assert(text.debugAssertIsValid());
-    assert(overflow != null);
     assert(softWrap != null);
+    assert(overflow != null);
+    assert(textScaleFactor != null);
   }
 
   final TextPainter _textPainter;
@@ -85,6 +87,21 @@ class RenderParagraph extends RenderBox {
       return;
     _overflow = value;
     markNeedsPaint();
+  }
+
+  /// The number of font pixels for each logical pixel.
+  ///
+  /// For example, if the text scale factor is 1.5, text will be 50% larger than
+  /// the specified font size.
+  double get textScaleFactor => _textPainter.textScaleFactor;
+  set textScaleFactor(double value) {
+    assert(value != null);
+    if (_textPainter.textScaleFactor == value)
+      return;
+    _textPainter.textScaleFactor = value;
+    _overflowPainter = null;
+    _overflowShader = null;
+    markNeedsLayout();
   }
 
   void _layoutText({ double minWidth: 0.0, double maxWidth: double.INFINITY }) {
@@ -171,7 +188,8 @@ class RenderParagraph extends RenderBox {
         case TextOverflow.fade:
         case TextOverflow.ellipsis:
           _overflowPainter ??= new TextPainter(
-            text: new TextSpan(style: _textPainter.text.style, text: '\u2026')
+            text: new TextSpan(style: _textPainter.text.style, text: '\u2026'),
+            textScaleFactor: textScaleFactor
           )..layout();
           final double overflowUnit = _overflowPainter.width;
           double fadeEnd = size.width;

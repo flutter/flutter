@@ -10,7 +10,7 @@ import 'dart:typed_data';
 
 import 'package:mojo/bindings.dart' as bindings;
 import 'package:mojo/core.dart' as core;
-import 'package:sky_services/pointer/pointer.mojom.dart';
+import 'package:flutter_services/pointer.dart';
 
 ui.Color color;
 

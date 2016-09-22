@@ -2,42 +2,49 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
+/// A composable, [Future]-based library for making HTTP requests.
 import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:mojo/core.dart' as mojo;
-
-import 'mojo_client.dart';
+import 'client.dart';
 import 'response.dart';
+
+export 'base_client.dart';
+export 'base_request.dart';
+export 'base_response.dart';
+export 'byte_stream.dart';
+export 'client.dart';
+export 'exception.dart';
+export 'io_client.dart';
+export 'multipart_file.dart';
+export 'multipart_request.dart';
+export 'request.dart';
+export 'response.dart';
+export 'streamed_request.dart';
+export 'streamed_response.dart';
 
 /// Sends an HTTP HEAD request with the given headers to the given URL, which
 /// can be a [Uri] or a [String].
 ///
-/// Network errors will be turned into [Response] object with a non-null
-/// [Response.error] field.
-///
-/// This automatically initializes a new [MojoClient] and closes that client once
+/// This automatically initializes a new [Client] and closes that client once
 /// the request is complete. If you're planning on making multiple requests to
-/// the same server, you should use a single [MojoClient] for all of those requests,
-/// so that the same underlying TCP connection can be re-used (via HTTP pipelining).
-Future<Response> head(dynamic url) {
-  return _withClient/*<Response>*/((MojoClient client) => client.head(url));
-}
+/// the same server, you should use a single [Client] for all of those requests.
+///
+/// For more fine-grained control over the request, use [Request] instead.
+Future<Response> head(dynamic url, {Map<String, String> headers}) =>
+  _withClient((Client client) => client.head(url, headers: headers));
 
 /// Sends an HTTP GET request with the given headers to the given URL, which can
 /// be a [Uri] or a [String].
 ///
-/// Network errors will be turned into [Response] object with a non-null
-/// [Response.error] field.
-///
-/// This automatically initializes a new [MojoClient] and closes that client once
+/// This automatically initializes a new [Client] and closes that client once
 /// the request is complete. If you're planning on making multiple requests to
-/// the same server, you should use a single [MojoClient] for all of those requests,
-/// so that the same underlying TCP connection can be re-used (via HTTP pipelining).
-Future<Response> get(dynamic url, { Map<String, String> headers }) {
-  return _withClient/*<Response>*/((MojoClient client) => client.get(url, headers: headers));
-}
+/// the same server, you should use a single [Client] for all of those requests.
+///
+/// For more fine-grained control over the request, use [Request] instead.
+Future<Response> get(dynamic url, {Map<String, String> headers}) =>
+  _withClient((Client client) => client.get(url, headers: headers));
 
 /// Sends an HTTP POST request with the given headers and body to the given URL,
 /// which can be a [Uri] or a [String].
@@ -56,18 +63,12 @@ Future<Response> get(dynamic url, { Map<String, String> headers }) {
 ///
 /// [encoding] defaults to [UTF8].
 ///
-/// Network errors will be turned into [Response] object with a non-null
-/// [Response.error] field.
-///
-/// This automatically initializes a new [MojoClient] and closes that client once
-/// the request is complete. If you're planning on making multiple requests to
-/// the same server, you should use a single [MojoClient] for all of those requests,
-/// so that the same underlying TCP connection can be re-used (via HTTP pipelining).
-Future<Response> post(dynamic url, { Map<String, String> headers, dynamic body, Encoding encoding: UTF8 }) {
-  return _withClient/*<Response>*/((MojoClient client) {
-    return client.post(url, headers: headers, body: body, encoding: encoding);
-  });
-}
+/// For more fine-grained control over the request, use [Request] or
+/// [StreamedRequest] instead.
+Future<Response> post(dynamic url, {Map<String, String> headers, dynamic body,
+    Encoding encoding}) =>
+  _withClient((Client client) => client.post(url,
+      headers: headers, body: body, encoding: encoding));
 
 /// Sends an HTTP PUT request with the given headers and body to the given URL,
 /// which can be a [Uri] or a [String].
@@ -86,18 +87,12 @@ Future<Response> post(dynamic url, { Map<String, String> headers, dynamic body, 
 ///
 /// [encoding] defaults to [UTF8].
 ///
-/// Network errors will be turned into [Response] object with a non-null
-/// [Response.error] field.
-///
-/// This automatically initializes a new [MojoClient] and closes that client once
-/// the request is complete. If you're planning on making multiple requests to
-/// the same server, you should use a single [MojoClient] for all of those requests,
-/// so that the same underlying TCP connection can be re-used (via HTTP pipelining).
-Future<Response> put(dynamic url, { Map<String, String> headers, dynamic body, Encoding encoding: UTF8 }) {
-  return _withClient/*<Response>*/((MojoClient client) {
-    return client.put(url, headers: headers, body: body, encoding: encoding);
-  });
-}
+/// For more fine-grained control over the request, use [Request] or
+/// [StreamedRequest] instead.
+Future<Response> put(dynamic url, {Map<String, String> headers, dynamic body,
+    Encoding encoding}) =>
+  _withClient((Client client) => client.put(url,
+      headers: headers, body: body, encoding: encoding));
 
 /// Sends an HTTP PATCH request with the given headers and body to the given
 /// URL, which can be a [Uri] or a [String].
@@ -116,78 +111,61 @@ Future<Response> put(dynamic url, { Map<String, String> headers, dynamic body, E
 ///
 /// [encoding] defaults to [UTF8].
 ///
-/// Network errors will be turned into [Response] object with a non-null
-/// [Response.error] field.
-///
-/// This automatically initializes a new [MojoClient] and closes that client once
-/// the request is complete. If you're planning on making multiple requests to
-/// the same server, you should use a single [MojoClient] for all of those requests,
-/// so that the same underlying TCP connection can be re-used (via HTTP pipelining).
-Future<Response> patch(dynamic url, { Map<String, String> headers, dynamic body, Encoding encoding: UTF8 }) {
-  return _withClient/*<Response>*/((MojoClient client) {
-     return client.patch(url, headers: headers, body: body, encoding: encoding);
-  });
-}
+/// For more fine-grained control over the request, use [Request] or
+/// [StreamedRequest] instead.
+Future<Response> patch(dynamic url, {Map<String, String> headers, dynamic body,
+    Encoding encoding}) =>
+  _withClient((Client client) => client.patch(url,
+      headers: headers, body: body, encoding: encoding));
 
 /// Sends an HTTP DELETE request with the given headers to the given URL, which
 /// can be a [Uri] or a [String].
 ///
-/// Network errors will be turned into [Response] object with a non-null
-/// [Response.error] field.
-///
-/// This automatically initializes a new [MojoClient] and closes that client once
+/// This automatically initializes a new [Client] and closes that client once
 /// the request is complete. If you're planning on making multiple requests to
-/// the same server, you should use a single [MojoClient] for all of those requests,
-/// so that the same underlying TCP connection can be re-used (via HTTP pipelining).
-Future<Response> delete(dynamic url, { Map<String, String> headers }) {
-  return _withClient/*<Response>*/((MojoClient client) => client.delete(url, headers: headers));
-}
+/// the same server, you should use a single [Client] for all of those requests.
+///
+/// For more fine-grained control over the request, use [Request] instead.
+Future<Response> delete(dynamic url, {Map<String, String> headers}) =>
+  _withClient((Client client) => client.delete(url, headers: headers));
 
 /// Sends an HTTP GET request with the given headers to the given URL, which can
 /// be a [Uri] or a [String], and returns a Future that completes to the body of
 /// the response as a [String].
 ///
-/// The Future will resolve with an error in the case of a network error or if
-/// the response doesn't have a success status code.
+/// The Future will emit a [ClientException] if the response doesn't have a
+/// success status code.
 ///
-/// This automatically initializes a new [MojoClient] and closes that client once
+/// This automatically initializes a new [Client] and closes that client once
 /// the request is complete. If you're planning on making multiple requests to
-/// the same server, you should use a single [MojoClient] for all of those requests,
-/// so that the same underlying TCP connection can be re-used (via HTTP pipelining).
-Future<String> read(dynamic url, { Map<String, String> headers }) {
-  return _withClient/*<String>*/((MojoClient client) => client.read(url, headers: headers));
-}
+/// the same server, you should use a single [Client] for all of those requests.
+///
+/// For more fine-grained control over the request and response, use [Request]
+/// instead.
+Future<String> read(dynamic url, {Map<String, String> headers}) =>
+  _withClient((Client client) => client.read(url, headers: headers));
 
 /// Sends an HTTP GET request with the given headers to the given URL, which can
 /// be a [Uri] or a [String], and returns a Future that completes to the body of
 /// the response as a list of bytes.
 ///
-/// The Future will resolve with an error in the case of a network error or if
-/// the response doesn't have a success status code.
+/// The Future will emit a [ClientException] if the response doesn't have a
+/// success status code.
 ///
-/// This automatically initializes a new [MojoClient] and closes that client once
+/// This automatically initializes a new [Client] and closes that client once
 /// the request is complete. If you're planning on making multiple requests to
-/// the same server, you should use a single [MojoClient] for all of those requests,
-/// so that the same underlying TCP connection can be re-used (via HTTP pipelining).
-Future<Uint8List> readBytes(dynamic url, { Map<String, String> headers }) {
-  return _withClient/*<Uint8List>*/((MojoClient client) => client.readBytes(url, headers: headers));
-}
-
-/// Sends an HTTP GET request with the given headers to the given URL, which can
-/// be a [Uri] or a [String], and returns a Future that completes to a data pipe
-/// containing the response bytes.
+/// the same server, you should use a single [Client] for all of those requests.
 ///
-/// The Future will resolve with an error in the case of a network error or if
-/// the response doesn't have a success status code.
-///
-/// This automatically initializes a new [MojoClient] and closes that client once
-/// the request is complete. If you're planning on making multiple requests to
-/// the same server, you should use a single [MojoClient] for all of those requests,
-/// so that the same underlying TCP connection can be re-used (via HTTP pipelining).
-Future<mojo.MojoDataPipeConsumer> readDataPipe(dynamic url, { Map<String, String> headers }) {
-  return _withClient/*<mojo.MojoDataPipeConsumer>*/((MojoClient client) => client.readDataPipe(url, headers: headers));
-}
+/// For more fine-grained control over the request and response, use [Request]
+/// instead.
+Future<Uint8List> readBytes(dynamic url, {Map<String, String> headers}) =>
+  _withClient((Client client) => client.readBytes(url, headers: headers));
 
-Future<dynamic/*=T*/> _withClient/*<T>*/(Future<dynamic/*=T*/> fn(MojoClient client)) {
-  return fn(new MojoClient());
+Future/*<T>*/ _withClient/*<T>*/(Future/*<T>*/ fn(Client client)) async {
+  Client client = new Client();
+  try {
+    return await fn(client);
+  } finally {
+    client.close();
+  }
 }
