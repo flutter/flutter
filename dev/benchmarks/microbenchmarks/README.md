@@ -1,6 +1,8 @@
 # microbenchmarks
 
-To run these benchmarks on a device:
+To run these benchmarks on a device, first run `flutter logs' in one
+window to see the device logs, then, in a different window, run any of
+these:
 
 ```
 flutter run --release lib/gestures/velocity_tracker_data.dart
