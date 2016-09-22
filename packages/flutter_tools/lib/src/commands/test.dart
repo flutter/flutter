@@ -36,6 +36,17 @@ class TestCommand extends FlutterCommand {
       defaultsTo: 'coverage/lcov.info',
       help: 'Where to store coverage information (if coverage is enabled).'
     );
+    commandValidator = () {
+      if (!FileSystemEntity.isFileSync('pubspec.yaml')) {
+        printError(
+          'Error: No pubspec.yaml file found in the current working directory.\n'
+          'Run this command from the root of your project. Test files must be\n'
+          'called *_test.dart and must reside in the package\'s \'test\'\n'
+          'directory (or one of its subdirectories).');
+        return false;
+      }
+      return true;
+    };
   }
 
   @override
@@ -43,19 +54,6 @@ class TestCommand extends FlutterCommand {
 
   @override
   String get description => 'Run Flutter unit tests for the current project.';
-
-  @override
-  Validator commandValidator = () {
-    if (!FileSystemEntity.isFileSync('pubspec.yaml')) {
-      printError(
-        'Error: No pubspec.yaml file found in the current working directory.\n'
-        'Run this command from the root of your project. Test files must be\n'
-        'called *_test.dart and must reside in the package\'s \'test\'\n'
-        'directory (or one of its subdirectories).');
-      return false;
-    }
-    return true;
-  };
 
   Iterable<String> _findTests(Directory directory) {
     return directory.listSync(recursive: true, followLinks: false)
