@@ -41,7 +41,7 @@ DART="$DART_SDK_PATH/bin/dart"
 
     echo Building flutter tool...
     FLUTTER_DIR="$FLUTTER_ROOT/packages/flutter"
-    (cd "$FLUTTER_TOOLS_DIR"; "../../bin/cache/dart-sdk/bin/pub" get --verbosity=error)
+    (cd "$FLUTTER_TOOLS_DIR"; "../../bin/cache/dart-sdk/bin/pub" get --verbosity=error --no-packages-dir)
     "$DART" --snapshot="$SNAPSHOT_PATH" --packages="$FLUTTER_TOOLS_DIR/.packages" "$SCRIPT_PATH"
     echo $REVISION > "$STAMP_PATH"
   fi
