@@ -446,7 +446,7 @@ class BottomNavigationBarState extends State<BottomNavigationBar> {
         new Positioned.fill(
           child: new Material( // Casts shadow.
             elevation: 8,
-            color: _backgroundColor
+            color: config.type == BottomNavigationBarType.shifting ? _backgroundColor : null
           )
         ),
         new SizedBox(
