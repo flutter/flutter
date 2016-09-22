@@ -49,13 +49,23 @@ enum DragAnchor {
   pointer,
 }
 
-/// Subclass this widget to customize the gesture used to start a drag.
-abstract class DraggableBase<T> extends StatefulWidget {
-  /// Initializes fields for subclasses.
+/// A widget that can be dragged from to a [DragTarget].
+///
+/// When a draggable widget recognizes the start of a drag gesture, it displays
+/// a [feedback] widget that tracks the user's finger across the screen. If the
+/// user lifts their finger while on top of a [DragTarget], that target is given
+/// the opportunity to accept the [data] carried by the draggble.
+///
+/// See also:
+///
+///  * [DragTarget]
+///  * [LongPressDraggable]
+class Draggable<T> extends StatefulWidget {
+  /// Creates a widget that can be dragged to a [DragTarget].
   ///
   /// The [child] and [feedback] arguments must not be null. If
   /// [maxSimultaneousDrags] is non-null, it must be positive.
-  DraggableBase({
+  Draggable({
     Key key,
     @required this.child,
     @required this.feedback,
@@ -63,6 +73,7 @@ abstract class DraggableBase<T> extends StatefulWidget {
     this.childWhenDragging,
     this.feedbackOffset: Offset.zero,
     this.dragAnchor: DragAnchor.child,
+    this.affinity,
     this.maxSimultaneousDrags,
     this.onDraggableCanceled
   }) : super(key: key) {
@@ -95,6 +106,22 @@ abstract class DraggableBase<T> extends StatefulWidget {
   /// Where this widget should be anchored during a drag.
   final DragAnchor dragAnchor;
 
+  /// Controls how this widget competes with other gestures to initiate a drag.
+  ///
+  /// If affinity is null, this widget initiates a drag as soon as it recognizes
+  /// a tap down gesture, regardless of any directionality. If affinity is
+  /// horizontal (or vertical), then this widget will compete with other
+  /// horizontal (or vertical, respectively) gestures.
+  ///
+  /// For example, if this widget is placed in a vertically scrolling region and
+  /// has horizontal affinity, pointer motion in the vertical direction will
+  /// result in a scroll and pointer motion in the horizontal direction will
+  /// result in a drag. Conversely, if the widget has a null or vertical
+  /// affinity, pointer motion in any direction will result in a drag rather
+  /// than in a scroll because the draggable widget, being the more specific
+  /// widget, will out-compete the [Scrollable] for vertical gestures.
+  final Axis affinity;
+
   /// How many simultaneous drags to support. When null, no limit is applied.
   /// Set this to 1 if you want to only allow the drag source to have one item
   /// dragged at a time.
@@ -103,120 +130,27 @@ abstract class DraggableBase<T> extends StatefulWidget {
   /// Called when the draggable is dropped without being accepted by a [DragTarget].
   final DraggableCanceledCallback onDraggableCanceled;
 
-  /// Should return a new MultiDragGestureRecognizer instance
-  /// constructed with the given arguments.
-  MultiDragGestureRecognizer<MultiDragPointerState> createRecognizer(GestureMultiDragStartCallback onStart);
+  /// Creates a gesture recognizer that recognizes the start of the drag.
+  ///
+  /// Subclasses can override this function to customize when they start
+  /// recognizing a drag.
+  @protected
+  MultiDragGestureRecognizer<MultiDragPointerState> createRecognizer(GestureMultiDragStartCallback onStart) {
+    switch (affinity) {
+      case Axis.horizontal:
+        return new HorizontalMultiDragGestureRecognizer()..onStart = onStart;
+      case Axis.vertical:
+        return new VerticalMultiDragGestureRecognizer()..onStart = onStart;
+    }
+    return new ImmediateMultiDragGestureRecognizer()..onStart = onStart;
+  }
 
   @override
   _DraggableState<T> createState() => new _DraggableState<T>();
 }
 
-/// Makes its child draggable starting from tap down.
-class Draggable<T> extends DraggableBase<T> {
-  /// Creates a widget that can be dragged starting from tap down.
-  ///
-  /// The [child] and [feedback] arguments must not be null. If
-  /// [maxSimultaneousDrags] is non-null, it must be positive.
-  Draggable({
-    Key key,
-    @required Widget child,
-    @required Widget feedback,
-    T data,
-    Widget childWhenDragging,
-    Offset feedbackOffset: Offset.zero,
-    DragAnchor dragAnchor: DragAnchor.child,
-    int maxSimultaneousDrags,
-    DraggableCanceledCallback onDraggableCanceled
-  }) : super(
-    key: key,
-    child: child,
-    feedback: feedback,
-    data: data,
-    childWhenDragging: childWhenDragging,
-    feedbackOffset: feedbackOffset,
-    dragAnchor: dragAnchor,
-    maxSimultaneousDrags: maxSimultaneousDrags,
-    onDraggableCanceled: onDraggableCanceled
-  );
-
-  @override
-  ImmediateMultiDragGestureRecognizer createRecognizer(GestureMultiDragStartCallback onStart) {
-    return new ImmediateMultiDragGestureRecognizer()..onStart = onStart;
-  }
-}
-
-/// Makes its child draggable. When competing with other gestures,
-/// this will only start the drag horizontally.
-class HorizontalDraggable<T> extends DraggableBase<T> {
-  /// Creates a widget that can be dragged.
-  ///
-  /// The [child] and [feedback] arguments must not be null. If
-  /// [maxSimultaneousDrags] is non-null, it must be positive.
-  HorizontalDraggable({
-    Key key,
-    @required Widget child,
-    @required Widget feedback,
-    T data,
-    Widget childWhenDragging,
-    Offset feedbackOffset: Offset.zero,
-    DragAnchor dragAnchor: DragAnchor.child,
-    int maxSimultaneousDrags,
-    DraggableCanceledCallback onDraggableCanceled
-  }) : super(
-    key: key,
-    child: child,
-    feedback: feedback,
-    data: data,
-    childWhenDragging: childWhenDragging,
-    feedbackOffset: feedbackOffset,
-    dragAnchor: dragAnchor,
-    maxSimultaneousDrags: maxSimultaneousDrags,
-    onDraggableCanceled: onDraggableCanceled
-  );
-
-  @override
-  HorizontalMultiDragGestureRecognizer createRecognizer(GestureMultiDragStartCallback onStart) {
-    return new HorizontalMultiDragGestureRecognizer()..onStart = onStart;
-  }
-}
-
-/// Makes its child draggable. When competing with other gestures,
-/// this will only start the drag vertically.
-class VerticalDraggable<T> extends DraggableBase<T> {
-  /// Creates a widget that can be dragged.
-  ///
-  /// The [child] and [feedback] arguments must not be null. If
-  /// [maxSimultaneousDrags] is non-null, it must be positive.
-  VerticalDraggable({
-    Key key,
-    @required Widget child,
-    @required Widget feedback,
-    T data,
-    Widget childWhenDragging,
-    Offset feedbackOffset: Offset.zero,
-    DragAnchor dragAnchor: DragAnchor.child,
-    int maxSimultaneousDrags,
-    DraggableCanceledCallback onDraggableCanceled
-  }) : super(
-    key: key,
-    child: child,
-    feedback: feedback,
-    data: data,
-    childWhenDragging: childWhenDragging,
-    feedbackOffset: feedbackOffset,
-    dragAnchor: dragAnchor,
-    maxSimultaneousDrags: maxSimultaneousDrags,
-    onDraggableCanceled: onDraggableCanceled
-  );
-
-  @override
-  VerticalMultiDragGestureRecognizer createRecognizer(GestureMultiDragStartCallback onStart) {
-    return new VerticalMultiDragGestureRecognizer()..onStart = onStart;
-  }
-}
-
 /// Makes its child draggable starting from long press.
-class LongPressDraggable<T> extends DraggableBase<T> {
+class LongPressDraggable<T> extends Draggable<T> {
   /// Creates a widget that can be dragged starting from long press.
   ///
   /// The [child] and [feedback] arguments must not be null. If
@@ -255,7 +189,7 @@ class LongPressDraggable<T> extends DraggableBase<T> {
   }
 }
 
-class _DraggableState<T> extends State<DraggableBase<T>> {
+class _DraggableState<T> extends State<Draggable<T>> {
   @override
   void initState() {
     super.initState();
@@ -324,6 +258,17 @@ class _DraggableState<T> extends State<DraggableBase<T>> {
 }
 
 /// A widget that receives data when a [Draggable] widget is dropped.
+///
+/// When a draggable is dragged on top of a drag target, the drag target is
+/// asked whether it will accept the data the draggable is carrying. If the user
+/// does drop the draggable on top of the drag target (and the drag target has
+/// indicated that it will accept the draggable's data), then the drag target is
+/// asked to accept the draggable's data.
+///
+/// See also:
+///
+///  * [Draggable]
+///  * [LongPressDraggable]
 class DragTarget<T> extends StatefulWidget {
   /// Creates a widget that receives drags.
   ///
