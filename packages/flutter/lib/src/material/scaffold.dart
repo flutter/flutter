@@ -53,6 +53,7 @@ enum _ScaffoldSlot {
   appBar,
   bottomSheet,
   snackBar,
+  bottomNavigationBar,
   floatingActionButton,
   drawer,
   statusBar,
@@ -80,13 +81,20 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
 
     final BoxConstraints fullWidthConstraints = looseConstraints.tighten(width: size.width);
     double contentTop = padding.top;
-    double contentBottom = size.height - padding.bottom;
+    double bottom = size.height - padding.bottom;
+    double contentBottom = bottom;
 
     if (hasChild(_ScaffoldSlot.appBar)) {
       final double appBarHeight = layoutChild(_ScaffoldSlot.appBar, fullWidthConstraints).height;
       if (appBarBehavior == AppBarBehavior.anchor)
         contentTop = appBarHeight;
       positionChild(_ScaffoldSlot.appBar, Offset.zero);
+    }
+
+    if (hasChild(_ScaffoldSlot.bottomNavigationBar)) {
+      final double bottomNavigationBarHeight = layoutChild(_ScaffoldSlot.bottomNavigationBar, fullWidthConstraints).height;
+      contentBottom -= bottomNavigationBarHeight;
+      positionChild(_ScaffoldSlot.bottomNavigationBar, new Offset(0.0, contentBottom));
     }
 
     if (hasChild(_ScaffoldSlot.body)) {
@@ -97,7 +105,10 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     }
 
     // The BottomSheet and the SnackBar are anchored to the bottom of the parent,
-    // they're as wide as the parent and are given their intrinsic height.
+    // they're as wide as the parent and are given their intrinsic height. The
+    // only difference is that SnackBar appears on the top side of the
+    // BottomNavigationBar while the BottomSheet is stacked on top of it.
+    //
     // If all three elements are present then either the center of the FAB straddles
     // the top edge of the BottomSheet or the bottom of the FAB is
     // _kFloatingActionButtonMargin above the SnackBar, whichever puts the FAB
@@ -110,7 +121,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
 
     if (hasChild(_ScaffoldSlot.bottomSheet)) {
       bottomSheetSize = layoutChild(_ScaffoldSlot.bottomSheet, fullWidthConstraints);
-      positionChild(_ScaffoldSlot.bottomSheet, new Offset((size.width - bottomSheetSize.width) / 2.0, contentBottom - bottomSheetSize.height));
+      positionChild(_ScaffoldSlot.bottomSheet, new Offset((size.width - bottomSheetSize.width) / 2.0, bottom - bottomSheetSize.height));
     }
 
     if (hasChild(_ScaffoldSlot.snackBar)) {
@@ -265,6 +276,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 ///  * [AppBar]
 ///  * [FloatingActionButton]
 ///  * [Drawer]
+///  * [BottomNavigationBar]
 ///  * [SnackBar]
 ///  * [BottomSheet]
 ///  * [ScaffoldState]
@@ -281,6 +293,7 @@ class Scaffold extends StatefulWidget {
     this.body,
     this.floatingActionButton,
     this.drawer,
+    this.bottomNavigationBar,
     this.scrollableKey,
     this.appBarBehavior: AppBarBehavior.anchor,
     this.resizeToAvoidBottomPadding: true
@@ -305,6 +318,12 @@ class Scaffold extends StatefulWidget {
   ///
   /// Typically a [Drawer].
   final Widget drawer;
+
+  /// A bottom navigation bar to display at the bottom of the scaffold.
+  ///
+  /// Snack bars slide from underneath the botton navigation while bottom sheets
+  /// are stacked on top.
+  final Widget bottomNavigationBar;
 
   /// The key of the primary [Scrollable] widget in the [body].
   ///
@@ -465,7 +484,7 @@ class ScaffoldState extends State<Scaffold> {
   /// content of the app. A persistent bottom sheet remains visible even when
   /// the user interacts with other parts of the app.
   ///
-  /// A closely related widget is  a modal bottom sheet, which is an alternative
+  /// A closely related widget is a modal bottom sheet, which is an alternative
   /// to a menu or a dialog and prevents the user from interacting with the rest
   /// of the app. Modal bottom sheets can be created and displayed with the
   /// [showModalBottomSheet] function.
@@ -759,7 +778,18 @@ class ScaffoldState extends State<Scaffold> {
     } else {
       children.add(new LayoutId(child: _buildScrollableAppBar(context, padding), id: _ScaffoldSlot.appBar));
     }
-    // Otherwise the AppBar will be part of a [app bar, body] Stack. See AppBarBehavior.scroll below.
+    // Otherwise the AppBar will be part of a [app bar, body] Stack. See
+    // AppBarBehavior.scroll below.
+
+    if (_snackBars.isNotEmpty)
+      _addIfNonNull(children, _snackBars.first._widget, _ScaffoldSlot.snackBar);
+
+    if (config.bottomNavigationBar != null) {
+      children.add(new LayoutId(
+        id: _ScaffoldSlot.bottomNavigationBar,
+        child: config.bottomNavigationBar
+      ));
+    }
 
     if (_currentBottomSheet != null || _dismissedBottomSheets.isNotEmpty) {
       final List<Widget> bottomSheets = <Widget>[];
@@ -773,9 +803,6 @@ class ScaffoldState extends State<Scaffold> {
       );
       _addIfNonNull(children, stack, _ScaffoldSlot.bottomSheet);
     }
-
-    if (_snackBars.isNotEmpty)
-      _addIfNonNull(children, _snackBars.first._widget, _ScaffoldSlot.snackBar);
 
     children.add(new LayoutId(
       id: _ScaffoldSlot.floatingActionButton,
