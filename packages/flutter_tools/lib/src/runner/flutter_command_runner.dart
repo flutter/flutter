@@ -86,7 +86,7 @@ class FlutterCommandRunner extends CommandRunner {
 
   @override
   String get usageFooter {
-    return 'Run "flutter -h -v" for verbose help output, including less commonly used options.';
+    return 'Run "flutter help -v" for verbose help output, including less commonly used options.';
   }
 
   static String get _defaultFlutterRoot {
