@@ -23,7 +23,7 @@ class FramebufferSkia {
   // Needed because Skia does not support drawing to ARGB directly.
   void ConvertToCorrectPixelFormatIfNeeded();
 
-  mojo::Framebuffer* get() const { return framebuffer_.get(); }
+  void Finish();
   const sk_sp<SkSurface>& surface() { return surface_; }
 
  private:

@@ -36,8 +36,8 @@ void Rasterizer::Draw(std::unique_ptr<flow::LayerTree> layer_tree,
   canvas->flush();
 
   framebuffer_.ConvertToCorrectPixelFormatIfNeeded();
-
-  framebuffer_.get()->Flush(ftl::MakeRunnable(std::move(callback)));
+  framebuffer_.Finish();
+  callback();
 }
 
 }  // namespace flutter_content_handler

@@ -65,6 +65,7 @@ void FramebufferSkia::Bind(mojo::InterfaceHandle<mojo::Framebuffer> framebuffer,
       sk_alpha_type = kOpaque_SkAlphaType;
       break;
     case mojo::FramebufferFormat::ARGB_8888:
+    case mojo::FramebufferFormat::RGB_x888:
       sk_color_type = kRGBA_8888_SkColorType;
       sk_alpha_type = kPremul_SkAlphaType;
       break;
@@ -89,7 +90,8 @@ void FramebufferSkia::Bind(mojo::InterfaceHandle<mojo::Framebuffer> framebuffer,
 }
 
 void FramebufferSkia::ConvertToCorrectPixelFormatIfNeeded() {
-  if (info_->format == mojo::FramebufferFormat::ARGB_8888) {
+  if (info_->format == mojo::FramebufferFormat::ARGB_8888 ||
+      info_->format == mojo::FramebufferFormat::RGB_x888) {
     // we need to convert from RGBA to ARGB
     SkPixmap bufferPixmap;
 
@@ -101,6 +103,11 @@ void FramebufferSkia::ConvertToCorrectPixelFormatIfNeeded() {
         std::swap(buffer[i + 0], buffer[i + 2]);
     }
   }
+}
+
+void FramebufferSkia::Finish() {
+  framebuffer_->Flush([] {});
+  framebuffer_.WaitForIncomingResponse();
 }
 
 }  // namespace flutter_content_handler
