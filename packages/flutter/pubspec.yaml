@@ -22,7 +22,7 @@ dependencies:
 
 dev_dependencies:
   flutter_test:
-    path: ../flutter_test
+    sdk: flutter
 
 environment:
   sdk: '>=1.19.0 <2.0.0'

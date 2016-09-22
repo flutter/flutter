@@ -5,9 +5,10 @@ dependencies:
   string_scanner: ^1.0.0
 
   flutter:
-    path: ../../packages/flutter
+    sdk: flutter
   flutter_markdown:
-    path: ../../packages/flutter_markdown
+    sdk: flutter
+
   # Also update dev/benchmarks/complex_layout/pubspec.yaml
   flutter_gallery_assets:
     git:
@@ -15,8 +16,7 @@ dependencies:
       ref: ef928550119411358b8b25e16aecde6ace513526
 
 dev_dependencies:
-  test: any # flutter_test provides the version constraints
   flutter_test:
-    path: ../../packages/flutter_test
+    sdk: flutter
   flutter_driver:
-    path: ../../packages/flutter_driver
+    sdk: flutter

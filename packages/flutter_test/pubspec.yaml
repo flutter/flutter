@@ -8,4 +8,4 @@ dependencies:
   test: 0.12.15+4
 
   flutter:
-    path: ../flutter
+    sdk: flutter

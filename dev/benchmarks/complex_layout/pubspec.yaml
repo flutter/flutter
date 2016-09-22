@@ -3,10 +3,11 @@ description: A new flutter project.
 
 dependencies:
   flutter:
-    path: ../../../packages/flutter
+    sdk: flutter
   flutter_driver:
-    path: ../../../packages/flutter_driver
-  # Also update examples/flutter_gallery/pubspec.yaml
+    sdk: flutter
+
+  # Also examples/flutter_gallery/pubspec.yaml
   flutter_gallery_assets:
     git:
       url: https://flutter.googlesource.com/gallery-assets
@@ -14,4 +15,4 @@ dependencies:
 
 dev_dependencies:
   flutter_test:
-    path: ../../../packages/flutter_test
+    sdk: flutter

@@ -1,11 +1,11 @@
 name: stocks
 dependencies:
   flutter:
-    path: ../../packages/flutter
+    sdk: flutter
   intl: '>=0.14.0 <0.15.0'
 
 dev_dependencies:
   flutter_test:
-    path: ../../packages/flutter_test
+    sdk: flutter
   flutter_driver:
-    path: ../../packages/flutter_driver
+    sdk: flutter

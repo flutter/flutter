@@ -28,11 +28,13 @@ if [ -n "$TRAVIS" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
   COVERAGE_FLAG=--coverage
 fi
 
+SRC_ROOT=$PWD
+
 # run tests
 (cd packages/flutter; flutter test $COVERAGE_FLAG)
 (cd packages/flutter_driver; dart -c test/all.dart)
 (cd packages/flutter_test; flutter test)
-(cd packages/flutter_tools; dart -c test/all.dart)
+(cd packages/flutter_tools; FLUTTER_ROOT=$SRC_ROOT dart -c test/all.dart)
 
 (cd dev/devicelab; dart -c test/all.dart)
 (cd dev/manual_tests; flutter test)

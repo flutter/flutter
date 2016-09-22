@@ -1,8 +1,9 @@
 name: hello_world
+
 dependencies:
   flutter:
-    path: ../../packages/flutter
+    sdk: flutter
+
 dev_dependencies:
-  test: any # flutter_test provides the version constraints
   flutter_test:
-    path: ../../packages/flutter_test
+    sdk: flutter
