@@ -68,12 +68,14 @@ abstract class _HeroHandle {
 /// Heroes are the parts of an application's screen-to-screen transitions where
 /// a widget from one screen shifts to a position on the other. For example,
 /// album art from a list of albums growing to become the centerpiece of the
-/// album's details view. In this context, a screen is a navigator ModalRoute.
+/// album's details view. In this context, a screen is a [ModalRoute] in a
+/// [Navigator].
 ///
-/// To get this effect, all you have to do is wrap each hero on each route with a
-/// [Hero] widget, and give each hero a [tag]. The tag must be unique within the
-/// current route's widget subtree. When the app transitions from one route to
-/// another, each hero is animated to its new location.
+/// To get this effect, all you have to do is wrap each hero on each route with
+/// a [Hero] widget, and give each hero a [tag]. The tag must be unique within
+/// the current route's widget subtree, and must match the tag of a [Hero] in
+/// the target route. When the app transitions from one route to another, each
+/// hero is animated to its new location.
 ///
 /// Heroes and the [Navigator]'s [Overlay]'s [Stack] must be axis-aligned for
 /// all this to work. The top left and bottom right coordinates of each animated
