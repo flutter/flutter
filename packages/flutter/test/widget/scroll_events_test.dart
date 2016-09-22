@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
@@ -25,7 +26,7 @@ Widget _buildScroller({Key key, List<String> log}) {
 void main() {
   GlobalKey<ScrollableState<Scrollable>> scrollKey;
 
-  Completer<Null> scrollTo(double newScrollOffset, {Duration duration}) {
+  Completer<Null> scrollTo(double newScrollOffset, { Duration duration }) {
     Completer<Null> completer = new Completer<Null>();
     scrollKey.currentState.scrollTo(newScrollOffset, duration: duration).whenComplete(completer.complete);
     return completer;

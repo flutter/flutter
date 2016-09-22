@@ -9,7 +9,6 @@ import 'package:flutter/widgets.dart';
 void main() {
   testWidgets('Verify that a tap dismisses a modal BottomSheet', (WidgetTester tester) async {
     BuildContext savedContext;
-    bool showBottomSheetThenCalled;
 
     await tester.pumpWidget(new MaterialApp(
       home: new Builder(
@@ -23,7 +22,7 @@ void main() {
     await tester.pump();
     expect(find.text('BottomSheet'), findsNothing);
 
-    showBottomSheetThenCalled = false;
+    bool showBottomSheetThenCalled = false;
     showModalBottomSheet/*<Null>*/(
       context: savedContext,
       builder: (BuildContext context) => new Text('BottomSheet')
