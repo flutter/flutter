@@ -17,6 +17,7 @@ import 'icon_theme_data.dart';
 import 'ink_well.dart';
 import 'material.dart';
 import 'theme.dart';
+import 'typography.dart';
 
 const double _kActiveMaxWidth = 168.0;
 const double _kInactiveMaxWidth = 96.0;
@@ -302,9 +303,13 @@ class BottomNavigationBarState extends State<BottomNavigationBar> {
       case BottomNavigationBarType.fixed:
         final List<Widget> children = <Widget>[];
         final ThemeData themeData = Theme.of(context);
+        final TextTheme textTheme = themeData.textTheme;
         final ColorTween colorTween = new ColorTween(
-          begin: Colors.black54,
-          end: config.fixedColor ?? themeData.primaryColor
+          begin: textTheme.caption.color,
+          end: config.fixedColor ?? (
+            themeData.brightness == Brightness.light ?
+                themeData.primaryColor : themeData.accentColor
+          )
         );
 
         for (int i = 0; i < config.labels.length; i += 1) {
