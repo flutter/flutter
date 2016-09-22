@@ -94,20 +94,19 @@ if (is_android) {
 
   # Subdirectories inside android_ndk_root that contain the sysroot for the
   # associated platform.
-  _android_api_level = 16
+  _android_api_level = 24
   x86_android_sysroot_subdir =
       "platforms/android-${_android_api_level}/arch-x86"
   arm_android_sysroot_subdir =
       "platforms/android-${_android_api_level}/arch-arm"
   mips_android_sysroot_subdir =
       "platforms/android-${_android_api_level}/arch-mips"
-  _android64_api_level = 21
   x86_64_android_sysroot_subdir =
-      "platforms/android-${_android64_api_level}/arch-x86_64"
+      "platforms/android-${_android_api_level}/arch-x86_64"
   arm64_android_sysroot_subdir =
-      "platforms/android-${_android64_api_level}/arch-arm64"
+      "platforms/android-${_android_api_level}/arch-arm64"
   mips64_android_sysroot_subdir =
-      "platforms/android-${_android64_api_level}/arch-mips64"
+      "platforms/android-${_android_api_level}/arch-mips64"
 
   # Toolchain root directory for each build. The actual binaries are inside
   # a "bin" directory inside of these.
@@ -126,32 +125,26 @@ if (is_android) {
     android_prebuilt_arch = "android-x86"
     _binary_prefix = "i686-linux-android"
     android_toolchain_root = "$x86_android_toolchain_root"
-    android_libgcc_file = "$android_toolchain_root/lib/gcc/i686-linux-android/${_android_toolchain_version}/libgcc.a"
   } else if (current_cpu == "arm") {
     android_prebuilt_arch = "android-arm"
     _binary_prefix = "arm-linux-androideabi"
     android_toolchain_root = "$arm_android_toolchain_root"
-    android_libgcc_file = "$android_toolchain_root/lib/gcc/arm-linux-androideabi/${_android_toolchain_version}/libgcc.a"
   } else if (current_cpu == "mipsel") {
     android_prebuilt_arch = "android-mips"
     _binary_prefix = "mipsel-linux-android"
     android_toolchain_root = "$mips_android_toolchain_root"
-    android_libgcc_file = "$android_toolchain_root/lib/gcc/mipsel-linux-android/${_android_toolchain_version}/libgcc.a"
   } else if (current_cpu == "x64") {
     android_prebuilt_arch = "android-x86_64"
     _binary_prefix = "x86_64-linux-android"
     android_toolchain_root = "$x86_64_android_toolchain_root"
-    android_libgcc_file = "$android_toolchain_root/lib/gcc/x86_64-linux-android/${_android_toolchain_version}/libgcc.a"
   } else if (current_cpu == "arm64") {
     android_prebuilt_arch = "android-arm64"
     _binary_prefix = "aarch64-linux-android"
     android_toolchain_root = "$arm64_android_toolchain_root"
-    android_libgcc_file = "$android_toolchain_root/lib/gcc/aarch64-linux-android/${_android_toolchain_version}/libgcc.a"
   } else if (current_cpu == "mips64el") {
     android_prebuilt_arch = "android-mips64"
     _binary_prefix = "mips64el-linux-android"
     android_toolchain_root = "$mips64_android_toolchain_root"
-    android_libgcc_file = "$android_toolchain_root/lib/gcc/mips64el-linux-android/${_android_toolchain_version}/libgcc.a"
   } else {
     assert(false, "Need android libgcc support for your target arch.")
   }

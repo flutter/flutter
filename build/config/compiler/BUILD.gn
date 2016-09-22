@@ -654,25 +654,13 @@ config("runtime_library") {
     ]
 
     lib_dirs += [ "$android_libcpp_root/libs/$android_app_abi" ]
-    libs += [ "$android_libcpp_library" ]
-
-    if (current_cpu == "mipsel") {
-      libs += [
-        # ld linker is used for mips Android, and ld does not accept library
-        # absolute path prefixed by "-l"; Since libgcc does not exist in mips
-        # sysroot the proper library will be linked.
-        # TODO(gordanac): Remove once gold linker is used for mips Android.
-        "gcc",
-      ]
-    } else {
-      libs += [
-        # Manually link the libgcc.a that the cross compiler uses. This is
-        # absolute because the linker will look inside the sysroot if it's not.
-        rebase_path(android_libgcc_file),
-      ]
-    }
 
     libs += [
+      "$android_libcpp_library",
+      "c++abi",
+      "android_support",
+      "unwind",
+      "gcc",
       "c",
       "dl",
       "m",
