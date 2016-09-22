@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:meta/meta.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
@@ -57,8 +59,11 @@ Future<Null> performTest(WidgetTester tester, bool maintainState) async {
   expect(find.text('10'), findsNothing);
   expect(find.text('100'), findsNothing);
 
-  tester.state/*<ScrollableState>*/(find.byType(Scrollable)).scrollTo(1000.0);
+  Completer<Null> completer = new Completer<Null>();
+  tester.state/*<ScrollableState>*/(find.byType(Scrollable)).scrollTo(1000.0).whenComplete(completer.complete);
+  expect(completer.isCompleted, isFalse);
   await tester.pump(new Duration(seconds: 1));
+  expect(completer.isCompleted, isTrue);
 
   // we're 600 pixels high, each item is 100 pixels high, scroll position is
   // 1000, so we should have exactly 6 items, 10..15.

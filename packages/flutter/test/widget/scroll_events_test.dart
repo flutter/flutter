@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
@@ -22,6 +24,14 @@ Widget _buildScroller({Key key, List<String> log}) {
 }
 
 void main() {
+  GlobalKey<ScrollableState<Scrollable>> scrollKey;
+
+  Completer<Null> scrollTo(double newScrollOffset, { Duration duration }) {
+    Completer<Null> completer = new Completer<Null>();
+    scrollKey.currentState.scrollTo(newScrollOffset, duration: duration).whenComplete(completer.complete);
+    return completer;
+  }
+
   testWidgets('Scroll event drag', (WidgetTester tester) async {
     List<String> log = <String>[];
     await tester.pumpWidget(_buildScroller(log: log));
@@ -42,12 +52,13 @@ void main() {
   });
 
   testWidgets('Scroll scrollTo animation', (WidgetTester tester) async {
-    GlobalKey<ScrollableState<Scrollable>> scrollKey = new GlobalKey<ScrollableState<Scrollable>>();
+    scrollKey = new GlobalKey<ScrollableState<Scrollable>>();
     List<String> log = <String>[];
     await tester.pumpWidget(_buildScroller(key: scrollKey, log: log));
 
     expect(log, equals(<String>[]));
-    scrollKey.currentState.scrollTo(100.0, duration: const Duration(seconds: 1));
+    Completer<Null> completer = scrollTo(100.0, duration: const Duration(seconds: 1));
+    expect(completer.isCompleted, isFalse);
     expect(log, equals(<String>['scrollstart']));
     await tester.pump(const Duration(milliseconds: 100));
     expect(log, equals(<String>['scrollstart']));
@@ -55,60 +66,74 @@ void main() {
     expect(log, equals(<String>['scrollstart', 'scroll']));
     await tester.pump(const Duration(milliseconds: 1500));
     expect(log, equals(<String>['scrollstart', 'scroll', 'scroll', 'scrollend']));
+    expect(completer.isCompleted, isTrue);
   });
 
   testWidgets('Scroll scrollTo no animation', (WidgetTester tester) async {
-    GlobalKey<ScrollableState<Scrollable>> scrollKey = new GlobalKey<ScrollableState<Scrollable>>();
+    scrollKey = new GlobalKey<ScrollableState<Scrollable>>();
     List<String> log = <String>[];
     await tester.pumpWidget(_buildScroller(key: scrollKey, log: log));
 
     expect(log, equals(<String>[]));
-    scrollKey.currentState.scrollTo(100.0);
+    Completer<Null> completer = scrollTo(100.0);
+    expect(completer.isCompleted, isFalse);
     expect(log, equals(<String>['scrollstart', 'scroll', 'scrollend']));
+    await tester.pump();
+    expect(completer.isCompleted, isTrue);
   });
 
   testWidgets('Scroll during animation', (WidgetTester tester) async {
-    GlobalKey<ScrollableState<Scrollable>> scrollKey = new GlobalKey<ScrollableState<Scrollable>>();
+    scrollKey = new GlobalKey<ScrollableState<Scrollable>>();
     List<String> log = <String>[];
     await tester.pumpWidget(_buildScroller(key: scrollKey, log: log));
 
     expect(log, equals(<String>[]));
-    scrollKey.currentState.scrollTo(100.0, duration: const Duration(seconds: 1));
+    Completer<Null> completer = scrollTo(100.0, duration: const Duration(seconds: 1));
+    expect(completer.isCompleted, isFalse);
     expect(log, equals(<String>['scrollstart']));
     await tester.pump(const Duration(milliseconds: 100));
     expect(log, equals(<String>['scrollstart']));
     await tester.pump(const Duration(milliseconds: 100));
     expect(log, equals(<String>['scrollstart', 'scroll']));
-    scrollKey.currentState.scrollTo(100.0);
+    expect(completer.isCompleted, isFalse);
+
+    completer = scrollTo(100.0);
+    expect(completer.isCompleted, isFalse);
     expect(log, equals(<String>['scrollstart', 'scroll', 'scroll']));
     await tester.pump(const Duration(milliseconds: 100));
     expect(log, equals(<String>['scrollstart', 'scroll', 'scroll', 'scrollend']));
     await tester.pump(const Duration(milliseconds: 1500));
     expect(log, equals(<String>['scrollstart', 'scroll', 'scroll', 'scrollend']));
+    expect(completer.isCompleted, isTrue);
   });
 
   testWidgets('Scroll during animation', (WidgetTester tester) async {
-    GlobalKey<ScrollableState<Scrollable>> scrollKey = new GlobalKey<ScrollableState<Scrollable>>();
+    scrollKey = new GlobalKey<ScrollableState<Scrollable>>();
     List<String> log = <String>[];
     await tester.pumpWidget(_buildScroller(key: scrollKey, log: log));
 
     expect(log, equals(<String>[]));
-    scrollKey.currentState.scrollTo(100.0, duration: const Duration(seconds: 1));
+    Completer<Null> completer = scrollTo(100.0, duration: const Duration(seconds: 1));
+    expect(completer.isCompleted, isFalse);
     expect(log, equals(<String>['scrollstart']));
     await tester.pump(const Duration(milliseconds: 100));
     expect(log, equals(<String>['scrollstart']));
     await tester.pump(const Duration(milliseconds: 100));
     expect(log, equals(<String>['scrollstart', 'scroll']));
-    scrollKey.currentState.scrollTo(100.0, duration: const Duration(seconds: 1));
+    expect(completer.isCompleted, isFalse);
+
+    completer = scrollTo(100.0, duration: const Duration(seconds: 1));
+    expect(completer.isCompleted, isFalse);
     expect(log, equals(<String>['scrollstart', 'scroll']));
     await tester.pump(const Duration(milliseconds: 100));
     expect(log, equals(<String>['scrollstart', 'scroll']));
     await tester.pump(const Duration(milliseconds: 1500));
     expect(log, equals(<String>['scrollstart', 'scroll', 'scroll', 'scrollend']));
+    expect(completer.isCompleted, isTrue);
   });
 
   testWidgets('fling, fling generates two start/end pairs', (WidgetTester tester) async {
-    GlobalKey<ScrollableState<Scrollable>> scrollKey = new GlobalKey<ScrollableState<Scrollable>>();
+    scrollKey = new GlobalKey<ScrollableState<Scrollable>>();
     List<String> log = <String>[];
     await tester.pumpWidget(_buildScroller(key: scrollKey, log: log));
 
@@ -127,7 +152,7 @@ void main() {
   });
 
   testWidgets('fling up ends', (WidgetTester tester) async {
-    GlobalKey<ScrollableState<Scrollable>> scrollKey = new GlobalKey<ScrollableState<Scrollable>>();
+    scrollKey = new GlobalKey<ScrollableState<Scrollable>>();
     List<String> log = <String>[];
     await tester.pumpWidget(_buildScroller(key: scrollKey, log: log));
 

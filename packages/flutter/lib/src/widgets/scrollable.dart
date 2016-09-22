@@ -472,6 +472,8 @@ class ScrollableState<T extends Scrollable> extends State<T> {
   /// This function does not accept a zero duration. To jump-scroll to
   /// the new offset, do not provide a duration, rather than providing
   /// a zero duration.
+  ///
+  /// The returned [Future] completes when the scrolling animation is complete.
   Future<Null> scrollTo(double newScrollOffset, {
     Duration duration,
     Curve curve: Curves.ease,
@@ -550,6 +552,8 @@ class ScrollableState<T extends Scrollable> extends State<T> {
   /// Calling this function starts a physics-based animation of the scroll
   /// offset with the given value as the initial velocity. The physics
   /// simulation is determined by the scroll behavior.
+  ///
+  /// The returned [Future] completes when the scrolling animation is complete.
   Future<Null> fling(double scrollVelocity) {
     if (scrollVelocity.abs() > kPixelScrollTolerance.velocity)
       return _startToEndAnimation(scrollVelocity);
