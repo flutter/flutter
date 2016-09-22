@@ -9,7 +9,6 @@ dependencies:
   flutter_markdown:
     path: ../../packages/flutter_markdown
   # Also update dev/benchmarks/complex_layout/pubspec.yaml
-  # and examples/flutter_gallery/pubspec.yaml
   flutter_gallery_assets:
     git:
       url: https://flutter.googlesource.com/gallery-assets
