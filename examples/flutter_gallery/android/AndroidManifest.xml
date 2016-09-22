@@ -22,6 +22,12 @@
         <screen android:screenSize="normal" android:screenDensity="hdpi" />
         <screen android:screenSize="normal" android:screenDensity="xhdpi" />
         <screen android:screenSize="normal" android:screenDensity="480" />
+        <!-- handles Nexus 5, 5X, and greater but should exclude very large tablets -->
+        <screen android:screenSize="large" android:screenDensity="ldpi" />
+        <screen android:screenSize="large" android:screenDensity="mdpi" />
+        <screen android:screenSize="large" android:screenDensity="hdpi" />
+        <screen android:screenSize="large" android:screenDensity="xhdpi" />
+        <screen android:screenSize="large" android:screenDensity="480" />
     </compatible-screens>
 
     <application android:icon="@mipmap/ic_launcher" android:label="Gallery" android:name="org.domokit.sky.shell.SkyApplication">
