@@ -31,7 +31,6 @@ fi
 # run tests
 (cd packages/flutter; flutter test $COVERAGE_FLAG)
 (cd packages/flutter_driver; dart -c test/all.dart)
-(cd packages/flutter_sprites; flutter test)
 (cd packages/flutter_test; flutter test)
 (cd packages/flutter_tools; dart -c test/all.dart)
 
