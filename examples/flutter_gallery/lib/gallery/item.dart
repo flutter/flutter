@@ -67,6 +67,12 @@ final List<GalleryItem> kAllGalleryItems = <GalleryItem>[
   ),
   // Components
   new GalleryItem(
+    title: 'Bottom navigation',
+    subtitle: 'Bottom navigation with cross-fading views',
+    routeName: BottomNavigationDemo.routeName,
+    buildRoute: (BuildContext context) => new BottomNavigationDemo()
+  ),
+  new GalleryItem(
     title: 'Buttons',
     subtitle: 'All kinds: flat, raised, dropdown, icon, etc',
     routeName: ButtonsDemo.routeName,
