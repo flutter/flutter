@@ -1,0 +1,38 @@
+# Copyright 2016 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+executable("linux") {
+  output_name = "sky_shell"
+
+  sources = [
+    "glfw_service_provider.cc",
+    "glfw_service_provider.h",
+    "main_linux.cc",
+    "message_pump_glfw.cc",
+    "message_pump_glfw.h",
+    "platform_view_glfw.cc",
+    "platform_view_glfw.h",
+  ]
+
+  deps = [
+    "//base",
+    "//flutter/services/engine:interfaces",
+    "//flutter/services/raw_keyboard:interfaces",
+    "//flutter/shell/common",
+    "//flutter/shell/gpu",
+    "//flutter/shell/testing",
+    "//flutter/skia",
+    "//lib/ftl",
+    "//mojo/common",
+    "//mojo/edk/base_edk",
+    "//mojo/edk/system",
+    "//mojo/public/cpp/bindings:utility",
+    "//mojo/public/interfaces/application",
+    "//third_party/glfw",
+  ]
+
+  ldflags = [
+    "-lGL",
+  ]
+}

@@ -1,0 +1,20 @@
+# Copyright 2016 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+assert(is_mac || is_ios)
+
+group("darwin") {
+  if (is_mac) {
+    deps = [
+      "desktop:shell_application_bundle",
+      "desktop:shell_standalone",
+    ]
+  } else if (is_ios) {
+    deps = [
+      "ios:flutter_framework",
+    ]
+  } else {
+    assert(false, "Unknown darwin platform type.")
+  }
+}

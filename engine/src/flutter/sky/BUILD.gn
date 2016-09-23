@@ -10,7 +10,7 @@ group("sky") {
   deps = [
     "//flutter/sky/engine/wtf:unittests($host_toolchain)",
     "//flutter/sky/packages",
-    "//flutter/sky/shell",
+    "//flutter/shell",
   ]
 
   if (dart_host_toolchain == host_toolchain) {

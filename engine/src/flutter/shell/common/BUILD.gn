@@ -1,0 +1,70 @@
+# Copyright 2016 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//mojo/dart/embedder/embedder.gni")
+
+dart_embedder_resources("generate_embedder_diagnostic_server_resources_cc") {
+  inputs = [
+    "//flutter/shell/common/diagnostic/diagnostic_server.dart"
+  ]
+  root_prefix = "//flutter/shell/common/diagnostic/"
+  output = "$target_gen_dir/embedder_diagnostic_server_resources.cc"
+  table_name = "sky_embedder_diagnostic_server"
+}
+
+source_set("common") {
+  sources = [
+    "$target_gen_dir/embedder_diagnostic_server_resources.cc",
+    "animator.cc",
+    "animator.h",
+    "diagnostic/diagnostic_server.cc",
+    "diagnostic/diagnostic_server.h",
+    "engine.cc",
+    "engine.h",
+    "picture_serializer.cc",
+    "picture_serializer.h",
+    "platform_view.cc",
+    "platform_view.h",
+    "platform_view_service_protocol.cc",
+    "platform_view_service_protocol.h",
+    "rasterizer.cc",
+    "rasterizer.h",
+    "shell.cc",
+    "shell.h",
+    "switches.cc",
+    "switches.h",
+    "systrace_logger.cc",
+    "systrace_logger.h",
+    "tracing_controller.cc",
+    "tracing_controller.h",
+    "ui_delegate.cc",
+    "ui_delegate.h",
+  ]
+
+  deps = [
+    "//base",
+    "//base:i18n",
+    "//dart/runtime/vm:libdart_platform",
+    "//dart/runtime:libdart",
+    "//flutter/assets",
+    "//flutter/common",
+    "//flutter/flow",
+    "//flutter/glue",
+    "//flutter/lib/ui",
+    "//flutter/runtime",
+    "//flutter/services/engine:interfaces",
+    "//flutter/services/vsync",
+    "//flutter/skia",
+    "//flutter/sky/engine/wtf",
+    "//flutter/synchronization",
+    "//lib/ftl",
+    "//lib/tonic",
+    "//mojo/application",
+    "//mojo/message_pump",
+    "//mojo/public/cpp/bindings:utility",
+    "//mojo/public/interfaces/application",
+    "//mojo/services/vsync/interfaces",
+    ":generate_embedder_diagnostic_server_resources_cc",
+  ]
+}
