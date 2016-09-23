@@ -15,9 +15,9 @@ dependencies:
   web_socket_channel: '^1.0.0'
   vm_service_client: '^0.2.0'
   flutter:
-    path: '../flutter'
+    sdk: flutter
   flutter_test:
-    path: '../flutter_test'
+    sdk: flutter
 
 dev_dependencies:
   test: 0.12.15+4

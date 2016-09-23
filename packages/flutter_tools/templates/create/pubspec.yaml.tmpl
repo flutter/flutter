@@ -2,9 +2,9 @@ name: {{projectName}}
 description: {{description}}
 dependencies:
   flutter:
-    path: {{flutterPackagesDirectory}}/flutter
+    sdk: flutter
 {{#withDriverTest?}}
 dev_dependencies:
   flutter_driver:
-    path: {{flutterPackagesDirectory}}/flutter_driver
+    sdk: flutter
 {{/withDriverTest?}}

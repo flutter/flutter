@@ -10,7 +10,7 @@ pub global activate dartdoc 0.9.7+1
 
 # This script generates a unified doc set, and creates
 # a custom index.html, placing everything into dev/docs/doc
-dart dev/tools/dartdoc.dart
+FLUTTER_ROOT=$PWD dart dev/tools/dartdoc.dart
 
 # Ensure google webmaster tools can verify our site.
 cp dev/docs/google2ed1af765c529f57.html dev/docs/doc
