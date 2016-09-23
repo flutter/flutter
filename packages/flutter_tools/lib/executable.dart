@@ -38,6 +38,7 @@ import 'src/commands/test.dart';
 import 'src/commands/trace.dart';
 import 'src/commands/update_packages.dart';
 import 'src/commands/upgrade.dart';
+import 'src/commands/watch.dart';
 import 'src/device.dart';
 import 'src/doctor.dart';
 import 'src/globals.dart';
@@ -84,7 +85,8 @@ Future<Null> main(List<String> args) async {
     ..addCommand(new TestCommand())
     ..addCommand(new TraceCommand())
     ..addCommand(new UpdatePackagesCommand(hidden: !verboseHelp))
-    ..addCommand(new UpgradeCommand());
+    ..addCommand(new UpgradeCommand())
+    ..addCommand(new WatchCommand(verboseHelp: verboseHelp));
 
   return Chain.capture/*<Future<Null>>*/(() async {
     // Initialize globals.
