@@ -44,7 +44,7 @@ fi
 
 # generate and analyze our large sample app
 dart dev/tools/mega_gallery.dart
-(cd dev/benchmarks/mega_gallery; flutter analyze --watch --benchmark)
+(cd dev/benchmarks/mega_gallery; flutter watch --benchmark)
 
 if [ -n "$COVERAGE_FLAG" ]; then
   GSUTIL=$HOME/google-cloud-sdk/bin/gsutil
