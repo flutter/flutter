@@ -1,0 +1,127 @@
+# Copyright 2016 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//build/config/android/config.gni")
+import("//build/config/android/rules.gni")
+
+generate_jni("jni_headers") {
+  visibility = [ ":*" ]
+
+  sources = [
+    "io/flutter/view/FlutterMain.java",
+    "io/flutter/view/FlutterView.java",
+  ]
+  jni_package = "shell"
+}
+
+shared_library("sky_shell") {
+  visibility = [ ":*" ]
+
+  sources = [
+    "flutter_main.cc",
+    "flutter_main.h",
+    "library_loader.cc",
+    "platform_view_android.cc",
+    "platform_view_android.h",
+  ]
+
+  deps = [
+    "//base",
+    "//dart/runtime:libdart",
+    "//flutter/common",
+    "//flutter/flow",
+    "//flutter/lib/jni",
+    "//flutter/runtime",
+    "//flutter/shell/common",
+    "//flutter/shell/gpu",
+    "//flutter/skia",
+    "//flutter/vulkan",
+    "//lib/ftl",
+    "//mojo/android:libsystem_java",
+    "//mojo/edk/base_edk",
+    "//mojo/edk/system",
+    ":jni_headers",
+  ]
+
+  ldflags = [
+    "-landroid",
+    "-lEGL",
+    "-lGLESv2",
+  ]
+}
+
+android_library("java") {
+  visibility = [ ":*" ]
+
+  java_files = [
+    "io/flutter/view/AccessibilityBridge.java",
+    "io/flutter/view/FlutterMain.java",
+    "io/flutter/view/FlutterView.java",
+    "io/flutter/view/ResourceCleaner.java",
+    "io/flutter/view/ResourceExtractor.java",
+    "io/flutter/view/ServiceFactory.java",
+    "io/flutter/view/ServiceProviderImpl.java",
+    "io/flutter/view/ServiceRegistry.java",
+    "org/domokit/sky/shell/SkyActivity.java",
+    "org/domokit/sky/shell/SkyApplication.java",
+  ]
+
+  deps = [
+    "//base:base_java",
+    "//flutter/services/activity:activity_lib",
+    "//flutter/services/activity:interfaces_java",
+    "//flutter/services/common:common_lib",
+    "//flutter/services/editing:editing_lib",
+    "//flutter/services/editing:interfaces_java",
+    "//flutter/services/engine:interfaces_java",
+    "//flutter/services/media:interfaces_java",
+    "//flutter/services/media:media_lib",
+    "//flutter/services/platform:interfaces_java",
+    "//flutter/services/platform:platform_lib",
+    "//flutter/services/pointer:interfaces_java",
+    "//flutter/services/raw_keyboard:interfaces_java",
+    "//flutter/services/raw_keyboard:raw_keyboard_lib",
+    "//flutter/services/semantics:interfaces_java",
+    "//flutter/services/sensors:sensors_lib",
+    "//flutter/services/vsync:vsync_lib",
+    "//mojo/android:system_java",
+    "//mojo/public/interfaces/application:application_java",
+    "//mojo/public/java:bindings",
+    "//mojo/public/java:system",
+    "//mojo/services/sensors/interfaces:interfaces_java",
+    "//mojo/services/vsync/interfaces:interfaces_java",
+  ]
+}
+
+copy_ex("assets") {
+  visibility = [ ":*" ]
+
+  clear_dir = true
+  dest = "$root_build_dir/sky_shell/assets"
+  sources = [
+    "$root_build_dir/icudtl.dat",
+  ]
+  deps = [
+    "//third_party/icu:icudata",
+  ]
+}
+
+android_apk("android") {
+  apk_name = "SkyShell"
+  android_manifest = "AndroidManifest.xml"
+
+  native_libs = [ "libsky_shell.so" ]
+  asset_location = "$root_build_dir/sky_shell/assets"
+
+  extensions_to_not_compress = ".flx"
+
+  flutter_dist_jar = "$root_build_dir/flutter.jar"
+
+  deps = [
+    "//base:base_java",
+    ":assets",
+    ":java",
+    ":sky_shell",
+  ]
+}

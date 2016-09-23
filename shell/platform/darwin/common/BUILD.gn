@@ -1,0 +1,43 @@
+# Copyright 2016 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+source_set("common") {
+  # Disable the assignment filter because the files will be used on iOS as well
+  # as Mac.
+  set_sources_assignment_filter([])
+  sources = [
+    "platform_mac.h",
+    "platform_mac.mm",
+    "platform_service_provider.cc",
+    "platform_service_provider.h",
+    "view_service_provider.cc",
+    "view_service_provider.h",
+  ]
+  set_sources_assignment_filter(sources_assignment_filter)
+
+  deps = [
+    "//base",
+    "//base:i18n",
+    "//dart/runtime:libdart",
+    "//flutter/runtime",
+    "//flutter/services/activity",
+    "//flutter/services/editing",
+    "//flutter/services/engine:interfaces",
+    "//flutter/services/media",
+    "//flutter/services/platform",
+    "//flutter/services/pointer:interfaces",
+    "//flutter/services/vsync",
+    "//flutter/shell/common",
+    "//flutter/shell/gpu",
+    "//flutter/shell/testing",
+    "//flutter/skia",
+    "//flutter/sky/engine/wtf",
+    "//lib/ftl",
+    "//mojo/common",
+    "//mojo/edk/base_edk",
+    "//mojo/edk/system",
+    "//mojo/public/cpp/bindings:utility",
+    "//mojo/public/interfaces/application",
+  ]
+}

@@ -1,0 +1,60 @@
+# Copyright 2016 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//build/config/mac/rules.gni")
+
+assert(is_mac)
+
+source_set("mac_desktop_platform") {
+  visibility = [ ":*" ]
+
+  sources = [
+    "main_mac.mm",
+    "platform_view_mac.h",
+    "platform_view_mac.mm",
+    "sky_app_delegate.h",
+    "sky_app_delegate.m",
+    "sky_application.h",
+    "sky_application.mm",
+    "sky_window.h",
+    "sky_window.mm",
+  ]
+
+  deps = [
+    "//base",
+    "//flutter/services/pointer:interfaces",
+    "//flutter/shell/common",
+    "//flutter/shell/platform/darwin/common",
+    "//flutter/shell/testing",
+    "//flutter/skia",
+    "//flutter/synchronization",
+    "//lib/ftl",
+  ]
+}
+
+executable("shell_standalone") {
+  output_name = "sky_shell"
+
+  deps = [
+    ":mac_desktop_platform",
+  ]
+}
+
+mac_app("shell_application_bundle") {
+  app_name = "SkyShell"
+  info_plist = "Info.plist"
+  xibs = [ "sky_mac.xib" ]
+
+  resource_copy_mac("mac_desktop_resources") {
+    resources = [
+      "//third_party/icu/android/icudtl.dat",
+    ]
+    bundle_directory = "."
+  }
+
+  deps = [
+    ":mac_desktop_platform",
+    ":mac_desktop_resources",
+  ]
+}

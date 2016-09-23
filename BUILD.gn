@@ -24,7 +24,6 @@ group("flutter") {
   if (is_ios) {
     deps += [
       "//flutter/services/dynamic:sdk_lib_archive",
-      "//flutter/sky/shell:flutter_framework",
     ]
   }
 }

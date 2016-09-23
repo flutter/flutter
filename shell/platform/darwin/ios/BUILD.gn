@@ -1,0 +1,161 @@
+# Copyright 2016 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+assert(is_ios)
+
+import("//build/config/ios/rules.gni")
+import("//build/config/ios/ios_sdk.gni")
+
+shared_library("flutter_framework_dylib") {
+  visibility = [ ":*" ]
+
+  output_name = "Flutter"
+
+  sources = [
+    "framework/Headers/Flutter.h",
+    "framework/Headers/FlutterAppDelegate.h",
+    "framework/Headers/FlutterAsyncMessageListener.h",
+    "framework/Headers/FlutterDartProject.h",
+    "framework/Headers/FlutterMacros.h",
+    "framework/Headers/FlutterMessageListener.h",
+    "framework/Headers/FlutterViewController.h",
+    "framework/Source/accessibility_bridge.h",
+    "framework/Source/accessibility_bridge.mm",
+    "framework/Source/application_messages_impl.h",
+    "framework/Source/application_messages_impl.mm",
+    "framework/Source/flutter_touch_mapper.h",
+    "framework/Source/flutter_touch_mapper.mm",
+    "framework/Source/FlutterAppDelegate.mm",
+    "framework/Source/FlutterDartProject.mm",
+    "framework/Source/FlutterDartProject_Internal.h",
+    "framework/Source/FlutterDartSource.h",
+    "framework/Source/FlutterDartSource.mm",
+    "framework/Source/FlutterDynamicServiceLoader.h",
+    "framework/Source/FlutterDynamicServiceLoader.mm",
+    "framework/Source/FlutterView.h",
+    "framework/Source/FlutterView.mm",
+    "framework/Source/FlutterViewController.mm",
+    "platform_view_ios.h",
+    "platform_view_ios.mm",
+  ]
+  
+
+  deps = [
+    "//base:base",
+    "//dart/runtime:libdart",
+    "//flutter/services/activity",
+    "//flutter/services/dynamic:embedder",
+    "//flutter/services/editing",
+    "//flutter/services/engine:interfaces",
+    "//flutter/services/media",
+    "//flutter/services/platform",
+    "//flutter/services/semantics",
+    "//flutter/services/vsync",
+    "//flutter/shell/common",
+    "//flutter/shell/gpu",
+    "//flutter/shell/platform/darwin/common",
+    "//flutter/skia",
+    "//flutter/sky/engine/platform",
+    "//flutter/sky/engine/wtf",
+    "//lib/ftl",
+    "//mojo/edk/base_edk",
+    "//mojo/edk/system",
+    "//mojo/public/cpp/application",
+    "//mojo/public/cpp/bindings",
+    "//mojo/public/interfaces/application",
+  ]
+
+  defines = [
+    "FLUTTER_FRAMEWORK"
+  ]
+
+  libs = [
+    "UIKit.framework",
+    "OpenGLES.framework",
+    "AVFoundation.framework",
+    "AudioToolbox.framework",
+    "QuartzCore.framework",
+  ]
+}
+
+group("flutter_framework") {
+  framework_dir = "$root_out_dir/Flutter.framework"
+
+  copy("framework_dylib") {
+    visibility = [ ":*" ]
+    sources = [ "$root_out_dir/libFlutter.dylib" ]
+    outputs = [ "$framework_dir/Flutter" ]
+
+    deps = [
+      ":flutter_framework_dylib",
+    ]
+  }
+
+  action("framework_install_name") {
+    visibility = [ ":*" ]
+    stamp_file = "$root_out_dir/flutter_install_name_stamp"
+    script = "//flutter/sky/tools/change_install_name.py"
+
+    inputs = [ "$framework_dir/Flutter" ]
+    outputs = [ stamp_file ]
+
+    args = [
+      "--dylib",
+      rebase_path("$framework_dir/Flutter"),
+      "--install_name",
+      "@rpath/Flutter.framework/Flutter",
+      "--stamp",
+      rebase_path(stamp_file),
+    ]
+
+    deps = [
+      ":framework_dylib"
+    ]
+  }
+
+  copy("framework_info_plist") {
+    visibility = [ ":*" ]
+    sources = [ "framework/Info.plist" ]
+    outputs = [ "$framework_dir/Info.plist" ]
+  }
+
+  copy("framework_module_map") {
+    visibility = [ ":*" ]
+    sources = [ "framework/module.modulemap" ]
+    outputs = [ "$framework_dir/Modules/module.modulemap" ]
+  }
+
+  copy("framework_headers") {
+    visibility = [ ":*" ]
+    sources = [
+      "framework/Headers/Flutter.h",
+      "framework/Headers/FlutterAppDelegate.h",
+      "framework/Headers/FlutterAsyncMessageListener.h",
+      "framework/Headers/FlutterDartProject.h",
+      "framework/Headers/FlutterMacros.h",
+      "framework/Headers/FlutterMessageListener.h",
+      "framework/Headers/FlutterViewController.h",
+    ]
+    outputs = [ "$framework_dir/Headers/{{source_file_part}}" ]
+  }
+
+  copy("framework_icu") {
+    visibility = [ ":*" ]
+    set_sources_assignment_filter([])
+    sources = [
+      "//third_party/icu/android/icudtl.dat",
+    ]
+    set_sources_assignment_filter(sources_assignment_filter)
+    outputs = [ "$framework_dir/{{source_file_part}}" ]
+  }
+
+  public_deps = [
+    ":framework_dylib",
+    ":framework_headers",
+    ":framework_icu",
+    ":framework_info_plist",
+    ":framework_install_name",
+    ":framework_module_map",
+  ]
+}
