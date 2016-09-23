@@ -431,8 +431,11 @@ class _IOSDeviceLogReader extends DeviceLogReader {
     });
   }
 
-  // Match for lines like "Runner[297] <Notice>: " in syslog.
-  static final RegExp _runnerRegex = new RegExp(r'Runner\[[\d]+\] <[A-Za-z]+>: ');
+  // Match for lines for the runner in syslog.
+  //
+  // iOS 9 format:  Runner[297] <Notice>:
+  // iOS 10 format: Runner(libsystem_asl.dylib)[297] <Notice>:
+  static final RegExp _runnerRegex = new RegExp(r'Runner[(.*)]\[[\d]+\] <[A-Za-z]+>: ');
 
   void _onLine(String line) {
     Match match = _runnerRegex.firstMatch(line);
