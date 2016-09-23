@@ -47,8 +47,4 @@ source_set("glfw") {
     "_GLFW_X11",
     "_GLFW_GLX",
   ]
-
-  deps = [
-    "//third_party/mesa:mesa_headers",
-  ]
 }
