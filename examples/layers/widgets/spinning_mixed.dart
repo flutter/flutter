@@ -51,7 +51,7 @@ void attachWidgetTreeToRenderTree(RenderProxyBox container) {
                   new RaisedButton(
                     child: new Row(
                       children: <Widget>[
-                        new Image.network('http://flutter.io/favicon.ico'),
+                        new Image.network('https://flutter.io/images/favicon.png'),
                         new Text('PRESS ME'),
                       ]
                     ),
@@ -83,9 +83,9 @@ void rotate(Duration timeStamp) {
   double delta = (timeStamp - timeBase).inMicroseconds.toDouble() / Duration.MICROSECONDS_PER_SECOND; // radians
 
   transformBox.setIdentity();
-  transformBox.translate(transformBox.size.width / 2.0, transformBox.size.height / 2.0);
   transformBox.rotateZ(delta);
-  transformBox.translate(-transformBox.size.width / 2.0, -transformBox.size.height / 2.0);
+
+  owner.buildScope(element);
 }
 
 void main() {
@@ -98,7 +98,7 @@ void main() {
   flexRoot.add(proxy);
   addFlexChildSolidColor(flexRoot, const Color(0xFF0000FF), flex: 1);
 
-  transformBox = new RenderTransform(child: flexRoot, transform: new Matrix4.identity());
+  transformBox = new RenderTransform(child: flexRoot, transform: new Matrix4.identity(), alignment: FractionalOffset.center);
   RenderPadding root = new RenderPadding(padding: new EdgeInsets.all(80.0), child: transformBox);
 
   binding.renderView.child = root;

@@ -7,7 +7,7 @@ import 'package:flutter/painting.dart';
 import 'package:test/test.dart';
 
 void main() {
-  test("TextSpan equals", () {
+  test('TextSpan equals', () {
     TextSpan a1 = new TextSpan(text: 'a');
     TextSpan a2 = new TextSpan(text: 'a');
     TextSpan b1 = new TextSpan(children: <TextSpan>[ a1 ]);
@@ -28,7 +28,7 @@ void main() {
     expect(c1 == b2, isFalse);
   });
 
-  test("TextSpan ", () {
+  test('TextSpan', () {
     final TextSpan test = new TextSpan(
       text: 'a',
       style: new TextStyle(

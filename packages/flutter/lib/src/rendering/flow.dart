@@ -378,16 +378,14 @@ class RenderFlow extends RenderBox
       final Matrix4 transform = childParentData._transform;
       if (transform == null)
         continue;
-      Matrix4 inverse = new Matrix4.zero();
-      double determinate = inverse.copyInverse(transform);
+      final Matrix4 inverse = new Matrix4.zero();
+      final double determinate = inverse.copyInverse(transform);
       if (determinate == 0.0) {
         // We cannot invert the transform. That means the child doesn't appear
         // on screen and cannot be hit.
         continue;
       }
-      final Vector3 position3 = new Vector3(position.x, position.y, 0.0);
-      final Vector3 transformed3 = inverse.transform3(position3);
-      Point childPosition = new Point(transformed3.x, transformed3.y);
+      final Point childPosition = MatrixUtils.transformPoint(inverse, position);
       if (child.hitTest(result, position: childPosition))
         return true;
     }
