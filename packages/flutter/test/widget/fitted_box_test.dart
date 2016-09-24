@@ -38,6 +38,7 @@ void main() {
     Point insidePoint = insideBox.localToGlobal(new Point(100.0, 50.0));
     Point outsidePoint = outsideBox.localToGlobal(new Point(200.0, 100.0));
 
+    expect(outsidePoint, equals(const Point(500.0, 350.0)));
     expect(insidePoint, equals(outsidePoint));
   });
 
