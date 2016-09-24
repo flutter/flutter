@@ -432,6 +432,42 @@ class Transform extends SingleChildRenderObjectWidget {
   }
 }
 
+/// Scales and positions its child within itself according to [fit].
+class FittedBox extends SingleChildRenderObjectWidget {
+  /// Creates a widget that scales and positions its child within itself according to [fit].
+  ///
+  /// The [fit] and [alignment] arguments must not be null.
+  FittedBox({
+    Key key,
+    this.fit: ImageFit.contain,
+    this.alignment: FractionalOffset.center,
+    Widget child
+  }) : super(key: key, child: child) {
+    assert(fit != null);
+    assert(alignment != null && alignment.dx != null && alignment.dy != null);
+  }
+
+  /// How to inscribe the child into the space allocated during layout.
+  final ImageFit fit;
+
+  /// How to align the child within its parent's bounds.
+  ///
+  /// An alignment of (0.0, 0.0) aligns the child to the top-left corner of its
+  /// parent's bounds.  An alignment of (1.0, 0.5) aligns the child to the middle
+  /// of the right edge of its parent's bounds.
+  final FractionalOffset alignment;
+
+  @override
+  RenderFittedBox createRenderObject(BuildContext context) => new RenderFittedBox(fit: fit, alignment: alignment);
+
+  @override
+  void updateRenderObject(BuildContext context, RenderFittedBox renderObject) {
+    renderObject
+      ..fit = fit
+      ..alignment = alignment;
+  }
+}
+
 /// A widget that applies a translation expressed as a fraction of the box's
 /// size before painting its child.
 class FractionalTranslation extends SingleChildRenderObjectWidget {
@@ -2227,7 +2263,7 @@ class RawImage extends LeafRenderObjectWidget {
   /// If non-null, apply this color filter to the image before painting.
   final Color color;
 
-  /// How to inscribe the image into the place allocated during layout.
+  /// How to inscribe the image into the space allocated during layout.
   ///
   /// The default varies based on the other fields. See the discussion at
   /// [paintImage].

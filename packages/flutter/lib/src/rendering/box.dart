@@ -209,6 +209,46 @@ class BoxConstraints extends Constraints {
     return result;
   }
 
+  /// Returns a size that attempts to meet the following conditions, in order:
+  ///
+  ///  - The size must satisfy these constraints.
+  ///  - The aspect ratio of the returned size matches the aspect ratio of the
+  ///    given size.
+  ///  - The returned size as big as possible while still being equal to or
+  ///    smaller than the given size.
+  Size constrainSizeAndAttemptToPreserveAspectRatio(Size size) {
+    if (isTight)
+      return smallest;
+
+    double width = size.width;
+    double height = size.height;
+    assert(width > 0.0);
+    assert(height > 0.0);
+    double aspectRatio = width / height;
+
+    if (width > maxWidth) {
+      width = maxWidth;
+      height = width / aspectRatio;
+    }
+
+    if (height > maxHeight) {
+      height = maxHeight;
+      width = height * aspectRatio;
+    }
+
+    if (width < minWidth) {
+      width = minWidth;
+      height = width / aspectRatio;
+    }
+
+    if (height < minHeight) {
+      height = minHeight;
+      width = height * aspectRatio;
+    }
+
+    return new Size(constrainWidth(width), constrainHeight(height));
+  }
+
   /// The biggest size that satisifes the constraints.
   Size get biggest => new Size(constrainWidth(), constrainHeight());
 

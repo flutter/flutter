@@ -1400,6 +1400,139 @@ class RenderTransform extends RenderProxyBox {
   }
 }
 
+/// Scales and positions its child within itself according to [fit].
+class RenderFittedBox extends RenderProxyBox {
+  /// Scales and positions its child within itself.
+  ///
+  /// The [fit] and [alignment] arguments must not be null.
+  RenderFittedBox({
+    RenderBox child,
+    ImageFit fit: ImageFit.contain,
+    FractionalOffset alignment: FractionalOffset.center
+  }) : _fit = fit, _alignment = alignment, super(child) {
+    assert(fit != null);
+    assert(alignment != null && alignment.dx != null && alignment.dy != null);
+  }
+
+  /// How to inscribe the child into the space allocated during layout.
+  ImageFit get fit => _fit;
+  ImageFit _fit;
+  set fit (ImageFit newFit) {
+    assert(newFit != null);
+    if (_fit == newFit)
+      return;
+    _fit = newFit;
+    _clearPaintData();
+    markNeedsPaint();
+  }
+
+  /// How to align the child within its parent's bounds.
+  ///
+  /// An alignment of (0.0, 0.0) aligns the child to the top-left corner of its
+  /// parent's bounds.  An alignment of (1.0, 0.5) aligns the child to the middle
+  /// of the right edge of its parent's bounds.
+  FractionalOffset get alignment => _alignment;
+  FractionalOffset _alignment;
+  set alignment (FractionalOffset newAlignment) {
+    assert(newAlignment != null && newAlignment.dx != null && newAlignment.dy != null);
+    if (_alignment == newAlignment)
+      return;
+    _alignment = newAlignment;
+    _clearPaintData();
+    markNeedsPaint();
+  }
+
+  @override
+  void performLayout() {
+    if (child != null) {
+      child.layout(const BoxConstraints(), parentUsesSize: true);
+      size = constraints.constrainSizeAndAttemptToPreserveAspectRatio(child.size);
+      _clearPaintData();
+    } else {
+      size = constraints.smallest;
+    }
+  }
+
+  bool _hasVisualOverflow;
+  Matrix4 _transform;
+
+  void _clearPaintData() {
+    _hasVisualOverflow = null;
+    _transform = null;
+  }
+
+  void _updatePaintData() {
+    if (_transform != null)
+      return;
+
+    if (child == null) {
+      _hasVisualOverflow = false;
+      _transform = new Matrix4.identity();
+    } else {
+      final Size childSize = child.size;
+      final FittedSizes sizes = applyImageFit(_fit, childSize, size);
+      final double scaleX = sizes.destination.width / sizes.source.width;
+      final double scaleY = sizes.destination.height / sizes.source.height;
+      final Rect sourceRect = _alignment.inscribe(sizes.source, Point.origin & childSize);
+      final Rect destinationRect = _alignment.inscribe(sizes.destination, Point.origin & size);
+      _hasVisualOverflow = sourceRect.width < childSize.width || sourceRect.height < childSize.width;
+      _transform = new Matrix4.translationValues(destinationRect.left, destinationRect.top, 0.0)
+        ..scale(scaleX, scaleY)
+        ..translate(-sourceRect.left, -sourceRect.top);
+    }
+  }
+
+  void _paintChildWithTransform(PaintingContext context, Offset offset) {
+    Offset childOffset = MatrixUtils.getAsTranslation(_transform);
+    if (childOffset == null)
+      context.pushTransform(needsCompositing, offset, _transform, super.paint);
+    else
+      super.paint(context, offset + childOffset);
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    _updatePaintData();
+    if (child != null) {
+      if (_hasVisualOverflow)
+        context.pushClipRect(needsCompositing, offset, Point.origin & size, _paintChildWithTransform);
+      else
+        _paintChildWithTransform(context, offset);
+    }
+  }
+
+  @override
+  bool hitTest(HitTestResult result, { Point position }) {
+    _updatePaintData();
+    Matrix4 inverse;
+    try {
+      inverse = new Matrix4.inverted(_transform);
+    } catch (e) {
+      // We cannot invert the effective transform. That means the child
+      // doesn't appear on screen and cannot be hit.
+      return false;
+    }
+    Vector3 position3 = new Vector3(position.x, position.y, 0.0);
+    Vector3 transformed3 = inverse.transform3(position3);
+    position = new Point(transformed3.x, transformed3.y);
+    return super.hitTest(result, position: position);
+  }
+
+  @override
+  void applyPaintTransform(RenderBox child, Matrix4 transform) {
+    _updatePaintData();
+    transform.multiply(_transform);
+    super.applyPaintTransform(child, transform);
+  }
+
+  @override
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('fit: $fit');
+    description.add('alignment: $alignment');
+  }
+}
+
 /// Applies a translation transformation before painting its child.
 ///
 /// The translation is expressed as a [FractionalOffset] relative to the

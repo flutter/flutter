@@ -114,7 +114,7 @@ class RenderImage extends RenderBox {
     markNeedsPaint();
   }
 
-  /// How to inscribe the image into the place allocated during layout.
+  /// How to inscribe the image into the space allocated during layout.
   ///
   /// The default varies based on the other fields. See the discussion at
   /// [paintImage].
@@ -178,36 +178,13 @@ class RenderImage extends RenderBox {
       height: _height
     ).enforce(constraints);
 
-    if (constraints.isTight || _image == null)
+    if (_image == null)
       return constraints.smallest;
 
-    double width = _image.width.toDouble() / _scale;
-    double height = _image.height.toDouble() / _scale;
-    assert(width > 0.0);
-    assert(height > 0.0);
-    double aspectRatio = width / height;
-
-    if (width > constraints.maxWidth) {
-      width = constraints.maxWidth;
-      height = width / aspectRatio;
-    }
-
-    if (height > constraints.maxHeight) {
-      height = constraints.maxHeight;
-      width = height * aspectRatio;
-    }
-
-    if (width < constraints.minWidth) {
-      width = constraints.minWidth;
-      height = width / aspectRatio;
-    }
-
-    if (height < constraints.minHeight) {
-      height = constraints.minHeight;
-      width = height * aspectRatio;
-    }
-
-    return constraints.constrain(new Size(width, height));
+    return constraints.constrainSizeAndAttemptToPreserveAspectRatio(new Size(
+      _image.width.toDouble() / _scale,
+      _image.height.toDouble() / _scale
+    ));
   }
 
   @override

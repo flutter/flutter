@@ -129,7 +129,7 @@ class Image extends StatefulWidget {
   /// If non-null, apply this color filter to the image before painting.
   final Color color;
 
-  /// How to inscribe the image into the place allocated during layout.
+  /// How to inscribe the image into the space allocated during layout.
   ///
   /// The default varies based on the other fields. See the discussion at
   /// [paintImage].
