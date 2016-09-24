@@ -1607,7 +1607,7 @@ class BuildOwner {
   /// Only one [buildScope] can be active at a time.
   ///
   /// A [buildScope] implies a [lockState] scope as well.
-  void buildScope(Element context, [VoidCallback callback]) {
+  void buildScope(BuildableElement context, [VoidCallback callback]) {
     if (callback == null && _dirtyElements.isEmpty)
       return;
     assert(context != null);
@@ -1623,8 +1623,27 @@ class BuildOwner {
     Timeline.startSync('Build');
     try {
       _scheduledFlushDirtyElements = true;
-      if (callback != null)
-        callback();
+      if (callback != null) {
+        assert(context is BuildableElement);
+        assert(_debugStateLocked);
+        BuildableElement debugPreviousBuildTarget;
+        assert(() {
+          context._debugSetAllowIgnoredCallsToMarkNeedsBuild(true);
+          debugPreviousBuildTarget = _debugCurrentBuildTarget;
+          _debugCurrentBuildTarget = context;
+         return true;
+        });
+        try {
+          callback();
+        } finally {
+          assert(() {
+            context._debugSetAllowIgnoredCallsToMarkNeedsBuild(false);
+            assert(_debugCurrentBuildTarget == context);
+            _debugCurrentBuildTarget = debugPreviousBuildTarget;
+            return true;
+          });
+        }
+      }
       _dirtyElements.sort(_elementSort);
       _dirtyElementsNeedsResorting = false;
       int dirtyCount = _dirtyElements.length;
@@ -2423,6 +2442,10 @@ class ErrorWidget extends LeafRenderObjectWidget {
 }
 
 /// An [Element] that can be marked dirty and rebuilt.
+///
+/// In practice, all subclasses of [Element] in the Flutter framework are
+/// subclasses of [BuildableElement]. The distinction exists primarily to
+/// segregate unrelated code.
 abstract class BuildableElement extends Element {
   /// Creates an element that uses the given widget as its configuration.
   BuildableElement(Widget widget) : super(widget);
@@ -2464,26 +2487,34 @@ abstract class BuildableElement extends Element {
     assert(_debugLifecycleState == _ElementLifecycle.active);
     assert(() {
       if (owner._debugBuilding) {
-        if (owner._debugCurrentBuildTarget == null) {
-          // If _debugCurrentBuildTarget is null, we're not actually building a
-          // widget but instead building the root of the tree via runApp.
-          // TODO(abarth): Remove these cases and ensure that we always have
-          // a current build target when we're building.
-          return true;
-        }
+        assert(owner._debugCurrentBuildTarget != null);
+        assert(owner._debugStateLocked);
         if (_debugIsInScope(owner._debugCurrentBuildTarget))
           return true;
-      }
-      if (owner._debugStateLocked && (!_debugAllowIgnoredCallsToMarkNeedsBuild || !dirty)) {
+        if (!_debugAllowIgnoredCallsToMarkNeedsBuild) {
+          throw new FlutterError(
+            'setState() or markNeedsBuild() called during build.\n'
+            'This ${widget.runtimeType} widget cannot be marked as needing to build because the framework '
+            'is already in the process of building widgets. A widget can be marked as '
+            'needing to be built during the build phase only if one of its ancestors '
+            'is currently building. This exception is allowed because the framework '
+            'builds parent widgets before children, which means a dirty descendant '
+            'will always be built. Otherwise, the framework might not visit this '
+            'widget during this build phase.\n'
+            'The widget on which setState() or markNeedsBuild() was called was:\n'
+            '  $this\n'
+            '${owner._debugCurrentBuildTarget == null ? "" : "The widget which was currently being built when the offending call was made was:\n  ${owner._debugCurrentBuildTarget}"}'
+          );
+        }
+        assert(dirty); // can only get here if we're not in scope, but ignored calls are allowed, and our call would somehow be ignored (since we're already dirty)
+      } else if (owner._debugStateLocked) {
+        assert(!_debugAllowIgnoredCallsToMarkNeedsBuild);
         throw new FlutterError(
-          'setState() or markNeedsBuild() called during build.\n'
-          'This widget cannot be marked as needing to build because the framework '
-          'is already in the process of building widgets. A widget can be marked as '
-          'needing to be built during the build phase only if one if its ancestors '
-          'is currently building. This exception is allowed because the framework '
-          'builds parent widgets before children, which means a dirty descendant '
-          'will always be built. Otherwise, the framework might not visit this '
-          'widget during this build phase.'
+          'setState() or markNeedsBuild() called when widget tree was locked.\n'
+          'This ${widget.runtimeType} widget cannot be marked as needing to build '
+          'because the framework is locked.\n'
+          'The widget on which setState() or markNeedsBuild() was called was:\n'
+          '  $this\n'
         );
       }
       return true;
@@ -2596,6 +2627,8 @@ Widget _buildNothing(BuildContext context) => null;
 ///
 /// Rather than creating a [RenderObject] directly, a [ComponentElement] creates
 /// [RenderObject]s indirectly by creating other [Element]s.
+///
+/// Contrast with [RenderObjectElement].
 abstract class ComponentElement extends BuildableElement {
   /// Creates an element that uses the given widget as its configuration.
   ComponentElement(Widget widget) : super(widget);
@@ -2994,6 +3027,12 @@ class InheritedElement extends ProxyElement {
 }
 
 /// An element that uses a [RenderObjectWidget] as its configuration.
+///
+/// [RenderObjectElement] objects have an associated [RenderObject] widget in
+/// the render tree, which handles concrete operations like laying out,
+/// painting, and hit testing.
+///
+/// Contrast with [ComponentElement].
 abstract class RenderObjectElement extends BuildableElement {
   /// Creates an element that uses the given widget as its configuration.
   RenderObjectElement(RenderObjectWidget widget) : super(widget);
