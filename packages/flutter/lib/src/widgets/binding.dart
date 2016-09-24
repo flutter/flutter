@@ -293,7 +293,8 @@ abstract class WidgetsBinding extends BindingBase implements GestureBinding, Ren
       return true;
     });
     try {
-      buildOwner.buildScope(renderViewElement);
+      if (renderViewElement != null)
+        buildOwner.buildScope(renderViewElement);
       super.beginFrame();
       buildOwner.finalizeTree();
     } finally {
@@ -340,7 +341,8 @@ abstract class WidgetsBinding extends BindingBase implements GestureBinding, Ren
   void reassembleApplication() {
     _needToReportFirstFrame = true;
     preventThisFrameFromBeingReportedAsFirstFrame();
-    buildOwner.reassemble(renderViewElement);
+    if (renderViewElement != null)
+      buildOwner.reassemble(renderViewElement);
     super.reassembleApplication();
   }
 }

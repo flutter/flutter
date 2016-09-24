@@ -90,13 +90,13 @@ class MatrixUtils {
         && a.storage[15] == 1.0;
   }
 
-  /// Applies the given matrix as a perspective transform to the given point.
+  /// Applies the given matrix as a transform to the given point.
   ///
   /// This function assumes the given point has a z-coordinate of 0.0. The
   /// z-coordinate of the result is ignored.
   static Point transformPoint(Matrix4 transform, Point point) {
     Vector3 position3 = new Vector3(point.x, point.y, 0.0);
-    Vector3 transformed3 = transform.perspectiveTransform(position3);
+    Vector3 transformed3 = transform.transform3(position3);
     return new Point(transformed3.x, transformed3.y);
   }
 
