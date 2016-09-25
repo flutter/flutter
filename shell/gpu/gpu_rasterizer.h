@@ -7,7 +7,7 @@
 
 #include "flutter/flow/compositor_context.h"
 #include "flutter/shell/common/rasterizer.h"
-#include "flutter/shell/gpu/ganesh_canvas.h"
+#include "flutter/shell/gpu/gpu_canvas.h"
 #include "lib/ftl/memory/weak_ptr.h"
 #include "lib/ftl/synchronization/waitable_event.h"
 
@@ -35,11 +35,14 @@ class GPURasterizer : public Rasterizer {
   void Draw(ftl::RefPtr<flutter::Pipeline<flow::LayerTree>> pipeline) override;
 
  private:
-  GaneshCanvas ganesh_canvas_;
+  std::unique_ptr<GPUCanvas> gpu_canvas_;
   flow::CompositorContext compositor_context_;
   std::unique_ptr<flow::LayerTree> last_layer_tree_;
   PlatformView* platform_view_;
   ftl::WeakPtrFactory<GPURasterizer> weak_factory_;
+
+  FTL_WARN_UNUSED_RESULT
+  bool Setup(PlatformView* platform_view);
 
   void DoDraw(std::unique_ptr<flow::LayerTree> tree);
 

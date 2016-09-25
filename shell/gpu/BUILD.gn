@@ -4,8 +4,6 @@
 
 source_set("gpu") {
   sources = [
-    "ganesh_canvas.cc",
-    "ganesh_canvas.h",
     "gpu_canvas.cc",
     "gpu_canvas.h",
     "gpu_canvas_gl.cc",
