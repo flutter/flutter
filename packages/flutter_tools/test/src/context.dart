@@ -111,6 +111,10 @@ class MockDeviceManager implements DeviceManager {
 class MockDoctor extends Doctor {
   // True for testing.
   @override
+  bool get canListAnything => true;
+
+  // True for testing.
+  @override
   bool get canLaunchAnything => true;
 }
 
