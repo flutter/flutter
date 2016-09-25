@@ -26,7 +26,7 @@ void testUsingContext(String description, dynamic testMethod(), {
   Timeout timeout,
   Map<Type, dynamic> overrides: const <Type, dynamic>{}
 }) {
-  test(description, () {
+  test(description, () async {
     AppContext testContext = new AppContext();
 
     overrides.forEach((Type type, dynamic value) {
@@ -65,7 +65,17 @@ void testUsingContext(String description, dynamic testMethod(), {
         testContext[XCode] = new XCode();
     }
 
-    return testContext.runInZone(testMethod);
+    try {
+      return await testContext.runInZone(testMethod);
+    } catch (error) {
+      if (testContext[Logger] is BufferLogger) {
+        BufferLogger bufferLogger = testContext[Logger];
+        if (bufferLogger.errorText.isNotEmpty)
+          print(bufferLogger.errorText);
+      }
+      throw error;
+    }
+
   }, timeout: timeout);
 }
 
