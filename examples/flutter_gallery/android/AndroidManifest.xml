@@ -22,6 +22,8 @@
         <screen android:screenSize="normal" android:screenDensity="hdpi" />
         <screen android:screenSize="normal" android:screenDensity="xhdpi" />
         <screen android:screenSize="normal" android:screenDensity="480" />
+        <!-- for the Nexus 6 and 6P -->
+        <screen android:screenSize="normal" android:screenDensity="560" />
         <!-- handles Nexus 5, 5X, but should exclude very large tablets -->
         <screen android:screenSize="large" android:screenDensity="ldpi" />
         <screen android:screenSize="large" android:screenDensity="mdpi" />
