@@ -37,28 +37,36 @@ ftl::WeakPtr<Rasterizer> GPURasterizer::GetWeakRasterizerPtr() {
   return weak_factory_.GetWeakPtr();
 }
 
+bool GPURasterizer::Setup(PlatformView* platform_view) {
+  if (platform_view == nullptr) {
+    return false;
+  }
+
+  if (!platform_view->ContextMakeCurrent()) {
+    return false;
+  }
+
+  auto gpu_canvas = GPUCanvas::CreatePlatformCanvas(*platform_view);
+
+  if (gpu_canvas == nullptr) {
+    return false;
+  }
+
+  if (!gpu_canvas->Setup()) {
+    return false;
+  }
+
+  gpu_canvas_ = std::move(gpu_canvas);
+  platform_view_ = platform_view;
+  return true;
+}
+
 void GPURasterizer::Setup(PlatformView* platform_view,
                           ftl::Closure continuation,
                           ftl::AutoResetWaitableEvent* setup_completion_event) {
-  FTL_CHECK(platform_view) << "Must be able to acquire the view.";
+  auto setup_result = Setup(platform_view);
 
-  // The context needs to be made current before the GrGL interface can be
-  // setup.
-  bool success = platform_view->ContextMakeCurrent();
-  if (success) {
-    success = ganesh_canvas_.SetupGrGLInterface();
-    if (!success)
-      FTL_LOG(ERROR) << "Could not create the GL interface";
-  } else {
-    FTL_LOG(ERROR) << "Could not make the context current for initial GL setup";
-  }
-
-  if (success) {
-    platform_view_ = platform_view;
-  } else {
-    FTL_LOG(ERROR)
-        << "WARNING: Flutter will be unable to render to the display";
-  }
+  FTL_CHECK(setup_result) << "Must be able to setup the GPU canvas.";
 
   continuation();
 
@@ -66,10 +74,19 @@ void GPURasterizer::Setup(PlatformView* platform_view,
 }
 
 void GPURasterizer::Clear(SkColor color) {
-  SkCanvas* canvas = ganesh_canvas_.GetCanvas(
-      platform_view_->DefaultFramebuffer(), platform_view_->GetSize());
+  if (gpu_canvas_ == nullptr) {
+    return;
+  }
+
+  SkCanvas* canvas = gpu_canvas_->AcquireCanvas(platform_view_->GetSize());
+
+  if (canvas == nullptr) {
+    return;
+  }
+
   canvas->clear(color);
   canvas->flush();
+
   platform_view_->SwapBuffers();
 }
 
@@ -113,7 +130,7 @@ void GPURasterizer::Draw(
 }
 
 void GPURasterizer::DoDraw(std::unique_ptr<flow::LayerTree> layer_tree) {
-  if (!layer_tree) {
+  if (!layer_tree || !gpu_canvas_) {
     return;
   }
 
@@ -132,10 +149,9 @@ void GPURasterizer::DoDraw(std::unique_ptr<flow::LayerTree> layer_tree) {
   }
 
   {
-    SkCanvas* canvas = ganesh_canvas_.GetCanvas(
-        platform_view_->DefaultFramebuffer(), layer_tree->frame_size());
+    SkCanvas* canvas = gpu_canvas_->AcquireCanvas(layer_tree->frame_size());
     flow::CompositorContext::ScopedFrame frame =
-        compositor_context_.AcquireFrame(ganesh_canvas_.gr_context(), *canvas);
+        compositor_context_.AcquireFrame(gpu_canvas_->GetContext(), *canvas);
     canvas->clear(SK_ColorBLACK);
     layer_tree->Raster(frame);
 
