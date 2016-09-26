@@ -30,7 +30,7 @@ dependencies:
 ''');
   for (String package in findPackageNames()) {
     buf.writeln('  $package:');
-    buf.writeln('    path: ../../packages/$package');
+    buf.writeln('    sdk: flutter');
   }
   new File('dev/docs/pubspec.yaml').writeAsStringSync(buf.toString());
 
@@ -45,7 +45,12 @@ dependencies:
   new File('dev/docs/lib/temp_doc.dart').writeAsStringSync(contents.toString());
 
   // Run pub.
-  Process process = await Process.start('pub', <String>['get'], workingDirectory: 'dev/docs');
+  Process process = await Process.start('pub', <String>['get'],
+    workingDirectory: 'dev/docs',
+    environment: <String, String>{
+      'FLUTTER_ROOT': Directory.current.path
+    }
+  );
   printStream(process.stdout);
   printStream(process.stderr);
   int code = await process.exitCode;

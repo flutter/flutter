@@ -4,7 +4,7 @@
 
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:sky_services/flutter/platform/system_chrome.mojom.dart' as mojom;
+import 'package:flutter_services/platform/system_chrome.dart' as mojom;
 
 import 'constants.dart';
 import 'icon_theme.dart';
@@ -22,6 +22,65 @@ final Object _kDefaultHeroTag = new Object();
 abstract class AppBarBottomWidget extends Widget {
   /// Defines the height of the app bar's optional bottom widget.
   double get bottomHeight;
+}
+
+enum _ToolbarSlot {
+  leading,
+  title,
+  actions,
+}
+
+class _ToolbarLayout extends MultiChildLayoutDelegate {
+  _ToolbarLayout({ this.centerTitle });
+
+  // If false the title should be left or right justified within the space bewteen
+  // the leading and actions widgets, depending on the locale's writing direction.
+  // If true the title is centered within the toolbar (not within the horizontal
+  // space bewteen the leading and actions widgets).
+  final bool centerTitle;
+
+  static const double kLeadingWidth = 40.0; // Same size as an IconButton
+  static const double kTitleLeft = 64.0; // The AppBar pads left and right an additional 8.0.
+
+  @override
+  void performLayout(Size size) {
+    double actionsWidth = 0.0;
+
+    if (hasChild(_ToolbarSlot.leading)) {
+      final BoxConstraints constraints = new BoxConstraints.tight(new Size(kLeadingWidth, size.height));
+      layoutChild(_ToolbarSlot.leading, constraints);
+      positionChild(_ToolbarSlot.leading, Offset.zero);
+    }
+
+    if (hasChild(_ToolbarSlot.actions)) {
+      final BoxConstraints constraints = new BoxConstraints.loose(size);
+      actionsWidth = layoutChild(_ToolbarSlot.actions, constraints).width;
+      positionChild(_ToolbarSlot.actions, new Offset(size.width - actionsWidth, 0.0));
+    }
+
+    if (hasChild(_ToolbarSlot.title)) {
+      final double maxWidth = size.width - kTitleLeft - actionsWidth;
+      final BoxConstraints constraints = new BoxConstraints.loose(size).copyWith(maxWidth: maxWidth);
+      final Size titleSize = layoutChild(_ToolbarSlot.title, constraints);
+      final double titleY = (size.height - titleSize.height) / 2.0;
+      double titleX = kTitleLeft;
+
+      // If the centered title will not fit between the leading and actions
+      // widgets, then align its left or right edge with the adjacent boundary.
+      if (centerTitle) {
+        titleX = (size.width - titleSize.width) / 2.0;
+        if (titleX + titleSize.width > size.width - actionsWidth)
+          titleX = size.width - actionsWidth - titleSize.width;
+        else if (titleX < kTitleLeft)
+          titleX = kTitleLeft;
+      }
+
+      positionChild(_ToolbarSlot.title, new Offset(titleX, titleY));
+    }
+  }
+
+  @override
+  bool shouldRelayout(_ToolbarLayout oldDelegate) => centerTitle != oldDelegate.centerTitle;
 }
 
 // TODO(eseidel) Toolbar needs to change size based on orientation:
@@ -180,6 +239,12 @@ class AppBar extends StatelessWidget {
   final double _expandedHeight;
   final double _collapsedHeight;
 
+  /// Returns the [expandedHeight] of the [AppBar] nearest to the given
+  /// [BuildContext].
+  ///
+  /// Calling this function sets up an inheritance relationship, so that the
+  /// widget corresponding to the given [BuildContext] will rebuild whenever
+  /// that height changes.
   static double getExpandedHeightFor(BuildContext context) {
     _AppBarExpandedHeight marker = context.inheritFromWidgetOfExactType(_AppBarExpandedHeight);
     return marker?.expandedHeight ?? 0.0;
@@ -215,13 +280,14 @@ class AppBar extends StatelessWidget {
       iconTheme: iconTheme ?? this.iconTheme,
       textTheme: textTheme ?? this.textTheme,
       padding: padding ?? this.padding,
+      centerTitle: centerTitle ?? this.centerTitle,
       heroTag: heroTag ?? this.heroTag,
       expandedHeight: expandedHeight ?? this._expandedHeight,
       collapsedHeight: collapsedHeight ?? this._collapsedHeight
     );
   }
 
-  double get _toolBarHeight => kToolBarHeight;
+  double get _toolbarHeight => kToolbarHeight;
 
   /// The height of the bottom widget. The [Scaffold] uses this value to control
   /// the size of the app bar when its appBarBehavior is [AppBarBehavior.scroll]
@@ -232,16 +298,18 @@ class AppBar extends StatelessWidget {
   /// The [Scaffold] gives its app bar this height initially. If a
   /// [flexibleSpace] widget is specified this height should be big
   /// enough to accommodate whatever that widget contains.
-  double get expandedHeight => _expandedHeight ?? (_toolBarHeight + bottomHeight);
+  ///
+  /// See also [getExpandedHeightFor].
+  double get expandedHeight => _expandedHeight ?? (_toolbarHeight + bottomHeight);
 
   /// By default, the height of the toolbar and the bottom widget (if any).
   /// If the height of the app bar is constrained to be less than this value
   /// then the toolbar and bottom widget are scrolled upwards, out of view.
-  double get collapsedHeight => _collapsedHeight ?? (_toolBarHeight + bottomHeight);
+  double get collapsedHeight => _collapsedHeight ?? (_toolbarHeight + bottomHeight);
 
   // Defines the opacity of the toolbar's text and icons.
-  double _toolBarOpacity(double appBarHeight, double statusBarHeight) {
-    return ((appBarHeight - bottomHeight - statusBarHeight) / _toolBarHeight).clamp(0.0, 1.0);
+  double _toolbarOpacity(double appBarHeight, double statusBarHeight) {
+    return ((appBarHeight - bottomHeight - statusBarHeight) / _toolbarHeight).clamp(0.0, 1.0);
   }
 
   double _bottomOpacity(double appBarHeight, double statusBarHeight) {
@@ -272,16 +340,14 @@ class AppBar extends StatelessWidget {
     TextStyle centerStyle = textTheme?.title ?? themeData.primaryTextTheme.title;
     TextStyle sideStyle = textTheme?.body1 ?? themeData.primaryTextTheme.body1;
 
-    final bool effectiveCenterTitle = _getEffectiveCenterTitle(themeData);
-
     Brightness brightness = this.brightness ?? themeData.primaryColorBrightness;
     SystemChrome.setSystemUIOverlayStyle(brightness == Brightness.dark
       ? mojom.SystemUiOverlayStyle.light
       : mojom.SystemUiOverlayStyle.dark);
 
-    final double toolBarOpacity = _toolBarOpacity(size.height, statusBarHeight);
-    if (toolBarOpacity != 1.0) {
-      final double opacity = const Interval(0.25, 1.0, curve: Curves.fastOutSlowIn).transform(toolBarOpacity);
+    final double toolbarOpacity = _toolbarOpacity(size.height, statusBarHeight);
+    if (toolbarOpacity != 1.0) {
+      final double opacity = const Interval(0.25, 1.0, curve: Curves.fastOutSlowIn).transform(toolbarOpacity);
       if (centerStyle?.color != null)
         centerStyle = centerStyle.copyWith(color: centerStyle.color.withOpacity(opacity));
       if (sideStyle?.color != null)
@@ -291,60 +357,58 @@ class AppBar extends StatelessWidget {
       );
     }
 
-    Widget centerWidget;
+    final List<Widget> toolbarChildren = <Widget>[];
+    if (leading != null) {
+      toolbarChildren.add(
+        new LayoutId(
+          id: _ToolbarSlot.leading,
+          child: leading
+        )
+      );
+    }
     if (title != null) {
-      centerWidget = new DefaultTextStyle(
-        style: centerStyle,
-        softWrap: false,
-        overflow: TextOverflow.ellipsis,
-        child: title
+      toolbarChildren.add(
+        new LayoutId(
+          id: _ToolbarSlot.title,
+          child: new DefaultTextStyle(
+            style: centerStyle,
+            softWrap: false,
+            overflow: TextOverflow.ellipsis,
+            child: title
+          )
+        )
+      );
+    }
+    if (actions != null && actions.isNotEmpty) {
+      toolbarChildren.add(
+        new LayoutId(
+          id: _ToolbarSlot.actions,
+          child: new Row(
+            mainAxisSize: MainAxisSize.min,
+            children: actions
+          )
+        )
       );
     }
 
-    final List<Widget> toolBarRow = <Widget>[];
-    if (leading != null) {
-      toolBarRow.add(new Padding(
-        padding: new EdgeInsets.only(right: 16.0),
-        child: leading
-      ));
-    }
-    toolBarRow.add(new Flexible(
-      child: new Align(
-        // TODO(abarth): In RTL this should be aligned to the right.
-        alignment: FractionalOffset.centerLeft,
-        child: new Padding(
-          padding: new EdgeInsets.only(left: 8.0),
-          child: effectiveCenterTitle ? null : centerWidget
-        )
-      )
-    ));
-    if (actions != null)
-      toolBarRow.addAll(actions);
-
-    Widget toolBar = new Padding(
+    Widget toolbar = new Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8.0),
-      child: new Row(children: toolBarRow)
+      child: new CustomMultiChildLayout(
+        delegate: new _ToolbarLayout(
+          centerTitle: _getEffectiveCenterTitle(themeData)
+        ),
+        children: toolbarChildren
+      )
     );
 
-    if (effectiveCenterTitle && centerWidget != null) {
-      toolBar = new Stack(
-        children: <Widget>[
-          // TODO(abarth): If there isn't enough room, we should move the title
-          // off center rather than overlap the actions.
-          new Center(child: centerWidget),
-          toolBar
-        ]
-      );
-    }
-
     Widget appBar = new SizedBox(
-      height: kToolBarHeight,
+      height: kToolbarHeight,
       child: new IconTheme.merge(
         context: context,
         data: appBarIconTheme,
         child: new DefaultTextStyle(
           style: sideStyle,
-          child: toolBar
+          child: toolbar
         )
       )
     );

@@ -28,13 +28,15 @@ if [ -n "$TRAVIS" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
   COVERAGE_FLAG=--coverage
 fi
 
+SRC_ROOT=$PWD
+
 # run tests
 (cd packages/flutter; flutter test $COVERAGE_FLAG)
 (cd packages/flutter_driver; dart -c test/all.dart)
-(cd packages/flutter_sprites; flutter test)
 (cd packages/flutter_test; flutter test)
-(cd packages/flutter_tools; dart -c test/all.dart)
+(cd packages/flutter_tools; FLUTTER_ROOT=$SRC_ROOT dart -c test/all.dart)
 
+(cd dev/devicelab; dart -c test/all.dart)
 (cd dev/manual_tests; flutter test)
 (cd examples/hello_world; flutter test)
 (cd examples/layers; flutter test)
@@ -43,7 +45,7 @@ fi
 
 # generate and analyze our large sample app
 dart dev/tools/mega_gallery.dart
-(cd dev/benchmarks/mega_gallery; flutter analyze --watch --benchmark)
+(cd dev/benchmarks/mega_gallery; flutter watch --benchmark)
 
 if [ -n "$COVERAGE_FLAG" ]; then
   GSUTIL=$HOME/google-cloud-sdk/bin/gsutil

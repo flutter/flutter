@@ -110,7 +110,7 @@ class AssetImage extends AssetBundleImageProvider {
         if (completer != null) {
           // We already returned from this function, which means we are in the
           // asynchronous mode. Pass the value to the completer. The completer's
-          // function is what we returned.
+          // future is what we returned.
           completer.complete(key);
         } else {
           // We haven't yet returned, so we must have been called synchronously
@@ -144,7 +144,7 @@ class AssetImage extends AssetBundleImageProvider {
     // TODO(ianh): JSON decoding really shouldn't be on the main thread.
     final Map<dynamic, dynamic> parsedManifest = JSON.decode(json);
     // TODO(ianh): convert that data structure to the right types.
-    return new SynchronousFuture<Map<dynamic, dynamic>>(parsedManifest);
+    return new SynchronousFuture<Map<dynamic, dynamic>>(parsedManifest); // ignore: return_of_invalid_type, https://github.com/flutter/flutter/issues/5771
   }
 
   String _chooseVariant(String main, ImageConfiguration config, List<String> candidates) {

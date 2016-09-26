@@ -100,6 +100,18 @@ abstract class VirtualViewportElement extends RenderObjectElement {
       visitor(child);
   }
 
+  @override
+  void detachChild(Element child) {
+    assert(() {
+      // TODO(ianh): implement detachChild for VirtualViewport
+      throw new FlutterError(
+        '$runtimeType does not yet support GlobalKey reparenting of its children.\n'
+        'As a temporary workaround, wrap the child with the GlobalKey in a '
+        'Container or other harmless child.'
+      );
+    });
+  }
+
   _WidgetProvider _widgetProvider;
 
   @override
@@ -175,7 +187,7 @@ abstract class VirtualViewportElement extends RenderObjectElement {
     assert(startOffsetBase != null);
     assert(startOffsetLimit != null);
     _updatePaintOffset();
-    owner.lockState(_materializeChildren, building: true);
+    owner.buildScope(this, _materializeChildren);
   }
 
   void _materializeChildren() {

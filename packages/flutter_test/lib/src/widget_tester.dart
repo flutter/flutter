@@ -164,7 +164,8 @@ class WidgetTester extends WidgetController implements HitTestDispatcher {
     EnginePhase phase = EnginePhase.sendSemanticsTree
   ]) {
     return TestAsyncUtils.guard(() {
-      runApp(widget);
+      binding.attachRootWidget(widget);
+      binding.scheduleFrame();
       return binding.pump(duration, phase);
     });
   }

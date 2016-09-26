@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter_tools/src/device.dart';
 import 'package:path/path.dart' as path;
 
 import '../base/utils.dart';
@@ -27,16 +28,20 @@ class ScreenshotCommand extends FlutterCommand {
   @override
   final List<String> aliases = <String>['pic'];
 
-  @override
-  bool get requiresProjectRoot => false;
+  Device device;
 
   @override
-  bool get requiresDevice => true;
+  Future<int> verifyThenRunCommand() async {
+    device = await findTargetDevice();
+    if (device == null)
+      return 1;
+    return super.verifyThenRunCommand();
+  }
 
   @override
-  Future<int> runInProject() async {
-    if (!deviceForCommand.supportsScreenshot) {
-      printError('Screenshot not supported for ${deviceForCommand.name}.');
+  Future<int> runCommand() async {
+    if (!device.supportsScreenshot) {
+      printError('Screenshot not supported for ${device.name}.');
       return 1;
     }
 
@@ -49,7 +54,7 @@ class ScreenshotCommand extends FlutterCommand {
     }
 
     try {
-      bool result = await deviceForCommand.takeScreenshot(outputFile);
+      bool result = await device.takeScreenshot(outputFile);
 
       if (result) {
         int sizeKB = outputFile.lengthSync() ~/ 1000;

@@ -31,13 +31,19 @@ class MediaQueryData {
   ///
   /// Consider using [MediaQueryData.fromWindow] to create data based on a
   /// [ui.Window].
-  const MediaQueryData({ this.size, this.devicePixelRatio, this.padding });
+  const MediaQueryData({
+    this.size: Size.zero,
+    this.devicePixelRatio: 1.0,
+    this.textScaleFactor: 1.0,
+    this.padding: EdgeInsets.zero
+  });
 
   /// Creates data for a media query based on the given window.
   MediaQueryData.fromWindow(ui.Window window)
-    : size = window.size,
+    : size = window.physicalSize / window.devicePixelRatio,
       devicePixelRatio = window.devicePixelRatio,
-      padding = new EdgeInsets.fromWindowPadding(window.padding);
+      textScaleFactor = 1.0, // TODO(abarth): Read this value from window.
+      padding = new EdgeInsets.fromWindowPadding(window.padding, window.devicePixelRatio);
 
   /// The size of the media in logical pixel (e.g, the size of the screen).
   ///
@@ -51,6 +57,12 @@ class MediaQueryData {
   /// be a power of two. Indeed, it might not even be an integer. For example,
   /// the Nexus 6 has a device pixel ratio of 3.5.
   final double devicePixelRatio;
+
+  /// The number of font pixels for each logical pixel.
+  ///
+  /// For example, if the text scale factor is 1.5, text will be 50% larger than
+  /// the specified font size.
+  final double textScaleFactor;
 
   /// The padding around the edges of the media (e.g., the screen).
   final EdgeInsets padding;
@@ -66,19 +78,16 @@ class MediaQueryData {
       return false;
     MediaQueryData typedOther = other;
     return typedOther.size == size
-        && typedOther.padding == padding
-        && typedOther.devicePixelRatio == devicePixelRatio;
+        && typedOther.devicePixelRatio == devicePixelRatio
+        && typedOther.textScaleFactor == textScaleFactor
+        && typedOther.padding == padding;
   }
 
   @override
-  int get hashCode => hashValues(
-    size.hashCode,
-    padding.hashCode,
-    devicePixelRatio.hashCode
-  );
+  int get hashCode => hashValues(size, devicePixelRatio, textScaleFactor, padding);
 
   @override
-  String toString() => '$runtimeType(size: $size, devicePixelRatio: $devicePixelRatio, padding: $padding)';
+  String toString() => '$runtimeType(size: $size, devicePixelRatio: $devicePixelRatio, textScaleFactor: $textScaleFactor, padding: $padding)';
 }
 
 /// Establishes a subtree in which media queries resolve to the given data.

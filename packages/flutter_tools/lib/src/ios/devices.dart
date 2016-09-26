@@ -191,6 +191,8 @@ class IOSDevice extends Device {
     XcodeBuildResult buildResult = await buildXcodeProject(app: app, mode: mode, target: mainPath, buildForDevice: true);
     if (!buildResult.success) {
       printError('Could not build the precompiled application for the device.');
+      diagnoseXcodeBuildFailure(buildResult);
+      printError('');
       return new LaunchResult.failed();
     }
 
@@ -281,6 +283,9 @@ class IOSDevice extends Device {
 
     if (installationResult != 0) {
       printError('Could not install ${bundle.path} on $id.');
+      printError("Try launching XCode and selecting 'Product > Run' to fix the problem:");
+      printError("  open ios/Runner.xcodeproj");
+      printError('');
       return new LaunchResult.failed();
     }
 
@@ -426,8 +431,11 @@ class _IOSDeviceLogReader extends DeviceLogReader {
     });
   }
 
-  // Match for lines like "Runner[297] <Notice>: " in syslog.
-  static final RegExp _runnerRegex = new RegExp(r'Runner\[[\d]+\] <[A-Za-z]+>: ');
+  // Match for lines for the runner in syslog.
+  //
+  // iOS 9 format:  Runner[297] <Notice>:
+  // iOS 10 format: Runner(libsystem_asl.dylib)[297] <Notice>:
+  static final RegExp _runnerRegex = new RegExp(r'Runner[(.*)]\[[\d]+\] <[A-Za-z]+>: ');
 
   void _onLine(String line) {
     Match match = _runnerRegex.firstMatch(line);

@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter_tools/src/device.dart';
 import 'package:path/path.dart' as path;
 
 import '../android/android_device.dart';
@@ -29,14 +30,20 @@ class RefreshCommand extends FlutterCommand {
     );
   }
 
-  @override
-  bool get androidOnly => true;
+  Device device;
 
   @override
-  bool get requiresDevice => true;
+  Future<int> verifyThenRunCommand() async {
+    if (!commandValidator())
+      return 1;
+    device = await findTargetDevice(androidOnly: true);
+    if (device == null)
+      return 1;
+    return super.verifyThenRunCommand();
+  }
 
   @override
-  Future<int> runInProject() async {
+  Future<int> runCommand() async {
     Directory tempDir = await Directory.systemTemp.createTemp('flutter_tools');
     try {
       String snapshotPath = path.join(tempDir.path, 'snapshot_blob.bin');
@@ -49,8 +56,6 @@ class RefreshCommand extends FlutterCommand {
 
       Cache.releaseLockEarly();
 
-      AndroidDevice device = deviceForCommand;
-
       String activity = argResults['activity'];
       if (activity == null) {
         AndroidApk apk = applicationPackages.getPackageForPlatform(device.platform);
@@ -62,7 +67,9 @@ class RefreshCommand extends FlutterCommand {
         }
       }
 
-      bool success = await device.refreshSnapshot(activity, snapshotPath);
+      AndroidDevice androidDevice = device;
+
+      bool success = await androidDevice.refreshSnapshot(activity, snapshotPath);
       if (!success) {
         printError('Error refreshing snapshot on $device.');
         return 1;

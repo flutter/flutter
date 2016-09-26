@@ -20,7 +20,7 @@ export 'package:flutter/rendering.dart' show
     CustomClipper,
     CustomPainter,
     FixedColumnCountGridDelegate,
-    FlexDirection,
+    FlexFit,
     FlowDelegate,
     FlowPaintingContext,
     FractionalOffsetTween,
@@ -205,8 +205,8 @@ class BackdropFilter extends SingleChildRenderObjectWidget {
 ///
 /// See also:
 ///
-///  * [CustomPainter]
-///  * [Canvas]
+///  * [CustomPainter].
+///  * [Canvas].
 class CustomPaint extends SingleChildRenderObjectWidget {
   /// Creates a widget that delegates its painting.
   CustomPaint({ Key key, this.painter, this.foregroundPainter, Widget child })
@@ -432,6 +432,42 @@ class Transform extends SingleChildRenderObjectWidget {
   }
 }
 
+/// Scales and positions its child within itself according to [fit].
+class FittedBox extends SingleChildRenderObjectWidget {
+  /// Creates a widget that scales and positions its child within itself according to [fit].
+  ///
+  /// The [fit] and [alignment] arguments must not be null.
+  FittedBox({
+    Key key,
+    this.fit: ImageFit.contain,
+    this.alignment: FractionalOffset.center,
+    Widget child
+  }) : super(key: key, child: child) {
+    assert(fit != null);
+    assert(alignment != null && alignment.dx != null && alignment.dy != null);
+  }
+
+  /// How to inscribe the child into the space allocated during layout.
+  final ImageFit fit;
+
+  /// How to align the child within its parent's bounds.
+  ///
+  /// An alignment of (0.0, 0.0) aligns the child to the top-left corner of its
+  /// parent's bounds.  An alignment of (1.0, 0.5) aligns the child to the middle
+  /// of the right edge of its parent's bounds.
+  final FractionalOffset alignment;
+
+  @override
+  RenderFittedBox createRenderObject(BuildContext context) => new RenderFittedBox(fit: fit, alignment: alignment);
+
+  @override
+  void updateRenderObject(BuildContext context, RenderFittedBox renderObject) {
+    renderObject
+      ..fit = fit
+      ..alignment = alignment;
+  }
+}
+
 /// A widget that applies a translation expressed as a fraction of the box's
 /// size before painting its child.
 class FractionalTranslation extends SingleChildRenderObjectWidget {
@@ -540,11 +576,11 @@ class Padding extends SingleChildRenderObjectWidget {
 ///
 /// See also:
 ///
-///  * [CustomSingleChildLayout]
-///  * [Center] (which is the same as [Align] but with the [alignment] always
-///    set to [FractionalOffset.center])
-///  * [FractionallySizedBox] (which sizes its child based on a fraction of its own
-///    size and positions the child according to a [FractionalOffset] value)
+///  * [CustomSingleChildLayout].
+///  * [Center], which is the same as [Align] but with the [alignment] always
+///    set to [FractionalOffset.center].
+///  * [FractionallySizedBox], which sizes its child based on a fraction of its own
+///    size and positions the child according to a [FractionalOffset] value.
 class Align extends SingleChildRenderObjectWidget {
   /// Creates an alignment widget.
   ///
@@ -794,6 +830,7 @@ class ConstrainedBox extends SingleChildRenderObjectWidget {
     Widget child
   }) : super(key: key, child: child) {
     assert(constraints != null);
+    assert(constraints.debugAssertIsValid());
   }
 
   /// The additional constraints to impose on the child.
@@ -1516,6 +1553,19 @@ class Positioned extends ParentDataWidget<Stack> {
        bottom = null,
        super(key: key, child: child);
 
+  /// Creates a Positioned object with [left], [top], [right], and [bottom] set
+  /// to 0.0 unless a value for them is passed.
+  Positioned.fill({
+    Key key,
+    Widget child,
+    this.left: 0.0,
+    this.top: 0.0,
+    this.right: 0.0,
+    this.bottom: 0.0
+  }) : width = null,
+       height = null,
+       super(key: key, child: child);
+
   /// The distance that the child's left edge is inset from the left of the stack.
   ///
   /// Only two out of the three horizontal values ([left], [right], [width]) can be
@@ -1822,7 +1872,7 @@ class Flex extends MultiChildRenderObjectWidget {
   /// [CrossAxisAlignment.baseline], then [textBaseline] must not be null.
   Flex({
     Key key,
-    this.direction: FlexDirection.horizontal,
+    this.direction: Axis.horizontal,
     this.mainAxisAlignment: MainAxisAlignment.start,
     this.mainAxisSize: MainAxisSize.max,
     this.crossAxisAlignment: CrossAxisAlignment.center,
@@ -1837,20 +1887,21 @@ class Flex extends MultiChildRenderObjectWidget {
   }
 
   /// The direction to use as the main axis.
-  final FlexDirection direction;
+  final Axis direction;
 
   /// How the children should be placed along the main axis.
   final MainAxisAlignment mainAxisAlignment;
 
-  /// The limit that defines how much space is available along the main axis.
+  /// How much space space should be occupied in the main axis.
   ///
-  /// By default the size of this widget will be as big as the incoming
-  /// max constraint. In other words it will become as big as possible
-  /// along its main axis by growing [Flexible] children and inserting
-  /// space between children per the [mainAxisAlignment] parameter.
-  /// If mainAxisSize is [MainAxisSize.min] then this widget's size along
-  /// the main axis will be as small as possible. This version of the layout
-  /// is sometimes referred to as "shrink wrapping".
+  /// After allocating space to children, there might be some remaining free
+  /// space. This value controls whether to maximize or minimize the amount of
+  /// free space, subject to the incoming layout contraints.
+  ///
+  /// If some children have a non-zero flex factors (and none have a fit of
+  /// [FlexFit.loose]), they will expand to consume all the available space and
+  /// there will be no remaining free space to maximize or minimize, making this
+  /// value irrelevant to the final layout.
   final MainAxisSize mainAxisSize;
 
   /// How the children should be placed along the cross axis.
@@ -1901,7 +1952,7 @@ class Row extends Flex {
   }) : super(
     children: children,
     key: key,
-    direction: FlexDirection.horizontal,
+    direction: Axis.horizontal,
     mainAxisAlignment: mainAxisAlignment,
     mainAxisSize: mainAxisSize,
     crossAxisAlignment: crossAxisAlignment,
@@ -1929,7 +1980,7 @@ class Column extends Flex {
   }) : super(
     children: children,
     key: key,
-    direction: FlexDirection.vertical,
+    direction: Axis.vertical,
     mainAxisAlignment: mainAxisAlignment,
     mainAxisSize: mainAxisSize,
     crossAxisAlignment: crossAxisAlignment,
@@ -1948,23 +1999,44 @@ class Flexible extends ParentDataWidget<Flex> {
   Flexible({
     Key key,
     this.flex: 1,
+    this.fit: FlexFit.tight,
     @required Widget child
   }) : super(key: key, child: child);
 
   /// The flex factor to use for this child
   ///
-  /// If null, the child is inflexible and determines its own size. If non-null,
-  /// the child is flexible and its extent in the main axis is determined by
-  /// dividing the free space (after placing the inflexible children)
-  /// according to the flex factors of the flexible children.
+  /// If null or zero, the child is inflexible and determines its own size. If
+  /// non-zero, the amount of space the child's can occupy in the main axis is
+  /// determined by dividing the free space (after placing the inflexible
+  /// children) according to the flex factors of the flexible children.
   final int flex;
+
+  /// How a flexible child is inscribed into the available space.
+  ///
+  /// If [flex] is non-zero, the [fit] determines whether the child fills the
+  /// space the parent makes available during layout. If the fit is
+  /// [FlexFit.tight], the child is required to fill the available space. If the
+  /// fit is [FlexFit.loose], the child can be at most as large as the available
+  /// space (but is allowed to be smaller).
+  final FlexFit fit;
 
   @override
   void applyParentData(RenderObject renderObject) {
     assert(renderObject.parentData is FlexParentData);
     final FlexParentData parentData = renderObject.parentData;
+    bool needsLayout = false;
+
     if (parentData.flex != flex) {
       parentData.flex = flex;
+      needsLayout = true;
+    }
+
+    if (parentData.fit != fit) {
+      parentData.fit = fit;
+      needsLayout = true;
+    }
+
+    if (needsLayout) {
       AbstractNode targetParent = renderObject.parent;
       if (targetParent is RenderObject)
         targetParent.markNeedsLayout();
@@ -2092,11 +2164,13 @@ class RichText extends LeafRenderObjectWidget {
     @required this.text,
     this.textAlign,
     this.softWrap: true,
-    this.overflow: TextOverflow.clip
+    this.overflow: TextOverflow.clip,
+    this.textScaleFactor: 1.0
   }) : super(key: key) {
     assert(text != null);
     assert(softWrap != null);
     assert(overflow != null);
+    assert(textScaleFactor != null);
   }
 
   /// The text to display in this widget.
@@ -2113,12 +2187,19 @@ class RichText extends LeafRenderObjectWidget {
   /// How visual overflow should be handled.
   final TextOverflow overflow;
 
+  /// The number of font pixels for each logical pixel.
+  ///
+  /// For example, if the text scale factor is 1.5, text will be 50% larger than
+  /// the specified font size.
+  final double textScaleFactor;
+
   @override
   RenderParagraph createRenderObject(BuildContext context) {
     return new RenderParagraph(text,
       textAlign: textAlign,
       softWrap: softWrap,
-      overflow: overflow
+      overflow: overflow,
+      textScaleFactor: textScaleFactor
     );
   }
 
@@ -2128,178 +2209,8 @@ class RichText extends LeafRenderObjectWidget {
       ..text = text
       ..textAlign = textAlign
       ..softWrap = softWrap
-      ..overflow = overflow;
-  }
-}
-
-/// The text style to apply to descendant [Text] widgets without explicit style.
-class DefaultTextStyle extends InheritedWidget {
-  /// Creates a default text style for the given subtree.
-  ///
-  /// Consider using [DefaultTextStyle.inherit] to inherit styling information
-  /// from a the current default text style for a given [BuildContext].
-  DefaultTextStyle({
-    Key key,
-    @required this.style,
-    this.textAlign,
-    this.softWrap: true,
-    this.overflow: TextOverflow.clip,
-    Widget child
-  }) : super(key: key, child: child) {
-    assert(style != null);
-    assert(softWrap != null);
-    assert(overflow != null);
-    assert(child != null);
-  }
-
-  /// A const-constructible default text style that provides fallback values.
-  ///
-  /// Returned from [of] when the given [BuildContext] doesn't have an enclosing default text style.
-  const DefaultTextStyle.fallback()
-    : style = const TextStyle(),
-      textAlign = null,
-      softWrap = true,
-      overflow = TextOverflow.clip;
-
-  /// Creates a default text style that inherits from the given [BuildContext].
-  ///
-  /// The given [style] is merged with the [style] from the default text style
-  /// for the given [BuildContext] and, if non-null, the given [textAlign]
-  /// replaces the [textAlign] from the default text style for the given
-  /// [BuildContext].
-  factory DefaultTextStyle.inherit({
-    Key key,
-    @required BuildContext context,
-    TextStyle style,
-    TextAlign textAlign,
-    bool softWrap,
-    TextOverflow overflow,
-    Widget child
-  }) {
-    assert(context != null);
-    assert(child != null);
-    DefaultTextStyle parent = DefaultTextStyle.of(context);
-    return new DefaultTextStyle(
-      key: key,
-      style: parent.style.merge(style),
-      textAlign: textAlign ?? parent.textAlign,
-      softWrap: softWrap ?? parent.softWrap,
-      overflow: overflow ?? parent.overflow,
-      child: child
-    );
-  }
-
-  /// The text style to apply.
-  final TextStyle style;
-
-  /// How the text should be aligned horizontally.
-  final TextAlign textAlign;
-
-  /// Whether the text should break at soft line breaks.
-  ///
-  /// If false, the glyphs in the text will be positioned as if there was unlimited horizontal space.
-  final bool softWrap;
-
-  /// How visual overflow should be handled.
-  final TextOverflow overflow;
-
-  /// The closest instance of this class that encloses the given context.
-  ///
-  /// If no such instance exists, returns an instance created by
-  /// [DefaultTextStyle.fallback], which contains fallback values.
-  static DefaultTextStyle of(BuildContext context) {
-    return context.inheritFromWidgetOfExactType(DefaultTextStyle) ?? const DefaultTextStyle.fallback();
-  }
-
-  @override
-  bool updateShouldNotify(DefaultTextStyle old) => style != old.style;
-
-  @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    '$style'.split('\n').forEach(description.add);
-  }
-}
-
-/// A run of text with a single style.
-///
-/// The [Text] widget displays a string of text with single style. The string
-/// might break across multiple lines or might all be displayed on the same line
-/// depending on the layout constraints.
-///
-/// The [style] argument is optional. When omitted, the text will use the style
-/// from the closest enclosing [DefaultTextStyle]. If the given style's
-/// [TextStyle.inherit] property is true, the given style will be merged with
-/// the closest enclosing [DefaultTextStyle]. This merging behavior is useful,
-/// for example, to make the text bold while using the default font family and
-/// size.
-///
-/// To display text that uses multiple styles (e.g., a paragraph with some bold
-/// words), use [RichText].
-///
-/// See also:
-///
-///  * [RichText]
-///  * [DefaultTextStyle]
-class Text extends StatelessWidget {
-  /// Creates a text widget.
-  ///
-  /// If the [style] argument is null, the text will use the style from the
-  /// closest enclosing [DefaultTextStyle].
-  Text(this.data, {
-    Key key,
-    this.style,
-    this.textAlign,
-    this.softWrap,
-    this.overflow
-  }) : super(key: key) {
-    assert(data != null);
-  }
-
-  /// The text to display.
-  final String data;
-
-  /// If non-null, the style to use for this text.
-  ///
-  /// If the style's "inherit" property is true, the style will be merged with
-  /// the closest enclosing [DefaultTextStyle]. Otherwise, the style will
-  /// replace the closest enclosing [DefaultTextStyle].
-  final TextStyle style;
-
-  /// How the text should be aligned horizontally.
-  final TextAlign textAlign;
-
-  /// Whether the text should break at soft line breaks.
-  ///
-  /// If false, the glyphs in the text will be positioned as if there was unlimited horizontal space.
-  final bool softWrap;
-
-  /// How visual overflow should be handled.
-  final TextOverflow overflow;
-
-  @override
-  Widget build(BuildContext context) {
-    DefaultTextStyle defaultTextStyle = DefaultTextStyle.of(context);
-    TextStyle effectiveTextStyle = style;
-    if (style == null || style.inherit)
-      effectiveTextStyle = defaultTextStyle.style.merge(style);
-    return new RichText(
-      textAlign: textAlign ?? defaultTextStyle.textAlign,
-      softWrap: softWrap ?? defaultTextStyle.softWrap,
-      overflow: overflow ?? defaultTextStyle.overflow,
-      text: new TextSpan(
-        style: effectiveTextStyle,
-        text: data
-      )
-    );
-  }
-
-  @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('"$data"');
-    if (style != null)
-      '$style'.split('\n').forEach(description.add);
+      ..overflow = overflow
+      ..textScaleFactor = textScaleFactor;
   }
 }
 
@@ -2352,7 +2263,7 @@ class RawImage extends LeafRenderObjectWidget {
   /// If non-null, apply this color filter to the image before painting.
   final Color color;
 
-  /// How to inscribe the image into the place allocated during layout.
+  /// How to inscribe the image into the space allocated during layout.
   ///
   /// The default varies based on the other fields. See the discussion at
   /// [paintImage].

@@ -10,12 +10,12 @@ import 'package:analyzer/file_system/physical_file_system.dart';
 import 'package:analyzer/plugin/options.dart';
 import 'package:analyzer/source/analysis_options_provider.dart';
 import 'package:analyzer/source/error_processor.dart';
+import 'package:analyzer/source/package_map_resolver.dart';
 import 'package:analyzer/src/context/builder.dart'; // ignore: implementation_imports
 import 'package:analyzer/src/dart/sdk/sdk.dart'; // ignore: implementation_imports
 import 'package:analyzer/src/generated/engine.dart'; // ignore: implementation_imports
 import 'package:analyzer/src/generated/error.dart'; // ignore: implementation_imports
 import 'package:analyzer/src/generated/java_io.dart'; // ignore: implementation_imports
-import 'package:analyzer/src/generated/sdk_io.dart'; // ignore: implementation_imports
 import 'package:analyzer/src/generated/source.dart'; // ignore: implementation_imports
 import 'package:analyzer/src/generated/source_io.dart'; // ignore: implementation_imports
 import 'package:analyzer/src/task/options.dart'; // ignore: implementation_imports
@@ -32,6 +32,8 @@ class AnalysisDriver {
 
   AnalysisOptionsProvider analysisOptionsProvider =
       new AnalysisOptionsProvider();
+
+  file_system.ResourceProvider resourceProvider = PhysicalResourceProvider.INSTANCE;
 
   AnalysisContext context;
 
@@ -111,18 +113,23 @@ class AnalysisDriver {
       resolvers.add(new DartUriResolver(sdk));
     } else {
       // Fall back to a standard SDK if no embedder is found.
-      DirectoryBasedDartSdk sdk = new DirectoryBasedDartSdk(new JavaFile(sdkDir));
+      FolderBasedDartSdk sdk = new FolderBasedDartSdk(resourceProvider,
+          PhysicalResourceProvider.INSTANCE.getFolder(sdkDir));
       sdk.analysisOptions = context.analysisOptions;
 
       resolvers.add(new DartUriResolver(sdk));
     }
 
     if (options.packageRootPath != null) {
-      JavaFile packageDirectory = new JavaFile(options.packageRootPath);
-      resolvers.add(new PackageUriResolver(<JavaFile>[packageDirectory]));
+      ContextBuilder builder = new ContextBuilder(resourceProvider, null, null);
+      builder.defaultPackagesDirectoryPath = options.packageRootPath;
+      PackageMapUriResolver packageUriResolver = new PackageMapUriResolver(resourceProvider,
+          builder.convertPackagesToMap(builder.createPackageMap('')));
+
+      resolvers.add(packageUriResolver);
     }
 
-    resolvers.add(new file_system.ResourceUriResolver(PhysicalResourceProvider.INSTANCE));
+    resolvers.add(new file_system.ResourceUriResolver(resourceProvider));
     return resolvers;
   }
 

@@ -45,10 +45,10 @@ import 'framework.dart';
 ///
 /// See also:
 ///
-///  * [Overlay]
-///  * [OverlayState]
-///  * [WidgetsApp]
-///  * [MaterialApp]
+///  * [Overlay].
+///  * [OverlayState].
+///  * [WidgetsApp].
+///  * [MaterialApp].
 class OverlayEntry {
   /// Creates an overlay entry.
   ///
@@ -167,10 +167,10 @@ class _OverlayEntryState extends State<_OverlayEntry> {
 ///
 /// See also:
 ///
-///  * [OverlayEntry]
-///  * [OverlayState]
-///  * [WidgetsApp]
-///  * [MaterialApp]
+///  * [OverlayEntry].
+///  * [OverlayState].
+///  * [WidgetsApp].
+///  * [MaterialApp].
 class Overlay extends StatefulWidget {
   /// Creates an overlay.
   ///
@@ -438,9 +438,10 @@ class _TheatreElement extends RenderObjectElement {
     if (child == _onstage) {
       _onstage = null;
     } else {
+      assert(_offstage.contains(child));
+      assert(!_detachedOffstageChildren.contains(child));
       _detachedOffstageChildren.add(child);
     }
-    deactivateChild(child);
     return true;
   }
 

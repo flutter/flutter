@@ -1,6 +1,6 @@
 ## Steps to Reproduce
 
-Please tell us what you were doing and what went wrong.
+Please tell us what you were doing and what went wrong. If you are running flutter tools from the command line, please try adding the -v or --verbose to gather more information.
 
 ## Flutter Doctor
 

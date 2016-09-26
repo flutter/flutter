@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:args/command_runner.dart';
+import 'package:meta/meta.dart';
 
 import '../application_package.dart';
 import '../build_info.dart';
@@ -26,15 +27,6 @@ abstract class FlutterCommand extends Command {
 
   @override
   FlutterCommandRunner get runner => super.runner;
-
-  /// Whether this command needs to be run from the root of a project.
-  bool get requiresProjectRoot => true;
-
-  /// Whether this command requires a (single) Flutter target device to be connected.
-  bool get requiresDevice => false;
-
-  /// Whether this command only applies to Android devices.
-  bool get androidOnly => false;
 
   /// Whether this command uses the 'target' option.
   bool _usesTargetOption = false;
@@ -100,7 +92,7 @@ abstract class FlutterCommand extends Command {
     return _defaultBuildMode;
   }
 
-  void _setupApplicationPackages() {
+  void setupApplicationPackages() {
     applicationPackages ??= new ApplicationPackageStore();
   }
 
@@ -108,12 +100,21 @@ abstract class FlutterCommand extends Command {
   /// tracking of the command.
   String get usagePath => name;
 
+  /// Runs this command.
+  ///
+  /// Rather than overriding this method, subclasses should override
+  /// [verifyThenRunCommand] to perform any verification
+  /// and [runCommand] to execute the command
+  /// so that this method can record and report the overall time to analytics.
   @override
   Future<int> run() {
     Stopwatch stopwatch = new Stopwatch()..start();
     UsageTimer analyticsTimer = usagePath == null ? null : flutterUsage.startTimer(name);
 
-    return _run().then((int exitCode) {
+    if (flutterUsage.isFirstRun)
+      flutterUsage.printUsage();
+
+    return verifyThenRunCommand().then((int exitCode) {
       int ms = stopwatch.elapsedMilliseconds;
       printTrace("'flutter $name' took ${ms}ms; exiting with code $exitCode.");
       analyticsTimer?.finish();
@@ -121,55 +122,15 @@ abstract class FlutterCommand extends Command {
     });
   }
 
-  Future<int> _run() async {
-    if (requiresProjectRoot && !commandValidator())
-      return 1;
-
-    // Ensure at least one toolchain is installed.
-    if (requiresDevice && !doctor.canLaunchAnything) {
-      printError("Unable to locate a development device; please run 'flutter doctor' "
-        "for information about installing additional components.");
-      return 1;
-    }
-
-    // Validate devices.
-    if (requiresDevice) {
-      List<Device> devices = await deviceManager.getDevices();
-
-      if (devices.isEmpty && deviceManager.hasSpecifiedDeviceId) {
-        printStatus("No devices found with name or id "
-            "matching '${deviceManager.specifiedDeviceId}'");
-        return 1;
-      } else if (devices.isEmpty) {
-        printStatus('No connected devices.');
-        return 1;
-      }
-
-      devices = devices.where((Device device) => device.isSupported()).toList();
-
-      if (androidOnly)
-        devices = devices.where((Device device) => device.platform == TargetPlatform.android_arm).toList();
-
-      if (devices.isEmpty) {
-        printStatus('No supported devices connected.');
-        return 1;
-      } else if (devices.length > 1) {
-        if (deviceManager.hasSpecifiedDeviceId) {
-          printStatus("Found ${devices.length} devices with name or id matching "
-              "'${deviceManager.specifiedDeviceId}':");
-        } else {
-          printStatus("More than one device connected; please specify a device with "
-              "the '-d <deviceId>' flag.");
-          devices = await deviceManager.getAllConnectedDevices();
-        }
-        printStatus('');
-        Device.printDevices(devices);
-        return 1;
-      } else {
-        _deviceForCommand = devices.single;
-      }
-    }
-
+  /// Perform validation then call [runCommand] to execute the command.
+  /// Return a [Future] that completes with an exit code
+  /// indicating whether execution was successful.
+  ///
+  /// Subclasses should override this method to perform verification
+  /// then call this method to execute the command
+  /// rather than calling [runCommand] directly.
+  @mustCallSuper
+  Future<int> verifyThenRunCommand() async {
     // Populate the cache. We call this before pub get below so that the sky_engine
     // package is available in the flutter cache for pub to find.
     await cache.updateAll();
@@ -180,16 +141,66 @@ abstract class FlutterCommand extends Command {
         return exitCode;
     }
 
-    if (flutterUsage.isFirstRun)
-      flutterUsage.printUsage();
-
-    _setupApplicationPackages();
+    setupApplicationPackages();
 
     String commandPath = usagePath;
     if (commandPath != null)
       flutterUsage.sendCommand(usagePath);
 
-    return await runInProject();
+    return await runCommand();
+  }
+
+  /// Subclasses must implement this to execute the command.
+  Future<int> runCommand();
+
+  /// Find and return the target [Device] based upon currently connected
+  /// devices and criteria entered by the user on the command line.
+  /// If a device cannot be found that meets specified criteria,
+  /// then print an error message and return `null`.
+  Future<Device> findTargetDevice({bool androidOnly: false}) async {
+    if (!doctor.canLaunchAnything) {
+      printError("Unable to locate a development device; please run 'flutter doctor' "
+          "for information about installing additional components.");
+      return null;
+    }
+
+    List<Device> devices = await deviceManager.getDevices();
+
+    if (devices.isEmpty && deviceManager.hasSpecifiedDeviceId) {
+      printStatus("No devices found with name or id "
+          "matching '${deviceManager.specifiedDeviceId}'");
+      return null;
+    } else if (devices.isEmpty) {
+      printNoConnectedDevices();
+      return null;
+    }
+
+    devices = devices.where((Device device) => device.isSupported()).toList();
+
+    if (androidOnly)
+      devices = devices.where((Device device) => device.platform == TargetPlatform.android_arm).toList();
+
+    if (devices.isEmpty) {
+      printStatus('No supported devices connected.');
+      return null;
+    } else if (devices.length > 1) {
+      if (deviceManager.hasSpecifiedDeviceId) {
+        printStatus("Found ${devices.length} devices with name or id matching "
+            "'${deviceManager.specifiedDeviceId}':");
+      } else {
+        printStatus("More than one device connected; please specify a device with "
+            "the '-d <deviceId>' flag.");
+        devices = await deviceManager.getAllConnectedDevices();
+      }
+      printStatus('');
+      Device.printDevices(devices);
+      return null;
+    }
+    return devices.single;
+  }
+
+  void printNoConnectedDevices() {
+    printStatus('No connected devices.');
   }
 
   // This is a field so that you can modify the value for testing.
@@ -225,13 +236,6 @@ abstract class FlutterCommand extends Command {
 
     return true;
   }
-
-  Future<int> runInProject();
-
-  // This is calculated in run() if the command has [requiresDevice] specified.
-  Device _deviceForCommand;
-
-  Device get deviceForCommand => _deviceForCommand;
 
   ApplicationPackageStore applicationPackages;
 }

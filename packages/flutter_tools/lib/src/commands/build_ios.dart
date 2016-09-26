@@ -38,11 +38,11 @@ class BuildIOSCommand extends BuildSubCommand {
   final String description = 'Build an iOS application bundle (Mac OS X host only).';
 
   @override
-  Future<int> runInProject() async {
+  Future<int> runCommand() async {
     bool forSimulator = argResults['simulator'];
     defaultBuildMode = forSimulator ? BuildMode.debug : BuildMode.release;
 
-    await super.runInProject();
+    await super.runCommand();
     if (getCurrentHostPlatform() != HostPlatform.darwin_x64) {
       printError('Building for iOS is only supported on the Mac.');
       return 1;
@@ -82,6 +82,8 @@ class BuildIOSCommand extends BuildSubCommand {
 
     if (!result.success) {
       printError('Encountered error while building for $logTarget.');
+      diagnoseXcodeBuildFailure(result);
+      printError('');
       return 1;
     }
 

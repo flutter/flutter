@@ -301,6 +301,8 @@ List<TextPainter> _initPainters(TextTheme textTheme, List<String> labels) {
   List<TextPainter> painters = new List<TextPainter>(labels.length);
   for (int i = 0; i < painters.length; ++i) {
     String label = labels[i];
+    // TODO(abarth): Handle textScaleFactor.
+    // https://github.com/flutter/flutter/issues/5939
     painters[i] = new TextPainter(
       text: new TextSpan(style: style, text: label)
     )..layout();
@@ -424,6 +426,12 @@ class _DialState extends State<_Dial> {
   void didUpdateConfig(_Dial oldConfig) {
     if (config.mode != oldConfig.mode && !_dragging)
       _animateTo(_getThetaForTime(config.selectedTime));
+  }
+
+  @override
+  void dispose() {
+    _thetaController.dispose();
+    super.dispose();
   }
 
   Tween<double> _thetaTween;

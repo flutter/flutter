@@ -10,7 +10,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:meta/meta.dart';
-import 'package:mojo_services/mojo/gfx/composition/scene_token.mojom.dart' as mojom;
+import 'package:flutter_services/mojo/gfx/composition/scene_token.dart' as mojom;
 import 'package:vector_math/vector_math_64.dart';
 
 import 'debug.dart';
@@ -789,7 +789,11 @@ class PipelineOwner {
   /// Typically created by the binding (e.g., [RendererBinding]), but can be
   /// created separately from the binding to drive off-screen render objects
   /// through the rendering pipeline.
-  PipelineOwner({ this.onNeedVisualUpdate });
+  PipelineOwner({
+    this.onNeedVisualUpdate,
+    this.onScheduleInitialSemantics,
+    this.onClearSemantics,
+  });
 
   /// Called when a render object associated with this pipeline owner wishes to
   /// update its visual appearance.
@@ -800,6 +804,21 @@ class PipelineOwner {
   /// duplicate calls quickly.
   final VoidCallback onNeedVisualUpdate;
 
+  /// Called when [addSemanticsListener] is called when there was no
+  /// [SemanticsOwner] present, to request that the
+  /// [RenderObject.scheduleInitialSemantics] method be called on the
+  /// appropriate object(s).
+  ///
+  /// For example, the [RendererBinding] calls it on the [RenderView] object.
+  final VoidCallback onScheduleInitialSemantics;
+
+  /// Called when the last [SemanticsListener] is removed from the
+  /// [SemanticsOwner], to request that the [RenderObject.clearSemantics] method
+  /// be called on the appropriate object(s).
+  ///
+  /// For example, the [RendererBinding] calls it on the [RenderView] object.
+  final VoidCallback onClearSemantics;
+
   /// Calls [onNeedVisualUpdate] if [onNeedVisualUpdate] is not null.
   ///
   /// Used to notify the pipeline owner that an associated render object wishes
@@ -809,15 +828,17 @@ class PipelineOwner {
       onNeedVisualUpdate();
   }
 
-  /// The unique render object managed by this pipeline that has no parent.
-  RenderObject get rootRenderObject => _rootRenderObject;
-  RenderObject _rootRenderObject;
-  set rootRenderObject(RenderObject value) {
-    if (_rootRenderObject == value)
+  /// The unique object managed by this pipeline that has no parent.
+  ///
+  /// This object does not have to be a [RenderObject].
+  AbstractNode get rootNode => _rootNode;
+  AbstractNode _rootNode;
+  set rootNode(AbstractNode value) {
+    if (_rootNode == value)
       return;
-    _rootRenderObject?.detach();
-    _rootRenderObject = value;
-    _rootRenderObject?.attach(this);
+    _rootNode?.detach();
+    _rootNode = value;
+    _rootNode?.attach(this);
   }
 
   /// Calls the given listener whenever the semantics of the render tree change.
@@ -829,7 +850,8 @@ class PipelineOwner {
         initialListener: listener,
         onLastListenerRemoved: _handleLastSemanticsListenerRemoved
       );
-      _rootRenderObject.scheduleInitialSemantics();
+      if (onScheduleInitialSemantics != null)
+        onScheduleInitialSemantics();
     } else {
       _semanticsOwner.addListener(listener);
     }
@@ -839,7 +861,8 @@ class PipelineOwner {
 
   void _handleLastSemanticsListenerRemoved() {
     assert(!_debugDoingSemantics);
-    rootRenderObject._clearSemantics();
+    if (onClearSemantics != null)
+      onClearSemantics();
     _semanticsOwner.dispose();
     _semanticsOwner = null;
   }
@@ -950,6 +973,18 @@ class PipelineOwner {
     }
   }
 
+  /// The object that is managing semantics for this pipeline owner, if any.
+  ///
+  /// An owner is created by [addSemanticsListener] the first time a listener is
+  /// added.
+  ///
+  /// The owner is valid for as long as there are listeners. Once the last
+  /// listener is removed (by calling [SemanticsOwner.removeListener] on the
+  /// [semanticsOwner]), the [semanticsOwner] field will revert to null, and the
+  /// previous owner will be disposed.
+  ///
+  /// When [semanticsOwner] is null, the [PipelineOwner] skips all steps
+  /// relating to semantics.
   SemanticsOwner get semanticsOwner => _semanticsOwner;
   SemanticsOwner _semanticsOwner;
   bool _debugDoingSemantics = false;
@@ -980,16 +1015,6 @@ class PipelineOwner {
       Timeline.finishSync();
     }
     _semanticsOwner.sendSemanticsTree();
-  }
-
-  /// Cause the entire render tree rooted at [rootRenderObject] to be entirely
-  /// reprocessed. This is used by development tools when the application code
-  /// has changed, to cause the rendering tree to pick up any changed
-  /// implementations.
-  ///
-  /// This is expensive and should not be called except during development.
-  void reassemble() {
-    _rootRenderObject?._reassemble();
   }
 }
 
@@ -1026,14 +1051,25 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     _performLayout = performLayout;
   }
 
-  void _reassemble() {
+  /// Cause the entire subtree rooted at the given [RenderObject] to be marked
+  /// dirty for layout, paint, etc. This is called by the [RendererBinding] in
+  /// response to the `ext.flutter.reassemble` hook, which is used by
+  /// development tools when the application code has changed, to cause the
+  /// widget tree to pick up any changed implementations.
+  ///
+  /// This is expensive and should not be called except during development.
+  ///
+  /// See also:
+  ///
+  /// * [BindingBase.reassembleApplication].
+  void reassemble() {
     _performLayout = performLayout;
     markNeedsLayout();
     markNeedsCompositingBitsUpdate();
     markNeedsPaint();
     markNeedsSemanticsUpdate();
     visitChildren((RenderObject child) {
-      child._reassemble();
+      child.reassemble();
     });
   }
 
@@ -1337,7 +1373,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       if (owner != null) {
         assert(() {
           if (debugPrintMarkNeedsLayoutStacks)
-            debugPrintStack();
+            debugPrintStack(label: 'markNeedsLayout() called for $this');
           return true;
         });
         owner._nodesNeedingLayout.add(this);
@@ -1478,12 +1514,13 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     ));
     assert(!_debugDoingThisResize);
     assert(!_debugDoingThisLayout);
-    final RenderObject parent = this.parent;
     RenderObject relayoutBoundary;
-    if (!parentUsesSize || sizedByParent || constraints.isTight || parent is! RenderObject)
+    if (!parentUsesSize || sizedByParent || constraints.isTight || parent is! RenderObject) {
       relayoutBoundary = this;
-    else
+    } else {
+      final RenderObject parent = this.parent;
       relayoutBoundary = parent._relayoutBoundary;
+    }
     assert(parent == this.parent);
     assert(() {
       _debugCanParentUseSize = parentUsesSize;
@@ -1790,7 +1827,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     if (isRepaintBoundary) {
       assert(() {
         if (debugPrintMarkNeedsPaintStacks)
-          debugPrintStack();
+          debugPrintStack(label: 'markNeedsPaint() called for $this');
         return true;
       });
       // If we always have our own layer, then we can just repaint
@@ -1980,12 +2017,17 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   }
 
   /// Removes all semantics from this render object and its descendants.
-  void _clearSemantics() {
+  ///
+  /// Should only be called in response to the [PipelineOwner] calling its
+  /// [PipelineOwner.onClearSemantics] callback.
+  ///
+  /// Should only be called on objects whose [parent] is not a [RenderObject].
+  void clearSemantics() {
     _needsSemanticsUpdate = true;
     _needsSemanticsGeometryUpdate = true;
     _semantics = null;
     visitChildren((RenderObject child) {
-      child._clearSemantics();
+      child.clearSemantics();
     });
   }
 

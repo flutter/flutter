@@ -62,6 +62,10 @@ class MockDeviceLogReader extends DeviceLogReader {
   Stream<String> get logLines => _linesController.stream;
 
   void addLine(String line) => _linesController.add(line);
+
+  void dispose() {
+    _linesController.close();
+  }
 }
 
 void applyMocksToCommand(FlutterCommand command) {

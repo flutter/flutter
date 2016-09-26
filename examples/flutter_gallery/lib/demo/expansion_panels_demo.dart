@@ -10,15 +10,6 @@ enum _Location {
   Bermuda
 }
 
-const TextStyle text54 = const TextStyle(
-  color: Colors.black54,
-  fontSize: 15.0
-);
-const TextStyle text87 = const TextStyle(
-  color: Colors.black87,
-  fontSize: 15.0
-);
-
 typedef Widget DemoItemBodyBuilder(DemoItem<dynamic> item);
 typedef String ValueToString<T>(T value);
 
@@ -49,13 +40,16 @@ class DualHeaderWithHint extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final TextTheme textTheme = theme.textTheme;
+
     return new Row(
       children: <Widget>[
         new Flexible(
           flex: 2,
           child: new Container(
             margin: const EdgeInsets.only(left: 24.0),
-            child: new Text(name, style: text87)
+            child: new Text(name, style: textTheme.body1.copyWith(fontSize: 15.0))
           )
         ),
         new Flexible(
@@ -63,8 +57,8 @@ class DualHeaderWithHint extends StatelessWidget {
           child: new Container(
             margin: const EdgeInsets.only(left: 24.0),
             child: _crossFade(
-              new Text(value, style: text54),
-              new Text(hint, style: text54),
+              new Text(value, style: textTheme.caption.copyWith(fontSize: 15.0)),
+              new Text(hint, style: textTheme.caption.copyWith(fontSize: 15.0)),
               showHint
             )
           )
@@ -89,6 +83,9 @@ class CollapsibleBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final TextTheme textTheme = theme.textTheme;
+
     return new Column(
       children: <Widget>[
         new Container(
@@ -99,7 +96,7 @@ class CollapsibleBody extends StatelessWidget {
           ) - margin,
           child: new Center(
             child: new DefaultTextStyle(
-              style: text54,
+              style: textTheme.caption.copyWith(fontSize: 15.0),
               child: child
             )
           )
@@ -185,7 +182,7 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
         value: 'Caribbean cruise',
         hint: 'Change trip name',
         valueToString: (String value) => value,
-        builder: (DemoItem<String> item) {
+        builder: (DemoItem<String> item) { // ignore: argument_type_not_assignable, https://github.com/flutter/flutter/issues/5771
           void close() {
             setState(() {
               item.isExpanded = false;
@@ -216,7 +213,7 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
         value: _Location.Bahamas,
         hint: 'Select location',
         valueToString: (_Location location) => location.toString().split(".")[1],
-        builder: (DemoItem<_Location> item) {
+        builder: (DemoItem<_Location> item) { // ignore: argument_type_not_assignable, https://github.com/flutter/flutter/issues/5771
           void close() {
             setState(() {
               item.isExpanded = false;
@@ -278,7 +275,7 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
         value: 80.0,
         hint: 'Select amount of sun',
         valueToString: (double amount) => '${amount.round()}',
-        builder: (DemoItem<double> item) {
+        builder: (DemoItem<double> item) { // ignore: argument_type_not_assignable, https://github.com/flutter/flutter/issues/5771
           void close() {
             setState(() {
               item.isExpanded = false;

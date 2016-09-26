@@ -46,8 +46,10 @@ set scrollOffset(double value) {
   scrollableState.scrollTo(value);
 }
 
-Future<Null> fling(double velocity) {
-  return scrollableState.fling(velocity);
+Completer<Null> fling(double velocity) {
+  Completer<Null> completer = new Completer<Null>();
+  scrollableState.fling(velocity).whenComplete(completer.complete);
+  return completer;
 }
 
 void main() {
@@ -60,49 +62,55 @@ void main() {
 
     Duration dt = const Duration(seconds: 2);
 
-    fling(1000.0);
+    Completer<Null> completer = fling(1000.0);
+    expect(completer.isCompleted, isFalse);
     await tester.pump(); // Start the scheduler at 0.0
     await tester.pump(dt);
     expect(scrollOffset, closeTo(200.0, 1.0));
+    expect(completer.isCompleted, isTrue);
 
     scrollOffset = 0.0;
     await tester.pump();
     expect(scrollOffset, 0.0);
 
-    fling(2000.0);
+    completer = fling(2000.0);
+    expect(completer.isCompleted, isFalse);
     await tester.pump();
     await tester.pump(dt);
     expect(scrollOffset, closeTo(400.0, 1.0));
+    expect(completer.isCompleted, isTrue);
 
     scrollOffset = 400.0;
     await tester.pump();
     expect(scrollOffset, 400.0);
 
-    fling(-800.0);
+    completer = fling(-800.0);
+    expect(completer.isCompleted, isFalse);
     await tester.pump();
     await tester.pump(dt);
     expect(scrollOffset, closeTo(0.0, 1.0));
+    expect(completer.isCompleted, isTrue);
 
     scrollOffset = 800.0;
     await tester.pump();
     expect(scrollOffset, 800.0);
 
-    fling(-2000.0);
+    completer = fling(-2000.0);
+    expect(completer.isCompleted, isFalse);
     await tester.pump();
     await tester.pump(dt);
     expect(scrollOffset, closeTo(200.0, 1.0));
+    expect(completer.isCompleted, isTrue);
 
     scrollOffset = 800.0;
     await tester.pump();
     expect(scrollOffset, 800.0);
 
-    bool completed = false;
-    fling(-2000.0).then((_) {
-      completed = true;
-      expectSync(scrollOffset, closeTo(200.0, 1.0));
-    });
+    completer = fling(-2000.0);
+    expect(completer.isCompleted, isFalse);
     await tester.pump();
     await tester.pump(dt);
-    expect(completed, true);
+    expect(completer.isCompleted, isTrue);
+    expectSync(scrollOffset, closeTo(200.0, 1.0));
   });
 }

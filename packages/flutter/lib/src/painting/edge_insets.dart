@@ -41,8 +41,11 @@ class EdgeInsets {
     : left = horizontal, top = vertical, right = horizontal, bottom = vertical;
 
   /// Creates insets that match the given window padding.
-  EdgeInsets.fromWindowPadding(ui.WindowPadding padding)
-    : left = padding.left, top = padding.top, right = padding.right, bottom = padding.bottom;
+  EdgeInsets.fromWindowPadding(ui.WindowPadding padding, double devicePixelRatio)
+    : left = padding.left / devicePixelRatio,
+      top = padding.top / devicePixelRatio,
+      right = padding.right / devicePixelRatio,
+      bottom = padding.bottom / devicePixelRatio;
 
   /// The offset from the left.
   final double left;

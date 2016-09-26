@@ -11,9 +11,7 @@ import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/http.dart' as http;
 import 'package:mojo/core.dart' as core;
-import 'package:mojo_services/mojo/asset_bundle/asset_bundle.mojom.dart' as mojom;
-
-import 'shell.dart';
+import 'package:flutter_services/mojo/asset_bundle/asset_bundle.dart' as mojom;
 
 /// A collection of resources used by the application.
 ///
@@ -86,12 +84,18 @@ class NetworkAssetBundle extends AssetBundle {
 
   @override
   Future<core.MojoDataPipeConsumer> load(String key) async {
-    return await http.readDataPipe(_urlFromKey(key));
+    http.Response response = await http.get(_urlFromKey(key));
+    if (response.statusCode == 200)
+      return null;
+    core.MojoDataPipe pipe = new core.MojoDataPipe();
+    core.DataPipeFiller.fillHandle(pipe.producer, response.bodyBytes.buffer.asByteData());
+    return pipe.consumer;
   }
 
   @override
   Future<String> loadString(String key, { bool cache: true }) async {
-    return (await http.get(_urlFromKey(key))).body;
+    http.Response response = await http.get(_urlFromKey(key));
+    return response.statusCode == 200 ? response.body : null;
   }
 
   /// Retrieve a string from the asset bundle, parse it with the given function,
@@ -155,12 +159,27 @@ abstract class CachingAssetBundle extends AssetBundle {
     assert(parser != null);
     if (_structuredDataCache.containsKey(key))
       return _structuredDataCache[key];
-    final Completer<dynamic> completer = new Completer<dynamic>();
-    _structuredDataCache[key] = completer.future;
-    completer.complete(loadString(key, cache: false).then/*<dynamic>*/(parser));
-    completer.future.then((dynamic value) {
-      _structuredDataCache[key] = new SynchronousFuture<dynamic>(value);
+    Completer<dynamic> completer;
+    Future<dynamic> result;
+    loadString(key, cache: false).then(parser).then((dynamic value) {
+      result = new SynchronousFuture<dynamic>(value);
+      _structuredDataCache[key] = result;
+      if (completer != null) {
+        // We already returned from the loadStructuredData function, which means
+        // we are in the asynchronous mode. Pass the value to the completer. The
+        // completer's future is what we returned.
+        completer.complete(value);
+      }
     });
+    if (result != null) {
+      // The code above ran synchronously, and came up with an answer.
+      // Return the SynchronousFuture that we created above.
+      return result;
+    }
+    // The code above hasn't yet run its "then" handler yet. Let's prepare a
+    // completer for it to use when it does run.
+    completer = new Completer<dynamic>();
+    _structuredDataCache[key] = completer.future;
     return completer.future;
   }
 
@@ -175,22 +194,6 @@ abstract class CachingAssetBundle extends AssetBundle {
 class MojoAssetBundle extends CachingAssetBundle {
   /// Creates an [AssetBundle] interface around the given [mojom.AssetBundleProxy] Mojo service.
   MojoAssetBundle(this._bundle);
-
-  /// Retrieves the asset bundle located at the given URL, unpacks it, and provides it contents.
-  factory MojoAssetBundle.fromNetwork(String relativeUrl) {
-    final mojom.AssetBundleProxy bundle = new mojom.AssetBundleProxy.unbound();
-    _fetchAndUnpackBundleAsychronously(relativeUrl, bundle);
-    return new MojoAssetBundle(bundle);
-  }
-
-  static Future<Null> _fetchAndUnpackBundleAsychronously(String relativeUrl, mojom.AssetBundleProxy bundle) async {
-    final core.MojoDataPipeConsumer bundleData = await http.readDataPipe(Uri.base.resolve(relativeUrl));
-    final mojom.AssetUnpackerProxy unpacker = shell.connectToApplicationService(
-      'mojo:asset_bundle', mojom.AssetUnpacker.connectToService
-    );
-    unpacker.unpackZipStream(bundleData, bundle);
-    unpacker.close();
-  }
 
   mojom.AssetBundleProxy _bundle;
 

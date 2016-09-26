@@ -19,8 +19,6 @@ class Adb {
 
   final String adbPath;
 
-  final Map<String, String> _idToNameCache = <String, String>{};
-
   bool exists() {
     try {
       runCheckedSync(<String>[adbPath, 'version']);
@@ -72,73 +70,6 @@ class Adb {
     return message.split('\n').map(
       (String deviceInfo) => new AdbDevice(deviceInfo)
     ).toList();
-  }
-
-  /// Listen to device activations and deactivations via the adb server's
-  /// 'track-devices' command. Call cancel on the returned stream to stop
-  /// listening.
-  Stream<List<AdbDevice>> trackDevices() {
-    StreamController<List<AdbDevice>> controller;
-    Socket socket;
-    bool isFirstNotification = true;
-
-    controller = new StreamController<List<AdbDevice>>(
-      onListen: () async {
-        socket = await Socket.connect(InternetAddress.LOOPBACK_IP_V4, adbServerPort);
-        printTrace('--> host:track-devices');
-        socket.add(_createAdbRequest('host:track-devices'));
-        socket.listen((List<int> data) async {
-          String stringResult = new String.fromCharCodes(data);
-          printTrace('<-- ${stringResult.trim()}');
-          _AdbServerResponse response = new _AdbServerResponse(
-            stringResult,
-            noStatus: !isFirstNotification
-          );
-
-          String devicesText = response.message.trim();
-          isFirstNotification = false;
-
-          if (devicesText.isEmpty) {
-            controller.add(<AdbDevice>[]);
-          } else {
-            List<AdbDevice> devices = devicesText.split('\n').map((String deviceInfo) {
-              return new AdbDevice(deviceInfo);
-            }).where((AdbDevice device) {
-              // Filter unauthorized devices - we can't connect to them.
-              return !device.isUnauthorized && !device.isOffline;
-            }).toList();
-
-            await _populateDeviceNames(devices);
-
-            controller.add(devices);
-          }
-        });
-        socket.done.then((_) => controller.close());
-      },
-      onCancel: () => socket?.destroy()
-    );
-
-    return controller.stream;
-  }
-
-  Future<Null> _populateDeviceNames(List<AdbDevice> devices) async {
-    for (AdbDevice device in devices) {
-      if (device.modelID == null) {
-        // If we don't have a name of a device in our cache, call `device -l` to populate it.
-        if (_idToNameCache[device.id] == null)
-          await _populateDeviceCache();
-
-        // Set the device name from the cached name. Adb device notifications only
-        // have IDs, not names. We get the name by calling `listDevices()`.
-        device.modelID = _idToNameCache[device.id];
-      }
-    }
-  }
-
-  Future<Null> _populateDeviceCache() async {
-    List<AdbDevice> devices = await listDevices();
-    for (AdbDevice device in devices)
-      _idToNameCache[device.id] = device.modelID;
   }
 
   Future<String> _sendAdbServerCommand(String command) async {

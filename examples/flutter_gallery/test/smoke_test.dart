@@ -50,18 +50,10 @@ Future<Null> smokeDemo(WidgetTester tester, String routeName) async {
   expect(find.text(kCaption), findsNothing);
 
   // Go back
-  if (routeName == '/pesto') {
-    // TODO(mpcomplete): workaround for Pesto, which has a drawer instead of a
-    // back button. Figure out how to have both.
-    Finder drawer = find.byType(Scaffold); // get a Widget for the BuildContext
-    expect(drawer, findsOneWidget);
-    Navigator.pop(drawer.evaluate().first);
-  } else {
-    Finder backButton = findBackButton(tester);
-    expect(backButton, findsOneWidget);
-    await tester.tap(backButton);
-    await tester.pump(); // Start the pop "back" operation.
-  }
+  Finder backButton = findBackButton(tester);
+  expect(backButton, findsOneWidget);
+  await tester.tap(backButton);
+  await tester.pump(); // Start the pop "back" operation.
   await tester.pump(const Duration(seconds: 1)); // Wait until it has finished.
   return null;
 }
@@ -90,7 +82,7 @@ void main() {
       await tester.scroll(findGalleryItemByRouteName(tester, routeName), new Offset(0.0, scrollDeltas[i]));
       await tester.pump(); // start the scroll
       await tester.pump(const Duration(milliseconds: 500)); // wait for overscroll to timeout, if necessary
-      await tester.pump(const Duration(milliseconds: 2000)); // wait for overscroll to fade away, if necessary
+      await tester.pump(const Duration(seconds: 3)); // wait for overscroll to fade away, if necessary
       tester.binding.debugAssertNoTransientCallbacks('A transient callback was still active after leaving route $routeName');
     }
 

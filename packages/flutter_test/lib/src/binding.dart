@@ -8,6 +8,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/http.dart' as http;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -22,9 +23,12 @@ import 'stack_manipulation.dart';
 
 /// Phases that can be reached by [WidgetTester.pumpWidget] and
 /// [TestWidgetsFlutterBinding.pump].
+///
+/// See [WidgetsBinding.beginFrame] for a more detailed description of some of
+/// these phases.
 // TODO(ianh): Merge with near-identical code in the rendering test code.
 enum EnginePhase {
-  /// The build phase in the widgets library. See [BuildOwner.buildDirtyElements].
+  /// The build phase in the widgets library. See [BuildOwner.buildScope].
   build,
 
   /// The layout phase in the rendering library. See [PipelineOwner.flushLayout].
@@ -106,6 +110,13 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   @override
   void initInstances() {
     timeDilation = 1.0; // just in case the developer has artificially changed it for development
+    http.Client.clientOverride = () {
+      return new http.MockClient((http.Request request){
+        return new Future<http.Response>.value(
+          new http.Response("Mocked: Unavailable.", 404, request: request)
+        );
+      });
+    };
     super.initInstances();
   }
 
@@ -396,6 +407,9 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
 ///
 /// This binding controls time, allowing tests to verify long
 /// animation sequences without having to execute them in real time.
+///
+/// This class assumes it is always run in checked mode (since tests are always
+/// run in checked mode).
 class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   @override
   void initInstances() {
@@ -447,26 +461,31 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   @override
   void beginFrame() {
     assert(inTest);
-    buildOwner.buildDirtyElements();
-    if (_phase == EnginePhase.build)
-      return;
-    assert(renderView != null);
-    pipelineOwner.flushLayout();
-    if (_phase == EnginePhase.layout)
-      return;
-    pipelineOwner.flushCompositingBits();
-    if (_phase == EnginePhase.compositingBits)
-      return;
-    pipelineOwner.flushPaint();
-    if (_phase == EnginePhase.paint)
-      return;
-    renderView.compositeFrame(); // this sends the bits to the GPU
-    if (_phase == EnginePhase.composite)
-      return;
-    pipelineOwner.flushSemantics();
-    if (_phase == EnginePhase.flushSemantics)
-      return;
-    buildOwner.finalizeTree();
+    try {
+      debugBuildingDirtyElements = true;
+      buildOwner.buildScope(renderViewElement);
+      if (_phase == EnginePhase.build)
+        return;
+      assert(renderView != null);
+      pipelineOwner.flushLayout();
+      if (_phase == EnginePhase.layout)
+        return;
+      pipelineOwner.flushCompositingBits();
+      if (_phase == EnginePhase.compositingBits)
+        return;
+      pipelineOwner.flushPaint();
+      if (_phase == EnginePhase.paint)
+        return;
+      renderView.compositeFrame(); // this sends the bits to the GPU
+      if (_phase == EnginePhase.composite)
+        return;
+      pipelineOwner.flushSemantics();
+      if (_phase == EnginePhase.flushSemantics)
+        return;
+    } finally {
+      buildOwner.finalizeTree();
+      debugBuildingDirtyElements = false;
+    }
   }
 
   @override
@@ -713,8 +732,8 @@ class TestViewConfiguration extends ViewConfiguration {
       super(size: size);
 
   static Matrix4 _getMatrix(Size size, double devicePixelRatio) {
-    final double actualWidth = ui.window.size.width * devicePixelRatio;
-    final double actualHeight = ui.window.size.height * devicePixelRatio;
+    final double actualWidth = ui.window.physicalSize.width;
+    final double actualHeight = ui.window.physicalSize.height;
     final double desiredWidth = size.width;
     final double desiredHeight = size.height;
     double scale, shiftX, shiftY;

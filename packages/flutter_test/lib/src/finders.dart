@@ -205,6 +205,14 @@ abstract class Finder {
     return false;
   }
 
+  /// Returns a variant of this finder that only matches the first element
+  /// matched by this finder.
+  Finder get first => new _FirstFinder(this);
+
+  /// Returns a variant of this finder that only matches the last element
+  /// matched by this finder.
+  Finder get last => new _LastFinder(this);
+
   @override
   String toString() {
     final String additional = skipOffstage ? ' (ignoring offstage widgets)' : '';
@@ -217,6 +225,34 @@ abstract class Finder {
     if (count < 4)
       return '$count widgets with $description$additional: $widgets';
     return '$count widgets with $description$additional: ${widgets[0]}, ${widgets[1]}, ${widgets[2]}, ...';
+  }
+}
+
+class _FirstFinder extends Finder {
+  _FirstFinder(this.parent);
+
+  final Finder parent;
+
+  @override
+  String get description => '${parent.description} (ignoring all but first)';
+
+  @override
+  Iterable<Element> apply(Iterable<Element> candidates) sync* {
+    yield parent.apply(candidates).first;
+  }
+}
+
+class _LastFinder extends Finder {
+  _LastFinder(this.parent);
+
+  final Finder parent;
+
+  @override
+  String get description => '${parent.description} (ignoring all but last)';
+
+  @override
+  Iterable<Element> apply(Iterable<Element> candidates) sync* {
+    yield parent.apply(candidates).last;
   }
 }
 

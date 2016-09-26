@@ -56,6 +56,7 @@ export 'src/widgets/size_changed_layout_notifier.dart';
 export 'src/widgets/status_transitions.dart';
 export 'src/widgets/table.dart';
 export 'src/widgets/text_selection.dart';
+export 'src/widgets/text.dart';
 export 'src/widgets/title.dart';
 export 'src/widgets/transitions.dart';
 export 'src/widgets/unique_widget.dart';

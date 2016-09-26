@@ -7,7 +7,6 @@ import 'dart:math' as math;
 import 'package:flutter/rendering.dart';
 import 'package:meta/meta.dart';
 
-import 'clamp_overscrolls.dart';
 import 'framework.dart';
 import 'scroll_configuration.dart';
 import 'scrollable.dart';
@@ -27,9 +26,9 @@ import 'virtual_viewport.dart';
 ///
 /// See also:
 ///
-///  * [ScrollableLazyList]
-///  * [LazyBlock]
-///  * [ScrollableViewport]
+///  * [ScrollableLazyList].
+///  * [LazyBlock].
+///  * [ScrollableViewport].
 class ScrollableList extends StatelessWidget {
   /// Creats a scrollable list of children that have equal size.
   ///
@@ -126,12 +125,12 @@ class ScrollableList extends StatelessWidget {
   /// The children, some of which might be materialized.
   final Iterable<Widget> children;
 
-  Widget _buildViewport(BuildContext context, ScrollableState state, double scrollOffset) {
+  Widget _buildViewport(BuildContext context, ScrollableState state) {
     return new ListViewport(
       onExtentsChanged: (double contentExtent, double containerExtent) {
         state.handleExtentsChanged(itemsWrap ? double.INFINITY : contentExtent, containerExtent);
       },
-      scrollOffset: scrollOffset,
+      scrollOffset: state.scrollOffset,
       mainAxis: scrollDirection,
       anchor: scrollAnchor,
       itemExtent: itemExtent,
@@ -139,10 +138,6 @@ class ScrollableList extends StatelessWidget {
       padding: padding,
       children: children
     );
-  }
-
-  Widget _buildContent(BuildContext context, ScrollableState state) {
-    return ClampOverscrolls.buildViewport(context, state, _buildViewport);
   }
 
   @override
@@ -156,7 +151,7 @@ class ScrollableList extends StatelessWidget {
       onScroll: onScroll,
       onScrollEnd: onScrollEnd,
       snapOffsetCallback: snapOffsetCallback,
-      builder: _buildContent
+      builder: _buildViewport
     );
     return ScrollConfiguration.wrap(context, result);
   }
@@ -377,9 +372,9 @@ class _VirtualListViewportElement extends VirtualViewportElement {
 ///
 /// See also:
 ///
-///  * [LazyListViewport]
-///  * [LazyBlockViewport]
-///  * [GridViewport]
+///  * [LazyListViewport].
+///  * [LazyBlockViewport].
+///  * [GridViewport].
 class ListViewport extends _VirtualListViewport with VirtualViewportFromIterable {
   /// Creates a virtual viewport onto a list of equally sized children.
   ///
@@ -420,8 +415,8 @@ class ListViewport extends _VirtualListViewport with VirtualViewportFromIterable
 ///
 /// See also:
 ///
-///  * [ScrollableList]
-///  * [LazyBlock]
+///  * [ScrollableList].
+///  * [LazyBlock].
 class ScrollableLazyList extends StatelessWidget {
   /// Creates an infinite scrollable list of children that have equal size.
   ///
@@ -529,10 +524,10 @@ class ScrollableLazyList extends StatelessWidget {
   /// The amount of space by which to inset the children inside the viewport.
   final EdgeInsets padding;
 
-  Widget _buildViewport(BuildContext context, ScrollableState state, double scrollOffset) {
+  Widget _buildViewport(BuildContext context, ScrollableState state) {
     return new LazyListViewport(
       onExtentsChanged: state.handleExtentsChanged,
-      scrollOffset: scrollOffset,
+      scrollOffset: state.scrollOffset,
       mainAxis: scrollDirection,
       anchor: scrollAnchor,
       itemExtent: itemExtent,
@@ -540,10 +535,6 @@ class ScrollableLazyList extends StatelessWidget {
       itemBuilder: itemBuilder,
       padding: padding
     );
-  }
-
-  Widget _buildContent(BuildContext context, ScrollableState state) {
-    return ClampOverscrolls.buildViewport(context, state, _buildViewport);
   }
 
   @override
@@ -557,7 +548,7 @@ class ScrollableLazyList extends StatelessWidget {
       onScroll: onScroll,
       onScrollEnd: onScrollEnd,
       snapOffsetCallback: snapOffsetCallback,
-      builder: _buildContent
+      builder: _buildViewport
     );
     return ScrollConfiguration.wrap(context, result);
   }
@@ -579,8 +570,8 @@ class ScrollableLazyList extends StatelessWidget {
 ///
 /// See also:
 ///
-///  * [ListViewport]
-///  * [LazyBlockViewport]
+///  * [ListViewport].
+///  * [LazyBlockViewport].
 class LazyListViewport extends _VirtualListViewport with VirtualViewportFromBuilder {
   /// Creates a virtual viewport onto an extremely large or infinite list of equally sized children.
   ///

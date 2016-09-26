@@ -107,6 +107,10 @@ abstract class BindingBase {
       name: 'exit',
       callback: _exitApplication
     );
+    registerSignalServiceExtension(
+      name: 'frameworkPresent',
+      callback: () => null
+    );
     assert(() { _debugServiceExtensionsRegistered = true; return true; });
   }
 
@@ -123,6 +127,7 @@ abstract class BindingBase {
   void reassembleApplication() {
     FlutterError.resetErrorCount();
   }
+
 
   /// Registers a service extension method with the given name (full
   /// name "ext.flutter.name"), which takes no arguments and returns

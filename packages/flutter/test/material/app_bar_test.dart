@@ -42,4 +42,141 @@ void main() {
     expect(center.x, greaterThan(400 - size.width / 2.0));
     expect(center.x, lessThan(400 + size.width / 2.0));
   });
+
+  testWidgets('AppBar centerTitle:true centers on Android', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new MaterialApp(
+        theme: new ThemeData(platform: TargetPlatform.android),
+        home: new Scaffold(
+          appBar: new AppBar(
+            centerTitle: true,
+            title: new Text('X')
+          )
+        )
+      )
+    );
+
+
+    Finder title = find.text('X');
+    Point center = tester.getCenter(title);
+    Size size = tester.getSize(title);
+    expect(center.x, greaterThan(400 - size.width / 2.0));
+    expect(center.x, lessThan(400 + size.width / 2.0));
+  });
+
+  testWidgets('AppBar centerTitle:false title left edge is 72.0 ', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Scaffold(
+          appBar: new AppBar(
+            centerTitle: false,
+            title: new Text('X')
+          )
+        )
+      )
+    );
+
+    expect(tester.getTopLeft(find.text('X')).x, 72.0);
+  });
+
+  testWidgets('AppBar centerTitle:false title overflow OK ', (WidgetTester tester) async {
+    // The app bar's title should be constrained to fit within the available space
+    // between the leading and actions widgets.
+
+    Key titleKey = new UniqueKey();
+    Widget leading;
+    List<Widget> actions;
+
+    Widget buildApp() {
+      return new MaterialApp(
+        home: new Scaffold(
+          appBar: new AppBar(
+            leading: leading,
+            centerTitle: false,
+            title: new Container(
+              key: titleKey,
+              constraints: new BoxConstraints.loose(const Size(1000.0, 1000.0))
+            ),
+            actions: actions
+          )
+        )
+      );
+    }
+
+    await tester.pumpWidget(buildApp());
+
+    Finder title = find.byKey(titleKey);
+    expect(tester.getTopLeft(title).x, 72.0);
+    // The toolbar's contents are padded on the right by 8.0
+    expect(tester.getSize(title).width, equals(800.0 - 72.0 - 8.0));
+
+    actions = <Widget>[
+      new SizedBox(width: 100.0),
+      new SizedBox(width: 100.0)
+    ];
+    await tester.pumpWidget(buildApp());
+
+    expect(tester.getTopLeft(title).x, 72.0);
+    // The title shrinks by 200.0 to allow for the actions widgets.
+    expect(tester.getSize(title).width, equals(800.0 - 72.0 - 8.0 - 200.0));
+
+    leading = new Container(); // AppBar will constrain the width to 24.0
+    await tester.pumpWidget(buildApp());
+    expect(tester.getTopLeft(title).x, 72.0);
+    // Adding a leading widget shouldn't effect the title's size
+    expect(tester.getSize(title).width, equals(800.0 - 72.0 - 8.0 - 200.0));
+  });
+
+  testWidgets('AppBar centerTitle:true title overflow OK ', (WidgetTester tester) async {
+    // The app bar's title should be constrained to fit within the available space
+    // between the leading and actions widgets. When it's also centered it may
+    // also be left or right justified if it doesn't fit in the overall center.
+
+    Key titleKey = new UniqueKey();
+    double titleWidth = 700.0;
+    Widget leading = new Container();
+    List<Widget> actions;
+
+    Widget buildApp() {
+      return new MaterialApp(
+        home: new Scaffold(
+          appBar: new AppBar(
+            leading: leading,
+            centerTitle: true,
+            title: new Container(
+              key: titleKey,
+              constraints: new BoxConstraints.loose(new Size(titleWidth, 1000.0))
+            ),
+            actions: actions
+          )
+        )
+      );
+    }
+
+    // Centering a title with width 700 within the 800 pixel wide test widget
+    // would mean that its left edge would have to be 50. The material spec says
+    // that the left edge of the title must be atleast 72.
+    await tester.pumpWidget(buildApp());
+
+    Finder title = find.byKey(titleKey);
+    expect(tester.getTopLeft(title).x, 72.0);
+    expect(tester.getSize(title).width, equals(700.0));
+
+    // Centering a title with width 620 within the 800 pixel wide test widget
+    // would mean that its left edge would have to be 90. We reserve 72
+    // on the left and the padded actions occupy 90 + 8 on the right. That
+    // leaves 630, so the title is right justified but its width isn't changed.
+
+    await tester.pumpWidget(buildApp());
+    leading = null;
+    titleWidth = 620.0;
+    actions = <Widget>[
+      new SizedBox(width: 45.0),
+      new SizedBox(width: 45.0)
+    ];
+    await tester.pumpWidget(buildApp());
+    expect(tester.getTopLeft(title).x, 800 - 620 - 45 - 45 - 8);
+    expect(tester.getSize(title).width, equals(620.0));
+  });
+
 }

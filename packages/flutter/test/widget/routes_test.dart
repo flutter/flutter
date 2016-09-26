@@ -210,7 +210,7 @@ void main() {
     await runNavigatorTest(
       tester,
       host,
-      () { host.removeRouteBefore(second); },
+      () { host.removeRouteBelow(second); },
       <String>[
         'first: dispose',
       ]
@@ -251,7 +251,7 @@ void main() {
     await runNavigatorTest(
       tester,
       host,
-      () { host.removeRouteBefore(four); },
+      () { host.removeRouteBelow(four); },
       <String>[
         'second: didChangeNext four',
         'three: dispose',
@@ -317,7 +317,7 @@ void main() {
     await runNavigatorTest(
       tester,
       host,
-      () { host.replaceRouteBefore(anchorRoute: routeC, newRoute: routeB = new TestRoute('b')); },
+      () { host.replaceRouteBelow(anchorRoute: routeC, newRoute: routeB = new TestRoute('b')); },
       <String>[
         'b: install',
         'b: didReplace B',

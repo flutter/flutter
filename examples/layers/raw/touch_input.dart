@@ -10,7 +10,7 @@ import 'dart:typed_data';
 
 import 'package:mojo/bindings.dart' as bindings;
 import 'package:mojo/core.dart' as core;
-import 'package:sky_services/pointer/pointer.mojom.dart';
+import 'package:flutter_services/pointer.dart';
 
 ui.Color color;
 
@@ -71,7 +71,7 @@ ui.Scene composite(ui.Picture picture, ui.Rect paintBounds) {
 }
 
 void beginFrame(Duration timeStamp) {
-  ui.Rect paintBounds = ui.Point.origin & ui.window.size;
+  ui.Rect paintBounds = ui.Point.origin & (ui.window.physicalSize / ui.window.devicePixelRatio);
   // First, record a picture with our painting commands.
   ui.Picture picture = paint(paintBounds);
   // Second, include that picture in a scene graph.

@@ -25,7 +25,14 @@ class PackagesCommand extends FlutterCommand {
   final String description = 'Commands for managing Flutter packages.';
 
   @override
-  Future<int> runInProject() => new Future<int>.value(0);
+  Future<int> verifyThenRunCommand() async {
+    if (!commandValidator())
+      return 1;
+    return super.verifyThenRunCommand();
+  }
+
+  @override
+  Future<int> runCommand() => new Future<int>.value(0);
 }
 
 class PackagesGetCommand extends FlutterCommand {
@@ -42,14 +49,11 @@ class PackagesGetCommand extends FlutterCommand {
       (upgrade ? 'Upgrade' : 'Get') + ' packages in a Flutter project.';
 
   @override
-  bool get requiresProjectRoot => false;
-
-  @override
   String get invocation =>
       "${runner.executableName} packages $name [<target directory>]";
 
   @override
-  Future<int> runInProject() async {
+  Future<int> runCommand() async {
     if (argResults.rest.length > 1) {
       printStatus('Too many arguments.');
       printStatus(usage);
@@ -66,6 +70,8 @@ class PackagesGetCommand extends FlutterCommand {
       printStatus(usage);
       return 1;
     }
+
+    // TODO: If the user is using a local build, we should use the packages from their build instead of the cache.
 
     return pubGet(directory: target, upgrade: upgrade, checkLastModified: false);
   }

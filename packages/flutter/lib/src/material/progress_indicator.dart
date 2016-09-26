@@ -243,9 +243,7 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
     if (value == null) // Indeterminate
       paint.strokeCap = StrokeCap.square;
 
-    Path path = new Path()
-      ..arcTo(Point.origin & size, arcStart, arcSweep, false);
-    canvas.drawPath(path, paint);
+    canvas.drawArc(Point.origin & size, arcStart, arcSweep, false, paint);
   }
 
   @override

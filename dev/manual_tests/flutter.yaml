@@ -1,14 +1,1 @@
 uses-material-design: true
-assets:
-  - packages/flutter_gallery_assets/weather_demo/sun.png
-  - packages/flutter_gallery_assets/weather_demo/clouds-0.png
-  - packages/flutter_gallery_assets/weather_demo/clouds-1.png
-  - packages/flutter_gallery_assets/weather_demo/ray.png
-  - packages/flutter_gallery_assets/weather_demo/sun.png
-  - packages/flutter_gallery_assets/weather_demo/weathersprites.json
-  - packages/flutter_gallery_assets/weather_demo/weathersprites.png
-  - packages/flutter_gallery_assets/weather_demo/icon-sun.png
-  - packages/flutter_gallery_assets/weather_demo/icon-rain.png
-  - packages/flutter_gallery_assets/weather_demo/icon-snow.png
-  - packages/flutter_gallery_assets/fitness_demo/jumpingjack.json
-  - packages/flutter_gallery_assets/fitness_demo/jumpingjack.png

@@ -43,9 +43,9 @@ void checkIconColor(WidgetTester tester, String label, Color color) {
   // way to find the menu item. I hope.
   Element semantics = findElementOfExactWidgetTypeGoingUp(tester.element(find.text(label)), MergeSemantics);
   expect(semantics, isNotNull);
-  Element asset = findElementOfExactWidgetTypeGoingDown(semantics, Text);
-  Text text = asset.widget;
-  expect(text.style.color, equals(color));
+  Element asset = findElementOfExactWidgetTypeGoingDown(semantics, RichText);
+  RichText richText = asset.widget;
+  expect(richText.text.style.color, equals(color));
 }
 
 void main() {
@@ -64,8 +64,8 @@ void main() {
     expect(find.text('Account Balance'), findsNothing);
 
     // drag the drawer out
-    Point left = new Point(0.0, ui.window.size.height / 2.0);
-    Point right = new Point(ui.window.size.width, left.y);
+    Point left = new Point(0.0, ui.window.physicalSize.height / 2.0);
+    Point right = new Point(ui.window.physicalSize.width, left.y);
     TestGesture gesture = await tester.startGesture(left);
     await tester.pump();
     await gesture.moveTo(right);

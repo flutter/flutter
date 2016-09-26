@@ -13,63 +13,106 @@ import 'scrollable.dart';
 /// scrolled to the given `scrollOffset`.
 typedef Widget ViewportBuilder(BuildContext context, ScrollableState state, double scrollOffset);
 
-/// A widget that controls whether [Scrollable] descendants will overscroll.
+/// A widget that controls whether viewport descendants will overscroll their contents.
+/// Overscrolling is clamped at the beginning or end or both according to the
+/// [edge] parameter.
 ///
-/// If `true`, the ClampOverscroll's [Scrollable] descendant will clamp its
-/// viewport's scrollOffsets to the [ScrollBehavior]'s min and max values.
-/// In this case the Scrollable's scrollOffset will still over- and undershoot
-/// the ScrollBehavior's limits, but the viewport itself will not.
+/// Scroll offset limits are defined by the enclosing Scrollable's [ScrollBehavior].
 class ClampOverscrolls extends InheritedWidget {
-  /// Creates a widget that controls whether [Scrollable] descendants will overscroll.
+  /// Creates a widget that controls whether viewport descendants will overscroll
+  /// their contents.
   ///
-  /// The [value] and [child] arguments must not be null.
+  /// The [edge] and [child] arguments must not be null.
   ClampOverscrolls({
     Key key,
-    @required this.value,
-    @required Widget child
+    this.edge: ScrollableEdge.none,
+    @required Widget child,
   }) : super(key: key, child: child) {
-    assert(value != null);
+    assert(edge != null);
     assert(child != null);
   }
 
-  /// Whether [Scrollable] descendants should clamp their viewport's
-  /// scrollOffset values when they are less than the [ScrollBehavior]'s minimum
-  /// or greater than its maximum.
-  final bool value;
+  /// Creates a widget that controls whether viewport descendants will overscroll
+  /// based on the given [edge] and the inherited ClampOverscrolls widget for
+  /// the given [context]. For example if edge is ScrollableEdge.leading
+  /// and a ClampOverscrolls ancestor exists that specified ScrollableEdge.trailing,
+  /// then this widget would clamp both scrollable edges.
+  ///
+  /// The [context], [edge] and [child] arguments must not be null.
+  factory ClampOverscrolls.inherit({
+    Key key,
+    @required BuildContext context,
+    @required ScrollableEdge edge: ScrollableEdge.none,
+    @required Widget child
+  }) {
+    assert(context != null);
+    assert(edge != null);
+    assert(child != null);
 
-  /// Whether a [Scrollable] widget within the given context should overscroll.
-  static bool of(BuildContext context) {
-    final ClampOverscrolls result = context.inheritFromWidgetOfExactType(ClampOverscrolls);
-    return result?.value ?? false;
+    // The child's clamped edge is the union of the given edge and the
+    // parent's clamped edge.
+    ScrollableEdge parentEdge = ClampOverscrolls.of(context)?.edge ?? ScrollableEdge.none;
+    ScrollableEdge childEdge = edge;
+    switch (parentEdge) {
+      case ScrollableEdge.leading:
+        if (edge == ScrollableEdge.trailing || edge == ScrollableEdge.both)
+          childEdge = ScrollableEdge.both;
+        break;
+      case ScrollableEdge.trailing:
+        if (edge == ScrollableEdge.leading || edge == ScrollableEdge.both)
+          childEdge = ScrollableEdge.both;
+        break;
+      case ScrollableEdge.both:
+        childEdge = ScrollableEdge.both;
+        break;
+      case ScrollableEdge.none:
+        break;
+    }
+
+    return new ClampOverscrolls(
+      key: key,
+      edge: childEdge,
+      child: child
+    );
   }
 
-  /// If ClampOverscrolls is true, clamps the ScrollableState's scrollOffset to the
-  /// [ScrollBehavior] minimum and maximum values and then constructs the viewport
-  /// with the clamped scrollOffset. ClampOverscrolls is reset to false for viewport
-  /// descendants.
-  ///
-  /// This utility function is typically used by [Scrollable.builder] callbacks.
-  static Widget buildViewport(BuildContext context, ScrollableState state, ViewportBuilder builder) {
-    // TODO(ianh): minScrollOffset and maxScrollOffset are typically determined
-    // by the container and content size. But we don't know those until we
-    // layout the viewport, which happens after build phase. We need to rethink
-    // this.
-    final bool clampOverscrolls = ClampOverscrolls.of(context);
-    final double clampedScrollOffset = clampOverscrolls
-      ? state.scrollOffset.clamp(state.scrollBehavior.minScrollOffset, state.scrollBehavior.maxScrollOffset)
-      : state.scrollOffset;
-    Widget viewport = builder(context, state, clampedScrollOffset);
-    if (clampOverscrolls)
-      viewport = new ClampOverscrolls(value: false, child: viewport);
-    return viewport;
+  /// Defines when viewport scrollOffsets are clamped in terms of the scrollDirection.
+  /// If edge is `leading` the viewport's scrollOffset will be clamped at its minimum
+  /// value (often 0.0). If edge is `trailing` then the scrollOffset will be clamped
+  /// to its maximum value.  If edge is `both` then both the leading and trailing
+  /// constraints are applied.
+  final ScrollableEdge edge;
+
+  /// Return the [newScrollOffset] clamped  according to [edge] and [scrollable]'s
+  /// scroll behavior. The value of [newScrollOffset] defaults to `scrollable.scrollOffset`.
+  double clampScrollOffset(ScrollableState scrollable, [double newScrollOffset]) {
+    final double scrollOffset = newScrollOffset ?? scrollable.scrollOffset;
+    final double minScrollOffset = scrollable.scrollBehavior.minScrollOffset;
+    final double maxScrollOffset = scrollable.scrollBehavior.maxScrollOffset;
+    switch (edge) {
+      case ScrollableEdge.both:
+        return scrollOffset.clamp(minScrollOffset, maxScrollOffset);
+      case ScrollableEdge.leading:
+        return scrollOffset.clamp(minScrollOffset, double.INFINITY);
+      case ScrollableEdge.trailing:
+        return scrollOffset.clamp(double.NEGATIVE_INFINITY, maxScrollOffset);
+      case ScrollableEdge.none:
+        return scrollOffset;
+    }
+    return scrollOffset;
+  }
+
+  /// The closest instance of this class that encloses the given context.
+  static ClampOverscrolls of(BuildContext context) {
+    return context.inheritFromWidgetOfExactType(ClampOverscrolls);
   }
 
   @override
-  bool updateShouldNotify(ClampOverscrolls old) => value != old.value;
+  bool updateShouldNotify(ClampOverscrolls old) => edge != old.edge;
 
   @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
-    description.add('value: $value');
+    description.add('edge: $edge');
   }
 }

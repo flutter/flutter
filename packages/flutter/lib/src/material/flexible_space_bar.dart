@@ -78,7 +78,7 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
 
     final double currentHeight = size.height;
     final double maxHeight = statusBarHeight + AppBar.getExpandedHeightFor(context);
-    final double minHeight = statusBarHeight + kToolBarHeight;
+    final double minHeight = statusBarHeight + kToolbarHeight;
     final double deltaHeight = maxHeight - minHeight;
 
     // 0.0 -> Expanded
@@ -89,7 +89,7 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
 
     // background image
     if (config.background != null) {
-      final double fadeStart = math.max(0.0, 1.0 - kToolBarHeight / deltaHeight);
+      final double fadeStart = math.max(0.0, 1.0 - kToolbarHeight / deltaHeight);
       final double fadeEnd = 1.0;
       assert(fadeStart <= fadeEnd);
       final double opacity = 1.0 - new Interval(fadeStart, fadeEnd).transform(t);
@@ -110,7 +110,7 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
 
     if (config.title != null) {
       final ThemeData theme = Theme.of(context);
-      final double opacity = (1.0 - (minHeight - currentHeight) / (kToolBarHeight - statusBarHeight)).clamp(0.0, 1.0);
+      final double opacity = (1.0 - (minHeight - currentHeight) / (kToolbarHeight - statusBarHeight)).clamp(0.0, 1.0);
       if (opacity > 0.0) {
         TextStyle titleStyle = theme.primaryTextTheme.title;
         titleStyle = titleStyle.copyWith(

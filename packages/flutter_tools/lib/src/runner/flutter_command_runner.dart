@@ -28,7 +28,16 @@ const String kFlutterEnginePackageName = 'sky_engine';
 class FlutterCommandRunner extends CommandRunner {
   FlutterCommandRunner({ bool verboseHelp: false }) : super(
     'flutter',
-    'Manage your Flutter app development.'
+    'Manage your Flutter app development.\n'
+      '\n'
+      'Common actions:\n'
+      '\n'
+      '  flutter create <output directory>\n'
+      '    Create a new Flutter project in the specified directory.\n'
+      '\n'
+      '  flutter run [options]\n'
+      '    Run your Flutter application on an attached device\n'
+      '    or in an emulator.',
   ) {
     argParser.addFlag('verbose',
         abbr: 'v',
@@ -86,7 +95,7 @@ class FlutterCommandRunner extends CommandRunner {
 
   @override
   String get usageFooter {
-    return 'Run "flutter -h -v" for verbose help output, including less commonly used options.';
+    return 'Run "flutter help -v" for verbose help output, including less commonly used options.';
   }
 
   static String get _defaultFlutterRoot {

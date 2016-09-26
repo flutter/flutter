@@ -8,7 +8,6 @@ import 'package:collection/collection.dart' show lowerBound;
 import 'package:flutter/rendering.dart';
 import 'package:meta/meta.dart';
 
-import 'clamp_overscrolls.dart';
 import 'framework.dart';
 import 'scroll_configuration.dart';
 import 'scrollable.dart';
@@ -20,9 +19,9 @@ import 'virtual_viewport.dart';
 ///
 /// See also:
 ///
-///  * [CustomGrid]
-///  * [ScrollableList]
-///  * [ScrollableViewport]
+///  * [CustomGrid].
+///  * [ScrollableList].
+///  * [ScrollableViewport].
 class ScrollableGrid extends StatelessWidget {
   /// Creates a vertically scrollable grid.
   ///
@@ -81,17 +80,13 @@ class ScrollableGrid extends StatelessWidget {
   /// The children that will be placed in the grid.
   final Iterable<Widget> children;
 
-  Widget _buildViewport(BuildContext context, ScrollableState state, double scrollOffset) {
+  Widget _buildViewport(BuildContext context, ScrollableState state) {
     return new GridViewport(
-      startOffset: scrollOffset,
+      scrollOffset: state.scrollOffset,
       delegate: delegate,
       onExtentsChanged: state.handleExtentsChanged,
       children: children
     );
-  }
-
-  Widget _buildContent(BuildContext context, ScrollableState state) {
-    return ClampOverscrolls.buildViewport(context, state, _buildViewport);
   }
 
   @override
@@ -107,7 +102,7 @@ class ScrollableGrid extends StatelessWidget {
       onScroll: onScroll,
       onScrollEnd: onScrollEnd,
       snapOffsetCallback: snapOffsetCallback,
-      builder: _buildContent
+      builder: _buildViewport,
     );
     return ScrollConfiguration.wrap(context, result);
   }
@@ -119,14 +114,14 @@ class ScrollableGrid extends StatelessWidget {
 ///
 /// See also:
 ///
-///  * [ListViewport]
-///  * [LazyListViewport]
+///  * [ListViewport].
+///  * [LazyListViewport].
 class GridViewport extends VirtualViewportFromIterable {
   /// Creates a virtual viewport onto a grid of widgets.
   ///
   /// The [delegate] argument must not be null.
   GridViewport({
-    this.startOffset,
+    this.scrollOffset,
     this.delegate,
     this.onExtentsChanged,
     this.children
@@ -134,8 +129,15 @@ class GridViewport extends VirtualViewportFromIterable {
     assert(delegate != null);
   }
 
+  /// The [startOffset] without taking the [delegate]'s padding into account.
+  final double scrollOffset;
+
   @override
-  final double startOffset;
+  double get startOffset {
+    if (delegate == null)
+      return scrollOffset;
+    return scrollOffset - delegate.padding.top;
+  }
 
   /// The delegate that controls the layout of the children.
   final GridDelegate delegate;

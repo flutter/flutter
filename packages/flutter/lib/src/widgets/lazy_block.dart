@@ -8,7 +8,6 @@ import 'package:flutter/rendering.dart';
 import 'package:meta/meta.dart';
 
 import 'basic.dart';
-import 'clamp_overscrolls.dart';
 import 'framework.dart';
 import 'scroll_configuration.dart';
 import 'scrollable.dart';
@@ -259,9 +258,9 @@ class LazyBlock extends StatelessWidget {
   /// See [LazyBlockDelegate] for details.
   final LazyBlockDelegate delegate;
 
-  Widget _buildViewport(BuildContext context, ScrollableState state, double scrollOffset) {
+  Widget _buildViewport(BuildContext context, ScrollableState state) {
     return new LazyBlockViewport(
-      startOffset: scrollOffset,
+      startOffset: state.scrollOffset,
       mainAxis: scrollDirection,
       padding: padding,
       onExtentsChanged: (int firstIndex, int lastIndex, double firstStartOffset, double lastEndOffset, double minScrollOffset, double containerExtent) {
@@ -272,13 +271,10 @@ class LazyBlock extends StatelessWidget {
           minScrollOffset: minScrollOffset,
           scrollOffset: state.scrollOffset
         ));
+        state.updateGestureDetector();
       },
       delegate: delegate
     );
-  }
-
-  Widget _buildContent(BuildContext context, ScrollableState state) {
-    return ClampOverscrolls.buildViewport(context, state, _buildViewport);
   }
 
   @override
@@ -291,7 +287,7 @@ class LazyBlock extends StatelessWidget {
       onScroll: onScroll,
       onScrollEnd: onScrollEnd,
       snapOffsetCallback: snapOffsetCallback,
-      builder: _buildContent
+      builder: _buildViewport
     );
     return ScrollConfiguration.wrap(context, result);
   }
@@ -497,6 +493,9 @@ class _LazyBlockElement extends RenderObjectElement {
   /// The largest start offset (exclusive) that can be displayed properly with the items currently represented in [_children].
   double _startOffsetUpperLimit = 0.0;
 
+  /// True if the children don't fill the viewport.
+  bool _underflow = false;
+
   int _lastReportedFirstChildLogicalIndex;
   int _lastReportedLastChildLogicalIndex;
   double _lastReportedFirstChildLogicalOffset;
@@ -508,6 +507,18 @@ class _LazyBlockElement extends RenderObjectElement {
   void visitChildren(ElementVisitor visitor) {
     for (Element child in _children)
       visitor(child);
+  }
+
+  @override
+  void detachChild(Element child) {
+    assert(() {
+      // TODO(ianh): implement detachChild for LazyBlock
+      throw new FlutterError(
+        'LazyBlock does not yet support GlobalKey reparenting of its children.\n'
+        'As a temporary workaround, wrap the child with the GlobalKey in a '
+        'Container or other harmless child.'
+      );
+    });
   }
 
   @override
@@ -585,7 +596,10 @@ class _LazyBlockElement extends RenderObjectElement {
   void performRebuild() {
     IndexedWidgetBuilder builder = widget.delegate.buildItem;
     List<Widget> widgets = <Widget>[];
-    for (int i = 0; i < _children.length; ++i) {
+    // If the most recent layout didn't fill the viewport but an additional child
+    // is now available, add it to the widgets list which will force a layout.
+    int buildChildCount = _underflow ? _children.length + 1 : _children.length;
+    for (int i = 0; i < buildChildCount; ++i) {
       int logicalIndex = _firstChildLogicalIndex + i;
       Widget childWidget = _callBuilder(builder, logicalIndex);
       if (childWidget == null)
@@ -629,11 +643,11 @@ class _LazyBlockElement extends RenderObjectElement {
       while (currentLogicalIndex > 0 && currentLogicalOffset > startLogicalOffset) {
         currentLogicalIndex -= 1;
         Element newElement;
-        owner.lockState(() {
+        owner.buildScope(this, () {
           Widget newWidget = _callBuilder(builder, currentLogicalIndex, requireNonNull: true);
           newWidget = new RepaintBoundary.wrap(newWidget, currentLogicalIndex);
           newElement = inflateWidget(newWidget, null);
-        }, building: true);
+        });
         newChildren.add(newElement);
         RenderBox child = block.firstChild;
         assert(child == newChildren.last.renderObject);
@@ -689,8 +703,8 @@ class _LazyBlockElement extends RenderObjectElement {
       _startOffsetLowerLimit = currentLogicalOffset;
     }
 
-    // Materialize new children until we fill the viewport (or run out of
-    // children to materialize).
+    // Materialize new children until we fill the viewport or run out of
+    // children to materialize. If we run out then _underflow is true.
 
     RenderBox child;
     while (currentLogicalOffset < endLogicalOffset) {
@@ -698,14 +712,14 @@ class _LazyBlockElement extends RenderObjectElement {
       if (physicalIndex >= _children.length) {
         assert(physicalIndex == _children.length);
         Element newElement;
-        owner.lockState(() {
+        owner.buildScope(this, () {
           Widget newWidget = _callBuilder(builder, currentLogicalIndex);
           if (newWidget == null)
             return;
           newWidget = new RepaintBoundary.wrap(newWidget, currentLogicalIndex);
           Element previousChild = _children.isEmpty ? null : _children.last;
           newElement = inflateWidget(newWidget, previousChild);
-        }, building: true);
+        });
         if (newElement == null)
           break;
         _children.add(newElement);
@@ -725,7 +739,8 @@ class _LazyBlockElement extends RenderObjectElement {
     // viewport. The currentLogicalIndex is the index of the first child that
     // we don't need.
 
-    if (currentLogicalOffset < endLogicalOffset) {
+    _underflow = currentLogicalOffset < endLogicalOffset;
+    if (_underflow) {
       // The last element is visible. We can scroll as far as they want, there's
       // nothing more to paint.
       _startOffsetUpperLimit = double.INFINITY;

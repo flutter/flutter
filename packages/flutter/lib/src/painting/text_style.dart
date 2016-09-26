@@ -35,6 +35,10 @@ class TextStyle {
   final String fontFamily;
 
   /// The size of gyphs (in logical pixels) to use when painting the text.
+  ///
+  /// During painting, the [fontSize] is multiplied by the current
+  /// `textScaleFactor` to let users make it easier to read text by increasing
+  /// its size.
   final double fontSize;
 
   /// The typeface thickness to use when painting the text (e.g., bold).
@@ -49,7 +53,7 @@ class TextStyle {
   /// The amount of space (in logical pixels) to add at each sequence of white-space (i.e. between each word).
   final double wordSpacing;
 
-  /// The baseline to use for aligning the text.
+  /// The common baseline that should be aligned between this text span and its parent text span, or, for the root text spans, with the line box.
   final TextBaseline textBaseline;
 
   /// The height of this text span, as a multiple of the font size.
@@ -100,6 +104,67 @@ class TextStyle {
     );
   }
 
+  /// Creates a copy of this text style but with the numeric fields multiplied
+  /// by the given factors and then incremented by the given deltas.
+  ///
+  /// For example, `style.apply(fontSizeFactor: 2.0, fontSizeDelta: 1.0)` would
+  /// return a [TextStyle] whose [fontSize] is `style.fontSize * 2.0 + 1.0`.
+  ///
+  /// For the [fontWeight], the delta is applied to the [FontWeight] enum index
+  /// values, so that for instance `style.apply(fontWeightDelta: -2)` when
+  /// applied to a `style` whose [fontWeight] is [FontWeight.w500] will return a
+  /// [TextStyle] with a [FontWeight.w300].
+  ///
+  /// The arguments must not be null.
+  ///
+  /// If the underlying values are null, then the corresponding factors and/or
+  /// deltas must not be specified.
+  ///
+  /// The non-numeric fields can be controlled using the cooresponding arguments.
+  TextStyle apply({
+    Color color,
+    String fontFamily,
+    double fontSizeFactor: 1.0,
+    double fontSizeDelta: 0.0,
+    int fontWeightDelta: 0,
+    double letterSpacingFactor: 1.0,
+    double letterSpacingDelta: 0.0,
+    double wordSpacingFactor: 1.0,
+    double wordSpacingDelta: 0.0,
+    double heightFactor: 1.0,
+    double heightDelta: 0.0,
+  }) {
+    assert(fontSizeFactor != null);
+    assert(fontSizeDelta != null);
+    assert(fontSize != null || (fontSizeFactor == 1.0 && fontSizeDelta == 0.0));
+    assert(fontWeightDelta != null);
+    assert(fontWeight != null || fontWeightDelta == 0.0);
+    assert(letterSpacingFactor != null);
+    assert(letterSpacingDelta != null);
+    assert(letterSpacing != null || (letterSpacingFactor == 1.0 && letterSpacingDelta == 0.0));
+    assert(wordSpacingFactor != null);
+    assert(wordSpacingDelta != null);
+    assert(wordSpacing != null || (wordSpacingFactor == 1.0 && wordSpacingDelta == 0.0));
+    assert(heightFactor != null);
+    assert(heightDelta != null);
+    assert(heightFactor != null || (heightFactor == 1.0 && heightDelta == 0.0));
+    return new TextStyle(
+      inherit: inherit,
+      color: color ?? this.color,
+      fontFamily: fontFamily ?? this.fontFamily,
+      fontSize: fontSize == null ? null : fontSize * fontSizeFactor + fontSizeDelta,
+      fontWeight: fontWeight == null ? null : FontWeight.values[(fontWeight.index + fontWeightDelta).clamp(0, FontWeight.values.length - 1)],
+      fontStyle: fontStyle,
+      letterSpacing: letterSpacing == null ? null : letterSpacing * letterSpacingFactor + letterSpacingDelta,
+      wordSpacing: wordSpacing == null ? null : wordSpacing * wordSpacingFactor + wordSpacingDelta,
+      textBaseline: textBaseline,
+      height: height == null ? null : height * heightFactor + heightDelta,
+      decoration: decoration,
+      decorationColor: decorationColor,
+      decorationStyle: decorationStyle,
+    );
+  }
+
   /// Returns a new text style that matches this text style but with some values
   /// replaced by the non-null parameters of the given text style. If the given
   /// text style is null, simply returns this text style.
@@ -133,8 +198,7 @@ class TextStyle {
       color: Color.lerp(begin.color, end.color, t),
       fontFamily: t < 0.5 ? begin.fontFamily : end.fontFamily,
       fontSize: ui.lerpDouble(begin.fontSize ?? end.fontSize, end.fontSize ?? begin.fontSize, t),
-      // TODO(ianh): Replace next line with "fontWeight: FontWeight.lerp(begin.fontWeight, end.fontWeight, t)," once engine is revved
-      fontWeight: FontWeight.values[ui.lerpDouble(begin?.fontWeight?.index ?? FontWeight.normal.index, end?.fontWeight?.index ?? FontWeight.normal.index, t.clamp(0.0, 1.0)).round()],
+      fontWeight: FontWeight.lerp(begin.fontWeight, end.fontWeight, t),
       fontStyle: t < 0.5 ? begin.fontStyle : end.fontStyle,
       letterSpacing: ui.lerpDouble(begin.letterSpacing ?? end.letterSpacing, end.letterSpacing ?? begin.letterSpacing, t),
       wordSpacing: ui.lerpDouble(begin.wordSpacing ?? end.wordSpacing, end.wordSpacing ?? begin.wordSpacing, t),
@@ -147,7 +211,7 @@ class TextStyle {
   }
 
   /// The style information for text runs, encoded for use by `dart:ui`.
-  ui.TextStyle get textStyle {
+  ui.TextStyle getTextStyle({ double textScaleFactor: 1.0 }) {
     return new ui.TextStyle(
       color: color,
       decoration: decoration,
@@ -155,8 +219,9 @@ class TextStyle {
       decorationStyle: decorationStyle,
       fontWeight: fontWeight,
       fontStyle: fontStyle,
+      textBaseline: textBaseline,
       fontFamily: fontFamily,
-      fontSize: fontSize,
+      fontSize: fontSize == null ? null : fontSize * textScaleFactor,
       letterSpacing: letterSpacing,
       wordSpacing: wordSpacing,
       height: height
@@ -164,14 +229,13 @@ class TextStyle {
   }
 
   /// The style information for paragraphs, encoded for use by `dart:ui`.
-  ui.ParagraphStyle getParagraphStyle({ TextAlign textAlign }) {
+  ui.ParagraphStyle getParagraphStyle({ TextAlign textAlign, double textScaleFactor: 1.0 }) {
     return new ui.ParagraphStyle(
       textAlign: textAlign,
-      textBaseline: textBaseline,
       fontWeight: fontWeight,
       fontStyle: fontStyle,
       fontFamily: fontFamily,
-      fontSize: fontSize,
+      fontSize: fontSize == null ? null : fontSize * textScaleFactor,
       lineHeight: height
     );
   }

@@ -8,6 +8,7 @@ import 'package:vector_math/vector_math_64.dart';
 import 'basic.dart';
 import 'container.dart';
 import 'framework.dart';
+import 'text.dart';
 
 /// An interpolation between two [BoxConstraint]s.
 class BoxConstraintsTween extends Tween<BoxConstraints> {
@@ -156,7 +157,7 @@ abstract class AnimatedWidgetBaseState<T extends ImplicitlyAnimatedWidget> exten
 
   @override
   void dispose() {
-    _controller.stop();
+    _controller.dispose();
     super.dispose();
   }
 
@@ -235,10 +236,11 @@ class AnimatedContainer extends ImplicitlyAnimatedWidget {
     Curve curve: Curves.linear,
     @required Duration duration
   }) : super(key: key, curve: curve, duration: duration) {
-    assert(decoration == null || decoration.debugAssertValid());
-    assert(foregroundDecoration == null || foregroundDecoration.debugAssertValid());
+    assert(decoration == null || decoration.debugAssertIsValid());
+    assert(foregroundDecoration == null || foregroundDecoration.debugAssertIsValid());
     assert(margin == null || margin.isNonNegative);
     assert(padding == null || padding.isNonNegative);
+    assert(constraints == null || constraints.debugAssertIsValid());
   }
 
   /// The widget below this widget in the tree.

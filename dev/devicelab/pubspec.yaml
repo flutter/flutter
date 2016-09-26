@@ -1,0 +1,19 @@
+name: flutter_devicelab
+version: 0.0.1
+author: Flutter Authors <flutter-dev@googlegroups.com>
+description: Flutter continuous integration performance and correctness tests.
+homepage: https://github.com/flutter/flutter
+
+environment:
+  sdk: '>=1.12.0 <2.0.0'
+
+dependencies:
+  args: ^0.13.4
+  meta: ^1.0.3
+  path: ^1.3.0
+  stack_trace: ^1.4.0
+  vm_service_client: '^0.2.0'
+
+dev_dependencies:
+  # See packages/flutter_test/pubspec.yaml for why we're pinning this version.
+  test: 0.12.15+4

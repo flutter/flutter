@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:ui' show Size, Locale, hashValues;
 import 'dart:ui' as ui show Image;
+import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/http.dart' as http;
@@ -99,26 +100,31 @@ class ImageConfiguration {
       if (hasArguments)
         result.write(', ');
       result.write('bundle: $bundle');
+      hasArguments = true;
     }
     if (devicePixelRatio != null) {
       if (hasArguments)
         result.write(', ');
       result.write('devicePixelRatio: $devicePixelRatio');
+      hasArguments = true;
     }
     if (locale != null) {
       if (hasArguments)
         result.write(', ');
       result.write('locale: $locale');
+      hasArguments = true;
     }
     if (size != null) {
       if (hasArguments)
         result.write(', ');
       result.write('size: $size');
+      hasArguments = true;
     }
     if (platform != null) {
       if (hasArguments)
         result.write(', ');
       result.write('platform: $platform');
+      hasArguments = true;
     }
     result.write(')');
     return result.toString();
@@ -219,10 +225,12 @@ abstract class DataPipeImageProvider<T> extends ImageProvider<T> {
   /// const constructors so that they can be used in const expressions.
   const DataPipeImageProvider();
 
+  /// Converts a key into an [ImageStreamCompleter], and begins fetching the
+  /// image using [loadAsync].
   @override
   ImageStreamCompleter load(T key) {
     return new OneFrameImageStreamCompleter(
-      _loadAsync(key),
+      loadAsync(key),
       informationCollector: (StringBuffer information) {
         information.writeln('Image provider: $this');
         information.write('Image key: $key');
@@ -230,7 +238,12 @@ abstract class DataPipeImageProvider<T> extends ImageProvider<T> {
     );
   }
 
-  Future<ImageInfo> _loadAsync(T key) async {
+  /// Fetches the image from the data pipe, decodes it, and returns a
+  /// corresponding [ImageInfo] object.
+  ///
+  /// This function is used by [load].
+  @protected
+  Future<ImageInfo> loadAsync(T key) async {
     final mojo.MojoDataPipeConsumer dataPipe = await loadDataPipe(key);
     if (dataPipe == null)
       throw 'Unable to read data';
@@ -266,7 +279,7 @@ abstract class DataPipeImageProvider<T> extends ImageProvider<T> {
 // TODO(ianh): Find some way to honour cache headers to the extent that when the
 // last reference to an image is released, we proactively evict the image from
 // our cache if the headers describe the image as having expired at that point.
-class NetworkImage extends DataPipeImageProvider<NetworkImage> {
+class NetworkImage extends ImageProvider<NetworkImage> {
   /// Creates an object that fetches the image at the given URL.
   ///
   /// The arguments must not be null.
@@ -284,15 +297,36 @@ class NetworkImage extends DataPipeImageProvider<NetworkImage> {
   }
 
   @override
-  Future<mojo.MojoDataPipeConsumer> loadDataPipe(NetworkImage key) async {
-    assert(key == this);
-    return http.readDataPipe(Uri.base.resolve(key.url));
+  ImageStreamCompleter load(NetworkImage key) {
+    return new OneFrameImageStreamCompleter(
+      _loadAsync(key),
+      informationCollector: (StringBuffer information) {
+        information.writeln('Image provider: $this');
+        information.write('Image key: $key');
+      }
+    );
   }
 
-  @override
-  double getScale(NetworkImage key) {
+  Future<ImageInfo> _loadAsync(NetworkImage key) async {
     assert(key == this);
-    return key.scale;
+
+    final Uri resolved = Uri.base.resolve(key.url);
+    final http.Response response = await http.get(resolved);
+    if (response == null || response.statusCode != 200)
+      return null;
+
+    Uint8List bytes = response.bodyBytes;
+    if (bytes.lengthInBytes == 0)
+      return null;
+
+    final ui.Image image = await decodeImageFromList(bytes);
+    if (image == null)
+      return null;
+
+    return new ImageInfo(
+      image: image,
+      scale: key.scale,
+    );
   }
 
   @override
@@ -367,7 +401,7 @@ abstract class AssetBundleImageProvider extends DataPipeImageProvider<AssetBundl
   Future<AssetBundleImageKey> obtainKey(ImageConfiguration configuration);
 
   @override
-  Future<mojo.MojoDataPipeConsumer> loadDataPipe(AssetBundleImageKey key) async {
+  Future<mojo.MojoDataPipeConsumer> loadDataPipe(AssetBundleImageKey key) {
     return key.bundle.load(key.name);
   }
 

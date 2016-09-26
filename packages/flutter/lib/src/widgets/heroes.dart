@@ -15,38 +15,9 @@ import 'overlay.dart';
 import 'pages.dart';
 import 'transitions.dart';
 
-// Heroes are the parts of an application's screen-to-screen transitions where a
-// widget from one screen shifts to a position on the other. For example,
-// album art from a list of albums growing to become the centerpiece of the
-// album's details view. In this context, a screen is a navigator ModalRoute.
-
-// To get this effect, all you have to do is wrap each hero on each route with a
-// Hero widget, and give each hero a tag. The tag must either be unique within the
-// current route's widget subtree. When the app transitions from one route to
-// another, each hero is animated to its new location. If a hero is only
-// present on one of the routes and not the other, then it will be made to
-// appear or disappear as needed.
-
 // TODO(ianh): Make the appear/disappear animations pretty. Right now they're
 // pretty crude (just rotate and shrink the constraints). They should probably
 // involve actually scaling and fading, at a minimum.
-
-// Heroes and the Navigator's Stack must be axis-aligned for all this to work.
-// The top left and bottom right coordinates of each animated Hero will be
-// converted to global coordinates and then from there converted to the
-// Navigator Stack's coordinate space, and the entire Hero subtree will, for the
-// duration of the animation, be lifted out of its original place, and
-// positioned on that stack. If the Hero isn't axis aligned, this is going to
-// fail in a rather ugly fashion. Don't rotate your heroes!
-
-// To make the animations look good, it's critical that the widget tree for the
-// hero in both locations be essentially identical. The widget of the target is
-// used to do the transition: when going from route A to route B, route B's
-// hero's widget is placed over route A's hero's widget, and route A's hero is
-// hidden. Then the widget is animated to route B's hero's position, and then
-// the widget is inserted into route B. When going back from B to A, route A's
-// hero's widget is placed over where route B's hero's widget was, and then the
-// animation goes the other way.
 
 // TODO(ianh): If the widgets use Inherited properties, they are taken from the
 // Navigator's position in the widget hierarchy, not the source or target. We
@@ -73,27 +44,95 @@ abstract class _HeroHandle {
   _HeroManifest _takeChild(Animation<double> currentAnimation);
 }
 
+/// A widget that marks its child as being a candidate for hero animations.
+///
+/// During a page transition (see [Navigator]), if a particular feature (e.g. a
+/// picture or heading) appears on both pages, it can be helpful for orienting
+/// the user if the feature appears to physically move from one page to the
+/// other. Such an animation is called a *hero animation*.
+///
+/// To label a widget as such a feature, wrap it in a [Hero] widget. When a
+/// navigation happens, the [Hero] widgets on each page are collected up. For
+/// each pair of [Hero] widgets that have the same tag, a hero animation is
+/// triggered.
+///
+/// Hero animations are managed by a [HeroController].
+///
+/// If a [Hero] is already in flight when another navigation occurs, then it
+/// will continue to the next page.
+///
+/// A particular page must not have more than one [Hero] for each [tag].
+///
+/// ## Discussion
+///
+/// Heroes are the parts of an application's screen-to-screen transitions where
+/// a widget from one screen shifts to a position on the other. For example,
+/// album art from a list of albums growing to become the centerpiece of the
+/// album's details view. In this context, a screen is a [ModalRoute] in a
+/// [Navigator].
+///
+/// To get this effect, all you have to do is wrap each hero on each route with
+/// a [Hero] widget, and give each hero a [tag]. The tag must be unique within
+/// the current route's widget subtree, and must match the tag of a [Hero] in
+/// the target route. When the app transitions from one route to another, each
+/// hero is animated to its new location.
+///
+/// Heroes and the [Navigator]'s [Overlay]'s [Stack] must be axis-aligned for
+/// all this to work. The top left and bottom right coordinates of each animated
+/// [Hero] will be converted to global coordinates and then from there converted
+/// to that [Stack]'s coordinate space, and the entire Hero subtree will, for
+/// the duration of the animation, be lifted out of its original place, and
+/// positioned on that stack. If the [Hero] isn't axis aligned, this is going to
+/// fail in a rather ugly fashion. Don't rotate your heroes!
+///
+/// To make the animations look good, it's critical that the widget tree for the
+/// hero in both locations be essentially identical. The widget of the *target*
+/// is used to do the transition: when going from route A to route B, route B's
+/// hero's widget is placed over route A's hero's widget, and route A's hero is
+/// hidden. Then the widget is animated to route B's hero's position, and then
+/// the widget is inserted into route B. When going back from B to A, route A's
+/// hero's widget is placed over where route B's hero's widget was, and then the
+/// animation goes the other way.
 class Hero extends StatefulWidget {
+  /// Create a hero.
+  ///
+  /// The [tag] and [child] are required.
   Hero({
     Key key,
-    this.tag,
-    this.child,
+    @required this.tag,
     this.turns: 1,
-    this.alwaysAnimate: false
+    this.alwaysAnimate: false,
+    @required this.child,
   }) : super(key: key) {
     assert(tag != null);
+    assert(turns != null);
+    assert(alwaysAnimate != null);
+    assert(child != null);
   }
 
+  /// The identifier for this particular hero. If the tag of this hero matches
+  /// the tag of a hero on the other page during a page transition, then a hero
+  /// animation will be triggered.
   final Object tag;
 
-  /// The widget below this widget in the tree.
-  final Widget child;
-
+  /// The relative number of full rotations that the hero is conceptually at.
+  ///
+  /// If a hero is animated from a [Hero] with [turns] set to 1 to a [Hero] with
+  /// [turns] set to 2, then it will turn by one full rotation during its
+  /// animation. Normally, all heroes have a [turns] value of 1.
   final int turns;
 
   /// If true, the hero will always animate, even if it has no matching hero to
-  /// animate to or from.
+  /// animate to or from. If it has no target, it will imply a target at the
+  /// same position with zero width and height and with [turns] set to zero.
+  /// This will typically cause it to shrink and spin.
   final bool alwaysAnimate;
+
+  /// The widget below this widget in the tree.
+  ///
+  /// This subtree should match the appearance of the subtrees of any other
+  /// heroes in the application with the same [tag].
+  final Widget child;
 
   /// Return a hero tag to _HeroState map of all of the heroes within the given subtree.
   static Map<Object, _HeroHandle> _of(BuildContext context) {
@@ -297,6 +336,12 @@ class _HeroMatch {
   final Object tag;
 }
 
+/// Signature for a function that takes two [Rect] instances and returns a
+/// [RectTween] that transitions between them.
+///
+/// This is typically used with a [HeroController] to provide an animation for
+/// [Hero] positions that looks nicer than a linear movement. For example, see
+/// [MaterialRectArcTween].
 typedef RectTween CreateRectTween(Rect begin, Rect end);
 
 class _HeroParty {
@@ -417,7 +462,15 @@ class _HeroParty {
   String toString() => '$_heroes';
 }
 
+/// A [Navigator] observer that manages [Hero] transitions.
+///
+/// An instance of [HeroController] should be used as the [Navigator.observer].
+/// This is done automatically by [MaterialApp].
 class HeroController extends NavigatorObserver {
+  /// Creates a hero controller with the given [RectTween] constructor if any.
+  ///
+  /// The [createRectTween] argument is optional. By default, a linear
+  /// [RectTween] is used.
   HeroController({ CreateRectTween createRectTween }) {
     _party = new _HeroParty(
       onQuestFinished: _handleQuestFinished,

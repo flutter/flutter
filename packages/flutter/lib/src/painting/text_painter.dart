@@ -32,9 +32,11 @@ class TextPainter {
   /// [layout].
   TextPainter({
     TextSpan text,
-    TextAlign textAlign
-  }) : _text = text, _textAlign = textAlign {
-    assert(text == null || text.debugAssertValid());
+    TextAlign textAlign,
+    double textScaleFactor: 1.0
+  }) : _text = text, _textAlign = textAlign, _textScaleFactor = textScaleFactor {
+    assert(text == null || text.debugAssertIsValid());
+    assert(textScaleFactor != null);
   }
 
   ui.Paragraph _paragraph;
@@ -44,7 +46,7 @@ class TextPainter {
   TextSpan get text => _text;
   TextSpan _text;
   set text(TextSpan value) {
-    assert(value == null || value.debugAssertValid());
+    assert(value == null || value.debugAssertIsValid());
     if (_text == value)
       return;
     _text = value;
@@ -59,6 +61,21 @@ class TextPainter {
     if (_textAlign == value)
       return;
     _textAlign = value;
+    _paragraph = null;
+    _needsLayout = true;
+  }
+
+  /// The number of font pixels for each logical pixel.
+  ///
+  /// For example, if the text scale factor is 1.5, text will be 50% larger than
+  /// the specified font size.
+  double get textScaleFactor => _textScaleFactor;
+  double _textScaleFactor;
+  set textScaleFactor(double value) {
+    assert(value != null);
+    if (_textScaleFactor == value)
+      return;
+    _textScaleFactor = value;
     _paragraph = null;
     _needsLayout = true;
   }
@@ -144,8 +161,8 @@ class TextPainter {
     _needsLayout = false;
     if (_paragraph == null) {
       ui.ParagraphBuilder builder = new ui.ParagraphBuilder();
-      _text.build(builder);
-      ui.ParagraphStyle paragraphStyle = _text.style?.getParagraphStyle(textAlign: textAlign);
+      _text.build(builder, textScaleFactor: textScaleFactor);
+      ui.ParagraphStyle paragraphStyle = _text.style?.getParagraphStyle(textAlign: textAlign, textScaleFactor: textScaleFactor);
       paragraphStyle ??= new ui.ParagraphStyle();
       _paragraph = builder.build(paragraphStyle);
     }

@@ -1,0 +1,139 @@
+# Describes the tasks we run in the continuous integration (CI) environment.
+#
+# Cocoon[1] uses this file to generate a checklist of tasks to be performed for
+# every master commit.
+#
+# [1] github.com/flutter/cocoon
+
+# CI tasks.
+#
+# Each key in this dictionary is the unique name of a task, which also
+# corresponds to a file in the "bin/" directory that the task runner will run.
+#
+# Due to historic reasons that may go away at some point, the suffix of the task
+# name is significant. It is used by the dashboard to pick the right HTML
+# template to display the results in a card. If you use a known name suffix also
+# make sure that your task outputs data in the expected format for that card.
+#
+# Known suffixes:
+#
+# __analysis_time:
+#     Analyzer performance benchmarks.
+# __refresh_time:
+#     Edit refresh cycle benchmarks.
+# __start_up:
+#     Application startup speed benchmarks.
+# __timeline_summary:
+#     Per-frame timings and missed/average/total counts.
+# __transition_perf:
+#     Flutter Gallery app transitions benchmark.
+# __size:
+#     Application size benchmarks.
+
+tasks:
+  # Deviceless tests
+
+  # TODO: make these not require "has-android-device"; it is only there to
+  #       ensure we have the Android SDK.
+
+  flutter_gallery__build:
+    description: >
+      Collects various performance metrics from AOT builds of the Flutter
+      Gallery.
+    stage: devicelab
+    required_agent_capabilities: ["has-android-device"]
+
+  complex_layout__build:
+    description: >
+      Collects various performance metrics from AOT builds of the Complex
+      Layout sample app.
+    stage: devicelab
+    required_agent_capabilities: ["has-android-device"]
+
+  basic_material_app__size:
+    description: >
+      Measures the APK/IPA sizes of a basic material app.
+    stage: devicelab
+    required_agent_capabilities: ["has-android-device"]
+
+  analyzer_cli__analysis_time:
+    description: >
+      Measures the speed of analyzing Flutter itself in batch mode.
+    stage: devicelab
+    required_agent_capabilities: ["has-android-device"]
+
+  analyzer_server__analysis_time:
+    description: >
+      Measures the speed of analyzing Flutter itself in server mode.
+    stage: devicelab
+    required_agent_capabilities: ["has-android-device"]
+
+
+  # Android on-device tests
+
+  complex_layout_scroll_perf__timeline_summary:
+    description: >
+      Measures the runtime performance of the Complex Layout sample app on
+      Android.
+    stage: devicelab
+    required_agent_capabilities: ["has-android-device"]
+
+  flutter_gallery__start_up:
+    description: >
+      Measures the startup time of the Flutter Gallery app on Android.
+    stage: devicelab
+    required_agent_capabilities: ["has-android-device"]
+
+  complex_layout__start_up:
+    description: >
+      Measures the startup time of the Complex Layout sample app on Android.
+    stage: devicelab
+    required_agent_capabilities: ["has-android-device"]
+
+  flutter_gallery__transition_perf:
+    description: >
+      Measures the performance of screen transitions in Flutter Gallery on
+      Android.
+    stage: devicelab
+    required_agent_capabilities: ["has-android-device"]
+
+  mega_gallery__refresh_time:
+    description: >
+      Measures AOT snapshot rebuild performance on a generated large app.
+    stage: devicelab
+    required_agent_capabilities: ["has-android-device"]
+
+  hot_mode_dev_cycle__benchmark:
+    description: >
+      Measures the performance of Dart VM hot patching feature.
+    stage: devicelab
+    required_agent_capabilities: ["has-android-device"]
+
+
+  # iOS on-device tests
+
+  complex_layout_scroll_perf_ios__timeline_summary:
+    description: >
+      Measures the runtime performance of the Complex Layout sample app on
+      iOS.
+    stage: devicelab_ios
+    required_agent_capabilities: ["has-ios-device"]
+
+  flutter_gallery_ios__start_up:
+    stage: devicelab_ios
+    required_agent_capabilities: ["has-ios-device"]
+    description: >
+      Measures the startup time of the Flutter Gallery app on iOS.
+
+  complex_layout_ios__start_up:
+    description: >
+      Measures the startup time of the Complex Layout sample app on iOS.
+    stage: devicelab_ios
+    required_agent_capabilities: ["has-ios-device"]
+
+  flutter_gallery_ios__transition_perf:
+    stage: devicelab_ios
+    required_agent_capabilities: ["has-ios-device"]
+    description: >
+      Measures the performance of screen transitions in Flutter Gallery on
+      iOS.

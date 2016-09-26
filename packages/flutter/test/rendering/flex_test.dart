@@ -24,7 +24,7 @@ void main() {
       additionalConstraints: const BoxConstraints.expand()
     );
     RenderFlex flex = new RenderFlex(
-      direction: FlexDirection.vertical,
+      direction: Axis.vertical,
       children: <RenderBox>[
         new RenderConstrainedBox(additionalConstraints: new BoxConstraints.tightFor(height: 200.0)),
         flexible,
@@ -46,7 +46,7 @@ void main() {
       additionalConstraints: const BoxConstraints.expand()
     );
     RenderFlex flex = new RenderFlex(
-      direction: FlexDirection.horizontal,
+      direction: Axis.horizontal,
       children: <RenderBox>[
         new RenderConstrainedBox(additionalConstraints: new BoxConstraints.tightFor(width: 200.0)),
         flexible,
@@ -65,7 +65,7 @@ void main() {
 
   test('Vertical Flipped Constraints', () {
     RenderFlex flex = new RenderFlex(
-      direction: FlexDirection.vertical,
+      direction: Axis.vertical,
       children: <RenderBox>[
         new RenderAspectRatio(aspectRatio: 1.0),
       ]
@@ -81,7 +81,7 @@ void main() {
   test('Defaults', () {
     RenderFlex flex = new RenderFlex();
     expect(flex.crossAxisAlignment, equals(CrossAxisAlignment.center));
-    expect(flex.direction, equals(FlexDirection.horizontal));
+    expect(flex.direction, equals(Axis.horizontal));
   });
 
   test('Parent data', () {
@@ -129,7 +129,7 @@ void main() {
     expect(box2.size.width, equals(100.0));
     expect(box2.size.height, equals(100.0));
 
-    flex.direction = FlexDirection.vertical;
+    flex.direction = Axis.vertical;
     pumpFrame();
     expect(box1.size.width, equals(100.0));
     expect(box1.size.height, equals(0.0));
@@ -157,7 +157,7 @@ void main() {
     expect(getOffset(box3).dx, equals(350.0));
     expect(box3.size.width, equals(100.0));
 
-    flex.direction = FlexDirection.vertical;
+    flex.direction = Axis.vertical;
     pumpFrame();
     expect(getOffset(box1).dy, equals(25.0));
     expect(box1.size.height, equals(100.0));
@@ -165,5 +165,108 @@ void main() {
     expect(box2.size.height, equals(100.0));
     expect(getOffset(box3).dy, equals(275.0));
     expect(box3.size.height, equals(100.0));
+  });
+
+  test('Fit.loose', () {
+    RenderConstrainedBox box1 = new RenderConstrainedBox(additionalConstraints: new BoxConstraints.tightFor(width: 100.0, height: 100.0));
+    RenderConstrainedBox box2 = new RenderConstrainedBox(additionalConstraints: new BoxConstraints.tightFor(width: 100.0, height: 100.0));
+    RenderConstrainedBox box3 = new RenderConstrainedBox(additionalConstraints: new BoxConstraints.tightFor(width: 100.0, height: 100.0));
+    RenderFlex flex = new RenderFlex(mainAxisAlignment: MainAxisAlignment.spaceBetween);
+    flex.addAll(<RenderBox>[box1, box2, box3]);
+    layout(flex, constraints: const BoxConstraints(
+      minWidth: 0.0, maxWidth: 500.0, minHeight: 0.0, maxHeight: 400.0)
+    );
+    Offset getOffset(RenderBox box) {
+      FlexParentData parentData = box.parentData;
+      return parentData.offset;
+    }
+    expect(getOffset(box1).dx, equals(0.0));
+    expect(box1.size.width, equals(100.0));
+    expect(getOffset(box2).dx, equals(200.0));
+    expect(box2.size.width, equals(100.0));
+    expect(getOffset(box3).dx, equals(400.0));
+    expect(box3.size.width, equals(100.0));
+
+    void setFit(RenderBox box, FlexFit fit) {
+      FlexParentData parentData = box.parentData;
+      parentData.flex = 1;
+      parentData.fit = fit;
+    }
+
+    setFit(box1, FlexFit.loose);
+    flex.markNeedsLayout();
+
+    pumpFrame();
+    expect(getOffset(box1).dx, equals(0.0));
+    expect(box1.size.width, equals(100.0));
+    expect(getOffset(box2).dx, equals(200.0));
+    expect(box2.size.width, equals(100.0));
+    expect(getOffset(box3).dx, equals(400.0));
+    expect(box3.size.width, equals(100.0));
+
+    box1.additionalConstraints = new BoxConstraints.tightFor(width: 1000.0, height: 100.0);
+
+    pumpFrame();
+    expect(getOffset(box1).dx, equals(0.0));
+    expect(box1.size.width, equals(300.0));
+    expect(getOffset(box2).dx, equals(300.0));
+    expect(box2.size.width, equals(100.0));
+    expect(getOffset(box3).dx, equals(400.0));
+    expect(box3.size.width, equals(100.0));
+  });
+
+  test('Flexible with MainAxisSize.min', () {
+    RenderConstrainedBox box1 = new RenderConstrainedBox(additionalConstraints: new BoxConstraints.tightFor(width: 100.0, height: 100.0));
+    RenderConstrainedBox box2 = new RenderConstrainedBox(additionalConstraints: new BoxConstraints.tightFor(width: 100.0, height: 100.0));
+    RenderConstrainedBox box3 = new RenderConstrainedBox(additionalConstraints: new BoxConstraints.tightFor(width: 100.0, height: 100.0));
+    RenderFlex flex = new RenderFlex(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween
+    );
+    flex.addAll(<RenderBox>[box1, box2, box3]);
+    layout(flex, constraints: const BoxConstraints(
+      minWidth: 0.0, maxWidth: 500.0, minHeight: 0.0, maxHeight: 400.0)
+    );
+    Offset getOffset(RenderBox box) {
+      FlexParentData parentData = box.parentData;
+      return parentData.offset;
+    }
+    expect(getOffset(box1).dx, equals(0.0));
+    expect(box1.size.width, equals(100.0));
+    expect(getOffset(box2).dx, equals(100.0));
+    expect(box2.size.width, equals(100.0));
+    expect(getOffset(box3).dx, equals(200.0));
+    expect(box3.size.width, equals(100.0));
+    expect(flex.size.width, equals(300.0));
+
+    void setFit(RenderBox box, FlexFit fit) {
+      FlexParentData parentData = box.parentData;
+      parentData.flex = 1;
+      parentData.fit = fit;
+    }
+
+    setFit(box1, FlexFit.tight);
+    flex.markNeedsLayout();
+
+    pumpFrame();
+    expect(getOffset(box1).dx, equals(0.0));
+    expect(box1.size.width, equals(300.0));
+    expect(getOffset(box2).dx, equals(300.0));
+    expect(box2.size.width, equals(100.0));
+    expect(getOffset(box3).dx, equals(400.0));
+    expect(box3.size.width, equals(100.0));
+    expect(flex.size.width, equals(500.0));
+
+    setFit(box1, FlexFit.loose);
+    flex.markNeedsLayout();
+
+    pumpFrame();
+    expect(getOffset(box1).dx, equals(0.0));
+    expect(box1.size.width, equals(100.0));
+    expect(getOffset(box2).dx, equals(100.0));
+    expect(box2.size.width, equals(100.0));
+    expect(getOffset(box3).dx, equals(200.0));
+    expect(box3.size.width, equals(100.0));
+    expect(flex.size.width, equals(300.0));
   });
 }

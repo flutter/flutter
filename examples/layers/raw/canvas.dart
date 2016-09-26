@@ -29,10 +29,13 @@ ui.Picture paint(ui.Rect paintBounds) {
   ui.Point mid = size.center(ui.Point.origin);
   double radius = size.shortestSide / 2.0;
 
+  final double devicePixelRatio = ui.window.devicePixelRatio;
+  final ui.Size logicalSize = ui.window.physicalSize / devicePixelRatio;
+
   canvas.save();
-  canvas.translate(-mid.x/2.0, ui.window.size.height*2.0);
+  canvas.translate(-mid.x/2.0, logicalSize.height*2.0);
   canvas.clipRect(
-      new ui.Rect.fromLTRB(0.0, -ui.window.size.height, ui.window.size.width, radius));
+      new ui.Rect.fromLTRB(0.0, -logicalSize.height, logicalSize.width, radius));
 
   canvas.translate(mid.x, mid.y);
   paint.color = const ui.Color.fromARGB(128, 255, 0, 255);
@@ -82,7 +85,7 @@ ui.Scene composite(ui.Picture picture, ui.Rect paintBounds) {
 }
 
 void beginFrame(Duration timeStamp) {
-  ui.Rect paintBounds = ui.Point.origin & ui.window.size;
+  ui.Rect paintBounds = ui.Point.origin & (ui.window.physicalSize / ui.window.devicePixelRatio);
   ui.Picture picture = paint(paintBounds);
   ui.Scene scene = composite(picture, paintBounds);
   ui.window.render(scene);

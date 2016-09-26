@@ -86,13 +86,15 @@ class Icon extends StatelessWidget {
         width: iconSize,
         height: iconSize,
         child: new Center(
-          child: new Text(
-            new String.fromCharCode(icon.codePoint),
-            style: new TextStyle(
-              inherit: false,
-              color: iconColor,
-              fontSize: iconSize,
-              fontFamily: 'MaterialIcons'
+          child: new RichText(
+            text: new TextSpan(
+              text: new String.fromCharCode(icon.codePoint),
+              style: new TextStyle(
+                inherit: false,
+                color: iconColor,
+                fontSize: iconSize,
+                fontFamily: 'MaterialIcons'
+              )
             )
           )
         )

@@ -10,7 +10,7 @@ import 'dart:ui' as ui show window;
 import 'package:flutter/foundation.dart';
 import 'package:mojo/bindings.dart' as mojo_bindings;
 import 'package:mojo/core.dart' as mojo_core;
-import 'package:sky_services/pointer/pointer.mojom.dart';
+import 'package:flutter_services/pointer.dart';
 
 import 'arena.dart';
 import 'converter.dart';
@@ -40,7 +40,7 @@ abstract class GestureBinding extends BindingBase implements HitTestable, HitTes
       0
     );
     final PointerPacket packet = PointerPacket.deserialize(message);
-    _pendingPointerEvents.addAll(PointerEventConverter.expand(packet.pointers));
+    _pendingPointerEvents.addAll(PointerEventConverter.expand(packet.pointers, ui.window.devicePixelRatio));
     _flushPointerEventQueue();
   }
 

@@ -1,17 +1,9 @@
 name: flutter_manual_tests
+
 dependencies:
   flutter:
-    path: ../../packages/flutter
-  flutter_sprites:
-    path: ../../packages/flutter_sprites
-  # Also update dev/manual_tests/pubspec.yaml
-  # and dev/benchmarks/complex_layout/pubspec.yaml
-  flutter_gallery_assets:
-    git:
-      url: https://flutter.googlesource.com/gallery-assets
-      ref: ef928550119411358b8b25e16aecde6ace513526
+    sdk: flutter
 
 dev_dependencies:
-  test: any # flutter_test provides the version constraints
   flutter_test:
-    path: ../../packages/flutter_test
+    sdk: flutter

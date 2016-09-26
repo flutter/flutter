@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/animation.dart';
+import 'package:flutter/foundation.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'box.dart';
@@ -54,10 +54,10 @@ abstract class FlowPaintingContext {
 ///  * [Flow]
 ///  * [RenderFlow]
 abstract class FlowDelegate {
-  /// The flow will repaint whenever the [repaint] animation ticks.
-  const FlowDelegate({ Animation<dynamic> repaint }) : _repaint = repaint;
+  /// The flow will repaint whenever [repaint] notifies its listeners.
+  const FlowDelegate({ Listenable repaint }) : _repaint = repaint;
 
-  final Animation<dynamic> _repaint;
+  final Listenable _repaint;
 
   /// Override to control the size of the container for the children.
   ///

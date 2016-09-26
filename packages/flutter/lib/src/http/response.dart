@@ -2,103 +2,94 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:http_parser/http_parser.dart';
+
+import 'base_request.dart';
+import 'base_response.dart';
+import 'streamed_response.dart';
+import 'utils.dart';
+
 /// An HTTP response where the entire response body is known in advance.
-class Response {
-  /// Creates a [Response] object with the given fields.
-  ///
-  /// If [bodyBytes] is non-null, it is used to populate [body].
-  Response.bytes(this.bodyBytes, this.statusCode, {
-    this.headers: const <String, String>{},
-    this.error
-  });
-
-  /// The result of decoding [bodyBytes] using the character encoding declared
-  /// in the headers.
-  ///
-  /// Defaults to [LATIN1] (ISO 8859-1).
-  ///
-  /// If [bodyBytes] is null, this will also be null.
-  String get body => bodyBytes == null ? null : _encodingForHeaders(headers).decode(bodyBytes);
-
-  /// The raw byte stream.
+class Response extends BaseResponse {
+  /// The bytes comprising the body of this response.
   final Uint8List bodyBytes;
 
-  /// The HTTP result code.
+  /// Creates a new HTTP response with a string body.
+  Response(
+      String body,
+      int statusCode,
+      {BaseRequest request,
+       Map<String, String> headers: const <String, String>{},
+       bool isRedirect: false,
+       bool persistentConnection: true,
+       String reasonPhrase})
+    : this.bytes(
+        _encodingForHeaders(headers).encode(body),
+        statusCode,
+        request: request,
+        headers: headers,
+        isRedirect: isRedirect,
+        persistentConnection: persistentConnection,
+        reasonPhrase: reasonPhrase);
+
+  /// Create a new HTTP response with a byte array body.
+  Response.bytes(
+      List<int> bodyBytes,
+      int statusCode,
+      {BaseRequest request,
+       Map<String, String> headers: const <String, String>{},
+       bool isRedirect: false,
+       bool persistentConnection: true,
+       String reasonPhrase})
+    : bodyBytes = toUint8List(bodyBytes),
+      super(
+        statusCode,
+        contentLength: bodyBytes.length,
+        request: request,
+        headers: headers,
+        isRedirect: isRedirect,
+        persistentConnection: persistentConnection,
+        reasonPhrase: reasonPhrase);
+
+  /// The body of the response as a string. This is converted from [bodyBytes]
+  /// using the `charset` parameter of the `Content-Type` header field, if
+  /// available. If it's unavailable or if the encoding name is unknown,
+  /// [LATIN1] is used by default, as per [RFC 2616][].
   ///
-  /// The code 500 is used when no status code could be obtained from the host.
-  final int statusCode;
+  /// [RFC 2616]: http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html
+  String get body => _encodingForHeaders(headers).decode(bodyBytes);
 
-  /// Error information, if any. This may be populated if the [statusCode] is
-  /// 4xx or 5xx. This may be a string (e.g. the status line from the server) or
-  /// an [Exception], but in either case the object should have a useful
-  /// [toString] implementation that returns a human-readable value.
-  final dynamic error;
-
-  /// The headers for this response.
-  final Map<String, String> headers;
-}
-
-bool _isSpace(String c) {
-  return c == ' ' || c == '\t' || c == '\n' || c == '\r' || c == '\f';
-}
-
-int _skipSpaces(String string, int index) {
-  while (index < string.length && _isSpace(string[index]))
-    index += 1;
-  return index;
-}
-
-// https://html.spec.whatwg.org/#algorithm-for-extracting-a-character-encoding-from-a-meta-element
-String _getCharset(String contentType) {
-  int index = 0;
-  while (index < contentType.length) {
-    index = contentType.indexOf(new RegExp(r'charset', caseSensitive: false), index);
-    if (index == -1)
-      return null;
-    index += 7;
-    index = _skipSpaces(contentType, index);
-    if (index >= contentType.length)
-      return null;
-    if (contentType[index] != '=')
-      continue;
-    index += 1;
-    index = _skipSpaces(contentType, index);
-    if (index >= contentType.length)
-      return null;
-    String delimiter = contentType[index];
-    if (delimiter == '"' || delimiter == '\'') {
-      index += 1;
-      if (index >= contentType.length)
-        return null;
-      int start = index;
-      int end = contentType.indexOf(delimiter, start);
-      if (end == -1)
-        return null;
-      return contentType.substring(start, end);
-    }
-    int start = index;
-    while (index < contentType.length) {
-      String c = contentType[index];
-      if (c == ' ' || c == ';')
-        break;
-      index += 1;
-    }
-    return contentType.substring(start, index);
+  /// Creates a new HTTP response by waiting for the full body to become
+  /// available from a [StreamedResponse].
+  static Future<Response> fromStream(StreamedResponse response) {
+    return response.stream.toBytes().then((List<int> body) {
+      return new Response.bytes(
+          body,
+          response.statusCode,
+          request: response.request,
+          headers: response.headers,
+          isRedirect: response.isRedirect,
+          persistentConnection: response.persistentConnection,
+          reasonPhrase: response.reasonPhrase);
+    });
   }
-  return null;
 }
 
-Encoding _encodingForHeaders(Map<String, String> headers) {
-  if (headers == null)
-    return LATIN1;
+/// Returns the encoding to use for a response with the given headers. This
+/// defaults to [LATIN1] if the headers don't specify a charset or
+/// if that charset is unknown.
+Encoding _encodingForHeaders(Map<String, String> headers) =>
+  encodingForCharset(_contentTypeForHeaders(headers).parameters['charset']);
+
+/// Returns the [MediaType] object for the given headers's content-type.
+///
+/// Defaults to `application/octet-stream`.
+MediaType _contentTypeForHeaders(Map<String, String> headers) {
   String contentType = headers['content-type'];
-  if (contentType == null)
-    return LATIN1;
-  String charset = _getCharset(contentType);
-  if (charset == null)
-    return LATIN1;
-  return Encoding.getByName(charset) ?? LATIN1;
+  if (contentType != null) return new MediaType.parse(contentType);
+  return new MediaType("application", "octet-stream");
 }

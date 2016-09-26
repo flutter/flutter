@@ -40,6 +40,8 @@ class Ticker {
     assert(_startTime == null);
     _completer = new Completer<Null>();
     _scheduleTick();
+    if (SchedulerBinding.instance.isProducingFrame)
+      _startTime = SchedulerBinding.instance.currentFrameTimeStamp;
     return _completer.future;
   }
 

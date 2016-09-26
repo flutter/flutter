@@ -316,7 +316,7 @@ class CardCollectionState extends State<CardCollection> {
                 }
               )
             )
-          : new DefaultTextStyle.inherit(
+          : new DefaultTextStyle.merge(
               context: context,
               style: cardLabelStyle.copyWith(
                 fontSize: _varyFontSizes ? 5.0 + index : null
@@ -363,11 +363,7 @@ class CardCollectionState extends State<CardCollection> {
     // size of the background,card Stack will be based only on the card. The
     // Viewport ensures that when the card's resize animation occurs, the
     // background (text and icons) will just be clipped, not resized.
-    Widget background = new Positioned(
-      top: 0.0,
-      right: 0.0,
-      bottom: 0.0,
-      left: 0.0,
+    Widget background = new Positioned.fill(
       child: new Container(
         margin: const EdgeInsets.all(4.0),
         child: new Viewport(

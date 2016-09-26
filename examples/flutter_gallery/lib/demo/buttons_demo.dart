@@ -143,7 +143,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
         children: <Widget>[
           new ListItem(
             title: new Text('Scrollable dropdown:'),
-            trailing: new DropDownButton<String>(
+            trailing: new DropdownButton<String>(
               value: dropdown1Value,
               onChanged: (String newValue) {
                 setState(() {
@@ -156,7 +156,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
                   'Bit', 'More', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten'
                  ]
                 .map((String value) {
-                  return new DropDownMenuItem<String>(
+                  return new DropdownMenuItem<String>(
                     value: value,
                     child: new Text(value));
                 })
@@ -168,7 +168,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
           ),
           new ListItem(
             title: new Text('Simple dropdown:'),
-            trailing: new DropDownButton<String>(
+            trailing: new DropdownButton<String>(
               value: dropdown2Value,
               onChanged: (String newValue) {
                 setState(() {
@@ -178,7 +178,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
               },
               items: <String>['One', 'Two', 'Free', 'Four']
                 .map((String value) {
-                  return new DropDownMenuItem<String>(
+                  return new DropdownMenuItem<String>(
                     value: value,
                     child: new Text(value));
                 })

@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 import 'package:meta/meta.dart';
 
@@ -18,13 +19,13 @@ import 'shadows.dart';
 import 'theme.dart';
 import 'material.dart';
 
-const Duration _kDropDownMenuDuration = const Duration(milliseconds: 300);
+const Duration _kDropdownMenuDuration = const Duration(milliseconds: 300);
 const double _kMenuItemHeight = 48.0;
 const EdgeInsets _kMenuVerticalPadding = const EdgeInsets.symmetric(vertical: 8.0);
 const EdgeInsets _kMenuHorizontalPadding = const EdgeInsets.symmetric(horizontal: 16.0);
 
-class _DropDownMenuPainter extends CustomPainter {
-  _DropDownMenuPainter({
+class _DropdownMenuPainter extends CustomPainter {
+  _DropdownMenuPainter({
     Color color,
     int elevation,
     this.selectedIndex,
@@ -67,7 +68,7 @@ class _DropDownMenuPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_DropDownMenuPainter oldPainter) {
+  bool shouldRepaint(_DropdownMenuPainter oldPainter) {
     return oldPainter.color != color
         || oldPainter.elevation != elevation
         || oldPainter.selectedIndex != selectedIndex
@@ -77,8 +78,8 @@ class _DropDownMenuPainter extends CustomPainter {
 
 // Do not use the platform-specific default scroll configuration.
 // Dropdown menus should never overscroll or display an overscroll indicator.
-class _DropDownScrollConfigurationDelegate extends ScrollConfigurationDelegate {
-  const _DropDownScrollConfigurationDelegate(this._platform);
+class _DropdownScrollConfigurationDelegate extends ScrollConfigurationDelegate {
+  const _DropdownScrollConfigurationDelegate(this._platform);
 
   @override
   TargetPlatform get platform => _platform;
@@ -88,25 +89,27 @@ class _DropDownScrollConfigurationDelegate extends ScrollConfigurationDelegate {
   ExtentScrollBehavior createScrollBehavior() => new OverscrollWhenScrollableBehavior(platform: platform);
 
   @override
-  Widget wrapScrollWidget(Widget scrollWidget) => new ClampOverscrolls(value: true, child: scrollWidget);
+  Widget wrapScrollWidget(BuildContext context, Widget scrollWidget) {
+    return new ClampOverscrolls(edge: ScrollableEdge.both, child: scrollWidget);
+  }
 
   @override
   bool updateShouldNotify(ScrollConfigurationDelegate old) => platform != old.platform;
 }
 
-class _DropDownMenu<T> extends StatefulWidget {
-  _DropDownMenu({
+class _DropdownMenu<T> extends StatefulWidget {
+  _DropdownMenu({
     Key key,
-    _DropDownRoute<T> route
+    _DropdownRoute<T> route
   }) : route = route, super(key: key);
 
-  final _DropDownRoute<T> route;
+  final _DropdownRoute<T> route;
 
   @override
-  _DropDownMenuState<T> createState() => new _DropDownMenuState<T>();
+  _DropdownMenuState<T> createState() => new _DropdownMenuState<T>();
 }
 
-class _DropDownMenuState<T> extends State<_DropDownMenu<T>> {
+class _DropdownMenuState<T> extends State<_DropdownMenu<T>> {
   CurvedAnimation _fadeOpacity;
   CurvedAnimation _resize;
 
@@ -125,7 +128,7 @@ class _DropDownMenuState<T> extends State<_DropDownMenu<T>> {
     _resize = new CurvedAnimation(
       parent: config.route.animation,
       curve: const Interval(0.25, 0.5),
-      reverseCurve: const Step(0.0)
+      reverseCurve: const Threshold(0.0)
     );
   }
 
@@ -139,13 +142,13 @@ class _DropDownMenuState<T> extends State<_DropDownMenu<T>> {
     //
     // When the menu is dismissed we just fade the entire thing out
     // in the first 0.25s.
-    final _DropDownRoute<T> route = config.route;
+    final _DropdownRoute<T> route = config.route;
     final double unit = 0.5 / (route.items.length + 1.5);
     final List<Widget> children = <Widget>[];
     for (int itemIndex = 0; itemIndex < route.items.length; ++itemIndex) {
       CurvedAnimation opacity;
       if (itemIndex == route.selectedIndex) {
-        opacity = new CurvedAnimation(parent: route.animation, curve: const Step(0.0));
+        opacity = new CurvedAnimation(parent: route.animation, curve: const Threshold(0.0));
       } else {
         final double start = (0.5 + (itemIndex + 1) * unit).clamp(0.0, 1.0);
         final double end = (start + 1.5 * unit).clamp(0.0, 1.0);
@@ -160,7 +163,7 @@ class _DropDownMenuState<T> extends State<_DropDownMenu<T>> {
           ),
           onTap: () => Navigator.pop(
             context,
-            new _DropDownRouteResult<T>(route.items[itemIndex].value)
+            new _DropdownRouteResult<T>(route.items[itemIndex].value)
           )
         )
       ));
@@ -169,7 +172,7 @@ class _DropDownMenuState<T> extends State<_DropDownMenu<T>> {
     return new FadeTransition(
       opacity: _fadeOpacity,
       child: new CustomPaint(
-        painter: new _DropDownMenuPainter(
+        painter: new _DropdownMenuPainter(
           color: Theme.of(context).canvasColor,
           elevation: route.elevation,
           selectedIndex: route.selectedIndex,
@@ -179,7 +182,7 @@ class _DropDownMenuState<T> extends State<_DropDownMenu<T>> {
           type: MaterialType.transparency,
           textStyle: route.style,
           child: new ScrollConfiguration(
-            delegate: new _DropDownScrollConfigurationDelegate(Theme.of(context).platform),
+            delegate: new _DropdownScrollConfigurationDelegate(Theme.of(context).platform),
             child: new Scrollbar(
               child: new ScrollableList(
                 scrollableKey: config.route.scrollableKey,
@@ -195,10 +198,10 @@ class _DropDownMenuState<T> extends State<_DropDownMenu<T>> {
   }
 }
 
-class _DropDownMenuRouteLayout<T> extends SingleChildLayoutDelegate {
-  _DropDownMenuRouteLayout({ this.route });
+class _DropdownMenuRouteLayout<T> extends SingleChildLayoutDelegate {
+  _DropdownMenuRouteLayout({ this.route });
 
-  final _DropDownRoute<T> route;
+  final _DropdownRoute<T> route;
 
   Rect get buttonRect => route.buttonRect;
   int get selectedIndex => route.selectedIndex;
@@ -249,29 +252,33 @@ class _DropDownMenuRouteLayout<T> extends SingleChildLayoutDelegate {
     if (route.initialLayout) {
       route.initialLayout = false;
       final double scrollOffset = selectedItemOffset - (buttonTop - top);
-      scrollableKey.currentState.scrollTo(scrollOffset);
+      SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
+        // TODO(ianh): Compute and set this during layout instead of being
+        // lagged by one frame. https://github.com/flutter/flutter/issues/5751
+        scrollableKey.currentState.scrollTo(scrollOffset);
+      });
     }
 
     return new Offset(buttonRect.left, top);
   }
 
   @override
-  bool shouldRelayout(_DropDownMenuRouteLayout<T> oldDelegate) => oldDelegate.route != route;
+  bool shouldRelayout(_DropdownMenuRouteLayout<T> oldDelegate) => oldDelegate.route != route;
 }
 
 // We box the return value so that the return value can be null. Otherwise,
 // canceling the route (which returns null) would get confused with actually
 // returning a real null value.
-class _DropDownRouteResult<T> {
-  const _DropDownRouteResult(this.result);
+class _DropdownRouteResult<T> {
+  const _DropdownRouteResult(this.result);
 
   final T result;
 
   @override
   bool operator ==(dynamic other) {
-    if (other is! _DropDownRouteResult<T>)
+    if (other is! _DropdownRouteResult<T>)
       return false;
-    final _DropDownRouteResult<T> typedOther = other;
+    final _DropdownRouteResult<T> typedOther = other;
     return result == typedOther.result;
   }
 
@@ -279,9 +286,9 @@ class _DropDownRouteResult<T> {
   int get hashCode => result.hashCode;
 }
 
-class _DropDownRoute<T> extends PopupRoute<_DropDownRouteResult<T>> {
-  _DropDownRoute({
-    Completer<_DropDownRouteResult<T>> completer,
+class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
+  _DropdownRoute({
+    Completer<_DropdownRouteResult<T>> completer,
     this.items,
     this.buttonRect,
     this.selectedIndex,
@@ -291,8 +298,8 @@ class _DropDownRoute<T> extends PopupRoute<_DropDownRouteResult<T>> {
     assert(style != null);
   }
 
-  final GlobalKey<ScrollableState> scrollableKey = new GlobalKey<ScrollableState>(debugLabel: '_DropDownMenu');
-  final List<DropDownMenuItem<T>> items;
+  final GlobalKey<ScrollableState> scrollableKey = new GlobalKey<ScrollableState>(debugLabel: '_DropdownMenu');
+  final List<DropdownMenuItem<T>> items;
   final Rect buttonRect;
   final int selectedIndex;
   final int elevation;
@@ -312,7 +319,7 @@ class _DropDownRoute<T> extends PopupRoute<_DropDownRouteResult<T>> {
   }
 
   @override
-  Duration get transitionDuration => _kDropDownMenuDuration;
+  Duration get transitionDuration => _kDropdownMenuDuration;
 
   @override
   bool get barrierDismissable => true;
@@ -323,21 +330,21 @@ class _DropDownRoute<T> extends PopupRoute<_DropDownRouteResult<T>> {
   @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> forwardAnimation) {
     return new CustomSingleChildLayout(
-      delegate: new _DropDownMenuRouteLayout<T>(route: this),
-      child: new _DropDownMenu<T>(route: this)
+      delegate: new _DropdownMenuRouteLayout<T>(route: this),
+      child: new _DropdownMenu<T>(route: this)
     );
   }
 }
 
-/// An item in a menu created by a [DropDownButton].
+/// An item in a menu created by a [DropdownButton].
 ///
 /// The type `T` is the type of the value the entry represents. All the entries
 /// in a given menu must represent values with consistent types.
-class DropDownMenuItem<T> extends StatelessWidget {
+class DropdownMenuItem<T> extends StatelessWidget {
   /// Creates an item for a drop down menu.
   ///
   /// The [child] argument is required.
-  DropDownMenuItem({
+  DropdownMenuItem({
     Key key,
     this.value,
     this.child
@@ -352,7 +359,7 @@ class DropDownMenuItem<T> extends StatelessWidget {
 
   /// The value to return if the user selects this menu item.
   ///
-  /// Eventually returned in a call to [DropDownButton.onChanged].
+  /// Eventually returned in a call to [DropdownButton.onChanged].
   final T value;
 
   @override
@@ -365,30 +372,30 @@ class DropDownMenuItem<T> extends StatelessWidget {
   }
 }
 
-/// An inherited widget that causes any descendant [DropDownButton]
+/// An inherited widget that causes any descendant [DropdownButton]
 /// widgets to not include their regular underline.
 ///
 /// This is used by [DataTable] to remove the underline from any
-/// [DropDownButton] widgets placed within material data tables, as
+/// [DropdownButton] widgets placed within material data tables, as
 /// required by the material design specification.
-class DropDownButtonHideUnderline extends InheritedWidget {
-  /// Creates a [DropDownButtonHideUnderline]. A non-null [child] must
+class DropdownButtonHideUnderline extends InheritedWidget {
+  /// Creates a [DropdownButtonHideUnderline]. A non-null [child] must
   /// be given.
-  DropDownButtonHideUnderline({
+  DropdownButtonHideUnderline({
     Key key,
     Widget child
   }) : super(key: key, child: child) {
     assert(child != null);
   }
 
-  /// Returns whether the underline of [DropDownButton] widgets should
+  /// Returns whether the underline of [DropdownButton] widgets should
   /// be hidden.
   static bool at(BuildContext context) {
-    return context.inheritFromWidgetOfExactType(DropDownButtonHideUnderline) != null;
+    return context.inheritFromWidgetOfExactType(DropdownButtonHideUnderline) != null;
   }
 
   @override
-  bool updateShouldNotify(DropDownButtonHideUnderline old) => false;
+  bool updateShouldNotify(DropdownButtonHideUnderline old) => false;
 }
 
 /// A material design button for selecting from a list of items.
@@ -404,14 +411,14 @@ class DropDownButtonHideUnderline extends InheritedWidget {
 ///  * [RaisedButton]
 ///  * [FlatButton]
 ///  * <https://www.google.com/design/spec/components/buttons.html#buttons-dropdown-buttons>
-class DropDownButton<T> extends StatefulWidget {
+class DropdownButton<T> extends StatefulWidget {
   /// Creates a drop down button.
   ///
   /// The [items] must have distinct values and [value] must be among them.
   ///
   /// The [elevation] and [iconSize] arguments must not be null (they both have
   /// defaults, so do not need to be specified).
-  DropDownButton({
+  DropdownButton({
     Key key,
     @required this.items,
     @required this.value,
@@ -421,11 +428,11 @@ class DropDownButton<T> extends StatefulWidget {
     this.iconSize: 24.0
   }) : super(key: key) {
     assert(items != null);
-    assert(items.where((DropDownMenuItem<T> item) => item.value == value).length == 1);
+    assert(items.where((DropdownMenuItem<T> item) => item.value == value).length == 1);
   }
 
   /// The list of possible items to select among.
-  final List<DropDownMenuItem<T>> items;
+  final List<DropdownMenuItem<T>> items;
 
   /// The currently selected item.
   final T value;
@@ -451,10 +458,10 @@ class DropDownButton<T> extends StatefulWidget {
   final double iconSize;
 
   @override
-  _DropDownButtonState<T> createState() => new _DropDownButtonState<T>();
+  _DropdownButtonState<T> createState() => new _DropdownButtonState<T>();
 }
 
-class _DropDownButtonState<T> extends State<DropDownButton<T>> {
+class _DropdownButtonState<T> extends State<DropdownButton<T>> {
   @override
   void initState() {
     super.initState();
@@ -463,7 +470,7 @@ class _DropDownButtonState<T> extends State<DropDownButton<T>> {
   }
 
   @override
-  void didUpdateConfig(DropDownButton<T> oldConfig) {
+  void didUpdateConfig(DropdownButton<T> oldConfig) {
     if (config.items[_selectedIndex].value != config.value)
       _updateSelectedIndex();
   }
@@ -481,14 +488,14 @@ class _DropDownButtonState<T> extends State<DropDownButton<T>> {
 
   TextStyle get _textStyle => config.style ?? Theme.of(context).textTheme.subhead;
 
-  _DropDownRoute<T> _currentRoute;
+  _DropdownRoute<T> _currentRoute;
 
   void _handleTap() {
     assert(_currentRoute == null);
     final RenderBox itemBox = context.findRenderObject();
     final Rect itemRect = itemBox.localToGlobal(Point.origin) & itemBox.size;
-    final Completer<_DropDownRouteResult<T>> completer = new Completer<_DropDownRouteResult<T>>();
-    _currentRoute = new _DropDownRoute<T>(
+    final Completer<_DropdownRouteResult<T>> completer = new Completer<_DropdownRouteResult<T>>();
+    _currentRoute = new _DropdownRoute<T>(
       completer: completer,
       items: config.items,
       buttonRect: _kMenuHorizontalPadding.inflateRect(itemRect),
@@ -497,7 +504,7 @@ class _DropDownButtonState<T> extends State<DropDownButton<T>> {
       style: _textStyle
     );
     Navigator.push(context, _currentRoute);
-    completer.future.then((_DropDownRouteResult<T> newValue) {
+    completer.future.then((_DropdownRouteResult<T> newValue) {
       _currentRoute = null;
       if (!mounted || newValue == null)
         return;
@@ -533,7 +540,7 @@ class _DropDownButtonState<T> extends State<DropDownButton<T>> {
       )
     );
 
-    if (!DropDownButtonHideUnderline.at(context)) {
+    if (!DropdownButtonHideUnderline.at(context)) {
       result = new Stack(
         children: <Widget>[
           result,

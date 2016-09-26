@@ -11,7 +11,6 @@ const Duration kBenchmarkTime = const Duration(seconds: 15);
 
 
 Future<Null> main() async {
-  assert(false); // don't run this in checked mode! Use --release.
   stock_data.StockDataFetcher.actuallyFetchData = false;
 
   final Stopwatch watch = new Stopwatch();

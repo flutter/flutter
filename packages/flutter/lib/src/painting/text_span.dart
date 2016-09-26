@@ -93,17 +93,17 @@ class TextSpan {
   /// Rather than using this directly, it's simpler to use the
   /// [TextPainter] class to paint [TextSpan] objects onto [Canvas]
   /// objects.
-  void build(ui.ParagraphBuilder builder) {
-    assert(debugAssertValid());
+  void build(ui.ParagraphBuilder builder, { double textScaleFactor: 1.0 }) {
+    assert(debugAssertIsValid());
     final bool hasStyle = style != null;
     if (hasStyle)
-      builder.pushStyle(style.textStyle);
+      builder.pushStyle(style.getTextStyle(textScaleFactor: textScaleFactor));
     if (text != null)
       builder.addText(text);
     if (children != null) {
       for (TextSpan child in children) {
         assert(child != null);
-        child.build(builder);
+        child.build(builder, textScaleFactor: textScaleFactor);
       }
     }
     if (hasStyle)
@@ -127,7 +127,7 @@ class TextSpan {
 
   /// Returns the text span that contains the given position in the text.
   TextSpan getSpanForPosition(TextPosition position) {
-    assert(debugAssertValid());
+    assert(debugAssertIsValid());
     TextAffinity affinity = position.affinity;
     int targetOffset = position.offset;
     int offset = 0;
@@ -151,7 +151,7 @@ class TextSpan {
   ///
   /// Styles are not honored in this process.
   String toPlainText() {
-    assert(debugAssertValid());
+    assert(debugAssertIsValid());
     StringBuffer buffer = new StringBuffer();
     visitTextSpan((TextSpan span) {
       buffer.write(span.text);
@@ -188,9 +188,9 @@ class TextSpan {
   ///
   /// This is intended to be used as follows:
   /// ```dart
-  ///   assert(myTextSpan.debugAssertValid());
+  ///   assert(myTextSpan.debugAssertIsValid());
   /// ```
-  bool debugAssertValid() {
+  bool debugAssertIsValid() {
     assert(() {
       if (!visitTextSpan((TextSpan span) {
         if (span.children != null) {

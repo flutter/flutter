@@ -8,19 +8,58 @@ import 'dart:ui' show Rect;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:meta/meta.dart';
-import 'package:sky_services/semantics/semantics.mojom.dart' as mojom;
+import 'package:flutter_services/semantics.dart' as mojom;
 import 'package:vector_math/vector_math_64.dart';
 
 import 'node.dart';
 
+/// The possible actions that can be conveyed from the operating system
+/// accessibility APIs to a [SemanticsNode] object.
 enum SemanticAction {
+  /// The equivalent of a user briefly tapping the screen with the finger
+  /// without moving it.
   tap,
+
+  /// The equivalent of a user pressing and holding the screen with the finger
+  /// for a few seconds without moving it.
   longPress,
+
+  /// The equivalent of a user moving their finger across the screen from right
+  /// to left.
+  ///
+  /// This action should be recognized by controls that are horizontally
+  /// scrollable.
   scrollLeft,
+
+  /// The equivalent of a user moving their finger across the screen from left
+  /// to right.
+  ///
+  /// This action should be recognized by controls that are horizontally
+  /// scrollable.
   scrollRight,
+
+  /// The equivalent of a user moving their finger across the screen from
+  /// bottom to top.
+  ///
+  /// This action should be recognized by controls that are vertically
+  /// scrollable.
   scrollUp,
+
+  /// The equivalent of a user moving their finger across the screen from top
+  /// to bottom.
+  ///
+  /// This action should be recognized by controls that are vertically
+  /// scrollable.
   scrollDown,
+
+  /// A request to increase the value represented by the [SemanticsNode].
+  ///
+  /// For example, this action might be recognized by a slider control.
   increase,
+
+  /// A request to decrease the value represented by the [SemanticsNode].
+  ///
+  /// For example, this action might be recognized by a slider control.
   decrease,
 }
 
@@ -32,6 +71,11 @@ enum SemanticAction {
 /// [SemanticsNode.canBeTapped] is true, [handleSemanticScrollDown]() will only
 /// be called if [SemanticsNode.canBeScrolledVertically] is true, etc).
 abstract class SemanticActionHandler { // ignore: one_member_abstracts
+  /// Called when the object implementing this interface receives a
+  /// [SemanticAction]. For example, if the user of an accessibility tool
+  /// instructs their device that they wish to tap a button, the [RenderObject]
+  /// behind that button would have its [performAction] method called with the
+  /// [SemanticAction.tap] action.
   void performAction(SemanticAction action);
 }
 

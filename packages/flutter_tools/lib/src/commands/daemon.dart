@@ -38,13 +38,10 @@ class DaemonCommand extends FlutterCommand {
   final String description = 'Run a persistent, JSON-RPC based server to communicate with devices.';
 
   @override
-  bool get requiresProjectRoot => false;
-
-  @override
   final bool hidden;
 
   @override
-  Future<int> runInProject() {
+  Future<int> runCommand() {
     printStatus('Starting device daemon...');
 
     AppContext appContext = new AppContext();
@@ -100,7 +97,10 @@ class Daemon {
     // Start listening.
     commandStream.listen(
       (Map<String, dynamic> request) => _handleRequest(request),
-      onDone: () => _onExitCompleter.complete(0)
+      onDone: () {
+        if (!_onExitCompleter.isCompleted)
+            _onExitCompleter.complete(0);
+      }
     );
   }
 
@@ -295,7 +295,7 @@ class AppDomain extends Domain {
     String target = _getStringArg(args, 'target');
     bool hotMode = _getBoolArg(args, 'hot') ?? false;
 
-    Device device = daemon.deviceDomain._getDevice(deviceId);
+    Device device = daemon.deviceDomain._getOrLocateDevice(deviceId);
     if (device == null)
       throw "device '$deviceId' not found";
 
@@ -536,6 +536,25 @@ class DeviceDomain extends Domain {
     }).toList();
     return devices.firstWhere((Device device) => device.id == deviceId, orElse: () => null);
   }
+
+  /// Return a known matching device, or scan for devices if no known match is found.
+  Device _getOrLocateDevice(String deviceId) {
+    // Look for an already known device.
+    Device device = _getDevice(deviceId);
+    if (device != null)
+      return device;
+
+    // Scan the different device providers for a match.
+    for (PollingDeviceDiscovery discoverer in _discoverers) {
+      List<Device> devices = discoverer.pollingGetDevices();
+      for (Device device in devices)
+        if (device.id == deviceId)
+          return device;
+    }
+
+    // No match found.
+    return null;
+  }
 }
 
 Map<String, String> _deviceToMap(Device device) {
@@ -578,6 +597,10 @@ class NotifyingLogger extends Logger {
   Status startProgress(String message) {
     printStatus(message);
     return new Status();
+  }
+
+  void dispose() {
+    _messageController.close();
   }
 }
 

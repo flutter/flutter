@@ -83,6 +83,51 @@ class BadDisposeWidgetState extends State<BadDisposeWidget> {
   }
 }
 
+class StatefulWrapper extends StatefulWidget {
+  StatefulWrapper({
+    Key key,
+    this.child,
+  }) : super(key: key);
+
+  final Widget child;
+
+  @override
+  StatefulWrapperState createState() => new StatefulWrapperState();
+}
+
+class StatefulWrapperState extends State<StatefulWrapper> {
+
+  void trigger() {
+    setState(() { built = null; });
+  }
+
+  int built;
+  int oldBuilt;
+
+  static int buildId = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    buildId += 1;
+    built = buildId;
+    return config.child;
+  }
+}
+
+class Wrapper extends StatelessWidget {
+  Wrapper({
+    Key key,
+    this.child,
+  }) : super(key: key);
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return child;
+  }
+}
+
 void main() {
   testWidgets('Legal times for setState', (WidgetTester tester) async {
     GlobalKey flipKey = new GlobalKey();
@@ -120,5 +165,64 @@ void main() {
     expect(tester.takeException(), isNull);
     await tester.pumpWidget(new Container());
     expect(tester.takeException(), isNotNull);
+  });
+
+  testWidgets('Dirty element list sort order', (WidgetTester tester) async {
+    GlobalKey key1 = new GlobalKey(debugLabel: 'key1');
+    GlobalKey key2 = new GlobalKey(debugLabel: 'key2');
+
+    bool didMiddle = false;
+    Widget middle;
+    List<StateSetter> setStates = <StateSetter>[];
+    Widget builder(BuildContext context, StateSetter setState) {
+      setStates.add(setState);
+      bool returnMiddle = !didMiddle;
+      didMiddle = true;
+      return new Wrapper(
+        child: new Wrapper(
+          child: new StatefulWrapper(
+            child: returnMiddle ? middle : new Container(),
+          ),
+        ),
+      );
+    }
+    Widget part1 = new Wrapper(
+      child: new KeyedSubtree(
+        key: key1,
+        child: new StatefulBuilder(
+          builder: builder,
+        ),
+      ),
+    );
+    Widget part2 = new Wrapper(
+      child: new KeyedSubtree(
+        key: key2,
+        child: new StatefulBuilder(
+          builder: builder,
+        ),
+      ),
+    );
+
+    middle = part2;
+    await tester.pumpWidget(part1);
+
+    for (StatefulWrapperState state in tester.stateList/*<StatefulWrapperState>*/(find.byType(StatefulWrapper))) {
+      expect(state.built, isNotNull);
+      state.oldBuilt = state.built;
+      state.trigger();
+    }
+    for (StateSetter setState in setStates)
+      setState(() { });
+
+    StatefulWrapperState.buildId = 0;
+    middle = part1;
+    didMiddle = false;
+    await tester.pumpWidget(part2);
+
+    for (StatefulWrapperState state in tester.stateList/*<StatefulWrapperState>*/(find.byType(StatefulWrapper))) {
+      expect(state.built, isNotNull);
+      expect(state.built, isNot(equals(state.oldBuilt)));
+    }
+
   });
 }

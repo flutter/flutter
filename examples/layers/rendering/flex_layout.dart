@@ -10,7 +10,7 @@ import 'package:flutter/rendering.dart';
 import 'src/solid_color_box.dart';
 
 void main() {
-  RenderFlex table = new RenderFlex(direction: FlexDirection.vertical);
+  RenderFlex table = new RenderFlex(direction: Axis.vertical);
 
   void addAlignmentRow(CrossAxisAlignment crossAxisAlignment) {
     TextStyle style = const TextStyle(color: const Color(0xFF000000));
@@ -50,7 +50,7 @@ void main() {
     const TextStyle style = const TextStyle(color: const Color(0xFF000000));
     RenderParagraph paragraph = new RenderParagraph(new TextSpan(style: style, text: '$justify'));
     table.add(new RenderPadding(child: paragraph, padding: new EdgeInsets.only(top: 20.0)));
-    RenderFlex row = new RenderFlex(direction: FlexDirection.horizontal);
+    RenderFlex row = new RenderFlex(direction: Axis.horizontal);
     row.add(new RenderSolidColorBox(const Color(0xFFFFCCCC), desiredSize: new Size(80.0, 60.0)));
     row.add(new RenderSolidColorBox(const Color(0xFFCCFFCC), desiredSize: new Size(64.0, 60.0)));
     row.add(new RenderSolidColorBox(const Color(0xFFCCCCFF), desiredSize: new Size(160.0, 60.0)));

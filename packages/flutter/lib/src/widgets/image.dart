@@ -129,7 +129,7 @@ class Image extends StatefulWidget {
   /// If non-null, apply this color filter to the image before painting.
   final Color color;
 
-  /// How to inscribe the image into the place allocated during layout.
+  /// How to inscribe the image into the space allocated during layout.
   ///
   /// The default varies based on the other fields. See the discussion at
   /// [paintImage].
@@ -156,7 +156,6 @@ class Image extends StatefulWidget {
 
   /// Whether to continue showing the old image (true), or briefly show nothing
   /// (false), when the image provider changes.
-  // TODO(ianh): Find a better name.
   final bool gaplessPlayback;
 
   @override
@@ -188,29 +187,20 @@ class _ImageState extends State<Image> {
   ImageInfo _imageInfo;
 
   @override
-  void didUpdateConfig(Image oldConfig) {
-    if (config.image != oldConfig.image)
-      _resolveImage();
-  }
-
-  @override
-  void deactivate() {
-    // If this image is activated again then force _imageStream to be recreated,
-    // in case the InheritedWidget ancestors it depends on have changed.
-    _imageStream?.removeListener(_handleImageChanged);
-    _imageStream = null;
-    super.deactivate();
-  }
-
-  @override
   void dependenciesChanged() {
     _resolveImage();
     super.dependenciesChanged();
   }
 
   @override
+  void didUpdateConfig(Image oldConfig) {
+    if (config.image != oldConfig.image)
+      _resolveImage();
+  }
+
+  @override
   void reassemble() {
-    _resolveImage();
+    _resolveImage(); // in case the image cache was flushed
     super.reassemble();
   }
 
@@ -236,16 +226,14 @@ class _ImageState extends State<Image> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    // This one-time initialization could have been done in initState() since
-    // changes to the inherited widgets that _resolveImage depends on, notably
-    // DefaultAssetBundle, are handle by the dependenciesChanged() method. We're
-    // doing it here instead to avoid the assert that disallows references to
-    // inherited widgets at initState() time. We've found that assert to be a
-    // reliable source of real bugs, and that it is worth this minor inconvenience.
-    if (_imageStream == null)
-      _resolveImage();
+  void dispose() {
+    assert(_imageStream != null);
+    _imageStream.removeListener(_handleImageChanged);
+    super.dispose();
+  }
 
+  @override
+  Widget build(BuildContext context) {
     return new RawImage(
       image: _imageInfo?.image,
       width: config.width,
@@ -257,5 +245,12 @@ class _ImageState extends State<Image> {
       repeat: config.repeat,
       centerSlice: config.centerSlice
     );
+  }
+
+  @override
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('stream: $_imageStream');
+    description.add('pixels: $_imageInfo');
   }
 }

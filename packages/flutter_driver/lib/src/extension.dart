@@ -60,14 +60,14 @@ class FlutterDriverExtension {
 
   FlutterDriverExtension() {
     _commandHandlers.addAll(<String, CommandHandlerCallback>{
-      'get_health': getHealth,
-      'tap': tap,
-      'get_text': getText,
-      'scroll': scroll,
-      'scrollIntoView': scrollIntoView,
+      'get_health': _getHealth,
+      'tap': _tap,
+      'get_text': _getText,
+      'scroll': _scroll,
+      'scrollIntoView': _scrollIntoView,
       'setInputText': _setInputText,
       'submitInputText': _submitInputText,
-      'waitFor': waitFor,
+      'waitFor': _waitFor,
     });
 
     _commandDeserializers.addAll(<String, CommandDeserializerCallback>{
@@ -123,7 +123,7 @@ class FlutterDriverExtension {
     return _onFrameReadyStream;
   }
 
-  Future<Health> getHealth(GetHealth command) async => new Health(HealthStatus.ok);
+  Future<Health> _getHealth(Command command) async => new Health(HealthStatus.ok);
 
   /// Runs `finder` repeatedly until it finds one or more [Element]s, or times out.
   ///
@@ -179,23 +179,26 @@ class FlutterDriverExtension {
     return constructor(finder);
   }
 
-  Future<TapResult> tap(Tap command) async {
-    prober.tap(await _waitForElement(_createFinder(command.finder)));
+  Future<TapResult> _tap(Command command) async {
+    Tap tapCommand = command;
+    await prober.tap(await _waitForElement(_createFinder(tapCommand.finder)));
     return new TapResult();
   }
 
-  Future<WaitForResult> waitFor(WaitFor command) async {
-    if ((await _waitForElement(_createFinder(command.finder))).evaluate().isNotEmpty)
+  Future<WaitForResult> _waitFor(Command command) async {
+    WaitFor waitForCommand = command;
+    if ((await _waitForElement(_createFinder(waitForCommand.finder))).evaluate().isNotEmpty)
       return new WaitForResult();
     else
       return null;
   }
 
-  Future<ScrollResult> scroll(Scroll command) async {
-    Finder target = await _waitForElement(_createFinder(command.finder));
-    final int totalMoves = command.duration.inMicroseconds * command.frequency ~/ Duration.MICROSECONDS_PER_SECOND;
-    Offset delta = new Offset(command.dx, command.dy) / totalMoves.toDouble();
-    Duration pause = command.duration ~/ totalMoves;
+  Future<ScrollResult> _scroll(Command command) async {
+    Scroll scrollCommand = command;
+    Finder target = await _waitForElement(_createFinder(scrollCommand.finder));
+    final int totalMoves = scrollCommand.duration.inMicroseconds * scrollCommand.frequency ~/ Duration.MICROSECONDS_PER_SECOND;
+    Offset delta = new Offset(scrollCommand.dx, scrollCommand.dy) / totalMoves.toDouble();
+    Duration pause = scrollCommand.duration ~/ totalMoves;
     Point startLocation = prober.getCenter(target);
     Point currentLocation = startLocation;
     TestPointer pointer = new TestPointer(1);
@@ -214,28 +217,32 @@ class FlutterDriverExtension {
     return new ScrollResult();
   }
 
-  Future<ScrollResult> scrollIntoView(ScrollIntoView command) async {
-    Finder target = await _waitForElement(_createFinder(command.finder));
+  Future<ScrollResult> _scrollIntoView(Command command) async {
+    ScrollIntoView scrollIntoViewCommand = command;
+    Finder target = await _waitForElement(_createFinder(scrollIntoViewCommand.finder));
     await Scrollable.ensureVisible(target.evaluate().single);
     return new ScrollResult();
   }
 
-  Future<SetInputTextResult> _setInputText(SetInputText command) async {
-    Finder target = await _waitForElement(_createFinder(command.finder));
+  Future<SetInputTextResult> _setInputText(Command command) async {
+    SetInputText setInputTextCommand = command;
+    Finder target = await _waitForElement(_createFinder(setInputTextCommand.finder));
     Input input = target.evaluate().single.widget;
-    input.onChanged(new InputValue(text: command.text));
+    input.onChanged(new InputValue(text: setInputTextCommand.text));
     return new SetInputTextResult();
   }
 
-  Future<SubmitInputTextResult> _submitInputText(SubmitInputText command) async {
-    Finder target = await _waitForElement(_createFinder(command.finder));
+  Future<SubmitInputTextResult> _submitInputText(Command command) async {
+    SubmitInputText submitInputTextCommand = command;
+    Finder target = await _waitForElement(_createFinder(submitInputTextCommand.finder));
     Input input = target.evaluate().single.widget;
     input.onSubmitted(input.value);
     return new SubmitInputTextResult(input.value.text);
   }
 
-  Future<GetTextResult> getText(GetText command) async {
-    Finder target = await _waitForElement(_createFinder(command.finder));
+  Future<GetTextResult> _getText(Command command) async {
+    GetText getTextCommand = command;
+    Finder target = await _waitForElement(_createFinder(getTextCommand.finder));
     // TODO(yjbanov): support more ways to read text
     Text text = target.evaluate().single.widget;
     return new GetTextResult(text.data);

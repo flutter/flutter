@@ -175,7 +175,7 @@ class FlutterDriver {
     // At this point the service extension must be installed. Verify it.
     Health health = await driver.checkHealth();
     if (health.status != HealthStatus.ok) {
-      client.close();
+      await client.close();
       throw new DriverError('Flutter application health check failed.');
     }
 
@@ -367,15 +367,12 @@ Future<VMServiceClientConnection> _waitAndConnect(String url) async {
       ws1 = await WebSocket.connect(uri.toString());
       ws2 = await WebSocket.connect(uri.toString());
       return new VMServiceClientConnection(
-        new VMServiceClient(new IOWebSocketChannel(ws1)),
-        new rpc.Peer(new IOWebSocketChannel(ws2))..listen()
+        new VMServiceClient(new IOWebSocketChannel(ws1).cast()),
+        new rpc.Peer(new IOWebSocketChannel(ws2).cast())..listen()
       );
     } catch(e) {
-      if (ws1 != null)
-        ws1.close();
-
-      if (ws2 != null)
-        ws2.close();
+      await ws1?.close();
+      await ws2?.close();
 
       if (timer.elapsed < const Duration(seconds: 30)) {
         _log.info('Waiting for application to start');

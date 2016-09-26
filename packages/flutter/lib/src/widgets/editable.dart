@@ -7,17 +7,18 @@ import 'dart:async';
 import 'package:flutter/rendering.dart' show RenderEditableLine, SelectionChangedHandler;
 import 'package:flutter/services.dart';
 import 'package:meta/meta.dart';
-import 'package:sky_services/editing/editing.mojom.dart' as mojom;
+import 'package:flutter_services/editing.dart' as mojom;
 
 import 'basic.dart';
-import 'framework.dart';
 import 'focus.dart';
-import 'scrollable.dart';
+import 'framework.dart';
+import 'media_query.dart';
 import 'scroll_behavior.dart';
+import 'scrollable.dart';
 import 'text_selection.dart';
 
 export 'package:flutter/painting.dart' show TextSelection;
-export 'package:sky_services/editing/editing.mojom.dart' show KeyboardType;
+export 'package:flutter_services/editing.dart' show KeyboardType;
 
 const Duration _kCursorBlinkHalfPeriod = const Duration(milliseconds: 500);
 
@@ -166,6 +167,7 @@ class RawInputLine extends Scrollable {
     this.hideText: false,
     this.style,
     this.cursorColor,
+    this.textScaleFactor,
     this.selectionColor,
     this.selectionHandleBuilder,
     this.selectionToolbarBuilder,
@@ -192,6 +194,14 @@ class RawInputLine extends Scrollable {
 
   /// The text style to use for the editable text.
   final TextStyle style;
+
+  /// The number of font pixels for each logical pixel.
+  ///
+  /// For example, if the text scale factor is 1.5, text will be 50% larger than
+  /// the specified font size.
+  ///
+  /// Defaults to [MediaQuery.textScaleFactor].
+  final double textScaleFactor;
 
   /// The color to use when painting the cursor.
   final Color cursorColor;
@@ -438,6 +448,7 @@ class RawInputLineState extends ScrollableState<RawInputLine> {
       cursorColor: config.cursorColor,
       showCursor: _showCursor,
       selectionColor: config.selectionColor,
+      textScaleFactor: config.textScaleFactor ?? MediaQuery.of(context).textScaleFactor,
       hideText: config.hideText,
       onSelectionChanged: _handleSelectionChanged,
       paintOffset: scrollOffsetToPixelDelta(scrollOffset),
@@ -454,6 +465,7 @@ class _EditableLineWidget extends LeafRenderObjectWidget {
     this.cursorColor,
     this.showCursor,
     this.selectionColor,
+    this.textScaleFactor,
     this.hideText,
     this.onSelectionChanged,
     this.paintOffset,
@@ -465,6 +477,7 @@ class _EditableLineWidget extends LeafRenderObjectWidget {
   final Color cursorColor;
   final bool showCursor;
   final Color selectionColor;
+  final double textScaleFactor;
   final bool hideText;
   final SelectionChangedHandler onSelectionChanged;
   final Offset paintOffset;
@@ -477,6 +490,7 @@ class _EditableLineWidget extends LeafRenderObjectWidget {
       cursorColor: cursorColor,
       showCursor: showCursor,
       selectionColor: selectionColor,
+      textScaleFactor: textScaleFactor,
       selection: value.selection,
       onSelectionChanged: onSelectionChanged,
       paintOffset: paintOffset,
@@ -491,6 +505,7 @@ class _EditableLineWidget extends LeafRenderObjectWidget {
       ..cursorColor = cursorColor
       ..showCursor = showCursor
       ..selectionColor = selectionColor
+      ..textScaleFactor = textScaleFactor
       ..selection = value.selection
       ..onSelectionChanged = onSelectionChanged
       ..paintOffset = paintOffset

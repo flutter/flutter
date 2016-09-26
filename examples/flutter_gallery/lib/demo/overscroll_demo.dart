@@ -45,46 +45,34 @@ class OverscrollDemoState extends State<OverscrollDemo> {
 
   @override
   Widget build(BuildContext context) {
+    Widget body = new MaterialList(
+      type: MaterialListType.threeLine,
+      padding: const EdgeInsets.all(8.0),
+      scrollableKey: _scrollableKey,
+      children: _items.map((String item) {
+        return new ListItem(
+          isThreeLine: true,
+          leading: new CircleAvatar(child: new Text(item)),
+          title: new Text('This item represents $item.'),
+          subtitle: new Text('Even more additional list item information appears on line three.')
+        );
+      })
+    );
+
     String  indicatorTypeText;
-    switch(_type) {
+    switch (_type) {
       case IndicatorType.overscroll:
         indicatorTypeText = 'Over-scroll indicator';
         break;
       case IndicatorType.refresh:
-        indicatorTypeText = 'Refresh indicator';
-        break;
-    }
-
-    // The default ScrollConfiguration doesn't include the
-    // OverscrollIndicator. That's what we want, since this demo
-    // adds the OverscrollIndicator itself.
-    Widget body = new ScrollConfiguration(
-      child: new MaterialList(
-        type: MaterialListType.threeLine,
-        padding: const EdgeInsets.all(8.0),
-        scrollableKey: _scrollableKey,
-        children: _items.map((String item) {
-          return new ListItem(
-            isThreeLine: true,
-            leading: new CircleAvatar(child: new Text(item)),
-            title: new Text('This item represents $item.'),
-            subtitle: new Text('Even more additional list item information appears on line three.')
-          );
-        })
-      )
-    );
-    switch(_type) {
-      case IndicatorType.overscroll:
-        body = new OverscrollIndicator(child: body);
-        break;
-      case IndicatorType.refresh:
         body = new RefreshIndicator(
           key: _refreshIndicatorKey,
-          child: body,
           refresh: refresh,
           scrollableKey: _scrollableKey,
-          location: RefreshIndicatorLocation.top
+          location: RefreshIndicatorLocation.top,
+          child: body,
         );
+        indicatorTypeText = 'Refresh indicator';
         break;
     }
 

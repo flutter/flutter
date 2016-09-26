@@ -469,46 +469,97 @@ abstract class SchedulerBinding extends BindingBase {
     return new Duration(microseconds: (rawDurationSinceEpoch.inMicroseconds / timeDilation).round() + _epochStart.inMicroseconds);
   }
 
+  /// The time stamp for the frame currently being processed.
+  ///
+  /// This is only valid while [handleBeginFrame] is running, i.e. while a frame
+  /// is being produced.
+  // TODO(ianh): Replace this when fixing https://github.com/flutter/flutter/issues/5469
+  Duration get currentFrameTimeStamp {
+    assert(_currentFrameTimeStamp != null);
+    return _currentFrameTimeStamp;
+  }
+  Duration _currentFrameTimeStamp;
+
+  int _debugFrameNumber = 0;
+
   /// Called by the engine to produce a new frame.
   ///
   /// This function first calls all the callbacks registered by
-  /// [scheduleFrameCallback]/[addFrameCallback], then calls all the
-  /// callbacks registered by [addPersistentFrameCallback], which
-  /// typically drive the rendering pipeline, and finally calls the
-  /// callbacks registered by [addPostFrameCallback].
+  /// [scheduleFrameCallback]/[addFrameCallback], then calls all the callbacks
+  /// registered by [addPersistentFrameCallback], which typically drive the
+  /// rendering pipeline, and finally calls the callbacks registered by
+  /// [addPostFrameCallback].
+  ///
+  /// If the given time stamp is null, the time stamp from the last frame is
+  /// reused.
+  ///
+  /// To have a banner shown at the start of every frame in debug mode, set
+  /// [debugPrintBeginFrameBanner] to true. The banner will be printed to the
+  /// console using [debugPrint] and will contain the frame number (which
+  /// increments by one for each frame), and the time stamp of the frame. If the
+  /// given time stamp was null, then the string "warm-up frame" is shown
+  /// instead of the time stamp. This allows you to distinguish frames eagerly
+  /// pushed by the framework from those requested by the engine in response to
+  /// the vsync signal from the operating system.
+  ///
+  /// You can also show a banner at the end of every frame by setting
+  /// [debugPrintEndFrameBanner] to true. This allows you to distinguish log
+  /// statements printed during a frame from those printed between frames (e.g.
+  /// in response to events or timers).
   void handleBeginFrame(Duration rawTimeStamp) {
     Timeline.startSync('Frame');
     _firstRawTimeStampInEpoch ??= rawTimeStamp;
-    Duration timeStamp = _adjustForEpoch(rawTimeStamp);
+    _currentFrameTimeStamp = _adjustForEpoch(rawTimeStamp ?? _lastRawTimeStamp);
+    if (rawTimeStamp != null)
+      _lastRawTimeStamp = rawTimeStamp;
+
+    String debugBanner;
     assert(() {
-      if (debugPrintBeginFrameBanner)
-        debugPrint('━━━━━━━┫ Begin Frame ($timeStamp) ┣━━━━━━━');
+      _debugFrameNumber += 1;
+      if (debugPrintBeginFrameBanner || debugPrintEndFrameBanner) {
+        StringBuffer frameTimeStampDescription = new StringBuffer();
+        if (rawTimeStamp != null) {
+          _debugDescribeTimeStamp(_currentFrameTimeStamp, frameTimeStampDescription);
+        } else {
+          frameTimeStampDescription.write('(warm-up frame)');
+        }
+        debugBanner = '▄▄▄▄▄▄▄▄ Frame ${_debugFrameNumber.toString().padRight(7)}   ${frameTimeStampDescription.toString().padLeft(18)} ▄▄▄▄▄▄▄▄';
+        if (debugPrintBeginFrameBanner)
+          debugPrint(debugBanner);
+      }
       return true;
     });
-    _lastRawTimeStamp = rawTimeStamp;
+
     assert(!_isProducingFrame);
     _isProducingFrame = true;
     _hasScheduledFrame = false;
-    _invokeTransientFrameCallbacks(timeStamp);
+    try {
 
-    for (FrameCallback callback in _persistentCallbacks)
-      _invokeFrameCallback(callback, timeStamp);
+      // TRANSIENT FRAME CALLBACKS
+      _invokeTransientFrameCallbacks(_currentFrameTimeStamp);
 
-    _isProducingFrame = false;
+      // PERSISTENT FRAME CALLBACKS
+      for (FrameCallback callback in _persistentCallbacks)
+        _invokeFrameCallback(callback, _currentFrameTimeStamp);
+      _isProducingFrame = false;
 
-    List<FrameCallback> localPostFrameCallbacks =
-        new List<FrameCallback>.from(_postFrameCallbacks);
-    _postFrameCallbacks.clear();
-    for (FrameCallback callback in localPostFrameCallbacks)
-      _invokeFrameCallback(callback, timeStamp);
+      // POST-FRAME CALLBACKS
+      List<FrameCallback> localPostFrameCallbacks =
+          new List<FrameCallback>.from(_postFrameCallbacks);
+      _postFrameCallbacks.clear();
+      for (FrameCallback callback in localPostFrameCallbacks)
+        _invokeFrameCallback(callback, _currentFrameTimeStamp);
 
-    Timeline.finishSync();
-
-    assert(() {
-      if (debugPrintEndFrameBanner)
-        debugPrint('━━━━━━━┫ End of Frame ┣━━━━━━━');
-      return true;
-    });
+    } finally {
+      _isProducingFrame = false; // just in case we throw before setting it above
+      _currentFrameTimeStamp = null;
+      Timeline.finishSync();
+      assert(() {
+        if (debugPrintEndFrameBanner)
+          debugPrint('▀' * debugBanner.length);
+        return true;
+      });
+    }
 
     // All frame-related callbacks have been executed. Run lower-priority tasks.
     _runTasks();
@@ -525,6 +576,22 @@ abstract class SchedulerBinding extends BindingBase {
     });
     _removedIds.clear();
     Timeline.finishSync();
+  }
+
+  static void _debugDescribeTimeStamp(Duration timeStamp, StringBuffer buffer) {
+    if (timeStamp.inDays > 0)
+      buffer.write('${timeStamp.inDays}d ');
+    if (timeStamp.inHours > 0)
+      buffer.write('${timeStamp.inHours - timeStamp.inDays * Duration.HOURS_PER_DAY}h ');
+    if (timeStamp.inMinutes > 0)
+      buffer.write('${timeStamp.inMinutes - timeStamp.inHours * Duration.MINUTES_PER_HOUR}m ');
+    if (timeStamp.inSeconds > 0)
+      buffer.write('${timeStamp.inSeconds - timeStamp.inMinutes * Duration.SECONDS_PER_MINUTE}s ');
+    buffer.write('${timeStamp.inMilliseconds - timeStamp.inSeconds * Duration.MILLISECONDS_PER_SECOND}');
+    int microseconds = timeStamp.inMicroseconds - timeStamp.inMilliseconds * Duration.MICROSECONDS_PER_MILLISECOND;
+    if (microseconds > 0)
+      buffer.write('.${microseconds.toString().padLeft(3, "0")}');
+    buffer.write('ms');
   }
 
   // Calls the given [callback] with [timestamp] as argument.

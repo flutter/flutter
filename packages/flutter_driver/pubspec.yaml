@@ -5,7 +5,7 @@ homepage: http://flutter.io
 author: Flutter Authors <flutter-dev@googlegroups.com>
 
 environment:
-  sdk: '>=1.16.0 <2.0.0'
+  sdk: '>=1.19.0 <2.0.0'
 
 dependencies:
   file: '^0.1.0'
@@ -15,11 +15,11 @@ dependencies:
   web_socket_channel: '^1.0.0'
   vm_service_client: '^0.2.0'
   flutter:
-    path: '../flutter'
+    sdk: flutter
   flutter_test:
-    path: '../flutter_test'
+    sdk: flutter
 
 dev_dependencies:
-  test: 0.12.15+1
-  mockito: '^0.11.0'
-  quiver: '^0.21.4'
+  test: 0.12.15+4
+  mockito: ^1.0.0
+  quiver: ^0.21.4

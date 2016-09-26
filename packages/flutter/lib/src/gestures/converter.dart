@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:sky_services/pointer/pointer.mojom.dart' as mojom;
+import 'package:flutter_services/pointer.dart' as mojom;
 
 import 'events.dart';
 
@@ -37,9 +37,9 @@ class PointerEventConverter {
   static Map<int, _PointerState> _pointers = <int, _PointerState>{};
 
   /// Expand the given packet of pointer data into a sequence of framework pointer events.
-  static Iterable<PointerEvent> expand(Iterable<mojom.Pointer> packet) sync* {
+  static Iterable<PointerEvent> expand(Iterable<mojom.Pointer> packet, double devicePixelRatio) sync* {
     for (mojom.Pointer datum in packet) {
-      Point position = new Point(datum.x, datum.y);
+      Point position = new Point(datum.x, datum.y) / devicePixelRatio;
       Duration timeStamp = new Duration(microseconds: datum.timeStamp);
       assert(_pointerKindMap.containsKey(datum.kind));
       PointerDeviceKind kind = _pointerKindMap[datum.kind];

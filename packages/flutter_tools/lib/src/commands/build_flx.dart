@@ -10,12 +10,12 @@ import '../globals.dart';
 import 'build.dart';
 
 class BuildFlxCommand extends BuildSubCommand {
-  BuildFlxCommand() {
+  BuildFlxCommand({bool verboseHelp: false}) {
     usesTargetOption();
     argParser.addFlag('precompiled', negatable: false);
     // This option is still referenced by the iOS build scripts. We should
     // remove it once we've updated those build scripts.
-    argParser.addOption('asset-base', help: 'Ignored. Will be removed.', hide: true);
+    argParser.addOption('asset-base', help: 'Ignored. Will be removed.', hide: !verboseHelp);
     argParser.addOption('manifest', defaultsTo: defaultManifestPath);
     argParser.addOption('private-key', defaultsTo: defaultPrivateKeyPath);
     argParser.addOption('output-file', abbr: 'o', defaultsTo: defaultFlxOutputPath);
@@ -38,8 +38,8 @@ class BuildFlxCommand extends BuildSubCommand {
     'they are used by some Flutter Android and iOS runtimes.';
 
   @override
-  Future<int> runInProject() async {
-    await super.runInProject();
+  Future<int> runCommand() async {
+    await super.runCommand();
     String outputPath = argResults['output-file'];
 
     return await build(

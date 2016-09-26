@@ -119,7 +119,8 @@ class HotRunner extends ResidentRunner {
     Device device, {
     String target,
     DebuggingOptions debuggingOptions,
-    bool usesTerminalUI: true
+    bool usesTerminalUI: true,
+    this.benchmarkMode: false,
   }) : super(device,
              target: target,
              debuggingOptions: debuggingOptions,
@@ -132,6 +133,8 @@ class HotRunner extends ResidentRunner {
   String _projectRootPath;
   Set<String> _startupDependencies;
   final AssetBundle bundle = new AssetBundle();
+  final bool benchmarkMode;
+  final Map<String, int> benchmarkData = new Map<String, int>();
 
   @override
   Future<int> run({
@@ -283,6 +286,25 @@ class HotRunner extends ResidentRunner {
     // Finish the file sync now.
     await _updateDevFS();
 
+    if (benchmarkMode) {
+      // We are running in benchmark mode.
+      printStatus('Running in benchmark mode.');
+      // Measure time to perform a hot restart.
+      printStatus('Benchmarking hot restart');
+      await restart(fullRestart: true);
+      await vmService.vm.refreshViews();
+      // TODO(johnmccutchan): Modify script entry point.
+      printStatus('Benchmarking hot reload');
+      // Measure time to perform a hot reload.
+      await restart(fullRestart: false);
+      printStatus('Benchmark completed. Exiting application.');
+      await _cleanupDevFS();
+      await stopEchoingDeviceLog();
+      await stopApp();
+      File benchmarkOutput = new File('hot_benchmark.json');
+      benchmarkOutput.writeAsStringSync(toPrettyJson(benchmarkData));
+    }
+
     return waitForAppToFinish();
   }
 
@@ -392,15 +414,25 @@ class HotRunner extends ResidentRunner {
     firstFrameTimer.start();
     await _updateDevFS();
     await _launchFromDevFS(_package, _mainPath);
+    bool waitForFrame =
+        await currentView.uiIsolate.flutterFrameworkPresent();
     Status restartStatus =
         logger.startProgress('Waiting for application to start...');
-    // Wait for the first frame to be rendered.
-    await firstFrameTimer.firstFrame();
+    if (waitForFrame) {
+      // Wait for the first frame to be rendered.
+      await firstFrameTimer.firstFrame();
+    }
     restartStatus.stop(showElapsedTime: true);
-    printStatus('Restart time: '
-                '${getElapsedAsMilliseconds(firstFrameTimer.elapsed)}');
+    if (waitForFrame) {
+      printStatus('Restart time: '
+                  '${getElapsedAsMilliseconds(firstFrameTimer.elapsed)}');
+      if (benchmarkMode) {
+        benchmarkData['hotRestartMillisecondsToFrame'] =
+            firstFrameTimer.elapsed.inMilliseconds;
+      }
+      flutterUsage.sendTiming('hot', 'restart', firstFrameTimer.elapsed);
+    }
     flutterUsage.sendEvent('hot', 'restart');
-    flutterUsage.sendTiming('hot', 'restart', firstFrameTimer.elapsed);
   }
 
   /// Returns [true] if the reload was successful.
@@ -463,18 +495,33 @@ class HotRunner extends ResidentRunner {
     await _evictDirtyAssets();
     Status reassembleStatus =
         logger.startProgress('Reassembling application...');
+    bool waitForFrame = true;
     try {
-      await currentView.uiIsolate.flutterReassemble();
+      waitForFrame = (await currentView.uiIsolate.flutterReassemble() != null);
     } catch (_) {
       reassembleStatus.stop(showElapsedTime: true);
       printError('Reassembling application failed.');
       return false;
     }
     reassembleStatus.stop(showElapsedTime: true);
-    await firstFrameTimer.firstFrame();
-    printStatus('Hot reload time: '
-                '${getElapsedAsMilliseconds(firstFrameTimer.elapsed)}');
-    flutterUsage.sendTiming('hot', 'reload', firstFrameTimer.elapsed);
+    try {
+      /* ensure that a frame is scheduled */
+      await currentView.uiIsolate.uiWindowScheduleFrame();
+    } catch (_) {
+      /* ignore any errors */
+    }
+    if (waitForFrame) {
+      // When the framework is present, we can wait for the first frame
+      // event and measure reload itme.
+      await firstFrameTimer.firstFrame();
+      printStatus('Hot reload time: '
+                  '${getElapsedAsMilliseconds(firstFrameTimer.elapsed)}');
+      if (benchmarkMode) {
+        benchmarkData['hotReloadMillisecondsToFrame'] =
+            firstFrameTimer.elapsed.inMilliseconds;
+      }
+      flutterUsage.sendTiming('hot', 'reload', firstFrameTimer.elapsed);
+    }
     return true;
   }
 

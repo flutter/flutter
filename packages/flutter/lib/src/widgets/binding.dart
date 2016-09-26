@@ -10,6 +10,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
+import 'package:meta/meta.dart';
 
 import 'app.dart';
 import 'framework.dart';
@@ -191,15 +192,41 @@ abstract class WidgetsBinding extends BindingBase implements GestureBinding, Ren
   }
 
   void _handleBuildScheduled() {
-    // If we're in the process of building dirty elements, we're know that any
-    // builds that are scheduled will be run this frame, which means we don't
-    // need to schedule another frame.
-    if (_buildingDirtyElements)
-      return;
+    // If we're in the process of building dirty elements, then changes
+    // should not trigger a new frame.
+    assert(() {
+      if (debugBuildingDirtyElements) {
+        throw new FlutterError(
+          'Build scheduled during frame.\n'
+          'While the widget tree was being built, laid out, and painted, '
+          'a new frame was scheduled to rebuild the widget tree. '
+          'This might be because setState() was called from a layout or '
+          'paint callback. '
+          'If a change is needed to the widget tree, it should be applied '
+          'as the tree is being built. Scheduling a change for the subsequent '
+          'frame instead results in an interface that lags behind by one frame. '
+          'If this was done to make your build dependent on a size measured at '
+          'layout time, consider using a LayoutBuilder, CustomSingleChildLayout, '
+          'or CustomMultiChildLayout. If, on the other hand, the one frame delay '
+          'is the desired effect, for example because this is an '
+          'animation, consider scheduling the frame in a post-frame callback '
+          'using SchedulerBinding.addPostFrameCallback or '
+          'using an AnimationController to trigger the animation.'
+        );
+      }
+      return true;
+    });
     scheduleFrame();
   }
 
-  bool _buildingDirtyElements = false;
+  /// Whether we are currently in a frame. This is used to verify
+  /// that frames are not scheduled redundantly.
+  ///
+  /// This is public so that test frameworks can change it.
+  ///
+  /// This flag is not used in release builds.
+  @protected
+  bool debugBuildingDirtyElements = false;
 
   /// Pump the build and rendering pipeline to generate a frame.
   ///
@@ -260,12 +287,21 @@ abstract class WidgetsBinding extends BindingBase implements GestureBinding, Ren
   // When editing the above, also update rendering/binding.dart's copy.
   @override
   void beginFrame() {
-    assert(!_buildingDirtyElements);
-    _buildingDirtyElements = true;
-    buildOwner.buildDirtyElements();
-    _buildingDirtyElements = false;
-    super.beginFrame();
-    buildOwner.finalizeTree();
+    assert(!debugBuildingDirtyElements);
+    assert(() {
+      debugBuildingDirtyElements = true;
+      return true;
+    });
+    try {
+      buildOwner.buildScope(renderViewElement);
+      super.beginFrame();
+      buildOwner.finalizeTree();
+    } finally {
+      assert(() {
+        debugBuildingDirtyElements = false;
+        return true;
+      });
+    }
     // TODO(ianh): Following code should not be included in release mode, only profile and debug modes.
     // See https://github.com/dart-lang/sdk/issues/27192
     if (_needToReportFirstFrame) {
@@ -285,13 +321,19 @@ abstract class WidgetsBinding extends BindingBase implements GestureBinding, Ren
   /// This is initialized the first time [runApp] is called.
   Element get renderViewElement => _renderViewElement;
   Element _renderViewElement;
-  void _runApp(Widget app) {
+
+  /// Takes a widget and attaches it to the [renderViewElement], creating it if
+  /// necessary.
+  ///
+  /// This is called by [runApp] to configure the widget tree.
+  ///
+  /// See also [RenderObjectToWidgetAdapter.attachToRenderTree].
+  void attachRootWidget(Widget rootWidget) {
     _renderViewElement = new RenderObjectToWidgetAdapter<RenderBox>(
       container: renderView,
       debugShortDescription: '[root]',
-      child: app
+      child: rootWidget
     ).attachToRenderTree(buildOwner, renderViewElement);
-    beginFrame();
   }
 
   @override
@@ -305,19 +347,38 @@ abstract class WidgetsBinding extends BindingBase implements GestureBinding, Ren
 
 /// Inflate the given widget and attach it to the screen.
 ///
+/// The widget is given constraints during layout that force it to fill the
+/// entire screen. If you wish to align your widget to one side of the screen
+/// (e.g., the top), consider using the [Align] widget. If you wish to center
+/// your widget, you can also use the [Center] widget
+///
 /// Initializes the binding using [WidgetsFlutterBinding] if necessary.
+///
+/// See also:
+///
+/// * [WidgetsBinding.attachRootWidget], which creates the root widget for the
+///   widget hierarchy.
+/// * [RenderObjectToWidgetAdapter.attachToRenderTree], which creates the root
+///   element for the element hierarchy.
+/// * [WidgetsBinding.handleBeginFrame], which pumps the widget pipeline to
+///   ensure the widget, element, and render trees are all built.
 void runApp(Widget app) {
-  WidgetsFlutterBinding.ensureInitialized()._runApp(app);
+  WidgetsFlutterBinding.ensureInitialized()
+    ..attachRootWidget(app)
+    ..handleBeginFrame(null);
 }
 
 /// Print a string representation of the currently running app.
 void debugDumpApp() {
   assert(WidgetsBinding.instance != null);
-  assert(WidgetsBinding.instance.renderViewElement != null);
   String mode = 'RELEASE MODE';
   assert(() { mode = 'CHECKED MODE'; return true; });
   debugPrint('${WidgetsBinding.instance.runtimeType} - $mode');
-  debugPrint(WidgetsBinding.instance.renderViewElement.toStringDeep());
+  if (WidgetsBinding.instance.renderViewElement != null) {
+    debugPrint(WidgetsBinding.instance.renderViewElement.toStringDeep());
+  } else {
+    debugPrint('<no tree currently mounted>');
+  }
 }
 
 /// A bridge from a [RenderObject] to an [Element] tree.
@@ -360,19 +421,23 @@ class RenderObjectToWidgetAdapter<T extends RenderObject> extends RenderObjectWi
   /// child of [container].
   ///
   /// If `element` is null, this function will create a new element. Otherwise,
-  /// the given element will be updated with this widget.
+  /// the given element will have an update scheduled to switch to this widget.
   ///
   /// Used by [runApp] to bootstrap applications.
   RenderObjectToWidgetElement<T> attachToRenderTree(BuildOwner owner, [RenderObjectToWidgetElement<T> element]) {
-    owner.lockState(() {
-      if (element == null) {
+    if (element == null) {
+      owner.lockState(() {
         element = createElement();
+        assert(element != null);
         element.assignOwner(owner);
+      });
+      owner.buildScope(element, () {
         element.mount(null, null);
-      } else {
-        element.update(this);
-      }
-    }, building: true);
+      });
+    } else {
+      element._newWidget = this;
+      element.markNeedsBuild();
+    }
     return element;
   }
 
@@ -412,6 +477,12 @@ class RenderObjectToWidgetElement<T extends RenderObject> extends RootRenderObje
   }
 
   @override
+  void detachChild(Element child) {
+    assert(child == _child);
+    _child = null;
+  }
+
+  @override
   void mount(Element parent, dynamic newSlot) {
     assert(parent == null);
     super.mount(parent, newSlot);
@@ -423,6 +494,23 @@ class RenderObjectToWidgetElement<T extends RenderObject> extends RootRenderObje
     super.update(newWidget);
     assert(widget == newWidget);
     _rebuild();
+  }
+
+  // When we are assigned a new widget, we store it here
+  // until we are ready to update to it.
+  Widget _newWidget;
+
+  @override
+  void performRebuild() {
+    if (_newWidget != null) {
+      // _newWidget can be null if, for instance, we were rebuilt
+      // due to a reassemble.
+      final Widget newWidget = _newWidget;
+      _newWidget = null;
+      update(newWidget);
+    }
+    super.performRebuild();
+    assert(_newWidget == null);
   }
 
   void _rebuild() {

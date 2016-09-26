@@ -7,6 +7,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 import 'package:meta/meta.dart';
 
@@ -36,10 +37,9 @@ const Duration _kTabBarScroll = const Duration(milliseconds: 200);
 const Curve _kTabIndicatorLeadingCurve = Curves.easeOut;
 const Curve _kTabIndicatorTrailingCurve = Curves.easeIn;
 
-// The scrollOffset (velocity) provided to fling() is pixels/ms, and the
-// tolerance velocity is pixels/sec. The additional factor of 5 is to further
-// increase sensitivity to swipe gestures and was determined "experimentally".
-final double _kMinFlingVelocity = kPixelScrollTolerance.velocity / 5000.0;
+// The additional factor of 5 is to further increase sensitivity to swipe
+// gestures and was determined "experimentally".
+final double _kMinFlingVelocity = kPixelScrollTolerance.velocity / 5.0;
 
 class _TabBarParentData extends ContainerBoxParentDataMixin<RenderBox> { }
 
@@ -648,8 +648,8 @@ class TabBarSelectionState<T> extends State<TabBarSelection<T>> {
 
   /// Calls listener methods every time the value or status of the selection animation changes.
   ///
-  /// Listeners can be removed with [unregisterAnimationListener].
-  void registerAnimationListener(TabBarSelectionAnimationListener listener) {
+  /// Listeners can be removed with [removeAnimationListener].
+  void addAnimationListener(TabBarSelectionAnimationListener listener) {
     _animationListeners.add(listener);
     _controller
       ..addStatusListener(listener.handleStatusChange)
@@ -658,8 +658,8 @@ class TabBarSelectionState<T> extends State<TabBarSelection<T>> {
 
   /// Stop calling listener methods every time the value or status of the animation changes.
   ///
-  /// Listeners can be added with [registerAnimationListener].
-  void unregisterAnimationListener(TabBarSelectionAnimationListener listener) {
+  /// Listeners can be added with [addAnimationListener].
+  void removeAnimationListener(TabBarSelectionAnimationListener listener) {
     _animationListeners.remove(listener);
     _controller
       ..removeStatusListener(listener.handleStatusChange)
@@ -671,7 +671,7 @@ class TabBarSelectionState<T> extends State<TabBarSelection<T>> {
     _controller.stop();
     for (TabBarSelectionAnimationListener listener in _animationListeners.toList()) {
       listener.handleSelectionDeactivate();
-      unregisterAnimationListener(listener);
+      removeAnimationListener(listener);
     }
     assert(_animationListeners.isEmpty);
     _writeValue();
@@ -771,29 +771,26 @@ class _TabBarState<T> extends ScrollableState<TabBar<T>> implements TabBarSelect
   void _initSelection(TabBarSelectionState<T> newSelection) {
     if (_selection == newSelection)
       return;
-    _selection?.unregisterAnimationListener(this);
+    _selection?.removeAnimationListener(this);
     _selection = newSelection;
-    _selection?.registerAnimationListener(this);
+    _selection?.addAnimationListener(this);
     if (_selection != null)
       _lastSelectedIndex = _selection.index;
   }
 
   @override
-  void initState() {
-    super.initState();
-    scrollBehavior.isScrollable = config.isScrollable;
-  }
-
-  @override
   void didUpdateConfig(TabBar<T> oldConfig) {
     super.didUpdateConfig(oldConfig);
-    if (!config.isScrollable)
-      scrollTo(0.0);
+    if (config.isScrollable != oldConfig.isScrollable) {
+      scrollBehavior.isScrollable = config.isScrollable;
+      if (!config.isScrollable)
+        scrollTo(0.0);
+    }
   }
 
   @override
   void dispose() {
-    _selection?.unregisterAnimationListener(this);
+    _selection?.removeAnimationListener(this);
     super.dispose();
   }
 
@@ -920,7 +917,10 @@ class _TabBarState<T> extends ScrollableState<TabBar<T>> implements TabBarSelect
   }
 
   @override
-  ScrollBehavior<double, double> createScrollBehavior() => new _TabsScrollBehavior();
+  ScrollBehavior<double, double> createScrollBehavior() {
+    return new _TabsScrollBehavior()
+      ..isScrollable = config.isScrollable;
+  }
 
   @override
   _TabsScrollBehavior get scrollBehavior => super.scrollBehavior;
@@ -968,11 +968,20 @@ class _TabBarState<T> extends ScrollableState<TabBar<T>> implements TabBarSelect
   }
 
   void _layoutChanged(Size tabBarSize, List<double> tabWidths) {
-    setState(() {
-      _tabBarSize = tabBarSize;
-      _tabWidths = tabWidths;
-      _indicatorRect = _selection != null ? _tabIndicatorRect(_selection.index) : Rect.zero;
-      _updateScrollBehavior();
+    // This is bad. We should use a LayoutBuilder or CustomMultiChildLayout or some such.
+    // As designed today, tabs are always lagging one frame behind, taking two frames
+    // to handle a layout change.
+    _tabBarSize = tabBarSize;
+    _tabWidths = tabWidths;
+    _indicatorRect = _selection != null ? _tabIndicatorRect(_selection.index) : Rect.zero;
+    _updateScrollBehavior();
+    SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
+      if (mounted) {
+        setState(() {
+          // the changes were made at layout time
+          // TODO(ianh): remove this setState: https://github.com/flutter/flutter/issues/5749
+        });
+      }
     });
   }
 
@@ -1100,9 +1109,9 @@ class _TabBarViewState<T> extends PageableListState<TabBarView<T>> implements Ta
   void _initSelection(TabBarSelectionState<T> newSelection) {
     if (_selection == newSelection)
       return;
-    _selection?.unregisterAnimationListener(this);
+    _selection?.removeAnimationListener(this);
     _selection = newSelection;
-    _selection?.registerAnimationListener(this);
+    _selection?.addAnimationListener(this);
     if (_selection != null)
       _updateItemsAndScrollBehavior();
   }
@@ -1116,7 +1125,7 @@ class _TabBarViewState<T> extends PageableListState<TabBarView<T>> implements Ta
 
   @override
   void dispose() {
-    _selection?.unregisterAnimationListener(this);
+    _selection?.removeAnimationListener(this);
     super.dispose();
   }
 

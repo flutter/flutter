@@ -42,13 +42,10 @@ class CreateCommand extends FlutterCommand {
     'If run on a project that already exists, this will repair the project, recreating any files that are missing.';
 
   @override
-  bool get requiresProjectRoot => false;
-
-  @override
   String get invocation => "${runner.executableName} $name <output directory>";
 
   @override
-  Future<int> runInProject() async {
+  Future<int> runCommand() async {
     if (argResults.rest.isEmpty) {
       printStatus('No option specified for the output directory.');
       printStatus(usage);

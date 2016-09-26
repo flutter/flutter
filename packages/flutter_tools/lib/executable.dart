@@ -38,6 +38,7 @@ import 'src/commands/test.dart';
 import 'src/commands/trace.dart';
 import 'src/commands/update_packages.dart';
 import 'src/commands/upgrade.dart';
+import 'src/commands/watch.dart';
 import 'src/device.dart';
 import 'src/doctor.dart';
 import 'src/globals.dart';
@@ -47,8 +48,9 @@ import 'src/runner/flutter_command_runner.dart';
 ///
 /// This function is intended to be used from the `flutter` command line tool.
 Future<Null> main(List<String> args) async {
-  bool help = args.contains('-h') || args.contains('--help');
   bool verbose = args.contains('-v') || args.contains('--verbose');
+  bool help = args.contains('-h') || args.contains('--help') ||
+      (args.isNotEmpty && args.first == 'help') || (args.length == 1 && verbose);
   bool verboseHelp = help && verbose;
 
   if (verboseHelp) {
@@ -58,8 +60,8 @@ Future<Null> main(List<String> args) async {
   }
 
   FlutterCommandRunner runner = new FlutterCommandRunner(verboseHelp: verboseHelp)
-    ..addCommand(new AnalyzeCommand())
-    ..addCommand(new BuildCommand())
+    ..addCommand(new AnalyzeCommand(verboseHelp: verboseHelp))
+    ..addCommand(new BuildCommand(verboseHelp: verboseHelp))
     ..addCommand(new ChannelCommand())
     ..addCommand(new ConfigCommand())
     ..addCommand(new CreateCommand())
@@ -74,7 +76,7 @@ Future<Null> main(List<String> args) async {
     ..addCommand(new PackagesCommand())
     ..addCommand(new PrecacheCommand())
     ..addCommand(new RefreshCommand())
-    ..addCommand(new RunCommand())
+    ..addCommand(new RunCommand(verboseHelp: verboseHelp))
     ..addCommand(new RunMojoCommand(hidden: !verboseHelp))
     ..addCommand(new ScreenshotCommand())
     ..addCommand(new SetupCommand(hidden: !verboseHelp))
@@ -83,9 +85,10 @@ Future<Null> main(List<String> args) async {
     ..addCommand(new TestCommand())
     ..addCommand(new TraceCommand())
     ..addCommand(new UpdatePackagesCommand(hidden: !verboseHelp))
-    ..addCommand(new UpgradeCommand());
+    ..addCommand(new UpgradeCommand())
+    ..addCommand(new WatchCommand(verboseHelp: verboseHelp));
 
-  return Chain.capture(() async {
+  return Chain.capture/*<Future<Null>>*/(() async {
     // Initialize globals.
     context[Logger] = new StdoutLogger();
     context[DeviceManager] = new DeviceManager();

@@ -2,9 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:math';
-
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 
 class PestoDemo extends StatelessWidget {
   PestoDemo({ Key key }) : super(key: key);
@@ -15,9 +14,6 @@ class PestoDemo extends StatelessWidget {
   Widget build(BuildContext context) => new PestoHome();
 }
 
-const String _kUserName = 'Jonathan';
-const String _kUserEmail = 'jonathan@example.com';
-const String _kUserImage = 'packages/flutter_gallery_assets/pesto/avatar.jpg';
 const String _kSmallLogoImage = 'packages/flutter_gallery_assets/pesto/logo_small.png';
 const String _kMediumLogoImage = 'packages/flutter_gallery_assets/pesto/logo_medium.png';
 const double _kAppBarHeight = 128.0;
@@ -54,7 +50,8 @@ class PestoStyle extends TextStyle {
     double fontSize: 12.0,
     FontWeight fontWeight,
     Color color: Colors.black87,
-    double height
+    double letterSpacing,
+    double height,
   }) : super(
     inherit: false,
     color: color,
@@ -62,7 +59,8 @@ class PestoStyle extends TextStyle {
     fontSize: fontSize,
     fontWeight: fontWeight,
     textBaseline: TextBaseline.alphabetic,
-    height: height
+    letterSpacing: letterSpacing,
+    height: height,
   );
 }
 
@@ -79,11 +77,6 @@ class RecipeGridPage extends StatefulWidget {
 
 class _RecipeGridPageState extends State<RecipeGridPage> {
   final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
-  final TextStyle favoritesMessageStyle = const PestoStyle(fontSize: 16.0);
-  final TextStyle userStyle = const PestoStyle(fontWeight: FontWeight.bold);
-  final TextStyle emailStyle = const PestoStyle(color: Colors.black54);
-
-  bool showFavorites = false;
 
   @override
   Widget build(BuildContext context) {
@@ -95,7 +88,6 @@ class _RecipeGridPageState extends State<RecipeGridPage> {
         scrollableKey: config.scrollableKey,
         appBarBehavior: AppBarBehavior.under,
         appBar: buildAppBar(context, statusBarHeight),
-        drawer: buildDrawer(context),
         floatingActionButton: new FloatingActionButton(
           child: new Icon(Icons.edit),
           onPressed: () {
@@ -127,17 +119,16 @@ class _RecipeGridPageState extends State<RecipeGridPage> {
         builder: (BuildContext context, BoxConstraints constraints) {
           final Size size = constraints.biggest;
           final double appBarHeight = size.height - statusBarHeight;
-          final String logo = appBarHeight >= 70.0 ? _kMediumLogoImage : _kSmallLogoImage;
-          // Extra padding. Calculated to give about 16px on the bottom for the
-          // `small` logo at its native size, and 30px for the `medium`.
-          final double extraPadding = min(0.19 * appBarHeight + 5.4, 40.0);
+          final double t = (appBarHeight - kToolbarHeight) / (_kAppBarHeight - kToolbarHeight);
+          final double extraPadding = new Tween<double>(begin: 10.0, end: 24.0).lerp(t);
+          final double logoHeight = appBarHeight - 1.5 * extraPadding;
           return new Padding(
             padding: new EdgeInsets.only(
               top: statusBarHeight + 0.5 * extraPadding,
               bottom: extraPadding
             ),
             child: new Center(
-              child: new Image.asset(logo, fit: ImageFit.scaleDown)
+              child: new PestoLogo(height: logoHeight, t: t.clamp(0.0, 1.0))
             )
           );
         }
@@ -145,73 +136,8 @@ class _RecipeGridPageState extends State<RecipeGridPage> {
     );
   }
 
-  Widget buildDrawer(BuildContext context) {
-    return new Drawer(
-      child: new Block(
-        children: <Widget>[
-          new DrawerHeader(
-            child: new Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                new Container(
-                  decoration: new BoxDecoration(
-                    border: new Border.all(color: _kTheme.primaryColor, width: 2.0),
-                    shape: BoxShape.circle
-                  ),
-                  width: 72.0,
-                  height: 72.0,
-                  padding: const EdgeInsets.all(2.0),
-                  margin: const EdgeInsets.only(bottom: 16.0),
-                  child: new ClipOval(
-                    child: new Image.asset(_kUserImage, fit: ImageFit.contain)
-                  )
-                ),
-                new Text(_kUserName, style: userStyle),
-                new Text(_kUserEmail, style: emailStyle)
-              ]
-            )
-          ),
-          new DrawerItem(
-            child: new Text('Home'),
-            icon: new Icon(Icons.home),
-            selected: !showFavorites,
-            onPressed: () {
-              Navigator.popUntil(context, ModalRoute.withName('/pesto'));
-            }
-          ),
-          new DrawerItem(
-            child: new Text('Favorites'),
-            icon: new Icon(Icons.favorite),
-            selected: showFavorites,
-            onPressed: () {
-              if (showFavorites)
-                Navigator.pop(context);
-              else
-                showFavoritesPage(context);
-            }
-          ),
-          new Divider(),
-          new DrawerItem(
-            child: new Text('Return to Gallery'),
-            icon: new Icon(Icons.arrow_back),
-            onPressed: () {
-              Navigator.popUntil(context, ModalRoute.withName('/'));
-            }
-          ),
-        ]
-      )
-    );
-  }
-
   Widget buildBody(BuildContext context, double statusBarHeight) {
     final EdgeInsets padding = new EdgeInsets.fromLTRB(8.0, 8.0 + _kAppBarHeight + statusBarHeight, 8.0, 8.0);
-
-    if (config.recipes.isEmpty) {
-      return new Padding(
-        padding: padding,
-        child: new Text('Save your favorite recipes to see them here.', style: favoritesMessageStyle)
-      );
-    }
 
     return new ScrollableGrid(
       scrollableKey: config.scrollableKey,
@@ -247,6 +173,61 @@ class _RecipeGridPageState extends State<RecipeGridPage> {
         );
       }
     ));
+  }
+}
+
+class PestoLogo extends StatefulWidget {
+  PestoLogo({this.height, this.t});
+
+  final double height;
+  final double t;
+
+  @override
+  _PestoLogoState createState() => new _PestoLogoState();
+}
+
+class _PestoLogoState extends State<PestoLogo> {
+  // Native sizes for logo and its image/text components.
+  static const double kLogoHeight = 162.0;
+  static const double kLogoWidth = 220.0;
+  static const double kImageHeight = 108.0;
+  static const double kTextHeight = 48.0;
+  final TextStyle titleStyle = const PestoStyle(fontSize: kTextHeight, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 3.0);
+  final RectTween _textRectTween = new RectTween(
+    begin: new Rect.fromLTWH(0.0, kLogoHeight, kLogoWidth, kTextHeight),
+    end: new Rect.fromLTWH(0.0, kImageHeight, kLogoWidth, kTextHeight)
+  );
+  final Curve _textOpacity = const Interval(0.4, 1.0, curve: Curves.easeInOut);
+  final RectTween _imageRectTween = new RectTween(
+    begin: new Rect.fromLTWH(0.0, 0.0, kLogoWidth, kLogoHeight),
+    end: new Rect.fromLTWH(0.0, 0.0, kLogoWidth, kImageHeight)
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    return new Transform(
+      transform: new Matrix4.identity()..scale(config.height / kLogoHeight),
+      alignment: FractionalOffset.topCenter,
+      child: new SizedBox(
+        width: kLogoWidth,
+        child: new Stack(
+          overflow: Overflow.visible,
+          children: <Widget>[
+            new Positioned.fromRect(
+              rect: _imageRectTween.lerp(config.t),
+              child: new Image.asset(_kSmallLogoImage, fit: ImageFit.contain)
+            ),
+            new Positioned.fromRect(
+              rect: _textRectTween.lerp(config.t),
+              child: new Opacity(
+                opacity: _textOpacity.transform(config.t),
+                child: new Text('PESTO', style: titleStyle, textAlign: TextAlign.center),
+              )
+            )
+          ]
+        )
+      )
+    );
   }
 }
 
@@ -317,6 +298,7 @@ class _RecipePageState extends State<RecipePage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
   final GlobalKey<ScrollableState> _scrollableKey = new GlobalKey<ScrollableState>();
   final TextStyle menuItemStyle = new PestoStyle(fontSize: 15.0, color: Colors.black54, height: 24.0/15.0);
+  final Object _disableHeroTransition = new Object();
 
   double _getAppBarHeight(BuildContext context) => MediaQuery.of(context).size.height * 0.3;
 
@@ -327,6 +309,7 @@ class _RecipePageState extends State<RecipePage> {
       scrollableKey: _scrollableKey,
       appBarBehavior: AppBarBehavior.scroll,
       appBar: new AppBar(
+        heroTag: _disableHeroTransition,
         expandedHeight: _getAppBarHeight(context),
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -346,9 +329,17 @@ class _RecipePageState extends State<RecipePage> {
             ]
           )
         ],
-        // This empty space keeps the app bar from moving until the screen is
-        // scrolled at least _getAppBarHeight().
-        flexibleSpace: new Container()
+        flexibleSpace: new FlexibleSpaceBar(
+          background: new DecoratedBox(
+            decoration: new BoxDecoration(
+              gradient: new LinearGradient(
+                begin: const FractionalOffset(0.5, 0.0),
+                end: const FractionalOffset(0.5, 0.40),
+                colors: <Color>[const Color(0x60000000), const Color(0x00000000)]
+              )
+            )
+          )
+        ),
       ),
       body: _buildContainer(context)
     );
@@ -379,7 +370,7 @@ class _RecipePageState extends State<RecipePage> {
           )
         ),
         new ClampOverscrolls(
-          value: true,
+          edge: ScrollableEdge.both,
           child: new ScrollableViewport(
             scrollableKey: _scrollableKey,
             child: new RepaintBoundary(

@@ -52,6 +52,103 @@ class LayoutBuilder extends RenderObjectWidget {
   // updateRenderObject is redundant with the logic in the LayoutBuilderElement below.
 }
 
+class _LayoutBuilderElement extends RenderObjectElement {
+  _LayoutBuilderElement(LayoutBuilder widget) : super(widget);
+
+  @override
+  LayoutBuilder get widget => super.widget;
+
+  @override
+  _RenderLayoutBuilder get renderObject => super.renderObject;
+
+  Element _child;
+
+  @override
+  void visitChildren(ElementVisitor visitor) {
+    if (_child != null)
+      visitor(_child);
+  }
+
+  @override
+  void detachChild(Element child) {
+    assert(child == _child);
+    _child = null;
+  }
+
+  @override
+  void mount(Element parent, dynamic newSlot) {
+    super.mount(parent, newSlot); // Creates the renderObject.
+    renderObject.callback = _layout;
+  }
+
+  @override
+  void update(LayoutBuilder newWidget) {
+    assert(widget != newWidget);
+    super.update(newWidget);
+    assert(widget == newWidget);
+    renderObject.callback = _layout;
+    renderObject.markNeedsLayout();
+  }
+
+  @override
+  void performRebuild() {
+    // This gets called if markNeedsBuild() is called on us.
+    // That might happen if, e.g., our builder uses Inherited widgets.
+    renderObject.markNeedsLayout();
+    super.performRebuild(); // Calls widget.updateRenderObject (a no-op in this case).
+  }
+
+  @override
+  void unmount() {
+    renderObject.callback = null;
+    super.unmount();
+  }
+
+  void _layout(BoxConstraints constraints) {
+    owner.buildScope(this, () {
+      Widget built;
+      if (widget.builder != null) {
+        try {
+          built = widget.builder(this, constraints);
+          debugWidgetBuilderValue(widget, built);
+        } catch (e, stack) {
+          _debugReportException('building $widget', e, stack);
+          built = new ErrorWidget(e);
+        }
+      }
+      try {
+        _child = updateChild(_child, built, null);
+        assert(_child != null);
+      } catch (e, stack) {
+        _debugReportException('building $widget', e, stack);
+        built = new ErrorWidget(e);
+        _child = updateChild(null, built, slot);
+      }
+    });
+  }
+
+  @override
+  void insertChildRenderObject(RenderObject child, dynamic slot) {
+    final RenderObjectWithChildMixin<RenderObject> renderObject = this.renderObject;
+    assert(slot == null);
+    renderObject.child = child;
+    assert(renderObject == this.renderObject);
+  }
+
+  @override
+  void moveChildRenderObject(RenderObject child, dynamic slot) {
+    assert(false);
+  }
+
+  @override
+  void removeChildRenderObject(RenderObject child) {
+    final _RenderLayoutBuilder renderObject = this.renderObject;
+    assert(renderObject.child == child);
+    renderObject.child = null;
+    assert(renderObject == this.renderObject);
+  }
+}
+
 class _RenderLayoutBuilder extends RenderBox with RenderObjectWithChildMixin<RenderBox> {
   _RenderLayoutBuilder({
     LayoutCallback callback,
@@ -125,105 +222,6 @@ class _RenderLayoutBuilder extends RenderBox with RenderObjectWithChildMixin<Ren
   void paint(PaintingContext context, Offset offset) {
     if (child != null)
       context.paintChild(child, offset);
-  }
-}
-
-// TODO(ianh): move this class up to just below its widget.
-class _LayoutBuilderElement extends RenderObjectElement {
-  _LayoutBuilderElement(LayoutBuilder widget) : super(widget);
-
-  @override
-  LayoutBuilder get widget => super.widget;
-
-  @override
-  _RenderLayoutBuilder get renderObject => super.renderObject;
-
-  Element _child;
-
-  @override
-  void visitChildren(ElementVisitor visitor) {
-    if (_child != null)
-      visitor(_child);
-  }
-
-  @override
-  void mount(Element parent, dynamic newSlot) {
-    super.mount(parent, newSlot); // Creates the renderObject.
-    renderObject.callback = _layout;
-  }
-
-  @override
-  void update(LayoutBuilder newWidget) {
-    assert(widget != newWidget);
-    super.update(newWidget);
-    assert(widget == newWidget);
-    renderObject.callback = _layout;
-    renderObject.markNeedsLayout();
-  }
-
-  @override
-  void performRebuild() {
-    // This gets called if markNeedsBuild() is called on us.
-    // That might happen if, e.g., our builder uses Inherited widgets.
-    renderObject.markNeedsLayout();
-    super.performRebuild(); // Calls widget.updateRenderObject (a no-op in this case).
-  }
-
-  @override
-  void unmount() {
-    renderObject.callback = null;
-    super.unmount();
-  }
-
-  void _layout(BoxConstraints constraints) {
-    Widget built;
-    if (widget.builder != null) {
-      owner.lockState(() {
-        try {
-          built = widget.builder(this, constraints);
-          debugWidgetBuilderValue(widget, built);
-        } catch (e, stack) {
-          _debugReportException('building $widget', e, stack);
-          built = new ErrorWidget(e);
-        }
-      });
-    }
-    owner.lockState(() {
-      if (widget.builder == null) {
-        if (_child != null)
-          _child = updateChild(_child, null, null);
-        return;
-      }
-      try {
-        _child = updateChild(_child, built, null);
-        assert(_child != null);
-      } catch (e, stack) {
-        _debugReportException('building $widget', e, stack);
-        built = new ErrorWidget(e);
-        _child = updateChild(null, built, slot);
-      }
-    }, building: true);
-  }
-
-  @override
-  void insertChildRenderObject(RenderObject child, dynamic slot) {
-    final RenderObjectWithChildMixin<RenderObject> renderObject = this.renderObject;
-    assert(slot == null);
-    renderObject.child = child;
-    assert(renderObject == this.renderObject);
-  }
-
-  @override
-  void moveChildRenderObject(RenderObject child, dynamic slot) {
-    assert(false);
-  }
-
-  @override
-  void removeChildRenderObject(RenderObject child) {
-    final _RenderLayoutBuilder renderObject = this.renderObject;
-    assert(renderObject.child == child);
-    renderObject.child = null;
-    assert(renderObject == this.renderObject);
   }
 }
 

@@ -7,6 +7,7 @@ import 'dart:async';
 import '../base/os.dart';
 import '../base/process.dart';
 import '../dart/pub.dart';
+import '../dart/summary.dart';
 import '../cache.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
@@ -20,10 +21,7 @@ class UpgradeCommand extends FlutterCommand {
   final String description = 'Upgrade your copy of Flutter.';
 
   @override
-  bool get requiresProjectRoot => false;
-
-  @override
-  Future<int> runInProject() async {
+  Future<int> runCommand() async {
     try {
       runCheckedSync(<String>[
         'git', 'rev-parse', '@{u}'
@@ -33,6 +31,14 @@ class UpgradeCommand extends FlutterCommand {
       return 1;
     }
 
+    FlutterVersion version = new FlutterVersion(Cache.flutterRoot);
+    if (version.channel == 'alpha') {
+      // The alpha branch is deprecated. Rather than trying to pull the alpha
+      // branch, we should switch upstream to master.
+      printStatus('Switching to from alpha to master...');
+      runSync(<String>['git', 'branch', '--set-upstream-to=origin/master']);
+    }
+
     printStatus('Upgrading Flutter from ${Cache.flutterRoot}...');
 
     int code = await runCommandAndStreamOutput(
@@ -40,6 +46,8 @@ class UpgradeCommand extends FlutterCommand {
       workingDirectory: Cache.flutterRoot,
       mapFunction: (String line) => matchesGitLine(line) ? null : line
     );
+
+    await buildUnlinkedForPackages(Cache.flutterRoot);
 
     if (code != 0)
       return code;

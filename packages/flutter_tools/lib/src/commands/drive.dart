@@ -3,20 +3,18 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io' as io;
 
 import 'package:path/path.dart' as path;
-import 'package:test/src/executable.dart' as executable; // ignore: implementation_imports
 
 import '../android/android_device.dart' show AndroidDevice;
 import '../application_package.dart';
 import '../base/file_system.dart';
 import '../base/common.dart';
-import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/process.dart';
 import '../build_info.dart';
 import '../cache.dart';
+import '../dart/package_map.dart';
 import '../dart/sdk.dart';
 import '../device.dart';
 import '../globals.dart';
@@ -47,6 +45,7 @@ import 'run.dart';
 /// exit code.
 class DriveCommand extends RunCommandBase {
   DriveCommand() {
+    usesPubOption();
     argParser.addFlag(
       'keep-app-running',
       negatable: true,
@@ -87,7 +86,14 @@ class DriveCommand extends RunCommandBase {
   int get debugPort => int.parse(argResults['debug-port']);
 
   @override
-  Future<int> runInProject() async {
+  Future<int> verifyThenRunCommand() async {
+    if (!commandValidator())
+      return 1;
+    return super.verifyThenRunCommand();
+  }
+
+  @override
+  Future<int> runCommand() async {
     String testFile = _getTestFile();
     if (testFile == null) {
       return 1;
@@ -124,16 +130,6 @@ class DriveCommand extends RunCommandBase {
       }
     } else {
       printStatus('Will connect to already running application instance.');
-    }
-
-    // Check for the existance of a `packages/` directory; pub test does not yet
-    // support running without symlinks.
-    if (!new io.Directory('packages').existsSync()) {
-      Status status = logger.startProgress(
-        'Missing packages directory; running `pub get` (to work around https://github.com/dart-lang/test/issues/327):'
-      );
-      await runAsync(<String>[sdkBinaryName('pub'), 'get', '--no-precompile']);
-      status.stop(showElapsedTime: true);
     }
 
     Cache.releaseLockEarly();
@@ -335,9 +331,13 @@ void restoreTestRunner() {
 
 Future<int> runTests(List<String> testArgs) async {
   printTrace('Running driver tests.');
-  List<String> args = testArgs.toList()..add('-rexpanded');
-  await executable.main(args);
-  return io.exitCode;
+
+  PackageMap.globalPackagesPath = path.normalize(path.absolute(PackageMap.globalPackagesPath));
+  List<String> args = testArgs.toList()
+    ..add('--packages=${PackageMap.globalPackagesPath}')
+    ..add('-rexpanded');
+  String dartVmPath = path.join(dartSdkPath, 'bin', 'dart');
+  return await runCommandAndStreamOutput(<String>[dartVmPath]..addAll(args));
 }
 
 

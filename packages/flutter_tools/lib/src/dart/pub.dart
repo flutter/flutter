@@ -48,8 +48,10 @@ Future<int> pubGet({
     String command = upgrade ? 'upgrade' : 'get';
     Status status = logger.startProgress("Running 'pub $command' in ${path.basename(directory)}...");
     int code = await runCommandAndStreamOutput(
-      <String>[sdkBinaryName('pub'), '--verbosity=warning', command, '--no-package-symlinks', '--no-precompile'],
-      workingDirectory: directory
+      <String>[sdkBinaryName('pub'), '--verbosity=warning', command, '--no-packages-dir', '--no-precompile'],
+      workingDirectory: directory,
+      mapFunction: _filterOverrideWarnings,
+      environment: <String, String>{ 'FLUTTER_ROOT': Cache.flutterRoot }
     );
     status.stop(showElapsedTime: true);
     if (code != 0)
@@ -61,4 +63,16 @@ Future<int> pubGet({
 
   printError('$directory: pubspec.yaml and .packages are in an inconsistent state');
   return 1;
+}
+
+String _filterOverrideWarnings(String str) {
+  // Warning: You are using these overridden dependencies:
+  // ! analyzer 0.29.0-alpha.0 from path ../../bin/cache/dart-sdk/lib/analyzer
+
+  if (str.contains('overridden dependencies:'))
+    return null;
+  if (str.startsWith('! analyzer '))
+    return null;
+
+  return str;
 }

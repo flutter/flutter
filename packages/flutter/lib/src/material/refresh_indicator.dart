@@ -80,8 +80,8 @@ enum _DismissTransition {
 /// See also:
 ///
 ///  * <https://www.google.com/design/spec/patterns/swipe-to-refresh.html>
-///  * [RefreshIndicatorState] (can be used to programatically show the refresh indicator)
-///  * [RefreshProgressIndicator]
+///  * [RefreshIndicatorState], can be used to programatically show the refresh indicator.
+///  * [RefreshProgressIndicator].
 class RefreshIndicator extends StatefulWidget {
   /// Creates a refresh indicator.
   ///
@@ -319,16 +319,26 @@ class RefreshIndicatorState extends State<RefreshIndicator> {
   /// been started interactively. If this method is called while the refresh
   /// callback is running, it quietly does nothing.
   ///
-  /// See also:
-  ///
-  /// * [GlobalKey] (creating the RefreshIndicator with a [GlobalKey<RefreshIndicatorState>]
-  ///   will make it possible to refer to the [RefreshIndicatorState] later)
+  /// Creating the RefreshIndicator with a [GlobalKey<RefreshIndicatorState>]
+  /// makes it possible to refer to the [RefreshIndicatorState].
   Future<Null> show() async {
     if (_mode != _RefreshIndicatorMode.refresh) {
       _sizeController.value = 0.0;
       _scaleController.value = 0.0;
       await _show();
     }
+  }
+
+  ScrollableEdge get _clampOverscrollsEdge {
+    switch (config.location) {
+      case RefreshIndicatorLocation.top:
+        return ScrollableEdge.leading;
+      case RefreshIndicatorLocation.bottom:
+        return ScrollableEdge.trailing;
+      case RefreshIndicatorLocation.both:
+        return ScrollableEdge.both;
+    }
+    return ScrollableEdge.none;
   }
 
   @override
@@ -353,9 +363,10 @@ class RefreshIndicatorState extends State<RefreshIndicator> {
       onPointerUp: _handlePointerUp,
       child: new Stack(
         children: <Widget>[
-          new ClampOverscrolls(
+          new ClampOverscrolls.inherit(
+            context: context,
+            edge: _clampOverscrollsEdge,
             child: config.child,
-            value: true
           ),
           new Positioned(
             top: _isIndicatorAtTop ? 0.0 : null,

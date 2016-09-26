@@ -20,6 +20,11 @@ the [Flutter Setup](https://flutter.io/setup/) guide.
 
 The `flutter run --release` command both builds and installs the Flutter app.
 
+## Prerelease checklist
+
+* Verify that the About box's license page scrolls and reveals its long
+long stream of license texts.
+
 ## Icon
 
 Android launcher icons were generated using Android Asset Studio:

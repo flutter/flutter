@@ -13,6 +13,7 @@ import '../cache.dart';
 import '../device.dart';
 import '../globals.dart';
 import '../hot.dart';
+import '../ios/mac.dart';
 import '../vmservice.dart';
 import '../resident_runner.dart';
 import '../run.dart';
@@ -44,7 +45,7 @@ class RunCommand extends RunCommandBase {
   @override
   final String description = 'Run your Flutter app on an attached device.';
 
-  RunCommand() {
+  RunCommand({bool verboseHelp: false}) {
     argParser.addFlag('full-restart',
         defaultsTo: true,
         help: 'Stop any currently running application process before running the app.');
@@ -58,14 +59,14 @@ class RunCommand extends RunCommandBase {
         defaultsTo: true,
         help: 'If necessary, build the app before running.');
     argParser.addOption('use-application-binary',
-        hide: true,
+        hide: !verboseHelp,
         help: 'Specify a pre-built application binary to use when running.');
     usesPubOption();
 
     // Option to enable hot reloading.
     argParser.addFlag('hot',
-                      negatable: false,
-                      defaultsTo: false,
+                      negatable: true,
+                      defaultsTo: true,
                       help: 'Run with support for hot reloading.');
 
     // Option to write the pid to a file.
@@ -79,17 +80,14 @@ class RunCommand extends RunCommandBase {
     // application, measure the startup time and the app restart time, write the
     // results out to 'refresh_benchmark.json', and exit. This flag is intended
     // for use in generating automated flutter benchmarks.
-    argParser.addFlag('benchmark', negatable: false, hide: true);
+    argParser.addFlag('benchmark', negatable: false, hide: !verboseHelp);
   }
 
-  @override
-  bool get requiresDevice => true;
+  Device device;
 
   @override
   String get usagePath {
-    Device device = deviceForCommand;
-
-    String command = argResults['hot'] ? 'hotrun' : name;
+    String command = shouldUseHotMode() ? 'hotrun' : name;
 
     if (device == null)
       return command;
@@ -99,7 +97,33 @@ class RunCommand extends RunCommandBase {
   }
 
   @override
-  Future<int> runInProject() async {
+  void printNoConnectedDevices() {
+    super.printNoConnectedDevices();
+    if (getCurrentHostPlatform() == HostPlatform.darwin_x64 &&
+        XCode.instance.isInstalledAndMeetsVersionCheck) {
+      printStatus('');
+      printStatus('To run on a simulator, launch it first:');
+      printStatus('open -a Simulator.app');
+      printStatus('');
+    }
+  }
+
+  bool shouldUseHotMode() {
+    return argResults['hot'] && (getBuildMode() == BuildMode.debug);
+  }
+
+  @override
+  Future<int> verifyThenRunCommand() async {
+    if (!commandValidator())
+      return 1;
+    device = await findTargetDevice();
+    if (device == null)
+      return 1;
+    return super.verifyThenRunCommand();
+  }
+
+  @override
+  Future<int> runCommand() async {
     int debugPort;
 
     if (argResults['debug-port'] != null) {
@@ -111,7 +135,7 @@ class RunCommand extends RunCommandBase {
       }
     }
 
-    if (deviceForCommand.isLocalEmulator && !isEmulatorBuildMode(getBuildMode())) {
+    if (device.isLocalEmulator && !isEmulatorBuildMode(getBuildMode())) {
       printError('${toTitleCase(getModeName(getBuildMode()))} mode is not supported for emulators.');
       return 1;
     }
@@ -130,16 +154,14 @@ class RunCommand extends RunCommandBase {
 
     Cache.releaseLockEarly();
 
-    // Do some early error checks for hot mode.
-    bool hotMode = argResults['hot'];
+    // Enable hot mode by default if ``--no-hot` was not passed and we are in
+    // debug mode.
+    final bool hotMode = shouldUseHotMode();
 
     if (hotMode) {
-      if (getBuildMode() != BuildMode.debug) {
-        printError('Hot mode only works with debug builds.');
-        return 1;
-      }
-      if (!deviceForCommand.supportsHotMode) {
-        printError('Hot mode is not supported by this device.');
+      if (!device.supportsHotMode) {
+        printError('Hot mode is not supported by this device. '
+                   'Run with --no-hot.');
         return 1;
       }
     }
@@ -151,15 +173,16 @@ class RunCommand extends RunCommandBase {
     }
     ResidentRunner runner;
 
-    if (argResults['hot']) {
+    if (hotMode) {
       runner = new HotRunner(
-        deviceForCommand,
+        device,
         target: targetFile,
         debuggingOptions: options,
+        benchmarkMode: argResults['benchmark'],
       );
     } else {
       runner = new RunAndStayResident(
-        deviceForCommand,
+        device,
         target: targetFile,
         debuggingOptions: options,
         traceStartup: traceStartup,

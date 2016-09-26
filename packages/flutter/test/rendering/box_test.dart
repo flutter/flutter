@@ -39,7 +39,7 @@ void main() {
     );
     RenderBox flex = new RenderFlex(
       children: <RenderBox>[padding],
-      direction: FlexDirection.vertical,
+      direction: Axis.vertical,
       crossAxisAlignment: CrossAxisAlignment.stretch
     );
     RenderBox outer = new RenderDecoratedBox(

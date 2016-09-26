@@ -30,7 +30,7 @@ class DevFSEntry {
   final AssetBundleEntry bundleEntry;
   String get assetPath => bundleEntry.archivePath;
 
-  final File file;
+  final FileSystemEntity file;
   FileStat _fileStat;
   // When we scanned for files, did this still exist?
   bool _exists = false;
@@ -69,15 +69,29 @@ class DevFSEntry {
     if (_isSourceEntry)
       return;
     _fileStat = file.statSync();
+    if (_fileStat.type == FileSystemEntityType.LINK) {
+      // Stat the link target.
+      String resolved = file.resolveSymbolicLinksSync();
+      _fileStat = FileStat.statSync(resolved);
+    }
   }
 
   bool get _isSourceEntry => file == null;
 
   bool get _isAssetEntry => bundleEntry != null;
 
+  File _getFile() {
+    if (file is Link) {
+      // The link target.
+      return new File(file.resolveSymbolicLinksSync());
+    }
+    return file;
+  }
+
   Future<List<int>> contentsAsBytes() async {
     if (_isSourceEntry)
       return bundleEntry.contentsAsBytes();
+    final File file = _getFile();
     return file.readAsBytes();
   }
 
@@ -86,6 +100,7 @@ class DevFSEntry {
       return new Stream<List<int>>.fromIterable(
           <List<int>>[bundleEntry.contentsAsBytes()]);
     }
+    final File file = _getFile();
     return file.openRead();
   }
 
@@ -417,7 +432,7 @@ class DevFS {
     logger.flush();
   }
 
-  void _scanFile(String devicePath, File file) {
+  void _scanFile(String devicePath, FileSystemEntity file) {
     DevFSEntry entry = _entries[devicePath];
     if (entry == null) {
       // New file.
@@ -485,10 +500,20 @@ class DevFS {
       Stream<FileSystemEntity> files =
           directory.list(recursive: recursive, followLinks: false);
       await for (FileSystemEntity file in files) {
-        if (file is! File) {
+        if (file is Link) {
+          final String linkPath = file.resolveSymbolicLinksSync();
+          final FileSystemEntityType linkType =
+              FileStat.statSync(linkPath).type;
+          if (linkType == FileSystemEntityType.DIRECTORY) {
+            // Skip links to directories.
+            continue;
+          }
+        }
+        if (file is Directory) {
           // Skip non-files.
           continue;
         }
+        assert((file is Link) || (file is File));
         if (ignoreDotFiles && path.basename(file.path).startsWith('.')) {
           // Skip dot files.
           continue;
