@@ -196,4 +196,46 @@ void main() {
     await tester.pump(new Duration(seconds: 1));
     expect(scrollableKey.currentState.scrollOffset, equals(500.0));
   });
+
+  testWidgets('Bottom sheet cannot overlap app bar', (WidgetTester tester) async {
+    Key sheetKey = new UniqueKey();
+
+    await tester.pumpWidget(
+      new MaterialApp(
+        theme: new ThemeData(platform: TargetPlatform.android),
+        home: new Scaffold(
+          appBar: new AppBar(
+            title: new Text('Title')
+          ),
+          body: new Builder(
+            builder: (BuildContext context) {
+              return new GestureDetector(
+                onTap: () {
+                  Scaffold.of(context).showBottomSheet((BuildContext context) {
+                    return new Container(
+                      key: sheetKey,
+                      decoration: new BoxDecoration(backgroundColor: Colors.blue[500])
+                    );
+                  });
+                },
+                child: new Text('X')
+              );
+            }
+          )
+        )
+      )
+    );
+
+    await tester.tap(find.text('X'));
+    await tester.pump(); // start animation
+    await tester.pump(const Duration(seconds: 1));
+
+    RenderBox appBarBox = tester.renderObject(find.byType(AppBar));
+    RenderBox sheetBox = tester.renderObject(find.byKey(sheetKey));
+
+    Point appBarBottomRight = appBarBox.localToGlobal(appBarBox.size.bottomRight(Point.origin));
+    Point sheetTopRight = sheetBox.localToGlobal(sheetBox.size.topRight(Point.origin));
+
+    expect(appBarBottomRight, equals(sheetTopRight));
+  });
 }
