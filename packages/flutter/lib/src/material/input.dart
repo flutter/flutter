@@ -24,7 +24,7 @@ export 'package:flutter_services/editing.dart' show KeyboardType;
 ///
 ///  * <https://www.google.com/design/spec/components/text-fields.html>
 ///
-/// For detailed a guide on using the input widget, see:
+/// For a detailed guide on using the input widget, see:
 ///
 /// * <https://flutter.io/text-input/>
 class Input extends StatefulWidget {
