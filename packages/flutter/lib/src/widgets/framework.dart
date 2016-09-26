@@ -1495,6 +1495,8 @@ class BuildOwner {
   /// widget tree.
   void markNeedsToResortDirtyElements() {
     assert(() {
+      if (debugPrintScheduleBuildForStacks)
+        debugPrintStack(label: 'markNeedsToResortDirtyElements() called; _dirtyElementsNeedsResorting was $_dirtyElementsNeedsResorting (now true); dirty list is: $_dirtyElements');
       if (_dirtyElementsNeedsResorting == null) {
         throw new FlutterError(
           'markNeedsToResortDirtyElements() called inappropriately.\n'
@@ -1633,6 +1635,7 @@ class BuildOwner {
           _debugCurrentBuildTarget = context;
          return true;
         });
+        _dirtyElementsNeedsResorting = false;
         try {
           callback();
         } finally {
