@@ -73,7 +73,10 @@ void main() {
       await tester.pumpWidget(new Text('foo'));
       int count;
 
-      AnimationController test = new AnimationController(duration: const Duration(milliseconds: 5100));
+      AnimationController test = new AnimationController(
+        duration: const Duration(milliseconds: 5100),
+        vsync: tester,
+      );
       count = await tester.pumpUntilNoTransientCallbacks(const Duration(seconds: 1));
       expect(count, 0);
 

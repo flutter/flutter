@@ -410,11 +410,14 @@ class _Dial extends StatefulWidget {
   _DialState createState() => new _DialState();
 }
 
-class _DialState extends State<_Dial> {
+class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    _thetaController = new AnimationController(duration: _kDialAnimateDuration);
+    _thetaController = new AnimationController(
+      duration: _kDialAnimateDuration,
+      vsync: this,
+    );
     _thetaTween = new Tween<double>(begin: _getThetaForTime(config.selectedTime));
     _theta = _thetaTween.animate(new CurvedAnimation(
       parent: _thetaController,

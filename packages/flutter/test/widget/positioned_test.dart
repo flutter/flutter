@@ -23,7 +23,8 @@ void main() {
       )
     );
     final AnimationController controller = new AnimationController(
-      duration: const Duration(seconds: 10)
+      duration: const Duration(seconds: 10),
+      vsync: tester,
     );
     final List<Size> sizes = <Size>[];
     final List<Offset> positions = <Offset>[];

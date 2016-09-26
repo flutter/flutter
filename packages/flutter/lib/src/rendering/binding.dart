@@ -198,7 +198,7 @@ abstract class RendererBinding extends BindingBase implements SchedulerBinding, 
   /// then invokes post-frame callbacks (registered with [addPostFrameCallback].
   ///
   /// Some bindings (for example, the [WidgetsBinding]) add extra steps to this
-  /// list.
+  /// list (for example, see [WidgetsBinding.beginFrame]).
   //
   // When editing the above, also update widgets/binding.dart's copy.
   @protected

@@ -30,7 +30,7 @@ import 'toggleable.dart';
 ///  * [Slider]
 ///  * <https://www.google.com/design/spec/components/selection-controls.html#selection-controls-checkbox>
 ///  * <https://www.google.com/design/spec/components/lists-controls.html#lists-controls-types-of-list-controls>
-class Checkbox extends StatelessWidget {
+class Checkbox extends StatefulWidget {
   /// Creates a material design checkbox.
   ///
   /// The checkbox itself does not maintain any state. Instead, when the state of
@@ -69,14 +69,20 @@ class Checkbox extends StatelessWidget {
   static const double width = 18.0;
 
   @override
+  _CheckboxState createState() => new _CheckboxState();
+}
+
+class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin {
+  @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     ThemeData themeData = Theme.of(context);
     return new _CheckboxRenderObjectWidget(
-      value: value,
-      activeColor: activeColor ?? themeData.accentColor,
-      inactiveColor: onChanged != null ? themeData.unselectedWidgetColor : themeData.disabledColor,
-      onChanged: onChanged
+      value: config.value,
+      activeColor: config.activeColor ?? themeData.accentColor,
+      inactiveColor: config.onChanged != null ? themeData.unselectedWidgetColor : themeData.disabledColor,
+      onChanged: config.onChanged,
+      vsync: this,
     );
   }
 }
@@ -84,27 +90,31 @@ class Checkbox extends StatelessWidget {
 class _CheckboxRenderObjectWidget extends LeafRenderObjectWidget {
   _CheckboxRenderObjectWidget({
     Key key,
-    this.value,
-    this.activeColor,
-    this.inactiveColor,
-    this.onChanged
+    @required this.value,
+    @required this.activeColor,
+    @required this.inactiveColor,
+    @required this.onChanged,
+    @required this.vsync,
   }) : super(key: key) {
     assert(value != null);
     assert(activeColor != null);
     assert(inactiveColor != null);
+    assert(vsync != null);
   }
 
   final bool value;
   final Color activeColor;
   final Color inactiveColor;
   final ValueChanged<bool> onChanged;
+  final TickerProvider vsync;
 
   @override
   _RenderCheckbox createRenderObject(BuildContext context) => new _RenderCheckbox(
     value: value,
     activeColor: activeColor,
     inactiveColor: inactiveColor,
-    onChanged: onChanged
+    onChanged: onChanged,
+    vsync: vsync,
   );
 
   @override
@@ -113,7 +123,8 @@ class _CheckboxRenderObjectWidget extends LeafRenderObjectWidget {
       ..value = value
       ..activeColor = activeColor
       ..inactiveColor = inactiveColor
-      ..onChanged = onChanged;
+      ..onChanged = onChanged
+      ..vsync = vsync;
   }
 }
 
@@ -127,13 +138,15 @@ class _RenderCheckbox extends RenderToggleable {
     bool value,
     Color activeColor,
     Color inactiveColor,
-    ValueChanged<bool> onChanged
+    ValueChanged<bool> onChanged,
+    @required TickerProvider vsync,
   }): super(
     value: value,
     activeColor: activeColor,
     inactiveColor: inactiveColor,
     onChanged: onChanged,
-    size: const Size(2 * kRadialReactionRadius, 2 * kRadialReactionRadius)
+    size: const Size(2 * kRadialReactionRadius, 2 * kRadialReactionRadius),
+    vsync: vsync,
   );
 
   @override

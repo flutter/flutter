@@ -86,6 +86,45 @@ class _FrameCallbackEntry {
   StackTrace debugStack;
 }
 
+/// The various phases that a [SchedulerBinding] goes through during
+/// [SchedulerBinding.handleBeginFrame].
+///
+/// This is exposed by [SchedulerBinding.schedulerPhase].
+///
+/// The values of this enum are ordered in the same order as the phases occur,
+/// so their relative index values can be compared to each other.
+///
+/// See also [WidgetsBinding.beginFrame].
+enum SchedulerPhase {
+  /// No frame is being processed. Tasks (scheduled by
+  /// [WidgetsBinding.scheduleTask]), microtasks (scheduled by
+  /// [scheduleMicrotask]), [Timer] callbacks, event handlers (e.g. from user
+  /// input), and other callbacks (e.g. from [Future]s, [Stream]s, and the like)
+  /// may be executing.
+  idle,
+
+  /// The transient callbacks (scheduled by
+  /// [WidgetsBinding.scheduleFrameCallback] and
+  /// [WidgetsBinding.addFrameCallback]) are currently executing.
+  ///
+  /// Typically, these callbacks handle updating objects to new animation states.
+  transientCallbacks,
+
+  /// The persistent callbacks (scheduled by
+  /// [WidgetsBinding.addPersistentFrameCallback]) are currently executing.
+  ///
+  /// Typically, this is the build/layout/paint pipeline. See
+  /// [WidgetsBinding.beginFrame].
+  persistentCallbacks,
+
+  /// The post-frame callbacks (scheduled by
+  /// [WidgetsBinding.addPostFrameCallback]) are currently executing.
+  ///
+  /// Typically, these callbacks handle cleanup and scheduling of work for the
+  /// next frame.
+  postFrameCallbacks,
+}
+
 /// Scheduler for running the following:
 ///
 /// * _Frame callbacks_, triggered by the system's
@@ -402,9 +441,9 @@ abstract class SchedulerBinding extends BindingBase {
   bool get hasScheduledFrame => _hasScheduledFrame;
   bool _hasScheduledFrame = false;
 
-  /// Whether this scheduler is currently producing a frame in [handleBeginFrame].
-  bool get isProducingFrame => _isProducingFrame;
-  bool _isProducingFrame = false;
+  /// The phase that the scheduler is currently operating under.
+  SchedulerPhase get schedulerPhase => _schedulerPhase;
+  SchedulerPhase _schedulerPhase = SchedulerPhase.idle;
 
   /// Schedules a new frame using [scheduleFrame] if this object is not
   /// currently producing a frame.
@@ -412,7 +451,7 @@ abstract class SchedulerBinding extends BindingBase {
   /// After this is called, the framework ensures that the end of the
   /// [handleBeginFrame] function will (eventually) be reached.
   void ensureVisualUpdate() {
-    if (_isProducingFrame)
+    if (schedulerPhase != SchedulerPhase.idle)
       return;
     scheduleFrame();
   }
@@ -530,20 +569,21 @@ abstract class SchedulerBinding extends BindingBase {
       return true;
     });
 
-    assert(!_isProducingFrame);
-    _isProducingFrame = true;
+    assert(schedulerPhase == SchedulerPhase.idle);
     _hasScheduledFrame = false;
     try {
 
       // TRANSIENT FRAME CALLBACKS
+      _schedulerPhase = SchedulerPhase.transientCallbacks;
       _invokeTransientFrameCallbacks(_currentFrameTimeStamp);
 
       // PERSISTENT FRAME CALLBACKS
+      _schedulerPhase = SchedulerPhase.persistentCallbacks;
       for (FrameCallback callback in _persistentCallbacks)
         _invokeFrameCallback(callback, _currentFrameTimeStamp);
-      _isProducingFrame = false;
 
       // POST-FRAME CALLBACKS
+      _schedulerPhase = SchedulerPhase.postFrameCallbacks;
       List<FrameCallback> localPostFrameCallbacks =
           new List<FrameCallback>.from(_postFrameCallbacks);
       _postFrameCallbacks.clear();
@@ -551,7 +591,7 @@ abstract class SchedulerBinding extends BindingBase {
         _invokeFrameCallback(callback, _currentFrameTimeStamp);
 
     } finally {
-      _isProducingFrame = false; // just in case we throw before setting it above
+      _schedulerPhase = SchedulerPhase.idle;
       _currentFrameTimeStamp = null;
       Timeline.finishSync();
       assert(() {
@@ -567,7 +607,7 @@ abstract class SchedulerBinding extends BindingBase {
 
   void _invokeTransientFrameCallbacks(Duration timeStamp) {
     Timeline.startSync('Animate');
-    assert(_isProducingFrame);
+    assert(schedulerPhase == SchedulerPhase.transientCallbacks);
     Map<int, _FrameCallbackEntry> callbacks = _transientCallbacks;
     _transientCallbacks = new Map<int, _FrameCallbackEntry>();
     callbacks.forEach((int id, _FrameCallbackEntry callbackEntry) {

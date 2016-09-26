@@ -405,9 +405,7 @@ class RawInputLineState extends ScrollableState<RawInputLine> {
       _keyboardHandle.release();
     if (_cursorTimer != null)
       _stopCursorTimer();
-    scheduleMicrotask(() { // can't hide while disposing, since it triggers a rebuild
-      _selectionOverlay?.dispose();
-    });
+    _selectionOverlay?.dispose();
     super.dispose();
   }
 
@@ -432,14 +430,12 @@ class RawInputLineState extends ScrollableState<RawInputLine> {
       _stopCursorTimer();
 
     if (_selectionOverlay != null) {
-      scheduleMicrotask(() { // can't update while disposing, since it triggers a rebuild
-        if (focused) {
-          _selectionOverlay.update(config.value);
-        } else {
-          _selectionOverlay?.hide();
-          _selectionOverlay = null;
-        }
-      });
+      if (focused) {
+        _selectionOverlay.update(config.value);
+      } else {
+        _selectionOverlay?.dispose();
+        _selectionOverlay = null;
+      }
     }
 
     return new _EditableLineWidget(

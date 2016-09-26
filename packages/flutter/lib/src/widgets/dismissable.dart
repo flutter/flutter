@@ -5,9 +5,10 @@
 import 'package:meta/meta.dart';
 
 import 'basic.dart';
-import 'transitions.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
+import 'ticker_provider.dart';
+import 'transitions.dart';
 
 const Duration _kDismissDuration = const Duration(milliseconds: 200);
 const Curve _kResizeTimeCurve = const Interval(0.4, 1.0, curve: Curves.ease);
@@ -113,11 +114,11 @@ class Dismissable extends StatefulWidget {
   _DismissableState createState() => new _DismissableState();
 }
 
-class _DismissableState extends State<Dismissable> {
+class _DismissableState extends State<Dismissable> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    _moveController = new AnimationController(duration: _kDismissDuration)
+    _moveController = new AnimationController(duration: _kDismissDuration, vsync: this)
       ..addStatusListener(_handleDismissStatusChanged);
     _updateMoveAnimation();
   }
@@ -278,7 +279,7 @@ class _DismissableState extends State<Dismissable> {
       if (config.onDismissed != null)
         config.onDismissed(_dismissDirection);
     } else {
-      _resizeController = new AnimationController(duration: config.resizeDuration)
+      _resizeController = new AnimationController(duration: config.resizeDuration, vsync: this)
         ..addListener(_handleResizeProgressChanged);
       _resizeController.forward();
       setState(() {

@@ -93,7 +93,7 @@ class Tooltip extends StatefulWidget {
   }
 }
 
-class _TooltipState extends State<Tooltip> {
+class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   AnimationController _controller;
   OverlayEntry _entry;
   Timer _timer;
@@ -101,7 +101,7 @@ class _TooltipState extends State<Tooltip> {
   @override
   void initState() {
     super.initState();
-    _controller = new AnimationController(duration: _kFadeDuration)
+    _controller = new AnimationController(duration: _kFadeDuration, vsync: this)
       ..addStatusListener(_handleStatusChanged);
   }
 
@@ -178,7 +178,7 @@ class _TooltipState extends State<Tooltip> {
   void dispose() {
     if (_entry != null)
       _removeEntry();
-    _controller.stop();
+    _controller.dispose();
     super.dispose();
   }
 

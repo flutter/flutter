@@ -122,7 +122,11 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   AnimationController createAnimationController() {
     Duration duration = transitionDuration;
     assert(duration != null && duration >= Duration.ZERO);
-    return new AnimationController(duration: duration, debugLabel: debugLabel);
+    return new AnimationController(
+      duration: duration,
+      debugLabel: debugLabel,
+      vsync: navigator,
+    );
   }
 
   /// Called to create the animation that exposes the current progress of

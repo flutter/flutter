@@ -8,6 +8,7 @@ import 'package:meta/meta.dart';
 import 'animated_size.dart';
 import 'basic.dart';
 import 'framework.dart';
+import 'ticker_provider.dart';
 import 'transitions.dart';
 
 /// Specifies which of the children to show. See [AnimatedCrossFade].
@@ -80,7 +81,7 @@ class AnimatedCrossFade extends StatefulWidget {
   _AnimatedCrossFadeState createState() => new _AnimatedCrossFadeState();
 }
 
-class _AnimatedCrossFadeState extends State<AnimatedCrossFade> {
+class _AnimatedCrossFadeState extends State<AnimatedCrossFade> with TickerProviderStateMixin {
   _AnimatedCrossFadeState() : super();
 
   AnimationController _controller;
@@ -90,7 +91,7 @@ class _AnimatedCrossFadeState extends State<AnimatedCrossFade> {
   @override
   void initState() {
     super.initState();
-    _controller = new AnimationController(duration: config.duration);
+    _controller = new AnimationController(duration: config.duration, vsync: this);
     if (config.crossFadeState == CrossFadeState.showSecond)
       _controller.value = 1.0;
     _firstAnimation = _initAnimation(config.firstCurve, true);
@@ -185,6 +186,7 @@ class _AnimatedCrossFadeState extends State<AnimatedCrossFade> {
         alignment: FractionalOffset.topCenter,
         duration: config.duration,
         curve: config.sizeCurve,
+        vsync: this,
         child: new Stack(
           overflow: Overflow.visible,
           children: children

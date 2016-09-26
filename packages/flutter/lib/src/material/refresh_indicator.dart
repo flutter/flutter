@@ -138,9 +138,9 @@ class RefreshIndicator extends StatefulWidget {
 
 /// Contains the state for a [RefreshIndicator]. This class can be used to
 /// programmatically show the refresh indicator, see the [show] method.
-class RefreshIndicatorState extends State<RefreshIndicator> {
-  final AnimationController _sizeController = new AnimationController();
-  final AnimationController _scaleController = new AnimationController();
+class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderStateMixin {
+  AnimationController _sizeController;
+  AnimationController _scaleController;
   Animation<double> _sizeFactor;
   Animation<double> _scaleFactor;
   Animation<double> _value;
@@ -154,15 +154,16 @@ class RefreshIndicatorState extends State<RefreshIndicator> {
   @override
   void initState() {
     super.initState();
-    _sizeFactor = new Tween<double>(begin: 0.0, end: _kDragSizeFactorLimit).animate(_sizeController);
-    _scaleFactor = new Tween<double>(begin: 1.0, end: 0.0).animate(_scaleController);
 
-    // The "value" of the circular progress indicator during a drag.
-    _value = new Tween<double>(
+    _sizeController = new AnimationController(vsync: this);
+    _sizeFactor = new Tween<double>(begin: 0.0, end: _kDragSizeFactorLimit).animate(_sizeController);
+    _value = new Tween<double>( // The "value" of the circular progress indicator during a drag.
       begin: 0.0,
       end: 0.75
-    )
-    .animate(_sizeController);
+    ).animate(_sizeController);
+
+    _scaleController = new AnimationController(vsync: this);
+    _scaleFactor = new Tween<double>(begin: 1.0, end: 0.0).animate(_scaleController);
   }
 
   @override

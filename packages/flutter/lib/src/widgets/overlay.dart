@@ -2,14 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:collection';
 
-import 'package:meta/meta.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
+import 'package:meta/meta.dart';
 
 import 'basic.dart';
 import 'debug.dart';
 import 'framework.dart';
+import 'ticker_provider.dart';
 
 /// A place in an [Overlay] that can contain a widget.
 ///
@@ -116,9 +119,27 @@ class OverlayEntry {
   final GlobalKey<_OverlayEntryState> _key = new GlobalKey<_OverlayEntryState>();
 
   /// Remove this entry from the overlay.
+  ///
+  /// This should only be called once.
+  ///
+  /// If this method is called while the [SchedulerBinding.schedulerPhase] is
+  /// [SchedulerBinding.persistentCallbacks], i.e. during the build, layout, or
+  /// paint phases (see [WidgetsBinding.beginFrame]), then the removal is
+  /// delayed until the post-frame callbacks phase. Otherwise the removal is
+  /// done synchronously. This means that it is safe to call during builds, but
+  /// also that if you do call this during a build, the UI will not update until
+  /// the next frame (i.e. many milliseconds later).
   void remove() {
-    _overlay?._remove(this);
+    assert(_overlay != null);
+    OverlayState overlay = _overlay;
     _overlay = null;
+    if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.persistentCallbacks) {
+      SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
+        overlay._remove(this);
+      });
+    } else {
+      overlay._remove(this);
+    }
   }
 
   /// Cause this entry to rebuild during the next pipeline flush.
@@ -226,7 +247,7 @@ class Overlay extends StatefulWidget {
 ///
 /// Used to insert [OverlayEntry]s into the overlay using the [insert] and
 /// [insertAll] functions.
-class OverlayState extends State<Overlay> {
+class OverlayState extends State<Overlay> with TickerProviderStateMixin {
   final List<OverlayEntry> _entries = new List<OverlayEntry>();
 
   @override
@@ -268,9 +289,10 @@ class OverlayState extends State<Overlay> {
   }
 
   void _remove(OverlayEntry entry) {
-    _entries.remove(entry);
-    if (mounted)
+    if (mounted) {
+      _entries.remove(entry);
       setState(() { /* entry was removed */ });
+    }
   }
 
   /// (DEBUG ONLY) Check whether a given entry is visible (i.e., not behind an
@@ -319,7 +341,7 @@ class OverlayState extends State<Overlay> {
         if (entry.opaque)
           onstage = false;
       } else if (entry.maintainState) {
-        offstageChildren.add(new _OverlayEntry(entry));
+        offstageChildren.add(new TickerMode(enabled: false, child: new _OverlayEntry(entry)));
       }
     }
     return new _Theatre(

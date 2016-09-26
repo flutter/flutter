@@ -524,6 +524,7 @@ class TrainHoppingAnimation extends Animation<double>
     _currentTrain = null;
     _nextTrain?.removeListener(_valueChangeHandler);
     _nextTrain = null;
+    super.dispose();
   }
 
   @override

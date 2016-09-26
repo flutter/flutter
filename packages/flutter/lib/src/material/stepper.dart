@@ -176,7 +176,7 @@ class Stepper extends StatefulWidget {
   _StepperState createState() => new _StepperState();
 }
 
-class _StepperState extends State<Stepper> {
+class _StepperState extends State<Stepper> with TickerProviderStateMixin {
   List<GlobalKey> _keys;
   final Map<int, StepState> _oldStates = new Map<int, StepState>();
 
@@ -608,7 +608,8 @@ class _StepperState extends State<Stepper> {
                   new AnimatedSize(
                     curve: Curves.fastOutSlowIn,
                     duration: kThemeAnimationDuration,
-                    child: config.steps[config.currentStep].content
+                    vsync: this,
+                    child: config.steps[config.currentStep].content,
                   ),
                   _buildVerticalControls()
                 ]

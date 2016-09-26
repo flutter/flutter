@@ -139,7 +139,7 @@ class BottomNavigationBar extends StatefulWidget {
   BottomNavigationBarState createState() => new BottomNavigationBarState();
 }
 
-class BottomNavigationBarState extends State<BottomNavigationBar> {
+class BottomNavigationBarState extends State<BottomNavigationBar> with TickerProviderStateMixin {
   List<AnimationController> _controllers;
   List<CurvedAnimation> animations;
   double _weight;
@@ -156,7 +156,8 @@ class BottomNavigationBarState extends State<BottomNavigationBar> {
     super.initState();
     _controllers = new List<AnimationController>.generate(config.labels.length, (int index) {
       return new AnimationController(
-        duration: kThemeAnimationDuration
+        duration: kThemeAnimationDuration,
+        vsync: this,
       )..addListener(_rebuild);
     });
     animations = new List<CurvedAnimation>.generate(config.labels.length, (int index) {
@@ -166,9 +167,7 @@ class BottomNavigationBarState extends State<BottomNavigationBar> {
         reverseCurve: Curves.fastOutSlowIn.flipped
       );
     });
-
     _controllers[config.currentIndex].value = 1.0;
-
     _backgroundColor = config.labels[config.currentIndex].backgroundColor;
   }
 
@@ -271,7 +270,8 @@ class BottomNavigationBarState extends State<BottomNavigationBar> {
         new _Circle(
           state: this,
           index: index,
-          color: config.labels[index].backgroundColor
+          color: config.labels[index].backgroundColor,
+          vsync: this,
         )..controller.addStatusListener((AnimationStatus status) {
           if (status == AnimationStatus.completed) {
             setState(() {
@@ -289,7 +289,6 @@ class BottomNavigationBarState extends State<BottomNavigationBar> {
     if (config.currentIndex != oldConfig.currentIndex) {
       if (config.type == BottomNavigationBarType.shifting)
         _pushCircle(config.currentIndex);
-
       _controllers[oldConfig.currentIndex].reverse();
       _controllers[config.currentIndex].forward();
     }
@@ -298,7 +297,6 @@ class BottomNavigationBarState extends State<BottomNavigationBar> {
   @override
   Widget build(BuildContext context) {
     Widget bottomNavigation;
-
     switch (config.type) {
       case BottomNavigationBarType.fixed:
         final List<Widget> children = <Widget>[];
@@ -311,7 +309,6 @@ class BottomNavigationBarState extends State<BottomNavigationBar> {
                 themeData.primaryColor : themeData.accentColor
           )
         );
-
         for (int i = 0; i < config.labels.length; i += 1) {
           children.add(
             new Flexible(
@@ -329,16 +326,16 @@ class BottomNavigationBarState extends State<BottomNavigationBar> {
                         margin: new EdgeInsets.only(
                           top: new Tween<double>(
                             begin: 8.0,
-                            end: 6.0
-                          ).evaluate(animations[i])
+                            end: 6.0,
+                          ).evaluate(animations[i]),
                         ),
                         child: new IconTheme(
                           data: new IconThemeData(
-                            color: colorTween.evaluate(animations[i])
+                            color: colorTween.evaluate(animations[i]),
                           ),
-                          child: config.labels[i].icon
-                        )
-                      )
+                          child: config.labels[i].icon,
+                        ),
+                      ),
                     ),
                     new Align(
                       alignment: FractionalOffset.bottomCenter,
@@ -347,41 +344,36 @@ class BottomNavigationBarState extends State<BottomNavigationBar> {
                         child: new DefaultTextStyle(
                           style: new TextStyle(
                             fontSize: 14.0,
-                            color: colorTween.evaluate(animations[i])
+                            color: colorTween.evaluate(animations[i]),
                           ),
                           child: new Transform(
                             transform: new Matrix4.diagonal3(new Vector3.all(
                               new Tween<double>(
                                 begin: 0.85,
                                 end: 1.0,
-                              ).evaluate(animations[i])
+                              ).evaluate(animations[i]),
                             )),
                             alignment: FractionalOffset.bottomCenter,
-                            child: config.labels[i].title
-                          )
-                        )
-                      )
-                    )
-                  ]
-                )
-              )
-            )
+                            child: config.labels[i].title,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           );
         }
-
         bottomNavigation = new SizedBox(
           width: _maxWidth,
-          child: new Row(
-            children: children
-          )
+          child: new Row(children: children),
         );
-
         break;
+
       case BottomNavigationBarType.shifting:
         final List<Widget> children = <Widget>[];
-
         _computeWeight();
-
         for (int i = 0; i < config.labels.length; i += 1) {
           children.add(
             new Flexible(
@@ -402,16 +394,16 @@ class BottomNavigationBarState extends State<BottomNavigationBar> {
                         margin: new EdgeInsets.only(
                           top: new Tween<double>(
                             begin: 18.0,
-                            end: 6.0
-                          ).evaluate(animations[i])
+                            end: 6.0,
+                          ).evaluate(animations[i]),
                         ),
                         child: new IconTheme(
                           data: new IconThemeData(
                             color: Colors.white
                           ),
-                          child: config.labels[i].icon
-                        )
-                      )
+                          child: config.labels[i].icon,
+                        ),
+                      ),
                     ),
                     new Align(
                       alignment: FractionalOffset.bottomCenter,
@@ -425,24 +417,22 @@ class BottomNavigationBarState extends State<BottomNavigationBar> {
                               color: Colors.white
                             ),
                             child: config.labels[i].title
-                          )
-                        )
-                      )
-                    )
-                  ]
-                )
-              )
-            )
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           );
         }
-
         bottomNavigation = new SizedBox(
           width: _maxWidth,
           child: new Row(
             children: children
           )
         );
-
         break;
     }
 
@@ -467,20 +457,20 @@ class BottomNavigationBarState extends State<BottomNavigationBar> {
                   child: new CustomPaint(
                     painter: new _RadialPainter(
                       circles: _circles.toList()
-                    )
-                  )
+                    ),
+                  ),
                 ),
                 new Material( // Splashes.
                   type: MaterialType.transparency,
                   child: new Center(
                     child: bottomNavigation
-                  )
-                )
-              ]
-            )
-          )
-        )
-      ]
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -489,20 +479,21 @@ class _Circle {
   _Circle({
     this.state,
     this.index,
-    this.color
+    this.color,
+    @required TickerProvider vsync,
   }) {
     assert(this.state != null);
     assert(this.index != null);
     assert(this.color != null);
 
     controller = new AnimationController(
-      duration: kThemeAnimationDuration
+      duration: kThemeAnimationDuration,
+      vsync: vsync,
     );
     animation = new CurvedAnimation(
       parent: controller,
       curve: Curves.fastOutSlowIn
     );
-
     controller.forward();
   }
 

@@ -204,10 +204,11 @@ class SnackBar extends StatelessWidget {
   // API for Scaffold.addSnackBar():
 
   /// Creates an animation controller useful for driving a snack bar's entrance and exit animation.
-  static AnimationController createAnimationController() {
+  static AnimationController createAnimationController({ @required TickerProvider vsync }) {
     return new AnimationController(
       duration: _kSnackBarTransitionDuration,
-      debugLabel: 'SnackBar'
+      debugLabel: 'SnackBar',
+      vsync: vsync,
     );
   }
 

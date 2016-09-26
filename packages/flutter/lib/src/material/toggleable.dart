@@ -5,6 +5,8 @@
 import 'package:flutter/animation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
+import 'package:meta/meta.dart';
 
 import 'constants.dart';
 
@@ -26,36 +28,86 @@ abstract class RenderToggleable extends RenderConstrainedBox implements Semantic
     Size size,
     Color activeColor,
     Color inactiveColor,
-    ValueChanged<bool> onChanged
+    ValueChanged<bool> onChanged,
+    @required TickerProvider vsync,
   }) : _value = value,
        _activeColor = activeColor,
        _inactiveColor = inactiveColor,
        _onChanged = onChanged,
+       _vsync = vsync,
        super(additionalConstraints: new BoxConstraints.tight(size)) {
     assert(value != null);
     assert(activeColor != null);
     assert(inactiveColor != null);
+    assert(vsync != null);
     _tap = new TapGestureRecognizer()
       ..onTapDown = _handleTapDown
       ..onTap = _handleTap
       ..onTapUp = _handleTapUp
       ..onTapCancel = _handleTapCancel;
-
     _positionController = new AnimationController(
       duration: _kToggleDuration,
-      value: _value ? 1.0 : 0.0
+      value: value ? 1.0 : 0.0,
+      vsync: vsync,
     );
     _position = new CurvedAnimation(
       parent: _positionController,
-      curve: Curves.linear
+      curve: Curves.linear,
     )..addListener(markNeedsPaint)
      ..addStatusListener(_handlePositionStateChanged);
-
-    _reactionController = new AnimationController(duration: kRadialReactionDuration);
+    _reactionController = new AnimationController(
+      duration: kRadialReactionDuration,
+      vsync: vsync,
+    );
     _reaction = new CurvedAnimation(
       parent: _reactionController,
-      curve: Curves.fastOutSlowIn
+      curve: Curves.fastOutSlowIn,
     )..addListener(markNeedsPaint);
+  }
+
+  /// Used by subclasses to manipulate the visual value of the control.
+  ///
+  /// Some controls respond to user input by updating their visual value. For
+  /// example, the thumb of a switch moves from one position to another when
+  /// dragged. These controls manipulate this animation controller to update
+  /// their [position] and eventually trigger an [onChanged] callback when the
+  /// animation reaches either 0.0 or 1.0.
+  @protected
+  AnimationController get positionController => _positionController;
+  AnimationController _positionController;
+
+  /// The visual value of the control.
+  ///
+  /// When the control is inactive, the [value] is false and this animation has
+  /// the value 0.0. When the control is active, the value is [true] and this
+  /// animation has the value 1.0. When the control is changing from inactive
+  /// to active (or vice versa), [value] is the target value and this animation
+  /// gradually updates from 0.0 to 1.0 (or vice versa).
+  CurvedAnimation get position => _position;
+  CurvedAnimation _position;
+
+  /// Used by subclasses to control the radial reaction animation.
+  ///
+  /// Some controls have a radial ink reaction to user input. This animation
+  /// controller can be used to start or stop these ink reactions.
+  ///
+  /// Subclasses should call [paintRadialReaction] to actually paint the radial
+  /// reaction.
+  @protected
+  AnimationController get reactionController => _reactionController;
+  AnimationController _reactionController;
+  Animation<double> _reaction;
+
+  /// The [TickerProvider] for the [AnimationController]s that run the animations.
+  TickerProvider get vsync => _vsync;
+  TickerProvider _vsync;
+  set vsync(TickerProvider value) {
+    assert(value != null);
+    if (value == _vsync)
+      return;
+    _vsync = value;
+    positionController.resync(vsync);
+    reactionController.resync(vsync);
   }
 
   /// Whether this control is current "active" (checked, on, selected) or "inactive" (unchecked, off, not selected).
@@ -138,50 +190,17 @@ abstract class RenderToggleable extends RenderConstrainedBox implements Semantic
   /// grey color and its value cannot be changed.
   bool get isInteractive => onChanged != null;
 
-  /// The visual value of the control.
-  ///
-  /// When the control is inactive, the [value] is false and this animation has
-  /// the value 0.0. When the control is active, the value is [true] and this
-  /// animation has the value 1.0. When the control is changing from inactive
-  /// to active (or vice versa), [value] is the target value and this animation
-  /// gradually updates from 0.0 to 1.0 (or vice versa).
-  CurvedAnimation get position => _position;
-  CurvedAnimation _position;
-
-  /// Used by subclasses to manipulate the visual value of the control.
-  ///
-  /// Some controls respond to user input by updating their visual value. For
-  /// example, the thumb of a switch moves from one position to another when
-  /// dragged. These controls manipulate this animation controller to update
-  /// their [position] and eventually trigger an [onChanged] callback when the
-  /// animation reaches either 0.0 or 1.0.
-  AnimationController get positionController => _positionController;
-  AnimationController _positionController;
-
-  /// Used by subclasses to control the radial reaction animation.
-  ///
-  /// Some controls have a radial ink reaction to user input. This animation
-  /// controller can be used to start or stop these ink reactions.
-  ///
-  /// Subclasses should call [paintRadialReaction] to actually paint the radial
-  /// reaction.
-  AnimationController get reactionController => _reactionController;
-  AnimationController _reactionController;
-  Animation<double> _reaction;
-
   TapGestureRecognizer _tap;
   Point _downPosition;
 
   @override
   void attach(PipelineOwner owner) {
     super.attach(owner);
-    if (_positionController != null) {
-      if (value)
-        _positionController.forward();
-      else
-        _positionController.reverse();
-    }
-    if (_reactionController != null && isInteractive) {
+    if (value)
+      _positionController.forward();
+    else
+      _positionController.reverse();
+    if (isInteractive) {
       switch (_reactionController.status) {
         case AnimationStatus.forward:
           _reactionController.forward();
@@ -199,8 +218,8 @@ abstract class RenderToggleable extends RenderConstrainedBox implements Semantic
 
   @override
   void detach() {
-    _positionController?.stop();
-    _reactionController?.stop();
+    _positionController.stop();
+    _reactionController.stop();
     super.detach();
   }
 

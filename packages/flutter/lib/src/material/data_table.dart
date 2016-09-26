@@ -675,7 +675,7 @@ class _SortArrow extends StatefulWidget {
   _SortArrowState createState() => new _SortArrowState();
 }
 
-class _SortArrowState extends State<_SortArrow> {
+class _SortArrowState extends State<_SortArrow> with TickerProviderStateMixin {
 
   AnimationController _opacityController;
   Animation<double> _opacityAnimation;
@@ -691,7 +691,8 @@ class _SortArrowState extends State<_SortArrow> {
     super.initState();
     _opacityAnimation = new CurvedAnimation(
       parent: _opacityController = new AnimationController(
-        duration: config.duration
+        duration: config.duration,
+        vsync: this,
       ),
       curve: Curves.fastOutSlowIn
     )
@@ -702,7 +703,8 @@ class _SortArrowState extends State<_SortArrow> {
       end: math.PI
     ).animate(new CurvedAnimation(
       parent: _orientationController = new AnimationController(
-        duration: config.duration
+        duration: config.duration,
+        vsync: this,
       ),
       curve: Curves.easeIn
     ))

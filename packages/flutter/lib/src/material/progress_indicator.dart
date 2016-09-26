@@ -146,7 +146,7 @@ class LinearProgressIndicator extends ProgressIndicator {
   _LinearProgressIndicatorState createState() => new _LinearProgressIndicatorState();
 }
 
-class _LinearProgressIndicatorState extends State<LinearProgressIndicator> {
+class _LinearProgressIndicatorState extends State<LinearProgressIndicator> with SingleTickerProviderStateMixin {
   Animation<double> _animation;
   AnimationController _controller;
 
@@ -154,7 +154,8 @@ class _LinearProgressIndicatorState extends State<LinearProgressIndicator> {
   void initState() {
     super.initState();
     _controller = new AnimationController(
-      duration: const Duration(milliseconds: 1500)
+      duration: const Duration(milliseconds: 1500),
+      vsync: this,
     )..repeat();
     _animation = new CurvedAnimation(parent: _controller, curve: Curves.fastOutSlowIn);
   }
@@ -310,23 +311,22 @@ final Animatable<int> _kStepTween = new StepTween(begin: 0, end: 5);
 
 final Animatable<double> _kRotationTween = new CurveTween(curve: new SawTooth(5));
 
-class _CircularProgressIndicatorState extends State<CircularProgressIndicator> {
+class _CircularProgressIndicatorState extends State<CircularProgressIndicator> with SingleTickerProviderStateMixin {
   AnimationController _controller;
 
   @override
   void initState() {
     super.initState();
-    _controller = _buildController();
+    _controller = new AnimationController(
+      duration: const Duration(milliseconds: 6666),
+      vsync: this,
+    )..repeat();
   }
 
   @override
   void dispose() {
     _controller.dispose();
     super.dispose();
-  }
-
-  AnimationController _buildController() {
-    return new AnimationController(duration: const Duration(milliseconds: 6666))..repeat();
   }
 
   Widget _buildIndicator(BuildContext context, double headValue, double tailValue, int stepValue, double rotationValue) {

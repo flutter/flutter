@@ -6,6 +6,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/animation.dart';
 import 'package:flutter/widgets.dart';
 
+import 'animation_tester.dart';
+
 void main() {
   setUp(() {
     WidgetsFlutterBinding.ensureInitialized();
@@ -24,7 +26,8 @@ void main() {
     curvedAnimation.reverseCurve = Curves.elasticOut;
     expect(curvedAnimation.toString(), hasOneLineDescription);
     AnimationController controller = new AnimationController(
-      duration: const Duration(milliseconds: 500)
+      duration: const Duration(milliseconds: 500),
+      vsync: const TestVSync(),
     );
     controller
       ..value = 0.5
@@ -48,7 +51,9 @@ void main() {
   });
 
   test('ProxyAnimation set parent generates value changed', () {
-    AnimationController controller = new AnimationController();
+    AnimationController controller = new AnimationController(
+      vsync: const TestVSync(),
+    );
     controller.value = 0.5;
     bool didReceiveCallback = false;
     ProxyAnimation animation = new ProxyAnimation()
@@ -65,7 +70,9 @@ void main() {
   });
 
   test('ReverseAnimation calls listeners', () {
-    AnimationController controller = new AnimationController();
+    AnimationController controller = new AnimationController(
+      vsync: const TestVSync(),
+    );
     controller.value = 0.5;
     bool didReceiveCallback = false;
     void listener() {
@@ -85,8 +92,12 @@ void main() {
   });
 
   test('TrainHoppingAnimation', () {
-    AnimationController currentTrain = new AnimationController();
-    AnimationController nextTrain = new AnimationController();
+    AnimationController currentTrain = new AnimationController(
+      vsync: const TestVSync(),
+    );
+    AnimationController nextTrain = new AnimationController(
+      vsync: const TestVSync(),
+    );
     currentTrain.value = 0.5;
     nextTrain.value = 0.75;
     bool didSwitchTrains = false;

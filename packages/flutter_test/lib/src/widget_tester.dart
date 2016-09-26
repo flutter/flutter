@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 import 'package:meta/meta.dart';
 import 'package:test/test.dart' as test_package;
@@ -50,7 +51,7 @@ void testWidgets(String description, WidgetTesterCallback callback, {
   WidgetTester tester = new WidgetTester._(binding);
   timeout ??= binding.defaultTestTimeout;
   test_package.group('-', () {
-    test_package.test(description, () => binding.runTest(() => callback(tester)), skip: skip);
+    test_package.test(description, () => binding.runTest(() => callback(tester), tester._endOfTestVerifications), skip: skip);
     test_package.tearDown(binding.postTest);
   }, timeout: timeout);
 }
@@ -108,7 +109,7 @@ Future<Null> benchmarkWidgets(WidgetTesterCallback callback) {
   TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
   assert(binding is! AutomatedTestWidgetsFlutterBinding);
   WidgetTester tester = new WidgetTester._(binding);
-  return binding.runTest(() => callback(tester)) ?? new Future<Null>.value();
+  return binding.runTest(() => callback(tester), tester._endOfTestVerifications) ?? new Future<Null>.value();
 }
 
 /// Assert that `actual` matches `matcher`.
@@ -143,7 +144,10 @@ void expectSync(dynamic actual, dynamic matcher, {
 }
 
 /// Class that programmatically interacts with widgets and the test environment.
-class WidgetTester extends WidgetController implements HitTestDispatcher {
+///
+/// For convenience, instances of this class (such as the one provided by
+/// `testWidget`) can be used as the `vsync` for `AnimationController` objects.
+class WidgetTester extends WidgetController implements HitTestDispatcher, TickerProvider {
   WidgetTester._(TestWidgetsFlutterBinding binding) : super(binding) {
     if (binding is LiveTestWidgetsFlutterBinding)
       binding.deviceEventDispatcher = this;
@@ -328,6 +332,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher {
   }
 
   bool _isPrivate(Type type) {
+    // used above so that we don't suggest matchers for private types
     return '_'.matchAsPrefix(type.toString()) != null;
   }
 
@@ -347,5 +352,63 @@ class WidgetTester extends WidgetController implements HitTestDispatcher {
   /// if microtasks continue to recursively schedule new microtasks.
   Future<Null> idle() {
     return TestAsyncUtils.guard(() => binding.idle());
+  }
+
+  Set<Ticker> _tickers;
+
+  @override
+  Ticker createTicker(TickerCallback onTick) {
+    _tickers ??= new Set<_TestTicker>();
+    final _TestTicker result = new _TestTicker(onTick, _removeTicker);
+    _tickers.add(result);
+    return result;
+  }
+
+  void _removeTicker(_TestTicker ticker) {
+    assert(_tickers != null);
+    assert(_tickers.contains(ticker));
+    _tickers.remove(ticker);
+  }
+
+  /// Throws an exception if any tickers created by the [WidgetTester] are still
+  /// active when the method is called.
+  ///
+  /// An argument can be specified to provide a string that will be used in the
+  /// error message. It should be an adverbial phrase describing the current
+  /// situation, such as "at the end of the test".
+  void verifyTickersWereDisposed([ String when = 'when none should have been' ]) {
+    assert(when != null);
+    if (_tickers != null) {
+      for (Ticker ticker in _tickers) {
+        if (ticker.isActive) {
+          throw new FlutterError(
+            'A Ticker was active $when.\n'
+            'All Tickers must be disposed. Tickers used by AnimationControllers '
+            'should be disposed by calling dispose() on the AnimationController itself. '
+            'Otherwise, the ticker will leak.\n'
+            'The offending ticker was: ${ticker.toString(debugIncludeStack: true)}'
+          );
+        }
+      }
+    }
+  }
+
+  void _endOfTestVerifications() {
+    verifyTickersWereDisposed('at the end of the test');
+  }
+}
+
+typedef void _TickerDisposeCallback(_TestTicker ticker);
+
+class _TestTicker extends Ticker {
+  _TestTicker(TickerCallback onTick, this._onDispose) : super(onTick);
+
+  _TickerDisposeCallback _onDispose;
+
+  @override
+  void dispose() {
+    if (_onDispose != null)
+      _onDispose(this);
+    super.dispose();
   }
 }

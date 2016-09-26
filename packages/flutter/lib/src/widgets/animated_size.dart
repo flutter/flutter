@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:meta/meta.dart';
 
 import 'basic.dart';
@@ -19,7 +20,8 @@ class AnimatedSize extends SingleChildRenderObjectWidget {
     Widget child,
     this.alignment: FractionalOffset.center,
     this.curve: Curves.linear,
-    @required this.duration
+    @required this.duration,
+    @required this.vsync,
   }) : super(key: key, child: child);
 
   /// The alignment of the child within the parent when the parent is not yet
@@ -42,12 +44,16 @@ class AnimatedSize extends SingleChildRenderObjectWidget {
   /// size.
   final Duration duration;
 
+  /// The [TickerProvider] for this widget.
+  final TickerProvider vsync;
+
   @override
   RenderAnimatedSize createRenderObject(BuildContext context) {
     return new RenderAnimatedSize(
       alignment: alignment,
       duration: duration,
-      curve: curve
+      curve: curve,
+      vsync: vsync,
     );
   }
 
@@ -57,6 +63,7 @@ class AnimatedSize extends SingleChildRenderObjectWidget {
     renderObject
       ..alignment = alignment
       ..duration = duration
-      ..curve = curve;
+      ..curve = curve
+      ..vsync = vsync;
   }
 }

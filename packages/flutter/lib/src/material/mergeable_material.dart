@@ -136,7 +136,7 @@ class _AnimationTuple {
   double gapStart;
 }
 
-class _MergeableMaterialState extends State<MergeableMaterial> {
+class _MergeableMaterialState extends State<MergeableMaterial> with TickerProviderStateMixin {
   List<MergeableMaterialItem> _children;
   final Map<LocalKey, _AnimationTuple> _animationTuples =
       <LocalKey, _AnimationTuple>{};
@@ -157,7 +157,8 @@ class _MergeableMaterialState extends State<MergeableMaterial> {
 
   void _initGap(MaterialGap gap) {
     final AnimationController controller = new AnimationController(
-      duration: kThemeAnimationDuration
+      duration: kThemeAnimationDuration,
+      vsync: this,
     );
 
     final CurvedAnimation startAnimation = new CurvedAnimation(

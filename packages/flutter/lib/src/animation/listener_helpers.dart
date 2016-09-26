@@ -4,6 +4,8 @@
 
 import 'dart:ui' show VoidCallback;
 
+import 'package:meta/meta.dart';
+
 import 'animation.dart';
 
 abstract class _ListenerMixin {
@@ -50,8 +52,10 @@ abstract class AnimationEagerListenerMixin implements _ListenerMixin {
   @override
   void didUnregisterListener() { }
 
-  /// Release any resources used by this object.
-  void dispose();
+  /// Release the resources used by this object. The object is no longer usable
+  /// after this method is called.
+  @mustCallSuper
+  void dispose() { }
 }
 
 /// A mixin that implements the addListener/removeListener protocol and notifies

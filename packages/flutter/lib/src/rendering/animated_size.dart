@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/animation.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:meta/meta.dart';
 
 import 'box.dart';
@@ -10,29 +11,41 @@ import 'object.dart';
 import 'shifted_box.dart';
 
 /// A render object that animates its size to its child's size over a given
-/// [duration] and with a given [curve]. In case the child's size is animating
-/// as opposed to abruptly changing size, the parent behaves like a normal
-/// container.
+/// [duration] and with a given [curve]. If the child's size itself animates
+/// (i.e. if it changes size two frames in a row, as opposed to abruptly
+/// changing size in one frame then remaining that size in subsequent frames),
+/// this render object sizes itself to fit the child instead of animating
+/// itself.
 ///
-/// In case the child overflows the current animated size of the parent, it gets
-/// clipped automatically.
+/// When the child overflows the current animated size of this render object, it
+/// is clipped.
 class RenderAnimatedSize extends RenderAligningShiftedBox {
   /// Creates a render object that animates its size to match its child.
-  /// The [duration] and [curve] arguments define the animation. The [alignment]
-  /// argument is used to align the child in the case where the parent is not
+  /// The [duration] and [curve] arguments define the animation.
+  ///
+  /// The [alignment] argument is used to align the child when the parent is not
   /// (yet) the same size as the child.
   ///
-  /// The arguments [duration], [curve], and [alignment] should not be null.
+  /// The [duration] is required.
+  ///
+  /// The [vsync] should specify a [TickerProvider] for the animation
+  /// controller.
+  ///
+  /// The arguments [duration], [curve], [alignment], and [vsync] must
+  /// not be null.
   RenderAnimatedSize({
+    @required TickerProvider vsync,
+    @required Duration duration,
     Curve curve: Curves.linear,
-    RenderBox child,
     FractionalOffset alignment: FractionalOffset.center,
-    @required Duration duration
-  }) : super(child: child, alignment: alignment) {
+    RenderBox child,
+  }) : _vsync = vsync, super(child: child, alignment: alignment) {
+    assert(vsync != null);
     assert(duration != null);
     assert(curve != null);
     _controller = new AnimationController(
-      duration: duration
+      vsync: vsync,
+      duration: duration,
     )..addListener(() {
       if (_controller.value != _lastValue)
         markNeedsLayout();
@@ -66,6 +79,17 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
     if (value == _animation.curve)
       return;
     _animation.curve = value;
+  }
+
+  /// The [TickerProvider] for the [AnimationController] that runs the animation.
+  TickerProvider get vsync => _vsync;
+  TickerProvider _vsync;
+  set vsync(TickerProvider value) {
+    assert(value != null);
+    if (value == _vsync)
+      return;
+    _vsync = value;
+    _controller.resync(vsync);
   }
 
   @override
@@ -104,8 +128,7 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
         size = child.size;
         _controller.stop();
       } else {
-        // Don't register first change (i.e. when _targetSize == _sourceSize)
-        // as a last-frame change.
+        // Don't register first change as a last-frame change.
         if (_sizeTween.end != _sizeTween.begin)
           _didChangeTargetSizeLastFrame = true;
 

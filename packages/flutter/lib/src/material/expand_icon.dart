@@ -60,14 +60,14 @@ class ExpandIcon extends StatefulWidget {
   _ExpandIconState createState() => new _ExpandIconState();
 }
 
-class _ExpandIconState extends State<ExpandIcon> {
+class _ExpandIconState extends State<ExpandIcon> with SingleTickerProviderStateMixin {
   AnimationController _controller;
   Animation<double> _iconTurns;
 
   @override
   void initState() {
     super.initState();
-    _controller = new AnimationController(duration: kThemeAnimationDuration);
+    _controller = new AnimationController(duration: kThemeAnimationDuration, vsync: this);
     _iconTurns = new Tween<double>(begin: 0.0, end: 0.5).animate(
       new CurvedAnimation(
         parent: _controller,

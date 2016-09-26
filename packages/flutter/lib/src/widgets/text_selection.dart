@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:meta/meta.dart';
 
 import 'basic.dart';
@@ -82,6 +83,10 @@ class TextSelectionOverlay implements TextSelectionDelegate {
     this.toolbarBuilder
   }): _input = input {
     assert(context != null);
+    final OverlayState overlay = Overlay.of(context);
+    assert(overlay != null);
+    _handleController = new AnimationController(duration: _kFadeDuration, vsync: overlay);
+    _toolbarController = new AnimationController(duration: _kFadeDuration, vsync: overlay);
   }
 
   /// The context in which the selection handles should appear.
@@ -117,8 +122,8 @@ class TextSelectionOverlay implements TextSelectionDelegate {
 
   /// Controls the fade-in animations.
   static const Duration _kFadeDuration = const Duration(milliseconds: 150);
-  final AnimationController _handleController = new AnimationController(duration: _kFadeDuration);
-  final AnimationController _toolbarController = new AnimationController(duration: _kFadeDuration);
+  AnimationController _handleController;
+  AnimationController _toolbarController;
   Animation<double> get _handleOpacity => _handleController.view;
   Animation<double> get _toolbarOpacity => _toolbarController.view;
 
@@ -153,11 +158,26 @@ class TextSelectionOverlay implements TextSelectionDelegate {
   }
 
   /// Updates the overlay after the [selection] has changed.
+  ///
+  /// If this method is called while the [SchedulerBinding.schedulerPhase] is
+  /// [SchedulerBinding.persistentCallbacks], i.e. during the build, layout, or
+  /// paint phases (see [WidgetsBinding.beginFrame]), then the update is delayed
+  /// until the post-frame callbacks phase. Otherwise the update is done
+  /// synchronously. This means that it is safe to call during builds, but also
+  /// that if you do call this during a build, the UI will not update until the
+  /// next frame (i.e. many milliseconds later).
   void update(InputValue newInput) {
     if (_input == newInput)
       return;
-
     _input = newInput;
+    if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.persistentCallbacks) {
+      SchedulerBinding.instance.addPostFrameCallback(_markNeedsBuild);
+    } else {
+      _markNeedsBuild();
+    }
+  }
+
+  void _markNeedsBuild([Duration duration]) {
     if (_handles != null) {
       _handles[0].markNeedsBuild();
       _handles[1].markNeedsBuild();

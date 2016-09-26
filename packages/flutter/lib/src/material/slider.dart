@@ -39,7 +39,7 @@ import 'typography.dart';
 ///  * [Radio]
 ///  * [Switch]
 ///  * <https://www.google.com/design/spec/components/sliders.html>
-class Slider extends StatelessWidget {
+class Slider extends StatefulWidget {
   /// Creates a material design slider.
   ///
   /// The slider itself does not maintain any state. Instead, when the state of
@@ -107,20 +107,26 @@ class Slider extends StatelessWidget {
   /// Defaults to accent color of the current [Theme].
   final Color activeColor;
 
+  @override
+  _SliderState createState() => new _SliderState();
+}
+
+class _SliderState extends State<Slider> with TickerProviderStateMixin {
   void _handleChanged(double value) {
-    assert(onChanged != null);
-    onChanged(value * (max - min) + min);
+    assert(config.onChanged != null);
+    config.onChanged(value * (config.max - config.min) + config.min);
   }
 
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     return new _SliderRenderObjectWidget(
-      value: (value - min) / (max - min),
-      divisions: divisions,
-      label: label,
-      activeColor: activeColor ?? Theme.of(context).accentColor,
-      onChanged: onChanged != null ? _handleChanged : null
+      value: (config.value - config.min) / (config.max - config.min),
+      divisions: config.divisions,
+      label: config.label,
+      activeColor: config.activeColor ?? Theme.of(context).accentColor,
+      onChanged: config.onChanged != null ? _handleChanged : null,
+      vsync: this,
     );
   }
 }
@@ -132,7 +138,8 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
     this.divisions,
     this.label,
     this.activeColor,
-    this.onChanged
+    this.onChanged,
+    this.vsync,
   }) : super(key: key);
 
   final double value;
@@ -140,6 +147,7 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
   final String label;
   final Color activeColor;
   final ValueChanged<double> onChanged;
+  final TickerProvider vsync;
 
   @override
   _RenderSlider createRenderObject(BuildContext context) => new _RenderSlider(
@@ -147,7 +155,8 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
     divisions: divisions,
     label: label,
     activeColor: activeColor,
-    onChanged: onChanged
+    onChanged: onChanged,
+    vsync: vsync,
   );
 
   @override
@@ -158,6 +167,8 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
       ..label = label
       ..activeColor = activeColor
       ..onChanged = onChanged;
+    // Ticker provider cannot change since there's a 1:1 relationship between
+    // the _SliderRenderObjectWidget object and the _SliderState object.
   }
 }
 
@@ -199,7 +210,8 @@ class _RenderSlider extends RenderConstrainedBox implements SemanticActionHandle
     int divisions,
     String label,
     Color activeColor,
-    this.onChanged
+    this.onChanged,
+    TickerProvider vsync,
   }) : _value = value,
        _divisions = divisions,
        _activeColor = activeColor,
@@ -210,14 +222,18 @@ class _RenderSlider extends RenderConstrainedBox implements SemanticActionHandle
       ..onStart = _handleDragStart
       ..onUpdate = _handleDragUpdate
       ..onEnd = _handleDragEnd;
-    _reactionController = new AnimationController(duration: kRadialReactionDuration);
+    _reactionController = new AnimationController(
+      duration: kRadialReactionDuration,
+      vsync: vsync,
+    );
     _reaction = new CurvedAnimation(
       parent: _reactionController,
       curve: Curves.fastOutSlowIn
     )..addListener(markNeedsPaint);
     _position = new AnimationController(
       value: value,
-      duration: _kDiscreteTransitionDuration
+      duration: _kDiscreteTransitionDuration,
+      vsync: vsync,
     )..addListener(markNeedsPaint);
   }
 

@@ -1207,21 +1207,23 @@ class _InactiveElements {
       }
       return true;
     });
-    element.unmount();
-    assert(element._debugLifecycleState == _ElementLifecycle.defunct);
     element.visitChildren((Element child) {
       assert(child._parent == element);
       _unmount(child);
     });
+    element.unmount();
+    assert(element._debugLifecycleState == _ElementLifecycle.defunct);
   }
 
   void _unmountAll() {
+    _locked = true;
+    final List<Element> elements = _elements.toList()..sort(Element._sort);
+    _elements.clear();
     try {
-      _locked = true;
-      for (Element element in _elements)
+      for (Element element in elements.reversed)
         _unmount(element);
     } finally {
-      _elements.clear();
+      assert(_elements.isEmpty);
       _locked = false;
     }
   }
@@ -1365,7 +1367,8 @@ abstract class BuildContext {
   /// [State.initState] methods, because those methods would not get called
   /// again if the inherited value were to change. To ensure that the widget
   /// correctly updates itself when the inherited value changes, only call this
-  /// (directly or indirectly) from build methods or layout and paint callbacks.
+  /// (directly or indirectly) from build methods, layout and paint callbacks, or
+  /// from [State.dependenciesChanged].
   ///
   /// It is also possible to call this from interaction event handlers (e.g.
   /// gesture callbacks) or timers, to obtain a value once, if that value is not
@@ -1373,6 +1376,12 @@ abstract class BuildContext {
   ///
   /// Calling this method is O(1) with a small constant factor, but will lead to
   /// the widget being rebuilt more often.
+  ///
+  /// Once a widget registers a dependency on a particular type by calling this
+  /// method, it will be rebuilt, and [State.dependenciesChanged] will be
+  /// called, whenever changes occur relating to that widget until the next time
+  /// the widget or one of its ancestors is moved (for example, because an
+  /// ancestor is added or removed).
   InheritedWidget inheritFromWidgetOfExactType(Type targetType);
 
   /// Returns the nearest ancestor widget of the given type, which must be the
@@ -1647,7 +1656,7 @@ class BuildOwner {
           });
         }
       }
-      _dirtyElements.sort(_elementSort);
+      _dirtyElements.sort(Element._sort);
       _dirtyElementsNeedsResorting = false;
       int dirtyCount = _dirtyElements.length;
       int index = 0;
@@ -1668,7 +1677,7 @@ class BuildOwner {
         }
         index += 1;
         if (dirtyCount < _dirtyElements.length || _dirtyElementsNeedsResorting) {
-          _dirtyElements.sort(_elementSort);
+          _dirtyElements.sort(Element._sort);
           _dirtyElementsNeedsResorting = false;
           dirtyCount = _dirtyElements.length;
           while (index > 0 && _dirtyElements[index - 1].dirty) {
@@ -1713,18 +1722,6 @@ class BuildOwner {
       });
     }
     assert(_debugStateLockLevel >= 0);
-  }
-
-  static int _elementSort(BuildableElement a, BuildableElement b) {
-    if (a.depth < b.depth)
-      return -1;
-    if (b.depth < a.depth)
-      return 1;
-    if (b.dirty && !a.dirty)
-      return -1;
-    if (a.dirty && !b.dirty)
-      return 1;
-    return 0;
   }
 
   /// Complete the element build pass by unmounting any elements that are no
@@ -1836,6 +1833,18 @@ abstract class Element implements BuildContext {
   /// The element at the root of the tree must have a depth greater than 0.
   int get depth => _depth;
   int _depth;
+
+  static int _sort(BuildableElement a, BuildableElement b) {
+    if (a.depth < b.depth)
+      return -1;
+    if (b.depth < a.depth)
+      return 1;
+    if (b.dirty && !a.dirty)
+      return -1;
+    if (a.dirty && !b.dirty)
+      return 1;
+    return 0;
+  }
 
   /// The configuration for this element.
   @override
@@ -2206,6 +2215,7 @@ abstract class Element implements BuildContext {
     // We unregistered our dependencies in deactivate, but never cleared the list.
     // Since we're going to be reused, let's clear our list now.
     _dependencies?.clear();
+    _hadUnsatisfiedDependencies = false;
     _updateInheritance();
     assert(() { _debugLifecycleState = _ElementLifecycle.active; return true; });
   }
@@ -2554,19 +2564,6 @@ abstract class BuildableElement extends Element {
       owner._debugCurrentBuildTarget = this;
      return true;
     });
-    _hadUnsatisfiedDependencies = false;
-    // In theory, we would also clear our actual _dependencies here. However, to
-    // clear it we'd have to notify each of them, unregister from them, and then
-    // reregister as soon as the build function re-dependended on it. So to
-    // avoid faffing around we just never unregister our dependencies except
-    // when we're deactivated. In principle this means we might be getting
-    // notified about widget types we once inherited from but no longer do, but
-    // in practice this is so rare that the extra cost when it does happen is
-    // far outweighed by the avoided work in the common case.
-    // We _do_ clear the list properly any time our ancestor chain changes in a
-    // way that might result in us getting a different Element's Widget for a
-    // particular Type. This avoids the potential of being registered to
-    // multiple identically-typed Widgets' Elements at the same time.
     performRebuild();
     assert(() {
       assert(owner._debugCurrentBuildTarget == this);

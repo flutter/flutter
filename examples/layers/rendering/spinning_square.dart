@@ -9,6 +9,13 @@ import 'dart:math' as math;
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
+
+class NonStopVSync implements TickerProvider {
+  const NonStopVSync();
+  @override
+  Ticker createTicker(TickerCallback onTick) => new Ticker(onTick);
+}
 
 void main() {
   // We first create a render object that represents a green box.
@@ -41,7 +48,8 @@ void main() {
   // To make the square spin, we use an animation that repeats every 1800
   // milliseconds.
   AnimationController animation = new AnimationController(
-    duration: const Duration(milliseconds: 1800)
+    duration: const Duration(milliseconds: 1800),
+    vsync: const NonStopVSync(),
   )..repeat();
   // The animation will produce a value between 0.0 and 1.0 each frame, but we
   // want to rotate the square using a value between 0.0 and math.PI. To change

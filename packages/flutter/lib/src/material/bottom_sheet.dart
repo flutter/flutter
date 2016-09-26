@@ -78,10 +78,11 @@ class BottomSheet extends StatefulWidget {
   _BottomSheetState createState() => new _BottomSheetState();
 
   /// Creates an animation controller suitable for controlling a [BottomSheet].
-  static AnimationController createAnimationController() {
+  static AnimationController createAnimationController(TickerProvider vsync) {
     return new AnimationController(
       duration: _kBottomSheetDuration,
-      debugLabel: 'BottomSheet'
+      debugLabel: 'BottomSheet',
+      vsync: vsync,
     );
   }
 }
@@ -222,7 +223,7 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
   @override
   AnimationController createAnimationController() {
     assert(_animationController == null);
-    _animationController = BottomSheet.createAnimationController();
+    _animationController = BottomSheet.createAnimationController(navigator.overlay);
     return _animationController;
   }
 

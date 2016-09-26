@@ -95,8 +95,8 @@ class Scrollbar extends StatefulWidget {
   _ScrollbarState createState() => new _ScrollbarState();
 }
 
-class _ScrollbarState extends State<Scrollbar> {
-  final AnimationController _fade = new AnimationController(duration: _kScrollbarThumbFadeDuration);
+class _ScrollbarState extends State<Scrollbar> with SingleTickerProviderStateMixin {
+  AnimationController _fade;
   CurvedAnimation _opacity;
   double _scrollOffset;
   Axis _scrollDirection;
@@ -106,6 +106,7 @@ class _ScrollbarState extends State<Scrollbar> {
   @override
   void initState() {
     super.initState();
+    _fade = new AnimationController(duration: _kScrollbarThumbFadeDuration, vsync: this);
     _opacity = new CurvedAnimation(parent: _fade, curve: Curves.fastOutSlowIn);
   }
 

@@ -11,7 +11,7 @@ class ProgressIndicatorDemo extends StatefulWidget {
   _ProgressIndicatorDemoState createState() => new _ProgressIndicatorDemoState();
 }
 
-class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> {
+class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> with SingleTickerProviderStateMixin {
   AnimationController _controller;
   Animation<double> _animation;
 
@@ -19,7 +19,8 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> {
   void initState() {
     super.initState();
     _controller = new AnimationController(
-      duration: const Duration(milliseconds: 1500)
+      duration: const Duration(milliseconds: 1500),
+      vsync: this,
     )..forward();
 
     _animation = new CurvedAnimation(
