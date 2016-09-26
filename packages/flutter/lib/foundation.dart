@@ -15,6 +15,7 @@ export 'src/foundation/binding.dart';
 export 'src/foundation/change_notifier.dart';
 export 'src/foundation/licenses.dart';
 export 'src/foundation/listenable.dart';
+export 'src/foundation/null.dart';
 export 'src/foundation/platform.dart';
 export 'src/foundation/print.dart';
 export 'src/foundation/synchronous_future.dart';
