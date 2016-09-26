@@ -14,7 +14,7 @@ import 'theme.dart';
 import 'typography.dart';
 
 // https://www.google.com/design/spec/components/snackbars-toasts.html#snackbars-toasts-specs
-const double _kSideMargins = 24.0;
+const double _kSnackBarPadding = 24.0;
 const double _kSingleLineVerticalPadding = 14.0;
 const double _kMultiLineVerticalTopPadding = 24.0;
 const double _kMultiLineVerticalSpaceBetweenTextAndButtons = 10.0;
@@ -83,13 +83,9 @@ class _SnackBarActionState extends State<SnackBarAction> {
 
   @override
   Widget build(BuildContext context) {
-    return new Container(
-      margin: const EdgeInsets.only(left: _kSideMargins),
-      child: new FlatButton(
-        onPressed: _haveTriggeredAction ? null : _handlePressed,
-        textTheme: ButtonTextTheme.accent,
-        child: new Text(config.label)
-      )
+    return new FlatButton(
+      onPressed: _haveTriggeredAction ? null : _handlePressed,
+      child: new Text(config.label)
     );
   }
 }
@@ -139,9 +135,10 @@ class SnackBar extends StatelessWidget {
   Widget build(BuildContext context) {
     assert(animation != null);
     List<Widget> children = <Widget>[
+      const SizedBox(width: _kSnackBarPadding),
       new Flexible(
         child: new Container(
-          margin: const EdgeInsets.symmetric(vertical: _kSingleLineVerticalPadding),
+          padding: const EdgeInsets.symmetric(vertical: _kSingleLineVerticalPadding),
           child: new DefaultTextStyle(
             style: Typography.white.subhead,
             child: content
@@ -149,8 +146,15 @@ class SnackBar extends StatelessWidget {
         )
       )
     ];
-    if (action != null)
-      children.add(action);
+    if (action != null) {
+      children.add(new ButtonTheme.bar(
+        padding: const EdgeInsets.symmetric(horizontal: _kSnackBarPadding),
+        textTheme: ButtonTextTheme.accent,
+        child: action
+      ));
+    } else {
+      children.add(const SizedBox(width: _kSnackBarPadding));
+    }
     CurvedAnimation heightAnimation = new CurvedAnimation(parent: animation, curve: _snackBarHeightCurve);
     CurvedAnimation fadeAnimation = new CurvedAnimation(parent: animation, curve: _snackBarFadeCurve, reverseCurve: const Threshold(0.0));
     ThemeData theme = Theme.of(context);
@@ -176,21 +180,18 @@ class SnackBar extends StatelessWidget {
             child: new Material(
               elevation: 6,
               color: _kSnackBackground,
-              child: new Container(
-                margin: const EdgeInsets.symmetric(horizontal: _kSideMargins),
-                child: new Theme(
-                  data: new ThemeData(
-                    brightness: Brightness.dark,
-                    accentColor: theme.accentColor,
-                    accentColorBrightness: theme.accentColorBrightness,
-                    textTheme: Typography.white
-                  ),
-                  child: new FadeTransition(
-                    opacity: fadeAnimation,
-                    child: new Row(
-                      children: children,
-                      crossAxisAlignment: CrossAxisAlignment.center
-                    )
+              child: new Theme(
+                data: new ThemeData(
+                  brightness: Brightness.dark,
+                  accentColor: theme.accentColor,
+                  accentColorBrightness: theme.accentColorBrightness,
+                  textTheme: Typography.white
+                ),
+                child: new FadeTransition(
+                  opacity: fadeAnimation,
+                  child: new Row(
+                    children: children,
+                    crossAxisAlignment: CrossAxisAlignment.center
                   )
                 )
               )
