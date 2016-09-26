@@ -22,6 +22,8 @@ enum TextOverflow {
   ellipsis,
 }
 
+const String _kEllipsis = '\u2026';
+
 /// A render object that displays a paragraph of text
 class RenderParagraph extends RenderBox {
   /// Creates a paragraph render object.
@@ -34,7 +36,12 @@ class RenderParagraph extends RenderBox {
     double textScaleFactor: 1.0
   }) : _softWrap = softWrap,
        _overflow = overflow,
-       _textPainter = new TextPainter(text: text, textAlign: textAlign, textScaleFactor: textScaleFactor) {
+       _textPainter = new TextPainter(
+           text: text,
+           textAlign: textAlign,
+           textScaleFactor: textScaleFactor,
+           ellipsis: overflow == TextOverflow.ellipsis ? _kEllipsis : null,
+       ) {
     assert(text != null);
     assert(text.debugAssertIsValid());
     assert(softWrap != null);
@@ -51,7 +58,6 @@ class RenderParagraph extends RenderBox {
     if (_textPainter.text == value)
       return;
     _textPainter.text = value;
-    _overflowPainter = null;
     _overflowShader = null;
     markNeedsLayout();
   }
@@ -86,6 +92,7 @@ class RenderParagraph extends RenderBox {
     if (_overflow == value)
       return;
     _overflow = value;
+    _textPainter.ellipsis = value == TextOverflow.ellipsis ? _kEllipsis : null;
     markNeedsPaint();
   }
 
@@ -99,13 +106,13 @@ class RenderParagraph extends RenderBox {
     if (_textPainter.textScaleFactor == value)
       return;
     _textPainter.textScaleFactor = value;
-    _overflowPainter = null;
     _overflowShader = null;
     markNeedsLayout();
   }
 
   void _layoutText({ double minWidth: 0.0, double maxWidth: double.INFINITY }) {
-    _textPainter.layout(minWidth: minWidth, maxWidth: _softWrap ? maxWidth : double.INFINITY);
+    bool wrap = _softWrap || _overflow == TextOverflow.ellipsis;
+    _textPainter.layout(minWidth: minWidth, maxWidth: wrap ? maxWidth : double.INFINITY);
   }
 
   @override
@@ -160,7 +167,6 @@ class RenderParagraph extends RenderBox {
   }
 
   bool _hasVisualOverflow = false;
-  TextPainter _overflowPainter;
   ui.Shader _overflowShader;
 
   @override
@@ -182,20 +188,16 @@ class RenderParagraph extends RenderBox {
     if (didOverflowWidth) {
       switch (_overflow) {
         case TextOverflow.clip:
-          _overflowPainter = null;
+        case TextOverflow.ellipsis:
           _overflowShader = null;
           break;
         case TextOverflow.fade:
-        case TextOverflow.ellipsis:
-          _overflowPainter ??= new TextPainter(
+          TextPainter fadeWidthPainter = new TextPainter(
             text: new TextSpan(style: _textPainter.text.style, text: '\u2026'),
             textScaleFactor: textScaleFactor
           )..layout();
-          final double overflowUnit = _overflowPainter.width;
-          double fadeEnd = size.width;
-          if (_overflow == TextOverflow.ellipsis)
-            fadeEnd -= overflowUnit / 2.0;
-          final double fadeStart = fadeEnd - _overflowPainter.width;
+          final double fadeEnd = size.width;
+          final double fadeStart = fadeEnd - fadeWidthPainter.width;
           // TODO(abarth): This shader has an LTR bias.
           _overflowShader = new ui.Gradient.linear(
             <Point>[new Point(fadeStart, 0.0), new Point(fadeEnd, 0.0)],
@@ -204,7 +206,6 @@ class RenderParagraph extends RenderBox {
           break;
       }
     } else {
-      _overflowPainter = null;
       _overflowShader = null;
     }
   }
@@ -225,7 +226,7 @@ class RenderParagraph extends RenderBox {
     final Canvas canvas = context.canvas;
     if (_hasVisualOverflow) {
       final Rect bounds = offset & size;
-      if (_overflowPainter != null)
+      if (_overflowShader != null)
         canvas.saveLayer(bounds, new Paint());
       else
         canvas.save();
@@ -239,11 +240,6 @@ class RenderParagraph extends RenderBox {
           ..transferMode = TransferMode.modulate
           ..shader = _overflowShader;
         canvas.drawRect(Point.origin & size, paint);
-        if (_overflow == TextOverflow.ellipsis) {
-          // TODO(abarth): This paint offset has an LTR bias.
-          Offset ellipseOffset = new Offset(size.width - _overflowPainter.width, 0.0);
-          _overflowPainter.paint(canvas, ellipseOffset);
-        }
       }
       canvas.restore();
     }
