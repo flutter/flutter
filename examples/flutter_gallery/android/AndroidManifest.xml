@@ -8,30 +8,6 @@
     <uses-sdk android:minSdkVersion="14" android:targetSdkVersion="21" />
     <uses-permission android:name="android.permission.INTERNET"/>
 
-    <!-- White-listing phones until Flutter's widgets and layouts have been tested for tablets. -->
-    <compatible-screens>
-        <!-- all small size screens -->
-        <screen android:screenSize="small" android:screenDensity="ldpi" />
-        <screen android:screenSize="small" android:screenDensity="mdpi" />
-        <screen android:screenSize="small" android:screenDensity="hdpi" />
-        <screen android:screenSize="small" android:screenDensity="xhdpi" />
-        <screen android:screenSize="small" android:screenDensity="480" />
-        <!-- all normal size screens -->
-        <screen android:screenSize="normal" android:screenDensity="ldpi" />
-        <screen android:screenSize="normal" android:screenDensity="mdpi" />
-        <screen android:screenSize="normal" android:screenDensity="hdpi" />
-        <screen android:screenSize="normal" android:screenDensity="xhdpi" />
-        <screen android:screenSize="normal" android:screenDensity="480" />
-        <!-- for the Nexus 6 and 6P -->
-        <screen android:screenSize="normal" android:screenDensity="560" />
-        <!-- handles Nexus 5, 5X, but should exclude very large tablets -->
-        <screen android:screenSize="large" android:screenDensity="ldpi" />
-        <screen android:screenSize="large" android:screenDensity="mdpi" />
-        <screen android:screenSize="large" android:screenDensity="hdpi" />
-        <screen android:screenSize="large" android:screenDensity="xhdpi" />
-        <screen android:screenSize="large" android:screenDensity="480" />
-    </compatible-screens>
-
     <application android:icon="@mipmap/ic_launcher" android:label="Gallery" android:name="org.domokit.sky.shell.SkyApplication">
         <activity android:configChanges="orientation|keyboardHidden|keyboard|screenSize" android:hardwareAccelerated="true" android:launchMode="singleTask" android:name="org.domokit.sky.shell.SkyActivity" android:theme="@android:style/Theme.Light.NoTitleBar" android:screenOrientation="sensorPortrait">
             <intent-filter>
