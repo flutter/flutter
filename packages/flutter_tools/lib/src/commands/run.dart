@@ -66,7 +66,7 @@ class RunCommand extends RunCommandBase {
     // Option to enable hot reloading.
     argParser.addFlag('hot',
                       negatable: true,
-                      defaultsTo: true,
+                      defaultsTo: kHotReloadDefault,
                       help: 'Run with support for hot reloading.');
 
     // Option to write the pid to a file.

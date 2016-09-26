@@ -25,6 +25,8 @@ import 'vmservice.dart';
 import 'resident_runner.dart';
 import 'toolchain.dart';
 
+const bool kHotReloadDefault = true;
+
 String getDevFSLoaderScript() {
   return path.absolute(path.join(Cache.flutterRoot,
                                  'packages',
