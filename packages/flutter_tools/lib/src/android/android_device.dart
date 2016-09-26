@@ -62,13 +62,22 @@ class AndroidDevice extends Device {
 
       List<String> propCommand = adbCommandForDevice(<String>['shell', 'getprop']);
       printTrace(propCommand.join(' '));
-      ProcessResult result = Process.runSync(propCommand.first, propCommand.sublist(1));
-      if (result.exitCode == 0) {
-        RegExp propertyExp = new RegExp(r'\[(.*?)\]: \[(.*?)\]');
-        for (Match match in propertyExp.allMatches(result.stdout))
-          _properties[match.group(1)] = match.group(2);
-      } else {
-        printError('Error retrieving device properties for $name.');
+
+      try {
+        // We pass an encoding of LATIN1 so that we don't try and interpret the
+        // `adb shell getprop` result as UTF8.
+        ProcessResult result = Process.runSync(
+          propCommand.first,
+          propCommand.sublist(1),
+          stdoutEncoding: LATIN1
+        );
+        if (result.exitCode == 0) {
+          _properties = parseAdbDeviceProperties(result.stdout);
+        } else {
+          printError('Error retrieving device properties for $name.');
+        }
+      } catch (error) {
+        printError('Error retrieving device properties for $name: $error');
       }
     }
 
@@ -563,6 +572,14 @@ class AndroidDevice extends Device {
       return result;
     });
   }
+}
+
+Map<String, String> parseAdbDeviceProperties(String str) {
+  Map<String, String> properties = <String, String>{};
+  final RegExp propertyExp = new RegExp(r'\[(.*?)\]: \[(.*?)\]');
+  for (Match match in propertyExp.allMatches(str))
+    properties[match.group(1)] = match.group(2);
+  return properties;
 }
 
 // 015d172c98400a03       device usb:340787200X product:nakasi model:Nexus_7 device:grouper
