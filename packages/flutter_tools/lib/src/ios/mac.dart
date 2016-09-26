@@ -15,7 +15,7 @@ import '../build_info.dart';
 import '../flx.dart' as flx;
 import '../globals.dart';
 import '../services.dart';
-import 'setup_xcodeproj.dart';
+import 'xcodeproj.dart';
 
 String get homeDirectory => path.absolute(Platform.environment['HOME']);
 

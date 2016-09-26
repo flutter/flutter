@@ -6,9 +6,13 @@ import 'dart:io';
 
 import 'package:path/path.dart' as path;
 
+import '../base/process.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../globals.dart';
+
+final RegExp _settingExpr = new RegExp(r'(\w+)\s*=\s*(\S+)');
+final RegExp _varExpr = new RegExp(r'\$\((.*)\)');
 
 void updateXcodeGeneratedProperties(String projectPath, BuildMode mode, String target) {
   StringBuffer localsBuffer = new StringBuffer();
@@ -42,4 +46,29 @@ void updateXcodeGeneratedProperties(String projectPath, BuildMode mode, String t
   File localsFile = new File(path.join(projectPath, 'ios', 'Flutter', 'Generated.xcconfig'));
   localsFile.createSync(recursive: true);
   localsFile.writeAsStringSync(localsBuffer.toString());
+}
+
+Map<String, String> getXcodeBuildSettings(String xcodeProjPath, String target) {
+  String absProjPath = path.absolute(xcodeProjPath);
+  String out = runCheckedSync(<String>[
+    '/usr/bin/xcodebuild', '-project', absProjPath, '-target', target, '-showBuildSettings'
+  ]);
+  Map<String, String> settings = <String, String>{};
+  for (String line in out.split('\n').where(_settingExpr.hasMatch)) {
+    Match match = _settingExpr.firstMatch(line);
+    settings[match[1]] = match[2];
+  }
+  return settings;
+}
+
+
+/// Substitutes variables in [str] with their values from the specified Xcode
+/// project and target.
+String substituteXcodeVariables(String str, String xcodeProjPath, String target) {
+  Iterable<Match> matches = _varExpr.allMatches(str);
+  if (matches.isEmpty)
+    return str;
+
+  Map<String, String> settings = getXcodeBuildSettings(xcodeProjPath, target);
+  return str.replaceAllMapped(_varExpr, (Match m) => settings[m[1]] ?? m[0]);
 }
