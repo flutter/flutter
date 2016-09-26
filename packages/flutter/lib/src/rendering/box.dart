@@ -1269,6 +1269,13 @@ abstract class RenderBox extends RenderObject {
   /// The caller is responsible for transforming [position] into the local
   /// coordinate space of the callee.  The callee is responsible for checking
   /// whether the given position is within its bounds.
+  ///
+  /// Hit testing requires layout to be up-to-date but does not require painting
+  /// to be up-to-date. That means a render object can rely upon [performLayout]
+  /// having been called in [hitTest] but cannot rely upon [paint] having been
+  /// called. For example, a render object might be a child of a [RenderOpacity]
+  /// object, which calls [hitTest] on its children when its opacity is zero
+  /// even through it does not [paint] its children.
   bool hitTest(HitTestResult result, { @required Point position }) {
     assert(() {
       if (needsLayout) {

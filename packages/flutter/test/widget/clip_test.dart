@@ -78,6 +78,29 @@ void main() {
     log.clear();
   });
 
+  testWidgets('Transparent ClipOval hit test', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new Opacity(
+        opacity: 0.0,
+        child: new ClipOval(
+          child: new GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () { log.add('tap'); },
+          )
+        )
+      )
+    );
+    expect(log, equals(<String>[]));
+
+    await tester.tapAt(new Point(10.0, 10.0));
+    expect(log, equals(<String>[]));
+    log.clear();
+
+    await tester.tapAt(new Point(400.0, 300.0));
+    expect(log, equals(<String>['tap']));
+    log.clear();
+  });
+
   testWidgets('ClipRect', (WidgetTester tester) async {
     await tester.pumpWidget(
       new Align(
