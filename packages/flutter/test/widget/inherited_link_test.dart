@@ -490,14 +490,4 @@ void main() {
     expect(tester.takeException(), isNotNull);
   });
 
-  testWidgets('InheritedWidgetLinkParent invalid key', (WidgetTester tester) async {
-    await tester.pumpWidget(new InheritedWidgetLinkParent(key: new UniqueKey()));
-    expect(tester.takeException(), isNotNull);
-  });
-
-  testWidgets('InheritedWidgetLinkChild invalid key', (WidgetTester tester) async {
-    await tester.pumpWidget(new InheritedWidgetLinkChild(key: new UniqueKey()));
-    expect(tester.takeException(), isNotNull);
-  });
-
 }

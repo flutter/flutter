@@ -8,6 +8,7 @@ import 'dart:developer';
 import 'dart:math' as math;
 
 import 'debug.dart';
+import 'inherited_link.dart';
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter/foundation.dart';
@@ -1100,52 +1101,6 @@ abstract class InheritedWidget extends ProxyWidget {
   /// object.
   @protected
   bool updateShouldNotify(InheritedWidget oldWidget);
-}
-
-/// Defines a location in the widget tree that an [InheritedWidgetLinkChild] can
-/// link to. The descendants of the link child inherit from the link parent's
-/// [InheritedWidget] ancestors instead of the link child's inherited widget
-/// ancestors.
-///
-/// This widget must be given its own [GlobalKey] and the value of its [link] must
-/// be a GlobalKey given to its link child. If the link is null then this widget
-/// has no effect on inherited values.
-class InheritedWidgetLinkParent extends ProxyWidget {
-  const InheritedWidgetLinkParent({ Key key, Widget child, this.link })
-    : super(key: key, child: child);
-
-  /// The value of an [InheritedWidgetLinkChild]'s key or null. The link child's
-  /// descendants will inherit from this widget's  [InheritedWidget] ancestors.
-  /// If [key] or link is null then this link child will have no effect on inheritance.
-  final GlobalKey link;
-
-  @override
-  InheritedElementLinkParent createElement() => new InheritedElementLinkParent(this);
-
-  @protected
-  bool updateShouldNotify(InheritedWidgetLinkParent oldWidget) => link != oldWidget.link;
-}
-
-/// This widget's child inherits values from the [InheritedWidget] ancestors of the
-/// [InheritedWidgetLinkParent] that it's linked to.
-///
-/// This widget must be given its own [GlobalKey] and the value of its [link] must
-/// be a GlobalKey given to its link parent. If the link is null then this widget
-/// has no effect on inherited values.
-class InheritedWidgetLinkChild extends ProxyWidget {
-  const InheritedWidgetLinkChild({ Key key, Widget child, this.link })
-    : super(key: key, child: child);
-
-  /// The value of an [InheritedWidgetLinkParent]'s key or null. This widget will
-  /// inherit from the link parent's [InheritedWidget] ancestors. If [key] or link
-  /// is null then this link child will have no effect on inheritance.
-  final GlobalKey link;
-
-  @override
-  InheritedElementLinkChild createElement() => new InheritedElementLinkChild(this);
-
-  @protected
-  bool updateShouldNotify(InheritedWidgetLinkChild oldWidget) => link != oldWidget.link;
 }
 
 /// RenderObjectWidgets provide the configuration for [RenderObjectElement]s,
@@ -3077,14 +3032,8 @@ class InheritedElementLinkParent extends ProxyElement {
   InheritedElementLinkChild get link => widget.link?._currentElement;
 
   bool _debugLinkIsValid() {
-    if (widget.link != null && !(widget.link is GlobalKey)) {
-      throw new FlutterError(
-        'An InheritedElementLinkParent\'s key must either by a GlobalKey or null.'
-      );
-    }
-
     final Element linkElement = widget.link?._currentElement;
-    if (linkElement != null && !(linkElement is InheritedElementLinkChild)) {
+    if (linkElement != null && linkElement is! InheritedElementLinkChild) {
       throw new FlutterError(
         'InheritedWidgetLinkParent link value is not an InheritedWidgetLinkChild.\n'
         'The value of an InheritedWidgetLinkParent\'s link must be a GlobalKey which '
@@ -3168,14 +3117,8 @@ class InheritedElementLinkChild extends ProxyElement {
   }
 
   bool _debugLinkIsValid() {
-    if (widget.link != null && !(widget.link is GlobalKey)) {
-      throw new FlutterError(
-        'An InheritedElementLinkChild\'s key must either by a GlobalKey or null.'
-      );
-    }
-
     final Element linkElement = widget.link?._currentElement;
-    if (linkElement != null && !(linkElement is InheritedElementLinkParent)) {
+    if (linkElement != null && linkElement is! InheritedElementLinkParent) {
       throw new FlutterError(
         'InheritedWidgetLinkChild link value is not an InheritedWidgetLinkParent.\n'
         'The value of an InheritedWidgetLinkChild\'s link must be a GlobalKey which '
@@ -3195,13 +3138,12 @@ class InheritedElementLinkChild extends ProxyElement {
     assert(link != null);
     assert(() {
       if (link.owner._debugBuilding) {
-        if (link.owner._debugCurrentBuildTarget == null) {
-          // If _debugCurrentBuildTarget is null, we're not actually building a
-          // widget but instead building the root of the tree via runApp.
-          // TODO(abarth): Remove these cases and ensure that we always have
-          // a current build target when we're building.
+        // If _debugCurrentBuildTarget is null, we're not actually building a
+        // widget but instead building the root of the tree via runApp.
+        // TODO(abarth): Remove these cases and ensure that we always have
+        // a current build target when we're building.
+        if (link.owner._debugCurrentBuildTarget == null)
           return true;
-        }
         if (_debugIsInScope(link.owner._debugCurrentBuildTarget))
           return true;
       }

@@ -30,6 +30,7 @@ export 'src/widgets/gridpaper.dart';
 export 'src/widgets/heroes.dart';
 export 'src/widgets/image.dart';
 export 'src/widgets/implicit_animations.dart';
+export 'src/widgets/inherited_link.dart';
 export 'src/widgets/layout_builder.dart';
 export 'src/widgets/lazy_block.dart';
 export 'src/widgets/locale_query.dart';
