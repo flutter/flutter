@@ -3162,8 +3162,9 @@ class InheritedElementLinkChild extends ProxyElement {
 
   @override
   void notifyClients(InheritedWidgetLinkChild oldWidget) {
-    if (widget.link != oldWidget.link)
-      _updateInheritanceRecursively(this);
+    if (!widget.updateShouldNotify(oldWidget))
+      return;
+    _updateInheritanceRecursively(this);
   }
 }
 
