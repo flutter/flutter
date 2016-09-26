@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:collection';
 import 'dart:developer';
+import 'dart:math' as math;
 
 import 'debug.dart';
 
@@ -1099,6 +1100,32 @@ abstract class InheritedWidget extends ProxyWidget {
   /// object.
   @protected
   bool updateShouldNotify(InheritedWidget oldWidget);
+}
+
+class InheritedWidgetLinkParent extends ProxyWidget {
+  const InheritedWidgetLinkParent({ Key key, Widget child, this.link })
+    : super(key: key, child: child);
+
+  final GlobalKey link;
+
+  @override
+  InheritedElementLinkParent createElement() => new InheritedElementLinkParent(this);
+
+  @protected
+  bool updateShouldNotify(InheritedWidgetLinkParent oldWidget) => link != oldWidget.link;
+}
+
+class InheritedWidgetLinkChild extends ProxyWidget {
+  const InheritedWidgetLinkChild({ Key key, Widget child, this.link })
+    : super(key: key, child: child);
+
+  final GlobalKey link;
+
+  @override
+  InheritedElementLinkChild createElement() => new InheritedElementLinkChild(this);
+
+  @protected
+  bool updateShouldNotify(InheritedWidgetLinkChild oldWidget) => link != oldWidget.link;
 }
 
 /// RenderObjectWidgets provide the configuration for [RenderObjectElement]s,
@@ -3012,17 +3039,131 @@ class InheritedElement extends ProxyElement {
   @protected
   void dispatchDependenciesChanged() {
     for (Element dependent in _dependents) {
-      assert(() {
-        // check that it really is our descendant
-        Element ancestor = dependent._parent;
-        while (ancestor != this && ancestor != null)
-          ancestor = ancestor._parent;
-        return ancestor == this;
-      });
+      assert(dependent._debugIsInScope(this));
       // check that it really deepends on us
       assert(dependent._dependencies.contains(this));
       dependent.dependenciesChanged();
     }
+  }
+}
+
+class InheritedElementLinkParent extends ProxyElement {
+  InheritedElementLinkParent(InheritedWidgetLinkParent widget) : super(widget);
+
+  @override
+  InheritedWidgetLinkParent get widget => super.widget;
+
+  InheritedElementLinkChild get link => widget.link?._currentElement;
+
+  @override
+  void activate() {
+    super.activate(); // clears _dependencies, and sets active to true
+    if (link != null && link._active)
+      link._markLinkChildNeedsBuild();
+  }
+
+  @override
+  void deactivate() {
+    super.deactivate();
+    if (link != null && link._active)
+      link._clearDependenciesRecursively(link);
+  }
+
+  @override
+  void _updateInheritance() {
+    super._updateInheritance();
+    if (link != null && link._active)
+      link._updateInheritanceRecursively(link);
+  }
+
+  @override
+  void notifyClients(InheritedWidgetLinkParent oldWidget) {
+    if (!widget.updateShouldNotify(oldWidget))
+      return;
+
+    InheritedElementLinkChild oldLink = oldWidget.link?._currentElement;
+    oldLink?._clearDependenciesRecursively(oldLink);
+    oldLink?._updateInheritance();
+    link?._updateInheritance();
+  }
+}
+
+class InheritedElementLinkChild extends ProxyElement {
+  InheritedElementLinkChild(InheritedWidgetLinkChild widget) : super(widget);
+
+  @override
+  InheritedWidgetLinkChild get widget => super.widget;
+
+  InheritedElementLinkParent get link => widget.link?._currentElement;
+
+  @override
+  int get depth {
+    if (_depth == null)
+      return null;
+    return math.max(_depth, 1 + (link?.depth ?? 0));
+  }
+
+  @override
+  bool _debugIsInScope(Element target) {
+    return super._debugIsInScope(target) || (link?._debugIsInScope(target) ?? false);
+  }
+
+  void _markLinkChildNeedsBuild() {
+    assert(_debugLifecycleState != _ElementLifecycle.defunct);
+    if (!_active)
+      return;
+    assert(owner != null);
+    assert(_debugLifecycleState == _ElementLifecycle.active);
+    assert(link != null);
+    assert(() {
+      if (link.owner._debugBuilding) {
+        if (link.owner._debugCurrentBuildTarget == null) {
+          // If _debugCurrentBuildTarget is null, we're not actually building a
+          // widget but instead building the root of the tree via runApp.
+          // TODO(abarth): Remove these cases and ensure that we always have
+          // a current build target when we're building.
+          return true;
+        }
+        if (_debugIsInScope(link.owner._debugCurrentBuildTarget))
+          return true;
+      }
+      return true;
+    });
+    if (dirty)
+      return;
+    _dirty = true;
+    owner.scheduleBuildFor(this);
+  }
+
+  @override
+  void _updateInheritance() {
+    if (link != null && link._active)
+      _inheritedWidgets = link._inheritedWidgets;
+    else
+      super._updateInheritance();
+  }
+
+  void _updateInheritanceRecursively(Element element) {
+    element._updateInheritance();
+    element.visitChildren(_updateInheritanceRecursively);
+  }
+
+  // We're going to rebuild this tree. Any element of a dependent list
+  // from an ancestor of the link-parent that points into a link-child
+  // descendant needs to be cleared.
+  void _clearDependenciesRecursively(Element element) {
+    if (element._dependencies != null) {
+      for (InheritedElement dependency in element._dependencies) {
+        dependency._dependents.remove(element);
+      }
+    }
+    element.visitChildren(_clearDependenciesRecursively);
+  }
+
+  @override
+  void notifyClients(InheritedWidgetLinkChild oldWidget) {
+    if (widget.link != oldWidget.link)
+      _updateInheritanceRecursively(this);
   }
 }
 
