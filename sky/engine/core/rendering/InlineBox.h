@@ -296,6 +296,7 @@ public:
             , m_hasEllipsisBoxOrHyphen(false)
             , m_dirOverride(false)
             , m_isText(false)
+            , m_hasAddedEllipsis(false)
             , m_determinedIfNextOnLineExists(false)
             , m_nextOnLineExists(false)
             , m_expansion(0)
@@ -326,6 +327,7 @@ public:
         // for InlineTextBox
         ADD_BOOLEAN_BITFIELD(dirOverride, DirOverride);
         ADD_BOOLEAN_BITFIELD(isText, IsText); // Whether or not this object represents text with a non-zero height. Includes non-image list markers, text boxes.
+        ADD_BOOLEAN_BITFIELD(hasAddedEllipsis, HasAddedEllipsis)
 
     private:
         mutable unsigned m_determinedIfNextOnLineExists : 1;
@@ -373,6 +375,8 @@ protected:
     void setCanHaveLeadingExpansion(bool canHaveLeadingExpansion) { m_bitfields.setHasSelectedChildrenOrCanHaveLeadingExpansion(canHaveLeadingExpansion); }
     signed expansion() { return m_bitfields.expansion(); }
     void setExpansion(signed expansion) { m_bitfields.setExpansion(expansion); }
+    bool hasAddedEllipsis() const { return m_bitfields.hasAddedEllipsis(); }
+    void setHasAddedEllipsis(bool hasAddedEllipsis) { m_bitfields.setHasAddedEllipsis(hasAddedEllipsis); }
 
     // For InlineFlowBox and InlineTextBox
     bool extracted() const { return m_bitfields.extracted(); }

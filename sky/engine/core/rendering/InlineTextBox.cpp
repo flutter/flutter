@@ -450,9 +450,18 @@ void InlineTextBox::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset, 
         string.narrow(m_start, length);
     maximumLength = renderer().textLength() - m_start;
 
+    StringBuilder charactersWithEllipsis;
+    if (hasAddedEllipsis()) {
+      charactersWithEllipsis.reserveCapacity(string.length() + 1);
+      charactersWithEllipsis.append(string);
+      charactersWithEllipsis.append(WTF::Unicode::horizontalEllipsis);
+      string = charactersWithEllipsis.toString().createView();
+      maximumLength = string.length();
+    }
+
     StringBuilder charactersWithHyphen;
     TextRun textRun = constructTextRun(styleToUse, font, string, maximumLength, hasHyphen() ? &charactersWithHyphen : 0);
-    if (hasHyphen())
+    if (hasHyphen() || hasAddedEllipsis())
         length = textRun.length();
 
     int sPos = 0;

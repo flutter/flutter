@@ -88,7 +88,7 @@ public:
     void handleOutOfFlowPositioned(Vector<RenderBox*>& positionedObjects);
     void handleEmptyInline();
     void handleReplaced();
-    bool handleText(WordMeasurements&, bool& hyphenated);
+    bool handleText(WordMeasurements&, bool& hyphenated, bool& ellipsized);
     void commitAndUpdateLineBreakIfNeeded();
     InlineIterator handleEndOfLine();
 
@@ -409,6 +409,13 @@ inline float measureHyphenWidth(RenderText* renderer, const Font& font, TextDire
         style->hyphenString().string(), style, style->direction()));
 }
 
+inline float measureEllipsisWidth(RenderText* renderer, const Font& font)
+{
+    RenderStyle* style = renderer->style();
+    return font.width(constructTextRun(renderer, font,
+        String(&WTF::Unicode::horizontalEllipsis, 1), style, style->direction()));
+}
+
 ALWAYS_INLINE TextDirection textDirectionFromUnicode(WTF::Unicode::Direction direction)
 {
     return direction == WTF::Unicode::RightToLeft
@@ -428,7 +435,7 @@ ALWAYS_INLINE float textWidth(RenderText* text, unsigned from, unsigned len, con
     return font.width(run, fallbackFonts, &glyphOverflow);
 }
 
-inline bool BreakingContext::handleText(WordMeasurements& wordMeasurements, bool& hyphenated)
+inline bool BreakingContext::handleText(WordMeasurements& wordMeasurements, bool& hyphenated, bool& ellipsized)
 {
     if (!m_current.offset())
         m_appliedStartWidth = false;
@@ -458,7 +465,16 @@ inline bool BreakingContext::handleText(WordMeasurements& wordMeasurements, bool
     bool breakWords = m_currentStyle->breakWords() && ((m_autoWrap && !m_width.committedWidth()) || m_currWS == PRE);
     bool midWordBreak = false;
     bool breakAll = m_currentStyle->wordBreak() == BreakAllWordBreak && m_autoWrap;
+
     float hyphenWidth = 0;
+
+    bool ellipsizeMode = m_blockStyle->textOverflow() == TextOverflowEllipsis;
+    float ellipsisWidth = 0;
+    unsigned ellipsisBreakOffset = 0;
+    if (ellipsizeMode) {
+        ellipsisWidth = measureEllipsisWidth(renderText, font);
+        breakAll = true;
+    }
 
     if (m_renderTextInfo.m_text != renderText) {
         m_renderTextInfo.m_text = renderText;
@@ -496,7 +512,14 @@ inline bool BreakingContext::handleText(WordMeasurements& wordMeasurements, bool
             wrapW += charWidth;
             bool midWordBreakIsBeforeSurrogatePair = U16_IS_LEAD(c) && m_current.offset() + 1 < renderText->textLength() && U16_IS_TRAIL((*renderText)[m_current.offset() + 1]);
             charWidth = textWidth(renderText, m_current.offset(), midWordBreakIsBeforeSurrogatePair ? 2 : 1, font, m_width.committedWidth() + wrapW, isFixedPitch, m_collapseWhiteSpace);
-            midWordBreak = m_width.committedWidth() + wrapW + charWidth > m_width.availableWidth();
+
+            float midWordWidth = m_width.committedWidth() + wrapW + charWidth;
+            midWordBreak = midWordWidth > m_width.availableWidth();
+
+            // Check whether there is enough space to fit this character plus an ellipsis.
+            if (ellipsizeMode && midWordWidth + ellipsisWidth <= m_width.availableWidth()) {
+                ellipsisBreakOffset = m_current.offset();
+            }
         }
 
         int nextBreakablePosition = m_current.nextBreakablePosition();
@@ -584,6 +607,13 @@ inline bool BreakingContext::handleText(WordMeasurements& wordMeasurements, bool
                             wordMeasurement.width = charWidth;
                         }
                     }
+
+                    if (ellipsizeMode) {
+                        // Break the line at the position where an ellipsis would fit.
+                        m_lineBreak.moveTo(m_current.object(), ellipsisBreakOffset, m_current.nextBreakablePosition());
+                        ellipsized = true;
+                    }
+
                     // Didn't fit. Jump to the end unless there's still an opportunity to collapse whitespace.
                     if (m_ignoringSpaces || !m_collapseWhiteSpace || !m_currentCharacterIsSpace || !previousCharacterIsSpace) {
                         m_atEnd = true;

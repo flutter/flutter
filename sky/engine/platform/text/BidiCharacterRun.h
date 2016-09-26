@@ -69,6 +69,7 @@ struct BidiCharacterRun {
     // Do not add anything apart from bitfields until after m_next. See https://bugs.webkit.org/show_bug.cgi?id=100173
     bool m_override : 1;
     bool m_hasHyphen : 1; // Used by BidiRun subclass which is a layering violation but enables us to save 8 bytes per object on 64-bit.
+    bool m_hasAddedEllipsis : 1;
     unsigned char m_level;
     BidiCharacterRun* m_next;
     int m_start;

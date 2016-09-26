@@ -93,6 +93,15 @@ enum TextAlign {
   center
 }
 
+/// How to handle text that overflows its bounds
+enum TextOverflow {
+  /// Default
+  clip,
+
+  /// Render as a single line that is ellipsized if it is too wide to fit
+  ellipsis
+}
+
 /// A horizontal line used for aligning text
 enum TextBaseline {
   // The horizontal line used to align the bottom of glyphs for alphabetic characters
@@ -375,13 +384,16 @@ class TextStyle {
 //
 //  - Element 3: The enum index of the |fontStyle|.
 //
+//  - Element 4: The enum index of the |textOverflow|.
+//
 Int32List _encodeParagraphStyle(TextAlign textAlign,
                                 FontWeight fontWeight,
                                 FontStyle fontStyle,
+                                TextOverflow textOverflow,
                                 String fontFamily,
                                 double fontSize,
                                 double lineHeight) {
-  Int32List result = new Int32List(4);
+  Int32List result = new Int32List(5);
   if (textAlign != null) {
     result[0] |= 1 << 1;
     result[1] = textAlign.index;
@@ -394,16 +406,20 @@ Int32List _encodeParagraphStyle(TextAlign textAlign,
     result[0] |= 1 << 3;
     result[3] = fontStyle.index;
   }
-  if (fontFamily != null) {
+  if (textOverflow != null) {
     result[0] |= 1 << 4;
-    // Passed separately to native.
+    result[4] = textOverflow.index;
   }
-  if (fontSize != null) {
+  if (fontFamily != null) {
     result[0] |= 1 << 5;
     // Passed separately to native.
   }
-  if (lineHeight != null) {
+  if (fontSize != null) {
     result[0] |= 1 << 6;
+    // Passed separately to native.
+  }
+  if (lineHeight != null) {
+    result[0] |= 1 << 7;
     // Passed separately to native.
   }
   return result;
@@ -423,12 +439,14 @@ class ParagraphStyle {
     TextAlign textAlign,
     FontWeight fontWeight,
     FontStyle fontStyle,
+    TextOverflow textOverflow,
     String fontFamily,
     double fontSize,
     double lineHeight
   }) : _encoded = _encodeParagraphStyle(textAlign,
                                         fontWeight,
                                         fontStyle,
+                                        textOverflow,
                                         fontFamily,
                                         fontSize,
                                         lineHeight),
@@ -465,9 +483,10 @@ class ParagraphStyle {
              'textAlign: ${   _encoded[0] & 0x02 == 0x02 ? TextAlign.values[_encoded[1]]    : "unspecified"}, '
              'fontWeight: ${  _encoded[0] & 0x04 == 0x04 ? FontWeight.values[_encoded[2]]   : "unspecified"}, '
              'fontStyle: ${   _encoded[0] & 0x08 == 0x08 ? FontStyle.values[_encoded[3]]    : "unspecified"}, '
-             'fontFamily: ${  _encoded[0] & 0x10 == 0x10 ? _fontFamily                      : "unspecified"}, '
-             'fontSize: ${    _encoded[0] & 0x20 == 0x20 ? _fontSize                        : "unspecified"}, '
-             'lineHeight: ${  _encoded[0] & 0x40 == 0x40 ? "${_lineHeight}x"                : "unspecified"}'
+             'textOverflow: ${ _encoded[0] & 0x10 == 0x10 ? TextOverflow.values[_encoded[4]] : "unspecified"}, '
+             'fontFamily: ${  _encoded[0] & 0x20 == 0x20 ? _fontFamily                      : "unspecified"}, '
+             'fontSize: ${    _encoded[0] & 0x40 == 0x40 ? _fontSize                        : "unspecified"}, '
+             'lineHeight: ${  _encoded[0] & 0x80 == 0x80 ? "${_lineHeight}x"                : "unspecified"}'
            ')';
   }
 }

@@ -515,6 +515,8 @@ RootInlineBox* RenderParagraph::constructLine(BidiRunList<BidiRun>& bidiRuns, co
             text->setDirOverride(r->dirOverride());
             if (r->m_hasHyphen)
                 text->setHasHyphen(true);
+            if (r->m_hasAddedEllipsis)
+                text->setHasAddedEllipsis(true);
         }
     }
 
@@ -909,6 +911,8 @@ void RenderParagraph::layoutRunsAndFloatsInRange(LineLayoutState& layoutState,
 
             if (bidiRuns.runCount() && lineBreaker.lineWasHyphenated())
                 bidiRuns.logicallyLastRun()->m_hasHyphen = true;
+            if (bidiRuns.runCount() && lineBreaker.lineWasEllipsized())
+                bidiRuns.logicallyLastRun()->m_hasAddedEllipsis = true;
 
             // Now that the runs have been ordered, we create the line boxes.
             // At the same time we figure out where border/padding/margin should be applied for
@@ -928,6 +932,12 @@ void RenderParagraph::layoutRunsAndFloatsInRange(LineLayoutState& layoutState,
 
         lineMidpointState.reset();
         resolver.setPosition(endOfLine, numberOfIsolateAncestors(endOfLine));
+
+        // Limit ellipsized text to a single line.
+        if (lineBreaker.lineWasEllipsized()) {
+            resolver.setPosition(InlineIterator(resolver.position().root(), 0, 0), 0);
+            break;
+        }
     }
 }
 

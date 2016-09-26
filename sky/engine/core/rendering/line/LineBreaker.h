@@ -46,6 +46,7 @@ public:
         FloatingObject* lastFloatFromPreviousLine, WordMeasurements&);
 
     bool lineWasHyphenated() { return m_hyphenated; }
+    bool lineWasEllipsized() { return m_ellipsized; }
     const Vector<RenderBox*>& positionedObjects() { return m_positionedObjects; }
 private:
     void reset();
@@ -54,6 +55,7 @@ private:
 
     RenderParagraph* m_block;
     bool m_hyphenated;
+    bool m_ellipsized;
     Vector<RenderBox*> m_positionedObjects;
 };
 

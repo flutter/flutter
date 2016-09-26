@@ -76,6 +76,7 @@ public:
 
     using InlineBox::hasHyphen;
     using InlineBox::setHasHyphen;
+    using InlineBox::setHasAddedEllipsis;
     using InlineBox::canHaveLeadingExpansion;
     using InlineBox::setCanHaveLeadingExpansion;
 

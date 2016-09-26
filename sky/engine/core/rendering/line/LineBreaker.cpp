@@ -45,6 +45,7 @@ void LineBreaker::reset()
 {
     m_positionedObjects.clear();
     m_hyphenated = false;
+    m_ellipsized = false;
 }
 
 InlineIterator LineBreaker::nextLineBreak(InlineBidiResolver& resolver, LineInfo& lineInfo,
@@ -75,7 +76,7 @@ InlineIterator LineBreaker::nextLineBreak(InlineBidiResolver& resolver, LineInfo
         } else if (context.currentObject()->isReplaced()) {
             context.handleReplaced();
         } else if (context.currentObject()->isText()) {
-            if (context.handleText(wordMeasurements, m_hyphenated)) {
+            if (context.handleText(wordMeasurements, m_hyphenated, m_ellipsized)) {
                 // We've hit a hard text line break. Our line break iterator is updated, so go ahead and early return.
                 return context.lineBreak();
             }
