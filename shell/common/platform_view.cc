@@ -128,12 +128,13 @@ void PlatformView::SetupResourceContextOnIOThreadPerform(
   if (!current) {
     LOG(WARNING)
         << "WARNING: Could not setup an OpenGL context on the resource loader.";
+    latch->Signal();
+    return;
   }
 
   blink::ResourceContext::Set(GrContext::Create(
       GrBackend::kOpenGL_GrBackend,
       reinterpret_cast<GrBackendContext>(GrGLCreateNativeInterface())));
-
   latch->Signal();
 }
 
