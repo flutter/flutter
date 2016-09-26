@@ -120,7 +120,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     Size snackBarSize = Size.zero;
 
     if (hasChild(_ScaffoldSlot.bottomSheet)) {
-      bottomSheetSize = layoutChild(_ScaffoldSlot.bottomSheet, fullWidthConstraints);
+      bottomSheetSize = layoutChild(_ScaffoldSlot.bottomSheet, fullWidthConstraints.copyWith(maxHeight: contentBottom - contentTop));
       positionChild(_ScaffoldSlot.bottomSheet, new Offset((size.width - bottomSheetSize.width) / 2.0, bottom - bottomSheetSize.height));
     }
 
