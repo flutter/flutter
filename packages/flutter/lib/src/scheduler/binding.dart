@@ -125,6 +125,10 @@ enum SchedulerPhase {
   postFrameCallbacks,
 }
 
+class _NullSchedulerBinding extends DebugHelpfulNullMixin implements SchedulerBinding {
+  const _NullSchedulerBinding(String message) : super(message);
+}
+
 /// Scheduler for running the following:
 ///
 /// * _Frame callbacks_, triggered by the system's
@@ -145,7 +149,13 @@ abstract class SchedulerBinding extends BindingBase {
   }
 
   /// The current [SchedulerBinding], if one has been created.
-  static SchedulerBinding get instance => _instance;
+  static SchedulerBinding get instance => _instance ??
+    debugHelpfulNull/*<_NullSchedulerBinding>*/(const _NullSchedulerBinding(
+      'The SchedulerBinding instance was accessed before the binding was initialized.\n'
+      'You have to call the binding\'s constructor (or "ensureInitialized" static method) before '
+      'calling any APIs that use the scheduler. See WidgetsFlutterBinding.ensureInitialized for '
+      'a common way to initialize the binding.'
+    ));
   static SchedulerBinding _instance;
 
   @override
