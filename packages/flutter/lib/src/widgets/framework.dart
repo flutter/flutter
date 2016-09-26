@@ -3067,6 +3067,7 @@ class InheritedElement extends ProxyElement {
   }
 }
 
+/// An element that uses a [InheritedWidgetLinkParent] as its configuration.
 class InheritedElementLinkParent extends ProxyElement {
   InheritedElementLinkParent(InheritedWidgetLinkParent widget) : super(widget);
 
@@ -3145,6 +3146,7 @@ class InheritedElementLinkParent extends ProxyElement {
   }
 }
 
+/// An element that uses a [InheritedWidgetLinkChild] as its configuration.
 class InheritedElementLinkChild extends ProxyElement {
   InheritedElementLinkChild(InheritedWidgetLinkChild widget) : super(widget);
 
