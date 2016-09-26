@@ -227,6 +227,7 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
           return new CollapsibleBody(
             child: new Column(
               mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 new Row(
                   mainAxisSize: MainAxisSize.min,
