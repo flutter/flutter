@@ -50,7 +50,8 @@ Future<int> pubGet({
     int code = await runCommandAndStreamOutput(
       <String>[sdkBinaryName('pub'), '--verbosity=warning', command, '--no-packages-dir', '--no-precompile'],
       workingDirectory: directory,
-      mapFunction: _filterOverrideWarnings
+      mapFunction: _filterOverrideWarnings,
+      environment: <String, String>{ 'FLUTTER_ROOT': Cache.flutterRoot }
     );
     status.stop(showElapsedTime: true);
     if (code != 0)

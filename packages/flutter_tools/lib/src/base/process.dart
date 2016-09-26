@@ -12,15 +12,23 @@ typedef String StringConverter(String string);
 
 // TODO(ianh): We have way too many ways to run subprocesses in this project.
 
-Map<String, String> _environment(bool allowReentrantFlutter) {
-  return allowReentrantFlutter ? <String, String>{ 'FLUTTER_ALREADY_LOCKED': 'true' } : null;
+Map<String, String> _environment(bool allowReentrantFlutter, [Map<String, String> environment]) {
+  if (allowReentrantFlutter) {
+    if (environment == null)
+      environment = <String, String>{ 'FLUTTER_ALREADY_LOCKED': 'true' };
+    else
+      environment['FLUTTER_ALREADY_LOCKED'] = 'true';
+  }
+
+  return environment;
 }
 
 /// This runs the command in the background from the specified working
 /// directory. Completes when the process has been started.
 Future<Process> runCommand(List<String> cmd, {
   String workingDirectory,
-  bool allowReentrantFlutter: false
+  bool allowReentrantFlutter: false,
+  Map<String, String> environment
 }) async {
   _traceCommand(cmd, workingDirectory: workingDirectory);
   String executable = cmd[0];
@@ -29,7 +37,7 @@ Future<Process> runCommand(List<String> cmd, {
     executable,
     arguments,
     workingDirectory: workingDirectory,
-    environment: _environment(allowReentrantFlutter)
+    environment: _environment(allowReentrantFlutter, environment)
   );
   return process;
 }
@@ -42,12 +50,14 @@ Future<int> runCommandAndStreamOutput(List<String> cmd, {
   String prefix: '',
   bool trace: false,
   RegExp filter,
-  StringConverter mapFunction
+  StringConverter mapFunction,
+  Map<String, String> environment
 }) async {
   Process process = await runCommand(
     cmd,
     workingDirectory: workingDirectory,
-    allowReentrantFlutter: allowReentrantFlutter
+    allowReentrantFlutter: allowReentrantFlutter,
+    environment: environment
   );
   StreamSubscription<String> subscription = process.stdout
     .transform(UTF8.decoder)
