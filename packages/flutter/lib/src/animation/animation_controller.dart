@@ -36,6 +36,13 @@ enum _AnimationDirection {
 /// a given duration. The animation controller generates a new value whenever the device running
 /// your app is ready to display a new frame (typically, this rate is around 60 values per second).
 ///
+/// An AnimationController needs a [TickerProvider], which is configured using the `vsync` argument
+/// on the constructor. If you are creating an AnimationController from a [State], then you can use
+/// the [TickerProviderStateMixin] and [SingleTickerProviderStateMixin] classes to obtain a suitable
+/// [TickerProvider]. The widget test framework [WidgetTester] object can be used as a ticker provider
+/// in the context of tests. In other contexts, you will have to either pass a [TickerProvider] from
+/// a higher level (e.g. indirectly from a [State] that mixes in [TickerProviderStateMixin]), or
+/// create a custom [TickerProvider] subclass.
 class AnimationController extends Animation<double>
   with AnimationEagerListenerMixin, AnimationLocalListenersMixin, AnimationLocalStatusListenersMixin {
 
