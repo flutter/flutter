@@ -12,6 +12,7 @@ import 'base/process.dart';
 import 'build_info.dart';
 import 'globals.dart';
 import 'ios/plist_utils.dart';
+import 'ios/xcodeproj.dart';
 
 abstract class ApplicationPackage {
   /// Package ID from the Android Manifest or equivalent.
@@ -137,6 +138,8 @@ class IOSApp extends ApplicationPackage {
     String value = getValueFromFile(plistPath, kCFBundleIdentifierKey);
     if (value == null)
       return null;
+    String projectPath = path.join('ios', 'Runner.xcodeproj');
+    value = substituteXcodeVariables(value, projectPath, 'Runner');
 
     return new IOSApp(
       appDirectory: path.join('ios'),
