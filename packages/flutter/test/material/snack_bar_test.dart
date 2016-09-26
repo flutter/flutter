@@ -295,4 +295,43 @@ void main() {
     await tester.tap(find.text('ACTION'));
     expect(tapCount, equals(1));
   });
+
+  testWidgets('SnackBar button text alignment', (WidgetTester tester) async {
+    await tester.pumpWidget(new MaterialApp(
+      home: new Scaffold(
+        body: new Builder(
+          builder: (BuildContext context) {
+            return new GestureDetector(
+              onTap: () {
+                Scaffold.of(context).showSnackBar(new SnackBar(
+                  content: new Text('I am a snack bar.'),
+                  duration: new Duration(seconds: 2),
+                  action: new SnackBarAction(label: 'ACTION', onPressed: () {})
+                ));
+              },
+              child: new Text('X')
+            );
+          }
+        )
+      )
+    ));
+    await tester.tap(find.text('X'));
+    await tester.pump(); // start animation
+    await tester.pump(const Duration(milliseconds: 750));
+
+    RenderBox textBox = tester.firstRenderObject(find.text('I am a snack bar.'));
+    RenderBox actionTextBox = tester.firstRenderObject(find.text('ACTION'));
+    RenderBox snackBarBox = tester.firstRenderObject(find.byType(SnackBar));
+
+    Point textBottomLeft = textBox.localToGlobal(textBox.size.bottomLeft(Point.origin));
+    Point textBottomRight = textBox.localToGlobal(textBox.size.bottomRight(Point.origin));
+    Point actionTextBottomLeft = actionTextBox.localToGlobal(actionTextBox.size.bottomLeft(Point.origin));
+    Point actionTextBottomRight = actionTextBox.localToGlobal(actionTextBox.size.bottomRight(Point.origin));
+    Point snackBarBottomLeft = snackBarBox.localToGlobal(snackBarBox.size.bottomLeft(Point.origin));
+    Point snackBarBottomRight = snackBarBox.localToGlobal(snackBarBox.size.bottomRight(Point.origin));
+
+    expect(textBottomLeft.x - snackBarBottomLeft.x, 24.0);
+    expect(actionTextBottomLeft.x - textBottomRight.x, 24.0);
+    expect(snackBarBottomRight.x - actionTextBottomRight.x, 24.0);
+  });
 }

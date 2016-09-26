@@ -782,7 +782,7 @@ class CustomMultiChildLayout extends MultiChildRenderObjectWidget {
 /// height, treating nulls as zero.
 class SizedBox extends SingleChildRenderObjectWidget {
   /// Creates a box of a specific size.
-  SizedBox({ Key key, this.width, this.height, Widget child })
+  const SizedBox({ Key key, this.width, this.height, Widget child })
     : super(key: key, child: child);
 
   /// If non-null, requires the child to have exactly this width.
