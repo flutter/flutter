@@ -1102,10 +1102,21 @@ abstract class InheritedWidget extends ProxyWidget {
   bool updateShouldNotify(InheritedWidget oldWidget);
 }
 
+/// Defines a location in the widget tree that an [InheritedWidgetLinkChild] can
+/// link to. The descendants of the link child inherit from the link parent's
+/// [InheritedWidget] ancestors instead of the link child's inherited widget
+/// ancestors.
+///
+/// This widget must be given its own [GlobalKey] and the value of its [link] must
+/// be a GlobalKey given to its link child. If the link is null then this widget
+/// has no effect on inherited values.
 class InheritedWidgetLinkParent extends ProxyWidget {
   const InheritedWidgetLinkParent({ Key key, Widget child, this.link })
     : super(key: key, child: child);
 
+  /// The value of an [InheritedWidgetLinkChild]'s key or null. The link child's
+  /// descendants will inherit from this widget's  [InheritedWidget] ancestors.
+  /// If [key] or link is null then this link child will have no effect on inheritance.
   final GlobalKey link;
 
   @override
@@ -1115,10 +1126,19 @@ class InheritedWidgetLinkParent extends ProxyWidget {
   bool updateShouldNotify(InheritedWidgetLinkParent oldWidget) => link != oldWidget.link;
 }
 
+/// This widget's child inherits values from the [InheritedWidget] ancestors of the
+/// [InheritedWidgetLinkParent] that it's linked to.
+///
+/// This widget must be given its own [GlobalKey] and the value of its [link] must
+/// be a GlobalKey given to its link parent. If the link is null then this widget
+/// has no effect on inherited values.
 class InheritedWidgetLinkChild extends ProxyWidget {
   const InheritedWidgetLinkChild({ Key key, Widget child, this.link })
     : super(key: key, child: child);
 
+  /// The value of an [InheritedWidgetLinkParent]'s key or null. This widget will
+  /// inherit from the link parent's [InheritedWidget] ancestors. If [key] or link
+  /// is null then this link child will have no effect on inheritance.
   final GlobalKey link;
 
   @override
@@ -3055,9 +3075,40 @@ class InheritedElementLinkParent extends ProxyElement {
 
   InheritedElementLinkChild get link => widget.link?._currentElement;
 
+  bool _debugLinkIsValid() {
+    if (widget.link != null && !(widget.link is GlobalKey)) {
+      throw new FlutterError(
+        'An InheritedElementLinkParent\'s key must either by a GlobalKey or null.'
+      );
+    }
+
+    final Element linkElement = widget.link?._currentElement;
+    if (linkElement != null && !(linkElement is InheritedElementLinkChild)) {
+      throw new FlutterError(
+        'InheritedWidgetLinkParent link value is not an InheritedWidgetLinkChild.\n'
+        'The value of an InheritedWidgetLinkParent\'s link must be a GlobalKey which '
+        'was given as an InheritedWidgetLinkChild\'s key.'
+      );
+    }
+
+    return true;
+  }
+
+  bool _debugLinkIsNotCyclic() {
+    if (_parent._debugIsInScope(this)) {
+      throw new FlutterError(
+        'Detetected an inherited widget link cycle starting with $this.\n'
+        'This will happen if an InheritedWidgetLinkParent is linked to an '
+        'InheritedWidgetLinkChild ancestor.'
+      );
+    }
+    return true;
+  }
+
   @override
   void activate() {
     super.activate(); // clears _dependencies, and sets active to true
+    assert(_debugLinkIsValid);
     if (link != null && link._active)
       link._markLinkChildNeedsBuild();
   }
@@ -3065,6 +3116,7 @@ class InheritedElementLinkParent extends ProxyElement {
   @override
   void deactivate() {
     super.deactivate();
+    assert(_debugLinkIsValid);
     if (link != null && link._active)
       link._clearDependenciesRecursively(link);
   }
@@ -3072,18 +3124,23 @@ class InheritedElementLinkParent extends ProxyElement {
   @override
   void _updateInheritance() {
     super._updateInheritance();
-    if (link != null && link._active)
+    assert(_debugLinkIsValid());
+    if (link != null && link._active) {
+      assert(_debugLinkIsNotCyclic);
       link._updateInheritanceRecursively(link);
+    }
   }
 
   @override
   void notifyClients(InheritedWidgetLinkParent oldWidget) {
     if (!widget.updateShouldNotify(oldWidget))
       return;
-
-    InheritedElementLinkChild oldLink = oldWidget.link?._currentElement;
-    oldLink?._clearDependenciesRecursively(oldLink);
-    oldLink?._updateInheritance();
+    InheritedElementLinkChild oldLinkChild = oldWidget.link?._currentElement;
+    if (oldLinkChild != null) {
+      oldLinkChild._clearDependenciesRecursively(oldLinkChild);
+      oldLinkChild._updateInheritance();
+    }
+    assert(_debugLinkIsValid);
     link?._updateInheritance();
   }
 }
@@ -3106,6 +3163,25 @@ class InheritedElementLinkChild extends ProxyElement {
   @override
   bool _debugIsInScope(Element target) {
     return super._debugIsInScope(target) || (link?._debugIsInScope(target) ?? false);
+  }
+
+  bool _debugLinkIsValid() {
+    if (widget.link != null && !(widget.link is GlobalKey)) {
+      throw new FlutterError(
+        'An InheritedElementLinkChild\'s key must either by a GlobalKey or null.'
+      );
+    }
+
+    final Element linkElement = widget.link?._currentElement;
+    if (linkElement != null && !(linkElement is InheritedElementLinkParent)) {
+      throw new FlutterError(
+        'InheritedWidgetLinkChild link value is not an InheritedWidgetLinkParent.\n'
+        'The value of an InheritedWidgetLinkChild\'s link must be a GlobalKey which '
+        'was given as an InheritedWidgetLinkParent\'s key.'
+      );
+    }
+
+    return true;
   }
 
   void _markLinkChildNeedsBuild() {
@@ -3137,6 +3213,7 @@ class InheritedElementLinkChild extends ProxyElement {
 
   @override
   void _updateInheritance() {
+    assert(_debugLinkIsValid);
     if (link != null && link._active)
       _inheritedWidgets = link._inheritedWidgets;
     else

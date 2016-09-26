@@ -413,4 +413,91 @@ void main() {
     expect(box.size.width, equals(100.0));
   });
 
+  testWidgets('InheritedWidgetLink child descends from parent', (WidgetTester tester) async {
+    GlobalKey linkParentKey = new GlobalKey();
+    GlobalKey linkChildKey = new GlobalKey();
+    Key containerKey = new UniqueKey();
+
+    // In this case the parent is an ancestor of child; so not the expected
+    // use case. The link child doesn't inherit from it's immediate ancestor, it
+    // inherits from the link parent's ancestor.
+    Widget buildFrame() {
+      return new InheritedValue(
+        value: 100.0,
+        child: new InheritedWidgetLinkParent(
+          key: linkParentKey,
+          link: linkChildKey,
+          child: new InheritedValue(
+            value: 200.0,
+            child: new InheritedWidgetLinkChild(
+              key: linkChildKey,
+              link: linkParentKey,
+              child: new Builder(
+                builder: (BuildContext context) {
+                  final InheritedValue inheritedValue = context.inheritFromWidgetOfExactType(InheritedValue);
+                  return new Center(
+                    child: new Container(
+                      key: containerKey,
+                      width: inheritedValue.value
+                    )
+                  );
+                }
+              )
+            )
+          )
+        )
+      );
+    }
+
+    await tester.pumpWidget(buildFrame());
+    RenderBox box = tester.renderObject(find.byKey(containerKey));
+    expect(box.size.width, equals(100.0));
+
+    linkParentKey = null;
+    linkChildKey = null;
+    await tester.pumpWidget(buildFrame());
+    box = tester.renderObject(find.byKey(containerKey));
+    expect(box.size.width, equals(200.0));
+  });
+
+  testWidgets('InheritedWidgetLink child descends from parent', (WidgetTester tester) async {
+    GlobalKey linkParentKey = new GlobalKey();
+    GlobalKey linkChildKey = new GlobalKey();
+
+    // In this case parent is a descendant of the child and the link creates
+    // a inheritance loop. An assert is expected.
+    Widget buildFrame() {
+      return new InheritedWidgetLinkChild(
+        key: linkParentKey,
+        link: linkChildKey,
+        child: new InheritedWidgetLinkParent(
+          key: linkChildKey,
+          link: linkParentKey,
+        )
+      );
+    }
+
+    await tester.pumpWidget(buildFrame());
+    expect(tester.takeException(), isNotNull);
+  });
+
+  testWidgets('InheritedWidgetLinkParent links to itself', (WidgetTester tester) async {
+    GlobalKey linkParentKey = new GlobalKey();
+    await tester.pumpWidget(new InheritedWidgetLinkParent(
+      key: linkParentKey,
+      link: linkParentKey,
+    ));
+    expect(tester.takeException(), isNotNull);
+  });
+
+  testWidgets('InheritedWidgetLinkParent invalid key', (WidgetTester tester) async {
+    await tester.pumpWidget(new InheritedWidgetLinkParent(key: new UniqueKey()));
+    expect(tester.takeException(), isNotNull);
+  });
+
+  testWidgets('InheritedWidgetLinkChild invalid key', (WidgetTester tester) async {
+    await tester.pumpWidget(new InheritedWidgetLinkChild(key: new UniqueKey()));
+    expect(tester.takeException(), isNotNull);
+  });
+
 }
