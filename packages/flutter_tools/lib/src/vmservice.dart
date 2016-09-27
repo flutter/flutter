@@ -10,12 +10,12 @@ import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:json_rpc_2/error_code.dart' as rpc_error_code;
 import 'package:web_socket_channel/io.dart';
 
-import 'globals.dart';
+import 'base/logger.dart';
 
 /// A connection to the Dart VM Service.
 class VMService {
-  VMService._(this.peer, this.port, this.httpAddress) {
-    _vm = new VM._empty(this);
+  VMService._(this.peer, this.port, this.httpAddress, this.log) {
+    _vm = new VM._empty(this, log);
 
     peer.registerMethod('streamNotify', (rpc.Parameters event) {
       _handleStreamNotify(event.asMap);
@@ -23,17 +23,18 @@ class VMService {
   }
 
   /// Connect to '127.0.0.1' at [port].
-  static Future<VMService> connect(int port) async {
+  static Future<VMService> connect(int port, Logger log) async {
     Uri uri = new Uri(scheme: 'ws', host: '127.0.0.1', port: port, path: 'ws');
     WebSocket ws = await WebSocket.connect(uri.toString());
     rpc.Peer peer = new rpc.Peer(new IOWebSocketChannel(ws).cast());
     peer.listen();
     Uri httpAddress = new Uri(scheme: 'http', host: '127.0.0.1', port: port);
-    return new VMService._(peer, port, httpAddress);
+    return new VMService._(peer, port, httpAddress, log);
   }
   final Uri httpAddress;
   final int port;
   final rpc.Peer peer;
+  final Logger log;
 
   VM _vm;
   /// The singleton [VM] object. Owns [Isolate] and [FlutterView] objects.
@@ -191,7 +192,7 @@ abstract class ServiceObject {
         serviceObject = new Isolate._empty(owner.vm);
       break;
       default:
-        printTrace("Unsupported service object type: $type");
+        owner.log.printTrace("Unsupported service object type: $type");
     }
     if (serviceObject == null) {
       // If we don't have a model object for this service object type, as a
@@ -399,6 +400,9 @@ abstract class ServiceObjectOwner extends ServiceObject {
   /// Returns the vmService connection.
   VMService get vmService => null;
 
+  /// Returns the logger to use for reporting status, tracing, and errors.
+  Logger get log;
+
   /// Builds a [ServiceObject] corresponding to the [id] from [map].
   /// The result may come from the cache.  The result will not necessarily
   /// be [loaded].
@@ -408,7 +412,7 @@ abstract class ServiceObjectOwner extends ServiceObject {
 /// There is only one instance of the VM class. The VM class owns [Isolate]
 /// and [FlutterView] objects.
 class VM extends ServiceObjectOwner {
-  VM._empty(this._vmService) : super._empty(null);
+  VM._empty(this._vmService, this.log) : super._empty(null);
 
   /// Connection to the VMService.
   final VMService _vmService;
@@ -417,6 +421,9 @@ class VM extends ServiceObjectOwner {
 
   @override
   VM get vm => this;
+
+  @override
+  final Logger log;
 
   @override
   Future<Map<String, dynamic>> _fetchDirect() async {
@@ -513,7 +520,7 @@ class VM extends ServiceObjectOwner {
 
           // Eagerly load the isolate.
           isolate.load().catchError((dynamic e, StackTrace stack) {
-            printTrace('Eagerly loading an isolate failed: $e\n$stack');
+            log.printTrace('Eagerly loading an isolate failed: $e\n$stack');
           });
         } else {
           // Existing isolate, update data.
@@ -670,7 +677,7 @@ class VM extends ServiceObjectOwner {
 /// An isolate running inside the VM. Instances of the Isolate class are always
 /// canonicalized.
 class Isolate extends ServiceObjectOwner {
-  Isolate._empty(ServiceObjectOwner owner) : super._empty(owner);
+  Isolate._empty(VM owner) : super._empty(owner);
 
   @override
   VM get vm => owner;
@@ -680,6 +687,9 @@ class Isolate extends ServiceObjectOwner {
 
   @override
   Isolate get isolate => this;
+
+  @override
+  Logger get log => vm.log;
 
   DateTime startTime;
 
@@ -919,7 +929,7 @@ class FlutterView extends ServiceObject {
       // TODO(johnmccutchan): Listen to the debug stream and catch initial
       // launch errors.
       if (event.kind == ServiceEvent.kIsolateRunnable) {
-        printTrace('Isolate is runnable.');
+        owner.log.printTrace('Isolate is runnable.');
         completer.complete(null);
       }
     });

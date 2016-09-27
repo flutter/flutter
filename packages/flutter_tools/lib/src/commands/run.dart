@@ -283,7 +283,7 @@ Future<int> startApp(
     printError('Error running application on ${device.name}.');
   } else if (traceStartup) {
     try {
-      VMService observatory = await VMService.connect(result.observatoryPort);
+      VMService observatory = await VMService.connect(result.observatoryPort, logger);
       await downloadStartupTrace(observatory);
     } catch (error) {
       printError('Error downloading trace from observatory: $error');
