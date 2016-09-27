@@ -19,7 +19,7 @@ enum StockHomeTab { market, portfolio }
 class _NotImplementedDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return new Dialog(
+    return new AlertDialog(
       title: new Text('Not Implemented'),
       content: new Text('This feature has not yet been implemented.'),
       actions: <Widget>[

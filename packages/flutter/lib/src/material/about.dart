@@ -273,7 +273,7 @@ class AboutDialog extends StatelessWidget {
     ];
     if (children != null)
       body.addAll(children);
-    return new Dialog(
+    return new AlertDialog(
       content: new Block(
         children: body
       ),

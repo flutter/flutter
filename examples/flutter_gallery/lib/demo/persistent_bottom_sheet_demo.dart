@@ -55,7 +55,7 @@ class _PersistentBottomSheetDemoState extends State<PersistentBottomSheetDemo> {
   void _showMessage()  {
     showDialog(
       context: context,
-      child: new Dialog(
+      child: new AlertDialog(
         content: new Text('You tapped the floating action button.'),
         actions: <Widget>[
           new FlatButton(

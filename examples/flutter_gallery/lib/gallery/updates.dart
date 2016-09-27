@@ -49,7 +49,7 @@ class UpdaterState extends State<Updater> {
     final ThemeData theme = Theme.of(context);
     final TextStyle dialogTextStyle =
         theme.textTheme.subhead.copyWith(color: theme.textTheme.caption.color);
-    return new Dialog(
+    return new AlertDialog(
       title: new Text('Update Flutter Gallery?'),
       content: new Text('A newer version is available.', style: dialogTextStyle),
       actions: <Widget>[

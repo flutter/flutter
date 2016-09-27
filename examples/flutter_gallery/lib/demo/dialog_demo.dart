@@ -69,10 +69,10 @@ class DialogDemoState extends State<DialogDemo> {
     _selectedTime = new TimeOfDay(hour: now.hour, minute: now.minute);
   }
 
-  void showDemoDialog/*<T>*/({ BuildContext context, Dialog dialog }) {
+  void showDemoDialog/*<T>*/({ BuildContext context, Widget child }) {
     showDialog/*<T>*/(
       context: context,
-      child: dialog
+      child: child
     )
     .then((dynamic/*=T*/ value) { // The value passed to Navigator.pop() or null.
       if (value != null) {
@@ -101,7 +101,7 @@ class DialogDemoState extends State<DialogDemo> {
             onPressed: () {
               showDemoDialog/*<DialogDemoAction>*/(
                 context: context,
-                dialog: new Dialog(
+                child: new AlertDialog(
                   content: new Text(
                     _alertWithoutTitleText,
                     style: dialogTextStyle
@@ -125,7 +125,7 @@ class DialogDemoState extends State<DialogDemo> {
             onPressed: () {
               showDemoDialog/*<DialogDemoAction>*/(
                 context: context,
-                dialog: new Dialog(
+                child: new AlertDialog(
                   title: new Text('Use Google\'s location service?'),
                   content: new Text(
                     _alertWithTitleText,
@@ -150,30 +150,27 @@ class DialogDemoState extends State<DialogDemo> {
             onPressed: () {
               showDemoDialog/*<String>*/(
                 context: context,
-                dialog: new Dialog(
+                child: new SimpleDialog(
                   title: new Text('Set backup account'),
-                  contentPadding: const EdgeInsets.only(top: 12.0, bottom: 16.0),
-                  content: new Column(
-                    children: <Widget>[
-                      new DialogDemoItem(
-                        icon: Icons.account_circle,
-                        color: theme.primaryColor,
-                        text: 'username@gmail.com',
-                        onPressed: () { Navigator.pop(context, 'username@gmail.com'); }
-                      ),
-                      new DialogDemoItem(
-                        icon: Icons.account_circle,
-                        color: theme.primaryColor,
-                        text: 'user02@gmail.com',
-                        onPressed: () { Navigator.pop(context, 'user02@gmail.com'); }
-                      ),
-                      new DialogDemoItem(
-                        icon: Icons.add_circle,
-                        text: 'add account',
-                        color: theme.disabledColor
-                      )
-                    ]
-                  )
+                  children: <Widget>[
+                    new DialogDemoItem(
+                      icon: Icons.account_circle,
+                      color: theme.primaryColor,
+                      text: 'username@gmail.com',
+                      onPressed: () { Navigator.pop(context, 'username@gmail.com'); }
+                    ),
+                    new DialogDemoItem(
+                      icon: Icons.account_circle,
+                      color: theme.primaryColor,
+                      text: 'user02@gmail.com',
+                      onPressed: () { Navigator.pop(context, 'user02@gmail.com'); }
+                    ),
+                    new DialogDemoItem(
+                      icon: Icons.add_circle,
+                      text: 'add account',
+                      color: theme.disabledColor
+                    )
+                  ]
                 )
               );
             }
