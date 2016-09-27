@@ -14,16 +14,16 @@ void main() {
   group('devices', () {
     testUsingContext('returns 0 when called', () {
       DevicesCommand command = new DevicesCommand();
-      return createTestCommandRunner(command).run(<String>['list']).then((int code) {
+      return createTestCommandRunner(command).run(<String>['devices']).then((int code) {
         expect(code, 0);
       });
     });
 
     testUsingContext('no error when no connected devices', () {
       DevicesCommand command = new DevicesCommand();
-      return createTestCommandRunner(command).run(<String>['list']).then((int code) {
+      return createTestCommandRunner(command).run(<String>['devices']).then((int code) {
         expect(code, 0);
-        expect(testLogger.statusText, contains('No connected devices'));
+        expect(testLogger.statusText, contains('No devices detected'));
       });
     }, overrides: <Type, dynamic>{
       AndroidSdk: null,
