@@ -67,7 +67,7 @@ class StockSettingsState extends State<StockSettings> {
       case StockMode.pessimistic:
         showDialog(
           context: context,
-          child: new Dialog(
+          child: new AlertDialog(
             title: new Text("Change mode?"),
             content: new Text("Optimistic mode means everything is awesome. Are you sure you can handle that?"),
             actions: <Widget>[

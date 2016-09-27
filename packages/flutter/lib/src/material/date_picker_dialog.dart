@@ -51,7 +51,8 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return new Dialog(
+    // TODO(abarth): Use Dialog directly.
+    return new AlertDialog(
       content: new DatePicker(
         selectedDate: _selectedDate,
         firstDate: config.firstDate,

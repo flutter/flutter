@@ -20,7 +20,7 @@ void main() {
                   onPressed: () {
                     showDialog(
                       context: context,
-                      child: new Dialog(
+                      child: new AlertDialog(
                         content: new Container(
                           height: 5000.0,
                           width: 300.0,

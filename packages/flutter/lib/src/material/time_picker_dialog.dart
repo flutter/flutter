@@ -47,7 +47,8 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return new Dialog(
+    // TODO(abarth): Use Dialog directly.
+    return new AlertDialog(
       content: new TimePicker(
         selectedTime: _selectedTime,
         onChanged: _handleTimeChanged

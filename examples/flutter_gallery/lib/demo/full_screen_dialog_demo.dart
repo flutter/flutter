@@ -115,7 +115,7 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
 
     showDialog(
       context: context,
-      child: new Dialog(
+      child: new AlertDialog(
         content: new Text(
           'Discard new event?',
           style: dialogTextStyle
