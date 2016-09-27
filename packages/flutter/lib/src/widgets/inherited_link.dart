@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'debug.dart';
 import 'framework.dart';
 
 
@@ -26,7 +25,6 @@ class InheritedWidgetLinkParent extends ProxyWidget {
   @override
   InheritedElementLinkParent createElement() => new InheritedElementLinkParent(this);
 
-  @protected
   bool updateShouldNotify(InheritedWidgetLinkParent oldWidget) => link != oldWidget.link;
 }
 
@@ -48,6 +46,5 @@ class InheritedWidgetLinkChild extends ProxyWidget {
   @override
   InheritedElementLinkChild createElement() => new InheritedElementLinkChild(this);
 
-  @protected
   bool updateShouldNotify(InheritedWidgetLinkChild oldWidget) => link != oldWidget.link;
 }

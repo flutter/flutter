@@ -11,11 +11,18 @@ class InheritedValue extends InheritedWidget {
 
   final double value;
 
+  static double of(BuildContext context) {
+    return context.inheritFromWidgetOfExactType(InheritedValue).value;
+  }
+
   @override
   bool updateShouldNotify(InheritedValue oldWidget) => value != oldWidget.value;
 
   @override
-  String toString() => "InheritedValue(value=$value)";
+  debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('value: $value');
+  }
 }
 
 void main() {
@@ -37,12 +44,11 @@ void main() {
               value: inheritedValue,
               child: new Builder(
                 builder: (BuildContext context) {
-                  final InheritedValue inheritedValue = context.inheritFromWidgetOfExactType(InheritedValue);
                   return new InheritedWidgetLinkParent(
                     key: linkParentKey,
                     link: linkChildKey,
                     child: new Container(
-                      width: inheritedValue.value
+                      width: InheritedValue.of(context),
                     )
                   );
                 }
@@ -55,10 +61,9 @@ void main() {
                 builder: (BuildContext context) {
                   // The InheritedWidgetLinkChild causes this lookup to redirect to the
                   // ancestors of the InheritedWidgetLinkParent above.
-                  final InheritedValue inheritedValue = context.inheritFromWidgetOfExactType(InheritedValue);
                   return new Container(
                     key: containerKey,
-                    width: inheritedValue.value
+                    width: InheritedValue.of(context),
                   );
                 }
               )
@@ -100,12 +105,11 @@ void main() {
                     value: inheritedValue,
                     child: new Builder(
                       builder: (BuildContext context) {
-                        final InheritedValue inheritedValue = context.inheritFromWidgetOfExactType(InheritedValue);
                         return new InheritedWidgetLinkParent(
                           key: linkParentKey,
                           link: linkChildKey,
                           child: new Container(
-                            width: inheritedValue.value
+                            width: InheritedValue.of(context),
                           )
                         );
                       }
@@ -120,10 +124,9 @@ void main() {
             link: linkParentKey,
             child: new Builder(
               builder: (BuildContext context) {
-                final InheritedValue inheritedValue = context.inheritFromWidgetOfExactType(InheritedValue);
                 return new Container(
                   key: containerKey,
-                  width: inheritedValue.value
+                  width: InheritedValue.of(context),
                 );
               }
             )
@@ -162,12 +165,11 @@ void main() {
                     value: 100.0,
                     child: new Builder(
                       builder: (BuildContext context) {
-                        final InheritedValue inheritedValue = context.inheritFromWidgetOfExactType(InheritedValue);
                         return new InheritedWidgetLinkParent(
                           key: linkParentKey,
                           link: linkChildKey,
                           child: new Container(
-                            width: inheritedValue.value
+                            width: InheritedValue.of(context),
                           )
                         );
                       }
@@ -182,10 +184,9 @@ void main() {
             link: linkParentKey,
             child: new Builder(
               builder: (BuildContext context) {
-                final InheritedValue inheritedValue = context.inheritFromWidgetOfExactType(InheritedValue);
                 return new Container(
                   key: containerKey,
-                  width: inheritedValue.value
+                  width: InheritedValue.of(context),
                 );
               }
             )
@@ -208,12 +209,11 @@ void main() {
             value: 500.0,
             child: new Builder(
               builder: (BuildContext context) {
-                final InheritedValue inheritedValue = context.inheritFromWidgetOfExactType(InheritedValue);
                 return new InheritedWidgetLinkParent(
                   key: linkParentKey,
                   link: linkChildKey,
                   child: new Container(
-                    width: inheritedValue.value
+                    width: InheritedValue.of(context),
                    )
                 );
               }
@@ -225,10 +225,9 @@ void main() {
             child: new Builder(
               builder: (BuildContext context) {
                 rebuilt = true;
-                final InheritedValue inheritedValue = context.inheritFromWidgetOfExactType(InheritedValue);
                 return new Container(
                   key: containerKey,
-                  width: inheritedValue.value
+                  width: InheritedValue.of(context),
                 );
               }
             )
@@ -257,21 +256,19 @@ void main() {
             value: 200.0,
             child: new Builder(
               builder: (BuildContext context) {
-                final InheritedValue inheritedValue = context.inheritFromWidgetOfExactType(InheritedValue);
                 return new InheritedWidgetLinkParent(
                   key: linkParentKey200, // If the child links here, it inherits value=200
                   link: linkChildKey,
                   child: new Container(
-                    width: inheritedValue.value,
+                    width: InheritedValue.of(context),
                     child: new InheritedValue(
                       value: 100.0,
                       child: new Builder(
                         builder: (BuildContext context) {
-                          final InheritedValue inheritedValue = context.inheritFromWidgetOfExactType(InheritedValue);
                           return new InheritedWidgetLinkParent(
                             key: linkParentKey100, // If the child links here, it inherits value=100
                             link: linkChildKey,
-                            child: new Container(width: inheritedValue.value)
+                            child: new Container(width: InheritedValue.of(context)),
                           );
                         }
                       )
@@ -286,10 +283,9 @@ void main() {
             link: linkParentKey, // Initially linkParentKey100, then linkParentKey200
             child: new Builder(
               builder: (BuildContext context) {
-                final InheritedValue inheritedValue = context.inheritFromWidgetOfExactType(InheritedValue);
                 return new Container(
                   key: containerKey,
-                  width: inheritedValue.value
+                  width: InheritedValue.of(context),
                 );
               }
             )
@@ -340,10 +336,9 @@ void main() {
                 link: parentLink, // Initially points to child one, then child two
                 child: new Builder(
                   builder: (BuildContext context) {
-                    final InheritedValue inheritedValue = context.inheritFromWidgetOfExactType(InheritedValue);
                     return new Container(
                       key: parentKey,
-                      width: inheritedValue.value
+                      width: InheritedValue.of(context),
                     );
                   }
                 )
@@ -355,10 +350,9 @@ void main() {
               link: childOneLink, // Initially points to parent, then null
               child: new Builder(
                 builder: (BuildContext context) {
-                  final InheritedValue inheritedValue = context.inheritFromWidgetOfExactType(InheritedValue);
                   return new Container(
                     key: childOneKey,
-                    width: inheritedValue.value,
+                    width: InheritedValue.of(context),
                   );
                 }
               )
@@ -369,10 +363,9 @@ void main() {
               link: childTwoLink, // Initially null, then points to parent
               child: new Builder(
                 builder: (BuildContext context) {
-                  final InheritedValue inheritedValue = context.inheritFromWidgetOfExactType(InheritedValue);
                   return new Container(
                     key: childTwoKey,
-                    width: inheritedValue.value,
+                    width: InheritedValue.of(context),
                   );
                 }
               )
@@ -434,11 +427,10 @@ void main() {
               link: linkParentKey,
               child: new Builder(
                 builder: (BuildContext context) {
-                  final InheritedValue inheritedValue = context.inheritFromWidgetOfExactType(InheritedValue);
                   return new Center(
                     child: new Container(
                       key: containerKey,
-                      width: inheritedValue.value
+                      width: InheritedValue.of(context),
                     )
                   );
                 }
@@ -488,6 +480,75 @@ void main() {
       link: linkParentKey,
     ));
     expect(tester.takeException(), isNotNull);
+  });
+
+  testWidgets('InheritedWidgetLink cross-link', (WidgetTester tester) async {
+    GlobalKey linkParent1Key = new GlobalKey(debugLabel: 'linkParent1Key');
+    GlobalKey linkParent2Key = new GlobalKey(debugLabel: 'linkParent2Key');
+    GlobalKey linkChild1Key = new GlobalKey(debugLabel: 'linkChild1Key');
+    GlobalKey linkChild2Key = new GlobalKey(debugLabel: 'linkChild2Key');
+    Key container1Key = new UniqueKey();
+    Key container2Key = new UniqueKey();
+
+    // The two parent-child links "cross" in the sense that the more deeply
+    // nested of the two children links to the parent that's higher up in
+    // the tree. This test works because the Element.depth of link children
+    // is defined to be the greater of their parent link's depth+1 AND their
+    // actual depth. See InheritedElementLinkChild.depth.
+    Widget buildFrame() {
+      return new Row(
+        children: <Widget>[
+          new InheritedValue(
+            value: 100.0,
+            child: new InheritedWidgetLinkParent(
+              key: linkParent1Key,
+              link: linkChild2Key,
+              child: new InheritedValue(
+                value: 200.0,
+                child: new InheritedWidgetLinkParent(
+                  key: linkParent2Key,
+                  link: linkChild1Key,
+                  child: new Container(width: 300.0),
+                )
+              )
+            )
+          ),
+          new InheritedWidgetLinkChild(
+            key: linkChild1Key,
+            link: linkParent2Key,
+            child: new Builder(
+              builder: (BuildContext context) {
+                return new Container(
+                  key: container1Key,
+                  width: InheritedValue.of(context),
+                  child: new InheritedWidgetLinkChild(
+                    key: linkChild2Key,
+                    link: linkParent1Key,
+                    child: new Builder(
+                      builder: (BuildContext context) {
+                        return new Center(
+                          child: new Container(
+                            key: container2Key,
+                            width: InheritedValue.of(context),
+                          )
+                        );
+                      }
+                    )
+                  )
+                );
+              }
+            )
+          )
+        ]
+      );
+    }
+
+    await tester.pumpWidget(buildFrame());
+    RenderBox box = tester.renderObject(find.byKey(container1Key));
+    expect(box.size.width, equals(200.0));
+
+    box = tester.renderObject(find.byKey(container2Key));
+    expect(box.size.width, equals(100.0));
   });
 
 }
