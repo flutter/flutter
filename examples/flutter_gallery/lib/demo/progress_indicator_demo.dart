@@ -63,26 +63,36 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> with Sing
 
   Widget _buildIndicators(BuildContext context, Widget child) {
     List<Widget> indicators = <Widget>[
-        new SizedBox(
-          width: 200.0,
-          child: new LinearProgressIndicator()
-        ),
-        new LinearProgressIndicator(),
-        new LinearProgressIndicator(),
-        new LinearProgressIndicator(value: _animation.value),
-        new CircularProgressIndicator(),
-        new SizedBox(
-            width: 20.0,
+      new SizedBox(
+        width: 200.0,
+        child: new LinearProgressIndicator()
+      ),
+      new LinearProgressIndicator(),
+      new LinearProgressIndicator(),
+      new LinearProgressIndicator(value: _animation.value),
+      new Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: <Widget>[
+          new CircularProgressIndicator(),
+          new SizedBox(
+              width: 20.0,
+              height: 20.0,
+              child: new CircularProgressIndicator(value: _animation.value)
+          ),
+          new SizedBox(
+            width: 100.0,
             height: 20.0,
-            child: new CircularProgressIndicator(value: _animation.value)
-        ),
-        new Text('${(_animation.value * 100.0).toStringAsFixed(1)}%${ _controller.isAnimating ? "" : " (paused)" }')
+            child: new Text('${(_animation.value * 100.0).toStringAsFixed(1)}%',
+              textAlign: TextAlign.right
+            ),
+          ),
+        ],
+      ),
     ];
     return new Column(
       children: indicators
         .map((Widget c) => new Container(child: c, margin: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0)))
         .toList(),
-      mainAxisAlignment: MainAxisAlignment.center
     );
   }
 
@@ -90,16 +100,20 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> with Sing
   Widget build(BuildContext context) {
     return new Scaffold(
       appBar: new AppBar(title: new Text('Progress indicators')),
-      body: new DefaultTextStyle(
-        style: Theme.of(context).textTheme.title,
-        child: new GestureDetector(
-          onTap: _handleTap,
-          behavior: HitTestBehavior.opaque,
-          child: new Container(
-            padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 8.0),
-            child: new AnimatedBuilder(
-              animation: _animation,
-              builder: _buildIndicators
+      body: new Center(
+        child: new ScrollableViewport(
+          child: new DefaultTextStyle(
+            style: Theme.of(context).textTheme.title,
+            child: new GestureDetector(
+              onTap: _handleTap,
+              behavior: HitTestBehavior.opaque,
+              child: new Container(
+                padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 8.0),
+                child: new AnimatedBuilder(
+                  animation: _animation,
+                  builder: _buildIndicators
+                )
+              )
             )
           )
         )
