@@ -249,6 +249,16 @@ class IOSDevice extends Device {
       // ports post launch.
       printTrace("Debugging is enabled, connecting to observatory and the diagnostic server");
 
+      Future<int> forwardObsPort = _acquireAndForwardPort(ProtocolDiscovery.kObservatoryService,
+                                                          debuggingOptions.observatoryPort);
+      Future<int> forwardDiagPort;
+      if (debuggingOptions.buildMode == BuildMode.debug) {
+        forwardDiagPort = _acquireAndForwardPort(ProtocolDiscovery.kDiagnosticService,
+                                                 debuggingOptions.diagnosticPort);
+      } else {
+        forwardDiagPort = new Future<int>.value(null);
+      }
+
       Future<int> launch = runCommandAndStreamOutput(launchCommand, trace: true);
 
       List<int> ports = await launch.then((int result) async {
@@ -260,17 +270,6 @@ class IOSDevice extends Device {
         }
 
         printTrace("Application launched on the device. Attempting to forward ports.");
-
-        Future<int> forwardObsPort = _acquireAndForwardPort(ProtocolDiscovery.kObservatoryService,
-                                                            debuggingOptions.observatoryPort);
-        Future<int> forwardDiagPort;
-        if (debuggingOptions.buildMode == BuildMode.debug) {
-          forwardDiagPort = _acquireAndForwardPort(ProtocolDiscovery.kDiagnosticService,
-                                                   debuggingOptions.diagnosticPort);
-        } else {
-          forwardDiagPort = new Future<int>.value(null);
-        }
-
         return Future.wait(<Future<int>>[forwardObsPort, forwardDiagPort]);
       });
 
@@ -435,7 +434,7 @@ class _IOSDeviceLogReader extends DeviceLogReader {
   //
   // iOS 9 format:  Runner[297] <Notice>:
   // iOS 10 format: Runner(libsystem_asl.dylib)[297] <Notice>:
-  static final RegExp _runnerRegex = new RegExp(r'Runner[(.*)]\[[\d]+\] <[A-Za-z]+>: ');
+  static final RegExp _runnerRegex = new RegExp(r'Runner(\(.*\))?\[[\d]+\] <[A-Za-z]+>: ');
 
   void _onLine(String line) {
     Match match = _runnerRegex.firstMatch(line);
