@@ -238,4 +238,35 @@ void main() {
 
     expect(appBarBottomRight, equals(sheetTopRight));
   });
+
+  group('back arrow', () {
+    Future<Null> expectBackIcon(WidgetTester tester, TargetPlatform platform, IconData expectedIcon) async {
+      GlobalKey rootKey = new GlobalKey();
+      final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+        '/': (_) => new Container(key: rootKey, child: new Text('Home')),
+        '/scaffold': (_) => new Scaffold(
+            appBar: new AppBar(),
+            body: new Text('Scaffold'),
+        )
+      };
+      await tester.pumpWidget(
+        new MaterialApp(theme: new ThemeData(platform: platform), routes: routes)
+      );
+
+      Navigator.pushNamed(rootKey.currentContext, '/scaffold');
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+
+      Icon icon = tester.widget(find.byType(Icon));
+      expect(icon.icon, expectedIcon);
+    }
+
+    testWidgets('Back arrow uses correct default on Android', (WidgetTester tester) async {
+      await expectBackIcon(tester, TargetPlatform.android, Icons.arrow_back);
+    });
+
+    testWidgets('Back arrow uses correct default on iOS', (WidgetTester tester) async {
+      await expectBackIcon(tester, TargetPlatform.iOS, Icons.arrow_back_ios);
+    });
+  });
 }

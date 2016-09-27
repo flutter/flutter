@@ -614,8 +614,11 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       } else {
         _shouldShowBackArrow ??= Navigator.canPop(context);
         if (_shouldShowBackArrow) {
+          IconData backIcon = Theme.of(context).platform == TargetPlatform.iOS
+              ? Icons.arrow_back_ios
+              : Icons.arrow_back;
           leading = new IconButton(
-            icon: new Icon(Icons.arrow_back),
+            icon: new Icon(backIcon),
             alignment: FractionalOffset.centerLeft,
             onPressed: () => Navigator.pop(context),
             tooltip: 'Back' // TODO(ianh): Figure out how to localize this string
