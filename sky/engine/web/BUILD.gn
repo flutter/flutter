@@ -10,7 +10,6 @@ source_set("web") {
   deps = [
     "//flutter/sky/engine/core",
     "//flutter/sky/engine/platform",
-    "//mojo/public/c",
   ]
 
   configs += [
@@ -26,7 +25,6 @@ source_set("web") {
   } else {
     deps += [
       "//mojo/message_pump",
-      "//mojo/public/c:gpu",
     ]
   }
 }
