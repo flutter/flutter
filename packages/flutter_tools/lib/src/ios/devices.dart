@@ -181,7 +181,8 @@ class IOSDevice extends Device {
     String mainPath,
     String route,
     DebuggingOptions debuggingOptions,
-    Map<String, dynamic> platformArgs
+    Map<String, dynamic> platformArgs,
+    bool prebuiltApplication: false
   }) async {
     // TODO(chinmaygarde): Use checked, mainPath, route.
     // TODO(devoncarew): Handle startPaused, debugPort.

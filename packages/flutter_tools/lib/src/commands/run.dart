@@ -81,6 +81,15 @@ class RunCommand extends RunCommandBase {
     // results out to 'refresh_benchmark.json', and exit. This flag is intended
     // for use in generating automated flutter benchmarks.
     argParser.addFlag('benchmark', negatable: false, hide: !verboseHelp);
+
+    commandValidator = () {
+      if (!runningWithPrebuiltApplication) {
+        return commonCommandValidator();
+      }
+      // When running with a prebuilt application, no command validation is
+      // necessary.
+      return true;
+    };
   }
 
   Device device;
@@ -108,9 +117,23 @@ class RunCommand extends RunCommandBase {
     }
   }
 
-  bool shouldUseHotMode() {
-    return argResults['hot'] && (getBuildMode() == BuildMode.debug);
+  @override
+  bool get shouldRunPub {
+    // If we are running with a prebuilt application, do not run pub.
+    if (runningWithPrebuiltApplication)
+      return false;
+
+    return super.shouldRunPub;
   }
+
+  bool shouldUseHotMode() {
+    bool hotArg = argResults['hot'] ?? false;
+    final bool shouldUseHotMode = hotArg && !runningWithPrebuiltApplication;
+    return (getBuildMode() == BuildMode.debug) && shouldUseHotMode;
+  }
+
+  bool get runningWithPrebuiltApplication =>
+      argResults['use-application-binary'] != null;
 
   @override
   Future<int> verifyThenRunCommand() async {
@@ -191,7 +214,7 @@ class RunCommand extends RunCommandBase {
       );
     }
 
-    return runner.run(route: route, shouldBuild: argResults['build']);
+    return runner.run(route: route, shouldBuild: !runningWithPrebuiltApplication && argResults['build']);
   }
 }
 
