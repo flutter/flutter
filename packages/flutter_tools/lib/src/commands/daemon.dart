@@ -326,13 +326,16 @@ class AppDomain extends Domain {
     if (hotMode) {
       runner = new HotRunner(
         device,
+        logger,
         target: target,
         debuggingOptions: options,
-        usesTerminalUI: false
+        usesTerminalUI: false,
+        flutterUsage: flutterUsage
       );
     } else {
       runner = new RunAndStayResident(
         device,
+        logger,
         target: target,
         debuggingOptions: options,
         usesTerminalUI: false

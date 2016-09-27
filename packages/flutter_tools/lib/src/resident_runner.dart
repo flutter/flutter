@@ -10,12 +10,11 @@ import 'package:path/path.dart' as path;
 import 'base/logger.dart';
 import 'build_info.dart';
 import 'device.dart';
-import 'globals.dart';
 import 'vmservice.dart';
 
 // Shared code between different resident application runners.
 abstract class ResidentRunner {
-  ResidentRunner(this.device, {
+  ResidentRunner(this.device, this.log, {
     this.target,
     this.debuggingOptions,
     this.usesTerminalUI: true
@@ -26,6 +25,7 @@ abstract class ResidentRunner {
   final DebuggingOptions debuggingOptions;
   final bool usesTerminalUI;
   final Completer<int> _finished = new Completer<int>();
+  final Logger log;
 
   VMService vmService;
   FlutterView currentView;
@@ -72,11 +72,11 @@ abstract class ResidentRunner {
       exit(0);
     });
     ProcessSignal.SIGUSR1.watch().listen((ProcessSignal signal) async {
-      printStatus('Caught SIGUSR1');
+      log.printStatus('Caught SIGUSR1');
       await restart(fullRestart: false);
     });
     ProcessSignal.SIGUSR2.watch().listen((ProcessSignal signal) async {
-      printStatus('Caught SIGUSR2');
+      log.printStatus('Caught SIGUSR2');
       await restart(fullRestart: true);
     });
   }
@@ -88,7 +88,7 @@ abstract class ResidentRunner {
     _loggingSubscription = device.logReader.logLines.listen((String line) {
       if (!line.contains('Observatory listening on http') &&
           !line.contains('Diagnostic server listening on http'))
-        printStatus(line);
+        log.printStatus(line);
     });
   }
 
@@ -103,14 +103,14 @@ abstract class ResidentRunner {
     if (!debuggingOptions.debuggingEnabled) {
       return new Future<Null>.error('Error the service protocol is not enabled.');
     }
-    vmService = await VMService.connect(port, logger);
-    printTrace('Connected to service protocol on port $port');
+    vmService = await VMService.connect(port, log);
+    log.printTrace('Connected to service protocol on port $port');
     await vmService.getVM();
     vmService.onExtensionEvent.listen((ServiceEvent event) {
-      printTrace(event.toString());
+      log.printTrace(event.toString());
     });
     vmService.onIsolateEvent.listen((ServiceEvent event) {
-      printTrace(event.toString());
+      log.printTrace(event.toString());
     });
 
     // Refresh the view list.
@@ -128,7 +128,7 @@ abstract class ResidentRunner {
   Future<bool> _commonTerminalInputHandler(String character) async {
     final String lower = character.toLowerCase();
 
-    printStatus(''); // the key the user tapped might be on this line
+    log.printStatus(''); // the key the user tapped might be on this line
 
     if (lower == 'h' || lower == '?' || character == AnsiTerminal.KEY_F1) {
       // F1, help
@@ -158,7 +158,7 @@ abstract class ResidentRunner {
   void appFinished() {
     if (_finished.isCompleted)
       return;
-    printStatus('Application finished.');
+    log.printStatus('Application finished.');
     _resetTerminal();
     _finished.complete(0);
   }
@@ -170,7 +170,7 @@ abstract class ResidentRunner {
 
   void setupTerminal() {
     if (usesTerminalUI) {
-      if (!logger.quiet)
+      if (!log.quiet)
         printHelp();
 
       terminal.singleCharMode = true;

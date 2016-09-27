@@ -176,13 +176,16 @@ class RunCommand extends RunCommandBase {
     if (hotMode) {
       runner = new HotRunner(
         device,
+        logger,
         target: targetFile,
         debuggingOptions: options,
         benchmarkMode: argResults['benchmark'],
+        flutterUsage: flutterUsage,
       );
     } else {
       runner = new RunAndStayResident(
         device,
+        logger,
         target: targetFile,
         debuggingOptions: options,
         traceStartup: traceStartup,
@@ -292,7 +295,7 @@ Future<int> startApp(
   }
 
   if (benchmark)
-    writeRunBenchmarkFile(stopwatch);
+    writeRunBenchmarkFile(stopwatch, logger);
 
   return result.started ? 0 : 2;
 }
