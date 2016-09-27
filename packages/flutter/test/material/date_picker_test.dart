@@ -21,7 +21,7 @@ void main() {
                   child: new Block(
                     children: <Widget>[
                       new Material(
-                        child: new DatePicker(
+                        child: new MonthPicker(
                           firstDate: new DateTime(0),
                           lastDate: new DateTime(9999),
                           key: _datePickerKey,
@@ -43,20 +43,20 @@ void main() {
       )
     );
 
-    await tester.tapAt(const Point(50.0, 200.0));
+    await tester.tapAt(const Point(50.0, 100.0));
     expect(_selectedDate, equals(new DateTime(2016, DateTime.JULY, 26)));
     await tester.pump(const Duration(seconds: 2));
 
-    await tester.tapAt(const Point(300.0, 200.0));
+    await tester.tapAt(const Point(300.0, 100.0));
     expect(_selectedDate, equals(new DateTime(2016, DateTime.JULY, 1)));
     await tester.pump(const Duration(seconds: 2));
 
-    await tester.tapAt(const Point(380.0, 120.0));
+    await tester.tapAt(const Point(380.0, 20.0));
     await tester.pump();
     await tester.pump(const Duration(seconds: 2));
     expect(_selectedDate, equals(new DateTime(2016, DateTime.JULY, 1)));
 
-    await tester.tapAt(const Point(300.0, 200.0));
+    await tester.tapAt(const Point(300.0, 100.0));
     expect(_selectedDate, equals(new DateTime(2016, DateTime.AUGUST, 5)));
     await tester.pump(const Duration(seconds: 2));
 
@@ -65,7 +65,7 @@ void main() {
     await tester.pump(const Duration(seconds: 2));
     expect(_selectedDate, equals(new DateTime(2016, DateTime.AUGUST, 5)));
 
-    await tester.tapAt(const Point(45.0, 370.0));
+    await tester.tapAt(const Point(45.0, 270.0));
     expect(_selectedDate, equals(new DateTime(2016, DateTime.SEPTEMBER, 25)));
     await tester.pump(const Duration(seconds: 2));
 
@@ -74,7 +74,7 @@ void main() {
     await tester.pump(const Duration(seconds: 2));
     expect(_selectedDate, equals(new DateTime(2016, DateTime.SEPTEMBER, 25)));
 
-    await tester.tapAt(const Point(210.0, 280.0));
+    await tester.tapAt(const Point(210.0, 180.0));
     expect(_selectedDate, equals(new DateTime(2016, DateTime.AUGUST, 17)));
     await tester.pump(const Duration(seconds: 2));
 
@@ -92,10 +92,10 @@ void main() {
                     child: new Material(
                       child: new Block(
                         children: <Widget>[
-                          new DatePicker(
+                          new MonthPicker(
                             firstDate: new DateTime(0),
                             lastDate: new DateTime(9999),
-                            onChanged: null,
+                            onChanged: (DateTime value) { },
                             selectedDate: new DateTime(2000, DateTime.JANUARY, 1)
                           )
                         ]

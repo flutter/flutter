@@ -10,10 +10,14 @@ import 'package:intl/date_symbols.dart';
 import 'package:intl/intl.dart';
 import 'package:meta/meta.dart';
 
+import 'button_bar.dart';
+import 'button.dart';
 import 'colors.dart';
 import 'debug.dart';
-import 'icon.dart';
+import 'dialog.dart';
+import 'flat_button.dart';
 import 'icon_button.dart';
+import 'icon.dart';
 import 'icons.dart';
 import 'ink_well.dart';
 import 'theme.dart';
@@ -21,115 +25,14 @@ import 'typography.dart';
 
 enum _DatePickerMode { day, year }
 
-/// A material design date picker.
-///
-/// The date picker widget is rarely used directly. Instead, consider using
-/// [showDatePicker], which creates a date picker dialog.
-///
-/// Requires one of its ancestors to be a [Material] widget.
-///
-/// See also:
-///
-///  * [showDatePicker]
-///  * <https://www.google.com/design/spec/components/pickers.html#pickers-date-pickers>
-class DatePicker extends StatefulWidget {
-  /// Creates a date picker.
-  ///
-  /// Rather than creating a date picker directly, consider using
-  /// [showDatePicker] to show a date picker in a dialog.
-  DatePicker({
-    Key key,
-    @required this.selectedDate,
-    @required this.onChanged,
-    @required this.firstDate,
-    @required this.lastDate
-  }) : super(key: key) {
-    assert(selectedDate != null);
-    assert(firstDate != null);
-    assert(lastDate != null);
-  }
+const double _kDatePickerHeaderHeight = 100.0;
 
-  /// The currently selected date.
-  ///
-  /// This date is highlighted in the picker.
-  final DateTime selectedDate;
-
-  /// Called when the user picks a date.
-  final ValueChanged<DateTime> onChanged;
-
-  /// The earliest date the user is permitted to pick.
-  final DateTime firstDate;
-
-  /// The latest date the user is permitted to pick.
-  final DateTime lastDate;
-
-  @override
-  _DatePickerState createState() => new _DatePickerState();
-}
-
-class _DatePickerState extends State<DatePicker> {
-  _DatePickerMode _mode = _DatePickerMode.day;
-
-  void _handleModeChanged(_DatePickerMode mode) {
-    HapticFeedback.vibrate();
-    setState(() {
-      _mode = mode;
-    });
-  }
-
-  void _handleYearChanged(DateTime dateTime) {
-    HapticFeedback.vibrate();
-    setState(() {
-      _mode = _DatePickerMode.day;
-    });
-    if (config.onChanged != null)
-      config.onChanged(dateTime);
-  }
-
-  void _handleDayChanged(DateTime dateTime) {
-    HapticFeedback.vibrate();
-    if (config.onChanged != null)
-      config.onChanged(dateTime);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    Widget header = new _DatePickerHeader(
-      selectedDate: config.selectedDate,
-      mode: _mode,
-      onModeChanged: _handleModeChanged
-    );
-    Widget picker;
-    switch (_mode) {
-      case _DatePickerMode.day:
-        picker = new MonthPicker(
-          selectedDate: config.selectedDate,
-          onChanged: _handleDayChanged,
-          firstDate: config.firstDate,
-          lastDate: config.lastDate
-        );
-        break;
-      case _DatePickerMode.year:
-        picker = new YearPicker(
-          selectedDate: config.selectedDate,
-          onChanged: _handleYearChanged,
-          firstDate: config.firstDate,
-          lastDate: config.lastDate
-        );
-        break;
-    }
-    return new BlockBody(
-      children: <Widget>[
-        header,
-        new Container(
-          height: _kMaxDayPickerHeight,
-          child: picker
-        )
-      ]
-    );
-  }
-
-}
+const Duration _kMonthScrollDuration = const Duration(milliseconds: 200);
+const double _kDayPickerRowHeight = 42.0;
+const int _kMaxDayPickerRowCount = 6; // A 31 day month that starts on Saturday.
+// Two extra rows: one for the day-of-week header and one for the month header.
+const double _kMaxDayPickerHeight = _kDayPickerRowHeight * (_kMaxDayPickerRowCount + 2);
+const double _kMonthPickerWidth = 330.0;
 
 // Shows the selected date in large font and toggles between year and day mode
 class _DatePickerHeader extends StatelessWidget {
@@ -182,7 +85,7 @@ class _DatePickerHeader extends StatelessWidget {
     }
 
     return new Container(
-      height: 100.0,
+      height: _kDatePickerHeaderHeight,
       padding: const EdgeInsets.symmetric(horizontal: 24.0),
       decoration: new BoxDecoration(backgroundColor: backgroundColor),
       child: new Column(
@@ -202,12 +105,6 @@ class _DatePickerHeader extends StatelessWidget {
     );
   }
 }
-
-const Duration _kMonthScrollDuration = const Duration(milliseconds: 200);
-const double _kDayPickerRowHeight = 42.0;
-const int _kMaxDayPickerRowCount = 6; // A 31 day month that starts on Saturday.
-// Two extra rows: one for the day-of-week header and one for the month header.
-const double _kMaxDayPickerHeight = _kDayPickerRowHeight * (_kMaxDayPickerRowCount + 2);
 
 class _DayPickerGridDelegate extends GridDelegateWithInOrderChildPlacement {
   @override
@@ -229,11 +126,12 @@ final _DayPickerGridDelegate _kDayPickerGridDelegate = new _DayPickerGridDelegat
 /// The days are arranged in a rectangular grid with one column for each day of
 /// the week.
 ///
-/// Part of the material design [DatePicker].
+/// The day picker widget is rarely used directly. Instead, consider using
+/// [showDatePicker], which creates a date picker dialog.
 ///
 /// See also:
 ///
-///  * [DatePicker].
+///  * [showDatePicker].
 ///  * <https://www.google.com/design/spec/components/pickers.html#pickers-date-pickers>
 class DayPicker extends StatelessWidget {
   /// Creates a day picker.
@@ -353,11 +251,12 @@ class DayPicker extends StatelessWidget {
 /// Shows the days of each month in a rectangular grid with one column for each
 /// day of the week.
 ///
-/// Part of the material design [DatePicker].
+/// The month picker widget is rarely used directly. Instead, consider using
+/// [showDatePicker], which creates a date picker dialog.
 ///
 /// See also:
 ///
-///  * [DatePicker]
+///  * [showDatePicker]
 ///  * <https://www.google.com/design/spec/components/pickers.html#pickers-date-pickers>
 class MonthPicker extends StatefulWidget {
   /// Creates a month picker.
@@ -458,7 +357,8 @@ class _MonthPickerState extends State<MonthPicker> {
   @override
   Widget build(BuildContext context) {
     return new SizedBox(
-      width: 330.0,
+      width: _kMonthPickerWidth,
+      height: _kMaxDayPickerHeight,
       child: new Stack(
         children: <Widget>[
           new PageableLazyList(
@@ -501,13 +401,14 @@ class _MonthPickerState extends State<MonthPicker> {
 
 /// A scrollable list of years to allow picking a year.
 ///
-/// Part of the material design [DatePicker].
+/// The year picker widget is rarely used directly. Instead, consider using
+/// [showDatePicker], which creates a date picker dialog.
 ///
 /// Requires one of its ancestors to be a [Material] widget.
 ///
 /// See also:
 ///
-///  * [DatePicker]
+///  * [showDatePicker]
 ///  * <https://www.google.com/design/spec/components/pickers.html#pickers-date-pickers>
 class YearPicker extends StatefulWidget {
   /// Creates a year picker.
@@ -579,4 +480,148 @@ class _YearPickerState extends State<YearPicker> {
       itemBuilder: _buildItems
     );
   }
+}
+
+class _DatePickerDialog extends StatefulWidget {
+  _DatePickerDialog({
+    Key key,
+    this.initialDate,
+    this.firstDate,
+    this.lastDate
+  }) : super(key: key);
+
+  final DateTime initialDate;
+  final DateTime firstDate;
+  final DateTime lastDate;
+
+  @override
+  _DatePickerDialogState createState() => new _DatePickerDialogState();
+}
+
+class _DatePickerDialogState extends State<_DatePickerDialog> {
+  @override
+  void initState() {
+    super.initState();
+    _selectedDate = config.initialDate;
+  }
+
+  DateTime _selectedDate;
+  _DatePickerMode _mode = _DatePickerMode.day;
+
+  void _handleModeChanged(_DatePickerMode mode) {
+    HapticFeedback.vibrate();
+    setState(() {
+      _mode = mode;
+    });
+  }
+
+  void _handleYearChanged(DateTime value) {
+    HapticFeedback.vibrate();
+    setState(() {
+      _mode = _DatePickerMode.day;
+      _selectedDate = value;
+    });
+  }
+
+  void _handleDayChanged(DateTime value) {
+    HapticFeedback.vibrate();
+    setState(() {
+      _selectedDate = value;
+    });
+  }
+
+  void _handleCancel() {
+    Navigator.pop(context);
+  }
+
+  void _handleOk() {
+    Navigator.pop(context, _selectedDate);
+  }
+
+  Widget _buildPicker() {
+    assert(_mode != null);
+    switch (_mode) {
+      case _DatePickerMode.day:
+        return new MonthPicker(
+          selectedDate: _selectedDate,
+          onChanged: _handleDayChanged,
+          firstDate: config.firstDate,
+          lastDate: config.lastDate
+        );
+      case _DatePickerMode.year:
+        return new YearPicker(
+          selectedDate: _selectedDate,
+          onChanged: _handleYearChanged,
+          firstDate: config.firstDate,
+          lastDate: config.lastDate
+        );
+    }
+    return null;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return new Dialog(
+      child: new SizedBox(
+        width: _kMonthPickerWidth,
+        child: new Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            new _DatePickerHeader(
+              selectedDate: _selectedDate,
+              mode: _mode,
+              onModeChanged: _handleModeChanged
+            ),
+            new Container(
+              height: _kMaxDayPickerHeight,
+              child: _buildPicker()
+            ),
+            new ButtonTheme.bar(
+              child: new ButtonBar(
+                alignment: MainAxisAlignment.end,
+                children: <Widget>[
+                  new FlatButton(
+                    child: new Text('CANCEL'),
+                    onPressed: _handleCancel
+                  ),
+                  new FlatButton(
+                    child: new Text('OK'),
+                    onPressed: _handleOk
+                  ),
+                ]
+              )
+            )
+          ]
+        )
+      )
+    );
+  }
+}
+
+/// Shows a dialog containing a material design date picker.
+///
+/// The returned [Future] resolves to the date selected by the user when the
+/// user closes the dialog. If the user cancels the dialog, the [Future]
+/// resolves to the initialDate.
+///
+/// See also:
+///
+///  * [showTimePicker]
+///  * <https://www.google.com/design/spec/components/pickers.html#pickers-date-pickers>
+Future<DateTime> showDatePicker({
+  BuildContext context,
+  DateTime initialDate,
+  DateTime firstDate,
+  DateTime lastDate
+}) async {
+  DateTime picked = await showDialog(
+    context: context,
+    child: new _DatePickerDialog(
+      initialDate: initialDate,
+      firstDate: firstDate,
+      lastDate: lastDate
+    )
+  );
+  return picked ?? initialDate;
 }

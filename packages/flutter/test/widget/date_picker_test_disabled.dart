@@ -12,7 +12,7 @@ void main() {
     Widget widget = new Material(
       child: new Block(
         children: <Widget>[
-          new DatePicker(
+          new MonthPicker(
             selectedDate: new DateTime.utc(2015, 6, 9, 7, 12),
             firstDate: new DateTime.utc(2013),
             lastDate: new DateTime.utc(2018),
