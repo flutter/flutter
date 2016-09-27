@@ -558,7 +558,7 @@ void main() {
     final Key containerKey = new UniqueKey();
 
     // The link parent is built at layout time with LayoutBuilder. The implementation
-    // of InheritedWidgetLinkChild ensures that it's not built until layout time either.
+    // of InheritedWidgetLinkChild ensures that it's not built until layout time.
     Widget buildFrame() {
       return new Row(
         children: <Widget>[
@@ -593,6 +593,73 @@ void main() {
     await tester.pumpWidget(buildFrame());
     RenderBox box = tester.renderObject(find.byKey(containerKey));
     expect(box.size.width, equals(100.0));
+  });
+
+
+  testWidgets('InheritedWidgetLink, LayoutBuilder setState', (WidgetTester tester) async {
+    final GlobalKey linkParentKey = new GlobalKey();
+    final GlobalKey linkChildKey = new GlobalKey();
+    final Key containerKey = new UniqueKey();
+    StateSetter setState;
+    double inheritedValue = 100.0;
+
+    // This is a test per https://github.com/flutter/flutter/pull/6072#issuecomment-249717601
+    // The structure is supposed to match:
+    //       /... -> layout builder -> ... -> inherited -> ... link parent
+    // root <
+    //      \ ... -> link child -> ... -> inheritor
+    Widget buildFrame() {
+      return new Row(
+        children: <Widget>[
+          new StatefulBuilder(
+            builder: (BuildContext context, StateSetter setter) {
+              setState = setter;
+              return new LayoutBuilder(
+                builder: (BuildContext context, BoxConstraints constraints) {
+                  return new Container(
+                    child: new InheritedValue(
+                      value: inheritedValue,
+                      child: new Container(
+                        child: new InheritedWidgetLinkParent(
+                          key: linkParentKey,
+                          link: linkChildKey,
+                          child: new Container(width: 200.0)
+                        )
+                      )
+                    )
+                  );
+                }
+              );
+            }
+          ),
+          new InheritedWidgetLinkChild(
+            key: linkChildKey,
+            link: linkParentKey,
+            child: new Container(
+              child: new Builder(
+                builder: (BuildContext context) {
+                  return new Container(
+                    key: containerKey,
+                    width: InheritedValue.of(context)
+                  );
+                }
+              )
+            )
+          )
+        ]
+      );
+    }
+
+    await tester.pumpWidget(buildFrame());
+    RenderBox box = tester.renderObject(find.byKey(containerKey));
+    expect(box.size.width, equals(100.0));
+
+    setState(() {
+      inheritedValue = 200.0;
+    });
+    await tester.pump();
+    expect(box.size.width, equals(200.0));
+
   });
 
 }
