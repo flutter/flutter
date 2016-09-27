@@ -8,6 +8,15 @@ To run an example, use `flutter run` inside that example's directory.  See the
 [getting started guide](https://flutter.io/getting-started/) to install
 the `flutter` tool.
 
+**Tip:** To see examples of how to use a specific Flutter framework class,
+copy and paste a URL with this format in your browser. Replace `foo` with the
+classname you are searching for (for example, here's the [query](https://github.com/flutter/flutter/search?q=path%3Aexamples+AppBar) for examples of
+the [`AppBar`](https://docs.flutter.io/flutter/material/AppBar-class.html) class).
+
+```
+https://github.com/flutter/flutter/search?q=path%3Aexamples+foo
+```
+
 Available examples include:
 
 - **Hello, world** The [hello world app](hello_world) is a basic app that shows
