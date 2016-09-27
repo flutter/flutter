@@ -47,21 +47,19 @@ int RunInteractive() {
   mojo::embedder::Init(mojo::embedder::CreateSimplePlatformSupport());
   shell::Shell::InitStandalone();
 
-  auto args = command_line.GetArgs();
-  if (args.empty())
-    return 1;
-
   std::string bundle_path =
       command_line.GetSwitchValueASCII(shell::switches::kFLX);
 
   if (bundle_path.empty()) {
     // Alternatively, use the first positional argument.
+    auto args = command_line.GetArgs();
+    if (args.empty())
+      return 1;
     bundle_path = args[0];
   }
 
-  if (bundle_path.empty()) {
+  if (bundle_path.empty())
     return 1;
-  }
 
   std::unique_ptr<shell::PlatformViewGLFW> platform_view(
       new shell::PlatformViewGLFW());
