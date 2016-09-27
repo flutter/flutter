@@ -293,7 +293,7 @@ class AppDomain extends Domain {
     String route = _getStringArg(args, 'route');
     String mode = _getStringArg(args, 'mode');
     String target = _getStringArg(args, 'target');
-    bool hotMode = _getBoolArg(args, 'hot') ?? false;
+    bool enableHotReload = _getBoolArg(args, 'hot') ?? kHotReloadDefault;
 
     Device device = daemon.deviceDomain._getOrLocateDevice(deviceId);
     if (device == null)
@@ -323,7 +323,7 @@ class AppDomain extends Domain {
 
     ResidentRunner runner;
 
-    if (hotMode) {
+    if (enableHotReload) {
       runner = new HotRunner(
         device,
         target: target,
@@ -339,7 +339,7 @@ class AppDomain extends Domain {
       );
     }
 
-    bool supportsRestart = hotMode ? device.supportsHotMode : device.supportsRestart;
+    bool supportsRestart = enableHotReload ? device.supportsHotMode : device.supportsRestart;
 
     AppInstance app = new AppInstance(_getNextAppId(), runner);
     _apps.add(app);
