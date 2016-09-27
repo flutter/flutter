@@ -4,12 +4,12 @@
 
 #include "mojo/edk/system/memory.h"
 
+#include <mojo/macros.h>
 #include <stddef.h>
 #include <stdint.h>
 
 #include <limits>
 
-#include "mojo/public/c/system/macros.h"
 #include "testing/gtest/include/gtest/gtest.h"
 
 namespace mojo {

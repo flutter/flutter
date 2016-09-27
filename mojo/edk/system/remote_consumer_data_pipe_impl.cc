@@ -139,13 +139,13 @@ MojoResult RemoteConsumerDataPipeImpl::ProducerWriteData(
   DCHECK_EQ(consumer_num_bytes_ % element_num_bytes(), 0u);
 
   if (min_num_bytes_to_write > capacity_num_bytes() - consumer_num_bytes_)
-    return MOJO_RESULT_OUT_OF_RANGE;
+    return MOJO_SYSTEM_RESULT_OUT_OF_RANGE;
 
   size_t num_bytes_to_write =
       std::min(static_cast<size_t>(max_num_bytes_to_write),
                capacity_num_bytes() - consumer_num_bytes_);
   if (num_bytes_to_write == 0)
-    return MOJO_RESULT_SHOULD_WAIT;
+    return MOJO_SYSTEM_RESULT_SHOULD_WAIT;
 
   // The maximum amount of data to send per message (make it a multiple of the
   // element size.
@@ -192,7 +192,7 @@ MojoResult RemoteConsumerDataPipeImpl::ProducerBeginWriteData(
   size_t max_num_bytes_to_write = capacity_num_bytes() - consumer_num_bytes_;
   // Don't go into a two-phase write if there's no room.
   if (max_num_bytes_to_write == 0)
-    return MOJO_RESULT_SHOULD_WAIT;
+    return MOJO_SYSTEM_RESULT_SHOULD_WAIT;
 
   EnsureBuffer();
   start_index_ = 0;  // We always have the full buffer.
@@ -330,7 +330,7 @@ MojoResult RemoteConsumerDataPipeImpl::ConsumerReadData(
     uint32_t /*min_num_bytes_to_read*/,
     bool /*peek*/) {
   NOTREACHED();
-  return MOJO_RESULT_INTERNAL;
+  return MOJO_SYSTEM_RESULT_INTERNAL;
 }
 
 MojoResult RemoteConsumerDataPipeImpl::ConsumerDiscardData(
@@ -338,26 +338,26 @@ MojoResult RemoteConsumerDataPipeImpl::ConsumerDiscardData(
     uint32_t /*max_num_bytes_to_discard*/,
     uint32_t /*min_num_bytes_to_discard*/) {
   NOTREACHED();
-  return MOJO_RESULT_INTERNAL;
+  return MOJO_SYSTEM_RESULT_INTERNAL;
 }
 
 MojoResult RemoteConsumerDataPipeImpl::ConsumerQueryData(
     UserPointer<uint32_t> /*num_bytes*/) {
   NOTREACHED();
-  return MOJO_RESULT_INTERNAL;
+  return MOJO_SYSTEM_RESULT_INTERNAL;
 }
 
 MojoResult RemoteConsumerDataPipeImpl::ConsumerBeginReadData(
     UserPointer<const void*> /*buffer*/,
     UserPointer<uint32_t> /*buffer_num_bytes*/) {
   NOTREACHED();
-  return MOJO_RESULT_INTERNAL;
+  return MOJO_SYSTEM_RESULT_INTERNAL;
 }
 
 MojoResult RemoteConsumerDataPipeImpl::ConsumerEndReadData(
     uint32_t /*num_bytes_read*/) {
   NOTREACHED();
-  return MOJO_RESULT_INTERNAL;
+  return MOJO_SYSTEM_RESULT_INTERNAL;
 }
 
 HandleSignalsState RemoteConsumerDataPipeImpl::ConsumerGetHandleSignalsState()

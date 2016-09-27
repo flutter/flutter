@@ -5,10 +5,10 @@
 #ifndef MOJO_GPU_GL_CONTEXT_H_
 #define MOJO_GPU_GL_CONTEXT_H_
 
+#include <mojo/gpu/MGL/mgl.h>
 #include "base/macros.h"
 #include "base/memory/ref_counted.h"
 #include "base/observer_list.h"
-#include "mojo/public/c/gpu/MGL/mgl.h"
 #include "mojo/public/cpp/bindings/interface_ptr.h"
 
 namespace mojo {

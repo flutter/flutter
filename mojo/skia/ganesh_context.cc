@@ -4,7 +4,7 @@
 
 #include "mojo/skia/ganesh_context.h"
 
-#include "mojo/public/c/gpu/MGL/mgl.h"
+#include <mojo/gpu/MGL/mgl.h>
 #include "mojo/skia/gl_bindings_skia.h"
 #include "third_party/skia/include/gpu/gl/GrGLInterface.h"
 

@@ -19,7 +19,7 @@ MojoResult MessagePipeEndpoint::ReadMessage(UserPointer<void> /*bytes*/,
                                             uint32_t* /*num_handles*/,
                                             MojoReadMessageFlags /*flags*/) {
   NOTREACHED();
-  return MOJO_RESULT_INTERNAL;
+  return MOJO_SYSTEM_RESULT_INTERNAL;
 }
 
 HandleSignalsState MessagePipeEndpoint::GetHandleSignalsState() const {
@@ -35,7 +35,7 @@ MojoResult MessagePipeEndpoint::AddAwakable(Awakable* /*awakable*/,
   NOTREACHED();
   if (signals_state)
     *signals_state = HandleSignalsState();
-  return MOJO_RESULT_INTERNAL;
+  return MOJO_SYSTEM_RESULT_INTERNAL;
 }
 
 void MessagePipeEndpoint::RemoveAwakable(bool /*match_context*/,

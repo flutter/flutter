@@ -38,7 +38,7 @@ namespace {
 // given cookie, in which case:
 //    - |r.wait_result| must equal |wait_result|.
 //    - If |wait_result| is |MOJO_RESULT_OK| or
-//      |MOJO_RESULT_FAILED_PRECONDITION|, then
+//      |MOJO_SYSTEM_RESULT_FAILED_PRECONDITION|, then
 //        - |r.signals_state.satisfied_signals & signals| must equal
 //          |signals_state.satisfied_signals & signals|, and
 //        - |r.signals_state.satisfiable & signals| must equal
@@ -57,7 +57,7 @@ bool CheckHasResult(uint32_t num_results,
       EXPECT_EQ(wait_result, results[i].wait_result) << cookie;
       EXPECT_EQ(0u, results[i].reserved) << cookie;
       if (wait_result == MOJO_RESULT_OK ||
-          wait_result == MOJO_RESULT_FAILED_PRECONDITION) {
+          wait_result == MOJO_SYSTEM_RESULT_FAILED_PRECONDITION) {
         EXPECT_EQ(signals_state.satisfied_signals & signals,
                   results[i].signals_state.satisfied_signals & signals)
             << cookie;
@@ -110,14 +110,14 @@ TEST(WaitSetDispatcherTest, Basic) {
                                           kCookie2, NullUserPointer()));
 
   // Adding something with the same cookie yields "already exists".
-  EXPECT_EQ(MOJO_RESULT_ALREADY_EXISTS,
+  EXPECT_EQ(MOJO_SYSTEM_RESULT_ALREADY_EXISTS,
             d->WaitSetAdd(d_member1.Clone(), kR, kCookie2, NullUserPointer()));
 
   // Can remove something based on a cookie.
   EXPECT_EQ(MOJO_RESULT_OK, d->WaitSetRemove(kCookie0));
 
   // Trying to remove the same cookie again should fail.
-  EXPECT_EQ(MOJO_RESULT_NOT_FOUND, d->WaitSetRemove(kCookie0));
+  EXPECT_EQ(MOJO_SYSTEM_RESULT_NOT_FOUND, d->WaitSetRemove(kCookie0));
 
   // Can re-add it (still not satisfied, but satisfiable).
   EXPECT_EQ(MOJO_RESULT_OK,
@@ -217,7 +217,7 @@ TEST(WaitSetDispatcherTest, Basic) {
                                MOJO_RESULT_OK,
                                d_member1->GetHandleSignalsState()));
     EXPECT_TRUE(CheckHasResult(num_results, results, kCookie2, kSignals2,
-                               MOJO_RESULT_FAILED_PRECONDITION,
+                               MOJO_SYSTEM_RESULT_FAILED_PRECONDITION,
                                d_member0->GetHandleSignalsState()));
   }
 
@@ -239,10 +239,10 @@ TEST(WaitSetDispatcherTest, Basic) {
                                MOJO_RESULT_OK,
                                d_member0->GetHandleSignalsState()));
     EXPECT_TRUE(CheckHasResult(num_results, results, kCookie1, kSignals1,
-                               MOJO_RESULT_CANCELLED,
+                               MOJO_SYSTEM_RESULT_CANCELLED,
                                MojoHandleSignalsState()));
     EXPECT_TRUE(CheckHasResult(num_results, results, kCookie2, kSignals2,
-                               MOJO_RESULT_FAILED_PRECONDITION,
+                               MOJO_SYSTEM_RESULT_FAILED_PRECONDITION,
                                d_member0->GetHandleSignalsState()));
   }
 
@@ -277,7 +277,7 @@ TEST(WaitSetDispatcherTest, TimeOut) {
     MojoWaitSetResult results[1] = {{456u}};
     uint32_t max_results = 789u;
     stopwatch.Start();
-    EXPECT_EQ(MOJO_RESULT_DEADLINE_EXCEEDED,
+    EXPECT_EQ(MOJO_SYSTEM_RESULT_DEADLINE_EXCEEDED,
               d->WaitSetWait(
                   2 * test::EpsilonTimeout(), MakeUserPointer(&num_results),
                   MakeUserPointer(results), MakeUserPointer(&max_results)));
@@ -302,7 +302,7 @@ TEST(WaitSetDispatcherTest, TimeOut) {
     MojoWaitSetResult results[1] = {{456u}};
     uint32_t max_results = 789u;
     stopwatch.Start();
-    EXPECT_EQ(MOJO_RESULT_DEADLINE_EXCEEDED,
+    EXPECT_EQ(MOJO_SYSTEM_RESULT_DEADLINE_EXCEEDED,
               d->WaitSetWait(
                   2 * test::EpsilonTimeout(), MakeUserPointer(&num_results),
                   MakeUserPointer(results), MakeUserPointer(&max_results)));
@@ -396,7 +396,7 @@ TEST(WaitSetDispatcherTest, BasicThreaded1) {
     EXPECT_EQ(1u, num_results);
 
     EXPECT_TRUE(CheckHasResult(num_results, results, kCookie2, kSignals2,
-                               MOJO_RESULT_FAILED_PRECONDITION,
+                               MOJO_SYSTEM_RESULT_FAILED_PRECONDITION,
                                d_member0->GetHandleSignalsState()));
 
     t.join();
@@ -421,7 +421,7 @@ TEST(WaitSetDispatcherTest, BasicThreaded1) {
                                MOJO_RESULT_OK,
                                d_member1->GetHandleSignalsState()));
     EXPECT_TRUE(CheckHasResult(num_results, results, kCookie2, kSignals2,
-                               MOJO_RESULT_FAILED_PRECONDITION,
+                               MOJO_SYSTEM_RESULT_FAILED_PRECONDITION,
                                d_member0->GetHandleSignalsState()));
 
     t.join();
@@ -448,10 +448,10 @@ TEST(WaitSetDispatcherTest, BasicThreaded1) {
     EXPECT_EQ(2u, num_results);
 
     EXPECT_TRUE(CheckHasResult(num_results, results, kCookie0, kSignals0,
-                               MOJO_RESULT_CANCELLED,
+                               MOJO_SYSTEM_RESULT_CANCELLED,
                                MojoHandleSignalsState()));
     EXPECT_TRUE(CheckHasResult(num_results, results, kCookie2, kSignals2,
-                               MOJO_RESULT_CANCELLED,
+                               MOJO_SYSTEM_RESULT_CANCELLED,
                                MojoHandleSignalsState()));
 
     t.join();
@@ -589,7 +589,7 @@ TEST(WaitSetDispatcherTest, BasicThreaded2) {
                              MakeUserPointer(results), NullUserPointer()));
     EXPECT_EQ(1u, num_results);
     EXPECT_TRUE(CheckHasResult(num_results, results, kCookie1, kSignals1,
-                               MOJO_RESULT_FAILED_PRECONDITION,
+                               MOJO_SYSTEM_RESULT_FAILED_PRECONDITION,
                                d_member->GetHandleSignalsState()));
 
     t.join();

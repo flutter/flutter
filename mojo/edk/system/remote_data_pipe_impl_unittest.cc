@@ -254,7 +254,7 @@ TEST_F(RemoteDataPipeImplTest, SendConsumerWithClosedProducer) {
     EXPECT_EQ(456u, context);
     consumer->RemoveAwakable(false, &waiter, 0, &hss);
   } else {
-    ASSERT_EQ(MOJO_RESULT_ALREADY_EXISTS, result);
+    ASSERT_EQ(MOJO_SYSTEM_RESULT_ALREADY_EXISTS, result);
   }
   // We don't know if the fact that the producer has been closed is known yet.
   EXPECT_TRUE((hss.satisfied_signals & MOJO_HANDLE_SIGNAL_READABLE));
@@ -279,12 +279,12 @@ TEST_F(RemoteDataPipeImplTest, SendConsumerWithClosedProducer) {
                                  MOJO_HANDLE_SIGNAL_READABLE, &hss);
   if (result == MOJO_RESULT_OK) {
     context = 0;
-    EXPECT_EQ(MOJO_RESULT_FAILED_PRECONDITION,
+    EXPECT_EQ(MOJO_SYSTEM_RESULT_FAILED_PRECONDITION,
               waiter.Wait(test::ActionTimeout(), &context, nullptr));
     EXPECT_EQ(789u, context);
     consumer->RemoveAwakable(false, &waiter, 0, &hss);
   } else {
-    ASSERT_EQ(MOJO_RESULT_FAILED_PRECONDITION, result);
+    ASSERT_EQ(MOJO_SYSTEM_RESULT_FAILED_PRECONDITION, result);
   }
   EXPECT_EQ(MOJO_HANDLE_SIGNAL_PEER_CLOSED, hss.satisfied_signals);
   EXPECT_EQ(MOJO_HANDLE_SIGNAL_PEER_CLOSED, hss.satisfiable_signals);
@@ -387,7 +387,7 @@ TEST_F(RemoteDataPipeImplTest, SendConsumerDuringTwoPhaseWrite) {
     EXPECT_EQ(456u, context);
     consumer->RemoveAwakable(false, &waiter, 0, &hss);
   } else {
-    ASSERT_EQ(MOJO_RESULT_ALREADY_EXISTS, result);
+    ASSERT_EQ(MOJO_SYSTEM_RESULT_ALREADY_EXISTS, result);
   }
   // We don't know if the fact that the producer has been closed is known yet.
   EXPECT_TRUE((hss.satisfied_signals & MOJO_HANDLE_SIGNAL_READABLE));
@@ -516,7 +516,7 @@ TEST_F(RemoteDataPipeImplTest, SendConsumerDuringSecondTwoPhaseWrite) {
     EXPECT_EQ(456u, context);
     consumer->RemoveAwakable(false, &waiter, 0, &hss);
   } else {
-    ASSERT_EQ(MOJO_RESULT_ALREADY_EXISTS, result);
+    ASSERT_EQ(MOJO_SYSTEM_RESULT_ALREADY_EXISTS, result);
   }
   EXPECT_EQ(MOJO_HANDLE_SIGNAL_READABLE | MOJO_HANDLE_SIGNAL_PEER_CLOSED |
                 MOJO_HANDLE_SIGNAL_READ_THRESHOLD,

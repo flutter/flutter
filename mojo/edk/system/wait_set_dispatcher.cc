@@ -50,12 +50,12 @@ MojoResult WaitSetDispatcher::ValidateCreateOptions(
 
   UserOptionsReader<MojoCreateWaitSetOptions> reader(in_options);
   if (!reader.is_valid())
-    return MOJO_RESULT_INVALID_ARGUMENT;
+    return MOJO_SYSTEM_RESULT_INVALID_ARGUMENT;
 
   if (!OPTIONS_STRUCT_HAS_MEMBER(MojoCreateWaitSetOptions, flags, reader))
     return MOJO_RESULT_OK;
   if ((reader.options().flags & ~kKnownFlags))
-    return MOJO_RESULT_UNIMPLEMENTED;
+    return MOJO_SYSTEM_RESULT_UNIMPLEMENTED;
   out_options->flags = reader.options().flags;
 
   // Checks for fields beyond |flags|:
@@ -81,12 +81,12 @@ MojoResult WaitSetDispatcher::ValidateWaitSetAddOptions(
 
   UserOptionsReader<MojoWaitSetAddOptions> reader(in_options);
   if (!reader.is_valid())
-    return MOJO_RESULT_INVALID_ARGUMENT;
+    return MOJO_SYSTEM_RESULT_INVALID_ARGUMENT;
 
   if (!OPTIONS_STRUCT_HAS_MEMBER(MojoWaitSetAddOptions, flags, reader))
     return MOJO_RESULT_OK;
   if ((reader.options().flags & ~kKnownFlags))
-    return MOJO_RESULT_UNIMPLEMENTED;
+    return MOJO_SYSTEM_RESULT_UNIMPLEMENTED;
   out_options->flags = reader.options().flags;
 
   // Checks for fields beyond |flags|:
@@ -162,15 +162,15 @@ MojoResult WaitSetDispatcher::WaitSetAddImpl(
   {
     MutexLocker locker(&mutex());
     if (is_closed_no_lock())
-      return MOJO_RESULT_INVALID_ARGUMENT;
+      return MOJO_SYSTEM_RESULT_INVALID_ARGUMENT;
     MojoWaitSetAddOptions validated_options;
     MojoResult result = ValidateWaitSetAddOptions(options, &validated_options);
     if (result != MOJO_RESULT_OK)
       return result;
     if (entries_.find(cookie) != entries_.end())
-      return MOJO_RESULT_ALREADY_EXISTS;
+      return MOJO_SYSTEM_RESULT_ALREADY_EXISTS;
     if (entries_.size() >= GetConfiguration().max_wait_set_num_entries)
-      return MOJO_RESULT_RESOURCE_EXHAUSTED;
+      return MOJO_SYSTEM_RESULT_RESOURCE_EXHAUSTED;
     entry = new Entry(dispatcher.Clone(), signals, cookie);
     entries_[cookie] = std::unique_ptr<Entry>(entry);
   }
@@ -195,26 +195,27 @@ MojoResult WaitSetDispatcher::WaitSetAddImpl(
     // Regardless of |result|, it's OK to just call |RemoveAwakable()|.
     dispatcher->RemoveAwakable(true, this, cookie, nullptr);
 
-    return MOJO_RESULT_INVALID_ARGUMENT;
+    return MOJO_SYSTEM_RESULT_INVALID_ARGUMENT;
   }
 
   // |entry| is valid: Since we weren't closed and the entry is still not marked
   // as ready, nothing should have removed it from |entries_|.
   DCHECK_EQ(entries_[cookie].get(), entry);
 
-  if (result == MOJO_RESULT_INVALID_ARGUMENT) {
+  if (result == MOJO_SYSTEM_RESULT_INVALID_ARGUMENT) {
     // The target dispatcher was closed, so we weren't added to its awakable
     // list. This means that user code has a race condition in this case. We
     // could try to keep the entry around and signal it as "cancelled", but it's
     // simpler to just say that the target dispatcher was bad in the first
     // place.
     entries_.erase(cookie);
-    return MOJO_RESULT_INVALID_ARGUMENT;
+    return MOJO_SYSTEM_RESULT_INVALID_ARGUMENT;
   }
 
   // In all other cases, we were added.
-  DCHECK(result == MOJO_RESULT_OK || result == MOJO_RESULT_ALREADY_EXISTS ||
-         result == MOJO_RESULT_FAILED_PRECONDITION);
+  DCHECK(result == MOJO_RESULT_OK ||
+         result == MOJO_SYSTEM_RESULT_ALREADY_EXISTS ||
+         result == MOJO_SYSTEM_RESULT_FAILED_PRECONDITION);
 
   DCHECK(!entry->ready);
   entry->ready = true;
@@ -227,20 +228,20 @@ MojoResult WaitSetDispatcher::WaitSetRemoveImpl(uint64_t cookie) {
   {
     MutexLocker locker(&mutex());
     if (is_closed_no_lock())
-      return MOJO_RESULT_INVALID_ARGUMENT;
+      return MOJO_SYSTEM_RESULT_INVALID_ARGUMENT;
     auto it = entries_.find(cookie);
     if (it == entries_.end())
-      return MOJO_RESULT_NOT_FOUND;
+      return MOJO_SYSTEM_RESULT_NOT_FOUND;
 
     Entry* entry = it->second.get();
     if (!entry->ready) {
       // |WaitSetAddImpl()| isn't done yet so, as far as user code is concerned,
       // the entry with this cookie hasn't been added yet.
-      return MOJO_RESULT_NOT_FOUND;
+      return MOJO_SYSTEM_RESULT_NOT_FOUND;
     }
     if (entry->is_being_removed) {
       // This entry is being removed on another thread!
-      return MOJO_RESULT_NOT_FOUND;
+      return MOJO_SYSTEM_RESULT_NOT_FOUND;
     }
 
     entry->is_being_removed = true;
@@ -278,7 +279,7 @@ MojoResult WaitSetDispatcher::WaitSetWaitImpl(
     UserPointer<uint32_t> max_results) {
   MutexLocker locker(&mutex());
   if (is_closed_no_lock())
-    return MOJO_RESULT_INVALID_ARGUMENT;
+    return MOJO_SYSTEM_RESULT_INVALID_ARGUMENT;
 
   // Read this before waiting. (If we're going to crash due to reading input
   // values, we'd like to do so before waiting.)
@@ -296,21 +297,21 @@ MojoResult WaitSetDispatcher::WaitSetWaitImpl(
       // NOTE(vtl): Possibly, we should add a version of |WaitWithTimeout()|
       // that takes an absolute deadline, since that's what pthreads takes.
       if (cv_.WaitWithTimeout(&mutex(), wait_remaining))
-        return MOJO_RESULT_DEADLINE_EXCEEDED;  // Definitely timed out.
+        return MOJO_SYSTEM_RESULT_DEADLINE_EXCEEDED;  // Definitely timed out.
 
       MojoTimeTicks now = GetTimeTicks();
       DCHECK_GE(now, start);
       uint64_t elapsed = static_cast<uint64_t>(now - start);
       // It's possible that the deadline has passed anyway.
       if (elapsed >= deadline)
-        return MOJO_RESULT_DEADLINE_EXCEEDED;
+        return MOJO_SYSTEM_RESULT_DEADLINE_EXCEEDED;
 
       // Otherwise, recalculate the amount that we have left to wait.
       wait_remaining = deadline - elapsed;
     }
   }
   if (is_closed_no_lock())
-    return MOJO_RESULT_CANCELLED;
+    return MOJO_SYSTEM_RESULT_CANCELLED;
   DCHECK_GT(triggered_count_, 0u);
 
   uint32_t num_results_out =
@@ -333,20 +334,20 @@ MojoResult WaitSetDispatcher::WaitSetWaitImpl(
       // it explicitly).
       wait_set_result.reserved = 0u;
       if (!entry->dispatcher) {
-        wait_set_result.wait_result = MOJO_RESULT_CANCELLED;
+        wait_set_result.wait_result = MOJO_SYSTEM_RESULT_CANCELLED;
       } else if (entry->signals_state.satisfies(entry->signals)) {
         wait_set_result.wait_result = MOJO_RESULT_OK;
         wait_set_result.signals_state = entry->signals_state;
       } else if (!entry->signals_state.can_satisfy(entry->signals)) {
-        wait_set_result.wait_result = MOJO_RESULT_FAILED_PRECONDITION;
+        wait_set_result.wait_result = MOJO_SYSTEM_RESULT_FAILED_PRECONDITION;
         wait_set_result.signals_state = entry->signals_state;
       } else {
         NOTREACHED();
-        wait_set_result.wait_result = MOJO_RESULT_INTERNAL;
+        wait_set_result.wait_result = MOJO_SYSTEM_RESULT_INTERNAL;
       }
-      // TODO(vtl): The comment in mojo/public/c/system/wait_set.h indicates
-      // that we may have to provide |MOJO_RESULT_BUSY|, but we never do that
-      // here. Is that right or am I missing something?
+      // TODO(vtl): The comment in mojo/public/c/include/mojo/system/wait_set.h
+      // indicates that we may have to provide |MOJO_SYSTEM_RESULT_BUSY|, but we
+      // never do that here. Is that right or am I missing something?
 
       entry = entry->triggered_next;
     }

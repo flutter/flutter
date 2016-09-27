@@ -25,7 +25,7 @@ mojo_edk_source_set("test") {
   ]
 
   mojo_sdk_public_deps = [
-    "mojo/public/c/system",
+    "mojo/public/c:system",
     "mojo/public/cpp/system",
   ]
 

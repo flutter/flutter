@@ -5,6 +5,8 @@
 #ifndef MOJO_EDK_SYSTEM_HANDLE_TABLE_H_
 #define MOJO_EDK_SYSTEM_HANDLE_TABLE_H_
 
+#include <mojo/system/handle.h>
+#include <mojo/system/result.h>
 #include <stddef.h>
 
 #include <unordered_map>
@@ -13,8 +15,6 @@
 
 #include "mojo/edk/system/handle.h"
 #include "mojo/edk/util/ref_ptr.h"
-#include "mojo/public/c/system/handle.h"
-#include "mojo/public/c/system/result.h"
 #include "mojo/public/cpp/system/macros.h"
 
 namespace mojo {
@@ -44,9 +44,9 @@ class HandleTable {
 
   // On success, gets the handle for the given handle value (which should not be
   // |MOJO_HANDLE_INVALID|). On failure, returns an appropriate result (and
-  // leaves |*handle| alone), namely |MOJO_RESULT_INVALID_ARGUMENT| if there's
-  // no handle for the given handle value or |MOJO_RESULT_BUSY| if the handle is
-  // marked as busy.
+  // leaves |*handle| alone), namely |MOJO_SYSTEM_RESULT_INVALID_ARGUMENT| if
+  // there's no handle for the given handle value or |MOJO_SYSTEM_RESULT_BUSY|
+  // if the handle is marked as busy.
   MojoResult GetHandle(MojoHandle handle_value, Handle* handle);
 
   // Like |GetHandle()|, but on success also removes the handle value from the
@@ -113,16 +113,16 @@ class HandleTable {
   //
   // For example, if |Core::WriteMessage()| is called with a handle to be sent,
   // (under the handle table lock) it must first check that that handle is not
-  // busy (if it is busy, then it fails with |MOJO_RESULT_BUSY|) and then marks
-  // it as busy. To avoid deadlock, it should also try to acquire the locks for
-  // all the dispatchers for the handles that it is sending (and fail with
-  // |MOJO_RESULT_BUSY| if the attempt fails). At this point, it can release the
-  // handle table lock.
+  // busy (if it is busy, then it fails with |MOJO_SYSTEM_RESULT_BUSY|) and then
+  // marks it as busy. To avoid deadlock, it should also try to acquire the
+  // locks for all the dispatchers for the handles that it is sending (and fail
+  // with |MOJO_SYSTEM_RESULT_BUSY| if the attempt fails). At this point, it can
+  // release the handle table lock.
   //
   // If |Core::Close()| is simultaneously called on that handle, it too checks
-  // if the handle is marked busy. If it is, it fails (with |MOJO_RESULT_BUSY|).
-  // This prevents |Core::WriteMessage()| from sending a handle that has been
-  // closed (or learning about this too late).
+  // if the handle is marked busy. If it is, it fails (with
+  // |MOJO_SYSTEM_RESULT_BUSY|). This prevents |Core::WriteMessage()| from
+  // sending a handle that has been closed (or learning about this too late).
   struct Entry {
     Entry();
     explicit Entry(Handle&& handle);

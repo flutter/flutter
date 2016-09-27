@@ -6,7 +6,7 @@
 // (public, C) API. These are "extensible" structs, which all have |struct_size|
 // as their first member. All fields (other than |struct_size|) are optional,
 // but any |flags| specified must be known to the system (otherwise, an error of
-// |MOJO_RESULT_UNIMPLEMENTED| should be returned).
+// |MOJO_SYSTEM_RESULT_UNIMPLEMENTED| should be returned).
 
 #ifndef MOJO_EDK_SYSTEM_OPTIONS_VALIDATION_H_
 #define MOJO_EDK_SYSTEM_OPTIONS_VALIDATION_H_

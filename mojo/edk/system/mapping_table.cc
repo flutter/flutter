@@ -27,7 +27,7 @@ MojoResult MappingTable::AddMapping(
 
   if (address_to_mapping_map_.size() >=
       GetConfiguration().max_mapping_table_sze)
-    return MOJO_RESULT_RESOURCE_EXHAUSTED;
+    return MOJO_SYSTEM_RESULT_RESOURCE_EXHAUSTED;
 
   uintptr_t address = reinterpret_cast<uintptr_t>(mapping->GetBase());
   DCHECK(address_to_mapping_map_.find(address) ==
@@ -39,7 +39,7 @@ MojoResult MappingTable::AddMapping(
 MojoResult MappingTable::RemoveMapping(uintptr_t address) {
   AddressToMappingMap::iterator it = address_to_mapping_map_.find(address);
   if (it == address_to_mapping_map_.end())
-    return MOJO_RESULT_INVALID_ARGUMENT;
+    return MOJO_SYSTEM_RESULT_INVALID_ARGUMENT;
   PlatformSharedBufferMapping* mapping_to_delete = it->second;
   address_to_mapping_map_.erase(it);
   delete mapping_to_delete;

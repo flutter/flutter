@@ -7,10 +7,10 @@
 
 #include <memory>
 
+#include <mojo/system/time.h>
 #include "base/callback_forward.h"
 #include "base/macros.h"
 #include "base/run_loop.h"
-#include "mojo/public/c/system/time.h"
 #include "mojo/public/cpp/system/handle.h"
 
 namespace base {

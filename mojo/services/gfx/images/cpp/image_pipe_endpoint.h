@@ -11,7 +11,7 @@
 #include <unordered_set>
 #include <vector>
 
-#include "mojo/public/c/system/macros.h"
+#include <mojo/macros.h>
 #include "mojo/services/gfx/images/interfaces/image_pipe.mojom.h"
 
 namespace image_pipe {

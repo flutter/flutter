@@ -41,9 +41,9 @@ MojoResult HandleTable::GetHandle(MojoHandle handle_value, Handle* handle) {
 
   HandleToEntryMap::iterator it = handle_to_entry_map_.find(handle_value);
   if (it == handle_to_entry_map_.end())
-    return MOJO_RESULT_INVALID_ARGUMENT;
+    return MOJO_SYSTEM_RESULT_INVALID_ARGUMENT;
   if (it->second.busy)
-    return MOJO_RESULT_BUSY;
+    return MOJO_SYSTEM_RESULT_BUSY;
   *handle = it->second.handle;
 
   return MOJO_RESULT_OK;
@@ -56,9 +56,9 @@ MojoResult HandleTable::GetAndRemoveHandle(MojoHandle handle_value,
 
   HandleToEntryMap::iterator it = handle_to_entry_map_.find(handle_value);
   if (it == handle_to_entry_map_.end())
-    return MOJO_RESULT_INVALID_ARGUMENT;
+    return MOJO_SYSTEM_RESULT_INVALID_ARGUMENT;
   if (it->second.busy)
-    return MOJO_RESULT_BUSY;
+    return MOJO_SYSTEM_RESULT_BUSY;
   *handle = std::move(it->second.handle);
   handle_to_entry_map_.erase(it);
 
@@ -117,11 +117,11 @@ MojoResult HandleTable::ReplaceHandleWithReducedRights(
 
   HandleToEntryMap::iterator it = handle_to_entry_map_.find(handle_value);
   if (it == handle_to_entry_map_.end())
-    return MOJO_RESULT_INVALID_ARGUMENT;
+    return MOJO_SYSTEM_RESULT_INVALID_ARGUMENT;
 
   Entry entry = it->second;
   if (entry.busy)
-    return MOJO_RESULT_BUSY;
+    return MOJO_SYSTEM_RESULT_BUSY;
   // We don't need to mark the entry as busy, since we do everything under the
   // handle table lock (unlike sending messages).
 
@@ -130,7 +130,7 @@ MojoResult HandleTable::ReplaceHandleWithReducedRights(
   HandleTransport transport =
       Dispatcher::HandleTableAccess::TryStartTransport(entry.handle);
   if (!transport.is_valid())
-    return MOJO_RESULT_BUSY;
+    return MOJO_SYSTEM_RESULT_BUSY;
 
   // We don't need to check the capacity of the handle table, since we're just
   // going to replace the old handle. (Nothing below can fail, so we won't need
@@ -164,29 +164,29 @@ MojoResult HandleTable::MarkBusyAndStartTransport(
 
   // First verify all the handle values and get their dispatchers.
   uint32_t i;
-  MojoResult error_result = MOJO_RESULT_INTERNAL;
+  MojoResult error_result = MOJO_SYSTEM_RESULT_INTERNAL;
   for (i = 0; i < num_handles; i++) {
     // Sending your own handle is not allowed (and, for consistency, returns
     // "busy").
     if (handle_values[i] == disallowed_handle_value) {
-      error_result = MOJO_RESULT_BUSY;
+      error_result = MOJO_SYSTEM_RESULT_BUSY;
       break;
     }
 
     HandleToEntryMap::iterator it = handle_to_entry_map_.find(handle_values[i]);
     if (it == handle_to_entry_map_.end()) {
-      error_result = MOJO_RESULT_INVALID_ARGUMENT;
+      error_result = MOJO_SYSTEM_RESULT_INVALID_ARGUMENT;
       break;
     }
 
     entries[i] = &it->second;
     if (entries[i]->busy) {
-      error_result = MOJO_RESULT_BUSY;
+      error_result = MOJO_SYSTEM_RESULT_BUSY;
       break;
     }
     // Note: "Busy" is "preferred" over "permission denied".
     if (!entries[i]->handle.has_all_rights(MOJO_HANDLE_RIGHT_TRANSFER)) {
-      error_result = MOJO_RESULT_PERMISSION_DENIED;
+      error_result = MOJO_SYSTEM_RESULT_PERMISSION_DENIED;
       break;
     }
     // Note: By marking the handle as busy here, we're also preventing the
@@ -206,7 +206,7 @@ MojoResult HandleTable::MarkBusyAndStartTransport(
 
       // Unset the busy flag (since it won't be unset below).
       entries[i]->busy = false;
-      error_result = MOJO_RESULT_BUSY;
+      error_result = MOJO_SYSTEM_RESULT_BUSY;
       break;
     }
 
@@ -214,7 +214,7 @@ MojoResult HandleTable::MarkBusyAndStartTransport(
     (*transports)[i] = transport;
   }
   if (i < num_handles) {
-    DCHECK_NE(error_result, MOJO_RESULT_INTERNAL);
+    DCHECK_NE(error_result, MOJO_SYSTEM_RESULT_INTERNAL);
 
     // Unset the busy flags and release the locks.
     for (uint32_t j = 0; j < i; j++) {

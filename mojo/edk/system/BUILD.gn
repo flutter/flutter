@@ -119,7 +119,7 @@ mojo_edk_source_set("system") {
   ]
 
   mojo_sdk_public_deps = [
-    "mojo/public/c/system",
+    "mojo/public/c:system",
     "mojo/public/cpp/system",
   ]
 

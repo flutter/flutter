@@ -11,7 +11,7 @@
 #include "mojo/edk/system/simple_dispatcher.h"
 #include "mojo/edk/util/ref_ptr.h"
 #include "mojo/edk/util/thread_annotations.h"
-#include "mojo/public/c/system/handle.h"
+#include <mojo/system/handle.h>
 #include "mojo/public/cpp/system/macros.h"
 
 namespace mojo {
@@ -36,9 +36,9 @@ class SharedBufferDispatcher final : public SimpleDispatcher {
   // buffer handles are duplicatable by default.
   static constexpr MojoHandleRights kDefaultHandleRights =
       MOJO_HANDLE_RIGHT_DUPLICATE | MOJO_HANDLE_RIGHT_TRANSFER |
-      MOJO_HANDLE_RIGHT_GET_OPTIONS | MOJO_HANDLE_RIGHT_SET_OPTIONS |
-      MOJO_HANDLE_RIGHT_MAP_READABLE | MOJO_HANDLE_RIGHT_MAP_WRITABLE |
-      MOJO_HANDLE_RIGHT_MAP_EXECUTABLE;
+      MOJO_HANDLE_RIGHT_READ | MOJO_HANDLE_RIGHT_WRITE |
+      MOJO_HANDLE_RIGHT_EXECUTE | MOJO_HANDLE_RIGHT_GET_OPTIONS |
+      MOJO_HANDLE_RIGHT_SET_OPTIONS;
 
   // The default options to use for |MojoCreateSharedBuffer()|. (Real uses
   // should obtain this via |ValidateCreateOptions()| with a null |in_options|;

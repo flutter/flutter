@@ -8,6 +8,9 @@
 
 #include <memory>
 
+#include <mojo/system/handle.h>
+#include <mojo/system/time.h>
+#include <mojo/system/wait.h>
 #include "base/logging.h"
 #include "mojo/edk/embedder/test_embedder.h"
 #include "mojo/edk/platform/platform_pipe.h"
@@ -19,9 +22,6 @@
 #include "mojo/edk/util/command_line.h"
 #include "mojo/edk/util/ref_ptr.h"
 #include "mojo/edk/util/waitable_event.h"
-#include "mojo/public/c/system/handle.h"
-#include "mojo/public/c/system/time.h"
-#include "mojo/public/c/system/wait.h"
 #include "mojo/public/cpp/system/handle.h"
 #include "mojo/public/cpp/system/macros.h"
 #include "mojo/public/cpp/system/message_pipe.h"

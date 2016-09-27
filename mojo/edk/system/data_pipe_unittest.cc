@@ -261,7 +261,7 @@ TEST(DataPipeTest, ValidateCreateOptionsInvalid) {
     };
     MojoCreateDataPipeOptions unused;
     EXPECT_EQ(
-        MOJO_RESULT_INVALID_ARGUMENT,
+        MOJO_SYSTEM_RESULT_INVALID_ARGUMENT,
         DataPipe::ValidateCreateOptions(MakeUserPointer(&options), &unused));
   }
 
@@ -275,7 +275,7 @@ TEST(DataPipeTest, ValidateCreateOptionsInvalid) {
     };
     MojoCreateDataPipeOptions unused;
     EXPECT_EQ(
-        MOJO_RESULT_UNIMPLEMENTED,
+        MOJO_SYSTEM_RESULT_UNIMPLEMENTED,
         DataPipe::ValidateCreateOptions(MakeUserPointer(&options), &unused));
   }
 
@@ -289,7 +289,7 @@ TEST(DataPipeTest, ValidateCreateOptionsInvalid) {
     };
     MojoCreateDataPipeOptions unused;
     EXPECT_EQ(
-        MOJO_RESULT_INVALID_ARGUMENT,
+        MOJO_SYSTEM_RESULT_INVALID_ARGUMENT,
         DataPipe::ValidateCreateOptions(MakeUserPointer(&options), &unused));
   }
   // |element_num_bytes| too big.
@@ -302,7 +302,7 @@ TEST(DataPipeTest, ValidateCreateOptionsInvalid) {
     };
     MojoCreateDataPipeOptions unused;
     EXPECT_EQ(
-        MOJO_RESULT_RESOURCE_EXHAUSTED,
+        MOJO_SYSTEM_RESULT_RESOURCE_EXHAUSTED,
         DataPipe::ValidateCreateOptions(MakeUserPointer(&options), &unused));
   }
   {
@@ -314,7 +314,7 @@ TEST(DataPipeTest, ValidateCreateOptionsInvalid) {
     };
     MojoCreateDataPipeOptions unused;
     EXPECT_EQ(
-        MOJO_RESULT_RESOURCE_EXHAUSTED,
+        MOJO_SYSTEM_RESULT_RESOURCE_EXHAUSTED,
         DataPipe::ValidateCreateOptions(MakeUserPointer(&options), &unused));
   }
 
@@ -328,7 +328,7 @@ TEST(DataPipeTest, ValidateCreateOptionsInvalid) {
     };
     MojoCreateDataPipeOptions unused;
     EXPECT_EQ(
-        MOJO_RESULT_INVALID_ARGUMENT,
+        MOJO_SYSTEM_RESULT_INVALID_ARGUMENT,
         DataPipe::ValidateCreateOptions(MakeUserPointer(&options), &unused));
   }
   {
@@ -340,7 +340,7 @@ TEST(DataPipeTest, ValidateCreateOptionsInvalid) {
     };
     MojoCreateDataPipeOptions unused;
     EXPECT_EQ(
-        MOJO_RESULT_INVALID_ARGUMENT,
+        MOJO_SYSTEM_RESULT_INVALID_ARGUMENT,
         DataPipe::ValidateCreateOptions(MakeUserPointer(&options), &unused));
   }
   {
@@ -352,7 +352,7 @@ TEST(DataPipeTest, ValidateCreateOptionsInvalid) {
     };
     MojoCreateDataPipeOptions unused;
     EXPECT_EQ(
-        MOJO_RESULT_INVALID_ARGUMENT,
+        MOJO_SYSTEM_RESULT_INVALID_ARGUMENT,
         DataPipe::ValidateCreateOptions(MakeUserPointer(&options), &unused));
   }
   // |capacity_num_bytes| too big.
@@ -365,7 +365,7 @@ TEST(DataPipeTest, ValidateCreateOptionsInvalid) {
     };
     MojoCreateDataPipeOptions unused;
     EXPECT_EQ(
-        MOJO_RESULT_RESOURCE_EXHAUSTED,
+        MOJO_SYSTEM_RESULT_RESOURCE_EXHAUSTED,
         DataPipe::ValidateCreateOptions(MakeUserPointer(&options), &unused));
   }
 }

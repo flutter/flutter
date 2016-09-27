@@ -46,7 +46,7 @@ TEST(SimpleDispatcherTest, Basic) {
   w.Init();
   d->SetSatisfiedSignals(MOJO_HANDLE_SIGNAL_READABLE);
   hss = HandleSignalsState();
-  EXPECT_EQ(MOJO_RESULT_ALREADY_EXISTS,
+  EXPECT_EQ(MOJO_SYSTEM_RESULT_ALREADY_EXISTS,
             d->AddAwakable(&w, 0, false, MOJO_HANDLE_SIGNAL_READABLE, &hss));
   EXPECT_EQ(MOJO_HANDLE_SIGNAL_READABLE, hss.satisfied_signals);
   EXPECT_EQ(MOJO_HANDLE_SIGNAL_READABLE | MOJO_HANDLE_SIGNAL_WRITABLE,
@@ -109,7 +109,7 @@ TEST(SimpleDispatcherTest, Basic) {
   ASSERT_EQ(MOJO_RESULT_OK,
             d->AddAwakable(&w, 4, false, MOJO_HANDLE_SIGNAL_WRITABLE, nullptr));
   stopwatch.Start();
-  EXPECT_EQ(MOJO_RESULT_DEADLINE_EXCEEDED, w.Wait(0, nullptr, nullptr));
+  EXPECT_EQ(MOJO_SYSTEM_RESULT_DEADLINE_EXCEEDED, w.Wait(0, nullptr, nullptr));
   EXPECT_LT(stopwatch.Elapsed(), test::EpsilonTimeout());
   hss = HandleSignalsState();
   d->RemoveAwakable(false, &w, 0, &hss);
@@ -124,7 +124,7 @@ TEST(SimpleDispatcherTest, Basic) {
   ASSERT_EQ(MOJO_RESULT_OK,
             d->AddAwakable(&w, 5, false, MOJO_HANDLE_SIGNAL_WRITABLE, nullptr));
   stopwatch.Start();
-  EXPECT_EQ(MOJO_RESULT_DEADLINE_EXCEEDED,
+  EXPECT_EQ(MOJO_SYSTEM_RESULT_DEADLINE_EXCEEDED,
             w.Wait(2 * test::EpsilonTimeout(), nullptr, nullptr));
   MojoDeadline elapsed = stopwatch.Elapsed();
   EXPECT_GT(elapsed, (2 - 1) * test::EpsilonTimeout());
@@ -151,7 +151,7 @@ TEST(SimpleDispatcherTest, BasicUnsatisfiable) {
   d->SetSatisfiableSignals(MOJO_HANDLE_SIGNAL_READABLE);
   d->SetSatisfiedSignals(0);
   hss = HandleSignalsState();
-  EXPECT_EQ(MOJO_RESULT_FAILED_PRECONDITION,
+  EXPECT_EQ(MOJO_SYSTEM_RESULT_FAILED_PRECONDITION,
             d->AddAwakable(&w, 1, false, MOJO_HANDLE_SIGNAL_WRITABLE, &hss));
   EXPECT_EQ(0u, hss.satisfied_signals);
   EXPECT_EQ(MOJO_HANDLE_SIGNAL_READABLE, hss.satisfiable_signals);
@@ -165,7 +165,7 @@ TEST(SimpleDispatcherTest, BasicUnsatisfiable) {
             d->AddAwakable(&w, 2, false, MOJO_HANDLE_SIGNAL_WRITABLE, nullptr));
   d->SetSatisfiableSignals(MOJO_HANDLE_SIGNAL_READABLE);
   stopwatch.Start();
-  EXPECT_EQ(MOJO_RESULT_FAILED_PRECONDITION,
+  EXPECT_EQ(MOJO_SYSTEM_RESULT_FAILED_PRECONDITION,
             w.Wait(MOJO_DEADLINE_INDEFINITE, &context, nullptr));
   EXPECT_LT(stopwatch.Elapsed(), test::EpsilonTimeout());
   EXPECT_EQ(2u, context);
@@ -182,7 +182,8 @@ TEST(SimpleDispatcherTest, BasicUnsatisfiable) {
             d->AddAwakable(&w, 3, false, MOJO_HANDLE_SIGNAL_WRITABLE, nullptr));
   d->SetSatisfiableSignals(MOJO_HANDLE_SIGNAL_READABLE);
   stopwatch.Start();
-  EXPECT_EQ(MOJO_RESULT_FAILED_PRECONDITION, w.Wait(0, &context, nullptr));
+  EXPECT_EQ(MOJO_SYSTEM_RESULT_FAILED_PRECONDITION,
+            w.Wait(0, &context, nullptr));
   EXPECT_LT(stopwatch.Elapsed(), test::EpsilonTimeout());
   EXPECT_EQ(3u, context);
   hss = HandleSignalsState();
@@ -199,7 +200,7 @@ TEST(SimpleDispatcherTest, BasicUnsatisfiable) {
             d->AddAwakable(&w, 4, false, MOJO_HANDLE_SIGNAL_WRITABLE, nullptr));
   d->SetSatisfiableSignals(MOJO_HANDLE_SIGNAL_READABLE);
   stopwatch.Start();
-  EXPECT_EQ(MOJO_RESULT_FAILED_PRECONDITION,
+  EXPECT_EQ(MOJO_SYSTEM_RESULT_FAILED_PRECONDITION,
             w.Wait(2 * test::EpsilonTimeout(), &context, nullptr));
   EXPECT_LT(stopwatch.Elapsed(), test::EpsilonTimeout());
   EXPECT_EQ(4u, context);
@@ -224,7 +225,7 @@ TEST(SimpleDispatcherTest, BasicClosed) {
   w.Init();
   EXPECT_EQ(MOJO_RESULT_OK, d->Close());
   hss = HandleSignalsState();
-  EXPECT_EQ(MOJO_RESULT_INVALID_ARGUMENT,
+  EXPECT_EQ(MOJO_SYSTEM_RESULT_INVALID_ARGUMENT,
             d->AddAwakable(&w, 1, false, MOJO_HANDLE_SIGNAL_WRITABLE, &hss));
   EXPECT_EQ(0u, hss.satisfied_signals);
   EXPECT_EQ(0u, hss.satisfiable_signals);
@@ -237,7 +238,7 @@ TEST(SimpleDispatcherTest, BasicClosed) {
             d->AddAwakable(&w, 2, false, MOJO_HANDLE_SIGNAL_WRITABLE, nullptr));
   EXPECT_EQ(MOJO_RESULT_OK, d->Close());
   stopwatch.Start();
-  EXPECT_EQ(MOJO_RESULT_CANCELLED,
+  EXPECT_EQ(MOJO_SYSTEM_RESULT_CANCELLED,
             w.Wait(MOJO_DEADLINE_INDEFINITE, &context, nullptr));
   EXPECT_LT(stopwatch.Elapsed(), test::EpsilonTimeout());
   EXPECT_EQ(2u, context);
@@ -250,7 +251,7 @@ TEST(SimpleDispatcherTest, BasicClosed) {
             d->AddAwakable(&w, 3, false, MOJO_HANDLE_SIGNAL_WRITABLE, nullptr));
   EXPECT_EQ(MOJO_RESULT_OK, d->Close());
   stopwatch.Start();
-  EXPECT_EQ(MOJO_RESULT_CANCELLED, w.Wait(0, &context, nullptr));
+  EXPECT_EQ(MOJO_SYSTEM_RESULT_CANCELLED, w.Wait(0, &context, nullptr));
   EXPECT_LT(stopwatch.Elapsed(), test::EpsilonTimeout());
   EXPECT_EQ(3u, context);
   // Don't need to remove waiters from closed dispatchers.
@@ -263,7 +264,7 @@ TEST(SimpleDispatcherTest, BasicClosed) {
             d->AddAwakable(&w, 4, false, MOJO_HANDLE_SIGNAL_WRITABLE, nullptr));
   EXPECT_EQ(MOJO_RESULT_OK, d->Close());
   stopwatch.Start();
-  EXPECT_EQ(MOJO_RESULT_CANCELLED,
+  EXPECT_EQ(MOJO_SYSTEM_RESULT_CANCELLED,
             w.Wait(2 * test::EpsilonTimeout(), &context, nullptr));
   EXPECT_LT(stopwatch.Elapsed(), test::EpsilonTimeout());
   EXPECT_EQ(4u, context);
@@ -288,12 +289,13 @@ TEST(SimpleDispatcherTest, BasicThreaded) {
       stopwatch.Start();
       thread.Start();
     }  // Joins the thread.
-    // If we closed earlier, then probably we'd get a |MOJO_RESULT_CANCELLED|.
+    // If we closed earlier, then probably we'd get a
+    // |MOJO_SYSTEM_RESULT_CANCELLED|.
     EXPECT_EQ(MOJO_RESULT_OK, d->Close());
   }
   EXPECT_LT(stopwatch.Elapsed(), test::EpsilonTimeout());
   EXPECT_FALSE(did_wait);
-  EXPECT_EQ(MOJO_RESULT_ALREADY_EXISTS, result);
+  EXPECT_EQ(MOJO_SYSTEM_RESULT_ALREADY_EXISTS, result);
   EXPECT_EQ(MOJO_HANDLE_SIGNAL_READABLE, hss.satisfied_signals);
   EXPECT_EQ(MOJO_HANDLE_SIGNAL_READABLE | MOJO_HANDLE_SIGNAL_WRITABLE,
             hss.satisfiable_signals);
@@ -340,7 +342,7 @@ TEST(SimpleDispatcherTest, BasicThreaded) {
   EXPECT_GT(elapsed, (2 - 1) * test::EpsilonTimeout());
   EXPECT_LT(elapsed, (2 + 1) * test::EpsilonTimeout());
   EXPECT_TRUE(did_wait);
-  EXPECT_EQ(MOJO_RESULT_FAILED_PRECONDITION, result);
+  EXPECT_EQ(MOJO_SYSTEM_RESULT_FAILED_PRECONDITION, result);
   EXPECT_EQ(3u, context);
   EXPECT_EQ(0u, hss.satisfied_signals);
   EXPECT_EQ(0u, hss.satisfiable_signals);
@@ -360,7 +362,7 @@ TEST(SimpleDispatcherTest, BasicThreaded) {
   EXPECT_GT(elapsed, (2 - 1) * test::EpsilonTimeout());
   EXPECT_LT(elapsed, (2 + 1) * test::EpsilonTimeout());
   EXPECT_TRUE(did_wait);
-  EXPECT_EQ(MOJO_RESULT_CANCELLED, result);
+  EXPECT_EQ(MOJO_SYSTEM_RESULT_CANCELLED, result);
   EXPECT_EQ(4u, context);
   EXPECT_EQ(0u, hss.satisfied_signals);
   EXPECT_EQ(0u, hss.satisfiable_signals);
@@ -378,14 +380,15 @@ TEST(SimpleDispatcherTest, BasicThreaded) {
       // Not what we're waiting for.
       d->SetSatisfiedSignals(MOJO_HANDLE_SIGNAL_WRITABLE);
     }  // Joins the thread (after its wait times out).
-    // If we closed earlier, then probably we'd get a |MOJO_RESULT_CANCELLED|.
+    // If we closed earlier, then probably we'd get a
+    // |MOJO_SYSTEM_RESULT_CANCELLED|.
     EXPECT_EQ(MOJO_RESULT_OK, d->Close());
   }
   elapsed = stopwatch.Elapsed();
   EXPECT_GT(elapsed, (2 - 1) * test::EpsilonTimeout());
   EXPECT_LT(elapsed, (2 + 1) * test::EpsilonTimeout());
   EXPECT_TRUE(did_wait);
-  EXPECT_EQ(MOJO_RESULT_DEADLINE_EXCEEDED, result);
+  EXPECT_EQ(MOJO_SYSTEM_RESULT_DEADLINE_EXCEEDED, result);
   EXPECT_EQ(MOJO_HANDLE_SIGNAL_WRITABLE, hss.satisfied_signals);
   EXPECT_EQ(MOJO_HANDLE_SIGNAL_READABLE | MOJO_HANDLE_SIGNAL_WRITABLE,
             hss.satisfiable_signals);
@@ -452,7 +455,7 @@ TEST(SimpleDispatcherTest, MultipleWaiters) {
   }
   for (uint32_t i = kNumWaiters / 2; i < kNumWaiters; i++) {
     EXPECT_TRUE(did_wait[i]) << i;
-    EXPECT_EQ(MOJO_RESULT_CANCELLED, result[i]) << i;
+    EXPECT_EQ(MOJO_SYSTEM_RESULT_CANCELLED, result[i]) << i;
     EXPECT_EQ(i, context[i]) << i;
     // Since we closed before joining, we can't say much about what each thread
     // saw as the state.
@@ -490,7 +493,7 @@ TEST(SimpleDispatcherTest, MultipleWaiters) {
   }
   for (uint32_t i = kNumWaiters / 2; i < kNumWaiters; i++) {
     EXPECT_TRUE(did_wait[i]) << i;
-    EXPECT_EQ(MOJO_RESULT_FAILED_PRECONDITION, result[i]) << i;
+    EXPECT_EQ(MOJO_SYSTEM_RESULT_FAILED_PRECONDITION, result[i]) << i;
     EXPECT_EQ(i, context[i]) << i;
     // Since we closed before joining, we can't say much about what each thread
     // saw as the state.
@@ -527,7 +530,7 @@ TEST(SimpleDispatcherTest, MultipleWaiters) {
   }
   for (uint32_t i = kNumWaiters / 2; i < kNumWaiters; i++) {
     EXPECT_TRUE(did_wait[i]) << i;
-    EXPECT_EQ(MOJO_RESULT_DEADLINE_EXCEEDED, result[i]) << i;
+    EXPECT_EQ(MOJO_SYSTEM_RESULT_DEADLINE_EXCEEDED, result[i]) << i;
     // Since we closed before joining, we can't say much about what each thread
     // saw as the state.
   }

@@ -5,11 +5,11 @@
 #ifndef MOJO_EDK_SYSTEM_AWAKABLE_LIST_H_
 #define MOJO_EDK_SYSTEM_AWAKABLE_LIST_H_
 
+#include <mojo/system/handle.h>
 #include <stdint.h>
 
 #include <vector>
 
-#include "mojo/public/c/system/handle.h"
 #include "mojo/public/cpp/system/macros.h"
 
 namespace mojo {

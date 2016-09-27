@@ -4,9 +4,9 @@
 
 #include "mojo/environment/default_logger.h"
 
+#include <mojo/environment/logger.h>
 #include "base/logging.h"
 #include "base/macros.h"
-#include "mojo/public/c/environment/logger.h"
 
 namespace mojo {
 namespace internal {

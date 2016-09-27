@@ -343,7 +343,7 @@ MojoResult MessagePipe::EnqueueMessageNoLock(
 
   // The destination port need not be open, unlike the source port.
   if (!endpoints_[port])
-    return MOJO_RESULT_FAILED_PRECONDITION;
+    return MOJO_SYSTEM_RESULT_FAILED_PRECONDITION;
 
   if (transports) {
     MojoResult result = AttachTransportsNoLock(port, message.get(), transports);

@@ -5,11 +5,12 @@
 #ifndef MOJO_EDK_SYSTEM_HANDLE_TRANSPORT_H_
 #define MOJO_EDK_SYSTEM_HANDLE_TRANSPORT_H_
 
+#include <mojo/system/handle.h>
+
 #include "mojo/edk/system/dispatcher.h"
 #include "mojo/edk/system/handle.h"
 #include "mojo/edk/util/ref_ptr.h"
 #include "mojo/edk/util/thread_annotations.h"
-#include "mojo/public/c/system/handle.h"
 
 namespace mojo {
 namespace system {

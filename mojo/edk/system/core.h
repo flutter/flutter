@@ -5,6 +5,13 @@
 #ifndef MOJO_EDK_SYSTEM_CORE_H_
 #define MOJO_EDK_SYSTEM_CORE_H_
 
+#include <mojo/system/buffer.h>
+#include <mojo/system/data_pipe.h>
+#include <mojo/system/handle.h>
+#include <mojo/system/message_pipe.h>
+#include <mojo/system/result.h>
+#include <mojo/system/time.h>
+#include <mojo/system/wait_set.h>
 #include <stdint.h>
 
 #include <functional>
@@ -17,13 +24,6 @@
 #include "mojo/edk/util/mutex.h"
 #include "mojo/edk/util/ref_ptr.h"
 #include "mojo/edk/util/thread_annotations.h"
-#include "mojo/public/c/system/buffer.h"
-#include "mojo/public/c/system/data_pipe.h"
-#include "mojo/public/c/system/handle.h"
-#include "mojo/public/c/system/message_pipe.h"
-#include "mojo/public/c/system/result.h"
-#include "mojo/public/c/system/time.h"
-#include "mojo/public/c/system/wait_set.h"
 #include "mojo/public/cpp/system/macros.h"
 
 namespace mojo {
@@ -59,9 +59,9 @@ class Core {
 
   // Gets the handle for the given handle value. On success, returns
   // |MOJO_RESULT_OK| (and sets |*h|). On failure, returns an appropriate result
-  // (and leaves |*h| alone), namely |MOJO_RESULT_INVALID_ARGUMENT| if the
-  // handle value is invalid or |MOJO_RESULT_BUSY| if the handle is marked as
-  // busy.
+  // (and leaves |*h| alone), namely |MOJO_SYSTEM_RESULT_INVALID_ARGUMENT| if
+  // the handle value is invalid or |MOJO_SYSTEM_RESULT_BUSY| if the handle is
+  // marked as busy.
   MojoResult GetHandle(MojoHandle handle, Handle* h);
 
   // Like |GetHandle()|, but on success also removes the handle from the
@@ -73,14 +73,15 @@ class Core {
   //
   // On success, returns |MOJO_RESULT_OK| and sets |*dispatcher| appropriately.
   // On failure, returns:
-  //   - |MOJO_RESULT_INVALID_ARGUMENT| if there's no handle for the given
-  //     handle value (or the handle value was |MOJO_HANDLE_INVALID|),
-  //   - |MOJO_RESULT_BUSY| if the handle is marked as busy,
-  //   - |MOJO_RESULT_PERMISSION_DENIED| if the handle does not have the
+  //   - |MOJO_SYSTEM_RESULT_INVALID_ARGUMENT| if there's no handle for the
+  //     given handle value (or the handle value was |MOJO_HANDLE_INVALID|),
+  //   - |MOJO_SYSTEM_RESULT_BUSY| if the handle is marked as busy,
+  //   - |MOJO_SYSTEM_RESULT_PERMISSION_DENIED| if the handle does not have the
   //     required rights *and* the dispatcher supports the specified
   //     |entrypoint_class|, or
-  //   - |MOJO_RESULT_INVALID_ARGUMENT| if the handle does not have the required
-  //     rights *but* the dispatcher does not support |entrypoint_class|.
+  //   - |MOJO_SYSTEM_RESULT_INVALID_ARGUMENT| if the handle does not have the
+  //     required rights *but* the dispatcher does not support
+  //     |entrypoint_class|.
   // (Warning: if the handle has the required rights, then its dispatcher will
   // be returned even if the dispatcher does not support |entrypoint_class|.)
   MojoResult GetDispatcherAndCheckRights(
@@ -110,12 +111,12 @@ class Core {
   // API functions, referenced below.
 
   // This method corresponds to the API function defined in
-  // "mojo/public/c/system/time.h":
+  // "mojo/public/c/include/mojo/system/time.h":
 
   MojoTimeTicks GetTimeTicksNow();
 
   // This method corresponds to the API function defined in
-  // "mojo/public/c/system/handle.h":
+  // "mojo/public/c/include/mojo/system/handle.h":
   MojoResult Close(MojoHandle handle);
   MojoResult GetRights(MojoHandle handle, UserPointer<MojoHandleRights> rights);
   MojoResult ReplaceHandleWithReducedRights(
@@ -128,7 +129,7 @@ class Core {
       UserPointer<MojoHandle> new_handle);
 
   // These methods correspond to the API functions defined in
-  // "mojo/public/c/system/wait.h":
+  // "mojo/public/c/include/mojo/system/wait.h":
   MojoResult Wait(MojoHandle handle,
                   MojoHandleSignals signals,
                   MojoDeadline deadline,
@@ -141,7 +142,7 @@ class Core {
                       UserPointer<MojoHandleSignalsState> signals_states);
 
   // These methods correspond to the API functions defined in
-  // "mojo/public/c/system/message_pipe.h":
+  // "mojo/public/c/include/mojo/system/message_pipe.h":
   MojoResult CreateMessagePipe(
       UserPointer<const MojoCreateMessagePipeOptions> options,
       UserPointer<MojoHandle> message_pipe_handle0,
@@ -160,7 +161,7 @@ class Core {
                          MojoReadMessageFlags flags);
 
   // These methods correspond to the API functions defined in
-  // "mojo/public/c/system/data_pipe.h":
+  // "mojo/public/c/include/mojo/system/data_pipe.h":
   MojoResult CreateDataPipe(
       UserPointer<const MojoCreateDataPipeOptions> options,
       UserPointer<MojoHandle> data_pipe_producer_handle,
@@ -201,7 +202,7 @@ class Core {
                          uint32_t num_bytes_read);
 
   // These methods correspond to the API functions defined in
-  // "mojo/public/c/system/buffer.h":
+  // "mojo/public/c/include/mojo/system/buffer.h":
   MojoResult CreateSharedBuffer(
       UserPointer<const MojoCreateSharedBufferOptions> options,
       uint64_t num_bytes,
@@ -221,7 +222,7 @@ class Core {
   MojoResult UnmapBuffer(UserPointer<void> buffer);
 
   // These methods correspond to the API functions defined in
-  // "mojo/public/c/system/wait_set.h":
+  // "mojo/public/c/include/mojo/system/wait_set.h":
   MojoResult CreateWaitSet(UserPointer<const MojoCreateWaitSetOptions> options,
                            UserPointer<MojoHandle> wait_set_handle);
   MojoResult WaitSetAdd(MojoHandle wait_set_handle,

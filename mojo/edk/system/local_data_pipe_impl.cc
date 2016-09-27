@@ -79,14 +79,14 @@ MojoResult LocalDataPipeImpl::ProducerWriteData(
   if (min_num_bytes_to_write > capacity_num_bytes() - current_num_bytes_) {
     // Don't return "should wait" since you can't wait for a specified amount
     // of data.
-    return MOJO_RESULT_OUT_OF_RANGE;
+    return MOJO_SYSTEM_RESULT_OUT_OF_RANGE;
   }
 
   size_t num_bytes_to_write =
       std::min(static_cast<size_t>(max_num_bytes_to_write),
                capacity_num_bytes() - current_num_bytes_);
   if (num_bytes_to_write == 0)
-    return MOJO_RESULT_SHOULD_WAIT;
+    return MOJO_SYSTEM_RESULT_SHOULD_WAIT;
 
   // The amount we can write in our first copy.
   size_t num_bytes_to_write_first =
@@ -122,7 +122,7 @@ MojoResult LocalDataPipeImpl::ProducerBeginWriteData(
   size_t max_num_bytes_to_write = GetMaxNumBytesToWrite();
   // Don't go into a two-phase write if there's no room.
   if (max_num_bytes_to_write == 0)
-    return MOJO_RESULT_SHOULD_WAIT;
+    return MOJO_SYSTEM_RESULT_SHOULD_WAIT;
 
   EnsureBuffer();
   buffer.Put(buffer_.get() + write_index);
@@ -231,15 +231,15 @@ MojoResult LocalDataPipeImpl::ConsumerReadData(UserPointer<void> elements,
   if (min_num_bytes_to_read > current_num_bytes_) {
     // Don't return "should wait" since you can't wait for a specified amount of
     // data.
-    return producer_open() ? MOJO_RESULT_OUT_OF_RANGE
-                           : MOJO_RESULT_FAILED_PRECONDITION;
+    return producer_open() ? MOJO_SYSTEM_RESULT_OUT_OF_RANGE
+                           : MOJO_SYSTEM_RESULT_FAILED_PRECONDITION;
   }
 
   size_t num_bytes_to_read =
       std::min(static_cast<size_t>(max_num_bytes_to_read), current_num_bytes_);
   if (num_bytes_to_read == 0) {
-    return producer_open() ? MOJO_RESULT_SHOULD_WAIT
-                           : MOJO_RESULT_FAILED_PRECONDITION;
+    return producer_open() ? MOJO_SYSTEM_RESULT_SHOULD_WAIT
+                           : MOJO_SYSTEM_RESULT_FAILED_PRECONDITION;
   }
 
   // The amount we can read in our first copy.
@@ -270,14 +270,14 @@ MojoResult LocalDataPipeImpl::ConsumerDiscardData(
   if (min_num_bytes_to_discard > current_num_bytes_) {
     // Don't return "should wait" since you can't wait for a specified amount of
     // data.
-    return producer_open() ? MOJO_RESULT_OUT_OF_RANGE
-                           : MOJO_RESULT_FAILED_PRECONDITION;
+    return producer_open() ? MOJO_SYSTEM_RESULT_OUT_OF_RANGE
+                           : MOJO_SYSTEM_RESULT_FAILED_PRECONDITION;
   }
 
   // Be consistent with other operations; error if no data available.
   if (current_num_bytes_ == 0) {
-    return producer_open() ? MOJO_RESULT_SHOULD_WAIT
-                           : MOJO_RESULT_FAILED_PRECONDITION;
+    return producer_open() ? MOJO_SYSTEM_RESULT_SHOULD_WAIT
+                           : MOJO_SYSTEM_RESULT_FAILED_PRECONDITION;
   }
 
   size_t num_bytes_to_discard = std::min(
@@ -300,8 +300,8 @@ MojoResult LocalDataPipeImpl::ConsumerBeginReadData(
   size_t max_num_bytes_to_read = GetMaxNumBytesToRead();
   // Don't go into a two-phase read if there's no data.
   if (max_num_bytes_to_read == 0) {
-    return producer_open() ? MOJO_RESULT_SHOULD_WAIT
-                           : MOJO_RESULT_FAILED_PRECONDITION;
+    return producer_open() ? MOJO_SYSTEM_RESULT_SHOULD_WAIT
+                           : MOJO_SYSTEM_RESULT_FAILED_PRECONDITION;
   }
 
   buffer.Put(buffer_.get() + start_index_);

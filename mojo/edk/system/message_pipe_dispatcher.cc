@@ -47,12 +47,12 @@ MojoResult MessagePipeDispatcher::ValidateCreateOptions(
 
   UserOptionsReader<MojoCreateMessagePipeOptions> reader(in_options);
   if (!reader.is_valid())
-    return MOJO_RESULT_INVALID_ARGUMENT;
+    return MOJO_SYSTEM_RESULT_INVALID_ARGUMENT;
 
   if (!OPTIONS_STRUCT_HAS_MEMBER(MojoCreateMessagePipeOptions, flags, reader))
     return MOJO_RESULT_OK;
   if ((reader.options().flags & ~kKnownFlags))
-    return MOJO_RESULT_UNIMPLEMENTED;
+    return MOJO_SYSTEM_RESULT_UNIMPLEMENTED;
   out_options->flags = reader.options().flags;
 
   // Checks for fields beyond |flags|:
@@ -177,7 +177,7 @@ MojoResult MessagePipeDispatcher::WriteMessageImplNoLock(
   mutex().AssertHeld();
 
   if (num_bytes > GetConfiguration().max_message_num_bytes)
-    return MOJO_RESULT_RESOURCE_EXHAUSTED;
+    return MOJO_SYSTEM_RESULT_RESOURCE_EXHAUSTED;
 
   return message_pipe_->WriteMessage(port_, bytes, num_bytes, transports,
                                      flags);

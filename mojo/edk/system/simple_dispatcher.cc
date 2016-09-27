@@ -39,9 +39,9 @@ MojoResult SimpleDispatcher::AddAwakableImplNoLock(
   MojoResult rv = MOJO_RESULT_OK;
   bool should_add = persistent;
   if (state.satisfies(signals))
-    rv = MOJO_RESULT_ALREADY_EXISTS;
+    rv = MOJO_SYSTEM_RESULT_ALREADY_EXISTS;
   else if (!state.can_satisfy(signals))
-    rv = MOJO_RESULT_FAILED_PRECONDITION;
+    rv = MOJO_SYSTEM_RESULT_FAILED_PRECONDITION;
   else
     should_add = true;
 

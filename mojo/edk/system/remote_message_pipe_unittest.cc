@@ -267,7 +267,7 @@ TEST_F(RemoteMessagePipeTest, Basic) {
   MojoResult result = mp1->AddAwakable(1, &waiter, 789, false,
                                        MOJO_HANDLE_SIGNAL_READABLE, &hss);
   if (result == MOJO_RESULT_OK) {
-    EXPECT_EQ(MOJO_RESULT_FAILED_PRECONDITION,
+    EXPECT_EQ(MOJO_SYSTEM_RESULT_FAILED_PRECONDITION,
               waiter.Wait(MOJO_DEADLINE_INDEFINITE, &context, nullptr));
     EXPECT_EQ(789u, context);
     hss = HandleSignalsState();
@@ -419,17 +419,17 @@ TEST_F(RemoteMessagePipeTest, Multiplex) {
 
   // Make sure there's nothing on MP 0, port 0 or MP 1, port 1 or MP 2, port 0.
   buffer_size = static_cast<uint32_t>(sizeof(buffer));
-  EXPECT_EQ(MOJO_RESULT_SHOULD_WAIT,
+  EXPECT_EQ(MOJO_SYSTEM_RESULT_SHOULD_WAIT,
             mp0->ReadMessage(0, UserPointer<void>(buffer),
                              MakeUserPointer(&buffer_size), nullptr, nullptr,
                              MOJO_READ_MESSAGE_FLAG_NONE));
   buffer_size = static_cast<uint32_t>(sizeof(buffer));
-  EXPECT_EQ(MOJO_RESULT_SHOULD_WAIT,
+  EXPECT_EQ(MOJO_SYSTEM_RESULT_SHOULD_WAIT,
             mp1->ReadMessage(1, UserPointer<void>(buffer),
                              MakeUserPointer(&buffer_size), nullptr, nullptr,
                              MOJO_READ_MESSAGE_FLAG_NONE));
   buffer_size = static_cast<uint32_t>(sizeof(buffer));
-  EXPECT_EQ(MOJO_RESULT_SHOULD_WAIT,
+  EXPECT_EQ(MOJO_SYSTEM_RESULT_SHOULD_WAIT,
             mp2->ReadMessage(0, UserPointer<void>(buffer),
                              MakeUserPointer(&buffer_size), nullptr, nullptr,
                              MOJO_READ_MESSAGE_FLAG_NONE));
@@ -468,17 +468,17 @@ TEST_F(RemoteMessagePipeTest, Multiplex) {
 
   // Make sure there's nothing on the other ports.
   buffer_size = static_cast<uint32_t>(sizeof(buffer));
-  EXPECT_EQ(MOJO_RESULT_SHOULD_WAIT,
+  EXPECT_EQ(MOJO_SYSTEM_RESULT_SHOULD_WAIT,
             mp0->ReadMessage(0, UserPointer<void>(buffer),
                              MakeUserPointer(&buffer_size), nullptr, nullptr,
                              MOJO_READ_MESSAGE_FLAG_NONE));
   buffer_size = static_cast<uint32_t>(sizeof(buffer));
-  EXPECT_EQ(MOJO_RESULT_SHOULD_WAIT,
+  EXPECT_EQ(MOJO_SYSTEM_RESULT_SHOULD_WAIT,
             mp2->ReadMessage(0, UserPointer<void>(buffer),
                              MakeUserPointer(&buffer_size), nullptr, nullptr,
                              MOJO_READ_MESSAGE_FLAG_NONE));
   buffer_size = static_cast<uint32_t>(sizeof(buffer));
-  EXPECT_EQ(MOJO_RESULT_SHOULD_WAIT,
+  EXPECT_EQ(MOJO_SYSTEM_RESULT_SHOULD_WAIT,
             mp3->ReadMessage(0, UserPointer<void>(buffer),
                              MakeUserPointer(&buffer_size), nullptr, nullptr,
                              MOJO_READ_MESSAGE_FLAG_NONE));
@@ -951,7 +951,7 @@ TEST_F(RemoteMessagePipeTest, SharedBufferPassing) {
   BootstrapChannelEndpoints(std::move(ep0), std::move(ep1));
 
   // We'll try to pass this dispatcher.
-  MojoResult result = MOJO_RESULT_INTERNAL;
+  MojoResult result = MOJO_SYSTEM_RESULT_INTERNAL;
   auto dispatcher = SharedBufferDispatcher::Create(
       platform_support(), SharedBufferDispatcher::kDefaultCreateOptions, 100,
       &result);

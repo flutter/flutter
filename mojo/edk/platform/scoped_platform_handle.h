@@ -5,8 +5,8 @@
 #ifndef MOJO_EDK_PLATFORM_SCOPED_PLATFORM_HANDLE_H_
 #define MOJO_EDK_PLATFORM_SCOPED_PLATFORM_HANDLE_H_
 
+#include <mojo/macros.h>
 #include "mojo/edk/platform/platform_handle.h"
-#include "mojo/public/c/system/macros.h"
 #include "mojo/public/cpp/system/macros.h"
 
 namespace mojo {

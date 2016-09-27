@@ -81,8 +81,8 @@ MojoResult LocalMessagePipeEndpoint::ReadMessage(
   const uint32_t max_num_handles = num_handles ? *num_handles : 0;
 
   if (message_queue_.IsEmpty()) {
-    return is_peer_open_ ? MOJO_RESULT_SHOULD_WAIT
-                         : MOJO_RESULT_FAILED_PRECONDITION;
+    return is_peer_open_ ? MOJO_SYSTEM_RESULT_SHOULD_WAIT
+                         : MOJO_SYSTEM_RESULT_FAILED_PRECONDITION;
   }
 
   // TODO(vtl): If |flags & MOJO_READ_MESSAGE_FLAG_MAY_DISCARD|, we could pop
@@ -126,7 +126,7 @@ MojoResult LocalMessagePipeEndpoint::ReadMessage(
   }
 
   if (!enough_space)
-    return MOJO_RESULT_RESOURCE_EXHAUSTED;
+    return MOJO_SYSTEM_RESULT_RESOURCE_EXHAUSTED;
 
   return MOJO_RESULT_OK;
 }
@@ -162,9 +162,9 @@ MojoResult LocalMessagePipeEndpoint::AddAwakable(
   MojoResult rv = MOJO_RESULT_OK;
   bool should_add = persistent;
   if (state.satisfies(signals))
-    rv = MOJO_RESULT_ALREADY_EXISTS;
+    rv = MOJO_SYSTEM_RESULT_ALREADY_EXISTS;
   else if (!state.can_satisfy(signals))
-    rv = MOJO_RESULT_FAILED_PRECONDITION;
+    rv = MOJO_SYSTEM_RESULT_FAILED_PRECONDITION;
   else
     should_add = true;
 

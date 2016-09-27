@@ -63,7 +63,7 @@ TEST(MessagePipeDispatcherTest, Basic) {
     // Try adding a writable waiter when already writable.
     w.Init();
     hss = HandleSignalsState();
-    EXPECT_EQ(MOJO_RESULT_ALREADY_EXISTS,
+    EXPECT_EQ(MOJO_SYSTEM_RESULT_ALREADY_EXISTS,
               d0->AddAwakable(&w, 0, false, MOJO_HANDLE_SIGNAL_WRITABLE, &hss));
     EXPECT_EQ(MOJO_HANDLE_SIGNAL_WRITABLE, hss.satisfied_signals);
     EXPECT_EQ(MOJO_HANDLE_SIGNAL_READABLE | MOJO_HANDLE_SIGNAL_WRITABLE |
@@ -97,7 +97,7 @@ TEST(MessagePipeDispatcherTest, Basic) {
     // Try adding a readable waiter when already readable (from above).
     w.Init();
     hss = HandleSignalsState();
-    EXPECT_EQ(MOJO_RESULT_ALREADY_EXISTS,
+    EXPECT_EQ(MOJO_SYSTEM_RESULT_ALREADY_EXISTS,
               d0->AddAwakable(&w, 2, false, MOJO_HANDLE_SIGNAL_READABLE, &hss));
     EXPECT_EQ(MOJO_HANDLE_SIGNAL_READABLE | MOJO_HANDLE_SIGNAL_WRITABLE,
               hss.satisfied_signals);
@@ -122,7 +122,8 @@ TEST(MessagePipeDispatcherTest, Basic) {
         MOJO_RESULT_OK,
         d0->AddAwakable(&w, 3, false, MOJO_HANDLE_SIGNAL_READABLE, nullptr));
     stopwatch.Start();
-    EXPECT_EQ(MOJO_RESULT_DEADLINE_EXCEEDED, w.Wait(0, nullptr, nullptr));
+    EXPECT_EQ(MOJO_SYSTEM_RESULT_DEADLINE_EXCEEDED,
+              w.Wait(0, nullptr, nullptr));
     EXPECT_LT(stopwatch.Elapsed(), test::EpsilonTimeout());
     hss = HandleSignalsState();
     d0->RemoveAwakable(false, &w, 0, &hss);
@@ -137,7 +138,7 @@ TEST(MessagePipeDispatcherTest, Basic) {
         MOJO_RESULT_OK,
         d0->AddAwakable(&w, 3, false, MOJO_HANDLE_SIGNAL_READABLE, nullptr));
     stopwatch.Start();
-    EXPECT_EQ(MOJO_RESULT_DEADLINE_EXCEEDED,
+    EXPECT_EQ(MOJO_SYSTEM_RESULT_DEADLINE_EXCEEDED,
               w.Wait(2 * test::EpsilonTimeout(), nullptr, nullptr));
     MojoDeadline elapsed = stopwatch.Elapsed();
     EXPECT_GT(elapsed, (2 - 1) * test::EpsilonTimeout());
@@ -191,8 +192,9 @@ TEST(MessagePipeDispatcherTest, SupportsEntrypointClass) {
   EXPECT_FALSE(d->SupportsEntrypointClass(EntrypointClass::DATA_PIPE_CONSUMER));
   EXPECT_FALSE(d->SupportsEntrypointClass(EntrypointClass::BUFFER));
 
-  // TODO(vtl): Check that it actually returns |MOJO_RESULT_INVALID_ARGUMENT|
-  // for methods in unsupported entrypoint classes.
+  // TODO(vtl): Check that it actually returns
+  // |MOJO_SYSTEM_RESULT_INVALID_ARGUMENT| for methods in unsupported entrypoint
+  // classes.
 
   EXPECT_EQ(MOJO_RESULT_OK, d->Close());
 }
@@ -212,7 +214,7 @@ TEST(MessagePipeDispatcherTest, InvalidParams) {
 
   // |WriteMessage|:
   // Huge buffer size.
-  EXPECT_EQ(MOJO_RESULT_RESOURCE_EXHAUSTED,
+  EXPECT_EQ(MOJO_SYSTEM_RESULT_RESOURCE_EXHAUSTED,
             d0->WriteMessage(UserPointer<const void>(buffer),
                              std::numeric_limits<uint32_t>::max(), nullptr,
                              MOJO_WRITE_MESSAGE_FLAG_NONE));
@@ -295,7 +297,7 @@ TEST(MessagePipeDispatcherTest, BasicClosed) {
     // Try waiting for readable on |d0|; should fail (already satisfied).
     w.Init();
     hss = HandleSignalsState();
-    EXPECT_EQ(MOJO_RESULT_ALREADY_EXISTS,
+    EXPECT_EQ(MOJO_SYSTEM_RESULT_ALREADY_EXISTS,
               d0->AddAwakable(&w, 0, false, MOJO_HANDLE_SIGNAL_READABLE, &hss));
     EXPECT_EQ(MOJO_HANDLE_SIGNAL_READABLE | MOJO_HANDLE_SIGNAL_WRITABLE,
               hss.satisfied_signals);
@@ -306,7 +308,7 @@ TEST(MessagePipeDispatcherTest, BasicClosed) {
     // Try reading from |d1|; should fail (nothing to read).
     buffer[0] = 0;
     buffer_size = kBufferSize;
-    EXPECT_EQ(MOJO_RESULT_SHOULD_WAIT,
+    EXPECT_EQ(MOJO_SYSTEM_RESULT_SHOULD_WAIT,
               d1->ReadMessage(UserPointer<void>(buffer),
                               MakeUserPointer(&buffer_size), 0, nullptr,
                               MOJO_READ_MESSAGE_FLAG_NONE));
@@ -317,7 +319,7 @@ TEST(MessagePipeDispatcherTest, BasicClosed) {
     // Try waiting for readable on |d0|; should fail (already satisfied).
     w.Init();
     hss = HandleSignalsState();
-    EXPECT_EQ(MOJO_RESULT_ALREADY_EXISTS,
+    EXPECT_EQ(MOJO_SYSTEM_RESULT_ALREADY_EXISTS,
               d0->AddAwakable(&w, 1, false, MOJO_HANDLE_SIGNAL_READABLE, &hss));
     EXPECT_EQ(MOJO_HANDLE_SIGNAL_READABLE | MOJO_HANDLE_SIGNAL_PEER_CLOSED,
               hss.satisfied_signals);
@@ -337,7 +339,7 @@ TEST(MessagePipeDispatcherTest, BasicClosed) {
     // Try waiting for readable on |d0|; should fail (already satisfied).
     w.Init();
     hss = HandleSignalsState();
-    EXPECT_EQ(MOJO_RESULT_ALREADY_EXISTS,
+    EXPECT_EQ(MOJO_SYSTEM_RESULT_ALREADY_EXISTS,
               d0->AddAwakable(&w, 2, false, MOJO_HANDLE_SIGNAL_READABLE, &hss));
     EXPECT_EQ(MOJO_HANDLE_SIGNAL_READABLE | MOJO_HANDLE_SIGNAL_PEER_CLOSED,
               hss.satisfied_signals);
@@ -357,7 +359,7 @@ TEST(MessagePipeDispatcherTest, BasicClosed) {
     // Try waiting for readable on |d0|; should fail (unsatisfiable).
     w.Init();
     hss = HandleSignalsState();
-    EXPECT_EQ(MOJO_RESULT_FAILED_PRECONDITION,
+    EXPECT_EQ(MOJO_SYSTEM_RESULT_FAILED_PRECONDITION,
               d0->AddAwakable(&w, 3, false, MOJO_HANDLE_SIGNAL_READABLE, &hss));
     EXPECT_EQ(MOJO_HANDLE_SIGNAL_PEER_CLOSED, hss.satisfied_signals);
     EXPECT_EQ(MOJO_HANDLE_SIGNAL_PEER_CLOSED, hss.satisfiable_signals);
@@ -365,7 +367,7 @@ TEST(MessagePipeDispatcherTest, BasicClosed) {
     // Try waiting for writable on |d0|; should fail (unsatisfiable).
     w.Init();
     hss = HandleSignalsState();
-    EXPECT_EQ(MOJO_RESULT_FAILED_PRECONDITION,
+    EXPECT_EQ(MOJO_SYSTEM_RESULT_FAILED_PRECONDITION,
               d0->AddAwakable(&w, 4, false, MOJO_HANDLE_SIGNAL_WRITABLE, &hss));
     EXPECT_EQ(MOJO_HANDLE_SIGNAL_PEER_CLOSED, hss.satisfied_signals);
     EXPECT_EQ(MOJO_HANDLE_SIGNAL_PEER_CLOSED, hss.satisfiable_signals);
@@ -374,14 +376,14 @@ TEST(MessagePipeDispatcherTest, BasicClosed) {
     // closed).
     buffer[0] = 0;
     buffer_size = kBufferSize;
-    EXPECT_EQ(MOJO_RESULT_FAILED_PRECONDITION,
+    EXPECT_EQ(MOJO_SYSTEM_RESULT_FAILED_PRECONDITION,
               d0->ReadMessage(UserPointer<void>(buffer),
                               MakeUserPointer(&buffer_size), 0, nullptr,
                               MOJO_READ_MESSAGE_FLAG_NONE));
 
     // Try writing to |d0|; should fail (other end closed).
     buffer[0] = 345678901;
-    EXPECT_EQ(MOJO_RESULT_FAILED_PRECONDITION,
+    EXPECT_EQ(MOJO_SYSTEM_RESULT_FAILED_PRECONDITION,
               d0->WriteMessage(UserPointer<const void>(buffer), kBufferSize,
                                nullptr, MOJO_WRITE_MESSAGE_FLAG_NONE));
 
@@ -448,7 +450,7 @@ TEST(MessagePipeDispatcherTest, BasicThreaded) {
     }  // Joins the thread.
     EXPECT_LT(stopwatch.Elapsed(), test::EpsilonTimeout());
     EXPECT_FALSE(did_wait);
-    EXPECT_EQ(MOJO_RESULT_ALREADY_EXISTS, result);
+    EXPECT_EQ(MOJO_SYSTEM_RESULT_ALREADY_EXISTS, result);
     EXPECT_EQ(MOJO_HANDLE_SIGNAL_READABLE | MOJO_HANDLE_SIGNAL_WRITABLE,
               hss.satisfied_signals);
     EXPECT_EQ(MOJO_HANDLE_SIGNAL_READABLE | MOJO_HANDLE_SIGNAL_WRITABLE |
@@ -480,7 +482,7 @@ TEST(MessagePipeDispatcherTest, BasicThreaded) {
     EXPECT_GT(elapsed, (2 - 1) * test::EpsilonTimeout());
     EXPECT_LT(elapsed, (2 + 1) * test::EpsilonTimeout());
     EXPECT_TRUE(did_wait);
-    EXPECT_EQ(MOJO_RESULT_FAILED_PRECONDITION, result);
+    EXPECT_EQ(MOJO_SYSTEM_RESULT_FAILED_PRECONDITION, result);
     EXPECT_EQ(3u, context);
     EXPECT_EQ(MOJO_HANDLE_SIGNAL_PEER_CLOSED, hss.satisfied_signals);
     EXPECT_EQ(MOJO_HANDLE_SIGNAL_PEER_CLOSED, hss.satisfiable_signals);
@@ -514,7 +516,7 @@ TEST(MessagePipeDispatcherTest, BasicThreaded) {
     EXPECT_GT(elapsed, (2 - 1) * test::EpsilonTimeout());
     EXPECT_LT(elapsed, (2 + 1) * test::EpsilonTimeout());
     EXPECT_TRUE(did_wait);
-    EXPECT_EQ(MOJO_RESULT_CANCELLED, result);
+    EXPECT_EQ(MOJO_SYSTEM_RESULT_CANCELLED, result);
     EXPECT_EQ(4u, context);
     EXPECT_EQ(0u, hss.satisfied_signals);
     EXPECT_EQ(0u, hss.satisfiable_signals);
@@ -607,7 +609,7 @@ class ReaderThread : public test::SimpleTestThread {
       result = read_dispatcher_->AddAwakable(&w, 0, false,
                                              MOJO_HANDLE_SIGNAL_READABLE, &hss);
       EXPECT_TRUE(result == MOJO_RESULT_OK ||
-                  result == MOJO_RESULT_ALREADY_EXISTS)
+                  result == MOJO_SYSTEM_RESULT_ALREADY_EXISTS)
           << "result: " << result;
       if (result == MOJO_RESULT_OK) {
         // Actually need to wait.
@@ -625,10 +627,11 @@ class ReaderThread : public test::SimpleTestThread {
       result = read_dispatcher_->ReadMessage(
           UserPointer<void>(buffer), MakeUserPointer(&buffer_size), 0, nullptr,
           MOJO_READ_MESSAGE_FLAG_NONE);
-      EXPECT_TRUE(result == MOJO_RESULT_OK || result == MOJO_RESULT_SHOULD_WAIT)
+      EXPECT_TRUE(result == MOJO_RESULT_OK ||
+                  result == MOJO_SYSTEM_RESULT_SHOULD_WAIT)
           << "result: " << result;
       // We're racing with others to read, so maybe we failed.
-      if (result == MOJO_RESULT_SHOULD_WAIT)
+      if (result == MOJO_SYSTEM_RESULT_SHOULD_WAIT)
         continue;  // In which case, try again.
       // Check for quit.
       if (buffer_size == 4 && memcmp("quit", buffer, 4) == 0)

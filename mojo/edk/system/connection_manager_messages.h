@@ -5,10 +5,10 @@
 #ifndef MOJO_EDK_SYSTEM_CONNECTION_MANAGER_MESSAGES_H_
 #define MOJO_EDK_SYSTEM_CONNECTION_MANAGER_MESSAGES_H_
 
+#include <mojo/macros.h>
 #include <string.h>
 
 #include "mojo/edk/system/process_identifier.h"
-#include "mojo/public/c/system/macros.h"
 
 namespace mojo {
 namespace system {

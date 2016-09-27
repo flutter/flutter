@@ -132,20 +132,20 @@ MojoResult RemoteProducerDataPipeImpl::ProducerWriteData(
     uint32_t /*max_num_bytes_to_write*/,
     uint32_t /*min_num_bytes_to_write*/) {
   NOTREACHED();
-  return MOJO_RESULT_INTERNAL;
+  return MOJO_SYSTEM_RESULT_INTERNAL;
 }
 
 MojoResult RemoteProducerDataPipeImpl::ProducerBeginWriteData(
     UserPointer<void*> /*buffer*/,
     UserPointer<uint32_t> /*buffer_num_bytes*/) {
   NOTREACHED();
-  return MOJO_RESULT_INTERNAL;
+  return MOJO_SYSTEM_RESULT_INTERNAL;
 }
 
 MojoResult RemoteProducerDataPipeImpl::ProducerEndWriteData(
     uint32_t /*num_bytes_written*/) {
   NOTREACHED();
-  return MOJO_RESULT_INTERNAL;
+  return MOJO_SYSTEM_RESULT_INTERNAL;
 }
 
 HandleSignalsState RemoteProducerDataPipeImpl::ProducerGetHandleSignalsState()
@@ -188,15 +188,15 @@ MojoResult RemoteProducerDataPipeImpl::ConsumerReadData(
   if (min_num_bytes_to_read > current_num_bytes_) {
     // Don't return "should wait" since you can't wait for a specified amount of
     // data.
-    return producer_open() ? MOJO_RESULT_OUT_OF_RANGE
-                           : MOJO_RESULT_FAILED_PRECONDITION;
+    return producer_open() ? MOJO_SYSTEM_RESULT_OUT_OF_RANGE
+                           : MOJO_SYSTEM_RESULT_FAILED_PRECONDITION;
   }
 
   size_t num_bytes_to_read =
       std::min(static_cast<size_t>(max_num_bytes_to_read), current_num_bytes_);
   if (num_bytes_to_read == 0) {
-    return producer_open() ? MOJO_RESULT_SHOULD_WAIT
-                           : MOJO_RESULT_FAILED_PRECONDITION;
+    return producer_open() ? MOJO_SYSTEM_RESULT_SHOULD_WAIT
+                           : MOJO_SYSTEM_RESULT_FAILED_PRECONDITION;
   }
 
   // The amount we can read in our first |memcpy()|.
@@ -227,14 +227,14 @@ MojoResult RemoteProducerDataPipeImpl::ConsumerDiscardData(
   if (min_num_bytes_to_discard > current_num_bytes_) {
     // Don't return "should wait" since you can't wait for a specified amount of
     // data.
-    return producer_open() ? MOJO_RESULT_OUT_OF_RANGE
-                           : MOJO_RESULT_FAILED_PRECONDITION;
+    return producer_open() ? MOJO_SYSTEM_RESULT_OUT_OF_RANGE
+                           : MOJO_SYSTEM_RESULT_FAILED_PRECONDITION;
   }
 
   // Be consistent with other operations; error if no data available.
   if (current_num_bytes_ == 0) {
-    return producer_open() ? MOJO_RESULT_SHOULD_WAIT
-                           : MOJO_RESULT_FAILED_PRECONDITION;
+    return producer_open() ? MOJO_SYSTEM_RESULT_SHOULD_WAIT
+                           : MOJO_SYSTEM_RESULT_FAILED_PRECONDITION;
   }
 
   size_t num_bytes_to_discard = std::min(
@@ -257,8 +257,8 @@ MojoResult RemoteProducerDataPipeImpl::ConsumerBeginReadData(
   size_t max_num_bytes_to_read = GetMaxNumBytesToRead();
   // Don't go into a two-phase read if there's no data.
   if (max_num_bytes_to_read == 0) {
-    return producer_open() ? MOJO_RESULT_SHOULD_WAIT
-                           : MOJO_RESULT_FAILED_PRECONDITION;
+    return producer_open() ? MOJO_SYSTEM_RESULT_SHOULD_WAIT
+                           : MOJO_SYSTEM_RESULT_FAILED_PRECONDITION;
   }
 
   buffer.Put(buffer_.get() + start_index_);

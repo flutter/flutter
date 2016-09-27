@@ -46,7 +46,7 @@ TEST(HandleTableTest, Basic) {
 
   // We removed |hv|, so it should no longer be valid.
   h.reset();
-  EXPECT_EQ(MOJO_RESULT_INVALID_ARGUMENT, ht.GetHandle(hv, &h));
+  EXPECT_EQ(MOJO_SYSTEM_RESULT_INVALID_ARGUMENT, ht.GetHandle(hv, &h));
 }
 
 TEST(HandleTableTest, AddHandlePair) {

@@ -82,8 +82,9 @@ TEST(PlatformHandleDispatcher, SupportsEntrypointClass) {
   EXPECT_FALSE(d->SupportsEntrypointClass(EntrypointClass::DATA_PIPE_CONSUMER));
   EXPECT_FALSE(d->SupportsEntrypointClass(EntrypointClass::BUFFER));
 
-  // TODO(vtl): Check that it actually returns |MOJO_RESULT_INVALID_ARGUMENT|
-  // for methods in unsupported entrypoint classes.
+  // TODO(vtl): Check that it actually returns
+  // |MOJO_SYSTEM_RESULT_INVALID_ARGUMENT| for methods in unsupported entrypoint
+  // classes.
 
   EXPECT_EQ(MOJO_RESULT_OK, d->Close());
 }

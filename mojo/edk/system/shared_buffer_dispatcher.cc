@@ -4,6 +4,8 @@
 
 #include "mojo/edk/system/shared_buffer_dispatcher.h"
 
+#include <mojo/macros.h>
+
 #include <limits>
 #include <utility>
 
@@ -14,7 +16,6 @@
 #include "mojo/edk/system/configuration.h"
 #include "mojo/edk/system/memory.h"
 #include "mojo/edk/system/options_validation.h"
-#include "mojo/public/c/system/macros.h"
 
 using mojo::platform::PlatformSharedBuffer;
 using mojo::platform::PlatformSharedBufferMapping;
@@ -55,12 +56,12 @@ MojoResult SharedBufferDispatcher::ValidateCreateOptions(
 
   UserOptionsReader<MojoCreateSharedBufferOptions> reader(in_options);
   if (!reader.is_valid())
-    return MOJO_RESULT_INVALID_ARGUMENT;
+    return MOJO_SYSTEM_RESULT_INVALID_ARGUMENT;
 
   if (!OPTIONS_STRUCT_HAS_MEMBER(MojoCreateSharedBufferOptions, flags, reader))
     return MOJO_RESULT_OK;
   if ((reader.options().flags & ~kKnownFlags))
-    return MOJO_RESULT_UNIMPLEMENTED;
+    return MOJO_SYSTEM_RESULT_UNIMPLEMENTED;
   out_options->flags = reader.options().flags;
 
   // Checks for fields beyond |flags|:
@@ -77,18 +78,18 @@ RefPtr<SharedBufferDispatcher> SharedBufferDispatcher::Create(
     uint64_t num_bytes,
     MojoResult* result) {
   if (!num_bytes) {
-    *result = MOJO_RESULT_INVALID_ARGUMENT;
+    *result = MOJO_SYSTEM_RESULT_INVALID_ARGUMENT;
     return nullptr;
   }
   if (num_bytes > GetConfiguration().max_shared_memory_num_bytes) {
-    *result = MOJO_RESULT_RESOURCE_EXHAUSTED;
+    *result = MOJO_SYSTEM_RESULT_RESOURCE_EXHAUSTED;
     return nullptr;
   }
 
   auto shared_buffer =
       platform_support->CreateSharedBuffer(static_cast<size_t>(num_bytes));
   if (!shared_buffer) {
-    *result = MOJO_RESULT_RESOURCE_EXHAUSTED;
+    *result = MOJO_SYSTEM_RESULT_RESOURCE_EXHAUSTED;
     return nullptr;
   }
 
@@ -197,13 +198,13 @@ MojoResult SharedBufferDispatcher::ValidateDuplicateOptions(
 
   UserOptionsReader<MojoDuplicateBufferHandleOptions> reader(in_options);
   if (!reader.is_valid())
-    return MOJO_RESULT_INVALID_ARGUMENT;
+    return MOJO_SYSTEM_RESULT_INVALID_ARGUMENT;
 
   if (!OPTIONS_STRUCT_HAS_MEMBER(MojoDuplicateBufferHandleOptions, flags,
                                  reader))
     return MOJO_RESULT_OK;
   if ((reader.options().flags & ~kKnownFlags))
-    return MOJO_RESULT_UNIMPLEMENTED;
+    return MOJO_SYSTEM_RESULT_UNIMPLEMENTED;
   out_options->flags = reader.options().flags;
 
   // Checks for fields beyond |flags|:
@@ -262,12 +263,13 @@ MojoResult SharedBufferDispatcher::GetBufferInformationImplNoLock(
 
   // Note: If/when |MojoBufferInformation| is extended beyond its initial
   // definition, more work will be necessary. (See the definition of
-  // |MojoGetBufferInformation()| in mojo/public/c/system/buffer.h.)
+  // |MojoGetBufferInformation()| in
+  // mojo/public/c/include/mojo/system/buffer.h.)
   static_assert(sizeof(MojoBufferInformation) == 16u,
                 "MojoBufferInformation has been extended!");
 
   if (info_num_bytes < sizeof(MojoBufferInformation))
-    return MOJO_RESULT_INVALID_ARGUMENT;
+    return MOJO_SYSTEM_RESULT_INVALID_ARGUMENT;
 
   MojoBufferInformation model_info = {
       sizeof(MojoBufferInformation),                         // |struct_size|.
@@ -287,19 +289,19 @@ MojoResult SharedBufferDispatcher::MapBufferImplNoLock(
   DCHECK(shared_buffer_);
 
   if (offset > static_cast<uint64_t>(std::numeric_limits<size_t>::max()))
-    return MOJO_RESULT_INVALID_ARGUMENT;
+    return MOJO_SYSTEM_RESULT_INVALID_ARGUMENT;
   if (num_bytes > static_cast<uint64_t>(std::numeric_limits<size_t>::max()))
-    return MOJO_RESULT_INVALID_ARGUMENT;
+    return MOJO_SYSTEM_RESULT_INVALID_ARGUMENT;
 
   if (!shared_buffer_->IsValidMap(static_cast<size_t>(offset),
                                   static_cast<size_t>(num_bytes)))
-    return MOJO_RESULT_INVALID_ARGUMENT;
+    return MOJO_SYSTEM_RESULT_INVALID_ARGUMENT;
 
   DCHECK(mapping);
   *mapping = shared_buffer_->MapNoCheck(static_cast<size_t>(offset),
                                         static_cast<size_t>(num_bytes));
   if (!*mapping)
-    return MOJO_RESULT_RESOURCE_EXHAUSTED;
+    return MOJO_SYSTEM_RESULT_RESOURCE_EXHAUSTED;
 
   return MOJO_RESULT_OK;
 }

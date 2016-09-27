@@ -8,7 +8,7 @@
 #include <atomic>
 #include <memory>
 
-#include "mojo/public/c/environment/logger.h"
+#include <mojo/environment/logger.h>
 #include "mojo/public/cpp/application/connect.h"
 #include "mojo/public/cpp/bindings/array.h"
 #include "mojo/public/cpp/bindings/message.h"

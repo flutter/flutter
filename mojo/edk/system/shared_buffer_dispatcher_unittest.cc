@@ -100,7 +100,7 @@ TEST_F(SharedBufferDispatcherTest, ValidateCreateOptionsInvalid) {
         MOJO_CREATE_SHARED_BUFFER_OPTIONS_FLAG_NONE  // |flags|.
     };
     MojoCreateSharedBufferOptions unused;
-    EXPECT_EQ(MOJO_RESULT_INVALID_ARGUMENT,
+    EXPECT_EQ(MOJO_SYSTEM_RESULT_INVALID_ARGUMENT,
               SharedBufferDispatcher::ValidateCreateOptions(
                   MakeUserPointer(&options), &unused));
   }
@@ -112,7 +112,7 @@ TEST_F(SharedBufferDispatcherTest, ValidateCreateOptionsInvalid) {
         ~0u                    // |flags|.
     };
     MojoCreateSharedBufferOptions unused;
-    EXPECT_EQ(MOJO_RESULT_UNIMPLEMENTED,
+    EXPECT_EQ(MOJO_SYSTEM_RESULT_UNIMPLEMENTED,
               SharedBufferDispatcher::ValidateCreateOptions(
                   MakeUserPointer(&options), &unused));
   }
@@ -121,7 +121,7 @@ TEST_F(SharedBufferDispatcherTest, ValidateCreateOptionsInvalid) {
 TEST_F(SharedBufferDispatcherTest, CreateAndMapBuffer) {
   const uint64_t kSize = 100u;
 
-  MojoResult result = MOJO_RESULT_INTERNAL;
+  MojoResult result = MOJO_SYSTEM_RESULT_INTERNAL;
   auto dispatcher = SharedBufferDispatcher::Create(
       platform_support(), SharedBufferDispatcher::kDefaultCreateOptions, kSize,
       &result);
@@ -141,9 +141,9 @@ TEST_F(SharedBufferDispatcherTest, CreateAndMapBuffer) {
 
   // Also check that some invalid calls to |GetBufferInformation()| fail in the
   // expected way.
-  EXPECT_EQ(MOJO_RESULT_INVALID_ARGUMENT,
+  EXPECT_EQ(MOJO_SYSTEM_RESULT_INVALID_ARGUMENT,
             dispatcher->GetBufferInformation(MakeUserPointer(&info), 0u));
-  EXPECT_EQ(MOJO_RESULT_INVALID_ARGUMENT,
+  EXPECT_EQ(MOJO_SYSTEM_RESULT_INVALID_ARGUMENT,
             dispatcher->GetBufferInformation(MakeUserPointer(&info), 15u));
 
   // It's also valid to call it with a larger-than-required |info_num_bytes|.
@@ -184,7 +184,7 @@ TEST_F(SharedBufferDispatcherTest, CreateAndMapBuffer) {
 }
 
 TEST_F(SharedBufferDispatcherTest, SupportsEntrypointClass) {
-  MojoResult result = MOJO_RESULT_INTERNAL;
+  MojoResult result = MOJO_SYSTEM_RESULT_INTERNAL;
   auto d = SharedBufferDispatcher::Create(
       platform_support(), SharedBufferDispatcher::kDefaultCreateOptions, 100u,
       &result);
@@ -197,8 +197,9 @@ TEST_F(SharedBufferDispatcherTest, SupportsEntrypointClass) {
   EXPECT_FALSE(d->SupportsEntrypointClass(EntrypointClass::DATA_PIPE_CONSUMER));
   EXPECT_TRUE(d->SupportsEntrypointClass(EntrypointClass::BUFFER));
 
-  // TODO(vtl): Check that it actually returns |MOJO_RESULT_INVALID_ARGUMENT|
-  // for methods in unsupported entrypoint classes.
+  // TODO(vtl): Check that it actually returns
+  // |MOJO_SYSTEM_RESULT_INVALID_ARGUMENT| for methods in unsupported entrypoint
+  // classes.
 
   EXPECT_EQ(MOJO_RESULT_OK, d->Close());
 }
@@ -206,7 +207,7 @@ TEST_F(SharedBufferDispatcherTest, SupportsEntrypointClass) {
 TEST_F(SharedBufferDispatcherTest, DuplicateDispatcher) {
   const uint64_t kSize = 100u;
 
-  MojoResult result = MOJO_RESULT_INTERNAL;
+  MojoResult result = MOJO_SYSTEM_RESULT_INTERNAL;
   auto dispatcher1 = SharedBufferDispatcher::Create(
       platform_support(), SharedBufferDispatcher::kDefaultCreateOptions, kSize,
       &result);
@@ -249,7 +250,7 @@ TEST_F(SharedBufferDispatcherTest, DuplicateDispatcher) {
 TEST_F(SharedBufferDispatcherTest, DuplicateBufferHandle) {
   const uint64_t kSize = 100u;
 
-  MojoResult result = MOJO_RESULT_INTERNAL;
+  MojoResult result = MOJO_SYSTEM_RESULT_INTERNAL;
   auto dispatcher1 = SharedBufferDispatcher::Create(
       platform_support(), SharedBufferDispatcher::kDefaultCreateOptions, kSize,
       &result);
@@ -291,7 +292,7 @@ TEST_F(SharedBufferDispatcherTest, DuplicateBufferHandle) {
 }
 
 TEST_F(SharedBufferDispatcherTest, DuplicateBufferHandleOptionsValid) {
-  MojoResult result = MOJO_RESULT_INTERNAL;
+  MojoResult result = MOJO_SYSTEM_RESULT_INTERNAL;
   auto dispatcher1 = SharedBufferDispatcher::Create(
       platform_support(), SharedBufferDispatcher::kDefaultCreateOptions, 100,
       &result);
@@ -314,7 +315,7 @@ TEST_F(SharedBufferDispatcherTest, DuplicateBufferHandleOptionsValid) {
 }
 
 TEST_F(SharedBufferDispatcherTest, DuplicateBufferHandleOptionsInvalid) {
-  MojoResult result = MOJO_RESULT_INTERNAL;
+  MojoResult result = MOJO_SYSTEM_RESULT_INTERNAL;
   auto dispatcher1 = SharedBufferDispatcher::Create(
       platform_support(), SharedBufferDispatcher::kDefaultCreateOptions, 100,
       &result);
@@ -325,7 +326,7 @@ TEST_F(SharedBufferDispatcherTest, DuplicateBufferHandleOptionsInvalid) {
     MojoDuplicateBufferHandleOptions options = {
         1u, MOJO_DUPLICATE_BUFFER_HANDLE_OPTIONS_FLAG_NONE};
     RefPtr<Dispatcher> dispatcher2;
-    EXPECT_EQ(MOJO_RESULT_INVALID_ARGUMENT,
+    EXPECT_EQ(MOJO_SYSTEM_RESULT_INVALID_ARGUMENT,
               dispatcher1->DuplicateBufferHandle(MakeUserPointer(&options),
                                                  &dispatcher2));
     EXPECT_FALSE(dispatcher2);
@@ -336,7 +337,7 @@ TEST_F(SharedBufferDispatcherTest, DuplicateBufferHandleOptionsInvalid) {
     MojoDuplicateBufferHandleOptions options = {
         sizeof(MojoDuplicateBufferHandleOptions), ~0u};
     RefPtr<Dispatcher> dispatcher2;
-    EXPECT_EQ(MOJO_RESULT_UNIMPLEMENTED,
+    EXPECT_EQ(MOJO_SYSTEM_RESULT_UNIMPLEMENTED,
               dispatcher1->DuplicateBufferHandle(MakeUserPointer(&options),
                                                  &dispatcher2));
     EXPECT_FALSE(dispatcher2);
@@ -347,39 +348,39 @@ TEST_F(SharedBufferDispatcherTest, DuplicateBufferHandleOptionsInvalid) {
 
 TEST_F(SharedBufferDispatcherTest, CreateInvalidNumBytes) {
   // Size too big.
-  MojoResult result = MOJO_RESULT_INTERNAL;
+  MojoResult result = MOJO_SYSTEM_RESULT_INTERNAL;
   auto dispatcher = SharedBufferDispatcher::Create(
       platform_support(), SharedBufferDispatcher::kDefaultCreateOptions,
       std::numeric_limits<uint64_t>::max(), &result);
-  EXPECT_EQ(MOJO_RESULT_RESOURCE_EXHAUSTED, result);
+  EXPECT_EQ(MOJO_SYSTEM_RESULT_RESOURCE_EXHAUSTED, result);
   EXPECT_FALSE(dispatcher);
 
   // Zero size.
-  result = MOJO_RESULT_INTERNAL;
+  result = MOJO_SYSTEM_RESULT_INTERNAL;
   dispatcher = SharedBufferDispatcher::Create(
       platform_support(), SharedBufferDispatcher::kDefaultCreateOptions, 0,
       &result);
-  EXPECT_EQ(MOJO_RESULT_INVALID_ARGUMENT, result);
+  EXPECT_EQ(MOJO_SYSTEM_RESULT_INVALID_ARGUMENT, result);
   EXPECT_FALSE(dispatcher);
 }
 
 TEST_F(SharedBufferDispatcherTest, MapBufferInvalidArguments) {
-  MojoResult result = MOJO_RESULT_INTERNAL;
+  MojoResult result = MOJO_SYSTEM_RESULT_INTERNAL;
   auto dispatcher = SharedBufferDispatcher::Create(
       platform_support(), SharedBufferDispatcher::kDefaultCreateOptions, 100,
       &result);
   EXPECT_EQ(MOJO_RESULT_OK, result);
 
   std::unique_ptr<PlatformSharedBufferMapping> mapping;
-  EXPECT_EQ(MOJO_RESULT_INVALID_ARGUMENT,
+  EXPECT_EQ(MOJO_SYSTEM_RESULT_INVALID_ARGUMENT,
             dispatcher->MapBuffer(0, 101, MOJO_MAP_BUFFER_FLAG_NONE, &mapping));
   EXPECT_FALSE(mapping);
 
-  EXPECT_EQ(MOJO_RESULT_INVALID_ARGUMENT,
+  EXPECT_EQ(MOJO_SYSTEM_RESULT_INVALID_ARGUMENT,
             dispatcher->MapBuffer(1, 100, MOJO_MAP_BUFFER_FLAG_NONE, &mapping));
   EXPECT_FALSE(mapping);
 
-  EXPECT_EQ(MOJO_RESULT_INVALID_ARGUMENT,
+  EXPECT_EQ(MOJO_SYSTEM_RESULT_INVALID_ARGUMENT,
             dispatcher->MapBuffer(0, 0, MOJO_MAP_BUFFER_FLAG_NONE, &mapping));
   EXPECT_FALSE(mapping);
 

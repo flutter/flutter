@@ -26,7 +26,7 @@ source_set("chromium") {
     "//base",
     "//base/third_party/dynamic_annotations",
     "//mojo/message_pump",
-    "//mojo/public/c/environment",
+    "//mojo/public/c:environment",
     "//mojo/public/cpp/bindings:callback",
     "//mojo/public/cpp/environment",
     "//mojo/public/cpp/system",

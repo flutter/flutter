@@ -37,7 +37,7 @@ TEST(AwakableListTest, BasicCancelAndRemoveAll) {
     // Double-remove okay:
     awakable_list.Remove(false, thread.waiter(), 0);
   }  // Join |thread|.
-  EXPECT_EQ(MOJO_RESULT_CANCELLED, result);
+  EXPECT_EQ(MOJO_SYSTEM_RESULT_CANCELLED, result);
   EXPECT_EQ(1u, context);
 
   // Cancel before after thread start.
@@ -49,7 +49,7 @@ TEST(AwakableListTest, BasicCancelAndRemoveAll) {
     awakable_list.CancelAndRemoveAll();
     thread.Start();
   }  // Join |thread|.
-  EXPECT_EQ(MOJO_RESULT_CANCELLED, result);
+  EXPECT_EQ(MOJO_SYSTEM_RESULT_CANCELLED, result);
   EXPECT_EQ(2u, context);
 
   // Cancel some time after thread start.
@@ -62,7 +62,7 @@ TEST(AwakableListTest, BasicCancelAndRemoveAll) {
     ThreadSleep(2 * test::EpsilonTimeout());
     awakable_list.CancelAndRemoveAll();
   }  // Join |thread|.
-  EXPECT_EQ(MOJO_RESULT_CANCELLED, result);
+  EXPECT_EQ(MOJO_SYSTEM_RESULT_CANCELLED, result);
   EXPECT_EQ(3u, context);
 }
 
@@ -150,7 +150,7 @@ TEST(AwakableListTest, BasicAwakeUnsatisfiable) {
                                       MOJO_HANDLE_SIGNAL_WRITABLE));
     awakable_list.Remove(false, thread.waiter(), 0);
   }  // Join |thread|.
-  EXPECT_EQ(MOJO_RESULT_FAILED_PRECONDITION, result);
+  EXPECT_EQ(MOJO_SYSTEM_RESULT_FAILED_PRECONDITION, result);
   EXPECT_EQ(1u, context);
 
   // Awake (for unsatisfiability) before after thread start.
@@ -168,7 +168,7 @@ TEST(AwakableListTest, BasicAwakeUnsatisfiable) {
     awakable_list.Remove(false, thread.waiter(), 0);
     thread.Start();
   }  // Join |thread|.
-  EXPECT_EQ(MOJO_RESULT_FAILED_PRECONDITION, result);
+  EXPECT_EQ(MOJO_SYSTEM_RESULT_FAILED_PRECONDITION, result);
   EXPECT_EQ(2u, context);
 
   // Awake (for unsatisfiability) some time after thread start.
@@ -189,7 +189,7 @@ TEST(AwakableListTest, BasicAwakeUnsatisfiable) {
     // Double-remove okay:
     awakable_list.Remove(false, thread.waiter(), 0);
   }  // Join |thread|.
-  EXPECT_EQ(MOJO_RESULT_FAILED_PRECONDITION, result);
+  EXPECT_EQ(MOJO_SYSTEM_RESULT_FAILED_PRECONDITION, result);
   EXPECT_EQ(3u, context);
 }
 
@@ -217,9 +217,9 @@ TEST(AwakableListTest, MultipleAwakables) {
     ThreadSleep(2 * test::EpsilonTimeout());
     awakable_list.CancelAndRemoveAll();
   }  // Join threads.
-  EXPECT_EQ(MOJO_RESULT_CANCELLED, result1);
+  EXPECT_EQ(MOJO_SYSTEM_RESULT_CANCELLED, result1);
   EXPECT_EQ(1u, context1);
-  EXPECT_EQ(MOJO_RESULT_CANCELLED, result2);
+  EXPECT_EQ(MOJO_SYSTEM_RESULT_CANCELLED, result2);
   EXPECT_EQ(2u, context2);
 
   // Awake one awakable, cancel other.
@@ -246,7 +246,7 @@ TEST(AwakableListTest, MultipleAwakables) {
   }  // Join threads.
   EXPECT_EQ(MOJO_RESULT_OK, result1);
   EXPECT_EQ(3u, context1);
-  EXPECT_EQ(MOJO_RESULT_CANCELLED, result2);
+  EXPECT_EQ(MOJO_SYSTEM_RESULT_CANCELLED, result2);
   EXPECT_EQ(4u, context2);
 
   // Cancel one awakable, awake other for unsatisfiability.
@@ -270,9 +270,9 @@ TEST(AwakableListTest, MultipleAwakables) {
     awakable_list.Remove(false, thread2.waiter(), 0);
     awakable_list.CancelAndRemoveAll();
   }  // Join threads.
-  EXPECT_EQ(MOJO_RESULT_CANCELLED, result1);
+  EXPECT_EQ(MOJO_SYSTEM_RESULT_CANCELLED, result1);
   EXPECT_EQ(5u, context1);
-  EXPECT_EQ(MOJO_RESULT_FAILED_PRECONDITION, result2);
+  EXPECT_EQ(MOJO_SYSTEM_RESULT_FAILED_PRECONDITION, result2);
   EXPECT_EQ(6u, context2);
 
   // Cancel one awakable, awake other for unsatisfiability.
@@ -336,11 +336,11 @@ TEST(AwakableListTest, MultipleAwakables) {
   }  // Join threads.
   EXPECT_EQ(MOJO_RESULT_OK, result1);
   EXPECT_EQ(7u, context1);
-  EXPECT_EQ(MOJO_RESULT_FAILED_PRECONDITION, result2);
+  EXPECT_EQ(MOJO_SYSTEM_RESULT_FAILED_PRECONDITION, result2);
   EXPECT_EQ(8u, context2);
-  EXPECT_EQ(MOJO_RESULT_FAILED_PRECONDITION, result3);
+  EXPECT_EQ(MOJO_SYSTEM_RESULT_FAILED_PRECONDITION, result3);
   EXPECT_EQ(9u, context3);
-  EXPECT_EQ(MOJO_RESULT_CANCELLED, result4);
+  EXPECT_EQ(MOJO_SYSTEM_RESULT_CANCELLED, result4);
   EXPECT_EQ(10u, context4);
 }
 

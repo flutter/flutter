@@ -68,7 +68,7 @@ MOJO_MULTIPROCESS_TEST_CHILD_MAIN(EchoEcho) {
         test::WaitIfNecessary(mp.get(), MOJO_HANDLE_SIGNAL_READABLE, &hss);
     if (result != MOJO_RESULT_OK) {
       // It was closed, probably.
-      CHECK_EQ(result, MOJO_RESULT_FAILED_PRECONDITION);
+      CHECK_EQ(result, MOJO_SYSTEM_RESULT_FAILED_PRECONDITION);
       CHECK_EQ(hss.satisfied_signals, MOJO_HANDLE_SIGNAL_PEER_CLOSED);
       CHECK_EQ(hss.satisfiable_signals, MOJO_HANDLE_SIGNAL_PEER_CLOSED);
       break;
@@ -201,7 +201,7 @@ TEST_F(MultiprocessMessagePipeTest, DISABLED_QueueMessages) {
   // Wait for it to become readable, which should fail (since we sent
   // "quitquitquit").
   HandleSignalsState hss;
-  EXPECT_EQ(MOJO_RESULT_FAILED_PRECONDITION,
+  EXPECT_EQ(MOJO_SYSTEM_RESULT_FAILED_PRECONDITION,
             test::WaitIfNecessary(mp.get(), MOJO_HANDLE_SIGNAL_READABLE, &hss));
   EXPECT_EQ(MOJO_HANDLE_SIGNAL_PEER_CLOSED, hss.satisfied_signals);
   EXPECT_EQ(MOJO_HANDLE_SIGNAL_PEER_CLOSED, hss.satisfiable_signals);
@@ -319,7 +319,7 @@ TEST_F(MultiprocessMessagePipeTest, MAYBE_SharedBufferPassing) {
   Init(std::move(ep));
 
   // Make a shared buffer.
-  MojoResult result = MOJO_RESULT_INTERNAL;
+  MojoResult result = MOJO_SYSTEM_RESULT_INTERNAL;
   auto dispatcher = SharedBufferDispatcher::Create(
       platform_support(), SharedBufferDispatcher::kDefaultCreateOptions, 100,
       &result);
@@ -386,7 +386,7 @@ TEST_F(MultiprocessMessagePipeTest, MAYBE_SharedBufferPassing) {
 
   // Wait for |mp| to become readable, which should fail.
   hss = HandleSignalsState();
-  EXPECT_EQ(MOJO_RESULT_FAILED_PRECONDITION,
+  EXPECT_EQ(MOJO_SYSTEM_RESULT_FAILED_PRECONDITION,
             test::WaitIfNecessary(mp.get(), MOJO_HANDLE_SIGNAL_READABLE, &hss));
   EXPECT_EQ(MOJO_HANDLE_SIGNAL_PEER_CLOSED, hss.satisfied_signals);
   EXPECT_EQ(MOJO_HANDLE_SIGNAL_PEER_CLOSED, hss.satisfiable_signals);
@@ -508,7 +508,7 @@ TEST_P(MultiprocessMessagePipeTestWithPipeCount, PlatformHandlePassing) {
 
   // Wait for it to become readable, which should fail.
   HandleSignalsState hss;
-  EXPECT_EQ(MOJO_RESULT_FAILED_PRECONDITION,
+  EXPECT_EQ(MOJO_SYSTEM_RESULT_FAILED_PRECONDITION,
             test::WaitIfNecessary(mp.get(), MOJO_HANDLE_SIGNAL_READABLE, &hss));
   EXPECT_EQ(MOJO_HANDLE_SIGNAL_PEER_CLOSED, hss.satisfied_signals);
   EXPECT_EQ(MOJO_HANDLE_SIGNAL_PEER_CLOSED, hss.satisfiable_signals);

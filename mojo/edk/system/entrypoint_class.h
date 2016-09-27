@@ -10,8 +10,8 @@ namespace system {
 
 // Classes of "entrypoints"/"syscalls": Each dispatcher should support entire
 // classes of methods (and if they don't support a given class, they should
-// return |MOJO_RESULT_INVALID_ARGUMENT| for all the methods in that class).
-// Warning: A dispatcher method may be called even if the dispatcher's
+// return |MOJO_SYSTEM_RESULT_INVALID_ARGUMENT| for all the methods in that
+// class). Warning: A dispatcher method may be called even if the dispatcher's
 // |SupportsEntrypointClass()| indicates that the method's class is not
 // supported.
 enum class EntrypointClass {

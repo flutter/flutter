@@ -71,10 +71,10 @@ class MockDispatcher : public Dispatcher {
     mutex().AssertHeld();
 
     if (num_bytes > GetConfiguration().max_message_num_bytes)
-      return MOJO_RESULT_RESOURCE_EXHAUSTED;
+      return MOJO_SYSTEM_RESULT_RESOURCE_EXHAUSTED;
 
     if (transports)
-      return MOJO_RESULT_UNIMPLEMENTED;
+      return MOJO_SYSTEM_RESULT_UNIMPLEMENTED;
 
     return MOJO_RESULT_OK;
   }
@@ -103,7 +103,7 @@ class MockDispatcher : public Dispatcher {
                                  MojoWriteDataFlags /*flags*/) override {
     info_->IncrementWriteDataCallCount();
     mutex().AssertHeld();
-    return MOJO_RESULT_UNIMPLEMENTED;
+    return MOJO_SYSTEM_RESULT_UNIMPLEMENTED;
   }
 
   MojoResult BeginWriteDataImplNoLock(
@@ -112,13 +112,13 @@ class MockDispatcher : public Dispatcher {
       MojoWriteDataFlags /*flags*/) override {
     info_->IncrementBeginWriteDataCallCount();
     mutex().AssertHeld();
-    return MOJO_RESULT_UNIMPLEMENTED;
+    return MOJO_SYSTEM_RESULT_UNIMPLEMENTED;
   }
 
   MojoResult EndWriteDataImplNoLock(uint32_t /*num_bytes_written*/) override {
     info_->IncrementEndWriteDataCallCount();
     mutex().AssertHeld();
-    return MOJO_RESULT_UNIMPLEMENTED;
+    return MOJO_SYSTEM_RESULT_UNIMPLEMENTED;
   }
 
   MojoResult ReadDataImplNoLock(UserPointer<void> /*elements*/,
@@ -126,7 +126,7 @@ class MockDispatcher : public Dispatcher {
                                 MojoReadDataFlags /*flags*/) override {
     info_->IncrementReadDataCallCount();
     mutex().AssertHeld();
-    return MOJO_RESULT_UNIMPLEMENTED;
+    return MOJO_SYSTEM_RESULT_UNIMPLEMENTED;
   }
 
   MojoResult BeginReadDataImplNoLock(UserPointer<const void*> /*buffer*/,
@@ -134,13 +134,13 @@ class MockDispatcher : public Dispatcher {
                                      MojoReadDataFlags /*flags*/) override {
     info_->IncrementBeginReadDataCallCount();
     mutex().AssertHeld();
-    return MOJO_RESULT_UNIMPLEMENTED;
+    return MOJO_SYSTEM_RESULT_UNIMPLEMENTED;
   }
 
   MojoResult EndReadDataImplNoLock(uint32_t /*num_bytes_read*/) override {
     info_->IncrementEndReadDataCallCount();
     mutex().AssertHeld();
-    return MOJO_RESULT_UNIMPLEMENTED;
+    return MOJO_SYSTEM_RESULT_UNIMPLEMENTED;
   }
 
   MojoResult DuplicateBufferHandleImplNoLock(
@@ -148,7 +148,7 @@ class MockDispatcher : public Dispatcher {
       RefPtr<Dispatcher>* /*new_dispatcher*/) override {
     info_->IncrementDuplicateBufferHandleCallCount();
     mutex().AssertHeld();
-    return MOJO_RESULT_UNIMPLEMENTED;
+    return MOJO_SYSTEM_RESULT_UNIMPLEMENTED;
   }
 
   MojoResult GetBufferInformationImplNoLock(
@@ -156,7 +156,7 @@ class MockDispatcher : public Dispatcher {
       uint32_t /*info_num_bytes*/) override {
     info_->IncrementGetBufferInformationCallCount();
     mutex().AssertHeld();
-    return MOJO_RESULT_UNIMPLEMENTED;
+    return MOJO_SYSTEM_RESULT_UNIMPLEMENTED;
   }
 
   MojoResult MapBufferImplNoLock(
@@ -167,7 +167,7 @@ class MockDispatcher : public Dispatcher {
       override {
     info_->IncrementMapBufferCallCount();
     mutex().AssertHeld();
-    return MOJO_RESULT_UNIMPLEMENTED;
+    return MOJO_SYSTEM_RESULT_UNIMPLEMENTED;
   }
 
   MojoResult WaitSetAddImpl(
@@ -177,13 +177,13 @@ class MockDispatcher : public Dispatcher {
       UserPointer<const MojoWaitSetAddOptions> /*options*/) override {
     info_->IncrementWaitSetAddCallCount();
     // Note: |mutex()| is *not* held.
-    return MOJO_RESULT_UNIMPLEMENTED;
+    return MOJO_SYSTEM_RESULT_UNIMPLEMENTED;
   }
 
   MojoResult WaitSetRemoveImpl(uint64_t /*cookie*/) override {
     info_->IncrementWaitSetRemoveCallCount();
     // Note: |mutex()| is *not* held.
-    return MOJO_RESULT_UNIMPLEMENTED;
+    return MOJO_SYSTEM_RESULT_UNIMPLEMENTED;
   }
 
   MojoResult WaitSetWaitImpl(MojoDeadline /*deadline*/,
@@ -192,7 +192,7 @@ class MockDispatcher : public Dispatcher {
                              UserPointer<uint32_t> /*max_results*/) override {
     info_->IncrementWaitSetWaitCallCount();
     // Note: |mutex()| is *not* held.
-    return MOJO_RESULT_UNIMPLEMENTED;
+    return MOJO_SYSTEM_RESULT_UNIMPLEMENTED;
   }
 
   MojoResult AddAwakableImplNoLock(Awakable* awakable,
@@ -209,7 +209,7 @@ class MockDispatcher : public Dispatcher {
       return MOJO_RESULT_OK;
     }
 
-    return MOJO_RESULT_FAILED_PRECONDITION;
+    return MOJO_SYSTEM_RESULT_FAILED_PRECONDITION;
   }
 
   void RemoveAwakableImplNoLock(bool /*match_context*/,
@@ -264,13 +264,12 @@ void CoreTestBase::TearDown() {
 MojoHandle CoreTestBase::CreateMockHandle(CoreTestBase::MockHandleInfo* info) {
   CHECK(core_);
   auto dispatcher = MockDispatcher::Create(info);
-  MojoHandle rv = core_->AddHandle(Handle(
-      std::move(dispatcher),
-      MOJO_HANDLE_RIGHT_DUPLICATE | MOJO_HANDLE_RIGHT_TRANSFER |
-          MOJO_HANDLE_RIGHT_READ | MOJO_HANDLE_RIGHT_WRITE |
-          MOJO_HANDLE_RIGHT_GET_OPTIONS | MOJO_HANDLE_RIGHT_SET_OPTIONS |
-          MOJO_HANDLE_RIGHT_MAP_READABLE | MOJO_HANDLE_RIGHT_MAP_WRITABLE |
-          MOJO_HANDLE_RIGHT_MAP_EXECUTABLE));
+  MojoHandle rv = core_->AddHandle(
+      Handle(std::move(dispatcher),
+             MOJO_HANDLE_RIGHT_DUPLICATE | MOJO_HANDLE_RIGHT_TRANSFER |
+                 MOJO_HANDLE_RIGHT_READ | MOJO_HANDLE_RIGHT_WRITE |
+                 MOJO_HANDLE_RIGHT_EXECUTE | MOJO_HANDLE_RIGHT_GET_OPTIONS |
+                 MOJO_HANDLE_RIGHT_SET_OPTIONS));
   CHECK_NE(rv, MOJO_HANDLE_INVALID);
   return rv;
 }

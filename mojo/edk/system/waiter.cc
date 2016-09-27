@@ -66,7 +66,7 @@ MojoResult Waiter::Wait(MojoDeadline deadline,
       // NOTE(vtl): Possibly, we should add a version of |WaitWithTimeout()|
       // that takes an absolute deadline, since that's what pthreads takes.
       if (cv_.WaitWithTimeout(&mutex_, wait_remaining))
-        return MOJO_RESULT_DEADLINE_EXCEEDED;  // Definitely timed out.
+        return MOJO_SYSTEM_RESULT_DEADLINE_EXCEEDED;  // Definitely timed out.
 
       // Otherwise, we may have been awoken.
       if (awoken_)
@@ -78,7 +78,7 @@ MojoResult Waiter::Wait(MojoDeadline deadline,
       uint64_t elapsed = static_cast<uint64_t>(now - start);
       // It's possible that the deadline has passed anyway.
       if (elapsed >= deadline)
-        return MOJO_RESULT_DEADLINE_EXCEEDED;
+        return MOJO_SYSTEM_RESULT_DEADLINE_EXCEEDED;
 
       // Otherwise, recalculate the amount that we have left to wait.
       wait_remaining = deadline - elapsed;

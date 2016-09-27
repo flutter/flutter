@@ -13,18 +13,18 @@ namespace system {
 MojoResult Awakable::MojoResultForAwakeReason(AwakeReason reason) {
   switch (reason) {
     case AwakeReason::CANCELLED:
-      return MOJO_RESULT_CANCELLED;
+      return MOJO_SYSTEM_RESULT_CANCELLED;
     case AwakeReason::SATISFIED:
       return MOJO_RESULT_OK;
     case AwakeReason::UNSATISFIABLE:
-      return MOJO_RESULT_FAILED_PRECONDITION;
+      return MOJO_SYSTEM_RESULT_FAILED_PRECONDITION;
     case AwakeReason::INITIALIZE:
       break;
     case AwakeReason::CHANGED:
       break;
   }
   NOTREACHED();
-  return MOJO_RESULT_INTERNAL;
+  return MOJO_SYSTEM_RESULT_INTERNAL;
 }
 
 }  // namespace system

@@ -35,7 +35,7 @@ class WaitingThread : public test::SimpleTestThread {
   explicit WaitingThread(MojoDeadline deadline)
       : deadline_(deadline),
         done_(false),
-        result_(MOJO_RESULT_UNKNOWN),
+        result_(MOJO_SYSTEM_RESULT_UNKNOWN),
         context_(static_cast<uint64_t>(-1)) {
     waiter_.Init();
   }
@@ -130,7 +130,7 @@ TEST(WaiterTest, Basic) {
                                               MOJO_HANDLE_SIGNAL_WRITABLE));
     thread.Start();
     thread.WaitUntilDone(&result, &context, &hss, &elapsed);
-    EXPECT_EQ(MOJO_RESULT_CANCELLED, result);
+    EXPECT_EQ(MOJO_SYSTEM_RESULT_CANCELLED, result);
     EXPECT_EQ(2u, context);
     EXPECT_TRUE(hss.equals(HandleSignalsState(MOJO_HANDLE_SIGNAL_NONE,
                                               MOJO_HANDLE_SIGNAL_WRITABLE)));
@@ -164,7 +164,7 @@ TEST(WaiterTest, Basic) {
     thread.waiter()->Awake(4, Awakable::AwakeReason::UNSATISFIABLE,
                            HandleSignalsState());
     thread.WaitUntilDone(&result, &context, &hss, &elapsed);
-    EXPECT_EQ(MOJO_RESULT_FAILED_PRECONDITION, result);
+    EXPECT_EQ(MOJO_SYSTEM_RESULT_FAILED_PRECONDITION, result);
     EXPECT_EQ(4u, context);
     EXPECT_TRUE(hss.equals(HandleSignalsState()));
     EXPECT_GT(elapsed, (5 - 1) * test::EpsilonTimeout());
@@ -176,7 +176,7 @@ TEST(WaiterTest, Basic) {
     WaitingThread thread(2 * test::EpsilonTimeout());
     thread.Start();
     thread.WaitUntilDone(&result, &context, &hss, &elapsed);
-    EXPECT_EQ(MOJO_RESULT_DEADLINE_EXCEEDED, result);
+    EXPECT_EQ(MOJO_SYSTEM_RESULT_DEADLINE_EXCEEDED, result);
     EXPECT_EQ(static_cast<uint64_t>(-1), context);
     EXPECT_GT(elapsed, (2 - 1) * test::EpsilonTimeout());
     EXPECT_LT(elapsed, (2 + 1) * test::EpsilonTimeout());
@@ -206,7 +206,7 @@ TEST(WaiterTest, Basic) {
                            HandleSignalsState());
     thread.Start();
     thread.WaitUntilDone(&result, &context, &hss, &elapsed);
-    EXPECT_EQ(MOJO_RESULT_CANCELLED, result);
+    EXPECT_EQ(MOJO_SYSTEM_RESULT_CANCELLED, result);
     EXPECT_EQ(6u, context);
     EXPECT_TRUE(hss.equals(HandleSignalsState()));
     EXPECT_LT(elapsed, test::EpsilonTimeout());
@@ -221,7 +221,7 @@ TEST(WaiterTest, Basic) {
                            HandleSignalsState(MOJO_HANDLE_SIGNAL_NONE,
                                               MOJO_HANDLE_SIGNAL_WRITABLE));
     thread.WaitUntilDone(&result, &context, &hss, &elapsed);
-    EXPECT_EQ(MOJO_RESULT_FAILED_PRECONDITION, result);
+    EXPECT_EQ(MOJO_SYSTEM_RESULT_FAILED_PRECONDITION, result);
     EXPECT_EQ(7u, context);
     EXPECT_TRUE(hss.equals(HandleSignalsState(MOJO_HANDLE_SIGNAL_NONE,
                                               MOJO_HANDLE_SIGNAL_WRITABLE)));
@@ -238,7 +238,7 @@ TEST(WaiterTest, Basic) {
                            HandleSignalsState(MOJO_HANDLE_SIGNAL_READABLE,
                                               MOJO_HANDLE_SIGNAL_READABLE));
     thread.WaitUntilDone(&result, &context, &hss, &elapsed);
-    EXPECT_EQ(MOJO_RESULT_CANCELLED, result);
+    EXPECT_EQ(MOJO_SYSTEM_RESULT_CANCELLED, result);
     EXPECT_EQ(8u, context);
     EXPECT_TRUE(hss.equals(HandleSignalsState(MOJO_HANDLE_SIGNAL_READABLE,
                                               MOJO_HANDLE_SIGNAL_READABLE)));
@@ -256,14 +256,15 @@ TEST(WaiterTest, TimeOut) {
 
   waiter.Init();
   stopwatch.Start();
-  EXPECT_EQ(MOJO_RESULT_DEADLINE_EXCEEDED, waiter.Wait(0, &context, nullptr));
+  EXPECT_EQ(MOJO_SYSTEM_RESULT_DEADLINE_EXCEEDED,
+            waiter.Wait(0, &context, nullptr));
   elapsed = stopwatch.Elapsed();
   EXPECT_LT(elapsed, test::EpsilonTimeout());
   EXPECT_EQ(123u, context);
 
   waiter.Init();
   stopwatch.Start();
-  EXPECT_EQ(MOJO_RESULT_DEADLINE_EXCEEDED,
+  EXPECT_EQ(MOJO_SYSTEM_RESULT_DEADLINE_EXCEEDED,
             waiter.Wait(2 * test::EpsilonTimeout(), &context, nullptr));
   elapsed = stopwatch.Elapsed();
   EXPECT_GT(elapsed, (2 - 1) * test::EpsilonTimeout());
@@ -272,7 +273,7 @@ TEST(WaiterTest, TimeOut) {
 
   waiter.Init();
   stopwatch.Start();
-  EXPECT_EQ(MOJO_RESULT_DEADLINE_EXCEEDED,
+  EXPECT_EQ(MOJO_SYSTEM_RESULT_DEADLINE_EXCEEDED,
             waiter.Wait(5 * test::EpsilonTimeout(), &context, nullptr));
   elapsed = stopwatch.Elapsed();
   EXPECT_GT(elapsed, (5 - 1) * test::EpsilonTimeout());
@@ -312,7 +313,7 @@ TEST(WaiterTest, MultipleAwakes) {
                            HandleSignalsState(MOJO_HANDLE_SIGNAL_READABLE,
                                               MOJO_HANDLE_SIGNAL_READABLE));
     thread.WaitUntilDone(&result, &context, &hss, &elapsed);
-    EXPECT_EQ(MOJO_RESULT_FAILED_PRECONDITION, result);
+    EXPECT_EQ(MOJO_SYSTEM_RESULT_FAILED_PRECONDITION, result);
     EXPECT_EQ(3u, context);
     EXPECT_TRUE(hss.equals(HandleSignalsState()));
     EXPECT_LT(elapsed, test::EpsilonTimeout());
@@ -328,7 +329,7 @@ TEST(WaiterTest, MultipleAwakes) {
                            HandleSignalsState(MOJO_HANDLE_SIGNAL_READABLE,
                                               MOJO_HANDLE_SIGNAL_READABLE));
     thread.WaitUntilDone(&result, &context, &hss, &elapsed);
-    EXPECT_EQ(MOJO_RESULT_CANCELLED, result);
+    EXPECT_EQ(MOJO_SYSTEM_RESULT_CANCELLED, result);
     EXPECT_EQ(5u, context);
     EXPECT_TRUE(hss.equals(HandleSignalsState()));
     EXPECT_LT(elapsed, test::EpsilonTimeout());
@@ -345,7 +346,7 @@ TEST(WaiterTest, MultipleAwakes) {
                            HandleSignalsState(MOJO_HANDLE_SIGNAL_READABLE,
                                               MOJO_HANDLE_SIGNAL_READABLE));
     thread.WaitUntilDone(&result, &context, &hss, &elapsed);
-    EXPECT_EQ(MOJO_RESULT_FAILED_PRECONDITION, result);
+    EXPECT_EQ(MOJO_SYSTEM_RESULT_FAILED_PRECONDITION, result);
     EXPECT_EQ(7u, context);
     EXPECT_TRUE(hss.equals(HandleSignalsState()));
     EXPECT_GT(elapsed, (1 - 1) * test::EpsilonTimeout());

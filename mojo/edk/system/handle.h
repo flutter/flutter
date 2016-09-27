@@ -5,10 +5,11 @@
 #ifndef MOJO_EDK_SYSTEM_HANDLE_H_
 #define MOJO_EDK_SYSTEM_HANDLE_H_
 
+#include <mojo/system/handle.h>
+
 #include <vector>
 
 #include "mojo/edk/util/ref_ptr.h"
-#include "mojo/public/c/system/handle.h"
 
 namespace mojo {
 namespace system {

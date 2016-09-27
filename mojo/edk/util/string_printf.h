@@ -14,7 +14,7 @@
 
 #include <string>
 
-#include "mojo/public/c/system/macros.h"
+#include <mojo/macros.h>
 
 namespace mojo {
 namespace util {

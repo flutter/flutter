@@ -4,6 +4,8 @@
 
 #include "mojo/edk/system/core.h"
 
+#include <mojo/macros.h>
+
 #include <limits>
 #include <memory>
 #include <utility>
@@ -27,7 +29,6 @@
 #include "mojo/edk/system/shared_buffer_dispatcher.h"
 #include "mojo/edk/system/wait_set_dispatcher.h"
 #include "mojo/edk/system/waiter.h"
-#include "mojo/public/c/system/macros.h"
 #include "mojo/public/cpp/system/macros.h"
 
 using mojo::platform::GetTimeTicks;
@@ -101,7 +102,7 @@ MojoHandle Core::AddHandle(Handle&& handle) {
 
 MojoResult Core::GetHandle(MojoHandle handle, Handle* h) {
   if (handle == MOJO_HANDLE_INVALID)
-    return MOJO_RESULT_INVALID_ARGUMENT;
+    return MOJO_SYSTEM_RESULT_INVALID_ARGUMENT;
 
   MutexLocker locker(&handle_table_mutex_);
   return handle_table_.GetHandle(handle, h);
@@ -109,7 +110,7 @@ MojoResult Core::GetHandle(MojoHandle handle, Handle* h) {
 
 MojoResult Core::GetAndRemoveHandle(MojoHandle handle, Handle* h) {
   if (handle == MOJO_HANDLE_INVALID)
-    return MOJO_RESULT_INVALID_ARGUMENT;
+    return MOJO_SYSTEM_RESULT_INVALID_ARGUMENT;
 
   MutexLocker locker(&handle_table_mutex_);
   return handle_table_.GetAndRemoveHandle(handle, h);
@@ -121,7 +122,7 @@ MojoResult Core::GetDispatcherAndCheckRights(
     EntrypointClass entrypoint_class,
     util::RefPtr<Dispatcher>* dispatcher) {
   if (handle == MOJO_HANDLE_INVALID)
-    return MOJO_RESULT_INVALID_ARGUMENT;
+    return MOJO_SYSTEM_RESULT_INVALID_ARGUMENT;
 
   Handle h;
   MojoResult result = GetHandle(handle, &h);
@@ -130,8 +131,8 @@ MojoResult Core::GetDispatcherAndCheckRights(
 
   if (!h.has_all_rights(required_handle_rights)) {
     return h.dispatcher->SupportsEntrypointClass(entrypoint_class)
-               ? MOJO_RESULT_PERMISSION_DENIED
-               : MOJO_RESULT_INVALID_ARGUMENT;
+               ? MOJO_SYSTEM_RESULT_PERMISSION_DENIED
+               : MOJO_SYSTEM_RESULT_INVALID_ARGUMENT;
   }
 
   *dispatcher = std::move(h.dispatcher);
@@ -160,7 +161,7 @@ MojoTimeTicks Core::GetTimeTicksNow() {
 
 MojoResult Core::Close(MojoHandle handle) {
   if (handle == MOJO_HANDLE_INVALID)
-    return MOJO_RESULT_INVALID_ARGUMENT;
+    return MOJO_SYSTEM_RESULT_INVALID_ARGUMENT;
 
   Handle h;
   {
@@ -193,7 +194,7 @@ MojoResult Core::ReplaceHandleWithReducedRights(
     MojoHandleRights rights_to_remove,
     UserPointer<MojoHandle> replacement_handle) {
   if (handle == MOJO_HANDLE_INVALID)
-    return MOJO_RESULT_INVALID_ARGUMENT;
+    return MOJO_SYSTEM_RESULT_INVALID_ARGUMENT;
 
   MojoHandle replacement_handle_value = MOJO_HANDLE_INVALID;
   {
@@ -219,7 +220,7 @@ MojoResult Core::DuplicateHandleWithReducedRights(
     return result;
 
   if (!h.has_all_rights(MOJO_HANDLE_RIGHT_DUPLICATE))
-    return MOJO_RESULT_PERMISSION_DENIED;
+    return MOJO_SYSTEM_RESULT_PERMISSION_DENIED;
 
   RefPtr<Dispatcher> new_dispatcher;
   result = h.dispatcher->DuplicateDispatcher(&new_dispatcher);
@@ -231,7 +232,7 @@ MojoResult Core::DuplicateHandleWithReducedRights(
   if (new_handle_value == MOJO_HANDLE_INVALID) {
     LOG(ERROR) << "Handle table full";
     new_dispatcher->Close();
-    return MOJO_RESULT_RESOURCE_EXHAUSTED;
+    return MOJO_SYSTEM_RESULT_RESOURCE_EXHAUSTED;
   }
 
   new_handle.Put(new_handle_value);
@@ -246,7 +247,7 @@ MojoResult Core::Wait(MojoHandle handle,
   HandleSignalsState hss;
   MojoResult result = WaitManyInternal(&handle, &signals, 1, deadline, &unused,
                                        signals_state.IsNull() ? nullptr : &hss);
-  if (result != MOJO_RESULT_INVALID_ARGUMENT && !signals_state.IsNull())
+  if (result != MOJO_SYSTEM_RESULT_INVALID_ARGUMENT && !signals_state.IsNull())
     signals_state.Put(hss);
   return result;
 }
@@ -258,7 +259,7 @@ MojoResult Core::WaitMany(UserPointer<const MojoHandle> handles,
                           UserPointer<uint32_t> result_index,
                           UserPointer<MojoHandleSignalsState> signals_states) {
   if (num_handles > GetConfiguration().max_wait_many_num_handles)
-    return MOJO_RESULT_RESOURCE_EXHAUSTED;
+    return MOJO_SYSTEM_RESULT_RESOURCE_EXHAUSTED;
 
   uint64_t index = static_cast<uint64_t>(-1);
   if (num_handles == 0u)
@@ -281,7 +282,7 @@ MojoResult Core::WaitMany(UserPointer<const MojoHandle> handles,
         handles_reader.GetPointer(), signals_reader.GetPointer(), num_handles,
         deadline, &index, reinterpret_cast<HandleSignalsState*>(
                               signals_states_writer.GetPointer()));
-    if (result != MOJO_RESULT_INVALID_ARGUMENT)
+    if (result != MOJO_SYSTEM_RESULT_INVALID_ARGUMENT)
       signals_states_writer.Commit();
   }
   if (index != static_cast<uint64_t>(-1) && !result_index.IsNull()) {
@@ -318,7 +319,7 @@ MojoResult Core::CreateMessagePipe(
     LOG(ERROR) << "Handle table full";
     dispatcher0->Close();
     dispatcher1->Close();
-    return MOJO_RESULT_RESOURCE_EXHAUSTED;
+    return MOJO_SYSTEM_RESULT_RESOURCE_EXHAUSTED;
   }
 
   auto message_pipe = MessagePipe::CreateLocalLocal();
@@ -363,7 +364,7 @@ MojoResult Core::WriteMessage(MojoHandle message_pipe_handle,
   // simply return failure unconditionally. It also breaks the usual
   // left-to-right verification order of arguments.)
   if (num_handles > GetConfiguration().max_message_num_handles)
-    return MOJO_RESULT_RESOURCE_EXHAUSTED;
+    return MOJO_SYSTEM_RESULT_RESOURCE_EXHAUSTED;
 
   UserPointer<const MojoHandle>::Reader handles_reader(handles, num_handles);
 
@@ -452,7 +453,7 @@ MojoResult Core::ReadMessage(MojoHandle message_pipe_handle,
             hs[i].dispatcher->Close();
         }
         if (result == MOJO_RESULT_OK)
-          result = MOJO_RESULT_RESOURCE_EXHAUSTED;
+          result = MOJO_SYSTEM_RESULT_RESOURCE_EXHAUSTED;
       }
     }
   }
@@ -489,7 +490,7 @@ MojoResult Core::CreateDataPipe(
     LOG(ERROR) << "Handle table full";
     producer_dispatcher->Close();
     consumer_dispatcher->Close();
-    return MOJO_RESULT_RESOURCE_EXHAUSTED;
+    return MOJO_SYSTEM_RESULT_RESOURCE_EXHAUSTED;
   }
   DCHECK_NE(handle_pair.second, MOJO_HANDLE_INVALID);
 
@@ -658,7 +659,7 @@ MojoResult Core::CreateSharedBuffer(
   if (handle == MOJO_HANDLE_INVALID) {
     LOG(ERROR) << "Handle table full";
     dispatcher->Close();
-    return MOJO_RESULT_RESOURCE_EXHAUSTED;
+    return MOJO_SYSTEM_RESULT_RESOURCE_EXHAUSTED;
   }
 
   shared_buffer_handle.Put(handle);
@@ -678,8 +679,8 @@ MojoResult Core::DuplicateBufferHandle(
 
   if (!h.has_all_rights(MOJO_HANDLE_RIGHT_DUPLICATE)) {
     return h.dispatcher->SupportsEntrypointClass(EntrypointClass::BUFFER)
-               ? MOJO_RESULT_PERMISSION_DENIED
-               : MOJO_RESULT_INVALID_ARGUMENT;
+               ? MOJO_SYSTEM_RESULT_PERMISSION_DENIED
+               : MOJO_SYSTEM_RESULT_INVALID_ARGUMENT;
   }
 
   // Don't verify |options| here; that's the dispatcher's job.
@@ -693,7 +694,7 @@ MojoResult Core::DuplicateBufferHandle(
   if (new_handle_value == MOJO_HANDLE_INVALID) {
     LOG(ERROR) << "Handle table full";
     new_dispatcher->Close();
-    return MOJO_RESULT_RESOURCE_EXHAUSTED;
+    return MOJO_SYSTEM_RESULT_RESOURCE_EXHAUSTED;
   }
 
   new_buffer_handle.Put(new_handle_value);
@@ -720,11 +721,9 @@ MojoResult Core::MapBuffer(MojoHandle buffer_handle,
                            MojoMapBufferFlags flags) {
   RefPtr<Dispatcher> dispatcher;
   // TODO(vtl): Currently we can only map read/write. So both
-  // |MOJO_HANDLE_RIGHT_MAP_READABLE| and |MOJO_HANDLE_RIGHT_MAP_WRITABLE| are
-  // required.
+  // |MOJO_HANDLE_RIGHT_READ| and |MOJO_HANDLE_RIGHT_WRITE| are required.
   MojoResult result = GetDispatcherAndCheckRights(
-      buffer_handle,
-      MOJO_HANDLE_RIGHT_MAP_READABLE | MOJO_HANDLE_RIGHT_MAP_WRITABLE,
+      buffer_handle, MOJO_HANDLE_RIGHT_READ | MOJO_HANDLE_RIGHT_WRITE,
       EntrypointClass::BUFFER, &dispatcher);
   if (result != MOJO_RESULT_OK)
     return result;
@@ -768,7 +767,7 @@ MojoResult Core::CreateWaitSet(
   if (handle == MOJO_HANDLE_INVALID) {
     LOG(ERROR) << "Handle table full";
     dispatcher->Close();
-    return MOJO_RESULT_RESOURCE_EXHAUSTED;
+    return MOJO_SYSTEM_RESULT_RESOURCE_EXHAUSTED;
   }
 
   wait_set_handle.Put(handle);
@@ -781,9 +780,9 @@ MojoResult Core::WaitSetAdd(MojoHandle wait_set_handle,
                             uint64_t cookie,
                             UserPointer<const MojoWaitSetAddOptions> options) {
   if (wait_set_handle == MOJO_HANDLE_INVALID)
-    return MOJO_RESULT_INVALID_ARGUMENT;
+    return MOJO_SYSTEM_RESULT_INVALID_ARGUMENT;
   if (handle == MOJO_HANDLE_INVALID)
-    return MOJO_RESULT_INVALID_ARGUMENT;
+    return MOJO_SYSTEM_RESULT_INVALID_ARGUMENT;
 
   Handle wait_set_h;
   Handle h;
@@ -800,8 +799,8 @@ MojoResult Core::WaitSetAdd(MojoHandle wait_set_handle,
   if (!wait_set_h.has_all_rights(MOJO_HANDLE_RIGHT_WRITE)) {
     return wait_set_h.dispatcher->SupportsEntrypointClass(
                EntrypointClass::WAIT_SET)
-               ? MOJO_RESULT_PERMISSION_DENIED
-               : MOJO_RESULT_INVALID_ARGUMENT;
+               ? MOJO_SYSTEM_RESULT_PERMISSION_DENIED
+               : MOJO_SYSTEM_RESULT_INVALID_ARGUMENT;
   }
 
   return wait_set_h.dispatcher->WaitSetAdd(std::move(h.dispatcher), signals,
@@ -853,7 +852,7 @@ MojoResult Core::WaitManyInternal(const MojoHandle* handles,
     for (uint32_t i = 0; i < num_handles; i++) {
       if (handles[i] == MOJO_HANDLE_INVALID) {
         *result_index = i;
-        return MOJO_RESULT_INVALID_ARGUMENT;
+        return MOJO_SYSTEM_RESULT_INVALID_ARGUMENT;
       }
 
       Handle handle;
@@ -883,7 +882,7 @@ MojoResult Core::WaitManyInternal(const MojoHandle* handles,
   }
   uint32_t num_added = i;
 
-  if (result == MOJO_RESULT_ALREADY_EXISTS)
+  if (result == MOJO_SYSTEM_RESULT_ALREADY_EXISTS)
     result = MOJO_RESULT_OK;  // The i-th one is already "triggered".
   else if (result == MOJO_RESULT_OK)
     result = waiter.Wait(deadline, result_index, nullptr);

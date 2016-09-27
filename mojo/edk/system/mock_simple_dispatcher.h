@@ -5,10 +5,11 @@
 #ifndef MOJO_EDK_SYSTEM_MOCK_SIMPLE_DISPATCHER_H_
 #define MOJO_EDK_SYSTEM_MOCK_SIMPLE_DISPATCHER_H_
 
+#include <mojo/system/handle.h>
+
 #include "mojo/edk/system/handle_signals_state.h"
 #include "mojo/edk/system/simple_dispatcher.h"
 #include "mojo/edk/util/thread_annotations.h"
-#include "mojo/public/c/system/handle.h"
 #include "mojo/public/cpp/system/macros.h"
 
 namespace mojo {

@@ -5,6 +5,7 @@
 #ifndef MOJO_EDK_SYSTEM_TRANSPORT_DATA_H_
 #define MOJO_EDK_SYSTEM_TRANSPORT_DATA_H_
 
+#include <mojo/system/handle.h>
 #include <stdint.h>
 
 #include <memory>
@@ -14,7 +15,6 @@
 #include "mojo/edk/platform/scoped_platform_handle.h"
 #include "mojo/edk/system/dispatcher.h"
 #include "mojo/edk/system/handle.h"
-#include "mojo/public/c/system/handle.h"
 #include "mojo/public/cpp/system/macros.h"
 
 namespace mojo {

@@ -4,10 +4,10 @@
 
 #include "mojo/edk/system/options_validation.h"
 
+#include <mojo/macros.h>
 #include <stddef.h>
 #include <stdint.h>
 
-#include "mojo/public/c/system/macros.h"
 #include "testing/gtest/include/gtest/gtest.h"
 
 namespace mojo {
