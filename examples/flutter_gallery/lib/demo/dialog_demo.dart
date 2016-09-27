@@ -33,16 +33,12 @@ class DialogDemoItem extends StatelessWidget {
     return new InkWell(
       onTap: onPressed,
       child: new Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8.0),
+        padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 24.0),
         child: new Row(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
-            new Icon(
-              icon,
-              size: 36.0,
-              color: color
-            ),
+            new Icon(icon, size: 36.0, color: color),
             new Padding(
               padding: const EdgeInsets.only(left: 16.0),
               child: new Text(text)
@@ -156,6 +152,7 @@ class DialogDemoState extends State<DialogDemo> {
                 context: context,
                 dialog: new Dialog(
                   title: new Text('Set backup account'),
+                  contentPadding: const EdgeInsets.only(top: 12.0, bottom: 16.0),
                   content: new Column(
                     children: <Widget>[
                       new DialogDemoItem(

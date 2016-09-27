@@ -81,14 +81,11 @@ class Dialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    List<Widget> dialogBody = new List<Widget>();
+    final List<Widget> children = new List<Widget>();
 
     if (title != null) {
-      EdgeInsets padding = titlePadding;
-      if (padding == null)
-        padding = new EdgeInsets.fromLTRB(24.0, 24.0, 24.0, content == null ? 20.0 : 0.0);
-      dialogBody.add(new Padding(
-        padding: padding,
+      children.add(new Padding(
+        padding: titlePadding ?? new EdgeInsets.fromLTRB(24.0, 24.0, 24.0, content == null ? 20.0 : 0.0),
         child: new DefaultTextStyle(
           style: Theme.of(context).textTheme.title,
           child: title
@@ -97,20 +94,22 @@ class Dialog extends StatelessWidget {
     }
 
     if (content != null) {
-      EdgeInsets padding = contentPadding;
-      if (padding == null)
-        padding = const EdgeInsets.fromLTRB(24.0, 20.0, 24.0, 24.0);
-      dialogBody.add(new Padding(
-        padding: padding,
-        child: new DefaultTextStyle(
-          style: Theme.of(context).textTheme.subhead,
-          child: content
+      children.add(new Flexible(
+        fit: FlexFit.loose,
+        child: new ScrollableViewport(
+          child: new Padding(
+            padding: contentPadding ?? const EdgeInsets.fromLTRB(24.0, 20.0, 24.0, 24.0),
+            child: new DefaultTextStyle(
+              style: Theme.of(context).textTheme.subhead,
+              child: content
+            )
+          )
         )
       ));
     }
 
     if (actions != null) {
-      dialogBody.add(new ButtonTheme.bar(
+      children.add(new ButtonTheme.bar(
         child: new ButtonBar(
           alignment: MainAxisAlignment.end,
           children: actions
@@ -128,7 +127,11 @@ class Dialog extends StatelessWidget {
             color: _getColor(context),
             type: MaterialType.card,
             child: new IntrinsicWidth(
-              child: new Block(children: dialogBody)
+              child: new Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: children
+              )
             )
           )
         )
