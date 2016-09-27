@@ -28,7 +28,6 @@ export 'src/material/constants.dart';
 export 'src/material/data_table.dart';
 export 'src/material/data_table_source.dart';
 export 'src/material/date_picker.dart';
-export 'src/material/date_picker_dialog.dart';
 export 'src/material/dialog.dart';
 export 'src/material/divider.dart';
 export 'src/material/drawer.dart';
