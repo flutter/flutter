@@ -21,7 +21,7 @@ vars = {
   'chromium_git': 'https://chromium.googlesource.com',
   'fuchsia_git': 'https://fuchsia.googlesource.com',
   'github_git': 'https://github.com',
-  'mojo_sdk_revision': '672a0b6386e3d15615928a22ce9df7da8395f253',
+  'mojo_sdk_revision': '6b5fb1227c742f5ecc077486ebc029f2711c61fa',
   'base_revision': '672b04e54b937ec899429a6bd5409c5a6300d151',
   'skia_revision': '5561e3ddbbf6c3e051075ada4a11ddc70760f03d',
 
@@ -45,7 +45,7 @@ allowed_hosts = [
 ]
 
 deps = {
-  'src': 'https://github.com/flutter/buildroot.git' + '@' + '79ef956051698e3843e87c781112bfd9cc3695f0',
+  'src': 'https://github.com/flutter/buildroot.git' + '@' + '2f656511ecc11565bd975b0f0ac7aa7383950132',
 
    # Fuchsia compatibility
    #
