@@ -12,14 +12,15 @@ class InheritedValue extends InheritedWidget {
   final double value;
 
   static double of(BuildContext context) {
-    return context.inheritFromWidgetOfExactType(InheritedValue).value;
+    InheritedValue inheritedValue = context.inheritFromWidgetOfExactType(InheritedValue);
+    return inheritedValue?.value;
   }
 
   @override
   bool updateShouldNotify(InheritedValue oldWidget) => value != oldWidget.value;
 
   @override
-  debugFillDescription(List<String> description) {
+  void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     description.add('value: $value');
   }
@@ -548,6 +549,49 @@ void main() {
     expect(box.size.width, equals(200.0));
 
     box = tester.renderObject(find.byKey(container2Key));
+    expect(box.size.width, equals(100.0));
+  });
+
+  testWidgets('InheritedWidgetLink, LayoutBuilder contains parent', (WidgetTester tester) async {
+    final GlobalKey linkParentKey = new GlobalKey();
+    final GlobalKey linkChildKey = new GlobalKey();
+    final Key containerKey = new UniqueKey();
+
+    // The link parent is built at layout time with LayoutBuilder. The implementation
+    // of InheritedWidgetLinkChild ensures that it's not built until layout time either.
+    Widget buildFrame() {
+      return new Row(
+        children: <Widget>[
+          new InheritedValue(
+            value: 100.0,
+            child: new LayoutBuilder(
+              builder: (BuildContext context, BoxConstraints constraints) {
+                return new InheritedWidgetLinkParent(
+                  key: linkParentKey,
+                  link: linkChildKey,
+                  child: new Container(width: 200.0)
+                );
+              }
+            )
+          ),
+          new InheritedWidgetLinkChild(
+            key: linkChildKey,
+            link: linkParentKey,
+            child: new Builder(
+              builder: (BuildContext context) {
+                return new Container(
+                  key: containerKey,
+                  width: InheritedValue.of(context)
+                );
+              }
+            )
+          )
+        ]
+      );
+    }
+
+    await tester.pumpWidget(buildFrame());
+    RenderBox box = tester.renderObject(find.byKey(containerKey));
     expect(box.size.width, equals(100.0));
   });
 

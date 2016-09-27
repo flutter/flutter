@@ -3,7 +3,9 @@
 // found in the LICENSE file.
 
 import 'framework.dart';
+import 'layout_builder.dart';
 
+import 'package:flutter/rendering.dart' show BoxConstraints;
 
 /// Defines a location in the widget tree that an [InheritedWidgetLinkChild] can
 /// link to. The descendants of the link child inherit from the link parent's
@@ -11,7 +13,7 @@ import 'framework.dart';
 /// ancestors.
 ///
 /// This widget must be given its own [GlobalKey] and the value of its [link] must
-/// be a GlobalKey given to its link child. If the link is null then this widget
+/// be the GlobalKey given to its link child. If the link is null then this widget
 /// has no effect on inherited values.
 class InheritedWidgetLinkParent extends ProxyWidget {
   const InheritedWidgetLinkParent({ GlobalKey key, Widget child, this.link })
@@ -32,19 +34,34 @@ class InheritedWidgetLinkParent extends ProxyWidget {
 /// [InheritedWidgetLinkParent] that it's linked to.
 ///
 /// This widget must be given its own [GlobalKey] and the value of its [link] must
-/// be a GlobalKey given to its link parent. If the link is null then this widget
+/// be the GlobalKey given to its link parent. If the link is null then this widget
 /// has no effect on inherited values.
-class InheritedWidgetLinkChild extends ProxyWidget {
-  const InheritedWidgetLinkChild({ GlobalKey key, Widget child, this.link })
-    : super(key: key, child: child);
+class InheritedWidgetLinkChild extends StatelessWidget {
+  InheritedWidgetLinkChild({ GlobalKey key, Widget child, GlobalKey link })
+    : _proxy =  new InheritedWidgetLinkChildProxy(key: key, child: child, link: link);
+
+  final InheritedWidgetLinkChildProxy _proxy;
 
   /// The value of an [InheritedWidgetLinkParent]'s key or null. This widget will
-  /// inherit from the link parent's [InheritedWidget] ancestors. If [key] or link
+  /// inherit from the link parent's [InheritedWidget] ancestors. If key or link
   /// is null then this link child will have no effect on inheritance.
+  GlobalKey get link => _proxy?.link;
+
+  Widget _buildProxy(BuildContext context, BoxConstraints constraints) => _proxy;
+
+  @override
+  Widget build(BuildContext context) => new LayoutBuilder(builder: _buildProxy);
+}
+
+
+class InheritedWidgetLinkChildProxy extends ProxyWidget {
+  const InheritedWidgetLinkChildProxy({ GlobalKey key, Widget child, this.link })
+    : super(key: key, child: child);
+
   final GlobalKey link;
 
   @override
   InheritedElementLinkChild createElement() => new InheritedElementLinkChild(this);
 
-  bool updateShouldNotify(InheritedWidgetLinkChild oldWidget) => link != oldWidget.link;
+  bool updateShouldNotify(InheritedWidgetLinkChildProxy oldWidget) => link != oldWidget.link;
 }

@@ -3097,10 +3097,10 @@ class InheritedElementLinkParent extends ProxyElement {
 
 /// An element that uses a [InheritedWidgetLinkChild] as its configuration.
 class InheritedElementLinkChild extends ProxyElement {
-  InheritedElementLinkChild(InheritedWidgetLinkChild widget) : super(widget);
+  InheritedElementLinkChild(InheritedWidgetLinkChildProxy widget) : super(widget);
 
   @override
-  InheritedWidgetLinkChild get widget => super.widget;
+  InheritedWidgetLinkChildProxy get widget => super.widget;
 
   InheritedElementLinkParent get link => widget.link?._currentElement;
 
@@ -3182,7 +3182,7 @@ class InheritedElementLinkChild extends ProxyElement {
   }
 
   @override
-  void notifyClients(InheritedWidgetLinkChild oldWidget) {
+  void notifyClients(InheritedWidgetLinkChildProxy oldWidget) {
     if (!widget.updateShouldNotify(oldWidget))
       return;
     _updateInheritanceRecursively(this);
