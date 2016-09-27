@@ -19,11 +19,11 @@ class _PersistentBottomSheetDemoState extends State<PersistentBottomSheetDemo> {
   @override
   void initState() {
     super.initState();
-    _showBottomSheetCallback = showBottomSheet;
+    _showBottomSheetCallback = _showBottomSheet;
   }
 
 
-  void showBottomSheet() {
+  void _showBottomSheet() {
     setState(() { // disable the button
       _showBottomSheetCallback = null;
     });
@@ -47,9 +47,24 @@ class _PersistentBottomSheetDemoState extends State<PersistentBottomSheetDemo> {
     })
     .closed.then((_) {
       setState(() { // re-enable the button
-        _showBottomSheetCallback = showBottomSheet;
+        _showBottomSheetCallback = _showBottomSheet;
       });
     });
+  }
+
+  void _showMessage()  {
+    showDialog(
+      context: context,
+      child: new Dialog(
+        content: new Text('You tapped the floating action button.'),
+        actions: <Widget>[
+          new FlatButton(
+            onPressed: () { Navigator.of(context).pop(); },
+            child: new Text('OK')
+          )
+        ]
+      )
+    );
   }
 
   @override
@@ -58,7 +73,7 @@ class _PersistentBottomSheetDemoState extends State<PersistentBottomSheetDemo> {
       key: _scaffoldKey,
       appBar: new AppBar(title: new Text('Persistent bottom sheet')),
       floatingActionButton: new FloatingActionButton(
-        onPressed: null,
+        onPressed: _showMessage,
         backgroundColor: Colors.redAccent[200],
         child: new Icon(Icons.add)
       ),
