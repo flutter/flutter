@@ -14,9 +14,9 @@ class TextFieldDemo extends StatefulWidget {
 }
 
 class PersonData {
-  String name;
-  String phoneNumber;
-  String password;
+  String name = '';
+  String phoneNumber = '';
+  String password = '';
 }
 
 class TextFieldDemoState extends State<TextFieldDemo> {
@@ -31,7 +31,14 @@ class TextFieldDemoState extends State<TextFieldDemo> {
   }
 
   void _handleSubmitted() {
-    showInSnackBar('${person.name}\'s phone number is ${person.phoneNumber}');
+    // TODO(mpcomplete): Form could keep track of validation errors?
+    if (_validateName(person.name) != null ||
+        _validatePhoneNumber(person.phoneNumber) != null ||
+        _validatePassword(person.password) != null) {
+      showInSnackBar('Please fix the errors in red before submitting.');
+    } else {
+      showInSnackBar('${person.name}\'s phone number is ${person.phoneNumber}');
+    }
   }
 
   String _validateName(String value) {
@@ -66,7 +73,6 @@ class TextFieldDemoState extends State<TextFieldDemo> {
         title: new Text('Text fields')
       ),
       body: new Form(
-        onSubmitted: _handleSubmitted,
         child: new Block(
           padding: const EdgeInsets.all(8.0),
           children: <Widget>[
@@ -112,6 +118,14 @@ class TextFieldDemoState extends State<TextFieldDemo> {
                   )
                 )
               ]
+            ),
+            new Container(
+              padding: const EdgeInsets.all(20.0),
+              align: const FractionalOffset(0.5, 0.5),
+              child: new RaisedButton(
+                child: new Text('SUBMIT'),
+                onPressed: _handleSubmitted,
+              ),
             )
           ]
         )

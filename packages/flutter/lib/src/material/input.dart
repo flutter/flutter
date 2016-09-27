@@ -290,7 +290,8 @@ class _FormFieldData {
   void onSubmitted(InputValue value) {
     FormScope scope = FormScope.of(inputState.context);
     assert(scope != null);
-    scope.form.onSubmitted();
+    if (scope.form.onSubmitted != null)
+      scope.form.onSubmitted();
     scope.onFieldChanged();
   }
 }
