@@ -941,6 +941,7 @@ class RenderClipRect extends _RenderCustomClip<Rect> {
   @override
   bool hitTest(HitTestResult result, { Point position }) {
     if (_clipper != null) {
+      _updateClip();
       assert(_clip != null);
       if (!_clip.contains(position))
         return false;
@@ -1033,6 +1034,7 @@ class RenderClipOval extends _RenderCustomClip<Rect> {
 
   @override
   bool hitTest(HitTestResult result, { Point position }) {
+    _updateClip();
     assert(_clip != null);
     Point center = _clip.center;
     // convert the position to an offset from the center of the unit circle
@@ -1082,6 +1084,7 @@ class RenderClipPath extends _RenderCustomClip<Path> {
   @override
   bool hitTest(HitTestResult result, { Point position }) {
     if (_clipper != null) {
+      _updateClip();
       assert(_clip != null);
       if (!_clip.contains(position))
         return false;
