@@ -134,7 +134,14 @@ public class SkyActivity extends Activity {
         String action = intent.getAction();
         if (Intent.ACTION_RUN.equals(action)) {
             String route = intent.getStringExtra("route");
-            mView.runFromBundle(intent.getDataString(),
+            String appBundlePath = intent.getDataString();
+            if (appBundlePath == null) {
+              // Fall back to the installation path if no bundle path
+              // was specified.
+              appBundlePath =
+                  FlutterMain.findAppBundlePath(getApplicationContext());
+            }
+            mView.runFromBundle(appBundlePath,
                                 intent.getStringExtra("snapshot"));
             if (route != null)
                 mView.pushRoute(route);
