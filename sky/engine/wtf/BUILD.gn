@@ -262,7 +262,7 @@ executable("unittests") {
     # will be injected at runtime so the link succeeds.
     deps += [
       "//mojo/public/cpp/environment:standalone",
-      "//mojo/public/platform/native:system_thunks",
+      "//mojo/public/platform/native:system",
     ]
   }
 }
