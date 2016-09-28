@@ -56,7 +56,7 @@ class StartupTest {
   Future<TaskResult> call() async {
     return await inDirectory(testDirectory, () async {
       String deviceId = (await devices.workingDevice).deviceId;
-      await pub('get');
+      await flutter('packages', options: ['get']);
 
       if (os == DeviceOperatingSystem.ios) {
         // This causes an Xcode project to be created.
@@ -92,7 +92,7 @@ class PerfTest {
   Future<TaskResult> call() {
     return inDirectory(testDirectory, () async {
       String deviceId = (await devices.workingDevice).deviceId;
-      await pub('get');
+      await flutter('packages', options: ['get']);
 
       if (os == DeviceOperatingSystem.ios) {
         // This causes an Xcode project to be created.
@@ -128,7 +128,7 @@ class BuildTest {
     return await inDirectory(testDirectory, () async {
       Device device = await devices.workingDevice;
       await device.unlock();
-      await pub('get');
+      await flutter('packages', options: ['get']);
 
       Stopwatch watch = new Stopwatch()..start();
       await flutter('build', options: <String>[

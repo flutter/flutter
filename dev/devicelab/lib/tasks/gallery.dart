@@ -28,7 +28,7 @@ class GalleryTransitionTest {
     Directory galleryDirectory =
         dir('${flutterDirectory.path}/examples/flutter_gallery');
     await inDirectory(galleryDirectory, () async {
-      await pub('get');
+      await flutter('packages', options: ['get']);
 
       if (os == DeviceOperatingSystem.ios) {
         // This causes an Xcode project to be created.
