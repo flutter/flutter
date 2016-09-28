@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -25,14 +26,20 @@ import 'typography.dart';
 
 enum _DatePickerMode { day, year }
 
-const double _kDatePickerHeaderHeight = 100.0;
+const double _kDatePickerHeaderPortraitHeight = 100.0;
+const double _kDatePickerHeaderLandscapeWidth = 168.0;
 
 const Duration _kMonthScrollDuration = const Duration(milliseconds: 200);
 const double _kDayPickerRowHeight = 42.0;
 const int _kMaxDayPickerRowCount = 6; // A 31 day month that starts on Saturday.
 // Two extra rows: one for the day-of-week header and one for the month header.
 const double _kMaxDayPickerHeight = _kDayPickerRowHeight * (_kMaxDayPickerRowCount + 2);
-const double _kMonthPickerWidth = 330.0;
+
+const double _kMonthPickerPortraitWidth = 330.0;
+const double _kMonthPickerLandscapeWidth = 344.0;
+
+const double _kDialogActionBarHeight = 52.0;
+const double _kDatePickerLandscapeHeight = _kMaxDayPickerHeight + _kDialogActionBarHeight;
 
 // Shows the selected date in large font and toggles between year and day mode
 class _DatePickerHeader extends StatelessWidget {
@@ -40,15 +47,18 @@ class _DatePickerHeader extends StatelessWidget {
     Key key,
     @required this.selectedDate,
     @required this.mode,
-    @required this.onModeChanged
+    @required this.onModeChanged,
+    @required this.orientation,
   }) : super(key: key) {
     assert(selectedDate != null);
     assert(mode != null);
+    assert(orientation != null);
   }
 
   final DateTime selectedDate;
   final _DatePickerMode mode;
   final ValueChanged<_DatePickerMode> onModeChanged;
+  final Orientation orientation;
 
   void _handleChangeMode(_DatePickerMode value) {
     if (value != mode)
@@ -84,12 +94,30 @@ class _DatePickerHeader extends StatelessWidget {
         break;
     }
 
+    double height;
+    double width;
+    EdgeInsets padding;
+    MainAxisAlignment mainAxisAlignment;
+    switch (orientation) {
+      case Orientation.portrait:
+        height = _kDatePickerHeaderPortraitHeight;
+        padding = const EdgeInsets.symmetric(horizontal: 24.0);
+        mainAxisAlignment = MainAxisAlignment.center;
+        break;
+      case Orientation.landscape:
+        width = _kDatePickerHeaderLandscapeWidth;
+        padding = const EdgeInsets.all(16.0);
+        mainAxisAlignment = MainAxisAlignment.start;
+        break;
+    }
+
     return new Container(
-      height: _kDatePickerHeaderHeight,
-      padding: const EdgeInsets.symmetric(horizontal: 24.0),
+      width: width,
+      height: height,
+      padding: padding,
       decoration: new BoxDecoration(backgroundColor: backgroundColor),
       child: new Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment: mainAxisAlignment,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           new GestureDetector(
@@ -98,7 +126,7 @@ class _DatePickerHeader extends StatelessWidget {
           ),
           new GestureDetector(
             onTap: () => _handleChangeMode(_DatePickerMode.day),
-            child: new Text(new DateFormat('MMMEd').format(selectedDate), style: dayStyle)
+            child: new Text(new DateFormat('E, MMM\u00a0d').format(selectedDate), style: dayStyle)
           ),
         ]
       )
@@ -112,7 +140,7 @@ class _DayPickerGridDelegate extends GridDelegateWithInOrderChildPlacement {
     final int columnCount = DateTime.DAYS_PER_WEEK;
     return new GridSpecification.fromRegularTiles(
       tileWidth: constraints.maxWidth / columnCount,
-      tileHeight: _kDayPickerRowHeight,
+      tileHeight: math.min(_kDayPickerRowHeight, constraints.maxHeight / (_kMaxDayPickerRowCount + 1)),
       columnCount: columnCount,
       rowCount: (childCount / columnCount).ceil()
     );
@@ -236,9 +264,12 @@ class DayPicker extends StatelessWidget {
               )
             )
           ),
-          new CustomGrid(
-            delegate: _kDayPickerGridDelegate,
-            children: labels
+          new Flexible(
+            fit: FlexFit.loose,
+            child: new CustomGrid(
+              delegate: _kDayPickerGridDelegate,
+              children: labels
+            )
           )
         ]
       )
@@ -357,7 +388,7 @@ class _MonthPickerState extends State<MonthPicker> {
   @override
   Widget build(BuildContext context) {
     return new SizedBox(
-      width: _kMonthPickerWidth,
+      width: _kMonthPickerPortraitWidth,
       height: _kMaxDayPickerHeight,
       child: new Stack(
         children: <Widget>[
@@ -507,6 +538,7 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
 
   DateTime _selectedDate;
   _DatePickerMode _mode = _DatePickerMode.day;
+  GlobalKey _pickerKey = new GlobalKey();
 
   void _handleModeChanged(_DatePickerMode mode) {
     HapticFeedback.vibrate();
@@ -543,6 +575,7 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
     switch (_mode) {
       case _DatePickerMode.day:
         return new MonthPicker(
+          key: _pickerKey,
           selectedDate: _selectedDate,
           onChanged: _handleDayChanged,
           firstDate: config.firstDate,
@@ -550,6 +583,7 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
         );
       case _DatePickerMode.year:
         return new YearPicker(
+          key: _pickerKey,
           selectedDate: _selectedDate,
           onChanged: _handleYearChanged,
           firstDate: config.firstDate,
@@ -561,39 +595,71 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return new Dialog(
+    Widget picker = new Flexible(
+      fit: FlexFit.loose,
       child: new SizedBox(
-        width: _kMonthPickerWidth,
-        child: new Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            new _DatePickerHeader(
-              selectedDate: _selectedDate,
-              mode: _mode,
-              onModeChanged: _handleModeChanged
-            ),
-            new Container(
-              height: _kMaxDayPickerHeight,
-              child: _buildPicker()
-            ),
-            new ButtonTheme.bar(
-              child: new ButtonBar(
-                alignment: MainAxisAlignment.end,
-                children: <Widget>[
-                  new FlatButton(
-                    child: new Text('CANCEL'),
-                    onPressed: _handleCancel
-                  ),
-                  new FlatButton(
-                    child: new Text('OK'),
-                    onPressed: _handleOk
-                  ),
-                ]
-              )
-            )
-          ]
-        )
+        height: _kMaxDayPickerHeight,
+        child: _buildPicker(),
+      )
+    );
+    Widget actions = new ButtonTheme.bar(
+      child: new ButtonBar(
+        alignment: MainAxisAlignment.end,
+        children: <Widget>[
+          new FlatButton(
+            child: new Text('CANCEL'),
+            onPressed: _handleCancel
+          ),
+          new FlatButton(
+            child: new Text('OK'),
+            onPressed: _handleOk
+          ),
+        ]
+      )
+    );
+
+    return new Dialog(
+      child: new OrientationBuilder(
+        builder: (BuildContext context, Orientation orientation) {
+          Widget header = new _DatePickerHeader(
+            selectedDate: _selectedDate,
+            mode: _mode,
+            onModeChanged: _handleModeChanged,
+            orientation: orientation
+          );
+          assert(orientation != null);
+          switch (orientation) {
+            case Orientation.portrait:
+              return new SizedBox(
+                width: _kMonthPickerPortraitWidth,
+                child: new Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: <Widget>[header, picker, actions]
+                )
+              );
+            case Orientation.landscape:
+              return new SizedBox(
+                height: _kDatePickerLandscapeHeight,
+                child: new Row(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: <Widget>[
+                    header,
+                    new SizedBox(
+                      width: _kMonthPickerLandscapeWidth,
+                      child: new Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: <Widget>[picker, actions]
+                      )
+                    )
+                  ]
+                )
+              );
+          }
+          return null;
+        }
       )
     );
   }
