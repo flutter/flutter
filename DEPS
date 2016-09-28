@@ -22,18 +22,18 @@ vars = {
   'fuchsia_git': 'https://fuchsia.googlesource.com',
   'github_git': 'https://github.com',
   'mojo_sdk_revision': '6b5fb1227c742f5ecc077486ebc029f2711c61fa',
-  'base_revision': '672b04e54b937ec899429a6bd5409c5a6300d151',
+  'base_revision': '75e70c3387cf327702a0533e93bc480446da0806',
   'skia_revision': '5561e3ddbbf6c3e051075ada4a11ddc70760f03d',
 
   # Note: When updating the Dart revision, ensure that all entries that are
   # dependencies of dart are also updated
-  'dart_revision': '43231d9ff416e301206239b76ad645ca38f34116',
-  'dart_boringssl_gen_revision': 'e3a1b341a3890ab10d372dc2fe6d1c6798828293',
+  'dart_revision': 'b29788329baab1183f6e430bc2cf3c4169b20621',
+  'dart_boringssl_gen_revision': '922830c0aad900dd3d143eef1ba06faa83fe263b',
   'dart_boringssl_revision': '8d343b44bbab829d1a28fdef650ca95f7db4412e',
   'dart_observatory_packages_revision': '26aad88f1c1915d39bbcbff3cad589e2402fdcf1',
   'dart_root_certificates_revision': 'aed07942ce98507d2be28cbd29e879525410c7fc',
 
-  'buildtools_revision': '565d04e8741429fb1b4f26d102f2c6c3b849edeb',
+  'buildtools_revision': '3d2e47bf14e4e67816a53e304dea422fa18f9180',
 }
 
 # Only these hosts are allowed for dependencies in this DEPS file.
@@ -45,7 +45,7 @@ allowed_hosts = [
 ]
 
 deps = {
-  'src': 'https://github.com/flutter/buildroot.git' + '@' + '2f656511ecc11565bd975b0f0ac7aa7383950132',
+  'src': 'https://github.com/flutter/buildroot.git' + '@' + 'a0b7e3ef735fd558146113820c1f52b8415f095e',
 
    # Fuchsia compatibility
    #
@@ -77,7 +77,7 @@ deps = {
    # Chromium-style dependencies.
 
   'src/base':
-   Var('chromium_git') + '/external/github.com/domokit/base' + '@' +  Var('base_revision'),
+   Var('github_git') + '/flutter/base.git' + '@' +  Var('base_revision'),
 
   'src/buildtools':
    Var('chromium_git') + '/chromium/buildtools.git' + '@' +  Var('buildtools_revision'),

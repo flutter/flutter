@@ -484,7 +484,7 @@ component("skia") {
     configs += [ "//build/config/compiler:optimize_max" ]
   }
 
-  if (use_glfw) {
+  if (is_linux) {
     deps += [ "//third_party/glfw" ]
   }
 }

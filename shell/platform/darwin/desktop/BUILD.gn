@@ -41,17 +41,20 @@ executable("shell_standalone") {
   ]
 }
 
+resource_copy_mac("mac_desktop_resources") {
+  app_name = "SkyShell"
+
+  resources = [
+    "//third_party/icu/android/icudtl.dat",
+  ]
+
+  bundle_directory = "."
+}
+
 mac_app("shell_application_bundle") {
   app_name = "SkyShell"
   info_plist = "Info.plist"
   xibs = [ "sky_mac.xib" ]
-
-  resource_copy_mac("mac_desktop_resources") {
-    resources = [
-      "//third_party/icu/android/icudtl.dat",
-    ]
-    bundle_directory = "."
-  }
 
   deps = [
     ":mac_desktop_platform",

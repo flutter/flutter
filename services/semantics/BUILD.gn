@@ -5,7 +5,7 @@
 import("//mojo/public/tools/bindings/mojom.gni")
 
 group("semantics") {
-  deps = [
+  public_deps = [
     ":interfaces",
   ]
 }

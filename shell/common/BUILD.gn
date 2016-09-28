@@ -63,6 +63,7 @@ source_set("common") {
     "//mojo/public/cpp/bindings:utility",
     "//mojo/public/interfaces/application",
     "//mojo/services/vsync/interfaces",
+    "//third_party/libjpeg",
     ":generate_embedder_diagnostic_server_resources_cc",
   ]
 }

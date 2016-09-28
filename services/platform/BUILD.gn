@@ -62,10 +62,10 @@ if (is_ios) {
 }
 
 group("platform") {
-  deps = [
+  public_deps = [
     ":interfaces"
   ]
   if (is_android || is_ios) {
-    deps += [ ":platform_lib" ]
+    public_deps += [ ":platform_lib" ]
   }
 }

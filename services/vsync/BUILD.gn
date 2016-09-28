@@ -19,7 +19,10 @@ source_set("vsync_lib_fallback") {
 }
 
 group("vsync") {
-  deps = [ ":vsync_lib", ":vsync_lib_fallback" ]
+  public_deps = [
+    ":vsync_lib",
+    ":vsync_lib_fallback",
+  ]
 }
 
 if (is_android) {
