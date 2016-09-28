@@ -38,6 +38,7 @@ export 'src/widgets/mimic.dart';
 export 'src/widgets/modal_barrier.dart';
 export 'src/widgets/navigator.dart';
 export 'src/widgets/notification_listener.dart';
+export 'src/widgets/orientation_builder.dart';
 export 'src/widgets/overlay.dart';
 export 'src/widgets/page_storage.dart';
 export 'src/widgets/pageable_list.dart';
