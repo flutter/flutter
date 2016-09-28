@@ -85,7 +85,7 @@ template("mac_toolchain") {
     tool("asm") {
       # For GCC we can just use the C compiler to compile assembly.
       depfile = "{{output}}.d"
-      command = "$cc -MMD -MF $depfile {{defines}} {{include_dirs}} $sysroot_flags $toolchain_flags {{cflags}} {{cflags_c}} -c {{source}} -o {{output}}"
+      command = "$cc -MMD -MF $depfile {{defines}} {{include_dirs}} {{asmflags}} $sysroot_flags $toolchain_flags {{cflags}} {{cflags_c}} -c {{source}} -o {{output}}"
       depsformat = "gcc"
       description = "ASM {{output}}"
       outputs = [
@@ -193,7 +193,7 @@ template("mac_toolchain") {
       description = "COPY {{source}} {{output}}"
     }
 
-    toolchain_args() {
+    toolchain_args =  {
       current_cpu = invoker.toolchain_cpu
       current_os = invoker.toolchain_os
 

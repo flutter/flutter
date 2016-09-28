@@ -611,6 +611,7 @@ if (is_win) {
   host_toolchain = "//build/toolchain/mac:clang_x64"
   set_default_toolchain(host_toolchain)
 } else if (is_ios) {
+  import("//build/config/ios/ios_sdk.gni") # For use_ios_simulator
   host_toolchain = "//build/toolchain/mac:clang_x64"
   if (use_ios_simulator) {
     set_default_toolchain("//build/toolchain/mac:ios_clang_x64")

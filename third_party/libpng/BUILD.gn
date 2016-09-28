@@ -29,7 +29,19 @@ source_set("libpng") {
     "pngwutil.c",
   ]
 
-  if ((is_ios && !use_ios_simulator) || (is_android && current_cpu == "arm")) {
+  if ((is_ios && !use_ios_simulator) ||
+      (is_android && (current_cpu == "arm" || current_cpu == "arm64"))) {
+
+    if (is_android) {
+      import("//build/config/android/config.gni")
+      rebased_android_toolchain_root =
+          rebase_path(android_toolchain_root, root_build_dir)
+      asmflags = [
+        "-fno-integrated-as",
+        "-B${rebased_android_toolchain_root}/bin",
+      ]
+    }
+
     sources += [
       "arm/arm_init.c",
       "arm/filter_neon.S",

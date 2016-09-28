@@ -12,7 +12,11 @@ source_set("iccjpeg") {
     "iccjpeg.h",
   ]
 
-  public_configs = [ ":iccjpeg_config" ]
+  public_configs = [
+    ":iccjpeg_config",
+    "//third_party/libjpeg:libjpeg_config",
+  ]
+
   deps = [
     "//third_party:jpeg",
   ]

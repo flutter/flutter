@@ -489,7 +489,7 @@ config("compiler") {
 
   # C++11 compiler flags setup.
   # ---------------------------
-  cc_std = [ "-std=c++11" ]
+  cc_std = [ "-std=c++14" ]
   cflags_cc += cc_std
   cflags_objcc += cc_std
 
@@ -559,6 +559,8 @@ config("compiler") {
       }
     }
   }
+
+  asmflags = cflags
 }
 
 config("compiler_arm_fpu") {

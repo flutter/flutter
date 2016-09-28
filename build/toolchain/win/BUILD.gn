@@ -121,7 +121,7 @@ template("msvc_toolchain") {
     tool("asm") {
       # TODO(brettw): "/safeseh" assembler argument is hardcoded here. Extract
       # assembler flags to a variable like cflags. crbug.com/418613
-      command = "$python_path gyp-win-tool asm-wrapper $env ml.exe {{defines}} {{include_dirs}} /safeseh /c /Fo {{output}} {{source}}"
+      command = "$python_path gyp-win-tool asm-wrapper $env ml.exe {{defines}} {{include_dirs}} {{asmflags}} /safeseh /c /Fo {{output}} {{source}}"
       description = "ASM {{output}}"
       outputs = [
         "{{target_out_dir}}/{{target_output_name}}/{{source_name_part}}.obj",
