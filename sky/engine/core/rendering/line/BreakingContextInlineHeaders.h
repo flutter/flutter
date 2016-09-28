@@ -409,11 +409,10 @@ inline float measureHyphenWidth(RenderText* renderer, const Font& font, TextDire
         style->hyphenString().string(), style, style->direction()));
 }
 
-inline float measureEllipsisWidth(RenderText* renderer, const Font& font)
+inline float measureEllipsisWidth(RenderText* renderer, const Font& font, const String& ellipsis)
 {
     RenderStyle* style = renderer->style();
-    return font.width(constructTextRun(renderer, font,
-        String(&WTF::Unicode::horizontalEllipsis, 1), style, style->direction()));
+    return font.width(constructTextRun(renderer, font, ellipsis, style, style->direction()));
 }
 
 ALWAYS_INLINE TextDirection textDirectionFromUnicode(WTF::Unicode::Direction direction)
@@ -468,11 +467,11 @@ inline bool BreakingContext::handleText(WordMeasurements& wordMeasurements, bool
 
     float hyphenWidth = 0;
 
-    bool ellipsizeMode = m_blockStyle->textOverflow() == TextOverflowEllipsis;
+    bool ellipsizeMode = !m_blockStyle->ellipsis().isEmpty();
     float ellipsisWidth = 0;
     unsigned ellipsisBreakOffset = 0;
     if (ellipsizeMode) {
-        ellipsisWidth = measureEllipsisWidth(renderText, font);
+        ellipsisWidth = measureEllipsisWidth(renderText, font, m_blockStyle->ellipsis().string());
         breakAll = true;
     }
 

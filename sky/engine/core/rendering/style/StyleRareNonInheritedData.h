@@ -87,6 +87,8 @@ public:
 
     LengthPoint m_objectPosition;
 
+    AtomicString m_ellipsis;
+
     unsigned m_transformStyle3D : 1; // ETransformStyle3D
 
     unsigned m_alignContent : 3; // EAlignContent

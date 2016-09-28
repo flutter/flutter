@@ -643,6 +643,9 @@ public:
     TouchAction touchAction() const { return static_cast<TouchAction>(rareNonInheritedData->m_touchAction); }
     TouchActionDelay touchActionDelay() const { return static_cast<TouchActionDelay>(rareInheritedData->m_touchActionDelay); }
 
+    // Flutter property getters
+    const AtomicString& ellipsis() const { return rareNonInheritedData->m_ellipsis; }
+
 // attribute setter methods
 
     void setDisplay(EDisplay v) { noninherited_flags.effectiveDisplay = v; }
@@ -899,6 +902,9 @@ public:
             rareNonInheritedData.access()->m_clipPath = operation;
     }
     ClipPathOperation* clipPath() const { return rareNonInheritedData->m_clipPath.get(); }
+
+    // Flutter property setters
+    void setEllipsis(const AtomicString& e) { SET_VAR(rareNonInheritedData, m_ellipsis, e); }
 
     static ClipPathOperation* initialClipPath() { return 0; }
 

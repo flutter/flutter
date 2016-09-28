@@ -40,7 +40,8 @@ class ParagraphBuilder : public ftl::RefCountedThreadSafe<ParagraphBuilder>,
   ftl::RefPtr<Paragraph> build(tonic::Int32List& encoded,
                                const std::string& fontFamily,
                                double fontSize,
-                               double lineHeight);
+                               double lineHeight,
+                               const std::string& ellipsis);
 
   static void RegisterNatives(tonic::DartLibraryNatives* natives);
 

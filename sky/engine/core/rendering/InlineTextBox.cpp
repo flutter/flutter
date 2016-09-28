@@ -452,9 +452,10 @@ void InlineTextBox::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset, 
 
     StringBuilder charactersWithEllipsis;
     if (hasAddedEllipsis()) {
-      charactersWithEllipsis.reserveCapacity(string.length() + 1);
+      const AtomicString& ellipsis = renderer().containingBlock()->style()->ellipsis();
+      charactersWithEllipsis.reserveCapacity(string.length() + ellipsis.length());
       charactersWithEllipsis.append(string);
-      charactersWithEllipsis.append(WTF::Unicode::horizontalEllipsis);
+      charactersWithEllipsis.append(ellipsis);
       string = charactersWithEllipsis.toString().createView();
       maximumLength = string.length();
     }
