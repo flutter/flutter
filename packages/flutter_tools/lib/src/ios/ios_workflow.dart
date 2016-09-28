@@ -80,6 +80,17 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
           'ios-deploy not available; this is used to deploy to connected iOS devices.\n'
           'Install via \'brew install ios-deploy\'.'
         ));
+      } else {
+        // Check for compatibility between libimobiledevice and Xcode.
+        // TODO(cbracken) remove this check once libimobiledevice > 1.2.0 is released.
+        ProcessResult result = (await runAsync(<String>['idevice_id', '-l'])).processResult;
+        if (result.exitCode == 0 && result.stdout.isNotEmpty && !exitsHappy(<String>['ideviceName'])) {
+          messages.add(new ValidationMessage.error(
+            'libimobiledevice is incompatible with the installed XCode version. To update, run:\n'
+            'brew uninstall libimobiledevice\n'
+            'brew install --HEAD libimobiledevice'
+          ));
+        }
       }
     } else {
       messages.add(new ValidationMessage.error(
