@@ -202,7 +202,7 @@ class RunAndStayResident extends ResidentRunner {
 
     if (vmService != null) {
       await vmService.vm.refreshViews();
-      printStatus('Connected to view \'${vmService.vm.mainView}\'.');
+      printStatus('Connected to ${vmService.vm.mainView}\.');
     }
 
     if (vmService != null && traceStartup) {

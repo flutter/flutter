@@ -18,12 +18,12 @@ import 'cache.dart';
 import 'commands/build_apk.dart';
 import 'commands/install.dart';
 import 'dart/package_map.dart';
+import 'devfs.dart';
 import 'device.dart';
 import 'globals.dart';
-import 'devfs.dart';
-import 'vmservice.dart';
 import 'resident_runner.dart';
 import 'toolchain.dart';
+import 'vmservice.dart';
 
 const bool kHotReloadDefault = true;
 
@@ -272,7 +272,7 @@ class HotRunner extends ResidentRunner {
     }
 
     await vmService.vm.refreshViews();
-    printStatus('Connected to view \'${vmService.vm.mainView}\'.');
+    printStatus('Connected to ${vmService.vm.mainView}.');
 
     printStatus('Running ${getDisplayPath(_mainPath)} on ${device.name}...');
     _loaderShowMessage('Launching...');
@@ -284,7 +284,7 @@ class HotRunner extends ResidentRunner {
 
     registerSignalHandlers();
 
-    printStatus('Finishing file synchronization...');
+    printTrace('Finishing file synchronization');
     // Finish the file sync now.
     await _updateDevFS();
 
@@ -347,13 +347,12 @@ class HotRunner extends ResidentRunner {
   }
 
   Future<bool> _updateDevFS({ DevFSProgressReporter progressReporter }) async {
+    Status devFSStatus = logger.startProgress('Syncing files to device...');
     final bool rebuildBundle = bundle.needsBuild();
     if (rebuildBundle) {
-      Status bundleStatus = logger.startProgress('Updating assets...');
+      printTrace('Updating assets');
       await bundle.build();
-      bundleStatus.stop(showElapsedTime: true);
     }
-    Status devFSStatus = logger.startProgress('Syncing files to device...');
     await _devFS.update(progressReporter: progressReporter,
                         bundle: bundle,
                         bundleDirty: rebuildBundle,
@@ -495,17 +494,14 @@ class HotRunner extends ResidentRunner {
       return false;
     }
     await _evictDirtyAssets();
-    Status reassembleStatus =
-        logger.startProgress('Reassembling application...');
+    printTrace('Reassembling application');
     bool waitForFrame = true;
     try {
       waitForFrame = (await currentView.uiIsolate.flutterReassemble() != null);
     } catch (_) {
-      reassembleStatus.stop(showElapsedTime: true);
       printError('Reassembling application failed.');
       return false;
     }
-    reassembleStatus.stop(showElapsedTime: true);
     try {
       /* ensure that a frame is scheduled */
       await currentView.uiIsolate.uiWindowScheduleFrame();
@@ -516,8 +512,8 @@ class HotRunner extends ResidentRunner {
       // When the framework is present, we can wait for the first frame
       // event and measure reload itme.
       await firstFrameTimer.firstFrame();
-      printStatus('Hot reload time: '
-                  '${getElapsedAsMilliseconds(firstFrameTimer.elapsed)}');
+      printStatus('Hot reload performed in '
+                  '${getElapsedAsMilliseconds(firstFrameTimer.elapsed)}.');
       if (benchmarkMode) {
         benchmarkData['hotReloadMillisecondsToFrame'] =
             firstFrameTimer.elapsed.inMilliseconds;

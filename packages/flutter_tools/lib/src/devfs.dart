@@ -8,7 +8,6 @@ import 'dart:io';
 
 import 'package:path/path.dart' as path;
 
-import 'base/logger.dart';
 import 'build_info.dart';
 import 'dart/package_map.dart';
 import 'asset.dart';
@@ -307,15 +306,13 @@ class DevFS {
                            Set<String> fileFilter}) async {
     _reset();
     printTrace('DevFS: Starting sync from $rootDirectory');
-    Status status;
-    status = logger.startProgress('Scanning project files...');
+    logger.printTrace('Scanning project files');
     Directory directory = rootDirectory;
     await _scanDirectory(directory,
                          recursive: true,
                          fileFilter: fileFilter);
-    status.stop(showElapsedTime: true);
 
-    status = logger.startProgress('Scanning package files...');
+    printTrace('Scanning package files');
     String packagesFilePath = path.join(rootDirectory.path, kPackagesFileName);
     StringBuffer sb;
     if (FileSystemEntity.isFileSync(packagesFilePath)) {
@@ -346,9 +343,8 @@ class DevFS {
         }
       }
     }
-    status.stop(showElapsedTime: true);
     if (bundle != null) {
-      status = logger.startProgress('Scanning asset files...');
+      printTrace('Scanning asset files');
       // Synchronize asset bundle.
       for (AssetBundleEntry entry in bundle.entries) {
         // We write the assets into the AssetBundle working dir so that they
@@ -357,10 +353,9 @@ class DevFS {
             path.join(getAssetBuildDirectory(), entry.archivePath);
         _scanBundleEntry(devicePath, entry, bundleDirty);
       }
-      status.stop(showElapsedTime: true);
     }
     // Handle deletions.
-    status = logger.startProgress('Scanning for deleted files...');
+    printTrace('Scanning for deleted files');
     final List<String> toRemove = new List<String>();
     _entries.forEach((String path, DevFSEntry entry) {
       if (!entry._exists) {
@@ -371,10 +366,9 @@ class DevFS {
     for (int i = 0; i < toRemove.length; i++) {
       _entries.remove(toRemove[i]);
     }
-    status.stop(showElapsedTime: true);
 
     if (_deletedEntries.length > 0) {
-      status = logger.startProgress('Removing deleted files...');
+      printTrace('Removing deleted files');
       for (DevFSEntry entry in _deletedEntries) {
         Future<Map<String, dynamic>> operation =
             _operations.deleteFile(fsName, entry);
@@ -384,13 +378,10 @@ class DevFS {
       await Future.wait(_pendingOperations);
       _pendingOperations.clear();
       _deletedEntries.clear();
-      status.stop(showElapsedTime: true);
-    } else {
-      printStatus("No files to remove.");
     }
 
     if (_dirtyEntries.length > 0) {
-      status = logger.startProgress('Updating files...');
+      printTrace('Updating files');
       if (_httpWriter != null) {
         try {
           await _httpWriter.write(_dirtyEntries,
@@ -418,9 +409,6 @@ class DevFS {
         _pendingOperations.clear();
       }
       _dirtyEntries.clear();
-      status.stop(showElapsedTime: true);
-    } else {
-      printStatus("No files to update.");
     }
 
     if (sb != null)
