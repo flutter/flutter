@@ -176,13 +176,16 @@ class RunCommand extends RunCommandBase {
     if (hotMode) {
       runner = new HotRunner(
         device,
+        logger,
         target: targetFile,
         debuggingOptions: options,
         benchmarkMode: argResults['benchmark'],
+        flutterUsage: flutterUsage,
       );
     } else {
       runner = new RunAndStayResident(
         device,
+        logger,
         target: targetFile,
         debuggingOptions: options,
         traceStartup: traceStartup,
@@ -283,7 +286,7 @@ Future<int> startApp(
     printError('Error running application on ${device.name}.');
   } else if (traceStartup) {
     try {
-      VMService observatory = await VMService.connect(result.observatoryPort);
+      VMService observatory = await VMService.connect(result.observatoryPort, logger);
       await downloadStartupTrace(observatory);
     } catch (error) {
       printError('Error downloading trace from observatory: $error');
@@ -292,7 +295,7 @@ Future<int> startApp(
   }
 
   if (benchmark)
-    writeRunBenchmarkFile(stopwatch);
+    writeRunBenchmarkFile(stopwatch, logger);
 
   return result.started ? 0 : 2;
 }

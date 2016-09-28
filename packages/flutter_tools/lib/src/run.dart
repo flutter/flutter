@@ -13,13 +13,13 @@ import 'commands/build_apk.dart';
 import 'commands/install.dart';
 import 'commands/trace.dart';
 import 'device.dart';
-import 'globals.dart';
 import 'vmservice.dart';
 import 'resident_runner.dart';
 
 class RunAndStayResident extends ResidentRunner {
   RunAndStayResident(
-    Device device, {
+    Device device,
+    Logger log, {
     String target,
     DebuggingOptions debuggingOptions,
     bool usesTerminalUI: true,
@@ -27,6 +27,7 @@ class RunAndStayResident extends ResidentRunner {
     this.benchmark: false,
     this.applicationBinary
   }) : super(device,
+             log,
              target: target,
              debuggingOptions: debuggingOptions,
              usesTerminalUI: usesTerminalUI);
@@ -54,17 +55,17 @@ class RunAndStayResident extends ResidentRunner {
         shouldBuild: shouldBuild
       );
     }, onError: (dynamic error, StackTrace stackTrace) {
-      printError('Exception from flutter run: $error', stackTrace);
+      log.printError('Exception from flutter run: $error', stackTrace);
     });
   }
 
   @override
   Future<bool> restart({ bool fullRestart: false }) async {
     if (vmService == null) {
-      printError('Debugging is not enabled.');
+      log.printError('Debugging is not enabled.');
       return false;
     } else {
-      Status status = logger.startProgress('Re-starting application...');
+      Status status = log.startProgress('Re-starting application...');
 
       Future<ServiceEvent> extensionAddedEvent;
 
@@ -104,7 +105,7 @@ class RunAndStayResident extends ResidentRunner {
       String message = 'Tried to run $_mainPath, but that file does not exist.';
       if (target == null)
         message += '\nConsider using the -t option to specify the Dart file to start.';
-      printError(message);
+      log.printError(message);
       return 1;
     }
 
@@ -115,7 +116,7 @@ class RunAndStayResident extends ResidentRunner {
       String hint = getMissingPackageHintForPlatform(device.platform);
       if (hint != null)
         message += '\n$hint';
-      printError(message);
+      log.printError(message);
       return 1;
     }
 
@@ -123,7 +124,7 @@ class RunAndStayResident extends ResidentRunner {
 
     // TODO(devoncarew): We shouldn't have to do type checks here.
     if (shouldBuild && device is AndroidDevice) {
-      printTrace('Running build command.');
+      log.printTrace('Running build command.');
 
       int result = await buildApk(
         device.platform,
@@ -137,13 +138,13 @@ class RunAndStayResident extends ResidentRunner {
 
     // TODO(devoncarew): Move this into the device.startApp() impls.
     if (_package != null) {
-      printTrace("Stopping app '${_package.name}' on ${device.name}.");
+      log.printTrace("Stopping app '${_package.name}' on ${device.name}.");
       await device.stopApp(_package);
     }
 
     // TODO(devoncarew): This fails for ios devices - we haven't built yet.
     if (device is AndroidDevice) {
-      printTrace('Running install command.');
+      log.printTrace('Running install command.');
       if (!(installApp(device, _package, uninstall: false)))
         return 1;
     }
@@ -153,7 +154,7 @@ class RunAndStayResident extends ResidentRunner {
       platformArgs = <String, dynamic>{ 'trace-startup': traceStartup };
 
     await startEchoingDeviceLog();
-    printStatus('Running ${getDisplayPath(_mainPath)} on ${device.name}...');
+    log.printStatus('Running ${getDisplayPath(_mainPath)} on ${device.name}...');
 
     _result = await device.startApp(
       _package,
@@ -165,7 +166,7 @@ class RunAndStayResident extends ResidentRunner {
     );
 
     if (!_result.started) {
-      printError('Error running application on ${device.name}.');
+      log.printError('Error running application on ${device.name}.');
       await stopEchoingDeviceLog();
       return 2;
     }
@@ -184,21 +185,21 @@ class RunAndStayResident extends ResidentRunner {
       }
     }
 
-    printStatus('Application running.');
+    log.printStatus('Application running.');
     if (debuggingOptions.buildMode == BuildMode.release)
       return 0;
 
     if (vmService != null) {
       await vmService.vm.refreshViews();
-      printStatus('Connected to view \'${vmService.vm.mainView}\'.');
+      log.printStatus('Connected to view \'${vmService.vm.mainView}\'.');
     }
 
     if (vmService != null && traceStartup) {
-      printStatus('Downloading startup trace info...');
+      log.printStatus('Downloading startup trace info...');
       try {
         await downloadStartupTrace(vmService);
       } catch(error) {
-        printError(error);
+        log.printError(error);
         return 2;
       }
       appFinished();
@@ -217,7 +218,7 @@ class RunAndStayResident extends ResidentRunner {
       Stopwatch restartTime = new Stopwatch()..start();
       bool restarted = await restart();
       restartTime.stop();
-      writeRunBenchmarkFile(startTime, restarted ? restartTime : null);
+      writeRunBenchmarkFile(startTime, log, restarted ? restartTime : null);
       await new Future<Null>.delayed(new Duration(seconds: 2));
       stop();
     }
@@ -250,12 +251,12 @@ class RunAndStayResident extends ResidentRunner {
   @override
   void printHelp() {
     String restartText = device.supportsRestart ? ', "r" or F5 to restart the app,' : '';
-    printStatus('Type "h" or F1 for help$restartText and "q", F10, or ctrl-c to quit.');
-    printStatus('Type "w" to print the widget hierarchy of the app, and "t" for the render tree.');
+    log.printStatus('Type "h" or F1 for help$restartText and "q", F10, or ctrl-c to quit.');
+    log.printStatus('Type "w" to print the widget hierarchy of the app, and "t" for the render tree.');
   }
 }
 
-void writeRunBenchmarkFile(Stopwatch startTime, [Stopwatch restartTime]) {
+void writeRunBenchmarkFile(Stopwatch startTime, Logger log, [Stopwatch restartTime]) {
   final String benchmarkOut = 'refresh_benchmark.json';
   Map<String, dynamic> data = <String, dynamic>{
     'start': startTime.elapsedMilliseconds,
@@ -265,5 +266,5 @@ void writeRunBenchmarkFile(Stopwatch startTime, [Stopwatch restartTime]) {
     data['restart'] = restartTime.elapsedMilliseconds;
 
   new File(benchmarkOut).writeAsStringSync(toPrettyJson(data));
-  printStatus('Run benchmark written to $benchmarkOut ($data).');
+  log.printStatus('Run benchmark written to $benchmarkOut ($data).');
 }

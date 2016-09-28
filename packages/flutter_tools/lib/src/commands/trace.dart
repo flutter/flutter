@@ -105,7 +105,7 @@ class Tracing {
   Tracing(this.vmService);
 
   static Future<Tracing> connect(int port) {
-    return VMService.connect(port).then((VMService observatory) => new Tracing(observatory));
+    return VMService.connect(port, logger).then((VMService observatory) => new Tracing(observatory));
   }
 
   final VMService vmService;
