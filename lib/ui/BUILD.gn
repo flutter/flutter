@@ -52,6 +52,10 @@ source_set("ui") {
     "text/text_box.h",
     "ui_dart_state.cc",
     "ui_dart_state.h",
+    "window/pointer_data_packet.cc",
+    "window/pointer_data_packet.h",
+    "window/pointer_data.cc",
+    "window/pointer_data.h",
     "window/window.cc",
     "window/window.h",
   ]

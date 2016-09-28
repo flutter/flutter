@@ -13,6 +13,9 @@ typedef void FrameCallback(Duration duration);
 /// Signature for [Window.onPointerPacket].
 typedef void PointerPacketCallback(ByteData serializedPacket);
 
+/// Signature for [Window.onPointerDataPacket].
+typedef void PointerDataPacketCallback(PointerDataPacket packet);
+
 /// Signature for [Window.onAppLifecycleStateChanged].
 typedef void AppLifecycleStateCallback(AppLifecycleState state);
 
@@ -148,6 +151,9 @@ class Window {
   /// provided in the form of a raw byte stream containing an encoded mojo
   /// PointerPacket.
   PointerPacketCallback onPointerPacket;
+
+  /// A callback that is invoked when pointer data is available.
+  PointerDataPacketCallback onPointerDataPacket;
 
   /// The route or path that the operating system requested when the application
   /// was launched.

@@ -82,6 +82,12 @@ void RuntimeController::HandlePointerPacket(
   GetWindow()->DispatchPointerPacket(packet);
 }
 
+void RuntimeController::HandlePointerDataPacket(
+    const PointerDataPacket& packet) {
+  TRACE_EVENT0("input", "RuntimeController::HandlePointerDataPacket");
+  GetWindow()->DispatchPointerDataPacket(packet);
+}
+
 Window* RuntimeController::GetWindow() {
   return dart_controller_->dart_state()->window();
 }
@@ -122,6 +128,5 @@ std::string RuntimeController::GetIsolateName() {
   }
   return dart_controller_->dart_state()->debug_name();
 }
-
 
 }  // namespace blink

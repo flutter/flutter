@@ -9,6 +9,7 @@
 
 #include "flutter/flow/layers/layer_tree.h"
 #include "flutter/lib/ui/ui_dart_state.h"
+#include "flutter/lib/ui/window/pointer_data_packet.h"
 #include "flutter/lib/ui/window/window.h"
 #include "flutter/services/engine/sky_engine.mojom.h"
 #include "flutter/services/pointer/pointer.mojom.h"
@@ -39,6 +40,7 @@ class RuntimeController : public WindowClient, public IsolateClient {
   void BeginFrame(ftl::TimePoint frame_time);
 
   void HandlePointerPacket(const pointer::PointerPacketPtr& packet);
+  void HandlePointerDataPacket(const PointerDataPacket& packet);
 
   void OnAppLifecycleStateChanged(sky::AppLifecycleState state);
 

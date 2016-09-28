@@ -11,6 +11,7 @@ dart_ui_files = [
   "//flutter/lib/ui/mojo_services.dart",
   "//flutter/lib/ui/natives.dart",
   "//flutter/lib/ui/painting.dart",
+  "//flutter/lib/ui/pointer.dart",
   "//flutter/lib/ui/text.dart",
   "//flutter/lib/ui/ui.dart",
   "//flutter/lib/ui/window.dart",
