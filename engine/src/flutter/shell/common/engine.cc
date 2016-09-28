@@ -45,6 +45,37 @@ std::string FindPackagesPath(const std::string& main_dart) {
   return packages_path;
 }
 
+blink::PointerData::Change GetChangeFromPointerType(pointer::PointerType type) {
+  switch (type) {
+    case pointer::PointerType::DOWN:
+      return blink::PointerData::Change::kDown;
+    case pointer::PointerType::UP:
+      return blink::PointerData::Change::kUp;
+    case pointer::PointerType::MOVE:
+      return blink::PointerData::Change::kMove;
+    case pointer::PointerType::CANCEL:
+      return blink::PointerData::Change::kCancel;
+  }
+  FTL_NOTREACHED();
+  return blink::PointerData::Change::kCancel;
+}
+
+blink::PointerData::DeviceKind GetDeviceKindFromPointerKind(
+    pointer::PointerKind kind) {
+  switch (kind) {
+    case pointer::PointerKind::TOUCH:
+      return blink::PointerData::DeviceKind::kTouch;
+    case pointer::PointerKind::MOUSE:
+      return blink::PointerData::DeviceKind::kMouse;
+    case pointer::PointerKind::STYLUS:
+      return blink::PointerData::DeviceKind::kStylus;
+    case pointer::PointerKind::INVERTED_STYLUS:
+      return blink::PointerData::DeviceKind::kInvertedStylus;
+  }
+  FTL_NOTREACHED();
+  return blink::PointerData::DeviceKind::kTouch;
+}
+
 }  // namespace
 
 Engine::Engine(Rasterizer* rasterizer)
@@ -126,7 +157,8 @@ void Engine::SetServices(sky::ServicesDataPtr services) {
 
   vsync::VSyncProviderPtr vsync_provider;
   if (services_->shell) {
-    // We bind and unbind our Shell here, since this is the only place we use
+    // We bind and unbind our Shell here, since this is the only place we
+    // use
     // it in this class.
     auto shell = mojo::ShellPtr::Create(services_->shell.Pass());
     mojo::ConnectToService(shell.get(), "mojo:vsync",
@@ -153,10 +185,41 @@ void Engine::OnLocaleChanged(const mojo::String& language_code,
     runtime_->SetLocale(language_code_, country_code_);
 }
 
-void Engine::OnPointerPacket(pointer::PointerPacketPtr packet) {
+// TODO(abarth): Remove pointer::PointerPacketPtr and route
+// blink::PointerDataPacket here.
+void Engine::OnPointerPacket(pointer::PointerPacketPtr packetPtr) {
   TRACE_EVENT0("flutter", "Engine::OnPointerPacket");
-  if (runtime_)
-    runtime_->HandlePointerPacket(packet);
+  if (runtime_) {
+    runtime_->HandlePointerPacket(packetPtr);
+
+    const size_t length = packetPtr->pointers.size();
+    blink::PointerDataPacket packet(length);
+    for (size_t i = 0; i < length; ++i) {
+      const pointer::PointerPtr& pointer = packetPtr->pointers[i];
+      blink::PointerData pointer_data;
+      pointer_data.time_stamp = pointer->time_stamp;
+      pointer_data.pointer = pointer->pointer;
+      pointer_data.change = GetChangeFromPointerType(pointer->type);
+      pointer_data.kind = GetDeviceKindFromPointerKind(pointer->kind);
+      pointer_data.physical_x = pointer->x;
+      pointer_data.physical_y = pointer->y;
+      pointer_data.buttons = pointer->buttons;
+      pointer_data.obscured = pointer->obscured ? 1 : 0;
+      pointer_data.pressure = pointer->pressure;
+      pointer_data.pressure_min = pointer->pressure_min;
+      pointer_data.pressure_max = pointer->pressure_max;
+      pointer_data.distance = pointer->distance;
+      pointer_data.distance_max = pointer->distance_max;
+      pointer_data.radius_major = pointer->radius_major;
+      pointer_data.radius_minor = pointer->radius_minor;
+      pointer_data.radius_min = pointer->radius_min;
+      pointer_data.radius_max = pointer->radius_max;
+      pointer_data.orientation = pointer->orientation;
+      pointer_data.tilt = pointer->tilt;
+      packet.SetPointerData(i, pointer_data);
+    }
+    runtime_->HandlePointerDataPacket(packet);
+  }
 }
 
 void Engine::RunFromSnapshotStream(

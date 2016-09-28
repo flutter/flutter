@@ -43,6 +43,11 @@ void _dispatchPointerPacket(ByteData serializedPacket) {
     window.onPointerPacket(serializedPacket);
 }
 
+void _dispatchPointerDataPacket(ByteData packet) {
+  if (window.onPointerDataPacket != null)
+    window.onPointerDataPacket(_unpackPointerDataPacket(packet));
+}
+
 void _beginFrame(int microseconds) {
   if (window.onBeginFrame != null)
     window.onBeginFrame(new Duration(microseconds: microseconds));
@@ -51,4 +56,40 @@ void _beginFrame(int microseconds) {
 void _onAppLifecycleStateChanged(int state) {
   if (window.onAppLifecycleStateChanged != null)
     window.onAppLifecycleStateChanged(AppLifecycleState.values[state]);
+}
+
+const int _kPointerDataFieldCount = 19;
+
+PointerDataPacket _unpackPointerDataPacket(ByteData packet) {
+  const int kStride = Int64List.BYTES_PER_ELEMENT;
+  const int kBytesPerPointerData = _kPointerDataFieldCount * kStride;
+  final int length = packet.lengthInBytes ~/ kBytesPerPointerData;
+  assert(length * kBytesPerPointerData == packet.lengthInBytes);
+  List<PointerData> pointers = new List<PointerData>(length);
+  for (int i = 0; i < length; ++i) {
+    int offset = i * _kPointerDataFieldCount;
+    pointers[i] = new PointerData(
+      timeStamp: new Duration(microseconds: packet.getInt64(kStride * offset++, _kFakeHostEndian)),
+      pointer: packet.getInt64(kStride * offset++, _kFakeHostEndian),
+      change: PointerChange.values[packet.getInt64(kStride * offset++, _kFakeHostEndian)],
+      kind: PointerDeviceKind.values[packet.getInt64(kStride * offset++, _kFakeHostEndian)],
+      physicalX: packet.getFloat64(kStride * offset++, _kFakeHostEndian),
+      physicalY: packet.getFloat64(kStride * offset++, _kFakeHostEndian),
+      buttons: packet.getInt64(kStride * offset++, _kFakeHostEndian),
+      obscured: packet.getInt64(kStride * offset++, _kFakeHostEndian) != 0,
+      pressure: packet.getFloat64(kStride * offset++, _kFakeHostEndian),
+      pressureMin: packet.getFloat64(kStride * offset++, _kFakeHostEndian),
+      pressureMax: packet.getFloat64(kStride * offset++, _kFakeHostEndian),
+      distance: packet.getFloat64(kStride * offset++, _kFakeHostEndian),
+      distanceMax: packet.getFloat64(kStride * offset++, _kFakeHostEndian),
+      radiusMajor: packet.getFloat64(kStride * offset++, _kFakeHostEndian),
+      radiusMinor: packet.getFloat64(kStride * offset++, _kFakeHostEndian),
+      radiusMin: packet.getFloat64(kStride * offset++, _kFakeHostEndian),
+      radiusMax: packet.getFloat64(kStride * offset++, _kFakeHostEndian),
+      orientation: packet.getFloat64(kStride * offset++, _kFakeHostEndian),
+      tilt: packet.getFloat64(kStride * offset++, _kFakeHostEndian),
+    );
+    assert(offset == (i + 1) * _kPointerDataFieldCount);
+  }
+  return new PointerDataPacket(pointers: pointers);
 }

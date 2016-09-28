@@ -121,6 +121,30 @@ void Window::DispatchPointerPacket(const pointer::PointerPacketPtr& packet) {
   DartInvokeField(library_.value(), "_dispatchPointerPacket", {data_handle});
 }
 
+void Window::DispatchPointerDataPacket(const PointerDataPacket& packet) {
+  tonic::DartState* dart_state = library_.dart_state().get();
+  if (!dart_state)
+    return;
+  tonic::DartState::Scope scope(dart_state);
+
+  Dart_Handle data_handle =
+      Dart_NewTypedData(Dart_TypedData_kByteData, packet.data().size());
+  if (Dart_IsError(data_handle))
+    return;
+
+  Dart_TypedData_Type type;
+  void* data = nullptr;
+  intptr_t len = 0;
+  if (Dart_IsError(Dart_TypedDataAcquireData(data_handle, &type, &data, &len)))
+    return;
+
+  memcpy(data, packet.data().data(), len);
+
+  Dart_TypedDataReleaseData(data_handle);
+  DartInvokeField(library_.value(), "_dispatchPointerDataPacket",
+                  {data_handle});
+}
+
 void Window::BeginFrame(ftl::TimePoint frameTime) {
   tonic::DartState* dart_state = library_.dart_state().get();
   if (!dart_state)
