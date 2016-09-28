@@ -43,6 +43,10 @@ ImageConfiguration createLocalImageConfiguration(BuildContext context, { Size si
 ///
 /// The image is painted using [paintImage], which describes the meanings of the
 /// various fields on this class in more detail.
+///
+/// See also:
+///
+///  * [Icon]
 class Image extends StatefulWidget {
   /// Creates a widget that displays an image.
   ///
