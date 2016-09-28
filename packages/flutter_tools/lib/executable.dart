@@ -155,7 +155,18 @@ Future<File> _createCrashReport(List<String> args, dynamic error, Chain chain) a
   buffer.writeln('## flutter doctor\n');
   buffer.writeln('```\n${await _doctorText()}```');
 
-  crashFile.writeAsStringSync(buffer.toString());
+  try {
+    crashFile.writeAsStringSync(buffer.toString());
+  } on FileSystemException catch (_) {
+    // Fallback to the system temporary directory.
+    crashFile = getUniqueFile(Directory.systemTemp, 'flutter', 'log');
+    try {
+      crashFile.writeAsStringSync(buffer.toString());
+    } on FileSystemException catch (e) {
+      printError('Could not write crash report to disk: $e');
+      printError(buffer.toString());
+    }
+  }
 
   return crashFile;
 }
