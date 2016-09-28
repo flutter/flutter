@@ -381,7 +381,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
                 padding: _isIndicatorAtTop
                   ? new EdgeInsets.only(top: config.displacement)
                   : new EdgeInsets.only(bottom: config.displacement),
-                align: _isIndicatorAtTop
+                alignment: _isIndicatorAtTop
                   ? FractionalOffset.bottomCenter
                   : FractionalOffset.topCenter,
                 child: new ScaleTransition(

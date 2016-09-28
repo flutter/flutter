@@ -406,7 +406,7 @@ class DataTable extends StatelessWidget {
     label = new Container(
       padding: padding,
       height: _kHeadingRowHeight,
-      align: new FractionalOffset(numeric ? 1.0 : 0.0, 0.5), // TODO(ianh): RTL for non-numeric
+      alignment: new FractionalOffset(numeric ? 1.0 : 0.0, 0.5), // TODO(ianh): RTL for non-numeric
       child: new AnimatedDefaultTextStyle(
         style: new TextStyle(
           // TODO(ianh): font family should be Roboto; see https://github.com/flutter/flutter/issues/3116
@@ -456,7 +456,7 @@ class DataTable extends StatelessWidget {
     label = new Container(
       padding: padding,
       height: _kDataRowHeight,
-      align: new FractionalOffset(numeric ? 1.0 : 0.0, 0.5), // TODO(ianh): RTL for non-numeric
+      alignment: new FractionalOffset(numeric ? 1.0 : 0.0, 0.5), // TODO(ianh): RTL for non-numeric
       child: new DefaultTextStyle(
         style: new TextStyle(
           // TODO(ianh): font family should be Roboto; see https://github.com/flutter/flutter/issues/3116

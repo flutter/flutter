@@ -130,7 +130,7 @@ class GalleryHomeState extends State<GalleryHome> with SingleTickerProviderState
           new Container(
             height: 48.0,
             padding: const EdgeInsets.only(left: 16.0),
-            align: FractionalOffset.centerLeft,
+            alignment: FractionalOffset.centerLeft,
             child: new Text(galleryItem.category, style: headerStyle)
           )
         );
