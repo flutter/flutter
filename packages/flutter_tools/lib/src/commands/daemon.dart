@@ -557,11 +557,12 @@ class DeviceDomain extends Domain {
   }
 }
 
-Map<String, String> _deviceToMap(Device device) {
-  return <String, String>{
+Map<String, dynamic> _deviceToMap(Device device) {
+  return <String, dynamic>{
     'id': device.id,
     'name': device.name,
-    'platform': getNameForTargetPlatform(device.platform)
+    'platform': getNameForTargetPlatform(device.platform),
+    'emulator': device.isLocalEmulator
   };
 }
 
