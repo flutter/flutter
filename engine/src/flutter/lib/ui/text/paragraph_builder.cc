@@ -95,18 +95,19 @@ const int tsHeightMask = 1 << tsHeightIndex;
 const int psTextAlignIndex = 1;
 const int psFontWeightIndex = 2;
 const int psFontStyleIndex = 3;
-const int psTextOverflowIndex = 4;
+// index 4 reserved for LineCount
 const int psFontFamilyIndex = 5;
 const int psFontSizeIndex = 6;
 const int psLineHeightIndex = 7;
+const int psEllipsisIndex = 8;
 
 const int psTextAlignMask = 1 << psTextAlignIndex;
 const int psFontWeightMask = 1 << psFontWeightIndex;
 const int psFontStyleMask = 1 << psFontStyleIndex;
-const int psTextOverflowMask = 1 << psTextOverflowIndex;
 const int psFontFamilyMask = 1 << psFontFamilyIndex;
 const int psFontSizeMask = 1 << psFontSizeIndex;
 const int psLineHeightMask = 1 << psLineHeightIndex;
+const int psEllipsisMask = 1 << psEllipsisIndex;
 
 }  // namespace
 
@@ -242,7 +243,8 @@ void ParagraphBuilder::addText(const std::string& text) {
 ftl::RefPtr<Paragraph> ParagraphBuilder::build(tonic::Int32List& encoded,
                                                const std::string& fontFamily,
                                                double fontSize,
-                                               double lineHeight) {
+                                               double lineHeight,
+                                               const std::string& ellipsis) {
   FTL_DCHECK(encoded.num_elements() == 5);
   int32_t mask = encoded[0];
 
@@ -284,10 +286,8 @@ ftl::RefPtr<Paragraph> ParagraphBuilder::build(tonic::Int32List& encoded,
     if (mask & psLineHeightMask)
       style->setLineHeight(Length(lineHeight * 100.0, Percent));
 
-    if (mask & psTextOverflowMask) {
-      style->setTextOverflow(
-          static_cast<TextOverflow>(encoded[psTextOverflowIndex]));
-    }
+    if (mask & psEllipsisMask)
+      style->setEllipsis(AtomicString::fromUTF8(ellipsis.c_str()));
 
     m_renderParagraph->setStyle(style.release());
   }

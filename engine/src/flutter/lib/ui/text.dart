@@ -93,15 +93,6 @@ enum TextAlign {
   center
 }
 
-/// How to handle text that overflows its bounds
-enum TextOverflow {
-  /// Default
-  clip,
-
-  /// Render as a single line that is ellipsized if it is too wide to fit
-  ellipsis
-}
-
 /// A horizontal line used for aligning text
 enum TextBaseline {
   // The horizontal line used to align the bottom of glyphs for alphabetic characters
@@ -371,12 +362,12 @@ class TextStyle {
 
 // This encoding must match the C++ version ParagraphBuilder::build.
 //
-// The encoded array buffer has 4 elements.
+// The encoded array buffer has 5 elements.
 //
-//  - Element 0: A bit field where the ith bit indicates wheter the ith element
-//    has a non-null value. Bit 6 indicates whether |fontFamily| is non-null.
-//    Bit 7 indicates whether |fontSize| is non-null. Bit 8 indicates whether
-//    |lineHeight| is non-null. Bit 0 is unused.
+//  - Element 0: A bit mask indicating which fields are non-null.
+//    Bit 0 is unused. Bits 1-n are set if the corresponding index in the
+//    encoded array is non-null.  The remaining bits represent fields that
+//    are passed separately from the array.
 //
 //  - Element 1: The enum index of the |textAlign|.
 //
@@ -384,15 +375,16 @@ class TextStyle {
 //
 //  - Element 3: The enum index of the |fontStyle|.
 //
-//  - Element 4: The enum index of the |textOverflow|.
+//  - Element 4: The value of |lineCount|.
 //
 Int32List _encodeParagraphStyle(TextAlign textAlign,
                                 FontWeight fontWeight,
                                 FontStyle fontStyle,
-                                TextOverflow textOverflow,
+                                int lineCount,
                                 String fontFamily,
                                 double fontSize,
-                                double lineHeight) {
+                                double lineHeight,
+                                String ellipsis) {
   Int32List result = new Int32List(5);
   if (textAlign != null) {
     result[0] |= 1 << 1;
@@ -406,9 +398,9 @@ Int32List _encodeParagraphStyle(TextAlign textAlign,
     result[0] |= 1 << 3;
     result[3] = fontStyle.index;
   }
-  if (textOverflow != null) {
+  if (lineCount != null) {
     result[0] |= 1 << 4;
-    result[4] = textOverflow.index;
+    result[4] = lineCount;
   }
   if (fontFamily != null) {
     result[0] |= 1 << 5;
@@ -422,6 +414,10 @@ Int32List _encodeParagraphStyle(TextAlign textAlign,
     result[0] |= 1 << 7;
     // Passed separately to native.
   }
+  if (ellipsis != null) {
+    result[0] |= 1 << 8;
+    // Passed separately to native.
+  }
   return result;
 }
 
@@ -432,32 +428,40 @@ class ParagraphStyle {
   /// * `textAlign`: The alignment of the text within the lines of the paragraph.
   /// * `fontWeight`: The typeface thickness to use when painting the text (e.g., bold).
   /// * `fontStyle`: The typeface variant to use when drawing the letters (e.g., italics).
+  /// * `lineCount`: Currently not implemented.
   /// * `fontFamily`: The name of the font to use when painting the text (e.g., Roboto).
   /// * `fontSize`: The size of glyphs (in logical pixels) to use when painting the text.
   /// * `lineHeight`: The minimum height of the line boxes, as a multiple of the font size.
+  /// * `ellipsis`: String used to ellipsize overflowing text.
   ParagraphStyle({
     TextAlign textAlign,
     FontWeight fontWeight,
     FontStyle fontStyle,
-    TextOverflow textOverflow,
+    int lineCount,
     String fontFamily,
     double fontSize,
-    double lineHeight
+    double lineHeight,
+    String ellipsis
   }) : _encoded = _encodeParagraphStyle(textAlign,
                                         fontWeight,
                                         fontStyle,
-                                        textOverflow,
+                                        lineCount,
                                         fontFamily,
                                         fontSize,
-                                        lineHeight),
+                                        lineHeight,
+                                        ellipsis),
        _fontFamily = fontFamily,
        _fontSize = fontSize,
-       _lineHeight = lineHeight;
+       _lineHeight = lineHeight,
+       _ellipsis = ellipsis {
+    assert(lineCount == null);
+  }
 
   final Int32List _encoded;
   final String _fontFamily;
   final double _fontSize;
   final double _lineHeight;
+  final String _ellipsis;
 
   bool operator ==(dynamic other) {
     if (identical(this, other))
@@ -467,7 +471,8 @@ class ParagraphStyle {
     final ParagraphStyle typedOther = other;
     if ( _fontFamily != typedOther._fontFamily ||
         _fontSize != typedOther._fontSize ||
-        _lineHeight != typedOther._lineHeight)
+        _lineHeight != typedOther._lineHeight ||
+        _ellipsis != typedOther._ellipsis)
      return false;
     for (int index = 0; index < _encoded.length; index += 1) {
       if (_encoded[index] != typedOther._encoded[index])
@@ -483,10 +488,11 @@ class ParagraphStyle {
              'textAlign: ${   _encoded[0] & 0x02 == 0x02 ? TextAlign.values[_encoded[1]]    : "unspecified"}, '
              'fontWeight: ${  _encoded[0] & 0x04 == 0x04 ? FontWeight.values[_encoded[2]]   : "unspecified"}, '
              'fontStyle: ${   _encoded[0] & 0x08 == 0x08 ? FontStyle.values[_encoded[3]]    : "unspecified"}, '
-             'textOverflow: ${ _encoded[0] & 0x10 == 0x10 ? TextOverflow.values[_encoded[4]] : "unspecified"}, '
+             'lineCount: ${   _encoded[0] & 0x10 == 0x10 ? _encoded[4]                      : "unspecified"}, '
              'fontFamily: ${  _encoded[0] & 0x20 == 0x20 ? _fontFamily                      : "unspecified"}, '
              'fontSize: ${    _encoded[0] & 0x40 == 0x40 ? _fontSize                        : "unspecified"}, '
-             'lineHeight: ${  _encoded[0] & 0x80 == 0x80 ? "${_lineHeight}x"                : "unspecified"}'
+             'lineHeight: ${  _encoded[0] & 0x80 == 0x80 ? "${_lineHeight}x"                : "unspecified"},'
+             'ellipsis: ${    _encoded[0] & 0x100 == 0x100 ? "\"$_ellipsis\""                : "unspecified"},'
            ')';
   }
 }
@@ -736,6 +742,6 @@ class ParagraphBuilder extends NativeFieldWrapperClass2 {
   ///
   /// After calling this function, the paragraph builder object is invalid and
   /// cannot be used further.
-  Paragraph build(ParagraphStyle style) => _build(style._encoded, style._fontFamily, style._fontSize, style._lineHeight);
-  Paragraph _build(Int32List encoded, String fontFamily, double fontSize, double lineHeight) native "ParagraphBuilder_build";
+  Paragraph build(ParagraphStyle style) => _build(style._encoded, style._fontFamily, style._fontSize, style._lineHeight, style._ellipsis);
+  Paragraph _build(Int32List encoded, String fontFamily, double fontSize, double lineHeight, String ellipsis) native "ParagraphBuilder_build";
 }
