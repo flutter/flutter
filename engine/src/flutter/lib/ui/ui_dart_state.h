@@ -12,8 +12,8 @@
 #include "lib/tonic/dart_state.h"
 
 namespace blink {
+struct DartJniIsolateData;
 class FontSelector;
-class DartJniIsolateData;
 class MojoServices;
 class Window;
 

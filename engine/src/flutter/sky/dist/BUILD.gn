@@ -41,6 +41,7 @@ if (is_android) {
 
     deps = [
       "//flutter/sky/packages/sky_engine",
+      "//flutter/sky/packages/sky_engine:sky_engine_pkg_helper",
     ]
   }
 
@@ -62,6 +63,7 @@ if (is_android) {
 
     deps = [
       "//flutter/sky/packages/sky_services",
+      "//flutter/sky/packages/sky_services:sky_services_pkg_helper",
     ]
   }
 }
