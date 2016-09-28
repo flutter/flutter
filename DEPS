@@ -125,6 +125,10 @@ deps = {
    Var('github_git') + '/KhronosGroup/Vulkan-Docs.git' + '@' + 'e29c2489e238509c41aeb8c7bce9d669a496344b',
 }
 
+recursedeps = [
+  'src/buildtools',
+]
+
 deps_os = {
   'android': {
     'src/third_party/colorama/src':
