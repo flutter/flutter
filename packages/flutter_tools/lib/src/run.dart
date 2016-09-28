@@ -38,6 +38,8 @@ class RunAndStayResident extends ResidentRunner {
   final bool benchmark;
   final String applicationBinary;
 
+  bool get prebuiltMode => applicationBinary != null;
+
   @override
   Future<int> run({
     Completer<DebugConnectionInfo> connectionInfoCompleter,
@@ -46,6 +48,7 @@ class RunAndStayResident extends ResidentRunner {
   }) {
     // Don't let uncaught errors kill the process.
     return runZoned(() {
+      assert(shouldBuild == !prebuiltMode);
       return _run(
         traceStartup: traceStartup,
         benchmark: benchmark,
@@ -78,7 +81,8 @@ class RunAndStayResident extends ResidentRunner {
         _package,
         _result,
         mainPath: _mainPath,
-        observatory: vmService
+        observatory: vmService,
+        prebuiltApplication: prebuiltMode
       );
 
       status.stop(showElapsedTime: true);
@@ -99,13 +103,15 @@ class RunAndStayResident extends ResidentRunner {
     String route,
     bool shouldBuild: true
   }) async {
-    _mainPath = findMainDartFile(target);
-    if (!FileSystemEntity.isFileSync(_mainPath)) {
-      String message = 'Tried to run $_mainPath, but that file does not exist.';
-      if (target == null)
-        message += '\nConsider using the -t option to specify the Dart file to start.';
-      printError(message);
-      return 1;
+    if (!prebuiltMode) {
+      _mainPath = findMainDartFile(target);
+      if (!FileSystemEntity.isFileSync(_mainPath)) {
+        String message = 'Tried to run $_mainPath, but that file does not exist.';
+        if (target == null)
+          message += '\nConsider using the -t option to specify the Dart file to start.';
+        printError(message);
+        return 1;
+      }
     }
 
     _package = getApplicationPackageForPlatform(device.platform, applicationBinary: applicationBinary);
@@ -153,7 +159,12 @@ class RunAndStayResident extends ResidentRunner {
       platformArgs = <String, dynamic>{ 'trace-startup': traceStartup };
 
     await startEchoingDeviceLog();
-    printStatus('Running ${getDisplayPath(_mainPath)} on ${device.name}...');
+    if (_mainPath == null) {
+      assert(prebuiltMode);
+      printStatus('Running ${_package.displayName} on ${device.name}');
+    } else {
+      printStatus('Running ${getDisplayPath(_mainPath)} on ${device.name}...');
+    }
 
     _result = await device.startApp(
       _package,
@@ -161,7 +172,8 @@ class RunAndStayResident extends ResidentRunner {
       mainPath: _mainPath,
       debuggingOptions: debuggingOptions,
       platformArgs: platformArgs,
-      route: route
+      route: route,
+      prebuiltApplication: prebuiltMode
     );
 
     if (!_result.started) {

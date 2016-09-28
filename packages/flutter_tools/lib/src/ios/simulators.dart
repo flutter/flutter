@@ -412,7 +412,8 @@ class IOSSimulator extends Device {
     String mainPath,
     String route,
     DebuggingOptions debuggingOptions,
-    Map<String, dynamic> platformArgs
+    Map<String, dynamic> platformArgs,
+    bool prebuiltApplication: false
   }) async {
     printTrace('Building ${app.name} for $id.');
 

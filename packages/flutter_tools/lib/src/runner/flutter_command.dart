@@ -22,7 +22,7 @@ typedef bool Validator();
 
 abstract class FlutterCommand extends Command {
   FlutterCommand() {
-    commandValidator = _commandValidator;
+    commandValidator = commonCommandValidator;
   }
 
   @override
@@ -206,7 +206,7 @@ abstract class FlutterCommand extends Command {
   // This is a field so that you can modify the value for testing.
   Validator commandValidator;
 
-  bool _commandValidator() {
+  bool commonCommandValidator() {
     if (!PackageMap.isUsingCustomPackagesPath) {
       // Don't expect a pubspec.yaml file if the user passed in an explicit .packages file path.
       if (!FileSystemEntity.isFileSync('pubspec.yaml')) {

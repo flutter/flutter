@@ -274,12 +274,15 @@ class AndroidDevice extends Device {
   }) async {
     printTrace('$this startBundle');
 
-    if (!FileSystemEntity.isFileSync(bundlePath)) {
-      printError('Cannot find $bundlePath');
-      return new LaunchResult.failed();
-    }
+    if (bundlePath != null) {
+      if (!FileSystemEntity.isFileSync(bundlePath)) {
+        printError('Cannot find $bundlePath');
+        return new LaunchResult.failed();
+      }
 
-    runCheckedSync(adbCommandForDevice(<String>['push', bundlePath, _deviceBundlePath]));
+      runCheckedSync(
+          adbCommandForDevice(<String>['push', bundlePath, _deviceBundlePath]));
+    }
 
     ProtocolDiscovery observatoryDiscovery;
     ProtocolDiscovery diagnosticDiscovery;
@@ -289,13 +292,26 @@ class AndroidDevice extends Device {
       diagnosticDiscovery = new ProtocolDiscovery(logReader, ProtocolDiscovery.kDiagnosticService);
     }
 
-    List<String> cmd = adbCommandForDevice(<String>[
-      'shell', 'am', 'start',
-      '-a', 'android.intent.action.RUN',
-      '-d', _deviceBundlePath,
-      '-f', '0x20000000',  // FLAG_ACTIVITY_SINGLE_TOP
-      '--ez', 'enable-background-compilation', 'true',
-    ]);
+    List<String> cmd;
+
+    if (bundlePath != null) {
+      // Specify in the RUN intent the path to the local bundle pushed.
+      cmd = adbCommandForDevice(<String>[
+        'shell', 'am', 'start',
+        '-a', 'android.intent.action.RUN',
+        '-d', _deviceBundlePath,
+        '-f', '0x20000000',  // FLAG_ACTIVITY_SINGLE_TOP
+        '--ez', 'enable-background-compilation', 'true',
+      ]);
+    } else {
+      cmd = adbCommandForDevice(<String>[
+        'shell', 'am', 'start',
+        '-a', 'android.intent.action.RUN',
+        '-f', '0x20000000',  // FLAG_ACTIVITY_SINGLE_TOP
+        '--ez', 'enable-background-compilation', 'true',
+      ]);
+    }
+
     if (traceStartup)
       cmd.addAll(<String>['--ez', 'trace-startup', 'true']);
     if (route != null)
@@ -372,19 +388,23 @@ class AndroidDevice extends Device {
     String mainPath,
     String route,
     DebuggingOptions debuggingOptions,
-    Map<String, dynamic> platformArgs
+    Map<String, dynamic> platformArgs,
+    bool prebuiltApplication: false
   }) async {
     if (!_checkForSupportedAdbVersion() || !_checkForSupportedAndroidVersion())
       return new LaunchResult.failed();
 
-    String localBundlePath = await flx.buildFlx(
-      mainPath: mainPath,
-      precompiledSnapshot: isAotBuildMode(debuggingOptions.buildMode),
-      includeRobotoFonts: false
-    );
+    String localBundlePath;
 
-    if (localBundlePath == null)
-      return new LaunchResult.failed();
+    if (!prebuiltApplication) {
+      localBundlePath = await flx.buildFlx(
+        mainPath: mainPath,
+        precompiledSnapshot: isAotBuildMode(debuggingOptions.buildMode),
+        includeRobotoFonts: false
+      );
+      if (localBundlePath == null)
+        return new LaunchResult.failed();
+    }
 
     printTrace('Starting bundle for $this.');
 
@@ -430,9 +450,14 @@ class AndroidDevice extends Device {
     ApplicationPackage package,
     LaunchResult result, {
     String mainPath,
-    VMService observatory
+    VMService observatory,
+    bool prebuiltApplication: false
   }) async {
     Directory tempDir = await Directory.systemTemp.createTemp('flutter_tools');
+
+    if (prebuiltApplication) {
+      return false;
+    }
 
     try {
       String snapshotPath = path.join(tempDir.path, 'snapshot_blob.bin');
