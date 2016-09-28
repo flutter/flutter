@@ -12,7 +12,7 @@ import 'package:flutter_devicelab/framework/utils.dart';
 
 void main() {
   task(() async {
-    Adb device = await adb();
+    Device device = await devices.workingDevice;
     await device.unlock();
     Directory appDir =
         dir(path.join(flutterDirectory.path, 'examples/flutter_gallery'));

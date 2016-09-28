@@ -20,14 +20,14 @@ TaskFunction createComplexLayoutScrollPerfTest({ @required DeviceOperatingSystem
   );
 }
 
-TaskFunction createFlutterGalleryStartupTest({ DeviceOperatingSystem os }) {
+TaskFunction createFlutterGalleryStartupTest({ @required DeviceOperatingSystem os }) {
   return new StartupTest(
     '${flutterDirectory.path}/examples/flutter_gallery',
     os: os,
   );
 }
 
-TaskFunction createComplexLayoutStartupTest({ DeviceOperatingSystem os }) {
+TaskFunction createComplexLayoutStartupTest({ @required DeviceOperatingSystem os }) {
   return new StartupTest(
     '${flutterDirectory.path}/dev/benchmarks/complex_layout',
     os: os,
@@ -56,7 +56,7 @@ class StartupTest {
   Future<TaskResult> call() async {
     return await inDirectory(testDirectory, () async {
       String deviceId = (await devices.workingDevice).deviceId;
-      await flutter('packages', options: ['get']);
+      await flutter('packages', options: <String>['get']);
 
       if (os == DeviceOperatingSystem.ios) {
         // This causes an Xcode project to be created.
@@ -92,7 +92,7 @@ class PerfTest {
   Future<TaskResult> call() {
     return inDirectory(testDirectory, () async {
       String deviceId = (await devices.workingDevice).deviceId;
-      await flutter('packages', options: ['get']);
+      await flutter('packages', options: <String>['get']);
 
       if (os == DeviceOperatingSystem.ios) {
         // This causes an Xcode project to be created.
@@ -128,7 +128,7 @@ class BuildTest {
     return await inDirectory(testDirectory, () async {
       Device device = await devices.workingDevice;
       await device.unlock();
-      await flutter('packages', options: ['get']);
+      await flutter('packages', options: <String>['get']);
 
       Stopwatch watch = new Stopwatch()..start();
       await flutter('build', options: <String>[

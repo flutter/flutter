@@ -24,7 +24,7 @@ TaskFunction createBasicMaterialAppSizeTest() {
         throw 'Failed to create sample Flutter app in ${sampleDir.path}';
 
       await inDirectory(sampleDir, () async {
-        await flutter('packages', options: ['get']);
+        await flutter('packages', options: <String>['get']);
         await flutter('build', options: <String>['clean']);
         await flutter('build', options: <String>['apk', '--release']);
         apkSizeInBytes = await file('${sampleDir.path}/build/app.apk').length();
