@@ -6,8 +6,6 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:mojo/bindings.dart' as mojo_bindings;
-import 'package:flutter_services/pointer.dart';
 import 'package:test/test.dart';
 
 typedef void HandleEventCallback(PointerEvent event);
@@ -35,42 +33,35 @@ void main() {
   setUp(ensureTestGestureBinding);
 
   test('Pointer tap events', () {
-    mojo_bindings.Encoder encoder = new mojo_bindings.Encoder();
-
-    PointerPacket packet = new PointerPacket();
-    packet.pointers = <Pointer>[new Pointer(), new Pointer()];
-    packet.pointers[0].type = PointerType.down;
-    packet.pointers[0].kind = PointerKind.touch;
-    packet.pointers[1].type = PointerType.up;
-    packet.pointers[1].kind = PointerKind.touch;
-    packet.encode(encoder);
+    ui.PointerDataPacket packet = new ui.PointerDataPacket(
+      pointers: <ui.PointerData>[
+        new ui.PointerData(change: ui.PointerChange.down),
+        new ui.PointerData(change: ui.PointerChange.up),
+      ]
+    );
 
     List<PointerEvent> events = <PointerEvent>[];
     _binding.callback = (PointerEvent event) => events.add(event);
 
-    ui.window.onPointerPacket(encoder.message.buffer);
+    ui.window.onPointerDataPacket(packet);
     expect(events.length, 2);
     expect(events[0].runtimeType, equals(PointerDownEvent));
     expect(events[1].runtimeType, equals(PointerUpEvent));
   });
 
   test('Pointer move events', () {
-    mojo_bindings.Encoder encoder = new mojo_bindings.Encoder();
-
-    PointerPacket packet = new PointerPacket();
-    packet.pointers = <Pointer>[new Pointer(), new Pointer(), new Pointer()];
-    packet.pointers[0].type = PointerType.down;
-    packet.pointers[0].kind = PointerKind.touch;
-    packet.pointers[1].type = PointerType.move;
-    packet.pointers[1].kind = PointerKind.touch;
-    packet.pointers[2].type = PointerType.up;
-    packet.pointers[2].kind = PointerKind.touch;
-    packet.encode(encoder);
+    ui.PointerDataPacket packet = new ui.PointerDataPacket(
+      pointers: <ui.PointerData>[
+        new ui.PointerData(change: ui.PointerChange.down),
+        new ui.PointerData(change: ui.PointerChange.move),
+        new ui.PointerData(change: ui.PointerChange.up),
+      ]
+    );
 
     List<PointerEvent> events = <PointerEvent>[];
     _binding.callback = (PointerEvent event) => events.add(event);
 
-    ui.window.onPointerPacket(encoder.message.buffer);
+    ui.window.onPointerDataPacket(packet);
     expect(events.length, 3);
     expect(events[0].runtimeType, equals(PointerDownEvent));
     expect(events[1].runtimeType, equals(PointerMoveEvent));
@@ -78,26 +69,25 @@ void main() {
   });
 
   test('Synthetic move events', () {
-    mojo_bindings.Encoder encoder = new mojo_bindings.Encoder();
-
-    PointerPacket packet = new PointerPacket();
-    packet.pointers = <Pointer>[new Pointer(), new Pointer()];
-    packet.pointers[0]
-      ..type = PointerType.down
-      ..kind = PointerKind.touch
-      ..x = 1.0
-      ..y = 3.0;
-    packet.pointers[1]
-      ..type = PointerType.up
-      ..kind = PointerKind.touch
-      ..x = 10.0
-      ..y = 15.0;
-    packet.encode(encoder);
+    ui.PointerDataPacket packet = new ui.PointerDataPacket(
+      pointers: <ui.PointerData>[
+        new ui.PointerData(
+          change: ui.PointerChange.down,
+          physicalX: 1.0,
+          physicalY: 3.0,
+        ),
+        new ui.PointerData(
+          change: ui.PointerChange.up,
+          physicalX: 10.0,
+          physicalY: 15.0,
+        ),
+      ]
+    );
 
     List<PointerEvent> events = <PointerEvent>[];
     _binding.callback = (PointerEvent event) => events.add(event);
 
-    ui.window.onPointerPacket(encoder.message.buffer);
+    ui.window.onPointerDataPacket(packet);
     expect(events.length, 3);
     expect(events[0].runtimeType, equals(PointerDownEvent));
     expect(events[1].runtimeType, equals(PointerMoveEvent));
@@ -106,35 +96,29 @@ void main() {
   });
 
   test('Pointer cancel events', () {
-    mojo_bindings.Encoder encoder = new mojo_bindings.Encoder();
-
-    PointerPacket packet = new PointerPacket();
-    packet.pointers = <Pointer>[new Pointer(), new Pointer()];
-    packet.pointers[0].type = PointerType.down;
-    packet.pointers[0].kind = PointerKind.touch;
-    packet.pointers[1].type = PointerType.cancel;
-    packet.pointers[1].kind = PointerKind.touch;
-    packet.encode(encoder);
+    ui.PointerDataPacket packet = new ui.PointerDataPacket(
+      pointers: <ui.PointerData>[
+        new ui.PointerData(change: ui.PointerChange.down),
+        new ui.PointerData(change: ui.PointerChange.cancel),
+      ]
+    );
 
     List<PointerEvent> events = <PointerEvent>[];
     _binding.callback = (PointerEvent event) => events.add(event);
 
-    ui.window.onPointerPacket(encoder.message.buffer);
+    ui.window.onPointerDataPacket(packet);
     expect(events.length, 2);
     expect(events[0].runtimeType, equals(PointerDownEvent));
     expect(events[1].runtimeType, equals(PointerCancelEvent));
   });
 
   test('Can cancel pointers', () {
-    mojo_bindings.Encoder encoder = new mojo_bindings.Encoder();
-
-    PointerPacket packet = new PointerPacket();
-    packet.pointers = <Pointer>[new Pointer(), new Pointer()];
-    packet.pointers[0].type = PointerType.down;
-    packet.pointers[0].kind = PointerKind.touch;
-    packet.pointers[1].type = PointerType.up;
-    packet.pointers[1].kind = PointerKind.touch;
-    packet.encode(encoder);
+    ui.PointerDataPacket packet = new ui.PointerDataPacket(
+      pointers: <ui.PointerData>[
+        new ui.PointerData(change: ui.PointerChange.down),
+        new ui.PointerData(change: ui.PointerChange.up),
+      ]
+    );
 
     List<PointerEvent> events = <PointerEvent>[];
     _binding.callback = (PointerEvent event) {
@@ -143,7 +127,7 @@ void main() {
         _binding.cancelPointer(event.pointer);
     };
 
-    ui.window.onPointerPacket(encoder.message.buffer);
+    ui.window.onPointerDataPacket(packet);
     expect(events.length, 2);
     expect(events[0].runtimeType, equals(PointerDownEvent));
     expect(events[1].runtimeType, equals(PointerCancelEvent));

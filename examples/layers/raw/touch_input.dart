@@ -8,10 +8,6 @@
 import 'dart:ui' as ui;
 import 'dart:typed_data';
 
-import 'package:mojo/bindings.dart' as bindings;
-import 'package:mojo/core.dart' as core;
-import 'package:flutter_services/pointer.dart';
-
 ui.Color color;
 
 ui.Picture paint(ui.Rect paintBounds) {
@@ -80,26 +76,18 @@ void beginFrame(Duration timeStamp) {
   ui.window.render(scene);
 }
 
-// Pointer input arrives as an array of bytes. The format for the data is
-// defined by pointer.mojom, which generates serializes and parsers for a
-// number of languages, including Dart, C++, Java, and Go.
-void handlePointerPacket(ByteData serializedPacket) {
-  // We wrap the byte data up into a Mojo Message object, which we then
-  // deserialize according to the mojom definition.
-  bindings.Message message = new bindings.Message(serializedPacket, <core.MojoHandle>[], serializedPacket.lengthInBytes, 0);
-  PointerPacket packet = PointerPacket.deserialize(message);
-
-  // The deserialized pointer packet contains a number of pointer movements,
-  // which we iterate through and process.
-  for (Pointer pointer in packet.pointers) {
-    if (pointer.type == PointerType.down) {
+void handlePointerDataPacket(ui.PointerDataPacket packet) {
+  // The pointer packet contains a number of pointer movements, which we iterate
+  // through and process.
+  for (ui.PointerData pointer in packet.pointers) {
+    if (pointer.change == ui.PointerChange.down) {
       // If the pointer went down, we change the color of the circle to blue.
       color = const ui.Color(0xFF0000FF);
       // Rather than calling paint() synchronously, we ask the engine to
       // schedule a frame. The engine will call onBeginFrame when it is actually
       // time to produce the frame.
       ui.window.scheduleFrame();
-    } else if (pointer.type == PointerType.up) {
+    } else if (pointer.change == ui.PointerChange.up) {
       // Similarly, if the pointer went up, we change the color of the circle to
       // green and schedule a frame. It's harmless to call scheduleFrame many
       // times because the engine will ignore redundant requests up until the
@@ -117,9 +105,9 @@ void main() {
   color = const ui.Color(0xFF00FF00);
   // The engine calls onBeginFrame whenever it wants us to produce a frame.
   ui.window.onBeginFrame = beginFrame;
-  // The engine calls onPointerPacket whenever it had updated information about
-  // the pointers directed at our app.
-  ui.window.onPointerPacket = handlePointerPacket;
+  // The engine calls onPointerDataPacket whenever it had updated information
+  // about the pointers directed at our app.
+  ui.window.onPointerDataPacket = handlePointerDataPacket;
   // Here we kick off the whole process by asking the engine to schedule a new
   // frame. The engine will eventually call onBeginFrame when it is time for us
   // to actually produce the frame.
