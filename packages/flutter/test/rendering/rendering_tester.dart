@@ -43,13 +43,20 @@ TestRenderingFlutterBinding get renderer {
   return _renderer;
 }
 
-void layout(RenderBox box, { BoxConstraints constraints, EnginePhase phase: EnginePhase.layout }) {
+/// Place the box in the render tree, at the given size and with the given
+/// alignment on the screen.
+void layout(RenderBox box, {
+  BoxConstraints constraints,
+  FractionalOffset alignment: FractionalOffset.center,
+  EnginePhase phase: EnginePhase.layout
+}) {
   assert(box != null); // If you want to just repump the last box, call pumpFrame().
   assert(box.parent == null); // We stick the box in another, so you can't reuse it easily, sorry.
 
   renderer.renderView.child = null;
   if (constraints != null) {
     box = new RenderPositionedBox(
+      alignment: alignment,
       child: new RenderConstrainedBox(
         additionalConstraints: constraints,
         child: box

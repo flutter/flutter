@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:ui' as ui show lerpDouble;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:meta/meta.dart';
@@ -184,6 +185,16 @@ class AnimationController extends Animation<double>
   ///
   /// Returns a [Future] that completes when the animation is complete.
   Future<Null> forward({ double from }) {
+    assert(() {
+      if (duration == null) {
+        throw new FlutterError(
+          'AnimationController.forward() called with no default Duration.\n'
+          'The "duration" property should be set, either in the constructor or later, before '
+          'calling the forward() function.'
+        );
+      }
+      return true;
+    });
     _direction = _AnimationDirection.forward;
     if (from != null)
       value = from;
@@ -194,6 +205,16 @@ class AnimationController extends Animation<double>
   ///
   /// Returns a [Future] that completes when the animation is complete.
   Future<Null> reverse({ double from }) {
+    assert(() {
+      if (duration == null) {
+        throw new FlutterError(
+          'AnimationController.reverse() called with no default Duration.\n'
+          'The "duration" property should be set, either in the constructor or later, before '
+          'calling the reverse() function.'
+        );
+      }
+      return true;
+    });
     _direction = _AnimationDirection.reverse;
     if (from != null)
       value = from;
@@ -206,7 +227,17 @@ class AnimationController extends Animation<double>
   Future<Null> animateTo(double target, { Duration duration, Curve curve: Curves.linear }) {
     Duration simulationDuration = duration;
     if (simulationDuration == null) {
-      assert(this.duration != null);
+      assert(() {
+        if (this.duration == null) {
+          throw new FlutterError(
+            'AnimationController.animateTo() called with no explicit Duration and no default Duration.\n'
+            'Either the "duration" argument to the animateTo() method should be provided, or the '
+            '"duration" property should be set, either in the constructor or later, before '
+            'calling the animateTo() function.'
+          );
+        }
+        return true;
+      });
       double range = upperBound - lowerBound;
       double remainingFraction = range.isFinite ? (target - _value).abs() / range : 1.0;
       simulationDuration = this.duration * remainingFraction;
@@ -233,6 +264,17 @@ class AnimationController extends Animation<double>
     min ??= lowerBound;
     max ??= upperBound;
     period ??= duration;
+    assert(() {
+      if (duration == null) {
+        throw new FlutterError(
+          'AnimationController.repeat() called with no explicit Duration and default Duration.\n'
+          'Either the "duration" argument to the repeat() method should be provided, or the '
+          '"duration" property should be set, either in the constructor or later, before '
+          'calling the repeat() function.'
+        );
+      }
+      return true;
+    });
     return animateWith(new _RepeatingSimulation(min, max, period));
   }
 

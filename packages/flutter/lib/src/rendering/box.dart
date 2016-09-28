@@ -1339,7 +1339,8 @@ abstract class RenderBox extends RenderObject {
   /// function to factor those transforms into the calculation.
   ///
   /// The RenderBox implementation takes care of adjusting the matrix for the
-  /// position of the given child.
+  /// position of the given child as determined during layout and stored on the
+  /// child's [parentData] in the [BoxParentData.offset] field.
   @override
   void applyPaintTransform(RenderObject child, Matrix4 transform) {
     assert(child.parent == this);
@@ -1348,20 +1349,24 @@ abstract class RenderBox extends RenderObject {
     transform.translate(offset.dx, offset.dy);
   }
 
+  Matrix4 _collectPaintTransform() {
+    assert(attached);
+    final List<RenderObject> renderers = <RenderObject>[];
+    for (RenderObject renderer = this; renderer != null; renderer = renderer.parent)
+      renderers.add(renderer);
+    final Matrix4 transform = new Matrix4.identity();
+    for (int index = renderers.length - 1; index > 0; index -= 1)
+      renderers[index].applyPaintTransform(renderers[index - 1], transform);
+    return transform;
+  }
+
   /// Convert the given point from the global coodinate system to the local
   /// coordinate system for this box.
   ///
   /// If the transform from global coordinates to local coordinates is
   /// degenerate, this function returns Point.origin.
   Point globalToLocal(Point point) {
-    assert(attached);
-    Matrix4 transform = new Matrix4.identity();
-    RenderObject renderer = this;
-    while (renderer.parent is RenderObject) {
-      RenderObject rendererParent = renderer.parent;
-      rendererParent.applyPaintTransform(renderer, transform);
-      renderer = rendererParent;
-    }
+    final Matrix4 transform = _collectPaintTransform();
     double det = transform.invert();
     if (det == 0.0)
       return Point.origin;
@@ -1371,13 +1376,7 @@ abstract class RenderBox extends RenderObject {
   /// Convert the given point from the local coordinate system for this box to
   /// the global coordinate system.
   Point localToGlobal(Point point) {
-    List<RenderObject> renderers = <RenderObject>[];
-    for (RenderObject renderer = this; renderer != null; renderer = renderer.parent)
-      renderers.add(renderer);
-    Matrix4 transform = new Matrix4.identity();
-    for (int index = renderers.length - 1; index > 0; index -= 1)
-      renderers[index].applyPaintTransform(renderers[index - 1], transform);
-    return MatrixUtils.transformPoint(transform, point);
+    return MatrixUtils.transformPoint(_collectPaintTransform(), point);
   }
 
   /// Returns a rectangle that contains all the pixels painted by this box.

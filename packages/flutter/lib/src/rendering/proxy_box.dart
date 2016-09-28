@@ -6,6 +6,7 @@ import 'dart:ui' as ui show ImageFilter;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/painting.dart';
 import 'package:meta/meta.dart';
 import 'package:vector_math/vector_math_64.dart';
 
@@ -1367,9 +1368,7 @@ class RenderTransform extends RenderProxyBox {
         // doesn't appear on screen and cannot be hit.
         return false;
       }
-      Vector3 position3 = new Vector3(position.x, position.y, 0.0);
-      Vector3 transformed3 = inverse.transform3(position3);
-      position = new Point(transformed3.x, transformed3.y);
+      position = MatrixUtils.transformPoint(inverse, position);
     }
     return super.hitTest(result, position: position);
   }
@@ -1515,9 +1514,7 @@ class RenderFittedBox extends RenderProxyBox {
       // doesn't appear on screen and cannot be hit.
       return false;
     }
-    Vector3 position3 = new Vector3(position.x, position.y, 0.0);
-    Vector3 transformed3 = inverse.transform3(position3);
-    position = new Point(transformed3.x, transformed3.y);
+    position = MatrixUtils.transformPoint(inverse, position);
     return super.hitTest(result, position: position);
   }
 

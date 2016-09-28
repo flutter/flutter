@@ -5,6 +5,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/gestures.dart';
+import 'package:flutter/painting.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'box.dart';
@@ -93,9 +94,7 @@ class RenderRotatedBox extends RenderBox with RenderObjectWithChildMixin<RenderB
     if (child == null || _paintTransform == null)
       return false;
     Matrix4 inverse = new Matrix4.inverted(_paintTransform);
-    Vector3 position3 = new Vector3(position.x, position.y, 0.0);
-    Vector3 transformed3 = inverse.transform3(position3);
-    return child.hitTest(result, position: new Point(transformed3.x, transformed3.y));
+    return child.hitTest(result, position: MatrixUtils.transformPoint(inverse, position));
   }
 
   void _paintChild(PaintingContext context, Offset offset) {
