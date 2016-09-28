@@ -166,7 +166,7 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
             decoration: new BoxDecoration(
               border: new Border(bottom: new BorderSide(color: theme.dividerColor))
             ),
-            align: FractionalOffset.bottomLeft,
+            alignment: FractionalOffset.bottomLeft,
             child: new Text('Event name', style: theme.textTheme.display2)
           ),
           new Container(
@@ -174,7 +174,7 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
             decoration: new BoxDecoration(
               border: new Border(bottom: new BorderSide(color: theme.dividerColor))
             ),
-            align: FractionalOffset.bottomLeft,
+            alignment: FractionalOffset.bottomLeft,
             child: new Text('Location', style: theme.textTheme.title.copyWith(color: Colors.black54))
           ),
           new Column(

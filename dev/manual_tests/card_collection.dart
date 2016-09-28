@@ -284,7 +284,7 @@ class CardCollectionState extends State<CardCollection> {
       flexibleSpace: new Container(
         padding: const EdgeInsets.only(left: 72.0),
         height: 128.0,
-        align: const FractionalOffset(0.0, 0.75),
+        alignment: const FractionalOffset(0.0, 0.75),
         child: new Text('Swipe Away: ${_cardModels.length}', style: Theme.of(context).primaryTextTheme.title)
       )
     );

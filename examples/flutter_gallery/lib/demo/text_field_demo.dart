@@ -121,7 +121,7 @@ class TextFieldDemoState extends State<TextFieldDemo> {
             ),
             new Container(
               padding: const EdgeInsets.all(20.0),
-              align: const FractionalOffset(0.5, 0.5),
+              alignment: const FractionalOffset(0.5, 0.5),
               child: new RaisedButton(
                 child: new Text('SUBMIT'),
                 onPressed: _handleSubmitted,

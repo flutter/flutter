@@ -76,7 +76,7 @@ class Container extends StatelessWidget {
   /// The `height` and `width` values include the padding.
   Container({
     Key key,
-    this.align,
+    this.alignment,
     this.padding,
     this.decoration,
     this.foregroundDecoration,
@@ -107,7 +107,7 @@ class Container extends StatelessWidget {
   ///
   /// If non-null, the container will expand to fill its parent and position its
   /// child within itself according to the given value.
-  final FractionalOffset align;
+  final FractionalOffset alignment;
 
   /// Empty space to inscribe inside the decoration.
   final EdgeInsets padding;
@@ -145,8 +145,8 @@ class Container extends StatelessWidget {
     if (child == null && (constraints == null || !constraints.isTight))
       current = new ConstrainedBox(constraints: const BoxConstraints.expand());
 
-    if (align != null)
-      current = new Align(alignment: align, child: current);
+    if (alignment != null)
+      current = new Align(alignment: alignment, child: current);
 
     EdgeInsets effectivePadding = _paddingIncludingDecoration;
     if (effectivePadding != null)
