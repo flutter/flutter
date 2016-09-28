@@ -255,7 +255,7 @@ class _CheckedPopupMenuItemState<T> extends _PopupMenuItemState<CheckedPopupMenu
 class _PopupMenu<T> extends StatelessWidget {
   _PopupMenu({
     Key key,
-    this.route
+    this.route,
   }) : super(key: key);
 
   final _PopupMenuRoute<T> route;
@@ -374,12 +374,16 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
     this.position,
     this.items,
     this.initialValue,
+    this.linkParentKey,
+    this.linkChildKey,
     this.elevation
   }) : super(completer: completer);
 
   final RelativeRect position;
   final List<PopupMenuEntry<T>> items;
   final dynamic initialValue;
+  final GlobalKey linkParentKey;
+  final GlobalKey linkChildKey;
   final int elevation;
 
   @override
@@ -413,7 +417,11 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
     }
     return new CustomSingleChildLayout(
       delegate: new _PopupMenuRouteLayout(position, selectedItemOffset),
-      child: new _PopupMenu<T>(route: this)
+      child: new InheritedWidgetLinkChild(
+        key: linkChildKey,
+        link: linkParentKey,
+        child: new _PopupMenu<T>(route: this)
+      )
     );
   }
 }
@@ -428,6 +436,8 @@ Future<dynamic/*=T*/> showMenu/*<T>*/({
   RelativeRect position,
   List<PopupMenuEntry<dynamic/*=T*/>> items,
   dynamic/*=T*/ initialValue,
+  GlobalKey linkChildKey,
+  GlobalKey linkParentKey,
   int elevation: 8
 }) {
   assert(context != null);
@@ -438,6 +448,8 @@ Future<dynamic/*=T*/> showMenu/*<T>*/({
     position: position,
     items: items,
     initialValue: initialValue,
+    linkChildKey: linkChildKey,
+    linkParentKey: linkParentKey,
     elevation: elevation
   ));
   return completer.future;
@@ -504,6 +516,9 @@ class PopupMenuButton<T> extends StatefulWidget {
 }
 
 class _PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
+  final GlobalKey _linkParentKey = new GlobalKey();
+  final GlobalKey _linkChildKey = new GlobalKey();
+
   void showButtonMenu(BuildContext context) {
     final RenderBox renderBox = context.findRenderObject();
     final Point topLeft = renderBox.localToGlobal(Point.origin);
@@ -512,10 +527,12 @@ class _PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
       elevation: config.elevation,
       items: config.itemBuilder(context),
       initialValue: config.initialValue,
+      linkParentKey: _linkParentKey,
+      linkChildKey: _linkChildKey,
       position: new RelativeRect.fromLTRB(
         topLeft.x, topLeft.y + (config.initialValue != null ? renderBox.size.height / 2.0 : 0.0),
         0.0, 0.0
-      )
+      ),
     )
     .then((T value) {
       if (value != null && config.onSelected != null)
@@ -525,17 +542,25 @@ class _PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
 
   @override
   Widget build(BuildContext context) {
+    Widget button;
     if (config.child == null) {
-      return new IconButton(
+      button = new IconButton(
         icon: new Icon(Icons.more_vert),
         padding: config.padding,
         tooltip: config.tooltip,
         onPressed: () { showButtonMenu(context); }
       );
+    } else {
+      button = new InkWell(
+        onTap: () { showButtonMenu(context); },
+        child: config.child,
+      );
     }
-    return new InkWell(
-      onTap: () { showButtonMenu(context); },
-      child: config.child
+
+    return new InheritedWidgetLinkParent(
+      key: _linkParentKey,
+      link: _linkChildKey,
+      child: button,
     );
   }
 }
