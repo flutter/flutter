@@ -11,26 +11,26 @@ import '../framework/adb.dart';
 import '../framework/framework.dart';
 import '../framework/utils.dart';
 
-TaskFunction createComplexLayoutScrollPerfTest({ @required bool ios: false }) {
+TaskFunction createComplexLayoutScrollPerfTest({ @required DeviceOperatingSystem os }) {
   return new PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/complex_layout',
     'test_driver/scroll_perf.dart',
     'complex_layout_scroll_perf',
-    ios: ios
+    os: os,
   );
 }
 
-TaskFunction createFlutterGalleryStartupTest({ bool ios: false }) {
+TaskFunction createFlutterGalleryStartupTest({ DeviceOperatingSystem os }) {
   return new StartupTest(
     '${flutterDirectory.path}/examples/flutter_gallery',
-    ios: ios
+    os: os,
   );
 }
 
-TaskFunction createComplexLayoutStartupTest({ bool ios: false }) {
+TaskFunction createComplexLayoutStartupTest({ DeviceOperatingSystem os }) {
   return new StartupTest(
     '${flutterDirectory.path}/dev/benchmarks/complex_layout',
-    ios: ios
+    os: os,
   );
 }
 
@@ -46,17 +46,19 @@ TaskFunction createComplexLayoutBuildTest() {
 class StartupTest {
   static const Duration _startupTimeout = const Duration(minutes: 2);
 
-  StartupTest(this.testDirectory, { this.ios });
+  StartupTest(this.testDirectory, { this.os }) {
+    deviceOperatingSystem = os;
+  }
 
   final String testDirectory;
-  final bool ios;
+  final DeviceOperatingSystem os;
 
   Future<TaskResult> call() async {
     return await inDirectory(testDirectory, () async {
-      String deviceId = await getUnlockedDeviceId(ios: ios);
+      String deviceId = (await devices.workingDevice).deviceId;
       await pub('get');
 
-      if (ios) {
+      if (os == DeviceOperatingSystem.ios) {
         // This causes an Xcode project to be created.
         await flutter('build', options: <String>['ios', '--profile']);
       }
@@ -80,19 +82,19 @@ class StartupTest {
 /// performance.
 class PerfTest {
 
-  PerfTest(this.testDirectory, this.testTarget, this.timelineFileName, { this.ios });
+  PerfTest(this.testDirectory, this.testTarget, this.timelineFileName, { this.os });
 
   final String testDirectory;
   final String testTarget;
   final String timelineFileName;
-  final bool ios;
+  final DeviceOperatingSystem os;
 
   Future<TaskResult> call() {
     return inDirectory(testDirectory, () async {
-      String deviceId = await getUnlockedDeviceId(ios: ios);
+      String deviceId = (await devices.workingDevice).deviceId;
       await pub('get');
 
-      if (ios) {
+      if (os == DeviceOperatingSystem.ios) {
         // This causes an Xcode project to be created.
         await flutter('build', options: <String>['ios', '--profile']);
       }
@@ -124,7 +126,7 @@ class BuildTest {
 
   Future<TaskResult> call() async {
     return await inDirectory(testDirectory, () async {
-      Adb device = await adb();
+      Device device = await devices.workingDevice;
       await device.unlock();
       await pub('get');
 

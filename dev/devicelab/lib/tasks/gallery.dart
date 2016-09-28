@@ -12,23 +12,25 @@ import '../framework/adb.dart';
 import '../framework/framework.dart';
 import '../framework/utils.dart';
 
-TaskFunction createGalleryTransitionTest({ @required bool ios: false }) {
-  return new GalleryTransitionTest(ios: ios);
+TaskFunction createGalleryTransitionTest({ @required DeviceOperatingSystem os }) {
+  return new GalleryTransitionTest(os: os);
 }
 
 class GalleryTransitionTest {
-  GalleryTransitionTest({ this.ios });
+  GalleryTransitionTest({ this.os }) {
+    deviceOperatingSystem = os;
+  }
 
-  final bool ios;
+  final DeviceOperatingSystem os;
 
   Future<TaskResult> call() async {
-    String deviceId = await getUnlockedDeviceId(ios: ios);
+    String deviceId = (await devices.workingDevice).deviceId;
     Directory galleryDirectory =
         dir('${flutterDirectory.path}/examples/flutter_gallery');
     await inDirectory(galleryDirectory, () async {
       await pub('get');
 
-      if (ios) {
+      if (os == DeviceOperatingSystem.ios) {
         // This causes an Xcode project to be created.
         await flutter('build', options: <String>['ios', '--profile']);
       }
