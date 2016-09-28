@@ -317,8 +317,4 @@ source_set("platform") {
     ]
     set_sources_assignment_filter(sources_assignment_filter)
   }
-
-  if (is_linux) {
-    direct_dependent_configs = [ "//build/config/linux:fontconfig" ]
-  }
 }

@@ -342,7 +342,7 @@ component("skia") {
     "//third_party/skia/src/fonts/SkGScalerContext.h",
   ]
 
-  if (is_ios || is_mac || is_android || use_glfw) {
+  if (is_ios || is_mac || is_android) {
     sources -= [
       "//third_party/skia/src/gpu/gl/GrGLCreateNativeInterface_none.cpp"
     ]
@@ -360,10 +360,6 @@ component("skia") {
     } else if (is_android) {
       sources += [
         "//third_party/skia/src/gpu/gl/android/GrGLCreateNativeInterface_android.cpp"
-      ]
-    } else if (use_glfw) {
-      sources += [
-        "//third_party/skia/src/gpu/gl/glfw/GrGLCreateNativeInterface_glfw.cpp"
       ]
     }
 
