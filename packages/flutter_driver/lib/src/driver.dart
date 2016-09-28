@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:vm_service_client/vm_service_client.dart';
@@ -265,6 +266,12 @@ class FlutterDriver {
   /// Returns the text in the `Text` widget located by [finder].
   Future<String> getText(SerializableFinder finder) async {
     return GetTextResult.fromJson(await _sendCommand(new GetText(finder))).text;
+  }
+
+  /// Take a screenshot.  The image will be returned as a PNG.
+  Future<List<int>> screenshot() async {
+    Map<String, dynamic> result = await _peer.sendRequest('_flutter.screenshot');
+    return BASE64.decode(result['screenshot']);
   }
 
   /// Starts recording performance traces.
