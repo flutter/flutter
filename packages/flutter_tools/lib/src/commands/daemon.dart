@@ -6,11 +6,10 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:usage/src/uuid.dart'; // ignore: implementation_imports
-
 import '../android/android_device.dart';
 import '../base/context.dart';
 import '../base/logger.dart';
+import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../device.dart';
