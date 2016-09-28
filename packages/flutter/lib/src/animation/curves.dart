@@ -77,10 +77,10 @@ class Interval extends Curve {
   /// Creates an interval curve.
   ///
   /// The [start] and [end] arguments must not be null.
-  const Interval(this.start, this.end, { this.curve: Curves.linear });
+  const Interval(this.begin, this.end, { this.curve: Curves.linear });
 
   /// The smallest value for which this interval is 0.0.
-  final double start;
+  final double begin;
 
   /// The smallest value for which this interval is 1.0.
   final double end;
@@ -90,14 +90,14 @@ class Interval extends Curve {
 
   @override
   double transform(double t) {
-    assert(start >= 0.0);
-    assert(start <= 1.0);
+    assert(begin >= 0.0);
+    assert(begin <= 1.0);
     assert(end >= 0.0);
     assert(end <= 1.0);
-    assert(end >= start);
+    assert(end >= begin);
     if (t == 0.0 || t == 1.0)
       return t;
-    t = ((t - start) / (end - start)).clamp(0.0, 1.0);
+    t = ((t - begin) / (end - begin)).clamp(0.0, 1.0);
     if (t == 0.0 || t == 1.0)
       return t;
     return curve.transform(t);
@@ -106,8 +106,8 @@ class Interval extends Curve {
   @override
   String toString() {
     if (curve is! Linear)
-      return '$runtimeType($start\u22EF$end)\u27A9$curve';
-    return '$runtimeType($start\u22EF$end)';
+      return '$runtimeType($begin\u22EF$end)\u27A9$curve';
+    return '$runtimeType($begin\u22EF$end)';
   }
 }
 
