@@ -230,13 +230,6 @@ final List<GalleryItem> kAllGalleryItems = <GalleryItem>[
   ),
   // Styles
   new GalleryItem(
-    title: 'Animation',
-    subtitle: 'Material motion for points and rectangles',
-    category: 'Style',
-    routeName: AnimationDemo.routeName,
-    buildRoute: (BuildContext context) => new AnimationDemo()
-  ),
-  new GalleryItem(
     title: 'Colors',
     subtitle: 'All of the predefined colors',
     category: 'Style',
