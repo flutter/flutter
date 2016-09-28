@@ -6,6 +6,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:usage/src/uuid.dart'; // ignore: implementation_imports
+
 import '../android/android_device.dart';
 import '../base/context.dart';
 import '../base/logger.dart';
@@ -280,9 +282,9 @@ class AppDomain extends Domain {
     registerHandler('discover', discover);
   }
 
-  static int _nextAppId = 0;
+  static Uuid _uuidGenerator = new Uuid();
 
-  static String _getNextAppId() => 'app-${_nextAppId++}';
+  static String _getNewAppId() => _uuidGenerator.generateV4();
 
   List<AppInstance> _apps = <AppInstance>[];
 
@@ -341,7 +343,7 @@ class AppDomain extends Domain {
 
     bool supportsRestart = enableHotReload ? device.supportsHotMode : device.supportsRestart;
 
-    AppInstance app = new AppInstance(_getNextAppId(), runner);
+    AppInstance app = new AppInstance(_getNewAppId(), runner);
     _apps.add(app);
     _sendAppEvent(app, 'start', <String, dynamic>{
       'deviceId': deviceId,
