@@ -5,12 +5,6 @@
 #ifndef MOJO_EDK_SYSTEM_DISPATCHER_H_
 #define MOJO_EDK_SYSTEM_DISPATCHER_H_
 
-#include <mojo/system/buffer.h>
-#include <mojo/system/data_pipe.h>
-#include <mojo/system/handle.h>
-#include <mojo/system/message_pipe.h>
-#include <mojo/system/result.h>
-#include <mojo/system/wait_set.h>
 #include <stddef.h>
 #include <stdint.h>
 
@@ -27,6 +21,12 @@
 #include "mojo/edk/util/ref_counted.h"
 #include "mojo/edk/util/ref_ptr.h"
 #include "mojo/edk/util/thread_annotations.h"
+#include "mojo/public/c/system/buffer.h"
+#include "mojo/public/c/system/data_pipe.h"
+#include "mojo/public/c/system/handle.h"
+#include "mojo/public/c/system/message_pipe.h"
+#include "mojo/public/c/system/result.h"
+#include "mojo/public/c/system/wait_set.h"
 #include "mojo/public/cpp/system/macros.h"
 
 namespace mojo {
@@ -85,11 +85,11 @@ class Dispatcher : public util::RefCountedThreadSafe<Dispatcher> {
 
   // Gets whether the given entrypoint class is supported; see the definition of
   // |EntrypointClass|. This is ONLY called when a rights check has failed, to
-  // determine whether |MOJO_SYSTEM_RESULT_PERMISSION_DENIED| (if the entrypoint
-  // class is supported) or |MOJO_SYSTEM_RESULT_INVALID_ARGUMENT| (if not)
-  // should be returned. In the case that the rights check passes, |Core| will
-  // proceed immediately to call the method (so if the method is not supported,
-  // it must still return |MOJO_SYSTEM_RESULT_INVALID_ARGUMENT|).
+  // determine whether |MOJO_RESULT_PERMISSION_DENIED| (if the entrypoint class
+  // is supported) or |MOJO_RESULT_INVALID_ARGUMENT| (if not) should be
+  // returned. In the case that the rights check passes, |Core| will proceed
+  // immediately to call the method (so if the method is not supported, it must
+  // still return |MOJO_RESULT_INVALID_ARGUMENT|).
   virtual bool SupportsEntrypointClass(
       EntrypointClass entrypoint_class) const = 0;
 
@@ -208,13 +208,12 @@ class Dispatcher : public util::RefCountedThreadSafe<Dispatcher> {
   //
   // Returns:
   //  - |MOJO_RESULT_OK| if the awakable was added;
-  //  - |MOJO_SYSTEM_RESULT_ALREADY_EXISTS| if |signals| is already satisfied
-  //    (if |persistent| is true, the awakable will still be added);
-  //  - |MOJO_SYSTEM_RESULT_INVALID_ARGUMENT| if the dispatcher has been closed;
-  //    and
-  //  - |MOJO_SYSTEM_RESULT_FAILED_PRECONDITION| if it is not (or no longer)
-  //    possible that |signals| will ever be satisfied(if |persistent| is true,
-  //    the awakable will still be added).
+  //  - |MOJO_RESULT_ALREADY_EXISTS| if |signals| is already satisfied (if
+  //    |persistent| is true, the awakable will still be added);
+  //  - |MOJO_RESULT_INVALID_ARGUMENT| if the dispatcher has been closed; and
+  //  - |MOJO_RESULT_FAILED_PRECONDITION| if it is not (or no longer) possible
+  //    that |signals| will ever be satisfied(if |persistent| is true, the
+  //    awakable will still be added).
   MojoResult AddAwakable(Awakable* awakable,
                          uint64_t context,
                          bool persistent,
@@ -386,7 +385,7 @@ class Dispatcher : public util::RefCountedThreadSafe<Dispatcher> {
   // WARNING: Unlike the others, the following wait set methods are *not* called
   // under |mutex_| and |is_closed_| is *not* checked. Thus any override must
   // lock |mutex()| and check |is_closed_no_lock()| (returning
-  // |MOJO_SYSTEM_RESULT_INVALID_ARGUMENT| if it is true).
+  // |MOJO_RESULT_INVALID_ARGUMENT| if it is true).
   virtual MojoResult WaitSetAddImpl(
       util::RefPtr<Dispatcher>&& dispatcher,
       MojoHandleSignals signals,

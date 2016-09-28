@@ -10,7 +10,6 @@
 #include <functional>
 #include <memory>
 
-#include <mojo/environment/tests/async_waiter_perftest_helpers.h>
 #include "base/bind.h"
 #include "base/location.h"
 #include "base/memory/scoped_ptr.h"
@@ -19,6 +18,7 @@
 #include "base/test/perf_log.h"
 #include "base/time/time.h"
 #include "mojo/message_pump/message_pump_mojo.h"
+#include "mojo/public/c/environment/tests/async_waiter_perftest_helpers.h"
 #include "mojo/public/cpp/environment/environment.h"
 #include "testing/gtest/include/gtest/gtest.h"
 

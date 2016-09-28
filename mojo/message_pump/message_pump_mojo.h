@@ -9,14 +9,14 @@
 #include <utility>
 #include <vector>
 
-#include <mojo/result.h>
-#include <mojo/system/time.h>
 #include "base/macros.h"
 #include "base/memory/scoped_ptr.h"
 #include "base/message_loop/message_pump.h"
 #include "base/observer_list.h"
 #include "base/synchronization/lock.h"
 #include "base/time/time.h"
+#include "mojo/public/c/system/result.h"
+#include "mojo/public/c/system/time.h"
 #include "mojo/public/cpp/system/handle.h"
 
 namespace mojo {

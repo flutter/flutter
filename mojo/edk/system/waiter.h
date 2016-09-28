@@ -5,14 +5,14 @@
 #ifndef MOJO_EDK_SYSTEM_WAITER_H_
 #define MOJO_EDK_SYSTEM_WAITER_H_
 
-#include <mojo/system/result.h>
-#include <mojo/system/time.h>
 #include <stdint.h>
 
 #include "mojo/edk/system/awakable.h"
 #include "mojo/edk/util/cond_var.h"
 #include "mojo/edk/util/mutex.h"
 #include "mojo/edk/util/thread_annotations.h"
+#include "mojo/public/c/system/result.h"
+#include "mojo/public/c/system/time.h"
 #include "mojo/public/cpp/system/macros.h"
 
 namespace mojo {
@@ -40,14 +40,14 @@ class Waiter final : public Awakable {
   // which case, obviously no context is ever returned.)
   // Returns:
   //   - |MOJO_RESULT_OK| if |Awake()| was called with |AwakeReason::SATISFIED|;
-  //   - |MOJO_SYSTEM_RESULT_CANCELLED| if |Awake()| was called with
+  //   - |MOJO_RESULT_CANCELLED| if |Awake()| was called with
   //     |AwakeReason::CANCELLED|;
-  //   - |MOJO_SYSTEM_RESULT_FAILED_PRECONDITION| if |Awake()| was called with
+  //   - |MOJO_RESULT_FAILED_PRECONDITION| if |Awake()| was called with
   //     |AwakeReason::UNSATISFIABLE|; or
-  //   - |MOJO_SYSTEM_RESULT_DEADLINE_EXCEEDED| if the deadline was exceeded.
+  //   - |MOJO_RESULT_DEADLINE_EXCEEDED| if the deadline was exceeded.
   //
-  // In all the cases except |MOJO_SYSTEM_RESULT_DEADLINE_EXCEEDED|, the context
-  // and signals state passed to |Awake()| be made available via |*context| and
+  // In all the cases except |MOJO_RESULT_DEADLINE_EXCEEDED|, the context and
+  // signals state passed to |Awake()| be made available via |*context| and
   // |*signals_state|, respectively (unless the respective pointer is null).
   MojoResult Wait(MojoDeadline deadline,
                   uint64_t* context,

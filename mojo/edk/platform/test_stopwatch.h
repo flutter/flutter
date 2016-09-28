@@ -7,7 +7,7 @@
 #ifndef MOJO_EDK_PLATFORM_TEST_STOPWATCH_H_
 #define MOJO_EDK_PLATFORM_TEST_STOPWATCH_H_
 
-#include <mojo/system/time.h>
+#include "mojo/public/c/system/time.h"
 #include "mojo/public/cpp/system/macros.h"
 
 namespace mojo {

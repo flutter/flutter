@@ -4,14 +4,6 @@
 
 #include "mojo/android/system/core_impl.h"
 
-#include <mojo/environment/async_waiter.h>
-#include <mojo/system/buffer.h>
-#include <mojo/system/data_pipe.h>
-#include <mojo/system/handle.h>
-#include <mojo/system/message_pipe.h>
-#include <mojo/result.h>
-#include <mojo/system/time.h>
-#include <mojo/system/wait.h>
 #include "base/android/base_jni_registrar.h"
 #include "base/android/jni_android.h"
 #include "base/android/jni_registrar.h"
@@ -21,6 +13,14 @@
 #include "base/memory/scoped_ptr.h"
 #include "base/message_loop/message_loop.h"
 #include "jni/CoreImpl_jni.h"
+#include "mojo/public/c/environment/async_waiter.h"
+#include "mojo/public/c/system/buffer.h"
+#include "mojo/public/c/system/data_pipe.h"
+#include "mojo/public/c/system/handle.h"
+#include "mojo/public/c/system/message_pipe.h"
+#include "mojo/public/c/system/result.h"
+#include "mojo/public/c/system/time.h"
+#include "mojo/public/c/system/wait.h"
 #include "mojo/public/cpp/environment/environment.h"
 
 namespace {

@@ -7,10 +7,10 @@
 
 #include <memory>
 
-#include <mojo/macros.h>
 #include "files/c/mojio_sys_types.h"
 #include "files/interfaces/directory.mojom-sync.h"
 #include "files/interfaces/directory.mojom.h"
+#include "mojo/public/c/system/macros.h"
 #include "mojo/public/cpp/bindings/interface_handle.h"
 #include "mojo/public/cpp/bindings/synchronous_interface_ptr.h"
 

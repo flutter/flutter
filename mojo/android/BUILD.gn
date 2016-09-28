@@ -46,7 +46,7 @@ source_set("libsystem_java") {
     ":system_java_jni_headers",
     "//base",
     "//mojo/message_pump",
-    "//mojo/public/c:system",
+    "//mojo/public/c/system:system",
     "//mojo/public/cpp/bindings:callback",
     "//mojo/public/cpp/environment",
   ]

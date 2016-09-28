@@ -18,10 +18,6 @@ using mojo::util::RefPtr;
 namespace mojo {
 namespace system {
 
-constexpr MojoReadDataFlags kKnownReadFlags =
-    MOJO_READ_DATA_FLAG_ALL_OR_NONE | MOJO_READ_DATA_FLAG_DISCARD |
-    MOJO_READ_DATA_FLAG_QUERY | MOJO_READ_DATA_FLAG_PEEK;
-
 // static
 constexpr MojoHandleRights DataPipeConsumerDispatcher::kDefaultHandleRights;
 
@@ -101,7 +97,7 @@ MojoResult DataPipeConsumerDispatcher::SetDataPipeConsumerOptionsImplNoLock(
   if (!options.IsNull()) {
     UserOptionsReader<MojoDataPipeConsumerOptions> reader(options);
     if (!reader.is_valid())
-      return MOJO_SYSTEM_RESULT_INVALID_ARGUMENT;
+      return MOJO_RESULT_INVALID_ARGUMENT;
 
     if (!OPTIONS_STRUCT_HAS_MEMBER(MojoDataPipeConsumerOptions,
                                    read_threshold_num_bytes, reader))
@@ -120,13 +116,12 @@ MojoResult DataPipeConsumerDispatcher::GetDataPipeConsumerOptionsImplNoLock(
 
   // Note: If/when |MojoDataPipeConsumerOptions| is extended beyond its initial
   // definition, more work will be necessary. (See the definition of
-  // |MojoGetDataPipeConsumerOptions()| in
-  // mojo/public/c/include/mojo/system/data_pipe.h.)
+  // |MojoGetDataPipeConsumerOptions()| in mojo/public/c/system/data_pipe.h.)
   static_assert(sizeof(MojoDataPipeConsumerOptions) == 8u,
                 "MojoDataPipeConsumerOptions has been extended!");
 
   if (options_num_bytes < sizeof(MojoDataPipeConsumerOptions))
-    return MOJO_SYSTEM_RESULT_INVALID_ARGUMENT;
+    return MOJO_RESULT_INVALID_ARGUMENT;
 
   uint32_t read_threshold_num_bytes = 0;
   data_pipe_->ConsumerGetOptions(&read_threshold_num_bytes);
@@ -144,15 +139,11 @@ MojoResult DataPipeConsumerDispatcher::ReadDataImplNoLock(
     MojoReadDataFlags flags) {
   mutex().AssertHeld();
 
-  // Unknown flag set.
-  if ((flags & ~kKnownReadFlags))
-    return MOJO_SYSTEM_RESULT_UNIMPLEMENTED;
-
   if ((flags & MOJO_READ_DATA_FLAG_DISCARD)) {
     // These flags are mutally exclusive.
     if ((flags & MOJO_READ_DATA_FLAG_QUERY) ||
         (flags & MOJO_READ_DATA_FLAG_PEEK))
-      return MOJO_SYSTEM_RESULT_INVALID_ARGUMENT;
+      return MOJO_RESULT_INVALID_ARGUMENT;
     DVLOG_IF(2, !elements.IsNull())
         << "Discard mode: ignoring non-null |elements|";
     return data_pipe_->ConsumerDiscardData(
@@ -161,7 +152,7 @@ MojoResult DataPipeConsumerDispatcher::ReadDataImplNoLock(
 
   if ((flags & MOJO_READ_DATA_FLAG_QUERY)) {
     if ((flags & MOJO_READ_DATA_FLAG_PEEK))
-      return MOJO_SYSTEM_RESULT_INVALID_ARGUMENT;
+      return MOJO_RESULT_INVALID_ARGUMENT;
     DCHECK(!(flags & MOJO_READ_DATA_FLAG_DISCARD));  // Handled above.
     DVLOG_IF(2, !elements.IsNull())
         << "Query mode: ignoring non-null |elements|";
@@ -179,15 +170,11 @@ MojoResult DataPipeConsumerDispatcher::BeginReadDataImplNoLock(
     MojoReadDataFlags flags) {
   mutex().AssertHeld();
 
-  // Currently, no flags are supported in two-phase mode.
-  if (flags) {
-    // Unknown flag set.
-    if ((flags & ~kKnownReadFlags))
-      return MOJO_SYSTEM_RESULT_UNIMPLEMENTED;
-
-    // Known flag.
-    return MOJO_SYSTEM_RESULT_INVALID_ARGUMENT;
-  }
+  // These flags may not be used in two-phase mode.
+  if ((flags & MOJO_READ_DATA_FLAG_ALL_OR_NONE) ||
+      (flags & MOJO_READ_DATA_FLAG_DISCARD) ||
+      (flags & MOJO_READ_DATA_FLAG_QUERY) || (flags & MOJO_READ_DATA_FLAG_PEEK))
+    return MOJO_RESULT_INVALID_ARGUMENT;
 
   return data_pipe_->ConsumerBeginReadData(buffer, buffer_num_bytes);
 }

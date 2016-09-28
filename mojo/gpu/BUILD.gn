@@ -13,14 +13,15 @@ source_set("gpu") {
   ]
 
   public_deps = [
-    "//mojo/public/c:gpu",
+    "//mojo/public/c/gpu",
   ]
 
   deps = [
     "//base",
     "//mojo/environment:chromium",
-    "//mojo/public/c:gpu_onscreen",
-    "//mojo/public/c:system",
+    "//mojo/public/c/gpu",
+    "//mojo/public/c/gpu:gpu_onscreen",
+    "//mojo/public/c/system",
     "//mojo/public/cpp/application",
     "//mojo/public/cpp/bindings",
     "//mojo/public/cpp/environment",

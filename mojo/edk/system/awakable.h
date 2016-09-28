@@ -5,10 +5,10 @@
 #ifndef MOJO_EDK_SYSTEM_AWAKABLE_H_
 #define MOJO_EDK_SYSTEM_AWAKABLE_H_
 
-#include <mojo/system/result.h>
 #include <stdint.h>
 
 #include "mojo/edk/system/handle_signals_state.h"
+#include "mojo/public/c/system/result.h"
 
 namespace mojo {
 namespace system {
@@ -32,14 +32,13 @@ class Awakable {
   };
 
   // Helper function that translates:
-  //   - |AwakeReason::CANCELLED| -> |MOJO_SYSTEM_RESULT_CANCELLED|.
+  //   - |AwakeReason::CANCELLED| -> |MOJO_RESULT_CANCELLED|.
   //   - |AwakeReason::SATISFIED| -> |MOJO_RESULT_OK|,
-  //   - |AwakeReason::UNSATISFIABLE| ->
-  //         |MOJO_SYSTEM_RESULT_FAILED_PRECONDITION|, and
-  //   - |AwakeReason::INITIALIZE| -> |MOJO_SYSTEM_RESULT_INTERNAL| (this
-  //     function never be called with this reason).
-  //   - |AwakeReason::CHANGED| -> |MOJO_SYSTEM_RESULT_INTERNAL| (this function
+  //   - |AwakeReason::UNSATISFIABLE| -> |MOJO_RESULT_FAILED_PRECONDITION|, and
+  //   - |AwakeReason::INITIALIZE| -> |MOJO_RESULT_INTERNAL| (this function
   //     never be called with this reason).
+  //   - |AwakeReason::CHANGED| -> |MOJO_RESULT_INTERNAL| (this function never
+  //     be called with this reason).
   static MojoResult MojoResultForAwakeReason(AwakeReason reason);
 
   // |Awake()| must satisfy the following contract:

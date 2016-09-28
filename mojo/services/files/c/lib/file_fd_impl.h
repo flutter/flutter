@@ -5,10 +5,10 @@
 #ifndef SERVICES_FILES_C_LIB_FILE_FD_IMPL_H_
 #define SERVICES_FILES_C_LIB_FILE_FD_IMPL_H_
 
-#include <mojo/macros.h>
 #include "files/c/lib/fd_impl.h"
 #include "files/c/mojio_sys_types.h"
 #include "files/interfaces/file.mojom-sync.h"
+#include "mojo/public/c/system/macros.h"
 #include "mojo/public/cpp/bindings/interface_handle.h"
 #include "mojo/public/cpp/bindings/synchronous_interface_ptr.h"
 

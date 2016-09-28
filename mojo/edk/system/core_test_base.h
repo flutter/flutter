@@ -5,12 +5,11 @@
 #ifndef MOJO_EDK_SYSTEM_CORE_TEST_BASE_H_
 #define MOJO_EDK_SYSTEM_CORE_TEST_BASE_H_
 
-#include <mojo/system/handle.h>
-
 #include <memory>
 
 #include "mojo/edk/util/mutex.h"
 #include "mojo/edk/util/thread_annotations.h"
+#include "mojo/public/c/system/handle.h"
 #include "mojo/public/cpp/system/macros.h"
 #include "testing/gtest/include/gtest/gtest.h"
 
@@ -36,8 +35,9 @@ class CoreTestBase : public testing::Test {
   static constexpr MojoHandleRights kDefaultMockHandleRights =
       MOJO_HANDLE_RIGHT_DUPLICATE | MOJO_HANDLE_RIGHT_TRANSFER |
       MOJO_HANDLE_RIGHT_READ | MOJO_HANDLE_RIGHT_WRITE |
-      MOJO_HANDLE_RIGHT_EXECUTE | MOJO_HANDLE_RIGHT_GET_OPTIONS |
-      MOJO_HANDLE_RIGHT_SET_OPTIONS;
+      MOJO_HANDLE_RIGHT_GET_OPTIONS | MOJO_HANDLE_RIGHT_SET_OPTIONS |
+      MOJO_HANDLE_RIGHT_MAP_READABLE | MOJO_HANDLE_RIGHT_MAP_WRITABLE |
+      MOJO_HANDLE_RIGHT_MAP_EXECUTABLE;
 
   CoreTestBase();
   ~CoreTestBase() override;

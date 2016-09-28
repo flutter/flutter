@@ -5,13 +5,13 @@
 #ifndef MOJO_EDK_SYSTEM_MAPPING_TABLE_H_
 #define MOJO_EDK_SYSTEM_MAPPING_TABLE_H_
 
-#include <mojo/system/result.h>
 #include <stdint.h>
 
 #include <memory>
 #include <unordered_map>
 #include <vector>
 
+#include "mojo/public/c/system/result.h"
 #include "mojo/public/cpp/system/macros.h"
 
 namespace mojo {

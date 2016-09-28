@@ -5,11 +5,10 @@
 #ifndef MOJO_EDK_SYSTEM_ASYNC_WAITER_H_
 #define MOJO_EDK_SYSTEM_ASYNC_WAITER_H_
 
-#include <mojo/system/result.h>
-
 #include <functional>
 
 #include "mojo/edk/system/awakable.h"
+#include "mojo/public/c/system/result.h"
 #include "mojo/public/cpp/system/macros.h"
 
 namespace mojo {

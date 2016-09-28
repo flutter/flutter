@@ -8,9 +8,9 @@
 #include <functional>
 #include <memory>
 
-#include <mojo/system/handle.h>
-#include <mojo/result.h>
 #include "mojo/edk/platform/scoped_platform_handle.h"
+#include "mojo/public/c/system/handle.h"
+#include "mojo/public/c/system/result.h"
 
 namespace mojo {
 

@@ -4,8 +4,6 @@
 
 #include "mojo/edk/embedder/embedder.h"
 
-#include <mojo/system/handle.h>
-#include <mojo/result.h>
 #include "base/logging.h"
 #include "mojo/edk/embedder/test_embedder.h"
 #include "mojo/edk/system/test/test_io_thread.h"
@@ -14,6 +12,8 @@
 #include "mojo/edk/util/ref_ptr.h"
 #include "mojo/edk/util/thread_annotations.h"
 #include "mojo/edk/util/waitable_event.h"
+#include "mojo/public/c/system/handle.h"
+#include "mojo/public/c/system/result.h"
 #include "mojo/public/cpp/system/handle.h"
 #include "mojo/public/cpp/system/macros.h"
 #include "mojo/public/cpp/system/message_pipe.h"

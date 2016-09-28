@@ -18,9 +18,6 @@ using mojo::util::RefPtr;
 namespace mojo {
 namespace system {
 
-constexpr MojoWriteDataFlags kKnownWriteFlags =
-    MOJO_WRITE_DATA_FLAG_ALL_OR_NONE;
-
 // static
 constexpr MojoHandleRights DataPipeProducerDispatcher::kDefaultHandleRights;
 
@@ -99,7 +96,7 @@ MojoResult DataPipeProducerDispatcher::SetDataPipeProducerOptionsImplNoLock(
   if (!options.IsNull()) {
     UserOptionsReader<MojoDataPipeProducerOptions> reader(options);
     if (!reader.is_valid())
-      return MOJO_SYSTEM_RESULT_INVALID_ARGUMENT;
+      return MOJO_RESULT_INVALID_ARGUMENT;
 
     if (!OPTIONS_STRUCT_HAS_MEMBER(MojoDataPipeProducerOptions,
                                    write_threshold_num_bytes, reader))
@@ -118,13 +115,12 @@ MojoResult DataPipeProducerDispatcher::GetDataPipeProducerOptionsImplNoLock(
 
   // Note: If/when |MojoDataPipeProducerOptions| is extended beyond its initial
   // definition, more work will be necessary. (See the definition of
-  // |MojoGetDataPipeProducerOptions()| in
-  // mojo/public/c/include/mojo/system/data_pipe.h.)
+  // |MojoGetDataPipeProducerOptions()| in mojo/public/c/system/data_pipe.h.)
   static_assert(sizeof(MojoDataPipeProducerOptions) == 8u,
                 "MojoDataPipeProducerOptions has been extended!");
 
   if (options_num_bytes < sizeof(MojoDataPipeProducerOptions))
-    return MOJO_SYSTEM_RESULT_INVALID_ARGUMENT;
+    return MOJO_RESULT_INVALID_ARGUMENT;
 
   uint32_t write_threshold_num_bytes = 0;
   data_pipe_->ProducerGetOptions(&write_threshold_num_bytes);
@@ -141,11 +137,6 @@ MojoResult DataPipeProducerDispatcher::WriteDataImplNoLock(
     UserPointer<uint32_t> num_bytes,
     MojoWriteDataFlags flags) {
   mutex().AssertHeld();
-
-  // Unknown flag set.
-  if ((flags & ~kKnownWriteFlags))
-    return MOJO_SYSTEM_RESULT_UNIMPLEMENTED;
-
   return data_pipe_->ProducerWriteData(
       elements, num_bytes, (flags & MOJO_WRITE_DATA_FLAG_ALL_OR_NONE));
 }
@@ -156,15 +147,9 @@ MojoResult DataPipeProducerDispatcher::BeginWriteDataImplNoLock(
     MojoWriteDataFlags flags) {
   mutex().AssertHeld();
 
-  // Currently, no flags are supported in two-phase mode.
-  if (flags) {
-    // Unknown flag set.
-    if ((flags & ~kKnownWriteFlags))
-      return MOJO_SYSTEM_RESULT_UNIMPLEMENTED;
-
-    // Known flag.
-    return MOJO_SYSTEM_RESULT_INVALID_ARGUMENT;
-  }
+  // This flag may not be used in two-phase mode.
+  if ((flags & MOJO_WRITE_DATA_FLAG_ALL_OR_NONE))
+    return MOJO_RESULT_INVALID_ARGUMENT;
 
   return data_pipe_->ProducerBeginWriteData(buffer, buffer_num_bytes);
 }

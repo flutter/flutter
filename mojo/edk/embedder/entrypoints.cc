@@ -5,14 +5,14 @@
 // This file contains the definitions of the system functions, which are
 // declared in various header files in mojo/public/c/system.
 
-#include <mojo/system/buffer.h>
-#include <mojo/system/data_pipe.h>
-#include <mojo/system/handle.h>
-#include <mojo/system/message_pipe.h>
-#include <mojo/system/time.h>
-#include <mojo/system/wait.h>
 #include "mojo/edk/embedder/embedder_internal.h"
 #include "mojo/edk/system/core.h"
+#include "mojo/public/c/system/buffer.h"
+#include "mojo/public/c/system/data_pipe.h"
+#include "mojo/public/c/system/handle.h"
+#include "mojo/public/c/system/message_pipe.h"
+#include "mojo/public/c/system/time.h"
+#include "mojo/public/c/system/wait.h"
 
 using mojo::embedder::internal::g_core;
 using mojo::system::MakeUserPointer;

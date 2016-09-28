@@ -31,7 +31,7 @@
 #ifndef MOJO_SERVICES_LOG_CPP_LOG_CLIENT_H_
 #define MOJO_SERVICES_LOG_CPP_LOG_CLIENT_H_
 
-#include <mojo/environment/logger.h>
+#include "mojo/public/c/environment/logger.h"
 #include "mojo/services/log/interfaces/log.mojom.h"
 
 namespace mojo {

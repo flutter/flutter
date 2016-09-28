@@ -9,7 +9,7 @@
 #include <string>
 #include <utility>
 
-#include <mojo/environment/logger.h>
+#include "mojo/public/c/environment/logger.h"
 #include "mojo/public/cpp/bindings/interface_handle.h"
 #include "mojo/public/cpp/bindings/lib/message_builder.h"
 #include "mojo/public/cpp/system/macros.h"

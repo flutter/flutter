@@ -5,7 +5,6 @@
 #ifndef MOJO_EDK_SYSTEM_MEMORY_H_
 #define MOJO_EDK_SYSTEM_MEMORY_H_
 
-#include <mojo/macros.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>  // For |memcpy()|.
@@ -13,6 +12,7 @@
 #include <memory>
 #include <type_traits>
 
+#include "mojo/public/c/system/macros.h"
 #include "mojo/public/cpp/system/macros.h"
 
 namespace mojo {
