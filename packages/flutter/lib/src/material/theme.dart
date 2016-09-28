@@ -18,6 +18,7 @@ const Duration kThemeAnimationDuration = const Duration(milliseconds: 200);
 ///
 ///  * [AnimatedTheme]
 ///  * [ThemeData]
+///  * [MaterialApp]
 class Theme extends InheritedWidget {
   /// Applies the given theme [data] to [child].
   ///
@@ -25,6 +26,7 @@ class Theme extends InheritedWidget {
   Theme({
     Key key,
     @required this.data,
+    this.isShadowTheme: true,
     Widget child
   }) : super(key: key, child: child) {
     assert(child != null);
@@ -34,14 +36,22 @@ class Theme extends InheritedWidget {
   /// Specifies the color and typography values for descendant widgets.
   final ThemeData data;
 
+  /// True if this theme shadows the one created by the [MaterialApp].
+  final bool isShadowTheme;
+
   static final ThemeData _kFallbackTheme = new ThemeData.fallback();
 
   /// The data from the closest instance of this class that encloses the given context.
   ///
   /// Defaults to the fallback theme data if none exists.
-  static ThemeData of(BuildContext context) {
-    Theme theme = context.inheritFromWidgetOfExactType(Theme);
-    return theme?.data ?? _kFallbackTheme;
+  ///
+  /// If [shadowTheme] is true and the closest Theme ancestor was installed by
+  /// the [MaterialApp] - in other words if the closest Theme ancestor does not
+  /// shadow the app's theme - then return null.
+  static ThemeData of(BuildContext context, { bool shadowTheme: false }) {
+    final Theme theme = context.inheritFromWidgetOfExactType(Theme);
+    final ThemeData themeData = theme?.data ?? _kFallbackTheme;
+    return shadowTheme ? (theme.isShadowTheme ? themeData : null) : themeData;
   }
 
   @override
@@ -77,6 +87,7 @@ class AnimatedTheme extends ImplicitlyAnimatedWidget {
   AnimatedTheme({
     Key key,
     @required this.data,
+    this.isShadowTheme: true,
     Curve curve: Curves.linear,
     Duration duration: kThemeAnimationDuration,
     this.child
@@ -87,6 +98,8 @@ class AnimatedTheme extends ImplicitlyAnimatedWidget {
 
   /// Specifies the color and typography values for descendant widgets.
   final ThemeData data;
+
+  final bool isShadowTheme;
 
   /// The widget below this widget in the tree.
   final Widget child;
@@ -108,6 +121,7 @@ class _AnimatedThemeState extends AnimatedWidgetBaseState<AnimatedTheme> {
   @override
   Widget build(BuildContext context) {
     return new Theme(
+      isShadowTheme: config.isShadowTheme,
       child: config.child,
       data: _data.evaluate(animation)
     );

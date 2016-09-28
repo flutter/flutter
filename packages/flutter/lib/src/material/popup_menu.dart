@@ -374,13 +374,15 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
     this.position,
     this.items,
     this.initialValue,
-    this.elevation
+    this.elevation,
+    this.theme
   }) : super(completer: completer);
 
   final RelativeRect position;
   final List<PopupMenuEntry<T>> items;
   final dynamic initialValue;
   final int elevation;
+  final ThemeData theme;
 
   @override
   Animation<double> createAnimation() {
@@ -411,9 +413,14 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
         selectedItemOffset += items[i].height;
       }
     }
+
+    Widget menu = new _PopupMenu<T>(route: this);
+    if (theme != null)
+      menu = new Theme(data: theme, child: menu);
+
     return new CustomSingleChildLayout(
       delegate: new _PopupMenuRouteLayout(position, selectedItemOffset),
-      child: new _PopupMenu<T>(route: this)
+      child: menu
     );
   }
 }
@@ -438,7 +445,8 @@ Future<dynamic/*=T*/> showMenu/*<T>*/({
     position: position,
     items: items,
     initialValue: initialValue,
-    elevation: elevation
+    elevation: elevation,
+    theme: Theme.of(context, shadowTheme: true)
   ));
   return completer.future;
 }
