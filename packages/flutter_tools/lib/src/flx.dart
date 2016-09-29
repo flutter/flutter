@@ -27,16 +27,20 @@ const String defaultPrivateKeyPath = 'privatekey.der';
 const String _kSnapshotKey = 'snapshot_blob.bin';
 
 Future<int> createSnapshot({
+  String snapshotterPath,
   String mainPath,
   String snapshotPath,
-  String depfilePath
+  String depfilePath,
+  String packages
 }) {
+  assert(snapshotterPath != null);
   assert(mainPath != null);
   assert(snapshotPath != null);
+  assert(packages != null);
 
   final List<String> args = <String>[
-    tools.getHostToolPath(HostTool.SkySnapshot),
-    '--packages=${path.absolute(PackageMap.globalPackagesPath)}',
+    snapshotterPath,
+    '--packages=$packages',
     '--snapshot=$snapshotPath'
   ];
   if (depfilePath != null) {
@@ -67,6 +71,7 @@ Future<String> buildFlx({
 }
 
 Future<int> build({
+  String snapshotterPath,
   String mainPath: defaultMainPath,
   String manifestPath: defaultManifestPath,
   String outputPath,
@@ -74,14 +79,17 @@ Future<int> build({
   String depfilePath,
   String privateKeyPath: defaultPrivateKeyPath,
   String workingDirPath,
+  String packagesPath,
   bool precompiledSnapshot: false,
   bool includeRobotoFonts: true,
   bool reportLicensedPackages: false
 }) async {
+  snapshotterPath ??= tools.getHostToolPath(HostTool.SkySnapshot);
   outputPath ??= defaultFlxOutputPath;
   snapshotPath ??= defaultSnapshotPath;
   depfilePath ??= defaultDepfilePath;
   workingDirPath ??= getAssetBuildDirectory();
+  packagesPath ??= path.absolute(PackageMap.globalPackagesPath);
   File snapshotFile;
 
   if (!precompiledSnapshot) {
@@ -90,9 +98,11 @@ Future<int> build({
     // In a precompiled snapshot, the instruction buffer contains script
     // content equivalents
     int result = await createSnapshot(
+      snapshotterPath: snapshotterPath,
       mainPath: mainPath,
       snapshotPath: snapshotPath,
-      depfilePath: depfilePath
+      depfilePath: depfilePath,
+      packages: packagesPath
     );
     if (result != 0) {
       printError('Failed to run the Flutter compiler. Exit code: $result');
