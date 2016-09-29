@@ -188,7 +188,7 @@ class _PointDemoState extends State<_PointDemo> {
     final MaterialPointArcTween arc = new MaterialPointArcTween(begin: _begin, end: _end);
     return new RawGestureDetector(
       behavior: _dragTarget == null ? HitTestBehavior.deferToChild : HitTestBehavior.opaque,
-      gestures: <Type, GestureRecognizerFactory>{ 
+      gestures: <Type, GestureRecognizerFactory>{
         ImmediateMultiDragGestureRecognizer: (ImmediateMultiDragGestureRecognizer recognizer) { // ignore: map_value_type_not_assignable, https://github.com/flutter/flutter/issues/5771
           return (recognizer ??= new ImmediateMultiDragGestureRecognizer())
             ..onStart = _handleOnStart;
@@ -407,8 +407,6 @@ class _ArcDemo {
 class AnimationDemo extends StatefulWidget {
   AnimationDemo({ Key key }) : super(key: key);
 
-  static const String routeName = '/animation';
-
   @override
   _AnimationDemoState createState() => new _AnimationDemoState();
 }
@@ -468,4 +466,10 @@ class _AnimationDemoState extends State<AnimationDemo> with TickerProviderStateM
       )
     );
   }
+}
+
+void main() {
+  runApp(new MaterialApp(
+    home: new AnimationDemo()
+  ));
 }

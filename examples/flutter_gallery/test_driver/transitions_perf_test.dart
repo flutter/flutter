@@ -55,7 +55,6 @@ final List<String> demoTitles = <String>[
   'Time picker',
   'Tooltips',
   // Style
-  'Animation',
   'Colors',
   'Typography'
 ];
