@@ -122,6 +122,9 @@ declare_args() {
   # Component build.
   is_component_build = false
 
+  # Official build.
+  is_official_build = false
+
   # Debug build.
   is_debug = true
 
