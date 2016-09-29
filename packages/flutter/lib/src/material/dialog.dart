@@ -166,7 +166,6 @@ class AlertDialog extends StatelessWidget {
     if (actions != null) {
       children.add(new ButtonTheme.bar(
         child: new ButtonBar(
-          alignment: MainAxisAlignment.end,
           children: actions
         )
       ));

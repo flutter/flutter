@@ -5,100 +5,82 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-void main() {
-  testWidgets('tap-select an hour', (WidgetTester tester) async {
-    Key _timePickerKey = new UniqueKey();
-    TimeOfDay _selectedTime = const TimeOfDay(hour: 7, minute: 0);
+class _TimePickerLauncher extends StatelessWidget {
+  _TimePickerLauncher({ Key key, this.onChanged }) : super(key: key);
 
-    await tester.pumpWidget(
-      new StatefulBuilder(
-        builder: (BuildContext context, StateSetter setState) {
-          return new Material(
-            child: new Center(
-              child: new SizedBox(
-                width: 200.0,
-                height: 400.0,
-                child: new TimePicker(
-                  key: _timePickerKey,
-                  selectedTime: _selectedTime,
-                  onChanged: (TimeOfDay value) {
-                    setState(() {
-                      _selectedTime = value;
-                    });
-                  }
-                )
-              )
-            )
-          );
-        }
-      )
-    );
+  final ValueChanged<TimeOfDay> onChanged;
 
-    Point center = tester.getCenter(find.byKey(_timePickerKey));
-
-    Point hour0 = new Point(center.x, center.y - 50.0); // 12:00 AM
-    await tester.tapAt(hour0);
-    expect(_selectedTime.hour, equals(0));
-
-    Point hour3 = new Point(center.x + 50.0, center.y);
-    await tester.tapAt(hour3);
-    expect(_selectedTime.hour, equals(3));
-
-    Point hour6 = new Point(center.x, center.y + 50.0);
-    await tester.tapAt(hour6);
-    expect(_selectedTime.hour, equals(6));
-
-    Point hour9 = new Point(center.x - 50.0, center.y);
-    await tester.tapAt(hour9);
-    expect(_selectedTime.hour, equals(9));
-
-    await tester.pump(const Duration(seconds: 1)); // Finish gesture animation.
-    await tester.pump(const Duration(seconds: 1)); // Finish settling animation.
-  });
-
-  testWidgets('render picker with intrinsic dimensions', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      new IntrinsicWidth(
-        child: new IntrinsicHeight(
-          child: new TimePicker(
-            onChanged: null,
-            selectedTime: new TimeOfDay(hour: 0, minute: 0)
+  @override
+  Widget build(BuildContext context) {
+    return new MaterialApp(
+      home: new Material(
+        child: new Center(
+          child: new Builder(
+            builder: (BuildContext context) {
+              return new RaisedButton(
+                child: new Text('X'),
+                onPressed: () async {
+                  onChanged(await showTimePicker(
+                    context: context,
+                    initialTime: const TimeOfDay(hour: 7, minute: 0)
+                  ));
+                }
+              );
+            }
           )
         )
       )
     );
-    await tester.pump(const Duration(seconds: 5));
+  }
+}
+
+Future<Point> startPicker(WidgetTester tester, ValueChanged<TimeOfDay> onChanged) async {
+  await tester.pumpWidget(new _TimePickerLauncher(onChanged: onChanged));
+  await tester.tap(find.text('X'));
+
+  await tester.pump(); // start animation
+  await tester.pump(const Duration(seconds: 1));
+
+  return tester.getCenter(find.byKey(new Key('time-picker-dial')));
+}
+
+Future<Null> finishPicker(WidgetTester tester) async {
+  await tester.tap(find.text('OK'));
+
+  await tester.pump(); // start animation
+  await tester.pump(const Duration(seconds: 1));
+}
+
+void main() {
+  testWidgets('tap-select an hour', (WidgetTester tester) async {
+    TimeOfDay result;
+
+    Point center = await startPicker(tester, (TimeOfDay time) { result = time; });
+    await tester.tapAt(new Point(center.x, center.y - 50.0)); // 12:00 AM
+    await finishPicker(tester);
+    expect(result, equals(const TimeOfDay(hour: 0, minute: 0)));
+
+    center = await startPicker(tester, (TimeOfDay time) { result = time; });
+    await tester.tapAt(new Point(center.x + 50.0, center.y));
+    await finishPicker(tester);
+    expect(result, equals(const TimeOfDay(hour: 3, minute: 0)));
+
+    center = await startPicker(tester, (TimeOfDay time) { result = time; });
+    await tester.tapAt(new Point(center.x, center.y + 50.0));
+    await finishPicker(tester);
+    expect(result, equals(const TimeOfDay(hour: 6, minute: 0)));
+
+    center = await startPicker(tester, (TimeOfDay time) { result = time; });
+    await tester.tapAt(new Point(center.x, center.y + 50.0));
+    await tester.tapAt(new Point(center.x - 50, center.y));
+    await finishPicker(tester);
+    expect(result, equals(const TimeOfDay(hour: 9, minute: 0)));
   });
 
   testWidgets('drag-select an hour', (WidgetTester tester) async {
-    Key _timePickerKey = new UniqueKey();
-    TimeOfDay _selectedTime = const TimeOfDay(hour: 7, minute: 0);
+    TimeOfDay result;
 
-    await tester.pumpWidget(
-      new StatefulBuilder(
-        builder: (BuildContext context, StateSetter setState) {
-          return new Material(
-            child: new Center(
-                child: new SizedBox(
-                width: 200.0,
-                height: 400.0,
-                child: new TimePicker(
-                  key: _timePickerKey,
-                  selectedTime: _selectedTime,
-                  onChanged: (TimeOfDay value) {
-                    setState(() {
-                      _selectedTime = value;
-                    });
-                  }
-                )
-              )
-            )
-          );
-        }
-      )
-    );
-
-    Point center = tester.getCenter(find.byKey(_timePickerKey));
+    Point center = await startPicker(tester, (TimeOfDay time) { result = time; });
     Point hour0 = new Point(center.x, center.y - 50.0); // 12:00 AM
     Point hour3 = new Point(center.x + 50.0, center.y);
     Point hour6 = new Point(center.x, center.y + 50.0);
@@ -109,29 +91,28 @@ void main() {
     gesture = await tester.startGesture(hour3);
     await gesture.moveBy(hour0 - hour3);
     await gesture.up();
-    expect(_selectedTime.hour, equals(0));
-    await tester.pump(const Duration(seconds: 1)); // Finish gesture animation.
-    await tester.pump(const Duration(seconds: 1)); // Finish settling animation.
+    await finishPicker(tester);
+    expect(result.hour, 0);
 
+    expect(await startPicker(tester, (TimeOfDay time) { result = time; }), equals(center));
     gesture = await tester.startGesture(hour0);
     await gesture.moveBy(hour3 - hour0);
     await gesture.up();
-    expect(_selectedTime.hour, equals(3));
-    await tester.pump(const Duration(seconds: 1));
-    await tester.pump(const Duration(seconds: 1));
+    await finishPicker(tester);
+    expect(result.hour, 3);
 
+    expect(await startPicker(tester, (TimeOfDay time) { result = time; }), equals(center));
     gesture = await tester.startGesture(hour3);
     await gesture.moveBy(hour6 - hour3);
     await gesture.up();
-    expect(_selectedTime.hour, equals(6));
-    await tester.pump(const Duration(seconds: 1));
-    await tester.pump(const Duration(seconds: 1));
+    await finishPicker(tester);
+    expect(result.hour, equals(6));
 
+    expect(await startPicker(tester, (TimeOfDay time) { result = time; }), equals(center));
     gesture = await tester.startGesture(hour6);
     await gesture.moveBy(hour9 - hour6);
     await gesture.up();
-    expect(_selectedTime.hour, equals(9));
-    await tester.pump(const Duration(seconds: 1));
-    await tester.pump(const Duration(seconds: 1));
+    await finishPicker(tester);
+    expect(result.hour, equals(9));
   });
 }
