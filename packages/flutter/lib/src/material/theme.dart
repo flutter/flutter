@@ -18,6 +18,7 @@ const Duration kThemeAnimationDuration = const Duration(milliseconds: 200);
 ///
 ///  * [AnimatedTheme]
 ///  * [ThemeData]
+///  * [MaterialApp]
 class Theme extends InheritedWidget {
   /// Applies the given theme [data] to [child].
   ///
@@ -25,6 +26,7 @@ class Theme extends InheritedWidget {
   Theme({
     Key key,
     @required this.data,
+    this.isMaterialAppTheme: false,
     Widget child
   }) : super(key: key, child: child) {
     assert(child != null);
@@ -34,14 +36,33 @@ class Theme extends InheritedWidget {
   /// Specifies the color and typography values for descendant widgets.
   final ThemeData data;
 
+  /// True if this theme was installed by the [MaterialApp].
+  ///
+  /// When an app uses the [Navigator] to push a route, the route's widgets
+  /// will only inherit from the app's theme, even though the widget that
+  /// triggered the push may inherit from a theme that "shadows" the app's
+  /// theme because it's deeper in the widget tree. Apps can find the shadowing
+  /// theme with `Theme.of(context, shadowThemeOnly: true)` and pass it along
+  /// to the class that creates a route's widgets. Material widgets that push
+  /// routes, like [PopupMenuButton] and [DropdownButton], do this.
+  final bool isMaterialAppTheme;
+
   static final ThemeData _kFallbackTheme = new ThemeData.fallback();
 
   /// The data from the closest instance of this class that encloses the given context.
   ///
   /// Defaults to the fallback theme data if none exists.
-  static ThemeData of(BuildContext context) {
-    Theme theme = context.inheritFromWidgetOfExactType(Theme);
-    return theme?.data ?? _kFallbackTheme;
+  ///
+  /// If [shadowThemeOnly] is true and the closest Theme ancestor was installed by
+  /// the [MaterialApp] - in other words if the closest Theme ancestor does not
+  /// shadow the app's theme - then return null. This property is specified in
+  /// situations where its useful to wrap a route's widgets with a Theme, but only
+  /// when the app's theme is being shadowed by a theme widget that is farather
+  /// down in the tree. See [isMaterialAppTheme].
+  static ThemeData of(BuildContext context, { bool shadowThemeOnly: false }) {
+    final Theme theme = context.inheritFromWidgetOfExactType(Theme);
+    final ThemeData themeData = theme?.data ?? _kFallbackTheme;
+    return shadowThemeOnly ? (theme.isMaterialAppTheme ? null : themeData) : themeData;
   }
 
   @override
@@ -77,6 +98,7 @@ class AnimatedTheme extends ImplicitlyAnimatedWidget {
   AnimatedTheme({
     Key key,
     @required this.data,
+    this.isMaterialAppTheme: false,
     Curve curve: Curves.linear,
     Duration duration: kThemeAnimationDuration,
     this.child
@@ -87,6 +109,9 @@ class AnimatedTheme extends ImplicitlyAnimatedWidget {
 
   /// Specifies the color and typography values for descendant widgets.
   final ThemeData data;
+
+  /// True if this theme was created by the [MaterialApp]. See [Theme.isMaterialAppTheme].
+  final bool isMaterialAppTheme;
 
   /// The widget below this widget in the tree.
   final Widget child;
@@ -108,6 +133,7 @@ class _AnimatedThemeState extends AnimatedWidgetBaseState<AnimatedTheme> {
   @override
   Widget build(BuildContext context) {
     return new Theme(
+      isMaterialAppTheme: config.isMaterialAppTheme,
       child: config.child,
       data: _data.evaluate(animation)
     );
