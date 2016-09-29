@@ -283,12 +283,12 @@ public:
 
     void clip(const IntRect& rect) { clipRect(rect); }
     void clip(const FloatRect& rect) { clipRect(rect); }
-    void clipRoundedRect(const RoundedRect&, SkRegion::Op = SkRegion::kIntersect_Op);
-    void clipOut(const IntRect& rect) { clipRect(rect, NotAntiAliased, SkRegion::kDifference_Op); }
+    void clipRoundedRect(const RoundedRect&, SkClipOp = kIntersect_SkClipOp);
+    void clipOut(const IntRect& rect) { clipRect(rect, NotAntiAliased, kDifference_SkClipOp); }
     void clipOutRoundedRect(const RoundedRect&);
     void clipPath(const Path&, WindRule = RULE_EVENODD);
     void clipConvexPolygon(size_t numPoints, const FloatPoint*, bool antialias = true);
-    void clipRect(const SkRect&, AntiAliasingMode = NotAntiAliased, SkRegion::Op = SkRegion::kIntersect_Op);
+    void clipRect(const SkRect&, AntiAliasingMode = NotAntiAliased, SkClipOp = kIntersect_SkClipOp);
 
     void drawText(const Font&, const TextRunPaintInfo&, const FloatPoint&);
     void drawEmphasisMarks(const Font&, const TextRunPaintInfo&, const AtomicString& mark, const FloatPoint&);
@@ -395,8 +395,8 @@ private:
 
 
     // SkCanvas wrappers.
-    void clipPath(const SkPath&, AntiAliasingMode = NotAntiAliased, SkRegion::Op = SkRegion::kIntersect_Op);
-    void clipRRect(const SkRRect&, AntiAliasingMode = NotAntiAliased, SkRegion::Op = SkRegion::kIntersect_Op);
+    void clipPath(const SkPath&, AntiAliasingMode = NotAntiAliased, SkClipOp = kIntersect_SkClipOp);
+    void clipRRect(const SkRRect&, AntiAliasingMode = NotAntiAliased, SkClipOp = kIntersect_SkClipOp);
     void concat(const SkMatrix&);
     void drawRRect(const SkRRect&, const SkPaint&);
 

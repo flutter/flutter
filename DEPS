@@ -23,7 +23,7 @@ vars = {
   'github_git': 'https://github.com',
   'mojo_sdk_revision': '6b5fb1227c742f5ecc077486ebc029f2711c61fa',
   'base_revision': '75e70c3387cf327702a0533e93bc480446da0806',
-  'skia_revision': '5561e3ddbbf6c3e051075ada4a11ddc70760f03d',
+  'skia_revision': 'e038489a743d6c0ab1cb208862c305180815bc8e',
 
   # Note: When updating the Dart revision, ensure that all entries that are
   # dependencies of dart are also updated

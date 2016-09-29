@@ -7,7 +7,10 @@ if (is_fuchsia) {
 group("skia") {
   # TODO(abarth): Switch the non-Fuchsia build over to using Skia's BUILD.gn
   # files as well.
-  public_deps = [ "//third_party/skia" ]
+  public_deps = [
+    "//third_party/skia",
+    "//third_party/skia:gpu",
+  ]
 }
 
 } else {
@@ -21,18 +24,6 @@ if (current_cpu == "arm" || current_cpu == "arm64") {
 if (current_cpu == "mipsel" || current_cpu == "mips64el") {
   import("//build/config/mips.gni")
 }
-
-# The list of Skia defines that are to be set for chromium.
-gypi_skia_defines =
-    exec_script("//build/gypi_to_gn.py",
-                [
-                  rebase_path(
-                      "//third_party/skia/gyp/skia_for_chromium_defines.gypi"),
-                  "--replace=<(skia_include_path)=//third_party/skia/include",
-                  "--replace=<(skia_src_path)=//third_party/skia/src",
-                ],
-                "scope",
-                [ "//third_party/skia/gyp/skia_for_chromium_defines.gypi" ])
 
 # The list of Skia core sources that are to be set for chromium.
 gypi_skia_core =
@@ -67,16 +58,14 @@ gypi_skia_effects =
                 "scope",
                 [ "//third_party/skia/gyp/effects.gypi" ])
 
-# The list of Skia utils that are to be set for chromium.
-gypi_skia_utils =
+gypi_skia_sources =
     exec_script("//build/gypi_to_gn.py",
                 [
-                  rebase_path("//third_party/skia/gyp/utils.gypi"),
-                  "--replace=<(skia_include_path)=//third_party/skia/include",
-                  "--replace=<(skia_src_path)=//third_party/skia/src",
+                  rebase_path("//third_party/skia/gyp/skia_sources.gypi"),
+                  "--replace=..=//third_party/skia",
                 ],
                 "scope",
-                [ "//third_party/skia/gyp/utils.gypi" ])
+                [ "//third_party/skia/gyp/skia_sources.gypi" ])
 
 gypi_skia_opts =
     exec_script("//build/gypi_to_gn.py",
@@ -134,9 +123,7 @@ config("skia_library_config") {
     include_dirs += [ "//third_party/skia/include/utils/ios" ]
   }
 
-  defines = gypi_skia_defines.skia_for_chromium_defines
-
-  defines += [ "SK_SUPPORT_GPU=1" ]
+  defines = [ "SK_SUPPORT_GPU=1" ]
 
   # Supported codecs.
   defines += [
@@ -242,7 +229,7 @@ component("skia") {
   # The skia gypi values are relative to the skia_dir, so we need to rebase.
   sources += gypi_skia_core.sources
   sources += gypi_skia_effects.sources
-  sources += gypi_skia_utils.sources
+  sources += gypi_skia_sources.utils_sources
 
   sources += [
     "//third_party/skia/src/codec/SkAndroidCodec.cpp",
@@ -269,6 +256,7 @@ component("skia") {
     "//third_party/skia/src/fonts/SkFontMgr_indirect.cpp",
     "//third_party/skia/src/fonts/SkRemotableFontMgr.cpp",
     "//third_party/skia/src/ports/SkDiscardableMemory_none.cpp",
+    "//third_party/skia/src/ports/SkFontConfigInterface.cpp",
     "//third_party/skia/src/ports/SkFontConfigInterface_direct_factory.cpp",
     "//third_party/skia/src/ports/SkFontConfigInterface_direct.cpp",
     "//third_party/skia/src/ports/SkFontHost_FreeType_common.cpp",
@@ -422,6 +410,7 @@ component("skia") {
 
   if (!is_linux) {
     sources -= [
+      "//third_party/skia/src/ports/SkFontConfigInterface.cpp",
       "//third_party/skia/src/ports/SkFontConfigInterface_direct_factory.cpp",
       "//third_party/skia/src/ports/SkFontConfigInterface_direct.cpp",
       "//third_party/skia/src/ports/SkFontMgr_FontConfigInterface.cpp",

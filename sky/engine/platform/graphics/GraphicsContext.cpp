@@ -1076,13 +1076,13 @@ void GraphicsContext::strokeEllipse(const FloatRect& ellipse)
     drawOval(ellipse, immutableState()->strokePaint());
 }
 
-void GraphicsContext::clipRoundedRect(const RoundedRect& rect, SkRegion::Op regionOp)
+void GraphicsContext::clipRoundedRect(const RoundedRect& rect, SkClipOp clipOp)
 {
     if (contextDisabled())
         return;
 
     if (!rect.isRounded()) {
-        clipRect(rect.rect(), NotAntiAliased, regionOp);
+        clipRect(rect.rect(), NotAntiAliased, clipOp);
         return;
     }
 
@@ -1093,7 +1093,7 @@ void GraphicsContext::clipRoundedRect(const RoundedRect& rect, SkRegion::Op regi
     SkRRect r;
     r.setRectRadii(rect.rect(), radii);
 
-    clipRRect(r, AntiAliased, regionOp);
+    clipRRect(r, AntiAliased, clipOp);
 }
 
 void GraphicsContext::clipOut(const Path& pathToClip)
@@ -1142,7 +1142,7 @@ void GraphicsContext::clipOutRoundedRect(const RoundedRect& rect)
     if (contextDisabled())
         return;
 
-    clipRoundedRect(rect, SkRegion::kDifference_Op);
+    clipRoundedRect(rect, kDifference_SkClipOp);
 }
 
 void GraphicsContext::canvasClip(const Path& pathToClip, WindRule clipRule)
@@ -1161,7 +1161,7 @@ void GraphicsContext::canvasClip(const Path& pathToClip, WindRule clipRule)
     path.setFillType(previousFillType);
 }
 
-void GraphicsContext::clipRect(const SkRect& rect, AntiAliasingMode aa, SkRegion::Op op)
+void GraphicsContext::clipRect(const SkRect& rect, AntiAliasingMode aa, SkClipOp op)
 {
     if (contextDisabled())
         return;
@@ -1171,7 +1171,7 @@ void GraphicsContext::clipRect(const SkRect& rect, AntiAliasingMode aa, SkRegion
     m_canvas->clipRect(rect, op, aa == AntiAliased);
 }
 
-void GraphicsContext::clipPath(const SkPath& path, AntiAliasingMode aa, SkRegion::Op op)
+void GraphicsContext::clipPath(const SkPath& path, AntiAliasingMode aa, SkClipOp op)
 {
     if (contextDisabled())
         return;
@@ -1181,7 +1181,7 @@ void GraphicsContext::clipPath(const SkPath& path, AntiAliasingMode aa, SkRegion
     m_canvas->clipPath(path, op, aa == AntiAliased);
 }
 
-void GraphicsContext::clipRRect(const SkRRect& rect, AntiAliasingMode aa, SkRegion::Op op)
+void GraphicsContext::clipRRect(const SkRRect& rect, AntiAliasingMode aa, SkClipOp op)
 {
     if (contextDisabled())
         return;
