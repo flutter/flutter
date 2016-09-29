@@ -19,7 +19,10 @@ const Duration taskTimeoutWithGracePeriod = const Duration(minutes: 11);
 ///
 /// [taskName] is the name of the task. The corresponding task executable is
 /// expected to be found under `bin/tasks`.
-Future<Map<String, dynamic>> runTask(String taskName) async {
+///
+/// Running the task in [silent] mode will suppress standard output from task
+/// processes and only print standard errors.
+Future<Map<String, dynamic>> runTask(String taskName, { bool silent: false }) async {
   String taskExecutable = 'bin/tasks/$taskName.dart';
 
   if (!file(taskExecutable).existsSync())
@@ -42,7 +45,9 @@ Future<Map<String, dynamic>> runTask(String taskName) async {
       .transform(new Utf8Decoder())
       .transform(new LineSplitter())
       .listen((String line) {
-    stdout.writeln('[$taskName] [STDOUT] $line');
+    if (!silent) {
+      stdout.writeln('[$taskName] [STDOUT] $line');
+    }
   });
 
   StreamSubscription<String> stderrSub = runner.stderr

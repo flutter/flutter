@@ -51,9 +51,11 @@ Future<Null> main(List<String> rawArgs) async {
     return null;
   }
 
+  bool silent = args['silent'];
+
   for (String taskName in taskNames) {
     section('Running task "$taskName"');
-    Map<String, dynamic> result = await runTask(taskName);
+    Map<String, dynamic> result = await runTask(taskName, silent: silent);
 
     if (!result['success'])
       exitCode = 1;
@@ -98,4 +100,9 @@ final ArgParser _argParser = new ArgParser()
         );
       }
     },
+  )
+  ..addFlag(
+    'silent',
+    negatable: true,
+    defaultsTo: false,
   );

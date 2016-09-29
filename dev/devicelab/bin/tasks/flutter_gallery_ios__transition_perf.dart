@@ -5,8 +5,9 @@
 import 'dart:async';
 
 import 'package:flutter_devicelab/tasks/gallery.dart';
+import 'package:flutter_devicelab/framework/adb.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
 
 Future<Null> main() async {
-  await task(createGalleryTransitionTest(ios: true));
+  await task(createGalleryTransitionTest(os: DeviceOperatingSystem.ios));
 }

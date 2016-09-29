@@ -5,8 +5,9 @@
 import 'dart:async';
 
 import 'package:flutter_devicelab/tasks/perf_tests.dart';
+import 'package:flutter_devicelab/framework/adb.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
 
 Future<Null> main() async {
-  await task(createComplexLayoutScrollPerfTest(ios: false));
+  await task(createComplexLayoutScrollPerfTest(os: DeviceOperatingSystem.android));
 }
