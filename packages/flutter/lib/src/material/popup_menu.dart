@@ -446,7 +446,7 @@ Future<dynamic/*=T*/> showMenu/*<T>*/({
     items: items,
     initialValue: initialValue,
     elevation: elevation,
-    theme: Theme.of(context, shadowTheme: true)
+    theme: Theme.of(context, shadowThemeOnly: true),
   ));
   return completer.future;
 }

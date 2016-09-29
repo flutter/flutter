@@ -293,7 +293,8 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
     this.buttonRect,
     this.selectedIndex,
     this.elevation: 8,
-    TextStyle style
+    this.theme,
+    TextStyle style,
   }) : _style = style, super(completer: completer) {
     assert(style != null);
   }
@@ -303,6 +304,7 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
   final Rect buttonRect;
   final int selectedIndex;
   final int elevation;
+  final ThemeData theme;
   // The layout gets this route's scrollableKey so that it can scroll the
   /// selected item into position, but only on the initial layout.
   bool initialLayout = true;
@@ -329,9 +331,13 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
 
   @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> forwardAnimation) {
+    Widget menu = new _DropdownMenu<T>(route: this);
+    if (theme != null)
+      menu = new Theme(data: theme, child: menu);
+
     return new CustomSingleChildLayout(
       delegate: new _DropdownMenuRouteLayout<T>(route: this),
-      child: new _DropdownMenu<T>(route: this)
+      child: menu,
     );
   }
 }
@@ -501,7 +507,8 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> {
       buttonRect: _kMenuHorizontalPadding.inflateRect(itemRect),
       selectedIndex: _selectedIndex,
       elevation: config.elevation,
-      style: _textStyle
+      theme: Theme.of(context, shadowThemeOnly: true),
+      style: _textStyle,
     );
     Navigator.push(context, _currentRoute);
     completer.future.then((_DropdownRouteResult<T> newValue) {

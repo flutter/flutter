@@ -246,7 +246,7 @@ class _MaterialAppState extends State<MaterialApp> {
     ThemeData theme = config.theme ?? new ThemeData.fallback();
     Widget result = new AnimatedTheme(
       data: theme,
-      isShadowTheme: false,
+      isMaterialAppTheme: true,
       child: new WidgetsApp(
         key: new GlobalObjectKey(this),
         title: config.title,
