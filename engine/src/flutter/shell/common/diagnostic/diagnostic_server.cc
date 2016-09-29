@@ -135,7 +135,7 @@ void DiagnosticServer::SkiaPictureTask(Dart_Port port_id) {
   SkDynamicMemoryWStream stream;
   PngPixelSerializer serializer;
   picture->serialize(&stream, &serializer);
-  SkAutoTUnref<SkData> picture_data(stream.copyToData());
+  sk_sp<SkData> picture_data(stream.snapshotAsData());
 
   Dart_CObject c_object;
   c_object.type = Dart_CObject_kTypedData;
