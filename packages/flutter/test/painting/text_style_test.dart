@@ -98,9 +98,9 @@ void main() {
 
     ui.ParagraphStyle ps2 = s2.getParagraphStyle(textAlign: TextAlign.center);
     expect(ps2, equals(new ui.ParagraphStyle(textAlign: TextAlign.center, fontWeight: FontWeight.w800, fontSize: 10.0, lineHeight: 100.0)));
-    expect(ps2.toString(), 'ParagraphStyle(textAlign: TextAlign.center, fontWeight: FontWeight.w800, fontStyle: unspecified, fontFamily: unspecified, fontSize: 10.0, lineHeight: 100.0x)');
+    expect(ps2.toString(), 'ParagraphStyle(textAlign: TextAlign.center, fontWeight: FontWeight.w800, fontStyle: unspecified, lineCount: unspecified, fontFamily: unspecified, fontSize: 10.0, lineHeight: 100.0x,ellipsis: unspecified,)');
     ui.ParagraphStyle ps5 = s5.getParagraphStyle();
     expect(ps5, equals(new ui.ParagraphStyle(fontWeight: FontWeight.w700, fontSize: 12.0, lineHeight: 123.0)));
-    expect(ps5.toString(), 'ParagraphStyle(textAlign: unspecified, fontWeight: FontWeight.w700, fontStyle: unspecified, fontFamily: unspecified, fontSize: 12.0, lineHeight: 123.0x)');
+    expect(ps5.toString(), 'ParagraphStyle(textAlign: unspecified, fontWeight: FontWeight.w700, fontStyle: unspecified, lineCount: unspecified, fontFamily: unspecified, fontSize: 12.0, lineHeight: 123.0x,ellipsis: unspecified,)');
   });
 }
