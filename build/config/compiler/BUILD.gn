@@ -554,8 +554,11 @@ config("compiler") {
         cflags += [ "--target=arm-linux-androideabi" ]
         ldflags += [ "--target=arm-linux-androideabi" ]
       } else if (current_cpu == "x86") {
-        cflags += [ "--target=x86-linux-androideabi" ]
-        ldflags += [ "--target=x86-linux-androideabi" ]
+        cflags += [ "--target=i686-linux-androideabi" ]
+        ldflags += [ "--target=i686-linux-androideabi" ]
+      } else if (current_cpu == "x64") {
+        cflags += [ "--target=x86_64-linux-androideabi" ]
+        ldflags += [ "--target=x86_64-linux-androideabi" ]
       }
     }
   }
