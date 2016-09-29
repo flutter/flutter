@@ -425,8 +425,8 @@ class HotRunner extends ResidentRunner {
     }
     restartStatus.stop(showElapsedTime: true);
     if (waitForFrame) {
-      printStatus('Restart time: '
-                  '${getElapsedAsMilliseconds(firstFrameTimer.elapsed)}');
+      printStatus('Restart performed in '
+                  '${getElapsedAsMilliseconds(firstFrameTimer.elapsed)}.');
       if (benchmarkMode) {
         benchmarkData['hotRestartMillisecondsToFrame'] =
             firstFrameTimer.elapsed.inMilliseconds;
