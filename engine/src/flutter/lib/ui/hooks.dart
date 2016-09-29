@@ -87,7 +87,7 @@ PointerDataPacket _unpackPointerDataPacket(ByteData packet) {
       radiusMin: packet.getFloat64(kStride * offset++, _kFakeHostEndian),
       radiusMax: packet.getFloat64(kStride * offset++, _kFakeHostEndian),
       orientation: packet.getFloat64(kStride * offset++, _kFakeHostEndian),
-      tilt: packet.getFloat64(kStride * offset++, _kFakeHostEndian),
+      tilt: packet.getFloat64(kStride * offset++, _kFakeHostEndian)
     );
     assert(offset == (i + 1) * _kPointerDataFieldCount);
   }
