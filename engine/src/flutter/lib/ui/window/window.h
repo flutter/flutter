@@ -38,7 +38,6 @@ class Window {
   void UpdateWindowMetrics(const sky::ViewportMetricsPtr& metrics);
   void UpdateLocale(const std::string& language_code,
                     const std::string& country_code);
-  void DispatchPointerPacket(const pointer::PointerPacketPtr& packet);
   void DispatchPointerDataPacket(const PointerDataPacket& packet);
   void BeginFrame(ftl::TimePoint frameTime);
 

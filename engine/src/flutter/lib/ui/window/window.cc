@@ -97,30 +97,6 @@ void Window::PopRoute() {
   DartInvokeField(library_.value(), "_popRoute", {});
 }
 
-void Window::DispatchPointerPacket(const pointer::PointerPacketPtr& packet) {
-  tonic::DartState* dart_state = library_.dart_state().get();
-  if (!dart_state)
-    return;
-  tonic::DartState::Scope scope(dart_state);
-
-  Dart_Handle data_handle =
-      Dart_NewTypedData(Dart_TypedData_kByteData, packet->GetSerializedSize());
-  if (Dart_IsError(data_handle))
-    return;
-
-  Dart_TypedData_Type type;
-  void* data;
-  intptr_t len;
-  if (Dart_IsError(Dart_TypedDataAcquireData(data_handle, &type, &data, &len)))
-    return;
-
-  packet->Serialize(data, len);
-
-  Dart_TypedDataReleaseData(data_handle);
-
-  DartInvokeField(library_.value(), "_dispatchPointerPacket", {data_handle});
-}
-
 void Window::DispatchPointerDataPacket(const PointerDataPacket& packet) {
   tonic::DartState* dart_state = library_.dart_state().get();
   if (!dart_state)
