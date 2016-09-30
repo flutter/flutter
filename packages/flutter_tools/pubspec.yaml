@@ -29,7 +29,7 @@ dependencies:
   pub_semver: ^1.0.0
   stack_trace: ^1.4.0
   usage: ^2.2.1
-  web_socket_channel: ^1.0.0
+  web_socket_channel: ^1.0.4
   xml: ^2.4.1
   yaml: ^2.1.3
 
