@@ -133,7 +133,7 @@ abstract class FlutterCommand extends Command {
   Future<int> verifyThenRunCommand() async {
     // Populate the cache. We call this before pub get below so that the sky_engine
     // package is available in the flutter cache for pub to find.
-    await cache.updateAll();
+    await cache.updateAll(withEngine: shouldRunPub);
 
     if (shouldRunPub) {
       int exitCode = await pubGet();

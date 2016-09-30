@@ -173,14 +173,16 @@ class Cache {
     return cachedFile.path;
   }
 
-  Future<Null> updateAll() async {
+  Future<Null> updateAll({bool withEngine: true}) async {
     MaterialFonts materialFonts = new MaterialFonts(cache);
     if (!materialFonts.isUpToDate())
       await materialFonts.download();
 
-    FlutterEngine engine = new FlutterEngine(cache);
-    if (!engine.isUpToDate())
-      await engine.download();
+    if (withEngine) {
+      FlutterEngine engine = new FlutterEngine(cache);
+      if (!engine.isUpToDate())
+        await engine.download();
+    }
   }
 
   /// Download a file from the given url and write it to the cache.
