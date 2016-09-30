@@ -4,13 +4,9 @@
 
 import 'dart:async';
 import 'dart:collection';
-import 'dart:typed_data';
-import 'dart:ui' as ui show window;
+import 'dart:ui' as ui show window, PointerDataPacket;
 
 import 'package:flutter/foundation.dart';
-import 'package:mojo/bindings.dart' as mojo_bindings;
-import 'package:mojo/core.dart' as mojo_core;
-import 'package:flutter_services/pointer.dart';
 
 import 'arena.dart';
 import 'converter.dart';
@@ -25,21 +21,14 @@ abstract class GestureBinding extends BindingBase implements HitTestable, HitTes
   void initInstances() {
     super.initInstances();
     _instance = this;
-    ui.window.onPointerPacket = _handlePointerPacket;
+    ui.window.onPointerDataPacket = _handlePointerDataPacket;
   }
 
   /// The singleton instance of this object.
   static GestureBinding get instance => _instance;
   static GestureBinding _instance;
 
-  void _handlePointerPacket(ByteData serializedPacket) {
-    final mojo_bindings.Message message = new mojo_bindings.Message(
-      serializedPacket,
-      <mojo_core.MojoHandle>[],
-      serializedPacket.lengthInBytes,
-      0
-    );
-    final PointerPacket packet = PointerPacket.deserialize(message);
+  void _handlePointerDataPacket(ui.PointerDataPacket packet) {
     _pendingPointerEvents.addAll(PointerEventConverter.expand(packet.pointers, ui.window.devicePixelRatio));
     _flushPointerEventQueue();
   }

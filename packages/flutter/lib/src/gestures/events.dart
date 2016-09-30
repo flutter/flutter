@@ -2,26 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show Point, Offset;
+import 'dart:ui' show Point, Offset, PointerDeviceKind;
 
 import 'package:flutter/foundation.dart';
 
-export 'dart:ui' show Point, Offset;
-
-/// The kind of pointer device.
-enum PointerDeviceKind {
-  /// A touch-based pointer device.
-  touch,
-
-  /// A pointer device with a stylus.
-  stylus,
-
-  /// A pointer device with a stylus that has been inverted.
-  invertedStylus,
-
-  /// A mouse-based pointer device.
-  mouse
-}
+export 'dart:ui' show Point, Offset, PointerDeviceKind;
 
 /// The bit of [PointerEvent.buttons] that corresponds to the primary mouse button.
 ///
