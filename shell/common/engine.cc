@@ -190,8 +190,6 @@ void Engine::OnLocaleChanged(const mojo::String& language_code,
 void Engine::OnPointerPacket(pointer::PointerPacketPtr packetPtr) {
   TRACE_EVENT0("flutter", "Engine::OnPointerPacket");
   if (runtime_) {
-    runtime_->HandlePointerPacket(packetPtr);
-
     const size_t length = packetPtr->pointers.size();
     blink::PointerDataPacket packet(length);
     for (size_t i = 0; i < length; ++i) {

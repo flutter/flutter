@@ -76,12 +76,6 @@ void RuntimeController::BeginFrame(ftl::TimePoint frame_time) {
   GetWindow()->BeginFrame(frame_time);
 }
 
-void RuntimeController::HandlePointerPacket(
-    const pointer::PointerPacketPtr& packet) {
-  TRACE_EVENT0("input", "RuntimeController::HandlePointerPacket");
-  GetWindow()->DispatchPointerPacket(packet);
-}
-
 void RuntimeController::HandlePointerDataPacket(
     const PointerDataPacket& packet) {
   TRACE_EVENT0("input", "RuntimeController::HandlePointerDataPacket");

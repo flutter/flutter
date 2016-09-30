@@ -39,7 +39,6 @@ class RuntimeController : public WindowClient, public IsolateClient {
 
   void BeginFrame(ftl::TimePoint frame_time);
 
-  void HandlePointerPacket(const pointer::PointerPacketPtr& packet);
   void HandlePointerDataPacket(const PointerDataPacket& packet);
 
   void OnAppLifecycleStateChanged(sky::AppLifecycleState state);

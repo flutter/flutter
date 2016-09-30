@@ -10,9 +10,6 @@ typedef void VoidCallback();
 /// Signature for [Window.onBeginFrame].
 typedef void FrameCallback(Duration duration);
 
-/// Signature for [Window.onPointerPacket].
-typedef void PointerPacketCallback(ByteData serializedPacket);
-
 /// Signature for [Window.onPointerDataPacket].
 typedef void PointerDataPacketCallback(PointerDataPacket packet);
 
@@ -146,11 +143,6 @@ class Window {
   /// signal. This is only called if [scheduleFrame] has been called since the
   /// last time this callback was invoked.
   FrameCallback onBeginFrame;
-
-  /// A callback that is invoked when pointer data is available. The data is
-  /// provided in the form of a raw byte stream containing an encoded mojo
-  /// PointerPacket.
-  PointerPacketCallback onPointerPacket;
 
   /// A callback that is invoked when pointer data is available.
   PointerDataPacketCallback onPointerDataPacket;

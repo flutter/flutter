@@ -38,11 +38,6 @@ void _popRoute() {
     window.onPopRoute();
 }
 
-void _dispatchPointerPacket(ByteData serializedPacket) {
-  if (window.onPointerPacket != null)
-    window.onPointerPacket(serializedPacket);
-}
-
 void _dispatchPointerDataPacket(ByteData packet) {
   if (window.onPointerDataPacket != null)
     window.onPointerDataPacket(_unpackPointerDataPacket(packet));
