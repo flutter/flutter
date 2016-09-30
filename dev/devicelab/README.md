@@ -1,8 +1,65 @@
 # Flutter devicelab
 
-This package contains the test framework and tests that run on physical devices.
-More generally the tests are referred to as "tasks" in the API, but since we
-primarily use it for testing, this document refers to them as "tests".
+"Devicelab" (a.k.a. "cocoon") is a physical lab that tests Flutter on real
+Android and iOS devices.
+
+This package contains the code for test framework and the tests. More generally
+the tests are referred to as "tasks" in the API, but since we primarily use it
+for testing, this document refers to them as "tests".
+
+You can see the continuous build results from the master branch at
+http://go/flutter-dashboard/build.html.
+
+# Running tests locally
+
+Do make sure your tests pass locally before deploying to the CI environment.
+Below is a handful of commands that run tests in a similar way to how the
+CI environment runs them. These commands are also useful when you need to
+reproduce a CI test failure locally.
+
+To run a test, use option `-t` (`--task`):
+
+```sh
+dart bin/run.dart -t {NAME_OF_TEST}
+```
+
+To run multiple tests, repeat option `-t` (`--task`) multiple times:
+
+```sh
+dart bin/run.dart -t test1 -t test2 -t test3
+```
+
+To run all tests defined in `manifest.yaml`, use option `-a` (`--all`):
+
+```sh
+dart bin/run.dart -a
+```
+
+To run tests from a specific stage, use option `-s` (`--stage`):
+
+```sh
+dart bin/run.dart -s {NAME_OF_STAGE}
+```
+
+# Reproducing broken builds locally
+
+If a commit caused a test to fail,
+[the dashboard](http://go/flutter-dashboard/build.html) might look something
+like this:
+
+![Broken Test](images/broken-test.png)
+
+The red circle tells you that a test failed. The number inside tells you how
+many times the devicelab attempted to run the test before giving up on it.
+
+To reproduce the breakage locally `git checkout` the corresponding Flutter
+revision. Note the name of the test that failed. In the example above the
+failing test is `flutter_gallery__transition_perf`. This name can be passed to
+the `run.dart` command. For example:
+
+```sh
+dart bin/run.dart -t flutter_gallery__transition_perf
+```
 
 # Writing tests
 
@@ -63,34 +120,3 @@ Where:
  - `{CAPABILITIES}` is an array that lists the capabilities required of
  the test agent (the computer that runs the test) to run your test. Available
  capabilities are: `has-android-device`, `has-ios-device`.
-
-# Running tests locally
-
-Do make sure your tests pass locally before deploying to the CI environment.
-Below is a handful of commands that run tests in a fashion very close to how the
-CI environment runs them. These commands are also useful when you need to
-reproduce a CI test failure locally.
-
-To run a test use option `-t` (`--task`):
-
-```sh
-dart bin/run.dart -t {NAME_OF_TEST}
-```
-
-To run multiple tests repeat option `-t` (`--task`) multiple times:
-
-```sh
-dart bin/run.dart -t test1 -t test2 -t test3
-```
-
-To run all tests defined in `manifest.yaml` use option `-a` (`--all`):
-
-```sh
-dart bin/run.dart -a
-```
-
-To run tests from a specific stage use option `-s` (`--stage`):
-
-```sh
-dart bin/run.dart -s {NAME_OF_STAGE}
-```
