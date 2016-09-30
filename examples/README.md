@@ -10,11 +10,11 @@ the `flutter` tool.
 
 **Tip:** To see examples of how to use a specific Flutter framework class,
 copy and paste a URL with this format in your browser. Replace `foo` with the
-classname you are searching for (for example, here's the [query](https://github.com/flutter/flutter/search?q=path%3Aexamples+AppBar) for examples of
+classname you are searching for (for example, here's the [query](https://github.com/flutter/flutter/search?q=path%3Aexamples+new+AppBar) for examples of
 the [`AppBar`](https://docs.flutter.io/flutter/material/AppBar-class.html) class).
 
 ```
-https://github.com/flutter/flutter/search?q=path%3Aexamples+foo
+https://github.com/flutter/flutter/search?q=path%3Aexamples++new+foo
 ```
 
 Available examples include:
