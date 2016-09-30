@@ -14,7 +14,7 @@ classname you are searching for (for example, here's the [query](https://github.
 the [`AppBar`](https://docs.flutter.io/flutter/material/AppBar-class.html) class).
 
 ```
-https://github.com/flutter/flutter/search?q=path%3Aexamples++new+foo
+https://github.com/flutter/flutter/search?q=path%3Aexamples+new+foo
 ```
 
 Available examples include:
