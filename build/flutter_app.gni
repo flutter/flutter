@@ -45,6 +45,17 @@ template("flutter_app") {
   flutter_snapshot_dir = get_label_info(flutter_snapshot_label, "root_out_dir")
   flutter_snapshot = "$flutter_snapshot_dir/sky_snapshot"
 
+  dart_binary_label = "//dart/runtime/bin:dart_no_observatory($host_toolchain)"
+  dart_binary_dir = get_label_info(dart_binary_label, "root_out_dir")
+  dart_binary = "$dart_binary_dir/dart_no_observatory"
+
+  flutter_tools_label = "//lib/flutter/packages/flutter_tools"
+  flutter_tools_gen_dir = get_label_info(flutter_tools_label, "target_gen_dir")
+  flutter_tools_name = get_label_info(flutter_tools_label, "name")
+  flutter_tools_packages = "$flutter_tools_gen_dir/$flutter_tools_name.packages"
+  flutter_tools_main = "$flutter_tools_label/bin/flutter_tools.dart"
+
+  dot_packages = "$target_gen_dir/$dart_package_name.packages"
   bundle_path = "$root_out_dir/$bundle_name"
   snapshot_path = "$target_gen_dir/${target_name}_snapshot.bin"
   depfile_path = "${snapshot_path}.d"
@@ -70,27 +81,37 @@ template("flutter_app") {
     script = "//flutter/build/package.py"
 
     args = [
-      "--snapshotter",
+      "--root",
+      rebase_path(dart_binary_dir),
+      "--dart",
+      rebase_path(dart_binary),
+      "--flutter-tools-packages",
+      rebase_path(flutter_tools_packages),
+      "--flutter-tools-main",
+      rebase_path(flutter_tools_main),
+      "--snapshotter-path",
       rebase_path(flutter_snapshot),
+      "--working-dir",
+      rebase_path("$target_gen_dir/build"),
+      "--app-dir",
+      rebase_path("."),
       "--main-dart",
       rebase_path(main_dart),
       "--packages",
-      rebase_path("$target_gen_dir/$dart_package_name.packages"),
-      "--bundle",
+      rebase_path(dot_packages),
+      "--output-file",
       rebase_path(bundle_path),
-      "--bundle-header",
-      "#!mojo mojo:flutter_content_handler",
       "--snapshot",
       rebase_path(snapshot_path),
       "--depfile",
       rebase_path(depfile_path),
-      "--build-output",
-      rebase_path(bundle_path, root_build_dir),
     ]
 
     deps = [
       ":$dart_package_name",
+      dart_binary_label,
       flutter_snapshot_label,
+      flutter_tools_label,
     ]
 
     if (defined(invoker.deps)) {
