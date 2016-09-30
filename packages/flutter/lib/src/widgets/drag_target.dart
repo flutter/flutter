@@ -316,6 +316,8 @@ class _DragTargetState<T> extends State<DragTarget<T>> {
 
   void didLeave(dynamic data) {
     assert(_candidateData.contains(data) || _rejectedData.contains(data));
+    if (!mounted)
+      return;
     setState(() {
       _candidateData.remove(data);
       _rejectedData.remove(data);
@@ -324,6 +326,8 @@ class _DragTargetState<T> extends State<DragTarget<T>> {
 
   void didDrop(dynamic data) {
     assert(_candidateData.contains(data));
+    if (!mounted)
+      return;
     setState(() {
       _candidateData.remove(data);
     });
