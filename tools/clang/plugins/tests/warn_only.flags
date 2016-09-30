@@ -1,1 +1,0 @@
--Werror -Xclang -plugin-arg-find-bad-constructs -Xclang warn-only

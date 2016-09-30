@@ -52,8 +52,6 @@ Thumbs.db
 /third_party/libc++/trunk/
 /third_party/libc++abi/trunk/
 /third_party/libjpeg_turbo/
-/third_party/llvm-build/
-/third_party/llvm/
 /third_party/mockito/src/
 /third_party/pdfium/
 /third_party/pywebsocket/src/

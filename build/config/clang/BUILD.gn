@@ -4,52 +4,6 @@
 
 import("clang.gni")
 
-config("find_bad_constructs") {
-  if (clang_use_chrome_plugins) {
-    cflags = []
-
-    # On Windows, the plugin is built directly into clang, so there's
-    # no need to load it dynamically.
-
-    if (is_mac || is_ios) {
-      cflags += [
-        "-Xclang",
-        "-load",
-        "-Xclang",
-        rebase_path(
-            "//third_party/llvm-build/Release+Asserts/lib/libFindBadConstructs.dylib",
-            root_build_dir),
-      ]
-    } else if (is_linux) {
-      cflags += [
-        "-Xclang",
-        "-load",
-        "-Xclang",
-        rebase_path(
-            "//third_party/llvm-build/Release+Asserts/lib/libFindBadConstructs.so",
-            root_build_dir),
-      ]
-    }
-
-    # https://crbug.com/441916
-    if (is_android || is_linux || is_mac) {
-      cflags += [
-        "-Xclang",
-        "-plugin-arg-find-bad-constructs",
-        "-Xclang",
-        "check-templates",
-      ]
-    }
-
-    cflags += [
-      "-Xclang",
-      "-add-plugin",
-      "-Xclang",
-      "find-bad-constructs",
-    ]
-  }
-}
-
 # Enables some extra Clang-specific warnings. Some third-party code won't
 # compile with these so may want to remove this config.
 config("extra_warnings") {

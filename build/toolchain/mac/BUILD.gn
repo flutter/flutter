@@ -208,12 +208,13 @@ template("mac_toolchain") {
   }
 }
 
+llvm_bin_path = "//buildtools/toolchain/clang+llvm-x86_64-darwin/bin"
+
 # Toolchain used for iOS device targets.
 mac_toolchain("ios_clang_arm") {
   toolchain_cpu = "arm"
   toolchain_os = "mac"
-  prefix = rebase_path("//third_party/llvm-build/Release+Asserts/bin",
-                       root_build_dir)
+  prefix = rebase_path(llvm_bin_path, root_build_dir)
   cc = "${goma_prefix}$prefix/clang"
   cxx = "${goma_prefix}$prefix/clang++"
   ld = cxx
@@ -225,8 +226,7 @@ mac_toolchain("ios_clang_arm") {
 mac_toolchain("ios_clang_x64") {
   toolchain_cpu = "x64"
   toolchain_os = "mac"
-  prefix = rebase_path("//third_party/llvm-build/Release+Asserts/bin",
-                       root_build_dir)
+  prefix = rebase_path(llvm_bin_path, root_build_dir)
   cc = "${goma_prefix}$prefix/clang"
   cxx = "${goma_prefix}$prefix/clang++"
   ld = cxx
@@ -238,8 +238,7 @@ mac_toolchain("ios_clang_x64") {
 mac_toolchain("clang_x64") {
   toolchain_cpu = "x64"
   toolchain_os = "mac"
-  prefix = rebase_path("//third_party/llvm-build/Release+Asserts/bin",
-                       root_build_dir)
+  prefix = rebase_path(llvm_bin_path, root_build_dir)
   cc = "${goma_prefix}$prefix/clang"
   cxx = "${goma_prefix}$prefix/clang++"
   ld = cxx
@@ -251,8 +250,7 @@ mac_toolchain("clang_x64") {
 mac_toolchain("clang_i386") {
   toolchain_cpu = "i386"
   toolchain_os = "mac"
-  prefix = rebase_path("//third_party/llvm-build/Release+Asserts/bin",
-                       root_build_dir)
+  prefix = rebase_path(llvm_bin_path, root_build_dir)
   cc = "${goma_prefix}$prefix/clang"
   cxx = "${goma_prefix}$prefix/clang++"
   ld = cxx

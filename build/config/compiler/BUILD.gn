@@ -24,12 +24,6 @@ declare_args() {
   # keep binary size down. Setting this flag to true disables such optimization
   android_full_debug = false
 
-  # Whether to use the binary binutils checked into third_party/binutils.
-  # These are not multi-arch so cannot be used except on x86 and x86-64 (the
-  # only two architectures that are currently checked in). Turn this off when
-  # you are using a custom toolchain and need to control -B in cflags.
-  linux_use_bundled_binutils = is_linux && current_cpu == "x64"
-
   # Compile in such a way as to enable profiling of the generated code. For
   # example, don't omit the frame pointer and leave in symbols.
   enable_profiling = false
@@ -40,18 +34,6 @@ declare_args() {
   # information to analyze.
   # Requires profiling to be set to true.
   enable_full_stack_frames_for_profiling = false
-
-  # Use gold for linking on 64-bit Linux only (on 32-bit it runs out of
-  # address space, and it doesn't support cross-compiling).
-  use_gold = is_linux && current_cpu == "x64"
-
-  # use_debug_fission: whether to use split DWARF debug info
-  # files. This can reduce link time significantly, but is incompatible
-  # with some utilities such as icecc and ccache. Requires gold and
-  # gcc >= 4.8 or clang.
-  # http://gcc.gnu.org/wiki/DebugFission
-  use_debug_fission = is_debug && !is_win && use_gold &&
-                      linux_use_bundled_binutils && !use_ccache
 
   if (is_win) {
     # Whether the VS xtree header has been patched to disable warning 4702. If
@@ -240,17 +222,6 @@ config("compiler") {
     ]
     cflags_cc += extra_flags
     cflags_objcc += extra_flags
-  }
-
-  if (is_clang && !is_nacl) {
-    # This is here so that all files get recompiled after a clang roll and
-    # when turning clang on or off. (defines are passed via the command line,
-    # and build system rebuild things when their commandline changes). Nothing
-    # should ever read this define.
-    defines +=
-        [ "CR_CLANG_REVISION=" + exec_script("//tools/clang/scripts/update.py",
-                                             [ "--print-revision" ],
-                                             "trim string") ]
   }
 
   # Mac-specific compiler flags setup.
@@ -447,39 +418,6 @@ config("compiler") {
     cflags += [ "-pthread" ]
     ldflags += [ "-pthread" ]
   }
-  if (use_gold) {
-    gold_path = rebase_path("//third_party/binutils/Linux_x64/Release/bin",
-                            root_build_dir)
-    ldflags += [
-      "-B$gold_path",
-
-      # Newer gccs and clangs support -fuse-ld, use the flag to force gold
-      # selection.
-      # gcc -- http://gcc.gnu.org/onlinedocs/gcc-4.8.0/gcc/Optimize-Options.html
-      "-fuse-ld=gold",
-
-      # Experimentation found that using four linking threads
-      # saved ~20% of link time.
-      # https://groups.google.com/a/chromium.org/group/chromium-dev/browse_thread/thread/281527606915bb36
-      # Only apply this to the target linker, since the host
-      # linker might not be gold, but isn't used much anyway.
-      # TODO(raymes): Disable threading because gold is frequently
-      # crashing on the bots: crbug.com/161942.
-      #"-Wl,--threads",
-      #"-Wl,--thread-count=4",
-    ]
-
-    if (!is_asan && !is_msan && !is_lsan && !is_tsan) {
-      # TODO(brettw) common.gypi has this only for target toolset.
-      ldflags += [ "-Wl,--icf=all" ]
-    }
-  }
-
-  if (linux_use_bundled_binutils) {
-    binutils_path = rebase_path("//third_party/binutils/Linux_x64/Release/bin",
-                                root_build_dir)
-    cflags += [ "-B$binutils_path" ]
-  }
 
   # Clang-specific compiler flags setup.
   # ------------------------------------
@@ -489,7 +427,7 @@ config("compiler") {
 
   # C++11 compiler flags setup.
   # ---------------------------
-  cc_std = [ "-std=c++11" ]
+  cc_std = [ "-std=c++14" ]
   cflags_cc += cc_std
   cflags_objcc += cc_std
 
@@ -584,6 +522,7 @@ config("compiler_arm_fpu") {
 
 config("runtime_library") {
   cflags = []
+  cflags_cc = []
   defines = []
   ldflags = []
   lib_dirs = []
@@ -678,6 +617,21 @@ config("runtime_library") {
     if (!is_clang) {
       libs += [ "atomic" ]
     }
+  }
+
+  # Linux standard liburary setup.
+  if (is_linux) {
+    cflags_cc += [
+      "-stdlib=libc++"
+    ]
+    ldflags += [
+      "-stdlib=libc++",
+      "-static-libstdc++",
+      # Remove one the toolchain distribution is fixed
+      # https://github.com/flutter/flutter/issues/6145
+      "-Wl,-Bstatic", "-lc++abi", "-Wl,-Bdynamic",
+      "-fuse-ld=lld",
+    ]
   }
 }
 
@@ -1177,9 +1131,6 @@ config("symbols") {
     ldflags = [ "/DEBUG" ]
   } else {
     cflags = [ "-g2" ]
-    if (use_debug_fission) {
-      cflags += [ "-gsplit-dwarf" ]
-    }
   }
 }
 
@@ -1189,9 +1140,6 @@ config("minimal_symbols") {
     ldflags = [ "/DEBUG" ]
   } else {
     cflags = [ "-g1" ]
-    if (use_debug_fission) {
-      cflags += [ "-gsplit-dwarf" ]
-    }
   }
 }
 

@@ -151,7 +151,10 @@ if (use_system_harfbuzz) {
 
     cflags = []
     if (is_clang) {
-      cflags += [ "-Wno-unused-value" ]
+      cflags += [
+        "-Wno-unused-value",
+        "-Wno-null-dereference",
+      ]
     }
     if (is_win) {
       cflags += [ "/wd4334" ]  # Result of 32-bit shift implicitly converted to 64 bits.

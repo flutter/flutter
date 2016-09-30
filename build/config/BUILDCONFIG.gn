@@ -441,7 +441,6 @@ if (is_fnl) {
 
 if (is_clang) {
   _native_compiler_configs += [
-    "//build/config/clang:find_bad_constructs",
     "//build/config/clang:extra_warnings",
   ]
 }

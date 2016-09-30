@@ -36,7 +36,7 @@ gcc_toolchain("clang_x86") {
     prefix = rebase_path("//third_party/llvm-allocated-type/Linux_ia32/bin",
                          root_build_dir)
   } else {
-    prefix = rebase_path("//third_party/llvm-build/Release+Asserts/bin",
+    prefix = rebase_path("//buildtools/toolchain/clang+llvm-x86_64-linux/bin",
                          root_build_dir)
   }
   cc = "${compiler_prefix}$prefix/clang"
@@ -70,7 +70,7 @@ gcc_toolchain("clang_x64") {
     prefix = rebase_path("//third_party/llvm-allocated-type/Linux_x64/bin",
                          root_build_dir)
   } else {
-    prefix = rebase_path("//third_party/llvm-build/Release+Asserts/bin",
+    prefix = rebase_path("//buildtools/toolchain/clang+llvm-x86_64-linux/bin",
                          root_build_dir)
   }
   cc = "${compiler_prefix}$prefix/clang"

@@ -47,7 +47,16 @@ template("android_gcc_toolchain") {
 
     is_clang = invoker.is_clang
     if (is_clang) {
-      prefix = rebase_path("//third_party/llvm-build/Release+Asserts/bin",
+      host_suffix = ""
+      if (host_os == "linux") {
+        host_suffix = "x86_64-linux"
+      } else if (host_os == "mac") {
+        host_suffix = "x86_64-darwin"
+      } else {
+        assert(false, "Unknown host")
+      }
+
+      prefix = rebase_path("//buildtools/toolchain/clang+llvm-$host_suffix/bin",
                            root_build_dir)
 
       cc = compiler_prefix + prefix + "/clang"
