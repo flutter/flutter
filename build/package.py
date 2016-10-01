@@ -19,7 +19,7 @@ def main():
   parser.add_argument('--flutter-tools-packages', type=str, required=True,
                       help='The package map for the Flutter tool')
   parser.add_argument('--flutter-tools-main', type=str, required=True,
-                      help='The main.drt file for the Flutter tool')
+                      help='The main.dart file for the Flutter tool')
   parser.add_argument('--snapshotter-path', type=str, required=True,
                       help='The Flutter snapshotter')
   parser.add_argument('--working-dir', type=str, required=True,
