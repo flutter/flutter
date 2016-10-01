@@ -53,7 +53,7 @@ template("flutter_app") {
   flutter_tools_gen_dir = get_label_info(flutter_tools_label, "target_gen_dir")
   flutter_tools_name = get_label_info(flutter_tools_label, "name")
   flutter_tools_packages = "$flutter_tools_gen_dir/$flutter_tools_name.packages"
-  flutter_tools_main = "$flutter_tools_label/bin/flutter_tools.dart"
+  flutter_tools_main = "$flutter_tools_label/bin/fuchsia_builder.dart"
 
   dot_packages = "$target_gen_dir/$dart_package_name.packages"
   bundle_path = "$root_out_dir/$bundle_name"

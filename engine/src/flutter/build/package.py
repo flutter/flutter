@@ -46,8 +46,6 @@ def main():
     args.dart,
     '--packages=%s' % args.flutter_tools_packages,
     args.flutter_tools_main,
-    'build',
-    'mojo',
     '--snapshotter-path=%s' % args.snapshotter_path,
     '--working-dir=%s' % args.working_dir,
     '--target=%s' % args.main_dart,
