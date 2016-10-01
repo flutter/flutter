@@ -17,31 +17,32 @@ void beginFrame(Duration timeStamp) {
   // system clock independently, the animations that we processed later would be
   // slightly ahead of the animations we processed earlier.
 
-  // PAINT
+  final double devicePixelRatio = ui.window.devicePixelRatio;
 
-  ui.Rect paintBounds = ui.Point.origin & ui.window.size;
-  ui.PictureRecorder recorder = new ui.PictureRecorder();
-  ui.Canvas canvas = new ui.Canvas(recorder, paintBounds);
+  // PAINT
+  final ui.Size logicalSize = ui.window.physicalSize / devicePixelRatio;
+  final ui.Rect paintBounds = ui.Point.origin & logicalSize;
+  final ui.PictureRecorder recorder = new ui.PictureRecorder();
+  final ui.Canvas canvas = new ui.Canvas(recorder, paintBounds);
   canvas.translate(paintBounds.width / 2.0, paintBounds.height / 2.0);
 
   // Here we determine the rotation according to the timeStamp given to us by
   // the engine.
-  double t = timeStamp.inMicroseconds / Duration.MICROSECONDS_PER_MILLISECOND / 1800.0;
+  final double t = timeStamp.inMicroseconds / Duration.MICROSECONDS_PER_MILLISECOND / 1800.0;
   canvas.rotate(math.PI * (t % 1.0));
 
   canvas.drawRect(new ui.Rect.fromLTRB(-100.0, -100.0, 100.0, 100.0),
                   new ui.Paint()..color = const ui.Color.fromARGB(255, 0, 255, 0));
-  ui.Picture picture = recorder.endRecording();
+  final ui.Picture picture = recorder.endRecording();
 
   // COMPOSITE
 
-  final double devicePixelRatio = ui.window.devicePixelRatio;
-  Float64List deviceTransform = new Float64List(16)
+  final Float64List deviceTransform = new Float64List(16)
     ..[0] = devicePixelRatio
     ..[5] = devicePixelRatio
     ..[10] = 1.0
     ..[15] = 1.0;
-  ui.SceneBuilder sceneBuilder = new ui.SceneBuilder()
+  final ui.SceneBuilder sceneBuilder = new ui.SceneBuilder()
     ..pushTransform(deviceTransform)
     ..addPicture(ui.Offset.zero, picture)
     ..pop();
