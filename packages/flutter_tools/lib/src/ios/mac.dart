@@ -28,6 +28,10 @@ class XCode {
 
     try {
       _xcodeSelectPath = runSync(<String>['xcode-select', '--print-path']);
+      if (_xcodeSelectPath == null || _xcodeSelectPath.trim().isEmpty) {
+        _isInstalled = false;
+        return;
+      }
       _isInstalled = true;
 
       _xcodeVersionText = runSync(<String>['xcodebuild', '-version']).replaceAll('\n', ', ');
