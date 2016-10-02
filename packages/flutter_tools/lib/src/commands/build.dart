@@ -15,7 +15,6 @@ import 'build_apk.dart';
 import 'build_aot.dart';
 import 'build_flx.dart';
 import 'build_ios.dart';
-import 'build_mojo.dart';
 
 class BuildCommand extends FlutterCommand {
   BuildCommand({bool verboseHelp: false}) {
@@ -24,7 +23,6 @@ class BuildCommand extends FlutterCommand {
     addSubcommand(new BuildCleanCommand());
     addSubcommand(new BuildIOSCommand());
     addSubcommand(new BuildFlxCommand(verboseHelp: verboseHelp));
-    addSubcommand(new BuildMojoCommand());
   }
 
   @override
