@@ -6,12 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gallery/gallery/app.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-Finder byTooltip(WidgetTester tester, String message) {
-  return find.byWidgetPredicate((Widget widget) {
-    return widget is Tooltip && widget.message == message;
-  });
-}
-
 void main() {
   TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
   if (binding is LiveTestWidgetsFlutterBinding)
@@ -44,7 +38,7 @@ void main() {
     await tester.pump(); // start animation
     await tester.pump(const Duration(seconds: 1)); // end animation
 
-    await tester.tap(byTooltip(tester, 'Show example code'));
+    await tester.tap(find.byTooltip('Show example code'));
     await tester.pump(); // start animation
     await tester.pump(const Duration(seconds: 1)); // end animation
 
