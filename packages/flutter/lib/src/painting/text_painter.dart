@@ -33,8 +33,9 @@ class TextPainter {
   TextPainter({
     TextSpan text,
     TextAlign textAlign,
-    double textScaleFactor: 1.0
-  }) : _text = text, _textAlign = textAlign, _textScaleFactor = textScaleFactor {
+    double textScaleFactor: 1.0,
+    String ellipsis,
+  }) : _text = text, _textAlign = textAlign, _textScaleFactor = textScaleFactor, _ellipsis = ellipsis {
     assert(text == null || text.debugAssertIsValid());
     assert(textScaleFactor != null);
   }
@@ -79,6 +80,21 @@ class TextPainter {
     _paragraph = null;
     _needsLayout = true;
   }
+
+  /// The string used to ellipsize overflowing text.  Setting this to a nonempty
+  /// string will cause this string to be substituted for the remaining text
+  /// if the text can not fit within the specificed maximum width.
+  String get ellipsis => _ellipsis;
+  String _ellipsis;
+  set ellipsis(String value) {
+    assert(value == null || value.isNotEmpty);
+    if (_ellipsis == value)
+      return;
+    _ellipsis = value;
+    _paragraph = null;
+    _needsLayout = true;
+  }
+
 
   // Unfortunately, using full precision floating point here causes bad layouts
   // because floating point math isn't associative. If we add and subtract
@@ -162,7 +178,11 @@ class TextPainter {
     if (_paragraph == null) {
       ui.ParagraphBuilder builder = new ui.ParagraphBuilder();
       _text.build(builder, textScaleFactor: textScaleFactor);
-      ui.ParagraphStyle paragraphStyle = _text.style?.getParagraphStyle(textAlign: textAlign, textScaleFactor: textScaleFactor);
+      ui.ParagraphStyle paragraphStyle = _text.style?.getParagraphStyle(
+        textAlign: textAlign,
+        textScaleFactor: textScaleFactor,
+        ellipsis: _ellipsis,
+      );
       paragraphStyle ??= new ui.ParagraphStyle();
       _paragraph = builder.build(paragraphStyle);
     }

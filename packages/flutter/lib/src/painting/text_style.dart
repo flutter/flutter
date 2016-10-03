@@ -229,14 +229,19 @@ class TextStyle {
   }
 
   /// The style information for paragraphs, encoded for use by `dart:ui`.
-  ui.ParagraphStyle getParagraphStyle({ TextAlign textAlign, double textScaleFactor: 1.0 }) {
+  ui.ParagraphStyle getParagraphStyle({
+      TextAlign textAlign,
+      double textScaleFactor: 1.0,
+      String ellipsis,
+   }) {
     return new ui.ParagraphStyle(
       textAlign: textAlign,
       fontWeight: fontWeight,
       fontStyle: fontStyle,
       fontFamily: fontFamily,
       fontSize: fontSize == null ? null : fontSize * textScaleFactor,
-      lineHeight: height
+      lineHeight: height,
+      ellipsis: ellipsis,
     );
   }
 
