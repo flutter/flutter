@@ -265,6 +265,10 @@ void main() {
       await expectBackIcon(tester, TargetPlatform.android, Icons.arrow_back);
     });
 
+    testWidgets('Back arrow uses correct default on Fuchsia', (WidgetTester tester) async {
+      await expectBackIcon(tester, TargetPlatform.fuchsia, Icons.arrow_back);
+    });
+
     testWidgets('Back arrow uses correct default on iOS', (WidgetTester tester) async {
       await expectBackIcon(tester, TargetPlatform.iOS, Icons.arrow_back_ios);
     });
