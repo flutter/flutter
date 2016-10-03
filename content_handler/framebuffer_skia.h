@@ -19,10 +19,6 @@ class FramebufferSkia {
   void Bind(mojo::InterfaceHandle<mojo::Framebuffer> framebuffer,
             mojo::FramebufferInfoPtr info);
 
-  // Converts pixels from internal format of BGRA to ARGB.
-  // Needed because Skia does not support drawing to ARGB directly.
-  void ConvertToCorrectPixelFormatIfNeeded();
-
   void Finish();
   const sk_sp<SkSurface>& surface() { return surface_; }
 

@@ -65,15 +65,16 @@ void FramebufferSkia::Bind(mojo::InterfaceHandle<mojo::Framebuffer> framebuffer,
       sk_alpha_type = kOpaque_SkAlphaType;
       break;
     case mojo::FramebufferFormat::ARGB_8888:
-    case mojo::FramebufferFormat::RGB_x888:
-      sk_color_type = kRGBA_8888_SkColorType;
+      sk_color_type = kBGRA_8888_SkColorType;
       sk_alpha_type = kPremul_SkAlphaType;
       break;
-    default:
-      FTL_LOG(WARNING) << "Unknown color type " << info_->format;
-      sk_color_type = kRGB_565_SkColorType;
+    case mojo::FramebufferFormat::RGB_x888:
+      sk_color_type = kBGRA_8888_SkColorType;
       sk_alpha_type = kOpaque_SkAlphaType;
       break;
+    default:
+      FTL_LOG(ERROR) << "Unknown color type " << info_->format;
+      return;
   }
 
   SkImageInfo image_info = SkImageInfo::Make(
@@ -87,22 +88,6 @@ void FramebufferSkia::Bind(mojo::InterfaceHandle<mojo::Framebuffer> framebuffer,
   surface_ = SkSurface::MakeRasterDirectReleaseProc(
       image_info, reinterpret_cast<void*>(buffer), row_bytes, DidReleaseSurface,
       backing_store_info);
-}
-
-void FramebufferSkia::ConvertToCorrectPixelFormatIfNeeded() {
-  if (info_->format == mojo::FramebufferFormat::ARGB_8888 ||
-      info_->format == mojo::FramebufferFormat::RGB_x888) {
-    // we need to convert from RGBA to ARGB
-    SkPixmap bufferPixmap;
-
-    if (surface_->peekPixels(&bufferPixmap)) {
-      uint8_t* buffer =
-          reinterpret_cast<uint8_t*>(bufferPixmap.writable_addr());
-      size_t buffer_size = bufferPixmap.getSafeSize();
-      for (size_t i = 0; i < buffer_size; i += 4)
-        std::swap(buffer[i + 0], buffer[i + 2]);
-    }
-  }
 }
 
 void FramebufferSkia::Finish() {
