@@ -76,7 +76,6 @@ class _GridPhotoViewerState extends State<GridPhotoViewer> with SingleTickerProv
       _focalPoint = _flingAnimation.value;
       _lastFocalPoint = _focalPoint;
     });
-
   }
 
   void _handleOnScaleStart(Point focalPoint) {
