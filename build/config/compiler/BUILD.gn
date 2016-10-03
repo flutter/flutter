@@ -427,7 +427,18 @@ config("compiler") {
 
   # C++11 compiler flags setup.
   # ---------------------------
-  cc_std = [ "-std=c++14" ]
+  # TODO(chinmaygarde): We are only using C++14 on x64 hosts (with a static
+  # libcxx and libcxxabi from buildtools) because the static libraries
+  # in buildtools are not compatible with x86. This will be rectified soon
+  # with libcxx and libcxxabi providing their own GN files. The "current_cpu"
+  # check can then be removed. So far, the only target that need x86 don't
+  # also require C++14.
+  # Tracked in https://fuchsia.atlassian.net/browse/TO-61
+  if (current_cpu == "x86") {
+    cc_std = [ "-std=c++11" ]
+  } else {
+    cc_std = [ "-std=c++14" ]
+  }
   cflags_cc += cc_std
   cflags_objcc += cc_std
 
@@ -620,7 +631,14 @@ config("runtime_library") {
   }
 
   # Linux standard liburary setup.
-  if (is_linux) {
+  # TODO(chinmaygarde): We are only using C++14 on x64 hosts (with a static
+  # libcxx and libcxxabi from buildtools) because the static libraries
+  # in buildtools are not compatible with x86. This will be rectified soon
+  # with libcxx and libcxxabi providing their own GN files. The "current_cpu"
+  # check can then be removed. So far, the only target that need x86 don't
+  # also require C++14.
+  # Tracked in https://fuchsia.atlassian.net/browse/TO-61
+  if (is_linux && current_cpu != "x86") {
     cflags_cc += [
       "-stdlib=libc++"
     ]
