@@ -24,17 +24,6 @@ Finder findGalleryItemByRouteName(WidgetTester tester, String routeName) {
   });
 }
 
-Finder byTooltip(WidgetTester tester, String message) {
-  return find.byWidgetPredicate((Widget widget) {
-    return widget is Tooltip && widget.message == message;
-  });
-}
-
-Finder findNavigationMenuButton(WidgetTester tester) =>
-    byTooltip(tester, 'Open navigation menu');
-
-Finder findBackButton(WidgetTester tester) => byTooltip(tester, 'Back');
-
 // Start a gallery demo and then go back. This function assumes that the
 // we're starting on the home route and that the submenu that contains
 // the item for a demo that pushes route 'routeName' is already open.
@@ -50,7 +39,7 @@ Future<Null> smokeDemo(WidgetTester tester, String routeName) async {
   expect(find.text(kCaption), findsNothing);
 
   // Go back
-  Finder backButton = findBackButton(tester);
+  Finder backButton = find.byTooltip('Back');
   expect(backButton, findsOneWidget);
   await tester.tap(backButton);
   await tester.pump(); // Start the pop "back" operation.
@@ -86,7 +75,7 @@ void main() {
       tester.binding.debugAssertNoTransientCallbacks('A transient callback was still active after leaving route $routeName');
     }
 
-    Finder navigationMenuButton = findNavigationMenuButton(tester);
+    Finder navigationMenuButton = find.byTooltip('Open navigation menu');
     expect(navigationMenuButton, findsOneWidget);
     await tester.tap(navigationMenuButton);
     await tester.pump(); // Start opening drawer.

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 
 import 'all_elements.dart';
 
@@ -122,6 +122,21 @@ class CommonFinders {
   /// nodes that are [Offstage] or that are from inactive [Route]s.
   Finder byWidgetPredicate(WidgetPredicate predicate, { bool skipOffstage: true }) {
     return new _WidgetPredicateFinder(predicate, skipOffstage: skipOffstage);
+  }
+
+  /// Finds Tooltip widgets with the given message.
+  ///
+  /// Example:
+  ///
+  ///     expect(tester, hasWidget(find.byTooltip('Back')));
+  ///
+  /// If the `skipOffstage` argument is true (the default), then this skips
+  /// nodes that are [Offstage] or that are from inactive [Route]s.
+  Finder byTooltip(String message, { bool skipOffstage: true }) {
+    return byWidgetPredicate(
+      (Widget widget) => widget is Tooltip && widget.message == message,
+      skipOffstage: skipOffstage,
+    );
   }
 
   /// Finds widgets using an element predicate.

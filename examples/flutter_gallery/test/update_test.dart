@@ -11,14 +11,6 @@ Future<String> mockUpdateUrlFetcher() {
   return new Future<String>.value('http://www.example.com/');
 }
 
-Finder byTooltip(WidgetTester tester, String message) {
-  return find.byWidgetPredicate((Widget widget) {
-    return widget is Tooltip && widget.message == message;
-  });
-}
-
-Finder findBackButton(WidgetTester tester) => byTooltip(tester, 'Back');
-
 void main() {
   TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
   if (binding is LiveTestWidgetsFlutterBinding) binding.allowAllFrames = true;
@@ -38,7 +30,7 @@ void main() {
     await tester.pump(); // Launch shrine
     await tester.pump(const Duration(seconds: 1)); // transition is complete
 
-    Finder backButton = findBackButton(tester);
+    Finder backButton = find.byTooltip('Back');
     expect(backButton, findsOneWidget);
     await tester.tap(backButton);
     await tester.pump(); // Start the pop "back" operation.

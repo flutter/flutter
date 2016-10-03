@@ -6,16 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_gallery/gallery/app.dart';
 
-Finder byTooltip(WidgetTester tester, String message) {
-  return find.byWidgetPredicate((Widget widget) {
-    return widget is Tooltip && widget.message == message;
-  });
-}
-
-Finder findNavigationMenuButton(WidgetTester tester) {
-  return byTooltip(tester, 'Open navigation menu');
-}
-
 void main() {
   TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
   if (binding is LiveTestWidgetsFlutterBinding)
