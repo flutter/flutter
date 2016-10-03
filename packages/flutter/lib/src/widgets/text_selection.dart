@@ -39,15 +39,6 @@ enum TextSelectionHandleType {
   collapsed,
 }
 
-/// Builds a selection handle of the given type.
-typedef Widget TextSelectionHandleBuilder(BuildContext context, TextSelectionHandleType type);
-
-/// Builds a toolbar near a text selection.
-///
-/// Typically displays buttons for copying and pasting text.
-// TODO(mpcomplete): A single position is probably insufficient.
-typedef Widget TextSelectionToolbarBuilder(BuildContext context, Point position, TextSelectionDelegate delegate);
-
 /// The text position that a give selection handle manipulates. Dragging the
 /// [start] handle always moves the [start]/[baseOffset] of the selection.
 enum _TextSelectionHandlePosition { start, end }
@@ -65,6 +56,22 @@ abstract class TextSelectionDelegate {
   void hideToolbar();
 }
 
+// An interface for building the selection UI, to be provided by the
+// implementor of the toolbar widget.
+abstract class TextSelectionUi {
+  /// Builds a selection handle of the given type.
+  Widget buildHandle(BuildContext context, TextSelectionHandleType type);
+
+  /// Builds a toolbar near a text selection.
+  ///
+  /// Typically displays buttons for copying and pasting text.
+  // TODO(mpcomplete): A single position is probably insufficient.
+  Widget buildToolbar(BuildContext context, Point position, TextSelectionDelegate delegate);
+
+  /// Returns the size of the selection handle.
+  Size get handleSize;
+}
+
 /// An object that manages a pair of text selection handles.
 ///
 /// The selection handles are displayed in the [Overlay] that most closely
@@ -79,8 +86,7 @@ class TextSelectionOverlay implements TextSelectionDelegate {
     this.debugRequiredFor,
     this.renderObject,
     this.onSelectionOverlayChanged,
-    this.handleBuilder,
-    this.toolbarBuilder
+    this.selectionUi,
   }): _input = input {
     assert(context != null);
     final OverlayState overlay = Overlay.of(context);
@@ -109,16 +115,8 @@ class TextSelectionOverlay implements TextSelectionDelegate {
   /// will be called with a new input value with an updated selection.
   final ValueChanged<InputValue> onSelectionOverlayChanged;
 
-  /// Builds the selection handles.
-  ///
-  /// The selection handles let the user adjust which portion of the text is
-  /// selected.
-  final TextSelectionHandleBuilder handleBuilder;
-
-  /// Builds a toolbar to display near the selection.
-  ///
-  /// The toolbar typically contains buttons for copying and pasting text.
-  final TextSelectionToolbarBuilder toolbarBuilder;
+  /// Builds text selection handles and toolbar.
+  final TextSelectionUi selectionUi;
 
   /// Controls the fade-in animations.
   static const Duration _kFadeDuration = const Duration(milliseconds: 150);
@@ -208,7 +206,7 @@ class TextSelectionOverlay implements TextSelectionDelegate {
 
   Widget _buildHandle(BuildContext context, _TextSelectionHandlePosition position) {
     if ((_selection.isCollapsed && position == _TextSelectionHandlePosition.end) ||
-        handleBuilder == null)
+        selectionUi == null)
       return new Container();  // hide the second handle when collapsed
 
     return new FadeTransition(
@@ -218,14 +216,14 @@ class TextSelectionOverlay implements TextSelectionDelegate {
         onSelectionHandleTapped: _handleSelectionHandleTapped,
         renderObject: renderObject,
         selection: _selection,
-        builder: handleBuilder,
+        selectionUi: selectionUi,
         position: position
       )
     );
   }
 
   Widget _buildToolbar(BuildContext context) {
-    if (toolbarBuilder == null)
+    if (selectionUi == null)
       return new Container();
 
     // Find the horizontal midpoint, just above the selected text.
@@ -239,7 +237,7 @@ class TextSelectionOverlay implements TextSelectionDelegate {
 
     return new FadeTransition(
       opacity: _toolbarOpacity,
-      child: toolbarBuilder(context, midpoint, this)
+      child: selectionUi.buildToolbar(context, midpoint, this)
     );
   }
 
@@ -283,7 +281,7 @@ class _TextSelectionHandleOverlay extends StatefulWidget {
     this.renderObject,
     this.onSelectionHandleChanged,
     this.onSelectionHandleTapped,
-    this.builder
+    this.selectionUi
   }) : super(key: key);
 
   final TextSelection selection;
@@ -291,7 +289,7 @@ class _TextSelectionHandleOverlay extends StatefulWidget {
   final RenderEditableLine renderObject;
   final ValueChanged<TextSelection> onSelectionHandleChanged;
   final VoidCallback onSelectionHandleTapped;
-  final TextSelectionHandleBuilder builder;
+  final TextSelectionUi selectionUi;
 
   @override
   _TextSelectionHandleOverlayState createState() => new _TextSelectionHandleOverlayState();
@@ -301,7 +299,7 @@ class _TextSelectionHandleOverlayState extends State<_TextSelectionHandleOverlay
   Point _dragPosition;
 
   void _handleDragStart(DragStartDetails details) {
-    _dragPosition = details.globalPosition;
+    _dragPosition = details.globalPosition + new Offset(0.0, -config.selectionUi.handleSize.height);
   }
 
   void _handleDragUpdate(DragUpdateDetails details) {
@@ -360,15 +358,15 @@ class _TextSelectionHandleOverlayState extends State<_TextSelectionHandleOverlay
     }
 
     return new GestureDetector(
-      onHorizontalDragStart: _handleDragStart,
-      onHorizontalDragUpdate: _handleDragUpdate,
+      onPanStart: _handleDragStart,
+      onPanUpdate: _handleDragUpdate,
       onTap: _handleTap,
       child: new Stack(
         children: <Widget>[
           new Positioned(
             left: point.x,
             top: point.y,
-            child: config.builder(context, type)
+            child: config.selectionUi.buildHandle(context, type)
           )
         ]
       )

@@ -94,6 +94,12 @@ class TextFieldDemoState extends State<TextFieldDemo> {
                 validator: _validatePhoneNumber
               )
             ),
+            new Input(
+              hintText: 'Tell us about yourself (optional)',
+              labelText: 'Life story',
+              multiline: true,
+              formField: new FormField<String>()
+            ),
             new Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[

@@ -436,4 +436,132 @@ void main() {
 
     // End the test here to ensure the animation is properly disposed of.
   });
+
+  testWidgets('Multiline text will wrap', (WidgetTester tester) async {
+    GlobalKey inputKey = new GlobalKey();
+    InputValue inputValue = InputValue.empty;
+
+    Widget builder() {
+      return new Center(
+        child: new Material(
+          child: new Input(
+            value: inputValue,
+            key: inputKey,
+            style: const TextStyle(color: Colors.black, fontSize: 34.0),
+            multiline: true,
+            hintText: 'Placeholder',
+            onChanged: (InputValue value) { inputValue = value; }
+          )
+        )
+      );
+    }
+
+    await tester.pumpWidget(builder());
+
+    RenderBox findInputBox() => tester.renderObject(find.byKey(inputKey));
+
+    RenderBox inputBox = findInputBox();
+    Size emptyInputSize = inputBox.size;
+
+    enterText('This is a long line of text that will wrap to multiple lines.');
+    await tester.pumpWidget(builder());
+    expect(findInputBox(), equals(inputBox));
+    expect(inputBox.size, greaterThan(emptyInputSize));
+
+    enterText('No wrapping here.');
+    await tester.pumpWidget(builder());
+    expect(findInputBox(), equals(inputBox));
+    expect(inputBox.size, equals(emptyInputSize));
+  });
+
+  testWidgets('Can drag handles to change selection in multiline', (WidgetTester tester) async {
+    GlobalKey inputKey = new GlobalKey();
+    InputValue inputValue = InputValue.empty;
+
+    Widget builder() {
+      return new Overlay(
+        initialEntries: <OverlayEntry>[
+          new OverlayEntry(
+            builder: (BuildContext context) {
+              return new Center(
+                child: new Material(
+                  child: new Input(
+                    value: inputValue,
+                    key: inputKey,
+                    style: const TextStyle(color: Colors.black, fontSize: 34.0),
+                    multiline: true,
+                    onChanged: (InputValue value) { inputValue = value; }
+                  )
+                )
+              );
+            }
+          )
+        ]
+      );
+    }
+
+    await tester.pumpWidget(builder());
+
+    String testValue = 'First line of text is here abcdef ghijkl mnopqrst. Second line of text goes until abcdef ghijkl mnopq. Third line of stuff.';
+    String cutValue = 'First line of stuff.';
+    enterText(testValue);
+
+    await tester.pumpWidget(builder());
+
+    // Check that the text spans multiple lines.
+    Point firstPos = textOffsetToPosition(tester, testValue.indexOf('First'));
+    Point secondPos = textOffsetToPosition(tester, testValue.indexOf('Second'));
+    Point thirdPos = textOffsetToPosition(tester, testValue.indexOf('Third'));
+    expect(firstPos.x, secondPos.x);
+    expect(firstPos.x, thirdPos.x);
+    expect(firstPos.y, lessThan(secondPos.y));
+    expect(secondPos.y, lessThan(thirdPos.y));
+
+    // Long press the 'n' in 'until' to select the word.
+    Point untilPos = textOffsetToPosition(tester, testValue.indexOf('until')+1);
+    TestGesture gesture = await tester.startGesture(untilPos, pointer: 7);
+    await tester.pump(const Duration(seconds: 2));
+    await gesture.up();
+    await tester.pump();
+
+    expect(inputValue.selection.baseOffset, 76);
+    expect(inputValue.selection.extentOffset, 81);
+
+    RenderEditableLine renderLine = findRenderEditableLine(tester);
+    List<TextSelectionPoint> endpoints = renderLine.getEndpointsForSelection(
+        inputValue.selection);
+    expect(endpoints.length, 2);
+
+    // Drag the right handle to the third line, just after 'Third'.
+    Point handlePos = endpoints[1].point + new Offset(1.0, 1.0);
+    Point newHandlePos = textOffsetToPosition(tester, testValue.indexOf('Third') + 5);
+    gesture = await tester.startGesture(handlePos, pointer: 7);
+    await tester.pump();
+    await gesture.moveTo(newHandlePos);
+    await tester.pump();
+    await gesture.up();
+    await tester.pump();
+
+    expect(inputValue.selection.baseOffset, 76);
+    expect(inputValue.selection.extentOffset, 108);
+
+    // Drag the left handle to the first line, just after 'First'.
+    handlePos = endpoints[0].point + new Offset(-1.0, 1.0);
+    newHandlePos = textOffsetToPosition(tester, testValue.indexOf('First') + 5);
+    gesture = await tester.startGesture(handlePos, pointer: 7);
+    await tester.pump();
+    await gesture.moveTo(newHandlePos);
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpWidget(builder());
+
+    expect(inputValue.selection.baseOffset, 5);
+    expect(inputValue.selection.extentOffset, 108);
+
+    await tester.tap(find.text('CUT'));
+    await tester.pumpWidget(builder());
+    expect(inputValue.selection.isCollapsed, true);
+    expect(inputValue.text, cutValue);
+  });
+
 }

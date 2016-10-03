@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:ui' as ui show Paragraph, ParagraphBuilder, ParagraphConstraints, ParagraphStyle, TextBox;
+import 'dart:math' as math;
 
 import 'package:flutter/gestures.dart';
 
@@ -43,15 +44,17 @@ class RenderEditableLine extends RenderBox {
     TextSpan text,
     Color cursorColor,
     bool showCursor: false,
+    bool multiline: false,
     Color selectionColor,
     double textScaleFactor: 1.0,
     TextSelection selection,
     this.onSelectionChanged,
     Offset paintOffset: Offset.zero,
-    this.onPaintOffsetUpdateNeeded
+    this.onPaintOffsetUpdateNeeded,
   }) : _textPainter = new TextPainter(text: text, textScaleFactor: textScaleFactor),
        _cursorColor = cursorColor,
        _showCursor = showCursor,
+       _multiline = multiline,
        _selection = selection,
        _paintOffset = paintOffset {
     assert(!showCursor || cursorColor != null);
@@ -163,14 +166,14 @@ class RenderEditableLine extends RenderBox {
     // TODO(mpcomplete): We should be more disciplined about when we dirty the
     // layout state of the text painter so that we can know that the layout is
     // clean at this point.
-    _textPainter.layout();
+    _textPainter.layout(maxWidth: _maxContentWidth);
 
     Offset offset = _paintOffset;
 
     if (selection.isCollapsed) {
       // TODO(mpcomplete): This doesn't work well at an RTL/LTR boundary.
       Offset caretOffset = _textPainter.getOffsetForCaret(selection.extent, _caretPrototype);
-      Point start = new Point(caretOffset.dx, size.height) + offset;
+      Point start = new Point(0.0, constraints.constrainHeight(_preferredHeight)) + caretOffset + offset;
       return <TextSelectionPoint>[new TextSelectionPoint(localToGlobal(start), null)];
     } else {
       List<ui.TextBox> boxes = _textPainter.getBoxesForSelection(selection);
@@ -200,9 +203,16 @@ class RenderEditableLine extends RenderBox {
       // TODO(abarth): ParagraphBuilder#build's argument should be optional.
       // TODO(abarth): These min/max values should be the default for ui.Paragraph.
       _layoutTemplate = builder.build(new ui.ParagraphStyle())
-        ..layout(new ui.ParagraphConstraints(width: double.INFINITY));
+        ..layout(new ui.ParagraphConstraints(width: _maxContentWidth));
     }
     return _layoutTemplate.height;
+  }
+
+  bool _multiline;
+  double get _maxContentWidth {
+    return _multiline ?
+      constraints.maxWidth - (_kCaretGap + _kCaretWidth) :
+      double.INFINITY;
   }
 
   @override
@@ -274,10 +284,11 @@ class RenderEditableLine extends RenderBox {
   @override
   void performLayout() {
     Size oldSize = hasSize ? size : null;
-    size = new Size(constraints.maxWidth, constraints.constrainHeight(_preferredHeight));
-    _caretPrototype = new Rect.fromLTWH(0.0, _kCaretHeightOffset, _kCaretWidth, size.height - 2.0 * _kCaretHeightOffset);
+    double lineHeight = constraints.constrainHeight(_preferredHeight);
+    _caretPrototype = new Rect.fromLTWH(0.0, _kCaretHeightOffset, _kCaretWidth, lineHeight - 2.0 * _kCaretHeightOffset);
     _selectionRects = null;
-    _textPainter.layout();
+    _textPainter.layout(maxWidth: _maxContentWidth);
+    size = new Size(constraints.maxWidth, constraints.constrainHeight(math.max(lineHeight, _textPainter.height)));
     Size contentSize = new Size(_textPainter.width + _kCaretGap + _kCaretWidth, _textPainter.height);
     if (onPaintOffsetUpdateNeeded != null && (size != oldSize || contentSize != _contentSize))
       onPaintOffsetUpdateNeeded(new ViewportDimensions(containerSize: size, contentSize: contentSize));
