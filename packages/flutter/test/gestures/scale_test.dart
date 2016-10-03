@@ -28,7 +28,7 @@ void main() {
     };
 
     bool didEndScale = false;
-    scale.onEnd = () {
+    scale.onEnd = (Velocity flingVelocity) {
       didEndScale = true;
     };
 

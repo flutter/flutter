@@ -6,6 +6,7 @@ import 'arena.dart';
 import 'recognizer.dart';
 import 'constants.dart';
 import 'events.dart';
+import 'velocity_tracker.dart';
 
 /// The possible states of a [ScaleGestureRecognizer].
 enum ScaleState {
@@ -35,7 +36,13 @@ typedef void GestureScaleStartCallback(Point focalPoint);
 typedef void GestureScaleUpdateCallback(double scale, Point focalPoint);
 
 /// Signature for when the pointers are no longer in contact with the screen.
-typedef void GestureScaleEndCallback();
+typedef void GestureScaleEndCallback(Velocity flingVelocity);
+
+bool _isFlingGesture(Velocity velocity) {
+  assert(velocity != null);
+  final double speedSquared = velocity.pixelsPerSecond.distanceSquared;
+  return speedSquared > kMinFlingVelocity * kMinFlingVelocity;
+}
 
 /// Recognizes a scale gesture.
 ///
@@ -61,12 +68,14 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   double _initialSpan;
   double _currentSpan;
   Map<int, Point> _pointerLocations;
+  Map<int, VelocityTracker> _velocityTrackers = new Map<int, VelocityTracker>();
 
   double get _scaleFactor => _initialSpan > 0.0 ? _currentSpan / _initialSpan : 1.0;
 
   @override
   void addPointer(PointerEvent event) {
     startTrackingPointer(event.pointer);
+    _velocityTrackers[event.pointer] = new VelocityTracker();
     if (_state == ScaleState.ready) {
       _state = ScaleState.possible;
       _initialSpan = 0.0;
@@ -80,6 +89,9 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
     assert(_state != ScaleState.ready);
     bool configChanged = false;
     if (event is PointerMoveEvent) {
+      VelocityTracker tracker = _velocityTrackers[event.pointer];
+      assert(tracker != null);
+      tracker.addPosition(event.timeStamp, event.position);
       _pointerLocations[event.pointer] = event.position;
     } else if (event is PointerDownEvent) {
       configChanged = true;
@@ -89,12 +101,12 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
       _pointerLocations.remove(event.pointer);
     }
 
-    _update(configChanged);
+    _update(configChanged, event.pointer);
 
     stopTrackingIfPointerNoLongerDown(event);
   }
 
-  void _update(bool configChanged) {
+  void _update(bool configChanged, int pointer) {
     int count = _pointerLocations.keys.length;
 
     // Compute the focal point
@@ -112,8 +124,20 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
     if (configChanged) {
       _initialSpan = _currentSpan;
       if (_state == ScaleState.started) {
-        if (onEnd != null)
-          onEnd();
+        if (onEnd != null) {
+          VelocityTracker tracker = _velocityTrackers[pointer];
+          assert(tracker != null);
+
+          Velocity velocity = tracker.getVelocity();
+          if (velocity != null && _isFlingGesture(velocity)) {
+            final Offset pixelsPerSecond = velocity.pixelsPerSecond;
+            if (pixelsPerSecond.distanceSquared > kMaxFlingVelocity * kMaxFlingVelocity)
+              velocity = new Velocity(pixelsPerSecond: (pixelsPerSecond / pixelsPerSecond.distance) * kMaxFlingVelocity);
+            onEnd(velocity);
+          } else {
+            onEnd(Velocity.zero);
+          }
+        }
         _state = ScaleState.accepted;
       }
     }
@@ -140,7 +164,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   void acceptGesture(int pointer) {
     if (_state != ScaleState.accepted) {
       _state = ScaleState.accepted;
-      _update(false);
+      _update(false, pointer);
     }
   }
 
@@ -160,6 +184,12 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
         break;
     }
     _state = ScaleState.ready;
+  }
+
+  @override
+  void dispose() {
+    _velocityTrackers.clear();
+    super.dispose();
   }
 
   @override
