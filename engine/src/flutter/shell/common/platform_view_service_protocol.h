@@ -9,6 +9,8 @@
 
 #include "dart/runtime/include/dart_tools_api.h"
 #include "flutter/shell/common/platform_view.h"
+#include "lib/ftl/synchronization/waitable_event.h"
+#include "third_party/skia/include/core/SkBitmap.h"
 
 namespace shell {
 
@@ -32,6 +34,15 @@ class PlatformViewServiceProtocol {
                         intptr_t num_params,
                         void* user_data,
                         const char** json_object);
+
+  static const char* kScreenshotExtensionName;
+  static bool Screenshot(const char* method,
+                         const char** param_keys,
+                         const char** param_values,
+                         intptr_t num_params,
+                         void* user_data,
+                         const char** json_object);
+  static void ScreenshotGpuTask(SkBitmap* bitmap);
 };
 
 }  // namespace shell

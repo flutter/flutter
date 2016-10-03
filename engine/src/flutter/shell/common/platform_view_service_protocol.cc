@@ -7,8 +7,15 @@
 #include <string.h>
 
 #include <string>
+#include <vector>
 
+#include "base/base64.h"
+#include "flutter/common/threads.h"
+#include "flutter/shell/common/rasterizer.h"
 #include "flutter/shell/common/shell.h"
+#include "lib/ftl/memory/weak_ptr.h"
+#include "third_party/skia/include/core/SkImageEncoder.h"
+#include "third_party/skia/include/core/SkSurface.h"
 
 namespace shell {
 namespace {
@@ -74,6 +81,15 @@ static bool ErrorUnknownView(const char** json_object, const char* view_id) {
   return false;
 }
 
+static bool ErrorServer(const char** json_object, const char* message) {
+  const intptr_t kServerError = -32000;
+  std::stringstream response;
+  response << "{\"code\":" << std::to_string(kServerError) << ",";
+  response << "\"message\":\"" << message << "\"}";
+  *json_object = strdup(response.str().c_str());
+  return false;
+}
+
 static void AppendIsolateRef(std::stringstream* stream,
                              int64_t main_port,
                              const std::string name) {
@@ -102,6 +118,9 @@ static void AppendFlutterView(std::stringstream* stream,
 void PlatformViewServiceProtocol::RegisterHook(bool running_precompiled_code) {
   // Listing of FlutterViews.
   Dart_RegisterRootServiceRequestCallback(kListViewsExtensionName, &ListViews,
+                                          nullptr);
+  // Screenshot.
+  Dart_RegisterRootServiceRequestCallback(kScreenshotExtensionName, &Screenshot,
                                           nullptr);
   // The following set of service protocol extensions require debug build
   if (running_precompiled_code) {
@@ -211,6 +230,76 @@ bool PlatformViewServiceProtocol::ListViews(const char* method,
   // Copy the response.
   *json_object = strdup(response.str().c_str());
   return true;
+}
+
+const char* PlatformViewServiceProtocol::kScreenshotExtensionName =
+    "_flutter.screenshot";
+
+bool PlatformViewServiceProtocol::Screenshot(const char* method,
+                                             const char** param_keys,
+                                             const char** param_values,
+                                             intptr_t num_params,
+                                             void* user_data,
+                                             const char** json_object) {
+  ftl::AutoResetWaitableEvent latch;
+  SkBitmap bitmap;
+  blink::Threads::Gpu()->PostTask([&latch, &bitmap]() {
+    ScreenshotGpuTask(&bitmap);
+    latch.Signal();
+  });
+
+  latch.Wait();
+
+  if (bitmap.empty())
+    return ErrorServer(json_object, "no screenshot available");
+
+  sk_sp<SkData> png(SkImageEncoder::EncodeData(
+      bitmap, SkImageEncoder::Type::kPNG_Type, SkImageEncoder::kDefaultQuality));
+
+  if (!png)
+    return ErrorServer(json_object, "can not encode screenshot");
+
+  std::string base64;
+  base::Base64Encode(
+      base::StringPiece(static_cast<const char*>(png->data()), png->size()),
+      &base64);
+
+  std::stringstream response;
+  response << "{\"type\":\"Screenshot\","
+           << "\"screenshot\":\"" << base64 << "\"}";
+  *json_object = strdup(response.str().c_str());
+  return true;
+}
+
+void PlatformViewServiceProtocol::ScreenshotGpuTask(SkBitmap* bitmap) {
+  std::vector<ftl::WeakPtr<Rasterizer>> rasterizers;
+  Shell::Shared().GetRasterizers(&rasterizers);
+  if (rasterizers.size() != 1)
+    return;
+
+  Rasterizer* rasterizer = rasterizers[0].get();
+  if (rasterizer == nullptr)
+    return;
+
+  flow::LayerTree* layer_tree = rasterizer->GetLastLayerTree();
+  if (layer_tree == nullptr)
+    return;
+
+  const SkISize& frame_size = layer_tree->frame_size();
+  if (!bitmap->tryAllocN32Pixels(frame_size.width(), frame_size.height()))
+    return;
+
+  sk_sp<SkSurface> surface = SkSurface::MakeRasterDirect(
+      bitmap->info(), bitmap->getPixels(), bitmap->rowBytes());
+
+  flow::CompositorContext compositor_context;
+  SkCanvas* canvas = surface->getCanvas();
+  flow::CompositorContext::ScopedFrame frame =
+      compositor_context.AcquireFrame(nullptr, *canvas, false);
+
+  canvas->clear(SK_ColorBLACK);
+  layer_tree->Raster(frame);
+  canvas->flush();
 }
 
 }  // namespace shell
