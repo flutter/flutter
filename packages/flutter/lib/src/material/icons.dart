@@ -42,8 +42,14 @@ class IconData {
 class Icons {
   Icons._();
 
+  /// <p><i class="material-icons md-36">360</i> &#x2014; material icon named "360".</p>
+  static const IconData threesixty = const IconData(0xe577);
+
   /// <p><i class="material-icons md-36">3d_rotation</i> &#x2014; material icon named "3d rotation".</p>
   static const IconData threed_rotation = const IconData(0xe84d); // 3d_rotation isn't a valid identifier.
+
+  /// <p><i class="material-icons md-36">4k</i> &#x2014; material icon named "4k".</p>
+  static const IconData four_k = const IconData(0xe072);
 
   /// <p><i class="material-icons md-36">ac_unit</i> &#x2014; material icon named "ac unit".</p>
   static const IconData ac_unit = const IconData(0xeb3b);
@@ -60,8 +66,14 @@ class Icons {
   /// <p><i class="material-icons md-36">accessibility</i> &#x2014; material icon named "accessibility".</p>
   static const IconData accessibility = const IconData(0xe84e);
 
+  /// <p><i class="material-icons md-36">accessibility_new</i> &#x2014; material icon named "accessibility new".</p>
+  static const IconData accessibility_new = const IconData(0xe92c);
+
   /// <p><i class="material-icons md-36">accessible</i> &#x2014; material icon named "accessible".</p>
   static const IconData accessible = const IconData(0xe914);
+
+  /// <p><i class="material-icons md-36">accessible_forward</i> &#x2014; material icon named "accessible forward".</p>
+  static const IconData accessible_forward = const IconData(0xe934);
 
   /// <p><i class="material-icons md-36">account_balance</i> &#x2014; material icon named "account balance".</p>
   static const IconData account_balance = const IconData(0xe84f);
@@ -93,17 +105,29 @@ class Icons {
   /// <p><i class="material-icons md-36">add_box</i> &#x2014; material icon named "add box".</p>
   static const IconData add_box = const IconData(0xe146);
 
+  /// <p><i class="material-icons md-36">add_call</i> &#x2014; material icon named "add call".</p>
+  static const IconData add_call = const IconData(0xe0e8);
+
   /// <p><i class="material-icons md-36">add_circle</i> &#x2014; material icon named "add circle".</p>
   static const IconData add_circle = const IconData(0xe147);
 
   /// <p><i class="material-icons md-36">add_circle_outline</i> &#x2014; material icon named "add circle outline".</p>
   static const IconData add_circle_outline = const IconData(0xe148);
 
+  /// <p><i class="material-icons md-36">add_comment</i> &#x2014; material icon named "add comment".</p>
+  static const IconData add_comment = const IconData(0xe266);
+
   /// <p><i class="material-icons md-36">add_location</i> &#x2014; material icon named "add location".</p>
   static const IconData add_location = const IconData(0xe567);
 
+  /// <p><i class="material-icons md-36">add_photo_alternate</i> &#x2014; material icon named "add photo alternate".</p>
+  static const IconData add_photo_alternate = const IconData(0xe43e);
+
   /// <p><i class="material-icons md-36">add_shopping_cart</i> &#x2014; material icon named "add shopping cart".</p>
   static const IconData add_shopping_cart = const IconData(0xe854);
+
+  /// <p><i class="material-icons md-36">add_to_home_screen</i> &#x2014; material icon named "add to home screen".</p>
+  static const IconData add_to_home_screen = const IconData(0xe1fe);
 
   /// <p><i class="material-icons md-36">add_to_photos</i> &#x2014; material icon named "add to photos".</p>
   static const IconData add_to_photos = const IconData(0xe39d);
@@ -171,6 +195,9 @@ class Icons {
   /// <p><i class="material-icons md-36">all_out</i> &#x2014; material icon named "all out".</p>
   static const IconData all_out = const IconData(0xe90b);
 
+  /// <p><i class="material-icons md-36">alternate_email</i> &#x2014; material icon named "alternate email".</p>
+  static const IconData alternate_email = const IconData(0xe0e6);
+
   /// <p><i class="material-icons md-36">android</i> &#x2014; material icon named "android".</p>
   static const IconData android = const IconData(0xe859);
 
@@ -186,6 +213,9 @@ class Icons {
   /// <p><i class="material-icons md-36">arrow_back</i> &#x2014; material icon named "arrow back".</p>
   static const IconData arrow_back = const IconData(0xe5c4);
 
+  /// <p><i class="material-icons md-36">arrow_back_ios</i> &#x2014; material icon named "arrow back ios".</p>
+  static const IconData arrow_back_ios = const IconData(0xe5e0);
+
   /// <p><i class="material-icons md-36">arrow_downward</i> &#x2014; material icon named "arrow downward".</p>
   static const IconData arrow_downward = const IconData(0xe5db);
 
@@ -200,6 +230,15 @@ class Icons {
 
   /// <p><i class="material-icons md-36">arrow_forward</i> &#x2014; material icon named "arrow forward".</p>
   static const IconData arrow_forward = const IconData(0xe5c8);
+
+  /// <p><i class="material-icons md-36">arrow_forward_ios</i> &#x2014; material icon named "arrow forward ios".</p>
+  static const IconData arrow_forward_ios = const IconData(0xe5e1);
+
+  /// <p><i class="material-icons md-36">arrow_left</i> &#x2014; material icon named "arrow left".</p>
+  static const IconData arrow_left = const IconData(0xe5de);
+
+  /// <p><i class="material-icons md-36">arrow_right</i> &#x2014; material icon named "arrow right".</p>
+  static const IconData arrow_right = const IconData(0xe5df);
 
   /// <p><i class="material-icons md-36">arrow_upward</i> &#x2014; material icon named "arrow upward".</p>
   static const IconData arrow_upward = const IconData(0xe5d8);
@@ -236,6 +275,9 @@ class Icons {
 
   /// <p><i class="material-icons md-36">assistant_photo</i> &#x2014; material icon named "assistant photo".</p>
   static const IconData assistant_photo = const IconData(0xe3a0);
+
+  /// <p><i class="material-icons md-36">atm</i> &#x2014; material icon named "atm".</p>
+  static const IconData atm = const IconData(0xe573);
 
   /// <p><i class="material-icons md-36">attach_file</i> &#x2014; material icon named "attach file".</p>
   static const IconData attach_file = const IconData(0xe226);
@@ -423,6 +465,12 @@ class Icons {
   /// <p><i class="material-icons md-36">cake</i> &#x2014; material icon named "cake".</p>
   static const IconData cake = const IconData(0xe7e9);
 
+  /// <p><i class="material-icons md-36">calendar_today</i> &#x2014; material icon named "calendar today".</p>
+  static const IconData calendar_today = const IconData(0xe935);
+
+  /// <p><i class="material-icons md-36">calendar_view_day</i> &#x2014; material icon named "calendar view day".</p>
+  static const IconData calendar_view_day = const IconData(0xe936);
+
   /// <p><i class="material-icons md-36">call</i> &#x2014; material icon named "call".</p>
   static const IconData call = const IconData(0xe0b0);
 
@@ -489,6 +537,9 @@ class Icons {
   /// <p><i class="material-icons md-36">cast_connected</i> &#x2014; material icon named "cast connected".</p>
   static const IconData cast_connected = const IconData(0xe308);
 
+  /// <p><i class="material-icons md-36">category</i> &#x2014; material icon named "category".</p>
+  static const IconData category = const IconData(0xe574);
+
   /// <p><i class="material-icons md-36">center_focus_strong</i> &#x2014; material icon named "center focus strong".</p>
   static const IconData center_focus_strong = const IconData(0xe3b4);
 
@@ -518,6 +569,9 @@ class Icons {
 
   /// <p><i class="material-icons md-36">check_circle</i> &#x2014; material icon named "check circle".</p>
   static const IconData check_circle = const IconData(0xe86c);
+
+  /// <p><i class="material-icons md-36">check_circle_outline</i> &#x2014; material icon named "check circle outline".</p>
+  static const IconData check_circle_outline = const IconData(0xe92d);
 
   /// <p><i class="material-icons md-36">chevron_left</i> &#x2014; material icon named "chevron left".</p>
   static const IconData chevron_left = const IconData(0xe5cb);
@@ -690,8 +744,14 @@ class Icons {
   /// <p><i class="material-icons md-36">delete_forever</i> &#x2014; material icon named "delete forever".</p>
   static const IconData delete_forever = const IconData(0xe92b);
 
+  /// <p><i class="material-icons md-36">delete_outline</i> &#x2014; material icon named "delete outline".</p>
+  static const IconData delete_outline = const IconData(0xe92e);
+
   /// <p><i class="material-icons md-36">delete_sweep</i> &#x2014; material icon named "delete sweep".</p>
   static const IconData delete_sweep = const IconData(0xe16c);
+
+  /// <p><i class="material-icons md-36">departure_board</i> &#x2014; material icon named "departure board".</p>
+  static const IconData departure_board = const IconData(0xe576);
 
   /// <p><i class="material-icons md-36">description</i> &#x2014; material icon named "description".</p>
   static const IconData description = const IconData(0xe873);
@@ -713,6 +773,9 @@ class Icons {
 
   /// <p><i class="material-icons md-36">device_hub</i> &#x2014; material icon named "device hub".</p>
   static const IconData device_hub = const IconData(0xe335);
+
+  /// <p><i class="material-icons md-36">device_unknown</i> &#x2014; material icon named "device unknown".</p>
+  static const IconData device_unknown = const IconData(0xe339);
 
   /// <p><i class="material-icons md-36">devices</i> &#x2014; material icon named "devices".</p>
   static const IconData devices = const IconData(0xe1b1);
@@ -786,6 +849,9 @@ class Icons {
   /// <p><i class="material-icons md-36">done_all</i> &#x2014; material icon named "done all".</p>
   static const IconData done_all = const IconData(0xe877);
 
+  /// <p><i class="material-icons md-36">done_outline</i> &#x2014; material icon named "done outline".</p>
+  static const IconData done_outline = const IconData(0xe92f);
+
   /// <p><i class="material-icons md-36">donut_large</i> &#x2014; material icon named "donut large".</p>
   static const IconData donut_large = const IconData(0xe917);
 
@@ -806,6 +872,9 @@ class Icons {
 
   /// <p><i class="material-icons md-36">edit</i> &#x2014; material icon named "edit".</p>
   static const IconData edit = const IconData(0xe3c9);
+
+  /// <p><i class="material-icons md-36">edit_attributes</i> &#x2014; material icon named "edit attributes".</p>
+  static const IconData edit_attributes = const IconData(0xe578);
 
   /// <p><i class="material-icons md-36">edit_location</i> &#x2014; material icon named "edit location".</p>
   static const IconData edit_location = const IconData(0xe568);
@@ -893,6 +962,9 @@ class Icons {
 
   /// <p><i class="material-icons md-36">fast_rewind</i> &#x2014; material icon named "fast rewind".</p>
   static const IconData fast_rewind = const IconData(0xe020);
+
+  /// <p><i class="material-icons md-36">fastfood</i> &#x2014; material icon named "fastfood".</p>
+  static const IconData fastfood = const IconData(0xe57a);
 
   /// <p><i class="material-icons md-36">favorite</i> &#x2014; material icon named "favorite".</p>
   static const IconData favorite = const IconData(0xe87d);
@@ -1098,6 +1170,9 @@ class Icons {
   /// <p><i class="material-icons md-36">format_list_numbered</i> &#x2014; material icon named "format list numbered".</p>
   static const IconData format_list_numbered = const IconData(0xe242);
 
+  /// <p><i class="material-icons md-36">format_list_numbered_rtl</i> &#x2014; material icon named "format list numbered rtl".</p>
+  static const IconData format_list_numbered_rtl = const IconData(0xe267);
+
   /// <p><i class="material-icons md-36">format_paint</i> &#x2014; material icon named "format paint".</p>
   static const IconData format_paint = const IconData(0xe243);
 
@@ -1229,6 +1304,9 @@ class Icons {
 
   /// <p><i class="material-icons md-36">headset_mic</i> &#x2014; material icon named "headset mic".</p>
   static const IconData headset_mic = const IconData(0xe311);
+
+  /// <p><i class="material-icons md-36">headset_off</i> &#x2014; material icon named "headset off".</p>
+  static const IconData headset_off = const IconData(0xe33a);
 
   /// <p><i class="material-icons md-36">healing</i> &#x2014; material icon named "healing".</p>
   static const IconData healing = const IconData(0xe3f3);
@@ -1374,6 +1452,9 @@ class Icons {
   /// <p><i class="material-icons md-36">label</i> &#x2014; material icon named "label".</p>
   static const IconData label = const IconData(0xe892);
 
+  /// <p><i class="material-icons md-36">label_important</i> &#x2014; material icon named "label important".</p>
+  static const IconData label_important = const IconData(0xe937);
+
   /// <p><i class="material-icons md-36">label_outline</i> &#x2014; material icon named "label outline".</p>
   static const IconData label_outline = const IconData(0xe893);
 
@@ -1439,6 +1520,9 @@ class Icons {
 
   /// <p><i class="material-icons md-36">link</i> &#x2014; material icon named "link".</p>
   static const IconData link = const IconData(0xe157);
+
+  /// <p><i class="material-icons md-36">link_off</i> &#x2014; material icon named "link off".</p>
+  static const IconData link_off = const IconData(0xe16f);
 
   /// <p><i class="material-icons md-36">linked_camera</i> &#x2014; material icon named "linked camera".</p>
   static const IconData linked_camera = const IconData(0xe438);
@@ -1611,6 +1695,9 @@ class Icons {
   /// <p><i class="material-icons md-36">markunread_mailbox</i> &#x2014; material icon named "markunread mailbox".</p>
   static const IconData markunread_mailbox = const IconData(0xe89b);
 
+  /// <p><i class="material-icons md-36">maximize</i> &#x2014; material icon named "maximize".</p>
+  static const IconData maximize = const IconData(0xe930);
+
   /// <p><i class="material-icons md-36">memory</i> &#x2014; material icon named "memory".</p>
   static const IconData memory = const IconData(0xe322);
 
@@ -1632,8 +1719,17 @@ class Icons {
   /// <p><i class="material-icons md-36">mic_off</i> &#x2014; material icon named "mic off".</p>
   static const IconData mic_off = const IconData(0xe02b);
 
+  /// <p><i class="material-icons md-36">minimize</i> &#x2014; material icon named "minimize".</p>
+  static const IconData minimize = const IconData(0xe931);
+
+  /// <p><i class="material-icons md-36">missed_video_call</i> &#x2014; material icon named "missed video call".</p>
+  static const IconData missed_video_call = const IconData(0xe073);
+
   /// <p><i class="material-icons md-36">mms</i> &#x2014; material icon named "mms".</p>
   static const IconData mms = const IconData(0xe618);
+
+  /// <p><i class="material-icons md-36">mobile_screen_share</i> &#x2014; material icon named "mobile screen share".</p>
+  static const IconData mobile_screen_share = const IconData(0xe0e7);
 
   /// <p><i class="material-icons md-36">mode_comment</i> &#x2014; material icon named "mode comment".</p>
   static const IconData mode_comment = const IconData(0xe253);
@@ -1743,11 +1839,17 @@ class Icons {
   /// <p><i class="material-icons md-36">not_interested</i> &#x2014; material icon named "not interested".</p>
   static const IconData not_interested = const IconData(0xe033);
 
+  /// <p><i class="material-icons md-36">not_listed_location</i> &#x2014; material icon named "not listed location".</p>
+  static const IconData not_listed_location = const IconData(0xe575);
+
   /// <p><i class="material-icons md-36">note</i> &#x2014; material icon named "note".</p>
   static const IconData note = const IconData(0xe06f);
 
   /// <p><i class="material-icons md-36">note_add</i> &#x2014; material icon named "note add".</p>
   static const IconData note_add = const IconData(0xe89c);
+
+  /// <p><i class="material-icons md-36">notification_important</i> &#x2014; material icon named "notification important".</p>
+  static const IconData notification_important = const IconData(0xe004);
 
   /// <p><i class="material-icons md-36">notifications</i> &#x2014; material icon named "notifications".</p>
   static const IconData notifications = const IconData(0xe7f4);
@@ -1763,6 +1865,9 @@ class Icons {
 
   /// <p><i class="material-icons md-36">notifications_paused</i> &#x2014; material icon named "notifications paused".</p>
   static const IconData notifications_paused = const IconData(0xe7f8);
+
+  /// <p><i class="material-icons md-36">offline_bolt</i> &#x2014; material icon named "offline bolt".</p>
+  static const IconData offline_bolt = const IconData(0xe932);
 
   /// <p><i class="material-icons md-36">offline_pin</i> &#x2014; material icon named "offline pin".</p>
   static const IconData offline_pin = const IconData(0xe90a);
@@ -1781,6 +1886,9 @@ class Icons {
 
   /// <p><i class="material-icons md-36">open_with</i> &#x2014; material icon named "open with".</p>
   static const IconData open_with = const IconData(0xe89f);
+
+  /// <p><i class="material-icons md-36">outlined_flag</i> &#x2014; material icon named "outlined flag".</p>
+  static const IconData outlined_flag = const IconData(0xe16e);
 
   /// <p><i class="material-icons md-36">pages</i> &#x2014; material icon named "pages".</p>
   static const IconData pages = const IconData(0xe7f9);
@@ -2124,6 +2232,9 @@ class Icons {
   /// <p><i class="material-icons md-36">report</i> &#x2014; material icon named "report".</p>
   static const IconData report = const IconData(0xe160);
 
+  /// <p><i class="material-icons md-36">report_off</i> &#x2014; material icon named "report off".</p>
+  static const IconData report_off = const IconData(0xe170);
+
   /// <p><i class="material-icons md-36">report_problem</i> &#x2014; material icon named "report problem".</p>
   static const IconData report_problem = const IconData(0xe8b2);
 
@@ -2135,6 +2246,9 @@ class Icons {
 
   /// <p><i class="material-icons md-36">restore</i> &#x2014; material icon named "restore".</p>
   static const IconData restore = const IconData(0xe8b3);
+
+  /// <p><i class="material-icons md-36">restore_from_trash</i> &#x2014; material icon named "restore from trash".</p>
+  static const IconData restore_from_trash = const IconData(0xe938);
 
   /// <p><i class="material-icons md-36">restore_page</i> &#x2014; material icon named "restore page".</p>
   static const IconData restore_page = const IconData(0xe929);
@@ -2178,14 +2292,23 @@ class Icons {
   /// <p><i class="material-icons md-36">save</i> &#x2014; material icon named "save".</p>
   static const IconData save = const IconData(0xe161);
 
+  /// <p><i class="material-icons md-36">save_alt</i> &#x2014; material icon named "save alt".</p>
+  static const IconData save_alt = const IconData(0xe171);
+
   /// <p><i class="material-icons md-36">scanner</i> &#x2014; material icon named "scanner".</p>
   static const IconData scanner = const IconData(0xe329);
+
+  /// <p><i class="material-icons md-36">scatter_plot</i> &#x2014; material icon named "scatter plot".</p>
+  static const IconData scatter_plot = const IconData(0xe268);
 
   /// <p><i class="material-icons md-36">schedule</i> &#x2014; material icon named "schedule".</p>
   static const IconData schedule = const IconData(0xe8b5);
 
   /// <p><i class="material-icons md-36">school</i> &#x2014; material icon named "school".</p>
   static const IconData school = const IconData(0xe80c);
+
+  /// <p><i class="material-icons md-36">score</i> &#x2014; material icon named "score".</p>
+  static const IconData score = const IconData(0xe269);
 
   /// <p><i class="material-icons md-36">screen_lock_landscape</i> &#x2014; material icon named "screen lock landscape".</p>
   static const IconData screen_lock_landscape = const IconData(0xe1be);
@@ -2312,6 +2435,9 @@ class Icons {
 
   /// <p><i class="material-icons md-36">shuffle</i> &#x2014; material icon named "shuffle".</p>
   static const IconData shuffle = const IconData(0xe043);
+
+  /// <p><i class="material-icons md-36">shutter_speed</i> &#x2014; material icon named "shutter speed".</p>
+  static const IconData shutter_speed = const IconData(0xe43d);
 
   /// <p><i class="material-icons md-36">signal_cellular_4_bar</i> &#x2014; material icon named "signal cellular 4 bar".</p>
   static const IconData signal_cellular_4_bar = const IconData(0xe1c8);
@@ -2472,6 +2598,9 @@ class Icons {
   /// <p><i class="material-icons md-36">subway</i> &#x2014; material icon named "subway".</p>
   static const IconData subway = const IconData(0xe56f);
 
+  /// <p><i class="material-icons md-36">supervised_user_circle</i> &#x2014; material icon named "supervised user circle".</p>
+  static const IconData supervised_user_circle = const IconData(0xe939);
+
   /// <p><i class="material-icons md-36">supervisor_account</i> &#x2014; material icon named "supervisor account".</p>
   static const IconData supervisor_account = const IconData(0xe8d3);
 
@@ -2483,6 +2612,9 @@ class Icons {
 
   /// <p><i class="material-icons md-36">swap_horiz</i> &#x2014; material icon named "swap horiz".</p>
   static const IconData swap_horiz = const IconData(0xe8d4);
+
+  /// <p><i class="material-icons md-36">swap_horizontal_circle</i> &#x2014; material icon named "swap horizontal circle".</p>
+  static const IconData swap_horizontal_circle = const IconData(0xe933);
 
   /// <p><i class="material-icons md-36">swap_vert</i> &#x2014; material icon named "swap vert".</p>
   static const IconData swap_vert = const IconData(0xe8d5);
@@ -2517,6 +2649,9 @@ class Icons {
   /// <p><i class="material-icons md-36">tab_unselected</i> &#x2014; material icon named "tab unselected".</p>
   static const IconData tab_unselected = const IconData(0xe8d9);
 
+  /// <p><i class="material-icons md-36">table_chart</i> &#x2014; material icon named "table chart".</p>
+  static const IconData table_chart = const IconData(0xe265);
+
   /// <p><i class="material-icons md-36">tablet</i> &#x2014; material icon named "tablet".</p>
   static const IconData tablet = const IconData(0xe32f);
 
@@ -2540,6 +2675,24 @@ class Icons {
 
   /// <p><i class="material-icons md-36">text_format</i> &#x2014; material icon named "text format".</p>
   static const IconData text_format = const IconData(0xe165);
+
+  /// <p><i class="material-icons md-36">text_rotate_up</i> &#x2014; material icon named "text rotate up".</p>
+  static const IconData text_rotate_up = const IconData(0xe93a);
+
+  /// <p><i class="material-icons md-36">text_rotate_vertical</i> &#x2014; material icon named "text rotate vertical".</p>
+  static const IconData text_rotate_vertical = const IconData(0xe93b);
+
+  /// <p><i class="material-icons md-36">text_rotation_angledown</i> &#x2014; material icon named "text rotation angledown".</p>
+  static const IconData text_rotation_angledown = const IconData(0xe93c);
+
+  /// <p><i class="material-icons md-36">text_rotation_angleup</i> &#x2014; material icon named "text rotation angleup".</p>
+  static const IconData text_rotation_angleup = const IconData(0xe93d);
+
+  /// <p><i class="material-icons md-36">text_rotation_down</i> &#x2014; material icon named "text rotation down".</p>
+  static const IconData text_rotation_down = const IconData(0xe93e);
+
+  /// <p><i class="material-icons md-36">text_rotation_none</i> &#x2014; material icon named "text rotation none".</p>
+  static const IconData text_rotation_none = const IconData(0xe93f);
 
   /// <p><i class="material-icons md-36">textsms</i> &#x2014; material icon named "textsms".</p>
   static const IconData textsms = const IconData(0xe0d8);
@@ -2619,6 +2772,9 @@ class Icons {
   /// <p><i class="material-icons md-36">transform</i> &#x2014; material icon named "transform".</p>
   static const IconData transform = const IconData(0xe428);
 
+  /// <p><i class="material-icons md-36">transit_enterexit</i> &#x2014; material icon named "transit enterexit".</p>
+  static const IconData transit_enterexit = const IconData(0xe579);
+
   /// <p><i class="material-icons md-36">translate</i> &#x2014; material icon named "translate".</p>
   static const IconData translate = const IconData(0xe8e2);
 
@@ -2630,6 +2786,9 @@ class Icons {
 
   /// <p><i class="material-icons md-36">trending_up</i> &#x2014; material icon named "trending up".</p>
   static const IconData trending_up = const IconData(0xe8e5);
+
+  /// <p><i class="material-icons md-36">trip_origin</i> &#x2014; material icon named "trip origin".</p>
+  static const IconData trip_origin = const IconData(0xe57b);
 
   /// <p><i class="material-icons md-36">tune</i> &#x2014; material icon named "tune".</p>
   static const IconData tune = const IconData(0xe429);
