@@ -250,6 +250,9 @@ component("skia") {
     "//third_party/skia/src/codec/SkSampler.cpp",
     "//third_party/skia/src/codec/SkSwizzler.cpp",
     "//third_party/skia/src/codec/SkWbmpCodec.cpp",
+    "//third_party/skia/src/images/SkImageEncoder.cpp",
+    "//third_party/skia/src/images/SkImageEncoder_Factory.cpp",
+    "//third_party/skia/src/images/SkPNGImageEncoder.cpp",
 
     "//third_party/skia/include/images/SkMovie.h",
     "//third_party/skia/include/ports/SkTypeface_win.h",
@@ -271,7 +274,6 @@ component("skia") {
     "//third_party/skia/src/ports/SkFontMgr_FontConfigInterface_factory.cpp",
     "//third_party/skia/src/ports/SkFontMgr_win_dw.cpp",
     "//third_party/skia/src/ports/SkGlobalInitialization_default.cpp",
-    "//third_party/skia/src/ports/SkImageEncoder_none.cpp",
     "//third_party/skia/src/ports/SkImageGenerator_skia.cpp",
     "//third_party/skia/src/ports/SkOSFile_posix.cpp",
     "//third_party/skia/src/ports/SkOSFile_stdio.cpp",
