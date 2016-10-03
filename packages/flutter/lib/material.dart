@@ -73,7 +73,6 @@ export 'src/material/tabs.dart';
 export 'src/material/theme.dart';
 export 'src/material/theme_data.dart';
 export 'src/material/time_picker.dart';
-export 'src/material/time_picker_dialog.dart';
 export 'src/material/toggleable.dart';
 export 'src/material/tooltip.dart';
 export 'src/material/two_level_list.dart';

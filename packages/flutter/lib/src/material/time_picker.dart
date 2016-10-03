@@ -2,13 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:meta/meta.dart';
 
+import 'button_bar.dart';
+import 'button.dart';
 import 'colors.dart';
+import 'dialog.dart';
+import 'flat_button.dart';
 import 'theme.dart';
 import 'typography.dart';
 
@@ -34,6 +39,18 @@ class TimeOfDay {
   /// The [hour] argument must be between 0 and 23, inclusive. The [minute]
   /// argument must be between 0 and 59, inclusive.
   const TimeOfDay({ @required this.hour, @required this.minute });
+
+  /// Creates a time of day based on the given time.
+  ///
+  /// The [hour] is set to the time's hour and the [minute] is set to the time's
+  /// minute in the timezone of the given [DateTime].
+  TimeOfDay.fromDateTime(DateTime time) : hour = time.hour, minute = time.minute;
+
+  /// Creates a time of day based on the current time.
+  ///
+  /// The [hour] is set to the current hour and the [minute] is set to the
+  /// current minute in the local time zone.
+  factory TimeOfDay.now() { return new TimeOfDay.fromDateTime(new DateTime.now()); }
 
   /// Returns a new TimeOfDay with the hour and/or minute replaced.
   TimeOfDay replacing({ int hour, int minute }) {
@@ -99,99 +116,33 @@ class TimeOfDay {
 }
 
 enum _TimePickerMode { hour, minute }
-const double _kHeaderFontSize = 60.0;
-const double _kPreferredDialExtent = 296.0;
 
-/// A material design time picker.
-///
-/// The time picker widget is rarely used directly. Instead, consider using
-/// [showTimePicker], which creates a time picker dialog.
-///
-/// See also:
-///
-///  * [showTimePicker]
-///  * <https://www.google.com/design/spec/components/pickers.html#pickers-time-pickers>
-class TimePicker extends StatefulWidget {
-  /// Creates a time picker.
-  ///
-  /// The [selectedTime] must not be null.
-  ///
-  /// Rarely used directly. Instead, consider using [showTimePicker], which
-  /// creates a time picker dialog.
-  TimePicker({
-    Key key,
-    @required this.selectedTime,
-    @required this.onChanged
-  }) : super(key: key) {
-    assert(selectedTime != null);
-  }
+const double _kTimePickerHeaderPortraitHeight = 96.0;
+const double _kTimePickerHeaderLandscapeWidth = 168.0;
 
-  /// The currently selected time.
-  ///
-  /// This time is highlighted in the picker.
-  final TimeOfDay selectedTime;
+const double _kTimePickerWidthPortrait = 328.0;
+const double _kTimePickerWidthLanscape = 512.0;
 
-  /// Called when the user picks a time.
-  final ValueChanged<TimeOfDay> onChanged;
-
-  @override
-  _TimePickerState createState() => new _TimePickerState();
-}
-
-class _TimePickerState extends State<TimePicker> {
-  _TimePickerMode _mode = _TimePickerMode.hour;
-
-  void _handleModeChanged(_TimePickerMode mode) {
-    HapticFeedback.vibrate();
-    setState(() {
-      _mode = mode;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return new Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: <Widget>[
-        new _TimePickerHeader(
-          selectedTime: config.selectedTime,
-          mode: _mode,
-          onModeChanged: _handleModeChanged,
-          onChanged: config.onChanged
-        ),
-        new Center(
-          child: new Container(
-            margin: const EdgeInsets.all(16.0),
-            width: _kPreferredDialExtent,
-            child: new AspectRatio(
-              aspectRatio: 1.0,
-              child: new _Dial(
-                mode: _mode,
-                selectedTime: config.selectedTime,
-                onChanged: config.onChanged
-              )
-            )
-          )
-        )
-      ]
-    );
-  }
-}
+const double _kTimePickerHeightPortrait = 484.0;
+const double _kTimePickerHeightLanscape = 304.0;
 
 // TODO(ianh): Localize!
 class _TimePickerHeader extends StatelessWidget {
   _TimePickerHeader({
     @required this.selectedTime,
     @required this.mode,
+    @required this.orientation,
     @required this.onModeChanged,
-    @required this.onChanged
+    @required this.onChanged,
   }) {
     assert(selectedTime != null);
     assert(mode != null);
+    assert(orientation != null);
   }
 
   final TimeOfDay selectedTime;
   final _TimePickerMode mode;
+  final Orientation orientation;
   final ValueChanged<_TimePickerMode> onModeChanged;
   final ValueChanged<TimeOfDay> onChanged;
 
@@ -205,10 +156,25 @@ class _TimePickerHeader extends StatelessWidget {
     onChanged(selectedTime.replacing(hour: newHour));
   }
 
+  TextStyle _getBaseHeaderStyle(TextTheme headerTextTheme) {
+    // These font sizes aren't listed in the spec explicitly. I worked them out
+    // by measuring the text using a screen ruler and comparing them to the
+    // screen shots of the time picker in the spec.
+    assert(orientation != null);
+    switch (orientation) {
+      case Orientation.portrait:
+        return headerTextTheme.display3.copyWith(fontSize: 60.0);
+      case Orientation.landscape:
+        return headerTextTheme.display2.copyWith(fontSize: 50.0);
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     ThemeData themeData = Theme.of(context);
     TextTheme headerTextTheme = themeData.primaryTextTheme;
+    TextStyle baseHeaderStyle = _getBaseHeaderStyle(headerTextTheme);
     Color activeColor;
     Color inactiveColor;
     switch(themeData.primaryColorBrightness) {
@@ -232,12 +198,8 @@ class _TimePickerHeader extends StatelessWidget {
         break;
     }
 
-    TextStyle activeStyle = headerTextTheme.display3.copyWith(
-      fontSize: _kHeaderFontSize, color: activeColor
-    );
-    TextStyle inactiveStyle = headerTextTheme.display3.copyWith(
-      fontSize: _kHeaderFontSize, color: inactiveColor
-    );
+    TextStyle activeStyle = baseHeaderStyle.copyWith(color: activeColor);
+    TextStyle inactiveStyle = baseHeaderStyle.copyWith(color: inactiveColor);
 
     TextStyle hourStyle = mode == _TimePickerMode.hour ? activeStyle : inactiveStyle;
     TextStyle minuteStyle = mode == _TimePickerMode.minute ? activeStyle : inactiveStyle;
@@ -249,50 +211,77 @@ class _TimePickerHeader extends StatelessWidget {
       color: selectedTime.period == DayPeriod.pm ? activeColor: inactiveColor
     );
 
-    return new Container(
-      height: 96.0,
-      decoration: new BoxDecoration(backgroundColor: backgroundColor),
-      child: new Row(
+    Widget dayPeriodPicker = new GestureDetector(
+      onTap: _handleChangeDayPeriod,
+      behavior: HitTestBehavior.opaque,
+      child: new Column(
+        mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          new Flexible(
-            child: new Align(
-              alignment: FractionalOffset.centerRight,
-              child: new GestureDetector(
-                onTap: () => _handleChangeMode(_TimePickerMode.hour),
-                child: new Text(selectedTime.hourOfPeriodLabel, style: hourStyle)
-              )
-            )
-          ),
-          new Text(':', style: inactiveStyle),
-          new Flexible(
-            child: new Align(
-              alignment: FractionalOffset.centerLeft,
-              child: new Row(
-                children: <Widget>[
-                  new GestureDetector(
-                    onTap: () => _handleChangeMode(_TimePickerMode.minute),
-                    child: new Text(selectedTime.minuteLabel, style: minuteStyle)
-                  ),
-                  new Container(width: 8.0, height: 0.0),  // Horizontal spacer
-                  new GestureDetector(
-                    onTap: _handleChangeDayPeriod,
-                    behavior: HitTestBehavior.opaque,
-                    child: new Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        new Text('AM', style: amStyle),
-                        new Container(width: 0.0, height: 8.0),  // Vertical spacer
-                        new Text('PM', style: pmStyle),
-                      ]
-                    )
-                  )
-                ]
-              )
-            )
-          )
+          new Text('AM', style: amStyle),
+          const SizedBox(width: 0.0, height: 4.0),  // Vertical spacer
+          new Text('PM', style: pmStyle),
         ]
       )
     );
+
+    Widget hour = new Align(
+      alignment: FractionalOffset.centerRight,
+      child: new GestureDetector(
+        onTap: () => _handleChangeMode(_TimePickerMode.hour),
+        child: new Text(selectedTime.hourOfPeriodLabel, style: hourStyle),
+      )
+    );
+
+    Widget minute = new GestureDetector(
+      onTap: () => _handleChangeMode(_TimePickerMode.minute),
+      child: new Text(selectedTime.minuteLabel, style: minuteStyle),
+    );
+
+    assert(orientation != null);
+    switch (orientation) {
+      case Orientation.portrait:
+        return new Container(
+          height: _kTimePickerHeaderPortraitHeight,
+          padding: const EdgeInsets.symmetric(horizontal: 24.0),
+          decoration: new BoxDecoration(backgroundColor: backgroundColor),
+          child: new Row(
+            children: <Widget>[
+              new Flexible(child: hour),
+              new Text(':', style: inactiveStyle),
+              new Flexible(
+                child: new Row(
+                  children: <Widget>[
+                    minute,
+                    const SizedBox(width: 8.0, height: 0.0),  // Horizontal spacer
+                    dayPeriodPicker,
+                  ]
+                )
+              )
+            ]
+          )
+        );
+      case Orientation.landscape:
+        return new Container(
+          width: _kTimePickerHeaderLandscapeWidth,
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          decoration: new BoxDecoration(backgroundColor: backgroundColor),
+          child: new Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              new Row(
+                children: <Widget>[
+                  new Flexible(child: hour),
+                  new Text(':', style: inactiveStyle),
+                  new Flexible(child: minute),
+                ],
+              ),
+              const SizedBox(width: 0.0, height: 8.0),  // Vertical spacer
+              dayPeriodPicker,
+            ]
+          )
+        );
+    }
+    return null;
   }
 }
 
@@ -578,6 +567,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
       onPanUpdate: _handlePanUpdate,
       onPanEnd: _handlePanEnd,
       child: new CustomPaint(
+        key: const ValueKey<String>('time-picker-dial'), // used for testing.
         painter: new _DialPainter(
           primaryLabels: primaryLabels,
           secondaryLabels: secondaryLabels,
@@ -588,4 +578,163 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
       )
     );
   }
+}
+
+class _TimePickerDialog extends StatefulWidget {
+  _TimePickerDialog({
+    Key key,
+    this.initialTime
+  }) : super(key: key) {
+    assert(initialTime != null);
+  }
+
+  final TimeOfDay initialTime;
+
+  @override
+  _TimePickerDialogState createState() => new _TimePickerDialogState();
+}
+
+class _TimePickerDialogState extends State<_TimePickerDialog> {
+  @override
+  void initState() {
+    super.initState();
+    _selectedTime = config.initialTime;
+  }
+
+  _TimePickerMode _mode = _TimePickerMode.hour;
+  TimeOfDay _selectedTime;
+
+  void _handleModeChanged(_TimePickerMode mode) {
+    HapticFeedback.vibrate();
+    setState(() {
+      _mode = mode;
+    });
+  }
+
+  void _handleTimeChanged(TimeOfDay value) {
+    setState(() {
+      _selectedTime = value;
+    });
+  }
+
+  void _handleCancel() {
+    Navigator.pop(context);
+  }
+
+  void _handleOk() {
+    Navigator.pop(context, _selectedTime);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    Widget picker = new Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: new AspectRatio(
+        aspectRatio: 1.0,
+        child: new _Dial(
+          mode: _mode,
+          selectedTime: _selectedTime,
+          onChanged: _handleTimeChanged,
+        )
+      )
+    );
+
+    Widget actions = new ButtonTheme.bar(
+      child: new ButtonBar(
+        children: <Widget>[
+          new FlatButton(
+            child: new Text('CANCEL'),
+            onPressed: _handleCancel
+          ),
+          new FlatButton(
+            child: new Text('OK'),
+            onPressed: _handleOk
+          ),
+        ]
+      )
+    );
+
+    return new Dialog(
+      child: new OrientationBuilder(
+        builder: (BuildContext context, Orientation orientation) {
+          Widget header = new _TimePickerHeader(
+            selectedTime: _selectedTime,
+            mode: _mode,
+            orientation: orientation,
+            onModeChanged: _handleModeChanged,
+            onChanged: _handleTimeChanged,
+          );
+
+          assert(orientation != null);
+          switch (orientation) {
+            case Orientation.portrait:
+              return new SizedBox(
+                width: _kTimePickerWidthPortrait,
+                height: _kTimePickerHeightPortrait,
+                child: new Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: <Widget>[
+                    header,
+                    new Flexible(child: picker),
+                    actions,
+                  ]
+                )
+              );
+            case Orientation.landscape:
+              return new SizedBox(
+                width: _kTimePickerWidthLanscape,
+                height: _kTimePickerHeightLanscape,
+                child: new Row(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: <Widget>[
+                    header,
+                    new Flexible(
+                      fit: FlexFit.loose,
+                      child: new Column(
+                        children: <Widget>[
+                          new Flexible(child: picker),
+                          actions,
+                        ]
+                      )
+                    ),
+                  ]
+                )
+              );
+          }
+          return null;
+        }
+      )
+    );
+  }
+}
+
+/// Shows a dialog containing a material design time picker.
+///
+/// The returned Future resolves to the time selected by the user when the user
+/// closes the dialog. If the user cancels the dialog, the Future resolves to
+/// the [initialTime].
+///
+/// To show a dialog with [initialTime] equal to the current time:
+/// ```dart
+/// showTimePicker(
+///   initialTime: new TimeOfDay.now(),
+///   context: context
+/// );
+/// ```
+///
+/// See also:
+///
+///  * [showDatePicker]
+///  * <https://www.google.com/design/spec/components/pickers.html#pickers-time-pickers>
+Future<TimeOfDay> showTimePicker({
+  BuildContext context,
+  TimeOfDay initialTime
+}) async {
+  assert(initialTime != null);
+  return await showDialog(
+    context: context,
+    child: new _TimePickerDialog(initialTime: initialTime)
+  ) ?? initialTime;
 }

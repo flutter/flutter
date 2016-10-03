@@ -94,8 +94,8 @@ class _DatePickerHeader extends StatelessWidget {
         break;
     }
 
-    double height;
     double width;
+    double height;
     EdgeInsets padding;
     MainAxisAlignment mainAxisAlignment;
     switch (orientation) {
@@ -604,7 +604,6 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
     );
     Widget actions = new ButtonTheme.bar(
       child: new ButtonBar(
-        alignment: MainAxisAlignment.end,
         children: <Widget>[
           new FlatButton(
             child: new Text('CANCEL'),
@@ -646,12 +645,15 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: <Widget>[
                     header,
-                    new SizedBox(
-                      width: _kMonthPickerLandscapeWidth,
-                      child: new Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: <Widget>[picker, actions]
+                    new Flexible(
+                      fit: FlexFit.loose,
+                      child: new SizedBox(
+                        width: _kMonthPickerLandscapeWidth,
+                        child: new Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: <Widget>[picker, actions]
+                        )
                       )
                     )
                   ]
