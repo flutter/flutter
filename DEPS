@@ -33,7 +33,7 @@ vars = {
   'dart_observatory_packages_revision': '26aad88f1c1915d39bbcbff3cad589e2402fdcf1',
   'dart_root_certificates_revision': 'aed07942ce98507d2be28cbd29e879525410c7fc',
 
-  'buildtools_revision': '3d2e47bf14e4e67816a53e304dea422fa18f9180',
+  'buildtools_revision': '1f4c1c3bd3bd4c991e6565a0dc509c8d8a3f90b4',
 }
 
 # Only these hosts are allowed for dependencies in this DEPS file.
@@ -45,7 +45,7 @@ allowed_hosts = [
 ]
 
 deps = {
-  'src': 'https://github.com/flutter/buildroot.git' + '@' + '8e04368ac4c14efc5d6421ef5f3c3876ba0170f7',
+  'src': 'https://github.com/flutter/buildroot.git' + '@' + '5756632bcf0c7636c53c9d84cb62813cc97c92dd',
 
    # Fuchsia compatibility
    #
@@ -80,7 +80,7 @@ deps = {
    Var('github_git') + '/flutter/base.git' + '@' +  Var('base_revision'),
 
   'src/buildtools':
-   Var('chromium_git') + '/chromium/buildtools.git' + '@' +  Var('buildtools_revision'),
+   Var('fuchsia_git') + '/buildtools' + '@' +  Var('buildtools_revision'),
 
   # TODO(abarth): Remove in favor of //third_party/gtest
   'src/testing/gtest':
@@ -173,10 +173,9 @@ hooks = [
     ],
   },
   {
-    # Pull clang if needed or requested via GYP_DEFINES.
     'name': 'clang',
     'pattern': '.',
-    'action': ['python', 'src/tools/clang/scripts/update.py', '--if-needed'],
+    'action': ['/bin/bash', 'src/buildtools/update.sh', '--toolchain', '--ninja', '--gn'],
   },
   {
     # Pull dart sdk if needed
@@ -191,68 +190,6 @@ hooks = [
     'pattern': '.',
     'action': ['python', 'src/build/util/lastchange.py',
                '-o', 'src/build/util/LASTCHANGE'],
-  },
-  # Pull GN binaries. This needs to be before running GYP below.
-  {
-    'name': 'gn_linux64',
-    'pattern': '.',
-    'action': [ 'download_from_google_storage',
-                '--no_resume',
-                '--quiet',
-                '--platform=linux*',
-                '--no_auth',
-                '--bucket', 'chromium-gn',
-                '-s', 'src/buildtools/linux64/gn.sha1',
-    ],
-  },
-  {
-    'name': 'gn_mac',
-    'pattern': '.',
-    'action': [ 'download_from_google_storage',
-                '--no_resume',
-                '--quiet',
-                '--platform=darwin',
-                '--no_auth',
-                '--bucket', 'chromium-gn',
-                '-s', 'src/buildtools/mac/gn.sha1',
-    ],
-  },
-  {
-    'name': 'gn_win',
-    'pattern': '.',
-    'action': [ 'download_from_google_storage',
-                '--no_resume',
-                '--quiet',
-                '--platform=win*',
-                '--no_auth',
-                '--bucket', 'chromium-gn',
-                '-s', 'src/buildtools/win/gn.exe.sha1',
-    ],
-  },
-  # Pull clang-format binaries using checked-in hashes.
-  {
-    'name': 'clang_format_linux',
-    'pattern': '.',
-    'action': [ 'download_from_google_storage',
-                '--no_resume',
-                '--quiet',
-                '--platform=linux*',
-                '--no_auth',
-                '--bucket', 'chromium-clang-format',
-                '-s', 'src/buildtools/linux64/clang-format.sha1',
-    ],
-  },
-  {
-    'name': 'clang_format_mac',
-    'pattern': '.',
-    'action': [ 'download_from_google_storage',
-                '--no_resume',
-                '--quiet',
-                '--platform=darwin',
-                '--no_auth',
-                '--bucket', 'chromium-clang-format',
-                '-s', 'src/buildtools/mac/clang-format.sha1',
-    ],
   },
   # Pull binutils for linux, enabled debug fission for faster linking /
   # debugging when used with clang on Ubuntu Precise.
