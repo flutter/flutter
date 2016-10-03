@@ -115,14 +115,13 @@ class FullScreenCodeDialogState extends State<FullScreenCodeDialog> {
   String _exampleCode;
 
   @override
-  void initState() {
-    super.initState();
-
+  void dependenciesChanged() {
     getExampleCode(config.exampleCodeTag, DefaultAssetBundle.of(context)).then((String code) {
       setState(() {
         _exampleCode = code;
       });
     });
+    super.dependenciesChanged();
   }
 
   @override
