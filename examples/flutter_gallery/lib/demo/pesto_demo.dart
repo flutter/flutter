@@ -313,11 +313,6 @@ class _RecipePageState extends State<RecipePage> {
         expandedHeight: _getAppBarHeight(context),
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: new IconButton(
-          icon: new Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
-          tooltip: 'Back'
-        ),
         actions: <Widget>[
           new PopupMenuButton<String>(
             onSelected: (String item) {},
