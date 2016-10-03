@@ -7,7 +7,6 @@ import 'dart:io';
 
 import 'package:http/http.dart' as http;
 
-import '../base/common.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
 
@@ -16,7 +15,6 @@ class SkiaCommand extends FlutterCommand {
     argParser.addOption('output-file', help: 'Write the Skia picture file to this path.');
     argParser.addOption('skiaserve', help: 'Post the picture to a skiaserve debugger at this URL.');
     argParser.addOption('diagnostic-port',
-        defaultsTo: kDefaultDiagnosticPort.toString(),
         help: 'Local port where the diagnostic server is listening.');
   }
 
@@ -43,6 +41,10 @@ class SkiaCommand extends FlutterCommand {
       skiaserveUri = Uri.parse(argResults['skiaserve']);
     } else {
       printError('Must provide --output-file or --skiaserve');
+      return 1;
+    }
+    if (argResults['diagnostic-port'] == null) {
+      printError('Must provide --diagnostic-port');
       return 1;
     }
 
