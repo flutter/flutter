@@ -4,6 +4,7 @@
 
 #include "flutter/lib/ui/painting/image.h"
 
+#include "flutter/common/threads.h"
 #include "lib/tonic/dart_args.h"
 #include "lib/tonic/dart_binding_macros.h"
 #include "lib/tonic/converter/dart_converter.h"
@@ -28,7 +29,10 @@ void CanvasImage::RegisterNatives(tonic::DartLibraryNatives* natives) {
 
 CanvasImage::CanvasImage() {}
 
-CanvasImage::~CanvasImage() {}
+CanvasImage::~CanvasImage() {
+  SkImage* image = image_.release();
+  Threads::IO()->PostTask([image]() { image->unref(); });
+}
 
 void CanvasImage::dispose() {
   ClearDartWrapper();
