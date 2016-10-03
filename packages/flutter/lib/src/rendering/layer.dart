@@ -8,7 +8,7 @@ import 'dart:ui' show Offset;
 import 'package:flutter/painting.dart';
 import 'package:vector_math/vector_math_64.dart';
 import 'package:meta/meta.dart';
-import 'package:flutter_services/mojo/gfx/composition/scene_token.dart' as mojom;
+import 'package:flutter_services/mozart/composition/scene_token.dart' as mojom;
 
 import 'debug.dart';
 
