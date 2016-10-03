@@ -614,8 +614,19 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       } else {
         _shouldShowBackArrow ??= Navigator.canPop(context);
         if (_shouldShowBackArrow) {
+          IconData backIcon;
+          switch (Theme.of(context).platform) {
+            case TargetPlatform.android:
+            case TargetPlatform.fuchsia:
+              backIcon = Icons.arrow_back;
+              break;
+            case TargetPlatform.iOS:
+              backIcon = Icons.arrow_back_ios;
+              break;
+          }
+          assert(backIcon != null);
           leading = new IconButton(
-            icon: new Icon(Icons.arrow_back),
+            icon: new Icon(backIcon),
             alignment: FractionalOffset.centerLeft,
             onPressed: () => Navigator.pop(context),
             tooltip: 'Back' // TODO(ianh): Figure out how to localize this string
