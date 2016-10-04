@@ -243,14 +243,15 @@ class AtomValidator extends DoctorValidator {
       : path.join(env['HOME'], '.atom');
   }
 
+  bool get isInstalled => FileSystemEntity.isDirectorySync(_getAtomHomePath());
+
   @override
   Future<ValidationResult> validate() async {
     List<ValidationMessage> messages = <ValidationMessage>[];
 
     int installCount = 0;
 
-    bool atomDirExists = FileSystemEntity.isDirectorySync(_getAtomHomePath());
-    if (!atomDirExists) {
+    if (!isInstalled) {
       messages.add(new ValidationMessage.error('Atom not installed; download at https://atom.io.'));
     } else {
       installCount++;
@@ -265,7 +266,7 @@ class AtomValidator extends DoctorValidator {
     return new ValidationResult(
       installCount == 3
         ? ValidationType.installed
-        : installCount == 1 ? ValidationType.partial : ValidationType.missing,
+        : installCount > 0 ? ValidationType.partial : ValidationType.missing,
       messages
     );
   }
