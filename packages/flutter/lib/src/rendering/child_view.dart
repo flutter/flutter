@@ -7,12 +7,12 @@ import 'dart:collection';
 import 'dart:ui' as ui;
 
 import 'package:flutter/services.dart';
-import 'package:flutter_services/mojo/gfx/composition/scene_token.dart' as mojom;
-import 'package:flutter_services/mojo/ui/view_containers.dart' as mojom;
-import 'package:flutter_services/mojo/ui/view_provider.dart' as mojom;
-import 'package:flutter_services/mojo/ui/view_properties.dart' as mojom;
-import 'package:flutter_services/mojo/ui/view_token.dart' as mojom;
-import 'package:flutter_services/mojo/ui/views.dart' as mojom;
+import 'package:flutter_services/mozart/composition/scene_token.dart' as mojom;
+import 'package:flutter_services/mozart/views/view_containers.dart' as mojom;
+import 'package:flutter_services/mozart/views/view_provider.dart' as mojom;
+import 'package:flutter_services/mozart/views/view_properties.dart' as mojom;
+import 'package:flutter_services/mozart/views/view_token.dart' as mojom;
+import 'package:flutter_services/mozart/views/views.dart' as mojom;
 import 'package:flutter_services/mojo/geometry.dart' as mojom;
 import 'package:mojo/application.dart';
 import 'package:mojo/core.dart' as core;
