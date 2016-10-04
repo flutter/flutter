@@ -9,7 +9,9 @@ import 'rendering_tester.dart';
 
 void main() {
   test('RenderViewport2 basic test - no children', () {
-    RenderViewport2 root = new RenderViewport2();
+    RenderViewport2 root = new RenderViewport2(
+      offset: new ViewportOffset.zero(),
+    );
     layout(root);
     root.offset = new ViewportOffset.fixed(900.0);
     pumpFrame();
@@ -18,6 +20,7 @@ void main() {
   test('RenderViewport2 basic test - down', () {
     RenderBox a, b, c, d, e;
     RenderViewport2 root = new RenderViewport2(
+      offset: new ViewportOffset.zero(),
       children: <RenderSliver>[
         new RenderSliverToBoxAdapter(child: a = new RenderSizedBox(const Size(100.0, 400.0))),
         new RenderSliverToBoxAdapter(child: b = new RenderSizedBox(const Size(100.0, 400.0))),
@@ -66,6 +69,7 @@ void main() {
     RenderBox a, b, c, d, e;
     RenderViewport2 root = new RenderViewport2(
       axisDirection: AxisDirection.up,
+      offset: new ViewportOffset.zero(),
       children: <RenderSliver>[
         new RenderSliverToBoxAdapter(child: a = new RenderSizedBox(const Size(100.0, 400.0))),
         new RenderSliverToBoxAdapter(child: b = new RenderSizedBox(const Size(100.0, 400.0))),
@@ -114,6 +118,7 @@ void main() {
     RenderBox a, b, c, d, e;
     RenderViewport2 root = new RenderViewport2(
       axisDirection: AxisDirection.right,
+      offset: new ViewportOffset.zero(),
       children: <RenderSliver>[
         new RenderSliverToBoxAdapter(child: a = new RenderSizedBox(const Size(400.0, 100.0))),
         new RenderSliverToBoxAdapter(child: b = new RenderSizedBox(const Size(400.0, 100.0))),
@@ -162,6 +167,7 @@ void main() {
     RenderBox a, b, c, d, e;
     RenderViewport2 root = new RenderViewport2(
       axisDirection: AxisDirection.left,
+      offset: new ViewportOffset.zero(),
       children: <RenderSliver>[
         new RenderSliverToBoxAdapter(child: a = new RenderSizedBox(const Size(400.0, 100.0))),
         new RenderSliverToBoxAdapter(child: b = new RenderSizedBox(const Size(400.0, 100.0))),
