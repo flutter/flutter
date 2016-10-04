@@ -158,6 +158,18 @@ abstract class PaintPattern {
   /// [Canvas.drawPath] call are ignored.
   void path({ Color color, bool hasMaskFilter, PaintingStyle style });
 
+  /// Indicates that a line is expected next.
+  ///
+  /// The next line is examined. Any arguments that are passed to this method
+  /// are compared to the actual [Canvas.drawLine] call's `paint` argument, and
+  /// any mismatches result in failure.
+  ///
+  /// If no call to [Canvas.drawLine] was made, then this results in failure.
+  ///
+  /// Any calls made between the last matched call (if any) and the
+  /// [Canvas.drawLine] call are ignored.
+  void line({ Color color, bool hasMaskFilter, PaintingStyle style });
+
   /// Provides a custom matcher.
   ///
   /// Each method call after the last matched call (if any) will be passed to
@@ -233,6 +245,11 @@ class _TestRecordingCanvasPatternMatcher extends Matcher implements PaintPattern
   @override
   void path({ Color color, bool hasMaskFilter, PaintingStyle style }) {
     _predicates.add(new _PathPaintPredicate(color: color, hasMaskFilter: hasMaskFilter, style: style));
+  }
+
+  @override
+  void line({ Color color, bool hasMaskFilter, PaintingStyle style }) {
+    _predicates.add(new _LinePaintPredicate(color: color, hasMaskFilter: hasMaskFilter, style: style));
   }
 
   @override
@@ -570,6 +587,13 @@ class _CirclePaintPredicate extends _DrawCommandPaintPredicate {
 class _PathPaintPredicate extends _DrawCommandPaintPredicate {
   _PathPaintPredicate({ Color color, bool hasMaskFilter, PaintingStyle style }) : super(
     #drawPath, 'a path', 2, 1, color: color, hasMaskFilter: hasMaskFilter, style: style
+  );
+}
+
+// TODO(ianh): add arguments to test the points, length, angle, that kind of thing
+class _LinePaintPredicate extends _DrawCommandPaintPredicate {
+  _LinePaintPredicate({ Color color, bool hasMaskFilter, PaintingStyle style }) : super(
+    #drawLine, 'a line', 3, 2, color: color, hasMaskFilter: hasMaskFilter, style: style
   );
 }
 

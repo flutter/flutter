@@ -320,7 +320,7 @@ class RenderPositionedBox extends RenderAligningShiftedBox {
         paint = new Paint()
           ..style = PaintingStyle.stroke
           ..strokeWidth = 1.0
-          ..color = debugPaintArrowColor;
+          ..color = debugPaintBoxArrowColor;
         path = new Path();
         final BoxParentData childParentData = child.parentData;
         if (childParentData.offset.dy > 0.0) {
