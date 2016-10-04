@@ -26,11 +26,12 @@ class LayerTree {
   void Raster(CompositorContext::ScopedFrame& frame,
               bool ignore_raster_cache = false);
 
+#if defined(OS_FUCHSIA)
   // TODO(abarth): Integrate scene updates with the rasterization pass so that
   // we can draw on top of child scenes (and so that we can apply clips and
   // blending operations to child scene).
-  void UpdateScene(mojo::gfx::composition::SceneUpdate* update,
-                   mojo::gfx::composition::Node* container);
+  void UpdateScene(mozart::SceneUpdate* update, mozart::Node* container);
+#endif
 
   Layer* root_layer() const { return root_layer_.get(); }
 

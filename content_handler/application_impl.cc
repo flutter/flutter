@@ -27,9 +27,6 @@ ApplicationImpl::ApplicationImpl(
     FTL_LOG(ERROR) << "Failed to receive bundle.";
     return;
   }
-  // TODO(abarth): In principle, we should call StartRuntimeIfReady() here but
-  // because we're draining the data pipe synchronously, we know that we can't
-  // possibly be ready yet because we haven't received the Initialize() message.
 }
 
 ApplicationImpl::~ApplicationImpl() {}
@@ -42,24 +39,36 @@ void ApplicationImpl::Initialize(mojo::InterfaceHandle<mojo::Shell> shell,
   mojo::ApplicationConnectorPtr connector;
   shell_->CreateApplicationConnector(mojo::GetProxy(&connector));
   runtime_holder_.reset(new RuntimeHolder());
-  runtime_holder_->Init(std::move(connector));
-  StartRuntimeIfReady();
+  runtime_holder_->Init(std::move(connector), std::move(bundle_));
 }
 
 void ApplicationImpl::AcceptConnection(
     const mojo::String& requestor_url,
     const mojo::String& resolved_url,
-    mojo::InterfaceRequest<mojo::ServiceProvider> services) {}
+    mojo::InterfaceRequest<mojo::ServiceProvider> services) {
+  service_provider_bindings_.AddBinding(this, std::move(services));
+}
 
 void ApplicationImpl::RequestQuit() {
   binding_.Close();
   delete this;
 }
 
-void ApplicationImpl::StartRuntimeIfReady() {
-  if (!runtime_holder_ || bundle_.empty())
-    return;
-  runtime_holder_->Run(url_, std::move(bundle_));
+void ApplicationImpl::ConnectToService(
+    const mojo::String& service_name,
+    mojo::ScopedMessagePipeHandle client_handle) {
+  if (service_name == mozart::ViewProvider::Name_) {
+    view_provider_bindings_.AddBinding(
+        this,
+        mojo::InterfaceRequest<mozart::ViewProvider>(std::move(client_handle)));
+  }
+}
+
+void ApplicationImpl::CreateView(
+    mojo::InterfaceRequest<mozart::ViewOwner> view_owner_request,
+    mojo::InterfaceRequest<mojo::ServiceProvider> services) {
+  runtime_holder_->CreateView(url_, std::move(view_owner_request),
+                              std::move(services));
 }
 
 }  // namespace flutter_content_handler

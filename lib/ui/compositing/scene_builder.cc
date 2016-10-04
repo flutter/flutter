@@ -5,7 +5,6 @@
 #include "flutter/lib/ui/compositing/scene_builder.h"
 
 #include "flutter/flow/layers/backdrop_filter_layer.h"
-#include "flutter/flow/layers/child_scene_layer.h"
 #include "flutter/flow/layers/clip_path_layer.h"
 #include "flutter/flow/layers/clip_rect_layer.h"
 #include "flutter/flow/layers/clip_rrect_layer.h"
@@ -18,11 +17,16 @@
 #include "flutter/flow/layers/transform_layer.h"
 #include "flutter/lib/ui/painting/matrix.h"
 #include "flutter/lib/ui/painting/shader.h"
+#include "lib/ftl/build_config.h"
 #include "lib/tonic/dart_args.h"
 #include "lib/tonic/dart_binding_macros.h"
 #include "lib/tonic/converter/dart_converter.h"
 #include "lib/tonic/dart_library_natives.h"
 #include "third_party/skia/include/core/SkColorFilter.h"
+
+#if defined(OS_FUCHSIA)
+#include "flutter/flow/layers/child_scene_layer.h"
+#endif
 
 namespace blink {
 
@@ -197,17 +201,16 @@ void SceneBuilder::addChildScene(double dx,
                                  int physicalWidth,
                                  int physicalHeight,
                                  uint32_t sceneToken) {
+#if defined(OS_FUCHSIA)
   if (!m_currentLayer)
     return;
   std::unique_ptr<flow::ChildSceneLayer> layer(new flow::ChildSceneLayer());
   layer->set_offset(SkPoint::Make(dx, dy));
   layer->set_device_pixel_ratio(devicePixelRatio);
   layer->set_physical_size(SkISize::Make(physicalWidth, physicalHeight));
-  mojo::gfx::composition::SceneTokenPtr token =
-      mojo::gfx::composition::SceneToken::New();
-  token->value = sceneToken;
-  layer->set_scene_token(token.Pass());
+  layer->set_scene_token(sceneToken);
   m_currentLayer->Add(std::move(layer));
+#endif
 }
 
 void SceneBuilder::addPerformanceOverlay(uint64_t enabledOptions,

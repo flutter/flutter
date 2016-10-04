@@ -4,12 +4,11 @@
 
 module sky;
 
+import "flutter/services/engine/input_event.mojom";
+import "flutter/services/pointer/pointer.mojom";
 import "mojo/public/interfaces/application/service_provider.mojom";
 import "mojo/public/interfaces/application/shell.mojom";
 import "mojo/services/asset_bundle/interfaces/asset_bundle.mojom";
-import "mojo/services/ui/views/interfaces/views.mojom";
-import "flutter/services/engine/input_event.mojom";
-import "flutter/services/pointer/pointer.mojom";
 
 enum AppLifecycleState {
   PAUSED,
@@ -31,7 +30,6 @@ struct ServicesData {
   mojo.Shell? shell;
   mojo.ServiceProvider? incoming_services;
   mojo.ServiceProvider&? outgoing_services;
-  mojo.ui.View? view;
   mojo.ServiceProvider? view_services;
 };
 

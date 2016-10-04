@@ -11,6 +11,7 @@
 #include "flutter/flow/instrumentation.h"
 #include "flutter/flow/raster_cache.h"
 #include "flutter/glue/trace_event.h"
+#include "lib/ftl/build_config.h"
 #include "lib/ftl/logging.h"
 #include "lib/ftl/macros.h"
 #include "third_party/skia/include/core/SkCanvas.h"
@@ -23,14 +24,12 @@
 #include "third_party/skia/include/core/SkRRect.h"
 #include "third_party/skia/include/core/SkXfermode.h"
 
-namespace mojo {
-namespace gfx {
-namespace composition {
+#if defined(OS_FUCHSIA)
+namespace mozart {
 class SceneUpdate;
 class Node;
-}  // composition
-}  // namespace gfx
-}  // namespace mojo
+}  // namespace mozart
+#endif
 
 namespace flow {
 
@@ -55,8 +54,11 @@ class Layer {
   };
 
   virtual void Paint(PaintContext& context) = 0;
-  virtual void UpdateScene(mojo::gfx::composition::SceneUpdate* update,
-                           mojo::gfx::composition::Node* container);
+
+#if defined(OS_FUCHSIA)
+  virtual void UpdateScene(mozart::SceneUpdate* update,
+                           mozart::Node* container);
+#endif
 
   ContainerLayer* parent() const { return parent_; }
 

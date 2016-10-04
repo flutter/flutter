@@ -16,6 +16,5 @@ class MojoServices {
   static int takeIncomingServices() native "MojoServices_takeIncomingServices";
   static int takeOutgoingServices() native "MojoServices_takeOutgoingServices";
   static int takeShell() native "MojoServices_takeShell";
-  static int takeView() native "MojoServices_takeView";
   static int takeViewServices() native "MojoServices_takeViewServices";
 }

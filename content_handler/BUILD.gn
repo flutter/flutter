@@ -12,16 +12,18 @@ executable("content_handler") {
     "application_impl.h",
     "content_handler_impl.cc",
     "content_handler_impl.h",
-    "framebuffer_skia.cc",
-    "framebuffer_skia.h",
     "main.cc",
     "rasterizer.cc",
     "rasterizer.h",
     "runtime_holder.cc",
     "runtime_holder.h",
+    "skia_surface_holder.cc",
+    "skia_surface_holder.h",
   ]
 
   deps = [
+    "//apps/mozart/services/composition/interfaces",
+    "//apps/mozart/services/views/interfaces",
     "//dart/runtime:libdart",
     "//dart/runtime/vm:libdart_platform",
     "//flutter/assets",

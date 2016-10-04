@@ -11,10 +11,8 @@ mojom("interfaces") {
   ]
 
   deps = [
+    "//flutter/services/pointer:interfaces",
     "//mojo/public/interfaces/application",
     "//mojo/services/asset_bundle/interfaces",
-    "//mojo/services/gfx/composition/interfaces",
-    "//mojo/services/ui/views/interfaces",
-    "//flutter/services/pointer:interfaces",
   ]
 }

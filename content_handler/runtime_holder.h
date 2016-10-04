@@ -5,6 +5,7 @@
 #ifndef FLUTTER_CONTENT_HANDLER_RUNTIME_HOLDER_H_
 #define FLUTTER_CONTENT_HANDLER_RUNTIME_HOLDER_H_
 
+#include "apps/mozart/services/views/interfaces/view_manager.mojom.h"
 #include "flutter/assets/unzipper_provider.h"
 #include "flutter/assets/zip_asset_store.h"
 #include "flutter/flow/layers/layer_tree.h"
@@ -14,20 +15,22 @@
 #include "lib/ftl/functional/closure.h"
 #include "lib/ftl/macros.h"
 #include "lib/ftl/memory/weak_ptr.h"
+#include "mojo/public/cpp/bindings/binding.h"
 #include "mojo/public/interfaces/application/application_connector.mojom.h"
 #include "mojo/services/asset_bundle/interfaces/asset_bundle.mojom.h"
-#include "mojo/services/framebuffer/interfaces/framebuffer.mojom.h"
 
 namespace flutter_content_handler {
 class Rasterizer;
 
-class RuntimeHolder : public blink::RuntimeDelegate {
+class RuntimeHolder : public blink::RuntimeDelegate, mozart::ViewListener {
  public:
   RuntimeHolder();
   ~RuntimeHolder();
 
-  void Init(mojo::ApplicationConnectorPtr connector);
-  void Run(const std::string& script_uri, std::vector<char> bundle);
+  void Init(mojo::ApplicationConnectorPtr connector, std::vector<char> bundle);
+  void CreateView(const std::string& script_uri,
+                  mojo::InterfaceRequest<mozart::ViewOwner> view_owner_request,
+                  mojo::InterfaceRequest<mojo::ServiceProvider> services);
 
  private:
   // |blink::RuntimeDelegate| implementation:
@@ -35,30 +38,35 @@ class RuntimeHolder : public blink::RuntimeDelegate {
   void Render(std::unique_ptr<flow::LayerTree> layer_tree) override;
   void DidCreateMainIsolate(Dart_Isolate isolate) override;
 
+  // |mozart::ViewListener| implementation:
+  void OnInvalidation(mozart::ViewInvalidationPtr invalidation,
+                      const OnInvalidationCallback& callback) override;
+
   ftl::WeakPtr<RuntimeHolder> GetWeakPtr();
 
   void InitRootBundle(std::vector<char> bundle);
   blink::UnzipperProvider GetUnzipperProviderForRootBundle();
 
-  void DidCreateFramebuffer(
-      mojo::InterfaceHandle<mojo::Framebuffer> framebuffer,
-      mojo::FramebufferInfoPtr info);
-
-  void ScheduleDelayedFrame();
   void BeginFrame();
   void OnFrameComplete();
+  void Invalidate();
 
   std::vector<char> root_bundle_data_;
   ftl::RefPtr<blink::ZipAssetStore> asset_store_;
   mojo::asset_bundle::AssetBundlePtr root_bundle_;
 
-  mojo::FramebufferProviderPtr framebuffer_provider_;
   std::unique_ptr<Rasterizer> rasterizer_;
   std::unique_ptr<blink::RuntimeController> runtime_;
   sky::ViewportMetricsPtr viewport_metrics_;
 
-  bool runtime_requested_frame_ = false;
-  bool did_defer_frame_request_ = false;
+  mozart::ViewManagerPtr view_manager_;
+  mojo::Binding<mozart::ViewListener> view_listener_binding_;
+  mozart::ViewPtr view_;
+  mozart::ViewPropertiesPtr view_properties_;
+  uint32_t scene_version_ = mozart::kSceneVersionNone;
+
+  bool pending_invalidation_ = false;
+  OnInvalidationCallback deferred_invalidation_callback_;
   bool is_ready_to_draw_ = false;
   int outstanding_requests_ = 0;
 
