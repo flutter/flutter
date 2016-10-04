@@ -7,6 +7,7 @@
 #include "base/mac/scoped_nsautorelease_pool.h"
 #include "base/trace_event/trace_event.h"
 #include "flutter/shell/platform/darwin/common/view_service_provider.h"
+#include "flutter/shell/platform/darwin/common/platform_service_provider.h"
 #include "flutter/sky/engine/wtf/MakeUnique.h"
 #include "lib/ftl/synchronization/waitable_event.h"
 #include "mojo/public/cpp/application/connect.h"
