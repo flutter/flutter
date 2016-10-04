@@ -24,6 +24,7 @@
 #include "flutter/shell/common/engine.h"
 #include "flutter/shell/common/shell.h"
 #include "jni/FlutterView_jni.h"
+#include "lib/ftl/functional/wrap_lambda.h"
 #include "third_party/skia/include/core/SkSurface.h"
 
 namespace shell {
@@ -430,13 +431,13 @@ void PlatformViewAndroid::DispatchPointerDataPacket(JNIEnv* env,
                                                     jint position) {
   char* data = static_cast<char*>(env->GetDirectBufferAddress(buffer));
 
-  auto engine = engine_->GetWeakPtr();
-  PointerDataPacket* packet = new PointerDataPacket(data, position);
-  blink::Threads::UI()->PostTask([engine, packet] {
+  blink::Threads::UI()->PostTask(ftl::WrapLambda([
+    engine = engine_->GetWeakPtr(),
+    packet = std::make_unique<PointerDataPacket>(data, position)
+  ] {
     if (engine.get())
       engine->HandlePointerDataPacket(*packet);
-    delete packet;
-  });
+  }));
 }
 
 void PlatformViewAndroid::ReleaseSurface() {
