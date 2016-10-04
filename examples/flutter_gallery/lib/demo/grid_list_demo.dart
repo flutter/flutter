@@ -78,29 +78,29 @@ class _GridPhotoViewerState extends State<GridPhotoViewer> with SingleTickerProv
     });
   }
 
-  void _handleOnScaleStart(Point focalPoint) {
+  void _handleOnScaleStart(ScaleStartDetails details) {
     setState(() {
       _lastScale = 1.0;
-      _lastFocalPoint = focalPoint;
+      _lastFocalPoint = details.focalPoint;
       // The fling animation stops if an input gesture starts.
       _controller.stop();
     });
   }
 
-  void _handleOnScaleUpdate(double scale, Point focalPoint) {
+  void _handleOnScaleUpdate(ScaleUpdateDetails details) {
     setState(() {
-      _scale = (_scale + (scale - _lastScale)).clamp(1.0, 3.0);
-      _lastScale = scale;
-      _focalPoint = _clampFocalPoint(_focalPoint + (_lastFocalPoint - focalPoint));
-      _lastFocalPoint = focalPoint;
+      _scale = (_scale + (details.scale - _lastScale)).clamp(1.0, 3.0);
+      _lastScale = details.scale;
+      _focalPoint = _clampFocalPoint(_focalPoint + (_lastFocalPoint - details.focalPoint));
+      _lastFocalPoint = details.focalPoint;
     });
   }
 
-  void _handleOnScaleEnd(Velocity flingVelocity) {
-    final double magnitude = flingVelocity.pixelsPerSecond.distance;
+  void _handleOnScaleEnd(ScaleEndDetails details) {
+    final double magnitude = details.velocity.pixelsPerSecond.distance;
     if (magnitude < _kMinFlingVelocity)
       return;
-    final Offset direction = flingVelocity.pixelsPerSecond / magnitude;
+    final Offset direction = details.velocity.pixelsPerSecond / magnitude;
     final RenderBox box = context.findRenderObject();
     final double distance = (Point.origin & box.size).shortestSide;
     _flingAnimation = new Tween<Point>(

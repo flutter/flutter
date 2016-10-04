@@ -27,16 +27,63 @@ enum ScaleState {
   started,
 }
 
+/// Details for [GestureScaleStartCallback].
+class ScaleStartDetails {
+  /// Creates details for [GestureScaleStartCallback].
+  ///
+  /// The [focalPoint] argument must not be null.
+  ScaleStartDetails({ this.focalPoint: Point.origin }) {
+    assert(focalPoint != null);
+  }
+
+  /// The initial focal point of the pointers in contact with the screen.
+  /// Reported in global coordinates.
+  final Point focalPoint;
+}
+
+/// Details for [GestureScaleUpdateCallback].
+class ScaleUpdateDetails {
+  /// Creates details for [GestureScaleUpdateCallback].
+  ///
+  /// The [focalPoint] and [scale] arguments must not be null. The [scale]
+  /// argument must be greater than or equal to zero.
+  ScaleUpdateDetails({ this.focalPoint: Point.origin, this.scale: 1.0 }) {
+    assert(focalPoint != null);
+    assert(scale != null && scale >= 0.0);
+  }
+
+  /// The focal point of the pointers in contact with the screen. Reported in
+  /// global coordinates.
+  final Point focalPoint;
+
+  /// The scale implied by the pointers in contact with the screen. A value
+  /// greater than or equal to zero.
+  final double scale;
+}
+
+/// Details for [GestureScaleEndCallback].
+class ScaleEndDetails {
+  /// Creates details for [GestureScaleEndCallback].
+  ///
+  /// The [velocity] argument must not be null.
+  ScaleEndDetails({ this.velocity: Velocity.zero }) {
+    assert(velocity != null);
+  }
+
+  /// The velocity of the last pointer to be lifted off of the screen.
+  final Velocity velocity;
+}
+
 /// Signature for when the pointers in contact with the screen have established
 /// a focal point and initial scale of 1.0.
-typedef void GestureScaleStartCallback(Point focalPoint);
+typedef void GestureScaleStartCallback(ScaleStartDetails details);
 
 /// Signature for when the pointers in contact with the screen have indicated a
 /// new focal point and/or scale.
-typedef void GestureScaleUpdateCallback(double scale, Point focalPoint);
+typedef void GestureScaleUpdateCallback(ScaleUpdateDetails details);
 
 /// Signature for when the pointers are no longer in contact with the screen.
-typedef void GestureScaleEndCallback(Velocity flingVelocity);
+typedef void GestureScaleEndCallback(ScaleEndDetails details);
 
 bool _isFlingGesture(Velocity velocity) {
   assert(velocity != null);
@@ -133,9 +180,9 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
             final Offset pixelsPerSecond = velocity.pixelsPerSecond;
             if (pixelsPerSecond.distanceSquared > kMaxFlingVelocity * kMaxFlingVelocity)
               velocity = new Velocity(pixelsPerSecond: (pixelsPerSecond / pixelsPerSecond.distance) * kMaxFlingVelocity);
-            onEnd(velocity);
+            onEnd(new ScaleEndDetails(velocity: velocity));
           } else {
-            onEnd(Velocity.zero);
+            onEnd(new ScaleEndDetails(velocity: Velocity.zero));
           }
         }
         _state = ScaleState.accepted;
@@ -153,11 +200,11 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
     if (_state == ScaleState.accepted && !configChanged) {
       _state = ScaleState.started;
       if (onStart != null)
-        onStart(focalPoint);
+        onStart(new ScaleStartDetails(focalPoint: focalPoint));
     }
 
     if (_state == ScaleState.started && onUpdate != null)
-      onUpdate(_scaleFactor, focalPoint);
+      onUpdate(new ScaleUpdateDetails(scale: _scaleFactor, focalPoint: focalPoint));
   }
 
   @override
