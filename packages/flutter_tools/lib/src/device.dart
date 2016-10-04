@@ -249,6 +249,8 @@ abstract class Device {
 
     return devices.map((Device device) {
       String supportIndicator = device.isSupported() ? '' : ' (unsupported)';
+      if (device.isLocalEmulator)
+        supportIndicator += ' • simulator';
       return '${device.name.padRight(nameWidth)} • '
              '${device.id.padRight(idWidth)} • '
              '${getNameForTargetPlatform(device.platform)}$supportIndicator';
