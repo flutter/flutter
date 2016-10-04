@@ -15,7 +15,6 @@ export 'src/widgets/auto_layout.dart';
 export 'src/widgets/banner.dart';
 export 'src/widgets/basic.dart';
 export 'src/widgets/binding.dart';
-export 'src/widgets/child_view.dart';
 export 'src/widgets/clamp_overscrolls.dart';
 export 'src/widgets/container.dart';
 export 'src/widgets/debug.dart';

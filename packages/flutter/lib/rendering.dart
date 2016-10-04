@@ -27,7 +27,6 @@ export 'src/rendering/auto_layout.dart';
 export 'src/rendering/binding.dart';
 export 'src/rendering/block.dart';
 export 'src/rendering/box.dart';
-export 'src/rendering/child_view.dart';
 export 'src/rendering/custom_layout.dart';
 export 'src/rendering/debug.dart';
 export 'src/rendering/editable_line.dart';
