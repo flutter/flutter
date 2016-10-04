@@ -161,8 +161,19 @@ class TestAsyncUtils {
     do {
       skipCount += 1;
       scope = candidateScope;
-      candidateScope = skipCount < _scopeStack.length ? _scopeStack[_scopeStack.length - skipCount - 1] : null;
-    } while (candidateScope?.zone != zone);
+      if (skipCount >= _scopeStack.length) {
+        if (zone == null)
+          break;
+        // Some people have reported reaching this point, but it's not clear
+        // why. For now, just silently return.
+        // TODO(ianh): If we ever get a test case that shows how we reach
+        // this point, reduce it and report the error if there is one.
+        return;
+      }
+      candidateScope = _scopeStack[_scopeStack.length - skipCount - 1];
+      assert(candidateScope != null);
+      assert(candidateScope.zone != null);
+    } while (candidateScope.zone != zone);
     assert(scope != null);
     StringBuffer message = new StringBuffer();
     message.writeln('Guarded function conflict. You must use "await" with all Future-returning test APIs.');
