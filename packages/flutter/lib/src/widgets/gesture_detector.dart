@@ -26,6 +26,9 @@ export 'package:flutter/gestures.dart' show
   GestureScaleStartCallback,
   GestureScaleUpdateCallback,
   GestureScaleEndCallback,
+  ScaleStartDetails,
+  ScaleUpdateDetails,
+  ScaleEndDetails,
   TapDownDetails,
   TapUpDetails,
   Velocity;

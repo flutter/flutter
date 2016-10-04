@@ -79,21 +79,21 @@ class _GestureDemoState extends State<GestureDemo> {
   bool _doubleTapEnabled = true;
   bool _longPressEnabled = true;
 
-  void _handleScaleStart(Point focalPoint) {
+  void _handleScaleStart(ScaleStartDetails details) {
     setState(() {
-      _startingFocalPoint = focalPoint;
+      _startingFocalPoint = details.focalPoint;
       _previousOffset = _offset;
       _previousZoom = _zoom;
     });
   }
 
-  void _handleScaleUpdate(double scale, Point focalPoint) {
+  void _handleScaleUpdate(ScaleUpdateDetails details) {
     setState(() {
-      _zoom = (_previousZoom * scale);
+      _zoom = (_previousZoom * details.scale);
 
       // Ensure that item under the focal point stays in the same place despite zooming
       Offset normalizedOffset = (_startingFocalPoint.toOffset() - _previousOffset) / _previousZoom;
-      _offset = focalPoint.toOffset() - normalizedOffset * _zoom;
+      _offset = details.focalPoint.toOffset() - normalizedOffset * _zoom;
     });
   }
 
