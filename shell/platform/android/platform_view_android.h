@@ -33,6 +33,9 @@ class PlatformViewAndroid : public PlatformView {
 
   void SurfaceDestroyed(JNIEnv* env, jobject obj);
 
+  void DispatchPointerDataPacket(JNIEnv* env, jobject obj, jobject buffer,
+                                 jint position);
+
   base::android::ScopedJavaLocalRef<jobject> GetBitmap(JNIEnv* env,
                                                        jobject obj);
 

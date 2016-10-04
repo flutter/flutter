@@ -185,13 +185,19 @@ void Engine::OnLocaleChanged(const mojo::String& language_code,
     runtime_->SetLocale(language_code_, country_code_);
 }
 
-// TODO(abarth): Remove pointer::PointerPacketPtr and route
-// blink::PointerDataPacket here.
+void Engine::HandlePointerDataPacket(const PointerDataPacket& packet) {
+  TRACE_EVENT0("flutter", "Engine::HandlePointerDataPacket");
+  if (runtime_)
+    runtime_->HandlePointerDataPacket(packet);
+}
+
+// TODO(abarth): Remove pointer::PointerPacketPtr and route PointerDataPacket
+// here.
 void Engine::OnPointerPacket(pointer::PointerPacketPtr packetPtr) {
   TRACE_EVENT0("flutter", "Engine::OnPointerPacket");
   if (runtime_) {
     const size_t length = packetPtr->pointers.size();
-    blink::PointerDataPacket packet(length);
+    PointerDataPacket packet(length);
     for (size_t i = 0; i < length; ++i) {
       const pointer::PointerPtr& pointer = packetPtr->pointers[i];
       blink::PointerData pointer_data;

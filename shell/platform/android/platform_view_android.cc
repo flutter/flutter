@@ -11,6 +11,7 @@
 #include <sys/time.h>
 #include <sys/types.h>
 
+#include <memory>
 #include <utility>
 
 #include "base/android/jni_android.h"
@@ -20,8 +21,10 @@
 #include "flutter/common/threads.h"
 #include "flutter/flow/compositor_context.h"
 #include "flutter/runtime/dart_service_isolate.h"
+#include "flutter/shell/common/engine.h"
 #include "flutter/shell/common/shell.h"
 #include "jni/FlutterView_jni.h"
+#include "lib/ftl/functional/wrap_lambda.h"
 #include "third_party/skia/include/core/SkSurface.h"
 
 namespace shell {
@@ -420,6 +423,21 @@ void PlatformViewAndroid::UpdateThreadPriorities() {
 
 void PlatformViewAndroid::SurfaceDestroyed(JNIEnv* env, jobject obj) {
   ReleaseSurface();
+}
+
+void PlatformViewAndroid::DispatchPointerDataPacket(JNIEnv* env,
+                                                    jobject obj,
+                                                    jobject buffer,
+                                                    jint position) {
+  char* data = static_cast<char*>(env->GetDirectBufferAddress(buffer));
+
+  blink::Threads::UI()->PostTask(ftl::WrapLambda([
+    engine = engine_->GetWeakPtr(),
+    packet = std::make_unique<PointerDataPacket>(data, position)
+  ] {
+    if (engine.get())
+      engine->HandlePointerDataPacket(*packet);
+  }));
 }
 
 void PlatformViewAndroid::ReleaseSurface() {

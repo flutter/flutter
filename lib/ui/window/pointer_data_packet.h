@@ -17,6 +17,7 @@ namespace blink {
 class PointerDataPacket {
  public:
   explicit PointerDataPacket(size_t count);
+  PointerDataPacket(char* data, size_t num_bytes);
   ~PointerDataPacket();
 
   void SetPointerData(size_t i, const PointerData& data);

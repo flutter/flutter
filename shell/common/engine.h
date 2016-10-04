@@ -25,6 +25,7 @@
 
 namespace shell {
 class Animator;
+using PointerDataPacket = blink::PointerDataPacket;
 
 class Engine : public UIDelegate,
                public sky::SkyEngine,
@@ -47,6 +48,8 @@ class Engine : public UIDelegate,
   Dart_Port GetUIIsolateMainPort();
 
   std::string GetUIIsolateName();
+
+  void HandlePointerDataPacket(const PointerDataPacket& packet);
 
  private:
   // UIDelegate implementation:
