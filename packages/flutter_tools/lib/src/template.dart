@@ -86,7 +86,7 @@ class Template {
           return;
         }
       } else {
-        printStatus('  $relativePathForLogging');
+        printTrace('  $relativePathForLogging');
       }
 
       finalDestinationFile.createSync(recursive: true);
