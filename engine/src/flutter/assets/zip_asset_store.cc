@@ -39,7 +39,7 @@ void ZipAssetStore::GetAsStream(const std::string& asset_name,
     if (fd.get() < 0)
       return;
     glue::CopyFromFileDescriptor(std::move(fd), std::move(producer),
-                                 task_runner_.get(), [](bool ignored) {});
+                                 task_runner_, [](bool ignored) {});
   } else {
     zip::UniqueUnzipper unzipper = unzipper_provider_();
     if (!unzipper.is_valid())
