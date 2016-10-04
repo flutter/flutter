@@ -53,6 +53,7 @@ def main():
     '--snapshot=%s' % args.snapshot,
     '--depfile=%s' % args.depfile,
     '--output-file=%s' % args.output_file,
+    '--header=#!mojo mojo:flutter_content_handler',
   ], env=env, cwd=args.app_dir)
 
   return result
