@@ -8,7 +8,6 @@ import 'dart:ui' show Offset;
 import 'package:flutter/painting.dart';
 import 'package:vector_math/vector_math_64.dart';
 import 'package:meta/meta.dart';
-import 'package:flutter_services/mojo/gfx/composition/scene_token.dart' as mojom;
 
 import 'debug.dart';
 
@@ -161,7 +160,7 @@ class ChildSceneLayer extends Layer {
   int physicalHeight;
 
   /// The composited scene that will contain the content rendered by the child.
-  mojom.SceneToken sceneToken;
+  int sceneToken;
 
   @override
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
@@ -170,7 +169,7 @@ class ChildSceneLayer extends Layer {
       devicePixelRatio,
       physicalWidth,
       physicalHeight,
-      sceneToken.value
+      sceneToken
     );
   }
 
@@ -180,7 +179,7 @@ class ChildSceneLayer extends Layer {
     description.add('offset: $offset');
     description.add('physicalWidth: $physicalWidth');
     description.add('physicalHeight: $physicalHeight');
-    description.add('sceneToken.value: ${sceneToken.value}');
+    description.add('sceneToken: $sceneToken');
   }
 }
 

@@ -20,6 +20,7 @@ import 'package:mojo/mojo/service_provider.mojom.dart' as mojom;
 
 import 'box.dart';
 import 'object.dart';
+import 'layer.dart';
 
 mojom.ViewProxy _initViewProxy() {
   int viewHandle = ui.MojoServices.takeView();
@@ -308,8 +309,15 @@ class RenderChildView extends RenderBox {
   @override
   void paint(PaintingContext context, Offset offset) {
     assert(needsCompositing);
-    if (_child?._viewInfo != null)
-      context.pushChildScene(offset, scale, _physicalWidth, _physicalHeight, _child._viewInfo.sceneToken);
+    if (_child?._viewInfo != null) {
+      context.addLayer(new ChildSceneLayer(
+        offset: offset,
+        devicePixelRatio: scale,
+        physicalWidth: _physicalWidth,
+        physicalHeight: _physicalHeight,
+        sceneToken: _child._viewInfo.sceneToken.value
+      ));
+    }
     assert(() {
       if (_view == null) {
         context.canvas.drawRect(offset & size, new Paint()..color = const Color(0xFF0000FF));
