@@ -22,9 +22,8 @@
 namespace shell {
 
 PlatformServiceProvider::PlatformServiceProvider(
-    mojo::InterfaceRequest<mojo::ServiceProvider> request,
-    DynamicServiceProviderCallback callback)
-    : dynamic_service_provider_(callback), binding_(this, request.Pass()) {}
+    mojo::InterfaceRequest<mojo::ServiceProvider> request)
+    : binding_(this, request.Pass()) {}
 
 PlatformServiceProvider::~PlatformServiceProvider() {}
 
@@ -94,8 +93,6 @@ void PlatformServiceProvider::ConnectToService(
     return;
   }
 #endif  // TARGET_OS_IPHONE
-
-  dynamic_service_provider_.Run(service_name, client_handle.Pass());
 }
 
 }  // namespace shell

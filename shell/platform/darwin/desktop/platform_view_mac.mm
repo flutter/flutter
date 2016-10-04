@@ -33,11 +33,6 @@ PlatformViewMac::PlatformViewMac(NSOpenGLView* gl_view)
 
 PlatformViewMac::~PlatformViewMac() = default;
 
-static void DynamicServiceResolve(const mojo::String& service_name,
-                                  mojo::ScopedMessagePipeHandle handle) {
-  // This platform does not support dynamic service loading.
-}
-
 static void IgnoreRequest(
     mojo::InterfaceRequest<flutter::platform::ApplicationMessages>) {}
 
@@ -45,8 +40,7 @@ void PlatformViewMac::ConnectToEngineAndSetupServices() {
   ConnectToEngine(mojo::GetProxy(&sky_engine_));
 
   mojo::ServiceProviderPtr service_provider;
-  new PlatformServiceProvider(mojo::GetProxy(&service_provider),
-                              base::Bind(DynamicServiceResolve));
+  new PlatformServiceProvider(mojo::GetProxy(&service_provider));
 
   mojo::ServiceProviderPtr view_service_provider;
   new ViewServiceProvider(IgnoreRequest,

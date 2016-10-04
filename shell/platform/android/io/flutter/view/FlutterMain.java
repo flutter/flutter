@@ -90,7 +90,6 @@ public class FlutterMain {
     private static final String DEFAULT_FLX = "app.flx";
 
     private static final String MANIFEST = "flutter.yaml";
-    private static final String SERVICES = "services.json";
     private static final String PRIVATE_DATA_DIRECTORY_SUFFIX = "sky_shell";
 
     private static final Set<String> SKY_RESOURCES = ImmutableSetBuilder.<String>newInstance()
@@ -199,8 +198,6 @@ public class FlutterMain {
     private static native void nativeRecordStartTimestamp(long initTimeMillis);
 
     private static void onServiceRegistryAvailable(final Context applicationContext, ServiceRegistry registry) {
-        parseServicesConfig(applicationContext, registry);
-
         registry.register(Activity.MANAGER.getName(), new ServiceFactory() {
             @Override
             public Binding connectToService(FlutterView view, Core core, MessagePipeHandle pipe) {
@@ -270,56 +267,6 @@ public class FlutterMain {
             @Override
             public Binding connectToService(FlutterView view, Core core, MessagePipeHandle pipe) {
                 return UrlLauncher.MANAGER.bind(new UrlLauncherImpl((android.app.Activity) view.getContext()), pipe);
-            }
-        });
-    }
-
-    /**
-     * Parses the auto-generated services.json file, which contains additional services to register.
-     */
-    private static void parseServicesConfig(Context applicationContext, ServiceRegistry registry) {
-        final AssetManager manager = applicationContext.getResources().getAssets();
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(manager.open(SERVICES)))) {
-            StringBuffer json = new StringBuffer();
-            while (true) {
-              String line = reader.readLine();
-              if (line == null)
-                  break;
-              json.append(line);
-            }
-
-            JSONObject object = (JSONObject) new JSONTokener(json.toString()).nextValue();
-            JSONArray services = object.getJSONArray("services");
-            for (int i = 0; i < services.length(); ++i) {
-                JSONObject service = services.getJSONObject(i);
-                String serviceName = service.getString("name");
-                String className = service.getString("class");
-                registerService(registry, serviceName, className);
-            }
-        } catch (FileNotFoundException e) {
-            // Not all apps will have a services.json file.
-            return;
-        } catch (Exception e) {
-            Log.e(TAG, "Failure parsing service configuration file", e);
-            return;
-        }
-    }
-
-    /**
-     * Registers a third-party service.
-     */
-    private static void registerService(ServiceRegistry registry, final String serviceName, final String className) {
-        registry.register(serviceName, new ServiceFactory() {
-            @Override
-            public Binding connectToService(FlutterView view, Core core, MessagePipeHandle pipe) {
-                try {
-                    return (Binding) Class.forName(className)
-                        .getMethod("connectToService", FlutterView.class, Core.class, MessagePipeHandle.class)
-                        .invoke(null, view, core, pipe);
-                } catch(Exception e) {
-                    Log.e(TAG, "Failed to register service '" + serviceName + "'", e);
-                    throw new RuntimeException(e);
-                }
             }
         });
     }

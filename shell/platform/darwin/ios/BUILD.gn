@@ -33,21 +33,18 @@ shared_library("flutter_framework_dylib") {
     "framework/Source/FlutterDartProject_Internal.h",
     "framework/Source/FlutterDartSource.h",
     "framework/Source/FlutterDartSource.mm",
-    "framework/Source/FlutterDynamicServiceLoader.h",
-    "framework/Source/FlutterDynamicServiceLoader.mm",
     "framework/Source/FlutterView.h",
     "framework/Source/FlutterView.mm",
     "framework/Source/FlutterViewController.mm",
     "platform_view_ios.h",
     "platform_view_ios.mm",
   ]
-  
+
 
   deps = [
     "//base:base",
     "//dart/runtime:libdart",
     "//flutter/services/activity",
-    "//flutter/services/dynamic:embedder",
     "//flutter/services/editing",
     "//flutter/services/engine:interfaces",
     "//flutter/services/media",

@@ -273,7 +273,6 @@ class IOSGLContext {
 
 PlatformViewIOS::PlatformViewIOS(CAEAGLLayer* layer)
     : context_(WTF::MakeUnique<IOSGLContext>(surface_config_, layer)),
-      dynamic_service_loader_([[FlutterDynamicServiceLoader alloc] init]),
       weak_factory_(this) {
   NSArray* paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory,
                                                        NSUserDomainMask, YES);
@@ -306,14 +305,6 @@ void PlatformViewIOS::ToggleAccessibility(UIView* view, bool enable) {
   }
 }
 
-static void DynamicServiceResolve(void* baton,
-                                  const mojo::String& service_name,
-                                  mojo::ScopedMessagePipeHandle handle) {
-  base::mac::ScopedNSAutoreleasePool pool;
-  auto loader = reinterpret_cast<FlutterDynamicServiceLoader*>(baton);
-  [loader resolveService:@(service_name.data()) handle:handle.Pass()];
-}
-
 void PlatformViewIOS::ConnectToEngineAndSetupServices() {
   ConnectToEngine(mojo::GetProxy(&engine_));
 
@@ -321,12 +312,7 @@ void PlatformViewIOS::ConnectToEngineAndSetupServices() {
 
   auto service_provider_proxy = mojo::GetProxy(&service_provider);
 
-  auto service_resolution_callback = base::Bind(
-      &DynamicServiceResolve,
-      base::Unretained(reinterpret_cast<void*>(dynamic_service_loader_.get())));
-
-  new PlatformServiceProvider(service_provider_proxy.Pass(),
-                              service_resolution_callback);
+  new PlatformServiceProvider(service_provider_proxy.Pass());
 
   ftl::WeakPtr<ApplicationMessagesImpl> appplication_messages_impl =
       app_message_receiver_.GetWeakPtr();
