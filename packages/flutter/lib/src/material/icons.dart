@@ -42,11 +42,15 @@ class IconData {
 class Icons {
   Icons._();
 
+  // Generated code: do not hand-edit.
+  // See https://github.com/flutter/flutter/wiki/Updating-Material-Design-Fonts
+  // BEGIN GENERATED
+
   /// <p><i class="material-icons md-36">360</i> &#x2014; material icon named "360".</p>
   static const IconData threesixty = const IconData(0xe577);
 
   /// <p><i class="material-icons md-36">3d_rotation</i> &#x2014; material icon named "3d rotation".</p>
-  static const IconData threed_rotation = const IconData(0xe84d); // 3d_rotation isn't a valid identifier.
+  static const IconData threed_rotation = const IconData(0xe84d);
 
   /// <p><i class="material-icons md-36">4k</i> &#x2014; material icon named "4k".</p>
   static const IconData four_k = const IconData(0xe072);
@@ -589,7 +593,7 @@ class Icons {
   static const IconData chrome_reader_mode = const IconData(0xe86d);
 
   /// <p><i class="material-icons md-36">class</i> &#x2014; material icon named "class".</p>
-  static const IconData class_ = const IconData(0xe86e); // class is a reserved word in Dart.
+  static const IconData class_ = const IconData(0xe86e);
 
   /// <p><i class="material-icons md-36">clear</i> &#x2014; material icon named "clear".</p>
   static const IconData clear = const IconData(0xe14c);
@@ -2996,4 +3000,5 @@ class Icons {
 
   /// <p><i class="material-icons md-36">zoom_out_map</i> &#x2014; material icon named "zoom out map".</p>
   static const IconData zoom_out_map = const IconData(0xe56b);
+  // END GENERATED
 }
