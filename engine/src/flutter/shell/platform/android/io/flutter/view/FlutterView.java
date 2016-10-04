@@ -44,10 +44,6 @@ import org.chromium.mojo.system.impl.CoreImpl;
 import org.chromium.mojom.editing.Keyboard;
 import org.chromium.mojom.flutter.platform.ApplicationMessages;
 import org.chromium.mojom.mojo.ServiceProvider;
-import org.chromium.mojom.pointer.Pointer;
-import org.chromium.mojom.pointer.PointerKind;
-import org.chromium.mojom.pointer.PointerPacket;
-import org.chromium.mojom.pointer.PointerType;
 import org.chromium.mojom.raw_keyboard.RawKeyboardService;
 import org.chromium.mojom.semantics.SemanticsServer;
 import org.chromium.mojom.sky.AppLifecycleState;
@@ -55,6 +51,8 @@ import org.chromium.mojom.sky.ServicesData;
 import org.chromium.mojom.sky.SkyEngine;
 import org.chromium.mojom.sky.ViewportMetrics;
 
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -254,71 +252,117 @@ public class FlutterView extends SurfaceView
         return mKeyboardState.createInputConnection(outAttrs);
     }
 
-    private Integer getPointerTypeForAction(int maskedAction) {
+    // Must match the PointerChange enum in pointer.dart.
+    private static final int kPointerChangeAdd = 0;
+    private static final int kPointerChangeRemove = 1;
+    private static final int kPointerChangeDown = 2;
+    private static final int kPointerChangeMove = 3;
+    private static final int kPointerChangeUp = 4;
+    private static final int kPointerChangeCancel = 5;
+
+    // Must match the PointerDeviceKind enum in pointer.dart.
+    private static final int kPointerDeviceKindTouch = 0;
+    private static final int kPointerDeviceKindMouse = 1;
+    private static final int kPointerDeviceKindStylus = 2;
+    private static final int kPointerDeviceKindInvertedStylus = 3;
+
+    private int getPointerChangeForAction(int maskedAction) {
         // Primary pointer:
         if (maskedAction == MotionEvent.ACTION_DOWN) {
-            return PointerType.DOWN;
+            return kPointerChangeDown;
         }
         if (maskedAction == MotionEvent.ACTION_UP) {
-            return PointerType.UP;
+            return kPointerChangeUp;
         }
         // Secondary pointer:
         if (maskedAction == MotionEvent.ACTION_POINTER_DOWN) {
-            return PointerType.DOWN;
+            return kPointerChangeDown;
         }
         if (maskedAction == MotionEvent.ACTION_POINTER_UP) {
-            return PointerType.UP;
+            return kPointerChangeUp;
         }
         // All pointers:
         if (maskedAction == MotionEvent.ACTION_MOVE) {
-            return PointerType.MOVE;
+            return kPointerChangeMove;
         }
         if (maskedAction == MotionEvent.ACTION_CANCEL) {
-            return PointerType.CANCEL;
+            return kPointerChangeCancel;
         }
-        return null;
+        return -1;
+    }
+
+    private int getPointerDeviceTypeForToolType(int toolType) {
+        switch (toolType) {
+            case MotionEvent.TOOL_TYPE_FINGER:
+                return kPointerDeviceKindTouch;
+            case MotionEvent.TOOL_TYPE_STYLUS:
+                return kPointerDeviceKindStylus;
+            case MotionEvent.TOOL_TYPE_MOUSE:
+                return kPointerDeviceKindMouse;
+            default:
+                // MotionEvent.TOOL_TYPE_UNKNOWN will reach here.
+                return -1;
+        }
     }
 
     private void addPointerForIndex(MotionEvent event, int pointerIndex,
-                                    List<Pointer> result) {
-        Integer pointerType = getPointerTypeForAction(event.getActionMasked());
-        if (pointerType == null) {
+                                    ByteBuffer packet) {
+        int pointerChange = getPointerChangeForAction(event.getActionMasked());
+        if (pointerChange == -1) {
             return;
         }
 
-        Pointer pointer = new Pointer();
+        int pointerKind = event.getToolType(pointerIndex);
+        if (pointerKind == -1) {
+            return;
+        }
 
-        pointer.timeStamp = event.getEventTime() * 1000; // Convert from milliseconds to microseconds.
-        pointer.pointer = event.getPointerId(pointerIndex);
-        pointer.type = pointerType;
-        pointer.kind = PointerKind.TOUCH;
-        pointer.x = event.getX(pointerIndex);
-        pointer.y = event.getY(pointerIndex);
+        long timeStamp = event.getEventTime() * 1000; // Convert from milliseconds to microseconds.
 
-        pointer.buttons = 0;
-        pointer.down = false;
-        pointer.primary = false;
-        pointer.obscured = false;
+        packet.putLong(timeStamp); // time_stamp
+        packet.putLong(event.getPointerId(pointerIndex)); // pointer
+        packet.putLong(pointerChange); // change
+        packet.putLong(pointerKind); // kind
+        packet.putDouble(event.getX(pointerIndex)); // physical_x
+        packet.putDouble(event.getY(pointerIndex)); // physical_y
+
+        if (pointerKind == kPointerDeviceKindMouse) {
+          packet.putLong(event.getButtonState() & 0x1F); // buttons
+        } else if (pointerKind == kPointerDeviceKindStylus) {
+          packet.putLong((event.getButtonState() >> 4) & 0xF); // buttons
+        } else {
+          packet.putLong(0); // buttons
+        }
+
+        packet.putLong(0); // obscured
 
         // TODO(eseidel): Could get the calibrated range if necessary:
         // event.getDevice().getMotionRange(MotionEvent.AXIS_PRESSURE)
-        pointer.pressure = event.getPressure(pointerIndex);
-        pointer.pressureMin = 0.0f;
-        pointer.pressureMax = 1.0f;
+        packet.putDouble(event.getPressure(pointerIndex)); // presure
+        packet.putDouble(0.0); // pressure_min
+        packet.putDouble(1.0); // pressure_max
 
-        pointer.distance = 0.0f;
-        pointer.distanceMin = 0.0f;
-        pointer.distanceMax = 0.0f;
+        if (pointerKind == kPointerDeviceKindStylus) {
+          packet.putDouble(event.getAxisValue(MotionEvent.AXIS_DISTANCE, pointerIndex)); // distance
+          packet.putDouble(0.0); // distance_max
+        } else {
+          packet.putDouble(0.0); // distance
+          packet.putDouble(0.0); // distance_max
+        }
 
-        pointer.radiusMajor = 0.0f;
-        pointer.radiusMinor = 0.0f;
-        pointer.radiusMin = 0.0f;
-        pointer.radiusMax = 0.0f;
+        packet.putDouble(event.getToolMajor(pointerIndex)); // radius_major
+        packet.putDouble(event.getToolMinor(pointerIndex)); // radius_minor
 
-        pointer.orientation = 0.0f;
-        pointer.tilt = 0.0f;
+        packet.putDouble(0.0); // radius_min
+        packet.putDouble(0.0); // radius_max
 
-        result.add(pointer);
+        packet.putDouble(event.getAxisValue(MotionEvent.AXIS_ORIENTATION, pointerIndex)); // orientation
+
+        if (pointerKind == kPointerDeviceKindStylus) {
+          packet.putDouble(event.getAxisValue(MotionEvent.AXIS_TILT, pointerIndex)); // tilt
+        } else {
+          packet.putDouble(0.0); // tilt
+        }
     }
 
     @Override
@@ -332,10 +376,15 @@ public class FlutterView extends SurfaceView
             requestUnbufferedDispatch(event);
         }
 
-        ArrayList<Pointer> pointers = new ArrayList<Pointer>();
+        // These values must match the unpacking code in hooks.dart.
+        final int kPointerDataFieldCount = 19;
+        final int kBytePerField = 8;
 
-        // TODO(abarth): Rather than unpacking these events here, we should
-        // probably send them in one packet to the engine.
+        int pointerCount = event.getPointerCount();
+
+        ByteBuffer packet = ByteBuffer.allocateDirect(pointerCount * kPointerDataFieldCount * kBytePerField);
+        packet.order(ByteOrder.LITTLE_ENDIAN);
+
         int maskedAction = event.getActionMasked();
         // ACTION_UP, ACTION_POINTER_UP, ACTION_DOWN, and ACTION_POINTER_DOWN
         // only apply to a single pointer, other events apply to all pointers.
@@ -343,20 +392,18 @@ public class FlutterView extends SurfaceView
                 || maskedAction == MotionEvent.ACTION_POINTER_UP
                 || maskedAction == MotionEvent.ACTION_DOWN
                 || maskedAction == MotionEvent.ACTION_POINTER_DOWN) {
-            addPointerForIndex(event, event.getActionIndex(), pointers);
+            addPointerForIndex(event, event.getActionIndex(), packet);
         } else {
             // ACTION_MOVE may not actually mean all pointers have moved
             // but it's the responsibility of a later part of the system to
             // ignore 0-deltas if desired.
-            for (int p = 0; p < event.getPointerCount(); p++) {
-                addPointerForIndex(event, p, pointers);
+            for (int p = 0; p < pointerCount; p++) {
+                addPointerForIndex(event, p, packet);
             }
         }
 
-        PointerPacket packet = new PointerPacket();
-        packet.pointers = pointers.toArray(new Pointer[0]);
-        mSkyEngine.onPointerPacket(packet);
-
+        assert packet.position() % (kPointerDataFieldCount * kBytePerField) == 0;
+        nativeDispatchPointerDataPacket(mNativePlatformView, packet, packet.position());
         return true;
     }
 
@@ -527,6 +574,8 @@ public class FlutterView extends SurfaceView
     private static native void nativeSurfaceChanged(long nativePlatformViewAndroid, int backgroundColor);
     private static native void nativeSurfaceDestroyed(long nativePlatformViewAndroid);
     private static native Bitmap nativeGetBitmap(long nativePlatformViewAndroid);
+
+    private static native void nativeDispatchPointerDataPacket(long nativePlatformViewAndroid, ByteBuffer buffer, int position);
 
 
     // ACCESSIBILITY

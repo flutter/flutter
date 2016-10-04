@@ -53,6 +53,10 @@ void _onAppLifecycleStateChanged(int state) {
     window.onAppLifecycleStateChanged(AppLifecycleState.values[state]);
 }
 
+// If this value changes, update the encoding code in the following files:
+//
+//  * pointer_data.cc
+//  * FlutterView.java
 const int _kPointerDataFieldCount = 19;
 
 PointerDataPacket _unpackPointerDataPacket(ByteData packet) {

@@ -79,7 +79,6 @@ android_library("java") {
     "//flutter/services/media:media_lib",
     "//flutter/services/platform:interfaces_java",
     "//flutter/services/platform:platform_lib",
-    "//flutter/services/pointer:interfaces_java",
     "//flutter/services/raw_keyboard:interfaces_java",
     "//flutter/services/raw_keyboard:raw_keyboard_lib",
     "//flutter/services/semantics:interfaces_java",
