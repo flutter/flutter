@@ -2703,6 +2703,16 @@ class WidgetToRenderBoxAdapter extends LeafRenderObjectWidget {
   }
 }
 
+class SliverToBoxAdapter extends SingleChildRenderObjectWidget {
+  SliverToBoxAdapter({
+    Key key,
+    Widget child,
+  }) : super(key: key, child: child);
+
+  @override
+  RenderSliverToBoxAdapter createRenderObject(BuildContext context) => new RenderSliverToBoxAdapter();
+}
+
 
 // EVENT HANDLING
 
