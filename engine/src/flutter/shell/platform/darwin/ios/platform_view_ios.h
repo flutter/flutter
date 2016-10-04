@@ -13,7 +13,6 @@
 #include "flutter/services/platform/app_messages.mojom.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/accessibility_bridge.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/application_messages_impl.h"
-#include "flutter/shell/platform/darwin/ios/framework/Source/FlutterDynamicServiceLoader.h"
 #include "flutter/shell/common/platform_view.h"
 
 @class CAEAGLLayer;
@@ -60,7 +59,6 @@ class PlatformViewIOS : public PlatformView {
   flutter::platform::ApplicationMessagesPtr app_message_sender_;
   ApplicationMessagesImpl app_message_receiver_;
   std::unique_ptr<AccessibilityBridge> accessibility_bridge_;
-  base::scoped_nsprotocol<FlutterDynamicServiceLoader*> dynamic_service_loader_;
   ftl::WeakPtrFactory<PlatformViewIOS> weak_factory_;
 
   void SetupAndLoadFromSource(const std::string& main,

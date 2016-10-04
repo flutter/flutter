@@ -20,12 +20,6 @@ group("flutter") {
       "//flutter/sky",
     ]
   }
-
-  if (is_ios) {
-    deps += [
-      "//flutter/services/dynamic:sdk_lib_archive",
-    ]
-  }
 }
 
 if (!is_fuchsia) {

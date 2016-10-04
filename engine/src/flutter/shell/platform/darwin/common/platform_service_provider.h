@@ -14,12 +14,7 @@ namespace shell {
 
 class PlatformServiceProvider : public mojo::ServiceProvider {
  public:
-  using DynamicServiceProviderCallback =
-      base::Callback<void(const mojo::String& service_name,
-                          mojo::ScopedMessagePipeHandle)>;
-
-  PlatformServiceProvider(mojo::InterfaceRequest<mojo::ServiceProvider> request,
-                          DynamicServiceProviderCallback callback);
+  PlatformServiceProvider(mojo::InterfaceRequest<mojo::ServiceProvider> request);
 
   ~PlatformServiceProvider() override;
 
@@ -27,7 +22,6 @@ class PlatformServiceProvider : public mojo::ServiceProvider {
                         mojo::ScopedMessagePipeHandle client_handle) override;
 
  private:
-  DynamicServiceProviderCallback dynamic_service_provider_;
   mojo::StrongBinding<mojo::ServiceProvider> binding_;
 
   FTL_DISALLOW_COPY_AND_ASSIGN(PlatformServiceProvider);
