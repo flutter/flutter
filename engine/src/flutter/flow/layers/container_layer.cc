@@ -39,10 +39,12 @@ void ContainerLayer::PaintChildren(PaintContext& context) const {
     layer->Paint(context);
 }
 
-void ContainerLayer::UpdateScene(mojo::gfx::composition::SceneUpdate* update,
-                                 mojo::gfx::composition::Node* container) {
+#if defined(OS_FUCHSIA)
+void ContainerLayer::UpdateScene(mozart::SceneUpdate* update,
+                                 mozart::Node* container) {
   for (auto& layer : layers_)
     layer->UpdateScene(update, container);
 }
+#endif
 
 }  // namespace flow

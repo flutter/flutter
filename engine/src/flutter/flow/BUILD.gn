@@ -10,8 +10,6 @@ source_set("flow") {
     "instrumentation.h",
     "layers/backdrop_filter_layer.cc",
     "layers/backdrop_filter_layer.h",
-    "layers/child_scene_layer.cc",
-    "layers/child_scene_layer.h",
     "layers/clip_path_layer.cc",
     "layers/clip_path_layer.h",
     "layers/clip_rect_layer.cc",
@@ -48,12 +46,16 @@ source_set("flow") {
     "//flutter/skia",
     "//flutter/synchronization",
     "//lib/ftl",
-    "//mojo/services/gfx/composition/interfaces",
   ]
 
   if (is_fuchsia) {
     sources += [
+      "layers/child_scene_layer.cc",
+      "layers/child_scene_layer.h",
       "texture_image_none.cc",
+    ]
+    deps += [
+      "//apps/mozart/services/composition/interfaces",
     ]
   } else {
     sources += [

@@ -9,7 +9,8 @@
 
 namespace flow {
 
-LayerTree::LayerTree() : scene_version_(0), rasterizer_tracing_threshold_(0) {}
+LayerTree::LayerTree()
+    : frame_size_{}, scene_version_(0), rasterizer_tracing_threshold_(0) {}
 
 LayerTree::~LayerTree() {}
 
@@ -32,10 +33,12 @@ void LayerTree::Raster(CompositorContext::ScopedFrame& frame,
   }
 }
 
-void LayerTree::UpdateScene(mojo::gfx::composition::SceneUpdate* update,
-                            mojo::gfx::composition::Node* container) {
+#if defined(OS_FUCHSIA)
+void LayerTree::UpdateScene(mozart::SceneUpdate* update,
+                            mozart::Node* container) {
   TRACE_EVENT0("flutter", "LayerTree::UpdateScene");
   root_layer_->UpdateScene(update, container);
 }
+#endif
 
 }  // namespace flow

@@ -49,13 +49,6 @@ void DartTakeShell(Dart_NativeArguments args) {
   Dart_SetIntegerReturnValue(args, handle);
 }
 
-void DartTakeView(Dart_NativeArguments args) {
-  int handle = MOJO_HANDLE_INVALID;
-  if (MojoServices* services = GetMojoServices())
-    handle = services->TakeView();
-  Dart_SetIntegerReturnValue(args, handle);
-}
-
 void DartTakeViewServices(Dart_NativeArguments args) {
   int handle = MOJO_HANDLE_INVALID;
   if (MojoServices* services = GetMojoServices())
@@ -71,7 +64,6 @@ void MojoServices::RegisterNatives(tonic::DartLibraryNatives* natives) {
       {"MojoServices_takeIncomingServices", DartTakeIncomingServices, 0, true},
       {"MojoServices_takeOutgoingServices", DartTakeOutgoingServices, 0, true},
       {"MojoServices_takeShell", DartTakeShell, 0, true},
-      {"MojoServices_takeView", DartTakeView, 0, true},
       {"MojoServices_takeViewServices", DartTakeViewServices, 0, true},
   });
 }
@@ -119,12 +111,6 @@ int MojoServices::TakeOutgoingServices() {
 int MojoServices::TakeShell() {
   if (services_)
     return services_->shell.PassHandle().release().value();
-  return MOJO_HANDLE_INVALID;
-}
-
-int MojoServices::TakeView() {
-  if (services_)
-    return services_->view.PassHandle().release().value();
   return MOJO_HANDLE_INVALID;
 }
 

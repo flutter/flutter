@@ -50,18 +50,19 @@ void ChildSceneLayer::Paint(PaintContext& context) {
   TRACE_EVENT0("flutter", "ChildSceneLayer::Paint");
 }
 
-void ChildSceneLayer::UpdateScene(mojo::gfx::composition::SceneUpdate* update,
-                                  mojo::gfx::composition::Node* container) {
+void ChildSceneLayer::UpdateScene(mozart::SceneUpdate* update,
+                                  mozart::Node* container) {
   uint32_t id = next_id++;
 
-  auto child_resource = mojo::gfx::composition::Resource::New();
-  child_resource->set_scene(mojo::gfx::composition::SceneResource::New());
-  child_resource->get_scene()->scene_token = scene_token_.Clone();
+  auto child_resource = mozart::Resource::New();
+  child_resource->set_scene(mozart::SceneResource::New());
+  child_resource->get_scene()->scene_token = mozart::SceneToken::New();
+  child_resource->get_scene()->scene_token->value = scene_token_;
   update->resources.insert(id, child_resource.Pass());
 
-  auto child_node = mojo::gfx::composition::Node::New();
-  child_node->op = mojo::gfx::composition::NodeOp::New();
-  child_node->op->set_scene(mojo::gfx::composition::SceneNodeOp::New());
+  auto child_node = mozart::Node::New();
+  child_node->op = mozart::NodeOp::New();
+  child_node->op->set_scene(mozart::SceneNodeOp::New());
   child_node->op->get_scene()->scene_resource_id = id;
   child_node->content_clip = mojo::RectF::New();
   child_node->content_clip->width = physical_size_.width();
