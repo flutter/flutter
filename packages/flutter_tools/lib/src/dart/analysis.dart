@@ -5,6 +5,7 @@
 import 'dart:collection';
 import 'dart:io';
 
+import 'package:analyzer/error/error.dart';
 import 'package:analyzer/file_system/file_system.dart' as file_system;
 import 'package:analyzer/file_system/physical_file_system.dart';
 import 'package:analyzer/plugin/options.dart';
@@ -14,7 +15,6 @@ import 'package:analyzer/source/package_map_resolver.dart';
 import 'package:analyzer/src/context/builder.dart'; // ignore: implementation_imports
 import 'package:analyzer/src/dart/sdk/sdk.dart'; // ignore: implementation_imports
 import 'package:analyzer/src/generated/engine.dart'; // ignore: implementation_imports
-import 'package:analyzer/src/generated/error.dart'; // ignore: implementation_imports
 import 'package:analyzer/src/generated/java_io.dart'; // ignore: implementation_imports
 import 'package:analyzer/src/generated/source.dart'; // ignore: implementation_imports
 import 'package:analyzer/src/generated/source_io.dart'; // ignore: implementation_imports

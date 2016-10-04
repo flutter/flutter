@@ -72,11 +72,9 @@ void buildSkyEngineSdkSummary(
   //
   // Build.
   //
-  SummaryBuildConfig config = new SummaryBuildConfig(strongMode: true);
-  BuilderOutput output =
-      new SummaryBuilder(sources, sdk.context, config).build();
+  List<int> bytes = new SummaryBuilder(sources, sdk.context, true).build();
   String outputPath = pathos.join(skyEnginePath, outBundleName);
-  new io.File(outputPath).writeAsBytesSync(output.sum);
+  new io.File(outputPath).writeAsBytesSync(bytes);
 }
 
 Future<Null> buildUnlinkedForPackages(String flutterPath) async {
