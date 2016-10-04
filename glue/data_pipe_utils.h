@@ -21,7 +21,7 @@ namespace glue {
 void CopyToFileDescriptor(
     mojo::ScopedDataPipeConsumerHandle source,
     ftl::UniqueFD destination,
-    ftl::TaskRunner* task_runner,
+    ftl::RefPtr<ftl::TaskRunner> task_runner,
     const std::function<void(bool /*success*/)>& callback);
 
 // Asynchronously copies data from source file to the destination. The given
@@ -30,7 +30,7 @@ void CopyToFileDescriptor(
 void CopyFromFileDescriptor(
     ftl::UniqueFD source,
     mojo::ScopedDataPipeProducerHandle destination,
-    ftl::TaskRunner* task_runner,
+    ftl::RefPtr<ftl::TaskRunner> task_runner,
     const std::function<void(bool /*success*/)>& callback);
 
 }  // namespace glue

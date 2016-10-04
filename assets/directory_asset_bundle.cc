@@ -35,7 +35,7 @@ void DirectoryAssetBundle::GetAsStream(
   if (fd.get() < 0)
     return;
   glue::CopyFromFileDescriptor(std::move(fd), std::move(pipe.producer_handle),
-                               task_runner_.get(), [](bool ignored) {});
+                               task_runner_, [](bool ignored) {});
 }
 
 DirectoryAssetBundle::~DirectoryAssetBundle() {}
