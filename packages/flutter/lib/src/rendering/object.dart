@@ -10,7 +10,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:meta/meta.dart';
-import 'package:flutter_services/mojo/gfx/composition/scene_token.dart' as mojom;
 import 'package:vector_math/vector_math_64.dart';
 
 import 'debug.dart';
@@ -217,39 +216,18 @@ class PaintingContext {
     _currentLayer?.willChangeHint = true;
   }
 
-  /// Adds a performance overlay to the scene.
+  /// Adds a composited layer to the recording.
   ///
-  /// * `offset` is the offset from the origin of the canvas' coordinate system
-  ///   to the origin of the caller's coordinate system.
-  /// * `optionsMask` is a mask is created by shifting 1 by the index of the
-  ///   specific [PerformanceOverlayOption] to enable.
-  /// * `rasterizerThreshold` is an integer specifying the number of frame
-  ///   intervals that the rasterizer must miss before it decides that the frame
-  ///   is suitable for capturing an SkPicture trace for further analysis.
-  /// * `size` is the size of the overlay to draw. The upper left corner of the
-  ///   overlay will be placed at the origin of the caller's coodinate system.
+  /// After calling this function, the [canvas] property will change to refer to
+  /// a new [Canvas] that draws on top of the given layer.
   ///
-  /// Performance overlays are always composited because they display data that
-  /// isn't available until the compositing phase.
-  void pushPerformanceOverlay(Offset offset, int optionsMask, int rasterizerThreshold, Size size) {
+  /// A [RenderObject] that uses this function is very likely to require its
+  /// [RenderObject.needsCompositing] property to return true. That informs
+  /// ancestor render objects that this render object will include a composited
+  /// layer, which causes them to use composited clips, for example.
+  void addLayer(Layer layer) {
     _stopRecordingIfNeeded();
-    _appendLayer(new PerformanceOverlayLayer(
-      overlayRect: new Rect.fromLTWH(offset.dx, offset.dy, size.width, size.height),
-      optionsMask: optionsMask,
-      rasterizerThreshold: rasterizerThreshold
-    ));
-  }
-
-  /// (mojo-only) Draws content from another process.
-  void pushChildScene(Offset offset, double devicePixelRatio, int physicalWidth, int physicalHeight, mojom.SceneToken sceneToken) {
-    _stopRecordingIfNeeded();
-    _appendLayer(new ChildSceneLayer(
-      offset: offset,
-      devicePixelRatio: devicePixelRatio,
-      physicalWidth: physicalWidth,
-      physicalHeight: physicalHeight,
-      sceneToken: sceneToken
-    ));
+    _appendLayer(layer);
   }
 
   /// Clip further painting using a rectangle.

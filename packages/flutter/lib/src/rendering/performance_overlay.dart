@@ -4,6 +4,7 @@
 
 import 'box.dart';
 import 'object.dart';
+import 'layer.dart';
 
 /// The options that control whether the performance overlay displays certain
 /// aspects of the compositor.
@@ -136,6 +137,10 @@ class RenderPerformanceOverlay extends RenderBox {
   @override
   void paint(PaintingContext context, Offset offset) {
     assert(needsCompositing);
-    context.pushPerformanceOverlay(offset, optionsMask, rasterizerThreshold, size);
+    context.addLayer(new PerformanceOverlayLayer(
+      overlayRect: new Rect.fromLTWH(offset.dx, offset.dy, size.width, size.height),
+      optionsMask: optionsMask,
+      rasterizerThreshold: rasterizerThreshold
+    ));
   }
 }
