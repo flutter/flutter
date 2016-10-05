@@ -275,22 +275,14 @@ class AtomValidator extends DoctorValidator {
 
     int installCount = 0;
 
-    if (!isInstalled) {
-      messages.add(new ValidationMessage.error('Atom not installed; download at https://atom.io.'));
-    } else {
+    if (_validateHasPackage(messages, 'flutter', 'Flutter'))
       installCount++;
 
-      if (!_validateHasPackage(messages, 'flutter', 'Flutter'))
-        installCount++;
-
-      if (!_validateHasPackage(messages, 'dartlang', 'Dart'))
-        installCount++;
-    }
+    if (_validateHasPackage(messages, 'dartlang', 'Dart'))
+      installCount++;
 
     return new ValidationResult(
-      installCount == 3
-        ? ValidationType.installed
-        : installCount > 0 ? ValidationType.partial : ValidationType.missing,
+      installCount == 2 ? ValidationType.installed : ValidationType.partial,
       messages
     );
   }
@@ -301,19 +293,18 @@ class AtomValidator extends DoctorValidator {
         '$packageName plugin not installed; this adds $description specific functionality to Atom.\n'
         'Install the plugin from Atom or run \'apm install $packageName\'.'
       ));
-      return true;
-    } else {
-      try {
-        String flutterPluginPath = path.join(_getAtomHomePath(), 'packages', packageName);
-        File packageFile = new File(path.join(flutterPluginPath, 'package.json'));
-        Map<String, dynamic> packageInfo = JSON.decode(packageFile.readAsStringSync());
-        String version = packageInfo['version'];
-        messages.add(new ValidationMessage('$packageName plugin version $version'));
-      } catch (error) {
-        printTrace('Unable to read $packageName plugin version: $error');
-      }
       return false;
     }
+    try {
+      String flutterPluginPath = path.join(_getAtomHomePath(), 'packages', packageName);
+      File packageFile = new File(path.join(flutterPluginPath, 'package.json'));
+      Map<String, dynamic> packageInfo = JSON.decode(packageFile.readAsStringSync());
+      String version = packageInfo['version'];
+      messages.add(new ValidationMessage('$packageName plugin version $version'));
+    } catch (error) {
+      printTrace('Unable to read $packageName plugin version: $error');
+    }
+    return true;
   }
 
   bool hasPackage(String packageName) {
