@@ -41,6 +41,7 @@ class Doctor {
 
     List<DoctorValidator> ideValidators = <DoctorValidator>[];
     ideValidators.addAll(AtomValidator.installed);
+    ideValidators.addAll(IntellijValidator.installed);
     if (ideValidators.isNotEmpty)
       _validators.addAll(ideValidators);
     else
@@ -317,6 +318,95 @@ class AtomValidator extends DoctorValidator {
 
   bool hasPackage(String packageName) {
     String packagePath = path.join(_getAtomHomePath(), 'packages', packageName);
+    return FileSystemEntity.isDirectorySync(packagePath);
+  }
+}
+
+class IntellijValidator extends DoctorValidator {
+  final String version;
+  final String pluginsPath;
+
+  IntellijValidator(String title, {this.version, this.pluginsPath}) : super(title);
+
+  static Iterable<DoctorValidator> get installed {
+    List<DoctorValidator> validators = <DoctorValidator>[];
+    Map<String, String> products = <String, String>{
+      'IntelliJIdea' : 'IntelliJ IDEA Ultimate Edition',
+      'IdeaIC' : 'IntelliJ IDEA Community Edition',
+      'WebStorm' : 'IntelliJ WebStorm',
+    };
+    String homeDir = Platform.environment['HOME'];
+
+    if (Platform.isLinux && homeDir != null) {
+      for (FileSystemEntity dir in new Directory(homeDir).listSync()) {
+        if (dir is Directory) {
+          String name = path.basename(dir.path);
+          products.forEach((String id, String title) {
+            if (name.startsWith('.$id')) {
+              String version = name.substring(id.length + 1);
+              String installPath;
+              try {
+                installPath = new File(path.join(dir.path, 'system', '.home')).readAsStringSync();
+              } catch (e) {
+                // ignored
+              }
+              if (installPath != null && FileSystemEntity.isDirectorySync(installPath)) {
+                validators.add(new IntellijValidator(
+                  title,
+                  version: version,
+                  pluginsPath: path.join(dir.path, 'config', 'plugins'),
+                ));
+              }
+            }
+          });
+        }
+      }
+    } else if (Platform.isMacOS) {
+      // TODO(danrubel) add support for Mac
+
+    } else {
+      // TODO(danrubel) add support for Windows
+    }
+    return validators;
+  }
+
+  @override
+  Future<ValidationResult> validate() async {
+    List<ValidationMessage> messages = <ValidationMessage>[];
+
+    int installCount = 0;
+
+    if (_validateHasPackage(messages, 'Dart', 'Dart'))
+      installCount++;
+
+    if (_validateHasPackage(messages, 'Flutter', 'Flutter'))
+      installCount++;
+
+    if (installCount < 2)
+      messages.add(new ValidationMessage(
+        'For information about managing plugins, see\n'
+        'https://www.jetbrains.com/help/idea/2016.2/managing-plugins.html'
+      ));
+
+    return new ValidationResult(
+        installCount == 2 ? ValidationType.installed : ValidationType.partial,
+        messages,
+        statusInfo: 'version $version');
+  }
+
+  bool _validateHasPackage(List<ValidationMessage> messages, String packageName, String description) {
+    if (!hasPackage(packageName)) {
+      messages.add(new ValidationMessage(
+        '$packageName plugin not installed; this adds $description specific functionality.'
+      ));
+      return false;
+    }
+    messages.add(new ValidationMessage('$packageName plugin installed'));
+    return true;
+  }
+
+  bool hasPackage(String packageName) {
+    String packagePath = path.join(pluginsPath, packageName);
     return FileSystemEntity.isDirectorySync(packagePath);
   }
 }
