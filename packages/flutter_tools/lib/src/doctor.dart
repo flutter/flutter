@@ -127,10 +127,11 @@ class Doctor {
       final String separator = Platform.isWindows ? ' ' : '•';
 
       for (ValidationMessage message in result.messages) {
+        String text = message.message.replaceAll('\n', '\n      ');
         if (message.isError) {
-          printStatus('    x ${message.message.replaceAll('\n', '\n      ')}', emphasis: true);
+          printStatus('    x $text', emphasis: true);
         } else {
-          printStatus('    $separator ${message.message.replaceAll('\n', '\n      ')}');
+          printStatus('    $separator $text');
         }
       }
     }
@@ -176,8 +177,6 @@ class ValidationResult {
   // A short message about the status.
   final String statusInfo;
   final List<ValidationMessage> messages;
-
-  bool get isInstalled => type == ValidationType.installed;
 
   String get leadingBox {
     if (type == ValidationType.missing)
