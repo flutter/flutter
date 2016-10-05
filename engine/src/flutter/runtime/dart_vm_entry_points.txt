@@ -4,6 +4,7 @@ dart:isolate,::,_startMainIsolate
 dart:mojo.internal,MojoHandleWatcher,mojoControlHandle
 dart:ui,::,_beginFrame
 dart:ui,::,_dispatchPointerDataPacket
+dart:ui,::,_dispatchSemanticsAction
 dart:ui,::,_getGetBaseURLClosure
 dart:ui,::,_getMainClosure
 dart:ui,::,_getPrintClosure
@@ -13,6 +14,7 @@ dart:ui,::,_popRoute
 dart:ui,::,_pushRoute
 dart:ui,::,_setupHooks
 dart:ui,::,_updateLocale
+dart:ui,::,_updateSemanticsEnabled
 dart:ui,::,_updateWindowMetrics
 dart:ui,Canvas,Canvas.
 dart:ui,Color,Color.
@@ -26,6 +28,8 @@ dart:ui,PictureRecorder,PictureRecorder.
 dart:ui,Rect,Rect.fromLTRB
 dart:ui,Scene,Scene.
 dart:ui,SceneBuilder,SceneBuilder.
+dart:ui,SemanticsUpdate,SemanticsUpdate.
+dart:ui,SemanticsUpdateBuilder,SemanticsUpdateBuilder.
 dart:ui,Shader,Shader.
 dart:ui,TextBox,TextBox._
 dart:vmservice_sky,::,main

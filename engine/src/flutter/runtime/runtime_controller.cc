@@ -64,6 +64,13 @@ void RuntimeController::SetLocale(const std::string& language_code,
   GetWindow()->UpdateLocale(language_code_, country_code_);
 }
 
+void RuntimeController::SetSemanticsEnabled(bool enabled) {
+  if (semantics_enabled_ == enabled)
+    return;
+  semantics_enabled_ = enabled;
+  GetWindow()->UpdateSemanticsEnabled(enabled);
+}
+
 void RuntimeController::PushRoute(const std::string& route) {
   GetWindow()->PushRoute(route);
 }
@@ -76,10 +83,16 @@ void RuntimeController::BeginFrame(ftl::TimePoint frame_time) {
   GetWindow()->BeginFrame(frame_time);
 }
 
-void RuntimeController::HandlePointerDataPacket(
+void RuntimeController::DispatchPointerDataPacket(
     const PointerDataPacket& packet) {
-  TRACE_EVENT0("input", "RuntimeController::HandlePointerDataPacket");
+  TRACE_EVENT0("flutter", "RuntimeController::DispatchPointerDataPacket");
   GetWindow()->DispatchPointerDataPacket(packet);
+}
+
+void RuntimeController::DispatchSemanticsAction(int32_t id,
+                                                SemanticsAction action) {
+  TRACE_EVENT0("flutter", "RuntimeController::DispatchSemanticsAction");
+  GetWindow()->DispatchSemanticsAction(id, action);
 }
 
 Window* RuntimeController::GetWindow() {
@@ -92,6 +105,11 @@ void RuntimeController::ScheduleFrame() {
 
 void RuntimeController::Render(Scene* scene) {
   client_->Render(scene->takeLayerTree());
+}
+
+void RuntimeController::UpdateSemantics(SemanticsUpdate* update) {
+  if (semantics_enabled_)
+    client_->UpdateSemantics(update->takeNodes());
 }
 
 void RuntimeController::DidCreateSecondaryIsolate(Dart_Isolate isolate) {

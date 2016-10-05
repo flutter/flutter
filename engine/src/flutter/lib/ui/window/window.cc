@@ -77,6 +77,16 @@ void Window::UpdateLocale(const std::string& language_code,
       });
 }
 
+void Window::UpdateSemanticsEnabled(bool enabled) {
+  tonic::DartState* dart_state = library_.dart_state().get();
+  if (!dart_state)
+    return;
+  tonic::DartState::Scope scope(dart_state);
+
+  DartInvokeField(library_.value(), "_updateSemanticsEnabled",
+                  {ToDart(enabled)});
+}
+
 void Window::PushRoute(const std::string& route) {
   tonic::DartState* dart_state = library_.dart_state().get();
   if (!dart_state)
@@ -119,6 +129,16 @@ void Window::DispatchPointerDataPacket(const PointerDataPacket& packet) {
   Dart_TypedDataReleaseData(data_handle);
   DartInvokeField(library_.value(), "_dispatchPointerDataPacket",
                   {data_handle});
+}
+
+void Window::DispatchSemanticsAction(int32_t id, SemanticsAction action) {
+  tonic::DartState* dart_state = library_.dart_state().get();
+  if (!dart_state)
+    return;
+  tonic::DartState::Scope scope(dart_state);
+
+  DartInvokeField(library_.value(), "_dispatchSemanticsAction",
+                  {ToDart(id), ToDart(static_cast<int32_t>(action))});
 }
 
 void Window::BeginFrame(ftl::TimePoint frameTime) {

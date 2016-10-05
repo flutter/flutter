@@ -34,12 +34,14 @@ class RuntimeController : public WindowClient, public IsolateClient {
   void SetViewportMetrics(const sky::ViewportMetricsPtr& metrics);
   void SetLocale(const std::string& language_code,
                  const std::string& country_code);
+  void SetSemanticsEnabled(bool enabled);
   void PushRoute(const std::string& route);
   void PopRoute();
 
   void BeginFrame(ftl::TimePoint frame_time);
 
-  void HandlePointerDataPacket(const PointerDataPacket& packet);
+  void DispatchPointerDataPacket(const PointerDataPacket& packet);
+  void DispatchSemanticsAction(int32_t id, SemanticsAction action);
 
   void OnAppLifecycleStateChanged(sky::AppLifecycleState state);
 
@@ -54,6 +56,7 @@ class RuntimeController : public WindowClient, public IsolateClient {
 
   void ScheduleFrame() override;
   void Render(Scene* scene) override;
+  void UpdateSemantics(SemanticsUpdate* update) override;
 
   void DidCreateSecondaryIsolate(Dart_Isolate isolate) override;
 
@@ -61,6 +64,7 @@ class RuntimeController : public WindowClient, public IsolateClient {
   sky::ViewportMetricsPtr viewport_metrics_;
   std::string language_code_;
   std::string country_code_;
+  bool semantics_enabled_ = false;
   std::unique_ptr<DartController> dart_controller_;
 
   FTL_DISALLOW_COPY_AND_ASSIGN(RuntimeController);

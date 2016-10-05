@@ -6,9 +6,11 @@
 #define FLUTTER_RUNTIME_RUNTIME_DELEGATE_H_
 
 #include <memory>
+#include <vector>
 
 #include "dart/runtime/include/dart_api.h"
 #include "flutter/flow/layers/layer_tree.h"
+#include "flutter/lib/ui/semantics/semantics_node.h"
 
 namespace blink {
 
@@ -16,6 +18,7 @@ class RuntimeDelegate {
  public:
   virtual void ScheduleFrame() = 0;
   virtual void Render(std::unique_ptr<flow::LayerTree> layer_tree) = 0;
+  virtual void UpdateSemantics(std::vector<SemanticsNode> update) = 0;
 
   virtual void DidCreateMainIsolate(Dart_Isolate isolate);
   virtual void DidCreateSecondaryIsolate(Dart_Isolate isolate);
