@@ -436,7 +436,7 @@ void PlatformViewAndroid::DispatchPointerDataPacket(JNIEnv* env,
     packet = std::make_unique<PointerDataPacket>(data, position)
   ] {
     if (engine.get())
-      engine->HandlePointerDataPacket(*packet);
+      engine->DispatchPointerDataPacket(*packet);
   }));
 }
 

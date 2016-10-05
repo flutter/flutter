@@ -5,6 +5,7 @@
 #ifndef FLUTTER_LIB_UI_WINDOW_WINDOW_H_
 #define FLUTTER_LIB_UI_WINDOW_WINDOW_H_
 
+#include "flutter/lib/ui/semantics/semantics_update.h"
 #include "flutter/lib/ui/window/pointer_data_packet.h"
 #include "flutter/services/engine/sky_engine.mojom.h"
 #include "flutter/services/pointer/pointer.mojom.h"
@@ -22,6 +23,7 @@ class WindowClient {
  public:
   virtual void ScheduleFrame() = 0;
   virtual void Render(Scene* scene) = 0;
+  virtual void UpdateSemantics(SemanticsUpdate* update) = 0;
 
  protected:
   virtual ~WindowClient();
@@ -38,7 +40,9 @@ class Window {
   void UpdateWindowMetrics(const sky::ViewportMetricsPtr& metrics);
   void UpdateLocale(const std::string& language_code,
                     const std::string& country_code);
+  void UpdateSemanticsEnabled(bool enabled);
   void DispatchPointerDataPacket(const PointerDataPacket& packet);
+  void DispatchSemanticsAction(int32_t id, SemanticsAction action);
   void BeginFrame(ftl::TimePoint frameTime);
 
   void PushRoute(const std::string& route);

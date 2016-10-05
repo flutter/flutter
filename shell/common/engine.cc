@@ -185,10 +185,10 @@ void Engine::OnLocaleChanged(const mojo::String& language_code,
     runtime_->SetLocale(language_code_, country_code_);
 }
 
-void Engine::HandlePointerDataPacket(const PointerDataPacket& packet) {
-  TRACE_EVENT0("flutter", "Engine::HandlePointerDataPacket");
+void Engine::DispatchPointerDataPacket(const PointerDataPacket& packet) {
+  TRACE_EVENT0("flutter", "Engine::DispatchPointerDataPacket");
   if (runtime_)
-    runtime_->HandlePointerDataPacket(packet);
+    runtime_->DispatchPointerDataPacket(packet);
 }
 
 // TODO(abarth): Remove pointer::PointerPacketPtr and route PointerDataPacket
@@ -222,7 +222,7 @@ void Engine::OnPointerPacket(pointer::PointerPacketPtr packetPtr) {
       pointer_data.tilt = pointer->tilt;
       packet.SetPointerData(i, pointer_data);
     }
-    runtime_->HandlePointerDataPacket(packet);
+    runtime_->DispatchPointerDataPacket(packet);
   }
 }
 
@@ -399,5 +399,7 @@ void Engine::Render(std::unique_ptr<flow::LayerTree> layer_tree) {
   layer_tree->set_frame_size(frame_size);
   animator_->Render(std::move(layer_tree));
 }
+
+void Engine::UpdateSemantics(std::vector<blink::SemanticsNode> update) {}
 
 }  // namespace shell

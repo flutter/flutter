@@ -26,6 +26,12 @@ void _updateLocale(String languageCode, String countryCode) {
     window.onLocaleChanged();
 }
 
+void _updateSemanticsEnabled(bool enabled) {
+  window._semanticsEnabled = enabled;
+  if (window.onSemanticsEnabledChanged != null)
+    window.onSemanticsEnabledChanged();
+}
+
 void _pushRoute(String route) {
   assert(window._defaultRouteName == null);
   window._defaultRouteName = route;
@@ -41,6 +47,11 @@ void _popRoute() {
 void _dispatchPointerDataPacket(ByteData packet) {
   if (window.onPointerDataPacket != null)
     window.onPointerDataPacket(_unpackPointerDataPacket(packet));
+}
+
+void _dispatchSemanticsAction(int id, int action) {
+  if (window.onSemanticsAction != null)
+    window.onSemanticsAction(id, SemanticsAction.values[action]);
 }
 
 void _beginFrame(int microseconds) {

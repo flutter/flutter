@@ -49,7 +49,7 @@ class Engine : public UIDelegate,
 
   std::string GetUIIsolateName();
 
-  void HandlePointerDataPacket(const PointerDataPacket& packet);
+  void DispatchPointerDataPacket(const PointerDataPacket& packet);
 
  private:
   // UIDelegate implementation:
@@ -80,6 +80,7 @@ class Engine : public UIDelegate,
   // RuntimeDelegate methods:
   void ScheduleFrame() override;
   void Render(std::unique_ptr<flow::LayerTree> layer_tree) override;
+  void UpdateSemantics(std::vector<blink::SemanticsNode> update) override;
   void DidCreateMainIsolate(Dart_Isolate isolate) override;
   void DidCreateSecondaryIsolate(Dart_Isolate isolate) override;
 

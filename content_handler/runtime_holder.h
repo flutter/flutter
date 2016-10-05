@@ -36,6 +36,7 @@ class RuntimeHolder : public blink::RuntimeDelegate, mozart::ViewListener {
   // |blink::RuntimeDelegate| implementation:
   void ScheduleFrame() override;
   void Render(std::unique_ptr<flow::LayerTree> layer_tree) override;
+  void UpdateSemantics(std::vector<blink::SemanticsNode> update) override;
   void DidCreateMainIsolate(Dart_Isolate isolate) override;
 
   // |mozart::ViewListener| implementation:

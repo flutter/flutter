@@ -13,6 +13,9 @@ typedef void FrameCallback(Duration duration);
 /// Signature for [Window.onPointerDataPacket].
 typedef void PointerDataPacketCallback(PointerDataPacket packet);
 
+/// Signature for [Window.onSemanticsAction].
+typedef void SemanticsActionCallback(int id, SemanticsAction action);
+
 /// Signature for [Window.onAppLifecycleStateChanged].
 typedef void AppLifecycleStateCallback(AppLifecycleState state);
 
@@ -124,9 +127,12 @@ class Window {
   /// [physicalSize], or [padding] values change.
   VoidCallback onMetricsChanged;
 
-  /// The system-reported locale. This establishes the language and formatting
-  /// conventions that application should, if possible, use to render their user
-  /// interface.
+  /// The system-reported locale.
+  ///
+  /// This establishes the language and formatting conventions that application
+  /// should, if possible, use to render their user interface.
+  ///
+  /// The [onLocaleChanged] callback is called whenever this value changes.
   Locale get locale => _locale;
   Locale _locale;
 
@@ -179,6 +185,33 @@ class Window {
   /// you can then obtain a [Scene] object, which you can display to
   /// the user via this [render] function.
   void render(Scene scene) native "Window_render";
+
+  /// Whether the user has requested that [updateSemantics] be called when
+  /// the semantic contents of window changes.
+  ///
+  /// The [onSemanticsEnabledChanged] callback is called whenever this value
+  /// changes.
+  bool get semanticsEnabled => _semanticsEnabled;
+  bool _semanticsEnabled = false;
+
+  /// A callback that is invoked when the value of [semanticsEnabled] changes.
+  VoidCallback onSemanticsEnabledChanged;
+
+  /// A callback that is invoked whenever the user requests an action to be
+  /// performed.
+  ///
+  /// This callback is used when the user expresses the action they wish to
+  /// perform based on the semantics supplied by [updateSemantics].
+  SemanticsActionCallback onSemanticsAction;
+
+  /// Change the retained semantics data about this window.
+  ///
+  /// If [semanticsEnabled] is true, the user has requested that this funciton
+  /// be called whenever the semantic content of this window changes.
+  ///
+  /// In either case, this function disposes the given update, which means the
+  /// semantics update cannot be used further.
+  void updateSemantics(SemanticsUpdate update) native "Window_updateSemantics";
 }
 
 /// The [Window] singleton. This object exposes the size of the display, the
