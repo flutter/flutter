@@ -39,7 +39,14 @@ class Doctor {
     if (_iosWorkflow.appliesToHostPlatform)
       _validators.add(_iosWorkflow);
 
-    _validators.add(new AtomValidator());
+    List<DoctorValidator> ideValidators = <DoctorValidator>[];
+    ideValidators.addAll(AtomValidator.installed);
+    ideValidators.addAll(IntellijValidator.installed);
+    if (ideValidators.isNotEmpty)
+      _validators.addAll(ideValidators);
+    else
+      _validators.add(new NoIdeValidator());
+
     _validators.add(new DeviceValidator());
   }
 
@@ -121,10 +128,11 @@ class Doctor {
       final String separator = Platform.isWindows ? ' ' : '•';
 
       for (ValidationMessage message in result.messages) {
+        String text = message.message.replaceAll('\n', '\n      ');
         if (message.isError) {
-          printStatus('    x ${message.message.replaceAll('\n', '\n      ')}', emphasis: true);
+          printStatus('    x $text', emphasis: true);
         } else {
-          printStatus('    $separator ${message.message.replaceAll('\n', '\n      ')}');
+          printStatus('    $separator $text');
         }
       }
     }
@@ -170,8 +178,6 @@ class ValidationResult {
   // A short message about the status.
   final String statusInfo;
   final List<ValidationMessage> messages;
-
-  bool get isInstalled => type == ValidationType.installed;
 
   String get leadingBox {
     if (type == ValidationType.missing)
@@ -226,8 +232,26 @@ class _FlutterValidator extends DoctorValidator {
   }
 }
 
+class NoIdeValidator extends DoctorValidator {
+  NoIdeValidator() : super('Flutter IDE Support');
+
+  @override
+  Future<ValidationResult> validate() async {
+    // TODO(danrubel): do not show Atom once IntelliJ support is complete
+    return new ValidationResult(ValidationType.missing, <ValidationMessage>[
+      new ValidationMessage('Atom - https://atom.io/'),
+      new ValidationMessage('IntelliJ - https://www.jetbrains.com/idea/'),
+    ], statusInfo: 'No supported IDEs installed');
+  }
+}
+
 class AtomValidator extends DoctorValidator {
   AtomValidator() : super('Atom - a lightweight development environment for Flutter');
+
+  static Iterable<DoctorValidator> get installed {
+    AtomValidator atom = new AtomValidator();
+    return atom.isInstalled ? <DoctorValidator>[atom] : <DoctorValidator>[];
+  }
 
   static File getConfigFile() {
     // ~/.atom/config.cson
@@ -243,29 +267,22 @@ class AtomValidator extends DoctorValidator {
       : path.join(env['HOME'], '.atom');
   }
 
+  bool get isInstalled => FileSystemEntity.isDirectorySync(_getAtomHomePath());
+
   @override
   Future<ValidationResult> validate() async {
     List<ValidationMessage> messages = <ValidationMessage>[];
 
     int installCount = 0;
 
-    bool atomDirExists = FileSystemEntity.isDirectorySync(_getAtomHomePath());
-    if (!atomDirExists) {
-      messages.add(new ValidationMessage.error('Atom not installed; download at https://atom.io.'));
-    } else {
+    if (_validateHasPackage(messages, 'flutter', 'Flutter'))
       installCount++;
 
-      if (!_validateHasPackage(messages, 'flutter', 'Flutter'))
-        installCount++;
-
-      if (!_validateHasPackage(messages, 'dartlang', 'Dart'))
-        installCount++;
-    }
+    if (_validateHasPackage(messages, 'dartlang', 'Dart'))
+      installCount++;
 
     return new ValidationResult(
-      installCount == 3
-        ? ValidationType.installed
-        : installCount == 1 ? ValidationType.partial : ValidationType.missing,
+      installCount == 2 ? ValidationType.installed : ValidationType.partial,
       messages
     );
   }
@@ -276,23 +293,113 @@ class AtomValidator extends DoctorValidator {
         '$packageName plugin not installed; this adds $description specific functionality to Atom.\n'
         'Install the plugin from Atom or run \'apm install $packageName\'.'
       ));
-      return true;
-    } else {
-      try {
-        String flutterPluginPath = path.join(_getAtomHomePath(), 'packages', packageName);
-        File packageFile = new File(path.join(flutterPluginPath, 'package.json'));
-        Map<String, dynamic> packageInfo = JSON.decode(packageFile.readAsStringSync());
-        String version = packageInfo['version'];
-        messages.add(new ValidationMessage('$packageName plugin version $version'));
-      } catch (error) {
-        printTrace('Unable to read $packageName plugin version: $error');
-      }
       return false;
     }
+    try {
+      String flutterPluginPath = path.join(_getAtomHomePath(), 'packages', packageName);
+      File packageFile = new File(path.join(flutterPluginPath, 'package.json'));
+      Map<String, dynamic> packageInfo = JSON.decode(packageFile.readAsStringSync());
+      String version = packageInfo['version'];
+      messages.add(new ValidationMessage('$packageName plugin version $version'));
+    } catch (error) {
+      printTrace('Unable to read $packageName plugin version: $error');
+    }
+    return true;
   }
 
   bool hasPackage(String packageName) {
     String packagePath = path.join(_getAtomHomePath(), 'packages', packageName);
+    return FileSystemEntity.isDirectorySync(packagePath);
+  }
+}
+
+class IntellijValidator extends DoctorValidator {
+  IntellijValidator(String title, {this.version, this.pluginsPath}) : super(title);
+
+  final String version;
+  final String pluginsPath;
+
+  static Iterable<DoctorValidator> get installed {
+    List<DoctorValidator> validators = <DoctorValidator>[];
+    Map<String, String> products = <String, String>{
+      'IntelliJIdea' : 'IntelliJ IDEA Ultimate Edition',
+      'IdeaIC' : 'IntelliJ IDEA Community Edition',
+      'WebStorm' : 'IntelliJ WebStorm',
+    };
+    String homeDir = Platform.environment['HOME'];
+
+    if (Platform.isLinux && homeDir != null) {
+      for (FileSystemEntity dir in new Directory(homeDir).listSync()) {
+        if (dir is Directory) {
+          String name = path.basename(dir.path);
+          products.forEach((String id, String title) {
+            if (name.startsWith('.$id')) {
+              String version = name.substring(id.length + 1);
+              String installPath;
+              try {
+                installPath = new File(path.join(dir.path, 'system', '.home')).readAsStringSync();
+              } catch (e) {
+                // ignored
+              }
+              if (installPath != null && FileSystemEntity.isDirectorySync(installPath)) {
+                validators.add(new IntellijValidator(
+                  title,
+                  version: version,
+                  pluginsPath: path.join(dir.path, 'config', 'plugins'),
+                ));
+              }
+            }
+          });
+        }
+      }
+    } else if (Platform.isMacOS) {
+      // TODO(danrubel): add support for Mac
+
+    } else {
+      // TODO(danrubel): add support for Windows
+    }
+    return validators;
+  }
+
+  @override
+  Future<ValidationResult> validate() async {
+    List<ValidationMessage> messages = <ValidationMessage>[];
+
+    int installCount = 0;
+
+    if (_validateHasPackage(messages, 'Dart', 'Dart'))
+      installCount++;
+
+    if (_validateHasPackage(messages, 'Flutter', 'Flutter'))
+      installCount++;
+
+    if (installCount < 2) {
+      messages.add(new ValidationMessage(
+          'For information about managing plugins, see\n'
+          'https://www.jetbrains.com/help/idea/2016.2/managing-plugins.html'
+      ));
+    }
+
+    return new ValidationResult(
+        installCount == 2 ? ValidationType.installed : ValidationType.partial,
+        messages,
+        statusInfo: 'version $version'
+    );
+  }
+
+  bool _validateHasPackage(List<ValidationMessage> messages, String packageName, String description) {
+    if (!hasPackage(packageName)) {
+      messages.add(new ValidationMessage(
+        '$packageName plugin not installed; this adds $description specific functionality.'
+      ));
+      return false;
+    }
+    messages.add(new ValidationMessage('$packageName plugin installed'));
+    return true;
+  }
+
+  bool hasPackage(String packageName) {
+    String packagePath = path.join(pluginsPath, packageName);
     return FileSystemEntity.isDirectorySync(packagePath);
   }
 }
