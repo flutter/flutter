@@ -213,7 +213,7 @@ class _InputState extends State<Input> {
         multiline: config.multiline,
         cursorColor: themeData.textSelectionColor,
         selectionColor: themeData.textSelectionColor,
-        selectionUi: materialTextSelectionUi,
+        selectionControls: materialTextSelectionControls,
         platform: Theme.of(context).platform,
         keyboardType: config.keyboardType,
         onChanged: onChanged,

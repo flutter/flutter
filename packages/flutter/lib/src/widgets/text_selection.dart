@@ -58,7 +58,7 @@ abstract class TextSelectionDelegate {
 
 // An interface for building the selection UI, to be provided by the
 // implementor of the toolbar widget.
-abstract class TextSelectionUi {
+abstract class TextSelectionControls {
   /// Builds a selection handle of the given type.
   Widget buildHandle(BuildContext context, TextSelectionHandleType type);
 
@@ -86,7 +86,7 @@ class TextSelectionOverlay implements TextSelectionDelegate {
     this.debugRequiredFor,
     this.renderObject,
     this.onSelectionOverlayChanged,
-    this.selectionUi,
+    this.selectionControls,
   }): _input = input {
     assert(context != null);
     final OverlayState overlay = Overlay.of(context);
@@ -116,7 +116,7 @@ class TextSelectionOverlay implements TextSelectionDelegate {
   final ValueChanged<InputValue> onSelectionOverlayChanged;
 
   /// Builds text selection handles and toolbar.
-  final TextSelectionUi selectionUi;
+  final TextSelectionControls selectionControls;
 
   /// Controls the fade-in animations.
   static const Duration _kFadeDuration = const Duration(milliseconds: 150);
@@ -206,7 +206,7 @@ class TextSelectionOverlay implements TextSelectionDelegate {
 
   Widget _buildHandle(BuildContext context, _TextSelectionHandlePosition position) {
     if ((_selection.isCollapsed && position == _TextSelectionHandlePosition.end) ||
-        selectionUi == null)
+        selectionControls == null)
       return new Container();  // hide the second handle when collapsed
 
     return new FadeTransition(
@@ -216,14 +216,14 @@ class TextSelectionOverlay implements TextSelectionDelegate {
         onSelectionHandleTapped: _handleSelectionHandleTapped,
         renderObject: renderObject,
         selection: _selection,
-        selectionUi: selectionUi,
+        selectionControls: selectionControls,
         position: position
       )
     );
   }
 
   Widget _buildToolbar(BuildContext context) {
-    if (selectionUi == null)
+    if (selectionControls == null)
       return new Container();
 
     // Find the horizontal midpoint, just above the selected text.
@@ -237,7 +237,7 @@ class TextSelectionOverlay implements TextSelectionDelegate {
 
     return new FadeTransition(
       opacity: _toolbarOpacity,
-      child: selectionUi.buildToolbar(context, midpoint, this)
+      child: selectionControls.buildToolbar(context, midpoint, this)
     );
   }
 
@@ -281,7 +281,7 @@ class _TextSelectionHandleOverlay extends StatefulWidget {
     this.renderObject,
     this.onSelectionHandleChanged,
     this.onSelectionHandleTapped,
-    this.selectionUi
+    this.selectionControls
   }) : super(key: key);
 
   final TextSelection selection;
@@ -289,7 +289,7 @@ class _TextSelectionHandleOverlay extends StatefulWidget {
   final RenderEditableLine renderObject;
   final ValueChanged<TextSelection> onSelectionHandleChanged;
   final VoidCallback onSelectionHandleTapped;
-  final TextSelectionUi selectionUi;
+  final TextSelectionControls selectionControls;
 
   @override
   _TextSelectionHandleOverlayState createState() => new _TextSelectionHandleOverlayState();
@@ -299,7 +299,7 @@ class _TextSelectionHandleOverlayState extends State<_TextSelectionHandleOverlay
   Point _dragPosition;
 
   void _handleDragStart(DragStartDetails details) {
-    _dragPosition = details.globalPosition + new Offset(0.0, -config.selectionUi.handleSize.height);
+    _dragPosition = details.globalPosition + new Offset(0.0, -config.selectionControls.handleSize.height);
   }
 
   void _handleDragUpdate(DragUpdateDetails details) {
@@ -366,7 +366,7 @@ class _TextSelectionHandleOverlayState extends State<_TextSelectionHandleOverlay
           new Positioned(
             left: point.x,
             top: point.y,
-            child: config.selectionUi.buildHandle(context, type)
+            child: config.selectionControls.buildHandle(context, type)
           )
         ]
       )

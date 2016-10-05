@@ -156,8 +156,8 @@ class InputValue {
 ///
 /// This control is not intended to be used directly. Instead, consider using
 /// [Input], which provides focus management and material design.
-///
-/// TODO(mpcomplete): rename RawInput since it can span multiple lines.
+//
+// TODO(mpcomplete): rename RawInput since it can span multiple lines.
 class RawInputLine extends Scrollable {
   /// Creates a basic single-line input control.
   ///
@@ -172,7 +172,7 @@ class RawInputLine extends Scrollable {
     this.textScaleFactor,
     this.multiline,
     this.selectionColor,
-    this.selectionUi,
+    this.selectionControls,
     @required this.platform,
     this.keyboardType,
     this.onChanged,
@@ -216,7 +216,7 @@ class RawInputLine extends Scrollable {
   final Color selectionColor;
 
   /// Optional delegate for building the text selection handles and toolbar.
-  final TextSelectionUi selectionUi;
+  final TextSelectionControls selectionControls;
 
   /// The platform whose behavior should be approximated, in particular
   /// for scroll physics. (See [ScrollBehavior.platform].)
@@ -357,14 +357,14 @@ class RawInputLineState extends ScrollableState<RawInputLine> {
       _selectionOverlay = null;
     }
 
-    if (config.selectionUi != null) {
+    if (config.selectionControls != null) {
       _selectionOverlay = new TextSelectionOverlay(
         input: newInput,
         context: context,
         debugRequiredFor: config,
         renderObject: renderObject,
         onSelectionOverlayChanged: _handleSelectionOverlayChanged,
-        selectionUi: config.selectionUi,
+        selectionControls: config.selectionControls,
       );
       if (newInput.text.isNotEmpty || longPress)
         _selectionOverlay.showHandles();

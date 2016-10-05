@@ -143,7 +143,7 @@ class _TextSelectionHandlePainter extends CustomPainter {
   }
 }
 
-class _MaterialTextSelectionUi extends TextSelectionUi {
+class _MaterialTextSelectionControls extends TextSelectionControls {
   @override
   Size handleSize = const Size(_kHandleSize, _kHandleSize);
 
@@ -196,4 +196,4 @@ class _MaterialTextSelectionUi extends TextSelectionUi {
   }
 }
 
-final _MaterialTextSelectionUi materialTextSelectionUi = new _MaterialTextSelectionUi();
+final _MaterialTextSelectionControls materialTextSelectionControls = new _MaterialTextSelectionControls();
