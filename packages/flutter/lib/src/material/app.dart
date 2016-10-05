@@ -52,6 +52,7 @@ class MaterialApp extends StatefulWidget {
     this.theme,
     this.home,
     this.routes: const <String, WidgetBuilder>{},
+    this.initialRoute,
     this.onGenerateRoute,
     this.onLocaleChanged,
     this.debugShowMaterialGrid: false,
@@ -109,6 +110,11 @@ class MaterialApp extends StatefulWidget {
   /// by [home]), then the [onGenerateRoute] callback is called to
   /// build the page instead.
   final Map<String, WidgetBuilder> routes;
+
+  /// The name of the first route to show.
+  ///
+  /// Defaults to [Window.defaultRouteName].
+  final String initialRoute;
 
   /// The route generator callback used when the app is navigated to a
   /// named route.
@@ -254,6 +260,7 @@ class _MaterialAppState extends State<MaterialApp> {
         // blue[500] is the primary color of the default theme
         color: config.color ?? theme?.primaryColor ?? Colors.blue[500],
         navigatorObserver: _heroController,
+        initialRoute: config.initialRoute,
         onGenerateRoute: _onGenerateRoute,
         onLocaleChanged: config.onLocaleChanged,
         showPerformanceOverlay: config.showPerformanceOverlay,
