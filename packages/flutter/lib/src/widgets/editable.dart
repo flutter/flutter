@@ -156,6 +156,8 @@ class InputValue {
 ///
 /// This control is not intended to be used directly. Instead, consider using
 /// [Input], which provides focus management and material design.
+//
+// TODO(mpcomplete): rename RawInput since it can span multiple lines.
 class RawInputLine extends Scrollable {
   /// Creates a basic single-line input control.
   ///
@@ -168,9 +170,9 @@ class RawInputLine extends Scrollable {
     this.style,
     this.cursorColor,
     this.textScaleFactor,
+    this.multiline,
     this.selectionColor,
-    this.selectionHandleBuilder,
-    this.selectionToolbarBuilder,
+    this.selectionControls,
     @required this.platform,
     this.keyboardType,
     this.onChanged,
@@ -206,16 +208,15 @@ class RawInputLine extends Scrollable {
   /// The color to use when painting the cursor.
   final Color cursorColor;
 
+  /// True if the text should wrap and span multiple lines, false if it should
+  /// stay on a single line and scroll when overflowed.
+  final bool multiline;
+
   /// The color to use when painting the selection.
   final Color selectionColor;
 
-  /// Optional builder function for a widget that controls the boundary of a
-  /// text selection.
-  final TextSelectionHandleBuilder selectionHandleBuilder;
-
-  /// Optional builder function for a set of controls for working with a
-  /// text selection (e.g. copy and paste).
-  final TextSelectionToolbarBuilder selectionToolbarBuilder;
+  /// Optional delegate for building the text selection handles and toolbar.
+  final TextSelectionControls selectionControls;
 
   /// The platform whose behavior should be approximated, in particular
   /// for scroll physics. (See [ScrollBehavior.platform].)
@@ -356,15 +357,14 @@ class RawInputLineState extends ScrollableState<RawInputLine> {
       _selectionOverlay = null;
     }
 
-    if (config.selectionHandleBuilder != null) {
+    if (config.selectionControls != null) {
       _selectionOverlay = new TextSelectionOverlay(
         input: newInput,
         context: context,
         debugRequiredFor: config,
         renderObject: renderObject,
         onSelectionOverlayChanged: _handleSelectionOverlayChanged,
-        handleBuilder: config.selectionHandleBuilder,
-        toolbarBuilder: config.selectionToolbarBuilder
+        selectionControls: config.selectionControls,
       );
       if (newInput.text.isNotEmpty || longPress)
         _selectionOverlay.showHandles();
@@ -443,6 +443,7 @@ class RawInputLineState extends ScrollableState<RawInputLine> {
       style: config.style,
       cursorColor: config.cursorColor,
       showCursor: _showCursor,
+      multiline: config.multiline,
       selectionColor: config.selectionColor,
       textScaleFactor: config.textScaleFactor ?? MediaQuery.of(context).textScaleFactor,
       hideText: config.hideText,
@@ -460,6 +461,7 @@ class _EditableLineWidget extends LeafRenderObjectWidget {
     this.style,
     this.cursorColor,
     this.showCursor,
+    this.multiline,
     this.selectionColor,
     this.textScaleFactor,
     this.hideText,
@@ -472,6 +474,7 @@ class _EditableLineWidget extends LeafRenderObjectWidget {
   final TextStyle style;
   final Color cursorColor;
   final bool showCursor;
+  final bool multiline;
   final Color selectionColor;
   final double textScaleFactor;
   final bool hideText;
@@ -485,6 +488,7 @@ class _EditableLineWidget extends LeafRenderObjectWidget {
       text: _styledTextSpan,
       cursorColor: cursorColor,
       showCursor: showCursor,
+      multiline: multiline,
       selectionColor: selectionColor,
       textScaleFactor: textScaleFactor,
       selection: value.selection,

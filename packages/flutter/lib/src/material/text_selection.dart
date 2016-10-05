@@ -143,49 +143,57 @@ class _TextSelectionHandlePainter extends CustomPainter {
   }
 }
 
-/// Builder for material-style copy/paste text selection toolbar.
-Widget buildTextSelectionToolbar(
-    BuildContext context, Point position, TextSelectionDelegate delegate) {
-  final Size screenSize = MediaQuery.of(context).size;
-  return new ConstrainedBox(
-    constraints: new BoxConstraints.loose(screenSize),
-    child: new CustomSingleChildLayout(
-      delegate: new _TextSelectionToolbarLayout(position),
-      child: new _TextSelectionToolbar(delegate)
-    )
-  );
-}
+class _MaterialTextSelectionControls extends TextSelectionControls {
+  @override
+  Size handleSize = const Size(_kHandleSize, _kHandleSize);
 
-/// Builder for material-style text selection handles.
-Widget buildTextSelectionHandle(
-    BuildContext context, TextSelectionHandleType type) {
-  Widget handle = new SizedBox(
-    width: _kHandleSize,
-    height: _kHandleSize,
-    child: new CustomPaint(
-      painter: new _TextSelectionHandlePainter(
-        color: Theme.of(context).textSelectionHandleColor
+  /// Builder for material-style copy/paste text selection toolbar.
+  @override
+  Widget buildToolbar(
+      BuildContext context, Point position, TextSelectionDelegate delegate) {
+    final Size screenSize = MediaQuery.of(context).size;
+    return new ConstrainedBox(
+      constraints: new BoxConstraints.loose(screenSize),
+      child: new CustomSingleChildLayout(
+        delegate: new _TextSelectionToolbarLayout(position),
+        child: new _TextSelectionToolbar(delegate)
       )
-    )
-  );
-
-  // [handle] is a circle, with a rectangle in the top left quadrant of that
-  // circle (an onion pointing to 10:30). We rotate [handle] to point
-  // straight up or up-right depending on the handle type.
-  switch (type) {
-    case TextSelectionHandleType.left:  // points up-right
-      return new Transform(
-        transform: new Matrix4.rotationZ(math.PI / 2.0),
-        child: handle
-      );
-    case TextSelectionHandleType.right:  // points up-left
-      return handle;
-    case TextSelectionHandleType.collapsed:  // points up
-      return new Transform(
-        transform: new Matrix4.rotationZ(math.PI / 4.0),
-        child: handle
-      );
+    );
   }
-  assert(type != null);
-  return null;
+
+  /// Builder for material-style text selection handles.
+  @override
+  Widget buildHandle(BuildContext context, TextSelectionHandleType type) {
+    Widget handle = new SizedBox(
+      width: _kHandleSize,
+      height: _kHandleSize,
+      child: new CustomPaint(
+        painter: new _TextSelectionHandlePainter(
+          color: Theme.of(context).textSelectionHandleColor
+        )
+      )
+    );
+
+    // [handle] is a circle, with a rectangle in the top left quadrant of that
+    // circle (an onion pointing to 10:30). We rotate [handle] to point
+    // straight up or up-right depending on the handle type.
+    switch (type) {
+      case TextSelectionHandleType.left:  // points up-right
+        return new Transform(
+          transform: new Matrix4.rotationZ(math.PI / 2.0),
+          child: handle
+        );
+      case TextSelectionHandleType.right:  // points up-left
+        return handle;
+      case TextSelectionHandleType.collapsed:  // points up
+        return new Transform(
+          transform: new Matrix4.rotationZ(math.PI / 4.0),
+          child: handle
+        );
+    }
+    assert(type != null);
+    return null;
+  }
 }
+
+final _MaterialTextSelectionControls materialTextSelectionControls = new _MaterialTextSelectionControls();

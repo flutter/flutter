@@ -219,7 +219,7 @@ class TextPainter {
     ui.TextBox box = boxes[0];
     double caretEnd = box.end;
     double dx = box.direction == TextDirection.rtl ? caretEnd : caretEnd - caretPrototype.width;
-    return new Offset(dx, 0.0);
+    return new Offset(dx, box.top);
   }
 
   Offset _getOffsetFromDownstream(int offset, Rect caretPrototype) {
@@ -229,7 +229,7 @@ class TextPainter {
     ui.TextBox box = boxes[0];
     double caretStart = box.start;
     double dx = box.direction == TextDirection.rtl ? caretStart - caretPrototype.width : caretStart;
-    return new Offset(dx, 0.0);
+    return new Offset(dx, box.top);
   }
 
   /// Returns the offset at which to paint the caret.
