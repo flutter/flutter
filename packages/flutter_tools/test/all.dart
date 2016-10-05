@@ -28,7 +28,6 @@ import 'devices_test.dart' as devices_test;
 import 'drive_test.dart' as drive_test;
 import 'format_test.dart' as format_test;
 import 'install_test.dart' as install_test;
-import 'listen_test.dart' as listen_test;
 import 'logs_test.dart' as logs_test;
 import 'os_utils_test.dart' as os_utils_test;
 import 'packages_test.dart' as packages_test;
@@ -62,7 +61,6 @@ void main() {
   drive_test.main();
   format_test.main();
   install_test.main();
-  listen_test.main();
   logs_test.main();
   os_utils_test.main();
   packages_test.main();

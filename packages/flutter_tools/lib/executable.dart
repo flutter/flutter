@@ -23,7 +23,6 @@ import 'src/commands/doctor.dart';
 import 'src/commands/drive.dart';
 import 'src/commands/format.dart';
 import 'src/commands/install.dart';
-import 'src/commands/listen.dart';
 import 'src/commands/logs.dart';
 import 'src/commands/setup.dart';
 import 'src/commands/packages.dart';
@@ -70,7 +69,6 @@ Future<Null> main(List<String> args) async {
     ..addCommand(new DriveCommand())
     ..addCommand(new FormatCommand())
     ..addCommand(new InstallCommand())
-    ..addCommand(new ListenCommand())
     ..addCommand(new LogsCommand())
     ..addCommand(new PackagesCommand())
     ..addCommand(new PrecacheCommand())
