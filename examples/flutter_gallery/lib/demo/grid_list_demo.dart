@@ -11,6 +11,10 @@ enum GridDemoTileStyle {
   twoLine
 }
 
+typedef void BannerTapCallback(Photo photo);
+
+const double _kMinFlingVelocity = 800.0;
+
 class Photo {
   Photo({ this.assetName, this.title, this.caption, this.isFavorite: false });
 
@@ -24,7 +28,111 @@ class Photo {
   bool get isValid => assetName != null && title != null && caption != null && isFavorite != null;
 }
 
-typedef void BannerTapCallback(Photo photo);
+class GridPhotoViewer extends StatefulWidget {
+  GridPhotoViewer({ Key key, this.photo }) : super(key: key);
+
+  final Photo photo;
+
+  @override
+  _GridPhotoViewerState createState() => new _GridPhotoViewerState();
+}
+
+class _GridPhotoViewerState extends State<GridPhotoViewer> with SingleTickerProviderStateMixin {
+  AnimationController _controller;
+  double _lastScale = 1.0;
+  double _scale = 1.0;
+  Point _lastFocalPoint = Point.origin;
+  Point _focalPoint = Point.origin;
+  Animation<Point> _flingAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = new AnimationController(vsync: this)
+      ..addListener(_handleFlingAnimation);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  // The minimum value for the focal point is 0,0. If the size of this
+  // renderer's box is w,h then the maximum value of the focal point is
+  // (w * _scale - w)/_scale, (h * _scale - h)/_scale.
+  Point _clampFocalPoint(Point point) {
+    final RenderBox box = context.findRenderObject();
+    final double inverseScale = (_scale - 1.0) / _scale;
+    final Point bottomRight = new Point(
+      box.size.width * inverseScale,
+      box.size.height * inverseScale
+    );
+     return new Point(point.x.clamp(0.0, bottomRight.x), point.y.clamp(0.0, bottomRight.y));
+  }
+
+  void _handleFlingAnimation() {
+    setState(() {
+      _focalPoint = _flingAnimation.value;
+      _lastFocalPoint = _focalPoint;
+    });
+  }
+
+  void _handleOnScaleStart(ScaleStartDetails details) {
+    setState(() {
+      _lastScale = 1.0;
+      _lastFocalPoint = details.focalPoint;
+      // The fling animation stops if an input gesture starts.
+      _controller.stop();
+    });
+  }
+
+  void _handleOnScaleUpdate(ScaleUpdateDetails details) {
+    setState(() {
+      _scale = (_scale + (details.scale - _lastScale)).clamp(1.0, 3.0);
+      _lastScale = details.scale;
+      _focalPoint = _clampFocalPoint(_focalPoint + (_lastFocalPoint - details.focalPoint));
+      _lastFocalPoint = details.focalPoint;
+    });
+  }
+
+  void _handleOnScaleEnd(ScaleEndDetails details) {
+    final double magnitude = details.velocity.pixelsPerSecond.distance;
+    if (magnitude < _kMinFlingVelocity)
+      return;
+    final Offset direction = details.velocity.pixelsPerSecond / magnitude;
+    final RenderBox box = context.findRenderObject();
+    final double distance = (Point.origin & box.size).shortestSide;
+    _flingAnimation = new Tween<Point>(
+      begin: _focalPoint,
+      end: _clampFocalPoint(_focalPoint + direction * -distance)
+    ).animate(_controller);
+    _controller
+      ..value = 0.0
+      ..fling(velocity: magnitude / 1000.0);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return new LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        return new GestureDetector(
+          onScaleStart: _handleOnScaleStart,
+          onScaleUpdate: _handleOnScaleUpdate,
+          onScaleEnd: _handleOnScaleEnd,
+          child: new Transform(
+            transform: new Matrix4.identity()
+              ..translate(_focalPoint.x * (1.0 - _scale), _focalPoint.y * (1.0 - _scale))
+              ..scale(_scale),
+            child: new ClipRect(
+              child: new Image.asset(config.photo.assetName, fit: ImageFit.cover)
+            )
+          )
+        );
+      }
+    );
+  }
+}
 
 class GridDemoPhotoItem extends StatelessWidget {
   GridDemoPhotoItem({
@@ -51,7 +159,7 @@ class GridDemoPhotoItem extends StatelessWidget {
           ),
           body: new Hero(
             tag: photo.tag,
-            child: new Image.asset(photo.assetName, fit: ImageFit.cover)
+            child: new GridPhotoViewer(photo: photo),
           )
         );
       }

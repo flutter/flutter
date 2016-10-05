@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:args/args.dart';
 import 'package:path/path.dart' as path;
 
 import '../base/logger.dart';
@@ -13,16 +14,12 @@ import '../base/utils.dart';
 import '../cache.dart';
 import '../dart/sdk.dart';
 import '../globals.dart';
-import 'analysis_common.dart';
+import 'analyze_base.dart';
 
-class WatchCommand extends AnalysisCommand {
-  WatchCommand({bool verboseHelp: false}) : super(verboseHelp: verboseHelp);
+class AnalyzeContinuously extends AnalyzeBase {
+  final List<Directory> repoAnalysisEntryPoints;
 
-  @override
-  String get name => 'watch';
-
-  @override
-  String get description => 'Analyze the project\'s Dart code continuously, watching the filesystem for changes.';
+  AnalyzeContinuously(ArgResults argResults, this.repoAnalysisEntryPoints) : super(argResults);
 
   String analysisTarget;
   bool firstAnalysis = true;
@@ -33,11 +30,11 @@ class WatchCommand extends AnalysisCommand {
   Status analysisStatus;
 
   @override
-  Future<int> runCommand() async {
+  Future<int> analyze() async {
     List<String> directories;
 
     if (argResults['flutter-repo']) {
-      directories = runner.getRepoAnalysisEntryPoints().map((Directory dir) => dir.path).toList();
+      directories = repoAnalysisEntryPoints.map((Directory dir) => dir.path).toList();
       analysisTarget = 'Flutter repository';
       printTrace('Analyzing Flutter repository:');
       for (String projectPath in directories)

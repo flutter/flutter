@@ -16,6 +16,7 @@ const String _kOptionSnapshotter = 'snapshotter-path';
 const String _kOptionTarget = 'target';
 const String _kOptionPackages = 'packages';
 const String _kOptionOutput = 'output-file';
+const String _kOptionHeader = 'header';
 const String _kOptionSnapshot = 'snapshot';
 const String _kOptionDepfile = 'depfile';
 const String _kOptionWorking = 'working-dir';
@@ -24,6 +25,7 @@ const List<String> _kOptions = const <String>[
   _kOptionTarget,
   _kOptionPackages,
   _kOptionOutput,
+  _kOptionHeader,
   _kOptionSnapshot,
   _kOptionDepfile,
   _kOptionWorking,
@@ -36,6 +38,7 @@ Future<Null> main(List<String> args) async {
     ..addOption(_kOptionTarget, help: 'The entry point into the app')
     ..addOption(_kOptionPackages, help: 'The .packages file')
     ..addOption(_kOptionOutput, help: 'The generated flx file')
+    ..addOption(_kOptionHeader, help: 'The header of the flx file')
     ..addOption(_kOptionSnapshot, help: 'The generated snapshot file')
     ..addOption(_kOptionDepfile, help: 'The generated dependency file')
     ..addOption(_kOptionWorking,
@@ -46,7 +49,7 @@ Future<Null> main(List<String> args) async {
     exit(1);
   }
   String outputPath = argResults[_kOptionOutput];
-  final int result = await build(
+  final int buildResult = await build(
     snapshotterPath: argResults[_kOptionSnapshotter],
     mainPath: argResults[_kOptionTarget],
     outputPath: outputPath,
@@ -56,8 +59,25 @@ Future<Null> main(List<String> args) async {
     packagesPath: argResults[_kOptionPackages],
     includeRobotoFonts: true,
   );
-  if (result != 0) {
-    printError('Error building $outputPath: $result.');
+  if (buildResult != 0) {
+    printError('Error building $outputPath: $buildResult.');
+    exit(buildResult);
   }
-  exit(result);
+  final int headerResult = _addHeader(outputPath, argResults[_kOptionHeader]);
+  if (headerResult != 0) {
+    printError('Error adding header to $outputPath: $headerResult.');
+  }
+  exit(headerResult);
+}
+
+int _addHeader(String outputPath, String header) {
+  try {
+    final File outputFile = new File(outputPath);
+    final List<int> content = outputFile.readAsBytesSync();
+    outputFile.writeAsStringSync('$header\n');
+    outputFile.writeAsBytesSync(content, mode: FileMode.APPEND);
+    return 0;
+  } catch (_) {
+    return 1;
+  }
 }

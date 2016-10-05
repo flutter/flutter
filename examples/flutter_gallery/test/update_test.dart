@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_gallery/gallery/app.dart';
 
@@ -10,14 +9,6 @@ Future<String> mockUpdateUrlFetcher() {
   // A real implementation would connect to the network to retrieve this value
   return new Future<String>.value('http://www.example.com/');
 }
-
-Finder byTooltip(WidgetTester tester, String message) {
-  return find.byWidgetPredicate((Widget widget) {
-    return widget is Tooltip && widget.message == message;
-  });
-}
-
-Finder findBackButton(WidgetTester tester) => byTooltip(tester, 'Back');
 
 void main() {
   TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
@@ -38,7 +29,7 @@ void main() {
     await tester.pump(); // Launch shrine
     await tester.pump(const Duration(seconds: 1)); // transition is complete
 
-    Finder backButton = findBackButton(tester);
+    Finder backButton = find.byTooltip('Back');
     expect(backButton, findsOneWidget);
     await tester.tap(backButton);
     await tester.pump(); // Start the pop "back" operation.

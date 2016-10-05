@@ -43,6 +43,7 @@ class WidgetsApp extends StatefulWidget {
     this.textStyle,
     this.color,
     this.navigatorObserver,
+    this.initialRoute,
     this.onLocaleChanged,
     this.showPerformanceOverlay: false,
     this.showSemanticsDebugger: false,
@@ -69,6 +70,11 @@ class WidgetsApp extends StatefulWidget {
   /// The route generator callback used when the app is navigated to a
   /// named route.
   final RouteFactory onGenerateRoute;
+
+  /// The name of the first route to show.
+  ///
+  /// Defaults to [Window.defaultRouteName].
+  final String initialRoute;
 
   /// Callback that is called when the operating system changes the
   /// current locale.
@@ -176,7 +182,7 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
           color: config.color,
           child: new Navigator(
             key: _navigator,
-            initialRoute: ui.window.defaultRouteName,
+            initialRoute: config.initialRoute ?? ui.window.defaultRouteName,
             onGenerateRoute: config.onGenerateRoute,
             observer: config.navigatorObserver
           )

@@ -16,19 +16,19 @@ void main() {
 
     bool didStartScale = false;
     Point updatedFocalPoint;
-    scale.onStart = (Point focalPoint) {
+    scale.onStart = (ScaleStartDetails details) {
       didStartScale = true;
-      updatedFocalPoint = focalPoint;
+      updatedFocalPoint = details.focalPoint;
     };
 
     double updatedScale;
-    scale.onUpdate = (double scale, Point focalPoint) {
-      updatedScale = scale;
-      updatedFocalPoint = focalPoint;
+    scale.onUpdate = (ScaleUpdateDetails details) {
+      updatedScale = details.scale;
+      updatedFocalPoint = details.focalPoint;
     };
 
     bool didEndScale = false;
-    scale.onEnd = () {
+    scale.onEnd = (ScaleEndDetails details) {
       didEndScale = true;
     };
 

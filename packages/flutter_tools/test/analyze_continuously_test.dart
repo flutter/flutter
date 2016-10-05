@@ -6,7 +6,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter_tools/src/base/os.dart';
-import 'package:flutter_tools/src/commands/watch.dart';
+import 'package:flutter_tools/src/commands/analyze_continuously.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/dart/sdk.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
@@ -29,7 +29,7 @@ void main() {
     return server?.dispose();
   });
 
-  group('watch', () {
+  group('analyze --watch', () {
     testUsingContext('AnalysisServer success', () async {
       _createSampleProject(tempDir);
 
