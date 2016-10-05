@@ -237,7 +237,7 @@ class NoIdeValidator extends DoctorValidator {
 
   @override
   Future<ValidationResult> validate() async {
-    // TODO(danrubel) do not show Atom once IntelliJ support is complete
+    // TODO(danrubel): do not show Atom once IntelliJ support is complete
     return new ValidationResult(ValidationType.missing, <ValidationMessage>[
       new ValidationMessage('Atom - https://atom.io/'),
       new ValidationMessage('IntelliJ - https://www.jetbrains.com/idea/'),
@@ -314,10 +314,10 @@ class AtomValidator extends DoctorValidator {
 }
 
 class IntellijValidator extends DoctorValidator {
+  IntellijValidator(String title, {this.version, this.pluginsPath}) : super(title);
+
   final String version;
   final String pluginsPath;
-
-  IntellijValidator(String title, {this.version, this.pluginsPath}) : super(title);
 
   static Iterable<DoctorValidator> get installed {
     List<DoctorValidator> validators = <DoctorValidator>[];
@@ -353,10 +353,10 @@ class IntellijValidator extends DoctorValidator {
         }
       }
     } else if (Platform.isMacOS) {
-      // TODO(danrubel) add support for Mac
+      // TODO(danrubel): add support for Mac
 
     } else {
-      // TODO(danrubel) add support for Windows
+      // TODO(danrubel): add support for Windows
     }
     return validators;
   }
@@ -373,16 +373,18 @@ class IntellijValidator extends DoctorValidator {
     if (_validateHasPackage(messages, 'Flutter', 'Flutter'))
       installCount++;
 
-    if (installCount < 2)
+    if (installCount < 2) {
       messages.add(new ValidationMessage(
-        'For information about managing plugins, see\n'
-        'https://www.jetbrains.com/help/idea/2016.2/managing-plugins.html'
+          'For information about managing plugins, see\n'
+          'https://www.jetbrains.com/help/idea/2016.2/managing-plugins.html'
       ));
+    }
 
     return new ValidationResult(
         installCount == 2 ? ValidationType.installed : ValidationType.partial,
         messages,
-        statusInfo: 'version $version');
+        statusInfo: 'version $version'
+    );
   }
 
   bool _validateHasPackage(List<ValidationMessage> messages, String packageName, String description) {
