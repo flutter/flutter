@@ -92,7 +92,7 @@ class Doctor {
 
     if (!allGood) {
       buffer.writeln();
-      buffer.write('Run "flutter doctor" for information about installing additional components.');
+      buffer.writeln('Run "flutter doctor" for information about installing additional components.');
     }
 
     return buffer.toString();

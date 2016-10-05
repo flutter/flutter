@@ -60,9 +60,10 @@ class Template {
 
   Map<String /* relative */, String /* absolute source */> _templateFilePaths;
 
-  void render(Directory destination, Map<String, dynamic> context,
+  int render(Directory destination, Map<String, dynamic> context,
       { bool overwriteExisting: true }) {
     destination.createSync(recursive: true);
+    int fileCount = 0;
 
     String destinationDirPath = destination.absolute.path;
 
@@ -82,12 +83,14 @@ class Template {
           printStatus('  $relativePathForLogging (overwritten)');
         } else {
           // The file exists but we cannot overwrite it, move on.
-          printStatus('  $relativePathForLogging (existing - skipped)');
+          printTrace('  $relativePathForLogging (existing - skipped)');
           return;
         }
       } else {
-        printStatus('  $relativePathForLogging');
+        printTrace('  $relativePathForLogging');
       }
+
+      fileCount++;
 
       finalDestinationFile.createSync(recursive: true);
       File sourceFile = new File(absoluteSrcPath);
@@ -118,6 +121,8 @@ class Template {
 
       sourceFile.copySync(finalDestinationFile.path);
     });
+
+    return fileCount;
   }
 }
 
