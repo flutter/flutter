@@ -36,7 +36,8 @@ class InkResponse extends StatefulWidget {
     this.onLongPress,
     this.onHighlightChanged,
     this.containedInkWell: false,
-    this.highlightShape: BoxShape.circle
+    this.highlightShape: BoxShape.circle,
+    this.radius,
   }) : super(key: key);
 
   /// The widget below this widget in the tree.
@@ -63,6 +64,9 @@ class InkResponse extends StatefulWidget {
 
   /// The shape (e.g., circle, rectangle) to use for the highlight drawn around this part of the material.
   final BoxShape highlightShape;
+
+  /// The radius of the ink splash.
+  final double radius;
 
   /// The rectangle to use for the highlight effect and for clipping
   /// the splash effects if [containedInkWell] is true.
@@ -138,6 +142,7 @@ class _InkResponseState<T extends InkResponse> extends State<T> {
       color: Theme.of(context).splashColor,
       containedInkWell: config.containedInkWell,
       rectCallback: config.containedInkWell ? rectCallback : null,
+      radius: config.radius,
       onRemoved: () {
         if (_splashes != null) {
           assert(_splashes.contains(splash));

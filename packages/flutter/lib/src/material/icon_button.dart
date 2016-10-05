@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
+
 import 'package:flutter/widgets.dart';
 import 'package:meta/meta.dart';
 
@@ -126,7 +128,7 @@ class IconButton extends StatelessWidget {
         maxHeight: size,
         child: new ConstrainedBox(
           constraints: new BoxConstraints.loose(
-            const Size.square(InkSplash.defaultRadius * 2.0)
+            new Size.square(math.max(size, InkSplash.defaultRadius * 2.0))
           ),
           child: new Align(
             alignment: alignment,
@@ -150,7 +152,8 @@ class IconButton extends StatelessWidget {
     }
     return new InkResponse(
       onTap: onPressed,
-      child: result
+      child: result,
+      radius: math.max(size, InkSplash.defaultRadius),
     );
   }
 

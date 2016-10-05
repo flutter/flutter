@@ -121,7 +121,8 @@ abstract class MaterialInkController {
     Color color,
     bool containedInkWell: false,
     RectCallback rectCallback,
-    VoidCallback onRemoved
+    VoidCallback onRemoved,
+    double radius,
   });
 
   /// Begin a highlight animation. If a rectCallback is given, then it
@@ -321,9 +322,9 @@ class _RenderInkFeatures extends RenderProxyBox implements MaterialInkController
     Color color,
     bool containedInkWell: false,
     RectCallback rectCallback,
-    VoidCallback onRemoved
+    VoidCallback onRemoved,
+    double radius,
   }) {
-    double radius;
     RectCallback clipCallback;
     if (containedInkWell) {
       Size size;
@@ -334,10 +335,10 @@ class _RenderInkFeatures extends RenderProxyBox implements MaterialInkController
         size = referenceBox.size;
         clipCallback = () => Point.origin & referenceBox.size;
       }
-      radius = _getSplashTargetSize(size, position);
+      radius ??= _getSplashTargetSize(size, position);
     } else {
       assert(rectCallback == null);
-      radius = InkSplash.defaultRadius;
+      radius ??= InkSplash.defaultRadius;
     }
     _InkSplash splash = new _InkSplash(
       controller: this,
