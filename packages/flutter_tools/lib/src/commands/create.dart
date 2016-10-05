@@ -146,7 +146,8 @@ All done! In order to run your application, type:
     flutterPackagesDirectory = path.normalize(flutterPackagesDirectory);
     flutterPackagesDirectory = _relativePath(from: dirPath, to: flutterPackagesDirectory);
 
-    printStatus('Creating project ${path.basename(projectName)}:');
+    printStatus('Creating project ${path.basename(projectName)} in ');
+    printStatus('  $dirPath');
 
     Map<String, dynamic> templateContext = <String, dynamic>{
       'projectName': projectName,
