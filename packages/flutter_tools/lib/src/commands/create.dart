@@ -82,24 +82,27 @@ class CreateCommand extends FlutterCommand {
 
     Directory projectDir = new Directory(argResults.rest.first);
     String dirPath = path.normalize(projectDir.absolute.path);
+    String relativePath = path.relative(dirPath);
     String projectName = _normalizeProjectName(path.basename(dirPath));
 
     if (_validateProjectDir(dirPath) != null) {
       printError(_validateProjectDir(dirPath));
       return 1;
     }
+
     if (_validateProjectName(projectName) != null) {
       printError(_validateProjectName(projectName));
       return 1;
     }
 
-    _renderTemplates(
+    int generatedCount = _renderTemplates(
       projectName,
       argResults['description'],
       dirPath,
       flutterPackagesDirectory,
       renderDriverTest: argResults['with-driver-test']
     );
+    printStatus('Wrote $generatedCount files.');
 
     printStatus('');
 
@@ -119,8 +122,8 @@ class CreateCommand extends FlutterCommand {
       printStatus('''
 All done! In order to run your application, type:
 
-  \$ cd $dirPath
-  \$ flutter run
+  \$ cd $relativePath
+  \$ flutter run lib/main.dart
 ''');
     } else {
       printStatus("You'll need to install additional components before you can run "
@@ -132,22 +135,21 @@ All done! In order to run your application, type:
       printStatus('');
       printStatus("After installing components, run 'flutter doctor' in order to "
         "re-validate your setup.");
-      printStatus("When complete, type 'flutter run' from the '$dirPath' "
+      printStatus("When complete, type 'flutter run lib/main.dart' from the '$relativePath' "
         "directory in order to launch your app.");
     }
 
     return 0;
   }
 
-  void _renderTemplates(String projectName, String projectDescription, String dirPath,
+  int _renderTemplates(String projectName, String projectDescription, String dirPath,
       String flutterPackagesDirectory, { bool renderDriverTest: false }) {
     new Directory(dirPath).createSync(recursive: true);
 
     flutterPackagesDirectory = path.normalize(flutterPackagesDirectory);
     flutterPackagesDirectory = _relativePath(from: dirPath, to: flutterPackagesDirectory);
 
-    printStatus('Creating project ${path.basename(projectName)} in ');
-    printStatus('  $dirPath');
+    printStatus('Creating project ${path.relative(dirPath)}...');
 
     Map<String, dynamic> templateContext = <String, dynamic>{
       'projectName': projectName,
@@ -158,18 +160,22 @@ All done! In order to run your application, type:
       'androidMinApiLevel': android.minApiLevel
     };
 
+    int fileCount = 0;
+
     if (renderDriverTest)
       templateContext['withDriverTest?'] = <String, dynamic>{};
 
     Template createTemplate = new Template.fromName('create');
-    createTemplate.render(new Directory(dirPath), templateContext,
+    fileCount += createTemplate.render(new Directory(dirPath), templateContext,
         overwriteExisting: false);
 
     if (renderDriverTest) {
       Template driverTemplate = new Template.fromName('driver');
-      driverTemplate.render(new Directory(path.join(dirPath, 'test_driver')),
+      fileCount += driverTemplate.render(new Directory(path.join(dirPath, 'test_driver')),
           templateContext, overwriteExisting: false);
     }
+
+    return fileCount;
   }
 }
 
