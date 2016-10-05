@@ -39,7 +39,13 @@ class Doctor {
     if (_iosWorkflow.appliesToHostPlatform)
       _validators.add(_iosWorkflow);
 
-    _validators.add(new AtomValidator());
+    List<DoctorValidator> ideValidators = <DoctorValidator>[];
+    ideValidators.addAll(AtomValidator.installed);
+    if (ideValidators.isNotEmpty)
+      _validators.addAll(ideValidators);
+    else
+      _validators.add(new NoIdeValidator());
+
     _validators.add(new DeviceValidator());
   }
 
@@ -226,8 +232,26 @@ class _FlutterValidator extends DoctorValidator {
   }
 }
 
+class NoIdeValidator extends DoctorValidator {
+  NoIdeValidator() : super('Flutter IDE Support');
+
+  @override
+  Future<ValidationResult> validate() async {
+    // TODO(danrubel) do not show Atom once IntelliJ support is complete
+    return new ValidationResult(ValidationType.missing, <ValidationMessage>[
+      new ValidationMessage('Atom - https://atom.io/'),
+      new ValidationMessage('IntelliJ - https://www.jetbrains.com/idea/'),
+    ], statusInfo: 'No supported IDEs installed');
+  }
+}
+
 class AtomValidator extends DoctorValidator {
   AtomValidator() : super('Atom - a lightweight development environment for Flutter');
+
+  static Iterable<DoctorValidator> get installed {
+    AtomValidator atom = new AtomValidator();
+    return atom.isInstalled ? <DoctorValidator>[atom] : <DoctorValidator>[];
+  }
 
   static File getConfigFile() {
     // ~/.atom/config.cson
