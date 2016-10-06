@@ -7,13 +7,14 @@
 
 #include <memory>
 
-#include "lib/ftl/macros.h"
-#include "lib/ftl/memory/weak_ptr.h"
 #include "base/mac/scoped_nsobject.h"
 #include "flutter/services/platform/app_messages.mojom.h"
+#include "flutter/shell/common/platform_view.h"
+#include "flutter/shell/gpu/gpu_surface_gl.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/accessibility_bridge.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/application_messages_impl.h"
-#include "flutter/shell/common/platform_view.h"
+#include "lib/ftl/macros.h"
+#include "lib/ftl/memory/weak_ptr.h"
 
 @class CAEAGLLayer;
 @class UIView;
@@ -22,7 +23,7 @@ namespace shell {
 
 class IOSGLContext;
 
-class PlatformViewIOS : public PlatformView {
+class PlatformViewIOS : public PlatformView, public GPUSurfaceGLDelegate {
  public:
   explicit PlatformViewIOS(CAEAGLLayer* layer);
 
@@ -40,13 +41,15 @@ class PlatformViewIOS : public PlatformView {
 
   ftl::WeakPtr<PlatformView> GetWeakViewPtr() override;
 
-  uint64_t DefaultFramebuffer() const override;
-
-  bool ContextMakeCurrent() override;
-
   bool ResourceContextMakeCurrent() override;
 
-  bool SwapBuffers() override;
+  bool GLContextMakeCurrent() override;
+
+  bool GLContextClearCurrent() override;
+
+  bool GLContextPresent() override;
+
+  intptr_t GLContextFBO() const override;
 
   void RunFromSource(const std::string& main,
                      const std::string& packages,

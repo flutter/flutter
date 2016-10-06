@@ -25,6 +25,7 @@ source_set("mac_desktop_platform") {
     "//base",
     "//flutter/common",
     "//flutter/shell/common",
+    "//flutter/shell/gpu",
     "//flutter/shell/platform/darwin/common",
     "//flutter/shell/testing",
     "//flutter/skia",

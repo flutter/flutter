@@ -3,11 +3,10 @@
 // found in the LICENSE file.
 
 #include "flutter/shell/platform/linux/platform_view_glfw.h"
-
-#include "flutter/common/threads.h"
-#include "flutter/shell/platform/linux/glfw_service_provider.h"
-
 #include <GLFW/glfw3.h>
+#include "flutter/common/threads.h"
+#include "flutter/shell/gpu/gpu_rasterizer.h"
+#include "flutter/shell/platform/linux/glfw_service_provider.h"
 
 namespace shell {
 
@@ -16,7 +15,11 @@ inline PlatformViewGLFW* ToPlatformView(GLFWwindow* window) {
 }
 
 PlatformViewGLFW::PlatformViewGLFW()
-    : valid_(false), glfw_window_(nullptr), buttons_(0), weak_factory_(this) {
+    : PlatformView(std::make_unique<GPURasterizer>()),
+      valid_(false),
+      glfw_window_(nullptr),
+      buttons_(0),
+      weak_factory_(this) {
   if (!glfwInit()) {
     return;
   }
@@ -79,13 +82,18 @@ ftl::WeakPtr<PlatformView> PlatformViewGLFW::GetWeakViewPtr() {
   return weak_factory_.GetWeakPtr();
 }
 
-uint64_t PlatformViewGLFW::DefaultFramebuffer() const {
+intptr_t PlatformViewGLFW::GLContextFBO() const {
   // The default window bound FBO.
   return 0;
 }
 
-bool PlatformViewGLFW::ContextMakeCurrent() {
+bool PlatformViewGLFW::GLContextMakeCurrent() {
   glfwMakeContextCurrent(glfw_window_);
+  return true;
+}
+
+bool PlatformViewGLFW::GLContextClearCurrent() {
+  glfwMakeContextCurrent(nullptr);
   return true;
 }
 
@@ -94,7 +102,7 @@ bool PlatformViewGLFW::ResourceContextMakeCurrent() {
   return false;
 }
 
-bool PlatformViewGLFW::SwapBuffers() {
+bool PlatformViewGLFW::GLContextPresent() {
   glfwSwapBuffers(glfw_window_);
   return true;
 }

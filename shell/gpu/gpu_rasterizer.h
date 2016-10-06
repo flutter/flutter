@@ -7,11 +7,12 @@
 
 #include "flutter/flow/compositor_context.h"
 #include "flutter/shell/common/rasterizer.h"
-#include "flutter/shell/gpu/gpu_canvas.h"
 #include "lib/ftl/memory/weak_ptr.h"
 #include "lib/ftl/synchronization/waitable_event.h"
 
 namespace shell {
+
+class Surface;
 
 class GPURasterizer : public Rasterizer {
  public:
@@ -19,11 +20,11 @@ class GPURasterizer : public Rasterizer {
 
   ~GPURasterizer() override;
 
-  void Setup(PlatformView* platform_view,
+  void Setup(std::unique_ptr<Surface> surface,
              ftl::Closure continuation,
              ftl::AutoResetWaitableEvent* setup_completion_event) override;
 
-  void Clear(SkColor color) override;
+  void Clear(SkColor color, const SkISize& size) override;
 
   void Teardown(
       ftl::AutoResetWaitableEvent* teardown_completion_event) override;
@@ -35,16 +36,18 @@ class GPURasterizer : public Rasterizer {
   void Draw(ftl::RefPtr<flutter::Pipeline<flow::LayerTree>> pipeline) override;
 
  private:
-  std::unique_ptr<GPUCanvas> gpu_canvas_;
+  std::unique_ptr<Surface> surface_;
   flow::CompositorContext compositor_context_;
   std::unique_ptr<flow::LayerTree> last_layer_tree_;
-  PlatformView* platform_view_;
   ftl::WeakPtrFactory<GPURasterizer> weak_factory_;
 
-  FTL_WARN_UNUSED_RESULT
-  bool Setup(PlatformView* platform_view);
+  void DoDraw(std::unique_ptr<flow::LayerTree> layer_tree);
 
-  void DoDraw(std::unique_ptr<flow::LayerTree> tree);
+  void DrawToSurface(flow::LayerTree& layer_tree);
+
+  bool ShouldDrawToTrace(flow::LayerTree& layer_tree);
+
+  void DrawToTraceIfNecessary(flow::LayerTree& layer_tree);
 
   FTL_DISALLOW_COPY_AND_ASSIGN(GPURasterizer);
 };

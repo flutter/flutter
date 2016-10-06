@@ -9,16 +9,15 @@
 
 #include "flutter/common/threads.h"
 #include "flutter/glue/trace_event.h"
+#include "flutter/shell/common/picture_serializer.h"
 #include "flutter/shell/common/platform_view.h"
 #include "flutter/shell/common/shell.h"
-#include "flutter/shell/common/picture_serializer.h"
 #include "mojo/public/cpp/system/data_pipe.h"
-#include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkPicture.h"
 
 namespace shell {
 
-GPURasterizer::GPURasterizer() : platform_view_(nullptr), weak_factory_(this) {
+GPURasterizer::GPURasterizer() : weak_factory_(this) {
   auto weak_ptr = weak_factory_.GetWeakPtr();
   blink::Threads::Gpu()->PostTask(
       [weak_ptr]() { Shell::Shared().AddRasterizer(weak_ptr); });
@@ -29,70 +28,45 @@ GPURasterizer::~GPURasterizer() {
   Shell::Shared().PurgeRasterizers();
 }
 
-std::unique_ptr<Rasterizer> Rasterizer::Create() {
-  return std::unique_ptr<GPURasterizer>(new GPURasterizer());
-}
-
 ftl::WeakPtr<Rasterizer> GPURasterizer::GetWeakRasterizerPtr() {
   return weak_factory_.GetWeakPtr();
 }
 
-bool GPURasterizer::Setup(PlatformView* platform_view) {
-  if (platform_view == nullptr) {
-    return false;
-  }
-
-  if (!platform_view->ContextMakeCurrent()) {
-    return false;
-  }
-
-  auto gpu_canvas = GPUCanvas::CreatePlatformCanvas(*platform_view);
-
-  if (gpu_canvas == nullptr) {
-    return false;
-  }
-
-  if (!gpu_canvas->Setup()) {
-    return false;
-  }
-
-  gpu_canvas_ = std::move(gpu_canvas);
-  platform_view_ = platform_view;
-  return true;
-}
-
-void GPURasterizer::Setup(PlatformView* platform_view,
+void GPURasterizer::Setup(std::unique_ptr<Surface> surface,
                           ftl::Closure continuation,
                           ftl::AutoResetWaitableEvent* setup_completion_event) {
-  auto setup_result = Setup(platform_view);
-
-  FTL_CHECK(setup_result) << "Must be able to setup the GPU canvas.";
+  surface_ = std::move(surface);
 
   continuation();
 
   setup_completion_event->Signal();
 }
 
-void GPURasterizer::Clear(SkColor color) {
-  if (gpu_canvas_ == nullptr) {
+void GPURasterizer::Clear(SkColor color, const SkISize& size) {
+  if (surface_ == nullptr) {
     return;
   }
 
-  SkCanvas* canvas = gpu_canvas_->AcquireCanvas(platform_view_->GetSize());
+  auto frame = surface_->AcquireFrame(size);
+
+  if (frame == nullptr) {
+    return;
+  }
+
+  SkCanvas* canvas = frame->SkiaCanvas();
 
   if (canvas == nullptr) {
     return;
   }
 
   canvas->clear(color);
-  canvas->flush();
 
-  platform_view_->SwapBuffers();
+  frame->Submit();
 }
 
 void GPURasterizer::Teardown(
     ftl::AutoResetWaitableEvent* teardown_completion_event) {
-  platform_view_ = nullptr;
+  surface_.reset();
   last_layer_tree_.reset();
   compositor_context_.OnGrContextDestroyed();
   teardown_completion_event->Signal();
@@ -105,9 +79,6 @@ flow::LayerTree* GPURasterizer::GetLastLayerTree() {
 void GPURasterizer::Draw(
     ftl::RefPtr<flutter::Pipeline<flow::LayerTree>> pipeline) {
   TRACE_EVENT0("flutter", "GPURasterizer::Draw");
-
-  if (!platform_view_)
-    return;
 
   flutter::Pipeline<flow::LayerTree>::Consumer consumer =
       std::bind(&GPURasterizer::DoDraw, this, std::placeholders::_1);
@@ -130,7 +101,7 @@ void GPURasterizer::Draw(
 }
 
 void GPURasterizer::DoDraw(std::unique_ptr<flow::LayerTree> layer_tree) {
-  if (!layer_tree || !gpu_canvas_) {
+  if (!layer_tree || !surface_) {
     return;
   }
 
@@ -139,62 +110,76 @@ void GPURasterizer::DoDraw(std::unique_ptr<flow::LayerTree> layer_tree) {
   // for instrumentation.
   compositor_context_.engine_time().SetLapTime(layer_tree->construction_time());
 
-  SkISize size = layer_tree->frame_size();
-  if (platform_view_->GetSize() != size) {
-    platform_view_->Resize(size);
-  }
+  DrawToSurface(*layer_tree);
 
-  if (!platform_view_->ContextMakeCurrent() || !layer_tree->root_layer()) {
+  DrawToTraceIfNecessary(*layer_tree);
+
+  last_layer_tree_ = std::move(layer_tree);
+}
+
+void GPURasterizer::DrawToSurface(flow::LayerTree& layer_tree) {
+  auto frame = surface_->AcquireFrame(layer_tree.frame_size());
+
+  if (frame == nullptr) {
     return;
   }
 
-  {
-    SkCanvas* canvas = gpu_canvas_->AcquireCanvas(layer_tree->frame_size());
-    flow::CompositorContext::ScopedFrame frame =
-        compositor_context_.AcquireFrame(gpu_canvas_->GetContext(), *canvas);
-    canvas->clear(SK_ColorBLACK);
-    layer_tree->Raster(frame);
+  auto canvas = frame->SkiaCanvas();
 
-    {
-      TRACE_EVENT0("flutter", "SkCanvas::Flush");
-      canvas->flush();
-    }
-
-    platform_view_->SwapBuffers();
+  if (canvas == nullptr) {
+    return;
   }
 
-  // Trace to a file if necessary
-  static const double kOneFrameDuration = 1e3 / 60.0;
-  bool frameExceededThreshold = false;
-  uint32_t thresholdInterval = layer_tree->rasterizer_tracing_threshold();
-  if (thresholdInterval != 0 &&
-      compositor_context_.frame_time().LastLap().ToMillisecondsF() >
-          thresholdInterval * kOneFrameDuration) {
-    // While rendering the last frame, if we exceeded the tracing threshold
-    // specified in the layer tree, we force a trace to disk.
-    frameExceededThreshold = true;
+  auto compositor_frame =
+      compositor_context_.AcquireFrame(surface_->GetContext(), *canvas);
+
+  canvas->clear(SK_ColorBLACK);
+
+  layer_tree.Raster(compositor_frame);
+
+  frame->Submit();
+}
+
+bool GPURasterizer::ShouldDrawToTrace(flow::LayerTree& layer_tree) {
+  if (Shell::Shared().tracing_controller().picture_tracing_enabled()) {
+    // Picture tracing is unconditionally enabled for all frames by the tracing
+    // controller.
+    return true;
   }
 
-  const auto& tracingController = Shell::Shared().tracing_controller();
+  const uint32_t threshold_interval = layer_tree.rasterizer_tracing_threshold();
 
-  if (frameExceededThreshold || tracingController.picture_tracing_enabled()) {
-    std::string path = tracingController.PictureTracingPathForCurrentTime();
-    LOG(INFO) << "Frame threshold exceeded. Capturing SKP to " << path;
-
-    SkPictureRecorder recorder;
-    recorder.beginRecording(SkRect::MakeWH(size.width(), size.height()));
-
-    {
-      auto frame = compositor_context_.AcquireFrame(
-          nullptr, *recorder.getRecordingCanvas(), false);
-      layer_tree->Raster(frame, true);
-    }
-
-    sk_sp<SkPicture> picture = recorder.finishRecordingAsPicture();
-    SerializePicture(path, picture.get());
+  if (threshold_interval == 0) {
+    // An interval of zero means tracing is disabled.
+    return false;
   }
 
-  last_layer_tree_ = std::move(layer_tree);
+  return compositor_context_.frame_time().LastLap().ToMillisecondsF() >
+         threshold_interval * 1e3 / 60.0;
+}
+
+void GPURasterizer::DrawToTraceIfNecessary(flow::LayerTree& layer_tree) {
+  if (!ShouldDrawToTrace(layer_tree)) {
+    return;
+  }
+
+  auto& tracing_controller = Shell::Shared().tracing_controller();
+
+  std::string path = tracing_controller.PictureTracingPathForCurrentTime();
+  LOG(INFO) << "Frame threshold exceeded. Capturing SKP to " << path;
+
+  SkPictureRecorder recorder;
+
+  recorder.beginRecording(layer_tree.frame_size().width(),
+                          layer_tree.frame_size().height());
+
+  auto compositor_frame = compositor_context_.AcquireFrame(
+      nullptr, *recorder.getRecordingCanvas(), false);
+  layer_tree.Raster(compositor_frame, true /* ignore raster cache */);
+
+  sk_sp<SkPicture> picture = recorder.finishRecordingAsPicture();
+
+  SerializePicture(path, picture.get());
 }
 
 }  // namespace shell

@@ -6,15 +6,15 @@
 #define SHELL_PLATFORM_GLFW_PLATFORM_VIEW_GLFW_H_
 
 #include <string>
-
 #include "flutter/shell/common/platform_view.h"
+#include "flutter/shell/gpu/gpu_surface_gl.h"
 #include "lib/ftl/memory/weak_ptr.h"
 
 struct GLFWwindow;
 
 namespace shell {
 
-class PlatformViewGLFW : public PlatformView {
+class PlatformViewGLFW : public PlatformView, public GPUSurfaceGLDelegate {
  public:
   PlatformViewGLFW();
 
@@ -28,13 +28,15 @@ class PlatformViewGLFW : public PlatformView {
 
   ftl::WeakPtr<PlatformView> GetWeakViewPtr() override;
 
-  uint64_t DefaultFramebuffer() const override;
-
-  bool ContextMakeCurrent() override;
-
   bool ResourceContextMakeCurrent() override;
 
-  bool SwapBuffers() override;
+  bool GLContextMakeCurrent() override;
+
+  bool GLContextClearCurrent() override;
+
+  bool GLContextPresent() override;
+
+  intptr_t GLContextFBO() const override;
 
   void RunFromSource(const std::string& main,
                      const std::string& packages,

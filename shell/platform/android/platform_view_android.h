@@ -7,15 +7,14 @@
 
 #include <string>
 
+#include <memory>
 #include "base/android/jni_android.h"
 #include "base/android/jni_weak_ref.h"
-#include "lib/ftl/memory/weak_ptr.h"
-#include "lib/ftl/synchronization/waitable_event.h"
 #include "flutter/shell/common/platform_view.h"
+#include "flutter/shell/platform/android/android_surface_gl.h"
+#include "lib/ftl/memory/weak_ptr.h"
 
 namespace shell {
-
-class AndroidGLContext;
 
 class PlatformViewAndroid : public PlatformView {
  public:
@@ -33,7 +32,9 @@ class PlatformViewAndroid : public PlatformView {
 
   void SurfaceDestroyed(JNIEnv* env, jobject obj);
 
-  void DispatchPointerDataPacket(JNIEnv* env, jobject obj, jobject buffer,
+  void DispatchPointerDataPacket(JNIEnv* env,
+                                 jobject obj,
+                                 jobject buffer,
                                  jint position);
 
   base::android::ScopedJavaLocalRef<jobject> GetBitmap(JNIEnv* env,
@@ -41,13 +42,7 @@ class PlatformViewAndroid : public PlatformView {
 
   ftl::WeakPtr<shell::PlatformView> GetWeakViewPtr() override;
 
-  uint64_t DefaultFramebuffer() const override;
-
-  bool ContextMakeCurrent() override;
-
   bool ResourceContextMakeCurrent() override;
-
-  bool SwapBuffers() override;
 
   virtual SkISize GetSize();
 
@@ -62,17 +57,17 @@ class PlatformViewAndroid : public PlatformView {
   }
 
  private:
+  std::unique_ptr<AndroidSurfaceGL> surface_gl_;
+  JavaObjectWeakGlobalRef flutter_view_;
+  ftl::WeakPtrFactory<PlatformViewAndroid> weak_factory_;
+
+  void UpdateThreadPriorities();
+
   void ReleaseSurface();
 
   void GetBitmapGpuTask(ftl::AutoResetWaitableEvent* latch,
                         jobject* pixels_out,
                         SkISize* size_out);
-
-  std::unique_ptr<AndroidGLContext> context_;
-  ftl::WeakPtrFactory<PlatformViewAndroid> weak_factory_;
-  JavaObjectWeakGlobalRef flutter_view_;
-
-  void UpdateThreadPriorities();
 
   FTL_DISALLOW_COPY_AND_ASSIGN(PlatformViewAndroid);
 };

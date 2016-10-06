@@ -9,6 +9,7 @@
 
 #include "flutter/shell/common/engine.h"
 #include "flutter/shell/common/shell.h"
+#include "flutter/shell/common/surface.h"
 #include "flutter/shell/common/ui_delegate.h"
 #include "lib/ftl/macros.h"
 #include "lib/ftl/memory/weak_ptr.h"
@@ -46,21 +47,16 @@ class PlatformView {
 
   void ConnectToEngine(mojo::InterfaceRequest<sky::SkyEngine> request);
 
-  void NotifyCreated();
+  void NotifyCreated(std::unique_ptr<Surface> surface);
 
-  void NotifyCreated(ftl::Closure continuation);
+  void NotifyCreated(std::unique_ptr<Surface> surface,
+                     ftl::Closure continuation);
 
   void NotifyDestroyed();
 
   virtual ftl::WeakPtr<PlatformView> GetWeakViewPtr() = 0;
 
-  virtual uint64_t DefaultFramebuffer() const = 0;
-
-  virtual bool ContextMakeCurrent() = 0;
-
   virtual bool ResourceContextMakeCurrent() = 0;
-
-  virtual bool SwapBuffers() = 0;
 
   virtual SkISize GetSize();
 
@@ -75,13 +71,11 @@ class PlatformView {
  protected:
   Config config_;
   SurfaceConfig surface_config_;
-
   std::unique_ptr<Rasterizer> rasterizer_;
   std::unique_ptr<Engine> engine_;
-
   SkISize size_;
 
-  explicit PlatformView();
+  explicit PlatformView(std::unique_ptr<Rasterizer> rasterizer);
 
   void SetupResourceContextOnIOThreadPerform(
       ftl::AutoResetWaitableEvent* event);

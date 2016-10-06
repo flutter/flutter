@@ -4,18 +4,17 @@
 
 #include "flutter/shell/platform/darwin/ios/platform_view_ios.h"
 
-#include "base/mac/scoped_nsautorelease_pool.h"
-#include "base/trace_event/trace_event.h"
-#include "flutter/shell/platform/darwin/common/view_service_provider.h"
-#include "flutter/shell/platform/darwin/common/platform_service_provider.h"
-#include "flutter/sky/engine/wtf/MakeUnique.h"
-#include "lib/ftl/synchronization/waitable_event.h"
-#include "mojo/public/cpp/application/connect.h"
-
+#import <OpenGLES/EAGL.h>
 #import <OpenGLES/ES2/gl.h>
 #import <OpenGLES/ES2/glext.h>
-#import <OpenGLES/EAGL.h>
 #import <QuartzCore/CAEAGLLayer.h>
+#include "base/mac/scoped_nsautorelease_pool.h"
+#include "base/trace_event/trace_event.h"
+#include "flutter/shell/gpu/gpu_rasterizer.h"
+#include "flutter/shell/platform/darwin/common/platform_service_provider.h"
+#include "flutter/shell/platform/darwin/common/view_service_provider.h"
+#include "lib/ftl/synchronization/waitable_event.h"
+#include "mojo/public/cpp/application/connect.h"
 
 namespace shell {
 
@@ -273,7 +272,8 @@ class IOSGLContext {
 };
 
 PlatformViewIOS::PlatformViewIOS(CAEAGLLayer* layer)
-    : context_(WTF::MakeUnique<IOSGLContext>(surface_config_, layer)),
+    : PlatformView(std::make_unique<GPURasterizer>()),
+      context_(std::make_unique<IOSGLContext>(surface_config_, layer)),
       weak_factory_(this) {
   NSArray* paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory,
                                                        NSUserDomainMask, YES);
@@ -351,20 +351,25 @@ ftl::WeakPtr<PlatformView> PlatformViewIOS::GetWeakViewPtr() {
   return weak_factory_.GetWeakPtr();
 }
 
-uint64_t PlatformViewIOS::DefaultFramebuffer() const {
-  return context_ != nullptr ? context_->framebuffer() : GL_NONE;
-}
-
-bool PlatformViewIOS::ContextMakeCurrent() {
-  return context_ != nullptr ? context_->MakeCurrent() : false;
-}
-
 bool PlatformViewIOS::ResourceContextMakeCurrent() {
   return context_ != nullptr ? context_->ResourceMakeCurrent() : false;
 }
 
-bool PlatformViewIOS::SwapBuffers() {
-  TRACE_EVENT0("flutter", "PlatformViewIOS::SwapBuffers");
+intptr_t PlatformViewIOS::GLContextFBO() const {
+  return context_ != nullptr ? context_->framebuffer() : GL_NONE;
+}
+
+bool PlatformViewIOS::GLContextMakeCurrent() {
+  return context_ != nullptr ? context_->MakeCurrent() : false;
+}
+
+bool PlatformViewIOS::GLContextClearCurrent() {
+  [EAGLContext setCurrentContext:nil];
+  return true;
+}
+
+bool PlatformViewIOS::GLContextPresent() {
+  TRACE_EVENT0("flutter", "PlatformViewIOS::GLContextPresent");
   return context_ != nullptr ? context_->PresentRenderBuffer() : false;
 }
 

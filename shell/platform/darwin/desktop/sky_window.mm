@@ -4,8 +4,8 @@
 
 #import "sky_window.h"
 
-#include "lib/ftl/time/time_delta.h"
 #include "flutter/common/threads.h"
+#include "flutter/shell/gpu/gpu_surface_gl.h"
 #include "flutter/shell/platform/darwin/desktop/platform_view_mac.h"
 
 @interface SkyWindow ()<NSWindowDelegate>
@@ -58,7 +58,8 @@ static inline blink::PointerData::Change PointerChangeFromNSEventPhase(
 
   _platformView.reset(new shell::PlatformViewMac(self.renderSurface));
   _platformView->SetupResourceContextOnIOThread();
-  _platformView->NotifyCreated();
+  _platformView->NotifyCreated(
+      std::make_unique<shell::GPUSurfaceGL>(_platformView.get()));
 }
 
 // TODO(eseidel): This does not belong in sky_window!

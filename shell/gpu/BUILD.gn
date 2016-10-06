@@ -4,23 +4,22 @@
 
 source_set("gpu") {
   sources = [
-    "gpu_canvas.cc",
-    "gpu_canvas.h",
-    "gpu_canvas_gl.cc",
-    "gpu_canvas_gl.h",
-    "gpu_canvas_vulkan.cc",
-    "gpu_canvas_vulkan.h",
     "gpu_rasterizer.cc",
     "gpu_rasterizer.h",
+    "gpu_surface_gl.cc",
+    "gpu_surface_gl.h",
+    "gpu_surface_vulkan.cc",
+    "gpu_surface_vulkan.h",
   ]
 
   deps = [
     "../common",
-    "//lib/ftl",
-    "//flutter/skia",
-    "//flutter/flow",
     "//flutter/common",
+    "//flutter/flow",
     "//flutter/glue",
+    "//flutter/skia",
+    "//flutter/synchronization",
+    "//lib/ftl",
     "//mojo/public/cpp/system",
   ]
 }

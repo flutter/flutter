@@ -21,13 +21,7 @@ class PlatformViewTest : public PlatformView {
 
   ftl::WeakPtr<PlatformView> GetWeakViewPtr() override;
 
-  uint64_t DefaultFramebuffer() const override;
-
-  bool ContextMakeCurrent() override;
-
   bool ResourceContextMakeCurrent() override;
-
-  bool SwapBuffers() override;
 
   void RunFromSource(const std::string& main,
                      const std::string& packages,

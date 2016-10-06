@@ -10,6 +10,7 @@
 #include "flutter/glue/movable_wrapper.h"
 #include "flutter/lib/ui/painting/resource_context.h"
 #include "flutter/shell/common/rasterizer.h"
+#include "lib/ftl/functional/wrap_lambda.h"
 #include "third_party/skia/include/gpu/gl/GrGLInterface.h"
 
 namespace shell {
@@ -18,8 +19,8 @@ PlatformView::Config::Config() : rasterizer(nullptr) {}
 
 PlatformView::Config::~Config() = default;
 
-PlatformView::PlatformView()
-    : rasterizer_(Rasterizer::Create()), size_(SkISize::Make(0, 0)) {
+PlatformView::PlatformView(std::unique_ptr<Rasterizer> rasterizer)
+    : rasterizer_(std::move(rasterizer)), size_(SkISize::Make(0, 0)) {
   engine_.reset(new Engine(rasterizer_.get()));
 
   // Setup the platform config.
@@ -51,23 +52,39 @@ void PlatformView::ConnectToEngine(
       [view]() { Shell::Shared().AddPlatformView(view); });
 }
 
-void PlatformView::NotifyCreated() {
-  PlatformView::NotifyCreated([]() {});
+void PlatformView::NotifyCreated(std::unique_ptr<Surface> surface) {
+  NotifyCreated(std::move(surface), []() {});
 }
 
-void PlatformView::NotifyCreated(ftl::Closure rasterizer_continuation) {
+void PlatformView::NotifyCreated(std::unique_ptr<Surface> surface,
+                                 ftl::Closure caller_continuation) {
   FTL_CHECK(config_.rasterizer);
 
   ftl::AutoResetWaitableEvent latch;
 
-  auto delegate_continuation = [this, rasterizer_continuation, &latch]() {
-    config_.rasterizer->Setup(this, rasterizer_continuation, &latch);
-  };
-
-  auto delegate = config_.ui_delegate;
-  blink::Threads::UI()->PostTask([delegate, delegate_continuation]() {
-    delegate->OnOutputSurfaceCreated(delegate_continuation);
+  auto ui_continuation = ftl::WrapLambda([
+    delegate = config_.ui_delegate,   //
+    rasterizer = config_.rasterizer,  //
+    surface = std::move(surface),     //
+    caller_continuation,              //
+    &latch
+  ]() mutable {
+    auto gpu_continuation = ftl::WrapLambda([
+      rasterizer,                    //
+      surface = std::move(surface),  //
+      caller_continuation,           //
+      &latch
+    ]() mutable {
+      // Runs on the GPU Thread. So does the Caller Continuation.
+      surface->Setup();
+      rasterizer->Setup(std::move(surface), caller_continuation, &latch);
+    });
+    // Runs on the UI Thread.
+    delegate->OnOutputSurfaceCreated(std::move(gpu_continuation));
   });
+
+  // Runs on the Platform Thread.
+  blink::Threads::UI()->PostTask(std::move(ui_continuation));
 
   latch.Wait();
 }
