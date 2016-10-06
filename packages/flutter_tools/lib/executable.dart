@@ -8,6 +8,7 @@ import 'dart:io';
 import 'package:args/command_runner.dart';
 import 'package:stack_trace/stack_trace.dart';
 
+import 'src/base/common.dart';
 import 'src/base/context.dart';
 import 'src/base/logger.dart';
 import 'src/base/process.dart';
@@ -102,6 +103,16 @@ Future<Null> main(List<String> args) async {
       );
       // Argument error exit code.
       _exit(64);
+    } else if (error is ToolExit) {
+      stderr.writeln(error.message);
+      if (verbose) {
+        stderr.writeln();
+        stderr.writeln(chain.terse.toString());
+        stderr.writeln();
+      }
+      stderr.writeln('If this problem persists, please report the problem at');
+      stderr.writeln('https://github.com/flutter/flutter/issues/new');
+      _exit(error.exitCode ?? 65);
     } else if (error is ProcessExit) {
       // We've caught an exit code.
       _exit(error.exitCode);
