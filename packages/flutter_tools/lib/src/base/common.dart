@@ -11,10 +11,11 @@ const int kDefaultDrivePort       = 8183;
 /// and no stack trace unless the --verbose option is specified.
 /// For example: network errors
 class ToolExit implements Exception {
-  ToolExit(this.message, {this.exitCode});
+  ToolExit(this.message, { this.exitCode });
 
   final String message;
   final int exitCode;
 
+  @override
   String toString() => "Exception: $message";
 }
