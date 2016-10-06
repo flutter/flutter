@@ -7,21 +7,24 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('IconButton test constrained size', (WidgetTester tester) async {
+    const double kIconSize = 80.0;
+
     await tester.pumpWidget(
       new Material(
         child: new Center(
           child: new IconButton(
             padding: EdgeInsets.zero,
             onPressed: () {},
-            icon: new Icon(Icons.ac_unit)
+            icon: new Icon(Icons.ac_unit),
+            size: kIconSize,
           )
         )
       )
     );
 
     RenderBox box = tester.renderObject(find.byType(IconButton));
-    expect(box.size.width, equals(InkSplash.defaultRadius * 2.0));
-    expect(box.size.height, equals(InkSplash.defaultRadius * 2.0));
+    expect(box.size.width, equals(kIconSize));
+    expect(box.size.height, equals(kIconSize));
   });
 
   testWidgets('IconButton AppBar size', (WidgetTester tester) async {
@@ -32,7 +35,7 @@ void main() {
             new IconButton(
               padding: EdgeInsets.zero,
               onPressed: () {},
-              icon: new Icon(Icons.ac_unit)
+              icon: new Icon(Icons.ac_unit),
             )
           ]
         )
