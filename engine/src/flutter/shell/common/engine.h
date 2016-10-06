@@ -62,7 +62,6 @@ class Engine : public UIDelegate,
   void OnViewportMetricsChanged(sky::ViewportMetricsPtr metrics) override;
   void OnLocaleChanged(const mojo::String& language_code,
                        const mojo::String& country_code) override;
-  void OnPointerPacket(pointer::PointerPacketPtr packet) override;
 
   void RunFromFile(const mojo::String& main,
                    const mojo::String& packages,

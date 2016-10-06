@@ -48,6 +48,8 @@ struct alignas(8) PointerData {
   double radius_max;
   double orientation;
   double tilt;
+
+  void Clear();
 };
 
 }  // namespace blink

@@ -23,7 +23,7 @@ source_set("mac_desktop_platform") {
 
   deps = [
     "//base",
-    "//flutter/services/pointer:interfaces",
+    "//flutter/common",
     "//flutter/shell/common",
     "//flutter/shell/platform/darwin/common",
     "//flutter/shell/testing",

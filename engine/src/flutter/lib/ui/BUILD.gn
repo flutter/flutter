@@ -72,7 +72,6 @@ source_set("ui") {
     "//flutter/flow",
     "//flutter/glue",
     "//flutter/services/engine:interfaces",
-    "//flutter/services/pointer:interfaces",
     "//flutter/skia",
     "//flutter/sky/engine",
     "//lib/tonic",

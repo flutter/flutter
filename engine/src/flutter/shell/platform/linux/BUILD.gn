@@ -17,6 +17,7 @@ executable("linux") {
 
   deps = [
     "//base",
+    "//flutter/common",
     "//flutter/services/engine:interfaces",
     "//flutter/services/raw_keyboard:interfaces",
     "//flutter/shell/common",

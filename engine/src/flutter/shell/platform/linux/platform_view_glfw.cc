@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 #include "flutter/shell/platform/linux/platform_view_glfw.h"
+
+#include "flutter/common/threads.h"
 #include "flutter/shell/platform/linux/glfw_service_provider.h"
 
 #include <GLFW/glfw3.h>
@@ -110,16 +112,16 @@ void PlatformViewGLFW::OnWindowSizeChanged(int width, int height) {
 }
 
 void PlatformViewGLFW::OnMouseButtonChanged(int button, int action, int mods) {
-  pointer::PointerType type;
+  blink::PointerData::Change change = blink::PointerData::Change::kCancel;
   if (action == GLFW_PRESS) {
     if (!buttons_) {
-      type = pointer::PointerType::DOWN;
+      change = blink::PointerData::Change::kDown;
       glfwSetCursorPosCallback(
           glfw_window_, [](GLFWwindow* window, double x, double y) {
             ToPlatformView(window)->OnCursorPosChanged(x, y);
           });
     } else {
-      type = pointer::PointerType::MOVE;
+      change = blink::PointerData::Change::kMove;
     }
     // GLFW's button order matches what we want:
     // https://github.com/flutter/engine/blob/master/sky/specs/pointer.md
@@ -128,52 +130,65 @@ void PlatformViewGLFW::OnMouseButtonChanged(int button, int action, int mods) {
   } else if (action == GLFW_RELEASE) {
     buttons_ &= ~(1 << button);
     if (!buttons_) {
-      type = pointer::PointerType::UP;
+      change = blink::PointerData::Change::kUp;
       glfwSetCursorPosCallback(glfw_window_, nullptr);
     } else {
-      type = pointer::PointerType::MOVE;
+      change = blink::PointerData::Change::kMove;
     }
   } else {
     DLOG(INFO) << "Unknown mouse action: " << action;
     return;
   }
 
-  double x = 0.f, y = 0.f;
+  double x = 0.0;
+  double y = 0.0;
   glfwGetCursorPos(glfw_window_, &x, &y);
 
   base::TimeDelta time_stamp = base::TimeTicks::Now() - base::TimeTicks();
 
-  auto pointer_data = pointer::Pointer::New();
-  pointer_data->time_stamp = time_stamp.InMicroseconds();
-  pointer_data->type = type;
-  pointer_data->kind = pointer::PointerKind::MOUSE;
-  pointer_data->x = x;
-  pointer_data->y = y;
-  pointer_data->buttons = buttons_;
-  pointer_data->pressure = 1.0;
-  pointer_data->pressure_max = 1.0;
+  blink::PointerData pointer_data;
+  pointer_data.Clear();
+  pointer_data.time_stamp = time_stamp.InMicroseconds();
+  pointer_data.change = change;
+  pointer_data.kind = blink::PointerData::DeviceKind::kMouse;
+  pointer_data.physical_x = x;
+  pointer_data.physical_y = y;
+  pointer_data.buttons = buttons_;
+  pointer_data.pressure = 1.0;
+  pointer_data.pressure_max = 1.0;
 
-  auto pointer_packet = pointer::PointerPacket::New();
-  pointer_packet->pointers.push_back(pointer_data.Pass());
-  engine_->OnPointerPacket(pointer_packet.Pass());
+  blink::Threads::UI()->PostTask(
+      [ engine = engine().GetWeakPtr(), pointer_data ] {
+        if (engine.get()) {
+          blink::PointerDataPacket packet(1);
+          packet.SetPointerData(0, pointer_data);
+          engine->DispatchPointerDataPacket(packet);
+        }
+      });
 }
 
 void PlatformViewGLFW::OnCursorPosChanged(double x, double y) {
   base::TimeDelta time_stamp = base::TimeTicks::Now() - base::TimeTicks();
 
-  auto pointer_data = pointer::Pointer::New();
-  pointer_data->time_stamp = time_stamp.InMicroseconds();
-  pointer_data->type = pointer::PointerType::MOVE;
-  pointer_data->kind = pointer::PointerKind::MOUSE;
-  pointer_data->x = x;
-  pointer_data->y = y;
-  pointer_data->buttons = buttons_;
-  pointer_data->pressure = 1.0;
-  pointer_data->pressure_max = 1.0;
+  blink::PointerData pointer_data;
+  pointer_data.Clear();
+  pointer_data.time_stamp = time_stamp.InMicroseconds();
+  pointer_data.change = blink::PointerData::Change::kMove;
+  pointer_data.kind = blink::PointerData::DeviceKind::kMouse;
+  pointer_data.physical_x = x;
+  pointer_data.physical_y = y;
+  pointer_data.buttons = buttons_;
+  pointer_data.pressure = 1.0;
+  pointer_data.pressure_max = 1.0;
 
-  auto pointer_packet = pointer::PointerPacket::New();
-  pointer_packet->pointers.push_back(pointer_data.Pass());
-  engine_->OnPointerPacket(pointer_packet.Pass());
+  blink::Threads::UI()->PostTask(
+      [ engine = engine().GetWeakPtr(), pointer_data ] {
+        if (engine.get()) {
+          blink::PointerDataPacket packet(1);
+          packet.SetPointerData(0, pointer_data);
+          engine->DispatchPointerDataPacket(packet);
+        }
+      });
 }
 
 void PlatformViewGLFW::OnKeyEvent(int key, int scancode, int action, int mods) {
