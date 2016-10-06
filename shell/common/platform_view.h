@@ -10,7 +10,6 @@
 #include "flutter/shell/common/engine.h"
 #include "flutter/shell/common/shell.h"
 #include "flutter/shell/common/surface.h"
-#include "flutter/shell/common/ui_delegate.h"
 #include "lib/ftl/macros.h"
 #include "lib/ftl/memory/weak_ptr.h"
 #include "lib/ftl/synchronization/waitable_event.h"
@@ -23,15 +22,6 @@ class Rasterizer;
 
 class PlatformView {
  public:
-  struct Config {
-    Config();
-
-    ~Config();
-
-    ftl::WeakPtr<UIDelegate> ui_delegate;
-    Rasterizer* rasterizer;
-  };
-
   struct SurfaceConfig {
     uint8_t red_bits = 8;
     uint8_t green_bits = 8;
@@ -62,6 +52,7 @@ class PlatformView {
 
   virtual void Resize(const SkISize& size);
 
+  Rasterizer& rasterizer() { return *rasterizer_; }
   Engine& engine() { return *engine_; }
 
   virtual void RunFromSource(const std::string& main,
@@ -69,7 +60,6 @@ class PlatformView {
                              const std::string& assets_directory) = 0;
 
  protected:
-  Config config_;
   SurfaceConfig surface_config_;
   std::unique_ptr<Rasterizer> rasterizer_;
   std::unique_ptr<Engine> engine_;
