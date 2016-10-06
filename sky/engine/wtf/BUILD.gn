@@ -213,6 +213,8 @@ source_set("wtf") {
 executable("unittests") {
   output_name = "flutter_wtf_unittests"
 
+  testonly = true
+
   sources = [
     "CheckedArithmeticTest.cpp",
     "DequeTest.cpp",
