@@ -62,7 +62,8 @@ static void Init(JNIEnv* env,
                  jobject context,
                  jobjectArray jargs) {
   base::PlatformThread::SetName("java_ui_thread");
-  base::android::ScopedJavaLocalRef<jobject> scoped_context(env, context);
+  base::android::ScopedJavaLocalRef<jobject> scoped_context(
+      env, env->NewLocalRef(context));
   base::android::InitApplicationContext(env, scoped_context);
 
   std::vector<std::string> args;
