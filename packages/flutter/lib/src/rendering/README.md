@@ -46,11 +46,11 @@ semantics.
 
 Semantic annotators are functions that, given a `SemanticsNode`, set
 some flags or strings on the object. They are obtained from
-`getSemanticAnnotators()`. For example, here is how `RenderParagraph`
+`getSemanticsAnnotators()`. For example, here is how `RenderParagraph`
 annotates the `SemanticsNode` with its text:
 
 ```dart
-  Iterable<SemanticAnnotator> getSemanticAnnotators() sync* {
+  Iterable<SemanticsAnnotator> getSemanticsAnnotators() sync* {
     yield (SemanticsNode node) {
       node.label = text.toPlainText();
     };

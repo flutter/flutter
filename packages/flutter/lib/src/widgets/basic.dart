@@ -2719,14 +2719,14 @@ class Semantics extends SingleChildRenderObjectWidget {
   final String label;
 
   @override
-  RenderSemanticAnnotations createRenderObject(BuildContext context) => new RenderSemanticAnnotations(
+  RenderSemanticsAnnotations createRenderObject(BuildContext context) => new RenderSemanticsAnnotations(
     container: container,
     checked: checked,
     label: label
   );
 
   @override
-  void updateRenderObject(BuildContext context, RenderSemanticAnnotations renderObject) {
+  void updateRenderObject(BuildContext context, RenderSemanticsAnnotations renderObject) {
     renderObject
       ..container = container
       ..checked = checked

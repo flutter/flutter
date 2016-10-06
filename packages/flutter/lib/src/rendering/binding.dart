@@ -187,7 +187,7 @@ abstract class RendererBinding extends BindingBase implements SchedulerBinding, 
   /// sent to the GPU.
   ///
   /// 6. The semantics phase: All the dirty [RenderObject]s in the system have
-  /// their semantics updated (see [RenderObject.semanticAnnotator]). This
+  /// their semantics updated (see [RenderObject.SemanticsAnnotator]). This
   /// generates the [SemanticsNode] tree. See
   /// [RenderObject.markNeedsSemanticsUpdate] for further details on marking an
   /// object dirty for semantics.
@@ -295,7 +295,7 @@ class SemanticsServer extends mojom.SemanticsServer {
 
   @override
   void performAction(int id, mojom.SemanticAction encodedAction) {
-    _semanticsOwner.performAction(id, SemanticAction.values[encodedAction.mojoEnumValue]);
+    _semanticsOwner.performAction(id, SemanticsAction.values[encodedAction.mojoEnumValue]);
   }
 }
 
