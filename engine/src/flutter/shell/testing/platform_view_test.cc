@@ -5,10 +5,13 @@
 #include "flutter/shell/testing/platform_view_test.h"
 
 #include "flutter/shell/common/shell.h"
+#include "flutter/shell/common/null_rasterizer.h"
 
 namespace shell {
 
-PlatformViewTest::PlatformViewTest() : weak_factory_(this) {}
+PlatformViewTest::PlatformViewTest()
+    : PlatformView(std::unique_ptr<Rasterizer>(new NullRasterizer())),
+      weak_factory_(this) {}
 
 PlatformViewTest::~PlatformViewTest() = default;
 
@@ -16,19 +19,7 @@ ftl::WeakPtr<PlatformView> PlatformViewTest::GetWeakViewPtr() {
   return weak_factory_.GetWeakPtr();
 }
 
-uint64_t PlatformViewTest::DefaultFramebuffer() const {
-  return 0;
-}
-
-bool PlatformViewTest::ContextMakeCurrent() {
-  return false;
-}
-
 bool PlatformViewTest::ResourceContextMakeCurrent() {
-  return false;
-}
-
-bool PlatformViewTest::SwapBuffers() {
   return false;
 }
 

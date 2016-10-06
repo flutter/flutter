@@ -6,6 +6,6 @@
 
 namespace shell {
 
-Rasterizer::~Rasterizer() {}
+Rasterizer::~Rasterizer() = default;
 
 }  // namespace shell

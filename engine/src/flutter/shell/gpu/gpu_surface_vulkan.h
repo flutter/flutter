@@ -2,10 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "gpu_canvas_vulkan.h"
+#ifndef SHELL_GPU_GPU_SURFACE_VULKAN_H_
+#define SHELL_GPU_GPU_SURFACE_VULKAN_H_
+
+#include "lib/ftl/macros.h"
 
 namespace shell {
 
 //
 
 }  // namespace shell
+
+#endif  // SHELL_GPU_GPU_SURFACE_VULKAN_H_

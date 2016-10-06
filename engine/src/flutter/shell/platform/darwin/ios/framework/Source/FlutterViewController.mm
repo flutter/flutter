@@ -9,14 +9,16 @@
 #include "base/mac/scoped_block.h"
 #include "base/mac/scoped_nsobject.h"
 #include "base/strings/sys_string_conversions.h"
-#include "lib/ftl/time/time_delta.h"
-#include "lib/ftl/functional/wrap_lambda.h"
 #include "flutter/common/threads.h"
 #include "flutter/services/platform/ios/system_chrome_impl.h"
-#include "flutter/shell/platform/darwin/ios/framework/Source/flutter_touch_mapper.h"
-#include "flutter/shell/platform/darwin/ios/framework/Source/FlutterDartProject_Internal.h"
-#include "flutter/shell/platform/darwin/ios/platform_view_ios.h"
+#include "flutter/shell/gpu/gpu_rasterizer.h"
+#include "flutter/shell/gpu/gpu_surface_gl.h"
 #include "flutter/shell/platform/darwin/common/platform_mac.h"
+#include "flutter/shell/platform/darwin/ios/framework/Source/FlutterDartProject_Internal.h"
+#include "flutter/shell/platform/darwin/ios/framework/Source/flutter_touch_mapper.h"
+#include "flutter/shell/platform/darwin/ios/platform_view_ios.h"
+#include "lib/ftl/functional/wrap_lambda.h"
+#include "lib/ftl/time/time_delta.h"
 
 @interface FlutterViewController ()<UIAlertViewDelegate>
 @end
@@ -198,7 +200,8 @@ enum MapperPhase {
   Removed,
 };
 
-using PointerChangeMapperPhase = std::pair<blink::PointerData::Change, MapperPhase>;
+using PointerChangeMapperPhase =
+    std::pair<blink::PointerData::Change, MapperPhase>;
 static inline PointerChangeMapperPhase PointerChangePhaseFromUITouchPhase(
     UITouchPhase phase) {
   switch (phase) {
@@ -266,12 +269,11 @@ static inline PointerChangeMapperPhase PointerChangePhaseFromUITouchPhase(
   }
 
   blink::Threads::UI()->PostTask(ftl::WrapLambda([
-      engine = _platformView->engine().GetWeakPtr(),
-      packet = std::move(packet)
-    ] {
-      if (engine.get())
-        engine->DispatchPointerDataPacket(*packet);
-    }));
+    engine = _platformView->engine().GetWeakPtr(), packet = std::move(packet)
+  ] {
+    if (engine.get())
+      engine->DispatchPointerDataPacket(*packet);
+  }));
 }
 
 - (void)touchesBegan:(NSSet*)touches withEvent:(UIEvent*)event {
@@ -385,7 +387,8 @@ static inline PointerChangeMapperPhase PointerChangePhaseFromUITouchPhase(
   CHECK(_platformView != nullptr);
 
   if (appeared) {
-    _platformView->NotifyCreated();
+    _platformView->NotifyCreated(
+        std::make_unique<shell::GPUSurfaceGL>(_platformView.get()));
   } else {
     _platformView->NotifyDestroyed();
   }

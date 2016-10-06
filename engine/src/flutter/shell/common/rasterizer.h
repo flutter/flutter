@@ -6,8 +6,8 @@
 #define SHELL_COMMON_RASTERIZER_H_
 
 #include <memory>
-
 #include "flutter/flow/layers/layer_tree.h"
+#include "flutter/shell/common/surface.h"
 #include "flutter/synchronization/pipeline.h"
 #include "lib/ftl/functional/closure.h"
 #include "lib/ftl/memory/weak_ptr.h"
@@ -16,20 +16,18 @@
 
 namespace shell {
 
-class PlatformView;
-
 class Rasterizer {
  public:
   virtual ~Rasterizer();
 
-  virtual void Setup(PlatformView* platform_view,
+  virtual void Setup(std::unique_ptr<Surface> surface_or_null,
                      ftl::Closure rasterizer_continuation,
                      ftl::AutoResetWaitableEvent* setup_completion_event) = 0;
 
-  virtual void Clear(SkColor color) = 0;
-
   virtual void Teardown(
       ftl::AutoResetWaitableEvent* teardown_completion_event) = 0;
+
+  virtual void Clear(SkColor color, const SkISize& size) = 0;
 
   virtual ftl::WeakPtr<Rasterizer> GetWeakRasterizerPtr() = 0;
 
@@ -37,9 +35,6 @@ class Rasterizer {
 
   virtual void Draw(
       ftl::RefPtr<flutter::Pipeline<flow::LayerTree>> pipeline) = 0;
-
-  // Implemented by each GPU backend.
-  static std::unique_ptr<Rasterizer> Create();
 };
 
 }  // namespace shell

@@ -21,10 +21,13 @@ class CompositorContext {
   class ScopedFrame {
    public:
     SkCanvas& canvas() { return *canvas_; }
+
     CompositorContext& context() const { return context_; }
+
     GrContext* gr_context() const { return gr_context_; }
 
     ScopedFrame(ScopedFrame&& frame);
+
     ~ScopedFrame();
 
    private:
@@ -44,6 +47,7 @@ class CompositorContext {
   };
 
   CompositorContext();
+
   ~CompositorContext();
 
   ScopedFrame AcquireFrame(GrContext* gr_context,
@@ -53,18 +57,21 @@ class CompositorContext {
   void OnGrContextDestroyed();
 
   RasterCache& raster_cache() { return raster_cache_; }
+
   const Counter& frame_count() const { return frame_count_; }
+
   const Stopwatch& frame_time() const { return frame_time_; }
+
   Stopwatch& engine_time() { return engine_time_; };
 
  private:
   RasterCache raster_cache_;
-
   Counter frame_count_;
   Stopwatch frame_time_;
   Stopwatch engine_time_;
 
   void BeginFrame(ScopedFrame& frame, bool enable_instrumentation);
+
   void EndFrame(ScopedFrame& frame, bool enable_instrumentation);
 
   FTL_DISALLOW_COPY_AND_ASSIGN(CompositorContext);

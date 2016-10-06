@@ -4,12 +4,13 @@
 
 #include "flutter/shell/platform/darwin/desktop/platform_view_mac.h"
 
-#include <Foundation/Foundation.h>
 #include <AppKit/AppKit.h>
+#include <Foundation/Foundation.h>
 
 #include "base/command_line.h"
 #include "base/trace_event/trace_event.h"
 #include "flutter/shell/common/switches.h"
+#include "flutter/shell/gpu/gpu_rasterizer.h"
 #include "flutter/shell/platform/darwin/common/platform_mac.h"
 #include "flutter/shell/platform/darwin/common/platform_service_provider.h"
 #include "flutter/shell/platform/darwin/common/view_service_provider.h"
@@ -18,7 +19,8 @@
 namespace shell {
 
 PlatformViewMac::PlatformViewMac(NSOpenGLView* gl_view)
-    : opengl_view_([gl_view retain]),
+    : PlatformView(std::make_unique<GPURasterizer>()),
+      opengl_view_([gl_view retain]),
       resource_loading_context_([[NSOpenGLContext alloc]
           initWithFormat:gl_view.pixelFormat
             shareContext:gl_view.openGLContext]),
@@ -95,17 +97,38 @@ ftl::WeakPtr<PlatformView> PlatformViewMac::GetWeakViewPtr() {
   return weak_factory_.GetWeakPtr();
 }
 
-uint64_t PlatformViewMac::DefaultFramebuffer() const {
+intptr_t PlatformViewMac::GLContextFBO() const {
   // Default window bound framebuffer FBO 0.
   return 0;
 }
 
-bool PlatformViewMac::ContextMakeCurrent() {
+bool PlatformViewMac::GLContextMakeCurrent() {
+  TRACE_EVENT0("flutter", "PlatformViewMac::GLContextMakeCurrent");
   if (!IsValid()) {
     return false;
   }
 
   [opengl_view_.get().openGLContext makeCurrentContext];
+  return true;
+}
+
+bool PlatformViewMac::GLContextClearCurrent() {
+  TRACE_EVENT0("flutter", "PlatformViewMac::GLContextClearCurrent");
+  if (!IsValid()) {
+    return false;
+  }
+
+  [NSOpenGLContext clearCurrentContext];
+  return true;
+}
+
+bool PlatformViewMac::GLContextPresent() {
+  TRACE_EVENT0("flutter", "PlatformViewMac::GLContextPresent");
+  if (!IsValid()) {
+    return false;
+  }
+
+  [opengl_view_.get().openGLContext flushBuffer];
   return true;
 }
 
@@ -117,17 +140,6 @@ bool PlatformViewMac::ResourceContextMakeCurrent() {
   }
 
   [context makeCurrentContext];
-  return true;
-}
-
-bool PlatformViewMac::SwapBuffers() {
-  TRACE_EVENT0("flutter", "PlatformViewMac::SwapBuffers");
-
-  if (!IsValid()) {
-    return false;
-  }
-
-  [opengl_view_.get().openGLContext flushBuffer];
   return true;
 }
 

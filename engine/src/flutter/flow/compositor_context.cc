@@ -8,9 +8,9 @@
 
 namespace flow {
 
-CompositorContext::CompositorContext() {}
+CompositorContext::CompositorContext() = default;
 
-CompositorContext::~CompositorContext() {}
+CompositorContext::~CompositorContext() = default;
 
 void CompositorContext::BeginFrame(ScopedFrame& frame,
                                    bool enable_instrumentation) {

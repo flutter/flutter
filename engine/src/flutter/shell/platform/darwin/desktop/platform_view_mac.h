@@ -7,6 +7,7 @@
 
 #include "base/mac/scoped_nsobject.h"
 #include "flutter/shell/common/platform_view.h"
+#include "flutter/shell/gpu/gpu_surface_gl.h"
 #include "lib/ftl/memory/weak_ptr.h"
 
 @class NSOpenGLView;
@@ -14,7 +15,7 @@
 
 namespace shell {
 
-class PlatformViewMac : public PlatformView {
+class PlatformViewMac : public PlatformView, public GPUSurfaceGLDelegate {
  public:
   PlatformViewMac(NSOpenGLView* gl_view);
 
@@ -26,13 +27,15 @@ class PlatformViewMac : public PlatformView {
 
   ftl::WeakPtr<PlatformView> GetWeakViewPtr() override;
 
-  uint64_t DefaultFramebuffer() const override;
+  bool GLContextMakeCurrent() override;
 
-  bool ContextMakeCurrent() override;
+  bool GLContextClearCurrent() override;
+
+  bool GLContextPresent() override;
+
+  intptr_t GLContextFBO() const override;
 
   bool ResourceContextMakeCurrent() override;
-
-  bool SwapBuffers() override;
 
   void RunFromSource(const std::string& main,
                      const std::string& packages,

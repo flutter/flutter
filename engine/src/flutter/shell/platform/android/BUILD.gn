@@ -19,6 +19,14 @@ shared_library("sky_shell") {
   visibility = [ ":*" ]
 
   sources = [
+    "android_context_gl.cc",
+    "android_context_gl.h",
+    "android_environment_gl.cc",
+    "android_environment_gl.h",
+    "android_native_window.cc",
+    "android_native_window.h",
+    "android_surface_gl.cc",
+    "android_surface_gl.h",
     "flutter_main.cc",
     "flutter_main.h",
     "library_loader.cc",

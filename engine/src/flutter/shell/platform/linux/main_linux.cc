@@ -10,6 +10,7 @@
 #include "base/message_loop/message_loop.h"
 #include "flutter/shell/common/shell.h"
 #include "flutter/shell/common/switches.h"
+#include "flutter/shell/gpu/gpu_surface_gl.h"
 #include "flutter/shell/platform/linux/message_pump_glfw.h"
 #include "flutter/shell/platform/linux/platform_view_glfw.h"
 #include "flutter/shell/testing/testing.h"
@@ -66,7 +67,8 @@ int RunInteractive() {
 
   platform_view->ConnectToEngineAndSetupServices();
 
-  platform_view->NotifyCreated();
+  platform_view->NotifyCreated(
+      std::make_unique<shell::GPUSurfaceGL>(platform_view.get()));
 
   if (IsDartFile(bundle_path)) {
     // Load directly from source.
