@@ -246,7 +246,7 @@ class RenderParagraph extends RenderBox {
   }
 
   @override
-  SemanticAnnotator get semanticAnnotator => _annotate;
+  SemanticsAnnotator get semanticsAnnotator => _annotate;
 
   void _annotate(SemanticsNode node) {
     node.label = text.toPlainText();

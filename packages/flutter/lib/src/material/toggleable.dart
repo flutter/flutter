@@ -18,7 +18,7 @@ final Tween<double> _kRadialReactionRadiusTween = new Tween<double>(begin: 0.0, 
 /// This class handles storing the current value, dispatching ValueChanged on a
 /// tap gesture and driving a changed animation. Subclasses are responsible for
 /// painting.
-abstract class RenderToggleable extends RenderConstrainedBox implements SemanticActionHandler {
+abstract class RenderToggleable extends RenderConstrainedBox implements SemanticsActionHandler {
   /// Creates a toggleable render object.
   ///
   /// The [value], [activeColor], and [inactiveColor] arguments must not be
@@ -286,19 +286,19 @@ abstract class RenderToggleable extends RenderConstrainedBox implements Semantic
   bool get isSemanticBoundary => isInteractive;
 
   @override
-  SemanticAnnotator get semanticAnnotator => _annotate;
+  SemanticsAnnotator get semanticsAnnotator => _annotate;
 
   void _annotate(SemanticsNode semantics) {
     semantics
       ..hasCheckedState = true
       ..isChecked = _value;
     if (isInteractive)
-      semantics.addAction(SemanticAction.tap);
+      semantics.addAction(SemanticsAction.tap);
   }
 
   @override
-  void performAction(SemanticAction action) {
-    if (action == SemanticAction.tap)
+  void performAction(SemanticsAction action) {
+    if (action == SemanticsAction.tap)
       _handleTap();
   }
 

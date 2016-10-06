@@ -2321,7 +2321,7 @@ class RenderMetaData extends RenderProxyBoxWithHitTestBehavior {
 
 /// Listens for the specified gestures from the semantics server (e.g.
 /// an accessibility tool).
-class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticActionHandler {
+class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsActionHandler {
   /// Creates a render object that listens for specific semantic gestures.
   ///
   /// The [scrollFactor] argument must not be null.
@@ -2406,13 +2406,13 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticAc
   }
 
   @override
-  SemanticAnnotator get semanticAnnotator => isSemanticBoundary ? _annotate : null;
+  SemanticsAnnotator get semanticsAnnotator => isSemanticBoundary ? _annotate : null;
 
   void _annotate(SemanticsNode node) {
     if (onTap != null)
-      node.addAction(SemanticAction.tap);
+      node.addAction(SemanticsAction.tap);
     if (onLongPress != null)
-      node.addAction(SemanticAction.longPress);
+      node.addAction(SemanticsAction.longPress);
     if (onHorizontalDragUpdate != null)
       node.addHorizontalScrollingActions();
     if (onVerticalDragUpdate != null)
@@ -2420,17 +2420,17 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticAc
   }
 
   @override
-  void performAction(SemanticAction action) {
+  void performAction(SemanticsAction action) {
     switch (action) {
-      case SemanticAction.tap:
+      case SemanticsAction.tap:
         if (onTap != null)
           onTap();
         break;
-      case SemanticAction.longPress:
+      case SemanticsAction.longPress:
         if (onLongPress != null)
           onLongPress();
         break;
-      case SemanticAction.scrollLeft:
+      case SemanticsAction.scrollLeft:
         if (onHorizontalDragUpdate != null) {
           final double primaryDelta = size.width * -scrollFactor;
           onHorizontalDragUpdate(new DragUpdateDetails(
@@ -2438,7 +2438,7 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticAc
           ));
         }
         break;
-      case SemanticAction.scrollRight:
+      case SemanticsAction.scrollRight:
         if (onHorizontalDragUpdate != null) {
           final double primaryDelta = size.width * scrollFactor;
           onHorizontalDragUpdate(new DragUpdateDetails(
@@ -2446,7 +2446,7 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticAc
           ));
         }
         break;
-      case SemanticAction.scrollUp:
+      case SemanticsAction.scrollUp:
         if (onVerticalDragUpdate != null) {
           final double primaryDelta = size.height * -scrollFactor;
           onVerticalDragUpdate(new DragUpdateDetails(
@@ -2454,7 +2454,7 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticAc
           ));
         }
         break;
-      case SemanticAction.scrollDown:
+      case SemanticsAction.scrollDown:
         if (onVerticalDragUpdate != null) {
           final double primaryDelta = size.height * scrollFactor;
           onVerticalDragUpdate(new DragUpdateDetails(
@@ -2462,8 +2462,8 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticAc
           ));
         }
         break;
-      case SemanticAction.increase:
-      case SemanticAction.decrease:
+      case SemanticsAction.increase:
+      case SemanticsAction.decrease:
         assert(false);
         break;
     }
@@ -2471,11 +2471,11 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticAc
 }
 
 /// Add annotations to the [SemanticsNode] for this subtree.
-class RenderSemanticAnnotations extends RenderProxyBox {
+class RenderSemanticsAnnotations extends RenderProxyBox {
   /// Creates a render object that attaches a semantic annotation.
   ///
   /// The [container] argument must not be null.
-  RenderSemanticAnnotations({
+  RenderSemanticsAnnotations({
     RenderBox child,
     bool container: false,
     bool checked,
@@ -2534,7 +2534,7 @@ class RenderSemanticAnnotations extends RenderProxyBox {
   bool get isSemanticBoundary => container;
 
   @override
-  SemanticAnnotator get semanticAnnotator => checked != null || label != null ? _annotate : null;
+  SemanticsAnnotator get semanticsAnnotator => checked != null || label != null ? _annotate : null;
 
   void _annotate(SemanticsNode node) {
     if (checked != null) {
@@ -2559,7 +2559,7 @@ class RenderMergeSemantics extends RenderProxyBox {
   RenderMergeSemantics({ RenderBox child }) : super(child);
 
   @override
-  SemanticAnnotator get semanticAnnotator => _annotate;
+  SemanticsAnnotator get semanticsAnnotator => _annotate;
 
   void _annotate(SemanticsNode node) {
     node.mergeAllDescendantsIntoThisNode = true;

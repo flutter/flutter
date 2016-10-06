@@ -78,14 +78,14 @@ class _SemanticsDebuggerState extends State<SemanticsDebugger> {
 
   void _handleTap() {
     assert(_lastPointerDownLocation != null);
-    _client._performAction(_lastPointerDownLocation, SemanticAction.tap);
+    _client._performAction(_lastPointerDownLocation, SemanticsAction.tap);
     setState(() {
       _lastPointerDownLocation = null;
     });
   }
   void _handleLongPress() {
     assert(_lastPointerDownLocation != null);
-    _client._performAction(_lastPointerDownLocation, SemanticAction.longPress);
+    _client._performAction(_lastPointerDownLocation, SemanticsAction.longPress);
     setState(() {
       _lastPointerDownLocation = null;
     });
@@ -127,7 +127,7 @@ class _SemanticsDebuggerEntry {
   _SemanticsDebuggerEntry(this.id);
 
   final int id;
-  final Set<SemanticAction> actions = new Set<SemanticAction>();
+  final Set<SemanticsAction> actions = new Set<SemanticsAction>();
   bool hasCheckedState = false;
   bool isChecked = false;
   String label;
@@ -139,7 +139,7 @@ class _SemanticsDebuggerEntry {
   String toString() {
     StringBuffer buffer = new StringBuffer();
     buffer.write('_SemanticsDebuggerEntry($id; $rect; "$label"');
-    for (SemanticAction action in actions)
+    for (SemanticsAction action in actions)
       buffer.write('; $action');
     buffer
       ..write('${hasCheckedState ? isChecked ? "; checked" : "; unchecked" : ""}')
@@ -166,7 +166,7 @@ class _SemanticsDebuggerEntry {
     if (node.actions != null) {
       actions.clear();
       for (int encodedAction in node.actions)
-        actions.add(SemanticAction.values[encodedAction]);
+        actions.add(SemanticsAction.values[encodedAction]);
     }
     if (node.strings != null) {
       assert(node.strings.label != null);
@@ -210,15 +210,15 @@ class _SemanticsDebuggerEntry {
   );
 
   bool get _isScrollable {
-    return actions.contains(SemanticAction.scrollLeft)
-        || actions.contains(SemanticAction.scrollRight)
-        || actions.contains(SemanticAction.scrollUp)
-        || actions.contains(SemanticAction.scrollDown);
+    return actions.contains(SemanticsAction.scrollLeft)
+        || actions.contains(SemanticsAction.scrollRight)
+        || actions.contains(SemanticsAction.scrollUp)
+        || actions.contains(SemanticsAction.scrollDown);
   }
 
   bool get _isAdjustable {
-    return actions.contains(SemanticAction.increase)
-        || actions.contains(SemanticAction.decrease);
+    return actions.contains(SemanticsAction.increase)
+        || actions.contains(SemanticsAction.decrease);
   }
 
   TextPainter textPainter;
@@ -229,14 +229,14 @@ class _SemanticsDebuggerEntry {
       annotations.add(isChecked ? 'checked' : 'unchecked');
       wantsTap = true;
     }
-    if (actions.contains(SemanticAction.tap)) {
+    if (actions.contains(SemanticsAction.tap)) {
       if (!wantsTap)
         annotations.add('button');
     } else {
       if (wantsTap)
         annotations.add('disabled');
     }
-    if (actions.contains(SemanticAction.longPress))
+    if (actions.contains(SemanticsAction.longPress))
       annotations.add('long-pressable');
     if (_isScrollable)
       annotations.add('scrollable');
@@ -384,7 +384,7 @@ class _SemanticsClient extends ChangeNotifier {
     return rootNode?.hitTest(position, filter);
   }
 
-  void _performAction(Point position, SemanticAction action) {
+  void _performAction(Point position, SemanticsAction action) {
     _SemanticsDebuggerEntry entry = _hitTest(position, (_SemanticsDebuggerEntry entry) => entry.actions.contains(action));
     _semanticsOwner.performAction(entry?.id ?? 0, action);
   }
@@ -396,17 +396,17 @@ class _SemanticsClient extends ChangeNotifier {
       return;
     if (vx.abs() > vy.abs()) {
       if (vx.sign < 0) {
-        _performAction(position, SemanticAction.decrease);
-        _performAction(position, SemanticAction.scrollLeft);
+        _performAction(position, SemanticsAction.decrease);
+        _performAction(position, SemanticsAction.scrollLeft);
       } else {
-        _performAction(position, SemanticAction.increase);
-        _performAction(position, SemanticAction.scrollRight);
+        _performAction(position, SemanticsAction.increase);
+        _performAction(position, SemanticsAction.scrollRight);
       }
     } else {
       if (vy.sign < 0)
-        _performAction(position, SemanticAction.scrollUp);
+        _performAction(position, SemanticsAction.scrollUp);
       else
-        _performAction(position, SemanticAction.scrollDown);
+        _performAction(position, SemanticsAction.scrollDown);
     }
   }
 }
