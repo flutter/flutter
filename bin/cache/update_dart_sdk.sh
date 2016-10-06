@@ -41,7 +41,15 @@ if [ ! -f "$DART_SDK_STAMP_PATH" ] || [ "$DART_SDK_VERSION" != `cat "$DART_SDK_S
   DART_SDK_ZIP="$FLUTTER_ROOT/bin/cache/dart-sdk.zip"
 
   curl --progress-bar -continue-at=- --location --output "$DART_SDK_ZIP" "$DART_SDK_URL"
-  unzip -o -q "$DART_SDK_ZIP" -d "$FLUTTER_ROOT/bin/cache"
+  unzip -o -q "$DART_SDK_ZIP" -d "$FLUTTER_ROOT/bin/cache" || {
+    echo
+    echo "It appears that the downloaded file is corrupt; please try the operation again later."
+    echo "If this problem persists, please report the problem at"
+    echo "https://github.com/flutter/flutter/issues/new"
+    echo
+    rm -f -- "$DART_SDK_ZIP"
+    exit 1
+  }
   rm -f -- "$DART_SDK_ZIP"
   echo "$DART_SDK_VERSION" > "$DART_SDK_STAMP_PATH"
 fi
