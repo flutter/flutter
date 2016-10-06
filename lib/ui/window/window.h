@@ -8,7 +8,6 @@
 #include "flutter/lib/ui/semantics/semantics_update.h"
 #include "flutter/lib/ui/window/pointer_data_packet.h"
 #include "flutter/services/engine/sky_engine.mojom.h"
-#include "flutter/services/pointer/pointer.mojom.h"
 #include "lib/ftl/time/time_point.h"
 #include "lib/tonic/dart_persistent_value.h"
 

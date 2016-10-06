@@ -26,7 +26,6 @@ source_set("common") {
     "//flutter/services/engine:interfaces",
     "//flutter/services/media",
     "//flutter/services/platform",
-    "//flutter/services/pointer:interfaces",
     "//flutter/services/vsync",
     "//flutter/shell/common",
     "//flutter/shell/gpu",

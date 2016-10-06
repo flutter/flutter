@@ -17,7 +17,6 @@ static_library("core") {
     "//flutter/assets",
     "//flutter/sky/engine/platform",
     "//flutter/services/engine:interfaces",
-    "//flutter/services/pointer:interfaces",
   ]
 
   if (flutter_runtime_mode != "release" && !is_fuchsia) {

@@ -4,11 +4,15 @@
 
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterViewController.h"
 
+#include <memory>
+
 #include "base/mac/scoped_block.h"
 #include "base/mac/scoped_nsobject.h"
 #include "base/strings/sys_string_conversions.h"
+#include "lib/ftl/time/time_delta.h"
+#include "lib/ftl/functional/wrap_lambda.h"
+#include "flutter/common/threads.h"
 #include "flutter/services/platform/ios/system_chrome_impl.h"
-#include "flutter/sky/engine/wtf/MakeUnique.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/flutter_touch_mapper.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/FlutterDartProject_Internal.h"
 #include "flutter/shell/platform/darwin/ios/platform_view_ios.h"
@@ -73,7 +77,7 @@ void FlutterInit(int argc, const char* argv[]) {
   _orientationPreferences = UIInterfaceOrientationMaskAll;
   _statusBarStyle = UIStatusBarStyleDefault;
   _viewportMetrics = sky::ViewportMetrics::New();
-  _platformView = WTF::MakeUnique<shell::PlatformViewIOS>(
+  _platformView = std::make_unique<shell::PlatformViewIOS>(
       reinterpret_cast<CAEAGLLayer*>(self.view.layer));
   _platformView->SetupResourceContextOnIOThread();
 
@@ -194,36 +198,37 @@ enum MapperPhase {
   Removed,
 };
 
-using PointerTypeMapperPhase = std::pair<pointer::PointerType, MapperPhase>;
-static inline PointerTypeMapperPhase PointerTypePhaseFromUITouchPhase(
+using PointerChangeMapperPhase = std::pair<blink::PointerData::Change, MapperPhase>;
+static inline PointerChangeMapperPhase PointerChangePhaseFromUITouchPhase(
     UITouchPhase phase) {
   switch (phase) {
     case UITouchPhaseBegan:
-      return PointerTypeMapperPhase(pointer::PointerType::DOWN,
-                                    MapperPhase::Added);
+      return PointerChangeMapperPhase(blink::PointerData::Change::kDown,
+                                      MapperPhase::Added);
     case UITouchPhaseMoved:
     case UITouchPhaseStationary:
       // There is no EVENT_TYPE_POINTER_STATIONARY. So we just pass a move type
       // with the same coordinates
-      return PointerTypeMapperPhase(pointer::PointerType::MOVE,
-                                    MapperPhase::Accessed);
+      return PointerChangeMapperPhase(blink::PointerData::Change::kMove,
+                                      MapperPhase::Accessed);
     case UITouchPhaseEnded:
-      return PointerTypeMapperPhase(pointer::PointerType::UP,
-                                    MapperPhase::Removed);
+      return PointerChangeMapperPhase(blink::PointerData::Change::kUp,
+                                      MapperPhase::Removed);
     case UITouchPhaseCancelled:
-      return PointerTypeMapperPhase(pointer::PointerType::CANCEL,
-                                    MapperPhase::Removed);
+      return PointerChangeMapperPhase(blink::PointerData::Change::kCancel,
+                                      MapperPhase::Removed);
   }
 
-  return PointerTypeMapperPhase(pointer::PointerType::CANCEL,
-                                MapperPhase::Accessed);
+  return PointerChangeMapperPhase(blink::PointerData::Change::kCancel,
+                                  MapperPhase::Accessed);
 }
 
 - (void)dispatchTouches:(NSSet*)touches phase:(UITouchPhase)phase {
-  auto eventTypePhase = PointerTypePhaseFromUITouchPhase(phase);
+  auto eventTypePhase = PointerChangePhaseFromUITouchPhase(phase);
   const CGFloat scale = [UIScreen mainScreen].scale;
-  auto pointer_packet = pointer::PointerPacket::New();
+  auto packet = std::make_unique<blink::PointerDataPacket>(touches.count);
 
+  int i = 0;
   for (UITouch* touch in touches) {
     int touch_identifier = 0;
 
@@ -243,37 +248,30 @@ static inline PointerTypeMapperPhase PointerTypePhaseFromUITouchPhase(
     CGPoint windowCoordinates = [touch locationInView:nil];
 
     auto pointer_time =
-        base::TimeDelta::FromSecondsD(touch.timestamp).InMicroseconds();
+        ftl::TimeDelta::FromSeconds(touch.timestamp).ToMicroseconds();
 
-    auto pointer_data = pointer::Pointer::New();
+    blink::PointerData pointer_data;
+    pointer_data.Clear();
 
-    pointer_data->time_stamp = pointer_time;
-    pointer_data->type = eventTypePhase.first;
-    pointer_data->kind = pointer::PointerKind::TOUCH;
-    pointer_data->pointer = touch_identifier;
-    pointer_data->x = windowCoordinates.x * scale;
-    pointer_data->y = windowCoordinates.y * scale;
-    pointer_data->buttons = 0;
-    pointer_data->down = false;
-    pointer_data->primary = false;
-    pointer_data->obscured = false;
-    pointer_data->pressure = 1.0;
-    pointer_data->pressure_min = 0.0;
-    pointer_data->pressure_max = 1.0;
-    pointer_data->distance = 0.0;
-    pointer_data->distance_min = 0.0;
-    pointer_data->distance_max = 0.0;
-    pointer_data->radius_major = 0.0;
-    pointer_data->radius_minor = 0.0;
-    pointer_data->radius_min = 0.0;
-    pointer_data->radius_max = 0.0;
-    pointer_data->orientation = 0.0;
-    pointer_data->tilt = 0.0;
+    pointer_data.time_stamp = pointer_time;
+    pointer_data.change = eventTypePhase.first;
+    pointer_data.kind = blink::PointerData::DeviceKind::kTouch;
+    pointer_data.pointer = touch_identifier;
+    pointer_data.physical_x = windowCoordinates.x * scale;
+    pointer_data.physical_y = windowCoordinates.y * scale;
+    pointer_data.pressure = 1.0;
+    pointer_data.pressure_max = 1.0;
 
-    pointer_packet->pointers.push_back(pointer_data.Pass());
+    packet->SetPointerData(i++, pointer_data);
   }
 
-  _platformView->engineProxy()->OnPointerPacket(pointer_packet.Pass());
+  blink::Threads::UI()->PostTask(ftl::WrapLambda([
+      engine = _platformView->engine().GetWeakPtr(),
+      packet = std::move(packet)
+    ] {
+      if (engine.get())
+        engine->DispatchPointerDataPacket(*packet);
+    }));
 }
 
 - (void)touchesBegan:(NSSet*)touches withEvent:(UIEvent*)event {

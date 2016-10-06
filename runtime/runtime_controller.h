@@ -12,7 +12,6 @@
 #include "flutter/lib/ui/window/pointer_data_packet.h"
 #include "flutter/lib/ui/window/window.h"
 #include "flutter/services/engine/sky_engine.mojom.h"
-#include "flutter/services/pointer/pointer.mojom.h"
 #include "lib/ftl/macros.h"
 
 namespace blink {

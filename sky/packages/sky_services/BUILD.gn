@@ -27,7 +27,6 @@ dart_pkg("sky_services") {
     "//flutter/services/editing:interfaces",
     "//flutter/services/media:interfaces",
     "//flutter/services/platform:interfaces",
-    "//flutter/services/pointer:interfaces",
     "//flutter/services/raw_keyboard:interfaces",
     "//flutter/services/semantics:interfaces",
   ]

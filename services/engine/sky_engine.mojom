@@ -5,7 +5,6 @@
 module sky;
 
 import "flutter/services/engine/input_event.mojom";
-import "flutter/services/pointer/pointer.mojom";
 import "mojo/public/interfaces/application/service_provider.mojom";
 import "mojo/public/interfaces/application/shell.mojom";
 import "mojo/services/asset_bundle/interfaces/asset_bundle.mojom";
@@ -41,7 +40,6 @@ interface SkyEngine {
 
   OnViewportMetricsChanged(ViewportMetrics metrics);
   OnLocaleChanged(string language_code, string country_code);
-  OnPointerPacket(pointer.PointerPacket packet);
 
   PushRoute(string route);
   PopRoute();

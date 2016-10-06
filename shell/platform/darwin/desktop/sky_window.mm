@@ -4,8 +4,8 @@
 
 #import "sky_window.h"
 
-#include "base/time/time.h"
-#include "flutter/services/pointer/pointer.mojom.h"
+#include "lib/ftl/time/time_delta.h"
+#include "flutter/common/threads.h"
 #include "flutter/shell/platform/darwin/desktop/platform_view_mac.h"
 
 @interface SkyWindow ()<NSWindowDelegate>
@@ -15,30 +15,30 @@
 
 @end
 
-static inline pointer::PointerType EventTypeFromNSEventPhase(
+static inline blink::PointerData::Change PointerChangeFromNSEventPhase(
     NSEventPhase phase) {
   switch (phase) {
     case NSEventPhaseNone:
-      return pointer::PointerType::CANCEL;
+      return blink::PointerData::Change::kCancel;
     case NSEventPhaseBegan:
-      return pointer::PointerType::DOWN;
+      return blink::PointerData::Change::kDown;
     case NSEventPhaseStationary:
     // There is no EVENT_TYPE_POINTER_STATIONARY. So we just pass a move type
     // with the same coordinates
     case NSEventPhaseChanged:
-      return pointer::PointerType::MOVE;
+      return blink::PointerData::Change::kMove;
     case NSEventPhaseEnded:
-      return pointer::PointerType::UP;
+      return blink::PointerData::Change::kUp;
     case NSEventPhaseCancelled:
-      return pointer::PointerType::CANCEL;
+      return blink::PointerData::Change::kCancel;
     case NSEventPhaseMayBegin:
-      return pointer::PointerType::CANCEL;
+      return blink::PointerData::Change::kCancel;
   }
-  return pointer::PointerType::CANCEL;
+  return blink::PointerData::Change::kCancel;
 }
 
 @implementation SkyWindow {
-  std::unique_ptr<shell::PlatformViewMac> _platform_view;
+  std::unique_ptr<shell::PlatformViewMac> _platformView;
 }
 
 @synthesize renderSurface = _renderSurface;
@@ -53,18 +53,18 @@ static inline pointer::PointerType EventTypeFromNSEventPhase(
 }
 
 - (void)setupPlatformView {
-  DCHECK(_platform_view == nullptr)
+  DCHECK(_platformView == nullptr)
       << "The platform view must not already be set.";
 
-  _platform_view.reset(new shell::PlatformViewMac(self.renderSurface));
-  _platform_view->SetupResourceContextOnIOThread();
-  _platform_view->NotifyCreated();
+  _platformView.reset(new shell::PlatformViewMac(self.renderSurface));
+  _platformView->SetupResourceContextOnIOThread();
+  _platformView->NotifyCreated();
 }
 
 // TODO(eseidel): This does not belong in sky_window!
 // Probably belongs in NSApplicationDelegate didFinishLaunching.
 - (void)setupAndLoadDart {
-  _platform_view->SetupAndLoadDart();
+  _platformView->SetupAndLoadDart();
 }
 
 - (void)windowDidResize:(NSNotification*)notification {
@@ -80,7 +80,7 @@ static inline pointer::PointerType EventTypeFromNSEventPhase(
   metrics->physical_height = size.height;
   metrics->device_pixel_ratio = 1.0;
 
-  _platform_view->engineProxy()->OnViewportMetricsChanged(metrics.Pass());
+  _platformView->engineProxy()->OnViewportMetricsChanged(metrics.Pass());
 }
 
 - (void)setupSurfaceIfNecessary {
@@ -101,35 +101,25 @@ static inline pointer::PointerType EventTypeFromNSEventPhase(
       [_renderSurface convertPoint:event.locationInWindow fromView:nil];
   location.y = _renderSurface.frame.size.height - location.y;
 
-  auto pointer_data = pointer::Pointer::New();
+  blink::PointerData pointer_data;
+  pointer_data.Clear();
+  pointer_data.time_stamp =
+      ftl::TimeDelta::FromSeconds(event.timestamp).ToMicroseconds();
+  pointer_data.change = PointerChangeFromNSEventPhase(phase);
+  pointer_data.kind = blink::PointerData::DeviceKind::kMouse;
+  pointer_data.physical_x = location.x;
+  pointer_data.physical_y = location.y;
+  pointer_data.pressure = 1.0;
+  pointer_data.pressure_max = 1.0;
 
-  pointer_data->time_stamp =
-      base::TimeDelta::FromSecondsD(event.timestamp).InMicroseconds();
-  pointer_data->type = EventTypeFromNSEventPhase(phase);
-  pointer_data->kind = pointer::PointerKind::TOUCH;
-  pointer_data->pointer = 0;
-  pointer_data->x = location.x;
-  pointer_data->y = location.y;
-  pointer_data->buttons = 0;
-  pointer_data->down = false;
-  pointer_data->primary = false;
-  pointer_data->obscured = false;
-  pointer_data->pressure = 1.0;
-  pointer_data->pressure_min = 0.0;
-  pointer_data->pressure_max = 1.0;
-  pointer_data->distance = 0.0;
-  pointer_data->distance_min = 0.0;
-  pointer_data->distance_max = 0.0;
-  pointer_data->radius_major = 0.0;
-  pointer_data->radius_minor = 0.0;
-  pointer_data->radius_min = 0.0;
-  pointer_data->radius_max = 0.0;
-  pointer_data->orientation = 0.0;
-  pointer_data->tilt = 0.0;
-
-  auto pointer_packet = pointer::PointerPacket::New();
-  pointer_packet->pointers.push_back(pointer_data.Pass());
-  _platform_view->engineProxy()->OnPointerPacket(pointer_packet.Pass());
+  blink::Threads::UI()->PostTask(
+      [ engine = _platformView->engine().GetWeakPtr(), pointer_data ] {
+        if (engine.get()) {
+          blink::PointerDataPacket packet(1);
+          packet.SetPointerData(0, pointer_data);
+          engine->DispatchPointerDataPacket(packet);
+        }
+      });
 }
 
 - (void)mouseDown:(NSEvent*)event {
@@ -145,8 +135,8 @@ static inline pointer::PointerType EventTypeFromNSEventPhase(
 }
 
 - (void)dealloc {
-  if (_platform_view) {
-    _platform_view->NotifyDestroyed();
+  if (_platformView) {
+    _platformView->NotifyDestroyed();
   }
 
   [super dealloc];
