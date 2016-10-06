@@ -73,7 +73,7 @@ void PlatformViewAndroid::SurfaceChanged(JNIEnv* env,
 
   auto surface = std::make_unique<GPUSurfaceGL>(surface_gl_.get());
   NotifyCreated(std::move(surface), [this, backgroundColor] {
-    config_.rasterizer->Clear(backgroundColor, GetSize());
+    rasterizer().Clear(backgroundColor, GetSize());
   });
   SetupResourceContextOnIOThread();
   UpdateThreadPriorities();

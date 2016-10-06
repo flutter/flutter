@@ -21,7 +21,6 @@
 #include "flutter/shell/common/shell.h"
 #include "flutter/shell/common/switches.h"
 #include "flutter/shell/common/tracing_controller.h"
-#include "flutter/shell/common/ui_delegate.h"
 #include "flutter/sky/engine/wtf/MakeUnique.h"
 #include "mojo/edk/embedder/embedder.h"
 #include "mojo/edk/embedder/simple_platform_support.h"

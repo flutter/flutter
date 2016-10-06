@@ -11,7 +11,6 @@
 #include "flutter/runtime/runtime_delegate.h"
 #include "flutter/services/engine/sky_engine.mojom.h"
 #include "flutter/shell/common/rasterizer.h"
-#include "flutter/shell/common/ui_delegate.h"
 #include "lib/ftl/macros.h"
 #include "lib/ftl/memory/weak_ptr.h"
 #include "mojo/public/cpp/application/service_provider_impl.h"
@@ -27,9 +26,7 @@ namespace shell {
 class Animator;
 using PointerDataPacket = blink::PointerDataPacket;
 
-class Engine : public UIDelegate,
-               public sky::SkyEngine,
-               public blink::RuntimeDelegate {
+class Engine : public sky::SkyEngine, public blink::RuntimeDelegate {
  public:
   explicit Engine(Rasterizer* rasterizer);
 
@@ -49,14 +46,12 @@ class Engine : public UIDelegate,
 
   std::string GetUIIsolateName();
 
+  void ConnectToEngine(mojo::InterfaceRequest<SkyEngine> request);
+  void OnOutputSurfaceCreated(const ftl::Closure& gpu_continuation);
+  void OnOutputSurfaceDestroyed(const ftl::Closure& gpu_continuation);
   void DispatchPointerDataPacket(const PointerDataPacket& packet);
 
  private:
-  // UIDelegate implementation:
-  void ConnectToEngine(mojo::InterfaceRequest<SkyEngine> request) override;
-  void OnOutputSurfaceCreated(const ftl::Closure& gpu_continuation) override;
-  void OnOutputSurfaceDestroyed(const ftl::Closure& gpu_continuation) override;
-
   // SkyEngine implementation:
   void SetServices(sky::ServicesDataPtr services) override;
   void OnViewportMetricsChanged(sky::ViewportMetricsPtr metrics) override;

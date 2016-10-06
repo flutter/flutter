@@ -7,7 +7,6 @@
 #include <utility>
 
 #include "flutter/common/threads.h"
-#include "flutter/glue/movable_wrapper.h"
 #include "flutter/lib/ui/painting/resource_context.h"
 #include "flutter/shell/common/rasterizer.h"
 #include "lib/ftl/functional/wrap_lambda.h"
@@ -15,17 +14,9 @@
 
 namespace shell {
 
-PlatformView::Config::Config() : rasterizer(nullptr) {}
-
-PlatformView::Config::~Config() = default;
-
 PlatformView::PlatformView(std::unique_ptr<Rasterizer> rasterizer)
     : rasterizer_(std::move(rasterizer)), size_(SkISize::Make(0, 0)) {
   engine_.reset(new Engine(rasterizer_.get()));
-
-  // Setup the platform config.
-  config_.ui_delegate = engine_->GetWeakPtr();
-  config_.rasterizer = rasterizer_.get();
 }
 
 PlatformView::~PlatformView() {
@@ -41,15 +32,14 @@ PlatformView::~PlatformView() {
 
 void PlatformView::ConnectToEngine(
     mojo::InterfaceRequest<sky::SkyEngine> request) {
-  ftl::WeakPtr<UIDelegate> ui_delegate = config_.ui_delegate;
-  auto wrapped_request = glue::WrapMovable(std::move(request));
-  blink::Threads::UI()->PostTask([ui_delegate, wrapped_request]() mutable {
-    if (ui_delegate)
-      ui_delegate->ConnectToEngine(wrapped_request.Unwrap());
-  });
-  ftl::WeakPtr<PlatformView> view = GetWeakViewPtr();
-  blink::Threads::UI()->PostTask(
-      [view]() { Shell::Shared().AddPlatformView(view); });
+  blink::Threads::UI()->PostTask(ftl::WrapLambda([
+    view = GetWeakViewPtr(), engine = engine().GetWeakPtr(),
+    request = std::move(request)
+  ]() mutable {
+    if (engine.get())
+      engine->ConnectToEngine(std::move(request));
+    Shell::Shared().AddPlatformView(view);
+  }));
 }
 
 void PlatformView::NotifyCreated(std::unique_ptr<Surface> surface) {
@@ -58,29 +48,26 @@ void PlatformView::NotifyCreated(std::unique_ptr<Surface> surface) {
 
 void PlatformView::NotifyCreated(std::unique_ptr<Surface> surface,
                                  ftl::Closure caller_continuation) {
-  FTL_CHECK(config_.rasterizer);
-
   ftl::AutoResetWaitableEvent latch;
 
   auto ui_continuation = ftl::WrapLambda([
-    delegate = config_.ui_delegate,   //
-    rasterizer = config_.rasterizer,  //
-    surface = std::move(surface),     //
-    caller_continuation,              //
+    this,                          //
+    surface = std::move(surface),  //
+    caller_continuation,           //
     &latch
   ]() mutable {
     auto gpu_continuation = ftl::WrapLambda([
-      rasterizer,                    //
+      this,                          //
       surface = std::move(surface),  //
       caller_continuation,           //
       &latch
     ]() mutable {
       // Runs on the GPU Thread. So does the Caller Continuation.
       surface->Setup();
-      rasterizer->Setup(std::move(surface), caller_continuation, &latch);
+      rasterizer_->Setup(std::move(surface), caller_continuation, &latch);
     });
     // Runs on the UI Thread.
-    delegate->OnOutputSurfaceCreated(std::move(gpu_continuation));
+    engine_->OnOutputSurfaceCreated(std::move(gpu_continuation));
   });
 
   // Runs on the Platform Thread.
@@ -90,23 +77,14 @@ void PlatformView::NotifyCreated(std::unique_ptr<Surface> surface,
 }
 
 void PlatformView::NotifyDestroyed() {
-  FTL_CHECK(config_.rasterizer != nullptr);
-
-  auto delegate = config_.ui_delegate;
-  auto rasterizer = config_.rasterizer->GetWeakRasterizerPtr();
-
   ftl::AutoResetWaitableEvent latch;
 
-  auto delegate_continuation = [rasterizer, &latch]() {
-    if (rasterizer)
-      rasterizer->Teardown(&latch);
-    // TODO(abarth): We should signal the latch if the rasterizer is gone.
+  auto engine_continuation = [this, &latch]() {
+    rasterizer_->Teardown(&latch);
   };
 
-  blink::Threads::UI()->PostTask([delegate, delegate_continuation]() {
-    if (delegate)
-      delegate->OnOutputSurfaceDestroyed(delegate_continuation);
-    // TODO(abarth): We should signal the latch if the delegate is gone.
+  blink::Threads::UI()->PostTask([this, engine_continuation]() {
+    engine_->OnOutputSurfaceDestroyed(engine_continuation);
   });
 
   latch.Wait();
