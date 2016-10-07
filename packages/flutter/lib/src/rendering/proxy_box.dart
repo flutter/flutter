@@ -873,7 +873,7 @@ abstract class CustomClipper<T> {
 
   /// Returns `true` if the new instance will result in a different clip
   /// than the oldClipper instance.
-  bool shouldRepaint(CustomClipper<T> oldClipper);
+  bool shouldRepaint(@checked CustomClipper<T> oldClipper);
 }
 
 abstract class _RenderCustomClip<T> extends RenderProxyBox {
@@ -1679,7 +1679,7 @@ abstract class CustomPainter {
   /// repaints should be avoided as much as possible, a [RepaintBoundary] or
   /// [RenderRepaintBoundary] (or other render object with [isRepaintBoundary]
   /// set to `true`) might be helpful.
-  bool shouldRepaint(CustomPainter oldDelegate);
+  bool shouldRepaint(@checked CustomPainter oldDelegate);
 
   /// Called whenever a hit test is being performed on an object that is using
   /// this custom paint delegate.

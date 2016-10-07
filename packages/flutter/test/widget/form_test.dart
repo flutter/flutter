@@ -5,6 +5,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_services/editing.dart' as mojom;
+import 'package:meta/meta.dart';
 
 class MockKeyboard extends mojom.KeyboardProxy {
   MockKeyboard() : super.unbound();
@@ -13,7 +14,7 @@ class MockKeyboard extends mojom.KeyboardProxy {
   mojom.EditingState currentState;
 
   @override
-  void setClient(mojom.KeyboardClientStub client, mojom.KeyboardConfiguration configuraiton) {
+  void setClient(@checked mojom.KeyboardClientStub client, mojom.KeyboardConfiguration configuraiton) {
     this.client = client.impl;
   }
 

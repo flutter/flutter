@@ -247,7 +247,7 @@ class RawInputLineState extends ScrollableState<RawInputLine> {
   TextSelectionOverlay _selectionOverlay;
 
   @override
-  ScrollBehavior<double, double> createScrollBehavior() => new BoundedBehavior(platform: config.platform);
+  ExtentScrollBehavior createScrollBehavior() => new BoundedBehavior(platform: config.platform);
 
   @override
   BoundedBehavior get scrollBehavior => super.scrollBehavior;

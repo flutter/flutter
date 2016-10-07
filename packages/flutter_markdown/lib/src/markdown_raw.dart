@@ -3,8 +3,10 @@
 // found in the LICENSE file.
 
 import 'package:markdown/markdown.dart' as md;
+import 'package:meta/meta.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/gestures.dart';
+
 import 'markdown_style_raw.dart';
 
 typedef void MarkdownLinkCallback(String href);
@@ -65,7 +67,7 @@ class MarkdownRaw extends StatelessWidget {
 
   MarkdownBodyRaw createMarkdownBody({
     String data,
-    MarkdownStyleRaw markdownStyle,
+    @checked MarkdownStyleRaw markdownStyle,
     SyntaxHighlighter syntaxHighlighter,
     MarkdownLinkCallback onTapLink
   }) {

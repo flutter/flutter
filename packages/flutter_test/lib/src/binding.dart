@@ -13,6 +13,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:meta/meta.dart';
 import 'package:quiver/testing/async.dart';
 import 'package:quiver/time.dart';
 import 'package:test/test.dart' as test_package;
@@ -803,7 +804,7 @@ class _LiveTestRenderView extends RenderView {
   @override
   TestViewConfiguration get configuration => super.configuration;
   @override
-  set configuration(TestViewConfiguration value) { super.configuration = value; }
+  set configuration(@checked TestViewConfiguration value) { super.configuration = value; }
 
   final Map<int, _LiveTestPointerRecord> _pointers = <int, _LiveTestPointerRecord>{};
 

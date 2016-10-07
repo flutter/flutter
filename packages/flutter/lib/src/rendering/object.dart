@@ -1074,7 +1074,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   ///
   /// You can call this function to set up the parent data for child before the
   /// child is added to the parent's child list.
-  void setupParentData(RenderObject child) {
+  void setupParentData(@checked RenderObject child) {
     assert(_debugCanPerformMutations);
     if (child.parentData is! ParentData)
       child.parentData = new ParentData();
@@ -1931,7 +1931,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   ///
   /// Used by coordinate conversion functions to translate coordinates local to
   /// one render object into coordinates local to another render object.
-  void applyPaintTransform(RenderObject child, Matrix4 transform) {
+  void applyPaintTransform(@checked RenderObject child, Matrix4 transform) {
     assert(child.parent == this);
   }
 
@@ -1943,7 +1943,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   ///
   /// This is used in the semantics phase to avoid including children
   /// that are not physically visible.
-  Rect describeApproximatePaintClip(RenderObject child) => null;
+  Rect describeApproximatePaintClip(@checked RenderObject child) => null;
 
 
   // SEMANTICS
@@ -2174,7 +2174,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
 
   /// Override this method to handle pointer events that hit this render object.
   @override
-  void handleEvent(PointerEvent event, HitTestEntry entry) { }
+  void handleEvent(PointerEvent event, @checked HitTestEntry entry) { }
 
 
   // HIT TESTING

@@ -868,15 +868,15 @@ class ServiceMap extends ServiceObject implements Map<String, dynamic> {
   @override
   bool containsValue(dynamic v) => _map.containsValue(v);
   @override
-  bool containsKey(String k) => _map.containsKey(k);
+  bool containsKey(Object k) => _map.containsKey(k);
   @override
   void forEach(Function f) => _map.forEach(f);
   @override
   dynamic putIfAbsent(String key, Function ifAbsent) => _map.putIfAbsent(key, ifAbsent);
   @override
-  void remove(String key) => _map.remove(key);
+  void remove(Object key) => _map.remove(key);
   @override
-  dynamic operator [](String k) => _map[k];
+  dynamic operator [](Object k) => _map[k];
   @override
   void operator []=(String k, dynamic v) => _map[k] = v;
   @override

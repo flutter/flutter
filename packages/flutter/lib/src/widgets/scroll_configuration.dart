@@ -33,7 +33,7 @@ abstract class ScrollConfigurationDelegate {
   /// Overrides should return true if this ScrollConfigurationDelegate differs
   /// from the provided old delegate in a way that requires rebuilding its
   /// scrolling container descendants.
-  bool updateShouldNotify(ScrollConfigurationDelegate old);
+  bool updateShouldNotify(@checked ScrollConfigurationDelegate old);
 }
 
 class _DefaultScrollConfigurationDelegate extends ScrollConfigurationDelegate {

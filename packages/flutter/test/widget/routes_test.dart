@@ -6,6 +6,7 @@ import 'dart:collection';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
+import 'package:meta/meta.dart';
 
 final List<String> results = <String>[];
 
@@ -42,7 +43,7 @@ class TestRoute extends LocalHistoryRoute<String> {
   }
 
   @override
-  void didReplace(TestRoute oldRoute) {
+  void didReplace(@checked TestRoute oldRoute) {
     log('didReplace ${oldRoute.name}');
   }
 
@@ -56,12 +57,12 @@ class TestRoute extends LocalHistoryRoute<String> {
   }
 
   @override
-  void didPopNext(TestRoute nextRoute) {
+  void didPopNext(@checked TestRoute nextRoute) {
     log('didPopNext ${nextRoute.name}');
   }
 
   @override
-  void didChangeNext(TestRoute nextRoute) {
+  void didChangeNext(@checked TestRoute nextRoute) {
     log('didChangeNext ${nextRoute?.name}');
   }
 

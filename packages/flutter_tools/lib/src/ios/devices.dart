@@ -333,7 +333,8 @@ class IOSDevice extends Device {
     ApplicationPackage package,
     LaunchResult result, {
     String mainPath,
-    VMService observatory
+    VMService observatory,
+    bool prebuiltApplication: false
   }) async {
     throw 'unsupported';
   }

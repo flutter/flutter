@@ -48,7 +48,7 @@ abstract class LazyBlockDelegate {
   ///
   /// When calling this function, [LazyBlock] will always pass an argument that
   /// matches the runtimeType of the receiver.
-  bool shouldRebuild(LazyBlockDelegate oldDelegate);
+  bool shouldRebuild(@checked LazyBlockDelegate oldDelegate);
 
   /// Returns the estimated total height of the children, in pixels.
   ///

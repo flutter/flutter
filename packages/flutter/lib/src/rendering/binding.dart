@@ -223,7 +223,7 @@ abstract class RendererBinding extends BindingBase implements SchedulerBinding, 
     assert(renderView != null);
     renderView.hitTest(result, position: position);
     // This super call is safe since it will be bound to a mixed-in declaration.
-    super.hitTest(result, position); //ignore: abstract_super_member_reference
+    super.hitTest(result, position); // ignore: abstract_super_member_reference
   }
 
   void _forceRepaint() {
@@ -289,7 +289,7 @@ class SemanticsServer extends mojom.SemanticsServer {
   }
 
   @override
-  void addSemanticsListener(mojom.SemanticsListenerProxy listener) {
+  void addSemanticsListener(@checked mojom.SemanticsListenerProxy listener) {
     _listeners.add(listener);
   }
 

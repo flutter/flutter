@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
+import 'package:meta/meta.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'box.dart';
@@ -107,7 +108,7 @@ abstract class FlowDelegate {
   /// This should compare the fields of the current delegate and the given
   /// oldDelegate and return true if the fields are such that the layout would
   /// be different.
-  bool shouldRelayout(FlowDelegate oldDelegate) => false;
+  bool shouldRelayout(@checked FlowDelegate oldDelegate) => false;
 
   /// Override this method to return true when the children need to be
   /// repainted. This should compare the fields of the current delegate and the
@@ -122,7 +123,7 @@ abstract class FlowDelegate {
   /// The flow container might repaint even if this function returns false, for
   /// example if layout triggers painting (e.g., if [shouldRelayout] returns
   /// true).
-  bool shouldRepaint(FlowDelegate oldDelegate);
+  bool shouldRepaint(@checked FlowDelegate oldDelegate);
 
   /// Override this method to include additional information in the
   /// debugging data printed by [debugDumpRenderTree] and friends.

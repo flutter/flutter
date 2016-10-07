@@ -4,6 +4,8 @@
 
 import 'dart:math' as math;
 
+import 'package:meta/meta.dart';
+
 import 'box.dart';
 import 'debug.dart';
 import 'object.dart';
@@ -745,7 +747,7 @@ class SingleChildLayoutDelegate {
   Offset getPositionForChild(Size size, Size childSize) => Offset.zero;
 
   /// Override this method to return true when the child needs to be laid out.
-  bool shouldRelayout(SingleChildLayoutDelegate oldDelegate) => true;
+  bool shouldRelayout(@checked SingleChildLayoutDelegate oldDelegate) => true;
 }
 
 /// Defers the layout of its single child to a delegate.

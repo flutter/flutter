@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
+
 import 'box.dart';
 import 'object.dart';
 
@@ -186,7 +188,7 @@ abstract class MultiChildLayoutDelegate {
   /// laid out. This should compare the fields of the current delegate
   /// and the given oldDelegate and return true if the fields are such
   /// that the layout would be different.
-  bool shouldRelayout(MultiChildLayoutDelegate oldDelegate);
+  bool shouldRelayout(@checked MultiChildLayoutDelegate oldDelegate);
 
   /// Override this method to include additional information in the
   /// debugging data printed by [debugDumpRenderTree] and friends.

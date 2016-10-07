@@ -9,6 +9,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:meta/meta.dart';
 import 'package:mojo/core.dart' as mojo;
 
 class TestImage extends ui.Image {
@@ -92,7 +93,7 @@ class TestAssetImage extends AssetImage {
   }
 
   @override
-  Future<ui.Image> decodeImage(TestMojoDataPipeConsumer pipe) {
+  Future<ui.Image> decodeImage(@checked TestMojoDataPipeConsumer pipe) {
     return new SynchronousFuture<ui.Image>(new TestImage(pipe.scale));
   }
 }
