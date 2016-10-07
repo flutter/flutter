@@ -255,12 +255,14 @@ class _InputState extends State<Input> {
       );
     }
 
-    return new GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: () => _rawInputLineKey.currentState?.requestKeyboard(),
-      child: new Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-        child: child
+    return new RepaintBoundary(
+      child: new GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () => _rawInputLineKey.currentState?.requestKeyboard(),
+        child: new Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: child
+        )
       )
     );
   }
