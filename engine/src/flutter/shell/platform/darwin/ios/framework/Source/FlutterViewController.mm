@@ -17,7 +17,7 @@
 #include "flutter/shell/platform/darwin/ios/framework/Source/FlutterDartProject_Internal.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/flutter_touch_mapper.h"
 #include "flutter/shell/platform/darwin/ios/platform_view_ios.h"
-#include "lib/ftl/functional/wrap_lambda.h"
+#include "lib/ftl/functional/make_copyable.h"
 #include "lib/ftl/time/time_delta.h"
 
 @interface FlutterViewController ()<UIAlertViewDelegate>
@@ -268,7 +268,7 @@ static inline PointerChangeMapperPhase PointerChangePhaseFromUITouchPhase(
     packet->SetPointerData(i++, pointer_data);
   }
 
-  blink::Threads::UI()->PostTask(ftl::WrapLambda([
+  blink::Threads::UI()->PostTask(ftl::MakeCopyable([
     engine = _platformView->engine().GetWeakPtr(), packet = std::move(packet)
   ] {
     if (engine.get())

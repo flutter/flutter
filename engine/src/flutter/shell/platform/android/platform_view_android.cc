@@ -23,7 +23,7 @@
 #include "flutter/shell/common/shell.h"
 #include "flutter/shell/gpu/gpu_rasterizer.h"
 #include "jni/FlutterView_jni.h"
-#include "lib/ftl/functional/wrap_lambda.h"
+#include "lib/ftl/functional/make_copyable.h"
 #include "third_party/skia/include/core/SkSurface.h"
 
 namespace shell {
@@ -100,7 +100,7 @@ void PlatformViewAndroid::DispatchPointerDataPacket(JNIEnv* env,
                                                     jint position) {
   char* data = static_cast<char*>(env->GetDirectBufferAddress(buffer));
 
-  blink::Threads::UI()->PostTask(ftl::WrapLambda([
+  blink::Threads::UI()->PostTask(ftl::MakeCopyable([
     engine = engine_->GetWeakPtr(),
     packet = std::make_unique<PointerDataPacket>(data, position)
   ] {

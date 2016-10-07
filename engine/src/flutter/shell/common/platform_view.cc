@@ -9,7 +9,7 @@
 #include "flutter/common/threads.h"
 #include "flutter/lib/ui/painting/resource_context.h"
 #include "flutter/shell/common/rasterizer.h"
-#include "lib/ftl/functional/wrap_lambda.h"
+#include "lib/ftl/functional/make_copyable.h"
 #include "third_party/skia/include/gpu/gl/GrGLInterface.h"
 
 namespace shell {
@@ -32,7 +32,7 @@ PlatformView::~PlatformView() {
 
 void PlatformView::ConnectToEngine(
     mojo::InterfaceRequest<sky::SkyEngine> request) {
-  blink::Threads::UI()->PostTask(ftl::WrapLambda([
+  blink::Threads::UI()->PostTask(ftl::MakeCopyable([
     view = GetWeakViewPtr(), engine = engine().GetWeakPtr(),
     request = std::move(request)
   ]() mutable {
@@ -50,13 +50,13 @@ void PlatformView::NotifyCreated(std::unique_ptr<Surface> surface,
                                  ftl::Closure caller_continuation) {
   ftl::AutoResetWaitableEvent latch;
 
-  auto ui_continuation = ftl::WrapLambda([
+  auto ui_continuation = ftl::MakeCopyable([
     this,                          //
     surface = std::move(surface),  //
     caller_continuation,           //
     &latch
   ]() mutable {
-    auto gpu_continuation = ftl::WrapLambda([
+    auto gpu_continuation = ftl::MakeCopyable([
       this,                          //
       surface = std::move(surface),  //
       caller_continuation,           //

@@ -37,4 +37,8 @@ void TaskRunnerAdaptor::PostDelayedTask(ftl::Closure task,
       base::TimeDelta::FromMicroseconds(delay.ToMicroseconds()));
 }
 
+bool TaskRunnerAdaptor::RunsTasksOnCurrentThread() {
+  return runner_->RunsTasksOnCurrentThread();
+}
+
 }  // namespace glue
