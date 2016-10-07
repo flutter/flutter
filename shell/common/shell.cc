@@ -94,6 +94,8 @@ Shell::Shell() {
   io_thread_->StartWithOptions(options);
 
   blink::Threads threads(ftl::MakeRefCounted<glue::TaskRunnerAdaptor>(
+                             base::MessageLoop::current()->task_runner()),
+                         ftl::MakeRefCounted<glue::TaskRunnerAdaptor>(
                              gpu_thread_->message_loop()->task_runner()),
                          ftl::MakeRefCounted<glue::TaskRunnerAdaptor>(
                              ui_thread_->message_loop()->task_runner()),

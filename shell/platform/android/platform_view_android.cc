@@ -12,6 +12,9 @@
 #include <memory>
 #include <utility>
 #include "base/android/jni_android.h"
+#include "base/android/jni_string.h"
+#include "base/bind.h"
+#include "base/location.h"
 #include "base/trace_event/trace_event.h"
 #include "flutter/common/threads.h"
 #include "flutter/flow/compositor_context.h"
@@ -104,6 +107,56 @@ void PlatformViewAndroid::DispatchPointerDataPacket(JNIEnv* env,
     if (engine.get())
       engine->DispatchPointerDataPacket(*packet);
   }));
+}
+
+void PlatformViewAndroid::InvokePlatformMessageResponseCallback(
+    JNIEnv* env,
+    jobject obj,
+    jint response_id,
+    jstring java_response) {
+  if (!response_id)
+    return;
+  auto it = pending_messages_.find(response_id);
+  if (it == pending_messages_.end())
+    return;
+  std::string response =
+      base::android::ConvertJavaStringToUTF8(env, java_response);
+  // TODO(abarth): There's an extra copy here.
+  it->second->InvokeCallback(
+      std::vector<char>(response.data(), response.data() + response.size()));
+  pending_messages_.erase(it);
+}
+
+void PlatformViewAndroid::HandlePlatformMessage(
+    ftl::RefPtr<blink::PlatformMessage> message) {
+  JNIEnv* env = base::android::AttachCurrentThread();
+  {
+    base::android::ScopedJavaLocalRef<jobject> view = flutter_view_.get(env);
+    if (view.is_null())
+      return;
+
+    int response_id = 0;
+    if (message->has_callback()) {
+      response_id = next_response_id_++;
+      pending_messages_[response_id] = message;
+    }
+
+    base::StringPiece message_name = message->name();
+
+    auto data = message->data();
+    base::StringPiece message_data(data.data(), data.size());
+
+    auto java_message_name =
+        base::android::ConvertUTF8ToJavaString(env, message_name);
+    auto java_message_data =
+        base::android::ConvertUTF8ToJavaString(env, message_data);
+    message->ClearData();
+
+    // This call can re-enter in InvokePlatformMessageResponseCallback.
+    Java_FlutterView_handlePlatformMessage(
+        env, view.obj(), java_message_name.obj(), java_message_data.obj(),
+        response_id);
+  }
 }
 
 void PlatformViewAndroid::ReleaseSurface() {

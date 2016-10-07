@@ -5,11 +5,13 @@
 #ifndef SHELL_PLATFORM_ANDROID_PLATFORM_VIEW_ANDROID_H_
 #define SHELL_PLATFORM_ANDROID_PLATFORM_VIEW_ANDROID_H_
 
-#include <string>
-
 #include <memory>
+#include <string>
+#include <unordered_map>
+
 #include "base/android/jni_android.h"
 #include "base/android/jni_weak_ref.h"
+#include "flutter/lib/ui/window/platform_message.h"
 #include "flutter/shell/common/platform_view.h"
 #include "flutter/shell/platform/android/android_surface_gl.h"
 #include "lib/ftl/memory/weak_ptr.h"
@@ -37,6 +39,11 @@ class PlatformViewAndroid : public PlatformView {
                                  jobject buffer,
                                  jint position);
 
+  void InvokePlatformMessageResponseCallback(JNIEnv* env,
+                                             jobject obj,
+                                             jint response_id,
+                                             jstring response);
+
   base::android::ScopedJavaLocalRef<jobject> GetBitmap(JNIEnv* env,
                                                        jobject obj);
 
@@ -61,6 +68,11 @@ class PlatformViewAndroid : public PlatformView {
   JavaObjectWeakGlobalRef flutter_view_;
   ftl::WeakPtrFactory<PlatformViewAndroid> weak_factory_;
 
+  // We use id 0 to mean that no response is expected.
+  int next_response_id_ = 1;
+  std::unordered_map<int, ftl::RefPtr<blink::PlatformMessage>>
+      pending_messages_;
+
   void UpdateThreadPriorities();
 
   void ReleaseSurface();
@@ -68,6 +80,8 @@ class PlatformViewAndroid : public PlatformView {
   void GetBitmapGpuTask(ftl::AutoResetWaitableEvent* latch,
                         jobject* pixels_out,
                         SkISize* size_out);
+
+  void HandlePlatformMessage(ftl::RefPtr<blink::PlatformMessage> message);
 
   FTL_DISALLOW_COPY_AND_ASSIGN(PlatformViewAndroid);
 };

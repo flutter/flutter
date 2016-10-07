@@ -7,6 +7,7 @@
 
 #include "flutter/assets/zip_asset_store.h"
 #include "flutter/glue/drain_data_pipe_job.h"
+#include "flutter/lib/ui/window/platform_message.h"
 #include "flutter/runtime/runtime_controller.h"
 #include "flutter/runtime/runtime_delegate.h"
 #include "flutter/services/engine/sky_engine.mojom.h"

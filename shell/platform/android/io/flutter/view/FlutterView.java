@@ -33,6 +33,7 @@ import android.view.inputmethod.InputConnection;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import org.chromium.base.CalledByNative;
 import org.chromium.base.JNINamespace;
 import org.chromium.mojo.bindings.Interface.Binding;
 import org.chromium.mojo.bindings.InterfaceRequest;
@@ -53,6 +54,7 @@ import org.chromium.mojom.sky.ViewportMetrics;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -577,6 +579,29 @@ public class FlutterView extends SurfaceView
 
     private static native void nativeDispatchPointerDataPacket(long nativePlatformViewAndroid, ByteBuffer buffer, int position);
 
+    private static native void nativeInvokePlatformMessageResponseCallback(long nativePlatformViewAndroid, int responseId, String buffer);
+
+    @CalledByNative
+    private void handlePlatformMessage(String messageName, String message, final int responseId) {
+        OnMessageListener listener = mOnMessageListeners.get(messageName);
+        if (listener != null) {
+            nativeInvokePlatformMessageResponseCallback(mNativePlatformView, responseId, listener.onMessage(this, message));
+            return;
+        }
+
+        OnMessageListenerAsync asyncListener = mAsyncOnMessageListeners.get(messageName);
+        if (asyncListener != null) {
+            asyncListener.onMessage(this, message, new MessageResponse() {
+              @Override
+              public void send(String response) {
+                  nativeInvokePlatformMessageResponseCallback(mNativePlatformView, responseId, response);
+              }
+            });
+            return;
+        }
+
+        nativeInvokePlatformMessageResponseCallback(mNativePlatformView, responseId, null);
+    }
 
     // ACCESSIBILITY
 

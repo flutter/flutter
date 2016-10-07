@@ -5,7 +5,10 @@
 #ifndef FLUTTER_LIB_UI_UI_DART_STATE_H_
 #define FLUTTER_LIB_UI_UI_DART_STATE_H_
 
+#include <utility>
+
 #include "dart/runtime/include/dart_api.h"
+#include "flutter/lib/ui/window/platform_message.h"
 #include "flutter/sky/engine/wtf/RefPtr.h"
 #include "lib/ftl/build_config.h"
 #include "lib/tonic/dart_persistent_value.h"
@@ -46,6 +49,14 @@ class UIDartState : public tonic::DartState {
   DartJniIsolateData* jni_data();
 #endif
 
+  void set_platform_message_sink(PlatformMessage::Sink sink) {
+    platform_message_sink_ = std::move(sink);
+  }
+
+  const PlatformMessage::Sink& platform_message_sink() const {
+    return platform_message_sink_;
+  }
+
   void set_font_selector(PassRefPtr<FontSelector> selector);
   PassRefPtr<FontSelector> font_selector();
 
@@ -57,6 +68,7 @@ class UIDartState : public tonic::DartState {
   std::string debug_name_;
   std::unique_ptr<MojoServices> mojo_services_;
   std::unique_ptr<Window> window_;
+  PlatformMessage::Sink platform_message_sink_;
   RefPtr<FontSelector> font_selector_;
 
 #if defined(OS_ANDROID)

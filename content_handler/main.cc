@@ -51,8 +51,9 @@ class App : public mojo::ApplicationImplBase {
     ftl::RefPtr<ftl::TaskRunner> io_task_runner;
     io_thread_ = mtl::CreateThread(&io_task_runner);
 
-    blink::Threads::Set(
-        blink::Threads(gpu_task_runner, ui_task_runner, io_task_runner));
+    // Notice that the Platform and UI threads are actually the same.
+    blink::Threads::Set(blink::Threads(ui_task_runner, gpu_task_runner,
+                                       ui_task_runner, io_task_runner));
     blink::Settings::Set(blink::Settings());
     blink::InitRuntime();
 
