@@ -9,7 +9,7 @@ FLUTTER_ROOT=$(dirname $(dirname $(dirname "${BASH_SOURCE[0]}")))
 
 DART_SDK_PATH="$FLUTTER_ROOT/bin/cache/dart-sdk"
 DART_SDK_STAMP_PATH="$FLUTTER_ROOT/bin/cache/dart-sdk.stamp"
-DART_SDK_VERSION=`cat "$FLUTTER_ROOT/bin/cache/dart-sdk.version"`
+DART_SDK_VERSION=`cat "$FLUTTER_ROOT/bin/internal/dart-sdk.version"`
 
 if [ ! -f "$DART_SDK_STAMP_PATH" ] || [ "$DART_SDK_VERSION" != `cat "$DART_SDK_STAMP_PATH"` ]; then
   echo "Downloading Dart SDK $DART_SDK_VERSION..."
