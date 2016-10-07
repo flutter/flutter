@@ -20,6 +20,7 @@ class TaskRunnerAdaptor : public ftl::TaskRunner {
 
   void PostTask(ftl::Closure task) override;
   void PostDelayedTask(ftl::Closure task, ftl::TimeDelta delay) override;
+  bool RunsTasksOnCurrentThread() override;
 
  protected:
   ~TaskRunnerAdaptor() override;

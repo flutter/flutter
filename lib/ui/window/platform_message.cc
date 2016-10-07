@@ -7,7 +7,7 @@
 #include <utility>
 
 #include "flutter/common/threads.h"
-#include "lib/ftl/functional/wrap_lambda.h"
+#include "lib/ftl/functional/make_copyable.h"
 #include "lib/tonic/dart_state.h"
 #include "lib/tonic/logging/dart_invoke.h"
 
@@ -23,7 +23,7 @@ PlatformMessage::PlatformMessage(std::string name,
 PlatformMessage::~PlatformMessage() {
   if (!callback_.is_empty()) {
     Threads::UI()->PostTask(
-        ftl::WrapLambda([callback = std::move(callback_)]() mutable {
+        ftl::MakeCopyable([callback = std::move(callback_)]() mutable {
           callback.Clear();
         }));
   }
@@ -32,7 +32,7 @@ PlatformMessage::~PlatformMessage() {
 void PlatformMessage::InvokeCallback(std::vector<char> data) {
   if (callback_.is_empty())
     return;
-  Threads::UI()->PostTask(ftl::WrapLambda(
+  Threads::UI()->PostTask(ftl::MakeCopyable(
       [ callback = std::move(callback_), data = std::move(data) ]() mutable {
         tonic::DartState* dart_state = callback.dart_state().get();
         if (!dart_state)
