@@ -7,8 +7,10 @@
 #include "flutter/lib/ui/compositing/scene.h"
 #include "flutter/lib/ui/ui_dart_state.h"
 #include "lib/tonic/converter/dart_converter.h"
+#include "lib/tonic/dart_args.h"
 #include "lib/tonic/dart_library_natives.h"
 #include "lib/tonic/logging/dart_invoke.h"
+#include "lib/tonic/typed_data/dart_byte_data.h"
 
 using tonic::DartInvokeField;
 using tonic::DartState;
@@ -31,6 +33,26 @@ void Render(Dart_NativeArguments args) {
     return;
   }
   UIDartState::Current()->window()->client()->Render(scene);
+}
+
+void SendPlatformMessage(Dart_Handle window,
+                         const std::string& name,
+                         Dart_Handle callback,
+                         const tonic::DartByteData& data) {
+  UIDartState* dart_state = UIDartState::Current();
+  const char* buffer = static_cast<const char*>(data.data());
+  auto message = ftl::MakeRefCounted<blink::PlatformMessage>(
+      name, std::vector<char>(buffer, buffer + data.length_in_bytes()),
+      tonic::DartPersistentValue(dart_state, callback));
+  if (const auto& sink = dart_state->platform_message_sink()) {
+    sink(std::move(message));
+  } else {
+    message->InvokeCallbackWithError();
+  }
+}
+
+void _SendPlatformMessage(Dart_NativeArguments args) {
+  tonic::DartCallStatic(&SendPlatformMessage, args);
 }
 
 }  // namespace
@@ -166,10 +188,10 @@ void Window::OnAppLifecycleStateChanged(sky::AppLifecycleState state) {
 }
 
 void Window::RegisterNatives(tonic::DartLibraryNatives* natives) {
-  natives->Register({
-      {"Window_scheduleFrame", ScheduleFrame, 1, true},
-      {"Window_render", Render, 2, true},
-  });
+  natives->Register(
+      {{"Window_scheduleFrame", ScheduleFrame, 1, true},
+       {"Window_render", Render, 2, true},
+       {"Window_sendPlatformMessage", _SendPlatformMessage, 4, true}});
 }
 
 }  // namespace blink

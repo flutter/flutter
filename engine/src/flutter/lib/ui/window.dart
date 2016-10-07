@@ -19,6 +19,8 @@ typedef void SemanticsActionCallback(int id, SemanticsAction action);
 /// Signature for [Window.onAppLifecycleStateChanged].
 typedef void AppLifecycleStateCallback(AppLifecycleState state);
 
+typedef void PlatformMessageResponseCallback(ByteData data);
+
 /// States that an application can be in.
 enum AppLifecycleState {
   // These values must match the order of the values of
@@ -212,6 +214,16 @@ class Window {
   /// In either case, this function disposes the given update, which means the
   /// semantics update cannot be used further.
   void updateSemantics(SemanticsUpdate update) native "Window_updateSemantics";
+
+  void sendPlatformMesssage(String name,
+                            ByteData data,
+                            PlatformMessageResponseCallback callback) {
+    _sendPlatformMesssage(name, callback, data);
+  }
+  void _sendPlatformMesssage(String name,
+                             PlatformMessageResponseCallback callback,
+                             ByteData data) native "Window_sendPlatformMesssage";
+
 }
 
 /// The [Window] singleton. This object exposes the size of the display, the
