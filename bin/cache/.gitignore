@@ -1,6 +1,0 @@
-*.snapshot
-*.stamp
-artifacts/
-dart-sdk/
-pkg/
-lockfile

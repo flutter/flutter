@@ -92,7 +92,7 @@ class Cache {
 
   static String get engineRevision {
     if (_engineRevision == null) {
-      File revisionFile = new File(path.join(flutterRoot, 'bin', 'cache', 'engine.version'));
+      File revisionFile = new File(path.join(flutterRoot, 'bin', 'internal', 'engine.version'));
       if (revisionFile.existsSync())
         _engineRevision = revisionFile.readAsStringSync().trim();
     }
@@ -127,7 +127,7 @@ class Cache {
   }
 
   String getVersionFor(String artifactName) {
-    File versionFile = new File(path.join(getRoot().path, '$artifactName.version'));
+    File versionFile = new File(path.join(_rootOverride?.path ?? flutterRoot, 'bin', 'internal', '$artifactName.version'));
     return versionFile.existsSync() ? versionFile.readAsStringSync().trim() : null;
   }
 
