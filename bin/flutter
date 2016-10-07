@@ -37,6 +37,7 @@ DART="$DART_SDK_PATH/bin/dart"
   fi
   REVISION=`(cd "$FLUTTER_ROOT"; git rev-parse HEAD)`
   if [ ! -f "$SNAPSHOT_PATH" ] || [ ! -f "$STAMP_PATH" ] || [ `cat "$STAMP_PATH"` != "$REVISION" ] || [ "$FLUTTER_TOOLS_DIR/pubspec.yaml" -nt "$FLUTTER_TOOLS_DIR/pubspec.lock" ]; then
+    mkdir -p "$FLUTTER_ROOT/bin/cache"
     "$FLUTTER_ROOT/bin/internal/update_dart_sdk.sh"
 
     echo Building flutter tool...
