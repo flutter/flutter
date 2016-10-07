@@ -5,6 +5,7 @@
 #include "gpu_surface_gl.h"
 
 #include "flutter/flow/gl_connection.h"
+#include "flutter/glue/trace_event.h"
 #include "lib/ftl/arraysize.h"
 #include "lib/ftl/logging.h"
 #include "third_party/skia/include/core/SkSurface.h"
@@ -132,7 +133,10 @@ bool GPUSurfaceGL::PresentSurface(SkCanvas* canvas) {
     return false;
   }
 
-  canvas->flush();
+  {
+    TRACE_EVENT0("flutter", "SkCanvas::Flush");
+    canvas->flush();
+  }
 
   delegate_->GLContextPresent();
 

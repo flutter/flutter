@@ -245,6 +245,7 @@ bool AndroidContextGL::ClearCurrent() {
 }
 
 bool AndroidContextGL::SwapBuffers() {
+  TRACE_EVENT0("flutter", "AndroidContextGL::SwapBuffers");
   return eglSwapBuffers(environment_->Display(), surface_);
 }
 
