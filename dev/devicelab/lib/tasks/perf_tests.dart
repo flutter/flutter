@@ -71,7 +71,6 @@ class StartupTest {
       ]).timeout(_startupTimeout);
       Map<String, dynamic> data = JSON.decode(file('$testDirectory/build/start_up_info.json').readAsStringSync());
       return new TaskResult.success(data, benchmarkScoreKeys: <String>[
-        'engineEnterTimestampMicros',
         'timeToFirstFrameMicros',
       ]);
     });
