@@ -58,7 +58,7 @@ abstract class AssetBundle {
   ///
   /// Implementations may cache the result, so a particular key should only be
   /// used with one parser for the lifetime of the asset bundle.
-  Future<dynamic> loadStructuredData(String key, dynamic parser(String value));
+  Future<dynamic> loadStructuredData(String key, Future<dynamic> parser(String value));
 
   /// If this is a caching asset bundle, and the given key describes a cached
   /// asset, then evict the asset from the cache so that the next time it is

@@ -7,7 +7,7 @@ import 'package:meta/meta.dart';
 import 'framework.dart';
 
 /// A widget that has exactly one inflated instance in the tree.
-abstract class UniqueWidget<T extends State> extends StatefulWidget {
+abstract class UniqueWidget<T extends State<StatefulWidget>> extends StatefulWidget {
   /// Creates a widget that has exactly one inflated instance in the tree.
   ///
   /// The [key] argument cannot be null because it identifies the unique

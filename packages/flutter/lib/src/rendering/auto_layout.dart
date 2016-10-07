@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cassowary.dart' as al; // "auto layout"
+import 'package:meta/meta.dart';
 
 import 'box.dart';
 import 'object.dart';
@@ -144,7 +145,7 @@ abstract class AutoLayoutDelegate {
   List<al.Constraint> getConstraints(AutoLayoutRect parent);
 
   /// Override this method to return true when new constraints need to be generated.
-  bool shouldUpdateConstraints(AutoLayoutDelegate oldDelegate);
+  bool shouldUpdateConstraints(@checked AutoLayoutDelegate oldDelegate);
 }
 
 /// A render object that uses the cassowary constraint solver to automatically size and position children.

@@ -29,7 +29,7 @@ abstract class VirtualViewport extends RenderObjectWidget {
 }
 
 abstract class _WidgetProvider {
-  void didUpdateWidget(VirtualViewport oldWidget, VirtualViewport newWidget);
+  void didUpdateWidget(@checked VirtualViewport oldWidget, @checked VirtualViewport newWidget);
   int get virtualChildCount;
   void prepareChildren(VirtualViewportElement context, int base, int count);
   Widget getChild(int i);
@@ -146,7 +146,7 @@ abstract class VirtualViewportElement extends RenderObjectElement {
   /// Copies the configuration described by [widget] to this element's [renderObject].
   @protected
   @mustCallSuper
-  void updateRenderObject(VirtualViewport oldWidget) {
+  void updateRenderObject(@checked VirtualViewport oldWidget) {
     renderObject.virtualChildCount = _widgetProvider.virtualChildCount;
 
     if (startOffsetBase != null) {

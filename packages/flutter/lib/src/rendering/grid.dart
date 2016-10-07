@@ -196,10 +196,10 @@ abstract class GridDelegate {
   /// [placementData] associated with that child as context. The returned
   /// [GridChildPlacement] is then used to determine the size and position of
   /// that child within the grid.
-  GridChildPlacement getChildPlacement(GridSpecification specification, int index, Object placementData);
+  GridChildPlacement getChildPlacement(GridSpecification specification, int index, @checked Object placementData);
 
   /// Override this method to return true when the children need to be laid out.
-  bool shouldRelayout(GridDelegate oldDelegate) => true;
+  bool shouldRelayout(@checked GridDelegate oldDelegate) => true;
 
   Size _getGridSize(BoxConstraints constraints, int childCount) {
     return getGridSpecification(constraints, childCount).gridSize;

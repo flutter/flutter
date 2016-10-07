@@ -925,7 +925,7 @@ class _TabBarState<T> extends ScrollableState<TabBar<T>> implements TabBarSelect
   }
 
   @override
-  ScrollBehavior<double, double> createScrollBehavior() {
+  ExtentScrollBehavior createScrollBehavior() {
     return new _TabsScrollBehavior()
       ..isScrollable = config.isScrollable;
   }

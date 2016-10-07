@@ -21,7 +21,6 @@ analyzer:
     # allow overriding fields (if they use super, ideally...)
     strong_mode_invalid_field_override: ignore
     # allow type narrowing
-    strong_mode_invalid_method_override: ignore
     strong_mode_static_type_error: ignore
     strong_mode_down_cast_composite: ignore
     # allow having TODOs in the code

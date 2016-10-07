@@ -21,7 +21,7 @@ class TestScrollConfigurationDelegate extends ScrollConfigurationDelegate {
   }
 
   @override
-  bool updateShouldNotify(TestScrollConfigurationDelegate old)  => flag != old.flag;
+  bool updateShouldNotify(TestScrollConfigurationDelegate old) => flag != old.flag;
 }
 
 void main() {
