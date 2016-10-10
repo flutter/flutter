@@ -10,7 +10,7 @@ dart_package("flutter_tools") {
   source_dir = "lib"
 
   deps = [
-    "//third_party/dart-pkg/pub/analyzer",
+    "//dart/pkg/analyzer",
     "//third_party/dart-pkg/pub/archive",
     "//third_party/dart-pkg/pub/args",
     "//third_party/dart-pkg/pub/coverage",
