@@ -151,30 +151,17 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
                 });
               },
               items: <String>[
-                'One',
-                'Two',
-                'Free',
-                'Four',
-                'Can',
-                'I',
-                'Have',
-                'A',
-                'Little',
-                'Bit',
-                'More',
-                'Five',
-                'Six',
-                'Seven',
-                'Eight',
-                'Nine',
-                'Ten'
-              ].map((String value) {
-                return new DropdownMenuItem<String>(
-                  value: value,
-                  child: new Text(value),
-                );
-              }).toList(),
-            ),
+                  'One', 'Two', 'Free', 'Four', 'Can', 'I', 'Have', 'A', 'Little',
+                  'Bit', 'More', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten'
+                 ]
+                .map((String value) {
+                  return new DropdownMenuItem<String>(
+                    value: value,
+                    child: new Text(value),
+                  );
+                })
+                .toList(),
+             ),
           ),
           new SizedBox(
             height: 24.0,
@@ -222,9 +209,8 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
             onPressed: null,
           )
         ]
-            .map((Widget button) =>
-                new SizedBox(width: 64.0, height: 64.0, child: button))
-            .toList(),
+        .map((Widget button) => new SizedBox(width: 64.0, height: 64.0, child: button))
+        .toList(),
       ),
     );
   }

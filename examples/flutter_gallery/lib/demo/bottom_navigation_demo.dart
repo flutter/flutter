@@ -33,8 +33,7 @@ class NavigationIconView {
   final AnimationController controller;
   CurvedAnimation _animation;
 
-  FadeTransition transition(
-      BottomNavigationBarType type, BuildContext context) {
+  FadeTransition transition(BottomNavigationBarType type, BuildContext context) {
     Color iconColor;
     if (type == BottomNavigationBarType.shifting) {
       iconColor = _color;
@@ -140,8 +139,7 @@ class _BottomNavigationDemoState extends State<BottomNavigationDemo>
   Widget build(BuildContext context) {
     final BottomNavigationBar botNavBar = new BottomNavigationBar(
       labels: _navigationViews
-          .map((NavigationIconView navigationView) =>
-              navigationView.destinationLabel)
+          .map((NavigationIconView navigationView) => navigationView.destinationLabel)
           .toList(),
       currentIndex: _currentIndex,
       type: _type,
