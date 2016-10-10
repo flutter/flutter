@@ -7,7 +7,6 @@ import 'package:flutter/rendering.dart';
 import 'package:test/test.dart';
 
 import 'rendering_tester.dart';
-import 'test_semantics_client.dart';
 
 class TestTree {
   TestTree() {
@@ -126,20 +125,25 @@ void main() {
   });
   test('objects can be detached and re-attached: semantics', () {
     TestTree testTree = new TestTree();
-    TestSemanticsClient client = new TestSemanticsClient(renderer.pipelineOwner);
+    int semanticsUpdateCount = 0;
+    SemanticsHandle semanticsHandle = renderer.pipelineOwner.ensureSemantics(
+      listener: () {
+        ++semanticsUpdateCount;
+      }
+    );
     // Lay out, composite, paint, and update semantics
     layout(testTree.root, phase: EnginePhase.flushSemantics);
-    expect(client.updates.length, equals(1));
+    expect(semanticsUpdateCount, 1);
     // Remove testTree from the custom render view
     renderer.renderView.child = null;
     expect(testTree.child.owner, isNull);
     // Dirty one of the elements
-    client.updates.clear();
+    semanticsUpdateCount = 0;
     testTree.child.markNeedsSemanticsUpdate();
-    expect(client.updates.length, equals(0));
+    expect(semanticsUpdateCount, 0);
     // Lay out, composite, paint, and update semantics again
     layout(testTree.root, phase: EnginePhase.flushSemantics);
-    expect(client.updates.length, equals(1));
-    client.dispose();
+    expect(semanticsUpdateCount, 1);
+    semanticsHandle.dispose();
   });
 }

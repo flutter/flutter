@@ -5,13 +5,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter_services/semantics.dart' as mojom;
 
-import '../rendering/test_semantics_client.dart';
+import 'semantics_tester.dart';
 
 void main() {
   testWidgets('Semantics shutdown and restart', (WidgetTester tester) async {
-    TestSemanticsClient client = new TestSemanticsClient(tester.binding.pipelineOwner);
+    SemanticsTester semantics = new SemanticsTester(tester);
+
+    TestSemantics expectedSemantics = new TestSemantics(
+      id: 0,
+      label: 'test1',
+    );
 
     await tester.pumpWidget(
       new Container(
@@ -22,37 +26,22 @@ void main() {
       )
     );
 
-    void checkUpdates(List<mojom.SemanticsNode> updates) {
-      expect(updates.length, equals(1));
-      expect(updates[0].id, equals(0));
-      expect(updates[0].actions, isEmpty);
-      expect(updates[0].flags.hasCheckedState, isFalse);
-      expect(updates[0].flags.isChecked, isFalse);
-      expect(updates[0].strings.label, equals('test1'));
-      expect(updates[0].geometry.transform, isNull);
-      expect(updates[0].geometry.left, equals(0.0));
-      expect(updates[0].geometry.top, equals(0.0));
-      expect(updates[0].geometry.width, equals(800.0));
-      expect(updates[0].geometry.height, equals(600.0));
-      expect(updates[0].children.length, equals(0));
-    }
+    expect(semantics, hasSemantics(expectedSemantics));
 
-    checkUpdates(client.updates);
-    client.updates.clear();
-    client.dispose();
+    semantics.dispose();
+    semantics = null;
 
     expect(tester.binding.hasScheduledFrame, isFalse);
-    client = new TestSemanticsClient(tester.binding.pipelineOwner);
+    semantics = new SemanticsTester(tester);
     expect(tester.binding.hasScheduledFrame, isTrue);
     await tester.pump();
 
-    checkUpdates(client.updates);
-    client.updates.clear();
-    client.dispose();
+    expect(semantics, hasSemantics(expectedSemantics));
+    semantics.dispose();
   });
 
   testWidgets('Detach and reattach assert', (WidgetTester tester) async {
-    TestSemanticsClient client = new TestSemanticsClient(tester.binding.pipelineOwner);
+    SemanticsTester semantics = new SemanticsTester(tester);
     GlobalKey key = new GlobalKey();
 
     await tester.pumpWidget(
@@ -69,11 +58,18 @@ void main() {
       )
     );
 
-    expect(client.updates.length, equals(1));
-    expect(client.updates[0].strings.label, equals('test1'));
-    expect(client.updates[0].children.length, equals(1));
-    expect(client.updates[0].children[0].strings.label, equals('test2a'));
-    client.updates.clear();
+    expect(semantics, hasSemantics(
+      new TestSemantics(
+        id: 0,
+        label: 'test1',
+        children: <TestSemantics>[
+          new TestSemantics(
+            id: 1,
+            label: 'test2a',
+          )
+        ]
+      )
+    ));
 
     await tester.pumpWidget(
       new Container(
@@ -93,14 +89,25 @@ void main() {
       )
     );
 
-    expect(client.updates.length, equals(1));
-    expect(client.updates[0].strings.label, equals('test1'));
-    expect(client.updates[0].children.length, equals(1));
-    expect(client.updates[0].children[0].strings.label, equals('middle'));
-    expect(client.updates[0].children[0].children.length, equals(1));
-    expect(client.updates[0].children[0].children[0].strings.label, equals('test2b'));
-    expect(client.updates[0].children[0].children[0].children.length, equals(0));
+    expect(semantics, hasSemantics(
+      new TestSemantics(
+        id: 0,
+        label: 'test1',
+        children: <TestSemantics>[
+          new TestSemantics(
+            id: 2,
+            label: 'middle',
+            children: <TestSemantics>[
+              new TestSemantics(
+                id: 1,
+                label: 'test2b',
+              )
+            ]
+          )
+        ]
+      )
+    ));
 
-    client.dispose();
+    semantics.dispose();
   });
 }

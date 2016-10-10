@@ -8,7 +8,6 @@ import 'dart:ui' show SemanticsFlags;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter_services/semantics.dart' as mojom;
 
 import 'basic.dart';
 import 'binding.dart';
@@ -153,21 +152,23 @@ class _SemanticsDebuggerState extends State<SemanticsDebugger> {
 
 class _SemanticsClient extends ChangeNotifier {
   _SemanticsClient(PipelineOwner pipelineOwner) {
-    _semanticsOwner = pipelineOwner.addSemanticsListener(_updateSemanticsTree);
+    _semanticsHandle = pipelineOwner.ensureSemantics(
+      listener: _didUpdateSemantics
+    );
   }
 
-  SemanticsOwner _semanticsOwner;
+  SemanticsHandle _semanticsHandle;
 
   @override
   void dispose() {
-    _semanticsOwner.removeListener(_updateSemanticsTree);
-    _semanticsOwner = null;
+    _semanticsHandle.dispose();
+    _semanticsHandle = null;
     super.dispose();
   }
 
   int generation = 0;
 
-  void _updateSemanticsTree(List<mojom.SemanticsNode> nodes) {
+  void _didUpdateSemantics() {
     generation += 1;
     notifyListeners();
   }
