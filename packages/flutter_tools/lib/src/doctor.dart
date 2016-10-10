@@ -9,6 +9,7 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 
 import 'android/android_workflow.dart';
+import 'base/common.dart';
 import 'base/context.dart';
 import 'base/os.dart';
 import 'device.dart';
@@ -326,10 +327,9 @@ class IntellijValidator extends DoctorValidator {
       'IdeaIC' : 'IntelliJ IDEA Community Edition',
       'WebStorm' : 'IntelliJ WebStorm',
     };
-    String homeDir = Platform.environment['HOME'];
 
-    if (Platform.isLinux && homeDir != null) {
-      for (FileSystemEntity dir in new Directory(homeDir).listSync()) {
+    if (Platform.isLinux && homeDirPath != null) {
+      for (FileSystemEntity dir in new Directory(homeDirPath).listSync()) {
         if (dir is Directory) {
           String name = path.basename(dir.path);
           products.forEach((String id, String title) {
