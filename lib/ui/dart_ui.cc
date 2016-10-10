@@ -4,8 +4,8 @@
 
 #include "flutter/lib/ui/dart_ui.h"
 
-#include "flutter/lib/ui/compositing/scene_builder.h"
 #include "flutter/lib/ui/compositing/scene.h"
+#include "flutter/lib/ui/compositing/scene_builder.h"
 #include "flutter/lib/ui/dart_runtime_hooks.h"
 #include "flutter/lib/ui/mojo_services.h"
 #include "flutter/lib/ui/painting/canvas.h"
@@ -18,6 +18,8 @@
 #include "flutter/lib/ui/painting/path.h"
 #include "flutter/lib/ui/painting/picture.h"
 #include "flutter/lib/ui/painting/picture_recorder.h"
+#include "flutter/lib/ui/semantics/semantics_update.h"
+#include "flutter/lib/ui/semantics/semantics_update_builder.h"
 #include "flutter/lib/ui/text/paragraph.h"
 #include "flutter/lib/ui/text/paragraph_builder.h"
 #include "flutter/lib/ui/window/window.h"
@@ -63,6 +65,8 @@ void DartUI::InitForGlobal() {
     PictureRecorder::RegisterNatives(g_natives);
     Scene::RegisterNatives(g_natives);
     SceneBuilder::RegisterNatives(g_natives);
+    SemanticsUpdate::RegisterNatives(g_natives);
+    SemanticsUpdateBuilder::RegisterNatives(g_natives);
     Window::RegisterNatives(g_natives);
   }
 }

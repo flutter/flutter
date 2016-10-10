@@ -35,6 +35,17 @@ void Render(Dart_NativeArguments args) {
   UIDartState::Current()->window()->client()->Render(scene);
 }
 
+void UpdateSemantics(Dart_NativeArguments args) {
+  Dart_Handle exception = nullptr;
+  SemanticsUpdate* update =
+      tonic::DartConverter<SemanticsUpdate*>::FromArguments(args, 1, exception);
+  if (exception) {
+    Dart_ThrowException(exception);
+    return;
+  }
+  UIDartState::Current()->window()->client()->UpdateSemantics(update);
+}
+
 void SendPlatformMessage(Dart_Handle window,
                          const std::string& name,
                          Dart_Handle callback,
@@ -188,10 +199,12 @@ void Window::OnAppLifecycleStateChanged(sky::AppLifecycleState state) {
 }
 
 void Window::RegisterNatives(tonic::DartLibraryNatives* natives) {
-  natives->Register(
-      {{"Window_scheduleFrame", ScheduleFrame, 1, true},
-       {"Window_render", Render, 2, true},
-       {"Window_sendPlatformMessage", _SendPlatformMessage, 4, true}});
+  natives->Register({
+      {"Window_scheduleFrame", ScheduleFrame, 1, true},
+      {"Window_sendPlatformMessage", _SendPlatformMessage, 4, true},
+      {"Window_render", Render, 2, true},
+      {"Window_updateSemantics", UpdateSemantics, 2, true},
+  });
 }
 
 }  // namespace blink
