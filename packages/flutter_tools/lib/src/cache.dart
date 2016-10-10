@@ -175,6 +175,8 @@ class Cache {
   }
 
   Future<Null> updateAll() async {
+    if (!_lockEnabled)
+      return null;
     MaterialFonts materialFonts = new MaterialFonts(cache);
     if (!materialFonts.isUpToDate())
       await materialFonts.download();
