@@ -15,7 +15,7 @@ class NavigationIconView {
        destinationLabel = new DestinationLabel(
          icon: icon,
          title: title,
-         backgroundColor: color
+         backgroundColor: color,
        ),
        controller = new AnimationController(
          duration: kThemeAnimationDuration,
@@ -23,7 +23,7 @@ class NavigationIconView {
        ) {
     _animation = new CurvedAnimation(
       parent: controller,
-      curve: new Interval(0.5, 1.0, curve: Curves.fastOutSlowIn)
+      curve: new Interval(0.5, 1.0, curve: Curves.fastOutSlowIn),
     );
   }
 
@@ -39,8 +39,9 @@ class NavigationIconView {
       iconColor = _color;
     } else {
       final ThemeData themeData = Theme.of(context);
-      iconColor = themeData.brightness == Brightness.light ?
-          themeData.primaryColor : themeData.accentColor;
+      iconColor = themeData.brightness == Brightness.light
+          ? themeData.primaryColor
+          : themeData.accentColor;
     }
 
     return new FadeTransition(
@@ -48,10 +49,10 @@ class NavigationIconView {
       child: new SlideTransition(
         position: new Tween<FractionalOffset>(
           begin: const FractionalOffset(0.0, 0.02), // Small offset from the top.
-          end: FractionalOffset.topLeft
+          end: FractionalOffset.topLeft,
         ).animate(_animation),
-        child: new Icon(_icon.icon, color: iconColor, size: 120.0)
-      )
+        child: new Icon(_icon.icon, color: iconColor, size: 120.0),
+      ),
     );
   }
 }
@@ -63,7 +64,8 @@ class BottomNavigationDemo extends StatefulWidget {
   _BottomNavigationDemoState createState() => new _BottomNavigationDemoState();
 }
 
-class _BottomNavigationDemoState extends State<BottomNavigationDemo> with TickerProviderStateMixin {
+class _BottomNavigationDemoState extends State<BottomNavigationDemo>
+    with TickerProviderStateMixin {
   int _currentIndex = 0;
   BottomNavigationBarType _type = BottomNavigationBarType.shifting;
   List<NavigationIconView> _navigationViews;
@@ -136,9 +138,9 @@ class _BottomNavigationDemoState extends State<BottomNavigationDemo> with Ticker
   @override
   Widget build(BuildContext context) {
     final BottomNavigationBar botNavBar = new BottomNavigationBar(
-      labels: _navigationViews.map(
-        (NavigationIconView navigationView) => navigationView.destinationLabel
-      ).toList(),
+      labels: _navigationViews
+          .map((NavigationIconView navigationView) => navigationView.destinationLabel)
+          .toList(),
       currentIndex: _currentIndex,
       type: _type,
       onTap: (int index) {
@@ -147,7 +149,7 @@ class _BottomNavigationDemoState extends State<BottomNavigationDemo> with Ticker
           _currentIndex = index;
           _navigationViews[_currentIndex].controller.forward();
         });
-      }
+      },
     );
 
     return new Scaffold(
@@ -169,9 +171,9 @@ class _BottomNavigationDemoState extends State<BottomNavigationDemo> with Ticker
                 value: BottomNavigationBarType.shifting,
                 child: new Text('Shifting'),
               )
-            ]
+            ],
           )
-        ]
+        ],
       ),
       body: _buildBody(),
       bottomNavigationBar: botNavBar,
