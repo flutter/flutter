@@ -50,7 +50,6 @@ shared_library("flutter_framework_dylib") {
     "//flutter/services/engine:interfaces",
     "//flutter/services/media",
     "//flutter/services/platform",
-    "//flutter/services/semantics",
     "//flutter/services/vsync",
     "//flutter/shell/common",
     "//flutter/shell/gpu",
