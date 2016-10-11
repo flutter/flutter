@@ -28,9 +28,9 @@ class PlatformViewAndroid : public PlatformView {
 
   void Detach(JNIEnv* env, jobject obj);
 
-  void SurfaceCreated(JNIEnv* env, jobject obj, jobject jsurface);
+  void SurfaceCreated(JNIEnv* env, jobject obj, jobject jsurface, jint backgroundColor);
 
-  void SurfaceChanged(JNIEnv* env, jobject obj, jint backgroundColor);
+  void SurfaceChanged(JNIEnv* env, jobject obj, jint width, jint height);
 
   void SurfaceDestroyed(JNIEnv* env, jobject obj);
 

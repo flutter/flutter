@@ -90,9 +90,6 @@ bool GPUSurfaceGL::Setup() {
   context_->setResourceCacheLimits(kMaxGaneshResourceCacheCount,
                                    kMaxGaneshResourceCacheBytes);
 
-  // Clean up the current context.
-  delegate_->GLContextClearCurrent();
-
   return true;
 }
 
@@ -111,10 +108,6 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceGL::AcquireFrame(const SkISize& size) {
     return nullptr;
   }
 
-  if (!delegate_->GLContextMakeCurrent()) {
-    return nullptr;
-  }
-
   auto weak_this = weak_factory_.GetWeakPtr();
 
   GPUSurfaceFrameGL::SubmitCallback submit_callback =
@@ -128,8 +121,6 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceGL::AcquireFrame(const SkISize& size) {
 
 bool GPUSurfaceGL::PresentSurface(SkCanvas* canvas) {
   if (delegate_ == nullptr || canvas == nullptr) {
-    delegate_->GLContextClearCurrent();
-
     return false;
   }
 
@@ -139,8 +130,6 @@ bool GPUSurfaceGL::PresentSurface(SkCanvas* canvas) {
   }
 
   delegate_->GLContextPresent();
-
-  delegate_->GLContextClearCurrent();
 
   return true;
 }

@@ -127,13 +127,13 @@ public class FlutterView extends SurfaceView
             @Override
             public void surfaceCreated(SurfaceHolder holder) {
                 assert mNativePlatformView != 0;
-                nativeSurfaceCreated(mNativePlatformView, holder.getSurface());
+                nativeSurfaceCreated(mNativePlatformView, holder.getSurface(), backgroundColor);
             }
 
             @Override
             public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
                 assert mNativePlatformView != 0;
-                nativeSurfaceChanged(mNativePlatformView, backgroundColor);
+                nativeSurfaceChanged(mNativePlatformView, width, height);
             }
 
             @Override
@@ -571,8 +571,11 @@ public class FlutterView extends SurfaceView
     private static native int nativeGetObservatoryPort();
     private static native void nativeDetach(long nativePlatformViewAndroid);
     private static native void nativeSurfaceCreated(long nativePlatformViewAndroid,
-                                                    Surface surface);
-    private static native void nativeSurfaceChanged(long nativePlatformViewAndroid, int backgroundColor);
+                                                    Surface surface,
+                                                    int backgroundColor);
+    private static native void nativeSurfaceChanged(long nativePlatformViewAndroid,
+                                                    int width,
+                                                    int height);
     private static native void nativeSurfaceDestroyed(long nativePlatformViewAndroid);
     private static native Bitmap nativeGetBitmap(long nativePlatformViewAndroid);
 

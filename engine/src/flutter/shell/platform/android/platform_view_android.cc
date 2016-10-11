@@ -43,7 +43,8 @@ void PlatformViewAndroid::Detach(JNIEnv* env, jobject obj) {
 
 void PlatformViewAndroid::SurfaceCreated(JNIEnv* env,
                                          jobject obj,
-                                         jobject jsurface) {
+                                         jobject jsurface,
+                                         jint backgroundColor) {
   // Note: This frame ensures that any local references used by
   // ANativeWindow_fromSurface are released immediately. This is needed as a
   // workaround for https://code.google.com/p/android/issues/detail?id=68174
@@ -68,21 +69,27 @@ void PlatformViewAndroid::SurfaceCreated(JNIEnv* env,
   }
 
   ANativeWindow_release(window);
+
+  auto gl_surface = std::make_unique<GPUSurfaceGL>(surface_gl_.get());
+  NotifyCreated(std::move(gl_surface), [this, backgroundColor] {
+    rasterizer().Clear(backgroundColor, GetSize());
+  });
+
+  SetupResourceContextOnIOThread();
+  UpdateThreadPriorities();
 }
 
 void PlatformViewAndroid::SurfaceChanged(JNIEnv* env,
                                          jobject obj,
-                                         jint backgroundColor) {
+                                         jint width,
+                                         jint height) {
   if (!surface_gl_) {
     return;
   }
 
-  auto surface = std::make_unique<GPUSurfaceGL>(surface_gl_.get());
-  NotifyCreated(std::move(surface), [this, backgroundColor] {
-    rasterizer().Clear(backgroundColor, GetSize());
+  blink::Threads::Gpu()->PostTask([this, width, height]() {
+    surface_gl_->OnScreenSurfaceResize(SkISize::Make(width, height));
   });
-  SetupResourceContextOnIOThread();
-  UpdateThreadPriorities();
 }
 
 void PlatformViewAndroid::UpdateThreadPriorities() {
