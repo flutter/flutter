@@ -314,51 +314,25 @@ class AtomValidator extends DoctorValidator {
   }
 }
 
-class IntellijValidator extends DoctorValidator {
-  IntellijValidator(String title, {this.version, this.pluginsPath}) : super(title);
+abstract class IntellijValidator extends DoctorValidator {
+  IntellijValidator(String title) : super(title);
 
-  final String version;
-  final String pluginsPath;
+  String get version;
+  String get pluginsPath;
+
+  static final Map<String, String> _idToTitle = <String, String>{
+    'IntelliJIdea' : 'IntelliJ IDEA Ultimate Edition',
+    'IdeaIC' : 'IntelliJ IDEA Community Edition',
+    'WebStorm' : 'IntelliJ WebStorm',
+  };
 
   static Iterable<DoctorValidator> get installed {
-    List<DoctorValidator> validators = <DoctorValidator>[];
-    Map<String, String> products = <String, String>{
-      'IntelliJIdea' : 'IntelliJ IDEA Ultimate Edition',
-      'IdeaIC' : 'IntelliJ IDEA Community Edition',
-      'WebStorm' : 'IntelliJ WebStorm',
-    };
-
-    if (Platform.isLinux && homeDirPath != null) {
-      for (FileSystemEntity dir in new Directory(homeDirPath).listSync()) {
-        if (dir is Directory) {
-          String name = path.basename(dir.path);
-          products.forEach((String id, String title) {
-            if (name.startsWith('.$id')) {
-              String version = name.substring(id.length + 1);
-              String installPath;
-              try {
-                installPath = new File(path.join(dir.path, 'system', '.home')).readAsStringSync();
-              } catch (e) {
-                // ignored
-              }
-              if (installPath != null && FileSystemEntity.isDirectorySync(installPath)) {
-                validators.add(new IntellijValidator(
-                  title,
-                  version: version,
-                  pluginsPath: path.join(dir.path, 'config', 'plugins'),
-                ));
-              }
-            }
-          });
-        }
-      }
-    } else if (Platform.isMacOS) {
-      // TODO(danrubel): add support for Mac
-
-    } else {
-      // TODO(danrubel): add support for Windows
-    }
-    return validators;
+    if (Platform.isLinux)
+      return IntellijValidatorOnLinux.installed;
+    if (Platform.isMacOS)
+      return IntellijValidatorOnMac.installed;
+    // TODO(danrubel): add support for Windows
+    return <DoctorValidator>[];
   }
 
   @override
@@ -401,6 +375,103 @@ class IntellijValidator extends DoctorValidator {
   bool hasPackage(String packageName) {
     String packagePath = path.join(pluginsPath, packageName);
     return FileSystemEntity.isDirectorySync(packagePath);
+  }
+}
+
+class IntellijValidatorOnLinux extends IntellijValidator {
+  IntellijValidatorOnLinux(String title, this.version, this.pluginsPath) : super(title);
+
+  String version;
+  String pluginsPath;
+
+  static Iterable<DoctorValidator> get installed {
+    List<DoctorValidator> validators = <DoctorValidator>[];
+    if (homeDirPath == null) return validators;
+    for (FileSystemEntity dir in new Directory(homeDirPath).listSync()) {
+      if (dir is Directory) {
+        String name = path.basename(dir.path);
+        IntellijValidator._idToTitle.forEach((String id, String title) {
+          if (name.startsWith('.$id')) {
+            String version = name.substring(id.length + 1);
+            String installPath;
+            try {
+              installPath = new File(path.join(dir.path, 'system', '.home')).readAsStringSync();
+            } catch (e) {
+              // ignored
+            }
+            if (installPath != null && FileSystemEntity.isDirectorySync(installPath)) {
+              String pluginsPath = path.join(dir.path, 'config', 'plugins');
+              validators.add(new IntellijValidatorOnLinux(title, version, pluginsPath));
+            }
+          }
+        });
+      }
+    }
+    return validators;
+  }
+}
+
+class IntellijValidatorOnMac extends IntellijValidator {
+  IntellijValidatorOnMac(String title, this.id, this.installPath) : super(title);
+
+  final String id;
+  final String installPath;
+
+  static final Map<String, String> _dirNameToId = <String, String>{
+    'IntelliJ IDEA' : 'IntelliJIdea',
+    'IntelliJ IDEA CE' : 'IdeaIC',
+    'WebStorm' : 'WebStorm',
+  };
+
+  static Iterable<DoctorValidator> get installed {
+    List<DoctorValidator> validators = <DoctorValidator>[];
+    for (FileSystemEntity dir in new Directory('/Applications').listSync()) {
+      if (dir is Directory) {
+        String name = path.basename(dir.path);
+        _dirNameToId.forEach((String dirName, String id) {
+          if (name == dirName) {
+            String title = IntellijValidator._idToTitle[id];
+            validators.add(new IntellijValidatorOnMac(title, id, dir.path));
+          }
+        });
+      }
+    }
+    return validators;
+  }
+
+  @override
+  String get version {
+    if (_version == null) {
+      String plist;
+      try {
+        plist = new File(path.join(installPath, 'Contents', 'Info.plist')).readAsStringSync();
+      } catch (e) {
+        // ignored
+      }
+      if (plist != null) {
+        int index = plist.indexOf('CFBundleShortVersionString');
+        if (index > 0) {
+          int start = plist.indexOf('<string>', index);
+          if (start > 0) {
+            int end = plist.indexOf('</string>', start);
+            if (end > 0) {
+              _version = plist.substring(start + 8, end);
+            }
+          }
+        }
+      }
+      _version ??= 'unknown';
+    }
+    return _version;
+  }
+  String _version;
+
+  @override
+  String get pluginsPath {
+    List<String> split = version.split('.');
+    String major = split[0];
+    String minor = split[1];
+    return path.join(homeDirPath, 'Library', 'Application Support', '$id$major.$minor');
   }
 }
 
