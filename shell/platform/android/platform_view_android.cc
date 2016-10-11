@@ -72,7 +72,8 @@ void PlatformViewAndroid::SurfaceCreated(JNIEnv* env,
 
   auto gl_surface = std::make_unique<GPUSurfaceGL>(surface_gl_.get());
   NotifyCreated(std::move(gl_surface), [this, backgroundColor] {
-    rasterizer().Clear(backgroundColor, GetSize());
+    if (surface_gl_)
+      rasterizer().Clear(backgroundColor, surface_gl_->OnScreenSurfaceSize());
   });
 
   SetupResourceContextOnIOThread();
@@ -192,16 +193,6 @@ void PlatformViewAndroid::ReleaseSurface() {
 
 bool PlatformViewAndroid::ResourceContextMakeCurrent() {
   return surface_gl_ ? surface_gl_->GLOffscreenContextMakeCurrent() : false;
-}
-
-SkISize PlatformViewAndroid::GetSize() {
-  return surface_gl_ ? surface_gl_->OnScreenSurfaceSize() : SkISize::Make(0, 0);
-}
-
-void PlatformViewAndroid::Resize(const SkISize& size) {
-  if (surface_gl_) {
-    surface_gl_->OnScreenSurfaceResize(size);
-  }
 }
 
 void PlatformViewAndroid::UpdateSemantics(

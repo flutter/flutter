@@ -53,10 +53,6 @@ class PlatformViewAndroid : public PlatformView {
 
   bool ResourceContextMakeCurrent() override;
 
-  SkISize GetSize() override;
-
-  void Resize(const SkISize& size) override;
-
   void UpdateSemantics(std::vector<blink::SemanticsNode> update) override;
 
   void RunFromSource(const std::string& main,
