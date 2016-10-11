@@ -52,10 +52,6 @@ class PlatformView {
 
   virtual bool ResourceContextMakeCurrent() = 0;
 
-  virtual SkISize GetSize();
-
-  virtual void Resize(const SkISize& size);
-
   virtual void UpdateSemantics(std::vector<blink::SemanticsNode> update);
 
   Rasterizer& rasterizer() { return *rasterizer_; }

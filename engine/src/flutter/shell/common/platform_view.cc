@@ -114,14 +114,6 @@ ftl::WeakPtr<PlatformView> PlatformView::GetWeakPtr() {
   return weak_factory_.GetWeakPtr();
 }
 
-SkISize PlatformView::GetSize() {
-  return size_;
-}
-
-void PlatformView::Resize(const SkISize& size) {
-  size_ = size;
-}
-
 void PlatformView::UpdateSemantics(std::vector<blink::SemanticsNode> update) {}
 
 void PlatformView::SetupResourceContextOnIOThread() {
