@@ -732,6 +732,36 @@ class _ForkingSemanticsFragment extends _SemanticsFragment {
   }
 }
 
+class SemanticsHandle {
+  SemanticsHandle._(this._owner, this.listener) {
+    assert(_owner != null);
+    if (listener != null)
+      _owner.semanticsOwner.addListener(listener);
+  }
+
+  PipelineOwner _owner;
+  final VoidCallback listener;
+
+  @mustCallSuper
+  void dispose() {
+    assert(() {
+      if (_owner == null) {
+        throw new FlutterError(
+          'SemanticsHandle has already been disposed.\n'
+          'Each SemanticsHandle should be disposed exactly once.'
+        );
+      }
+      return true;
+    });
+    if (_owner != null) {
+      if (listener != null)
+        _owner.semanticsOwner.removeListener(listener);
+      _owner._didDisposeSemanticsHandle();
+      _owner = null;
+    }
+  }
+}
+
 /// The pipeline owner manages the rendering pipeline.
 ///
 /// The pipeline owner provides an interface for driving the rendering pipeline
@@ -769,8 +799,8 @@ class PipelineOwner {
   /// through the rendering pipeline.
   PipelineOwner({
     this.onNeedVisualUpdate,
-    this.onScheduleInitialSemantics,
-    this.onClearSemantics,
+    this.onSemanticsOwnerCreated,
+    this.onSemanticsOwnerDisposed,
   });
 
   /// Called when a render object associated with this pipeline owner wishes to
@@ -782,20 +812,16 @@ class PipelineOwner {
   /// duplicate calls quickly.
   final VoidCallback onNeedVisualUpdate;
 
-  /// Called when [addSemanticsListener] is called when there was no
-  /// [SemanticsOwner] present, to request that the
-  /// [RenderObject.scheduleInitialSemantics] method be called on the
-  /// appropriate object(s).
+  /// Called whenever this pipeline owner creates as semantics object.
   ///
-  /// For example, the [RendererBinding] calls it on the [RenderView] object.
-  final VoidCallback onScheduleInitialSemantics;
+  /// Typical implementations will schedule the creation of the initial
+  /// semantics tree.
+  final VoidCallback onSemanticsOwnerCreated;
 
-  /// Called when the last [SemanticsListener] is removed from the
-  /// [SemanticsOwner], to request that the [RenderObject.clearSemantics] method
-  /// be called on the appropriate object(s).
+  /// Called whenever this pipeline owner disposes its semantics owner.
   ///
-  /// For example, the [RendererBinding] calls it on the [RenderView] object.
-  final VoidCallback onClearSemantics;
+  /// Typical implementations will tear down the semantics tree.
+  final VoidCallback onSemanticsOwnerDisposed;
 
   /// Calls [onNeedVisualUpdate] if [onNeedVisualUpdate] is not null.
   ///
@@ -817,32 +843,6 @@ class PipelineOwner {
     _rootNode?.detach();
     _rootNode = value;
     _rootNode?.attach(this);
-  }
-
-  /// Calls the given listener whenever the semantics of the render tree change.
-  ///
-  /// Creates [semanticsOwner] if necessary.
-  SemanticsOwner addSemanticsListener(SemanticsListener listener) {
-    if (_semanticsOwner == null) {
-      _semanticsOwner = new SemanticsOwner(
-        initialListener: listener,
-        onLastListenerRemoved: _handleLastSemanticsListenerRemoved
-      );
-      if (onScheduleInitialSemantics != null)
-        onScheduleInitialSemantics();
-    } else {
-      _semanticsOwner.addListener(listener);
-    }
-    assert(_semanticsOwner != null);
-    return _semanticsOwner;
-  }
-
-  void _handleLastSemanticsListenerRemoved() {
-    assert(!_debugDoingSemantics);
-    if (onClearSemantics != null)
-      onClearSemantics();
-    _semanticsOwner.dispose();
-    _semanticsOwner = null;
   }
 
   List<RenderObject> _nodesNeedingLayout = <RenderObject>[];
@@ -953,18 +953,39 @@ class PipelineOwner {
 
   /// The object that is managing semantics for this pipeline owner, if any.
   ///
-  /// An owner is created by [addSemanticsListener] the first time a listener is
-  /// added.
-  ///
-  /// The owner is valid for as long as there are listeners. Once the last
-  /// listener is removed (by calling [SemanticsOwner.removeListener] on the
-  /// [semanticsOwner]), the [semanticsOwner] field will revert to null, and the
-  /// previous owner will be disposed.
+  /// An owner is created by [ensureSemantics]. The owner is valid for as long
+  /// there are [SemanticsHandle] returned by [ensureSemantics] that have not
+  /// yet be disposed. Once the last handle has been disposed, the
+  /// [semanticsOwner] field will revert to null, and the previous owner will be
+  /// disposed.
   ///
   /// When [semanticsOwner] is null, the [PipelineOwner] skips all steps
   /// relating to semantics.
   SemanticsOwner get semanticsOwner => _semanticsOwner;
   SemanticsOwner _semanticsOwner;
+
+  int _outstandingSemanticsHandle = 0;
+
+  SemanticsHandle ensureSemantics({ VoidCallback listener }) {
+    if (_outstandingSemanticsHandle++ == 0) {
+      assert(_semanticsOwner == null);
+      _semanticsOwner = new SemanticsOwner();
+      if (onSemanticsOwnerCreated != null)
+        onSemanticsOwnerCreated();
+    }
+    return new SemanticsHandle._(this, listener);
+  }
+
+  void _didDisposeSemanticsHandle() {
+    assert(_semanticsOwner != null);
+    if (--_outstandingSemanticsHandle == 0) {
+      _semanticsOwner.dispose();
+      _semanticsOwner = null;
+      if (onSemanticsOwnerDisposed != null)
+        onSemanticsOwnerDisposed();
+    }
+  }
+
   bool _debugDoingSemantics = false;
   final List<RenderObject> _nodesNeedingSemantics = <RenderObject>[];
 
@@ -987,12 +1008,12 @@ class PipelineOwner {
         if (node._needsSemanticsUpdate && node.owner == this)
           node._updateSemantics();
       }
+      _semanticsOwner.sendSemanticsUpdate();
     } finally {
       _nodesNeedingSemantics.clear();
       assert(() { _debugDoingSemantics = false; return true; });
       Timeline.finishSync();
     }
-    _semanticsOwner.sendSemanticsTree();
   }
 }
 
@@ -1995,9 +2016,6 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   }
 
   /// Removes all semantics from this render object and its descendants.
-  ///
-  /// Should only be called in response to the [PipelineOwner] calling its
-  /// [PipelineOwner.onClearSemantics] callback.
   ///
   /// Should only be called on objects whose [parent] is not a [RenderObject].
   void clearSemantics() {

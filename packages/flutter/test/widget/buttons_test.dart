@@ -2,16 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/rendering.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter_services/semantics.dart' as mojom;
 
-import '../rendering/test_semantics_client.dart';
+import 'semantics_tester.dart';
 
 void main() {
   testWidgets('Does FlatButton contribute semantics', (WidgetTester tester) async {
-    TestSemanticsClient client = new TestSemanticsClient(tester.binding.pipelineOwner);
+    SemanticsTester semantics = new SemanticsTester(tester);
     await tester.pumpWidget(
       new Material(
         child: new Center(
@@ -22,25 +22,22 @@ void main() {
         )
       )
     );
-    expect(client.updates.length, equals(1));
-    expect(client.updates[0].id, equals(0));
-    expect(client.updates[0].actions, isEmpty);
-    expect(client.updates[0].flags.hasCheckedState, isFalse);
-    expect(client.updates[0].flags.isChecked, isFalse);
-    expect(client.updates[0].strings.label, equals(''));
-    expect(client.updates[0].geometry.transform, isNull);
-    expect(client.updates[0].geometry.left, equals(0.0));
-    expect(client.updates[0].geometry.top, equals(0.0));
-    expect(client.updates[0].geometry.width, equals(800.0));
-    expect(client.updates[0].geometry.height, equals(600.0));
-    expect(client.updates[0].children.length, equals(1));
-    expect(client.updates[0].children[0].id, equals(1));
-    expect(client.updates[0].children[0].actions, equals(<int>[mojom.SemanticAction.tap.mojoEnumValue]));
-    expect(client.updates[0].children[0].flags.hasCheckedState, isFalse);
-    expect(client.updates[0].children[0].flags.isChecked, isFalse);
-    expect(client.updates[0].children[0].strings.label, equals('Hello'));
-    expect(client.updates[0].children[0].children.length, equals(0));
-    client.updates.clear();
-    client.dispose();
+
+    expect(semantics, hasSemantics(
+      new TestSemantics(
+        id: 0,
+        children: <TestSemantics>[
+          new TestSemantics(
+            id: 1,
+            actions: SemanticsAction.tap.index,
+            label: 'Hello',
+            rect: new Rect.fromLTRB(0.0, 0.0, 88.0, 36.0),
+            transform: new Matrix4.translationValues(356.0, 282.0, 0.0)
+          )
+        ]
+      )
+    ));
+
+    semantics.dispose();
   });
 }

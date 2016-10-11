@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-import '../rendering/test_semantics_client.dart';
+import '../widget/semantics_tester.dart';
 
 // This file uses "as dynamic" in a few places to defeat the static
 // analysis. In general you want to avoid using this style in your
@@ -431,7 +431,8 @@ void main() {
   });
 
   testWidgets('Does tooltip contribute semantics', (WidgetTester tester) async {
-    TestSemanticsClient client = new TestSemanticsClient(tester.binding.pipelineOwner);
+    SemanticsTester semantics = new SemanticsTester(tester);
+
     GlobalKey key = new GlobalKey();
     await tester.pumpWidget(
       new Overlay(
@@ -456,37 +457,16 @@ void main() {
         ]
       )
     );
-    expect(client.updates.length, equals(1));
-    expect(client.updates[0].id, equals(0));
-    expect(client.updates[0].actions, isEmpty);
-    expect(client.updates[0].flags.hasCheckedState, isFalse);
-    expect(client.updates[0].flags.isChecked, isFalse);
-    expect(client.updates[0].strings.label, equals('TIP'));
-    expect(client.updates[0].geometry.transform, isNull);
-    expect(client.updates[0].geometry.left, equals(0.0));
-    expect(client.updates[0].geometry.top, equals(0.0));
-    expect(client.updates[0].geometry.width, equals(800.0));
-    expect(client.updates[0].geometry.height, equals(600.0));
-    expect(client.updates[0].children.length, equals(0));
-    client.updates.clear();
+
+    expect(semantics, hasSemantics(new TestSemantics(id: 0, label: 'TIP')));
 
     // before using "as dynamic" in your code, see note top of file
     (key.currentState as dynamic).ensureTooltipVisible(); // this triggers a rebuild of the semantics because the tree changes
 
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
-    expect(client.updates.length, equals(1));
-    expect(client.updates[0].id, equals(0));
-    expect(client.updates[0].actions, isEmpty);
-    expect(client.updates[0].flags.hasCheckedState, isFalse);
-    expect(client.updates[0].flags.isChecked, isFalse);
-    expect(client.updates[0].strings.label, equals('TIP'));
-    expect(client.updates[0].geometry.transform, isNull);
-    expect(client.updates[0].geometry.left, equals(0.0));
-    expect(client.updates[0].geometry.top, equals(0.0));
-    expect(client.updates[0].geometry.width, equals(800.0));
-    expect(client.updates[0].geometry.height, equals(600.0));
-    expect(client.updates[0].children.length, equals(0));
-    client.updates.clear();
-    client.dispose();
+
+    expect(semantics, hasSemantics(new TestSemantics(id: 0, label: 'TIP')));
+
+    semantics.dispose();
   });
 }

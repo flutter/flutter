@@ -2,15 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' show SemanticsFlags;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/test_semantics_client.dart';
+import 'semantics_tester.dart';
 
 void main() {
   testWidgets('Semantics 3', (WidgetTester tester) async {
-    TestSemanticsClient client = new TestSemanticsClient(tester.binding.pipelineOwner);
+    SemanticsTester semantics = new SemanticsTester(tester);
 
     // implicit annotators
     await tester.pumpWidget(
@@ -25,19 +27,14 @@ void main() {
         )
       )
     );
-    expect(client.updates.length, equals(1));
-    expect(client.updates[0].id, equals(0));
-    expect(client.updates[0].actions, isEmpty);
-    expect(client.updates[0].flags.hasCheckedState, isTrue);
-    expect(client.updates[0].flags.isChecked, isTrue);
-    expect(client.updates[0].strings.label, equals('test'));
-    expect(client.updates[0].geometry.transform, isNull);
-    expect(client.updates[0].geometry.left, equals(0.0));
-    expect(client.updates[0].geometry.top, equals(0.0));
-    expect(client.updates[0].geometry.width, equals(800.0));
-    expect(client.updates[0].geometry.height, equals(600.0));
-    expect(client.updates[0].children.length, equals(0));
-    client.updates.clear();
+
+    expect(semantics, hasSemantics(
+      new TestSemantics(
+        id: 0,
+        flags: SemanticsFlags.hasCheckedState.index | SemanticsFlags.isChecked.index,
+        label: 'test',
+      )
+    ));
 
     // remove one
     await tester.pumpWidget(
@@ -49,19 +46,13 @@ void main() {
         )
       )
     );
-    expect(client.updates.length, equals(1));
-    expect(client.updates[0].id, equals(0));
-    expect(client.updates[0].actions, isEmpty);
-    expect(client.updates[0].flags.hasCheckedState, isTrue);
-    expect(client.updates[0].flags.isChecked, isTrue);
-    expect(client.updates[0].strings.label, equals(''));
-    expect(client.updates[0].geometry.transform, isNull);
-    expect(client.updates[0].geometry.left, equals(0.0));
-    expect(client.updates[0].geometry.top, equals(0.0));
-    expect(client.updates[0].geometry.width, equals(800.0));
-    expect(client.updates[0].geometry.height, equals(600.0));
-    expect(client.updates[0].children.length, equals(0));
-    client.updates.clear();
+
+    expect(semantics, hasSemantics(
+      new TestSemantics(
+        id: 0,
+        flags: SemanticsFlags.hasCheckedState.index | SemanticsFlags.isChecked.index,
+      )
+    ));
 
     // change what it says
     await tester.pumpWidget(
@@ -73,19 +64,13 @@ void main() {
         )
       )
     );
-    expect(client.updates.length, equals(1));
-    expect(client.updates[0].id, equals(0));
-    expect(client.updates[0].actions, isEmpty);
-    expect(client.updates[0].flags.hasCheckedState, isFalse);
-    expect(client.updates[0].flags.isChecked, isFalse);
-    expect(client.updates[0].strings.label, equals('test'));
-    expect(client.updates[0].geometry.transform, isNull);
-    expect(client.updates[0].geometry.left, equals(0.0));
-    expect(client.updates[0].geometry.top, equals(0.0));
-    expect(client.updates[0].geometry.width, equals(800.0));
-    expect(client.updates[0].geometry.height, equals(600.0));
-    expect(client.updates[0].children.length, equals(0));
-    client.updates.clear();
+
+    expect(semantics, hasSemantics(
+      new TestSemantics(
+        id: 0,
+        label: 'test',
+      )
+    ));
 
     // add a node
     await tester.pumpWidget(
@@ -100,19 +85,19 @@ void main() {
         )
       )
     );
-    expect(client.updates.length, equals(1));
-    expect(client.updates[0].id, equals(0));
-    expect(client.updates[0].actions, isEmpty);
-    expect(client.updates[0].flags.hasCheckedState, isTrue);
-    expect(client.updates[0].flags.isChecked, isTrue);
-    expect(client.updates[0].strings.label, equals('test'));
-    expect(client.updates[0].geometry.transform, isNull);
-    expect(client.updates[0].geometry.left, equals(0.0));
-    expect(client.updates[0].geometry.top, equals(0.0));
-    expect(client.updates[0].geometry.width, equals(800.0));
-    expect(client.updates[0].geometry.height, equals(600.0));
-    expect(client.updates[0].children.length, equals(0));
-    client.updates.clear();
+
+    expect(semantics, hasSemantics(
+      new TestSemantics(
+        id: 0,
+        flags: SemanticsFlags.hasCheckedState.index | SemanticsFlags.isChecked.index,
+        label: 'test',
+      )
+    ));
+
+    int changeCount = 0;
+    tester.binding.pipelineOwner.semanticsOwner.addListener(() {
+      changeCount += 1;
+    });
 
     // make no changes
     await tester.pumpWidget(
@@ -127,7 +112,9 @@ void main() {
         )
       )
     );
-    expect(client.updates.length, equals(0));
-    client.dispose();
+
+    expect(changeCount, 0);
+
+    semantics.dispose();
   });
 }

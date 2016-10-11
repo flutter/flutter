@@ -365,7 +365,7 @@ class ThemeData {
   }
 
   @override
-  bool operator==(Object other) {
+  bool operator ==(Object other) {
     if (other.runtimeType != runtimeType)
       return false;
     ThemeData otherData = other;

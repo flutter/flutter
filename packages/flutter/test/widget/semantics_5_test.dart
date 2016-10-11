@@ -6,11 +6,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/test_semantics_client.dart';
+import 'semantics_tester.dart';
 
 void main() {
   testWidgets('Semantics 5', (WidgetTester tester) async {
-    TestSemanticsClient client = new TestSemanticsClient(tester.binding.pipelineOwner);
+    SemanticsTester semantics = new SemanticsTester(tester);
 
     await tester.pumpWidget(
       new Stack(
@@ -28,18 +28,22 @@ void main() {
         ]
       )
     );
-    expect(client.updates.length, equals(1));
-    expect(client.updates[0].id, equals(0));
-    expect(client.updates[0].flags.hasCheckedState, isFalse);
-    expect(client.updates[0].strings.label, equals(''));
-    expect(client.updates[0].children.length, equals(2));
-    expect(client.updates[0].children[0].id, equals(1));
-    expect(client.updates[0].children[0].flags.hasCheckedState, isFalse);
-    expect(client.updates[0].children[0].strings.label, equals(''));
-    expect(client.updates[0].children[1].id, equals(2));
-    expect(client.updates[0].children[1].flags.hasCheckedState, isFalse);
-    expect(client.updates[0].children[1].strings.label, equals('label'));
-    client.updates.clear();
-    client.dispose();
+
+    expect(semantics, hasSemantics(
+      new TestSemantics(
+        id: 0,
+        children: <TestSemantics>[
+          new TestSemantics(
+            id: 1,
+          ),
+          new TestSemantics(
+            id: 2,
+            label: 'label',
+          ),
+        ]
+      )
+    ));
+
+    semantics.dispose();
   });
 }
