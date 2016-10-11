@@ -12,8 +12,8 @@
 
 namespace shell {
 
-Animator::Animator(Rasterizer* rasterizer, Engine* engine)
-    : rasterizer_(rasterizer->GetWeakRasterizerPtr()),
+Animator::Animator(ftl::WeakPtr<Rasterizer> rasterizer, Engine* engine)
+    : rasterizer_(rasterizer),
       engine_(engine),
       layer_tree_pipeline_(ftl::MakeRefCounted<LayerTreePipeline>(3)),
       pending_frame_semaphore_(1),
@@ -77,16 +77,12 @@ void Animator::Render(std::unique_ptr<flow::LayerTree> layer_tree) {
   // Commit the pending continuation.
   producer_continuation_.Complete(std::move(layer_tree));
 
-  // Notify the rasterizer that the pipeline has items it may consume.
-  auto weak_rasterizer(rasterizer_);
-  auto pipeline = layer_tree_pipeline_;
-
-  blink::Threads::Gpu()->PostTask([weak_rasterizer, pipeline]() {
-    if (!weak_rasterizer) {
-      return;
-    }
-    weak_rasterizer->Draw(pipeline);
-  });
+  blink::Threads::Gpu()->PostTask(
+      [ rasterizer = rasterizer_, pipeline = layer_tree_pipeline_ ]() {
+        if (!rasterizer.get())
+          return;
+        rasterizer->Draw(pipeline);
+      });
 }
 
 void Animator::RequestFrame() {
@@ -107,16 +103,11 @@ void Animator::RequestFrame() {
   // started an expensive operation right after posting this message however.
   // To support that, we need edge triggered wakes on VSync.
 
-  auto weak = weak_factory_.GetWeakPtr();
-
-  blink::Threads::UI()->PostTask([weak]() {
-    if (!weak) {
+  blink::Threads::UI()->PostTask([self = weak_factory_.GetWeakPtr()]() {
+    if (!self.get())
       return;
-    }
-
     TRACE_EVENT_INSTANT0("flutter", "RequestFrame", TRACE_EVENT_SCOPE_PROCESS);
-
-    weak->AwaitVSync(base::Bind(&Animator::BeginFrame, weak));
+    self->AwaitVSync(base::Bind(&Animator::BeginFrame, self));
   });
 }
 

@@ -12,4 +12,12 @@ SemanticsNode::SemanticsNode() = default;
 
 SemanticsNode::~SemanticsNode() = default;
 
+bool SemanticsNode::HasAction(SemanticsAction action) {
+  return (actions & static_cast<int32_t>(action)) != 0;
+}
+
+bool SemanticsNode::HasFlag(SemanticsFlags flag) {
+  return (flags & static_cast<int32_t>(flag)) != 0;
+}
+
 }  // namespace blink

@@ -18,8 +18,7 @@ PlatformViewGLFW::PlatformViewGLFW()
     : PlatformView(std::make_unique<GPURasterizer>()),
       valid_(false),
       glfw_window_(nullptr),
-      buttons_(0),
-      weak_factory_(this) {
+      buttons_(0) {
   if (!glfwInit()) {
     return;
   }
@@ -76,10 +75,6 @@ sky::SkyEnginePtr& PlatformViewGLFW::EngineProxy() {
 
 bool PlatformViewGLFW::IsValid() const {
   return valid_;
-}
-
-ftl::WeakPtr<PlatformView> PlatformViewGLFW::GetWeakViewPtr() {
-  return weak_factory_.GetWeakPtr();
 }
 
 intptr_t PlatformViewGLFW::GLContextFBO() const {

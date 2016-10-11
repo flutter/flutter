@@ -46,7 +46,6 @@ import org.chromium.mojom.editing.Keyboard;
 import org.chromium.mojom.flutter.platform.ApplicationMessages;
 import org.chromium.mojom.mojo.ServiceProvider;
 import org.chromium.mojom.raw_keyboard.RawKeyboardService;
-import org.chromium.mojom.semantics.SemanticsServer;
 import org.chromium.mojom.sky.AppLifecycleState;
 import org.chromium.mojom.sky.ServicesData;
 import org.chromium.mojom.sky.SkyEngine;
@@ -578,7 +577,8 @@ public class FlutterView extends SurfaceView
     private static native Bitmap nativeGetBitmap(long nativePlatformViewAndroid);
 
     private static native void nativeDispatchPointerDataPacket(long nativePlatformViewAndroid, ByteBuffer buffer, int position);
-
+    private static native void nativeDispatchSemanticsAction(long nativePlatformViewAndroid, int id, int action);
+    private static native void nativeSetSemanticsEnabled(long nativePlatformViewAndroid, boolean enabled);
     private static native void nativeInvokePlatformMessageResponseCallback(long nativePlatformViewAndroid, int responseId, String buffer);
 
     @CalledByNative
@@ -603,10 +603,20 @@ public class FlutterView extends SurfaceView
         nativeInvokePlatformMessageResponseCallback(mNativePlatformView, responseId, null);
     }
 
+    @CalledByNative
+    private void updateSemantics(ByteBuffer buffer, String[] strings) {
+        if (mAccessibilityNodeProvider != null)
+            mAccessibilityNodeProvider.updateSemantics(buffer, strings);
+    }
+
     // ACCESSIBILITY
 
     private boolean mAccessibilityEnabled = false;
     private boolean mTouchExplorationEnabled = false;
+
+    protected void dispatchSemanticsAction(int id, int action) {
+        nativeDispatchSemanticsAction(mNativePlatformView, id, action);
+    }
 
     @Override
     protected void onAttachedToWindow() {
@@ -669,21 +679,14 @@ public class FlutterView extends SurfaceView
 
     void ensureAccessibilityEnabled() {
         if (mAccessibilityNodeProvider == null) {
-            mAccessibilityNodeProvider = new AccessibilityBridge(this, createSemanticsServer());
+            mAccessibilityNodeProvider = new AccessibilityBridge(this);
+            nativeSetSemanticsEnabled(mNativePlatformView, true);
         }
-    }
-
-    private SemanticsServer.Proxy createSemanticsServer() {
-        Core core = CoreImpl.getInstance();
-        Pair<SemanticsServer.Proxy, InterfaceRequest<SemanticsServer>> server =
-                  SemanticsServer.MANAGER.getInterfaceRequest(core);
-        mDartServiceProvider.connectToService(SemanticsServer.MANAGER.getName(), server.second.passHandle());
-        return server.first;
     }
 
     void resetAccessibilityTree() {
         if (mAccessibilityNodeProvider != null) {
-            mAccessibilityNodeProvider.reset(createSemanticsServer());
+            mAccessibilityNodeProvider.reset();
         }
     }
 

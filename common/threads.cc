@@ -26,6 +26,10 @@ Threads::Threads(ftl::RefPtr<ftl::TaskRunner> platform,
 
 Threads::~Threads() {}
 
+const ftl::RefPtr<ftl::TaskRunner>& Threads::Platform() {
+  return Get().platform_;
+}
+
 const ftl::RefPtr<ftl::TaskRunner>& Threads::Gpu() {
   return Get().gpu_;
 }

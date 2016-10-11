@@ -7,6 +7,7 @@
 
 #include <memory>
 
+#include "flutter/lib/ui/semantics/semantics_node.h"
 #include "flutter/shell/common/engine.h"
 #include "flutter/shell/common/shell.h"
 #include "flutter/shell/common/surface.h"
@@ -35,6 +36,9 @@ class PlatformView {
 
   virtual ~PlatformView();
 
+  void DispatchSemanticsAction(int32_t id, blink::SemanticsAction action);
+  void SetSemanticsEnabled(bool enabled);
+
   void ConnectToEngine(mojo::InterfaceRequest<sky::SkyEngine> request);
 
   void NotifyCreated(std::unique_ptr<Surface> surface);
@@ -44,13 +48,15 @@ class PlatformView {
 
   void NotifyDestroyed();
 
-  virtual ftl::WeakPtr<PlatformView> GetWeakViewPtr() = 0;
+  ftl::WeakPtr<PlatformView> GetWeakPtr();
 
   virtual bool ResourceContextMakeCurrent() = 0;
 
   virtual SkISize GetSize();
 
   virtual void Resize(const SkISize& size);
+
+  virtual void UpdateSemantics(std::vector<blink::SemanticsNode> update);
 
   Rasterizer& rasterizer() { return *rasterizer_; }
   Engine& engine() { return *engine_; }
@@ -60,17 +66,19 @@ class PlatformView {
                              const std::string& assets_directory) = 0;
 
  protected:
-  SurfaceConfig surface_config_;
-  std::unique_ptr<Rasterizer> rasterizer_;
-  std::unique_ptr<Engine> engine_;
-  SkISize size_;
-
   explicit PlatformView(std::unique_ptr<Rasterizer> rasterizer);
 
   void SetupResourceContextOnIOThreadPerform(
       ftl::AutoResetWaitableEvent* event);
 
+  SurfaceConfig surface_config_;
+  std::unique_ptr<Rasterizer> rasterizer_;
+  std::unique_ptr<Engine> engine_;
+  SkISize size_;
+
  private:
+  ftl::WeakPtrFactory<PlatformView> weak_factory_;
+
   FTL_DISALLOW_COPY_AND_ASSIGN(PlatformView);
 };
 

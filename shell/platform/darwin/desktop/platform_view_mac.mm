@@ -23,8 +23,7 @@ PlatformViewMac::PlatformViewMac(NSOpenGLView* gl_view)
       opengl_view_([gl_view retain]),
       resource_loading_context_([[NSOpenGLContext alloc]
           initWithFormat:gl_view.pixelFormat
-            shareContext:gl_view.openGLContext]),
-      weak_factory_(this) {
+            shareContext:gl_view.openGLContext]) {
   NSArray* paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory,
                                                        NSUserDomainMask, YES);
   if (paths.count > 0) {
@@ -91,10 +90,6 @@ void PlatformViewMac::SetupAndLoadFromSource(
 
 sky::SkyEnginePtr& PlatformViewMac::engineProxy() {
   return sky_engine_;
-}
-
-ftl::WeakPtr<PlatformView> PlatformViewMac::GetWeakViewPtr() {
-  return weak_factory_.GetWeakPtr();
 }
 
 intptr_t PlatformViewMac::GLContextFBO() const {

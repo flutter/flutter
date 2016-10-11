@@ -364,11 +364,11 @@ static inline PointerChangeMapperPhase PointerChangePhaseFromUITouchPhase(
   // There doesn't appear to be any way to determine whether the accessibility
   // inspector is enabled on the simulator. We conservatively always turn on the
   // accessibility bridge in the simulator.
-  bool enable = true;
+  bool enabled = true;
 #else
-  bool enable = UIAccessibilityIsVoiceOverRunning();
+  bool enabled = UIAccessibilityIsVoiceOverRunning();
 #endif
-  _platformView->ToggleAccessibility(self.view, enable);
+  _platformView->ToggleAccessibility(self.view, enabled);
 }
 
 #pragma mark - Locale updates

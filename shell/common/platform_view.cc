@@ -15,8 +15,10 @@
 namespace shell {
 
 PlatformView::PlatformView(std::unique_ptr<Rasterizer> rasterizer)
-    : rasterizer_(std::move(rasterizer)), size_(SkISize::Make(0, 0)) {
-  engine_.reset(new Engine(rasterizer_.get()));
+    : rasterizer_(std::move(rasterizer)),
+      size_(SkISize::Make(0, 0)),
+      weak_factory_(this) {
+  engine_.reset(new Engine(this));
 }
 
 PlatformView::~PlatformView() {
@@ -30,10 +32,28 @@ PlatformView::~PlatformView() {
   blink::Threads::UI()->PostTask([engine]() { delete engine; });
 }
 
+void PlatformView::DispatchSemanticsAction(int32_t id,
+                                           blink::SemanticsAction action) {
+  blink::Threads::UI()->PostTask(
+      [ engine = engine_->GetWeakPtr(), id, action ] {
+        if (engine.get()) {
+          engine->DispatchSemanticsAction(
+              id, static_cast<blink::SemanticsAction>(action));
+        }
+      });
+}
+
+void PlatformView::SetSemanticsEnabled(bool enabled) {
+  blink::Threads::UI()->PostTask([ engine = engine_->GetWeakPtr(), enabled ] {
+    if (engine.get())
+      engine->SetSemanticsEnabled(enabled);
+  });
+}
+
 void PlatformView::ConnectToEngine(
     mojo::InterfaceRequest<sky::SkyEngine> request) {
   blink::Threads::UI()->PostTask(ftl::MakeCopyable([
-    view = GetWeakViewPtr(), engine = engine().GetWeakPtr(),
+    view = GetWeakPtr(), engine = engine().GetWeakPtr(),
     request = std::move(request)
   ]() mutable {
     if (engine.get())
@@ -90,6 +110,10 @@ void PlatformView::NotifyDestroyed() {
   latch.Wait();
 }
 
+ftl::WeakPtr<PlatformView> PlatformView::GetWeakPtr() {
+  return weak_factory_.GetWeakPtr();
+}
+
 SkISize PlatformView::GetSize() {
   return size_;
 }
@@ -97,6 +121,8 @@ SkISize PlatformView::GetSize() {
 void PlatformView::Resize(const SkISize& size) {
   size_ = size;
 }
+
+void PlatformView::UpdateSemantics(std::vector<blink::SemanticsNode> update) {}
 
 void PlatformView::SetupResourceContextOnIOThread() {
   ftl::AutoResetWaitableEvent latch;

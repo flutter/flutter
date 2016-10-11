@@ -6,16 +6,13 @@
 #define SHELL_PLATFORM_IOS_FRAMEWORK_SOURCE_ACCESSIBILITY_BRIDGE_H_
 
 #include <memory>
-#include <set>
 #include <unordered_map>
+#include <unordered_set>
+#include <vector>
 
-#include "flutter/services/semantics/semantics.mojom.h"
+#include "flutter/lib/ui/semantics/semantics_node.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/FlutterView.h"
-#include "flutter/sky/engine/platform/geometry/FloatRect.h"
 #include "lib/ftl/macros.h"
-#include "mojo/public/cpp/bindings/array.h"
-#include "mojo/public/cpp/bindings/strong_binding.h"
-#include "mojo/public/interfaces/application/service_provider.mojom.h"
 #include "third_party/skia/include/core/SkMatrix44.h"
 #include "third_party/skia/include/core/SkRect.h"
 
@@ -23,50 +20,47 @@ namespace shell {
 class AccessibilityBridge;
 }  // namespace shell
 
-@interface SemanticObject : NSObject
+@interface SemanticsObject : NSObject
 
 /**
  * The globally unique identifier for this node.
  */
-@property(nonatomic, readonly) uint32_t uid;
+@property(nonatomic, readonly) int32_t uid;
 
 /**
  * The parent of this node in the node tree. Will be nil for the root node and
  * during transient state changes.
  */
-@property(nonatomic, assign) SemanticObject* parent;
+@property(nonatomic, assign) SemanticsObject* parent;
 
 - (instancetype)init __attribute__((unavailable("Use initWithBridge instead")));
 - (instancetype)initWithBridge:(shell::AccessibilityBridge*)bridge
-                           uid:(uint32_t)uid NS_DESIGNATED_INITIALIZER;
+                           uid:(int32_t)uid NS_DESIGNATED_INITIALIZER;
 
 @end
 
 namespace shell {
+class PlatformViewIOS;
 
-class AccessibilityBridge final : public semantics::SemanticsListener {
+class AccessibilityBridge final {
  public:
-  AccessibilityBridge(UIView*, mojo::ServiceProvider*);
-  ~AccessibilityBridge() override;
+  AccessibilityBridge(UIView* view, PlatformViewIOS* platform_view);
+  ~AccessibilityBridge();
 
-  void UpdateSemanticsTree(mojo::Array<semantics::SemanticsNodePtr>) override;
+  void UpdateSemantics(std::vector<blink::SemanticsNode> nodes);
+  void DispatchSemanticsAction(int32_t id, blink::SemanticsAction action);
 
-  UIView* view() { return view_; }
-  semantics::SemanticsServer* server() { return semantics_server_.get(); }
+  UIView* view() const { return view_; }
 
  private:
-  SemanticObject* UpdateSemanticObject(
-      const semantics::SemanticsNodePtr& node,
-      std::set<SemanticObject*>* updated_objects,
-      std::set<SemanticObject*>* removed_objects);
-  void RemoveSemanticObject(SemanticObject* node,
-                            std::set<SemanticObject*>* updated_objects);
+  SemanticsObject* GetOrCreateObject(int32_t id);
+  void VisitObjectsRecursively(SemanticsObject* object,
+                               std::unordered_set<int>* visited_objects);
+  void ReleaseObjects(const std::unordered_map<int, SemanticsObject*>& objects);
 
   UIView* view_;
-  semantics::SemanticsServerPtr semantics_server_;
-  std::unordered_map<int, SemanticObject*> objects_;
-
-  mojo::Binding<semantics::SemanticsListener> binding_;
+  PlatformViewIOS* platform_view_;
+  std::unordered_map<int, SemanticsObject*> objects_;
 
   FTL_DISALLOW_COPY_AND_ASSIGN(AccessibilityBridge);
 };

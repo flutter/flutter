@@ -44,6 +44,7 @@ shared_library("flutter_framework_dylib") {
   deps = [
     "//base:base",
     "//dart/runtime:libdart",
+    "//flutter/lib/ui",
     "//flutter/services/activity",
     "//flutter/services/editing",
     "//flutter/services/engine:interfaces",

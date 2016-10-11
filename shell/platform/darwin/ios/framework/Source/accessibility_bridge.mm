@@ -4,45 +4,42 @@
 
 #include "flutter/shell/platform/darwin/ios/framework/Source/accessibility_bridge.h"
 
-#import <UIKit/UIKit.h>
 #include <vector>
+#include <utility>
 
-#include "base/logging.h"
-#include "mojo/public/cpp/application/connect.h"
+#import <UIKit/UIKit.h>
+
+#include "lib/ftl/logging.h"
+#include "flutter/shell/platform/darwin/ios/platform_view_ios.h"
 
 namespace {
 
-constexpr uint32_t kRootNodeId = 0;
+constexpr int32_t kRootNodeId = 0;
 
-// Contains better abstractions than the raw Mojo data structure
-struct Geometry {
-  Geometry& operator=(const semantics::SemanticGeometryPtr& other) {
-    if (!other->transform.is_null()) {
-      transform.setColMajorf(other->transform.data());
-    }
-    rect.setXYWH(other->left, other->top, other->width, other->height);
-    return *this;
+blink::SemanticsAction GetSemanticsActionForScrollDirection(
+    UIAccessibilityScrollDirection direction) {
+  switch (direction) {
+    case UIAccessibilityScrollDirectionRight:
+    case UIAccessibilityScrollDirectionPrevious: // TODO(abarth): Support RTL.
+      return blink::SemanticsAction::kScrollRight;
+    case UIAccessibilityScrollDirectionLeft:
+    case UIAccessibilityScrollDirectionNext: // TODO(abarth): Support RTL.
+      return blink::SemanticsAction::kScrollLeft;
+    case UIAccessibilityScrollDirectionUp:
+      return blink::SemanticsAction::kScrollUp;
+    case UIAccessibilityScrollDirectionDown:
+      return blink::SemanticsAction::kScrollDown;
   }
-
-  SkMatrix44 transform = SkMatrix44(SkMatrix44::kIdentity_Constructor);
-  SkRect rect;
-};
+  FTL_DCHECK(false); // Unreachable
+  return blink::SemanticsAction::kScrollDown;
+}
 
 }  // namespace
 
-@implementation SemanticObject {
+@implementation SemanticsObject {
   shell::AccessibilityBridge* _bridge;
-
-  semantics::SemanticFlagsPtr _flags;
-  semantics::SemanticStringsPtr _strings;
-  Geometry _geometry;
-  bool _canBeTapped;
-  bool _canBeLongPressed;
-  bool _canBeScrolledHorizontally;
-  bool _canBeScrolledVertically;
-  bool _canBeAdjusted;
-
-  std::vector<SemanticObject*> _children;
+  blink::SemanticsNode _node;
+  std::vector<SemanticsObject*> _children;
 }
 
 #pragma mark - Override base class designated initializers
@@ -57,9 +54,9 @@ struct Geometry {
 #pragma mark - Designated initializers
 
 - (instancetype)initWithBridge:(shell::AccessibilityBridge*)bridge
-                           uid:(uint32_t)uid {
-  DCHECK(bridge != nil) << "bridge must be set";
-  DCHECK(uid >= kRootNodeId);
+                           uid:(int32_t)uid {
+  FTL_DCHECK(bridge != nil) << "bridge must be set";
+  FTL_DCHECK(uid >= kRootNodeId);
   self = [super init];
 
   if (self) {
@@ -72,52 +69,11 @@ struct Geometry {
 
 #pragma mark - Semantic object methods
 
-- (void)updateWith:(const semantics::SemanticsNodePtr&)node {
-  DCHECK(_uid == node->id);
-
-  if (!node->flags.is_null()) {
-    _flags = node->flags.Pass();
-  }
-
-  if (!node->strings.is_null()) {
-    _strings = node->strings.Pass();
-  }
-
-  if (!node->geometry.is_null()) {
-    _geometry = node->geometry;
-  }
-
-  if (!node->actions.is_null()) {
-    _canBeTapped = false;
-    _canBeLongPressed = false;
-    _canBeScrolledHorizontally = false;
-    _canBeScrolledVertically = false;
-    for (int action : node->actions) {
-      switch (static_cast<semantics::SemanticAction>(action)) {
-        case semantics::SemanticAction::TAP:
-          _canBeTapped = true;
-          break;
-        case semantics::SemanticAction::LONG_PRESS:
-          _canBeLongPressed = true;
-          break;
-        case semantics::SemanticAction::SCROLL_LEFT:
-        case semantics::SemanticAction::SCROLL_RIGHT:
-          _canBeScrolledHorizontally = true;
-          break;
-        case semantics::SemanticAction::SCROLL_UP:
-        case semantics::SemanticAction::SCROLL_DOWN:
-          _canBeScrolledVertically = true;
-          break;
-        case semantics::SemanticAction::INCREASE:
-        case semantics::SemanticAction::DECREASE:
-          _canBeAdjusted = true;
-          break;
-      }
-    }
-  }
+- (void)setSemanticsNode:(const blink::SemanticsNode*)node {
+  _node = *node;
 }
 
-- (std::vector<SemanticObject*>*)children {
+- (std::vector<SemanticsObject*>*)children {
   return &_children;
 }
 
@@ -133,39 +89,40 @@ struct Geometry {
   // Note: hit detection will only apply to elements that report
   // -isAccessibilityElement of YES. The framework will continue scanning the
   // entire element tree looking for such a hit.
-  return _canBeTapped || _children.empty();
+  return _node.HasAction(blink::SemanticsAction::kTap) || _children.empty();
 }
 
 - (NSString*)accessibilityLabel {
-  if (_strings.is_null() || _strings->label.get().empty()) {
+  if (_node.label.empty()) {
     return nil;
   }
-  return @(_strings->label.data());
+  return @(_node.label.data());
 }
 
 - (UIAccessibilityTraits)accessibilityTraits {
   UIAccessibilityTraits traits = UIAccessibilityTraitNone;
-  if (_canBeTapped) {
+  if (_node.HasAction(blink::SemanticsAction::kTap)) {
     traits |= UIAccessibilityTraitButton;
   }
-  if (_canBeAdjusted) {
+  if (_node.HasAction(blink::SemanticsAction::kIncrease)
+      || _node.HasAction(blink::SemanticsAction::kDecrease)) {
     traits |= UIAccessibilityTraitAdjustable;
   }
   return traits;
 }
 
 - (CGRect)accessibilityFrame {
-  SkMatrix44 globalTransform = _geometry.transform;
-  for (SemanticObject* parent = _parent; parent; parent = parent.parent) {
-    globalTransform = globalTransform * parent->_geometry.transform;
+  SkMatrix44 globalTransform = _node.transform;
+  for (SemanticsObject* parent = _parent; parent; parent = parent.parent) {
+    globalTransform = globalTransform * parent->_node.transform;
   }
 
   SkPoint quad[4];
-  _geometry.rect.toQuad(quad);
+  _node.rect.toQuad(quad);
   for (auto& point : quad) {
     SkScalar vector[4] = {point.x(), point.y(), 0, 1};
     globalTransform.mapScalars(vector);
-    point.set(vector[0], vector[1]);
+    point.set(vector[0] / vector[3], vector[1] / vector[3]);
   }
   SkRect rect;
   rect.set(quad, 4);
@@ -210,61 +167,22 @@ struct Geometry {
 }
 
 - (void)accessibilityIncrement {
-  if (_canBeAdjusted) {
-    _bridge->server()->PerformAction(_uid, semantics::SemanticAction::INCREASE);
+  if (_node.HasAction(blink::SemanticsAction::kIncrease)) {
+    _bridge->DispatchSemanticsAction(_uid, blink::SemanticsAction::kIncrease);
   }
 }
 
 - (void)accessibilityDecrement {
-  if (_canBeAdjusted) {
-    _bridge->server()->PerformAction(_uid, semantics::SemanticAction::DECREASE);
+  if (_node.HasAction(blink::SemanticsAction::kDecrease)) {
+    _bridge->DispatchSemanticsAction(_uid, blink::SemanticsAction::kDecrease);
   }
 }
 
 - (BOOL)accessibilityScroll:(UIAccessibilityScrollDirection)direction {
-  BOOL canBeScrolled = NO;
-  switch (direction) {
-    case UIAccessibilityScrollDirectionRight:
-    case UIAccessibilityScrollDirectionLeft:
-      canBeScrolled = _canBeScrolledHorizontally;
-      break;
-    case UIAccessibilityScrollDirectionUp:
-    case UIAccessibilityScrollDirectionDown:
-      canBeScrolled = _canBeScrolledVertically;
-      break;
-    default:
-      // Note: page turning of reading content is not currently supported
-      // (UIAccessibilityScrollDirectionNext,
-      //  UIAccessibilityScrollDirectionPrevious)
-      canBeScrolled = NO;
-      break;
-  }
-
-  if (!canBeScrolled) {
+  blink::SemanticsAction action = GetSemanticsActionForScrollDirection(direction);
+  if (_node.HasAction(action))
     return NO;
-  }
-
-  switch (direction) {
-    case UIAccessibilityScrollDirectionRight:
-      _bridge->server()->PerformAction(_uid,
-                                       semantics::SemanticAction::SCROLL_RIGHT);
-      break;
-    case UIAccessibilityScrollDirectionLeft:
-      _bridge->server()->PerformAction(_uid,
-                                       semantics::SemanticAction::SCROLL_LEFT);
-      break;
-    case UIAccessibilityScrollDirectionUp:
-      _bridge->server()->PerformAction(_uid,
-                                       semantics::SemanticAction::SCROLL_UP);
-      break;
-    case UIAccessibilityScrollDirectionDown:
-      _bridge->server()->PerformAction(_uid,
-                                       semantics::SemanticAction::SCROLL_DOWN);
-      break;
-    default:
-      DCHECK(false) << "Unsupported scroll direction: " << direction;
-  }
-
+  _bridge->DispatchSemanticsAction(_uid, action);
   // TODO(tvolkert): provide meaningful string (e.g. "page 2 of 5")
   UIAccessibilityPostNotification(UIAccessibilityPageScrolledNotification, nil);
   return YES;
@@ -287,38 +205,46 @@ struct Geometry {
 namespace shell {
 
 AccessibilityBridge::AccessibilityBridge(UIView* view,
-                                         mojo::ServiceProvider* serviceProvider)
-    : view_(view), binding_(this) {
-  mojo::ConnectToService(serviceProvider, mojo::GetProxy(&semantics_server_));
-  mojo::InterfaceHandle<semantics::SemanticsListener> listener;
-  binding_.Bind(&listener);
-  semantics_server_->AddSemanticsListener(listener.Pass());
-}
+                                         PlatformViewIOS* platform_view)
+    : view_(view), platform_view_(platform_view) {}
 
 AccessibilityBridge::~AccessibilityBridge() {
-  for (const auto& entry : objects_) {
-    SemanticObject* object = entry.second;
-    [object neuter];
-    [object release];
-  }
+  ReleaseObjects(objects_);
+  objects_.clear();
 }
 
-void AccessibilityBridge::UpdateSemanticsTree(
-    mojo::Array<semantics::SemanticsNodePtr> nodes) {
-  std::set<SemanticObject*> updated_objects;
-  std::set<SemanticObject*> removed_objects;
-
-  for (const semantics::SemanticsNodePtr& node : nodes) {
-    UpdateSemanticObject(node, &updated_objects, &removed_objects);
-  }
-
-  for (SemanticObject* object : removed_objects) {
-    if (!updated_objects.count(object)) {
-      RemoveSemanticObject(object, &updated_objects);
+void AccessibilityBridge::UpdateSemantics(std::vector<blink::SemanticsNode> nodes) {
+  for (const blink::SemanticsNode& node : nodes) {
+    SemanticsObject* object = GetOrCreateObject(node.id);
+    [object setSemanticsNode:&node];
+    const size_t childrenCount = node.children.size();
+    auto& children = *[object children];
+    children.resize(childrenCount);
+    for (size_t i = 0; i < childrenCount; ++i) {
+      SemanticsObject* child = GetOrCreateObject(node.children[i]);
+      child.parent = object;
+      children[i] = child;
     }
   }
 
-  SemanticObject* root = objects_[kRootNodeId];
+  SemanticsObject* root = objects_[kRootNodeId];
+
+  std::unordered_set<int> visited_objects;
+  if (root)
+    VisitObjectsRecursively(root, &visited_objects);
+
+  std::unordered_map<int, SemanticsObject*> doomed_objects;
+  doomed_objects.swap(objects_);
+  for (int uid : visited_objects) {
+    auto it = doomed_objects.find(uid);
+    objects_.insert(*it);
+    doomed_objects.erase(it);
+    // TODO(abarth): Use extract once we're at C++17.
+  }
+
+  ReleaseObjects(doomed_objects);
+  doomed_objects.clear();
+
   if (root) {
     if (!view_.accessibilityElements) {
       view_.accessibilityElements = @[ root ];
@@ -330,46 +256,36 @@ void AccessibilityBridge::UpdateSemanticsTree(
                                   nil);
 }
 
-SemanticObject* AccessibilityBridge::UpdateSemanticObject(
-    const semantics::SemanticsNodePtr& node,
-    std::set<SemanticObject*>* updated_objects,
-    std::set<SemanticObject*>* removed_objects) {
-  SemanticObject* object = objects_[node->id];
+void AccessibilityBridge::DispatchSemanticsAction(
+    int32_t uid,
+    blink::SemanticsAction action) {
+  platform_view_->DispatchSemanticsAction(uid, action);
+}
+
+SemanticsObject* AccessibilityBridge::GetOrCreateObject(int32_t uid) {
+  SemanticsObject* object = objects_[uid];
   if (!object) {
-    object = [[SemanticObject alloc] initWithBridge:this uid:node->id];
-    objects_[node->id] = object;
-  }
-  [object updateWith:node];
-  updated_objects->insert(object);
-  if (!node->children.is_null()) {
-    std::vector<SemanticObject*>* children = [object children];
-    removed_objects->insert(children->begin(), children->end());
-    children->clear();
-    children->reserve(node->children.size());
-    for (const auto& child_node : node->children) {
-      SemanticObject* child_object =
-          UpdateSemanticObject(child_node, updated_objects, removed_objects);
-      child_object.parent = object;
-      children->push_back(child_object);
-    }
+    object = [[SemanticsObject alloc] initWithBridge:this uid:uid];
+    objects_[uid] = object;
   }
   return object;
 }
 
-void AccessibilityBridge::RemoveSemanticObject(
-    SemanticObject* object,
-    std::set<SemanticObject*>* updated_objects) {
-  DCHECK(objects_[object.uid] == object);
-  objects_.erase(object.uid);
-  for (SemanticObject* child : *[object children]) {
-    if (!updated_objects->count(child)) {
-      DCHECK(child.parent == object);
-      child.parent = nil;
-      RemoveSemanticObject(child, updated_objects);
-    }
+void AccessibilityBridge::VisitObjectsRecursively(
+    SemanticsObject* object,
+    std::unordered_set<int>* visited_objects) {
+  visited_objects->insert(object.uid);
+  for (SemanticsObject* child : *[object children])
+    VisitObjectsRecursively(child, visited_objects);
+}
+
+void AccessibilityBridge::ReleaseObjects(
+    const std::unordered_map<int, SemanticsObject*>& objects) {
+  for (const auto& entry : objects) {
+    SemanticsObject* object = entry.second;
+    [object neuter];
+    [object release];
   }
-  [object neuter];
-  [object release];
 }
 
 }  // namespace shell

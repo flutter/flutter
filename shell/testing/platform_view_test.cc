@@ -4,20 +4,15 @@
 
 #include "flutter/shell/testing/platform_view_test.h"
 
-#include "flutter/shell/common/shell.h"
 #include "flutter/shell/common/null_rasterizer.h"
+#include "flutter/shell/common/shell.h"
 
 namespace shell {
 
 PlatformViewTest::PlatformViewTest()
-    : PlatformView(std::unique_ptr<Rasterizer>(new NullRasterizer())),
-      weak_factory_(this) {}
+    : PlatformView(std::unique_ptr<Rasterizer>(new NullRasterizer())) {}
 
 PlatformViewTest::~PlatformViewTest() = default;
-
-ftl::WeakPtr<PlatformView> PlatformViewTest::GetWeakViewPtr() {
-  return weak_factory_.GetWeakPtr();
-}
 
 bool PlatformViewTest::ResourceContextMakeCurrent() {
   return false;
