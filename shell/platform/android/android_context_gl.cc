@@ -276,6 +276,8 @@ bool AndroidContextGL::Resize(const SkISize& size) {
   std::tie(success, surface_) =
       CreateSurface(environment_->Display(), config_, window_);
 
+  MakeCurrent();
+
   if (!success) {
     LOG(ERROR) << "Unable to create EGL window surface on resize.";
     return false;
