@@ -172,8 +172,9 @@ void Engine::DispatchSemanticsAction(int id, blink::SemanticsAction action) {
 
 void Engine::SetSemanticsEnabled(bool enabled) {
   TRACE_EVENT0("flutter", "Engine::DispatchPointerDataPacket");
+  semantics_enabled_ = enabled;
   if (runtime_)
-    runtime_->SetSemanticsEnabled(enabled);
+    runtime_->SetSemanticsEnabled(semantics_enabled_);
 }
 
 void Engine::RunFromSnapshotStream(
@@ -220,6 +221,7 @@ void Engine::ConfigureRuntime(const std::string& script_uri) {
   runtime_->CreateDartController(std::move(script_uri));
   runtime_->SetViewportMetrics(viewport_metrics_);
   runtime_->SetLocale(language_code_, country_code_);
+  runtime_->SetSemanticsEnabled(semantics_enabled_);
   if (!initial_route_.empty())
     runtime_->PushRoute(initial_route_);
 }
