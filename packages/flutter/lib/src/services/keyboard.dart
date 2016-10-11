@@ -95,6 +95,7 @@ class KeyboardHandle {
     if (_attached) {
       assert(_keyboard._currentHandle == this);
       _attached = false;
+      //_keyboard.service.clearClient();
       _keyboard._currentHandle = null;
       _keyboard._scheduleHide();
     }
