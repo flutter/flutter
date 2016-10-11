@@ -7,41 +7,54 @@ package io.flutter.view;
 import android.graphics.Rect;
 import android.opengl.Matrix;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityNodeProvider;
 
-import org.chromium.mojo.system.MojoException;
-import org.chromium.mojom.semantics.SemanticAction;
-import org.chromium.mojom.semantics.SemanticsListener;
-import org.chromium.mojom.semantics.SemanticsNode;
-import org.chromium.mojom.semantics.SemanticsServer;
-import org.chromium.mojom.sky.ViewportMetrics;
-
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-class AccessibilityBridge extends AccessibilityNodeProvider implements SemanticsListener {
-    private Map<Integer, SemanticObject> mObjects;
-    private FlutterView mOwner;
-    private SemanticsServer.Proxy mSemanticsServer;
-    private boolean mAccessibilityEnabled = false;
-    private SemanticObject mFocusedObject;
-    private SemanticObject mHoveredObject;
+class AccessibilityBridge extends AccessibilityNodeProvider {
+    private static final String TAG = "FlutterView";
 
-    AccessibilityBridge(FlutterView owner, SemanticsServer.Proxy semanticsServer) {
+    private Map<Integer, SemanticsObject> mObjects;
+    private FlutterView mOwner;
+    private boolean mAccessibilityEnabled = false;
+    private SemanticsObject mFocusedObject;
+    private SemanticsObject mHoveredObject;
+
+    private static final int SEMANTICS_ACTION_TAP = 1 << 0;
+    private static final int SEMANTICS_ACTION_LONG_PRESS = 1 << 1;
+    private static final int SEMANTICS_ACTION_SCROLL_LEFT = 1 << 2;
+    private static final int SEMANTICS_ACTION_SCROLL_RIGHT = 1 << 3;
+    private static final int SEMANTICS_ACTION_SCROLL_UP = 1 << 4;
+    private static final int SEMANTICS_ACTION_SCROLL_DOWN = 1 << 5;
+    private static final int SEMANTICS_ACTION_INCREASE = 1 << 6;
+    private static final int SEMANTICS_ACTION_DECREASE = 1 << 7;
+
+    private static final int SEMANTICS_ACTION_SCROLLABLE = SEMANTICS_ACTION_SCROLL_LEFT |
+                                                           SEMANTICS_ACTION_SCROLL_RIGHT |
+                                                           SEMANTICS_ACTION_SCROLL_UP |
+                                                           SEMANTICS_ACTION_SCROLL_DOWN;
+
+    private static final int SEMANTICS_FLAG_HAS_CHECKED_STATE = 1 << 0;
+    private static final int SEMANTICS_FLAG_IS_CHECKED = 1 << 1;
+
+    AccessibilityBridge(FlutterView owner) {
         assert owner != null;
-        assert semanticsServer != null;
         mOwner = owner;
-        mObjects = new HashMap<Integer, SemanticObject>();
-        mSemanticsServer = semanticsServer;
-        mSemanticsServer.addSemanticsListener(this);
+        mObjects = new HashMap<Integer, SemanticsObject>();
     }
 
     void setAccessibilityEnabled(boolean accessibilityEnabled) {
@@ -58,7 +71,7 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements Semantics
             return result;
         }
 
-        SemanticObject object = mObjects.get(virtualViewId);
+        SemanticsObject object = mObjects.get(virtualViewId);
         if (object == null)
             return null;
 
@@ -88,15 +101,15 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements Semantics
         result.setVisibleToUser(true);
         result.setEnabled(true); // TODO(ianh): Expose disabled subtrees
 
-        if (object.canBeTapped) {
+        if ((object.actions & SEMANTICS_ACTION_TAP) != 0) {
             result.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_CLICK);
             result.setClickable(true);
         }
-        if (object.canBeLongPressed) {
+        if ((object.actions & SEMANTICS_ACTION_LONG_PRESS) != 0) {
             result.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_LONG_CLICK);
             result.setLongClickable(true);
         }
-        if (object.canBeScrolledHorizontally || object.canBeScrolledVertically) {
+        if ((object.actions & SEMANTICS_ACTION_SCROLLABLE) != 0) {
             // TODO(ianh): Once we're on SDK v23+, call addAction to
             // expose AccessibilityAction.ACTION_SCROLL_LEFT, _RIGHT,
             // _UP, and _DOWN when appropriate.
@@ -106,8 +119,8 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements Semantics
             result.setScrollable(true);
         }
 
-        result.setCheckable(object.hasCheckedState);
-        result.setChecked(object.isChecked);
+        result.setCheckable((object.flags & SEMANTICS_FLAG_HAS_CHECKED_STATE) != 0);
+        result.setChecked((object.flags & SEMANTICS_FLAG_IS_CHECKED) != 0);
         result.setText(object.label);
 
         // TODO(ianh): use setTraversalBefore/setTraversalAfter to set
@@ -124,7 +137,7 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements Semantics
         }
 
         if (object.children != null) {
-            for (SemanticObject child : object.children) {
+            for (SemanticsObject child : object.children) {
                 result.addChild(mOwner, child.id);
             }
         }
@@ -134,36 +147,36 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements Semantics
 
     @Override
     public boolean performAction(int virtualViewId, int action, Bundle arguments) {
-        SemanticObject object = mObjects.get(virtualViewId);
+        SemanticsObject object = mObjects.get(virtualViewId);
         if (object == null) {
             return false;
         }
         switch (action) {
             case AccessibilityNodeInfo.ACTION_CLICK: {
-                mSemanticsServer.performAction(virtualViewId, SemanticAction.TAP);
+                mOwner.dispatchSemanticsAction(virtualViewId, SEMANTICS_ACTION_TAP);
                 return true;
             }
             case AccessibilityNodeInfo.ACTION_LONG_CLICK: {
-                mSemanticsServer.performAction(virtualViewId, SemanticAction.LONG_PRESS);
+                mOwner.dispatchSemanticsAction(virtualViewId, SEMANTICS_ACTION_LONG_PRESS);
                 return true;
             }
             case AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD: {
-                if (object.canBeScrolledVertically) {
-                    mSemanticsServer.performAction(virtualViewId, SemanticAction.SCROLL_UP);
-                } else if (object.canBeScrolledHorizontally) {
+                if ((object.actions & SEMANTICS_ACTION_SCROLL_UP) != 0) {
+                    mOwner.dispatchSemanticsAction(virtualViewId, SEMANTICS_ACTION_SCROLL_UP);
+                } else if ((object.actions & SEMANTICS_ACTION_SCROLL_LEFT) != 0) {
                     // TODO(ianh): bidi support
-                    mSemanticsServer.performAction(virtualViewId, SemanticAction.SCROLL_LEFT);
+                    mOwner.dispatchSemanticsAction(virtualViewId, SEMANTICS_ACTION_SCROLL_LEFT);
                 } else {
                     return false;
                 }
                 return true;
             }
             case AccessibilityNodeInfo.ACTION_SCROLL_FORWARD: {
-                if (object.canBeScrolledVertically) {
-                    mSemanticsServer.performAction(virtualViewId, SemanticAction.SCROLL_DOWN);
-                } else if (object.canBeScrolledHorizontally) {
+                if ((object.actions & SEMANTICS_ACTION_SCROLL_DOWN) != 0) {
+                    mOwner.dispatchSemanticsAction(virtualViewId, SEMANTICS_ACTION_SCROLL_DOWN);
+                } else if ((object.actions & SEMANTICS_ACTION_SCROLL_RIGHT) != 0) {
                     // TODO(ianh): bidi support
-                    mSemanticsServer.performAction(virtualViewId, SemanticAction.SCROLL_RIGHT);
+                    mOwner.dispatchSemanticsAction(virtualViewId, SEMANTICS_ACTION_SCROLL_RIGHT);
                 } else {
                     return false;
                 }
@@ -192,8 +205,19 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements Semantics
     // TODO(ianh): implement findAccessibilityNodeInfosByText()
     // TODO(ianh): implement findFocus()
 
-    private SemanticObject getRootObject() {
+    private SemanticsObject getRootObject() {
+      assert mObjects.containsKey(0);
       return mObjects.get(0);
+    }
+
+    private SemanticsObject getOrCreateObject(int id) {
+      SemanticsObject object = mObjects.get(id);
+      if (object == null) {
+          object = new SemanticsObject();
+          object.id = id;
+          mObjects.put(id, object);
+      }
+      return object;
     }
 
     void handleTouchExplorationExit() {
@@ -207,8 +231,7 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements Semantics
         if (mObjects.isEmpty()) {
             return;
         }
-        assert mObjects.containsKey(0);
-        SemanticObject newObject = getRootObject().hitTest(Math.round(x), Math.round(y));
+        SemanticsObject newObject = getRootObject().hitTest(new float[]{ x, y, 0, 1 });
         if (newObject != mHoveredObject) {
             // sending ENTER before EXIT is how Android wants it
             if (newObject != null) {
@@ -221,57 +244,35 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements Semantics
         }
     }
 
-    @Override
-    public void updateSemanticsTree(SemanticsNode[] nodes) {
-        Set<SemanticObject> updatedObjects = new HashSet<SemanticObject>();
-        Set<SemanticObject> removedObjects = new HashSet<SemanticObject>();
-        for (SemanticsNode node : nodes) {
-            updateSemanticObject(node, updatedObjects, removedObjects);
-            sendAccessibilityEvent(node.id, AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
+    void updateSemantics(ByteBuffer buffer, String[] strings) {
+        buffer.order(ByteOrder.LITTLE_ENDIAN);
+        ArrayList<Integer> updated = new ArrayList<Integer>();
+        while (buffer.hasRemaining()) {
+            int id = buffer.getInt();
+            getOrCreateObject(id).updateWith(buffer, strings);
+            updated.add(id);
         }
-        for (SemanticObject object : removedObjects) {
-            if (!updatedObjects.contains(object)) {
-                removeSemanticObject(object, updatedObjects);
-            }
-        }
-    }
 
-    private SemanticObject updateSemanticObject(SemanticsNode node,
-                                                Set<SemanticObject> updatedObjects,
-                                                Set<SemanticObject> removedObjects) {
-        SemanticObject object = mObjects.get(node.id);
-        if (object == null) {
-            object = new SemanticObject();
-            mObjects.put(node.id, object);
+        Set<SemanticsObject> visitedObjects = new HashSet<SemanticsObject>();
+        SemanticsObject rootObject = getRootObject();
+        if (rootObject != null) {
+          final float[] identity = new float[16];
+          Matrix.setIdentityM(identity, 0);
+          rootObject.updateRecursively(identity, visitedObjects, false);
         }
-        object.updateWith(node);
-        updatedObjects.add(object);
-        if (node.children != null) {
-            if (node.children.length == 0) {
-                if (object.children != null) {
-                    removedObjects.addAll(object.children);
-                }
-                object.children = null;
-            } else {
-                if (object.children == null) {
-                    object.children = new ArrayList<SemanticObject>(node.children.length);
-                } else {
-                    removedObjects.addAll(object.children);
-                    object.children.clear();
-                }
-                for (SemanticsNode childNode : node.children) {
-                    SemanticObject childObject = updateSemanticObject(childNode, updatedObjects, removedObjects);
-                    childObject.parent = object;
-                    object.children.add(childObject);
-                }
+
+        Iterator<Map.Entry<Integer, SemanticsObject>> it = mObjects.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry<Integer, SemanticsObject> entry = it.next();
+            if (!visitedObjects.contains(entry.getKey())) {
+                willRemoveSemanticsObject(entry.getValue());
+                it.remove();
             }
         }
-        if (node.geometry != null) {
-            // has to be done after children are updated
-            // since they also get marked dirty
-            object.invalidateGlobalGeometry();
+
+        for (Integer id : updated) {
+            sendAccessibilityEvent(id, AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
         }
-        return object;
     }
 
     private void sendAccessibilityEvent(int virtualViewId, int eventType) {
@@ -288,11 +289,10 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements Semantics
         }
     }
 
-    private void removeSemanticObject(SemanticObject object, Set<SemanticObject> updatedObjects) {
+    private void willRemoveSemanticsObject(SemanticsObject object) {
         assert mObjects.containsKey(object.id);
         assert mObjects.get(object.id) == object;
         object.parent = null;
-        mObjects.remove(object.id);
         if (mFocusedObject == object) {
             sendAccessibilityEvent(mFocusedObject.id, AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED);
             mFocusedObject = null;
@@ -300,153 +300,183 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements Semantics
         if (mHoveredObject == object) {
             mHoveredObject = null;
         }
-        if (object.children != null) {
-            for (SemanticObject child : object.children) {
-                if (!updatedObjects.contains(child)) {
-                    assert child.parent == object;
-                    removeSemanticObject(child, updatedObjects);
-                }
-            }
-        }
     }
 
-    void reset(SemanticsServer.Proxy newSemanticsServer) {
+    void reset() {
         mObjects.clear();
-        sendAccessibilityEvent(mFocusedObject.id, AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED);
+        if (mFocusedObject != null)
+            sendAccessibilityEvent(mFocusedObject.id, AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED);
         mFocusedObject = null;
         mHoveredObject = null;
-        mSemanticsServer.close();
         sendAccessibilityEvent(0, AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
-        mSemanticsServer = newSemanticsServer;
-        mSemanticsServer.addSemanticsListener(this);
     }
 
-    private class SemanticObject {
-        SemanticObject() { }
+    private class SemanticsObject {
+        SemanticsObject() { }
 
-        void updateWith(SemanticsNode node) {
-            if (id == -1) {
-                id = node.id;
-                assert node.flags != null;
-                assert node.strings != null;
-                assert node.geometry != null;
-                assert node.children != null;
-            }
-            assert id == node.id;
-            if (node.flags != null) {
-                hasCheckedState = node.flags.hasCheckedState;
-                isChecked = node.flags.isChecked;
-            }
-            if (node.strings != null) {
-                label = node.strings.label;
-            }
-            if (node.geometry != null) {
-                transform = node.geometry.transform;
-                left = node.geometry.left;
-                top = node.geometry.top;
-                width = node.geometry.width;
-                height = node.geometry.height;
-            }
-            if (node.actions != null) {
-                canBeTapped = false;
-                canBeLongPressed = false;
-                canBeScrolledHorizontally = false;
-                canBeScrolledVertically = false;
-                for (int action : node.actions) {
-                    switch (action) {
-                    case SemanticAction.TAP:
-                        canBeTapped = true;
-                        break;
-                    case SemanticAction.LONG_PRESS:
-                        canBeLongPressed = true;
-                        break;
-                    case SemanticAction.SCROLL_LEFT:
-                        canBeScrolledHorizontally = true;
-                        break;
-                    case SemanticAction.SCROLL_RIGHT:
-                        canBeScrolledHorizontally = true;
-                        break;
-                    case SemanticAction.SCROLL_UP:
-                        canBeScrolledVertically = true;
-                        break;
-                    case SemanticAction.SCROLL_DOWN:
-                        canBeScrolledVertically = true;
-                        break;
-                    case SemanticAction.INCREASE:
-                        // Not implemented.
-                        break;
-                    case SemanticAction.DECREASE:
-                        // Not implemented.
-                        break;
-                    }
-                }
-            }
-        }
-
-        // fields that we pass straight to the Android accessibility API
         int id = -1;
-        SemanticObject parent;
-        boolean canBeTapped;
-        boolean canBeLongPressed;
-        boolean canBeScrolledHorizontally;
-        boolean canBeScrolledVertically;
-        boolean hasCheckedState;
-        boolean isChecked;
-        String label;
-        List<SemanticObject> children;
 
-        // geometry, which we have to convert to global coordinates to send to Android
-        private float[] transform; // can be null, meaning identity transform
+        int actions;
+        int flags;
+        String label;
+
         private float left;
         private float top;
-        private float width;
-        private float height;
+        private float right;
+        private float bottom;
+        private float[] transform;
 
-        private boolean geometryDirty = true;
-        private void invalidateGlobalGeometry() {
-            if (geometryDirty) {
-                return;
-            }
-            geometryDirty = true;
-            // TODO(ianh): if we are the AccessibilityBridge.this.mFocusedObject
-            // then we may have to unfocus and refocus ourselves to get Android to update the focus rect
-            if (children != null) {
-                for (SemanticObject child : children) {
-                    child.invalidateGlobalGeometry();
+        SemanticsObject parent;
+        List<SemanticsObject> children;
+
+        private boolean inverseTransformDirty = true;
+        private float[] inverseTransform;
+
+        private boolean globalGeometryDirty = true;
+        private float[] globalTransform;
+        private Rect globalRect;
+
+        void updateWith(ByteBuffer buffer, String[] strings) {
+            actions = buffer.getInt();
+            flags = buffer.getInt();
+
+            final int stringIndex = buffer.getInt();
+            if (stringIndex == -1)
+                label = null;
+            else
+                label = strings[stringIndex];
+
+            left = buffer.getFloat();
+            top = buffer.getFloat();
+            right = buffer.getFloat();
+            bottom = buffer.getFloat();
+
+            if (transform == null)
+                transform = new float[16];
+            for (int i = 0; i < 16; ++i)
+                transform[i] = buffer.getFloat();
+            inverseTransformDirty = true;
+            globalGeometryDirty = true;
+
+            final int childCount = buffer.getInt();
+            if (childCount == 0) {
+                children = null;
+            } else {
+                if (children == null)
+                    children = new ArrayList<SemanticsObject>(childCount);
+                else
+                    children.clear();
+
+                for (int i = 0; i < childCount; ++i) {
+                    SemanticsObject child = getOrCreateObject(buffer.getInt());
+                    children.add(child);
+                    child.parent = this;
                 }
             }
         }
 
-        private float[] globalTransform; // cached transform from the root node to this node
-        private Rect globalRect; // cached Rect of bounds of this node in coordinate space of the root node
+        private void ensureInverseTransform() {
+            if (!inverseTransformDirty)
+                return;
+            inverseTransformDirty = false;
+            if (inverseTransform == null)
+                inverseTransform = new float[16];
+            if (!Matrix.invertM(inverseTransform, 0, transform, 0))
+                Arrays.fill(inverseTransform, 0);
+        }
 
-        private float[] getGlobalTransform() {
-            if (geometryDirty) {
-                if (parent == null) {
-                    globalTransform = transform;
-                } else {
-                    float[] parentTransform = parent.getGlobalTransform();
-                    if (transform == null) {
-                        globalTransform = parentTransform;
-                    } else if (parentTransform == null) {
-                        globalTransform = transform;
-                    } else {
-                        globalTransform = new float[16];
-                        Matrix.multiplyMM(globalTransform, 0, transform, 0, parentTransform, 0);
+        Rect getGlobalRect() {
+            assert !globalGeometryDirty;
+            return globalRect;
+        }
+
+        SemanticsObject hitTest(float[] point) {
+            final float w = point[3];
+            final float x = point[0] / w;
+            final float y = point[1] / w;
+            if (x < left || x >= right || y < top || y >= bottom)
+                return null;
+            if (children != null) {
+                final float[] transformedPoint = new float[4];
+                for (int i = children.size() - 1; i >= 0; i -= 1) {
+                    final SemanticsObject child = children.get(i);
+                    child.ensureInverseTransform();
+                    Matrix.multiplyMV(transformedPoint, 0, child.inverseTransform, 0, point, 0);
+                    final SemanticsObject result = child.hitTest(transformedPoint);
+                    if (result != null) {
+                        return result;
                     }
                 }
             }
-            return globalTransform;
+            return this;
         }
 
-        private float[] transformPoint(float[] transform, float[] point) {
-            if (transform == null)
-                return point; // this is a 4-item array but the caller will ignore all but the first two items
-            float[] transformedPoint = new float[4];
-            Matrix.multiplyMV(transformedPoint, 0, transform, 0, point, 0);
-            assert transformedPoint[2] == 0;
-            return new float[]{transformedPoint[0] / transformedPoint[3],
-                               transformedPoint[1] / transformedPoint[3]};
+        void updateRecursively(float[] ancestorTransform, Set<SemanticsObject> visitedObjects, boolean forceUpdate) {
+            visitedObjects.add(this);
+
+            if (globalGeometryDirty)
+                forceUpdate = true;
+
+            if (forceUpdate) {
+                if (globalTransform == null)
+                    globalTransform = new float[16];
+                Matrix.multiplyMM(globalTransform, 0, transform, 0, ancestorTransform, 0);
+
+                final float[] sample = new float[4];
+                sample[2] = 0;
+                sample[3] = 1;
+
+                final float[] point1 = new float[4];
+                final float[] point2 = new float[4];
+                final float[] point3 = new float[4];
+                final float[] point4 = new float[4];
+
+                sample[0] = left;
+                sample[1] = top;
+                transformPoint(point1, globalTransform, sample);
+
+                sample[0] = right;
+                sample[1] = top;
+                transformPoint(point2, globalTransform, sample);
+
+                sample[0] = right;
+                sample[1] = bottom;
+                transformPoint(point3, globalTransform, sample);
+
+                sample[0] = left;
+                sample[1] = bottom;
+                transformPoint(point4, globalTransform, sample);
+
+                if (globalRect == null)
+                    globalRect = new Rect();
+
+                globalRect.set(
+                    Math.round(min(point1[0], point2[0], point3[0], point4[0])),
+                    Math.round(min(point1[1], point2[1], point3[1], point4[1])),
+                    Math.round(max(point1[0], point2[0], point3[0], point4[0])),
+                    Math.round(max(point1[1], point2[1], point3[1], point4[1]))
+                );
+
+                globalGeometryDirty = false;
+            }
+
+            assert globalTransform != null;
+            assert globalRect != null;
+
+            if (children != null) {
+                for (int i = 0; i < children.size(); ++i) {
+                    children.get(i).updateRecursively(globalTransform, visitedObjects, forceUpdate);
+                }
+            }
+        }
+
+        private void transformPoint(float[] result, float[] transform, float[] point) {
+            Matrix.multiplyMV(result, 0, transform, 0, point, 0);
+            final float w = result[3];
+            result[0] /= w;
+            result[1] /= w;
+            result[2] /= w;
+            result[3] = 0;
         }
 
         private float min(float a, float b, float c, float d) {
@@ -456,47 +486,5 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements Semantics
         private float max(float a, float b, float c, float d) {
             return Math.max(a, Math.max(b, Math.max(c, d)));
         }
-
-        Rect getGlobalRect() {
-            if (geometryDirty) {
-                float[] transform = getGlobalTransform();
-                float[] point1 = transformPoint(transform, new float[]{left,         top,          0, 1});
-                float[] point2 = transformPoint(transform, new float[]{left + width, top,          0, 1});
-                float[] point3 = transformPoint(transform, new float[]{left + width, top + height, 0, 1});
-                float[] point4 = transformPoint(transform, new float[]{left,         top + height, 0, 1});
-                // TODO(ianh): Scaling here is a hack to work around #1360.
-                float scale = mOwner.getDevicePixelRatio();
-                globalRect = new Rect(
-                  Math.round(min(point1[0], point2[0], point3[0], point4[0]) * scale),
-                  Math.round(min(point1[1], point2[1], point3[1], point4[1]) * scale),
-                  Math.round(max(point1[0], point2[0], point3[0], point4[0]) * scale),
-                  Math.round(max(point1[1], point2[1], point3[1], point4[1]) * scale)
-                );
-            }
-            return globalRect;
-        }
-
-        SemanticObject hitTest(int x, int y) {
-            Rect rect = getGlobalRect();
-            if (!rect.contains(x, y))
-                return null;
-            if (children != null) {
-                for (int index = children.size()-1; index >= 0; index -= 1) {
-                    SemanticObject child = children.get(index);
-                    SemanticObject result = child.hitTest(x, y);
-                    if (result != null) {
-                        return result;
-                    }
-                }
-            }
-            return this;
-        }
     }
-
-    @Override
-    public void close() {}
-
-    @Override
-    public void onConnectionError(MojoException e) {}
-
 }

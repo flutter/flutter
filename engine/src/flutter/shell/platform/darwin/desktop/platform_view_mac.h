@@ -25,8 +25,6 @@ class PlatformViewMac : public PlatformView, public GPUSurfaceGLDelegate {
 
   sky::SkyEnginePtr& engineProxy();
 
-  ftl::WeakPtr<PlatformView> GetWeakViewPtr() override;
-
   bool GLContextMakeCurrent() override;
 
   bool GLContextClearCurrent() override;
@@ -45,7 +43,6 @@ class PlatformViewMac : public PlatformView, public GPUSurfaceGLDelegate {
   base::scoped_nsobject<NSOpenGLView> opengl_view_;
   base::scoped_nsobject<NSOpenGLContext> resource_loading_context_;
   sky::SkyEnginePtr sky_engine_;
-  ftl::WeakPtrFactory<PlatformViewMac> weak_factory_;
 
   bool IsValid() const;
 

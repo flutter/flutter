@@ -273,8 +273,7 @@ class IOSGLContext {
 
 PlatformViewIOS::PlatformViewIOS(CAEAGLLayer* layer)
     : PlatformView(std::make_unique<GPURasterizer>()),
-      context_(std::make_unique<IOSGLContext>(surface_config_, layer)),
-      weak_factory_(this) {
+      context_(std::make_unique<IOSGLContext>(surface_config_, layer)) {
   NSArray* paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory,
                                                        NSUserDomainMask, YES);
   shell::Shell::Shared().tracing_controller().set_traces_base_path(
@@ -295,15 +294,16 @@ shell::ApplicationMessagesImpl& PlatformViewIOS::AppMessageReceiver() {
   return app_message_receiver_;
 }
 
-void PlatformViewIOS::ToggleAccessibility(UIView* view, bool enable) {
-  if (enable) {
-    if (!accessibility_bridge_ && dart_services_.get() != nullptr) {
+void PlatformViewIOS::ToggleAccessibility(UIView* view, bool enabled) {
+  if (enabled) {
+    if (!accessibility_bridge_) {
       accessibility_bridge_.reset(
-          new shell::AccessibilityBridge(view, dart_services_.get()));
+          new shell::AccessibilityBridge(view, this));
     }
   } else {
     accessibility_bridge_ = nullptr;
   }
+  SetSemanticsEnabled(enabled);
 }
 
 void PlatformViewIOS::ConnectToEngineAndSetupServices() {
@@ -347,10 +347,6 @@ void PlatformViewIOS::SetupAndLoadFromSource(
   engine_->RunFromFile(main, packages, assets_directory);
 }
 
-ftl::WeakPtr<PlatformView> PlatformViewIOS::GetWeakViewPtr() {
-  return weak_factory_.GetWeakPtr();
-}
-
 bool PlatformViewIOS::ResourceContextMakeCurrent() {
   return context_ != nullptr ? context_->ResourceMakeCurrent() : false;
 }
@@ -385,6 +381,12 @@ void PlatformViewIOS::RunFromSource(const std::string& main,
 
   latch->Wait();
   delete latch;
+}
+
+void PlatformViewIOS::UpdateSemantics(
+    std::vector<blink::SemanticsNode> update) {
+  if (accessibility_bridge_)
+    accessibility_bridge_->UpdateSemantics(std::move(update));
 }
 
 }  // namespace shell

@@ -26,8 +26,6 @@ class PlatformViewGLFW : public PlatformView, public GPUSurfaceGLDelegate {
 
   bool IsValid() const;
 
-  ftl::WeakPtr<PlatformView> GetWeakViewPtr() override;
-
   bool ResourceContextMakeCurrent() override;
 
   bool GLContextMakeCurrent() override;
@@ -47,7 +45,6 @@ class PlatformViewGLFW : public PlatformView, public GPUSurfaceGLDelegate {
   GLFWwindow* glfw_window_;
   sky::SkyEnginePtr engine_;
   int buttons_;
-  ftl::WeakPtrFactory<PlatformViewGLFW> weak_factory_;
 
   void OnWindowSizeChanged(int width, int height);
 

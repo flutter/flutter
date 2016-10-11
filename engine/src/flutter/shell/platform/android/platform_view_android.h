@@ -44,20 +44,24 @@ class PlatformViewAndroid : public PlatformView {
                                              jint response_id,
                                              jstring response);
 
+  void DispatchSemanticsAction(JNIEnv* env, jobject obj, jint id, jint action);
+
+  void SetSemanticsEnabled(JNIEnv* env, jobject obj, jboolean enabled);
+
   base::android::ScopedJavaLocalRef<jobject> GetBitmap(JNIEnv* env,
                                                        jobject obj);
 
-  ftl::WeakPtr<shell::PlatformView> GetWeakViewPtr() override;
-
   bool ResourceContextMakeCurrent() override;
 
-  virtual SkISize GetSize();
+  SkISize GetSize() override;
 
-  virtual void Resize(const SkISize& size);
+  void Resize(const SkISize& size) override;
 
-  virtual void RunFromSource(const std::string& main,
-                             const std::string& packages,
-                             const std::string& assets_directory);
+  void UpdateSemantics(std::vector<blink::SemanticsNode> update) override;
+
+  void RunFromSource(const std::string& main,
+                     const std::string& packages,
+                     const std::string& assets_directory) override;
 
   void set_flutter_view(const JavaObjectWeakGlobalRef& flutter_view) {
     flutter_view_ = flutter_view;
@@ -66,7 +70,6 @@ class PlatformViewAndroid : public PlatformView {
  private:
   std::unique_ptr<AndroidSurfaceGL> surface_gl_;
   JavaObjectWeakGlobalRef flutter_view_;
-  ftl::WeakPtrFactory<PlatformViewAndroid> weak_factory_;
 
   // We use id 0 to mean that no response is expected.
   int next_response_id_ = 1;

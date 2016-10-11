@@ -29,7 +29,7 @@ class PlatformViewIOS : public PlatformView, public GPUSurfaceGLDelegate {
 
   ~PlatformViewIOS() override;
 
-  void ToggleAccessibility(UIView* view, bool enable);
+  void ToggleAccessibility(UIView* view, bool enabled);
 
   void ConnectToEngineAndSetupServices();
 
@@ -38,8 +38,6 @@ class PlatformViewIOS : public PlatformView, public GPUSurfaceGLDelegate {
   flutter::platform::ApplicationMessagesPtr& AppMessageSender();
 
   ApplicationMessagesImpl& AppMessageReceiver();
-
-  ftl::WeakPtr<PlatformView> GetWeakViewPtr() override;
 
   bool ResourceContextMakeCurrent() override;
 
@@ -55,6 +53,8 @@ class PlatformViewIOS : public PlatformView, public GPUSurfaceGLDelegate {
                      const std::string& packages,
                      const std::string& assets_directory) override;
 
+  void UpdateSemantics(std::vector<blink::SemanticsNode> update) override;
+
  private:
   std::unique_ptr<IOSGLContext> context_;
   sky::SkyEnginePtr engine_;
@@ -62,7 +62,6 @@ class PlatformViewIOS : public PlatformView, public GPUSurfaceGLDelegate {
   flutter::platform::ApplicationMessagesPtr app_message_sender_;
   ApplicationMessagesImpl app_message_receiver_;
   std::unique_ptr<AccessibilityBridge> accessibility_bridge_;
-  ftl::WeakPtrFactory<PlatformViewIOS> weak_factory_;
 
   void SetupAndLoadFromSource(const std::string& main,
                               const std::string& packages,

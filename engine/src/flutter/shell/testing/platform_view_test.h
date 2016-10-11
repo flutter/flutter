@@ -19,8 +19,6 @@ class PlatformViewTest : public PlatformView {
 
   ~PlatformViewTest();
 
-  ftl::WeakPtr<PlatformView> GetWeakViewPtr() override;
-
   bool ResourceContextMakeCurrent() override;
 
   void RunFromSource(const std::string& main,
@@ -28,8 +26,6 @@ class PlatformViewTest : public PlatformView {
                      const std::string& assets_directory) override;
 
  private:
-  ftl::WeakPtrFactory<PlatformViewTest> weak_factory_;
-
   FTL_DISALLOW_COPY_AND_ASSIGN(PlatformViewTest);
 };
 

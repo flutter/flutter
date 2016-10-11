@@ -9,9 +9,12 @@
 #include <sys/resource.h>
 #include <sys/time.h>
 #include <sys/types.h>
+
 #include <memory>
 #include <utility>
+
 #include "base/android/jni_android.h"
+#include "base/android/jni_array.h"
 #include "base/android/jni_string.h"
 #include "base/bind.h"
 #include "base/location.h"
@@ -29,7 +32,7 @@
 namespace shell {
 
 PlatformViewAndroid::PlatformViewAndroid()
-    : PlatformView(std::make_unique<GPURasterizer>()), weak_factory_(this) {}
+    : PlatformView(std::make_unique<GPURasterizer>()) {}
 
 PlatformViewAndroid::~PlatformViewAndroid() = default;
 
@@ -159,15 +162,25 @@ void PlatformViewAndroid::HandlePlatformMessage(
   }
 }
 
+void PlatformViewAndroid::DispatchSemanticsAction(JNIEnv* env,
+                                                  jobject obj,
+                                                  jint id,
+                                                  jint action) {
+  PlatformView::DispatchSemanticsAction(
+      id, static_cast<blink::SemanticsAction>(action));
+}
+
+void PlatformViewAndroid::SetSemanticsEnabled(JNIEnv* env,
+                                              jobject obj,
+                                              jboolean enabled) {
+  PlatformView::SetSemanticsEnabled(enabled);
+}
+
 void PlatformViewAndroid::ReleaseSurface() {
   if (surface_gl_) {
     NotifyDestroyed();
     surface_gl_ = nullptr;
   }
-}
-
-ftl::WeakPtr<shell::PlatformView> PlatformViewAndroid::GetWeakViewPtr() {
-  return weak_factory_.GetWeakPtr();
 }
 
 bool PlatformViewAndroid::ResourceContextMakeCurrent() {
@@ -181,6 +194,56 @@ SkISize PlatformViewAndroid::GetSize() {
 void PlatformViewAndroid::Resize(const SkISize& size) {
   if (surface_gl_) {
     surface_gl_->OnScreenSurfaceResize(size);
+  }
+}
+
+void PlatformViewAndroid::UpdateSemantics(
+    std::vector<blink::SemanticsNode> update) {
+  constexpr size_t kBytesPerNode = 25 * sizeof(int32_t);
+  constexpr size_t kBytesPerChild = sizeof(int32_t);
+
+  JNIEnv* env = base::android::AttachCurrentThread();
+  {
+    base::android::ScopedJavaLocalRef<jobject> view = flutter_view_.get(env);
+    if (view.is_null())
+      return;
+
+    size_t num_bytes = 0;
+    for (const blink::SemanticsNode& node : update) {
+      num_bytes += kBytesPerNode;
+      num_bytes += node.children.size() * kBytesPerChild;
+    }
+
+    std::vector<char> buffer(num_bytes);
+    int32_t* buffer_int32 = reinterpret_cast<int32_t*>(&buffer[0]);
+    float* buffer_float32 = reinterpret_cast<float*>(&buffer[0]);
+
+    std::vector<std::string> strings;
+    size_t position = 0;
+    for (const blink::SemanticsNode& node : update) {
+      buffer_int32[position++] = node.id;
+      buffer_int32[position++] = node.flags;
+      buffer_int32[position++] = node.actions;
+      if (node.label.empty()) {
+        buffer_int32[position++] = -1;
+      } else {
+        buffer_int32[position++] = strings.size();
+        strings.push_back(node.label);
+      }
+      buffer_float32[position++] = node.rect.left();
+      buffer_float32[position++] = node.rect.top();
+      buffer_float32[position++] = node.rect.right();
+      buffer_float32[position++] = node.rect.bottom();
+      node.transform.asColMajorf(&buffer_float32[position]);
+      position += 16;
+      buffer_int32[position++] = node.children.size();
+      for (int32_t child : node.children)
+        buffer_int32[position++] = child;
+    }
+
+    Java_FlutterView_updateSemantics(
+        env, view.obj(), env->NewDirectByteBuffer(buffer.data(), buffer.size()),
+        base::android::ToJavaArrayOfStrings(env, strings).obj());
   }
 }
 

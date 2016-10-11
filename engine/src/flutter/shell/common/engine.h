@@ -24,12 +24,13 @@
 #include "third_party/skia/include/core/SkPicture.h"
 
 namespace shell {
+class PlatformView;
 class Animator;
 using PointerDataPacket = blink::PointerDataPacket;
 
 class Engine : public sky::SkyEngine, public blink::RuntimeDelegate {
  public:
-  explicit Engine(Rasterizer* rasterizer);
+  explicit Engine(PlatformView* platform_view);
 
   ~Engine() override;
 
@@ -51,6 +52,8 @@ class Engine : public sky::SkyEngine, public blink::RuntimeDelegate {
   void OnOutputSurfaceCreated(const ftl::Closure& gpu_continuation);
   void OnOutputSurfaceDestroyed(const ftl::Closure& gpu_continuation);
   void DispatchPointerDataPacket(const PointerDataPacket& packet);
+  void DispatchSemanticsAction(int id, blink::SemanticsAction action);
+  void SetSemanticsEnabled(bool enabled);
 
  private:
   // SkyEngine implementation:
@@ -91,6 +94,7 @@ class Engine : public sky::SkyEngine, public blink::RuntimeDelegate {
   void ConfigureAssetBundle(const std::string& path);
   void ConfigureRuntime(const std::string& script_uri);
 
+  ftl::WeakPtr<PlatformView> platform_view_;
   std::unique_ptr<Animator> animator_;
 
   sky::ServicesDataPtr services_;

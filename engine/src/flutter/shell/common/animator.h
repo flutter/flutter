@@ -19,7 +19,7 @@ namespace shell {
 
 class Animator {
  public:
-  explicit Animator(Rasterizer* rasterizer, Engine* engine);
+  explicit Animator(ftl::WeakPtr<Rasterizer> rasterizer, Engine* engine);
 
   ~Animator();
 

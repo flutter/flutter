@@ -37,6 +37,9 @@ struct SemanticsNode {
   SemanticsNode();
   ~SemanticsNode();
 
+  bool HasAction(SemanticsAction action);
+  bool HasFlag(SemanticsFlags flag);
+
   int32_t id = 0;
   int32_t flags = 0;
   int32_t actions = 0;
