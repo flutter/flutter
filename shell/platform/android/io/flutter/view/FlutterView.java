@@ -608,8 +608,10 @@ public class FlutterView extends SurfaceView
 
     @CalledByNative
     private void updateSemantics(ByteBuffer buffer, String[] strings) {
-        if (mAccessibilityNodeProvider != null)
+        if (mAccessibilityNodeProvider != null) {
+            buffer.order(ByteOrder.LITTLE_ENDIAN);
             mAccessibilityNodeProvider.updateSemantics(buffer, strings);
+        }
     }
 
     // ACCESSIBILITY

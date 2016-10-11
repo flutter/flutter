@@ -245,7 +245,6 @@ class AccessibilityBridge extends AccessibilityNodeProvider {
     }
 
     void updateSemantics(ByteBuffer buffer, String[] strings) {
-        buffer.order(ByteOrder.LITTLE_ENDIAN);
         ArrayList<Integer> updated = new ArrayList<Integer>();
         while (buffer.hasRemaining()) {
             int id = buffer.getInt();
@@ -264,8 +263,9 @@ class AccessibilityBridge extends AccessibilityNodeProvider {
         Iterator<Map.Entry<Integer, SemanticsObject>> it = mObjects.entrySet().iterator();
         while (it.hasNext()) {
             Map.Entry<Integer, SemanticsObject> entry = it.next();
-            if (!visitedObjects.contains(entry.getKey())) {
-                willRemoveSemanticsObject(entry.getValue());
+            SemanticsObject object = entry.getValue();
+            if (!visitedObjects.contains(object)) {
+                willRemoveSemanticsObject(object);
                 it.remove();
             }
         }
@@ -316,8 +316,8 @@ class AccessibilityBridge extends AccessibilityNodeProvider {
 
         int id = -1;
 
-        int actions;
         int flags;
+        int actions;
         String label;
 
         private float left;
@@ -336,9 +336,21 @@ class AccessibilityBridge extends AccessibilityNodeProvider {
         private float[] globalTransform;
         private Rect globalRect;
 
+        void log(String indent) {
+          Log.i(TAG, indent + "SemanticsObject id=" + id + " label=" + label + " actions=" +  actions + " flags=" + flags + "\n" +
+                     indent + "  +-- rect.ltrb=(" + left + ", " + top + ", " + right + ", " + bottom + ")\n" +
+                     indent + "  +-- transform=" + Arrays.toString(transform) + "\n");
+          if (children != null) {
+              String childIndent = indent + "  ";
+              for (SemanticsObject child : children) {
+                  child.log(childIndent);
+              }
+          }
+        }
+
         void updateWith(ByteBuffer buffer, String[] strings) {
-            actions = buffer.getInt();
             flags = buffer.getInt();
+            actions = buffer.getInt();
 
             final int stringIndex = buffer.getInt();
             if (stringIndex == -1)
@@ -369,8 +381,8 @@ class AccessibilityBridge extends AccessibilityNodeProvider {
 
                 for (int i = 0; i < childCount; ++i) {
                     SemanticsObject child = getOrCreateObject(buffer.getInt());
-                    children.add(child);
                     child.parent = this;
+                    children.add(child);
                 }
             }
         }

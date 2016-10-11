@@ -111,6 +111,7 @@ class Engine : public sky::SkyEngine, public blink::RuntimeDelegate {
   sky::ViewportMetricsPtr viewport_metrics_;
   std::string language_code_;
   std::string country_code_;
+  bool semantics_enabled_ = false;
   mojo::Binding<SkyEngine> binding_;
   ftl::RefPtr<blink::ZipAssetStore> asset_store_;
 

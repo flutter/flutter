@@ -29,19 +29,24 @@ void RuntimeController::CreateDartController(const std::string& script_uri) {
   FTL_DCHECK(!dart_controller_);
 
   dart_controller_.reset(new DartController());
-  std::unique_ptr<Window> window(new Window(this));
   dart_controller_->CreateIsolateFor(
       script_uri,
-      std::unique_ptr<UIDartState>(new UIDartState(this, std::move(window))));
+      std::make_unique<UIDartState>(this, std::make_unique<Window>(this)));
 
   UIDartState* dart_state = dart_controller_->dart_state();
   DartState::Scope scope(dart_state);
   dart_state->window()->DidCreateIsolate();
   client_->DidCreateMainIsolate(dart_state->isolate());
 
+  Window* window = GetWindow();
+
   if (viewport_metrics_)
-    GetWindow()->UpdateWindowMetrics(viewport_metrics_);
-  GetWindow()->UpdateLocale(language_code_, country_code_);
+    window->UpdateWindowMetrics(viewport_metrics_);
+
+  window->UpdateLocale(language_code_, country_code_);
+
+  if (semantics_enabled_)
+    window->UpdateSemanticsEnabled(semantics_enabled_);
 }
 
 void RuntimeController::SetViewportMetrics(
@@ -68,7 +73,7 @@ void RuntimeController::SetSemanticsEnabled(bool enabled) {
   if (semantics_enabled_ == enabled)
     return;
   semantics_enabled_ = enabled;
-  GetWindow()->UpdateSemanticsEnabled(enabled);
+  GetWindow()->UpdateSemanticsEnabled(semantics_enabled_);
 }
 
 void RuntimeController::PushRoute(const std::string& route) {
