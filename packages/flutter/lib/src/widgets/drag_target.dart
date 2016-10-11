@@ -228,7 +228,7 @@ class _DraggableState<T> extends State<Draggable<T>> {
       _activeCount += 1;
     });
     return new _DragAvatar<T>(
-      overlay: Overlay.of(context, debugRequiredFor: config),
+      overlayState: Overlay.of(context, debugRequiredFor: config),
       data: config.data,
       initialPosition: position,
       dragStartPoint: dragStartPoint,
@@ -357,7 +357,7 @@ typedef void _OnDragEnd(Velocity velocity, Offset offset, bool wasAccepted);
 // this widget.
 class _DragAvatar<T> extends Drag {
   _DragAvatar({
-    OverlayState overlay,
+    this.overlayState,
     this.data,
     Point initialPosition,
     this.dragStartPoint: Point.origin,
@@ -365,11 +365,11 @@ class _DragAvatar<T> extends Drag {
     this.feedbackOffset: Offset.zero,
     this.onDragEnd
   }) {
-    assert(overlay != null);
+    assert(overlayState != null);
     assert(dragStartPoint != null);
     assert(feedbackOffset != null);
     _entry = new OverlayEntry(builder: _build);
-    overlay.insert(_entry);
+    overlayState.insert(_entry);
     _position = initialPosition;
     updateDrag(initialPosition);
   }
@@ -379,6 +379,7 @@ class _DragAvatar<T> extends Drag {
   final Widget feedback;
   final Offset feedbackOffset;
   final _OnDragEnd onDragEnd;
+  final OverlayState overlayState;
 
   _DragTargetState<T> _activeTarget;
   List<_DragTargetState<T>> _enteredTargets = <_DragTargetState<T>>[];
@@ -477,12 +478,14 @@ class _DragAvatar<T> extends Drag {
   }
 
   Widget _build(BuildContext context) {
+    RenderBox box = overlayState.context.findRenderObject();
+    Point overlayTopLeft = box.localToGlobal(Point.origin);
     return new Positioned(
-      left: _lastOffset.dx,
-      top: _lastOffset.dy,
+      left: _lastOffset.dx - overlayTopLeft.x,
+      top: _lastOffset.dy - overlayTopLeft.y,
       child: new IgnorePointer(
         child: feedback
-      )
+      ),
     );
   }
 }
