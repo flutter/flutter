@@ -10,6 +10,7 @@
 #include "flutter/common/threads.h"
 #include "flutter/content_handler/rasterizer.h"
 #include "flutter/lib/ui/mojo_services.h"
+#include "flutter/lib/ui/window/pointer_data_packet.h"
 #include "flutter/runtime/asset_font_selector.h"
 #include "flutter/runtime/dart_controller.h"
 #include "flutter/services/engine/sky_engine.mojom.h"
@@ -32,11 +33,27 @@ constexpr int kMaxPipelineDepth = 3;
 // to recover before acknowleding the invalidation and scheduling more frames.
 constexpr int kRecoveryPipelineDepth = 1;
 
+blink::PointerData::Change GetChangeFromEventType(mozart::EventType type) {
+  switch (type) {
+    case mozart::EventType::POINTER_CANCEL:
+      return blink::PointerData::Change::kCancel;
+    case mozart::EventType::POINTER_DOWN:
+      return blink::PointerData::Change::kDown;
+    case mozart::EventType::POINTER_MOVE:
+      return blink::PointerData::Change::kMove;
+    case mozart::EventType::POINTER_UP:
+      return blink::PointerData::Change::kUp;
+    default:
+      return blink::PointerData::Change::kCancel;
+  }
+}
+
 }  // namespace
 
 RuntimeHolder::RuntimeHolder()
     : viewport_metrics_(sky::ViewportMetrics::New()),
       view_listener_binding_(this),
+      input_listener_binding_(this),
       weak_factory_(this) {}
 
 RuntimeHolder::~RuntimeHolder() {
@@ -78,6 +95,15 @@ void RuntimeHolder::CreateView(
   view_manager_->CreateView(mojo::GetProxy(&view_),
                             std::move(view_owner_request),
                             std::move(view_listener), script_uri);
+
+  mojo::ServiceProviderPtr view_services;
+  view_->GetServiceProvider(GetProxy(&view_services));
+
+  // Listen for input events.
+  mojo::ConnectToService(view_services.get(), GetProxy(&input_connection_));
+  mozart::InputListenerPtr input_listener;
+  input_listener_binding_.Bind(GetProxy(&input_listener));
+  input_connection_->SetListener(std::move(input_listener));
 
   mozart::ScenePtr scene;
   view_->CreateScene(mojo::GetProxy(&scene));
@@ -148,6 +174,26 @@ blink::UnzipperProvider RuntimeHolder::GetUnzipperProviderForRootBundle() {
   };
 }
 
+void RuntimeHolder::OnEvent(mozart::EventPtr event,
+                            const OnEventCallback& callback) {
+  bool handled = false;
+  if (event->pointer_data) {
+    blink::PointerData pointer_data;
+    pointer_data.time_stamp = event->time_stamp;
+    pointer_data.pointer = event->pointer_data->pointer_id;
+    pointer_data.change = GetChangeFromEventType(event->action);
+    pointer_data.kind = blink::PointerData::DeviceKind::kTouch;
+    pointer_data.physical_x = event->pointer_data->x;
+    pointer_data.physical_y = event->pointer_data->y;
+
+    blink::PointerDataPacket packet(1);
+    packet.SetPointerData(0, pointer_data);
+    runtime_->DispatchPointerDataPacket(packet);
+    handled = true;
+  }
+  callback.Run(handled);
+}
+
 void RuntimeHolder::OnInvalidation(mozart::ViewInvalidationPtr invalidation,
                                    const OnInvalidationCallback& callback) {
   FTL_DCHECK(invalidation);
@@ -160,8 +206,9 @@ void RuntimeHolder::OnInvalidation(mozart::ViewInvalidationPtr invalidation,
         view_properties_->view_layout->size->width;
     viewport_metrics_->physical_height =
         view_properties_->view_layout->size->height;
-    viewport_metrics_->device_pixel_ratio =
-        view_properties_->display_metrics->device_pixel_ratio;
+    viewport_metrics_->device_pixel_ratio = 2.0;
+    // TODO(abarth): Use view_properties_->display_metrics->device_pixel_ratio
+    // once that's reasonable.
     runtime_->SetViewportMetrics(viewport_metrics_);
   }
 

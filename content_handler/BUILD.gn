@@ -23,6 +23,7 @@ executable("content_handler") {
 
   deps = [
     "//apps/mozart/services/composition/interfaces",
+    "//apps/mozart/services/input/interfaces",
     "//apps/mozart/services/views/interfaces",
     "//dart/runtime:libdart",
     "//dart/runtime/vm:libdart_platform",

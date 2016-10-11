@@ -5,6 +5,7 @@
 #ifndef FLUTTER_CONTENT_HANDLER_RUNTIME_HOLDER_H_
 #define FLUTTER_CONTENT_HANDLER_RUNTIME_HOLDER_H_
 
+#include "apps/mozart/services/input/interfaces/input_connection.mojom.h"
 #include "apps/mozart/services/views/interfaces/view_manager.mojom.h"
 #include "flutter/assets/unzipper_provider.h"
 #include "flutter/assets/zip_asset_store.h"
@@ -22,7 +23,9 @@
 namespace flutter_content_handler {
 class Rasterizer;
 
-class RuntimeHolder : public blink::RuntimeDelegate, mozart::ViewListener {
+class RuntimeHolder : public blink::RuntimeDelegate,
+                      public mozart::ViewListener,
+                      public mozart::InputListener {
  public:
   RuntimeHolder();
   ~RuntimeHolder();
@@ -38,6 +41,10 @@ class RuntimeHolder : public blink::RuntimeDelegate, mozart::ViewListener {
   void Render(std::unique_ptr<flow::LayerTree> layer_tree) override;
   void UpdateSemantics(std::vector<blink::SemanticsNode> update) override;
   void DidCreateMainIsolate(Dart_Isolate isolate) override;
+
+  // |mozart::InputListener| implementation:
+  void OnEvent(mozart::EventPtr event,
+               const OnEventCallback& callback) override;
 
   // |mozart::ViewListener| implementation:
   void OnInvalidation(mozart::ViewInvalidationPtr invalidation,
@@ -62,6 +69,8 @@ class RuntimeHolder : public blink::RuntimeDelegate, mozart::ViewListener {
 
   mozart::ViewManagerPtr view_manager_;
   mojo::Binding<mozart::ViewListener> view_listener_binding_;
+  mojo::Binding<mozart::InputListener> input_listener_binding_;
+  mozart::InputConnectionPtr input_connection_;
   mozart::ViewPtr view_;
   mozart::ViewPropertiesPtr view_properties_;
   uint32_t scene_version_ = mozart::kSceneVersionNone;

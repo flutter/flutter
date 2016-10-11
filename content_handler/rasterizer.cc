@@ -58,6 +58,7 @@ void Rasterizer::Draw(std::unique_ptr<flow::LayerTree> layer_tree,
     update->resources.insert(kContentImageResourceId, content_resource.Pass());
 
     auto root_node = mozart::Node::New();
+    root_node->hit_test_behavior = mozart::HitTestBehavior::New();
     root_node->op = mozart::NodeOp::New();
     root_node->op->set_image(mozart::ImageNodeOp::New());
     root_node->op->get_image()->content_rect = bounds.Clone();
