@@ -544,7 +544,9 @@ class SemanticsNode extends AbstractNode {
       flags: data.flags,
       actions: data.actions,
       rect: data.rect,
+      label: data.label,
       transform: data.transform?.storage ?? _kIdentityTransform,
+      children: children,
     );
     _dirty = false;
   }
