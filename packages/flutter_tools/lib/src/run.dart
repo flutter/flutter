@@ -261,7 +261,8 @@ class RunAndStayResident extends ResidentRunner {
 
   @override
   void printHelp() {
-    String restartText = device.supportsRestart ? ', "r" or F5 to restart the app,' : '';
+    final bool showRestartText = !prebuiltMode && device.supportsRestart;
+    String restartText = showRestartText ? ', "r" or F5 to restart the app,' : '';
     printStatus('Type "h" or F1 for help$restartText and "q", F10, or ctrl-c to quit.');
     printStatus('Type "w" to print the widget hierarchy of the app, and "t" for the render tree.');
   }
