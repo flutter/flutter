@@ -5,14 +5,16 @@
 package io.flutter.plugin.platform;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.net.Uri;
 import android.os.Build;
+import android.view.HapticFeedbackConstants;
 import android.view.SoundEffectConstants;
 import android.view.View;
-
 import io.flutter.plugin.common.JSONMessageListener;
 import io.flutter.view.FlutterView;
-
+import org.chromium.base.PathUtils;
 import org.domokit.common.ActivityLifecycleListener;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -40,6 +42,10 @@ public class PlatformPlugin extends JSONMessageListener implements ActivityLifec
         JSONArray args = message.getJSONArray("args");
         if (method.equals("SystemSound.play")) {
             playSystemSound(args.getString(0));
+        } else if (method.equals("HapticFeedback.vibrate")) {
+            vibrateHapticFeedback();
+        } else if (method.equals("UrlLauncher.launch")) {
+            launchURL(args.getString(0));
         } else if (method.equals("SystemChrome.setPreferredOrientations")) {
             setSystemChromePreferredOrientatations(args.getJSONArray(0));
         } else if (method.equals("SystemChrome.setApplicationSwitcherDescription")) {
@@ -48,6 +54,10 @@ public class PlatformPlugin extends JSONMessageListener implements ActivityLifec
             setSystemChromeEnabledSystemUIOverlays(args.getJSONArray(0));
         } else if (method.equals("SystemChrome.setSystemUIOverlayStyle")) {
             setSystemChromeSystemUIOverlayStyle(args.getString(0));
+        } else if (method.equals("PathProvider.getTemporaryDirectory")) {
+            return getPathProviderTemporaryDirectory();
+        } else if (method.equals("PathProvider.getApplicationDocumentsDirectory")) {
+            return getPathProviderApplicationDocumentsDirectory();
         } else {
             // TODO(abarth): We should throw an exception here that gets
             // transmitted back to Dart.
@@ -59,6 +69,21 @@ public class PlatformPlugin extends JSONMessageListener implements ActivityLifec
         if (soundType.equals("SystemSoundType.click")) {
             View view = mActivity.getWindow().getDecorView();
             view.playSoundEffect(SoundEffectConstants.CLICK);
+        }
+    }
+
+    private void vibrateHapticFeedback() {
+        View view = mActivity.getWindow().getDecorView();
+        view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+    }
+
+    private void launchURL(String url) {
+        try {
+            Intent launchIntent = new Intent(Intent.ACTION_VIEW);
+            launchIntent.setData(Uri.parse(url));
+            mActivity.startActivity(launchIntent);
+        } catch (java.lang.Exception exception) {
+            // Ignore parsing or ActivityNotFound errors
         }
     }
 
@@ -133,6 +158,18 @@ public class PlatformPlugin extends JSONMessageListener implements ActivityLifec
         // You can change the navigation bar color (including translucent colors)
         // in Android, but you can't change the color of the navigation buttons,
         // so LIGHT vs DARK effectively isn't supported in Android.
+    }
+
+    private JSONObject getPathProviderTemporaryDirectory() throws JSONException {
+        JSONObject result = new JSONObject();
+        result.put("path", mActivity.getCacheDir().getPath());
+        return result;
+    }
+
+    private JSONObject getPathProviderApplicationDocumentsDirectory() throws JSONException {
+        JSONObject result = new JSONObject();
+        result.put("path", PathUtils.getDataDirectory(mActivity));
+        return result;
     }
 
     @Override
