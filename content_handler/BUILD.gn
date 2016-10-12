@@ -37,6 +37,7 @@ executable("content_handler") {
     "//flutter/sky/engine/platform",
     "//lib/ftl",
     "//lib/mtl",
+    "//lib/trace_event",
     "//lib/zip",
     "//mojo/public/cpp/application",
     "//mojo/public/cpp/bindings",

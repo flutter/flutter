@@ -16,6 +16,7 @@
 #include "lib/ftl/tasks/task_runner.h"
 #include "lib/mtl/tasks/message_loop.h"
 #include "lib/mtl/threading/create_thread.h"
+#include "lib/trace_event/tracing_client.h"
 #include "mojo/public/cpp/application/application_impl_base.h"
 #include "mojo/public/cpp/application/connect.h"
 #include "mojo/public/cpp/application/run_application.h"
@@ -33,14 +34,20 @@ class App : public mojo::ApplicationImplBase {
  public:
   App() {}
   ~App() override {
-    if (initialized_)
+    if (initialized_) {
       StopThreads();
+      trace_event::DestroyTracer();
+    }
   }
 
   // Overridden from ApplicationDelegate:
   void OnInitialize() override {
     FTL_DCHECK(!initialized_);
     initialized_ = true;
+
+    tracing::TraceProviderRegistryPtr registry;
+    ConnectToService(shell(), "mojo:tracing", GetProxy(&registry));
+    trace_event::InitializeTracer(std::move(registry));
 
     ftl::RefPtr<ftl::TaskRunner> gpu_task_runner;
     gpu_thread_ = mtl::CreateThread(&gpu_task_runner);
