@@ -4,16 +4,7 @@
 
 import 'dart:async';
 
-import 'package:flutter_services/platform/url_launcher.dart' as mojom;
-import 'shell.dart';
-
-mojom.UrlLauncherProxy _initUrlLauncherProxy() {
-  return shell.connectToApplicationService(
-      mojom.UrlLauncher.serviceName,
-      mojom.UrlLauncher.connectToService);
-}
-
-final mojom.UrlLauncherProxy _connectedUrlLauncherService = _initUrlLauncherProxy();
+import 'platform_messages.dart';
 
 /// Allows applications to delegate responsbility of handling certain URLs to
 /// the underlying platform.
@@ -27,18 +18,10 @@ class UrlLauncher {
   ///
   /// * [urlString]: The URL string to be parsed by the underlying platform and
   ///   before it attempts to launch the same.
-  ///
-  /// Return Value:
-  ///
-  ///   boolean indicating if the intent to handle the URL was successfully
-  ///   conveyed to the to underlying platform and the platform could
-  ///   successfully handle the same. The platform is responsible for URL
-  ///   parsing.
-  static Future<bool> launch(String urlString) {
-    Completer<bool> completer = new Completer<bool>();
-    _connectedUrlLauncherService.launch(urlString, (bool success) {
-      completer.complete(success);
+  static Future<Null> launch(String urlString) async {
+    await PlatformMessages.sendJSON('flutter/platform', <String, dynamic>{
+      'method': 'UrlLauncher.launch',
+      'args': <String>[ urlString ],
     });
-    return completer.future;
   }
 }

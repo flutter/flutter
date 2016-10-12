@@ -5,15 +5,7 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:flutter_services/platform/path_provider.dart' as mojom;
-
-import 'shell.dart';
-
-mojom.PathProviderProxy _initPathProviderProxy() {
-  return shell.connectToApplicationService('mojo:flutter_platform', mojom.PathProvider.connectToService);
-}
-
-final mojom.PathProviderProxy _pathProviderProxy = _initPathProviderProxy();
+import 'platform_messages.dart';
 
 /// Returns commonly used locations on the filesystem.
 class PathProvider {
@@ -29,12 +21,15 @@ class PathProvider {
   ///
   ///  * _iOS_: `NSTemporaryDirectory()`
   ///  * _Android_: `getCacheDir()` on the context.
-  static Future<Directory> getTemporaryDirectory() {
-    Completer<Directory> completer = new Completer<Directory>();
-    _pathProviderProxy.temporaryDirectory((String path) {
-      completer.complete(new Directory(path));
-    });
-    return completer.future;
+  static Future<Directory> getTemporaryDirectory() async {
+    Map<String, dynamic> result =
+      await PlatformMessages.sendJSON('flutter/platform', <String, dynamic>{
+        'method': 'PathProvider.getTemporaryDirectory',
+        'args': <Null>[],
+      });
+    if (result == null)
+      return null;
+    return new Directory(result['path']);
   }
 
   /// Path to a directory where the application may place files that are private
@@ -45,11 +40,14 @@ class PathProvider {
   ///
   ///  * _iOS_: `NSDocumentsDirectory`
   ///  * _Android_: The AppData directory.
-  static Future<Directory> getApplicationDocumentsDirectory() {
-    Completer<Directory> completer = new Completer<Directory>();
-    _pathProviderProxy.applicationDocumentsDirectory((String path) {
-      completer.complete(new Directory(path));
+  static Future<Directory> getApplicationDocumentsDirectory() async {
+    Map<String, dynamic> result =
+        await PlatformMessages.sendJSON('flutter/platform', <String, dynamic>{
+      'method': 'PathProvider.getApplicationDocumentsDirectory',
+      'args': <Null>[],
     });
-    return completer.future;
+    if (result == null)
+      return null;
+    return new Directory(result['path']);
   }
 }

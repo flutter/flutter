@@ -4,18 +4,13 @@
 
 import 'dart:async';
 
-import 'package:flutter_services/platform/system_sound.dart' as mojom;
-import 'package:flutter_services/platform/system_sound.dart' show SystemSoundType;
+import 'platform_messages.dart';
 
-import 'shell.dart';
-
-export 'package:flutter_services/platform/system_sound.dart' show SystemSoundType;
-
-mojom.SystemSoundProxy _initSystemSoundProxy() {
-  return shell.connectToApplicationService('mojo:flutter_platform', mojom.SystemSound.connectToService);
+/// A sound provided by the system
+enum SystemSoundType {
+  /// A short indication that a button was pressed.
+  click,
 }
-
-final mojom.SystemSoundProxy _systemChromeProxy = _initSystemSoundProxy();
 
 /// Allows easy access to the library of short system specific sounds for
 /// common tasks.
@@ -23,18 +18,11 @@ class SystemSound {
   SystemSound._();
 
   /// Play the specified system sound. If that sound is not present on the
-  /// system, this method is a no-op and returns `true`.
-  ///
-  /// Return Value:
-  ///
-  ///   boolean indicating if the intent to play the specified sound was
-  ///   successfully conveyed to the embedder. No sound may actually play if the
-  ///   device is muted or the sound was not available on the platform.
-  static Future<bool> play(SystemSoundType type) {
-    Completer<bool> completer = new Completer<bool>();
-    _systemChromeProxy.play(type, (bool success) {
-      completer.complete(success);
+  /// system, this method is a no-op.
+  static Future<Null> play(SystemSoundType type) async {
+    await PlatformMessages.sendJSON('flutter/platform', <String, dynamic>{
+      'method': 'SystemSound.play',
+      'args': <String>[ type.toString() ],
     });
-    return completer.future;
   }
 }
