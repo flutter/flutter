@@ -165,7 +165,10 @@ public class FlutterView extends SurfaceView
 
         setLocale(getResources().getConfiguration().locale);
 
-        mOnMessageListeners.put("flutter/platform", new PlatformPlugin((Activity)getContext()));
+        // Configure the platform plugin.
+        PlatformPlugin platformPlugin = new PlatformPlugin((Activity)getContext());
+        addOnMessageListener("flutter/platform", platformPlugin);
+        addActivityLifecycleListener(platformPlugin);
 
         if ((context.getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
             discoveryReceiver = new DiscoveryReceiver();

@@ -4,6 +4,7 @@
 
 package org.domokit.common;
 
+// TODO(abarth): Move to io.flutter.plugin.common.
 public interface ActivityLifecycleListener {
     void onPostResume();
 }
