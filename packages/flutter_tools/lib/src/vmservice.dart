@@ -190,8 +190,6 @@ abstract class ServiceObject {
       case 'Isolate':
         serviceObject = new Isolate._empty(owner.vm);
       break;
-      default:
-        printTrace("Unsupported service object type: $type");
     }
     if (serviceObject == null) {
       // If we don't have a model object for this service object type, as a
