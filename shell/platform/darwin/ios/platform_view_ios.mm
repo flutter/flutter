@@ -8,6 +8,9 @@
 #import <OpenGLES/ES2/gl.h>
 #import <OpenGLES/ES2/glext.h>
 #import <QuartzCore/CAEAGLLayer.h>
+
+#include <utility>
+
 #include "base/mac/scoped_nsautorelease_pool.h"
 #include "base/trace_event/trace_event.h"
 #include "flutter/shell/gpu/gpu_rasterizer.h"
@@ -369,6 +372,17 @@ bool PlatformViewIOS::GLContextPresent() {
   return context_ != nullptr ? context_->PresentRenderBuffer() : false;
 }
 
+void PlatformViewIOS::UpdateSemantics(
+    std::vector<blink::SemanticsNode> update) {
+  if (accessibility_bridge_)
+    accessibility_bridge_->UpdateSemantics(std::move(update));
+}
+
+void PlatformViewIOS::HandlePlatformMessage(
+    ftl::RefPtr<blink::PlatformMessage> message) {
+  app_message_receiver_.HandlePlatformMessage(std::move(message));
+}
+
 void PlatformViewIOS::RunFromSource(const std::string& main,
                                     const std::string& packages,
                                     const std::string& assets_directory) {
@@ -381,12 +395,6 @@ void PlatformViewIOS::RunFromSource(const std::string& main,
 
   latch->Wait();
   delete latch;
-}
-
-void PlatformViewIOS::UpdateSemantics(
-    std::vector<blink::SemanticsNode> update) {
-  if (accessibility_bridge_)
-    accessibility_bridge_->UpdateSemantics(std::move(update));
 }
 
 }  // namespace shell

@@ -49,11 +49,14 @@ class PlatformViewIOS : public PlatformView, public GPUSurfaceGLDelegate {
 
   intptr_t GLContextFBO() const override;
 
+  void HandlePlatformMessage(
+      ftl::RefPtr<blink::PlatformMessage> message) override;
+
+  void UpdateSemantics(std::vector<blink::SemanticsNode> update) override;
+
   void RunFromSource(const std::string& main,
                      const std::string& packages,
                      const std::string& assets_directory) override;
-
-  void UpdateSemantics(std::vector<blink::SemanticsNode> update) override;
 
  private:
   std::unique_ptr<IOSGLContext> context_;

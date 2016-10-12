@@ -7,11 +7,12 @@
 
 #include <unordered_map>
 
-#include "lib/ftl/memory/weak_ptr.h"
-#include "mojo/public/cpp/bindings/binding_set.h"
+#include "flutter/lib/ui/window/platform_message.h"
 #include "flutter/services/platform/app_messages.mojom.h"
 #include "flutter/shell/platform/darwin/ios/framework/Headers/FlutterAsyncMessageListener.h"
 #include "flutter/shell/platform/darwin/ios/framework/Headers/FlutterMessageListener.h"
+#include "lib/ftl/memory/weak_ptr.h"
+#include "mojo/public/cpp/bindings/binding_set.h"
 
 namespace shell {
 
@@ -23,6 +24,8 @@ class ApplicationMessagesImpl : public flutter::platform::ApplicationMessages {
   ftl::WeakPtr<ApplicationMessagesImpl> GetWeakPtr();
   void AddBinding(
       mojo::InterfaceRequest<flutter::platform::ApplicationMessages> request);
+
+  void HandlePlatformMessage(ftl::RefPtr<blink::PlatformMessage> message);
 
   void SetMessageListener(const std::string& message_name,
                           NSObject<FlutterMessageListener>* listener);
