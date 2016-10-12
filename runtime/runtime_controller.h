@@ -56,6 +56,7 @@ class RuntimeController : public WindowClient, public IsolateClient {
   void ScheduleFrame() override;
   void Render(Scene* scene) override;
   void UpdateSemantics(SemanticsUpdate* update) override;
+  void HandlePlatformMessage(ftl::RefPtr<PlatformMessage> message) override;
 
   void DidCreateSecondaryIsolate(Dart_Isolate isolate) override;
 

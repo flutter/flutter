@@ -55,11 +55,9 @@ void SendPlatformMessage(Dart_Handle window,
   auto message = ftl::MakeRefCounted<blink::PlatformMessage>(
       name, std::vector<char>(buffer, buffer + data.length_in_bytes()),
       tonic::DartPersistentValue(dart_state, callback));
-  if (const auto& sink = dart_state->platform_message_sink()) {
-    sink(std::move(message));
-  } else {
-    message->InvokeCallbackWithError();
-  }
+
+  UIDartState::Current()->window()->client()->HandlePlatformMessage(
+      std::move(message));
 }
 
 void _SendPlatformMessage(Dart_NativeArguments args) {

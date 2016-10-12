@@ -117,6 +117,11 @@ void RuntimeController::UpdateSemantics(SemanticsUpdate* update) {
     client_->UpdateSemantics(update->takeNodes());
 }
 
+void RuntimeController::HandlePlatformMessage(
+    ftl::RefPtr<PlatformMessage> message) {
+  client_->HandlePlatformMessage(std::move(message));
+}
+
 void RuntimeController::DidCreateSecondaryIsolate(Dart_Isolate isolate) {
   client_->DidCreateSecondaryIsolate(isolate);
 }

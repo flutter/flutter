@@ -360,4 +360,14 @@ void Engine::UpdateSemantics(std::vector<blink::SemanticsNode> update) {
       }));
 }
 
+void Engine::HandlePlatformMessage(
+    ftl::RefPtr<blink::PlatformMessage> message) {
+  blink::Threads::Platform()->PostTask([
+    platform_view = platform_view_, message = std::move(message)
+  ]() mutable {
+    if (platform_view)
+      platform_view->HandlePlatformMessage(std::move(message));
+  });
+}
+
 }  // namespace shell

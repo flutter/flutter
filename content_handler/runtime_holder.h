@@ -40,6 +40,8 @@ class RuntimeHolder : public blink::RuntimeDelegate,
   void ScheduleFrame() override;
   void Render(std::unique_ptr<flow::LayerTree> layer_tree) override;
   void UpdateSemantics(std::vector<blink::SemanticsNode> update) override;
+  void HandlePlatformMessage(
+      ftl::RefPtr<blink::PlatformMessage> message) override;
   void DidCreateMainIsolate(Dart_Isolate isolate) override;
 
   // |mozart::InputListener| implementation:

@@ -147,6 +147,11 @@ void RuntimeHolder::Render(std::unique_ptr<flow::LayerTree> layer_tree) {
 
 void RuntimeHolder::UpdateSemantics(std::vector<blink::SemanticsNode> update) {}
 
+void RuntimeHolder::HandlePlatformMessage(
+    ftl::RefPtr<blink::PlatformMessage> message) {
+  message->InvokeCallbackWithError();
+}
+
 void RuntimeHolder::DidCreateMainIsolate(Dart_Isolate isolate) {
   blink::MojoServices::Create(isolate, nullptr, nullptr,
                               std::move(root_bundle_));

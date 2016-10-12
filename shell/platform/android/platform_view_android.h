@@ -28,7 +28,10 @@ class PlatformViewAndroid : public PlatformView {
 
   void Detach(JNIEnv* env, jobject obj);
 
-  void SurfaceCreated(JNIEnv* env, jobject obj, jobject jsurface, jint backgroundColor);
+  void SurfaceCreated(JNIEnv* env,
+                      jobject obj,
+                      jobject jsurface,
+                      jint backgroundColor);
 
   void SurfaceChanged(JNIEnv* env, jobject obj, jint width, jint height);
 
@@ -55,6 +58,9 @@ class PlatformViewAndroid : public PlatformView {
 
   void UpdateSemantics(std::vector<blink::SemanticsNode> update) override;
 
+  void HandlePlatformMessage(
+      ftl::RefPtr<blink::PlatformMessage> message) override;
+
   void RunFromSource(const std::string& main,
                      const std::string& packages,
                      const std::string& assets_directory) override;
@@ -79,8 +85,6 @@ class PlatformViewAndroid : public PlatformView {
   void GetBitmapGpuTask(ftl::AutoResetWaitableEvent* latch,
                         jobject* pixels_out,
                         SkISize* size_out);
-
-  void HandlePlatformMessage(ftl::RefPtr<blink::PlatformMessage> message);
 
   FTL_DISALLOW_COPY_AND_ASSIGN(PlatformViewAndroid);
 };
