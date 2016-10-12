@@ -53,6 +53,8 @@ class PlatformView {
   virtual bool ResourceContextMakeCurrent() = 0;
 
   virtual void UpdateSemantics(std::vector<blink::SemanticsNode> update);
+  virtual void HandlePlatformMessage(
+      ftl::RefPtr<blink::PlatformMessage> message);
 
   Rasterizer& rasterizer() { return *rasterizer_; }
   Engine& engine() { return *engine_; }

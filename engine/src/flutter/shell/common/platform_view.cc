@@ -116,6 +116,11 @@ ftl::WeakPtr<PlatformView> PlatformView::GetWeakPtr() {
 
 void PlatformView::UpdateSemantics(std::vector<blink::SemanticsNode> update) {}
 
+void PlatformView::HandlePlatformMessage(
+    ftl::RefPtr<blink::PlatformMessage> message) {
+  message->InvokeCallbackWithError();
+}
+
 void PlatformView::SetupResourceContextOnIOThread() {
   ftl::AutoResetWaitableEvent latch;
 
