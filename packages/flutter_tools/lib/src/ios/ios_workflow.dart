@@ -32,11 +32,12 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
   @override
   Future<ValidationResult> validate() async {
     List<ValidationMessage> messages = <ValidationMessage>[];
-    int installCount = 0;
+    ValidationType xcodeStatus = ValidationType.missing;
+    ValidationType brewStatus = ValidationType.missing;
     String xcodeVersionInfo;
 
     if (xcode.isInstalled) {
-      installCount++;
+      xcodeStatus = ValidationType.installed;
 
       messages.add(new ValidationMessage('XCode at ${xcode.xcodeSelectPath}'));
 
@@ -46,6 +47,7 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
       messages.add(new ValidationMessage(xcode.xcodeVersionText));
 
       if (!xcode.isInstalledAndMeetsVersionCheck) {
+        xcodeStatus = ValidationType.partial;
         messages.add(new ValidationMessage.error(
           'Flutter requires a minimum XCode version of $kXcodeRequiredVersionMajor.$kXcodeRequiredVersionMinor.0.\n'
           'Download the latest version or update via the Mac App Store.'
@@ -53,11 +55,13 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
       }
 
       if (!xcode.eulaSigned) {
+        xcodeStatus = ValidationType.partial;
         messages.add(new ValidationMessage.error(
           'XCode end user license agreement not signed; open XCode or run the command \'sudo xcodebuild -license\'.'
         ));
       }
     } else {
+      xcodeStatus = ValidationType.missing;
       messages.add(new ValidationMessage.error(
         'XCode not installed; this is necessary for iOS development.\n'
         'Download at https://developer.apple.com/xcode/download/.'
@@ -66,9 +70,10 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
 
     // brew installed
     if (os.which('brew') != null) {
-      installCount++;
+      brewStatus = ValidationType.installed;
 
       if (!exitsHappy(<String>['ideviceinstaller', '-h'])) {
+        brewStatus = ValidationType.partial;
         messages.add(new ValidationMessage.error(
           'ideviceinstaller not available; this is used to discover connected iOS devices.\n'
           'Install via \'brew install ideviceinstaller\'.'
@@ -76,6 +81,7 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
       }
 
       if (!hasIDeviceId) {
+        brewStatus = ValidationType.partial;
         messages.add(new ValidationMessage.error(
           'ios-deploy not available; this is used to deploy to connected iOS devices.\n'
           'Install via \'brew install ios-deploy\'.'
@@ -85,6 +91,7 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
         // TODO(cbracken) remove this check once libimobiledevice > 1.2.0 is released.
         ProcessResult result = (await runAsync(<String>['idevice_id', '-l'])).processResult;
         if (result.exitCode == 0 && result.stdout.isNotEmpty && !exitsHappy(<String>['ideviceName'])) {
+          brewStatus = ValidationType.partial;
           messages.add(new ValidationMessage.error(
             'libimobiledevice is incompatible with the installed XCode version. To update, run:\n'
             'brew uninstall libimobiledevice\n'
@@ -93,6 +100,7 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
         }
       }
     } else {
+      brewStatus = ValidationType.missing;
       messages.add(new ValidationMessage.error(
         'Brew not installed; use this to install tools for iOS device development.\n'
         'Download brew at http://brew.sh/.'
@@ -100,7 +108,7 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
     }
 
     return new ValidationResult(
-      installCount == 2 ? ValidationType.installed : installCount == 1 ? ValidationType.partial : ValidationType.missing,
+      xcodeStatus == brewStatus ? xcodeStatus : ValidationType.partial,
       messages,
       statusInfo: xcodeVersionInfo
     );
