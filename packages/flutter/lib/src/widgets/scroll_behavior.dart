@@ -14,10 +14,6 @@ const double _kScrollDragMountainView = 0.025;
 const double _kScrollDragCupertino = 0.125;
 final SpringDescription _kScrollSpring = new SpringDescription.withDampingRatio(mass: 0.5, springConstant: 100.0, ratio: 1.1);
 
-Simulation _createScrollSimulation(double position, double velocity, double minScrollOffset, double maxScrollOffset, double scrollDrag) {
-  return new ScrollSimulation(position, velocity, minScrollOffset, maxScrollOffset, _kScrollSpring, scrollDrag);
-}
-
 Simulation _createSnapScrollSimulation(double startOffset, double endOffset, double startVelocity, double endVelocity) {
   return new FrictionSimulation.through(startOffset, endOffset, startVelocity, endVelocity);
 }
@@ -259,7 +255,15 @@ class OverscrollBehavior extends BoundedBehavior {
 
   @override
   Simulation createScrollSimulation(double position, double velocity) {
-    return _createScrollSimulation(position, velocity, minScrollOffset, maxScrollOffset, scrollDrag);
+    return new ScrollSimulation(
+      position: position,
+      velocity: velocity,
+      leadingExtent: minScrollOffset,
+      trailingExtent: maxScrollOffset,
+      spring: _kScrollSpring,
+      drag: scrollDrag,
+      platform: platform,
+    );
   }
 
   @override
