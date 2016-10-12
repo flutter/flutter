@@ -60,6 +60,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import io.flutter.plugin.platform.PlatformPlugin;
+
 import org.domokit.common.ActivityLifecycleListener;
 import org.domokit.activity.ActivityImpl;
 import org.domokit.editing.KeyboardImpl;
@@ -162,6 +164,8 @@ public class FlutterView extends SurfaceView
         mActivityLifecycleListeners = new ArrayList<ActivityLifecycleListener>();
 
         setLocale(getResources().getConfiguration().locale);
+
+        mOnMessageListeners.put("flutter/platform", new PlatformPlugin((Activity)getContext()));
 
         if ((context.getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
             discoveryReceiver = new DiscoveryReceiver();
@@ -585,14 +589,14 @@ public class FlutterView extends SurfaceView
     private static native void nativeInvokePlatformMessageResponseCallback(long nativePlatformViewAndroid, int responseId, String buffer);
 
     @CalledByNative
-    private void handlePlatformMessage(String messageName, String message, final int responseId) {
-        OnMessageListener listener = mOnMessageListeners.get(messageName);
+    private void handlePlatformMessage(String name, String message, final int responseId) {
+        OnMessageListener listener = mOnMessageListeners.get(name);
         if (listener != null) {
             nativeInvokePlatformMessageResponseCallback(mNativePlatformView, responseId, listener.onMessage(this, message));
             return;
         }
 
-        OnMessageListenerAsync asyncListener = mAsyncOnMessageListeners.get(messageName);
+        OnMessageListenerAsync asyncListener = mAsyncOnMessageListeners.get(name);
         if (asyncListener != null) {
             asyncListener.onMessage(this, message, new MessageResponse() {
               @Override

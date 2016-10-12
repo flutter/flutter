@@ -215,14 +215,14 @@ class Window {
   /// semantics update cannot be used further.
   void updateSemantics(SemanticsUpdate update) native "Window_updateSemantics";
 
-  void sendPlatformMesssage(String name,
-                            ByteData data,
-                            PlatformMessageResponseCallback callback) {
-    _sendPlatformMesssage(name, callback, data);
+  void sendPlatformMessage(String name,
+                           ByteData data,
+                           PlatformMessageResponseCallback callback) {
+    _sendPlatformMessage(name, callback, data);
   }
-  void _sendPlatformMesssage(String name,
-                             PlatformMessageResponseCallback callback,
-                             ByteData data) native "Window_sendPlatformMesssage";
+  void _sendPlatformMessage(String name,
+                            PlatformMessageResponseCallback callback,
+                            ByteData data) native "Window_sendPlatformMessage";
 
 }
 
