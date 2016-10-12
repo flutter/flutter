@@ -4,9 +4,21 @@
 
 #include "flutter/shell/platform/darwin/ios/framework/Source/application_messages_impl.h"
 
+#include <vector>
+
 #include "base/strings/sys_string_conversions.h"
 
 namespace shell {
+namespace {
+
+std::vector<char> SysNSStringToVector(NSString* string) {
+  if (!string.length)
+    return std::vector<char>();
+  const char* utf8 = string.UTF8String;
+  return std::vector<char>(utf8, utf8 + strlen(utf8));
+}
+
+} // namespace
 
 ApplicationMessagesImpl::ApplicationMessagesImpl() : weak_factory_(this) {}
 
@@ -19,6 +31,31 @@ ftl::WeakPtr<ApplicationMessagesImpl> ApplicationMessagesImpl::GetWeakPtr() {
 void ApplicationMessagesImpl::AddBinding(
     mojo::InterfaceRequest<flutter::platform::ApplicationMessages> request) {
   binding_.AddBinding(this, request.Pass());
+}
+
+void ApplicationMessagesImpl::HandlePlatformMessage(
+    ftl::RefPtr<blink::PlatformMessage> message) {
+  NSString* string = [NSString stringWithUTF8String:message->data().data()];
+
+  {
+    auto it = listeners_.find(message->name());
+    if (it != listeners_.end()) {
+      NSString* response = [it->second didReceiveString:string];
+      message->InvokeCallback(SysNSStringToVector(response));
+      return;
+    }
+  }
+
+  {
+    auto it = async_listeners_.find(message->name());
+    if (it != async_listeners_.end()) {
+      [it->second
+          didReceiveString:string
+                  callback:^(NSString* response) {
+                    message->InvokeCallback(SysNSStringToVector(response));
+                  }];
+    }
+  }
 }
 
 void ApplicationMessagesImpl::SetMessageListener(
