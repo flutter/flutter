@@ -145,6 +145,10 @@ void KeyboardImpl::SetClient(mojo::InterfaceHandle<::editing::KeyboardClient> cl
   [client_ setClient: ::editing::KeyboardClientPtr::Create(client.Pass())];
 }
 
+void KeyboardImpl::ClearClient() {
+  // TODO: implement this
+}
+
 void KeyboardImpl::SetEditingState(::editing::EditingStatePtr state) {
   [client_ setEditingState:state.Pass()];
 }

@@ -25,6 +25,7 @@ class KeyboardImpl : public ::editing::Keyboard {
   ~KeyboardImpl() override;
   void SetClient(mojo::InterfaceHandle<::editing::KeyboardClient> client,
                  ::editing::KeyboardConfigurationPtr configuration) override;
+  void ClearClient() override;
   void SetEditingState(::editing::EditingStatePtr state) override;
   void Show() override;
   void Hide() override;

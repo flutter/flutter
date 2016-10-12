@@ -39,6 +39,11 @@ public class KeyboardImpl implements Keyboard {
     }
 
     @Override
+    public void clearClient() {
+        mViewState.close();
+    }
+
+    @Override
     public void setEditingState(EditingState state) {
         mViewState.setEditingState(state);
     }

@@ -44,6 +44,7 @@ interface KeyboardClient {
 [ServiceName="editing::Keyboard"]
 interface Keyboard {
   SetClient(KeyboardClient client, KeyboardConfiguration configuration);
+  ClearClient();
   SetEditingState(EditingState state);
   Show();
   Hide();
