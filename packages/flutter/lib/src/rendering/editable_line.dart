@@ -298,7 +298,8 @@ class RenderEditableLine extends RenderBox {
     _selectionRects = null;
     _textPainter.layout(maxWidth: _maxContentWidth);
     size = new Size(constraints.maxWidth, constraints.constrainHeight(
-      _textPainter.height.clamp(lineHeight, lineHeight * _maxLines)));
+      _textPainter.height.clamp(lineHeight, lineHeight * _maxLines)
+    ));
     Size contentSize = new Size(_textPainter.width + _kCaretGap + _kCaretWidth, _textPainter.height);
     assert(_selection != null);  // valid assumption?
     Offset caretOffset = _textPainter.getOffsetForCaret(_selection.extent, _caretPrototype);

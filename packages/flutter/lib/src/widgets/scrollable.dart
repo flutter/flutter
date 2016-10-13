@@ -486,9 +486,7 @@ class ScrollableState<T extends Scrollable> extends State<T> with SingleTickerPr
 
     if (duration == null) {
       _stop();
-      // scheduleMicrotask(() {
-        _setScrollOffset(newScrollOffset, details: details);
-      // });
+      _setScrollOffset(newScrollOffset, details: details);
       return new Future<Null>.value();
     }
 
