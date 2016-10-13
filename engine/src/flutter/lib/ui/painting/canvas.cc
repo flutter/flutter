@@ -8,9 +8,9 @@
 
 #include "flutter/lib/ui/painting/image.h"
 #include "flutter/lib/ui/painting/matrix.h"
+#include "lib/tonic/converter/dart_converter.h"
 #include "lib/tonic/dart_args.h"
 #include "lib/tonic/dart_binding_macros.h"
-#include "lib/tonic/converter/dart_converter.h"
 #include "lib/tonic/dart_library_natives.h"
 #include "third_party/skia/include/core/SkBitmap.h"
 #include "third_party/skia/include/core/SkCanvas.h"
@@ -162,13 +162,13 @@ void Canvas::clipRect(double left, double top, double right, double bottom) {
 void Canvas::clipRRect(const RRect& rrect) {
   if (!canvas_)
     return;
-  canvas_->clipRRect(rrect.sk_rrect, SkRegion::kIntersect_Op);
+  canvas_->clipRRect(rrect.sk_rrect, true);
 }
 
 void Canvas::clipPath(const CanvasPath* path) {
   if (!canvas_)
     return;
-  canvas_->clipPath(path->path(), SkRegion::kIntersect_Op);
+  canvas_->clipPath(path->path(), true);
 }
 
 void Canvas::drawColor(SkColor color, SkXfermode::Mode transfer_mode) {
@@ -244,21 +244,19 @@ void Canvas::drawCircle(double x,
 }
 
 void Canvas::drawArc(double left,
-             double top,
-             double right,
-             double bottom,
-             double startAngle,
-             double sweepAngle,
-             bool useCenter,
-             const Paint& paint,
-             const PaintData& paint_data) {
+                     double top,
+                     double right,
+                     double bottom,
+                     double startAngle,
+                     double sweepAngle,
+                     bool useCenter,
+                     const Paint& paint,
+                     const PaintData& paint_data) {
   if (!canvas_)
     return;
   canvas_->drawArc(SkRect::MakeLTRB(left, top, right, bottom),
-                   startAngle * 180.0 / M_PI,
-                   sweepAngle* 180.0 / M_PI,
-                   useCenter,
-                   *paint.paint());
+                   startAngle * 180.0 / M_PI, sweepAngle * 180.0 / M_PI,
+                   useCenter, *paint.paint());
 }
 
 void Canvas::drawPath(const CanvasPath* path,
