@@ -8,21 +8,13 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-
+import io.flutter.plugin.platform.PlatformPlugin;
 import io.flutter.view.FlutterMain;
 import io.flutter.view.FlutterView;
-
-import org.chromium.base.PathUtils;
-import org.chromium.base.TraceEvent;
-import org.chromium.mojom.sky.EventType;
-import org.chromium.mojom.sky.InputEvent;
-
-import java.io.File;
 import java.util.ArrayList;
+import org.chromium.base.TraceEvent;
 
 
 /**
@@ -60,9 +52,7 @@ public class SkyActivity extends Activity {
             Window window = getWindow();
             window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
             window.setStatusBarColor(0x40000000);
-            window.getDecorView().setSystemUiVisibility(
-                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                    | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
+            window.getDecorView().setSystemUiVisibility(PlatformPlugin.DEFAULT_SYSTEM_UI);
         }
 
         String[] args = getArgsFromIntent(getIntent());
