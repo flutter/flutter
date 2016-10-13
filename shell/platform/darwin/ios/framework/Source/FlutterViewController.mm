@@ -10,13 +10,12 @@
 #include "base/mac/scoped_nsobject.h"
 #include "base/strings/sys_string_conversions.h"
 #include "flutter/common/threads.h"
-#include "flutter/services/platform/ios/system_chrome_impl.h"
 #include "flutter/shell/gpu/gpu_rasterizer.h"
 #include "flutter/shell/gpu/gpu_surface_gl.h"
 #include "flutter/shell/platform/darwin/common/platform_mac.h"
+#include "flutter/shell/platform/darwin/ios/framework/Source/flutter_touch_mapper.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/FlutterDartProject_Internal.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformPlugin.h"
-#include "flutter/shell/platform/darwin/ios/framework/Source/flutter_touch_mapper.h"
 #include "flutter/shell/platform/darwin/ios/platform_view_ios.h"
 #include "lib/ftl/functional/make_copyable.h"
 #include "lib/ftl/time/time_delta.h"
@@ -97,12 +96,12 @@ void FlutterInit(int argc, const char* argv[]) {
   NSNotificationCenter* center = [NSNotificationCenter defaultCenter];
   [center addObserver:self
              selector:@selector(onOrientationPreferencesUpdated:)
-                 name:@(flutter::platform::kOrientationUpdateNotificationName)
+                 name:@(shell::kOrientationUpdateNotificationName)
                object:nil];
 
   [center addObserver:self
              selector:@selector(onPreferredStatusBarStyleUpdated:)
-                 name:@(flutter::platform::kOverlayStyleUpdateNotificationName)
+                 name:@(shell::kOverlayStyleUpdateNotificationName)
                object:nil];
 
   [center addObserver:self
@@ -339,7 +338,7 @@ static inline PointerChangeMapperPhase PointerChangePhaseFromUITouchPhase(
     NSDictionary* info = notification.userInfo;
 
     NSNumber* update =
-        info[@(flutter::platform::kOrientationUpdateNotificationKey)];
+        info[@(shell::kOrientationUpdateNotificationKey)];
 
     if (update == nil) {
       return;
@@ -430,7 +429,7 @@ static inline PointerChangeMapperPhase PointerChangePhaseFromUITouchPhase(
     NSDictionary* info = notification.userInfo;
 
     NSNumber* update =
-        info[@(flutter::platform::kOverlayStyleUpdateNotificationKey)];
+        info[@(shell::kOverlayStyleUpdateNotificationKey)];
 
     if (update == nil) {
       return;

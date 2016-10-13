@@ -24,7 +24,6 @@ source_set("common") {
     "//flutter/services/activity",
     "//flutter/services/editing",
     "//flutter/services/engine:interfaces",
-    "//flutter/services/media",
     "//flutter/services/platform",
     "//flutter/services/vsync",
     "//flutter/shell/common",
