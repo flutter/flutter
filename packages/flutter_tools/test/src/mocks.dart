@@ -21,7 +21,7 @@ class MockApplicationPackageStore extends ApplicationPackageStore {
       apkPath: '/mock/path/to/android/SkyShell.apk',
       launchActivity: 'io.flutter.android.mock.MockActivity'
     ),
-    iOS: new IOSApp(
+    iOS: new BuildableIOSApp(
       appDirectory: '/mock/path/to/iOS/SkyShell.app',
       projectBundleId: 'io.flutter.ios.mock'
     )

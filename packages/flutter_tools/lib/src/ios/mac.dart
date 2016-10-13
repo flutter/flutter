@@ -102,7 +102,7 @@ bool _xcodeVersionCheckValid(int major, int minor) {
 }
 
 Future<XcodeBuildResult> buildXcodeProject({
-  IOSApp app,
+  BuildableIOSApp app,
   BuildMode mode,
   String target: flx.defaultMainPath,
   bool buildForDevice,

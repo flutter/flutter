@@ -205,6 +205,9 @@ Future<Null> _exit(int code) async {
     printTrace('ensureAnalyticsSent: ${stopwatch.elapsedMilliseconds}ms');
   }
 
+  // Run shutdown hooks before flushing logs
+  await runShutdownHooks();
+
   // Write any buffered output.
   logger.flush();
 

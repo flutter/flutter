@@ -415,10 +415,12 @@ class IOSSimulator extends Device {
     Map<String, dynamic> platformArgs,
     bool prebuiltApplication: false
   }) async {
-    printTrace('Building ${app.name} for $id.');
+    if (!prebuiltApplication) {
+      printTrace('Building ${app.name} for $id.');
 
-    if (!(await _setupUpdatedApplicationBundle(app)))
-      return new LaunchResult.failed();
+      if (!(await _setupUpdatedApplicationBundle(app)))
+        return new LaunchResult.failed();
+    }
 
     ProtocolDiscovery observatoryDiscovery;
 
@@ -426,11 +428,14 @@ class IOSSimulator extends Device {
       observatoryDiscovery = new ProtocolDiscovery(logReader, ProtocolDiscovery.kObservatoryService);
 
     // Prepare launch arguments.
-    List<String> args = <String>[
-      "--flx=${path.absolute(path.join(getBuildDirectory(), 'app.flx'))}",
-      "--dart-main=${path.absolute(mainPath)}",
-      "--packages=${path.absolute('.packages')}",
-    ];
+    List<String> args = <String>[];
+
+    if (!prebuiltApplication)
+      args.addAll(<String>[
+        "--flx=${path.absolute(path.join(getBuildDirectory(), 'app.flx'))}",
+        "--dart-main=${path.absolute(mainPath)}",
+        "--packages=${path.absolute('.packages')}",
+      ]);
 
     if (debuggingOptions.debuggingEnabled) {
       if (debuggingOptions.buildMode == BuildMode.debug)
