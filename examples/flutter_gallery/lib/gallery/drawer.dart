@@ -43,7 +43,7 @@ class _GalleryDrawerHeaderState extends State<GalleryDrawerHeader> {
                                               : FlutterLogoStyle.stacked
                                               : FlutterLogoStyle.markOnly,
         swatch: _swatch,
-        textColor: config.light ? const Color(0xFF616161) : const Color(0xFF9E9E9E),
+        textColor: config.light ? const Color(0xFF616161) : const Color(0xFF9E9E9E)
       ),
       duration: const Duration(milliseconds: 750),
       child: new GestureDetector(

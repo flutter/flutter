@@ -107,7 +107,7 @@ class GalleryHomeState extends State<GalleryHome> with SingleTickerProviderState
     _controller = new AnimationController(
       duration: const Duration(milliseconds: 600),
       debugLabel: 'preview banner',
-      vsync: this,
+      vsync: this
     )..forward();
   }
 
@@ -195,7 +195,7 @@ class GalleryHomeState extends State<GalleryHome> with SingleTickerProviderState
             opacity: new CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
             child: new Banner(
               message: 'PREVIEW',
-              location: BannerLocation.topRight,
+              location: BannerLocation.topRight
             )
           ),
         ]

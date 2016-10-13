@@ -54,37 +54,37 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
         tabName: 'RAISED',
         description: _raisedText,
         widget: buildRaisedButton(),
-        exampleCodeTag: _raisedCode,
+        exampleCodeTag: _raisedCode
       ),
       new ComponentDemoTabData(
         tabName: 'FLAT',
         description: _flatText,
         widget: buildFlatButton(),
-        exampleCodeTag: _flatCode,
+        exampleCodeTag: _flatCode
       ),
       new ComponentDemoTabData(
         tabName: 'DROPDOWN',
         description: _dropdownText,
         widget: buildDropdownButton(),
-        exampleCodeTag: _dropdownCode,
+        exampleCodeTag: _dropdownCode
       ),
       new ComponentDemoTabData(
         tabName: 'ICON',
         description: _iconText,
         widget: buildIconButton(),
-        exampleCodeTag: _iconCode,
+        exampleCodeTag: _iconCode
       ),
       new ComponentDemoTabData(
         tabName: 'ACTION',
         description: _actionText,
         widget: buildActionButton(),
-        exampleCodeTag: _actionCode,
+        exampleCodeTag: _actionCode
       ),
     ];
 
     return new TabbedComponentDemoScaffold(
       title: 'Buttons',
-      demos: demos,
+      demos: demos
     );
   }
 
@@ -98,14 +98,14 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
             child: new Text('RAISED BUTTON'),
             onPressed: () {
               // Perform some action
-            },
+            }
           ),
           new RaisedButton(
             child: new Text('DISABLED'),
-            onPressed: null,
+            onPressed: null
           )
-        ],
-      ),
+        ]
+      )
     );
   }
 
@@ -119,14 +119,14 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
             child: new Text('FLAT BUTTON'),
             onPressed: () {
               // Perform some action
-            },
+            }
           ),
           new FlatButton(
             child: new Text('DISABLED'),
-            onPressed: null,
+            onPressed: null
           )
-        ],
-      ),
+        ]
+      )
     );
   }
 
@@ -157,14 +157,14 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
                 .map((String value) {
                   return new DropdownMenuItem<String>(
                     value: value,
-                    child: new Text(value),
+                    child: new Text(value)
                   );
                 })
-                .toList(),
-             ),
+                .toList()
+             )
           ),
           new SizedBox(
-            height: 24.0,
+            height: 24.0
           ),
           new ListItem(
             title: new Text('Simple dropdown:'),
@@ -179,13 +179,13 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
               items: <String>['One', 'Two', 'Free', 'Four'].map((String value) {
                 return new DropdownMenuItem<String>(
                   value: value,
-                  child: new Text(value),
+                  child: new Text(value)
                 );
-              }).toList(),
-            ),
+              }).toList()
+            )
           )
-        ],
-      ),
+        ]
+      )
     );
   }
 
@@ -202,16 +202,16 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
             onPressed: () {
               setState(() => iconButtonToggle = !iconButtonToggle);
             },
-            color: iconButtonToggle ? Theme.of(context).primaryColor : null,
+            color: iconButtonToggle ? Theme.of(context).primaryColor : null
           ),
           new IconButton(
             icon: new Icon(Icons.thumb_up),
-            onPressed: null,
+            onPressed: null
           )
         ]
         .map((Widget button) => new SizedBox(width: 64.0, height: 64.0, child: button))
-        .toList(),
-      ),
+        .toList()
+      )
     );
   }
 
@@ -222,8 +222,8 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
         child: new Icon(Icons.add),
         onPressed: () {
           // Perform some action
-        },
-      ),
+        }
+      )
     );
   }
 }

@@ -130,8 +130,8 @@ class TextFieldDemoState extends State<TextFieldDemo> {
               alignment: const FractionalOffset(0.5, 0.5),
               child: new RaisedButton(
                 child: new Text('SUBMIT'),
-                onPressed: _handleSubmitted,
-              ),
+                onPressed: _handleSubmitted
+              )
             )
           ]
         )

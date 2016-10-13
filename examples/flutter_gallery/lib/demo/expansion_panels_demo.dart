@@ -34,7 +34,7 @@ class DualHeaderWithHint extends StatelessWidget {
       secondCurve: new Interval(0.4, 1.0, curve: Curves.fastOutSlowIn),
       sizeCurve: Curves.fastOutSlowIn,
       crossFadeState: isExpanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
-      duration: const Duration(milliseconds: 200),
+      duration: const Duration(milliseconds: 200)
     );
   }
 
@@ -198,8 +198,8 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
                 value: new InputValue(text: item.value),
                 formField: new FormField<String>(
                   setter: (String val) { item.value = val; }
-                ),
-              ),
+                )
+              )
             ),
             onSave: close,
             onCancel: close

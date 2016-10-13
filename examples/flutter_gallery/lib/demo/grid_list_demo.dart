@@ -159,7 +159,7 @@ class GridDemoPhotoItem extends StatelessWidget {
           ),
           body: new Hero(
             tag: photo.tag,
-            child: new GridPhotoViewer(photo: photo),
+            child: new GridPhotoViewer(photo: photo)
           )
         );
       }
