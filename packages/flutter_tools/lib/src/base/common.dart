@@ -13,7 +13,9 @@ const int kDefaultDrivePort       = 8183;
 /// Return the absolute path of the user's home directory
 String get homeDirPath {
   if (_homeDirPath == null) {
-    _homeDirPath = Platform.environment['HOME'] ?? Platform.environment['USERPROFILE'];
+    _homeDirPath = Platform.isWindows
+        ? Platform.environment['USERPROFILE']
+        : Platform.environment['HOME'];
     if (_homeDirPath != null)
       _homeDirPath = path.absolute(_homeDirPath);
   }

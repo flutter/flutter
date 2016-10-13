@@ -42,7 +42,7 @@ class Doctor {
 
     List<DoctorValidator> ideValidators = <DoctorValidator>[];
     ideValidators.addAll(AtomValidator.installed);
-    ideValidators.addAll(IntellijValidator.installed);
+    ideValidators.addAll(IntelliJValidator.installed);
     if (ideValidators.isNotEmpty)
       _validators.addAll(ideValidators);
     else
@@ -314,8 +314,8 @@ class AtomValidator extends DoctorValidator {
   }
 }
 
-abstract class IntellijValidator extends DoctorValidator {
-  IntellijValidator(String title) : super(title);
+abstract class IntelliJValidator extends DoctorValidator {
+  IntelliJValidator(String title) : super(title);
 
   String get version;
   String get pluginsPath;
@@ -328,9 +328,9 @@ abstract class IntellijValidator extends DoctorValidator {
 
   static Iterable<DoctorValidator> get installed {
     if (Platform.isLinux)
-      return IntellijValidatorOnLinux.installed;
+      return IntelliJValidatorOnLinux.installed;
     if (Platform.isMacOS)
-      return IntellijValidatorOnMac.installed;
+      return IntelliJValidatorOnMac.installed;
     // TODO(danrubel): add support for Windows
     return <DoctorValidator>[];
   }
@@ -378,8 +378,8 @@ abstract class IntellijValidator extends DoctorValidator {
   }
 }
 
-class IntellijValidatorOnLinux extends IntellijValidator {
-  IntellijValidatorOnLinux(String title, this.version, this.pluginsPath) : super(title);
+class IntelliJValidatorOnLinux extends IntelliJValidator {
+  IntelliJValidatorOnLinux(String title, this.version, this.pluginsPath) : super(title);
 
   String version;
   String pluginsPath;
@@ -390,7 +390,7 @@ class IntellijValidatorOnLinux extends IntellijValidator {
     for (FileSystemEntity dir in new Directory(homeDirPath).listSync()) {
       if (dir is Directory) {
         String name = path.basename(dir.path);
-        IntellijValidator._idToTitle.forEach((String id, String title) {
+        IntelliJValidator._idToTitle.forEach((String id, String title) {
           if (name.startsWith('.$id')) {
             String version = name.substring(id.length + 1);
             String installPath;
@@ -401,7 +401,7 @@ class IntellijValidatorOnLinux extends IntellijValidator {
             }
             if (installPath != null && FileSystemEntity.isDirectorySync(installPath)) {
               String pluginsPath = path.join(dir.path, 'config', 'plugins');
-              validators.add(new IntellijValidatorOnLinux(title, version, pluginsPath));
+              validators.add(new IntelliJValidatorOnLinux(title, version, pluginsPath));
             }
           }
         });
@@ -411,16 +411,16 @@ class IntellijValidatorOnLinux extends IntellijValidator {
   }
 }
 
-class IntellijValidatorOnMac extends IntellijValidator {
-  IntellijValidatorOnMac(String title, this.id, this.installPath) : super(title);
+class IntelliJValidatorOnMac extends IntelliJValidator {
+  IntelliJValidatorOnMac(String title, this.id, this.installPath) : super(title);
 
   final String id;
   final String installPath;
 
   static final Map<String, String> _dirNameToId = <String, String>{
-    'IntelliJ IDEA' : 'IntelliJIdea',
-    'IntelliJ IDEA CE' : 'IdeaIC',
-    'WebStorm' : 'WebStorm',
+    'IntelliJ IDEA.app' : 'IntelliJIdea',
+    'IntelliJ IDEA CE.app' : 'IdeaIC',
+    'WebStorm.app' : 'WebStorm',
   };
 
   static Iterable<DoctorValidator> get installed {
@@ -430,8 +430,8 @@ class IntellijValidatorOnMac extends IntellijValidator {
         String name = path.basename(dir.path);
         _dirNameToId.forEach((String dirName, String id) {
           if (name == dirName) {
-            String title = IntellijValidator._idToTitle[id];
-            validators.add(new IntellijValidatorOnMac(title, id, dir.path));
+            String title = IntelliJValidator._idToTitle[id];
+            validators.add(new IntelliJValidatorOnMac(title, id, dir.path));
           }
         });
       }
@@ -445,10 +445,6 @@ class IntellijValidatorOnMac extends IntellijValidator {
       String plist;
       try {
         plist = new File(path.join(installPath, 'Contents', 'Info.plist')).readAsStringSync();
-      } catch (e) {
-        // ignored
-      }
-      if (plist != null) {
         int index = plist.indexOf('CFBundleShortVersionString');
         if (index > 0) {
           int start = plist.indexOf('<string>', index);
@@ -459,6 +455,8 @@ class IntellijValidatorOnMac extends IntellijValidator {
             }
           }
         }
+      } on FileSystemException catch (e) {
+        // ignored
       }
       _version ??= 'unknown';
     }
