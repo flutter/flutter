@@ -123,7 +123,9 @@ class CreateCommand extends FlutterCommand {
 All done! In order to run your application, type:
 
   \$ cd $relativePath
-  \$ flutter run lib/main.dart
+  \$ flutter run
+
+Your main program file is lib/main.dart in the $relativePath directory.
 ''');
     } else {
       printStatus("You'll need to install additional components before you can run "
@@ -135,8 +137,9 @@ All done! In order to run your application, type:
       printStatus('');
       printStatus("After installing components, run 'flutter doctor' in order to "
         "re-validate your setup.");
-      printStatus("When complete, type 'flutter run lib/main.dart' from the '$relativePath' "
+      printStatus("When complete, type 'flutter run' from the '$relativePath' "
         "directory in order to launch your app.");
+      printStatus("Your main program file is: $relativePath/lib/main.dart");
     }
 
     return 0;
