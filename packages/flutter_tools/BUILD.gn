@@ -10,7 +10,7 @@ dart_package("flutter_tools") {
   source_dir = "lib"
 
   deps = [
-    "//third_party/dart-pkg/pub/analyzer",
+    "//dart/pkg/analyzer",
     "//third_party/dart-pkg/pub/archive",
     "//third_party/dart-pkg/pub/args",
     "//third_party/dart-pkg/pub/coverage",
@@ -21,7 +21,7 @@ dart_package("flutter_tools") {
     "//third_party/dart-pkg/pub/json_schema",
     "//third_party/dart-pkg/pub/linter",
     "//third_party/dart-pkg/pub/meta",
-    "//third_party/dart-pkg/pub/mustache4dart",
+    "//third_party/dart-pkg/pub/mustache",
     "//third_party/dart-pkg/pub/package_config",
     "//third_party/dart-pkg/pub/path",
     "//third_party/dart-pkg/pub/pub_semver",

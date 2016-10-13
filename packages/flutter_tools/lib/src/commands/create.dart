@@ -162,8 +162,7 @@ All done! In order to run your application, type:
 
     int fileCount = 0;
 
-    if (renderDriverTest)
-      templateContext['withDriverTest?'] = <String, dynamic>{};
+    templateContext['withDriverTest'] = renderDriverTest;
 
     Template createTemplate = new Template.fromName('create');
     fileCount += createTemplate.render(new Directory(dirPath), templateContext,

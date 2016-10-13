@@ -483,8 +483,8 @@ class HotRunner extends ResidentRunner {
       int errorCode = error['code'];
       if (errorCode == Isolate.kIsolateReloadBarred) {
         printError('Unable to hot reload app due to an unrecoverable error in '
-                   'the source code. Please address the error and then '
-                   'Use "R" to restart the app.');
+                   'the source code. Please address the error and then use '
+                   '"R" to restart the app.');
         flutterUsage.sendEvent('hot', 'reload-barred');
         return false;
       }

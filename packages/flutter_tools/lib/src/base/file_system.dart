@@ -11,7 +11,7 @@ import 'package:path/path.dart' as path;
 export 'package:file/io.dart';
 export 'package:file/sync_io.dart';
 
-/// Currently active implmenetation of the file system.
+/// Currently active implementation of the file system.
 ///
 /// By default it uses local disk-based implementation. Override this in tests
 /// with [MemoryFileSystem].

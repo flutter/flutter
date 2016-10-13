@@ -4,20 +4,83 @@
 
 import 'dart:async';
 
-import 'package:flutter_services/platform/system_chrome.dart' as mojom;
-import 'package:flutter_services/platform/system_chrome.dart'
-    show DeviceOrientation, SystemUiOverlay, SystemUiOverlayStyle;
+import 'platform_messages.dart';
 
-import 'shell.dart';
+/// Specifies a particular device orientation.
+///
+/// Discussion:
+///
+/// To determine which values correspond to which orientations, first position
+/// the device in its default orientation (this is the orientation that the
+/// system first uses for its boot logo, or the orientation in which the
+/// hardware logos or markings are upright, or the orientation in which the
+/// cameras are at the top). If this is a portrait orientation, then this is
+/// [portraitUp]. Otherwise, it's [landscapeLeft]. As you rotate the device by 90
+/// degrees in a counter-clockwise direction around the axis that traverses the
+/// screen, you step through each value in this enum in the order given. (For a
+/// device with a landscape default orientation, the orientation obtained by
+/// rotating the device 90 degrees clockwise from its default orientation is
+/// [portraitUp].)
+enum DeviceOrientation {
+  /// If the device shows its boot logo in portrait, then the boot logo is shown
+  /// in [portraitUp]. Otherwise, the device shows its boot logo in landscape
+  /// and this orientation is obtained by rotating the device 90 degrees
+  /// clockwise from its boot orientation.
+  portraitUp,
 
-export 'package:flutter_services/platform/system_chrome.dart'
-    show DeviceOrientation, SystemUiOverlay, SystemUiOverlayStyle;
+  /// The orientation that is 90 degrees clockwise from [portraitUp].
+  landscapeLeft,
 
-mojom.SystemChromeProxy _initSystemChromeProxy() {
-  return shell.connectToApplicationService('mojo:flutter_platform', mojom.SystemChrome.connectToService);
+  /// The orientation that is 180 degrees from [portraitUp].
+  portraitDown,
+
+  /// The orientation that is 90 degrees counterclockwise from [portraitUp].
+  landscapeRight,
 }
 
-final mojom.SystemChromeProxy _systemChromeProxy = _initSystemChromeProxy();
+/// Specifies a description of the application that is pertinent to the
+/// embedder's application switcher (a.k.a. "recent tasks") user interface.
+class ApplicationSwitcherDescription {
+  /// Creates an ApplicationSwitcherDescription.
+  const ApplicationSwitcherDescription({ this.label, this.primaryColor });
+
+  /// A label and description of the current state of the application.
+  final String label;
+
+  /// The application's primary color.
+  final int primaryColor;
+}
+
+/// Specifies a system overlay at a particular location. Certain platforms
+/// may not use all overlays specified here.
+enum SystemUiOverlay {
+  /// The status bar provided by the embedder on the top of the application
+  /// surface (optional)
+  top,
+
+  /// The status bar provided by the embedder on the bottom of the application
+  /// surface (optional)
+  bottom,
+}
+
+/// Specifies a preference for the style of the system overlays. Certain
+/// platforms may not respect this preference.
+enum SystemUiOverlayStyle {
+  /// System overlays should be drawn with a light color. Intended for
+  /// applications with a dark background.
+  light,
+
+  /// System overlays should be drawn with a dark color. Intended for
+  /// applications with a light background.
+  dark,
+}
+
+List<String> _stringify(List<dynamic> list) {
+  List<String> result = <String>[];
+  for (dynamic item in list)
+    result.add(item.toString());
+  return result;
+}
 
 /// Controls specific aspects of the embedder interface.
 class SystemChrome {
@@ -28,19 +91,13 @@ class SystemChrome {
   ///
   /// Arguments:
   ///
-  ///  * [deviceOrientationMask]: A mask of [DeviceOrientation] enum values.
-  ///    The value 0 is synonymous with having all options enabled.
-  ///
-  /// Return Value:
-  ///
-  ///   boolean indicating if the orientation mask is valid and the changes
-  ///   could be conveyed successfully to the embedder.
-  static Future<bool> setPreferredOrientations(int deviceOrientationMask) {
-    Completer<bool> completer = new Completer<bool>();
-    _systemChromeProxy.setPreferredOrientations(deviceOrientationMask, (bool success) {
-      completer.complete(success);
+  ///  * [orientation]: A list of [DeviceOrientation] enum values. The empty
+  ///    list is synonymous with having all options enabled.
+  static Future<Null> setPreferredOrientations(List<DeviceOrientation> orientations) async {
+    await PlatformMessages.sendJSON('flutter/platform', <String, dynamic>{
+      'method': 'SystemChrome.setPreferredOrientations',
+      'args': <List<String>>[ _stringify(orientations) ],
     });
-    return completer.future;
   }
 
   /// Specifies the description of the current state of the application as it
@@ -50,21 +107,18 @@ class SystemChrome {
   ///
   ///  * [description]: The application description.
   ///
-  /// Return Value:
-  ///
-  ///   boolean indicating if the description was conveyed successfully to the
-  ///   embedder.
-  ///
   /// Platform Specific Notes:
   ///
   ///   If application-specified metadata is unsupported on the platform,
   ///   specifying it is a no-op and always return true.
-  static Future<bool> setApplicationSwitcherDescription(mojom.ApplicationSwitcherDescription description) {
-    Completer<bool> completer = new Completer<bool>();
-    _systemChromeProxy.setApplicationSwitcherDescription(description, (bool success) {
-      completer.complete(success);
+  static Future<Null> setApplicationSwitcherDescription(ApplicationSwitcherDescription description) async {
+    await PlatformMessages.sendJSON('flutter/platform', <String, dynamic>{
+      'method': 'SystemChrome.setApplicationSwitcherDescription',
+      'args': <Map<String, dynamic>>[<String, dynamic>{
+        'label': description.label,
+        'primaryColor': description.primaryColor,
+      }],
     });
-    return completer.future;
   }
 
   /// Specifies the set of overlays visible on the embedder when the
@@ -76,21 +130,15 @@ class SystemChrome {
   ///  * [overlaysMask]: A mask of [SystemUiOverlay] enum values that denotes
   ///    the overlays to show.
   ///
-  /// Return Value:
-  ///
-  ///   boolean indicating if the preference was conveyed successfully to the
-  ///   embedder.
-  ///
   /// Platform Specific Notes:
   ///
   ///   If the overlay is unsupported on the platform, enabling or disabling
   ///   that overlay is a no-op and always return true.
-  static Future<bool> setEnabledSystemUIOverlays(int overlaysMask) {
-    Completer<bool> completer = new Completer<bool>();
-    _systemChromeProxy.setEnabledSystemUiOverlays(overlaysMask, (bool success) {
-      completer.complete(success);
+  static Future<Null> setEnabledSystemUIOverlays(List<SystemUiOverlay> overlays) async {
+    await PlatformMessages.sendJSON('flutter/platform', <String, dynamic>{
+      'method': 'SystemChrome.setEnabledSystemUIOverlays',
+      'args': <List<String>>[ _stringify(overlays) ],
     });
-    return completer.future;
  }
 
   /// Specifies the style of the system overlays that are visible on the
@@ -118,8 +166,9 @@ class SystemChrome {
     scheduleMicrotask(() {
       assert(_pendingStyle != null);
       if (_pendingStyle != _latestStyle) {
-        _systemChromeProxy.setSystemUiOverlayStyle(_pendingStyle, (bool success) {
-          // Ignored.
+        PlatformMessages.sendJSON('flutter/platform', <String, dynamic>{
+          'method': 'SystemChrome.setSystemUIOverlayStyle',
+          'args': <String>[ _pendingStyle.toString() ],
         });
         _latestStyle = _pendingStyle;
       }

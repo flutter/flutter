@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-{{#withDriverTest?}}
+{{#withDriverTest}}
 import 'package:flutter_driver/driver_extension.dart';
-{{/withDriverTest?}}
+{{/withDriverTest}}
 
 void main() {
-{{#withDriverTest?}}
+{{#withDriverTest}}
   // Starts the app with Flutter Driver extension enabled to allow Flutter Driver
   // to test the app.
   enableFlutterDriverExtension();
-{{/withDriverTest?}}
+{{/withDriverTest}}
   runApp(
     new MaterialApp(
       title: 'Flutter Demo',

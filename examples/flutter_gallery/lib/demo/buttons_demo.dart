@@ -7,36 +7,35 @@ import 'package:flutter/material.dart';
 import '../gallery/demo.dart';
 
 const String _raisedText =
-  "Raised buttons add dimension to mostly flat layouts. They emphasize "
-  "functions on busy or wide spaces.";
+    "Raised buttons add dimension to mostly flat layouts. They emphasize "
+    "functions on busy or wide spaces.";
 
 const String _raisedCode = 'buttons_raised';
 
-const String _flatText =
-  "A flat button displays an ink splash on press "
-  "but does not lift. Use flat buttons on toolbars, in dialogs and "
-  "inline with padding";
+const String _flatText = "A flat button displays an ink splash on press "
+    "but does not lift. Use flat buttons on toolbars, in dialogs and "
+    "inline with padding";
 
 const String _flatCode = 'buttons_flat';
 
 const String _dropdownText =
-  "A dropdown button displays a menu that's used to select a value from a "
-  "small set of values. The button displays the current value and a down "
-  "arrow.";
+    "A dropdown button displays a menu that's used to select a value from a "
+    "small set of values. The button displays the current value and a down "
+    "arrow.";
 
 const String _dropdownCode = 'buttons_dropdown';
 
 const String _iconText =
-  "IconButtons are appropriate for toggle buttons that allow a single choice to be "
-  "selected or deselected, such as adding or removing an item's star.";
+    "IconButtons are appropriate for toggle buttons that allow a single choice "
+    "to be selected or deselected, such as adding or removing an item's star.";
 
 const String _iconCode = 'buttons_icon';
 
 const String _actionText =
-  "Floating action buttons are used for a promoted action. They are "
-  "distinguished by a circled icon floating above the UI and can have motion "
-  "behaviors that include morphing, launching, and a transferring anchor "
-  "point.";
+    "Floating action buttons are used for a promoted action. They are "
+    "distinguished by a circled icon floating above the UI and can have motion "
+    "behaviors that include morphing, launching, and a transferring anchor "
+    "point.";
 
 const String _actionCode = 'buttons_action';
 
@@ -55,37 +54,37 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
         tabName: 'RAISED',
         description: _raisedText,
         widget: buildRaisedButton(),
-        exampleCodeTag: _raisedCode
+        exampleCodeTag: _raisedCode,
       ),
       new ComponentDemoTabData(
         tabName: 'FLAT',
         description: _flatText,
         widget: buildFlatButton(),
-        exampleCodeTag: _flatCode
+        exampleCodeTag: _flatCode,
       ),
       new ComponentDemoTabData(
         tabName: 'DROPDOWN',
         description: _dropdownText,
         widget: buildDropdownButton(),
-        exampleCodeTag: _dropdownCode
+        exampleCodeTag: _dropdownCode,
       ),
       new ComponentDemoTabData(
         tabName: 'ICON',
         description: _iconText,
         widget: buildIconButton(),
-        exampleCodeTag: _iconCode
+        exampleCodeTag: _iconCode,
       ),
       new ComponentDemoTabData(
         tabName: 'ACTION',
         description: _actionText,
         widget: buildActionButton(),
-        exampleCodeTag: _actionCode
+        exampleCodeTag: _actionCode,
       ),
     ];
 
     return new TabbedComponentDemoScaffold(
       title: 'Buttons',
-      demos: demos
+      demos: demos,
     );
   }
 
@@ -99,14 +98,14 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
             child: new Text('RAISED BUTTON'),
             onPressed: () {
               // Perform some action
-            }
+            },
           ),
           new RaisedButton(
             child: new Text('DISABLED'),
-            onPressed: null
+            onPressed: null,
           )
-        ]
-      )
+        ],
+      ),
     );
   }
 
@@ -120,14 +119,14 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
             child: new Text('FLAT BUTTON'),
             onPressed: () {
               // Perform some action
-            }
+            },
           ),
           new FlatButton(
             child: new Text('DISABLED'),
-            onPressed: null
+            onPressed: null,
           )
-        ]
-      )
+        ],
+      ),
     );
   }
 
@@ -158,13 +157,14 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
                 .map((String value) {
                   return new DropdownMenuItem<String>(
                     value: value,
-                    child: new Text(value));
+                    child: new Text(value),
+                  );
                 })
-                .toList()
-             )
+                .toList(),
+             ),
           ),
           new SizedBox(
-            height: 24.0
+            height: 24.0,
           ),
           new ListItem(
             title: new Text('Simple dropdown:'),
@@ -176,17 +176,16 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
                     dropdown2Value = newValue;
                 });
               },
-              items: <String>['One', 'Two', 'Free', 'Four']
-                .map((String value) {
-                  return new DropdownMenuItem<String>(
-                    value: value,
-                    child: new Text(value));
-                })
-                .toList()
-            )
+              items: <String>['One', 'Two', 'Free', 'Four'].map((String value) {
+                return new DropdownMenuItem<String>(
+                  value: value,
+                  child: new Text(value),
+                );
+              }).toList(),
+            ),
           )
-        ]
-      )
+        ],
+      ),
     );
   }
 
@@ -203,16 +202,16 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
             onPressed: () {
               setState(() => iconButtonToggle = !iconButtonToggle);
             },
-            color: iconButtonToggle ? Theme.of(context).primaryColor : null
+            color: iconButtonToggle ? Theme.of(context).primaryColor : null,
           ),
           new IconButton(
             icon: new Icon(Icons.thumb_up),
-            onPressed: null
+            onPressed: null,
           )
         ]
         .map((Widget button) => new SizedBox(width: 64.0, height: 64.0, child: button))
-        .toList()
-      )
+        .toList(),
+      ),
     );
   }
 
@@ -223,8 +222,8 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
         child: new Icon(Icons.add),
         onPressed: () {
           // Perform some action
-        }
-      )
+        },
+      ),
     );
   }
 }

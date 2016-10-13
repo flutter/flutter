@@ -7,11 +7,11 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/test_semantics_client.dart';
+import 'semantics_tester.dart';
 
 void main() {
   testWidgets('Semantics 2', (WidgetTester tester) async {
-    TestSemanticsClient client = new TestSemanticsClient(tester.binding.pipelineOwner);
+    SemanticsTester semantics = new SemanticsTester(tester);
 
     // this test is the same as the test in Semantics 1, but
     // starting with the second branch being ignored and then
@@ -36,41 +36,25 @@ void main() {
         crossAxisAlignment: CrossAxisAlignment.stretch
       )
     );
-    expect(client.updates.length, equals(1));
-    expect(client.updates[0].id, equals(0));
-    expect(client.updates[0].actions, isEmpty);
-    expect(client.updates[0].flags.hasCheckedState, isFalse);
-    expect(client.updates[0].flags.isChecked, isFalse);
-    expect(client.updates[0].strings.label, equals(''));
-    expect(client.updates[0].geometry.transform, isNull);
-    expect(client.updates[0].geometry.left, equals(0.0));
-    expect(client.updates[0].geometry.top, equals(0.0));
-    expect(client.updates[0].geometry.width, equals(800.0));
-    expect(client.updates[0].geometry.height, equals(600.0));
-    expect(client.updates[0].children.length, equals(2));
-    expect(client.updates[0].children[0].id, equals(1));
-    expect(client.updates[0].children[0].actions, isEmpty);
-    expect(client.updates[0].children[0].flags.hasCheckedState, isFalse);
-    expect(client.updates[0].children[0].flags.isChecked, isFalse);
-    expect(client.updates[0].children[0].strings.label, equals('child1'));
-    expect(client.updates[0].children[0].geometry.transform, isNull);
-    expect(client.updates[0].children[0].geometry.left, equals(0.0));
-    expect(client.updates[0].children[0].geometry.top, equals(0.0));
-    expect(client.updates[0].children[0].geometry.width, equals(800.0));
-    expect(client.updates[0].children[0].geometry.height, equals(10.0));
-    expect(client.updates[0].children[0].children.length, equals(0));
-    expect(client.updates[0].children[1].id, equals(2));
-    expect(client.updates[0].children[1].actions, isEmpty);
-    expect(client.updates[0].children[1].flags.hasCheckedState, isFalse);
-    expect(client.updates[0].children[1].flags.isChecked, isFalse);
-    expect(client.updates[0].children[1].strings.label, equals('child2'));
-    expect(client.updates[0].children[1].geometry.transform, equals(<double>[1.0,0.0,0.0,0.0, 0.0,1.0,0.0,0.0, 0.0,0.0,1.0,0.0, 0.0,10.0,0.0,1.0]));
-    expect(client.updates[0].children[1].geometry.left, equals(0.0));
-    expect(client.updates[0].children[1].geometry.top, equals(0.0));
-    expect(client.updates[0].children[1].geometry.width, equals(800.0));
-    expect(client.updates[0].children[1].geometry.height, equals(10.0));
-    expect(client.updates[0].children[1].children.length, equals(0));
-    client.updates.clear();
+
+    expect(semantics, hasSemantics(
+      new TestSemantics(
+        id: 0,
+        children: <TestSemantics>[
+          new TestSemantics(
+            id: 1,
+            label: 'child1',
+            rect: new Rect.fromLTRB(0.0, 0.0, 800.0, 10.0),
+          ),
+          new TestSemantics(
+            id: 2,
+            label: 'child2',
+            rect: new Rect.fromLTRB(0.0, 0.0, 800.0, 10.0),
+            transform: new Matrix4.translationValues(0.0, 10.0, 0.0),
+          ),
+        ],
+      )
+    ));
 
     // toggle a branch off
     await tester.pumpWidget(
@@ -91,19 +75,8 @@ void main() {
         crossAxisAlignment: CrossAxisAlignment.stretch
       )
     );
-    expect(client.updates.length, equals(1));
-    expect(client.updates[0].id, equals(0));
-    expect(client.updates[0].actions, isEmpty);
-    expect(client.updates[0].flags.hasCheckedState, isFalse);
-    expect(client.updates[0].flags.isChecked, isFalse);
-    expect(client.updates[0].strings.label, equals('child1'));
-    expect(client.updates[0].geometry.transform, isNull);
-    expect(client.updates[0].geometry.left, equals(0.0));
-    expect(client.updates[0].geometry.top, equals(0.0));
-    expect(client.updates[0].geometry.width, equals(800.0));
-    expect(client.updates[0].geometry.height, equals(600.0));
-    expect(client.updates[0].children.length, equals(0));
-    client.updates.clear();
+
+    expect(semantics, hasSemantics(new TestSemantics(id: 0, label: 'child1')));
 
     // toggle a branch back on
     await tester.pumpWidget(
@@ -124,41 +97,26 @@ void main() {
         crossAxisAlignment: CrossAxisAlignment.stretch
       )
     );
-    expect(client.updates.length, equals(1));
-    expect(client.updates[0].id, equals(0));
-    expect(client.updates[0].actions, isEmpty);
-    expect(client.updates[0].flags.hasCheckedState, isFalse);
-    expect(client.updates[0].flags.isChecked, isFalse);
-    expect(client.updates[0].strings.label, equals(''));
-    expect(client.updates[0].geometry.transform, isNull);
-    expect(client.updates[0].geometry.left, equals(0.0));
-    expect(client.updates[0].geometry.top, equals(0.0));
-    expect(client.updates[0].geometry.width, equals(800.0));
-    expect(client.updates[0].geometry.height, equals(600.0));
-    expect(client.updates[0].children.length, equals(2));
-    expect(client.updates[0].children[0].id, equals(3));
-    expect(client.updates[0].children[0].actions, isEmpty);
-    expect(client.updates[0].children[0].flags.hasCheckedState, isFalse);
-    expect(client.updates[0].children[0].flags.isChecked, isFalse);
-    expect(client.updates[0].children[0].strings.label, equals('child1'));
-    expect(client.updates[0].children[0].geometry.transform, isNull);
-    expect(client.updates[0].children[0].geometry.left, equals(0.0));
-    expect(client.updates[0].children[0].geometry.top, equals(0.0));
-    expect(client.updates[0].children[0].geometry.width, equals(800.0));
-    expect(client.updates[0].children[0].geometry.height, equals(10.0));
-    expect(client.updates[0].children[0].children.length, equals(0));
-    expect(client.updates[0].children[1].id, equals(2));
-    expect(client.updates[0].children[1].actions, isEmpty);
-    expect(client.updates[0].children[1].flags.hasCheckedState, isFalse);
-    expect(client.updates[0].children[1].flags.isChecked, isFalse);
-    expect(client.updates[0].children[1].strings.label, equals('child2'));
-    expect(client.updates[0].children[1].geometry.transform, equals(<double>[1.0,0.0,0.0,0.0, 0.0,1.0,0.0,0.0, 0.0,0.0,1.0,0.0, 0.0,10.0,0.0,1.0]));
-    expect(client.updates[0].children[1].geometry.left, equals(0.0));
-    expect(client.updates[0].children[1].geometry.top, equals(0.0));
-    expect(client.updates[0].children[1].geometry.width, equals(800.0));
-    expect(client.updates[0].children[1].geometry.height, equals(10.0));
-    expect(client.updates[0].children[1].children.length, equals(0));
-    client.updates.clear();
-    client.dispose();
+
+    expect(semantics, hasSemantics(
+      new TestSemantics(
+        id: 0,
+        children: <TestSemantics>[
+          new TestSemantics(
+            id: 3,
+            label: 'child1',
+            rect: new Rect.fromLTRB(0.0, 0.0, 800.0, 10.0),
+          ),
+          new TestSemantics(
+            id: 2,
+            label: 'child2',
+            rect: new Rect.fromLTRB(0.0, 0.0, 800.0, 10.0),
+            transform: new Matrix4.translationValues(0.0, 10.0, 0.0),
+          ),
+        ],
+      )
+    ));
+
+    semantics.dispose();
   });
 }

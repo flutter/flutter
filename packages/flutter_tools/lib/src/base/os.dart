@@ -124,7 +124,7 @@ Future<int> findAvailablePort() async {
   return port;
 }
 
-const int _kMaxSearchIterations = 5;
+const int _kMaxSearchIterations = 20;
 
 /// This method will attempt to return a port close to or the same as
 /// [defaultPort]. Failing that, it will return any available port.

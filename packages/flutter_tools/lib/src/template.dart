@@ -4,7 +4,7 @@
 
 import 'dart:io';
 
-import 'package:mustache4dart/mustache4dart.dart' as mustache;
+import 'package:mustache/mustache.dart' as mustache;
 import 'package:path/path.dart' as path;
 
 import 'cache.dart';
@@ -109,7 +109,7 @@ class Template {
 
       if (sourceFile.path.endsWith(_kTemplateExtension)) {
         String templateContents = sourceFile.readAsStringSync();
-        String renderedContents = mustache.render(templateContents, context);
+        String renderedContents = new mustache.Template(templateContents).renderString(context);
 
         finalDestinationFile.writeAsStringSync(renderedContents);
 

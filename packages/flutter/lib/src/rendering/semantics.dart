@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:math' as math;
+import 'dart:ui' as ui;
 import 'dart:ui' show Rect, SemanticsAction, SemanticsFlags;
+import 'dart:typed_data';
 
-import 'package:flutter_services/semantics.dart' as mojom;
+import 'package:meta/meta.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
-import 'package:meta/meta.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'node.dart';
@@ -57,14 +57,19 @@ typedef bool SemanticsNodeVisitor(SemanticsNode node);
 class SemanticsData {
   /// Creates a semantics data object.
   ///
-  /// The [flags], [actions], [label], and [rect] arguments must not be null.
-  const SemanticsData({
+  /// The [flags], [actions], [label], and [Rect] arguments must not be null.
+  SemanticsData({
     @required this.flags,
     @required this.actions,
     @required this.label,
     @required this.rect,
     this.transform
-  });
+  }) {
+    assert(flags != null);
+    assert(actions != null);
+    assert(label != null);
+    assert(rect != null);
+  }
 
   /// A bit field of [SemanticsFlags] that apply to this node.
   final int flags;
@@ -90,6 +95,41 @@ class SemanticsData {
 
   /// Whether [actions] contains the given action.
   bool hasAction(SemanticsAction action) => (actions & action.index) != 0;
+
+  @override
+  String toString() {
+    StringBuffer buffer = new StringBuffer();
+    buffer.write('$runtimeType($rect');
+    if (transform != null)
+      buffer.write('; $transform');
+    for (SemanticsAction action in SemanticsAction.values.values) {
+      if ((actions & action.index) != 0)
+        buffer.write('; $action');
+    }
+    for (SemanticsFlags flag in SemanticsFlags.values.values) {
+      if ((flags & flag.index) != 0)
+        buffer.write('; $flag');
+    }
+    if (label.isNotEmpty)
+      buffer.write('; "$label"');
+    buffer.write(')');
+    return buffer.toString();
+  }
+
+  @override
+  bool operator ==(dynamic other) {
+    if (other is! SemanticsData)
+      return false;
+    final SemanticsData typedOther = other;
+    return typedOther.flags == flags
+        && typedOther.actions == actions
+        && typedOther.label == label
+        && typedOther.rect == rect
+        && typedOther.transform == transform;
+  }
+
+  @override
+  int get hashCode => hashValues(flags, actions, label, rect, transform);
 }
 
 /// A node that represents some semantic data.
@@ -307,6 +347,9 @@ class SemanticsNode extends AbstractNode {
   bool get hasChildren => _children?.isNotEmpty ?? false;
   bool _dead = false;
 
+  /// The number of children this node has.
+  int get childrenCount => hasChildren ? _children.length : 0;
+
   /// Visits the immediate children of this node.
   ///
   /// This function calls visitor for each child in a pre-order travseral
@@ -477,53 +520,35 @@ class SemanticsNode extends AbstractNode {
     );
   }
 
-  mojom.SemanticsNode _serialize() {
-    mojom.SemanticsNode result = new mojom.SemanticsNode();
-    result.id = id;
-    if (_dirty) {
-      // We could be even more efficient about not sending data here, by only
-      // sending the bits that are dirty (tracking the geometry, flags, strings,
-      // and children separately). For now, we send all or nothing.
-      result.geometry = new mojom.SemanticGeometry();
-      result.geometry.transform = transform?.storage;
-      result.geometry.top = rect.top;
-      result.geometry.left = rect.left;
-      result.geometry.width = math.max(rect.width, 0.0);
-      result.geometry.height = math.max(rect.height, 0.0);
-      result.flags = new mojom.SemanticFlags();
-      result.flags.hasCheckedState = hasCheckedState;
-      result.flags.isChecked = isChecked;
-      result.strings = new mojom.SemanticStrings();
-      result.strings.label = label;
-      List<mojom.SemanticsNode> children = <mojom.SemanticsNode>[];
-      int mergedActions = _actions;
-      if (_shouldMergeAllDescendantsIntoThisNode) {
-        _visitDescendants((SemanticsNode node) {
-          mergedActions |= node._actions;
-          result.flags.hasCheckedState = result.flags.hasCheckedState || node.hasCheckedState;
-          result.flags.isChecked = result.flags.isChecked || node.isChecked;
-          if (node.label != '')
-            result.strings.label = result.strings.label.isNotEmpty ? '${result.strings.label}\n${node.label}' : node.label;
-          node._dirty = false;
-          return true; // continue walk
-        });
-        // and we pretend to have no children
-      } else {
-        if (_children != null) {
-          for (SemanticsNode child in _children)
-            children.add(child._serialize());
-        }
-      }
-      result.children = children;
-      result.actions = <int>[];
-      for (mojom.SemanticAction action in mojom.SemanticAction.values) {
-        int bit = 1 << action.mojoEnumValue;
-        if ((mergedActions & bit) != 0)
-          result.actions.add(action.mojoEnumValue);
-      }
-      _dirty = false;
+  static Float64List _initIdentityTransform() {
+    return new Matrix4.identity().storage;
+  }
+
+  static final Int32List _kEmptyChildList = new Int32List(0);
+  static final Float64List _kIdentityTransform = _initIdentityTransform();
+
+  void _addToUpdate(ui.SemanticsUpdateBuilder builder) {
+    assert(_dirty);
+    final SemanticsData data = getSemanticsData();
+    Int32List children;
+    if (!hasChildren || mergeAllDescendantsIntoThisNode) {
+      children = _kEmptyChildList;
+    } else {
+      final int childCount = _children.length;
+      children = new Int32List(childCount);
+      for (int i = 0; i < childCount; ++i)
+        children[i] = _children[i].id;
     }
-    return result;
+    builder.updateNode(
+      id: id,
+      flags: data.flags,
+      actions: data.actions,
+      rect: data.rect,
+      label: data.label,
+      transform: data.transform?.storage ?? _kIdentityTransform,
+      children: children,
+    );
+    _dirty = false;
   }
 
   @override
@@ -567,73 +592,31 @@ class SemanticsNode extends AbstractNode {
   }
 }
 
-/// Signature for functions that receive updates about render tree semantics.
-typedef void SemanticsListener(List<mojom.SemanticsNode> nodes);
-
 /// Owns [SemanticsNode] objects and notifies listeners of changes to the
 /// render tree semantics.
 ///
 /// To listen for semantic updates, call [PipelineOwner.addSemanticsListener],
 /// which will create a [SemanticsOwner] if necessary.
-class SemanticsOwner {
-  /// Creates a [SemanticsOwner].
-  ///
-  /// The `onLastListenerRemoved` argument must not be null and will be called
-  /// when the last listener is removed from this object.
-  SemanticsOwner({
-    @required SemanticsListener initialListener,
-    @required VoidCallback onLastListenerRemoved
-  }) : _onLastListenerRemoved = onLastListenerRemoved {
-    assert(_onLastListenerRemoved != null);
-    addListener(initialListener);
-  }
-
-  final VoidCallback _onLastListenerRemoved;
-
+class SemanticsOwner extends ChangeNotifier {
   final Set<SemanticsNode> _dirtyNodes = new Set<SemanticsNode>();
   final Map<int, SemanticsNode> _nodes = <int, SemanticsNode>{};
   final Set<SemanticsNode> _detachedNodes = new Set<SemanticsNode>();
-
-  final List<SemanticsListener> _listeners = <SemanticsListener>[];
 
   /// The root node of the semantics tree, if any.
   ///
   /// If the semantics tree is empty, returns null.
   SemanticsNode get rootSemanticsNode => _nodes[0];
 
-  /// Releases any resources retained by this object.
-  ///
-  /// Requires that there are no listeners registered with [addListener].
+  @override
   void dispose() {
-    assert(_listeners.isEmpty);
     _dirtyNodes.clear();
     _nodes.clear();
     _detachedNodes.clear();
+    super.dispose();
   }
 
-  /// Add a consumer of semantic data.
-  ///
-  /// After the [PipelineOwner] updates the semantic data for a given frame, it
-  /// calls [sendSemanticsTree], which uploads the data to each listener
-  /// registered with this function.
-  ///
-  /// Listeners can be removed with [removeListener].
-  void addListener(SemanticsListener listener) {
-    _listeners.add(listener);
-  }
-
-  /// Removes a consumer of semantic data.
-  ///
-  /// Listeners can be added with [addListener].
-  void removeListener(SemanticsListener listener) {
-    _listeners.remove(listener);
-    if (_listeners.isEmpty)
-      _onLastListenerRemoved();
-  }
-
-  /// Uploads the semantics tree to the listeners registered with [addListener].
-  void sendSemanticsTree() {
-    assert(_listeners.isNotEmpty);
+  /// Update the semantics using [ui.window.updateSemantics].
+  void sendSemanticsUpdate() {
     for (SemanticsNode oldNode in _detachedNodes) {
       // The other side will have forgotten this node if we even send
       // it again, so make sure to mark it dirty so that it'll get
@@ -680,7 +663,7 @@ class SemanticsOwner {
       }
     }
     visitedNodes.sort((SemanticsNode a, SemanticsNode b) => a.depth - b.depth);
-    List<mojom.SemanticsNode> updatedNodes = <mojom.SemanticsNode>[];
+    ui.SemanticsUpdateBuilder builder = new ui.SemanticsUpdateBuilder();
     for (SemanticsNode node in visitedNodes) {
       assert(node.parent?._dirty != true); // could be null (no parent) or false (not dirty)
       // The _serialize() method marks the node as not dirty, and
@@ -694,11 +677,11 @@ class SemanticsOwner {
       // which happens e.g. when the node is no longer contributing
       // semantics).
       if (node._dirty && node.attached)
-        updatedNodes.add(node._serialize());
+        node._addToUpdate(builder);
     }
-    for (SemanticsListener listener in new List<SemanticsListener>.from(_listeners))
-      listener(updatedNodes);
     _dirtyNodes.clear();
+    ui.window.updateSemantics(builder.build());
+    notifyListeners();
   }
 
   SemanticsActionHandler _getSemanticsActionHandlerForId(int id, SemanticsAction action) {

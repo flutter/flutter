@@ -2,15 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' show SemanticsFlags;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/test_semantics_client.dart';
+import 'semantics_tester.dart';
 
 void main() {
   testWidgets('Semantics 4', (WidgetTester tester) async {
-    TestSemanticsClient client = new TestSemanticsClient(tester.binding.pipelineOwner);
+    SemanticsTester semantics = new SemanticsTester(tester);
 
     //    O
     //   / \       O=root
@@ -40,18 +42,32 @@ void main() {
         ]
       )
     );
-    expect(client.updates.length, equals(1));
-    expect(client.updates[0].id, equals(0));
-    expect(client.updates[0].children.length, equals(2));
-    expect(client.updates[0].children[0].id, equals(1));
-    expect(client.updates[0].children[0].children.length, equals(0));
-    expect(client.updates[0].children[1].id, equals(2));
-    expect(client.updates[0].children[1].children.length, equals(2));
-    expect(client.updates[0].children[1].children[0].id, equals(3));
-    expect(client.updates[0].children[1].children[0].children.length, equals(0));
-    expect(client.updates[0].children[1].children[1].id, equals(4));
-    expect(client.updates[0].children[1].children[1].children.length, equals(0));
-    client.updates.clear();
+
+    expect(semantics, hasSemantics(
+      new TestSemantics(
+        id: 0,
+        children: <TestSemantics>[
+          new TestSemantics(
+            id: 1,
+            label: 'L1',
+          ),
+          new TestSemantics(
+            id: 2,
+            label: 'L2',
+            children: <TestSemantics>[
+              new TestSemantics(
+                id: 3,
+                flags: SemanticsFlags.hasCheckedState.index | SemanticsFlags.isChecked.index,
+              ),
+              new TestSemantics(
+                id: 4,
+                flags: SemanticsFlags.hasCheckedState.index,
+              ),
+            ]
+          ),
+        ],
+      )
+    ));
 
     //    O        O=root
     //   / \       L=node with label
@@ -78,10 +94,23 @@ void main() {
         ]
       )
     );
-    expect(client.updates.length, equals(1));
-    expect(client.updates[0].id, equals(2));
-    expect(client.updates[0].children.length, equals(0));
-    client.updates.clear();
+
+    expect(semantics, hasSemantics(
+      new TestSemantics(
+        id: 0,
+        children: <TestSemantics>[
+          new TestSemantics(
+            id: 1,
+            label: 'L1',
+          ),
+          new TestSemantics(
+            id: 2,
+            label: 'L2',
+            flags: SemanticsFlags.hasCheckedState.index | SemanticsFlags.isChecked.index,
+          ),
+        ],
+      )
+    ));
 
     //             O=root
     //    OLC      L=node with label
@@ -105,10 +134,15 @@ void main() {
         ]
       )
     );
-    expect(client.updates.length, equals(1));
-    expect(client.updates[0].id, equals(0));
-    expect(client.updates[0].children.length, equals(0));
-    client.updates.clear();
-    client.dispose();
+
+    expect(semantics, hasSemantics(
+      new TestSemantics(
+        id: 0,
+        label: 'L2',
+        flags: SemanticsFlags.hasCheckedState.index | SemanticsFlags.isChecked.index,
+      )
+    ));
+
+    semantics.dispose();
   });
 }

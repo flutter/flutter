@@ -4,15 +4,7 @@
 
 import 'dart:async';
 
-import 'package:flutter_services/platform/haptic_feedback.dart' as mojom;
-
-import 'shell.dart';
-
-mojom.HapticFeedbackProxy _initHapticFeedbackProxy() {
-  return shell.connectToApplicationService('mojo:flutter_platform', mojom.HapticFeedback.connectToService);
-}
-
-final mojom.HapticFeedbackProxy _hapticFeedbackProxy = _initHapticFeedbackProxy();
+import 'platform_messages.dart';
 
 /// Allows access to the haptic feedback interface on the device. This API is
 /// intentionally terse since it calls default platform behavior. It is not
@@ -29,18 +21,10 @@ class HapticFeedback {
   ///   AudioServicesPlaySystemSound)
   /// * _Android_: Uses the platform haptic feedback API that simulates a short
   ///   a short tap on a virtual keyboard.
-  ///
-  /// Return Value:
-  ///
-  ///   boolean indicating if the intent to provide haptic feedback to the user
-  ///   was successfully conveyed to the embedder. There may not be any actual
-  ///   feedback if the device does not have a vibrator or one is disabled in
-  ///   system settings.
-  static Future<bool> vibrate() {
-    Completer<bool> completer = new Completer<bool>();
-    _hapticFeedbackProxy.vibrate((bool result) {
-      completer.complete(result);
+  static Future<Null> vibrate() async {
+    await PlatformMessages.sendJSON('flutter/platform', <String, dynamic>{
+      'method': 'HapticFeedback.vibrate',
+      'args': <Null>[],
     });
-    return completer.future;
   }
 }

@@ -4,7 +4,6 @@
 
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_services/platform/system_chrome.dart' as mojom;
 
 import 'constants.dart';
 import 'icon_theme.dart';
@@ -342,8 +341,8 @@ class AppBar extends StatelessWidget {
 
     Brightness brightness = this.brightness ?? themeData.primaryColorBrightness;
     SystemChrome.setSystemUIOverlayStyle(brightness == Brightness.dark
-      ? mojom.SystemUiOverlayStyle.light
-      : mojom.SystemUiOverlayStyle.dark);
+      ? SystemUiOverlayStyle.light
+      : SystemUiOverlayStyle.dark);
 
     final double toolbarOpacity = _toolbarOpacity(size.height, statusBarHeight);
     if (toolbarOpacity != 1.0) {
