@@ -15,6 +15,7 @@
 #include "flutter/shell/gpu/gpu_surface_gl.h"
 #include "flutter/shell/platform/darwin/common/platform_mac.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/FlutterDartProject_Internal.h"
+#include "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformPlugin.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/flutter_touch_mapper.h"
 #include "flutter/shell/platform/darwin/ios/platform_view_ios.h"
 #include "lib/ftl/functional/make_copyable.h"
@@ -36,6 +37,7 @@ void FlutterInit(int argc, const char* argv[]) {
   sky::ViewportMetricsPtr _viewportMetrics;
   shell::TouchMapper _touchMapper;
   std::unique_ptr<shell::PlatformViewIOS> _platformView;
+  base::scoped_nsprotocol<FlutterPlatformPlugin*> _platformPlugin;
 
   BOOL _initialized;
 }
@@ -82,6 +84,9 @@ void FlutterInit(int argc, const char* argv[]) {
   _platformView = std::make_unique<shell::PlatformViewIOS>(
       reinterpret_cast<CAEAGLLayer*>(self.view.layer));
   _platformView->SetupResourceContextOnIOThread();
+
+  _platformPlugin.reset([[FlutterPlatformPlugin alloc] init]);
+  [self addMessageListener:_platformPlugin.get()];
 
   [self setupNotificationCenterObservers];
 
