@@ -206,8 +206,10 @@ class RenderEditableLine extends RenderBox {
   /// Returns the Rect in local coordinates for the caret at the given text
   /// position.
   Rect getLocalRectForCaret(TextPosition caretPosition) {
+    double lineHeight = constraints.constrainHeight(_preferredLineHeight);
     Offset caretOffset = _textPainter.getOffsetForCaret(caretPosition, _caretPrototype);
-    return _caretPrototype.shift(caretOffset + _paintOffset);
+    // This rect is the same as _caretPrototype but without the vertical padding.
+    return new Rect.fromLTWH(0.0, 0.0, _kCaretWidth, lineHeight).shift(caretOffset + _paintOffset);
   }
 
   Size _contentSize;
@@ -310,8 +312,7 @@ class RenderEditableLine extends RenderBox {
     ));
     Size contentSize = new Size(_textPainter.width + _kCaretGap + _kCaretWidth, _textPainter.height);
     assert(_selection != null);
-    Offset caretOffset = _textPainter.getOffsetForCaret(_selection.extent, _caretPrototype);
-    Rect caretRect = _caretPrototype.shift(caretOffset + _paintOffset);
+    Rect caretRect = getLocalRectForCaret(_selection.extent);
     if (onPaintOffsetUpdateNeeded != null && (size != oldSize || contentSize != _contentSize || !_withinBounds(caretRect)))
       onPaintOffsetUpdateNeeded(new ViewportDimensions(containerSize: size, contentSize: contentSize), caretRect);
     _contentSize = contentSize;
