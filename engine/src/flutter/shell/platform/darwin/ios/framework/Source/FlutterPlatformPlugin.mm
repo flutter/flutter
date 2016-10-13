@@ -56,6 +56,8 @@ using namespace shell;
     [self setSystemChromeEnabledSystemUIOverlays:args.firstObject];
   } else if ([method isEqualToString:@"SystemChrome.setSystemUIOverlayStyle"]) {
     [self setSystemChromeSystemUIOverlayStyle:args.firstObject];
+  } else if ([method isEqualToString:@"SystemNavigator.pop"]) {
+    [self popSystemNavigator];
   } else if ([method isEqualToString:@"PathProvider.getTemporaryDirectory"]) {
     return [self getPathProviderTemporaryDirectory];
   } else if ([method isEqualToString:@"PathProvider.getApplicationDocumentsDirectory"]) {
@@ -158,6 +160,10 @@ using namespace shell;
     // in favor of delegating to the view controller
     [[UIApplication sharedApplication] setStatusBarStyle:statusBarStyle];
   }
+}
+
+- (void)popSystemNavigator {
+  // Apple's human user guidelines say not to terminate iOS applications.
 }
 
 - (NSDictionary*)getPathProviderTemporaryDirectory {

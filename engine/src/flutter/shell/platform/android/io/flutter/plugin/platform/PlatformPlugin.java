@@ -51,6 +51,8 @@ public class PlatformPlugin extends JSONMessageListener implements ActivityLifec
             setSystemChromeEnabledSystemUIOverlays(args.getJSONArray(0));
         } else if (method.equals("SystemChrome.setSystemUIOverlayStyle")) {
             setSystemChromeSystemUIOverlayStyle(args.getString(0));
+        } else if (method.equals("SystemNavigator.pop")) {
+            popSystemNavigator();
         } else if (method.equals("PathProvider.getTemporaryDirectory")) {
             return getPathProviderTemporaryDirectory();
         } else if (method.equals("PathProvider.getApplicationDocumentsDirectory")) {
@@ -158,6 +160,10 @@ public class PlatformPlugin extends JSONMessageListener implements ActivityLifec
         // You can change the navigation bar color (including translucent colors)
         // in Android, but you can't change the color of the navigation buttons,
         // so LIGHT vs DARK effectively isn't supported in Android.
+    }
+
+    private void popSystemNavigator() {
+        mActivity.finish();
     }
 
     private JSONObject getPathProviderTemporaryDirectory() throws JSONException {
