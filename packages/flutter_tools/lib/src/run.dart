@@ -5,10 +5,14 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:path/path.dart' as path;
+
 import 'application_package.dart';
 import 'base/logger.dart';
+import 'base/process.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
+import 'cache.dart';
 import 'commands/build_apk.dart';
 import 'commands/install.dart';
 import 'commands/trace.dart';
@@ -114,67 +118,89 @@ class RunAndStayResident extends ResidentRunner {
       }
     }
 
-    _package = getApplicationPackageForPlatform(device.platform, applicationBinary: applicationBinary);
-
-    if (_package == null) {
-      String message = 'No application found for ${device.platform}.';
-      String hint = getMissingPackageHintForPlatform(device.platform);
-      if (hint != null)
-        message += '\n$hint';
-      printError(message);
-      return 1;
-    }
-
     Stopwatch startTime = new Stopwatch()..start();
 
-    // TODO(devoncarew): We shouldn't have to do type checks here.
-    if (shouldBuild && device is AndroidDevice) {
-      printTrace('Running build command.');
-
-      int result = await buildApk(
-        device.platform,
-        target: target,
-        buildMode: debuggingOptions.buildMode
-      );
-
-      if (result != 0)
-        return result;
+    String toolsExtension = Cache.instance.getToolsExtension('run');
+    if (toolsExtension != null) {
+      printStatus('running flutter-run tools extension');
+      printStatus('  $toolsExtension');
+      int exitCode = await runCommandAndStreamOutput(<String>[toolsExtension, _mainPath]);
+      if (exitCode == 0) {
+        printStatus('tools extension finished');
+        _result = new LaunchResult.succeeded();
+        // fall through to connect debugger
+      } else if (exitCode == 59) {
+        printStatus('tools extension finished, but did not launch app');
+        _result = null;
+        // fall through to launch app and connect debugger
+      } else {
+        printStatus('tools extension: $toolsExtension');
+        printStatus('  exitCode: $exitCode');
+        _result = new LaunchResult.failed();
+      }
     }
 
-    // TODO(devoncarew): Move this into the device.startApp() impls.
-    if (_package != null) {
-      printTrace("Stopping app '${_package.name}' on ${device.name}.");
-      await device.stopApp(_package);
-    }
+    if (_result == null) {
+      _package = getApplicationPackageForPlatform(device.platform, applicationBinary: applicationBinary);
 
-    // TODO(devoncarew): This fails for ios devices - we haven't built yet.
-    if (device is AndroidDevice) {
-      printTrace('Running install command.');
-      if (!(installApp(device, _package, uninstall: false)))
+      if (_package == null) {
+        String message = 'No application found for ${device.platform}.';
+        String hint = getMissingPackageHintForPlatform(device.platform);
+        if (hint != null)
+          message += '\n$hint';
+        printError(message);
         return 1;
+      }
+
+      // TODO(devoncarew): We shouldn't have to do type checks here.
+      if (shouldBuild && device is AndroidDevice) {
+        printStatus('Building APK...');
+
+        int result = await buildApk(
+          device.platform,
+          target: target,
+          buildMode: debuggingOptions.buildMode
+        );
+
+        if (result != 0)
+          return result;
+      }
+
+      // TODO(devoncarew): Move this into the device.startApp() impls.
+      if (_package != null) {
+        printStatus("Stopping app '${_package.name}' on ${device.name}.");
+        await device.stopApp(_package);
+      }
+
+      // TODO(devoncarew): This fails for ios devices - we haven't built yet.
+      if (device is AndroidDevice) {
+        printStatus('Installing onto ${device.name}...');
+        if (!(installApp(device, _package, uninstall: false)))
+          return 1;
+      }
+
+      Map<String, dynamic> platformArgs;
+      if (traceStartup != null)
+        platformArgs = <String, dynamic>{ 'trace-startup': traceStartup };
+
+      await startEchoingDeviceLog();
+      if (_mainPath == null) {
+        assert(prebuiltMode);
+        printStatus('Running ${_package.displayName} on ${device.name}');
+      } else {
+        printStatus('Running ${getDisplayPath(_mainPath)} on ${device.name}...');
+      }
+
+      _result = await device.startApp(
+          _package,
+          debuggingOptions.buildMode,
+          mainPath: _mainPath,
+          debuggingOptions: debuggingOptions,
+          platformArgs: platformArgs,
+          route: route,
+          prebuiltApplication: prebuiltMode
+      );
     }
-
-    Map<String, dynamic> platformArgs;
-    if (traceStartup != null)
-      platformArgs = <String, dynamic>{ 'trace-startup': traceStartup };
-
-    await startEchoingDeviceLog();
-    if (_mainPath == null) {
-      assert(prebuiltMode);
-      printStatus('Running ${_package.displayName} on ${device.name}');
-    } else {
-      printStatus('Running ${getDisplayPath(_mainPath)} on ${device.name}...');
-    }
-
-    _result = await device.startApp(
-      _package,
-      debuggingOptions.buildMode,
-      mainPath: _mainPath,
-      debuggingOptions: debuggingOptions,
-      platformArgs: platformArgs,
-      route: route,
-      prebuiltApplication: prebuiltMode
-    );
 
     if (!_result.started) {
       printError('Error running application on ${device.name}.');

@@ -126,6 +126,13 @@ class Cache {
     return new Directory(path.join(getCacheArtifacts().path, name));
   }
 
+  /// Return a path to the specified tools extension if it exists
+  /// or `null` if it does not.
+  String getToolsExtension(String commandName) {
+    String toolsExtension = path.join(_rootOverride?.path ?? flutterRoot, 'bin', 'tool-extensions', 'flutter-$commandName');
+    return FileSystemEntity.isFileSync(toolsExtension) ? toolsExtension : null;
+  }
+
   String getVersionFor(String artifactName) {
     File versionFile = new File(path.join(_rootOverride?.path ?? flutterRoot, 'bin', 'internal', '$artifactName.version'));
     return versionFile.existsSync() ? versionFile.readAsStringSync().trim() : null;
