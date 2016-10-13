@@ -97,7 +97,7 @@ class TextFieldDemoState extends State<TextFieldDemo> {
             new Input(
               hintText: 'Tell us about yourself (optional)',
               labelText: 'Life story',
-              multiline: true,
+              maxLines: 3,
               formField: new FormField<String>()
             ),
             new Row(

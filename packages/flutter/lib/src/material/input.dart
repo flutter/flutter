@@ -43,7 +43,7 @@ class Input extends StatefulWidget {
     this.hideText: false,
     this.isDense: false,
     this.autofocus: false,
-    this.multiline: false,
+    this.maxLines: 1,
     this.formField,
     this.onChanged,
     this.onSubmitted
@@ -85,9 +85,10 @@ class Input extends StatefulWidget {
   /// Whether this input field should focus itself is nothing else is already focused.
   final bool autofocus;
 
-  /// True if the text should wrap and span multiple lines, false if it should
-  /// stay on a single line and scroll when overflowed.
-  final bool multiline;
+  /// The maximum number of lines for the text to span, wrapping if necessary.
+  /// If this is 1 (the default), the text will not wrap, but will scroll
+  /// horizontally instead.
+  final int maxLines;
 
   /// Form-specific data, required if this Input is part of a Form.
   final FormField<String> formField;
@@ -210,7 +211,7 @@ class _InputState extends State<Input> {
         focusKey: focusKey,
         style: textStyle,
         hideText: config.hideText,
-        multiline: config.multiline,
+        maxLines: config.maxLines,
         cursorColor: themeData.textSelectionColor,
         selectionColor: themeData.textSelectionColor,
         selectionControls: materialTextSelectionControls,

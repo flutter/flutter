@@ -449,7 +449,7 @@ void main() {
             value: inputValue,
             key: inputKey,
             style: const TextStyle(color: Colors.black, fontSize: 34.0),
-            multiline: true,
+            maxLines: 3,
             hintText: 'Placeholder',
             onChanged: (InputValue value) { inputValue = value; }
           )
@@ -490,7 +490,7 @@ void main() {
                     value: inputValue,
                     key: inputKey,
                     style: const TextStyle(color: Colors.black, fontSize: 34.0),
-                    multiline: true,
+                    maxLines: 3,
                     onChanged: (InputValue value) { inputValue = value; }
                   )
                 )
