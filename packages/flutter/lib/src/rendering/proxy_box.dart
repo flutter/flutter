@@ -1479,7 +1479,7 @@ class RenderFittedBox extends RenderProxyBox {
       final Rect destinationRect = _alignment.inscribe(sizes.destination, Point.origin & size);
       _hasVisualOverflow = sourceRect.width < childSize.width || sourceRect.height < childSize.width;
       _transform = new Matrix4.translationValues(destinationRect.left, destinationRect.top, 0.0)
-        ..scale(scaleX, scaleY)
+        ..scale(scaleX, scaleY, 1.0)
         ..translate(-sourceRect.left, -sourceRect.top);
     }
   }

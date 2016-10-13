@@ -445,17 +445,20 @@ class TransformLayer extends OffsetLayer {
   /// The [transform] property must be non-null before the compositing phase of
   /// the pipeline.
   TransformLayer({
-    Offset offset: Offset.zero,
     this.transform
-  }): super(offset: offset);
+  });
 
   /// The matrix to apply
   Matrix4 transform;
 
   @override
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
-    Matrix4 effectiveTransform = new Matrix4.translationValues(offset.dx + layerOffset.dx, offset.dy + layerOffset.dy, 0.0)
-      ..multiply(transform);
+    assert(offset == Offset.zero);
+    Matrix4 effectiveTransform = transform;
+    if (layerOffset != Offset.zero) {
+      effectiveTransform = new Matrix4.translationValues(layerOffset.dx, layerOffset.dy, 0.0)
+        ..multiply(transform);
+    }
     builder.pushTransform(effectiveTransform.storage);
     addChildrenToScene(builder, Offset.zero);
     builder.pop();

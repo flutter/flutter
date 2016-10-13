@@ -107,13 +107,13 @@ class MatrixUtils {
     return math.max(a, math.max(b, math.max(c, d)));
   }
 
-  /// Returns a rect that bounds the result of applying the given matrix as a
-  /// perspective transform to the given rect.
+  /// Returns a rect that bounds the result of applying the inverse of the given
+  /// matrix as a perspective transform to the given rect.
   ///
   /// This function assumes the given rect is in the plane with z equals 0.0.
   /// The transformed rect is then projected back into the plane with z equals
   /// 0.0 before computing its bounding rect.
-  static Rect transformRect(Rect rect, Matrix4 transform) {
+  static Rect inverseTransformRect(Rect rect, Matrix4 transform) {
     assert(rect != null);
     assert(transform.determinant != 0.0);
     if (isIdentity(transform))
