@@ -708,6 +708,8 @@ class ScrollableState<T extends Scrollable> extends State<T> with SingleTickerPr
 
   // Used for state changes that sometimes occur during a build phase. If so,
   // we skip calling setState, as the changes will apply to the next build.
+  // TODO(ianh): This is ugly and hopefully temporary. Ideally this won't be
+  // needed after Scrollable is rewritten.
   void _setStateMaybeDuringBuild(VoidCallback fn) {
     if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.persistentCallbacks) {
       fn();
