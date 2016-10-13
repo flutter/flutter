@@ -177,19 +177,26 @@ class _InputState extends State<Input> {
       ));
     }
 
-    EdgeInsets margin = new EdgeInsets.only(bottom: config.isDense ? 4.0 : 8.0);
-    EdgeInsets padding = new EdgeInsets.only(top: topPadding, bottom: 8.0);
     Color borderColor = activeColor;
-    double borderWidth = focused ? 2.0 : 1.0;
+    double bottomPadding = 8.0;
+    double bottomBorder = focused ? 2.0 : 1.0;
+    double bottomHeight = config.isDense ? 14.0 : 18.0;
 
     if (errorText != null) {
       borderColor = themeData.errorColor;
-      borderWidth = 2.0;
-      if (!config.isDense) {
-        margin = const EdgeInsets.only(bottom: 15.0);
-        padding = new EdgeInsets.only(top: topPadding, bottom: 1.0);
-      }
+      bottomBorder = 2.0;
+      if (!config.isDense)
+        bottomPadding = 1.0;
     }
+
+    EdgeInsets padding = new EdgeInsets.only(top: topPadding, bottom: bottomPadding);
+    Border border = new Border(
+      bottom: new BorderSide(
+        color: borderColor,
+        width: bottomBorder,
+      )
+    );
+    EdgeInsets margin = new EdgeInsets.only(bottom: bottomHeight - (bottomPadding + bottomBorder));
 
     stackChildren.add(new AnimatedContainer(
       margin: margin,
@@ -197,12 +204,7 @@ class _InputState extends State<Input> {
       duration: _kTransitionDuration,
       curve: _kTransitionCurve,
       decoration: new BoxDecoration(
-        border: new Border(
-          bottom: new BorderSide(
-            color: borderColor,
-            width: borderWidth
-          )
-        )
+        border: border,
       ),
       child: new RawInputLine(
         key: _rawInputLineKey,
