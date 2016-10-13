@@ -5,8 +5,6 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:path/path.dart' as path;
-
 import 'application_package.dart';
 import 'base/logger.dart';
 import 'base/process.dart';
@@ -118,25 +116,50 @@ class RunAndStayResident extends ResidentRunner {
       }
     }
 
+    _result = null;
     Stopwatch startTime = new Stopwatch()..start();
 
     String toolsExtension = Cache.instance.getToolsExtension('run');
     if (toolsExtension != null) {
-      printStatus('running flutter-run tools extension');
-      printStatus('  $toolsExtension');
-      int exitCode = await runCommandAndStreamOutput(<String>[toolsExtension, _mainPath]);
-      if (exitCode == 0) {
-        printStatus('tools extension finished');
-        _result = new LaunchResult.succeeded();
-        // fall through to connect debugger
-      } else if (exitCode == 59) {
-        printStatus('tools extension finished, but did not launch app');
+      int observatoryPort;
+      const observatoryPrefix = 'Observatory listening on http://127.0.0.1:';
+      int diagnosticPort;
+      const diagnosticPrefix = 'Diagnostic server listening on http://127.0.0.1:';
+      Completer<bool> launched = new Completer<bool>();
+
+      await startEchoingDeviceLog();
+      int exitCode;
+      runCommandAndStreamOutput(
+        <String>[toolsExtension, _mainPath],
+        mapFunction: (String line) {
+          if (line.startsWith(observatoryPrefix))
+            observatoryPort = int.parse(line.substring(observatoryPrefix.length), onError: (_) => null);
+          if (line.startsWith(diagnosticPrefix))
+            diagnosticPort = int.parse(line.substring(diagnosticPrefix.length), onError: (_) => null);
+          if (!launched.isCompleted) {
+            if (line.contains('Application not launched by flutter-run script'))
+              launched.complete(false);
+            else if (line.contains('Application running'))
+              launched.complete(true);
+          }
+          return line;
+        }).then((int result) {
+        exitCode = result;
+        if (!launched.isCompleted)
+          launched.complete(exitCode == 0);
+      });
+
+      if (await launched.future) {
+        _result = new LaunchResult.succeeded(
+            observatoryPort: observatoryPort, diagnosticPort: diagnosticPort);
+        // fall through to connect observatory
+      } else if (exitCode == null || exitCode == 0) {
         _result = null;
-        // fall through to launch app and connect debugger
+        // fall through to launch app and connect observatory
       } else {
-        printStatus('tools extension: $toolsExtension');
-        printStatus('  exitCode: $exitCode');
         _result = new LaunchResult.failed();
+        printStatus('flutter-run script failed: $exitCode');
+        // fall through to report failure
       }
     }
 
