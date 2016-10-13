@@ -241,17 +241,17 @@ class PaintingContext {
   /// * `painter` is a callback that will paint with the [clipRect] applied. This
   ///   function calls the [painter] synchronously.
   void pushClipRect(bool needsCompositing, Offset offset, Rect clipRect, PaintingContextCallback painter) {
-    Rect offsetClipRect = clipRect.shift(offset);
+    final Rect offsetClipRect = clipRect.shift(offset);
     if (needsCompositing) {
       _stopRecordingIfNeeded();
-      ClipRectLayer clipLayer = new ClipRectLayer(clipRect: offsetClipRect);
+      final ClipRectLayer clipLayer = new ClipRectLayer(clipRect: offsetClipRect);
       _appendLayer(clipLayer);
-      PaintingContext childContext = new PaintingContext._(clipLayer, offsetClipRect);
+      final PaintingContext childContext = new PaintingContext._(clipLayer, offsetClipRect);
       painter(childContext, offset);
       childContext._stopRecordingIfNeeded();
     } else {
       canvas.save();
-      canvas.clipRect(clipRect.shift(offset));
+      canvas.clipRect(offsetClipRect);
       painter(this, offset);
       canvas.restore();
     }
@@ -270,13 +270,13 @@ class PaintingContext {
   /// * `painter` is a callback that will paint with the `clipRRect` applied. This
   ///   function calls the `painter` synchronously.
   void pushClipRRect(bool needsCompositing, Offset offset, Rect bounds, RRect clipRRect, PaintingContextCallback painter) {
-    Rect offsetBounds = bounds.shift(offset);
-    RRect offsetClipRRect = clipRRect.shift(offset);
+    final Rect offsetBounds = bounds.shift(offset);
+    final RRect offsetClipRRect = clipRRect.shift(offset);
     if (needsCompositing) {
       _stopRecordingIfNeeded();
-      ClipRRectLayer clipLayer = new ClipRRectLayer(clipRRect: offsetClipRRect);
+      final ClipRRectLayer clipLayer = new ClipRRectLayer(clipRRect: offsetClipRRect);
       _appendLayer(clipLayer);
-      PaintingContext childContext = new PaintingContext._(clipLayer, offsetBounds);
+      final PaintingContext childContext = new PaintingContext._(clipLayer, offsetBounds);
       painter(childContext, offset);
       childContext._stopRecordingIfNeeded();
     } else {
@@ -300,13 +300,13 @@ class PaintingContext {
   /// * `painter` is a callback that will paint with the `clipPath` applied. This
   ///   function calls the `painter` synchronously.
   void pushClipPath(bool needsCompositing, Offset offset, Rect bounds, Path clipPath, PaintingContextCallback painter) {
-    Rect offsetBounds = bounds.shift(offset);
-    Path offsetClipPath = clipPath.shift(offset);
+    final Rect offsetBounds = bounds.shift(offset);
+    final Path offsetClipPath = clipPath.shift(offset);
     if (needsCompositing) {
       _stopRecordingIfNeeded();
-      ClipPathLayer clipLayer = new ClipPathLayer(clipPath: offsetClipPath);
+      final ClipPathLayer clipLayer = new ClipPathLayer(clipPath: offsetClipPath);
       _appendLayer(clipLayer);
-      PaintingContext childContext = new PaintingContext._(clipLayer, offsetBounds);
+      final PaintingContext childContext = new PaintingContext._(clipLayer, offsetBounds);
       painter(childContext, offset);
       childContext._stopRecordingIfNeeded();
     } else {
@@ -327,20 +327,20 @@ class PaintingContext {
   /// * `painter` is a callback that will paint with the `transform` applied. This
   ///   function calls the `painter` synchronously.
   void pushTransform(bool needsCompositing, Offset offset, Matrix4 transform, PaintingContextCallback painter) {
+    final Matrix4 effectiveTransform = new Matrix4.translationValues(offset.dx, offset.dy, 0.0)
+      ..multiply(transform)..translate(-offset.dx, -offset.dy);
     if (needsCompositing) {
       _stopRecordingIfNeeded();
-      TransformLayer transformLayer = new TransformLayer(offset: offset, transform: transform);
+      final TransformLayer transformLayer = new TransformLayer(transform: effectiveTransform);
       _appendLayer(transformLayer);
-      // TODO(abarth): We need to run _paintBounds through the inverse of transform.
-      PaintingContext childContext = new PaintingContext._(transformLayer, _paintBounds);
-      painter(childContext, Offset.zero);
+      final Rect transformedPaintBounds = MatrixUtils.inverseTransformRect(_paintBounds, effectiveTransform);
+      final PaintingContext childContext = new PaintingContext._(transformLayer, transformedPaintBounds);
+      painter(childContext, offset);
       childContext._stopRecordingIfNeeded();
     } else {
-      Matrix4 offsetMatrix = new Matrix4.translationValues(offset.dx, offset.dy, 0.0);
-      Matrix4 transformWithOffset = offsetMatrix * transform;
       canvas.save();
-      canvas.transform(transformWithOffset.storage);
-      painter(this, Offset.zero);
+      canvas.transform(effectiveTransform.storage);
+      painter(this, offset);
       canvas.restore();
     }
   }
@@ -356,9 +356,9 @@ class PaintingContext {
   ///   function calls the `painter` synchronously.
   void pushOpacity(Offset offset, int alpha, PaintingContextCallback painter) {
     _stopRecordingIfNeeded();
-    OpacityLayer opacityLayer = new OpacityLayer(alpha: alpha);
+    final OpacityLayer opacityLayer = new OpacityLayer(alpha: alpha);
     _appendLayer(opacityLayer);
-    PaintingContext childContext = new PaintingContext._(opacityLayer, _paintBounds);
+    final PaintingContext childContext = new PaintingContext._(opacityLayer, _paintBounds);
     painter(childContext, offset);
     childContext._stopRecordingIfNeeded();
   }
@@ -377,13 +377,13 @@ class PaintingContext {
   ///   function calls the `painter` synchronously.
   void pushShaderMask(Offset offset, Shader shader, Rect maskRect, TransferMode transferMode, PaintingContextCallback painter) {
     _stopRecordingIfNeeded();
-    ShaderMaskLayer shaderLayer = new ShaderMaskLayer(
+    final ShaderMaskLayer shaderLayer = new ShaderMaskLayer(
       shader: shader,
       maskRect: maskRect,
       transferMode: transferMode
     );
     _appendLayer(shaderLayer);
-    PaintingContext childContext = new PaintingContext._(shaderLayer, _paintBounds);
+    final PaintingContext childContext = new PaintingContext._(shaderLayer, _paintBounds);
     painter(childContext, offset);
     childContext._stopRecordingIfNeeded();
   }
@@ -395,9 +395,9 @@ class PaintingContext {
   // TODO(abarth): I don't quite understand how this API is supposed to work.
   void pushBackdropFilter(Offset offset, ui.ImageFilter filter, PaintingContextCallback painter) {
     _stopRecordingIfNeeded();
-    BackdropFilterLayer backdropFilterLayer = new BackdropFilterLayer(filter: filter);
+    final BackdropFilterLayer backdropFilterLayer = new BackdropFilterLayer(filter: filter);
     _appendLayer(backdropFilterLayer);
-    PaintingContext childContext = new PaintingContext._(backdropFilterLayer, _paintBounds);
+    final PaintingContext childContext = new PaintingContext._(backdropFilterLayer, _paintBounds);
     painter(childContext, offset);
     childContext._stopRecordingIfNeeded();
   }
@@ -487,7 +487,7 @@ class _SemanticsGeometry {
         } else {
           Matrix4 clipTransform = new Matrix4.identity();
           parent.applyPaintTransform(child, clipTransform);
-          clipRect = MatrixUtils.transformRect(clipRect, clipTransform);
+          clipRect = MatrixUtils.inverseTransformRect(clipRect, clipTransform);
         }
       }
       parent.applyPaintTransform(child, transform);
