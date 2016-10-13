@@ -430,12 +430,13 @@ class IOSSimulator extends Device {
     // Prepare launch arguments.
     List<String> args = <String>[];
 
-    if (!prebuiltApplication)
+    if (!prebuiltApplication) {
       args.addAll(<String>[
         "--flx=${path.absolute(path.join(getBuildDirectory(), 'app.flx'))}",
         "--dart-main=${path.absolute(mainPath)}",
         "--packages=${path.absolute('.packages')}",
       ]);
+    }
 
     if (debuggingOptions.debuggingEnabled) {
       if (debuggingOptions.buildMode == BuildMode.debug)

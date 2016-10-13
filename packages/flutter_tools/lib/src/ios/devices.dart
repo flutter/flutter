@@ -189,7 +189,7 @@ class IOSDevice extends Device {
       // TODO(devoncarew): Handle startPaused, debugPort.
       printTrace('Building ${app.name} for $id');
 
-      // Step 1: Install the precompiled/DBC application if necessary.
+      // Step 1: Build the precompiled/DBC application if necessary.
       XcodeBuildResult buildResult = await buildXcodeProject(app: app, mode: mode, target: mainPath, buildForDevice: true);
       if (!buildResult.success) {
         printError('Could not build the precompiled application for the device.');
