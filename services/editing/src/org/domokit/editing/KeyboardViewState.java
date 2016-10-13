@@ -67,7 +67,7 @@ public class KeyboardViewState {
             return null;
         outAttrs.inputType = inputTypeFromKeyboardType(mConfiguration.type);
         outAttrs.actionLabel = mConfiguration.actionLabel;
-        outAttrs.imeOptions = EditorInfo.IME_ACTION_DONE;
+        outAttrs.imeOptions = EditorInfo.IME_ACTION_DONE | EditorInfo.IME_FLAG_NO_FULLSCREEN;
         InputConnectionAdaptor connection = new InputConnectionAdaptor(mView, mClient);
         if (mIncomingState != null) {
             outAttrs.initialSelStart = mIncomingState.selectionBase;
