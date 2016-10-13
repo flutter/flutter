@@ -16,7 +16,9 @@ class DrainDataPipeJob::JobImpl : public DataPipeDrainer::Client {
  public:
   explicit JobImpl(mojo::ScopedDataPipeConsumerHandle handle,
                    const ResultCallback& callback)
-      : callback_(callback), drainer_(this, std::move(handle)) {}
+      : callback_(callback), drainer_(this) {
+    drainer_.Start(std::move(handle));
+  }
 
  private:
   // mojo::common::DataPipeDrainer::Client
