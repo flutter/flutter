@@ -184,17 +184,19 @@ class IOSDevice extends Device {
     Map<String, dynamic> platformArgs,
     bool prebuiltApplication: false
   }) async {
-    // TODO(chinmaygarde): Use checked, mainPath, route.
-    // TODO(devoncarew): Handle startPaused, debugPort.
-    printTrace('Building ${app.name} for $id');
+    if (!prebuiltApplication) {
+      // TODO(chinmaygarde): Use checked, mainPath, route.
+      // TODO(devoncarew): Handle startPaused, debugPort.
+      printTrace('Building ${app.name} for $id');
 
-    // Step 1: Install the precompiled/DBC application if necessary.
-    XcodeBuildResult buildResult = await buildXcodeProject(app: app, mode: mode, target: mainPath, buildForDevice: true);
-    if (!buildResult.success) {
-      printError('Could not build the precompiled application for the device.');
-      diagnoseXcodeBuildFailure(buildResult);
-      printError('');
-      return new LaunchResult.failed();
+      // Step 1: Build the precompiled/DBC application if necessary.
+      XcodeBuildResult buildResult = await buildXcodeProject(app: app, mode: mode, target: mainPath, buildForDevice: true);
+      if (!buildResult.success) {
+        printError('Could not build the precompiled application for the device.');
+        diagnoseXcodeBuildFailure(buildResult);
+        printError('');
+        return new LaunchResult.failed();
+      }
     }
 
     // Step 2: Check that the application exists at the specified path.

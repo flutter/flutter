@@ -8,10 +8,11 @@ import 'package:path/path.dart' as path;
 import 'package:xml/xml.dart' as xml;
 
 import 'android/gradle.dart';
+import 'base/os.dart' show os;
 import 'base/process.dart';
 import 'build_info.dart';
 import 'globals.dart';
-import 'ios/plist_utils.dart';
+import 'ios/plist_utils.dart' as plist;
 import 'ios/xcodeproj.dart';
 
 abstract class ApplicationPackage {
@@ -122,46 +123,111 @@ class AndroidApk extends ApplicationPackage {
   String get name => path.basename(apkPath);
 }
 
-class IOSApp extends ApplicationPackage {
-  static final String kBundleName = 'Runner.app';
+/// Tests whether a [FileSystemEntity] is an iOS bundle directory
+bool _isBundleDirectory(FileSystemEntity entity) =>
+    entity is Directory && entity.path.endsWith('.app');
 
-  IOSApp({
-    this.appDirectory,
-    String projectBundleId
-  }) : super(id: projectBundleId);
+abstract class IOSApp extends ApplicationPackage {
+  IOSApp({String projectBundleId}) : super(id: projectBundleId);
+
+  /// Creates a new IOSApp from an existing IPA.
+  factory IOSApp.fromIpa(String applicationBinary) {
+    Directory bundleDir;
+    try {
+      Directory tempDir = Directory.systemTemp.createTempSync('flutter_app_');
+      addShutdownHook(() async => await tempDir.delete(recursive: true));
+      os.unzip(new File(applicationBinary), tempDir);
+      Directory payloadDir = new Directory(path.join(tempDir.path, 'Payload'));
+      bundleDir = payloadDir.listSync().singleWhere(_isBundleDirectory);
+    } on StateError catch (e, stackTrace) {
+      printError('Invalid prebuilt iOS binary: ${e.toString()}', stackTrace);
+      return null;
+    }
+
+    String plistPath = path.join(bundleDir.path, 'Info.plist');
+    String id = plist.getValueFromFile(plistPath, plist.kCFBundleIdentifierKey);
+    if (id == null)
+      return null;
+
+    return new PrebuiltIOSApp(
+      ipaPath: applicationBinary,
+      bundleDir: bundleDir,
+      bundleName: path.basename(bundleDir.path),
+      projectBundleId: id,
+    );
+  }
 
   factory IOSApp.fromCurrentDirectory() {
     if (getCurrentHostPlatform() != HostPlatform.darwin_x64)
       return null;
 
     String plistPath = path.join('ios', 'Runner', 'Info.plist');
-    String value = getValueFromFile(plistPath, kCFBundleIdentifierKey);
-    if (value == null)
+    String id = plist.getValueFromFile(plistPath, plist.kCFBundleIdentifierKey);
+    if (id == null)
       return null;
     String projectPath = path.join('ios', 'Runner.xcodeproj');
-    value = substituteXcodeVariables(value, projectPath, 'Runner');
+    id = substituteXcodeVariables(id, projectPath, 'Runner');
 
-    return new IOSApp(
+    return new BuildableIOSApp(
       appDirectory: path.join('ios'),
-      projectBundleId: value
+      projectBundleId: id
     );
   }
+
+  @override
+  String get displayName => id;
+
+  String get simulatorBundlePath;
+
+  String get deviceBundlePath;
+}
+
+class BuildableIOSApp extends IOSApp {
+  static final String kBundleName = 'Runner.app';
+
+  BuildableIOSApp({
+    this.appDirectory,
+    String projectBundleId,
+  }) : super(projectBundleId: projectBundleId);
+
+  final String appDirectory;
 
   @override
   String get name => kBundleName;
 
   @override
-  String get displayName => id;
-
-  final String appDirectory;
-
   String get simulatorBundlePath => _buildAppPath('iphonesimulator');
 
+  @override
   String get deviceBundlePath => _buildAppPath('iphoneos');
 
   String _buildAppPath(String type) {
     return path.join(getIosBuildDirectory(), 'Release-$type', kBundleName);
   }
+}
+
+class PrebuiltIOSApp extends IOSApp {
+  final String ipaPath;
+  final Directory bundleDir;
+  final String bundleName;
+
+  PrebuiltIOSApp({
+    this.ipaPath,
+    this.bundleDir,
+    this.bundleName,
+    String projectBundleId,
+  }) : super(projectBundleId: projectBundleId);
+
+  @override
+  String get name => bundleName;
+
+  @override
+  String get simulatorBundlePath => _bundlePath;
+
+  @override
+  String get deviceBundlePath => _bundlePath;
+
+  String get _bundlePath => bundleDir.path;
 }
 
 ApplicationPackage getApplicationPackageForPlatform(TargetPlatform platform, {
@@ -171,11 +237,13 @@ ApplicationPackage getApplicationPackageForPlatform(TargetPlatform platform, {
     case TargetPlatform.android_arm:
     case TargetPlatform.android_x64:
     case TargetPlatform.android_x86:
-      if (applicationBinary != null)
-        return new AndroidApk.fromApk(applicationBinary);
-      return new AndroidApk.fromCurrentDirectory();
+      return applicationBinary == null
+          ? new AndroidApk.fromCurrentDirectory()
+          : new AndroidApk.fromApk(applicationBinary);
     case TargetPlatform.ios:
-      return new IOSApp.fromCurrentDirectory();
+      return applicationBinary == null
+          ? new IOSApp.fromCurrentDirectory()
+          : new IOSApp.fromIpa(applicationBinary);
     case TargetPlatform.darwin_x64:
     case TargetPlatform.linux_x64:
       return null;

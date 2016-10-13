@@ -148,7 +148,7 @@ class RunAndStayResident extends ResidentRunner {
     }
 
     // TODO(devoncarew): This fails for ios devices - we haven't built yet.
-    if (device is AndroidDevice) {
+    if (prebuiltMode || device is AndroidDevice) {
       printTrace('Running install command.');
       if (!(installApp(device, _package, uninstall: false)))
         return 1;

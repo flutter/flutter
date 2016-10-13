@@ -9,8 +9,19 @@ import 'dart:io';
 import '../globals.dart';
 
 typedef String StringConverter(String string);
+typedef Future<dynamic> ShutdownHook();
 
 // TODO(ianh): We have way too many ways to run subprocesses in this project.
+
+List<ShutdownHook> _shutdownHooks = <ShutdownHook>[];
+void addShutdownHook(ShutdownHook shutdownHook) {
+  _shutdownHooks.add(shutdownHook);
+}
+
+Future<Null> runShutdownHooks() async {
+  for (ShutdownHook shutdownHook in _shutdownHooks)
+    await shutdownHook();
+}
 
 Map<String, String> _environment(bool allowReentrantFlutter, [Map<String, String> environment]) {
   if (allowReentrantFlutter) {
