@@ -70,11 +70,16 @@ public class KeyboardViewState {
         outAttrs.imeOptions = EditorInfo.IME_ACTION_DONE;
         InputConnectionAdaptor connection = new InputConnectionAdaptor(mView, mClient);
         if (mIncomingState != null) {
+            outAttrs.initialSelStart = mIncomingState.selectionBase;
+            outAttrs.initialSelEnd = mIncomingState.selectionExtent;
             connection.getEditable().append(mIncomingState.text);
             connection.setSelection(mIncomingState.selectionBase,
                                     mIncomingState.selectionExtent);
             connection.setComposingRegion(mIncomingState.composingBase,
                                           mIncomingState.composingExtent);
+        } else {
+            outAttrs.initialSelStart = 0;
+            outAttrs.initialSelEnd = 0;
         }
         return connection;
     }
