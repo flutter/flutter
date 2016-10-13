@@ -54,6 +54,11 @@ void main() {
   MockClipboard mockClipboard = new MockClipboard();
   serviceMocker.registerMockService(mockClipboard);
 
+  const String kThreeLines =
+    'First line of text is here abcdef ghijkl mnopqrst. ' +
+    'Second line of text goes until abcdef ghijkl mnopq. ' +
+    'Third line of stuff keeps going until abcdef ghijk. ';
+
   void enterText(String testValue) {
     // Simulate entry of text through the keyboard.
     expect(mockKeyboard.client, isNotNull);
@@ -469,11 +474,7 @@ void main() {
     expect(findInputBox(), equals(inputBox));
     expect(inputBox.size, equals(emptyInputSize));
 
-    String threeLines =
-      'First line of text is here abcdef ghijkl mnopqrst. ' +
-      'Second line of text goes until abcdef ghijkl mnopq. ' +
-      'Third line of stuff keeps going until abcdef ghijk. ';
-    enterText(threeLines);
+    enterText(kThreeLines);
     await tester.pumpWidget(builder(3), const Duration(seconds: 1));
     expect(findInputBox(), equals(inputBox));
     expect(inputBox.size, greaterThan(emptyInputSize));
@@ -481,7 +482,7 @@ void main() {
     Size threeLineInputSize = inputBox.size;
 
     // An extra line won't increase the size because we max at 3.
-    String fourLines = threeLines + 'Fourth line of text wraps and will not display.';
+    String fourLines = kThreeLines + 'Fourth line of text wraps and will not display.';
     enterText(fourLines);
     await tester.pumpWidget(builder(3), const Duration(seconds: 2));
     expect(findInputBox(), equals(inputBox));
@@ -522,8 +523,8 @@ void main() {
 
     await tester.pumpWidget(builder());
 
-    String testValue = 'First line of text is here abcdef ghijkl mnopqrst. Second line of text goes until abcdef ghijkl mnopq. Third line of stuff.';
-    String cutValue = 'First line of stuff.';
+    String testValue = kThreeLines;
+    String cutValue = 'First line of stuff keeps going until abcdef ghijk. ';
     enterText(testValue);
 
     await tester.pumpWidget(builder());
