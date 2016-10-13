@@ -31,28 +31,14 @@ import org.chromium.base.library_loader.LibraryLoader;
 import org.chromium.base.library_loader.LibraryProcessType;
 import org.chromium.base.library_loader.ProcessInitException;
 import org.chromium.mojo.bindings.Interface.Binding;
-import org.chromium.mojo.sensors.SensorServiceImpl;
 import org.chromium.mojo.system.Core;
 import org.chromium.mojo.system.impl.CoreImpl;
 import org.chromium.mojo.system.MessagePipeHandle;
 import org.chromium.mojom.activity.Activity;
 import org.chromium.mojom.editing.Clipboard;
-import org.chromium.mojom.flutter.platform.HapticFeedback;
-import org.chromium.mojom.flutter.platform.PathProvider;
-import org.chromium.mojom.flutter.platform.SystemChrome;
-import org.chromium.mojom.flutter.platform.SystemSound;
-import org.chromium.mojom.flutter.platform.UrlLauncher;
-import org.chromium.mojom.media.MediaService;
-import org.chromium.mojom.sensors.SensorService;
 import org.chromium.mojom.vsync.VSyncProvider;
 import org.domokit.activity.ActivityImpl;
 import org.domokit.editing.ClipboardImpl;
-import org.domokit.media.MediaServiceImpl;
-import org.domokit.platform.HapticFeedbackImpl;
-import org.domokit.platform.PathProviderImpl;
-import org.domokit.platform.SystemChromeImpl;
-import org.domokit.platform.SystemSoundImpl;
-import org.domokit.platform.UrlLauncherImpl;
 import org.domokit.vsync.VSyncProviderImpl;
 
 /**
@@ -212,61 +198,10 @@ public class FlutterMain {
             }
         });
 
-        registry.register(MediaService.MANAGER.getName(), new ServiceFactory() {
-            @Override
-            public Binding connectToService(FlutterView view, Core core, MessagePipeHandle pipe) {
-                return MediaService.MANAGER.bind(new MediaServiceImpl(view.getContext(), core), pipe);
-            }
-        });
-
-        registry.register(SensorService.MANAGER.getName(), new ServiceFactory() {
-            @Override
-            public Binding connectToService(FlutterView view, Core core, MessagePipeHandle pipe) {
-                return SensorService.MANAGER.bind(new SensorServiceImpl(view.getContext()), pipe);
-            }
-        });
-
         registry.register(VSyncProvider.MANAGER.getName(), new ServiceFactory() {
             @Override
             public Binding connectToService(FlutterView view, Core core, MessagePipeHandle pipe) {
                 return VSyncProvider.MANAGER.bind(new VSyncProviderImpl(pipe), pipe);
-            }
-        });
-
-        registry.register(HapticFeedback.MANAGER.getName(), new ServiceFactory() {
-            @Override
-            public Binding connectToService(FlutterView view, Core core, MessagePipeHandle pipe) {
-                return HapticFeedback.MANAGER.bind(new HapticFeedbackImpl((android.app.Activity) view.getContext()), pipe);
-            }
-        });
-
-        registry.register(PathProvider.MANAGER.getName(), new ServiceFactory() {
-            @Override
-            public Binding connectToService(FlutterView view, Core core, MessagePipeHandle pipe) {
-                return PathProvider.MANAGER.bind(new PathProviderImpl(view.getContext()), pipe);
-            }
-        });
-
-        registry.register(SystemChrome.MANAGER.getName(), new ServiceFactory() {
-            @Override
-            public Binding connectToService(FlutterView view, Core core, MessagePipeHandle pipe) {
-                SystemChromeImpl chrome = new SystemChromeImpl((android.app.Activity) view.getContext());
-                view.addActivityLifecycleListener(chrome);
-                return SystemChrome.MANAGER.bind(chrome, pipe);
-            }
-        });
-
-        registry.register(SystemSound.MANAGER.getName(), new ServiceFactory() {
-            @Override
-            public Binding connectToService(FlutterView view, Core core, MessagePipeHandle pipe) {
-                return SystemSound.MANAGER.bind(new SystemSoundImpl((android.app.Activity) view.getContext()), pipe);
-            }
-        });
-
-        registry.register(UrlLauncher.MANAGER.getName(), new ServiceFactory() {
-            @Override
-            public Binding connectToService(FlutterView view, Core core, MessagePipeHandle pipe) {
-                return UrlLauncher.MANAGER.bind(new UrlLauncherImpl((android.app.Activity) view.getContext()), pipe);
             }
         });
     }

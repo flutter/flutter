@@ -17,19 +17,21 @@ static NSDictionary* GetDirectoryOfType(NSSearchPathDirectory dir) {
   return @{ @"path": paths.firstObject };
 }
 
-namespace flutter {
-namespace platform {
+namespace shell {
 
 // TODO(abarth): Move these definitions from system_chrome_impl.cc to here.
-extern const char* const kOrientationUpdateNotificationName;
-extern const char* const kOrientationUpdateNotificationKey;
-extern const char* const kOverlayStyleUpdateNotificationName;
-extern const char* const kOverlayStyleUpdateNotificationKey;
+const char* const kOrientationUpdateNotificationName =
+    "io.flutter.plugin.platform.SystemChromeOrientationNotificationName";
+const char* const kOrientationUpdateNotificationKey =
+    "io.flutter.plugin.platform.SystemChromeOrientationNotificationKey";
+const char* const kOverlayStyleUpdateNotificationName =
+    "io.flutter.plugin.platform.SystemChromeOverlayNotificationName";
+const char* const kOverlayStyleUpdateNotificationKey =
+    "io.flutter.plugin.platform.SystemChromeOverlayNotificationKey";
 
-}  // namespace platform
-}  // namespace flutter
+}  // namespace shell
 
-using namespace flutter::platform;
+using namespace shell;
 
 @implementation FlutterPlatformPlugin
 
