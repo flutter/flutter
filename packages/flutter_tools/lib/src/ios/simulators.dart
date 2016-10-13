@@ -10,6 +10,7 @@ import 'dart:math' as math;
 import 'package:path/path.dart' as path;
 
 import '../application_package.dart';
+import '../base/common.dart';
 import '../base/context.dart';
 import '../base/process.dart';
 import '../build_info.dart';
@@ -318,7 +319,7 @@ class IOSSimulator extends Device {
   String get xcrunPath => path.join('/usr', 'bin', 'xcrun');
 
   String _getSimulatorPath() {
-    return path.join(homeDirectory, 'Library', 'Developer', 'CoreSimulator', 'Devices', id);
+    return path.join(homeDirPath, 'Library', 'Developer', 'CoreSimulator', 'Devices', id);
   }
 
   String _getSimulatorAppHomeDirectory(ApplicationPackage app) {
@@ -544,7 +545,7 @@ class IOSSimulator extends Device {
   }
 
   String get logFilePath {
-    return path.join(homeDirectory, 'Library', 'Logs', 'CoreSimulator', id, 'system.log');
+    return path.join(homeDirPath, 'Library', 'Logs', 'CoreSimulator', id, 'system.log');
   }
 
   @override
@@ -587,7 +588,6 @@ class IOSSimulator extends Device {
 
   @override
   Future<bool> takeScreenshot(File outputFile) async {
-    String homeDirPath = Platform.environment['HOME'] ?? Platform.environment['USERPROFILE'];
     Directory desktopDir = new Directory(path.join(homeDirPath, 'Desktop'));
 
     // 'Simulator Screen Shot Mar 25, 2016, 2.59.43 PM.png'
