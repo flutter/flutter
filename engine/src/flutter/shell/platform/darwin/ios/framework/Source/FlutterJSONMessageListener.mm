@@ -7,6 +7,8 @@
 @implementation FlutterJSONMessageListener
 
 - (NSString*)didReceiveString:(NSString*)message {
+  if (!message)
+    return nil;
   NSError *error = nil;
   NSData* data = [message dataUsingEncoding:NSUTF8StringEncoding];
   NSDictionary* jsonObject = [NSJSONSerialization JSONObjectWithData:data options:0 error:&error];
@@ -16,6 +18,8 @@
   if (!response)
     return nil;
   NSData* responseData = [NSJSONSerialization dataWithJSONObject:response options:0 error:nil];
+  if (!responseData)
+    return nil;
   return [[[NSString alloc] initWithData:responseData encoding:NSUTF8StringEncoding] autorelease];
 }
 
