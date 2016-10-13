@@ -381,7 +381,10 @@ abstract class IntelliJValidator extends DoctorValidator {
 class IntelliJValidatorOnLinux extends IntelliJValidator {
   IntelliJValidatorOnLinux(String title, this.version, this.pluginsPath) : super(title);
 
+  @override
   String version;
+
+  @override
   String pluginsPath;
 
   static Iterable<DoctorValidator> get installed {
