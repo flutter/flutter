@@ -14,7 +14,8 @@
                   android:launchMode="singleTop"
                   android:theme="@android:style/Theme.Black.NoTitleBar"
                   android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
-                  android:hardwareAccelerated="true">
+                  android:hardwareAccelerated="true"
+                  android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
