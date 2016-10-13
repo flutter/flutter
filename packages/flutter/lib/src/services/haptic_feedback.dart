@@ -24,7 +24,7 @@ class HapticFeedback {
   static Future<Null> vibrate() async {
     await PlatformMessages.sendJSON('flutter/platform', <String, dynamic>{
       'method': 'HapticFeedback.vibrate',
-      'args': <Null>[],
+      'args': const <Null>[],
     });
   }
 }

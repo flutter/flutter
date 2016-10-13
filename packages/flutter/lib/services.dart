@@ -14,7 +14,6 @@
 /// Flutter library.
 library services;
 
-export 'src/services/activity.dart';
 export 'src/services/asset_bundle.dart';
 export 'src/services/binding.dart';
 export 'src/services/clipboard.dart';
@@ -30,5 +29,6 @@ export 'src/services/path_provider.dart';
 export 'src/services/platform_messages.dart';
 export 'src/services/shell.dart';
 export 'src/services/system_chrome.dart';
+export 'src/services/system_navigator.dart';
 export 'src/services/system_sound.dart';
 export 'src/services/url_launcher.dart';

@@ -164,7 +164,7 @@ abstract class WidgetsBinding extends BindingBase implements GestureBinding, Ren
       if (observer.didPopRoute())
         return;
     }
-    activity.finishCurrentActivity();
+    SystemNavigator.pop();
   }
 
   /// Called when the application lifecycle state changes.
