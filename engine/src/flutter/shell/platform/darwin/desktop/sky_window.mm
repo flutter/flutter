@@ -104,8 +104,9 @@ static inline blink::PointerData::Change PointerChangeFromNSEventPhase(
 
   blink::PointerData pointer_data;
   pointer_data.Clear();
-  pointer_data.time_stamp =
-      ftl::TimeDelta::FromSeconds(event.timestamp).ToMicroseconds();
+
+  constexpr int kMicrosecondsPerSecond = 1000 * 1000;
+  pointer_data.time_stamp = event.timestamp * kMicrosecondsPerSecond;
   pointer_data.change = PointerChangeFromNSEventPhase(phase);
   pointer_data.kind = blink::PointerData::DeviceKind::kMouse;
   pointer_data.physical_x = location.x;

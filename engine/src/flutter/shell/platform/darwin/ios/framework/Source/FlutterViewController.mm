@@ -254,13 +254,11 @@ static inline PointerChangeMapperPhase PointerChangePhaseFromUITouchPhase(
     DCHECK(touch_identifier != 0);
     CGPoint windowCoordinates = [touch locationInView:nil];
 
-    auto pointer_time =
-        ftl::TimeDelta::FromSeconds(touch.timestamp).ToMicroseconds();
-
     blink::PointerData pointer_data;
     pointer_data.Clear();
 
-    pointer_data.time_stamp = pointer_time;
+    constexpr int kMicrosecondsPerSecond = 1000 * 1000;
+    pointer_data.time_stamp = touch.timestamp * kMicrosecondsPerSecond;
     pointer_data.change = eventTypePhase.first;
     pointer_data.kind = blink::PointerData::DeviceKind::kTouch;
     pointer_data.pointer = touch_identifier;
