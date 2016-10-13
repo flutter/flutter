@@ -106,6 +106,16 @@ class RenderEditableLine extends RenderBox {
     markNeedsPaint();
   }
 
+  /// Whether to paint the cursor.
+  int get maxLines => _maxLines;
+  int _maxLines;
+  set maxLines(int value) {
+    if (_maxLines == value)
+      return;
+    _maxLines = value;
+    markNeedsLayout();
+  }
+
   /// The color to use when painting the selection.
   Color get selectionColor => _selectionColor;
   Color _selectionColor;
@@ -216,7 +226,6 @@ class RenderEditableLine extends RenderBox {
     return _layoutTemplate.height;
   }
 
-  int _maxLines;
   double get _maxContentWidth {
     return _maxLines > 1 ?
       constraints.maxWidth - (_kCaretGap + _kCaretWidth) :

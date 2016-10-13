@@ -438,18 +438,18 @@ void main() {
     // End the test here to ensure the animation is properly disposed of.
   });
 
-  testWidgets('Multiline text will wrap', (WidgetTester tester) async {
+  testWidgets('Multiline text will wrap up to maxLines', (WidgetTester tester) async {
     GlobalKey inputKey = new GlobalKey();
     InputValue inputValue = InputValue.empty;
 
-    Widget builder() {
+    Widget builder(int maxLines) {
       return new Center(
         child: new Material(
           child: new Input(
             value: inputValue,
             key: inputKey,
             style: const TextStyle(color: Colors.black, fontSize: 34.0),
-            maxLines: 3,
+            maxLines: maxLines,
             hintText: 'Placeholder',
             onChanged: (InputValue value) { inputValue = value; }
           )
@@ -457,22 +457,41 @@ void main() {
       );
     }
 
-    await tester.pumpWidget(builder());
+    await tester.pumpWidget(builder(3));
 
     RenderBox findInputBox() => tester.renderObject(find.byKey(inputKey));
 
     RenderBox inputBox = findInputBox();
     Size emptyInputSize = inputBox.size;
 
-    enterText('This is a long line of text that will wrap to multiple lines.');
-    await tester.pumpWidget(builder());
+    enterText('No wrapping here.');
+    await tester.pumpWidget(builder(3), const Duration(seconds: 1));
+    expect(findInputBox(), equals(inputBox));
+    expect(inputBox.size, equals(emptyInputSize));
+
+    String threeLines =
+      'First line of text is here abcdef ghijkl mnopqrst. ' +
+      'Second line of text goes until abcdef ghijkl mnopq. ' +
+      'Third line of stuff keeps going until abcdef ghijk. ';
+    enterText(threeLines);
+    await tester.pumpWidget(builder(3), const Duration(seconds: 1));
     expect(findInputBox(), equals(inputBox));
     expect(inputBox.size, greaterThan(emptyInputSize));
 
-    enterText('No wrapping here.');
-    await tester.pumpWidget(builder());
+    Size threeLineInputSize = inputBox.size;
+
+    // An extra line won't increase the size because we max at 3.
+    String fourLines = threeLines + 'Fourth line of text wraps and will not display.';
+    enterText(fourLines);
+    await tester.pumpWidget(builder(3), const Duration(seconds: 2));
     expect(findInputBox(), equals(inputBox));
-    expect(inputBox.size, equals(emptyInputSize));
+    expect(inputBox.size, threeLineInputSize);
+
+    // But now it will.
+    enterText(fourLines);
+    await tester.pumpWidget(builder(4), const Duration(seconds: 2));
+    expect(findInputBox(), equals(inputBox));
+    expect(inputBox.size, greaterThan(threeLineInputSize));
   });
 
   testWidgets('Can drag handles to change selection in multiline', (WidgetTester tester) async {

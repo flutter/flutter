@@ -530,6 +530,7 @@ class _EditableLineWidget extends LeafRenderObjectWidget {
       ..text = _styledTextSpan
       ..cursorColor = cursorColor
       ..showCursor = showCursor
+      ..maxLines = maxLines
       ..selectionColor = selectionColor
       ..textScaleFactor = textScaleFactor
       ..selection = value.selection
