@@ -194,7 +194,7 @@ class PaintingContext {
     _canvas = null;
   }
 
-  static final Paint _disableAntialias = new Paint()..isAntiAlias = false;
+  static final Paint _defaultPaint = new Paint();
 
   /// Hints that the painting in the current layer is complex and would benefit
   /// from caching.
@@ -280,7 +280,7 @@ class PaintingContext {
       painter(childContext, offset);
       childContext._stopRecordingIfNeeded();
     } else {
-      canvas.saveLayer(offsetBounds, _disableAntialias);
+      canvas.saveLayer(offsetBounds, _defaultPaint);
       canvas.clipRRect(offsetClipRRect);
       painter(this, offset);
       canvas.restore();
@@ -310,7 +310,7 @@ class PaintingContext {
       painter(childContext, offset);
       childContext._stopRecordingIfNeeded();
     } else {
-      canvas.saveLayer(bounds.shift(offset), _disableAntialias);
+      canvas.saveLayer(bounds.shift(offset), _defaultPaint);
       canvas.clipPath(clipPath.shift(offset));
       painter(this, offset);
       canvas.restore();
