@@ -344,7 +344,7 @@ abstract class IntelliJValidator extends DoctorValidator {
     if (_validateHasPackage(messages, 'Dart', 'Dart'))
       installCount++;
 
-    if (_validateHasPackage(messages, 'Flutter', 'Flutter'))
+    if (_validateHasPackage(messages, 'flutter-intellij.jar', 'Flutter'))
       installCount++;
 
     if (installCount < 2) {
@@ -361,19 +361,21 @@ abstract class IntelliJValidator extends DoctorValidator {
     );
   }
 
-  bool _validateHasPackage(List<ValidationMessage> messages, String packageName, String description) {
+  bool _validateHasPackage(List<ValidationMessage> messages, String packageName, String title) {
     if (!hasPackage(packageName)) {
       messages.add(new ValidationMessage(
-        '$packageName plugin not installed; this adds $description specific functionality.'
+        '$title plugin not installed; this adds $title specific functionality.'
       ));
       return false;
     }
-    messages.add(new ValidationMessage('$packageName plugin installed'));
+    messages.add(new ValidationMessage('$title plugin installed'));
     return true;
   }
 
   bool hasPackage(String packageName) {
     String packagePath = path.join(pluginsPath, packageName);
+    if (packageName.endsWith('.jar'))
+      return FileSystemEntity.isFileSync(packagePath);
     return FileSystemEntity.isDirectorySync(packagePath);
   }
 }
@@ -458,7 +460,7 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
             }
           }
         }
-      } on FileSystemException catch (e) {
+      } on FileSystemException catch (_) {
         // ignored
       }
       _version ??= 'unknown';
