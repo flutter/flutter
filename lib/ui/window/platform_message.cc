@@ -52,8 +52,8 @@ void PlatformMessage::InvokeCallback(std::vector<char> data) {
           Dart_TypedData_Type type;
           DART_CHECK_VALID(
               Dart_TypedDataAcquireData(byte_buffer, &type, &buffer, &length));
-          FTL_CHECK(type = Dart_TypedData_kByteData);
-          FTL_CHECK(length = data.size());
+          FTL_CHECK(type == Dart_TypedData_kByteData);
+          FTL_CHECK(static_cast<size_t>(length) == data.size());
           memcpy(buffer, data.data(), length);
           Dart_TypedDataReleaseData(byte_buffer);
         }
