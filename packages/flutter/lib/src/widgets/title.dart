@@ -28,7 +28,12 @@ class Title extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    updateTaskDescription(label: title, color: color);
+    SystemChrome.setApplicationSwitcherDescription(
+      new ApplicationSwitcherDescription(
+        label: title,
+        primaryColor: color.value,
+      )
+    );
     return child;
   }
 

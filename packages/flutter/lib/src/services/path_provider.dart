@@ -25,7 +25,7 @@ class PathProvider {
     Map<String, dynamic> result =
       await PlatformMessages.sendJSON('flutter/platform', <String, dynamic>{
         'method': 'PathProvider.getTemporaryDirectory',
-        'args': <Null>[],
+        'args': const <Null>[],
       });
     if (result == null)
       return null;
@@ -44,7 +44,7 @@ class PathProvider {
     Map<String, dynamic> result =
         await PlatformMessages.sendJSON('flutter/platform', <String, dynamic>{
       'method': 'PathProvider.getApplicationDocumentsDirectory',
-      'args': <Null>[],
+      'args': const <Null>[],
     });
     if (result == null)
       return null;
