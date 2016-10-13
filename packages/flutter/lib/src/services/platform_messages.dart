@@ -17,7 +17,7 @@ dynamic _decodeJSON(String message) {
 
 void _sendString(String name, String message, void callback(String reply)) {
   Uint8List encoded = UTF8.encoder.convert(message);
-  ui.window.sendPlatformMesssage(name, encoded.buffer.asByteData(), (ByteData reply) {
+  ui.window.sendPlatformMessage(name, encoded.buffer.asByteData(), (ByteData reply) {
     callback(_decodeUTF8(reply));
   });
 }
