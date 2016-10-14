@@ -32,11 +32,21 @@ PlatformView::~PlatformView() {
   blink::Threads::UI()->PostTask([engine]() { delete engine; });
 }
 
+void PlatformView::DispatchPlatformMessage(
+    ftl::RefPtr<blink::PlatformMessage> message) {
+  blink::Threads::UI()->PostTask(
+      [ engine = engine_->GetWeakPtr(), message = std::move(message) ] {
+        if (engine) {
+          engine->DispatchPlatformMessage(message);
+        }
+      });
+}
+
 void PlatformView::DispatchSemanticsAction(int32_t id,
                                            blink::SemanticsAction action) {
   blink::Threads::UI()->PostTask(
       [ engine = engine_->GetWeakPtr(), id, action ] {
-        if (engine.get()) {
+        if (engine) {
           engine->DispatchSemanticsAction(
               id, static_cast<blink::SemanticsAction>(action));
         }
@@ -45,7 +55,7 @@ void PlatformView::DispatchSemanticsAction(int32_t id,
 
 void PlatformView::SetSemanticsEnabled(bool enabled) {
   blink::Threads::UI()->PostTask([ engine = engine_->GetWeakPtr(), enabled ] {
-    if (engine.get())
+    if (engine)
       engine->SetSemanticsEnabled(enabled);
   });
 }
@@ -56,7 +66,7 @@ void PlatformView::ConnectToEngine(
     view = GetWeakPtr(), engine = engine().GetWeakPtr(),
     request = std::move(request)
   ]() mutable {
-    if (engine.get())
+    if (engine)
       engine->ConnectToEngine(std::move(request));
     Shell::Shared().AddPlatformView(view);
   }));
@@ -118,7 +128,8 @@ void PlatformView::UpdateSemantics(std::vector<blink::SemanticsNode> update) {}
 
 void PlatformView::HandlePlatformMessage(
     ftl::RefPtr<blink::PlatformMessage> message) {
-  message->InvokeCallbackWithError();
+  if (auto response = message->response())
+    response->CompleteWithError();
 }
 
 void PlatformView::SetupResourceContextOnIOThread() {

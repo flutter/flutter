@@ -149,7 +149,8 @@ void RuntimeHolder::UpdateSemantics(std::vector<blink::SemanticsNode> update) {}
 
 void RuntimeHolder::HandlePlatformMessage(
     ftl::RefPtr<blink::PlatformMessage> message) {
-  message->InvokeCallbackWithError();
+  if (auto response = message->response())
+    response->CompleteWithError();
 }
 
 void RuntimeHolder::DidCreateMainIsolate(Dart_Isolate isolate) {

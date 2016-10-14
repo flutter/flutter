@@ -19,7 +19,14 @@ typedef void SemanticsActionCallback(int id, SemanticsAction action);
 /// Signature for [Window.onAppLifecycleStateChanged].
 typedef void AppLifecycleStateCallback(AppLifecycleState state);
 
+/// Signature for responses to platform messages.
+///
+/// Used as a parameter to [Window.sendPlatformMessage] and
+/// [Window.onPlatformMessage].
 typedef void PlatformMessageResponseCallback(ByteData data);
+
+/// Signature for [Window.onPlatformMessage].
+typedef void PlatformMessageCallback(String name, ByteData data, PlatformMessageResponseCallback callback);
 
 /// States that an application can be in.
 enum AppLifecycleState {
@@ -215,6 +222,12 @@ class Window {
   /// semantics update cannot be used further.
   void updateSemantics(SemanticsUpdate update) native "Window_updateSemantics";
 
+  /// Sends a message to a platform-specific plugin.
+  ///
+  /// The `name` parameter determines which plugin receives the message. The
+  /// `data` parameter contains the message payload and is typically UTF-8
+  /// encoded JSON but can be arbitrary data. If the plugin replies to the
+  /// message, `callback` will be called with the response.
   void sendPlatformMessage(String name,
                            ByteData data,
                            PlatformMessageResponseCallback callback) {
@@ -224,6 +237,21 @@ class Window {
                             PlatformMessageResponseCallback callback,
                             ByteData data) native "Window_sendPlatformMessage";
 
+  /// Called whenever this window receives a message from a platform-specific
+  /// plugin.
+  ///
+  /// The `name` parameter determines which plugin sent the message. The `data`
+  /// parameter is the payload and is typically UTF-8 encoded JSON but can be
+  /// arbitrary data.
+  ///
+  /// Message handlers must call the function given in the `callback` parameter.
+  /// If the handler does not need to respond, the handler should pass `null` to
+  /// the callback.
+  PlatformMessageCallback onPlatformMessage;
+
+  /// Called by [_dispatchPlatformMessage].
+  void _respondToPlatformMessage(int responseId, ByteData data)
+      native "Window_respondToPlatformMessage";
 }
 
 /// The [Window] singleton. This object exposes the size of the display, the

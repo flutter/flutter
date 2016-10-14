@@ -39,6 +39,7 @@ class RuntimeController : public WindowClient, public IsolateClient {
 
   void BeginFrame(ftl::TimePoint frame_time);
 
+  void DispatchPlatformMessage(ftl::RefPtr<PlatformMessage> message);
   void DispatchPointerDataPacket(const PointerDataPacket& packet);
   void DispatchSemanticsAction(int32_t id, SemanticsAction action);
 

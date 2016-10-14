@@ -3,6 +3,7 @@ dart:io,_Platform,set:_nativeScript
 dart:isolate,::,_startMainIsolate
 dart:mojo.internal,MojoHandleWatcher,mojoControlHandle
 dart:ui,::,_beginFrame
+dart:ui,::,_dispatchPlatformMessage
 dart:ui,::,_dispatchPointerDataPacket
 dart:ui,::,_dispatchSemanticsAction
 dart:ui,::,_getGetBaseURLClosure

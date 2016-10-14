@@ -5,6 +5,8 @@
 #ifndef FLUTTER_LIB_UI_WINDOW_WINDOW_H_
 #define FLUTTER_LIB_UI_WINDOW_WINDOW_H_
 
+#include <unordered_map>
+
 #include "flutter/lib/ui/semantics/semantics_update.h"
 #include "flutter/lib/ui/window/platform_message.h"
 #include "flutter/lib/ui/window/pointer_data_packet.h"
@@ -42,6 +44,7 @@ class Window {
   void UpdateLocale(const std::string& language_code,
                     const std::string& country_code);
   void UpdateSemanticsEnabled(bool enabled);
+  void DispatchPlatformMessage(ftl::RefPtr<PlatformMessage> message);
   void DispatchPointerDataPacket(const PointerDataPacket& packet);
   void DispatchSemanticsAction(int32_t id, SemanticsAction action);
   void BeginFrame(ftl::TimePoint frameTime);
@@ -51,11 +54,18 @@ class Window {
 
   void OnAppLifecycleStateChanged(sky::AppLifecycleState state);
 
+  void CompletePlatformMessageResponse(int response_id, std::vector<char> data);
+
   static void RegisterNatives(tonic::DartLibraryNatives* natives);
 
  private:
   WindowClient* client_;
   tonic::DartPersistentValue library_;
+
+  // We use id 0 to mean that no response is expected.
+  int next_response_id_ = 1;
+  std::unordered_map<int, ftl::RefPtr<blink::PlatformMessageResponse>>
+      pending_responses_;
 };
 
 }  // namespace blink

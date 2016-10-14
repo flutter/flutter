@@ -44,6 +44,16 @@ void _popRoute() {
     window.onPopRoute();
 }
 
+void _dispatchPlatformMessage(String name, ByteData data, int responseId) {
+  if (window.onPlatformMessage != null) {
+    window.onPlatformMessage(name, data, (ByteData responseData) {
+      window._respondToPlatformMessage(responseId, responseData);
+    });
+  } else {
+    window._respondToPlatformMessage(responseId, null);
+  }
+}
+
 void _dispatchPointerDataPacket(ByteData packet) {
   if (window.onPointerDataPacket != null)
     window.onPointerDataPacket(_unpackPointerDataPacket(packet));

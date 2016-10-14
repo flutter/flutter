@@ -158,20 +158,23 @@ void Engine::OnLocaleChanged(const mojo::String& language_code,
     runtime_->SetLocale(language_code_, country_code_);
 }
 
+void Engine::DispatchPlatformMessage(
+    ftl::RefPtr<blink::PlatformMessage> message) {
+  if (runtime_)
+    runtime_->DispatchPlatformMessage(std::move(message));
+}
+
 void Engine::DispatchPointerDataPacket(const PointerDataPacket& packet) {
-  TRACE_EVENT0("flutter", "Engine::DispatchPointerDataPacket");
   if (runtime_)
     runtime_->DispatchPointerDataPacket(packet);
 }
 
 void Engine::DispatchSemanticsAction(int id, blink::SemanticsAction action) {
-  TRACE_EVENT0("flutter", "Engine::DispatchPointerDataPacket");
   if (runtime_)
     runtime_->DispatchSemanticsAction(id, action);
 }
 
 void Engine::SetSemanticsEnabled(bool enabled) {
-  TRACE_EVENT0("flutter", "Engine::DispatchPointerDataPacket");
   semantics_enabled_ = enabled;
   if (runtime_)
     runtime_->SetSemanticsEnabled(semantics_enabled_);
