@@ -114,6 +114,46 @@ class Dismissable extends StatefulWidget {
   _DismissableState createState() => new _DismissableState();
 }
 
+class _DismissableClipper extends CustomClipper<Rect> {
+  _DismissableClipper({
+    this.axis,
+    Animation<FractionalOffset> moveAnimation
+  }) : moveAnimation = moveAnimation, super(reclip: moveAnimation) {
+    assert(axis != null);
+    assert(moveAnimation != null);
+  }
+
+  final Axis axis;
+  final Animation<FractionalOffset> moveAnimation;
+
+  @override
+  Rect getClip(Size size) {
+    assert(axis != null);
+    switch (axis) {
+      case Axis.horizontal:
+        final double offset = moveAnimation.value.dx * size.width;
+        if (offset < 0)
+          return new Rect.fromLTRB(size.width + offset, 0.0, size.width, size.height);
+        return new Rect.fromLTRB(0.0, 0.0, offset, size.height);
+      case Axis.vertical:
+        final double offset = moveAnimation.value.dy * size.height;
+        if (offset < 0)
+          return new Rect.fromLTRB(0.0, size.height + offset, size.width, size.height);
+        return new Rect.fromLTRB(0.0, 0.0, size.width, offset);
+    }
+    return null;
+  }
+
+  @override
+  Rect getApproximateClipRect(Size size) => getClip(size);
+
+  @override
+  bool shouldReclip(_DismissableClipper oldClipper) {
+    return oldClipper.axis != axis
+        || oldClipper.moveAnimation.value != moveAnimation.value;
+  }
+}
+
 class _DismissableState extends State<Dismissable> with TickerProviderStateMixin {
   @override
   void initState() {
@@ -156,17 +196,18 @@ class _DismissableState extends State<Dismissable> with TickerProviderStateMixin
     return _dragUnderway || _moveController.isAnimating;
   }
 
-  Size _findSize() {
-    RenderBox box = context.findRenderObject();
+  double get _overallDragAxisExtent {
+    final RenderBox box = context.findRenderObject();
     assert(box != null);
     assert(box.hasSize);
-    return box.size;
+    final Size size = box.size;
+    return _directionIsXAxis ? size.width : size.height;
   }
 
   void _handleDragStart(DragStartDetails details) {
     _dragUnderway = true;
     if (_moveController.isAnimating) {
-      _dragExtent = _moveController.value * _findSize().width * _dragExtent.sign;
+      _dragExtent = _moveController.value * _overallDragAxisExtent * _dragExtent.sign;
       _moveController.stop();
     } else {
       _dragExtent = 0.0;
@@ -207,7 +248,7 @@ class _DismissableState extends State<Dismissable> with TickerProviderStateMixin
       });
     }
     if (!_moveController.isAnimating) {
-      _moveController.value = _dragExtent.abs() / (_directionIsXAxis ? _findSize().width : _findSize().height);
+      _moveController.value = _dragExtent.abs() / _overallDragAxisExtent;
     }
   }
 
@@ -221,8 +262,8 @@ class _DismissableState extends State<Dismissable> with TickerProviderStateMixin
   }
 
   bool _isFlingGesture(Velocity velocity) {
-    double vx = velocity.pixelsPerSecond.dx;
-    double vy = velocity.pixelsPerSecond.dy;
+    final double vx = velocity.pixelsPerSecond.dx;
+    final double vy = velocity.pixelsPerSecond.dy;
     if (_directionIsXAxis) {
       if (vx.abs() - vy.abs() < _kMinFlingVelocityDelta)
         return false;
@@ -255,7 +296,7 @@ class _DismissableState extends State<Dismissable> with TickerProviderStateMixin
     if (_moveController.isCompleted) {
       _startResizeAnimation();
     } else if (_isFlingGesture(details.velocity)) {
-      double flingVelocity = _directionIsXAxis ? details.velocity.pixelsPerSecond.dx : details.velocity.pixelsPerSecond.dy;
+      final double flingVelocity = _directionIsXAxis ? details.velocity.pixelsPerSecond.dx : details.velocity.pixelsPerSecond.dy;
       _dragExtent = flingVelocity.sign;
       _moveController.fling(velocity: flingVelocity.abs() * _kFlingVelocityScale);
     } else if (_moveController.value > _kDismissThreshold) {
@@ -340,17 +381,28 @@ class _DismissableState extends State<Dismissable> with TickerProviderStateMixin
       );
     }
 
-    Widget backgroundAndChild = new SlideTransition(
+    Widget content = new SlideTransition(
       position: _moveAnimation,
       child: config.child
     );
+
     if (background != null) {
-      backgroundAndChild = new Stack(
-        children: <Widget>[
-          new Positioned(left: 0.0, top: 0.0, bottom: 0.0, right: 0.0, child: background),
-          new Viewport(child: backgroundAndChild)
-        ]
-      );
+      List<Widget> children = <Widget>[];
+
+      if (!_moveAnimation.isDismissed) {
+        children.add(new Positioned.fill(
+          child: new ClipRect(
+            clipper: new _DismissableClipper(
+              axis: _directionIsXAxis ? Axis.horizontal : Axis.vertical,
+              moveAnimation: _moveAnimation,
+            ),
+            child: background
+          )
+        ));
+      }
+
+      children.add(content);
+      content = new Stack(children: children);
     }
 
     // We are not resizing but we may be being dragging in config.direction.
@@ -362,7 +414,7 @@ class _DismissableState extends State<Dismissable> with TickerProviderStateMixin
       onVerticalDragUpdate: _directionIsXAxis ? null : _handleDragUpdate,
       onVerticalDragEnd: _directionIsXAxis ? null : _handleDragEnd,
       behavior: HitTestBehavior.opaque,
-      child: backgroundAndChild
+      child: content
     );
   }
 }

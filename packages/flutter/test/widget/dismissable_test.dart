@@ -302,7 +302,7 @@ void main() {
     await dismissElement(tester, itemFinder, gestureDirection: DismissDirection.startToEnd);
     await tester.pump();
 
-    expect(find.text('background'), findsNWidgets(5));
+    expect(find.text('background'), findsOneWidget); // The other four have been culled.
     RenderBox backgroundBox = tester.firstRenderObject(find.text('background'));
     expect(backgroundBox.size.height, equals(100.0));
   });
