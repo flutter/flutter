@@ -3,110 +3,70 @@
 // found in the LICENSE file.
 
 import 'package:meta/meta.dart';
+import 'package:flutter/foundation.dart';
 
-import 'basic.dart';
 import 'framework.dart';
 
 /// A container for grouping together multiple form field widgets (e.g.
 /// [Input] widgets).
-class Form extends StatefulWidget {
+///
+/// When one form widget changes value, all the form widgets are rebuilt,
+/// giving them an opportunity to rerun any [FormField.validator] callbacks.
+class Form extends InheritedWidget {
   /// Creates a container for form fields.
   ///
   /// The [child] argument must not be null.
   Form({
     Key key,
-    @required this.child,
-    this.onSubmitted
-  }) : super(key: key) {
-    assert(child != null);
-  }
-
-  /// Called when the input is accepted anywhere on the form.
-  final VoidCallback onSubmitted;
-
-  /// Root of the widget hierarchy that contains this form.
-  final Widget child;
+    @required Widget child,
+  }) : super(key: key, child: child);
 
   @override
-  _FormState createState() => new _FormState();
-}
+  bool updateShouldNotify(Form oldWidget) => false;
 
-class _FormState extends State<Form> {
-  int generation = 0;
-
-  void _onFieldChanged() {
-    setState(() {
-      ++generation;
-    });
+  /// Registers a form field widget with the nearest enclosing form, if any.
+  static void register(BuildContext context) {
+    assert(context != null);
+    context.inheritFromWidgetOfExactType(Form);
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return new FormScope._(
-      formState: this,
-      generation: generation,
-      child: config.child
-    );
+  /// Notifies the form field widgets who have registered with the
+  /// nearest enclosing form using [register] that they need to rebuild
+  /// to take into account a form field's value having changed.
+  ///
+  /// If there is no such form, does nothing.
+  static void fieldChanged(BuildContext context) {
+    assert(context != null);
+    InheritedElement form = context.ancestorInheritedElementForWidgetOfExactType(Form);
+    form?.dispatchDependenciesChanged();
   }
 }
 
 /// Signature for validating a form field.
 typedef String FormFieldValidator<T>(T value);
 
-/// Signature for being notified when a form field changes value.
-typedef void FormFieldSetter<T>(T newValue);
-
-/// Identifying information for form controls.
-class FormField<T> {
-  /// Creates identifying information for form controls
+/// The value of a form field.
+///
+/// When provided to an editable widget (e.g. an [Input]), the editable widget
+/// stores the value in the form field so that the parent doesn't have to maintain
+/// that state manually.
+class FormField<T> extends ChangeNotifier {
+  /// Creates a form field value.
   FormField({
-    this.setter,
-    this.validator
-  });
+    T initialValue,
+    this.validator,
+  }) : _value = initialValue;
 
-  /// An optional method to call with the new value when the form field changes.
-  final FormFieldSetter<T> setter;
+  T get value => _value;
+  T _value;
+  set value(T newValue) {
+    if (newValue == _value)
+      return;
+    _value = newValue;
+    notifyListeners();
+  }
 
   /// An optional method that validates an input. Returns an error string to
   /// display if the input is invalid, or null otherwise.
   final FormFieldValidator<T> validator;
-}
-
-/// A widget that establishes a scope for a [Form].
-///
-/// Cannot be created directly. Instead, create a [Form] widget, which builds
-/// a [FormScope].
-///
-/// Useful for locating the closest enclosing [Form].
-class FormScope extends InheritedWidget {
-  FormScope._({
-    Key key,
-    Widget child,
-    _FormState formState,
-    int generation
-  }) : _formState = formState,
-       _generation = generation,
-       super(key: key, child: child);
-
-  final _FormState _formState;
-
-  /// Incremented every time a form field has changed. This lets us know when
-  /// to rebuild the form.
-  final int _generation;
-
-  /// The [Form] associated with this widget.
-  Form get form => _formState.config;
-
-  /// The closest [FormScope] encloses the given context.
-  static FormScope of(BuildContext context) {
-    return context.inheritFromWidgetOfExactType(FormScope);
-  }
-
-  /// Use this to notify the Form that a form field has changed. This will
-  /// cause all form fields to rebuild, useful if form fields have
-  /// interdependencies.
-  void onFieldChanged() => _formState._onFieldChanged();
-
-  @override
-  bool updateShouldNotify(FormScope old) => _generation != old._generation;
 }

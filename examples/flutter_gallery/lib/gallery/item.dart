@@ -111,8 +111,8 @@ final List<GalleryItem> kAllGalleryItems = <GalleryItem>[
   new GalleryItem(
     title: 'Expansion panels',
     subtitle: 'List of expanding panels',
-    routeName: ExpasionPanelsDemo.routeName,
-    buildRoute: (BuildContext context) => new ExpasionPanelsDemo()
+    routeName: ExpansionPanelsDemo.routeName,
+    buildRoute: (BuildContext context) => new ExpansionPanelsDemo()
   ),
   new GalleryItem(
     title: 'Floating action button',
