@@ -278,10 +278,9 @@ class SimpleDialog extends StatelessWidget {
 
 class _DialogRoute<T> extends PopupRoute<T> {
   _DialogRoute({
-    Completer<T> completer,
     this.child,
     this.theme,
-  }) : super(completer: completer);
+  });
 
   final Widget child;
   final ThemeData theme;
@@ -324,11 +323,8 @@ class _DialogRoute<T> extends PopupRoute<T> {
 ///  * [Dialog]
 ///  * <https://www.google.com/design/spec/components/dialogs.html>
 Future<dynamic/*=T*/> showDialog/*<T>*/({ BuildContext context, Widget child }) {
-  Completer<dynamic/*=T*/> completer = new Completer<dynamic/*=T*/>();
-  Navigator.push(context, new _DialogRoute<dynamic/*=T*/>(
-    completer: completer,
+  return Navigator.push(context, new _DialogRoute<dynamic/*=T*/>(
     child: child,
     theme: Theme.of(context, shadowThemeOnly: true),
   ));
-  return completer.future;
 }

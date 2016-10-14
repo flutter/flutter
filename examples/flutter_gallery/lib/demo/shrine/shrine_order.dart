@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 
 import '../shrine_demo.dart' show ShrinePageRoute;
@@ -226,9 +224,8 @@ class ShrineOrderRoute extends ShrinePageRoute<Order> {
   ShrineOrderRoute({
     this.order,
     WidgetBuilder builder,
-    Completer<Order> completer,
     RouteSettings settings: const RouteSettings()
-  }) : super(builder: builder, completer: completer, settings: settings) {
+  }) : super(builder: builder, settings: settings) {
     assert(order != null);
   }
 

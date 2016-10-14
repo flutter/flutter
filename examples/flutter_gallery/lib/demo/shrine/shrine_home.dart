@@ -296,18 +296,10 @@ class _ShrineHomeState extends State<ShrineHome> {
   static final GlobalKey<ScrollableState> scrollableKey = new GlobalKey<ScrollableState>();
   static final GridDelegate gridDelegate = new ShrineGridDelegate();
 
-  void handleCompletedOrder(Order completedOrder) {
-    assert(completedOrder.product != null);
-    if (completedOrder.quantity == 0)
-      _shoppingCart.remove(completedOrder.product);
-  }
-
-  void showOrderPage(Product product) {
+  Future<Null> showOrderPage(Product product) async {
     final Order order = _shoppingCart[product] ?? new Order(product: product);
-    final Completer<Order> completer = new Completer<Order>();
-    Navigator.push(context, new ShrineOrderRoute(
+    final Order completedOrder = await Navigator.push(context, new ShrineOrderRoute(
       order: order,
-      completer: completer,
       builder: (BuildContext context) {
         return new OrderPage(
           order: order,
@@ -316,7 +308,9 @@ class _ShrineHomeState extends State<ShrineHome> {
         );
       }
     ));
-    completer.future.then(handleCompletedOrder);
+    assert(completedOrder.product != null);
+    if (completedOrder.quantity == 0)
+      _shoppingCart.remove(completedOrder.product);
   }
 
   @override

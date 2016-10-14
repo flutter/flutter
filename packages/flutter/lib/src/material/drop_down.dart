@@ -288,14 +288,13 @@ class _DropdownRouteResult<T> {
 
 class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
   _DropdownRoute({
-    Completer<_DropdownRouteResult<T>> completer,
     this.items,
     this.buttonRect,
     this.selectedIndex,
     this.elevation: 8,
     this.theme,
     TextStyle style,
-  }) : _style = style, super(completer: completer) {
+  }) : _style = style {
     assert(style != null);
   }
 
@@ -502,7 +501,6 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> {
     final Rect itemRect = itemBox.localToGlobal(Point.origin) & itemBox.size;
     final Completer<_DropdownRouteResult<T>> completer = new Completer<_DropdownRouteResult<T>>();
     _currentRoute = new _DropdownRoute<T>(
-      completer: completer,
       items: config.items,
       buttonRect: _kMenuHorizontalPadding.inflateRect(itemRect),
       selectedIndex: _selectedIndex,

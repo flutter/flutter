@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/rendering.dart';
 import 'package:meta/meta.dart';
 
@@ -32,6 +34,12 @@ abstract class Route<T> {
   /// will initialize its [Focus] to this key.
   GlobalKey get focusKey => null;
 
+  /// A future that completes when this route is popped off the navigator.
+  ///
+  /// The future completes with the value given to [Navigator.pop], if any.
+  Future<T> get popped => _popCompleter.future;
+  final Completer<T> _popCompleter = new Completer<T>();
+
   /// Called when the route is inserted into the navigator.
   ///
   /// Use this to populate overlayEntries and add them to the overlay
@@ -40,9 +48,13 @@ abstract class Route<T> {
   /// responsible for _removing_ the entries and this way it's symmetric.)
   ///
   /// The overlay argument will be null if this is the first route inserted.
+  @protected
+  @mustCallSuper
   void install(OverlayEntry insertionPoint) { }
 
   /// Called after install() when the route is pushed onto the navigator.
+  @protected
+  @mustCallSuper
   void didPush() { }
 
   /// When this route is popped (see [Navigator.pop]) if the result isn't
@@ -50,6 +62,8 @@ abstract class Route<T> {
   T get currentResult => null;
 
   /// Called after install() when the route replaced another in the navigator.
+  @protected
+  @mustCallSuper
   void didReplace(Route<dynamic> oldRoute) { }
 
   /// A request was made to pop this route. If the route can handle it
@@ -59,19 +73,28 @@ abstract class Route<T> {
   ///
   /// If this is called, the Navigator will not call dispose(). It is the
   /// responsibility of the Route to later call dispose().
-  bool didPop(T result) => true;
+  @protected
+  @mustCallSuper
+  bool didPop(T result) {
+    _popCompleter.complete(result);
+    return true;
+  }
 
   /// Whether calling didPop() would return false.
   bool get willHandlePopInternally => false;
 
   /// The given route, which came after this one, has been popped off the
   /// navigator.
+  @protected
+  @mustCallSuper
   void didPopNext(Route<dynamic> nextRoute) { }
 
   /// This route's next route has changed to the given new route. This is called
   /// on a route whenever the next route changes for any reason, except for
   /// cases when didPopNext() would be called, so long as it is in the history.
   /// nextRoute will be null if there's no next route.
+  @protected
+  @mustCallSuper
   void didChangeNext(Route<dynamic> nextRoute) { }
 
   /// The route should remove its overlays and free any other resources.
@@ -79,6 +102,7 @@ abstract class Route<T> {
   /// A call to didPop() implies that the Route should call dispose() itself,
   /// but it is possible for dispose() to be called directly (e.g. if the route
   /// is replaced, or if the navigator itself is disposed).
+  @mustCallSuper
   void dispose() { }
 
   /// If the route's transition can be popped via a user gesture (e.g. the iOS
@@ -248,8 +272,10 @@ class Navigator extends StatefulWidget {
   ///
   /// The route name will be passed to that navigator's [onGenerateRoute]
   /// callback. The returned route will be pushed into the navigator.
-  static void pushNamed(BuildContext context, String routeName) {
-    Navigator.of(context).pushNamed(routeName);
+  ///
+  /// Returns a Future that completes when the pushed route is popped.
+  static Future<dynamic> pushNamed(BuildContext context, String routeName) {
+    return Navigator.of(context).pushNamed(routeName);
   }
 
   /// Push a route onto the navigator that most tightly encloses the given context.
@@ -258,8 +284,10 @@ class Navigator extends StatefulWidget {
   /// The route will have didPush() and didChangeNext() called on it; the
   /// previous route, if any, will have didChangeNext() called on it; and the
   /// Navigator observer, if any, will have didPush() called on it.
-  static void push(BuildContext context, Route<dynamic> route) {
-    Navigator.of(context).push(route);
+  ///
+  /// Returns a Future that completes when the pushed route is popped.
+  static Future<dynamic> push(BuildContext context, Route<dynamic> route) {
+    return Navigator.of(context).push(route);
   }
 
   /// Pop a route off the navigator that most tightly encloses the given context.
@@ -269,10 +297,10 @@ class Navigator extends StatefulWidget {
   /// (if any) is notified using its didPop() method, and the previous route is
   /// notified using [Route.didChangeNext].
   ///
-  /// If non-null, [result] will be used as the result of the route. Routes
+  /// If non-null, `result` will be used as the result of the route. Routes
   /// such as dialogs or popup menus typically use this mechanism to return the
   /// value selected by the user to the widget that created their route. The
-  /// type of [result], if provided, must match the type argument of the class
+  /// type of `result`, if provided, must match the type argument of the class
   /// of the current route. (In practice, this is usually "dynamic".)
   ///
   /// Returns true if a route was popped; returns false if there are no further
@@ -299,11 +327,20 @@ class Navigator extends StatefulWidget {
   }
 
   /// Executes a simple transaction that both pops the current route off and
-  /// pushes a named route into the navigator that most tightly encloses the given context.
-  static void popAndPushNamed(BuildContext context, String routeName) {
-    Navigator.of(context)
-      ..pop()
-      ..pushNamed(routeName);
+  /// pushes a named route into the navigator that most tightly encloses the
+  /// given context.
+  ///
+  /// If non-null, `result` will be used as the result of the route that is
+  /// popped. Routes such as dialogs or popup menus typically use this mechanism
+  /// to return the value selected by the user to the widget that created their
+  /// route. The type of `result`, if provided, must match the type argument of
+  /// the class of the current route. (In practice, this is usually "dynamic".)
+  ///
+  /// Returns a Future that completes when the pushed route is popped.
+  static Future<dynamic> popAndPushNamed(BuildContext context, String routeName, { dynamic result }) {
+    NavigatorState navigator = Navigator.of(context);
+    navigator.pop(result);
+    return navigator.pushNamed(routeName);
   }
 
   /// The state from the closest instance of this class that encloses the given context.
@@ -378,7 +415,9 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
 
   /// Looks up the route with the given name using [Navigator.onGenerateRoute],
   /// and then [push]es that route.
-  void pushNamed(String name) {
+  ///
+  /// Returns a Future that completes when the pushed route is popped.
+  Future<dynamic> pushNamed(String name) {
     assert(!_debugLocked);
     assert(name != null);
     RouteSettings settings = new RouteSettings(name: name);
@@ -388,7 +427,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       route = config.onUnknownRoute(settings);
       assert(route != null);
     }
-    push(route);
+    return push(route);
   }
 
   /// Adds the given route to the navigator's history, and transitions to it.
@@ -400,7 +439,9 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   ///
   /// Ongoing gestures within the current route are canceled when a new route is
   /// pushed.
-  void push(Route<dynamic> route) {
+  ///
+  /// Returns a Future that completes when the pushed route is popped.
+  Future<dynamic> push(Route<dynamic> route) {
     assert(!_debugLocked);
     assert(() { _debugLocked = true; return true; });
     assert(route != null);
@@ -418,6 +459,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     });
     assert(() { _debugLocked = false; return true; });
     _cancelActivePointers();
+    return route.popped;
   }
 
   /// Replaces a route that is not currently visible with a new route.

@@ -35,16 +35,19 @@ class TestRoute extends LocalHistoryRoute<String> {
     _entries.add(entry);
     navigator.overlay?.insert(entry, above: insertionPoint);
     routes.add(this);
+    super.install(insertionPoint);
   }
 
   @override
   void didPush() {
     log('didPush');
+    super.didPush();
   }
 
   @override
   void didReplace(@checked TestRoute oldRoute) {
     log('didReplace ${oldRoute.name}');
+    super.didReplace(oldRoute);
   }
 
   @override
@@ -59,11 +62,13 @@ class TestRoute extends LocalHistoryRoute<String> {
   @override
   void didPopNext(@checked TestRoute nextRoute) {
     log('didPopNext ${nextRoute.name}');
+    super.didPopNext(nextRoute);
   }
 
   @override
   void didChangeNext(@checked TestRoute nextRoute) {
     log('didChangeNext ${nextRoute?.name}');
+    super.didChangeNext(nextRoute);
   }
 
   @override
@@ -72,6 +77,7 @@ class TestRoute extends LocalHistoryRoute<String> {
     _entries.forEach((OverlayEntry entry) { entry.remove(); });
     _entries.clear();
     routes.remove(this);
+    super.dispose();
   }
 
 }

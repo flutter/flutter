@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'basic.dart';
 import 'navigator.dart';
 import 'overlay.dart';
@@ -13,9 +11,8 @@ import 'routes.dart';
 abstract class PageRoute<T> extends ModalRoute<T> {
   /// Creates a modal route that replaces the entire screen.
   PageRoute({
-    Completer<T> completer,
     RouteSettings settings: const RouteSettings()
-  }) : super(completer: completer, settings: settings);
+  }) : super(settings: settings);
 
   @override
   bool get opaque => true;

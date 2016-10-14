@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 
 import 'shrine/shrine_home.dart' show ShrineHome;
@@ -26,9 +24,8 @@ Widget buildShrine(Widget child) {
 class ShrinePageRoute<T> extends MaterialPageRoute<T> {
   ShrinePageRoute({
     WidgetBuilder builder,
-    Completer<T> completer,
     RouteSettings settings: const RouteSettings()
-  }) : super(builder: builder, completer: completer, settings: settings);
+  }) : super(builder: builder, settings: settings);
 
   @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> forwardAnimation) {

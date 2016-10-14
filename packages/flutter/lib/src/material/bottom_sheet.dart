@@ -204,10 +204,9 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
 
 class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
   _ModalBottomSheetRoute({
-    Completer<T> completer,
     this.builder,
     this.theme,
-  }) : super(completer: completer);
+  });
 
   final WidgetBuilder builder;
   final ThemeData theme;
@@ -260,11 +259,8 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
 Future<dynamic/*=T*/> showModalBottomSheet/*<T>*/({ BuildContext context, WidgetBuilder builder }) {
   assert(context != null);
   assert(builder != null);
-  final Completer<dynamic/*=T*/> completer = new Completer<dynamic/*=T*/>();
-  Navigator.push(context, new _ModalBottomSheetRoute<dynamic/*=T*/>(
-    completer: completer,
+  return Navigator.push(context, new _ModalBottomSheetRoute<dynamic/*=T*/>(
     builder: builder,
     theme: Theme.of(context, shadowThemeOnly: true),
   ));
-  return completer.future;
 }
