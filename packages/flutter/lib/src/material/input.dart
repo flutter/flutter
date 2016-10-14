@@ -20,6 +20,14 @@ export 'package:flutter_services/editing.dart' show KeyboardType;
 ///
 /// Requires one of its ancestors to be a [Material] widget.
 ///
+/// If the [Input] has a [Form] ancestor, the [formField] property must
+/// be specified. In this case, the [Input] keeps track of the value of
+/// the [Input] field automatically, and the initial value can be specified
+/// using the [value] property.
+///
+/// If the [Input] does not have a [Form] ancestor, then the [value]
+/// must be updated each time the [onChanged] callback is invoked.
+///
 /// See also:
 ///
 ///  * <https://www.google.com/design/spec/components/text-fields.html>
@@ -31,6 +39,8 @@ class Input extends StatefulWidget {
   /// Creates a text input field.
   ///
   /// By default, the input uses a keyboard appropriate for text entry.
+  ///
+  /// The [formField] argument is required if the [Input] has an ancestor [Form].
   Input({
     Key key,
     this.value,
@@ -46,10 +56,15 @@ class Input extends StatefulWidget {
     this.multiline: false,
     this.formField,
     this.onChanged,
-    this.onSubmitted
+    this.onSubmitted,
   }) : super(key: key);
 
   /// The text of the input field.
+  ///
+  /// If the [Input] is in a [Form], this is the initial value only.
+  ///
+  /// Otherwise, this is the current value, and must be updated every
+  /// time [onChanged] is called.
   final InputValue value;
 
   /// The type of keyboard to use for editing the text.
@@ -71,31 +86,51 @@ class Input extends StatefulWidget {
   final String hintText;
 
   /// Text to show when the input text is invalid.
+  ///
+  /// If this is set, then the [formField]'s [FormField.validator], if any, is
+  /// ignored.
   final String errorText;
 
   /// The style to use for the text being edited.
   final TextStyle style;
 
   /// Whether to hide the text being edited (e.g., for passwords).
+  ///
+  /// When this is set to true, all the characters in the input are replaced by
+  /// U+2022 BULLET characters (•).
   final bool hideText;
 
   /// Whether the input field is part of a dense form (i.e., uses less vertical space).
   final bool isDense;
 
-  /// Whether this input field should focus itself is nothing else is already focused.
+  /// Whether this input field should focus itself if nothing else is already focused.
   final bool autofocus;
 
   /// True if the text should wrap and span multiple lines, false if it should
   /// stay on a single line and scroll when overflowed.
   final bool multiline;
 
-  /// Form-specific data, required if this Input is part of a Form.
+  /// The [Form] entry for this input control. Required if the input is in a [Form].
+  /// Ignored otherwise.
+  ///
+  /// Putting an Input in a [Form] means the Input will keep track of its own value,
+  /// using the [value] property only as the field's initial value. It also means
+  /// that when any field in the [Form] changes, all the widgets in the form will be
+  /// rebuilt, so that each field's [FormField.validator] callback can be reevaluated.
   final FormField<String> formField;
 
   /// Called when the text being edited changes.
+  ///
+  /// If the [Input] is not in a [Form], the [value] must be updated each time [onChanged]
+  /// is invoked. (If there is a [Form], then the value is tracked in the [formField], and
+  /// this callback is purely advisory.)
+  ///
+  /// If the [Input] is in a [Form], this is called after the [formField] is updated.
   final ValueChanged<InputValue> onChanged;
 
   /// Called when the user indicates that they are done editing the text in the field.
+  ///
+  /// If the [Input] is in a [Form], this is called after the [formField] is notified.
   final ValueChanged<InputValue> onSubmitted;
 
   @override
@@ -114,13 +149,22 @@ class _InputState extends State<Input> {
   _FormFieldData _formData;
 
   @override
+  void dispose() {
+    _formData?.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     ThemeData themeData = Theme.of(context);
     BuildContext focusContext = focusKey.currentContext;
     bool focused = focusContext != null && Focus.at(focusContext, autofocus: config.autofocus);
-    if (_formData == null)
+    if (_formData == null) {
       _formData = _FormFieldData.maybeCreate(context, this);
+    } else {
+      _formData = _formData.maybeDispose(context);
+    }
     InputValue value =  _formData?.value ?? config.value ?? InputValue.empty;
     ValueChanged<InputValue> onChanged = _formData?.onChanged ?? config.onChanged;
     ValueChanged<InputValue> onSubmitted = _formData?.onSubmitted ?? config.onSubmitted;
@@ -219,7 +263,7 @@ class _InputState extends State<Input> {
         platform: Theme.of(context).platform,
         keyboardType: config.keyboardType,
         onChanged: onChanged,
-        onSubmitted: onSubmitted
+        onSubmitted: onSubmitted,
       )
     ));
 
@@ -270,14 +314,26 @@ class _InputState extends State<Input> {
   }
 }
 
+// _FormFieldData is a helper class for _InputState for when the Input
+// is in a Form.
+//
+// An instance is created when the Input is put in a Form, and lives
+// until the Input is taken placed somewhere without a Form. (If the
+// Input is moved from one Form to another, the same _FormFieldData is
+// used for both forms).
+//
+// The _FormFieldData stores the value of the Input. Without a Form,
+// the Input is essentially stateless.
+
 class _FormFieldData {
   _FormFieldData(this.inputState) {
     assert(field != null);
     value = inputState.config.value ?? new InputValue();
   }
 
-  InputValue value;
   final _InputState inputState;
+  InputValue value;
+
   FormField<String> get field => inputState.config.formField;
 
   static _FormFieldData maybeCreate(BuildContext context, _InputState inputState) {
@@ -287,20 +343,39 @@ class _FormFieldData {
     return null;
   }
 
+  _FormFieldData maybeDispose(BuildContext context) {
+    if (FormScope.of(context) != null)
+      return this;
+    dispose();
+    return null;
+  }
+
+  void dispose() {
+    value = null;
+  }
+
   void onChanged(InputValue value) {
+    assert(value != null);
+    assert(field != null);
     FormScope scope = FormScope.of(inputState.context);
     assert(scope != null);
     this.value = value;
     if (field.setter != null)
       field.setter(value.text);
+    if (inputState.config.onChanged != null)
+      inputState.config.onChanged(value);
     scope.onFieldChanged();
   }
 
   void onSubmitted(InputValue value) {
+    assert(value != null);
+    assert(field != null);
     FormScope scope = FormScope.of(inputState.context);
     assert(scope != null);
     if (scope.form.onSubmitted != null)
       scope.form.onSubmitted();
+    if (inputState.config.onSubmitted != null)
+      inputState.config.onSubmitted(value);
     scope.onFieldChanged();
   }
 }
