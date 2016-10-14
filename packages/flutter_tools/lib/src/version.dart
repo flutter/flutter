@@ -107,5 +107,7 @@ String _runSync(String executable, List<String> arguments, String cwd) {
 }
 
 String _shortGitRevision(String revision) {
+  if (revision == null)
+    return '';
   return revision.length > 10 ? revision.substring(0, 10) : revision;
 }
