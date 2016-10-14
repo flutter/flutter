@@ -64,6 +64,7 @@ android_library("java") {
   visibility = [ ":*" ]
 
   java_files = [
+    "io/flutter/plugin/common/ActivityLifecycleListener.java",
     "io/flutter/plugin/common/JSONMessageListener.java",
     "io/flutter/plugin/platform/PlatformPlugin.java",
     "io/flutter/view/AccessibilityBridge.java",
@@ -71,6 +72,7 @@ android_library("java") {
     "io/flutter/view/FlutterView.java",
     "io/flutter/view/ResourceCleaner.java",
     "io/flutter/view/ResourceExtractor.java",
+    "io/flutter/view/ResourcePaths.java",
     "io/flutter/view/ServiceFactory.java",
     "io/flutter/view/ServiceProviderImpl.java",
     "io/flutter/view/ServiceRegistry.java",
@@ -80,9 +82,6 @@ android_library("java") {
 
   deps = [
     "//base:base_java",
-    "//flutter/services/activity:activity_lib",
-    "//flutter/services/activity:interfaces_java",
-    "//flutter/services/common:common_lib",
     "//flutter/services/editing:editing_lib",
     "//flutter/services/editing:interfaces_java",
     "//flutter/services/engine:interfaces_java",

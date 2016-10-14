@@ -34,10 +34,8 @@ import org.chromium.mojo.bindings.Interface.Binding;
 import org.chromium.mojo.system.Core;
 import org.chromium.mojo.system.impl.CoreImpl;
 import org.chromium.mojo.system.MessagePipeHandle;
-import org.chromium.mojom.activity.Activity;
 import org.chromium.mojom.editing.Clipboard;
 import org.chromium.mojom.vsync.VSyncProvider;
-import org.domokit.activity.ActivityImpl;
 import org.domokit.editing.ClipboardImpl;
 import org.domokit.vsync.VSyncProviderImpl;
 
@@ -184,13 +182,6 @@ public class FlutterMain {
     private static native void nativeRecordStartTimestamp(long initTimeMillis);
 
     private static void onServiceRegistryAvailable(final Context applicationContext, ServiceRegistry registry) {
-        registry.register(Activity.MANAGER.getName(), new ServiceFactory() {
-            @Override
-            public Binding connectToService(FlutterView view, Core core, MessagePipeHandle pipe) {
-                return Activity.MANAGER.bind(new ActivityImpl(), pipe);
-            }
-        });
-
         registry.register(Clipboard.MANAGER.getName(), new ServiceFactory() {
             @Override
             public Binding connectToService(FlutterView view, Core core, MessagePipeHandle pipe) {

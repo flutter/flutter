@@ -13,8 +13,6 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 
-import org.domokit.common.ResourcePaths;
-
 /**
  * A class to clean up orphaned resource directories after unclean shutdowns.
  **/

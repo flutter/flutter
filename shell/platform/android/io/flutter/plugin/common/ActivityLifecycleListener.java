@@ -2,9 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-package org.domokit.common;
+package io.flutter.plugin.common;
 
-// TODO(abarth): Move to io.flutter.plugin.common.
 public interface ActivityLifecycleListener {
     void onPostResume();
 }

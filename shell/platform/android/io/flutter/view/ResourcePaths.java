@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-package org.domokit.common;
+package io.flutter.view;
 
 import android.content.Context;
 
 import java.io.File;
 import java.io.IOException;
 
-public class ResourcePaths {
+class ResourcePaths {
     // The filename prefix used by Chromium temporary file APIs.
     public static final String TEMPORARY_RESOURCE_PREFIX = ".org.chromium.Chromium.";
 
