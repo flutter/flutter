@@ -855,8 +855,29 @@ class RenderBackdropFilter extends RenderProxyBox {
   }
 }
 
-/// A class that provides custom clips.
+/// An interface for providing custom clips.
+///
+/// This class is used by a number of clip widgets (e.g., [ClipRect] and
+/// [ClipPath]).
+///
+/// The [getClip] method is called whenever the custom clip needs to be updated.
+///
+/// The [shouldReclip] method is called when a new instance of the class
+/// is provided, to check if the new instance actually represents different
+/// information.
+///
+/// The most efficient way to update the clip provided by this class is to
+/// supply a reclip argument to the constructor of the [CustomClipper]. The
+/// custom object will listen to this animation and update the clip whenever the
+/// animation ticks, avoiding both the build and layout phases of the pipeline.
 abstract class CustomClipper<T> {
+  /// Creates a custom clipper.
+  ///
+  /// The clipper will update its clip whenever [reclip] notifies its listeners.
+  const CustomClipper({ Listenable reclip }) : _reclip = reclip;
+
+  final Listenable _reclip;
+
   /// Returns a description of the clip given that the render object being
   /// clipped is of the given size.
   T getClip(Size size);
@@ -871,9 +892,22 @@ abstract class CustomClipper<T> {
   /// with very small arcs in the corners), then this may be adequate.
   Rect getApproximateClipRect(Size size) => Point.origin & size;
 
-  /// Returns `true` if the new instance will result in a different clip
-  /// than the oldClipper instance.
-  bool shouldRepaint(@checked CustomClipper<T> oldClipper);
+  /// Called whenever a new instance of the custom clipper delegate class is
+  /// provided to the clip object, or any time that a new clip object is created
+  /// with a new instance of the custom painter delegate class (which amounts to
+  /// the same thing, because the latter is implemented in terms of the former).
+  ///
+  /// If the new instance represents different information than the old
+  /// instance, then the method should return `true`, otherwise it should return
+  /// `false`.
+  ///
+  /// If the method returns `false`, then the [getClip] call might be optimized
+  /// away.
+  ///
+  /// It's possible that the [getClip] method will get called even if
+  /// [shouldReclip] returns `false` or if the [getClip] method is never called
+  /// at all (e.g. if the box changes size).
+  bool shouldReclip(@checked CustomClipper<T> oldClipper);
 }
 
 abstract class _RenderCustomClip<T> extends RenderProxyBox {
@@ -893,11 +927,31 @@ abstract class _RenderCustomClip<T> extends RenderProxyBox {
     assert(newClipper != null || oldClipper != null);
     if (newClipper == null || oldClipper == null ||
         oldClipper.runtimeType != oldClipper.runtimeType ||
-        newClipper.shouldRepaint(oldClipper)) {
-      _clip = null;
-      markNeedsPaint();
-      markNeedsSemanticsUpdate(onlyChanges: true);
+        newClipper.shouldReclip(oldClipper)) {
+      _markNeedsClip();
     }
+    if (attached) {
+      oldClipper?._reclip?.removeListener(_markNeedsClip);
+      newClipper?._reclip?.addListener(_markNeedsClip);
+    }
+  }
+
+  @override
+  void attach(PipelineOwner owner) {
+    super.attach(owner);
+    _clipper?._reclip?.addListener(_markNeedsClip);
+ }
+
+  @override
+  void detach() {
+    _clipper?._reclip?.removeListener(_markNeedsClip);
+    super.detach();
+  }
+
+  void _markNeedsClip() {
+    _clip = null;
+    markNeedsPaint();
+    markNeedsSemanticsUpdate(onlyChanges: true);
   }
 
   T get _defaultClip;
@@ -1660,14 +1714,15 @@ abstract class CustomPainter {
   /// Called whenever a new instance of the custom painter delegate class is
   /// provided to the [RenderCustomPaint] object, or any time that a new
   /// [CustomPaint] object is created with a new instance of the custom painter
-  /// delegate class (which amounts to the same thing, since the latter is
+  /// delegate class (which amounts to the same thing, because the latter is
   /// implemented in terms of the former).
   ///
   /// If the new instance represents different information than the old
   /// instance, then the method should return `true`, otherwise it should return
   /// `false`.
   ///
-  /// If the method returns `false`, then the paint call might be optimized away.
+  /// If the method returns `false`, then the [paint] call might be optimized
+  /// away.
   ///
   /// It's possible that the [paint] method will get called even if
   /// [shouldRepaint] returns `false` (e.g. if an ancestor or descendant needed to

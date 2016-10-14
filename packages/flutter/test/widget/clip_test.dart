@@ -15,7 +15,7 @@ class PathClipper extends CustomClipper<Path> {
       ..addRect(new Rect.fromLTWH(50.0, 50.0, 100.0, 100.0));
   }
   @override
-  bool shouldRepaint(PathClipper oldClipper) => false;
+  bool shouldReclip(PathClipper oldClipper) => false;
 }
 
 class ValueClipper<T> extends CustomClipper<T> {
@@ -31,7 +31,7 @@ class ValueClipper<T> extends CustomClipper<T> {
   }
 
   @override
-  bool shouldRepaint(ValueClipper<T> oldClipper) {
+  bool shouldReclip(ValueClipper<T> oldClipper) {
     return oldClipper.message != message || oldClipper.value != value;
   }
 }
