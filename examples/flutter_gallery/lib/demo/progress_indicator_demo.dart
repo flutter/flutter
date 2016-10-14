@@ -20,7 +20,7 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> with Sing
     super.initState();
     _controller = new AnimationController(
       duration: const Duration(milliseconds: 1500),
-      vsync: this,
+      vsync: this
     )..forward();
 
     _animation = new CurvedAnimation(
@@ -84,15 +84,15 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> with Sing
             height: 20.0,
             child: new Text('${(_animation.value * 100.0).toStringAsFixed(1)}%',
               textAlign: TextAlign.right
-            ),
+            )
           ),
-        ],
+        ]
       ),
     ];
     return new Column(
       children: indicators
         .map((Widget c) => new Container(child: c, margin: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0)))
-        .toList(),
+        .toList()
     );
   }
 

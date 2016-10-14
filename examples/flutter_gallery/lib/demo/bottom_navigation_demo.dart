@@ -9,21 +9,21 @@ class NavigationIconView {
     Icon icon,
     Widget title,
     Color color,
-    TickerProvider vsync,
+    TickerProvider vsync
   }) : _icon = icon,
        _color = color,
        destinationLabel = new DestinationLabel(
          icon: icon,
          title: title,
-         backgroundColor: color,
+         backgroundColor: color
        ),
        controller = new AnimationController(
          duration: kThemeAnimationDuration,
-         vsync: vsync,
+         vsync: vsync
        ) {
     _animation = new CurvedAnimation(
       parent: controller,
-      curve: new Interval(0.5, 1.0, curve: Curves.fastOutSlowIn),
+      curve: new Interval(0.5, 1.0, curve: Curves.fastOutSlowIn)
     );
   }
 
@@ -49,10 +49,10 @@ class NavigationIconView {
       child: new SlideTransition(
         position: new Tween<FractionalOffset>(
           begin: const FractionalOffset(0.0, 0.02), // Small offset from the top.
-          end: FractionalOffset.topLeft,
+          end: FractionalOffset.topLeft
         ).animate(_animation),
-        child: new Icon(_icon.icon, color: iconColor, size: 120.0),
-      ),
+        child: new Icon(_icon.icon, color: iconColor, size: 120.0)
+      )
     );
   }
 }
@@ -78,25 +78,25 @@ class _BottomNavigationDemoState extends State<BottomNavigationDemo>
         icon: new Icon(Icons.access_alarm),
         title: new Text('Alarm'),
         color: Colors.deepPurple[500],
-        vsync: this,
+        vsync: this
       ),
       new NavigationIconView(
         icon: new Icon(Icons.cloud),
         title: new Text('Cloud'),
         color: Colors.teal[500],
-        vsync: this,
+        vsync: this
       ),
       new NavigationIconView(
         icon: new Icon(Icons.favorite),
         title: new Text('Favorites'),
         color: Colors.indigo[500],
-        vsync: this,
+        vsync: this
       ),
       new NavigationIconView(
         icon: new Icon(Icons.event_available),
         title: new Text('Event'),
         color: Colors.pink[500],
-        vsync: this,
+        vsync: this
       )
     ];
 
@@ -149,7 +149,7 @@ class _BottomNavigationDemoState extends State<BottomNavigationDemo>
           _currentIndex = index;
           _navigationViews[_currentIndex].controller.forward();
         });
-      },
+      }
     );
 
     return new Scaffold(
@@ -165,18 +165,18 @@ class _BottomNavigationDemoState extends State<BottomNavigationDemo>
             itemBuilder: (BuildContext context) => <PopupMenuItem<BottomNavigationBarType>>[
               new PopupMenuItem<BottomNavigationBarType>(
                 value: BottomNavigationBarType.fixed,
-                child: new Text('Fixed'),
+                child: new Text('Fixed')
               ),
               new PopupMenuItem<BottomNavigationBarType>(
                 value: BottomNavigationBarType.shifting,
-                child: new Text('Shifting'),
+                child: new Text('Shifting')
               )
-            ],
+            ]
           )
-        ],
+        ]
       ),
       body: _buildBody(),
-      bottomNavigationBar: botNavBar,
+      bottomNavigationBar: botNavBar
     );
   }
 }

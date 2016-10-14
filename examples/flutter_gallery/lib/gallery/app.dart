@@ -12,17 +12,17 @@ import 'updates.dart';
 final Map<String, WidgetBuilder> _kRoutes = new Map<String, WidgetBuilder>.fromIterable(
   kAllGalleryItems,
   key: (GalleryItem item) => item.routeName,
-  value: (GalleryItem item) => item.buildRoute,
+  value: (GalleryItem item) => item.buildRoute
 );
 
 final ThemeData _kGalleryLightTheme = new ThemeData(
   brightness: Brightness.light,
-  primarySwatch: Colors.lightBlue,
+  primarySwatch: Colors.lightBlue
 );
 
 final ThemeData _kGalleryDarkTheme = new ThemeData(
   brightness: Brightness.dark,
-  primarySwatch: Colors.lightBlue,
+  primarySwatch: Colors.lightBlue
 );
 
 class GalleryApp extends StatefulWidget {
@@ -63,13 +63,13 @@ class GalleryAppState extends State<GalleryApp> {
         setState(() {
           timeDilation = value;
         });
-      },
+      }
     );
 
     if (config.updateUrlFetcher != null) {
       home = new Updater(
         updateUrlFetcher: config.updateUrlFetcher,
-        child: home,
+        child: home
       );
     }
 
@@ -79,7 +79,7 @@ class GalleryAppState extends State<GalleryApp> {
       theme: _useLightTheme ? _kGalleryLightTheme : _kGalleryDarkTheme,
       showPerformanceOverlay: _showPerformanceOverlay,
       routes: _kRoutes,
-      home: home,
+      home: home
     );
   }
 }

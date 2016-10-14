@@ -51,7 +51,7 @@ class PestoStyle extends TextStyle {
     FontWeight fontWeight,
     Color color: Colors.black87,
     double letterSpacing,
-    double height,
+    double height
   }) : super(
     inherit: false,
     color: color,
@@ -60,7 +60,7 @@ class PestoStyle extends TextStyle {
     fontWeight: fontWeight,
     textBaseline: TextBaseline.alphabetic,
     letterSpacing: letterSpacing,
-    height: height,
+    height: height
   );
 }
 
@@ -221,7 +221,7 @@ class _PestoLogoState extends State<PestoLogo> {
               rect: _textRectTween.lerp(config.t),
               child: new Opacity(
                 opacity: _textOpacity.transform(config.t),
-                child: new Text('PESTO', style: titleStyle, textAlign: TextAlign.center),
+                child: new Text('PESTO', style: titleStyle, textAlign: TextAlign.center)
               )
             )
           ]
@@ -334,7 +334,7 @@ class _RecipePageState extends State<RecipePage> {
               )
             )
           )
-        ),
+        )
       ),
       body: _buildContainer(context)
     );
