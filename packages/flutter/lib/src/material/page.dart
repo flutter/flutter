@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:flutter/widgets.dart';
 import 'material.dart';
 import 'theme.dart';
@@ -167,10 +165,9 @@ class MaterialPageRoute<T> extends PageRoute<T> {
   /// Creates a page route for use in a material design app.
   MaterialPageRoute({
     this.builder,
-    Completer<T> completer,
     RouteSettings settings: const RouteSettings(),
     this.maintainState: true,
-  }) : super(completer: completer, settings: settings) {
+  }) : super(settings: settings) {
     assert(builder != null);
     assert(opaque);
   }

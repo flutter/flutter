@@ -32,21 +32,23 @@ abstract class OverlayRoute<T> extends Route<T> {
     assert(_overlayEntries.isEmpty);
     _overlayEntries.addAll(createOverlayEntries());
     navigator.overlay?.insertAll(_overlayEntries, above: insertionPoint);
+    super.install(insertionPoint);
   }
 
-  /// A request was made to pop this route. If the route can handle it
-  /// internally (e.g. because it has its own stack of internal state) then
-  /// return false, otherwise return true. Returning false will prevent the
-  /// default behavior of NavigatorState.pop().
+  /// Controls whether [didPop] calls [finished].
   ///
-  /// If this is called, the Navigator will not call dispose(). It is the
-  /// responsibility of the Route to later call dispose().
-  ///
-  /// Subclasses shouldn't call this if they want to delay the finished() call.
+  /// If true, this route removes its overlay entries during [didPop].
+  /// Subclasses can override this getter if they want to delay the [finished]
+  /// call (for example to animate the route's exit before removing it from the
+  /// overlay).
+  @protected
+  bool get finishedWhenPopped => true;
+
   @override
   bool didPop(T result) {
-    finished();
-    return true;
+    if (finishedWhenPopped)
+      finished();
+    return super.didPop(result);
   }
 
   /// Clears out the overlay entries.
@@ -56,6 +58,7 @@ abstract class OverlayRoute<T> extends Route<T> {
   /// overlay removal.
   ///
   /// Do not call this method outside of this context.
+  @protected
   void finished() {
     for (OverlayEntry entry in _overlayEntries)
       entry.remove();
@@ -65,6 +68,7 @@ abstract class OverlayRoute<T> extends Route<T> {
   @override
   void dispose() {
     finished();
+    super.dispose();
   }
 }
 
@@ -72,26 +76,20 @@ abstract class OverlayRoute<T> extends Route<T> {
 abstract class TransitionRoute<T> extends OverlayRoute<T> {
   /// Creates a route with entrance and exit transitions.
   TransitionRoute({
-    Completer<T> popCompleter,
     Completer<T> transitionCompleter
-  }) : _popCompleter = popCompleter,
-       _transitionCompleter = transitionCompleter;
+  }) : _transitionCompleter = transitionCompleter;
 
   /// The same as the default constructor but callable with mixins.
   TransitionRoute.explicit(
-    Completer<T> popCompleter,
     Completer<T> transitionCompleter
-  ) : this(popCompleter: popCompleter, transitionCompleter: transitionCompleter);
-
-  /// This future completes once the animation has been dismissed. For
-  /// ModalRoutes, this will be after the completer that's passed in, since that
-  /// one completes before the animation even starts, as soon as the route is
-  /// popped.
-  Future<T> get popped => _popCompleter?.future;
-  final Completer<T> _popCompleter;
+  ) : this(transitionCompleter: transitionCompleter);
 
   /// This future completes only once the transition itself has finished, after
   /// the overlay entries have been removed from the navigator's overlay.
+  ///
+  /// This future completes once the animation has been dismissed. That will be
+  /// after [popped], because [popped] completes before the animation even
+  /// starts, as soon as the route is popped.
   Future<T> get completed => _transitionCompleter?.future;
   final Completer<T> _transitionCompleter;
 
@@ -103,6 +101,9 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   /// When an opaque route's entrance transition is complete, the routes behind
   /// the opaque route will not be built to save resources.
   bool get opaque;
+
+  @override
+  bool get finishedWhenPopped => false;
 
   /// The animation that drives the route's transition and the previous route's
   /// forward transition.
@@ -192,8 +193,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   bool didPop(T result) {
     _result = result;
     _controller.reverse();
-    _popCompleter?.complete(_result);
-    return true;
+    return super.didPop(result);
   }
 
   @override
@@ -455,9 +455,8 @@ class _ModalScopeState extends State<_ModalScope> {
 abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T> {
   /// Creates a route that blocks interaction with previous routes.
   ModalRoute({
-    Completer<T> completer,
     this.settings: const RouteSettings()
-  }) : super.explicit(completer, null);
+  }) : super.explicit(null);
 
   // The API for general users of this class
 
@@ -678,9 +677,6 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
 
 /// A modal route that overlays a widget over the current route.
 abstract class PopupRoute<T> extends ModalRoute<T> {
-  /// Creates a modal route that overlays a widget over the current route.
-  PopupRoute({ Completer<T> completer }) : super(completer: completer);
-
   @override
   bool get opaque => false;
 
