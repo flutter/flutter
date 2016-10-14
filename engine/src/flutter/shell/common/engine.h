@@ -51,6 +51,7 @@ class Engine : public sky::SkyEngine, public blink::RuntimeDelegate {
   void ConnectToEngine(mojo::InterfaceRequest<SkyEngine> request);
   void OnOutputSurfaceCreated(const ftl::Closure& gpu_continuation);
   void OnOutputSurfaceDestroyed(const ftl::Closure& gpu_continuation);
+  void DispatchPlatformMessage(ftl::RefPtr<blink::PlatformMessage> message);
   void DispatchPointerDataPacket(const PointerDataPacket& packet);
   void DispatchSemanticsAction(int id, blink::SemanticsAction action);
   void SetSemanticsEnabled(bool enabled);

@@ -36,12 +36,14 @@ void ApplicationMessagesImpl::AddBinding(
 void ApplicationMessagesImpl::HandlePlatformMessage(
     ftl::RefPtr<blink::PlatformMessage> message) {
   NSString* string = [NSString stringWithUTF8String:message->data().data()];
+  ftl::RefPtr<blink::PlatformMessageResponse> completer = message->response();
 
   {
     auto it = listeners_.find(message->name());
     if (it != listeners_.end()) {
       NSString* response = [it->second didReceiveString:string];
-      message->InvokeCallback(SysNSStringToVector(response));
+      if (completer)
+        completer->Complete(SysNSStringToVector(response));
       return;
     }
   }
@@ -52,7 +54,8 @@ void ApplicationMessagesImpl::HandlePlatformMessage(
       [it->second
           didReceiveString:string
                   callback:^(NSString* response) {
-                    message->InvokeCallback(SysNSStringToVector(response));
+                    if (completer)
+                      completer->Complete(SysNSStringToVector(response));
                   }];
     }
   }

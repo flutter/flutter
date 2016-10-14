@@ -127,16 +127,17 @@ void PlatformViewAndroid::InvokePlatformMessageResponseCallback(
     jstring java_response) {
   if (!response_id)
     return;
-  auto it = pending_messages_.find(response_id);
-  if (it == pending_messages_.end())
+  auto it = pending_responses_.find(response_id);
+  if (it == pending_responses_.end())
     return;
   std::string response;
   if (java_response)
-      response = base::android::ConvertJavaStringToUTF8(env, java_response);
+    response = base::android::ConvertJavaStringToUTF8(env, java_response);
+  auto response = std::move(it->second);
+  pending_responses_.erase(it);
   // TODO(abarth): There's an extra copy here.
-  it->second->InvokeCallback(
+  response->Complete(
       std::vector<char>(response.data(), response.data() + response.size()));
-  pending_messages_.erase(it);
 }
 
 void PlatformViewAndroid::HandlePlatformMessage(
@@ -148,9 +149,9 @@ void PlatformViewAndroid::HandlePlatformMessage(
       return;
 
     int response_id = 0;
-    if (message->has_callback()) {
+    if (auto response = message->response()) {
       response_id = next_response_id_++;
-      pending_messages_[response_id] = message;
+      pending_responses_[response_id] = response;
     }
 
     base::StringPiece message_name = message->name();
@@ -162,7 +163,7 @@ void PlatformViewAndroid::HandlePlatformMessage(
         base::android::ConvertUTF8ToJavaString(env, message_name);
     auto java_message_data =
         base::android::ConvertUTF8ToJavaString(env, message_data);
-    message->ClearData();
+    message = nullptr;
 
     // This call can re-enter in InvokePlatformMessageResponseCallback.
     Java_FlutterView_handlePlatformMessage(

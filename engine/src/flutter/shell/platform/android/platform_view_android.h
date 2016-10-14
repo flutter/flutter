@@ -75,8 +75,8 @@ class PlatformViewAndroid : public PlatformView {
 
   // We use id 0 to mean that no response is expected.
   int next_response_id_ = 1;
-  std::unordered_map<int, ftl::RefPtr<blink::PlatformMessage>>
-      pending_messages_;
+  std::unordered_map<int, ftl::RefPtr<blink::PlatformMessageResponse>>
+      pending_responses_;
 
   void UpdateThreadPriorities();
 
