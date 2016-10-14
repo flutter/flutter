@@ -5,7 +5,6 @@
 #include "flutter/shell/platform/darwin/common/platform_service_provider.h"
 
 #if TARGET_OS_IPHONE
-#include "flutter/services/activity/ios/activity_impl.h"
 #include "flutter/services/editing/ios/clipboard_impl.h"
 #include "flutter/services/vsync/ios/vsync_provider_ios_impl.h"
 #else
@@ -24,11 +23,6 @@ void PlatformServiceProvider::ConnectToService(
     const mojo::String& service_name,
     mojo::ScopedMessagePipeHandle client_handle) {
 #if TARGET_OS_IPHONE
-  if (service_name == ::activity::Activity::Name_) {
-    new sky::services::activity::ActivityImpl(
-        mojo::InterfaceRequest<::activity::Activity>(client_handle.Pass()));
-    return;
-  }
   if (service_name == ::editing::Clipboard::Name_) {
     new sky::services::editing::ClipboardImpl(
         mojo::InterfaceRequest<::editing::Clipboard>(client_handle.Pass()));

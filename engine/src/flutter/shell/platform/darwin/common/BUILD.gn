@@ -21,7 +21,6 @@ source_set("common") {
     "//base:i18n",
     "//dart/runtime:libdart",
     "//flutter/runtime",
-    "//flutter/services/activity",
     "//flutter/services/editing",
     "//flutter/services/engine:interfaces",
     "//flutter/services/platform",
