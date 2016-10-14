@@ -79,6 +79,11 @@ class UpgradeCommand extends FlutterCommand {
         return code;
     }
 
+    // Run a doctor check in case system requirements have changed.
+    printStatus('');
+    printStatus('Running flutter doctor...');
+    await doctor.diagnose();
+
     return 0;
   }
 
