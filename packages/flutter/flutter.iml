@@ -3,9 +3,8 @@
   <component name="NewModuleRootManager" inherit-compiler-output="true">
     <exclude-output />
     <content url="file://$MODULE_DIR$">
-      <excludeFolder url="file://$MODULE_DIR$/.pub" />
       <excludeFolder url="file://$MODULE_DIR$/bin/packages" />
-      <excludeFolder url="file://$MODULE_DIR$/packages/flutter" />
+      <excludeFolder url="file://$MODULE_DIR$/packages" />
       <excludeFolder url="file://$MODULE_DIR$/test/animation/packages" />
       <excludeFolder url="file://$MODULE_DIR$/test/cassowary/packages" />
       <excludeFolder url="file://$MODULE_DIR$/test/engine/packages" />

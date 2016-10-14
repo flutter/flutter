@@ -5,7 +5,7 @@
     <content url="file://$MODULE_DIR$">
       <excludeFolder url="file://$MODULE_DIR$/.pub" />
       <excludeFolder url="file://$MODULE_DIR$/bin/packages" />
-      <excludeFolder url="file://$MODULE_DIR$/packages/flutter_tools" />
+      <excludeFolder url="file://$MODULE_DIR$/packages" />
       <excludeFolder url="file://$MODULE_DIR$/test/packages" />
       <excludeFolder url="file://$MODULE_DIR$/test/src/ios/packages" />
       <excludeFolder url="file://$MODULE_DIR$/test/src/packages" />
