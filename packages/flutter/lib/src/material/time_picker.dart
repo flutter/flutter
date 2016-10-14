@@ -492,10 +492,9 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
   void _handlePanStart(DragStartDetails details) {
     assert(!_dragging);
     _dragging = true;
-    RenderBox box = context.findRenderObject();
+    final RenderBox box = context.findRenderObject();
     _position = box.globalToLocal(details.globalPosition);
-    double radius = box.size.shortestSide / 2.0;
-    _center = new Point(radius, radius);
+    _center = box.size.center(Point.origin);
     _updateThetaForPan();
     _notifyOnChangedIfNeeded();
   }
