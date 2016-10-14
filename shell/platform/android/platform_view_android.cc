@@ -133,10 +133,10 @@ void PlatformViewAndroid::InvokePlatformMessageResponseCallback(
   std::string response;
   if (java_response)
     response = base::android::ConvertJavaStringToUTF8(env, java_response);
-  auto response = std::move(it->second);
+  auto message_response = std::move(it->second);
   pending_responses_.erase(it);
   // TODO(abarth): There's an extra copy here.
-  response->Complete(
+  message_response->Complete(
       std::vector<char>(response.data(), response.data() + response.size()));
 }
 
