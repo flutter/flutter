@@ -6,6 +6,9 @@ part of dart_ui;
 
 /// How the pointer has changed since the last report.
 enum PointerChange {
+  /// The input from the pointer is no longer directed towards this receiver.
+  cancel,
+
   /// The device has started tracking the pointer.
   ///
   /// For example, the pointer might be hovering above the device, having not yet
@@ -26,9 +29,6 @@ enum PointerChange {
 
   /// The pointer has stopped making contact with the device.
   up,
-
-  /// The input from the pointer is no longer directed towards this receiver.
-  cancel,
 }
 
 /// The kind of pointer device.

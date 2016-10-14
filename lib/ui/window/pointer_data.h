@@ -13,12 +13,12 @@ namespace blink {
 struct alignas(8) PointerData {
   // Must match the PointerChange enum in pointer.dart.
   enum class Change : int64_t {
+    kCancel,
     kAdd,
     kRemove,
     kDown,
     kMove,
     kUp,
-    kCancel,
   };
 
   // Must match the PointerDeviceKind enum in pointer.dart.
