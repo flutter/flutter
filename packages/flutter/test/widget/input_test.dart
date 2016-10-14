@@ -54,6 +54,14 @@ void main() {
   MockClipboard mockClipboard = new MockClipboard();
   serviceMocker.registerMockService(mockClipboard);
 
+  const String kThreeLines =
+    'First line of text is here abcdef ghijkl mnopqrst. ' +
+    'Second line of text goes until abcdef ghijkl mnopq. ' +
+    'Third line of stuff keeps going until abcdef ghijk. ';
+  const String kFourLines =
+    kThreeLines +
+    'Fourth line won\'t display and ends at abcdef ghi. ';
+
   void enterText(String testValue) {
     // Simulate entry of text through the keyboard.
     expect(mockKeyboard.client, isNotNull);
@@ -61,6 +69,32 @@ void main() {
       ..text = testValue
       ..composingBase = 0
       ..composingExtent = testValue.length);
+  }
+
+  // Returns the first RenderEditableLine.
+  RenderEditableLine findRenderEditableLine(WidgetTester tester) {
+    RenderObject root = tester.renderObject(find.byType(RawInputLine));
+    expect(root, isNotNull);
+
+    RenderEditableLine renderLine;
+    void recursiveFinder(RenderObject child) {
+      if (child is RenderEditableLine) {
+        renderLine = child;
+        return;
+      }
+      child.visitChildren(recursiveFinder);
+    }
+    root.visitChildren(recursiveFinder);
+    expect(renderLine, isNotNull);
+    return renderLine;
+  }
+
+  Point textOffsetToPosition(WidgetTester tester, int offset) {
+    RenderEditableLine renderLine = findRenderEditableLine(tester);
+    List<TextSelectionPoint> endpoints = renderLine.getEndpointsForSelection(
+        new TextSelection.collapsed(offset: offset));
+    expect(endpoints.length, 1);
+    return endpoints[0].point + new Offset(0.0, -2.0);
   }
 
   testWidgets('Editable text has consistent size', (WidgetTester tester) async {
@@ -173,32 +207,6 @@ void main() {
 
     await tester.pump();
   });
-
-  // Returns the first RenderEditableLine.
-  RenderEditableLine findRenderEditableLine(WidgetTester tester) {
-    RenderObject root = tester.renderObject(find.byType(RawInputLine));
-    expect(root, isNotNull);
-
-    RenderEditableLine renderLine;
-    void recursiveFinder(RenderObject child) {
-      if (child is RenderEditableLine) {
-        renderLine = child;
-        return;
-      }
-      child.visitChildren(recursiveFinder);
-    }
-    root.visitChildren(recursiveFinder);
-    expect(renderLine, isNotNull);
-    return renderLine;
-  }
-
-  Point textOffsetToPosition(WidgetTester tester, int offset) {
-    RenderEditableLine renderLine = findRenderEditableLine(tester);
-    List<TextSelectionPoint> endpoints = renderLine.getEndpointsForSelection(
-        new TextSelection.collapsed(offset: offset));
-    expect(endpoints.length, 1);
-    return endpoints[0].point + new Offset(0.0, -2.0);
-  }
 
   testWidgets('Can long press to select', (WidgetTester tester) async {
     GlobalKey inputKey = new GlobalKey();
@@ -438,18 +446,18 @@ void main() {
     // End the test here to ensure the animation is properly disposed of.
   });
 
-  testWidgets('Multiline text will wrap', (WidgetTester tester) async {
+  testWidgets('Multiline text will wrap up to maxLines', (WidgetTester tester) async {
     GlobalKey inputKey = new GlobalKey();
     InputValue inputValue = InputValue.empty;
 
-    Widget builder() {
+    Widget builder(int maxLines) {
       return new Center(
         child: new Material(
           child: new Input(
             value: inputValue,
             key: inputKey,
             style: const TextStyle(color: Colors.black, fontSize: 34.0),
-            multiline: true,
+            maxLines: maxLines,
             hintText: 'Placeholder',
             onChanged: (InputValue value) { inputValue = value; }
           )
@@ -457,22 +465,36 @@ void main() {
       );
     }
 
-    await tester.pumpWidget(builder());
+    await tester.pumpWidget(builder(3));
 
     RenderBox findInputBox() => tester.renderObject(find.byKey(inputKey));
 
     RenderBox inputBox = findInputBox();
     Size emptyInputSize = inputBox.size;
 
-    enterText('This is a long line of text that will wrap to multiple lines.');
-    await tester.pumpWidget(builder());
+    enterText('No wrapping here.');
+    await tester.pumpWidget(builder(3));
+    expect(findInputBox(), equals(inputBox));
+    expect(inputBox.size, equals(emptyInputSize));
+
+    enterText(kThreeLines);
+    await tester.pumpWidget(builder(3));
     expect(findInputBox(), equals(inputBox));
     expect(inputBox.size, greaterThan(emptyInputSize));
 
-    enterText('No wrapping here.');
-    await tester.pumpWidget(builder());
+    Size threeLineInputSize = inputBox.size;
+
+    // An extra line won't increase the size because we max at 3.
+    enterText(kFourLines);
+    await tester.pumpWidget(builder(3));
     expect(findInputBox(), equals(inputBox));
-    expect(inputBox.size, equals(emptyInputSize));
+    expect(inputBox.size, threeLineInputSize);
+
+    // But now it will.
+    enterText(kFourLines);
+    await tester.pumpWidget(builder(4));
+    expect(findInputBox(), equals(inputBox));
+    expect(inputBox.size, greaterThan(threeLineInputSize));
   });
 
   testWidgets('Can drag handles to change selection in multiline', (WidgetTester tester) async {
@@ -490,7 +512,7 @@ void main() {
                     value: inputValue,
                     key: inputKey,
                     style: const TextStyle(color: Colors.black, fontSize: 34.0),
-                    multiline: true,
+                    maxLines: 3,
                     onChanged: (InputValue value) { inputValue = value; }
                   )
                 )
@@ -503,8 +525,8 @@ void main() {
 
     await tester.pumpWidget(builder());
 
-    String testValue = 'First line of text is here abcdef ghijkl mnopqrst. Second line of text goes until abcdef ghijkl mnopq. Third line of stuff.';
-    String cutValue = 'First line of stuff.';
+    String testValue = kThreeLines;
+    String cutValue = 'First line of stuff keeps going until abcdef ghijk. ';
     enterText(testValue);
 
     await tester.pumpWidget(builder());
@@ -563,6 +585,97 @@ void main() {
     await tester.pumpWidget(builder());
     expect(inputValue.selection.isCollapsed, true);
     expect(inputValue.text, cutValue);
+  });
+
+  testWidgets('Can scroll multiline input', (WidgetTester tester) async {
+    GlobalKey inputKey = new GlobalKey();
+    InputValue inputValue = InputValue.empty;
+
+    Widget builder() {
+      return new Overlay(
+        initialEntries: <OverlayEntry>[
+          new OverlayEntry(
+            builder: (BuildContext context) {
+              return new Center(
+                child: new Material(
+                  child: new Input(
+                    value: inputValue,
+                    key: inputKey,
+                    style: const TextStyle(color: Colors.black, fontSize: 34.0),
+                    maxLines: 2,
+                    onChanged: (InputValue value) { inputValue = value; }
+                  )
+                )
+              );
+            }
+          )
+        ]
+      );
+    }
+
+    await tester.pumpWidget(builder());
+
+    enterText(kFourLines);
+
+    await tester.pumpWidget(builder());
+
+    RenderBox findInputBox() => tester.renderObject(find.byKey(inputKey));
+    RenderBox inputBox = findInputBox();
+
+    // Check that the last line of text is not displayed.
+    Point firstPos = textOffsetToPosition(tester, kFourLines.indexOf('First'));
+    Point fourthPos = textOffsetToPosition(tester, kFourLines.indexOf('Fourth'));
+    expect(firstPos.x, fourthPos.x);
+    expect(firstPos.y, lessThan(fourthPos.y));
+    expect(inputBox.hitTest(new HitTestResult(), position: inputBox.globalToLocal(firstPos)), isTrue);
+    expect(inputBox.hitTest(new HitTestResult(), position: inputBox.globalToLocal(fourthPos)), isFalse);
+
+    TestGesture gesture = await tester.startGesture(firstPos, pointer: 7);
+    await tester.pump();
+    await gesture.moveBy(new Offset(0.0, -1000.0));
+    await tester.pump();
+    await gesture.up();
+    await tester.pump();
+
+    // Now the first line is scrolled up, and the fourth line is visible.
+    Point newFirstPos = textOffsetToPosition(tester, kFourLines.indexOf('First'));
+    Point newFourthPos = textOffsetToPosition(tester, kFourLines.indexOf('Fourth'));
+    expect(newFirstPos.y, lessThan(firstPos.y));
+    expect(inputBox.hitTest(new HitTestResult(), position: inputBox.globalToLocal(newFirstPos)), isFalse);
+    expect(inputBox.hitTest(new HitTestResult(), position: inputBox.globalToLocal(newFourthPos)), isTrue);
+
+    // Now try scrolling by dragging the selection handle.
+
+    // Long press the 'i' in 'Fourth line' to select the word.
+    await tester.pump(const Duration(seconds: 2));
+    Point untilPos = textOffsetToPosition(tester, kFourLines.indexOf('Fourth line')+8);
+    gesture = await tester.startGesture(untilPos, pointer: 7);
+    await tester.pump(const Duration(seconds: 2));
+    await gesture.up();
+    await tester.pump();
+
+    RenderEditableLine renderLine = findRenderEditableLine(tester);
+    List<TextSelectionPoint> endpoints = renderLine.getEndpointsForSelection(
+        inputValue.selection);
+    expect(endpoints.length, 2);
+
+    // Drag the left handle to the first line, just after 'First'.
+    Point handlePos = endpoints[0].point + new Offset(-1.0, 1.0);
+    Point newHandlePos = textOffsetToPosition(tester, kFourLines.indexOf('First') + 5);
+    gesture = await tester.startGesture(handlePos, pointer: 7);
+    await tester.pump();
+    await gesture.moveTo(newHandlePos + new Offset(0.0, -10.0));
+    await tester.pump();
+    await gesture.up();
+    await tester.pump();
+
+    // The text should have scrolled up with the handle to keep the active
+    // cursor visible, back to its original position.
+    newFirstPos = textOffsetToPosition(tester, kFourLines.indexOf('First'));
+    newFourthPos = textOffsetToPosition(tester, kFourLines.indexOf('Fourth'));
+    expect(newFirstPos.y, firstPos.y);
+    expect(inputBox.hitTest(new HitTestResult(), position: inputBox.globalToLocal(newFirstPos)), isTrue);
+    expect(inputBox.hitTest(new HitTestResult(), position: inputBox.globalToLocal(newFourthPos)), isFalse);
   });
 
 }

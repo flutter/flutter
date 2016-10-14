@@ -4,7 +4,7 @@
 
 import 'dart:async';
 
-import 'package:flutter/rendering.dart' show RenderEditableLine, SelectionChangedHandler;
+import 'package:flutter/rendering.dart' show RenderEditableLine, SelectionChangedHandler, RenderEditableLinePaintOffsetNeededCallback;
 import 'package:flutter/services.dart';
 import 'package:meta/meta.dart';
 import 'package:flutter_services/editing.dart' as mojom;
@@ -170,17 +170,17 @@ class RawInputLine extends Scrollable {
     this.style,
     this.cursorColor,
     this.textScaleFactor,
-    this.multiline,
+    int maxLines: 1,
     this.selectionColor,
     this.selectionControls,
     @required this.platform,
     this.keyboardType,
     this.onChanged,
     this.onSubmitted
-  }) : super(
+  }) : maxLines = maxLines, super(
     key: key,
     initialScrollOffset: 0.0,
-    scrollDirection: Axis.horizontal
+    scrollDirection: maxLines > 1 ? Axis.vertical : Axis.horizontal
   ) {
     assert(value != null);
   }
@@ -208,9 +208,10 @@ class RawInputLine extends Scrollable {
   /// The color to use when painting the cursor.
   final Color cursorColor;
 
-  /// True if the text should wrap and span multiple lines, false if it should
-  /// stay on a single line and scroll when overflowed.
-  final bool multiline;
+  /// The maximum number of lines for the text to span, wrapping if necessary.
+  /// If this is 1 (the default), the text will not wrap, but will scroll
+  /// horizontally instead.
+  final int maxLines;
 
   /// The color to use when painting the selection.
   final Color selectionColor;
@@ -273,28 +274,43 @@ class RawInputLineState extends ScrollableState<RawInputLine> {
 
   bool get _isAttachedToKeyboard => _keyboardHandle != null && _keyboardHandle.attached;
 
-  double _contentWidth = 0.0;
-  double _containerWidth = 0.0;
+  bool get _isMultiline => config.maxLines > 1;
 
-  Offset _handlePaintOffsetUpdateNeeded(ViewportDimensions dimensions) {
+  double _contentExtent = 0.0;
+  double _containerExtent = 0.0;
+
+  Offset _handlePaintOffsetUpdateNeeded(ViewportDimensions dimensions, Rect caretRect) {
     // We make various state changes here but don't have to do so in a
     // setState() callback because we are called during layout and all
     // we're updating is the new offset, which we are providing to the
     // render object via our return value.
-    _containerWidth = dimensions.containerSize.width;
-    _contentWidth = dimensions.contentSize.width;
+    _contentExtent = _isMultiline ?
+      dimensions.contentSize.height :
+      dimensions.contentSize.width;
+    _containerExtent = _isMultiline ?
+      dimensions.containerSize.height :
+      dimensions.containerSize.width;
     didUpdateScrollBehavior(scrollBehavior.updateExtents(
-      contentExtent: _contentWidth,
-      containerExtent: _containerWidth,
-      // Set the scroll offset to match the content width so that the
-      // cursor (which is always at the end of the text) will be
-      // visible.
+      contentExtent: _contentExtent,
+      containerExtent: _containerExtent,
       // TODO(ianh): We should really only do this when text is added,
       // not generally any time the size changes.
-      scrollOffset: pixelOffsetToScrollOffset(-_contentWidth)
+      scrollOffset: _getScrollOffsetForCaret(caretRect, _containerExtent)
     ));
     updateGestureDetector();
     return scrollOffsetToPixelDelta(scrollOffset);
+  }
+
+  // Calculate the new scroll offset so the cursor remains visible.
+  double _getScrollOffsetForCaret(Rect caretRect, double containerExtent) {
+    double caretStart = _isMultiline ? caretRect.top : caretRect.left;
+    double caretEnd = _isMultiline ? caretRect.bottom : caretRect.right;
+    double newScrollOffset = scrollOffset;
+    if (caretStart < 0.0)  // cursor before start of bounds
+      newScrollOffset += pixelOffsetToScrollOffset(-caretStart);
+    else if (caretEnd >= containerExtent)  // cursor after end of bounds
+      newScrollOffset += pixelOffsetToScrollOffset(-(caretEnd - containerExtent));
+    return newScrollOffset;
   }
 
   void _attachOrDetachKeyboard(bool focused) {
@@ -373,10 +389,18 @@ class RawInputLineState extends ScrollableState<RawInputLine> {
     }
   }
 
-  void _handleSelectionOverlayChanged(InputValue newInput) {
+  void _handleSelectionOverlayChanged(InputValue newInput, Rect caretRect) {
     assert(!newInput.composing.isValid);  // composing range must be empty while selecting
     if (config.onChanged != null)
       config.onChanged(newInput);
+
+    didUpdateScrollBehavior(scrollBehavior.updateExtents(
+      // TODO(mpcomplete): should just be able to pass
+      // scrollBehavior.containerExtent here (and remove the member var), but
+      // scrollBehavior gets re-created too often, and is sometimes
+      // uninitialized here. Investigate if this is a bug.
+      scrollOffset: _getScrollOffsetForCaret(caretRect, _containerExtent)
+    ));
   }
 
   /// Whether the blinking cursor is actually visible at this precise moment
@@ -438,18 +462,20 @@ class RawInputLineState extends ScrollableState<RawInputLine> {
       }
     }
 
-    return new _EditableLineWidget(
-      value: _keyboardClient.inputValue,
-      style: config.style,
-      cursorColor: config.cursorColor,
-      showCursor: _showCursor,
-      multiline: config.multiline,
-      selectionColor: config.selectionColor,
-      textScaleFactor: config.textScaleFactor ?? MediaQuery.of(context).textScaleFactor,
-      hideText: config.hideText,
-      onSelectionChanged: _handleSelectionChanged,
-      paintOffset: scrollOffsetToPixelDelta(scrollOffset),
-      onPaintOffsetUpdateNeeded: _handlePaintOffsetUpdateNeeded
+    return new ClipRect(
+      child: new _EditableLineWidget(
+        value: _keyboardClient.inputValue,
+        style: config.style,
+        cursorColor: config.cursorColor,
+        showCursor: _showCursor,
+        maxLines: config.maxLines,
+        selectionColor: config.selectionColor,
+        textScaleFactor: config.textScaleFactor ?? MediaQuery.of(context).textScaleFactor,
+        hideText: config.hideText,
+        onSelectionChanged: _handleSelectionChanged,
+        paintOffset: scrollOffsetToPixelDelta(scrollOffset),
+        onPaintOffsetUpdateNeeded: _handlePaintOffsetUpdateNeeded
+      )
     );
   }
 }
@@ -461,7 +487,7 @@ class _EditableLineWidget extends LeafRenderObjectWidget {
     this.style,
     this.cursorColor,
     this.showCursor,
-    this.multiline,
+    this.maxLines,
     this.selectionColor,
     this.textScaleFactor,
     this.hideText,
@@ -474,13 +500,13 @@ class _EditableLineWidget extends LeafRenderObjectWidget {
   final TextStyle style;
   final Color cursorColor;
   final bool showCursor;
-  final bool multiline;
+  final int maxLines;
   final Color selectionColor;
   final double textScaleFactor;
   final bool hideText;
   final SelectionChangedHandler onSelectionChanged;
   final Offset paintOffset;
-  final ViewportDimensionsChangeCallback onPaintOffsetUpdateNeeded;
+  final RenderEditableLinePaintOffsetNeededCallback onPaintOffsetUpdateNeeded;
 
   @override
   RenderEditableLine createRenderObject(BuildContext context) {
@@ -488,7 +514,7 @@ class _EditableLineWidget extends LeafRenderObjectWidget {
       text: _styledTextSpan,
       cursorColor: cursorColor,
       showCursor: showCursor,
-      multiline: multiline,
+      maxLines: maxLines,
       selectionColor: selectionColor,
       textScaleFactor: textScaleFactor,
       selection: value.selection,
@@ -504,6 +530,7 @@ class _EditableLineWidget extends LeafRenderObjectWidget {
       ..text = _styledTextSpan
       ..cursorColor = cursorColor
       ..showCursor = showCursor
+      ..maxLines = maxLines
       ..selectionColor = selectionColor
       ..textScaleFactor = textScaleFactor
       ..selection = value.selection

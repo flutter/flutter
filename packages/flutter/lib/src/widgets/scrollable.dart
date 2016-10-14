@@ -8,6 +8,7 @@ import 'dart:ui' as ui show window;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/physics.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:meta/meta.dart';
 
 import 'basic.dart';
@@ -436,7 +437,7 @@ class ScrollableState<T extends Scrollable> extends State<T> with SingleTickerPr
 
     final ClampOverscrolls clampOverscrolls = ClampOverscrolls.of(context);
     final double clampedScrollOffset = clampOverscrolls?.clampScrollOffset(this, newScrollOffset) ?? newScrollOffset;
-    setState(() {
+    _setStateMaybeDuringBuild(() {
       _virtualScrollOffset = newScrollOffset;
       _scrollUnderway = _scrollOffset != clampedScrollOffset;
       _scrollOffset = clampedScrollOffset;
@@ -705,6 +706,18 @@ class ScrollableState<T extends Scrollable> extends State<T> with SingleTickerPr
     });
   }
 
+  // Used for state changes that sometimes occur during a build phase. If so,
+  // we skip calling setState, as the changes will apply to the next build.
+  // TODO(ianh): This is ugly and hopefully temporary. Ideally this won't be
+  // needed after Scrollable is rewritten.
+  void _setStateMaybeDuringBuild(VoidCallback fn) {
+    if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.persistentCallbacks) {
+      fn();
+    } else {
+      setState(fn);
+    }
+  }
+
   void _endScroll({ DragEndDetails details }) {
     _numberOfInProgressScrolls -= 1;
     if (_numberOfInProgressScrolls == 0) {
@@ -713,7 +726,7 @@ class ScrollableState<T extends Scrollable> extends State<T> with SingleTickerPr
         // If the scroll hasn't already stopped because we've hit a clamped
         // edge or the controller stopped animating, then rebuild the Scrollable
         // with the IgnorePointer widget turned off.
-        setState(() {
+        _setStateMaybeDuringBuild(() {
           _scrollUnderway = false;
         });
       }

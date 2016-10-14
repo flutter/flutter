@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:ui' as ui show Paragraph, ParagraphBuilder, ParagraphConstraints, ParagraphStyle, TextBox;
-import 'dart:math' as math;
 
 import 'package:flutter/gestures.dart';
 
@@ -37,6 +36,8 @@ class TextSelectionPoint {
   final TextDirection direction;
 }
 
+typedef Offset RenderEditableLinePaintOffsetNeededCallback(ViewportDimensions dimensions, Rect caretRect);
+
 /// A single line of editable text.
 class RenderEditableLine extends RenderBox {
   /// Creates a render object for a single line of editable text.
@@ -44,7 +45,7 @@ class RenderEditableLine extends RenderBox {
     TextSpan text,
     Color cursorColor,
     bool showCursor: false,
-    bool multiline: false,
+    int maxLines: 1,
     Color selectionColor,
     double textScaleFactor: 1.0,
     TextSelection selection,
@@ -54,7 +55,7 @@ class RenderEditableLine extends RenderBox {
   }) : _textPainter = new TextPainter(text: text, textScaleFactor: textScaleFactor),
        _cursorColor = cursorColor,
        _showCursor = showCursor,
-       _multiline = multiline,
+       _maxLines = maxLines,
        _selection = selection,
        _paintOffset = paintOffset {
     assert(!showCursor || cursorColor != null);
@@ -70,7 +71,7 @@ class RenderEditableLine extends RenderBox {
   SelectionChangedHandler onSelectionChanged;
 
   /// Called when the inner or outer dimensions of this render object change.
-  ViewportDimensionsChangeCallback onPaintOffsetUpdateNeeded;
+  RenderEditableLinePaintOffsetNeededCallback onPaintOffsetUpdateNeeded;
 
   /// The text to display
   TextSpan get text => _textPainter.text;
@@ -103,6 +104,16 @@ class RenderEditableLine extends RenderBox {
       return;
     _showCursor = value;
     markNeedsPaint();
+  }
+
+  /// Whether to paint the cursor.
+  int get maxLines => _maxLines;
+  int _maxLines;
+  set maxLines(int value) {
+    if (_maxLines == value)
+      return;
+    _maxLines = value;
+    markNeedsLayout();
   }
 
   /// The color to use when painting the selection.
@@ -173,7 +184,7 @@ class RenderEditableLine extends RenderBox {
     if (selection.isCollapsed) {
       // TODO(mpcomplete): This doesn't work well at an RTL/LTR boundary.
       Offset caretOffset = _textPainter.getOffsetForCaret(selection.extent, _caretPrototype);
-      Point start = new Point(0.0, constraints.constrainHeight(_preferredHeight)) + caretOffset + offset;
+      Point start = new Point(0.0, constraints.constrainHeight(_preferredLineHeight)) + caretOffset + offset;
       return <TextSelectionPoint>[new TextSelectionPoint(localToGlobal(start), null)];
     } else {
       List<ui.TextBox> boxes = _textPainter.getBoxesForSelection(selection);
@@ -192,10 +203,19 @@ class RenderEditableLine extends RenderBox {
     return _textPainter.getPositionForOffset(globalToLocal(globalPosition).toOffset());
   }
 
+  /// Returns the Rect in local coordinates for the caret at the given text
+  /// position.
+  Rect getLocalRectForCaret(TextPosition caretPosition) {
+    double lineHeight = constraints.constrainHeight(_preferredLineHeight);
+    Offset caretOffset = _textPainter.getOffsetForCaret(caretPosition, _caretPrototype);
+    // This rect is the same as _caretPrototype but without the vertical padding.
+    return new Rect.fromLTWH(0.0, 0.0, _kCaretWidth, lineHeight).shift(caretOffset + _paintOffset);
+  }
+
   Size _contentSize;
 
   ui.Paragraph _layoutTemplate;
-  double get _preferredHeight {
+  double get _preferredLineHeight {
     if (_layoutTemplate == null) {
       ui.ParagraphBuilder builder = new ui.ParagraphBuilder()
         ..pushStyle(text.style.getTextStyle(textScaleFactor: textScaleFactor))
@@ -208,21 +228,20 @@ class RenderEditableLine extends RenderBox {
     return _layoutTemplate.height;
   }
 
-  bool _multiline;
   double get _maxContentWidth {
-    return _multiline ?
+    return _maxLines > 1 ?
       constraints.maxWidth - (_kCaretGap + _kCaretWidth) :
       double.INFINITY;
   }
 
   @override
   double computeMinIntrinsicHeight(double width) {
-    return _preferredHeight;
+    return _preferredLineHeight;
   }
 
   @override
   double computeMaxIntrinsicHeight(double width) {
-    return _preferredHeight;
+    return _preferredLineHeight;
   }
 
   @override
@@ -284,15 +303,24 @@ class RenderEditableLine extends RenderBox {
   @override
   void performLayout() {
     Size oldSize = hasSize ? size : null;
-    double lineHeight = constraints.constrainHeight(_preferredHeight);
+    double lineHeight = constraints.constrainHeight(_preferredLineHeight);
     _caretPrototype = new Rect.fromLTWH(0.0, _kCaretHeightOffset, _kCaretWidth, lineHeight - 2.0 * _kCaretHeightOffset);
     _selectionRects = null;
     _textPainter.layout(maxWidth: _maxContentWidth);
-    size = new Size(constraints.maxWidth, constraints.constrainHeight(math.max(lineHeight, _textPainter.height)));
+    size = new Size(constraints.maxWidth, constraints.constrainHeight(
+      _textPainter.height.clamp(lineHeight, lineHeight * _maxLines)
+    ));
     Size contentSize = new Size(_textPainter.width + _kCaretGap + _kCaretWidth, _textPainter.height);
-    if (onPaintOffsetUpdateNeeded != null && (size != oldSize || contentSize != _contentSize))
-      onPaintOffsetUpdateNeeded(new ViewportDimensions(containerSize: size, contentSize: contentSize));
+    assert(_selection != null);
+    Rect caretRect = getLocalRectForCaret(_selection.extent);
+    if (onPaintOffsetUpdateNeeded != null && (size != oldSize || contentSize != _contentSize || !_withinBounds(caretRect)))
+      onPaintOffsetUpdateNeeded(new ViewportDimensions(containerSize: size, contentSize: contentSize), caretRect);
     _contentSize = contentSize;
+  }
+
+  bool _withinBounds(Rect caretRect) {
+    Rect bounds = new Rect.fromLTWH(0.0, 0.0, size.width, size.height);
+    return (bounds.contains(caretRect.topLeft) && bounds.contains(caretRect.bottomRight));
   }
 
   void _paintCaret(Canvas canvas, Offset effectiveOffset) {

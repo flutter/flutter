@@ -43,6 +43,8 @@ enum TextSelectionHandleType {
 /// [start] handle always moves the [start]/[baseOffset] of the selection.
 enum _TextSelectionHandlePosition { start, end }
 
+typedef void TextSelectionOverlayChanged(InputValue value, Rect caretRect);
+
 /// An interface for manipulating the selection, to be used by the implementor
 /// of the toolbar widget.
 abstract class TextSelectionDelegate {
@@ -113,7 +115,7 @@ class TextSelectionOverlay implements TextSelectionDelegate {
   ///
   /// For example, if the use drags one of the selection handles, this function
   /// will be called with a new input value with an updated selection.
-  final ValueChanged<InputValue> onSelectionOverlayChanged;
+  final TextSelectionOverlayChanged onSelectionOverlayChanged;
 
   /// Builds text selection handles and toolbar.
   final TextSelectionControls selectionControls;
@@ -212,7 +214,7 @@ class TextSelectionOverlay implements TextSelectionDelegate {
     return new FadeTransition(
       opacity: _handleOpacity,
       child: new _TextSelectionHandleOverlay(
-        onSelectionHandleChanged: _handleSelectionHandleChanged,
+        onSelectionHandleChanged: (TextSelection newSelection) { _handleSelectionHandleChanged(newSelection, position); },
         onSelectionHandleTapped: _handleSelectionHandleTapped,
         renderObject: renderObject,
         selection: _selection,
@@ -241,8 +243,19 @@ class TextSelectionOverlay implements TextSelectionDelegate {
     );
   }
 
-  void _handleSelectionHandleChanged(TextSelection newSelection) {
-    inputValue = _input.copyWith(selection: newSelection, composing: TextRange.empty);
+  void _handleSelectionHandleChanged(TextSelection newSelection, _TextSelectionHandlePosition position) {
+    Rect caretRect;
+    switch (position) {
+      case _TextSelectionHandlePosition.start:
+        caretRect = renderObject.getLocalRectForCaret(newSelection.base);
+        break;
+      case _TextSelectionHandlePosition.end:
+        caretRect = renderObject.getLocalRectForCaret(newSelection.extent);
+        break;
+    }
+    update(_input.copyWith(selection: newSelection, composing: TextRange.empty));
+    if (onSelectionOverlayChanged != null)
+      onSelectionOverlayChanged(_input, caretRect);
   }
 
   void _handleSelectionHandleTapped() {
@@ -262,8 +275,10 @@ class TextSelectionOverlay implements TextSelectionDelegate {
   @override
   set inputValue(InputValue value) {
     update(value);
-    if (onSelectionOverlayChanged != null)
-      onSelectionOverlayChanged(value);
+    if (onSelectionOverlayChanged != null) {
+      Rect caretRect = renderObject.getLocalRectForCaret(value.selection.extent);
+      onSelectionOverlayChanged(value, caretRect);
+    }
   }
 
   @override
