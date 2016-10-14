@@ -203,6 +203,7 @@ class UnboundedBehavior extends ExtentScrollBehavior {
       velocity: velocity,
       leadingExtent: double.NEGATIVE_INFINITY,
       trailingExtent: double.INFINITY,
+      platform: platform,
     );
   }
 
