@@ -75,6 +75,7 @@ class Draggable<T> extends StatefulWidget {
     this.dragAnchor: DragAnchor.child,
     this.affinity,
     this.maxSimultaneousDrags,
+    this.onDragStarted,
     this.onDraggableCanceled
   }) : super(key: key) {
     assert(child != null);
@@ -127,6 +128,9 @@ class Draggable<T> extends StatefulWidget {
   /// dragged at a time.
   final int maxSimultaneousDrags;
 
+  /// Called when the draggable starts being dragged.
+  final VoidCallback onDragStarted;
+
   /// Called when the draggable is dropped without being accepted by a [DragTarget].
   final DraggableCanceledCallback onDraggableCanceled;
 
@@ -164,6 +168,7 @@ class LongPressDraggable<T> extends Draggable<T> {
     Offset feedbackOffset: Offset.zero,
     DragAnchor dragAnchor: DragAnchor.child,
     int maxSimultaneousDrags,
+    VoidCallback onDragStarted,
     DraggableCanceledCallback onDraggableCanceled
   }) : super(
     key: key,
@@ -174,6 +179,7 @@ class LongPressDraggable<T> extends Draggable<T> {
     feedbackOffset: feedbackOffset,
     dragAnchor: dragAnchor,
     maxSimultaneousDrags: maxSimultaneousDrags,
+    onDragStarted: onDragStarted,
     onDraggableCanceled: onDraggableCanceled
   );
 
@@ -227,7 +233,7 @@ class _DraggableState<T> extends State<Draggable<T>> {
     setState(() {
       _activeCount += 1;
     });
-    return new _DragAvatar<T>(
+    final _DragAvatar<T> avatar = new _DragAvatar<T>(
       overlay: Overlay.of(context, debugRequiredFor: config),
       data: config.data,
       initialPosition: position,
@@ -242,6 +248,9 @@ class _DraggableState<T> extends State<Draggable<T>> {
         });
       }
     );
+    if (config.onDragStarted != null)
+      config.onDragStarted();
+    return avatar;
   }
 
   @override

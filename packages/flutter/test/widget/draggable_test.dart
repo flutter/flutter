@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 void main() {
   testWidgets('Drag and drop - control test', (WidgetTester tester) async {
     List<int> accepted = <int>[];
+    int dragStartedCount = 0;
 
     await tester.pumpWidget(new MaterialApp(
       home: new Column(
@@ -15,7 +16,10 @@ void main() {
           new Draggable<int>(
             data: 1,
             child: new Text('Source'),
-            feedback: new Text('Dragging')
+            feedback: new Text('Dragging'),
+            onDragStarted: () {
+              ++dragStartedCount;
+            },
           ),
           new DragTarget<int>(
             builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
@@ -33,6 +37,7 @@ void main() {
     expect(find.text('Source'), findsOneWidget);
     expect(find.text('Dragging'), findsNothing);
     expect(find.text('Target'), findsOneWidget);
+    expect(dragStartedCount, 0);
 
     Point firstLocation = tester.getCenter(find.text('Source'));
     TestGesture gesture = await tester.startGesture(firstLocation, pointer: 7);
@@ -42,6 +47,7 @@ void main() {
     expect(find.text('Source'), findsOneWidget);
     expect(find.text('Dragging'), findsOneWidget);
     expect(find.text('Target'), findsOneWidget);
+    expect(dragStartedCount, 1);
 
     Point secondLocation = tester.getCenter(find.text('Target'));
     await gesture.moveTo(secondLocation);
@@ -51,6 +57,7 @@ void main() {
     expect(find.text('Source'), findsOneWidget);
     expect(find.text('Dragging'), findsOneWidget);
     expect(find.text('Target'), findsOneWidget);
+    expect(dragStartedCount, 1);
 
     await gesture.up();
     await tester.pump();
@@ -59,6 +66,7 @@ void main() {
     expect(find.text('Source'), findsOneWidget);
     expect(find.text('Dragging'), findsNothing);
     expect(find.text('Target'), findsOneWidget);
+    expect(dragStartedCount, 1);
   });
 
   testWidgets('Drag and drop - dragging over button', (WidgetTester tester) async {
