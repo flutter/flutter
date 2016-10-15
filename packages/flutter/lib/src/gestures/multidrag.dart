@@ -72,6 +72,7 @@ abstract class MultiDragPointerState {
   }
 
   /// Resolve this pointer's entry in the [GestureArenaManager] with the given disposition.
+  @protected
   void resolve(GestureDisposition disposition) {
     _arenaEntry.resolve(disposition);
   }
@@ -93,17 +94,21 @@ abstract class MultiDragPointerState {
   /// Override this to call resolve() if the drag should be accepted or rejected.
   /// This is called when a pointer movement is received, but only if the gesture
   /// has not yet been resolved.
+  @protected
   void checkForResolutionAfterMove() { }
 
   /// Called when the gesture was accepted.
   ///
   /// Either immediately or at some future point before the gesture is disposed,
   /// call starter(), passing it initialPosition, to start the drag.
+  @protected
   void accepted(GestureMultiDragStartCallback starter);
 
   /// Called when the gesture was rejected.
   ///
   /// [dispose()] will be called immediately following this.
+  @protected
+  @mustCallSuper
   void rejected() {
     assert(_arenaEntry != null);
     assert(_client == null);
@@ -149,6 +154,7 @@ abstract class MultiDragPointerState {
   }
 
   /// Releases any resources used by the object.
+  @protected
   @mustCallSuper
   void dispose() {
     _arenaEntry?.resolve(GestureDisposition.rejected);
@@ -195,6 +201,7 @@ abstract class MultiDragGestureRecognizer<T extends MultiDragPointerState> exten
 
   /// Subclasses should override this method to create per-pointer state
   /// objects to track the pointer associated with the given event.
+  @protected
   T createNewPointerState(PointerDownEvent event);
 
   void _handleEvent(PointerEvent event) {
@@ -215,7 +222,7 @@ abstract class MultiDragGestureRecognizer<T extends MultiDragPointerState> exten
       state._cancel();
       _removeState(event.pointer);
     } else if (event is! PointerDownEvent) {
-      // we get the PointerDownEvent that resulted in our addPointer gettig called since we
+      // we get the PointerDownEvent that resulted in our addPointer getting called since we
       // add ourselves to the pointer router then (before the pointer router has heard of
       // the event).
       assert(false);
@@ -408,6 +415,11 @@ class _DelayedPointerState extends MultiDragPointerState {
     assert(_starter == null);
   }
 
+  void _ensureTimerStopped() {
+    _timer?.cancel();
+    _timer = null;
+  }
+
   @override
   void accepted(GestureMultiDragStartCallback starter) {
     assert(_starter == null);
@@ -419,16 +431,25 @@ class _DelayedPointerState extends MultiDragPointerState {
 
   @override
   void checkForResolutionAfterMove() {
-    assert(_timer != null);
+    if (_timer == null) {
+      // If we've been accepted by the gesture arena but the pointer moves too
+      // much before the timer fires, we end up a state where the timer is
+      // stopped but we keep getting calls to this function because we never
+      // actually started the drag. In this case, _starter will be non-null
+      // because we're essentially waiting forever to start the drag.
+      assert(_starter != null);
+      return;
+    }
     assert(pendingDelta != null);
-    if (pendingDelta.distance > kTouchSlop)
+    if (pendingDelta.distance > kTouchSlop) {
       resolve(GestureDisposition.rejected);
+      _ensureTimerStopped();
+    }
   }
 
   @override
   void dispose() {
-    _timer?.cancel();
-    _timer = null;
+    _ensureTimerStopped();
     super.dispose();
   }
 }
