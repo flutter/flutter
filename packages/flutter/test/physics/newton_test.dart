@@ -5,6 +5,7 @@
 import 'package:test/test.dart';
 
 import 'package:flutter/physics.dart';
+import 'package:flutter/widgets.dart';
 
 void main() {
   test('test_friction', () {

@@ -8,6 +8,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/physics.dart';
 import 'package:meta/meta.dart';
 
+import 'scroll_simulation.dart';
+
 export 'package:flutter/foundation.dart' show TargetPlatform;
 
 Simulation _createSnapScrollSimulation(double startOffset, double endOffset, double startVelocity, double endVelocity) {

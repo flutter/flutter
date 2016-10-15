@@ -3,11 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-
-import 'friction_simulation.dart';
-import 'simulation_group.dart';
-import 'simulation.dart';
-import 'spring_simulation.dart';
+import 'package:flutter/physics.dart';
 
 final SpringDescription _kScrollSpring = new SpringDescription.withDampingRatio(mass: 0.5, springConstant: 100.0, ratio: 1.1);
 
