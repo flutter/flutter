@@ -82,13 +82,13 @@ abstract class MultiDragPointerState {
     _velocityTracker.addPosition(event.timeStamp, event.position);
     if (_client != null) {
       assert(pendingDelta == null);
+      // Call client last to avoid reentrancy.
       _client.update(new DragUpdateDetails(delta: event.delta));
     } else {
       assert(pendingDelta != null);
       _pendingDelta += event.delta;
       checkForResolutionAfterMove();
     }
-    return null;
   }
 
   /// Override this to call resolve() if the drag should be accepted or rejected.
@@ -123,34 +123,41 @@ abstract class MultiDragPointerState {
     assert(client != null);
     assert(pendingDelta != null);
     _client = client;
-    _client.update(new DragUpdateDetails(delta: pendingDelta));
+    final DragUpdateDetails details = new DragUpdateDetails(delta: pendingDelta);
     _pendingDelta = null;
+    // Call client last to avoid reentrancy.
+    _client.update(details);
   }
 
   void _up() {
     assert(_arenaEntry != null);
+    _arenaEntry = null;
     if (_client != null) {
       assert(pendingDelta == null);
-      _client.end(new DragEndDetails(velocity: _velocityTracker.getVelocity() ?? Velocity.zero));
+      final DragEndDetails details = new DragEndDetails(velocity: _velocityTracker.getVelocity() ?? Velocity.zero);
+      final Drag client = _client;
       _client = null;
+      // Call client last to avoid reentrancy.
+      client.end(details);
     } else {
       assert(pendingDelta != null);
       _pendingDelta = null;
     }
-    _arenaEntry = null;
   }
 
   void _cancel() {
     assert(_arenaEntry != null);
+    _arenaEntry = null;
     if (_client != null) {
       assert(pendingDelta == null);
-      _client.cancel();
+      final Drag client = _client;
       _client = null;
+      // Call client last to avoid reentrancy.
+      client.cancel();
     } else {
       assert(pendingDelta != null);
       _pendingDelta = null;
     }
-    _arenaEntry = null;
   }
 
   /// Releases any resources used by the object.
@@ -213,13 +220,16 @@ abstract class MultiDragGestureRecognizer<T extends MultiDragPointerState> exten
     T state = _pointers[event.pointer];
     if (event is PointerMoveEvent) {
       state._move(event);
+      // We might be disposed here.
     } else if (event is PointerUpEvent) {
       assert(event.delta == Offset.zero);
       state._up();
+      // We might be disposed here.
       _removeState(event.pointer);
     } else if (event is PointerCancelEvent) {
       assert(event.delta == Offset.zero);
       state._cancel();
+      // We might be disposed here.
       _removeState(event.pointer);
     } else if (event is! PointerDownEvent) {
       // we get the PointerDownEvent that resulted in our addPointer getting called since we
@@ -266,7 +276,11 @@ abstract class MultiDragGestureRecognizer<T extends MultiDragPointerState> exten
   }
 
   void _removeState(int pointer) {
-    assert(_pointers != null);
+    if (_pointers == null) {
+      // We've already been disposed. It's harmless to skip removing the state
+      // for the given pointer because dispose() has already removed it.
+      return;
+    }
     assert(_pointers.containsKey(pointer));
     GestureBinding.instance.pointerRouter.removeRoute(pointer, _handleEvent);
     _pointers.remove(pointer).dispose();
