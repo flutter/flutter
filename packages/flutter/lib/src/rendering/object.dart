@@ -222,7 +222,7 @@ class PaintingContext {
   /// a new [Canvas] that draws on top of the given layer.
   ///
   /// A [RenderObject] that uses this function is very likely to require its
-  /// [RenderObject.needsCompositing] property to return true. That informs
+  /// [RenderObject.alwaysNeedsCompositing] property to return true. That informs
   /// ancestor render objects that this render object will include a composited
   /// layer, which causes them to use composited clips, for example.
   void addLayer(Layer layer) {
@@ -354,6 +354,11 @@ class PaintingContext {
   ///   and an alpha value of 255 means the painting is fully opaque.
   /// * `painter` is a callback that will paint with the `alpha` applied. This
   ///   function calls the `painter` synchronously.
+  ///
+  /// A [RenderObject] that uses this function is very likely to require its
+  /// [RenderObject.alwaysNeedsCompositing] property to return true. That informs
+  /// ancestor render objects that this render object will include a composited
+  /// layer, which causes them to use composited clips, for example.
   void pushOpacity(Offset offset, int alpha, PaintingContextCallback painter) {
     _stopRecordingIfNeeded();
     final OpacityLayer opacityLayer = new OpacityLayer(alpha: alpha);
@@ -375,6 +380,11 @@ class PaintingContext {
   ///   the painting done by `painter`.
   /// * `painter` is a callback that will paint with the mask applied. This
   ///   function calls the `painter` synchronously.
+  ///
+  /// A [RenderObject] that uses this function is very likely to require its
+  /// [RenderObject.alwaysNeedsCompositing] property to return true. That informs
+  /// ancestor render objects that this render object will include a composited
+  /// layer, which causes them to use composited clips, for example.
   void pushShaderMask(Offset offset, Shader shader, Rect maskRect, TransferMode transferMode, PaintingContextCallback painter) {
     _stopRecordingIfNeeded();
     final ShaderMaskLayer shaderLayer = new ShaderMaskLayer(
@@ -392,6 +402,11 @@ class PaintingContext {
   ///
   /// This function applies a filter to the existing painted content and then
   /// synchronously calls the painter to paint on top of the filtered backdrop.
+  ///
+  /// A [RenderObject] that uses this function is very likely to require its
+  /// [RenderObject.alwaysNeedsCompositing] property to return true. That informs
+  /// ancestor render objects that this render object will include a composited
+  /// layer, which causes them to use composited clips, for example.
   // TODO(abarth): I don't quite understand how this API is supposed to work.
   void pushBackdropFilter(Offset offset, ui.ImageFilter filter, PaintingContextCallback painter) {
     _stopRecordingIfNeeded();
