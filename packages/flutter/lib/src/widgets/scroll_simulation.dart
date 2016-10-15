@@ -2,10 +2,22 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'friction_simulation.dart';
-import 'simulation_group.dart';
-import 'simulation.dart';
-import 'spring_simulation.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/physics.dart';
+
+final SpringDescription _kScrollSpring = new SpringDescription.withDampingRatio(mass: 0.5, springConstant: 100.0, ratio: 1.1);
+
+class _MountainViewSimulation extends FrictionSimulation {
+  static const double drag = 0.025;
+  _MountainViewSimulation({ double position, double velocity })
+    : super(drag, position, velocity);
+}
+
+class _CupertinoSimulation extends FrictionSimulation {
+  static const double drag = 0.135;
+  _CupertinoSimulation({ double position, double velocity })
+    : super(drag, position, velocity * 0.91);
+}
 
 /// Composite simulation for scrollable interfaces.
 ///
@@ -26,13 +38,22 @@ class ScrollSimulation extends SimulationGroup {
   /// consistent with the other arguments.
   ///
   /// The final argument is the coefficient of friction, which is unitless.
-  ScrollSimulation(
+  ScrollSimulation({
     double position,
     double velocity,
-    this._leadingExtent,
-    this._trailingExtent,
-    this._spring,
-    this._drag) {
+    double leadingExtent,
+    double trailingExtent,
+    SpringDescription spring,
+    double drag,
+    TargetPlatform platform,
+  }) : _leadingExtent = leadingExtent,
+       _trailingExtent = trailingExtent,
+       _spring = spring ?? _kScrollSpring,
+       _drag = drag,
+       _platform = platform {
+    assert(_leadingExtent != null);
+    assert(_trailingExtent != null);
+    assert(_spring != null);
     _chooseSimulation(position, velocity, 0.0);
   }
 
@@ -40,6 +61,7 @@ class ScrollSimulation extends SimulationGroup {
   final double _trailingExtent;
   final SpringDescription _spring;
   final double _drag;
+  final TargetPlatform _platform;
 
   bool _isSpringing = false;
   Simulation _currentSimulation;
@@ -76,7 +98,24 @@ class ScrollSimulation extends SimulationGroup {
     }
 
     if (_currentSimulation == null) {
-      _currentSimulation = new FrictionSimulation(_drag, position, velocity);
+      switch (_platform) {
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+          _currentSimulation = new _MountainViewSimulation(
+            position: position,
+            velocity: velocity
+          );
+          break;
+        case TargetPlatform.iOS:
+          _currentSimulation = new _CupertinoSimulation(
+            position: position,
+            velocity: velocity,
+          );
+          break;
+      }
+      // No platform specified
+      _currentSimulation ??= new FrictionSimulation(_drag, position, velocity);
+
       return true;
     }
 

@@ -5,6 +5,7 @@
 import 'package:test/test.dart';
 
 import 'package:flutter/physics.dart';
+import 'package:flutter/widgets.dart';
 
 void main() {
   test('test_friction', () {
@@ -191,13 +192,27 @@ void main() {
     SpringDescription spring = new SpringDescription.withDampingRatio(
         mass: 1.0, springConstant: 50.0, ratio: 0.5);
 
-    ScrollSimulation scroll = new ScrollSimulation(100.0, 800.0, 0.0, 300.0, spring, 0.3);
+    ScrollSimulation scroll = new ScrollSimulation(
+      position: 100.0,
+      velocity: 800.0,
+      leadingExtent: 0.0,
+      trailingExtent: 300.0,
+      spring: spring,
+      drag: 0.3
+    );
     scroll.tolerance = const Tolerance(velocity: 0.5, distance: 0.1);
     expect(scroll.isDone(0.0), false);
     expect(scroll.isDone(0.5), false); // switch from friction to spring
     expect(scroll.isDone(3.5), true);
 
-    ScrollSimulation scroll2 = new ScrollSimulation(100.0, -800.0, 0.0, 300.0, spring, 0.3);
+    ScrollSimulation scroll2 = new ScrollSimulation(
+      position: 100.0,
+      velocity: -800.0,
+      leadingExtent: 0.0,
+      trailingExtent: 300.0,
+      spring: spring,
+      drag: 0.3
+    );
     scroll2.tolerance = const Tolerance(velocity: 0.5, distance: 0.1);
     expect(scroll2.isDone(0.0), false);
     expect(scroll2.isDone(0.5), false); // switch from friction to spring
@@ -208,8 +223,14 @@ void main() {
     SpringDescription spring = new SpringDescription.withDampingRatio(
         mass: 1.0, springConstant: 50.0, ratio: 0.5);
 
-    ScrollSimulation scroll =
-        new ScrollSimulation(100.0, 400.0, 0.0, double.INFINITY, spring, 0.3);
+    ScrollSimulation scroll = new ScrollSimulation(
+      position: 100.0,
+      velocity: 400.0,
+      leadingExtent: 0.0,
+      trailingExtent: double.INFINITY,
+      spring: spring,
+      drag: 0.3,
+    );
     scroll.tolerance = const Tolerance(velocity: 1.0);
 
     expect(scroll.isDone(0.0), false);
@@ -232,7 +253,14 @@ void main() {
 
   test('over/under scroll spring', () {
     SpringDescription spring = new SpringDescription.withDampingRatio(mass: 1.0, springConstant: 170.0, ratio: 1.1);
-    ScrollSimulation scroll = new ScrollSimulation(500.0, -7500.0, 0.0, 1000.0, spring, 0.025);
+    ScrollSimulation scroll = new ScrollSimulation(
+      position: 500.0,
+      velocity: -7500.0,
+      leadingExtent: 0.0,
+      trailingExtent: 1000.0,
+      spring: spring,
+      drag: 0.025,
+    );
     scroll.tolerance = new Tolerance(velocity: 45.0, distance: 1.5);
 
     expect(scroll.isDone(0.0), false);

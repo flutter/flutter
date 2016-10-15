@@ -11,7 +11,6 @@ library physics;
 export 'src/physics/clamped_simulation.dart';
 export 'src/physics/friction_simulation.dart';
 export 'src/physics/gravity_simulation.dart';
-export 'src/physics/scroll_simulation.dart';
 export 'src/physics/simulation_group.dart';
 export 'src/physics/simulation.dart';
 export 'src/physics/spring_simulation.dart';

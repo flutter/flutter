@@ -8,15 +8,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/physics.dart';
 import 'package:meta/meta.dart';
 
+import 'scroll_simulation.dart';
+
 export 'package:flutter/foundation.dart' show TargetPlatform;
-
-const double _kScrollDragMountainView = 0.025;
-const double _kScrollDragCupertino = 0.125;
-final SpringDescription _kScrollSpring = new SpringDescription.withDampingRatio(mass: 0.5, springConstant: 100.0, ratio: 1.1);
-
-Simulation _createScrollSimulation(double position, double velocity, double minScrollOffset, double maxScrollOffset, double scrollDrag) {
-  return new ScrollSimulation(position, velocity, minScrollOffset, maxScrollOffset, _kScrollSpring, scrollDrag);
-}
 
 Simulation _createSnapScrollSimulation(double startOffset, double endOffset, double startVelocity, double endVelocity) {
   return new FrictionSimulation.through(startOffset, endOffset, startVelocity, endVelocity);
@@ -68,20 +62,6 @@ abstract class ScrollBehavior<T, U> {
 
   /// Whether this scroll behavior currently permits scrolling.
   bool get isScrollable => true;
-
-  /// The scroll drag constant to use for physics simulations created by this
-  /// ScrollBehavior.
-  double get scrollDrag {
-    assert(platform != null);
-    switch (platform) {
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-        return _kScrollDragMountainView;
-      case TargetPlatform.iOS:
-        return _kScrollDragCupertino;
-    }
-    return null;
-  }
 
   @override
   String toString() {
@@ -220,8 +200,12 @@ class UnboundedBehavior extends ExtentScrollBehavior {
 
   @override
   Simulation createScrollSimulation(double position, double velocity) {
-    return new BoundedFrictionSimulation(
-      scrollDrag, position, velocity, double.NEGATIVE_INFINITY, double.INFINITY
+    return new ScrollSimulation(
+      position: position,
+      velocity: velocity,
+      leadingExtent: double.NEGATIVE_INFINITY,
+      trailingExtent: double.INFINITY,
+      platform: platform,
     );
   }
 
@@ -259,7 +243,13 @@ class OverscrollBehavior extends BoundedBehavior {
 
   @override
   Simulation createScrollSimulation(double position, double velocity) {
-    return _createScrollSimulation(position, velocity, minScrollOffset, maxScrollOffset, scrollDrag);
+    return new ScrollSimulation(
+      position: position,
+      velocity: velocity,
+      leadingExtent: minScrollOffset,
+      trailingExtent: maxScrollOffset,
+      platform: platform,
+    );
   }
 
   @override
