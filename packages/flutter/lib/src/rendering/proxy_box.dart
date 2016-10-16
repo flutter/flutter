@@ -1015,25 +1015,30 @@ class RenderClipRect extends _RenderCustomClip<Rect> {
 
 /// Clips its child using a rounded rectangle.
 ///
-/// Creates a rounded rectangle from its layout dimensions and the given border
-/// radius and prevents its child from painting outside that rounded
-/// rectangle.
-class RenderClipRRect extends RenderProxyBox {
+/// By default, [RenderClipRRect] uses its own bounds as the base rectangle for
+/// the clip, but the size and location of the clip can be customized using a
+/// custom [clipper].
+class RenderClipRRect extends _RenderCustomClip<RRect> {
   /// Creates a rounded-rectangular clip.
   ///
   /// The [borderRadius] defaults to [BorderRadius.zero], i.e. a rectangle with
   /// right-angled corners.
+  ///
+  /// If [clipper] is non-null, then [borderRadius] is ignored.
   RenderClipRRect({
     RenderBox child,
-    BorderRadius borderRadius: BorderRadius.zero
-  }) : _borderRadius = borderRadius, super(child) {
-    assert(_borderRadius != null);
+    BorderRadius borderRadius: BorderRadius.zero,
+    CustomClipper<RRect> clipper,
+  }) : _borderRadius = borderRadius, super(child: child, clipper: clipper) {
+    assert(_borderRadius != null || clipper != null);
   }
 
-  /// The border radius of the rounded corners..
+  /// The border radius of the rounded corners.
   ///
   /// Values are clamped so that horizontal and vertical radii sums do not
   /// exceed width/height.
+  ///
+  /// This value is ignored if [clipper] is non-null.
   BorderRadius get borderRadius => _borderRadius;
   BorderRadius _borderRadius;
   set borderRadius (BorderRadius value) {
@@ -1041,19 +1046,28 @@ class RenderClipRRect extends RenderProxyBox {
     if (_borderRadius == value)
       return;
     _borderRadius = value;
-    markNeedsPaint();
+    _markNeedsClip();
   }
 
-  // TODO(ianh): either convert this to the CustomClipper world, or
-  // TODO(ianh): implement describeApproximatePaintClip for this class
-  // TODO(ianh): implement hit testing for this class
+  @override
+  RRect get _defaultClip => _borderRadius.toRRect(Point.origin & size);
+
+  @override
+  bool hitTest(HitTestResult result, { Point position }) {
+    if (_clipper != null) {
+      _updateClip();
+      assert(_clip != null);
+      if (!_clip.contains(position))
+        return false;
+    }
+    return super.hitTest(result, position: position);
+  }
 
   @override
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
-      Rect rect = Point.origin & size;
-      RRect rrect = borderRadius.toRRect(rect);
-      context.pushClipRRect(needsCompositing, offset, rect, rrect, super.paint);
+      _updateClip();
+      context.pushClipRRect(needsCompositing, offset, _clip.outerRect, _clip, super.paint);
     }
   }
 }
