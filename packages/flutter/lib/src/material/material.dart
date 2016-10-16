@@ -63,7 +63,7 @@ abstract class InkSplash {
   /// Causes the reaction to propagate faster across the material.
   void confirm();
 
-  /// The user input was cancelled.
+  /// The user input was canceled.
   ///
   /// Causes the reaction to gradually disappear.
   void cancel();

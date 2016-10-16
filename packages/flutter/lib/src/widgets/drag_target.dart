@@ -134,6 +134,13 @@ class Draggable<T> extends StatefulWidget {
   final VoidCallback onDragStarted;
 
   /// Called when the draggable is dropped without being accepted by a [DragTarget].
+  ///
+  /// This function might be called after this widget has been removed from the
+  /// tree. For example, if a drag was in progress when this widget was removed
+  /// from the tree and the drag ended up being canceled, this callback will
+  /// still be called. For this reason, implementations of this callback might
+  /// need to check [State.mounted] to check whether the state receiving the
+  /// callback is still in the tree.
   final DraggableCanceledCallback onDraggableCanceled;
 
   /// Creates a gesture recognizer that recognizes the start of the drag.
@@ -206,12 +213,28 @@ class _DraggableState<T> extends State<Draggable<T>> {
 
   @override
   void dispose() {
-    _recognizer.dispose();
+    _disposeRecognizerIfInactive();
     super.dispose();
   }
 
+  // This gesture recognizer has an unusual lifetime. We want to support the use
+  // case of removing the Draggable from the tree in the middle of a drag. That
+  // means we need to keep this recognizer alive after this state object has
+  // been disposed because it's the one listening to the pointer events that are
+  // driving the drag.
+  //
+  // We achieve that by keeping count of the number of active drags and only
+  // disposing the gesture recognizer after (a) this state object has been
+  // disposed and (b) there are no more active drags.
   GestureRecognizer _recognizer;
   int _activeCount = 0;
+
+  void _disposeRecognizerIfInactive() {
+    if (_activeCount > 0)
+      return;
+    _recognizer.dispose();
+    _recognizer = null;
+  }
 
   void _routePointer(PointerEvent event) {
     if (config.maxSimultaneousDrags != null && _activeCount >= config.maxSimultaneousDrags)
@@ -243,11 +266,16 @@ class _DraggableState<T> extends State<Draggable<T>> {
       feedback: config.feedback,
       feedbackOffset: config.feedbackOffset,
       onDragEnd: (Velocity velocity, Offset offset, bool wasAccepted) {
-        setState(() {
+        if (mounted) {
+          setState(() {
+            _activeCount -= 1;
+          });
+        } else {
           _activeCount -= 1;
-          if (!wasAccepted && config.onDraggableCanceled != null)
-            config.onDraggableCanceled(velocity, offset);
-        });
+          _disposeRecognizerIfInactive();
+        }
+        if (!wasAccepted && config.onDraggableCanceled != null)
+          config.onDraggableCanceled(velocity, offset);
       }
     );
     if (config.onDragStarted != null)
@@ -366,9 +394,8 @@ typedef void _OnDragEnd(Velocity velocity, Offset offset, bool wasAccepted);
 
 // The lifetime of this object is a little dubious right now. Specifically, it
 // lives as long as the pointer is down. Arguably it should self-immolate if the
-// overlay goes away, or maybe even if the Draggable that created goes away.
-// This will probably need to be changed once we have more experience with using
-// this widget.
+// overlay goes away. _DraggableState has some delicate logic to continue
+// eeding this object pointer events even after it has been disposed.
 class _DragAvatar<T> extends Drag {
   _DragAvatar({
     OverlayState overlay,
@@ -400,7 +427,6 @@ class _DragAvatar<T> extends Drag {
   Offset _lastOffset;
   OverlayEntry _entry;
 
-  // Drag API
   @override
   void update(DragUpdateDetails details) {
     _position += details.delta;
