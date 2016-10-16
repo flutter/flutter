@@ -62,7 +62,8 @@ abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
   final Map<int, GestureArenaEntry> _entries = <int, GestureArenaEntry>{};
   final Set<int> _trackedPointers = new HashSet<int>();
 
-  /// Called when a pointer event is routed to this recongizer.
+  /// Called when a pointer event is routed to this recognizer.
+  @protected
   void handleEvent(PointerEvent event);
 
   @override
@@ -75,9 +76,12 @@ abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
   ///
   /// The given pointer ID is the ID of the last pointer this recognizer was
   /// tracking.
+  @protected
   void didStopTrackingLastPointer(int pointer);
 
   /// Resolves this recognizer's participation in each gesture arena with the given disposition.
+  @protected
+  @mustCallSuper
   void resolve(GestureDisposition disposition) {
     List<GestureArenaEntry> localEntries = new List<GestureArenaEntry>.from(_entries.values);
     _entries.clear();
@@ -100,6 +104,7 @@ abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
   /// The pointer events are delivered to [handleEvent].
   ///
   /// Use [stopTrackingPointer] to remove the route added by this function.
+  @protected
   void startTrackingPointer(int pointer) {
     GestureBinding.instance.pointerRouter.addRoute(pointer, handleEvent);
     _trackedPointers.add(pointer);
@@ -113,6 +118,7 @@ abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
   /// call [didStopTrackingLastPointer] synchronously.
   ///
   /// Use [startTrackingPointer] to add the routes in the first place.
+  @protected
   void stopTrackingPointer(int pointer) {
     if (_trackedPointers.contains(pointer)) {
       GestureBinding.instance.pointerRouter.removeRoute(pointer, handleEvent);
@@ -124,6 +130,7 @@ abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
 
   /// Stops tracking the pointer associated with the given event if the event is
   /// a [PointerUpEvent] or a [PointerCancelEvent] event.
+  @protected
   void stopTrackingIfPointerNoLongerDown(PointerEvent event) {
     if (event is PointerUpEvent || event is PointerCancelEvent)
       stopTrackingPointer(event.pointer);
@@ -202,11 +209,13 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
   }
 
   /// Override to provide behavior for the primary pointer when the gesture is still possible.
+  @protected
   void handlePrimaryPointer(PointerEvent event);
 
   /// Override to be notified when [deadline] is exceeded.
   ///
   /// You must override this method if you supply a [deadline].
+  @protected
   void didExceedDeadline() {
     assert(deadline == null);
   }

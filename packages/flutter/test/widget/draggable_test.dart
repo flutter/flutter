@@ -1200,6 +1200,29 @@ void main() {
     expect(find.text('Target'), findsOneWidget);
   });
 
+  testWidgets('Tap above long-press draggable works', (WidgetTester tester) async {
+    List<String> events = <String>[];
+
+    await tester.pumpWidget(new MaterialApp(
+      home: new Material(
+        child: new Center(
+          child: new GestureDetector(
+            onTap: () {
+              events.add('tap');
+            },
+            child: new LongPressDraggable<int>(
+              feedback: new Text('Feedback'),
+              child: new Text('X'),
+            ),
+          ),
+        ),
+      ),
+    ));
+
+    expect(events, isEmpty);
+    await tester.tap(find.text('X'));
+    expect(events, equals(<String>['tap']));
+  });
 }
 
 class DragTargetData { }
