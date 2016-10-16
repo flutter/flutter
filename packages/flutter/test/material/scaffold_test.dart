@@ -239,6 +239,38 @@ void main() {
     expect(appBarBottomRight, equals(sheetTopRight));
   });
 
+  testWidgets('Persistent bottom buttons are persistent', (WidgetTester tester) async {
+    bool didPressButton = false;
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Scaffold(
+          body: new ScrollableViewport(
+            child: new Container(
+              decoration: new BoxDecoration(
+                backgroundColor: Colors.amber[500],
+              ),
+              height: 5000.0,
+              child: new Text('body'),
+            ),
+          ),
+          persistentFooterButtons: <Widget>[
+            new FlatButton(
+              onPressed: () {
+                didPressButton = true;
+              },
+              child: new Text('X'),
+            )
+          ],
+        ),
+      ),
+    );
+
+    await tester.scroll(find.text('body'), const Offset(0.0, -1000.0));
+    expect(didPressButton, isFalse);
+    await tester.tap(find.text('X'));
+    expect(didPressButton, isTrue);
+  });
+
   group('back arrow', () {
     Future<Null> expectBackIcon(WidgetTester tester, TargetPlatform platform, IconData expectedIcon) async {
       GlobalKey rootKey = new GlobalKey();
