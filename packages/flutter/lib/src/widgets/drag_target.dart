@@ -64,7 +64,7 @@ class Draggable<T> extends StatefulWidget {
   /// Creates a widget that can be dragged to a [DragTarget].
   ///
   /// The [child] and [feedback] arguments must not be null. If
-  /// [maxSimultaneousDrags] is non-null, it must be positive.
+  /// [maxSimultaneousDrags] is non-null, it must be non-negative.
   Draggable({
     Key key,
     @required this.child,
@@ -80,7 +80,7 @@ class Draggable<T> extends StatefulWidget {
   }) : super(key: key) {
     assert(child != null);
     assert(feedback != null);
-    assert(maxSimultaneousDrags == null || maxSimultaneousDrags > 0);
+    assert(maxSimultaneousDrags == null || maxSimultaneousDrags >= 0);
   }
 
   /// The data that will be dropped by this draggable.
@@ -123,9 +123,11 @@ class Draggable<T> extends StatefulWidget {
   /// widget, will out-compete the [Scrollable] for vertical gestures.
   final Axis affinity;
 
-  /// How many simultaneous drags to support. When null, no limit is applied.
-  /// Set this to 1 if you want to only allow the drag source to have one item
-  /// dragged at a time.
+  /// How many simultaneous drags to support.
+  ///
+  /// When null, no limit is applied. Set this to 1 if you want to only allow
+  /// the drag source to have one item dragged at a time. Set this to 0 if you
+  /// want to prevent the draggable from actually being dragged.
   final int maxSimultaneousDrags;
 
   /// Called when the draggable starts being dragged.
@@ -158,7 +160,7 @@ class LongPressDraggable<T> extends Draggable<T> {
   /// Creates a widget that can be dragged starting from long press.
   ///
   /// The [child] and [feedback] arguments must not be null. If
-  /// [maxSimultaneousDrags] is non-null, it must be positive.
+  /// [maxSimultaneousDrags] is non-null, it must be non-negative.
   LongPressDraggable({
     Key key,
     @required Widget child,
@@ -306,42 +308,46 @@ class DragTarget<T> extends StatefulWidget {
   _DragTargetState<T> createState() => new _DragTargetState<T>();
 }
 
-class _DragTargetState<T> extends State<DragTarget<T>> {
-  final List<T> _candidateData = new List<T>();
-  final List<dynamic> _rejectedData = new List<dynamic>();
+List/*<T>*/ _mapAvatarsToData/*<T>*/(List/*<_DragAvatar<T>>*/ avatars) {
+  return avatars.map/*<T>*/((_DragAvatar/*<T>*/ avatar) => avatar.data).toList();
+}
 
-  bool didEnter(dynamic data) {
-    assert(!_candidateData.contains(data));
-    assert(!_rejectedData.contains(data));
-    if (data is T && (config.onWillAccept == null || config.onWillAccept(data))) {
+class _DragTargetState<T> extends State<DragTarget<T>> {
+  final List<_DragAvatar<T>> _candidateAvatars = new List<_DragAvatar<T>>();
+  final List<_DragAvatar<dynamic>> _rejectedAvatars = new List<_DragAvatar<dynamic>>();
+
+  bool didEnter(_DragAvatar<dynamic> avatar) {
+    assert(!_candidateAvatars.contains(avatar));
+    assert(!_rejectedAvatars.contains(avatar));
+    if (avatar.data is T && (config.onWillAccept == null || config.onWillAccept(avatar.data))) {
       setState(() {
-        _candidateData.add(data);
+        _candidateAvatars.add(avatar);
       });
       return true;
     }
-    _rejectedData.add(data);
+    _rejectedAvatars.add(avatar);
     return false;
   }
 
-  void didLeave(dynamic data) {
-    assert(_candidateData.contains(data) || _rejectedData.contains(data));
+  void didLeave(_DragAvatar<dynamic> avatar) {
+    assert(_candidateAvatars.contains(avatar) || _rejectedAvatars.contains(avatar));
     if (!mounted)
       return;
     setState(() {
-      _candidateData.remove(data);
-      _rejectedData.remove(data);
+      _candidateAvatars.remove(avatar);
+      _rejectedAvatars.remove(avatar);
     });
   }
 
-  void didDrop(dynamic data) {
-    assert(_candidateData.contains(data));
+  void didDrop(_DragAvatar<dynamic> avatar) {
+    assert(_candidateAvatars.contains(avatar));
     if (!mounted)
       return;
     setState(() {
-      _candidateData.remove(data);
+      _candidateAvatars.remove(avatar);
     });
     if (config.onAccept != null)
-      config.onAccept(data);
+      config.onAccept(avatar.data);
   }
 
   @override
@@ -350,11 +356,10 @@ class _DragTargetState<T> extends State<DragTarget<T>> {
     return new MetaData(
       metaData: this,
       behavior: HitTestBehavior.translucent,
-      child: config.builder(context, _candidateData, _rejectedData)
+      child: config.builder(context, _mapAvatarsToData/*<T>*/(_candidateAvatars), _mapAvatarsToData(_rejectedAvatars))
     );
   }
 }
-
 
 enum _DragEndKind { dropped, canceled }
 typedef void _OnDragEnd(Velocity velocity, Offset offset, bool wasAccepted);
@@ -443,7 +448,7 @@ class _DragAvatar<T> extends Drag {
     // Enter new targets.
     _DragTargetState<T> newTarget = targets.firstWhere((_DragTargetState<T> target) {
         _enteredTargets.add(target);
-        return target.didEnter(data);
+        return target.didEnter(this);
       },
       orElse: () => null
     );
@@ -465,14 +470,14 @@ class _DragAvatar<T> extends Drag {
 
   void _leaveAllEntered() {
     for (int i = 0; i < _enteredTargets.length; i += 1)
-      _enteredTargets[i].didLeave(data);
+      _enteredTargets[i].didLeave(this);
     _enteredTargets.clear();
   }
 
   void finishDrag(_DragEndKind endKind, [Velocity velocity]) {
     bool wasAccepted = false;
     if (endKind == _DragEndKind.dropped && _activeTarget != null) {
-      _activeTarget.didDrop(data);
+      _activeTarget.didDrop(this);
       wasAccepted = true;
       _enteredTargets.remove(_activeTarget);
     }

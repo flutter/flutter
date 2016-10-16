@@ -884,6 +884,118 @@ void main() {
     }
   });
 
+  testWidgets('Drag and drop - maxSimultaneousDrags', (WidgetTester tester) async {
+    List<int> accepted = <int>[];
+
+    Widget build(int maxSimultaneousDrags) {
+      return new MaterialApp(
+        home: new Column(
+          children: <Widget>[
+            new Draggable<int>(
+              data: 1,
+              maxSimultaneousDrags: maxSimultaneousDrags,
+              child: new Text('Source'),
+              feedback: new Text('Dragging')
+            ),
+            new DragTarget<int>(
+              builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
+                return new Container(height: 100.0, child: new Text('Target'));
+              },
+              onAccept: (int data) {
+                accepted.add(data);
+              }
+            ),
+          ]
+        )
+      );
+    }
+
+    await tester.pumpWidget(build(0));
+
+    Point firstLocation = tester.getCenter(find.text('Source'));
+    Point secondLocation = tester.getCenter(find.text('Target'));
+
+    expect(accepted, isEmpty);
+    expect(find.text('Source'), findsOneWidget);
+    expect(find.text('Dragging'), findsNothing);
+    expect(find.text('Target'), findsOneWidget);
+
+    TestGesture gesture = await tester.startGesture(firstLocation, pointer: 7);
+    await tester.pump();
+
+    expect(accepted, isEmpty);
+    expect(find.text('Source'), findsOneWidget);
+    expect(find.text('Dragging'), findsNothing);
+    expect(find.text('Target'), findsOneWidget);
+
+    await gesture.up();
+
+    await tester.pumpWidget(build(2));
+
+    expect(accepted, isEmpty);
+    expect(find.text('Source'), findsOneWidget);
+    expect(find.text('Dragging'), findsNothing);
+    expect(find.text('Target'), findsOneWidget);
+
+    TestGesture gesture1 = await tester.startGesture(firstLocation, pointer: 8);
+    await tester.pump();
+
+    expect(accepted, isEmpty);
+    expect(find.text('Source'), findsOneWidget);
+    expect(find.text('Dragging'), findsOneWidget);
+    expect(find.text('Target'), findsOneWidget);
+
+    TestGesture gesture2 = await tester.startGesture(firstLocation, pointer: 9);
+    await tester.pump();
+
+    expect(accepted, isEmpty);
+    expect(find.text('Source'), findsOneWidget);
+    expect(find.text('Dragging'), findsNWidgets(2));
+    expect(find.text('Target'), findsOneWidget);
+
+    TestGesture gesture3 = await tester.startGesture(firstLocation, pointer: 10);
+    await tester.pump();
+
+    expect(accepted, isEmpty);
+    expect(find.text('Source'), findsOneWidget);
+    expect(find.text('Dragging'), findsNWidgets(2));
+    expect(find.text('Target'), findsOneWidget);
+
+    await gesture1.moveTo(secondLocation);
+    await gesture2.moveTo(secondLocation);
+    await gesture3.moveTo(secondLocation);
+    await tester.pump();
+
+    expect(accepted, isEmpty);
+    expect(find.text('Source'), findsOneWidget);
+    expect(find.text('Dragging'), findsNWidgets(2));
+    expect(find.text('Target'), findsOneWidget);
+
+    await gesture1.up();
+    await tester.pump();
+
+    expect(accepted, equals(<int>[1]));
+    expect(find.text('Source'), findsOneWidget);
+    expect(find.text('Dragging'), findsOneWidget);
+    expect(find.text('Target'), findsOneWidget);
+
+    await gesture2.up();
+    await tester.pump();
+
+    expect(accepted, equals(<int>[1, 1]));
+    expect(find.text('Source'), findsOneWidget);
+    expect(find.text('Dragging'), findsNothing);
+    expect(find.text('Target'), findsOneWidget);
+
+    await gesture3.up();
+    await tester.pump();
+
+    expect(accepted, equals(<int>[1, 1]));
+    expect(find.text('Source'), findsOneWidget);
+    expect(find.text('Dragging'), findsNothing);
+    expect(find.text('Target'), findsOneWidget);
+  });
+
   testWidgets('Draggable disposes recognizer', (WidgetTester tester) async {
     bool didTap = false;
     await tester.pumpWidget(new Overlay(
