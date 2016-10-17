@@ -10,6 +10,8 @@ import 'package:flutter/widgets.dart';
 
 import 'app_bar.dart';
 import 'bottom_sheet.dart';
+import 'button_bar.dart';
+import 'button.dart';
 import 'drawer.dart';
 import 'icon.dart';
 import 'icon_button.dart';
@@ -53,6 +55,7 @@ enum _ScaffoldSlot {
   appBar,
   bottomSheet,
   snackBar,
+  persistentFooter,
   bottomNavigationBar,
   floatingActionButton,
   drawer,
@@ -95,6 +98,12 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
       final double bottomNavigationBarHeight = layoutChild(_ScaffoldSlot.bottomNavigationBar, fullWidthConstraints).height;
       contentBottom -= bottomNavigationBarHeight;
       positionChild(_ScaffoldSlot.bottomNavigationBar, new Offset(0.0, contentBottom));
+    }
+
+    if (hasChild(_ScaffoldSlot.persistentFooter)) {
+      final double persistentFooterHeight = layoutChild(_ScaffoldSlot.persistentFooter, fullWidthConstraints.copyWith(maxHeight: contentBottom - contentTop)).height;
+      contentBottom -= persistentFooterHeight;
+      positionChild(_ScaffoldSlot.persistentFooter, new Offset(0.0, contentBottom));
     }
 
     if (hasChild(_ScaffoldSlot.body)) {
@@ -299,6 +308,7 @@ class Scaffold extends StatefulWidget {
     this.appBar,
     this.body,
     this.floatingActionButton,
+    this.persistentFooterButtons,
     this.drawer,
     this.bottomNavigationBar,
     this.scrollableKey,
@@ -320,6 +330,18 @@ class Scaffold extends StatefulWidget {
   ///
   /// Typically a [FloatingActionButton].
   final Widget floatingActionButton;
+
+  /// A set of buttons that are displayed at the bottom of the scaffold.
+  ///
+  /// Typically this is a list of [FlatButton] widgets. These buttons are
+  /// persistently visible, even of the [body] of the scaffold scrolls.
+  ///
+  /// These widgets will be wrapped in a [ButtonBar].
+  ///
+  /// See also:
+  ///
+  ///  * <https://material.google.com/components/buttons.html#buttons-persistent-footer-buttons>
+  final List<Widget> persistentFooterButtons;
 
   /// A panel displayed to the side of the body, often hidden on mobile devices.
   ///
@@ -761,6 +783,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     EdgeInsets padding = MediaQuery.of(context).padding;
+    ThemeData themeData = Theme.of(context);
     if (!config.resizeToAvoidBottomPadding)
       padding = new EdgeInsets.fromLTRB(padding.left, padding.top, padding.right, 0.0);
 
@@ -804,6 +827,26 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     if (_snackBars.isNotEmpty)
       _addIfNonNull(children, _snackBars.first._widget, _ScaffoldSlot.snackBar);
 
+    if (config.persistentFooterButtons != null) {
+      children.add(new LayoutId(
+        id: _ScaffoldSlot.persistentFooter,
+        child: new Container(
+          decoration: new BoxDecoration(
+            border: new Border(
+              top: new BorderSide(
+                color: themeData.dividerColor
+              ),
+            ),
+          ),
+          child: new ButtonTheme.bar(
+            child: new ButtonBar(
+              children: config.persistentFooterButtons
+            ),
+          ),
+        ),
+      ));
+    }
+
     if (config.bottomNavigationBar != null) {
       children.add(new LayoutId(
         id: _ScaffoldSlot.bottomNavigationBar,
@@ -831,7 +874,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       )
     ));
 
-    if (Theme.of(context).platform == TargetPlatform.iOS) {
+    if (themeData.platform == TargetPlatform.iOS) {
       children.add(new LayoutId(
         id: _ScaffoldSlot.statusBar,
         child: new GestureDetector(
