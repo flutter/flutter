@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/scheduler.dart';
@@ -293,8 +292,8 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
     this.selectedIndex,
     this.elevation: 8,
     this.theme,
-    TextStyle style,
-  }) : _style = style {
+    this.style,
+  }) {
     assert(style != null);
   }
 
@@ -304,20 +303,11 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
   final int selectedIndex;
   final int elevation;
   final ThemeData theme;
+  final TextStyle style;
+
   // The layout gets this route's scrollableKey so that it can scroll the
   /// selected item into position, but only on the initial layout.
   bool initialLayout = true;
-
-  TextStyle get style => _style;
-  TextStyle _style;
-  set style (TextStyle value) {
-    assert(value != null);
-    if (_style == value)
-      return;
-    setState(() {
-      _style = value;
-    });
-  }
 
   @override
   Duration get transitionDuration => _kDropdownMenuDuration;
@@ -493,24 +483,17 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> {
 
   TextStyle get _textStyle => config.style ?? Theme.of(context).textTheme.subhead;
 
-  _DropdownRoute<T> _currentRoute;
-
   void _handleTap() {
-    assert(_currentRoute == null);
     final RenderBox itemBox = context.findRenderObject();
     final Rect itemRect = itemBox.localToGlobal(Point.origin) & itemBox.size;
-    final Completer<_DropdownRouteResult<T>> completer = new Completer<_DropdownRouteResult<T>>();
-    _currentRoute = new _DropdownRoute<T>(
+    Navigator.push(context, new _DropdownRoute<T>(
       items: config.items,
       buttonRect: _kMenuHorizontalPadding.inflateRect(itemRect),
       selectedIndex: _selectedIndex,
       elevation: config.elevation,
       theme: Theme.of(context, shadowThemeOnly: true),
       style: _textStyle,
-    );
-    Navigator.push(context, _currentRoute);
-    completer.future.then((_DropdownRouteResult<T> newValue) {
-      _currentRoute = null;
+    )).then((_DropdownRouteResult<T> newValue) {
       if (!mounted || newValue == null)
         return;
       if (config.onChanged != null)
@@ -521,10 +504,8 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
-    final TextStyle style = _textStyle;
-    _currentRoute?.style = style;
     Widget result = new DefaultTextStyle(
-      style: style,
+      style: _textStyle,
       child: new Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         mainAxisSize: MainAxisSize.min,
