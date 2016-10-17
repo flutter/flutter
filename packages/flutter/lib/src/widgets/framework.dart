@@ -2728,7 +2728,17 @@ class StatefulElement extends ComponentElement {
   /// Creates an element that uses the given widget as its configuration.
   StatefulElement(StatefulWidget widget)
     : _state = widget.createState(), super(widget) {
-    assert(_state._debugTypesAreRight(widget));
+    assert(() {
+      if (!_state._debugTypesAreRight(widget)) {
+        throw new FlutterError(
+          'StatefulWidget.createState must return a subtype of State<${widget.runtimeType}>\n'
+          'The createState function for ${widget.runtimeType} returned a state '
+          'of type ${_state.runtimeType}, which is not a subtype of '
+          'State<${widget.runtimeType}>, violating the contract for createState.'
+        );
+      }
+      return true;
+    });
     assert(_state._element == null);
     _state._element = this;
     assert(_builder == _buildNothing);
