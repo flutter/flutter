@@ -83,6 +83,10 @@ class DriveCommand extends RunCommandBase {
   Device _device;
   Device get device => _device;
 
+  /// Subscription to log messages printed on the device or simulator.
+  // ignore: cancel_subscriptions
+  StreamSubscription<String> _deviceLogSubscription;
+
   int get debugPort => int.parse(argResults['debug-port']);
 
   @override
@@ -306,6 +310,10 @@ Future<int> startApp(DriveCommand command) async {
     platformArgs['trace-startup'] = command.traceStartup;
 
   printTrace('Starting application.');
+
+  // Forward device log messages to the terminal window running the "drive" command.
+  command._deviceLogSubscription = command.device.logReader.logLines.listen(printStatus);
+
   LaunchResult result = await command.device.startApp(
     package,
     command.getBuildMode(),
@@ -318,6 +326,10 @@ Future<int> startApp(DriveCommand command) async {
     ),
     platformArgs: platformArgs
   );
+
+  if (!result.started) {
+    await command._deviceLogSubscription.cancel();
+  }
 
   return result.started ? 0 : 2;
 }
@@ -352,5 +364,6 @@ Future<int> stopApp(DriveCommand command) async {
   printTrace('Stopping application.');
   ApplicationPackage package = command.applicationPackages.getPackageForPlatform(command.device.platform);
   bool stopped = await command.device.stopApp(package);
+  await command._deviceLogSubscription?.cancel();
   return stopped ? 0 : 1;
 }
