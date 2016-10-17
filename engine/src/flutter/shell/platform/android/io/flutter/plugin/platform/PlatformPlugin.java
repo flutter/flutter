@@ -5,6 +5,10 @@
 package io.flutter.plugin.platform;
 
 import android.app.Activity;
+import android.content.ClipboardManager;
+import android.content.ClipData;
+import android.content.ClipDescription;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.net.Uri;
@@ -27,6 +31,7 @@ public class PlatformPlugin extends JSONMessageListener implements ActivityLifec
     private final Activity mActivity;
     public static final int DEFAULT_SYSTEM_UI = View.SYSTEM_UI_FLAG_LAYOUT_STABLE
             | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
+    private static final String kTextPlainFormat = "text/plain";
 
     public PlatformPlugin(Activity activity) {
         mActivity = activity;
@@ -53,6 +58,10 @@ public class PlatformPlugin extends JSONMessageListener implements ActivityLifec
             setSystemChromeSystemUIOverlayStyle(args.getString(0));
         } else if (method.equals("SystemNavigator.pop")) {
             popSystemNavigator();
+        } else if (method.equals("Clipboard.getData")) {
+            return getClipboardData(args.getString(0));
+        } else if (method.equals("Clipboard.setData")) {
+            setClipboardData(args.getJSONObject(0));
         } else if (method.equals("PathProvider.getTemporaryDirectory")) {
             return getPathProviderTemporaryDirectory();
         } else if (method.equals("PathProvider.getApplicationDocumentsDirectory")) {
@@ -164,6 +173,28 @@ public class PlatformPlugin extends JSONMessageListener implements ActivityLifec
 
     private void popSystemNavigator() {
         mActivity.finish();
+    }
+
+    private JSONObject getClipboardData(String format) throws JSONException {
+        ClipboardManager clipboard = (ClipboardManager) mActivity.getSystemService(Context.CLIPBOARD_SERVICE);
+        ClipData clip = clipboard.getPrimaryClip();
+        if (clip == null)
+            return null;
+
+        if ((format == null || format.equals(kTextPlainFormat)) &&
+            clip.getDescription().hasMimeType(ClipDescription.MIMETYPE_TEXT_PLAIN)) {
+              JSONObject result = new JSONObject();
+              result.put("text", clip.getItemAt(0).getText().toString());
+              return result;
+        }
+
+        return null;
+    }
+
+    private void setClipboardData(JSONObject data) throws JSONException {
+        ClipboardManager clipboard = (ClipboardManager) mActivity.getSystemService(Context.CLIPBOARD_SERVICE);
+        ClipData clip = ClipData.newPlainText("text label?", data.getString("text"));
+        clipboard.setPrimaryClip(clip);
     }
 
     private JSONObject getPathProviderTemporaryDirectory() throws JSONException {

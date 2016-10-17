@@ -9,13 +9,19 @@
 #include <UIKit/UIApplication.h>
 #include <UIKit/UIKit.h>
 
-static NSDictionary* GetDirectoryOfType(NSSearchPathDirectory dir) {
+namespace {
+
+constexpr char kTextPlainFormat[] = "text/plain";
+
+NSDictionary* GetDirectoryOfType(NSSearchPathDirectory dir) {
   NSArray* paths =
       NSSearchPathForDirectoriesInDomains(dir, NSUserDomainMask, YES);
   if (paths.count == 0)
     return nil;
   return @{ @"path": paths.firstObject };
 }
+
+}  // namespaces
 
 namespace shell {
 
@@ -58,6 +64,10 @@ using namespace shell;
     [self setSystemChromeSystemUIOverlayStyle:args.firstObject];
   } else if ([method isEqualToString:@"SystemNavigator.pop"]) {
     [self popSystemNavigator];
+  } else if ([method isEqualToString:@"Clipboard.getData"]) {
+    return [self getClipboardData:args.firstObject];
+  } else if ([method isEqualToString:@"Clipboard.setData"]) {
+    [self setClipboardData:args.firstObject];
   } else if ([method isEqualToString:@"PathProvider.getTemporaryDirectory"]) {
     return [self getPathProviderTemporaryDirectory];
   } else if ([method isEqualToString:@"PathProvider.getApplicationDocumentsDirectory"]) {
@@ -164,6 +174,18 @@ using namespace shell;
 
 - (void)popSystemNavigator {
   // Apple's human user guidelines say not to terminate iOS applications.
+}
+
+- (NSDictionary*)getClipboardData:(NSString*)format {
+  UIPasteboard* pasteboard = [UIPasteboard generalPasteboard];
+  if (!format || [format isEqualToString:@(kTextPlainFormat)])
+    return @{ @"text": pasteboard.string };
+  return nil;
+}
+
+- (void)setClipboardData:(NSDictionary *)data {
+  UIPasteboard* pasteboard = [UIPasteboard generalPasteboard];
+  pasteboard.string = data[@"text"];
 }
 
 - (NSDictionary*)getPathProviderTemporaryDirectory {
