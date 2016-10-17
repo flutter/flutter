@@ -217,9 +217,9 @@ void main() {
     await pageRight(tester);
     expect(currentPage, equals(5));
 
-    RenderBox box = globalKeys[5].currentContext.findRenderObject();
-    expect(box.size.width, equals(pageSize.width));
-    expect(box.size.height, equals(pageSize.height));
+    Size boxSize = globalKeys[5].currentContext.size;
+    expect(boxSize.width, equals(pageSize.width));
+    expect(boxSize.height, equals(pageSize.height));
 
     pageSize = new Size(pageSize.height, pageSize.width);
     await tester.pumpWidget(buildFrame(itemsWrap: true));
@@ -231,8 +231,8 @@ void main() {
     expect(find.text('4'), findsNothing);
     expect(find.text('5'), findsOneWidget);
 
-    box = globalKeys[5].currentContext.findRenderObject();
-    expect(box.size.width, equals(pageSize.width));
-    expect(box.size.height, equals(pageSize.height));
+    boxSize = globalKeys[5].currentContext.size;
+    expect(boxSize.width, equals(pageSize.width));
+    expect(boxSize.height, equals(pageSize.height));
   });
 }

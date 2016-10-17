@@ -745,13 +745,11 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   }
 
   void _handleDragUpdate(DragUpdateDetails details) {
-    final RenderBox box = context.findRenderObject();
-    _backGestureController?.dragUpdate(details.primaryDelta / box.size.width);
+    _backGestureController?.dragUpdate(details.primaryDelta / context.size.width);
   }
 
   void _handleDragEnd(DragEndDetails details) {
-    final RenderBox box = context.findRenderObject();
-    _backGestureController?.dragEnd(details.velocity.pixelsPerSecond.dx / box.size.width);
+    _backGestureController?.dragEnd(details.velocity.pixelsPerSecond.dx / context.size.width);
     _backGestureController = null;
   }
 

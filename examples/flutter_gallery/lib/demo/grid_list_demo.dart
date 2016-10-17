@@ -62,11 +62,11 @@ class _GridPhotoViewerState extends State<GridPhotoViewer> with SingleTickerProv
   // renderer's box is w,h then the maximum value of the focal point is
   // (w * _scale - w)/_scale, (h * _scale - h)/_scale.
   Point _clampFocalPoint(Point point) {
-    final RenderBox box = context.findRenderObject();
+    final Size size = context.size;
     final double inverseScale = (_scale - 1.0) / _scale;
     final Point bottomRight = new Point(
-      box.size.width * inverseScale,
-      box.size.height * inverseScale
+      size.width * inverseScale,
+      size.height * inverseScale,
     );
      return new Point(point.x.clamp(0.0, bottomRight.x), point.y.clamp(0.0, bottomRight.y));
   }
@@ -101,8 +101,7 @@ class _GridPhotoViewerState extends State<GridPhotoViewer> with SingleTickerProv
     if (magnitude < _kMinFlingVelocity)
       return;
     final Offset direction = details.velocity.pixelsPerSecond / magnitude;
-    final RenderBox box = context.findRenderObject();
-    final double distance = (Point.origin & box.size).shortestSide;
+    final double distance = (Point.origin & context.size).shortestSide;
     _flingAnimation = new Tween<Point>(
       begin: _focalPoint,
       end: _clampFocalPoint(_focalPoint + direction * -distance)

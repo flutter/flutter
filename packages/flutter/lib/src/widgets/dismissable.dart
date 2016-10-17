@@ -197,10 +197,7 @@ class _DismissableState extends State<Dismissable> with TickerProviderStateMixin
   }
 
   double get _overallDragAxisExtent {
-    final RenderBox box = context.findRenderObject();
-    assert(box != null);
-    assert(box.hasSize);
-    final Size size = box.size;
+    final Size size = context.size;
     return _directionIsXAxis ? size.width : size.height;
   }
 
@@ -324,8 +321,7 @@ class _DismissableState extends State<Dismissable> with TickerProviderStateMixin
         ..addListener(_handleResizeProgressChanged);
       _resizeController.forward();
       setState(() {
-        RenderBox box = context.findRenderObject();
-        _sizePriorToCollapse = box.size;
+        _sizePriorToCollapse = context.size;
         _resizeAnimation = new Tween<double>(
           begin: 1.0,
           end: 0.0

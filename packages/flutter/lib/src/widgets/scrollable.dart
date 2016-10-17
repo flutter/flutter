@@ -595,8 +595,7 @@ class ScrollableState<T extends Scrollable> extends State<T> with SingleTickerPr
 
   /// Returns the snapped offset closest to the given scroll offset.
   double snapScrollOffset(double scrollOffset) {
-    RenderBox box = context.findRenderObject();
-    return config.snapOffsetCallback == null ? scrollOffset : config.snapOffsetCallback(scrollOffset, box.size);
+    return config.snapOffsetCallback == null ? scrollOffset : config.snapOffsetCallback(scrollOffset, context.size);
   }
 
   Simulation _createSnapSimulation(double scrollVelocity) {

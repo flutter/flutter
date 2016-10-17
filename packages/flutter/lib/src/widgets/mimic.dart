@@ -197,12 +197,8 @@ class MimicableState extends State<Mimicable> {
       }
       return true;
     });
-    RenderBox box = context.findRenderObject();
-    assert(box != null);
-    assert(box.hasSize);
-    assert(!box.needsLayout);
     setState(() {
-      _placeholderSize = box.size;
+      _placeholderSize = context.size;
     });
     return new MimicableHandle._(this);
   }
