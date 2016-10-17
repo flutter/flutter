@@ -581,11 +581,16 @@ public class FlutterView extends SurfaceView
     private static native void nativeSurfaceDestroyed(long nativePlatformViewAndroid);
     private static native Bitmap nativeGetBitmap(long nativePlatformViewAndroid);
 
+    // Send a platform message to Dart.
+    private static native void nativeDispatchPlatformMessage(long nativePlatformViewAndroid, String name, String message, int responseId);
     private static native void nativeDispatchPointerDataPacket(long nativePlatformViewAndroid, ByteBuffer buffer, int position);
     private static native void nativeDispatchSemanticsAction(long nativePlatformViewAndroid, int id, int action);
     private static native void nativeSetSemanticsEnabled(long nativePlatformViewAndroid, boolean enabled);
-    private static native void nativeInvokePlatformMessageResponseCallback(long nativePlatformViewAndroid, int responseId, String buffer);
 
+    // Send a response to a platform message received from Dart.
+    private static native void nativeInvokePlatformMessageResponseCallback(long nativePlatformViewAndroid, int responseId, String message);
+
+    // Called by native to send us a platform message.
     @CalledByNative
     private void handlePlatformMessage(String name, String message, final int responseId) {
         OnMessageListener listener = mOnMessageListeners.get(name);
@@ -597,15 +602,26 @@ public class FlutterView extends SurfaceView
         OnMessageListenerAsync asyncListener = mAsyncOnMessageListeners.get(name);
         if (asyncListener != null) {
             asyncListener.onMessage(this, message, new MessageResponse() {
-              @Override
-              public void send(String response) {
-                  nativeInvokePlatformMessageResponseCallback(mNativePlatformView, responseId, response);
-              }
+                @Override
+                public void send(String response) {
+                    nativeInvokePlatformMessageResponseCallback(mNativePlatformView, responseId, response);
+                }
             });
             return;
         }
 
         nativeInvokePlatformMessageResponseCallback(mNativePlatformView, responseId, null);
+    }
+
+    private int mNextResponseId = 1;
+    private final Map<Integer, MessageReplyCallback> mPendingResponses = new HashMap<Integer, MessageReplyCallback>();
+
+    // Called by native to respond to a platform message that we sent.
+    @CalledByNative
+    private void handlePlatformMessageResponse(int responseId, String response) {
+        MessageReplyCallback callback = mPendingResponses.remove(responseId);
+        if (callback != null)
+            callback.onReply(response);
     }
 
     @CalledByNative
@@ -712,12 +728,23 @@ public class FlutterView extends SurfaceView
         return true;
     }
 
+    private void dispatchPlatformMessage(String name, String message, MessageReplyCallback callback) {
+        int responseId = 0;
+        if (callback != null) {
+            responseId = mNextResponseId++;
+            mPendingResponses.put(responseId, callback);
+        }
+        nativeDispatchPlatformMessage(mNativePlatformView, name, message, responseId);
+    }
+
     /**
      * Send a message to the Flutter application.  The Flutter Dart code can register a
      * host message handler that will receive these messages.
      */
     public void sendToFlutter(String messageName, String message,
                               final MessageReplyCallback callback) {
+        // TODO(abarth): Switch to dispatchPlatformMessage once the framework
+        // side has been converted.
         mFlutterAppMessages.sendString(messageName, message,
             new ApplicationMessages.SendStringResponse() {
                 @Override

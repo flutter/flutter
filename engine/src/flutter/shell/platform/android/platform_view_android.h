@@ -37,6 +37,12 @@ class PlatformViewAndroid : public PlatformView {
 
   void SurfaceDestroyed(JNIEnv* env, jobject obj);
 
+  void DispatchPlatformMessage(JNIEnv* env,
+                               jobject obj,
+                               jstring name,
+                               jstring message,
+                               jint response_id);
+
   void DispatchPointerDataPacket(JNIEnv* env,
                                  jobject obj,
                                  jobject buffer,
@@ -60,6 +66,8 @@ class PlatformViewAndroid : public PlatformView {
 
   void HandlePlatformMessage(
       ftl::RefPtr<blink::PlatformMessage> message) override;
+
+  void HandlePlatformMessageResponse(int response_id, std::vector<char> data);
 
   void RunFromSource(const std::string& main,
                      const std::string& packages,
