@@ -52,7 +52,7 @@ class TableRow {
       result.write('$key, ');
     if (decoration != null)
       result.write('$decoration, ');
-    if (children != null) {
+    if (children == null) {
       result.write('child list is null');
     } else if (children.length == 0) {
       result.write('no children');
