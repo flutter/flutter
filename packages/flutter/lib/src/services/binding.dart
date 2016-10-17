@@ -3,12 +3,14 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 
 import 'asset_bundle.dart';
 import 'image_cache.dart';
 import 'shell.dart';
+import 'platform_messages.dart';
 
 /// Ensures that the [MojoShell] singleton is created synchronously
 /// during binding initialization. This allows other binding classes
@@ -27,6 +29,8 @@ abstract class ServicesBinding extends BindingBase {
   @override
   void initInstances() {
     super.initInstances();
+    ui.window
+      ..onPlatformMessage = PlatformMessages.handlePlatformMessage;
     new MojoShell();
     LicenseRegistry.addLicense(_addLicenses);
   }
