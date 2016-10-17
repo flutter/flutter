@@ -30,6 +30,36 @@
 #include "third_party/skia/include/core/SkSurface.h"
 
 namespace shell {
+namespace {
+
+class PlatformMessageResponseAndroid : public blink::PlatformMessageResponse {
+  FRIEND_MAKE_REF_COUNTED(PlatformMessageResponseAndroid);
+
+ public:
+  void Complete(std::vector<char> data) override {
+    ftl::RefPtr<PlatformMessageResponseAndroid> self(this);
+    blink::Threads::Platform()->PostTask(
+        [ self, data = std::move(data) ]() mutable {
+          if (!self->view_)
+            return;
+          static_cast<PlatformViewAndroid*>(self->view_.get())
+              ->HandlePlatformMessageResponse(self->response_id_,
+                                              std::move(data));
+        });
+  }
+
+  void CompleteWithError() override { Complete(std::vector<char>()); }
+
+ private:
+  PlatformMessageResponseAndroid(int response_id,
+                                 ftl::WeakPtr<PlatformView> view)
+      : response_id_(response_id), view_(view) {}
+
+  int response_id_;
+  ftl::WeakPtr<PlatformView> view_;
+};
+
+}  // namespace
 
 PlatformViewAndroid::PlatformViewAndroid()
     : PlatformView(std::make_unique<GPURasterizer>()) {}
@@ -105,6 +135,29 @@ void PlatformViewAndroid::SurfaceDestroyed(JNIEnv* env, jobject obj) {
   ReleaseSurface();
 }
 
+void PlatformViewAndroid::DispatchPlatformMessage(JNIEnv* env,
+                                                  jobject obj,
+                                                  jstring java_name,
+                                                  jstring java_message_data,
+                                                  jint response_id) {
+  std::string name = base::android::ConvertJavaStringToUTF8(env, java_name);
+  std::string data;
+  if (java_message_data)
+    data = base::android::ConvertJavaStringToUTF8(env, java_message_data);
+
+  ftl::RefPtr<blink::PlatformMessageResponse> response;
+  if (response_id) {
+    response = ftl::MakeRefCounted<PlatformMessageResponseAndroid>(
+        response_id, GetWeakPtr());
+  }
+
+  PlatformView::DispatchPlatformMessage(
+      ftl::MakeRefCounted<blink::PlatformMessage>(
+          std::move(name),
+          std::vector<char>(data.data(), data.data() + data.size()),
+          std::move(response)));
+}
+
 void PlatformViewAndroid::DispatchPointerDataPacket(JNIEnv* env,
                                                     jobject obj,
                                                     jobject buffer,
@@ -143,33 +196,47 @@ void PlatformViewAndroid::InvokePlatformMessageResponseCallback(
 void PlatformViewAndroid::HandlePlatformMessage(
     ftl::RefPtr<blink::PlatformMessage> message) {
   JNIEnv* env = base::android::AttachCurrentThread();
-  {
-    base::android::ScopedJavaLocalRef<jobject> view = flutter_view_.get(env);
-    if (view.is_null())
-      return;
+  base::android::ScopedJavaLocalRef<jobject> view = flutter_view_.get(env);
+  if (view.is_null())
+    return;
 
-    int response_id = 0;
-    if (auto response = message->response()) {
-      response_id = next_response_id_++;
-      pending_responses_[response_id] = response;
-    }
-
-    base::StringPiece message_name = message->name();
-
-    auto data = message->data();
-    base::StringPiece message_data(data.data(), data.size());
-
-    auto java_message_name =
-        base::android::ConvertUTF8ToJavaString(env, message_name);
-    auto java_message_data =
-        base::android::ConvertUTF8ToJavaString(env, message_data);
-    message = nullptr;
-
-    // This call can re-enter in InvokePlatformMessageResponseCallback.
-    Java_FlutterView_handlePlatformMessage(
-        env, view.obj(), java_message_name.obj(), java_message_data.obj(),
-        response_id);
+  int response_id = 0;
+  if (auto response = message->response()) {
+    response_id = next_response_id_++;
+    pending_responses_[response_id] = response;
   }
+
+  base::StringPiece message_name = message->name();
+
+  auto data = message->data();
+  base::StringPiece message_data(data.data(), data.size());
+
+  auto java_message_name =
+      base::android::ConvertUTF8ToJavaString(env, message_name);
+  auto java_message_data =
+      base::android::ConvertUTF8ToJavaString(env, message_data);
+  message = nullptr;
+
+  // This call can re-enter in InvokePlatformMessageResponseCallback.
+  Java_FlutterView_handlePlatformMessage(env, view.obj(),
+                                         java_message_name.obj(),
+                                         java_message_data.obj(), response_id);
+}
+
+void PlatformViewAndroid::HandlePlatformMessageResponse(
+    int response_id,
+    std::vector<char> data) {
+  JNIEnv* env = base::android::AttachCurrentThread();
+  base::android::ScopedJavaLocalRef<jobject> view = flutter_view_.get(env);
+  if (view.is_null())
+    return;
+
+  base::StringPiece message_data(data.data(), data.size());
+  auto java_message_data =
+      base::android::ConvertUTF8ToJavaString(env, message_data);
+
+  Java_FlutterView_handlePlatformMessageResponse(env, view.obj(), response_id,
+                                                 java_message_data.obj());
 }
 
 void PlatformViewAndroid::DispatchSemanticsAction(JNIEnv* env,
