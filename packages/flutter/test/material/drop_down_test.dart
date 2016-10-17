@@ -6,6 +6,64 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 
 void main() {
+  testWidgets('Drop down button control test', (WidgetTester tester) async {
+    List<String> items = <String>['one', 'two', 'three', 'four'];
+    String value = items.first;
+
+    void didChangeValue(String newValue) {
+      value = newValue;
+    }
+
+    Widget build() {
+      return new MaterialApp(
+        home: new Material(
+          child: new Center(
+            child: new DropdownButton<String>(
+              value: value,
+              items: items.map((String item) {
+                return new DropdownMenuItem<String>(
+                  value: item,
+                  child: new Text(item),
+                );
+              }).toList(),
+              onChanged: didChangeValue,
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(build());
+
+    await tester.tap(find.text('one'));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1)); // finish the menu animation
+
+    expect(value, equals('one'));
+
+    await tester.tap(find.text('three').last);
+
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1)); // finish the menu animation
+
+    expect(value, equals('three'));
+
+    await tester.tap(find.text('three'));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1)); // finish the menu animation
+
+    expect(value, equals('three'));
+
+    await tester.pumpWidget(build());
+
+    await tester.tap(find.text('two').last);
+
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1)); // finish the menu animation
+
+    expect(value, equals('two'));
+  });
+
   testWidgets('Drop down screen edges', (WidgetTester tester) async {
     int value = 4;
     List<DropdownMenuItem<int>> items = <DropdownMenuItem<int>>[];
@@ -19,7 +77,7 @@ void main() {
     DropdownButton<int> button = new DropdownButton<int>(
       value: value,
       onChanged: handleChanged,
-      items: items
+      items: items,
     );
 
     await tester.pumpWidget(
@@ -27,10 +85,10 @@ void main() {
         home: new Material(
           child: new Align(
             alignment: FractionalOffset.topCenter,
-            child: button
-          )
-        )
-      )
+            child: button,
+          ),
+        ),
+      ),
     );
 
     await tester.tap(find.text('4'));
@@ -48,13 +106,13 @@ void main() {
     expect(value, 4);
     await tester.tap(find.byConfig(button));
     expect(value, 4);
-    await tester.idle(); // this waits for the route's completer to complete, which calls handleChanged
+    // this waits for the route's completer to complete, which calls handleChanged
+    await tester.idle();
     expect(value, 4);
 
     // TODO(abarth): Remove these calls to pump once navigator cleans up its
     // pop transitions.
     await tester.pump();
     await tester.pump(const Duration(seconds: 1)); // finish the menu animation
-
   });
 }

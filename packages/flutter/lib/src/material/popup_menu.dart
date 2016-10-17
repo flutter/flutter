@@ -508,7 +508,7 @@ class PopupMenuButton<T> extends StatefulWidget {
 }
 
 class _PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
-  void showButtonMenu(BuildContext context) {
+  void showButtonMenu() {
     final RenderBox renderBox = context.findRenderObject();
     final Point topLeft = renderBox.localToGlobal(Point.origin);
     showMenu/*<T>*/(
@@ -521,9 +521,11 @@ class _PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
         0.0, 0.0
       )
     )
-    .then((T value) {
-      if (value != null && config.onSelected != null)
-        config.onSelected(value);
+    .then((T newValue) {
+      if (!mounted || newValue == null)
+        return;
+      if (config.onSelected != null)
+        config.onSelected(newValue);
     });
   }
 
@@ -534,12 +536,12 @@ class _PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
         icon: new Icon(Icons.more_vert),
         padding: config.padding,
         tooltip: config.tooltip,
-        onPressed: () { showButtonMenu(context); }
+        onPressed: showButtonMenu,
       );
     }
     return new InkWell(
-      onTap: () { showButtonMenu(context); },
-      child: config.child
+      onTap: showButtonMenu,
+      child: config.child,
     );
   }
 }
