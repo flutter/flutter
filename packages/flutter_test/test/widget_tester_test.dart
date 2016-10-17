@@ -104,4 +104,37 @@ void main() {
     });
   });
 
+  group('find.byElementPredicate', () {
+    testWidgets('fails with a custom description in the message', (WidgetTester tester) async {
+      await tester.pumpWidget(new Text('foo'));
+
+      String customDescription = 'custom description';
+      TestFailure failure;
+      try {
+        expect(find.byElementPredicate((_) => false, description: customDescription), findsOneWidget);
+      } catch(e) {
+        failure = e;
+      }
+
+      expect(failure, isNotNull);
+      expect(failure.message, contains('Actual: ?:<zero widgets with $customDescription'));
+    });
+  });
+
+  group('find.byWidgetPredicate', () {
+    testWidgets('fails with a custom description in the message', (WidgetTester tester) async {
+      await tester.pumpWidget(new Text('foo'));
+
+      String customDescription = 'custom description';
+      TestFailure failure;
+      try {
+        expect(find.byWidgetPredicate((_) => false, description: customDescription), findsOneWidget);
+      } catch(e) {
+        failure = e;
+      }
+
+      expect(failure, isNotNull);
+      expect(failure.message, contains('Actual: ?:<zero widgets with $customDescription'));
+    });
+  });
 }

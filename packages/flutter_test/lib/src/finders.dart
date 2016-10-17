@@ -110,18 +110,24 @@ class CommonFinders {
   /// nodes that are [Offstage] or that are from inactive [Route]s.
   Finder byConfig(Widget config, { bool skipOffstage: true }) => new _ConfigFinder(config, skipOffstage: skipOffstage);
 
-  /// Finds widgets using a widget predicate.
+  /// Finds widgets using a widget [predicate].
   ///
   /// Example:
   ///
   ///     expect(tester, hasWidget(find.byWidgetPredicate(
-  ///       (Widget widget) => widget is Tooltip && widget.message == 'Back'
+  ///       (Widget widget) => widget is Tooltip && widget.message == 'Back',
+  ///       description: 'widget with tooltip "Back"',
   ///     )));
+  ///
+  /// If [description] is provided, then this uses it as the description of the
+  /// [Finder] and appears, for example, in the error message when the finder
+  /// fails to locate the desired widget. Otherwise, the description prints the
+  /// signature of the predicate function.
   ///
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// nodes that are [Offstage] or that are from inactive [Route]s.
-  Finder byWidgetPredicate(WidgetPredicate predicate, { bool skipOffstage: true }) {
-    return new _WidgetPredicateFinder(predicate, skipOffstage: skipOffstage);
+  Finder byWidgetPredicate(WidgetPredicate predicate, { String description, bool skipOffstage: true }) {
+    return new _WidgetPredicateFinder(predicate, description: description, skipOffstage: skipOffstage);
   }
 
   /// Finds Tooltip widgets with the given message.
@@ -139,7 +145,7 @@ class CommonFinders {
     );
   }
 
-  /// Finds widgets using an element predicate.
+  /// Finds widgets using an element [predicate].
   ///
   /// Example:
   ///
@@ -147,13 +153,19 @@ class CommonFinders {
   ///       // finds elements of type SingleChildRenderObjectElement, including
   ///       // those that are actually subclasses of that type.
   ///       // (contrast with byElementType, which only returns exact matches)
-  ///       (Element element) => element is SingleChildRenderObjectElement
+  ///       (Element element) => element is SingleChildRenderObjectElement,
+  ///       description: '$SingleChildRenderObjectElement element',
   ///     )));
+  ///
+  /// If [description] is provided, then this uses it as the description of the
+  /// [Finder] and appears, for example, in the error message when the finder
+  /// fails to locate the desired widget. Otherwise, the description prints the
+  /// signature of the predicate function.
   ///
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// nodes that are [Offstage] or that are from inactive [Route]s.
-  Finder byElementPredicate(ElementPredicate predicate, { bool skipOffstage: true }) {
-    return new _ElementPredicateFinder(predicate, skipOffstage: skipOffstage);
+  Finder byElementPredicate(ElementPredicate predicate, { String description, bool skipOffstage: true }) {
+    return new _ElementPredicateFinder(predicate, description: description, skipOffstage: skipOffstage);
   }
 }
 
@@ -397,12 +409,15 @@ class _ConfigFinder extends MatchFinder {
 }
 
 class _WidgetPredicateFinder extends MatchFinder {
-  _WidgetPredicateFinder(this.predicate, { bool skipOffstage: true }) : super(skipOffstage: skipOffstage);
+  _WidgetPredicateFinder(this.predicate, { String description, bool skipOffstage: true })
+      : _description = description,
+        super(skipOffstage: skipOffstage);
 
   final WidgetPredicate predicate;
+  final String _description;
 
   @override
-  String get description => 'widget matching predicate ($predicate)';
+  String get description => _description ?? 'widget matching predicate ($predicate)';
 
   @override
   bool matches(Element candidate) {
@@ -411,12 +426,15 @@ class _WidgetPredicateFinder extends MatchFinder {
 }
 
 class _ElementPredicateFinder extends MatchFinder {
-  _ElementPredicateFinder(this.predicate, { bool skipOffstage: true }) : super(skipOffstage: skipOffstage);
+  _ElementPredicateFinder(this.predicate, { String description, bool skipOffstage: true })
+      : _description = description,
+        super(skipOffstage: skipOffstage);
 
   final ElementPredicate predicate;
+  final String _description;
 
   @override
-  String get description => 'element matching predicate ($predicate)';
+  String get description => _description ?? 'element matching predicate ($predicate)';
 
   @override
   bool matches(Element candidate) {
