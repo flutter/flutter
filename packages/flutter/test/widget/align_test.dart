@@ -38,8 +38,8 @@ void main() {
       )
     );
 
-    RenderBox box = alignKey.currentContext.findRenderObject();
-    expect(box.size.width, equals(800.0));
-    expect(box.size.height, equals(10.0));
+    final Size size = alignKey.currentContext.size;
+    expect(size.width, equals(800.0));
+    expect(size.height, equals(10.0));
   });
 }
