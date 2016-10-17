@@ -35,9 +35,13 @@ void ApplicationMessagesImpl::AddBinding(
 
 void ApplicationMessagesImpl::HandlePlatformMessage(
     ftl::RefPtr<blink::PlatformMessage> message) {
-  NSString* string = [NSString stringWithUTF8String:message->data().data()];
-  ftl::RefPtr<blink::PlatformMessageResponse> completer = message->response();
+  const auto& buffer = message->data();
+  NSString* string = [[NSString alloc] initWithBytes:buffer.data()
+                                              length:buffer.size()
+                                            encoding:NSUTF8StringEncoding];
+  [string autorelease];
 
+  ftl::RefPtr<blink::PlatformMessageResponse> completer = message->response();
   {
     auto it = listeners_.find(message->name());
     if (it != listeners_.end()) {

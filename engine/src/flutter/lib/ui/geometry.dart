@@ -1106,7 +1106,7 @@ class RRect {
 
   // Returns the minimum between min and scale to which radius1 and radius2
   // should be scaled with in order not to exceed the limit.
-  double _getMin(double min, double radius1, double radius2, limit) {
+  double _getMin(double min, double radius1, double radius2, double limit) {
     double sum = radius1 + radius2;
     if (sum > limit && sum != 0.0)
       return math.min(min, limit / sum);
