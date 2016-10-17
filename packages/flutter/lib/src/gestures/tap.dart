@@ -59,7 +59,7 @@ typedef void GestureTapCancelCallback();
 /// [TapGestureRecognizer] considers all the pointers involved in the pointer
 /// event sequence as contributing to one gesture. For this reason, extra
 /// pointer interactions during a tap sequence are not recognized as additional
-/// taps. Fo example, down-1, down-2, up-1, up-2 produces only one tap on up-1.
+/// taps. For example, down-1, down-2, up-1, up-2 produces only one tap on up-1.
 ///
 /// See also:
 ///
@@ -84,7 +84,7 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
   GestureTapCancelCallback onTapCancel;
 
   bool _sentTapDown = false;
-  bool _wonArena = false;
+  bool _wonArenaForPrimaryPointer = false;
   Point _finalPosition;
 
   @override
@@ -97,7 +97,7 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
 
   @override
   void resolve(GestureDisposition disposition) {
-    if (_wonArena && disposition == GestureDisposition.rejected) {
+    if (_wonArenaForPrimaryPointer && disposition == GestureDisposition.rejected) {
       if (onTapCancel != null)
         onTapCancel();
       _reset();
@@ -115,7 +115,7 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
     super.acceptGesture(pointer);
     if (pointer == primaryPointer) {
       _checkDown();
-      _wonArena = true;
+      _wonArenaForPrimaryPointer = true;
       _checkUp();
     }
   }
@@ -140,7 +140,7 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
   }
 
   void _checkUp() {
-    if (_wonArena && _finalPosition != null) {
+    if (_wonArenaForPrimaryPointer && _finalPosition != null) {
       resolve(GestureDisposition.accepted);
       if (onTapUp != null)
         onTapUp(new TapUpDetails(globalPosition: _finalPosition));
@@ -152,7 +152,7 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
 
   void _reset() {
     _sentTapDown = false;
-    _wonArena = false;
+    _wonArenaForPrimaryPointer = false;
     _finalPosition = null;
   }
 

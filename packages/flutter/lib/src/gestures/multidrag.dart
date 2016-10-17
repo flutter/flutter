@@ -73,6 +73,7 @@ abstract class MultiDragPointerState {
 
   /// Resolve this pointer's entry in the [GestureArenaManager] with the given disposition.
   @protected
+  @mustCallSuper
   void resolve(GestureDisposition disposition) {
     _arenaEntry.resolve(disposition);
   }
@@ -131,7 +132,6 @@ abstract class MultiDragPointerState {
 
   void _up() {
     assert(_arenaEntry != null);
-    _arenaEntry = null;
     if (_client != null) {
       assert(pendingDelta == null);
       final DragEndDetails details = new DragEndDetails(velocity: _velocityTracker.getVelocity() ?? Velocity.zero);
@@ -147,7 +147,6 @@ abstract class MultiDragPointerState {
 
   void _cancel() {
     assert(_arenaEntry != null);
-    _arenaEntry = null;
     if (_client != null) {
       assert(pendingDelta == null);
       final Drag client = _client;
@@ -165,6 +164,7 @@ abstract class MultiDragPointerState {
   @mustCallSuper
   void dispose() {
     _arenaEntry?.resolve(GestureDisposition.rejected);
+    _arenaEntry = null;
     assert(() { _pendingDelta = null; return true; });
   }
 }

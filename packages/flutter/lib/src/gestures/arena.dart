@@ -92,6 +92,18 @@ class GestureArenaManager {
   }
 
   /// Forces resolution of the arena, giving the win to the first member.
+  ///
+  /// Sweep is typically after all the other processing for a [PointerUpEvent]
+  /// have taken place. It ensures that multiple passive gestures do not cause a
+  /// stalemate that prevents the user from interacting with the app.
+  ///
+  /// Recognizers that wish to delay resolving an arena past [PointerUpEvent]
+  /// should call [hold] to delay sweep until [release] is called.
+  ///
+  /// See also:
+  ///
+  ///  * [hold]
+  ///  * [release]
   void sweep(int pointer) {
     _GestureArena state = _arenas[pointer];
     if (state == null)
@@ -112,6 +124,17 @@ class GestureArenaManager {
   }
 
   /// Prevents the arena from being swept.
+  ///
+  /// Typically, a winner is chosen in an arena after all the other
+  /// [PointerUpEvent] processing by [sweep]. If a recognizer wishes to delay
+  /// resolving an arena past [PointerUpEvent], the recognizer can [hold] the
+  /// arena open using this function. To release such a hold and let the arena
+  /// resolve, call [release].
+  ///
+  /// See also:
+  ///
+  ///  * [sweep]
+  ///  * [release]
   void hold(int pointer) {
     _GestureArena state = _arenas[pointer];
     if (state == null)
@@ -123,6 +146,11 @@ class GestureArenaManager {
   ///
   /// If a sweep was attempted on a held arena, the sweep will be done
   /// on release.
+  ///
+  /// See also:
+  ///
+  ///  * [sweep]
+  ///  * [hold]
   void release(int pointer) {
     _GestureArena state = _arenas[pointer];
     if (state == null)
