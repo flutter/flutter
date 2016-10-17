@@ -171,18 +171,41 @@ public class FlutterView extends SurfaceView
         }
     }
 
+    private void encodeKeyEvent(KeyEvent event, JSONObject message) throws JSONException {
+        message.put("flags", event.getFlags());
+        message.put("scanCode", event.getScanCode());
+        message.put("metaState", event.getMetaState());
+    }
+
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
-        if (mRawKeyboardState.onKey(this, keyCode, event))
-            return true;
-        return super.onKeyUp(keyCode, event);
+        try {
+            JSONObject message = new JSONObject();
+            message.put("type", "keyup");
+            message.put("keymap", "android");
+            encodeKeyEvent(event, message);
+            dispatchPlatformMessage("flutter/keyevent", message.toString(), null);
+        } catch (JSONException e) {
+            Log.e(TAG, "Failed to serialize key event", e);
+        }
+        // TODO(abarth): Remove once clients are moved over to platform messages.
+        mRawKeyboardState.onKey(this, keyCode, event);
+        return true;
     }
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (mRawKeyboardState.onKey(this, keyCode, event))
-            return true;
-        return super.onKeyDown(keyCode, event);
+        try {
+            JSONObject message = new JSONObject();
+            message.put("type", "keydown");
+            message.put("keymap", "android");
+            encodeKeyEvent(event, message);
+            dispatchPlatformMessage("flutter/keyevent", message.toString(), null);
+        } catch (JSONException e) {
+            Log.e(TAG, "Failed to serialize key event", e);
+        }
+        mRawKeyboardState.onKey(this, keyCode, event);
+        return true;
     }
 
     SkyEngine getEngine() {
