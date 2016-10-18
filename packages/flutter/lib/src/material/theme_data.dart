@@ -393,7 +393,8 @@ class ThemeData {
            (otherData.textTheme == textTheme) &&
            (otherData.primaryTextTheme == primaryTextTheme) &&
            (otherData.iconTheme == iconTheme) &&
-           (otherData.primaryIconTheme == primaryIconTheme);
+           (otherData.primaryIconTheme == primaryIconTheme) &&
+           (otherData.platform == platform);
   }
 
   @override
