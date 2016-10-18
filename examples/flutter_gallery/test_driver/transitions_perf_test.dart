@@ -115,6 +115,7 @@ void main() {
         // Scroll each demo menu item into view, launch the demo and
         // return to the demo menu 2x.
         for(String demoTitle in demoTitles) {
+          print('Testing "$demoTitle" demo');
           SerializableFinder menuItem = find.text(demoTitle);
           await driver.scrollIntoView(menuItem);
           await new Future<Null>.delayed(new Duration(milliseconds: 500));
@@ -125,6 +126,7 @@ void main() {
             await driver.tap(find.byTooltip('Back'));
             await new Future<Null>.delayed(new Duration(milliseconds: 1000));
           }
+          print('Success');
         }
       },
       streams: const <TimelineStream>[
