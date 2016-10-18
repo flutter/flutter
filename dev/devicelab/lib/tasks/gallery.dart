@@ -24,7 +24,9 @@ class GalleryTransitionTest {
   final DeviceOperatingSystem os;
 
   Future<TaskResult> call() async {
-    String deviceId = (await devices.workingDevice).deviceId;
+    Device device = await devices.workingDevice;
+    await device.unlock();
+    String deviceId = device.deviceId;
     Directory galleryDirectory =
         dir('${flutterDirectory.path}/examples/flutter_gallery');
     await inDirectory(galleryDirectory, () async {
