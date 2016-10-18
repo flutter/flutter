@@ -45,7 +45,6 @@ import org.chromium.mojo.system.impl.CoreImpl;
 import org.chromium.mojom.editing.Keyboard;
 import org.chromium.mojom.flutter.platform.ApplicationMessages;
 import org.chromium.mojom.mojo.ServiceProvider;
-import org.chromium.mojom.raw_keyboard.RawKeyboardService;
 import org.chromium.mojom.sky.AppLifecycleState;
 import org.chromium.mojom.sky.ServicesData;
 import org.chromium.mojom.sky.SkyEngine;
@@ -65,8 +64,6 @@ import io.flutter.plugin.platform.PlatformPlugin;
 
 import org.domokit.editing.KeyboardImpl;
 import org.domokit.editing.KeyboardViewState;
-import org.domokit.raw_keyboard.RawKeyboardServiceImpl;
-import org.domokit.raw_keyboard.RawKeyboardServiceState;
 
 /**
  * An Android view containing a Flutter app.
@@ -92,7 +89,6 @@ public class FlutterView extends SurfaceView
     private final SurfaceHolder.Callback mSurfaceCallback;
     private final ViewportMetrics mMetrics;
     private final KeyboardViewState mKeyboardState;
-    private final RawKeyboardServiceState mRawKeyboardState;
     private final AccessibilityManager mAccessibilityManager;
     private BroadcastReceiver discoveryReceiver;
     private List<ActivityLifecycleListener> mActivityLifecycleListeners;
@@ -142,7 +138,6 @@ public class FlutterView extends SurfaceView
         getHolder().addCallback(mSurfaceCallback);
 
         mKeyboardState = new KeyboardViewState(this);
-        mRawKeyboardState = new RawKeyboardServiceState();
 
         Core core = CoreImpl.getInstance();
 
@@ -173,6 +168,8 @@ public class FlutterView extends SurfaceView
 
     private void encodeKeyEvent(KeyEvent event, JSONObject message) throws JSONException {
         message.put("flags", event.getFlags());
+        message.put("codePoint", event.getUnicodeChar());
+        message.put("keyCode", event.getKeyCode());
         message.put("scanCode", event.getScanCode());
         message.put("metaState", event.getMetaState());
     }
@@ -188,8 +185,6 @@ public class FlutterView extends SurfaceView
         } catch (JSONException e) {
             Log.e(TAG, "Failed to serialize key event", e);
         }
-        // TODO(abarth): Remove once clients are moved over to platform messages.
-        mRawKeyboardState.onKey(this, keyCode, event);
         return true;
     }
 
@@ -204,7 +199,6 @@ public class FlutterView extends SurfaceView
         } catch (JSONException e) {
             Log.e(TAG, "Failed to serialize key event", e);
         }
-        mRawKeyboardState.onKey(this, keyCode, event);
         return true;
     }
 
@@ -466,13 +460,6 @@ public class FlutterView extends SurfaceView
             @Override
             public Binding connectToService(FlutterView view, Core core, MessagePipeHandle pipe) {
                 return Keyboard.MANAGER.bind(new KeyboardImpl(view.getContext(), mKeyboardState), pipe);
-            }
-        });
-
-        registry.register(RawKeyboardService.MANAGER.getName(), new ServiceFactory() {
-            @Override
-            public Binding connectToService(FlutterView view, Core core, MessagePipeHandle pipe) {
-                return RawKeyboardService.MANAGER.bind(new RawKeyboardServiceImpl(mRawKeyboardState), pipe);
             }
         });
 
