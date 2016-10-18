@@ -23,7 +23,6 @@ class _MountainViewSimulation extends Simulation {
     _scaledFriction = friction * _decelerationForFriction(0.84); // See mPhysicalCoeff
     _duration = _flingDuration(velocity);
     _distance = _flingDistance(velocity);
-    print("_MountainViewSimulation velocity=$velocity duration=$_duration, distance=$_distance)");
   }
 
   final double position;
@@ -47,9 +46,9 @@ class _MountainViewSimulation extends Simulation {
   double _flingDeceleration(double velocity) {
     return math.log(0.35 * velocity.abs() / _scaledFriction);
   }
-  // See getSplineFlingDuration()
+  // See getSplineFlingDuration(). Returns a value in seconds.
   double _flingDuration(double velocity) {
-    return 1000.0 * math.exp(_flingDeceleration(velocity) / (_decelerationRate - 1.0));
+    return math.exp(_flingDeceleration(velocity) / (_decelerationRate - 1.0));
   }
 
   // See getSplineFlingDistance()
@@ -63,16 +62,17 @@ class _MountainViewSimulation extends Simulation {
   // and scroller.getFinalY() were 686ms and 961 pixels respectively.
   // Algebra courtesy of Wolfram Alpha.
   //
+  // f(x) = scrollOffset, x is time in millseconds
   // f(x) = 3.60882×10^-6 x^3 - 0.00668009 x^2 + 4.29427 x - 3.15307
   // f(x) = 3.60882×10^-6 x^3 - 0.00668009 x^2 + 4.29427 x, so f(0) is 0
   // f(686ms) = 961 pixels
   // Scale to f(0 <= t <= 1.0), x = t * 686
   // f(t) = 1165.03 t^3 - 3143.62 t^2 + 2945.87 t
-  // Scale so that 0.0 <= f(t) <= 1.0
+  // Scale f(t) so that 0.0 <= f(t) <= 1.0
   // f(t) = (1165.03 t^3 - 3143.62 t^2 + 2945.87 t) / 961.0
-  //      = 1.21231 t^3 - 3.2712 t^2 + 3.06542 t
+  //      = 1.2 t^3 - 3.27 t^2 + 3.06542 t
   double _flingDistancePenetration(double t) {
-    return (1.2 * t * t * t) - (3.27 * t * t) + (3.06542 * t);
+    return (1.2 * t * t * t) - (3.27 * t * t) + (3.065 * t);
   }
 
   // The deriviate of the _flingPenetration() function.
@@ -82,19 +82,19 @@ class _MountainViewSimulation extends Simulation {
 
   @override
   double x(double time) {
-    final double t = 1000.0 * (time / _duration).clamp(0.0, 1.0);
-    return position + (1.0 / 3.0) * _distance * _flingDistancePenetration(t) * velocity.sign;
+    final double t = (time / _duration).clamp(0.0, 1.0);
+    return position + _distance * _flingDistancePenetration(t) * velocity.sign / devicePixelRatio;
   }
 
   @override
   double dx(double time) {
-    final double t = 1000.0 * (time / _duration).clamp(0.0, 1.0);
+    final double t = (time / _duration).clamp(0.0, 1.0);
     return velocity * _flingVelocityPenetration(t);
   }
 
   @override
   bool isDone(double time) {
-    return time >= _duration / 1000.0;
+    return time >= _duration;
   }
 }
 
