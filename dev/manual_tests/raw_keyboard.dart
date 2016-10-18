@@ -3,8 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-
-import 'package:flutter_services/input_event.dart' as mojom;
+import 'package:flutter/services.dart';
 
 GlobalKey _key = new GlobalKey();
 
@@ -32,9 +31,9 @@ class RawKeyboardDemo extends StatefulWidget {
 }
 
 class _HardwareKeyDemoState extends State<RawKeyboardDemo> {
-  mojom.InputEvent _event;
+  RawKeyEvent _event;
 
-  void _handleKey(mojom.InputEvent event) {
+  void _handleKeyEvent(RawKeyEvent event) {
     setState(() {
       _event = event;
     });
@@ -50,26 +49,34 @@ class _HardwareKeyDemoState extends State<RawKeyboardDemo> {
           Focus.moveTo(config.key);
         },
         child: new Center(
-          child: new Text('Tap to focus', style: Typography.black.display1)
-        )
+          child: new Text('Tap to focus', style: Typography.black.display1),
+        ),
       );
     } else if (_event == null) {
       child = new Center(
-        child: new Text('Press a key', style: Typography.black.display1)
+        child: new Text('Press a key', style: Typography.black.display1),
       );
     } else {
+      int codePoint;
+      int keyCode;
+      final RawKeyEventData data = _event.data;
+      if (data is RawKeyEventDataAndroid) {
+        codePoint = data.codePoint;
+        keyCode = data.keyCode;
+      }
       child = new Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          new Text('${_event.type}', style: Typography.black.body2),
-          new Text('${_event.keyData.keyCode}', style: Typography.black.display4)
+          new Text('${_event.runtimeType}', style: Typography.black.body2),
+          new Text('codePoint: $codePoint', style: Typography.black.display4),
+          new Text('keyCode: $keyCode', style: Typography.black.display4),
         ],
-        mainAxisAlignment: MainAxisAlignment.center
       );
     }
     return new RawKeyboardListener(
       focused: focused,
-      onKey: _handleKey,
-      child: child
+      onKey: _handleKeyEvent,
+      child: child,
     );
   }
 }
