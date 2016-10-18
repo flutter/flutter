@@ -3,13 +3,12 @@
 // found in the LICENSE file.
 
 import 'package:flutter/services.dart';
-import 'package:flutter_services/raw_keyboard.dart' as mojom;
-import 'package:flutter_services/input_event.dart' as mojom;
 
 import 'basic.dart';
 import 'framework.dart';
 
-/// A widget that calls a callback whenever the user presses a key on a keyboard.
+/// A widget that calls a callback whenever the user presses or releases a key
+/// on a keyboard.
 ///
 /// A [RawKeyboardListener] is useful for listening to raw key events and
 /// hardware buttons that are represented as keys. Typically used by games and
@@ -43,7 +42,7 @@ class RawKeyboardListener extends StatefulWidget {
   final bool focused;
 
   /// Called whenever this widget receives a raw keyboard event.
-  final ValueChanged<mojom.InputEvent> onKey;
+  final ValueChanged<RawKeyEvent> onKey;
 
   /// The widget below this widget in the tree.
   final Widget child;
@@ -52,14 +51,12 @@ class RawKeyboardListener extends StatefulWidget {
   _RawKeyboardListenerState createState() => new _RawKeyboardListenerState();
 }
 
-class _RawKeyboardListenerState extends State<RawKeyboardListener> implements mojom.RawKeyboardListener {
+class _RawKeyboardListenerState extends State<RawKeyboardListener> {
   @override
   void initState() {
     super.initState();
     _attachOrDetachKeyboard();
   }
-
-  mojom.RawKeyboardListenerStub _stub;
 
   @override
   void didUpdateConfig(RawKeyboardListener oldConfig) {
@@ -79,22 +76,21 @@ class _RawKeyboardListenerState extends State<RawKeyboardListener> implements mo
       _detachKeyboardIfAttached();
   }
 
+  bool _listening = false;
+
   void _attachKeyboardIfDetached() {
-    if (_stub != null)
+    if (_listening)
       return;
-    _stub = new mojom.RawKeyboardListenerStub.unbound()..impl = this;
-    mojom.RawKeyboardServiceProxy keyboard = shell.connectToViewAssociatedService(mojom.RawKeyboardService.connectToService);
-    keyboard.addListener(_stub);
-    keyboard.close();
+    RawKeyboard.instance.addListener(_handleRawKeyEvent);
   }
 
   void _detachKeyboardIfAttached() {
-    _stub?.close();
-    _stub = null;
+    if (!_listening)
+      return;
+    RawKeyboard.instance.removeListener(_handleRawKeyEvent);
   }
 
-  @override
-  void onKey(mojom.InputEvent event) {
+  void _handleRawKeyEvent(RawKeyEvent event) {
     if (config.onKey != null)
       config.onKey(event);
   }
