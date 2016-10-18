@@ -28,28 +28,34 @@ dynamic _decodeJSON(String message) {
   return message != null ? JSON.decode(message) : null;
 }
 
-void _sendString(String name, String message, void callback(String reply)) {
-  Uint8List encoded = UTF8.encoder.convert(message);
-  ui.window.sendPlatformMessage(name, encoded.buffer.asByteData(), (ByteData reply) {
-    try {
-      callback(_decodeUTF8(reply));
-    } catch (exception, stack) {
-      FlutterError.reportError(new FlutterErrorDetails(
-        exception: exception,
-        stack: stack,
-        library: 'services library',
-        context: 'during a platform message response callback',
-      ));
-    }
-  });
-}
-
 typedef Future<ByteData> _PlatformMessageHandler(ByteData message);
 
 /// Sends message to and receives messages from the underlying platform.
 class PlatformMessages {
+  /// Handlers for incoming platform messages.
   static final Map<String, _PlatformMessageHandler> _handlers =
       <String, _PlatformMessageHandler>{};
+
+  /// Mock handlers that intercept and respond to outgoing messages.
+  static final Map<String, _PlatformMessageHandler> _mockHandlers =
+      <String, _PlatformMessageHandler>{};
+
+  static Future<ByteData> _sendPlatformMessage(String name, ByteData message) {
+    final Completer<ByteData> completer = new Completer<ByteData>();
+    ui.window.sendPlatformMessage(name, message, (ByteData reply) {
+      try {
+        completer.complete(reply);
+      } catch (exception, stack) {
+        FlutterError.reportError(new FlutterErrorDetails(
+          exception: exception,
+          stack: stack,
+          library: 'services library',
+          context: 'during a platform message response callback',
+        ));
+      }
+    });
+    return completer.future;
+  }
 
   /// Calls the handler registered for the given name.
   ///
@@ -77,22 +83,22 @@ class PlatformMessages {
     }
   }
 
+  /// Send a binary message to the host application.
+  static Future<ByteData> sendBinary(String name, ByteData message) {
+    final _PlatformMessageHandler handler = _mockHandlers[name];
+    if (handler != null)
+      return handler(message);
+    return _sendPlatformMessage(name, message);
+  }
+
   /// Send a string message to the host application.
-  static Future<String> sendString(String name, String message) {
-    Completer<String> completer = new Completer<String>();
-    _sendString(name, message, (String reply) {
-      completer.complete(reply);
-    });
-    return completer.future;
+  static Future<String> sendString(String name, String message) async {
+    return _decodeUTF8(await sendBinary(name, _encodeUTF8(message)));
   }
 
   /// Sends a JSON-encoded message to the host application and JSON-decodes the response.
-  static Future<dynamic> sendJSON(String name, dynamic json) {
-    Completer<dynamic> completer = new Completer<dynamic>();
-    _sendString(name, JSON.encode(json), (String reply) {
-      completer.complete(_decodeJSON(reply));
-    });
-    return completer.future;
+  static Future<dynamic> sendJSON(String name, dynamic json) async {
+    return _decodeJSON(await sendString(name, _encodeJSON(json)));
   }
 
   /// Set a callback for receiving binary messages from the platform.
@@ -120,6 +126,37 @@ class PlatformMessages {
   /// The given callback will replace the currently registered callback (if any).
   static void setJSONMessageHandler(String name, Future<dynamic> handler(dynamic message)) {
     setStringMessageHandler(name, (String message) async {
+      return _encodeJSON(await handler(_decodeJSON(message)));
+    });
+  }
+
+  /// Sets a message handler that intercepts outgoing messages in binary form.
+  ///
+  /// The given callback will replace the currently registered callback (if any).
+  /// To remove the mock handler, pass `null` as the `handler` argument.
+  static void setMockBinaryMessageHandler(String name, Future<ByteData> handler(ByteData message)) {
+    if (handler == null)
+      _mockHandlers.remove(handler);
+    else
+      _mockHandlers[name] = handler;
+  }
+
+  /// Sets a message handler that intercepts outgoing messages in string form.
+  ///
+  /// The given callback will replace the currently registered callback (if any).
+  /// To remove the mock handler, pass `null` as the `handler` argument.
+  static void setMockStringMessageHandler(String name, Future<String> handler(String message)) {
+    setMockBinaryMessageHandler(name, (ByteData message) async {
+      return _encodeUTF8(await handler(_decodeUTF8(message)));
+    });
+  }
+
+  /// Sets a message handler that intercepts outgoing messages in JSON form.
+  ///
+  /// The given callback will replace the currently registered callback (if any).
+  /// To remove the mock handler, pass `null` as the `handler` argument.
+  static void setMockJSONMessageHandler(String name, Future<dynamic> handler(dynamic message)) {
+    setMockStringMessageHandler(name, (String message) async {
       return _encodeJSON(await handler(_decodeJSON(message)));
     });
   }
