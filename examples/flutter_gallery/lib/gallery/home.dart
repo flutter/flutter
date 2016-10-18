@@ -76,7 +76,8 @@ class GalleryHome extends StatefulWidget {
     this.timeDilation,
     this.onTimeDilationChanged,
     this.showPerformanceOverlay,
-    this.onShowPerformanceOverlayChanged
+    this.onShowPerformanceOverlayChanged,
+    this.onPlatformChanged,
   }) : super(key: key) {
     assert(onThemeChanged != null);
     assert(onTimeDilationChanged != null);
@@ -90,6 +91,8 @@ class GalleryHome extends StatefulWidget {
 
   final bool showPerformanceOverlay;
   final ValueChanged<bool> onShowPerformanceOverlayChanged;
+
+  final ValueChanged<TargetPlatform> onPlatformChanged;
 
   @override
   GalleryHomeState createState() => new GalleryHomeState();
@@ -153,7 +156,8 @@ class GalleryHomeState extends State<GalleryHome> with SingleTickerProviderState
         timeDilation: config.timeDilation,
         onTimeDilationChanged: config.onTimeDilationChanged,
         showPerformanceOverlay: config.showPerformanceOverlay,
-        onShowPerformanceOverlayChanged: config.onShowPerformanceOverlayChanged
+        onShowPerformanceOverlayChanged: config.onShowPerformanceOverlayChanged,
+        onPlatformChanged: config.onPlatformChanged,
       ),
       appBar: new AppBar(
         expandedHeight: _kFlexibleSpaceMaxHeight,

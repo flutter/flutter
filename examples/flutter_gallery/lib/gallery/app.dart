@@ -43,6 +43,8 @@ class GalleryAppState extends State<GalleryApp> {
   bool _useLightTheme = true;
   bool _showPerformanceOverlay = false;
 
+  TargetPlatform platform = defaultTargetPlatform;
+
   @override
   Widget build(BuildContext context) {
     Widget home = new GalleryHome(
@@ -58,6 +60,11 @@ class GalleryAppState extends State<GalleryApp> {
           _showPerformanceOverlay = value;
         });
       } : null,
+      onPlatformChanged: (TargetPlatform value) {
+        setState(() {
+          platform = value;
+        });
+      },
       timeDilation: timeDilation,
       onTimeDilationChanged: (double value) {
         setState(() {
@@ -76,7 +83,7 @@ class GalleryAppState extends State<GalleryApp> {
     return new MaterialApp(
       title: 'Flutter Gallery',
       color: Colors.grey[500],
-      theme: _useLightTheme ? _kGalleryLightTheme : _kGalleryDarkTheme,
+      theme: (_useLightTheme ? _kGalleryLightTheme : _kGalleryDarkTheme).copyWith(platform: platform),
       showPerformanceOverlay: _showPerformanceOverlay,
       routes: _kRoutes,
       home: home,
