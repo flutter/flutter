@@ -215,7 +215,6 @@ class DriverOptions extends AnalysisOptionsImpl {
 
   DriverOptions() {
     // Set defaults.
-    cacheSize = 512;
     lint = true;
     generateSdkErrors = false;
     trackCacheDependencies = false;
