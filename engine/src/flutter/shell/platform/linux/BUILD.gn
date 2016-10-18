@@ -19,7 +19,6 @@ executable("linux") {
     "//base",
     "//flutter/common",
     "//flutter/services/engine:interfaces",
-    "//flutter/services/raw_keyboard:interfaces",
     "//flutter/shell/common",
     "//flutter/shell/gpu",
     "//flutter/shell/testing",

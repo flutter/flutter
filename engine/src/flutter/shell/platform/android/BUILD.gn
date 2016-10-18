@@ -86,8 +86,6 @@ android_library("java") {
     "//flutter/services/editing:interfaces_java",
     "//flutter/services/engine:interfaces_java",
     "//flutter/services/platform:interfaces_java",
-    "//flutter/services/raw_keyboard:interfaces_java",
-    "//flutter/services/raw_keyboard:raw_keyboard_lib",
     "//flutter/services/vsync:vsync_lib",
     "//mojo/android:system_java",
     "//mojo/public/interfaces/application:application_java",

@@ -25,6 +25,5 @@ dart_pkg("sky_services") {
     ":copy_sky_services_license",
     "//flutter/services/editing:interfaces",
     "//flutter/services/platform:interfaces",
-    "//flutter/services/raw_keyboard:interfaces",
   ]
 }
