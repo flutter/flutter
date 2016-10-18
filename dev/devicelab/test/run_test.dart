@@ -35,7 +35,7 @@ void main() {
 
     test('Exits with code 1 when fails to connect', () async {
       expect(await runScript(<String>['smoke_test_setup_failure']), 1);
-    }, skip: true); // https://github.com/flutter/flutter/issues/5901
+    });
 
     test('Exits with code 1 when results are mixed', () async {
       expect(
