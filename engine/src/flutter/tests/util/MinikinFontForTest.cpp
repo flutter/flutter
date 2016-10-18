@@ -18,31 +18,31 @@
 
 #include <minikin/MinikinFont.h>
 
-#include <SkTypeface.h>
-
 #include <cutils/log.h>
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <sys/mman.h>
 
 namespace minikin {
 
-// static
-MinikinFontForTest* MinikinFontForTest::createFromFile(const std::string& font_path) {
-    sk_sp<SkTypeface> typeface = SkTypeface::MakeFromFile(font_path.c_str());
-    MinikinFontForTest* font = new MinikinFontForTest(font_path, std::move(typeface));
-    return font;
+static int uniqueId = 0;  // TODO: make thread safe if necessary.
+
+MinikinFontForTest::MinikinFontForTest(const std::string& font_path, int index) :
+        MinikinFont(uniqueId++),
+        mFontPath(font_path),
+        mFontIndex(index) {
+    int fd = open(font_path.c_str(), O_RDONLY);
+    LOG_ALWAYS_FATAL_IF(fd == -1);
+    struct stat st = {};
+    LOG_ALWAYS_FATAL_IF(fstat(fd, &st) != 0);
+    mFontSize = st.st_size;
+    mFontData = mmap(NULL, mFontSize, PROT_READ, MAP_SHARED, fd, 0);
+    LOG_ALWAYS_FATAL_IF(mFontData == nullptr);
+    close(fd);
 }
 
-// static
-MinikinFontForTest* MinikinFontForTest::createFromFileWithIndex(const std::string& font_path,
-        int index) {
-    sk_sp<SkTypeface> typeface = SkTypeface::MakeFromFile(font_path.c_str(), index);
-    MinikinFontForTest* font = new MinikinFontForTest(font_path, std::move(typeface));
-    return font;
-}
-
-MinikinFontForTest::MinikinFontForTest(const std::string& font_path, sk_sp<SkTypeface> typeface) :
-        MinikinFont(typeface->uniqueID()),
-        mTypeface(std::move(typeface)),
-        mFontPath(font_path) {
+MinikinFontForTest::~MinikinFontForTest() {
+    munmap(mFontData, mFontSize);
 }
 
 float MinikinFontForTest::GetHorizontalAdvance(uint32_t /* glyph_id */,
@@ -54,22 +54,6 @@ float MinikinFontForTest::GetHorizontalAdvance(uint32_t /* glyph_id */,
 void MinikinFontForTest::GetBounds(MinikinRect* /* bounds */, uint32_t /* glyph_id */,
         const MinikinPaint& /* paint */) const {
     LOG_ALWAYS_FATAL("MinikinFontForTest::GetBounds is not yet implemented");
-}
-
-const void* MinikinFontForTest::GetTable(uint32_t tag, size_t* size,
-        MinikinDestroyFunc* destroy) {
-    const size_t tableSize = mTypeface->getTableSize(tag);
-    *size = tableSize;
-    if (tableSize == 0) {
-        return nullptr;
-    }
-    void* buf = malloc(tableSize);
-    if (buf == nullptr) {
-        return nullptr;
-    }
-    mTypeface->getTableData(tag, 0, tableSize, buf);
-    *destroy = free;
-    return buf;
 }
 
 }  // namespace minikin
