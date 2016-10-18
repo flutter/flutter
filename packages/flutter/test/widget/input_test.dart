@@ -36,9 +36,9 @@ class MockClipboard {
     'text': null
   };
 
-  Future<dynamic> handleJSONMessage(dynamic json) async {
-    final String method = json['method'];
-    final List<dynamic> args= json['args'];
+  Future<dynamic> handleJSONMessage(dynamic message) async {
+    final String method = message['method'];
+    final List<dynamic> args= message['args'];
     switch (method) {
       case 'Clipboard.getData':
         return _clipboardData;

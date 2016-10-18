@@ -18,6 +18,8 @@ class ClipboardData {
   final String text;
 }
 
+const String _kChannelName = 'flutter/platform';
+
 /// An interface to the system's clipboard.
 class Clipboard {
   /// Constants for common [getData] [format] types.
@@ -27,23 +29,21 @@ class Clipboard {
 
   /// Stores the given clipboard data on the clipboard.
   static Future<Null> setData(ClipboardData data) async {
-    await PlatformMessages.sendJSON('flutter/platform', <String, dynamic>{
-      'method': 'Clipboard.setData',
-      'args': <Map<String, dynamic>>[<String, dynamic>{
+    await PlatformMessages.invokeMethod(
+       _kChannelName,
+      'Clipboard.setData',
+      <Map<String, dynamic>>[<String, dynamic>{
         'text': data.text,
       }],
-    });
+    );
   }
 
   /// Retrieves data from the clipboard that matches the given format.
   ///
   ///  * `format` is a media type, such as `text/plain`.
   static Future<ClipboardData> getData(String format) async {
-    Map<String, dynamic> result =
-        await PlatformMessages.sendJSON('flutter/platform', <String, dynamic>{
-      'method': 'Clipboard.getData',
-      'args': <String>[format],
-    });
+    Map<String, dynamic> result = await PlatformMessages.invokeMethod(
+        _kChannelName, 'Clipboard.getData', <String>[format]);
     if (result == null)
       return null;
     return new ClipboardData(text: result['text']);

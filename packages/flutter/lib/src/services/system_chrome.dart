@@ -75,6 +75,8 @@ enum SystemUiOverlayStyle {
   dark,
 }
 
+const String _kChannelName = 'flutter/platform';
+
 List<String> _stringify(List<dynamic> list) {
   List<String> result = <String>[];
   for (dynamic item in list)
@@ -94,10 +96,11 @@ class SystemChrome {
   ///  * [orientation]: A list of [DeviceOrientation] enum values. The empty
   ///    list is synonymous with having all options enabled.
   static Future<Null> setPreferredOrientations(List<DeviceOrientation> orientations) async {
-    await PlatformMessages.sendJSON('flutter/platform', <String, dynamic>{
-      'method': 'SystemChrome.setPreferredOrientations',
-      'args': <List<String>>[ _stringify(orientations) ],
-    });
+    await PlatformMessages.invokeMethod(
+      _kChannelName,
+      'SystemChrome.setPreferredOrientations',
+      <List<String>>[ _stringify(orientations) ],
+    );
   }
 
   /// Specifies the description of the current state of the application as it
@@ -112,13 +115,14 @@ class SystemChrome {
   ///   If application-specified metadata is unsupported on the platform,
   ///   specifying it is a no-op and always return true.
   static Future<Null> setApplicationSwitcherDescription(ApplicationSwitcherDescription description) async {
-    await PlatformMessages.sendJSON('flutter/platform', <String, dynamic>{
-      'method': 'SystemChrome.setApplicationSwitcherDescription',
-      'args': <Map<String, dynamic>>[<String, dynamic>{
+    await PlatformMessages.invokeMethod(
+      _kChannelName,
+      'SystemChrome.setApplicationSwitcherDescription',
+      <Map<String, dynamic>>[<String, dynamic>{
         'label': description.label,
         'primaryColor': description.primaryColor,
       }],
-    });
+    );
   }
 
   /// Specifies the set of overlays visible on the embedder when the
@@ -135,10 +139,11 @@ class SystemChrome {
   ///   If the overlay is unsupported on the platform, enabling or disabling
   ///   that overlay is a no-op and always return true.
   static Future<Null> setEnabledSystemUIOverlays(List<SystemUiOverlay> overlays) async {
-    await PlatformMessages.sendJSON('flutter/platform', <String, dynamic>{
-      'method': 'SystemChrome.setEnabledSystemUIOverlays',
-      'args': <List<String>>[ _stringify(overlays) ],
-    });
+    await PlatformMessages.invokeMethod(
+      _kChannelName,
+      'SystemChrome.setEnabledSystemUIOverlays',
+      <List<String>>[ _stringify(overlays) ],
+    );
  }
 
   /// Specifies the style of the system overlays that are visible on the
@@ -166,10 +171,11 @@ class SystemChrome {
     scheduleMicrotask(() {
       assert(_pendingStyle != null);
       if (_pendingStyle != _latestStyle) {
-        PlatformMessages.sendJSON('flutter/platform', <String, dynamic>{
-          'method': 'SystemChrome.setSystemUIOverlayStyle',
-          'args': <String>[ _pendingStyle.toString() ],
-        });
+        PlatformMessages.invokeMethod(
+          _kChannelName,
+          'SystemChrome.setSystemUIOverlayStyle',
+          <String>[ _pendingStyle.toString() ],
+        );
         _latestStyle = _pendingStyle;
       }
       _pendingStyle = null;

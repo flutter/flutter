@@ -20,9 +20,10 @@ class SystemSound {
   /// Play the specified system sound. If that sound is not present on the
   /// system, this method is a no-op.
   static Future<Null> play(SystemSoundType type) async {
-    await PlatformMessages.sendJSON('flutter/platform', <String, dynamic>{
-      'method': 'SystemSound.play',
-      'args': <String>[ type.toString() ],
-    });
+    await PlatformMessages.invokeMethod(
+      'flutter/platform',
+      'SystemSound.play',
+      <String>[ type.toString() ],
+    );
   }
 }
