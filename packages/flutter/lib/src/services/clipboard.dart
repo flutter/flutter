@@ -4,38 +4,48 @@
 
 import 'dart:async';
 
-import 'package:flutter_services/editing.dart' as mojom;
+import 'platform_messages.dart';
 
-import 'shell.dart';
+/// Data stored on the system clip board.
+///
+/// The system clip board can contain data of various media types. This data
+/// structure currently supports only plain text data in the [text] property.
+class ClipboardData {
+  /// Creates data for the system clipboard.
+  const ClipboardData({ this.text });
 
-export 'package:flutter_services/editing.dart' show ClipboardData;
-
-mojom.ClipboardProxy _initClipboardProxy() {
-  return shell.connectToApplicationService('mojo:clipboard', mojom.Clipboard.connectToService);
+  /// Plain text data on the clip board.
+  final String text;
 }
 
-final mojom.ClipboardProxy _clipboardProxy = _initClipboardProxy();
-
-/// An interface to the system's clipboard. Wraps the mojo interface.
+/// An interface to the system's clipboard.
 class Clipboard {
-  /// Constants for common [getClipboardData] [format] types.
+  /// Constants for common [getData] [format] types.
   static final String kTextPlain = 'text/plain';
 
   Clipboard._();
 
   /// Stores the given clipboard data on the clipboard.
-  static void setClipboardData(mojom.ClipboardData clip) {
-    _clipboardProxy.setClipboardData(clip);
+  static Future<Null> setData(ClipboardData data) async {
+    await PlatformMessages.sendJSON('flutter/platform', <String, dynamic>{
+      'method': 'Clipboard.setData',
+      'args': <Map<String, dynamic>>[<String, dynamic>{
+        'text': data.text,
+      }],
+    });
   }
 
   /// Retrieves data from the clipboard that matches the given format.
   ///
   ///  * `format` is a media type, such as `text/plain`.
-  static Future<mojom.ClipboardData> getClipboardData(String format) {
-    Completer<mojom.ClipboardData> completer = new Completer<mojom.ClipboardData>();
-    _clipboardProxy.getClipboardData(format, (mojom.ClipboardData clip) {
-      completer.complete(clip);
+  static Future<ClipboardData> getData(String format) async {
+    Map<String, dynamic> result =
+        await PlatformMessages.sendJSON('flutter/platform', <String, dynamic>{
+      'method': 'Clipboard.getData',
+      'args': <String>[format],
     });
-    return completer.future;
+    if (result == null)
+      return null;
+    return new ClipboardData(text: result['text']);
   }
 }

@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_services/editing.dart' as mojom;
 import 'package:meta/meta.dart';
 
@@ -30,29 +31,30 @@ class MockKeyboard extends mojom.KeyboardProxy {
   void setEditingState(mojom.EditingState state) {}
 }
 
-class MockClipboard extends mojom.ClipboardProxy {
-  MockClipboard() : super.unbound();
+class MockClipboard {
+  Object _clipboardData = <String, dynamic>{
+    'text': null
+  };
 
-  mojom.ClipboardData _clip;
-
-  @override
-  void setClipboardData(mojom.ClipboardData clip) {
-    _clip = clip;
-  }
-
-  @override
-  void getClipboardData(String format, void callback(mojom.ClipboardData clip)) {
-    scheduleMicrotask(() {
-      callback(_clip);
-    });
+  Future<dynamic> handleJSONMessage(dynamic json) async {
+    final String method = json['method'];
+    final List<dynamic> args= json['args'];
+    switch (method) {
+      case 'Clipboard.getData':
+        return _clipboardData;
+      case 'Clipboard.setData':
+        _clipboardData = args[0];
+        break;
+    }
   }
 }
 
 void main() {
   MockKeyboard mockKeyboard = new MockKeyboard();
   serviceMocker.registerMockService(mockKeyboard);
+
   MockClipboard mockClipboard = new MockClipboard();
-  serviceMocker.registerMockService(mockClipboard);
+  PlatformMessages.setMockJSONMessageHandler('flutter/platform', mockClipboard.handleJSONMessage);
 
   const String kThreeLines =
     'First line of text is here abcdef ghijkl mnopqrst. ' +

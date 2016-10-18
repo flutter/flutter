@@ -50,7 +50,7 @@ class _TextSelectionToolbar extends StatelessWidget {
   }
 
   void _handleCut() {
-    Clipboard.setClipboardData(new ClipboardData()..text = value.selection.textInside(value.text));
+    Clipboard.setData(new ClipboardData(text: value.selection.textInside(value.text)));
     delegate.inputValue = new InputValue(
       text: value.selection.textBefore(value.text) + value.selection.textAfter(value.text),
       selection: new TextSelection.collapsed(offset: value.selection.start)
@@ -59,7 +59,7 @@ class _TextSelectionToolbar extends StatelessWidget {
   }
 
   void _handleCopy() {
-    Clipboard.setClipboardData(new ClipboardData()..text = value.selection.textInside(value.text));
+    Clipboard.setData(new ClipboardData(text: value.selection.textInside(value.text)));
     delegate.inputValue = new InputValue(
       text: value.text,
       selection: new TextSelection.collapsed(offset: value.selection.end)
@@ -69,11 +69,11 @@ class _TextSelectionToolbar extends StatelessWidget {
 
   Future<Null> _handlePaste() async {
     InputValue value = this.value;  // Snapshot the input before using `await`.
-    ClipboardData clip = await Clipboard.getClipboardData(Clipboard.kTextPlain);
-    if (clip != null) {
+    ClipboardData data = await Clipboard.getData(Clipboard.kTextPlain);
+    if (data != null) {
       delegate.inputValue = new InputValue(
-        text: value.selection.textBefore(value.text) + clip.text + value.selection.textAfter(value.text),
-        selection: new TextSelection.collapsed(offset: value.selection.start + clip.text.length)
+        text: value.selection.textBefore(value.text) + data.text + value.selection.textAfter(value.text),
+        selection: new TextSelection.collapsed(offset: value.selection.start + data.text.length)
       );
     }
     delegate.hideToolbar();
