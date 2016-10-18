@@ -456,7 +456,8 @@ class BottomNavigationBarState extends State<BottomNavigationBar> with TickerPro
                   bottom: 0.0,
                   child: new CustomPaint(
                     painter: new _RadialPainter(
-                      circles: _circles.toList()
+                      circles: _circles.toList(),
+                      bottomNavMaxWidth: _maxWidth,
                     ),
                   ),
                 ),
@@ -514,10 +515,12 @@ class _Circle {
 
 class _RadialPainter extends CustomPainter {
   _RadialPainter({
-    this.circles
+    this.circles,
+    this.bottomNavMaxWidth,
   });
 
   final List<_Circle> circles;
+  final double bottomNavMaxWidth;
 
   // Computes the maximum radius attainable such that at least one of the
   // bounding rectangle's corners touches the egde of the circle. Drawing a
@@ -533,6 +536,9 @@ class _RadialPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_RadialPainter oldPainter) {
+    if (bottomNavMaxWidth != oldPainter.bottomNavMaxWidth)
+      return true;
+
     if (circles == oldPainter.circles)
       return false;
     if (circles.length != oldPainter.circles.length)
@@ -555,8 +561,13 @@ class _RadialPainter extends CustomPainter {
       final Paint paint = new Paint()..color = circle.color;
       final Rect rect = new Rect.fromLTWH(0.0, 0.0, size.width, size.height);
       canvas.clipRect(rect);
+      double navWidth = math.min(bottomNavMaxWidth, size.width);
+      Point center = new Point(
+        (size.width - navWidth) / 2.0 + circle.offset.dx * navWidth,
+        circle.offset.dy * size.height
+      );
       canvas.drawCircle(
-        circle.offset.withinRect(rect),
+        center,
         radiusTween.lerp(circle.animation.value),
         paint
       );
