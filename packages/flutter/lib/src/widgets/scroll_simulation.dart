@@ -2,15 +2,100 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/physics.dart';
 
 final SpringDescription _kScrollSpring = new SpringDescription.withDampingRatio(mass: 0.5, springConstant: 100.0, ratio: 1.1);
 
-class _MountainViewSimulation extends FrictionSimulation {
-  static const double drag = 0.025;
-  _MountainViewSimulation({ double position, double velocity })
-    : super(drag, position, velocity);
+// This class is based on Scroller.java from
+// https://android.googlesource.com/platform/frameworks/base/+/master/core/java/android/widget
+// The "See" comments refer to Scroller methods and values. Some simplifications
+// have been made.
+class _MountainViewSimulation extends Simulation {
+  _MountainViewSimulation({
+    this.position,
+    this.velocity,
+    this.friction: 0.015,
+    this.devicePixelRatio: 3.0,
+  }) {
+    _scaledFriction = friction * _decelerationForFriction(0.84); // See mPhysicalCoeff
+    _duration = _flingDuration(velocity);
+    _distance = _flingDistance(velocity);
+    print("_MountainViewSimulation velocity=$velocity duration=$_duration, distance=$_distance)");
+  }
+
+  final double position;
+  final double velocity;
+  final double friction;
+  final double devicePixelRatio;
+
+  double _scaledFriction;
+  double _duration;
+  double _distance;
+
+  // See DECELERATION_RATE
+  static final double _decelerationRate = math.log(0.78) / math.log(0.9);
+
+  // See computeDeceleration().
+  double _decelerationForFriction(double friction) {
+    return devicePixelRatio * friction * 61774.04968;
+  }
+
+  // See getSplineDeceleration()
+  double _flingDeceleration(double velocity) {
+    return math.log(0.35 * velocity.abs() / _scaledFriction);
+  }
+  // See getSplineFlingDuration()
+  double _flingDuration(double velocity) {
+    return 1000.0 * math.exp(_flingDeceleration(velocity) / (_decelerationRate - 1.0));
+  }
+
+  // See getSplineFlingDistance()
+  double _flingDistance(double velocity) {
+    final double rate = _decelerationRate / (_decelerationRate - 1.0) * _flingDeceleration(velocity);
+    return _scaledFriction * math.exp(rate);
+  }
+
+  // Based on a cubic curve fit to the computeScrollOffset() values produced
+  // for an initial velocity of 4000. The value of scroller.getDuration()
+  // and scroller.getFinalY() were 686ms and 961 pixels respectively.
+  // Algebra courtesy of Wolfram Alpha.
+  //
+  // f(x) = 3.60882×10^-6 x^3 - 0.00668009 x^2 + 4.29427 x - 3.15307
+  // f(x) = 3.60882×10^-6 x^3 - 0.00668009 x^2 + 4.29427 x, so f(0) is 0
+  // f(686ms) = 961 pixels
+  // Scale to f(0 <= t <= 1.0), x = t * 686
+  // f(t) = 1165.03 t^3 - 3143.62 t^2 + 2945.87 t
+  // Scale so that 0.0 <= f(t) <= 1.0
+  // f(t) = (1165.03 t^3 - 3143.62 t^2 + 2945.87 t) / 961.0
+  //      = 1.21231 t^3 - 3.2712 t^2 + 3.06542 t
+  double _flingDistancePenetration(double t) {
+    return (1.2 * t * t * t) - (3.27 * t * t) + (3.06542 * t);
+  }
+
+  // The deriviate of the _flingPenetration() function.
+  double _flingVelocityPenetration(double t) {
+    return (3.63693 * t * t) - (6.5424 * t) + 3.06542;
+  }
+
+  @override
+  double x(double time) {
+    final double t = 1000.0 * (time / _duration).clamp(0.0, 1.0);
+    return position + (1.0 / 3.0) * _distance * _flingDistancePenetration(t) * velocity.sign;
+  }
+
+  @override
+  double dx(double time) {
+    final double t = 1000.0 * (time / _duration).clamp(0.0, 1.0);
+    return velocity * _flingVelocityPenetration(t);
+  }
+
+  @override
+  bool isDone(double time) {
+    return time >= _duration / 1000.0;
+  }
 }
 
 class _CupertinoSimulation extends FrictionSimulation {
@@ -103,7 +188,7 @@ class ScrollSimulation extends SimulationGroup {
         case TargetPlatform.fuchsia:
           _currentSimulation = new _MountainViewSimulation(
             position: position,
-            velocity: velocity
+            velocity: velocity * 3.0,
           );
           break;
         case TargetPlatform.iOS:
