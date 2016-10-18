@@ -163,7 +163,7 @@ class FlutterDriverExtension {
       if (widget is Tooltip)
         return widget.message == arguments.text;
       return false;
-    });
+    }, description: 'widget with text tooltip "${arguments.text}"');
   }
 
   Finder _createByValueKeyFinder(ByValueKey arguments) {
