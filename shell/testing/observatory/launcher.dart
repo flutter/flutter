@@ -41,6 +41,7 @@ class ShellProcess {
 class ShellLauncher {
   final List<String> args = [
     '--observatory-port=0',
+    '--non-interactive',
   ];
   final String shellExecutablePath;
   final String mainDartPath;
