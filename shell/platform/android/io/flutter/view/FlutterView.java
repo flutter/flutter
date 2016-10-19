@@ -71,8 +71,7 @@ import org.domokit.editing.KeyboardViewState;
  */
 @JNINamespace("shell")
 public class FlutterView extends SurfaceView
-  implements AccessibilityManager.AccessibilityStateChangeListener,
-             AccessibilityManager.TouchExplorationStateChangeListener {
+  implements AccessibilityManager.AccessibilityStateChangeListener {
     private static final String TAG = "FlutterView";
 
     private static final String ACTION_DISCOVER = "io.flutter.view.DISCOVER";
@@ -654,6 +653,7 @@ public class FlutterView extends SurfaceView
 
     private boolean mAccessibilityEnabled = false;
     private boolean mTouchExplorationEnabled = false;
+    private TouchExplorationListener mTouchExplorationListener;
 
     protected void dispatchSemanticsAction(int id, int action) {
         nativeDispatchSemanticsAction(mNativePlatformView, id, action);
@@ -668,14 +668,19 @@ public class FlutterView extends SurfaceView
           ensureAccessibilityEnabled();
         resetWillNotDraw();
         mAccessibilityManager.addAccessibilityStateChangeListener(this);
-        mAccessibilityManager.addTouchExplorationStateChangeListener(this);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            if (mTouchExplorationListener == null)
+                mTouchExplorationListener = new TouchExplorationListener();
+            mAccessibilityManager.addTouchExplorationStateChangeListener(mTouchExplorationListener);
+        }
     }
 
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         mAccessibilityManager.removeAccessibilityStateChangeListener(this);
-        mAccessibilityManager.removeTouchExplorationStateChangeListener(this);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT)
+            mAccessibilityManager.removeTouchExplorationStateChangeListener(mTouchExplorationListener);
     }
 
     private void resetWillNotDraw() {
@@ -696,18 +701,21 @@ public class FlutterView extends SurfaceView
         resetWillNotDraw();
     }
 
-    @Override
-    public void onTouchExplorationStateChanged(boolean enabled) {
-        if (enabled) {
-            mTouchExplorationEnabled = true;
-            ensureAccessibilityEnabled();
-        } else {
-            mTouchExplorationEnabled = false;
-            if (mAccessibilityNodeProvider != null) {
-                mAccessibilityNodeProvider.handleTouchExplorationExit();
+    class TouchExplorationListener
+      implements AccessibilityManager.TouchExplorationStateChangeListener {
+        @Override
+        public void onTouchExplorationStateChanged(boolean enabled) {
+            if (enabled) {
+                mTouchExplorationEnabled = true;
+                ensureAccessibilityEnabled();
+            } else {
+                mTouchExplorationEnabled = false;
+                if (mAccessibilityNodeProvider != null) {
+                    mAccessibilityNodeProvider.handleTouchExplorationExit();
+                }
             }
+            resetWillNotDraw();
         }
-        resetWillNotDraw();
     }
 
     @Override
