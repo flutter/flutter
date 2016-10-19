@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/physics.dart';
 
 final SpringDescription _kScrollSpring = new SpringDescription.withDampingRatio(mass: 0.5, springConstant: 100.0, ratio: 1.1);
+final double _kDrag = 0.025;
 
 // This class is based on Scroller.java from
 // https://android.googlesource.com/platform/frameworks/base/+/master/core/java/android/widget
@@ -18,7 +19,6 @@ class _MountainViewSimulation extends Simulation {
     this.position,
     this.velocity,
     this.friction: 0.015,
-    this.devicePixelRatio: 3.0,
   }) {
     _scaledFriction = friction * _decelerationForFriction(0.84); // See mPhysicalCoeff
     _duration = _flingDuration(velocity);
@@ -28,7 +28,6 @@ class _MountainViewSimulation extends Simulation {
   final double position;
   final double velocity;
   final double friction;
-  final double devicePixelRatio;
 
   double _scaledFriction;
   double _duration;
@@ -39,7 +38,7 @@ class _MountainViewSimulation extends Simulation {
 
   // See computeDeceleration().
   double _decelerationForFriction(double friction) {
-    return devicePixelRatio * friction * 61774.04968;
+    return friction * 61774.04968;
   }
 
   // See getSplineDeceleration()
@@ -70,7 +69,7 @@ class _MountainViewSimulation extends Simulation {
   // f(t) = 1165.03 t^3 - 3143.62 t^2 + 2945.87 t
   // Scale f(t) so that 0.0 <= f(t) <= 1.0
   // f(t) = (1165.03 t^3 - 3143.62 t^2 + 2945.87 t) / 961.0
-  //      = 1.2 t^3 - 3.27 t^2 + 3.06542 t
+  //      = 1.2 t^3 - 3.27 t^2 + 3.065 t
   double _flingDistancePenetration(double t) {
     return (1.2 * t * t * t) - (3.27 * t * t) + (3.065 * t);
   }
@@ -83,7 +82,7 @@ class _MountainViewSimulation extends Simulation {
   @override
   double x(double time) {
     final double t = (time / _duration).clamp(0.0, 1.0);
-    return position + _distance * _flingDistancePenetration(t) * velocity.sign / devicePixelRatio;
+    return position + _distance * _flingDistancePenetration(t) * velocity.sign;
   }
 
   @override
@@ -134,7 +133,7 @@ class ScrollSimulation extends SimulationGroup {
   }) : _leadingExtent = leadingExtent,
        _trailingExtent = trailingExtent,
        _spring = spring ?? _kScrollSpring,
-       _drag = drag,
+       _drag = drag ?? _kDrag,
        _platform = platform {
     assert(_leadingExtent != null);
     assert(_trailingExtent != null);
@@ -188,7 +187,7 @@ class ScrollSimulation extends SimulationGroup {
         case TargetPlatform.fuchsia:
           _currentSimulation = new _MountainViewSimulation(
             position: position,
-            velocity: velocity * 3.0,
+            velocity: velocity,
           );
           break;
         case TargetPlatform.iOS:
