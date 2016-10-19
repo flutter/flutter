@@ -23,17 +23,35 @@ double snapOffsetCallback(double offset, Size size) {
   return (offset / itemExtent).floor() * itemExtent;
 }
 
+class TestScrollConfigurationDelegate extends ScrollConfigurationDelegate {
+  const TestScrollConfigurationDelegate();
+
+  // Not testing platform-specific fling scrolling, use the default fling
+  // decleration simulation.
+  @override
+  TargetPlatform get platform => null;
+
+  @override
+  ExtentScrollBehavior createScrollBehavior() => new OverscrollWhenScrollableBehavior(platform: platform);
+
+  @override
+  bool updateShouldNotify(ScrollConfigurationDelegate old) => false;
+}
+
 Widget buildFrame() {
   scrollableListKey = new GlobalKey();
-  return new Center(
-    child: new Container(
-      height: itemExtent * 2.0,
-      child: new ScrollableList(
-        scrollableKey: scrollableListKey,
-        snapOffsetCallback: snapOffsetCallback,
-        scrollDirection: scrollDirection,
-        itemExtent: itemExtent,
-        children: <int>[0, 1, 2, 3, 4, 5, 7, 8, 9].map(buildItem)
+  return new ScrollConfiguration(
+    delegate: const TestScrollConfigurationDelegate(),
+    child: new Center(
+      child: new Container(
+        height: itemExtent * 2.0,
+        child: new ScrollableList(
+          scrollableKey: scrollableListKey,
+          snapOffsetCallback: snapOffsetCallback,
+          scrollDirection: scrollDirection,
+          itemExtent: itemExtent,
+          children: <int>[0, 1, 2, 3, 4, 5, 7, 8, 9].map(buildItem)
+        )
       )
     )
   );
