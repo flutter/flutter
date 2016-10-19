@@ -16,11 +16,13 @@
 #include "flutter/shell/platform/darwin/ios/framework/Source/flutter_touch_mapper.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/FlutterDartProject_Internal.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformPlugin.h"
+#include "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputDelegate.h"
+#include "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputPlugin.h"
 #include "flutter/shell/platform/darwin/ios/platform_view_ios.h"
 #include "lib/ftl/functional/make_copyable.h"
 #include "lib/ftl/time/time_delta.h"
 
-@interface FlutterViewController ()<UIAlertViewDelegate>
+@interface FlutterViewController ()<UIAlertViewDelegate, FlutterTextInputDelegate>
 @end
 
 void FlutterInit(int argc, const char* argv[]) {
@@ -37,6 +39,7 @@ void FlutterInit(int argc, const char* argv[]) {
   shell::TouchMapper _touchMapper;
   std::unique_ptr<shell::PlatformViewIOS> _platformView;
   base::scoped_nsprotocol<FlutterPlatformPlugin*> _platformPlugin;
+  base::scoped_nsprotocol<FlutterTextInputPlugin*> _textInputPlugin;
 
   BOOL _initialized;
 }
@@ -86,6 +89,11 @@ void FlutterInit(int argc, const char* argv[]) {
 
   _platformPlugin.reset([[FlutterPlatformPlugin alloc] init]);
   [self addMessageListener:_platformPlugin.get()];
+
+
+  _textInputPlugin.reset([[FlutterTextInputPlugin alloc] init]);
+  _textInputPlugin.get().textInputDelegate = self;
+  [self addMessageListener:_textInputPlugin.get()];
 
   [self setupNotificationCenterObservers];
 
@@ -170,14 +178,14 @@ void FlutterInit(int argc, const char* argv[]) {
 #pragma mark - Loading the view
 
 - (void)loadView {
-  FlutterView* surface = [[FlutterView alloc] init];
+  FlutterView* view = [[FlutterView alloc] init];
 
-  self.view = surface;
+  self.view = view;
   self.view.multipleTouchEnabled = YES;
   self.view.autoresizingMask =
       UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
 
-  [surface release];
+  [view release];
 }
 
 #pragma mark - Application lifecycle notifications
@@ -328,6 +336,15 @@ static inline PointerChangeMapperPhase PointerChangePhaseFromUITouchPhase(
       _viewportMetrics.Clone());
 }
 
+#pragma mark - Text input delegate
+
+- (void)updateEditingClient:(int)client withState:(NSDictionary*)state {
+  [self sendJSON:@{
+    @"method": @"TextInputClient.updateEditingState",
+    @"args": @[@(client), state],
+  } withMessageName:@"flutter/textinputclient"];
+}
+
 #pragma mark - Orientation updates
 
 - (void)onOrientationPreferencesUpdated:(NSNotification*)notification {
@@ -465,6 +482,19 @@ static inline PointerChangeMapperPhase PointerChangePhaseFromUITouchPhase(
       [callback_ptr](const mojo::String& response) {
         callback_ptr.get()(base::SysUTF8ToNSString(response));
       });
+}
+
+// TODO(abarth): Switch sendString over to using platform messages.
+- (void)sendJSON:(NSDictionary*)message withMessageName:(NSString*)messageName {
+  NSData* data = [NSJSONSerialization dataWithJSONObject:message options:0 error:nil];
+  if (!data)
+    return;
+  const char* bytes = static_cast<const char*>(data.bytes);
+  _platformView->DispatchPlatformMessage(
+      ftl::MakeRefCounted<blink::PlatformMessage>(
+          messageName.UTF8String,
+          std::vector<char>(bytes, bytes + data.length),
+          nullptr));
 }
 
 - (void)addMessageListener:(NSObject<FlutterMessageListener>*)listener {
