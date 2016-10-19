@@ -190,22 +190,17 @@ class TextInputConnection {
   final TextInputClient _client;
 
   /// Whether this connection is currently interacting with the text input control.
-  bool get attached => _attached;
-  bool _attached = true;
-
-  bool get _isAttachedAndCurrent {
-    return _attached && _clientHandler._currentConnection == this;
-  }
+  bool get attached => _clientHandler._currentConnection == this;
 
   /// Requests that the text input control become visible.
   void show() {
-    assert(_isAttachedAndCurrent);
+    assert(attached);
     PlatformMessages.invokeMethod(_kChannelName, 'TextInput.show');
   }
 
   /// Requests that the text input control change its internal state to match the given state.
   void setEditingState(TextEditingState state) {
-    assert(_isAttachedAndCurrent);
+    assert(attached);
     PlatformMessages.invokeMethod(
       _kChannelName,
       'TextInput.setEditingState',
@@ -218,15 +213,13 @@ class TextInputConnection {
   /// After calling this method, the text input control might disappear if no
   /// other client attaches to it within this animation frame.
   void close() {
-    if (_attached) {
-      assert(_clientHandler._currentConnection == this);
-      _attached = false;
+    if (attached) {
       PlatformMessages.invokeMethod(_kChannelName, 'TextInput.clearClient');
       _clientHandler
         .._currentConnection = null
         .._scheduleHide();
     }
-    assert(_clientHandler._currentConnection != this);
+    assert(!attached);
   }
 }
 

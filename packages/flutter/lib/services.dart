@@ -24,7 +24,6 @@ export 'src/services/image_decoder.dart';
 export 'src/services/image_provider.dart';
 export 'src/services/image_resolution.dart';
 export 'src/services/image_stream.dart';
-export 'src/services/keyboard.dart';
 export 'src/services/path_provider.dart';
 export 'src/services/platform_messages.dart';
 export 'src/services/raw_keyboard.dart';

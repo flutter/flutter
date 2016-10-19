@@ -14,7 +14,7 @@ import 'material.dart';
 import 'text_selection.dart';
 import 'theme.dart';
 
-export 'package:flutter_services/editing.dart' show KeyboardType;
+export 'package:flutter/services.dart' show TextInputType;
 
 /// A material design text input field.
 ///
@@ -44,7 +44,7 @@ class Input extends StatefulWidget {
   Input({
     Key key,
     this.value,
-    this.keyboardType: KeyboardType.text,
+    this.keyboardType: TextInputType.text,
     this.icon,
     this.labelText,
     this.hintText,
@@ -68,7 +68,7 @@ class Input extends StatefulWidget {
   final InputValue value;
 
   /// The type of keyboard to use for editing the text.
-  final KeyboardType keyboardType;
+  final TextInputType keyboardType;
 
   /// An icon to show adjacent to the input field.
   ///

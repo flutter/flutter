@@ -7,7 +7,6 @@ import 'dart:async';
 import 'package:flutter/rendering.dart' show RenderEditable, SelectionChangedHandler, RenderEditablePaintOffsetNeededCallback;
 import 'package:flutter/services.dart';
 import 'package:meta/meta.dart';
-import 'package:flutter_services/editing.dart' as mojom;
 
 import 'basic.dart';
 import 'focus.dart';
@@ -18,73 +17,37 @@ import 'scrollable.dart';
 import 'text_selection.dart';
 
 export 'package:flutter/painting.dart' show TextSelection;
-export 'package:flutter_services/editing.dart' show KeyboardType;
+export 'package:flutter/services.dart' show TextInputType;
 
 const Duration _kCursorBlinkHalfPeriod = const Duration(milliseconds: 500);
 
-TextSelection _getTextSelectionFromEditingState(mojom.EditingState state) {
+TextSelection _getTextSelectionFromEditingState(TextEditingState state) {
   return new TextSelection(
     baseOffset: state.selectionBase,
     extentOffset: state.selectionExtent,
-    affinity: TextAffinity.values[state.selectionAffinity.mojoEnumValue],
-    isDirectional: state.selectionIsDirectional
+    affinity: state.selectionAffinity,
+    isDirectional: state.selectionIsDirectional,
   );
 }
 
-class _KeyboardClientImpl implements mojom.KeyboardClient {
-  _KeyboardClientImpl({
-    this.inputValue,
-    this.onUpdated,
-    this.onSubmitted
-  }) {
-    assert(inputValue != null);
-    assert(onUpdated != null);
-    assert(onSubmitted != null);
-  }
+InputValue _getInputValueFromEditingState(TextEditingState state) {
+  return new InputValue(
+    text: state.text,
+    selection: _getTextSelectionFromEditingState(state),
+    composing: new TextRange(start: state.composingBase, end: state.composingExtent),
+  );
+}
 
-  InputValue inputValue;
-
-  /// Called whenever the text changes.
-  final VoidCallback onUpdated;
-
-  /// Called whenever the user indicates they are done editing the string.
-  final VoidCallback onSubmitted;
-
-  /// A keyboard client stub that can be attached to a keyboard service.
-  mojom.KeyboardClientStub createStub() {
-    return new mojom.KeyboardClientStub.unbound()..impl = this;
-  }
-
-  mojom.EditingState get editingState {
-    return new mojom.EditingState()
-      ..text = inputValue.text
-      ..selectionBase = inputValue.selection.baseOffset
-      ..selectionExtent = inputValue.selection.extentOffset
-      ..selectionAffinity = mojom.TextAffinity.values[inputValue.selection.affinity.index]
-      ..selectionIsDirectional = inputValue.selection.isDirectional
-      ..composingBase = inputValue.composing.start
-      ..composingExtent = inputValue.composing.end;
-  }
-
-  @override
-  void updateEditingState(mojom.EditingState state) {
-    inputValue = new InputValue(
-      text: state.text,
-      selection: _getTextSelectionFromEditingState(state),
-      composing: new TextRange(start: state.composingBase, end: state.composingExtent)
-    );
-    onUpdated();
-  }
-
-  void clearComposing() {
-    inputValue = inputValue.copyWith(composing: TextRange.empty);
-  }
-
-  @override
-  void submit(mojom.SubmitAction action) {
-    clearComposing();
-    onSubmitted();
-  }
+TextEditingState _getTextEditingStateFromInputValue(InputValue value) {
+  return new TextEditingState(
+    text: value.text,
+    selectionBase: value.selection.baseOffset,
+    selectionExtent: value.selection.extentOffset,
+    selectionAffinity: value.selection.affinity,
+    selectionIsDirectional: value.selection.isDirectional,
+    composingBase: value.composing.start,
+    composingExtent: value.composing.end,
+  );
 }
 
 /// Configuration information for an input field.
@@ -92,6 +55,9 @@ class _KeyboardClientImpl implements mojom.KeyboardClient {
 /// An [InputValue] contains the text for the input field as well as the
 /// selection extent and the composing range.
 class InputValue {
+  // TODO(abarth): This class is really the same as TextEditingState.
+  // We should merge them into one object.
+
   /// Creates configuration information for an input field
   ///
   /// The selection and composing range must be within the text.
@@ -226,7 +192,7 @@ class RawInput extends Scrollable {
   final TargetPlatform platform;
 
   /// The type of keyboard to use for editing the text.
-  final KeyboardType keyboardType;
+  final TextInputType keyboardType;
 
   /// Called when the text being edited changes.
   final ValueChanged<InputValue> onChanged;
@@ -239,12 +205,12 @@ class RawInput extends Scrollable {
 }
 
 /// State for a [RawInput].
-class RawInputState extends ScrollableState<RawInput> {
+class RawInputState extends ScrollableState<RawInput> implements TextInputClient {
   Timer _cursorTimer;
   bool _showCursor = false;
 
-  _KeyboardClientImpl _keyboardClient;
-  KeyboardHandle _keyboardHandle;
+  InputValue _currentValue;
+  TextInputConnection _textInputConnection;
   TextSelectionOverlay _selectionOverlay;
 
   @override
@@ -256,23 +222,19 @@ class RawInputState extends ScrollableState<RawInput> {
   @override
   void initState() {
     super.initState();
-    _keyboardClient = new _KeyboardClientImpl(
-      inputValue: config.value,
-      onUpdated: _handleTextUpdated,
-      onSubmitted: _handleTextSubmitted
-    );
+    _currentValue = config.value;
   }
 
   @override
   void didUpdateConfig(RawInput oldConfig) {
-    if (_keyboardClient.inputValue != config.value) {
-      _keyboardClient.inputValue = config.value;
+    if (_currentValue != config.value) {
+      _currentValue = config.value;
       if (_isAttachedToKeyboard)
-        _keyboardHandle.setEditingState(_keyboardClient.editingState);
+        _textInputConnection.setEditingState(_getTextEditingStateFromInputValue(_currentValue));
     }
   }
 
-  bool get _isAttachedToKeyboard => _keyboardHandle != null && _keyboardHandle.attached;
+  bool get _isAttachedToKeyboard => _textInputConnection != null && _textInputConnection.attached;
 
   bool get _isMultiline => config.maxLines > 1;
 
@@ -315,18 +277,23 @@ class RawInputState extends ScrollableState<RawInput> {
 
   void _attachOrDetachKeyboard(bool focused) {
     if (focused && !_isAttachedToKeyboard) {
-      _keyboardHandle = keyboard.attach(_keyboardClient.createStub(),
-                                        new mojom.KeyboardConfiguration()
-                                          ..type = config.keyboardType);
-      _keyboardHandle.setEditingState(_keyboardClient.editingState);
-      _keyboardHandle.show();
+      _textInputConnection = TextInput.attach(
+          this, new TextInputConfiguration(inputType: config.keyboardType))
+        ..setEditingState(_getTextEditingStateFromInputValue(_currentValue))
+        ..show();
     } else if (!focused) {
       if (_isAttachedToKeyboard) {
-        _keyboardHandle.release();
-        _keyboardHandle = null;
+        _textInputConnection.close();
+        _textInputConnection = null;
       }
-      _keyboardClient.clearComposing();
+      _clearComposing();
     }
+  }
+
+  void _clearComposing() {
+    // TODO(abarth): We should call config.onChanged to notify our parent of
+    // this change in our composing range.
+    _currentValue = _currentValue.copyWith(composing: TextRange.empty);
   }
 
   /// Express interest in interacting with the keyboard.
@@ -338,25 +305,29 @@ class RawInputState extends ScrollableState<RawInput> {
   /// keyboard become visible.
   void requestKeyboard() {
     if (_isAttachedToKeyboard) {
-      _keyboardHandle.show();
+      _textInputConnection.show();
     } else {
       Focus.moveTo(config.focusKey);
     }
   }
 
-  void _handleTextUpdated() {
+  @override
+  void updateEditingState(TextEditingState state) {
+    _currentValue = _getInputValueFromEditingState(state);
     if (config.onChanged != null)
-      config.onChanged(_keyboardClient.inputValue);
-    if (_keyboardClient.inputValue.text != config.value.text) {
+      config.onChanged(_currentValue);
+    if (_currentValue.text != config.value.text) {
       _selectionOverlay?.hide();
       _selectionOverlay = null;
     }
   }
 
-  void _handleTextSubmitted() {
+  @override
+  void performAction(TextInputAction action) {
+    _clearComposing();
     Focus.clear(context);
     if (config.onSubmitted != null)
-      config.onSubmitted(_keyboardClient.inputValue);
+      config.onSubmitted(_currentValue);
   }
 
   void _handleSelectionChanged(TextSelection selection, RenderEditable renderObject, bool longPress) {
@@ -364,7 +335,7 @@ class RawInputState extends ScrollableState<RawInput> {
     // EditableWidget, not just changes triggered by user gestures.
     requestKeyboard();
 
-    InputValue newInput = new InputValue(text: _keyboardClient.inputValue.text, selection: selection);
+    InputValue newInput = _currentValue.copyWith(selection: selection, composing: TextRange.empty);
     if (config.onChanged != null)
       config.onChanged(newInput);
 
@@ -425,8 +396,10 @@ class RawInputState extends ScrollableState<RawInput> {
 
   @override
   void dispose() {
-    if (_isAttachedToKeyboard)
-      _keyboardHandle.release();
+    if (_isAttachedToKeyboard) {
+      _textInputConnection.close();
+      _textInputConnection = null;
+    }
     if (_cursorTimer != null)
       _stopCursorTimer();
     _selectionOverlay?.dispose();
@@ -464,7 +437,7 @@ class RawInputState extends ScrollableState<RawInput> {
 
     return new ClipRect(
       child: new _Editable(
-        value: _keyboardClient.inputValue,
+        value: _currentValue,
         style: config.style,
         cursorColor: config.cursorColor,
         showCursor: _showCursor,
