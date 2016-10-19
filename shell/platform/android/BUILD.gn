@@ -66,6 +66,8 @@ android_library("java") {
   java_files = [
     "io/flutter/plugin/common/ActivityLifecycleListener.java",
     "io/flutter/plugin/common/JSONMessageListener.java",
+    "io/flutter/plugin/editing/InputConnectionAdaptor.java",
+    "io/flutter/plugin/editing/TextInputPlugin.java",
     "io/flutter/plugin/platform/PlatformPlugin.java",
     "io/flutter/view/AccessibilityBridge.java",
     "io/flutter/view/FlutterMain.java",

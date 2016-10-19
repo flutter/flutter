@@ -60,6 +60,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import io.flutter.plugin.common.ActivityLifecycleListener;
+import io.flutter.plugin.editing.TextInputPlugin;
 import io.flutter.plugin.platform.PlatformPlugin;
 
 import org.domokit.editing.KeyboardImpl;
@@ -77,6 +78,8 @@ public class FlutterView extends SurfaceView
     private static final String ACTION_DISCOVER = "io.flutter.view.DISCOVER";
 
     private long mNativePlatformView;
+    private TextInputPlugin mTextInputPlugin;
+
     private SkyEngine.Proxy mSkyEngine;
     private ServiceProviderImpl mPlatformServiceProvider;
     private Binding mPlatformServiceProviderBinding;
@@ -159,6 +162,8 @@ public class FlutterView extends SurfaceView
         PlatformPlugin platformPlugin = new PlatformPlugin((Activity)getContext());
         addOnMessageListener("flutter/platform", platformPlugin);
         addActivityLifecycleListener(platformPlugin);
+        mTextInputPlugin = new TextInputPlugin((Activity)getContext());
+        addOnMessageListener("flutter/textinput", mTextInputPlugin);
 
         if ((context.getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
             discoveryReceiver = new DiscoveryReceiver();
@@ -181,7 +186,7 @@ public class FlutterView extends SurfaceView
             message.put("type", "keyup");
             message.put("keymap", "android");
             encodeKeyEvent(event, message);
-            dispatchPlatformMessage("flutter/keyevent", message.toString(), null);
+            sendPlatformMessage("flutter/keyevent", message.toString(), null);
         } catch (JSONException e) {
             Log.e(TAG, "Failed to serialize key event", e);
         }
@@ -195,7 +200,7 @@ public class FlutterView extends SurfaceView
             message.put("type", "keydown");
             message.put("keymap", "android");
             encodeKeyEvent(event, message);
-            dispatchPlatformMessage("flutter/keyevent", message.toString(), null);
+            sendPlatformMessage("flutter/keyevent", message.toString(), null);
         } catch (JSONException e) {
             Log.e(TAG, "Failed to serialize key event", e);
         }
@@ -269,7 +274,10 @@ public class FlutterView extends SurfaceView
 
     @Override
     public InputConnection onCreateInputConnection(EditorInfo outAttrs) {
-        return mKeyboardState.createInputConnection(outAttrs);
+        InputConnection connection = mKeyboardState.createInputConnection(outAttrs);
+        if (connection == null)
+          connection = mTextInputPlugin.createInputConnection(this, outAttrs);
+        return connection;
     }
 
     // Must match the PointerChange enum in pointer.dart.
@@ -738,7 +746,12 @@ public class FlutterView extends SurfaceView
         return true;
     }
 
-    private void dispatchPlatformMessage(String name, String message, MessageReplyCallback callback) {
+    /**
+     * Send a message to the Flutter application. The Flutter application can
+     * register a platform message handler that will receive these messages with
+     * the PlatformMessages object.
+     */
+    public void sendPlatformMessage(String name, String message, MessageReplyCallback callback) {
         int responseId = 0;
         if (callback != null) {
             responseId = mNextResponseId++;
