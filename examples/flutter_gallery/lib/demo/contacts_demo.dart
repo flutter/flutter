@@ -99,7 +99,8 @@ class ContactsDemoState extends State<ContactsDemo> {
     return new Theme(
       data: new ThemeData(
         brightness: Brightness.light,
-        primarySwatch: Colors.indigo
+        primarySwatch: Colors.indigo,
+        platform: Theme.of(context).platform,
       ),
       child: new Scaffold(
         key: _scaffoldKey,

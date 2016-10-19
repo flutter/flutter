@@ -162,7 +162,8 @@ class KeyPad extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData themeData = new ThemeData(
       primarySwatch: Colors.purple,
-      brightness: Brightness.dark
+      brightness: Brightness.dark,
+      platform: Theme.of(context).platform,
     );
     return new Theme(
       data: themeData,
