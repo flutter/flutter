@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SHELL_PLATFORM_IOS_FRAMEWORK_SOURCE_FLUTTERPLATFORM_PLUGIN_H_
-#define SHELL_PLATFORM_IOS_FRAMEWORK_SOURCE_FLUTTERPLATFORM_PLUGIN_H_
+#ifndef SHELL_PLATFORM_IOS_FRAMEWORK_SOURCE_FLUTTERPLATFORMPLUGIN_H_
+#define SHELL_PLATFORM_IOS_FRAMEWORK_SOURCE_FLUTTERPLATFORMPLUGIN_H_
 
 #include "flutter/shell/platform/darwin/ios/framework/Headers/FlutterJSONMessageListener.h"
 
@@ -20,4 +20,4 @@ extern const char* const kOverlayStyleUpdateNotificationKey;
 
 }  // namespace shell
 
-#endif  // SHELL_PLATFORM_IOS_FRAMEWORK_SOURCE_FLUTTERPLATFORM_PLUGIN_H_
+#endif  // SHELL_PLATFORM_IOS_FRAMEWORK_SOURCE_FLUTTERPLATFORMPLUGIN_H_
