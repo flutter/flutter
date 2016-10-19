@@ -4,7 +4,7 @@
 
 import 'dart:async';
 
-import 'package:flutter/rendering.dart' show RenderEditableLine, SelectionChangedHandler, RenderEditableLinePaintOffsetNeededCallback;
+import 'package:flutter/rendering.dart' show RenderEditable, SelectionChangedHandler, RenderEditablePaintOffsetNeededCallback;
 import 'package:flutter/services.dart';
 import 'package:meta/meta.dart';
 import 'package:flutter_services/editing.dart' as mojom;
@@ -158,11 +158,11 @@ class InputValue {
 /// [Input], which provides focus management and material design.
 //
 // TODO(mpcomplete): rename RawInput since it can span multiple lines.
-class RawInputLine extends Scrollable {
+class RawInput extends Scrollable {
   /// Creates a basic single-line input control.
   ///
   /// The [value] argument must not be null.
-  RawInputLine({
+  RawInput({
     Key key,
     @required this.value,
     this.focusKey,
@@ -235,11 +235,11 @@ class RawInputLine extends Scrollable {
   final ValueChanged<InputValue> onSubmitted;
 
   @override
-  RawInputLineState createState() => new RawInputLineState();
+  RawInputState createState() => new RawInputState();
 }
 
-/// State for a [RawInputLine].
-class RawInputLineState extends ScrollableState<RawInputLine> {
+/// State for a [RawInput].
+class RawInputState extends ScrollableState<RawInput> {
   Timer _cursorTimer;
   bool _showCursor = false;
 
@@ -264,7 +264,7 @@ class RawInputLineState extends ScrollableState<RawInputLine> {
   }
 
   @override
-  void didUpdateConfig(RawInputLine oldConfig) {
+  void didUpdateConfig(RawInput oldConfig) {
     if (_keyboardClient.inputValue != config.value) {
       _keyboardClient.inputValue = config.value;
       if (_isAttachedToKeyboard)
@@ -359,9 +359,9 @@ class RawInputLineState extends ScrollableState<RawInputLine> {
       config.onSubmitted(_keyboardClient.inputValue);
   }
 
-  void _handleSelectionChanged(TextSelection selection, RenderEditableLine renderObject, bool longPress) {
+  void _handleSelectionChanged(TextSelection selection, RenderEditable renderObject, bool longPress) {
     // Note that this will show the keyboard for all selection changes on the
-    // EditableLineWidget, not just changes triggered by user gestures.
+    // EditableWidget, not just changes triggered by user gestures.
     requestKeyboard();
 
     InputValue newInput = new InputValue(text: _keyboardClient.inputValue.text, selection: selection);
@@ -463,7 +463,7 @@ class RawInputLineState extends ScrollableState<RawInputLine> {
     }
 
     return new ClipRect(
-      child: new _EditableLineWidget(
+      child: new _Editable(
         value: _keyboardClient.inputValue,
         style: config.style,
         cursorColor: config.cursorColor,
@@ -480,8 +480,8 @@ class RawInputLineState extends ScrollableState<RawInputLine> {
   }
 }
 
-class _EditableLineWidget extends LeafRenderObjectWidget {
-  _EditableLineWidget({
+class _Editable extends LeafRenderObjectWidget {
+  _Editable({
     Key key,
     this.value,
     this.style,
@@ -506,11 +506,11 @@ class _EditableLineWidget extends LeafRenderObjectWidget {
   final bool hideText;
   final SelectionChangedHandler onSelectionChanged;
   final Offset paintOffset;
-  final RenderEditableLinePaintOffsetNeededCallback onPaintOffsetUpdateNeeded;
+  final RenderEditablePaintOffsetNeededCallback onPaintOffsetUpdateNeeded;
 
   @override
-  RenderEditableLine createRenderObject(BuildContext context) {
-    return new RenderEditableLine(
+  RenderEditable createRenderObject(BuildContext context) {
+    return new RenderEditable(
       text: _styledTextSpan,
       cursorColor: cursorColor,
       showCursor: showCursor,
@@ -525,7 +525,7 @@ class _EditableLineWidget extends LeafRenderObjectWidget {
   }
 
   @override
-  void updateRenderObject(BuildContext context, RenderEditableLine renderObject) {
+  void updateRenderObject(BuildContext context, RenderEditable renderObject) {
     renderObject
       ..text = _styledTextSpan
       ..cursorColor = cursorColor

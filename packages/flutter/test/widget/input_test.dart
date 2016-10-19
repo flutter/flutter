@@ -73,27 +73,27 @@ void main() {
       ..composingExtent = testValue.length);
   }
 
-  // Returns the first RenderEditableLine.
-  RenderEditableLine findRenderEditableLine(WidgetTester tester) {
-    RenderObject root = tester.renderObject(find.byType(RawInputLine));
+  // Returns the first RenderEditable.
+  RenderEditable findRenderEditable(WidgetTester tester) {
+    RenderObject root = tester.renderObject(find.byType(RawInput));
     expect(root, isNotNull);
 
-    RenderEditableLine renderLine;
+    RenderEditable renderEditable;
     void recursiveFinder(RenderObject child) {
-      if (child is RenderEditableLine) {
-        renderLine = child;
+      if (child is RenderEditable) {
+        renderEditable = child;
         return;
       }
       child.visitChildren(recursiveFinder);
     }
     root.visitChildren(recursiveFinder);
-    expect(renderLine, isNotNull);
-    return renderLine;
+    expect(renderEditable, isNotNull);
+    return renderEditable;
   }
 
   Point textOffsetToPosition(WidgetTester tester, int offset) {
-    RenderEditableLine renderLine = findRenderEditableLine(tester);
-    List<TextSelectionPoint> endpoints = renderLine.getEndpointsForSelection(
+    RenderEditable renderEditable = findRenderEditable(tester);
+    List<TextSelectionPoint> endpoints = renderEditable.getEndpointsForSelection(
         new TextSelection.collapsed(offset: offset));
     expect(endpoints.length, 1);
     return endpoints[0].point + new Offset(0.0, -2.0);
@@ -157,7 +157,7 @@ void main() {
 
     await tester.pumpWidget(builder());
 
-    RawInputLineState editableText = tester.state(find.byType(RawInputLine));
+    RawInputState editableText = tester.state(find.byType(RawInput));
 
     // Check that the cursor visibility toggles after each blink interval.
     Future<Null> checkCursorToggle() async {
@@ -296,8 +296,8 @@ void main() {
 
     TextSelection selection = inputValue.selection;
 
-    RenderEditableLine renderLine = findRenderEditableLine(tester);
-    List<TextSelectionPoint> endpoints = renderLine.getEndpointsForSelection(
+    RenderEditable renderEditable = findRenderEditable(tester);
+    List<TextSelectionPoint> endpoints = renderEditable.getEndpointsForSelection(
         selection);
     expect(endpoints.length, 2);
 
@@ -363,8 +363,8 @@ void main() {
     // Tap the selection handle to bring up the "paste / select all" menu.
     await tester.tapAt(textOffsetToPosition(tester, testValue.indexOf('e')));
     await tester.pumpWidget(builder());
-    RenderEditableLine renderLine = findRenderEditableLine(tester);
-    List<TextSelectionPoint> endpoints = renderLine.getEndpointsForSelection(
+    RenderEditable renderEditable = findRenderEditable(tester);
+    List<TextSelectionPoint> endpoints = renderEditable.getEndpointsForSelection(
         inputValue.selection);
     await tester.tapAt(endpoints[0].point + new Offset(1.0, 1.0));
     await tester.pumpWidget(builder());
@@ -383,8 +383,8 @@ void main() {
     // Tap again to bring back the menu.
     await tester.tapAt(textOffsetToPosition(tester, testValue.indexOf('e')));
     await tester.pumpWidget(builder());
-    renderLine = findRenderEditableLine(tester);
-    endpoints = renderLine.getEndpointsForSelection(inputValue.selection);
+    renderEditable = findRenderEditable(tester);
+    endpoints = renderEditable.getEndpointsForSelection(inputValue.selection);
     await tester.tapAt(endpoints[0].point + new Offset(1.0, 1.0));
     await tester.pumpWidget(builder());
 
@@ -427,8 +427,8 @@ void main() {
     // Tap the selection handle to bring up the "paste / select all" menu.
     await tester.tapAt(textOffsetToPosition(tester, testValue.indexOf('e')));
     await tester.pumpWidget(builder());
-    RenderEditableLine renderLine = findRenderEditableLine(tester);
-    List<TextSelectionPoint> endpoints = renderLine.getEndpointsForSelection(
+    RenderEditable renderEditable = findRenderEditable(tester);
+    List<TextSelectionPoint> endpoints = renderEditable.getEndpointsForSelection(
         inputValue.selection);
     await tester.tapAt(endpoints[0].point + new Offset(1.0, 1.0));
     await tester.pumpWidget(builder());
@@ -552,8 +552,8 @@ void main() {
     expect(inputValue.selection.baseOffset, 76);
     expect(inputValue.selection.extentOffset, 81);
 
-    RenderEditableLine renderLine = findRenderEditableLine(tester);
-    List<TextSelectionPoint> endpoints = renderLine.getEndpointsForSelection(
+    RenderEditable renderEditable = findRenderEditable(tester);
+    List<TextSelectionPoint> endpoints = renderEditable.getEndpointsForSelection(
         inputValue.selection);
     expect(endpoints.length, 2);
 
@@ -656,8 +656,8 @@ void main() {
     await gesture.up();
     await tester.pump();
 
-    RenderEditableLine renderLine = findRenderEditableLine(tester);
-    List<TextSelectionPoint> endpoints = renderLine.getEndpointsForSelection(
+    RenderEditable renderEditable = findRenderEditable(tester);
+    List<TextSelectionPoint> endpoints = renderEditable.getEndpointsForSelection(
         inputValue.selection);
     expect(endpoints.length, 2);
 

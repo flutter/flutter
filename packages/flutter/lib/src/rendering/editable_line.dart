@@ -17,7 +17,7 @@ const double _kCaretWidth = 1.0; // pixels
 final String _kZeroWidthSpace = new String.fromCharCode(0x200B);
 
 /// Called when the user changes the selection (including cursor location).
-typedef void SelectionChangedHandler(TextSelection selection, RenderEditableLine renderObject, bool longPress);
+typedef void SelectionChangedHandler(TextSelection selection, RenderEditable renderObject, bool longPress);
 
 /// Represents a global screen coordinate of the point in a selection, and the
 /// text direction at that point.
@@ -36,12 +36,12 @@ class TextSelectionPoint {
   final TextDirection direction;
 }
 
-typedef Offset RenderEditableLinePaintOffsetNeededCallback(ViewportDimensions dimensions, Rect caretRect);
+typedef Offset RenderEditablePaintOffsetNeededCallback(ViewportDimensions dimensions, Rect caretRect);
 
 /// A single line of editable text.
-class RenderEditableLine extends RenderBox {
+class RenderEditable extends RenderBox {
   /// Creates a render object for a single line of editable text.
-  RenderEditableLine({
+  RenderEditable({
     TextSpan text,
     Color cursorColor,
     bool showCursor: false,
@@ -71,7 +71,7 @@ class RenderEditableLine extends RenderBox {
   SelectionChangedHandler onSelectionChanged;
 
   /// Called when the inner or outer dimensions of this render object change.
-  RenderEditableLinePaintOffsetNeededCallback onPaintOffsetUpdateNeeded;
+  RenderEditablePaintOffsetNeededCallback onPaintOffsetUpdateNeeded;
 
   /// The text to display
   TextSpan get text => _textPainter.text;
