@@ -19,10 +19,10 @@ class MockKeyboard extends mojom.KeyboardProxy {
   }
 
   @override
-  void show() {}
+  void show() { }
 
   @override
-  void hide() {}
+  void hide() { }
 
   @override
   void setEditingState(mojom.EditingState state) {
@@ -48,16 +48,14 @@ void main() {
   }
 
   testWidgets('Setter callback is called', (WidgetTester tester) async {
-    String fieldValue;
+    FormField<InputValue> field = new FormField<InputValue>();
 
     Widget builder() {
       return new Center(
         child: new Material(
           child: new Form(
             child: new Input(
-              formField: new FormField<String>(
-                setter: (String value) { fieldValue = value; }
-              )
+              formField: field,
             )
           )
         )
@@ -66,12 +64,12 @@ void main() {
 
     await tester.pumpWidget(builder());
 
-    expect(fieldValue, isNull);
+    expect(field.value, isNull);
 
     Future<Null> checkText(String testValue) async {
       enterText(testValue);
       // pump'ing is unnecessary because callback happens regardless of frames
-      expect(fieldValue, equals(testValue));
+      expect(field.value.text, equals(testValue));
     }
 
     await checkText('Test');
@@ -80,7 +78,11 @@ void main() {
 
   testWidgets('Validator sets the error text', (WidgetTester tester) async {
     GlobalKey inputKey = new GlobalKey();
-    String errorText(String input) => input + '/error';
+    String errorText(String input) => '$input/error';
+
+    FormField<InputValue> field = new FormField<InputValue>(
+      validator: (InputValue value) => errorText(value.text)
+    );
 
     Widget builder() {
       return new Center(
@@ -88,9 +90,7 @@ void main() {
           child: new Form(
             child: new Input(
               key: inputKey,
-              formField: new FormField<String>(
-                validator: errorText
-              )
+              formField: field,
             )
           )
         )
@@ -113,10 +113,15 @@ void main() {
   testWidgets('Multiple Inputs communicate', (WidgetTester tester) async {
     GlobalKey inputKey = new GlobalKey();
     GlobalKey focusKey = new GlobalKey();
-    // Input 1's text value.
-    String fieldValue;
-    // Input 2's validator depends on a input 1's value.
-    String errorText(String input) => fieldValue.toString() + '/error';
+
+    String errorText(String value) => '$value/error';
+
+    FormField<InputValue> field1 = new FormField<InputValue>();
+
+    FormField<InputValue> field2 = new FormField<InputValue>(
+      // Input 2's validator depends on a input 1's value.
+      validator: (InputValue input) => errorText(field1.value?.text),
+    );
 
     Widget builder() {
       return new Center(
@@ -128,14 +133,10 @@ void main() {
                 children: <Widget>[
                   new Input(
                     key: inputKey,
-                    formField: new FormField<String>(
-                      setter: (String value) { fieldValue = value; }
-                    )
+                    formField: field1,
                   ),
                   new Input(
-                    formField: new FormField<String>(
-                      validator: errorText
-                    )
+                    formField: field2,
                   )
                 ]
               )
@@ -153,7 +154,7 @@ void main() {
       enterText(testValue);
       await tester.pump();
 
-      expect(fieldValue, equals(testValue));
+      expect(field1.value.text, equals(testValue));
 
       // Check for a new Text widget with our error text.
       expect(find.text(errorText(testValue)), findsOneWidget);
@@ -166,20 +167,20 @@ void main() {
 
   testWidgets('Provide initial value to input', (WidgetTester tester) async {
     String initialValue = 'hello';
-    String currentValue;
+
+    FormField<InputValue> field = new FormField<InputValue>(
+      initialValue: new InputValue(text: initialValue),
+    );
 
     Widget builder() {
       return new Center(
-          child: new Material(
-              child: new Form(
-                  child: new Input(
-                      value: new InputValue(text: initialValue),
-                      formField: new FormField<String>(
-                          setter: (String value) { currentValue = value; }
-                      )
-                  )
-              )
+        child: new Material(
+          child: new Form(
+            child: new Input(
+              formField: field,
+            )
           )
+        )
       );
     }
 
@@ -194,11 +195,11 @@ void main() {
     expect(editableText.config.value.text, equals(initialValue));
 
     // sanity check, make sure we can still edit the text and everything updates
-    expect(currentValue, isNull);
+    expect(field.value.text, initialValue);
     enterText('world');
-    expect(currentValue, equals('world'));
+    expect(field.value.text, 'world');
     await tester.pump();
-    expect(editableText.config.value.text, equals('world'));
+    expect(editableText.config.value.text, 'world');
 
   });
 }

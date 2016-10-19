@@ -10,8 +10,8 @@ enum _Location {
   Bermuda
 }
 
-typedef Widget DemoItemBodyBuilder(DemoItem<dynamic> item);
-typedef String ValueToString<T>(T value);
+typedef Widget DemoItemBodyBuilder<T, U>(DemoItem<T, U> item);
+typedef U Converter<T, U>(T value);
 
 class DualHeaderWithHint extends StatelessWidget {
   DualHeaderWithHint({
@@ -73,7 +73,7 @@ class CollapsibleBody extends StatelessWidget {
     this.margin: EdgeInsets.zero,
     this.child,
     this.onSave,
-    this.onCancel
+    this.onCancel,
   });
 
   final EdgeInsets margin;
@@ -123,7 +123,7 @@ class CollapsibleBody extends StatelessWidget {
                 child: new FlatButton(
                   onPressed: onSave,
                   textTheme: ButtonTextTheme.accent,
-                  child: new Text('SAVE')
+                  child: new Text('SAVE'),
                 )
               )
             ]
@@ -134,21 +134,57 @@ class CollapsibleBody extends StatelessWidget {
   }
 }
 
-class DemoItem<T> {
+class DemoItem<T, U> {
   DemoItem({
     this.name,
-    this.value,
+    T value,
     this.hint,
     this.builder,
-    this.valueToString
-  });
+    this.valueToString,
+    this.valueToField,
+    this.fieldToValue,
+  }) {
+    _value = value;
+    _field = new FormField<U>(initialValue: _valueToField(value));
+  }
 
   final String name;
   final String hint;
-  final DemoItemBodyBuilder builder;
-  final ValueToString<T> valueToString;
-  T value;
+  final DemoItemBodyBuilder<T, U> builder;
+  final Converter<T, String> valueToString;
+  final Converter<T, U> valueToField;
+  final Converter<U, T> fieldToValue;
+
   bool isExpanded = false;
+
+  T get value => _value;
+  T _value;
+
+  FormField<U> get field => _field;
+  FormField<U> _field;
+
+  U _valueToField(T value) {
+    if (valueToField != null)
+      return valueToField(value);
+    assert(T == U);
+    return value as U; // ignore: avoid_as
+  }
+
+  T _fieldToValue(U value) {
+    if (fieldToValue != null)
+      return fieldToValue(value);
+    assert(T == U);
+    return value as T; // ignore: avoid_as
+  }
+
+  void save() {
+    _value = _fieldToValue(field.value);
+    _field.value = _valueToField(value);
+  }
+
+  void cancel() {
+    _field.value = _valueToField(value);
+  }
 
   ExpansionPanelHeaderBuilder get headerBuilder {
     return (BuildContext context, bool isExpanded) {
@@ -156,74 +192,76 @@ class DemoItem<T> {
         name: name,
         value: valueToString(value),
         hint: hint,
-        showHint: isExpanded
+        showHint: isExpanded,
       );
     };
   }
 }
 
-class ExpasionPanelsDemo extends StatefulWidget {
+class ExpansionPanelsDemo extends StatefulWidget {
   static const String routeName = '/expansion_panels';
 
   @override
   _ExpansionPanelsDemoState createState() => new _ExpansionPanelsDemoState();
 }
 
-class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
-  List<DemoItem<dynamic>> _demoItems;
+class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
+  List<DemoItem<dynamic, dynamic>> _demoItems;
+
+  VoidCallback _saver(DemoItem<dynamic, dynamic> item) {
+    return () {
+      setState(() {
+        item.save();
+        item.isExpanded = false;
+      });
+    };
+  }
+
+  VoidCallback _canceler(DemoItem<dynamic, dynamic> item) {
+    return () {
+      setState(() {
+        item.cancel();
+        item.isExpanded = false;
+      });
+    };
+  }
 
   @override
   void initState() {
     super.initState();
 
-    _demoItems = <DemoItem<dynamic>>[
-      new DemoItem<String>(
+    _demoItems = <DemoItem<dynamic, dynamic>>[
+      new DemoItem<String, InputValue>(
         name: 'Trip name',
         value: 'Caribbean cruise',
         hint: 'Change trip name',
         valueToString: (String value) => value,
-        builder: (DemoItem<String> item) { // ignore: argument_type_not_assignable, https://github.com/flutter/flutter/issues/5771
-          void close() {
-            setState(() {
-              item.isExpanded = false;
-            });
-          }
-
+        valueToField: (String value) => new InputValue(text: value),
+        fieldToValue: (InputValue value) => value.text,
+        builder: (DemoItem<String, InputValue> item) { // ignore: argument_type_not_assignable, https://github.com/flutter/flutter/issues/5771
           return new CollapsibleBody(
             margin: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: new Form(
-              child: new Input(
-                hintText: item.hint,
-                labelText: item.name,
-                value: new InputValue(text: item.value),
-                formField: new FormField<String>(
-                  setter: (String val) { item.value = val; }
-                ),
-              ),
+            child: new Input(
+              hintText: item.hint,
+              labelText: item.name,
+              formField: item.field,
             ),
-            onSave: close,
-            onCancel: close
+            onSave: _saver(item),
+            onCancel: _canceler(item),
           );
         }
       ),
-      new DemoItem<_Location>(
+      new DemoItem<_Location, _Location>(
         name: 'Location',
         value: _Location.Bahamas,
         hint: 'Select location',
         valueToString: (_Location location) => location.toString().split(".")[1],
-        builder: (DemoItem<_Location> item) { // ignore: argument_type_not_assignable, https://github.com/flutter/flutter/issues/5771
-          void close() {
+        builder: (DemoItem<_Location, _Location> item) { // ignore: argument_type_not_assignable, https://github.com/flutter/flutter/issues/5771
+          void changeLocation(_Location value) {
             setState(() {
-              item.isExpanded = false;
+              item.field.value = value;
             });
           }
-
-          void changeLocation(_Location newLocation) {
-            setState(() {
-              item.value = newLocation;
-            });
-          }
-
           return new CollapsibleBody(
             child: new Column(
               mainAxisSize: MainAxisSize.min,
@@ -234,7 +272,7 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
                   children: <Widget>[
                     new Radio<_Location>(
                       value: _Location.Bahamas,
-                      groupValue: item.value,
+                      groupValue: item.field.value,
                       onChanged: changeLocation
                     ),
                     new Text('Bahamas')
@@ -245,7 +283,7 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
                   children: <Widget>[
                     new Radio<_Location>(
                       value: _Location.Barbados,
-                      groupValue: item.value,
+                      groupValue: item.field.value,
                       onChanged: changeLocation
                     ),
                     new Text('Barbados')
@@ -256,7 +294,7 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
                   children: <Widget>[
                     new Radio<_Location>(
                       value: _Location.Bermuda,
-                      groupValue: item.value,
+                      groupValue: item.field.value,
                       onChanged: changeLocation
                     ),
                     new Text('Bermuda')
@@ -264,39 +302,33 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
                 )
               ]
             ),
-            onSave: close,
-            onCancel: close
+            onSave: _saver(item),
+            onCancel: _canceler(item),
           );
         }
       ),
-      new DemoItem<double>(
+      new DemoItem<double, double>(
         name: 'Sun amount',
         value: 80.0,
         hint: 'Select amount of sun',
         valueToString: (double amount) => '${amount.round()}',
-        builder: (DemoItem<double> item) { // ignore: argument_type_not_assignable, https://github.com/flutter/flutter/issues/5771
-          void close() {
-            setState(() {
-              item.isExpanded = false;
-            });
-          }
-
+        builder: (DemoItem<double, double> item) { // ignore: argument_type_not_assignable, https://github.com/flutter/flutter/issues/5771
           return new CollapsibleBody(
             child: new Slider(
-              value: item.value,
+              value: item.field.value,
               min: 0.0,
               max: 100.0,
               divisions: 5,
-              activeColor: Colors.orange[100 + (item.value * 5.0).round()],
-              label: '${item.value.round()}',
+              activeColor: Colors.orange[100 + (item.field.value * 5.0).round()],
+              label: '${item.field.value.round()}',
               onChanged: (double value) {
                 setState(() {
-                  item.value = value;
+                  item.field.value = value;
                 });
               }
             ),
-            onSave: close,
-            onCancel: close
+            onSave: _saver(item),
+            onCancel: _canceler(item),
           );
         }
       )
@@ -316,7 +348,7 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
                 _demoItems[index].isExpanded = !isExpanded;
               });
             },
-            children: _demoItems.map((DemoItem<dynamic> item) {
+            children: _demoItems.map((DemoItem<dynamic, dynamic> item) {
               return new ExpansionPanel(
                 isExpanded: item.isExpanded,
                 headerBuilder: item.headerBuilder,

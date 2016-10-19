@@ -1405,6 +1405,18 @@ abstract class BuildContext {
   /// ancestor is added or removed).
   InheritedWidget inheritFromWidgetOfExactType(Type targetType);
 
+  /// Obtains the element corresponding to the nearest widget of the given type,
+  /// which must be the type of a concrete [InheritedWidget] subclass.
+  ///
+  /// Calling this method is O(1) with a small constant factor.
+  ///
+  /// This method does not establish a relationship with the target in the way
+  /// that [inheritFromWidgetOfExactType] does. It is normally used by such
+  /// widgets to obtain their corresponding [InheritedElement] object so that they
+  /// can call [InheritedElement.dispatchDependenciesChanged] to actually
+  /// notify the widgets that _did_ register such a relationship.
+  InheritedElement ancestorInheritedElementForWidgetOfExactType(Type targetType);
+
   /// Returns the nearest ancestor widget of the given type, which must be the
   /// type of a concrete [Widget] subclass.
   ///
@@ -2402,6 +2414,12 @@ abstract class Element implements BuildContext {
     return null;
   }
 
+  @override
+  InheritedElement ancestorInheritedElementForWidgetOfExactType(Type targetType) {
+    InheritedElement ancestor = _inheritedWidgets == null ? null : _inheritedWidgets[targetType];
+    return ancestor;
+  }
+
   void _updateInheritance() {
     assert(_active);
     _inheritedWidgets = _parent?._inheritedWidgets;
@@ -3118,8 +3136,9 @@ class InheritedElement extends ProxyElement {
   /// [InheritedElement] calls this function if [InheritedWidget.updateShouldNotify]
   /// returns true. Subclasses of [InheritedElement] might wish to call this
   /// function at other times if their inherited information changes outside of
-  /// the build phase.
-  @protected
+  /// the build phase. [InheritedWidget] subclasses can also call this directly
+  /// by first obtaining their [InheritedElement] using
+  /// [BuildContext.ancestorInheritedElementForWidgetOfExactType].
   void dispatchDependenciesChanged() {
     for (Element dependent in _dependents) {
       assert(() {

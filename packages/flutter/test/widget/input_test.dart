@@ -149,6 +149,7 @@ void main() {
         child: new Material(
           child: new Input(
             key: inputKey,
+            value: new InputValue(),
             hintText: 'Placeholder'
           )
         )
@@ -192,6 +193,7 @@ void main() {
         child: new Material(
           child: new Input(
             key: inputKey,
+            value: new InputValue(),
             hideText: true,
             hintText: 'Placeholder'
           )
