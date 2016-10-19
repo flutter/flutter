@@ -31,6 +31,8 @@
 namespace shell {
 namespace {
 
+constexpr char kAssetPluginChannel[] = "flutter/assets";
+
 bool PathExists(const std::string& path) {
   return access(path.c_str(), R_OK) == 0;
 }
@@ -197,6 +199,9 @@ void Engine::RunFromSnapshotStream(
 void Engine::ConfigureAssetBundle(const std::string& path) {
   struct stat stat_result = {0};
 
+  directory_asset_bundle_.reset();
+  zip_asset_bundle_.reset();
+
   if (::stat(path.c_str(), &stat_result) != 0) {
     LOG(INFO) << "Could not configure asset bundle at path: " << path;
     return;
@@ -204,8 +209,8 @@ void Engine::ConfigureAssetBundle(const std::string& path) {
 
   if (S_ISDIR(stat_result.st_mode)) {
     // Directory asset bundle.
-    new blink::DirectoryAssetBundle(mojo::GetProxy(&root_bundle_), path,
-                                    blink::Threads::IO());
+    directory_asset_bundle_ = std::make_unique<blink::DirectoryAssetBundle>(
+        mojo::GetProxy(&root_bundle_), path, blink::Threads::IO());
     return;
   }
 
@@ -213,7 +218,8 @@ void Engine::ConfigureAssetBundle(const std::string& path) {
     // Zip asset bundle.
     asset_store_ = ftl::MakeRefCounted<blink::ZipAssetStore>(
         blink::GetUnzipperProviderForPath(path), blink::Threads::IO());
-    new blink::ZipAssetBundle(mojo::GetProxy(&root_bundle_), asset_store_);
+    zip_asset_bundle_ = std::make_unique<blink::ZipAssetBundle>(
+        mojo::GetProxy(&root_bundle_), asset_store_);
     return;
   }
 }
@@ -365,12 +371,34 @@ void Engine::UpdateSemantics(std::vector<blink::SemanticsNode> update) {
 
 void Engine::HandlePlatformMessage(
     ftl::RefPtr<blink::PlatformMessage> message) {
+  if (message->name() == kAssetPluginChannel) {
+    HandleAssetPlatformMessage(std::move(message));
+    return;
+  }
   blink::Threads::Platform()->PostTask([
     platform_view = platform_view_, message = std::move(message)
   ]() mutable {
     if (platform_view)
       platform_view->HandlePlatformMessage(std::move(message));
   });
+}
+
+void Engine::HandleAssetPlatformMessage(
+    ftl::RefPtr<blink::PlatformMessage> message) {
+  ftl::RefPtr<blink::PlatformMessageResponse> response = message->response();
+  if (!response)
+    return;
+  const auto& data = message->data();
+  std::string asset_name(reinterpret_cast<const char*>(data.data()),
+                         data.size());
+  std::vector<uint8_t> asset_data;
+  if ((directory_asset_bundle_ &&
+       directory_asset_bundle_->GetAsBuffer(asset_name, &asset_data)) ||
+      (asset_store_ && asset_store_->GetAsBuffer(asset_name, &asset_data))) {
+    response->Complete(std::move(asset_data));
+  } else {
+    response->CompleteWithError();
+  }
 }
 
 }  // namespace shell
