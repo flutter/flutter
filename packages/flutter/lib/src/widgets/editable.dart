@@ -463,7 +463,7 @@ class RawInputState extends ScrollableState<RawInput> {
     }
 
     return new ClipRect(
-      child: new _EditableWidget(
+      child: new _Editable(
         value: _keyboardClient.inputValue,
         style: config.style,
         cursorColor: config.cursorColor,
@@ -480,8 +480,8 @@ class RawInputState extends ScrollableState<RawInput> {
   }
 }
 
-class _EditableWidget extends LeafRenderObjectWidget {
-  _EditableWidget({
+class _Editable extends LeafRenderObjectWidget {
+  _Editable({
     Key key,
     this.value,
     this.style,
