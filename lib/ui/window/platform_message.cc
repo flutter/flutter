@@ -9,7 +9,7 @@
 namespace blink {
 
 PlatformMessage::PlatformMessage(std::string name,
-                                 std::vector<char> data,
+                                 std::vector<uint8_t> data,
                                  ftl::RefPtr<PlatformMessageResponse> response)
     : name_(std::move(name)),
       data_(std::move(data)),

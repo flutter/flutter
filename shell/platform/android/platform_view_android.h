@@ -67,7 +67,8 @@ class PlatformViewAndroid : public PlatformView {
   void HandlePlatformMessage(
       ftl::RefPtr<blink::PlatformMessage> message) override;
 
-  void HandlePlatformMessageResponse(int response_id, std::vector<char> data);
+  void HandlePlatformMessageResponse(int response_id,
+                                     std::vector<uint8_t> data);
 
   void RunFromSource(const std::string& main,
                      const std::string& packages,

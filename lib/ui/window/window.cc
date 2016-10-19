@@ -21,7 +21,7 @@ using tonic::ToDart;
 namespace blink {
 namespace {
 
-Dart_Handle ToByteData(const std::vector<char> buffer) {
+Dart_Handle ToByteData(const std::vector<uint8_t>& buffer) {
   if (buffer.empty())
     return Dart_Null();
 
@@ -72,7 +72,7 @@ void SendPlatformMessage(Dart_Handle window,
                          Dart_Handle callback,
                          const tonic::DartByteData& data) {
   UIDartState* dart_state = UIDartState::Current();
-  const char* buffer = static_cast<const char*>(data.data());
+  const uint8_t* buffer = static_cast<const uint8_t*>(data.data());
 
   ftl::RefPtr<PlatformMessageResponse> response;
   if (!Dart_IsNull(callback)) {
@@ -82,7 +82,7 @@ void SendPlatformMessage(Dart_Handle window,
 
   UIDartState::Current()->window()->client()->HandlePlatformMessage(
       ftl::MakeRefCounted<PlatformMessage>(
-          name, std::vector<char>(buffer, buffer + data.length_in_bytes()),
+          name, std::vector<uint8_t>(buffer, buffer + data.length_in_bytes()),
           response));
 }
 
@@ -93,9 +93,10 @@ void _SendPlatformMessage(Dart_NativeArguments args) {
 void RespondToPlatformMessage(Dart_Handle window,
                               int response_id,
                               const tonic::DartByteData& data) {
-  const char* buffer = static_cast<const char*>(data.data());
+  const uint8_t* buffer = static_cast<const uint8_t*>(data.data());
   UIDartState::Current()->window()->CompletePlatformMessageResponse(
-      response_id, std::vector<char>(buffer, buffer + data.length_in_bytes()));
+      response_id,
+      std::vector<uint8_t>(buffer, buffer + data.length_in_bytes()));
 }
 
 void _RespondToPlatformMessage(Dart_NativeArguments args) {
@@ -244,7 +245,7 @@ void Window::OnAppLifecycleStateChanged(sky::AppLifecycleState state) {
 }
 
 void Window::CompletePlatformMessageResponse(int response_id,
-                                             std::vector<char> data) {
+                                             std::vector<uint8_t> data) {
   if (!response_id)
     return;
   auto it = pending_responses_.find(response_id);

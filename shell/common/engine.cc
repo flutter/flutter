@@ -186,11 +186,11 @@ void Engine::RunFromSnapshotStream(
   TRACE_EVENT0("flutter", "Engine::RunFromSnapshotStream");
   ConfigureRuntime(script_uri);
   snapshot_drainer_.reset(new glue::DrainDataPipeJob(
-      std::move(snapshot), [this](std::vector<char> snapshot) {
+      std::move(snapshot), [this](std::vector<uint8_t> snapshot) {
         FTL_DCHECK(runtime_);
         FTL_DCHECK(runtime_->dart_controller());
-        runtime_->dart_controller()->RunFromSnapshot(
-            reinterpret_cast<uint8_t*>(snapshot.data()), snapshot.size());
+        runtime_->dart_controller()->RunFromSnapshot(snapshot.data(),
+                                                     snapshot.size());
       }));
 }
 

@@ -17,14 +17,14 @@ namespace blink {
 class PointerDataPacket {
  public:
   explicit PointerDataPacket(size_t count);
-  PointerDataPacket(char* data, size_t num_bytes);
+  PointerDataPacket(uint8_t* data, size_t num_bytes);
   ~PointerDataPacket();
 
   void SetPointerData(size_t i, const PointerData& data);
-  const std::vector<char>& data() const { return data_; }
+  const std::vector<uint8_t>& data() const { return data_; }
 
  private:
-  std::vector<char> data_;
+  std::vector<uint8_t> data_;
 
   FTL_DISALLOW_COPY_AND_ASSIGN(PointerDataPacket);
 };

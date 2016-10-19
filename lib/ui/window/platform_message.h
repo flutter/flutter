@@ -20,7 +20,7 @@ class PlatformMessage : public ftl::RefCountedThreadSafe<PlatformMessage> {
 
  public:
   const std::string& name() const { return name_; }
-  const std::vector<char>& data() const { return data_; }
+  const std::vector<uint8_t>& data() const { return data_; }
 
   const ftl::RefPtr<PlatformMessageResponse>& response() const {
     return response_;
@@ -28,12 +28,12 @@ class PlatformMessage : public ftl::RefCountedThreadSafe<PlatformMessage> {
 
  private:
   PlatformMessage(std::string name,
-                  std::vector<char> data,
+                  std::vector<uint8_t> data,
                   ftl::RefPtr<PlatformMessageResponse> response);
   ~PlatformMessage();
 
   std::string name_;
-  std::vector<char> data_;
+  std::vector<uint8_t> data_;
   ftl::RefPtr<PlatformMessageResponse> response_;
 };
 

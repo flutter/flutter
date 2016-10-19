@@ -26,7 +26,7 @@ using tonic::ToDart;
 namespace blink {
 namespace {
 
-sk_sp<SkImage> DecodeImage(std::vector<char> buffer) {
+sk_sp<SkImage> DecodeImage(std::vector<uint8_t> buffer) {
   TRACE_EVENT0("blink", "DecodeImage");
 
   if (buffer.empty())
@@ -70,7 +70,7 @@ void InvokeImageCallback(sk_sp<SkImage> image,
 
 void DecodeImageAndInvokeImageCallback(
     glue::MovableWrapper<std::unique_ptr<DartPersistentValue>> callback,
-    std::vector<char> buffer) {
+    std::vector<uint8_t> buffer) {
   sk_sp<SkImage> image = DecodeImage(std::move(buffer));
   Threads::UI()->PostTask([callback, image]() mutable {
     InvokeImageCallback(image, callback.Unwrap());
@@ -100,7 +100,7 @@ void DecodeImageFromDataPipe(Dart_NativeArguments args) {
   Threads::IO()->PostTask([callback, consumer]() mutable {
     glue::DrainDataPipeJob* job = nullptr;
     job = new glue::DrainDataPipeJob(
-        consumer.Unwrap(), [callback, job](std::vector<char> buffer) {
+        consumer.Unwrap(), [callback, job](std::vector<uint8_t> buffer) {
           delete job;
           DecodeImageAndInvokeImageCallback(callback, std::move(buffer));
         });
@@ -126,12 +126,11 @@ void DecodeImageFromList(Dart_NativeArguments args) {
   auto callback = glue::WrapMovable(std::unique_ptr<DartPersistentValue>(
       new DartPersistentValue(tonic::DartState::Current(), callback_handle)));
 
-  const char* bytes = reinterpret_cast<const char*>(list.data());
-  auto buffer = glue::WrapMovable(std::unique_ptr<std::vector<char>>(
-      new std::vector<char>(bytes, bytes + list.num_elements())));
+  const uint8_t* bytes = reinterpret_cast<const uint8_t*>(list.data());
+  std::vector<uint8_t> buffer(bytes, bytes + list.num_elements());
 
-  Threads::IO()->PostTask([callback, buffer]() mutable {
-    DecodeImageAndInvokeImageCallback(callback, std::move(*buffer.Unwrap()));
+  Threads::IO()->PostTask([ callback, buffer = std::move(buffer) ]() mutable {
+    DecodeImageAndInvokeImageCallback(callback, std::move(buffer));
   });
 }
 
