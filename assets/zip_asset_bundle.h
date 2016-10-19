@@ -6,8 +6,8 @@
 #define FLUTTER_ASSETS_ZIP_ASSET_BUNDLE_H_
 
 #include "flutter/assets/zip_asset_store.h"
+#include "mojo/public/cpp/bindings/binding.h"
 #include "mojo/public/cpp/bindings/interface_request.h"
-#include "mojo/public/cpp/bindings/strong_binding.h"
 #include "mojo/services/asset_bundle/interfaces/asset_bundle.mojom.h"
 
 namespace blink {
@@ -17,6 +17,7 @@ class ZipAssetBundle : public mojo::asset_bundle::AssetBundle {
   ZipAssetBundle(
       mojo::InterfaceRequest<mojo::asset_bundle::AssetBundle> request,
       ftl::RefPtr<ZipAssetStore> store);
+  ~ZipAssetBundle() override;
 
   // mojo::assert_bundle::AssetBundle implementation:
   void GetAsStream(
@@ -25,9 +26,7 @@ class ZipAssetBundle : public mojo::asset_bundle::AssetBundle {
       override;
 
  private:
-  ~ZipAssetBundle() override;
-
-  mojo::StrongBinding<mojo::asset_bundle::AssetBundle> binding_;
+  mojo::Binding<mojo::asset_bundle::AssetBundle> binding_;
   ftl::RefPtr<ZipAssetStore> store_;
 };
 

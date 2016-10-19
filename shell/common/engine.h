@@ -23,6 +23,11 @@
 #include "mojo/services/asset_bundle/interfaces/asset_bundle.mojom.h"
 #include "third_party/skia/include/core/SkPicture.h"
 
+namespace blink {
+class DirectoryAssetBundle;
+class ZipAssetBundle;
+}  // namespace blink
+
 namespace shell {
 class PlatformView;
 class Animator;
@@ -97,6 +102,8 @@ class Engine : public sky::SkyEngine, public blink::RuntimeDelegate {
   void ConfigureAssetBundle(const std::string& path);
   void ConfigureRuntime(const std::string& script_uri);
 
+  void HandleAssetPlatformMessage(ftl::RefPtr<blink::PlatformMessage> message);
+
   ftl::WeakPtr<PlatformView> platform_view_;
   std::unique_ptr<Animator> animator_;
 
@@ -116,7 +123,10 @@ class Engine : public sky::SkyEngine, public blink::RuntimeDelegate {
   std::string country_code_;
   bool semantics_enabled_ = false;
   mojo::Binding<SkyEngine> binding_;
+
   ftl::RefPtr<blink::ZipAssetStore> asset_store_;
+  std::unique_ptr<blink::DirectoryAssetBundle> directory_asset_bundle_;
+  std::unique_ptr<blink::ZipAssetBundle> zip_asset_bundle_;
 
   // TODO(eseidel): This should move into an AnimatorStateMachine.
   bool activity_running_;
