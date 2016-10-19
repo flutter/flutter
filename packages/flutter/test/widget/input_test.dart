@@ -8,28 +8,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_services/editing.dart' as mojom;
-import 'package:meta/meta.dart';
 
-class MockKeyboard extends mojom.KeyboardProxy {
-  MockKeyboard() : super.unbound();
-
-  mojom.KeyboardClient client;
-
-  @override
-  void setClient(@checked mojom.KeyboardClientStub client, mojom.KeyboardConfiguration configuraiton) {
-    this.client = client.impl;
-  }
-
-  @override
-  void show() {}
-
-  @override
-  void hide() {}
-
-  @override
-  void setEditingState(mojom.EditingState state) {}
-}
+import 'mock_text_input.dart';
 
 class MockClipboard {
   Object _clipboardData = <String, dynamic>{
@@ -50,9 +30,7 @@ class MockClipboard {
 }
 
 void main() {
-  MockKeyboard mockKeyboard = new MockKeyboard();
-  serviceMocker.registerMockService(mockKeyboard);
-
+  MockTextInput mockTextInput = new MockTextInput()..register();
   MockClipboard mockClipboard = new MockClipboard();
   PlatformMessages.setMockJSONMessageHandler('flutter/platform', mockClipboard.handleJSONMessage);
 
@@ -64,13 +42,12 @@ void main() {
     kThreeLines +
     'Fourth line won\'t display and ends at abcdef ghi. ';
 
-  void enterText(String testValue) {
-    // Simulate entry of text through the keyboard.
-    expect(mockKeyboard.client, isNotNull);
-    mockKeyboard.client.updateEditingState(new mojom.EditingState()
-      ..text = testValue
-      ..composingBase = 0
-      ..composingExtent = testValue.length);
+  void updateEditingState(TextEditingState state) {
+    mockTextInput.updateEditingState(state);
+  }
+
+  void enterText(String text) {
+    mockTextInput.enterText(text);
   }
 
   // Returns the first RenderEditable.
@@ -123,13 +100,14 @@ void main() {
     RenderBox inputBox = findInputBox();
     Size emptyInputSize = inputBox.size;
 
-    Future<Null> checkText(String testValue) {
+    Future<Null> checkText(String testValue) async {
       enterText(testValue);
+      await tester.idle();
 
       // Check that the onChanged event handler fired.
       expect(inputValue.text, equals(testValue));
 
-      return tester.pumpWidget(builder());
+      return await tester.pumpWidget(builder());
     }
 
     await checkText(' ');
@@ -177,10 +155,11 @@ void main() {
     await checkCursorToggle();
 
     // Try the test again with a nonempty EditableText.
-    mockKeyboard.client.updateEditingState(new mojom.EditingState()
-      ..text = 'X'
-      ..selectionBase = 1
-      ..selectionExtent = 1);
+    updateEditingState(new TextEditingState(
+      text: 'X',
+      selectionBase: 1,
+      selectionExtent: 1,
+    ));
     await checkCursorToggle();
   });
 
@@ -202,10 +181,11 @@ void main() {
     await tester.pumpWidget(builder());
 
     const String testValue = 'ABC';
-    mockKeyboard.client.updateEditingState(new mojom.EditingState()
-      ..text = testValue
-      ..selectionBase = testValue.length
-      ..selectionExtent = testValue.length);
+    updateEditingState(new TextEditingState(
+      text: testValue,
+      selectionBase: testValue.length,
+      selectionExtent: testValue.length,
+    ));
 
     await tester.pump();
   });
@@ -238,6 +218,7 @@ void main() {
 
     String testValue = 'abc def ghi';
     enterText(testValue);
+    await tester.idle();
     expect(inputValue.text, testValue);
 
     await tester.pumpWidget(builder());
@@ -284,6 +265,7 @@ void main() {
 
     String testValue = 'abc def ghi';
     enterText(testValue);
+    await tester.idle();
 
     await tester.pumpWidget(builder());
 
@@ -358,6 +340,7 @@ void main() {
 
     String testValue = 'abc def ghi';
     enterText(testValue);
+    await tester.idle();
     await tester.pumpWidget(builder());
 
     // Tap the selection handle to bring up the "paste / select all" menu.
@@ -422,6 +405,7 @@ void main() {
 
     String testValue = 'abc def ghi';
     enterText(testValue);
+    await tester.idle();
     await tester.pumpWidget(builder());
 
     // Tap the selection handle to bring up the "paste / select all" menu.
@@ -475,11 +459,13 @@ void main() {
     Size emptyInputSize = inputBox.size;
 
     enterText('No wrapping here.');
+    await tester.idle();
     await tester.pumpWidget(builder(3));
     expect(findInputBox(), equals(inputBox));
     expect(inputBox.size, equals(emptyInputSize));
 
     enterText(kThreeLines);
+    await tester.idle();
     await tester.pumpWidget(builder(3));
     expect(findInputBox(), equals(inputBox));
     expect(inputBox.size, greaterThan(emptyInputSize));
@@ -488,12 +474,14 @@ void main() {
 
     // An extra line won't increase the size because we max at 3.
     enterText(kFourLines);
+    await tester.idle();
     await tester.pumpWidget(builder(3));
     expect(findInputBox(), equals(inputBox));
     expect(inputBox.size, threeLineInputSize);
 
     // But now it will.
     enterText(kFourLines);
+    await tester.idle();
     await tester.pumpWidget(builder(4));
     expect(findInputBox(), equals(inputBox));
     expect(inputBox.size, greaterThan(threeLineInputSize));
@@ -530,6 +518,7 @@ void main() {
     String testValue = kThreeLines;
     String cutValue = 'First line of stuff keeps going until abcdef ghijk. ';
     enterText(testValue);
+    await tester.idle();
 
     await tester.pumpWidget(builder());
 
@@ -618,6 +607,7 @@ void main() {
     await tester.pumpWidget(builder());
 
     enterText(kFourLines);
+    await tester.idle();
 
     await tester.pumpWidget(builder());
 

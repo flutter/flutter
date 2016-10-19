@@ -4,47 +4,14 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_services/editing.dart' as mojom;
-import 'package:meta/meta.dart';
 
-class MockKeyboard extends mojom.KeyboardProxy {
-  MockKeyboard() : super.unbound();
-
-  mojom.KeyboardClient client;
-  mojom.EditingState currentState;
-
-  @override
-  void setClient(@checked mojom.KeyboardClientStub client, mojom.KeyboardConfiguration configuraiton) {
-    this.client = client.impl;
-  }
-
-  @override
-  void show() {}
-
-  @override
-  void hide() {}
-
-  @override
-  void setEditingState(mojom.EditingState state) {
-    currentState = state;
-  }
-
-}
+import 'mock_text_input.dart';
 
 void main() {
-  MockKeyboard mockKeyboard = new MockKeyboard();
+  MockTextInput mockTextInput = new MockTextInput()..register();
 
-  setUpAll(() {
-    serviceMocker.registerMockService(mockKeyboard);
-  });
-
-  void enterText(String testValue) {
-    // Simulate entry of text through the keyboard.
-    expect(mockKeyboard.client, isNotNull);
-    mockKeyboard.client.updateEditingState(new mojom.EditingState()
-      ..text = testValue
-      ..composingBase = 0
-      ..composingExtent = testValue.length);
+  void enterText(String text) {
+    mockTextInput.enterText(text);
   }
 
   testWidgets('Setter callback is called', (WidgetTester tester) async {
@@ -70,6 +37,7 @@ void main() {
 
     Future<Null> checkText(String testValue) async {
       enterText(testValue);
+      await tester.idle();
       // pump'ing is unnecessary because callback happens regardless of frames
       expect(fieldValue, equals(testValue));
     }
@@ -101,6 +69,7 @@ void main() {
 
     Future<Null> checkErrorText(String testValue) async {
       enterText(testValue);
+      await tester.idle();
       await tester.pump();
       // Check for a new Text widget with our error text.
       expect(find.text(errorText(testValue)), findsOneWidget);
@@ -151,6 +120,7 @@ void main() {
 
     Future<Null> checkErrorText(String testValue) async {
       enterText(testValue);
+      await tester.idle();
       await tester.pump();
 
       expect(fieldValue, equals(testValue));
@@ -186,8 +156,8 @@ void main() {
     await tester.pumpWidget(builder());
 
     // initial value should be loaded into keyboard editing state
-    expect(mockKeyboard.currentState, isNotNull);
-    expect(mockKeyboard.currentState.text, equals(initialValue));
+    expect(mockTextInput.editingState, isNotNull);
+    expect(mockTextInput.editingState['text'], equals(initialValue));
 
     // initial value should also be visible in the raw input line
     RawInputState editableText = tester.state(find.byType(RawInput));
@@ -196,6 +166,7 @@ void main() {
     // sanity check, make sure we can still edit the text and everything updates
     expect(currentValue, isNull);
     enterText('world');
+    await tester.idle();
     expect(currentValue, equals('world'));
     await tester.pump();
     expect(editableText.config.value.text, equals('world'));
