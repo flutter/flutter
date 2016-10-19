@@ -129,6 +129,8 @@ class _ApkBuilder {
       '-keystore', keystore.path,
       '-storepass', keystorePassword,
       '-keypass', keyPassword,
+      '-digestalg', 'SHA1',
+      '-sigalg', 'MD5withRSA',
       outputApk.path,
       keyAlias,
     ]);
