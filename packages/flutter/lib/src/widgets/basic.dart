@@ -33,6 +33,7 @@ export 'package:flutter/rendering.dart' show
     MainAxisSize,
     MaxTileWidthGridDelegate,
     MultiChildLayoutDelegate,
+    Overflow,
     PaintingContext,
     PointerCancelEvent,
     PointerCancelEventListener,
