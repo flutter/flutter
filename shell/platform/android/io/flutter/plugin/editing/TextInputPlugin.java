@@ -45,7 +45,7 @@ public class TextInputPlugin extends JSONMessageListener {
         } else if (method.equals("TextInput.hide")) {
             hideTextInput(view);
         } else if (method.equals("TextInput.setClient")) {
-            setTextInputClient(view, args.getInt(0), args.getJSONObject(0));
+            setTextInputClient(view, args.getInt(0), args.getJSONObject(1));
         } else if (method.equals("TextInput.setEditingState")) {
             setTextInputEditingState(view, args.getJSONObject(0));
         } else if (method.equals("TextInput.clearClient")) {
