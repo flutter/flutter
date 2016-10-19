@@ -92,7 +92,8 @@ class GalleryDrawer extends StatelessWidget {
     this.timeDilation,
     this.onTimeDilationChanged,
     this.showPerformanceOverlay,
-    this.onShowPerformanceOverlayChanged
+    this.onShowPerformanceOverlayChanged,
+    this.onPlatformChanged,
   }) : super(key: key) {
     assert(onThemeChanged != null);
     assert(onTimeDilationChanged != null);
@@ -106,6 +107,8 @@ class GalleryDrawer extends StatelessWidget {
 
   final bool showPerformanceOverlay;
   final ValueChanged<bool> onShowPerformanceOverlayChanged;
+
+  final ValueChanged<TargetPlatform> onPlatformChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -140,6 +143,40 @@ class GalleryDrawer extends StatelessWidget {
             value: false,
             groupValue: useLightTheme,
             onChanged: onThemeChanged
+          )
+        ]
+      )
+    );
+
+    final Widget mountainViewItem = new DrawerItem(
+      // on iOS, we don't want to show an Android phone icon
+      icon: new Icon(defaultTargetPlatform == TargetPlatform.iOS ? Icons.star : Icons.phone_android),
+      onPressed: () { onPlatformChanged(TargetPlatform.android); },
+      selected: Theme.of(context).platform == TargetPlatform.android,
+      child: new Row(
+        children: <Widget>[
+          new Flexible(child: new Text('Android')),
+          new Radio<TargetPlatform>(
+            value: TargetPlatform.android,
+            groupValue: Theme.of(context).platform,
+            onChanged: onPlatformChanged,
+          )
+        ]
+      )
+    );
+
+    final Widget cupertinoItem = new DrawerItem(
+      // on iOS, we don't want to show the iPhone icon
+      icon: new Icon(defaultTargetPlatform == TargetPlatform.iOS ? Icons.star_border : Icons.phone_iphone),
+      onPressed: () { onPlatformChanged(TargetPlatform.iOS); },
+      selected: Theme.of(context).platform == TargetPlatform.iOS,
+      child: new Row(
+        children: <Widget>[
+          new Flexible(child: new Text('iOS')),
+          new Radio<TargetPlatform>(
+            value: TargetPlatform.iOS,
+            groupValue: Theme.of(context).platform,
+            onChanged: onPlatformChanged,
           )
         ]
       )
@@ -216,14 +253,17 @@ class GalleryDrawer extends StatelessWidget {
       lightThemeItem,
       darkThemeItem,
       new Divider(),
+      mountainViewItem,
+      cupertinoItem,
+      new Divider(),
       animateSlowlyItem,
-      // index 5, optional: Performance Overlay
+      // index 8, optional: Performance Overlay
       fileAnIssueItem,
       aboutItem
     ];
 
     if (onShowPerformanceOverlayChanged != null) {
-      allDrawerItems.insert(5, new DrawerItem(
+      allDrawerItems.insert(8, new DrawerItem(
         icon: new Icon(Icons.assessment),
         onPressed: () { onShowPerformanceOverlayChanged(!showPerformanceOverlay); },
         selected: showPerformanceOverlay,

@@ -7,6 +7,8 @@ import 'dart:io' show Platform;
 import 'assertions.dart';
 
 /// The platform that user interaction should adapt to target.
+///
+/// The [defaultTargetPlatform] getter returns the current platform.
 enum TargetPlatform {
   /// Android: <https://www.android.com/>
   android,
@@ -25,7 +27,7 @@ enum TargetPlatform {
 /// regardless of the host platform. (Android was chosen because the tests were
 /// originally written assuming Android-like behavior, and we added platform
 /// adaptations for iOS later). Tests can check iOS behavior by using the
-/// platform override APIs (like in [ThemeData.platform] in the material
+/// platform override APIs (such as [ThemeData.platform] in the material
 /// library).
 TargetPlatform get defaultTargetPlatform {
   TargetPlatform result;

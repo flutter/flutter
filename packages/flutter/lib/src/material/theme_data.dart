@@ -332,6 +332,66 @@ class ThemeData {
   /// Defaults to the current platform.
   final TargetPlatform platform;
 
+  /// Creates a copy of this theme but with the given fields replaced with the new values.
+  ThemeData copyWith({
+    Brightness brightness,
+    Map<int, Color> primarySwatch,
+    Color primaryColor,
+    Brightness primaryColorBrightness,
+    Color accentColor,
+    Brightness accentColorBrightness,
+    Color canvasColor,
+    Color cardColor,
+    Color dividerColor,
+    Color highlightColor,
+    Color splashColor,
+    Color selectedRowColor,
+    Color unselectedWidgetColor,
+    Color disabledColor,
+    Color buttonColor,
+    Color secondaryHeaderColor,
+    Color textSelectionColor,
+    Color textSelectionHandleColor,
+    Color backgroundColor,
+    Color indicatorColor,
+    Color hintColor,
+    Color errorColor,
+    TextTheme textTheme,
+    TextTheme primaryTextTheme,
+    IconThemeData iconTheme,
+    IconThemeData primaryIconTheme,
+    TargetPlatform platform,
+  }) {
+    return new ThemeData(
+      brightness: brightness ?? this.brightness,
+      primaryColor: primaryColor ?? this.primaryColor,
+      primaryColorBrightness: primaryColorBrightness ?? this.primaryColorBrightness,
+      accentColor: accentColor ?? this.accentColor,
+      accentColorBrightness: accentColorBrightness ?? this.accentColorBrightness,
+      canvasColor: canvasColor ?? this.canvasColor,
+      cardColor: cardColor ?? this.cardColor,
+      dividerColor: dividerColor ?? this.dividerColor,
+      highlightColor: highlightColor ?? this.highlightColor,
+      splashColor: splashColor ?? this.splashColor,
+      selectedRowColor: selectedRowColor ?? this.selectedRowColor,
+      unselectedWidgetColor: unselectedWidgetColor ?? this.unselectedWidgetColor,
+      disabledColor: disabledColor ?? this.disabledColor,
+      buttonColor: buttonColor ?? this.buttonColor,
+      secondaryHeaderColor: secondaryHeaderColor ?? this.secondaryHeaderColor,
+      textSelectionColor: textSelectionColor ?? this.textSelectionColor,
+      textSelectionHandleColor: textSelectionHandleColor ?? this.textSelectionHandleColor,
+      backgroundColor: backgroundColor ?? this.backgroundColor,
+      indicatorColor: indicatorColor ?? this.indicatorColor,
+      hintColor: hintColor ?? this.hintColor,
+      errorColor: errorColor ?? this.errorColor,
+      textTheme: textTheme ?? this.textTheme,
+      primaryTextTheme: primaryTextTheme ?? this.primaryTextTheme,
+      iconTheme: iconTheme ?? this.iconTheme,
+      primaryIconTheme: primaryIconTheme ?? this.primaryIconTheme,
+      platform: platform ?? this.platform,
+    );
+  }
+
   /// Linearly interpolate between two themes.
   static ThemeData lerp(ThemeData begin, ThemeData end, double t) {
     return new ThemeData.raw(
@@ -393,7 +453,8 @@ class ThemeData {
            (otherData.textTheme == textTheme) &&
            (otherData.primaryTextTheme == primaryTextTheme) &&
            (otherData.iconTheme == iconTheme) &&
-           (otherData.primaryIconTheme == primaryIconTheme);
+           (otherData.primaryIconTheme == primaryIconTheme) &&
+           (otherData.platform == platform);
   }
 
   @override
@@ -417,14 +478,15 @@ class ThemeData {
       backgroundColor,
       accentColor,
       accentColorBrightness,
+      indicatorColor,
       hashValues( // Too many values.
-        indicatorColor,
         hintColor,
         errorColor,
         textTheme,
         primaryTextTheme,
         iconTheme,
-        primaryIconTheme
+        primaryIconTheme,
+        platform,
       )
     );
   }
