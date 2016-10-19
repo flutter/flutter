@@ -94,7 +94,11 @@ if (is_android) {
 
   # Subdirectories inside android_ndk_root that contain the sysroot for the
   # associated platform.
-  _android_api_level = 22
+  if (current_cpu == "x64") {
+    _android_api_level = 22
+  } else {
+    _android_api_level = 16
+  }
   x86_android_sysroot_subdir =
       "platforms/android-${_android_api_level}/arch-x86"
   arm_android_sysroot_subdir =
