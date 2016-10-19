@@ -19,9 +19,10 @@ class UrlLauncher {
   /// * [urlString]: The URL string to be parsed by the underlying platform and
   ///   before it attempts to launch the same.
   static Future<Null> launch(String urlString) async {
-    await PlatformMessages.sendJSON('flutter/platform', <String, dynamic>{
-      'method': 'UrlLauncher.launch',
-      'args': <String>[ urlString ],
-    });
+    await PlatformMessages.invokeMethod(
+      'flutter/platform',
+      'UrlLauncher.launch',
+      <String>[ urlString ],
+    );
   }
 }

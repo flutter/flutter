@@ -18,9 +18,6 @@ class SystemNavigator {
   ///   On iOS, this is a no-op because Apple's human interface guidelines state
   ///   that applications should not exit themselves.
   static Future<Null> pop() async {
-    await PlatformMessages.sendJSON('flutter/platform', <String, dynamic>{
-      'method': 'SystemNavigator.pop',
-      'args': const <Null>[],
-    });
+    await PlatformMessages.invokeMethod('flutter/platform', 'SystemNavigator.pop');
   }
 }
