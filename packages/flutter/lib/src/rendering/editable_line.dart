@@ -184,7 +184,7 @@ class RenderEditable extends RenderBox {
     if (selection.isCollapsed) {
       // TODO(mpcomplete): This doesn't work well at an RTL/LTR boundary.
       Offset caretOffset = _textPainter.getOffsetForCaret(selection.extent, _caretPrototype);
-      Point start = new Point(0.0, constraints.constrainHeight(_preferredLineHeight)) + caretOffset + offset;
+      Point start = new Point(0.0, _preferredLineHeight) + caretOffset + offset;
       return <TextSelectionPoint>[new TextSelectionPoint(localToGlobal(start), null)];
     } else {
       List<ui.TextBox> boxes = _textPainter.getBoxesForSelection(selection);
@@ -206,10 +206,9 @@ class RenderEditable extends RenderBox {
   /// Returns the Rect in local coordinates for the caret at the given text
   /// position.
   Rect getLocalRectForCaret(TextPosition caretPosition) {
-    double lineHeight = constraints.constrainHeight(_preferredLineHeight);
     Offset caretOffset = _textPainter.getOffsetForCaret(caretPosition, _caretPrototype);
     // This rect is the same as _caretPrototype but without the vertical padding.
-    return new Rect.fromLTWH(0.0, 0.0, _kCaretWidth, lineHeight).shift(caretOffset + _paintOffset);
+    return new Rect.fromLTWH(0.0, 0.0, _kCaretWidth, _preferredLineHeight).shift(caretOffset + _paintOffset);
   }
 
   Size _contentSize;
@@ -223,7 +222,7 @@ class RenderEditable extends RenderBox {
       // TODO(abarth): ParagraphBuilder#build's argument should be optional.
       // TODO(abarth): These min/max values should be the default for ui.Paragraph.
       _layoutTemplate = builder.build(new ui.ParagraphStyle())
-        ..layout(new ui.ParagraphConstraints(width: _maxContentWidth));
+        ..layout(new ui.ParagraphConstraints(width: double.INFINITY));
     }
     return _layoutTemplate.height;
   }
@@ -241,7 +240,7 @@ class RenderEditable extends RenderBox {
 
   @override
   double computeMaxIntrinsicHeight(double width) {
-    return _preferredLineHeight;
+    return _preferredLineHeight * maxLines;
   }
 
   @override
@@ -303,12 +302,11 @@ class RenderEditable extends RenderBox {
   @override
   void performLayout() {
     Size oldSize = hasSize ? size : null;
-    double lineHeight = constraints.constrainHeight(_preferredLineHeight);
-    _caretPrototype = new Rect.fromLTWH(0.0, _kCaretHeightOffset, _kCaretWidth, lineHeight - 2.0 * _kCaretHeightOffset);
+    _caretPrototype = new Rect.fromLTWH(0.0, _kCaretHeightOffset, _kCaretWidth, _preferredLineHeight - 2.0 * _kCaretHeightOffset);
     _selectionRects = null;
     _textPainter.layout(maxWidth: _maxContentWidth);
     size = new Size(constraints.maxWidth, constraints.constrainHeight(
-      _textPainter.height.clamp(lineHeight, lineHeight * _maxLines)
+      _textPainter.height.clamp(_preferredLineHeight, _preferredLineHeight * _maxLines)
     ));
     Size contentSize = new Size(_textPainter.width + _kCaretGap + _kCaretWidth, _textPainter.height);
     assert(_selection != null);

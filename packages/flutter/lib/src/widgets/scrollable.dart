@@ -513,6 +513,11 @@ class ScrollableState<T extends Scrollable> extends State<T> with SingleTickerPr
   /// If there are no in-progress scrolling physics, this function scrolls to
   /// the given offset instead.
   void didUpdateScrollBehavior(double newScrollOffset) {
+    _setStateMaybeDuringBuild(() {
+      _contentExtent = scrollBehavior.contentExtent;
+      _containerExtent = scrollBehavior.containerExtent;
+    });
+
     // This does not call setState, because if anything below actually
     // changes our build, it will itself independently trigger a frame.
     assert(_controller.isAnimating || _simulation == null);
@@ -536,8 +541,6 @@ class ScrollableState<T extends Scrollable> extends State<T> with SingleTickerPr
   ///     [didUpdateScrollBehavior].
   ///  3. Updating this object's gesture detector with [updateGestureDetector].
   void handleExtentsChanged(double contentExtent, double containerExtent) {
-    _contentExtent = contentExtent;
-    _containerExtent = containerExtent;
     didUpdateScrollBehavior(scrollBehavior.updateExtents(
       contentExtent: contentExtent,
       containerExtent: containerExtent,

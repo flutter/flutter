@@ -311,7 +311,7 @@ void main() {
     await gesture.moveTo(newHandlePos);
     await tester.pump();
     await gesture.up();
-    await tester.pump();
+    await tester.pumpWidget(builder());
 
     expect(inputValue.selection.baseOffset, selection.baseOffset);
     expect(inputValue.selection.extentOffset, selection.extentOffset+2);
@@ -565,7 +565,7 @@ void main() {
     await gesture.moveTo(newHandlePos);
     await tester.pump();
     await gesture.up();
-    await tester.pump();
+    await tester.pumpWidget(builder());
 
     expect(inputValue.selection.baseOffset, 76);
     expect(inputValue.selection.extentOffset, 108);
@@ -635,7 +635,11 @@ void main() {
     TestGesture gesture = await tester.startGesture(firstPos, pointer: 7);
     await tester.pump();
     await gesture.moveBy(new Offset(0.0, -1000.0));
-    await tester.pump();
+    await tester.pump(const Duration(seconds: 2));
+    // Wait and drag again to trigger https://github.com/flutter/flutter/issues/6329
+    // (No idea why this is necessary, but the bug wouldn't repro without it.)
+    await gesture.moveBy(new Offset(0.0, -1000.0));
+    await tester.pump(const Duration(seconds: 2));
     await gesture.up();
     await tester.pump();
 
@@ -679,5 +683,4 @@ void main() {
     expect(inputBox.hitTest(new HitTestResult(), position: inputBox.globalToLocal(newFirstPos)), isTrue);
     expect(inputBox.hitTest(new HitTestResult(), position: inputBox.globalToLocal(newFourthPos)), isFalse);
   });
-
 }
