@@ -189,7 +189,7 @@ public class FlutterView extends SurfaceView
         } catch (JSONException e) {
             Log.e(TAG, "Failed to serialize key event", e);
         }
-        return true;
+        return super.onKeyUp(keyCode, event);
     }
 
     @Override
@@ -203,7 +203,7 @@ public class FlutterView extends SurfaceView
         } catch (JSONException e) {
             Log.e(TAG, "Failed to serialize key event", e);
         }
-        return true;
+        return super.onKeyDown(keyCode, event);
     }
 
     SkyEngine getEngine() {
