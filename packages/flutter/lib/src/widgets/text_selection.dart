@@ -109,7 +109,7 @@ class TextSelectionOverlay implements TextSelectionDelegate {
   // TODO(mpcomplete): what if the renderObject is removed or replaced, or
   // moves? Not sure what cases I need to handle, or how to handle them.
   /// The editable line in which the selected text is being displayed.
-  final RenderEditableLine renderObject;
+  final RenderEditable renderObject;
 
   /// Called when the the selection changes.
   ///
@@ -301,7 +301,7 @@ class _TextSelectionHandleOverlay extends StatefulWidget {
 
   final TextSelection selection;
   final _TextSelectionHandlePosition position;
-  final RenderEditableLine renderObject;
+  final RenderEditable renderObject;
   final ValueChanged<TextSelection> onSelectionHandleChanged;
   final VoidCallback onSelectionHandleTapped;
   final TextSelectionControls selectionControls;

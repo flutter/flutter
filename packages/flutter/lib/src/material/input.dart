@@ -142,9 +142,9 @@ const Duration _kTransitionDuration = const Duration(milliseconds: 200);
 const Curve _kTransitionCurve = Curves.fastOutSlowIn;
 
 class _InputState extends State<Input> {
-  GlobalKey<RawInputLineState> _rawInputLineKey = new GlobalKey<RawInputLineState>();
+  GlobalKey<RawInputState> _rawInputKey = new GlobalKey<RawInputState>();
 
-  GlobalKey get focusKey => config.key is GlobalKey ? config.key : _rawInputLineKey;
+  GlobalKey get focusKey => config.key is GlobalKey ? config.key : _rawInputKey;
 
   // Optional state to retain if we are inside a Form widget.
   _FormFieldData _formData;
@@ -251,8 +251,8 @@ class _InputState extends State<Input> {
       decoration: new BoxDecoration(
         border: border,
       ),
-      child: new RawInputLine(
-        key: _rawInputLineKey,
+      child: new RawInput(
+        key: _rawInputKey,
         value: value,
         focusKey: focusKey,
         style: textStyle,
@@ -305,7 +305,7 @@ class _InputState extends State<Input> {
     return new RepaintBoundary(
       child: new GestureDetector(
         behavior: HitTestBehavior.opaque,
-        onTap: () => _rawInputLineKey.currentState?.requestKeyboard(),
+        onTap: () => _rawInputKey.currentState?.requestKeyboard(),
         child: new Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
           child: child

@@ -190,7 +190,7 @@ void main() {
     expect(mockKeyboard.currentState.text, equals(initialValue));
 
     // initial value should also be visible in the raw input line
-    RawInputLineState editableText = tester.state(find.byType(RawInputLine));
+    RawInputState editableText = tester.state(find.byType(RawInput));
     expect(editableText.config.value.text, equals(initialValue));
 
     // sanity check, make sure we can still edit the text and everything updates
