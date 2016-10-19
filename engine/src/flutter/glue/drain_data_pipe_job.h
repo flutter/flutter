@@ -16,7 +16,7 @@ namespace glue {
 
 class DrainDataPipeJob {
  public:
-  using ResultCallback = std::function<void(std::vector<char>)>;
+  using ResultCallback = std::function<void(std::vector<uint8_t>)>;
 
   DrainDataPipeJob(mojo::ScopedDataPipeConsumerHandle handle,
                    const ResultCallback& callback);

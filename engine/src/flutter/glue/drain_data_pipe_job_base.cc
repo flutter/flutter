@@ -21,13 +21,13 @@ class DrainDataPipeJob::JobImpl : public DataPipeDrainer::Client {
  private:
   // mojo::common::DataPipeDrainer::Client
   void OnDataAvailable(const void* data, size_t num_bytes) override {
-    const char* bytes = static_cast<const char*>(data);
+    const uint8_t* bytes = static_cast<const uint8_t*>(data);
     buffer_.insert(buffer_.end(), bytes, bytes + num_bytes);
   }
 
   void OnDataComplete() override { callback_(std::move(buffer_)); }
 
-  std::vector<char> buffer_;
+  std::vector<uint8_t> buffer_;
   ResultCallback callback_;
   DataPipeDrainer drainer_;
 

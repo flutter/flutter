@@ -11,11 +11,12 @@
 namespace shell {
 namespace {
 
-std::vector<char> SysNSStringToVector(NSString* string) {
+std::vector<uint8_t> SysNSStringToVector(NSString* string) {
   if (!string.length)
-    return std::vector<char>();
-  const char* utf8 = string.UTF8String;
-  return std::vector<char>(utf8, utf8 + strlen(utf8));
+    return std::vector<uint8_t>();
+  const char* chars = string.UTF8String;
+  const uint8_t* bytes = reinterpret_cast<const uint8_t*>(chars);
+  return std::vector<uint8_t>(bytes, bytes + strlen(chars));
 }
 
 } // namespace

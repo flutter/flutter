@@ -54,7 +54,8 @@ class Window {
 
   void OnAppLifecycleStateChanged(sky::AppLifecycleState state);
 
-  void CompletePlatformMessageResponse(int response_id, std::vector<char> data);
+  void CompletePlatformMessageResponse(int response_id,
+                                       std::vector<uint8_t> data);
 
   static void RegisterNatives(tonic::DartLibraryNatives* natives);
 

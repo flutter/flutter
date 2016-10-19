@@ -11,7 +11,7 @@ namespace blink {
 PointerDataPacket::PointerDataPacket(size_t count)
     : data_(count * sizeof(PointerData)) {}
 
-PointerDataPacket::PointerDataPacket(char* data, size_t num_bytes)
+PointerDataPacket::PointerDataPacket(uint8_t* data, size_t num_bytes)
     : data_(data, data + num_bytes) {}
 
 PointerDataPacket::~PointerDataPacket() = default;

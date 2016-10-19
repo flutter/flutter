@@ -489,11 +489,11 @@ static inline PointerChangeMapperPhase PointerChangePhaseFromUITouchPhase(
   NSData* data = [NSJSONSerialization dataWithJSONObject:message options:0 error:nil];
   if (!data)
     return;
-  const char* bytes = static_cast<const char*>(data.bytes);
+  const uint8_t* bytes = static_cast<const uint8_t*>(data.bytes);
   _platformView->DispatchPlatformMessage(
       ftl::MakeRefCounted<blink::PlatformMessage>(
           messageName.UTF8String,
-          std::vector<char>(bytes, bytes + data.length),
+          std::vector<uint8_t>(bytes, bytes + data.length),
           nullptr));
 }
 

@@ -26,7 +26,7 @@ PlatformMessageResponseDart::~PlatformMessageResponseDart() {
   }
 }
 
-void PlatformMessageResponseDart::Complete(std::vector<char> data) {
+void PlatformMessageResponseDart::Complete(std::vector<uint8_t> data) {
   if (callback_.is_empty())
     return;
   FTL_DCHECK(!is_complete_);
@@ -63,7 +63,7 @@ void PlatformMessageResponseDart::Complete(std::vector<char> data) {
 
 void PlatformMessageResponseDart::CompleteWithError() {
   // TODO(abarth): We should have a dedicated error pathway.
-  Complete(std::vector<char>());
+  Complete(std::vector<uint8_t>());
 }
 
 }  // namespace blink

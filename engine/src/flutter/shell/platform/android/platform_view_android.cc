@@ -36,7 +36,7 @@ class PlatformMessageResponseAndroid : public blink::PlatformMessageResponse {
   FRIEND_MAKE_REF_COUNTED(PlatformMessageResponseAndroid);
 
  public:
-  void Complete(std::vector<char> data) override {
+  void Complete(std::vector<uint8_t> data) override {
     ftl::RefPtr<PlatformMessageResponseAndroid> self(this);
     blink::Threads::Platform()->PostTask(
         [ self, data = std::move(data) ]() mutable {
@@ -48,7 +48,7 @@ class PlatformMessageResponseAndroid : public blink::PlatformMessageResponse {
         });
   }
 
-  void CompleteWithError() override { Complete(std::vector<char>()); }
+  void CompleteWithError() override { Complete(std::vector<uint8_t>()); }
 
  private:
   PlatformMessageResponseAndroid(int response_id,
@@ -151,10 +151,10 @@ void PlatformViewAndroid::DispatchPlatformMessage(JNIEnv* env,
         response_id, GetWeakPtr());
   }
 
+  const uint8_t* buffer = reinterpret_cast<const uint8_t*>(data.data());
   PlatformView::DispatchPlatformMessage(
       ftl::MakeRefCounted<blink::PlatformMessage>(
-          std::move(name),
-          std::vector<char>(data.data(), data.data() + data.size()),
+          std::move(name), std::vector<uint8_t>(buffer, buffer + data.size()),
           std::move(response)));
 }
 
@@ -162,7 +162,7 @@ void PlatformViewAndroid::DispatchPointerDataPacket(JNIEnv* env,
                                                     jobject obj,
                                                     jobject buffer,
                                                     jint position) {
-  char* data = static_cast<char*>(env->GetDirectBufferAddress(buffer));
+  uint8_t* data = static_cast<uint8_t*>(env->GetDirectBufferAddress(buffer));
 
   blink::Threads::UI()->PostTask(ftl::MakeCopyable([
     engine = engine_->GetWeakPtr(),
@@ -190,7 +190,7 @@ void PlatformViewAndroid::InvokePlatformMessageResponseCallback(
   pending_responses_.erase(it);
   // TODO(abarth): There's an extra copy here.
   message_response->Complete(
-      std::vector<char>(response.data(), response.data() + response.size()));
+      std::vector<uint8_t>(response.data(), response.data() + response.size()));
 }
 
 void PlatformViewAndroid::HandlePlatformMessage(
@@ -209,7 +209,8 @@ void PlatformViewAndroid::HandlePlatformMessage(
   base::StringPiece message_name = message->name();
 
   auto data = message->data();
-  base::StringPiece message_data(data.data(), data.size());
+  base::StringPiece message_data(reinterpret_cast<const char*>(data.data()),
+                                 data.size());
 
   auto java_message_name =
       base::android::ConvertUTF8ToJavaString(env, message_name);
@@ -225,13 +226,14 @@ void PlatformViewAndroid::HandlePlatformMessage(
 
 void PlatformViewAndroid::HandlePlatformMessageResponse(
     int response_id,
-    std::vector<char> data) {
+    std::vector<uint8_t> data) {
   JNIEnv* env = base::android::AttachCurrentThread();
   base::android::ScopedJavaLocalRef<jobject> view = flutter_view_.get(env);
   if (view.is_null())
     return;
 
-  base::StringPiece message_data(data.data(), data.size());
+  base::StringPiece message_data(reinterpret_cast<const char*>(data.data()),
+                                 data.size());
   auto java_message_data =
       base::android::ConvertUTF8ToJavaString(env, message_data);
 
@@ -281,7 +283,7 @@ void PlatformViewAndroid::UpdateSemantics(
       num_bytes += node.children.size() * kBytesPerChild;
     }
 
-    std::vector<char> buffer(num_bytes);
+    std::vector<uint8_t> buffer(num_bytes);
     int32_t* buffer_int32 = reinterpret_cast<int32_t*>(&buffer[0]);
     float* buffer_float32 = reinterpret_cast<float*>(&buffer[0]);
 
