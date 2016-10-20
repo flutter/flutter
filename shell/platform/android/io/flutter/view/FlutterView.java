@@ -42,7 +42,6 @@ import org.chromium.mojo.system.MessagePipeHandle;
 import org.chromium.mojo.system.MojoException;
 import org.chromium.mojo.system.Pair;
 import org.chromium.mojo.system.impl.CoreImpl;
-import org.chromium.mojom.editing.Keyboard;
 import org.chromium.mojom.flutter.platform.ApplicationMessages;
 import org.chromium.mojom.mojo.ServiceProvider;
 import org.chromium.mojom.sky.AppLifecycleState;
@@ -62,9 +61,6 @@ import java.util.Map;
 import io.flutter.plugin.common.ActivityLifecycleListener;
 import io.flutter.plugin.editing.TextInputPlugin;
 import io.flutter.plugin.platform.PlatformPlugin;
-
-import org.domokit.editing.KeyboardImpl;
-import org.domokit.editing.KeyboardViewState;
 
 /**
  * An Android view containing a Flutter app.
@@ -90,7 +86,6 @@ public class FlutterView extends SurfaceView
     private HashMap<String, OnMessageListenerAsync> mAsyncOnMessageListeners;
     private final SurfaceHolder.Callback mSurfaceCallback;
     private final ViewportMetrics mMetrics;
-    private final KeyboardViewState mKeyboardState;
     private final AccessibilityManager mAccessibilityManager;
     private BroadcastReceiver discoveryReceiver;
     private List<ActivityLifecycleListener> mActivityLifecycleListeners;
@@ -138,8 +133,6 @@ public class FlutterView extends SurfaceView
             }
         };
         getHolder().addCallback(mSurfaceCallback);
-
-        mKeyboardState = new KeyboardViewState(this);
 
         Core core = CoreImpl.getInstance();
 
@@ -273,10 +266,7 @@ public class FlutterView extends SurfaceView
 
     @Override
     public InputConnection onCreateInputConnection(EditorInfo outAttrs) {
-        InputConnection connection = mKeyboardState.createInputConnection(outAttrs);
-        if (connection == null)
-          connection = mTextInputPlugin.createInputConnection(this, outAttrs);
-        return connection;
+        return mTextInputPlugin.createInputConnection(this, outAttrs);
     }
 
     // Must match the PointerChange enum in pointer.dart.
@@ -463,13 +453,6 @@ public class FlutterView extends SurfaceView
     }
 
     private void configureLocalServices(ServiceRegistry registry) {
-        registry.register(Keyboard.MANAGER.getName(), new ServiceFactory() {
-            @Override
-            public Binding connectToService(FlutterView view, Core core, MessagePipeHandle pipe) {
-                return Keyboard.MANAGER.bind(new KeyboardImpl(view.getContext(), mKeyboardState), pipe);
-            }
-        });
-
         registry.register(ApplicationMessages.MANAGER.getName(), new ServiceFactory() {
             @Override
             public Binding connectToService(FlutterView view, Core core, MessagePipeHandle pipe) {

@@ -4,7 +4,6 @@
 
 module sky;
 
-import "flutter/services/engine/input_event.mojom";
 import "mojo/public/interfaces/application/service_provider.mojom";
 import "mojo/public/interfaces/application/shell.mojom";
 import "mojo/services/asset_bundle/interfaces/asset_bundle.mojom";
