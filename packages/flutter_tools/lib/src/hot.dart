@@ -493,6 +493,15 @@ class HotRunner extends ResidentRunner {
       printError('Hot reload failed:\ncode = $errorCode\nmessage = $errorMessage\n$st');
       return false;
     }
+    // Reload the isolate.
+    await currentView.uiIsolate.reload();
+    // Check if the isolate is paused.
+    final ServiceEvent pauseEvent = currentView.uiIsolate.pauseEvent;
+    if ((pauseEvent != null) && (pauseEvent.isPauseEvent)) {
+      // Isolate is paused. Stop here.
+      printTrace('Skipping reassemble because isolate is paused.');
+      return true;
+    }
     await _evictDirtyAssets();
     printTrace('Reassembling application');
     bool waitForFrame = true;
@@ -510,7 +519,7 @@ class HotRunner extends ResidentRunner {
     }
     if (waitForFrame) {
       // When the framework is present, we can wait for the first frame
-      // event and measure reload itme.
+      // event and measure reload time.
       await firstFrameTimer.firstFrame();
       printStatus('Hot reload performed in '
                   '${getElapsedAsMilliseconds(firstFrameTimer.elapsed)}.');

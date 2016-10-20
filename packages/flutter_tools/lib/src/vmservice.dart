@@ -332,6 +332,7 @@ class ServiceEvent extends ServiceObject {
   static const String kPauseBreakpoint        = 'PauseBreakpoint';
   static const String kPauseInterrupted       = 'PauseInterrupted';
   static const String kPauseException         = 'PauseException';
+  static const String kPausePostRequest       = 'PausePostRequest';
   static const String kNone                   = 'None';
   static const String kResume                 = 'Resume';
   static const String kBreakpointAdded        = 'BreakpointAdded';
@@ -379,6 +380,7 @@ class ServiceEvent extends ServiceObject {
             kind == kPauseBreakpoint ||
             kind == kPauseInterrupted ||
             kind == kPauseException ||
+            kind == kPausePostRequest ||
             kind == kNone);
   }
 }
@@ -680,6 +682,7 @@ class Isolate extends ServiceObjectOwner {
   Isolate get isolate => this;
 
   DateTime startTime;
+  ServiceEvent pauseEvent;
 
   final Map<String, ServiceObject> _cache = new Map<String, ServiceObject>();
 
@@ -744,8 +747,9 @@ class Isolate extends ServiceObjectOwner {
     int startTimeMillis = map['startTime'];
     startTime = new DateTime.fromMillisecondsSinceEpoch(startTimeMillis);
 
-    // TODO(johnmccutchan): Extract any properties we care about here.
     _upgradeCollection(map, this);
+
+    pauseEvent = map['pauseEvent'];
   }
 
   static final int kIsolateReloadBarred = 1005;
