@@ -214,7 +214,8 @@ abstract class PageableState<T extends Pageable> extends ScrollableState<T> {
   int get _itemCount => config.itemCount;
   int _previousItemCount;
 
-  double get _pixelsPerScrollUnit {
+  /// Convert from the item based scroll units to logical pixels.
+  double get pixelsPerScrollUnit {
     final RenderBox box = context.findRenderObject();
     if (box == null || !box.hasSize)
       return 0.0;
@@ -230,13 +231,13 @@ abstract class PageableState<T extends Pageable> extends ScrollableState<T> {
 
   @override
   double pixelOffsetToScrollOffset(double pixelOffset) {
-    final double pixelsPerScrollUnit = _pixelsPerScrollUnit;
-    return super.pixelOffsetToScrollOffset(pixelsPerScrollUnit == 0.0 ? 0.0 : pixelOffset / pixelsPerScrollUnit);
+    final double unit = pixelsPerScrollUnit;
+    return super.pixelOffsetToScrollOffset(unit == 0.0 ? 0.0 : pixelOffset / unit);
   }
 
   @override
   double scrollOffsetToPixelOffset(double scrollOffset) {
-    return super.scrollOffsetToPixelOffset(scrollOffset * _pixelsPerScrollUnit);
+    return super.scrollOffsetToPixelOffset(scrollOffset * pixelsPerScrollUnit);
   }
 
   int _scrollOffsetToPageIndex(double scrollOffset) {
