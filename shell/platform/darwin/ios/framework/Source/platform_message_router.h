@@ -2,48 +2,37 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SHELL_PLATFORM_IOS_FRAMEWORK_SOURCE_APPLICATION_MESSAGES_IMPL_H_
-#define SHELL_PLATFORM_IOS_FRAMEWORK_SOURCE_APPLICATION_MESSAGES_IMPL_H_
+#ifndef SHELL_PLATFORM_IOS_FRAMEWORK_SOURCE_PLATFORM_MESSAGE_ROUTER_H_
+#define SHELL_PLATFORM_IOS_FRAMEWORK_SOURCE_PLATFORM_MESSAGE_ROUTER_H_
 
 #include <unordered_map>
 
 #include "flutter/lib/ui/window/platform_message.h"
-#include "flutter/services/platform/app_messages.mojom.h"
 #include "flutter/shell/platform/darwin/ios/framework/Headers/FlutterAsyncMessageListener.h"
 #include "flutter/shell/platform/darwin/ios/framework/Headers/FlutterMessageListener.h"
 #include "lib/ftl/memory/weak_ptr.h"
-#include "mojo/public/cpp/bindings/binding_set.h"
 
 namespace shell {
 
-class ApplicationMessagesImpl : public flutter::platform::ApplicationMessages {
+class PlatformMessageRouter {
  public:
-  ApplicationMessagesImpl();
-  ~ApplicationMessagesImpl() override;
-
-  ftl::WeakPtr<ApplicationMessagesImpl> GetWeakPtr();
-  void AddBinding(
-      mojo::InterfaceRequest<flutter::platform::ApplicationMessages> request);
+  PlatformMessageRouter();
+  ~PlatformMessageRouter();
 
   void HandlePlatformMessage(ftl::RefPtr<blink::PlatformMessage> message);
 
-  void SetMessageListener(const std::string& message_name,
+  void SetMessageListener(const std::string& channel,
                           NSObject<FlutterMessageListener>* listener);
 
-  void SetAsyncMessageListener(const std::string& message_name,
+  void SetAsyncMessageListener(const std::string& channel,
                                NSObject<FlutterAsyncMessageListener>* listener);
 
  private:
-  void SendString(const mojo::String& message_name,
-                  const mojo::String& message,
-                  const SendStringCallback& callback) override;
-
-  mojo::BindingSet<flutter::platform::ApplicationMessages> binding_;
   std::unordered_map<std::string, NSObject<FlutterMessageListener>*> listeners_;
   std::unordered_map<std::string, NSObject<FlutterAsyncMessageListener>*>
       async_listeners_;
 
-  ftl::WeakPtrFactory<ApplicationMessagesImpl> weak_factory_;
+  FTL_DISALLOW_COPY_AND_ASSIGN(PlatformMessageRouter);
 };
 
 }  // namespace shell

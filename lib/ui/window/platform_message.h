@@ -19,7 +19,7 @@ class PlatformMessage : public ftl::RefCountedThreadSafe<PlatformMessage> {
   FRIEND_MAKE_REF_COUNTED(PlatformMessage);
 
  public:
-  const std::string& name() const { return name_; }
+  const std::string& channel() const { return channel_; }
   const std::vector<uint8_t>& data() const { return data_; }
 
   const ftl::RefPtr<PlatformMessageResponse>& response() const {
@@ -32,7 +32,7 @@ class PlatformMessage : public ftl::RefCountedThreadSafe<PlatformMessage> {
                   ftl::RefPtr<PlatformMessageResponse> response);
   ~PlatformMessage();
 
-  std::string name_;
+  std::string channel_;
   std::vector<uint8_t> data_;
   ftl::RefPtr<PlatformMessageResponse> response_;
 };

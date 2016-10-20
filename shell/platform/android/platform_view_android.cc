@@ -39,13 +39,13 @@ class PlatformMessageResponseAndroid : public blink::PlatformMessageResponse {
   void Complete(std::vector<uint8_t> data) override {
     ftl::RefPtr<PlatformMessageResponseAndroid> self(this);
     blink::Threads::Platform()->PostTask(
-        [ self, data = std::move(data) ]() mutable {
+        ftl::MakeCopyable([ self, data = std::move(data) ]() mutable {
           if (!self->view_)
             return;
           static_cast<PlatformViewAndroid*>(self->view_.get())
               ->HandlePlatformMessageResponse(self->response_id_,
                                               std::move(data));
-        });
+        }));
   }
 
   void CompleteWithError() override { Complete(std::vector<uint8_t>()); }
@@ -206,21 +206,18 @@ void PlatformViewAndroid::HandlePlatformMessage(
     pending_responses_[response_id] = response;
   }
 
-  base::StringPiece message_name = message->name();
-
   auto data = message->data();
   base::StringPiece message_data(reinterpret_cast<const char*>(data.data()),
                                  data.size());
 
-  auto java_message_name =
-      base::android::ConvertUTF8ToJavaString(env, message_name);
+  auto java_channel =
+      base::android::ConvertUTF8ToJavaString(env, message->channel());
   auto java_message_data =
       base::android::ConvertUTF8ToJavaString(env, message_data);
   message = nullptr;
 
   // This call can re-enter in InvokePlatformMessageResponseCallback.
-  Java_FlutterView_handlePlatformMessage(env, view.obj(),
-                                         java_message_name.obj(),
+  Java_FlutterView_handlePlatformMessage(env, view.obj(), java_channel.obj(),
                                          java_message_data.obj(), response_id);
 }
 

@@ -11,8 +11,8 @@ source_set("common") {
     "platform_mac.mm",
     "platform_service_provider.cc",
     "platform_service_provider.h",
-    "view_service_provider.cc",
-    "view_service_provider.h",
+    "string_conversions.mm",
+    "string_conversions.h",
   ]
   set_sources_assignment_filter(sources_assignment_filter)
 

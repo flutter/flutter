@@ -193,8 +193,9 @@ void Window::DispatchPlatformMessage(ftl::RefPtr<PlatformMessage> message) {
     pending_responses_[response_id] = response;
   }
 
-  DartInvokeField(library_.value(), "_dispatchPlatformMessage",
-                  {ToDart(message->name()), data_handle, ToDart(response_id)});
+  DartInvokeField(
+      library_.value(), "_dispatchPlatformMessage",
+      {ToDart(message->channel()), data_handle, ToDart(response_id)});
 }
 
 void Window::DispatchPointerDataPacket(const PointerDataPacket& packet) {

@@ -42,7 +42,6 @@ import org.chromium.mojo.system.MessagePipeHandle;
 import org.chromium.mojo.system.MojoException;
 import org.chromium.mojo.system.Pair;
 import org.chromium.mojo.system.impl.CoreImpl;
-import org.chromium.mojom.flutter.platform.ApplicationMessages;
 import org.chromium.mojom.mojo.ServiceProvider;
 import org.chromium.mojom.sky.AppLifecycleState;
 import org.chromium.mojom.sky.ServicesData;
@@ -78,10 +77,6 @@ public class FlutterView extends SurfaceView
     private SkyEngine.Proxy mSkyEngine;
     private ServiceProviderImpl mPlatformServiceProvider;
     private Binding mPlatformServiceProviderBinding;
-    private ServiceProviderImpl mViewServiceProvider;
-    private Binding mViewServiceProviderBinding;
-    private ServiceProvider.Proxy mDartServiceProvider;
-    private ApplicationMessages.Proxy mFlutterAppMessages;
     private HashMap<String, OnMessageListener> mOnMessageListeners;
     private HashMap<String, OnMessageListenerAsync> mAsyncOnMessageListeners;
     private final SurfaceHolder.Callback mSurfaceCallback;
@@ -137,10 +132,6 @@ public class FlutterView extends SurfaceView
         Core core = CoreImpl.getInstance();
 
         mPlatformServiceProvider = new ServiceProviderImpl(core, this, ServiceRegistry.SHARED);
-
-        ServiceRegistry localRegistry = new ServiceRegistry();
-        configureLocalServices(localRegistry);
-        mViewServiceProvider = new ServiceProviderImpl(core, this, localRegistry);
 
         mAccessibilityManager = (AccessibilityManager)getContext().getSystemService(Context.ACCESSIBILITY_SERVICE);
 
@@ -250,18 +241,11 @@ public class FlutterView extends SurfaceView
             mPlatformServiceProvider.unbindServices();
         }
 
-        if (mViewServiceProviderBinding != null) {
-            mViewServiceProviderBinding.unbind().close();
-            mViewServiceProvider.unbindServices();
-        }
-
         getHolder().removeCallback(mSurfaceCallback);
         nativeDetach(mNativePlatformView);
         mNativePlatformView = 0;
 
         mSkyEngine.close();
-        mDartServiceProvider.close();
-        mFlutterAppMessages.close();
     }
 
     @Override
@@ -452,15 +436,6 @@ public class FlutterView extends SurfaceView
         return super.onApplyWindowInsets(insets);
     }
 
-    private void configureLocalServices(ServiceRegistry registry) {
-        registry.register(ApplicationMessages.MANAGER.getName(), new ServiceFactory() {
-            @Override
-            public Binding connectToService(FlutterView view, Core core, MessagePipeHandle pipe) {
-                return ApplicationMessages.MANAGER.bind(new ApplicationMessagesImpl(), pipe);
-            }
-        });
-    }
-
     private void attach() {
         Core core = CoreImpl.getInstance();
         Pair<SkyEngine.Proxy, InterfaceRequest<SkyEngine>> engine =
@@ -475,34 +450,16 @@ public class FlutterView extends SurfaceView
             mPlatformServiceProviderBinding.unbind().close();
             mPlatformServiceProvider.unbindServices();
         }
-        if (mViewServiceProviderBinding != null) {
-            mViewServiceProviderBinding.unbind().close();
-            mViewServiceProvider.unbindServices();
-        }
-        if (mDartServiceProvider != null) {
-            mDartServiceProvider.close();
-        }
 
         Core core = CoreImpl.getInstance();
-
-        Pair<ServiceProvider.Proxy, InterfaceRequest<ServiceProvider>> dartServiceProvider =
-                ServiceProvider.MANAGER.getInterfaceRequest(core);
-        mDartServiceProvider = dartServiceProvider.first;
 
         Pair<ServiceProvider.Proxy, InterfaceRequest<ServiceProvider>> platformServiceProvider =
                 ServiceProvider.MANAGER.getInterfaceRequest(core);
         mPlatformServiceProviderBinding = ServiceProvider.MANAGER.bind(
                 mPlatformServiceProvider, platformServiceProvider.second);
 
-        Pair<ServiceProvider.Proxy, InterfaceRequest<ServiceProvider>> viewServiceProvider =
-                ServiceProvider.MANAGER.getInterfaceRequest(core);
-        mViewServiceProviderBinding = ServiceProvider.MANAGER.bind(
-                mViewServiceProvider, viewServiceProvider.second);
-
         ServicesData services = new ServicesData();
         services.incomingServices = platformServiceProvider.first;
-        services.outgoingServices = dartServiceProvider.second;
-        services.viewServices = viewServiceProvider.first;
         mSkyEngine.setServices(services);
 
         resetAccessibilityTree();
@@ -510,12 +467,6 @@ public class FlutterView extends SurfaceView
 
     private void postRun() {
         Core core = CoreImpl.getInstance();
-        // Connect to the ApplicationMessages service exported by the Flutter framework
-        Pair<ApplicationMessages.Proxy, InterfaceRequest<ApplicationMessages>> appMessages =
-                  ApplicationMessages.MANAGER.getInterfaceRequest(core);
-        mDartServiceProvider.connectToService(ApplicationMessages.MANAGER.getName(),
-                                              appMessages.second.passHandle());
-        mFlutterAppMessages = appMessages.first;
     }
 
     public void runFromBundle(String bundlePath, String snapshotPath) {
@@ -582,7 +533,7 @@ public class FlutterView extends SurfaceView
     private static native Bitmap nativeGetBitmap(long nativePlatformViewAndroid);
 
     // Send a platform message to Dart.
-    private static native void nativeDispatchPlatformMessage(long nativePlatformViewAndroid, String name, String message, int responseId);
+    private static native void nativeDispatchPlatformMessage(long nativePlatformViewAndroid, String channel, String message, int responseId);
     private static native void nativeDispatchPointerDataPacket(long nativePlatformViewAndroid, ByteBuffer buffer, int position);
     private static native void nativeDispatchSemanticsAction(long nativePlatformViewAndroid, int id, int action);
     private static native void nativeSetSemanticsEnabled(long nativePlatformViewAndroid, boolean enabled);
@@ -592,14 +543,14 @@ public class FlutterView extends SurfaceView
 
     // Called by native to send us a platform message.
     @CalledByNative
-    private void handlePlatformMessage(String name, String message, final int responseId) {
-        OnMessageListener listener = mOnMessageListeners.get(name);
+    private void handlePlatformMessage(String channel, String message, final int responseId) {
+        OnMessageListener listener = mOnMessageListeners.get(channel);
         if (listener != null) {
             nativeInvokePlatformMessageResponseCallback(mNativePlatformView, responseId, listener.onMessage(this, message));
             return;
         }
 
-        OnMessageListenerAsync asyncListener = mAsyncOnMessageListeners.get(name);
+        OnMessageListenerAsync asyncListener = mAsyncOnMessageListeners.get(channel);
         if (asyncListener != null) {
             asyncListener.onMessage(this, message, new MessageResponse() {
                 @Override
@@ -742,36 +693,25 @@ public class FlutterView extends SurfaceView
      * register a platform message handler that will receive these messages with
      * the PlatformMessages object.
      */
-    public void sendPlatformMessage(String name, String message, MessageReplyCallback callback) {
+    public void sendPlatformMessage(String channel, String message, MessageReplyCallback callback) {
         int responseId = 0;
         if (callback != null) {
             responseId = mNextResponseId++;
             mPendingResponses.put(responseId, callback);
         }
-        nativeDispatchPlatformMessage(mNativePlatformView, name, message, responseId);
+        nativeDispatchPlatformMessage(mNativePlatformView, channel, message, responseId);
     }
 
     /**
      * Send a message to the Flutter application.  The Flutter Dart code can register a
      * host message handler that will receive these messages.
      */
-    public void sendToFlutter(String messageName, String message,
-                              final MessageReplyCallback callback) {
-        // TODO(abarth): Switch to dispatchPlatformMessage once the framework
-        // side has been converted.
-        mFlutterAppMessages.sendString(messageName, message,
-            new ApplicationMessages.SendStringResponse() {
-                @Override
-                public void call(String reply) {
-                    if (callback != null) {
-                        callback.onReply(reply);
-                    }
-                }
-            });
+    public void sendToFlutter(String channel, String message, MessageReplyCallback callback) {
+        sendPlatformMessage(channel, message, callback);
     }
 
-    public void sendToFlutter(String messageName, String message) {
-        sendToFlutter(messageName, message, null);
+    public void sendToFlutter(String channel, String message) {
+        sendToFlutter(channel, message, null);
     }
 
     /** Callback invoked when the app replies to a message sent with sendToFlutter. */
@@ -783,16 +723,16 @@ public class FlutterView extends SurfaceView
      * Register a callback to be invoked when the Flutter application sends a message
      * to its host.
      */
-    public void addOnMessageListener(String messageName, OnMessageListener listener) {
-        mOnMessageListeners.put(messageName, listener);
+    public void addOnMessageListener(String channel, OnMessageListener listener) {
+        mOnMessageListeners.put(channel, listener);
     }
 
     /**
      * Register a callback to be invoked when the Flutter application sends a message
      * to its host.  The reply to the message can be provided asynchronously.
      */
-    public void addOnMessageListenerAsync(String messageName, OnMessageListenerAsync listener) {
-        mAsyncOnMessageListeners.put(messageName, listener);
+    public void addOnMessageListenerAsync(String channel, OnMessageListenerAsync listener) {
+        mAsyncOnMessageListeners.put(channel, listener);
     }
 
     public interface OnMessageListener {
@@ -813,48 +753,6 @@ public class FlutterView extends SurfaceView
 
     public interface MessageResponse {
         void send(String reply);
-    }
-
-    private class ApplicationMessagesImpl implements ApplicationMessages {
-        @Override
-        public void close() {}
-
-        @Override
-        public void onConnectionError(MojoException e) {}
-
-        @Override
-        public void sendString(String messageName, String message, SendStringResponse callback) {
-            OnMessageListener listener = mOnMessageListeners.get(messageName);
-            if (listener != null) {
-                callback.call(listener.onMessage(FlutterView.this, message));
-                return;
-            }
-
-            OnMessageListenerAsync asyncListener = mAsyncOnMessageListeners.get(messageName);
-            if (asyncListener != null) {
-                asyncListener.onMessage(FlutterView.this, message, new MessageResponseAdapter(callback));
-                return;
-            }
-
-            callback.call(null);
-        }
-    }
-
-    /**
-     * This class wraps the raw Mojo callback object in an interface that is owned
-     * by Flutter and can be safely given to host apps.
-     */
-    private static class MessageResponseAdapter implements MessageResponse {
-        private ApplicationMessages.SendStringResponse callback;
-
-        MessageResponseAdapter(ApplicationMessages.SendStringResponse callback) {
-            this.callback = callback;
-        }
-
-        @Override
-        public void send(String reply) {
-            callback.call(reply);
-        }
     }
 
     /** Broadcast receiver used to discover active Flutter instances. */

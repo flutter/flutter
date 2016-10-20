@@ -13,6 +13,7 @@
 #include "flutter/shell/gpu/gpu_rasterizer.h"
 #include "flutter/shell/gpu/gpu_surface_gl.h"
 #include "flutter/shell/platform/darwin/common/platform_mac.h"
+#include "flutter/shell/platform/darwin/common/string_conversions.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/flutter_touch_mapper.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/FlutterDartProject_Internal.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformPlugin.h"
@@ -21,6 +22,33 @@
 #include "flutter/shell/platform/darwin/ios/platform_view_ios.h"
 #include "lib/ftl/functional/make_copyable.h"
 #include "lib/ftl/time/time_delta.h"
+
+namespace {
+
+typedef void (^PlatformMessageResponseCallback)(NSString*);
+
+class PlatformMessageResponseDarwin : public blink::PlatformMessageResponse {
+  FRIEND_MAKE_REF_COUNTED(PlatformMessageResponseDarwin);
+
+ public:
+  void Complete(std::vector<uint8_t> data) override {
+    ftl::RefPtr<PlatformMessageResponseDarwin> self(this);
+    blink::Threads::Platform()->PostTask(
+        ftl::MakeCopyable([ self, data = std::move(data) ]() mutable {
+          self->callback_.get()(shell::GetNSStringFromVector(data));
+        }));
+  }
+
+  void CompleteWithError() override { Complete(std::vector<uint8_t>()); }
+
+ private:
+  explicit PlatformMessageResponseDarwin(PlatformMessageResponseCallback callback)
+      : callback_(callback, base::scoped_policy::RETAIN) {}
+
+  base::mac::ScopedBlock<PlatformMessageResponseCallback> callback_;
+};
+
+}  // namespace
 
 @interface FlutterViewController ()<UIAlertViewDelegate, FlutterTextInputDelegate>
 @end
@@ -461,56 +489,55 @@ static inline PointerChangeMapperPhase PointerChangePhaseFromUITouchPhase(
 
 #pragma mark - Application Messages
 
-- (void)sendString:(NSString*)message withMessageName:(NSString*)messageName {
+- (void)sendString:(NSString*)message withMessageName:(NSString*)channel {
   NSAssert(message, @"The message must not be null");
-  NSAssert(messageName, @"The messageName must not be null");
-  _platformView->AppMessageSender()->SendString(
-      messageName.UTF8String, message.UTF8String,
-      [](const mojo::String& response) {});
+  NSAssert(channel, @"The channel must not be null");
+  _platformView->DispatchPlatformMessage(
+      ftl::MakeRefCounted<blink::PlatformMessage>(
+          channel.UTF8String,
+          shell::GetVectorFromNSString(message),
+          nullptr));
 }
 
 - (void)sendString:(NSString*)message
-    withMessageName:(NSString*)messageName
+    withMessageName:(NSString*)channel
            callback:(void (^)(NSString*))callback {
   NSAssert(message, @"The message must not be null");
-  NSAssert(messageName, @"The messageName must not be null");
+  NSAssert(channel, @"The channel must not be null");
   NSAssert(callback, @"The callback must not be null");
-  base::mac::ScopedBlock<void (^)(NSString*)> callback_ptr(
-      callback, base::scoped_policy::RETAIN);
-  _platformView->AppMessageSender()->SendString(
-      messageName.UTF8String, message.UTF8String,
-      [callback_ptr](const mojo::String& response) {
-        callback_ptr.get()(base::SysUTF8ToNSString(response));
-      });
+  _platformView->DispatchPlatformMessage(
+      ftl::MakeRefCounted<blink::PlatformMessage>(
+          channel.UTF8String,
+          shell::GetVectorFromNSString(message),
+          ftl::MakeRefCounted<PlatformMessageResponseDarwin>(callback)));
 }
 
-// TODO(abarth): Switch sendString over to using platform messages.
-- (void)sendJSON:(NSDictionary*)message withMessageName:(NSString*)messageName {
+- (void)sendJSON:(NSDictionary*)message withMessageName:(NSString*)channel {
   NSData* data = [NSJSONSerialization dataWithJSONObject:message options:0 error:nil];
   if (!data)
     return;
   const uint8_t* bytes = static_cast<const uint8_t*>(data.bytes);
   _platformView->DispatchPlatformMessage(
       ftl::MakeRefCounted<blink::PlatformMessage>(
-          messageName.UTF8String,
+          channel.UTF8String,
           std::vector<uint8_t>(bytes, bytes + data.length),
           nullptr));
 }
 
 - (void)addMessageListener:(NSObject<FlutterMessageListener>*)listener {
   NSAssert(listener, @"The listener must not be null");
-  NSString* messageName = listener.messageName;
-  NSAssert(messageName, @"The messageName must not be null");
-  _platformView->AppMessageReceiver().SetMessageListener(messageName.UTF8String,
-                                                         listener);
+  NSString* channel = listener.messageName;
+  NSAssert(channel, @"The channel must not be null");
+  _platformView->platform_message_router().SetMessageListener(channel.UTF8String,
+                                                              listener);
 }
 
 - (void)removeMessageListener:(NSObject<FlutterMessageListener>*)listener {
   NSAssert(listener, @"The listener must not be null");
-  NSString* messageName = listener.messageName;
-  NSAssert(messageName, @"The messageName must not be null");
-  _platformView->AppMessageReceiver().SetMessageListener(messageName.UTF8String,
-                                                         nil);
+  NSString* channel = listener.messageName;
+  NSAssert(channel, @"The channel must not be null");
+  _platformView->platform_message_router().SetMessageListener(channel.UTF8String,
+                                                              nil);
 }
 
 - (void)addAsyncMessageListener:
@@ -518,7 +545,7 @@ static inline PointerChangeMapperPhase PointerChangePhaseFromUITouchPhase(
   NSAssert(listener, @"The listener must not be null");
   NSString* messageName = listener.messageName;
   NSAssert(messageName, @"The messageName must not be null");
-  _platformView->AppMessageReceiver().SetAsyncMessageListener(
+  _platformView->platform_message_router().SetAsyncMessageListener(
       messageName.UTF8String, listener);
 }
 
@@ -527,7 +554,7 @@ static inline PointerChangeMapperPhase PointerChangePhaseFromUITouchPhase(
   NSAssert(listener, @"The listener must not be null");
   NSString* messageName = listener.messageName;
   NSAssert(messageName, @"The messageName must not be null");
-  _platformView->AppMessageReceiver().SetAsyncMessageListener(
+  _platformView->platform_message_router().SetAsyncMessageListener(
       messageName.UTF8String, nil);
 }
 
