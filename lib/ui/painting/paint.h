@@ -32,10 +32,6 @@ class PaintData {};
 namespace tonic {
 
 template <>
-struct DartConverter<SkXfermode::Mode>
-    : public DartConverterInteger<SkXfermode::Mode> {};
-
-template <>
 struct DartConverter<blink::Paint> {
   static blink::Paint FromArguments(Dart_NativeArguments args,
                                     int index,

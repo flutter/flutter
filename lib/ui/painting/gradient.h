@@ -13,11 +13,6 @@
 
 namespace tonic {
 class DartLibraryNatives;
-
-template <>
-struct DartConverter<SkShader::TileMode>
-    : public DartConverterInteger<SkShader::TileMode> {};
-
 }  // namspace tonic
 
 namespace blink {

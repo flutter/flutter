@@ -18,15 +18,6 @@
 
 namespace tonic {
 class DartLibraryNatives;
-
-template <>
-struct DartConverter<SkCanvas::PointMode>
-    : public DartConverterInteger<SkCanvas::PointMode> {};
-
-template <>
-struct DartConverter<SkCanvas::VertexMode>
-    : public DartConverterInteger<SkCanvas::VertexMode> {};
-
 }  // namespace tonic
 
 namespace blink {
