@@ -9,7 +9,6 @@ import 'package:flutter/foundation.dart';
 
 import 'asset_bundle.dart';
 import 'image_cache.dart';
-import 'shell.dart';
 import 'platform_messages.dart';
 
 /// Ensures that the [MojoShell] singleton is created synchronously
@@ -31,7 +30,6 @@ abstract class ServicesBinding extends BindingBase {
     super.initInstances();
     ui.window
       ..onPlatformMessage = PlatformMessages.handlePlatformMessage;
-    new MojoShell();
     LicenseRegistry.addLicense(_addLicenses);
   }
 
