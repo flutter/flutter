@@ -89,7 +89,8 @@ abstract class Pageable extends Scrollable {
   /// The animation curve to use when animating to a given page.
   final Curve curve;
 
-  int get _itemCount;
+  /// The number of items, one per page, to display.
+  int get itemCount;
 }
 
 /// A widget that pages through an iterable list of children.
@@ -142,7 +143,7 @@ class PageableList extends Pageable {
   final Iterable<Widget> children;
 
   @override
-  int get _itemCount => children?.length ?? 0;
+  int get itemCount => children?.length ?? 0;
 
   @override
   PageableListState<PageableList> createState() => new PageableListState<PageableList>();
@@ -175,7 +176,7 @@ class PageableLazyList extends Pageable {
     ValueChanged<int> onPageChanged,
     Duration duration: const Duration(milliseconds: 200),
     Curve curve: Curves.ease,
-    this.itemCount,
+    this.itemCount: 0,
     this.itemBuilder
   }) : super(
     key: key,
@@ -194,13 +195,11 @@ class PageableLazyList extends Pageable {
   );
 
   /// The total number of list items.
+  @override
   final int itemCount;
 
   /// A function that returns the pages themselves.
   final ItemListBuilder itemBuilder;
-
-  @override
-  int get _itemCount => itemCount ?? 0;
 
   @override
   _PageableLazyListState createState() => new _PageableLazyListState();
@@ -212,7 +211,7 @@ class PageableLazyList extends Pageable {
 ///
 /// Subclasses typically override [buildContent] to build viewports.
 abstract class PageableState<T extends Pageable> extends ScrollableState<T> {
-  int get _itemCount => config._itemCount;
+  int get _itemCount => config.itemCount;
   int _previousItemCount;
 
   double get _pixelsPerScrollUnit {
