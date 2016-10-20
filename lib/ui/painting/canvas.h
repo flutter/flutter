@@ -68,7 +68,7 @@ class Canvas : public ftl::RefCountedThreadSafe<Canvas>,
   void clipRRect(const RRect& rrect);
   void clipPath(const CanvasPath* path);
 
-  void drawColor(SkColor color, SkXfermode::Mode transfer_mode);
+  void drawColor(SkColor color, SkBlendMode blend_mode);
   void drawLine(double x1,
                 double y1,
                 double x2,

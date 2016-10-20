@@ -20,8 +20,8 @@ class ShaderMaskLayer : public ContainerLayer {
 
   void set_mask_rect(const SkRect& mask_rect) { mask_rect_ = mask_rect; }
 
-  void set_transfer_mode(SkXfermode::Mode transfer_mode) {
-    transfer_mode_ = transfer_mode;
+  void set_blend_mode(SkBlendMode blend_mode) {
+    blend_mode_ = blend_mode;
   }
 
  protected:
@@ -30,7 +30,7 @@ class ShaderMaskLayer : public ContainerLayer {
  private:
   sk_sp<SkShader> shader_;
   SkRect mask_rect_;
-  SkXfermode::Mode transfer_mode_;
+  SkBlendMode blend_mode_;
 
   FTL_DISALLOW_COPY_AND_ASSIGN(ShaderMaskLayer);
 };

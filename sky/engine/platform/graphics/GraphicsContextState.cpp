@@ -228,9 +228,9 @@ void GraphicsContextState::setCompositeOperation(CompositeOperator compositeOper
 {
     m_compositeOperator = compositeOperation;
     m_blendMode = blendMode;
-    SkXfermode::Mode xferMode = WebCoreCompositeToSkiaComposite(compositeOperation, blendMode);
-    m_strokePaint.setXfermodeMode(xferMode);
-    m_fillPaint.setXfermodeMode(xferMode);
+    SkBlendMode skiaBlendMode = WebCoreCompositeToSkiaComposite(compositeOperation, blendMode);
+    m_strokePaint.setBlendMode(skiaBlendMode);
+    m_fillPaint.setBlendMode(skiaBlendMode);
 }
 
 void GraphicsContextState::setInterpolationQuality(InterpolationQuality quality)

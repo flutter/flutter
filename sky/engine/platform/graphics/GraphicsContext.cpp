@@ -353,7 +353,7 @@ void GraphicsContext::beginLayer(float opacity, CompositeOperator op, const Floa
 
     SkPaint layerPaint;
     layerPaint.setAlpha(static_cast<unsigned char>(opacity * 255));
-    layerPaint.setXfermodeMode(WebCoreCompositeToSkiaComposite(op, m_paintState->blendMode()));
+    layerPaint.setBlendMode(WebCoreCompositeToSkiaComposite(op, m_paintState->blendMode()));
     layerPaint.setImageFilter(imageFilter);
 
     if (bounds) {
@@ -1295,7 +1295,7 @@ void GraphicsContext::clearRect(const FloatRect& rect)
 
     SkRect r = rect;
     SkPaint paint(immutableState()->fillPaint());
-    paint.setXfermodeMode(SkXfermode::kClear_Mode);
+    paint.setBlendMode(SkBlendMode::kClear);
     drawRect(r, paint);
 }
 
@@ -1467,7 +1467,7 @@ void GraphicsContext::preparePaintForDrawRectToRect(
     bool isLazyDecoded,
     bool isDataComplete) const
 {
-    paint->setXfermodeMode(WebCoreCompositeToSkiaComposite(compositeOp, blendMode));
+    paint->setBlendMode(WebCoreCompositeToSkiaComposite(compositeOp, blendMode));
     paint->setColorFilter(sk_ref_sp(this->colorFilter()));
     paint->setAlpha(this->getNormalizedAlpha());
     paint->setLooper(this->drawLooper());

@@ -19,7 +19,7 @@ namespace tonic {
 
 constexpr int kIsAntiAliasIndex = 0;
 constexpr int kColorIndex = 1;
-constexpr int kTransferModeIndex = 2;
+constexpr int kBlendModeIndex = 2;
 constexpr int kStyleIndex = 3;
 constexpr int kStrokeWidthIndex = 4;
 constexpr int kStrokeCapIndex = 5;
@@ -82,10 +82,11 @@ Paint DartConverter<Paint>::FromArguments(Dart_NativeArguments args,
     paint.setColor(color);
   }
 
-  uint32_t encoded_transfer_mode = uint_data[kTransferModeIndex];
-  if (encoded_transfer_mode) {
-    uint32_t transfer_mode = encoded_transfer_mode ^ SkXfermode::kSrcOver_Mode;
-    paint.setXfermodeMode(static_cast<SkXfermode::Mode>(transfer_mode));
+  uint32_t encoded_blend_mode = uint_data[kBlendModeIndex];
+  if (encoded_blend_mode) {
+    uint32_t transfer_mode =
+        encoded_blend_mode ^ static_cast<uint32_t>(SkBlendMode::kSrcOver);
+    paint.setBlendMode(static_cast<SkBlendMode>(transfer_mode));
   }
 
   uint32_t style = uint_data[kStyleIndex];

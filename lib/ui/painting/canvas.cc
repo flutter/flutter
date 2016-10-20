@@ -171,10 +171,10 @@ void Canvas::clipPath(const CanvasPath* path) {
   canvas_->clipPath(path->path(), true);
 }
 
-void Canvas::drawColor(SkColor color, SkXfermode::Mode transfer_mode) {
+void Canvas::drawColor(SkColor color, SkBlendMode blend_mode) {
   if (!canvas_)
     return;
-  canvas_->drawColor(color, transfer_mode);
+  canvas_->drawColor(color, blend_mode);
 }
 
 void Canvas::drawLine(double x1,

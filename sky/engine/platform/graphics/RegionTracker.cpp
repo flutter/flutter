@@ -68,44 +68,31 @@ static inline bool xfermodeIsOpaque(const SkPaint& paint, bool srcIsOpaque)
     if (!srcIsOpaque)
         return false;
 
-    SkXfermode* xfermode = paint.getXfermode();
-    if (!xfermode)
-        return true; // default to kSrcOver_Mode
-    SkXfermode::Mode mode;
-    if (!xfermode->asMode(&mode))
-        return false;
-
-    switch (mode) {
-    case SkXfermode::kSrc_Mode: // source
-    case SkXfermode::kSrcOver_Mode: // source + dest - source*dest
-    case SkXfermode::kDstOver_Mode: // source + dest - source*dest
-    case SkXfermode::kDstATop_Mode: // source
-    case SkXfermode::kPlus_Mode: // source+dest
+    switch (paint.getBlendMode()) {
+    case SkBlendMode::kSrc: // source
+    case SkBlendMode::kSrcOver: // source + dest - source*dest
+    case SkBlendMode::kDstOver: // source + dest - source*dest
+    case SkBlendMode::kDstATop: // source
+    case SkBlendMode::kPlus: // source+dest
     default: // the rest are all source + dest - source*dest
         return true;
-    case SkXfermode::kClear_Mode: // 0
-    case SkXfermode::kDst_Mode: // dest
-    case SkXfermode::kSrcIn_Mode: // source * dest
-    case SkXfermode::kDstIn_Mode: // dest * source
-    case SkXfermode::kSrcOut_Mode: // source * (1-dest)
-    case SkXfermode::kDstOut_Mode: // dest * (1-source)
-    case SkXfermode::kSrcATop_Mode: // dest
-    case SkXfermode::kXor_Mode: // source + dest - 2*(source*dest)
+    case SkBlendMode::kClear: // 0
+    case SkBlendMode::kDst: // dest
+    case SkBlendMode::kSrcIn: // source * dest
+    case SkBlendMode::kDstIn: // dest * source
+    case SkBlendMode::kSrcOut: // source * (1-dest)
+    case SkBlendMode::kDstOut: // dest * (1-source)
+    case SkBlendMode::kSrcATop: // dest
+    case SkBlendMode::kXor: // source + dest - 2*(source*dest)
         return false;
     }
 }
 
 static inline bool xfermodeIsOverwrite(const SkPaint& paint)
 {
-    SkXfermode* xfermode = paint.getXfermode();
-    if (!xfermode)
-        return false; // default to kSrcOver_Mode
-    SkXfermode::Mode mode;
-    if (!xfermode->asMode(&mode))
-        return false;
-    switch (mode) {
-    case SkXfermode::kSrc_Mode:
-    case SkXfermode::kClear_Mode:
+    switch (paint.getBlendMode()) {
+    case SkBlendMode::kSrc:
+    case SkBlendMode::kClear:
         return true;
     default:
         return false;
@@ -115,30 +102,23 @@ static inline bool xfermodeIsOverwrite(const SkPaint& paint)
 // Returns true if the xfermode will keep the dst opaque, assuming the dst is already opaque.
 static inline bool xfermodePreservesOpaque(const SkPaint& paint, bool srcIsOpaque)
 {
-    SkXfermode* xfermode = paint.getXfermode();
-    if (!xfermode)
-        return true; // default to kSrcOver_Mode
-    SkXfermode::Mode mode;
-    if (!xfermode->asMode(&mode))
-        return false;
-
-    switch (mode) {
-    case SkXfermode::kDst_Mode: // dest
-    case SkXfermode::kSrcOver_Mode: // source + dest - source*dest
-    case SkXfermode::kDstOver_Mode: // source + dest - source*dest
-    case SkXfermode::kSrcATop_Mode: // dest
-    case SkXfermode::kPlus_Mode: // source+dest
+    switch (paint.getBlendMode()) {
+    case SkBlendMode::kDst: // dest
+    case SkBlendMode::kSrcOver: // source + dest - source*dest
+    case SkBlendMode::kDstOver: // source + dest - source*dest
+    case SkBlendMode::kSrcATop: // dest
+    case SkBlendMode::kPlus: // source+dest
     default: // the rest are all source + dest - source*dest
         return true;
-    case SkXfermode::kClear_Mode: // 0
-    case SkXfermode::kSrcOut_Mode: // source * (1-dest)
-    case SkXfermode::kDstOut_Mode: // dest * (1-source)
-    case SkXfermode::kXor_Mode: // source + dest - 2*(source*dest)
+    case SkBlendMode::kClear: // 0
+    case SkBlendMode::kSrcOut: // source * (1-dest)
+    case SkBlendMode::kDstOut: // dest * (1-source)
+    case SkBlendMode::kXor: // source + dest - 2*(source*dest)
         return false;
-    case SkXfermode::kSrc_Mode: // source
-    case SkXfermode::kSrcIn_Mode: // source * dest
-    case SkXfermode::kDstIn_Mode: // dest * source
-    case SkXfermode::kDstATop_Mode: // source
+    case SkBlendMode::kSrc: // source
+    case SkBlendMode::kSrcIn: // source * dest
+    case SkBlendMode::kDstIn: // dest * source
+    case SkBlendMode::kDstATop: // source
         return srcIsOpaque;
     }
 }

@@ -16,16 +16,14 @@ class ColorFilterLayer : public ContainerLayer {
 
   void set_color(SkColor color) { color_ = color; }
 
-  void set_transfer_mode(SkXfermode::Mode transfer_mode) {
-    transfer_mode_ = transfer_mode;
-  }
+  void set_blend_mode(SkBlendMode blend_mode) { blend_mode_ = blend_mode; }
 
  protected:
   void Paint(PaintContext& context) override;
 
  private:
   SkColor color_;
-  SkXfermode::Mode transfer_mode_;
+  SkBlendMode blend_mode_;
 
   FTL_DISALLOW_COPY_AND_ASSIGN(ColorFilterLayer);
 };
