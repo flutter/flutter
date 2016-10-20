@@ -62,10 +62,10 @@ class RunAndStayResident extends ResidentRunner {
   }
 
   @override
-  Future<bool> restart({ bool fullRestart: false }) async {
+  Future<OperationResult> restart({ bool fullRestart: false, bool pauseAfterRestart: false }) async {
     if (vmService == null) {
       printError('Debugging is not enabled.');
-      return false;
+      return new OperationResult(1, 'debugging not enabled');
     } else {
       Status status = logger.startProgress('Re-starting application...');
 
@@ -77,7 +77,7 @@ class RunAndStayResident extends ResidentRunner {
           .first;
       }
 
-      bool restartResult = await device.restartApp(
+      bool result = await device.restartApp(
         _package,
         _result,
         mainPath: _mainPath,
@@ -87,12 +87,11 @@ class RunAndStayResident extends ResidentRunner {
 
       status.stop(showElapsedTime: true);
 
-      if (restartResult && extensionAddedEvent != null) {
-        // TODO(devoncarew): We should restore the route here.
+      if (result && extensionAddedEvent != null) {
         await extensionAddedEvent;
       }
 
-      return restartResult;
+      return result ? OperationResult.ok : new OperationResult(1, 'restart error');
     }
   }
 
@@ -227,9 +226,9 @@ class RunAndStayResident extends ResidentRunner {
       mainFile.writeAsBytesSync(mainFile.readAsBytesSync());
 
       Stopwatch restartTime = new Stopwatch()..start();
-      bool restarted = await restart();
+      OperationResult result = await restart();
       restartTime.stop();
-      writeRunBenchmarkFile(startTime, restarted ? restartTime : null);
+      writeRunBenchmarkFile(startTime, result.isOk ? restartTime : null);
       await new Future<Null>.delayed(new Duration(seconds: 2));
       stop();
     }

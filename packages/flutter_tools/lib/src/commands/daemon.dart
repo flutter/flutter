@@ -384,13 +384,14 @@ class AppDomain extends Domain {
   Future<bool> restart(Map<String, dynamic> args) async {
     String appId = _getStringArg(args, 'appId', required: true);
     bool fullRestart = _getBoolArg(args, 'fullRestart') ?? false;
+    bool pauseAfterRestart = _getBoolArg(args, 'pause') ?? false;
 
     AppInstance app = _getApp(appId);
     if (app == null)
       throw "app '$appId' not found";
 
     return app._runInZone(this, () {
-      return app.restart(fullRestart: fullRestart);
+      return app.restart(fullRestart: fullRestart, pauseAfterRestart: pauseAfterRestart);
     });
   }
 
@@ -615,8 +616,8 @@ class AppInstance {
 
   _AppRunLogger _logger;
 
-  Future<bool> restart({ bool fullRestart: false }) {
-    return runner.restart(fullRestart: fullRestart);
+  Future<OperationResult> restart({ bool fullRestart: false, bool pauseAfterRestart: false }) {
+    return runner.restart(fullRestart: fullRestart, pauseAfterRestart: pauseAfterRestart);
   }
 
   Future<Null> stop() => runner.stop();

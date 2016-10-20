@@ -38,7 +38,7 @@ abstract class ResidentRunner {
     bool shouldBuild: true
   });
 
-  Future<bool> restart({ bool fullRestart: false });
+  Future<OperationResult> restart({ bool fullRestart: false, bool pauseAfterRestart: false });
 
   Future<Null> stop() async {
     await stopEchoingDeviceLog();
@@ -207,6 +207,17 @@ abstract class ResidentRunner {
   void printHelp();
   /// Called when the runner should handle a terminal command.
   Future<Null> handleTerminalCommand(String code);
+}
+
+class OperationResult {
+  static final OperationResult ok = new OperationResult(0, '');
+
+  OperationResult(this.code, this.message);
+
+  final int code;
+  final String message;
+
+  bool get isOk => code != 0;
 }
 
 /// Given the value of the --target option, return the path of the Dart file
