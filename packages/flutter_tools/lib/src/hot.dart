@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:path/path.dart' as path;
+import 'package:stack_trace/stack_trace.dart';
 
 import 'application_package.dart';
 import 'asset.dart';
@@ -145,7 +146,7 @@ class HotRunner extends ResidentRunner {
     bool shouldBuild: true
   }) {
     // Don't let uncaught errors kill the process.
-    return runZoned(() {
+    return Chain.capture(() {
       return _run(
         connectionInfoCompleter: connectionInfoCompleter,
         route: route,
