@@ -430,15 +430,26 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
 
   static Iterable<DoctorValidator> get installed {
     List<DoctorValidator> validators = <DoctorValidator>[];
+
+    void checkForIntelliJ(Directory dir) {
+      String name = path.basename(dir.path);
+      _dirNameToId.forEach((String dirName, String id) {
+        if (name == dirName) {
+          String title = IntelliJValidator._idToTitle[id];
+          validators.add(new IntelliJValidatorOnMac(title, id, dir.path));
+        }
+      });
+    }
+
     for (FileSystemEntity dir in new Directory('/Applications').listSync()) {
       if (dir is Directory) {
-        String name = path.basename(dir.path);
-        _dirNameToId.forEach((String dirName, String id) {
-          if (name == dirName) {
-            String title = IntelliJValidator._idToTitle[id];
-            validators.add(new IntelliJValidatorOnMac(title, id, dir.path));
+        checkForIntelliJ(dir);
+        if (!dir.path.endsWith('.app')) {
+          for (FileSystemEntity subdir in dir.listSync()) {
+            if (subdir is Directory)
+              checkForIntelliJ(subdir);
           }
-        });
+        }
       }
     }
     return validators;
