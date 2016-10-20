@@ -32,6 +32,8 @@ typedef Future<ByteData> _PlatformMessageHandler(ByteData message);
 
 /// Sends message to and receives messages from the underlying platform.
 class PlatformMessages {
+  PlatformMessages._();
+
   /// Handlers for incoming platform messages.
   static final Map<String, _PlatformMessageHandler> _handlers =
       <String, _PlatformMessageHandler>{};
@@ -143,7 +145,7 @@ class PlatformMessages {
   /// To remove the mock handler, pass `null` as the `handler` argument.
   static void setMockBinaryMessageHandler(String channel, Future<ByteData> handler(ByteData message)) {
     if (handler == null)
-      _mockHandlers.remove(handler);
+      _mockHandlers.remove(channel);
     else
       _mockHandlers[channel] = handler;
   }
