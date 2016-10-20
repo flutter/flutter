@@ -60,8 +60,12 @@ class Template {
 
   Map<String /* relative */, String /* absolute source */> _templateFilePaths;
 
-  int render(Directory destination, Map<String, dynamic> context,
-      { bool overwriteExisting: true }) {
+  int render(
+    Directory destination,
+    Map<String, dynamic> context, {
+    bool overwriteExisting: true,
+    String projectName
+  }) {
     destination.createSync(recursive: true);
     int fileCount = 0;
 
@@ -72,6 +76,8 @@ class Template {
           .join(destinationDirPath, relativeDestPath)
           .replaceAll(_kCopyTemplateExtension, '')
           .replaceAll(_kTemplateExtension, '');
+      if (projectName != null)
+        finalDestinationPath = finalDestinationPath.replaceAll('projectName', projectName);
       File finalDestinationFile = new File(finalDestinationPath);
       String relativePathForLogging = path.relative(finalDestinationFile.path);
 

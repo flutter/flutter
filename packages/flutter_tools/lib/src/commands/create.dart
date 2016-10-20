@@ -168,8 +168,11 @@ Your main program file is lib/main.dart in the $relativePath directory.
     templateContext['withDriverTest'] = renderDriverTest;
 
     Template createTemplate = new Template.fromName('create');
-    fileCount += createTemplate.render(new Directory(dirPath), templateContext,
-        overwriteExisting: false);
+    fileCount += createTemplate.render(
+      new Directory(dirPath),
+      templateContext, overwriteExisting: false,
+      projectName: projectName
+    );
 
     if (renderDriverTest) {
       Template driverTemplate = new Template.fromName('driver');
