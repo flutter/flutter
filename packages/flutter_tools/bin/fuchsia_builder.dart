@@ -9,6 +9,7 @@ import 'package:args/args.dart';
 
 import '../lib/src/base/context.dart';
 import '../lib/src/base/logger.dart';
+import '../lib/src/cache.dart';
 import '../lib/src/flx.dart';
 import '../lib/src/globals.dart';
 
@@ -48,6 +49,7 @@ Future<Null> main(List<String> args) async {
     printError('Missing option! All options must be specified.');
     exit(1);
   }
+  Cache.flutterRoot = Platform.environment['FLUTTER_ROOT'];
   String outputPath = argResults[_kOptionOutput];
   final int buildResult = await build(
     snapshotterPath: argResults[_kOptionSnapshotter],

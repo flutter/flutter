@@ -118,6 +118,7 @@ Future<int> build({
     outputPath: outputPath,
     privateKeyPath: privateKeyPath,
     workingDirPath: workingDirPath,
+    packagesPath: packagesPath,
     includeRobotoFonts: includeRobotoFonts,
     reportLicensedPackages: reportLicensedPackages
   );
@@ -129,11 +130,13 @@ Future<int> assemble({
   String outputPath,
   String privateKeyPath: defaultPrivateKeyPath,
   String workingDirPath,
+  String packagesPath,
   bool includeRobotoFonts: true,
   bool reportLicensedPackages: false
 }) async {
   outputPath ??= defaultFlxOutputPath;
   workingDirPath ??= getAssetBuildDirectory();
+  packagesPath ??= path.absolute(PackageMap.globalPackagesPath);
   printTrace('Building $outputPath');
 
   // Build the asset bundle.
@@ -141,6 +144,7 @@ Future<int> assemble({
   int result = await assetBundle.build(
     manifestPath: manifestPath,
     workingDirPath: workingDirPath,
+    packagesPath: packagesPath,
     includeRobotoFonts: includeRobotoFonts,
     reportLicensedPackages: reportLicensedPackages
   );
