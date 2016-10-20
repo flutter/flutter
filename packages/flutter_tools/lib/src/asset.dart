@@ -68,10 +68,12 @@ class AssetBundle {
   Future<int> build({
     String manifestPath: defaultManifestPath,
     String workingDirPath,
+    String packagesPath,
     bool includeRobotoFonts: true,
     bool reportLicensedPackages: false
   }) async {
     workingDirPath ??= getAssetBuildDirectory();
+    packagesPath ??= path.absolute(PackageMap.globalPackagesPath);
     Object manifest = _loadFlutterYamlManifest(manifestPath);
     if (manifest == null) {
       // No manifest file found for this application.
@@ -88,8 +90,7 @@ class AssetBundle {
 
     _lastBuildTimestamp = new DateTime.now();
 
-    final PackageMap packageMap =
-        new PackageMap(path.join(assetBasePath, '.packages'));
+    final PackageMap packageMap = new PackageMap(packagesPath);
 
     Map<_Asset, List<_Asset>> assetVariants = _parseAssets(
       packageMap,
