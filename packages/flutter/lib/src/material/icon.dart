@@ -65,6 +65,15 @@ class Icon extends StatelessWidget {
   ///
   /// The given color will be adjusted by the opacity of the current
   /// [IconTheme], if any.
+  ///
+  /// Typically, a material design color will be used, as follows:
+  ///
+  /// ```dart
+  ///  new Icon(
+  ///    icon: Icons.widgets,
+  ///    color: Colors.blue[400],
+  ///  ),
+  /// ```
   final Color color;
 
   @override
