@@ -17,7 +17,7 @@ void ShaderMaskLayer::Paint(PaintContext& context) {
   PaintChildren(context);
 
   SkPaint paint;
-  paint.setXfermodeMode(transfer_mode_);
+  paint.setBlendMode(blend_mode_);
   paint.setShader(shader_);
   context.canvas.translate(mask_rect_.left(), mask_rect_.top());
   context.canvas.drawRect(

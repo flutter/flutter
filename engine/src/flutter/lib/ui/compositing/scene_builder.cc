@@ -18,9 +18,9 @@
 #include "flutter/lib/ui/painting/matrix.h"
 #include "flutter/lib/ui/painting/shader.h"
 #include "lib/ftl/build_config.h"
+#include "lib/tonic/converter/dart_converter.h"
 #include "lib/tonic/dart_args.h"
 #include "lib/tonic/dart_binding_macros.h"
-#include "lib/tonic/converter/dart_converter.h"
 #include "lib/tonic/dart_library_natives.h"
 #include "third_party/skia/include/core/SkColorFilter.h"
 
@@ -121,10 +121,10 @@ void SceneBuilder::pushOpacity(int alpha) {
   addLayer(std::move(layer), m_cullRects.top());
 }
 
-void SceneBuilder::pushColorFilter(int color, int transferMode) {
+void SceneBuilder::pushColorFilter(int color, int blendMode) {
   std::unique_ptr<flow::ColorFilterLayer> layer(new flow::ColorFilterLayer());
   layer->set_color(static_cast<SkColor>(color));
-  layer->set_transfer_mode(static_cast<SkXfermode::Mode>(transferMode));
+  layer->set_blend_mode(static_cast<SkBlendMode>(blendMode));
   addLayer(std::move(layer), m_cullRects.top());
 }
 
@@ -140,12 +140,12 @@ void SceneBuilder::pushShaderMask(Shader* shader,
                                   double maskRectRight,
                                   double maskRectTop,
                                   double maskRectBottom,
-                                  int transferMode) {
+                                  int blendMode) {
   std::unique_ptr<flow::ShaderMaskLayer> layer(new flow::ShaderMaskLayer());
   layer->set_shader(shader->shader());
   layer->set_mask_rect(SkRect::MakeLTRB(maskRectLeft, maskRectTop,
                                         maskRectRight, maskRectBottom));
-  layer->set_transfer_mode(static_cast<SkXfermode::Mode>(transferMode));
+  layer->set_blend_mode(static_cast<SkBlendMode>(blendMode));
   addLayer(std::move(layer), m_cullRects.top());
 }
 
