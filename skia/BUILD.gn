@@ -524,6 +524,8 @@ source_set("skia_opts") {
     assert(false, "Need to port cpu specific stuff from skia_library_opts.gyp")
   }
 
+  sources += gypi_skia_opts.hsw_sources
+
   if (is_android && !is_debug) {
     configs -= [ "//build/config/compiler:optimize" ]
     configs += [ "//build/config/compiler:optimize_max" ]
