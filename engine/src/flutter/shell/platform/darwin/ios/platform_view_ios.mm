@@ -15,7 +15,6 @@
 #include "base/trace_event/trace_event.h"
 #include "flutter/shell/gpu/gpu_rasterizer.h"
 #include "flutter/shell/platform/darwin/common/platform_service_provider.h"
-#include "flutter/shell/platform/darwin/common/view_service_provider.h"
 #include "lib/ftl/synchronization/waitable_event.h"
 #include "mojo/public/cpp/application/connect.h"
 
@@ -289,14 +288,6 @@ sky::SkyEnginePtr& PlatformViewIOS::engineProxy() {
   return engine_;
 }
 
-flutter::platform::ApplicationMessagesPtr& PlatformViewIOS::AppMessageSender() {
-  return app_message_sender_;
-}
-
-shell::ApplicationMessagesImpl& PlatformViewIOS::AppMessageReceiver() {
-  return app_message_receiver_;
-}
-
 void PlatformViewIOS::ToggleAccessibility(UIView* view, bool enabled) {
   if (enabled) {
     if (!accessibility_bridge_) {
@@ -313,33 +304,11 @@ void PlatformViewIOS::ConnectToEngineAndSetupServices() {
   ConnectToEngine(mojo::GetProxy(&engine_));
 
   mojo::ServiceProviderPtr service_provider;
-
-  auto service_provider_proxy = mojo::GetProxy(&service_provider);
-
-  new PlatformServiceProvider(service_provider_proxy.Pass());
-
-  ftl::WeakPtr<ApplicationMessagesImpl> appplication_messages_impl =
-      app_message_receiver_.GetWeakPtr();
-
-  mojo::ServiceProviderPtr viewServiceProvider;
-
-  new ViewServiceProvider(
-      [appplication_messages_impl](
-          mojo::InterfaceRequest<flutter::platform::ApplicationMessages>
-              request) {
-        if (appplication_messages_impl)
-          appplication_messages_impl->AddBinding(std::move(request));
-      },
-      mojo::GetProxy(&viewServiceProvider));
+  new PlatformServiceProvider(mojo::GetProxy(&service_provider));
 
   sky::ServicesDataPtr services = sky::ServicesData::New();
   services->incoming_services = service_provider.Pass();
-  services->outgoing_services = mojo::GetProxy(&dart_services_);
-  services->view_services = viewServiceProvider.Pass();
   engine_->SetServices(services.Pass());
-
-  mojo::ConnectToService(dart_services_.get(),
-                         mojo::GetProxy(&app_message_sender_));
 }
 
 void PlatformViewIOS::SetupAndLoadFromSource(
@@ -380,7 +349,7 @@ void PlatformViewIOS::UpdateSemantics(
 
 void PlatformViewIOS::HandlePlatformMessage(
     ftl::RefPtr<blink::PlatformMessage> message) {
-  app_message_receiver_.HandlePlatformMessage(std::move(message));
+  platform_message_router_.HandlePlatformMessage(std::move(message));
 }
 
 void PlatformViewIOS::RunFromSource(const std::string& main,

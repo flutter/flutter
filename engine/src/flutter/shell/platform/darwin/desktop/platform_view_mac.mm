@@ -13,7 +13,6 @@
 #include "flutter/shell/gpu/gpu_rasterizer.h"
 #include "flutter/shell/platform/darwin/common/platform_mac.h"
 #include "flutter/shell/platform/darwin/common/platform_service_provider.h"
-#include "flutter/shell/platform/darwin/common/view_service_provider.h"
 #include "lib/ftl/synchronization/waitable_event.h"
 
 namespace shell {
@@ -34,22 +33,14 @@ PlatformViewMac::PlatformViewMac(NSOpenGLView* gl_view)
 
 PlatformViewMac::~PlatformViewMac() = default;
 
-static void IgnoreRequest(
-    mojo::InterfaceRequest<flutter::platform::ApplicationMessages>) {}
-
 void PlatformViewMac::ConnectToEngineAndSetupServices() {
   ConnectToEngine(mojo::GetProxy(&sky_engine_));
 
   mojo::ServiceProviderPtr service_provider;
   new PlatformServiceProvider(mojo::GetProxy(&service_provider));
 
-  mojo::ServiceProviderPtr view_service_provider;
-  new ViewServiceProvider(IgnoreRequest,
-                          mojo::GetProxy(&view_service_provider));
-
   sky::ServicesDataPtr services = sky::ServicesData::New();
   services->incoming_services = service_provider.Pass();
-  services->view_services = view_service_provider.Pass();
   sky_engine_->SetServices(services.Pass());
 }
 

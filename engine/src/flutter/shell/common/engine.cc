@@ -371,7 +371,7 @@ void Engine::UpdateSemantics(std::vector<blink::SemanticsNode> update) {
 
 void Engine::HandlePlatformMessage(
     ftl::RefPtr<blink::PlatformMessage> message) {
-  if (message->name() == kAssetPluginChannel) {
+  if (message->channel() == kAssetPluginChannel) {
     HandleAssetPlatformMessage(std::move(message));
     return;
   }
