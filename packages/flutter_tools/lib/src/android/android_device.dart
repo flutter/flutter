@@ -13,9 +13,11 @@ import '../application_package.dart';
 import '../base/os.dart';
 import '../base/process.dart';
 import '../build_info.dart';
+import '../dart/package_map.dart';
 import '../device.dart';
 import '../flx.dart' as flx;
 import '../globals.dart';
+import '../toolchain.dart';
 import '../vmservice.dart';
 import '../protocol_discovery.dart';
 import 'adb.dart';
@@ -461,7 +463,12 @@ class AndroidDevice extends Device {
 
     try {
       String snapshotPath = path.join(tempDir.path, 'snapshot_blob.bin');
-      int result = await flx.createSnapshot(mainPath: mainPath, snapshotPath: snapshotPath);
+      int result = await flx.createSnapshot(
+        snapshotterPath: tools.getHostToolPath(HostTool.SkySnapshot),
+        mainPath: mainPath,
+        snapshotPath: snapshotPath,
+        packages: path.absolute(PackageMap.globalPackagesPath),
+     );
 
       if (result != 0) {
         printError('Failed to run the Flutter compiler; exit code: $result');
