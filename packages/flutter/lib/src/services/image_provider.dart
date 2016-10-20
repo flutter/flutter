@@ -10,7 +10,6 @@ import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/http.dart' as http;
 import 'package:meta/meta.dart';
-import 'package:mojo/core.dart' as mojo;
 
 import 'asset_bundle.dart';
 import 'image_cache.dart';
@@ -209,26 +208,62 @@ abstract class ImageProvider<T> {
   String toString() => '$runtimeType()';
 }
 
-/// A subclass of [ImageProvider] that knows how to invoke
-/// [decodeImageFromDataPipe].
+/// Key for the image obtained by an [AssetImage] or [ExactAssetImage].
 ///
-/// This factors out the common logic of many [ImageProvider] classes,
-/// simplifying what subclasses must implement to just three small methods:
+/// This is used to identify the precise resource in the [imageCache].
+class AssetBundleImageKey {
+  /// Creates the key for an [AssetImage] or [AssetBundleImageProvider].
+  ///
+  /// The arguments must not be null.
+  const AssetBundleImageKey({
+    @required this.bundle,
+    @required this.name,
+    @required this.scale
+  });
+
+  /// The bundle from which the image will be obtained.
+  ///
+  /// The image is obtained by calling [AssetBundle.load] on the given [bundle]
+  /// using the key given by [name].
+  final AssetBundle bundle;
+
+  /// The key to use to obtain the resource from the [bundle]. This is the
+  /// argument passed to [AssetBundle.load].
+  final String name;
+
+  /// The scale to place in the [ImageInfo] object of the image.
+  final double scale;
+
+  @override
+  bool operator ==(dynamic other) {
+    if (other.runtimeType != runtimeType)
+      return false;
+    final AssetBundleImageKey typedOther = other;
+    return bundle == typedOther.bundle
+        && name == typedOther.name
+        && scale == typedOther.scale;
+  }
+
+  @override
+  int get hashCode => hashValues(bundle, name, scale);
+
+  @override
+  String toString() => '$runtimeType(bundle: $bundle, name: $name, scale: $scale)';
+}
+
+/// A subclass of [ImageProvider] that knows about [AssetBundle]s.
 ///
-/// * [obtainKey], to resolve an [ImageConfiguration].
-/// * [getScale], to determine the scale of the image associated with a
-///   particular key.
-/// * [loadDataPipe], to obtain the [mojo.MojoDataPipeConsumer] object that
-///   contains the actual image data.
-abstract class DataPipeImageProvider<T> extends ImageProvider<T> {
+/// This factors out the common logic of [AssetBundle]-based [ImageProvider]
+/// classes, simplifying what subclasses must implement to just [obtainKey].
+abstract class AssetBundleImageProvider extends ImageProvider<AssetBundleImageKey> {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
-  const DataPipeImageProvider();
+  const AssetBundleImageProvider();
 
   /// Converts a key into an [ImageStreamCompleter], and begins fetching the
   /// image using [loadAsync].
   @override
-  ImageStreamCompleter load(T key) {
+  ImageStreamCompleter load(AssetBundleImageKey key) {
     return new OneFrameImageStreamCompleter(
       loadAsync(key),
       informationCollector: (StringBuffer information) {
@@ -238,39 +273,29 @@ abstract class DataPipeImageProvider<T> extends ImageProvider<T> {
     );
   }
 
-  /// Fetches the image from the data pipe, decodes it, and returns a
+  /// Fetches the image from the asset bundle, decodes it, and returns a
   /// corresponding [ImageInfo] object.
   ///
   /// This function is used by [load].
   @protected
-  Future<ImageInfo> loadAsync(T key) async {
-    final mojo.MojoDataPipeConsumer dataPipe = await loadDataPipe(key);
-    if (dataPipe == null)
+  Future<ImageInfo> loadAsync(AssetBundleImageKey key) async {
+    final ByteData data = await key.bundle.load(key.name);
+    if (data == null)
       throw 'Unable to read data';
-    final ui.Image image = await decodeImage(dataPipe);
+    final ui.Image image = await decodeImage(data);
     if (image == null)
       throw 'Unable to decode image data';
-    return new ImageInfo(image: image, scale: getScale(key));
+    return new ImageInfo(image: image, scale: key.scale);
   }
 
-  /// Converts raw image data from a [mojo.MojoDataPipeConsumer] data pipe into
-  /// a decoded [ui.Image] which can be passed to a [Canvas].
+  /// Converts raw image data from a [ByteData] buffer into a decoded
+  /// [ui.Image] which can be passed to a [Canvas].
   ///
-  /// By default, this just uses [decodeImageFromDataPipe]. This method could be
+  /// By default, this just uses [decodeImageFromList]. This method could be
   /// overridden in subclasses (e.g. for testing).
-  Future<ui.Image> decodeImage(mojo.MojoDataPipeConsumer pipe) => decodeImageFromDataPipe(pipe);
-
-  /// Returns the data pipe that contains the image data to decode.
-  ///
-  /// Must be implemented by subclasses of [DataPipeImageProvider].
-  @protected
-  Future<mojo.MojoDataPipeConsumer> loadDataPipe(T key);
-
-  /// Returns the scale to use when creating the [ImageInfo] for the given key.
-  ///
-  /// Must be implemented by subclasses of [DataPipeImageProvider].
-  @protected
-  double getScale(T key);
+  Future<ui.Image> decodeImage(ByteData data) {
+    return decodeImageFromList(data.buffer.asUint8List());
+  }
 }
 
 /// Fetches the given URL from the network, associating it with the given scale.
@@ -343,72 +368,6 @@ class NetworkImage extends ImageProvider<NetworkImage> {
 
   @override
   String toString() => '$runtimeType("$url", scale: $scale)';
-}
-
-/// Key for the image obtained by an [AssetImage] or [AssetBundleImageProvider].
-///
-/// This is used to identify the precise resource in the [imageCache].
-class AssetBundleImageKey {
-  /// Creates the key for an [AssetImage] or [AssetBundleImageProvider].
-  ///
-  /// The arguments must not be null.
-  const AssetBundleImageKey({
-    @required this.bundle,
-    @required this.name,
-    @required this.scale
-  });
-
-  /// The bundle from which the image will be obtained.
-  ///
-  /// The image is obtained by calling [AssetBundle.load] on the given [bundle]
-  /// using the key given by [name].
-  final AssetBundle bundle;
-
-  /// The key to use to obtain the resource from the [bundle]. This is the
-  /// argument passed to [AssetBundle.load].
-  final String name;
-
-  /// The scale to place in the [ImageInfo] object of the image.
-  final double scale;
-
-  @override
-  bool operator ==(dynamic other) {
-    if (other.runtimeType != runtimeType)
-      return false;
-    final AssetBundleImageKey typedOther = other;
-    return bundle == typedOther.bundle
-        && name == typedOther.name
-        && scale == typedOther.scale;
-  }
-
-  @override
-  int get hashCode => hashValues(bundle, name, scale);
-
-  @override
-  String toString() => '$runtimeType(bundle: $bundle, name: $name, scale: $scale)';
-}
-
-/// A subclass of [DataPipeImageProvider] that knows about [AssetBundle]s.
-///
-/// This factors out the common logic of [AssetBundle]-based [ImageProvider]
-/// classes, simplifying what subclasses must implement to just [obtainKey].
-abstract class AssetBundleImageProvider extends DataPipeImageProvider<AssetBundleImageKey> {
-  /// Abstract const constructor. This constructor enables subclasses to provide
-  /// const constructors so that they can be used in const expressions.
-  const AssetBundleImageProvider();
-
-  @override
-  Future<AssetBundleImageKey> obtainKey(ImageConfiguration configuration);
-
-  @override
-  Future<mojo.MojoDataPipeConsumer> loadDataPipe(AssetBundleImageKey key) {
-    return key.bundle.load(key.name);
-  }
-
-  @override
-  double getScale(AssetBundleImageKey key) {
-    return key.scale;
-  }
 }
 
 /// Fetches an image from an [AssetBundle], associating it with the given scale.

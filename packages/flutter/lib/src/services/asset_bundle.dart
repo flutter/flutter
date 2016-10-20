@@ -4,14 +4,12 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
-import 'dart:ui' as ui;
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/http.dart' as http;
-import 'package:mojo/core.dart' as core;
-import 'package:flutter_services/mojo/asset_bundle/asset_bundle.dart' as mojom;
+
+import 'platform_messages.dart';
 
 /// A collection of resources used by the application.
 ///
@@ -42,7 +40,7 @@ import 'package:flutter_services/mojo/asset_bundle/asset_bundle.dart' as mojom;
 ///  * [rootBundle]
 abstract class AssetBundle {
   /// Retrieve a binary resource from the asset bundle as a data stream.
-  Future<core.MojoDataPipeConsumer> load(String key);
+  Future<ByteData> load(String key);
 
   /// Retrieve a string from the asset bundle.
   ///
@@ -83,13 +81,11 @@ class NetworkAssetBundle extends AssetBundle {
   String _urlFromKey(String key) => _baseUrl.resolve(key).toString();
 
   @override
-  Future<core.MojoDataPipeConsumer> load(String key) async {
+  Future<ByteData> load(String key) async {
     http.Response response = await http.get(_urlFromKey(key));
     if (response.statusCode == 200)
       return null;
-    core.MojoDataPipe pipe = new core.MojoDataPipe();
-    core.DataPipeFiller.fillHandle(pipe.producer, response.bodyBytes.buffer.asByteData());
-    return pipe.consumer;
+    return response.bodyBytes.buffer.asByteData();
   }
 
   @override
@@ -138,9 +134,8 @@ abstract class CachingAssetBundle extends AssetBundle {
   }
 
   Future<String> _fetchString(String key) async {
-    final core.MojoDataPipeConsumer pipe = await load(key);
-    final ByteData data = await core.DataPipeDrainer.drainHandle(pipe);
-    return UTF8.decode(new Uint8List.view(data.buffer));
+    final ByteData data = await load(key);
+    return UTF8.decode(data.buffer.asUint8List());
   }
 
   /// Retrieve a string from the asset bundle, parse it with the given function,
@@ -190,47 +185,17 @@ abstract class CachingAssetBundle extends AssetBundle {
   }
 }
 
-/// An [AssetBundle] that loads resources from a Mojo service.
-class MojoAssetBundle extends CachingAssetBundle {
-  /// Creates an [AssetBundle] interface around the given [mojom.AssetBundleProxy] Mojo service.
-  MojoAssetBundle(this._bundle);
-
-  mojom.AssetBundleProxy _bundle;
-
+/// An [AssetBundle] that loads resources using platform messages.
+class PlatformAssetBundle extends CachingAssetBundle {
   @override
-  Future<core.MojoDataPipeConsumer> load(String key) {
-    Completer<core.MojoDataPipeConsumer> completer = new Completer<core.MojoDataPipeConsumer>();
-    _bundle.getAsStream(key, (core.MojoDataPipeConsumer assetData) {
-      completer.complete(assetData);
-    });
-    return completer.future;
+  Future<ByteData> load(String key) {
+    Uint8List encoded = UTF8.encoder.convert(key);
+    return PlatformMessages.sendBinary('flutter/assets', encoded.buffer.asByteData());
   }
 }
 
 AssetBundle _initRootBundle() {
-  int h = ui.MojoServices.takeRootBundle();
-  if (h == core.MojoHandle.INVALID) {
-    assert(() {
-      if (!Platform.environment.containsKey('FLUTTER_TEST')) {
-        FlutterError.reportError(new FlutterErrorDetails(
-          exception:
-            'dart:ui MojoServices.takeRootBundle() returned an invalid handle.\n'
-            'This might happen if the Dart VM was restarted without restarting the underlying Flutter engine, '
-            'or if the Flutter framework\'s rootBundle object was first accessed after some other code called '
-            'takeRootBundle. The root bundle handle can only be obtained once in the lifetime of the Flutter '
-            'engine. Mojo handles cannot be shared.\n'
-            'The rootBundle object will be initialised with a NetworkAssetBundle instead of a MojoAssetBundle. '
-            'This may cause subsequent network errors.',
-          library: 'services library',
-          context: 'while initialising the root bundle'
-        ));
-      }
-      return true;
-    });
-    return new NetworkAssetBundle(Uri.base);
-  }
-  core.MojoHandle handle = new core.MojoHandle(h);
-  return new MojoAssetBundle(new mojom.AssetBundleProxy.fromHandle(handle));
+  return new PlatformAssetBundle();
 }
 
 /// The [AssetBundle] from which this application was loaded.
@@ -247,10 +212,6 @@ AssetBundle _initRootBundle() {
 /// directly replying upon the [rootBundle] created at build time. For
 /// convenience, the [WidgetsApp] or [MaterialApp] widget at the top of the
 /// widget hierarchy configures the [DefaultAssetBundle] to be the [rootBundle].
-///
-/// In normal operation, the [rootBundle] is a [MojoAssetBundle], though it can
-/// also end up being a [NetworkAssetBundle] in some cases (e.g. if the
-/// application's resources are being served from a local HTTP server).
 ///
 /// See also:
 ///

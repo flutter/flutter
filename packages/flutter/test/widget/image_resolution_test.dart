@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:typed_data';
 import 'dart:ui' as ui show Image;
 
 import 'package:flutter/rendering.dart';
@@ -10,7 +11,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meta/meta.dart';
-import 'package:mojo/core.dart' as mojo;
 
 class TestImage extends ui.Image {
   TestImage(this.scale);
@@ -26,9 +26,12 @@ class TestImage extends ui.Image {
   void dispose() { }
 }
 
-class TestMojoDataPipeConsumer extends mojo.MojoDataPipeConsumer {
-  TestMojoDataPipeConsumer(this.scale) : super(null);
+class TestByteData implements ByteData {
+  TestByteData(this.scale);
   final double scale;
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => null;
 }
 
 String testManifest = '''
@@ -44,26 +47,26 @@ String testManifest = '''
 
 class TestAssetBundle extends CachingAssetBundle {
   @override
-  Future<mojo.MojoDataPipeConsumer> load(String key) {
-    mojo.MojoDataPipeConsumer pipe;
+  Future<ByteData> load(String key) {
+    ByteData data;
     switch (key) {
       case 'assets/image.png':
-        pipe = new TestMojoDataPipeConsumer(1.0);
+        data = new TestByteData(1.0);
         break;
       case 'assets/1.5x/image.png':
-        pipe = new TestMojoDataPipeConsumer(1.5);
+        data = new TestByteData(1.5);
         break;
       case 'assets/2.0x/image.png':
-        pipe = new TestMojoDataPipeConsumer(2.0);
+        data = new TestByteData(2.0);
         break;
       case 'assets/3.0x/image.png':
-        pipe = new TestMojoDataPipeConsumer(3.0);
+        data = new TestByteData(3.0);
         break;
       case 'assets/4.0x/image.png':
-        pipe = new TestMojoDataPipeConsumer(4.0);
+        data = new TestByteData(4.0);
         break;
     }
-    return new SynchronousFuture<mojo.MojoDataPipeConsumer>(pipe);
+    return new SynchronousFuture<ByteData>(data);
   }
 
   @override
@@ -83,9 +86,9 @@ class TestAssetImage extends AssetImage {
   @override
   Future<ImageInfo> loadAsync(AssetBundleImageKey key) {
     ImageInfo result;
-    key.bundle.load(key.name).then((mojo.MojoDataPipeConsumer dataPipe) {
-      decodeImage(dataPipe).then((ui.Image image) {
-        result = new ImageInfo(image: image, scale: getScale(key));
+    key.bundle.load(key.name).then((ByteData data) {
+      decodeImage(data).then((ui.Image image) {
+        result = new ImageInfo(image: image, scale: key.scale);
       });
     });
     assert(result != null);
@@ -93,8 +96,8 @@ class TestAssetImage extends AssetImage {
   }
 
   @override
-  Future<ui.Image> decodeImage(@checked TestMojoDataPipeConsumer pipe) {
-    return new SynchronousFuture<ui.Image>(new TestImage(pipe.scale));
+  Future<ui.Image> decodeImage(@checked TestByteData data) {
+    return new SynchronousFuture<ui.Image>(new TestImage(data.scale));
   }
 }
 
