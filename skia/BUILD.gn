@@ -115,6 +115,8 @@ config("skia_library_config") {
     "//third_party/skia/src/gpu",
   ]
 
+  include_dirs += gypi_skia_sources.sksl_include_dirs
+
   if (is_mac || is_ios) {
     include_dirs += [ "//third_party/skia/include/utils/mac" ]
   }
@@ -230,6 +232,7 @@ component("skia") {
   sources += gypi_skia_core.sources
   sources += gypi_skia_effects.sources
   sources += gypi_skia_sources.utils_sources
+  sources += gypi_skia_sources.sksl_sources
 
   sources += [
     "//third_party/skia/src/codec/SkAndroidCodec.cpp",
