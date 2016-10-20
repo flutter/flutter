@@ -74,7 +74,7 @@ class TextFieldDemoState extends State<TextFieldDemo> {
       ),
       body: new Form(
         child: new Block(
-          padding: const EdgeInsets.all(8.0),
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
           children: <Widget>[
             new Input(
               hintText: 'What do people call you?',
@@ -113,6 +113,7 @@ class TextFieldDemoState extends State<TextFieldDemo> {
                     )
                   )
                 ),
+                new SizedBox(width: 16.0),
                 new Flexible(
                   child: new Input(
                     hintText: 'How do you log in?',
