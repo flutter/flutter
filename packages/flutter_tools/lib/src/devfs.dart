@@ -225,7 +225,8 @@ class _DevFSHttpWriter {
     HttpClientRequest request = await _client.putUrl(httpAddress);
     request.headers.removeAll(HttpHeaders.ACCEPT_ENCODING);
     request.headers.add('dev_fs_name', fsName);
-    request.headers.add('dev_fs_path', entry.devicePath);
+    request.headers.add('dev_fs_path_b64',
+                        BASE64.encode(UTF8.encode(entry.devicePath)));
     Stream<List<int>> contents = entry.contentsAsCompressedStream();
     await request.addStream(contents);
     HttpClientResponse response = await request.close();
