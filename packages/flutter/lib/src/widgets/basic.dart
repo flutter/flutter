@@ -1979,6 +1979,11 @@ class Row extends Flex {
 ///
 /// For details about the flex layout algorithm, see [RenderFlex]. To control
 /// the flex of child widgets, see the [Flexible] widget.
+///
+/// The Column widget does not scroll (and in general it is considered an error
+/// to have more children in a Column than will fit in the available room). If
+/// you have a list of widgets and want them to be able to scroll if there is
+/// insufficient room, consider using a [Block].
 class Column extends Flex {
   /// Creates a vertical array of children.
   ///
