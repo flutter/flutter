@@ -84,8 +84,6 @@ android_library("java") {
 
   deps = [
     "//base:base_java",
-    "//flutter/services/editing:editing_lib",
-    "//flutter/services/editing:interfaces_java",
     "//flutter/services/engine:interfaces_java",
     "//flutter/services/platform:interfaces_java",
     "//flutter/services/vsync:vsync_lib",

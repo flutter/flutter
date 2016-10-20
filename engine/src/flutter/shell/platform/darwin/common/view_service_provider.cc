@@ -25,13 +25,6 @@ void ViewServiceProvider::ConnectToService(
             std::move(client_handle)));
     return;
   }
-#if TARGET_OS_IPHONE
-  if (service_name == ::editing::Keyboard::Name_) {
-    new sky::services::editing::KeyboardImpl(
-        mojo::InterfaceRequest<::editing::Keyboard>(std::move(client_handle)));
-    return;
-  }
-#endif
 }
 
 }  // namespace shell

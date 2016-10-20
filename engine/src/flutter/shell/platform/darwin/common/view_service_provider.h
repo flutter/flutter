@@ -13,10 +13,6 @@
 #include "mojo/public/cpp/bindings/strong_binding.h"
 #include "mojo/public/interfaces/application/service_provider.mojom.h"
 
-#if TARGET_OS_IPHONE
-#include "flutter/services/editing/ios/keyboard_impl.h"
-#endif
-
 namespace shell {
 
 typedef std::function<void(
