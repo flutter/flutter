@@ -49,7 +49,8 @@ template("flutter_app") {
   dart_binary_dir = get_label_info(dart_binary_label, "root_out_dir")
   dart_binary = "$dart_binary_dir/dart_no_observatory"
 
-  flutter_tools_label = "//lib/flutter/packages/flutter_tools"
+  flutter_root = "//lib/flutter"
+  flutter_tools_label = "$flutter_root/packages/flutter_tools"
   flutter_tools_gen_dir = get_label_info(flutter_tools_label, "target_gen_dir")
   flutter_tools_name = get_label_info(flutter_tools_label, "name")
   flutter_tools_packages = "$flutter_tools_gen_dir/$flutter_tools_name.packages"
@@ -83,6 +84,8 @@ template("flutter_app") {
     args = [
       "--root",
       rebase_path(dart_binary_dir),
+      "--flutter-root",
+      rebase_path(flutter_root),
       "--dart",
       rebase_path(dart_binary),
       "--flutter-tools-packages",
