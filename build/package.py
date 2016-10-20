@@ -14,6 +14,8 @@ def main():
 
   parser.add_argument('--root', type=str, required=True,
                       help='The root of the output directory')
+  parser.add_argument('--flutter-root', type=str, required=True,
+                      help='The root of the Flutter SDK')
   parser.add_argument('--dart', type=str, required=True,
                       help='The Dart binary to use')
   parser.add_argument('--flutter-tools-packages', type=str, required=True,
@@ -41,6 +43,7 @@ def main():
 
   env = os.environ.copy()
   env['LD_LIBRARY_PATH'] = args.root
+  env['FLUTTER_ROOT'] = args.flutter_root
 
   result = subprocess.call([
     args.dart,
