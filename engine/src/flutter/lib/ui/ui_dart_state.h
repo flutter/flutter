@@ -16,7 +16,6 @@
 namespace blink {
 struct DartJniIsolateData;
 class FontSelector;
-class MojoServices;
 class Window;
 
 class IsolateClient {
@@ -41,9 +40,6 @@ class UIDartState : public tonic::DartState {
   const std::string& debug_name() const { return debug_name_; }
   Window* window() const { return window_.get(); }
 
-  void set_mojo_services(std::unique_ptr<MojoServices> mojo_services);
-  MojoServices* mojo_services();
-
 #if defined(OS_ANDROID)
   DartJniIsolateData* jni_data();
 #endif
@@ -57,7 +53,6 @@ class UIDartState : public tonic::DartState {
   IsolateClient* isolate_client_;
   Dart_Port main_port_;
   std::string debug_name_;
-  std::unique_ptr<MojoServices> mojo_services_;
   std::unique_ptr<Window> window_;
   RefPtr<FontSelector> font_selector_;
 
