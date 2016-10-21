@@ -217,7 +217,7 @@ class OperationResult {
   final int code;
   final String message;
 
-  bool get isOk => code != 0;
+  bool get isOk => code == 0;
 }
 
 /// Given the value of the --target option, return the path of the Dart file
