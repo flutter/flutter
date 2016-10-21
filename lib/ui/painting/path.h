@@ -69,7 +69,7 @@ class CanvasPath : public ftl::RefCountedThreadSafe<CanvasPath>,
   void reset();
   bool contains(double x, double y);
   ftl::RefPtr<CanvasPath> shift(double dx, double dy);
-  ftl::RefPtr<CanvasPath> transform(const tonic::Float64List& matrix4);
+  ftl::RefPtr<CanvasPath> transform(tonic::Float64List& matrix4);
 
   const SkPath& path() const { return path_; }
 
