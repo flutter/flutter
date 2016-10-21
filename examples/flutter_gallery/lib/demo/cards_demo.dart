@@ -70,12 +70,15 @@ class TravelDestinationItem extends StatelessWidget {
                   new Positioned(
                     bottom: 16.0,
                     left: 16.0,
-                    child: new Text(destination.title,
-                      style: titleStyle,
-                      softWrap: false,
-                      overflow: TextOverflow.ellipsis
-                    )
-                  )
+                    right: 16.0,
+                    child: new FittedBox(
+                      fit: ImageFit.scaleDown,
+                      alignment: FractionalOffset.centerLeft,
+                      child: new Text(destination.title,
+                        style: titleStyle,
+                      ),
+                    ),
+                  ),
                 ]
               )
             ),
