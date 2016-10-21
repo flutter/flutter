@@ -222,19 +222,14 @@ class _DevFSHttpWriter {
 
   Future<Null> _scheduleWrite(DevFSEntry entry,
                               DevFSProgressReporter progressReporter) async {
-    try {
-      HttpClientRequest request = await _client.putUrl(httpAddress);
-      request.headers.removeAll(HttpHeaders.ACCEPT_ENCODING);
-      request.headers.add('dev_fs_name', fsName);
-      request.headers.add('dev_fs_path_b64',
-                          BASE64.encode(UTF8.encode(entry.devicePath)));
-      Stream<List<int>> contents = entry.contentsAsCompressedStream();
-      await request.addStream(contents);
-      HttpClientResponse response = await request.close();
-      await response.drain();
-    } catch (e, stackTrace) {
-      printError('Error writing "${entry.devicePath}" to DevFS: $e\n$stackTrace');
-    }
+    HttpClientRequest request = await _client.putUrl(httpAddress);
+    request.headers.removeAll(HttpHeaders.ACCEPT_ENCODING);
+    request.headers.add('dev_fs_name', fsName);
+    request.headers.add('dev_fs_path', entry.devicePath);
+    Stream<List<int>> contents = entry.contentsAsCompressedStream();
+    await request.addStream(contents);
+    HttpClientResponse response = await request.close();
+    await response.drain();
     if (progressReporter != null) {
       _done++;
       progressReporter(_done, _max);

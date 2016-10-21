@@ -452,16 +452,16 @@ class HotRunner extends ResidentRunner {
   }
 
   @override
-  Future<bool> restart({ bool fullRestart: false }) async {
+  Future<OperationResult> restart({ bool fullRestart: false, bool pauseAfterRestart: false }) async {
     if (fullRestart) {
       await _restartFromSources();
-      return true;
+      return OperationResult.ok;
     } else {
-      return _reloadSources();
+      return _reloadSources(pause: pauseAfterRestart);
     }
   }
 
-  Future<bool> _reloadSources() async {
+  Future<OperationResult> _reloadSources({ bool pause: false }) async {
     if (currentView.uiIsolate == null)
       throw 'Application isolate not found';
     FirstFrameTimer firstFrameTimer = new FirstFrameTimer(vmService);
@@ -471,28 +471,31 @@ class HotRunner extends ResidentRunner {
     Status reloadStatus = logger.startProgress('Performing hot reload...');
     try {
       Map<String, dynamic> reloadReport =
-          await currentView.uiIsolate.reloadSources();
+          await currentView.uiIsolate.reloadSources(pause: pause);
       reloadStatus.stop(showElapsedTime: true);
       if (!_printReloadReport(reloadReport)) {
         // Reload failed.
         flutterUsage.sendEvent('hot', 'reload-reject');
-        return false;
+        return new OperationResult(1, 'reload rejected');
       } else {
         flutterUsage.sendEvent('hot', 'reload');
       }
     } catch (error, st) {
       int errorCode = error['code'];
+      String errorMessage = error['message'];
+
+      reloadStatus.stop(showElapsedTime: true);
+
       if (errorCode == Isolate.kIsolateReloadBarred) {
         printError('Unable to hot reload app due to an unrecoverable error in '
                    'the source code. Please address the error and then use '
                    '"R" to restart the app.');
         flutterUsage.sendEvent('hot', 'reload-barred');
-        return false;
+        return new OperationResult(errorCode, errorMessage);
       }
-      String errorMessage = error['message'];
-      reloadStatus.stop(showElapsedTime: true);
+
       printError('Hot reload failed:\ncode = $errorCode\nmessage = $errorMessage\n$st');
-      return false;
+      return new OperationResult(errorCode, errorMessage);
     }
     // Reload the isolate.
     await currentView.uiIsolate.reload();
@@ -501,7 +504,7 @@ class HotRunner extends ResidentRunner {
     if ((pauseEvent != null) && (pauseEvent.isPauseEvent)) {
       // Isolate is paused. Stop here.
       printTrace('Skipping reassemble because isolate is paused.');
-      return true;
+      return OperationResult.ok;
     }
     await _evictDirtyAssets();
     printTrace('Reassembling application');
@@ -510,7 +513,7 @@ class HotRunner extends ResidentRunner {
       waitForFrame = (await currentView.uiIsolate.flutterReassemble() != null);
     } catch (_) {
       printError('Reassembling application failed.');
-      return false;
+      return new OperationResult(1, 'error reassembling application');
     }
     try {
       /* ensure that a frame is scheduled */
@@ -530,7 +533,7 @@ class HotRunner extends ResidentRunner {
       }
       flutterUsage.sendTiming('hot', 'reload', firstFrameTimer.elapsed);
     }
-    return true;
+    return OperationResult.ok;
   }
 
   @override
