@@ -193,9 +193,10 @@ ftl::RefPtr<CanvasPath> CanvasPath::shift(double dx, double dy) {
 }
 
 ftl::RefPtr<CanvasPath> CanvasPath::transform(
-    const tonic::Float64List& matrix4) {
+    tonic::Float64List& matrix4) {
   ftl::RefPtr<CanvasPath> path = CanvasPath::Create();
   path_.transform(ToSkMatrix(matrix4), &path->path_);
+  matrix4.Release();
   return path;
 }
 
