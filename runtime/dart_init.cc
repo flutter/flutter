@@ -384,8 +384,9 @@ DartJniIsolateData* GetDartJniDataForCurrentIsolate() {
 
 #if DART_ALLOW_DYNAMIC_RESOLUTION
 
-constexpr char kDartVmIsolateSnapshotBufferName[] = "kVmIsolateSnapshot";
-constexpr char kDartIsolateSnapshotBufferName[] = "kIsolateSnapshot";
+constexpr char kDartVmIsolateSnapshotBufferName[] =
+    "kDartVmIsolateSnapshotBuffer";
+constexpr char kDartIsolateSnapshotBufferName[] = "kDartIsolateSnapshotBuffer";
 constexpr char kInstructionsSnapshotName[] = "kInstructionsSnapshot";
 constexpr char kDataSnapshotName[] = "kDataSnapshot";
 
