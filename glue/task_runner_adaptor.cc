@@ -30,6 +30,16 @@ void TaskRunnerAdaptor::PostTask(ftl::Closure task) {
   runner_->PostTask(FROM_HERE, base::Bind(RunClosure, task));
 }
 
+void TaskRunnerAdaptor::PostTaskForTime(ftl::Closure task,
+                                        ftl::TimePoint target_time) {
+  ftl::TimePoint now = ftl::TimePoint::Now();
+  runner_->PostDelayedTask(FROM_HERE, base::Bind(RunClosure, task),
+                           target_time <= now
+                               ? base::TimeDelta()
+                               : base::TimeDelta::FromMicroseconds(
+                                     (target_time - now).ToMicroseconds()));
+}
+
 void TaskRunnerAdaptor::PostDelayedTask(ftl::Closure task,
                                         ftl::TimeDelta delay) {
   runner_->PostDelayedTask(
