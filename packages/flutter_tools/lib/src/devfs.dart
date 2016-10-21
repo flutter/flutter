@@ -420,9 +420,6 @@ class DevFS {
       await _operations.writeSource(fsName, '.packages', sb.toString());
 
     printTrace('DevFS: Sync finished');
-    // NB: You must call flush after a printTrace if you want to be printed
-    // immediately.
-    logger.flush();
   }
 
   void _scanFile(String devicePath, FileSystemEntity file) {

@@ -129,11 +129,7 @@ class FlutterCommandRunner extends CommandRunner {
     if (args.length == 1 && args.first == 'build')
       args = <String>['build', '-h'];
 
-    return super.run(args).then((dynamic result) {
-      return result;
-    }).whenComplete(() {
-      logger.flush();
-    });
+    return super.run(args);
   }
 
   @override
