@@ -82,7 +82,7 @@ class _RecipeGridPageState extends State<RecipeGridPage> {
   Widget build(BuildContext context) {
     final double statusBarHeight = MediaQuery.of(context).padding.top;
     return new Theme(
-      data: _kTheme,
+      data: _kTheme.copyWith(platform: Theme.of(context).platform),
       child: new Scaffold(
         key: scaffoldKey,
         scrollableKey: config.scrollableKey,
@@ -168,7 +168,7 @@ class _RecipeGridPageState extends State<RecipeGridPage> {
       settings: const RouteSettings(name: "/pesto/recipe"),
       builder: (BuildContext context) {
         return new Theme(
-          data: _kTheme,
+          data: _kTheme.copyWith(platform: Theme.of(context).platform),
           child: new RecipePage(recipe: recipe)
         );
       }
