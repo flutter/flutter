@@ -482,6 +482,9 @@ class HotRunner extends ResidentRunner {
     } catch (error, st) {
       int errorCode = error['code'];
       String errorMessage = error['message'];
+
+      reloadStatus.stop(showElapsedTime: true);
+
       if (errorCode == Isolate.kIsolateReloadBarred) {
         printError('Unable to hot reload app due to an unrecoverable error in '
                    'the source code. Please address the error and then use '
@@ -489,7 +492,7 @@ class HotRunner extends ResidentRunner {
         flutterUsage.sendEvent('hot', 'reload-barred');
         return new OperationResult(errorCode, errorMessage);
       }
-      reloadStatus.stop(showElapsedTime: true);
+
       printError('Hot reload failed:\ncode = $errorCode\nmessage = $errorMessage\n$st');
       return new OperationResult(errorCode, errorMessage);
     }
@@ -509,8 +512,8 @@ class HotRunner extends ResidentRunner {
       /* ignore any errors */
     }
     if (waitForFrame) {
-      // When the framework is present, we can wait for the first frame
-      // event and measure reload itme.
+      // When the framework is present, we can wait for the first frame event
+      // and measure reload item.
       await firstFrameTimer.firstFrame();
       printStatus('Hot reload performed in '
                   '${getElapsedAsMilliseconds(firstFrameTimer.elapsed)}.');

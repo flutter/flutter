@@ -72,6 +72,8 @@ class DaemonCommand extends FlutterCommand {
   dynamic _jsonEncodeObject(dynamic object) {
     if (object is Device)
       return _deviceToMap(object);
+    if (object is OperationResult)
+      return _operationResultToMap(object);
     return object;
   }
 
@@ -81,7 +83,7 @@ class DaemonCommand extends FlutterCommand {
   }
 }
 
-typedef void DispatchComand(Map<String, dynamic> command);
+typedef void DispatchCommand(Map<String, dynamic> command);
 
 typedef Future<dynamic> CommandHandler(Map<String, dynamic> args);
 
@@ -109,7 +111,7 @@ class Daemon {
   AppDomain appDomain;
   DeviceDomain deviceDomain;
 
-  final DispatchComand sendCommand;
+  final DispatchCommand sendCommand;
   final DaemonCommand daemonCommand;
   final NotifyingLogger notifyingLogger;
 
@@ -381,7 +383,7 @@ class AppDomain extends Domain {
     };
   }
 
-  Future<bool> restart(Map<String, dynamic> args) async {
+  Future<OperationResult> restart(Map<String, dynamic> args) async {
     String appId = _getStringArg(args, 'appId', required: true);
     bool fullRestart = _getBoolArg(args, 'fullRestart') ?? false;
     bool pauseAfterRestart = _getBoolArg(args, 'pause') ?? false;
@@ -568,10 +570,19 @@ Map<String, dynamic> _deviceToMap(Device device) {
   };
 }
 
+Map<String, dynamic> _operationResultToMap(OperationResult result) {
+  return <String, dynamic>{
+    'code': result.code,
+    'message': result.message
+  };
+}
+
 dynamic _toJsonable(dynamic obj) {
   if (obj is String || obj is int || obj is bool || obj is Map<dynamic, dynamic> || obj is List<dynamic> || obj == null)
     return obj;
   if (obj is Device)
+    return obj;
+  if (obj is OperationResult)
     return obj;
   return '$obj';
 }
