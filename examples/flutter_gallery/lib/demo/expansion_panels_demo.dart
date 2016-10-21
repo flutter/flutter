@@ -192,12 +192,15 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
           return new CollapsibleBody(
             margin: const EdgeInsets.symmetric(horizontal: 16.0),
             child: new Form(
-              child: new Input(
-                hintText: item.hint,
-                labelText: item.name,
-                value: new InputValue(text: item.value),
-                formField: new FormField<String>(
-                  setter: (String val) { item.value = val; }
+              child: new Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: new Input(
+                  hintText: item.hint,
+                  labelText: item.name,
+                  value: new InputValue(text: item.value),
+                  formField: new FormField<String>(
+                    setter: (String val) { item.value = val; }
+                  ),
                 ),
               ),
             ),

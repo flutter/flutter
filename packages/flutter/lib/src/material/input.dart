@@ -190,7 +190,7 @@ class _InputState extends State<Input> {
 
     List<Widget> stackChildren = <Widget>[];
 
-    bool hasInlineLabel = config.labelText != null && !focused && !value.text.isNotEmpty;
+    bool hasInlineLabel = config.labelText != null && !focused && value.text == null;
 
     if (config.labelText != null) {
       TextStyle labelStyle = hasInlineLabel ?
@@ -213,7 +213,7 @@ class _InputState extends State<Input> {
       topPadding += topPaddingIncrement;
     }
 
-    if (config.hintText != null && value.text.isEmpty && !hasInlineLabel) {
+    if (config.hintText != null && value.text == null && !hasInlineLabel) {
       TextStyle hintStyle = themeData.textTheme.subhead.copyWith(color: themeData.hintColor);
       stackChildren.add(new Positioned(
         left: 0.0,
@@ -306,10 +306,7 @@ class _InputState extends State<Input> {
       child: new GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: () => _rawInputKey.currentState?.requestKeyboard(),
-        child: new Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: child
-        )
+        child: child
       )
     );
   }
