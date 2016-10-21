@@ -46,6 +46,12 @@ class Divider extends StatelessWidget {
   ///
   /// Defaults to the current theme's divider color, given by
   /// [ThemeData.dividerColor].
+  ///
+  /// ```dart
+  ///  new Divider(
+  ///    color: Colors.deepOrange[500],
+  ///  ),
+  /// ```
   final Color color;
 
   @override

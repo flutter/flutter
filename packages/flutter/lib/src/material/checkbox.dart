@@ -58,6 +58,21 @@ class Checkbox extends StatefulWidget {
   /// value.
   ///
   /// If null, the checkbox will be displayed as disabled.
+  ///
+  /// The callback provided to onChanged should update the state of the parent
+  /// [StatefulWidget] using the [State.setState] method, so that the parent
+  /// gets rebuilt; for example:
+  ///
+  /// ```dart
+  /// new Checkbox(
+  ///   value: _throwShotAway,
+  ///   onChanged: (bool newValue) {
+  ///     setState(() {
+  ///       _throwShotAway = newValue;
+  ///     });
+  ///   },
+  /// ),
+  /// ```
   final ValueChanged<bool> onChanged;
 
   /// The color to use when this checkbox is checked.

@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:path/path.dart' as path;
+import 'package:stack_trace/stack_trace.dart';
 
 import 'application_package.dart';
 import 'asset.dart';
@@ -145,7 +146,7 @@ class HotRunner extends ResidentRunner {
     bool shouldBuild: true
   }) {
     // Don't let uncaught errors kill the process.
-    return runZoned(() {
+    return Chain.capture(() {
       return _run(
         connectionInfoCompleter: connectionInfoCompleter,
         route: route,
@@ -496,6 +497,15 @@ class HotRunner extends ResidentRunner {
       printError('Hot reload failed:\ncode = $errorCode\nmessage = $errorMessage\n$st');
       return new OperationResult(errorCode, errorMessage);
     }
+    // Reload the isolate.
+    await currentView.uiIsolate.reload();
+    // Check if the isolate is paused.
+    final ServiceEvent pauseEvent = currentView.uiIsolate.pauseEvent;
+    if ((pauseEvent != null) && (pauseEvent.isPauseEvent)) {
+      // Isolate is paused. Stop here.
+      printTrace('Skipping reassemble because isolate is paused.');
+      return OperationResult.ok;
+    }
     await _evictDirtyAssets();
     printTrace('Reassembling application');
     bool waitForFrame = true;
@@ -512,8 +522,8 @@ class HotRunner extends ResidentRunner {
       /* ignore any errors */
     }
     if (waitForFrame) {
-      // When the framework is present, we can wait for the first frame event
-      // and measure reload item.
+      // When the framework is present, we can wait for the first frame
+      // event and measure reload time.
       await firstFrameTimer.firstFrame();
       printStatus('Hot reload performed in '
                   '${getElapsedAsMilliseconds(firstFrameTimer.elapsed)}.');

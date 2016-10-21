@@ -66,6 +66,9 @@ typedef double SnapOffsetCallback(double scrollOffset, Size containerSize);
 ///
 /// Widgets that subclass [Scrollable] typically use state objects that subclass
 /// [ScrollableState].
+///
+/// If you have a list of widgets and want them to be able to scroll if there is
+/// insufficient room, consider using [Block].
 class Scrollable extends StatefulWidget {
   /// Initializes fields for subclasses.
   ///

@@ -70,6 +70,16 @@ class FlatButton extends StatelessWidget {
 
   /// The color of the button, as printed on the [Material]. Defaults to null,
   /// meaning that the color is automatically derived from the [Theme].
+  ///
+  /// Typically, a material design color will be used, as follows:
+  ///
+  /// ```dart
+  ///  new FlatButton(
+  ///    color: Colors.blue[500],
+  ///    onPressed: _handleTap,
+  ///    child: new Text('DEMO'),
+  ///  ),
+  /// ```
   final Color color;
 
   /// The color of the button when the button is disabled. Buttons are disabled

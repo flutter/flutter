@@ -5,6 +5,8 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:stack_trace/stack_trace.dart';
+
 import 'application_package.dart';
 import 'base/logger.dart';
 import 'base/utils.dart';
@@ -47,7 +49,7 @@ class RunAndStayResident extends ResidentRunner {
     bool shouldBuild: true
   }) {
     // Don't let uncaught errors kill the process.
-    return runZoned(() {
+    return Chain.capture(() {
       assert(shouldBuild == !prebuiltMode);
       return _run(
         traceStartup: traceStartup,

@@ -3,10 +3,10 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_gallery/gallery/example_code_parser.dart';
-import 'package:mojo/core.dart' as core;
 import 'package:test/test.dart';
 
 void main() {
@@ -36,7 +36,7 @@ test 1 1
 
 class TestAssetBundle extends AssetBundle {
   @override
-  Future<core.MojoDataPipeConsumer> load(String key) => null;
+  Future<ByteData> load(String key) => null;
 
   @override
   Future<String> loadString(String key, { bool cache: true }) {

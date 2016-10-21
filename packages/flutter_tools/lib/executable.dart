@@ -28,7 +28,6 @@ import 'src/commands/logs.dart';
 import 'src/commands/setup.dart';
 import 'src/commands/packages.dart';
 import 'src/commands/precache.dart';
-import 'src/commands/refresh.dart';
 import 'src/commands/run.dart';
 import 'src/commands/run_mojo.dart';
 import 'src/commands/screenshot.dart';
@@ -73,7 +72,6 @@ Future<Null> main(List<String> args) async {
     ..addCommand(new LogsCommand())
     ..addCommand(new PackagesCommand())
     ..addCommand(new PrecacheCommand())
-    ..addCommand(new RefreshCommand())
     ..addCommand(new RunCommand(verboseHelp: verboseHelp))
     ..addCommand(new RunMojoCommand(hidden: !verboseHelp))
     ..addCommand(new ScreenshotCommand())
