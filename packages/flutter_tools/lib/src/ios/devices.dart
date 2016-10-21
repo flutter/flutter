@@ -295,7 +295,7 @@ class IOSDevice extends Device {
   }
 
   Future<int> _acquireAndForwardPort(String serviceName, int localPort) async {
-    Duration stepTimeout = const Duration(seconds: 10);
+    Duration stepTimeout = const Duration(seconds: 60);
 
     Future<int> remote = new ProtocolDiscovery(logReader, serviceName).nextPort();
 
