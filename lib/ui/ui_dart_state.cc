@@ -4,7 +4,6 @@
 
 #include "flutter/lib/ui/ui_dart_state.h"
 
-#include "flutter/lib/ui/mojo_services.h"
 #include "flutter/lib/ui/window/window.h"
 #include "flutter/sky/engine/platform/fonts/FontSelector.h"
 #include "lib/tonic/converter/dart_converter.h"
@@ -53,15 +52,6 @@ void UIDartState::DidSetIsolate() {
 
 UIDartState* UIDartState::Current() {
   return static_cast<UIDartState*>(DartState::Current());
-}
-
-void UIDartState::set_mojo_services(
-    std::unique_ptr<MojoServices> mojo_services) {
-  mojo_services_ = std::move(mojo_services);
-}
-
-MojoServices* UIDartState::mojo_services() {
-  return mojo_services_.get();
 }
 
 #if defined(OS_ANDROID)

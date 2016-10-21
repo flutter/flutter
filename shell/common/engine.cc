@@ -14,7 +14,6 @@
 #include "flutter/common/threads.h"
 #include "flutter/glue/movable_wrapper.h"
 #include "flutter/glue/trace_event.h"
-#include "flutter/lib/ui/mojo_services.h"
 #include "flutter/runtime/asset_font_selector.h"
 #include "flutter/runtime/dart_controller.h"
 #include "flutter/runtime/dart_init.h"
@@ -302,29 +301,11 @@ void Engine::OnAppLifecycleStateChanged(sky::AppLifecycleState state) {
 }
 
 void Engine::DidCreateMainIsolate(Dart_Isolate isolate) {
-  mojo::ServiceProviderPtr services_from_embedder;
-  service_provider_bindings_.AddBinding(
-      &service_provider_impl_, mojo::GetProxy(&services_from_embedder));
-
-  blink::MojoServices::Create(isolate, std::move(services_),
-                              std::move(services_from_embedder),
-                              std::move(root_bundle_));
-
   if (asset_store_)
     blink::AssetFontSelector::Install(asset_store_);
 }
 
-void Engine::DidCreateSecondaryIsolate(Dart_Isolate isolate) {
-  mojo::ServiceProviderPtr services_from_embedder;
-  auto request = glue::WrapMovable(mojo::GetProxy(&services_from_embedder));
-  ftl::WeakPtr<Engine> engine = weak_factory_.GetWeakPtr();
-  blink::Threads::UI()->PostTask([engine, request]() mutable {
-    if (engine)
-      engine->BindToServiceProvider(request.Unwrap());
-  });
-  blink::MojoServices::Create(isolate, nullptr,
-                              std::move(services_from_embedder), nullptr);
-}
+void Engine::DidCreateSecondaryIsolate(Dart_Isolate isolate) {}
 
 void Engine::BindToServiceProvider(
     mojo::InterfaceRequest<mojo::ServiceProvider> request) {

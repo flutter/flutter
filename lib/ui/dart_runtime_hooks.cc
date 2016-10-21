@@ -42,8 +42,6 @@ namespace blink {
 #define DECLARE_FUNCTION(name, count) \
   extern void name(Dart_NativeArguments args);
 
-// Lists the native functions implementing basic functionality in
-// the Mojo embedder dart, such as printing, and file I/O.
 #define BUILTIN_NATIVE_LIST(V) \
   V(Logger_PrintString, 1)     \
   V(ScheduleMicrotask, 1)

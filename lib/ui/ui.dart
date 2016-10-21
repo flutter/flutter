@@ -7,10 +7,8 @@
 /// To use, import `dart:ui`.
 ///
 /// This library exposes the lowest-level services that Flutter frameworks use
-/// to bootstrap applications, such as methods to obtain handles for the mojo
-/// IPC system, classes for driving the graphics and text layout and rendering
-/// subsystems, callbacks for integrating with the engine scheduler and the
-/// pointer input system, and functions for image decoding.
+/// to bootstrap applications, such as classes for driving the input, graphics
+/// text, layout, and rendering subsystems.
 library dart_ui;
 
 import 'dart:_internal';
@@ -27,7 +25,6 @@ part 'geometry.dart';
 part 'hash_codes.dart';
 part 'hooks.dart';
 part 'lerp.dart';
-part 'mojo_services.dart';
 part 'natives.dart';
 part 'painting.dart';
 part 'pointer.dart';

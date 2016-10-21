@@ -7,7 +7,6 @@
 #include "flutter/lib/ui/compositing/scene.h"
 #include "flutter/lib/ui/compositing/scene_builder.h"
 #include "flutter/lib/ui/dart_runtime_hooks.h"
-#include "flutter/lib/ui/mojo_services.h"
 #include "flutter/lib/ui/painting/canvas.h"
 #include "flutter/lib/ui/painting/gradient.h"
 #include "flutter/lib/ui/painting/image.h"
@@ -58,7 +57,6 @@ void DartUI::InitForGlobal() {
     ImageFilter::RegisterNatives(g_natives);
     ImageShader::RegisterNatives(g_natives);
     MaskFilter::RegisterNatives(g_natives);
-    MojoServices::RegisterNatives(g_natives);
     Paragraph::RegisterNatives(g_natives);
     ParagraphBuilder::RegisterNatives(g_natives);
     Picture::RegisterNatives(g_natives);

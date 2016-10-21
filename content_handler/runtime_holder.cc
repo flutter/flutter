@@ -9,7 +9,6 @@
 #include "flutter/assets/zip_asset_bundle.h"
 #include "flutter/common/threads.h"
 #include "flutter/content_handler/rasterizer.h"
-#include "flutter/lib/ui/mojo_services.h"
 #include "flutter/lib/ui/window/pointer_data_packet.h"
 #include "flutter/runtime/asset_font_selector.h"
 #include "flutter/runtime/dart_controller.h"
@@ -154,9 +153,6 @@ void RuntimeHolder::HandlePlatformMessage(
 }
 
 void RuntimeHolder::DidCreateMainIsolate(Dart_Isolate isolate) {
-  blink::MojoServices::Create(isolate, nullptr, nullptr,
-                              std::move(root_bundle_));
-
   if (asset_store_)
     blink::AssetFontSelector::Install(asset_store_);
 }

@@ -7,7 +7,6 @@
 #include "flutter/common/threads.h"
 #include "flutter/flow/bitmap_image.h"
 #include "flutter/flow/texture_image.h"
-#include "flutter/glue/drain_data_pipe_job.h"
 #include "flutter/glue/movable_wrapper.h"
 #include "flutter/glue/trace_event.h"
 #include "flutter/lib/ui/painting/image.h"
@@ -15,7 +14,6 @@
 #include "lib/tonic/dart_persistent_value.h"
 #include "lib/tonic/dart_state.h"
 #include "lib/tonic/logging/dart_invoke.h"
-#include "lib/tonic/mojo/mojo_converter.h"
 #include "lib/tonic/typed_data/uint8_list.h"
 #include "third_party/skia/include/core/SkImageGenerator.h"
 
@@ -77,36 +75,6 @@ void DecodeImageAndInvokeImageCallback(
   });
 }
 
-void DecodeImageFromDataPipe(Dart_NativeArguments args) {
-  Dart_Handle exception = nullptr;
-
-  auto consumer = glue::WrapMovable(
-      tonic::DartConverter<mojo::ScopedDataPipeConsumerHandle>::FromArguments(
-          args, 0, exception));
-  if (exception) {
-    Dart_ThrowException(exception);
-    return;
-  }
-
-  Dart_Handle callback_handle = Dart_GetNativeArgument(args, 1);
-  if (!Dart_IsClosure(callback_handle)) {
-    Dart_ThrowException(ToDart("Callback must be a function"));
-    return;
-  }
-
-  auto callback = glue::WrapMovable(std::unique_ptr<DartPersistentValue>(
-      new DartPersistentValue(tonic::DartState::Current(), callback_handle)));
-
-  Threads::IO()->PostTask([callback, consumer]() mutable {
-    glue::DrainDataPipeJob* job = nullptr;
-    job = new glue::DrainDataPipeJob(
-        consumer.Unwrap(), [callback, job](std::vector<uint8_t> buffer) {
-          delete job;
-          DecodeImageAndInvokeImageCallback(callback, std::move(buffer));
-        });
-  });
-}
-
 void DecodeImageFromList(Dart_NativeArguments args) {
   Dart_Handle exception = nullptr;
 
@@ -138,7 +106,6 @@ void DecodeImageFromList(Dart_NativeArguments args) {
 
 void ImageDecoding::RegisterNatives(tonic::DartLibraryNatives* natives) {
   natives->Register({
-      {"decodeImageFromDataPipe", DecodeImageFromDataPipe, 2, true},
       {"decodeImageFromList", DecodeImageFromList, 2, true},
   });
 }

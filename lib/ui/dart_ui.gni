@@ -8,7 +8,6 @@ dart_ui_files = [
   "//flutter/lib/ui/hash_codes.dart",
   "//flutter/lib/ui/hooks.dart",
   "//flutter/lib/ui/lerp.dart",
-  "//flutter/lib/ui/mojo_services.dart",
   "//flutter/lib/ui/natives.dart",
   "//flutter/lib/ui/painting.dart",
   "//flutter/lib/ui/pointer.dart",

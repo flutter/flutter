@@ -185,12 +185,12 @@ class SceneBuilder extends NativeFieldWrapperClass2 {
   }
   void _addPicture(double dx, double dy, Picture picture, int hints) native "SceneBuilder_addPicture";
 
-  /// (mojo-only) Adds a scene rendered by another application to the scene for
-  /// this application.
+  /// (Fuchsia-only) Adds a scene rendered by another application to the scene
+  /// for this application.
   ///
   /// Applications typically obtain scene tokens when embedding other views via
-  /// the Mojo view manager, but this function is agnostic as to the source of
-  /// scene token.
+  /// the Fuchsia view manager, but this function is agnostic as to the source
+  /// of scene token.
   void addChildScene(Offset offset,
                      double devicePixelRatio,
                      int physicalWidth,

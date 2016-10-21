@@ -545,8 +545,7 @@ class Paint {
 
 /// Opaque handle to raw decoded image data (pixels).
 ///
-/// To obtain an Image object, use the [decodeImageFromDataPipe] or
-/// [decodeImageFromList] functions.
+/// To obtain an Image object, use [decodeImageFromList].
 ///
 /// To draw an Image, use one of the methods on the [Canvas] class, such as
 /// [drawImage].
@@ -565,12 +564,8 @@ abstract class Image extends NativeFieldWrapperClass2 {
   String toString() => '[$width\u00D7$height]';
 }
 
-/// Callback signature for [decodeImageFromDataPipe] and [decodeImageFromList].
+/// Callback signature for [decodeImageFromList].
 typedef void ImageDecoderCallback(Image result);
-
-/// Convert an image file from a mojo pipe into an [Image] object.
-void decodeImageFromDataPipe(int handle, ImageDecoderCallback callback)
-    native "decodeImageFromDataPipe";
 
 /// Convert an image file from a byte array into an [Image] object.
 void decodeImageFromList(Uint8List list, ImageDecoderCallback callback)
