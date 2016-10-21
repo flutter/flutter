@@ -206,9 +206,6 @@ Future<Null> _exit(int code) async {
   // Run shutdown hooks before flushing logs
   await runShutdownHooks();
 
-  // Write any buffered output.
-  logger.flush();
-
   // Give the task / timer queue one cycle through before we hard exit.
   Timer.run(() {
     printTrace('exiting with code $code');

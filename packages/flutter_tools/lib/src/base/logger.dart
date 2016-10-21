@@ -34,9 +34,6 @@ abstract class Logger {
 
   /// Start an indeterminate progress display.
   Status startProgress(String message);
-
-  /// Flush any buffered output.
-  void flush() { }
 }
 
 class Status {
@@ -87,9 +84,6 @@ class StdoutLogger extends Logger {
       return new Status();
     }
   }
-
-  @override
-  void flush() { }
 }
 
 class BufferLogger extends Logger {
@@ -123,34 +117,31 @@ class BufferLogger extends Logger {
     printStatus(message);
     return new Status();
   }
-
-  @override
-  void flush() { }
 }
 
 class VerboseLogger extends Logger {
-  _LogMessage lastMessage;
+  Stopwatch stopwatch = new Stopwatch();
+
+  VerboseLogger() {
+    stopwatch.start();
+  }
 
   @override
   bool get isVerbose => true;
 
   @override
   void printError(String message, [StackTrace stackTrace]) {
-    _emit();
-    lastMessage = new _LogMessage(_LogType.error, message, stackTrace);
+    _emit(_LogType.error, message, stackTrace);
   }
 
   @override
   void printStatus(String message, { bool emphasis: false, bool newline: true }) {
-    // TODO(ianh): We ignore newline and emphasis here.
-    _emit();
-    lastMessage = new _LogMessage(_LogType.status, message);
+    _emit(_LogType.status, message);
   }
 
   @override
   void printTrace(String message) {
-    _emit();
-    lastMessage = new _LogMessage(_LogType.trace, message);
+    _emit(_LogType.trace, message);
   }
 
   @override
@@ -159,40 +150,25 @@ class VerboseLogger extends Logger {
     return new Status();
   }
 
-  @override
-  void flush() => _emit();
-
-  void _emit() {
-    lastMessage?.emit();
-    lastMessage = null;
-  }
-}
-
-enum _LogType {
-  error,
-  status,
-  trace
-}
-
-class _LogMessage {
-  _LogMessage(this.type, this.message, [this.stackTrace]) {
-    stopwatch.start();
-  }
-
-  final _LogType type;
-  final String message;
-  final StackTrace stackTrace;
-
-  Stopwatch stopwatch = new Stopwatch();
-
-  void emit() {
-    stopwatch.stop();
+  void _emit(_LogType type, String message, [StackTrace stackTrace]) {
+    if (message.trim().isEmpty)
+      return;
 
     int millis = stopwatch.elapsedMilliseconds;
-    String prefix = '${millis.toString().padLeft(4)} ms • ';
+    stopwatch.reset();
+
+    String prefix;
+    const int prefixWidth = 8;
+    if (millis == 0) {
+      prefix = ''.padLeft(prefixWidth);
+    } else {
+      prefix = '+$millis ms'.padLeft(prefixWidth);
+      if (millis >= 100)
+        prefix = terminal.writeBold(prefix);
+    }
+    prefix = '[$prefix] ';
+
     String indent = ''.padLeft(prefix.length);
-    if (millis >= 100)
-      prefix = terminal.writeBold(prefix.substring(0, prefix.length - 3)) + ' • ';
     String indentMessage = message.replaceAll('\n', '\n$indent');
 
     if (type == _LogType.error) {
@@ -205,6 +181,12 @@ class _LogMessage {
       print(prefix + indentMessage);
     }
   }
+}
+
+enum _LogType {
+  error,
+  status,
+  trace
 }
 
 class AnsiTerminal {
