@@ -269,13 +269,38 @@ Future<String> _buildAotSnapshot(
   if (platform == TargetPlatform.ios) {
     printStatus('Building app.dylib...');
 
+    // These names are known to from the engine.
+    const String kDartVmIsolateSnapshotBuffer = 'kDartVmIsolateSnapshotBuffer';
+    const String kDartIsolateSnapshotBuffer = 'kDartIsolateSnapshotBuffer';
+
+    runCheckedSync(<String>['mv', vmIsolateSnapshot, path.join(outputDir.path, kDartVmIsolateSnapshotBuffer)]);
+    runCheckedSync(<String>['mv', isolateSnapshot, path.join(outputDir.path, kDartIsolateSnapshotBuffer)]);
+
+    String kDartVmIsolateSnapshotBufferC = path.join(outputDir.path, '$kDartVmIsolateSnapshotBuffer.c');
+    String kDartIsolateSnapshotBufferC = path.join(outputDir.path, '$kDartIsolateSnapshotBuffer.c');
+
+    runCheckedSync(<String>[
+      'xxd', '--include', kDartVmIsolateSnapshotBuffer, path.basename(kDartVmIsolateSnapshotBufferC)
+    ], workingDirectory: outputDir.path);
+    runCheckedSync(<String>[
+      'xxd', '--include', kDartIsolateSnapshotBuffer, path.basename(kDartIsolateSnapshotBufferC)
+    ], workingDirectory: outputDir.path);
+
     String assemblyO = path.join(outputDir.path, 'snapshot_assembly.o');
+    String kDartVmIsolateSnapshotBufferO = path.join(outputDir.path, '$kDartVmIsolateSnapshotBuffer.o');
+    String kDartIsolateSnapshotBufferO = path.join(outputDir.path, '$kDartIsolateSnapshotBuffer.o');
 
     List<String> commonBuildOptions = <String>['-arch', 'arm64', '-miphoneos-version-min=8.0'];
     if (!interpreter)
       runCheckedSync(<String>['xcrun', 'cc']
         ..addAll(commonBuildOptions)
         ..addAll(<String>['-c', assembly, '-o', assemblyO]));
+    runCheckedSync(<String>['xcrun', 'cc']
+      ..addAll(commonBuildOptions)
+      ..addAll(<String>['-c', kDartVmIsolateSnapshotBufferC, '-o', kDartVmIsolateSnapshotBufferO]));
+    runCheckedSync(<String>['xcrun', 'cc']
+      ..addAll(commonBuildOptions)
+      ..addAll(<String>['-c', kDartIsolateSnapshotBufferC, '-o', kDartIsolateSnapshotBufferO]));
 
     String appSo = path.join(outputDir.path, 'app.dylib');
 
@@ -287,6 +312,8 @@ Future<String> _buildAotSnapshot(
         '-Xlinker', '-rpath', '-Xlinker', '@loader_path/Frameworks',
         '-install_name', '@rpath/app.dylib',
         '-o', appSo,
+        kDartVmIsolateSnapshotBufferO,
+        kDartIsolateSnapshotBufferO,
     ]);
     if (!interpreter)
       linkCommand.add(assemblyO);
