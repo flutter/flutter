@@ -9,6 +9,7 @@
 #include "flutter/content_handler/runtime_holder.h"
 #include "lib/ftl/logging.h"
 #include "lib/mtl/data_pipe/vector.h"
+#include "lib/mtl/shared_buffer/strings.h"
 #include "lib/zip/unzipper.h"
 #include "mojo/public/cpp/application/connect.h"
 
@@ -18,14 +19,26 @@ ApplicationImpl::ApplicationImpl(
     mojo::InterfaceRequest<mojo::Application> application,
     mojo::URLResponsePtr response)
     : binding_(this, std::move(application)) {
-  // TODO(abarth): Currently we block the UI thread to drain the response body,
-  // but we should do that work asynchronously instead. However, there when I
-  // tried draining the data pipe asynchronously, the drain didn't complete.
-  // We'll need to investigate why in more detail.
-  bool result = mtl::BlockingCopyToVector(std::move(response->body), &bundle_);
-  if (!result) {
-    FTL_LOG(ERROR) << "Failed to receive bundle.";
-    return;
+  if (response->body->is_stream()) {
+    // TODO(abarth): Currently we block the UI thread to drain the response body,
+    // but we should do that work asynchronously instead. However, there when I
+    // tried draining the data pipe asynchronously, the drain didn't complete.
+    // We'll need to investigate why in more detail.
+    bool result = mtl::BlockingCopyToVector(std::move(response->body->get_stream()), &bundle_);
+    if (!result) {
+      FTL_LOG(ERROR) << "Failed to receive bundle.";
+      return;
+    }
+  } else if (response->body->is_buffer()) {
+    std::string string;
+    bool result = mtl::StringFromSharedBuffer(std::move(response->body->get_buffer()), &string);
+    if (!result) {
+      FTL_LOG(ERROR) << "Failed to receive bundle.";
+      return;
+    }
+    bundle_.assign(string.begin(), string.end());
+  } else {
+    FTL_NOTREACHED();
   }
 }
 
