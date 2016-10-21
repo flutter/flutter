@@ -18,7 +18,6 @@
 #include "lib/ftl/memory/weak_ptr.h"
 #include "mojo/public/cpp/bindings/binding.h"
 #include "mojo/public/interfaces/application/application_connector.mojom.h"
-#include "mojo/services/asset_bundle/interfaces/asset_bundle.mojom.h"
 
 namespace flutter_content_handler {
 class Rasterizer;
@@ -56,6 +55,7 @@ class RuntimeHolder : public blink::RuntimeDelegate,
 
   void InitRootBundle(std::vector<char> bundle);
   blink::UnzipperProvider GetUnzipperProviderForRootBundle();
+  void HandleAssetPlatformMessage(ftl::RefPtr<blink::PlatformMessage> message);
 
   void BeginFrame();
   void OnFrameComplete();
@@ -63,7 +63,6 @@ class RuntimeHolder : public blink::RuntimeDelegate,
 
   std::vector<char> root_bundle_data_;
   ftl::RefPtr<blink::ZipAssetStore> asset_store_;
-  mojo::asset_bundle::AssetBundlePtr root_bundle_;
 
   std::unique_ptr<Rasterizer> rasterizer_;
   std::unique_ptr<blink::RuntimeController> runtime_;

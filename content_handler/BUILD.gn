@@ -43,7 +43,6 @@ executable("content_handler") {
     "//mojo/public/cpp/bindings",
     "//mojo/public/cpp/system",
     "//mojo/public/interfaces/application",
-    "//mojo/services/asset_bundle/interfaces",
     "//mojo/services/content_handler/interfaces",
     "//mojo/services/framebuffer/interfaces",
     "//mojo/system",
