@@ -6,7 +6,10 @@ import 'package:flutter/widgets.dart';
 
 import 'material.dart';
 
-/// A material design card
+/// A material design card.
+///
+/// A card is a sheet of [Material] used to represent some related information,
+/// for example an album, a geographical location, a meal, contact details, etc.
 ///
 /// See also:
 ///
