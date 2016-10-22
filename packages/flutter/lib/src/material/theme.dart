@@ -59,6 +59,46 @@ class Theme extends InheritedWidget {
   /// situations where its useful to wrap a route's widgets with a Theme, but only
   /// when the app's theme is being shadowed by a theme widget that is farather
   /// down in the tree. See [isMaterialAppTheme].
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// @override
+  /// Widget build(BuildContext context) {
+  ///   return new Text(
+  ///     'Example',
+  ///     style: Theme.of(context).textTheme.title,
+  ///   );
+  /// }
+  /// ```
+  ///
+  /// When the [Theme] is actually created in the same `build` function
+  /// (possibly indirectly, e.g. as part of a [MaterialApp]), the `context`
+  /// argument to the `build` function can't be used to find the [Theme] (since
+  /// it's "above" the widget being returned). In such cases, the following
+  /// technique with a [Builder] can be used to provide a new scope with a
+  /// [BuildContext] that is "under" the [Theme]:
+  ///
+  /// ```dart
+  /// @override
+  /// Widget build(BuildContext context) {
+  ///   return new MaterialApp(
+  ///     theme: new ThemeData.light(),
+  ///     body: new Builder(
+  ///       // Create an inner BuildContext so that we can refer to
+  ///       // the Theme with Theme.of().
+  ///       builder: (BuildContext context) {
+  ///         return new Center(
+  ///           child: new Text(
+  ///             'Example',
+  ///             style: Theme.of(context).textTheme.title,
+  ///           ),
+  ///         );
+  ///       },
+  ///     ),
+  ///   );
+  /// }
+  /// ```
   static ThemeData of(BuildContext context, { bool shadowThemeOnly: false }) {
     final Theme theme = context.inheritFromWidgetOfExactType(Theme);
     final ThemeData themeData = theme?.data ?? _kFallbackTheme;

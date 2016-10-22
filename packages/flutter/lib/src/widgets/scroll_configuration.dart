@@ -80,6 +80,12 @@ class ScrollConfiguration extends InheritedWidget {
   /// [ScrollConfigurationDelegate] that approximates the scrolling physics of
   /// the current platform (see [defaultTargetPlatform]) using a
   /// [OverscrollWhenScrollableBehavior] behavior model.
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// ScrollConfigurationDelegate scrollConfiguration = ScrollConfiguration.of(context);
+  /// ```
   static ScrollConfigurationDelegate of(BuildContext context) {
     ScrollConfiguration configuration = context.inheritFromWidgetOfExactType(ScrollConfiguration);
     return configuration?.delegate ?? _defaultDelegate;

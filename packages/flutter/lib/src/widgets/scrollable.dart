@@ -155,6 +155,12 @@ class Scrollable extends StatefulWidget {
   final ScrollBuilder builder;
 
   /// The state from the closest instance of this class that encloses the given context.
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// ScrollableState scrollable = Scrollable.of(context);
+  /// ```
   static ScrollableState of(BuildContext context) {
     return context.ancestorStateOfType(const TypeMatcher<ScrollableState>());
   }
