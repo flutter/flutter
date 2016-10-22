@@ -255,6 +255,7 @@ class _TwoLevelSublistState extends State<TwoLevelSublist> with SingleTickerProv
 ///
 ///  * [TwoLevelSublist]
 ///  * [TwoLevelListItem]
+///  * [MaterialList], for lists that only have one level.
 class TwoLevelList extends StatelessWidget {
   /// Creates a scrollable list of items that can expand and collapse.
   ///

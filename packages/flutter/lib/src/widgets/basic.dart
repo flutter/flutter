@@ -1406,7 +1406,7 @@ class Viewport extends SingleChildRenderObjectWidget {
 ///
 /// See also:
 ///
-///  * [Block] (which combines block layout with scrolling)
+///  * [Block], which combines block layout with scrolling.
 class BlockBody extends MultiChildRenderObjectWidget {
   /// Creates a block layout widget.
   ///
@@ -1951,6 +1951,13 @@ class Flex extends MultiChildRenderObjectWidget {
 ///
 /// For details about the flex layout algorithm, see [RenderFlex]. To control
 /// the flex of child widgets, see the [Flexible] widget.
+///
+/// The Row widget does not scroll (and in general it is considered an error to
+/// have more children in a Row than will fit in the available room). If you
+/// have a line of widgets and want them to be able to scroll if there is
+/// insufficient room, consider using a [Block].
+///
+/// For a vertical variant, see [Column].
 class Row extends Flex {
   /// Creates a horizontal array of children.
   ///
@@ -1984,6 +1991,8 @@ class Row extends Flex {
 /// to have more children in a Column than will fit in the available room). If
 /// you have a list of widgets and want them to be able to scroll if there is
 /// insufficient room, consider using a [Block].
+///
+/// For a horizontal variant, see [Row].
 class Column extends Flex {
   /// Creates a vertical array of children.
   ///
