@@ -731,10 +731,8 @@ Future<TimeOfDay> showTimePicker({
   TimeOfDay initialTime
 }) async {
   assert(initialTime != null);
-  TimeOfDay picked = await showDialog(
+  return await showDialog(
     context: context,
     child: new _TimePickerDialog(initialTime: initialTime)
   );
-
-  return picked ?? null;
 }

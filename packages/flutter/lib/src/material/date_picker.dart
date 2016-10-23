@@ -682,7 +682,7 @@ Future<DateTime> showDatePicker({
   DateTime firstDate,
   DateTime lastDate
 }) async {
-  DateTime picked = await showDialog(
+  return await showDialog(
     context: context,
     child: new _DatePickerDialog(
       initialDate: initialDate,
@@ -690,5 +690,4 @@ Future<DateTime> showDatePicker({
       lastDate: lastDate
     )
   );
-  return picked ?? null;
 }
