@@ -33,7 +33,7 @@ abstract class FlutterCommand extends Command {
 
   bool _usesPubOption = false;
 
-  bool get shouldRunPub => _usesPubOption && argResults['pub'];
+  bool get shouldRunPub => _usesPubOption && (argResults['pub'] || argResults['get-packages']);
 
   BuildMode _defaultBuildMode;
 
@@ -55,10 +55,9 @@ abstract class FlutterCommand extends Command {
   }
 
   void usesPubOption() {
-    argParser.addFlag('pub',
+    argParser.addFlag('get-packages',
       defaultsTo: true,
-      help: 'Whether to run "pub get" before executing this command.');
-    _usesPubOption = true;
+      help: 'Whether to run "flutter packages get" before executing this command.');
   }
 
   void addBuildModeFlags({ bool defaultToRelease: true }) {
@@ -226,7 +225,7 @@ abstract class FlutterCommand extends Command {
     }
 
     // Validate the current package map only if we will not be running "pub get" later.
-    if (!(_usesPubOption && argResults['pub'])) {
+    if (!shouldRunPub) {
       String error = new PackageMap(PackageMap.globalPackagesPath).checkValid();
       if (error != null) {
         printError(error);

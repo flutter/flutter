@@ -18,7 +18,7 @@ class UpdatePackagesCommand extends FlutterCommand {
   UpdatePackagesCommand({ this.hidden: false }) {
     argParser.addFlag(
       'upgrade',
-      help: 'Run "pub upgrade" rather than "pub get".',
+      help: 'Run "flutter packages upgrade" rather than "flutter packages get".',
       defaultsTo: false
     );
   }
