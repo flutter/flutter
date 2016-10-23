@@ -17,10 +17,9 @@ import '../template.dart';
 
 class CreateCommand extends FlutterCommand {
   CreateCommand() {
-    argParser.addFlag('pub',
-      defaultsTo: true,
-      help: 'Whether to run "pub get" after the project has been created.'
-    );
+
+    usesPubOption();
+
     argParser.addFlag(
       'with-driver-test',
       negatable: true,
@@ -106,7 +105,7 @@ class CreateCommand extends FlutterCommand {
 
     printStatus('');
 
-    if (argResults['pub']) {
+    if (shouldRunPub) {
       int code = await pubGet(directory: dirPath);
       if (code != 0)
         return code;
