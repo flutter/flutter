@@ -296,7 +296,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 ///  * [SnackBar]
 ///  * [BottomSheet]
 ///  * [ScaffoldState]
-///  * <https://www.google.com/design/spec/layout/structure.html>
+///  * <https://material.google.com/layout/structure.html>
 class Scaffold extends StatefulWidget {
   /// Creates a visual scaffold for material design widgets.
   ///
@@ -525,7 +525,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   ///
   ///  * [BottomSheet]
   ///  * [showModalBottomSheet]
-  ///  * <https://www.google.com/design/spec/components/bottom-sheets.html#bottom-sheets-persistent-bottom-sheets>
+  ///  * <https://material.google.com/components/bottom-sheets.html#bottom-sheets-persistent-bottom-sheets>
   PersistentBottomSheetController<dynamic/*=T*/> showBottomSheet/*<T>*/(WidgetBuilder builder) {
     if (_currentBottomSheet != null) {
       _currentBottomSheet.close();

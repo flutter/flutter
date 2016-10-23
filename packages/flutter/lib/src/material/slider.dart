@@ -38,7 +38,7 @@ import 'typography.dart';
 ///  * [CheckBox]
 ///  * [Radio]
 ///  * [Switch]
-///  * <https://www.google.com/design/spec/components/sliders.html>
+///  * <https://material.google.com/components/sliders.html>
 class Slider extends StatefulWidget {
   /// Creates a material design slider.
   ///

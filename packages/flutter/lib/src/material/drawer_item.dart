@@ -24,7 +24,7 @@ import 'theme.dart';
 ///
 ///  * [Drawer]
 ///  * [DrawerHeader]
-///  * <https://www.google.com/design/spec/patterns/navigation-drawer.html>
+///  * <https://material.google.com/patterns/navigation-drawer.html>
 class DrawerItem extends StatelessWidget {
   /// Creates a material design drawer item.
   ///

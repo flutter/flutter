@@ -13,7 +13,7 @@ import 'theme_data.dart';
 import 'theme.dart';
 import 'typography.dart';
 
-// https://www.google.com/design/spec/components/snackbars-toasts.html#snackbars-toasts-specs
+// https://material.google.com/components/snackbars-toasts.html#snackbars-toasts-specs
 const double _kSnackBarPadding = 24.0;
 const double _kSingleLineVerticalPadding = 14.0;
 const double _kMultiLineVerticalTopPadding = 24.0;
@@ -42,7 +42,7 @@ const Curve _snackBarFadeCurve = const Interval(0.72, 1.0, curve: Curves.fastOut
 /// See also:
 ///
 ///  * [SnackBar]
-///  * <https://www.google.com/design/spec/components/snackbars-toasts.html>
+///  * <https://material.google.com/components/snackbars-toasts.html>
 class SnackBarAction extends StatefulWidget {
   /// Creates an action for a [SnackBar].
   ///
@@ -99,7 +99,7 @@ class _SnackBarActionState extends State<SnackBarAction> {
 ///
 ///  * [Scaffold.of] and [ScaffoldState.showSnackBar]
 ///  * [SnackBarAction]
-///  * <https://www.google.com/design/spec/components/snackbars-toasts.html>
+///  * <https://material.google.com/components/snackbars-toasts.html>
 class SnackBar extends StatelessWidget {
   /// Creates a snack bar.
   ///

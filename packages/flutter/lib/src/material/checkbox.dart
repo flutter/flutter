@@ -28,8 +28,8 @@ import 'toggleable.dart';
 ///  * [Radio]
 ///  * [Switch]
 ///  * [Slider]
-///  * <https://www.google.com/design/spec/components/selection-controls.html#selection-controls-checkbox>
-///  * <https://www.google.com/design/spec/components/lists-controls.html#lists-controls-types-of-list-controls>
+///  * <https://material.google.com/components/selection-controls.html#selection-controls-checkbox>
+///  * <https://material.google.com/components/lists-controls.html#lists-controls-types-of-list-controls>
 class Checkbox extends StatefulWidget {
   /// Creates a material design checkbox.
   ///

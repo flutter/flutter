@@ -12,7 +12,7 @@ import 'material.dart';
 ///
 ///  * [Dialog]
 ///  * [showDialog]
-///  * <https://www.google.com/design/spec/components/cards.html>
+///  * <https://material.google.com/components/cards.html>
 class Card extends StatelessWidget {
   /// Creates a material design card.
   const Card({

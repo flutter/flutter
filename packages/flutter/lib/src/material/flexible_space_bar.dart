@@ -25,7 +25,7 @@ import 'theme.dart';
 ///
 ///  * [AppBar]
 ///  * [Scaffold]
-///  * <https://www.google.com/design/spec/patterns/scrolling-techniques.html>
+///  * <https://material.google.com/patterns/scrolling-techniques.html>
 class FlexibleSpaceBar extends StatefulWidget {
   /// Creates a flexible space bar.
   ///

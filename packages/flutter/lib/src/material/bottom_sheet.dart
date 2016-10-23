@@ -39,7 +39,7 @@ const Color _kBarrierColor = Colors.black54;
 ///
 ///  * [Scaffold.showBottomSheet]
 ///  * [showModalBottomSheet]
-///  * <https://www.google.com/design/spec/components/bottom-sheets.html>
+///  * <https://material.google.com/components/bottom-sheets.html>
 class BottomSheet extends StatefulWidget {
   /// Creates a bottom sheet.
   ///
@@ -255,7 +255,7 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
 ///
 ///  * [BottomSheet]
 ///  * [Scaffold.showBottomSheet]
-///  * <https://www.google.com/design/spec/components/bottom-sheets.html#bottom-sheets-modal-bottom-sheets>
+///  * <https://material.google.com/components/bottom-sheets.html#bottom-sheets-modal-bottom-sheets>
 Future<dynamic/*=T*/> showModalBottomSheet/*<T>*/({ BuildContext context, WidgetBuilder builder }) {
   assert(context != null);
   assert(builder != null);

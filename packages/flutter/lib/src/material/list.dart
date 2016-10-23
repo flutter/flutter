@@ -11,7 +11,7 @@ import 'package:flutter/widgets.dart';
 ///  * [MaterialList]
 ///  * [ListItem]
 ///  * [kListItemExtent]
-///  * <https://www.google.com/design/spec/components/lists.html#lists-specs>
+///  * <https://material.google.com/components/lists.html#lists-specs>
 enum MaterialListType {
   /// A list item that contains a single line of text.
   oneLine,
@@ -33,7 +33,7 @@ enum MaterialListType {
 ///  * [MaterialListType]
 ///  * [ListItem]
 ///  * [kListItemExtent]
-///  * <https://www.google.com/design/spec/components/lists.html#lists-specs>
+///  * <https://material.google.com/components/lists.html#lists-specs>
 Map<MaterialListType, double> kListItemExtent = const <MaterialListType, double>{
   MaterialListType.oneLine: 48.0,
   MaterialListType.oneLineWithAvatar: 56.0,
@@ -52,7 +52,7 @@ Map<MaterialListType, double> kListItemExtent = const <MaterialListType, double>
 ///  * [ScrollableList]
 ///  * [TwoLevelList]
 ///  * [ScrollableGrid]
-///  * <https://www.google.com/design/spec/components/lists.html>
+///  * <https://material.google.com/components/lists.html>
 class MaterialList extends StatelessWidget {
   /// Creates a material list.
   ///

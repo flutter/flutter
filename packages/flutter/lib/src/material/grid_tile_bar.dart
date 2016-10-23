@@ -19,7 +19,7 @@ import 'typography.dart';
 /// See also:
 ///
 ///  * [GridTile]
-///  * <https://www.google.com/design/spec/components/grid-lists.html#grid-lists-specs>
+///  * <https://material.google.com/components/grid-lists.html#grid-lists-specs>
 class GridTileBar extends StatelessWidget {
   /// Creates a grid tile bar.
   ///

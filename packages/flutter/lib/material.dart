@@ -7,7 +7,7 @@
 /// To use, import `package:flutter/material.dart`.
 ///
 /// See
-/// [www.google.com/design/spec/material-design](https://www.google.com/design/spec/material-design/introduction.html)
+/// [material.google.com](https://material.google.com/)
 /// for an introduction to Material Design.
 library material;
 
