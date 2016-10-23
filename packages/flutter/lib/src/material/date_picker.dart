@@ -670,8 +670,7 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
 /// Shows a dialog containing a material design date picker.
 ///
 /// The returned [Future] resolves to the date selected by the user when the
-/// user closes the dialog. If the user cancels the dialog, the [Future]
-/// resolves to the initialDate.
+/// user closes the dialog. If the user cancels the dialog, null is returned.
 ///
 /// See also:
 ///
@@ -691,5 +690,5 @@ Future<DateTime> showDatePicker({
       lastDate: lastDate
     )
   );
-  return picked ?? initialDate;
+  return picked ?? null;
 }

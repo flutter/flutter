@@ -712,8 +712,7 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
 /// Shows a dialog containing a material design time picker.
 ///
 /// The returned Future resolves to the time selected by the user when the user
-/// closes the dialog. If the user cancels the dialog, the Future resolves to
-/// the [initialTime].
+/// closes the dialog. If the user cancels the dialog, null is returned.
 ///
 /// To show a dialog with [initialTime] equal to the current time:
 /// ```dart
@@ -732,8 +731,10 @@ Future<TimeOfDay> showTimePicker({
   TimeOfDay initialTime
 }) async {
   assert(initialTime != null);
-  return await showDialog(
+  TimeOfDay picked = await showDialog(
     context: context,
     child: new _TimePickerDialog(initialTime: initialTime)
-  ) ?? initialTime;
+  );
+
+  return picked ?? null;
 }
