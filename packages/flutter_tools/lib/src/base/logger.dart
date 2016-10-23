@@ -250,8 +250,10 @@ class _AnsiStatus extends Status {
     live = false;
 
     if (showElapsedTime) {
-      double seconds = stopwatch.elapsedMilliseconds / 1000.0;
-      print('\b\b\b\b${seconds.toStringAsFixed(1)}s');
+      // Rendered undesirable in issue #5400
+      // double seconds = stopwatch.elapsedMilliseconds / 1000.0
+
+      print('\b\b\b\b${stopwatch.elapsedMilliseconds.toString()}ms');
     } else {
       print('\b ');
     }
