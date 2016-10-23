@@ -23,7 +23,7 @@ Available examples include:
   the text "hello, world."
 
 - **Flutter gallery** The [flutter gallery app](flutter_gallery) showcases
-  Flutter's implementation of [material design](https://www.google.com/design/spec/material-design/introduction.html).
+  Flutter's implementation of [material design](https://material.google.com/).
 
 - **Layers** The [layers vignettes](layers) show how to use the various layers
   in the Flutter framework. There is no main.dart in this directory because each

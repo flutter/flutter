@@ -25,7 +25,7 @@ import 'colors.dart';
 ///  * [Typography]
 ///  * [Theme]
 ///  * [ThemeData]
-///  * <http://www.google.com/design/spec/style/typography.html>
+///  * <http://material.google.com/style/typography.html>
 class TextTheme {
   /// Create a text theme that uses the given values.
   ///
@@ -267,7 +267,7 @@ class TextTheme {
 ///
 ///  * [Theme]
 ///  * [ThemeData]
-///  * <http://www.google.com/design/spec/style/typography.html>
+///  * <http://material.google.com/style/typography.html>
 class Typography {
   Typography._();
 

@@ -32,7 +32,7 @@ const Duration _kShowDuration = const Duration(milliseconds: 1500);
 ///
 /// See also:
 ///
-///  * <https://www.google.com/design/spec/components/tooltips.html>
+///  * <https://material.google.com/components/tooltips.html>
 class Tooltip extends StatefulWidget {
   /// Creates a tooltip.
   ///

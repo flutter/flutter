@@ -160,7 +160,7 @@ final _DayPickerGridDelegate _kDayPickerGridDelegate = new _DayPickerGridDelegat
 /// See also:
 ///
 ///  * [showDatePicker].
-///  * <https://www.google.com/design/spec/components/pickers.html#pickers-date-pickers>
+///  * <https://material.google.com/components/pickers.html#pickers-date-pickers>
 class DayPicker extends StatelessWidget {
   /// Creates a day picker.
   ///
@@ -288,7 +288,7 @@ class DayPicker extends StatelessWidget {
 /// See also:
 ///
 ///  * [showDatePicker]
-///  * <https://www.google.com/design/spec/components/pickers.html#pickers-date-pickers>
+///  * <https://material.google.com/components/pickers.html#pickers-date-pickers>
 class MonthPicker extends StatefulWidget {
   /// Creates a month picker.
   ///
@@ -440,7 +440,7 @@ class _MonthPickerState extends State<MonthPicker> {
 /// See also:
 ///
 ///  * [showDatePicker]
-///  * <https://www.google.com/design/spec/components/pickers.html#pickers-date-pickers>
+///  * <https://material.google.com/components/pickers.html#pickers-date-pickers>
 class YearPicker extends StatefulWidget {
   /// Creates a year picker.
   ///
@@ -676,7 +676,7 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
 /// See also:
 ///
 ///  * [showTimePicker]
-///  * <https://www.google.com/design/spec/components/pickers.html#pickers-date-pickers>
+///  * <https://material.google.com/components/pickers.html#pickers-date-pickers>
 Future<DateTime> showDatePicker({
   BuildContext context,
   DateTime initialDate,

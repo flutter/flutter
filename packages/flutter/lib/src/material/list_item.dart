@@ -26,7 +26,7 @@ import 'theme.dart';
 ///  * [MaterialList]
 ///  * [CircleAvatar]
 ///  * [Divider]
-///  * <https://www.google.com/design/spec/components/lists.html>
+///  * <https://material.google.com/components/lists.html>
 class ListItem extends StatelessWidget {
   /// Creates a list item.
   ///

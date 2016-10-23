@@ -160,7 +160,7 @@ abstract class MaterialInkController {
 ///
 /// See also:
 ///
-/// * <https://www.google.com/design/spec/material-design/introduction.html>
+/// * <https://material.google.com/>
 class Material extends StatefulWidget {
   /// Creates a piece of material.
   ///

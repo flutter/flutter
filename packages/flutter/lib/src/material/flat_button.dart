@@ -33,7 +33,7 @@ import 'theme.dart';
 ///
 ///  * [RaisedButton]
 ///  * [DropdownButton]
-///  * <https://www.google.com/design/spec/components/buttons.html>
+///  * <https://material.google.com/components/buttons.html>
 class FlatButton extends StatelessWidget {
   /// Creates a flat button.
   ///

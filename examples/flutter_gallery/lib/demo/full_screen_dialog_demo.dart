@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
 // This demo is based on
-// https://www.google.com/design/spec/components/dialogs.html#dialogs-full-screen-dialogs
+// https://material.google.com/components/dialogs.html#dialogs-full-screen-dialogs
 
 enum DismissDialogAction {
   cancel,

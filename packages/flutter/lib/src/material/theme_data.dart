@@ -64,7 +64,7 @@ class ThemeData {
   ///    ([accentColorBrightness]), so that the right contrasting text
   ///    color will be used over the accent color.
   ///
-  /// See <https://www.google.com/design/spec/style/color.html> for
+  /// See <https://material.google.com/style/color.html> for
   /// more discussion on how to pick the right colors.
   factory ThemeData({
     Brightness brightness,

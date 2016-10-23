@@ -5,7 +5,7 @@
 import 'dart:ui' show Color;
 
 /// [Color] constants which represent Material design's
-/// [color palette](http://www.google.com/design/spec/style/color.html).
+/// [color palette](http://material.google.com/style/color.html).
 ///
 /// To select a specific color from one of the swatches, index into the swatch
 /// using an integer for the specific color desired, as follows:
