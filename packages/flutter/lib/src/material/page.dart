@@ -141,7 +141,7 @@ class _CupertinoBackGestureController extends NavigationGestureController {
     }
 
     // Don't end the gesture until the transition completes.
-    AnimationStatus status = controller.status;
+    final AnimationStatus status = controller.status;
     handleStatusChanged(controller.status);
     controller?.addStatusListener(handleStatusChanged);
 

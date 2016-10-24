@@ -771,15 +771,15 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   }
 
   void _handleDragEnd(DragEndDetails details) {
-    bool willPop = _backGestureController?.dragEnd(details.velocity.pixelsPerSecond.dx / context.size.width);
-    if (willPop == true)
+    final bool willPop = _backGestureController?.dragEnd(details.velocity.pixelsPerSecond.dx / context.size.width) ?? false;
+    if (willPop)
       _currentBottomSheet?.close();
     _backGestureController = null;
   }
 
   void _handleDragCancel() {
-    bool willPop = _backGestureController?.dragEnd(0.0);
-    if (willPop == true)
+    final bool willPop = _backGestureController?.dragEnd(0.0) ?? false;
+    if (willPop)
       _currentBottomSheet?.close();
     _backGestureController = null;
   }

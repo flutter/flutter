@@ -217,9 +217,10 @@ abstract class NavigationGestureController {
   void dragUpdate(double fractionalDelta);
 
   /// The drag gesture has ended with a horizontal motion of
-  /// [fractionalVelocity] as a fraction of screen width per second. Returns
-  /// true if the gesture will complete (i.e. a back gesture will result in a
-  /// pop).
+  /// [fractionalVelocity] as a fraction of screen width per second.
+  ///
+  /// Returns true if the gesture will complete (i.e. a back gesture will
+  /// result in a pop).
   bool dragEnd(double fractionalVelocity);
 }
 
