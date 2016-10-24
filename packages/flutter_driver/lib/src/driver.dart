@@ -253,7 +253,7 @@ class FlutterDriver {
   ///
   /// [dx] and [dy] specify the total offset for the entire scrolling action.
   ///
-  /// [duration] specifies the lenght of the action.
+  /// [duration] specifies the length of the action.
   ///
   /// The move events are generated at a given [frequency] in Hz (or events per
   /// second). It defaults to 60Hz.

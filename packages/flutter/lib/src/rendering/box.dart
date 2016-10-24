@@ -90,7 +90,7 @@ class BoxConstraints extends Constraints {
       minHeight = 0.0,
       maxHeight = size.height;
 
-  /// Creates box constraints that expand to fill another box contraints.
+  /// Creates box constraints that expand to fill another box constraints.
   ///
   /// If width or height is given, the constraints will require exactly the
   /// given value in the given dimension.

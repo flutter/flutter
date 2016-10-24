@@ -1996,7 +1996,7 @@ abstract class Element implements BuildContext {
   /// The framework calls this function when a newly created element is added to
   /// the tree for the first time. Use this method to initialize state that
   /// depends on having a parent. State that is independent of the parent can
-  /// more easily be initialized in the contructor.
+  /// more easily be initialized in the constructor.
   ///
   /// This method transitions the element from the "initial" lifecycle state to
   /// the "active" lifecycle state.

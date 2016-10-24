@@ -41,7 +41,7 @@ class TextRange {
   /// Whether this range is empty (but still potentially placed inside the text).
   bool get isCollapsed => start == end;
 
-  /// Whether the start of this range preceeds the end.
+  /// Whether the start of this range precedes the end.
   bool get isNormalized => end >= start;
 
   /// The text before this range.
