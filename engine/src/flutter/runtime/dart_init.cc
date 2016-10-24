@@ -210,7 +210,7 @@ Dart_Isolate ServiceIsolateCreateCallback(const char* script_uri,
   tonic::DartState* dart_state = new tonic::DartState();
   Dart_Isolate isolate = Dart_CreateIsolate(
       script_uri, "main",
-      reinterpret_cast<const uint8_t*>(DART_SYMBOL(kDartIsolateSnapshotBuffer)),
+      reinterpret_cast<const uint8_t*>(DART_SYMBOL(kIsolateSnapshot)),
       nullptr, dart_state, error);
   FTL_CHECK(isolate) << error;
   dart_state->SetIsolate(isolate);
@@ -287,7 +287,7 @@ Dart_Isolate IsolateCreateCallback(const char* script_uri,
 
   Dart_Isolate isolate = Dart_CreateIsolate(
       script_uri, main,
-      reinterpret_cast<uint8_t*>(DART_SYMBOL(kDartIsolateSnapshotBuffer)),
+      reinterpret_cast<uint8_t*>(DART_SYMBOL(kIsolateSnapshot)),
       nullptr, dart_state, error);
   FTL_CHECK(isolate) << error;
   dart_state->SetIsolate(isolate);
@@ -384,9 +384,8 @@ DartJniIsolateData* GetDartJniDataForCurrentIsolate() {
 
 #if DART_ALLOW_DYNAMIC_RESOLUTION
 
-constexpr char kDartVmIsolateSnapshotBufferName[] =
-    "kDartVmIsolateSnapshotBuffer";
-constexpr char kDartIsolateSnapshotBufferName[] = "kDartIsolateSnapshotBuffer";
+constexpr char kVmIsolateSnapshotName[] = "kVmIsolateSnapshot";
+constexpr char kIsolateSnapshotName[] = "kIsolateSnapshot";
 constexpr char kInstructionsSnapshotName[] = "kInstructionsSnapshot";
 constexpr char kDataSnapshotName[] = "kDataSnapshot";
 
@@ -441,9 +440,9 @@ struct SymbolAsset {
 };
 
 static SymbolAsset g_symbol_assets[] = {
-    {kDartVmIsolateSnapshotBufferName, "snapshot_aot_vmisolate", false,
+    {kVmIsolateSnapshotName, "snapshot_aot_vmisolate", false,
      offsetof(Settings, aot_vm_isolate_snapshot_file_name)},
-    {kDartIsolateSnapshotBufferName, "snapshot_aot_isolate", false,
+    {kIsolateSnapshotName, "snapshot_aot_isolate", false,
      offsetof(Settings, aot_isolate_snapshot_file_name)},
     {kInstructionsSnapshotName, "snapshot_aot_instr", true,
      offsetof(Settings, aot_instructions_blob_file_name)},
@@ -657,7 +656,7 @@ void InitDartVM() {
     Dart_InitializeParams params = {};
     params.version = DART_INITIALIZE_PARAMS_CURRENT_VERSION;
     params.vm_isolate_snapshot =
-        reinterpret_cast<uint8_t*>(DART_SYMBOL(kDartVmIsolateSnapshotBuffer));
+        reinterpret_cast<uint8_t*>(DART_SYMBOL(kVmIsolateSnapshot));
     params.instructions_snapshot = PrecompiledInstructionsSymbolIfPresent();
     params.data_snapshot = PrecompiledDataSnapshotSymbolIfPresent();
     params.create = IsolateCreateCallback;
