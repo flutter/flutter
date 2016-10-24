@@ -43,6 +43,8 @@ shared_library("flutter_framework_dylib") {
     "framework/Source/FlutterViewController.mm",
     "framework/Source/platform_message_router.h",
     "framework/Source/platform_message_router.mm",
+    "framework/Source/vsync_waiter_ios.h",
+    "framework/Source/vsync_waiter_ios.mm",
     "platform_view_ios.h",
     "platform_view_ios.mm",
   ]
@@ -54,7 +56,6 @@ shared_library("flutter_framework_dylib") {
     "//flutter/lib/ui",
     "//flutter/services/engine:interfaces",
     "//flutter/services/platform",
-    "//flutter/services/vsync",
     "//flutter/shell/common",
     "//flutter/shell/gpu",
     "//flutter/shell/platform/darwin/common",

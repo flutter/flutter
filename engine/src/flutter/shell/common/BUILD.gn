@@ -40,6 +40,10 @@ source_set("common") {
     "switches.h",
     "tracing_controller.cc",
     "tracing_controller.h",
+    "vsync_waiter.cc",
+    "vsync_waiter.h",
+    "vsync_waiter_fallback.cc",
+    "vsync_waiter_fallback.h",
   ]
 
   deps = [
@@ -54,7 +58,6 @@ source_set("common") {
     "//flutter/lib/ui",
     "//flutter/runtime",
     "//flutter/services/engine:interfaces",
-    "//flutter/services/vsync",
     "//flutter/skia",
     "//flutter/sky/engine/wtf",
     "//flutter/synchronization",

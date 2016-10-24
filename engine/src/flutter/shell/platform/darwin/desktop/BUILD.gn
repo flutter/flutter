@@ -19,6 +19,8 @@ source_set("mac_desktop_platform") {
     "sky_application.mm",
     "sky_window.h",
     "sky_window.mm",
+    "vsync_waiter_mac.cc",
+    "vsync_waiter_mac.h",
   ]
 
   deps = [

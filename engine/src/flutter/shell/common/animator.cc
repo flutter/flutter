@@ -12,17 +12,16 @@
 
 namespace shell {
 
-Animator::Animator(ftl::WeakPtr<Rasterizer> rasterizer, Engine* engine)
+Animator::Animator(ftl::WeakPtr<Rasterizer> rasterizer,
+                   VsyncWaiter* waiter,
+                   Engine* engine)
     : rasterizer_(rasterizer),
+      waiter_(waiter),
       engine_(engine),
       layer_tree_pipeline_(ftl::MakeRefCounted<LayerTreePipeline>(3)),
       pending_frame_semaphore_(1),
       paused_(false),
-      weak_factory_(this) {
-  new sky::services::vsync::VsyncProviderFallbackImpl(
-      mojo::InterfaceRequest<::vsync::VSyncProvider>(
-          mojo::GetProxy(&fallback_vsync_provider_)));
-}
+      weak_factory_(this) {}
 
 Animator::~Animator() = default;
 
@@ -39,7 +38,7 @@ void Animator::Start() {
   RequestFrame();
 }
 
-void Animator::BeginFrame(int64_t time_stamp) {
+void Animator::BeginFrame(ftl::TimePoint frame_time) {
   pending_frame_semaphore_.Signal();
 
   if (!producer_continuation_) {
@@ -63,6 +62,8 @@ void Animator::BeginFrame(int64_t time_stamp) {
   // to service potential frame.
   DCHECK(producer_continuation_);
 
+  // TODO(abarth): We should use |frame_time| instead, but the frame time we get
+  // on Android appears to be unstable.
   last_begin_frame_time_ = ftl::TimePoint::Now();
   engine_->BeginFrame(last_begin_frame_time_);
 }
@@ -92,7 +93,7 @@ void Animator::RequestFrame() {
 
   if (!pending_frame_semaphore_.TryWait()) {
     // Multiple calls to Animator::RequestFrame will still result in a single
-    // request to the VSyncProvider.
+    // request to the VsyncWaiter.
     return;
   }
 
@@ -107,30 +108,16 @@ void Animator::RequestFrame() {
     if (!self.get())
       return;
     TRACE_EVENT_INSTANT0("flutter", "RequestFrame", TRACE_EVENT_SCOPE_PROCESS);
-    self->AwaitVSync(base::Bind(&Animator::BeginFrame, self));
+    self->AwaitVSync();
   });
 }
 
-void Animator::set_vsync_provider(vsync::VSyncProviderPtr vsync_provider) {
-  vsync_provider_ = vsync_provider.Pass();
-
-  // We may be waiting on a VSync signal from the old VSync provider.
-  pending_frame_semaphore_.Signal();
-
-  RequestFrame();
-}
-
-void Animator::AwaitVSync(
-    const vsync::VSyncProvider::AwaitVSyncCallback& callback) {
-  // First, try the platform provided VSync provider.
-  if (vsync_provider_) {
-    vsync_provider_->AwaitVSync(callback);
-    return;
-  }
-
-  // Then, use the fallback provider if the platform cannot reliably supply
-  // VSync signals to us.
-  return fallback_vsync_provider_->AwaitVSync(callback);
+void Animator::AwaitVSync() {
+  waiter_->AsyncWaitForVsync([self = weak_factory_.GetWeakPtr()](
+      ftl::TimePoint frame_time) {
+    if (self)
+      self->BeginFrame(frame_time);
+  });
 }
 
 }  // namespace shell

@@ -44,7 +44,6 @@ import org.chromium.mojo.system.Pair;
 import org.chromium.mojo.system.impl.CoreImpl;
 import org.chromium.mojom.mojo.ServiceProvider;
 import org.chromium.mojom.sky.AppLifecycleState;
-import org.chromium.mojom.sky.ServicesData;
 import org.chromium.mojom.sky.SkyEngine;
 import org.chromium.mojom.sky.ViewportMetrics;
 
@@ -75,8 +74,6 @@ public class FlutterView extends SurfaceView
     private TextInputPlugin mTextInputPlugin;
 
     private SkyEngine.Proxy mSkyEngine;
-    private ServiceProviderImpl mPlatformServiceProvider;
-    private Binding mPlatformServiceProviderBinding;
     private HashMap<String, OnMessageListener> mOnMessageListeners;
     private HashMap<String, OnMessageListenerAsync> mAsyncOnMessageListeners;
     private final SurfaceHolder.Callback mSurfaceCallback;
@@ -130,8 +127,6 @@ public class FlutterView extends SurfaceView
         getHolder().addCallback(mSurfaceCallback);
 
         Core core = CoreImpl.getInstance();
-
-        mPlatformServiceProvider = new ServiceProviderImpl(core, this, ServiceRegistry.SHARED);
 
         mAccessibilityManager = (AccessibilityManager)getContext().getSystemService(Context.ACCESSIBILITY_SERVICE);
 
@@ -234,11 +229,6 @@ public class FlutterView extends SurfaceView
     public void destroy() {
         if (discoveryReceiver != null) {
             getContext().unregisterReceiver(discoveryReceiver);
-        }
-
-        if (mPlatformServiceProviderBinding != null) {
-            mPlatformServiceProviderBinding.unbind().close();
-            mPlatformServiceProvider.unbindServices();
         }
 
         getHolder().removeCallback(mSurfaceCallback);
@@ -446,22 +436,6 @@ public class FlutterView extends SurfaceView
     }
 
     private void preRun() {
-        if (mPlatformServiceProviderBinding != null) {
-            mPlatformServiceProviderBinding.unbind().close();
-            mPlatformServiceProvider.unbindServices();
-        }
-
-        Core core = CoreImpl.getInstance();
-
-        Pair<ServiceProvider.Proxy, InterfaceRequest<ServiceProvider>> platformServiceProvider =
-                ServiceProvider.MANAGER.getInterfaceRequest(core);
-        mPlatformServiceProviderBinding = ServiceProvider.MANAGER.bind(
-                mPlatformServiceProvider, platformServiceProvider.second);
-
-        ServicesData services = new ServicesData();
-        services.incomingServices = platformServiceProvider.first;
-        mSkyEngine.setServices(services);
-
         resetAccessibilityTree();
     }
 

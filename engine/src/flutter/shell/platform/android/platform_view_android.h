@@ -60,6 +60,8 @@ class PlatformViewAndroid : public PlatformView {
   base::android::ScopedJavaLocalRef<jobject> GetBitmap(JNIEnv* env,
                                                        jobject obj);
 
+  VsyncWaiter* GetVsyncWaiter() override;
+
   bool ResourceContextMakeCurrent() override;
 
   void UpdateSemantics(std::vector<blink::SemanticsNode> update) override;

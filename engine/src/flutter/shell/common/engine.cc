@@ -52,8 +52,10 @@ std::string FindPackagesPath(const std::string& main_dart) {
 
 Engine::Engine(PlatformView* platform_view)
     : platform_view_(platform_view->GetWeakPtr()),
-      animator_(new Animator(platform_view->rasterizer().GetWeakRasterizerPtr(),
-                             this)),
+      animator_(std::make_unique<Animator>(
+          platform_view->rasterizer().GetWeakRasterizerPtr(),
+          platform_view->GetVsyncWaiter(),
+          this)),
       binding_(this),
       activity_running_(false),
       have_surface_(false),
@@ -117,32 +119,6 @@ void Engine::OnOutputSurfaceDestroyed(const ftl::Closure& gpu_continuation) {
   have_surface_ = false;
   StopAnimator();
   blink::Threads::Gpu()->PostTask(gpu_continuation);
-}
-
-void Engine::SetServices(sky::ServicesDataPtr services) {
-  services_ = services.Pass();
-
-  if (services_->incoming_services) {
-    incoming_services_ =
-        mojo::ServiceProviderPtr::Create(services_->incoming_services.Pass());
-    service_provider_impl_.set_fallback_service_provider(
-        incoming_services_.get());
-  }
-
-  vsync::VSyncProviderPtr vsync_provider;
-  if (services_->shell) {
-    // We bind and unbind our Shell here, since this is the only place we
-    // use
-    // it in this class.
-    auto shell = mojo::ShellPtr::Create(services_->shell.Pass());
-    mojo::ConnectToService(shell.get(), "mojo:vsync",
-                           mojo::GetProxy(&vsync_provider));
-    services_->shell = shell.Pass();
-  } else {
-    mojo::ConnectToService(incoming_services_.get(),
-                           mojo::GetProxy(&vsync_provider));
-  }
-  animator_->set_vsync_provider(vsync_provider.Pass());
 }
 
 void Engine::OnViewportMetricsChanged(sky::ViewportMetricsPtr metrics) {
@@ -306,12 +282,6 @@ void Engine::DidCreateMainIsolate(Dart_Isolate isolate) {
 }
 
 void Engine::DidCreateSecondaryIsolate(Dart_Isolate isolate) {}
-
-void Engine::BindToServiceProvider(
-    mojo::InterfaceRequest<mojo::ServiceProvider> request) {
-  service_provider_bindings_.AddBinding(&service_provider_impl_,
-                                        request.Pass());
-}
 
 void Engine::StopAnimator() {
   animator_->Stop();

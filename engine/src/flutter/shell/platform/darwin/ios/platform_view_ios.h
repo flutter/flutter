@@ -38,6 +38,8 @@ class PlatformViewIOS : public PlatformView, public GPUSurfaceGLDelegate {
     return platform_message_router_;
   }
 
+  VsyncWaiter* GetVsyncWaiter() override;
+
   bool ResourceContextMakeCurrent() override;
 
   bool GLContextMakeCurrent() override;

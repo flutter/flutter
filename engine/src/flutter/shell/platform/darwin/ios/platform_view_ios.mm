@@ -14,7 +14,7 @@
 #include "base/mac/scoped_nsautorelease_pool.h"
 #include "base/trace_event/trace_event.h"
 #include "flutter/shell/gpu/gpu_rasterizer.h"
-#include "flutter/shell/platform/darwin/common/platform_service_provider.h"
+#include "flutter/shell/platform/darwin/ios/framework/Source/vsync_waiter_ios.h"
 #include "lib/ftl/synchronization/waitable_event.h"
 #include "mojo/public/cpp/application/connect.h"
 
@@ -276,6 +276,8 @@ class IOSGLContext {
 PlatformViewIOS::PlatformViewIOS(CAEAGLLayer* layer)
     : PlatformView(std::make_unique<GPURasterizer>()),
       context_(std::make_unique<IOSGLContext>(surface_config_, layer)) {
+  CreateEngine();
+
   NSArray* paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory,
                                                        NSUserDomainMask, YES);
   shell::Shell::Shared().tracing_controller().set_traces_base_path(
@@ -291,8 +293,7 @@ sky::SkyEnginePtr& PlatformViewIOS::engineProxy() {
 void PlatformViewIOS::ToggleAccessibility(UIView* view, bool enabled) {
   if (enabled) {
     if (!accessibility_bridge_) {
-      accessibility_bridge_.reset(
-          new shell::AccessibilityBridge(view, this));
+      accessibility_bridge_.reset(new shell::AccessibilityBridge(view, this));
     }
   } else {
     accessibility_bridge_ = nullptr;
@@ -302,13 +303,6 @@ void PlatformViewIOS::ToggleAccessibility(UIView* view, bool enabled) {
 
 void PlatformViewIOS::ConnectToEngineAndSetupServices() {
   ConnectToEngine(mojo::GetProxy(&engine_));
-
-  mojo::ServiceProviderPtr service_provider;
-  new PlatformServiceProvider(mojo::GetProxy(&service_provider));
-
-  sky::ServicesDataPtr services = sky::ServicesData::New();
-  services->incoming_services = service_provider.Pass();
-  engine_->SetServices(services.Pass());
 }
 
 void PlatformViewIOS::SetupAndLoadFromSource(
@@ -317,6 +311,12 @@ void PlatformViewIOS::SetupAndLoadFromSource(
     const std::string& assets_directory) {
   ConnectToEngineAndSetupServices();
   engine_->RunFromFile(main, packages, assets_directory);
+}
+
+VsyncWaiter* PlatformViewIOS::GetVsyncWaiter() {
+  if (!vsync_waiter_)
+    vsync_waiter_ = std::make_unique<VsyncWaiterIOS>();
+  return vsync_waiter_.get();
 }
 
 bool PlatformViewIOS::ResourceContextMakeCurrent() {

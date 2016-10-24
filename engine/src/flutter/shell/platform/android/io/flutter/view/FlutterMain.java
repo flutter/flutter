@@ -34,8 +34,6 @@ import org.chromium.mojo.bindings.Interface.Binding;
 import org.chromium.mojo.system.Core;
 import org.chromium.mojo.system.impl.CoreImpl;
 import org.chromium.mojo.system.MessagePipeHandle;
-import org.chromium.mojom.vsync.VSyncProvider;
-import org.domokit.vsync.VSyncProviderImpl;
 
 /**
  * A class to intialize the Flutter engine.
@@ -135,8 +133,6 @@ public class FlutterMain {
         // of the JNI call is negligible).
         long initTimeMillis = SystemClock.uptimeMillis() - initStartTimestampMillis;
         nativeRecordStartTimestamp(initTimeMillis);
-
-        onServiceRegistryAvailable(applicationContext, ServiceRegistry.SHARED);
     }
 
     /**
@@ -178,15 +174,6 @@ public class FlutterMain {
 
     private static native void nativeInit(Context context, String[] args);
     private static native void nativeRecordStartTimestamp(long initTimeMillis);
-
-    private static void onServiceRegistryAvailable(final Context applicationContext, ServiceRegistry registry) {
-        registry.register(VSyncProvider.MANAGER.getName(), new ServiceFactory() {
-            @Override
-            public Binding connectToService(FlutterView view, Core core, MessagePipeHandle pipe) {
-                return VSyncProvider.MANAGER.bind(new VSyncProviderImpl(pipe), pipe);
-            }
-        });
-    }
 
     /**
      * Initialize our Flutter config values by obtaining them from the

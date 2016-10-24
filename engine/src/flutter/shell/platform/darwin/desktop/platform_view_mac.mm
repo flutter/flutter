@@ -12,7 +12,7 @@
 #include "flutter/shell/common/switches.h"
 #include "flutter/shell/gpu/gpu_rasterizer.h"
 #include "flutter/shell/platform/darwin/common/platform_mac.h"
-#include "flutter/shell/platform/darwin/common/platform_service_provider.h"
+#include "flutter/shell/platform/darwin/desktop/vsync_waiter_mac.h"
 #include "lib/ftl/synchronization/waitable_event.h"
 
 namespace shell {
@@ -23,6 +23,8 @@ PlatformViewMac::PlatformViewMac(NSOpenGLView* gl_view)
       resource_loading_context_([[NSOpenGLContext alloc]
           initWithFormat:gl_view.pixelFormat
             shareContext:gl_view.openGLContext]) {
+  CreateEngine();
+
   NSArray* paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory,
                                                        NSUserDomainMask, YES);
   if (paths.count > 0) {
@@ -35,13 +37,6 @@ PlatformViewMac::~PlatformViewMac() = default;
 
 void PlatformViewMac::ConnectToEngineAndSetupServices() {
   ConnectToEngine(mojo::GetProxy(&sky_engine_));
-
-  mojo::ServiceProviderPtr service_provider;
-  new PlatformServiceProvider(mojo::GetProxy(&service_provider));
-
-  sky::ServicesDataPtr services = sky::ServicesData::New();
-  services->incoming_services = service_provider.Pass();
-  sky_engine_->SetServices(services.Pass());
 }
 
 void PlatformViewMac::SetupAndLoadDart() {
@@ -116,6 +111,12 @@ bool PlatformViewMac::GLContextPresent() {
 
   [opengl_view_.get().openGLContext flushBuffer];
   return true;
+}
+
+VsyncWaiter* PlatformViewMac::GetVsyncWaiter() {
+  if (!vsync_waiter_)
+    vsync_waiter_ = std::make_unique<VsyncWaiterMac>();
+  return vsync_waiter_.get();
 }
 
 bool PlatformViewMac::ResourceContextMakeCurrent() {
