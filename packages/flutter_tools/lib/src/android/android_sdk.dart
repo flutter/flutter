@@ -153,7 +153,7 @@ class AndroidSdk {
         .toList();
     }
 
-    // Match up platforms with the best cooresponding build-tools.
+    // Match up platforms with the best corresponding build-tools.
     _sdkVersions = platforms.map((String platformName) {
       int platformVersion;
 
