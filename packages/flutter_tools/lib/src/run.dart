@@ -267,7 +267,7 @@ class RunAndStayResident extends ResidentRunner {
 
   @override
   Future<Null> preStop() async {
-    // If we're running in release mode stop the app using the Device logic.
+    // If we're running in release mode, stop the app using the device logic.
     if (vmService == null)
       await device.stopApp(_package);
   }
