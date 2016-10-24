@@ -468,6 +468,12 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// Returns the modal route most closely associated with the given context.
   ///
   /// Returns `null` if the given context is not associated with a modal route.
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// ModalRoute<dynamic> route = ModalRoute.of(context);
+  /// ```
   static ModalRoute<dynamic> of(BuildContext context) {
     _ModalScopeStatus widget = context.inheritFromWidgetOfExactType(_ModalScopeStatus);
     return widget?.route;

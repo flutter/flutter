@@ -2392,6 +2392,12 @@ class DefaultAssetBundle extends InheritedWidget {
   ///
   /// If there is no [DefaultAssetBundle] ancestor widget in the tree
   /// at the given context, then this will return the [rootBundle].
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// AssetBundle bundle = DefaultAssetBundle.of(context);
+  /// ```
   static AssetBundle of(BuildContext context) {
     DefaultAssetBundle result = context.inheritFromWidgetOfExactType(DefaultAssetBundle);
     return result?.bundle ?? rootBundle;

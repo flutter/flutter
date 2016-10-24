@@ -218,6 +218,12 @@ class Overlay extends StatefulWidget {
   /// if not. The exception attempts to explain that the calling [Widget] (the
   /// one given by the [debugRequiredFor] argument) needs an [Overlay] to be
   /// present to function.
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// OverlayState overlay = Overlay.of(context);
+  /// ```
   static OverlayState of(BuildContext context, { Widget debugRequiredFor }) {
     OverlayState result = context.ancestorStateOfType(const TypeMatcher<OverlayState>());
     assert(() {

@@ -203,6 +203,12 @@ class Material extends StatefulWidget {
 
   /// The ink controller from the closest instance of this class that
   /// encloses the given context.
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// MaterialInkController inkController = Material.of(context);
+  /// ```
   static MaterialInkController of(BuildContext context) {
     final _RenderInkFeatures result = context.ancestorRenderObjectOfType(const TypeMatcher<_RenderInkFeatures>());
     return result;
