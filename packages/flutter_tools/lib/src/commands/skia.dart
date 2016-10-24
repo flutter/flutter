@@ -12,7 +12,7 @@ import '../runner/flutter_command.dart';
 
 class SkiaCommand extends FlutterCommand {
   SkiaCommand() {
-    argParser.addOption('output-file', help: 'Write the Skia picture file to this path.');
+    argParser.addOption('out', help: 'Write the Skia picture file to this path.');
     argParser.addOption('skiaserve', help: 'Post the picture to a skiaserve debugger at this URL.');
     argParser.addOption('diagnostic-port',
         help: 'Local port where the diagnostic server is listening.');
@@ -35,12 +35,12 @@ class SkiaCommand extends FlutterCommand {
   Future<int> runCommand() async {
     File outputFile;
     Uri skiaserveUri;
-    if (argResults['output-file'] != null) {
-      outputFile = new File(argResults['output-file']);
+    if (argResults['out'] != null) {
+      outputFile = new File(argResults['out']);
     } else if (argResults['skiaserve'] != null) {
       skiaserveUri = Uri.parse(argResults['skiaserve']);
     } else {
-      printError('Must provide --output-file or --skiaserve');
+      printError('Must provide --out or --skiaserve');
       return 1;
     }
     if (argResults['diagnostic-port'] == null) {
