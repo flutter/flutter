@@ -4,6 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 import 'material.dart';
+import 'theme.dart';
 
 const double _kMinFlingVelocity = 1.0;  // screen width per second
 
