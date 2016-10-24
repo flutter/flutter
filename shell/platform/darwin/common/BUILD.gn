@@ -9,8 +9,6 @@ source_set("common") {
   sources = [
     "platform_mac.h",
     "platform_mac.mm",
-    "platform_service_provider.cc",
-    "platform_service_provider.h",
     "string_conversions.mm",
     "string_conversions.h",
   ]
@@ -23,7 +21,6 @@ source_set("common") {
     "//flutter/runtime",
     "//flutter/services/engine:interfaces",
     "//flutter/services/platform",
-    "//flutter/services/vsync",
     "//flutter/shell/common",
     "//flutter/shell/gpu",
     "//flutter/shell/testing",

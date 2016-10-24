@@ -25,6 +25,7 @@
 #include "flutter/shell/common/engine.h"
 #include "flutter/shell/common/shell.h"
 #include "flutter/shell/gpu/gpu_rasterizer.h"
+#include "flutter/shell/platform/android/vsync_waiter_android.h"
 #include "jni/FlutterView_jni.h"
 #include "lib/ftl/functional/make_copyable.h"
 #include "third_party/skia/include/core/SkSurface.h"
@@ -62,7 +63,9 @@ class PlatformMessageResponseAndroid : public blink::PlatformMessageResponse {
 }  // namespace
 
 PlatformViewAndroid::PlatformViewAndroid()
-    : PlatformView(std::make_unique<GPURasterizer>()) {}
+    : PlatformView(std::make_unique<GPURasterizer>()) {
+  CreateEngine();
+}
 
 PlatformViewAndroid::~PlatformViewAndroid() = default;
 
@@ -257,6 +260,12 @@ void PlatformViewAndroid::ReleaseSurface() {
     NotifyDestroyed();
     surface_gl_ = nullptr;
   }
+}
+
+VsyncWaiter* PlatformViewAndroid::GetVsyncWaiter() {
+  if (!vsync_waiter_)
+    vsync_waiter_ = std::make_unique<VsyncWaiterAndroid>();
+  return vsync_waiter_.get();
 }
 
 bool PlatformViewAndroid::ResourceContextMakeCurrent() {

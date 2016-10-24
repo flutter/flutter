@@ -24,17 +24,8 @@ struct ViewportMetrics {
   uint32 scene_version;
 };
 
-struct ServicesData {
-  mojo.Shell? shell;
-  mojo.ServiceProvider? incoming_services;
-  mojo.ServiceProvider&? outgoing_services;
-  mojo.ServiceProvider? view_services;
-};
-
 [ServiceName="sky::SkyEngine"]
 interface SkyEngine {
-  SetServices(ServicesData services);
-
   OnAppLifecycleStateChanged(AppLifecycleState state);
 
   OnViewportMetricsChanged(ViewportMetrics metrics);

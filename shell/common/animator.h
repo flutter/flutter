@@ -2,24 +2,25 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SHELL_COMMON_ANIMATOR_H_
-#define SHELL_COMMON_ANIMATOR_H_
+#ifndef FLUTTER_SHELL_COMMON_ANIMATOR_H_
+#define FLUTTER_SHELL_COMMON_ANIMATOR_H_
 
-#include "base/memory/weak_ptr.h"
-#include "flutter/services/vsync/fallback/vsync_provider_fallback_impl.h"
 #include "flutter/shell/common/engine.h"
 #include "flutter/shell/common/rasterizer.h"
+#include "flutter/shell/common/vsync_waiter.h"
 #include "flutter/synchronization/pipeline.h"
 #include "flutter/synchronization/semaphore.h"
 #include "lib/ftl/memory/ref_ptr.h"
+#include "lib/ftl/memory/weak_ptr.h"
 #include "lib/ftl/time/time_point.h"
-#include "mojo/services/vsync/interfaces/vsync.mojom.h"
 
 namespace shell {
 
 class Animator {
  public:
-  explicit Animator(ftl::WeakPtr<Rasterizer> rasterizer, Engine* engine);
+  Animator(ftl::WeakPtr<Rasterizer> rasterizer,
+           VsyncWaiter* waiter,
+           Engine* engine);
 
   ~Animator();
 
@@ -31,30 +32,28 @@ class Animator {
 
   void Stop();
 
-  void set_vsync_provider(vsync::VSyncProviderPtr vsync_provider);
-
  private:
   using LayerTreePipeline = flutter::Pipeline<flow::LayerTree>;
 
-  void BeginFrame(int64_t time_stamp);
+  void BeginFrame(ftl::TimePoint frame_time);
 
-  void AwaitVSync(const vsync::VSyncProvider::AwaitVSyncCallback& callback);
+  void AwaitVSync();
 
   ftl::WeakPtr<Rasterizer> rasterizer_;
+  VsyncWaiter* waiter_;
   Engine* engine_;
-  vsync::VSyncProviderPtr vsync_provider_;
-  vsync::VSyncProviderPtr fallback_vsync_provider_;
+
   ftl::TimePoint last_begin_frame_time_;
   ftl::RefPtr<LayerTreePipeline> layer_tree_pipeline_;
   flutter::Semaphore pending_frame_semaphore_;
   LayerTreePipeline::ProducerContinuation producer_continuation_;
   bool paused_;
 
-  base::WeakPtrFactory<Animator> weak_factory_;
+  ftl::WeakPtrFactory<Animator> weak_factory_;
 
   FTL_DISALLOW_COPY_AND_ASSIGN(Animator);
 };
 
 }  // namespace shell
 
-#endif  // SHELL_COMMON_ANIMATOR_H_
+#endif  // FLUTTER_SHELL_COMMON_ANIMATOR_H_

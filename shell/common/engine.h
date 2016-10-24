@@ -63,7 +63,6 @@ class Engine : public sky::SkyEngine, public blink::RuntimeDelegate {
 
  private:
   // SkyEngine implementation:
-  void SetServices(sky::ServicesDataPtr services) override;
   void OnViewportMetricsChanged(sky::ViewportMetricsPtr metrics) override;
   void OnLocaleChanged(const mojo::String& language_code,
                        const mojo::String& country_code) override;
@@ -90,9 +89,6 @@ class Engine : public sky::SkyEngine, public blink::RuntimeDelegate {
   void DidCreateMainIsolate(Dart_Isolate isolate) override;
   void DidCreateSecondaryIsolate(Dart_Isolate isolate) override;
 
-  void BindToServiceProvider(
-      mojo::InterfaceRequest<mojo::ServiceProvider> request);
-
   void RunFromSnapshotStream(const std::string& script_uri,
                              mojo::ScopedDataPipeConsumerHandle snapshot);
 
@@ -106,11 +102,6 @@ class Engine : public sky::SkyEngine, public blink::RuntimeDelegate {
 
   ftl::WeakPtr<PlatformView> platform_view_;
   std::unique_ptr<Animator> animator_;
-
-  sky::ServicesDataPtr services_;
-  mojo::ServiceProviderImpl service_provider_impl_;
-  mojo::ServiceProviderPtr incoming_services_;
-  mojo::BindingSet<mojo::ServiceProvider> service_provider_bindings_;
 
   mojo::asset_bundle::AssetBundlePtr root_bundle_;
   std::unique_ptr<blink::RuntimeController> runtime_;

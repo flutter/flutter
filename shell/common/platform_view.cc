@@ -9,6 +9,7 @@
 #include "flutter/common/threads.h"
 #include "flutter/lib/ui/painting/resource_context.h"
 #include "flutter/shell/common/rasterizer.h"
+#include "flutter/shell/common/vsync_waiter_fallback.h"
 #include "lib/ftl/functional/make_copyable.h"
 #include "third_party/skia/include/gpu/gl/GrGLInterface.h"
 
@@ -17,9 +18,7 @@ namespace shell {
 PlatformView::PlatformView(std::unique_ptr<Rasterizer> rasterizer)
     : rasterizer_(std::move(rasterizer)),
       size_(SkISize::Make(0, 0)),
-      weak_factory_(this) {
-  engine_.reset(new Engine(this));
-}
+      weak_factory_(this) {}
 
 PlatformView::~PlatformView() {
   blink::Threads::UI()->PostTask(
@@ -30,6 +29,10 @@ PlatformView::~PlatformView() {
 
   Engine* engine = engine_.release();
   blink::Threads::UI()->PostTask([engine]() { delete engine; });
+}
+
+void PlatformView::CreateEngine() {
+  engine_.reset(new Engine(this));
 }
 
 void PlatformView::DispatchPlatformMessage(
@@ -122,6 +125,12 @@ void PlatformView::NotifyDestroyed() {
 
 ftl::WeakPtr<PlatformView> PlatformView::GetWeakPtr() {
   return weak_factory_.GetWeakPtr();
+}
+
+VsyncWaiter* PlatformView::GetVsyncWaiter() {
+  if (!vsync_waiter_)
+    vsync_waiter_ = std::make_unique<VsyncWaiterFallback>();
+  return vsync_waiter_.get();
 }
 
 void PlatformView::UpdateSemantics(std::vector<blink::SemanticsNode> update) {}

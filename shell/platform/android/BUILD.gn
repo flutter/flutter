@@ -11,6 +11,7 @@ generate_jni("jni_headers") {
   sources = [
     "io/flutter/view/FlutterMain.java",
     "io/flutter/view/FlutterView.java",
+    "io/flutter/view/VsyncWaiter.java",
   ]
   jni_package = "shell"
 }
@@ -32,6 +33,8 @@ shared_library("sky_shell") {
     "library_loader.cc",
     "platform_view_android.cc",
     "platform_view_android.h",
+    "vsync_waiter_android.cc",
+    "vsync_waiter_android.h",
   ]
 
   deps = [
@@ -78,6 +81,7 @@ android_library("java") {
     "io/flutter/view/ServiceFactory.java",
     "io/flutter/view/ServiceProviderImpl.java",
     "io/flutter/view/ServiceRegistry.java",
+    "io/flutter/view/VsyncWaiter.java",
     "org/domokit/sky/shell/SkyActivity.java",
     "org/domokit/sky/shell/SkyApplication.java",
   ]
@@ -86,7 +90,6 @@ android_library("java") {
     "//base:base_java",
     "//flutter/services/engine:interfaces_java",
     "//flutter/services/platform:interfaces_java",
-    "//flutter/services/vsync:vsync_lib",
     "//mojo/android:system_java",
     "//mojo/public/interfaces/application:application_java",
     "//mojo/public/java:bindings",

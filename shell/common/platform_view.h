@@ -11,6 +11,7 @@
 #include "flutter/shell/common/engine.h"
 #include "flutter/shell/common/shell.h"
 #include "flutter/shell/common/surface.h"
+#include "flutter/shell/common/vsync_waiter.h"
 #include "lib/ftl/macros.h"
 #include "lib/ftl/memory/weak_ptr.h"
 #include "lib/ftl/synchronization/waitable_event.h"
@@ -51,6 +52,9 @@ class PlatformView {
 
   ftl::WeakPtr<PlatformView> GetWeakPtr();
 
+  // The VsyncWaiter will live at least as long as the PlatformView.
+  virtual VsyncWaiter* GetVsyncWaiter();
+
   virtual bool ResourceContextMakeCurrent() = 0;
 
   virtual void UpdateSemantics(std::vector<blink::SemanticsNode> update);
@@ -67,12 +71,15 @@ class PlatformView {
  protected:
   explicit PlatformView(std::unique_ptr<Rasterizer> rasterizer);
 
+  void CreateEngine();
+
   void SetupResourceContextOnIOThreadPerform(
       ftl::AutoResetWaitableEvent* event);
 
   SurfaceConfig surface_config_;
   std::unique_ptr<Rasterizer> rasterizer_;
   std::unique_ptr<Engine> engine_;
+  std::unique_ptr<VsyncWaiter> vsync_waiter_;
   SkISize size_;
 
  private:

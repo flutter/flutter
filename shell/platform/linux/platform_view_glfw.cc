@@ -19,6 +19,8 @@ PlatformViewGLFW::PlatformViewGLFW()
       valid_(false),
       glfw_window_(nullptr),
       buttons_(0) {
+  CreateEngine();
+
   if (!glfwInit()) {
     return;
   }
@@ -60,13 +62,6 @@ PlatformViewGLFW::~PlatformViewGLFW() {
 
 void PlatformViewGLFW::ConnectToEngineAndSetupServices() {
   ConnectToEngine(mojo::GetProxy(&engine_));
-
-  mojo::ServiceProviderPtr platform_service_provider;
-  new GLFWServiceProvider(mojo::GetProxy(&platform_service_provider));
-
-  sky::ServicesDataPtr services = sky::ServicesData::New();
-  services->incoming_services = platform_service_provider.Pass();
-  engine_->SetServices(services.Pass());
 }
 
 sky::SkyEnginePtr& PlatformViewGLFW::EngineProxy() {
