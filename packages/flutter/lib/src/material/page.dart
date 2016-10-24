@@ -131,7 +131,7 @@ class _CupertinoBackGestureController extends NavigationGestureController {
   }
 
   @override
-  void dragEnd(double velocity) {
+  bool dragEnd(double velocity) {
     if (velocity.abs() >= _kMinFlingVelocity) {
       controller.fling(velocity: -velocity);
     } else if (controller.value <= 0.5) {
@@ -141,8 +141,11 @@ class _CupertinoBackGestureController extends NavigationGestureController {
     }
 
     // Don't end the gesture until the transition completes.
+    final AnimationStatus status = controller.status;
     handleStatusChanged(controller.status);
     controller?.addStatusListener(handleStatusChanged);
+
+    return (status == AnimationStatus.reverse || status == AnimationStatus.dismissed);
   }
 
   void handleStatusChanged(AnimationStatus status) {

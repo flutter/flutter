@@ -218,7 +218,10 @@ abstract class NavigationGestureController {
 
   /// The drag gesture has ended with a horizontal motion of
   /// [fractionalVelocity] as a fraction of screen width per second.
-  void dragEnd(double fractionalVelocity);
+  ///
+  /// Returns true if the gesture will complete (i.e. a back gesture will
+  /// result in a pop).
+  bool dragEnd(double fractionalVelocity);
 }
 
 /// Signature for the [Navigator.popUntil] predicate argument.
