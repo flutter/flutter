@@ -22,8 +22,8 @@
 #include "lib/tonic/file_loader/file_loader.h"
 
 extern "C" {
-extern const uint8_t kDartVmIsolateSnapshotBuffer[];
-extern const uint8_t kDartIsolateSnapshotBuffer[];
+extern const uint8_t kVmIsolateSnapshot[];
+extern const uint8_t kIsolateSnapshot[];
 }
 
 namespace {
@@ -89,7 +89,7 @@ void InitDartVM() {
   FTL_CHECK(Dart_SetVMFlags(arraysize(kDartArgs), kDartArgs));
   Dart_InitializeParams params = {};
   params.version = DART_INITIALIZE_PARAMS_CURRENT_VERSION;
-  params.vm_isolate_snapshot = kDartVmIsolateSnapshotBuffer;
+  params.vm_isolate_snapshot = kVmIsolateSnapshot;
   char* error = Dart_Initialize(&params);
   if (error)
     FTL_LOG(FATAL) << error;
@@ -98,7 +98,7 @@ void InitDartVM() {
 Dart_Isolate CreateDartIsolate() {
   char* error = nullptr;
   Dart_Isolate isolate =
-      Dart_CreateIsolate("dart:snapshot", "main", kDartIsolateSnapshotBuffer,
+      Dart_CreateIsolate("dart:snapshot", "main", kIsolateSnapshot,
                          nullptr, nullptr, &error);
   FTL_CHECK(isolate) << error;
   Dart_ExitIsolate();
