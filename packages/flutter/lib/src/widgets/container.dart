@@ -70,6 +70,12 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
 /// paints the [decoration] to fill the padded extent, then it paints the child,
 /// and finally paints the [foregroundDecoration], also filling the padded
 /// extent.
+///
+/// Containers with no children try to be as big as possible unless the incoming
+/// constraints are unbounded, in which case they try to be as small as
+/// possible. Containers with children size themselves to their children. The
+/// `width`, `height`, and [constraints] arguments to the constructor override
+/// this.
 class Container extends StatelessWidget {
   /// Creates a widget that combines common painting, positioning, and sizing widgets.
   ///
@@ -98,32 +104,42 @@ class Container extends StatelessWidget {
     assert(constraints == null || constraints.debugAssertIsValid());
   }
 
-  /// The child contained by the container.
+  /// The [child] contained by the container.
   ///
-  /// If null, the container will expand to fill all available space in its parent.
+  /// If null, and if the [constraints] are unbounded or also null, the
+  /// container will expand to fill all available space in its parent, unless
+  /// the parent provides unbounded constraints, in which case the container
+  /// will attempt to be as small as possible.
   final Widget child;
 
-  /// Align the child within the container.
+  /// Align the [child] within the container.
   ///
   /// If non-null, the container will expand to fill its parent and position its
-  /// child within itself according to the given value.
+  /// child within itself according to the given value. If the incoming
+  /// constraints are unbounded, then the child will be shrink-wrapped instead.
+  ///
+  /// Ignored if [child] is null.
   final FractionalOffset alignment;
 
-  /// Empty space to inscribe inside the decoration.
+  /// Empty space to inscribe inside the [decoration]. The [child], if any, is
+  /// placed inside this padding.
   final EdgeInsets padding;
 
-  /// The decoration to paint behind the child.
+  /// The decoration to paint behind the [child].
   final Decoration decoration;
 
-  /// The decoration to paint in front of the child.
+  /// The decoration to paint in front of the [child].
   final Decoration foregroundDecoration;
 
   /// Additional constraints to apply to the child.
   ///
+  /// The constructor `width` and `height` arguments are combined with the
+  /// `constraints` argument to set this property.
+  ///
   /// The [padding] goes inside the constraints.
   final BoxConstraints constraints;
 
-  /// Empty space to surround the decoration.
+  /// Empty space to surround the [decoration] and [child].
   final EdgeInsets margin;
 
   /// The transformation matrix to apply before painting the container.
@@ -142,8 +158,13 @@ class Container extends StatelessWidget {
   Widget build(BuildContext context) {
     Widget current = child;
 
-    if (child == null && (constraints == null || !constraints.isTight))
-      current = new ConstrainedBox(constraints: const BoxConstraints.expand());
+    if (child == null && (constraints == null || !constraints.isTight)) {
+      current = new LimitedBox(
+        maxWidth: 0.0,
+        maxHeight: 0.0,
+        child: new ConstrainedBox(constraints: const BoxConstraints.expand())
+      );
+    }
 
     if (alignment != null)
       current = new Align(alignment: alignment, child: current);
@@ -180,6 +201,8 @@ class Container extends StatelessWidget {
     super.debugFillDescription(description);
     if (constraints != null)
       description.add('$constraints');
+    if (alignment != null)
+      description.add('$alignment');
     if (decoration != null)
       description.add('bg: $decoration');
     if (foregroundDecoration != null)
