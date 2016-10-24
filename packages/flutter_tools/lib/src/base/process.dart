@@ -151,14 +151,16 @@ bool exitsHappy(List<String> cli) {
 /// Throws an error if cmd exits with a non-zero value.
 String runCheckedSync(List<String> cmd, {
   String workingDirectory,
-  bool allowReentrantFlutter: false
+  bool allowReentrantFlutter: false,
+  bool hideStdout: false,
 }) {
   return _runWithLoggingSync(
     cmd,
     workingDirectory: workingDirectory,
     allowReentrantFlutter: allowReentrantFlutter,
+    hideStdout: hideStdout,
     checked: true,
-    noisyErrors: true
+    noisyErrors: true,
   );
 }
 
@@ -186,7 +188,8 @@ String _runWithLoggingSync(List<String> cmd, {
   bool checked: false,
   bool noisyErrors: false,
   String workingDirectory,
-  bool allowReentrantFlutter: false
+  bool allowReentrantFlutter: false,
+  bool hideStdout: false,
 }) {
   _traceCommand(cmd, workingDirectory: workingDirectory);
   ProcessResult results = Process.runSync(
@@ -198,7 +201,7 @@ String _runWithLoggingSync(List<String> cmd, {
 
   printTrace('Exit code ${results.exitCode} from: ${cmd.join(' ')}');
 
-  if (results.stdout.isNotEmpty) {
+  if (results.stdout.isNotEmpty && !hideStdout) {
     if (results.exitCode != 0 && noisyErrors)
       printStatus(results.stdout.trim());
     else
