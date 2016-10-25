@@ -24,7 +24,7 @@ namespace flutter_content_handler {
 namespace {
 
 constexpr char kSnapshotKey[] = "snapshot_blob.bin";
-constexpr char kAssetPluginChannel[] = "flutter/assets";
+constexpr char kAssetChannel[] = "flutter/assets";
 
 // Maximum number of frames in flight.
 constexpr int kMaxPipelineDepth = 3;
@@ -149,7 +149,7 @@ void RuntimeHolder::UpdateSemantics(std::vector<blink::SemanticsNode> update) {}
 
 void RuntimeHolder::HandlePlatformMessage(
     ftl::RefPtr<blink::PlatformMessage> message) {
-  if (message->channel() == kAssetPluginChannel) {
+  if (message->channel() == kAssetChannel) {
     HandleAssetPlatformMessage(std::move(message));
     return;
   }

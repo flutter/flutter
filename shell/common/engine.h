@@ -64,9 +64,6 @@ class Engine : public sky::SkyEngine, public blink::RuntimeDelegate {
  private:
   // SkyEngine implementation:
   void OnViewportMetricsChanged(sky::ViewportMetricsPtr metrics) override;
-  void OnLocaleChanged(const mojo::String& language_code,
-                       const mojo::String& country_code) override;
-
   void RunFromFile(const mojo::String& main,
                    const mojo::String& packages,
                    const mojo::String& bundle) override;
@@ -76,9 +73,6 @@ class Engine : public sky::SkyEngine, public blink::RuntimeDelegate {
   void RunFromBundleAndSnapshot(const mojo::String& script_uri,
                                 const mojo::String& bundle_path,
                                 const mojo::String& snapshot_path) override;
-  void PushRoute(const mojo::String& route) override;
-  void PopRoute() override;
-  void OnAppLifecycleStateChanged(sky::AppLifecycleState state) override;
 
   // RuntimeDelegate methods:
   void ScheduleFrame() override;
@@ -98,6 +92,12 @@ class Engine : public sky::SkyEngine, public blink::RuntimeDelegate {
   void ConfigureAssetBundle(const std::string& path);
   void ConfigureRuntime(const std::string& script_uri);
 
+  bool HandleLifecyclePlatformMessage(blink::PlatformMessage* message);
+  bool HandleNavigationPlatformMessage(
+      ftl::RefPtr<blink::PlatformMessage> message);
+  bool HandleLocalizationPlatformMessage(
+      ftl::RefPtr<blink::PlatformMessage> message);
+
   void HandleAssetPlatformMessage(ftl::RefPtr<blink::PlatformMessage> message);
 
   ftl::WeakPtr<PlatformView> platform_view_;
@@ -108,7 +108,7 @@ class Engine : public sky::SkyEngine, public blink::RuntimeDelegate {
 
   std::unique_ptr<glue::DrainDataPipeJob> snapshot_drainer_;
 
-  std::string initial_route_;
+  ftl::RefPtr<blink::PlatformMessage> pending_push_route_message_;
   sky::ViewportMetricsPtr viewport_metrics_;
   std::string language_code_;
   std::string country_code_;

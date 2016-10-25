@@ -30,6 +30,7 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityNodeProvider;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -42,8 +43,6 @@ import org.chromium.mojo.system.MessagePipeHandle;
 import org.chromium.mojo.system.MojoException;
 import org.chromium.mojo.system.Pair;
 import org.chromium.mojo.system.impl.CoreImpl;
-import org.chromium.mojom.mojo.ServiceProvider;
-import org.chromium.mojom.sky.AppLifecycleState;
 import org.chromium.mojom.sky.SkyEngine;
 import org.chromium.mojom.sky.ViewportMetrics;
 
@@ -185,35 +184,57 @@ public class FlutterView extends SurfaceView
         return super.onKeyDown(keyCode, event);
     }
 
-    SkyEngine getEngine() {
-        return mSkyEngine;
-    }
-
     public void addActivityLifecycleListener(ActivityLifecycleListener listener) {
         mActivityLifecycleListeners.add(listener);
     }
 
     public void onPause() {
-        mSkyEngine.onAppLifecycleStateChanged(AppLifecycleState.PAUSED);
+        sendPlatformMessage("flutter/lifecycle", "AppLifecycleState.paused", null);
     }
 
     public void onPostResume() {
         for (ActivityLifecycleListener listener : mActivityLifecycleListeners)
             listener.onPostResume();
 
-        mSkyEngine.onAppLifecycleStateChanged(AppLifecycleState.RESUMED);
+        sendPlatformMessage("flutter/lifecycle", "AppLifecycleState.resumed", null);
     }
 
     public void pushRoute(String route) {
-        mSkyEngine.pushRoute(route);
+        try {
+            final JSONArray args = new JSONArray();
+            args.put(0, route);
+            final JSONObject message = new JSONObject();
+            message.put("method", "pushRoute");
+            message.put("args", args);
+            sendPlatformMessage("flutter/navigation", message.toString(), null);
+        } catch (JSONException e) {
+            Log.e(TAG, "Unexpected JSONException pushing route", e);
+        }
     }
 
     public void popRoute() {
-        mSkyEngine.popRoute();
+        try {
+            final JSONObject message = new JSONObject();
+            message.put("method", "popRoute");
+            message.put("args", new JSONArray());
+            sendPlatformMessage("flutter/navigation", message.toString(), null);
+        } catch (JSONException e) {
+            Log.e(TAG, "Unexpected JSONException pushing route", e);
+        }
     }
 
     private void setLocale(Locale locale) {
-        mSkyEngine.onLocaleChanged(locale.getLanguage(), locale.getCountry());
+        try {
+            final JSONArray args = new JSONArray();
+            args.put(0, locale.getLanguage());
+            args.put(1, locale.getCountry());
+            final JSONObject message = new JSONObject();
+            message.put("method", "setLocale");
+            message.put("args", args);
+            sendPlatformMessage("flutter/localization", message.toString(), null);
+        } catch (JSONException e) {
+            Log.e(TAG, "Unexpected JSONException pushing route", e);
+        }
     }
 
     @Override

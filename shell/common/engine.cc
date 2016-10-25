@@ -24,13 +24,17 @@
 #include "lib/ftl/files/path.h"
 #include "lib/ftl/functional/make_copyable.h"
 #include "mojo/public/cpp/application/connect.h"
+#include "third_party/rapidjson/rapidjson/document.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkPictureRecorder.h"
 
 namespace shell {
 namespace {
 
-constexpr char kAssetPluginChannel[] = "flutter/assets";
+constexpr char kAssetChannel[] = "flutter/assets";
+constexpr char kLifecycleChannel[] = "flutter/lifecycle";
+constexpr char kNavigationChannel[] = "flutter/navigation";
+constexpr char kLocalizationChannel[] = "flutter/localization";
 
 bool PathExists(const std::string& path) {
   return access(path.c_str(), R_OK) == 0;
@@ -127,18 +131,85 @@ void Engine::OnViewportMetricsChanged(sky::ViewportMetricsPtr metrics) {
     runtime_->SetViewportMetrics(viewport_metrics_);
 }
 
-void Engine::OnLocaleChanged(const mojo::String& language_code,
-                             const mojo::String& country_code) {
-  language_code_ = language_code;
-  country_code_ = country_code;
-  if (runtime_)
-    runtime_->SetLocale(language_code_, country_code_);
-}
-
 void Engine::DispatchPlatformMessage(
     ftl::RefPtr<blink::PlatformMessage> message) {
-  if (runtime_)
+  if (message->channel() == kLifecycleChannel) {
+    if (HandleLifecyclePlatformMessage(message.get()))
+      return;
+  } else if (message->channel() == kLocalizationChannel) {
+    if (HandleLocalizationPlatformMessage(std::move(message)))
+      return;
+  }
+
+  if (runtime_) {
     runtime_->DispatchPlatformMessage(std::move(message));
+    return;
+  }
+
+  // If there's no runtime_, we need to buffer some navigation messages.
+  if (message->channel() == kNavigationChannel)
+    HandleNavigationPlatformMessage(std::move(message));
+}
+
+bool Engine::HandleLifecyclePlatformMessage(blink::PlatformMessage* message) {
+  const auto& data = message->data();
+  std::string state(reinterpret_cast<const char*>(data.data()), data.size());
+  if (state == "AppLifecycleState.paused") {
+    activity_running_ = false;
+    StopAnimator();
+  } else if (state == "AppLifecycleState.resumed") {
+    activity_running_ = true;
+    StartAnimatorIfPossible();
+  }
+  return false;
+}
+
+bool Engine::HandleNavigationPlatformMessage(
+    ftl::RefPtr<blink::PlatformMessage> message) {
+  FTL_DCHECK(!runtime_);
+  const auto& data = message->data();
+
+  rapidjson::Document document;
+  document.Parse(reinterpret_cast<const char*>(data.data()), data.size());
+  if (document.HasParseError() || !document.IsObject())
+    return false;
+  auto root = document.GetObject();
+  auto method = root.FindMember("method");
+  if (method == root.MemberEnd() || method->value != "pushRoute")
+    return false;
+
+  pending_push_route_message_ = std::move(message);
+  return true;
+}
+
+bool Engine::HandleLocalizationPlatformMessage(
+    ftl::RefPtr<blink::PlatformMessage> message) {
+  const auto& data = message->data();
+
+  rapidjson::Document document;
+  document.Parse(reinterpret_cast<const char*>(data.data()), data.size());
+  if (document.HasParseError() || !document.IsObject())
+    return false;
+  auto root = document.GetObject();
+  auto method = root.FindMember("method");
+  if (method == root.MemberEnd() || method->value != "setLocale")
+    return false;
+
+  auto args = root.FindMember("args");
+  if (args == root.MemberEnd() || !args->value.IsArray())
+    return false;
+
+  const auto& language = args->value[0];
+  const auto& country = args->value[1];
+
+  if (!language.IsString() || !country.IsString())
+    return false;
+
+  language_code_ = language.GetString();
+  country_code_ = country.GetString();
+  if (runtime_)
+    runtime_->SetLocale(language_code_, country_code_);
+  return true;
 }
 
 void Engine::DispatchPointerDataPacket(const PointerDataPacket& packet) {
@@ -206,8 +277,8 @@ void Engine::ConfigureRuntime(const std::string& script_uri) {
   runtime_->SetViewportMetrics(viewport_metrics_);
   runtime_->SetLocale(language_code_, country_code_);
   runtime_->SetSemanticsEnabled(semantics_enabled_);
-  if (!initial_route_.empty())
-    runtime_->PushRoute(initial_route_);
+  if (pending_push_route_message_)
+    runtime_->DispatchPlatformMessage(std::move(pending_push_route_message_));
 }
 
 void Engine::RunFromPrecompiledSnapshot(const mojo::String& bundle_path) {
@@ -245,35 +316,6 @@ void Engine::RunFromBundleAndSnapshot(const mojo::String& script_uri,
   asset_store_->GetAsStream(blink::kSnapshotAssetKey,
                             std::move(pipe.producer_handle));
   RunFromSnapshotStream(script_uri, std::move(pipe.consumer_handle));
-}
-
-void Engine::PushRoute(const mojo::String& route) {
-  if (runtime_)
-    runtime_->PushRoute(route);
-  else
-    initial_route_ = route;
-}
-
-void Engine::PopRoute() {
-  if (runtime_)
-    runtime_->PopRoute();
-}
-
-void Engine::OnAppLifecycleStateChanged(sky::AppLifecycleState state) {
-  switch (state) {
-    case sky::AppLifecycleState::PAUSED:
-      activity_running_ = false;
-      StopAnimator();
-      break;
-
-    case sky::AppLifecycleState::RESUMED:
-      activity_running_ = true;
-      StartAnimatorIfPossible();
-      break;
-  }
-
-  if (runtime_)
-    runtime_->OnAppLifecycleStateChanged(state);
 }
 
 void Engine::DidCreateMainIsolate(Dart_Isolate isolate) {
@@ -322,7 +364,7 @@ void Engine::UpdateSemantics(std::vector<blink::SemanticsNode> update) {
 
 void Engine::HandlePlatformMessage(
     ftl::RefPtr<blink::PlatformMessage> message) {
-  if (message->channel() == kAssetPluginChannel) {
+  if (message->channel() == kAssetChannel) {
     HandleAssetPlatformMessage(std::move(message));
     return;
   }

@@ -4,15 +4,6 @@
 
 module sky;
 
-import "mojo/public/interfaces/application/service_provider.mojom";
-import "mojo/public/interfaces/application/shell.mojom";
-import "mojo/services/asset_bundle/interfaces/asset_bundle.mojom";
-
-enum AppLifecycleState {
-  PAUSED,
-  RESUMED,
-};
-
 struct ViewportMetrics {
   float device_pixel_ratio = 1.0;
   int32 physical_width;
@@ -26,13 +17,7 @@ struct ViewportMetrics {
 
 [ServiceName="sky::SkyEngine"]
 interface SkyEngine {
-  OnAppLifecycleStateChanged(AppLifecycleState state);
-
   OnViewportMetricsChanged(ViewportMetrics metrics);
-  OnLocaleChanged(string language_code, string country_code);
-
-  PushRoute(string route);
-  PopRoute();
 
   RunFromFile(string main, string packages, string bundle_path);
   RunFromPrecompiledSnapshot(string bundle_path);

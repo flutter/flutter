@@ -10,9 +10,6 @@ dart:ui,::,_getGetBaseURLClosure
 dart:ui,::,_getMainClosure
 dart:ui,::,_getPrintClosure
 dart:ui,::,_getScheduleMicrotaskClosure
-dart:ui,::,_onAppLifecycleStateChanged
-dart:ui,::,_popRoute
-dart:ui,::,_pushRoute
 dart:ui,::,_setupHooks
 dart:ui,::,_updateLocale
 dart:ui,::,_updateSemanticsEnabled

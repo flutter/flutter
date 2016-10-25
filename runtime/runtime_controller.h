@@ -34,16 +34,12 @@ class RuntimeController : public WindowClient, public IsolateClient {
   void SetLocale(const std::string& language_code,
                  const std::string& country_code);
   void SetSemanticsEnabled(bool enabled);
-  void PushRoute(const std::string& route);
-  void PopRoute();
 
   void BeginFrame(ftl::TimePoint frame_time);
 
   void DispatchPlatformMessage(ftl::RefPtr<PlatformMessage> message);
   void DispatchPointerDataPacket(const PointerDataPacket& packet);
   void DispatchSemanticsAction(int32_t id, SemanticsAction action);
-
-  void OnAppLifecycleStateChanged(sky::AppLifecycleState state);
 
   Dart_Port GetMainPort();
 
