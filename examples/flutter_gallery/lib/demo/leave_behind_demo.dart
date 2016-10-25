@@ -134,7 +134,7 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
       key: _scaffoldKey,
       scrollableKey: _scrollableKey,
       appBar: new AppBar(
-        title: new Text('Swipe items to dismiss'),
+        title: new Text('Swipe to dismiss'),
         actions: <Widget>[
           new PopupMenuButton<LeaveBehindDemoAction>(
             onSelected: handleDemoAction,
