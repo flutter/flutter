@@ -622,18 +622,24 @@ final RegExp _kDeviceRegex = new RegExp(r'^(\S+)\s+(\S+)(.*)');
 /// [mockAdbOutput] is public for testing.
 List<AndroidDevice> getAdbDevices({ String mockAdbOutput }) {
   List<AndroidDevice> devices = <AndroidDevice>[];
-  List<String> output;
+  String text;
 
   if (mockAdbOutput == null) {
     String adbPath = getAdbPath(androidSdk);
     if (adbPath == null)
       return <AndroidDevice>[];
-    output = runSync(<String>[adbPath, 'devices', '-l']).trim().split('\n');
+    text = runSync(<String>[adbPath, 'devices', '-l']);
   } else {
-    output = mockAdbOutput.trim().split('\n');
+    text = mockAdbOutput;
   }
 
-  for (String line in output) {
+  // Check for error messages from adb
+  if (!text.contains('List of devices')) {
+    printError(text);
+    return <AndroidDevice>[];
+  }
+
+  for (String line in text.trim().split('\n')) {
     // Skip lines like: * daemon started successfully *
     if (line.startsWith('* daemon '))
       continue;
