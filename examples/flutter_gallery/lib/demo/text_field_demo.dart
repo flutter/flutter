@@ -65,6 +65,8 @@ class TextFieldDemoState extends State<TextFieldDemo> {
     return null;
   }
 
+  String _retypePassword = '';
+
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
@@ -72,33 +74,26 @@ class TextFieldDemoState extends State<TextFieldDemo> {
       appBar: new AppBar(
         title: new Text('Text fields')
       ),
-      body: new Form(
-        child: new Block(
+      body: new Block(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
           children: <Widget>[
             new Input(
               hintText: 'What do people call you?',
               labelText: 'Name',
-              formField: new FormField<String>(
-                // TODO(mpcomplete): replace with person#name=
-                setter:  (String val) { person.name = val; },
-                validator: _validateName
-              )
+              onChanged: (InputValue val) { setState(() { person.name = val.text; }); },
+              errorText: _validateName(person.name),
             ),
             new Input(
               hintText: 'Where can we reach you?',
               labelText: 'Phone Number',
               keyboardType: TextInputType.phone,
-              formField: new FormField<String>(
-                setter: (String val) { person.phoneNumber = val; },
-                validator: _validatePhoneNumber
-              )
+              onChanged: (InputValue val) { setState(() { person.phoneNumber = val.text; }); },
+              errorText: _validatePhoneNumber(person.phoneNumber),
             ),
             new Input(
               hintText: 'Tell us about yourself (optional)',
               labelText: 'Life story',
               maxLines: 3,
-              formField: new FormField<String>()
             ),
             new Row(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -108,9 +103,7 @@ class TextFieldDemoState extends State<TextFieldDemo> {
                     hintText: 'How do you log in?',
                     labelText: 'New Password',
                     hideText: true,
-                    formField: new FormField<String>(
-                      setter: (String val) { person.password = val; }
-                    )
+                    onChanged: (InputValue val) { setState(() { person.password = val.text; }); },
                   )
                 ),
                 new SizedBox(width: 16.0),
@@ -119,9 +112,8 @@ class TextFieldDemoState extends State<TextFieldDemo> {
                     hintText: 'How do you log in?',
                     labelText: 'Re-type Password',
                     hideText: true,
-                    formField: new FormField<String>(
-                      validator: _validatePassword
-                    )
+                    onChanged: (InputValue val) { setState(() { _retypePassword = val.text; }); },
+                    errorText: _validatePassword(_retypePassword),
                   )
                 )
               ]
@@ -135,7 +127,6 @@ class TextFieldDemoState extends State<TextFieldDemo> {
               ),
             )
           ]
-        )
       )
     );
   }
