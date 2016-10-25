@@ -666,12 +666,12 @@ TEST_F(FontCollectionItemizeTest, itemize_vs_sequence_but_no_base_char) {
 
     std::vector<FontFamily*> families;
     FontFamily* family1 = new FontFamily(VARIANT_DEFAULT);
-    MinikinAutoUnref<MinikinFont> font(new MinikinFontForTest(kLatinFont));
+    MinikinAutoUnref<MinikinFont> font(MinikinFontForTest::createFromFile(kLatinFont));
     family1->addFont(font.get());
     families.push_back(family1);
 
     FontFamily* family2 = new FontFamily(VARIANT_DEFAULT);
-    MinikinAutoUnref<MinikinFont> font2(new MinikinFontForTest(kVSTestFont));
+    MinikinAutoUnref<MinikinFont> font2(MinikinFontForTest::createFromFile(kVSTestFont));
     family2->addFont(font2.get());
     families.push_back(family2);
 
@@ -797,7 +797,7 @@ TEST_F(FontCollectionItemizeTest, itemize_LanguageScore) {
         FontFamily* firstFamily = new FontFamily(
                 FontStyle::registerLanguageList("und"), 0 /* variant */);
         MinikinAutoUnref<MinikinFont> firstFamilyMinikinFont(
-                new MinikinFontForTest(kNoGlyphFont));
+                MinikinFontForTest::createFromFile(kNoGlyphFont));
         firstFamily->addFont(firstFamilyMinikinFont.get());
         families.push_back(firstFamily);
 
@@ -809,7 +809,7 @@ TEST_F(FontCollectionItemizeTest, itemize_LanguageScore) {
         for (size_t i = 0; i < testCase.fontLanguages.size(); ++i) {
             FontFamily* family = new FontFamily(
                     FontStyle::registerLanguageList(testCase.fontLanguages[i]), 0 /* variant */);
-            MinikinAutoUnref<MinikinFont> minikin_font(new MinikinFontForTest(kJAFont));
+            MinikinAutoUnref<MinikinFont> minikin_font(MinikinFontForTest::createFromFile(kJAFont));
             family->addFont(minikin_font.get());
             families.push_back(family);
             fontLangIdxMap.insert(std::make_pair(minikin_font.get(), i));

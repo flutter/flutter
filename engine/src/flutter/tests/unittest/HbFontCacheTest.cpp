@@ -38,13 +38,13 @@ public:
 
 TEST_F(HbFontCacheTest, getHbFontLockedTest) {
     MinikinAutoUnref<MinikinFontForTest> fontA(
-            new MinikinFontForTest(kTestFontDir "Regular.ttf"));
+            MinikinFontForTest::createFromFile(kTestFontDir "Regular.ttf"));
 
     MinikinAutoUnref<MinikinFontForTest> fontB(
-            new MinikinFontForTest(kTestFontDir "Bold.ttf"));
+            MinikinFontForTest::createFromFile(kTestFontDir "Bold.ttf"));
 
     MinikinAutoUnref<MinikinFontForTest> fontC(
-            new MinikinFontForTest(kTestFontDir "BoldItalic.ttf"));
+            MinikinFontForTest::createFromFile(kTestFontDir "BoldItalic.ttf"));
 
     android::AutoMutex _l(gMinikinLock);
     // Never return NULL.
@@ -66,7 +66,7 @@ TEST_F(HbFontCacheTest, getHbFontLockedTest) {
 
 TEST_F(HbFontCacheTest, purgeCacheTest) {
     MinikinAutoUnref<MinikinFontForTest> minikinFont(
-            new MinikinFontForTest(kTestFontDir "Regular.ttf"));
+            MinikinFontForTest::createFromFile(kTestFontDir "Regular.ttf"));
 
     android::AutoMutex _l(gMinikinLock);
     hb_font_t* font = getHbFontLocked(minikinFont.get());

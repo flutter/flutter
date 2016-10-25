@@ -18,6 +18,7 @@
 #define MINIKIN_TEST_MINIKIN_FONT_FOR_TEST_H
 
 #include <minikin/MinikinFont.h>
+#include <SkRefCnt.h>
 
 class SkTypeface;
 
@@ -25,28 +26,27 @@ namespace minikin {
 
 class MinikinFontForTest : public MinikinFont {
 public:
-    MinikinFontForTest(const std::string& font_path, int index);
-    MinikinFontForTest(const std::string& font_path) : MinikinFontForTest(font_path, 0) {}
-    virtual ~MinikinFontForTest();
+    MinikinFontForTest(const std::string& font_path, sk_sp<SkTypeface> typeface);
+
+    // Helper function for creating MinikinFontForTest instance from font file.
+    // Calller need to unref returned object.
+    static MinikinFontForTest* createFromFile(const std::string& font_path);
+    static MinikinFontForTest* createFromFileWithIndex(const std::string& font_path, int index);
 
     // MinikinFont overrides.
     float GetHorizontalAdvance(uint32_t glyph_id, const MinikinPaint &paint) const;
     void GetBounds(MinikinRect* bounds, uint32_t glyph_id,
             const MinikinPaint& paint) const;
+    const void* GetTable(uint32_t tag, size_t* size, MinikinDestroyFunc* destroy);
 
     const std::string& fontPath() const { return mFontPath; }
-    const void* GetFontData() const { return mFontData; }
-    size_t GetFontSize() const { return mFontSize; }
-    int GetFontIndex() const { return mFontIndex; }
 private:
     MinikinFontForTest() = delete;
     MinikinFontForTest(const MinikinFontForTest&) = delete;
     MinikinFontForTest& operator=(MinikinFontForTest&) = delete;
 
+    sk_sp<SkTypeface> mTypeface;
     const std::string mFontPath;
-    const int mFontIndex;
-    void* mFontData;
-    size_t mFontSize;
 };
 
 }  // namespace minikin
