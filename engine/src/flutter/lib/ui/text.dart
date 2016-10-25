@@ -716,8 +716,8 @@ abstract class Paragraph extends NativeFieldWrapperClass2 {
 class ParagraphBuilder extends NativeFieldWrapperClass2 {
   /// Creates a [ParagraphBuilder] object, which is used to create a
   /// [Paragraph].
-  ParagraphBuilder() { _constructor(); }
-  void _constructor() native "ParagraphBuilder_constructor";
+  ParagraphBuilder(ParagraphStyle style) { _constructor(style._encoded, style._fontFamily, style._fontSize, style._lineHeight, style._ellipsis); }
+  void _constructor(Int32List encoded, String fontFamily, double fontSize, double lineHeight, String ellipsis) native "ParagraphBuilder_constructor";
 
   /// Applies the given style to the added text until [pop] is called.
   ///
@@ -742,6 +742,5 @@ class ParagraphBuilder extends NativeFieldWrapperClass2 {
   ///
   /// After calling this function, the paragraph builder object is invalid and
   /// cannot be used further.
-  Paragraph build(ParagraphStyle style) => _build(style._encoded, style._fontFamily, style._fontSize, style._lineHeight, style._ellipsis);
-  Paragraph _build(Int32List encoded, String fontFamily, double fontSize, double lineHeight, String ellipsis) native "ParagraphBuilder_build";
+  Paragraph build() native "ParagraphBuilder_build";
 }

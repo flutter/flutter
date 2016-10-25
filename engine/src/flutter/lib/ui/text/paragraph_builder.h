@@ -21,9 +21,11 @@ class ParagraphBuilder : public ftl::RefCountedThreadSafe<ParagraphBuilder>,
   FRIEND_MAKE_REF_COUNTED(ParagraphBuilder);
 
  public:
-  static ftl::RefPtr<ParagraphBuilder> create() {
-    return ftl::MakeRefCounted<ParagraphBuilder>();
-  }
+  static ftl::RefPtr<ParagraphBuilder> create(tonic::Int32List& encoded,
+                                              const std::string& fontFamily,
+                                              double fontSize,
+                                              double lineHeight,
+                                              const std::string& ellipsis);
 
   ~ParagraphBuilder() override;
 
@@ -37,16 +39,16 @@ class ParagraphBuilder : public ftl::RefCountedThreadSafe<ParagraphBuilder>,
 
   void addText(const std::string& text);
 
-  ftl::RefPtr<Paragraph> build(tonic::Int32List& encoded,
-                               const std::string& fontFamily,
-                               double fontSize,
-                               double lineHeight,
-                               const std::string& ellipsis);
+  ftl::RefPtr<Paragraph> build();
 
   static void RegisterNatives(tonic::DartLibraryNatives* natives);
 
  private:
-  explicit ParagraphBuilder();
+  explicit ParagraphBuilder(tonic::Int32List& encoded,
+                            const std::string& fontFamily,
+                            double fontSize,
+                            double lineHeight,
+                            const std::string& ellipsis);
 
   void createRenderView();
 
