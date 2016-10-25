@@ -151,11 +151,16 @@ class RawInput extends Scrollable {
     scrollDirection: maxLines > 1 ? Axis.vertical : Axis.horizontal
   );
 
-  /// The string being displayed in this widget.
-  // final InputValue value;
-
+  /// The editable text displayed in the input field. If this is null, the
+  /// [RawInput] manages it for you.
   final String text;
+
+  /// The range of editable text that is currently selected. If this is null,
+  /// the [RawInput] manages it for you.
   final TextSelection selection;
+
+  /// The range of editable text that is still being composed. If this is null,
+  /// the [RawInput] manages it for you.
   final TextRange composing;
 
   /// Key of the enclosing widget that holds the focus.

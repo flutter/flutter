@@ -20,13 +20,10 @@ export 'package:flutter/services.dart' show TextInputType;
 ///
 /// Requires one of its ancestors to be a [Material] widget.
 ///
-/// If the [Input] has a [Form] ancestor, the [formField] property must
-/// be specified. In this case, the [Input] keeps track of the value of
-/// the [Input] field automatically, and the initial value can be specified
-/// using the [value] property.
-///
-/// If the [Input] does not have a [Form] ancestor, then the [value]
-/// must be updated each time the [onChanged] callback is invoked.
+/// The [text], [selection], and [composing] properties control the editable
+/// text. If null, the [Input] widget will manage them for you, as the user
+/// edits the input field. Otherwise, they should be updated in response to the
+/// [onChanged] event.
 ///
 /// See also:
 ///
@@ -39,8 +36,6 @@ class Input extends StatefulWidget {
   /// Creates a text input field.
   ///
   /// By default, the input uses a keyboard appropriate for text entry.
-  ///
-  /// The [formField] argument is required if the [Input] has an ancestor [Form].
   Input({
     Key key,
     this.text,
@@ -60,16 +55,16 @@ class Input extends StatefulWidget {
     this.onSubmitted,
   }) : super(key: key);
 
-  /// The text of the input field.
-  ///
-  /// If the [Input] is in a [Form], this is the initial value only.
-  ///
-  /// Otherwise, this is the current value, and must be updated every
-  /// time [onChanged] is called.
-  // final InputValue value;
-
+  /// The editable text displayed in the input field. If this is null, the
+  /// [Input] manages it for you.
   final String text;
+
+  /// The range of editable text that is currently selected. If this is null,
+  /// the [Input] manages it for you.
   final TextSelection selection;
+
+  /// The range of editable text that is still being composed. If this is null,
+  /// the [Input] manages it for you.
   final TextRange composing;
 
   /// The type of keyboard to use for editing the text.
@@ -91,9 +86,6 @@ class Input extends StatefulWidget {
   final String hintText;
 
   /// Text to show when the input text is invalid.
-  ///
-  /// If this is set, then the [formField]'s [FormField.validator], if any, is
-  /// ignored.
   final String errorText;
 
   /// The style to use for the text being edited.
@@ -118,16 +110,12 @@ class Input extends StatefulWidget {
 
   /// Called when the text being edited changes.
   ///
-  /// If the [Input] is not in a [Form], the [value] must be updated each time [onChanged]
-  /// is invoked. (If there is a [Form], then the value is tracked in the [formField], and
-  /// this callback is purely advisory.)
-  ///
-  /// If the [Input] is in a [Form], this is called after the [formField] is updated.
+  /// The [text], [selection], and [composing] arguments must be updated (or
+  /// remain null to allow the [Input] to manage them) each time [onChanged] is
+  /// invoked.
   final ValueChanged<InputValue> onChanged;
 
   /// Called when the user indicates that they are done editing the text in the field.
-  ///
-  /// If the [Input] is in a [Form], this is called after the [formField] is notified.
   final ValueChanged<InputValue> onSubmitted;
 
   @override
