@@ -84,7 +84,9 @@ void main() {
       return new Center(
         child: new Material(
           child: new Input(
-            value: inputValue,
+            text: inputValue.text,
+            selection: inputValue.selection,
+            composing: inputValue.composing,
             key: inputKey,
             hintText: 'Placeholder',
             onChanged: (InputValue value) { inputValue = value; }
@@ -202,7 +204,9 @@ void main() {
               return new Center(
                 child: new Material(
                   child: new Input(
-                    value: inputValue,
+                    text: inputValue.text,
+                    selection: inputValue.selection,
+                    composing: inputValue.composing,
                     key: inputKey,
                     onChanged: (InputValue value) { inputValue = value; }
                   )
@@ -249,7 +253,9 @@ void main() {
               return new Center(
                 child: new Material(
                   child: new Input(
-                    value: inputValue,
+                    text: inputValue.text,
+                    selection: inputValue.selection,
+                    composing: inputValue.composing,
                     key: inputKey,
                     onChanged: (InputValue value) { inputValue = value; }
                   )
@@ -324,7 +330,9 @@ void main() {
               return new Center(
                 child: new Material(
                   child: new Input(
-                    value: inputValue,
+                    text: inputValue.text,
+                    selection: inputValue.selection,
+                    composing: inputValue.composing,
                     key: inputKey,
                     onChanged: (InputValue value) { inputValue = value; }
                   )
@@ -389,7 +397,9 @@ void main() {
               return new Center(
                 child: new Material(
                   child: new Input(
-                    value: inputValue,
+                    text: inputValue.text,
+                    selection: inputValue.selection,
+                    composing: inputValue.composing,
                     key: inputKey,
                     onChanged: (InputValue value) { inputValue = value; }
                   )
@@ -440,7 +450,9 @@ void main() {
       return new Center(
         child: new Material(
           child: new Input(
-            value: inputValue,
+            text: inputValue.text,
+            selection: inputValue.selection,
+            composing: inputValue.composing,
             key: inputKey,
             style: const TextStyle(color: Colors.black, fontSize: 34.0),
             maxLines: maxLines,
@@ -499,7 +511,9 @@ void main() {
               return new Center(
                 child: new Material(
                   child: new Input(
-                    value: inputValue,
+                    text: inputValue.text,
+                    selection: inputValue.selection,
+                    composing: inputValue.composing,
                     key: inputKey,
                     style: const TextStyle(color: Colors.black, fontSize: 34.0),
                     maxLines: 3,
@@ -590,7 +604,9 @@ void main() {
               return new Center(
                 child: new Material(
                   child: new Input(
-                    value: inputValue,
+                    text: inputValue.text,
+                    selection: inputValue.selection,
+                    composing: inputValue.composing,
                     key: inputKey,
                     style: const TextStyle(color: Colors.black, fontSize: 34.0),
                     maxLines: 2,
