@@ -606,9 +606,15 @@ void InitDartVM() {
                 arraysize(kDartPrecompilationArgs));
   }
 
+#if defined(OS_FUCHSIA) && defined(NDEBUG)
+  if (false) {
+    // Do not enable checked mode for Fuchsia release builds
+    // TODO(mikejurka): remove this once precompiled code is working on Fuchsia
+#else
   if (!IsRunningPrecompiledCode()) {
     // Enable checked mode if we are not running precompiled code. We run non-
     // precompiled code only in the debug product mode.
+#endif
     PushBackAll(&args, kDartCheckedModeArgs, arraysize(kDartCheckedModeArgs));
   }
 
