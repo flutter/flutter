@@ -323,7 +323,6 @@ abstract class IntelliJValidator extends DoctorValidator {
   static final Map<String, String> _idToTitle = <String, String>{
     'IntelliJIdea' : 'IntelliJ IDEA Ultimate Edition',
     'IdeaIC' : 'IntelliJ IDEA Community Edition',
-    'WebStorm' : 'IntelliJ WebStorm',
   };
 
   static Iterable<DoctorValidator> get installed {
@@ -425,7 +424,6 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
   static final Map<String, String> _dirNameToId = <String, String>{
     'IntelliJ IDEA.app' : 'IntelliJIdea',
     'IntelliJ IDEA CE.app' : 'IdeaIC',
-    'WebStorm.app' : 'WebStorm',
   };
 
   static Iterable<DoctorValidator> get installed {
