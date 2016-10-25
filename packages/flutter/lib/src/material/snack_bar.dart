@@ -11,7 +11,6 @@ import 'material.dart';
 import 'scaffold.dart';
 import 'theme_data.dart';
 import 'theme.dart';
-import 'typography.dart';
 
 // https://material.google.com/components/snackbars-toasts.html#snackbars-toasts-specs
 const double _kSnackBarPadding = 24.0;
@@ -134,13 +133,19 @@ class SnackBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(animation != null);
+    ThemeData theme = Theme.of(context);
+    ThemeData darkTheme = new ThemeData(
+      brightness: Brightness.dark,
+      accentColor: theme.accentColor,
+      accentColorBrightness: theme.accentColorBrightness
+    );
     List<Widget> children = <Widget>[
       const SizedBox(width: _kSnackBarPadding),
       new Flexible(
         child: new Container(
           padding: const EdgeInsets.symmetric(vertical: _kSingleLineVerticalPadding),
           child: new DefaultTextStyle(
-            style: Typography.white.subhead,
+            style: darkTheme.textTheme.subhead,
             child: content
           )
         )
@@ -157,7 +162,6 @@ class SnackBar extends StatelessWidget {
     }
     CurvedAnimation heightAnimation = new CurvedAnimation(parent: animation, curve: _snackBarHeightCurve);
     CurvedAnimation fadeAnimation = new CurvedAnimation(parent: animation, curve: _snackBarFadeCurve, reverseCurve: const Threshold(0.0));
-    ThemeData theme = Theme.of(context);
     return new ClipRect(
       child: new AnimatedBuilder(
         animation: heightAnimation,
@@ -181,12 +185,7 @@ class SnackBar extends StatelessWidget {
               elevation: 6,
               color: _kSnackBackground,
               child: new Theme(
-                data: new ThemeData(
-                  brightness: Brightness.dark,
-                  accentColor: theme.accentColor,
-                  accentColorBrightness: theme.accentColorBrightness,
-                  textTheme: Typography.white
-                ),
+                data: darkTheme,
                 child: new FadeTransition(
                   opacity: fadeAnimation,
                   child: new Row(
