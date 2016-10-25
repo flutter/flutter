@@ -1911,7 +1911,7 @@ class Flex extends MultiChildRenderObjectWidget {
   ///
   /// After allocating space to children, there might be some remaining free
   /// space. This value controls whether to maximize or minimize the amount of
-  /// free space, subject to the incoming layout contraints.
+  /// free space, subject to the incoming layout constraints.
   ///
   /// If some children have a non-zero flex factors (and none have a fit of
   /// [FlexFit.loose]), they will expand to consume all the available space and

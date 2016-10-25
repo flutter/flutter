@@ -45,7 +45,7 @@ class FlexParentData extends ContainerBoxParentDataMixin<RenderBox> {
 /// During a flex layout, available space along the main axis is allocated to
 /// children. After allocating space, there might be some remaining free space.
 /// This value controls whether to maximize or minimize the amount of free
-/// space, subject to the incoming layout contraints.
+/// space, subject to the incoming layout constraints.
 ///
 /// See [Row], [Column], [MainAxisAlignment], [Flexible].
 enum MainAxisSize {
@@ -169,7 +169,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
   ///
   /// After allocating space to children, there might be some remaining free
   /// space. This value controls whether to maximize or minimize the amount of
-  /// free space, subject to the incoming layout contraints.
+  /// free space, subject to the incoming layout constraints.
   ///
   /// If some children have a non-zero flex factors (and none have a fit of
   /// [FlexFit.loose]), they will expand to consume all the available space and
