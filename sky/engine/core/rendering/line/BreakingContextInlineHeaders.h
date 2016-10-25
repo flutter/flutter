@@ -471,8 +471,8 @@ inline bool BreakingContext::handleText(WordMeasurements& wordMeasurements, bool
     float ellipsisWidth = 0;
     unsigned ellipsisBreakOffset = 0;
     if (ellipsizeMode) {
+        ASSERT(breakAll);
         ellipsisWidth = measureEllipsisWidth(renderText, font, m_blockStyle->ellipsis().string());
-        breakAll = true;
     }
 
     if (m_renderTextInfo.m_text != renderText) {

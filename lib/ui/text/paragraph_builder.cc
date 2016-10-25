@@ -20,48 +20,6 @@
 namespace blink {
 namespace {
 
-RenderParagraph* createRenderParagraph(RenderStyle* parentStyle) {
-  RefPtr<RenderStyle> style = RenderStyle::create();
-  style->inheritFrom(parentStyle);
-  style->setDisplay(PARAGRAPH);
-
-  RenderParagraph* renderParagraph = new RenderParagraph();
-  renderParagraph->setStyle(style.release());
-  return renderParagraph;
-}
-
-float getComputedSizeFromSpecifiedSize(float specifiedSize) {
-  if (specifiedSize < std::numeric_limits<float>::epsilon())
-    return 0.0f;
-  return specifiedSize;
-}
-
-void createFontForDocument(RenderStyle* style) {
-  FontDescription fontDescription = FontDescription();
-  fontDescription.setScript(
-      localeToScriptCodeForFontSelection(style->locale()));
-
-  // Using 14px default to match Material Design English Body1:
-  // http://www.google.com/design/spec/style/typography.html#typography-typeface
-  const float defaultFontSize = 14.0;
-
-  fontDescription.setSpecifiedSize(defaultFontSize);
-  fontDescription.setComputedSize(defaultFontSize);
-
-  FontOrientation fontOrientation = Horizontal;
-  NonCJKGlyphOrientation glyphOrientation = NonCJKGlyphOrientationVerticalRight;
-
-  fontDescription.setOrientation(fontOrientation);
-  fontDescription.setNonCJKGlyphOrientation(glyphOrientation);
-  style->setFontDescription(fontDescription);
-  style->font().update(UIDartState::Current()->font_selector());
-}
-
-Color getColorFromARGB(int argb) {
-  return Color((argb & 0x00FF0000) >> 16, (argb & 0x0000FF00) >> 8,
-               (argb & 0x000000FF) >> 0, (argb & 0xFF000000) >> 24);
-}
-
 // TextStyle
 
 const int tsColorIndex = 1;
@@ -109,6 +67,96 @@ const int psFontSizeMask = 1 << psFontSizeIndex;
 const int psLineHeightMask = 1 << psLineHeightIndex;
 const int psEllipsisMask = 1 << psEllipsisIndex;
 
+float getComputedSizeFromSpecifiedSize(float specifiedSize) {
+  if (specifiedSize < std::numeric_limits<float>::epsilon())
+    return 0.0f;
+  return specifiedSize;
+}
+
+void createFontForDocument(RenderStyle* style) {
+  FontDescription fontDescription = FontDescription();
+  fontDescription.setScript(
+      localeToScriptCodeForFontSelection(style->locale()));
+
+  // Using 14px default to match Material Design English Body1:
+  // http://www.google.com/design/spec/style/typography.html#typography-typeface
+  const float defaultFontSize = 14.0;
+
+  fontDescription.setSpecifiedSize(defaultFontSize);
+  fontDescription.setComputedSize(defaultFontSize);
+
+  FontOrientation fontOrientation = Horizontal;
+  NonCJKGlyphOrientation glyphOrientation = NonCJKGlyphOrientationVerticalRight;
+
+  fontDescription.setOrientation(fontOrientation);
+  fontDescription.setNonCJKGlyphOrientation(glyphOrientation);
+  style->setFontDescription(fontDescription);
+  style->font().update(UIDartState::Current()->font_selector());
+}
+
+PassRefPtr<RenderStyle> decodeParagraphStyle(
+    RenderStyle* parentStyle,
+    tonic::Int32List& encoded,
+    const std::string& fontFamily,
+    double fontSize,
+    double lineHeight,
+    const std::string& ellipsis) {
+  FTL_DCHECK(encoded.num_elements() == 5);
+
+  RefPtr<RenderStyle> style = RenderStyle::create();
+  style->inheritFrom(parentStyle);
+  style->setDisplay(PARAGRAPH);
+
+  int32_t mask = encoded[0];
+
+  if (mask & psTextAlignMask)
+    style->setTextAlign(static_cast<ETextAlign>(encoded[psTextAlignIndex]));
+
+  if (mask & (psFontWeightMask | psFontStyleMask | psFontFamilyMask |
+              psFontSizeMask)) {
+    FontDescription fontDescription = style->fontDescription();
+
+    if (mask & psFontWeightMask)
+      fontDescription.setWeight(
+          static_cast<FontWeight>(encoded[psFontWeightIndex]));
+
+    if (mask & psFontStyleMask)
+      fontDescription.setStyle(
+          static_cast<FontStyle>(encoded[psFontStyleIndex]));
+
+    if (mask & psFontFamilyMask) {
+      FontFamily family;
+      family.setFamily(String::fromUTF8(fontFamily));
+      fontDescription.setFamily(family);
+    }
+
+    if (mask & psFontSizeMask) {
+      fontDescription.setSpecifiedSize(fontSize);
+      fontDescription.setIsAbsoluteSize(true);
+      fontDescription.setComputedSize(
+          getComputedSizeFromSpecifiedSize(fontSize));
+    }
+
+    style->setFontDescription(fontDescription);
+    style->font().update(UIDartState::Current()->font_selector());
+  }
+
+  if (mask & psLineHeightMask)
+    style->setLineHeight(Length(lineHeight * 100.0, Percent));
+
+  if (mask & psEllipsisMask) {
+    style->setEllipsis(AtomicString::fromUTF8(ellipsis.c_str()));
+    style->setWordBreak(BreakAllWordBreak);
+  }
+
+  return style.release();
+}
+
+Color getColorFromARGB(int argb) {
+  return Color((argb & 0x00FF0000) >> 16, (argb & 0x0000FF00) >> 8,
+               (argb & 0x000000FF) >> 0, (argb & 0xFF000000) >> 24);
+}
+
 }  // namespace
 
 static void ParagraphBuilder_constructor(Dart_NativeArguments args) {
@@ -127,13 +175,34 @@ FOR_EACH_BINDING(DART_NATIVE_CALLBACK)
 
 void ParagraphBuilder::RegisterNatives(tonic::DartLibraryNatives* natives) {
   natives->Register(
-      {{"ParagraphBuilder_constructor", ParagraphBuilder_constructor, 1, true},
+      {{"ParagraphBuilder_constructor", ParagraphBuilder_constructor, 6, true},
        FOR_EACH_BINDING(DART_REGISTER_NATIVE)});
 }
 
-ParagraphBuilder::ParagraphBuilder() {
+ftl::RefPtr<ParagraphBuilder> ParagraphBuilder::create(
+    tonic::Int32List& encoded,
+    const std::string& fontFamily,
+    double fontSize,
+    double lineHeight,
+    const std::string& ellipsis) {
+  return ftl::MakeRefCounted<ParagraphBuilder>(
+      encoded, fontFamily, fontSize, lineHeight, ellipsis);
+}
+
+ParagraphBuilder::ParagraphBuilder(tonic::Int32List& encoded,
+                                   const std::string& fontFamily,
+                                   double fontSize,
+                                   double lineHeight,
+                                   const std::string& ellipsis) {
   createRenderView();
-  m_renderParagraph = createRenderParagraph(m_renderView->style());
+
+  RefPtr<RenderStyle> paragraphStyle = decodeParagraphStyle(
+      m_renderView->style(), encoded, fontFamily, fontSize, lineHeight, ellipsis);
+  encoded.Release();
+
+  m_renderParagraph = new RenderParagraph();
+  m_renderParagraph->setStyle(paragraphStyle.release());
+
   m_currentRenderObject = m_renderParagraph;
   m_renderView->addChild(m_currentRenderObject);
 }
@@ -240,60 +309,7 @@ void ParagraphBuilder::addText(const std::string& text) {
   m_currentRenderObject->addChild(renderText);
 }
 
-ftl::RefPtr<Paragraph> ParagraphBuilder::build(tonic::Int32List& encoded,
-                                               const std::string& fontFamily,
-                                               double fontSize,
-                                               double lineHeight,
-                                               const std::string& ellipsis) {
-  FTL_DCHECK(encoded.num_elements() == 5);
-  int32_t mask = encoded[0];
-
-  if (mask) {
-    RefPtr<RenderStyle> style = RenderStyle::clone(m_renderParagraph->style());
-
-    if (mask & psTextAlignMask)
-      style->setTextAlign(static_cast<ETextAlign>(encoded[psTextAlignIndex]));
-
-    if (mask & (psFontWeightMask | psFontStyleMask | psFontFamilyMask |
-                psFontSizeMask)) {
-      FontDescription fontDescription = style->fontDescription();
-
-      if (mask & psFontWeightMask)
-        fontDescription.setWeight(
-            static_cast<FontWeight>(encoded[psFontWeightIndex]));
-
-      if (mask & psFontStyleMask)
-        fontDescription.setStyle(
-            static_cast<FontStyle>(encoded[psFontStyleIndex]));
-
-      if (mask & psFontFamilyMask) {
-        FontFamily family;
-        family.setFamily(String::fromUTF8(fontFamily));
-        fontDescription.setFamily(family);
-      }
-
-      if (mask & psFontSizeMask) {
-        fontDescription.setSpecifiedSize(fontSize);
-        fontDescription.setIsAbsoluteSize(true);
-        fontDescription.setComputedSize(
-            getComputedSizeFromSpecifiedSize(fontSize));
-      }
-
-      style->setFontDescription(fontDescription);
-      style->font().update(UIDartState::Current()->font_selector());
-    }
-
-    if (mask & psLineHeightMask)
-      style->setLineHeight(Length(lineHeight * 100.0, Percent));
-
-    if (mask & psEllipsisMask)
-      style->setEllipsis(AtomicString::fromUTF8(ellipsis.c_str()));
-
-    m_renderParagraph->setStyle(style.release());
-  }
-
-  encoded.Release();
-
+ftl::RefPtr<Paragraph> ParagraphBuilder::build() {
   m_currentRenderObject = nullptr;
   return Paragraph::create(m_renderView.release());
 }
