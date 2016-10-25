@@ -27,7 +27,6 @@ VsyncWaiterFallback::VsyncWaiterFallback()
 VsyncWaiterFallback::~VsyncWaiterFallback() = default;
 
 void VsyncWaiterFallback::AsyncWaitForVsync(Callback callback) {
-  FTL_LOG(INFO) << "VsyncWaiterFallback::AsyncWaitForVsync";
   FTL_DCHECK(!callback_);
   callback_ = std::move(callback);
 
