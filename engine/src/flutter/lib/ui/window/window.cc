@@ -157,26 +157,6 @@ void Window::UpdateSemanticsEnabled(bool enabled) {
                   {ToDart(enabled)});
 }
 
-void Window::PushRoute(const std::string& route) {
-  tonic::DartState* dart_state = library_.dart_state().get();
-  if (!dart_state)
-    return;
-  tonic::DartState::Scope scope(dart_state);
-
-  DartInvokeField(library_.value(), "_pushRoute", {
-                                                      StdStringToDart(route),
-                                                  });
-}
-
-void Window::PopRoute() {
-  tonic::DartState* dart_state = library_.dart_state().get();
-  if (!dart_state)
-    return;
-  tonic::DartState::Scope scope(dart_state);
-
-  DartInvokeField(library_.value(), "_popRoute", {});
-}
-
 void Window::DispatchPlatformMessage(ftl::RefPtr<PlatformMessage> message) {
   tonic::DartState* dart_state = library_.dart_state().get();
   if (!dart_state)
@@ -233,16 +213,6 @@ void Window::BeginFrame(ftl::TimePoint frameTime) {
                   {
                       Dart_NewInteger(microseconds),
                   });
-}
-
-void Window::OnAppLifecycleStateChanged(sky::AppLifecycleState state) {
-  tonic::DartState* dart_state = library_.dart_state().get();
-  if (!dart_state)
-    return;
-  tonic::DartState::Scope scope(dart_state);
-
-  DartInvokeField(library_.value(), "_onAppLifecycleStateChanged",
-                  {ToDart(static_cast<int>(state))});
 }
 
 void Window::CompletePlatformMessageResponse(int response_id,

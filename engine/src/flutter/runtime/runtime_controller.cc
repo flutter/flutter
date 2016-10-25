@@ -76,14 +76,6 @@ void RuntimeController::SetSemanticsEnabled(bool enabled) {
   GetWindow()->UpdateSemanticsEnabled(semantics_enabled_);
 }
 
-void RuntimeController::PushRoute(const std::string& route) {
-  GetWindow()->PushRoute(route);
-}
-
-void RuntimeController::PopRoute() {
-  GetWindow()->PopRoute();
-}
-
 void RuntimeController::BeginFrame(ftl::TimePoint frame_time) {
   GetWindow()->BeginFrame(frame_time);
 }
@@ -130,11 +122,6 @@ void RuntimeController::HandlePlatformMessage(
 
 void RuntimeController::DidCreateSecondaryIsolate(Dart_Isolate isolate) {
   client_->DidCreateSecondaryIsolate(isolate);
-}
-
-void RuntimeController::OnAppLifecycleStateChanged(
-    sky::AppLifecycleState state) {
-  GetWindow()->OnAppLifecycleStateChanged(state);
 }
 
 Dart_Port RuntimeController::GetMainPort() {

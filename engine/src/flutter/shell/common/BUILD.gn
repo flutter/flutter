@@ -69,6 +69,7 @@ source_set("common") {
     "//mojo/public/interfaces/application",
     "//mojo/services/vsync/interfaces",
     "//third_party/libjpeg",
+    "//third_party/rapidjson",
     ":generate_embedder_diagnostic_server_resources_cc",
   ]
 }

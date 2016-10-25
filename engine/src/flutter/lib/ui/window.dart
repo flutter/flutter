@@ -16,9 +16,6 @@ typedef void PointerDataPacketCallback(PointerDataPacket packet);
 /// Signature for [Window.onSemanticsAction].
 typedef void SemanticsActionCallback(int id, SemanticsAction action);
 
-/// Signature for [Window.onAppLifecycleStateChanged].
-typedef void AppLifecycleStateCallback(AppLifecycleState state);
-
 /// Signature for responses to platform messages.
 ///
 /// Used as a parameter to [Window.sendPlatformMessage] and
@@ -148,10 +145,6 @@ class Window {
   /// A callback that is invoked whenever [locale] changes value.
   VoidCallback onLocaleChanged;
 
-  /// A callback that is invoked when there is a transition in the application's
-  /// lifecycle (such as pausing or resuming).
-  AppLifecycleStateCallback onAppLifecycleStateChanged;
-
   /// A callback that is invoked to notify the application that it is an
   /// appropriate time to provide a scene using the [SceneBuilder] API and the
   /// [render] method. When possible, this is driven by the hardware VSync
@@ -166,11 +159,6 @@ class Window {
   /// was launched.
   String get defaultRouteName => _defaultRouteName;
   String _defaultRouteName;
-
-  /// A callback that is invoked when the operating system requests that the
-  /// application goes "back" one step in its history. For example, on Android
-  /// this is invoked in response to the "back" button.
-  VoidCallback onPopRoute;
 
   /// Requests that, at the next appropriate opportunity, the [onBeginFrame]
   /// callback be invoked.

@@ -49,11 +49,6 @@ class Window {
   void DispatchSemanticsAction(int32_t id, SemanticsAction action);
   void BeginFrame(ftl::TimePoint frameTime);
 
-  void PushRoute(const std::string& route);
-  void PopRoute();
-
-  void OnAppLifecycleStateChanged(sky::AppLifecycleState state);
-
   void CompletePlatformMessageResponse(int response_id,
                                        std::vector<uint8_t> data);
 
