@@ -52,11 +52,22 @@ class GalleryTransitionTest {
     Map<String, dynamic> original = JSON.decode(file(
             '${galleryDirectory.path}/build/transition_durations.timeline.json')
         .readAsStringSync());
-    Map<String, dynamic> clean = new Map<String, dynamic>.fromIterable(
+    Map<String, dynamic> transitions = new Map<String, dynamic>.fromIterable(
         original.keys,
         key: (String key) => key.replaceAll('/', ''),
         value: (String key) => original[key]);
 
-    return new TaskResult.success(clean);
+    Map<String, dynamic> summary = JSON.decode(file('${galleryDirectory.path}/build/transitions.timeline_summary.json').readAsStringSync());
+
+    Map<String, dynamic> data = <String, dynamic>{
+      'transitions': transitions,
+    };
+    data.addAll(summary);
+
+    return new TaskResult.success(data, benchmarkScoreKeys: <String>[
+      'average_frame_build_time_millis',
+      'worst_frame_build_time_millis',
+      'missed_frame_build_budget_count',
+    ]);
   }
 }
