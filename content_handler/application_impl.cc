@@ -9,7 +9,7 @@
 #include "flutter/content_handler/runtime_holder.h"
 #include "lib/ftl/logging.h"
 #include "lib/mtl/data_pipe/vector.h"
-#include "lib/mtl/shared_buffer/strings.h"
+#include "lib/mtl/shared_buffer/vector.h"
 #include "lib/zip/unzipper.h"
 #include "mojo/public/cpp/application/connect.h"
 
@@ -30,13 +30,11 @@ ApplicationImpl::ApplicationImpl(
       return;
     }
   } else if (response->body->is_buffer()) {
-    std::string string;
-    bool result = mtl::StringFromSharedBuffer(std::move(response->body->get_buffer()), &string);
+    bool result = mtl::VectorFromSharedBuffer(std::move(response->body->get_buffer()), &bundle_);
     if (!result) {
       FTL_LOG(ERROR) << "Failed to receive bundle.";
       return;
     }
-    bundle_.assign(string.begin(), string.end());
   } else {
     FTL_NOTREACHED();
   }
