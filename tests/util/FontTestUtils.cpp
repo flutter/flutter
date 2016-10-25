@@ -77,11 +77,12 @@ FontCollection* getFontCollection(const char* fontDir, const char* fontXml) {
 
             if (index == nullptr) {
                 MinikinAutoUnref<MinikinFontForTest>
-                        minikinFont(new MinikinFontForTest(fontPath));
+                        minikinFont(MinikinFontForTest::createFromFile(fontPath));
                 family->addFont(minikinFont.get(), FontStyle(weight, italic));
             } else {
                 MinikinAutoUnref<MinikinFontForTest>
-                        minikinFont(new MinikinFontForTest(fontPath, atoi((const char*)index)));
+                        minikinFont(MinikinFontForTest::createFromFileWithIndex(fontPath,
+                                atoi((const char*)index)));
                 family->addFont(minikinFont.get(), FontStyle(weight, italic));
             }
         }

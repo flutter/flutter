@@ -58,7 +58,7 @@ void expectVSGlyphs(const FontCollection* fc, uint32_t codepoint, const std::set
 
 TEST(FontCollectionTest, hasVariationSelectorTest) {
   MinikinAutoUnref<FontFamily> family(new FontFamily());
-  MinikinAutoUnref<MinikinFont> font(new MinikinFontForTest(kVsTestFont));
+  MinikinAutoUnref<MinikinFont> font(MinikinFontForTest::createFromFile(kVsTestFont));
   family->addFont(font.get());
   std::vector<FontFamily*> families({family.get()});
   MinikinAutoUnref<FontCollection> fc(new FontCollection(families));

@@ -351,7 +351,7 @@ void expectVSGlyphs(FontFamily* family, uint32_t codepoint, const std::set<uint3
 
 TEST_F(FontFamilyTest, hasVariationSelectorTest) {
     MinikinAutoUnref<MinikinFontForTest>
-            minikinFont(new MinikinFontForTest(kVsTestFont));
+            minikinFont(MinikinFontForTest::createFromFile(kVsTestFont));
     MinikinAutoUnref<FontFamily> family(new FontFamily);
     family->addFont(minikinFont.get());
 
@@ -405,7 +405,7 @@ TEST_F(FontFamilyTest, hasVSTableTest) {
                 "Font " + testCase.fontPath + " shouldn't have a variation sequence table.");
 
         MinikinAutoUnref<MinikinFontForTest> minikinFont(
-                new MinikinFontForTest(testCase.fontPath));
+                MinikinFontForTest::createFromFile(testCase.fontPath));
         MinikinAutoUnref<FontFamily> family(new FontFamily);
         family->addFont(minikinFont.get());
         android::AutoMutex _l(gMinikinLock);
