@@ -360,7 +360,7 @@ class _CreateCompanySheetState extends State<_CreateCompanySheet> {
         new Input(
           autofocus: true,
           hintText: 'Company Name',
-          value: _companyName,
+          text: _companyName.text,
           onChanged: _handleCompanyNameChanged
         ),
       ]

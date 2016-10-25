@@ -236,8 +236,8 @@ class FlutterDriverExtension {
     SubmitInputText submitInputTextCommand = command;
     Finder target = await _waitForElement(_createFinder(submitInputTextCommand.finder));
     Input input = target.evaluate().single.widget;
-    input.onSubmitted(input.value);
-    return new SubmitInputTextResult(input.value.text);
+    input.onSubmitted(new InputValue(text: input.text, selection: input.selection, composing: input.composing));
+    return new SubmitInputTextResult(input.text);
   }
 
   Future<GetTextResult> _getText(Command command) async {

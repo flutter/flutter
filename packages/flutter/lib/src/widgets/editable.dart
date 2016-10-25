@@ -249,6 +249,8 @@ class RawInputState extends ScrollableState<RawInput> implements TextInputClient
 
   @override
   void didUpdateConfig(RawInput oldConfig) {
+    if (config.text != null && config.text != _currentValue.text)
+      _currentValue = null;  // forces the selection and composing to reset.
     _setCurrentValue(text: config.text, selection: config.selection, composing: config.composing);
   }
 
