@@ -4,10 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 
-import 'colors.dart';
-import 'icon_theme.dart';
-import 'icon_theme_data.dart';
-import 'typography.dart';
+import 'theme.dart';
 
 /// A header used in a material design [GridTile].
 ///
@@ -77,6 +74,12 @@ class GridTileBar extends StatelessWidget {
     if (leading != null)
       children.add(new Padding(padding: const EdgeInsets.only(right: 8.0), child: leading));
 
+    ThemeData theme = Theme.of(context);
+    ThemeData darkTheme = new ThemeData(
+      brightness: Brightness.dark,
+      accentColor: theme.accentColor,
+      accentColorBrightness: theme.accentColorBrightness
+    );
     if (title != null && subtitle != null) {
       children.add(
         new Flexible(
@@ -84,13 +87,13 @@ class GridTileBar extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               new DefaultTextStyle(
-                style: Typography.white.subhead,
+                style: darkTheme.textTheme.subhead,
                 softWrap: false,
                 overflow: TextOverflow.ellipsis,
                 child: title
               ),
               new DefaultTextStyle(
-                style: Typography.white.caption,
+                style: darkTheme.textTheme.caption,
                 softWrap: false,
                 overflow: TextOverflow.ellipsis,
                 child: subtitle
@@ -103,7 +106,7 @@ class GridTileBar extends StatelessWidget {
       children.add(
         new Flexible(
           child: new DefaultTextStyle(
-            style: Typography.white.subhead,
+            style: darkTheme.textTheme.subhead,
             softWrap: false,
             overflow: TextOverflow.ellipsis,
             child: title ?? subtitle
@@ -118,9 +121,8 @@ class GridTileBar extends StatelessWidget {
     return new Container(
       padding: padding,
       decoration: decoration,
-      child: new IconTheme.merge(
-        context: context,
-        data: new IconThemeData(color: Colors.white),
+      child: new Theme(
+        data: darkTheme,
         child: new Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: children
