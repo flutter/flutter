@@ -58,8 +58,6 @@ abstract class WidgetsBinding extends BindingBase implements GestureBinding, Ren
     _instance = this;
     buildOwner.onBuildScheduled = _handleBuildScheduled;
     ui.window.onLocaleChanged = handleLocaleChanged;
-    ui.window.onPopRoute = handlePopRoute;
-    ui.window.onAppLifecycleStateChanged = handleAppLifecycleStateChanged;
     PlatformMessages.setJSONMessageHandler('flutter/navigation', _handleNavigationMessage);
     PlatformMessages.setStringMessageHandler('flutter/lifecycle', _handleLifecycleMessage);
   }
