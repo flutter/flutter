@@ -24,7 +24,7 @@ class _DatePickerDemoState extends State<DatePickerDemo> {
       firstDate: new DateTime(2015, 8),
       lastDate: new DateTime(2101)
     );
-    if (picked != _selectedDate) {
+    if (picked != null && picked != _selectedDate) {
       setState(() {
         _selectedDate = picked;
       });
