@@ -163,8 +163,27 @@ def main(argv):
   print "gn gen --check in %s" % out_dir
   command.append(out_dir)
   command.append('--args=%s' % ' '.join(gn_args))
-  return subprocess.call(command, cwd=SRC_ROOT)
+  gn_call_result = subprocess.call(command, cwd=SRC_ROOT)
 
+  if gn_call_result == 0:
+    # Generate/Replace the compile commands database in out.
+    compile_cmd_gen_cmd = [
+      '%s/buildtools/%s/ninja' % (SRC_ROOT, subdir),
+      '-C',
+      out_dir,
+      '-t',
+      'compdb',
+      'cxx',
+      'cc',
+      'mm',
+    ]
+
+    contents = subprocess.check_output(compile_cmd_gen_cmd, cwd=SRC_ROOT)
+    compile_commands = open('%s/out/compile_commands.json' % SRC_ROOT, 'w+')
+    compile_commands.write(contents)
+    compile_commands.close()
+
+  return gn_call_result
 
 if __name__ == '__main__':
     sys.exit(main(sys.argv))
