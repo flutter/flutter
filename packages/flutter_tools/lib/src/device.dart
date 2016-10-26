@@ -239,24 +239,35 @@ abstract class Device {
   String toString() => name;
 
   static Iterable<String> descriptions(List<Device> devices) {
-    int nameWidth = 0;
-    int idWidth = 0;
+    if (devices.isEmpty)
+      return <String>[];
 
+    // Extract device information
+    List<List<String>> table = <List<String>>[];
     for (Device device in devices) {
-      nameWidth = math.max(nameWidth, device.name.length);
-      idWidth = math.max(idWidth, device.id.length);
-    }
-
-    return devices.map((Device device) {
       String supportIndicator = device.isSupported() ? '' : ' (unsupported)';
       if (device.isLocalEmulator) {
         String type = device.platform == TargetPlatform.ios ? 'simulator' : 'emulator';
         supportIndicator += ' ($type)';
       }
-      return '${device.name.padRight(nameWidth)} • '
-             '${device.id.padRight(idWidth)} • '
-             '${getNameForTargetPlatform(device.platform)}$supportIndicator';
-    });
+      table.add(<String>[
+        device.name,
+        device.id,
+        '${getNameForTargetPlatform(device.platform)}$supportIndicator',
+      ]);
+    }
+
+    // Calculate column widths
+    List<int> indices = new List.generate(table[0].length - 1, (int i) => i);
+    List<int> widths = indices.map((int i) => 0).toList();
+    for (List<String> row in table) {
+      widths = indices.map((int i) => math.max(widths[i], row[i].length)).toList();
+    }
+
+    // Join columns into lines of text
+    return table.map((List<String> row) =>
+        indices.map((int i) => row[i].padRight(widths[i])).join(' • ') +
+        ' • ${row.last}');
   }
 
   static void printDevices(List<Device> devices) {
