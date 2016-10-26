@@ -90,7 +90,9 @@ class PerfTest {
 
   Future<TaskResult> call() {
     return inDirectory(testDirectory, () async {
-      String deviceId = (await devices.workingDevice).deviceId;
+      Device device = await devices.workingDevice;
+      await device.unlock();
+      String deviceId = device.deviceId;
       await flutter('packages', options: <String>['get']);
 
       if (os == DeviceOperatingSystem.ios) {
