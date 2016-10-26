@@ -56,7 +56,7 @@ class CreateCommand extends FlutterCommand {
       printError('Multiple output directories specified.');
       for (String arg in argResults.rest) {
         if (arg.startsWith('-')) {
-          printError('Try moving $arg to be immedately following $name');
+          printError('Try moving $arg to be immediately following $name');
           break;
         }
       }
