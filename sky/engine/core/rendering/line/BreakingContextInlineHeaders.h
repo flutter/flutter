@@ -607,12 +607,6 @@ inline bool BreakingContext::handleText(WordMeasurements& wordMeasurements, bool
                         }
                     }
 
-                    if (ellipsizeMode) {
-                        // Break the line at the position where an ellipsis would fit.
-                        m_lineBreak.moveTo(m_current.object(), ellipsisBreakOffset, m_current.nextBreakablePosition());
-                        ellipsized = true;
-                    }
-
                     // Didn't fit. Jump to the end unless there's still an opportunity to collapse whitespace.
                     if (m_ignoringSpaces || !m_collapseWhiteSpace || !m_currentCharacterIsSpace || !previousCharacterIsSpace) {
                         m_atEnd = true;
@@ -648,10 +642,16 @@ inline bool BreakingContext::handleText(WordMeasurements& wordMeasurements, bool
             }
 
             if (midWordBreak && !U16_IS_TRAIL(c) && !(WTF::Unicode::category(c) & (WTF::Unicode::Mark_NonSpacing | WTF::Unicode::Mark_Enclosing | WTF::Unicode::Mark_SpacingCombining))) {
-                // Remember this as a breakable position in case
-                // adding the end width forces a break.
-                m_lineBreak.moveTo(m_current.object(), m_current.offset(), m_current.nextBreakablePosition());
-                midWordBreak &= (breakWords || breakAll);
+                if (ellipsizeMode) {
+                    // Break the line at the position where an ellipsis would fit.
+                    m_lineBreak.moveTo(m_current.object(), ellipsisBreakOffset, m_current.nextBreakablePosition());
+                    ellipsized = true;
+                } else {
+                    // Remember this as a breakable position in case
+                    // adding the end width forces a break.
+                    m_lineBreak.moveTo(m_current.object(), m_current.offset(), m_current.nextBreakablePosition());
+                    midWordBreak &= (breakWords || breakAll);
+                }
             }
 
             if (betweenWords) {
@@ -690,8 +690,9 @@ inline bool BreakingContext::handleText(WordMeasurements& wordMeasurements, bool
         }
 
         if (!m_currentCharacterIsSpace && previousCharacterShouldCollapseIfPreWap) {
-            if (m_autoWrap && m_currentStyle->breakOnlyAfterWhiteSpace())
+            if (m_autoWrap && m_currentStyle->breakOnlyAfterWhiteSpace() && !ellipsizeMode) {
                 m_lineBreak.moveTo(m_current.object(), m_current.offset(), m_current.nextBreakablePosition());
+            }
         }
 
         if (m_collapseWhiteSpace && m_currentCharacterIsSpace && !m_ignoringSpaces)
