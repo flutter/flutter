@@ -115,6 +115,13 @@ class AndroidDevice extends Device {
     return _platform;
   }
 
+  @override
+  String get sdkNameAndVersion => 'Android $_sdkVersion (API $_apiVersion)';
+
+  String get _sdkVersion => _getProperty('ro.build.version.release');
+
+  String get _apiVersion => _getProperty('ro.build.version.sdk');
+
   _AdbLogReader _logReader;
   _AndroidDevicePortForwarder _portForwarder;
 

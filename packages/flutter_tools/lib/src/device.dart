@@ -163,6 +163,8 @@ abstract class Device {
 
   TargetPlatform get platform;
 
+  String get sdkNameAndVersion;
+
   /// Get the log reader for this device.
   DeviceLogReader get logReader;
 
@@ -253,12 +255,13 @@ abstract class Device {
       table.add(<String>[
         device.name,
         device.id,
-        '${getNameForTargetPlatform(device.platform)}$supportIndicator',
+        '${getNameForTargetPlatform(device.platform)}',
+        '${device.sdkNameAndVersion}$supportIndicator',
       ]);
     }
 
     // Calculate column widths
-    List<int> indices = new List.generate(table[0].length - 1, (int i) => i);
+    List<int> indices = new List<int>.generate(table[0].length - 1, (int i) => i);
     List<int> widths = indices.map((int i) => 0).toList();
     for (List<String> row in table) {
       widths = indices.map((int i) => math.max(widths[i], row[i].length)).toList();
