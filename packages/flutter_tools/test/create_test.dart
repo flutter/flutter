@@ -95,7 +95,7 @@ void main() {
       expect(code, 2);
       expect(logger.errorText, contains('Try moving --pub'));
     }, overrides:  <Type, dynamic>{
-      Logger : logger,
+      Logger: logger,
     });
 
     // Verify that we fail with an error code when the file exists.
