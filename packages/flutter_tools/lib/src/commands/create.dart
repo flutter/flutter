@@ -47,13 +47,19 @@ class CreateCommand extends FlutterCommand {
   @override
   Future<int> runCommand() async {
     if (argResults.rest.isEmpty) {
-      printStatus('No option specified for the output directory.');
-      printStatus(usage);
+      printError('No option specified for the output directory.');
+      printError(usage);
       return 2;
     }
 
     if (argResults.rest.length > 1) {
-      printStatus('Multiple output directories specified.');
+      printError('Multiple output directories specified.');
+      for (String arg in argResults.rest) {
+        if (arg.startsWith('-')) {
+          printError('Try moving $arg to be immediately following $name');
+          break;
+        }
+      }
       return 2;
     }
 

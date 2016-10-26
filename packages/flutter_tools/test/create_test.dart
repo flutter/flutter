@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:args/command_runner.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/dart/sdk.dart';
@@ -80,6 +81,21 @@ void main() {
 
       code = await runner.run(<String>['create', '--no-pub', temp.path]);
       expect(code, 0);
+    });
+
+    // Verify that we help the user correct an option ordering issue
+    BufferLogger logger = new BufferLogger();
+    testUsingContext('produces sensible error message', () async {
+      Cache.flutterRoot = '../..';
+
+      CreateCommand command = new CreateCommand();
+      CommandRunner runner = createTestCommandRunner(command);
+
+      int code = await runner.run(<String>['create', temp.path, '--pub']);
+      expect(code, 2);
+      expect(logger.errorText, contains('Try moving --pub'));
+    }, overrides:  <Type, dynamic>{
+      Logger: logger,
     });
 
     // Verify that we fail with an error code when the file exists.
