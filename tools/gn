@@ -173,9 +173,11 @@ def main(argv):
       out_dir,
       '-t',
       'compdb',
-      'cxx',
       'cc',
-      'mm',
+      'cxx',
+      'objc',
+      'objcxx',
+      'asm',
     ]
 
     contents = subprocess.check_output(compile_cmd_gen_cmd, cwd=SRC_ROOT)
