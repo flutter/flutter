@@ -238,9 +238,7 @@ class NoIdeValidator extends DoctorValidator {
 
   @override
   Future<ValidationResult> validate() async {
-    // TODO(danrubel): do not show Atom once IntelliJ support is complete
     return new ValidationResult(ValidationType.missing, <ValidationMessage>[
-      new ValidationMessage('Atom - https://atom.io/'),
       new ValidationMessage('IntelliJ - https://www.jetbrains.com/idea/'),
     ], statusInfo: 'No supported IDEs installed');
   }
