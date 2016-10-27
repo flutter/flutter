@@ -2,6 +2,8 @@
 
 Demo app for the material design widgets and other features provided by Flutter.
 
+![ezgif-1203880943](https://cloud.githubusercontent.com/assets/3802023/19763536/605e1940-9c36-11e6-8d91-930c8b97f4d8.gif)
+
 ## Building
 
 You can follow these instructions to build the gallery app
