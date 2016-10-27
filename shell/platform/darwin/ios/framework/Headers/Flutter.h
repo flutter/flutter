@@ -8,6 +8,7 @@
 #include "FlutterAppDelegate.h"
 #include "FlutterAsyncMessageListener.h"
 #include "FlutterDartProject.h"
+#include "FlutterJSONMessageListener.h"
 #include "FlutterMacros.h"
 #include "FlutterMessageListener.h"
 #include "FlutterViewController.h"
