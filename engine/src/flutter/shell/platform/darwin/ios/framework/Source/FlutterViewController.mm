@@ -14,11 +14,11 @@
 #include "flutter/shell/gpu/gpu_surface_gl.h"
 #include "flutter/shell/platform/darwin/common/platform_mac.h"
 #include "flutter/shell/platform/darwin/common/string_conversions.h"
-#include "flutter/shell/platform/darwin/ios/framework/Source/flutter_touch_mapper.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/FlutterDartProject_Internal.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformPlugin.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputDelegate.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputPlugin.h"
+#include "flutter/shell/platform/darwin/ios/framework/Source/flutter_touch_mapper.h"
 #include "flutter/shell/platform/darwin/ios/platform_view_ios.h"
 #include "lib/ftl/functional/make_copyable.h"
 #include "lib/ftl/time/time_delta.h"
@@ -330,10 +330,13 @@ static inline PointerChangeMapperPhase PointerChangePhaseFromUITouchPhase(
 
 - (void)updateViewportMetrics {
   blink::Threads::UI()->PostTask([
-    engine = _platformView->engine().GetWeakPtr(), metrics = _viewportMetrics
+    weak_platform_view = _platformView->GetWeakPtr(), metrics = _viewportMetrics
   ] {
-    if (engine.get())
-      engine->SetViewportMetrics(metrics);
+    if (!weak_platform_view) {
+      return;
+    }
+    weak_platform_view->UpdateSurfaceSize();
+    weak_platform_view->engine().SetViewportMetrics(metrics);
   });
 }
 

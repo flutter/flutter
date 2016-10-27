@@ -38,6 +38,10 @@ class PlatformViewIOS : public PlatformView, public GPUSurfaceGLDelegate {
     return platform_message_router_;
   }
 
+  ftl::WeakPtr<PlatformViewIOS> GetWeakPtr();
+
+  void UpdateSurfaceSize();
+
   VsyncWaiter* GetVsyncWaiter() override;
 
   bool ResourceContextMakeCurrent() override;
@@ -64,6 +68,7 @@ class PlatformViewIOS : public PlatformView, public GPUSurfaceGLDelegate {
   sky::SkyEnginePtr engine_;
   PlatformMessageRouter platform_message_router_;
   std::unique_ptr<AccessibilityBridge> accessibility_bridge_;
+  ftl::WeakPtrFactory<PlatformViewIOS> weak_factory_;
 
   void SetupAndLoadFromSource(const std::string& main,
                               const std::string& packages,
