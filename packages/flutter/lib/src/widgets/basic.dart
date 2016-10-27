@@ -1879,15 +1879,30 @@ class GridPlacementData<DataType> extends ParentDataWidget<GridRenderObjectWidge
 ///
 /// For details about the flex layout algorithm, see [RenderFlex]. To control
 /// the flex of child widgets, see the [Flexible] widget.
+///
+/// The Flex widget allows you to control the axis along which the children
+/// are placed (horizontal or vertical). If you know the axis in advance, then
+/// consider using a [Row] (if it's horizontal) or [Column] (if it's vertical)
+/// instead, since that will be less verbose.
+///
+/// The Flex widget does not scroll (and in general it is considered an error to
+/// have more children in a Flex than will fit in the available room). If you
+/// have some widgets and want them to be able to scroll if there is
+/// insufficient room, consider using a [Block].
+///
+/// If you only have one child, then rather than using [Flex], [Row], or
+/// [Column], consider using [Align] or [Center] to position the child.
 class Flex extends MultiChildRenderObjectWidget {
   /// Creates a flex layout.
+  ///
+  /// The [direction] is required.
   ///
   /// The [direction], [mainAxisAlignment], and [crossAxisAlignment] arguments
   /// must not be null. If [crossAxisAlignment] is
   /// [CrossAxisAlignment.baseline], then [textBaseline] must not be null.
   Flex({
     Key key,
-    this.direction: Axis.horizontal,
+    @required this.direction,
     this.mainAxisAlignment: MainAxisAlignment.start,
     this.mainAxisSize: MainAxisSize.max,
     this.crossAxisAlignment: CrossAxisAlignment.center,
@@ -1902,6 +1917,11 @@ class Flex extends MultiChildRenderObjectWidget {
   }
 
   /// The direction to use as the main axis.
+  ///
+  /// If you know the axis in advance, then consider using a [Row] (if it's
+  /// horizontal) or [Column] (if it's vertical) instead of a [Flex], since that
+  /// will be less verbose. (For [Row] and [Column] this property is fixed to
+  /// the appropriate axis.)
   final Axis direction;
 
   /// How the children should be placed along the main axis.
@@ -1958,6 +1978,9 @@ class Flex extends MultiChildRenderObjectWidget {
 /// insufficient room, consider using a [Block].
 ///
 /// For a vertical variant, see [Column].
+///
+/// If you only have one child, then consider using [Align] or [Center] to
+/// position the child.
 class Row extends Flex {
   /// Creates a horizontal array of children.
   ///
@@ -1993,6 +2016,9 @@ class Row extends Flex {
 /// insufficient room, consider using a [Block].
 ///
 /// For a horizontal variant, see [Row].
+///
+/// If you only have one child, then consider using [Align] or [Center] to
+/// position the child.
 class Column extends Flex {
   /// Creates a vertical array of children.
   ///
@@ -2017,14 +2043,15 @@ class Column extends Flex {
   );
 }
 
-/// A widget that controls how a child of a [Flex], [Row], or [Column] flexes.
+/// A widget that controls how a child of a [Row], [Column], or [Flex] flexes.
 ///
-/// A [Flexible] widget must be a descendant of a [Flex], [Row], or [Column],
-/// and the path from the [Flexible] widget to its enclosing [Flex], [Row], or
-/// [Column] must contain only [StatelessWidget]s or [StatefulWidget]s (not
-/// other kinds of widgets, like [RenderObjectWidget]s).
+/// A [Flexible] widget must be a descendant of a [Row], [Column], or [Flex],
+/// and the path from the [Flexible] widget to its enclosing [Row], [Column], or
+/// [Flex] must contain only [StatelessWidget]s or [StatefulWidget]s (not other
+/// kinds of widgets, like [RenderObjectWidget]s).
 class Flexible extends ParentDataWidget<Flex> {
-  /// Creates a widget that controls how a child of a [Flex], [Row], or [Column] flexes.
+  /// Creates a widget that controls how a child of a [Row], [Column], or [Flex]
+  /// flexes.
   Flexible({
     Key key,
     this.flex: 1,
