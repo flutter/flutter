@@ -3,16 +3,14 @@
 // found in the LICENSE file.
 
 #include "flutter/shell/platform/darwin/ios/platform_view_ios.h"
-
 #import <OpenGLES/EAGL.h>
 #import <OpenGLES/ES2/gl.h>
 #import <OpenGLES/ES2/glext.h>
 #import <QuartzCore/CAEAGLLayer.h>
-
 #include <utility>
-
 #include "base/mac/scoped_nsautorelease_pool.h"
 #include "base/trace_event/trace_event.h"
+#include "flutter/common/threads.h"
 #include "flutter/shell/gpu/gpu_rasterizer.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/vsync_waiter_ios.h"
 #include "lib/ftl/synchronization/waitable_event.h"
@@ -170,32 +168,6 @@ class IOSGLContext {
 
   GLuint framebuffer() const { return framebuffer_; }
 
-  bool MakeCurrent() {
-    base::mac::ScopedNSAutoreleasePool pool;
-
-    return UpdateStorageSizeIfNecessary() &&
-           [EAGLContext setCurrentContext:context_.get()];
-  }
-
-  bool ResourceMakeCurrent() {
-    base::mac::ScopedNSAutoreleasePool pool;
-
-    return [EAGLContext setCurrentContext:resource_context_.get()];
-  }
-
- private:
-  base::scoped_nsobject<CAEAGLLayer> layer_;
-  base::scoped_nsobject<EAGLContext> context_;
-  base::scoped_nsobject<EAGLContext> resource_context_;
-
-  GLuint framebuffer_;
-  GLuint colorbuffer_;
-  GLuint depthbuffer_;
-  GLuint stencilbuffer_;
-  GLuint depth_stencil_packed_buffer_;
-
-  GLintSize storage_size_;
-
   bool UpdateStorageSizeIfNecessary() {
     GLintSize size([layer_.get() bounds].size);
 
@@ -270,12 +242,37 @@ class IOSGLContext {
     return true;
   }
 
+  bool MakeCurrent() {
+    base::mac::ScopedNSAutoreleasePool pool;
+
+    return UpdateStorageSizeIfNecessary() &&
+           [EAGLContext setCurrentContext:context_.get()];
+  }
+
+  bool ResourceMakeCurrent() {
+    base::mac::ScopedNSAutoreleasePool pool;
+
+    return [EAGLContext setCurrentContext:resource_context_.get()];
+  }
+
+ private:
+  base::scoped_nsobject<CAEAGLLayer> layer_;
+  base::scoped_nsobject<EAGLContext> context_;
+  base::scoped_nsobject<EAGLContext> resource_context_;
+  GLuint framebuffer_;
+  GLuint colorbuffer_;
+  GLuint depthbuffer_;
+  GLuint stencilbuffer_;
+  GLuint depth_stencil_packed_buffer_;
+  GLintSize storage_size_;
+
   FTL_DISALLOW_COPY_AND_ASSIGN(IOSGLContext);
 };
 
 PlatformViewIOS::PlatformViewIOS(CAEAGLLayer* layer)
     : PlatformView(std::make_unique<GPURasterizer>()),
-      context_(std::make_unique<IOSGLContext>(surface_config_, layer)) {
+      context_(std::make_unique<IOSGLContext>(surface_config_, layer)),
+      weak_factory_(this) {
   CreateEngine();
 
   NSArray* paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory,
@@ -311,6 +308,18 @@ void PlatformViewIOS::SetupAndLoadFromSource(
     const std::string& assets_directory) {
   ConnectToEngineAndSetupServices();
   engine_->RunFromFile(main, packages, assets_directory);
+}
+
+ftl::WeakPtr<PlatformViewIOS> PlatformViewIOS::GetWeakPtr() {
+  return weak_factory_.GetWeakPtr();
+}
+
+void PlatformViewIOS::UpdateSurfaceSize() {
+  blink::Threads::Gpu()->PostTask([self = GetWeakPtr()]() {
+    if (self && self->context_ != nullptr) {
+      self->context_->UpdateStorageSizeIfNecessary();
+    }
+  });
 }
 
 VsyncWaiter* PlatformViewIOS::GetVsyncWaiter() {
