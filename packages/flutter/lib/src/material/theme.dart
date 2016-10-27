@@ -101,8 +101,12 @@ class Theme extends InheritedWidget {
   /// ```
   static ThemeData of(BuildContext context, { bool shadowThemeOnly: false }) {
     final Theme theme = context.inheritFromWidgetOfExactType(Theme);
-    final ThemeData themeData = theme?.data ?? _kFallbackTheme;
-    return shadowThemeOnly ? (theme.isMaterialAppTheme ? null : themeData) : themeData;
+    if (shadowThemeOnly) {
+      if (theme == null || theme.isMaterialAppTheme)
+        return null;
+      return theme.data;
+    }
+    return (theme != null) ? theme.data : _kFallbackTheme;
   }
 
   @override
