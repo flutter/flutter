@@ -75,13 +75,17 @@ static inline blink::PointerData::Change PointerChangeFromNSEventPhase(
 - (void)updateWindowSize {
   [self setupSurfaceIfNecessary];
 
-  auto metrics = sky::ViewportMetrics::New();
+  blink::ViewportMetrics metrics;
   auto size = self.renderSurface.frame.size;
-  metrics->physical_width = size.width;
-  metrics->physical_height = size.height;
-  metrics->device_pixel_ratio = 1.0;
+  metrics.physical_width = size.width;
+  metrics.physical_height = size.height;
 
-  _platformView->engineProxy()->OnViewportMetricsChanged(metrics.Pass());
+  blink::Threads::UI()->PostTask(
+      [ engine = _platformView->engine().GetWeakPtr(), metrics ] {
+        if (engine.get()) {
+          engine->SetViewportMetrics(metrics);
+        }
+      });
 }
 
 - (void)setupSurfaceIfNecessary {

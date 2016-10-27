@@ -37,6 +37,16 @@ class PlatformViewAndroid : public PlatformView {
 
   void SurfaceDestroyed(JNIEnv* env, jobject obj);
 
+  void SetViewportMetrics(JNIEnv* env,
+                          jobject obj,
+                          jfloat device_pixel_ratio,
+                          jint physical_width,
+                          jint physical_height,
+                          jint physical_padding_top,
+                          jint physical_padding_right,
+                          jint physical_padding_bottom,
+                          jint physical_padding_left);
+
   void DispatchPlatformMessage(JNIEnv* env,
                                jobject obj,
                                jstring name,

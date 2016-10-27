@@ -8,6 +8,7 @@
 #include "flutter/assets/zip_asset_store.h"
 #include "flutter/glue/drain_data_pipe_job.h"
 #include "flutter/lib/ui/window/platform_message.h"
+#include "flutter/lib/ui/window/viewport_metrics.h"
 #include "flutter/runtime/runtime_controller.h"
 #include "flutter/runtime/runtime_delegate.h"
 #include "flutter/services/engine/sky_engine.mojom.h"
@@ -56,6 +57,7 @@ class Engine : public sky::SkyEngine, public blink::RuntimeDelegate {
   void ConnectToEngine(mojo::InterfaceRequest<SkyEngine> request);
   void OnOutputSurfaceCreated(const ftl::Closure& gpu_continuation);
   void OnOutputSurfaceDestroyed(const ftl::Closure& gpu_continuation);
+  void SetViewportMetrics(const blink::ViewportMetrics& metrics);
   void DispatchPlatformMessage(ftl::RefPtr<blink::PlatformMessage> message);
   void DispatchPointerDataPacket(const PointerDataPacket& packet);
   void DispatchSemanticsAction(int id, blink::SemanticsAction action);
@@ -63,7 +65,6 @@ class Engine : public sky::SkyEngine, public blink::RuntimeDelegate {
 
  private:
   // SkyEngine implementation:
-  void OnViewportMetricsChanged(sky::ViewportMetricsPtr metrics) override;
   void RunFromFile(const mojo::String& main,
                    const mojo::String& packages,
                    const mojo::String& bundle) override;
@@ -109,7 +110,7 @@ class Engine : public sky::SkyEngine, public blink::RuntimeDelegate {
   std::unique_ptr<glue::DrainDataPipeJob> snapshot_drainer_;
 
   ftl::RefPtr<blink::PlatformMessage> pending_push_route_message_;
-  sky::ViewportMetricsPtr viewport_metrics_;
+  blink::ViewportMetrics viewport_metrics_;
   std::string language_code_;
   std::string country_code_;
   bool semantics_enabled_ = false;

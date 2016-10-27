@@ -10,7 +10,7 @@
 #include "flutter/lib/ui/semantics/semantics_update.h"
 #include "flutter/lib/ui/window/platform_message.h"
 #include "flutter/lib/ui/window/pointer_data_packet.h"
-#include "flutter/services/engine/sky_engine.mojom.h"
+#include "flutter/lib/ui/window/viewport_metrics.h"
 #include "lib/ftl/time/time_point.h"
 #include "lib/tonic/dart_persistent_value.h"
 
@@ -40,7 +40,7 @@ class Window {
   WindowClient* client() const { return client_; }
 
   void DidCreateIsolate();
-  void UpdateWindowMetrics(const sky::ViewportMetricsPtr& metrics);
+  void UpdateWindowMetrics(const ViewportMetrics& metrics);
   void UpdateLocale(const std::string& language_code,
                     const std::string& country_code);
   void UpdateSemanticsEnabled(bool enabled);

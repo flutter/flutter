@@ -65,7 +65,7 @@ void FlutterInit(int argc, const char* argv[]) {
   base::scoped_nsprotocol<FlutterDartProject*> _dartProject;
   UIInterfaceOrientationMask _orientationPreferences;
   UIStatusBarStyle _statusBarStyle;
-  sky::ViewportMetricsPtr _viewportMetrics;
+  blink::ViewportMetrics _viewportMetrics;
   shell::TouchMapper _touchMapper;
   std::unique_ptr<shell::PlatformViewIOS> _platformView;
   base::scoped_nsprotocol<FlutterPlatformPlugin*> _platformPlugin;
@@ -112,7 +112,6 @@ void FlutterInit(int argc, const char* argv[]) {
 
   _orientationPreferences = UIInterfaceOrientationMaskAll;
   _statusBarStyle = UIStatusBarStyleDefault;
-  _viewportMetrics = sky::ViewportMetrics::New();
   _platformView = std::make_unique<shell::PlatformViewIOS>(
       reinterpret_cast<CAEAGLLayer*>(self.view.layer));
   _platformView->SetupResourceContextOnIOThread();
@@ -329,18 +328,25 @@ static inline PointerChangeMapperPhase PointerChangePhaseFromUITouchPhase(
 
 #pragma mark - Handle view resizing
 
+- (void)updateViewportMetrics {
+  blink::Threads::UI()->PostTask([
+    engine = _platformView->engine().GetWeakPtr(), metrics = _viewportMetrics
+  ] {
+    if (engine.get())
+      engine->SetViewportMetrics(metrics);
+  });
+}
+
 - (void)viewDidLayoutSubviews {
   CGSize size = self.view.bounds.size;
   CGFloat scale = [UIScreen mainScreen].scale;
 
-  _viewportMetrics->device_pixel_ratio = scale;
-  _viewportMetrics->physical_width = size.width * scale;
-  _viewportMetrics->physical_height = size.height * scale;
-  _viewportMetrics->physical_padding_top =
+  _viewportMetrics.device_pixel_ratio = scale;
+  _viewportMetrics.physical_width = size.width * scale;
+  _viewportMetrics.physical_height = size.height * scale;
+  _viewportMetrics.physical_padding_top =
       [UIApplication sharedApplication].statusBarFrame.size.height * scale;
-
-  _platformView->engineProxy()->OnViewportMetricsChanged(
-      _viewportMetrics.Clone());
+  [self updateViewportMetrics];
 }
 
 #pragma mark - Keyboard events
@@ -350,15 +356,13 @@ static inline PointerChangeMapperPhase PointerChangePhaseFromUITouchPhase(
   CGFloat bottom = CGRectGetHeight(
       [[info objectForKey:UIKeyboardFrameBeginUserInfoKey] CGRectValue]);
   CGFloat scale = [UIScreen mainScreen].scale;
-  _viewportMetrics->physical_padding_bottom = bottom * scale;
-  _platformView->engineProxy()->OnViewportMetricsChanged(
-      _viewportMetrics.Clone());
+  _viewportMetrics.physical_padding_bottom = bottom * scale;
+  [self updateViewportMetrics];
 }
 
 - (void)keyboardWillBeHidden:(NSNotification*)notification {
-  _viewportMetrics->physical_padding_bottom = 0.0;
-  _platformView->engineProxy()->OnViewportMetricsChanged(
-      _viewportMetrics.Clone());
+  _viewportMetrics.physical_padding_bottom = 0;
+  [self updateViewportMetrics];
 }
 
 #pragma mark - Text input delegate

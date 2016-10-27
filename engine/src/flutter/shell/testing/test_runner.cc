@@ -6,8 +6,7 @@
 
 #include <iostream>
 
-#include "base/message_loop/message_loop.h"
-#include "base/strings/string_util.h"
+#include "flutter/common/threads.h"
 #include "flutter/shell/common/platform_view.h"
 #include "flutter/shell/common/shell.h"
 #include "flutter/shell/testing/platform_view_test.h"
@@ -18,12 +17,15 @@ TestRunner::TestRunner()
     : platform_view_(new PlatformViewTest()), weak_ptr_factory_(this) {
   platform_view_->ConnectToEngine(GetProxy(&sky_engine_));
 
-  sky::ViewportMetricsPtr metrics = sky::ViewportMetrics::New();
+  blink::ViewportMetrics metrics;
+  metrics.physical_width = 800;
+  metrics.physical_height = 600;
 
-  metrics->physical_width = 800;
-  metrics->physical_height = 600;
-
-  sky_engine_->OnViewportMetricsChanged(metrics.Pass());
+  blink::Threads::UI()->PostTask(
+      [ engine = platform_view_->engine().GetWeakPtr(), metrics ] {
+        if (engine.get())
+          engine->SetViewportMetrics(metrics);
+      });
 }
 
 TestRunner::~TestRunner() = default;

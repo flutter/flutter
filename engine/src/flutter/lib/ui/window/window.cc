@@ -115,7 +115,7 @@ void Window::DidCreateIsolate() {
   library_.Set(DartState::Current(), Dart_LookupLibrary(ToDart("dart:ui")));
 }
 
-void Window::UpdateWindowMetrics(const sky::ViewportMetricsPtr& metrics) {
+void Window::UpdateWindowMetrics(const ViewportMetrics& metrics) {
   tonic::DartState* dart_state = library_.dart_state().get();
   if (!dart_state)
     return;
@@ -123,13 +123,13 @@ void Window::UpdateWindowMetrics(const sky::ViewportMetricsPtr& metrics) {
   DartInvokeField(
       library_.value(), "_updateWindowMetrics",
       {
-          ToDart(metrics->device_pixel_ratio),
-          ToDart(static_cast<double>(metrics->physical_width)),
-          ToDart(static_cast<double>(metrics->physical_height)),
-          ToDart(static_cast<double>(metrics->physical_padding_top)),
-          ToDart(static_cast<double>(metrics->physical_padding_right)),
-          ToDart(static_cast<double>(metrics->physical_padding_bottom)),
-          ToDart(static_cast<double>(metrics->physical_padding_left)),
+          ToDart(metrics.device_pixel_ratio),
+          ToDart(static_cast<double>(metrics.physical_width)),
+          ToDart(static_cast<double>(metrics.physical_height)),
+          ToDart(static_cast<double>(metrics.physical_padding_top)),
+          ToDart(static_cast<double>(metrics.physical_padding_right)),
+          ToDart(static_cast<double>(metrics.physical_padding_bottom)),
+          ToDart(static_cast<double>(metrics.physical_padding_left)),
       });
 }
 
