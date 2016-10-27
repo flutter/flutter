@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter_tools/src/android/android_device.dart';
-import 'package:flutter_tools/src/base/logger.dart';
 import 'package:test/test.dart';
 
 import 'src/context.dart';
@@ -49,7 +48,6 @@ ZX1G22JJWR             device usb:3-3 product:shamu model:Nexus_6 device:shamu f
       expect(devices.first.name, 'Nexus 6');
     });
 
-    BufferLogger logger = new BufferLogger();
     testUsingContext('adb error message', () {
       List<AndroidDevice> devices = getAdbDevices(mockAdbOutput: '''
 It appears you do not have 'Android SDK Platform-tools' installed.
@@ -57,9 +55,7 @@ Use the 'android' tool to install them:
     android update sdk --no-ui --filter 'platform-tools'
 ''');
       expect(devices, hasLength(0));
-      expect(logger.errorText, contains('you do not have'));
-    }, overrides: <Type, dynamic>{
-      Logger : logger,
+      expect(testLogger.errorText, contains('you do not have'));
     });
   });
 
