@@ -243,6 +243,8 @@ class RunAndStayResident extends ResidentRunner {
   Future<Null> handleTerminalCommand(String code) async {
     String lower = code.toLowerCase();
     if (lower == 'r' || code == AnsiTerminal.KEY_F5) {
+      if (!supportsServiceProtocol)
+        return;
       if (device.supportsRestart) {
         // F5, restart
         await restart();
@@ -263,13 +265,17 @@ class RunAndStayResident extends ResidentRunner {
 
   @override
   void printHelp({ @required bool details }) {
-    if (!prebuiltMode && device.supportsRestart)
+    final bool showRestartText = !prebuiltMode && device.supportsRestart &&
+        supportsServiceProtocol;
+    if (showRestartText)
       printStatus('To restart the app, press "r" or F5.');
     if (_result.hasObservatory)
       printStatus('The Observatory debugger and profiler is available at: http://127.0.0.1:${_result.observatoryPort}/');
     if (details) {
-      printStatus('To dump the widget hierarchy of the app (debugDumpApp), press "w".');
-      printStatus('To dump the rendering tree of the app (debugDumpRenderTree), press "r".');
+      if (supportsServiceProtocol) {
+        printStatus('To dump the widget hierarchy of the app (debugDumpApp), press "w".');
+        printStatus('To dump the rendering tree of the app (debugDumpRenderTree), press "r".');
+      }
       printStatus('To repeat this help message, press "h" or F1. To quit, press "q", F10, or Ctrl-C.');
     } else {
       printStatus('For a more detailed help message, press "h" or F1. To quit, press "q", F10, or Ctrl-C.');
