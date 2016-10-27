@@ -138,6 +138,30 @@ void PlatformViewAndroid::SurfaceDestroyed(JNIEnv* env, jobject obj) {
   ReleaseSurface();
 }
 
+void PlatformViewAndroid::SetViewportMetrics(JNIEnv* env,
+                                             jobject obj,
+                                             jfloat device_pixel_ratio,
+                                             jint physical_width,
+                                             jint physical_height,
+                                             jint physical_padding_top,
+                                             jint physical_padding_right,
+                                             jint physical_padding_bottom,
+                                             jint physical_padding_left) {
+  blink::ViewportMetrics metrics;
+  metrics.device_pixel_ratio = device_pixel_ratio;
+  metrics.physical_width = physical_width;
+  metrics.physical_height = physical_height;
+  metrics.physical_padding_top = physical_padding_top;
+  metrics.physical_padding_right = physical_padding_right;
+  metrics.physical_padding_bottom = physical_padding_bottom;
+  metrics.physical_padding_left = physical_padding_left;
+
+  blink::Threads::UI()->PostTask([ engine = engine_->GetWeakPtr(), metrics ] {
+    if (engine.get())
+      engine->SetViewportMetrics(metrics);
+  });
+}
+
 void PlatformViewAndroid::DispatchPlatformMessage(JNIEnv* env,
                                                   jobject obj,
                                                   jstring java_name,

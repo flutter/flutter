@@ -125,8 +125,8 @@ void Engine::OnOutputSurfaceDestroyed(const ftl::Closure& gpu_continuation) {
   blink::Threads::Gpu()->PostTask(gpu_continuation);
 }
 
-void Engine::OnViewportMetricsChanged(sky::ViewportMetricsPtr metrics) {
-  viewport_metrics_ = metrics.Pass();
+void Engine::SetViewportMetrics(const blink::ViewportMetrics& metrics) {
+  viewport_metrics_ = metrics;
   if (runtime_)
     runtime_->SetViewportMetrics(viewport_metrics_);
 }
@@ -341,15 +341,12 @@ void Engine::ScheduleFrame() {
 void Engine::Render(std::unique_ptr<flow::LayerTree> layer_tree) {
   if (!layer_tree)
     return;
-  if (!viewport_metrics_)
-    return;
 
-  SkISize frame_size = SkISize::Make(viewport_metrics_->physical_width,
-                                     viewport_metrics_->physical_height);
+  SkISize frame_size = SkISize::Make(viewport_metrics_.physical_width,
+                                     viewport_metrics_.physical_height);
   if (frame_size.isEmpty())
     return;
 
-  layer_tree->set_scene_version(viewport_metrics_->scene_version);
   layer_tree->set_frame_size(frame_size);
   animator_->Render(std::move(layer_tree));
 }

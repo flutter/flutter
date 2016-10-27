@@ -13,9 +13,10 @@ source_set("testing") {
   ]
 
   deps = [
-    "../common",
     "//base",
+    "//flutter/common",
     "//flutter/services/engine:interfaces",
+    "//flutter/shell/common",
     "//flutter/skia",
     "//lib/ftl",
     "//mojo/public/cpp/bindings",

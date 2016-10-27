@@ -51,8 +51,7 @@ blink::PointerData::Change GetChangeFromEventType(mozart::EventType type) {
 }  // namespace
 
 RuntimeHolder::RuntimeHolder()
-    : viewport_metrics_(sky::ViewportMetrics::New()),
-      view_listener_binding_(this),
+    : view_listener_binding_(this),
       input_listener_binding_(this),
       weak_factory_(this) {}
 
@@ -130,8 +129,8 @@ void RuntimeHolder::Render(std::unique_ptr<flow::LayerTree> layer_tree) {
     return;  // Only draw once per frame.
   is_ready_to_draw_ = false;
 
-  layer_tree->set_frame_size(SkISize::Make(viewport_metrics_->physical_width,
-                                           viewport_metrics_->physical_height));
+  layer_tree->set_frame_size(SkISize::Make(viewport_metrics_.physical_width,
+                                           viewport_metrics_.physical_height));
   layer_tree->set_scene_version(scene_version_);
 
   blink::Threads::Gpu()->PostTask(ftl::MakeCopyable([
@@ -224,11 +223,11 @@ void RuntimeHolder::OnInvalidation(mozart::ViewInvalidationPtr invalidation,
   // Apply view property changes.
   if (invalidation->properties) {
     view_properties_ = std::move(invalidation->properties);
-    viewport_metrics_->physical_width =
+    viewport_metrics_.physical_width =
         view_properties_->view_layout->size->width;
-    viewport_metrics_->physical_height =
+    viewport_metrics_.physical_height =
         view_properties_->view_layout->size->height;
-    viewport_metrics_->device_pixel_ratio = 2.0;
+    viewport_metrics_.device_pixel_ratio = 2.0;
     // TODO(abarth): Use view_properties_->display_metrics->device_pixel_ratio
     // once that's reasonable.
     runtime_->SetViewportMetrics(viewport_metrics_);

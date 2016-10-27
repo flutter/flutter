@@ -4,21 +4,8 @@
 
 module sky;
 
-struct ViewportMetrics {
-  float device_pixel_ratio = 1.0;
-  int32 physical_width;
-  int32 physical_height;
-  int32 physical_padding_top;
-  int32 physical_padding_right;
-  int32 physical_padding_bottom;
-  int32 physical_padding_left;
-  uint32 scene_version;
-};
-
 [ServiceName="sky::SkyEngine"]
 interface SkyEngine {
-  OnViewportMetricsChanged(ViewportMetrics metrics);
-
   RunFromFile(string main, string packages, string bundle_path);
   RunFromPrecompiledSnapshot(string bundle_path);
   RunFromBundle(string script_uri, string bundle_path);

@@ -102,11 +102,14 @@ void PlatformViewGLFW::RunFromSource(const std::string& main,
                                      const std::string& assets_directory) {}
 
 void PlatformViewGLFW::OnWindowSizeChanged(int width, int height) {
-  auto metrics = sky::ViewportMetrics::New();
-  metrics->physical_width = width;
-  metrics->physical_height = height;
-  metrics->device_pixel_ratio = 1.0;
-  engine_->OnViewportMetricsChanged(metrics.Pass());
+  blink::ViewportMetrics metrics;
+  metrics.physical_width = width;
+  metrics.physical_height = height;
+
+  blink::Threads::UI()->PostTask([ engine = engine().GetWeakPtr(), metrics ] {
+    if (engine.get())
+      engine->SetViewportMetrics(metrics);
+  });
 }
 
 void PlatformViewGLFW::OnMouseButtonChanged(int button, int action, int mods) {

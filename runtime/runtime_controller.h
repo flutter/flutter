@@ -30,7 +30,7 @@ class RuntimeController : public WindowClient, public IsolateClient {
   void CreateDartController(const std::string& script_uri);
   DartController* dart_controller() const { return dart_controller_.get(); }
 
-  void SetViewportMetrics(const sky::ViewportMetricsPtr& metrics);
+  void SetViewportMetrics(const ViewportMetrics& metrics);
   void SetLocale(const std::string& language_code,
                  const std::string& country_code);
   void SetSemanticsEnabled(bool enabled);
@@ -58,7 +58,7 @@ class RuntimeController : public WindowClient, public IsolateClient {
   void DidCreateSecondaryIsolate(Dart_Isolate isolate) override;
 
   RuntimeDelegate* client_;
-  sky::ViewportMetricsPtr viewport_metrics_;
+  ViewportMetrics viewport_metrics_;
   std::string language_code_;
   std::string country_code_;
   bool semantics_enabled_ = false;

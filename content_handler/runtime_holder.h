@@ -10,9 +10,9 @@
 #include "flutter/assets/unzipper_provider.h"
 #include "flutter/assets/zip_asset_store.h"
 #include "flutter/flow/layers/layer_tree.h"
+#include "flutter/lib/ui/window/viewport_metrics.h"
 #include "flutter/runtime/runtime_controller.h"
 #include "flutter/runtime/runtime_delegate.h"
-#include "flutter/services/engine/sky_engine.mojom.h"
 #include "lib/ftl/functional/closure.h"
 #include "lib/ftl/macros.h"
 #include "lib/ftl/memory/weak_ptr.h"
@@ -66,7 +66,7 @@ class RuntimeHolder : public blink::RuntimeDelegate,
 
   std::unique_ptr<Rasterizer> rasterizer_;
   std::unique_ptr<blink::RuntimeController> runtime_;
-  sky::ViewportMetricsPtr viewport_metrics_;
+  blink::ViewportMetrics viewport_metrics_;
 
   mozart::ViewManagerPtr view_manager_;
   mojo::Binding<mozart::ViewListener> view_listener_binding_;

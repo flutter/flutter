@@ -44,7 +44,6 @@ import org.chromium.mojo.system.MojoException;
 import org.chromium.mojo.system.Pair;
 import org.chromium.mojo.system.impl.CoreImpl;
 import org.chromium.mojom.sky.SkyEngine;
-import org.chromium.mojom.sky.ViewportMetrics;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -68,6 +67,16 @@ public class FlutterView extends SurfaceView
     private static final String TAG = "FlutterView";
 
     private static final String ACTION_DISCOVER = "io.flutter.view.DISCOVER";
+
+    class ViewportMetrics {
+        float devicePixelRatio = 1.0f;
+        int physicalWidth = 0;
+        int physicalHeight = 0;
+        int physicalPaddingTop = 0;
+        int physicalPaddingRight = 0;
+        int physicalPaddingBottom = 0;
+        int physicalPaddingLeft = 0;
+    }
 
     private long mNativePlatformView;
     private TextInputPlugin mTextInputPlugin;
@@ -433,7 +442,7 @@ public class FlutterView extends SurfaceView
     protected void onSizeChanged(int width, int height, int oldWidth, int oldHeight) {
         mMetrics.physicalWidth = width;
         mMetrics.physicalHeight = height;
-        mSkyEngine.onViewportMetricsChanged(mMetrics);
+        updateViewportMetrics();
         super.onSizeChanged(width, height, oldWidth, oldHeight);
     }
 
@@ -443,7 +452,7 @@ public class FlutterView extends SurfaceView
         mMetrics.physicalPaddingRight = insets.getSystemWindowInsetRight();
         mMetrics.physicalPaddingBottom = insets.getSystemWindowInsetBottom();
         mMetrics.physicalPaddingLeft = insets.getSystemWindowInsetLeft();
-        mSkyEngine.onViewportMetricsChanged(mMetrics);
+        updateViewportMetrics();
         return super.onApplyWindowInsets(insets);
     }
 
@@ -525,6 +534,14 @@ public class FlutterView extends SurfaceView
                                                     int width,
                                                     int height);
     private static native void nativeSurfaceDestroyed(long nativePlatformViewAndroid);
+    private static native void nativeSetViewportMetrics(long nativePlatformViewAndroid, 
+                                                        float devicePixelRatio,
+                                                        int physicalWidth,
+                                                        int physicalHeight,
+                                                        int physicalPaddingTop,
+                                                        int physicalPaddingRight,
+                                                        int physicalPaddingBottom,
+                                                        int physicalPaddingLeft);
     private static native Bitmap nativeGetBitmap(long nativePlatformViewAndroid);
 
     // Send a platform message to Dart.
@@ -535,6 +552,17 @@ public class FlutterView extends SurfaceView
 
     // Send a response to a platform message received from Dart.
     private static native void nativeInvokePlatformMessageResponseCallback(long nativePlatformViewAndroid, int responseId, String message);
+
+    private void updateViewportMetrics() {
+        nativeSetViewportMetrics(mNativePlatformView,
+                                 mMetrics.devicePixelRatio,
+                                 mMetrics.physicalWidth,
+                                 mMetrics.physicalHeight,
+                                 mMetrics.physicalPaddingTop,
+                                 mMetrics.physicalPaddingRight,
+                                 mMetrics.physicalPaddingBottom,
+                                 mMetrics.physicalPaddingLeft);
+    }
 
     // Called by native to send us a platform message.
     @CalledByNative
