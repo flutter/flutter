@@ -46,8 +46,7 @@ class GdbClient(object):
     SYSTEM_LIBS_PATH = '/tmp/flutter_gdb_device_libs'
 
     def _gdb_local_path(self):
-        GDB_LOCAL_PATH = ('third_party/android_tools/ndk/toolchains/arm-linux-androideabi-4.9/'
-                          'prebuilt/%s-x86_64/bin/arm-linux-androideabi-gdb')
+        GDB_LOCAL_PATH = ('third_party/android_tools/ndk/prebuilt/%s-x86_64/bin/gdb-orig')
         if sys.platform.startswith('darwin'):
             return GDB_LOCAL_PATH % 'darwin'
         else:
