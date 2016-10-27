@@ -4,6 +4,9 @@
 
 import 'package:flutter/widgets.dart';
 
+import 'colors.dart';
+import 'icon_theme.dart';
+import 'icon_theme_data.dart';
 import 'theme.dart';
 
 /// A header used in a material design [GridTile].
@@ -123,9 +126,13 @@ class GridTileBar extends StatelessWidget {
       decoration: decoration,
       child: new Theme(
         data: darkTheme,
-        child: new Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: children
+        child: new IconTheme.merge(
+          context: context,
+          data: new IconThemeData(color: Colors.white),
+          child: new Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: children
+          )
         )
       )
     );
