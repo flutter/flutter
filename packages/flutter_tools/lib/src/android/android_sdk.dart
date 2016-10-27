@@ -11,6 +11,8 @@ import '../base/common.dart';
 import '../base/os.dart';
 import '../globals.dart';
 
+const String kAndroidHome = 'ANDROID_HOME';
+
 // Android SDK layout:
 
 // $ANDROID_HOME/platform-tools/adb
@@ -58,8 +60,8 @@ class AndroidSdk {
 
   static AndroidSdk locateAndroidSdk() {
     String androidHomeDir;
-    if (Platform.environment.containsKey('ANDROID_HOME')) {
-      androidHomeDir = Platform.environment['ANDROID_HOME'];
+    if (Platform.environment.containsKey(kAndroidHome)) {
+      androidHomeDir = Platform.environment[kAndroidHome];
     } else if (Platform.isLinux) {
       if (homeDirPath != null)
         androidHomeDir = '$homeDirPath/Android/Sdk';
