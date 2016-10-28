@@ -161,9 +161,6 @@ Future<String> _buildAotSnapshot(
     return null;
   }
 
-  String mojoPkg = _getSdkExtensionPath(packageMap, 'mojo');
-  String mojoInternalPath = path.join(mojoPkg, 'sdk_ext', 'internal.dart');
-
   String skyEnginePkg = _getSdkExtensionPath(packageMap, 'sky_engine');
   String uiPath = path.join(skyEnginePkg, 'dart_ui', 'ui.dart');
   String jniPath = path.join(skyEnginePkg, 'dart_jni', 'jni.dart');
@@ -173,7 +170,6 @@ Future<String> _buildAotSnapshot(
     genSnapshot,
     vmEntryPoints,
     ioEntryPoints,
-    mojoInternalPath,
     uiPath,
     jniPath,
     vmServicePath,
@@ -218,7 +214,6 @@ Future<String> _buildAotSnapshot(
     '--vm_isolate_snapshot=$vmIsolateSnapshot',
     '--isolate_snapshot=$isolateSnapshot',
     '--packages=${packageMap.packagesPath}',
-    '--url_mapping=dart:mojo.internal,$mojoInternalPath',
     '--url_mapping=dart:ui,$uiPath',
     '--url_mapping=dart:jni,$jniPath',
     '--url_mapping=dart:vmservice_sky,$vmServicePath',
