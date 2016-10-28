@@ -24,7 +24,6 @@
 #include "flutter/common/settings.h"
 #include "flutter/glue/trace_event.h"
 #include "flutter/lib/io/dart_io.h"
-#include "flutter/lib/mojo/dart_mojo_internal.h"
 #include "flutter/lib/ui/dart_runtime_hooks.h"
 #include "flutter/lib/ui/dart_ui.h"
 #include "flutter/lib/ui/ui_dart_state.h"
@@ -48,7 +47,6 @@
 #include "lib/tonic/scopes/dart_api_scope.h"
 #include "lib/tonic/scopes/dart_isolate_scope.h"
 #include "lib/tonic/typed_data/uint8_list.h"
-#include "mojo/public/platform/dart/dart_handle_watcher.h"
 
 #if defined(OS_ANDROID)
 #include "flutter/lib/jni/dart_jni.h"
@@ -219,7 +217,6 @@ Dart_Isolate ServiceIsolateCreateCallback(const char* script_uri,
     tonic::DartApiScope dart_api_scope;
     DartIO::InitForIsolate();
     DartUI::InitForIsolate();
-    DartMojoInternal::InitForIsolate();
     DartRuntimeHooks::Install(DartRuntimeHooks::SecondaryIsolate, script_uri);
     const Settings& settings = Settings::Get();
     if (settings.enable_observatory) {
@@ -295,7 +292,6 @@ Dart_Isolate IsolateCreateCallback(const char* script_uri,
     tonic::DartApiScope dart_api_scope;
     DartIO::InitForIsolate();
     DartUI::InitForIsolate();
-    DartMojoInternal::InitForIsolate();
     DartRuntimeHooks::Install(DartRuntimeHooks::SecondaryIsolate, script_uri);
 
     std::unique_ptr<DartClassProvider> ui_class_provider(
@@ -581,9 +577,6 @@ void InitDartVM() {
       dart::bin::SetSystemTempDirectory(settings.temp_directory_path.c_str());
     }
   }
-
-  DartMojoInternal::SetHandleWatcherProducerHandle(
-      mojo::dart::HandleWatcher::Start());
 
   std::vector<const char*> args;
 

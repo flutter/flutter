@@ -23,8 +23,6 @@
 #include "flutter/shell/common/switches.h"
 #include "flutter/shell/common/tracing_controller.h"
 #include "flutter/sky/engine/wtf/MakeUnique.h"
-#include "mojo/edk/embedder/embedder.h"
-#include "mojo/edk/embedder/simple_platform_support.h"
 
 namespace shell {
 
@@ -91,8 +89,6 @@ class EmbedderState {
     // we attach to the CFRunLoop
     embedder_message_loop_->Attach();
 #endif
-
-    mojo::embedder::Init(mojo::embedder::CreateSimplePlatformSupport());
 
     shell::Shell::InitStandalone(icu_data_path);
   }

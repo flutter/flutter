@@ -23,6 +23,5 @@ dart_pkg("sky_services") {
 
   deps = [
     ":copy_sky_services_license",
-    "//flutter/services/platform:interfaces",
   ]
 }

@@ -28,16 +28,11 @@
 #include "flutter/shell/common/diagnostic/diagnostic_server.h"
 #include "flutter/skia/ext/event_tracer_impl.h"
 #include "lib/ftl/files/unique_fd.h"
-#include "mojo/message_pump/message_pump_mojo.h"
 
 namespace shell {
 namespace {
 
 static Shell* g_shell = nullptr;
-
-scoped_ptr<base::MessagePump> CreateMessagePumpMojo() {
-  return make_scoped_ptr(new mojo::common::MessagePumpMojo);
-}
 
 bool IsInvalid(const ftl::WeakPtr<Rasterizer>& rasterizer) {
   return !rasterizer;
@@ -82,7 +77,6 @@ Shell::Shell() {
   DCHECK(!g_shell);
 
   base::Thread::Options options;
-  options.message_pump_factory = base::Bind(&CreateMessagePumpMojo);
 
   gpu_thread_.reset(new base::Thread("gpu_thread"));
   gpu_thread_->StartWithOptions(options);

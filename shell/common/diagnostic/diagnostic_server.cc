@@ -19,8 +19,8 @@
 #include "lib/tonic/logging/dart_invoke.h"
 #include "third_party/skia/include/core/SkStream.h"
 
-namespace mojo {
-namespace dart {
+namespace flutter {
+namespace runtime {
 extern ResourcesEntry __sky_embedder_diagnostic_server_resources_[];
 }
 }
@@ -69,7 +69,7 @@ void DiagnosticServer::Start() {
   }
 
   EmbedderResources resources(
-      &mojo::dart::__sky_embedder_diagnostic_server_resources_[0]);
+      &flutter::runtime::__sky_embedder_diagnostic_server_resources_[0]);
 
   const char* source = nullptr;
   int source_length =

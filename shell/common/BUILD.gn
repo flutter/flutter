@@ -2,7 +2,58 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-import("//mojo/dart/embedder/embedder.gni")
+# Template to generate a dart embedder resource.cc file.
+# Required invoker inputs:
+#   String output (name of output file)
+#   List inputs (list of input files to be included)
+#   String table_name (name of symbol for resource table)
+#   String root_prefix (base directory of resources)
+# Optional invoker inputs:
+#   String input_directory (directory of resources that are recursively added)
+#   List deps
+#   List datadeps
+template("dart_embedder_resources") {
+  action(target_name) {
+    script = "//dart/runtime/tools/create_resources.py"
+    deps = []
+    if (defined(invoker.deps)) {
+      deps += invoker.deps
+    }
+    datadeps = []
+    if (defined(invoker.datadeps)) {
+      datadeps = invoker.datadeps
+    }
+
+    output = invoker.output
+    outputs = [
+      output,
+    ]
+
+    inputs = [ script ] + invoker.inputs
+
+    root_prefix = rebase_path(invoker.root_prefix)
+
+    args = [
+      "--output",
+      rebase_path(output),
+      "--outer_namespace",
+      "flutter",
+      "--inner_namespace",
+      "runtime",
+      "--table_name",
+      invoker.table_name,
+      "--root_prefix",
+      root_prefix,
+    ]
+    if (defined(invoker.input_directory)) {
+      args += [
+        "--client_root",
+        rebase_path(invoker.input_directory),
+      ]
+    }
+    args += rebase_path(invoker.inputs)
+  }
+}
 
 dart_embedder_resources("generate_embedder_diagnostic_server_resources_cc") {
   inputs = [
@@ -62,7 +113,6 @@ source_set("common") {
     "//flutter/synchronization",
     "//lib/ftl",
     "//lib/tonic",
-    "//mojo/message_pump",
     "//third_party/libjpeg",
     "//third_party/rapidjson",
     ":generate_embedder_diagnostic_server_resources_cc",

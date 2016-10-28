@@ -21,8 +21,6 @@ executable("linux") {
     "//flutter/shell/testing",
     "//flutter/skia",
     "//lib/ftl",
-    "//mojo/edk/base_edk",
-    "//mojo/edk/system",
     "//third_party/glfw",
   ]
 

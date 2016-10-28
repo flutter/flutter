@@ -2,7 +2,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-import("//mojo/dart/packages/mojo/sdk_ext_sources.gni")
 import("//flutter/common/config.gni") # for flutter_aot
 
 if (target_os == "ios") {

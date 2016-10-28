@@ -22,9 +22,5 @@ source_set("web") {
     deps += [
       "//lib/mtl/tasks",
     ]
-  } else {
-    deps += [
-      "//mojo/message_pump",
-    ]
   }
 }

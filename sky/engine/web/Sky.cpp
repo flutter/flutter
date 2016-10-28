@@ -48,7 +48,6 @@
 #else  // defined(OS_FUCHSIA)
 
 #include "base/message_loop/message_loop.h"
-#include "mojo/message_pump/message_pump_mojo.h"
 
 #endif  // defined(OS_FUCHSIA)
 
@@ -81,37 +80,21 @@ class TaskObserver : public base::MessageLoop::TaskObserver {
   }
 };
 
-class SignalObserver : public mojo::common::MessagePumpMojo::Observer {
- public:
-  void WillSignalHandler() override {}
-  void DidSignalHandler() override { didProcessTask(); }
-};
-
 static TaskObserver* s_taskObserver = 0;
-static SignalObserver* s_signalObserver = 0;
 
 void addMessageLoopObservers() {
   ASSERT(!s_taskObserver);
   s_taskObserver = new TaskObserver;
 
-  ASSERT(!s_signalObserver);
-  s_signalObserver = new SignalObserver;
-
   base::MessageLoop::current()->AddTaskObserver(s_taskObserver);
-  mojo::common::MessagePumpMojo::current()->AddObserver(s_signalObserver);
 }
 
 void removeMessageLoopObservers() {
   base::MessageLoop::current()->RemoveTaskObserver(s_taskObserver);
-  mojo::common::MessagePumpMojo::current()->RemoveObserver(s_signalObserver);
 
   ASSERT(s_taskObserver);
   delete s_taskObserver;
   s_taskObserver = 0;
-
-  ASSERT(s_signalObserver);
-  delete s_signalObserver;
-  s_signalObserver = 0;
 }
 
 #endif  // defined(OS_FUCHSIA)

@@ -5,8 +5,8 @@
 #ifndef FLUTTER_RUNTIME_EMBEDDER_RESOURCES_H_
 #define FLUTTER_RUNTIME_EMBEDDER_RESOURCES_H_
 
-namespace mojo {
-namespace dart {
+namespace flutter {
+namespace runtime {
 
 struct ResourcesEntry {
   const char* path_;
@@ -14,14 +14,14 @@ struct ResourcesEntry {
   int length_;
 };
 
-}  // namespace dart
-}  // namespace mojo
+}  // namespace runtime
+}  // namespace flutter
 
 namespace blink {
 
 class EmbedderResources {
  public:
-  EmbedderResources(mojo::dart::ResourcesEntry* resources_table);
+  EmbedderResources(flutter::runtime::ResourcesEntry* resources_table);
 
   static const int kNoSuchInstance;
 
@@ -29,9 +29,9 @@ class EmbedderResources {
   const char* Path(int idx);
 
  private:
-  mojo::dart::ResourcesEntry* At(int idx);
+  flutter::runtime::ResourcesEntry* At(int idx);
 
-  mojo::dart::ResourcesEntry* resources_table_;
+  flutter::runtime::ResourcesEntry* resources_table_;
 };
 
 }  // namespace blink

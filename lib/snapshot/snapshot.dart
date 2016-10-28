@@ -11,6 +11,5 @@ import 'dart:io';
 import 'dart:isolate';
 import 'dart:jni';
 import 'dart:math';
-import 'dart:mojo.internal';
 import 'dart:ui';
 import 'dart:typed_data';
