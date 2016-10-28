@@ -73,7 +73,6 @@ source_set("runtime") {
     "//flutter/lib/io",
     "//flutter/lib/mojo",
     "//flutter/lib/ui",
-    "//flutter/services/engine:interfaces",
     "//flutter/skia",
     "//flutter/sky/engine/platform",
     "//lib/ftl",

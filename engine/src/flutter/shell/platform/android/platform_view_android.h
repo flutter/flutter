@@ -35,6 +35,17 @@ class PlatformViewAndroid : public PlatformView {
 
   void SurfaceChanged(JNIEnv* env, jobject obj, jint width, jint height);
 
+  void RunBundleAndSnapshot(JNIEnv* env,
+                            jobject obj,
+                            jstring bundle_path,
+                            jstring snapshot_override);
+
+  void RunBundleAndSource(JNIEnv* env,
+                          jobject obj,
+                          jstring bundle_path,
+                          jstring main,
+                          jstring packages);
+
   void SurfaceDestroyed(JNIEnv* env, jobject obj);
 
   void SetViewportMetrics(JNIEnv* env,
@@ -82,9 +93,9 @@ class PlatformViewAndroid : public PlatformView {
   void HandlePlatformMessageResponse(int response_id,
                                      std::vector<uint8_t> data);
 
-  void RunFromSource(const std::string& main,
-                     const std::string& packages,
-                     const std::string& assets_directory) override;
+  void RunFromSource(const std::string& assets_directory,
+                     const std::string& main,
+                     const std::string& packages) override;
 
   void set_flutter_view(const JavaObjectWeakGlobalRef& flutter_view) {
     flutter_view_ = flutter_view;

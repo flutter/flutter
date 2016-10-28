@@ -4,9 +4,6 @@
 
 source_set("glue") {
   sources = [
-    "data_pipe_utils.cc",
-    "data_pipe_utils.h",
-    "drain_data_pipe_job.h",
     "movable_wrapper.h",
     "stack_trace.h",
     "thread.h",
@@ -21,6 +18,7 @@ source_set("glue") {
 
   if (is_fuchsia) {
     sources += [
+      "drain_data_pipe_job.h",
       "drain_data_pipe_job_fuchsia.cc",
       "stack_trace_fuchsia.cc",
       "thread_fuchsia.cc",
@@ -35,7 +33,6 @@ source_set("glue") {
     ]
   } else {
     sources += [
-      "drain_data_pipe_job_base.cc",
       "stack_trace_base.cc",
       "task_runner_adaptor.cc",
       "task_runner_adaptor.h",
@@ -44,7 +41,6 @@ source_set("glue") {
 
     deps += [
       "//base",
-      "//mojo/data_pipe_utils",
     ]
   }
 }

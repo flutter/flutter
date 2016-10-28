@@ -6,22 +6,13 @@
 #define SHELL_COMMON_ENGINE_H_
 
 #include "flutter/assets/zip_asset_store.h"
-#include "flutter/glue/drain_data_pipe_job.h"
 #include "flutter/lib/ui/window/platform_message.h"
 #include "flutter/lib/ui/window/viewport_metrics.h"
 #include "flutter/runtime/runtime_controller.h"
 #include "flutter/runtime/runtime_delegate.h"
-#include "flutter/services/engine/sky_engine.mojom.h"
 #include "flutter/shell/common/rasterizer.h"
 #include "lib/ftl/macros.h"
 #include "lib/ftl/memory/weak_ptr.h"
-#include "mojo/public/cpp/application/service_provider_impl.h"
-#include "mojo/public/cpp/bindings/binding.h"
-#include "mojo/public/cpp/bindings/binding_set.h"
-#include "mojo/public/cpp/system/data_pipe.h"
-#include "mojo/public/cpp/system/handle.h"
-#include "mojo/public/interfaces/application/service_provider.mojom.h"
-#include "mojo/services/asset_bundle/interfaces/asset_bundle.mojom.h"
 #include "third_party/skia/include/core/SkPicture.h"
 
 namespace blink {
@@ -34,7 +25,7 @@ class PlatformView;
 class Animator;
 using PointerDataPacket = blink::PointerDataPacket;
 
-class Engine : public sky::SkyEngine, public blink::RuntimeDelegate {
+class Engine : public blink::RuntimeDelegate {
  public:
   explicit Engine(PlatformView* platform_view);
 
@@ -68,7 +59,6 @@ class Engine : public sky::SkyEngine, public blink::RuntimeDelegate {
 
   std::string GetUIIsolateName();
 
-  void ConnectToEngine(mojo::InterfaceRequest<SkyEngine> request);
   void OnOutputSurfaceCreated(const ftl::Closure& gpu_continuation);
   void OnOutputSurfaceDestroyed(const ftl::Closure& gpu_continuation);
   void SetViewportMetrics(const blink::ViewportMetrics& metrics);
@@ -78,17 +68,6 @@ class Engine : public sky::SkyEngine, public blink::RuntimeDelegate {
   void SetSemanticsEnabled(bool enabled);
 
  private:
-  // SkyEngine implementation:
-  void RunFromFile(const mojo::String& main,
-                   const mojo::String& packages,
-                   const mojo::String& bundle) override;
-  void RunFromPrecompiledSnapshot(const mojo::String& bundle_path) override;
-  void RunFromBundle(const mojo::String& script_uri,
-                     const mojo::String& bundle_path) override;
-  void RunFromBundleAndSnapshot(const mojo::String& script_uri,
-                                const mojo::String& bundle_path,
-                                const mojo::String& snapshot_path) override;
-
   // RuntimeDelegate methods:
   void ScheduleFrame() override;
   void Render(std::unique_ptr<flow::LayerTree> layer_tree) override;
@@ -115,22 +94,17 @@ class Engine : public sky::SkyEngine, public blink::RuntimeDelegate {
 
   ftl::WeakPtr<PlatformView> platform_view_;
   std::unique_ptr<Animator> animator_;
-
-  mojo::asset_bundle::AssetBundlePtr root_bundle_;
   std::unique_ptr<blink::RuntimeController> runtime_;
-
-  std::unique_ptr<glue::DrainDataPipeJob> snapshot_drainer_;
 
   ftl::RefPtr<blink::PlatformMessage> pending_push_route_message_;
   blink::ViewportMetrics viewport_metrics_;
   std::string language_code_;
   std::string country_code_;
   bool semantics_enabled_ = false;
-  mojo::Binding<SkyEngine> binding_;
 
+  // TODO(abarth): Unify these two behind a common interface.
   ftl::RefPtr<blink::ZipAssetStore> asset_store_;
   std::unique_ptr<blink::DirectoryAssetBundle> directory_asset_bundle_;
-  std::unique_ptr<blink::ZipAssetBundle> zip_asset_bundle_;
 
   // TODO(eseidel): This should move into an AnimatorStateMachine.
   bool activity_running_;

@@ -50,7 +50,6 @@ shared_library("sky_shell") {
     "//flutter/skia",
     "//flutter/vulkan",
     "//lib/ftl",
-    "//mojo/android:libsystem_java",
     "//mojo/edk/base_edk",
     "//mojo/edk/system",
     ":jni_headers",
@@ -78,9 +77,6 @@ android_library("java") {
     "io/flutter/view/ResourceCleaner.java",
     "io/flutter/view/ResourceExtractor.java",
     "io/flutter/view/ResourcePaths.java",
-    "io/flutter/view/ServiceFactory.java",
-    "io/flutter/view/ServiceProviderImpl.java",
-    "io/flutter/view/ServiceRegistry.java",
     "io/flutter/view/VsyncWaiter.java",
     "org/domokit/sky/shell/SkyActivity.java",
     "org/domokit/sky/shell/SkyApplication.java",
@@ -88,13 +84,6 @@ android_library("java") {
 
   deps = [
     "//base:base_java",
-    "//flutter/services/engine:interfaces_java",
-    "//flutter/services/platform:interfaces_java",
-    "//mojo/android:system_java",
-    "//mojo/public/interfaces/application:application_java",
-    "//mojo/public/java:bindings",
-    "//mojo/public/java:system",
-    "//mojo/services/vsync/interfaces:interfaces_java",
   ]
 }
 

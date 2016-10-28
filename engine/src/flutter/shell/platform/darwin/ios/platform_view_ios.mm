@@ -3,18 +3,19 @@
 // found in the LICENSE file.
 
 #include "flutter/shell/platform/darwin/ios/platform_view_ios.h"
+
 #import <OpenGLES/EAGL.h>
 #import <OpenGLES/ES2/gl.h>
 #import <OpenGLES/ES2/glext.h>
 #import <QuartzCore/CAEAGLLayer.h>
 #include <utility>
+
 #include "base/mac/scoped_nsautorelease_pool.h"
 #include "base/trace_event/trace_event.h"
 #include "flutter/common/threads.h"
 #include "flutter/shell/gpu/gpu_rasterizer.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/vsync_waiter_ios.h"
 #include "lib/ftl/synchronization/waitable_event.h"
-#include "mojo/public/cpp/application/connect.h"
 
 namespace shell {
 
@@ -283,10 +284,6 @@ PlatformViewIOS::PlatformViewIOS(CAEAGLLayer* layer)
 
 PlatformViewIOS::~PlatformViewIOS() = default;
 
-sky::SkyEnginePtr& PlatformViewIOS::engineProxy() {
-  return engine_;
-}
-
 void PlatformViewIOS::ToggleAccessibility(UIView* view, bool enabled) {
   if (enabled) {
     if (!accessibility_bridge_) {
@@ -298,16 +295,15 @@ void PlatformViewIOS::ToggleAccessibility(UIView* view, bool enabled) {
   SetSemanticsEnabled(enabled);
 }
 
-void PlatformViewIOS::ConnectToEngineAndSetupServices() {
-  ConnectToEngine(mojo::GetProxy(&engine_));
-}
-
 void PlatformViewIOS::SetupAndLoadFromSource(
+    const std::string& assets_directory,
     const std::string& main,
-    const std::string& packages,
-    const std::string& assets_directory) {
-  ConnectToEngineAndSetupServices();
-  engine_->RunFromFile(main, packages, assets_directory);
+    const std::string& packages) {
+  blink::Threads::UI()->PostTask(
+      [ engine = engine().GetWeakPtr(), assets_directory, main, packages ] {
+        if (engine)
+          engine->RunBundleAndSource(assets_directory, main, packages);
+      });
 }
 
 ftl::WeakPtr<PlatformViewIOS> PlatformViewIOS::GetWeakPtr() {
@@ -361,13 +357,13 @@ void PlatformViewIOS::HandlePlatformMessage(
   platform_message_router_.HandlePlatformMessage(std::move(message));
 }
 
-void PlatformViewIOS::RunFromSource(const std::string& main,
-                                    const std::string& packages,
-                                    const std::string& assets_directory) {
+void PlatformViewIOS::RunFromSource(const std::string& assets_directory,
+                                    const std::string& main,
+                                    const std::string& packages) {
   auto latch = new ftl::ManualResetWaitableEvent();
 
   dispatch_async(dispatch_get_main_queue(), ^{
-    SetupAndLoadFromSource(main, packages, assets_directory);
+    SetupAndLoadFromSource(assets_directory, main, packages);
     latch->Signal();
   });
 

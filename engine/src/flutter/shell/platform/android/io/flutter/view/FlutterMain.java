@@ -30,10 +30,6 @@ import org.chromium.base.PathUtils;
 import org.chromium.base.library_loader.LibraryLoader;
 import org.chromium.base.library_loader.LibraryProcessType;
 import org.chromium.base.library_loader.ProcessInitException;
-import org.chromium.mojo.bindings.Interface.Binding;
-import org.chromium.mojo.system.Core;
-import org.chromium.mojo.system.impl.CoreImpl;
-import org.chromium.mojo.system.MessagePipeHandle;
 
 /**
  * A class to intialize the Flutter engine.
@@ -163,8 +159,6 @@ public class FlutterMain {
 
             nativeInit(applicationContext, shellArgs.toArray(new String[0]));
 
-            // Create the mojo run loop.
-            CoreImpl.getInstance().createDefaultRunLoop();
             sInitialized = true;
         } catch (Exception e) {
             Log.e(TAG, "Flutter initialization failed.", e);

@@ -11,28 +11,18 @@
 #include "flutter/assets/unzipper_provider.h"
 #include "lib/ftl/macros.h"
 #include "lib/ftl/memory/ref_counted.h"
-#include "lib/ftl/tasks/task_runner.h"
-#include "mojo/public/cpp/system/data_pipe.h"
 
 namespace blink {
 
 class ZipAssetStore : public ftl::RefCountedThreadSafe<ZipAssetStore> {
  public:
-  ZipAssetStore(UnzipperProvider unzipper_provider,
-                ftl::RefPtr<ftl::TaskRunner> task_runner);
+  explicit ZipAssetStore(UnzipperProvider unzipper_provider);
   ~ZipAssetStore();
 
-  // Serve this asset from another file instead of using the ZIP contents.
-  void AddOverlayFile(std::string asset_name, std::string file_path);
-
-  void GetAsStream(const std::string& asset_name,
-                   mojo::ScopedDataPipeProducerHandle producer);
   bool GetAsBuffer(const std::string& asset_name, std::vector<uint8_t>* data);
 
  private:
   UnzipperProvider unzipper_provider_;
-  ftl::RefPtr<ftl::TaskRunner> task_runner_;
-  std::map<std::string, std::string> overlay_files_;
 
   FTL_DISALLOW_COPY_AND_ASSIGN(ZipAssetStore);
 };

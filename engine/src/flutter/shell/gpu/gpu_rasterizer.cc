@@ -12,7 +12,6 @@
 #include "flutter/shell/common/picture_serializer.h"
 #include "flutter/shell/common/platform_view.h"
 #include "flutter/shell/common/shell.h"
-#include "mojo/public/cpp/system/data_pipe.h"
 #include "third_party/skia/include/core/SkPicture.h"
 
 namespace shell {

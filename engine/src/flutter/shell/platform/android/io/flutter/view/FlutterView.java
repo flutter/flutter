@@ -36,14 +36,6 @@ import org.json.JSONObject;
 
 import org.chromium.base.CalledByNative;
 import org.chromium.base.JNINamespace;
-import org.chromium.mojo.bindings.Interface.Binding;
-import org.chromium.mojo.bindings.InterfaceRequest;
-import org.chromium.mojo.system.Core;
-import org.chromium.mojo.system.MessagePipeHandle;
-import org.chromium.mojo.system.MojoException;
-import org.chromium.mojo.system.Pair;
-import org.chromium.mojo.system.impl.CoreImpl;
-import org.chromium.mojom.sky.SkyEngine;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -81,7 +73,6 @@ public class FlutterView extends SurfaceView
     private long mNativePlatformView;
     private TextInputPlugin mTextInputPlugin;
 
-    private SkyEngine.Proxy mSkyEngine;
     private HashMap<String, OnMessageListener> mOnMessageListeners;
     private HashMap<String, OnMessageListenerAsync> mAsyncOnMessageListeners;
     private final SurfaceHolder.Callback mSurfaceCallback;
@@ -133,8 +124,6 @@ public class FlutterView extends SurfaceView
             }
         };
         getHolder().addCallback(mSurfaceCallback);
-
-        Core core = CoreImpl.getInstance();
 
         mAccessibilityManager = (AccessibilityManager)getContext().getSystemService(Context.ACCESSIBILITY_SERVICE);
 
@@ -264,8 +253,6 @@ public class FlutterView extends SurfaceView
         getHolder().removeCallback(mSurfaceCallback);
         nativeDetach(mNativePlatformView);
         mNativePlatformView = 0;
-
-        mSkyEngine.close();
     }
 
     @Override
@@ -457,12 +444,7 @@ public class FlutterView extends SurfaceView
     }
 
     private void attach() {
-        Core core = CoreImpl.getInstance();
-        Pair<SkyEngine.Proxy, InterfaceRequest<SkyEngine>> engine =
-                SkyEngine.MANAGER.getInterfaceRequest(core);
-        mSkyEngine = engine.first;
-        mNativePlatformView =
-            nativeAttach(engine.second.passHandle().releaseNativeHandle(), this);
+        mNativePlatformView = nativeAttach(this);
     }
 
     private void preRun() {
@@ -470,35 +452,21 @@ public class FlutterView extends SurfaceView
     }
 
     private void postRun() {
-        Core core = CoreImpl.getInstance();
     }
 
-    public void runFromBundle(String bundlePath, String snapshotPath) {
+    public void runFromBundle(String bundlePath, String snapshotOverride) {
         preRun();
-
-        if (FlutterMain.isRunningPrecompiledCode()) {
-            mSkyEngine.runFromPrecompiledSnapshot(bundlePath);
-        } else {
-            String scriptUri = "file://" + bundlePath;
-            if (snapshotPath != null) {
-                mSkyEngine.runFromBundleAndSnapshot(scriptUri, bundlePath, snapshotPath);
-            } else {
-                mSkyEngine.runFromBundle(scriptUri, bundlePath);
-            }
-        }
-
+        nativeRunBundleAndSnapshot(mNativePlatformView, bundlePath, snapshotOverride);
         postRun();
     }
 
-    public void runFromSource(final String main,
-                              final String packages,
-                              final String assetsDirectory) {
+    private void runFromSource(final String assetsDirectory,
+                               final String main,
+                               final String packages) {
         Runnable runnable = new Runnable() {
             public void run() {
                 preRun();
-                mSkyEngine.runFromFile(main,
-                                       packages,
-                                       assetsDirectory);
+                nativeRunBundleAndSource(mNativePlatformView, assetsDirectory, main, packages);
                 postRun();
                 synchronized (this) {
                     notify();
@@ -523,8 +491,7 @@ public class FlutterView extends SurfaceView
         return nativeGetBitmap(mNativePlatformView);
     }
 
-    private static native long nativeAttach(int skyEngineHandle,
-                                            FlutterView view);
+    private static native long nativeAttach(FlutterView view);
     private static native int nativeGetObservatoryPort();
     private static native void nativeDetach(long nativePlatformViewAndroid);
     private static native void nativeSurfaceCreated(long nativePlatformViewAndroid,
@@ -534,6 +501,15 @@ public class FlutterView extends SurfaceView
                                                     int width,
                                                     int height);
     private static native void nativeSurfaceDestroyed(long nativePlatformViewAndroid);
+
+    private static native void nativeRunBundleAndSnapshot(long nativePlatformViewAndroid,
+                                                          String bundlePath,
+                                                          String snapshotOverride);
+    private static native void nativeRunBundleAndSource(long nativePlatformViewAndroid,
+                                                        String bundlePath,
+                                                        String main,
+                                                        String packages);
+
     private static native void nativeSetViewportMetrics(long nativePlatformViewAndroid, 
                                                         float devicePixelRatio,
                                                         int physicalWidth,

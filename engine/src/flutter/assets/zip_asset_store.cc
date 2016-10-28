@@ -9,8 +9,6 @@
 
 #include <utility>
 
-#include "flutter/assets/unzip_job.h"
-#include "flutter/glue/data_pipe_utils.h"
 #include "lib/ftl/files/eintr_wrapper.h"
 #include "lib/ftl/files/unique_fd.h"
 #include "lib/zip/unique_unzipper.h"
@@ -18,36 +16,10 @@
 
 namespace blink {
 
-ZipAssetStore::ZipAssetStore(UnzipperProvider unzipper_provider,
-                             ftl::RefPtr<ftl::TaskRunner> task_runner)
-    : unzipper_provider_(std::move(unzipper_provider)),
-      task_runner_(std::move(task_runner)) {}
+ZipAssetStore::ZipAssetStore(UnzipperProvider unzipper_provider)
+    : unzipper_provider_(std::move(unzipper_provider)) {}
 
 ZipAssetStore::~ZipAssetStore() {}
-
-void ZipAssetStore::AddOverlayFile(std::string asset_name,
-                                   std::string file_path) {
-  overlay_files_.emplace(std::move(asset_name), std::move(file_path));
-}
-
-void ZipAssetStore::GetAsStream(const std::string& asset_name,
-                                mojo::ScopedDataPipeProducerHandle producer) {
-  auto overlay = overlay_files_.find(asset_name);
-  if (overlay != overlay_files_.end()) {
-    // TODO(abarth): Consider moving the |open| call to task_runner_.
-    ftl::UniqueFD fd(HANDLE_EINTR(open(overlay->second.c_str(), O_RDONLY)));
-    if (fd.get() < 0)
-      return;
-    glue::CopyFromFileDescriptor(std::move(fd), std::move(producer),
-                                 task_runner_, [](bool ignored) {});
-  } else {
-    zip::UniqueUnzipper unzipper = unzipper_provider_();
-    if (!unzipper.is_valid())
-      return;
-    new UnzipJob(std::move(unzipper), asset_name, std::move(producer),
-                 task_runner_);
-  }
-}
 
 bool ZipAssetStore::GetAsBuffer(const std::string& asset_name,
                                 std::vector<uint8_t>* data) {

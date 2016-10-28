@@ -5,13 +5,13 @@
 #ifndef SHELL_PLATFORM_MAC_PLATFORM_MAC_H_
 #define SHELL_PLATFORM_MAC_PLATFORM_MAC_H_
 
-#include "flutter/services/engine/sky_engine.mojom.h"
+#include "flutter/shell/common/engine.h"
 
 namespace shell {
 
 void PlatformMacMain(int argc, const char* argv[], std::string icu_data_path);
 
-bool AttemptLaunchFromCommandLineSwitches(sky::SkyEnginePtr& engine);
+bool AttemptLaunchFromCommandLineSwitches(Engine* engine);
 
 }  // namespace shell
 

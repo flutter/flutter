@@ -3,10 +3,11 @@
 // found in the LICENSE file.
 
 #include "flutter/shell/platform/linux/platform_view_glfw.h"
+
 #include <GLFW/glfw3.h>
+
 #include "flutter/common/threads.h"
 #include "flutter/shell/gpu/gpu_rasterizer.h"
-#include "flutter/shell/platform/linux/glfw_service_provider.h"
 
 namespace shell {
 
@@ -60,14 +61,6 @@ PlatformViewGLFW::~PlatformViewGLFW() {
   glfwTerminate();
 }
 
-void PlatformViewGLFW::ConnectToEngineAndSetupServices() {
-  ConnectToEngine(mojo::GetProxy(&engine_));
-}
-
-sky::SkyEnginePtr& PlatformViewGLFW::EngineProxy() {
-  return engine_;
-}
-
 bool PlatformViewGLFW::IsValid() const {
   return valid_;
 }
@@ -97,9 +90,9 @@ bool PlatformViewGLFW::GLContextPresent() {
   return true;
 }
 
-void PlatformViewGLFW::RunFromSource(const std::string& main,
-                                     const std::string& packages,
-                                     const std::string& assets_directory) {}
+void PlatformViewGLFW::RunFromSource(const std::string& assets_directory,
+                                     const std::string& main,
+                                     const std::string& packages) {}
 
 void PlatformViewGLFW::OnWindowSizeChanged(int width, int height) {
   blink::ViewportMetrics metrics;

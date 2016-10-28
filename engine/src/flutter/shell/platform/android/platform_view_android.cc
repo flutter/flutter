@@ -138,6 +138,40 @@ void PlatformViewAndroid::SurfaceDestroyed(JNIEnv* env, jobject obj) {
   ReleaseSurface();
 }
 
+void PlatformViewAndroid::RunBundleAndSnapshot(JNIEnv* env,
+                                               jobject obj,
+                                               jstring java_bundle_path,
+                                               jstring java_snapshot_override) {
+  std::string bundle_path =
+      base::android::ConvertJavaStringToUTF8(env, java_bundle_path);
+  std::string snapshot_override =
+      base::android::ConvertJavaStringToUTF8(env, java_snapshot_override);
+
+  blink::Threads::UI()->PostTask(
+      [ engine = engine_->GetWeakPtr(), bundle_path, snapshot_override ] {
+        if (engine)
+          engine->RunBundleAndSnapshot(bundle_path, snapshot_override);
+      });
+}
+
+void PlatformViewAndroid::RunBundleAndSource(JNIEnv* env,
+                                             jobject obj,
+                                             jstring java_bundle_path,
+                                             jstring java_main,
+                                             jstring java_packages) {
+  std::string bundle_path =
+      base::android::ConvertJavaStringToUTF8(env, java_bundle_path);
+  std::string main = base::android::ConvertJavaStringToUTF8(env, java_main);
+  std::string packages =
+      base::android::ConvertJavaStringToUTF8(env, java_packages);
+
+  blink::Threads::UI()->PostTask(
+      [ engine = engine_->GetWeakPtr(), bundle_path, main, packages ] {
+        if (engine)
+          engine->RunBundleAndSource(bundle_path, main, packages);
+      });
+}
+
 void PlatformViewAndroid::SetViewportMetrics(JNIEnv* env,
                                              jobject obj,
                                              jfloat device_pixel_ratio,
@@ -157,7 +191,7 @@ void PlatformViewAndroid::SetViewportMetrics(JNIEnv* env,
   metrics.physical_padding_left = physical_padding_left;
 
   blink::Threads::UI()->PostTask([ engine = engine_->GetWeakPtr(), metrics ] {
-    if (engine.get())
+    if (engine)
       engine->SetViewportMetrics(metrics);
   });
 }
@@ -346,9 +380,9 @@ void PlatformViewAndroid::UpdateSemantics(
   }
 }
 
-void PlatformViewAndroid::RunFromSource(const std::string& main,
-                                        const std::string& packages,
-                                        const std::string& assets_directory) {
+void PlatformViewAndroid::RunFromSource(const std::string& assets_directory,
+                                        const std::string& main,
+                                        const std::string& packages) {
   FTL_CHECK(base::android::IsVMInitialized());
   JNIEnv* env = base::android::AttachCurrentThread();
   FTL_CHECK(env);
@@ -372,14 +406,14 @@ void PlatformViewAndroid::RunFromSource(const std::string& main,
     FTL_CHECK(run_from_source_method_id);
 
     // Invoke runFromSource on the Android UI thread.
+    jstring java_assets_directory = env->NewStringUTF(assets_directory.c_str());
+    FTL_CHECK(java_assets_directory);
     jstring java_main = env->NewStringUTF(main.c_str());
     FTL_CHECK(java_main);
     jstring java_packages = env->NewStringUTF(packages.c_str());
     FTL_CHECK(java_packages);
-    jstring java_assets_directory = env->NewStringUTF(assets_directory.c_str());
-    FTL_CHECK(java_assets_directory);
     env->CallVoidMethod(local_flutter_view.obj(), run_from_source_method_id,
-                        java_main, java_packages, java_assets_directory);
+                        java_assets_directory, java_main, java_packages);
   }
 
   // Detaching from the VM deletes any stray local references.
@@ -496,14 +530,8 @@ bool PlatformViewAndroid::Register(JNIEnv* env) {
   return RegisterNativesImpl(env);
 }
 
-static jlong Attach(JNIEnv* env,
-                    jclass clazz,
-                    jint skyEngineHandle,
-                    jobject flutterView) {
+static jlong Attach(JNIEnv* env, jclass clazz, jobject flutterView) {
   PlatformViewAndroid* view = new PlatformViewAndroid();
-  view->ConnectToEngine(mojo::InterfaceRequest<sky::SkyEngine>(
-      mojo::ScopedMessagePipeHandle(mojo::MessagePipeHandle(skyEngineHandle))));
-
   // Create a weak reference to the flutterView Java object so that we can make
   // calls into it later.
   view->set_flutter_view(JavaObjectWeakGlobalRef(env, flutterView));

@@ -13,13 +13,12 @@ source_set("gpu") {
   ]
 
   deps = [
-    "../common",
     "//flutter/common",
     "//flutter/flow",
     "//flutter/glue",
+    "//flutter/shell/common",
     "//flutter/skia",
     "//flutter/synchronization",
     "//lib/ftl",
-    "//mojo/public/cpp/system",
   ]
 }
