@@ -21,6 +21,7 @@
 #include "flutter/shell/common/animator.h"
 #include "flutter/shell/common/platform_view.h"
 #include "flutter/sky/engine/public/web/Sky.h"
+#include "lib/ftl/files/file.h"
 #include "lib/ftl/files/path.h"
 #include "lib/ftl/functional/make_copyable.h"
 #include "mojo/public/cpp/application/connect.h"
@@ -52,6 +53,10 @@ std::string FindPackagesPath(const std::string& main_dart) {
   return packages_path;
 }
 
+std::string GetScriptUriFromPath(const std::string& path) {
+  return "file://" + path;
+}
+
 }  // namespace
 
 Engine::Engine(PlatformView* platform_view)
@@ -75,6 +80,56 @@ void Engine::Init() {
   blink::InitRuntime();
 }
 
+void Engine::RunBundle(const std::string& bundle_path) {
+  TRACE_EVENT0("flutter", "Engine::RunBundle");
+  ConfigureAssetBundle(bundle_path);
+  ConfigureRuntime(GetScriptUriFromPath(bundle_path));
+  if (blink::IsRunningPrecompiledCode()) {
+    runtime_->dart_controller()->RunFromPrecompiledSnapshot();
+  } else {
+    std::vector<uint8_t> snapshot;
+    if (!GetAssetAsBuffer(blink::kSnapshotAssetKey, &snapshot))
+      return;
+    runtime_->dart_controller()->RunFromSnapshot(snapshot.data(),
+                                                 snapshot.size());
+  }
+}
+
+void Engine::RunBundleAndSnapshot(const std::string& bundle_path,
+                                  const std::string& snapshot_override) {
+  TRACE_EVENT0("flutter", "Engine::RunBundleAndSnapshot");
+  if (snapshot_override.empty()) {
+    RunBundle(bundle_path);
+    return;
+  }
+  ConfigureAssetBundle(bundle_path);
+  ConfigureRuntime(GetScriptUriFromPath(bundle_path));
+  if (blink::IsRunningPrecompiledCode()) {
+    runtime_->dart_controller()->RunFromPrecompiledSnapshot();
+  } else {
+    std::vector<uint8_t> snapshot;
+    if (!files::ReadFileToVector(snapshot_override, &snapshot))
+      return;
+    runtime_->dart_controller()->RunFromSnapshot(snapshot.data(),
+                                                 snapshot.size());
+  }
+}
+
+void Engine::RunBundleAndSource(const std::string& bundle_path,
+                                const std::string& main,
+                                const std::string& packages) {
+  TRACE_EVENT0("flutter", "Engine::RunBundleAndSource");
+  FTL_CHECK(!blink::IsRunningPrecompiledCode())
+      << "Cannot run from source in a precompiled build.";
+  std::string packages_path = packages;
+  if (packages_path.empty())
+    packages_path = FindPackagesPath(main);
+  if (!bundle_path.empty())
+    ConfigureAssetBundle(bundle_path);
+  ConfigureRuntime(GetScriptUriFromPath(main));
+  runtime_->dart_controller()->RunFromSource(main, packages_path);
+}
+
 void Engine::BeginFrame(ftl::TimePoint frame_time) {
   TRACE_EVENT0("flutter", "Engine::BeginFrame");
   if (runtime_)
@@ -83,15 +138,8 @@ void Engine::BeginFrame(ftl::TimePoint frame_time) {
 
 void Engine::RunFromSource(const std::string& main,
                            const std::string& packages,
-                           const std::string& bundle) {
-  TRACE_EVENT0("flutter", "Engine::RunFromSource");
-  std::string packages_path = packages;
-  if (packages_path.empty())
-    packages_path = FindPackagesPath(main);
-  if (!bundle.empty())
-    ConfigureAssetBundle(bundle);
-  ConfigureRuntime(main);
-  runtime_->dart_controller()->RunFromSource(main, packages_path);
+                           const std::string& bundle_path) {
+  RunBundleAndSource(bundle_path, main, packages);
 }
 
 Dart_Port Engine::GetUIIsolateMainPort() {
@@ -228,20 +276,6 @@ void Engine::SetSemanticsEnabled(bool enabled) {
     runtime_->SetSemanticsEnabled(semantics_enabled_);
 }
 
-void Engine::RunFromSnapshotStream(
-    const std::string& script_uri,
-    mojo::ScopedDataPipeConsumerHandle snapshot) {
-  TRACE_EVENT0("flutter", "Engine::RunFromSnapshotStream");
-  ConfigureRuntime(script_uri);
-  snapshot_drainer_.reset(new glue::DrainDataPipeJob(
-      std::move(snapshot), [this](std::vector<uint8_t> snapshot) {
-        FTL_DCHECK(runtime_);
-        FTL_DCHECK(runtime_->dart_controller());
-        runtime_->dart_controller()->RunFromSnapshot(snapshot.data(),
-                                                     snapshot.size());
-      }));
-}
-
 void Engine::ConfigureAssetBundle(const std::string& path) {
   struct stat stat_result = {0};
 
@@ -282,40 +316,24 @@ void Engine::ConfigureRuntime(const std::string& script_uri) {
 }
 
 void Engine::RunFromPrecompiledSnapshot(const mojo::String& bundle_path) {
-  TRACE_EVENT0("flutter", "Engine::RunFromPrecompiledSnapshot");
-  ConfigureAssetBundle(bundle_path.get());
-  ConfigureRuntime("http://localhost");
-  runtime_->dart_controller()->RunFromPrecompiledSnapshot();
+  RunBundle(bundle_path);
 }
 
 void Engine::RunFromFile(const mojo::String& main,
                          const mojo::String& packages,
                          const mojo::String& bundle) {
-  RunFromSource(main, packages, bundle);
+  RunBundleAndSource(bundle, main, packages);
 }
 
 void Engine::RunFromBundle(const mojo::String& script_uri,
-                           const mojo::String& path) {
-  TRACE_EVENT0("flutter", "Engine::RunFromBundle");
-  ConfigureAssetBundle(path);
-  mojo::DataPipe pipe;
-  asset_store_->GetAsStream(blink::kSnapshotAssetKey,
-                            std::move(pipe.producer_handle));
-  RunFromSnapshotStream(script_uri, std::move(pipe.consumer_handle));
+                           const mojo::String& bundle_path) {
+  RunBundle(bundle_path);
 }
 
 void Engine::RunFromBundleAndSnapshot(const mojo::String& script_uri,
                                       const mojo::String& bundle_path,
                                       const mojo::String& snapshot_path) {
-  TRACE_EVENT0("flutter", "Engine::RunFromBundleAndSnapshot");
-
-  ConfigureAssetBundle(bundle_path);
-
-  asset_store_->AddOverlayFile(blink::kSnapshotAssetKey, snapshot_path);
-  mojo::DataPipe pipe;
-  asset_store_->GetAsStream(blink::kSnapshotAssetKey,
-                            std::move(pipe.producer_handle));
-  RunFromSnapshotStream(script_uri, std::move(pipe.consumer_handle));
+  RunBundleAndSnapshot(bundle_path, snapshot_path);
 }
 
 void Engine::DidCreateMainIsolate(Dart_Isolate isolate) {
@@ -382,13 +400,18 @@ void Engine::HandleAssetPlatformMessage(
   std::string asset_name(reinterpret_cast<const char*>(data.data()),
                          data.size());
   std::vector<uint8_t> asset_data;
-  if ((directory_asset_bundle_ &&
-       directory_asset_bundle_->GetAsBuffer(asset_name, &asset_data)) ||
-      (asset_store_ && asset_store_->GetAsBuffer(asset_name, &asset_data))) {
+  if (GetAssetAsBuffer(asset_name, &asset_data)) {
     response->Complete(std::move(asset_data));
   } else {
     response->CompleteWithError();
   }
+}
+
+bool Engine::GetAssetAsBuffer(const std::string& name,
+                              std::vector<uint8_t>* data) {
+  return (directory_asset_bundle_ &&
+          directory_asset_bundle_->GetAsBuffer(name, data)) ||
+         (asset_store_ && asset_store_->GetAsBuffer(name, data));
 }
 
 }  // namespace shell

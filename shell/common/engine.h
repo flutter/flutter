@@ -44,6 +44,20 @@ class Engine : public sky::SkyEngine, public blink::RuntimeDelegate {
 
   static void Init();
 
+  void RunBundle(const std::string& bundle_path);
+
+  // Uses the given snapshot instead of looking inside the bundle for the
+  // snapshot. If |snapshot_override| is empty, this function looks for the
+  // snapshot in the bundle itself.
+  void RunBundleAndSnapshot(const std::string& bundle_path,
+                            const std::string& snapshot_override);
+
+  // Uses the given source code instead of looking inside the bindle for the
+  // source code.
+  void RunBundleAndSource(const std::string& bundle_path,
+                          const std::string& main,
+                          const std::string& packages);
+
   void BeginFrame(ftl::TimePoint frame_time);
 
   void RunFromSource(const std::string& main,
@@ -84,9 +98,6 @@ class Engine : public sky::SkyEngine, public blink::RuntimeDelegate {
   void DidCreateMainIsolate(Dart_Isolate isolate) override;
   void DidCreateSecondaryIsolate(Dart_Isolate isolate) override;
 
-  void RunFromSnapshotStream(const std::string& script_uri,
-                             mojo::ScopedDataPipeConsumerHandle snapshot);
-
   void StopAnimator();
   void StartAnimatorIfPossible();
 
@@ -100,6 +111,7 @@ class Engine : public sky::SkyEngine, public blink::RuntimeDelegate {
       ftl::RefPtr<blink::PlatformMessage> message);
 
   void HandleAssetPlatformMessage(ftl::RefPtr<blink::PlatformMessage> message);
+  bool GetAssetAsBuffer(const std::string& name, std::vector<uint8_t>* data);
 
   ftl::WeakPtr<PlatformView> platform_view_;
   std::unique_ptr<Animator> animator_;
