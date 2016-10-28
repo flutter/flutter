@@ -45,6 +45,8 @@ const Color _kDarkThemeSplashColor = const Color(0x40CCCCCC);
 /// Holds the color and typography values for a material design theme.
 ///
 /// Use this class to configure a [Theme] widget.
+///
+/// To obtain the current theme, use [Theme.of].
 class ThemeData {
   /// Create a ThemeData given a set of preferred values.
   ///
