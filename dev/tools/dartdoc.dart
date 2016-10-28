@@ -74,11 +74,6 @@ dependencies:
     args.add(name.substring(0, name.length - 5));
   }
 
-  findSkyServicesLibraryNames().forEach((String libName) {
-    args.add('--include-external');
-    args.add(libName);
-  });
-
   process = await Process.start('pub', args, workingDirectory: 'dev/docs');
   printStream(process.stdout);
   printStream(process.stderr);
@@ -129,21 +124,6 @@ void addHtmlBaseToIndex() {
 void putRedirectInOldIndexLocation() {
   String metaTag = '<meta http-equiv="refresh" content="0;URL=../index.html">';
   new File('$kDocRoot/flutter/index.html').writeAsStringSync(metaTag);
-}
-
-List<String> findSkyServicesLibraryNames() {
-  Directory skyServicesLocation = new Directory('bin/cache/pkg/sky_services/lib');
-  if (!skyServicesLocation.existsSync()) {
-    throw 'Did not find sky_services package location in ${skyServicesLocation.path}.';
-  }
-  return skyServicesLocation.listSync(followLinks: false, recursive: true)
-      .where((FileSystemEntity entity) {
-    return entity is File && entity.path.endsWith('.mojom.dart');
-  }).map((FileSystemEntity entity) {
-    String basename = path.basename(entity.path);
-    basename = basename.substring(0, basename.length-('.dart'.length));
-    return basename.replaceAll('.', '_');
-  });
 }
 
 List<String> findPackageNames() {
