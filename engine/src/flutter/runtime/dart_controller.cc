@@ -11,7 +11,6 @@
 #include "flutter/common/threads.h"
 #include "flutter/glue/trace_event.h"
 #include "flutter/lib/io/dart_io.h"
-#include "flutter/lib/mojo/dart_mojo_internal.h"
 #include "flutter/lib/ui/dart_runtime_hooks.h"
 #include "flutter/lib/ui/dart_ui.h"
 #include "flutter/lib/ui/ui_dart_state.h"
@@ -137,8 +136,8 @@ void DartController::CreateIsolateFor(const std::string& script_uri,
   char* error = nullptr;
   Dart_Isolate isolate = Dart_CreateIsolate(
       script_uri.c_str(), "main",
-      reinterpret_cast<uint8_t*>(DART_SYMBOL(kIsolateSnapshot)),
-      nullptr, static_cast<tonic::DartState*>(state.get()), &error);
+      reinterpret_cast<uint8_t*>(DART_SYMBOL(kIsolateSnapshot)), nullptr,
+      static_cast<tonic::DartState*>(state.get()), &error);
   FTL_CHECK(isolate) << error;
   ui_dart_state_ = state.release();
   dart_state()->message_handler().Initialize(blink::Threads::UI());
@@ -153,7 +152,6 @@ void DartController::CreateIsolateFor(const std::string& script_uri,
     tonic::DartApiScope dart_api_scope;
     DartIO::InitForIsolate();
     DartUI::InitForIsolate();
-    DartMojoInternal::InitForIsolate();
     DartRuntimeHooks::Install(DartRuntimeHooks::MainIsolate, script_uri);
 
     std::unique_ptr<tonic::DartClassProvider> ui_class_provider(

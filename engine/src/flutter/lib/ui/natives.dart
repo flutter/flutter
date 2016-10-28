@@ -28,9 +28,6 @@ Future<developer.ServiceExtensionResponse> _scheduleFrame(
 }
 
 void _setupHooks() {
-  // Wire up timer implementation that is driven by MojoHandleWatcher.
-  VMLibraryHooks.eventHandlerSendData = MojoHandleWatcher.timer;
-  VMLibraryHooks.timerMillisecondClock = MojoCoreNatives.timerMillisecondClock;
   assert(() {
     // In debug mode, register the schedule frame extension.
     developer.registerExtension('ext.ui.window.scheduleFrame', _scheduleFrame);

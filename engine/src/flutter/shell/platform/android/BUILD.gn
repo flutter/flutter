@@ -50,8 +50,6 @@ shared_library("sky_shell") {
     "//flutter/skia",
     "//flutter/vulkan",
     "//lib/ftl",
-    "//mojo/edk/base_edk",
-    "//mojo/edk/system",
     ":jni_headers",
   ]
 

@@ -72,21 +72,17 @@ static void InitDartInternal(Dart_Handle builtin_library,
     // Call |_setupHooks| to configure |VMLibraryHooks|.
     Dart_Handle method_name = Dart_NewStringFromCString("_setupHooks");
     DART_CHECK_VALID(Dart_Invoke(builtin_library, method_name, 0, NULL))
-
-    // Call |_setupHooks| to configure |VMLibraryHooks|.
-    Dart_Handle isolate_lib = Dart_LookupLibrary(ToDart("dart:isolate"));
-    DART_CHECK_VALID(isolate_lib);
-    DART_CHECK_VALID(Dart_Invoke(isolate_lib, method_name, 0, NULL));
-  } else {
-    FTL_CHECK(isolate_type == DartRuntimeHooks::SecondaryIsolate);
-    Dart_Handle io_lib = Dart_LookupLibrary(ToDart("dart:io"));
-    DART_CHECK_VALID(io_lib);
-    Dart_Handle setup_hooks = Dart_NewStringFromCString("_setupHooks");
-    DART_CHECK_VALID(Dart_Invoke(io_lib, setup_hooks, 0, NULL));
-    Dart_Handle isolate_lib = Dart_LookupLibrary(ToDart("dart:isolate"));
-    DART_CHECK_VALID(isolate_lib);
-    DART_CHECK_VALID(Dart_Invoke(isolate_lib, setup_hooks, 0, NULL));
   }
+
+  Dart_Handle setup_hooks = Dart_NewStringFromCString("_setupHooks");
+
+  Dart_Handle io_lib = Dart_LookupLibrary(ToDart("dart:io"));
+  DART_CHECK_VALID(io_lib);
+  DART_CHECK_VALID(Dart_Invoke(io_lib, setup_hooks, 0, NULL));
+
+  Dart_Handle isolate_lib = Dart_LookupLibrary(ToDart("dart:isolate"));
+  DART_CHECK_VALID(isolate_lib);
+  DART_CHECK_VALID(Dart_Invoke(isolate_lib, setup_hooks, 0, NULL));
 }
 
 static void InitDartCore(Dart_Handle builtin, const std::string& script_uri) {

@@ -10,7 +10,7 @@
 
 namespace blink {
 
-using mojo::dart::ResourcesEntry;
+using flutter::runtime::ResourcesEntry;
 
 EmbedderResources::EmbedderResources(ResourcesEntry* resources_table)
     : resources_table_(resources_table) {}

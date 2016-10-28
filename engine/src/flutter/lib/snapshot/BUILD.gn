@@ -6,7 +6,6 @@ import("//flutter/lib/jni/dart_jni.gni")
 import("//flutter/lib/snapshot/toolchain.gni")
 import("//flutter/lib/ui/dart_ui.gni")
 import("//flutter/lib/ui/dart_ui.gni")
-import("//mojo/dart/packages/mojo/sdk_ext_sources.gni")
 
 bindings_output_dir = "$root_gen_dir/sky/bindings"
 
@@ -37,9 +36,6 @@ action("generate_snapshot_bin") {
     "snapshot.dart",
   ] + dart_ui_files
     + dart_jni_files
-    + rebase_path(dart_mojo_internal_sdk_sources,
-                  "",
-                  "//mojo/dart/packages/mojo")
   vm_isolate_snapshot = "$target_gen_dir/vm_isolate_snapshot.bin"
   isolate_snapshot = "$target_gen_dir/isolate_snapshot.bin"
   outputs = [
@@ -47,8 +43,6 @@ action("generate_snapshot_bin") {
     isolate_snapshot,
   ]
 
-  dart_mojo_internal_path =
-      rebase_path("//mojo/dart/packages/mojo/sdk_ext/internal.dart")
   rebased_dart_ui_path = rebase_path(dart_ui_path)
   rebased_dart_jni_path = rebase_path(dart_jni_path)
 
@@ -70,7 +64,6 @@ action("generate_snapshot_bin") {
     rebase_path(isolate_snapshot, root_build_dir),
     "--target_os",
     target_os,
-    "--url_mapping=dart:mojo.internal,$dart_mojo_internal_path",
     "--url_mapping=dart:ui,$rebased_dart_ui_path",
     "--url_mapping=dart:jni,$rebased_dart_jni_path",
   ]

@@ -61,8 +61,6 @@ shared_library("flutter_framework_dylib") {
     "//flutter/sky/engine/platform",
     "//flutter/sky/engine/wtf",
     "//lib/ftl",
-    "//mojo/edk/base_edk",
-    "//mojo/edk/system",
   ]
 
   defines = [

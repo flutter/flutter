@@ -24,8 +24,6 @@
 #include "flutter/shell/common/shell.h"
 #include "jni/FlutterMain_jni.h"
 #include "lib/ftl/macros.h"
-#include "mojo/edk/embedder/embedder.h"
-#include "mojo/edk/embedder/simple_platform_support.h"
 
 using base::LazyInstance;
 
@@ -77,8 +75,6 @@ static void Init(JNIEnv* env,
 
   g_java_message_loop.Get().reset(new base::MessageLoopForUI);
   base::MessageLoopForUI::current()->Start();
-
-  mojo::embedder::Init(mojo::embedder::CreateSimplePlatformSupport());
 
   Shell::InitStandalone();
 

@@ -29,8 +29,8 @@
 #define kLibrarySourceNamePrefix "/vmservice"
 static const char* kServiceIsolateScript = "vmservice_io.dart";
 
-namespace mojo {
-namespace dart {
+namespace flutter {
+namespace runtime {
 extern ResourcesEntry __flutter_embedded_service_isolate_resources_[];
 }
 }
@@ -104,7 +104,7 @@ bool DartServiceIsolate::Startup(std::string server_ip,
 
   if (!g_resources) {
     g_resources = new EmbedderResources(
-        &mojo::dart::__flutter_embedded_service_isolate_resources_[0]);
+        &flutter::runtime::__flutter_embedded_service_isolate_resources_[0]);
   }
 
   Dart_Handle result;

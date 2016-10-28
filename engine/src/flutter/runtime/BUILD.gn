@@ -23,9 +23,9 @@ action("gen_embedded_resources_cc") {
     "--output",
     rebase_path(output_file),
     "--outer_namespace",
-    "mojo",  # TODO(abarth): Change namespace.
+    "flutter",
     "--inner_namespace",
-    "dart",  # TODO(abarth): Change namespace.
+    "runtime",
     "--table_name",
     "flutter_embedded_service_isolate",
     "--root_prefix",
@@ -71,13 +71,11 @@ source_set("runtime") {
     "//flutter/flow",
     "//flutter/glue",
     "//flutter/lib/io",
-    "//flutter/lib/mojo",
     "//flutter/lib/ui",
     "//flutter/skia",
     "//flutter/sky/engine/platform",
     "//lib/ftl",
     "//lib/tonic",
-    "//mojo/public/platform/dart:mojo_internal_impl",
     "//third_party/rapidjson",
   ]
 

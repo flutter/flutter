@@ -15,15 +15,12 @@
 #include "flutter/shell/platform/linux/message_pump_glfw.h"
 #include "flutter/shell/platform/linux/platform_view_glfw.h"
 #include "flutter/shell/testing/testing.h"
-#include "mojo/edk/embedder/embedder.h"
-#include "mojo/edk/embedder/simple_platform_support.h"
 
 namespace {
 
 int RunNonInteractive() {
   base::MessageLoop message_loop;
 
-  mojo::embedder::Init(mojo::embedder::CreateSimplePlatformSupport());
   shell::Shell::InitStandalone();
 
   if (!shell::InitForTesting()) {
@@ -45,7 +42,6 @@ int RunInteractive() {
 
   base::MessageLoop message_loop(shell::MessagePumpGLFW::Create());
 
-  mojo::embedder::Init(mojo::embedder::CreateSimplePlatformSupport());
   shell::Shell::InitStandalone();
 
   std::string target = command_line.GetSwitchValueASCII(shell::switches::kFLX);

@@ -12,7 +12,6 @@
 #include "flutter/assets/unzipper_provider.h"
 #include "flutter/assets/zip_asset_store.h"
 #include "flutter/common/threads.h"
-#include "flutter/glue/movable_wrapper.h"
 #include "flutter/glue/trace_event.h"
 #include "flutter/runtime/asset_font_selector.h"
 #include "flutter/runtime/dart_controller.h"

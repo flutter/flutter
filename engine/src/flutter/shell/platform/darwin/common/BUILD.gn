@@ -26,7 +26,5 @@ source_set("common") {
     "//flutter/skia",
     "//flutter/sky/engine/wtf",
     "//lib/ftl",
-    "//mojo/edk/base_edk",
-    "//mojo/edk/system",
   ]
 }

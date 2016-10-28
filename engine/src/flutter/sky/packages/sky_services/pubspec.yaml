@@ -1,9 +1,7 @@
 name: sky_services
 version: 0.0.99
 author: Flutter Authors <flutter-dev@googlegroups.com>
-description: Mojom interfaces associated with Flutter
+description: An empty package
 homepage: http://flutter.io
-dependencies:
-  mojo_sdk: 0.2.31
 environment:
   sdk: '>=1.8.0 <2.0.0'

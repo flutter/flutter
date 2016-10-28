@@ -4,7 +4,6 @@
 
 source_set("glue") {
   sources = [
-    "movable_wrapper.h",
     "stack_trace.h",
     "thread.h",
     "trace_event.h",
@@ -12,8 +11,6 @@ source_set("glue") {
 
   deps = [
     "//lib/ftl",
-    "//mojo/public/cpp/environment",
-    "//mojo/public/cpp/system",
   ]
 
   if (is_fuchsia) {
@@ -26,6 +23,8 @@ source_set("glue") {
 
     deps += [
       "//lib/mtl",
+      "//mojo/public/cpp/environment",
+      "//mojo/public/cpp/system",
     ]
 
     public_deps = [

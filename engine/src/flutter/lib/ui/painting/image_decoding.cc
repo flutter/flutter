@@ -7,10 +7,10 @@
 #include "flutter/common/threads.h"
 #include "flutter/flow/bitmap_image.h"
 #include "flutter/flow/texture_image.h"
-#include "flutter/glue/movable_wrapper.h"
 #include "flutter/glue/trace_event.h"
 #include "flutter/lib/ui/painting/image.h"
 #include "flutter/lib/ui/painting/resource_context.h"
+#include "lib/ftl/functional/make_copyable.h"
 #include "lib/tonic/dart_persistent_value.h"
 #include "lib/tonic/dart_state.h"
 #include "lib/tonic/logging/dart_invoke.h"
@@ -67,12 +67,13 @@ void InvokeImageCallback(sk_sp<SkImage> image,
 }
 
 void DecodeImageAndInvokeImageCallback(
-    glue::MovableWrapper<std::unique_ptr<DartPersistentValue>> callback,
+    std::unique_ptr<DartPersistentValue> callback,
     std::vector<uint8_t> buffer) {
   sk_sp<SkImage> image = DecodeImage(std::move(buffer));
-  Threads::UI()->PostTask([callback, image]() mutable {
-    InvokeImageCallback(image, callback.Unwrap());
-  });
+  Threads::UI()->PostTask(
+      ftl::MakeCopyable([ callback = std::move(callback), image ]() mutable {
+        InvokeImageCallback(image, std::move(callback));
+      }));
 }
 
 void DecodeImageFromList(Dart_NativeArguments args) {
@@ -91,15 +92,16 @@ void DecodeImageFromList(Dart_NativeArguments args) {
     return;
   }
 
-  auto callback = glue::WrapMovable(std::unique_ptr<DartPersistentValue>(
-      new DartPersistentValue(tonic::DartState::Current(), callback_handle)));
-
   const uint8_t* bytes = reinterpret_cast<const uint8_t*>(list.data());
   std::vector<uint8_t> buffer(bytes, bytes + list.num_elements());
 
-  Threads::IO()->PostTask([ callback, buffer = std::move(buffer) ]() mutable {
-    DecodeImageAndInvokeImageCallback(callback, std::move(buffer));
-  });
+  Threads::IO()->PostTask(ftl::MakeCopyable([
+    callback = std::make_unique<DartPersistentValue>(
+        tonic::DartState::Current(), callback_handle),
+    buffer = std::move(buffer)
+  ]() mutable {
+    DecodeImageAndInvokeImageCallback(std::move(callback), std::move(buffer));
+  }));
 }
 
 }  // namespace
