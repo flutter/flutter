@@ -60,9 +60,9 @@ public class TextInputPlugin extends JSONMessageListener {
     private static int inputTypeFromTextInputType(String inputType) {
         if (inputType.equals("TextInputType.datetime"))
             return InputType.TYPE_CLASS_DATETIME;
-        if (inputType.equals("TextInputType.datetime"))
+        if (inputType.equals("TextInputType.number"))
             return InputType.TYPE_CLASS_NUMBER;
-        if (inputType.equals("TextInputType.datetime"))
+        if (inputType.equals("TextInputType.phone"))
             return InputType.TYPE_CLASS_PHONE;
         return InputType.TYPE_CLASS_TEXT;
     }
