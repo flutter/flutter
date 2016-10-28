@@ -12,8 +12,13 @@ source_set("mojo") {
     "//dart/runtime:libdart",
     "//lib/ftl",
     "//lib/tonic",
-    "//mojo/public/cpp/environment:standalone",
     "//mojo/public/cpp/system",
     "//mojo/public/platform/dart:mojo_internal_impl",
   ]
+
+  if (!is_fuchsia) {
+    deps += [
+      "//mojo/public/cpp/environment:logging_only",
+    ]
+  }
 }
