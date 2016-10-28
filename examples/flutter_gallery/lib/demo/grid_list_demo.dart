@@ -37,6 +37,21 @@ class GridPhotoViewer extends StatefulWidget {
   _GridPhotoViewerState createState() => new _GridPhotoViewerState();
 }
 
+class _GridTitleText extends StatelessWidget {
+  _GridTitleText(this.text);
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return new FittedBox(
+      fit: ImageFit.scaleDown,
+      alignment: FractionalOffset.centerLeft,
+      child: new Text(text),
+    );
+  }
+}
+
 class _GridPhotoViewerState extends State<GridPhotoViewer> with SingleTickerProviderStateMixin {
   AnimationController _controller;
   Animation<Offset> _flingAnimation;
@@ -180,7 +195,7 @@ class GridDemoPhotoItem extends StatelessWidget {
           header: new GestureDetector(
             onTap: () { onBannerTap(photo); },
             child: new GridTileBar(
-              title: new Text(photo.title),
+              title: new _GridTitleText(photo.title),
               backgroundColor: Colors.black45,
               leading: new Icon(
                 icon,
@@ -197,8 +212,8 @@ class GridDemoPhotoItem extends StatelessWidget {
             onTap: () { onBannerTap(photo); },
             child: new GridTileBar(
               backgroundColor: Colors.black45,
-              title: new Text(photo.title),
-              subtitle: new Text(photo.caption),
+              title: new _GridTitleText(photo.title),
+              subtitle: new _GridTitleText(photo.caption),
               trailing: new Icon(
                 icon,
                 color: Colors.white
