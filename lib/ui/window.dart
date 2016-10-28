@@ -27,9 +27,6 @@ typedef void PlatformMessageCallback(String name, ByteData data, PlatformMessage
 
 /// States that an application can be in.
 enum AppLifecycleState {
-  // These values must match the order of the values of
-  // AppLifecycleState in sky_engine.mojom
-
   /// The application is not currently visible to the user. When the
   /// application is in this state, the engine will not call the
   /// [onBeginFrame] callback.

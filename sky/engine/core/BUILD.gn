@@ -16,7 +16,6 @@ static_library("core") {
     "//dart/runtime/vm:libdart_platform",
     "//flutter/assets",
     "//flutter/sky/engine/platform",
-    "//flutter/services/engine:interfaces",
   ]
 
   if (flutter_runtime_mode != "release" && !is_fuchsia) {

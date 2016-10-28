@@ -18,11 +18,13 @@ namespace shell {
 PlatformView::PlatformView(std::unique_ptr<Rasterizer> rasterizer)
     : rasterizer_(std::move(rasterizer)),
       size_(SkISize::Make(0, 0)),
-      weak_factory_(this) {}
+      weak_factory_(this) {
+  blink::Threads::UI()->PostTask(
+      [self = GetWeakPtr()] { Shell::Shared().AddPlatformView(self); });
+}
 
 PlatformView::~PlatformView() {
-  blink::Threads::UI()->PostTask(
-      []() { Shell::Shared().PurgePlatformViews(); });
+  blink::Threads::UI()->PostTask([] { Shell::Shared().PurgePlatformViews(); });
 
   Rasterizer* rasterizer = rasterizer_.release();
   blink::Threads::Gpu()->PostTask([rasterizer]() { delete rasterizer; });
@@ -61,18 +63,6 @@ void PlatformView::SetSemanticsEnabled(bool enabled) {
     if (engine)
       engine->SetSemanticsEnabled(enabled);
   });
-}
-
-void PlatformView::ConnectToEngine(
-    mojo::InterfaceRequest<sky::SkyEngine> request) {
-  blink::Threads::UI()->PostTask(ftl::MakeCopyable([
-    view = GetWeakPtr(), engine = engine().GetWeakPtr(),
-    request = std::move(request)
-  ]() mutable {
-    if (engine)
-      engine->ConnectToEngine(std::move(request));
-    Shell::Shared().AddPlatformView(view);
-  }));
 }
 
 void PlatformView::NotifyCreated(std::unique_ptr<Surface> surface) {

@@ -30,10 +30,6 @@ class PlatformViewIOS : public PlatformView, public GPUSurfaceGLDelegate {
 
   void ToggleAccessibility(UIView* view, bool enabled);
 
-  void ConnectToEngineAndSetupServices();
-
-  sky::SkyEnginePtr& engineProxy();
-
   PlatformMessageRouter& platform_message_router() {
     return platform_message_router_;
   }
@@ -59,20 +55,19 @@ class PlatformViewIOS : public PlatformView, public GPUSurfaceGLDelegate {
 
   void UpdateSemantics(std::vector<blink::SemanticsNode> update) override;
 
-  void RunFromSource(const std::string& main,
-                     const std::string& packages,
-                     const std::string& assets_directory) override;
+  void RunFromSource(const std::string& assets_directory,
+                     const std::string& main,
+                     const std::string& packages) override;
 
  private:
   std::unique_ptr<IOSGLContext> context_;
-  sky::SkyEnginePtr engine_;
   PlatformMessageRouter platform_message_router_;
   std::unique_ptr<AccessibilityBridge> accessibility_bridge_;
   ftl::WeakPtrFactory<PlatformViewIOS> weak_factory_;
 
-  void SetupAndLoadFromSource(const std::string& main,
-                              const std::string& packages,
-                              const std::string& assets_directory);
+  void SetupAndLoadFromSource(const std::string& assets_directory,
+                              const std::string& main,
+                              const std::string& packages);
 
   FTL_DISALLOW_COPY_AND_ASSIGN(PlatformViewIOS);
 };

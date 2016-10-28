@@ -136,8 +136,7 @@ RegisterNativeServiceProtocolExtensionHook
 void IsolateShutdownCallback(void* callback_data) {
   if (tonic::DartStickyError::IsSet()) {
     tonic::DartApiScope api_scope;
-    FTL_LOG(ERROR) << "Isolate "
-                   << tonic::StdStringFromDart(Dart_DebugName())
+    FTL_LOG(ERROR) << "Isolate " << tonic::StdStringFromDart(Dart_DebugName())
                    << " exited with an error";
     Dart_Handle sticky_error = Dart_GetStickyError();
     FTL_CHECK(LogIfError(sticky_error));
@@ -191,9 +190,8 @@ static bool StringEndsWith(const std::string& string,
   if (ending.size() > string.size())
     return false;
 
-  return string.compare(string.size() - ending.size(),
-                        ending.size(),
-                        ending) == 0;
+  return string.compare(string.size() - ending.size(), ending.size(), ending) ==
+         0;
 }
 
 #if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_RELEASE
@@ -210,8 +208,8 @@ Dart_Isolate ServiceIsolateCreateCallback(const char* script_uri,
   tonic::DartState* dart_state = new tonic::DartState();
   Dart_Isolate isolate = Dart_CreateIsolate(
       script_uri, "main",
-      reinterpret_cast<const uint8_t*>(DART_SYMBOL(kIsolateSnapshot)),
-      nullptr, dart_state, error);
+      reinterpret_cast<const uint8_t*>(DART_SYMBOL(kIsolateSnapshot)), nullptr,
+      dart_state, error);
   FTL_CHECK(isolate) << error;
   dart_state->SetIsolate(isolate);
   FTL_CHECK(Dart_IsServiceIsolate(isolate));
@@ -277,8 +275,7 @@ Dart_Isolate IsolateCreateCallback(const char* script_uri,
     const std::string& bundle_path = entry_path;
     ftl::RefPtr<ZipAssetStore> zip_asset_store =
         ftl::MakeRefCounted<ZipAssetStore>(
-            GetUnzipperProviderForPath(std::move(bundle_path)),
-            ftl::RefPtr<ftl::TaskRunner>());
+            GetUnzipperProviderForPath(std::move(bundle_path)));
     zip_asset_store->GetAsBuffer(kSnapshotAssetKey, &snapshot_data);
   }
 
@@ -287,8 +284,8 @@ Dart_Isolate IsolateCreateCallback(const char* script_uri,
 
   Dart_Isolate isolate = Dart_CreateIsolate(
       script_uri, main,
-      reinterpret_cast<uint8_t*>(DART_SYMBOL(kIsolateSnapshot)),
-      nullptr, dart_state, error);
+      reinterpret_cast<uint8_t*>(DART_SYMBOL(kIsolateSnapshot)), nullptr,
+      dart_state, error);
   FTL_CHECK(isolate) << error;
   dart_state->SetIsolate(isolate);
   FTL_CHECK(!LogIfError(
@@ -607,16 +604,17 @@ void InitDartVM() {
   }
 
 #if defined(OS_FUCHSIA) && defined(NDEBUG)
-  if (false) {
-    // Do not enable checked mode for Fuchsia release builds
-    // TODO(mikejurka): remove this once precompiled code is working on Fuchsia
+  // Do not enable checked mode for Fuchsia release builds
+  // TODO(mikejurka): remove this once precompiled code is working on Fuchsia
+  const bool use_checked_mode = false;
 #else
-  if (!IsRunningPrecompiledCode()) {
-    // Enable checked mode if we are not running precompiled code. We run non-
-    // precompiled code only in the debug product mode.
+  // Enable checked mode if we are not running precompiled code. We run non-
+  // precompiled code only in the debug product mode.
+  const bool use_checked_mode = !IsRunningPrecompiledCode();
 #endif
+
+  if (use_checked_mode)
     PushBackAll(&args, kDartCheckedModeArgs, arraysize(kDartCheckedModeArgs));
-  }
 
   if (settings.start_paused)
     PushBackAll(&args, kDartStartPausedArgs, arraysize(kDartStartPausedArgs));

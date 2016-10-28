@@ -6,13 +6,13 @@
 #define SHELL_COMMON_RASTERIZER_H_
 
 #include <memory>
+
 #include "flutter/flow/layers/layer_tree.h"
 #include "flutter/shell/common/surface.h"
 #include "flutter/synchronization/pipeline.h"
 #include "lib/ftl/functional/closure.h"
 #include "lib/ftl/memory/weak_ptr.h"
 #include "lib/ftl/synchronization/waitable_event.h"
-#include "mojo/public/cpp/bindings/binding.h"
 
 namespace shell {
 

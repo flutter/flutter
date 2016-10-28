@@ -10,7 +10,7 @@
 
 #include "flutter/assets/directory_asset_bundle.h"
 #include "flutter/assets/unzipper_provider.h"
-#include "flutter/assets/zip_asset_bundle.h"
+#include "flutter/assets/zip_asset_store.h"
 #include "flutter/common/threads.h"
 #include "flutter/glue/movable_wrapper.h"
 #include "flutter/glue/trace_event.h"
@@ -24,7 +24,6 @@
 #include "lib/ftl/files/file.h"
 #include "lib/ftl/files/path.h"
 #include "lib/ftl/functional/make_copyable.h"
-#include "mojo/public/cpp/application/connect.h"
 #include "third_party/rapidjson/rapidjson/document.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkPictureRecorder.h"
@@ -65,7 +64,6 @@ Engine::Engine(PlatformView* platform_view)
           platform_view->rasterizer().GetWeakRasterizerPtr(),
           platform_view->GetVsyncWaiter(),
           this)),
-      binding_(this),
       activity_running_(false),
       have_surface_(false),
       weak_factory_(this) {}
@@ -153,10 +151,6 @@ std::string Engine::GetUIIsolateName() {
     return "";
   }
   return runtime_->GetIsolateName();
-}
-
-void Engine::ConnectToEngine(mojo::InterfaceRequest<SkyEngine> request) {
-  binding_.Bind(request.Pass());
 }
 
 void Engine::OnOutputSurfaceCreated(const ftl::Closure& gpu_continuation) {
@@ -280,7 +274,8 @@ void Engine::ConfigureAssetBundle(const std::string& path) {
   struct stat stat_result = {0};
 
   directory_asset_bundle_.reset();
-  zip_asset_bundle_.reset();
+  // TODO(abarth): We should reset asset_store_ as well, but that might break
+  // custom font loading in hot reload.
 
   if (::stat(path.c_str(), &stat_result) != 0) {
     LOG(INFO) << "Could not configure asset bundle at path: " << path;
@@ -288,24 +283,19 @@ void Engine::ConfigureAssetBundle(const std::string& path) {
   }
 
   if (S_ISDIR(stat_result.st_mode)) {
-    // Directory asset bundle.
-    directory_asset_bundle_ = std::make_unique<blink::DirectoryAssetBundle>(
-        mojo::GetProxy(&root_bundle_), path, blink::Threads::IO());
+    directory_asset_bundle_ =
+        std::make_unique<blink::DirectoryAssetBundle>(path);
     return;
   }
 
   if (S_ISREG(stat_result.st_mode)) {
-    // Zip asset bundle.
     asset_store_ = ftl::MakeRefCounted<blink::ZipAssetStore>(
-        blink::GetUnzipperProviderForPath(path), blink::Threads::IO());
-    zip_asset_bundle_ = std::make_unique<blink::ZipAssetBundle>(
-        mojo::GetProxy(&root_bundle_), asset_store_);
+        blink::GetUnzipperProviderForPath(path));
     return;
   }
 }
 
 void Engine::ConfigureRuntime(const std::string& script_uri) {
-  snapshot_drainer_.reset();
   runtime_ = blink::RuntimeController::Create(this);
   runtime_->CreateDartController(std::move(script_uri));
   runtime_->SetViewportMetrics(viewport_metrics_);
@@ -313,27 +303,6 @@ void Engine::ConfigureRuntime(const std::string& script_uri) {
   runtime_->SetSemanticsEnabled(semantics_enabled_);
   if (pending_push_route_message_)
     runtime_->DispatchPlatformMessage(std::move(pending_push_route_message_));
-}
-
-void Engine::RunFromPrecompiledSnapshot(const mojo::String& bundle_path) {
-  RunBundle(bundle_path);
-}
-
-void Engine::RunFromFile(const mojo::String& main,
-                         const mojo::String& packages,
-                         const mojo::String& bundle) {
-  RunBundleAndSource(bundle, main, packages);
-}
-
-void Engine::RunFromBundle(const mojo::String& script_uri,
-                           const mojo::String& bundle_path) {
-  RunBundle(bundle_path);
-}
-
-void Engine::RunFromBundleAndSnapshot(const mojo::String& script_uri,
-                                      const mojo::String& bundle_path,
-                                      const mojo::String& snapshot_path) {
-  RunBundleAndSnapshot(bundle_path, snapshot_path);
 }
 
 void Engine::DidCreateMainIsolate(Dart_Isolate isolate) {

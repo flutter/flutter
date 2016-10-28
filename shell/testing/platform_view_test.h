@@ -21,9 +21,9 @@ class PlatformViewTest : public PlatformView {
 
   bool ResourceContextMakeCurrent() override;
 
-  void RunFromSource(const std::string& main,
-                     const std::string& packages,
-                     const std::string& assets_directory) override;
+  void RunFromSource(const std::string& assets_directory,
+                     const std::string& main,
+                     const std::string& packages) override;
 
  private:
   FTL_DISALLOW_COPY_AND_ASSIGN(PlatformViewTest);

@@ -10,8 +10,6 @@
 #include "base/bind.h"
 #include "base/logging.h"
 #include "flutter/lib/jni/dart_jni.h"
-#include "mojo/android/system/base_run_loop.h"
-#include "mojo/android/system/core_impl.h"
 #include "flutter/shell/platform/android/flutter_main.h"
 #include "flutter/shell/platform/android/platform_view_android.h"
 #include "flutter/shell/platform/android/vsync_waiter_android.h"
@@ -19,8 +17,6 @@
 namespace {
 
 base::android::RegistrationMethod kSkyRegisteredMethods[] = {
-    {"CoreImpl", mojo::android::RegisterCoreImpl},
-    {"BaseRunLoop", mojo::android::RegisterBaseRunLoop},
     {"FlutterView", shell::PlatformViewAndroid::Register},
     {"VsyncWaiter", shell::VsyncWaiterAndroid::Register},
     {"FlutterMain", shell::RegisterFlutterMain},

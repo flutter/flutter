@@ -18,6 +18,7 @@
 #include "base/trace_event/trace_event.h"
 #include "dart/runtime/include/dart_tools_api.h"
 #include "flutter/runtime/start_up.h"
+#include "flutter/common/threads.h"
 #include "flutter/shell/common/shell.h"
 #include "flutter/shell/common/switches.h"
 #include "flutter/shell/common/tracing_controller.h"
@@ -118,10 +119,10 @@ void PlatformMacMain(int argc, const char* argv[], std::string icu_data_path) {
   });
 }
 
-static bool FlagsValidForCommandLineLaunch(const std::string& dart_main,
-                                           const std::string& packages,
-                                           const std::string& bundle) {
-  if (dart_main.empty() || packages.empty() || bundle.empty()) {
+static bool FlagsValidForCommandLineLaunch(const std::string& bundle_path,
+                                           const std::string& main,
+                                           const std::string& packages) {
+  if (main.empty() || packages.empty() || bundle_path.empty()) {
     return false;
   }
 
@@ -131,7 +132,7 @@ static bool FlagsValidForCommandLineLaunch(const std::string& dart_main,
 
   NSFileManager* manager = [NSFileManager defaultManager];
 
-  if (![manager fileExistsAtPath:@(dart_main.c_str())]) {
+  if (![manager fileExistsAtPath:@(main.c_str())]) {
     return false;
   }
 
@@ -139,7 +140,7 @@ static bool FlagsValidForCommandLineLaunch(const std::string& dart_main,
     return false;
   }
 
-  if (![manager fileExistsAtPath:@(bundle.c_str())]) {
+  if (![manager fileExistsAtPath:@(bundle_path.c_str())]) {
     return false;
   }
 
@@ -163,46 +164,50 @@ static std::string ResolveCommandLineLaunchFlag(const char* name) {
   return "";
 }
 
-bool AttemptLaunchFromCommandLineSwitches(sky::SkyEnginePtr& engine) {
+bool AttemptLaunchFromCommandLineSwitches(Engine* engine) {
   base::mac::ScopedNSAutoreleasePool pool;
 
   NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
 
   auto command_line = *base::CommandLine::ForCurrentProcess();
 
-  if (command_line.HasSwitch(switches::kMainDartFile) ||
-      command_line.HasSwitch(switches::kPackages) ||
-      command_line.HasSwitch(switches::kFLX)) {
+  if (command_line.HasSwitch(switches::kFLX) ||
+      command_line.HasSwitch(switches::kMainDartFile) ||
+      command_line.HasSwitch(switches::kPackages)) {
     // The main dart file, flx bundle and the package root must be specified in
     // one go. We dont want to end up in a situation where we take one value
     // from the command line and the others from user defaults. In case, any
     // new flags are specified, forget about all the old ones.
+    [defaults removeObjectForKey:@(switches::kFLX)];
     [defaults removeObjectForKey:@(switches::kMainDartFile)];
     [defaults removeObjectForKey:@(switches::kPackages)];
-    [defaults removeObjectForKey:@(switches::kFLX)];
 
     [defaults synchronize];
   }
 
-  std::string dart_main = ResolveCommandLineLaunchFlag(switches::kMainDartFile);
+  std::string bundle_path = ResolveCommandLineLaunchFlag(switches::kFLX);
+  std::string main = ResolveCommandLineLaunchFlag(switches::kMainDartFile);
   std::string packages = ResolveCommandLineLaunchFlag(switches::kPackages);
-  std::string bundle = ResolveCommandLineLaunchFlag(switches::kFLX);
 
-  if (!FlagsValidForCommandLineLaunch(dart_main, packages, bundle)) {
+  if (!FlagsValidForCommandLineLaunch(bundle_path, main, packages)) {
     return false;
   }
 
   // Save the newly resolved dart main file and the package root to user
   // defaults so that the next time the user launches the application in the
   // simulator without the tooling, the application boots up.
-  [defaults setObject:@(dart_main.c_str()) forKey:@(switches::kMainDartFile)];
+  [defaults setObject:@(bundle_path.c_str()) forKey:@(switches::kFLX)];
+  [defaults setObject:@(main.c_str()) forKey:@(switches::kMainDartFile)];
   [defaults setObject:@(packages.c_str()) forKey:@(switches::kPackages)];
-  [defaults setObject:@(bundle.c_str()) forKey:@(switches::kFLX)];
 
   [defaults synchronize];
 
-  // Finally launch with the newly resolved arguments.
-  engine->RunFromFile(dart_main, packages, bundle);
+  blink::Threads::UI()->PostTask(
+      [ engine = engine->GetWeakPtr(), bundle_path, main, packages ] {
+        if (engine)
+          engine->RunBundleAndSource(bundle_path, main, packages);
+      });
+
   return true;
 }
 

@@ -41,8 +41,6 @@ class PlatformView {
   void DispatchSemanticsAction(int32_t id, blink::SemanticsAction action);
   void SetSemanticsEnabled(bool enabled);
 
-  void ConnectToEngine(mojo::InterfaceRequest<sky::SkyEngine> request);
-
   void NotifyCreated(std::unique_ptr<Surface> surface);
 
   void NotifyCreated(std::unique_ptr<Surface> surface,
@@ -64,9 +62,9 @@ class PlatformView {
   Rasterizer& rasterizer() { return *rasterizer_; }
   Engine& engine() { return *engine_; }
 
-  virtual void RunFromSource(const std::string& main,
-                             const std::string& packages,
-                             const std::string& assets_directory) = 0;
+  virtual void RunFromSource(const std::string& assets_directory,
+                             const std::string& main,
+                             const std::string& packages) = 0;
 
  protected:
   explicit PlatformView(std::unique_ptr<Rasterizer> rasterizer);

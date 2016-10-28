@@ -33,7 +33,6 @@ executable("content_handler") {
     "//flutter/glue",
     "//flutter/lib/ui",
     "//flutter/runtime",
-    "//flutter/services/engine:interfaces",
     "//flutter/sky/engine/platform",
     "//lib/ftl",
     "//lib/mtl",

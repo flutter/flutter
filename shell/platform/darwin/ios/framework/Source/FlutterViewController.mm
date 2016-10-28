@@ -181,13 +181,11 @@ void FlutterInit(int argc, const char* argv[]) {
 - (void)connectToEngineAndLoad {
   TRACE_EVENT0("flutter", "connectToEngineAndLoad");
 
-  _platformView->ConnectToEngineAndSetupServices();
-
   // We ask the VM to check what it supports.
   const enum VMType type =
       Dart_IsPrecompiledRuntime() ? VMTypePrecompilation : VMTypeInterpreter;
 
-  [_dartProject launchInEngine:_platformView->engineProxy()
+  [_dartProject launchInEngine:&_platformView->engine()
                 embedderVMType:type
                         result:^(BOOL success, NSString* message) {
                           if (!success) {

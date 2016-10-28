@@ -20,10 +20,6 @@ class PlatformViewGLFW : public PlatformView, public GPUSurfaceGLDelegate {
 
   ~PlatformViewGLFW() override;
 
-  void ConnectToEngineAndSetupServices();
-
-  sky::SkyEnginePtr& EngineProxy();
-
   bool IsValid() const;
 
   bool ResourceContextMakeCurrent() override;
@@ -36,14 +32,13 @@ class PlatformViewGLFW : public PlatformView, public GPUSurfaceGLDelegate {
 
   intptr_t GLContextFBO() const override;
 
-  void RunFromSource(const std::string& main,
-                     const std::string& packages,
-                     const std::string& assets_directory) override;
+  void RunFromSource(const std::string& assets_directory,
+                     const std::string& main,
+                     const std::string& packages) override;
 
  private:
   bool valid_;
   GLFWwindow* glfw_window_;
-  sky::SkyEnginePtr engine_;
   int buttons_;
 
   void OnWindowSizeChanged(int width, int height);

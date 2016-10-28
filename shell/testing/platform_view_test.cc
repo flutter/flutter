@@ -20,8 +20,8 @@ bool PlatformViewTest::ResourceContextMakeCurrent() {
   return false;
 }
 
-void PlatformViewTest::RunFromSource(const std::string& main,
-                                     const std::string& packages,
-                                     const std::string& assets_directory) {}
+void PlatformViewTest::RunFromSource(const std::string& assets_directory,
+                                     const std::string& main,
+                                     const std::string& packages) {}
 
 }  // namespace shell

@@ -5,9 +5,8 @@
 #ifndef SHELL_PLATFORM_IOS_FRAMEWORK_SOURCE_FLUTTERDARTPROJECT_INTERNAL_H_
 #define SHELL_PLATFORM_IOS_FRAMEWORK_SOURCE_FLUTTERDARTPROJECT_INTERNAL_H_
 
+#include "flutter/shell/common/engine.h"
 #include "flutter/shell/platform/darwin/ios/framework/Headers/FlutterDartProject.h"
-
-#include "flutter/services/engine/sky_engine.mojom.h"
 
 enum VMType {
   // An invalid VM configuration.
@@ -22,7 +21,7 @@ typedef void (^LaunchResult)(BOOL success, NSString* message);
 
 @interface FlutterDartProject ()
 
-- (void)launchInEngine:(sky::SkyEnginePtr&)engine
+- (void)launchInEngine:(shell::Engine*)engine
         embedderVMType:(VMType)type
                 result:(LaunchResult)result;
 

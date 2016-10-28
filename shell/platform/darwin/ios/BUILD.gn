@@ -54,8 +54,6 @@ shared_library("flutter_framework_dylib") {
     "//base:base",
     "//dart/runtime:libdart",
     "//flutter/lib/ui",
-    "//flutter/services/engine:interfaces",
-    "//flutter/services/platform",
     "//flutter/shell/common",
     "//flutter/shell/gpu",
     "//flutter/shell/platform/darwin/common",
@@ -65,9 +63,6 @@ shared_library("flutter_framework_dylib") {
     "//lib/ftl",
     "//mojo/edk/base_edk",
     "//mojo/edk/system",
-    "//mojo/public/cpp/application",
-    "//mojo/public/cpp/bindings",
-    "//mojo/public/interfaces/application",
   ]
 
   defines = [

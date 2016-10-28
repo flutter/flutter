@@ -6,13 +6,12 @@
 
 #include <utility>
 
-#include "flutter/assets/zip_asset_bundle.h"
+#include "flutter/assets/zip_asset_store.h"
 #include "flutter/common/threads.h"
 #include "flutter/content_handler/rasterizer.h"
 #include "flutter/lib/ui/window/pointer_data_packet.h"
 #include "flutter/runtime/asset_font_selector.h"
 #include "flutter/runtime/dart_controller.h"
-#include "flutter/services/engine/sky_engine.mojom.h"
 #include "lib/ftl/functional/make_copyable.h"
 #include "lib/ftl/functional/make_runnable.h"
 #include "lib/ftl/logging.h"
@@ -164,7 +163,7 @@ void RuntimeHolder::DidCreateMainIsolate(Dart_Isolate isolate) {
 void RuntimeHolder::InitRootBundle(std::vector<char> bundle) {
   root_bundle_data_ = std::move(bundle);
   asset_store_ = ftl::MakeRefCounted<blink::ZipAssetStore>(
-      GetUnzipperProviderForRootBundle(), blink::Threads::IO());
+      GetUnzipperProviderForRootBundle());
 }
 
 void RuntimeHolder::HandleAssetPlatformMessage(
@@ -187,10 +186,6 @@ blink::UnzipperProvider RuntimeHolder::GetUnzipperProviderForRootBundle() {
   return [self = GetWeakPtr()]() {
     if (!self)
       return zip::UniqueUnzipper();
-    // TODO(abarth): The lifetimes aren't quite right here. The unzipper we
-    // create here might be passed off to an UnzipJob that runs on a background
-    // thread. The UnzipJob might outlive this object and be referencing a dead
-    // root_bundle_data_.
     return zip::CreateUnzipper(&self->root_bundle_data_);
   };
 }

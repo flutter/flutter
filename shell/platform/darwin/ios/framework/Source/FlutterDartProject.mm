@@ -6,8 +6,9 @@
 
 #include "base/command_line.h"
 #include "dart/runtime/include/dart_api.h"
-#include "flutter/shell/platform/darwin/ios/framework/Source/FlutterDartSource.h"
+#include "flutter/common/threads.h"
 #include "flutter/shell/common/switches.h"
+#include "flutter/shell/platform/darwin/ios/framework/Source/FlutterDartSource.h"
 
 static NSURL* URLForSwitch(const char* name) {
   auto cmd = *base::CommandLine::ForCurrentProcess();
@@ -143,7 +144,7 @@ static NSString* NSStringFromVMType(VMType type) {
   return @"Unknown";
 }
 
-- (void)launchInEngine:(sky::SkyEnginePtr&)engine
+- (void)launchInEngine:(shell::Engine*)engine
         embedderVMType:(VMType)embedderVMType
                 result:(LaunchResult)result {
   if (_vmTypeRequirement == VMTypeInvalid) {
@@ -184,7 +185,7 @@ static NSString* NSStringFromVMType(VMType type) {
 
 #pragma mark - Running from precompiled application bundles
 
-- (void)runFromPrecompiledSourceInEngine:(sky::SkyEnginePtr&)engine
+- (void)runFromPrecompiledSourceInEngine:(shell::Engine*)engine
                                   result:(LaunchResult)result {
   if (![_precompiledDartBundle load]) {
     NSString* message = [NSString
@@ -207,13 +208,19 @@ static NSString* NSStringFromVMType(VMType type) {
     return;
   }
 
-  engine->RunFromPrecompiledSnapshot(path.UTF8String);
+  std::string bundle_path = path.UTF8String;
+  blink::Threads::UI()->PostTask(
+      [ engine = engine->GetWeakPtr(), bundle_path ] {
+        if (engine)
+          engine->RunBundle(bundle_path);
+      });
+
   result(YES, @"Success");
 }
 
 #pragma mark - Running from source
 
-- (void)runFromSourceInEngine:(sky::SkyEnginePtr&)engine
+- (void)runFromSourceInEngine:(shell::Engine*)engine
                        result:(LaunchResult)result {
   if (_dartSource == nil) {
     result(NO, @"Dart source not specified.");
@@ -225,13 +232,23 @@ static NSString* NSStringFromVMType(VMType type) {
       return result(NO, message);
     }
 
+    std::string bundle_path =
+        _dartSource.flxArchive.absoluteURL.path.UTF8String;
+
     if (_dartSource.archiveContainsScriptSnapshot) {
-      engine->RunFromBundle("file://script_snapshot",
-                            _dartSource.flxArchive.absoluteURL.path.UTF8String);
+      blink::Threads::UI()->PostTask(
+          [ engine = engine->GetWeakPtr(), bundle_path ] {
+            if (engine)
+              engine->RunBundle(bundle_path);
+          });
     } else {
-      engine->RunFromFile(_dartSource.dartMain.absoluteURL.path.UTF8String,
-                          _dartSource.packages.absoluteURL.path.UTF8String,
-                          _dartSource.flxArchive.absoluteURL.path.UTF8String);
+      std::string main = _dartSource.dartMain.absoluteURL.path.UTF8String;
+      std::string packages = _dartSource.packages.absoluteURL.path.UTF8String;
+      blink::Threads::UI()->PostTask(
+          [ engine = engine->GetWeakPtr(), bundle_path, main, packages ] {
+            if (engine)
+              engine->RunBundleAndSource(bundle_path, main, packages);
+          });
     }
 
     result(YES, @"Success");

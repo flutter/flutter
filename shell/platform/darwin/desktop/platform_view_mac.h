@@ -23,8 +23,6 @@ class PlatformViewMac : public PlatformView, public GPUSurfaceGLDelegate {
 
   void SetupAndLoadDart();
 
-  sky::SkyEnginePtr& engineProxy();
-
   bool GLContextMakeCurrent() override;
 
   bool GLContextClearCurrent() override;
@@ -37,22 +35,19 @@ class PlatformViewMac : public PlatformView, public GPUSurfaceGLDelegate {
 
   bool ResourceContextMakeCurrent() override;
 
-  void RunFromSource(const std::string& main,
-                     const std::string& packages,
-                     const std::string& assets_directory) override;
+  void RunFromSource(const std::string& assets_directory,
+                     const std::string& main,
+                     const std::string& packages) override;
 
  private:
   base::scoped_nsobject<NSOpenGLView> opengl_view_;
   base::scoped_nsobject<NSOpenGLContext> resource_loading_context_;
-  sky::SkyEnginePtr sky_engine_;
 
   bool IsValid() const;
 
-  void ConnectToEngineAndSetupServices();
-
-  void SetupAndLoadFromSource(const std::string& main,
-                              const std::string& packages,
-                              const std::string& assets_directory);
+  void SetupAndLoadFromSource(const std::string& assets_directory,
+                              const std::string& main,
+                              const std::string& packages);
 
   FTL_DISALLOW_COPY_AND_ASSIGN(PlatformViewMac);
 };

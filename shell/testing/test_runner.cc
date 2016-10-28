@@ -13,17 +13,14 @@
 
 namespace shell {
 
-TestRunner::TestRunner()
-    : platform_view_(new PlatformViewTest()), weak_ptr_factory_(this) {
-  platform_view_->ConnectToEngine(GetProxy(&sky_engine_));
-
+TestRunner::TestRunner() : platform_view_(new PlatformViewTest()) {
   blink::ViewportMetrics metrics;
   metrics.physical_width = 800;
   metrics.physical_height = 600;
 
   blink::Threads::UI()->PostTask(
       [ engine = platform_view_->engine().GetWeakPtr(), metrics ] {
-        if (engine.get())
+        if (engine)
           engine->SetViewportMetrics(metrics);
       });
 }
@@ -38,7 +35,11 @@ TestRunner& TestRunner::Shared() {
 }
 
 void TestRunner::Run(const TestDescriptor& test) {
-  sky_engine_->RunFromFile(test.path, test.packages, "");
+  blink::Threads::UI()->PostTask(
+      [ engine = platform_view_->engine().GetWeakPtr(), test ] {
+        if (engine)
+          engine->RunBundleAndSource(std::string(), test.path, test.packages);
+      });
 }
 
 }  // namespace shell
