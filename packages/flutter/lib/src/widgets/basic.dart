@@ -1433,25 +1433,30 @@ class BlockBody extends MultiChildRenderObjectWidget {
 
 /// A widget that uses the stack layout algorithm for its children.
 ///
-/// This class is useful if you want to overlap several children in a
-/// simple way, for example having some text and an image, overlaid
-/// with a gradient and a button attached to the bottom.
+/// This class is useful if you want to overlap several children in a simple
+/// way, for example having some text and an image, overlaid with a gradient and
+/// a button attached to the bottom.
 ///
-/// If you want to lay a number of children out in a particular
-/// pattern, or if you want to make a custom layout manager, you
-/// probably want to use [CustomMultiChildLayout] instead. In
-/// particular, when using a Stack you can't position children
-/// relative to their size or the stack's own size.
+/// Each child of a [Stack] widget is either _positioned_ or _non-positioned_.
+/// Positioned children are those wrapped in a [Positioned] widget that has at
+/// least one non-null property. The stack sizes itself to contain all the
+/// non-positioned children, which are positioned according to [alignment]
+/// (which defaults to the top-left corner). The positioned children are then
+/// placed relative to the stack according to their top, right, bottom, and left
+/// properties.
 ///
-/// For more details about the stack layout algorithm, see
-/// [RenderStack]. To control the position of child widgets, see the
-/// [Positioned] widget.
+/// For more details about the stack layout algorithm, see [RenderStack].
+///
+/// If you want to lay a number of children out in a particular pattern, or if
+/// you want to make a custom layout manager, you probably want to use
+/// [CustomMultiChildLayout] instead. In particular, when using a [Stack] you
+/// can't position children relative to their size or the stack's own size.
 ///
 /// See also:
 ///
 ///  * [Flow]
-///  * [Align] (which sizes itself based on its child's size and positions
-///    the child according to a [FractionalOffset] value)
+///  * [Align], which sizes itself based on its child's size and positions
+///    the child according to a [FractionalOffset] value.
 ///  * [CustomSingleChildLayout]
 ///  * [CustomMultiChildLayout]
 class Stack extends MultiChildRenderObjectWidget {
@@ -1497,6 +1502,10 @@ class Stack extends MultiChildRenderObjectWidget {
 }
 
 /// A [Stack] that shows a single child from a list of children.
+///
+/// The displayed child is the one with the given [index].
+///
+/// For more details, see [Stack].
 class IndexedStack extends Stack {
   /// Creates a [Stack] widget that paints a single child.
   ///
@@ -1530,6 +1539,18 @@ class IndexedStack extends Stack {
 /// the [Positioned] widget to its enclosing [Stack] must contain only
 /// [StatelessWidget]s or [StatefulWidget]s (not other kinds of widgets, like
 /// [RenderObjectWidget]s).
+///
+/// If a widget is wrapped in a [Positioned], then it is a _positioned_ widget
+/// in its [Stack]. If the [top] property is non-null, the top edge of this child
+/// will be positioned [top] layout units from the top of the stack widget. The
+/// [right], [bottom], and [left] properties work analogously.
+///
+/// If both the [top] and [bottom] properties are non-null, then the child will
+/// be forced to have exactly the height required to satisfy both constraints.
+/// Similarly, setting the [right] and [left] properties to non-null values will
+/// force the child to have a particular width. Alternatively the [width] and
+/// [height] properties can be used to give the dimensions, with one
+/// corresponding position property (e.g. [top] and [height]).
 class Positioned extends ParentDataWidget<Stack> {
   /// Creates a widget that controls where a child of a [Stack] is positioned.
   ///
@@ -1877,17 +1898,34 @@ class GridPlacementData<DataType> extends ParentDataWidget<GridRenderObjectWidge
 
 /// A widget that uses the flex layout algorithm for its children.
 ///
-/// For details about the flex layout algorithm, see [RenderFlex]. To control
-/// the flex of child widgets, see the [Flexible] widget.
+/// The [Flex] widget allows you to control the axis along which the children are
+/// placed (horizontal or vertical). This is referred to as the _main axis_. If
+/// you know the main axis in advance, then consider using a [Row] (if it's
+/// horizontal) or [Column] (if it's vertical) instead, since that will be less
+/// verbose.
 ///
-/// The Flex widget allows you to control the axis along which the children
-/// are placed (horizontal or vertical). If you know the axis in advance, then
-/// consider using a [Row] (if it's horizontal) or [Column] (if it's vertical)
-/// instead, since that will be less verbose.
+/// Each child of a [Flex] widget is either flexible or inflexible. The [Flex]
+/// first lays out its inflexible children and subtracts their total length
+/// along the main axis to determine how much free space is available. The
+/// [Flex] then divides this free space among the flexible children in a ratio
+/// determined by their [Flexible.flex] properties. To control the flex of child
+/// widgets, see the [Flexible] widget.
 ///
-/// The Flex widget does not scroll (and in general it is considered an error to
-/// have more children in a Flex than will fit in the available room). If you
-/// have some widgets and want them to be able to scroll if there is
+/// The [mainAxisAlignment] property determines how the remaining free space (if
+/// any) in the main direction is allocated after the flexible children are
+/// dealt with. The [crossAxisAlignment] property determines how children are
+/// positioned in the cross direction.
+///
+/// By default, a [Flex] will size itself along the main axis to the maximum
+/// size permitted by its parent, unless that would be infinite (e.g. if it is
+/// in a [Block] with the same main axis), in which case it will shrink-wrap its
+/// children. The [mainAxisSize] property can be used to control this.
+///
+/// For more details about the flex layout algorithm, see [RenderFlex].
+///
+/// The [Flex] widget does not scroll (and in general it is considered an error
+/// to have more children in a [Flex] than will fit in the available room). If
+/// you have some widgets and want them to be able to scroll if there is
 /// insufficient room, consider using a [Block].
 ///
 /// If you only have one child, then rather than using [Flex], [Row], or
@@ -1969,12 +2007,28 @@ class Flex extends MultiChildRenderObjectWidget {
 
 /// A widget that lays out its children in a horizontal array.
 ///
-/// For details about the flex layout algorithm, see [RenderFlex]. To control
-/// the flex of child widgets, see the [Flexible] widget.
+/// Each child of a [Row] widget is either flexible or inflexible. The [Row]
+/// first lays out its inflexible children and subtracts their total width to
+/// determine how much free space is available. The [Row] then divides this free
+/// space among the flexible children in a ratio determined by their
+/// [Flexible.flex] properties. To control the flex of child widgets, see the
+/// [Flexible] widget.
 ///
-/// The Row widget does not scroll (and in general it is considered an error to
-/// have more children in a Row than will fit in the available room). If you
-/// have a line of widgets and want them to be able to scroll if there is
+/// The [mainAxisAlignment] property determines how the remaining horizontal
+/// free space (if any) is allocated after the flexible children are dealt with.
+/// The [crossAxisAlignment] property determines how children are positioned
+/// vertically.
+///
+/// By default, a [Row] will size itself vertically to the maximum size
+/// permitted by its parent, unless that would be infinitely wide (e.g. if it is
+/// in a horizontal [Block]), in which case it will shrink-wrap its children.
+/// The [mainAxisSize] property can be used to control this.
+///
+/// For more details about the flex layout algorithm, see [RenderFlex].
+///
+/// The [Row] widget does not scroll (and in general it is considered an error
+/// to have more children in a [Row] than will fit in the available room). If
+/// you have a line of widgets and want them to be able to scroll if there is
 /// insufficient room, consider using a [Block].
 ///
 /// For a vertical variant, see [Column].
@@ -2007,13 +2061,29 @@ class Row extends Flex {
 
 /// A widget that lays out its children in a vertical array.
 ///
-/// For details about the flex layout algorithm, see [RenderFlex]. To control
-/// the flex of child widgets, see the [Flexible] widget.
+/// Each child of a [Row] widget is either flexible or inflexible. The [Row]
+/// first lays out its inflexible children and subtracts their total width to
+/// determine how much free space is available. The [Row] then divides this free
+/// space among the flexible children in a ratio determined by their
+/// [Flexible.flex] properties. To control the flex of child widgets, see the
+/// [Flexible] widget.
 ///
-/// The Column widget does not scroll (and in general it is considered an error
-/// to have more children in a Column than will fit in the available room). If
-/// you have a list of widgets and want them to be able to scroll if there is
-/// insufficient room, consider using a [Block].
+/// The [mainAxisAlignment] property determines how the remaining vertical free
+/// space (if any) is allocated after the flexible children are dealt with. The
+/// [crossAxisAlignment] property determines how children are positioned
+/// horizontally.
+///
+/// By default, a [Column] will size itself vertically to the maximum size
+/// permitted by its parent, unless that would be infinitely high (e.g. if it is
+/// in a vertical [Block]), in which case it will shrink-wrap its children. The
+/// [mainAxisSize] property can be used to control this.
+///
+/// For more details about the flex layout algorithm, see [RenderFlex].
+///
+/// The [Column] widget does not scroll (and in general it is considered an
+/// error to have more children in a [Column] than will fit in the available
+/// room). If you have a list of widgets and want them to be able to scroll if
+/// there is insufficient room, consider using a [Block].
 ///
 /// For a horizontal variant, see [Row].
 ///
