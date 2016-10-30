@@ -30,7 +30,7 @@ class ButtonBar extends StatelessWidget {
     Key key,
     this.alignment: MainAxisAlignment.end,
     this.mainAxisSize: MainAxisSize.max,
-    this.children
+    this.children: const <Widget>[],
   }) : super(key: key);
 
   /// How the children should be placed along the horizontal axis.

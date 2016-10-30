@@ -68,7 +68,7 @@ class MaterialList extends StatelessWidget {
     this.onScroll,
     this.onScrollEnd,
     this.type: MaterialListType.twoLine,
-    this.children,
+    this.children: const <Widget>[],
     this.padding: EdgeInsets.zero,
     this.scrollableKey
   }) : super(key: key);
