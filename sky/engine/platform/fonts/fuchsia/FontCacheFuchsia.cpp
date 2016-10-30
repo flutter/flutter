@@ -5,7 +5,6 @@
 #include "flutter/sky/engine/platform/fonts/fuchsia/FontCacheFuchsia.h"
 
 #include <limits>
-#include <magenta/process.h>
 #include <magenta/syscalls.h>
 #include <utility>
 
