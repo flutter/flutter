@@ -61,6 +61,9 @@ class RunCommand extends RunCommandBase {
     argParser.addOption('use-application-binary',
         hide: !verboseHelp,
         help: 'Specify a pre-built application binary to use when running.');
+    argParser.addFlag('machine',
+        hide: !verboseHelp,
+        help: 'Provide output and progress in machine friendly format.');
     usesPubOption();
 
     // Option to enable hot reloading.
@@ -206,6 +209,7 @@ class RunCommand extends RunCommandBase {
         target: targetFile,
         debuggingOptions: options,
         benchmarkMode: argResults['benchmark'],
+        usesTerminalUI: argResults['machine'],
       );
     } else {
       runner = new RunAndStayResident(
@@ -214,6 +218,7 @@ class RunCommand extends RunCommandBase {
         debuggingOptions: options,
         traceStartup: traceStartup,
         benchmark: argResults['benchmark'],
+        usesTerminalUI: argResults['machine'],
         applicationBinary: argResults['use-application-binary']
       );
     }
