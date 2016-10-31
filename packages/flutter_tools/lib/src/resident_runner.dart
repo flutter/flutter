@@ -106,12 +106,6 @@ abstract class ResidentRunner {
     vmService = await VMService.connect(port);
     printTrace('Connected to service protocol on port $port');
     await vmService.getVM();
-    vmService.onExtensionEvent.listen((ServiceEvent event) {
-      printTrace(event.toString());
-    });
-    vmService.onIsolateEvent.listen((ServiceEvent event) {
-      printTrace(event.toString());
-    });
 
     // Refresh the view list.
     await vmService.vm.refreshViews();
