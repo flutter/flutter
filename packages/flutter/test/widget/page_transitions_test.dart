@@ -406,4 +406,81 @@ void main() {
     // Sheet called setState and didn't crash.
     expect(sheet.setStateCalled, isTrue);
   });
+
+  testWidgets('Test completed future', (WidgetTester tester) async {
+    final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      '/': (_) => new Center(child: new Text('home')),
+      '/next': (_) => new Center(child: new Text('next')),
+    };
+
+    await tester.pumpWidget(new MaterialApp(routes: routes));
+
+    PageRoute<Null> route = new MaterialPageRoute<Null>(
+      settings: new RouteSettings(name: '/page'),
+      builder: (BuildContext context) => new Center(child: new Text('page')),
+    );
+
+    int popCount = 0;
+    route.popped.then((_) {
+      ++popCount;
+    });
+
+    int completeCount = 0;
+    route.completed.then((_) {
+      ++completeCount;
+    });
+
+    expect(popCount, 0);
+    expect(completeCount, 0);
+
+    Navigator.push(tester.element(find.text('home')), route);
+
+    expect(popCount, 0);
+    expect(completeCount, 0);
+
+    await tester.pump();
+
+    expect(popCount, 0);
+    expect(completeCount, 0);
+
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(popCount, 0);
+    expect(completeCount, 0);
+
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(popCount, 0);
+    expect(completeCount, 0);
+
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(popCount, 0);
+    expect(completeCount, 0);
+
+    Navigator.pop(tester.element(find.text('page')));
+
+    expect(popCount, 0);
+    expect(completeCount, 0);
+
+    await tester.pump();
+
+    expect(popCount, 1);
+    expect(completeCount, 0);
+
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(popCount, 1);
+    expect(completeCount, 0);
+
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(popCount, 1);
+    expect(completeCount, 0);
+
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(popCount, 1);
+    expect(completeCount, 1);
+  });
 }
