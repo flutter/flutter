@@ -144,7 +144,7 @@ class LazyBlockChildren extends LazyBlockDelegate {
   ///
   /// The list of children must not be modified after being passed to this
   /// constructor.
-  LazyBlockChildren({ this.children }) {
+  LazyBlockChildren({ this.children: const <Widget>[] }) {
     assert(children != null);
   }
 

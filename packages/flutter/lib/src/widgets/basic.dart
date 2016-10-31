@@ -745,8 +745,6 @@ class LayoutId extends ParentDataWidget<CustomMultiChildLayout> {
   }
 }
 
-const List<Widget> _emptyWidgetList = const <Widget>[];
-
 /// A widget that defers the layout of multiple children to a delegate.
 ///
 /// The delegate can determine the layout constraints for each child and can
@@ -767,7 +765,7 @@ class CustomMultiChildLayout extends MultiChildRenderObjectWidget {
   CustomMultiChildLayout({
     Key key,
     @required this.delegate,
-    List<Widget> children: _emptyWidgetList
+    List<Widget> children: const <Widget>[],
   }) : super(key: key, children: children) {
     assert(delegate != null);
   }
@@ -1414,7 +1412,7 @@ class BlockBody extends MultiChildRenderObjectWidget {
   BlockBody({
     Key key,
     this.mainAxis: Axis.vertical,
-    List<Widget> children: _emptyWidgetList
+    List<Widget> children: const <Widget>[],
   }) : super(key: key, children: children) {
     assert(mainAxis != null);
   }
@@ -1468,7 +1466,7 @@ class Stack extends MultiChildRenderObjectWidget {
     Key key,
     this.alignment: FractionalOffset.topLeft,
     this.overflow: Overflow.clip,
-    List<Widget> children: _emptyWidgetList
+    List<Widget> children: const <Widget>[],
   }) : super(key: key, children: children);
 
   /// How to align the non-positioned children in the stack.
@@ -1514,7 +1512,7 @@ class IndexedStack extends Stack {
     Key key,
     FractionalOffset alignment: FractionalOffset.topLeft,
     this.index: 0,
-    List<Widget> children: _emptyWidgetList
+    List<Widget> children: const <Widget>[],
   }) : super(key: key, alignment: alignment, children: children) {
     assert(index != null);
   }
@@ -1710,8 +1708,8 @@ class Positioned extends ParentDataWidget<Stack> {
 abstract class GridRenderObjectWidget extends MultiChildRenderObjectWidget {
   /// Initializes fields for subclasses.
   GridRenderObjectWidget({
-    List<Widget> children: _emptyWidgetList,
-    Key key
+    Key key,
+    List<Widget> children: const <Widget>[],
   }) : super(key: key, children: children) {
     _delegate = createDelegate();
   }
@@ -1743,12 +1741,16 @@ class CustomGrid extends GridRenderObjectWidget {
   CustomGrid({
     Key key,
     @required this.delegate,
-    List<Widget> children: _emptyWidgetList
+    List<Widget> children: const <Widget>[],
   }) : super(key: key, children: children) {
     assert(delegate != null);
   }
 
   /// The delegate that controls the layout of the children.
+  ///
+  /// For example, a [FixedColumnCountGridDelegate] for grids that have a fixed
+  /// number of columns or a [MaxTileWidthGridDelegate] for grids that have a
+  /// maximum tile width.
   final GridDelegate delegate;
 
   @override
@@ -1769,7 +1771,7 @@ class FixedColumnCountGrid extends GridRenderObjectWidget {
     this.rowSpacing: 0.0,
     this.tileAspectRatio: 1.0,
     this.padding: EdgeInsets.zero,
-    List<Widget> children: _emptyWidgetList
+    List<Widget> children: const <Widget>[],
   }) : super(key: key, children: children) {
     assert(columnCount != null && columnCount >= 0);
     assert(tileAspectRatio != null && tileAspectRatio > 0.0);
@@ -1816,7 +1818,7 @@ class MaxTileWidthGrid extends GridRenderObjectWidget {
     this.rowSpacing: 0.0,
     this.tileAspectRatio: 1.0,
     this.padding: EdgeInsets.zero,
-    List<Widget> children: _emptyWidgetList
+    List<Widget> children: const <Widget>[],
   }) : super(key: key, children: children) {
     assert(maxTileWidth != null && maxTileWidth >= 0.0);
     assert(tileAspectRatio != null && tileAspectRatio > 0.0);
@@ -1945,7 +1947,7 @@ class Flex extends MultiChildRenderObjectWidget {
     this.mainAxisSize: MainAxisSize.max,
     this.crossAxisAlignment: CrossAxisAlignment.center,
     this.textBaseline,
-    List<Widget> children: _emptyWidgetList
+    List<Widget> children: const <Widget>[],
   }) : super(key: key, children: children) {
     assert(direction != null);
     assert(mainAxisAlignment != null);
@@ -2047,7 +2049,7 @@ class Row extends Flex {
     MainAxisSize mainAxisSize: MainAxisSize.max,
     CrossAxisAlignment crossAxisAlignment: CrossAxisAlignment.center,
     TextBaseline textBaseline,
-    List<Widget> children: _emptyWidgetList
+    List<Widget> children: const <Widget>[],
   }) : super(
     children: children,
     key: key,
@@ -2101,7 +2103,7 @@ class Column extends Flex {
     MainAxisSize mainAxisSize: MainAxisSize.max,
     CrossAxisAlignment crossAxisAlignment: CrossAxisAlignment.center,
     TextBaseline textBaseline,
-    List<Widget> children: _emptyWidgetList
+    List<Widget> children: const <Widget>[],
   }) : super(
     children: children,
     key: key,
@@ -2212,7 +2214,7 @@ class Flow extends MultiChildRenderObjectWidget {
   Flow({
     Key key,
     @required this.delegate,
-    List<Widget> children: _emptyWidgetList
+    List<Widget> children: const <Widget>[],
   }) : super(key: key, children: RepaintBoundary.wrapAll(children)) {
     assert(delegate != null);
   }
@@ -2227,7 +2229,7 @@ class Flow extends MultiChildRenderObjectWidget {
   Flow.unwrapped({
     Key key,
     this.delegate,
-    List<Widget> children: _emptyWidgetList
+    List<Widget> children: const <Widget>[],
   }) : super(key: key, children: children) {
     assert(delegate != null);
   }

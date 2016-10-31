@@ -49,7 +49,7 @@ class ScrollableList extends StatelessWidget {
     @required this.itemExtent,
     this.itemsWrap: false,
     this.padding,
-    this.children
+    this.children: const <Widget>[],
   }) : super(key: key) {
     assert(scrollDirection != null);
     assert(scrollAnchor != null);
@@ -389,7 +389,7 @@ class ListViewport extends _VirtualListViewport with VirtualViewportFromIterable
     @required double itemExtent,
     bool itemsWrap: false,
     EdgeInsets padding,
-    this.children
+    this.children: const <Widget>[],
   }) : super(
     onExtentsChanged,
     scrollOffset,

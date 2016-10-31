@@ -1215,7 +1215,7 @@ abstract class MultiChildRenderObjectWidget extends RenderObjectWidget {
   ///
   /// The [children] argument must not be null and must not contain any null
   /// objects.
-  MultiChildRenderObjectWidget({ Key key, this.children })
+  MultiChildRenderObjectWidget({ Key key, this.children: const <Widget>[] })
     : super(key: key) {
     assert(children != null);
     assert(!children.any((Widget child) => child == null));

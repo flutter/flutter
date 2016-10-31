@@ -122,7 +122,7 @@ class PageableList extends Pageable {
     ValueChanged<int> onPageChanged,
     Duration duration: const Duration(milliseconds: 200),
     Curve curve: Curves.ease,
-    this.children
+    this.children: const <Widget>[],
   }) : super(
     key: key,
     initialScrollOffset: initialScrollOffset,
@@ -542,7 +542,7 @@ class PageViewport extends _VirtualPageViewport with VirtualViewportFromIterable
     Axis mainAxis: Axis.vertical,
     ViewportAnchor anchor: ViewportAnchor.start,
     bool itemsWrap: false,
-    this.children
+    this.children: const <Widget>[],
   }) : super(
     startOffset,
     mainAxis,
