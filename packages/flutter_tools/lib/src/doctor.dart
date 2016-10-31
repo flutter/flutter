@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert' show JSON;
 import 'dart:io';
 
 import 'package:path/path.dart' as path;
@@ -11,7 +10,6 @@ import 'package:path/path.dart' as path;
 import 'android/android_workflow.dart';
 import 'base/common.dart';
 import 'base/context.dart';
-import 'base/os.dart';
 import 'device.dart';
 import 'globals.dart';
 import 'ios/ios_workflow.dart';
@@ -41,8 +39,7 @@ class Doctor {
       _validators.add(_iosWorkflow);
 
     List<DoctorValidator> ideValidators = <DoctorValidator>[];
-    ideValidators.addAll(AtomValidator.installed);
-    ideValidators.addAll(IntelliJValidator.installed);
+    ideValidators.addAll(IntelliJValidator.getInstalledValidator());
     if (ideValidators.isNotEmpty)
       _validators.addAll(ideValidators);
     else
@@ -244,74 +241,6 @@ class NoIdeValidator extends DoctorValidator {
   }
 }
 
-class AtomValidator extends DoctorValidator {
-  AtomValidator() : super('Atom - a lightweight development environment for Flutter');
-
-  static Iterable<DoctorValidator> get installed {
-    AtomValidator atom = new AtomValidator();
-    return atom.isInstalled ? <DoctorValidator>[atom] : <DoctorValidator>[];
-  }
-
-  static File getConfigFile() {
-    // ~/.atom/config.cson
-    return new File(path.join(_getAtomHomePath(), 'config.cson'));
-  }
-
-  static String _getAtomHomePath() {
-    final Map<String, String> env = Platform.environment;
-    if (env['ATOM_HOME'] != null)
-      return env['ATOM_HOME'];
-    return os.isWindows
-      ? path.join(env['USERPROFILE'], '.atom')
-      : path.join(env['HOME'], '.atom');
-  }
-
-  bool get isInstalled => FileSystemEntity.isDirectorySync(_getAtomHomePath());
-
-  @override
-  Future<ValidationResult> validate() async {
-    List<ValidationMessage> messages = <ValidationMessage>[];
-
-    int installCount = 0;
-
-    if (_validateHasPackage(messages, 'flutter', 'Flutter'))
-      installCount++;
-
-    if (_validateHasPackage(messages, 'dartlang', 'Dart'))
-      installCount++;
-
-    return new ValidationResult(
-      installCount == 2 ? ValidationType.installed : ValidationType.partial,
-      messages
-    );
-  }
-
-  bool _validateHasPackage(List<ValidationMessage> messages, String packageName, String description) {
-    if (!hasPackage(packageName)) {
-      messages.add(new ValidationMessage(
-        '$packageName plugin not installed; this adds $description specific functionality to Atom.\n'
-        'Install the plugin from Atom or run \'apm install $packageName\'.'
-      ));
-      return false;
-    }
-    try {
-      String flutterPluginPath = path.join(_getAtomHomePath(), 'packages', packageName);
-      File packageFile = new File(path.join(flutterPluginPath, 'package.json'));
-      Map<String, dynamic> packageInfo = JSON.decode(packageFile.readAsStringSync());
-      String version = packageInfo['version'];
-      messages.add(new ValidationMessage('$packageName plugin version $version'));
-    } catch (error) {
-      printTrace('Unable to read $packageName plugin version: $error');
-    }
-    return true;
-  }
-
-  bool hasPackage(String packageName) {
-    String packagePath = path.join(_getAtomHomePath(), 'packages', packageName);
-    return FileSystemEntity.isDirectorySync(packagePath);
-  }
-}
-
 abstract class IntelliJValidator extends DoctorValidator {
   IntelliJValidator(String title) : super(title);
 
@@ -323,7 +252,7 @@ abstract class IntelliJValidator extends DoctorValidator {
     'IdeaIC' : 'IntelliJ IDEA Community Edition',
   };
 
-  static Iterable<DoctorValidator> get installed {
+  static Iterable<DoctorValidator> getInstalledValidator() {
     if (Platform.isLinux)
       return IntelliJValidatorOnLinux.installed;
     if (Platform.isMacOS)
