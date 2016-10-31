@@ -11,6 +11,7 @@ import 'package:path/path.dart' as path;
 import '../android/android_sdk.dart';
 import '../application_package.dart';
 import '../base/os.dart';
+import '../base/logger.dart';
 import '../base/process.dart';
 import '../build_info.dart';
 import '../dart/package_map.dart';
@@ -238,7 +239,9 @@ class AndroidDevice extends Device {
     if (!_checkForSupportedAdbVersion() || !_checkForSupportedAndroidVersion())
       return false;
 
+    Status status = logger.startProgress('Installing ${apk.apkPath}...');
     String installOut = runCheckedSync(adbCommandForDevice(<String>['install', '-r', apk.apkPath]));
+    status.stop(showElapsedTime: true);
     RegExp failureExp = new RegExp(r'^Failure.*$', multiLine: true);
     String failure = failureExp.stringMatch(installOut);
     if (failure != null) {
