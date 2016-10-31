@@ -74,24 +74,14 @@ abstract class OverlayRoute<T> extends Route<T> {
 
 /// A route with entrance and exit transitions.
 abstract class TransitionRoute<T> extends OverlayRoute<T> {
-  /// Creates a route with entrance and exit transitions.
-  TransitionRoute({
-    Completer<T> transitionCompleter
-  }) : _transitionCompleter = transitionCompleter;
-
-  /// The same as the default constructor but callable with mixins.
-  TransitionRoute.explicit(
-    Completer<T> transitionCompleter
-  ) : this(transitionCompleter: transitionCompleter);
-
   /// This future completes only once the transition itself has finished, after
   /// the overlay entries have been removed from the navigator's overlay.
   ///
   /// This future completes once the animation has been dismissed. That will be
   /// after [popped], because [popped] completes before the animation even
   /// starts, as soon as the route is popped.
-  Future<T> get completed => _transitionCompleter?.future;
-  final Completer<T> _transitionCompleter;
+  Future<T> get completed => _transitionCompleter.future;
+  final Completer<T> _transitionCompleter = new Completer<T>();
 
   /// The duration the transition lasts.
   Duration get transitionDuration;
@@ -252,7 +242,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   @override
   void finished() {
     super.finished();
-    _transitionCompleter?.complete(_result);
+    _transitionCompleter.complete(_result);
   }
 
   @override
@@ -456,7 +446,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// Creates a route that blocks interaction with previous routes.
   ModalRoute({
     this.settings: const RouteSettings()
-  }) : super.explicit(null);
+  });
 
   // The API for general users of this class
 
