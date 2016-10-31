@@ -42,9 +42,11 @@ Paragraph::Paragraph(PassOwnPtr<RenderView> renderView)
     : m_renderView(renderView) {}
 
 Paragraph::~Paragraph() {
-  PassOwnPtr<RenderView> renderView = m_renderView.release();
-  Threads::UI()->PostTask(
-      [renderView]() { /* renderView's destructor runs. */ });
+  if (m_renderView) {
+    RenderView* renderView = m_renderView.leakPtr();
+    Threads::UI()->PostTask(
+        [renderView]() { renderView->destroy(); });
+  }
 }
 
 double Paragraph::width() {

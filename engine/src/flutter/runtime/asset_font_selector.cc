@@ -186,7 +186,7 @@ PassRefPtr<FontData> AssetFontSelector::getFontData(
                                    font_description.orientation(),
                                    font_description.useSubpixelPositioning());
 
-    font_data = SimpleFontData::create(platform_data);
+    font_data = SimpleFontData::create(platform_data, CustomFontData::create());
     font_platform_data_cache_.set(key, font_data);
   }
 

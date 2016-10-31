@@ -208,9 +208,11 @@ ParagraphBuilder::ParagraphBuilder(tonic::Int32List& encoded,
 }
 
 ParagraphBuilder::~ParagraphBuilder() {
-  PassOwnPtr<RenderView> renderView = m_renderView.release();
-  Threads::UI()->PostTask(
-      [renderView]() { /* renderView's destructor runs. */ });
+  if (m_renderView) {
+    RenderView* renderView = m_renderView.leakPtr();
+    Threads::UI()->PostTask(
+        [renderView]() { renderView->destroy(); });
+  }
 }
 
 void ParagraphBuilder::pushStyle(tonic::Int32List& encoded,
