@@ -105,8 +105,13 @@ class ScreenshotCommand extends FlutterCommand {
         port: int.parse(argResults[_kSkia]),
         path: '/skp');
 
-    http.Request skpRequest = new http.Request('GET', skpUri);
-    http.StreamedResponse skpResponse = await skpRequest.send();
+    http.StreamedResponse skpResponse;
+    try {
+      skpResponse = await new http.Request('GET', skpUri).send();
+    } on SocketException catch (e) {
+      printError('Skia screenshot failed: $skpUri\n$e');
+      return 1;
+    }
     if (skpResponse.statusCode != HttpStatus.OK) {
       String error = await skpResponse.stream.toStringStream().join();
       printError('Error: $error');
