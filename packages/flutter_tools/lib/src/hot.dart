@@ -249,7 +249,13 @@ class HotRunner extends ResidentRunner {
     }
 
     _observatoryPort = result.observatoryPort;
-    await connectToServiceProtocol(_observatoryPort);
+    try {
+      await connectToServiceProtocol(_observatoryPort);
+    } catch (error) {
+      printError('Error connecting to the service protocol: $error');
+      return 2;
+    }
+
 
     try {
       Uri baseUri = await _initDevFS();

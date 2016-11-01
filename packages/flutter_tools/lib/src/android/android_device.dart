@@ -528,6 +528,8 @@ class AndroidDevice extends Device {
     return _portForwarder;
   }
 
+  static RegExp _timeRegExp = new RegExp(r'^\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3}', multiLine: true);
+
   /// Return the most recent timestamp in the Android log or `null` if there is
   /// no available timestamp. The format can be passed to logcat's -T option.
   String get lastLogcatTimestamp {
@@ -535,8 +537,7 @@ class AndroidDevice extends Device {
       'logcat', '-v', 'time', '-t', '1'
     ]));
 
-    RegExp timeRegExp = new RegExp(r'^\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3}', multiLine: true);
-    Match timeMatch = timeRegExp.firstMatch(output);
+    Match timeMatch = _timeRegExp.firstMatch(output);
     return timeMatch?.group(0);
   }
 
@@ -726,24 +727,24 @@ class _AdbLogReader extends DeviceLogReader {
   @override
   String get name => device.name;
 
+  DateTime _timeOrigin;
+
+  DateTime _adbTimestampToDateTime(String adbTimestamp) {
+    // The adb timestamp format is: mm-dd hours:minutes:seconds.milliseconds
+    // Dart's DateTime parse function accepts this format so long as we provide
+    // the year, resulting in:
+    // yyyy-mm-dd hours:minutes:seconds.milliseconds.
+    return DateTime.parse('${new DateTime.now().year}-$adbTimestamp');
+  }
+
   void _start() {
     // Start the adb logcat process.
-    List<String> args = <String>['logcat', '-v', 'tag'];
+    List<String> args = <String>['logcat', '-v', 'time'];
     String lastTimestamp = device.lastLogcatTimestamp;
-    if (lastTimestamp != null) {
-      bool supportsLastTimestamp = false;
-
-      // Check to see if this copy of adb supports -T.
-      try {
-        // "logcat: invalid option -- T", "Unrecognized Option"
-        // logcat -g will finish immediately; it will print an error to stdout if -T isn't supported.
-        String result = runSync(device.adbCommandForDevice(<String>['logcat', '-g', '-T', lastTimestamp]));
-        supportsLastTimestamp = !result.contains('logcat: invalid option') && !result.contains('Unrecognized Option');
-      } catch (_) { }
-
-      if (supportsLastTimestamp)
-        args.addAll(<String>['-T', lastTimestamp]);
-    }
+    if (lastTimestamp != null)
+        _timeOrigin = _adbTimestampToDateTime(lastTimestamp);
+    else
+        _timeOrigin = null;
     runCommand(device.adbCommandForDevice(args)).then((Process process) {
       _process = process;
       _process.stdout.transform(UTF8.decoder).transform(const LineSplitter()).listen(_onLine);
@@ -771,7 +772,28 @@ class _AdbLogReader extends DeviceLogReader {
   // we default to true in case none of the log lines match
   bool _acceptedLastLine = true;
 
+  // The format of the line is controlled by the '-v' parameter passed to
+  // adb logcat. We are currently passing 'time', which has the format:
+  // mm-dd hh:mm:ss.milliseconds Priority/Tag( PID): ....
   void _onLine(String line) {
+    final Match timeMatch = AndroidDevice._timeRegExp.firstMatch(line);
+    if (timeMatch == null) {
+      return;
+    }
+    if (_timeOrigin != null) {
+      final String timestamp = timeMatch.group(0);
+      DateTime time = _adbTimestampToDateTime(timestamp);
+      if (time.isBefore(_timeOrigin)) {
+        // Ignore log messages before the origin.
+        printTrace('skipped old log line: $line');
+        return;
+      }
+    }
+    if (line.length == timeMatch.end) {
+      return;
+    }
+    // Chop off the time.
+    line = line.substring(timeMatch.end + 1);
     if (_logFormat.hasMatch(line)) {
       // Filter on approved names and levels.
       for (RegExp regex in _whitelistedTags) {
