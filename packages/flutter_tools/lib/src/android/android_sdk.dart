@@ -28,7 +28,8 @@ const String kAndroidHome = 'ANDROID_HOME';
 
 // Special case some version names in the sdk.
 const Map<String, int> _namedVersionMap = const <String, int> {
-  'android-N': 24
+  'android-N': 24,
+  'android-stable': 24,
 };
 
 /// Locate ADB. Prefer to use one from an Android SDK, if we can locate that.
