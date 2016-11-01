@@ -28,7 +28,9 @@ class ScreenshotCommand extends FlutterCommand {
       _kSkia,
       valueHelp: 'port',
       help: 'Retrieve the last frame rendered by a Flutter app as a Skia picture\n'
-        'using the specified diagnostic server port',
+        'using the specified diagnostic server port.\n'
+        'To find the diagnostic server port number, use "flutter run --verbose"\n'
+        'and look for "Diagnostic server listening on" in the output.'
     );
     argParser.addOption(
       _kSkiaServe,
