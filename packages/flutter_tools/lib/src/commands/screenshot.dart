@@ -107,20 +107,25 @@ class ScreenshotCommand extends FlutterCommand {
         port: int.parse(argResults[_kSkia]),
         path: '/skp');
 
+    void printErrorHelpText() {
+      printError('');
+      printError('Be sure the --$_kSkia= option specifies the diagnostic server port, not the observatory port');
+      printError('To find the diagnostic server port number, use "flutter run --verbose"');
+      printError('and look for "Diagnostic server listening on" in the output.');
+    }
+
     http.StreamedResponse skpResponse;
     try {
       skpResponse = await new http.Request('GET', skpUri).send();
     } on SocketException catch (e) {
       printError('Skia screenshot failed: $skpUri\n$e');
-      printError('');
-      printError('Be sure that --$_kSkia specifies the diagnostic server port, not the observatory port');
-      printError('To find the diagnostic server port number, use "flutter run --verbose"');
-      printError('and look for "Diagnostic server listening on" in the output.');
+      printErrorHelpText();
       return 1;
     }
     if (skpResponse.statusCode != HttpStatus.OK) {
       String error = await skpResponse.stream.toStringStream().join();
       printError('Error: $error');
+      printErrorHelpText();
       return 1;
     }
 
@@ -134,14 +139,24 @@ class ScreenshotCommand extends FlutterCommand {
       http.StreamedResponse postResponse = await postRequest.send();
       if (postResponse.statusCode != HttpStatus.OK) {
         printError('Failed to post Skia picture to skiaserve');
+        printErrorHelpText();
         return 1;
       }
     } else {
-      outputFile ??= getUniqueFile(Directory.current, 'flutter', 'skia');
+      outputFile ??= getUniqueFile(Directory.current, 'flutter', 'skp');
       IOSink sink = outputFile.openWrite();
       await sink.addStream(skpResponse.stream);
       await sink.close();
       await showOutputFileInfo(outputFile);
+      if (await outputFile.length() < 1000) {
+        String content = await outputFile.readAsString();
+        if (content.startsWith('{"jsonrpc":"2.0", "error"')) {
+          printError('');
+          printError('It appears the output file contains an error message, not valid skia output.');
+          printErrorHelpText();
+          return 1;
+        }
+      }
     }
     return 0;
   }
