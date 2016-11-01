@@ -19,7 +19,7 @@ class CreateCommand extends FlutterCommand {
   CreateCommand() {
     argParser.addFlag('pub',
       defaultsTo: true,
-      help: 'Whether to run "pub get" after the project has been created.'
+      help: 'Whether to run "flutter packages get" after the project has been created.'
     );
     argParser.addFlag(
       'with-driver-test',
