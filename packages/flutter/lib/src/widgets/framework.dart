@@ -789,7 +789,7 @@ abstract class State<T extends StatefulWidget> {
   /// bundle may have changed).
   ///
   /// In addition to this method being invoked, it is guaranteed that the
-  /// [build] method will be invoked when a reassemble is signalled. Most
+  /// [build] method will be invoked when a reassemble is signaled. Most
   /// widgets therefore do not need to do anything in the [reassemble] method.
   ///
   /// This function will only be called during development. In release builds,
@@ -3281,7 +3281,7 @@ abstract class RenderObjectElement extends BuildableElement {
     // the old child list (old.children), and update our renderObject
     // accordingly.
 
-    // The cases it tries to optimise for are:
+    // The cases it tries to optimize for are:
     //  - the old list is empty
     //  - the lists are identical
     //  - there is an insertion or removal of one or more widgets in

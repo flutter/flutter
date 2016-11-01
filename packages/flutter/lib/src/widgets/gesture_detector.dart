@@ -388,8 +388,8 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
         throw new FlutterError(
           'Unexpected call to replaceGestureRecognizers() method of RawGestureDetectorState.\n'
           'The replaceGestureRecognizers() method can only be called during the layout phase. '
-          'To set the gesture recognisers at other times, trigger a new build using setState() '
-          'and provide the new gesture recognisers as constructor arguments to the corresponding '
+          'To set the gesture recognizers at other times, trigger a new build using setState() '
+          'and provide the new gesture recognizers as constructor arguments to the corresponding '
           'RawGestureDetector or GestureDetector object.'
         );
       }

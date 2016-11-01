@@ -43,7 +43,7 @@ abstract class GestureRecognizer extends GestureArenaMember {
   ///
   /// This method is called by the owner of this gesture recognizer
   /// when the object is no longer needed (e.g. when a gesture
-  /// recogniser is being unregistered from a [GestureDetector], the
+  /// recognizer is being unregistered from a [GestureDetector], the
   /// GestureDetector widget calls this method).
   @mustCallSuper
   void dispose() { }
@@ -178,7 +178,7 @@ enum GestureRecognizerState {
   /// been accepted definitively.
   possible,
 
-  /// Further pointer events cannot cause this recognizer to recognise the
+  /// Further pointer events cannot cause this recognizer to recognize the
   /// gesture until the recognizer returns to the [ready] state (typically when
   /// all the pointers the recognizer is tracking are removed from the screen).
   defunct,

@@ -128,7 +128,7 @@ enum SchedulerPhase {
 /// Scheduler for running the following:
 ///
 /// * _Frame callbacks_, triggered by the system's
-///   [ui.window.onBeginFrame] callback, for synchronising the
+///   [ui.window.onBeginFrame] callback, for synchronizing the
 ///   application's behavior to the system's display. For example, the
 ///   rendering layer uses this to drive its rendering pipeline.
 ///
