@@ -144,8 +144,8 @@ void PlatformViewAndroid::RunBundleAndSnapshot(JNIEnv* env,
                                                jstring java_snapshot_override) {
   std::string bundle_path =
       base::android::ConvertJavaStringToUTF8(env, java_bundle_path);
-  std::string snapshot_override =
-      base::android::ConvertJavaStringToUTF8(env, java_snapshot_override);
+  std::string snapshot_override = java_snapshot_override ?
+      base::android::ConvertJavaStringToUTF8(env, java_snapshot_override) : "";
 
   blink::Threads::UI()->PostTask(
       [ engine = engine_->GetWeakPtr(), bundle_path, snapshot_override ] {
