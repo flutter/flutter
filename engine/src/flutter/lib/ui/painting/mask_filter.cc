@@ -4,6 +4,7 @@
 
 #include "flutter/lib/ui/painting/mask_filter.h"
 
+#include "flutter/common/threads.h"
 #include "lib/tonic/dart_args.h"
 #include "lib/tonic/dart_binding_macros.h"
 #include "lib/tonic/converter/dart_converter.h"
@@ -34,6 +35,11 @@ ftl::RefPtr<MaskFilter> MaskFilter::Create(unsigned style,
 MaskFilter::MaskFilter(sk_sp<SkMaskFilter> filter)
     : filter_(std::move(filter)) {}
 
-MaskFilter::~MaskFilter() {}
+MaskFilter::~MaskFilter() {
+  // Skia objects must be deleted on the IO thread so that any associated GL
+  // objects will be cleaned up through the IO thread's GL context.
+  SkMaskFilter* filter = filter_.release();
+  Threads::IO()->PostTask([filter]() { filter->unref(); });
+}
 
 }  // namespace blink

@@ -4,6 +4,8 @@
 
 #include "flutter/lib/ui/painting/shader.h"
 
+#include "flutter/common/threads.h"
+
 namespace blink {
 
 IMPLEMENT_WRAPPERTYPEINFO(ui, Shader);
@@ -12,6 +14,10 @@ Shader::Shader(sk_sp<SkShader> shader) : shader_(shader) {
 }
 
 Shader::~Shader() {
+  // Skia objects must be deleted on the IO thread so that any associated GL
+  // objects will be cleaned up through the IO thread's GL context.
+  SkShader* shader = shader_.release();
+  Threads::IO()->PostTask([shader]() { shader->unref(); });
 }
 
 } // namespace blink
