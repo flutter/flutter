@@ -28,6 +28,11 @@ abstract class ResidentRunner {
   final bool usesTerminalUI;
   final Completer<int> _finished = new Completer<int>();
 
+  bool get isRunningDebug => debuggingOptions.buildMode == BuildMode.debug;
+  bool get isRunningProfile => debuggingOptions.buildMode == BuildMode.profile;
+  bool get isRunningRelease => debuggingOptions.buildMode == BuildMode.release;
+  bool get supportsServiceProtocol => isRunningDebug || isRunningProfile;
+
   VMService vmService;
   FlutterView currentView;
   StreamSubscription<String> _loggingSubscription;
@@ -72,6 +77,8 @@ abstract class ResidentRunner {
       await cleanupAfterSignal();
       exit(0);
     });
+    if (!supportsServiceProtocol)
+      return;
     ProcessSignal.SIGUSR1.watch().listen((ProcessSignal signal) async {
       printStatus('Caught SIGUSR1');
       await restart(fullRestart: false);
@@ -130,9 +137,13 @@ abstract class ResidentRunner {
       printHelp(details: true);
       return true;
     } else if (lower == 'w') {
+      if (!supportsServiceProtocol)
+        return true;
       await _debugDumpApp();
       return true;
     } else if (lower == 't') {
+      if (!supportsServiceProtocol)
+        return true;
       await _debugDumpRenderTree();
       return true;
     } else if (lower == 'q' || character == AnsiTerminal.KEY_F10) {
