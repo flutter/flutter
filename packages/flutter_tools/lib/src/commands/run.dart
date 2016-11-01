@@ -63,23 +63,21 @@ class RunCommand extends RunCommandBase {
         help: 'Specify a pre-built application binary to use when running.');
     argParser.addFlag('machine',
         hide: !verboseHelp,
-        help: 'Provide output and progress in machine friendly format.');
+        help: 'Handle machine structured JSON command input\n'
+              'and provide output and progress in machine friendly format.');
     usesPubOption();
 
     // Option to enable hot reloading.
     argParser.addFlag('hot',
-                      negatable: true,
-                      defaultsTo: kHotReloadDefault,
-                      help: 'Run with support for hot reloading.');
+        negatable: true,
+        defaultsTo: kHotReloadDefault,
+        help: 'Run with support for hot reloading.');
 
     // Option to write the pid to a file.
     argParser.addOption('pid-file',
-                        help: """
-                              Specify a file to write the process id to.
-                              You can send SIGUSR1 to trigger a hot reload
-                              and SIGUSR2 to trigger a full restart.
-                              """);
-
+        help: 'Specify a file to write the process id to.\n'
+              'You can send SIGUSR1 to trigger a hot reload\n'
+              'and SIGUSR2 to trigger a full restart.');
 
     // Hidden option to enable a benchmarking mode. This will run the given
     // application, measure the startup time and the app restart time, write the
