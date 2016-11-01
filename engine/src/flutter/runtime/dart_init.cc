@@ -258,22 +258,25 @@ Dart_Isolate IsolateCreateCallback(const char* script_uri,
     return ServiceIsolateCreateCallback(script_uri, error);
   }
 
-  // Assert that entry script URI starts with file://
   std::string entry_uri = script_uri;
-  FTL_CHECK(entry_uri.find(kFileUriPrefix) == 0u);
-  // Entry script path (file:// is stripped).
-  std::string entry_path(script_uri + strlen(kFileUriPrefix));
-  // Are we running a .dart source file?
-  const bool running_from_source = StringEndsWith(entry_path, ".dart");
+  // Are we running from a Dart source file?
+  const bool running_from_source = StringEndsWith(entry_uri, ".dart");
 
   std::vector<uint8_t> snapshot_data;
-  if (!IsRunningPrecompiledCode() && !running_from_source) {
-    // Attempt to copy the snapshot from the asset bundle.
-    const std::string& bundle_path = entry_path;
-    ftl::RefPtr<ZipAssetStore> zip_asset_store =
-        ftl::MakeRefCounted<ZipAssetStore>(
-            GetUnzipperProviderForPath(std::move(bundle_path)));
-    zip_asset_store->GetAsBuffer(kSnapshotAssetKey, &snapshot_data);
+  std::string entry_path;
+  if (!IsRunningPrecompiledCode()) {
+    // Assert that entry script URI starts with file://
+    FTL_CHECK(entry_uri.find(kFileUriPrefix) == 0u);
+    // Entry script path (file:// is stripped).
+    entry_path = std::string(script_uri + strlen(kFileUriPrefix));
+    if (!running_from_source) {
+      // Attempt to copy the snapshot from the asset bundle.
+      const std::string& bundle_path = entry_path;
+      ftl::RefPtr<ZipAssetStore> zip_asset_store =
+          ftl::MakeRefCounted<ZipAssetStore>(
+              GetUnzipperProviderForPath(std::move(bundle_path)));
+      zip_asset_store->GetAsBuffer(kSnapshotAssetKey, &snapshot_data);
+    }
   }
 
   UIDartState* parent_dart_state = static_cast<UIDartState*>(callback_data);
@@ -311,7 +314,8 @@ Dart_Isolate IsolateCreateCallback(const char* script_uri,
       // We are running from a script snapshot.
       FTL_CHECK(!LogIfError(Dart_LoadScriptFromSnapshot(snapshot_data.data(),
                                                         snapshot_data.size())));
-    } else {
+    } else if (running_from_source) {
+      // We are running from source.
       // Forward the .packages configuration from the parent isolate to the
       // child isolate.
       tonic::FileLoader& parent_loader = parent_dart_state->file_loader();
@@ -320,7 +324,7 @@ Dart_Isolate IsolateCreateCallback(const char* script_uri,
       if (!packages.empty() && !loader.LoadPackagesMap(packages)) {
         FTL_LOG(WARNING) << "Failed to load package map: " << packages;
       }
-      // We are running from source.
+      // Load the script.
       FTL_CHECK(!LogIfError(loader.LoadScript(entry_path)));
     }
 
