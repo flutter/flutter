@@ -112,6 +112,10 @@ class ScreenshotCommand extends FlutterCommand {
       skpResponse = await new http.Request('GET', skpUri).send();
     } on SocketException catch (e) {
       printError('Skia screenshot failed: $skpUri\n$e');
+      printError('');
+      printError('Be sure that --$_kSkia specifies the diagnostic server port, not the observatory port');
+      printError('To find the diagnostic server port number, use "flutter run --verbose"');
+      printError('and look for "Diagnostic server listening on" in the output.');
       return 1;
     }
     if (skpResponse.statusCode != HttpStatus.OK) {
