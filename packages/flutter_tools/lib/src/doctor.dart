@@ -39,7 +39,7 @@ class Doctor {
       _validators.add(_iosWorkflow);
 
     List<DoctorValidator> ideValidators = <DoctorValidator>[];
-    ideValidators.addAll(IntelliJValidator.getInstalledValidators());
+    ideValidators.addAll(IntelliJValidator.installedValidators);
     if (ideValidators.isNotEmpty)
       _validators.addAll(ideValidators);
     else
@@ -252,7 +252,7 @@ abstract class IntelliJValidator extends DoctorValidator {
     'IdeaIC' : 'IntelliJ IDEA Community Edition',
   };
 
-  static Iterable<DoctorValidator> getInstalledValidators() {
+  static Iterable<DoctorValidator> get installedValidators {
     if (Platform.isLinux)
       return IntelliJValidatorOnLinux.installed;
     if (Platform.isMacOS)
