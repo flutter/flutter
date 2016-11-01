@@ -46,7 +46,7 @@ class IOSSimulatorUtils {
       return <IOSSimulator>[];
 
     return SimControl.instance.getConnectedDevices().map((SimDevice device) {
-      return new IOSSimulator(device.udid, name: device.name);
+      return new IOSSimulator(device.udid, name: device.name, category: device.category);
     }).toList();
   }
 }
@@ -302,10 +302,12 @@ class SimDevice {
 }
 
 class IOSSimulator extends Device {
-  IOSSimulator(String id, { this.name }) : super(id);
+  IOSSimulator(String id, { this.name, this.category }) : super(id);
 
   @override
   final String name;
+
+  final String category;
 
   @override
   bool get isLocalEmulator => true;
@@ -556,6 +558,9 @@ class IOSSimulator extends Device {
 
   @override
   TargetPlatform get platform => TargetPlatform.ios;
+
+  @override
+  String get sdkNameAndVersion => category;
 
   @override
   DeviceLogReader get logReader {

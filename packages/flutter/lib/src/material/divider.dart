@@ -6,20 +6,23 @@ import 'package:flutter/widgets.dart';
 
 import 'theme.dart';
 
-/// A material design divider.
-///
 /// A one logical pixel thick horizontal line, with padding on either
-/// side. The box's total height is controlled by [height].
+/// side.
+///
+/// In the material design language, this represents a divider.
 ///
 /// Dividers can be used in lists and [Drawer]s to separate content vertically.
 /// To create a one-pixel divider between items in a list, consider using
 /// [ListItem.divideItems], which is optimized for this case.
 ///
+/// The box's total height is controlled by [height]. The appropriate padding is
+/// automatically computed from the height.
+///
 /// See also:
 ///
-///  * [ListItem.divideItems]
-///  * [PopupMenuDivider]
-///  * <https://www.google.com/design/spec/components/dividers.html>
+///  * [PopupMenuDivider], which is the equivalent but for popup menus.
+///  * [ListItem.divideItems], another approach to dividing widgets in a list.
+///  * <https://material.google.com/components/dividers.html>
 class Divider extends StatelessWidget {
   /// Creates a material design divider.
   ///

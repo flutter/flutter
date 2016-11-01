@@ -34,7 +34,7 @@ class TextStyle {
   /// The name of the font to use when painting the text (e.g., Roboto).
   final String fontFamily;
 
-  /// The size of gyphs (in logical pixels) to use when painting the text.
+  /// The size of glyphs (in logical pixels) to use when painting the text.
   ///
   /// During painting, the [fontSize] is multiplied by the current
   /// `textScaleFactor` to let users make it easier to read text by increasing
@@ -120,7 +120,7 @@ class TextStyle {
   /// If the underlying values are null, then the corresponding factors and/or
   /// deltas must not be specified.
   ///
-  /// The non-numeric fields can be controlled using the cooresponding arguments.
+  /// The non-numeric fields can be controlled using the corresponding arguments.
   TextStyle apply({
     Color color,
     String fontFamily,

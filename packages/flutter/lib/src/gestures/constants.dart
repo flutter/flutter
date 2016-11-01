@@ -11,7 +11,7 @@ const Duration kPressTimeout = const Duration(milliseconds: 100);
 
 /// Maximum length of time between a tap down and a tap up for the gesture to be
 /// considered a tap. (Currently not honored by the TapGestureRecognizer.)
-// TODO(ianh): Remove this, or implement a hover-tap gesture recogniser which
+// TODO(ianh): Remove this, or implement a hover-tap gesture recognizer which
 // uses this.
 const Duration kHoverTapTimeout = const Duration(milliseconds: 150);
 

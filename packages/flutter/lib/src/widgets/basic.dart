@@ -745,8 +745,6 @@ class LayoutId extends ParentDataWidget<CustomMultiChildLayout> {
   }
 }
 
-const List<Widget> _emptyWidgetList = const <Widget>[];
-
 /// A widget that defers the layout of multiple children to a delegate.
 ///
 /// The delegate can determine the layout constraints for each child and can
@@ -767,7 +765,7 @@ class CustomMultiChildLayout extends MultiChildRenderObjectWidget {
   CustomMultiChildLayout({
     Key key,
     @required this.delegate,
-    List<Widget> children: _emptyWidgetList
+    List<Widget> children: const <Widget>[],
   }) : super(key: key, children: children) {
     assert(delegate != null);
   }
@@ -1406,7 +1404,7 @@ class Viewport extends SingleChildRenderObjectWidget {
 ///
 /// See also:
 ///
-///  * [Block] (which combines block layout with scrolling)
+///  * [Block], which combines block layout with scrolling.
 class BlockBody extends MultiChildRenderObjectWidget {
   /// Creates a block layout widget.
   ///
@@ -1414,7 +1412,7 @@ class BlockBody extends MultiChildRenderObjectWidget {
   BlockBody({
     Key key,
     this.mainAxis: Axis.vertical,
-    List<Widget> children: _emptyWidgetList
+    List<Widget> children: const <Widget>[],
   }) : super(key: key, children: children) {
     assert(mainAxis != null);
   }
@@ -1433,25 +1431,30 @@ class BlockBody extends MultiChildRenderObjectWidget {
 
 /// A widget that uses the stack layout algorithm for its children.
 ///
-/// This class is useful if you want to overlap several children in a
-/// simple way, for example having some text and an image, overlaid
-/// with a gradient and a button attached to the bottom.
+/// This class is useful if you want to overlap several children in a simple
+/// way, for example having some text and an image, overlaid with a gradient and
+/// a button attached to the bottom.
 ///
-/// If you want to lay a number of children out in a particular
-/// pattern, or if you want to make a custom layout manager, you
-/// probably want to use [CustomMultiChildLayout] instead. In
-/// particular, when using a Stack you can't position children
-/// relative to their size or the stack's own size.
+/// Each child of a [Stack] widget is either _positioned_ or _non-positioned_.
+/// Positioned children are those wrapped in a [Positioned] widget that has at
+/// least one non-null property. The stack sizes itself to contain all the
+/// non-positioned children, which are positioned according to [alignment]
+/// (which defaults to the top-left corner). The positioned children are then
+/// placed relative to the stack according to their top, right, bottom, and left
+/// properties.
 ///
-/// For more details about the stack layout algorithm, see
-/// [RenderStack]. To control the position of child widgets, see the
-/// [Positioned] widget.
+/// For more details about the stack layout algorithm, see [RenderStack].
+///
+/// If you want to lay a number of children out in a particular pattern, or if
+/// you want to make a custom layout manager, you probably want to use
+/// [CustomMultiChildLayout] instead. In particular, when using a [Stack] you
+/// can't position children relative to their size or the stack's own size.
 ///
 /// See also:
 ///
 ///  * [Flow]
-///  * [Align] (which sizes itself based on its child's size and positions
-///    the child according to a [FractionalOffset] value)
+///  * [Align], which sizes itself based on its child's size and positions
+///    the child according to a [FractionalOffset] value.
 ///  * [CustomSingleChildLayout]
 ///  * [CustomMultiChildLayout]
 class Stack extends MultiChildRenderObjectWidget {
@@ -1463,7 +1466,7 @@ class Stack extends MultiChildRenderObjectWidget {
     Key key,
     this.alignment: FractionalOffset.topLeft,
     this.overflow: Overflow.clip,
-    List<Widget> children: _emptyWidgetList
+    List<Widget> children: const <Widget>[],
   }) : super(key: key, children: children);
 
   /// How to align the non-positioned children in the stack.
@@ -1497,6 +1500,10 @@ class Stack extends MultiChildRenderObjectWidget {
 }
 
 /// A [Stack] that shows a single child from a list of children.
+///
+/// The displayed child is the one with the given [index].
+///
+/// For more details, see [Stack].
 class IndexedStack extends Stack {
   /// Creates a [Stack] widget that paints a single child.
   ///
@@ -1505,7 +1512,7 @@ class IndexedStack extends Stack {
     Key key,
     FractionalOffset alignment: FractionalOffset.topLeft,
     this.index: 0,
-    List<Widget> children: _emptyWidgetList
+    List<Widget> children: const <Widget>[],
   }) : super(key: key, alignment: alignment, children: children) {
     assert(index != null);
   }
@@ -1530,6 +1537,18 @@ class IndexedStack extends Stack {
 /// the [Positioned] widget to its enclosing [Stack] must contain only
 /// [StatelessWidget]s or [StatefulWidget]s (not other kinds of widgets, like
 /// [RenderObjectWidget]s).
+///
+/// If a widget is wrapped in a [Positioned], then it is a _positioned_ widget
+/// in its [Stack]. If the [top] property is non-null, the top edge of this child
+/// will be positioned [top] layout units from the top of the stack widget. The
+/// [right], [bottom], and [left] properties work analogously.
+///
+/// If both the [top] and [bottom] properties are non-null, then the child will
+/// be forced to have exactly the height required to satisfy both constraints.
+/// Similarly, setting the [right] and [left] properties to non-null values will
+/// force the child to have a particular width. Alternatively the [width] and
+/// [height] properties can be used to give the dimensions, with one
+/// corresponding position property (e.g. [top] and [height]).
 class Positioned extends ParentDataWidget<Stack> {
   /// Creates a widget that controls where a child of a [Stack] is positioned.
   ///
@@ -1689,8 +1708,8 @@ class Positioned extends ParentDataWidget<Stack> {
 abstract class GridRenderObjectWidget extends MultiChildRenderObjectWidget {
   /// Initializes fields for subclasses.
   GridRenderObjectWidget({
-    List<Widget> children: _emptyWidgetList,
-    Key key
+    Key key,
+    List<Widget> children: const <Widget>[],
   }) : super(key: key, children: children) {
     _delegate = createDelegate();
   }
@@ -1722,12 +1741,16 @@ class CustomGrid extends GridRenderObjectWidget {
   CustomGrid({
     Key key,
     @required this.delegate,
-    List<Widget> children: _emptyWidgetList
+    List<Widget> children: const <Widget>[],
   }) : super(key: key, children: children) {
     assert(delegate != null);
   }
 
   /// The delegate that controls the layout of the children.
+  ///
+  /// For example, a [FixedColumnCountGridDelegate] for grids that have a fixed
+  /// number of columns or a [MaxTileWidthGridDelegate] for grids that have a
+  /// maximum tile width.
   final GridDelegate delegate;
 
   @override
@@ -1748,7 +1771,7 @@ class FixedColumnCountGrid extends GridRenderObjectWidget {
     this.rowSpacing: 0.0,
     this.tileAspectRatio: 1.0,
     this.padding: EdgeInsets.zero,
-    List<Widget> children: _emptyWidgetList
+    List<Widget> children: const <Widget>[],
   }) : super(key: key, children: children) {
     assert(columnCount != null && columnCount >= 0);
     assert(tileAspectRatio != null && tileAspectRatio > 0.0);
@@ -1795,7 +1818,7 @@ class MaxTileWidthGrid extends GridRenderObjectWidget {
     this.rowSpacing: 0.0,
     this.tileAspectRatio: 1.0,
     this.padding: EdgeInsets.zero,
-    List<Widget> children: _emptyWidgetList
+    List<Widget> children: const <Widget>[],
   }) : super(key: key, children: children) {
     assert(maxTileWidth != null && maxTileWidth >= 0.0);
     assert(tileAspectRatio != null && tileAspectRatio > 0.0);
@@ -1877,22 +1900,54 @@ class GridPlacementData<DataType> extends ParentDataWidget<GridRenderObjectWidge
 
 /// A widget that uses the flex layout algorithm for its children.
 ///
-/// For details about the flex layout algorithm, see [RenderFlex]. To control
-/// the flex of child widgets, see the [Flexible] widget.
+/// The [Flex] widget allows you to control the axis along which the children are
+/// placed (horizontal or vertical). This is referred to as the _main axis_. If
+/// you know the main axis in advance, then consider using a [Row] (if it's
+/// horizontal) or [Column] (if it's vertical) instead, since that will be less
+/// verbose.
+///
+/// Each child of a [Flex] widget is either flexible or inflexible. The [Flex]
+/// first lays out its inflexible children and subtracts their total length
+/// along the main axis to determine how much free space is available. The
+/// [Flex] then divides this free space among the flexible children in a ratio
+/// determined by their [Flexible.flex] properties. To control the flex of child
+/// widgets, see the [Flexible] widget.
+///
+/// The [mainAxisAlignment] property determines how the remaining free space (if
+/// any) in the main direction is allocated after the flexible children are
+/// dealt with. The [crossAxisAlignment] property determines how children are
+/// positioned in the cross direction.
+///
+/// By default, a [Flex] will size itself along the main axis to the maximum
+/// size permitted by its parent, unless that would be infinite (e.g. if it is
+/// in a [Block] with the same main axis), in which case it will shrink-wrap its
+/// children. The [mainAxisSize] property can be used to control this.
+///
+/// For more details about the flex layout algorithm, see [RenderFlex].
+///
+/// The [Flex] widget does not scroll (and in general it is considered an error
+/// to have more children in a [Flex] than will fit in the available room). If
+/// you have some widgets and want them to be able to scroll if there is
+/// insufficient room, consider using a [Block].
+///
+/// If you only have one child, then rather than using [Flex], [Row], or
+/// [Column], consider using [Align] or [Center] to position the child.
 class Flex extends MultiChildRenderObjectWidget {
   /// Creates a flex layout.
+  ///
+  /// The [direction] is required.
   ///
   /// The [direction], [mainAxisAlignment], and [crossAxisAlignment] arguments
   /// must not be null. If [crossAxisAlignment] is
   /// [CrossAxisAlignment.baseline], then [textBaseline] must not be null.
   Flex({
     Key key,
-    this.direction: Axis.horizontal,
+    @required this.direction,
     this.mainAxisAlignment: MainAxisAlignment.start,
     this.mainAxisSize: MainAxisSize.max,
     this.crossAxisAlignment: CrossAxisAlignment.center,
     this.textBaseline,
-    List<Widget> children: _emptyWidgetList
+    List<Widget> children: const <Widget>[],
   }) : super(key: key, children: children) {
     assert(direction != null);
     assert(mainAxisAlignment != null);
@@ -1902,6 +1957,11 @@ class Flex extends MultiChildRenderObjectWidget {
   }
 
   /// The direction to use as the main axis.
+  ///
+  /// If you know the axis in advance, then consider using a [Row] (if it's
+  /// horizontal) or [Column] (if it's vertical) instead of a [Flex], since that
+  /// will be less verbose. (For [Row] and [Column] this property is fixed to
+  /// the appropriate axis.)
   final Axis direction;
 
   /// How the children should be placed along the main axis.
@@ -1911,7 +1971,7 @@ class Flex extends MultiChildRenderObjectWidget {
   ///
   /// After allocating space to children, there might be some remaining free
   /// space. This value controls whether to maximize or minimize the amount of
-  /// free space, subject to the incoming layout contraints.
+  /// free space, subject to the incoming layout constraints.
   ///
   /// If some children have a non-zero flex factors (and none have a fit of
   /// [FlexFit.loose]), they will expand to consume all the available space and
@@ -1949,8 +2009,34 @@ class Flex extends MultiChildRenderObjectWidget {
 
 /// A widget that lays out its children in a horizontal array.
 ///
-/// For details about the flex layout algorithm, see [RenderFlex]. To control
-/// the flex of child widgets, see the [Flexible] widget.
+/// Each child of a [Row] widget is either flexible or inflexible. The [Row]
+/// first lays out its inflexible children and subtracts their total width to
+/// determine how much free space is available. The [Row] then divides this free
+/// space among the flexible children in a ratio determined by their
+/// [Flexible.flex] properties. To control the flex of child widgets, see the
+/// [Flexible] widget.
+///
+/// The [mainAxisAlignment] property determines how the remaining horizontal
+/// free space (if any) is allocated after the flexible children are dealt with.
+/// The [crossAxisAlignment] property determines how children are positioned
+/// vertically.
+///
+/// By default, a [Row] will size itself vertically to the maximum size
+/// permitted by its parent, unless that would be infinitely wide (e.g. if it is
+/// in a horizontal [Block]), in which case it will shrink-wrap its children.
+/// The [mainAxisSize] property can be used to control this.
+///
+/// For more details about the flex layout algorithm, see [RenderFlex].
+///
+/// The [Row] widget does not scroll (and in general it is considered an error
+/// to have more children in a [Row] than will fit in the available room). If
+/// you have a line of widgets and want them to be able to scroll if there is
+/// insufficient room, consider using a [Block].
+///
+/// For a vertical variant, see [Column].
+///
+/// If you only have one child, then consider using [Align] or [Center] to
+/// position the child.
 class Row extends Flex {
   /// Creates a horizontal array of children.
   ///
@@ -1963,7 +2049,7 @@ class Row extends Flex {
     MainAxisSize mainAxisSize: MainAxisSize.max,
     CrossAxisAlignment crossAxisAlignment: CrossAxisAlignment.center,
     TextBaseline textBaseline,
-    List<Widget> children: _emptyWidgetList
+    List<Widget> children: const <Widget>[],
   }) : super(
     children: children,
     key: key,
@@ -1977,13 +2063,34 @@ class Row extends Flex {
 
 /// A widget that lays out its children in a vertical array.
 ///
-/// For details about the flex layout algorithm, see [RenderFlex]. To control
-/// the flex of child widgets, see the [Flexible] widget.
+/// Each child of a [Row] widget is either flexible or inflexible. The [Row]
+/// first lays out its inflexible children and subtracts their total width to
+/// determine how much free space is available. The [Row] then divides this free
+/// space among the flexible children in a ratio determined by their
+/// [Flexible.flex] properties. To control the flex of child widgets, see the
+/// [Flexible] widget.
 ///
-/// The Column widget does not scroll (and in general it is considered an error
-/// to have more children in a Column than will fit in the available room). If
-/// you have a list of widgets and want them to be able to scroll if there is
-/// insufficient room, consider using a [Block].
+/// The [mainAxisAlignment] property determines how the remaining vertical free
+/// space (if any) is allocated after the flexible children are dealt with. The
+/// [crossAxisAlignment] property determines how children are positioned
+/// horizontally.
+///
+/// By default, a [Column] will size itself vertically to the maximum size
+/// permitted by its parent, unless that would be infinitely high (e.g. if it is
+/// in a vertical [Block]), in which case it will shrink-wrap its children. The
+/// [mainAxisSize] property can be used to control this.
+///
+/// For more details about the flex layout algorithm, see [RenderFlex].
+///
+/// The [Column] widget does not scroll (and in general it is considered an
+/// error to have more children in a [Column] than will fit in the available
+/// room). If you have a list of widgets and want them to be able to scroll if
+/// there is insufficient room, consider using a [Block].
+///
+/// For a horizontal variant, see [Row].
+///
+/// If you only have one child, then consider using [Align] or [Center] to
+/// position the child.
 class Column extends Flex {
   /// Creates a vertical array of children.
   ///
@@ -1996,7 +2103,7 @@ class Column extends Flex {
     MainAxisSize mainAxisSize: MainAxisSize.max,
     CrossAxisAlignment crossAxisAlignment: CrossAxisAlignment.center,
     TextBaseline textBaseline,
-    List<Widget> children: _emptyWidgetList
+    List<Widget> children: const <Widget>[],
   }) : super(
     children: children,
     key: key,
@@ -2008,14 +2115,15 @@ class Column extends Flex {
   );
 }
 
-/// A widget that controls how a child of a [Flex], [Row], or [Column] flexes.
+/// A widget that controls how a child of a [Row], [Column], or [Flex] flexes.
 ///
-/// A [Flexible] widget must be a descendant of a [Flex], [Row], or [Column],
-/// and the path from the [Flexible] widget to its enclosing [Flex], [Row], or
-/// [Column] must contain only [StatelessWidget]s or [StatefulWidget]s (not
-/// other kinds of widgets, like [RenderObjectWidget]s).
+/// A [Flexible] widget must be a descendant of a [Row], [Column], or [Flex],
+/// and the path from the [Flexible] widget to its enclosing [Row], [Column], or
+/// [Flex] must contain only [StatelessWidget]s or [StatefulWidget]s (not other
+/// kinds of widgets, like [RenderObjectWidget]s).
 class Flexible extends ParentDataWidget<Flex> {
-  /// Creates a widget that controls how a child of a [Flex], [Row], or [Column] flexes.
+  /// Creates a widget that controls how a child of a [Row], [Column], or [Flex]
+  /// flexes.
   Flexible({
     Key key,
     this.flex: 1,
@@ -2106,7 +2214,7 @@ class Flow extends MultiChildRenderObjectWidget {
   Flow({
     Key key,
     @required this.delegate,
-    List<Widget> children: _emptyWidgetList
+    List<Widget> children: const <Widget>[],
   }) : super(key: key, children: RepaintBoundary.wrapAll(children)) {
     assert(delegate != null);
   }
@@ -2121,7 +2229,7 @@ class Flow extends MultiChildRenderObjectWidget {
   Flow.unwrapped({
     Key key,
     this.delegate,
-    List<Widget> children: _emptyWidgetList
+    List<Widget> children: const <Widget>[],
   }) : super(key: key, children: children) {
     assert(delegate != null);
   }
@@ -2383,6 +2491,12 @@ class DefaultAssetBundle extends InheritedWidget {
   ///
   /// If there is no [DefaultAssetBundle] ancestor widget in the tree
   /// at the given context, then this will return the [rootBundle].
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// AssetBundle bundle = DefaultAssetBundle.of(context);
+  /// ```
   static AssetBundle of(BuildContext context) {
     DefaultAssetBundle result = context.inheritFromWidgetOfExactType(DefaultAssetBundle);
     return result?.bundle ?? rootBundle;

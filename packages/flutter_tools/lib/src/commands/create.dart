@@ -47,13 +47,19 @@ class CreateCommand extends FlutterCommand {
   @override
   Future<int> runCommand() async {
     if (argResults.rest.isEmpty) {
-      printStatus('No option specified for the output directory.');
-      printStatus(usage);
+      printError('No option specified for the output directory.');
+      printError(usage);
       return 2;
     }
 
     if (argResults.rest.length > 1) {
-      printStatus('Multiple output directories specified.');
+      printError('Multiple output directories specified.');
+      for (String arg in argResults.rest) {
+        if (arg.startsWith('-')) {
+          printError('Try moving $arg to be immediately following $name');
+          break;
+        }
+      }
       return 2;
     }
 
@@ -85,13 +91,15 @@ class CreateCommand extends FlutterCommand {
     String relativePath = path.relative(dirPath);
     String projectName = _normalizeProjectName(path.basename(dirPath));
 
-    if (_validateProjectDir(dirPath) != null) {
-      printError(_validateProjectDir(dirPath));
+    String error =_validateProjectDir(dirPath, flutterRoot: flutterRoot);
+    if (error != null) {
+      printError(error);
       return 1;
     }
 
-    if (_validateProjectName(projectName) != null) {
-      printError(_validateProjectName(projectName));
+    error = _validateProjectName(projectName);
+    if (error != null) {
+      printError(error);
       return 1;
     }
 
@@ -236,17 +244,22 @@ String _validateProjectName(String projectName) {
 
 /// Return `null` if the project directory is legal. Return a validation message
 /// if we should disallow the directory name.
-String _validateProjectDir(String projectName) {
-  FileSystemEntityType type = FileSystemEntity.typeSync(projectName);
+String _validateProjectDir(String dirPath, { String flutterRoot }) {
+  if (path.isWithin(flutterRoot, dirPath)) {
+    return "Cannot create a project within the Flutter SDK.\n"
+      "Target directory '$dirPath' is within the Flutter SDK at '$flutterRoot'.";
+  }
+
+  FileSystemEntityType type = FileSystemEntity.typeSync(dirPath);
 
   if (type != FileSystemEntityType.NOT_FOUND) {
     switch(type) {
       case FileSystemEntityType.FILE:
         // Do not overwrite files.
-        return "Invalid project name: '$projectName' - file exists.";
+        return "Invalid project name: '$dirPath' - file exists.";
       case FileSystemEntityType.LINK:
         // Do not overwrite links.
-        return "Invalid project name: '$projectName' - refers to a link.";
+        return "Invalid project name: '$dirPath' - refers to a link.";
     }
   }
 

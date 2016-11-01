@@ -82,6 +82,18 @@ void main() {
       expect(code, 0);
     });
 
+    // Verify that we help the user correct an option ordering issue
+    testUsingContext('produces sensible error message', () async {
+      Cache.flutterRoot = '../..';
+
+      CreateCommand command = new CreateCommand();
+      CommandRunner runner = createTestCommandRunner(command);
+
+      int code = await runner.run(<String>['create', temp.path, '--pub']);
+      expect(code, 2);
+      expect(testLogger.errorText, contains('Try moving --pub'));
+    });
+
     // Verify that we fail with an error code when the file exists.
     testUsingContext('fails when file exists', () async {
       Cache.flutterRoot = '../..';

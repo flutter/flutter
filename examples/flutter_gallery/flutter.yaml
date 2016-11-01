@@ -78,7 +78,9 @@ fonts:
     fonts:
       - asset: packages/flutter_gallery_assets/pesto/fonts/Raleway-Regular.ttf
       - asset: packages/flutter_gallery_assets/pesto/fonts/Raleway-Medium.ttf
+        weight: 500
       - asset: packages/flutter_gallery_assets/pesto/fonts/Raleway-SemiBold.ttf
+        weight: 600
   - family: AbrilFatface
     fonts:
       - asset: packages/flutter_gallery_assets/shrine/fonts/abrilfatface/AbrilFatface-Regular.ttf

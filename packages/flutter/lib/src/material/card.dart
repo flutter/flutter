@@ -6,13 +6,18 @@ import 'package:flutter/widgets.dart';
 
 import 'material.dart';
 
-/// A material design card
+/// A material design card.
+///
+/// A card is a sheet of [Material] used to represent some related information,
+/// for example an album, a geographical location, a meal, contact details, etc.
 ///
 /// See also:
 ///
-///  * [Dialog]
-///  * [showDialog]
-///  * <https://www.google.com/design/spec/components/cards.html>
+///  * [ListItem], to display icons and text in a card.
+///  * [ButtonBar], to display buttons at the bottom of a card. Typically these
+///    would be styled using a ButtonTheme created with [new ButtonTheme.bar].
+///  * [showDialog], to display a modal card.
+///  * <https://material.google.com/components/cards.html>
 class Card extends StatelessWidget {
   /// Creates a material design card.
   const Card({

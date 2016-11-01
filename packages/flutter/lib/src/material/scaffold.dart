@@ -296,7 +296,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 ///  * [SnackBar]
 ///  * [BottomSheet]
 ///  * [ScaffoldState]
-///  * <https://www.google.com/design/spec/layout/structure.html>
+///  * <https://material.google.com/layout/structure.html>
 class Scaffold extends StatefulWidget {
   /// Creates a visual scaffold for material design widgets.
   ///
@@ -324,6 +324,20 @@ class Scaffold extends StatefulWidget {
   /// Displayed below the app bar and behind the [floatingActionButton] and
   /// [drawer]. To avoid the body being resized to avoid the window padding
   /// (e.g., from the onscreen keyboard), see [resizeToAvoidBottomPadding].
+  ///
+  /// The widget in the body of the scaffold will be forced to the size of the
+  /// available space, to cover the entire scaffold other than any app bars,
+  /// footer buttons, or navigation bars.
+  ///
+  /// To center this widget instead, consider putting it in a [Center] widget
+  /// and having that be the body.
+  ///
+  /// If you have a column of widgets that should normally fit on the screen,
+  /// but may overflow and would in such cases need to scroll, consider using a
+  /// [Block] as the body of the scaffold.
+  ///
+  /// If you have a list of items, consider using a [LazyBlock] or
+  /// [LazyScrollableList] as the body of the scaffold.
   final Widget body;
 
   /// A button displayed on top of the body.
@@ -376,7 +390,84 @@ class Scaffold extends StatefulWidget {
   final bool resizeToAvoidBottomPadding;
 
   /// The state from the closest instance of this class that encloses the given context.
-  static ScaffoldState of(BuildContext context) => context.ancestorStateOfType(const TypeMatcher<ScaffoldState>());
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// @override
+  /// Widget build(BuildContext context) {
+  ///   return new RaisedButton(
+  ///     child: new Text('SHOW A SNACKBAR'),
+  ///     onPressed: () {
+  ///       Scaffold.of(context).showSnackBar(new SnackBar(
+  ///         content: new Text('Hello!'),
+  ///       ));
+  ///     },
+  ///   );
+  /// }
+  /// ```
+  ///
+  /// When the [Scaffold] is actually created in the same `build` function, the
+  /// `context` argument to the `build` function can't be used to find the
+  /// [Scaffold] (since it's "above" the widget being returned). In such cases,
+  /// the following technique with a [Builder] can be used to provide a new
+  /// scope with a [BuildContext] that is "under" the [Scaffold]:
+  ///
+  /// ```dart
+  /// @override
+  /// Widget build(BuildContext context) {
+  ///   return new Scaffold(
+  ///     appBar: new AppBar(
+  ///       title: new Text('Demo')
+  ///     ),
+  ///     body: new Builder(
+  ///       // Create an inner BuildContext so that the onPressed methods
+  ///       // can refer to the Scaffold with Scaffold.of().
+  ///       builder: (BuildContext context) {
+  ///         return new Center(
+  ///           child: new RaisedButton(
+  ///             child: new Text('SHOW A SNACKBAR'),
+  ///             onPressed: () {
+  ///               Scaffold.of(context).showSnackBar(new SnackBar(
+  ///                 content: new Text('Hello!'),
+  ///               ));
+  ///             },
+  ///           ),
+  ///         );
+  ///       },
+  ///     ),
+  ///   );
+  /// }
+  /// ```
+  ///
+  /// If there is no [Scaffold] in scope, then this will throw an exception.
+  /// To return null if there is no [Scaffold], then pass `nullOk: true`.
+  static ScaffoldState of(BuildContext context, { bool nullOk: false }) {
+    assert(nullOk != null);
+    assert(context != null);
+    ScaffoldState result = context.ancestorStateOfType(const TypeMatcher<ScaffoldState>());
+    if (nullOk || result != null)
+      return result;
+    throw new FlutterError(
+      'Scaffold.of() called with a context that does not contain a Scaffold.\n'
+      'No Scaffold ancestor could be found starting from the context that was passed to Scaffold.of(). '
+      'This usually happens when the context provided is from the same StatefulWidget as that '
+      'whose build function actually creates the Scaffold widget being sought.\n'
+      'There are several ways to avoid this problem. The simplest is to use a Builder to get a '
+      'context that is "under" the Scaffold. For an example of this, please see the '
+      'documentation for Scaffold.of():\n'
+      '  https://docs.flutter.io/flutter/material/Scaffold/of.html\n'
+      'A more efficient solution is to split your build function into several widgets. This '
+      'introduces a new context from which you can obtain the Scaffold. In this solution, '
+      'you would have an outer widget that creates the Scaffold populated by instances of '
+      'your new inner widgets, and then in these inner widgets you would use Scaffold.of().\n'
+      'A less elegant but more expedient solution is assign a GlobalKey to the Scaffold, '
+      'then use the key.currentState property to obtain the ScaffoldState rather than '
+      'using the Scaffold.of() function.\n'
+      'The context used was:\n'
+      '  $context'
+    );
+  }
 
   @override
   ScaffoldState createState() => new ScaffoldState();
@@ -525,7 +616,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   ///
   ///  * [BottomSheet]
   ///  * [showModalBottomSheet]
-  ///  * <https://www.google.com/design/spec/components/bottom-sheets.html#bottom-sheets-persistent-bottom-sheets>
+  ///  * <https://material.google.com/components/bottom-sheets.html#bottom-sheets-persistent-bottom-sheets>
   PersistentBottomSheetController<dynamic/*=T*/> showBottomSheet/*<T>*/(WidgetBuilder builder) {
     if (_currentBottomSheet != null) {
       _currentBottomSheet.close();
@@ -771,12 +862,16 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   }
 
   void _handleDragEnd(DragEndDetails details) {
-    _backGestureController?.dragEnd(details.velocity.pixelsPerSecond.dx / context.size.width);
+    final bool willPop = _backGestureController?.dragEnd(details.velocity.pixelsPerSecond.dx / context.size.width) ?? false;
+    if (willPop)
+      _currentBottomSheet?.close();
     _backGestureController = null;
   }
 
   void _handleDragCancel() {
-    _backGestureController?.dragEnd(0.0);
+    final bool willPop = _backGestureController?.dragEnd(0.0) ?? false;
+    if (willPop)
+      _currentBottomSheet?.close();
     _backGestureController = null;
   }
 
@@ -804,7 +899,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     if (config.appBarBehavior != AppBarBehavior.anchor) {
       body = new NotificationListener<ScrollNotification>(
         onNotification: _handleScrollNotification,
-        child: config.body
+        child: config.body,
       );
     } else {
       body = config.body;

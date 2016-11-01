@@ -37,13 +37,28 @@ class GridPhotoViewer extends StatefulWidget {
   _GridPhotoViewerState createState() => new _GridPhotoViewerState();
 }
 
+class _GridTitleText extends StatelessWidget {
+  _GridTitleText(this.text);
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return new FittedBox(
+      fit: ImageFit.scaleDown,
+      alignment: FractionalOffset.centerLeft,
+      child: new Text(text),
+    );
+  }
+}
+
 class _GridPhotoViewerState extends State<GridPhotoViewer> with SingleTickerProviderStateMixin {
   AnimationController _controller;
-  double _lastScale = 1.0;
+  Animation<Offset> _flingAnimation;
+  Offset _offset = Offset.zero;
   double _scale = 1.0;
-  Point _lastFocalPoint = Point.origin;
-  Point _focalPoint = Point.origin;
-  Animation<Point> _flingAnimation;
+  Offset _normalizedOffset;
+  double _previousScale;
 
   @override
   void initState() {
@@ -58,30 +73,24 @@ class _GridPhotoViewerState extends State<GridPhotoViewer> with SingleTickerProv
     super.dispose();
   }
 
-  // The minimum value for the focal point is 0,0. If the size of this
-  // renderer's box is w,h then the maximum value of the focal point is
-  // (w * _scale - w)/_scale, (h * _scale - h)/_scale.
-  Point _clampFocalPoint(Point point) {
+  // The maximum offset value is 0,0. If the size of this renderer's box is w,h
+  // then the minimum offset value is w - _scale * w, h - _scale * h.
+  Offset _clampOffset(Offset offset) {
     final Size size = context.size;
-    final double inverseScale = (_scale - 1.0) / _scale;
-    final Point bottomRight = new Point(
-      size.width * inverseScale,
-      size.height * inverseScale,
-    );
-     return new Point(point.x.clamp(0.0, bottomRight.x), point.y.clamp(0.0, bottomRight.y));
+    final Offset minOffset = new Offset(size.width, size.height) * (1.0 - _scale);
+    return new Offset(offset.dx.clamp(minOffset.dx, 0.0), offset.dy.clamp(minOffset.dy, 0.0));
   }
 
   void _handleFlingAnimation() {
     setState(() {
-      _focalPoint = _flingAnimation.value;
-      _lastFocalPoint = _focalPoint;
+      _offset = _flingAnimation.value;
     });
   }
 
   void _handleOnScaleStart(ScaleStartDetails details) {
     setState(() {
-      _lastScale = 1.0;
-      _lastFocalPoint = details.focalPoint;
+      _previousScale = _scale;
+      _normalizedOffset = (details.focalPoint.toOffset() - _offset) / _scale;
       // The fling animation stops if an input gesture starts.
       _controller.stop();
     });
@@ -89,10 +98,9 @@ class _GridPhotoViewerState extends State<GridPhotoViewer> with SingleTickerProv
 
   void _handleOnScaleUpdate(ScaleUpdateDetails details) {
     setState(() {
-      _scale = (_scale + (details.scale - _lastScale)).clamp(1.0, 3.0);
-      _lastScale = details.scale;
-      _focalPoint = _clampFocalPoint(_focalPoint + (_lastFocalPoint - details.focalPoint));
-      _lastFocalPoint = details.focalPoint;
+      _scale = (_previousScale * details.scale).clamp(1.0, 4.0);
+      // Ensure that image location under the focal point stays in the same place despite scaling.
+      _offset = _clampOffset(details.focalPoint.toOffset() - _normalizedOffset * _scale);
     });
   }
 
@@ -102,9 +110,9 @@ class _GridPhotoViewerState extends State<GridPhotoViewer> with SingleTickerProv
       return;
     final Offset direction = details.velocity.pixelsPerSecond / magnitude;
     final double distance = (Point.origin & context.size).shortestSide;
-    _flingAnimation = new Tween<Point>(
-      begin: _focalPoint,
-      end: _clampFocalPoint(_focalPoint + direction * -distance)
+    _flingAnimation = new Tween<Offset>(
+      begin: _offset,
+      end: _clampOffset(_offset + direction * distance)
     ).animate(_controller);
     _controller
       ..value = 0.0
@@ -121,7 +129,7 @@ class _GridPhotoViewerState extends State<GridPhotoViewer> with SingleTickerProv
           onScaleEnd: _handleOnScaleEnd,
           child: new Transform(
             transform: new Matrix4.identity()
-              ..translate(_focalPoint.x * (1.0 - _scale), _focalPoint.y * (1.0 - _scale))
+              ..translate(_offset.dx, _offset.dy)
               ..scale(_scale),
             child: new ClipRect(
               child: new Image.asset(config.photo.assetName, fit: ImageFit.cover)
@@ -187,7 +195,7 @@ class GridDemoPhotoItem extends StatelessWidget {
           header: new GestureDetector(
             onTap: () { onBannerTap(photo); },
             child: new GridTileBar(
-              title: new Text(photo.title),
+              title: new _GridTitleText(photo.title),
               backgroundColor: Colors.black45,
               leading: new Icon(
                 icon,
@@ -204,8 +212,8 @@ class GridDemoPhotoItem extends StatelessWidget {
             onTap: () { onBannerTap(photo); },
             child: new GridTileBar(
               backgroundColor: Colors.black45,
-              title: new Text(photo.title),
-              subtitle: new Text(photo.caption),
+              title: new _GridTitleText(photo.title),
+              subtitle: new _GridTitleText(photo.caption),
               trailing: new Icon(
                 icon,
                 color: Colors.white

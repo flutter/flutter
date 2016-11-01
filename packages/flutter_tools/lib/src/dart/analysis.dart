@@ -121,8 +121,10 @@ class AnalysisDriver {
     }
 
     if (options.packageRootPath != null) {
-      ContextBuilder builder = new ContextBuilder(resourceProvider, null, null);
-      builder.defaultPackagesDirectoryPath = options.packageRootPath;
+      ContextBuilderOptions builderOptions = new ContextBuilderOptions();
+      builderOptions.defaultPackagesDirectoryPath = options.packageRootPath;
+      ContextBuilder builder = new ContextBuilder(resourceProvider, null, null, 
+          options: builderOptions);
       PackageMapUriResolver packageUriResolver = new PackageMapUriResolver(resourceProvider,
           builder.convertPackagesToMap(builder.createPackageMap('')));
 

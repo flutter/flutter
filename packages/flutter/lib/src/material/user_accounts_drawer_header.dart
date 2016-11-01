@@ -23,7 +23,7 @@ import 'debug.dart';
 ///
 ///  * [Drawer]
 ///  * [DrawerHeader], for a drawer header that doesn't show user acounts
-///  * <https://www.google.com/design/spec/patterns/navigation-drawer.html>
+///  * <https://material.google.com/patterns/navigation-drawer.html>
 class UserAccountsDrawerHeader extends StatefulWidget {
   /// Creates a material design drawer header.
   ///

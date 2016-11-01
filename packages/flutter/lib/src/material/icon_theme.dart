@@ -49,6 +49,12 @@ class IconTheme extends InheritedWidget {
   /// context.
   ///
   /// Defaults to the current [ThemeData.iconTheme].
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// IconThemeData theme = IconTheme.of(context);
+  /// ```
   static IconThemeData of(BuildContext context) {
     IconTheme result = context.inheritFromWidgetOfExactType(IconTheme);
     return result?.data ?? Theme.of(context).iconTheme;

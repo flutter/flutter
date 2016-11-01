@@ -23,7 +23,7 @@ import 'theme.dart';
 
 typedef void _TabLayoutChanged(Size size, List<double> widths);
 
-// See https://www.google.com/design/spec/components/tabs.html#tabs-specs
+// See https://material.google.com/components/tabs.html#tabs-specs
 const double _kTabHeight = 46.0;
 const double _kTextAndIconTabHeight = 72.0;
 const double _kTabIndicatorHeight = 2.0;
@@ -507,6 +507,12 @@ class TabBarSelection<T> extends StatefulWidget {
   TabBarSelectionState<T> createState() => new TabBarSelectionState<T>();
 
   /// The state from the closest instance of this class that encloses the given context.
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// TabBarSelectionState<Foo> tabState = TabBarSelection.of/*<Foo>*/(context);
+  /// ```
   static TabBarSelectionState<dynamic/*=T*/> of/*<T>*/(BuildContext context) {
     return context.ancestorStateOfType(new TypeMatcher<TabBarSelectionState<dynamic/*=T*/>>());
   }
@@ -720,7 +726,7 @@ class _TabIndicatorTween extends Tween<Rect> {
 ///  * [TabBarSelection]
 ///  * [TabBarView]
 ///  * [AppBar.tabBar]
-///  * <https://www.google.com/design/spec/components/tabs.html>
+///  * <https://material.google.com/components/tabs.html>
 class TabBar<T> extends Scrollable implements AppBarBottomWidget {
   /// Creates a widget that displays a horizontal row of tabs, one per label.
   ///
@@ -1075,7 +1081,7 @@ class _TabBarState<T> extends ScrollableState<TabBar<T>> implements TabBarSelect
 ///
 ///  * [TabBarSelection]
 ///  * [TabBar]
-///  * <https://www.google.com/design/spec/components/tabs.html>
+///  * <https://material.google.com/components/tabs.html>
 class TabBarView<T> extends PageableList {
   /// Creates a widget that displays the contents of a tab.
   ///

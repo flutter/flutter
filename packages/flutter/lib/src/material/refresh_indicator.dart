@@ -79,7 +79,7 @@ enum _DismissTransition {
 ///
 /// See also:
 ///
-///  * <https://www.google.com/design/spec/patterns/swipe-to-refresh.html>
+///  * <https://material.google.com/patterns/swipe-to-refresh.html>
 ///  * [RefreshIndicatorState], can be used to programatically show the refresh indicator.
 ///  * [RefreshProgressIndicator].
 class RefreshIndicator extends StatefulWidget {

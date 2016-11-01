@@ -7,6 +7,12 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
 
 void main() {
+  testWidgets('ScrollableGrid default control', (WidgetTester tester) async {
+    await tester.pumpWidget(new Center(child: new ScrollableGrid(
+      delegate: new FixedColumnCountGridDelegate(columnCount: 1),
+    )));
+  });
+
   // Tests https://github.com/flutter/flutter/issues/5522
   testWidgets('ScrollableGrid displays correct children with nonzero padding', (WidgetTester tester) async {
     GlobalKey<ScrollableState> scrollableKey = new GlobalKey<ScrollableState>();

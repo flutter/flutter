@@ -712,8 +712,7 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
 /// Shows a dialog containing a material design time picker.
 ///
 /// The returned Future resolves to the time selected by the user when the user
-/// closes the dialog. If the user cancels the dialog, the Future resolves to
-/// the [initialTime].
+/// closes the dialog. If the user cancels the dialog, null is returned.
 ///
 /// To show a dialog with [initialTime] equal to the current time:
 /// ```dart
@@ -726,7 +725,7 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
 /// See also:
 ///
 ///  * [showDatePicker]
-///  * <https://www.google.com/design/spec/components/pickers.html#pickers-time-pickers>
+///  * <https://material.google.com/components/pickers.html#pickers-time-pickers>
 Future<TimeOfDay> showTimePicker({
   BuildContext context,
   TimeOfDay initialTime
@@ -735,5 +734,5 @@ Future<TimeOfDay> showTimePicker({
   return await showDialog(
     context: context,
     child: new _TimePickerDialog(initialTime: initialTime)
-  ) ?? initialTime;
+  );
 }

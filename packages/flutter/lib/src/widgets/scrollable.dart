@@ -61,14 +61,14 @@ typedef double SnapOffsetCallback(double scrollOffset, Size containerSize);
 
 /// A base class for scrollable widgets.
 ///
+/// If you have a list of widgets and want them to be able to scroll if there is
+/// insufficient room, consider using [Block].
+///
 /// Commonly used classes that are based on Scrollable include [ScrollableList],
 /// [ScrollableGrid], and [ScrollableViewport].
 ///
 /// Widgets that subclass [Scrollable] typically use state objects that subclass
 /// [ScrollableState].
-///
-/// If you have a list of widgets and want them to be able to scroll if there is
-/// insufficient room, consider using [Block].
 class Scrollable extends StatefulWidget {
   /// Initializes fields for subclasses.
   ///
@@ -155,6 +155,12 @@ class Scrollable extends StatefulWidget {
   final ScrollBuilder builder;
 
   /// The state from the closest instance of this class that encloses the given context.
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// ScrollableState scrollable = Scrollable.of(context);
+  /// ```
   static ScrollableState of(BuildContext context) {
     return context.ancestorStateOfType(const TypeMatcher<ScrollableState>());
   }
@@ -916,11 +922,11 @@ class ScrollNotification extends Notification {
 ///
 /// See also:
 ///
+///  * [Block], if your single child is a [Column].
 ///  * [ScrollableList], if you have many identically-sized children.
 ///  * [PageableList], if you have children that each take the entire screen.
 ///  * [ScrollableGrid], if your children are in a grid pattern.
 ///  * [LazyBlock], if you have many children of varying sizes.
-///  * [Block], if your single child is a [BlockBody] or a [Column].
 class ScrollableViewport extends StatelessWidget {
   /// Creates a simple scrolling widget that has a single child.
   ///
@@ -1035,7 +1041,7 @@ class ScrollableViewport extends StatelessWidget {
   }
 }
 
-/// A mashup of [ScrollableViewport] and [BlockBody].
+/// A scrolling list of variably-sized children.
 ///
 /// Useful when you have a small, fixed number of children that you wish to
 /// arrange in a block layout and that might exceed the height of its container
@@ -1046,13 +1052,14 @@ class ScrollableViewport extends StatelessWidget {
 /// or [ScrollableList] (if the children all have the same fixed height), as
 /// they avoid doing work for children that are not visible.
 ///
-/// If you have a single child, then use [ScrollableViewport] directly.
+/// This widget is implemented using [ScrollableViewport] and [BlockBody]. If
+/// you have a single child, consider using [ScrollableViewport] directly.
 ///
 /// See also:
 ///
-///  * [ScrollableViewport], if you only have one child.
+///  * [LazyBlock], if you have many children with varying heights.
 ///  * [ScrollableList], if all your children are the same height.
-///  * [LazyBlock], if you have children with varying heights.
+///  * [ScrollableViewport], if you only have one child.
 class Block extends StatelessWidget {
   /// Creates a scrollable array of children.
   Block({

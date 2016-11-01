@@ -103,6 +103,12 @@ class ClampOverscrolls extends InheritedWidget {
   }
 
   /// The closest instance of this class that encloses the given context.
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// ScrollableEdge edge = ClampOverscrolls.of(context).edge;
+  /// ```
   static ClampOverscrolls of(BuildContext context) {
     return context.inheritFromWidgetOfExactType(ClampOverscrolls);
   }

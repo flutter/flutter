@@ -14,7 +14,7 @@ import 'package:flutter/widgets.dart';
 ///
 ///  * [ScrollableGrid]
 ///  * [GridTileBar]
-///  * <https://www.google.com/design/spec/components/grid-lists.html>
+///  * <https://material.google.com/components/grid-lists.html>
 class GridTile extends StatelessWidget {
   /// Creates a grid tile.
   ///

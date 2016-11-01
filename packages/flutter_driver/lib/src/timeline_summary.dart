@@ -33,7 +33,7 @@ class TimelineSummary {
     int totalBuildTimeMicros = 0;
     int frameCount = 0;
 
-    for (TimedEvent event in _extractBeginFrameEvents()) {
+    for (TimedEvent event in _extractFrameEvents()) {
       frameCount++;
       totalBuildTimeMicros += event.duration.inMicroseconds;
     }
@@ -51,7 +51,7 @@ class TimelineSummary {
     int maxBuildTimeMicros = 0;
     int frameCount = 0;
 
-    for (TimedEvent event in _extractBeginFrameEvents()) {
+    for (TimedEvent event in _extractFrameEvents()) {
       frameCount++;
       maxBuildTimeMicros = math.max(maxBuildTimeMicros, event.duration.inMicroseconds);
     }
@@ -62,13 +62,13 @@ class TimelineSummary {
   }
 
   /// The total number of frames recorded in the timeline.
-  int countFrames() => _extractBeginFrameEvents().length;
+  int countFrames() => _extractFrameEvents().length;
 
   /// The number of frames that missed the [frameBuildBudget] and therefore are
   /// in the danger of missing frames.
   ///
   /// See [kBuildBudget].
-  int computeMissedFrameBuildBudgetCount([Duration frameBuildBudget = kBuildBudget]) => _extractBeginFrameEvents()
+  int computeMissedFrameBuildBudgetCount([Duration frameBuildBudget = kBuildBudget]) => _extractFrameEvents()
     .where((TimedEvent event) => event.duration > kBuildBudget)
     .length;
 
@@ -79,7 +79,7 @@ class TimelineSummary {
       'worst_frame_build_time_millis': computeWorstFrameBuildTimeMillis(),
       'missed_frame_build_budget_count': computeMissedFrameBuildBudgetCount(),
       'frame_count': countFrames(),
-      'frame_build_times': _extractBeginFrameEvents()
+      'frame_build_times': _extractFrameEvents()
         .map((TimedEvent event) => event.duration.inMicroseconds)
         .toList()
     };
@@ -113,28 +113,22 @@ class TimelineSummary {
       .toList();
   }
 
-  /// Extracts timed events that are reported as a pair of begin/end events.
-  List<TimedEvent> _extractTimedBeginEndEvents(String name) {
-    List<TimedEvent> result = <TimedEvent>[];
-
-    // Timeline does not guarantee that the first event is the "begin" event.
-    Iterator<TimelineEvent> events = _extractNamedEvents(name)
-        .skipWhile((TimelineEvent evt) => evt.phase != 'B').iterator;
-    while(events.moveNext()) {
-      TimelineEvent beginEvent = events.current;
-      if (events.moveNext()) {
-        TimelineEvent endEvent = events.current;
-        result.add(new TimedEvent(
-          beginEvent.timestampMicros,
-          endEvent.timestampMicros
-        ));
-      }
-    }
-
-    return result;
+  /// Extracts timed events that are reported as complete ("X") timeline events.
+  ///
+  /// See: https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU
+  List<TimedEvent> _extractCompleteEvents(String name) {
+    return _extractNamedEvents(name)
+        .where((TimelineEvent event) => event.phase == 'X')
+        .map((TimelineEvent event) {
+          return new TimedEvent(
+            event.timestampMicros,
+            event.timestampMicros + event.duration.inMicroseconds,
+          );
+        })
+        .toList();
   }
 
-  List<TimedEvent> _extractBeginFrameEvents() => _extractTimedBeginEndEvents('Engine::BeginFrame');
+  List<TimedEvent> _extractFrameEvents() => _extractCompleteEvents('Frame');
 }
 
 /// Timing information about an event that happened in the event loop.

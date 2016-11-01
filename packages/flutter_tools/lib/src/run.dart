@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:meta/meta.dart';
 import 'package:stack_trace/stack_trace.dart';
 
 import 'application_package.dart';
@@ -196,11 +197,11 @@ class RunAndStayResident extends ResidentRunner {
       }
     }
 
-    printStatus('Application running.');
+    printTrace('Application running.');
 
     if (vmService != null) {
       await vmService.vm.refreshViews();
-      printStatus('Connected to ${vmService.vm.mainView}\.');
+      printTrace('Connected to ${vmService.vm.mainView}\.');
     }
 
     if (vmService != null && traceStartup) {
@@ -239,6 +240,8 @@ class RunAndStayResident extends ResidentRunner {
   Future<Null> handleTerminalCommand(String code) async {
     String lower = code.toLowerCase();
     if (lower == 'r' || code == AnsiTerminal.KEY_F5) {
+      if (!supportsServiceProtocol)
+        return;
       if (device.supportsRestart) {
         // F5, restart
         await restart();
@@ -258,11 +261,22 @@ class RunAndStayResident extends ResidentRunner {
   }
 
   @override
-  void printHelp() {
-    final bool showRestartText = !prebuiltMode && device.supportsRestart;
-    String restartText = showRestartText ? ', "r" or F5 to restart the app,' : '';
-    printStatus('Type "h" or F1 for help$restartText and "q", F10, or ctrl-c to quit.');
-    printStatus('Type "w" to print the widget hierarchy of the app, and "t" for the render tree.');
+  void printHelp({ @required bool details }) {
+    final bool showRestartText = !prebuiltMode && device.supportsRestart &&
+        supportsServiceProtocol;
+    if (showRestartText)
+      printStatus('To restart the app, press "r" or F5.');
+    if (_result.hasObservatory)
+      printStatus('The Observatory debugger and profiler is available at: http://127.0.0.1:${_result.observatoryPort}/');
+    if (details) {
+      if (supportsServiceProtocol) {
+        printStatus('To dump the widget hierarchy of the app (debugDumpApp), press "w".');
+        printStatus('To dump the rendering tree of the app (debugDumpRenderTree), press "r".');
+      }
+      printStatus('To repeat this help message, press "h" or F1. To quit, press "q", F10, or Ctrl-C.');
+    } else {
+      printStatus('For a more detailed help message, press "h" or F1. To quit, press "q", F10, or Ctrl-C.');
+    }
   }
 
   @override

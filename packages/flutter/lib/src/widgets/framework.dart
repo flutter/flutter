@@ -328,10 +328,11 @@ class TypeMatcher<T> {
 /// is an immutable description of part of a user interface. Widgets can be
 /// inflated into elements, which manage the underlying render tree.
 ///
-/// Widgets themselves have no mutable state. If you wish to associate
-/// mutatable state with a widget, consider using a [StatefulWidget], which
-/// creates a [State] object (via [StatefulWidget.createState]) whenever it is
-/// inflated into an element and incorporated into the tree.
+/// Widgets themselves have no mutable state (all their fields must be final).
+/// If you wish to associate mutable state with a widget, consider using a
+/// [StatefulWidget], which creates a [State] object (via
+/// [StatefulWidget.createState]) whenever it is inflated into an element and
+/// incorporated into the tree.
 ///
 /// A given widget can be included in the tree zero or more times. In particular
 /// a given widget can be placed in the tree multiple times. Each time a widget
@@ -349,9 +350,12 @@ class TypeMatcher<T> {
 ///
 /// See also:
 ///
-///  * [StatelessWidget].
-///  * [StatefulWidget].
-///  * [InheritedWidget].
+///  * [StatefulWidget] and [State], for widgets that can build differently
+///    several times over their lifetime.
+///  * [InheritedWidget], for widgets that introduce ambient state that can
+///    be read by descendant widgets.
+///  * [StatelessWidget], for widgets that always build the same way given a
+///    particular configuration and ambient state.
 abstract class Widget {
   /// Initializes [key] for subclasses.
   const Widget({ this.key });
@@ -422,7 +426,7 @@ abstract class Widget {
 /// building a constellation of other widgets that describe the user interface
 /// more concretely. The building process continues recursively until the
 /// description of the user interface is fully concrete (e.g., consists
-/// enitrely of [RenderObjectWidget]s, which describe concrete [RenderObject]s).
+/// entirely of [RenderObjectWidget]s, which describe concrete [RenderObject]s).
 ///
 /// Stateless widget are useful when the part of the user interface you are
 /// describing does not depend on anything other than the configuration
@@ -433,7 +437,10 @@ abstract class Widget {
 ///
 /// See also:
 ///
-///  * [StatefulWidget].
+///  * [StatefulWidget] and [State], for widgets that can build differently
+///    several times over their lifetime.
+///  * [InheritedWidget], for widgets that introduce ambient state that can
+///    be read by descendant widgets.
 abstract class StatelessWidget extends Widget {
   /// Initializes [key] for subclasses.
   const StatelessWidget({ Key key }) : super(key: key);
@@ -466,20 +473,32 @@ abstract class StatelessWidget extends Widget {
   /// given widget might be with multiple different [BuildContext] arguments
   /// over time if the widget is moved around the tree or if the widget is
   /// inserted into the tree in multiple places at once.
+  ///
+  /// The implementation of this method must only depend on:
+  ///
+  /// * the fields of the widget, which themselves must not change over time,
+  ///   and
+  /// * any ambient state obtained from the `context` using
+  ///   [BuildContext.inheritFromWidgetOfExactType].
+  ///
+  /// If a widget's [build] method is to depend on anything else, use a
+  /// [StatefulWidget] instead.
   @protected
   Widget build(BuildContext context);
 }
 
 /// A widget that has mutable state.
 ///
-/// State is information (1) that can be read synchronously when the widget is
-/// built and (2) for which we will be notified when it changes.
+/// State is information that (1) can be read synchronously when the widget is
+/// built and (2) might change during the lifetime of the widget. It is the
+/// responsibility of the widget implementer to ensure that the [State] is
+/// promptly notified when such state changes, using [State.setState].
 ///
 /// A stateful widget is a widget that describes part of the user interface by
 /// building a constellation of other widgets that describe the user interface
 /// more concretely. The building process continues recursively until the
 /// description of the user interface is fully concrete (e.g., consists
-/// enitrely of [RenderObjectWidget]s, which describe concrete [RenderObject]s).
+/// entirely of [RenderObjectWidget]s, which describe concrete [RenderObject]s).
 ///
 /// Stateless widget are useful when the part of the user interface you are
 /// describing can change dynamically, e.g. due to having an internal
@@ -489,8 +508,12 @@ abstract class StatelessWidget extends Widget {
 /// [StatelessWidget].
 ///
 /// [StatefulWidget] instances themselves are immutable and store their mutable
-/// state in separate [State] objects that are created by the [createState]
-/// method. The framework calls [createState] whenever it inflates a
+/// state either in separate [State] objects that are created by the
+/// [createState] method, or in objects to which that [State] subscribes, for
+/// example [Stream] or [ChangeNotifier] objects, to which references are stored
+/// in final fields on the [StatefulWidget] itself.
+///
+/// The framework calls [createState] whenever it inflates a
 /// [StatefulWidget], which means that multiple [State] objects might be
 /// associated with the same [StatefulWidget] if that widget has been inserted
 /// into the tree in multiple places. Similarly, if a [StatefulWidget] is
@@ -514,8 +537,11 @@ abstract class StatelessWidget extends Widget {
 ///
 /// See also:
 ///
-///  * [State].
-///  * [StatelessWidget].
+///  * [State], where the logic behind a [StatefulWidget] is hosted.
+///  * [StatelessWidget], for widgets that always build the same way given a
+///    particular configuration and ambient state.
+///  * [InheritedWidget], for widgets that introduce ambient state that can
+///    be read by descendant widgets.
 abstract class StatefulWidget extends Widget {
   /// Initializes [key] for subclasses.
   const StatefulWidget({ Key key }) : super(key: key);
@@ -571,8 +597,10 @@ typedef void StateSetter(VoidCallback fn);
 
 /// The logic and internal state for a [StatefulWidget].
 ///
-/// State is information (1) that can be read synchronously when the widget is
-/// built and (2) for which we will be notified when it changes.
+/// State is information that (1) can be read synchronously when the widget is
+/// built and (2) might change during the lifetime of the widget. It is the
+/// responsibility of the widget implementer to ensure that the [State] is
+/// promptly notified when such state changes, using [State.setState].
 ///
 /// [State] objects are created by the framework by calling the
 /// [StatefulWidget.createState] method when inflating a [StatefulWidget] to
@@ -645,8 +673,12 @@ typedef void StateSetter(VoidCallback fn);
 ///
 /// See also:
 ///
-///  * [StatefulWidget].
-///  * [StatelessWidget].
+///  * [StatefulWidget], where the current configuration of a [State] is hosted
+///    (see [config]).
+///  * [StatelessWidget], for widgets that always build the same way given a
+///    particular configuration and ambient state.
+///  * [InheritedWidget], for widgets that introduce ambient state that can
+///    be read by descendant widgets.
 @optionalTypeArgs
 abstract class State<T extends StatefulWidget> {
   /// The current configuration.
@@ -670,17 +702,6 @@ abstract class State<T extends StatefulWidget> {
   /// created for that particular [Widget].
   bool _debugTypesAreRight(Widget widget) => widget is T;
 
-  /// The [StatefulElement] that owns this [State] object.
-  ///
-  /// The framework associates [State] objects with an element after creating
-  /// them with [StatefulWidget.createState] and before calling [initState]. The
-  /// association is permanent: the [State] object will never change its
-  /// element. However, the element itself can be moved around the tree.
-  ///
-  /// After calling [dispose], the framework severs the [State] object's
-  /// connection with the element.
-  StatefulElement _element;
-
   /// The location in the tree where this widget builds.
   ///
   /// The framework associates [State] objects with a [BuildContext] after
@@ -692,6 +713,7 @@ abstract class State<T extends StatefulWidget> {
   /// After calling [dispose], the framework severs the [State] object's
   /// connection with the [BuildContext].
   BuildContext get context => _element;
+  StatefulElement _element;
 
   /// Whether this [State] object is currently in a tree.
   ///
@@ -706,12 +728,19 @@ abstract class State<T extends StatefulWidget> {
 
   /// Called when this object is inserted into the tree.
   ///
-  /// Override this method to perform initialization that depends on the
-  /// location at which this object was inserted into the tree (i.e., [context])
-  /// or on the widget used to configure this object (i.e., [config])
-  ///
   /// The framework will call this method exactly once for each [State] object
   /// it creates.
+  ///
+  /// Override this method to perform initialization that depends on the
+  /// location at which this object was inserted into the tree (i.e., [context])
+  /// or on the widget used to configure this object (i.e., [config]).
+  ///
+  /// If a [State]'s [build] method depends on an object that can itself change
+  /// state, for example a [ChangeNotifier] or [Stream], or some other object to
+  /// which one can subscribe to receive notifications, then the [State] should
+  /// subscribe to that object during [initState], unsubscribe from the old
+  /// object and subscribe to the new object when it changes in
+  /// [didUpdateConfig], and then unsubscribe from the object in [dispose].
   ///
   /// You cannot use [BuildContext.inheritFromWidgetOfExactType] from this
   /// method. However, [dependenciesChanged] will be called immediately
@@ -734,11 +763,18 @@ abstract class State<T extends StatefulWidget> {
   /// refer to the new widget and then call the this method with the previous
   /// widget as an argument.
   ///
-  /// Override this metthod to respond to changes in the [config] widget (e.g.,
+  /// Override this method to respond to changes in the [config] widget (e.g.,
   /// to start implicit animations).
   ///
   /// The framework always calls [build] after calling [didUpdateConfig], which
   /// means any calls to [setState] in [didUpdateConfig] are redundant.
+  ///
+  /// If a [State]'s [build] method depends on an object that can itself change
+  /// state, for example a [ChangeNotifier] or [Stream], or some other object to
+  /// which one can subscribe to receive notifications, then the [State] should
+  /// subscribe to that object during [initState], unsubscribe from the old
+  /// object and subscribe to the new object when it changes in
+  /// [didUpdateConfig], and then unsubscribe from the object in [dispose].
   ///
   /// If you override this, make sure your method starts with a call to
   /// super.didUpdateConfig(oldConfig).
@@ -753,7 +789,7 @@ abstract class State<T extends StatefulWidget> {
   /// bundle may have changed).
   ///
   /// In addition to this method being invoked, it is guaranteed that the
-  /// [build] method will be invoked when a reassemble is signalled. Most
+  /// [build] method will be invoked when a reassemble is signaled. Most
   /// widgets therefore do not need to do anything in the [reassemble] method.
   ///
   /// This function will only be called during development. In release builds,
@@ -871,6 +907,9 @@ abstract class State<T extends StatefulWidget> {
   ///
   /// If you override this, make sure to end your method with a call to
   /// super.deactivate().
+  ///
+  /// See also [dispose], which is called after [deactivate] if the widget is
+  /// removed from the tree permanently.
   @protected
   @mustCallSuper
   void deactivate() { }
@@ -886,8 +925,17 @@ abstract class State<T extends StatefulWidget> {
   /// Subclasses should override this method to release any resources retained
   /// by this object (e.g., stop any active animations).
   ///
+  /// If a [State]'s [build] method depends on an object that can itself change
+  /// state, for example a [ChangeNotifier] or [Stream], or some other object to
+  /// which one can subscribe to receive notifications, then the [State] should
+  /// subscribe to that object during [initState], unsubscribe from the old
+  /// object and subscribe to the new object when it changes in
+  /// [didUpdateConfig], and then unsubscribe from the object in [dispose].
+  ///
   /// If you override this, make sure to end your method with a call to
   /// super.dispose().
+  ///
+  /// See also [deactivate], which is called prior to [dispose].
   @protected
   @mustCallSuper
   void dispose() {
@@ -1167,7 +1215,7 @@ abstract class MultiChildRenderObjectWidget extends RenderObjectWidget {
   ///
   /// The [children] argument must not be null and must not contain any null
   /// objects.
-  MultiChildRenderObjectWidget({ Key key, this.children })
+  MultiChildRenderObjectWidget({ Key key, this.children: const <Widget>[] })
     : super(key: key) {
     assert(children != null);
     assert(!children.any((Widget child) => child == null));
@@ -1996,7 +2044,7 @@ abstract class Element implements BuildContext {
   /// The framework calls this function when a newly created element is added to
   /// the tree for the first time. Use this method to initialize state that
   /// depends on having a parent. State that is independent of the parent can
-  /// more easily be initialized in the contructor.
+  /// more easily be initialized in the constructor.
   ///
   /// This method transitions the element from the "initial" lifecycle state to
   /// the "active" lifecycle state.
@@ -3233,7 +3281,7 @@ abstract class RenderObjectElement extends BuildableElement {
     // the old child list (old.children), and update our renderObject
     // accordingly.
 
-    // The cases it tries to optimise for are:
+    // The cases it tries to optimize for are:
     //  - the old list is empty
     //  - the lists are identical
     //  - there is an insertion or removal of one or more widgets in

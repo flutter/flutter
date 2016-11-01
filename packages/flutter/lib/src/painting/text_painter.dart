@@ -176,15 +176,15 @@ class TextPainter {
       return;
     _needsLayout = false;
     if (_paragraph == null) {
-      ui.ParagraphBuilder builder = new ui.ParagraphBuilder();
-      _text.build(builder, textScaleFactor: textScaleFactor);
       ui.ParagraphStyle paragraphStyle = _text.style?.getParagraphStyle(
         textAlign: textAlign,
         textScaleFactor: textScaleFactor,
         ellipsis: _ellipsis,
       );
       paragraphStyle ??= new ui.ParagraphStyle();
-      _paragraph = builder.build(paragraphStyle);
+      ui.ParagraphBuilder builder = new ui.ParagraphBuilder(paragraphStyle);
+      _text.build(builder, textScaleFactor: textScaleFactor);
+      _paragraph = builder.build();
     }
     _lastMinWidth = minWidth;
     _lastMaxWidth = maxWidth;

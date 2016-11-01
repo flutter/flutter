@@ -47,7 +47,7 @@ DART="$DART_SDK_PATH/bin/dart"
     "$DART" --snapshot="$SNAPSHOT_PATH" --packages="$FLUTTER_TOOLS_DIR/.packages" "$SCRIPT_PATH"
     echo $REVISION > "$STAMP_PATH"
   fi
-) 3< $PROG_NAME
+) 3< "$PROG_NAME"
 
 set +e
 "$DART" "$SNAPSHOT_PATH" "$@"

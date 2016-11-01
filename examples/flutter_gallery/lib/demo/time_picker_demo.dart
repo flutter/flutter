@@ -21,7 +21,7 @@ class _TimePickerDemoState extends State<TimePickerDemo> {
       context: context,
       initialTime: _selectedTime
     );
-    if (picked != _selectedTime) {
+    if (picked != null && picked != _selectedTime) {
       setState(() {
         _selectedTime = picked;
       });

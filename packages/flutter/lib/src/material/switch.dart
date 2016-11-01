@@ -31,7 +31,7 @@ import 'toggleable.dart';
 ///  * [CheckBox]
 ///  * [Radio]
 ///  * [Slider]
-///  * <https://www.google.com/design/spec/components/selection-controls.html#selection-controls-switch>
+///  * <https://material.google.com/components/selection-controls.html#selection-controls-switch>
 class Switch extends StatefulWidget {
   /// Creates a material design switch.
   ///
