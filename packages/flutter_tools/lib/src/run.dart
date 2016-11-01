@@ -11,14 +11,13 @@ import 'package:stack_trace/stack_trace.dart';
 import 'application_package.dart';
 import 'base/logger.dart';
 import 'base/utils.dart';
-import 'build_info.dart';
 import 'commands/build_apk.dart';
 import 'commands/install.dart';
 import 'commands/trace.dart';
 import 'device.dart';
 import 'globals.dart';
-import 'vmservice.dart';
 import 'resident_runner.dart';
+import 'vmservice.dart';
 
 class RunAndStayResident extends ResidentRunner {
   RunAndStayResident(
@@ -199,8 +198,6 @@ class RunAndStayResident extends ResidentRunner {
     }
 
     printTrace('Application running.');
-    if (debuggingOptions.buildMode == BuildMode.release)
-      return 0;
 
     if (vmService != null) {
       await vmService.vm.refreshViews();
@@ -280,6 +277,13 @@ class RunAndStayResident extends ResidentRunner {
     } else {
       printStatus('For a more detailed help message, press "h" or F1. To quit, press "q", F10, or Ctrl-C.');
     }
+  }
+
+  @override
+  Future<Null> preStop() async {
+    // If we're running in release mode, stop the app using the device logic.
+    if (vmService == null)
+      await device.stopApp(_package);
   }
 }
 
