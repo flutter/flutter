@@ -1041,7 +1041,7 @@ class ScrollableViewport extends StatelessWidget {
   }
 }
 
-/// A mashup of [ScrollableViewport] and [BlockBody].
+/// A scrolling list of variably-sized children.
 ///
 /// Useful when you have a small, fixed number of children that you wish to
 /// arrange in a block layout and that might exceed the height of its container
@@ -1052,7 +1052,8 @@ class ScrollableViewport extends StatelessWidget {
 /// or [ScrollableList] (if the children all have the same fixed height), as
 /// they avoid doing work for children that are not visible.
 ///
-/// If you have a single child, then use [ScrollableViewport] directly.
+/// This widget is implemented using [ScrollableViewport] and [BlockBody]. If
+/// you have a single child, consider using [ScrollableViewport] directly.
 ///
 /// See also:
 ///

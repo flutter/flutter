@@ -324,6 +324,20 @@ class Scaffold extends StatefulWidget {
   /// Displayed below the app bar and behind the [floatingActionButton] and
   /// [drawer]. To avoid the body being resized to avoid the window padding
   /// (e.g., from the onscreen keyboard), see [resizeToAvoidBottomPadding].
+  ///
+  /// The widget in the body of the scaffold will be forced to the size of the
+  /// available space, to cover the entire scaffold other than any app bars,
+  /// footer buttons, or navigation bars.
+  ///
+  /// To center this widget instead, consider putting it in a [Center] widget
+  /// and having that be the body.
+  ///
+  /// If you have a column of widgets that should normally fit on the screen,
+  /// but may overflow and would in such cases need to scroll, consider using a
+  /// [Block] as the body of the scaffold.
+  ///
+  /// If you have a list of items, consider using a [LazyBlock] or
+  /// [LazyScrollableList] as the body of the scaffold.
   final Widget body;
 
   /// A button displayed on top of the body.
@@ -885,7 +899,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     if (config.appBarBehavior != AppBarBehavior.anchor) {
       body = new NotificationListener<ScrollNotification>(
         onNotification: _handleScrollNotification,
-        child: config.body
+        child: config.body,
       );
     } else {
       body = config.body;
