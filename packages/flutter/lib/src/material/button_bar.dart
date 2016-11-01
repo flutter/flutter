@@ -18,10 +18,11 @@ import 'raised_button.dart';
 ///
 /// See also:
 ///
-///  * [RaisedButton]
-///  * [FlatButton]
-///  * [Dialog]
-///  * [ButtonTheme]
+///  * [RaisedButton], a kind of button.
+///  * [FlatButton], another kind of button.
+///  * [Card], at the bottom of which it is common to place a [ButtonBar].
+///  * [Dialog], which uses a [ButtonBar] for its actions.
+///  * [ButtonTheme], which configures the [ButtonBar].
 class ButtonBar extends StatelessWidget {
   /// Creates a button bar.
   ///
