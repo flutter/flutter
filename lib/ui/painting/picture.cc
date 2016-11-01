@@ -4,6 +4,7 @@
 
 #include "flutter/lib/ui/painting/picture.h"
 
+#include "flutter/common/threads.h"
 #include "flutter/lib/ui/painting/canvas.h"
 #include "lib/tonic/dart_args.h"
 #include "lib/tonic/dart_binding_macros.h"
@@ -24,7 +25,12 @@ ftl::RefPtr<Picture> Picture::Create(sk_sp<SkPicture> picture) {
 
 Picture::Picture(sk_sp<SkPicture> picture) : picture_(std::move(picture)) {}
 
-Picture::~Picture() {}
+Picture::~Picture() {
+  // Skia objects must be deleted on the IO thread so that any associated GL
+  // objects will be cleaned up through the IO thread's GL context.
+  SkPicture* picture = picture_.release();
+  Threads::IO()->PostTask([picture]() { picture->unref(); });
+}
 
 void Picture::dispose() {
   ClearDartWrapper();

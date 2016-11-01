@@ -30,6 +30,8 @@ void CanvasImage::RegisterNatives(tonic::DartLibraryNatives* natives) {
 CanvasImage::CanvasImage() {}
 
 CanvasImage::~CanvasImage() {
+  // Skia objects must be deleted on the IO thread so that any associated GL
+  // objects will be cleaned up through the IO thread's GL context.
   SkImage* image = image_.release();
   Threads::IO()->PostTask([image]() { image->unref(); });
 }
