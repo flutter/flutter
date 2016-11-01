@@ -809,6 +809,13 @@ class Isolate extends ServiceObjectOwner {
     }).catchError((dynamic error) => null);
   }
 
+  void flutterLoaderShowExplanation(String explanation) {
+    // Invoke loaderShowExplanation; ignore any returned errors.
+    invokeRpcRaw('ext.flutter.loaderShowExplanation', <String, dynamic> {
+      'value': explanation
+    }).catchError((dynamic error) => null);
+  }
+
   void flutterLoaderSetProgress(double progress) {
     // Invoke loaderSetProgress; ignore any returned errors.
     invokeRpcRaw('ext.flutter.loaderSetProgress', <String, dynamic>{
