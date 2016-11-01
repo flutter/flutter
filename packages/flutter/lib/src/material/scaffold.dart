@@ -436,7 +436,7 @@ class Scaffold extends StatefulWidget {
       return result;
     throw new FlutterError(
       'Scaffold.of() called with a context that does not contain a Scaffold.\n'
-      'No Scaffold could be found starting from the context that was passed to Scaffold.of(). '
+      'No Scaffold ancestor could be found starting from the context that was passed to Scaffold.of(). '
       'This usually happens when the context provided is from the same StatefulWidget as that '
       'whose build function actually creates the Scaffold widget being sought.\n'
       'There are several ways to avoid this problem. The simplest is to use a Builder to get a '
