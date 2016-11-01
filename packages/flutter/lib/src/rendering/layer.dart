@@ -134,7 +134,7 @@ class PictureLayer extends Layer {
   }
 }
 
-/// (mojo-only) A layer that represents content from another process.
+/// (Fuchsia-only) A layer that represents content from another process.
 class ChildSceneLayer extends Layer {
   /// Creates a layer that displays content rendered by another process.
   ///

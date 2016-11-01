@@ -98,6 +98,12 @@ class FormScope extends InheritedWidget {
   Form get form => _formState.config;
 
   /// The closest [FormScope] encloses the given context.
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// FormScope form = FormScope.of(context);
+  /// ```
   static FormScope of(BuildContext context) {
     return context.inheritFromWidgetOfExactType(FormScope);
   }

@@ -532,6 +532,10 @@ class RenderGrid extends RenderVirtualViewport<GridParentData> {
 
   /// The delegate that controls the layout of the children.
   ///
+  /// For example, a [FixedColumnCountGridDelegate] for grids that have a fixed
+  /// number of columns or a [MaxTileWidthGridDelegate] for grids that have a
+  /// maximum tile width.
+  ///
   /// If the new delegate is the same as the previous one, this does nothing.
   ///
   /// If the new delegate is the same class as the previous one, then the new

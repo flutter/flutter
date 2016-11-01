@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:ui' show Point, Offset;
 
+import 'package:flutter/foundation.dart';
 import 'package:meta/meta.dart';
 
 import 'arena.dart';
@@ -15,6 +16,8 @@ import 'events.dart';
 import 'pointer_router.dart';
 
 export 'pointer_router.dart' show PointerRouter;
+
+typedef T RecognizerCallback<T>();
 
 /// The base class that all GestureRecognizers should inherit from.
 ///
@@ -48,6 +51,28 @@ abstract class GestureRecognizer extends GestureArenaMember {
   /// Returns a very short pretty description of the gesture that the
   /// recognizer looks for, like 'tap' or 'horizontal drag'.
   String toStringShort() => toString();
+
+  /// Invoke a callback provided by the application and log any exceptions.
+  @protected
+  dynamic/*=T*/ invokeCallback/*<T>*/(String name, RecognizerCallback<dynamic/*=T*/> callback) {
+    dynamic/*=T*/ result;
+    try {
+      result = callback();
+    } catch (exception, stack) {
+      FlutterError.reportError(new FlutterErrorDetails(
+        exception: exception,
+        stack: stack,
+        library: 'gesture',
+        context: 'while handling a gesture',
+        informationCollector: (StringBuffer information) {
+          information.writeln('Handler: $name');
+          information.writeln('Recognizer:');
+          information.writeln('  $this');
+        }
+      ));
+    }
+    return result;
+  }
 }
 
 /// Base class for gesture recognizers that can only recognize one

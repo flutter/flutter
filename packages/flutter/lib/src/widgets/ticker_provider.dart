@@ -44,6 +44,12 @@ class TickerMode extends InheritedWidget {
   /// enabled or disabled.
   ///
   /// In the absence of a [TickerMode] widget, this function defaults to true.
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// bool tickingEnabled = TickerMode.of(context);
+  /// ```
   static bool of(BuildContext context) {
     TickerMode widget = context.inheritFromWidgetOfExactType(TickerMode);
     return widget?.enabled ?? true;

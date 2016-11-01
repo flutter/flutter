@@ -83,6 +83,12 @@ class DefaultTextStyle extends InheritedWidget {
   ///
   /// If no such instance exists, returns an instance created by
   /// [DefaultTextStyle.fallback], which contains fallback values.
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// DefaultTextStyle style = DefaultTextStyle.of(context);
+  /// ```
   static DefaultTextStyle of(BuildContext context) {
     return context.inheritFromWidgetOfExactType(DefaultTextStyle) ?? const DefaultTextStyle.fallback();
   }

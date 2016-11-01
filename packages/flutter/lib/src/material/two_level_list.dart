@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/widgets.dart';
+import 'package:meta/meta.dart';
 
 import 'colors.dart';
 import 'icon.dart';
@@ -32,7 +33,7 @@ class TwoLevelListItem extends StatelessWidget {
   TwoLevelListItem({
     Key key,
     this.leading,
-    this.title,
+    @required this.title,
     this.trailing,
     this.enabled: true,
     this.onTap,
@@ -107,10 +108,10 @@ class TwoLevelSublist extends StatefulWidget {
   TwoLevelSublist({
     Key key,
     this.leading,
-    this.title,
+    @required this.title,
     this.backgroundColor,
     this.onOpenChanged,
-    this.children
+    this.children: const <Widget>[],
   }) : super(key: key);
 
   /// A widget to display before the title.
@@ -255,6 +256,7 @@ class _TwoLevelSublistState extends State<TwoLevelSublist> with SingleTickerProv
 ///
 ///  * [TwoLevelSublist]
 ///  * [TwoLevelListItem]
+///  * [MaterialList], for lists that only have one level.
 class TwoLevelList extends StatelessWidget {
   /// Creates a scrollable list of items that can expand and collapse.
   ///
@@ -262,7 +264,7 @@ class TwoLevelList extends StatelessWidget {
   TwoLevelList({
     Key key,
     this.scrollableKey,
-    this.children,
+    this.children: const <Widget>[],
     this.type: MaterialListType.twoLine,
     this.padding
   }) : super(key: key) {

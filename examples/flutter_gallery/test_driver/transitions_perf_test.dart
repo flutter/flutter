@@ -138,6 +138,9 @@ void main() {
       // 'Start Transition' event when a demo is launched (see GalleryItem).
       saveDurationsHistogram(timeline.json['traceEvents']);
 
+      TimelineSummary summary = new TimelineSummary.summarize(timeline);
+      summary.writeSummaryToFile('transitions');
+
     }, timeout: new Timeout(new Duration(minutes: 5)));
   });
 }

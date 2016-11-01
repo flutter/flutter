@@ -180,9 +180,9 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
             final Offset pixelsPerSecond = velocity.pixelsPerSecond;
             if (pixelsPerSecond.distanceSquared > kMaxFlingVelocity * kMaxFlingVelocity)
               velocity = new Velocity(pixelsPerSecond: (pixelsPerSecond / pixelsPerSecond.distance) * kMaxFlingVelocity);
-            onEnd(new ScaleEndDetails(velocity: velocity));
+            invokeCallback/*<Null>*/('onEnd', () => onEnd(new ScaleEndDetails(velocity: velocity)));
           } else {
-            onEnd(new ScaleEndDetails(velocity: Velocity.zero));
+            invokeCallback/*<Null>*/('onEnd', () => onEnd(new ScaleEndDetails(velocity: Velocity.zero)));
           }
         }
         _state = ScaleState.accepted;
@@ -200,11 +200,11 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
     if (_state == ScaleState.accepted && !configChanged) {
       _state = ScaleState.started;
       if (onStart != null)
-        onStart(new ScaleStartDetails(focalPoint: focalPoint));
+        invokeCallback/*<Null>*/('onStart', () => onStart(new ScaleStartDetails(focalPoint: focalPoint)));
     }
 
     if (_state == ScaleState.started && onUpdate != null)
-      onUpdate(new ScaleUpdateDetails(scale: _scaleFactor, focalPoint: focalPoint));
+      invokeCallback/*<Null>*/('onUpdate', () => onUpdate(new ScaleUpdateDetails(scale: _scaleFactor, focalPoint: focalPoint)));
   }
 
   @override

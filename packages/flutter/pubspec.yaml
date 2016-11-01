@@ -15,8 +15,6 @@ dependencies:
   async: "^1.10.0"
   http_parser: ">=0.0.1 <4.0.0"
 
-  flutter_services:
-    path: ../../bin/cache/pkg/flutter_services
   sky_engine:
     path: ../../bin/cache/pkg/sky_engine
 

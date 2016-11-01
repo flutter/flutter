@@ -34,7 +34,7 @@ class MarkdownStyleRaw {
   }
 
   /// Creates a new [MarkdownStyleRaw] based on the current style, with the
-  /// provided paramaters overridden.
+  /// provided parameters overridden.
   MarkdownStyleRaw copyWith({
     TextStyle a,
     TextStyle p,

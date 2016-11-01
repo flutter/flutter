@@ -8,8 +8,8 @@ import 'dart:math' as math;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
 
-import 'colors.dart';
-import 'typography.dart';
+import 'theme.dart';
+import 'theme_data.dart';
 
 const double _kScreenEdgeMargin = 10.0;
 const Duration _kFadeDuration = const Duration(milliseconds: 200);
@@ -265,6 +265,12 @@ class _TooltipOverlay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    ThemeData theme = Theme.of(context);
+    ThemeData darkTheme = new ThemeData(
+      brightness: Brightness.dark,
+      textTheme: theme.brightness == Brightness.dark ? theme.textTheme : theme.primaryTextTheme,
+      platform: theme.platform,
+    );
     return new Positioned.fill(
       child: new IgnorePointer(
         child: new CustomSingleChildLayout(
@@ -279,14 +285,14 @@ class _TooltipOverlay extends StatelessWidget {
               opacity: 0.9,
               child: new Container(
                 decoration: new BoxDecoration(
-                  backgroundColor: Colors.grey[700],
+                  backgroundColor: darkTheme.backgroundColor,
                   borderRadius: new BorderRadius.circular(2.0)
                 ),
                 height: height,
                 padding: padding,
                 child: new Center(
                   widthFactor: 1.0,
-                  child: new Text(message, style: Typography.white.body1)
+                  child: new Text(message, style: darkTheme.textTheme.body1)
                 )
               )
             )

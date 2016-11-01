@@ -48,9 +48,13 @@ Map<MaterialListType, double> kListItemExtent = const <MaterialListType, double>
 ///
 /// See also:
 ///
-///  * [ListItem]
-///  * [ScrollableList]
-///  * [TwoLevelList]
+///  * [Block], which shows heterogeneous widgets in a list and makes the list
+///    scrollable if necessary.
+///  * [ListItem], to show content in a [MaterialList] using material design
+///    conventions.
+///  * [ScrollableList], on which this widget is based.
+///  * [TwoLevelList], for lists that have subsections that can collapse and
+///    expand.
 ///  * [ScrollableGrid]
 ///  * <https://material.google.com/components/lists.html>
 class MaterialList extends StatelessWidget {
@@ -64,7 +68,7 @@ class MaterialList extends StatelessWidget {
     this.onScroll,
     this.onScrollEnd,
     this.type: MaterialListType.twoLine,
-    this.children,
+    this.children: const <Widget>[],
     this.padding: EdgeInsets.zero,
     this.scrollableKey
   }) : super(key: key);

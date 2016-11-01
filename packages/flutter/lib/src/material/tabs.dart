@@ -507,6 +507,12 @@ class TabBarSelection<T> extends StatefulWidget {
   TabBarSelectionState<T> createState() => new TabBarSelectionState<T>();
 
   /// The state from the closest instance of this class that encloses the given context.
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// TabBarSelectionState<Foo> tabState = TabBarSelection.of/*<Foo>*/(context);
+  /// ```
   static TabBarSelectionState<dynamic/*=T*/> of/*<T>*/(BuildContext context) {
     return context.ancestorStateOfType(new TypeMatcher<TabBarSelectionState<dynamic/*=T*/>>());
   }

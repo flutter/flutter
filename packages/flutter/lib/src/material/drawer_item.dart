@@ -73,7 +73,7 @@ class DrawerItem extends StatelessWidget {
           return themeData.accentColor;
         if (onPressed == null)
           return Colors.white30;
-        return null; // use default icon theme colour unmodified
+        return null; // use default icon theme color unmodified
     }
     assert(themeData.brightness != null);
     return null;
