@@ -35,7 +35,7 @@ class ScrollableGrid extends StatelessWidget {
     this.snapOffsetCallback,
     this.scrollableKey,
     @required this.delegate,
-    this.children
+    this.children: const <Widget>[],
   }) : super(key: key) {
     assert(delegate != null);
   }
@@ -75,6 +75,10 @@ class ScrollableGrid extends StatelessWidget {
   final Key scrollableKey;
 
   /// The delegate that controls the layout of the children.
+  ///
+  /// For example, a [FixedColumnCountGridDelegate] for grids that have a fixed
+  /// number of columns or a [MaxTileWidthGridDelegate] for grids that have a
+  /// maximum tile width.
   final GridDelegate delegate;
 
   /// The children that will be placed in the grid.
@@ -124,7 +128,7 @@ class GridViewport extends VirtualViewportFromIterable {
     this.scrollOffset,
     this.delegate,
     this.onExtentsChanged,
-    this.children
+    this.children: const <Widget>[],
   }) {
     assert(delegate != null);
   }
@@ -140,6 +144,10 @@ class GridViewport extends VirtualViewportFromIterable {
   }
 
   /// The delegate that controls the layout of the children.
+  ///
+  /// For example, a [FixedColumnCountGridDelegate] for grids that have a fixed
+  /// number of columns or a [MaxTileWidthGridDelegate] for grids that have a
+  /// maximum tile width.
   final GridDelegate delegate;
 
   /// Called when the interior or exterior dimensions of the viewport change.

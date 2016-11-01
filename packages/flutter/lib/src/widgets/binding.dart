@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:developer' as developer;
 import 'dart:ui' as ui show window;
 import 'dart:ui' show AppLifecycleState, Locale;
@@ -57,8 +58,8 @@ abstract class WidgetsBinding extends BindingBase implements GestureBinding, Ren
     _instance = this;
     buildOwner.onBuildScheduled = _handleBuildScheduled;
     ui.window.onLocaleChanged = handleLocaleChanged;
-    ui.window.onPopRoute = handlePopRoute;
-    ui.window.onAppLifecycleStateChanged = handleAppLifecycleStateChanged;
+    PlatformMessages.setJSONMessageHandler('flutter/navigation', _handleNavigationMessage);
+    PlatformMessages.setStringMessageHandler('flutter/lifecycle', _handleLifecycleMessage);
   }
 
   /// The current [WidgetsBinding], if one has been created.
@@ -157,8 +158,6 @@ abstract class WidgetsBinding extends BindingBase implements GestureBinding, Ren
   /// [WidgetsApp] uses this in conjunction with a [Navigator] to
   /// cause the back button to close dialog boxes, return from modal
   /// pages, and so forth.
-  ///
-  /// See [ui.window.onPopRoute].
   void handlePopRoute() {
     for (WidgetsBindingObserver observer in _observers) {
       if (observer.didPopRoute())
@@ -167,15 +166,32 @@ abstract class WidgetsBinding extends BindingBase implements GestureBinding, Ren
     SystemNavigator.pop();
   }
 
+  Future<dynamic> _handleNavigationMessage(Map<String, dynamic> message) async {
+    final String method = message['method'];
+    if (method == 'popRoute')
+      handlePopRoute();
+    // TODO(abarth): Handle 'pushRoute'.
+  }
+
   /// Called when the application lifecycle state changes.
   ///
   /// Notifies all the observers using
   /// [WidgetsBindingObserver.didChangeAppLifecycleState].
-  ///
-  /// See [ui.window.onAppLifecycleStateChanged].
   void handleAppLifecycleStateChanged(AppLifecycleState state) {
     for (WidgetsBindingObserver observer in _observers)
       observer.didChangeAppLifecycleState(state);
+  }
+
+  Future<String> _handleLifecycleMessage(String message) async {
+    switch (message) {
+      case 'AppLifecycleState.paused':
+        handleAppLifecycleStateChanged(AppLifecycleState.paused);
+        break;
+      case 'AppLifecycleState.resumed':
+        handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+        break;
+    }
+    return null;
   }
 
   bool _needToReportFirstFrame = true;

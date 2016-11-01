@@ -288,7 +288,7 @@ class SemanticsNode extends AbstractNode {
   bool get hasCheckedState => (_flags & SemanticsFlags.hasCheckedState.index) != 0;
   set hasCheckedState(bool value) => _setFlag(SemanticsFlags.hasCheckedState, value);
 
-  /// If this node has Boolean state that can be controlled by the user, whether that state is on or off, cooresponding to `true` and `false`, respectively.
+  /// If this node has Boolean state that can be controlled by the user, whether that state is on or off, corresponding to `true` and `false`, respectively.
   bool get isChecked => (_flags & SemanticsFlags.isChecked.index) != 0;
   set isChecked(bool value) => _setFlag(SemanticsFlags.isChecked, value);
 

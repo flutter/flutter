@@ -8,7 +8,7 @@ import 'colors.dart';
 import 'material.dart';
 
 // TODO(eseidel): Draw width should vary based on device size:
-// http://www.google.com/design/spec/layout/structure.html#structure-side-nav
+// http://material.google.com/layout/structure.html#structure-side-nav
 
 // Mobile:
 // Width = Screen width − 56 dp
@@ -39,7 +39,7 @@ const Duration _kBaseSettleDuration = const Duration(milliseconds: 246);
 ///  * [Scaffold.drawer]
 ///  * [DrawerItem]
 ///  * [DrawerHeader]
-///  * <https://www.google.com/design/spec/patterns/navigation-drawer.html>
+///  * <https://material.google.com/patterns/navigation-drawer.html>
 class Drawer extends StatelessWidget {
   /// Creates a material design drawer.
   ///

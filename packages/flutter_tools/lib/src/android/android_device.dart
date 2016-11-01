@@ -11,6 +11,7 @@ import 'package:path/path.dart' as path;
 import '../android/android_sdk.dart';
 import '../application_package.dart';
 import '../base/os.dart';
+import '../base/logger.dart';
 import '../base/process.dart';
 import '../build_info.dart';
 import '../dart/package_map.dart';
@@ -114,6 +115,13 @@ class AndroidDevice extends Device {
 
     return _platform;
   }
+
+  @override
+  String get sdkNameAndVersion => 'Android $_sdkVersion (API $_apiVersion)';
+
+  String get _sdkVersion => _getProperty('ro.build.version.release');
+
+  String get _apiVersion => _getProperty('ro.build.version.sdk');
 
   _AdbLogReader _logReader;
   _AndroidDevicePortForwarder _portForwarder;
@@ -231,7 +239,9 @@ class AndroidDevice extends Device {
     if (!_checkForSupportedAdbVersion() || !_checkForSupportedAndroidVersion())
       return false;
 
+    Status status = logger.startProgress('Installing ${apk.apkPath}...');
     String installOut = runCheckedSync(adbCommandForDevice(<String>['install', '-r', apk.apkPath]));
+    status.stop(showElapsedTime: true);
     RegExp failureExp = new RegExp(r'^Failure.*$', multiLine: true);
     String failure = failureExp.stringMatch(installOut);
     if (failure != null) {
@@ -622,18 +632,24 @@ final RegExp _kDeviceRegex = new RegExp(r'^(\S+)\s+(\S+)(.*)');
 /// [mockAdbOutput] is public for testing.
 List<AndroidDevice> getAdbDevices({ String mockAdbOutput }) {
   List<AndroidDevice> devices = <AndroidDevice>[];
-  List<String> output;
+  String text;
 
   if (mockAdbOutput == null) {
     String adbPath = getAdbPath(androidSdk);
     if (adbPath == null)
       return <AndroidDevice>[];
-    output = runSync(<String>[adbPath, 'devices', '-l']).trim().split('\n');
+    text = runSync(<String>[adbPath, 'devices', '-l']);
   } else {
-    output = mockAdbOutput.trim().split('\n');
+    text = mockAdbOutput;
   }
 
-  for (String line in output) {
+  // Check for error messages from adb
+  if (!text.contains('List of devices')) {
+    printError(text);
+    return <AndroidDevice>[];
+  }
+
+  for (String line in text.trim().split('\n')) {
     // Skip lines like: * daemon started successfully *
     if (line.startsWith('* daemon '))
       continue;

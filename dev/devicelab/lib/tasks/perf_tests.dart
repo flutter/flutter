@@ -90,7 +90,9 @@ class PerfTest {
 
   Future<TaskResult> call() {
     return inDirectory(testDirectory, () async {
-      String deviceId = (await devices.workingDevice).deviceId;
+      Device device = await devices.workingDevice;
+      await device.unlock();
+      String deviceId = device.deviceId;
       await flutter('packages', options: <String>['get']);
 
       if (os == DeviceOperatingSystem.ios) {
@@ -108,6 +110,14 @@ class PerfTest {
         deviceId,
       ]);
       Map<String, dynamic> data = JSON.decode(file('$testDirectory/build/$timelineFileName.timeline_summary.json').readAsStringSync());
+
+      if (data['frame_count'] < 5) {
+        return new TaskResult.failure(
+          'Timeline contains too few frames: ${data['frame_count']}. Possibly '
+          'trace events are not being captured.',
+        );
+      }
+
       return new TaskResult.success(data, benchmarkScoreKeys: <String>[
         'average_frame_build_time_millis',
         'worst_frame_build_time_millis',

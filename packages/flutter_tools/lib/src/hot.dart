@@ -57,7 +57,7 @@ class StartupDependencySetBuilder {
 
     String output;
     try {
-      output = runCheckedSync(args);
+      output = runCheckedSync(args, hideStdout: true);
     } catch (e) {
       return null;
     }

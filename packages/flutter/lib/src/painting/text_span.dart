@@ -62,13 +62,13 @@ class TextSpan {
 
   /// The text contained in the span.
   ///
-  /// If both [text] and [children] are non-null, the text will preceed the
+  /// If both [text] and [children] are non-null, the text will precede the
   /// children.
   final String text;
 
   /// Additional spans to include as children.
   ///
-  /// If both [text] and [children] are non-null, the text will preceed the
+  /// If both [text] and [children] are non-null, the text will precede the
   /// children.
   ///
   /// Modifying the list after the [TextSpan] has been created is not

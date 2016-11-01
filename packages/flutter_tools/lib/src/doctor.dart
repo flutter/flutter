@@ -238,9 +238,7 @@ class NoIdeValidator extends DoctorValidator {
 
   @override
   Future<ValidationResult> validate() async {
-    // TODO(danrubel): do not show Atom once IntelliJ support is complete
     return new ValidationResult(ValidationType.missing, <ValidationMessage>[
-      new ValidationMessage('Atom - https://atom.io/'),
       new ValidationMessage('IntelliJ - https://www.jetbrains.com/idea/'),
     ], statusInfo: 'No supported IDEs installed');
   }
@@ -323,7 +321,6 @@ abstract class IntelliJValidator extends DoctorValidator {
   static final Map<String, String> _idToTitle = <String, String>{
     'IntelliJIdea' : 'IntelliJ IDEA Ultimate Edition',
     'IdeaIC' : 'IntelliJ IDEA Community Edition',
-    'WebStorm' : 'IntelliJ WebStorm',
   };
 
   static Iterable<DoctorValidator> get installed {
@@ -425,7 +422,6 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
   static final Map<String, String> _dirNameToId = <String, String>{
     'IntelliJ IDEA.app' : 'IntelliJIdea',
     'IntelliJ IDEA CE.app' : 'IdeaIC',
-    'WebStorm.app' : 'WebStorm',
   };
 
   static Iterable<DoctorValidator> get installed {

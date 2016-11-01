@@ -52,7 +52,7 @@ void beginFrame(Duration timeStamp) {
 
 void main() {
   // To create a paragraph of text, we use ParagraphBuilder.
-  ui.ParagraphBuilder builder = new ui.ParagraphBuilder()
+  ui.ParagraphBuilder builder = new ui.ParagraphBuilder(new ui.ParagraphStyle())
     // We first push a style that turns the text blue.
     ..pushStyle(new ui.TextStyle(color: const ui.Color(0xFF0000FF)))
     ..addText('Hello, ')
@@ -74,7 +74,7 @@ void main() {
   // which time we can apply styling that affects the entire paragraph, such as
   // left, right, or center alignment. Once built, the contents of the paragraph
   // cannot be altered, but sizing and positioning information can be updated.
-  paragraph = builder.build(new ui.ParagraphStyle())
+  paragraph = builder.build()
     // Next, we supply a width that the text is permitted to occupy and we ask
     // the paragraph to the visual position of each its glyphs as well as its
     // overall size, subject to its sizing constraints.

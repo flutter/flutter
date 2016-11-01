@@ -11,7 +11,7 @@ import 'package:flutter/widgets.dart';
 ///  * [MaterialList]
 ///  * [ListItem]
 ///  * [kListItemExtent]
-///  * <https://www.google.com/design/spec/components/lists.html#lists-specs>
+///  * <https://material.google.com/components/lists.html#lists-specs>
 enum MaterialListType {
   /// A list item that contains a single line of text.
   oneLine,
@@ -33,7 +33,7 @@ enum MaterialListType {
 ///  * [MaterialListType]
 ///  * [ListItem]
 ///  * [kListItemExtent]
-///  * <https://www.google.com/design/spec/components/lists.html#lists-specs>
+///  * <https://material.google.com/components/lists.html#lists-specs>
 Map<MaterialListType, double> kListItemExtent = const <MaterialListType, double>{
   MaterialListType.oneLine: 48.0,
   MaterialListType.oneLineWithAvatar: 56.0,
@@ -48,11 +48,15 @@ Map<MaterialListType, double> kListItemExtent = const <MaterialListType, double>
 ///
 /// See also:
 ///
-///  * [ListItem]
-///  * [ScrollableList]
-///  * [TwoLevelList]
+///  * [Block], which shows heterogeneous widgets in a list and makes the list
+///    scrollable if necessary.
+///  * [ListItem], to show content in a [MaterialList] using material design
+///    conventions.
+///  * [ScrollableList], on which this widget is based.
+///  * [TwoLevelList], for lists that have subsections that can collapse and
+///    expand.
 ///  * [ScrollableGrid]
-///  * <https://www.google.com/design/spec/components/lists.html>
+///  * <https://material.google.com/components/lists.html>
 class MaterialList extends StatelessWidget {
   /// Creates a material list.
   ///
@@ -64,7 +68,7 @@ class MaterialList extends StatelessWidget {
     this.onScroll,
     this.onScrollEnd,
     this.type: MaterialListType.twoLine,
-    this.children,
+    this.children: const <Widget>[],
     this.padding: EdgeInsets.zero,
     this.scrollableKey
   }) : super(key: key);

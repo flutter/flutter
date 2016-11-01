@@ -24,7 +24,7 @@ import 'theme.dart';
 ///  * [AlertDialog]
 ///  * [SimpleDialog]
 ///  * [showDialog]
-///  * <https://www.google.com/design/spec/components/dialogs.html>
+///  * <https://material.google.com/components/dialogs.html>
 class Dialog extends StatelessWidget {
   /// Creates a dialog.
   ///
@@ -321,7 +321,7 @@ class _DialogRoute<T> extends PopupRoute<T> {
 ///
 /// See also:
 ///  * [Dialog]
-///  * <https://www.google.com/design/spec/components/dialogs.html>
+///  * <https://material.google.com/components/dialogs.html>
 Future<dynamic/*=T*/> showDialog/*<T>*/({ BuildContext context, Widget child }) {
   return Navigator.push(context, new _DialogRoute<dynamic/*=T*/>(
     child: child,

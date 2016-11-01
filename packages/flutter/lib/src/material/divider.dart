@@ -19,7 +19,7 @@ import 'theme.dart';
 ///
 ///  * [ListItem.divideItems]
 ///  * [PopupMenuDivider]
-///  * <https://www.google.com/design/spec/components/dividers.html>
+///  * <https://material.google.com/components/dividers.html>
 class Divider extends StatelessWidget {
   /// Creates a material design divider.
   ///

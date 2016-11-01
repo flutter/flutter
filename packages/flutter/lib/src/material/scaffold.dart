@@ -296,7 +296,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 ///  * [SnackBar]
 ///  * [BottomSheet]
 ///  * [ScaffoldState]
-///  * <https://www.google.com/design/spec/layout/structure.html>
+///  * <https://material.google.com/layout/structure.html>
 class Scaffold extends StatefulWidget {
   /// Creates a visual scaffold for material design widgets.
   ///
@@ -376,6 +376,55 @@ class Scaffold extends StatefulWidget {
   final bool resizeToAvoidBottomPadding;
 
   /// The state from the closest instance of this class that encloses the given context.
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// @override
+  /// Widget build(BuildContext context) {
+  ///   return new RaisedButton(
+  ///     child: new Text('SHOW A SNACKBAR'),
+  ///     onPressed: () {
+  ///       Scaffold.of(context).showSnackBar(new SnackBar(
+  ///         content: new Text('Hello!'),
+  ///       ));
+  ///     },
+  ///   );
+  /// }
+  /// ```
+  ///
+  /// When the [Scaffold] is actually created in the same `build` function, the
+  /// `context` argument to the `build` function can't be used to find the
+  /// [Scaffold] (since it's "above" the widget being returned). In such cases,
+  /// the following technique with a [Builder] can be used to provide a new
+  /// scope with a [BuildContext] that is "under" the [Scaffold]:
+  ///
+  /// ```dart
+  /// @override
+  /// Widget build(BuildContext context) {
+  ///   return new Scaffold(
+  ///     appBar: new AppBar(
+  ///       title: new Text('Demo')
+  ///     ),
+  ///     body: new Builder(
+  ///       // Create an inner BuildContext so that the onPressed methods
+  ///       // can refer to the Scaffold with Scaffold.of().
+  ///       builder: (BuildContext context) {
+  ///         return new Center(
+  ///           child: new RaisedButton(
+  ///             child: new Text('SHOW A SNACKBAR'),
+  ///             onPressed: () {
+  ///               Scaffold.of(context).showSnackBar(new SnackBar(
+  ///                 content: new Text('Hello!'),
+  ///               ));
+  ///             },
+  ///           ),
+  ///         );
+  ///       },
+  ///     ),
+  ///   );
+  /// }
+  /// ```
   static ScaffoldState of(BuildContext context) => context.ancestorStateOfType(const TypeMatcher<ScaffoldState>());
 
   @override
@@ -525,7 +574,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   ///
   ///  * [BottomSheet]
   ///  * [showModalBottomSheet]
-  ///  * <https://www.google.com/design/spec/components/bottom-sheets.html#bottom-sheets-persistent-bottom-sheets>
+  ///  * <https://material.google.com/components/bottom-sheets.html#bottom-sheets-persistent-bottom-sheets>
   PersistentBottomSheetController<dynamic/*=T*/> showBottomSheet/*<T>*/(WidgetBuilder builder) {
     if (_currentBottomSheet != null) {
       _currentBottomSheet.close();
@@ -771,12 +820,16 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   }
 
   void _handleDragEnd(DragEndDetails details) {
-    _backGestureController?.dragEnd(details.velocity.pixelsPerSecond.dx / context.size.width);
+    final bool willPop = _backGestureController?.dragEnd(details.velocity.pixelsPerSecond.dx / context.size.width) ?? false;
+    if (willPop)
+      _currentBottomSheet?.close();
     _backGestureController = null;
   }
 
   void _handleDragCancel() {
-    _backGestureController?.dragEnd(0.0);
+    final bool willPop = _backGestureController?.dragEnd(0.0) ?? false;
+    if (willPop)
+      _currentBottomSheet?.close();
     _backGestureController = null;
   }
 

@@ -30,7 +30,7 @@ export 'package:flutter/services.dart' show TextInputType;
 ///
 /// See also:
 ///
-///  * <https://www.google.com/design/spec/components/text-fields.html>
+///  * <https://material.google.com/components/text-fields.html>
 ///
 /// For a detailed guide on using the input widget, see:
 ///

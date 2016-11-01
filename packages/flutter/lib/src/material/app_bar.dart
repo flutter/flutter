@@ -83,7 +83,7 @@ class _ToolbarLayout extends MultiChildLayoutDelegate {
 }
 
 // TODO(eseidel) Toolbar needs to change size based on orientation:
-// http://www.google.com/design/spec/layout/structure.html#structure-app-bar
+// http://material.google.com/layout/structure.html#structure-app-bar
 // Mobile Landscape: 48dp
 // Mobile Portrait: 56dp
 // Tablet/Desktop: 64dp
@@ -130,7 +130,7 @@ class _AppBarExpandedHeight extends InheritedWidget {
 ///  * [IconButton]
 ///  * [PopupMenuButton]
 ///  * [FlexibleSpaceBar]
-///  * <https://www.google.com/design/spec/layout/structure.html#structure-toolbars>
+///  * <https://material.google.com/layout/structure.html#structure-toolbars>
 class AppBar extends StatelessWidget {
   /// Creates a material design app bar.
   ///

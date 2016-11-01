@@ -3,7 +3,6 @@ import 'dart:io' as io;
 
 import 'package:analyzer/file_system/file_system.dart';
 import 'package:analyzer/file_system/physical_file_system.dart';
-import 'package:analyzer/source/sdk_ext.dart';
 import 'package:analyzer/src/context/builder.dart'; // ignore: implementation_imports
 import 'package:analyzer/src/dart/sdk/sdk.dart'; // ignore: implementation_imports
 import 'package:analyzer/src/generated/engine.dart'; // ignore: implementation_imports
@@ -13,27 +12,20 @@ import 'package:analyzer/src/summary/pub_summary.dart'; // ignore: implementatio
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/globals.dart';
-import 'package:package_config/packages.dart';
 import 'package:path/path.dart' as pathos;
 import 'package:yaml/src/yaml_node.dart'; // ignore: implementation_imports
 
-/// Given the [skyEnginePath] and [flutterServicesPath], locate corresponding
-/// `_embedder.yaml` and `_sdkext`, compose the full embedded Dart SDK, and
-/// build the [outBundleName] file with its linked summary.
-void buildSkyEngineSdkSummary(
-    String skyEnginePath, String flutterServicesPath, String outBundleName) {
+/// Given the [skyEnginePath], locate corresponding `_embedder.yaml` and compose
+/// the full embedded Dart SDK, and build the [outBundleName] file with its
+/// linked summary.
+void buildSkyEngineSdkSummary(String skyEnginePath, String outBundleName) {
   ResourceProvider resourceProvider = PhysicalResourceProvider.INSTANCE;
 
-  ContextBuilder builder = new ContextBuilder(resourceProvider, null, null);
-  Packages packages = builder.createPackageMap(flutterServicesPath);
-  Map<String, List<Folder>> packageMap = builder.convertPackagesToMap(packages);
-  if (packageMap == null) {
-    printError('The expected .packages was not found in $flutterServicesPath.');
-    return;
-  }
-  packageMap['sky_engine'] = <Folder>[
-    resourceProvider.getFolder(pathos.join(skyEnginePath, 'lib'))
-  ];
+  Map<String, List<Folder>> packageMap = <String, List<Folder>>{
+    'sky_engine': <Folder>[
+      resourceProvider.getFolder(pathos.join(skyEnginePath, 'lib'))
+    ]
+  };
 
   //
   // Read the `_embedder.yaml` file.
@@ -47,21 +39,9 @@ void buildSkyEngineSdkSummary(
   }
 
   //
-  // Read the `_sdkext` file.
-  //
-  SdkExtUriResolver extResolver = new SdkExtUriResolver(packageMap);
-  Map<String, String> urlMappings = extResolver.urlMappings;
-  if (embedderYamls.length != 1) {
-    printError('Exactly one extension library was expected in $packageMap, '
-        'but $urlMappings found.');
-    return;
-  }
-
-  //
   // Create the EmbedderSdk instance.
   //
   EmbedderSdk sdk = new EmbedderSdk(resourceProvider, embedderYamls);
-  sdk.addExtensions(urlMappings);
   sdk.analysisOptions = new AnalysisOptionsImpl()..strongMode = true;
 
   //

@@ -24,7 +24,7 @@ import 'theme.dart';
 ///
 ///  * [Drawer]
 ///  * [DrawerHeader]
-///  * <https://www.google.com/design/spec/patterns/navigation-drawer.html>
+///  * <https://material.google.com/patterns/navigation-drawer.html>
 class DrawerItem extends StatelessWidget {
   /// Creates a material design drawer item.
   ///
@@ -73,7 +73,7 @@ class DrawerItem extends StatelessWidget {
           return themeData.accentColor;
         if (onPressed == null)
           return Colors.white30;
-        return null; // use default icon theme colour unmodified
+        return null; // use default icon theme color unmodified
     }
     assert(themeData.brightness != null);
     return null;

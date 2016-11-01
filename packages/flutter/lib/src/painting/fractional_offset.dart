@@ -17,14 +17,14 @@ class FractionalOffset {
 
   /// The distance fraction in the horizontal direction.
   ///
-  /// A value of 0.0 cooresponds to the leftmost edge. A value of 1.0
-  /// cooresponds to the rightmost edge.
+  /// A value of 0.0 corresponds to the leftmost edge. A value of 1.0
+  /// corresponds to the rightmost edge.
   final double dx;
 
   /// The distance fraction in the vertical direction.
   ///
-  /// A value of 0.0 cooresponds to the topmost edge. A value of 1.0
-  /// cooresponds to the bottommost edge.
+  /// A value of 0.0 corresponds to the topmost edge. A value of 1.0
+  /// corresponds to the bottommost edge.
   final double dy;
 
   /// The top left corner.

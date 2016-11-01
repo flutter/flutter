@@ -160,7 +160,7 @@ final _DayPickerGridDelegate _kDayPickerGridDelegate = new _DayPickerGridDelegat
 /// See also:
 ///
 ///  * [showDatePicker].
-///  * <https://www.google.com/design/spec/components/pickers.html#pickers-date-pickers>
+///  * <https://material.google.com/components/pickers.html#pickers-date-pickers>
 class DayPicker extends StatelessWidget {
   /// Creates a day picker.
   ///
@@ -288,7 +288,7 @@ class DayPicker extends StatelessWidget {
 /// See also:
 ///
 ///  * [showDatePicker]
-///  * <https://www.google.com/design/spec/components/pickers.html#pickers-date-pickers>
+///  * <https://material.google.com/components/pickers.html#pickers-date-pickers>
 class MonthPicker extends StatefulWidget {
   /// Creates a month picker.
   ///
@@ -440,7 +440,7 @@ class _MonthPickerState extends State<MonthPicker> {
 /// See also:
 ///
 ///  * [showDatePicker]
-///  * <https://www.google.com/design/spec/components/pickers.html#pickers-date-pickers>
+///  * <https://material.google.com/components/pickers.html#pickers-date-pickers>
 class YearPicker extends StatefulWidget {
   /// Creates a year picker.
   ///
@@ -670,20 +670,19 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
 /// Shows a dialog containing a material design date picker.
 ///
 /// The returned [Future] resolves to the date selected by the user when the
-/// user closes the dialog. If the user cancels the dialog, the [Future]
-/// resolves to the initialDate.
+/// user closes the dialog. If the user cancels the dialog, null is returned.
 ///
 /// See also:
 ///
 ///  * [showTimePicker]
-///  * <https://www.google.com/design/spec/components/pickers.html#pickers-date-pickers>
+///  * <https://material.google.com/components/pickers.html#pickers-date-pickers>
 Future<DateTime> showDatePicker({
   BuildContext context,
   DateTime initialDate,
   DateTime firstDate,
   DateTime lastDate
 }) async {
-  DateTime picked = await showDialog(
+  return await showDialog(
     context: context,
     child: new _DatePickerDialog(
       initialDate: initialDate,
@@ -691,5 +690,4 @@ Future<DateTime> showDatePicker({
       lastDate: lastDate
     )
   );
-  return picked ?? initialDate;
 }

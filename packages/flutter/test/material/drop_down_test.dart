@@ -64,6 +64,72 @@ void main() {
     expect(value, equals('two'));
   });
 
+  testWidgets('Drop down button with no app', (WidgetTester tester) async {
+    List<String> items = <String>['one', 'two', 'three', 'four'];
+    String value = items.first;
+
+    void didChangeValue(String newValue) {
+      value = newValue;
+    }
+
+    Widget build() {
+      return new Navigator(
+        initialRoute: '/',
+        onGenerateRoute: (RouteSettings settings) {
+          return new MaterialPageRoute<Null>(
+            settings: settings,
+            builder: (BuildContext context) {
+              return new Material(
+                child: new Center(
+                  child: new DropdownButton<String>(
+                    value: value,
+                    items: items.map((String item) {
+                      return new DropdownMenuItem<String>(
+                        value: item,
+                        child: new Text(item),
+                      );
+                    }).toList(),
+                    onChanged: didChangeValue,
+                  ),
+                )
+              );
+            },
+          );
+        }
+      );
+    }
+
+    await tester.pumpWidget(build());
+
+    await tester.tap(find.text('one'));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1)); // finish the menu animation
+
+    expect(value, equals('one'));
+
+    await tester.tap(find.text('three').last);
+
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1)); // finish the menu animation
+
+    expect(value, equals('three'));
+
+    await tester.tap(find.text('three'));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1)); // finish the menu animation
+
+    expect(value, equals('three'));
+
+    await tester.pumpWidget(build());
+
+    await tester.tap(find.text('two').last);
+
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1)); // finish the menu animation
+
+    expect(value, equals('two'));
+  });
+
   testWidgets('Drop down screen edges', (WidgetTester tester) async {
     int value = 4;
     List<DropdownMenuItem<int>> items = <DropdownMenuItem<int>>[];
