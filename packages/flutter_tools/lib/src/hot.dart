@@ -260,6 +260,7 @@ class HotRunner extends ResidentRunner {
       return 3;
     }
     _loaderShowMessage('Connecting...', progress: 0);
+    _loaderShowExplanation('You can use hot reload to update your app on the fly, without restarting it.');
     bool devfsResult = await _updateDevFS(
       progressReporter: (int progress, int max) {
         if (progress % 10 == 0)
@@ -335,6 +336,10 @@ class HotRunner extends ResidentRunner {
       currentView.uiIsolate.flutterLoaderSetProgress(0.0);
       currentView.uiIsolate.flutterLoaderSetProgressMax(-1.0);
     }
+  }
+
+  void _loaderShowExplanation(String explanation) {
+    currentView.uiIsolate.flutterLoaderShowExplanation(explanation);
   }
 
   DevFS _devFS;
