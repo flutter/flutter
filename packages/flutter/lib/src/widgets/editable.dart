@@ -67,7 +67,7 @@ class InputValue {
   const InputValue({
     this.text: '',
     this.selection: const TextSelection.collapsed(offset: -1),
-    this.composing: TextRange.empty
+    this.composing: TextRange.empty,
   });
 
   /// The current text being edited.
@@ -110,7 +110,7 @@ class InputValue {
     TextSelection selection,
     TextRange composing
   }) {
-    return new InputValue (
+    return new InputValue(
       text: text ?? this.text,
       selection: selection ?? this.selection,
       composing: composing ?? this.composing
@@ -130,7 +130,9 @@ class RawInput extends Scrollable {
   /// The [value] argument must not be null.
   RawInput({
     Key key,
-    @required this.value,
+    this.text,
+    this.selection,
+    this.composing,
     this.focusKey,
     this.hideText: false,
     this.style,
@@ -147,12 +149,19 @@ class RawInput extends Scrollable {
     key: key,
     initialScrollOffset: 0.0,
     scrollDirection: maxLines > 1 ? Axis.vertical : Axis.horizontal
-  ) {
-    assert(value != null);
-  }
+  );
 
-  /// The string being displayed in this widget.
-  final InputValue value;
+  /// The editable text displayed in the input field. If this is null, the
+  /// [RawInput] manages it for you.
+  final String text;
+
+  /// The range of editable text that is currently selected. If this is null,
+  /// the [RawInput] manages it for you.
+  final TextSelection selection;
+
+  /// The range of editable text that is still being composed. If this is null,
+  /// the [RawInput] manages it for you.
+  final TextRange composing;
 
   /// Key of the enclosing widget that holds the focus.
   final GlobalKey focusKey;
@@ -219,19 +228,30 @@ class RawInputState extends ScrollableState<RawInput> implements TextInputClient
   @override
   BoundedBehavior get scrollBehavior => super.scrollBehavior;
 
+  void _setCurrentValue({String text, TextSelection selection, TextRange composing}) {
+    InputValue updatedValue = new InputValue(
+      text: text ?? _currentValue?.text ?? '',
+      selection: selection ?? _currentValue?.selection ?? const TextSelection.collapsed(offset: -1),
+      composing: composing ?? _currentValue?.composing ?? TextRange.empty
+    );
+    if (_currentValue == updatedValue)
+      return;
+    _currentValue = updatedValue;
+    if (_isAttachedToKeyboard)
+      _textInputConnection.setEditingState(_getTextEditingStateFromInputValue(_currentValue));
+  }
+
   @override
   void initState() {
     super.initState();
-    _currentValue = config.value;
+    _setCurrentValue(text: config.text, selection: config.selection, composing: config.composing);
   }
 
   @override
   void didUpdateConfig(RawInput oldConfig) {
-    if (_currentValue != config.value) {
-      _currentValue = config.value;
-      if (_isAttachedToKeyboard)
-        _textInputConnection.setEditingState(_getTextEditingStateFromInputValue(_currentValue));
-    }
+    if (config.text != null && config.text != _currentValue.text)
+      _currentValue = null;  // forces the selection and composing to reset.
+    _setCurrentValue(text: config.text, selection: config.selection, composing: config.composing);
   }
 
   bool get _isAttachedToKeyboard => _textInputConnection != null && _textInputConnection.attached;
@@ -313,10 +333,11 @@ class RawInputState extends ScrollableState<RawInput> implements TextInputClient
 
   @override
   void updateEditingState(TextEditingState state) {
+    String oldText = _currentValue?.text;
     _currentValue = _getInputValueFromEditingState(state);
     if (config.onChanged != null)
       config.onChanged(_currentValue);
-    if (_currentValue.text != config.value.text) {
+    if (_currentValue.text != oldText) {
       _selectionOverlay?.hide();
       _selectionOverlay = null;
     }
@@ -335,9 +356,9 @@ class RawInputState extends ScrollableState<RawInput> implements TextInputClient
     // EditableWidget, not just changes triggered by user gestures.
     requestKeyboard();
 
-    InputValue newInput = _currentValue.copyWith(selection: selection, composing: TextRange.empty);
+    _setCurrentValue(text: _currentValue.text, selection: selection, composing: TextRange.empty);
     if (config.onChanged != null)
-      config.onChanged(newInput);
+      config.onChanged(_currentValue);
 
     if (_selectionOverlay != null) {
       _selectionOverlay.hide();
@@ -346,14 +367,14 @@ class RawInputState extends ScrollableState<RawInput> implements TextInputClient
 
     if (config.selectionControls != null) {
       _selectionOverlay = new TextSelectionOverlay(
-        input: newInput,
+        input: _currentValue,
         context: context,
         debugRequiredFor: config,
         renderObject: renderObject,
         onSelectionOverlayChanged: _handleSelectionOverlayChanged,
         selectionControls: config.selectionControls,
       );
-      if (newInput.text.isNotEmpty || longPress)
+      if (_currentValue.text.isNotEmpty || longPress)
         _selectionOverlay.showHandles();
       if (longPress)
         _selectionOverlay.showToolbar();
@@ -361,9 +382,9 @@ class RawInputState extends ScrollableState<RawInput> implements TextInputClient
   }
 
   void _handleSelectionOverlayChanged(InputValue newInput, Rect caretRect) {
-    assert(!newInput.composing.isValid);  // composing range must be empty while selecting
+    _setCurrentValue(text: newInput.text, selection: newInput.selection, composing: TextRange.empty);
     if (config.onChanged != null)
-      config.onChanged(newInput);
+      config.onChanged(_currentValue);
 
     didUpdateScrollBehavior(scrollBehavior.updateExtents(
       // TODO(mpcomplete): should just be able to pass
@@ -421,14 +442,14 @@ class RawInputState extends ScrollableState<RawInput> implements TextInputClient
     bool focused = Focus.at(config.focusKey.currentContext);
     _attachOrDetachKeyboard(focused);
 
-    if (_cursorTimer == null && focused && config.value.selection.isCollapsed)
+    if (_cursorTimer == null && focused && _currentValue.selection.isCollapsed)
       _startCursorTimer();
-    else if (_cursorTimer != null && (!focused || !config.value.selection.isCollapsed))
+    else if (_cursorTimer != null && (!focused || !_currentValue.selection.isCollapsed))
       _stopCursorTimer();
 
     if (_selectionOverlay != null) {
       if (focused) {
-        _selectionOverlay.update(config.value);
+        _selectionOverlay.update(_currentValue);
       } else {
         _selectionOverlay?.dispose();
         _selectionOverlay = null;

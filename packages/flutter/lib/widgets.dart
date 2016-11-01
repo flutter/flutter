@@ -22,7 +22,6 @@ export 'src/widgets/dismissable.dart';
 export 'src/widgets/drag_target.dart';
 export 'src/widgets/editable.dart';
 export 'src/widgets/focus.dart';
-export 'src/widgets/form.dart';
 export 'src/widgets/framework.dart';
 export 'src/widgets/gesture_detector.dart';
 export 'src/widgets/gridpaper.dart';

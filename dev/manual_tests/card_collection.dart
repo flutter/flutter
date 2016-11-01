@@ -308,7 +308,6 @@ class CardCollectionState extends State<CardCollection> {
             new Center(
               child: new Input(
                 key: new GlobalObjectKey(cardModel),
-                value: cardModel.inputValue,
                 onChanged: (InputValue value) {
                   setState(() {
                     cardModel.inputValue = value;

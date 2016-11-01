@@ -291,7 +291,9 @@ class StockHomeState extends State<StockHome> {
         tooltip: 'Back'
       ),
       title: new Input(
-        value: _searchQuery,
+        text: _searchQuery.text,
+        selection: _searchQuery.selection,
+        composing: _searchQuery.composing,
         autofocus: true,
         hintText: 'Search stocks',
         onChanged: _handleSearchQueryChanged
@@ -358,7 +360,7 @@ class _CreateCompanySheetState extends State<_CreateCompanySheet> {
         new Input(
           autofocus: true,
           hintText: 'Company Name',
-          value: _companyName,
+          text: _companyName.text,
           onChanged: _handleCompanyNameChanged
         ),
       ]

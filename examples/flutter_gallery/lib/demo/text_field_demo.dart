@@ -65,6 +65,8 @@ class TextFieldDemoState extends State<TextFieldDemo> {
     return null;
   }
 
+  String _retypePassword = '';
+
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
@@ -72,70 +74,59 @@ class TextFieldDemoState extends State<TextFieldDemo> {
       appBar: new AppBar(
         title: new Text('Text fields')
       ),
-      body: new Form(
-        child: new Block(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          children: <Widget>[
-            new Input(
-              hintText: 'What do people call you?',
-              labelText: 'Name',
-              formField: new FormField<String>(
-                // TODO(mpcomplete): replace with person#name=
-                setter:  (String val) { person.name = val; },
-                validator: _validateName
-              )
-            ),
-            new Input(
-              hintText: 'Where can we reach you?',
-              labelText: 'Phone Number',
-              keyboardType: TextInputType.phone,
-              formField: new FormField<String>(
-                setter: (String val) { person.phoneNumber = val; },
-                validator: _validatePhoneNumber
-              )
-            ),
-            new Input(
-              hintText: 'Tell us about yourself (optional)',
-              labelText: 'Life story',
-              maxLines: 3,
-              formField: new FormField<String>()
-            ),
-            new Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                new Flexible(
-                  child: new Input(
-                    hintText: 'How do you log in?',
-                    labelText: 'New Password',
-                    hideText: true,
-                    formField: new FormField<String>(
-                      setter: (String val) { person.password = val; }
-                    )
-                  )
-                ),
-                new SizedBox(width: 16.0),
-                new Flexible(
-                  child: new Input(
-                    hintText: 'How do you log in?',
-                    labelText: 'Re-type Password',
-                    hideText: true,
-                    formField: new FormField<String>(
-                      validator: _validatePassword
-                    )
-                  )
+      body: new Block(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        children: <Widget>[
+          new Input(
+            hintText: 'What do people call you?',
+            labelText: 'Name',
+            onChanged: (InputValue val) { setState(() { person.name = val.text; }); },
+            errorText: _validateName(person.name),
+          ),
+          new Input(
+            hintText: 'Where can we reach you?',
+            labelText: 'Phone Number',
+            keyboardType: TextInputType.phone,
+            onChanged: (InputValue val) { setState(() { person.phoneNumber = val.text; }); },
+            errorText: _validatePhoneNumber(person.phoneNumber),
+          ),
+          new Input(
+            hintText: 'Tell us about yourself (optional)',
+            labelText: 'Life story',
+            maxLines: 3,
+          ),
+          new Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              new Flexible(
+                child: new Input(
+                  hintText: 'How do you log in?',
+                  labelText: 'New Password',
+                  hideText: true,
+                  onChanged: (InputValue val) { setState(() { person.password = val.text; }); },
                 )
-              ]
-            ),
-            new Container(
-              padding: const EdgeInsets.all(20.0),
-              alignment: const FractionalOffset(0.5, 0.5),
-              child: new RaisedButton(
-                child: new Text('SUBMIT'),
-                onPressed: _handleSubmitted,
               ),
-            )
-          ]
-        )
+              new SizedBox(width: 16.0),
+              new Flexible(
+                child: new Input(
+                  hintText: 'How do you log in?',
+                  labelText: 'Re-type Password',
+                  hideText: true,
+                  onChanged: (InputValue val) { setState(() { _retypePassword = val.text; }); },
+                  errorText: _validatePassword(_retypePassword),
+                )
+              )
+            ]
+          ),
+          new Container(
+            padding: const EdgeInsets.all(20.0),
+            alignment: const FractionalOffset(0.5, 0.5),
+            child: new RaisedButton(
+              child: new Text('SUBMIT'),
+              onPressed: _handleSubmitted,
+            ),
+          )
+        ]
       )
     );
   }

@@ -84,7 +84,6 @@ void main() {
       return new Center(
         child: new Material(
           child: new Input(
-            value: inputValue,
             key: inputKey,
             hintText: 'Placeholder',
             onChanged: (InputValue value) { inputValue = value; }
@@ -202,7 +201,6 @@ void main() {
               return new Center(
                 child: new Material(
                   child: new Input(
-                    value: inputValue,
                     key: inputKey,
                     onChanged: (InputValue value) { inputValue = value; }
                   )
@@ -249,7 +247,6 @@ void main() {
               return new Center(
                 child: new Material(
                   child: new Input(
-                    value: inputValue,
                     key: inputKey,
                     onChanged: (InputValue value) { inputValue = value; }
                   )
@@ -324,7 +321,6 @@ void main() {
               return new Center(
                 child: new Material(
                   child: new Input(
-                    value: inputValue,
                     key: inputKey,
                     onChanged: (InputValue value) { inputValue = value; }
                   )
@@ -389,7 +385,6 @@ void main() {
               return new Center(
                 child: new Material(
                   child: new Input(
-                    value: inputValue,
                     key: inputKey,
                     onChanged: (InputValue value) { inputValue = value; }
                   )
@@ -434,18 +429,14 @@ void main() {
 
   testWidgets('Multiline text will wrap up to maxLines', (WidgetTester tester) async {
     GlobalKey inputKey = new GlobalKey();
-    InputValue inputValue = InputValue.empty;
-
     Widget builder(int maxLines) {
       return new Center(
         child: new Material(
           child: new Input(
-            value: inputValue,
             key: inputKey,
             style: const TextStyle(color: Colors.black, fontSize: 34.0),
             maxLines: maxLines,
             hintText: 'Placeholder',
-            onChanged: (InputValue value) { inputValue = value; }
           )
         )
       );
@@ -499,7 +490,6 @@ void main() {
               return new Center(
                 child: new Material(
                   child: new Input(
-                    value: inputValue,
                     key: inputKey,
                     style: const TextStyle(color: Colors.black, fontSize: 34.0),
                     maxLines: 3,
@@ -590,7 +580,6 @@ void main() {
               return new Center(
                 child: new Material(
                   child: new Input(
-                    value: inputValue,
                     key: inputKey,
                     style: const TextStyle(color: Colors.black, fontSize: 34.0),
                     maxLines: 2,

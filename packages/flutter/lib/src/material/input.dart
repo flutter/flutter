@@ -20,13 +20,10 @@ export 'package:flutter/services.dart' show TextInputType;
 ///
 /// Requires one of its ancestors to be a [Material] widget.
 ///
-/// If the [Input] has a [Form] ancestor, the [formField] property must
-/// be specified. In this case, the [Input] keeps track of the value of
-/// the [Input] field automatically, and the initial value can be specified
-/// using the [value] property.
-///
-/// If the [Input] does not have a [Form] ancestor, then the [value]
-/// must be updated each time the [onChanged] callback is invoked.
+/// The [text], [selection], and [composing] properties control the editable
+/// text. If null, the [Input] widget will manage them for you, as the user
+/// edits the input field. Otherwise, they should be updated in response to the
+/// [onChanged] event.
 ///
 /// See also:
 ///
@@ -39,11 +36,11 @@ class Input extends StatefulWidget {
   /// Creates a text input field.
   ///
   /// By default, the input uses a keyboard appropriate for text entry.
-  ///
-  /// The [formField] argument is required if the [Input] has an ancestor [Form].
   Input({
     Key key,
-    this.value,
+    this.text,
+    this.selection,
+    this.composing,
     this.keyboardType: TextInputType.text,
     this.icon,
     this.labelText,
@@ -54,18 +51,21 @@ class Input extends StatefulWidget {
     this.isDense: false,
     this.autofocus: false,
     this.maxLines: 1,
-    this.formField,
     this.onChanged,
     this.onSubmitted,
   }) : super(key: key);
 
-  /// The text of the input field.
-  ///
-  /// If the [Input] is in a [Form], this is the initial value only.
-  ///
-  /// Otherwise, this is the current value, and must be updated every
-  /// time [onChanged] is called.
-  final InputValue value;
+  /// The editable text displayed in the input field. If this is null, the
+  /// [Input] manages it for you.
+  final String text;
+
+  /// The range of editable text that is currently selected. If this is null,
+  /// the [Input] manages it for you.
+  final TextSelection selection;
+
+  /// The range of editable text that is still being composed. If this is null,
+  /// the [Input] manages it for you.
+  final TextRange composing;
 
   /// The type of keyboard to use for editing the text.
   final TextInputType keyboardType;
@@ -86,9 +86,6 @@ class Input extends StatefulWidget {
   final String hintText;
 
   /// Text to show when the input text is invalid.
-  ///
-  /// If this is set, then the [formField]'s [FormField.validator], if any, is
-  /// ignored.
   final String errorText;
 
   /// The style to use for the text being edited.
@@ -111,27 +108,14 @@ class Input extends StatefulWidget {
   /// horizontally instead.
   final int maxLines;
 
-  /// The [Form] entry for this input control. Required if the input is in a [Form].
-  /// Ignored otherwise.
-  ///
-  /// Putting an Input in a [Form] means the Input will keep track of its own value,
-  /// using the [value] property only as the field's initial value. It also means
-  /// that when any field in the [Form] changes, all the widgets in the form will be
-  /// rebuilt, so that each field's [FormField.validator] callback can be reevaluated.
-  final FormField<String> formField;
-
   /// Called when the text being edited changes.
   ///
-  /// If the [Input] is not in a [Form], the [value] must be updated each time [onChanged]
-  /// is invoked. (If there is a [Form], then the value is tracked in the [formField], and
-  /// this callback is purely advisory.)
-  ///
-  /// If the [Input] is in a [Form], this is called after the [formField] is updated.
+  /// The [text], [selection], and [composing] arguments must be updated (or
+  /// remain null to allow the [Input] to manage them) each time [onChanged] is
+  /// invoked.
   final ValueChanged<InputValue> onChanged;
 
   /// Called when the user indicates that they are done editing the text in the field.
-  ///
-  /// If the [Input] is in a [Form], this is called after the [formField] is notified.
   final ValueChanged<InputValue> onSubmitted;
 
   @override
@@ -146,13 +130,15 @@ class _InputState extends State<Input> {
 
   GlobalKey get focusKey => config.key is GlobalKey ? config.key : _rawInputKey;
 
-  // Optional state to retain if we are inside a Form widget.
-  _FormFieldData _formData;
-
-  @override
-  void dispose() {
-    _formData?.dispose();
-    super.dispose();
+  InputValue _currentValue;
+  void _onChanged(InputValue val) {
+    // We call setState more often than necessary, because this only controls
+    // whether the hint text is displayed, but it's simpler to always call it.
+    setState(() {
+      _currentValue = val;
+    });
+    if (config.onChanged != null)
+      config.onChanged(val);
   }
 
   @override
@@ -161,21 +147,10 @@ class _InputState extends State<Input> {
     ThemeData themeData = Theme.of(context);
     BuildContext focusContext = focusKey.currentContext;
     bool focused = focusContext != null && Focus.at(focusContext, autofocus: config.autofocus);
-    if (_formData == null) {
-      _formData = _FormFieldData.maybeCreate(context, this);
-    } else {
-      _formData = _formData.maybeDispose(context);
-    }
-    InputValue value =  _formData?.value ?? config.value ?? InputValue.empty;
-    ValueChanged<InputValue> onChanged = _formData?.onChanged ?? config.onChanged;
-    ValueChanged<InputValue> onSubmitted = _formData?.onSubmitted ?? config.onSubmitted;
     String errorText = config.errorText;
-
-    if (errorText == null && config.formField != null && config.formField.validator != null)
-      errorText = config.formField.validator(value.text);
-
     TextStyle textStyle = config.style ?? themeData.textTheme.subhead;
     Color activeColor = themeData.hintColor;
+    String text = config.text ?? _currentValue?.text ?? '';
     if (focused) {
       switch (themeData.brightness) {
         case Brightness.dark:
@@ -190,7 +165,7 @@ class _InputState extends State<Input> {
 
     List<Widget> stackChildren = <Widget>[];
 
-    bool hasInlineLabel = config.labelText != null && !focused && !value.text.isNotEmpty;
+    bool hasInlineLabel = config.labelText != null && !focused && text.isEmpty;
 
     if (config.labelText != null) {
       TextStyle labelStyle = hasInlineLabel ?
@@ -213,7 +188,7 @@ class _InputState extends State<Input> {
       topPadding += topPaddingIncrement;
     }
 
-    if (config.hintText != null && value.text.isEmpty && !hasInlineLabel) {
+    if (config.hintText != null && text.isEmpty && !hasInlineLabel) {
       TextStyle hintStyle = themeData.textTheme.subhead.copyWith(color: themeData.hintColor);
       stackChildren.add(new Positioned(
         left: 0.0,
@@ -253,7 +228,9 @@ class _InputState extends State<Input> {
       ),
       child: new RawInput(
         key: _rawInputKey,
-        value: value,
+        text: config.text,
+        selection: config.selection,
+        composing: config.composing,
         focusKey: focusKey,
         style: textStyle,
         hideText: config.hideText,
@@ -263,8 +240,8 @@ class _InputState extends State<Input> {
         selectionControls: materialTextSelectionControls,
         platform: Theme.of(context).platform,
         keyboardType: config.keyboardType,
-        onChanged: onChanged,
-        onSubmitted: onSubmitted,
+        onChanged: _onChanged,
+        onSubmitted: config.onSubmitted,
       )
     ));
 
@@ -309,71 +286,5 @@ class _InputState extends State<Input> {
         child: child
       )
     );
-  }
-}
-
-// _FormFieldData is a helper class for _InputState for when the Input
-// is in a Form.
-//
-// An instance is created when the Input is put in a Form, and lives
-// until the Input is taken placed somewhere without a Form. (If the
-// Input is moved from one Form to another, the same _FormFieldData is
-// used for both forms).
-//
-// The _FormFieldData stores the value of the Input. Without a Form,
-// the Input is essentially stateless.
-
-class _FormFieldData {
-  _FormFieldData(this.inputState) {
-    assert(field != null);
-    value = inputState.config.value ?? new InputValue();
-  }
-
-  final _InputState inputState;
-  InputValue value;
-
-  FormField<String> get field => inputState.config.formField;
-
-  static _FormFieldData maybeCreate(BuildContext context, _InputState inputState) {
-    // Only create a _FormFieldData if this Input is a descendent of a Form.
-    if (FormScope.of(context) != null)
-      return new _FormFieldData(inputState);
-    return null;
-  }
-
-  _FormFieldData maybeDispose(BuildContext context) {
-    if (FormScope.of(context) != null)
-      return this;
-    dispose();
-    return null;
-  }
-
-  void dispose() {
-    value = null;
-  }
-
-  void onChanged(InputValue value) {
-    assert(value != null);
-    assert(field != null);
-    FormScope scope = FormScope.of(inputState.context);
-    assert(scope != null);
-    this.value = value;
-    if (field.setter != null)
-      field.setter(value.text);
-    if (inputState.config.onChanged != null)
-      inputState.config.onChanged(value);
-    scope.onFieldChanged();
-  }
-
-  void onSubmitted(InputValue value) {
-    assert(value != null);
-    assert(field != null);
-    FormScope scope = FormScope.of(inputState.context);
-    assert(scope != null);
-    if (scope.form.onSubmitted != null)
-      scope.form.onSubmitted();
-    if (inputState.config.onSubmitted != null)
-      inputState.config.onSubmitted(value);
-    scope.onFieldChanged();
   }
 }
