@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 import 'package:stack_trace/stack_trace.dart';
 
@@ -135,6 +136,7 @@ class HotRunner extends ResidentRunner {
   String _mainPath;
   String _projectRootPath;
   Set<String> _startupDependencies;
+  int _observatoryPort;
   final AssetBundle bundle = new AssetBundle();
   final bool benchmarkMode;
   final Map<String, int> benchmarkData = new Map<String, int>();
@@ -217,7 +219,7 @@ class HotRunner extends ResidentRunner {
 
     await startEchoingDeviceLog();
 
-    printStatus('Launching loader on ${device.name}...');
+    printTrace('Launching loader on ${device.name}...');
 
     // Start the loader.
     Future<LaunchResult> futureResult = device.startApp(
@@ -246,13 +248,14 @@ class HotRunner extends ResidentRunner {
       return 2;
     }
 
-    await connectToServiceProtocol(result.observatoryPort);
+    _observatoryPort = result.observatoryPort;
+    await connectToServiceProtocol(_observatoryPort);
 
     try {
       Uri baseUri = await _initDevFS();
       if (connectionInfoCompleter != null) {
         connectionInfoCompleter.complete(
-          new DebugConnectionInfo(result.observatoryPort, baseUri: baseUri.toString())
+          new DebugConnectionInfo(_observatoryPort, baseUri: baseUri.toString())
         );
       }
     } catch (error) {
@@ -273,13 +276,13 @@ class HotRunner extends ResidentRunner {
     }
 
     await vmService.vm.refreshViews();
-    printStatus('Connected to ${vmService.vm.mainView}.');
+    printTrace('Connected to ${vmService.vm.mainView}.');
 
     printStatus('Running ${getDisplayPath(_mainPath)} on ${device.name}...');
     _loaderShowMessage('Launching...');
     await _launchFromDevFS(_package, _mainPath);
 
-    printStatus('Application running.');
+    printTrace('Application running.');
 
     setupTerminal();
 
@@ -361,10 +364,7 @@ class HotRunner extends ResidentRunner {
     devFSStatus.stop(showElapsedTime: true);
     // Clear the minimal set after the first sync.
     _startupDependencies = null;
-    if (progressReporter != null)
-      printStatus('Synced ${getSizeAsMB(_devFS.bytes)}.');
-    else
-      printTrace('Synced ${getSizeAsMB(_devFS.bytes)}.');
+    printTrace('Synced ${getSizeAsMB(_devFS.bytes)}.');
     return true;
   }
 
@@ -537,10 +537,16 @@ class HotRunner extends ResidentRunner {
   }
 
   @override
-  void printHelp() {
-    printStatus('Type "h" or F1 for this help message; type "q", F10, or ctrl-c to quit.', emphasis: true);
-    printStatus('Type "r" or F5 to perform a hot reload of the app, and "R" to restart the app.', emphasis: true);
-    printStatus('Type "w" to print the widget hierarchy of the app, and "t" for the render tree.', emphasis: true);
+  void printHelp({ @required bool details }) {
+    printStatus('To hot reload your app on the fly, press "r" or F5. To restart the app entirely, press "R".', emphasis: true);
+    printStatus('The Observatory debugger and profiler is available at: http://127.0.0.1:$_observatoryPort/');
+    if (details) {
+      printStatus('To dump the widget hierarchy of the app (debugDumpApp), press "w".');
+      printStatus('To dump the rendering tree of the app (debugDumpRenderTree), press "r".');
+      printStatus('To repeat this help message, press "h" or F1. To quit, press "q", F10, or Ctrl-C.');
+    } else {
+      printStatus('For a more detailed help message, press "h" or F1. To quit, press "q", F10, or Ctrl-C.');
+    }
   }
 
   @override

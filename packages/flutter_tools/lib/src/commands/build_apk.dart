@@ -378,7 +378,7 @@ int _buildApk(
       artifactBuilder.directory, components.resources, buildMode
     );
 
-    int signResult = _signApk(builder, components, unalignedApk, keystore);
+    int signResult = _signApk(builder, components, unalignedApk, keystore, buildMode);
     if (signResult != 0)
       return signResult;
 
@@ -397,7 +397,11 @@ int _buildApk(
 }
 
 int _signApk(
-  _ApkBuilder builder, _ApkComponents components, File apk, ApkKeystoreInfo keystoreInfo
+  _ApkBuilder builder,
+  _ApkComponents components,
+  File apk,
+  ApkKeystoreInfo keystoreInfo,
+  BuildMode buildMode,
 ) {
   File keystore;
   String keystorePassword;
@@ -405,7 +409,12 @@ int _signApk(
   String keyPassword;
 
   if (keystoreInfo == null) {
-    printStatus('Warning: signing the APK using the debug keystore.');
+    if (buildMode == BuildMode.release) {
+      printStatus('Warning! Signing the APK using the debug keystore.');
+      printStatus('You will need a real keystore to distribute your application.');
+    } else {
+      printTrace('Signing the APK using the debug keystore.');
+    }
     keystore = components.debugKeystore;
     keystorePassword = _kDebugKeystorePassword;
     keyAlias = _kDebugKeystoreKeyAlias;
@@ -415,7 +424,7 @@ int _signApk(
     keystorePassword = keystoreInfo.password ?? '';
     keyAlias = keystoreInfo.keyAlias ?? '';
     if (keystorePassword.isEmpty || keyAlias.isEmpty) {
-      printError('Must provide a keystore password and a key alias.');
+      printError('You must provide a keystore password and a key alias.');
       return 1;
     }
     keyPassword = keystoreInfo.keyPassword ?? '';
@@ -586,7 +595,7 @@ Future<int> buildAndroid(
 
   if (result == 0) {
     File apkFile = new File(outputFile);
-    printStatus('Built $outputFile (${getSizeAsMB(apkFile.lengthSync())}).');
+    printTrace('Built $outputFile (${getSizeAsMB(apkFile.lengthSync())}).');
 
     _writeBuildMetaEntry(
       path.dirname(outputFile),
