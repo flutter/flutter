@@ -71,11 +71,9 @@ class RunCommand extends RunCommandBase {
 
     // Option to write the pid to a file.
     argParser.addOption('pid-file',
-                        help: """
-                              Specify a file to write the process id to.
-                              You can send SIGUSR1 to trigger a hot reload
-                              and SIGUSR2 to trigger a full restart.
-                              """);
+                        help: "Specify a file to write the process id to.\n"
+                              "You can send SIGUSR1 to trigger a hot reload\n"
+                              "and SIGUSR2 to trigger a full restart.");
 
 
     // Hidden option to enable a benchmarking mode. This will run the given
