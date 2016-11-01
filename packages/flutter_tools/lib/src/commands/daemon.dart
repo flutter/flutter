@@ -711,7 +711,7 @@ class _AppLoggerStatus implements Status {
   final int id;
 
   @override
-  void stop({ bool showElapsedTime: false }) {
+  void stop({ bool showElapsedTime: true }) {
     _sendFinished();
   }
 

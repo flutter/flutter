@@ -37,7 +37,7 @@ abstract class Logger {
 }
 
 class Status {
-  void stop({ bool showElapsedTime: false }) { }
+  void stop({ bool showElapsedTime: true }) { }
   void cancel() { }
 }
 
@@ -244,7 +244,7 @@ class _AnsiStatus extends Status {
   }
 
   @override
-  void stop({ bool showElapsedTime: false }) {
+  void stop({ bool showElapsedTime: true }) {
     if (!live)
       return;
     live = false;
