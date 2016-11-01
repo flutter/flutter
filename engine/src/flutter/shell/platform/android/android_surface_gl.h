@@ -16,11 +16,13 @@ namespace shell {
 
 class AndroidSurfaceGL : public GPUSurfaceGLDelegate {
  public:
-  AndroidSurfaceGL(AndroidNativeWindow window,
-                   PlatformView::SurfaceConfig onscreen_config,
-                   PlatformView::SurfaceConfig offscreen_config);
+  explicit AndroidSurfaceGL(PlatformView::SurfaceConfig offscreen_config);
 
   ~AndroidSurfaceGL();
+
+  bool SetNativeWindowForOnScreenContext(
+      AndroidNativeWindow window,
+      PlatformView::SurfaceConfig onscreen_config);
 
   bool IsValid() const;
 
@@ -41,7 +43,6 @@ class AndroidSurfaceGL : public GPUSurfaceGLDelegate {
  private:
   ftl::RefPtr<AndroidContextGL> onscreen_context_;
   ftl::RefPtr<AndroidContextGL> offscreen_context_;
-  bool valid_;
 
   FTL_DISALLOW_COPY_AND_ASSIGN(AndroidSurfaceGL);
 };

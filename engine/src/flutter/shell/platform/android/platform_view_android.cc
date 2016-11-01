@@ -9,10 +9,9 @@
 #include <sys/resource.h>
 #include <sys/time.h>
 #include <sys/types.h>
-
+#include <unistd.h>
 #include <memory>
 #include <utility>
-
 #include "base/android/jni_android.h"
 #include "base/android/jni_array.h"
 #include "base/android/jni_string.h"
@@ -65,6 +64,13 @@ class PlatformMessageResponseAndroid : public blink::PlatformMessageResponse {
 PlatformViewAndroid::PlatformViewAndroid()
     : PlatformView(std::make_unique<GPURasterizer>()) {
   CreateEngine();
+
+  // Create the GL surface so that we can setup the resource context.
+  PlatformView::SurfaceConfig offscreen_config;
+  offscreen_config.stencil_bits = 0;
+  surface_gl_ = std::make_unique<AndroidSurfaceGL>(offscreen_config);
+
+  SetupResourceContextOnIOThread();
 }
 
 PlatformViewAndroid::~PlatformViewAndroid() = default;
@@ -87,29 +93,25 @@ void PlatformViewAndroid::SurfaceCreated(JNIEnv* env,
   // Use the default onscreen configuration.
   PlatformView::SurfaceConfig onscreen_config;
 
-  // The offscreen config is the same as the default except we know we don't
-  // need the stencil buffer.
-  PlatformView::SurfaceConfig offscreen_config;
-  offscreen_config.stencil_bits = 0;
-
-  auto surface = std::make_unique<AndroidSurfaceGL>(window, onscreen_config,
-                                                    offscreen_config);
-
-  if (surface->IsValid()) {
-    surface_gl_ = std::move(surface);
-  } else {
+  if (!surface_gl_->SetNativeWindowForOnScreenContext(window,
+                                                      onscreen_config)) {
     LOG(INFO) << "Could not create the OpenGL Android Surface.";
   }
 
   ANativeWindow_release(window);
 
-  auto gl_surface = std::make_unique<GPUSurfaceGL>(surface_gl_.get());
-  NotifyCreated(std::move(gl_surface), [this, backgroundColor] {
-    if (surface_gl_)
-      rasterizer().Clear(backgroundColor, surface_gl_->OnScreenSurfaceSize());
-  });
+  if (!surface_gl_->IsValid()) {
+    return;
+  }
 
-  SetupResourceContextOnIOThread();
+  NotifyCreated(
+      std::make_unique<GPUSurfaceGL>(surface_gl_.get()),  // GPU surface
+      [this, backgroundColor] {
+        if (surface_gl_)
+          rasterizer().Clear(backgroundColor,
+                             surface_gl_->OnScreenSurfaceSize());
+      });
+
   UpdateThreadPriorities();
 }
 
@@ -314,10 +316,7 @@ void PlatformViewAndroid::SetSemanticsEnabled(JNIEnv* env,
 }
 
 void PlatformViewAndroid::ReleaseSurface() {
-  if (surface_gl_) {
-    NotifyDestroyed();
-    surface_gl_ = nullptr;
-  }
+  NotifyDestroyed();
 }
 
 VsyncWaiter* PlatformViewAndroid::GetVsyncWaiter() {
