@@ -13,8 +13,8 @@ import 'material.dart';
 ///
 /// See also:
 ///
-///  * [Dialog]
-///  * [showDialog]
+///  * [ListItem], to display icons and text in a card.
+///  * [Dialog] and [showDialog], to display a modal card.
 ///  * <https://material.google.com/components/cards.html>
 class Card extends StatelessWidget {
   /// Creates a material design card.
