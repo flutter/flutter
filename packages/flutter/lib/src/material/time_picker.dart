@@ -513,11 +513,6 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
     _animateTo(_getThetaForTime(config.selectedTime));
   }
 
-  final List<TextPainter> _hoursWhite = _initHours(Typography.white);
-  final List<TextPainter> _hoursBlack = _initHours(Typography.black);
-  final List<TextPainter> _minutesWhite = _initMinutes(Typography.white);
-  final List<TextPainter> _minutesBlack = _initMinutes(Typography.black);
-
   @override
   Widget build(BuildContext context) {
     ThemeData themeData = Theme.of(context);
@@ -532,32 +527,17 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
         break;
     }
 
+    ThemeData theme = Theme.of(context);
     List<TextPainter> primaryLabels;
     List<TextPainter> secondaryLabels;
     switch (config.mode) {
       case _TimePickerMode.hour:
-        switch (themeData.brightness) {
-          case Brightness.light:
-            primaryLabels = _hoursBlack;
-            secondaryLabels = _hoursWhite;
-            break;
-          case Brightness.dark:
-            primaryLabels = _hoursWhite;
-            secondaryLabels = _hoursBlack;
-            break;
-        }
+        primaryLabels = _initHours(theme.textTheme);
+        secondaryLabels = _initHours(theme.primaryTextTheme);
         break;
       case _TimePickerMode.minute:
-        switch (themeData.brightness) {
-          case Brightness.light:
-            primaryLabels = _minutesBlack;
-            secondaryLabels = _minutesWhite;
-            break;
-          case Brightness.dark:
-            primaryLabels = _minutesWhite;
-            secondaryLabels = _minutesBlack;
-            break;
-        }
+        primaryLabels = _initMinutes(theme.textTheme);
+        secondaryLabels = _initMinutes(theme.primaryTextTheme);
         break;
     }
 
