@@ -15,7 +15,7 @@ import 'theme.dart';
 /// An area of a [Material] that responds to touch. Has a configurable shape and
 /// can be configured to clip splashes that extend outside its bounds or not.
 ///
-/// For a variant of this widget that is specialised for rectangular areas that
+/// For a variant of this widget that is specialized for rectangular areas that
 /// always clip splashes, see [InkWell].
 ///
 /// Must have an ancestor [Material] widget in which to cause ink reactions.

@@ -9,7 +9,8 @@ import 'debug.dart';
 import 'ink_well.dart';
 import 'theme.dart';
 
-/// An item in a material design list.
+/// An item in a material design list, typically consisting of an icon and some
+/// text.
 ///
 /// [MaterialList] items are one to three lines of text optionally flanked by
 /// icons. Icons are defined with the [leading] and [trailing] parameters. The
@@ -93,7 +94,11 @@ class ListItem extends StatelessWidget {
   final GestureLongPressCallback onLongPress;
 
   /// Add a one pixel border in between each item. If color isn't specified the
-  /// dividerColor of the context's theme is used.
+  /// [ThemeData.dividerColor] of the context's [Theme] is used.
+  ///
+  /// See also:
+  ///
+  /// * [Divider], which you can use to obtain this effect manually.
   static Iterable<Widget> divideItems({ BuildContext context, Iterable<Widget> items, Color color }) sync* {
     assert(items != null);
     assert(color != null || context != null);
@@ -103,14 +108,14 @@ class ListItem extends StatelessWidget {
     final bool isNotEmpty = iterator.moveNext();
 
     Widget item = iterator.current;
-    while(iterator.moveNext()) {
+    while (iterator.moveNext()) {
       yield new DecoratedBox(
         decoration: new BoxDecoration(
           border: new Border(
-            bottom: new BorderSide(color: dividerColor)
-          )
+            bottom: new BorderSide(color: dividerColor),
+          ),
         ),
-        child: item
+        child: item,
       );
       item = iterator.current;
     }

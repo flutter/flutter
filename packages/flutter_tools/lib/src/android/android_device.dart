@@ -11,6 +11,7 @@ import 'package:path/path.dart' as path;
 import '../android/android_sdk.dart';
 import '../application_package.dart';
 import '../base/os.dart';
+import '../base/logger.dart';
 import '../base/process.dart';
 import '../build_info.dart';
 import '../dart/package_map.dart';
@@ -238,7 +239,9 @@ class AndroidDevice extends Device {
     if (!_checkForSupportedAdbVersion() || !_checkForSupportedAndroidVersion())
       return false;
 
+    Status status = logger.startProgress('Installing ${apk.apkPath}...');
     String installOut = runCheckedSync(adbCommandForDevice(<String>['install', '-r', apk.apkPath]));
+    status.stop(showElapsedTime: true);
     RegExp failureExp = new RegExp(r'^Failure.*$', multiLine: true);
     String failure = failureExp.stringMatch(installOut);
     if (failure != null) {
@@ -266,14 +269,16 @@ class AndroidDevice extends Device {
     return true;
   }
 
-  Future<Null> _forwardPort(String service, int devicePort, int port) async {
+  Future<int> _forwardPort(String service, int devicePort, int port) async {
     try {
       // Set up port forwarding for observatory.
       port = await portForwarder.forward(devicePort, hostPort: port);
-      printStatus('$service listening on http://127.0.0.1:$port');
+      printTrace('$service listening on http://127.0.0.1:$port');
+      return port;
     } catch (e) {
       printError('Unable to forward port $port: $e');
     }
+    return null;
   }
 
   Future<LaunchResult> startBundle(AndroidApk apk, String bundlePath, {
@@ -360,17 +365,17 @@ class AndroidDevice extends Device {
           observatoryDevicePort = await observatoryDiscovery.nextPort().timeout(new Duration(seconds: 20));
         }
 
-        printTrace('observatory port = $observatoryDevicePort');
+        printTrace('observatory port on device: $observatoryDevicePort');
         int observatoryLocalPort = await options.findBestObservatoryPort();
         // TODO(devoncarew): Remember the forwarding information (so we can later remove the
         // port forwarding).
-        await _forwardPort(ProtocolDiscovery.kObservatoryService, observatoryDevicePort, observatoryLocalPort);
+        observatoryLocalPort = await _forwardPort(ProtocolDiscovery.kObservatoryService, observatoryDevicePort, observatoryLocalPort);
 
         int diagnosticLocalPort;
         if (diagnosticDevicePort != null) {
-          printTrace('diagnostic port = $diagnosticDevicePort');
+          printTrace('diagnostic port on device: $diagnosticDevicePort');
           diagnosticLocalPort = await options.findBestDiagnosticPort();
-          await _forwardPort(ProtocolDiscovery.kDiagnosticService, diagnosticDevicePort, diagnosticLocalPort);
+          diagnosticLocalPort = await _forwardPort(ProtocolDiscovery.kDiagnosticService, diagnosticDevicePort, diagnosticLocalPort);
         }
 
         return new LaunchResult.succeeded(
@@ -712,8 +717,6 @@ class _AdbLogReader extends DeviceLogReader {
 
   final AndroidDevice device;
 
-  bool _lastWasFiltered = false;
-
   StreamController<String> _linesController;
   Process _process;
 
@@ -754,38 +757,44 @@ class _AdbLogReader extends DeviceLogReader {
   }
 
   // 'W/ActivityManager: '
-  static final RegExp _logFormat = new RegExp(r'^[VDIWEF]\/[^:]+:\s+');
+  static final RegExp _logFormat = new RegExp(r'^[VDIWEF]\/.{8,}:\s');
 
   static final List<RegExp> _whitelistedTags = <RegExp>[
     new RegExp(r'^[VDIWEF]\/flutter[^:]*:\s+', caseSensitive: false),
     new RegExp(r'^[IE]\/DartVM[^:]*:\s+'),
     new RegExp(r'^[WEF]\/AndroidRuntime:\s+'),
-    new RegExp(r'^[WEF]\/ActivityManager:\s+'),
+    new RegExp(r'^[WEF]\/ActivityManager:\s+.*(\bflutter\b|\bdomokit\b|\bsky\b)'),
     new RegExp(r'^[WEF]\/System\.err:\s+'),
     new RegExp(r'^[F]\/[\S^:]+:\s+')
   ];
 
+  // we default to true in case none of the log lines match
+  bool _acceptedLastLine = true;
+
   void _onLine(String line) {
     if (_logFormat.hasMatch(line)) {
-      // Filter out some noisy ActivityManager notifications.
-      if (line.startsWith('W/ActivityManager: getRunningAppProcesses'))
-        return;
-
       // Filter on approved names and levels.
       for (RegExp regex in _whitelistedTags) {
         if (regex.hasMatch(line)) {
-          _lastWasFiltered = false;
+          _acceptedLastLine = true;
           _linesController.add(line);
           return;
         }
       }
-
-      _lastWasFiltered = true;
+      _acceptedLastLine = false;
+    } else if (line == '--------- beginning of system' ||
+               line == '--------- beginning of main' ) {
+      // hide the ugly adb logcat log boundaries at the start
+      _acceptedLastLine = false;
     } else {
-      // If it doesn't match the log pattern at all, pass it through.
-      if (!_lastWasFiltered)
+      // If it doesn't match the log pattern at all, then pass it through if we
+      // passed the last matching line through. It might be a multiline message.
+      if (_acceptedLastLine) {
         _linesController.add(line);
+        return;
+      }
     }
+    printTrace('skipped log line: $line');
   }
 
   void _stop() {

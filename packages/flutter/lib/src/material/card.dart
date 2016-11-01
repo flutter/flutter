@@ -13,8 +13,10 @@ import 'material.dart';
 ///
 /// See also:
 ///
-///  * [Dialog]
-///  * [showDialog]
+///  * [ListItem], to display icons and text in a card.
+///  * [ButtonBar], to display buttons at the bottom of a card. Typically these
+///    would be styled using a ButtonTheme created with [new ButtonTheme.bar].
+///  * [showDialog], to display a modal card.
 ///  * <https://material.google.com/components/cards.html>
 class Card extends StatelessWidget {
   /// Creates a material design card.

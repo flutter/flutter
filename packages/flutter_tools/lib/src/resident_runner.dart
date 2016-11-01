@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 
 import 'base/logger.dart';
@@ -26,6 +27,11 @@ abstract class ResidentRunner {
   final DebuggingOptions debuggingOptions;
   final bool usesTerminalUI;
   final Completer<int> _finished = new Completer<int>();
+
+  bool get isRunningDebug => debuggingOptions.buildMode == BuildMode.debug;
+  bool get isRunningProfile => debuggingOptions.buildMode == BuildMode.profile;
+  bool get isRunningRelease => debuggingOptions.buildMode == BuildMode.release;
+  bool get supportsServiceProtocol => isRunningDebug || isRunningProfile;
 
   VMService vmService;
   FlutterView currentView;
@@ -71,6 +77,8 @@ abstract class ResidentRunner {
       await cleanupAfterSignal();
       exit(0);
     });
+    if (!supportsServiceProtocol)
+      return;
     ProcessSignal.SIGUSR1.watch().listen((ProcessSignal signal) async {
       printStatus('Caught SIGUSR1');
       await restart(fullRestart: false);
@@ -106,12 +114,6 @@ abstract class ResidentRunner {
     vmService = await VMService.connect(port);
     printTrace('Connected to service protocol on port $port');
     await vmService.getVM();
-    vmService.onExtensionEvent.listen((ServiceEvent event) {
-      printTrace(event.toString());
-    });
-    vmService.onIsolateEvent.listen((ServiceEvent event) {
-      printTrace(event.toString());
-    });
 
     // Refresh the view list.
     await vmService.vm.refreshViews();
@@ -132,12 +134,16 @@ abstract class ResidentRunner {
 
     if (lower == 'h' || lower == '?' || character == AnsiTerminal.KEY_F1) {
       // F1, help
-      printHelp();
+      printHelp(details: true);
       return true;
     } else if (lower == 'w') {
+      if (!supportsServiceProtocol)
+        return true;
       await _debugDumpApp();
       return true;
     } else if (lower == 't') {
+      if (!supportsServiceProtocol)
+        return true;
       await _debugDumpRenderTree();
       return true;
     } else if (lower == 'q' || character == AnsiTerminal.KEY_F10) {
@@ -171,7 +177,7 @@ abstract class ResidentRunner {
   void setupTerminal() {
     if (usesTerminalUI) {
       if (!logger.quiet)
-        printHelp();
+        printHelp(details: false);
 
       terminal.singleCharMode = true;
       terminal.onCharInput.listen((String code) {
@@ -204,7 +210,7 @@ abstract class ResidentRunner {
   /// Called right before we exit.
   Future<Null> cleanupAtFinish();
   /// Called to print help to the terminal.
-  void printHelp();
+  void printHelp({ @required bool details });
   /// Called when the runner should handle a terminal command.
   Future<Null> handleTerminalCommand(String code);
 }

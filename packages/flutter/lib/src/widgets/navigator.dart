@@ -324,7 +324,8 @@ class Navigator extends StatefulWidget {
     return Navigator.of(context).pop(result);
   }
 
-  /// Calls [pop()] repeatedly until the predicate returns false.
+  /// Calls [pop()] repeatedly until the predicate returns true.
+  ///
   /// The predicate may be applied to the same route more than once if
   /// [Route.willHandlePopInternally] is true.
   static void popUntil(BuildContext context, RoutePredicate predicate) {
@@ -616,6 +617,9 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   }
 
   /// Repeatedly calls [pop] until the given `predicate` returns true.
+  ///
+  /// The predicate may be applied to the same route more than once if
+  /// [Route.willHandlePopInternally] is true.
   void popUntil(RoutePredicate predicate) {
     while (!predicate(_history.last))
       pop();

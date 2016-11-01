@@ -22,7 +22,9 @@ void main() {
             return new Column(
               children: <Widget>[
                 new Flexible(
-                  child: new Container() // TODO(ianh): replace this with our logo in a Center box
+                  child: new Center(
+                    child: new FlutterLogo(size: 100.0),
+                  ),
                 ),
                 new Flexible(
                   child: new Builder(
@@ -38,21 +40,21 @@ void main() {
                         children.add(new Center(child: new CircularProgressIndicator(value: progressMax > 0 ? progress / progressMax : null)));
                       }
                       return new Block(children: children);
-                    }
-                  )
+                    },
+                  ),
                 ),
                 new Flexible(
                   child: new Block(
-                    padding: new EdgeInsets.symmetric(horizontal: 16.0),
+                    padding: new EdgeInsets.symmetric(horizontal: 24.0),
                     children: <Widget>[ new Text(explanation, textAlign: TextAlign.center) ]
-                  )
+                  ),
                 ),
-              ]
+              ],
             );
-          }
-        )
-      )
-    )
+          },
+        ),
+      ),
+    ),
   );
   connectionTimeout = new Timer(const Duration(seconds: 8), () {
     setState(() {
@@ -79,6 +81,17 @@ class LoaderBinding extends WidgetsFlutterBinding {
         connectionTimeout = null;
         setState(() {
           message = value;
+        });
+      }
+    );
+    registerStringServiceExtension(
+      name: 'loaderShowExplanation',
+      getter: () => explanation,
+      setter: (String value) {
+        connectionTimeout?.cancel();
+        connectionTimeout = null;
+        setState(() {
+          explanation = value;
         });
       }
     );
