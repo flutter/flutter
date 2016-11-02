@@ -30,7 +30,6 @@ import 'src/commands/packages.dart';
 import 'src/commands/precache.dart';
 import 'src/commands/run.dart';
 import 'src/commands/screenshot.dart';
-import 'src/commands/skia.dart';
 import 'src/commands/stop.dart';
 import 'src/commands/test.dart';
 import 'src/commands/trace.dart';
@@ -74,7 +73,6 @@ Future<Null> main(List<String> args) async {
     ..addCommand(new RunCommand(verboseHelp: verboseHelp))
     ..addCommand(new ScreenshotCommand())
     ..addCommand(new SetupCommand(hidden: !verboseHelp))
-    ..addCommand(new SkiaCommand())
     ..addCommand(new StopCommand())
     ..addCommand(new TestCommand())
     ..addCommand(new TraceCommand())
