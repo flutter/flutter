@@ -521,8 +521,9 @@ void PlatformViewAndroid::GetBitmapGpuTask(ftl::AutoResetWaitableEvent* latch,
   latch->Signal();
 }
 
-jint GetObservatoryPort(JNIEnv* env, jclass clazz) {
-  return blink::DartServiceIsolate::GetObservatoryPort();
+jstring GetObservatoryUri(JNIEnv* env, jclass clazz) {
+  return env->NewStringUTF(
+      blink::DartServiceIsolate::GetObservatoryUri().c_str());
 }
 
 bool PlatformViewAndroid::Register(JNIEnv* env) {

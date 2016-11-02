@@ -22,7 +22,7 @@ class DartServiceIsolate {
                       bool disable_origin_check,
                       char** error);
 
-  static int GetObservatoryPort();
+  static std::string GetObservatoryUri();
 
  private:
   // Native entries.

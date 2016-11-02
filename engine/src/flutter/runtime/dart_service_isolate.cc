@@ -41,7 +41,7 @@ namespace {
 static Dart_LibraryTagHandler g_embedder_tag_handler;
 static tonic::DartLibraryNatives* g_natives;
 static EmbedderResources* g_resources;
-static int observatory_port_;
+static std::string observatory_uri_;
 
 Dart_NativeFunction GetNativeFunction(Dart_Handle name,
                                       int argument_count,
@@ -66,14 +66,14 @@ void DartServiceIsolate::TriggerResourceLoad(Dart_NativeArguments args) {
 
 void DartServiceIsolate::NotifyServerState(Dart_NativeArguments args) {
   Dart_Handle exception = nullptr;
-  int port = tonic::DartConverter<int>::FromArguments(args, 1, exception);
+  std::string uri = tonic::DartConverter<std::string>::FromArguments(args, 0, exception);
   if (!exception) {
-    observatory_port_ = port;
+    observatory_uri_ = uri;
   }
 }
 
-int DartServiceIsolate::GetObservatoryPort() {
-  return observatory_port_;
+std::string DartServiceIsolate::GetObservatoryUri() {
+  return observatory_uri_;
 }
 
 void DartServiceIsolate::Shutdown(Dart_NativeArguments args) {
@@ -97,7 +97,7 @@ bool DartServiceIsolate::Startup(std::string server_ip,
   if (!g_natives) {
     g_natives = new tonic::DartLibraryNatives();
     g_natives->Register({
-        {"VMServiceIO_NotifyServerState", NotifyServerState, 2, true},
+        {"VMServiceIO_NotifyServerState", NotifyServerState, 1, true},
         {"VMServiceIO_Shutdown", Shutdown, 0, true},
     });
   }

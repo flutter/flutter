@@ -37,6 +37,7 @@ import org.json.JSONObject;
 import org.chromium.base.CalledByNative;
 import org.chromium.base.JNINamespace;
 
+import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
@@ -492,7 +493,7 @@ public class FlutterView extends SurfaceView
     }
 
     private static native long nativeAttach(FlutterView view);
-    private static native int nativeGetObservatoryPort();
+    private static native String nativeGetObservatoryUri();
     private static native void nativeDetach(long nativePlatformViewAndroid);
     private static native void nativeSurfaceCreated(long nativePlatformViewAndroid,
                                                     Surface surface,
@@ -758,10 +759,11 @@ public class FlutterView extends SurfaceView
     private class DiscoveryReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
+            URI observatoryUri = URI.create(nativeGetObservatoryUri());
             JSONObject discover = new JSONObject();
             try {
                 discover.put("id", getContext().getPackageName());
-                discover.put("observatoryPort", nativeGetObservatoryPort());
+                discover.put("observatoryPort", observatoryUri.getPort());
                 Log.i(TAG, "DISCOVER: " + discover);
             } catch (JSONException e) {}
         }
