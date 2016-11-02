@@ -156,7 +156,7 @@ class RunCommand extends RunCommandBase {
 
     Cache.releaseLockEarly();
 
-    // Enable hot mode by default if ``--no-hot` was not passed and we are in
+    // Enable hot mode by default if `--no-hot` was not passed and we are in
     // debug mode.
     final bool hotMode = shouldUseHotMode();
 
