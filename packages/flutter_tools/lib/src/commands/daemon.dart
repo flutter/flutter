@@ -289,6 +289,23 @@ class AppDomain extends Domain {
       throw "'$projectDirectory' does not exist";
 
     BuildMode buildMode = getBuildModeForName(mode) ?? BuildMode.debug;
+
+    AppInstance app = startApp(
+        device, projectDirectory, target, route,
+        buildMode, startPaused, enableHotReload);
+
+    return <String, dynamic>{
+      'appId': app.id,
+      'deviceId': device.id,
+      'directory': projectDirectory,
+      'supportsRestart': isRestartSupported(enableHotReload, device)
+    };
+  }
+
+  AppInstance startApp(
+      Device device, String projectDirectory, String target, String route,
+      BuildMode buildMode, bool startPaused, bool enableHotReload) {
+
     DebuggingOptions options;
 
     switch (buildMode) {
@@ -325,14 +342,12 @@ class AppDomain extends Domain {
       );
     }
 
-    bool supportsRestart = enableHotReload ? device.supportsHotMode : device.supportsRestart;
-
     AppInstance app = new AppInstance(_getNewAppId(), runner);
     _apps.add(app);
     _sendAppEvent(app, 'start', <String, dynamic>{
-      'deviceId': deviceId,
+      'deviceId': device.id,
       'directory': projectDirectory,
-      'supportsRestart': supportsRestart
+      'supportsRestart': isRestartSupported(enableHotReload, device)
     });
 
     Completer<DebugConnectionInfo> connectionInfoCompleter;
@@ -358,13 +373,11 @@ class AppDomain extends Domain {
       });
     });
 
-    return <String, dynamic>{
-      'appId': app.id,
-      'deviceId': deviceId,
-      'directory': projectDirectory,
-      'supportsRestart': supportsRestart
-    };
+    return app;
   }
+
+  bool isRestartSupported(bool enableHotReload, Device device) =>
+      enableHotReload ? device.supportsHotMode : device.supportsRestart;
 
   Future<OperationResult> restart(Map<String, dynamic> args) async {
     String appId = _getStringArg(args, 'appId', required: true);
