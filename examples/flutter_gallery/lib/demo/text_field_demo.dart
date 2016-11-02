@@ -79,6 +79,8 @@ class TextFieldDemoState extends State<TextFieldDemo> {
         child: new Block(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
           children: <Widget>[
+            // It's simpler to use an InputFormField, as below, but a FormField
+            // that builds an Input is equivalent.
             new FormField<InputValue>(
               initialValue: InputValue.empty,
               onSaved: (InputValue val) { person.name = val.text; },
