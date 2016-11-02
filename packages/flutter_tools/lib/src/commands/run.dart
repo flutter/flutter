@@ -46,7 +46,7 @@ class RunCommand extends RunCommandBase {
   @override
   final String description = 'Run your Flutter app on an attached device.';
 
-  RunCommand({bool verboseHelp: false}) {
+  RunCommand({ bool verboseHelp: false }) {
     argParser.addFlag('full-restart',
         defaultsTo: true,
         help: 'Stop any currently running application process before running the app.');
@@ -69,16 +69,20 @@ class RunCommand extends RunCommandBase {
     usesPubOption();
 
     // Option to enable hot reloading.
-    argParser.addFlag('hot',
-        negatable: true,
-        defaultsTo: kHotReloadDefault,
-        help: 'Run with support for hot reloading.');
+    argParser.addFlag(
+      'hot',
+      negatable: true,
+      defaultsTo: kHotReloadDefault,
+      help: 'Run with support for hot reloading.'
+    );
 
     // Option to write the pid to a file.
-    argParser.addOption('pid-file',
-        help: 'Specify a file to write the process id to.\n'
-              'You can send SIGUSR1 to trigger a hot reload\n'
-              'and SIGUSR2 to trigger a full restart.');
+    argParser.addOption(
+      'pid-file',
+      help: 'Specify a file to write the process id to.\n'
+            'You can send SIGUSR1 to trigger a hot reload\n'
+            'and SIGUSR2 to trigger a full restart.'
+    );
 
     // Hidden option to enable a benchmarking mode. This will run the given
     // application, measure the startup time and the app restart time, write the
@@ -286,7 +290,7 @@ Future<int> startApp(
   // messy.
   if (stop) {
     if (package != null) {
-      printTrace("Stopping app '${package.name}' on ${device.name}.");
+      printTrace('Stopping app "${package.name}" on ${device.name}.');
       await device.stopApp(package);
     }
   }
