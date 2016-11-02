@@ -13,35 +13,26 @@ import '../lib/src/cache.dart';
 import '../lib/src/flx.dart';
 import '../lib/src/globals.dart';
 
-const String _kOptionSnapshotter = 'snapshotter-path';
-const String _kOptionTarget = 'target';
 const String _kOptionPackages = 'packages';
 const String _kOptionOutput = 'output-file';
 const String _kOptionHeader = 'header';
 const String _kOptionSnapshot = 'snapshot';
-const String _kOptionDepfile = 'depfile';
 const String _kOptionWorking = 'working-dir';
 const List<String> _kOptions = const <String>[
-  _kOptionSnapshotter,
-  _kOptionTarget,
   _kOptionPackages,
   _kOptionOutput,
   _kOptionHeader,
   _kOptionSnapshot,
-  _kOptionDepfile,
   _kOptionWorking,
 ];
 
 Future<Null> main(List<String> args) async {
   context[Logger] = new StdoutLogger();
   final ArgParser parser = new ArgParser()
-    ..addOption(_kOptionSnapshotter, help: 'The snapshotter executable')
-    ..addOption(_kOptionTarget, help: 'The entry point into the app')
     ..addOption(_kOptionPackages, help: 'The .packages file')
     ..addOption(_kOptionOutput, help: 'The generated flx file')
     ..addOption(_kOptionHeader, help: 'The header of the flx file')
     ..addOption(_kOptionSnapshot, help: 'The generated snapshot file')
-    ..addOption(_kOptionDepfile, help: 'The generated dependency file')
     ..addOption(_kOptionWorking,
         help: 'The directory where to put temporary files');
   final ArgResults argResults = parser.parse(args);
@@ -52,13 +43,11 @@ Future<Null> main(List<String> args) async {
   Cache.flutterRoot = Platform.environment['FLUTTER_ROOT'];
   String outputPath = argResults[_kOptionOutput];
   final int buildResult = await build(
-    snapshotterPath: argResults[_kOptionSnapshotter],
-    mainPath: argResults[_kOptionTarget],
     outputPath: outputPath,
     snapshotPath: argResults[_kOptionSnapshot],
-    depfilePath: argResults[_kOptionDepfile],
     workingDirPath: argResults[_kOptionWorking],
     packagesPath: argResults[_kOptionPackages],
+    precompiledSnapshot: true,
     includeRobotoFonts: true,
   );
   if (buildResult != 0) {

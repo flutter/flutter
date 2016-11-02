@@ -90,7 +90,6 @@ Future<int> build({
   depfilePath ??= defaultDepfilePath;
   workingDirPath ??= getAssetBuildDirectory();
   packagesPath ??= path.absolute(PackageMap.globalPackagesPath);
-  File snapshotFile;
 
   if (!precompiledSnapshot) {
     ensureDirectoryExists(snapshotPath);
@@ -108,9 +107,9 @@ Future<int> build({
       printError('Failed to run the Flutter compiler. Exit code: $result');
       return result;
     }
-
-    snapshotFile = new File(snapshotPath);
   }
+
+  File snapshotFile = new File(snapshotPath);
 
   return assemble(
     manifestPath: manifestPath,
