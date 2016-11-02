@@ -659,7 +659,8 @@ class Align extends SingleChildRenderObjectWidget {
 ///
 /// See also:
 ///
-///  * [Align]
+///  * [Align], which lets you arbitrarily position a child within itself,
+///    rather than just centering it.
 class Center extends Align {
   /// Creates a widget that centers its child.
   Center({ Key key, double widthFactor, double heightFactor, Widget child })
