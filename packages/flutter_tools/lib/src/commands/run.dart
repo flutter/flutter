@@ -19,6 +19,7 @@ import '../resident_runner.dart';
 import '../run.dart';
 import '../runner/flutter_command.dart';
 import 'build_apk.dart';
+import 'daemon.dart';
 import 'install.dart';
 import 'trace.dart';
 
@@ -61,6 +62,10 @@ class RunCommand extends RunCommandBase {
     argParser.addOption('use-application-binary',
         hide: !verboseHelp,
         help: 'Specify a pre-built application binary to use when running.');
+    argParser.addFlag('machine',
+        hide: !verboseHelp,
+        help: 'Handle machine structured JSON command input\n'
+              'and provide output and progress in machine friendly format.');
     usesPubOption();
 
     // Option to enable hot reloading.
@@ -78,7 +83,6 @@ class RunCommand extends RunCommandBase {
             'You can send SIGUSR1 to trigger a hot reload\n'
             'and SIGUSR2 to trigger a full restart.'
     );
-
 
     // Hidden option to enable a benchmarking mode. This will run the given
     // application, measure the startup time and the app restart time, write the
@@ -153,8 +157,23 @@ class RunCommand extends RunCommandBase {
 
   @override
   Future<int> runCommand() async {
-    int debugPort;
 
+    Cache.releaseLockEarly();
+
+    // Enable hot mode by default if `--no-hot` was not passed and we are in
+    // debug mode.
+    final bool hotMode = shouldUseHotMode();
+
+    if (argResults['machine']) {
+      Daemon daemon = new Daemon(stdinCommandStream, stdoutCommandResponse,
+          notifyingLogger: new NotifyingLogger());
+      AppInstance app = daemon.appDomain.startApp(
+        device, Directory.current.path, targetFile, route,
+        getBuildMode(), argResults['start-paused'], hotMode);
+      return app.runner.waitForAppToFinish();
+    }
+
+    int debugPort;
     if (argResults['debug-port'] != null) {
       try {
         debugPort = int.parse(argResults['debug-port']);
@@ -181,12 +200,6 @@ class RunCommand extends RunCommandBase {
       );
     }
 
-    Cache.releaseLockEarly();
-
-    // Enable hot mode by default if ``--no-hot` was not passed and we are in
-    // debug mode.
-    final bool hotMode = shouldUseHotMode();
-
     if (hotMode) {
       if (!device.supportsHotMode) {
         printError('Hot mode is not supported by this device. '
@@ -207,7 +220,7 @@ class RunCommand extends RunCommandBase {
         device,
         target: targetFile,
         debuggingOptions: options,
-        benchmarkMode: argResults['benchmark'],
+        benchmarkMode: argResults['benchmark']
       );
     } else {
       runner = new RunAndStayResident(

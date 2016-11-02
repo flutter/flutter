@@ -52,29 +52,12 @@ class DaemonCommand extends FlutterCommand {
     Cache.releaseLockEarly();
 
     return appContext.runInZone(() {
-      Stream<Map<String, dynamic>> commandStream = stdin
-        .transform(UTF8.decoder)
-        .transform(const LineSplitter())
-        .where((String line) => line.startsWith('[{') && line.endsWith('}]'))
-        .map((String line) {
-          line = line.substring(1, line.length - 1);
-          return JSON.decode(line);
-        });
-
-      Daemon daemon = new Daemon(commandStream, (Map<String, dynamic> command) {
-        stdout.writeln('[${JSON.encode(command, toEncodable: _jsonEncodeObject)}]');
-      }, daemonCommand: this, notifyingLogger: notifyingLogger);
+      Daemon daemon = new Daemon(
+          stdinCommandStream, stdoutCommandResponse,
+          daemonCommand: this, notifyingLogger: notifyingLogger);
 
       return daemon.onExit;
     }, onError: _handleError);
-  }
-
-  dynamic _jsonEncodeObject(dynamic object) {
-    if (object is Device)
-      return _deviceToMap(object);
-    if (object is OperationResult)
-      return _operationResultToMap(object);
-    return object;
   }
 
   dynamic _handleError(dynamic error, StackTrace stackTrace) {
@@ -306,6 +289,23 @@ class AppDomain extends Domain {
       throw "'$projectDirectory' does not exist";
 
     BuildMode buildMode = getBuildModeForName(mode) ?? BuildMode.debug;
+
+    AppInstance app = startApp(
+        device, projectDirectory, target, route,
+        buildMode, startPaused, enableHotReload);
+
+    return <String, dynamic>{
+      'appId': app.id,
+      'deviceId': device.id,
+      'directory': projectDirectory,
+      'supportsRestart': isRestartSupported(enableHotReload, device)
+    };
+  }
+
+  AppInstance startApp(
+      Device device, String projectDirectory, String target, String route,
+      BuildMode buildMode, bool startPaused, bool enableHotReload) {
+
     DebuggingOptions options;
 
     switch (buildMode) {
@@ -342,14 +342,12 @@ class AppDomain extends Domain {
       );
     }
 
-    bool supportsRestart = enableHotReload ? device.supportsHotMode : device.supportsRestart;
-
     AppInstance app = new AppInstance(_getNewAppId(), runner);
     _apps.add(app);
     _sendAppEvent(app, 'start', <String, dynamic>{
-      'deviceId': deviceId,
+      'deviceId': device.id,
       'directory': projectDirectory,
-      'supportsRestart': supportsRestart
+      'supportsRestart': isRestartSupported(enableHotReload, device)
     });
 
     Completer<DebugConnectionInfo> connectionInfoCompleter;
@@ -375,13 +373,11 @@ class AppDomain extends Domain {
       });
     });
 
-    return <String, dynamic>{
-      'appId': app.id,
-      'deviceId': deviceId,
-      'directory': projectDirectory,
-      'supportsRestart': supportsRestart
-    };
+    return app;
   }
+
+  bool isRestartSupported(bool enableHotReload, Device device) =>
+      enableHotReload ? device.supportsHotMode : device.supportsRestart;
 
   Future<OperationResult> restart(Map<String, dynamic> args) async {
     String appId = _getStringArg(args, 'appId', required: true);
@@ -559,6 +555,27 @@ class DeviceDomain extends Domain {
     // No match found.
     return null;
   }
+}
+
+Stream<Map<String, dynamic>> get stdinCommandStream => stdin
+  .transform(UTF8.decoder)
+  .transform(const LineSplitter())
+  .where((String line) => line.startsWith('[{') && line.endsWith('}]'))
+  .map((String line) {
+    line = line.substring(1, line.length - 1);
+    return JSON.decode(line);
+  });
+
+void stdoutCommandResponse(Map<String, dynamic> command) {
+  stdout.writeln('[${JSON.encode(command, toEncodable: _jsonEncodeObject)}]');
+}
+
+dynamic _jsonEncodeObject(dynamic object) {
+  if (object is Device)
+    return _deviceToMap(object);
+  if (object is OperationResult)
+    return _operationResultToMap(object);
+  return object;
 }
 
 Map<String, dynamic> _deviceToMap(Device device) {
