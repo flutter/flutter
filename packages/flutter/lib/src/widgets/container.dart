@@ -166,12 +166,14 @@ class Container extends StatelessWidget {
       );
     }
 
-    if (alignment != null)
-      current = new Align(alignment: alignment, child: current);
-
     EdgeInsets effectivePadding = _paddingIncludingDecoration;
     if (effectivePadding != null)
       current = new Padding(padding: effectivePadding, child: current);
+
+    // If a child was specified then align it - but not the implicit
+    // DecoratedBox descendants - within this container.
+    if (alignment != null && child != null)
+      current = new Align(alignment: alignment, child: current);
 
     if (decoration != null)
       current = new DecoratedBox(decoration: decoration, child: current);
@@ -192,6 +194,11 @@ class Container extends StatelessWidget {
 
     if (transform != null)
       current = new Transform(transform: transform, child: current);
+
+    // If no child was specified then align the implicit DecoratedBox
+    // descendants, if any.
+    if (alignment != null && child == null)
+      current = new Align(alignment: alignment, child: current);
 
     return current;
   }
