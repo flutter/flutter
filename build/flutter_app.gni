@@ -63,7 +63,9 @@ template("flutter_app") {
 
   main_dart = invoker.main_dart
 
-  action(target_name) {
+  flutter_snapshot_name = target_name + "_snapshot"
+
+  action(flutter_snapshot_name) {
     depfile = depfile_path
 
     inputs = [
@@ -71,13 +73,51 @@ template("flutter_app") {
     ]
 
     outputs = [
-      bundle_path,
       snapshot_path,
     ]
 
     if (defined(invoker.sources)) {
       sources = invoker.sources
     }
+
+    script = "//flutter/build/snapshot.py"
+
+    args = [
+      "--snapshotter-path",
+      rebase_path(flutter_snapshot),
+      "--app-dir",
+      rebase_path("."),
+      "--main-dart",
+      rebase_path(main_dart),
+      "--packages",
+      rebase_path(dot_packages),
+      "--snapshot",
+      rebase_path(snapshot_path),
+      "--depfile",
+      rebase_path(depfile_path),
+      "--build-output",
+      rebase_path(snapshot_path, root_build_dir),
+
+    ]
+
+    deps = [
+      ":$dart_package_name",
+      flutter_snapshot_label,
+    ]
+
+    if (defined(invoker.deps)) {
+      deps += invoker.deps
+    }
+  }
+
+  action(target_name) {
+    inputs = [
+      snapshot_path,
+    ]
+
+    outputs = [
+      bundle_path,
+    ]
 
     script = "//flutter/build/package.py"
 
@@ -92,33 +132,22 @@ template("flutter_app") {
       rebase_path(flutter_tools_packages),
       "--flutter-tools-main",
       rebase_path(flutter_tools_main),
-      "--snapshotter-path",
-      rebase_path(flutter_snapshot),
       "--working-dir",
       rebase_path("$target_gen_dir/build"),
       "--app-dir",
       rebase_path("."),
-      "--main-dart",
-      rebase_path(main_dart),
       "--packages",
       rebase_path(dot_packages),
       "--output-file",
       rebase_path(bundle_path),
       "--snapshot",
       rebase_path(snapshot_path),
-      "--depfile",
-      rebase_path(depfile_path),
     ]
 
     deps = [
-      ":$dart_package_name",
+      ":$flutter_snapshot_name",
       dart_binary_label,
-      flutter_snapshot_label,
       flutter_tools_label,
     ]
-
-    if (defined(invoker.deps)) {
-      deps += invoker.deps
-    }
   }
 }
