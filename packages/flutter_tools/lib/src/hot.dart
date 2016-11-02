@@ -249,7 +249,13 @@ class HotRunner extends ResidentRunner {
     }
 
     _observatoryPort = result.observatoryPort;
-    await connectToServiceProtocol(_observatoryPort);
+    try {
+      await connectToServiceProtocol(_observatoryPort);
+    } catch (error) {
+      printError('Error connecting to the service protocol: $error');
+      return 2;
+    }
+
 
     try {
       Uri baseUri = await _initDevFS();
@@ -543,7 +549,7 @@ class HotRunner extends ResidentRunner {
 
   @override
   void printHelp({ @required bool details }) {
-    printStatus('To hot reload your app on the fly, press "r" or F5. To restart the app entirely, press "R".', emphasis: true);
+    printStatus('🔥  To hot reload your app on the fly, press "r" or F5. To restart the app entirely, press "R".', emphasis: true);
     printStatus('The Observatory debugger and profiler is available at: http://127.0.0.1:$_observatoryPort/');
     if (details) {
       printStatus('To dump the widget hierarchy of the app (debugDumpApp), press "w".');

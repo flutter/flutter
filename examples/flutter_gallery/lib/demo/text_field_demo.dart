@@ -30,37 +30,39 @@ class TextFieldDemoState extends State<TextFieldDemo> {
     ));
   }
 
+  GlobalKey<FormState> _formKey = new GlobalKey<FormState>();
+  GlobalKey<FormFieldState<InputValue>> _passwordFieldKey = new GlobalKey<FormFieldState<InputValue>>();
   void _handleSubmitted() {
-    // TODO(mpcomplete): Form could keep track of validation errors?
-    if (_validateName(person.name) != null ||
-        _validatePhoneNumber(person.phoneNumber) != null ||
-        _validatePassword(person.password) != null) {
+    FormState form = _formKey.currentState;
+    if (form.hasErrors) {
       showInSnackBar('Please fix the errors in red before submitting.');
     } else {
+      form.save();
       showInSnackBar('${person.name}\'s phone number is ${person.phoneNumber}');
     }
   }
 
-  String _validateName(String value) {
-    if (value.isEmpty)
+  String _validateName(InputValue value) {
+    if (value.text.isEmpty)
       return 'Name is required.';
     RegExp nameExp = new RegExp(r'^[A-za-z ]+$');
-    if (!nameExp.hasMatch(value))
+    if (!nameExp.hasMatch(value.text))
       return 'Please enter only alphabetical characters.';
     return null;
   }
 
-  String _validatePhoneNumber(String value) {
+  String _validatePhoneNumber(InputValue value) {
     RegExp phoneExp = new RegExp(r'^\d\d\d-\d\d\d\-\d\d\d\d$');
-    if (!phoneExp.hasMatch(value))
+    if (!phoneExp.hasMatch(value.text))
       return '###-###-#### - Please enter a valid phone number.';
     return null;
   }
 
-  String _validatePassword(String value) {
-    if (person.password == null || person.password.isEmpty)
+  String _validatePassword(InputValue value) {
+    FormFieldState<InputValue> passwordField = _passwordFieldKey.currentState;
+    if (passwordField.value == null || passwordField.value.text.isEmpty)
       return 'Please choose a password.';
-    if (person.password != value)
+    if (passwordField.value.text != value.text)
       return 'Passwords don\'t match';
     return null;
   }
@@ -73,55 +75,57 @@ class TextFieldDemoState extends State<TextFieldDemo> {
         title: new Text('Text fields')
       ),
       body: new Form(
+        key: _formKey,
         child: new Block(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
           children: <Widget>[
-            new Input(
-              hintText: 'What do people call you?',
-              labelText: 'Name',
-              formField: new FormField<String>(
-                // TODO(mpcomplete): replace with person#name=
-                setter:  (String val) { person.name = val; },
-                validator: _validateName
-              )
+            // It's simpler to use an InputFormField, as below, but a FormField
+            // that builds an Input is equivalent.
+            new FormField<InputValue>(
+              initialValue: InputValue.empty,
+              onSaved: (InputValue val) { person.name = val.text; },
+              validator: _validateName,
+              builder: (FormFieldState<InputValue> field) {
+                return new Input(
+                  hintText: 'What do people call you?',
+                  labelText: 'Name',
+                  value: field.value,
+                  onChanged: field.onChanged,
+                  errorText: field.errorText
+                );
+              },
             ),
-            new Input(
+            new InputFormField(
               hintText: 'Where can we reach you?',
               labelText: 'Phone Number',
               keyboardType: TextInputType.phone,
-              formField: new FormField<String>(
-                setter: (String val) { person.phoneNumber = val; },
-                validator: _validatePhoneNumber
-              )
+              onSaved: (InputValue val) { person.phoneNumber = val.text; },
+              validator: _validatePhoneNumber,
             ),
-            new Input(
+            new InputFormField(
               hintText: 'Tell us about yourself (optional)',
               labelText: 'Life story',
               maxLines: 3,
-              formField: new FormField<String>()
             ),
             new Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 new Flexible(
-                  child: new Input(
+                  child: new InputFormField(
+                    key: _passwordFieldKey,
                     hintText: 'How do you log in?',
                     labelText: 'New Password',
                     hideText: true,
-                    formField: new FormField<String>(
-                      setter: (String val) { person.password = val; }
-                    )
+                    onSaved: (InputValue val) { person.password = val.text; }
                   )
                 ),
                 new SizedBox(width: 16.0),
                 new Flexible(
-                  child: new Input(
+                  child: new InputFormField(
                     hintText: 'How do you log in?',
                     labelText: 'Re-type Password',
                     hideText: true,
-                    formField: new FormField<String>(
-                      validator: _validatePassword
-                    )
+                    validator: _validatePassword,
                   )
                 )
               ]
