@@ -95,12 +95,24 @@ class PaintingContext {
   /// into the layer subtree associated with this painting context. Otherwise,
   /// the child will be painted into the current PictureLayer for this context.
   void paintChild(RenderObject child, Offset offset) {
+    assert(() {
+      if (debugProfilePaintsEnabled)
+        Timeline.startSync('${child.runtimeType}');
+      return true;
+    });
+
     if (child.isRepaintBoundary) {
       _stopRecordingIfNeeded();
       _compositeChild(child, offset);
     } else {
       child._paintWithContext(this, offset);
     }
+
+    assert(() {
+      if (debugProfilePaintsEnabled)
+        Timeline.finishSync();
+      return true;
+    });
   }
 
   void _compositeChild(RenderObject child, Offset offset) {

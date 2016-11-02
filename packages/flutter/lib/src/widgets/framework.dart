@@ -2846,6 +2846,12 @@ abstract class ComponentElement extends BuildableElement {
   /// [rebuild] when the element needs updating.
   @override
   void performRebuild() {
+    assert(() {
+      if (debugProfileBuildsEnabled)
+        Timeline.startSync('${widget.runtimeType}');
+      return true;
+    });
+
     assert(_debugSetAllowIgnoredCallsToMarkNeedsBuild(true));
     Widget built;
     try {
@@ -2868,6 +2874,12 @@ abstract class ComponentElement extends BuildableElement {
       built = new ErrorWidget(e);
       _child = updateChild(null, built, slot);
     }
+
+    assert(() {
+      if (debugProfileBuildsEnabled)
+        Timeline.finishSync();
+      return true;
+    });
   }
 
   @override
