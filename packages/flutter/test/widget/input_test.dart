@@ -673,4 +673,64 @@ void main() {
     expect(inputBox.hitTest(new HitTestResult(), position: inputBox.globalToLocal(newFirstPos)), isTrue);
     expect(inputBox.hitTest(new HitTestResult(), position: inputBox.globalToLocal(newFourthPos)), isFalse);
   });
+
+  testWidgets('Input remembers InputValue state when you pass null', (WidgetTester tester) async {
+    GlobalKey inputKey = new GlobalKey();
+    String testValue = 'abc def ghi';
+    InputValue inputValue = new InputValue(text: testValue);
+
+    Widget builder() {
+      return new Overlay(
+        initialEntries: <OverlayEntry>[
+          new OverlayEntry(
+            builder: (BuildContext context) {
+              return new Center(
+                child: new Material(
+                  child: new Input(
+                    value: new InputValue(text: inputValue.text),
+                    key: inputKey,
+                    onChanged: (InputValue value) { inputValue = value; }
+                  )
+                )
+              );
+            }
+          )
+        ]
+      );
+    }
+
+    await tester.pumpWidget(builder());
+
+    // Long press the 'e' to select 'def'.
+    Point ePos = textOffsetToPosition(tester, testValue.indexOf('e'));
+    TestGesture gesture = await tester.startGesture(ePos, pointer: 7);
+    await tester.pump(const Duration(seconds: 2));
+    await gesture.up();
+    await tester.pump();
+
+    expect(inputValue.selection.baseOffset, 4);
+    expect(inputValue.selection.extentOffset, 7);
+
+    RenderEditable renderEditable = findRenderEditable(tester);
+    List<TextSelectionPoint> endpoints = renderEditable.getEndpointsForSelection(
+        inputValue.selection);
+    expect(endpoints.length, 2);
+
+    // Rebuild, passing null for the selection. The selection should remain the
+    // same.
+    await tester.pumpWidget(builder());
+
+    // Try to interact with the selection handles after rebuild.
+    Point handlePos = endpoints[1].point + new Offset(1.0, 1.0);
+    Point newHandlePos = textOffsetToPosition(tester, 9);
+    gesture = await tester.startGesture(handlePos, pointer: 7);
+    await tester.pump();
+    await gesture.moveTo(newHandlePos);
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpWidget(builder());
+
+    expect(inputValue.selection.baseOffset, 4);
+    expect(inputValue.selection.extentOffset, 9);
+  });
 }
