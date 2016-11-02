@@ -67,7 +67,7 @@ class ScreenshotCommand extends FlutterCommand {
         printError('Must specify --$_kSkia or have a connected device');
         return 1;
       }
-      if (!device.supportsScreenshot) {
+      if (!device.supportsScreenshot && argResults[_kSkia] == null) {
         printError('Screenshot not supported for ${device.name}.');
         return 1;
       }
@@ -78,9 +78,8 @@ class ScreenshotCommand extends FlutterCommand {
   @override
   Future<int> runCommand() async {
     File outputFile;
-    if (argResults.wasParsed(_kOut)) {
+    if (argResults.wasParsed(_kOut))
       outputFile = new File(argResults[_kOut]);
-    }
 
     if (argResults[_kSkia] != null) {
       return runSkia(outputFile);
@@ -109,7 +108,7 @@ class ScreenshotCommand extends FlutterCommand {
 
     void printErrorHelpText() {
       printError('');
-      printError('Be sure the --$_kSkia= option specifies the diagnostic server port, not the observatory port');
+      printError('Be sure the --$_kSkia= option specifies the diagnostic server port, not the observatory port.');
       printError('To find the diagnostic server port number, use "flutter run --verbose"');
       printError('and look for "Diagnostic server listening on" in the output.');
     }
@@ -138,7 +137,7 @@ class ScreenshotCommand extends FlutterCommand {
 
       http.StreamedResponse postResponse = await postRequest.send();
       if (postResponse.statusCode != HttpStatus.OK) {
-        printError('Failed to post Skia picture to skiaserve');
+        printError('Failed to post Skia picture to skiaserve.');
         printErrorHelpText();
         return 1;
       }
