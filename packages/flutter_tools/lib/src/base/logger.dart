@@ -73,15 +73,17 @@ class StdoutLogger extends Logger {
 
   @override
   Status startProgress(String message) {
-    _status?.cancel();
-    _status = null;
-
-    if (supportsColor) {
-      _status = new _AnsiStatus(message);
-      return _status;
-    } else {
-      printStatus(message);
+    if (_status != null) {
+      // Ignore nested progresses; return a no-op status object.
       return new Status();
+    } else {
+      if (supportsColor) {
+        _status = new _AnsiStatus(message);
+        return _status;
+      } else {
+        printStatus(message);
+        return new Status();
+      }
     }
   }
 }
@@ -250,7 +252,7 @@ class _AnsiStatus extends Status {
     live = false;
 
     if (showElapsedTime) {
-      print('\b\b\b\b${stopwatch.elapsedMilliseconds.toString()}ms');
+      print('\b\b\b\b\b${stopwatch.elapsedMilliseconds.toString().padLeft(3)}ms');
     } else {
       print('\b ');
     }

@@ -591,7 +591,7 @@ Future<int> buildAndroid(
   }
 
   int result = _buildApk(platform, buildMode, components, flxPath, keystore, outputFile);
-  status.stop(showElapsedTime: true);
+  status.stop();
 
   if (result == 0) {
     File apkFile = new File(outputFile);

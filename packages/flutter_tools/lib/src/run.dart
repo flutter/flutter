@@ -87,7 +87,7 @@ class RunAndStayResident extends ResidentRunner {
         prebuiltApplication: prebuiltMode
       );
 
-      status.stop(showElapsedTime: true);
+      status.stop();
 
       if (result && extensionAddedEvent != null) {
         await extensionAddedEvent;

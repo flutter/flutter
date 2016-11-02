@@ -53,7 +53,7 @@ Future<int> pubGet({
       mapFunction: _filterOverrideWarnings,
       environment: <String, String>{ 'FLUTTER_ROOT': Cache.flutterRoot }
     );
-    status.stop(showElapsedTime: true);
+    status.stop();
     if (code != 0)
       return code;
   }

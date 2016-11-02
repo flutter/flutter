@@ -102,7 +102,7 @@ Future<Null> _buildUnlinkedForPackage(
       try {
         await manager.computeUnlinkedForFolder(name, libFolder);
       } finally {
-        status.stop(showElapsedTime: true);
+        status.stop();
       }
     }
   }

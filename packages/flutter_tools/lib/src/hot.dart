@@ -322,10 +322,10 @@ class HotRunner extends ResidentRunner {
       // F5, restart
       if ((code == 'r') || (code == AnsiTerminal.KEY_F5)) {
         // lower-case 'r'
-        await _reloadSources();
+        await restart();
       } else {
         // upper-case 'R'.
-        await _restartFromSources();
+        await restart(fullRestart: true);
       }
     }
   }
@@ -366,7 +366,7 @@ class HotRunner extends ResidentRunner {
                         bundle: bundle,
                         bundleDirty: rebuildBundle,
                         fileFilter: _startupDependencies);
-    devFSStatus.stop(showElapsedTime: true);
+    devFSStatus.stop();
     // Clear the minimal set after the first sync.
     _startupDependencies = null;
     printTrace('Synced ${getSizeAsMB(_devFS.bytes)}.');
@@ -429,10 +429,10 @@ class HotRunner extends ResidentRunner {
       // Wait for the first frame to be rendered.
       await firstFrameTimer.firstFrame();
     }
-    restartStatus.stop(showElapsedTime: true);
+    restartStatus.stop();
     if (waitForFrame) {
-      printStatus('Restart performed in '
-                  '${getElapsedAsMilliseconds(firstFrameTimer.elapsed)}.');
+      printTrace('Restart performed in '
+                 '${getElapsedAsMilliseconds(firstFrameTimer.elapsed)}.');
       if (benchmarkMode) {
         benchmarkData['hotRestartMillisecondsToFrame'] =
             firstFrameTimer.elapsed.inMilliseconds;
@@ -452,17 +452,27 @@ class HotRunner extends ResidentRunner {
     }
     int loadedLibraryCount = reloadReport['details']['loadedLibraryCount'];
     int finalLibraryCount = reloadReport['details']['finalLibraryCount'];
-    printStatus('Reloaded $loadedLibraryCount of $finalLibraryCount libraries.');
+    printTrace('Reloaded $loadedLibraryCount of $finalLibraryCount libraries.');
     return true;
   }
 
   @override
   Future<OperationResult> restart({ bool fullRestart: false, bool pauseAfterRestart: false }) async {
     if (fullRestart) {
-      await _restartFromSources();
-      return OperationResult.ok;
+      Status status = logger.startProgress('Performing full restart...');
+      try {
+        await _restartFromSources();
+        return OperationResult.ok;
+      } finally {
+        status.stop();
+      }
     } else {
-      return _reloadSources(pause: pauseAfterRestart);
+      Status status = logger.startProgress('Performing hot reload...');
+      try {
+        return await _reloadSources(pause: pauseAfterRestart);
+      } finally {
+        status.stop();
+      }
     }
   }
 
@@ -473,11 +483,9 @@ class HotRunner extends ResidentRunner {
     firstFrameTimer.start();
     if (_devFS != null)
       await _updateDevFS();
-    Status reloadStatus = logger.startProgress('Performing hot reload...');
     try {
       Map<String, dynamic> reloadReport =
           await currentView.uiIsolate.reloadSources(pause: pause);
-      reloadStatus.stop(showElapsedTime: true);
       if (!_printReloadReport(reloadReport)) {
         // Reload failed.
         flutterUsage.sendEvent('hot', 'reload-reject');
@@ -488,9 +496,6 @@ class HotRunner extends ResidentRunner {
     } catch (error, st) {
       int errorCode = error['code'];
       String errorMessage = error['message'];
-
-      reloadStatus.stop(showElapsedTime: true);
-
       if (errorCode == Isolate.kIsolateReloadBarred) {
         printError('Unable to hot reload app due to an unrecoverable error in '
                    'the source code. Please address the error and then use '
@@ -530,8 +535,8 @@ class HotRunner extends ResidentRunner {
       // When the framework is present, we can wait for the first frame
       // event and measure reload time.
       await firstFrameTimer.firstFrame();
-      printStatus('Hot reload performed in '
-                  '${getElapsedAsMilliseconds(firstFrameTimer.elapsed)}.');
+      printTrace('Hot reload performed in '
+                 '${getElapsedAsMilliseconds(firstFrameTimer.elapsed)}.');
       if (benchmarkMode) {
         benchmarkData['hotReloadMillisecondsToFrame'] =
             firstFrameTimer.elapsed.inMilliseconds;

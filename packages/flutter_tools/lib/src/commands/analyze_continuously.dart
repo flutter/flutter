@@ -66,7 +66,7 @@ class AnalyzeContinuously extends AnalyzeBase {
       analyzedPaths.clear();
       analysisTimer = new Stopwatch()..start();
     } else {
-      analysisStatus?.stop(showElapsedTime: true);
+      analysisStatus?.stop();
       analysisTimer.stop();
 
       logger.printStatus(terminal.clearScreen(), newline: false);

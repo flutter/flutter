@@ -679,8 +679,14 @@ class _AppRunLogger extends Logger {
   @override
   void printTrace(String message) { }
 
+  Status _status;
+
   @override
   Status startProgress(String message) {
+    // Ignore nested progresses; return a no-op status object.
+    if (_status != null)
+      return new Status();
+
     int id = _nextProgressId++;
 
     _sendLogEvent(<String, dynamic>{
@@ -689,7 +695,8 @@ class _AppRunLogger extends Logger {
       'id': id.toString()
     });
 
-    return new _AppLoggerStatus(this, id);
+    _status = new _AppLoggerStatus(this, id);
+    return _status;
   }
 
   void close() {
@@ -712,11 +719,13 @@ class _AppLoggerStatus implements Status {
 
   @override
   void stop({ bool showElapsedTime: true }) {
+    logger._status = null;
     _sendFinished();
   }
 
   @override
   void cancel() {
+    logger._status = null;
     _sendFinished();
   }
 
