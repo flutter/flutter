@@ -144,7 +144,7 @@ class RunAndStayResident extends ResidentRunner {
 
     // TODO(devoncarew): Move this into the device.startApp() impls.
     if (_package != null) {
-      printTrace("Stopping app '${_package.name}' on ${device.name}.");
+      printTrace('Stopping app "${_package.name}" on ${device.name}.');
       await device.stopApp(_package);
     }
 
