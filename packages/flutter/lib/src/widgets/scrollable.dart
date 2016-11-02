@@ -47,6 +47,8 @@ final Tolerance kPixelScrollTolerance = new Tolerance(
 );
 
 /// Signature for building a widget based on [ScrollableState].
+///
+/// Used by [Scrollable.builder].
 typedef Widget ScrollBuilder(BuildContext context, ScrollableState state);
 
 /// Signature for callbacks that receive a scroll offset.

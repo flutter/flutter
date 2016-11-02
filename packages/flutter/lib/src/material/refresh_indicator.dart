@@ -28,10 +28,12 @@ const Duration _kIndicatorSnapDuration = const Duration(milliseconds: 150);
 // has completed.
 const Duration _kIndicatorScaleDuration = const Duration(milliseconds: 200);
 
-/// The signature for a function that's called when the user has dragged the
-/// refresh indicator far enough to demonstrate that they want the app to
-/// refresh. The returned Future must complete when the refresh operation
-/// is finished.
+/// The signature for a function that's called when the user has dragged a
+/// [RefreshIndicator] far enough to demonstrate that they want the app to
+/// refresh. The returned [Future] must complete when the refresh operation is
+/// finished.
+///
+/// Used by [RefreshIndicator.refresh].
 typedef Future<Null> RefreshCallback();
 
 /// Where the refresh indicator appears: top for over-scrolls at the
@@ -117,7 +119,7 @@ class RefreshIndicator extends StatefulWidget {
 
   /// A function that's called when the user has dragged the refresh indicator
   /// far enough to demonstrate that they want the app to refresh. The returned
-  /// Future must complete when the refresh operation is finished.
+  /// [Future] must complete when the refresh operation is finished.
   final RefreshCallback refresh;
 
   /// Where the refresh indicator should appear, [RefreshIndicatorLocation.top]

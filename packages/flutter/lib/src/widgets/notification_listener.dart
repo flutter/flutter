@@ -4,7 +4,11 @@
 
 import 'framework.dart';
 
+/// Signature for [Notification] listeners.
+///
 /// Return true to cancel the notification bubbling.
+///
+/// Used by [NotificationListener.onNotification].
 typedef bool NotificationListenerCallback<T extends Notification>(T notification);
 
 /// A notification that can bubble up the widget tree.

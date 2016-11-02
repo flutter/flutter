@@ -162,6 +162,8 @@ class RouteSettings {
 }
 
 /// Creates a route for the given route settings.
+///
+/// Used by [Navigator.onGenerateRoute] and [Navigator.onUnknownRoute].
 typedef Route<dynamic> RouteFactory(RouteSettings settings);
 
 /// An interface for observing the behavior of a [Navigator].

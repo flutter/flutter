@@ -110,6 +110,8 @@ class ObjectKey extends LocalKey {
 }
 
 /// Signature for a callback when a global key is removed from the tree.
+///
+/// Used by [GlobalKey.registerRemoveListener].
 typedef void GlobalKeyRemoveListener(GlobalKey key);
 
 /// A key that is unique across the entire app.
@@ -222,7 +224,7 @@ abstract class GlobalKey<T extends State<StatefulWidget>> extends Key {
   /// Stop calling `listener` whenever a widget with the given global key is
   /// removed from the tree.
   ///
-  /// Listeners can be added with [addListener].
+  /// Listeners can be added with [registerRemoveListener].
   static void unregisterRemoveListener(GlobalKey key, GlobalKeyRemoveListener listener) {
     assert(key != null);
     assert(_removeListeners.containsKey(key));
@@ -2780,10 +2782,16 @@ abstract class BuildableElement extends Element {
   }
 }
 
-/// Signature for a function that creates a widget.
+/// Signature for a function that creates a widget, e.g. [StatelessWidget.build]
+/// or [State.build].
+///
+/// Used by [Builder.builder], [OverlayEntry.builder], etc.
 typedef Widget WidgetBuilder(BuildContext context);
 
-/// Signature for a function that creates a widget for a given index, e.g., in a list.
+/// Signature for a function that creates a widget for a given index, e.g., in a
+/// list.
+///
+/// Used by [LazyBlockBuilder.builder].
 typedef Widget IndexedWidgetBuilder(BuildContext context, int index);
 
 // See ComponentElement._builder.

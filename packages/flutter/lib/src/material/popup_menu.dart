@@ -447,11 +447,17 @@ Future<dynamic/*=T*/> showMenu/*<T>*/({
   ));
 }
 
-/// A callback that is passed the value of the PopupMenuItem that caused
-/// its menu to be dismissed.
+/// Signature for the callback invoked when a menu item is selected. The
+/// argument is the value of the [PopupMenuItem] that caused its menu to be
+/// dismissed.
+///
+/// Used by [PopupMenuButton.onSelected].
 typedef void PopupMenuItemSelected<T>(T value);
 
-/// Signature used by [PopupMenuButton] to lazily construct the items shown when the button is pressed.
+/// Signature used by [PopupMenuButton] to lazily construct the items shown when
+/// the button is pressed.
+///
+/// Used by [PopupMenuButton.itemBuilder].
 typedef List<PopupMenuEntry<T>> PopupMenuItemBuilder<T>(BuildContext context);
 
 /// Displays a menu when pressed and calls [onSelected] when the menu is dismissed
