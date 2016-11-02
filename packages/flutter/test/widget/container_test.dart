@@ -11,12 +11,11 @@ void main() {
   });
 
   testWidgets('Size of a container within an align', (WidgetTester tester) async {
-    GlobalKey innerContainerKey = new GlobalKey(debugLabel: "50x100");
+    GlobalKey innerContainerKey = new GlobalKey();
 
     await tester.pumpWidget(
       new Center(
         child: new SizedBox(
-          key: new ValueKey("300x400"),
           width: 300.0,
           height: 400.0,
           child: new Align(
@@ -126,7 +125,7 @@ void main() {
     RenderBox containerBox = innerContainerKey.currentContext.findRenderObject();
     List<RenderObject> renderers = tester.renderObjectList(find.byType(DecoratedBox)).toList();
     expect(renderers.length, equals(2));
-    for (var renderer in renderers) {
+    for (RenderObject renderer in renderers) {
       RenderBox decoratedBox = renderer;
       expect(decoratedBox.size.width, equals(50.0));
       expect(decoratedBox.size.height, equals(100.0));
@@ -165,7 +164,7 @@ void main() {
     RenderBox containerBox = innerContainerKey.currentContext.findRenderObject();
     List<RenderObject> renderers = tester.renderObjectList(find.byType(DecoratedBox)).toList();
     expect(renderers.length, equals(2));
-    for (var renderer in renderers) {
+    for (RenderObject renderer in renderers) {
       RenderBox decoratedBox = renderer;
       expect(decoratedBox.size.width, equals(50.0));
       expect(decoratedBox.size.height, equals(100.0));
