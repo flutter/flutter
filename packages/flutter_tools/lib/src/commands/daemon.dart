@@ -52,29 +52,12 @@ class DaemonCommand extends FlutterCommand {
     Cache.releaseLockEarly();
 
     return appContext.runInZone(() {
-      Stream<Map<String, dynamic>> commandStream = stdin
-        .transform(UTF8.decoder)
-        .transform(const LineSplitter())
-        .where((String line) => line.startsWith('[{') && line.endsWith('}]'))
-        .map((String line) {
-          line = line.substring(1, line.length - 1);
-          return JSON.decode(line);
-        });
-
-      Daemon daemon = new Daemon(commandStream, (Map<String, dynamic> command) {
-        stdout.writeln('[${JSON.encode(command, toEncodable: _jsonEncodeObject)}]');
-      }, daemonCommand: this, notifyingLogger: notifyingLogger);
+      Daemon daemon = new Daemon(
+          stdinCommandStream, stdoutCommandResponse,
+          daemonCommand: this, notifyingLogger: notifyingLogger);
 
       return daemon.onExit;
     }, onError: _handleError);
-  }
-
-  dynamic _jsonEncodeObject(dynamic object) {
-    if (object is Device)
-      return _deviceToMap(object);
-    if (object is OperationResult)
-      return _operationResultToMap(object);
-    return object;
   }
 
   dynamic _handleError(dynamic error, StackTrace stackTrace) {
@@ -559,6 +542,27 @@ class DeviceDomain extends Domain {
     // No match found.
     return null;
   }
+}
+
+Stream<Map<String, dynamic>> get stdinCommandStream => stdin
+  .transform(UTF8.decoder)
+  .transform(const LineSplitter())
+  .where((String line) => line.startsWith('[{') && line.endsWith('}]'))
+  .map((String line) {
+    line = line.substring(1, line.length - 1);
+    return JSON.decode(line);
+  });
+
+void stdoutCommandResponse(Map<String, dynamic> command) {
+  stdout.writeln('[${JSON.encode(command, toEncodable: _jsonEncodeObject)}]');
+}
+
+dynamic _jsonEncodeObject(dynamic object) {
+  if (object is Device)
+    return _deviceToMap(object);
+  if (object is OperationResult)
+    return _operationResultToMap(object);
+  return object;
 }
 
 Map<String, dynamic> _deviceToMap(Device device) {
