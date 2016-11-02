@@ -80,7 +80,11 @@ class InputValue {
   final TextRange composing;
 
   /// An input value that corresponds to the empty string with no selection and no composing range.
-  static const InputValue empty = const InputValue();
+  static const InputValue empty = const InputValue(
+    text: '',
+    selection: const TextSelection.collapsed(offset: -1),
+    composing: TextRange.empty
+  );
 
   @override
   String toString() => '$runtimeType(text: \u2524$text\u251C, selection: $selection, composing: $composing)';
