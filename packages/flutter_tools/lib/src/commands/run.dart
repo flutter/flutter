@@ -19,6 +19,7 @@ import '../resident_runner.dart';
 import '../run.dart';
 import '../runner/flutter_command.dart';
 import 'build_apk.dart';
+import 'daemon.dart';
 import 'install.dart';
 import 'trace.dart';
 
@@ -152,8 +153,23 @@ class RunCommand extends RunCommandBase {
 
   @override
   Future<int> runCommand() async {
-    int debugPort;
 
+    Cache.releaseLockEarly();
+
+    // Enable hot mode by default if ``--no-hot` was not passed and we are in
+    // debug mode.
+    final bool hotMode = shouldUseHotMode();
+
+    if (argResults['machine']) {
+      Daemon daemon = new Daemon(stdinCommandStream, stdoutCommandResponse,
+          notifyingLogger: new NotifyingLogger());
+      AppInstance app = daemon.appDomain.startApp(
+        device, Directory.current.path, targetFile, route,
+        getBuildMode(), argResults['start-paused'], hotMode);
+      return app.runner.waitForAppToFinish();
+    }
+
+    int debugPort;
     if (argResults['debug-port'] != null) {
       try {
         debugPort = int.parse(argResults['debug-port']);
@@ -180,12 +196,6 @@ class RunCommand extends RunCommandBase {
       );
     }
 
-    Cache.releaseLockEarly();
-
-    // Enable hot mode by default if ``--no-hot` was not passed and we are in
-    // debug mode.
-    final bool hotMode = shouldUseHotMode();
-
     if (hotMode) {
       if (!device.supportsHotMode) {
         printError('Hot mode is not supported by this device. '
@@ -206,8 +216,7 @@ class RunCommand extends RunCommandBase {
         device,
         target: targetFile,
         debuggingOptions: options,
-        benchmarkMode: argResults['benchmark'],
-        usesTerminalUI: argResults['machine'],
+        benchmarkMode: argResults['benchmark']
       );
     } else {
       runner = new RunAndStayResident(
@@ -216,7 +225,6 @@ class RunCommand extends RunCommandBase {
         debuggingOptions: options,
         traceStartup: traceStartup,
         benchmark: argResults['benchmark'],
-        usesTerminalUI: argResults['machine'],
         applicationBinary: argResults['use-application-binary']
       );
     }
