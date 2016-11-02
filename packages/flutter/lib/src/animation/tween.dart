@@ -75,7 +75,7 @@ class _ChainedEvaluation<T> extends Animatable<T> {
 /// [Tween] is useful if you want to interpolate across a range.
 ///
 /// To use a [Tween] object with an animation, call the [Tween] object's `animate()` method and
-/// pass it the [Animation] object that you want to modify.
+/// pass it to the [Animation] object that you want to modify.
 ///
 /// You can chain [Tween] objects together using the `chain()` method, so that a single
 /// [Animation] object is configured by multiple [Tween] objects called in succession. This is
