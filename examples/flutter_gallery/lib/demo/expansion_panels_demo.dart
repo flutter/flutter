@@ -176,10 +176,6 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
   void initState() {
     super.initState();
 
-    GlobalKey<FormState> form1Key = new GlobalKey<FormState>();
-    GlobalKey<FormState> form2Key = new GlobalKey<FormState>();
-    GlobalKey<FormState> form3Key = new GlobalKey<FormState>();
-
     _demoItems = <DemoItem<dynamic>>[
       new DemoItem<String>(
         name: 'Trip name',
@@ -194,20 +190,23 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
           }
 
           return new Form(
-            key: form1Key,
-            child: new CollapsibleBody(
-              margin: const EdgeInsets.symmetric(horizontal: 16.0),
-              onSave: () { form1Key.currentState.save(); close(); },
-              onCancel: () { form1Key.currentState.reset(); close(); },
-              child: new Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: new InputFormField(
-                  hintText: item.hint,
-                  labelText: item.name,
-                  initialValue: new InputValue(text: item.value),
-                  onSaved: (InputValue val) { item.value = val.text; },
-                ),
-              ),
+            child: new Builder(
+              builder: (BuildContext context) {
+                return new CollapsibleBody(
+                  margin: const EdgeInsets.symmetric(horizontal: 16.0),
+                  onSave: () { Form.of(context).save(); close(); },
+                  onCancel: () { Form.of(context).reset(); close(); },
+                  child: new Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: new InputFormField(
+                      hintText: item.hint,
+                      labelText: item.name,
+                      initialValue: new InputValue(text: item.value),
+                      onSaved: (InputValue val) { item.value = val.text; },
+                    ),
+                  ),
+                );
+              }
             )
           );
         }
@@ -224,57 +223,61 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
             });
           }
 
+
           return new Form(
-            key: form2Key,
-            child: new CollapsibleBody(
-              onSave: () { form2Key.currentState.save(); close(); },
-              onCancel: () { form2Key.currentState.reset(); close(); },
-              child: new FormField<_Location>(
-                initialValue: item.value,
-                onSaved: (_Location result) { item.value = result; },
-                builder: (FormFieldState<_Location> field) {
-                  return new Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      new Row(
+            child: new Builder(
+              builder: (BuildContext context) {
+                return new CollapsibleBody(
+                  onSave: () { Form.of(context).save(); close(); },
+                  onCancel: () { Form.of(context).reset(); close(); },
+                  child: new FormField<_Location>(
+                    initialValue: item.value,
+                    onSaved: (_Location result) { item.value = result; },
+                    builder: (FormFieldState<_Location> field) {
+                      return new Column(
                         mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
-                          new Radio<_Location>(
-                            value: _Location.Bahamas,
-                            groupValue: field.value,
-                            onChanged: field.onChanged,
+                          new Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: <Widget>[
+                              new Radio<_Location>(
+                                value: _Location.Bahamas,
+                                groupValue: field.value,
+                                onChanged: field.onChanged,
+                              ),
+                              new Text('Bahamas')
+                            ]
                           ),
-                          new Text('Bahamas')
-                        ]
-                      ),
-                      new Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: <Widget>[
-                          new Radio<_Location>(
-                            value: _Location.Barbados,
-                            groupValue: field.value,
-                            onChanged: field.onChanged,
+                          new Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: <Widget>[
+                              new Radio<_Location>(
+                                value: _Location.Barbados,
+                                groupValue: field.value,
+                                onChanged: field.onChanged,
+                              ),
+                              new Text('Barbados')
+                            ]
                           ),
-                          new Text('Barbados')
+                          new Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: <Widget>[
+                              new Radio<_Location>(
+                                value: _Location.Bermuda,
+                                groupValue: field.value,
+                                onChanged: field.onChanged,
+                              ),
+                              new Text('Bermuda')
+                            ]
+                          )
                         ]
-                      ),
-                      new Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: <Widget>[
-                          new Radio<_Location>(
-                            value: _Location.Bermuda,
-                            groupValue: field.value,
-                            onChanged: field.onChanged,
-                          ),
-                          new Text('Bermuda')
-                        ]
-                      )
-                    ]
-                  );
-                }
-              ),
-            ),
+                      );
+                    }
+                  ),
+                );
+              }
+            )
           );
         }
       ),
@@ -291,25 +294,28 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
           }
 
           return new Form(
-            key: form3Key,
-            child: new CollapsibleBody(
-              onSave: () { form3Key.currentState.save(); close(); },
-              onCancel: () { form3Key.currentState.reset(); close(); },
-              child: new FormField<double>(
-                initialValue: item.value,
-                onSaved: (double value) { item.value = value; },
-                builder: (FormFieldState<double> field) {
-                  return new Slider(
-                    min: 0.0,
-                    max: 100.0,
-                    divisions: 5,
-                    activeColor: Colors.orange[100 + (field.value * 5.0).round()],
-                    label: '${field.value.round()}',
-                    value: field.value,
-                    onChanged: field.onChanged,
-                  );
-                },
-              ),
+            child: new Builder(
+              builder: (BuildContext context) {
+                return new CollapsibleBody(
+                  onSave: () { Form.of(context).save(); close(); },
+                  onCancel: () { Form.of(context).reset(); close(); },
+                  child: new FormField<double>(
+                    initialValue: item.value,
+                    onSaved: (double value) { item.value = value; },
+                    builder: (FormFieldState<double> field) {
+                      return new Slider(
+                        min: 0.0,
+                        max: 100.0,
+                        divisions: 5,
+                        activeColor: Colors.orange[100 + (field.value * 5.0).round()],
+                        label: '${field.value.round()}',
+                        value: field.value,
+                        onChanged: field.onChanged,
+                      );
+                    },
+                  ),
+                );
+              }
             )
           );
         }

@@ -19,6 +19,19 @@ class Form extends StatefulWidget {
     assert(child != null);
   }
 
+  /// Returns the closest [FormState] which encloses the given context.
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// FormState form = Form.of(context);
+  /// form.save();
+  /// ```
+  static FormState of(BuildContext context) {
+    _FormScope scope = context.inheritFromWidgetOfExactType(_FormScope);
+    return scope?._formState;
+  }
+
   /// Root of the widget hierarchy that contains this form.
   final Widget child;
 
@@ -97,17 +110,6 @@ class _FormScope extends InheritedWidget {
 
   /// The [Form] associated with this widget.
   Form get form => _formState.config;
-
-  /// The closest [_FormScope] which encloses the given context.
-  ///
-  /// Typical usage is as follows:
-  ///
-  /// ```dart
-  /// _FormScope form = _FormScope.of(context);
-  /// ```
-  static _FormScope of(BuildContext context) {
-    return context.inheritFromWidgetOfExactType(_FormScope);
-  }
 
   @override
   bool updateShouldNotify(_FormScope old) => _generation != old._generation;
@@ -199,7 +201,7 @@ class FormFieldState<T> extends State<FormField<T>> {
     setState(() {
       _value = value;
     });
-    _FormScope.of(context)?._formState?._fieldDidChange();
+    Form.of(context)?._fieldDidChange();
   }
 
   @override
@@ -210,9 +212,7 @@ class FormFieldState<T> extends State<FormField<T>> {
 
   @override
   void deactivate() {
-    _FormScope formScope = _FormScope.of(context);
-    if (formScope != null)
-      formScope._formState._unregister(this);
+    Form.of(context)?._unregister(this);
     super.deactivate();
   }
 
@@ -221,7 +221,7 @@ class FormFieldState<T> extends State<FormField<T>> {
     if (config.validator != null)
       _errorText = config.validator(_value);
 
-    _FormScope.of(context)?._formState?._register(this);
+    Form.of(context)?._register(this);
     return config.builder(this);
   }
 }
