@@ -202,10 +202,17 @@ int CreateSnapshot(const ftl::CommandLine& command_line) {
   DartScope scope(isolate);
 
   DART_CHECK_VALID(Dart_SetLibraryTagHandler(HandleLibraryTag));
-  DART_CHECK_VALID(Dart_LoadScript(ToDart(main_dart), Dart_Null(),
-                                   ToDart(loader.Fetch(main_dart)), 0, 0));
+  Dart_Handle load_result =
+      Dart_LoadScript(ToDart(main_dart), Dart_Null(),
+                      ToDart(loader.Fetch(main_dart)), 0, 0);
 
   if (print_deps_mode) {
+    if (Dart_IsError(load_result)) {
+      // Loading / parsing the source resulted in an error. Report the error
+      // to stderr and exit.
+      std::cerr << Dart_GetError(load_result) << std::endl;
+      return 1;
+    }
     // The script has been loaded, print out the minimal dependencies to run.
     for (const auto& dep : loader.url_dependencies()) {
       std::string file = dep;
@@ -213,6 +220,7 @@ int CreateSnapshot(const ftl::CommandLine& command_line) {
       std::cout << file << "\n";
     }
   } else {
+    DART_CHECK_VALID(load_result);
     DART_CHECK_VALID(Dart_FinalizeLoading(false));
 
     // The script has been loaded, generate a snapshot.
