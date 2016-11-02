@@ -38,7 +38,7 @@ import 'typography.dart';
 ///  * [CheckBox]
 ///  * [Radio]
 ///  * [Switch]
-///  * <https://www.google.com/design/spec/components/sliders.html>
+///  * <https://material.google.com/components/sliders.html>
 class Slider extends StatefulWidget {
   /// Creates a material design slider.
   ///
@@ -78,6 +78,25 @@ class Slider extends StatefulWidget {
   /// value.
   ///
   /// If null, the slider will be displayed as disabled.
+  ///
+  /// The callback provided to onChanged should update the state of the parent
+  /// [StatefulWidget] using the [State.setState] method, so that the parent
+  /// gets rebuilt; for example:
+  ///
+  /// ```dart
+  /// new Slider(
+  ///   value: _duelCommandment.toDouble(),
+  ///   min: 1.0,
+  ///   max: 10.0,
+  ///   divisions: 10,
+  ///   label: '$_duelCommandment',
+  ///   onChanged: (double newValue) {
+  ///     setState(() {
+  ///       _duelCommandment = newValue.round();
+  ///     });
+  ///   },
+  /// ),
+  /// ```
   final ValueChanged<double> onChanged;
 
   /// The minium value the user can select.
@@ -120,11 +139,13 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
+    ThemeData theme = Theme.of(context);
     return new _SliderRenderObjectWidget(
       value: (config.value - config.min) / (config.max - config.min),
       divisions: config.divisions,
       label: config.label,
-      activeColor: config.activeColor ?? Theme.of(context).accentColor,
+      activeColor: config.activeColor ?? theme.accentColor,
+      textTheme: theme.primaryTextTheme,
       onChanged: config.onChanged != null ? _handleChanged : null,
       vsync: this,
     );
@@ -138,6 +159,7 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
     this.divisions,
     this.label,
     this.activeColor,
+    this.textTheme,
     this.onChanged,
     this.vsync,
   }) : super(key: key);
@@ -146,6 +168,7 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
   final int divisions;
   final String label;
   final Color activeColor;
+  final TextTheme textTheme;
   final ValueChanged<double> onChanged;
   final TickerProvider vsync;
 
@@ -155,6 +178,7 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
     divisions: divisions,
     label: label,
     activeColor: activeColor,
+    textTheme: textTheme,
     onChanged: onChanged,
     vsync: vsync,
   );
@@ -166,6 +190,7 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
       ..divisions = divisions
       ..label = label
       ..activeColor = activeColor
+      ..textTheme = textTheme
       ..onChanged = onChanged;
     // Ticker provider cannot change since there's a 1:1 relationship between
     // the _SliderRenderObjectWidget object and the _SliderState object.
@@ -210,11 +235,13 @@ class _RenderSlider extends RenderConstrainedBox implements SemanticsActionHandl
     int divisions,
     String label,
     Color activeColor,
+    TextTheme textTheme,
     this.onChanged,
     TickerProvider vsync,
   }) : _value = value,
        _divisions = divisions,
        _activeColor = activeColor,
+       _textTheme = textTheme,
         super(additionalConstraints: _getAdditionalConstraints(label)) {
     assert(value != null && value >= 0.0 && value <= 1.0);
     this.label = label;
@@ -271,7 +298,7 @@ class _RenderSlider extends RenderConstrainedBox implements SemanticsActionHandl
       // https://github.com/flutter/flutter/issues/5938
       _labelPainter
         ..text = new TextSpan(
-          style: Typography.white.body1.copyWith(fontSize: 10.0),
+          style: _textTheme.body1.copyWith(fontSize: 10.0),
           text: newLabel
         )
         ..layout();
@@ -287,6 +314,15 @@ class _RenderSlider extends RenderConstrainedBox implements SemanticsActionHandl
     if (value == _activeColor)
       return;
     _activeColor = value;
+    markNeedsPaint();
+  }
+
+  TextTheme get textTheme => _textTheme;
+  TextTheme _textTheme;
+  set textTheme(TextTheme value) {
+    if (value == _textTheme)
+      return;
+    _textTheme = value;
     markNeedsPaint();
   }
 

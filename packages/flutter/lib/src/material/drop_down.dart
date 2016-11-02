@@ -211,7 +211,7 @@ class _DropdownMenuRouteLayout<T> extends SingleChildLayoutDelegate {
     // The maximum height of a simple menu should be one or more rows less than
     // the view height. This ensures a tappable area outside of the simple menu
     // with which to dismiss the menu.
-    //   -- https://www.google.com/design/spec/components/menus.html#menus-simple-menus
+    //   -- https://material.google.com/components/menus.html#menus-simple-menus
     final double maxHeight = math.max(0.0, constraints.maxHeight - 2 * _kMenuItemHeight);
     final double width = buttonRect.width + 8.0;
     return new BoxConstraints(
@@ -405,7 +405,7 @@ class DropdownButtonHideUnderline extends InheritedWidget {
 ///
 ///  * [RaisedButton]
 ///  * [FlatButton]
-///  * <https://www.google.com/design/spec/components/buttons.html#buttons-dropdown-buttons>
+///  * <https://material.google.com/components/buttons.html#buttons-dropdown-buttons>
 class DropdownButton<T> extends StatefulWidget {
   /// Creates a drop down button.
   ///

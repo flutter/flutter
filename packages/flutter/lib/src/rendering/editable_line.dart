@@ -216,12 +216,12 @@ class RenderEditable extends RenderBox {
   ui.Paragraph _layoutTemplate;
   double get _preferredLineHeight {
     if (_layoutTemplate == null) {
-      ui.ParagraphBuilder builder = new ui.ParagraphBuilder()
+      ui.ParagraphBuilder builder = new ui.ParagraphBuilder(new ui.ParagraphStyle())
         ..pushStyle(text.style.getTextStyle(textScaleFactor: textScaleFactor))
         ..addText(_kZeroWidthSpace);
       // TODO(abarth): ParagraphBuilder#build's argument should be optional.
       // TODO(abarth): These min/max values should be the default for ui.Paragraph.
-      _layoutTemplate = builder.build(new ui.ParagraphStyle())
+      _layoutTemplate = builder.build()
         ..layout(new ui.ParagraphConstraints(width: double.INFINITY));
     }
     return _layoutTemplate.height;

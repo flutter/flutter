@@ -14,7 +14,7 @@ import 'theme.dart';
 import 'tooltip.dart';
 
 // TODO(eseidel): This needs to change based on device size?
-// http://www.google.com/design/spec/layout/metrics-keylines.html#metrics-keylines-keylines-spacing
+// http://material.google.com/layout/metrics-keylines.html#metrics-keylines-keylines-spacing
 const double _kSize = 56.0;
 const double _kSizeMini = 40.0;
 final Object _kDefaultHeroTag = new Object();
@@ -37,7 +37,7 @@ final Object _kDefaultHeroTag = new Object();
 ///  * [Scaffold]
 ///  * [RaisedButton]
 ///  * [FlatButton]
-///  * <https://www.google.com/design/spec/components/buttons-floating-action-button.html>
+///  * <https://material.google.com/components/buttons-floating-action-button.html>
 class FloatingActionButton extends StatefulWidget {
   /// Creates a floating action button.
   ///

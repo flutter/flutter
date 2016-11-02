@@ -223,7 +223,7 @@ class DataCell {
 ///  * [DataRow]
 ///  * [DataCell]
 ///  * [PaginatedDataTable]
-///  * <https://www.google.com/design/spec/components/data-tables.html>
+///  * <https://material.google.com/components/data-tables.html>
 class DataTable extends StatelessWidget {
   /// Creates a widget describing a data table.
   ///

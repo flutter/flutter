@@ -9,16 +9,24 @@ import 'theme_data.dart';
 
 export 'theme_data.dart' show Brightness, ThemeData;
 
-/// The duration over which theme changes animate.
+/// The duration over which theme changes animate by default.
 const Duration kThemeAnimationDuration = const Duration(milliseconds: 200);
 
 /// Applies a theme to descendant widgets.
 ///
+/// A theme describes the colors and typographic choices of an application.
+///
+/// Descendant widgets obtain the current theme's [ThemeData] object using
+/// [Theme.of]. When a widget uses [Theme.of], it is automatically rebuilt if
+/// the theme later changes, so that the changes can be applied.
+///
 /// See also:
 ///
-///  * [AnimatedTheme]
-///  * [ThemeData]
-///  * [MaterialApp]
+///  * [ThemeData], which describes the actual configuration of a theme.
+///  * [AnimatedTheme], which animates the [ThemeData] when it changes rather
+///    than changing the theme all at once.
+///  * [MaterialApp], which includes an [AnimatedTheme] widget configured via
+///    the [MaterialApp.theme] argument.
 class Theme extends InheritedWidget {
   /// Applies the given theme [data] to [child].
   ///
@@ -49,20 +57,67 @@ class Theme extends InheritedWidget {
 
   static final ThemeData _kFallbackTheme = new ThemeData.fallback();
 
-  /// The data from the closest instance of this class that encloses the given context.
+  /// The data from the closest [Theme] instance that encloses the given
+  /// context.
   ///
-  /// Defaults to the fallback theme data if none exists.
+  /// Defaults to [new ThemeData.fallback] if there is no [Theme] in the given
+  /// build context.
   ///
-  /// If [shadowThemeOnly] is true and the closest Theme ancestor was installed by
-  /// the [MaterialApp] - in other words if the closest Theme ancestor does not
-  /// shadow the app's theme - then return null. This property is specified in
-  /// situations where its useful to wrap a route's widgets with a Theme, but only
-  /// when the app's theme is being shadowed by a theme widget that is farather
-  /// down in the tree. See [isMaterialAppTheme].
+  /// If [shadowThemeOnly] is true and the closest [Theme] ancestor was
+  /// installed by the [MaterialApp] — in other words if the closest [Theme]
+  /// ancestor does not shadow the application's theme — then this returns null.
+  /// This argument should be used in situations where its useful to wrap a
+  /// route's widgets with a [Theme], but only when the application's overall
+  /// theme is being shadowed by a [Theme] widget that is deeper in the tree.
+  /// See [isMaterialAppTheme].
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// @override
+  /// Widget build(BuildContext context) {
+  ///   return new Text(
+  ///     'Example',
+  ///     style: Theme.of(context).textTheme.title,
+  ///   );
+  /// }
+  /// ```
+  ///
+  /// When the [Theme] is actually created in the same `build` function
+  /// (possibly indirectly, e.g. as part of a [MaterialApp]), the `context`
+  /// argument to the `build` function can't be used to find the [Theme] (since
+  /// it's "above" the widget being returned). In such cases, the following
+  /// technique with a [Builder] can be used to provide a new scope with a
+  /// [BuildContext] that is "under" the [Theme]:
+  ///
+  /// ```dart
+  /// @override
+  /// Widget build(BuildContext context) {
+  ///   return new MaterialApp(
+  ///     theme: new ThemeData.light(),
+  ///     body: new Builder(
+  ///       // Create an inner BuildContext so that we can refer to
+  ///       // the Theme with Theme.of().
+  ///       builder: (BuildContext context) {
+  ///         return new Center(
+  ///           child: new Text(
+  ///             'Example',
+  ///             style: Theme.of(context).textTheme.title,
+  ///           ),
+  ///         );
+  ///       },
+  ///     ),
+  ///   );
+  /// }
+  /// ```
   static ThemeData of(BuildContext context, { bool shadowThemeOnly: false }) {
     final Theme theme = context.inheritFromWidgetOfExactType(Theme);
-    final ThemeData themeData = theme?.data ?? _kFallbackTheme;
-    return shadowThemeOnly ? (theme.isMaterialAppTheme ? null : themeData) : themeData;
+    if (shadowThemeOnly) {
+      if (theme == null || theme.isMaterialAppTheme)
+        return null;
+      return theme.data;
+    }
+    return (theme != null) ? theme.data : _kFallbackTheme;
   }
 
   @override
@@ -84,12 +139,16 @@ class ThemeDataTween extends Tween<ThemeData> {
   ThemeData lerp(double t) => ThemeData.lerp(begin, end, t);
 }
 
-/// Animated version of [Theme] which automatically transitions the colours,
+/// Animated version of [Theme] which automatically transitions the colors,
 /// etc, over a given duration whenever the given theme changes.
 ///
 /// See also:
 ///
-///  * [ThemeData]
+///  * [Theme], which [AnimatedTheme] uses to actually apply the interpolated
+///    theme.
+///  * [ThemeData], which describes the actual configuration of a theme.
+///  * [MaterialApp], which includes an [AnimatedTheme] widget configured via
+///    the [MaterialApp.theme] argument.
 class AnimatedTheme extends ImplicitlyAnimatedWidget {
   /// Creates an animated theme.
   ///

@@ -149,7 +149,7 @@ class MaterialApp extends StatefulWidget {
 
   /// Turns on a [GridPaper] overlay that paints a baseline grid
   /// Material apps:
-  /// https://www.google.com/design/spec/layout/metrics-keylines.html
+  /// https://material.google.com/layout/metrics-keylines.html
   /// Only available in checked mode.
   final bool debugShowMaterialGrid;
 

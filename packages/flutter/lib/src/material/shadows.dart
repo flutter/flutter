@@ -6,7 +6,7 @@ import 'dart:ui' show Color, Offset;
 
 import 'package:flutter/painting.dart';
 
-// Based on http://www.google.com/design/spec/what-is-material/elevation-shadows.html
+// Based on http://material.google.com/what-is-material/elevation-shadows.html
 // Currently, only the elevation values that are bound to one or more widgets are
 // defined here.
 
@@ -20,7 +20,7 @@ import 'package:flutter/painting.dart';
 /// See also:
 ///
 ///  * [Material]
-///  * <https://www.google.com/design/spec/what-is-material/elevation-shadows.html>
+///  * <https://material.google.com/what-is-material/elevation-shadows.html>
 const Map<int, List<BoxShadow>> kElevationToShadow = _elevationToShadow; // to hide the literal from the docs
 
 const Color _kKeyUmbraOpacity = const Color(0x33000000); // alpha = 0.2

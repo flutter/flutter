@@ -186,7 +186,7 @@ class MovableBall extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Widget ball = new DefaultTextStyle(
-      style: Typography.white.body1,
+      style: Theme.of(context).primaryTextTheme.body1,
       textAlign: TextAlign.center,
       child: new Dot(
         key: kBallKey,

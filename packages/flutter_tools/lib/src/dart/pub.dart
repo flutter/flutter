@@ -46,7 +46,7 @@ Future<int> pubGet({
 
   if (!checkLastModified || _shouldRunPubGet(pubSpecYaml: pubSpecYaml, dotPackages: dotPackages)) {
     String command = upgrade ? 'upgrade' : 'get';
-    Status status = logger.startProgress("Running 'pub $command' in ${path.basename(directory)}...");
+    Status status = logger.startProgress("Running 'flutter packages $command' in ${path.basename(directory)}...");
     int code = await runCommandAndStreamOutput(
       <String>[sdkBinaryName('pub'), '--verbosity=warning', command, '--no-packages-dir', '--no-precompile'],
       workingDirectory: directory,

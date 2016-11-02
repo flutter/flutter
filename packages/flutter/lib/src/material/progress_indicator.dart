@@ -23,7 +23,7 @@ const double _kCircularProgressIndicatorStrokeWidth = 4.0;
 ///
 /// See also:
 ///
-///  * <https://www.google.com/design/spec/components/progress-activity.html>
+///  * <https://material.google.com/components/progress-activity.html>
 abstract class ProgressIndicator extends StatefulWidget {
   /// Creates a progress indicator.
   ///
@@ -130,7 +130,7 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
 /// See also:
 ///
 ///  * [CircularProgressIndicator]
-///  * <https://www.google.com/design/spec/components/progress-activity.html#progress-activity-types-of-indicators>
+///  * <https://material.google.com/components/progress-activity.html#progress-activity-types-of-indicators>
 class LinearProgressIndicator extends ProgressIndicator {
   /// Creates a linear progress indicator.
   ///
@@ -276,7 +276,7 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
 /// See also:
 ///
 ///  * [LinearProgressIndicator]
-///  * <https://www.google.com/design/spec/components/progress-activity.html#progress-activity-types-of-indicators>
+///  * <https://material.google.com/components/progress-activity.html#progress-activity-types-of-indicators>
 class CircularProgressIndicator extends ProgressIndicator {
   /// Creates a circular progress indicator.
   ///

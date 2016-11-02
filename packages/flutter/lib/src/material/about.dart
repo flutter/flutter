@@ -203,7 +203,7 @@ class AboutDialog extends StatelessWidget {
     this.applicationVersion,
     this.applicationIcon,
     this.applicationLegalese,
-    this.children
+    this.children,
   }) : super(key: key);
 
   /// The name of the application.

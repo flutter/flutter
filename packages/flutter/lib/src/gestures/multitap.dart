@@ -191,7 +191,7 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
     _freezeTracker(tracker);
     _trackers.remove(tracker.pointer);
     if (onDoubleTap != null)
-      onDoubleTap();
+      invokeCallback/*<Null>*/('onDoubleTap', onDoubleTap);
     _reset();
   }
 
@@ -359,7 +359,7 @@ class MultiTapGestureRecognizer extends GestureRecognizer {
       longTapDelay: longTapDelay
     );
     if (onTapDown != null)
-      onTapDown(event.pointer, new TapDownDetails(globalPosition: event.position));
+      invokeCallback/*<Null>*/('onTapDown', () => onTapDown(event.pointer, new TapDownDetails(globalPosition: event.position)));
   }
 
   @override
@@ -380,19 +380,19 @@ class MultiTapGestureRecognizer extends GestureRecognizer {
     _gestureMap.remove(pointer);
     if (resolution == _TapResolution.tap) {
       if (onTapUp != null)
-        onTapUp(pointer, new TapUpDetails(globalPosition: globalPosition));
+        invokeCallback/*<Null>*/('onTapUp', () => onTapUp(pointer, new TapUpDetails(globalPosition: globalPosition)));
       if (onTap != null)
-        onTap(pointer);
+        invokeCallback/*<Null>*/('onTap', () => onTap(pointer));
     } else {
       if (onTapCancel != null)
-        onTapCancel(pointer);
+        invokeCallback/*<Null>*/('onTapCancel', () => onTapCancel(pointer));
     }
   }
 
   void _handleLongTap(int pointer, Point lastPosition) {
     assert(_gestureMap.containsKey(pointer));
     if (onLongTapDown != null)
-      onLongTapDown(pointer, new TapDownDetails(globalPosition: lastPosition));
+      invokeCallback/*<Null>*/('onLongTapDown', () => onLongTapDown(pointer, new TapDownDetails(globalPosition: lastPosition)));
   }
 
   @override

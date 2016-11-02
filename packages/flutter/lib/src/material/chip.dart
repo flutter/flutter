@@ -33,7 +33,7 @@ const TextStyle _kLabelStyle = const TextStyle(
 /// See also:
 ///
 ///  * [CircleAvatar]
-///  * <https://www.google.com/design/spec/components/chips.html>
+///  * <https://material.google.com/components/chips.html>
 class Chip extends StatelessWidget {
   /// Creates a material design chip.
   ///

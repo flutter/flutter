@@ -12,12 +12,14 @@ import 'theme.dart';
 
 /// A material design icon.
 ///
-/// Available icons are shown on this page:
-/// <https://design.google.com/icons/>
+/// Icons are not interactive. For an interactive icon, consider [IconButton].
 ///
 /// Icons are identified by their name (as given on that page), with
 /// spaces converted to underscores, from the [Icons] class. For
 /// example, the "alarm add" icon is [Icons.alarm_add].
+///
+/// Available icons are shown on this page:
+/// <https://design.google.com/icons/>
 ///
 /// To use this class, make sure you set `uses-material-design: true`
 /// in your project's `flutter.yaml` file. This ensures that the
@@ -65,6 +67,15 @@ class Icon extends StatelessWidget {
   ///
   /// The given color will be adjusted by the opacity of the current
   /// [IconTheme], if any.
+  ///
+  /// Typically, a material design color will be used, as follows:
+  ///
+  /// ```dart
+  ///  new Icon(
+  ///    icon: Icons.widgets,
+  ///    color: Colors.blue[400],
+  ///  ),
+  /// ```
   final Color color;
 
   @override

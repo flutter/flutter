@@ -34,7 +34,7 @@ const double _kInnerRadius = 5.0;
 ///  * [CheckBox]
 ///  * [Slider]
 ///  * [Switch]
-///  * <https://www.google.com/design/spec/components/selection-controls.html#selection-controls-radio-button>
+///  * <https://material.google.com/components/selection-controls.html#selection-controls-radio-button>
 class Radio<T> extends StatefulWidget {
   /// Creates a material design radio button.
   ///
@@ -70,6 +70,22 @@ class Radio<T> extends StatefulWidget {
   /// radio button with the new [groupValue].
   ///
   /// If null, the radio button will be displayed as disabled.
+  ///
+  /// The callback provided to onChanged should update the state of the parent
+  /// [StatefulWidget] using the [State.setState] method, so that the parent
+  /// gets rebuilt; for example:
+  ///
+  /// ```dart
+  /// new Radio<SingingCharacter>(
+  ///   value: SingingCharacter.lafayette,
+  ///   groupValue: _character,
+  ///   onChanged: (SingingCharacter newValue) {
+  ///     setState(() {
+  ///       _character = newValue;
+  ///     });
+  ///   },
+  /// ),
+  /// ```
   final ValueChanged<T> onChanged;
 
   /// The color to use when this radio button is selected.

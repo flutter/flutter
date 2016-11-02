@@ -5,19 +5,19 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:meta/meta.dart';
 import 'package:stack_trace/stack_trace.dart';
 
 import 'application_package.dart';
 import 'base/logger.dart';
 import 'base/utils.dart';
-import 'build_info.dart';
 import 'commands/build_apk.dart';
 import 'commands/install.dart';
 import 'commands/trace.dart';
 import 'device.dart';
 import 'globals.dart';
-import 'vmservice.dart';
 import 'resident_runner.dart';
+import 'vmservice.dart';
 
 class RunAndStayResident extends ResidentRunner {
   RunAndStayResident(
@@ -64,10 +64,10 @@ class RunAndStayResident extends ResidentRunner {
   }
 
   @override
-  Future<bool> restart({ bool fullRestart: false }) async {
+  Future<OperationResult> restart({ bool fullRestart: false, bool pauseAfterRestart: false }) async {
     if (vmService == null) {
       printError('Debugging is not enabled.');
-      return false;
+      return new OperationResult(1, 'debugging not enabled');
     } else {
       Status status = logger.startProgress('Re-starting application...');
 
@@ -79,7 +79,7 @@ class RunAndStayResident extends ResidentRunner {
           .first;
       }
 
-      bool restartResult = await device.restartApp(
+      bool result = await device.restartApp(
         _package,
         _result,
         mainPath: _mainPath,
@@ -89,12 +89,11 @@ class RunAndStayResident extends ResidentRunner {
 
       status.stop(showElapsedTime: true);
 
-      if (restartResult && extensionAddedEvent != null) {
-        // TODO(devoncarew): We should restore the route here.
+      if (result && extensionAddedEvent != null) {
         await extensionAddedEvent;
       }
 
-      return restartResult;
+      return result ? OperationResult.ok : new OperationResult(1, 'restart error');
     }
   }
 
@@ -198,13 +197,11 @@ class RunAndStayResident extends ResidentRunner {
       }
     }
 
-    printStatus('Application running.');
-    if (debuggingOptions.buildMode == BuildMode.release)
-      return 0;
+    printTrace('Application running.');
 
     if (vmService != null) {
       await vmService.vm.refreshViews();
-      printStatus('Connected to ${vmService.vm.mainView}\.');
+      printTrace('Connected to ${vmService.vm.mainView}\.');
     }
 
     if (vmService != null && traceStartup) {
@@ -229,9 +226,9 @@ class RunAndStayResident extends ResidentRunner {
       mainFile.writeAsBytesSync(mainFile.readAsBytesSync());
 
       Stopwatch restartTime = new Stopwatch()..start();
-      bool restarted = await restart();
+      OperationResult result = await restart();
       restartTime.stop();
-      writeRunBenchmarkFile(startTime, restarted ? restartTime : null);
+      writeRunBenchmarkFile(startTime, result.isOk ? restartTime : null);
       await new Future<Null>.delayed(new Duration(seconds: 2));
       stop();
     }
@@ -243,6 +240,8 @@ class RunAndStayResident extends ResidentRunner {
   Future<Null> handleTerminalCommand(String code) async {
     String lower = code.toLowerCase();
     if (lower == 'r' || code == AnsiTerminal.KEY_F5) {
+      if (!supportsServiceProtocol)
+        return;
       if (device.supportsRestart) {
         // F5, restart
         await restart();
@@ -262,11 +261,31 @@ class RunAndStayResident extends ResidentRunner {
   }
 
   @override
-  void printHelp() {
-    final bool showRestartText = !prebuiltMode && device.supportsRestart;
-    String restartText = showRestartText ? ', "r" or F5 to restart the app,' : '';
-    printStatus('Type "h" or F1 for help$restartText and "q", F10, or ctrl-c to quit.');
-    printStatus('Type "w" to print the widget hierarchy of the app, and "t" for the render tree.');
+  void printHelp({ @required bool details }) {
+    bool haveDetails = false;
+    if (!prebuiltMode && device.supportsRestart && supportsServiceProtocol)
+      printStatus('To restart the app, press "r" or F5.');
+    if (_result.hasObservatory)
+      printStatus('The Observatory debugger and profiler is available at: http://127.0.0.1:${_result.observatoryPort}/');
+    if (supportsServiceProtocol) {
+      haveDetails = true;
+      if (details) {
+        printStatus('To dump the widget hierarchy of the app (debugDumpApp), press "w".');
+        printStatus('To dump the rendering tree of the app (debugDumpRenderTree), press "r".');
+      }
+    }
+    if (haveDetails && !details) {
+      printStatus('For a more detailed help message, press "h" or F1. To quit, press "q", F10, or Ctrl-C.');
+    } else {
+      printStatus('To repeat this help message, press "h" or F1. To quit, press "q", F10, or Ctrl-C.');
+    }
+  }
+
+  @override
+  Future<Null> preStop() async {
+    // If we're running in release mode, stop the app using the device logic.
+    if (vmService == null)
+      await device.stopApp(_package);
   }
 }
 

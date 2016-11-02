@@ -182,7 +182,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
       _initialPosition = event.position;
       _pendingDragOffset = Offset.zero;
       if (onDown != null)
-        onDown(new DragDownDetails(globalPosition: _initialPosition));
+        invokeCallback/*<Null>*/('onDown', () => onDown(new DragDownDetails(globalPosition: _initialPosition)));
     }
   }
 
@@ -196,11 +196,11 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
       Offset delta = event.delta;
       if (_state == _DragState.accepted) {
         if (onUpdate != null) {
-          onUpdate(new DragUpdateDetails(
+          invokeCallback/*<Null>*/('onUpdate', () => onUpdate(new DragUpdateDetails(
             delta: _getDeltaForDetails(delta),
             primaryDelta: _getPrimaryDeltaForDetails(delta),
             globalPosition: event.position
-          ));
+          )));
         }
       } else {
         _pendingDragOffset += delta;
@@ -218,12 +218,12 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
       Offset delta = _pendingDragOffset;
       _pendingDragOffset = Offset.zero;
       if (onStart != null)
-        onStart(new DragStartDetails(globalPosition: _initialPosition));
+        invokeCallback/*<Null>*/('onStart', () => onStart(new DragStartDetails(globalPosition: _initialPosition)));
       if (delta != Offset.zero && onUpdate != null) {
-        onUpdate(new DragUpdateDetails(
+        invokeCallback/*<Null>*/('onUpdate', () => onUpdate(new DragUpdateDetails(
           delta: _getDeltaForDetails(delta),
           primaryDelta: _getPrimaryDeltaForDetails(delta)
-        ));
+        )));
       }
     }
   }
@@ -239,7 +239,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
       resolve(GestureDisposition.rejected);
       _state = _DragState.ready;
       if (onCancel != null)
-        onCancel();
+        invokeCallback/*<Null>*/('onCancel', onCancel);
       return;
     }
     bool wasAccepted = (_state == _DragState.accepted);
@@ -253,9 +253,9 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
         final Offset pixelsPerSecond = velocity.pixelsPerSecond;
         if (pixelsPerSecond.distanceSquared > kMaxFlingVelocity * kMaxFlingVelocity)
           velocity = new Velocity(pixelsPerSecond: (pixelsPerSecond / pixelsPerSecond.distance) * kMaxFlingVelocity);
-        onEnd(new DragEndDetails(velocity: velocity));
+        invokeCallback/*<Null>*/('onEnd', () => onEnd(new DragEndDetails(velocity: velocity)));
       } else {
-        onEnd(new DragEndDetails(velocity: Velocity.zero));
+        invokeCallback/*<Null>*/('onEnd', () => onEnd(new DragEndDetails(velocity: Velocity.zero)));
       }
     }
     _velocityTrackers.clear();

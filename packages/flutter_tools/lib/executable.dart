@@ -28,11 +28,8 @@ import 'src/commands/logs.dart';
 import 'src/commands/setup.dart';
 import 'src/commands/packages.dart';
 import 'src/commands/precache.dart';
-import 'src/commands/refresh.dart';
 import 'src/commands/run.dart';
-import 'src/commands/run_mojo.dart';
 import 'src/commands/screenshot.dart';
-import 'src/commands/skia.dart';
 import 'src/commands/stop.dart';
 import 'src/commands/test.dart';
 import 'src/commands/trace.dart';
@@ -73,12 +70,9 @@ Future<Null> main(List<String> args) async {
     ..addCommand(new LogsCommand())
     ..addCommand(new PackagesCommand())
     ..addCommand(new PrecacheCommand())
-    ..addCommand(new RefreshCommand())
     ..addCommand(new RunCommand(verboseHelp: verboseHelp))
-    ..addCommand(new RunMojoCommand(hidden: !verboseHelp))
     ..addCommand(new ScreenshotCommand())
     ..addCommand(new SetupCommand(hidden: !verboseHelp))
-    ..addCommand(new SkiaCommand())
     ..addCommand(new StopCommand())
     ..addCommand(new TestCommand())
     ..addCommand(new TraceCommand())
@@ -207,9 +201,6 @@ Future<Null> _exit(int code) async {
 
   // Run shutdown hooks before flushing logs
   await runShutdownHooks();
-
-  // Write any buffered output.
-  logger.flush();
 
   // Give the task / timer queue one cycle through before we hard exit.
   Timer.run(() {

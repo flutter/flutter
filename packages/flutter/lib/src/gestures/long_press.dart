@@ -26,7 +26,7 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
   void didExceedDeadline() {
     resolve(GestureDisposition.accepted);
     if (onLongPress != null)
-      onLongPress();
+      invokeCallback/*<Null>*/('onLongPress', onLongPress);
   }
 
   @override

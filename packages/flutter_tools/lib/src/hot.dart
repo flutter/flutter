@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 import 'package:stack_trace/stack_trace.dart';
 
@@ -57,7 +58,7 @@ class StartupDependencySetBuilder {
 
     String output;
     try {
-      output = runCheckedSync(args);
+      output = runCheckedSync(args, hideStdout: true);
     } catch (e) {
       return null;
     }
@@ -135,6 +136,7 @@ class HotRunner extends ResidentRunner {
   String _mainPath;
   String _projectRootPath;
   Set<String> _startupDependencies;
+  int _observatoryPort;
   final AssetBundle bundle = new AssetBundle();
   final bool benchmarkMode;
   final Map<String, int> benchmarkData = new Map<String, int>();
@@ -217,7 +219,7 @@ class HotRunner extends ResidentRunner {
 
     await startEchoingDeviceLog();
 
-    printStatus('Launching loader on ${device.name}...');
+    printTrace('Launching loader on ${device.name}...');
 
     // Start the loader.
     Future<LaunchResult> futureResult = device.startApp(
@@ -246,13 +248,20 @@ class HotRunner extends ResidentRunner {
       return 2;
     }
 
-    await connectToServiceProtocol(result.observatoryPort);
+    _observatoryPort = result.observatoryPort;
+    try {
+      await connectToServiceProtocol(_observatoryPort);
+    } catch (error) {
+      printError('Error connecting to the service protocol: $error');
+      return 2;
+    }
+
 
     try {
       Uri baseUri = await _initDevFS();
       if (connectionInfoCompleter != null) {
         connectionInfoCompleter.complete(
-          new DebugConnectionInfo(result.observatoryPort, baseUri: baseUri.toString())
+          new DebugConnectionInfo(_observatoryPort, baseUri: baseUri.toString())
         );
       }
     } catch (error) {
@@ -260,6 +269,7 @@ class HotRunner extends ResidentRunner {
       return 3;
     }
     _loaderShowMessage('Connecting...', progress: 0);
+    _loaderShowExplanation('You can use hot reload to update your app on the fly, without restarting it.');
     bool devfsResult = await _updateDevFS(
       progressReporter: (int progress, int max) {
         if (progress % 10 == 0)
@@ -273,13 +283,13 @@ class HotRunner extends ResidentRunner {
     }
 
     await vmService.vm.refreshViews();
-    printStatus('Connected to ${vmService.vm.mainView}.');
+    printTrace('Connected to ${vmService.vm.mainView}.');
 
     printStatus('Running ${getDisplayPath(_mainPath)} on ${device.name}...');
     _loaderShowMessage('Launching...');
     await _launchFromDevFS(_package, _mainPath);
 
-    printStatus('Application running.');
+    printTrace('Application running.');
 
     setupTerminal();
 
@@ -337,6 +347,10 @@ class HotRunner extends ResidentRunner {
     }
   }
 
+  void _loaderShowExplanation(String explanation) {
+    currentView.uiIsolate.flutterLoaderShowExplanation(explanation);
+  }
+
   DevFS _devFS;
 
   Future<Uri> _initDevFS() {
@@ -361,10 +375,7 @@ class HotRunner extends ResidentRunner {
     devFSStatus.stop(showElapsedTime: true);
     // Clear the minimal set after the first sync.
     _startupDependencies = null;
-    if (progressReporter != null)
-      printStatus('Synced ${getSizeAsMB(_devFS.bytes)}.');
-    else
-      printTrace('Synced ${getSizeAsMB(_devFS.bytes)}.');
+    printTrace('Synced ${getSizeAsMB(_devFS.bytes)}.');
     return true;
   }
 
@@ -452,16 +463,16 @@ class HotRunner extends ResidentRunner {
   }
 
   @override
-  Future<bool> restart({ bool fullRestart: false }) async {
+  Future<OperationResult> restart({ bool fullRestart: false, bool pauseAfterRestart: false }) async {
     if (fullRestart) {
       await _restartFromSources();
-      return true;
+      return OperationResult.ok;
     } else {
-      return _reloadSources();
+      return _reloadSources(pause: pauseAfterRestart);
     }
   }
 
-  Future<bool> _reloadSources() async {
+  Future<OperationResult> _reloadSources({ bool pause: false }) async {
     if (currentView.uiIsolate == null)
       throw 'Application isolate not found';
     FirstFrameTimer firstFrameTimer = new FirstFrameTimer(vmService);
@@ -471,28 +482,31 @@ class HotRunner extends ResidentRunner {
     Status reloadStatus = logger.startProgress('Performing hot reload...');
     try {
       Map<String, dynamic> reloadReport =
-          await currentView.uiIsolate.reloadSources();
+          await currentView.uiIsolate.reloadSources(pause: pause);
       reloadStatus.stop(showElapsedTime: true);
       if (!_printReloadReport(reloadReport)) {
         // Reload failed.
         flutterUsage.sendEvent('hot', 'reload-reject');
-        return false;
+        return new OperationResult(1, 'reload rejected');
       } else {
         flutterUsage.sendEvent('hot', 'reload');
       }
     } catch (error, st) {
       int errorCode = error['code'];
+      String errorMessage = error['message'];
+
+      reloadStatus.stop(showElapsedTime: true);
+
       if (errorCode == Isolate.kIsolateReloadBarred) {
         printError('Unable to hot reload app due to an unrecoverable error in '
                    'the source code. Please address the error and then use '
                    '"R" to restart the app.');
         flutterUsage.sendEvent('hot', 'reload-barred');
-        return false;
+        return new OperationResult(errorCode, errorMessage);
       }
-      String errorMessage = error['message'];
-      reloadStatus.stop(showElapsedTime: true);
+
       printError('Hot reload failed:\ncode = $errorCode\nmessage = $errorMessage\n$st');
-      return false;
+      return new OperationResult(errorCode, errorMessage);
     }
     // Reload the isolate.
     await currentView.uiIsolate.reload();
@@ -501,7 +515,7 @@ class HotRunner extends ResidentRunner {
     if ((pauseEvent != null) && (pauseEvent.isPauseEvent)) {
       // Isolate is paused. Stop here.
       printTrace('Skipping reassemble because isolate is paused.');
-      return true;
+      return OperationResult.ok;
     }
     await _evictDirtyAssets();
     printTrace('Reassembling application');
@@ -510,7 +524,7 @@ class HotRunner extends ResidentRunner {
       waitForFrame = (await currentView.uiIsolate.flutterReassemble() != null);
     } catch (_) {
       printError('Reassembling application failed.');
-      return false;
+      return new OperationResult(1, 'error reassembling application');
     }
     try {
       /* ensure that a frame is scheduled */
@@ -530,14 +544,20 @@ class HotRunner extends ResidentRunner {
       }
       flutterUsage.sendTiming('hot', 'reload', firstFrameTimer.elapsed);
     }
-    return true;
+    return OperationResult.ok;
   }
 
   @override
-  void printHelp() {
-    printStatus('Type "h" or F1 for this help message; type "q", F10, or ctrl-c to quit.', emphasis: true);
-    printStatus('Type "r" or F5 to perform a hot reload of the app, and "R" to restart the app.', emphasis: true);
-    printStatus('Type "w" to print the widget hierarchy of the app, and "t" for the render tree.', emphasis: true);
+  void printHelp({ @required bool details }) {
+    printStatus('🔥  To hot reload your app on the fly, press "r" or F5. To restart the app entirely, press "R".', emphasis: true);
+    printStatus('The Observatory debugger and profiler is available at: http://127.0.0.1:$_observatoryPort/');
+    if (details) {
+      printStatus('To dump the widget hierarchy of the app (debugDumpApp), press "w".');
+      printStatus('To dump the rendering tree of the app (debugDumpRenderTree), press "r".');
+      printStatus('To repeat this help message, press "h" or F1. To quit, press "q", F10, or Ctrl-C.');
+    } else {
+      printStatus('For a more detailed help message, press "h" or F1. To quit, press "q", F10, or Ctrl-C.');
+    }
   }
 
   @override

@@ -358,7 +358,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
           new DefaultTextStyle(
             // These typographic styles aren't quite the regular ones. We pick the closest ones from the regular
             // list and then tweak them appropriately.
-            // See https://www.google.com/design/spec/components/data-tables.html#data-tables-tables-within-cards
+            // See https://material.google.com/components/data-tables.html#data-tables-tables-within-cards
             style: _selectedRowCount > 0 ? themeData.textTheme.subhead.copyWith(color: themeData.accentColor)
                                          : themeData.textTheme.title.copyWith(fontWeight: FontWeight.w400),
             child: new IconTheme.merge(

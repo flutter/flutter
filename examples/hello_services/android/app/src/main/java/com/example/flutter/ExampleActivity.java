@@ -17,7 +17,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
-import org.domokit.activity.ActivityImpl;
 import io.flutter.view.FlutterMain;
 import io.flutter.view.FlutterView;
 

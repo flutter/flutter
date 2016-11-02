@@ -82,7 +82,7 @@ class _RecipeGridPageState extends State<RecipeGridPage> {
   Widget build(BuildContext context) {
     final double statusBarHeight = MediaQuery.of(context).padding.top;
     return new Theme(
-      data: _kTheme,
+      data: _kTheme.copyWith(platform: Theme.of(context).platform),
       child: new Scaffold(
         key: scaffoldKey,
         scrollableKey: config.scrollableKey,
@@ -168,7 +168,7 @@ class _RecipeGridPageState extends State<RecipeGridPage> {
       settings: const RouteSettings(name: "/pesto/recipe"),
       builder: (BuildContext context) {
         return new Theme(
-          data: _kTheme,
+          data: _kTheme.copyWith(platform: Theme.of(context).platform),
           child: new RecipePage(recipe: recipe)
         );
       }
@@ -555,7 +555,7 @@ class RecipeStep {
 
 final List<Recipe> kPestoRecipes = <Recipe>[
   const Recipe(
-    name: 'Pesto Bruchetta',
+    name: 'Pesto Bruschetta',
     author: 'Peter Carlsson',
     ingredientsImagePath: 'packages/flutter_gallery_assets/pesto/quick.png',
     description: 'Bask in greens this season by trying this delightful take on traditional bruschetta. Top with a dollop of homemade pesto, and season with freshly ground sea salt and pepper.',

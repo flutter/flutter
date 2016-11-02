@@ -31,7 +31,7 @@ import 'toggleable.dart';
 ///  * [CheckBox]
 ///  * [Radio]
 ///  * [Slider]
-///  * <https://www.google.com/design/spec/components/selection-controls.html#selection-controls-switch>
+///  * <https://material.google.com/components/selection-controls.html#selection-controls-switch>
 class Switch extends StatefulWidget {
   /// Creates a material design switch.
   ///
@@ -61,6 +61,21 @@ class Switch extends StatefulWidget {
   /// value.
   ///
   /// If null, the switch will be displayed as disabled.
+  ///
+  /// The callback provided to onChanged should update the state of the parent
+  /// [StatefulWidget] using the [State.setState] method, so that the parent
+  /// gets rebuilt; for example:
+  ///
+  /// ```dart
+  /// new Switch(
+  ///   value: _giveVerse,
+  ///   onChanged: (bool newValue) {
+  ///     setState(() {
+  ///       _giveVerse = newValue;
+  ///     });
+  ///   },
+  /// ),
+  /// ```
   final ValueChanged<bool> onChanged;
 
   /// The color to use when this switch is on.

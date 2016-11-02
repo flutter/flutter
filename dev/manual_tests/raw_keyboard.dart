@@ -41,6 +41,7 @@ class _HardwareKeyDemoState extends State<RawKeyboardDemo> {
 
   @override
   Widget build(BuildContext context)  {
+    final TextTheme textTheme = Theme.of(context).textTheme;
     bool focused = Focus.at(context);
     Widget child;
     if (!focused) {
@@ -49,12 +50,12 @@ class _HardwareKeyDemoState extends State<RawKeyboardDemo> {
           Focus.moveTo(config.key);
         },
         child: new Center(
-          child: new Text('Tap to focus', style: Typography.black.display1),
+          child: new Text('Tap to focus', style: textTheme.display1),
         ),
       );
     } else if (_event == null) {
       child = new Center(
-        child: new Text('Press a key', style: Typography.black.display1),
+        child: new Text('Press a key', style: textTheme.display1),
       );
     } else {
       int codePoint;
@@ -67,9 +68,9 @@ class _HardwareKeyDemoState extends State<RawKeyboardDemo> {
       child = new Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          new Text('${_event.runtimeType}', style: Typography.black.body2),
-          new Text('codePoint: $codePoint', style: Typography.black.display4),
-          new Text('keyCode: $keyCode', style: Typography.black.display4),
+          new Text('${_event.runtimeType}', style: textTheme.body2),
+          new Text('codePoint: $codePoint', style: textTheme.display4),
+          new Text('keyCode: $keyCode', style: textTheme.display4),
         ],
       );
     }

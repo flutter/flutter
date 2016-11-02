@@ -30,7 +30,7 @@ enum PageableListFlingBehavior {
 /// a value that shows a single page.
 ///
 /// [Pageable] uses different units for its scroll offset than [Scrollable]. One
-/// unit of scroll offset cooresponds to one child widget, which means a scroll
+/// unit of scroll offset corresponds to one child widget, which means a scroll
 /// offset of 2.75 indicates that the viewport is three quarters of the way
 /// between the child with index 2 and the child with index 3.
 ///
@@ -89,7 +89,8 @@ abstract class Pageable extends Scrollable {
   /// The animation curve to use when animating to a given page.
   final Curve curve;
 
-  int get _itemCount;
+  /// The number of items, one per page, to display.
+  int get itemCount;
 }
 
 /// A widget that pages through an iterable list of children.
@@ -121,7 +122,7 @@ class PageableList extends Pageable {
     ValueChanged<int> onPageChanged,
     Duration duration: const Duration(milliseconds: 200),
     Curve curve: Curves.ease,
-    this.children
+    this.children: const <Widget>[],
   }) : super(
     key: key,
     initialScrollOffset: initialScrollOffset,
@@ -142,7 +143,7 @@ class PageableList extends Pageable {
   final Iterable<Widget> children;
 
   @override
-  int get _itemCount => children?.length ?? 0;
+  int get itemCount => children?.length ?? 0;
 
   @override
   PageableListState<PageableList> createState() => new PageableListState<PageableList>();
@@ -175,7 +176,7 @@ class PageableLazyList extends Pageable {
     ValueChanged<int> onPageChanged,
     Duration duration: const Duration(milliseconds: 200),
     Curve curve: Curves.ease,
-    this.itemCount,
+    this.itemCount: 0,
     this.itemBuilder
   }) : super(
     key: key,
@@ -194,13 +195,11 @@ class PageableLazyList extends Pageable {
   );
 
   /// The total number of list items.
+  @override
   final int itemCount;
 
   /// A function that returns the pages themselves.
   final ItemListBuilder itemBuilder;
-
-  @override
-  int get _itemCount => itemCount ?? 0;
 
   @override
   _PageableLazyListState createState() => new _PageableLazyListState();
@@ -212,10 +211,11 @@ class PageableLazyList extends Pageable {
 ///
 /// Subclasses typically override [buildContent] to build viewports.
 abstract class PageableState<T extends Pageable> extends ScrollableState<T> {
-  int get _itemCount => config._itemCount;
+  int get _itemCount => config.itemCount;
   int _previousItemCount;
 
-  double get _pixelsPerScrollUnit {
+  /// Convert from the item based scroll units to logical pixels.
+  double get pixelsPerScrollUnit {
     final RenderBox box = context.findRenderObject();
     if (box == null || !box.hasSize)
       return 0.0;
@@ -231,13 +231,13 @@ abstract class PageableState<T extends Pageable> extends ScrollableState<T> {
 
   @override
   double pixelOffsetToScrollOffset(double pixelOffset) {
-    final double pixelsPerScrollUnit = _pixelsPerScrollUnit;
-    return super.pixelOffsetToScrollOffset(pixelsPerScrollUnit == 0.0 ? 0.0 : pixelOffset / pixelsPerScrollUnit);
+    final double unit = pixelsPerScrollUnit;
+    return super.pixelOffsetToScrollOffset(unit == 0.0 ? 0.0 : pixelOffset / unit);
   }
 
   @override
   double scrollOffsetToPixelOffset(double scrollOffset) {
-    return super.scrollOffsetToPixelOffset(scrollOffset * _pixelsPerScrollUnit);
+    return super.scrollOffsetToPixelOffset(scrollOffset * pixelsPerScrollUnit);
   }
 
   int _scrollOffsetToPageIndex(double scrollOffset) {
@@ -526,7 +526,7 @@ class _VirtualPageViewportElement extends VirtualViewportElement {
 ///
 /// Useful for [Pageable] widgets.
 ///
-/// One unit of start offset cooresponds to one child widget, which means a
+/// One unit of start offset corresponds to one child widget, which means a
 /// start offset of 2.75 indicates that the viewport is three quarters of the
 /// way between the child with index 2 and the child with index 3.
 ///
@@ -542,7 +542,7 @@ class PageViewport extends _VirtualPageViewport with VirtualViewportFromIterable
     Axis mainAxis: Axis.vertical,
     ViewportAnchor anchor: ViewportAnchor.start,
     bool itemsWrap: false,
-    this.children
+    this.children: const <Widget>[],
   }) : super(
     startOffset,
     mainAxis,
@@ -558,7 +558,7 @@ class PageViewport extends _VirtualPageViewport with VirtualViewportFromIterable
 ///
 /// Useful for [Pageable] widgets.
 ///
-/// One unit of start offset cooresponds to one child widget, which means a
+/// One unit of start offset corresponds to one child widget, which means a
 /// start offset of 2.75 indicates that the viewport is three quarters of the
 /// way between the child with index 2 and the child with index 3.
 ///

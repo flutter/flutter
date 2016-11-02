@@ -89,7 +89,7 @@ class IOSDevice extends Device {
 
     List<IOSDevice> devices = <IOSDevice>[];
     for (String id in _getAttachedDeviceIDs(mockIOS)) {
-      String name = _getDeviceName(id, mockIOS);
+      String name = IOSDevice._getDeviceInfo(id, 'DeviceName', mockIOS);
       devices.add(new IOSDevice(id, name: name));
     }
     return devices;
@@ -105,11 +105,11 @@ class IOSDevice extends Device {
     }
   }
 
-  static String _getDeviceName(String deviceID, [IOSDevice mockIOS]) {
+  static String _getDeviceInfo(String deviceID, String infoKey, [IOSDevice mockIOS]) {
     String informerPath = (mockIOS != null)
         ? mockIOS.informerPath
         : _checkForCommand('ideviceinfo');
-    return runSync(<String>[informerPath, '-k', 'DeviceName', '-u', deviceID]).trim();
+    return runSync(<String>[informerPath, '-k', infoKey, '-u', deviceID]).trim();
   }
 
   static final Map<String, String> _commandMap = <String, String>{};
@@ -295,7 +295,7 @@ class IOSDevice extends Device {
   }
 
   Future<int> _acquireAndForwardPort(String serviceName, int localPort) async {
-    Duration stepTimeout = const Duration(seconds: 10);
+    Duration stepTimeout = const Duration(seconds: 60);
 
     Future<int> remote = new ProtocolDiscovery(logReader, serviceName).nextPort();
 
@@ -368,6 +368,13 @@ class IOSDevice extends Device {
 
   @override
   TargetPlatform get platform => TargetPlatform.ios;
+
+  @override
+  String get sdkNameAndVersion => 'iOS $_sdkVersion ($_buildVersion)';
+
+  String get _sdkVersion => _getDeviceInfo(id, 'ProductVersion');
+
+  String get _buildVersion => _getDeviceInfo(id, 'BuildVersion');
 
   @override
   DeviceLogReader get logReader {

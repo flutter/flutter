@@ -93,6 +93,12 @@ class ButtonTheme extends InheritedWidget {
   final EdgeInsets padding;
 
   /// The color from the closest instance of this class that encloses the given context.
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// ButtonTheme theme = ButtonTheme.of(context);
+  /// ```
   static ButtonTheme of(BuildContext context) {
     ButtonTheme result = context.inheritFromWidgetOfExactType(ButtonTheme);
     return result ?? const ButtonTheme();

@@ -25,7 +25,12 @@ class VMService {
   /// Connect to '127.0.0.1' at [port].
   static Future<VMService> connect(int port) async {
     Uri uri = new Uri(scheme: 'ws', host: '127.0.0.1', port: port, path: 'ws');
-    WebSocket ws = await WebSocket.connect(uri.toString());
+    WebSocket ws;
+    try {
+      ws = await WebSocket.connect(uri.toString());
+    } catch (e) {
+      return new Future<VMService>.error('Failed to connect to $uri\n  $e');
+    }
     rpc.Peer peer = new rpc.Peer(new IOWebSocketChannel(ws).cast());
     peer.listen();
     Uri httpAddress = new Uri(scheme: 'http', host: '127.0.0.1', port: port);
@@ -754,9 +759,11 @@ class Isolate extends ServiceObjectOwner {
 
   static final int kIsolateReloadBarred = 1005;
 
-  Future<Map<String, dynamic>> reloadSources() async {
+  Future<Map<String, dynamic>> reloadSources({ bool pause: false }) async {
     try {
-      Map<String, dynamic> response = await invokeRpcRaw('_reloadSources');
+      Map<String, dynamic> response = await invokeRpcRaw(
+        '_reloadSources', <String, dynamic>{ 'pause': pause }
+      );
       return response;
     } on rpc.RpcException catch(e) {
       return new Future<Map<String, dynamic>>.error(<String, dynamic>{
@@ -799,6 +806,13 @@ class Isolate extends ServiceObjectOwner {
     // Invoke loaderShowMessage; ignore any returned errors.
     invokeRpcRaw('ext.flutter.loaderShowMessage', <String, dynamic> {
       'value': message
+    }).catchError((dynamic error) => null);
+  }
+
+  void flutterLoaderShowExplanation(String explanation) {
+    // Invoke loaderShowExplanation; ignore any returned errors.
+    invokeRpcRaw('ext.flutter.loaderShowExplanation', <String, dynamic> {
+      'value': explanation
     }).catchError((dynamic error) => null);
   }
 

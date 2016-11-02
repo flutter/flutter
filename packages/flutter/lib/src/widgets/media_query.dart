@@ -124,6 +124,12 @@ class MediaQuery extends InheritedWidget {
   /// You can use this function to query the size an orientation of the screen.
   /// When that information changes, your widget will be scheduled to be rebuilt,
   /// keeping your widget up-to-date.
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// MediaQueryData media = MediaQuery.of(context);
+  /// ```
   static MediaQueryData of(BuildContext context) {
     MediaQuery query = context.inheritFromWidgetOfExactType(MediaQuery);
     return query?.data ?? new MediaQueryData.fromWindow(ui.window);

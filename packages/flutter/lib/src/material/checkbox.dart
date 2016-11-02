@@ -28,8 +28,8 @@ import 'toggleable.dart';
 ///  * [Radio]
 ///  * [Switch]
 ///  * [Slider]
-///  * <https://www.google.com/design/spec/components/selection-controls.html#selection-controls-checkbox>
-///  * <https://www.google.com/design/spec/components/lists-controls.html#lists-controls-types-of-list-controls>
+///  * <https://material.google.com/components/selection-controls.html#selection-controls-checkbox>
+///  * <https://material.google.com/components/lists-controls.html#lists-controls-types-of-list-controls>
 class Checkbox extends StatefulWidget {
   /// Creates a material design checkbox.
   ///
@@ -58,6 +58,21 @@ class Checkbox extends StatefulWidget {
   /// value.
   ///
   /// If null, the checkbox will be displayed as disabled.
+  ///
+  /// The callback provided to onChanged should update the state of the parent
+  /// [StatefulWidget] using the [State.setState] method, so that the parent
+  /// gets rebuilt; for example:
+  ///
+  /// ```dart
+  /// new Checkbox(
+  ///   value: _throwShotAway,
+  ///   onChanged: (bool newValue) {
+  ///     setState(() {
+  ///       _throwShotAway = newValue;
+  ///     });
+  ///   },
+  /// ),
+  /// ```
   final ValueChanged<bool> onChanged;
 
   /// The color to use when this checkbox is checked.

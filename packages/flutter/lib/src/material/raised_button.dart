@@ -31,7 +31,7 @@ import 'theme.dart';
 ///  * [FlatButton]
 ///  * [DropdownButton]
 ///  * [FloatingActionButton]
-///  * <https://www.google.com/design/spec/components/buttons.html>
+///  * <https://material.google.com/components/buttons.html>
 class RaisedButton extends StatelessWidget {
   /// Creates a raised button.
   ///
@@ -56,6 +56,14 @@ class RaisedButton extends StatelessWidget {
 
   /// The color of the button, as printed on the [Material]. Defaults to null,
   /// meaning that the color is automatically derived from the [Theme].
+  ///
+  /// ```dart
+  ///  new RaisedButton(
+  ///    color: Colors.blue[500],
+  ///    onPressed: _handleTap,
+  ///    child: new Text('DEMO'),
+  ///  ),
+  /// ```
   final Color color;
 
   /// The color of the button when the button is disabled. Buttons are disabled

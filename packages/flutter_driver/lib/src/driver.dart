@@ -73,9 +73,13 @@ class FlutterDriver {
   ///
   /// Resumes the application if it is currently paused (e.g. at a breakpoint).
   ///
-  /// [dartVmServiceUrl] is the URL to Dart observatory (a.k.a. VM service). By
-  /// default it connects to `http://localhost:8183`.
-  static Future<FlutterDriver> connect({String dartVmServiceUrl: 'http://localhost:8183'}) async {
+  /// [dartVmServiceUrl] is the URL to Dart observatory (a.k.a. VM service). If
+  /// not specified, the URL specified by the `VM_SERVICE_URL` environment
+  /// variable is used, or 'http://localhost:8183'.
+  static Future<FlutterDriver> connect({String dartVmServiceUrl}) async {
+    dartVmServiceUrl ??= Platform.environment['VM_SERVICE_URL'];
+    dartVmServiceUrl ??= 'http://localhost:8183';
+
     // Connect to Dart VM servcies
     _log.info('Connecting to Flutter application at $dartVmServiceUrl');
     VMServiceClientConnection connection = await vmServiceConnectFunction(dartVmServiceUrl);
@@ -249,7 +253,7 @@ class FlutterDriver {
   ///
   /// [dx] and [dy] specify the total offset for the entire scrolling action.
   ///
-  /// [duration] specifies the lenght of the action.
+  /// [duration] specifies the length of the action.
   ///
   /// The move events are generated at a given [frequency] in Hz (or events per
   /// second). It defaults to 60Hz.

@@ -13,6 +13,38 @@ class TestOverlayRoute extends OverlayRoute<Null> {
   Widget _build(BuildContext context) => new Text('Overlay');
 }
 
+class PersistentBottomSheetTest extends StatefulWidget {
+  PersistentBottomSheetTest({ Key key }) : super(key: key);
+
+  @override
+  PersistentBottomSheetTestState createState() => new PersistentBottomSheetTestState();
+}
+
+class PersistentBottomSheetTestState extends State<PersistentBottomSheetTest> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+
+  bool setStateCalled = false;
+
+  void showBottomSheet() {
+    _scaffoldKey.currentState.showBottomSheet/*<Null>*/((BuildContext context) {
+      return new Text('bottomSheet');
+    })
+    .closed.then((_) {
+      setState(() {
+        setStateCalled = true;
+      });
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return new Scaffold(
+      key: _scaffoldKey,
+      body: new Text('Sheet')
+    );
+  }
+}
+
 void main() {
   testWidgets('Check onstage/offstage handling around transitions', (WidgetTester tester) async {
     GlobalKey containerKey1 = new GlobalKey();
@@ -331,5 +363,124 @@ void main() {
 
     expect(find.text('Home'), isOnstage);
     expect(find.text('Settings'), findsNothing);
+  });
+
+  // Tests bug https://github.com/flutter/flutter/issues/6451
+  testWidgets('Check back gesture with a persistent bottom sheet showing', (WidgetTester tester) async {
+    GlobalKey containerKey1 = new GlobalKey();
+    GlobalKey containerKey2 = new GlobalKey();
+    final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      '/': (_) => new Scaffold(key: containerKey1, body: new Text('Home')),
+      '/sheet': (_) => new PersistentBottomSheetTest(key: containerKey2),
+    };
+
+    await tester.pumpWidget(new MaterialApp(
+      routes: routes,
+      theme: new ThemeData(platform: TargetPlatform.iOS),
+    ));
+
+    Navigator.pushNamed(containerKey1.currentContext, '/sheet');
+
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(find.text('Home'), findsNothing);
+    expect(find.text('Sheet'), isOnstage);
+
+    // Show the bottom sheet.
+    PersistentBottomSheetTestState sheet = containerKey2.currentState;
+    sheet.showBottomSheet();
+
+    await tester.pump(const Duration(seconds: 1));
+
+    // Drag from left edge to invoke the gesture.
+    TestGesture gesture = await tester.startGesture(new Point(5.0, 100.0));
+    await gesture.moveBy(new Offset(500.0, 0.0));
+    await gesture.up();
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(find.text('Home'), isOnstage);
+    expect(find.text('Sheet'), findsNothing);
+
+    // Sheet called setState and didn't crash.
+    expect(sheet.setStateCalled, isTrue);
+  });
+
+  testWidgets('Test completed future', (WidgetTester tester) async {
+    final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      '/': (_) => new Center(child: new Text('home')),
+      '/next': (_) => new Center(child: new Text('next')),
+    };
+
+    await tester.pumpWidget(new MaterialApp(routes: routes));
+
+    PageRoute<Null> route = new MaterialPageRoute<Null>(
+      settings: new RouteSettings(name: '/page'),
+      builder: (BuildContext context) => new Center(child: new Text('page')),
+    );
+
+    int popCount = 0;
+    route.popped.then((_) {
+      ++popCount;
+    });
+
+    int completeCount = 0;
+    route.completed.then((_) {
+      ++completeCount;
+    });
+
+    expect(popCount, 0);
+    expect(completeCount, 0);
+
+    Navigator.push(tester.element(find.text('home')), route);
+
+    expect(popCount, 0);
+    expect(completeCount, 0);
+
+    await tester.pump();
+
+    expect(popCount, 0);
+    expect(completeCount, 0);
+
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(popCount, 0);
+    expect(completeCount, 0);
+
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(popCount, 0);
+    expect(completeCount, 0);
+
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(popCount, 0);
+    expect(completeCount, 0);
+
+    Navigator.pop(tester.element(find.text('page')));
+
+    expect(popCount, 0);
+    expect(completeCount, 0);
+
+    await tester.pump();
+
+    expect(popCount, 1);
+    expect(completeCount, 0);
+
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(popCount, 1);
+    expect(completeCount, 0);
+
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(popCount, 1);
+    expect(completeCount, 0);
+
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(popCount, 1);
+    expect(completeCount, 1);
   });
 }

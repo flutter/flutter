@@ -218,7 +218,10 @@ abstract class NavigationGestureController {
 
   /// The drag gesture has ended with a horizontal motion of
   /// [fractionalVelocity] as a fraction of screen width per second.
-  void dragEnd(double fractionalVelocity);
+  ///
+  /// Returns true if the gesture will complete (i.e. a back gesture will
+  /// result in a pop).
+  bool dragEnd(double fractionalVelocity);
 }
 
 /// Signature for the [Navigator.popUntil] predicate argument.
@@ -274,6 +277,12 @@ class Navigator extends StatefulWidget {
   /// callback. The returned route will be pushed into the navigator.
   ///
   /// Returns a Future that completes when the pushed route is popped.
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// Navigator.pushNamed(context, '/nyc/1776');
+  /// ```
   static Future<dynamic> pushNamed(BuildContext context, String routeName) {
     return Navigator.of(context).pushNamed(routeName);
   }
@@ -305,11 +314,18 @@ class Navigator extends StatefulWidget {
   ///
   /// Returns true if a route was popped; returns false if there are no further
   /// previous routes.
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// Navigator.pop(context);
+  /// ```
   static bool pop(BuildContext context, [ dynamic result ]) {
     return Navigator.of(context).pop(result);
   }
 
-  /// Calls [pop()] repeatedly until the predicate returns false.
+  /// Calls [pop()] repeatedly until the predicate returns true.
+  ///
   /// The predicate may be applied to the same route more than once if
   /// [Route.willHandlePopInternally] is true.
   static void popUntil(BuildContext context, RoutePredicate predicate) {
@@ -337,6 +353,12 @@ class Navigator extends StatefulWidget {
   /// the class of the current route. (In practice, this is usually "dynamic".)
   ///
   /// Returns a Future that completes when the pushed route is popped.
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// Navigator.popAndPushNamed(context, '/nyc/1776');
+  /// ```
   static Future<dynamic> popAndPushNamed(BuildContext context, String routeName, { dynamic result }) {
     NavigatorState navigator = Navigator.of(context);
     navigator.pop(result);
@@ -344,6 +366,15 @@ class Navigator extends StatefulWidget {
   }
 
   /// The state from the closest instance of this class that encloses the given context.
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// Navigator.of(context)
+  ///   ..pop()
+  ///   ..pop()
+  ///   ..pushNamed('/settings');
+  /// ```
   static NavigatorState of(BuildContext context) {
     NavigatorState navigator = context.ancestorStateOfType(const TypeMatcher<NavigatorState>());
     assert(() {
@@ -586,6 +617,9 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   }
 
   /// Repeatedly calls [pop] until the given `predicate` returns true.
+  ///
+  /// The predicate may be applied to the same route more than once if
+  /// [Route.willHandlePopInternally] is true.
   void popUntil(RoutePredicate predicate) {
     while (!predicate(_history.last))
       pop();
