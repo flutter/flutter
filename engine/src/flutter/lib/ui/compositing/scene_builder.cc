@@ -36,20 +36,21 @@ static void SceneBuilder_constructor(Dart_NativeArguments args) {
 
 IMPLEMENT_WRAPPERTYPEINFO(ui, SceneBuilder);
 
-#define FOR_EACH_BINDING(V)                      \
-  V(SceneBuilder, pushTransform)                 \
-  V(SceneBuilder, pushClipRect)                  \
-  V(SceneBuilder, pushClipRRect)                 \
-  V(SceneBuilder, pushClipPath)                  \
-  V(SceneBuilder, pushOpacity)                   \
-  V(SceneBuilder, pushColorFilter)               \
-  V(SceneBuilder, pushBackdropFilter)            \
-  V(SceneBuilder, pushShaderMask)                \
-  V(SceneBuilder, pop)                           \
-  V(SceneBuilder, addPicture)                    \
-  V(SceneBuilder, addChildScene)                 \
-  V(SceneBuilder, addPerformanceOverlay)         \
-  V(SceneBuilder, setRasterizerTracingThreshold) \
+#define FOR_EACH_BINDING(V)                         \
+  V(SceneBuilder, pushTransform)                    \
+  V(SceneBuilder, pushClipRect)                     \
+  V(SceneBuilder, pushClipRRect)                    \
+  V(SceneBuilder, pushClipPath)                     \
+  V(SceneBuilder, pushOpacity)                      \
+  V(SceneBuilder, pushColorFilter)                  \
+  V(SceneBuilder, pushBackdropFilter)               \
+  V(SceneBuilder, pushShaderMask)                   \
+  V(SceneBuilder, pop)                              \
+  V(SceneBuilder, addPicture)                       \
+  V(SceneBuilder, addChildScene)                    \
+  V(SceneBuilder, addPerformanceOverlay)            \
+  V(SceneBuilder, setRasterizerTracingThreshold)    \
+  V(SceneBuilder, setCheckerboardRasterCacheImages) \
   V(SceneBuilder, build)
 
 FOR_EACH_BINDING(DART_NATIVE_CALLBACK)
@@ -61,7 +62,9 @@ void SceneBuilder::RegisterNatives(tonic::DartLibraryNatives* natives) {
 }
 
 SceneBuilder::SceneBuilder()
-    : m_currentLayer(nullptr), m_currentRasterizerTracingThreshold(0) {
+    : m_currentLayer(nullptr),
+      m_currentRasterizerTracingThreshold(0),
+      m_checkerboardRasterCacheImages(false) {
   m_cullRects.push(SkRect::MakeLargest());
 }
 
@@ -230,11 +233,16 @@ void SceneBuilder::setRasterizerTracingThreshold(uint32_t frameInterval) {
   m_currentRasterizerTracingThreshold = frameInterval;
 }
 
+void SceneBuilder::setCheckerboardRasterCacheImages(bool checkerboard) {
+  m_checkerboardRasterCacheImages = checkerboard;
+}
+
 ftl::RefPtr<Scene> SceneBuilder::build() {
   m_currentLayer = nullptr;
   int32_t threshold = m_currentRasterizerTracingThreshold;
   m_currentRasterizerTracingThreshold = 0;
-  ftl::RefPtr<Scene> scene = Scene::create(std::move(m_rootLayer), threshold);
+  ftl::RefPtr<Scene> scene = Scene::create(std::move(m_rootLayer), threshold,
+                                           m_checkerboardRasterCacheImages);
   ClearDartWrapper();
   return scene;
 }

@@ -4,13 +4,16 @@
 
 #include "flutter/flow/layers/layer_tree.h"
 
-#include "flutter/glue/trace_event.h"
 #include "flutter/flow/layers/layer.h"
+#include "flutter/glue/trace_event.h"
 
 namespace flow {
 
 LayerTree::LayerTree()
-    : frame_size_{}, scene_version_(0), rasterizer_tracing_threshold_(0) {}
+    : frame_size_{},
+      scene_version_(0),
+      rasterizer_tracing_threshold_(0),
+      checkerboard_raster_cache_images_(0) {}
 
 LayerTree::~LayerTree() {}
 

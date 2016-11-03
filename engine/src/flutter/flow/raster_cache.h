@@ -10,6 +10,7 @@
 
 #include "flutter/flow/instrumentation.h"
 #include "lib/ftl/macros.h"
+#include "lib/ftl/memory/weak_ptr.h"
 #include "third_party/skia/include/core/SkImage.h"
 #include "third_party/skia/include/core/SkSize.h"
 
@@ -29,6 +30,8 @@ class RasterCache {
 
   void Clear();
 
+  void SetCheckboardCacheImages(bool checkerboard);
+
  private:
   struct Entry {
     Entry();
@@ -41,7 +44,10 @@ class RasterCache {
   };
 
   using Cache = std::unordered_map<uint32_t, Entry>;
+
   Cache cache_;
+  bool checkerboard_images_;
+  ftl::WeakPtrFactory<RasterCache> weak_factory_;
 
   FTL_DISALLOW_COPY_AND_ASSIGN(RasterCache);
 };
