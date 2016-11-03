@@ -164,6 +164,16 @@ String runCheckedSync(List<String> cmd, {
   );
 }
 
+/// Run cmd and return stdout on success.
+///
+/// Throws the standard error output if cmd exits with a non-zero value.
+String runSyncAndThrowStdErrOnError(List<String> cmd) {
+  return _runWithLoggingSync(cmd,
+                             checked: true,
+                             throwStandardErrorOnError: true,
+                             hideStdout: true);
+}
+
 /// Run cmd and return stdout.
 String runSync(List<String> cmd, {
   String workingDirectory,
@@ -187,6 +197,7 @@ void _traceCommand(List<String> args, { String workingDirectory }) {
 String _runWithLoggingSync(List<String> cmd, {
   bool checked: false,
   bool noisyErrors: false,
+  bool throwStandardErrorOnError: false,
   String workingDirectory,
   bool allowReentrantFlutter: false,
   bool hideStdout: false,
@@ -215,6 +226,9 @@ String _runWithLoggingSync(List<String> cmd, {
       else
         printTrace(results.stderr.trim());
     }
+
+    if (throwStandardErrorOnError)
+      throw results.stderr.trim();
 
     if (checked)
       throw 'Exit code ${results.exitCode} from: ${cmd.join(' ')}';

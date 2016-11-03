@@ -118,7 +118,7 @@ class AndroidSdk {
       return <String>['Android SDK file not found: $adbPath.'];
 
     if (sdkVersions.isEmpty || latestVersion == null)
-      return <String>['Android SDK does not have the proper build-tools.'];
+      return <String>['Android SDK is missing command line tools; download from https://goo.gl/XxQghQ'];
 
     return latestVersion.validateSdkWellFormed();
   }
