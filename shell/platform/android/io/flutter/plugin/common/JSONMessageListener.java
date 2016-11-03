@@ -28,4 +28,8 @@ public abstract class JSONMessageListener implements FlutterView.OnMessageListen
     }
 
     public abstract JSONObject onJSONMessage(FlutterView view, JSONObject message) throws JSONException;
+
+    public static String getStringOrNull(JSONObject object, String name) throws JSONException {
+        return object.isNull(name) ? null : object.getString(name);
+    }
 }

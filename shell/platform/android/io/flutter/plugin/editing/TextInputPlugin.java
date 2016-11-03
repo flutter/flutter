@@ -72,7 +72,7 @@ public class TextInputPlugin extends JSONMessageListener {
             return null;
         try {
             outAttrs.inputType = inputTypeFromTextInputType(mConfiguration.getString("inputType"));
-            outAttrs.actionLabel = mConfiguration.getString("actionLabel");
+            outAttrs.actionLabel = getStringOrNull(mConfiguration, "actionLabel");
             outAttrs.imeOptions = EditorInfo.IME_ACTION_DONE | EditorInfo.IME_FLAG_NO_FULLSCREEN;
             InputConnectionAdaptor connection = new InputConnectionAdaptor(view, mClient);
             if (mIncomingState != null) {
