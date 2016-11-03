@@ -137,7 +137,7 @@ Future<int> buildGradleProject(BuildMode buildMode) async {
         workingDirectory: 'android',
         allowReentrantFlutter: true
       );
-      status.stop(showElapsedTime: true);
+      status.stop();
       if (exitcode != 0)
         return exitcode;
     } catch (error) {
@@ -159,7 +159,7 @@ Future<int> buildGradleProject(BuildMode buildMode) async {
     workingDirectory: 'android',
     allowReentrantFlutter: true
   );
-  status.stop(showElapsedTime: true);
+  status.stop();
 
   if (exitcode == 0) {
     File apkFile = new File(gradleAppOut);

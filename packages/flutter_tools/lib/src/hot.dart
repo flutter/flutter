@@ -339,15 +339,7 @@ class HotRunner extends ResidentRunner {
   Future<Null> handleTerminalCommand(String code) async {
     final String lower = code.toLowerCase();
     if ((lower == 'r') || (code == AnsiTerminal.KEY_F5)) {
-      OperationResult result = OperationResult.ok;
-      // F5, restart
-      if ((code == 'r') || (code == AnsiTerminal.KEY_F5)) {
-        // lower-case 'r'
-        result = await _reloadSources();
-      } else {
-        // upper-case 'R'.
-        result = await _restartFromSources();
-      }
+      OperationResult result = await restart(fullRestart: code == 'R');
       if (!result.isOk) {
         // TODO(johnmccutchan): Attempt to determine the number of errors that
         // occurred and tighten this message.
@@ -396,7 +388,7 @@ class HotRunner extends ResidentRunner {
                         bundle: bundle,
                         bundleDirty: rebuildBundle,
                         fileFilter: _dartDependencies);
-    devFSStatus.stop(showElapsedTime: true);
+    devFSStatus.stop();
     // Clear the set after the sync.
     _dartDependencies = null;
     printTrace('Synced ${getSizeAsMB(_devFS.bytes)}.');
@@ -461,10 +453,10 @@ class HotRunner extends ResidentRunner {
       // Wait for the first frame to be rendered.
       await firstFrameTimer.firstFrame();
     }
-    restartStatus.stop(showElapsedTime: true);
+    restartStatus.stop();
     if (waitForFrame) {
-      printStatus('Restart performed in '
-                  '${getElapsedAsMilliseconds(firstFrameTimer.elapsed)}.');
+      printTrace('Restart performed in '
+                 '${getElapsedAsMilliseconds(firstFrameTimer.elapsed)}.');
       if (benchmarkMode) {
         benchmarkData['hotRestartMillisecondsToFrame'] =
             firstFrameTimer.elapsed.inMilliseconds;
@@ -476,25 +468,41 @@ class HotRunner extends ResidentRunner {
   }
 
   /// Returns [true] if the reload was successful.
-  bool _printReloadReport(Map<String, dynamic> reloadReport) {
+  bool _validateReloadReport(Map<String, dynamic> reloadReport) {
     if (!reloadReport['success']) {
       printError('Hot reload was rejected:');
       for (Map<String, dynamic> notice in reloadReport['details']['notices'])
         printError('${notice['message']}');
       return false;
     }
-    int loadedLibraryCount = reloadReport['details']['loadedLibraryCount'];
-    int finalLibraryCount = reloadReport['details']['finalLibraryCount'];
-    printStatus('Reloaded $loadedLibraryCount of $finalLibraryCount libraries.');
     return true;
   }
 
   @override
   Future<OperationResult> restart({ bool fullRestart: false, bool pauseAfterRestart: false }) async {
     if (fullRestart) {
-      return _restartFromSources();
+      Status status = logger.startProgress('Performing full restart...');
+      try {
+        await _restartFromSources();
+        status.stop();
+        printStatus('Restart complete.');
+        return OperationResult.ok;
+      } catch (error) {
+        status.stop();
+        rethrow;
+      }
     } else {
-      return _reloadSources(pause: pauseAfterRestart);
+      Status status = logger.startProgress('Performing hot reload...');
+      try {
+        OperationResult result = await _reloadSources(pause: pauseAfterRestart);
+        status.stop();
+        if (result.isOk)
+          printStatus("${result.message}.");
+        return result;
+      } catch (error) {
+        status.stop();
+        rethrow;
+      }
     }
   }
 
@@ -508,24 +516,23 @@ class HotRunner extends ResidentRunner {
       if (!updatedDevFS)
         return new OperationResult(1, 'Dart Source Error');
     }
-    Status reloadStatus = logger.startProgress('Performing hot reload...');
+    String reloadMessage;
     try {
       Map<String, dynamic> reloadReport =
           await currentView.uiIsolate.reloadSources(pause: pause);
-      reloadStatus.stop(showElapsedTime: true);
-      if (!_printReloadReport(reloadReport)) {
+      if (!_validateReloadReport(reloadReport)) {
         // Reload failed.
         flutterUsage.sendEvent('hot', 'reload-reject');
         return new OperationResult(1, 'reload rejected');
       } else {
         flutterUsage.sendEvent('hot', 'reload');
+        int loadedLibraryCount = reloadReport['details']['loadedLibraryCount'];
+        int finalLibraryCount = reloadReport['details']['finalLibraryCount'];
+        reloadMessage = 'Reloaded $loadedLibraryCount of $finalLibraryCount libraries';
       }
     } catch (error, st) {
       int errorCode = error['code'];
       String errorMessage = error['message'];
-
-      reloadStatus.stop(showElapsedTime: true);
-
       if (errorCode == Isolate.kIsolateReloadBarred) {
         printError('Unable to hot reload app due to an unrecoverable error in '
                    'the source code. Please address the error and then use '
@@ -565,15 +572,15 @@ class HotRunner extends ResidentRunner {
       // When the framework is present, we can wait for the first frame
       // event and measure reload time.
       await firstFrameTimer.firstFrame();
-      printStatus('Hot reload performed in '
-                  '${getElapsedAsMilliseconds(firstFrameTimer.elapsed)}.');
+      printTrace('Hot reload performed in '
+                 '${getElapsedAsMilliseconds(firstFrameTimer.elapsed)}.');
       if (benchmarkMode) {
         benchmarkData['hotReloadMillisecondsToFrame'] =
             firstFrameTimer.elapsed.inMilliseconds;
       }
       flutterUsage.sendTiming('hot', 'reload', firstFrameTimer.elapsed);
     }
-    return OperationResult.ok;
+    return new OperationResult(OperationResult.ok.code, reloadMessage);
   }
 
   @override

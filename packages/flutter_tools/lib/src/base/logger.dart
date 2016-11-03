@@ -37,7 +37,7 @@ abstract class Logger {
 }
 
 class Status {
-  void stop({ bool showElapsedTime: false }) { }
+  void stop({ bool showElapsedTime: true }) { }
   void cancel() { }
 }
 
@@ -73,15 +73,17 @@ class StdoutLogger extends Logger {
 
   @override
   Status startProgress(String message) {
-    _status?.cancel();
-    _status = null;
-
-    if (supportsColor) {
-      _status = new _AnsiStatus(message);
-      return _status;
-    } else {
-      printStatus(message);
+    if (_status != null) {
+      // Ignore nested progresses; return a no-op status object.
       return new Status();
+    } else {
+      if (supportsColor) {
+        _status = new _AnsiStatus(message);
+        return _status;
+      } else {
+        printStatus(message);
+        return new Status();
+      }
     }
   }
 }
@@ -244,13 +246,13 @@ class _AnsiStatus extends Status {
   }
 
   @override
-  void stop({ bool showElapsedTime: false }) {
+  void stop({ bool showElapsedTime: true }) {
     if (!live)
       return;
     live = false;
 
     if (showElapsedTime) {
-      print('\b\b\b\b${stopwatch.elapsedMilliseconds.toString()}ms');
+      print('\b\b\b\b\b${stopwatch.elapsedMilliseconds.toString().padLeft(3)}ms');
     } else {
       print('\b ');
     }

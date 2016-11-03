@@ -241,7 +241,7 @@ class AndroidDevice extends Device {
 
     Status status = logger.startProgress('Installing ${apk.apkPath}...');
     String installOut = runCheckedSync(adbCommandForDevice(<String>['install', '-r', apk.apkPath]));
-    status.stop(showElapsedTime: true);
+    status.stop();
     RegExp failureExp = new RegExp(r'^Failure.*$', multiLine: true);
     String failure = failureExp.stringMatch(installOut);
     if (failure != null) {
