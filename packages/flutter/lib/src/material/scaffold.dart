@@ -504,6 +504,12 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   ///
   /// If the scaffold has a non-null [Scaffold.drawer], this function will cause
   /// the drawer to begin its entrance animation.
+  ///
+  /// Normally this is not needed since the [Scaffold] automatically shows an
+  /// appropriate [IconButton], and handles the edge-swipe gesture, to show the
+  /// drawer.
+  ///
+  /// To close the drawer once it is open, use [Navigator.pop].
   void openDrawer() {
     _drawerKey.currentState?.open();
   }
