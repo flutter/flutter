@@ -176,9 +176,10 @@ abstract class ResidentRunner {
 
   void setupTerminal() {
     if (usesTerminalUI) {
-      if (!logger.quiet)
+      if (!logger.quiet) {
+        printStatus('');
         printHelp(details: false);
-
+      }
       terminal.singleCharMode = true;
       terminal.onCharInput.listen((String code) {
         processTerminalInput(code);

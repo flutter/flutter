@@ -32,8 +32,6 @@ class CardCollectionState extends State<CardCollection> {
   static const double kCardMargins = 8.0;
   static const double kFixedCardHeight = 100.0;
 
-  final TextStyle backgroundTextStyle = Typography.white.title;
-
   Map<int, Color> _primaryColor = Colors.deepPurple;
   List<CardModel> _cardModels;
   DismissDirection _dismissDirection = DismissDirection.horizontal;
@@ -358,6 +356,9 @@ class CardCollectionState extends State<CardCollection> {
     if (_dismissDirection == DismissDirection.endToStart)
       rightArrowIcon = new Opacity(opacity: 0.1, child: rightArrowIcon);
 
+    final ThemeData theme = Theme.of(context);
+    final TextStyle backgroundTextStyle = theme.primaryTextTheme.title;
+
     // The background Widget appears behind the Dismissable card when the card
     // moves to the left or right. The Positioned widget ensures that the
     // size of the background,card Stack will be based only on the card. The
@@ -369,7 +370,7 @@ class CardCollectionState extends State<CardCollection> {
         child: new Viewport(
           child: new Container(
             height: cardModel.height,
-            decoration: new BoxDecoration(backgroundColor: Theme.of(context).primaryColor),
+            decoration: new BoxDecoration(backgroundColor: theme.primaryColor),
             child: new Row(
               children: <Widget>[
                 leftArrowIcon,

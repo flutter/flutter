@@ -41,6 +41,8 @@ class ParentData {
 ///
 /// The `offset` argument is the offset from the origin of the coordinate system
 /// of the [PaintingContext.canvas] to the coordinate system of the callee.
+///
+/// Used by many of the methods of [PaintingContext].
 typedef void PaintingContextCallback(PaintingContext context, Offset offset);
 
 /// A place to paint.
@@ -463,9 +465,13 @@ abstract class Constraints {
 }
 
 /// Signature for a function that is called for each [RenderObject].
+///
+/// Used by [RenderObject.visitChildren] and [RenderObject.visitChildrenForSemantics].
 typedef void RenderObjectVisitor(RenderObject child);
 
 /// Signature for a function that is called during layout.
+///
+/// Used by [RenderObject.invokeLayoutCallback].
 typedef void LayoutCallback(Constraints constraints);
 
 class _SemanticsGeometry {

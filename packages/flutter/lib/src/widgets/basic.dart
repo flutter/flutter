@@ -659,7 +659,8 @@ class Align extends SingleChildRenderObjectWidget {
 ///
 /// See also:
 ///
-///  * [Align]
+///  * [Align], which lets you arbitrarily position a child within itself,
+///    rather than just centering it.
 class Center extends Align {
   /// Creates a widget that centers its child.
   Center({ Key key, double widthFactor, double heightFactor, Widget child })
@@ -2957,7 +2958,7 @@ class KeyedSubtree extends StatelessWidget {
   }
 
   /// Wrap each item in a KeyedSubtree whose key is based on the item's existing key or
-  /// its list index + baseIndex.
+  /// the sum of its list index and `baseIndex`.
   static List<Widget> ensureUniqueKeysForList(Iterable<Widget> items, { int baseIndex: 0 }) {
     if (items == null || items.isEmpty)
       return items;
@@ -2981,7 +2982,7 @@ class KeyedSubtree extends StatelessWidget {
 ///
 /// See also:
 ///
-///  * [StatefulBuilder] (which also has state)
+///  * [StatefulBuilder], a platonic widget which also has state.
 class Builder extends StatelessWidget {
   /// Creates a widget that delegates its build to a callback.
   ///
@@ -3015,7 +3016,7 @@ typedef Widget StatefulWidgetBuilder(BuildContext context, StateSetter setState)
 ///
 /// See also:
 ///
-///  * [Builder] (which lacks state)
+///  * [Builder], the platonic stateless widget.
 class StatefulBuilder extends StatefulWidget {
   /// Creates a widget that both has state and delegates its build to a callback.
   ///

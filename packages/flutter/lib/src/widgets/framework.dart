@@ -110,6 +110,8 @@ class ObjectKey extends LocalKey {
 }
 
 /// Signature for a callback when a global key is removed from the tree.
+///
+/// Used by [GlobalKey.registerRemoveListener].
 typedef void GlobalKeyRemoveListener(GlobalKey key);
 
 /// A key that is unique across the entire app.
@@ -222,7 +224,7 @@ abstract class GlobalKey<T extends State<StatefulWidget>> extends Key {
   /// Stop calling `listener` whenever a widget with the given global key is
   /// removed from the tree.
   ///
-  /// Listeners can be added with [addListener].
+  /// Listeners can be added with [registerRemoveListener].
   static void unregisterRemoveListener(GlobalKey key, GlobalKeyRemoveListener listener) {
     assert(key != null);
     assert(_removeListeners.containsKey(key));
@@ -1453,6 +1455,18 @@ abstract class BuildContext {
   /// ancestor is added or removed).
   InheritedWidget inheritFromWidgetOfExactType(Type targetType);
 
+  /// Obtains the element corresponding to the nearest widget of the given type,
+  /// which must be the type of a concrete [InheritedWidget] subclass.
+  ///
+  /// Calling this method is O(1) with a small constant factor.
+  ///
+  /// This method does not establish a relationship with the target in the way
+  /// that [inheritFromWidgetOfExactType] does. It is normally used by such
+  /// widgets to obtain their corresponding [InheritedElement] object so that they
+  /// can call [InheritedElement.dispatchDependenciesChanged] to actually
+  /// notify the widgets that _did_ register such a relationship.
+  InheritedElement ancestorInheritedElementForWidgetOfExactType(Type targetType);
+
   /// Returns the nearest ancestor widget of the given type, which must be the
   /// type of a concrete [Widget] subclass.
   ///
@@ -2450,6 +2464,12 @@ abstract class Element implements BuildContext {
     return null;
   }
 
+  @override
+  InheritedElement ancestorInheritedElementForWidgetOfExactType(Type targetType) {
+    InheritedElement ancestor = _inheritedWidgets == null ? null : _inheritedWidgets[targetType];
+    return ancestor;
+  }
+
   void _updateInheritance() {
     assert(_active);
     _inheritedWidgets = _parent?._inheritedWidgets;
@@ -2762,10 +2782,16 @@ abstract class BuildableElement extends Element {
   }
 }
 
-/// Signature for a function that creates a widget.
+/// Signature for a function that creates a widget, e.g. [StatelessWidget.build]
+/// or [State.build].
+///
+/// Used by [Builder.builder], [OverlayEntry.builder], etc.
 typedef Widget WidgetBuilder(BuildContext context);
 
-/// Signature for a function that creates a widget for a given index, e.g., in a list.
+/// Signature for a function that creates a widget for a given index, e.g., in a
+/// list.
+///
+/// Used by [LazyBlockBuilder.builder].
 typedef Widget IndexedWidgetBuilder(BuildContext context, int index);
 
 // See ComponentElement._builder.
@@ -3166,8 +3192,9 @@ class InheritedElement extends ProxyElement {
   /// [InheritedElement] calls this function if [InheritedWidget.updateShouldNotify]
   /// returns true. Subclasses of [InheritedElement] might wish to call this
   /// function at other times if their inherited information changes outside of
-  /// the build phase.
-  @protected
+  /// the build phase. [InheritedWidget] subclasses can also call this directly
+  /// by first obtaining their [InheritedElement] using
+  /// [BuildContext.ancestorInheritedElementForWidgetOfExactType].
   void dispatchDependenciesChanged() {
     for (Element dependent in _dependents) {
       assert(() {

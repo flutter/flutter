@@ -193,6 +193,8 @@ class RenderViewportBase extends RenderBox {
 }
 
 /// Signature for notifications about [RenderViewport] dimensions changing.
+///
+/// Used by [RenderViewport.onPaintOffsetUpdateNeeded].
 typedef Offset ViewportDimensionsChangeCallback(ViewportDimensions dimensions);
 
 /// A render object that's bigger on the inside.

@@ -44,6 +44,8 @@ typedef void SemanticsAnnotator(SemanticsNode semantics);
 /// Signature for a function that is called for each [SemanticsNode].
 ///
 /// Return false to stop visiting nodes.
+///
+/// Used by [SemanticsNode.visitChildren].
 typedef bool SemanticsNodeVisitor(SemanticsNode node);
 
 /// Summary information about a [SemanticsNode] object.

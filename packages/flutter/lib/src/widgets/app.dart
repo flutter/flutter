@@ -22,6 +22,8 @@ import 'text.dart';
 import 'title.dart';
 
 /// Signature for a function that is called when the operating system changes the current locale.
+///
+/// Used by [WidgetsApp.onLocaleChanged].
 typedef Future<LocaleQueryData> LocaleChangedCallback(Locale locale);
 
 /// A convenience class that wraps a number of widgets that are commonly

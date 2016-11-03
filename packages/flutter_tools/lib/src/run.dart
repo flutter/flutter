@@ -144,7 +144,7 @@ class RunAndStayResident extends ResidentRunner {
 
     // TODO(devoncarew): Move this into the device.startApp() impls.
     if (_package != null) {
-      printTrace("Stopping app '${_package.name}' on ${device.name}.");
+      printTrace('Stopping app "${_package.name}" on ${device.name}.');
       await device.stopApp(_package);
     }
 
@@ -262,20 +262,22 @@ class RunAndStayResident extends ResidentRunner {
 
   @override
   void printHelp({ @required bool details }) {
-    final bool showRestartText = !prebuiltMode && device.supportsRestart &&
-        supportsServiceProtocol;
-    if (showRestartText)
+    bool haveDetails = false;
+    if (!prebuiltMode && device.supportsRestart && supportsServiceProtocol)
       printStatus('To restart the app, press "r" or F5.');
     if (_result.hasObservatory)
       printStatus('The Observatory debugger and profiler is available at: http://127.0.0.1:${_result.observatoryPort}/');
-    if (details) {
-      if (supportsServiceProtocol) {
+    if (supportsServiceProtocol) {
+      haveDetails = true;
+      if (details) {
         printStatus('To dump the widget hierarchy of the app (debugDumpApp), press "w".');
         printStatus('To dump the rendering tree of the app (debugDumpRenderTree), press "r".');
       }
-      printStatus('To repeat this help message, press "h" or F1. To quit, press "q", F10, or Ctrl-C.');
-    } else {
+    }
+    if (haveDetails && !details) {
       printStatus('For a more detailed help message, press "h" or F1. To quit, press "q", F10, or Ctrl-C.');
+    } else {
+      printStatus('To repeat this help message, press "h" or F1. To quit, press "q", F10, or Ctrl-C.');
     }
   }
 

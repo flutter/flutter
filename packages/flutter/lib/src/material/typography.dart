@@ -3,7 +3,9 @@
 // found in the LICENSE file.
 
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
+import 'package:meta/meta.dart';
 
 import 'colors.dart';
 
@@ -51,7 +53,7 @@ class TextTheme {
     this.button
   });
 
-  const TextTheme._black()
+  const TextTheme._blackMountainView()
     : display4 = const TextStyle(fontFamily: 'Roboto', inherit: false, fontSize: 112.0, fontWeight: FontWeight.w100, color: Colors.black54, textBaseline: TextBaseline.alphabetic),
       display3 = const TextStyle(fontFamily: 'Roboto', inherit: false, fontSize:  56.0, fontWeight: FontWeight.w400, color: Colors.black54, textBaseline: TextBaseline.alphabetic),
       display2 = const TextStyle(fontFamily: 'Roboto', inherit: false, fontSize:  45.0, fontWeight: FontWeight.w400, color: Colors.black54, textBaseline: TextBaseline.alphabetic),
@@ -64,7 +66,7 @@ class TextTheme {
       caption  = const TextStyle(fontFamily: 'Roboto', inherit: false, fontSize:  12.0, fontWeight: FontWeight.w400, color: Colors.black54, textBaseline: TextBaseline.alphabetic),
       button   = const TextStyle(fontFamily: 'Roboto', inherit: false, fontSize:  14.0, fontWeight: FontWeight.w500, color: Colors.black87, textBaseline: TextBaseline.alphabetic);
 
-  const TextTheme._white()
+  const TextTheme._whiteMountainView()
     : display4 = const TextStyle(fontFamily: 'Roboto', inherit: false, fontSize: 112.0, fontWeight: FontWeight.w100, color: Colors.white70, textBaseline: TextBaseline.alphabetic),
       display3 = const TextStyle(fontFamily: 'Roboto', inherit: false, fontSize:  56.0, fontWeight: FontWeight.w400, color: Colors.white70, textBaseline: TextBaseline.alphabetic),
       display2 = const TextStyle(fontFamily: 'Roboto', inherit: false, fontSize:  45.0, fontWeight: FontWeight.w400, color: Colors.white70, textBaseline: TextBaseline.alphabetic),
@@ -76,6 +78,32 @@ class TextTheme {
       body1    = const TextStyle(fontFamily: 'Roboto', inherit: false, fontSize:  14.0, fontWeight: FontWeight.w400, color: Colors.white,   textBaseline: TextBaseline.alphabetic),
       caption  = const TextStyle(fontFamily: 'Roboto', inherit: false, fontSize:  12.0, fontWeight: FontWeight.w400, color: Colors.white70, textBaseline: TextBaseline.alphabetic),
       button   = const TextStyle(fontFamily: 'Roboto', inherit: false, fontSize:  14.0, fontWeight: FontWeight.w500, color: Colors.white,   textBaseline: TextBaseline.alphabetic);
+
+  const TextTheme._blackCupertino()
+      : display4 = const TextStyle(fontFamily: '.SF UI Display', inherit: false, fontSize: 112.0, fontWeight: FontWeight.w100, color: Colors.black54, textBaseline: TextBaseline.alphabetic),
+        display3 = const TextStyle(fontFamily: '.SF UI Display', inherit: false, fontSize:  56.0, fontWeight: FontWeight.w400, color: Colors.black54, textBaseline: TextBaseline.alphabetic),
+        display2 = const TextStyle(fontFamily: '.SF UI Display', inherit: false, fontSize:  45.0, fontWeight: FontWeight.w400, color: Colors.black54, textBaseline: TextBaseline.alphabetic),
+        display1 = const TextStyle(fontFamily: '.SF UI Display', inherit: false, fontSize:  34.0, fontWeight: FontWeight.w400, color: Colors.black54, textBaseline: TextBaseline.alphabetic),
+        headline = const TextStyle(fontFamily: '.SF UI Display', inherit: false, fontSize:  24.0, fontWeight: FontWeight.w400, color: Colors.black87, textBaseline: TextBaseline.alphabetic),
+        title    = const TextStyle(fontFamily: '.SF UI Display', inherit: false, fontSize:  20.0, fontWeight: FontWeight.w500, color: Colors.black87, textBaseline: TextBaseline.alphabetic),
+        subhead  = const TextStyle(fontFamily: '.SF UI Text', inherit: false, fontSize:  16.0, fontWeight: FontWeight.w400, color: Colors.black87, textBaseline: TextBaseline.alphabetic),
+        body2    = const TextStyle(fontFamily: '.SF UI Text', inherit: false, fontSize:  14.0, fontWeight: FontWeight.w500, color: Colors.black87, textBaseline: TextBaseline.alphabetic),
+        body1    = const TextStyle(fontFamily: '.SF UI Text', inherit: false, fontSize:  14.0, fontWeight: FontWeight.w400, color: Colors.black87, textBaseline: TextBaseline.alphabetic),
+        caption  = const TextStyle(fontFamily: '.SF UI Text', inherit: false, fontSize:  12.0, fontWeight: FontWeight.w400, color: Colors.black54, textBaseline: TextBaseline.alphabetic),
+        button   = const TextStyle(fontFamily: '.SF UI Text', inherit: false, fontSize:  14.0, fontWeight: FontWeight.w500, color: Colors.black87, textBaseline: TextBaseline.alphabetic);
+
+  const TextTheme._whiteCupertino()
+      : display4 = const TextStyle(fontFamily: '.SF UI Display', inherit: false, fontSize: 112.0, fontWeight: FontWeight.w100, color: Colors.white70, textBaseline: TextBaseline.alphabetic),
+        display3 = const TextStyle(fontFamily: '.SF UI Display', inherit: false, fontSize:  56.0, fontWeight: FontWeight.w400, color: Colors.white70, textBaseline: TextBaseline.alphabetic),
+        display2 = const TextStyle(fontFamily: '.SF UI Display', inherit: false, fontSize:  45.0, fontWeight: FontWeight.w400, color: Colors.white70, textBaseline: TextBaseline.alphabetic),
+        display1 = const TextStyle(fontFamily: '.SF UI Display', inherit: false, fontSize:  34.0, fontWeight: FontWeight.w400, color: Colors.white70, textBaseline: TextBaseline.alphabetic),
+        headline = const TextStyle(fontFamily: '.SF UI Display', inherit: false, fontSize:  24.0, fontWeight: FontWeight.w400, color: Colors.white,   textBaseline: TextBaseline.alphabetic),
+        title    = const TextStyle(fontFamily: '.SF UI Display', inherit: false, fontSize:  20.0, fontWeight: FontWeight.w500, color: Colors.white,   textBaseline: TextBaseline.alphabetic),
+        subhead  = const TextStyle(fontFamily: '.SF UI Text', inherit: false, fontSize:  16.0, fontWeight: FontWeight.w400, color: Colors.white,   textBaseline: TextBaseline.alphabetic),
+        body2    = const TextStyle(fontFamily: '.SF UI Text', inherit: false, fontSize:  14.0, fontWeight: FontWeight.w500, color: Colors.white,   textBaseline: TextBaseline.alphabetic),
+        body1    = const TextStyle(fontFamily: '.SF UI Text', inherit: false, fontSize:  14.0, fontWeight: FontWeight.w400, color: Colors.white,   textBaseline: TextBaseline.alphabetic),
+        caption  = const TextStyle(fontFamily: '.SF UI Text', inherit: false, fontSize:  12.0, fontWeight: FontWeight.w400, color: Colors.white70, textBaseline: TextBaseline.alphabetic),
+        button   = const TextStyle(fontFamily: '.SF UI Text', inherit: false, fontSize:  14.0, fontWeight: FontWeight.w500, color: Colors.white,   textBaseline: TextBaseline.alphabetic);
 
   /// Extremely large text.
   ///
@@ -255,10 +283,10 @@ class TextTheme {
 
 /// The two material design text themes.
 ///
-/// [Typography.black] and [Typography.white] define the two text themes used in
-/// material design. The black text theme, which uses dark glyphs, is used on
-/// light backgrounds in light themes. The white text theme, which uses light
-/// glyphs, is used in dark themes and on dark backgrounds in in light themes.
+/// Material design defines two text themes: [black] and [white]. The black
+/// text theme, which uses dark glyphs, is used on light backgrounds in light
+/// themes. The white text theme, which uses light glyphs, is used in dark
+/// themes and on dark backgrounds in light themes.
 ///
 /// To obtain the current text theme, call [Theme.of] with the current
 /// [BuildContext] and read the [ThemeData.textTheme] property.
@@ -269,11 +297,30 @@ class TextTheme {
 ///  * [ThemeData]
 ///  * <http://material.google.com/style/typography.html>
 class Typography {
-  Typography._();
+  /// Creates the default typography for the specified platform.
+  factory Typography({ @required TargetPlatform platform }) {
+    assert(platform != null);
+    switch (platform) {
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+        return const Typography._(
+            const TextTheme._blackMountainView(),
+            const TextTheme._whiteMountainView(),
+        );
+      case TargetPlatform.iOS:
+        return const Typography._(
+            const TextTheme._blackCupertino(),
+            const TextTheme._whiteCupertino(),
+        );
+    }
+    return null;
+  }
+
+  const Typography._(this.black, this.white);
 
   /// A material design text theme with dark glyphs.
-  static const TextTheme black = const TextTheme._black();
+  final TextTheme black;
 
   /// A material design text theme with light glyphs.
-  static const TextTheme white = const TextTheme._white();
+  final TextTheme white;
 }

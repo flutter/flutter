@@ -121,10 +121,87 @@ const double _kTimePickerHeaderPortraitHeight = 96.0;
 const double _kTimePickerHeaderLandscapeWidth = 168.0;
 
 const double _kTimePickerWidthPortrait = 328.0;
-const double _kTimePickerWidthLanscape = 512.0;
+const double _kTimePickerWidthLandscape = 512.0;
 
 const double _kTimePickerHeightPortrait = 484.0;
-const double _kTimePickerHeightLanscape = 304.0;
+const double _kTimePickerHeightLandscape = 304.0;
+
+const double _kPeriodGap = 8.0;
+
+enum _TimePickerHeaderId {
+  hour,
+  colon,
+  minute,
+  period, // AM/PM picker
+}
+
+class _TimePickerHeaderLayout extends MultiChildLayoutDelegate {
+  _TimePickerHeaderLayout(this.orientation);
+
+  final Orientation orientation;
+
+  @override
+  void performLayout(Size size) {
+    final BoxConstraints constraints = new BoxConstraints.loose(size);
+    final Size hourSize = layoutChild(_TimePickerHeaderId.hour, constraints);
+    final Size colonSize = layoutChild(_TimePickerHeaderId.colon, constraints);
+    final Size minuteSize = layoutChild(_TimePickerHeaderId.minute, constraints);
+    final Size periodSize = layoutChild(_TimePickerHeaderId.period, constraints);
+
+    switch (orientation) {
+      // 11:57--period
+      //
+      // The colon is centered horizontally, the entire layout is centered vertically.
+      // The "--" is a _kPeriodGap horizontal gap.
+      case Orientation.portrait:
+        final double width = colonSize.width / 2.0 + minuteSize.width + _kPeriodGap + periodSize.width;
+        final double right = math.max(0.0, size.width / 2.0 - width);
+
+        double x = size.width - right - periodSize.width;
+        positionChild(_TimePickerHeaderId.period, new Offset(x, (size.height - periodSize.height) / 2.0));
+
+        x -= minuteSize.width + _kPeriodGap;
+        positionChild(_TimePickerHeaderId.minute, new Offset(x, (size.height - minuteSize.height) / 2.0));
+
+        x -= colonSize.width;
+        positionChild(_TimePickerHeaderId.colon, new Offset(x, (size.height - colonSize.height) / 2.0));
+
+        x -= hourSize.width;
+        positionChild(_TimePickerHeaderId.hour, new Offset(x, (size.height - hourSize.height) / 2.0));
+      break;
+
+      // 11:57
+      //  --
+      // period
+      //
+      // The colon is centered horizontally, the entire layout is centered vertically.
+      // The "--" is a _kPeriodGap vertical gap.
+      case Orientation.landscape:
+        final double width = colonSize.width / 2.0 + minuteSize.width;
+        final double offset = math.max(0.0, size.width / 2.0 - width);
+        final double timeHeight = math.max(hourSize.height, colonSize.height);
+        final double height = timeHeight + _kPeriodGap + periodSize.height;
+        final double timeCenter = (size.height - height) / 2.0 + timeHeight / 2.0;
+
+        double x = size.width - offset - minuteSize.width;
+        positionChild(_TimePickerHeaderId.minute, new Offset(x, timeCenter - minuteSize.height / 2.0));
+
+        x -= colonSize.width;
+        positionChild(_TimePickerHeaderId.colon, new Offset(x, timeCenter - colonSize.height / 2.0));
+
+        x -= hourSize.width;
+        positionChild(_TimePickerHeaderId.hour, new Offset(x, timeCenter - hourSize.height / 2.0));
+
+        x = (size.width - periodSize.width) / 2.0;
+        positionChild(_TimePickerHeaderId.period, new Offset(x, timeCenter + timeHeight / 2.0 + _kPeriodGap));
+        break;
+    }
+  }
+
+  @override
+  bool shouldRelayout(_TimePickerHeaderLayout oldDelegate) => orientation != oldDelegate.orientation;
+}
+
 
 // TODO(ianh): Localize!
 class _TimePickerHeader extends StatelessWidget {
@@ -224,12 +301,9 @@ class _TimePickerHeader extends StatelessWidget {
       )
     );
 
-    Widget hour = new Align(
-      alignment: FractionalOffset.centerRight,
-      child: new GestureDetector(
-        onTap: () => _handleChangeMode(_TimePickerMode.hour),
-        child: new Text(selectedTime.hourOfPeriodLabel, style: hourStyle),
-      )
+    Widget hour = new GestureDetector(
+      onTap: () => _handleChangeMode(_TimePickerMode.hour),
+      child: new Text(selectedTime.hourOfPeriodLabel, style: hourStyle),
     );
 
     Widget minute = new GestureDetector(
@@ -237,51 +311,39 @@ class _TimePickerHeader extends StatelessWidget {
       child: new Text(selectedTime.minuteLabel, style: minuteStyle),
     );
 
+    Widget colon = new Text(':', style: inactiveStyle);
+
+    EdgeInsets padding;
+    double height;
+    double width;
+
     assert(orientation != null);
-    switch (orientation) {
+    switch(orientation) {
       case Orientation.portrait:
-        return new Container(
-          height: _kTimePickerHeaderPortraitHeight,
-          padding: const EdgeInsets.symmetric(horizontal: 24.0),
-          decoration: new BoxDecoration(backgroundColor: backgroundColor),
-          child: new Row(
-            children: <Widget>[
-              new Flexible(child: hour),
-              new Text(':', style: inactiveStyle),
-              new Flexible(
-                child: new Row(
-                  children: <Widget>[
-                    minute,
-                    const SizedBox(width: 8.0, height: 0.0),  // Horizontal spacer
-                    dayPeriodPicker,
-                  ]
-                )
-              )
-            ]
-          )
-        );
+        height = _kTimePickerHeaderPortraitHeight;
+        padding = const EdgeInsets.symmetric(horizontal: 24.0);
+        break;
       case Orientation.landscape:
-        return new Container(
-          width: _kTimePickerHeaderLandscapeWidth,
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          decoration: new BoxDecoration(backgroundColor: backgroundColor),
-          child: new Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              new Row(
-                children: <Widget>[
-                  new Flexible(child: hour),
-                  new Text(':', style: inactiveStyle),
-                  new Flexible(child: minute),
-                ],
-              ),
-              const SizedBox(width: 0.0, height: 8.0),  // Vertical spacer
-              dayPeriodPicker,
-            ]
-          )
-        );
+        width = _kTimePickerHeaderLandscapeWidth;
+        padding = const EdgeInsets.symmetric(horizontal: 16.0);
+        break;
     }
-    return null;
+
+    return new Container(
+      width: width,
+      height: height,
+      padding: padding,
+      decoration: new BoxDecoration(backgroundColor: backgroundColor),
+      child: new CustomMultiChildLayout(
+        delegate: new _TimePickerHeaderLayout(orientation),
+        children: <Widget>[
+          new LayoutId(id: _TimePickerHeaderId.hour, child: hour),
+          new LayoutId(id: _TimePickerHeaderId.colon, child: colon),
+          new LayoutId(id: _TimePickerHeaderId.minute, child: minute),
+          new LayoutId(id: _TimePickerHeaderId.period, child: dayPeriodPicker),
+        ],
+      )
+    );
   }
 }
 
@@ -662,8 +724,8 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
               );
             case Orientation.landscape:
               return new SizedBox(
-                width: _kTimePickerWidthLanscape,
-                height: _kTimePickerHeightLanscape,
+                width: _kTimePickerWidthLandscape,
+                height: _kTimePickerHeightLandscape,
                 child: new Row(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.stretch,

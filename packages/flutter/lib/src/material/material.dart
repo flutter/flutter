@@ -13,7 +13,9 @@ import 'constants.dart';
 import 'shadows.dart';
 import 'theme.dart';
 
-/// Signature for callback used by ink effects to obtain the rectangle for the effect.
+/// Signature for the callback used by ink effects to obtain the rectangle for the effect.
+///
+/// Used by [MaterialInkController.splashAt], for example.
 typedef Rect RectCallback();
 
 /// The various kinds of material in material design. Used to

@@ -373,6 +373,10 @@ class RelativePositionedTransition extends AnimatedWidget {
 }
 
 /// A builder that builds a widget given a child.
+///
+/// The child should typically be part of the returned widget tree.
+///
+/// Used by [AnimatedBuilder.builder].
 typedef Widget TransitionBuilder(BuildContext context, Widget child);
 
 /// A general-purpose widget for building animations.

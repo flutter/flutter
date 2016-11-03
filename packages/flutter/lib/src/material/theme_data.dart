@@ -122,11 +122,13 @@ class ThemeData {
     indicatorColor ??= accentColor == primaryColor ? Colors.white : accentColor;
     hintColor ??= isDark ? const Color(0x42FFFFFF) : const Color(0x4C000000);
     errorColor ??= Colors.red[700];
-    textTheme ??= isDark ? Typography.white : Typography.black;
-    primaryTextTheme ??= primaryIsDark ? Typography.white : Typography.black;
     iconTheme ??= isDark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black);
     primaryIconTheme ??= primaryIsDark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black);
     platform ??= defaultTargetPlatform;
+
+    final Typography typography = new Typography(platform: platform);
+    primaryTextTheme ??= primaryIsDark ? typography.white : typography.black;
+    textTheme ??= isDark ? typography.white : typography.black;
     return new ThemeData.raw(
       brightness: brightness,
       primaryColor: primaryColor,
