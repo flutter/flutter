@@ -42,12 +42,12 @@ Future<Null> main(List<String> args) async {
   }
   Cache.flutterRoot = Platform.environment['FLUTTER_ROOT'];
   String outputPath = argResults[_kOptionOutput];
-  final int buildResult = await build(
+  final int buildResult = await assemble(
     outputPath: outputPath,
-    snapshotPath: argResults[_kOptionSnapshot],
+    snapshotFile: new File(argResults[_kOptionSnapshot]),
     workingDirPath: argResults[_kOptionWorking],
     packagesPath: argResults[_kOptionPackages],
-    precompiledSnapshot: true,
+    manifestPath: defaultManifestPath,
     includeRobotoFonts: true,
   );
   if (buildResult != 0) {
