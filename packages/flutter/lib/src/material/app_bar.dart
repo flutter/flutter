@@ -214,6 +214,8 @@ class AppBar extends StatelessWidget {
   /// The z-coordinate at which to place this app bar.
   ///
   /// The following elevations have defined shadows: 1, 2, 3, 4, 6, 8, 9, 12, 16, 24
+  ///
+  /// Defaults to 4, the appropriate elevation for app bars.
   final int elevation;
 
   /// The color to use for the app bar's material. Typically this should be set

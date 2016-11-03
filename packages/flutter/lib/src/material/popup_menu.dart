@@ -424,11 +424,19 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
   }
 }
 
-/// Show a popup menu that contains the [items] at [position]. If [initialValue]
+/// Show a popup menu that contains the `items` at `position`. If `initialValue`
 /// is specified then the first item with a matching value will be highlighted
-/// and the value of [position] implies where the left, center point of the
-/// highlighted item should appear. If [initialValue] is not specified then position
-/// implies the menu's origin.
+/// and the value of `position` implies where the left, center point of the
+/// highlighted item should appear. If `initialValue` is not specified then
+/// `position` specifies the menu's origin.
+///
+/// The `context` argument is used to look up a [Navigator] to show the menu and
+/// a [Theme] to use for the menu.
+///
+/// The `elevation` argument specifies the z-coordinate at which to place the
+/// menu. The following elevations have defined shadows: 1, 2, 3, 4, 6, 8, 9,
+/// 12, 16, 24. The elevation defaults to 8, the appropriate elevation for popup
+/// menus.
 Future<dynamic/*=T*/> showMenu/*<T>*/({
   BuildContext context,
   RelativeRect position,

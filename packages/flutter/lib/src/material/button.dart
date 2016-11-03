@@ -158,11 +158,15 @@ class MaterialButton extends StatefulWidget {
   /// The z-coordinate at which to place this button.
   ///
   /// The following elevations have defined shadows: 1, 2, 3, 4, 6, 8, 9, 12, 16, 24
+  ///
+  /// Defaults to 0.
   final int elevation;
 
   /// The z-coordinate at which to place this button when highlighted.
   ///
   /// The following elevations have defined shadows: 1, 2, 3, 4, 6, 8, 9, 12, 16, 24
+  ///
+  /// Defaults to 0.
   final int highlightElevation;
 
   /// The smallest horizontal extent that the button will occupy.

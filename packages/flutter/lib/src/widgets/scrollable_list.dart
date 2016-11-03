@@ -27,10 +27,10 @@ import 'virtual_viewport.dart';
 ///
 /// See also:
 ///
-///  * [Block].
-///  * [ScrollableLazyList].
-///  * [LazyBlock].
-///  * [ScrollableViewport].
+///  * [Block], which allows its children to have arbitrary sizes.
+///  * [ScrollableLazyList], a more efficient version of [ScrollableList].
+///  * [LazyBlock], a more efficient version of [Block].
+///  * [ScrollableViewport], which only has one child.
 class ScrollableList extends StatelessWidget {
   /// Creats a scrollable list of children that have equal size.
   ///

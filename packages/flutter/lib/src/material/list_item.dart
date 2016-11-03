@@ -9,24 +9,29 @@ import 'debug.dart';
 import 'ink_well.dart';
 import 'theme.dart';
 
-/// An item in a material design list, typically consisting of an icon and some
-/// text.
+/// A single row typically containing an icon and some text.
 ///
-/// [MaterialList] items are one to three lines of text optionally flanked by
-/// icons. Icons are defined with the [leading] and [trailing] parameters. The
-/// first line of text is not optional and is specified with [title]. The value
-/// of [subtitle] will occupy the space allocated for an aditional line of text,
-/// or two lines if [isThreeLine] is true. If [dense] is true then the overall
-/// height of this list item and the size of the [DefaultTextStyle]s that wrap
-/// the [title] and [subtitle] widget are reduced.
+/// List items are one to three lines of text optionally flanked by icons or
+/// other widgets, such as check boxes. The icons (or other widgets) for the
+/// item are defined with the [leading] and [trailing] parameters. The first
+/// line of text is not optional and is specified with [title]. The value of
+/// [subtitle], which _is_ optional, will occupy the space allocated for an
+/// additional line of text, or two lines if [isThreeLine] is true. If [dense]
+/// is true then the overall height of this list item and the size of the
+/// [DefaultTextStyle]s that wrap the [title] and [subtitle] widget are reduced.
+///
+/// List items are typically used in [MaterialList]s or in [Card]s.
 ///
 /// Requires one of its ancestors to be a [Material] widget.
 ///
 /// See also:
 ///
-///  * [MaterialList]
-///  * [CircleAvatar]
-///  * [Divider]
+///  * [MaterialList], which takes a list of [ListItem] widgets and shows them
+///    as a scrolling list.
+///  * [Card], which can be used with [Column] to show a few [ListItem]s.
+///  * [CircleAvatar], which shows an icon representing a person.
+///  * [Divider], which can be used to separate [ListItem]s.
+///  * [ListItem.divideItems], another way to separate [ListItem]s.
 ///  * <https://material.google.com/components/lists.html>
 class ListItem extends StatelessWidget {
   /// Creates a list item.

@@ -74,16 +74,23 @@ class RaisedButton extends StatelessWidget {
   /// The z-coordinate at which to place this button.
   ///
   /// The following elevations have defined shadows: 1, 2, 3, 4, 6, 8, 9, 12, 16, 24
+  ///
+  /// Defaults to 2, the appropriate elevation for raised buttons.
   final int elevation;
 
   /// The z-coordinate at which to place this button when highlighted.
   ///
   /// The following elevations have defined shadows: 1, 2, 3, 4, 6, 8, 9, 12, 16, 24
+  ///
+  /// Defaults to 8, the appropriate elevation for raised buttons while they are
+  /// being touched.
   final int highlightElevation;
 
   /// The z-coordinate at which to place this button when disabled.
   ///
   /// The following elevations have defined shadows: 1, 2, 3, 4, 6, 8, 9, 12, 16, 24
+  ///
+  /// Defaults to 0, the appropriate elevation for disabled raised buttons.
   final int disabledElevation;
 
   /// The theme brightness to use for this button.
