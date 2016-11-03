@@ -480,7 +480,7 @@ class HotRunner extends ResidentRunner {
         return OperationResult.ok;
       } catch (error) {
         status.stop();
-        throw error;
+        rethrow;
       }
     } else {
       Status status = logger.startProgress('Performing hot reload...');
@@ -492,7 +492,7 @@ class HotRunner extends ResidentRunner {
         return result;
       } catch (error) {
         status.stop();
-        throw error;
+        rethrow;
       }
     }
   }
