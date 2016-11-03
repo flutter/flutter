@@ -38,9 +38,9 @@ String getDevFSLoaderScript() {
                                  'loader_app.dart'));
 }
 
-class StartupDependencySetBuilder {
-  StartupDependencySetBuilder(this.mainScriptPath,
-                              this.projectRootPath);
+class DartDependencySetBuilder {
+  DartDependencySetBuilder(this.mainScriptPath,
+                           this.projectRootPath);
 
   final String mainScriptPath;
   final String projectRootPath;
@@ -56,12 +56,7 @@ class StartupDependencySetBuilder {
       mainScriptPath
     ];
 
-    String output;
-    try {
-      output = runCheckedSync(args, hideStdout: true);
-    } catch (e) {
-      return null;
-    }
+    String output = runSyncAndThrowStdErrOnError(args);
 
     final List<String> lines = LineSplitter.split(output).toList();
     final Set<String> minimalDependencies = new Set<String>();
@@ -135,7 +130,7 @@ class HotRunner extends ResidentRunner {
   ApplicationPackage _package;
   String _mainPath;
   String _projectRootPath;
-  Set<String> _startupDependencies;
+  Set<String> _dartDependencies;
   int _observatoryPort;
   final AssetBundle bundle = new AssetBundle();
   final bool benchmarkMode;
@@ -161,6 +156,23 @@ class HotRunner extends ResidentRunner {
     });
   }
 
+  bool _refreshDartDependencies() {
+    if (_dartDependencies != null) {
+      // Already computed.
+      return true;
+    }
+    DartDependencySetBuilder dartDependencySetBuilder =
+        new DartDependencySetBuilder(_mainPath, _projectRootPath);
+    try {
+      _dartDependencies = dartDependencySetBuilder.build();
+    } catch (error) {
+      printStatus('Error detected in application source code:', emphasis: true);
+      printError(error);
+      return false;
+    }
+    return true;
+  }
+
   Future<int> _run({
     Completer<DebugConnectionInfo> connectionInfoCompleter,
     Completer<Null> appStartedCompleter,
@@ -184,6 +196,12 @@ class HotRunner extends ResidentRunner {
       if (hint != null)
         message += '\n$hint';
       printError(message);
+      return 1;
+    }
+
+    // Determine the Dart dependencies eagerly.
+    if (!_refreshDartDependencies()) {
+      // Some kind of source level error or missing file in the Dart code.
       return 1;
     }
 
@@ -233,15 +251,6 @@ class HotRunner extends ResidentRunner {
       platformArgs: platformArgs,
       route: route
     );
-
-    // In parallel, compute the minimal dependency set.
-    StartupDependencySetBuilder startupDependencySetBuilder =
-        new StartupDependencySetBuilder(_mainPath, _projectRootPath);
-    _startupDependencies = startupDependencySetBuilder.build();
-    if (_startupDependencies == null) {
-      printError('Error determining the set of Dart sources necessary to start '
-                 'the application. Initial file upload may take a long time.');
-    }
 
     LaunchResult result = await futureResult;
 
@@ -330,13 +339,19 @@ class HotRunner extends ResidentRunner {
   Future<Null> handleTerminalCommand(String code) async {
     final String lower = code.toLowerCase();
     if ((lower == 'r') || (code == AnsiTerminal.KEY_F5)) {
+      OperationResult result = OperationResult.ok;
       // F5, restart
       if ((code == 'r') || (code == AnsiTerminal.KEY_F5)) {
         // lower-case 'r'
-        await _reloadSources();
+        result = await _reloadSources();
       } else {
         // upper-case 'R'.
-        await _restartFromSources();
+        result = await _restartFromSources();
+      }
+      if (!result.isOk) {
+        // TODO(johnmccutchan): Attempt to determine the number of errors that
+        // occurred and tighten this message.
+        printStatus('Try again after fixing the above error(s).', emphasis: true);
       }
     }
   }
@@ -367,6 +382,10 @@ class HotRunner extends ResidentRunner {
   }
 
   Future<bool> _updateDevFS({ DevFSProgressReporter progressReporter }) async {
+    if (!_refreshDartDependencies()) {
+      // Did not update DevFS because of a Dart source error.
+      return false;
+    }
     Status devFSStatus = logger.startProgress('Syncing files to device...');
     final bool rebuildBundle = bundle.needsBuild();
     if (rebuildBundle) {
@@ -376,10 +395,10 @@ class HotRunner extends ResidentRunner {
     await _devFS.update(progressReporter: progressReporter,
                         bundle: bundle,
                         bundleDirty: rebuildBundle,
-                        fileFilter: _startupDependencies);
+                        fileFilter: _dartDependencies);
     devFSStatus.stop(showElapsedTime: true);
-    // Clear the minimal set after the first sync.
-    _startupDependencies = null;
+    // Clear the set after the sync.
+    _dartDependencies = null;
     printTrace('Synced ${getSizeAsMB(_devFS.bytes)}.');
     return true;
   }
@@ -427,10 +446,12 @@ class HotRunner extends ResidentRunner {
                         deviceAssetsDirectoryPath);
   }
 
-  Future<Null> _restartFromSources() async {
+  Future<OperationResult> _restartFromSources() async {
     FirstFrameTimer firstFrameTimer = new FirstFrameTimer(vmService);
     firstFrameTimer.start();
-    await _updateDevFS();
+    bool updatedDevFS = await _updateDevFS();
+    if (!updatedDevFS)
+      return new OperationResult(1, 'Dart Source Error');
     await _launchFromDevFS(_package, _mainPath);
     bool waitForFrame =
         await currentView.uiIsolate.flutterFrameworkPresent();
@@ -451,6 +472,7 @@ class HotRunner extends ResidentRunner {
       flutterUsage.sendTiming('hot', 'restart', firstFrameTimer.elapsed);
     }
     flutterUsage.sendEvent('hot', 'restart');
+    return OperationResult.ok;
   }
 
   /// Returns [true] if the reload was successful.
@@ -470,8 +492,7 @@ class HotRunner extends ResidentRunner {
   @override
   Future<OperationResult> restart({ bool fullRestart: false, bool pauseAfterRestart: false }) async {
     if (fullRestart) {
-      await _restartFromSources();
-      return OperationResult.ok;
+      return _restartFromSources();
     } else {
       return _reloadSources(pause: pauseAfterRestart);
     }
@@ -482,8 +503,11 @@ class HotRunner extends ResidentRunner {
       throw 'Application isolate not found';
     FirstFrameTimer firstFrameTimer = new FirstFrameTimer(vmService);
     firstFrameTimer.start();
-    if (_devFS != null)
-      await _updateDevFS();
+    if (_devFS != null) {
+      bool updatedDevFS = await _updateDevFS();
+      if (!updatedDevFS)
+        return new OperationResult(1, 'Dart Source Error');
+    }
     Status reloadStatus = logger.startProgress('Performing hot reload...');
     try {
       Map<String, dynamic> reloadReport =
