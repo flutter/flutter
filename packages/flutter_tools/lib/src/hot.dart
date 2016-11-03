@@ -449,16 +449,13 @@ class HotRunner extends ResidentRunner {
   }
 
   /// Returns [true] if the reload was successful.
-  bool _printReloadReport(Map<String, dynamic> reloadReport) {
+  bool _validateReloadReport(Map<String, dynamic> reloadReport) {
     if (!reloadReport['success']) {
       printError('Hot reload was rejected:');
       for (Map<String, dynamic> notice in reloadReport['details']['notices'])
         printError('${notice['message']}');
       return false;
     }
-    int loadedLibraryCount = reloadReport['details']['loadedLibraryCount'];
-    int finalLibraryCount = reloadReport['details']['finalLibraryCount'];
-    printTrace('Reloaded $loadedLibraryCount of $finalLibraryCount libraries.');
     return true;
   }
 
@@ -468,16 +465,24 @@ class HotRunner extends ResidentRunner {
       Status status = logger.startProgress('Performing full restart...');
       try {
         await _restartFromSources();
-        return OperationResult.ok;
-      } finally {
         status.stop();
+        printStatus('Restart complete.');
+        return OperationResult.ok;
+      } catch (error) {
+        status.stop();
+        throw error;
       }
     } else {
       Status status = logger.startProgress('Performing hot reload...');
       try {
-        return await _reloadSources(pause: pauseAfterRestart);
-      } finally {
+        OperationResult result = await _reloadSources(pause: pauseAfterRestart);
         status.stop();
+        if (result.isOk)
+          printStatus("${result.message}.");
+        return result;
+      } catch (error) {
+        status.stop();
+        throw error;
       }
     }
   }
@@ -489,15 +494,19 @@ class HotRunner extends ResidentRunner {
     firstFrameTimer.start();
     if (_devFS != null)
       await _updateDevFS();
+    String reloadMessage;
     try {
       Map<String, dynamic> reloadReport =
           await currentView.uiIsolate.reloadSources(pause: pause);
-      if (!_printReloadReport(reloadReport)) {
+      if (!_validateReloadReport(reloadReport)) {
         // Reload failed.
         flutterUsage.sendEvent('hot', 'reload-reject');
         return new OperationResult(1, 'reload rejected');
       } else {
         flutterUsage.sendEvent('hot', 'reload');
+        int loadedLibraryCount = reloadReport['details']['loadedLibraryCount'];
+        int finalLibraryCount = reloadReport['details']['finalLibraryCount'];
+        reloadMessage = 'Reloaded $loadedLibraryCount of $finalLibraryCount libraries';
       }
     } catch (error, st) {
       int errorCode = error['code'];
@@ -549,7 +558,7 @@ class HotRunner extends ResidentRunner {
       }
       flutterUsage.sendTiming('hot', 'reload', firstFrameTimer.elapsed);
     }
-    return OperationResult.ok;
+    return new OperationResult(OperationResult.ok.code, reloadMessage);
   }
 
   @override
