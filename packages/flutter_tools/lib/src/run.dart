@@ -45,6 +45,7 @@ class RunAndStayResident extends ResidentRunner {
   @override
   Future<int> run({
     Completer<DebugConnectionInfo> connectionInfoCompleter,
+    Completer<Null> appStartedCompleter,
     String route,
     bool shouldBuild: true
   }) {
@@ -55,6 +56,7 @@ class RunAndStayResident extends ResidentRunner {
         traceStartup: traceStartup,
         benchmark: benchmark,
         connectionInfoCompleter: connectionInfoCompleter,
+        appStartedCompleter: appStartedCompleter,
         route: route,
         shouldBuild: shouldBuild
       );
@@ -101,6 +103,7 @@ class RunAndStayResident extends ResidentRunner {
     bool traceStartup: false,
     bool benchmark: false,
     Completer<DebugConnectionInfo> connectionInfoCompleter,
+    Completer<Null> appStartedCompleter,
     String route,
     bool shouldBuild: true
   }) async {
@@ -185,8 +188,8 @@ class RunAndStayResident extends ResidentRunner {
 
     startTime.stop();
 
-    if (connectionInfoCompleter != null && _result.hasObservatory)
-      connectionInfoCompleter.complete(new DebugConnectionInfo(_result.observatoryPort));
+    if (_result.hasObservatory)
+      connectionInfoCompleter?.complete(new DebugConnectionInfo(_result.observatoryPort));
 
     // Connect to observatory.
     if (debuggingOptions.debuggingEnabled) {
@@ -217,6 +220,8 @@ class RunAndStayResident extends ResidentRunner {
       setupTerminal();
       registerSignalHandlers();
     }
+
+    appStartedCompleter?.complete();
 
     if (benchmark) {
       await new Future<Null>.delayed(new Duration(seconds: 4));

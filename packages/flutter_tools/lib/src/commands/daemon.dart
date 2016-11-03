@@ -361,16 +361,25 @@ class AppDomain extends Domain {
         _sendAppEvent(app, 'debugPort', params);
       });
     }
+    Completer<Null> appStartedCompleter = new Completer<Null>();
+    appStartedCompleter.future.then((_) {
+      _sendAppEvent(app, 'started');
+    });
 
-    app._runInZone(this, () {
-      runner.run(connectionInfoCompleter: connectionInfoCompleter, route: route).then((_) {
+    app._runInZone(this, () async {
+      try {
+        await runner.run(
+          connectionInfoCompleter: connectionInfoCompleter,
+          appStartedCompleter: appStartedCompleter,
+          route: route,
+        );
         _sendAppEvent(app, 'stop');
-      }).catchError((dynamic error) {
-        _sendAppEvent(app, 'stop', <String, dynamic>{ 'error' : error.toString() });
-      }).whenComplete(() {
+      } catch (error) {
+        _sendAppEvent(app, 'stop', <String, dynamic>{'error': error.toString()});
+      } finally {
         Directory.current = cwd;
         _apps.remove(app);
-      });
+      }
     });
 
     return app;
