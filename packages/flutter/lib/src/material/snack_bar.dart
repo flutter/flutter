@@ -26,8 +26,7 @@ const Color _kSnackBackground = const Color(0xFF323232);
 // TODO(ianh): Implement the Tablet version of snackbar if we're "on a tablet".
 
 const Duration _kSnackBarTransitionDuration = const Duration(milliseconds: 250);
-const Duration _kSnackBarShortDisplayDuration = const Duration(milliseconds: 1500);
-const Duration _kSnackBarMediumDisplayDuration = const Duration(milliseconds: 2750);
+const Duration _kSnackBarDisplayDuration = const Duration(milliseconds: 1500);
 const Curve _snackBarHeightCurve = Curves.fastOutSlowIn;
 const Curve _snackBarFadeCurve = const Interval(0.72, 1.0, curve: Curves.fastOutSlowIn);
 
@@ -92,12 +91,20 @@ class _SnackBarActionState extends State<SnackBarAction> {
 /// A lightweight message with an optional action which briefly displays at the
 /// bottom of the screen.
 ///
-/// Displayed with the Scaffold.of().showSnackBar() API.
+/// To display a snack bar, call `Scaffold.of(context).showSnackBar()`, passing
+/// an instance of [SnackBar] that describes the message.
+///
+/// To control how long the [SnackBar] remains visible, specify a [duration].
 ///
 /// See also:
 ///
-///  * [Scaffold.of] and [ScaffoldState.showSnackBar]
-///  * [SnackBarAction]
+///  * [Scaffold.of], to obtain the current [ScaffoldState], which manages the
+///    display and animation of snack bars.
+///  * [ScaffoldState.showSnackBar], which displays a [SnackBar].
+///  * [ScaffoldState.removeCurrentSnackBar], which abruptly hides the currently
+///    displayed snack bar, if any, and allows the next to be displayed.
+///  * [SnackBarAction], which is used to specify an [action] button to show
+///    on the snack bar.
 ///  * <https://material.google.com/components/snackbars-toasts.html>
 class SnackBar extends StatelessWidget {
   /// Creates a snack bar.
@@ -107,7 +114,7 @@ class SnackBar extends StatelessWidget {
     Key key,
     this.content,
     this.action,
-    this.duration: _kSnackBarShortDisplayDuration,
+    this.duration: _kSnackBarDisplayDuration,
     this.animation
   }) : super(key: key) {
     assert(content != null);
@@ -122,9 +129,20 @@ class SnackBar extends StatelessWidget {
   ///
   /// For example, the snack bar might let the user undo the operation that
   /// prompted the snackbar. Snack bars can have at most one action.
+  ///
+  /// The action should not be "dismiss" or "cancel".
   final SnackBarAction action;
 
   /// The amount of time the snack bar should be displayed.
+  ///
+  /// Defaults to 1.5s.
+  ///
+  /// See also:
+  ///
+  ///  * [ScaffoldState.removeCurrentSnackBar], which abruptly hides the
+  ///    currently displayed snack bar, if any, and allows the next to be
+  ///    displayed.
+  ///  * <https://material.google.com/components/snackbars-toasts.html>
   final Duration duration;
 
   /// The animation driving the entrance and exit of the snack bar.

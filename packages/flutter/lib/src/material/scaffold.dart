@@ -514,12 +514,17 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   AnimationController _snackBarController;
   Timer _snackBarTimer;
 
-  /// Shows a [SnackBar] at the bottom fo the scaffold.
+  /// Shows a [SnackBar] at the bottom of the scaffold.
   ///
   /// A scaffold can show at most one snack bar at a time. If this function is
   /// called while another snack bar is already visible, the given snack bar
   /// will be added to a queue and displayed after the earlier snack bars have
   /// closed.
+  ///
+  /// To control how long a [SnackBar] remains visible, use [SnackBar.duration].
+  ///
+  /// To remove a [SnackBar] suddenly (without an animation), use
+  /// [removeCurrentSnackBar].
   ScaffoldFeatureController<SnackBar, Null> showSnackBar(SnackBar snackbar) {
     _snackBarController ??= SnackBar.createAnimationController(vsync: this)
       ..addStatusListener(_handleSnackBarStatusChange);
