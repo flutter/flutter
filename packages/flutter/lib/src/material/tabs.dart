@@ -290,11 +290,9 @@ class _TabBarWrapper extends MultiChildRenderObjectWidget {
   }
 }
 
-/// Signature for building icons for tabs.
+/// Signature for building icons for [TabLabel]s.
 ///
-/// See also:
-///
-///  * [TabLabel]
+/// Used by [TabLabel.iconBuilder].
 typedef Widget TabLabelIconBuilder(BuildContext context, Color color);
 
 /// Each TabBar tab can display either a title [text], an icon, or both. An icon

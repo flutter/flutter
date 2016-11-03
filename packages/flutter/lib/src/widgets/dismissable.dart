@@ -17,7 +17,10 @@ const double _kMinFlingVelocityDelta = 400.0;
 const double _kFlingVelocityScale = 1.0 / 300.0;
 const double _kDismissThreshold = 0.4;
 
-/// Signature used by [Dismissable] to indicate that it has been dismissed in the given `direction`.
+/// Signature used by [Dismissable] to indicate that it has been dismissed in
+/// the given `direction`.
+///
+/// Used by [Dismissable.onDismissed].
 typedef void DismissDirectionCallback(DismissDirection direction);
 
 /// The direction in which a [Dismissable] can be dismissed.

@@ -43,6 +43,12 @@ enum TextSelectionHandleType {
 /// [start] handle always moves the [start]/[baseOffset] of the selection.
 enum _TextSelectionHandlePosition { start, end }
 
+/// Signature for reporting changes to the selection component of an
+/// [InputValue] for the purposes of a [TextSelectionOverlay]. The [caretRect]
+/// argument gives the location of the caret in the coordinate space of the
+/// [RenderBox] given by the [TextSelectionOverlay.renderObject].
+///
+/// Used by [TextSelectionOverlay.onSelectionOverlayChanged].
 typedef void TextSelectionOverlayChanged(InputValue value, Rect caretRect);
 
 /// An interface for manipulating the selection, to be used by the implementor

@@ -18,6 +18,9 @@ import 'framework.dart';
 ///  * The [containerExtent] is the exterior dimension of the viewport (i.e.,
 ///    the amount of the thing inside the viewport that is visible from outside
 ///    the viewport).
+///
+/// Used by [ScrollableGrid.onExtentsChanged],
+/// [ScrollableList.onExtentsChanged], etc.
 typedef void ExtentsChangedCallback(double contentExtent, double containerExtent);
 
 /// An abstract widget whose children are not all materialized.
@@ -279,6 +282,8 @@ class _IterableWidgetProvider extends _WidgetProvider {
 }
 
 /// Signature of a callback that returns the sublist of widgets in the given range.
+///
+/// Used by [PageableList.itemBuilder], [ScrollableLazyList.itemBuilder], etc.
 typedef List<Widget> ItemListBuilder(BuildContext context, int start, int count);
 
 /// A VirtualViewport that represents its children using [ItemListBuilder].

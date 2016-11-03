@@ -7,12 +7,6 @@ import 'package:meta/meta.dart';
 import 'framework.dart';
 import 'scrollable.dart';
 
-/// Signature for building the contents of a scrollable widget.
-///
-/// Typically returns a tree of widgets that includes the viewport that will be
-/// scrolled to the given `scrollOffset`.
-typedef Widget ViewportBuilder(BuildContext context, ScrollableState state, double scrollOffset);
-
 /// A widget that controls whether viewport descendants will overscroll their contents.
 /// Overscrolling is clamped at the beginning or end or both according to the
 /// [edge] parameter.

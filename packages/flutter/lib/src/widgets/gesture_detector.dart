@@ -37,6 +37,8 @@ export 'package:flutter/gestures.dart' show
 ///
 /// The `recognizer` argument is the gesture recognizer that currently occupies
 /// the slot for which a gesture recognizer is being created.
+///
+/// Used by [RawGestureDetector.gestures].
 typedef GestureRecognizer GestureRecognizerFactory(GestureRecognizer recognizer);
 
 /// A widget that detects gestures.
