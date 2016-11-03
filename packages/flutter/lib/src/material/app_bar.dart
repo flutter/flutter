@@ -125,11 +125,13 @@ class _AppBarExpandedHeight extends InheritedWidget {
 ///
 /// See also:
 ///
-///  * [Scaffold]
-///  * [TabBar]
-///  * [IconButton]
-///  * [PopupMenuButton]
-///  * [FlexibleSpaceBar]
+///  * [Scaffold], which displays the [AppBar] in its [Scaffold.appBar] slot.
+///  * [TabBar], which is typically placed in the [bottom] slot of the [AppBar]
+///    if the screen has multiple pages arranged in tabs.
+///  * [IconButton], which is used with [actions] to show buttons on the app bar.
+///  * [PopupMenuButton], to show a popup menu on the app bar, via [actions].
+///  * [FlexibleSpaceBar], which is used with [flexibleSpace] when the app bar
+///    can expand and collapse.
 ///  * <https://material.google.com/layout/structure.html#structure-toolbars>
 class AppBar extends StatelessWidget {
   /// Creates a material design app bar.
@@ -172,11 +174,29 @@ class AppBar extends StatelessWidget {
   /// of the app.
   final Widget title;
 
-  /// Widgets to display after the title widget.
+  /// Widgets to display after the [title] widget.
   ///
   /// Typically these widgets are [IconButton]s representing common operations.
   /// For less common operations, consider using a [PopupMenuButton] as the
   /// last action.
+  ///
+  /// For example:
+  ///
+  /// ```dart
+  /// return new Scaffold(
+  ///   appBar: new AppBar(
+  ///     title: new Text('Hello World'),
+  ///     actions: <Widget>[
+  ///       new IconButton(
+  ///         icon: new Icon(Icons.shopping_cart),
+  ///         tooltip: 'Open shopping cart',
+  ///         onPressed: _openCart,
+  ///       ),
+  ///     ]
+  ///   ),
+  ///   body: _buildBody(),
+  /// );
+  /// ```
   final List<Widget> actions;
 
   /// This widget is stacked behind the toolbar and the tabbar and it is not
