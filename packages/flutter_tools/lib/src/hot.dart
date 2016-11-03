@@ -144,6 +144,7 @@ class HotRunner extends ResidentRunner {
   @override
   Future<int> run({
     Completer<DebugConnectionInfo> connectionInfoCompleter,
+    Completer<Null> appStartedCompleter,
     String route,
     bool shouldBuild: true
   }) {
@@ -151,6 +152,7 @@ class HotRunner extends ResidentRunner {
     return Chain.capture(() {
       return _run(
         connectionInfoCompleter: connectionInfoCompleter,
+        appStartedCompleter: appStartedCompleter,
         route: route,
         shouldBuild: shouldBuild
       );
@@ -161,6 +163,7 @@ class HotRunner extends ResidentRunner {
 
   Future<int> _run({
     Completer<DebugConnectionInfo> connectionInfoCompleter,
+    Completer<Null> appStartedCompleter,
     String route,
     bool shouldBuild: true
   }) async {
@@ -298,6 +301,8 @@ class HotRunner extends ResidentRunner {
     printTrace('Finishing file synchronization');
     // Finish the file sync now.
     await _updateDevFS();
+
+    appStartedCompleter?.complete();
 
     if (benchmarkMode) {
       // We are running in benchmark mode.

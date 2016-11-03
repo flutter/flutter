@@ -40,6 +40,7 @@ abstract class ResidentRunner {
   /// Start the app and keep the process running during its lifetime.
   Future<int> run({
     Completer<DebugConnectionInfo> connectionInfoCompleter,
+    Completer<Null> appStartedCompleter,
     String route,
     bool shouldBuild: true
   });
