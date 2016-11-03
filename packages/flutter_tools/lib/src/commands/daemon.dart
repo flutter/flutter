@@ -344,7 +344,7 @@ class AppDomain extends Domain {
 
     AppInstance app = new AppInstance(_getNewAppId(), runner);
     _apps.add(app);
-    _sendAppEvent(app, 'starting', <String, dynamic>{
+    _sendAppEvent(app, 'start', <String, dynamic>{
       'deviceId': device.id,
       'directory': projectDirectory,
       'supportsRestart': isRestartSupported(enableHotReload, device)
@@ -373,9 +373,9 @@ class AppDomain extends Domain {
           appStartedCompleter: appStartedCompleter,
           route: route,
         );
-        _sendAppEvent(app, 'stopped');
+        _sendAppEvent(app, 'stop');
       } catch (error) {
-        _sendAppEvent(app, 'stopped', <String, dynamic>{'error': error.toString()});
+        _sendAppEvent(app, 'stop', <String, dynamic>{'error': error.toString()});
       } finally {
         Directory.current = cwd;
         _apps.remove(app);
