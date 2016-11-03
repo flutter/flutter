@@ -6,7 +6,7 @@ import 'package:flutter/widgets.dart';
 
 import 'material.dart';
 
-/// A material design card.
+/// A material design card. A card has slightly rounded corners and a shadow.
 ///
 /// A card is a sheet of [Material] used to represent some related information,
 /// for example an album, a geographical location, a meal, contact details, etc.
@@ -33,7 +33,11 @@ class Card extends StatelessWidget {
   /// The color of material used for this card.
   final Color color;
 
+  /// The z-coordinate at which to place this card.
+  ///
   /// The following elevations have defined shadows: 1, 2, 3, 4, 6, 8, 9, 12, 16, 24
+  ///
+  /// Defaults to 2, the appropriate elevation for cards.
   final int elevation;
 
   @override

@@ -336,7 +336,7 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
 /// The type `T` is the type of the value the entry represents. All the entries
 /// in a given menu must represent values with consistent types.
 class DropdownMenuItem<T> extends StatelessWidget {
-  /// Creates an item for a drop down menu.
+  /// Creates an item for a dropdown menu.
   ///
   /// The [child] argument is required.
   DropdownMenuItem({
@@ -407,7 +407,7 @@ class DropdownButtonHideUnderline extends InheritedWidget {
 ///  * [FlatButton]
 ///  * <https://material.google.com/components/buttons.html#buttons-dropdown-buttons>
 class DropdownButton<T> extends StatefulWidget {
-  /// Creates a drop down button.
+  /// Creates a dropdown button.
   ///
   /// The [items] must have distinct values and [value] must be among them.
   ///
@@ -438,9 +438,11 @@ class DropdownButton<T> extends StatefulWidget {
   /// The z-coordinate at which to place the menu when open.
   ///
   /// The following elevations have defined shadows: 1, 2, 3, 4, 6, 8, 9, 12, 16, 24
+  ///
+  /// Defaults to 8, the appropriate elevation for dropdown buttons.
   final int elevation;
 
-  /// The text style to use for text in the drop down button and the drop down
+  /// The text style to use for text in the dropdown button and the dropdown
   /// menu that appears when you tap the button.
   ///
   /// Defaults to the [TextTheme.subhead] value of the current
