@@ -79,7 +79,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
 
     // This part of the layout has the same effect as putting the app bar and
     // body in a column and making the body flexible. What's different is that
-    // in this case the app bar appears -after- the body in the stacking order,
+    // in this case the app bar appears _after_ the body in the stacking order,
     // so the app bar's shadow is drawn on top of the body.
 
     final BoxConstraints fullWidthConstraints = looseConstraints.tighten(width: size.width);
@@ -108,7 +108,10 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
 
     if (hasChild(_ScaffoldSlot.body)) {
       final double bodyHeight = contentBottom - contentTop;
-      final BoxConstraints bodyConstraints = fullWidthConstraints.tighten(height: bodyHeight);
+      final BoxConstraints bodyConstraints = new BoxConstraints(
+        maxWidth: fullWidthConstraints.maxWidth,
+        maxHeight: bodyHeight,
+      );
       layoutChild(_ScaffoldSlot.body, bodyConstraints);
       positionChild(_ScaffoldSlot.body, new Offset(0.0, contentTop));
     }
@@ -325,22 +328,20 @@ class Scaffold extends StatefulWidget {
   /// [drawer]. To avoid the body being resized to avoid the window padding
   /// (e.g., from the onscreen keyboard), see [resizeToAvoidBottomPadding].
   ///
-  /// The widget in the body of the scaffold will be forced to the size of the
-  /// available space, to cover the entire scaffold other than any app bars,
-  /// footer buttons, or navigation bars.
-  ///
-  /// To center this widget instead, consider putting it in a [Center] widget
-  /// and having that be the body.
+  /// The widget in the body of the scaffold is positioned at the top-left of
+  /// the available space between the app bar and the bottom of the scaffold. To
+  /// center this widget instead, consider putting it in a [Center] widget and
+  /// having that be the body.
   ///
   /// If you have a column of widgets that should normally fit on the screen,
   /// but may overflow and would in such cases need to scroll, consider using a
   /// [Block] as the body of the scaffold.
   ///
-  /// If you have a list of items, consider using a [LazyBlock] or
-  /// [LazyScrollableList] as the body of the scaffold.
+  /// If you have a list of items, consider using a [LazyBlock],
+  /// [LazyScrollableList], or [MaterialList] as the body of the scaffold.
   final Widget body;
 
-  /// A button displayed on top of the body.
+  /// A button displayed on top of the [body].
   ///
   /// Typically a [FloatingActionButton].
   final Widget floatingActionButton;
@@ -357,7 +358,7 @@ class Scaffold extends StatefulWidget {
   ///  * <https://material.google.com/components/buttons.html#buttons-persistent-footer-buttons>
   final List<Widget> persistentFooterButtons;
 
-  /// A panel displayed to the side of the body, often hidden on mobile devices.
+  /// A panel displayed to the side of the [body], often hidden on mobile devices.
   ///
   /// Typically a [Drawer].
   final Widget drawer;
