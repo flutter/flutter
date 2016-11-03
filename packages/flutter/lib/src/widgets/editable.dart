@@ -118,14 +118,12 @@ class InputValue {
   }
 }
 
-/// A basic single-line input control.
+/// A basic text input control.
 ///
 /// This control is not intended to be used directly. Instead, consider using
 /// [Input], which provides focus management and material design.
-//
-// TODO(mpcomplete): rename RawInput since it can span multiple lines.
 class RawInput extends Scrollable {
-  /// Creates a basic single-line input control.
+  /// Creates a basic text input control.
   ///
   /// The [value] argument must not be null.
   RawInput({

@@ -14,7 +14,6 @@ import 'gesture_detector.dart';
 import 'overlay.dart';
 import 'transitions.dart';
 
-// TODO(mpcomplete): Need one for [collapsed].
 /// Which type of selection handle to be displayed.
 ///
 /// With mixed-direction text, both handles may be the same type. Examples:
