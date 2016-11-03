@@ -52,6 +52,8 @@ class DrawerItem extends StatelessWidget {
   /// Called when the user taps this drawer item.
   ///
   /// If null, the drawer item is displayed as disabled.
+  ///
+  /// To close the [Drawer] when an item is pressed, call [Navigator.pop].
   final VoidCallback onPressed;
 
   /// Whether this drawer item is currently selected.
