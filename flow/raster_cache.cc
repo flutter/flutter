@@ -4,6 +4,9 @@
 
 #include "flutter/flow/raster_cache.h"
 
+#include <vector>
+
+#include "flutter/common/threads.h"
 #include "flutter/glue/trace_event.h"
 #include "lib/ftl/logging.h"
 #include "third_party/skia/include/core/SkCanvas.h"
@@ -11,11 +14,7 @@
 #include "third_party/skia/include/core/SkPicture.h"
 #include "third_party/skia/include/core/SkSurface.h"
 
-#define ENABLE_RASTER_CACHE 1
-
 namespace flow {
-
-#if ENABLE_RASTER_CACHE
 
 static const int kRasterThreshold = 3;
 
@@ -25,9 +24,43 @@ static bool isWorthRasterizing(SkPicture* picture) {
   return picture->approximateOpCount() > 10;
 }
 
-#endif
+static sk_sp<SkShader> CreateCheckerboardShader(SkColor c1,
+                                                SkColor c2,
+                                                int size) {
+  SkBitmap bm;
+  bm.allocN32Pixels(2 * size, 2 * size);
+  bm.eraseColor(c1);
+  bm.eraseArea(SkIRect::MakeLTRB(0, 0, size, size), c2);
+  bm.eraseArea(SkIRect::MakeLTRB(size, size, 2 * size, 2 * size), c2);
+  return SkShader::MakeBitmapShader(bm, SkShader::kRepeat_TileMode,
+                                    SkShader::kRepeat_TileMode);
+}
 
-RasterCache::RasterCache() {}
+static void DrawCheckerboard(SkCanvas* canvas,
+                             SkColor c1,
+                             SkColor c2,
+                             int size) {
+  SkPaint paint;
+  paint.setShader(CreateCheckerboardShader(c1, c2, size));
+  canvas->drawPaint(paint);
+}
+
+static void DrawCheckerboard(SkCanvas* canvas, const SkRect& rect) {
+  // Draw a checkerboard
+  canvas->save();
+  canvas->clipRect(rect);
+  DrawCheckerboard(canvas, 0x4400FF00, 0x00000000, 12);
+  canvas->restore();
+
+  // Stroke the drawn area
+  SkPaint debugPaint;
+  debugPaint.setStrokeWidth(3);
+  debugPaint.setColor(SK_ColorRED);
+  debugPaint.setStyle(SkPaint::kStroke_Style);
+  canvas->drawRect(rect, debugPaint);
+}
+
+RasterCache::RasterCache() : checkerboard_images_(false), weak_factory_(this) {}
 
 RasterCache::~RasterCache() {}
 
@@ -42,7 +75,6 @@ sk_sp<SkImage> RasterCache::GetPrerolledImage(GrContext* context,
                                               const SkMatrix& ctm,
                                               bool is_complex,
                                               bool will_change) {
-#if ENABLE_RASTER_CACHE
   SkScalar scaleX = ctm.getScaleX();
   SkScalar scaleY = ctm.getScaleY();
 
@@ -86,15 +118,15 @@ sk_sp<SkImage> RasterCache::GetPrerolledImage(GrContext* context,
         canvas->scale(scaleX, scaleY);
         canvas->translate(-rect.left(), -rect.top());
         canvas->drawPicture(picture);
+        if (checkerboard_images_) {
+          DrawCheckerboard(canvas, rect);
+        }
         entry.image = surface->makeImageSnapshot();
       }
     }
   }
 
   return entry.image;
-#else
-  return nullptr;
-#endif
 }
 
 void RasterCache::SweepAfterFrame() {
@@ -113,6 +145,22 @@ void RasterCache::SweepAfterFrame() {
 
 void RasterCache::Clear() {
   cache_.clear();
+}
+
+void RasterCache::SetCheckboardCacheImages(bool checkerboard) {
+  if (checkerboard_images_ == checkerboard) {
+    return;
+  }
+
+  checkerboard_images_ = checkerboard;
+
+  // Clear all existing entries so previously rasterized items (with or without
+  // a checkerboard) will be refreshed in subsequent passes.
+  blink::Threads::Gpu()->PostTask([self = weak_factory_.GetWeakPtr()]() {
+    if (self) {
+      self->Clear();
+    }
+  });
 }
 
 }  // namespace flow

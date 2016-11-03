@@ -42,6 +42,7 @@ source_set("flow") {
   ]
 
   deps = [
+    "//flutter/common",
     "//flutter/glue",
     "//flutter/skia",
     "//flutter/synchronization",

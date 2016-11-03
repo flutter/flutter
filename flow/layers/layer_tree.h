@@ -66,13 +66,21 @@ class LayerTree {
     return rasterizer_tracing_threshold_;
   }
 
+  void set_checkerboard_raster_cache_images(bool checkerboard) {
+    checkerboard_raster_cache_images_ = checkerboard;
+  }
+
+  bool checkerboard_raster_cache_images() const {
+    return checkerboard_raster_cache_images_;
+  }
+
  private:
   SkISize frame_size_;  // Physical pixels.
   uint32_t scene_version_;
   std::unique_ptr<Layer> root_layer_;
-
   ftl::TimeDelta construction_time_;
   uint32_t rasterizer_tracing_threshold_;
+  bool checkerboard_raster_cache_images_;
 
   FTL_DISALLOW_COPY_AND_ASSIGN(LayerTree);
 };

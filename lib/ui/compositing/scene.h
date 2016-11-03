@@ -26,7 +26,8 @@ class Scene : public ftl::RefCountedThreadSafe<Scene>,
  public:
   ~Scene() override;
   static ftl::RefPtr<Scene> create(std::unique_ptr<flow::Layer> rootLayer,
-                                   uint32_t rasterizerTracingThreshold);
+                                   uint32_t rasterizerTracingThreshold,
+                                   bool checkerboardRasterCacheImages);
 
   std::unique_ptr<flow::LayerTree> takeLayerTree();
 
@@ -36,7 +37,8 @@ class Scene : public ftl::RefCountedThreadSafe<Scene>,
 
  private:
   explicit Scene(std::unique_ptr<flow::Layer> rootLayer,
-                 uint32_t rasterizerTracingThreshold);
+                 uint32_t rasterizerTracingThreshold,
+                 bool checkerboardRasterCacheImages);
 
   std::unique_ptr<flow::LayerTree> m_layerTree;
 };

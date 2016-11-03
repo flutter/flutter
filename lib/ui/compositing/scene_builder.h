@@ -5,9 +5,9 @@
 #ifndef FLUTTER_LIB_UI_COMPOSITING_SCENE_BUILDER_H_
 #define FLUTTER_LIB_UI_COMPOSITING_SCENE_BUILDER_H_
 
-#include <stack>
 #include <stdint.h>
 #include <memory>
+#include <stack>
 
 #include "flutter/flow/layers/container_layer.h"
 #include "flutter/lib/ui/compositing/scene.h"
@@ -63,18 +63,22 @@ class SceneBuilder : public ftl::RefCountedThreadSafe<SceneBuilder>,
 
   void setRasterizerTracingThreshold(uint32_t frameInterval);
 
+  void setCheckerboardRasterCacheImages(bool checkerboard);
+
   ftl::RefPtr<Scene> build();
 
   static void RegisterNatives(tonic::DartLibraryNatives* natives);
 
  private:
-  explicit SceneBuilder();
+  SceneBuilder();
 
-  void addLayer(std::unique_ptr<flow::ContainerLayer> layer, const SkRect& cullRect);
+  void addLayer(std::unique_ptr<flow::ContainerLayer> layer,
+                const SkRect& cullRect);
 
   std::unique_ptr<flow::ContainerLayer> m_rootLayer;
   flow::ContainerLayer* m_currentLayer;
   int32_t m_currentRasterizerTracingThreshold;
+  bool m_checkerboardRasterCacheImages;
   std::stack<SkRect> m_cullRects;
 };
 

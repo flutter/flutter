@@ -4,9 +4,9 @@
 
 #include "flutter/lib/ui/compositing/scene.h"
 
+#include "lib/tonic/converter/dart_converter.h"
 #include "lib/tonic/dart_args.h"
 #include "lib/tonic/dart_binding_macros.h"
-#include "lib/tonic/converter/dart_converter.h"
 #include "lib/tonic/dart_library_natives.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkPictureRecorder.h"
@@ -20,16 +20,21 @@ IMPLEMENT_WRAPPERTYPEINFO(ui, Scene);
 DART_BIND_ALL(Scene, FOR_EACH_BINDING)
 
 ftl::RefPtr<Scene> Scene::create(std::unique_ptr<flow::Layer> rootLayer,
-                                 uint32_t rasterizerTracingThreshold) {
+                                 uint32_t rasterizerTracingThreshold,
+                                 bool checkerboardRasterCacheImages) {
   return ftl::MakeRefCounted<Scene>(std::move(rootLayer),
-                                    rasterizerTracingThreshold);
+                                    rasterizerTracingThreshold,
+                                    checkerboardRasterCacheImages);
 }
 
 Scene::Scene(std::unique_ptr<flow::Layer> rootLayer,
-             uint32_t rasterizerTracingThreshold)
+             uint32_t rasterizerTracingThreshold,
+             bool checkerboardRasterCacheImages)
     : m_layerTree(new flow::LayerTree()) {
   m_layerTree->set_root_layer(std::move(rootLayer));
   m_layerTree->set_rasterizer_tracing_threshold(rasterizerTracingThreshold);
+  m_layerTree->set_checkerboard_raster_cache_images(
+      checkerboardRasterCacheImages);
 }
 
 Scene::~Scene() {}
