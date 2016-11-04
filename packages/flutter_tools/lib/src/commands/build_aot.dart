@@ -233,6 +233,7 @@ Future<String> _buildAotSnapshot(
         '--instructions_blob=$instructionsBlob',
         '--embedder_entry_points_manifest=$vmEntryPointsAndroid',
         '--no-sim-use-hardfp',
+        '--no-use-integer-division',  // Not supported by the Pixel in 32-bit mode.
       ]);
       break;
     case TargetPlatform.ios:
