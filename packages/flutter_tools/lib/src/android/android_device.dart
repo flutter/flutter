@@ -414,7 +414,6 @@ class AndroidDevice extends Device {
       localBundlePath = await flx.buildFlx(
         mainPath: mainPath,
         precompiledSnapshot: isAotBuildMode(debuggingOptions.buildMode),
-        includeRobotoFonts: false
       );
       if (localBundlePath == null)
         return new LaunchResult.failed();
