@@ -48,7 +48,7 @@ Future<Null> main(List<String> args) async {
     workingDirPath: argResults[_kOptionWorking],
     packagesPath: argResults[_kOptionPackages],
     manifestPath: defaultManifestPath,
-    includeRobotoFonts: true,
+    includeDefaultFonts: false,
   );
   if (buildResult != 0) {
     printError('Error building $outputPath: $buildResult.');
