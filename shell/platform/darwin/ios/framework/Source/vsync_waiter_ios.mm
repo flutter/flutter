@@ -11,6 +11,7 @@
 #include <mach/mach_time.h>
 
 #include "flutter/common/threads.h"
+#include "flutter/glue/trace_event.h"
 #include "lib/ftl/logging.h"
 
 @interface VSyncClient : NSObject
@@ -20,6 +21,7 @@
 @implementation VSyncClient {
   CADisplayLink* _displayLink;
   shell::VsyncWaiter::Callback _pendingCallback;
+  bool _traceCounter;
 }
 
 - (instancetype)init {
@@ -44,6 +46,8 @@
 }
 
 - (void)onDisplayLink:(CADisplayLink*)link {
+  _traceCounter = !_traceCounter;
+  TRACE_COUNTER1("flutter", "OnDisplayLink", _traceCounter);
   ftl::TimePoint frame_time = ftl::TimePoint::Now();
   _displayLink.paused = YES;
   auto callback = std::move(_pendingCallback);
