@@ -57,7 +57,7 @@ Future<int> createSnapshot({
 Future<String> buildFlx({
   String mainPath: defaultMainPath,
   bool precompiledSnapshot: false,
-  bool includeRobotoFonts: true
+  bool includeRobotoFonts: false
 }) async {
   int result;
   result = await build(
@@ -81,7 +81,7 @@ Future<int> build({
   String workingDirPath,
   String packagesPath,
   bool precompiledSnapshot: false,
-  bool includeRobotoFonts: true,
+  bool includeRobotoFonts: false,
   bool reportLicensedPackages: false
 }) async {
   snapshotterPath ??= tools.getHostToolPath(HostTool.SkySnapshot);
@@ -131,7 +131,7 @@ Future<int> assemble({
   String privateKeyPath: defaultPrivateKeyPath,
   String workingDirPath,
   String packagesPath,
-  bool includeRobotoFonts: true,
+  bool includeRobotoFonts: false,
   bool reportLicensedPackages: false
 }) async {
   outputPath ??= defaultFlxOutputPath;

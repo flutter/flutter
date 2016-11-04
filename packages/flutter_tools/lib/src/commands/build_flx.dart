@@ -22,7 +22,7 @@ class BuildFlxCommand extends BuildSubCommand {
     argParser.addOption('snapshot', defaultsTo: defaultSnapshotPath);
     argParser.addOption('depfile', defaultsTo: defaultDepfilePath);
     argParser.addOption('working-dir', defaultsTo: getAssetBuildDirectory());
-    argParser.addFlag('include-roboto-fonts', defaultsTo: true);
+    argParser.addFlag('include-roboto-fonts', defaultsTo: false);
     argParser.addFlag('report-licensed-packages', help: 'Whether to report the names of all the packages that are included in the application\'s LICENSE file.', defaultsTo: false);
     usesPubOption();
   }

@@ -69,7 +69,7 @@ class AssetBundle {
     String manifestPath: defaultManifestPath,
     String workingDirPath,
     String packagesPath,
-    bool includeRobotoFonts: true,
+    bool includeRobotoFonts: false,
     bool reportLicensedPackages: false
   }) async {
     workingDirPath ??= getAssetBuildDirectory();
