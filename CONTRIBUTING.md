@@ -160,7 +160,7 @@ flutter/tools/gn --android --runtime-mode=profile
 flutter/tools/gn --android --runtime-mode=release
 
 cd out
-ls | xargs -n 1 sh -c 'ninja -C $0 || exit 255'
+find . -mindepth 1 -maxdepth 1 -type d | xargs -n 1 sh -c 'ninja -C $0 || exit 255'
 
 flutter update-packages --upgrade
 ```
