@@ -41,6 +41,8 @@ class Status {
   void cancel() { }
 }
 
+typedef void _FinishCallback();
+
 class StdoutLogger extends Logger {
   Status _status;
 
@@ -78,7 +80,7 @@ class StdoutLogger extends Logger {
       return new Status();
     } else {
       if (supportsColor) {
-        _status = new _AnsiStatus(message);
+        _status = new _AnsiStatus(message, () { _status = null; });
         return _status;
       } else {
         printStatus(message);
@@ -223,7 +225,7 @@ class AnsiTerminal {
 }
 
 class _AnsiStatus extends Status {
-  _AnsiStatus(this.message) {
+  _AnsiStatus(this.message, this.onFinish) {
     stopwatch = new Stopwatch()..start();
 
     stdout.write('${message.padRight(51)}     ');
@@ -235,6 +237,7 @@ class _AnsiStatus extends Status {
   static final List<String> _progress = <String>['-', r'\', '|', r'/', '-', r'\', '|', '/'];
 
   final String message;
+  final _FinishCallback onFinish;
   Stopwatch stopwatch;
   Timer timer;
   int index = 1;
@@ -247,6 +250,8 @@ class _AnsiStatus extends Status {
 
   @override
   void stop({ bool showElapsedTime: true }) {
+    onFinish();
+
     if (!live)
       return;
     live = false;
@@ -262,6 +267,8 @@ class _AnsiStatus extends Status {
 
   @override
   void cancel() {
+    onFinish();
+
     if (!live)
       return;
     live = false;
