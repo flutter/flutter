@@ -131,6 +131,7 @@ Future<int> assemble({
   String privateKeyPath: defaultPrivateKeyPath,
   String workingDirPath,
   String packagesPath,
+  bool includeDefaultFonts: true,
   bool includeRobotoFonts: true,
   bool reportLicensedPackages: false
 }) async {
@@ -145,6 +146,7 @@ Future<int> assemble({
     manifestPath: manifestPath,
     workingDirPath: workingDirPath,
     packagesPath: packagesPath,
+    includeDefaultFonts: includeDefaultFonts,
     includeRobotoFonts: includeRobotoFonts,
     reportLicensedPackages: reportLicensedPackages
   );

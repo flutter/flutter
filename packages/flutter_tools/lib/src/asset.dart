@@ -69,6 +69,7 @@ class AssetBundle {
     String manifestPath: defaultManifestPath,
     String workingDirPath,
     String packagesPath,
+    bool includeDefaultFonts: true,
     bool includeRobotoFonts: true,
     bool reportLicensedPackages: false
   }) async {
@@ -120,7 +121,7 @@ class AssetBundle {
     }
 
     List<_Asset> materialAssets = <_Asset>[];
-    if (usesMaterialDesign) {
+    if (usesMaterialDesign && includeDefaultFonts) {
       materialAssets.addAll(_getMaterialAssets(_kFontSetMaterial));
       if (includeRobotoFonts)
         materialAssets.addAll(_getMaterialAssets(_kFontSetRoboto));
@@ -135,7 +136,7 @@ class AssetBundle {
     entries.add(_createAssetManifest(assetVariants));
 
     AssetBundleEntry fontManifest =
-        _createFontManifest(manifestDescriptor, usesMaterialDesign, includeRobotoFonts);
+        _createFontManifest(manifestDescriptor, usesMaterialDesign, includeDefaultFonts, includeRobotoFonts);
     if (fontManifest != null)
       entries.add(fontManifest);
 
@@ -311,9 +312,10 @@ AssetBundleEntry _createAssetManifest(Map<_Asset, List<_Asset>> assetVariants) {
 
 AssetBundleEntry _createFontManifest(Map<String, dynamic> manifestDescriptor,
                              bool usesMaterialDesign,
+                             bool includeDefaultFonts,
                              bool includeRobotoFonts) {
   List<Map<String, dynamic>> fonts = <Map<String, dynamic>>[];
-  if (usesMaterialDesign) {
+  if (usesMaterialDesign && includeDefaultFonts) {
     fonts.addAll(_getMaterialFonts(AssetBundle._kFontSetMaterial));
     if (includeRobotoFonts)
       fonts.addAll(_getMaterialFonts(AssetBundle._kFontSetRoboto));
