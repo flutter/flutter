@@ -99,7 +99,7 @@ class GalleryHome extends StatefulWidget {
 }
 
 class GalleryHomeState extends State<GalleryHome> with SingleTickerProviderStateMixin {
-  static final Key _homeKey = new ValueKey<String>('Gallery Home');
+  static final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
   static final GlobalKey<ScrollableState> _scrollableKey = new GlobalKey<ScrollableState>();
 
   AnimationController _controller;
@@ -148,7 +148,7 @@ class GalleryHomeState extends State<GalleryHome> with SingleTickerProviderState
   Widget build(BuildContext context) {
     final double statusBarHeight = MediaQuery.of(context).padding.top;
     Widget home = new Scaffold(
-      key: _homeKey,
+      key: _scaffoldKey,
       scrollableKey: _scrollableKey,
       drawer: new GalleryDrawer(
         useLightTheme: config.useLightTheme,
@@ -166,7 +166,7 @@ class GalleryHomeState extends State<GalleryHome> with SingleTickerProviderState
           background: new Builder(
             builder: (BuildContext context) {
               return new _AppBarBackground(
-                animation: Scaffold.of(context)?.appBarAnimation
+                animation: _scaffoldKey.currentState.appBarAnimation
               );
             }
           )
