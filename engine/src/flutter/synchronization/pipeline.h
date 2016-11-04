@@ -5,13 +5,13 @@
 #ifndef SYNCHRONIZATION_PIPELINE_H_
 #define SYNCHRONIZATION_PIPELINE_H_
 
+#include "flutter/glue/trace_event.h"
+#include "flutter/synchronization/pipeline.h"
+#include "flutter/synchronization/semaphore.h"
+#include "lib/ftl/functional/closure.h"
 #include "lib/ftl/macros.h"
 #include "lib/ftl/memory/ref_counted.h"
 #include "lib/ftl/synchronization/mutex.h"
-#include "lib/ftl/functional/closure.h"
-#include "flutter/synchronization/semaphore.h"
-#include "flutter/synchronization/pipeline.h"
-#include "flutter/glue/trace_event.h"
 
 #include <memory>
 #include <queue>
@@ -74,7 +74,6 @@ class Pipeline : public ftl::RefCountedThreadSafe<Pipeline<R>> {
 
     ProducerContinuation(Continuation continuation, size_t trace_id)
         : continuation_(continuation), trace_id_(trace_id) {
-      TRACE_EVENT_ASYNC_BEGIN0("flutter", "PipelineItem", trace_id_);
       TRACE_EVENT_ASYNC_BEGIN0("flutter", "PipelineProduce", trace_id_);
     }
 
@@ -128,8 +127,6 @@ class Pipeline : public ftl::RefCountedThreadSafe<Pipeline<R>> {
     }
 
     empty_.Signal();
-
-    TRACE_EVENT_ASYNC_END0("flutter", "PipelineItem", trace_id);
 
     return items_count > 0 ? PipelineConsumeResult::MoreAvailable
                            : PipelineConsumeResult::Done;
