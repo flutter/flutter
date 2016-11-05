@@ -19,6 +19,7 @@ export 'package:flutter/services.dart' show TextInputType;
 class InputField extends StatefulWidget {
   InputField({
     Key key,
+    this.focusKey,
     this.value,
     this.keyboardType: TextInputType.text,
     this.hintText,
@@ -28,6 +29,8 @@ class InputField extends StatefulWidget {
     this.onChanged,
     this.onSubmitted,
   }) : super(key: key);
+
+  final GlobalKey focusKey;
 
   /// The current state of text of the input field. This includes the selected
   /// text, if any, among other things.
@@ -68,7 +71,11 @@ class InputField extends StatefulWidget {
 class _InputFieldState extends State<InputField> {
   GlobalKey<RawInputState> _rawInputKey = new GlobalKey<RawInputState>();
 
-  GlobalKey get focusKey => config.key is GlobalKey ? config.key : _rawInputKey;
+  //GlobalKey get focusKey => config.key is GlobalKey ? config.key : _rawInputKey;
+
+  void requestKeyboard() {
+    _rawInputKey.currentState?.requestKeyboard();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -81,12 +88,12 @@ class _InputFieldState extends State<InputField> {
       new GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: () {
-          _rawInputKey.currentState?.requestKeyboard();
+          requestKeyboard();
         },
         child: new RawInput(
           key: _rawInputKey,
           value: value,
-          focusKey: focusKey,
+          focusKey: config.focusKey,
           style: textStyle,
           hideText: config.hideText,
           maxLines: config.maxLines,
@@ -218,15 +225,16 @@ const Duration _kTransitionDuration = const Duration(milliseconds: 200);
 const Curve _kTransitionCurve = Curves.fastOutSlowIn;
 
 class _InputState extends State<Input> {
-  GlobalKey<RawInputState> _rawInputKey = new GlobalKey<RawInputState>();
+  GlobalKey<_InputFieldState> _inputFieldKey = new GlobalKey<_InputFieldState>(debugLabel: 'Input.inputField');
+  GlobalKey<_InputFieldState> _focusKey = new GlobalKey(debugLabel: 'Input.focus');
 
-  GlobalKey get focusKey => config.key is GlobalKey ? config.key : _rawInputKey;
+  //GlobalKey get focusKey => config.key is GlobalKey ? config.key : _focusKey;
 
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     ThemeData themeData = Theme.of(context);
-    BuildContext focusContext = focusKey.currentContext;
+    BuildContext focusContext = _focusKey.currentContext;
     bool focused = focusContext != null && Focus.at(focusContext, autofocus: config.autofocus);
     InputValue value = config.value ?? InputValue.empty;
     String errorText = config.errorText;
@@ -306,7 +314,8 @@ class _InputState extends State<Input> {
         border: border,
       ),
       child: new InputField(
-        key: _rawInputKey,
+        key: _inputFieldKey,
+        focusKey: _focusKey,
         value: value,
         style: textStyle,
         hideText: config.hideText,
@@ -353,9 +362,10 @@ class _InputState extends State<Input> {
     }
 
     return new GestureDetector(
+      key: _focusKey,
       behavior: HitTestBehavior.opaque,
       onTap: () {
-        _rawInputKey.currentState?.requestKeyboard();
+        _inputFieldKey.currentState?.requestKeyboard();
       },
       child: child,
     );
