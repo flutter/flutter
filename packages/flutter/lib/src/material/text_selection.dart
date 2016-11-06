@@ -53,7 +53,8 @@ class _TextSelectionToolbar extends StatelessWidget {
     Clipboard.setData(new ClipboardData(text: value.selection.textInside(value.text)));
     delegate.inputValue = new InputValue(
       text: value.selection.textBefore(value.text) + value.selection.textAfter(value.text),
-      selection: new TextSelection.collapsed(offset: value.selection.start)
+      selection: new TextSelection.collapsed(offset: value.selection.start),
+      composing: TextRange.empty,
     );
     delegate.hideToolbar();
   }
@@ -62,7 +63,8 @@ class _TextSelectionToolbar extends StatelessWidget {
     Clipboard.setData(new ClipboardData(text: value.selection.textInside(value.text)));
     delegate.inputValue = new InputValue(
       text: value.text,
-      selection: new TextSelection.collapsed(offset: value.selection.end)
+      selection: new TextSelection.collapsed(offset: value.selection.end),
+      composing: TextRange.empty,
     );
     delegate.hideToolbar();
   }
@@ -73,7 +75,8 @@ class _TextSelectionToolbar extends StatelessWidget {
     if (data != null) {
       delegate.inputValue = new InputValue(
         text: value.selection.textBefore(value.text) + data.text + value.selection.textAfter(value.text),
-        selection: new TextSelection.collapsed(offset: value.selection.start + data.text.length)
+        selection: new TextSelection.collapsed(offset: value.selection.start + data.text.length),
+        composing: TextRange.empty,
       );
     }
     delegate.hideToolbar();
@@ -82,7 +85,8 @@ class _TextSelectionToolbar extends StatelessWidget {
   void _handleSelectAll() {
     delegate.inputValue = new InputValue(
       text: value.text,
-      selection: new TextSelection(baseOffset: 0, extentOffset: value.text.length)
+      selection: new TextSelection(baseOffset: 0, extentOffset: value.text.length),
+      composing: TextRange.empty,
     );
   }
 }
