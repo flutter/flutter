@@ -32,6 +32,7 @@ font_src_files := \
     data/Italic.ttf \
     data/Ja.ttf \
     data/Ko.ttf \
+    data/NoCmapFormat14.ttf \
     data/NoGlyphFont.ttf \
     data/Regular.ttf \
     data/TextEmojiFont.ttf \
