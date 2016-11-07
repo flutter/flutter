@@ -6,6 +6,7 @@
 
 #include <utility>
 
+#include "apps/modular/lib/app/connect.h"
 #include "flutter/assets/zip_asset_store.h"
 #include "flutter/common/threads.h"
 #include "flutter/content_handler/rasterizer.h"
@@ -17,9 +18,8 @@
 #include "lib/ftl/logging.h"
 #include "lib/ftl/time/time_delta.h"
 #include "lib/zip/create_unzipper.h"
-#include "mojo/public/cpp/application/connect.h"
 
-namespace flutter_content_handler {
+namespace flutter_runner {
 namespace {
 
 constexpr char kSnapshotKey[] = "snapshot_blob.bin";
@@ -61,20 +61,19 @@ RuntimeHolder::~RuntimeHolder() {
       }));
 }
 
-void RuntimeHolder::Init(mojo::ApplicationConnectorPtr connector,
+void RuntimeHolder::Init(modular::ServiceProviderPtr environment_services,
                          std::vector<char> bundle) {
   FTL_DCHECK(!rasterizer_);
   rasterizer_.reset(new Rasterizer());
   InitRootBundle(std::move(bundle));
 
-  mojo::ConnectToService(connector.get(), "mojo:view_manager_service",
-                         mojo::GetProxy(&view_manager_));
+  ConnectToService(environment_services.get(), fidl::GetProxy(&view_manager_));
 }
 
 void RuntimeHolder::CreateView(
     const std::string& script_uri,
-    mojo::InterfaceRequest<mozart::ViewOwner> view_owner_request,
-    mojo::InterfaceRequest<mojo::ServiceProvider> services) {
+    fidl::InterfaceRequest<mozart::ViewOwner> view_owner_request,
+    fidl::InterfaceRequest<modular::ServiceProvider> services) {
   if (view_listener_binding_.is_bound()) {
     // TODO(jeffbrown): Refactor this to support multiple view instances
     // sharing the same underlying root bundle (but with different runtimes).
@@ -89,22 +88,22 @@ void RuntimeHolder::CreateView(
   }
 
   mozart::ViewListenerPtr view_listener;
-  view_listener_binding_.Bind(mojo::GetProxy(&view_listener));
-  view_manager_->CreateView(mojo::GetProxy(&view_),
+  view_listener_binding_.Bind(fidl::GetProxy(&view_listener));
+  view_manager_->CreateView(fidl::GetProxy(&view_),
                             std::move(view_owner_request),
                             std::move(view_listener), script_uri);
 
-  mojo::ServiceProviderPtr view_services;
+  modular::ServiceProviderPtr view_services;
   view_->GetServiceProvider(GetProxy(&view_services));
 
   // Listen for input events.
-  mojo::ConnectToService(view_services.get(), GetProxy(&input_connection_));
+  ConnectToService(view_services.get(), GetProxy(&input_connection_));
   mozart::InputListenerPtr input_listener;
   input_listener_binding_.Bind(GetProxy(&input_listener));
   input_connection_->SetListener(std::move(input_listener));
 
   mozart::ScenePtr scene;
-  view_->CreateScene(mojo::GetProxy(&scene));
+  view_->CreateScene(fidl::GetProxy(&scene));
   blink::Threads::Gpu()->PostTask(ftl::MakeCopyable([
     rasterizer = rasterizer_.get(), scene = std::move(scene)
   ]() mutable { rasterizer->SetScene(std::move(scene)); }));
@@ -117,7 +116,7 @@ void RuntimeHolder::CreateView(
 }
 
 void RuntimeHolder::ScheduleFrame() {
-  if (pending_invalidation_ || !deferred_invalidation_callback_.is_null())
+  if (pending_invalidation_ || deferred_invalidation_callback_)
     return;
   pending_invalidation_ = true;
   view_->Invalidate();
@@ -207,7 +206,7 @@ void RuntimeHolder::OnEvent(mozart::EventPtr event,
     runtime_->DispatchPointerDataPacket(packet);
     handled = true;
   }
-  callback.Run(handled);
+  callback(handled);
 }
 
 void RuntimeHolder::OnInvalidation(mozart::ViewInvalidationPtr invalidation,
@@ -233,7 +232,7 @@ void RuntimeHolder::OnInvalidation(mozart::ViewInvalidationPtr invalidation,
 
   // TODO(jeffbrown): Flow the frame time through the rendering pipeline.
   if (outstanding_requests_ >= kMaxPipelineDepth) {
-    FTL_DCHECK(deferred_invalidation_callback_.is_null());
+    FTL_DCHECK(!deferred_invalidation_callback_);
     deferred_invalidation_callback_ = callback;
     return;
   }
@@ -245,7 +244,7 @@ void RuntimeHolder::OnInvalidation(mozart::ViewInvalidationPtr invalidation,
   // Note that this may result in the view processing stale view properties
   // (such as size) if it prematurely acks the frame but takes too long
   // to handle it.
-  callback.Run();
+  callback();
 }
 
 ftl::WeakPtr<RuntimeHolder> RuntimeHolder::GetWeakPtr() {
@@ -274,16 +273,16 @@ void RuntimeHolder::OnFrameComplete() {
   FTL_DCHECK(outstanding_requests_ > 0);
   --outstanding_requests_;
 
-  if (!deferred_invalidation_callback_.is_null() &&
+  if (deferred_invalidation_callback_ &&
       outstanding_requests_ <= kRecoveryPipelineDepth) {
     // Schedule frame first to avoid potentially generating a second
     // invalidation in case the view manager already has one pending
     // awaiting acknowledgement of the deferred invalidation.
-    OnInvalidationCallback callback = deferred_invalidation_callback_;
-    deferred_invalidation_callback_.reset();
+    OnInvalidationCallback callback =
+        std::move(deferred_invalidation_callback_);
     ScheduleFrame();
-    callback.Run();
+    callback();
   }
 }
 
-}  // namespace flutter_content_handler
+}  // namespace flutter_runner

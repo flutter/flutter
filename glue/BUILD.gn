@@ -5,7 +5,6 @@
 source_set("glue") {
   sources = [
     "stack_trace.h",
-    "thread.h",
     "trace_event.h",
   ]
 
@@ -15,27 +14,13 @@ source_set("glue") {
 
   if (is_fuchsia) {
     sources += [
-      "drain_data_pipe_job.h",
-      "drain_data_pipe_job_fuchsia.cc",
       "stack_trace_fuchsia.cc",
-      "thread_fuchsia.cc",
-    ]
-
-    deps += [
-      "//lib/mtl",
-      "//mojo/public/cpp/environment",
-      "//mojo/public/cpp/system",
-    ]
-
-    public_deps = [
-      "//lib/trace_event",
     ]
   } else {
     sources += [
       "stack_trace_base.cc",
       "task_runner_adaptor.cc",
       "task_runner_adaptor.h",
-      "thread_base.cc",
     ]
 
     deps += [

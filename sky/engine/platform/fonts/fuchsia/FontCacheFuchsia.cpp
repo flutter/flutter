@@ -6,13 +6,15 @@
 
 #include <limits>
 #include <magenta/syscalls.h>
+#include <mx/process.h>
+#include <mx/vmo.h>
 #include <utility>
 
+#include "apps/fonts/services/font_provider.fidl.h"
 #include "flutter/sky/engine/platform/fonts/AlternateFontFamily.h"
 #include "flutter/sky/engine/platform/fonts/FontCache.h"
 #include "flutter/sky/engine/platform/fonts/FontDescription.h"
 #include "lib/ftl/logging.h"
-#include "mojo/services/ui/fonts/interfaces/font_provider.mojom.h"
 #include "third_party/skia/include/core/SkData.h"
 #include "third_party/skia/include/core/SkTypeface.h"
 #include "third_party/skia/include/ports/SkFontMgr.h"
@@ -20,7 +22,7 @@
 namespace blink {
 namespace {
 
-uint32_t ToMojoWeight(FontWeight weight) {
+uint32_t ToIntegerWeight(FontWeight weight) {
   switch (weight) {
     case FontWeight100:
       return 100;
@@ -45,48 +47,46 @@ uint32_t ToMojoWeight(FontWeight weight) {
   return 400;
 }
 
-mojo::FontSlant ToMojoSlant(FontStyle style) {
+fonts::FontSlant ToFontSlant(FontStyle style) {
   switch (style) {
     case FontStyleNormal:
-      return mojo::FontSlant::UPRIGHT;
+      return fonts::FontSlant::UPRIGHT;
     case FontStyleItalic:
-      return mojo::FontSlant::ITALIC;
+      return fonts::FontSlant::ITALIC;
   }
   ASSERT_NOT_REACHED();
-  return mojo::FontSlant::UPRIGHT;
+  return fonts::FontSlant::UPRIGHT;
 }
 
 void UnmapMemory(const void* buffer, void* context) {
-  mx_process_unmap_vm(mx_process_self(), reinterpret_cast<uintptr_t>(buffer),
-                      0);
+  mx::process::self().unmap_vm(reinterpret_cast<uintptr_t>(buffer), 0);
 }
 
-sk_sp<SkData> MakeSkDataFromVMO(mx_handle_t vmo) {
+sk_sp<SkData> MakeSkDataFromVMO(const mx::vmo& vmo) {
   uint64_t size = 0;
-  mx_status_t status = mx_vmo_get_size(vmo, &size);
+  mx_status_t status = vmo.get_size(&size);
   if (status != NO_ERROR || size > std::numeric_limits<mx_size_t>::max())
     return nullptr;
   uintptr_t buffer = 0;
-  status = mx_process_map_vm(mx_process_self(), vmo, 0, size, &buffer,
-                             MX_VM_FLAG_PERM_READ);
+  mx::process::self().map_vm(vmo, 0, size, &buffer, MX_VM_FLAG_PERM_READ);
   if (status != NO_ERROR)
     return nullptr;
   return SkData::MakeWithProc(reinterpret_cast<void*>(buffer), size,
                               UnmapMemory, nullptr);
 }
 
-mojo::FontProviderPtr* g_font_provider = nullptr;
+fonts::FontProviderPtr* g_font_provider = nullptr;
 
-mojo::FontProviderPtr& GetFontProvider() {
+fonts::FontProviderPtr& GetFontProvider() {
   FTL_CHECK(g_font_provider);
   return *g_font_provider;
 }
 
 }  // namespace
 
-void SetFontProvider(mojo::FontProviderPtr provider) {
+void SetFontProvider(fonts::FontProviderPtr provider) {
   FTL_CHECK(!g_font_provider);
-  g_font_provider = new mojo::FontProviderPtr;
+  g_font_provider = new fonts::FontProviderPtr;
   *g_font_provider = std::move(provider);
 }
 
@@ -106,24 +106,23 @@ sk_sp<SkTypeface> FontCache::createTypeface(
     name = family.utf8();
   }
 
-  auto request = mojo::FontRequest::New();
+  auto request = fonts::FontRequest::New();
   request->family = name.data();
-  request->weight = ToMojoWeight(fontDescription.weight());
+  request->weight = ToIntegerWeight(fontDescription.weight());
   request->width = static_cast<uint32_t>(fontDescription.stretch());
-  request->slant = ToMojoSlant(fontDescription.style());
+  request->slant = ToFontSlant(fontDescription.style());
 
-  mojo::FontResponsePtr response;
+  fonts::FontResponsePtr response;
   auto& font_provider = GetFontProvider();
   font_provider->GetFont(
       std::move(request),
-      [&response](mojo::FontResponsePtr r) { response = std::move(r); });
+      [&response](fonts::FontResponsePtr r) { response = std::move(r); });
   font_provider.WaitForIncomingResponse();
 
   if (!response)
     return nullptr;
 
-  sk_sp<SkData> data = MakeSkDataFromVMO(
-      static_cast<mx_handle_t>(response->data->vmo.get().value()));
+  sk_sp<SkData> data = MakeSkDataFromVMO(response->data->vmo);
   if (!data)
     return nullptr;
 

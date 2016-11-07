@@ -290,10 +290,7 @@ source_set("platform") {
     ]
 
     deps += [
-      "//mojo/public/cpp/bindings",
-      "//mojo/public/cpp/system",
-      "//mojo/services/ui/fonts/interfaces",
-      "//mojo/system",
+      "//apps/fonts/services",
     ]
   }
 

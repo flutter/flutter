@@ -6,12 +6,12 @@
 
 #include <utility>
 
-#include "apps/mozart/services/composition/interfaces/image.mojom.h"
+#include "apps/mozart/services/composition/image.fidl.h"
 #include "flutter/content_handler/skia_surface_holder.h"
 #include "lib/ftl/logging.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 
-namespace flutter_content_handler {
+namespace flutter_runner {
 
 namespace {
 constexpr uint32_t kContentImageResourceId = 1;
@@ -22,7 +22,7 @@ Rasterizer::Rasterizer() {}
 
 Rasterizer::~Rasterizer() {}
 
-void Rasterizer::SetScene(mojo::InterfaceHandle<mozart::Scene> scene) {
+void Rasterizer::SetScene(fidl::InterfaceHandle<mozart::Scene> scene) {
   scene_.Bind(std::move(scene));
 }
 
@@ -48,14 +48,15 @@ void Rasterizer::Draw(std::unique_ptr<flow::LayerTree> layer_tree,
     layer_tree->Raster(frame);
     canvas->flush();
 
-    mojo::RectF bounds;
+    mozart::RectF bounds;
     bounds.width = frame_size.width();
     bounds.height = frame_size.height();
 
     auto content_resource = mozart::Resource::New();
     content_resource->set_image(mozart::ImageResource::New());
     content_resource->get_image()->image = surface_holder.TakeImage();
-    update->resources.insert(kContentImageResourceId, content_resource.Pass());
+    update->resources.insert(kContentImageResourceId,
+                             std::move(content_resource));
 
     auto root_node = mozart::Node::New();
     root_node->hit_test_behavior = mozart::HitTestBehavior::New();
@@ -63,12 +64,11 @@ void Rasterizer::Draw(std::unique_ptr<flow::LayerTree> layer_tree,
     root_node->op->set_image(mozart::ImageNodeOp::New());
     root_node->op->get_image()->content_rect = bounds.Clone();
     root_node->op->get_image()->image_resource_id = kContentImageResourceId;
-    update->nodes.insert(kRootNodeId, root_node.Pass());
+    update->nodes.insert(kRootNodeId, std::move(root_node));
 
     layer_tree->UpdateScene(update.get(), root_node.get());
   } else {
-    auto root_node = mozart::Node::New();
-    update->nodes.insert(kRootNodeId, root_node.Pass());
+    update->nodes.insert(kRootNodeId, mozart::Node::New());
   }
 
   scene_->Update(std::move(update));
@@ -80,4 +80,4 @@ void Rasterizer::Draw(std::unique_ptr<flow::LayerTree> layer_tree,
   callback();
 }
 
-}  // namespace flutter_content_handler
+}  // namespace flutter_runner

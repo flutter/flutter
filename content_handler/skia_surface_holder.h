@@ -5,13 +5,15 @@
 #ifndef FLUTTER_CONTENT_HANDLER_SKIA_SURFACE_HOLDER_H_
 #define FLUTTER_CONTENT_HANDLER_SKIA_SURFACE_HOLDER_H_
 
-#include "apps/mozart/services/composition/interfaces/image.mojom.h"
+#include <mx/vmo.h>
+
+#include "apps/mozart/services/composition/image.fidl.h"
+#include "apps/mozart/services/geometry/geometry.fidl.h"
 #include "lib/ftl/macros.h"
-#include "mojo/services/geometry/interfaces/geometry.mojom.h"
 #include "third_party/skia/include/core/SkSize.h"
 #include "third_party/skia/include/core/SkSurface.h"
 
-namespace flutter_content_handler {
+namespace flutter_runner {
 
 // Provides an |SkSurface| backed by a shared memory buffer for software
 // rendering which can then be passed to the Mozart compositor in the form
@@ -35,13 +37,13 @@ class SkiaSurfaceHolder {
   mozart::ImagePtr TakeImage();
 
  private:
-  mojo::ScopedSharedBufferHandle buffer_handle_;
+  mx::vmo vmo_;
   void* buffer_;
   sk_sp<SkSurface> surface_;
 
   FTL_DISALLOW_COPY_AND_ASSIGN(SkiaSurfaceHolder);
 };
 
-}  // namespace flutter_content_handler
+}  // namespace flutter_runner
 
 #endif  // FLUTTER_CONTENT_HANDLER_SKIA_SURFACE_HOLDER_H_

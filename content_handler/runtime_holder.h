@@ -5,8 +5,9 @@
 #ifndef FLUTTER_CONTENT_HANDLER_RUNTIME_HOLDER_H_
 #define FLUTTER_CONTENT_HANDLER_RUNTIME_HOLDER_H_
 
-#include "apps/mozart/services/input/interfaces/input_connection.mojom.h"
-#include "apps/mozart/services/views/interfaces/view_manager.mojom.h"
+#include "apps/modular/services/application/service_provider.fidl.h"
+#include "apps/mozart/services/input/input_connection.fidl.h"
+#include "apps/mozart/services/views/view_manager.fidl.h"
 #include "flutter/assets/unzipper_provider.h"
 #include "flutter/assets/zip_asset_store.h"
 #include "flutter/flow/layers/layer_tree.h"
@@ -16,10 +17,9 @@
 #include "lib/ftl/functional/closure.h"
 #include "lib/ftl/macros.h"
 #include "lib/ftl/memory/weak_ptr.h"
-#include "mojo/public/cpp/bindings/binding.h"
-#include "mojo/public/interfaces/application/application_connector.mojom.h"
+#include "lib/fidl/cpp/bindings/binding.h"
 
-namespace flutter_content_handler {
+namespace flutter_runner {
 class Rasterizer;
 
 class RuntimeHolder : public blink::RuntimeDelegate,
@@ -29,10 +29,11 @@ class RuntimeHolder : public blink::RuntimeDelegate,
   RuntimeHolder();
   ~RuntimeHolder();
 
-  void Init(mojo::ApplicationConnectorPtr connector, std::vector<char> bundle);
+  void Init(modular::ServiceProviderPtr environment_services,
+            std::vector<char> bundle);
   void CreateView(const std::string& script_uri,
-                  mojo::InterfaceRequest<mozart::ViewOwner> view_owner_request,
-                  mojo::InterfaceRequest<mojo::ServiceProvider> services);
+                  fidl::InterfaceRequest<mozart::ViewOwner> view_owner_request,
+                  fidl::InterfaceRequest<modular::ServiceProvider> services);
 
  private:
   // |blink::RuntimeDelegate| implementation:
@@ -69,8 +70,8 @@ class RuntimeHolder : public blink::RuntimeDelegate,
   blink::ViewportMetrics viewport_metrics_;
 
   mozart::ViewManagerPtr view_manager_;
-  mojo::Binding<mozart::ViewListener> view_listener_binding_;
-  mojo::Binding<mozart::InputListener> input_listener_binding_;
+  fidl::Binding<mozart::ViewListener> view_listener_binding_;
+  fidl::Binding<mozart::InputListener> input_listener_binding_;
   mozart::InputConnectionPtr input_connection_;
   mozart::ViewPtr view_;
   mozart::ViewPropertiesPtr view_properties_;
@@ -86,6 +87,6 @@ class RuntimeHolder : public blink::RuntimeDelegate,
   FTL_DISALLOW_COPY_AND_ASSIGN(RuntimeHolder);
 };
 
-}  // namespace flutter_content_handler
+}  // namespace flutter_runner
 
 #endif  // FLUTTER_CONTENT_HANDLER_RUNTIME_HOLDER_H_

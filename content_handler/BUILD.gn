@@ -5,13 +5,13 @@
 assert(is_fuchsia)
 
 executable("content_handler") {
-  output_name = "flutter_content_handler"
+  output_name = "flutter_runner"
 
   sources = [
-    "application_impl.cc",
-    "application_impl.h",
-    "content_handler_impl.cc",
-    "content_handler_impl.h",
+    "app.cc",
+    "app.h",
+    "application_controller_impl.cc",
+    "application_controller_impl.h",
     "main.cc",
     "rasterizer.cc",
     "rasterizer.h",
@@ -22,11 +22,12 @@ executable("content_handler") {
   ]
 
   deps = [
-    "//apps/mozart/services/composition/interfaces",
-    "//apps/mozart/services/input/interfaces",
-    "//apps/mozart/services/views/interfaces",
-    "//dart/runtime:libdart",
+    "//apps/modular/lib/app",
+    "//apps/mozart/services/composition",
+    "//apps/mozart/services/input",
+    "//apps/mozart/services/views",
     "//dart/runtime/vm:libdart_platform",
+    "//dart/runtime:libdart",
     "//flutter/assets",
     "//flutter/common",
     "//flutter/flow",
@@ -36,15 +37,7 @@ executable("content_handler") {
     "//flutter/sky/engine/platform",
     "//lib/ftl",
     "//lib/mtl",
-    "//lib/trace_event",
     "//lib/zip",
-    "//mojo/public/cpp/application",
-    "//mojo/public/cpp/bindings",
-    "//mojo/public/cpp/system",
-    "//mojo/public/interfaces/application",
-    "//mojo/services/content_handler/interfaces",
-    "//mojo/services/framebuffer/interfaces",
-    "//mojo/system",
     "//third_party/skia",
 
     # TODO(abarth): We shouldn't need to depend on libdart_builtin but we fail

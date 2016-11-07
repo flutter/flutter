@@ -6,7 +6,7 @@
 #define FLUTTER_FLOW_LAYERS_CHILD_SCENE_LAYER_H_
 
 #include "flutter/flow/layers/layer.h"
-#include "apps/mozart/services/composition/interfaces/scenes.mojom.h"
+#include "apps/mozart/services/composition/scenes.fidl.h"
 
 namespace flow {
 

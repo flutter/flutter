@@ -55,8 +55,8 @@ source_set("flow") {
       "layers/child_scene_layer.h",
       "texture_image_none.cc",
     ]
-    deps += [
-      "//apps/mozart/services/composition/interfaces",
+    public_deps = [
+      "//apps/mozart/services/composition",
     ]
   } else {
     sources += [

@@ -5,11 +5,11 @@
 #ifndef SKY_ENGINE_PLATFORM_FONTS_FUCHSIA_FONT_CACHE_FUCHSIA_H_
 #define SKY_ENGINE_PLATFORM_FONTS_FUCHSIA_FONT_CACHE_FUCHSIA_H_
 
-#include "mojo/services/ui/fonts/interfaces/font_provider.mojom.h"
+#include "apps/fonts/services/font_provider.fidl.h"
 
 namespace blink {
 
-void SetFontProvider(mojo::FontProviderPtr provider);
+void SetFontProvider(fonts::FontProviderPtr provider);
 
 }  // namespace blink
 

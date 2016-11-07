@@ -254,9 +254,4 @@ executable("unittests") {
     ":wtf",
     "//third_party/gtest",
   ]
-
-  if (is_fuchsia) {
-    # TODO(abarth): This shouldn't be necessary.
-    deps += [ "//mojo/system" ]
-  }
 }

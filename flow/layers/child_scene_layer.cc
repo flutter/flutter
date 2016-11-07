@@ -7,9 +7,9 @@
 namespace flow {
 namespace {
 
-mojo::TransformPtr GetTransformFromSkMatrix(const SkMatrix& input) {
+mozart::TransformPtr GetTransformFromSkMatrix(const SkMatrix& input) {
   // Expand 3x3 to 4x4.
-  auto output = mojo::Transform::New();
+  auto output = mozart::Transform::New();
   output->matrix.resize(16u);
   output->matrix[0] = input[0];
   output->matrix[1] = input[1];
@@ -27,7 +27,7 @@ mojo::TransformPtr GetTransformFromSkMatrix(const SkMatrix& input) {
   output->matrix[13] = input[7];
   output->matrix[14] = 0.f;
   output->matrix[15] = input[8];
-  return output.Pass();
+  return output;
 }
 
 // TODO(abarth): We need to figure out how to allocate these ids sensibly.
@@ -58,17 +58,17 @@ void ChildSceneLayer::UpdateScene(mozart::SceneUpdate* update,
   child_resource->set_scene(mozart::SceneResource::New());
   child_resource->get_scene()->scene_token = mozart::SceneToken::New();
   child_resource->get_scene()->scene_token->value = scene_token_;
-  update->resources.insert(id, child_resource.Pass());
+  update->resources.insert(id, std::move(child_resource));
 
   auto child_node = mozart::Node::New();
   child_node->op = mozart::NodeOp::New();
   child_node->op->set_scene(mozart::SceneNodeOp::New());
   child_node->op->get_scene()->scene_resource_id = id;
-  child_node->content_clip = mojo::RectF::New();
+  child_node->content_clip = mozart::RectF::New();
   child_node->content_clip->width = physical_size_.width();
   child_node->content_clip->height = physical_size_.height();
   child_node->content_transform = GetTransformFromSkMatrix(transform_);
-  update->nodes.insert(id, child_node.Pass());
+  update->nodes.insert(id, std::move(child_node));
   container->child_node_ids.push_back(id);
 }
 

@@ -47,7 +47,7 @@ def main():
     '--packages=%s' % args.packages,
     '--snapshot=%s' % args.snapshot,
     '--output-file=%s' % args.output_file,
-    '--header=#!mojo mojo:flutter_content_handler',
+    '--header=#!fuchsia file:///system/apps/flutter_runner',
   ], env=env, cwd=args.app_dir)
 
   return result
