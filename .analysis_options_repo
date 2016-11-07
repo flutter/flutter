@@ -27,7 +27,7 @@ analyzer:
     # allow having TODOs in the code
     todo: ignore
   exclude:
-    - 'bin/**'
+    - 'bin/cache/**'
 
 linter:
   rules:
