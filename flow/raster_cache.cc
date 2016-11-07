@@ -156,11 +156,7 @@ void RasterCache::SetCheckboardCacheImages(bool checkerboard) {
 
   // Clear all existing entries so previously rasterized items (with or without
   // a checkerboard) will be refreshed in subsequent passes.
-  blink::Threads::Gpu()->PostTask([self = weak_factory_.GetWeakPtr()]() {
-    if (self) {
-      self->Clear();
-    }
-  });
+  Clear();
 }
 
 }  // namespace flow
