@@ -313,17 +313,21 @@ class _InputState extends State<Input> {
       decoration: new BoxDecoration(
         border: border,
       ),
-      child: new InputField(
-        key: _inputFieldKey,
-        focusKey: focusKey,
-        value: value,
-        style: textStyle,
-        hideText: config.hideText,
-        maxLines: config.maxLines,
-        keyboardType: config.keyboardType,
-        hintText: config.hintText,
-        onChanged: config.onChanged,
-        onSubmitted: config.onSubmitted,
+      child: new Builder(
+        builder: (BuildContext context) {
+          return new InputField(
+            key: _inputFieldKey,
+            focusKey: focusKey,
+            value: value,
+            style: textStyle,
+            hideText: config.hideText,
+            maxLines: config.maxLines,
+            keyboardType: config.keyboardType,
+            hintText: config.hintText,
+            onChanged: config.onChanged,
+            onSubmitted: config.onSubmitted,
+          );
+        }
       ),
     ));
 
@@ -362,6 +366,7 @@ class _InputState extends State<Input> {
     }
 
     return new GestureDetector(
+      key: config.key is GlobalKey ? null : focusKey,
       behavior: HitTestBehavior.opaque,
       onTap: () {
         _inputFieldKey.currentState?.requestKeyboard();

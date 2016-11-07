@@ -16,7 +16,6 @@ void main() {
 
   testWidgets('onSaved callback is called', (WidgetTester tester) async {
     GlobalKey<FormState> formKey = new GlobalKey<FormState>();
-    GlobalKey<FormState> focusKey = new GlobalKey();
     String fieldValue;
 
     Widget builder() {
@@ -24,14 +23,9 @@ void main() {
         child: new Material(
           child: new Form(
             key: formKey,
-            child: new Builder(
-              builder: (BuildContext context) {
-                return new InputFormField(
-                  focusKey: focusKey,
-                  onSaved: (InputValue value) { fieldValue = value.text; },
-                );
-              }
-            )
+            child: new InputFormField(
+              onSaved: (InputValue value) { fieldValue = value.text; },
+            ),
           )
         )
       );
@@ -55,22 +49,16 @@ void main() {
 
   testWidgets('Validator sets the error text', (WidgetTester tester) async {
     GlobalKey inputKey = new GlobalKey();
-    GlobalKey focusKey = new GlobalKey();
     String errorText(InputValue input) => input.text + '/error';
 
     Widget builder() {
       return new Center(
         child: new Material(
           child: new Form(
-            child: new Builder(
-              builder: (BuildContext context) {
-                return new InputFormField(
-                  focusKey: focusKey,
-                  key: inputKey,
-                  validator: errorText
-                );
-              }
-            )
+            child: new InputFormField(
+               key: inputKey,
+               validator: errorText
+            ),
           )
         )
       );
@@ -94,7 +82,6 @@ void main() {
     GlobalKey<FormState> formKey = new GlobalKey<FormState>();
     GlobalKey<FormFieldState<InputValue>> fieldKey = new GlobalKey<FormFieldState<InputValue>>();
     GlobalKey inputFocusKey = new GlobalKey();
-    GlobalKey otherFocusKey = new GlobalKey();
     GlobalKey focusKey = new GlobalKey();
     // Input 2's validator depends on a input 1's value.
     String errorText(InputValue input) => fieldKey.currentState.value?.text.toString() + '/error';
@@ -104,26 +91,21 @@ void main() {
         child: new Material(
           child: new Form(
             key: formKey,
-            child: new Builder(
-              builder: (BuildContext context) {
-                return new Focus(
-                  key: focusKey,
-                  child: new Block(
-                    children: <Widget>[
-                      new InputFormField(
-                        autofocus: true,
-                        key: fieldKey,
-                        focusKey: inputFocusKey,
-                      ),
-                      new InputFormField(
-                        validator: errorText,
-                        focusKey: otherFocusKey,
-                      )
-                    ]
-                  )
-                );
-              }
-            )
+            child: new Focus(
+              key: focusKey,
+              child: new Block(
+                children: <Widget>[
+                  new InputFormField(
+                    autofocus: true,
+                    key: fieldKey,
+                    focusKey: inputFocusKey,
+                  ),
+                  new InputFormField(
+                    validator: errorText,
+                  ),
+                ]
+              )
+            ),
           )
         )
       );
@@ -149,22 +131,16 @@ void main() {
 
   testWidgets('Provide initial value to input', (WidgetTester tester) async {
     String initialValue = 'hello';
-    GlobalKey focusKey = new GlobalKey();
     GlobalKey<FormFieldState<InputValue>> inputKey = new GlobalKey<FormFieldState<InputValue>>();
 
     Widget builder() {
       return new Center(
         child: new Material(
           child: new Form(
-            child: new Builder(
-              builder: (BuildContext context) {
-                return new InputFormField(
-                  key: inputKey,
-                  focusKey: focusKey,
-                  initialValue: new InputValue(text: initialValue),
-                );
-              }
-            )
+            child: new InputFormField(
+              key: inputKey,
+              initialValue: new InputValue(text: initialValue),
+            ),
           )
         )
       );
@@ -192,7 +168,6 @@ void main() {
   testWidgets('No crash when a FormField is removed from the tree', (WidgetTester tester) async {
     GlobalKey<FormState> formKey = new GlobalKey<FormState>();
     GlobalKey fieldKey = new GlobalKey();
-    GlobalKey<FormState> focusKey = new GlobalKey();
     String fieldValue;
 
     Widget builder(bool remove) {
@@ -200,17 +175,12 @@ void main() {
         child: new Material(
           child: new Form(
             key: formKey,
-            child: new Builder(
-              builder: (BuildContext context) {
-                return remove ? new Container() : new InputFormField(
-                  key: fieldKey,
-                  focusKey: focusKey,
-                  autofocus: true,
-                  onSaved: (InputValue value) { fieldValue = value.text; },
-                  validator: (InputValue value) { return value.text.isEmpty ? null : 'yes'; }
-                );
-              }
-            )
+            child: new InputFormField(
+              key: fieldKey,
+              autofocus: true,
+              onSaved: (InputValue value) { fieldValue = value.text; },
+              validator: (InputValue value) { return value.text.isEmpty ? null : 'yes'; }
+            ),
           )
         )
       );
