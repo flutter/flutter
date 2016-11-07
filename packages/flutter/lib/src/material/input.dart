@@ -70,7 +70,7 @@ class InputField extends StatefulWidget {
 
 class _InputFieldState extends State<InputField> {
   GlobalKey<RawInputState> _rawInputKey = new GlobalKey<RawInputState>();
-  GlobalKey<RawInputState> _focusKey = new GlobalKey();
+  GlobalKey<RawInputState> _focusKey = new GlobalKey(debugLabel: "_InputFieldState _focusKey");
 
   GlobalKey get focusKey => config.focusKey ?? (config.key is GlobalKey ? config.key : _focusKey);
 
@@ -235,8 +235,8 @@ const Duration _kTransitionDuration = const Duration(milliseconds: 200);
 const Curve _kTransitionCurve = Curves.fastOutSlowIn;
 
 class _InputState extends State<Input> {
-  GlobalKey<_InputFieldState> _inputFieldKey = new GlobalKey<_InputFieldState>(debugLabel: 'Input.inputField');
-  GlobalKey<_InputFieldState> _focusKey = new GlobalKey(debugLabel: 'Input.focus');
+  GlobalKey<_InputFieldState> _inputFieldKey = new GlobalKey<_InputFieldState>(debugLabel: '_InputState _inputFieldKey');
+  GlobalKey<_InputFieldState> _focusKey = new GlobalKey(debugLabel: '_InputState _focusKey');
 
   GlobalKey get focusKey => config.key is GlobalKey ? config.key : _focusKey;
 
