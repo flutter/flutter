@@ -2064,12 +2064,12 @@ class Row extends Flex {
 
 /// A widget that lays out its children in a vertical array.
 ///
-/// Each child of a [Row] widget is either flexible or inflexible. The [Row]
-/// first lays out its inflexible children and subtracts their total width to
-/// determine how much free space is available. The [Row] then divides this free
-/// space among the flexible children in a ratio determined by their
-/// [Flexible.flex] properties. To control the flex of child widgets, see the
-/// [Flexible] widget.
+/// Each child of a [Column] widget is either flexible or inflexible. The
+/// [Column] first lays out its inflexible children and subtracts their total
+/// height to determine how much free space is available. The [Column] then
+/// divides this free space among the flexible children in a ratio determined by
+/// their [Flexible.flex] properties. To control the flex of child widgets, see
+/// the [Flexible] widget.
 ///
 /// The [mainAxisAlignment] property determines how the remaining vertical free
 /// space (if any) is allocated after the flexible children are dealt with. The
