@@ -77,6 +77,8 @@ class GalleryHome extends StatefulWidget {
     this.onTimeDilationChanged,
     this.showPerformanceOverlay,
     this.onShowPerformanceOverlayChanged,
+    this.checkerboardRasterCacheImages,
+    this.onCheckerboardRasterCacheImagesChanged,
     this.onPlatformChanged,
   }) : super(key: key) {
     assert(onThemeChanged != null);
@@ -91,6 +93,9 @@ class GalleryHome extends StatefulWidget {
 
   final bool showPerformanceOverlay;
   final ValueChanged<bool> onShowPerformanceOverlayChanged;
+
+  final bool checkerboardRasterCacheImages;
+  final ValueChanged<bool> onCheckerboardRasterCacheImagesChanged;
 
   final ValueChanged<TargetPlatform> onPlatformChanged;
 
@@ -157,6 +162,8 @@ class GalleryHomeState extends State<GalleryHome> with SingleTickerProviderState
         onTimeDilationChanged: config.onTimeDilationChanged,
         showPerformanceOverlay: config.showPerformanceOverlay,
         onShowPerformanceOverlayChanged: config.onShowPerformanceOverlayChanged,
+        checkerboardRasterCacheImages: config.checkerboardRasterCacheImages,
+        onCheckerboardRasterCacheImagesChanged: config.onCheckerboardRasterCacheImagesChanged,
         onPlatformChanged: config.onPlatformChanged,
       ),
       appBar: new AppBar(
