@@ -56,8 +56,8 @@ void main() {
         child: new Material(
           child: new Form(
             child: new InputFormField(
-               key: inputKey,
-               validator: errorText
+              key: inputKey,
+              validator: errorText,
             ),
           )
         )

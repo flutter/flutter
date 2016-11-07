@@ -692,7 +692,7 @@ void main() {
     await tester.pumpWidget(builder());
 
     Future<Null> checkText(String testValue) async {
-      enterText('Hello World');
+      enterText(testValue);
       await tester.idle();
 
       // Check that the onChanged event handler fired.
@@ -724,7 +724,7 @@ void main() {
     await tester.pumpWidget(builder());
 
     Future<Null> checkText(String testValue) async {
-      enterText('Hello World');
+      enterText(testValue);
       await tester.idle();
 
       // Check that the onChanged event handler fired.
