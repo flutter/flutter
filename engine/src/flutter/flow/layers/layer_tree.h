@@ -70,10 +70,6 @@ class LayerTree {
     checkerboard_raster_cache_images_ = checkerboard;
   }
 
-  bool checkerboard_raster_cache_images() const {
-    return checkerboard_raster_cache_images_;
-  }
-
  private:
   SkISize frame_size_;  // Physical pixels.
   uint32_t scene_version_;
