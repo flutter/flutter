@@ -73,7 +73,10 @@ void testUsingContext(String description, dynamic testMethod(), {
         if (bufferLogger.errorText.isNotEmpty)
           print(bufferLogger.errorText);
       }
-      throw error;
+      // Previously the following line read "throw error;". This is bad because
+      // it drops the error's actual stacktrace. Use 'rethrow' to preserve
+      // the stacktrace.
+      rethrow;
     }
 
   }, timeout: timeout);

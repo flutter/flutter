@@ -40,10 +40,12 @@ String getDevFSLoaderScript() {
 
 class DartDependencySetBuilder {
   DartDependencySetBuilder(this.mainScriptPath,
-                           this.projectRootPath);
+                           this.projectRootPath,
+                           this.packagesFilePath);
 
   final String mainScriptPath;
   final String projectRootPath;
+  final String packagesFilePath;
 
   Set<String> build() {
     final String skySnapshotPath =
@@ -51,7 +53,7 @@ class DartDependencySetBuilder {
 
     final List<String> args = <String>[
       skySnapshotPath,
-      '--packages=${path.absolute(PackageMap.globalPackagesPath)}',
+      '--packages=$packagesFilePath',
       '--print-deps',
       mainScriptPath
     ];
@@ -120,16 +122,24 @@ class HotRunner extends ResidentRunner {
     DebuggingOptions debuggingOptions,
     bool usesTerminalUI: true,
     this.benchmarkMode: false,
+    this.applicationBinary,
+    String projectRootPath,
+    String packagesFilePath,
   }) : super(device,
              target: target,
              debuggingOptions: debuggingOptions,
              usesTerminalUI: usesTerminalUI) {
-    _projectRootPath = Directory.current.path;
+    _projectRootPath = projectRootPath ?? Directory.current.path;
+    _packagesFilePath =
+            packagesFilePath ?? path.absolute(PackageMap.globalPackagesPath);
   }
 
   ApplicationPackage _package;
   String _mainPath;
   String _projectRootPath;
+  String _packagesFilePath;
+  final String applicationBinary;
+  bool get prebuiltMode => applicationBinary != null;
   Set<String> _dartDependencies;
   int _observatoryPort;
   final AssetBundle bundle = new AssetBundle();
@@ -144,6 +154,7 @@ class HotRunner extends ResidentRunner {
     bool shouldBuild: true
   }) {
     // Don't let uncaught errors kill the process.
+    assert(shouldBuild == !prebuiltMode);
     return Chain.capture(() {
       return _run(
         connectionInfoCompleter: connectionInfoCompleter,
@@ -162,7 +173,8 @@ class HotRunner extends ResidentRunner {
       return true;
     }
     DartDependencySetBuilder dartDependencySetBuilder =
-        new DartDependencySetBuilder(_mainPath, _projectRootPath);
+        new DartDependencySetBuilder(
+              _mainPath, _projectRootPath, _packagesFilePath);
     try {
       _dartDependencies = dartDependencySetBuilder.build();
     } catch (error) {
@@ -188,7 +200,7 @@ class HotRunner extends ResidentRunner {
       return 1;
     }
 
-    _package = getApplicationPackageForPlatform(device.platform);
+    _package = getApplicationPackageForPlatform(device.platform, applicationBinary: applicationBinary);
 
     if (_package == null) {
       String message = 'No application found for ${device.platform}.';
@@ -222,15 +234,10 @@ class HotRunner extends ResidentRunner {
     // TODO(devoncarew): Move this into the device.startApp() impls.
     if (_package != null) {
       printTrace("Stopping app '${_package.name}' on ${device.name}.");
-      // We don't wait for the stop command to complete.
-      device.stopApp(_package);
+      await device.stopApp(_package);
     }
 
-    // Allow any stop commands from above to start work.
-    await new Future<Duration>.delayed(Duration.ZERO);
-
-    // TODO(devoncarew): This fails for ios devices - we haven't built yet.
-    if (device is AndroidDevice) {
+    if (prebuiltMode || device is AndroidDevice) {
       printTrace('Running install command.');
       if (!(installApp(device, _package, uninstall: false)))
         return 1;
@@ -249,7 +256,8 @@ class HotRunner extends ResidentRunner {
       mainPath: getDevFSLoaderScript(),
       debuggingOptions: debuggingOptions,
       platformArgs: platformArgs,
-      route: route
+      route: route,
+      prebuiltApplication: prebuiltMode
     );
 
     LaunchResult result = await futureResult;
@@ -369,7 +377,8 @@ class HotRunner extends ResidentRunner {
     String fsName = path.basename(_projectRootPath);
     _devFS = new DevFS(vmService,
                        fsName,
-                       new Directory(_projectRootPath));
+                       new Directory(_projectRootPath),
+                       packagesFilePath: _packagesFilePath);
     return _devFS.create();
   }
 

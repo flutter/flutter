@@ -252,20 +252,31 @@ class DevFS {
   /// Create a [DevFS] named [fsName] for the local files in [directory].
   DevFS(VMService serviceProtocol,
         String fsName,
-        this.rootDirectory)
+        this.rootDirectory, {
+        String packagesFilePath
+      })
     : _operations = new ServiceProtocolDevFSOperations(serviceProtocol),
       _httpWriter = new _DevFSHttpWriter(fsName, serviceProtocol),
-      fsName = fsName;
+      fsName = fsName {
+    _packagesFilePath =
+        packagesFilePath ?? path.join(rootDirectory.path, kPackagesFileName);
+  }
 
   DevFS.operations(this._operations,
                    this.fsName,
-                   this.rootDirectory)
-    : _httpWriter = null;
+                   this.rootDirectory, {
+                   String packagesFilePath,
+      })
+    : _httpWriter = null {
+    _packagesFilePath =
+        packagesFilePath ?? path.join(rootDirectory.path, kPackagesFileName);
+  }
 
   final DevFSOperations _operations;
   final _DevFSHttpWriter _httpWriter;
   final String fsName;
   final Directory rootDirectory;
+  String _packagesFilePath;
   final Map<String, DevFSEntry> _entries = <String, DevFSEntry>{};
   final Set<DevFSEntry> _dirtyEntries = new Set<DevFSEntry>();
   final Set<DevFSEntry> _deletedEntries = new Set<DevFSEntry>();
@@ -318,10 +329,10 @@ class DevFS {
                          fileFilter: fileFilter);
 
     printTrace('Scanning package files');
-    String packagesFilePath = path.join(rootDirectory.path, kPackagesFileName);
+
     StringBuffer sb;
-    if (FileSystemEntity.isFileSync(packagesFilePath)) {
-      PackageMap packageMap = new PackageMap(kPackagesFileName);
+    if (FileSystemEntity.isFileSync(_packagesFilePath)) {
+      PackageMap packageMap = new PackageMap(_packagesFilePath);
 
       for (String packageName in packageMap.map.keys) {
         Uri uri = packageMap.map[packageName];
