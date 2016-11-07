@@ -70,8 +70,9 @@ class InputField extends StatefulWidget {
 
 class _InputFieldState extends State<InputField> {
   GlobalKey<RawInputState> _rawInputKey = new GlobalKey<RawInputState>();
+  GlobalKey<RawInputState> _focusKey = new GlobalKey();
 
-  //GlobalKey get focusKey => config.key is GlobalKey ? config.key : _rawInputKey;
+  GlobalKey get focusKey => config.focusKey ?? (config.key is GlobalKey ? config.key : _focusKey);
 
   void requestKeyboard() {
     _rawInputKey.currentState?.requestKeyboard();
@@ -86,24 +87,33 @@ class _InputFieldState extends State<InputField> {
 
     final List<Widget> stackChildren = <Widget>[
       new GestureDetector(
+        key: focusKey == _focusKey ? _focusKey : null,
         behavior: HitTestBehavior.opaque,
         onTap: () {
           requestKeyboard();
         },
-        child: new RawInput(
-          key: _rawInputKey,
-          value: value,
-          focusKey: config.focusKey,
-          style: textStyle,
-          hideText: config.hideText,
-          maxLines: config.maxLines,
-          cursorColor: themeData.textSelectionColor,
-          selectionColor: themeData.textSelectionColor,
-          selectionControls: materialTextSelectionControls,
-          platform: Theme.of(context).platform,
-          keyboardType: config.keyboardType,
-          onChanged: config.onChanged,
-          onSubmitted: config.onSubmitted,
+        // Since the focusKey may have been created here, defer building the
+        // RawInput until the focusKey's context has been set. This is necessary
+        // because the RawInput will check the focus, like Focus.at(focusContext),
+        // when it builds.
+        child: new Builder(
+          builder: (BuildContext context) {
+            return new RawInput(
+              key: _rawInputKey,
+              value: value,
+              focusKey: focusKey,
+              style: textStyle,
+              hideText: config.hideText,
+              maxLines: config.maxLines,
+              cursorColor: themeData.textSelectionColor,
+              selectionColor: themeData.textSelectionColor,
+              selectionControls: materialTextSelectionControls,
+              platform: Theme.of(context).platform,
+              keyboardType: config.keyboardType,
+              onChanged: config.onChanged,
+              onSubmitted: config.onSubmitted,
+            );
+          }
         ),
       ),
     ];
@@ -313,6 +323,10 @@ class _InputState extends State<Input> {
       decoration: new BoxDecoration(
         border: border,
       ),
+      // Since the focusKey may have been created here, defer building the
+      // InputField until the focusKey's context has been set. This is necessary
+      // because our descendants may check the focus, like Focus.at(focusContext),
+      // when they build.
       child: new Builder(
         builder: (BuildContext context) {
           return new InputField(
