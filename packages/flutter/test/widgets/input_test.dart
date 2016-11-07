@@ -673,4 +673,66 @@ void main() {
     expect(inputBox.hitTest(new HitTestResult(), position: inputBox.globalToLocal(newFirstPos)), isTrue);
     expect(inputBox.hitTest(new HitTestResult(), position: inputBox.globalToLocal(newFourthPos)), isFalse);
   });
+
+  testWidgets('InputField smoke test', (WidgetTester tester) async {
+    InputValue inputValue = InputValue.empty;
+
+    Widget builder() {
+      return new Center(
+        child: new Material(
+          child: new InputField(
+            value: inputValue,
+            hintText: 'Placeholder',
+            onChanged: (InputValue value) { inputValue = value; }
+          )
+        )
+      );
+    }
+
+    await tester.pumpWidget(builder());
+
+    Future<Null> checkText(String testValue) async {
+      enterText(testValue);
+      await tester.idle();
+
+      // Check that the onChanged event handler fired.
+      expect(inputValue.text, equals(testValue));
+
+      return await tester.pumpWidget(builder());
+    }
+
+    checkText('Hello World');
+  });
+
+  testWidgets('InputField with global key', (WidgetTester tester) async {
+    GlobalKey inputFieldKey = new GlobalKey(debugLabel: 'inputFieldKey');
+    InputValue inputValue = InputValue.empty;
+
+    Widget builder() {
+      return new Center(
+        child: new Material(
+          child: new InputField(
+            key: inputFieldKey,
+            value: inputValue,
+            hintText: 'Placeholder',
+            onChanged: (InputValue value) { inputValue = value; }
+          )
+        )
+      );
+    }
+
+    await tester.pumpWidget(builder());
+
+    Future<Null> checkText(String testValue) async {
+      enterText(testValue);
+      await tester.idle();
+
+      // Check that the onChanged event handler fired.
+      expect(inputValue.text, equals(testValue));
+
+      return await tester.pumpWidget(builder());
+    }
+
+    checkText('Hello World');
+  });
 }

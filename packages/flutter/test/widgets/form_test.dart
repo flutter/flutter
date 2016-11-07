@@ -24,8 +24,8 @@ void main() {
           child: new Form(
             key: formKey,
             child: new InputFormField(
-              onSaved: (InputValue value) { fieldValue = value.text; }
-            )
+              onSaved: (InputValue value) { fieldValue = value.text; },
+            ),
           )
         )
       );
@@ -57,8 +57,8 @@ void main() {
           child: new Form(
             child: new InputFormField(
               key: inputKey,
-              validator: errorText
-            )
+              validator: errorText,
+            ),
           )
         )
       );
@@ -101,11 +101,11 @@ void main() {
                     focusKey: inputFocusKey,
                   ),
                   new InputFormField(
-                    validator: errorText
-                  )
+                    validator: errorText,
+                  ),
                 ]
               )
-            )
+            ),
           )
         )
       );
@@ -140,7 +140,7 @@ void main() {
             child: new InputFormField(
               key: inputKey,
               initialValue: new InputValue(text: initialValue),
-            )
+            ),
           )
         )
       );
@@ -175,14 +175,12 @@ void main() {
         child: new Material(
           child: new Form(
             key: formKey,
-            child: remove ?
-              new Container() :
-              new InputFormField(
-                key: fieldKey,
-                autofocus: true,
-                onSaved: (InputValue value) { fieldValue = value.text; },
-                validator: (InputValue value) { return value.text.isEmpty ? null : 'yes'; }
-              )
+            child: remove ? new Container() : new InputFormField(
+              key: fieldKey,
+              autofocus: true,
+              onSaved: (InputValue value) { fieldValue = value.text; },
+              validator: (InputValue value) { return value.text.isEmpty ? null : 'yes'; }
+            ),
           )
         )
       );
