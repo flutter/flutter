@@ -281,22 +281,11 @@ FontFamily* FontCollection::getFamilyForChar(uint32_t ch, uint32_t vs,
         return mFamilies[0];
     }
 
-    const std::vector<FontFamily*>* familyVec = &mFamilyVec;
+    const std::vector<FontFamily*>& familyVec = (vs == 0) ? mFamilyVec : mFamilies;
     Range range = mRanges[ch >> kLogCharsPerPage];
 
-    std::vector<FontFamily*> familyVecForVS;
     if (vs != 0) {
-        // If variation selector is specified, need to search for both the variation sequence and
-        // its base codepoint. Compute the union vector of them.
-        familyVecForVS = mVSFamilyVec;
-        familyVecForVS.insert(familyVecForVS.end(),
-                mFamilyVec.begin() + range.start, mFamilyVec.begin() + range.end);
-        std::sort(familyVecForVS.begin(), familyVecForVS.end());
-        auto last = std::unique(familyVecForVS.begin(), familyVecForVS.end());
-        familyVecForVS.erase(last, familyVecForVS.end());
-
-        familyVec = &familyVecForVS;
-        range = { 0, familyVecForVS.size() };
+        range = { 0, mFamilies.size() };
     }
 
 #ifdef VERBOSE_DEBUG
@@ -305,7 +294,7 @@ FontFamily* FontCollection::getFamilyForChar(uint32_t ch, uint32_t vs,
     FontFamily* bestFamily = nullptr;
     uint32_t bestScore = kUnsupportedFontScore;
     for (size_t i = range.start; i < range.end; i++) {
-        FontFamily* family = (*familyVec)[i];
+        FontFamily* family = familyVec[i];
         const uint32_t score = calcFamilyScore(ch, vs, variant, langListId, family);
         if (score == kFirstFontScore) {
             // If the first font family supports the given character or variation sequence, always
