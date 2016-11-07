@@ -175,7 +175,7 @@ void main() {
         child: new Material(
           child: new Form(
             key: formKey,
-            child: new InputFormField(
+            child: remove ? new Container() : new InputFormField(
               key: fieldKey,
               autofocus: true,
               onSaved: (InputValue value) { fieldValue = value.text; },
