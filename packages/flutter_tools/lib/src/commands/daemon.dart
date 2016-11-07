@@ -715,10 +715,9 @@ class _AppRunLogger extends Logger {
 
     int id = _nextProgressId++;
 
-    _sendLogEvent(<String, dynamic>{
-      'log': message,
-      'progress': true,
-      'id': id.toString()
+    _sendProgressEvent(<String, dynamic>{
+      'id': id.toString(),
+      'message': message,
     });
 
     _status = new _AppLoggerStatus(this, id);
@@ -734,6 +733,13 @@ class _AppRunLogger extends Logger {
       printStatus('event sent after app closed: $event');
     else
       domain._sendAppEvent(app, 'log', event);
+  }
+
+  void _sendProgressEvent(Map<String, dynamic> event) {
+    if (domain == null)
+      printStatus('event sent after app closed: $event');
+    else
+      domain._sendAppEvent(app, 'progress', event);
   }
 }
 
@@ -756,8 +762,7 @@ class _AppLoggerStatus implements Status {
   }
 
   void _sendFinished() {
-    logger._sendLogEvent(<String, dynamic>{
-      'progress': true,
+    logger._sendProgressEvent(<String, dynamic>{
       'id': id.toString(),
       'finished': true
     });
