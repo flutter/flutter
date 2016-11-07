@@ -62,6 +62,15 @@ class RunCommand extends RunCommandBase {
     argParser.addOption('use-application-binary',
         hide: !verboseHelp,
         help: 'Specify a pre-built application binary to use when running.');
+    argParser.addOption('snapshotter',
+        hide: !verboseHelp,
+        help: 'Specify the path to the sky_snapshot binary.');
+    argParser.addOption('packages',
+        hide: !verboseHelp,
+        help: 'Specify the path to the .packages file.');
+    argParser.addOption('project_root',
+        hide: !verboseHelp,
+        help: 'Specify the project root directory.');
     argParser.addFlag('machine',
         hide: !verboseHelp,
         help: 'Handle machine structured JSON command input\n'
@@ -138,7 +147,7 @@ class RunCommand extends RunCommandBase {
 
   bool shouldUseHotMode() {
     bool hotArg = argResults['hot'] ?? false;
-    final bool shouldUseHotMode = hotArg && !runningWithPrebuiltApplication;
+    final bool shouldUseHotMode = hotArg;
     return (getBuildMode() == BuildMode.debug) && shouldUseHotMode;
   }
 
@@ -220,7 +229,10 @@ class RunCommand extends RunCommandBase {
         device,
         target: targetFile,
         debuggingOptions: options,
-        benchmarkMode: argResults['benchmark']
+        benchmarkMode: argResults['benchmark'],
+        applicationBinary: argResults['use-application-binary'],
+        projectRootPath: argResults['project_root'],
+        packagesFilePath: argResults['packages'],
       );
     } else {
       runner = new RunAndStayResident(

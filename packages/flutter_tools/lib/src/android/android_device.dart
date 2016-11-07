@@ -785,7 +785,6 @@ class _AdbLogReader extends DeviceLogReader {
       DateTime time = _adbTimestampToDateTime(timestamp);
       if (time.isBefore(_timeOrigin)) {
         // Ignore log messages before the origin.
-        printTrace('skipped old log line: $line');
         return;
       }
     }
@@ -816,7 +815,6 @@ class _AdbLogReader extends DeviceLogReader {
         return;
       }
     }
-    printTrace('skipped log line: $line');
   }
 
   void _stop() {
