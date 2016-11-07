@@ -26,7 +26,7 @@ abstract class Logger {
 
   /// Display normal output of the command. This should be used for things like
   /// progress messages, success messages, or just normal command output.
-  void printStatus(String message, { bool emphasis: false, bool newline: true });
+  void printStatus(String message, { bool emphasis: false, bool newline: true, String ansiAlternative });
 
   /// Use this for verbose tracing output. Users can turn this output on in order
   /// to help diagnose issues with the toolchain or with their setup.
@@ -60,14 +60,16 @@ class StdoutLogger extends Logger {
   }
 
   @override
-  void printStatus(String message, { bool emphasis: false, bool newline: true }) {
+  void printStatus(String message, { bool emphasis: false, bool newline: true, String ansiAlternative }) {
     _status?.cancel();
     _status = null;
-
+    if (terminal.supportsColor && ansiAlternative != null)
+      message = ansiAlternative;
+    if (emphasis)
+      message = terminal.bolden(message);
     if (newline)
-      stdout.writeln(emphasis ? terminal.writeBold(message) : message);
-    else
-      stdout.write(emphasis ? terminal.writeBold(message) : message);
+      message = '$message\n';
+    stdout.write(message);
   }
 
   @override
@@ -106,7 +108,7 @@ class BufferLogger extends Logger {
   void printError(String message, [StackTrace stackTrace]) => _error.writeln(message);
 
   @override
-  void printStatus(String message, { bool emphasis: false, bool newline: true }) {
+  void printStatus(String message, { bool emphasis: false, bool newline: true, String ansiAlternative }) {
     if (newline)
       _status.writeln(message);
     else
@@ -139,7 +141,7 @@ class VerboseLogger extends Logger {
   }
 
   @override
-  void printStatus(String message, { bool emphasis: false, bool newline: true }) {
+  void printStatus(String message, { bool emphasis: false, bool newline: true, String ansiAlternative }) {
     _emit(_LogType.status, message);
   }
 
@@ -168,7 +170,7 @@ class VerboseLogger extends Logger {
     } else {
       prefix = '+$millis ms'.padLeft(prefixWidth);
       if (millis >= 100)
-        prefix = terminal.writeBold(prefix);
+        prefix = terminal.bolden(prefix);
     }
     prefix = '[$prefix] ';
 
@@ -176,11 +178,11 @@ class VerboseLogger extends Logger {
     String indentMessage = message.replaceAll('\n', '\n$indent');
 
     if (type == _LogType.error) {
-      stderr.writeln(prefix + terminal.writeBold(indentMessage));
+      stderr.writeln(prefix + terminal.bolden(indentMessage));
       if (stackTrace != null)
         stderr.writeln(indent + stackTrace.toString().replaceAll('\n', '\n$indent'));
     } else if (type == _LogType.status) {
-      print(prefix + terminal.writeBold(indentMessage));
+      print(prefix + terminal.bolden(indentMessage));
     } else {
       print(prefix + indentMessage);
     }
@@ -210,7 +212,7 @@ class AnsiTerminal {
 
   bool supportsColor;
 
-  String writeBold(String str) => supportsColor ? '$_bold$str$_reset' : str;
+  String bolden(String str) => supportsColor ? '$_bold$str$_reset' : str;
 
   String clearScreen() => supportsColor ? _clear : '\n\n';
 
