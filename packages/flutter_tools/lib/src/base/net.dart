@@ -27,9 +27,16 @@ Future<List<int>> fetchUrl(Uri url) async {
     );
   }
 
-  BytesBuilder responseBody = new BytesBuilder(copy: false);
-  await for (List<int> chunk in response)
-    responseBody.add(chunk);
+  try {
+    BytesBuilder responseBody = new BytesBuilder(copy: false);
+    await for (List<int> chunk in response)
+        responseBody.add(chunk);
 
-  return responseBody.takeBytes();
+    return responseBody.takeBytes();
+  } on IOException catch (e) {
+    throw new ToolExit(
+      'Download failed: $url\n  $e',
+      exitCode: kNetworkProblemExitCode,
+    );
+  }
 }
