@@ -436,6 +436,48 @@ class PaintingContext {
 ///
 /// Concrete layout models (such as box) will create concrete subclasses to
 /// communicate layout constraints between parents and children.
+///
+/// ## Writing a Constraints subclass
+///
+/// When creating a new [RenderObject] subclass with a new layout protocol, one
+/// will usually need to create a new [Constraints] subclass to express the
+/// input to the layout algorithms.
+///
+/// A [Constraints] subclass should be immutable (all fields final). There are
+/// several members to implement, in addition to whatever fields, constructors,
+/// and helper methods one may find useful for a particular layout protocol:
+///
+/// * The [isTight] getter, which should return true if the object represents a
+///   case where the [RenderObject] class has no choice for how to lay itself
+///   out. For example, [BoxConstraints] returns true for [isTight] when both
+///   the minimum and maximum widths and the minimum and maximum heights are
+///   equal.
+///
+/// * The [isNormalized] getter, which should return true if the object
+///   represents its data in its canonical form. Sometimes, it is possible for
+///   fields to be redundant with each other, such that several different
+///   representations have the same implications. For example, a
+///   [BoxConstraints] instance with its minimum width greater than its maximum
+///   width is equivalent to one where the maximum width is set to that minimum
+///   width (`2<w<1` is equivalent to `2<w<2`, since minimum constraints have
+///   priority). This getter is used by the default implementation of
+///   [debugAssertIsValid].
+///
+/// * The [debugAssertIsValid] method, which should assert if there's anything
+///   wrong with the constraints object. (We use this approach rather than
+///   asserting in constructors so that our constructors can be `const` and so
+///   that it is possible to create invalid constraints temporarily while
+///   building valid ones.) See the implementation of
+///   [BoxConstraints.debugAssertIsValid] for an example of the detailed checks
+///   that can be made.
+///
+/// * The [operator ==] and [hashCode] members, so that constraints can be
+///   compared for equality. If a render object is given constraints that are
+///   equal, then the rendering library will avoid laying the object out again
+///   if it is not dirty.
+///
+/// * The [toString] method, which should describe the constraints so that they
+///   appear in a usefully readable form in the output of [debugDumpRenderTree].
 abstract class Constraints {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
@@ -1058,24 +1100,111 @@ void _doNothing() { }
 /// The [RenderObject] class hierarchy is the core of the rendering
 /// library's reason for being.
 ///
-/// [RenderObject]s have a [parent], and have a slot called
-/// [parentData] in which the parent [RenderObject] can store
-/// child-specific data, for example, the child position. The
-/// [RenderObject] class also implements the basic layout and paint
-/// protocols.
+/// [RenderObject]s have a [parent], and have a slot called [parentData] in
+/// which the parent [RenderObject] can store child-specific data, for example,
+/// the child position. The [RenderObject] class also implements the basic
+/// layout and paint protocols.
 ///
-/// The [RenderObject] class, however, does not define a child model
-/// (e.g. whether a node has zero, one, or more children). It also
-/// doesn't define a coordinate system (e.g. whether children are
-/// positioned in cartesian coordinates, in polar coordinates, etc) or
-/// a specific layout protocol (e.g. whether the layout is
-/// width-in-height-out, or constraint-in-size-out, or whether the
-/// parent sets the size and position of the child before or after the
-/// child lays out, etc; or indeed whether the children are allowed to
-/// read their parent's [parentData] slot).
+/// The [RenderObject] class, however, does not define a child model (e.g.
+/// whether a node has zero, one, or more children). It also doesn't define a
+/// coordinate system (e.g. whether children are positioned in cartesian
+/// coordinates, in polar coordinates, etc) or a specific layout protocol (e.g.
+/// whether the layout is width-in-height-out, or constraint-in-size-out, or
+/// whether the parent sets the size and position of the child before or after
+/// the child lays out, etc; or indeed whether the children are allowed to read
+/// their parent's [parentData] slot).
 ///
 /// The [RenderBox] subclass introduces the opinion that the layout
 /// system uses cartesian coordinates.
+///
+/// ## Writing a RenderObject subclass
+///
+/// In most cases, subclassing [RenderObject] itself is overkill, and
+/// [RenderBox] would be a better starting point. However, if a render object
+/// doesn't want to use a cartesian coordinate system, then it should indeed
+/// inherit from [RenderObject] directly. This allows it to define its own
+/// layout protocol by using a new subclass of [Constraints] rather than using
+/// [BoxConstraints], and by potentially using an entirely new set of objects
+/// and values to represent the result of the output rather than just a [Size].
+/// This increased flexibility comes at the cost of not being able to rely on
+/// the features of [RenderBox]. For example, [RenderBox] implements an
+/// intrinsic sizing protocol that allows you to measure a child without fully
+/// laying it out, in such a way that if that child changes size, the parent
+/// will be laid out again (to take into account the new dimensions of the
+/// child). This is a subtle and bug-prone feature to get right.
+///
+/// Most aspects of writing a [RenderBox] apply to writing a [RenderObject] as
+/// well, and therefore the discussion at [RenderBox] is recommended background
+/// reading. The main differences are around layout and hit testing, since those
+/// are the aspects that [RenderBox] primarily specializes.
+///
+/// ### Layout
+///
+/// A layout protocol begins with a subclass of [Constraints]. See the
+/// discussion at [Constraints] for more information on how to write a
+/// [Constraints] subclass.
+///
+/// The [performLayout] method should take the [constraints], and apply them.
+/// The output of the layout algorithm is fields set on the object that describe
+/// the geometry of the object for the purposes of the parent's layout. For
+/// example, with [RenderBox] the output is the [RenderBox.size] field. This
+/// output should only be read by the parent if the parent specified
+/// `parentUsesSize` as true when calling [layout] on the child.
+///
+/// Anytime anything changes on a render object that would affect the layout of
+/// that object, it should call [markNeedsLayout].
+///
+/// ### Hit Testing
+///
+/// Hit testing is even more open-ended than layout. There is no method to
+/// override, you are expected to provide one.
+///
+/// The general behaviour of your hit-testing method should be similar to the
+/// behavior described for [RenderBox]. The main difference is that the input
+/// need not be a [Point]. You are also allowed to use a different subclass of
+/// [HitTestEntry] when adding entries to the [HitTestResult]. When the
+/// [handleEvent] method is called, the same object that was added to the
+/// [HitTestResult] will be passed in, so it can be used to track information
+/// like the precise coordinate of the hit, in whatever coordinate system is
+/// used by the new layout protocol.
+///
+/// ### Adapting from one protocol to another
+///
+/// In general, the root of a Flutter render object tree is a [RenderView]. This
+/// object has a single child, which must be a [RenderBox]. Thus, if you want to
+/// have a custom [RenderObject] subclass in the render tree, you have two
+/// choices: you either need to replace the [RenderView] itself, or you need to
+/// have a [RenderBox] that has your class as its child. (The latter is the much
+/// more common case.)
+///
+/// This [RenderBox] subclass converts from the box protocol to the protocol of
+/// your class.
+///
+/// In particular, this means that for hit testing it overrides
+/// [RenderBox.hitTest], and calls whatever method you have in your class for
+/// hit testing.
+///
+/// Similarly, it overrides [performLayout] to create a [Constraints] object
+/// appropriate for your class and passes that to the child's [layout] method.
+///
+/// ### Layout interactions between render objects
+///
+/// In general, the layout of a render box should only depend on the output of
+/// its child's layout, and then only if `parentUsesSize` is set to true in the
+/// [layout] call. Furthermore, if it is set to true, the parent must call the
+/// child's [layout] if the child is to be rendered, because otherwise the
+/// parent will not be notified when the child changes its layout outputs.
+///
+/// It is possible to set up render object protocols that transfer additional
+/// information. For example, in the [RenderBox] protocol you can query your
+/// children's intrinsic dimensions and baseline geometry. However, if this is
+/// done then it is imperative that the child call [markNeedsLayout] on the
+/// parent any time that additional information changes, if the parent used it
+/// in the last layout phase. For an example of how to implement this, see the
+/// [RenderBox.markNeedsLayout] method. It overrides
+/// [RenderObject.markNeedsLayout] so that if a parent has queried the intrinsic
+/// or baseline information, it gets marked dirty whenever the child's geometry
+/// changes.
 abstract class RenderObject extends AbstractNode implements HitTestTarget {
   /// Initializes internal fields for subclasses.
   RenderObject() {
@@ -1494,7 +1623,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
 
   /// Compute the layout for this render object.
   ///
-  /// This function is the main entry point for parents to ask their children to
+  /// This method is the main entry point for parents to ask their children to
   /// update their layout information. The parent passes a constraints object,
   /// which informs the child as which layouts are permissible. The child is
   /// required to obey the given constraints.
@@ -1507,11 +1636,12 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   /// parentUsesSize, the child can change its layout information (subject to
   /// the given constraints) without informing the parent.
   ///
-  /// Subclasses should not override layout directly. Instead, they should
-  /// override performResize and/or performLayout.
+  /// Subclasses should not override [layout] directly. Instead, they should
+  /// override [performResize] and/or [performLayout]. The [layout] method
+  /// delegates the actual work to [performResize] and [performLayout].
   ///
-  /// The parent's performLayout method should call the layout of all its
-  /// children unconditionally. It is the layout function's responsibility (as
+  /// The parent's performLayout method should call the [layout] of all its
+  /// children unconditionally. It is the [layout] method's responsibility (as
   /// implemented here) to return early if the child does not need to do any
   /// work to update its layout information.
   void layout(Constraints constraints, { bool parentUsesSize: false }) {
@@ -1617,12 +1747,12 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     assert(parent == this.parent);
   }
 
-  /// If a subclass has a "size" (the state controlled by "parentUsesSize",
-  /// whatever it is in the subclass, e.g. the actual "size" property of
-  /// RenderBox), and the subclass verifies that in checked mode this "size"
-  /// property isn't used when debugCanParentUseSize isn't set, then that
-  /// subclass should override debugResetSize() to reapply the current values of
-  /// debugCanParentUseSize to that state.
+  /// If a subclass has a "size" (the state controlled by `parentUsesSize`,
+  /// whatever it is in the subclass, e.g. the actual `size` property of
+  /// [RenderBox]), and the subclass verifies that in checked mode this "size"
+  /// property isn't used when [debugCanParentUseSize] isn't set, then that
+  /// subclass should override [debugResetSize] to reapply the current values of
+  /// [debugCanParentUseSize] to that state.
   @protected
   void debugResetSize() { }
 
