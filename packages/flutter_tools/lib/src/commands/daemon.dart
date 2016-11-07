@@ -624,7 +624,7 @@ class NotifyingLogger extends Logger {
   }
 
   @override
-  void printStatus(String message, { bool emphasis: false, bool newline: true }) {
+  void printStatus(String message, { bool emphasis: false, bool newline: true, String ansiAlternative }) {
     _messageController.add(new LogMessage('status', message));
   }
 
@@ -698,7 +698,7 @@ class _AppRunLogger extends Logger {
   }
 
   @override
-  void printStatus(String message, { bool emphasis: false, bool newline: true }) {
+  void printStatus(String message, { bool emphasis: false, bool newline: true, String ansiAlternative }) {
     _sendLogEvent(<String, dynamic>{ 'log': message });
   }
 
