@@ -16,6 +16,115 @@ import 'theme.dart';
 
 export 'package:flutter/services.dart' show TextInputType;
 
+class InputField extends StatefulWidget {
+  InputField({
+    Key key,
+    this.focusKey,
+    this.value,
+    this.keyboardType: TextInputType.text,
+    this.hintText,
+    this.style,
+    this.hideText: false,
+    this.maxLines: 1,
+    this.onChanged,
+    this.onSubmitted,
+  }) : super(key: key);
+
+  final GlobalKey focusKey;
+
+  /// The current state of text of the input field. This includes the selected
+  /// text, if any, among other things.
+  final InputValue value;
+
+  /// The type of keyboard to use for editing the text.
+  final TextInputType keyboardType;
+
+  /// Text to show inline in the input field when it would otherwise be empty.
+  final String hintText;
+
+  /// The style to use for the text being edited.
+  final TextStyle style;
+
+  /// Whether to hide the text being edited (e.g., for passwords).
+  ///
+  /// When this is set to true, all the characters in the input are replaced by
+  /// U+2022 BULLET characters (•).
+  final bool hideText;
+
+  /// The maximum number of lines for the text to span, wrapping if necessary.
+  /// If this is 1 (the default), the text will not wrap, but will scroll
+  /// horizontally instead.
+  final int maxLines;
+
+  /// Called when the text being edited changes.
+  ///
+  /// The [value] must be updated each time [onChanged] is invoked.
+  final ValueChanged<InputValue> onChanged;
+
+  /// Called when the user indicates that they are done editing the text in the field.
+  final ValueChanged<InputValue> onSubmitted;
+
+  @override
+  _InputFieldState createState() => new _InputFieldState();
+}
+
+class _InputFieldState extends State<InputField> {
+  GlobalKey<RawInputState> _rawInputKey = new GlobalKey<RawInputState>();
+
+  //GlobalKey get focusKey => config.key is GlobalKey ? config.key : _rawInputKey;
+
+  void requestKeyboard() {
+    _rawInputKey.currentState?.requestKeyboard();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    assert(debugCheckHasMaterial(context));
+    final InputValue value = config.value ?? InputValue.empty;
+    final ThemeData themeData = Theme.of(context);
+    final TextStyle textStyle = config.style ?? themeData.textTheme.subhead;
+
+    final List<Widget> stackChildren = <Widget>[
+      new GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () {
+          requestKeyboard();
+        },
+        child: new RawInput(
+          key: _rawInputKey,
+          value: value,
+          focusKey: config.focusKey,
+          style: textStyle,
+          hideText: config.hideText,
+          maxLines: config.maxLines,
+          cursorColor: themeData.textSelectionColor,
+          selectionColor: themeData.textSelectionColor,
+          selectionControls: materialTextSelectionControls,
+          platform: Theme.of(context).platform,
+          keyboardType: config.keyboardType,
+          onChanged: config.onChanged,
+          onSubmitted: config.onSubmitted,
+        ),
+      ),
+    ];
+
+    if (config.hintText != null && value.text.isEmpty) {
+      TextStyle hintStyle = themeData.textTheme.subhead.copyWith(color: themeData.hintColor);
+      stackChildren.add(
+        new Positioned(
+          left: 0.0,
+          top: textStyle.fontSize - hintStyle.fontSize,
+          child: new IgnorePointer(
+            child: new Text(config.hintText, style: hintStyle),
+          ),
+        ),
+      );
+    }
+
+    return new RepaintBoundary(child: new Stack(children: stackChildren));
+  }
+}
+
 /// A material design text input field.
 ///
 /// Requires one of its ancestors to be a [Material] widget.
@@ -116,9 +225,10 @@ const Duration _kTransitionDuration = const Duration(milliseconds: 200);
 const Curve _kTransitionCurve = Curves.fastOutSlowIn;
 
 class _InputState extends State<Input> {
-  GlobalKey<RawInputState> _rawInputKey = new GlobalKey<RawInputState>();
+  GlobalKey<_InputFieldState> _inputFieldKey = new GlobalKey<_InputFieldState>(debugLabel: 'Input.inputField');
+  GlobalKey<_InputFieldState> _focusKey = new GlobalKey(debugLabel: 'Input.focus');
 
-  GlobalKey get focusKey => config.key is GlobalKey ? config.key : _rawInputKey;
+  GlobalKey get focusKey => config.key is GlobalKey ? config.key : _focusKey;
 
   @override
   Widget build(BuildContext context) {
@@ -145,36 +255,33 @@ class _InputState extends State<Input> {
 
     List<Widget> stackChildren = <Widget>[];
 
-    bool hasInlineLabel = config.labelText != null && !focused && !value.text.isNotEmpty;
-
+    final bool hasInlineLabel = config.labelText != null && !focused && !value.text.isNotEmpty;
     if (config.labelText != null) {
-      TextStyle labelStyle = hasInlineLabel ?
+      final TextStyle labelStyle = hasInlineLabel ?
         themeData.textTheme.subhead.copyWith(color: themeData.hintColor) :
         themeData.textTheme.caption.copyWith(color: activeColor);
 
-      double topPaddingIncrement = themeData.textTheme.caption.fontSize + (config.isDense ? 4.0 : 8.0);
+      final double topPaddingIncrement = themeData.textTheme.caption.fontSize + (config.isDense ? 4.0 : 8.0);
       double top = topPadding;
       if (hasInlineLabel)
         top += topPaddingIncrement + textStyle.fontSize - labelStyle.fontSize;
 
-      stackChildren.add(new AnimatedPositioned(
-        left: 0.0,
-        top: top,
-        duration: _kTransitionDuration,
-        curve: _kTransitionCurve,
-        child: new Text(config.labelText, style: labelStyle)
-      ));
+      stackChildren.add(
+        new AnimatedPositioned(
+          left: 0.0,
+          top: top,
+          duration: _kTransitionDuration,
+          curve: _kTransitionCurve,
+          child: new AnimatedOpacity(
+            opacity: focused ? 1.0 : 0.0,
+            curve: _kTransitionCurve,
+            duration: _kTransitionDuration,
+            child: new Text(config.labelText, style: labelStyle)
+          ),
+        ),
+      );
 
       topPadding += topPaddingIncrement;
-    }
-
-    if (config.hintText != null && value.text.isEmpty && !hasInlineLabel) {
-      TextStyle hintStyle = themeData.textTheme.subhead.copyWith(color: themeData.hintColor);
-      stackChildren.add(new Positioned(
-        left: 0.0,
-        top: topPadding + textStyle.fontSize - hintStyle.fontSize,
-        child: new Text(config.hintText, style: hintStyle)
-      ));
     }
 
     Color borderColor = activeColor;
@@ -206,21 +313,18 @@ class _InputState extends State<Input> {
       decoration: new BoxDecoration(
         border: border,
       ),
-      child: new RawInput(
-        key: _rawInputKey,
-        value: value,
+      child: new InputField(
+        key: _inputFieldKey,
         focusKey: focusKey,
+        value: value,
         style: textStyle,
         hideText: config.hideText,
         maxLines: config.maxLines,
-        cursorColor: themeData.textSelectionColor,
-        selectionColor: themeData.textSelectionColor,
-        selectionControls: materialTextSelectionControls,
-        platform: Theme.of(context).platform,
         keyboardType: config.keyboardType,
+        hintText: config.hintText,
         onChanged: config.onChanged,
         onSubmitted: config.onSubmitted,
-      )
+      ),
     ));
 
     if (errorText != null && !config.isDense) {
@@ -257,12 +361,12 @@ class _InputState extends State<Input> {
       );
     }
 
-    return new RepaintBoundary(
-      child: new GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: () => _rawInputKey.currentState?.requestKeyboard(),
-        child: child
-      )
+    return new GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () {
+        _inputFieldKey.currentState?.requestKeyboard();
+      },
+      child: child,
     );
   }
 }
