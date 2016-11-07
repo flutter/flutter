@@ -2017,26 +2017,29 @@ abstract class Element implements BuildContext {
   @protected
   void detachChild(Element child);
 
-  /// This method is the core of the system.
+  /// Update the given child with the given new configuration.
+  ///
+  /// This method is the core of the widgets system.
   ///
   /// It is called each time we are to add, update, or remove a child based on
   /// an updated configuration.
   ///
-  /// If the child is null, and the newWidget is not null, then we have a new
-  /// child for which we need to create an Element, configured with newWidget.
+  /// If the `child` is null, and the `newWidget` is not null, then we have a new
+  /// child for which we need to create an [Element], configured with `newWidget`.
   ///
-  /// If the newWidget is null, and the child is not null, then we need to
+  /// If the `newWidget` is null, and the `child` is not null, then we need to
   /// remove it because it no longer has a configuration.
   ///
-  /// If neither are null, then we need to update the child's configuration to
-  /// be the new configuration given by newWidget. If newWidget can be given to
-  /// the existing child, then it is so given. Otherwise, the old child needs
-  /// to be disposed and a new child created for the new configuration.
+  /// If neither are null, then we need to update the `child`'s configuration to
+  /// be the new configuration given by `newWidget`. If `newWidget` can be given
+  /// to the existing child (as determined by [Widget.canUpdate]), then it is so
+  /// given. Otherwise, the old child needs to be disposed and a new child
+  /// created for the new configuration.
   ///
-  /// If both are null, then we don't have a child and won't have a child, so
-  /// we do nothing.
+  /// If both are null, then we don't have a child and won't have a child, so we
+  /// do nothing.
   ///
-  /// The updateChild() method returns the new child, if it had to create one,
+  /// The [updateChild] method returns the new child, if it had to create one,
   /// or the child that was passed in, if it just had to update the child, or
   /// null, if it removed the child and did not replace it.
   @protected
@@ -2201,7 +2204,8 @@ abstract class Element implements BuildContext {
     return element;
   }
 
-  /// Create an element for the given widget and add it as a child of this element in the given slot.
+  /// Create an element for the given widget and add it as a child of this
+  /// element in the given slot.
   ///
   /// This method is typically called by [updateChild] but can be called
   /// directly by subclasses that need finer-grained control over creating
@@ -3242,6 +3246,157 @@ class InheritedElement extends ProxyElement {
 /// painting, and hit testing.
 ///
 /// Contrast with [ComponentElement].
+///
+/// For details on the lifecycle of an element, see the discussion at [Element].
+///
+/// ## Writing a RenderObjectElement subclass
+///
+/// There are three common child models used by most [RenderObject]s:
+///
+/// * Leaf render objects, with no children: The [LeafRenderObjectElement] class
+///   handles this case.
+///
+/// * A single child: The [SingleChildRenderObjectElement] class handles this
+///   case.
+///
+/// * A linked list of children: The [MultiChildRenderObjectElement] class
+///   handles this case.
+///
+/// Sometimes, however, a render object's child model is more complicated. Maybe
+/// it has a two-dimensional array of children. Maybe it constructs children on
+/// demand. Maybe it features multiple lists. In such situations, the
+/// corresponding [Element] for the [Widget] that configures that [RenderObject]
+/// will be a new subclass of [RenderObjectElement].
+///
+/// Such a subclass is responsible for managing children, specifically the
+/// [Element] children of this object, and the [RenderObject] children of its
+/// corresponding [RenderObject].
+///
+/// ### Specializing the getters
+///
+/// [RenderObjectElement] objects spend much of their time acting as
+/// intermediaries between their [widget] and their [renderObject]. To make this
+/// more tractable, most [RenderObjectElement] subclasses override these getters
+/// so that they return the specific type that the element expects, e.g.:
+///
+/// ```dart
+/// class FooElement extends RenderObjectElement {
+///
+/// @override
+/// Foo get widget => super.widget;
+///
+/// @override
+/// RenderFoo get renderObject => super.renderObject;
+///
+/// // ...
+/// }
+/// ```
+///
+/// ### Slots
+///
+/// Each child [Element] corresponds to a [RenderObject] which should be
+/// attached to this element's render object as a child.
+///
+/// However, the immediate children of the element may not be the ones that
+/// eventually produce the actual [RenderObject] that they correspond to. For
+/// example a [StatelessElement] (the element of a [StatelessWidget]) simply
+/// corresponds to whatever [RenderObject] its child (the element returned by
+/// its [StatelessWidget.build] method) corresponds to.
+///
+/// Each child is therefore assigned a _slot_ token. This is an identifier whose
+/// meaning is private to this [RenderObjectElement] node. When the descendant
+/// that finally produces the [RenderObject] is ready to attach it to this
+/// node's render object, it passes that slot token back to this node, and that
+/// allows this node to cheaply identify where to put the child render object
+/// relative to the others in the parent render object.
+///
+/// ### Updating children
+///
+/// Early in the lifecycle of an element, the framework calls the [mount]
+/// method. This method should call [inflateChild] for each child, passing in
+/// the widget for that child, and the slot for that child, thus obtaining a
+/// list of child [Element]s.
+///
+/// Subsequently, the framework will call the [update] method. In this method,
+/// the [RenderObjectElement] should call [updateChild] for each child, passing
+/// in the [Element] that was obtained during [mount] or the last time [update]
+/// was run (whichever happened most recently), the new [Widget], and the slot.
+/// This provides the object with a new list of [Element] objects.
+///
+/// Where possible, the [update] method should attempt to map the elements from
+/// the last pass to the widgets in the new pass. For example, if one of the
+/// elements from the last pass was configured with a particular [Key], and one
+/// of the widgets in this new pass has that same key, they should be paired up,
+/// and the old element should be updated with the widget (and the slot
+/// corresponding to the new widget's new position, also). The [updateChildren]
+/// method may be useful in this regard.
+///
+/// [updateChild] should be called for children in their logical order. The
+/// order can matter; for example, if two of the children use [Focus.at]'s
+/// `autofocus` feature in their build method, then the first one to be updated
+/// will gain the focus.
+///
+/// #### Dynamically determining the children during the build phase
+///
+/// The child widgets need not necessarily come from this element's widget
+/// verbatim. They could be generated dynamically from a callback, or generated
+/// in other more creative ways.
+///
+/// #### Dynamically determining the children during layout
+///
+/// If the widgets are to be generated at layout time, then generating them when
+/// the [update] method won't work: layout of this element's render object
+/// hasn't started yet at that point. Instead, the [update] method can mark the
+/// render object as needing layout (see [RenderObject.markNeedsLayout]), and
+/// then the render object's [performLayout] method can call back to the element
+/// to have it generate the widgets and call [updateChild] accordingly.
+///
+/// For a render object to call an element during layout, it must use
+/// [RenderObject.invokeLayoutCallback]. For an element to call [updateChild]
+/// outside of its [update] method, it must use [BuildOwner.buildScope].
+///
+/// The framework provides many more checks in normal operation than it does
+/// when doing a build during layout. For this reason, creating widgets with
+/// layout-time build semantics should be done with great care.
+///
+/// #### Handling errors when building
+///
+/// If an element calls a builder function to obtain widgets for its children,
+/// it may find that the build throws an exception. Such exceptions should be
+/// caught and reported using [FlutterError.reportError]. If a child is needed
+/// but a builder has failed in this way, an instance of [ErrorWidget] can be
+/// used instead.
+///
+/// ### Detaching children
+///
+/// It is possible, when using [GlobalKey]s, for a child to be proactively
+/// removed by another element before this element has been updated.
+/// (Specifically, this happens when the subtree rooted at a widget with a
+/// particular [GlobalKey] is being moved from this element to an element
+/// processed earlier in the build phase.) When this happens, this element's
+/// [detachChild] method will be called with a reference to the affected child
+/// element.
+///
+/// The [detachChild] method of a [RenderObjectElement] subclass must remove the
+/// child element from its child list, so that when it next [update]s its
+/// children, the removed child is not considered.
+///
+/// For performance reasons, if there are many elements, it may be quicker to
+/// track which elements were detached by storing them in a [Set], rather than
+/// proactively mutating the local record of the child list and the identities
+/// of all the slots. For example, see the implementation of
+/// [MultiChildRenderObjectElement].
+///
+/// ### Maintaining the render object tree
+///
+/// Once a descendant produces a render object, it will call
+/// [insertChildRenderObject]. If the descendant's slot changes identity, it
+/// will call [moveChildRenderObject]. If a descendant goes away, it will call
+/// [removeChildRenderObject].
+///
+/// These three methods should update the render tree accordingly, attaching,
+/// moving, and detaching the given child render object from this element's own
+/// render object respectively.
 abstract class RenderObjectElement extends BuildableElement {
   /// Creates an element that uses the given widget as its configuration.
   RenderObjectElement(RenderObjectWidget widget) : super(widget);
