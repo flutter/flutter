@@ -46,13 +46,13 @@ static void LogLastEGLError() {
 
   for (size_t i = 0; i < count; i++) {
     if (last_error == pairs[i].code) {
-      DLOG(INFO) << "EGL Error: " << pairs[i].name << " (" << pairs[i].code
-                 << ")";
+      FTL_LOG(ERROR) << "EGL Error: " << pairs[i].name << " (" << pairs[i].code
+                     << ")";
       return;
     }
   }
 
-  DLOG(WARNING) << "Unknown EGL Error";
+  FTL_LOG(ERROR) << "Unknown EGL Error";
 }
 
 static EGLResult<EGLSurface> CreateContext(EGLDisplay display,
@@ -164,7 +164,7 @@ AndroidContextGL::AndroidContextGL(ftl::RefPtr<AndroidEnvironmentGL> env,
       ChooseEGLConfiguration(environment_->Display(), config);
 
   if (!success) {
-    DLOG(INFO) << "Could not choose a configuration.";
+    FTL_LOG(ERROR) << "Could not choose an EGL configuration.";
     LogLastEGLError();
     return;
   }
@@ -175,7 +175,7 @@ AndroidContextGL::AndroidContextGL(ftl::RefPtr<AndroidEnvironmentGL> env,
       CreateSurface(environment_->Display(), config_, window_);
 
   if (!success) {
-    DLOG(INFO) << "Could not create the surface.";
+    FTL_LOG(ERROR) << "Could not create the EGL surface.";
     LogLastEGLError();
     return;
   }
@@ -187,7 +187,7 @@ AndroidContextGL::AndroidContextGL(ftl::RefPtr<AndroidEnvironmentGL> env,
       share_context != nullptr ? share_context->context_ : EGL_NO_CONTEXT);
 
   if (!success) {
-    DLOG(INFO) << "Could not create a context";
+    FTL_LOG(ERROR) << "Could not create an EGL context";
     LogLastEGLError();
     return;
   }
@@ -206,12 +206,12 @@ AndroidContextGL::AndroidContextGL(ftl::RefPtr<AndroidEnvironmentGL> env,
 
 AndroidContextGL::~AndroidContextGL() {
   if (!TeardownContext(environment_->Display(), context_)) {
-    LOG(INFO) << "Could not tear down the EGL context. Possible resource leak.";
+    FTL_LOG(ERROR) << "Could not tear down the EGL context. Possible resource leak.";
     LogLastEGLError();
   }
 
   if (!TeardownSurface(environment_->Display(), surface_)) {
-    LOG(INFO) << "Could not tear down the EGL surface. Possible resource leak.";
+    FTL_LOG(ERROR) << "Could not tear down the EGL surface. Possible resource leak.";
     LogLastEGLError();
   }
 }
@@ -227,7 +227,7 @@ bool AndroidContextGL::IsValid() const {
 bool AndroidContextGL::MakeCurrent() {
   if (eglMakeCurrent(environment_->Display(), surface_, surface_, context_) !=
       EGL_TRUE) {
-    LOG(INFO) << "Could not make the context current";
+    FTL_LOG(ERROR) << "Could not make the context current";
     LogLastEGLError();
     return false;
   }
@@ -237,7 +237,7 @@ bool AndroidContextGL::MakeCurrent() {
 bool AndroidContextGL::ClearCurrent() {
   if (eglMakeCurrent(environment_->Display(), EGL_NO_SURFACE, EGL_NO_SURFACE,
                      EGL_NO_CONTEXT) != EGL_TRUE) {
-    LOG(INFO) << "Could not clear the current context";
+    FTL_LOG(ERROR) << "Could not clear the current context";
     LogLastEGLError();
     return false;
   }
@@ -256,7 +256,7 @@ SkISize AndroidContextGL::GetSize() {
   if (!eglQuerySurface(environment_->Display(), surface_, EGL_WIDTH, &width) ||
       !eglQuerySurface(environment_->Display(), surface_, EGL_HEIGHT,
                        &height)) {
-    LOG(ERROR) << "Unable to query EGL surface size";
+    FTL_LOG(ERROR) << "Unable to query EGL surface size";
     LogLastEGLError();
     return SkISize::Make(0, 0);
   }
@@ -279,7 +279,7 @@ bool AndroidContextGL::Resize(const SkISize& size) {
   MakeCurrent();
 
   if (!success) {
-    LOG(ERROR) << "Unable to create EGL window surface on resize.";
+    FTL_LOG(ERROR) << "Unable to create EGL window surface on resize.";
     return false;
   }
 
