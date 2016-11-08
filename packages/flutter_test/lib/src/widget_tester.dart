@@ -163,6 +163,10 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// microtasks, by calling [pump] with the same `duration` (if any). The
   /// supplied [EnginePhase] is the final phase reached during the pump pass; if
   /// not supplied, the whole pass is executed.
+  ///
+  /// Subsequent calls to this is different from [pump] in that it forces a full
+  /// rebuild of the tree, even if [widget] is the same as the previous call.
+  /// [pump] will only rebuild the widgets that have changed.
   Future<Null> pumpWidget(Widget widget, [
     Duration duration,
     EnginePhase phase = EnginePhase.sendSemanticsTree
