@@ -50,6 +50,12 @@ void main() {
     mockTextInput.enterText(text);
   }
 
+  Future<Null> showKeyboard(WidgetTester tester) async {
+    RawInputState editable = tester.state(find.byType(RawInput).first);
+    editable.requestKeyboard();
+    await tester.pump();
+  }
+
   // Returns the first RenderEditable.
   RenderEditable findRenderEditable(WidgetTester tester) {
     RenderObject root = tester.renderObject(find.byType(RawInput));
@@ -94,6 +100,7 @@ void main() {
     }
 
     await tester.pumpWidget(builder());
+    await showKeyboard(tester);
 
     RenderBox findInputBox() => tester.renderObject(find.byKey(inputKey));
 
@@ -134,6 +141,7 @@ void main() {
     }
 
     await tester.pumpWidget(builder());
+    await showKeyboard(tester);
 
     RawInputState editableText = tester.state(find.byType(RawInput));
 
@@ -179,6 +187,7 @@ void main() {
     }
 
     await tester.pumpWidget(builder());
+    await showKeyboard(tester);
 
     const String testValue = 'ABC';
     updateEditingState(new TextEditingState(
@@ -215,6 +224,7 @@ void main() {
     }
 
     await tester.pumpWidget(builder());
+    await showKeyboard(tester);
 
     String testValue = 'abc def ghi';
     enterText(testValue);
@@ -262,6 +272,7 @@ void main() {
     }
 
     await tester.pumpWidget(builder());
+    await showKeyboard(tester);
 
     String testValue = 'abc def ghi';
     enterText(testValue);
@@ -337,6 +348,7 @@ void main() {
     }
 
     await tester.pumpWidget(builder());
+    await showKeyboard(tester);
 
     String testValue = 'abc def ghi';
     enterText(testValue);
@@ -402,6 +414,7 @@ void main() {
     }
 
     await tester.pumpWidget(builder());
+    await showKeyboard(tester);
 
     String testValue = 'abc def ghi';
     enterText(testValue);
@@ -452,6 +465,7 @@ void main() {
     }
 
     await tester.pumpWidget(builder(3));
+    await showKeyboard(tester);
 
     RenderBox findInputBox() => tester.renderObject(find.byKey(inputKey));
 
@@ -514,6 +528,7 @@ void main() {
     }
 
     await tester.pumpWidget(builder());
+    await showKeyboard(tester);
 
     String testValue = kThreeLines;
     String cutValue = 'First line of stuff keeps going until abcdef ghijk. ';
@@ -605,6 +620,7 @@ void main() {
     }
 
     await tester.pumpWidget(builder());
+    await showKeyboard(tester);
 
     enterText(kFourLines);
     await tester.idle();
@@ -690,6 +706,7 @@ void main() {
     }
 
     await tester.pumpWidget(builder());
+    await showKeyboard(tester);
 
     Future<Null> checkText(String testValue) async {
       enterText(testValue);
@@ -722,6 +739,7 @@ void main() {
     }
 
     await tester.pumpWidget(builder());
+    await showKeyboard(tester);
 
     Future<Null> checkText(String testValue) async {
       enterText(testValue);

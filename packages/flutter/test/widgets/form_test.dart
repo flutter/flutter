@@ -14,6 +14,12 @@ void main() {
     mockTextInput.enterText(text);
   }
 
+  Future<Null> showKeyboard(WidgetTester tester) async {
+    RawInputState editable = tester.state(find.byType(RawInput).first);
+    editable.requestKeyboard();
+    await tester.pump();
+  }
+
   testWidgets('onSaved callback is called', (WidgetTester tester) async {
     GlobalKey<FormState> formKey = new GlobalKey<FormState>();
     String fieldValue;
@@ -32,6 +38,7 @@ void main() {
     }
 
     await tester.pumpWidget(builder());
+    await showKeyboard(tester);
 
     expect(fieldValue, isNull);
 
@@ -65,6 +72,7 @@ void main() {
     }
 
     await tester.pumpWidget(builder());
+    await showKeyboard(tester);
 
     Future<Null> checkErrorText(String testValue) async {
       enterText(testValue);
@@ -81,7 +89,6 @@ void main() {
   testWidgets('Multiple Inputs communicate', (WidgetTester tester) async {
     GlobalKey<FormState> formKey = new GlobalKey<FormState>();
     GlobalKey<FormFieldState<InputValue>> fieldKey = new GlobalKey<FormFieldState<InputValue>>();
-    GlobalKey inputFocusKey = new GlobalKey();
     GlobalKey focusKey = new GlobalKey();
     // Input 2's validator depends on a input 1's value.
     String errorText(InputValue input) => fieldKey.currentState.value?.text.toString() + '/error';
@@ -96,9 +103,7 @@ void main() {
               child: new Block(
                 children: <Widget>[
                   new InputFormField(
-                    autofocus: true,
-                    key: fieldKey,
-                    focusKey: inputFocusKey,
+                    key: fieldKey
                   ),
                   new InputFormField(
                     validator: errorText,
@@ -112,8 +117,7 @@ void main() {
     }
 
     await tester.pumpWidget(builder());
-    await tester.pump();
-    Focus.moveTo(inputFocusKey);
+    await showKeyboard(tester);
 
     Future<Null> checkErrorText(String testValue) async {
       enterText(testValue);
@@ -147,6 +151,7 @@ void main() {
     }
 
     await tester.pumpWidget(builder());
+    await showKeyboard(tester);
 
     // initial value should be loaded into keyboard editing state
     expect(mockTextInput.editingState, isNotNull);
@@ -187,7 +192,7 @@ void main() {
     }
 
     await tester.pumpWidget(builder(false));
-    await tester.pump();
+    await showKeyboard(tester);
 
     expect(fieldValue, isNull);
     expect(formKey.currentState.hasErrors, isFalse);
