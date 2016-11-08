@@ -46,6 +46,8 @@ AndroidSurfaceGL::AndroidSurfaceGL(
   offscreen_context_ = GlobalResourceLoadingContext(offscreen_config);
 
   if (!offscreen_context_ || !offscreen_context_->IsValid()) {
+    FTL_LOG(ERROR) << "Unable to create an offscreen EGL context";
+    FTL_LOG(ERROR) << "If you are running in an Android emulator, make sure that OpenGL is enabled";
     offscreen_context_ = nullptr;
   }
 }
