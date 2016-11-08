@@ -19,8 +19,9 @@ final JsonEncoder _prettyEncoder = new JsonEncoder.withIndent('  ');
 /// phase. Anything past that is in the danger of missing the frame as 60FPS.
 const Duration kBuildBudget = const Duration(milliseconds: 8);
 
-/// Extracts statistics from the event loop timeline.
+/// Extracts statistics from a [Timeline].
 class TimelineSummary {
+  /// Creates a timeline summary given a full timeline object.
   TimelineSummary.summarize(this._timeline);
 
   final Timeline _timeline;
@@ -142,6 +143,7 @@ class TimedEvent {
   /// The duration of the event.
   final Duration duration;
 
+  /// Creates a timed event given begin and end timestamps in microseconds.
   TimedEvent(int beginTimeMicros, int endTimeMicros)
     : this.beginTimeMicros = beginTimeMicros,
       this.endTimeMicros = endTimeMicros,
