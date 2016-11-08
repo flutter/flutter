@@ -26,7 +26,6 @@ class RunAndStayResident extends ResidentRunner {
     DebuggingOptions debuggingOptions,
     bool usesTerminalUI: true,
     this.traceStartup: false,
-    this.benchmark: false,
     this.applicationBinary
   }) : super(device,
              target: target,
@@ -37,7 +36,6 @@ class RunAndStayResident extends ResidentRunner {
   String _mainPath;
   LaunchResult _result;
   final bool traceStartup;
-  final bool benchmark;
   final String applicationBinary;
 
   bool get prebuiltMode => applicationBinary != null;
@@ -54,7 +52,6 @@ class RunAndStayResident extends ResidentRunner {
       assert(shouldBuild == !prebuiltMode);
       return _run(
         traceStartup: traceStartup,
-        benchmark: benchmark,
         connectionInfoCompleter: connectionInfoCompleter,
         appStartedCompleter: appStartedCompleter,
         route: route,
@@ -101,7 +98,6 @@ class RunAndStayResident extends ResidentRunner {
 
   Future<int> _run({
     bool traceStartup: false,
-    bool benchmark: false,
     Completer<DebugConnectionInfo> connectionInfoCompleter,
     Completer<Null> appStartedCompleter,
     String route,
@@ -194,10 +190,6 @@ class RunAndStayResident extends ResidentRunner {
     // Connect to observatory.
     if (debuggingOptions.debuggingEnabled) {
       await connectToServiceProtocol(_result.observatoryPort);
-
-      if (benchmark) {
-        await vmService.getVM();
-      }
     }
 
     printTrace('Application running.');
@@ -222,21 +214,6 @@ class RunAndStayResident extends ResidentRunner {
     }
 
     appStartedCompleter?.complete();
-
-    if (benchmark) {
-      await new Future<Null>.delayed(new Duration(seconds: 4));
-
-      // Touch the file.
-      File mainFile = new File(_mainPath);
-      mainFile.writeAsBytesSync(mainFile.readAsBytesSync());
-
-      Stopwatch restartTime = new Stopwatch()..start();
-      OperationResult result = await restart();
-      restartTime.stop();
-      writeRunBenchmarkFile(startTime, result.isOk ? restartTime : null);
-      await new Future<Null>.delayed(new Duration(seconds: 2));
-      stop();
-    }
 
     return waitForAppToFinish();
   }
@@ -294,15 +271,3 @@ class RunAndStayResident extends ResidentRunner {
   }
 }
 
-void writeRunBenchmarkFile(Stopwatch startTime, [Stopwatch restartTime]) {
-  final String benchmarkOut = 'refresh_benchmark.json';
-  Map<String, dynamic> data = <String, dynamic>{
-    'start': startTime.elapsedMilliseconds,
-    'time': (restartTime ?? startTime).elapsedMilliseconds // time and restart are the same
-  };
-  if (restartTime != null)
-    data['restart'] = restartTime.elapsedMilliseconds;
-
-  new File(benchmarkOut).writeAsStringSync(toPrettyJson(data));
-  printStatus('Run benchmark written to $benchmarkOut ($data).');
-}

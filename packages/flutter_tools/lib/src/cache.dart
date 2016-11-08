@@ -167,7 +167,7 @@ class Cache {
         await _downloadFileToCache(url, cachedFile, unzip);
       } catch (e) {
         printError('Failed to fetch third-party artifact $url: $e');
-        throw e;
+        rethrow;
       }
     }
 
