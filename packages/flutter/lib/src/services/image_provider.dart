@@ -248,7 +248,7 @@ class AssetBundleImageKey {
   int get hashCode => hashValues(bundle, name, scale);
 
   @override
-  String toString() => '$runtimeType(bundle: $bundle, name: $name, scale: $scale)';
+  String toString() => '$runtimeType(bundle: $bundle, name: "$name", scale: $scale)';
 }
 
 /// A subclass of [ImageProvider] that knows about [AssetBundle]s.
@@ -432,5 +432,5 @@ class ExactAssetImage extends AssetBundleImageProvider {
   int get hashCode => hashValues(name, scale, bundle);
 
   @override
-  String toString() => '$runtimeType(name: $name, scale: $scale, bundle: $bundle)';
+  String toString() => '$runtimeType(name: "$name", scale: $scale, bundle: $bundle)';
 }

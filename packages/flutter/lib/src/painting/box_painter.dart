@@ -967,7 +967,7 @@ class BackgroundImage {
     this.repeat: ImageRepeat.noRepeat,
     this.centerSlice,
     this.colorFilter,
-    this.alignment
+    this.alignment,
   });
 
   /// The image to be painted into the background.
@@ -999,6 +999,8 @@ class BackgroundImage {
   /// An alignment of (0.0, 0.0) aligns the image to the top-left corner of its
   /// layout bounds.  An alignment of (1.0, 0.5) aligns the image to the middle
   /// of the right edge of its layout bounds.
+  ///
+  /// Defaults to [FractionalOffset.center].
   final FractionalOffset alignment;
 
   @override
@@ -1024,6 +1026,25 @@ class BackgroundImage {
 }
 
 /// An immutable description of how to paint a box.
+///
+/// The following example uses the [Container] widget from the widgets layer to
+/// draw a background image with a border:
+///
+/// ```dart
+/// new Container(
+///   decoration: new BoxDecoration(
+///     backgroundColor: const Color(0xff7c94b6),
+///     backgroundImage: new BackgroundImage(
+///       image: new ExactAssetImage('images/flowers.jpeg'),
+///       fit: ImageFit.cover,
+///     ),
+///     border: new Border.all(
+///       color: Colors.black,
+///       width: 8.0,
+///     ),
+///   ),
+/// )
+/// ```
 class BoxDecoration extends Decoration {
   /// Creates a box decoration.
   ///
