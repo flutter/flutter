@@ -595,12 +595,12 @@ class HotRunner extends ResidentRunner {
   @override
   void printHelp({ @required bool details }) {
     const String fire = '🔥';
-    const String redOnBlack = '\u001B[31;40m';
+    const String red = '\u001B[31m';
     const String bold = '\u001B[0;1m';
     const String reset = '\u001B[0m';
     printStatus(
       '$fire  To hot reload your app on the fly, press "r" or F5. To restart the app entirely, press "R".',
-      ansiAlternative: '$redOnBlack$fire$bold  To ${redOnBlack}hot reload$bold your app on the fly, '
+      ansiAlternative: '$red$fire$bold  To hot reload your app on the fly, '
                        'press "r" or F5. To restart the app entirely, press "R".$reset'
     );
     printStatus('The Observatory debugger and profiler is available at: http://127.0.0.1:$_observatoryPort/');
