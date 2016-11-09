@@ -15,7 +15,8 @@ const double _kDrawerHeaderHeight = 160.0 + 1.0; // bottom edge
 ///
 /// Part of the material design [Drawer].
 ///
-/// Requires one of its ancestors to be a [Material] widget.
+/// Requires one of its ancestors to be a [Material] widget. This condition is
+/// satisfied by putting the [DrawerItem] in a [Drawer].
 ///
 /// See also:
 ///

@@ -273,8 +273,12 @@ class RawInputState extends ScrollableState<RawInput> implements TextInputClient
     return newScrollOffset;
   }
 
+  // True if the focus was explicitly requested last frame. This ensures we
+  // don't show the keyboard when focus defaults back to the RawInput.
+  bool _requestingFocus = false;
+
   void _attachOrDetachKeyboard(bool focused) {
-    if (focused && !_isAttachedToKeyboard) {
+    if (focused && !_isAttachedToKeyboard && _requestingFocus) {
       _textInputConnection = TextInput.attach(
           this, new TextInputConfiguration(inputType: config.keyboardType))
         ..setEditingState(_getTextEditingStateFromInputValue(_currentValue))
@@ -286,6 +290,7 @@ class RawInputState extends ScrollableState<RawInput> implements TextInputClient
       }
       _clearComposing();
     }
+    _requestingFocus = false;
   }
 
   void _clearComposing() {
@@ -306,6 +311,9 @@ class RawInputState extends ScrollableState<RawInput> implements TextInputClient
       _textInputConnection.show();
     } else {
       Focus.moveTo(config.focusKey);
+      setState(() {
+        _requestingFocus = true;
+      });
     }
   }
 

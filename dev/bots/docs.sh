@@ -2,8 +2,7 @@
 set -e
 
 # Install dartdoc.
-# We peg to this version to work around a bug affecting Flutter in 0.9.7+2.
-pub global activate dartdoc 0.9.7+1
+pub global activate dartdoc 0.9.7+6
 
 # Generate flutter docs into dev/docs/doc/api/.
 (cd dev/tools; pub get)

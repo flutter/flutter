@@ -527,22 +527,412 @@ class _IntrinsicDimensionsCacheEntry {
 
 /// A render object in a 2D cartesian coordinate system.
 ///
-/// The size of each box is expressed as a width and a height. Each box has its
-/// own coordinate system in which its upper left corner is placed at (0, 0).
-/// The lower right corner of the box is therefore at (width, height). The box
-/// contains all the points including the upper left corner and extending to,
-/// but not including, the lower right corner.
+/// The [size] of each box is expressed as a width and a height. Each box has
+/// its own coordinate system in which its upper left corner is placed at (0,
+/// 0). The lower right corner of the box is therefore at (width, height). The
+/// box contains all the points including the upper left corner and extending
+/// to, but not including, the lower right corner.
 ///
 /// Box layout is performed by passing a [BoxConstraints] object down the tree.
-/// The box constraints establish a min and max value for the child's width
-/// and height. In determining its size, the child must respect the constraints
+/// The box constraints establish a min and max value for the child's width and
+/// height. In determining its size, the child must respect the constraints
 /// given to it by its parent.
 ///
 /// This protocol is sufficient for expressing a number of common box layout
-/// data flows.  For example, to implement a width-in-height-out data flow, call
+/// data flows. For example, to implement a width-in-height-out data flow, call
 /// your child's [layout] function with a set of box constraints with a tight
 /// width value (and pass true for parentUsesSize). After the child determines
 /// its height, use the child's height to determine your size.
+///
+/// ## Writing a RenderBox subclass
+///
+/// One would implement a new [RenderBox] subclass to describe a new layout
+/// model, new paint model, new hit-testing model, or new semantics model, while
+/// remaining in the cartesian space defined by the [RenderBox] protocol.
+///
+/// To create a new protocol, consider subclassing [RenderObject] instead.
+///
+/// ### Constructors and properties of a new RenderBox subclass
+///
+/// The constructor will typically take a named argument for each property of
+/// the class. The value is then passed to a private field of the class and the
+/// constructor asserts its correctness (e.g. if it should not be null, it
+/// asserts it's not null).
+///
+/// Properties have the form of a getter/setter/field group like the following:
+///
+/// ```dart
+/// AxisDirection get axis => _axis;
+/// AxisDirection _axis;
+/// set axis(AxisDirection value) {
+///   assert(value != null); // same check as in the constructor
+///   if (value == _axis)
+///     return;
+///   _axis = value;
+///   markNeedsLayout();
+/// }
+/// ```
+///
+/// The setter will typically finish with either a call to [markNeedsLayout], if
+/// the layout uses this property, or [markNeedsPaint], if only the painter
+/// function does. (No need to call both, [markNeedsLayout] implies
+/// [markNeedsPaint].)
+///
+/// Consider layout and paint to be expensive; be conservative about calling
+/// [markNeedsLayout] or [markNeedsPaint]. They should only be called if the
+/// layout (or paint, respectively) has actually changed.
+///
+/// ### Children
+///
+/// If a render object is a leaf, that is, it cannot have any children, then
+/// ignore this section. (Examples of leaf render objects are [RenderImage] and
+/// [RenderParagraph].)
+///
+/// For render objects with children, there are four possible scenarios:
+///
+/// * A single [RenderBox] child. In this scenario, consider inheriting from
+///   [RenderProxyBox] (if the render object sizes itself to match the child) or
+///   [RenderShiftedBox] (if the child will be smaller than the box and the box
+///   will align the child inside itself).
+///
+/// * A single child, but it isn't a [RenderBox]. Use the
+///   [RenderObjectWithChildMixin] mixin.
+///
+/// * A single list of children. Use the [ContainerRenderObjectMixin] mixin.
+///
+/// * A more complicated child model.
+///
+/// #### Using RenderProxyBox
+///
+/// By default, a [RenderProxyBox] render object sizes itself to fit its child, or
+/// to be as small as possible if there is no child; it passes all hit testing
+/// and painting on to the child, and intrinsic dimensions and baseline
+/// measurements similarly are proxied to the child.
+///
+/// A subclass of [RenderProxyBox] just needs to override the parts of the
+/// [RenderBox] protocol that matter. For example, [RenderOpacity] just
+/// overrides the paint method (and [alwaysNeedsCompositing] to reflect what the
+/// paint method does, and the [visitChildrenForSemantics] method so that the
+/// child is hidden from accessibility tools when it's invisible), and adds an
+/// [RenderOpacity.opacity] field.
+///
+/// [RenderProxyBox] assumes that the child is the size of the parent and
+/// positioned at 0,0. If this is not true, then use [RenderShiftedBox] instead.
+///
+/// See
+/// [proxy_box.dart](https://github.com/flutter/flutter/blob/master/packages/flutter/lib/src/rendering/proxy_box.dart)
+/// for examples of inheriting from [RenderProxyBox].
+///
+/// #### Using RenderShiftedBox
+///
+/// By default, a [RenderShiftedBox] acts much like a [RenderProxyBox] but
+/// without assuming that the child is positioned at 0,0 (the actual position
+/// recorded in the child's [parentData] field is used), and without providing a
+/// default layout algorithm.
+///
+/// See
+/// [shifted_box.dart](https://github.com/flutter/flutter/blob/master/packages/flutter/lib/src/rendering/shifted_box.dart)
+/// for examples of inheriting from [RenderShiftedBox].
+///
+/// #### Kinds of children and child-specific data
+///
+/// A [RenderBox] doesn't have to have [RenderBox] children. One can use another
+/// subclass of [RenderObject] for a [RenderBox]'s children. See the discussion
+/// at [RenderObject].
+///
+/// Children can have additional data owned by the parent but stored on the
+/// child using the [parentData] field. The class used for that data must
+/// inherit from [ParentData]. The [setupParentData] method is used to
+/// initialise the [parentData] field of a child when the child is attached.
+///
+/// By convention, [RenderBox] objects that have [RenderBox] children use the
+/// [BoxParentData] class, which has a [BoxParentData.offset] field to store the
+/// position of the child relative to the parent. ([RenderProxyBox] does not
+/// need this offset and therefore is an exception to this rule.)
+///
+/// #### Using RenderObjectWithChildMixin
+///
+/// If a render object has a single child but it isn't a [RenderBox], then the
+/// [RenderObjectWithChildMixin] class, which is a mixin that will handle the
+/// boilerplate of managing a child, will be useful.
+///
+/// It's a generic class with one type argument, the type of the child. For
+/// example, if you are building a `RenderFoo` class which takes a single
+/// `RenderBar` child, you would use the mixin as follows:
+///
+/// ```dart
+/// class RenderFoo extends RenderBox
+///   with RenderObjectWithChildMixin<RenderBar> {
+///   // ...
+/// }
+/// ```
+///
+/// Since the `RenderFoo` class itself is still a [RenderBox] in this case, you
+/// still have to implement the [RenderBox] layout algorithm, as well as
+/// features like intrinsics and baselines, painting, and hit testing.
+///
+/// #### Using ContainerRenderObjectMixin
+///
+/// If a render box can have multiple children, then the
+/// [ContainerRenderObjectMixin] mixin can be used to handle the boilerplate. It
+/// uses a linked list to model the children in a manner that is easy to mutate
+/// dynamically and that can be walked efficiently. Random access is not
+/// efficient in this model; if you need random access to the children consider
+/// the next section on more complicated child models.
+///
+/// The [ContainerRenderObjectMixin] class has two type arguments. The first is
+/// the type of the child objects. The second is the type for their
+/// [parentData]. The class used for [parentData] must itself have the
+/// [ContainerParentDataMixin] class mixed into it; this is where
+/// [ContainerRenderObjectMixin] stores the linked list. A [ParentData] class
+/// can extend [ContainerBoxParentDataMixin]; this is essentially
+/// [BoxParentData] mixed with [ContainerParentDataMixin]. For example, if a
+/// `RenderFoo` class wanted to have a linked list of [RenderBox] children, one
+/// might create a `FooParentData` class as follows:
+///
+/// ```dart
+/// class FooParentData extends ContainerBoxParentDataMixin<RenderBox> {
+///   // (any fields you might need for these children)
+/// }
+/// ```
+///
+/// When using [ContainerRenderObjectMixin] in a [RenderBox], consider mixing in
+/// [RenderBoxContainerDefaultsMixin], which provides a collection of utility
+/// methods that implement common parts of the [RenderBox] protocol (such as
+/// painting the children).
+///
+/// The declaration of the `RenderFoo` class itself would thus look like this:
+///
+/// ```dart
+/// class RenderFlex extends RenderBox with
+///   ContainerRenderObjectMixin<RenderBox, FooParentData>,
+///   RenderBoxContainerDefaultsMixin<RenderBox, FooParentData> {
+///   // ...
+/// }
+/// ```
+///
+/// When walking the children (e.g. during layout), the following pattern is
+/// commonly used (in this case assuming that the children are all [RenderBox]
+/// objects and that this render object uses `FooParentData` objects for its
+/// children's [parentData] fields):
+///
+/// ```dart
+/// RenderBox child = firstChild;
+/// while (child != null) {
+///   final FooParentData childParentData = child.parentData;
+///   // ...operate on child and childParentData...
+///   assert(child.parentData == childParentData);
+///   child = childParentData.nextSibling;
+/// }
+/// ```
+///
+/// #### More complicated child models
+///
+/// Render objects can have more complicated models, for example a map of
+/// children keyed on an enum, or a 2D grid of efficiently randomly-accessible
+/// children, or multiple lists of children, etc. If a render object has a model
+/// that can't be handled by the mixins above, it must implement the
+/// [RenderObject] child protocol, as follows:
+///
+/// * Any time a child is removed, call [dropChild] with the child.
+///
+/// * Any time a child is added, call [adoptChild] with the child.
+///
+/// * Implement the [attach] method such that it calls [attach] on each child.
+///
+/// * Implement the [detach] method such that it calls [detach] on each child.
+///
+/// * Implement the [redepthChildren] method such that it calls [redepthChild]
+///   on each child.
+///
+/// * Implement the [visitChildren] method such that it calls its argument for
+///   each child, typically in paint order (back-most to front-most).
+///
+/// * Implement [debugDescribeChildren] such that it outputs a string that
+///   describes all the children. In principle, for each child you want to
+///   include the results of that child's [toStringDeep] function.
+///
+/// Implementing these seven bullet points is essentially all that the two
+/// aforementioned mixins do.
+///
+/// ### Layout
+///
+/// [RenderBox] classes implement a layout algorithm. They have a set of
+/// constraints provided to them, and they size themselves based on those
+/// constraints and whatever other inputs they may have (for example, their
+/// children or properties).
+///
+/// When implementing a [RenderBox] subclass, one must make a choice. Does it
+/// size itself exclusively based on the constraints, or does it use any other
+/// information in sizing itself? An example of sizing purely based on the
+/// constraints would be growing to fit the parent.
+///
+/// Sizing purely based on the constraints allows the system to make some
+/// significant optimisations. Classes that use this approach should override
+/// [sizedByParent] to return true, and then override [performResize] to set the
+/// [size] using nothing but the constraints, e.g.:
+///
+/// ```dart
+/// @override
+/// bool get sizedByParent => true;
+///
+/// @override
+/// void performResize() {
+///   size = constraints.smallest;
+/// }
+/// ```
+///
+/// Otherwise, the size is set in the [performLayout] function.
+///
+/// The [performLayout] function is where render boxes decide, if they are not
+/// [sizedByParent], what [size] they should be, and also where they decide
+/// where their children should be.
+///
+/// #### Layout of RenderBox children
+///
+/// The [performLayout] function should call the [layout] function of each (box)
+/// child, passing it a [BoxConstraints] object describing the constraints
+/// within which the child can render. Passing tight constraints (see
+/// [BoxConstraints.isTight]) to the child will allow the rendering library to
+/// apply some optimisations, as it knows that if the constraints are tight, the
+/// child's dimensions cannot change even if the layout of the child itself
+/// changes.
+///
+/// If the [performLayout] function will use the child's size to affect other
+/// aspects of the layout, for example if the render box sizes itself around the
+/// child, or positions several children based on the size of those children,
+/// then it must specify the `parentUsesSize` argument to the child's [layout]
+/// function, setting it to true.
+///
+/// This flag turns off some optimisations; algorithms that do not rely on the
+/// children's sizes will be more efficient. (In particular, relying on the
+/// child's [size] means that if the child is marked dirty for layout, the
+/// parent will probably also be marked dirty for layout, unless the
+/// [constraints] given by the parent to the child were tight constraints.)
+///
+/// For [RenderBox] classes that do not inherit from [RenderProxyBox], once they
+/// have laid out their children, should also position them, by setting the
+/// [BoxParentData.offset] field of each child's [parentData] object.
+///
+/// #### Layout of non-RenderBox children
+///
+/// The children of a [RenderBox] do not have to be [RenderBox]es themselves. If
+/// they use another protocol (as discussed at [RenderObject]), then instead of
+/// [BoxConstraints], the parent would pass in the appropriate [Constraints]
+/// subclass, and instead of reading the child's size, the parent would read
+/// whatever the output of [layout] is for that layout protocol. The
+/// `parentUsesSize` flag is still used to indicate whether the parent is going
+/// to read that output, and optimisations still kick in if the child has tight
+/// constraints (as defined by [Constraints.isTight]).
+///
+/// ### Painting
+///
+/// To describe how a render box paints, implement the [paint] method. It is
+/// given a [PaintingContext] object and an [Offset]. The painting context
+/// provides methods to affect the layer tree as well as a
+/// [PaintingContext.canvas] which can be used to add drawing commands. The
+/// canvas object should not be cached across calls to the [PaintingContext]'s
+/// methods; every time a method on [PaintingContext] is called, there is a
+/// chance that the canvas will change identity. The offset specifies the
+/// position of the top left corner of the box in the coordinate system of the
+/// [PaintingContext.canvas].
+///
+/// To draw text on a canvas, use a [TextPainter].
+///
+/// To draw an image to a canvas, use the [paintImage] method.
+///
+/// A [RenderBox] that uses methods on [PaintingContext] that introduce new
+/// layers should override the [alwaysNeedsCompositing] getter and set it to
+/// true. If the object sometimes does and sometimes does not, it can have that
+/// getter return true in some cases and false in others. In that case, whenever
+/// the return value would change, call [markNeedsCompositingBitsUpdate]. (This
+/// is done automatically when a child is added or removed, so you don't have to
+/// call it explicitly if the [alwaysNeedsCompositing] getter only changes value
+/// based on the presence or absence of children.)
+///
+/// Anytime anything changes on the object that would cause the [paint] method
+/// to paint something different (but would not cause the layout to change),
+/// the object should call [markNeedsPaint].
+///
+/// #### Painting children
+///
+/// The [paint] method's `context` argument has a [PaintingContext.paintChild]
+/// method, which should be called for each child that is to be painted. It
+/// should be given a reference to the child, and an [Offset] giving the
+/// position of the child relative to the parent.
+///
+/// If the [paint] method applies a transform to the painting context before
+/// painting children (or generally applies an additional offset beyond the
+/// offset it was itself given as an argument), then the [applyPaintTransform]
+/// method should also be overridden. That method must adjust the matrix that it
+/// is given in the same manner as it transformed the painting context and
+/// offset before painting the given child. This is used by the [globalToLocal]
+/// and [localToGlobal] methods.
+///
+/// #### Hit Tests
+///
+/// Hit testing for render boxes is implemented by the [hitTest] method. The
+/// default implementation of this method defers to [hitTestSelf] and
+/// [hitTestChildren]. When implementing hit testing, you can either override
+/// these latter two methods, or ignore them and just override [hitTest].
+///
+/// The [hitTest] method itself is given a [Point], and must return true if the
+/// object or one of its children has absorbed the hit (preventing objects below
+/// this one from being hit), or false if the hit can continue to other objects
+/// below this one.
+///
+/// For each child [RenderBox], the [hitTest] method on the child should be
+/// called with the same [HitTestResult] argument and with the point transformed
+/// into the child's coordinate space (in the same manner that the
+/// [applyPaintTransform] method would). The default implementation defers to
+/// [hitTestChildren] to call the children. [RenderBoxContainerDefaultsMixin]
+/// provides a [RenderBoxContainerDefaultsMixin.defaultHitTestChildren] method
+/// that does this assuming that the children are axis-aligned, not transformed,
+/// and positioned according to the [BoxParentData.offset] field of the
+/// [parentData]; more elaborate boxes can override [hitTestChildren]
+/// accordingly.
+///
+/// If the object is hit, then it should also add itself to the [HitTestResult]
+/// object that is given as an argument to the [hitTest] method, using
+/// [HitTestResult.add]. The default implementation defers to [hitTestSelf] to
+/// determine if the box is hit. If the object adds itself before the children
+/// can add themselves, then it will be as if the object was above the children.
+/// If it adds itself after the children, then it will be as if it was below the
+/// children. Entries added to the [HitTestResult] object should use the
+/// [BoxHitTestEntry] class. The entries are subsequently walked by the system
+/// in the order they were added, and for each entry, the target's [handleEvent]
+/// method is called, passing in the [HitTestEntry] object.
+///
+/// Hit testing cannot rely on painting having happened.
+///
+/// ### Semantics
+///
+/// For a render box to be accessible, implement the
+/// [describeApproximatePaintClip] and [visitChildrenForSemantics] methods, and
+/// the [semanticAnnotator] getter. The default implementations are sufficient
+/// for objects that only affect layout, but nodes that represent interactive
+/// components or information (diagrams, text, images, etc) should provide more
+/// complete implementations. For more information, see the documentation for
+/// these members.
+///
+/// ### Intrinsics and Baselines
+///
+/// The layout, painting, hit testing, and semantics protocols are common to all
+/// render objects. [RenderBox] objects must implement two additional protocols:
+/// intrinsic sizing and baseline measurements.
+///
+/// There are four methods to implement for intrinsic sizing, to compute the
+/// minimum and maximum intrinsic width and height of the box. The documentation
+/// for these methods discusses the protocol in detail:
+/// [computeMinIntrinsicWidth], [computeMaxIntrinsicWidth],
+/// [computeMinIntrinsicHeight], [computeMaxIntrinsicHeight].
+///
+/// In addition, if the box has any children, it must implement
+/// [computeDistanceToActualBaseline]. [RenderProxyBox] provides a simple
+/// implementation that forwards to the child; [RenderShiftedBox] provides an
+/// implementation that offsets the child's baseline information by the position
+/// of the child relative to the parent. If you do not inherited from either of
+/// these classes, however, you must implement the algorithm yourself.
 abstract class RenderBox extends RenderObject {
   @override
   void setupParentData(RenderObject child) {

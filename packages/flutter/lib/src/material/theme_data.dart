@@ -247,14 +247,14 @@ class ThemeData {
   /// The background color for major parts of the app (toolbars, tab bars, etc)
   final Color primaryColor;
 
-  /// The brightness of the primaryColor. Used to determine the color of text and
+  /// The brightness of the [primaryColor]. Used to determine the color of text and
   /// icons placed on top of the primary color (e.g. toolbar text).
   final Brightness primaryColorBrightness;
 
   /// The foreground color for widgets (knobs, text, etc)
   final Color accentColor;
 
-  /// The brightness of the accentColor. Used to determine the color of text
+  /// The brightness of the [accentColor]. Used to determine the color of text
   /// and icons placed on top of the accent color (e.g. the icons on a floating
   /// action button).
   final Brightness accentColorBrightness;

@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
+import 'package:meta/meta.dart';
 import 'package:vm_service_client/vm_service_client.dart';
 import 'package:web_socket_channel/io.dart';
 
@@ -17,8 +18,34 @@ import 'input.dart';
 import 'message.dart';
 import 'timeline.dart';
 
+/// Timeline stream identifier.
 enum TimelineStream {
-  all, api, compiler, dart, debugger, embedder, gc, isolate, vm
+  /// A meta-identifier that instructs the Dart VM to record all streams.
+  all,
+
+  /// Marks events related to calls made via Dart's C API.
+  api,
+
+  /// Marks events from the Dart VM's JIT compiler.
+  compiler,
+
+  /// Marks events emitted using the `dart:developer` API.
+  dart,
+
+  /// Marks events from the Dart VM debugger.
+  debugger,
+
+  /// Marks events emitted using the `dart_tools_api.h` C API.
+  embedder,
+
+  /// Marks events from the garbage collector.
+  gc,
+
+  /// Marks events related to message passing between Dart isolates.
+  isolate,
+
+  /// Marks internal VM events.
+  vm,
 }
 
 const List<TimelineStream> _defaultStreams = const <TimelineStream>[TimelineStream.all];
@@ -62,6 +89,9 @@ typedef dynamic EvaluatorFunction();
 
 /// Drives a Flutter Application running in another process.
 class FlutterDriver {
+  /// Creates a driver that uses a connection provided by the given
+  /// [_serviceClient], [_peer] and [_appIsolate].
+  @visibleForTesting
   FlutterDriver.connectedTo(this._serviceClient, this._peer, this._appIsolate);
 
   static const String _kFlutterExtensionMethod = 'ext.flutter.driver';
@@ -316,6 +346,9 @@ class FlutterDriver {
   ///
   /// This is merely a convenience wrapper on top of [startTracing] and
   /// [stopTracingAndDownloadTimeline].
+  ///
+  /// [streams] limits the recorded timeline event streams to only the ones
+  /// listed. By default, all streams are recorded.
   Future<Timeline> traceAction(Future<dynamic> action(), { List<TimelineStream> streams: _defaultStreams }) async {
     await startTracing(streams: streams);
     await action();
@@ -334,6 +367,7 @@ class FlutterDriver {
 }
 
 /// Encapsulates connection information to an instance of a Flutter application.
+@visibleForTesting
 class VMServiceClientConnection {
   /// Use this for structured access to the VM service's public APIs.
   final VMServiceClient client;
@@ -344,6 +378,7 @@ class VMServiceClientConnection {
   /// caution.
   final rpc.Peer peer;
 
+  /// Creates an instance of this class given a [client] and a [peer].
   VMServiceClientConnection(this.client, this.peer);
 }
 

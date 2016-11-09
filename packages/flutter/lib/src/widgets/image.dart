@@ -4,13 +4,17 @@
 
 import 'dart:io' show Platform;
 
-import 'package:meta/meta.dart';
-
 import 'package:flutter/services.dart';
+import 'package:meta/meta.dart';
 
 import 'basic.dart';
 import 'framework.dart';
 import 'media_query.dart';
+
+export 'package:flutter/services.dart' show
+    AssetImage,
+    ExactAssetImage,
+    NetworkImage;
 
 /// Creates an [ImageConfiguration] based on the given [BuildContext] (and
 /// optionally size).
