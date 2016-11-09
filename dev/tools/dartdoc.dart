@@ -82,7 +82,22 @@ dependencies:
   if (exitCode != 0)
     exit(exitCode);
 
+  sanityCheckDocs();
+
   createIndexAndCleanup();
+}
+
+void sanityCheckDocs() {
+  List<String> canaries = <String>[
+    '$kDocRoot/api/material/Material-class.html',
+    '$kDocRoot/api/material/Tooltip-class.html',
+    '$kDocRoot/api/widgets/Widget-class.html',
+    '$kDocRoot/api/dart-ui/Canvas-class.html',
+  ];
+  for (String canary in canaries) {
+    if (!new File(canary).existsSync())
+      throw new Exception('Missing "$canary", which probably means the documentation failed to build correctly.');
+  }
 }
 
 /// Creates a custom index.html because we try to maintain old
