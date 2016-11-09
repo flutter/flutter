@@ -93,6 +93,8 @@ class GalleryDrawer extends StatelessWidget {
     this.onTimeDilationChanged,
     this.showPerformanceOverlay,
     this.onShowPerformanceOverlayChanged,
+    this.checkerboardRasterCacheImages,
+    this.onCheckerboardRasterCacheImagesChanged,
     this.onPlatformChanged,
   }) : super(key: key) {
     assert(onThemeChanged != null);
@@ -107,6 +109,9 @@ class GalleryDrawer extends StatelessWidget {
 
   final bool showPerformanceOverlay;
   final ValueChanged<bool> onShowPerformanceOverlayChanged;
+
+  final bool checkerboardRasterCacheImages;
+  final ValueChanged<bool> onCheckerboardRasterCacheImagesChanged;
 
   final ValueChanged<TargetPlatform> onPlatformChanged;
 
@@ -273,6 +278,23 @@ class GalleryDrawer extends StatelessWidget {
             new Checkbox(
               value: showPerformanceOverlay,
               onChanged: (bool value) { onShowPerformanceOverlayChanged(!showPerformanceOverlay); }
+            )
+          ]
+        )
+      ));
+    }
+
+    if (onCheckerboardRasterCacheImagesChanged != null) {
+      allDrawerItems.insert(8, new DrawerItem(
+        icon: new Icon(Icons.assessment),
+        onPressed: () { onCheckerboardRasterCacheImagesChanged(!checkerboardRasterCacheImages); },
+        selected: checkerboardRasterCacheImages,
+        child: new Row(
+          children: <Widget>[
+            new Flexible(child: new Text('Checkerboard Raster Cache Images')),
+            new Checkbox(
+              value: checkerboardRasterCacheImages,
+              onChanged: (bool value) { onCheckerboardRasterCacheImagesChanged(!checkerboardRasterCacheImages); }
             )
           ]
         )

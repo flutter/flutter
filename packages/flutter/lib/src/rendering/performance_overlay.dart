@@ -59,12 +59,19 @@ enum PerformanceOverlayOption {
 class RenderPerformanceOverlay extends RenderBox {
   /// Creates a performance overlay render object.
   ///
-  /// The [optionsMask] and [rasterizerThreshold] arguments must not be null.
+  /// The [optionsMask], [rasterizerThreshold] and [checkerboardRasterCacheImages]
+  /// arguments must not be null.
   RenderPerformanceOverlay({
     int optionsMask: 0,
-    int rasterizerThreshold: 0
+    int rasterizerThreshold: 0,
+    bool checkerboardRasterCacheImages: false,
   }) : _optionsMask = optionsMask,
-      _rasterizerThreshold = rasterizerThreshold;
+      _rasterizerThreshold = rasterizerThreshold,
+      _checkerboardRasterCacheImages = checkerboardRasterCacheImages {
+    assert(optionsMask != null);
+    assert(rasterizerThreshold != null);
+    assert(checkerboardRasterCacheImages != null);
+  }
 
   /// The mask is created by shifting 1 by the index of the specific
   /// [PerformanceOverlayOption] to enable.
@@ -88,6 +95,17 @@ class RenderPerformanceOverlay extends RenderBox {
     if (threshold == _rasterizerThreshold)
       return;
     _rasterizerThreshold = threshold;
+    markNeedsPaint();
+  }
+
+  /// Whether the raster cache should checkerboard cached entries.
+  bool get checkerboardRasterCacheImages => _checkerboardRasterCacheImages;
+  bool _checkerboardRasterCacheImages;
+  set checkerboardRasterCacheImages (bool checkerboard) {
+    assert(checkerboard != null);
+    if (checkerboard == _checkerboardRasterCacheImages)
+      return;
+    _checkerboardRasterCacheImages = checkerboard;
     markNeedsPaint();
   }
 
@@ -140,7 +158,8 @@ class RenderPerformanceOverlay extends RenderBox {
     context.addLayer(new PerformanceOverlayLayer(
       overlayRect: new Rect.fromLTWH(offset.dx, offset.dy, size.width, size.height),
       optionsMask: optionsMask,
-      rasterizerThreshold: rasterizerThreshold
+      rasterizerThreshold: rasterizerThreshold,
+      checkerboardRasterCacheImages: checkerboardRasterCacheImages,
     ));
   }
 }

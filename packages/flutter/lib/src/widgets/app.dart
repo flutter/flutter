@@ -48,11 +48,13 @@ class WidgetsApp extends StatefulWidget {
     this.initialRoute,
     this.onLocaleChanged,
     this.showPerformanceOverlay: false,
+    this.checkerboardRasterCacheImages: false,
     this.showSemanticsDebugger: false,
     this.debugShowCheckedModeBanner: true
   }) : super(key: key) {
     assert(onGenerateRoute != null);
     assert(showPerformanceOverlay != null);
+    assert(checkerboardRasterCacheImages != null);
     assert(showSemanticsDebugger != null);
   }
 
@@ -85,6 +87,9 @@ class WidgetsApp extends StatefulWidget {
   /// Turns on a performance overlay.
   /// https://flutter.io/debugging/#performanceoverlay
   final bool showPerformanceOverlay;
+
+  /// Checkerboards raster cache images.
+  final bool checkerboardRasterCacheImages;
 
   /// Turns on an overlay that shows the accessibility information
   /// reported by the framework.
@@ -197,11 +202,22 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
         child: result
       );
     }
+
+    PerformanceOverlay performanceOverlay;
+    // We need to push a performance overlay if any of the display or checkerboarding
+    // options are set.
     if (config.showPerformanceOverlay || WidgetsApp.showPerformanceOverlayOverride) {
+      performanceOverlay = new PerformanceOverlay.allEnabled(
+                  checkerboardRasterCacheImages: config.checkerboardRasterCacheImages);
+    } else if (config.checkerboardRasterCacheImages) {
+      performanceOverlay = new PerformanceOverlay(checkerboardRasterCacheImages: true);
+    }
+
+    if (performanceOverlay != null) {
       result = new Stack(
         children: <Widget>[
           result,
-          new Positioned(top: 0.0, left: 0.0, right: 0.0, child: new PerformanceOverlay.allEnabled()),
+          new Positioned(top: 0.0, left: 0.0, right: 0.0, child: performanceOverlay),
         ]
       );
     }
