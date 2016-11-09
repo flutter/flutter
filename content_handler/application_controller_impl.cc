@@ -35,7 +35,7 @@ ApplicationControllerImpl::ApplicationControllerImpl(
   }
 
   // TODO(abarth): The Dart code should end up with outgoing_services.
-  if (startup_info->outgoing_services.is_pending()) {
+  if (startup_info->outgoing_services) {
     service_provider_bindings_.AddBinding(
         this, std::move(startup_info->outgoing_services));
   }
@@ -43,10 +43,12 @@ ApplicationControllerImpl::ApplicationControllerImpl(
   url_ = startup_info->url;
   runtime_holder_.reset(new RuntimeHolder());
 
-  // TODO(abarth): The Dart code should end up with environment_services.
-  runtime_holder_->Init(modular::ServiceProviderPtr::Create(
-                            std::move(startup_info->environment_services)),
-                        std::move(bundle));
+  // TODO(abarth): The Dart code should end up with environment.
+  modular::ServiceProviderPtr environment_services;
+  modular::ApplicationEnvironmentPtr::Create(
+      std::move(startup_info->environment))
+      ->GetServices(GetProxy(&environment_services));
+  runtime_holder_->Init(std::move(environment_services), std::move(bundle));
 }
 
 ApplicationControllerImpl::~ApplicationControllerImpl() = default;
