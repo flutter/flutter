@@ -1,11 +1,5 @@
 name: stocks
 dependencies:
-
-  # version 0.13.6+1 does not return the value from the command
-  # causing flutter tools to always have exit code 0
-  # see https://github.com/flutter/flutter/issues/6766
-  args: 0.13.6
-
   flutter:
     sdk: flutter
   intl: '>=0.14.0 <0.15.0'
