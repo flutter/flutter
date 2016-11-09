@@ -1,5 +1,11 @@
 name: flutter_test
 dependencies:
+
+  # version 0.13.6+1 does not return the value from the command
+  # causing flutter tools to always have exit code 0
+  # see https://github.com/flutter/flutter/issues/6766
+  args: 0.13.6
+
   quiver: ^0.21.4
 
   # The flutter tools depend on very specific internal implementation

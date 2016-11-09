@@ -18,7 +18,8 @@ import 'theme.dart';
 ///
 /// Part of the material design [Drawer].
 ///
-/// Requires one of its ancestors to be a [Material] widget.
+/// Requires one of its ancestors to be a [Material] widget. This condition is
+/// satisfied by putting the [DrawerItem] in a [Drawer].
 ///
 /// See also:
 ///
@@ -115,18 +116,20 @@ class DrawerItem extends StatelessWidget {
         )
       );
     }
-    children.add(
-      new Flexible(
-        child: new Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: new AnimatedDefaultTextStyle(
-            style: _getTextStyle(themeData),
-            duration: kThemeChangeDuration,
-            child: child
+    if (child != null) {
+      children.add(
+        new Flexible(
+          child: new Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: new AnimatedDefaultTextStyle(
+              style: _getTextStyle(themeData),
+              duration: kThemeChangeDuration,
+              child: child
+            )
           )
         )
-      )
-    );
+      );
+    }
 
     return new MergeSemantics(
       child: new Container(

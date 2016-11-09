@@ -53,9 +53,6 @@ export 'package:flutter/rendering.dart' show
     ViewportAnchor,
     ViewportDimensions,
     ViewportDimensionsChangeCallback;
-export 'package:flutter/services.dart' show
-    AssetImage,
-    NetworkImage;
 
 // PAINTING NODES
 

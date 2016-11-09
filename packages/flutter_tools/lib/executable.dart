@@ -86,7 +86,7 @@ Future<Null> main(List<String> args) async {
     Doctor.initGlobal();
 
     dynamic result = await runner.run(args);
-    _exit(result is int ? result : 0);
+    _exit(result is int ? result : 1);
   }, onError: (dynamic error, Chain chain) {
     if (error is UsageException) {
       stderr.writeln(error.message);
