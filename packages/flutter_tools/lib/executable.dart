@@ -95,7 +95,10 @@ Future<Null> main(List<String> args) async {
       context[HotRunnerConfig] = new HotRunnerConfig();
 
     dynamic result = await runner.run(args);
-    _exit(result is int ? result : 1);
+    if (result is! int)
+      throw 'Expected integer exit code, but received $result';
+
+    _exit(result);
   }, onError: (dynamic error, Chain chain) {
     if (error is UsageException) {
       stderr.writeln(error.message);
