@@ -9,6 +9,7 @@ import 'dart:io';
 import 'dart:isolate';
 
 import 'package:logging/logging.dart';
+import 'package:stack_trace/stack_trace.dart';
 
 import 'utils.dart';
 
@@ -115,16 +116,24 @@ class _TaskRunner {
     _keepAlivePort?.close();
   }
 
-  Future<TaskResult> _performTask() async {
-    try {
-      return await task();
-    } catch (taskError, taskErrorStack) {
+  Future<TaskResult> _performTask() {
+    Completer<TaskResult> completer = new Completer<TaskResult>();
+    Chain.capture(() async {
+      completer.complete(await task());
+    }, onError: (dynamic taskError, Chain taskErrorStack) {
       String message = 'Task failed: $taskError';
-      if (taskErrorStack != null) {
-        message += '\n\n$taskErrorStack';
-      }
-      return new TaskResult.failure(message);
-    }
+      stderr
+        ..writeln(message)
+        ..writeln('\nStack trace:')
+        ..writeln(taskErrorStack.terse);
+      // IMPORTANT: We're completing the future _successfully_ but with a value
+      // that indicates a task failure. This is intentional. At this point we
+      // are catching errors coming from arbitrary (and untrustworthy) task
+      // code. Our goal is to convert the failure into a readable message.
+      // Propagating it further is not useful.
+      completer.complete(new TaskResult.failure(message));
+    });
+    return completer.future;
   }
 }
 
