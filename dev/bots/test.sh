@@ -22,6 +22,7 @@ flutter analyze --flutter-repo
 # verify that the tests actually return failure on failure and success on success
 (cd dev/automated_tests; ! flutter test test_smoke_test/fail_test.dart > /dev/null)
 (cd dev/automated_tests; flutter test test_smoke_test/pass_test.dart > /dev/null)
+(cd packages/flutter_driver; ! flutter drive --use-existing-app -t test_driver/failure.dart >/dev/null 2>&1)
 
 COVERAGE_FLAG=
 if [ -n "$TRAVIS" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
