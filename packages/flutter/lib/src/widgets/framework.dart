@@ -1428,7 +1428,7 @@ abstract class BuildContext {
   ///
   /// This getter will only return a valid result if [findRenderObject] actually
   /// returns a [RenderBox]. If [findRenderObject] returns a render object that
-  /// is not a subtype of [RenderBox] (e.g., [RenderView], this getter will
+  /// is not a subtype of [RenderBox] (e.g., [RenderView]), this getter will
   /// throw an exception in checked mode and will return null in release mode.
   ///
   /// Calling this getter is theoretically relatively expensive (O(N) in the
@@ -2899,7 +2899,7 @@ abstract class ComponentElement extends BuildableElement {
   }
 }
 
-/// An element that uses a [StatelessWidget] as its configuration.
+/// An [Element] that uses a [StatelessWidget] as its configuration.
 class StatelessElement extends ComponentElement {
   /// Creates an element that uses the given widget as its configuration.
   StatelessElement(StatelessWidget widget) : super(widget) {
@@ -2925,7 +2925,7 @@ class StatelessElement extends ComponentElement {
   }
 }
 
-/// An element that uses a [StatefulWidget] as its configuration.
+/// An [Element] that uses a [StatefulWidget] as its configuration.
 class StatefulElement extends ComponentElement {
   /// Creates an element that uses the given widget as its configuration.
   StatefulElement(StatefulWidget widget)
@@ -3087,7 +3087,7 @@ class StatefulElement extends ComponentElement {
   }
 }
 
-/// An element that uses a [ProxyElement] as its configuration.
+/// An [Element] that uses a [ProxyElement] as its configuration.
 abstract class ProxyElement extends ComponentElement {
   /// Initializes fields for subclasses.
   ProxyElement(ProxyWidget widget) : super(widget) {
@@ -3125,7 +3125,7 @@ abstract class ProxyElement extends ComponentElement {
   void notifyClients(@checked ProxyWidget oldWidget);
 }
 
-/// An element that uses a [ParentDataWidget] as its configuration.
+/// An [Element] that uses a [ParentDataWidget] as its configuration.
 class ParentDataElement<T extends RenderObjectWidget> extends ProxyElement {
   /// Creates an element that uses the given widget as its configuration.
   ParentDataElement(ParentDataWidget<T> widget) : super(widget);
@@ -3178,7 +3178,7 @@ class ParentDataElement<T extends RenderObjectWidget> extends ProxyElement {
   }
 }
 
-/// An element that uses a [InheritedWidget] as its configuration.
+/// An [Element] that uses a [InheritedWidget] as its configuration.
 class InheritedElement extends ProxyElement {
   /// Creates an element that uses the given widget as its configuration.
   InheritedElement(InheritedWidget widget) : super(widget);
@@ -3239,7 +3239,7 @@ class InheritedElement extends ProxyElement {
   }
 }
 
-/// An element that uses a [RenderObjectWidget] as its configuration.
+/// An [Element] that uses a [RenderObjectWidget] as its configuration.
 ///
 /// [RenderObjectElement] objects have an associated [RenderObject] widget in
 /// the render tree, which handles concrete operations like laying out,
@@ -3282,13 +3282,13 @@ class InheritedElement extends ProxyElement {
 /// ```dart
 /// class FooElement extends RenderObjectElement {
 ///
-/// @override
-/// Foo get widget => super.widget;
+///   @override
+///   Foo get widget => super.widget;
 ///
-/// @override
-/// RenderFoo get renderObject => super.renderObject;
+///   @override
+///   RenderFoo get renderObject => super.renderObject;
 ///
-/// // ...
+///   // ...
 /// }
 /// ```
 ///
@@ -3740,7 +3740,7 @@ abstract class RootRenderObjectElement extends RenderObjectElement {
   }
 }
 
-/// An element that uses a [LeafRenderObjectWidget] as its configuration.
+/// An [Element] that uses a [LeafRenderObjectWidget] as its configuration.
 class LeafRenderObjectElement extends RenderObjectElement {
   /// Creates an element that uses the given widget as its configuration.
   LeafRenderObjectElement(LeafRenderObjectWidget widget): super(widget);
@@ -3766,7 +3766,7 @@ class LeafRenderObjectElement extends RenderObjectElement {
   }
 }
 
-/// An element that uses a [SingleChildRenderObjectWidget] as its configuration.
+/// An [Element] that uses a [SingleChildRenderObjectWidget] as its configuration.
 ///
 /// The child is optional.
 ///
@@ -3829,7 +3829,7 @@ class SingleChildRenderObjectElement extends RenderObjectElement {
   }
 }
 
-/// An element that uses a [MultiChildRenderObjectWidget] as its configuration.
+/// An [Element] that uses a [MultiChildRenderObjectWidget] as its configuration.
 ///
 /// This element subclass can be used for RenderObjectWidgets whose
 /// RenderObjects use the [ContainerRenderObjectMixin] mixin with a parent data
