@@ -2019,10 +2019,8 @@ abstract class Element implements BuildContext {
 
   /// Update the given child with the given new configuration.
   ///
-  /// This method is the core of the widgets system.
-  ///
-  /// It is called each time we are to add, update, or remove a child based on
-  /// an updated configuration.
+  /// This method is the core of the widgets system. It is called each time we
+  /// are to add, update, or remove a child based on an updated configuration.
   ///
   /// If the `child` is null, and the `newWidget` is not null, then we have a new
   /// child for which we need to create an [Element], configured with `newWidget`.
@@ -2042,6 +2040,12 @@ abstract class Element implements BuildContext {
   /// The [updateChild] method returns the new child, if it had to create one,
   /// or the child that was passed in, if it just had to update the child, or
   /// null, if it removed the child and did not replace it.
+  ///
+  /// The following table summarises the above:
+  ///
+  /// |                 | `newWidget == null`                 | `newWidget != null`                                            |
+  /// | `child == null` | Returns null.                       | Returns new [Element].                                         |
+  /// | `child != null` | Old child is removed, returns null. | Old child updated if possible, returns child or new [Element]. |
   @protected
   Element updateChild(Element child, Widget newWidget, dynamic newSlot) {
     if (newWidget == null) {
