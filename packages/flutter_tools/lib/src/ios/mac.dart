@@ -141,17 +141,18 @@ Future<XcodeBuildResult> buildXcodeProject({
 
   if (buildForDevice) {
     commands.addAll(<String>['-sdk', 'iphoneos', '-arch', 'arm64']);
-    if (!codesign) {
-      commands.addAll(
-        <String>[
-          'CODE_SIGNING_ALLOWED=NO',
-          'CODE_SIGNING_REQUIRED=NO',
-          'CODE_SIGNING_IDENTITY=""'
-        ]
-      );
-    }
   } else {
     commands.addAll(<String>['-sdk', 'iphonesimulator', '-arch', 'x86_64']);
+  }
+
+  if (!codesign) {
+    commands.addAll(
+      <String>[
+        'CODE_SIGNING_ALLOWED=NO',
+        'CODE_SIGNING_REQUIRED=NO',
+        'CODE_SIGNING_IDENTITY=""'
+      ]
+    );
   }
 
   RunResult result = await runAsync(
