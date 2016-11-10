@@ -387,12 +387,14 @@ class HotRunner extends ResidentRunner {
       // Did not update DevFS because of a Dart source error.
       return false;
     }
-    Status devFSStatus = logger.startProgress('Syncing files to device...');
     final bool rebuildBundle = bundle.needsBuild();
     if (rebuildBundle) {
       printTrace('Updating assets');
-      await bundle.build();
+      int result = await bundle.build();
+      if (result != 0)
+        return false;
     }
+    Status devFSStatus = logger.startProgress('Syncing files to device...');
     await _devFS.update(progressReporter: progressReporter,
                         bundle: bundle,
                         bundleDirty: rebuildBundle,

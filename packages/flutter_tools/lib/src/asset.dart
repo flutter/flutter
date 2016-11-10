@@ -75,7 +75,14 @@ class AssetBundle {
   }) async {
     workingDirPath ??= getAssetBuildDirectory();
     packagesPath ??= path.absolute(PackageMap.globalPackagesPath);
-    Object manifest = _loadFlutterYamlManifest(manifestPath);
+    Object manifest;
+    try {
+      manifest = _loadFlutterYamlManifest(manifestPath);
+    } catch (e) {
+      printStatus('Error detected in flutter.yaml:', emphasis: true);
+      printError(e);
+      return 1;
+    }
     if (manifest == null) {
       // No manifest file found for this application.
       return 0;
@@ -449,13 +456,8 @@ Future<int> _validateFlutterYamlManifest(Object manifest) async {
   if (validator.validate(manifest)) {
     return 0;
   } else {
-    if (validator.errors.length == 1) {
-      printError('Error in flutter.yaml: ${validator.errors.first}');
-    } else {
-      printError('Error in flutter.yaml:');
-      printError('  ' + validator.errors.join('\n  '));
-    }
-
+    printStatus('Error detected in flutter.yaml:', emphasis: true);
+    printError(validator.errors.join('\n'));
     return 1;
   }
 }
