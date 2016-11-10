@@ -27,9 +27,7 @@ void buildSkyEngineSdkSummary(String skyEnginePath, String outBundleName) {
     ]
   };
 
-  //
   // Read the `_embedder.yaml` file.
-  //
   EmbedderYamlLocator yamlLocator = new EmbedderYamlLocator(packageMap);
   Map<Folder, YamlMap> embedderYamls = yamlLocator.embedderYamls;
   if (embedderYamls.length != 1) {
@@ -38,20 +36,14 @@ void buildSkyEngineSdkSummary(String skyEnginePath, String outBundleName) {
     return;
   }
 
-  //
   // Create the EmbedderSdk instance.
-  //
   EmbedderSdk sdk = new EmbedderSdk(resourceProvider, embedderYamls);
   sdk.analysisOptions = new AnalysisOptionsImpl()..strongMode = true;
 
-  //
   // Gather sources.
-  //
   List<Source> sources = sdk.uris.map(sdk.mapDartUri).toList();
 
-  //
   // Build.
-  //
   List<int> bytes = new SummaryBuilder(sources, sdk.context, true).build();
   String outputPath = pathos.join(skyEnginePath, outBundleName);
   new io.File(outputPath).writeAsBytesSync(bytes);
@@ -64,15 +56,11 @@ Future<Null> buildUnlinkedForPackages(String flutterPath) async {
 
   Folder flutterFolder = provider.getFolder(flutterPath);
 
-  //
   // Build in packages/.
-  //
   Folder packagesFolder = flutterFolder.getChildAssumingFolder('packages');
   await _buildUnlinkedForDirectChildren(manager, packagesFolder);
 
-  //
   // Build in bin/cache/pkg/.
-  //
   Folder pkgFolder = flutterFolder
       .getChildAssumingFolder('bin')
       .getChildAssumingFolder('cache')
@@ -81,16 +69,19 @@ Future<Null> buildUnlinkedForPackages(String flutterPath) async {
 }
 
 Future<Null> _buildUnlinkedForDirectChildren(
-    PubSummaryManager manager, Folder packagesFolder) async {
+  PubSummaryManager manager,
+  Folder packagesFolder
+) async {
   for (Resource child in packagesFolder.getChildren()) {
-    if (child is Folder) {
+    if (child is Folder)
       await _buildUnlinkedForPackage(manager, child);
-    }
   }
 }
 
 Future<Null> _buildUnlinkedForPackage(
-    PubSummaryManager manager, Folder packageFolder) async {
+  PubSummaryManager manager,
+  Folder packageFolder
+) async {
   if (packageFolder.exists) {
     String name = packageFolder.shortName;
     File pubspecFile = packageFolder.getChildAssumingFile('pubspec.yaml');
