@@ -808,10 +808,19 @@ class CustomMultiChildLayout extends MultiChildRenderObjectWidget {
 ///
 /// If not given a child, this widget will size itself to the given width and
 /// height, treating nulls as zero.
+///
+/// The [new SizedBox.expand] constructor can be used to make a [SizedBox] that
+/// sizes itself to fit the parent. It is equivalent to setting [width] and
+/// [height] to [double.INFINITY].
 class SizedBox extends SingleChildRenderObjectWidget {
   /// Creates a box of a specific size.
   const SizedBox({ Key key, this.width, this.height, Widget child })
     : super(key: key, child: child);
+
+  const SizedBox.expand({ Key key, Widget child })
+    : width = double.INFINITY,
+      height = double.INFINITY,
+      super(key: key, child: child);
 
   /// If non-null, requires the child to have exactly this width.
   final double width;
@@ -834,12 +843,21 @@ class SizedBox extends SingleChildRenderObjectWidget {
   }
 
   @override
+  String toStringShort() {
+    String type = (width == double.INFINITY && height == double.INFINITY) ?
+                  '$runtimeType.expand' : '$runtimeType';
+    return key == null ? '$type' : '$type-$key';
+  }
+
+  @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
-    if (width != null)
-      description.add('width: $width');
-    if (height != null)
-      description.add('height: $height');
+    if (width != double.INFINITY || height != double.INFINITY) {
+      if (width != null)
+        description.add('width: $width');
+      if (height != null)
+        description.add('height: $height');
+    }
   }
 }
 
