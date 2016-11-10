@@ -595,11 +595,11 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
     switch (config.mode) {
       case _TimePickerMode.hour:
         primaryLabels = _initHours(theme.textTheme);
-        secondaryLabels = _initHours(theme.primaryTextTheme);
+        secondaryLabels = _initHours(theme.accentTextTheme);
         break;
       case _TimePickerMode.minute:
         primaryLabels = _initMinutes(theme.textTheme);
-        secondaryLabels = _initMinutes(theme.primaryTextTheme);
+        secondaryLabels = _initMinutes(theme.accentTextTheme);
         break;
     }
 
