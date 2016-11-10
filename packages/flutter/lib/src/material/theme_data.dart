@@ -93,8 +93,10 @@ class ThemeData {
     Color errorColor,
     TextTheme textTheme,
     TextTheme primaryTextTheme,
+    TextTheme accentTextTheme,
     IconThemeData iconTheme,
     IconThemeData primaryIconTheme,
+    IconThemeData accentIconTheme,
     TargetPlatform platform
   }) {
     brightness ??= Brightness.light;
@@ -104,7 +106,8 @@ class ThemeData {
     primaryColorBrightness ??= Brightness.dark;
     final bool primaryIsDark = primaryColorBrightness == Brightness.dark;
     accentColor ??= isDark ? Colors.tealAccent[200] : primarySwatch[500];
-    accentColorBrightness ??= Brightness.dark;
+    accentColorBrightness ??= isDark ? Brightness.light : Brightness.dark;
+    final bool accentIsDark = accentColorBrightness == Brightness.dark;
     canvasColor ??= isDark ? Colors.grey[850] : Colors.grey[50];
     cardColor ??= isDark ? Colors.grey[800] : Colors.white;
     dividerColor ??= isDark ? const Color(0x1FFFFFFF) : const Color(0x1F000000);
@@ -124,11 +127,12 @@ class ThemeData {
     errorColor ??= Colors.red[700];
     iconTheme ??= isDark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black);
     primaryIconTheme ??= primaryIsDark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black);
+    accentIconTheme ??= accentIsDark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black);
     platform ??= defaultTargetPlatform;
-
     final Typography typography = new Typography(platform: platform);
-    primaryTextTheme ??= primaryIsDark ? typography.white : typography.black;
     textTheme ??= isDark ? typography.white : typography.black;
+    primaryTextTheme ??= primaryIsDark ? typography.white : typography.black;
+    accentTextTheme ??= accentIsDark ? typography.white : typography.black;
     return new ThemeData.raw(
       brightness: brightness,
       primaryColor: primaryColor,
@@ -153,8 +157,10 @@ class ThemeData {
       errorColor: errorColor,
       textTheme: textTheme,
       primaryTextTheme: primaryTextTheme,
+      accentTextTheme: accentTextTheme,
       iconTheme: iconTheme,
       primaryIconTheme: primaryIconTheme,
+      accentIconTheme: accentIconTheme,
       platform: platform
     );
   }
@@ -189,8 +195,10 @@ class ThemeData {
     this.errorColor,
     this.textTheme,
     this.primaryTextTheme,
+    this.accentTextTheme,
     this.iconTheme,
     this.primaryIconTheme,
+    this.accentIconTheme,
     this.platform
   }) {
     assert(brightness != null);
@@ -216,8 +224,10 @@ class ThemeData {
     assert(errorColor != null);
     assert(textTheme != null);
     assert(primaryTextTheme != null);
+    assert(accentTextTheme != null);
     assert(iconTheme != null);
     assert(primaryIconTheme != null);
+    assert(accentIconTheme != null);
     assert(platform != null);
   }
 
@@ -325,11 +335,17 @@ class ThemeData {
   /// A text theme that contrasts with the primary color.
   final TextTheme primaryTextTheme;
 
+  /// A text theme that contrasts with the accent color.
+  final TextTheme accentTextTheme;
+
   /// An icon theme that contrasts with the card and canvas colors.
   final IconThemeData iconTheme;
 
   /// An icon theme that contrasts with the primary color.
   final IconThemeData primaryIconTheme;
+
+  /// An icon theme that contrasts with the accent color.
+  final IconThemeData accentIconTheme;
 
   /// The platform the material widgets should adapt to target.
   ///
@@ -362,8 +378,10 @@ class ThemeData {
     Color errorColor,
     TextTheme textTheme,
     TextTheme primaryTextTheme,
+    TextTheme accentTextTheme,
     IconThemeData iconTheme,
     IconThemeData primaryIconTheme,
+    IconThemeData accentIconTheme,
     TargetPlatform platform,
   }) {
     return new ThemeData(
@@ -390,8 +408,10 @@ class ThemeData {
       errorColor: errorColor ?? this.errorColor,
       textTheme: textTheme ?? this.textTheme,
       primaryTextTheme: primaryTextTheme ?? this.primaryTextTheme,
+      accentTextTheme: accentTextTheme ?? this.accentTextTheme,
       iconTheme: iconTheme ?? this.iconTheme,
       primaryIconTheme: primaryIconTheme ?? this.primaryIconTheme,
+      accentIconTheme: accentIconTheme ?? this.accentIconTheme,
       platform: platform ?? this.platform,
     );
   }
@@ -422,8 +442,10 @@ class ThemeData {
       errorColor: Color.lerp(begin.errorColor, end.errorColor, t),
       textTheme: TextTheme.lerp(begin.textTheme, end.textTheme, t),
       primaryTextTheme: TextTheme.lerp(begin.primaryTextTheme, end.primaryTextTheme, t),
+      accentTextTheme: TextTheme.lerp(begin.accentTextTheme, end.accentTextTheme, t),
       iconTheme: IconThemeData.lerp(begin.iconTheme, end.iconTheme, t),
       primaryIconTheme: IconThemeData.lerp(begin.primaryIconTheme, end.primaryIconTheme, t),
+      accentIconTheme: IconThemeData.lerp(begin.accentIconTheme, end.accentIconTheme, t),
       platform: t < 0.5 ? begin.platform : end.platform
     );
   }
@@ -456,8 +478,10 @@ class ThemeData {
            (otherData.errorColor == errorColor) &&
            (otherData.textTheme == textTheme) &&
            (otherData.primaryTextTheme == primaryTextTheme) &&
+           (otherData.accentTextTheme == accentTextTheme) &&
            (otherData.iconTheme == iconTheme) &&
            (otherData.primaryIconTheme == primaryIconTheme) &&
+           (otherData.accentIconTheme == accentIconTheme) &&
            (otherData.platform == platform);
   }
 
@@ -488,8 +512,10 @@ class ThemeData {
         errorColor,
         textTheme,
         primaryTextTheme,
+        accentTextTheme,
         iconTheme,
         primaryIconTheme,
+        accentIconTheme,
         platform,
       )
     );

@@ -145,7 +145,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
       divisions: config.divisions,
       label: config.label,
       activeColor: config.activeColor ?? theme.accentColor,
-      textTheme: theme.primaryTextTheme,
+      textTheme: theme.accentTextTheme,
       onChanged: config.onChanged != null ? _handleChanged : null,
       vsync: this,
     );
