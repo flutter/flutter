@@ -42,4 +42,39 @@ void main() {
 
     expect(log, equals(<String>['background', 'child', 'foreground']));
   });
+
+  testWidgets('CustomPaint sizing', (WidgetTester tester) async {
+    GlobalKey target = new GlobalKey();
+
+    await tester.pumpWidget(new Center(
+      child: new CustomPaint(key: target)
+    ));
+    expect(target.currentContext.size, Size.zero);
+
+    await tester.pumpWidget(new Center(
+      child: new CustomPaint(key: target, child: new Container())
+    ));
+    expect(target.currentContext.size, const Size(800.0, 600.0));
+
+    await tester.pumpWidget(new Center(
+      child: new CustomPaint(key: target, size: const Size(20.0, 20.0))
+    ));
+    expect(target.currentContext.size, const Size(20.0, 20.0));
+
+    await tester.pumpWidget(new Center(
+      child: new CustomPaint(key: target, size: const Size(2000.0, 100.0))
+    ));
+    expect(target.currentContext.size, const Size(800.0, 100.0));
+
+    await tester.pumpWidget(new Center(
+      child: new CustomPaint(key: target, size: Size.zero, child: new Container())
+    ));
+    expect(target.currentContext.size, const Size(800.0, 600.0));
+
+    await tester.pumpWidget(new Center(
+      child: new CustomPaint(key: target, child: new Container(height: 0.0, width: 0.0))
+    ));
+    expect(target.currentContext.size, Size.zero);
+
+  });
 }

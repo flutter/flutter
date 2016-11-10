@@ -197,9 +197,13 @@ class BackdropFilter extends SingleChildRenderObjectWidget {
 ///
 /// Painters are implemented by subclassing [CustomPainter].
 ///
-/// Because custom paint calls its painters during paint, you cannot mark the
-/// tree as needing a new layout during the callback (the layout for this frame
-/// has already happened).
+/// Because custom paint calls its painters during paint, you cannot call
+/// `setState` or `markNeedsLayout` during the callback (the layout for this
+/// frame has already happened).
+///
+/// Custom painters normally size themselves to their child. If they do not have
+/// a child, they attempt to size themselves to the [size], which defaults to
+/// [Size.zero].
 ///
 /// See also:
 ///
@@ -207,8 +211,10 @@ class BackdropFilter extends SingleChildRenderObjectWidget {
 ///  * [Canvas].
 class CustomPaint extends SingleChildRenderObjectWidget {
   /// Creates a widget that delegates its painting.
-  CustomPaint({ Key key, this.painter, this.foregroundPainter, Widget child })
-    : super(key: key, child: child);
+  CustomPaint({ Key key, this.painter, this.foregroundPainter, this.size: Size.zero, Widget child })
+    : super(key: key, child: child) {
+    assert(size != null);
+  }
 
   /// The painter that paints before the children.
   final CustomPainter painter;
@@ -216,17 +222,28 @@ class CustomPaint extends SingleChildRenderObjectWidget {
   /// The painter that paints after the children.
   final CustomPainter foregroundPainter;
 
+  /// The size that this [CustomPaint] should aim for, given the layout
+  /// constraints, if there is no child.
+  ///
+  /// Defaults to [Size.zero].
+  ///
+  /// If there's a child, this is ignored, and the size of the child is used
+  /// instead.
+  final Size size;
+
   @override
   RenderCustomPaint createRenderObject(BuildContext context) => new RenderCustomPaint(
     painter: painter,
-    foregroundPainter: foregroundPainter
+    foregroundPainter: foregroundPainter,
+    preferredSize: size,
   );
 
   @override
   void updateRenderObject(BuildContext context, RenderCustomPaint renderObject) {
     renderObject
       ..painter = painter
-      ..foregroundPainter = foregroundPainter;
+      ..foregroundPainter = foregroundPainter
+      ..preferredSize = size;
   }
 
   @override
