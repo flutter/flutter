@@ -8,6 +8,7 @@ import 'dart:io';
 
 import 'package:path/path.dart' as path;
 
+import 'base/context.dart';
 import 'build_info.dart';
 import 'dart/package_map.dart';
 import 'asset.dart';
@@ -15,6 +16,13 @@ import 'globals.dart';
 import 'vmservice.dart';
 
 typedef void DevFSProgressReporter(int progress, int max);
+
+class DevFSConfig {
+  /// Should DevFS assume that symlink targets are stable?
+  bool cacheSymlinks = false;
+}
+
+DevFSConfig get devFSConfig => context[DevFSConfig];
 
 // A file that has been added to a DevFS.
 class DevFSEntry {
@@ -30,10 +38,13 @@ class DevFSEntry {
   String get assetPath => bundleEntry.archivePath;
 
   final FileSystemEntity file;
+  FileSystemEntity _linkTarget;
   FileStat _fileStat;
   // When we scanned for files, did this still exist?
   bool _exists = false;
   DateTime get lastModified => _fileStat?.modified;
+  bool get _isSourceEntry => file == null;
+  bool get _isAssetEntry => bundleEntry != null;
   bool get stillExists {
     if (_isSourceEntry)
       return true;
@@ -67,19 +78,28 @@ class DevFSEntry {
   void _stat() {
     if (_isSourceEntry)
       return;
+    if (_linkTarget != null) {
+      // Stat the cached symlink target.
+      _fileStat = _linkTarget.statSync();
+      return;
+    }
     _fileStat = file.statSync();
     if (_fileStat.type == FileSystemEntityType.LINK) {
-      // Stat the link target.
+      // Resolve, stat, and maybe cache the symlink target.
       String resolved = file.resolveSymbolicLinksSync();
-      _fileStat = FileStat.statSync(resolved);
+      FileSystemEntity linkTarget = new File(resolved);
+      // Stat the link target.
+      _fileStat = linkTarget.statSync();
+      if (devFSConfig.cacheSymlinks) {
+        _linkTarget = linkTarget;
+      }
     }
   }
 
-  bool get _isSourceEntry => file == null;
-
-  bool get _isAssetEntry => bundleEntry != null;
-
   File _getFile() {
+    if (_linkTarget != null) {
+      return _linkTarget;
+    }
     if (file is Link) {
       // The link target.
       return new File(file.resolveSymbolicLinksSync());

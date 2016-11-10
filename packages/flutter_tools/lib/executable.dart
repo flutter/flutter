@@ -35,6 +35,7 @@ import 'src/commands/test.dart';
 import 'src/commands/trace.dart';
 import 'src/commands/update_packages.dart';
 import 'src/commands/upgrade.dart';
+import 'src/devfs.dart';
 import 'src/device.dart';
 import 'src/doctor.dart';
 import 'src/globals.dart';
@@ -83,6 +84,7 @@ Future<Null> main(List<String> args) async {
     // Initialize globals.
     context[Logger] = new StdoutLogger();
     context[DeviceManager] = new DeviceManager();
+    context[DevFSConfig] = new DevFSConfig();
     Doctor.initGlobal();
 
     dynamic result = await runner.run(args);
