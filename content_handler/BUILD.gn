@@ -35,8 +35,10 @@ executable("content_handler") {
     "//flutter/lib/ui",
     "//flutter/runtime",
     "//flutter/sky/engine/platform",
+    "//lib/fidl/dart/sdk_ext",
     "//lib/ftl",
     "//lib/mtl",
+    "//lib/tonic/mx",
     "//lib/zip",
     "//third_party/skia",
 

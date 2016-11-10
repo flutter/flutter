@@ -5,7 +5,12 @@
 import("//flutter/lib/jni/dart_jni.gni")
 import("//flutter/lib/snapshot/toolchain.gni")
 import("//flutter/lib/ui/dart_ui.gni")
-import("//flutter/lib/ui/dart_ui.gni")
+
+target_is_fuchsia = target_os == "fuchsia"
+
+if (target_is_fuchsia) {
+  import("//lib/fidl/dart/sdk_ext/sdk_ext.gni")
+}
 
 bindings_output_dir = "$root_gen_dir/sky/bindings"
 
@@ -26,6 +31,12 @@ copy("generate_dart_jni") {
 }
 
 action("generate_snapshot_bin") {
+  if (target_is_fuchsia) {
+    snapshot_dart = "snapshot_fuchsia.dart"
+  } else {
+    snapshot_dart = "snapshot.dart"
+  }
+
   deps = [
     "//dart/runtime/bin:gen_snapshot($dart_host_toolchain)",
     ":generate_dart_ui",
@@ -33,9 +44,10 @@ action("generate_snapshot_bin") {
   ]
   inputs = [
     "//dart/runtime/tools/create_snapshot_bin.py",
-    "snapshot.dart",
+    snapshot_dart,
   ] + dart_ui_files
     + dart_jni_files
+
   vm_isolate_snapshot = "$target_gen_dir/vm_isolate_snapshot.bin"
   isolate_snapshot = "$target_gen_dir/isolate_snapshot.bin"
   outputs = [
@@ -57,7 +69,7 @@ action("generate_snapshot_bin") {
     "--package_root",
     rebase_path("$root_gen_dir"),
     "--script",
-    rebase_path("snapshot.dart"),
+    rebase_path(snapshot_dart),
     "--vm_output_bin",
     rebase_path(vm_isolate_snapshot, root_build_dir),
     "--output_bin",
@@ -67,6 +79,12 @@ action("generate_snapshot_bin") {
     "--url_mapping=dart:ui,$rebased_dart_ui_path",
     "--url_mapping=dart:jni,$rebased_dart_jni_path",
   ]
+
+  if (target_is_fuchsia) {
+    inputs += fidl_dart_sdk_ext_files
+    fidl_internal_path = rebase_path(fidl_dart_sdk_ext_lib)
+    args += [ "--url_mapping=dart:fidl.internal,$fidl_internal_path" ]
+  }
 }
 
 action("generate_snapshot_file") {

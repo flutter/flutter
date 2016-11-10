@@ -5,6 +5,9 @@
 #ifndef FLUTTER_CONTENT_HANDLER_RUNTIME_HOLDER_H_
 #define FLUTTER_CONTENT_HANDLER_RUNTIME_HOLDER_H_
 
+#include <mx/channel.h>
+
+#include "apps/modular/services/application/application_environment.fidl.h"
 #include "apps/modular/services/application/service_provider.fidl.h"
 #include "apps/mozart/services/input/input_connection.fidl.h"
 #include "apps/mozart/services/views/view_manager.fidl.h"
@@ -29,7 +32,8 @@ class RuntimeHolder : public blink::RuntimeDelegate,
   RuntimeHolder();
   ~RuntimeHolder();
 
-  void Init(modular::ServiceProviderPtr environment_services,
+  void Init(fidl::InterfaceHandle<modular::ApplicationEnvironment> environment,
+            fidl::InterfaceRequest<modular::ServiceProvider> outgoing_services,
             std::vector<char> bundle);
   void CreateView(const std::string& script_uri,
                   fidl::InterfaceRequest<mozart::ViewOwner> view_owner_request,
@@ -58,12 +62,19 @@ class RuntimeHolder : public blink::RuntimeDelegate,
   blink::UnzipperProvider GetUnzipperProviderForRootBundle();
   void HandleAssetPlatformMessage(ftl::RefPtr<blink::PlatformMessage> message);
 
+  void InitFidlInternal();
+
   void BeginFrame();
   void OnFrameComplete();
   void Invalidate();
 
+  modular::ApplicationEnvironmentPtr environment_;
+  modular::ServiceProviderPtr environment_services_;
+  fidl::InterfaceRequest<modular::ServiceProvider> outgoing_services_;
+
   std::vector<char> root_bundle_data_;
   ftl::RefPtr<blink::ZipAssetStore> asset_store_;
+  mx::channel handle_watcher_;
 
   std::unique_ptr<Rasterizer> rasterizer_;
   std::unique_ptr<blink::RuntimeController> runtime_;

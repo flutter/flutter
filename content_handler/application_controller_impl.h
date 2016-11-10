@@ -39,7 +39,7 @@ class ApplicationControllerImpl : public modular::ApplicationController,
   // |modular::ServiceProvider| implementation
 
   void ConnectToService(const fidl::String& service_name,
-                        mx::channel client_handle) override;
+                        mx::channel channel) override;
 
   // |mozart::ViewProvider| implementation
 
@@ -54,6 +54,8 @@ class ApplicationControllerImpl : public modular::ApplicationController,
   fidl::Binding<modular::ApplicationController> binding_;
 
   fidl::BindingSet<modular::ServiceProvider> service_provider_bindings_;
+  modular::ServiceProviderPtr dart_service_provider_;
+
   fidl::BindingSet<mozart::ViewProvider> view_provider_bindings_;
 
   std::string url_;

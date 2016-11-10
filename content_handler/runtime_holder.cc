@@ -7,17 +7,23 @@
 #include <utility>
 
 #include "apps/modular/lib/app/connect.h"
+#include "dart/runtime/include/dart_api.h"
 #include "flutter/assets/zip_asset_store.h"
 #include "flutter/common/threads.h"
 #include "flutter/content_handler/rasterizer.h"
 #include "flutter/lib/ui/window/pointer_data_packet.h"
 #include "flutter/runtime/asset_font_selector.h"
 #include "flutter/runtime/dart_controller.h"
+#include "lib/fidl/dart/sdk_ext/src/handle_watcher.h"
+#include "lib/fidl/dart/sdk_ext/src/natives.h"
 #include "lib/ftl/functional/make_copyable.h"
-#include "lib/ftl/functional/make_runnable.h"
 #include "lib/ftl/logging.h"
 #include "lib/ftl/time/time_delta.h"
+#include "lib/tonic/mx/mx_converter.h"
 #include "lib/zip/create_unzipper.h"
+
+using tonic::DartConverter;
+using tonic::ToDart;
 
 namespace flutter_runner {
 namespace {
@@ -55,19 +61,28 @@ RuntimeHolder::RuntimeHolder()
       weak_factory_(this) {}
 
 RuntimeHolder::~RuntimeHolder() {
+  if (handle_watcher_)
+    fidl::dart::HandleWatcher::Stop(std::move(handle_watcher_));
+
   blink::Threads::Gpu()->PostTask(
       ftl::MakeCopyable([rasterizer = std::move(rasterizer_)](){
           // Deletes rasterizer.
       }));
 }
 
-void RuntimeHolder::Init(modular::ServiceProviderPtr environment_services,
-                         std::vector<char> bundle) {
+void RuntimeHolder::Init(
+    fidl::InterfaceHandle<modular::ApplicationEnvironment> environment,
+    fidl::InterfaceRequest<modular::ServiceProvider> outgoing_services,
+    std::vector<char> bundle) {
   FTL_DCHECK(!rasterizer_);
   rasterizer_.reset(new Rasterizer());
-  InitRootBundle(std::move(bundle));
 
-  ConnectToService(environment_services.get(), fidl::GetProxy(&view_manager_));
+  environment_.Bind(std::move(environment));
+  environment_->GetServices(fidl::GetProxy(&environment_services_));
+  ConnectToService(environment_services_.get(), fidl::GetProxy(&view_manager_));
+  outgoing_services_ = std::move(outgoing_services);
+
+  InitRootBundle(std::move(bundle));
 }
 
 void RuntimeHolder::CreateView(
@@ -157,6 +172,32 @@ void RuntimeHolder::HandlePlatformMessage(
 void RuntimeHolder::DidCreateMainIsolate(Dart_Isolate isolate) {
   if (asset_store_)
     blink::AssetFontSelector::Install(asset_store_);
+  InitFidlInternal();
+}
+
+void RuntimeHolder::InitFidlInternal() {
+  handle_watcher_ = fidl::dart::HandleWatcher::Start();
+
+  fidl::InterfaceHandle<modular::ApplicationEnvironment> environment;
+  environment_->Duplicate(GetProxy(&environment));
+
+  Dart_Handle fidl_internal = Dart_LookupLibrary(ToDart("dart:fidl.internal"));
+
+  DART_CHECK_VALID(Dart_SetNativeResolver(
+      fidl_internal, fidl::dart::NativeLookup, fidl::dart::NativeSymbol));
+
+  Dart_Handle handle_watcher_type =
+      Dart_GetType(fidl_internal, ToDart("HandleWatcher"), 0, nullptr);
+  DART_CHECK_VALID(Dart_SetField(handle_watcher_type, ToDart("controlHandle"),
+                                 Dart_NewInteger(handle_watcher_.get())));
+
+  DART_CHECK_VALID(Dart_SetField(
+      fidl_internal, ToDart("_environment"),
+      DartConverter<mx::channel>::ToDart(environment.PassHandle())));
+
+  DART_CHECK_VALID(Dart_SetField(
+      fidl_internal, ToDart("_outgoingServices"),
+      DartConverter<mx::channel>::ToDart(outgoing_services_.PassChannel())));
 }
 
 void RuntimeHolder::InitRootBundle(std::vector<char> bundle) {

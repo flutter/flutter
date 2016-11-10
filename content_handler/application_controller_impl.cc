@@ -34,7 +34,6 @@ ApplicationControllerImpl::ApplicationControllerImpl(
     return;
   }
 
-  // TODO(abarth): The Dart code should end up with outgoing_services.
   if (startup_info->outgoing_services) {
     service_provider_bindings_.AddBinding(
         this, std::move(startup_info->outgoing_services));
@@ -42,13 +41,9 @@ ApplicationControllerImpl::ApplicationControllerImpl(
 
   url_ = startup_info->url;
   runtime_holder_.reset(new RuntimeHolder());
-
-  // TODO(abarth): The Dart code should end up with environment.
-  modular::ServiceProviderPtr environment_services;
-  modular::ApplicationEnvironmentPtr::Create(
-      std::move(startup_info->environment))
-      ->GetServices(GetProxy(&environment_services));
-  runtime_holder_->Init(std::move(environment_services), std::move(bundle));
+  runtime_holder_->Init(std::move(startup_info->environment),
+                        fidl::GetProxy(&dart_service_provider_),
+                        std::move(bundle));
 }
 
 ApplicationControllerImpl::~ApplicationControllerImpl() = default;
@@ -65,11 +60,12 @@ void ApplicationControllerImpl::Detach() {
 
 void ApplicationControllerImpl::ConnectToService(
     const fidl::String& service_name,
-    mx::channel client_handle) {
+    mx::channel channel) {
   if (service_name == mozart::ViewProvider::Name_) {
     view_provider_bindings_.AddBinding(
-        this,
-        fidl::InterfaceRequest<mozart::ViewProvider>(std::move(client_handle)));
+        this, fidl::InterfaceRequest<mozart::ViewProvider>(std::move(channel)));
+  } else {
+    dart_service_provider_->ConnectToService(service_name, std::move(channel));
   }
 }
 
