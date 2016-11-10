@@ -517,7 +517,7 @@ class HotRunner extends ResidentRunner {
     if ((pauseEvent != null) && (pauseEvent.isPauseEvent)) {
       // Isolate is paused. Stop here.
       printTrace('Skipping reassemble because isolate is paused.');
-      return OperationResult.ok;
+      return new OperationResult(OperationResult.ok.code, reloadMessage);
     }
     await _evictDirtyAssets();
     printTrace('Reassembling application');

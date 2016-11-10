@@ -9,7 +9,6 @@ import 'package:path/path.dart' as path;
 
 import 'android/android_workflow.dart';
 import 'base/common.dart';
-import 'base/context.dart';
 import 'device.dart';
 import 'globals.dart';
 import 'ios/ios_workflow.dart';
@@ -46,10 +45,6 @@ class Doctor {
       _validators.add(new NoIdeValidator());
 
     _validators.add(new DeviceValidator());
-  }
-
-  static void initGlobal() {
-    context[Doctor] = new Doctor();
   }
 
   IOSWorkflow _iosWorkflow;
