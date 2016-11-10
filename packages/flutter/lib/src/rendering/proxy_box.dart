@@ -1783,17 +1783,27 @@ abstract class CustomPainter {
 /// tree as needing a new layout during the callback (the layout for this frame
 /// has already happened).
 ///
+/// Custom painters normally size themselves to their child. If they do not have
+/// a child, they attempt to size themselves to the [preferredSize], which
+/// defaults to [Size.zero].
+///
 /// See also:
 ///
-///  * [CustomPainter]
-///  * [Canvas]
+///  * [CustomPainter], the class that custom painter delegates should extend.
+///  * [Canvas], the API provided to custom painter delegates.
 class RenderCustomPaint extends RenderProxyBox {
   /// Creates a render object that delegates its painting.
   RenderCustomPaint({
     CustomPainter painter,
     CustomPainter foregroundPainter,
-    RenderBox child
-  }) : _painter = painter, _foregroundPainter = foregroundPainter, super(child);
+    Size preferredSize: Size.zero,
+    RenderBox child,
+  }) : _painter = painter,
+       _foregroundPainter = foregroundPainter,
+       _preferredSize = preferredSize,
+       super(child) {
+    assert(preferredSize != null);
+  }
 
   /// The background custom paint delegate.
   ///
@@ -1860,6 +1870,23 @@ class RenderCustomPaint extends RenderProxyBox {
     }
   }
 
+  /// The size that this [RenderCustomPaint] should aim for, given the layout
+  /// constraints, if there is no child.
+  ///
+  /// Defaults to [Size.zero].
+  ///
+  /// If there's a child, this is ignored, and the size of the child is used
+  /// instead.
+  Size get preferredSize => _preferredSize;
+  Size _preferredSize;
+  set preferredSize (Size value) {
+    assert(value != null);
+    if (preferredSize == value)
+      return;
+    _preferredSize = value;
+    markNeedsLayout();
+  }
+
   @override
   void attach(PipelineOwner owner) {
     super.attach(owner);
@@ -1884,6 +1911,11 @@ class RenderCustomPaint extends RenderProxyBox {
   @override
   bool hitTestSelf(Point position) {
     return _painter != null && (_painter.hitTest(position) ?? true);
+  }
+
+  @override
+  void performResize() {
+    size = constraints.constrain(preferredSize);
   }
 
   void _paintWithPainter(Canvas canvas, Offset offset, CustomPainter painter) {
