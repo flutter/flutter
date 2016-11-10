@@ -36,7 +36,14 @@ Future<Null> parseServiceConfigs(
     return;
   }
 
-  dynamic manifest = _loadYamlFile(_kFlutterManifestPath);
+  dynamic manifest;
+  try {
+    manifest = _loadYamlFile(_kFlutterManifestPath);
+  } catch (e) {
+    printStatus('Error detected in flutter.yaml:', emphasis: true);
+    printError(e);
+    return;
+  }
   if (manifest == null || manifest['services'] == null) {
     printTrace('No services specified in the manifest');
     return;
