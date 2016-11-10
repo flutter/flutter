@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:io';
 
-import '../application_package.dart';
 import '../base/common.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
@@ -14,14 +13,10 @@ import '../device.dart';
 import '../globals.dart';
 import '../hot.dart';
 import '../ios/mac.dart';
-import '../vmservice.dart';
 import '../resident_runner.dart';
 import '../run.dart';
 import '../runner/flutter_command.dart';
-import 'build_apk.dart';
 import 'daemon.dart';
-import 'install.dart';
-import 'trace.dart';
 
 abstract class RunCommandBase extends FlutterCommand {
   RunCommandBase() {
@@ -239,113 +234,10 @@ class RunCommand extends RunCommandBase {
         target: targetFile,
         debuggingOptions: options,
         traceStartup: traceStartup,
-        benchmark: argResults['benchmark'],
         applicationBinary: argResults['use-application-binary']
       );
     }
 
     return runner.run(route: route, shouldBuild: !runningWithPrebuiltApplication && argResults['build']);
   }
-}
-
-Future<int> startApp(
-  Device device, {
-  String target,
-  bool stop: true,
-  bool install: true,
-  DebuggingOptions debuggingOptions,
-  bool traceStartup: false,
-  bool benchmark: false,
-  String route,
-  BuildMode buildMode: BuildMode.debug
-}) async {
-  String mainPath = findMainDartFile(target);
-  if (!FileSystemEntity.isFileSync(mainPath)) {
-    String message = 'Tried to run $mainPath, but that file does not exist.';
-    if (target == null)
-      message += '\nConsider using the -t option to specify the Dart file to start.';
-    printError(message);
-    return 1;
-  }
-
-  ApplicationPackage package = getApplicationPackageForPlatform(device.platform);
-
-  if (package == null) {
-    String message = 'No application found for ${device.platform}.';
-    String hint = getMissingPackageHintForPlatform(device.platform);
-    if (hint != null)
-      message += '\n$hint';
-    printError(message);
-    return 1;
-  }
-
-  Stopwatch stopwatch = new Stopwatch()..start();
-
-  // TODO(devoncarew): We shouldn't have to do type checks here.
-  if (install && device is AndroidDevice) {
-    printTrace('Running build command.');
-
-    int result = await buildApk(
-      device.platform,
-      target: target,
-      buildMode: buildMode
-    );
-
-    if (result != 0)
-      return result;
-  }
-
-  // TODO(devoncarew): Move this into the device.startApp() impls. They should
-  // wait on the stop command to complete before (re-)starting the app. We could
-  // plumb a Future through the start command from here, but that seems a little
-  // messy.
-  if (stop) {
-    if (package != null) {
-      printTrace('Stopping app "${package.name}" on ${device.name}.');
-      await device.stopApp(package);
-    }
-  }
-
-  // TODO(devoncarew): This fails for ios devices - we haven't built yet.
-  if (install && device is AndroidDevice) {
-    printStatus('Installing $package to $device...');
-
-    if (!(installApp(device, package, uninstall: false)))
-      return 1;
-  }
-
-  Map<String, dynamic> platformArgs = <String, dynamic>{};
-
-  if (traceStartup != null)
-    platformArgs['trace-startup'] = traceStartup;
-
-  printStatus('Running ${getDisplayPath(mainPath)} on ${device.name}...');
-
-  LaunchResult result = await device.startApp(
-    package,
-    buildMode,
-    mainPath: mainPath,
-    route: route,
-    debuggingOptions: debuggingOptions,
-    platformArgs: platformArgs
-  );
-
-  stopwatch.stop();
-
-  if (!result.started) {
-    printError('Error running application on ${device.name}.');
-  } else if (traceStartup) {
-    try {
-      VMService observatory = await VMService.connect(result.observatoryPort);
-      await downloadStartupTrace(observatory);
-    } catch (error) {
-      printError('Error downloading trace from observatory: $error');
-      return 1;
-    }
-  }
-
-  if (benchmark)
-    writeRunBenchmarkFile(stopwatch);
-
-  return result.started ? 0 : 2;
 }
