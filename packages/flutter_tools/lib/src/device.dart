@@ -13,7 +13,6 @@ import 'base/os.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
 import 'globals.dart';
-import 'vmservice.dart';
 import 'ios/devices.dart';
 import 'ios/simulators.dart';
 
@@ -189,30 +188,7 @@ abstract class Device {
   });
 
   /// Does this device implement support for hot reloading / restarting?
-  bool get supportsHotMode => false;
-
-  /// Run from a file. Necessary for hot mode.
-  Future<bool> runFromFile(ApplicationPackage package,
-                           String scriptUri,
-                           String packagesUri) {
-    throw 'runFromFile unsupported';
-  }
-
-  bool get supportsRestart => false;
-
-  bool get restartSendsFrameworkInitEvent => true;
-
-  /// Restart the given app; the application will already have been launched with
-  /// [startApp].
-  Future<bool> restartApp(
-    ApplicationPackage package,
-    LaunchResult result, {
-    String mainPath,
-    VMService observatory,
-    bool prebuiltApplication: false
-  }) async {
-    throw 'unsupported';
-  }
+  bool get supportsHotMode => true;
 
   /// Stop an app package on the current device.
   Future<bool> stopApp(ApplicationPackage app);
