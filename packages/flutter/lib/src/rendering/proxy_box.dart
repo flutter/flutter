@@ -2323,6 +2323,12 @@ class RenderOffstage extends RenderProxyBox {
       return;
     super.visitChildrenForSemantics(visitor);
   }
+
+  @override
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('offstage: $offstage');
+  }
 }
 
 /// A render object that absorbs pointers during hit testing.
