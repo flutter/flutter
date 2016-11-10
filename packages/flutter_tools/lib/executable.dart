@@ -100,7 +100,8 @@ Future<Null> main(List<String> args) async {
       // Argument error exit code.
       _exit(64);
     } else if (error is ToolExit) {
-      stderr.writeln(error.message);
+      if (error.message != null)
+        stderr.writeln(error.message);
       if (verbose) {
         stderr.writeln();
         stderr.writeln(chain.terse.toString());
