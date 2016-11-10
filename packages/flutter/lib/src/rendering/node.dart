@@ -4,54 +4,49 @@
 
 import 'package:meta/meta.dart';
 
-/// An abstract node in a tree
+/// An abstract node in a tree.
 ///
 /// AbstractNode has as notion of depth, attachment, and parent, but does not
 /// have a model for children.
 ///
-/// * When a subclass is changing the parent of a child, it should
-///   call either parent.adoptChild(child) or parent.dropChild(child)
-///   as appropriate. Subclasses should expose an API for
-///   manipulating the tree if you want to (e.g. a setter for a
-///   'child' property, or an 'add()' method to manipulate a list).
+/// When a subclass is changing the parent of a child, it should call either
+/// `parent.adoptChild(child)` or `parent.dropChild(child)` as appropriate.
+/// Subclasses can expose an API for manipulating the tree if desired (e.g. a
+/// setter for a `child` property, or an `add()` method to manipulate a list).
 ///
-/// * You can see the current parent by querying 'parent'.
+/// The current parent node is exposed by the [parent] property.
 ///
-/// * You can see the current attachment state by querying
-///   'attached'. The root of any tree that is to be considered
-///   attached should be manually attached by calling 'attach()'.
-///   Other than that, don't call 'attach()' or 'detach()'. This is
-///   all managed automatically assuming you call the 'adoptChild()'
-///   and 'dropChild()' methods appropriately.
+/// The current attachment state is exposed by [attached]. The root of any tree
+/// that is to be considered attached should be manually attached by calling
+/// [attach]. Other than that, the [attach] and [detach] methods should not be
+/// called directly; attachment is managed automatically by the aforementioned
+/// [adoptChild] and [dropChild] methods.
 ///
-/// * Subclasses that have children must override 'attach()' and
-///   'detach()' as described below.
+/// Subclasses that have children must override [attach] and [detach] as
+/// described in the documentation for those methods.
 ///
-/// * Nodes always have a 'depth' greater than their ancestors'.
-///   There's no guarantee regarding depth between siblings. The
-///   depth of a node is used to ensure that nodes are processed in
-///   depth order. The 'depth' of a child can be more than one
-///   greater than the 'depth' of the parent, because the 'depth'
-///   values are never decreased: all that matters is that it's
-///   greater than the parent. Consider a tree with a root node A, a
-///   child B, and a grandchild C. Initially, A will have 'depth' 0,
-///   B 'depth' 1, and C 'depth' 2. If C is moved to be a child of A,
-///   sibling of B, then the numbers won't change. C's 'depth' will
-///   still be 2. This is all managed automatically assuming you call
-///   'adoptChild()' and 'dropChild()' appropriately.
+/// Nodes always have a [depth] greater than their ancestors'. There's no
+/// guarantee regarding depth between siblings. The depth of a node is used to
+/// ensure that nodes are processed in depth order. The [depth] of a child can
+/// be more than one greater than the [depth] of the parent, because the [depth]
+/// values are never decreased: all that matters is that it's greater than the
+/// parent. Consider a tree with a root node A, a child B, and a grandchild C.
+/// Initially, A will have [depth] 0, B [depth] 1, and C [depth] 2. If C is
+/// moved to be a child of A, sibling of B, then the numbers won't change. C's
+/// [depth] will still be 2. The [depth] is automatically maintained by the
+/// [adoptChild] and [dropChild] methods.
 class AbstractNode {
-
-  // AbstractNode represents a node in a tree.
-  // The AbstractNode protocol is described in README.md.
-
-  int _depth = 0;
   /// The depth of this node in the tree.
   ///
   /// The depth of nodes in a tree monotonically increases as you traverse down
   /// the trees.
   int get depth => _depth;
+  int _depth = 0;
 
-  /// Call only from overrides of [redepthChildren]
+  /// Adjust the [depth] of the given [child] to be greated than this node's own
+  /// [depth].
+  ///
+  /// Only call this method from overrides of [redepthChildren].
   @protected
   void redepthChild(AbstractNode child) {
     assert(child.owner == owner);
@@ -61,23 +56,27 @@ class AbstractNode {
     }
   }
 
-  /// Override this method in subclasses with child nodes to call
-  /// redepthChild(child) for each child. Do not call directly.
+  /// Adjust the [depth] of this node's children, if any.
+  ///
+  /// Override this method in subclasses with child nodes to call [redepthChild]
+  /// for each child. Do not call this method directly.
   void redepthChildren() { }
 
-  Object _owner;
   /// The owner for this node (null if unattached).
+  ///
+  /// The entire subtree that this node belongs to will have the same owner.
   Object get owner => _owner;
+  Object _owner;
 
   /// Whether this node is in a tree whose root is attached to something.
   bool get attached => _owner != null;
 
   /// Mark this node as attached to the given owner.
   ///
-  /// Typically called only from the parent's attach(), and to mark the root of
-  /// a tree attached.
+  /// Typically called only from the [parent]'s [attach] method, and by the
+  /// [owner] to mark the root of a tree as attached.
   ///
-  /// Subclasses with children should attach all their children to the same
+  /// Subclasses with children should [attach] all their children to the same
   /// [owner] whenever this method is called.
   @mustCallSuper
   void attach(@checked Object owner) {
@@ -88,10 +87,10 @@ class AbstractNode {
 
   /// Mark this node as detached.
   ///
-  /// Typically called only from the parent's detach(), and to mark the root of
-  /// a tree detached.
+  /// Typically called only from the [parent]'s [detach], and by the [owner] to
+  /// mark the root of a tree as detached.
   ///
-  /// Subclasses with children should detach all their children whenever this
+  /// Subclasses with children should [detach] all their children whenever this
   /// method is called.
   @mustCallSuper
   void detach() {
@@ -99,10 +98,12 @@ class AbstractNode {
     _owner = null;
   }
 
-  AbstractNode _parent;
   /// The parent of this node in the tree.
   AbstractNode get parent => _parent;
+  AbstractNode _parent;
 
+  /// Mark the given node as being a child of this node.
+  ///
   /// Subclasses should call this function when they acquire a new child.
   @protected
   @mustCallSuper
@@ -122,6 +123,8 @@ class AbstractNode {
     redepthChild(child);
   }
 
+  /// Disconnect the given node from this node.
+  ///
   /// Subclasses should call this function when they lose a child.
   @protected
   @mustCallSuper
