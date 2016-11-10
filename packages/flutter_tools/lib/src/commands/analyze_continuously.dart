@@ -9,6 +9,7 @@ import 'dart:io';
 import 'package:args/args.dart';
 import 'package:path/path.dart' as path;
 
+import '../base/common.dart';
 import '../base/logger.dart';
 import '../base/utils.dart';
 import '../cache.dart';
@@ -53,7 +54,10 @@ class AnalyzeContinuously extends AnalyzeBase {
     await server.start();
     final int exitCode = await server.onExit;
 
-    printStatus('Analysis server exited with code $exitCode.');
+    String message = 'Analysis server exited with code $exitCode.';
+    if (exitCode != 0)
+      throw new ToolExit(message, exitCode: exitCode);
+    printStatus(message);
     return 0;
   }
 

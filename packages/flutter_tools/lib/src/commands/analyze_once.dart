@@ -10,6 +10,7 @@ import 'package:args/args.dart';
 import 'package:path/path.dart' as path;
 import 'package:yaml/yaml.dart' as yaml;
 
+import '../base/common.dart';
 import '../cache.dart';
 import '../dart/analysis.dart';
 import '../globals.dart';
@@ -123,12 +124,17 @@ class AnalyzeOnce extends AnalyzeBase {
 
     // prepare a union of all the .packages files
     if (dependencies.hasConflicts) {
-      printError(dependencies.generateConflictReport());
-      printError('Make sure you have run "pub upgrade" in all the directories mentioned above.');
+      StringBuffer message = new StringBuffer();
+      message.writeln(dependencies.generateConflictReport());
+      message.writeln('Make sure you have run "pub upgrade" in all the directories mentioned above.');
       if (dependencies.hasConflictsAffectingFlutterRepo)
-        printError('For packages in the flutter repository, try using "flutter update-packages --upgrade" to do all of them at once.');
-      printError('If this does not help, to track down the conflict you can use "pub deps --style=list" and "pub upgrade --verbosity=solver" in the affected directories.');
-      return 1;
+        message.writeln(
+            'For packages in the flutter repository, try using '
+            '"flutter update-packages --upgrade" to do all of them at once.');
+      message.write(
+          'If this does not help, to track down the conflict you can use '
+          '"pub deps --style=list" and "pub upgrade --verbosity=solver" in the affected directories.');
+      throw new ToolExit(message.toString());
     }
     Map<String, String> packages = dependencies.asPackageMap();
 
@@ -185,11 +191,11 @@ class AnalyzeOnce extends AnalyzeBase {
       writeBenchmark(stopwatch, errorCount, membersMissingDocumentation);
 
     if (errorCount > 0) {
+      // we consider any level of error to be an error exit (we don't report different levels)
       if (membersMissingDocumentation > 0 && flutterRepo)
-        printError('[lint] $membersMissingDocumentation public ${ membersMissingDocumentation == 1 ? "member lacks" : "members lack" } documentation (ran in ${elapsed}s)');
+        throw new ToolExit('[lint] $membersMissingDocumentation public ${ membersMissingDocumentation == 1 ? "member lacks" : "members lack" } documentation (ran in ${elapsed}s)');
       else
-        print('(Ran in ${elapsed}s)');
-      return 1; // we consider any level of error to be an error exit (we don't report different levels)
+        throw new ToolExit('(Ran in ${elapsed}s)');
     }
     if (argResults['congratulate']) {
       if (membersMissingDocumentation > 0 && flutterRepo) {

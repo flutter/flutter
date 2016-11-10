@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import '../android/android_device.dart';
+import '../base/common.dart';
 import '../base/context.dart';
 import '../base/logger.dart';
 import '../base/utils.dart';
@@ -51,12 +52,15 @@ class DaemonCommand extends FlutterCommand {
 
     Cache.releaseLockEarly();
 
-    return appContext.runInZone(() {
+    return appContext.runInZone(() async {
       Daemon daemon = new Daemon(
           stdinCommandStream, stdoutCommandResponse,
           daemonCommand: this, notifyingLogger: notifyingLogger);
 
-      return daemon.onExit;
+      int code = await daemon.onExit;
+      if (code != null)
+        throw new ToolExit(null, exitCode: code);
+      return 0;
     }, onError: _handleError);
   }
 

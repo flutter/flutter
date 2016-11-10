@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import '../base/common.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
 
@@ -16,7 +17,8 @@ class DoctorCommand extends FlutterCommand {
 
   @override
   Future<int> runCommand() async {
-    await doctor.diagnose();
+    if (!await doctor.diagnose())
+      throw new ToolExit(null);
     return 0;
   }
 }
