@@ -57,7 +57,7 @@ deps = {
    Var('fuchsia_git') + '/ftl' + '@' + '9f51f24056554352b045fda338e9101c0e5af272',
 
   'src/lib/tonic':
-   Var('fuchsia_git') + '/tonic' + '@' + 'd171be8076dc3310f43ee67ac49e87765688c3d7',
+   Var('fuchsia_git') + '/tonic' + '@' + '36142e27c6765301a4122dd85045c565b2d8b33f',
 
   'src/lib/zip':
    Var('fuchsia_git') + '/zip' + '@' + '92dc87ca645fe8e9f5151ef6dac86d8311a7222f',
