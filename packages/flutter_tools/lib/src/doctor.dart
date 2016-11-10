@@ -323,6 +323,7 @@ class IntelliJValidatorOnLinux extends IntelliJValidator {
         String name = path.basename(dir.path);
         IntelliJValidator._idToTitle.forEach((String id, String title) {
           if (name.startsWith('.$id')) {
+            printTrace('Found IntelliJ config: ${dir.path}');
             String version = name.substring(id.length + 1);
             String installPath;
             try {
@@ -331,6 +332,7 @@ class IntelliJValidatorOnLinux extends IntelliJValidator {
               // ignored
             }
             if (installPath != null && FileSystemEntity.isDirectorySync(installPath)) {
+              printTrace('Found IntelliJ installation: $installPath');
               String pluginsPath = path.join(dir.path, 'config', 'plugins');
               validators.add(new IntelliJValidatorOnLinux(title, version, pluginsPath));
             }
