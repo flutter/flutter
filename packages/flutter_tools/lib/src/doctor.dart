@@ -302,10 +302,12 @@ abstract class IntelliJValidator extends DoctorValidator {
 }
 
 class IntelliJValidatorOnLinux extends IntelliJValidator {
-  IntelliJValidatorOnLinux(String title, this.version, this.pluginsPath) : super(title);
+  IntelliJValidatorOnLinux(String title, this.version, this.installPath, this.pluginsPath) : super(title);
 
   @override
   String version;
+
+  String installPath;
 
   @override
   String pluginsPath;
@@ -313,6 +315,21 @@ class IntelliJValidatorOnLinux extends IntelliJValidator {
   static Iterable<DoctorValidator> get installed {
     List<DoctorValidator> validators = <DoctorValidator>[];
     if (homeDirPath == null) return validators;
+
+    void addValidator(String title, String version, String installPath, String pluginsPath) {
+      IntelliJValidatorOnLinux validator =
+        new IntelliJValidatorOnLinux(title, version, installPath, pluginsPath);
+      for (int index = 0; index < validators.length; ++index) {
+        DoctorValidator other = validators[index];
+        if (other is IntelliJValidatorOnLinux && validator.installPath == other.installPath) {
+          if (validator.version.compareTo(other.version) > 0)
+            validators[index] = validator;
+          return;
+        }
+      }
+      validators.add(validator);
+    }
+
     for (FileSystemEntity dir in new Directory(homeDirPath).listSync()) {
       if (dir is Directory) {
         String name = path.basename(dir.path);
@@ -327,7 +344,7 @@ class IntelliJValidatorOnLinux extends IntelliJValidator {
             }
             if (installPath != null && FileSystemEntity.isDirectorySync(installPath)) {
               String pluginsPath = path.join(dir.path, 'config', 'plugins');
-              validators.add(new IntelliJValidatorOnLinux(title, version, pluginsPath));
+              addValidator(title, version, installPath, pluginsPath);
             }
           }
         });
