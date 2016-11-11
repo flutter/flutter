@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import '../application_package.dart';
+import '../base/common.dart';
 import '../cache.dart';
 import '../device.dart';
 import '../globals.dart';
@@ -36,7 +37,9 @@ class InstallCommand extends FlutterCommand {
 
     printStatus('Installing $package to $device...');
 
-    return installApp(device, package) ? 0 : 2;
+    if (!installApp(device, package))
+      throw new ToolExit('Install failed');
+    return 0;
   }
 }
 

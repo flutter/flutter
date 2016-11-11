@@ -421,8 +421,11 @@ class IOSSimulator extends Device {
     if (!prebuiltApplication) {
       printTrace('Building ${app.name} for $id.');
 
-      if (!(await _setupUpdatedApplicationBundle(app)))
+      try {
+        await _setupUpdatedApplicationBundle(app);
+      } on ToolExit {
         return new LaunchResult.failed();
+      }
     }
 
     ProtocolDiscovery observatoryDiscovery;
@@ -496,45 +499,33 @@ class IOSSimulator extends Device {
     return isInstalled && isRunning;
   }
 
-  Future<bool> _setupUpdatedApplicationBundle(ApplicationPackage app) async {
-    bool sideloadResult = await _sideloadUpdatedAssetsForInstalledApplicationBundle(app);
-
-    if (!sideloadResult)
-      return false;
+  Future<Null> _setupUpdatedApplicationBundle(ApplicationPackage app) async {
+    await _sideloadUpdatedAssetsForInstalledApplicationBundle(app);
 
     if (!_applicationIsInstalledAndRunning(app))
       return _buildAndInstallApplicationBundle(app);
-
-    return true;
   }
 
-  Future<bool> _buildAndInstallApplicationBundle(ApplicationPackage app) async {
+  Future<Null> _buildAndInstallApplicationBundle(ApplicationPackage app) async {
     // Step 1: Build the Xcode project.
     // The build mode for the simulator is always debug.
     XcodeBuildResult buildResult = await buildXcodeProject(app: app, mode: BuildMode.debug, buildForDevice: false);
-    if (!buildResult.success) {
-      printError('Could not build the application for the simulator.');
-      return false;
-    }
+    if (!buildResult.success)
+      throw new ToolExit('Could not build the application for the simulator.');
 
     // Step 2: Assert that the Xcode project was successfully built.
     IOSApp iosApp = app;
     Directory bundle = new Directory(iosApp.simulatorBundlePath);
     bool bundleExists = await bundle.exists();
-    if (!bundleExists) {
-      printError('Could not find the built application bundle at ${bundle.path}.');
-      return false;
-    }
+    if (!bundleExists)
+      throw new ToolExit('Could not find the built application bundle at ${bundle.path}.');
 
     // Step 3: Install the updated bundle to the simulator.
     SimControl.instance.install(id, path.absolute(bundle.path));
-    return true;
   }
 
-  Future<bool> _sideloadUpdatedAssetsForInstalledApplicationBundle(
-      ApplicationPackage app) async {
-    return (await flx.build(precompiledSnapshot: true)) == 0;
-  }
+  Future<Null> _sideloadUpdatedAssetsForInstalledApplicationBundle(ApplicationPackage app) =>
+      flx.build(precompiledSnapshot: true);
 
   @override
   Future<bool> stopApp(ApplicationPackage app) async {

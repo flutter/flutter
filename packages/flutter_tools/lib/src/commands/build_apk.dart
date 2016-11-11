@@ -10,6 +10,7 @@ import 'package:path/path.dart' as path;
 
 import '../android/android_sdk.dart';
 import '../android/gradle.dart';
+import '../base/common.dart';
 import '../base/file_system.dart' show ensureDirectoryExists;
 import '../base/logger.dart';
 import '../base/os.dart';
@@ -227,23 +228,19 @@ class BuildApkCommand extends BuildSubCommand {
     await super.runCommand();
 
     TargetPlatform targetPlatform = _getTargetPlatform(argResults['target-arch']);
-    if (targetPlatform != TargetPlatform.android_arm && getBuildMode() != BuildMode.debug) {
-      printError('Profile and release builds are only supported on ARM targets.');
-      return 1;
-    }
+    if (targetPlatform != TargetPlatform.android_arm && getBuildMode() != BuildMode.debug)
+      throw new ToolExit('Profile and release builds are only supported on ARM targets.');
 
     if (isProjectUsingGradle()) {
-      if (targetPlatform != TargetPlatform.android_arm) {
-        printError('Gradle builds only support ARM targets.');
-        return 1;
-      }
-      return await buildAndroidWithGradle(
+      if (targetPlatform != TargetPlatform.android_arm)
+        throw new ToolExit('Gradle builds only support ARM targets.');
+      await buildAndroidWithGradle(
         TargetPlatform.android_arm,
         getBuildMode(),
         target: targetFile
       );
     } else {
-      return await buildAndroid(
+      await buildAndroid(
         targetPlatform,
         getBuildMode(),
         force: true,
@@ -261,6 +258,7 @@ class BuildApkCommand extends BuildSubCommand {
         )
       );
     }
+    return 0;
   }
 }
 
@@ -477,7 +475,7 @@ bool _needsRebuild(
   return false;
 }
 
-Future<int> buildAndroid(
+Future<Null> buildAndroid(
   TargetPlatform platform,
   BuildMode buildMode, {
   bool force: false,
@@ -492,16 +490,13 @@ Future<int> buildAndroid(
   outputFile ??= _defaultOutputPath;
 
   // Validate that we can find an android sdk.
-  if (androidSdk == null) {
-    printError('No Android SDK found. Try setting the ANDROID_HOME environment variable.');
-    return 1;
-  }
+  if (androidSdk == null)
+    throw new ToolExit('No Android SDK found. Try setting the ANDROID_HOME environment variable.');
 
   List<String> validationResult = androidSdk.validateSdkWellFormed();
   if (validationResult.isNotEmpty) {
     validationResult.forEach(printError);
-    printError('Try re-installing or updating your Android SDK.');
-    return 1;
+    throw new ToolExit('Try re-installing or updating your Android SDK.');
   }
 
   Map<String, File> extraFiles = <String, File>{};
@@ -522,14 +517,12 @@ Future<int> buildAndroid(
       !force &&
       !_needsRebuild(outputFile, manifest, platform, buildMode, extraFiles)) {
     printTrace('APK up to date; skipping build step.');
-    return 0;
+    return;
   }
 
   if (resources != null) {
-    if (!FileSystemEntity.isDirectorySync(resources)) {
-      printError('Resources directory "$resources" not found.');
-      return 1;
-    }
+    if (!FileSystemEntity.isDirectorySync(resources))
+      throw new ToolExit('Resources directory "$resources" not found.');
   } else {
     if (FileSystemEntity.isDirectorySync(_kDefaultResourcesPath))
       resources = _kDefaultResourcesPath;
@@ -537,20 +530,16 @@ Future<int> buildAndroid(
 
   _ApkComponents components = await _findApkComponents(platform, buildMode, manifest, resources, extraFiles);
 
-  if (components == null) {
-    printError('Failure building APK: unable to find components.');
-    return 1;
-  }
+  if (components == null)
+    throw new ToolExit('Failure building APK: unable to find components.');
 
   String typeName = path.basename(tools.getEngineArtifactsDirectory(platform, buildMode).path);
   Status status = logger.startProgress('Building APK in ${getModeName(buildMode)} mode ($typeName)...');
 
   if (flxPath != null && flxPath.isNotEmpty) {
-    if (!FileSystemEntity.isFileSync(flxPath)) {
-      printError('FLX does not exist: $flxPath');
-      printError('(Omit the --flx option to build the FLX automatically)');
-      return 1;
-    }
+    if (!FileSystemEntity.isFileSync(flxPath))
+      throw new ToolExit('FLX does not exist: $flxPath\n'
+        '(Omit the --flx option to build the FLX automatically)');
   } else {
     // Build the FLX.
     flxPath = await flx.buildFlx(
@@ -559,33 +548,25 @@ Future<int> buildAndroid(
       includeRobotoFonts: false);
 
     if (flxPath == null)
-      return 1;
+      throw new ToolExit(null);
   }
 
   // Build an AOT snapshot if needed.
   if (isAotBuildMode(buildMode) && aotPath == null) {
     aotPath = await buildAotSnapshot(findMainDartFile(target), platform, buildMode);
-    if (aotPath == null) {
-      printError('Failed to build AOT snapshot');
-      return 1;
-    }
+    if (aotPath == null)
+      throw new ToolExit('Failed to build AOT snapshot');
   }
 
   if (aotPath != null) {
-    if (!isAotBuildMode(buildMode)) {
-      printError('AOT snapshot can not be used in build mode $buildMode');
-      return 1;
-    }
-    if (!FileSystemEntity.isDirectorySync(aotPath)) {
-      printError('AOT snapshot does not exist: $aotPath');
-      return 1;
-    }
+    if (!isAotBuildMode(buildMode))
+      throw new ToolExit('AOT snapshot can not be used in build mode $buildMode');
+    if (!FileSystemEntity.isDirectorySync(aotPath))
+      throw new ToolExit('AOT snapshot does not exist: $aotPath');
     for (String aotFilename in kAotSnapshotFiles) {
       String aotFilePath = path.join(aotPath, aotFilename);
-      if (!FileSystemEntity.isFileSync(aotFilePath)) {
-        printError('Missing AOT snapshot file: $aotFilePath');
-        return 1;
-      }
+      if (!FileSystemEntity.isFileSync(aotFilePath))
+        throw new ToolExit('Missing AOT snapshot file: $aotFilePath');
       components.extraFiles['assets/$aotFilename'] = new File(aotFilePath);
     }
   }
@@ -593,43 +574,39 @@ Future<int> buildAndroid(
   int result = _buildApk(platform, buildMode, components, flxPath, keystore, outputFile);
   status.stop();
 
-  if (result == 0) {
-    File apkFile = new File(outputFile);
-    printTrace('Built $outputFile (${getSizeAsMB(apkFile.lengthSync())}).');
+  if (result != 0)
+    throw new ToolExit('Build APK failed ($result)', exitCode: result);
 
-    _writeBuildMetaEntry(
-      path.dirname(outputFile),
-      'targetBuildType',
-      _getTargetBuildTypeToken(platform, buildMode, new File(outputFile))
-    );
-  }
+  File apkFile = new File(outputFile);
+  printTrace('Built $outputFile (${getSizeAsMB(apkFile.lengthSync())}).');
 
-  return result;
+  _writeBuildMetaEntry(
+    path.dirname(outputFile),
+    'targetBuildType',
+    _getTargetBuildTypeToken(platform, buildMode, new File(outputFile))
+  );
 }
 
-Future<int> buildAndroidWithGradle(
+Future<Null> buildAndroidWithGradle(
   TargetPlatform platform,
   BuildMode buildMode, {
   bool force: false,
   String target
 }) async {
   // Validate that we can find an android sdk.
-  if (androidSdk == null) {
-    printError('No Android SDK found. Try setting the ANDROID_HOME environment variable.');
-    return 1;
-  }
+  if (androidSdk == null)
+    throw new ToolExit('No Android SDK found. Try setting the ANDROID_HOME environment variable.');
 
   List<String> validationResult = androidSdk.validateSdkWellFormed();
   if (validationResult.isNotEmpty) {
     validationResult.forEach(printError);
-    printError('Try re-installing or updating your Android SDK.');
-    return 1;
+    throw new ToolExit('Try re-installing or updating your Android SDK.');
   }
 
   return buildGradleProject(buildMode);
 }
 
-Future<int> buildApk(
+Future<Null> buildApk(
   TargetPlatform platform, {
   String target,
   BuildMode buildMode: BuildMode.debug
@@ -642,10 +619,8 @@ Future<int> buildApk(
       target: target
     );
   } else {
-    if (!FileSystemEntity.isFileSync(_kDefaultAndroidManifestPath)) {
-      printError('Cannot build APK: missing $_kDefaultAndroidManifestPath.');
-      return 1;
-    }
+    if (!FileSystemEntity.isFileSync(_kDefaultAndroidManifestPath))
+      throw new ToolExit('Cannot build APK: missing $_kDefaultAndroidManifestPath.');
 
     return await buildAndroid(
       platform,

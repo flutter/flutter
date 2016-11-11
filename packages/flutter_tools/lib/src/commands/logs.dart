@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import '../base/common.dart';
 import '../cache.dart';
 import '../device.dart';
 import '../globals.dart';
@@ -31,7 +32,7 @@ class LogsCommand extends FlutterCommand {
   Future<int> verifyThenRunCommand() async {
     device = await findTargetDevice();
     if (device == null)
-      return 1;
+      throw new ToolExit(null);
     return super.verifyThenRunCommand();
   }
 
@@ -74,7 +75,7 @@ class LogsCommand extends FlutterCommand {
     int result = await exitCompleter.future;
     subscription.cancel();
     if (result != 0)
-      printError('Error listening to $logReader logs.');
-    return result;
+      throw new ToolExit('Error listening to $logReader logs.');
+    return 0;
   }
 }

@@ -7,6 +7,7 @@ import 'dart:io';
 
 import 'package:path/path.dart' as path;
 
+import '../base/common.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
 import '../base/utils.dart';
@@ -46,10 +47,8 @@ class BuildAotCommand extends BuildSubCommand {
     await super.runCommand();
     String targetPlatform = argResults['target-platform'];
     TargetPlatform platform = getTargetPlatformForName(targetPlatform);
-    if (platform == null) {
-      printError('Unknown platform: $targetPlatform');
-      return 1;
-    }
+    if (platform == null)
+      throw new ToolExit('Unknown platform: $targetPlatform');
 
     String typeName = path.basename(tools.getEngineArtifactsDirectory(platform, getBuildMode()).path);
     Status status = logger.startProgress('Building AOT snapshot in ${getModeName(getBuildMode())} mode ($typeName)...');
@@ -63,7 +62,7 @@ class BuildAotCommand extends BuildSubCommand {
     status.stop();
 
     if (outputPath == null)
-      return 1;
+      throw new ToolExit(null);
 
     printStatus('Built to $outputPath${Platform.pathSeparator}.');
     return 0;

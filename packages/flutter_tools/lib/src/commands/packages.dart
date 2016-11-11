@@ -4,9 +4,9 @@
 
 import 'dart:async';
 
+import '../base/common.dart';
 import '../base/os.dart';
 import '../dart/pub.dart';
-import '../globals.dart';
 import '../runner/flutter_command.dart';
 
 class PackagesCommand extends FlutterCommand {
@@ -53,22 +53,18 @@ class PackagesGetCommand extends FlutterCommand {
 
   @override
   Future<int> runCommand() async {
-    if (argResults.rest.length > 1) {
-      printStatus('Too many arguments.');
-      printStatus(usage);
-      return 1;
-    }
+    if (argResults.rest.length > 1)
+      throw new ToolExit('Too many arguments.\n$usage');
 
     String target = findProjectRoot(
         argResults.rest.length == 1 ? argResults.rest[0] : null);
-    if (target == null) {
-      printStatus('Expected to find project root starting at ' +
+    if (target == null)
+      throw new ToolExit(
+          'Expected to find project root starting at ' +
           (argResults.rest.length == 1
               ? argResults.rest[0]
-              : 'current working directory'));
-      printStatus(usage);
-      return 1;
-    }
+              : 'current working directory') +
+          '$usage');
 
     // TODO: If the user is using a local build, we should use the packages from their build instead of the cache.
 

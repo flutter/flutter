@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:path/path.dart' as path;
 
 import '../application_package.dart';
+import '../base/common.dart';
 import '../base/logger.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
@@ -43,17 +44,13 @@ class BuildIOSCommand extends BuildSubCommand {
     defaultBuildMode = forSimulator ? BuildMode.debug : BuildMode.release;
 
     await super.runCommand();
-    if (getCurrentHostPlatform() != HostPlatform.darwin_x64) {
-      printError('Building for iOS is only supported on the Mac.');
-      return 1;
-    }
+    if (getCurrentHostPlatform() != HostPlatform.darwin_x64)
+      throw new ToolExit('Building for iOS is only supported on the Mac.');
 
     IOSApp app = applicationPackages.getPackageForPlatform(TargetPlatform.ios);
 
-    if (app == null) {
-      printError('Application not configured for iOS');
-      return 1;
-    }
+    if (app == null)
+      throw new ToolExit('Application not configured for iOS');
 
     bool shouldCodesign = argResults['codesign'];
 
@@ -62,10 +59,8 @@ class BuildIOSCommand extends BuildSubCommand {
         'have to manually codesign before deploying to device.');
     }
 
-    if (forSimulator && !isEmulatorBuildMode(getBuildMode())) {
-      printError('${toTitleCase(getModeName(getBuildMode()))} mode is not supported for emulators.');
-      return 1;
-    }
+    if (forSimulator && !isEmulatorBuildMode(getBuildMode()))
+      throw new ToolExit('${toTitleCase(getModeName(getBuildMode()))} mode is not supported for emulators.');
 
     String logTarget = forSimulator ? 'simulator' : 'device';
 
@@ -83,8 +78,7 @@ class BuildIOSCommand extends BuildSubCommand {
     if (!result.success) {
       printError('Encountered error while building for $logTarget.');
       diagnoseXcodeBuildFailure(result);
-      printError('');
-      return 1;
+      throw new ToolExit('');
     }
 
     if (result.output != null)

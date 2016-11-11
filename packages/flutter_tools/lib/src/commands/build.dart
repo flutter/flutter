@@ -10,6 +10,7 @@ import 'package:meta/meta.dart';
 import '../build_info.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
+import '../base/common.dart';
 import '../base/utils.dart';
 import 'build_apk.dart';
 import 'build_aot.dart';
@@ -94,10 +95,9 @@ class BuildCleanCommand extends FlutterCommand {
 
     try {
       buildDir.deleteSync(recursive: true);
-      return 0;
     } catch (error) {
-      printError(error.toString());
-      return 1;
+      throw new ToolExit(error.toString());
     }
+    return 0;
   }
 }
