@@ -96,7 +96,7 @@ class BuildCleanCommand extends FlutterCommand {
     try {
       buildDir.deleteSync(recursive: true);
     } catch (error) {
-      throw new ToolExit(error.toString());
+      throwToolExit(error.toString());
     }
     return 0;
   }

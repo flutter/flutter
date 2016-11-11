@@ -183,7 +183,7 @@ void main() {
       });
       testRunner = (_) {
         print('>>> testRunner called - throwing ToolExit 123');
-        throw new ToolExit(null, exitCode: 123);
+        throwToolExit(null, exitCode: 123);
       };
       appStopper = expectAsync((_) {
         return new Future<int>.value(0);

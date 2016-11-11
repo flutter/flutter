@@ -45,12 +45,12 @@ class BuildIOSCommand extends BuildSubCommand {
 
     await super.runCommand();
     if (getCurrentHostPlatform() != HostPlatform.darwin_x64)
-      throw new ToolExit('Building for iOS is only supported on the Mac.');
+      throwToolExit('Building for iOS is only supported on the Mac.');
 
     IOSApp app = applicationPackages.getPackageForPlatform(TargetPlatform.ios);
 
     if (app == null)
-      throw new ToolExit('Application not configured for iOS');
+      throwToolExit('Application not configured for iOS');
 
     bool shouldCodesign = argResults['codesign'];
 
@@ -60,7 +60,7 @@ class BuildIOSCommand extends BuildSubCommand {
     }
 
     if (forSimulator && !isEmulatorBuildMode(getBuildMode()))
-      throw new ToolExit('${toTitleCase(getModeName(getBuildMode()))} mode is not supported for emulators.');
+      throwToolExit('${toTitleCase(getModeName(getBuildMode()))} mode is not supported for emulators.');
 
     String logTarget = forSimulator ? 'simulator' : 'device';
 
@@ -78,7 +78,7 @@ class BuildIOSCommand extends BuildSubCommand {
     if (!result.success) {
       printError('Encountered error while building for $logTarget.');
       diagnoseXcodeBuildFailure(result);
-      throw new ToolExit('');
+      throwToolExit('');
     }
 
     if (result.output != null)

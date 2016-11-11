@@ -105,7 +105,7 @@ Future<Null> build({
       packages: packagesPath
     );
     if (result != 0)
-      throw new ToolExit('Failed to run the Flutter compiler. Exit code: $result', exitCode: result);
+      throwToolExit('Failed to run the Flutter compiler. Exit code: $result', exitCode: result);
 
     snapshotFile = new File(snapshotPath);
   }
@@ -149,7 +149,7 @@ Future<Null> assemble({
     reportLicensedPackages: reportLicensedPackages
   );
   if (result != 0)
-    throw new ToolExit('Error building $outputPath: $result', exitCode: result);
+    throwToolExit('Error building $outputPath: $result', exitCode: result);
 
   ZipBuilder zipBuilder = new ZipBuilder();
 

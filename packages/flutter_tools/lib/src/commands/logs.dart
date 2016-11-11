@@ -32,7 +32,7 @@ class LogsCommand extends FlutterCommand {
   Future<int> verifyThenRunCommand() async {
     device = await findTargetDevice();
     if (device == null)
-      throw new ToolExit(null);
+      throwToolExit(null);
     return super.verifyThenRunCommand();
   }
 
@@ -75,7 +75,7 @@ class LogsCommand extends FlutterCommand {
     int result = await exitCompleter.future;
     subscription.cancel();
     if (result != 0)
-      throw new ToolExit('Error listening to $logReader logs.');
+      throwToolExit('Error listening to $logReader logs.');
     return 0;
   }
 }

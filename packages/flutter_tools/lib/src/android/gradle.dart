@@ -112,7 +112,7 @@ Future<Null> buildGradleProject(BuildMode buildMode) async {
   if (gradlew == null) {
     String gradle = locateSystemGradle();
     if (gradle == null) {
-      throw new ToolExit(
+      throwToolExit(
         'Unable to locate gradle. Please configure the path to gradle using \'flutter config --gradle-dir\'.'
       );
     } else {
@@ -139,14 +139,14 @@ Future<Null> buildGradleProject(BuildMode buildMode) async {
       );
       status.stop();
       if (exitcode != 0)
-        throw new ToolExit('Gradle failed: $exitcode', exitCode: exitcode);
+        throwToolExit('Gradle failed: $exitcode', exitCode: exitcode);
     } catch (error) {
-      throw new ToolExit('$error');
+      throwToolExit('$error');
     }
 
     gradlew = locateProjectGradlew();
     if (gradlew == null)
-      throw new ToolExit('Unable to build android/gradlew.');
+      throwToolExit('Unable to build android/gradlew.');
   }
 
   // Run 'gradlew build'.
@@ -159,7 +159,7 @@ Future<Null> buildGradleProject(BuildMode buildMode) async {
   status.stop();
 
   if (exitcode != 0)
-    throw new ToolExit('Gradlew failed: $exitcode', exitCode: exitcode);
+    throwToolExit('Gradlew failed: $exitcode', exitCode: exitcode);
 
   File apkFile = new File(gradleAppOut);
   printStatus('Built $gradleAppOut (${getSizeAsMB(apkFile.lengthSync())}).');

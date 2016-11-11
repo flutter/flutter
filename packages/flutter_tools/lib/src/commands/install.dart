@@ -25,7 +25,7 @@ class InstallCommand extends FlutterCommand {
     commandValidator();
     device = await findTargetDevice();
     if (device == null)
-      throw new ToolExit('No target device found');
+      throwToolExit('No target device found');
     return super.verifyThenRunCommand();
   }
 
@@ -38,7 +38,7 @@ class InstallCommand extends FlutterCommand {
     printStatus('Installing $package to $device...');
 
     if (!installApp(device, package))
-      throw new ToolExit('Install failed');
+      throwToolExit('Install failed');
     return 0;
   }
 }

@@ -152,7 +152,7 @@ class RunCommand extends RunCommandBase {
     commandValidator();
     device = await findTargetDevice();
     if (device == null)
-      throw new ToolExit(null);
+      throwToolExit(null);
     return super.verifyThenRunCommand();
   }
 
@@ -173,7 +173,7 @@ class RunCommand extends RunCommandBase {
         getBuildMode(), argResults['start-paused'], hotMode);
       int result = await app.runner.waitForAppToFinish();
       if (result != 0)
-        throw new ToolExit(null, exitCode: result);
+        throwToolExit(null, exitCode: result);
     }
 
     int debugPort;
@@ -181,12 +181,12 @@ class RunCommand extends RunCommandBase {
       try {
         debugPort = int.parse(argResults['debug-port']);
       } catch (error) {
-        throw new ToolExit('Invalid port for `--debug-port`: $error');
+        throwToolExit('Invalid port for `--debug-port`: $error');
       }
     }
 
     if (device.isLocalEmulator && !isEmulatorBuildMode(getBuildMode()))
-      throw new ToolExit('${toTitleCase(getModeName(getBuildMode()))} mode is not supported for emulators.');
+      throwToolExit('${toTitleCase(getModeName(getBuildMode()))} mode is not supported for emulators.');
 
     DebuggingOptions options;
 
@@ -202,7 +202,7 @@ class RunCommand extends RunCommandBase {
 
     if (hotMode) {
       if (!device.supportsHotMode)
-        throw new ToolExit('Hot mode is not supported by this device. Run with --no-hot.');
+        throwToolExit('Hot mode is not supported by this device. Run with --no-hot.');
     }
 
     String pidFile = argResults['pid-file'];
@@ -237,7 +237,7 @@ class RunCommand extends RunCommandBase {
       shouldBuild: !runningWithPrebuiltApplication && argResults['build'],
     );
     if (result != 0)
-      throw new ToolExit(null, exitCode: result);
+      throwToolExit(null, exitCode: result);
     return 0;
   }
 }

@@ -99,21 +99,21 @@ class DriveCommand extends RunCommandBase {
   Future<int> runCommand() async {
     String testFile = _getTestFile();
     if (testFile == null)
-      throw new ToolExit(null);
+      throwToolExit(null);
 
     this._device = await targetDeviceFinder();
     if (device == null)
-      throw new ToolExit(null);
+      throwToolExit(null);
 
     if (await fs.type(testFile) != FileSystemEntityType.FILE)
-      throw new ToolExit('Test file not found: $testFile');
+      throwToolExit('Test file not found: $testFile');
 
     if (!argResults['use-existing-app']) {
       printStatus('Starting application: ${argResults["target"]}');
 
       if (getBuildMode() == BuildMode.release) {
         // This is because we need VM service to be able to drive the app.
-        throw new ToolExit(
+        throwToolExit(
           'Flutter Driver does not support running in release mode.\n'
           '\n'
           'Use --profile mode for testing application performance.\n'
@@ -123,7 +123,7 @@ class DriveCommand extends RunCommandBase {
 
       int result = await appStarter(this);
       if (result != 0)
-        throw new ToolExit('Application failed to start ($result). Will not run test. Quitting.', exitCode: result);
+        throwToolExit('Application failed to start ($result). Will not run test. Quitting.', exitCode: result);
     } else {
       printStatus('Will connect to already running application instance.');
     }
@@ -135,7 +135,7 @@ class DriveCommand extends RunCommandBase {
     } catch (error, stackTrace) {
       if (error is ToolExit)
         rethrow;
-      throw new ToolExit('CAUGHT EXCEPTION: $error\n$stackTrace');
+      throwToolExit('CAUGHT EXCEPTION: $error\n$stackTrace');
     } finally {
       if (!argResults['keep-app-running'] && !argResults['use-existing-app']) {
         printStatus('Stopping application instance.');
@@ -341,7 +341,7 @@ Future<Null> runTests(List<String> testArgs) async {
   String dartVmPath = path.join(dartSdkPath, 'bin', 'dart');
   int result = await runCommandAndStreamOutput(<String>[dartVmPath]..addAll(args));
   if (result != 0)
-    throw new ToolExit('Driver tests failed: $result', exitCode: result);
+    throwToolExit('Driver tests failed: $result', exitCode: result);
 }
 
 

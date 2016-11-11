@@ -27,7 +27,7 @@ class FormatCommand extends FlutterCommand {
   @override
   Future<int> runCommand() async {
     if (argResults.rest.isEmpty) {
-      throw new ToolExit(
+      throwToolExit(
         'No files specified to be formatted.\n'
         '\n'
         'To format all files in the current directory tree:\n'
@@ -42,7 +42,7 @@ class FormatCommand extends FlutterCommand {
     List<String> cmd = <String>[dartfmt, '-w']..addAll(argResults.rest);
     int result = await runCommandAndStreamOutput(cmd);
     if (result != 0)
-      throw new ToolExit('Formatting failed: $result', exitCode: result);
+      throwToolExit('Formatting failed: $result', exitCode: result);
     return 0;
   }
 }

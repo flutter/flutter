@@ -48,7 +48,7 @@ class BuildAotCommand extends BuildSubCommand {
     String targetPlatform = argResults['target-platform'];
     TargetPlatform platform = getTargetPlatformForName(targetPlatform);
     if (platform == null)
-      throw new ToolExit('Unknown platform: $targetPlatform');
+      throwToolExit('Unknown platform: $targetPlatform');
 
     String typeName = path.basename(tools.getEngineArtifactsDirectory(platform, getBuildMode()).path);
     Status status = logger.startProgress('Building AOT snapshot in ${getModeName(getBuildMode())} mode ($typeName)...');
@@ -62,7 +62,7 @@ class BuildAotCommand extends BuildSubCommand {
     status.stop();
 
     if (outputPath == null)
-      throw new ToolExit(null);
+      throwToolExit(null);
 
     printStatus('Built to $outputPath${Platform.pathSeparator}.');
     return 0;

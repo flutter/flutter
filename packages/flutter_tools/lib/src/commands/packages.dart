@@ -54,12 +54,12 @@ class PackagesGetCommand extends FlutterCommand {
   @override
   Future<int> runCommand() async {
     if (argResults.rest.length > 1)
-      throw new ToolExit('Too many arguments.\n$usage');
+      throwToolExit('Too many arguments.\n$usage');
 
     String target = findProjectRoot(
         argResults.rest.length == 1 ? argResults.rest[0] : null);
     if (target == null)
-      throw new ToolExit(
+      throwToolExit(
           'Expected to find project root starting at ' +
           (argResults.rest.length == 1
               ? argResults.rest[0]

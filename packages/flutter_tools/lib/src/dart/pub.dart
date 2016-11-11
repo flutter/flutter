@@ -40,7 +40,7 @@ Future<Null> pubGet({
 
   if (!pubSpecYaml.existsSync()) {
     if (!skipIfAbsent)
-      throw new ToolExit('$directory: no pubspec.yaml found');
+      throwToolExit('$directory: no pubspec.yaml found');
     return;
   }
 
@@ -55,13 +55,13 @@ Future<Null> pubGet({
     );
     status.stop();
     if (code != 0)
-      throw new ToolExit('pub $command failed ($code)', exitCode: code);
+      throwToolExit('pub $command failed ($code)', exitCode: code);
   }
 
   if (dotPackages.existsSync() && dotPackages.lastModifiedSync().isAfter(pubSpecYaml.lastModifiedSync()))
     return;
 
-  throw new ToolExit('$directory: pubspec.yaml and .packages are in an inconsistent state');
+  throwToolExit('$directory: pubspec.yaml and .packages are in an inconsistent state');
 }
 
 String _filterOverrideWarnings(String str) {

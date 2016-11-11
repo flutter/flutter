@@ -511,14 +511,14 @@ class IOSSimulator extends Device {
     // The build mode for the simulator is always debug.
     XcodeBuildResult buildResult = await buildXcodeProject(app: app, mode: BuildMode.debug, buildForDevice: false);
     if (!buildResult.success)
-      throw new ToolExit('Could not build the application for the simulator.');
+      throwToolExit('Could not build the application for the simulator.');
 
     // Step 2: Assert that the Xcode project was successfully built.
     IOSApp iosApp = app;
     Directory bundle = new Directory(iosApp.simulatorBundlePath);
     bool bundleExists = await bundle.exists();
     if (!bundleExists)
-      throw new ToolExit('Could not find the built application bundle at ${bundle.path}.');
+      throwToolExit('Could not find the built application bundle at ${bundle.path}.');
 
     // Step 3: Install the updated bundle to the simulator.
     SimControl.instance.install(id, path.absolute(bundle.path));
