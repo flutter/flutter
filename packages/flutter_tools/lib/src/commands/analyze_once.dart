@@ -127,10 +127,11 @@ class AnalyzeOnce extends AnalyzeBase {
       StringBuffer message = new StringBuffer();
       message.writeln(dependencies.generateConflictReport());
       message.writeln('Make sure you have run "pub upgrade" in all the directories mentioned above.');
-      if (dependencies.hasConflictsAffectingFlutterRepo)
+      if (dependencies.hasConflictsAffectingFlutterRepo) {
         message.writeln(
             'For packages in the flutter repository, try using '
             '"flutter update-packages --upgrade" to do all of them at once.');
+      }
       message.write(
           'If this does not help, to track down the conflict you can use '
           '"pub deps --style=list" and "pub upgrade --verbosity=solver" in the affected directories.');
