@@ -26,8 +26,7 @@ class PackagesCommand extends FlutterCommand {
 
   @override
   Future<int> verifyThenRunCommand() async {
-    if (!commandValidator())
-      return 1;
+    commandValidator();
     return super.verifyThenRunCommand();
   }
 

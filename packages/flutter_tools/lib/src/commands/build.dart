@@ -33,8 +33,7 @@ class BuildCommand extends FlutterCommand {
 
   @override
   Future<int> verifyThenRunCommand() async {
-    if (!commandValidator())
-      return 1;
+    commandValidator();
     return super.verifyThenRunCommand();
   }
 
@@ -46,8 +45,7 @@ abstract class BuildSubCommand extends FlutterCommand {
   @override
   @mustCallSuper
   Future<int> verifyThenRunCommand() async {
-    if (!commandValidator())
-      return 1;
+    commandValidator();
     return super.verifyThenRunCommand();
   }
 
@@ -82,8 +80,7 @@ class BuildCleanCommand extends FlutterCommand {
 
   @override
   Future<int> verifyThenRunCommand() async {
-    if (!commandValidator())
-      return 1;
+    commandValidator();
     return super.verifyThenRunCommand();
   }
 

@@ -150,11 +150,10 @@ class RunCommand extends RunCommandBase {
 
   @override
   Future<int> verifyThenRunCommand() async {
-    if (!commandValidator())
-      return 1;
+    commandValidator();
     device = await findTargetDevice();
     if (device == null)
-      return 1;
+      throw new ToolExit(null);
     return super.verifyThenRunCommand();
   }
 

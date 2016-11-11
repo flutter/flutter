@@ -91,8 +91,7 @@ class DriveCommand extends RunCommandBase {
 
   @override
   Future<int> verifyThenRunCommand() async {
-    if (!commandValidator())
-      return 1;
+    commandValidator();
     return super.verifyThenRunCommand();
   }
 
