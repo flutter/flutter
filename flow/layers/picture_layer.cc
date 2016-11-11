@@ -4,6 +4,7 @@
 
 #include "flutter/flow/layers/picture_layer.h"
 
+#include "flutter/common/threads.h"
 #include "flutter/flow/raster_cache.h"
 #include "lib/ftl/logging.h"
 
@@ -11,7 +12,12 @@ namespace flow {
 
 PictureLayer::PictureLayer() {}
 
-PictureLayer::~PictureLayer() {}
+PictureLayer::~PictureLayer() {
+  // The picture may contain references to textures that are associated
+  // with the IO thread's context.
+  SkPicture* picture = picture_.release();
+  blink::Threads::IO()->PostTask([picture]() { picture->unref(); });
+}
 
 void PictureLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
   if (auto cache = context->raster_cache) {
