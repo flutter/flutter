@@ -112,10 +112,9 @@ void main() {
         fail('Expect exception');
       } on ToolExit catch (e) {
         expect(e.exitCode ?? 1, 1);
-        expect(
-            testLogger.errorText,
-            contains(
-                'Application file $appFile is outside the package directory $packageDir'));
+        expect(testLogger.errorText, contains(
+          'Application file $appFile is outside the package directory $packageDir',
+        ));
       }
     });
 
@@ -133,10 +132,10 @@ void main() {
         fail('Expect exception');
       } on ToolExit catch (e) {
         expect(e.exitCode ?? 1, 1);
-        expect(
-            testLogger.errorText,
-            contains('Application file main.dart must reside in one of the '
-                'sub-directories of the package structure, not in the root directory.'));
+        expect(testLogger.errorText, contains(
+          'Application file main.dart must reside in one of the '
+          'sub-directories of the package structure, not in the root directory.',
+        ));
       }
     });
 
@@ -182,7 +181,6 @@ void main() {
         return new Future<int>.value(0);
       });
       testRunner = (_) {
-        print('>>> testRunner called - throwing ToolExit 123');
         throwToolExit(null, exitCode: 123);
       };
       appStopper = expectAsync((_) {
@@ -234,9 +232,7 @@ void main() {
         expect(device.name, 'mock-simulator');
       });
 
-      testUsingContext(
-          'uses existing Android device if and there are no simulators',
-          () async {
+      testUsingContext('uses existing Android device if and there are no simulators', () async {
         setOs();
         mockDevice = new MockAndroidDevice();
         when(mockDevice.name).thenReturn('mock-android-device');
@@ -290,4 +286,4 @@ class MockDevice extends Mock implements Device {
   }
 }
 
-class MockAndroidDevice extends Mock implements AndroidDevice {}
+class MockAndroidDevice extends Mock implements AndroidDevice { }

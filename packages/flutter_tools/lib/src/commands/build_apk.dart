@@ -537,9 +537,10 @@ Future<Null> buildAndroid(
   Status status = logger.startProgress('Building APK in ${getModeName(buildMode)} mode ($typeName)...');
 
   if (flxPath != null && flxPath.isNotEmpty) {
-    if (!FileSystemEntity.isFileSync(flxPath))
+    if (!FileSystemEntity.isFileSync(flxPath)) {
       throwToolExit('FLX does not exist: $flxPath\n'
         '(Omit the --flx option to build the FLX automatically)');
+    }
   } else {
     // Build the FLX.
     flxPath = await flx.buildFlx(
