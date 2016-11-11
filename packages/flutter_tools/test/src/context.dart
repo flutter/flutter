@@ -9,10 +9,13 @@ import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/doctor.dart';
+import 'package:flutter_tools/src/hot.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:flutter_tools/src/ios/simulators.dart';
 import 'package:flutter_tools/src/usage.dart';
+
 import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
 
@@ -52,6 +55,14 @@ void testUsingContext(String description, dynamic testMethod(), {
       MockOperatingSystemUtils os = new MockOperatingSystemUtils();
       when(os.isWindows).thenReturn(false);
       testContext[OperatingSystemUtils] = os;
+    }
+
+    if (!overrides.containsKey(DevFSConfig)) {
+      testContext[DevFSConfig] = new DevFSConfig();
+    }
+
+    if (!overrides.containsKey(HotRunnerConfig)) {
+      testContext[HotRunnerConfig] = new HotRunnerConfig();
     }
 
     if (!overrides.containsKey(IOSSimulatorUtils)) {

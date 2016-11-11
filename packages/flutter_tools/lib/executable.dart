@@ -39,6 +39,7 @@ import 'src/devfs.dart';
 import 'src/device.dart';
 import 'src/doctor.dart';
 import 'src/globals.dart';
+import 'src/hot.dart';
 import 'src/runner/flutter_command_runner.dart';
 
 /// Main entry point for commands.
@@ -90,6 +91,8 @@ Future<Null> main(List<String> args) async {
       context[DevFSConfig] = new DevFSConfig();
     if (context[Doctor] == null)
       context[Doctor] = new Doctor();
+    if (context[HotRunnerConfig] == null)
+      context[HotRunnerConfig] = new HotRunnerConfig();
 
     dynamic result = await runner.run(args);
     _exit(result is int ? result : 1);
