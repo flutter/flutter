@@ -73,6 +73,7 @@ class PackagesGetCommand extends FlutterCommand {
 
     // TODO: If the user is using a local build, we should use the packages from their build instead of the cache.
 
-    return pubGet(directory: target, upgrade: upgrade, checkLastModified: false);
+    await pubGet(directory: target, upgrade: upgrade, checkLastModified: false);
+    return 0;
   }
 }

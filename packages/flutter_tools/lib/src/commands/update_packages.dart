@@ -53,9 +53,7 @@ class UpdatePackagesCommand extends FlutterCommand {
       final bool upgrade = argResults['upgrade'];
 
       for (Directory dir in runner.getRepoPackages()) {
-        int code = await pubGet(directory: dir.path, upgrade: upgrade, checkLastModified: false);
-        if (code != 0)
-          throw code;
+        await pubGet(directory: dir.path, upgrade: upgrade, checkLastModified: false);
         count++;
       }
 
