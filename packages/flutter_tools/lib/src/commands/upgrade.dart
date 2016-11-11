@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import '../base/common.dart';
 import '../base/os.dart';
 import '../base/process.dart';
 import '../dart/pub.dart';
@@ -21,7 +22,7 @@ class UpgradeCommand extends FlutterCommand {
   final String description = 'Upgrade your copy of Flutter.';
 
   @override
-  Future<int> runCommand() async {
+  Future<Null> runCommand() async {
     try {
       runCheckedSync(<String>[
         'git', 'rev-parse', '@{u}'
@@ -79,8 +80,6 @@ class UpgradeCommand extends FlutterCommand {
     printStatus('');
     printStatus('Running flutter doctor...');
     await doctor.diagnose();
-
-    return 0;
   }
 
   //  dev/benchmarks/complex_layout/lib/main.dart        |  24 +-

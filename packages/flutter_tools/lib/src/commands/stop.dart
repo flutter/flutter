@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import '../application_package.dart';
+import '../base/common.dart';
 import '../build_info.dart';
 import '../device.dart';
 import '../globals.dart';
@@ -20,9 +21,8 @@ class StopCommand extends FlutterCommand {
   Device device;
 
   @override
-  Future<int> verifyThenRunCommand() async {
-    if (!commandValidator())
-      return 1;
+  Future<Null> verifyThenRunCommand() async {
+    commandValidator();
     device = await findTargetDevice();
     if (device == null)
       return 1;
@@ -30,7 +30,7 @@ class StopCommand extends FlutterCommand {
   }
 
   @override
-  Future<int> runCommand() async {
+  Future<Null> runCommand() async {
     ApplicationPackage app = applicationPackages.getPackageForPlatform(device.platform);
     if (app == null) {
       String platformName = getNameForTargetPlatform(device.platform);

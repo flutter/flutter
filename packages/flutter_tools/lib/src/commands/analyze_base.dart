@@ -20,7 +20,7 @@ abstract class AnalyzeBase {
   AnalyzeBase(this.argResults);
 
   /// Called by [AnalyzeCommand] to start the analysis process.
-  Future<int> analyze();
+  Future<Null> analyze();
 
   void dumpErrors(Iterable<String> errors) {
     if (argResults['write'] != null) {

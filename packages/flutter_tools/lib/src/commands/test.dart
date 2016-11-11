@@ -8,6 +8,7 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 import 'package:test/src/executable.dart' as executable; // ignore: implementation_imports
 
+import '../base/common.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
 import '../cache.dart';
@@ -142,11 +143,10 @@ class TestCommand extends FlutterCommand {
   }
 
   @override
-  Future<int> runCommand() async {
+  Future<Null> runCommand() async {
     List<String> testArgs = argResults.rest.map((String testPath) => path.absolute(testPath)).toList();
 
-    if (!commandValidator())
-      return 1;
+    commandValidator();
 
     Directory testDir;
 

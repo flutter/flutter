@@ -52,7 +52,7 @@ class ScreenshotCommand extends FlutterCommand {
   Device device;
 
   @override
-  Future<int> verifyThenRunCommand() async {
+  Future<Null> verifyThenRunCommand() async {
     if (argResults[_kSkia] != null) {
       if (argResults[_kOut] != null && argResults[_kSkiaServe] != null)
         throwToolExit('Cannot specify both --$_kOut and --$_kSkiaServe');
@@ -69,7 +69,7 @@ class ScreenshotCommand extends FlutterCommand {
   }
 
   @override
-  Future<int> runCommand() async {
+  Future<Null> runCommand() async {
     File outputFile;
     if (argResults.wasParsed(_kOut))
       outputFile = new File(argResults[_kOut]);
@@ -81,7 +81,7 @@ class ScreenshotCommand extends FlutterCommand {
     }
   }
 
-  Future<int> runScreenshot(File outputFile) async {
+  Future<Null> runScreenshot(File outputFile) async {
     outputFile ??= getUniqueFile(Directory.current, 'flutter', 'png');
     try {
       if (!await device.takeScreenshot(outputFile))
@@ -90,10 +90,9 @@ class ScreenshotCommand extends FlutterCommand {
       throwToolExit('Error taking screenshot: $error');
     }
     await showOutputFileInfo(outputFile);
-    return 0;
   }
 
-  Future<int> runSkia(File outputFile) async {
+  Future<Null> runSkia(File outputFile) async {
     Uri skpUri = new Uri(scheme: 'http', host: '127.0.0.1',
         port: int.parse(argResults[_kSkia]),
         path: '/skp');
@@ -136,7 +135,6 @@ class ScreenshotCommand extends FlutterCommand {
           throwToolExit('\nIt appears the output file contains an error message, not valid skia output.\n\n$errorHelpText');
       }
     }
-    return 0;
   }
 
   Future<Null> showOutputFileInfo(File outputFile) async {

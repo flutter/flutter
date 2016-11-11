@@ -46,11 +46,11 @@ class UpdatePackagesCommand extends FlutterCommand {
   }
 
   @override
-  Future<int> runCommand() async {
     try {
       final Stopwatch timer = new Stopwatch()..start();
       int count = 0;
       final bool upgrade = argResults['upgrade'];
+  Future<Null> runCommand() async {
 
       for (Directory dir in runner.getRepoPackages()) {
         await pubGet(directory: dir.path, upgrade: upgrade, checkLastModified: false);

@@ -39,7 +39,7 @@ class BuildIOSCommand extends BuildSubCommand {
   final String description = 'Build an iOS application bundle (Mac OS X host only).';
 
   @override
-  Future<int> runCommand() async {
+  Future<Null> runCommand() async {
     bool forSimulator = argResults['simulator'];
     defaultBuildMode = forSimulator ? BuildMode.debug : BuildMode.release;
 
@@ -83,7 +83,5 @@ class BuildIOSCommand extends BuildSubCommand {
 
     if (result.output != null)
       printStatus('Built ${result.output}.');
-
-    return 0;
   }
 }

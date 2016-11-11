@@ -28,7 +28,7 @@ class AnalyzeOnce extends AnalyzeBase {
   AnalyzeOnce(ArgResults argResults, this.repoPackages) : super(argResults);
 
   @override
-  Future<int> analyze() async {
+  Future<Null> analyze() async {
     Stopwatch stopwatch = new Stopwatch()..start();
     Set<Directory> pubSpecDirectories = new HashSet<Directory>();
     List<File> dartFiles = <File>[];
@@ -205,7 +205,6 @@ class AnalyzeOnce extends AnalyzeBase {
         printStatus('No analyzer warnings! (ran in ${elapsed}s)');
       }
     }
-    return 0;
   }
 
   List<String> flutterRootComponents;

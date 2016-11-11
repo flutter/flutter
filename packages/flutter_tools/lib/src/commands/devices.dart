@@ -18,7 +18,7 @@ class DevicesCommand extends FlutterCommand {
   final String description = 'List all connected devices.';
 
   @override
-  Future<int> runCommand() async {
+  Future<Null> runCommand() async {
     if (!doctor.canListAnything) {
       throwToolExit(
         "Unable to locate a development device; please run 'flutter doctor' for "
@@ -37,6 +37,5 @@ class DevicesCommand extends FlutterCommand {
       printStatus('${devices.length} connected ${pluralize('device', devices.length)}:\n');
       Device.printDevices(devices);
     }
-    return 0;
   }
 }
