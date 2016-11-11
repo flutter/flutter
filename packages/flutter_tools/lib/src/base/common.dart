@@ -27,8 +27,8 @@ String _homeDirPath;
 /// where the tool should exit with a clear message to the user
 /// and no stack trace unless the --verbose option is specified.
 /// For example: network errors
-void throwToolExit(String message, { int exitCode }) {
-  throw new ToolExit(message, exitCode: exitCode);
+void throwToolExit(String message, { int exitCode, bool isUnusual: false }) {
+  throw new ToolExit(message, exitCode: exitCode, isUnusual: isUnusual);
 }
 
 /// Specialized exception for expected situations
@@ -36,10 +36,12 @@ void throwToolExit(String message, { int exitCode }) {
 /// and no stack trace unless the --verbose option is specified.
 /// For example: network errors
 class ToolExit implements Exception {
-  ToolExit(this.message, { this.exitCode });
+
+  ToolExit(this.message, { this.exitCode, this.isUnusual: false });
 
   final String message;
   final int exitCode;
+  final bool isUnusual;
 
   @override
   String toString() => "Exception: $message";
