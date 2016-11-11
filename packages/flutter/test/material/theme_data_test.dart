@@ -13,4 +13,58 @@ void main() {
       expect(theme.textTheme, typography.black, reason: 'Not using default typography for $platform');
     }
   });
+
+  test('Default text theme contrasts with brightness', () {
+    ThemeData lightTheme = new ThemeData(brightness: Brightness.light);
+    ThemeData darkTheme = new ThemeData(brightness: Brightness.dark);
+    Typography typography = new Typography(platform: lightTheme.platform);
+
+    expect(lightTheme.textTheme.title.color, typography.black.title.color);
+    expect(darkTheme.textTheme.title.color, typography.white.title.color);
+  });
+
+  test('Default primary text theme contrasts with primary brightness', () {
+    ThemeData lightTheme = new ThemeData(primaryColorBrightness: Brightness.light);
+    ThemeData darkTheme = new ThemeData(primaryColorBrightness: Brightness.dark);
+    Typography typography = new Typography(platform: lightTheme.platform);
+
+    expect(lightTheme.primaryTextTheme.title.color, typography.black.title.color);
+    expect(darkTheme.primaryTextTheme.title.color, typography.white.title.color);
+  });
+
+  test('Default accent text theme contrasts with accent brightness', () {
+    ThemeData lightTheme = new ThemeData(accentColorBrightness: Brightness.light);
+    ThemeData darkTheme = new ThemeData(accentColorBrightness: Brightness.dark);
+    Typography typography = new Typography(platform: lightTheme.platform);
+
+    expect(lightTheme.accentTextTheme.title.color, typography.black.title.color);
+    expect(darkTheme.accentTextTheme.title.color, typography.white.title.color);
+  });
+
+  test('Default icon theme contrasts with brightness', () {
+    ThemeData lightTheme = new ThemeData(brightness: Brightness.light);
+    ThemeData darkTheme = new ThemeData(brightness: Brightness.dark);
+    Typography typography = new Typography(platform: lightTheme.platform);
+
+    expect(lightTheme.textTheme.title.color, typography.black.title.color);
+    expect(darkTheme.textTheme.title.color, typography.white.title.color);
+  });
+
+  test('Default primary icon theme contrasts with primary brightness', () {
+    ThemeData lightTheme = new ThemeData(primaryColorBrightness: Brightness.light);
+    ThemeData darkTheme = new ThemeData(primaryColorBrightness: Brightness.dark);
+    Typography typography = new Typography(platform: lightTheme.platform);
+
+    expect(lightTheme.primaryTextTheme.title.color, typography.black.title.color);
+    expect(darkTheme.primaryTextTheme.title.color, typography.white.title.color);
+  });
+
+  test('Default accent icon theme contrasts with accent brightness', () {
+    ThemeData lightTheme = new ThemeData(accentColorBrightness: Brightness.light);
+    ThemeData darkTheme = new ThemeData(accentColorBrightness: Brightness.dark);
+    Typography typography = new Typography(platform: lightTheme.platform);
+
+    expect(lightTheme.accentTextTheme.title.color, typography.black.title.color);
+    expect(darkTheme.accentTextTheme.title.color, typography.white.title.color);
+  });
 }

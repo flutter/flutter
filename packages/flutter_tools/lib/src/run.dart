@@ -9,7 +9,6 @@ import 'package:meta/meta.dart';
 import 'package:stack_trace/stack_trace.dart';
 
 import 'application_package.dart';
-import 'base/logger.dart';
 import 'base/utils.dart';
 import 'commands/build_apk.dart';
 import 'commands/install.dart';
@@ -17,7 +16,6 @@ import 'commands/trace.dart';
 import 'device.dart';
 import 'globals.dart';
 import 'resident_runner.dart';
-import 'vmservice.dart';
 
 class RunAndStayResident extends ResidentRunner {
   RunAndStayResident(
@@ -60,40 +58,6 @@ class RunAndStayResident extends ResidentRunner {
     }, onError: (dynamic error, StackTrace stackTrace) {
       printError('Exception from flutter run: $error', stackTrace);
     });
-  }
-
-  @override
-  Future<OperationResult> restart({ bool fullRestart: false, bool pauseAfterRestart: false }) async {
-    if (vmService == null) {
-      printError('Debugging is not enabled.');
-      return new OperationResult(1, 'debugging not enabled');
-    } else {
-      Status status = logger.startProgress('Re-starting application...');
-
-      Future<ServiceEvent> extensionAddedEvent;
-
-      if (device.restartSendsFrameworkInitEvent) {
-        extensionAddedEvent = vmService.onExtensionEvent
-          .where((ServiceEvent event) => event.extensionKind == 'Flutter.FrameworkInitialization')
-          .first;
-      }
-
-      bool result = await device.restartApp(
-        _package,
-        _result,
-        mainPath: _mainPath,
-        observatory: vmService,
-        prebuiltApplication: prebuiltMode
-      );
-
-      status.stop();
-
-      if (result && extensionAddedEvent != null) {
-        await extensionAddedEvent;
-      }
-
-      return result ? OperationResult.ok : new OperationResult(1, 'restart error');
-    }
   }
 
   Future<int> _run({
@@ -219,17 +183,7 @@ class RunAndStayResident extends ResidentRunner {
   }
 
   @override
-  Future<Null> handleTerminalCommand(String code) async {
-    String lower = code.toLowerCase();
-    if (lower == 'r' || code == AnsiTerminal.KEY_F5) {
-      if (!supportsServiceProtocol)
-        return;
-      if (device.supportsRestart) {
-        // F5, restart
-        await restart();
-      }
-    }
-  }
+  Future<Null> handleTerminalCommand(String code) async => null;
 
   @override
   Future<Null> cleanupAfterSignal() async {
@@ -245,15 +199,13 @@ class RunAndStayResident extends ResidentRunner {
   @override
   void printHelp({ @required bool details }) {
     bool haveDetails = false;
-    if (!prebuiltMode && device.supportsRestart && supportsServiceProtocol)
-      printStatus('To restart the app, press "r" or F5.');
     if (_result.hasObservatory)
       printStatus('The Observatory debugger and profiler is available at: http://127.0.0.1:${_result.observatoryPort}/');
     if (supportsServiceProtocol) {
       haveDetails = true;
       if (details) {
         printStatus('To dump the widget hierarchy of the app (debugDumpApp), press "w".');
-        printStatus('To dump the rendering tree of the app (debugDumpRenderTree), press "r".');
+        printStatus('To dump the rendering tree of the app (debugDumpRenderTree), press "t".');
       }
     }
     if (haveDetails && !details) {
@@ -270,4 +222,3 @@ class RunAndStayResident extends ResidentRunner {
       await device.stopApp(_package);
   }
 }
-

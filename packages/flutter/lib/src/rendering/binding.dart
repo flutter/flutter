@@ -138,7 +138,11 @@ abstract class RendererBinding extends BindingBase implements SchedulerBinding, 
   SemanticsHandle _semanticsHandle;
 
   void _handleSemanticsEnabledChanged() {
-    if (ui.window.semanticsEnabled) {
+    setSemanticsEnabled(ui.window.semanticsEnabled);
+  }
+
+  void setSemanticsEnabled(bool enabled) {
+    if (enabled) {
       _semanticsHandle ??= _pipelineOwner.ensureSemantics();
     } else {
       _semanticsHandle?.dispose();

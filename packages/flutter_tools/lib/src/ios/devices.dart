@@ -12,7 +12,6 @@ import '../base/process.dart';
 import '../build_info.dart';
 import '../device.dart';
 import '../globals.dart';
-import '../vmservice.dart';
 import '../protocol_discovery.dart';
 import 'mac.dart';
 
@@ -328,17 +327,6 @@ class IOSDevice extends Device {
 
     printStatus('$serviceName listening on http://127.0.0.1:$localPort');
     return localPort;
-  }
-
-  @override
-  Future<bool> restartApp(
-    ApplicationPackage package,
-    LaunchResult result, {
-    String mainPath,
-    VMService observatory,
-    bool prebuiltApplication: false
-  }) async {
-    throw 'unsupported';
   }
 
   @override

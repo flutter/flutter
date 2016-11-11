@@ -82,10 +82,14 @@ Future<Null> main(List<String> args) async {
 
   return Chain.capture/*<Future<Null>>*/(() async {
     // Initialize globals.
-    context[Logger] = new StdoutLogger();
-    context[DeviceManager] = new DeviceManager();
-    context[DevFSConfig] = new DevFSConfig();
-    Doctor.initGlobal();
+    if (context[Logger] == null)
+      context[Logger] = new StdoutLogger();
+    if (context[DeviceManager] == null)
+      context[DeviceManager] = new DeviceManager();
+    if (context[DevFSConfig] == null)
+      context[DevFSConfig] = new DevFSConfig();
+    if (context[Doctor] == null)
+      context[Doctor] = new Doctor();
 
     dynamic result = await runner.run(args);
     _exit(result is int ? result : 1);

@@ -45,7 +45,11 @@ abstract class ResidentRunner {
     bool shouldBuild: true
   });
 
-  Future<OperationResult> restart({ bool fullRestart: false, bool pauseAfterRestart: false });
+  bool get supportsRestart => false;
+
+  Future<OperationResult> restart({ bool fullRestart: false, bool pauseAfterRestart: false }) {
+    throw 'unsupported';
+  }
 
   Future<Null> stop() async {
     await stopEchoingDeviceLog();
@@ -79,6 +83,8 @@ abstract class ResidentRunner {
       exit(0);
     });
     if (!supportsServiceProtocol)
+      return;
+    if (!supportsRestart)
       return;
     ProcessSignal.SIGUSR1.watch().listen((ProcessSignal signal) async {
       printStatus('Caught SIGUSR1');

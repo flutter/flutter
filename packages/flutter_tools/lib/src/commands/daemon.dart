@@ -390,7 +390,7 @@ class AppDomain extends Domain {
   }
 
   bool isRestartSupported(bool enableHotReload, Device device) =>
-      enableHotReload ? device.supportsHotMode : device.supportsRestart;
+      enableHotReload && device.supportsHotMode;
 
   Future<OperationResult> restart(Map<String, dynamic> args) async {
     String appId = _getStringArg(args, 'appId', required: true);

@@ -372,6 +372,7 @@ class SemanticsNode extends AbstractNode {
   /// child list for the given frame at once instead of needing to process the
   /// changes incrementally as new children are compiled.
   void finalizeChildren() {
+    // The goal of this function is updating sawChange.
     if (_children != null) {
       for (SemanticsNode child in _children)
         child._dead = true;
@@ -473,8 +474,12 @@ class SemanticsNode extends AbstractNode {
     owner._detachedNodes.add(this);
     super.detach();
     if (_children != null) {
-      for (SemanticsNode child in _children)
-        child.detach();
+      for (SemanticsNode child in _children) {
+        // The list of children may be stale and may contain nodes that have
+        // been assigned to a different parent.
+        if (child.parent == this)
+          child.detach();
+      }
     }
   }
 

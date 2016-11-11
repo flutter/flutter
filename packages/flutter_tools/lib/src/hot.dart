@@ -79,42 +79,6 @@ class DartDependencySetBuilder {
   }
 }
 
-
-class FirstFrameTimer {
-  FirstFrameTimer(this.vmService);
-
-  void start() {
-    stopwatch.reset();
-    stopwatch.start();
-    _subscription = vmService.onExtensionEvent.listen(_onExtensionEvent);
-  }
-
-  /// Returns a Future which completes after the first frame event is received.
-  Future<Null> firstFrame() => _completer.future;
-
-  void _onExtensionEvent(ServiceEvent event) {
-    if (event.extensionKind == 'Flutter.FirstFrame')
-      _stop();
-  }
-
-  void _stop() {
-    _subscription?.cancel();
-    _subscription = null;
-    stopwatch.stop();
-    _completer.complete(null);
-  }
-
-  Duration get elapsed {
-    assert(!stopwatch.isRunning);
-    return stopwatch.elapsed;
-  }
-
-  final VMService vmService;
-  final Stopwatch stopwatch = new Stopwatch();
-  final Completer<Null> _completer = new Completer<Null>();
-  StreamSubscription<ServiceEvent> _subscription;
-}
-
 class HotRunner extends ResidentRunner {
   HotRunner(
     Device device, {
@@ -450,31 +414,21 @@ class HotRunner extends ResidentRunner {
   }
 
   Future<OperationResult> _restartFromSources() async {
-    FirstFrameTimer firstFrameTimer = new FirstFrameTimer(vmService);
-    firstFrameTimer.start();
+    Stopwatch restartTimer = new Stopwatch();
+    restartTimer.start();
     bool updatedDevFS = await _updateDevFS();
     if (!updatedDevFS)
       return new OperationResult(1, 'Dart Source Error');
     await _launchFromDevFS(_package, _mainPath);
-    bool waitForFrame =
-        await currentView.uiIsolate.flutterFrameworkPresent();
-    Status restartStatus =
-        logger.startProgress('Waiting for application to start...');
-    if (waitForFrame) {
-      // Wait for the first frame to be rendered.
-      await firstFrameTimer.firstFrame();
-    }
-    restartStatus.stop();
-    if (waitForFrame) {
-      printTrace('Restart performed in '
-                 '${getElapsedAsMilliseconds(firstFrameTimer.elapsed)}.');
-      if (benchmarkMode) {
-        benchmarkData['hotRestartMillisecondsToFrame'] =
-            firstFrameTimer.elapsed.inMilliseconds;
-      }
-      flutterUsage.sendTiming('hot', 'restart', firstFrameTimer.elapsed);
+    restartTimer.stop();
+    printTrace('Restart performed in '
+        '${getElapsedAsMilliseconds(restartTimer.elapsed)}.');
+    if (benchmarkMode) {
+      benchmarkData['hotRestartMillisecondsToFrame'] =
+          restartTimer.elapsed.inMilliseconds;
     }
     flutterUsage.sendEvent('hot', 'restart');
+    flutterUsage.sendTiming('hot', 'restart', restartTimer.elapsed);
     return OperationResult.ok;
   }
 
@@ -488,6 +442,9 @@ class HotRunner extends ResidentRunner {
     }
     return true;
   }
+
+  @override
+  bool get supportsRestart => true;
 
   @override
   Future<OperationResult> restart({ bool fullRestart: false, bool pauseAfterRestart: false }) async {
@@ -520,13 +477,11 @@ class HotRunner extends ResidentRunner {
   Future<OperationResult> _reloadSources({ bool pause: false }) async {
     if (currentView.uiIsolate == null)
       throw 'Application isolate not found';
-    FirstFrameTimer firstFrameTimer = new FirstFrameTimer(vmService);
-    firstFrameTimer.start();
-    if (_devFS != null) {
-      bool updatedDevFS = await _updateDevFS();
-      if (!updatedDevFS)
-        return new OperationResult(1, 'Dart Source Error');
-    }
+    Stopwatch reloadTimer = new Stopwatch();
+    reloadTimer.start();
+    bool updatedDevFS = await _updateDevFS();
+    if (!updatedDevFS)
+      return new OperationResult(1, 'Dart Source Error');
     String reloadMessage;
     try {
       Map<String, dynamic> reloadReport =
@@ -562,13 +517,12 @@ class HotRunner extends ResidentRunner {
     if ((pauseEvent != null) && (pauseEvent.isPauseEvent)) {
       // Isolate is paused. Stop here.
       printTrace('Skipping reassemble because isolate is paused.');
-      return OperationResult.ok;
+      return new OperationResult(OperationResult.ok.code, reloadMessage);
     }
     await _evictDirtyAssets();
     printTrace('Reassembling application');
-    bool waitForFrame = true;
     try {
-      waitForFrame = (await currentView.uiIsolate.flutterReassemble() != null);
+      await currentView.uiIsolate.flutterReassemble();
     } catch (_) {
       printError('Reassembling application failed.');
       return new OperationResult(1, 'error reassembling application');
@@ -579,18 +533,14 @@ class HotRunner extends ResidentRunner {
     } catch (_) {
       /* ignore any errors */
     }
-    if (waitForFrame) {
-      // When the framework is present, we can wait for the first frame
-      // event and measure reload time.
-      await firstFrameTimer.firstFrame();
-      printTrace('Hot reload performed in '
-                 '${getElapsedAsMilliseconds(firstFrameTimer.elapsed)}.');
-      if (benchmarkMode) {
-        benchmarkData['hotReloadMillisecondsToFrame'] =
-            firstFrameTimer.elapsed.inMilliseconds;
-      }
-      flutterUsage.sendTiming('hot', 'reload', firstFrameTimer.elapsed);
+    reloadTimer.stop();
+    printTrace('Hot reload performed in '
+               '${getElapsedAsMilliseconds(reloadTimer.elapsed)}.');
+    if (benchmarkMode) {
+      benchmarkData['hotReloadMillisecondsToFrame'] =
+          reloadTimer.elapsed.inMilliseconds;
     }
+    flutterUsage.sendTiming('hot', 'reload', reloadTimer.elapsed);
     return new OperationResult(OperationResult.ok.code, reloadMessage);
   }
 
@@ -608,7 +558,7 @@ class HotRunner extends ResidentRunner {
     printStatus('The Observatory debugger and profiler is available at: http://127.0.0.1:$_observatoryPort/');
     if (details) {
       printStatus('To dump the widget hierarchy of the app (debugDumpApp), press "w".');
-      printStatus('To dump the rendering tree of the app (debugDumpRenderTree), press "r".');
+      printStatus('To dump the rendering tree of the app (debugDumpRenderTree), press "t".');
       printStatus('To repeat this help message, press "h" or F1. To quit, press "q", F10, or Ctrl-C.');
     } else {
       printStatus('For a more detailed help message, press "h" or F1. To quit, press "q", F10, or Ctrl-C.');

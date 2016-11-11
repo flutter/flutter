@@ -6,20 +6,15 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:path/path.dart' as path;
-
 import '../android/android_sdk.dart';
 import '../application_package.dart';
 import '../base/os.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
 import '../build_info.dart';
-import '../dart/package_map.dart';
 import '../device.dart';
 import '../flx.dart' as flx;
 import '../globals.dart';
-import '../toolchain.dart';
-import '../vmservice.dart';
 import '../protocol_discovery.dart';
 import 'adb.dart';
 import 'android.dart';
@@ -30,8 +25,6 @@ const String _defaultAdbPath = 'adb';
 // Path where the FLX bundle will be copied on the device.
 const String _deviceBundlePath = '/data/local/tmp/dev.flx';
 
-// Path where the snapshot will be copied on the device.
-const String _deviceSnapshotPath = '/data/local/tmp/dev_snapshot.bin';
 
 class AndroidDevices extends PollingDeviceDiscovery {
   AndroidDevices() : super('AndroidDevices');
@@ -435,74 +428,6 @@ class AndroidDevice extends Device {
   bool get supportsHotMode => true;
 
   @override
-  Future<bool> runFromFile(ApplicationPackage package,
-                           String scriptUri,
-                           String packagesUri) async {
-    AndroidApk apk = package;
-    List<String> cmd = adbCommandForDevice(<String>[
-      'shell', 'am', 'start',
-      '-a', 'android.intent.action.RUN',
-      '-d', _deviceBundlePath,
-      '-f', '0x20000000',  // FLAG_ACTIVITY_SINGLE_TOP
-    ]);
-    cmd.addAll(<String>['--es', 'file', scriptUri]);
-    cmd.addAll(<String>['--es', 'packages', packagesUri]);
-    cmd.add(apk.launchActivity);
-    String result = runCheckedSync(cmd);
-    if (result.contains('Error: ')) {
-      printError(result.trim());
-      return false;
-    }
-    return true;
-  }
-
-  @override
-  bool get supportsRestart => true;
-
-  @override
-  Future<bool> restartApp(
-    ApplicationPackage package,
-    LaunchResult result, {
-    String mainPath,
-    VMService observatory,
-    bool prebuiltApplication: false
-  }) async {
-    Directory tempDir = await Directory.systemTemp.createTemp('flutter_tools');
-
-    if (prebuiltApplication) {
-      return false;
-    }
-
-    try {
-      String snapshotPath = path.join(tempDir.path, 'snapshot_blob.bin');
-      int result = await flx.createSnapshot(
-        snapshotterPath: tools.getHostToolPath(HostTool.SkySnapshot),
-        mainPath: mainPath,
-        snapshotPath: snapshotPath,
-        packages: path.absolute(PackageMap.globalPackagesPath),
-     );
-
-      if (result != 0) {
-        printError('Failed to run the Flutter compiler; exit code: $result');
-        return false;
-      }
-
-      AndroidApk apk = package;
-      String androidActivity = apk.launchActivity;
-      bool success = await refreshSnapshot(androidActivity, snapshotPath);
-
-      if (!success) {
-        printError('Error refreshing snapshot on $this.');
-        return false;
-      }
-
-      return true;
-    } finally {
-      tempDir.deleteSync(recursive: true);
-    }
-  }
-
-  @override
   Future<bool> stopApp(ApplicationPackage app) {
     List<String> command = adbCommandForDevice(<String>['shell', 'am', 'force-stop', app.id]);
     return runCommandAndStreamOutput(command).then((int exitCode) => exitCode == 0);
@@ -543,44 +468,6 @@ class AndroidDevice extends Device {
 
   @override
   bool isSupported() => true;
-
-  Future<bool> refreshSnapshot(String activity, String snapshotPath) async {
-    if (!FileSystemEntity.isFileSync(snapshotPath)) {
-      printError('Cannot find $snapshotPath');
-      return false;
-    }
-
-    RunResult result = await runAsync(
-      adbCommandForDevice(<String>['push', snapshotPath, _deviceSnapshotPath])
-    );
-    if (result.exitCode != 0) {
-      printStatus(result.toString());
-      return false;
-    }
-
-    List<String> cmd = adbCommandForDevice(<String>[
-      'shell', 'am', 'start',
-      '-a', 'android.intent.action.RUN',
-      '-d', _deviceBundlePath,
-      '-f', '0x20000000',  // FLAG_ACTIVITY_SINGLE_TOP
-      '--es', 'snapshot', _deviceSnapshotPath,
-      activity,
-    ]);
-    result = await runAsync(cmd);
-    if (result.exitCode != 0) {
-      printStatus(result.toString());
-      return false;
-    }
-
-    final RegExp errorRegExp = new RegExp(r'^Error: .*$', multiLine: true);
-    Match errorMatch = errorRegExp.firstMatch(result.processResult.stdout);
-    if (errorMatch != null) {
-      printError(errorMatch.group(0));
-      return false;
-    }
-
-    return true;
-  }
 
   @override
   bool get supportsScreenshot => true;
