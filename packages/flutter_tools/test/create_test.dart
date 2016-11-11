@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:args/command_runner.dart';
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/dart/sdk.dart';
@@ -89,9 +90,13 @@ void main() {
       CreateCommand command = new CreateCommand();
       CommandRunner runner = createTestCommandRunner(command);
 
-      int code = await runner.run(<String>['create', temp.path, '--pub']);
-      expect(code, 2);
-      expect(testLogger.errorText, contains('Try moving --pub'));
+      try {
+        await runner.run(<String>['create', temp.path, '--pub']);
+        fail('expected ToolExit exception');
+      } on ToolExit catch (e) {
+        expect(e.exitCode, 2);
+        expect(e.message, contains('Try moving --pub'));
+      }
     });
 
     // Verify that we fail with an error code when the file exists.
@@ -101,8 +106,12 @@ void main() {
       CommandRunner runner = createTestCommandRunner(command);
       File existingFile = new File("${temp.path.toString()}/bad");
       if (!existingFile.existsSync()) existingFile.createSync();
-      int code = await runner.run(<String>['create', existingFile.path]);
-      expect(code, 1);
+      try {
+        await runner.run(<String>['create', existingFile.path]);
+        fail('expected ToolExit exception');
+      } on ToolExit catch (e) {
+        expect(e.message, contains('file exists'));
+      }
     });
   });
 }

@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import '../base/common.dart';
 import '../base/utils.dart';
 import '../device.dart';
 import '../globals.dart';
@@ -19,9 +20,10 @@ class DevicesCommand extends FlutterCommand {
   @override
   Future<int> runCommand() async {
     if (!doctor.canListAnything) {
-      printError("Unable to locate a development device; please run 'flutter doctor' for "
-        "information about installing additional components.");
-      return 1;
+      throwToolExit(
+        "Unable to locate a development device; please run 'flutter doctor' for "
+        "information about installing additional components.",
+        exitCode: 1);
     }
 
     List<Device> devices = await deviceManager.getAllConnectedDevices();
@@ -35,7 +37,6 @@ class DevicesCommand extends FlutterCommand {
       printStatus('${devices.length} connected ${pluralize('device', devices.length)}:\n');
       Device.printDevices(devices);
     }
-
     return 0;
   }
 }

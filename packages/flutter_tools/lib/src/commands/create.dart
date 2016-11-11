@@ -8,6 +8,7 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 
 import '../android/android.dart' as android;
+import '../base/common.dart';
 import '../base/utils.dart';
 import '../cache.dart';
 import '../dart/pub.dart';
@@ -46,28 +47,23 @@ class CreateCommand extends FlutterCommand {
 
   @override
   Future<int> runCommand() async {
-    if (argResults.rest.isEmpty) {
-      printError('No option specified for the output directory.');
-      printError(usage);
-      return 2;
-    }
+    if (argResults.rest.isEmpty)
+      throwToolExit('No option specified for the output directory.\n$usage', exitCode: 2);
 
     if (argResults.rest.length > 1) {
-      printError('Multiple output directories specified.');
+      String message = 'Multiple output directories specified.';
       for (String arg in argResults.rest) {
         if (arg.startsWith('-')) {
-          printError('Try moving $arg to be immediately following $name');
+          message += '\nTry moving $arg to be immediately following $name';
           break;
         }
       }
-      return 2;
+      throwToolExit(message, exitCode: 2);
     }
 
-    if (Cache.flutterRoot == null) {
-      printError('Neither the --flutter-root command line flag nor the FLUTTER_ROOT environment\n'
-        'variable was specified. Unable to find package:flutter.');
-      return 2;
-    }
+    if (Cache.flutterRoot == null)
+      throwToolExit('Neither the --flutter-root command line flag nor the FLUTTER_ROOT environment\n'
+        'variable was specified. Unable to find package:flutter.', exitCode: 2);
 
     await Cache.instance.updateAll();
 
@@ -75,16 +71,12 @@ class CreateCommand extends FlutterCommand {
 
     String flutterPackagesDirectory = path.join(flutterRoot, 'packages');
     String flutterPackagePath = path.join(flutterPackagesDirectory, 'flutter');
-    if (!FileSystemEntity.isFileSync(path.join(flutterPackagePath, 'pubspec.yaml'))) {
-      printError('Unable to find package:flutter in $flutterPackagePath');
-      return 2;
-    }
+    if (!FileSystemEntity.isFileSync(path.join(flutterPackagePath, 'pubspec.yaml')))
+      throwToolExit('Unable to find package:flutter in $flutterPackagePath', exitCode: 2);
 
     String flutterDriverPackagePath = path.join(flutterRoot, 'packages', 'flutter_driver');
-    if (!FileSystemEntity.isFileSync(path.join(flutterDriverPackagePath, 'pubspec.yaml'))) {
-      printError('Unable to find package:flutter_driver in $flutterDriverPackagePath');
-      return 2;
-    }
+    if (!FileSystemEntity.isFileSync(path.join(flutterDriverPackagePath, 'pubspec.yaml')))
+      throwToolExit('Unable to find package:flutter_driver in $flutterDriverPackagePath', exitCode: 2);
 
     Directory projectDir = new Directory(argResults.rest.first);
     String dirPath = path.normalize(projectDir.absolute.path);
@@ -92,16 +84,12 @@ class CreateCommand extends FlutterCommand {
     String projectName = _normalizeProjectName(path.basename(dirPath));
 
     String error =_validateProjectDir(dirPath, flutterRoot: flutterRoot);
-    if (error != null) {
-      printError(error);
-      return 1;
-    }
+    if (error != null)
+      throwToolExit(error);
 
     error = _validateProjectName(projectName);
-    if (error != null) {
-      printError(error);
-      return 1;
-    }
+    if (error != null)
+      throwToolExit(error);
 
     int generatedCount = _renderTemplates(
       projectName,
@@ -114,11 +102,8 @@ class CreateCommand extends FlutterCommand {
 
     printStatus('');
 
-    if (argResults['pub']) {
-      int code = await pubGet(directory: dirPath);
-      if (code != 0)
-        return code;
-    }
+    if (argResults['pub'])
+      await pubGet(directory: dirPath);
 
     printStatus('');
 
@@ -149,7 +134,6 @@ Your main program file is lib/main.dart in the $relativePath directory.
         "directory in order to launch your app.");
       printStatus("Your main program file is: $relativePath/lib/main.dart");
     }
-
     return 0;
   }
 

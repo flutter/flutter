@@ -23,6 +23,14 @@ String get homeDirPath {
 }
 String _homeDirPath;
 
+/// Throw a specialized exception for expected situations
+/// where the tool should exit with a clear message to the user
+/// and no stack trace unless the --verbose option is specified.
+/// For example: network errors
+void throwToolExit(String message, { int exitCode }) {
+  throw new ToolExit(message, exitCode: exitCode);
+}
+
 /// Specialized exception for expected situations
 /// where the tool should exit with a clear message to the user
 /// and no stack trace unless the --verbose option is specified.

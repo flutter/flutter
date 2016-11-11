@@ -20,7 +20,7 @@ Future<List<int>> fetchUrl(Uri url) async {
 
   printTrace('Received response statusCode=${response.statusCode}');
   if (response.statusCode != 200) {
-    throw new ToolExit(
+    throwToolExit(
       'Download failed: $url\n'
           '  because (${response.statusCode}) ${response.reasonPhrase}',
       exitCode: kNetworkProblemExitCode,
