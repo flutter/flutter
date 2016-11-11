@@ -4,6 +4,8 @@
 
 #include "flutter/flow/raster_cache.h"
 
+#include <stdlib.h>
+
 #include <vector>
 
 #include "flutter/common/threads.h"
@@ -49,13 +51,17 @@ static void DrawCheckerboard(SkCanvas* canvas, const SkRect& rect) {
   // Draw a checkerboard
   canvas->save();
   canvas->clipRect(rect);
-  DrawCheckerboard(canvas, 0x4400FF00, 0x00000000, 12);
+
+  auto checkerboard_color =
+      SkColorSetARGBInline(64, rand() % 256, rand() % 256, rand() % 256);
+
+  DrawCheckerboard(canvas, checkerboard_color, 0x00000000, 12);
   canvas->restore();
 
   // Stroke the drawn area
   SkPaint debugPaint;
-  debugPaint.setStrokeWidth(3);
-  debugPaint.setColor(SK_ColorRED);
+  debugPaint.setStrokeWidth(8);
+  debugPaint.setColor(SkColorSetA(checkerboard_color, 255));
   debugPaint.setStyle(SkPaint::kStroke_Style);
   canvas->drawRect(rect, debugPaint);
 }
