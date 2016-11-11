@@ -34,7 +34,7 @@ Future<List<int>> fetchUrl(Uri url) async {
 
     return responseBody.takeBytes();
   } on IOException catch (e) {
-    throwToolExit(
+    throw new ToolExit(
       'Download failed: $url\n  $e',
       exitCode: kNetworkProblemExitCode,
     );
