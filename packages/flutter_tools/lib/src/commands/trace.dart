@@ -60,8 +60,7 @@ class TraceCommand extends FlutterCommand {
     try {
       tracing = await Tracing.connect(observatoryPort);
     } catch (error) {
-      printError('Error connecting to observatory: $error');
-      return 1;
+      throwToolExit('Error connecting to observatory: $error');
     }
 
     Cache.releaseLockEarly();

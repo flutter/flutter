@@ -25,7 +25,7 @@ class StopCommand extends FlutterCommand {
     commandValidator();
     device = await findTargetDevice();
     if (device == null)
-      return 1;
+      throwToolExit(null);
     return super.verifyThenRunCommand();
   }
 
@@ -34,10 +34,10 @@ class StopCommand extends FlutterCommand {
     ApplicationPackage app = applicationPackages.getPackageForPlatform(device.platform);
     if (app == null) {
       String platformName = getNameForTargetPlatform(device.platform);
-      printError('No Flutter application for $platformName found in the current directory.');
-      return 1;
+      throwToolExit('No Flutter application for $platformName found in the current directory.');
     }
     printStatus('Stopping apps on ${device.name}.');
-    return await device.stopApp(app) ? 0 : 1;
+    if (!await device.stopApp(app))
+      throwToolExit(null);
   }
 }

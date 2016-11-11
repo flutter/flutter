@@ -58,9 +58,9 @@ class SetupCommand extends FlutterCommand {
       printStatus('\nThe flutter command is available on the path.');
     }
 
-    if (goodInstall)
-      printStatus('\nFlutter setup complete!');
+    if (!goodInstall)
+      throwToolExit(null);
 
-    return goodInstall ? 0 : 1;
+    printStatus('\nFlutter setup complete!');
   }
 }
