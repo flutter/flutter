@@ -9,6 +9,7 @@ import("//flutter/lib/ui/dart_ui.gni")
 target_is_fuchsia = target_os == "fuchsia"
 
 if (target_is_fuchsia) {
+  import("//apps/mozart/lib/flutter/sdk_ext/sdk_ext.gni")
   import("//lib/fidl/dart/sdk_ext/sdk_ext.gni")
 }
 
@@ -81,9 +82,13 @@ action("generate_snapshot_bin") {
   ]
 
   if (target_is_fuchsia) {
-    inputs += fidl_dart_sdk_ext_files
+    inputs += fidl_dart_sdk_ext_files + mozart_dart_sdk_ext_files
     fidl_internal_path = rebase_path(fidl_dart_sdk_ext_lib)
-    args += [ "--url_mapping=dart:fidl.internal,$fidl_internal_path" ]
+    mozart_internal_path = rebase_path(mozart_dart_sdk_ext_lib)
+    args += [
+      "--url_mapping=dart:fidl.internal,$fidl_internal_path",
+      "--url_mapping=dart:mozart.internal,$mozart_internal_path",
+    ]
   }
 }
 

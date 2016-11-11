@@ -64,9 +64,10 @@ void Rasterizer::Draw(std::unique_ptr<flow::LayerTree> layer_tree,
     root_node->op->set_image(mozart::ImageNodeOp::New());
     root_node->op->get_image()->content_rect = bounds.Clone();
     root_node->op->get_image()->image_resource_id = kContentImageResourceId;
-    update->nodes.insert(kRootNodeId, std::move(root_node));
 
     layer_tree->UpdateScene(update.get(), root_node.get());
+
+    update->nodes.insert(kRootNodeId, std::move(root_node));
   } else {
     update->nodes.insert(kRootNodeId, mozart::Node::New());
   }

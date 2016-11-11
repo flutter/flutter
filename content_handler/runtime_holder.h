@@ -63,6 +63,7 @@ class RuntimeHolder : public blink::RuntimeDelegate,
   void HandleAssetPlatformMessage(ftl::RefPtr<blink::PlatformMessage> message);
 
   void InitFidlInternal();
+  void InitMozartInternal();
 
   void BeginFrame();
   void OnFrameComplete();

@@ -11,5 +11,6 @@ import 'dart:fidl.internal';
 import 'dart:io';
 import 'dart:isolate';
 import 'dart:math';
+import 'dart:mozart.internal';
 import 'dart:typed_data';
 import 'dart:ui';

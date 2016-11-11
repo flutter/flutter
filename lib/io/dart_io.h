@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_TONIC_DART_IO_H_
-#define FLUTTER_TONIC_DART_IO_H_
+#ifndef FLUTTER_LIB_IO_DART_IO_H_
+#define FLUTTER_LIB_IO_DART_IO_H_
 
 #include "lib/ftl/macros.h"
 
@@ -19,4 +19,4 @@ class DartIO {
 
 }  // namespace blink
 
-#endif  // FLUTTER_TONIC_DART_IO_H_
+#endif  // FLUTTER_LIB_IO_DART_IO_H_

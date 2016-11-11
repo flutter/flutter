@@ -173,6 +173,7 @@ void RuntimeHolder::DidCreateMainIsolate(Dart_Isolate isolate) {
   if (asset_store_)
     blink::AssetFontSelector::Install(asset_store_);
   InitFidlInternal();
+  InitMozartInternal();
 }
 
 void RuntimeHolder::InitFidlInternal() {
@@ -198,6 +199,18 @@ void RuntimeHolder::InitFidlInternal() {
   DART_CHECK_VALID(Dart_SetField(
       fidl_internal, ToDart("_outgoingServices"),
       DartConverter<mx::channel>::ToDart(outgoing_services_.PassChannel())));
+}
+
+void RuntimeHolder::InitMozartInternal() {
+  fidl::InterfaceHandle<mozart::ViewContainer> view_container;
+  view_->GetContainer(fidl::GetProxy(&view_container));
+
+  Dart_Handle mozart_internal =
+      Dart_LookupLibrary(ToDart("dart:mozart.internal"));
+
+  DART_CHECK_VALID(Dart_SetField(
+      mozart_internal, ToDart("_viewContainer"),
+      DartConverter<mx::channel>::ToDart(view_container.PassHandle())));
 }
 
 void RuntimeHolder::InitRootBundle(std::vector<char> bundle) {
