@@ -45,8 +45,7 @@ void main() {
       CreateCommand command = new CreateCommand();
       CommandRunner runner = createTestCommandRunner(command);
 
-      int code = await runner.run(<String>['create', '--no-pub', temp.path]);
-      expect(code, 0);
+      await runner.run(<String>['create', '--no-pub', temp.path]);
 
       void expectExists(String relPath) {
         expect(FileSystemEntity.isFileSync('${temp.path}/$relPath'), true);
@@ -76,11 +75,9 @@ void main() {
       CreateCommand command = new CreateCommand();
       CommandRunner runner = createTestCommandRunner(command);
 
-      int code = await runner.run(<String>['create', '--no-pub', temp.path]);
-      expect(code, 0);
+      await runner.run(<String>['create', '--no-pub', temp.path]);
 
-      code = await runner.run(<String>['create', '--no-pub', temp.path]);
-      expect(code, 0);
+      await runner.run(<String>['create', '--no-pub', temp.path]);
     });
 
     // Verify that we help the user correct an option ordering issue
@@ -123,8 +120,7 @@ Future<Null> _createAndAnalyzeProject(Directory dir, List<String> createArgs) as
   List<String> args = <String>['create'];
   args.addAll(createArgs);
   args.add(dir.path);
-  int code = await runner.run(args);
-  expect(code, 0);
+  await runner.run(args);
 
   String mainPath = path.join(dir.path, 'lib', 'main.dart');
   expect(new File(mainPath).existsSync(), true);

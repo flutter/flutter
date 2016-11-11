@@ -14,27 +14,23 @@ import 'src/mocks.dart';
 
 void main() {
   group('stop', () {
-    testUsingContext('returns 0 when Android is connected and ready to be stopped', () {
+    testUsingContext('returns 0 when Android is connected and ready to be stopped', () async {
       StopCommand command = new StopCommand();
       applyMocksToCommand(command);
       MockAndroidDevice device = new MockAndroidDevice();
       when(device.stopApp(any)).thenReturn(new Future<bool>.value(true));
       testDeviceManager.addDevice(device);
-      return createTestCommandRunner(command).run(<String>['stop']).then((int code) {
-        expect(code, 0);
-      });
+      await createTestCommandRunner(command).run(<String>['stop']);
     });
 
-    testUsingContext('returns 0 when iOS is connected and ready to be stopped', () {
+    testUsingContext('returns 0 when iOS is connected and ready to be stopped', () async {
       StopCommand command = new StopCommand();
       applyMocksToCommand(command);
       MockIOSDevice device = new MockIOSDevice();
       when(device.stopApp(any)).thenReturn(new Future<bool>.value(true));
       testDeviceManager.addDevice(device);
 
-      return createTestCommandRunner(command).run(<String>['stop']).then((int code) {
-        expect(code, 0);
-      });
+      await createTestCommandRunner(command).run(<String>['stop']);
     });
   });
 }

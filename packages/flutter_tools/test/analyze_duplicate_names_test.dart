@@ -37,8 +37,7 @@ void main() {
       applyMocksToCommand(command);
       return createTestCommandRunner(command).run(
         <String>['analyze', '--no-current-package', '--no-current-directory', dartFileA.path, dartFileB.path]
-      ).then((int code) {
-        expect(code, 0);
+      ).then((_) {
         expect(testLogger.statusText, startsWith('Analyzing 2 files...\nNo analyzer warnings!'));
       });
 

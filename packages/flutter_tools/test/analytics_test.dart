@@ -40,21 +40,18 @@ void main() {
       flutterUsage.enabled = false;
       CreateCommand command = new CreateCommand();
       CommandRunner runner = createTestCommandRunner(command);
-      int code = await runner.run(<String>['create', '--no-pub', temp.path]);
-      expect(code, 0);
+      await runner.run(<String>['create', '--no-pub', temp.path]);
       expect(count, 0);
 
       flutterUsage.enabled = true;
-      code = await runner.run(<String>['create', '--no-pub', temp.path]);
-      expect(code, 0);
+      await runner.run(<String>['create', '--no-pub', temp.path]);
       expect(count, flutterUsage.isFirstRun ? 0 : 2);
 
       count = 0;
       flutterUsage.enabled = false;
       DoctorCommand doctorCommand = new DoctorCommand();
       runner = createTestCommandRunner(doctorCommand);
-      code = await runner.run(<String>['doctor']);
-      expect(code, 0);
+      await runner.run(<String>['doctor']);
       expect(count, 0);
     }, overrides: <Type, dynamic>{
       Usage: new Usage()

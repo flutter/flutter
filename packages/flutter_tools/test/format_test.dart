@@ -32,8 +32,7 @@ void main() {
       CreateCommand command = new CreateCommand();
       CommandRunner runner = createTestCommandRunner(command);
 
-      int code = await runner.run(<String>['create', '--no-pub', temp.path]);
-      expect(code, 0);
+      await runner.run(<String>['create', '--no-pub', temp.path]);
     }
 
     testUsingContext('a file', () async {
@@ -45,8 +44,7 @@ void main() {
 
       FormatCommand command = new FormatCommand();
       CommandRunner runner = createTestCommandRunner(command);
-      int code = await runner.run(<String>['format', srcFile.path]);
-      expect(code, 0);
+      await runner.run(<String>['format', srcFile.path]);
 
       String formatted = srcFile.readAsStringSync();
       expect(formatted, original);

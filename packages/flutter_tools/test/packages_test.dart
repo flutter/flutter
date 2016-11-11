@@ -29,8 +29,7 @@ void main() {
       CreateCommand command = new CreateCommand();
       CommandRunner runner = createTestCommandRunner(command);
 
-      int code = await runner.run(<String>['create', '--no-pub', temp.path]);
-      expect(code, 0);
+      await runner.run(<String>['create', '--no-pub', temp.path]);
     }
 
     Future<Null> runCommand(String verb) async {
@@ -39,8 +38,7 @@ void main() {
       PackagesCommand command = new PackagesCommand();
       CommandRunner runner = createTestCommandRunner(command);
 
-      int code = await runner.run(<String>['packages', verb, temp.path]);
-      expect(code, 0);
+      await runner.run(<String>['packages', verb, temp.path]);
     }
 
     void expectExists(String relPath) {
