@@ -1992,6 +1992,9 @@ abstract class Element implements BuildContext {
 
   /// Calls the argument for each child. Must be overridden by subclasses that
   /// support having children.
+  ///
+  /// There is no guaranteed order in which the children will be visited, though
+  /// it should be consistent over time.
   void visitChildren(ElementVisitor visitor) { }
 
   /// Calls the argument for each child that is relevant for semantics. By
@@ -3401,6 +3404,13 @@ class InheritedElement extends ProxyElement {
 /// These three methods should update the render tree accordingly, attaching,
 /// moving, and detaching the given child render object from this element's own
 /// render object respectively.
+///
+/// ### Walking the children
+///
+/// If a [RenderObjectElement] object has any children [Element]s, it must
+/// expose them in its implementation of the [visitChildren] method. This method
+/// is used by many of the framework's internal mechanisms, and so should be
+/// fast. It is also used by the test framework and [debugDumpApp].
 abstract class RenderObjectElement extends BuildableElement {
   /// Creates an element that uses the given widget as its configuration.
   RenderObjectElement(RenderObjectWidget widget) : super(widget);
