@@ -56,7 +56,7 @@ class AnalyzeContinuously extends AnalyzeBase {
 
     String message = 'Analysis server exited with code $exitCode.';
     if (exitCode != 0)
-      throw new ToolExit(message, exitCode: exitCode);
+      throwToolExit(message, exitCode: exitCode);
     printStatus(message);
     return 0;
   }

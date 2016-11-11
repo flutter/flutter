@@ -59,7 +59,7 @@ class DaemonCommand extends FlutterCommand {
 
       int code = await daemon.onExit;
       if (code != null)
-        throw new ToolExit(null, exitCode: code);
+        throwToolExit(null, exitCode: code);
       return 0;
     }, onError: _handleError);
   }

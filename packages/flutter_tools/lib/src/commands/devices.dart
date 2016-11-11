@@ -20,7 +20,7 @@ class DevicesCommand extends FlutterCommand {
   @override
   Future<int> runCommand() async {
     if (!doctor.canListAnything)
-      throw new ToolExit(
+      throwToolExit(
         "Unable to locate a development device; please run 'flutter doctor' for "
         "information about installing additional components.",
         exitCode: 1);

@@ -28,7 +28,7 @@ class ChannelCommand extends FlutterCommand {
       case 1:
         return _switchChannel(argResults.rest[0]);
       default:
-        throw new ToolExit('Too many arguments.$usage');
+        throwToolExit('Too many arguments.$usage');
     }
   }
 
@@ -51,7 +51,7 @@ class ChannelCommand extends FlutterCommand {
       },
     );
     if (result != 0)
-      throw new ToolExit('List channels failed: $result', exitCode: result);
+      throwToolExit('List channels failed: $result', exitCode: result);
     return 0;
   }
 
@@ -62,7 +62,7 @@ class ChannelCommand extends FlutterCommand {
       workingDirectory: Cache.flutterRoot,
     );
     if (result != 0)
-      throw new ToolExit('Switch channel failed: $result', exitCode: result);
+      throwToolExit('Switch channel failed: $result', exitCode: result);
     return 0;
   }
 }

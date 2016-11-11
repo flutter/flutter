@@ -134,7 +134,7 @@ class AnalyzeOnce extends AnalyzeBase {
       message.write(
           'If this does not help, to track down the conflict you can use '
           '"pub deps --style=list" and "pub upgrade --verbosity=solver" in the affected directories.');
-      throw new ToolExit(message.toString());
+      throwToolExit(message.toString());
     }
     Map<String, String> packages = dependencies.asPackageMap();
 
@@ -193,9 +193,9 @@ class AnalyzeOnce extends AnalyzeBase {
     if (errorCount > 0) {
       // we consider any level of error to be an error exit (we don't report different levels)
       if (membersMissingDocumentation > 0 && flutterRepo)
-        throw new ToolExit('[lint] $membersMissingDocumentation public ${ membersMissingDocumentation == 1 ? "member lacks" : "members lack" } documentation (ran in ${elapsed}s)');
+        throwToolExit('[lint] $membersMissingDocumentation public ${ membersMissingDocumentation == 1 ? "member lacks" : "members lack" } documentation (ran in ${elapsed}s)');
       else
-        throw new ToolExit('(Ran in ${elapsed}s)');
+        throwToolExit('(Ran in ${elapsed}s)');
     }
     if (argResults['congratulate']) {
       if (membersMissingDocumentation > 0 && flutterRepo) {

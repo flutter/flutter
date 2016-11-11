@@ -48,7 +48,7 @@ class CreateCommand extends FlutterCommand {
   @override
   Future<int> runCommand() async {
     if (argResults.rest.isEmpty)
-      throw new ToolExit('No option specified for the output directory.\n$usage', exitCode: 2);
+      throwToolExit('No option specified for the output directory.\n$usage', exitCode: 2);
 
     if (argResults.rest.length > 1) {
       String message = 'Multiple output directories specified.';
@@ -58,11 +58,11 @@ class CreateCommand extends FlutterCommand {
           break;
         }
       }
-      throw new ToolExit(message, exitCode: 2);
+      throwToolExit(message, exitCode: 2);
     }
 
     if (Cache.flutterRoot == null)
-      throw new ToolExit('Neither the --flutter-root command line flag nor the FLUTTER_ROOT environment\n'
+      throwToolExit('Neither the --flutter-root command line flag nor the FLUTTER_ROOT environment\n'
         'variable was specified. Unable to find package:flutter.', exitCode: 2);
 
     await Cache.instance.updateAll();
@@ -72,11 +72,11 @@ class CreateCommand extends FlutterCommand {
     String flutterPackagesDirectory = path.join(flutterRoot, 'packages');
     String flutterPackagePath = path.join(flutterPackagesDirectory, 'flutter');
     if (!FileSystemEntity.isFileSync(path.join(flutterPackagePath, 'pubspec.yaml')))
-      throw new ToolExit('Unable to find package:flutter in $flutterPackagePath', exitCode: 2);
+      throwToolExit('Unable to find package:flutter in $flutterPackagePath', exitCode: 2);
 
     String flutterDriverPackagePath = path.join(flutterRoot, 'packages', 'flutter_driver');
     if (!FileSystemEntity.isFileSync(path.join(flutterDriverPackagePath, 'pubspec.yaml')))
-      throw new ToolExit('Unable to find package:flutter_driver in $flutterDriverPackagePath', exitCode: 2);
+      throwToolExit('Unable to find package:flutter_driver in $flutterDriverPackagePath', exitCode: 2);
 
     Directory projectDir = new Directory(argResults.rest.first);
     String dirPath = path.normalize(projectDir.absolute.path);
@@ -85,11 +85,11 @@ class CreateCommand extends FlutterCommand {
 
     String error =_validateProjectDir(dirPath, flutterRoot: flutterRoot);
     if (error != null)
-      throw new ToolExit(error);
+      throwToolExit(error);
 
     error = _validateProjectName(projectName);
     if (error != null)
-      throw new ToolExit(error);
+      throwToolExit(error);
 
     int generatedCount = _renderTemplates(
       projectName,
