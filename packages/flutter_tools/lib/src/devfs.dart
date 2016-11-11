@@ -20,6 +20,8 @@ typedef void DevFSProgressReporter(int progress, int max);
 class DevFSConfig {
   /// Should DevFS assume that symlink targets are stable?
   bool cacheSymlinks = false;
+  /// Should DevFS assume that there are no symlinks to directories?
+  bool noDirectorySymlinks = false;
 }
 
 DevFSConfig get devFSConfig => context[DevFSConfig];
@@ -521,12 +523,12 @@ class DevFS {
       Stream<FileSystemEntity> files =
           directory.list(recursive: recursive, followLinks: false);
       await for (FileSystemEntity file in files) {
-        if (file is Link) {
+        if (!devFSConfig.noDirectorySymlinks && (file is Link)) {
+          // Check if this is a symlink to a directory and skip it.
           final String linkPath = file.resolveSymbolicLinksSync();
           final FileSystemEntityType linkType =
               FileStat.statSync(linkPath).type;
           if (linkType == FileSystemEntityType.DIRECTORY) {
-            // Skip links to directories.
             continue;
           }
         }

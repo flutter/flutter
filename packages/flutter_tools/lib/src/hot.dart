@@ -12,6 +12,7 @@ import 'package:stack_trace/stack_trace.dart';
 
 import 'application_package.dart';
 import 'asset.dart';
+import 'base/context.dart';
 import 'base/logger.dart';
 import 'base/process.dart';
 import 'base/utils.dart';
@@ -26,6 +27,15 @@ import 'globals.dart';
 import 'resident_runner.dart';
 import 'toolchain.dart';
 import 'vmservice.dart';
+
+class HotRunnerConfig {
+  /// Should the hot runner compute the minimal Dart dependencies?
+  bool computeDartDependencies = true;
+  /// Should the hot runner assume that the minimal Dart dependencies do not change?
+  bool stableDartDependencies = false;
+}
+
+HotRunnerConfig get hotRunnerConfig => context[HotRunnerConfig];
 
 const bool kHotReloadDefault = true;
 
@@ -132,6 +142,10 @@ class HotRunner extends ResidentRunner {
   }
 
   bool _refreshDartDependencies() {
+    if (!hotRunnerConfig.computeDartDependencies) {
+      // Disabled.
+      return true;
+    }
     if (_dartDependencies != null) {
       // Already computed.
       return true;
@@ -364,8 +378,10 @@ class HotRunner extends ResidentRunner {
                         bundleDirty: rebuildBundle,
                         fileFilter: _dartDependencies);
     devFSStatus.stop();
-    // Clear the set after the sync.
-    _dartDependencies = null;
+    if (!hotRunnerConfig.stableDartDependencies) {
+      // Clear the set after the sync so they are recomputed next time.
+      _dartDependencies = null;
+    }
     printTrace('Synced ${getSizeAsMB(_devFS.bytes)}.');
     return true;
   }
