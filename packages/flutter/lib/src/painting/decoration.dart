@@ -79,8 +79,16 @@ abstract class Decoration {
   /// if it is a [BoxDecoration] with definitely no [BackgroundImage]).
   BoxPainter createBoxPainter([VoidCallback onChanged]);
 
+  /// Returns a string representation of this object.
+  ///
+  /// Every line of the output should be prefixed by `prefix`.
+  ///
+  /// If `indentPrefix` is non-null, then the description can be further split
+  /// into sublines, and each subline should be prefixed with `indentPrefix`
+  /// (rather that `prefix`). This is used, for example, by [BoxDecoration] for
+  /// the otherwise quite verbose [BoxShadow] descriptions.
   @override
-  String toString([String prefix = '']) => '$prefix$runtimeType';
+  String toString([String prefix = '', String indentPrefix ]) => '$prefix$runtimeType';
 }
 
 /// A stateful class that can paint a particular [Decoration].

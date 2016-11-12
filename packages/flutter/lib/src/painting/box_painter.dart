@@ -1191,7 +1191,7 @@ class BoxDecoration extends Decoration {
   /// If the method is passed a non-empty string argument, then the output will
   /// span multiple lines, each prefixed by that argument.
   @override
-  String toString([String prefix = '']) {
+  String toString([String prefix = '', String indentPrefix]) {
     List<String> result = <String>[];
     if (backgroundColor != null)
       result.add('${prefix}backgroundColor: $backgroundColor');
@@ -1201,8 +1201,15 @@ class BoxDecoration extends Decoration {
       result.add('${prefix}border: $border');
     if (borderRadius != null)
       result.add('${prefix}borderRadius: $borderRadius');
-    if (boxShadow != null)
-      result.add('${prefix}boxShadow: ${boxShadow.map((BoxShadow shadow) => shadow.toString())}');
+    if (boxShadow != null) {
+      if (indentPrefix != null && boxShadow.length > 1) {
+        result.add('${prefix}boxShadow:');
+        for (BoxShadow shadow in boxShadow)
+          result.add('$indentPrefix$shadow');
+      } else {
+        result.add('${prefix}boxShadow: ${boxShadow.map((BoxShadow shadow) => shadow.toString()).join(", ")}');
+      }
+    }
     if (gradient != null)
       result.add('${prefix}gradient: $gradient');
     if (shape != BoxShape.rectangle)

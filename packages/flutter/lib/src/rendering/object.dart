@@ -2409,7 +2409,10 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     final String descriptionPrefix = childrenDescription != '' ? '$prefixOtherLines \u2502 ' : '$prefixOtherLines   ';
     List<String> description = <String>[];
     debugFillDescription(description);
-    result += description.map((String description) => "$descriptionPrefix$description\n").join();
+    result += description
+      .expand((String description) => description.split('\n'))
+      .map/*<String>*/((String line) => "$descriptionPrefix$line\n")
+      .join();
     if (childrenDescription == '')
       result += '$prefixOtherLines\n';
     result += childrenDescription;
