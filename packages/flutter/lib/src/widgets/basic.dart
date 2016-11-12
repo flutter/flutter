@@ -2211,6 +2211,49 @@ class Flexible extends ParentDataWidget<Flex> {
   }
 }
 
+class Wrap extends MultiChildRenderObjectWidget {
+  Wrap({
+    Key key,
+    this.direction: Axis.horizontal,
+    this.mainAxisAlignment: WrapAlignment.center,
+    this.crossAxisAlignment: WrapAlignment.center,
+    this.spacing: 0.0,
+    List<Widget> children: const <Widget>[],
+  }) : super(key: key, children: children) {
+    assert(direction != null);
+    assert(mainAxisAlignment != null);
+    assert(crossAxisAlignment != null);
+    assert(spacing != null);
+  }
+
+  final Axis direction;
+
+  final WrapAlignment mainAxisAlignment;
+
+  final WrapAlignment crossAxisAlignment;
+
+  final double spacing;
+
+  @override
+  RenderWrap createRenderObject(BuildContext context) {
+    return new RenderWrap(
+      direction: direction,
+      mainAxisAlignment: mainAxisAlignment,
+      crossAxisAlignment: crossAxisAlignment,
+      spacing: spacing,
+    );
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, RenderWrap renderObject) {
+    renderObject
+      ..direction = direction
+      ..mainAxisAlignment = mainAxisAlignment
+      ..crossAxisAlignment = crossAxisAlignment
+      ..spacing = spacing;
+  }
+}
+
 /// A widget that implements the flow layout algorithm.
 ///
 /// Flow layouts are optimized for repositioning children using transformation

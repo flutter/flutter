@@ -141,6 +141,10 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
        _mainAxisSize = mainAxisSize,
        _crossAxisAlignment = crossAxisAlignment,
        _textBaseline = textBaseline {
+    assert(direction != null);
+    assert(mainAxisAlignment != null);
+    assert(mainAxisSize != null);
+    assert(crossAxisAlignment != null);
     addAll(children);
   }
 
@@ -148,6 +152,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
   Axis get direction => _direction;
   Axis _direction;
   set direction (Axis value) {
+    assert(value != null);
     if (_direction != value) {
       _direction = value;
       markNeedsLayout();
@@ -178,6 +183,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
   MainAxisSize get mainAxisSize => _mainAxisSize;
   MainAxisSize _mainAxisSize;
   set mainAxisSize (MainAxisSize value) {
+    assert(value != null);
     if (_mainAxisSize != value) {
       _mainAxisSize = value;
       markNeedsLayout();
@@ -188,6 +194,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
   CrossAxisAlignment get crossAxisAlignment => _crossAxisAlignment;
   CrossAxisAlignment _crossAxisAlignment;
   set crossAxisAlignment (CrossAxisAlignment value) {
+    assert(value != null);
     if (_crossAxisAlignment != value) {
       _crossAxisAlignment = value;
       markNeedsLayout();
@@ -195,6 +202,8 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
   }
 
   /// If aligning items according to their baseline, which baseline to use.
+  ///
+  /// Must not be null if [crossAxisAlignment] is [CrossAxisAlignment.baseline].
   TextBaseline get textBaseline => _textBaseline;
   TextBaseline _textBaseline;
   set textBaseline (TextBaseline value) {
@@ -348,11 +357,23 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
   }
 
   double _getCrossSize(RenderBox child) {
-    return (_direction == Axis.horizontal) ? child.size.height : child.size.width;
+    switch (_direction) {
+      case Axis.horizontal:
+        return child.size.height;
+      case Axis.vertical:
+        return child.size.width;
+    }
+    return null;
   }
 
   double _getMainSize(RenderBox child) {
-    return (_direction == Axis.horizontal) ? child.size.width : child.size.height;
+    switch (_direction) {
+      case Axis.horizontal:
+        return child.size.width;
+      case Axis.vertical:
+        return child.size.height;
+    }
+    return null;
   }
 
   @override
