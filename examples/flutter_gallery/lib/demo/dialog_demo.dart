@@ -183,7 +183,7 @@ class DialogDemoState extends State<DialogDemo> {
                 initialTime: _selectedTime
               )
               .then((TimeOfDay value) {
-                if (value != _selectedTime) {
+                if (value != null && value != _selectedTime) {
                   _selectedTime = value;
                   _scaffoldKey.currentState.showSnackBar(new SnackBar(
                     content: new Text('You selected: $value')
