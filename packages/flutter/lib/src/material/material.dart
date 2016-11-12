@@ -160,8 +160,14 @@ abstract class MaterialInkController {
 /// placed inside Material.) Otherwise, in-progress ink features (e.g., ink
 /// splashes and ink highlights) won't move to account for the new layout.
 ///
+/// In general, the features of a [Material] should not change over time (e.g. a
+/// [Material] should not change its [color] or [type]). The one exception is
+/// the [elevation], changes to which will be animated.
+///
 /// See also:
 ///
+/// * [MergeableMaterial], a piece of material that can split and remerge.
+/// * [Card], a wrapper for a [Material] of [type] [MaterialType.card].
 /// * <https://material.google.com/>
 class Material extends StatefulWidget {
   /// Creates a piece of material.
@@ -173,10 +179,12 @@ class Material extends StatefulWidget {
     this.elevation: 0,
     this.color,
     this.textStyle,
+    this.borderRadius,
     this.child
   }) : super(key: key) {
     assert(type != null);
     assert(elevation != null);
+    assert(type != MaterialType.circle || borderRadius == null);
   }
 
   /// The widget below this widget in the tree.
@@ -205,6 +213,13 @@ class Material extends StatefulWidget {
   /// The typographical style to use for text within this material.
   final TextStyle textStyle;
 
+  /// If non-null, the corners of this box are rounded by this [BorderRadius].
+  /// Otherwise, the corners specified for the current [type] of material are
+  /// used.
+  ///
+  /// Must be null if [type] is [MaterialType.circle].
+  final BorderRadius borderRadius;
+
   /// The ink controller from the closest instance of this class that
   /// encloses the given context.
   ///
@@ -228,6 +243,10 @@ class Material extends StatefulWidget {
     description.add('elevation: $elevation');
     if (color != null)
       description.add('color: $color');
+    if (textStyle != null)
+      description.add('textStyle: $textStyle');
+    if (borderRadius != null)
+      description.add('borderRadius: $borderRadius');
   }
 }
 
@@ -251,6 +270,7 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     Color backgroundColor = _getBackgroundColor(context);
     Widget contents = config.child;
+    BorderRadius radius = config.borderRadius ?? kMaterialEdges[config.type];
     if (contents != null) {
       contents = new AnimatedDefaultTextStyle(
         style: config.textStyle ?? Theme.of(context).textTheme.body1,
@@ -274,7 +294,7 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
       contents = new ClipOval(child: contents);
     } else if (kMaterialEdges[config.type] != null) {
       contents = new ClipRRect(
-        borderRadius: kMaterialEdges[config.type],
+        borderRadius: radius,
         child: contents
       );
     }
@@ -283,13 +303,13 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
         curve: Curves.fastOutSlowIn,
         duration: kThemeChangeDuration,
         decoration: new BoxDecoration(
-          borderRadius: kMaterialEdges[config.type],
+          borderRadius: radius,
           boxShadow: config.elevation == 0 ? null : kElevationToShadow[config.elevation],
           shape: config.type == MaterialType.circle ? BoxShape.circle : BoxShape.rectangle
         ),
         child: new Container(
           decoration: new BoxDecoration(
-            borderRadius: kMaterialEdges[config.type],
+            borderRadius: radius,
             backgroundColor: backgroundColor,
             shape: config.type == MaterialType.circle ? BoxShape.circle : BoxShape.rectangle
           ),
