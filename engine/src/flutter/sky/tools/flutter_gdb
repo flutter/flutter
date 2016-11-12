@@ -6,6 +6,7 @@
 import argparse
 import os
 import re
+import shutil
 import subprocess
 import sys
 
@@ -61,9 +62,11 @@ class GdbClient(object):
         parser.add_argument('--no-pull-libs', action="store_false",
             default=True, dest="pull_libs",
             help="Do not copy system libraries from the device to the host")
+        parser.add_argument('--sysroot', action="store_true", default=False,
+            help='Create a sysroot tree suitable for debugging on Android N')
         parser.set_defaults(func=self.run)
 
-    def _copy_system_libs(self, adb_path, package):
+    def _copy_system_libs(self, adb_path, package, sysroot):
         """Copy libraries used by the Flutter process from the device to the host."""
         package_pid = _find_package_pid(adb_path, package)
         if package_pid is None:
@@ -72,18 +75,24 @@ class GdbClient(object):
         # Find library files that are mapped into the process.
         proc_maps = subprocess.check_output(
             [adb_path, 'shell', 'run-as', package, 'cat', '/proc/%d/maps' % package_pid])
-        proc_libs = re.findall('(/system/.*\.so)\s*$', proc_maps, re.MULTILINE)
+        proc_libs = re.findall('(/system/.*\.(?:so|oat))\s*$', proc_maps, re.MULTILINE)
 
-        device_libs = set(proc_libs)
-        device_libs.add('/system/bin/linker')
+        if sysroot:
+            device_libs = set((lib, lib[1:]) for lib in proc_libs)
+            device_libs.add(('/system/bin/linker', 'system/bin/linker'))
+            device_libs.add(('/system/bin/app_process32', 'system/bin/app_process32'))
+        else:
+            device_libs = set((lib, os.path.basename(lib)) for lib in proc_libs)
+            device_libs.add(('/system/bin/linker', 'linker'))
 
-        if not os.path.exists(GdbClient.SYSTEM_LIBS_PATH):
-            os.makedirs(GdbClient.SYSTEM_LIBS_PATH)
+        shutil.rmtree(GdbClient.SYSTEM_LIBS_PATH)
 
         dev_null = open(os.devnull, 'w')
-        for lib in sorted(device_libs):
+        for lib, local_path in sorted(device_libs):
             print 'Copying %s' % lib
-            local_path = os.path.join(GdbClient.SYSTEM_LIBS_PATH, os.path.basename(lib))
+            local_path = os.path.join(GdbClient.SYSTEM_LIBS_PATH, local_path)
+            if not os.path.exists(os.path.dirname(local_path)):
+                os.makedirs(os.path.dirname(local_path))
             subprocess.check_call([adb_path, 'pull', lib, local_path], stderr=dev_null)
 
         return True
@@ -93,20 +102,23 @@ class GdbClient(object):
         adb_path = os.path.join(flutter_root, ADB_LOCAL_PATH)
 
         if args.pull_libs:
-            if not self._copy_system_libs(adb_path, args.package):
+            if not self._copy_system_libs(adb_path, args.package, args.sysroot):
                 return 1
 
         subprocess.check_call(
             [adb_path, 'forward', 'tcp:%d' % args.gdb_port, 'tcp:%d' % args.gdb_port])
 
-        eval_commands = ['target remote localhost:%d' % args.gdb_port]
-
         debug_out_path = os.path.join(flutter_root, 'out/%s' % args.local_engine)
         if not os.path.exists(os.path.join(debug_out_path, 'libsky_shell.so')):
             print 'Unable to find libsky_shell.so. Make sure you have completed a %s build' % args.local_engine
             return 1
+
+        eval_commands = []
+        if args.sysroot:
+            eval_commands.append('set sysroot %s' % GdbClient.SYSTEM_LIBS_PATH)
         eval_commands.append('set solib-search-path %s:%s' %
                              (debug_out_path, GdbClient.SYSTEM_LIBS_PATH))
+        eval_commands.append('target remote localhost:%d' % args.gdb_port)
 
         exec_command = [os.path.join(flutter_root, self._gdb_local_path())]
         for command in eval_commands:
