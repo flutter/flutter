@@ -17,15 +17,16 @@ executable("content_handler") {
     "rasterizer.h",
     "runtime_holder.cc",
     "runtime_holder.h",
-    "skia_surface_holder.cc",
-    "skia_surface_holder.h",
   ]
 
   deps = [
     "//apps/modular/lib/app",
+    "//apps/mozart/services/buffers",
+    "//apps/mozart/services/buffers/cpp",
     "//apps/mozart/services/composition",
     "//apps/mozart/services/input",
     "//apps/mozart/services/views",
+    "//apps/mozart/lib/skia:vmo",
     "//dart/runtime/vm:libdart_platform",
     "//dart/runtime:libdart",
     "//flutter/assets",

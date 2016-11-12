@@ -6,8 +6,7 @@
 
 #include <utility>
 
-#include "apps/mozart/services/composition/image.fidl.h"
-#include "flutter/content_handler/skia_surface_holder.h"
+#include "apps/mozart/lib/skia/skia_vmo_surface.h"
 #include "lib/ftl/logging.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 
@@ -24,6 +23,7 @@ Rasterizer::~Rasterizer() {}
 
 void Rasterizer::SetScene(fidl::InterfaceHandle<mozart::Scene> scene) {
   scene_.Bind(std::move(scene));
+  buffer_producer_.reset(new mozart::BufferProducer());
 }
 
 void Rasterizer::Draw(std::unique_ptr<flow::LayerTree> layer_tree,
@@ -37,24 +37,21 @@ void Rasterizer::Draw(std::unique_ptr<flow::LayerTree> layer_tree,
   const SkISize& frame_size = layer_tree->frame_size();
   auto update = mozart::SceneUpdate::New();
 
+  sk_sp<SkSurface> surface;
   if (!frame_size.isEmpty()) {
-    // TODO(jeffbrown): Maintain a pool of images and recycle them.
-    SkiaSurfaceHolder surface_holder(frame_size);
+    // Get a surface to draw the contents.
+    mozart::ImagePtr image;
+    surface = mozart::MakeSkSurface(frame_size, buffer_producer_.get(), &image);
+    FTL_CHECK(surface);
 
-    SkCanvas* canvas = surface_holder.surface()->getCanvas();
-    flow::CompositorContext::ScopedFrame frame =
-        compositor_context_.AcquireFrame(nullptr, *canvas);
-    canvas->clear(SK_ColorBLACK);
-    layer_tree->Raster(frame);
-    canvas->flush();
-
+    // Update the scene contents.
     mozart::RectF bounds;
     bounds.width = frame_size.width();
     bounds.height = frame_size.height();
 
     auto content_resource = mozart::Resource::New();
     content_resource->set_image(mozart::ImageResource::New());
-    content_resource->get_image()->image = surface_holder.TakeImage();
+    content_resource->get_image()->image = std::move(image);
     update->resources.insert(kContentImageResourceId,
                              std::move(content_resource));
 
@@ -72,11 +69,25 @@ void Rasterizer::Draw(std::unique_ptr<flow::LayerTree> layer_tree,
     update->nodes.insert(kRootNodeId, mozart::Node::New());
   }
 
+  // Publish the updated scene contents.
+  // TODO(jeffbrown): We should set the metadata's presentation_time here too.
   scene_->Update(std::move(update));
-
   auto metadata = mozart::SceneMetadata::New();
   metadata->version = layer_tree->scene_version();
   scene_->Publish(std::move(metadata));
+
+  // Draw the contents of the scene to a surface.
+  // We do this after publishing to take advantage of pipelining.
+  // The image buffer's fence is signalled automatically when the surface
+  // goes out of scope.
+  if (surface) {
+    SkCanvas* canvas = surface->getCanvas();
+    flow::CompositorContext::ScopedFrame frame =
+        compositor_context_.AcquireFrame(nullptr, *canvas);
+    canvas->clear(SK_ColorBLACK);
+    layer_tree->Raster(frame);
+    canvas->flush();
+  }
 
   callback();
 }
