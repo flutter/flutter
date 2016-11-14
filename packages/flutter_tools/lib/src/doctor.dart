@@ -307,7 +307,7 @@ class IntelliJValidatorOnLinux extends IntelliJValidator {
   @override
   String version;
 
-  String installPath;
+  final String installPath;
 
   @override
   String pluginsPath;
