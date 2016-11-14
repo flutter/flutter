@@ -53,6 +53,17 @@ blink::PointerData::Change GetChangeFromEventType(mozart::EventType type) {
   }
 }
 
+blink::PointerData::DeviceKind GetKindFromEventKind(mozart::PointerKind kind) {
+  switch (kind) {
+    case mozart::PointerKind::TOUCH:
+      return blink::PointerData::DeviceKind::kTouch;
+    case mozart::PointerKind::MOUSE:
+      return blink::PointerData::DeviceKind::kMouse;
+    default:
+      return blink::PointerData::DeviceKind::kTouch;
+  }
+}
+
 }  // namespace
 
 RuntimeHolder::RuntimeHolder()
@@ -251,13 +262,14 @@ void RuntimeHolder::OnEvent(mozart::EventPtr event,
     pointer_data.time_stamp = event->time_stamp;
     pointer_data.pointer = event->pointer_data->pointer_id;
     pointer_data.change = GetChangeFromEventType(event->action);
-    pointer_data.kind = blink::PointerData::DeviceKind::kTouch;
+    pointer_data.kind = GetKindFromEventKind(event->pointer_data->kind);
     pointer_data.physical_x = event->pointer_data->x;
     pointer_data.physical_y = event->pointer_data->y;
 
     blink::PointerDataPacket packet(1);
     packet.SetPointerData(0, pointer_data);
     runtime_->DispatchPointerDataPacket(packet);
+
     handled = true;
   }
   callback(handled);
