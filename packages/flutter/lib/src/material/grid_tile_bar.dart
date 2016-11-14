@@ -64,11 +64,11 @@ class GridTileBar extends StatelessWidget {
     if (backgroundColor != null)
       decoration = new BoxDecoration(backgroundColor: backgroundColor);
 
-    EdgeInsets padding = (leading != null)
-      ? const EdgeInsets.only(left: 8.0, right: 16.0)
-      : const EdgeInsets.only(left: 16.0, right: 8.0);
-
     final List<Widget> children = <Widget>[];
+    final EdgeInsets padding = new EdgeInsets.only(
+      left: leading != null ? 8.0 : 16.0,
+      right: trailing != null ? 8.0 : 16.0
+    );
 
     if (leading != null)
       children.add(new Padding(padding: const EdgeInsets.only(right: 8.0), child: leading));
