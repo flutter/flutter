@@ -67,7 +67,7 @@ class GridTileBar extends StatelessWidget {
     final List<Widget> children = <Widget>[];
     final EdgeInsets padding = new EdgeInsets.only(
       left: leading != null ? 8.0 : 16.0,
-      right: trailing != null ? 8.0 : 16.0
+      right: trailing != null ? 8.0 : 16.0,
     );
 
     if (leading != null)
