@@ -418,7 +418,7 @@ class _TheatreElement extends RenderObjectElement {
   static final Object _onstageSlot = new Object();
 
   List<Element> _offstage;
-  final Set<Element> _detachedOffstageChildren = new HashSet<Element>();
+  final Set<Element> _forgottenOffstageChildren = new HashSet<Element>();
 
   @override
   void insertChildRenderObject(RenderBox child, dynamic slot) {
@@ -462,7 +462,7 @@ class _TheatreElement extends RenderObjectElement {
     if (_onstage != null)
       visitor(_onstage);
     for (Element child in _offstage) {
-      if (!_detachedOffstageChildren.contains(child))
+      if (!_forgottenOffstageChildren.contains(child))
         visitor(child);
     }
   }
@@ -474,13 +474,13 @@ class _TheatreElement extends RenderObjectElement {
   }
 
   @override
-  bool detachChild(Element child) {
+  bool forgetChild(Element child) {
     if (child == _onstage) {
       _onstage = null;
     } else {
       assert(_offstage.contains(child));
-      assert(!_detachedOffstageChildren.contains(child));
-      _detachedOffstageChildren.add(child);
+      assert(!_forgottenOffstageChildren.contains(child));
+      _forgottenOffstageChildren.add(child);
     }
     return true;
   }
@@ -503,8 +503,8 @@ class _TheatreElement extends RenderObjectElement {
     super.update(newWidget);
     assert(widget == newWidget);
     _onstage = updateChild(_onstage, widget.onstage, _onstageSlot);
-    _offstage = updateChildren(_offstage, widget.offstage, detachedChildren: _detachedOffstageChildren);
-    _detachedOffstageChildren.clear();
+    _offstage = updateChildren(_offstage, widget.offstage, forgottenChildren: _forgottenOffstageChildren);
+    _forgottenOffstageChildren.clear();
   }
 }
 

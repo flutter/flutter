@@ -514,9 +514,9 @@ class _LazyBlockElement extends RenderObjectElement {
   }
 
   @override
-  void detachChild(Element child) {
+  void forgetChild(Element child) {
     assert(() {
-      // TODO(ianh): implement detachChild for LazyBlock
+      // TODO(ianh): implement forgetChild for LazyBlock
       throw new FlutterError(
         'LazyBlock does not yet support GlobalKey reparenting of its children.\n'
         'As a temporary workaround, wrap the child with the GlobalKey in a '

@@ -274,7 +274,7 @@ class _TableElement extends RenderObjectElement {
     renderObject.setChild(childParentData.x, childParentData.y, null);
   }
 
-  final Set<Element> _detachedChildren = new HashSet<Element>();
+  final Set<Element> _forgottenChildren = new HashSet<Element>();
 
   @override
   void update(Table newWidget) {
@@ -300,17 +300,17 @@ class _TableElement extends RenderObjectElement {
       }
       newChildren.add(new _TableElementRow(
         key: row.key,
-        children: updateChildren(oldChildren, row.children, detachedChildren: _detachedChildren)
+        children: updateChildren(oldChildren, row.children, forgottenChildren: _forgottenChildren)
       ));
     }
     while (oldUnkeyedRows.moveNext())
-      updateChildren(oldUnkeyedRows.current.children, const <Widget>[], detachedChildren: _detachedChildren);
+      updateChildren(oldUnkeyedRows.current.children, const <Widget>[], forgottenChildren: _forgottenChildren);
     for (List<Element> oldChildren in oldKeyedRows.values.where((List<Element> list) => !taken.contains(list)))
-      updateChildren(oldChildren, const <Widget>[], detachedChildren: _detachedChildren);
+      updateChildren(oldChildren, const <Widget>[], forgottenChildren: _forgottenChildren);
     assert(() { _debugWillReattachChildren = false; return true; });
     _children = newChildren;
     _updateRenderObjectChildren();
-    _detachedChildren.clear();
+    _forgottenChildren.clear();
     super.update(newWidget);
     assert(widget == newWidget);
   }
@@ -326,14 +326,14 @@ class _TableElement extends RenderObjectElement {
   @override
   void visitChildren(ElementVisitor visitor) {
     for (Element child in _children.expand((_TableElementRow row) => row.children)) {
-      if (!_detachedChildren.contains(child))
+      if (!_forgottenChildren.contains(child))
         visitor(child);
     }
   }
 
   @override
-  bool detachChild(Element child) {
-    _detachedChildren.add(child);
+  bool forgetChild(Element child) {
+    _forgottenChildren.add(child);
     return true;
   }
 }
