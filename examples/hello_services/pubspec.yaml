@@ -1,12 +1,6 @@
 name: hello_services
 
 dependencies:
-
-  # version 0.13.6+1 does not return the value from the command
-  # causing flutter tools to always have exit code 0
-  # see https://github.com/flutter/flutter/issues/6766
-  args: 0.13.6
-
   flutter:
     sdk: flutter
 

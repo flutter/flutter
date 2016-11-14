@@ -8,11 +8,9 @@ import 'package:file/file.dart';
 import 'package:flutter_tools/src/android/android_device.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/commands/drive.dart';
 import 'package:flutter_tools/src/device.dart';
-import 'package:flutter_tools/src/globals.dart';
 import 'package:flutter_tools/src/ios/simulators.dart';
 import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
@@ -164,11 +162,8 @@ void main() {
         'drive',
         '--target=$testApp',
       ];
-      return createTestCommandRunner(command).run(args).then((int code) {
-        expect(code, 0);
-        BufferLogger buffer = logger;
-        expect(buffer.errorText, isEmpty);
-      });
+      await createTestCommandRunner(command).run(args);
+      expect(testLogger.errorText, isEmpty);
     });
 
     testUsingContext('returns exitCode set by test runner', () async {

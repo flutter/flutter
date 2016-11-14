@@ -25,7 +25,7 @@ class FormatCommand extends FlutterCommand {
   String get invocation => "${runner.executableName} $name <one or more paths>";
 
   @override
-  Future<int> runCommand() async {
+  Future<Null> runCommand() async {
     if (argResults.rest.isEmpty) {
       throwToolExit(
         'No files specified to be formatted.\n'
@@ -43,6 +43,5 @@ class FormatCommand extends FlutterCommand {
     int result = await runCommandAndStreamOutput(cmd);
     if (result != 0)
       throwToolExit('Formatting failed: $result', exitCode: result);
-    return 0;
   }
 }

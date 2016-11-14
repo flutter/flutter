@@ -90,13 +90,13 @@ class DriveCommand extends RunCommandBase {
   int get debugPort => int.parse(argResults['debug-port']);
 
   @override
-  Future<int> verifyThenRunCommand() async {
+  Future<Null> verifyThenRunCommand() async {
     commandValidator();
     return super.verifyThenRunCommand();
   }
 
   @override
-  Future<int> runCommand() async {
+  Future<Null> runCommand() async {
     String testFile = _getTestFile();
     if (testFile == null)
       throwToolExit(null);
@@ -149,7 +149,6 @@ class DriveCommand extends RunCommandBase {
         printStatus('Leaving the application running.');
       }
     }
-    return 0;
   }
 
   String _getTestFile() {

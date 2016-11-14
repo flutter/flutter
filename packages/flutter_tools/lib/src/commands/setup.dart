@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import '../base/common.dart';
 import '../base/os.dart';
 import '../base/process.dart';
 import '../globals.dart';
@@ -26,7 +27,7 @@ class SetupCommand extends FlutterCommand {
   final bool hidden;
 
   @override
-  Future<int> runCommand() async {
+  Future<Null> runCommand() async {
     printStatus('Running Flutter setup...');
 
     // setup brew on mac
@@ -57,9 +58,9 @@ class SetupCommand extends FlutterCommand {
       printStatus('\nThe flutter command is available on the path.');
     }
 
-    if (goodInstall)
-      printStatus('\nFlutter setup complete!');
+    if (!goodInstall)
+      throwToolExit(null);
 
-    return goodInstall ? 0 : 1;
+    printStatus('\nFlutter setup complete!');
   }
 }

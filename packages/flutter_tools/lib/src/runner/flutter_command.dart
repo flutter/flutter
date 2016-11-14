@@ -9,6 +9,7 @@ import 'package:args/command_runner.dart';
 import 'package:meta/meta.dart';
 
 import '../application_package.dart';
+import '../base/common.dart';
 import '../build_info.dart';
 import '../dart/package_map.dart';
 import '../dart/pub.dart';
@@ -18,9 +19,9 @@ import '../globals.dart';
 import '../usage.dart';
 import 'flutter_command_runner.dart';
 
-typedef bool Validator();
+typedef void Validator();
 
-abstract class FlutterCommand extends Command {
+abstract class FlutterCommand extends Command<Null> {
   FlutterCommand() {
     commandValidator = commonCommandValidator;
   }
@@ -107,18 +108,17 @@ abstract class FlutterCommand extends Command {
   /// and [runCommand] to execute the command
   /// so that this method can record and report the overall time to analytics.
   @override
-  Future<int> run() {
+  Future<Null> run() {
     Stopwatch stopwatch = new Stopwatch()..start();
     UsageTimer analyticsTimer = usagePath == null ? null : flutterUsage.startTimer(name);
 
     if (flutterUsage.isFirstRun)
       flutterUsage.printUsage();
 
-    return verifyThenRunCommand().then((int exitCode) {
+    return verifyThenRunCommand().whenComplete(() {
       int ms = stopwatch.elapsedMilliseconds;
-      printTrace("'flutter $name' took ${ms}ms; exiting with code $exitCode.");
+      printTrace("'flutter $name' took ${ms}ms.");
       analyticsTimer?.finish();
-      return exitCode;
     });
   }
 
@@ -130,7 +130,7 @@ abstract class FlutterCommand extends Command {
   /// then call this method to execute the command
   /// rather than calling [runCommand] directly.
   @mustCallSuper
-  Future<int> verifyThenRunCommand() async {
+  Future<Null> verifyThenRunCommand() async {
     // Populate the cache. We call this before pub get below so that the sky_engine
     // package is available in the flutter cache for pub to find.
     await cache.updateAll();
@@ -144,11 +144,11 @@ abstract class FlutterCommand extends Command {
     if (commandPath != null)
       flutterUsage.sendCommand(usagePath);
 
-    return await runCommand();
+    await runCommand();
   }
 
   /// Subclasses must implement this to execute the command.
-  Future<int> runCommand();
+  Future<Null> runCommand();
 
   /// Find and return the target [Device] based upon currently connected
   /// devices and criteria entered by the user on the command line.
@@ -203,35 +203,28 @@ abstract class FlutterCommand extends Command {
   // This is a field so that you can modify the value for testing.
   Validator commandValidator;
 
-  bool commonCommandValidator() {
+  void commonCommandValidator() {
     if (!PackageMap.isUsingCustomPackagesPath) {
       // Don't expect a pubspec.yaml file if the user passed in an explicit .packages file path.
       if (!FileSystemEntity.isFileSync('pubspec.yaml')) {
-        printError('Error: No pubspec.yaml file found.\n'
+        throw new ToolExit('Error: No pubspec.yaml file found.\n'
           'This command should be run from the root of your Flutter project.\n'
           'Do not run this command from the root of your git clone of Flutter.');
-        return false;
       }
     }
 
     if (_usesTargetOption) {
       String targetPath = targetFile;
-      if (!FileSystemEntity.isFileSync(targetPath)) {
-        printError('Target file "$targetPath" not found.');
-        return false;
-      }
+      if (!FileSystemEntity.isFileSync(targetPath))
+        throw new ToolExit('Target file "$targetPath" not found.');
     }
 
     // Validate the current package map only if we will not be running "pub get" later.
     if (!(_usesPubOption && argResults['pub'])) {
       String error = new PackageMap(PackageMap.globalPackagesPath).checkValid();
-      if (error != null) {
-        printError(error);
-        return false;
-      }
+      if (error != null)
+        throw new ToolExit(error);
     }
-
-    return true;
   }
 
   ApplicationPackageStore applicationPackages;

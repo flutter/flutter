@@ -31,7 +31,7 @@ class AnalyzeContinuously extends AnalyzeBase {
   Status analysisStatus;
 
   @override
-  Future<int> analyze() async {
+  Future<Null> analyze() async {
     List<String> directories;
 
     if (argResults['flutter-repo']) {
@@ -58,7 +58,6 @@ class AnalyzeContinuously extends AnalyzeBase {
     if (exitCode != 0)
       throwToolExit(message, exitCode: exitCode);
     printStatus(message);
-    return 0;
   }
 
   void _handleAnalysisStatus(AnalysisServer server, bool isAnalyzing) {

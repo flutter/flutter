@@ -224,7 +224,7 @@ class BuildApkCommand extends BuildSubCommand {
   }
 
   @override
-  Future<int> runCommand() async {
+  Future<Null> runCommand() async {
     await super.runCommand();
 
     TargetPlatform targetPlatform = _getTargetPlatform(argResults['target-arch']);
@@ -258,7 +258,6 @@ class BuildApkCommand extends BuildSubCommand {
         )
       );
     }
-    return 0;
   }
 }
 

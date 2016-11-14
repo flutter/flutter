@@ -46,14 +46,13 @@ class TraceCommand extends FlutterCommand {
     'with --start and later with --stop.';
 
   @override
-  Future<int> verifyThenRunCommand() async {
-    if (!commandValidator())
-      return 1;
+  Future<Null> verifyThenRunCommand() async {
+    commandValidator();
     return super.verifyThenRunCommand();
   }
 
   @override
-  Future<int> runCommand() async {
+  Future<Null> runCommand() async {
     int observatoryPort = int.parse(argResults['debug-port']);
 
     Tracing tracing;
@@ -61,8 +60,7 @@ class TraceCommand extends FlutterCommand {
     try {
       tracing = await Tracing.connect(observatoryPort);
     } catch (error) {
-      printError('Error connecting to observatory: $error');
-      return 1;
+      throwToolExit('Error connecting to observatory: $error');
     }
 
     Cache.releaseLockEarly();
@@ -81,8 +79,6 @@ class TraceCommand extends FlutterCommand {
     } else {
       await tracing.startTracing();
     }
-
-    return 0;
   }
 
   Future<Null> _stopTracing(Tracing tracing) async {

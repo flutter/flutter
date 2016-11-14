@@ -37,7 +37,7 @@ class BuildFlxCommand extends BuildSubCommand {
     'they are used by some Flutter Android and iOS runtimes.';
 
   @override
-  Future<int> runCommand() async {
+  Future<Null> runCommand() async {
     await super.runCommand();
     String outputPath = argResults['output-file'];
 
@@ -53,6 +53,5 @@ class BuildFlxCommand extends BuildSubCommand {
       includeRobotoFonts: argResults['include-roboto-fonts'],
       reportLicensedPackages: argResults['report-licensed-packages']
     );
-    return 0;
   }
 }

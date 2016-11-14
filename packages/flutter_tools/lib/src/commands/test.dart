@@ -8,6 +8,7 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 import 'package:test/src/executable.dart' as executable; // ignore: implementation_imports
 
+import '../base/common.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
 import '../cache.dart';
@@ -38,14 +39,12 @@ class TestCommand extends FlutterCommand {
     );
     commandValidator = () {
       if (!FileSystemEntity.isFileSync('pubspec.yaml')) {
-        printError(
+        throwToolExit(
           'Error: No pubspec.yaml file found in the current working directory.\n'
           'Run this command from the root of your project. Test files must be\n'
           'called *_test.dart and must reside in the package\'s \'test\'\n'
           'directory (or one of its subdirectories).');
-        return false;
       }
-      return true;
     };
   }
 
@@ -142,20 +141,17 @@ class TestCommand extends FlutterCommand {
   }
 
   @override
-  Future<int> runCommand() async {
+  Future<Null> runCommand() async {
     List<String> testArgs = argResults.rest.map((String testPath) => path.absolute(testPath)).toList();
 
-    if (!commandValidator())
-      return 1;
+    commandValidator();
 
     Directory testDir;
 
     if (testArgs.isEmpty) {
       testDir = _currentPackageTestDir;
-      if (!testDir.existsSync()) {
-        printError("Test directory '${testDir.path}' not found.");
-        return 1;
-      }
+      if (!testDir.existsSync())
+        throwToolExit("Test directory '${testDir.path}' not found.");
 
       testArgs.addAll(_findTests(testDir));
     }
@@ -169,10 +165,8 @@ class TestCommand extends FlutterCommand {
 
     loader.installHook();
     loader.shellPath = tools.getHostToolPath(HostTool.SkyShell);
-    if (!FileSystemEntity.isFileSync(loader.shellPath)) {
-        printError('Cannot find Flutter shell at ${loader.shellPath}');
-      return 1;
-    }
+    if (!FileSystemEntity.isFileSync(loader.shellPath))
+      throwToolExit('Cannot find Flutter shell at ${loader.shellPath}');
 
     Cache.releaseLockEarly();
 
@@ -183,9 +177,10 @@ class TestCommand extends FlutterCommand {
 
     if (collector.enabled) {
       if (!await _collectCoverageData(collector, mergeCoverageData: argResults['merge-coverage']))
-        return 1;
+        throwToolExit(null);
     }
 
-    return result;
+    if (result != 0)
+      throwToolExit(null);
   }
 }

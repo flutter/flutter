@@ -94,8 +94,8 @@ Future<Null> main(List<String> args) async {
     if (context[HotRunnerConfig] == null)
       context[HotRunnerConfig] = new HotRunnerConfig();
 
-    dynamic result = await runner.run(args);
-    _exit(result is int ? result : 1);
+    await runner.run(args);
+    _exit(0);
   }, onError: (dynamic error, Chain chain) {
     if (error is UsageException) {
       stderr.writeln(error.message);
@@ -113,10 +113,6 @@ Future<Null> main(List<String> args) async {
         stderr.writeln();
         stderr.writeln(chain.terse.toString());
         stderr.writeln();
-      }
-      if (error.isUnusual) {
-        stderr.writeln('If this problem persists, please report the problem at');
-        stderr.writeln('https://github.com/flutter/flutter/issues/new');
       }
       _exit(error.exitCode ?? 1);
     } else if (error is ProcessExit) {

@@ -46,7 +46,7 @@ class CreateCommand extends FlutterCommand {
   String get invocation => "${runner.executableName} $name <output directory>";
 
   @override
-  Future<int> runCommand() async {
+  Future<Null> runCommand() async {
     if (argResults.rest.isEmpty)
       throwToolExit('No option specified for the output directory.\n$usage', exitCode: 2);
 
@@ -134,7 +134,6 @@ Your main program file is lib/main.dart in the $relativePath directory.
         "directory in order to launch your app.");
       printStatus("Your main program file is: $relativePath/lib/main.dart");
     }
-    return 0;
   }
 
   int _renderTemplates(String projectName, String projectDescription, String dirPath,

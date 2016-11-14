@@ -12,19 +12,15 @@ import 'src/context.dart';
 
 void main() {
   group('devices', () {
-    testUsingContext('returns 0 when called', () {
+    testUsingContext('returns 0 when called', () async {
       DevicesCommand command = new DevicesCommand();
-      return createTestCommandRunner(command).run(<String>['devices']).then((int code) {
-        expect(code, 0);
-      });
+      await createTestCommandRunner(command).run(<String>['devices']);
     });
 
-    testUsingContext('no error when no connected devices', () {
+    testUsingContext('no error when no connected devices', () async {
       DevicesCommand command = new DevicesCommand();
-      return createTestCommandRunner(command).run(<String>['devices']).then((int code) {
-        expect(code, 0);
-        expect(testLogger.statusText, contains('No devices detected'));
-      });
+      await createTestCommandRunner(command).run(<String>['devices']);
+      expect(testLogger.statusText, contains('No devices detected'));
     }, overrides: <Type, dynamic>{
       AndroidSdk: null,
       DeviceManager: new DeviceManager()

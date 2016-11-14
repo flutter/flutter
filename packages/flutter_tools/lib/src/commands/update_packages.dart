@@ -46,24 +46,19 @@ class UpdatePackagesCommand extends FlutterCommand {
   }
 
   @override
-  Future<int> runCommand() async {
-    try {
-      final Stopwatch timer = new Stopwatch()..start();
-      int count = 0;
-      final bool upgrade = argResults['upgrade'];
+  Future<Null> runCommand() async {
+    final Stopwatch timer = new Stopwatch()..start();
+    int count = 0;
+    final bool upgrade = argResults['upgrade'];
 
-      for (Directory dir in runner.getRepoPackages()) {
-        await pubGet(directory: dir.path, upgrade: upgrade, checkLastModified: false);
-        count++;
-      }
-
-      await _downloadCoverageData();
-
-      final double seconds = timer.elapsedMilliseconds / 1000.0;
-      printStatus('\nRan \'pub\' $count time${count == 1 ? "" : "s"} and fetched coverage data in ${seconds.toStringAsFixed(1)}s.');
-      return 0;
-    } on int catch (code) {
-      return code;
+    for (Directory dir in runner.getRepoPackages()) {
+      await pubGet(directory: dir.path, upgrade: upgrade, checkLastModified: false);
+      count++;
     }
+
+    await _downloadCoverageData();
+
+    final double seconds = timer.elapsedMilliseconds / 1000.0;
+    printStatus('\nRan \'pub\' $count time${count == 1 ? "" : "s"} and fetched coverage data in ${seconds.toStringAsFixed(1)}s.');
   }
 }

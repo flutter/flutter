@@ -25,13 +25,13 @@ class PackagesCommand extends FlutterCommand {
   final String description = 'Commands for managing Flutter packages.';
 
   @override
-  Future<int> verifyThenRunCommand() async {
+  Future<Null> verifyThenRunCommand() async {
     commandValidator();
     return super.verifyThenRunCommand();
   }
 
   @override
-  Future<int> runCommand() => new Future<int>.value(0);
+  Future<Null> runCommand() async { }
 }
 
 class PackagesGetCommand extends FlutterCommand {
@@ -52,7 +52,7 @@ class PackagesGetCommand extends FlutterCommand {
       "${runner.executableName} packages $name [<target directory>]";
 
   @override
-  Future<int> runCommand() async {
+  Future<Null> runCommand() async {
     if (argResults.rest.length > 1)
       throwToolExit('Too many arguments.\n$usage');
 
@@ -69,6 +69,5 @@ class PackagesGetCommand extends FlutterCommand {
     // TODO: If the user is using a local build, we should use the packages from their build instead of the cache.
 
     await pubGet(directory: target, upgrade: upgrade, checkLastModified: false);
-    return 0;
   }
 }

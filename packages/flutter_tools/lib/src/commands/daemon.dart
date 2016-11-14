@@ -43,7 +43,7 @@ class DaemonCommand extends FlutterCommand {
   final bool hidden;
 
   @override
-  Future<int> runCommand() {
+  Future<Null> runCommand() {
     printStatus('Starting device daemon...');
 
     AppContext appContext = new AppContext();
@@ -60,7 +60,6 @@ class DaemonCommand extends FlutterCommand {
       int code = await daemon.onExit;
       if (code != null)
         throwToolExit(null, exitCode: code);
-      return 0;
     }, onError: _handleError);
   }
 

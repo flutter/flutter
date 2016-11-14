@@ -21,7 +21,7 @@ class ChannelCommand extends FlutterCommand {
   String get invocation => '${runner.executableName} $name [<channel-name>]';
 
   @override
-  Future<int> runCommand() {
+  Future<Null> runCommand() {
     switch (argResults.rest.length) {
       case 0:
         return _listChannels();
@@ -32,7 +32,7 @@ class ChannelCommand extends FlutterCommand {
     }
   }
 
-  Future<int> _listChannels() async {
+  Future<Null> _listChannels() async {
     String currentBranch = runSync(
         <String>['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
         workingDirectory: Cache.flutterRoot);
@@ -52,10 +52,9 @@ class ChannelCommand extends FlutterCommand {
     );
     if (result != 0)
       throwToolExit('List channels failed: $result', exitCode: result);
-    return 0;
   }
 
-  Future<int> _switchChannel(String branchName) async {
+  Future<Null> _switchChannel(String branchName) async {
     printStatus('Switching to flutter channel named $branchName');
     int result = await runCommandAndStreamOutput(
       <String>['git', 'checkout', branchName],
@@ -63,6 +62,5 @@ class ChannelCommand extends FlutterCommand {
     );
     if (result != 0)
       throwToolExit('Switch channel failed: $result', exitCode: result);
-    return 0;
   }
 }

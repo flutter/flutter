@@ -27,20 +27,18 @@ void main() {
 
     Future<Null> createProject() async {
       CreateCommand command = new CreateCommand();
-      CommandRunner runner = createTestCommandRunner(command);
+      CommandRunner<Null> runner = createTestCommandRunner(command);
 
-      int code = await runner.run(<String>['create', '--no-pub', temp.path]);
-      expect(code, 0);
+      await runner.run(<String>['create', '--no-pub', temp.path]);
     }
 
     Future<Null> runCommand(String verb) async {
       await createProject();
 
       PackagesCommand command = new PackagesCommand();
-      CommandRunner runner = createTestCommandRunner(command);
+      CommandRunner<Null> runner = createTestCommandRunner(command);
 
-      int code = await runner.run(<String>['packages', verb, temp.path]);
-      expect(code, 0);
+      await runner.run(<String>['packages', verb, temp.path]);
     }
 
     void expectExists(String relPath) {

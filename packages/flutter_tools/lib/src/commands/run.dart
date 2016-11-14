@@ -148,7 +148,7 @@ class RunCommand extends RunCommandBase {
       argResults['use-application-binary'] != null;
 
   @override
-  Future<int> verifyThenRunCommand() async {
+  Future<Null> verifyThenRunCommand() async {
     commandValidator();
     device = await findTargetDevice();
     if (device == null)
@@ -157,7 +157,7 @@ class RunCommand extends RunCommandBase {
   }
 
   @override
-  Future<int> runCommand() async {
+  Future<Null> runCommand() async {
 
     Cache.releaseLockEarly();
 
@@ -238,6 +238,5 @@ class RunCommand extends RunCommandBase {
     );
     if (result != 0)
       throwToolExit(null, exitCode: result);
-    return 0;
   }
 }
