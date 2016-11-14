@@ -1298,7 +1298,7 @@ class RenderDecoratedBox extends RenderProxyBox {
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     description.add('decoration:');
-    description.addAll(_decoration.toString("  ").split('\n'));
+    description.addAll(_decoration.toString('  ', '    ').split('\n'));
     description.add('configuration: $configuration');
   }
 }

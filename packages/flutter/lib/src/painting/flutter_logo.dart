@@ -220,7 +220,7 @@ class FlutterLogoDecoration extends Decoration {
   }
 
   @override
-  String toString([String prefix = '']) {
+  String toString([String prefix = '', String prefixIndent ]) {
     final String extra = _inTransition ? ', transition $_position:$_opacity' : '';
     if (swatch == null)
       return '$prefix$runtimeType(null, $style$extra)';

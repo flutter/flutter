@@ -2560,7 +2560,19 @@ abstract class Element implements BuildContext {
     }
     if (node != null)
       chain.add('\u22EF');
-    return chain.join(' \u2190 ');
+    String result = '';
+    String line = '';
+    for (String link in chain) {
+      if (line != '')
+        line += ' \u2190 ';
+      if (link.length > 3 && line.length + link.length > 65) {
+        result += '$line\n';
+        line = '         ';
+      }
+      line += link;
+    }
+    result += line;
+    return result;
   }
 
   /// A short, textual description of this element.
@@ -3462,7 +3474,10 @@ abstract class RenderObjectElement extends BuildableElement {
   }
 
   void _debugUpdateRenderObjectOwner() {
-    _renderObject.debugCreator = debugGetCreatorChain(10);
+    assert(() {
+      _renderObject.debugCreator = new _DebugCreator(this);
+      return true;
+    });
   }
 
   @override
@@ -3920,6 +3935,13 @@ class MultiChildRenderObjectElement extends RenderObjectElement {
     _children = updateChildren(_children, widget.children, detachedChildren: _detachedChildren);
     _detachedChildren.clear();
   }
+}
+
+class _DebugCreator {
+  _DebugCreator(this.element);
+  final RenderObjectElement element;
+  @override
+  String toString() => element.debugGetCreatorChain(12);
 }
 
 void _debugReportException(String context, dynamic exception, StackTrace stack, {
