@@ -43,7 +43,7 @@ void main() {
       Cache.flutterRoot = '../..';
 
       CreateCommand command = new CreateCommand();
-      CommandRunner runner = createTestCommandRunner(command);
+      CommandRunner<Null> runner = createTestCommandRunner(command);
 
       await runner.run(<String>['create', '--no-pub', temp.path]);
 
@@ -73,7 +73,7 @@ void main() {
       Cache.flutterRoot = '../..';
 
       CreateCommand command = new CreateCommand();
-      CommandRunner runner = createTestCommandRunner(command);
+      CommandRunner<Null> runner = createTestCommandRunner(command);
 
       await runner.run(<String>['create', '--no-pub', temp.path]);
 
@@ -85,7 +85,7 @@ void main() {
       Cache.flutterRoot = '../..';
 
       CreateCommand command = new CreateCommand();
-      CommandRunner runner = createTestCommandRunner(command);
+      CommandRunner<Null> runner = createTestCommandRunner(command);
 
       try {
         await runner.run(<String>['create', temp.path, '--pub']);
@@ -100,7 +100,7 @@ void main() {
     testUsingContext('fails when file exists', () async {
       Cache.flutterRoot = '../..';
       CreateCommand command = new CreateCommand();
-      CommandRunner runner = createTestCommandRunner(command);
+      CommandRunner<Null> runner = createTestCommandRunner(command);
       File existingFile = new File("${temp.path.toString()}/bad");
       if (!existingFile.existsSync()) existingFile.createSync();
       try {
@@ -116,7 +116,7 @@ void main() {
 Future<Null> _createAndAnalyzeProject(Directory dir, List<String> createArgs) async {
   Cache.flutterRoot = '../..';
   CreateCommand command = new CreateCommand();
-  CommandRunner runner = createTestCommandRunner(command);
+  CommandRunner<Null> runner = createTestCommandRunner(command);
   List<String> args = <String>['create'];
   args.addAll(createArgs);
   args.add(dir.path);

@@ -39,7 +39,7 @@ void main() {
 
       flutterUsage.enabled = false;
       CreateCommand command = new CreateCommand();
-      CommandRunner runner = createTestCommandRunner(command);
+      CommandRunner<Null> runner = createTestCommandRunner(command);
       await runner.run(<String>['create', '--no-pub', temp.path]);
       expect(count, 0);
 
@@ -64,7 +64,7 @@ void main() {
 
       flutterUsage.enabled = false;
       ConfigCommand command = new ConfigCommand();
-      CommandRunner runner = createTestCommandRunner(command);
+      CommandRunner<Null> runner = createTestCommandRunner(command);
       await runner.run(<String>['config']);
       expect(count, 0);
 

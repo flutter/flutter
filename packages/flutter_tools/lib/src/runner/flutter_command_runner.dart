@@ -25,7 +25,7 @@ const String kSnapshotFileName = 'flutter_tools.snapshot'; // in //flutter/bin/c
 const String kFlutterToolsScriptFileName = 'flutter_tools.dart'; // in //flutter/packages/flutter_tools/bin/
 const String kFlutterEnginePackageName = 'sky_engine';
 
-class FlutterCommandRunner extends CommandRunner {
+class FlutterCommandRunner extends CommandRunner<Null> {
   FlutterCommandRunner({ bool verboseHelp: false }) : super(
     'flutter',
     'Manage your Flutter app development.\n'

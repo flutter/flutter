@@ -30,7 +30,7 @@ void main() {
 
     Future<Null> createProject() async {
       CreateCommand command = new CreateCommand();
-      CommandRunner runner = createTestCommandRunner(command);
+      CommandRunner<Null> runner = createTestCommandRunner(command);
 
       await runner.run(<String>['create', '--no-pub', temp.path]);
     }
@@ -43,7 +43,7 @@ void main() {
       srcFile.writeAsStringSync(original.replaceFirst('main()', 'main(  )'));
 
       FormatCommand command = new FormatCommand();
-      CommandRunner runner = createTestCommandRunner(command);
+      CommandRunner<Null> runner = createTestCommandRunner(command);
       await runner.run(<String>['format', srcFile.path]);
 
       String formatted = srcFile.readAsStringSync();

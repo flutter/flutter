@@ -13,7 +13,7 @@ void main() {
   group('channel', () {
     testUsingContext('list', () async {
       ChannelCommand command = new ChannelCommand();
-      CommandRunner runner = createTestCommandRunner(command);
+      CommandRunner<Null> runner = createTestCommandRunner(command);
       await runner.run(<String>['channel']);
       expect(testLogger.errorText, hasLength(0));
       // The bots may return an empty list of channels (network hiccup?)
