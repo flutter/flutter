@@ -36,7 +36,7 @@ static void BM_GraphemeBreak_Ascii(benchmark::State& state) {
     uint16_t buffer[12];
     ParseUnicode(buffer, 12, ASCII_TEST_STR, &result_size, nullptr);
     LOG_ALWAYS_FATAL_IF(result_size != 12);
-    const size_t testIndex = state.range_x();
+    const size_t testIndex = state.range(0);
     while (state.KeepRunning()) {
         GraphemeBreak::isGraphemeBreak(buffer, 0, result_size, testIndex);
     }
@@ -51,7 +51,7 @@ static void BM_GraphemeBreak_Emoji(benchmark::State& state) {
     uint16_t buffer[12];
     ParseUnicode(buffer, 12, EMOJI_TEST_STR, &result_size, nullptr);
     LOG_ALWAYS_FATAL_IF(result_size != 12);
-    const size_t testIndex = state.range_x();
+    const size_t testIndex = state.range(0);
     while (state.KeepRunning()) {
         GraphemeBreak::isGraphemeBreak(buffer, 0, result_size, testIndex);
     }
@@ -66,7 +66,7 @@ static void BM_GraphemeBreak_Emoji_Flags(benchmark::State& state) {
     uint16_t buffer[12];
     ParseUnicode(buffer, 12, FLAGS_TEST_STR, &result_size, nullptr);
     LOG_ALWAYS_FATAL_IF(result_size != 12);
-    const size_t testIndex = state.range_x();
+    const size_t testIndex = state.range(0);
     while (state.KeepRunning()) {
         GraphemeBreak::isGraphemeBreak(buffer, 0, result_size, testIndex);
     }

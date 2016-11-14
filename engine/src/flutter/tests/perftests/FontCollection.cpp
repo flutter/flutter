@@ -30,8 +30,8 @@ static void BM_FontCollection_hasVariationSelector(benchmark::State& state) {
     MinikinAutoUnref<FontCollection> collection(
             getFontCollection(SYSTEM_FONT_PATH, SYSTEM_FONT_XML));
 
-    uint32_t baseCp = state.range_x();
-    uint32_t vsCp = state.range_y();
+    uint32_t baseCp = state.range(0);
+    uint32_t vsCp = state.range(1);
 
     char titleBuffer[64];
     snprintf(titleBuffer, 64, "hasVariationSelector U+%04X,U+%04X", baseCp, vsCp);
@@ -66,7 +66,7 @@ static void BM_FontCollection_itemize(benchmark::State& state) {
     MinikinAutoUnref<FontCollection> collection(
             getFontCollection(SYSTEM_FONT_PATH, SYSTEM_FONT_XML));
 
-    size_t testIndex = state.range_x();
+    size_t testIndex = state.range(0);
     state.SetLabel("Itemize: " + ITEMIZE_TEST_CASES[testIndex].labelText);
 
     uint16_t buffer[64];
