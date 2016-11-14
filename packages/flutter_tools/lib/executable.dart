@@ -114,9 +114,11 @@ Future<Null> main(List<String> args) async {
         stderr.writeln(chain.terse.toString());
         stderr.writeln();
       }
-      stderr.writeln('If this problem persists, please report the problem at');
-      stderr.writeln('https://github.com/flutter/flutter/issues/new');
-      _exit(error.exitCode ?? 65);
+      if (error.isUnusual) {
+        stderr.writeln('If this problem persists, please report the problem at');
+        stderr.writeln('https://github.com/flutter/flutter/issues/new');
+      }
+      _exit(error.exitCode ?? 1);
     } else if (error is ProcessExit) {
       // We've caught an exit code.
       _exit(error.exitCode);

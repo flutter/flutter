@@ -7,6 +7,7 @@ import 'dart:io';
 
 import 'package:path/path.dart' as path;
 
+import '../base/common.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
 import '../cache.dart';
@@ -25,7 +26,7 @@ bool _shouldRunPubGet({ File pubSpecYaml, File dotPackages }) {
   return false;
 }
 
-Future<int> pubGet({
+Future<Null> pubGet({
   String directory,
   bool skipIfAbsent: false,
   bool upgrade: false,
@@ -38,10 +39,9 @@ Future<int> pubGet({
   File dotPackages = new File(path.join(directory, '.packages'));
 
   if (!pubSpecYaml.existsSync()) {
-    if (skipIfAbsent)
-      return 0;
-    printError('$directory: no pubspec.yaml found');
-    return 1;
+    if (!skipIfAbsent)
+      throwToolExit('$directory: no pubspec.yaml found');
+    return;
   }
 
   if (!checkLastModified || _shouldRunPubGet(pubSpecYaml: pubSpecYaml, dotPackages: dotPackages)) {
@@ -55,14 +55,13 @@ Future<int> pubGet({
     );
     status.stop();
     if (code != 0)
-      return code;
+      throwToolExit('pub $command failed ($code)', exitCode: code);
   }
 
   if (dotPackages.existsSync() && dotPackages.lastModifiedSync().isAfter(pubSpecYaml.lastModifiedSync()))
-    return 0;
+    return;
 
-  printError('$directory: pubspec.yaml and .packages are in an inconsistent state');
-  return 1;
+  throwToolExit('$directory: pubspec.yaml and .packages are in an inconsistent state');
 }
 
 String _filterOverrideWarnings(String str) {

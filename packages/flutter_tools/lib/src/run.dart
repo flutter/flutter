@@ -95,14 +95,11 @@ class RunAndStayResident extends ResidentRunner {
     if (shouldBuild && device is AndroidDevice) {
       printTrace('Running build command.');
 
-      int result = await buildApk(
+      await buildApk(
         device.platform,
         target: target,
         buildMode: debuggingOptions.buildMode
       );
-
-      if (result != 0)
-        return result;
     }
 
     // TODO(devoncarew): Move this into the device.startApp() impls.

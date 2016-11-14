@@ -7,6 +7,7 @@ import 'dart:io';
 
 import 'package:args/args.dart';
 
+import '../lib/src/base/common.dart';
 import '../lib/src/base/context.dart';
 import '../lib/src/base/logger.dart';
 import '../lib/src/cache.dart';
@@ -42,17 +43,18 @@ Future<Null> main(List<String> args) async {
   }
   Cache.flutterRoot = Platform.environment['FLUTTER_ROOT'];
   String outputPath = argResults[_kOptionOutput];
-  final int buildResult = await assemble(
-    outputPath: outputPath,
-    snapshotFile: new File(argResults[_kOptionSnapshot]),
-    workingDirPath: argResults[_kOptionWorking],
-    packagesPath: argResults[_kOptionPackages],
-    manifestPath: defaultManifestPath,
-    includeDefaultFonts: false,
-  );
-  if (buildResult != 0) {
-    printError('Error building $outputPath: $buildResult.');
-    exit(buildResult);
+  try {
+    await assemble(
+      outputPath: outputPath,
+      snapshotFile: new File(argResults[_kOptionSnapshot]),
+      workingDirPath: argResults[_kOptionWorking],
+      packagesPath: argResults[_kOptionPackages],
+      manifestPath: defaultManifestPath,
+      includeDefaultFonts: false,
+    );
+  } on ToolExit catch (e) {
+    printError(e.message);
+    exit(e.exitCode);
   }
   final int headerResult = _addHeader(outputPath, argResults[_kOptionHeader]);
   if (headerResult != 0) {

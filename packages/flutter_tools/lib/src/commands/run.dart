@@ -95,12 +95,11 @@ class RunCommand extends RunCommandBase {
     argParser.addFlag('benchmark', negatable: false, hide: !verboseHelp);
 
     commandValidator = () {
-      if (!runningWithPrebuiltApplication) {
-        return commonCommandValidator();
-      }
+      if (!runningWithPrebuiltApplication)
+        commonCommandValidator();
+
       // When running with a prebuilt application, no command validation is
       // necessary.
-      return true;
     };
   }
 
@@ -150,11 +149,10 @@ class RunCommand extends RunCommandBase {
 
   @override
   Future<int> verifyThenRunCommand() async {
-    if (!commandValidator())
-      return 1;
+    commandValidator();
     device = await findTargetDevice();
     if (device == null)
-      return 1;
+      throwToolExit(null);
     return super.verifyThenRunCommand();
   }
 
@@ -173,7 +171,9 @@ class RunCommand extends RunCommandBase {
       AppInstance app = daemon.appDomain.startApp(
         device, Directory.current.path, targetFile, route,
         getBuildMode(), argResults['start-paused'], hotMode);
-      return app.runner.waitForAppToFinish();
+      int result = await app.runner.waitForAppToFinish();
+      if (result != 0)
+        throwToolExit(null, exitCode: result);
     }
 
     int debugPort;
@@ -181,15 +181,12 @@ class RunCommand extends RunCommandBase {
       try {
         debugPort = int.parse(argResults['debug-port']);
       } catch (error) {
-        printError('Invalid port for `--debug-port`: $error');
-        return 1;
+        throwToolExit('Invalid port for `--debug-port`: $error');
       }
     }
 
-    if (device.isLocalEmulator && !isEmulatorBuildMode(getBuildMode())) {
-      printError('${toTitleCase(getModeName(getBuildMode()))} mode is not supported for emulators.');
-      return 1;
-    }
+    if (device.isLocalEmulator && !isEmulatorBuildMode(getBuildMode()))
+      throwToolExit('${toTitleCase(getModeName(getBuildMode()))} mode is not supported for emulators.');
 
     DebuggingOptions options;
 
@@ -204,11 +201,8 @@ class RunCommand extends RunCommandBase {
     }
 
     if (hotMode) {
-      if (!device.supportsHotMode) {
-        printError('Hot mode is not supported by this device. '
-                   'Run with --no-hot.');
-        return 1;
-      }
+      if (!device.supportsHotMode)
+        throwToolExit('Hot mode is not supported by this device. Run with --no-hot.');
     }
 
     String pidFile = argResults['pid-file'];
@@ -238,6 +232,12 @@ class RunCommand extends RunCommandBase {
       );
     }
 
-    return runner.run(route: route, shouldBuild: !runningWithPrebuiltApplication && argResults['build']);
+    int result = await runner.run(
+      route: route,
+      shouldBuild: !runningWithPrebuiltApplication && argResults['build'],
+    );
+    if (result != 0)
+      throwToolExit(null, exitCode: result);
+    return 0;
   }
 }

@@ -8,6 +8,7 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 
 import 'asset.dart';
+import 'base/common.dart';
 import 'base/file_system.dart' show ensureDirectoryExists;
 import 'base/process.dart';
 import 'dart/package_map.dart';
@@ -59,18 +60,17 @@ Future<String> buildFlx({
   bool precompiledSnapshot: false,
   bool includeRobotoFonts: true
 }) async {
-  int result;
-  result = await build(
+  await build(
     snapshotPath: defaultSnapshotPath,
     outputPath: defaultFlxOutputPath,
     mainPath: mainPath,
     precompiledSnapshot: precompiledSnapshot,
     includeRobotoFonts: includeRobotoFonts
   );
-  return result == 0 ? defaultFlxOutputPath : null;
+  return defaultFlxOutputPath;
 }
 
-Future<int> build({
+Future<Null> build({
   String snapshotterPath,
   String mainPath: defaultMainPath,
   String manifestPath: defaultManifestPath,
@@ -104,10 +104,8 @@ Future<int> build({
       depfilePath: depfilePath,
       packages: packagesPath
     );
-    if (result != 0) {
-      printError('Failed to run the Flutter compiler. Exit code: $result');
-      return result;
-    }
+    if (result != 0)
+      throwToolExit('Failed to run the Flutter compiler. Exit code: $result', exitCode: result);
 
     snapshotFile = new File(snapshotPath);
   }
@@ -124,7 +122,7 @@ Future<int> build({
   );
 }
 
-Future<int> assemble({
+Future<Null> assemble({
   String manifestPath,
   File snapshotFile,
   String outputPath,
@@ -150,9 +148,8 @@ Future<int> assemble({
     includeRobotoFonts: includeRobotoFonts,
     reportLicensedPackages: reportLicensedPackages
   );
-  if (result != 0) {
-    return result;
-  }
+  if (result != 0)
+    throwToolExit('Error building $outputPath: $result', exitCode: result);
 
   ZipBuilder zipBuilder = new ZipBuilder();
 
@@ -168,6 +165,4 @@ Future<int> assemble({
   zipBuilder.createZip(new File(outputPath), new Directory(workingDirPath));
 
   printTrace('Built $outputPath.');
-
-  return 0;
 }

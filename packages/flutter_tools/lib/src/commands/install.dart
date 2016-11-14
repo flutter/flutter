@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import '../application_package.dart';
+import '../base/common.dart';
 import '../cache.dart';
 import '../device.dart';
 import '../globals.dart';
@@ -21,11 +22,10 @@ class InstallCommand extends FlutterCommand {
 
   @override
   Future<int> verifyThenRunCommand() async {
-    if (!commandValidator())
-      return 1;
+    commandValidator();
     device = await findTargetDevice();
     if (device == null)
-      return 1;
+      throwToolExit('No target device found');
     return super.verifyThenRunCommand();
   }
 
@@ -37,7 +37,9 @@ class InstallCommand extends FlutterCommand {
 
     printStatus('Installing $package to $device...');
 
-    return installApp(device, package) ? 0 : 2;
+    if (!installApp(device, package))
+      throwToolExit('Install failed');
+    return 0;
   }
 }
 

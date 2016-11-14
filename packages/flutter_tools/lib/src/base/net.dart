@@ -24,6 +24,7 @@ Future<List<int>> fetchUrl(Uri url) async {
       'Download failed: $url\n'
           '  because (${response.statusCode}) ${response.reasonPhrase}',
       exitCode: kNetworkProblemExitCode,
+      isUnusual: true,
     );
   }
 
@@ -37,6 +38,7 @@ Future<List<int>> fetchUrl(Uri url) async {
     throw new ToolExit(
       'Download failed: $url\n  $e',
       exitCode: kNetworkProblemExitCode,
+      isUnusual: true,
     );
   }
 }

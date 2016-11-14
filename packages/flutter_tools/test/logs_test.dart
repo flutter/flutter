@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/commands/logs.dart';
 import 'package:test/test.dart';
 
@@ -11,12 +12,15 @@ import 'src/mocks.dart';
 
 void main() {
   group('logs', () {
-    testUsingContext('fail with a bad device id', () {
+    testUsingContext('fail with a bad device id', () async {
       LogsCommand command = new LogsCommand();
       applyMocksToCommand(command);
-      return createTestCommandRunner(command).run(<String>['-d', 'abc123', 'logs']).then((int code) {
-        expect(code, 1);
-      });
+      try {
+        await createTestCommandRunner(command).run(<String>['-d', 'abc123', 'logs']);
+        fail('Expect exception');
+      } on ToolExit catch (e) {
+        expect(e.exitCode ?? 1, 1);
+      }
     });
   });
 }

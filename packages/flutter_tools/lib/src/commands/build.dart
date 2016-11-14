@@ -10,6 +10,7 @@ import 'package:meta/meta.dart';
 import '../build_info.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
+import '../base/common.dart';
 import '../base/utils.dart';
 import 'build_apk.dart';
 import 'build_aot.dart';
@@ -33,8 +34,7 @@ class BuildCommand extends FlutterCommand {
 
   @override
   Future<int> verifyThenRunCommand() async {
-    if (!commandValidator())
-      return 1;
+    commandValidator();
     return super.verifyThenRunCommand();
   }
 
@@ -46,8 +46,7 @@ abstract class BuildSubCommand extends FlutterCommand {
   @override
   @mustCallSuper
   Future<int> verifyThenRunCommand() async {
-    if (!commandValidator())
-      return 1;
+    commandValidator();
     return super.verifyThenRunCommand();
   }
 
@@ -82,8 +81,7 @@ class BuildCleanCommand extends FlutterCommand {
 
   @override
   Future<int> verifyThenRunCommand() async {
-    if (!commandValidator())
-      return 1;
+    commandValidator();
     return super.verifyThenRunCommand();
   }
 
@@ -97,10 +95,9 @@ class BuildCleanCommand extends FlutterCommand {
 
     try {
       buildDir.deleteSync(recursive: true);
-      return 0;
     } catch (error) {
-      printError(error.toString());
-      return 1;
+      throwToolExit(error.toString());
     }
+    return 0;
   }
 }

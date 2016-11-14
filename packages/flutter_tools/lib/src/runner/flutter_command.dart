@@ -135,11 +135,8 @@ abstract class FlutterCommand extends Command {
     // package is available in the flutter cache for pub to find.
     await cache.updateAll();
 
-    if (shouldRunPub) {
-      int exitCode = await pubGet();
-      if (exitCode != 0)
-        return exitCode;
-    }
+    if (shouldRunPub)
+      await pubGet();
 
     setupApplicationPackages();
 

@@ -72,11 +72,7 @@ class UpgradeCommand extends FlutterCommand {
     String projRoot = findProjectRoot();
     if (projRoot != null) {
       printStatus('');
-      code = await pubGet(
-          directory: projRoot, upgrade: true, checkLastModified: false);
-
-      if (code != 0)
-        return code;
+      await pubGet(directory: projRoot, upgrade: true, checkLastModified: false);
     }
 
     // Run a doctor check in case system requirements have changed.

@@ -7,6 +7,7 @@ import 'dart:io';
 
 import 'package:path/path.dart' as path;
 
+import '../base/common.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/process.dart';
@@ -90,7 +91,7 @@ String locateProjectGradlew({ bool ensureExecutable: true }) {
   }
 }
 
-Future<int> buildGradleProject(BuildMode buildMode) async {
+Future<Null> buildGradleProject(BuildMode buildMode) async {
   // Create android/local.properties.
   File localProperties = new File('android/local.properties');
   if (!localProperties.existsSync()) {
@@ -111,10 +112,9 @@ Future<int> buildGradleProject(BuildMode buildMode) async {
   if (gradlew == null) {
     String gradle = locateSystemGradle();
     if (gradle == null) {
-      printError(
+      throwToolExit(
         'Unable to locate gradle. Please configure the path to gradle using \'flutter config --gradle-dir\'.'
       );
-      return 1;
     } else {
       printTrace('Using gradle from $gradle.');
     }
@@ -139,17 +139,14 @@ Future<int> buildGradleProject(BuildMode buildMode) async {
       );
       status.stop();
       if (exitcode != 0)
-        return exitcode;
+        throwToolExit('Gradle failed: $exitcode', exitCode: exitcode);
     } catch (error) {
-      printError('$error');
-      return 1;
+      throwToolExit('$error');
     }
 
     gradlew = locateProjectGradlew();
-    if (gradlew == null) {
-      printError('Unable to build android/gradlew.');
-      return 1;
-    }
+    if (gradlew == null)
+      throwToolExit('Unable to build android/gradlew.');
   }
 
   // Run 'gradlew build'.
@@ -161,12 +158,11 @@ Future<int> buildGradleProject(BuildMode buildMode) async {
   );
   status.stop();
 
-  if (exitcode == 0) {
-    File apkFile = new File(gradleAppOut);
-    printStatus('Built $gradleAppOut (${getSizeAsMB(apkFile.lengthSync())}).');
-  }
+  if (exitcode != 0)
+    throwToolExit('Gradlew failed: $exitcode', exitCode: exitcode);
 
-  return exitcode;
+  File apkFile = new File(gradleAppOut);
+  printStatus('Built $gradleAppOut (${getSizeAsMB(apkFile.lengthSync())}).');
 }
 
 class _GradleFile {
