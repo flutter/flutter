@@ -19,52 +19,54 @@ class _SliderDemoState extends State<SliderDemo> {
   Widget build(BuildContext context) {
     return new Scaffold(
       appBar: new AppBar(title: new Text('Sliders')),
-      body: new Column(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: <Widget>[
-          new Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget> [
-              new Slider(
-                value: _value,
-                min: 0.0,
-                max: 100.0,
-                onChanged: (double value) {
-                  setState(() {
-                    _value = value;
-                  });
-                }
-              ),
-              new Text('Continuous'),
-            ]
-          ),
-          new Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget> [
-              new Slider(value: 0.25, onChanged: null),
-              new Text('Disabled'),
-            ]
-          ),
-          new Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget> [
-              new Slider(
-                value: _discreteValue,
-                min: 0.0,
-                max: 100.0,
-                divisions: 5,
-                label: '${_discreteValue.round()}',
-                onChanged: (double value) {
-                  setState(() {
-                    _discreteValue = value;
-                  });
-                }
-              ),
-              new Text('Discrete'),
-            ]
-          ),
-        ]
-      )
+      body: new Center(
+        child: new Column(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: <Widget>[
+            new Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget> [
+                new Slider(
+                  value: _value,
+                  min: 0.0,
+                  max: 100.0,
+                  onChanged: (double value) {
+                    setState(() {
+                      _value = value;
+                    });
+                  }
+                ),
+                new Text('Continuous'),
+              ]
+            ),
+            new Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget> [
+                new Slider(value: 0.25, onChanged: null),
+                new Text('Disabled'),
+              ]
+            ),
+            new Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget> [
+                new Slider(
+                  value: _discreteValue,
+                  min: 0.0,
+                  max: 100.0,
+                  divisions: 5,
+                  label: '${_discreteValue.round()}',
+                  onChanged: (double value) {
+                    setState(() {
+                      _discreteValue = value;
+                    });
+                  }
+                ),
+                new Text('Discrete'),
+              ],
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

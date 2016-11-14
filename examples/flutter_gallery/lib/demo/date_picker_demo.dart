@@ -36,16 +36,18 @@ class _DatePickerDemoState extends State<DatePickerDemo> {
     return
       new Scaffold(
       appBar: new AppBar(title: new Text('Date picker')),
-      body: new Column(
-        children: <Widget>[
-          new Text(new DateFormat.yMMMd().format(_selectedDate)),
-          new SizedBox(height: 20.0),
-          new RaisedButton(
-            onPressed: _handleSelectDate,
-            child: new Text('SELECT DATE')
-          ),
-        ],
-        mainAxisAlignment: MainAxisAlignment.center
+      body: new Center(
+        child: new Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            new Text(new DateFormat.yMMMd().format(_selectedDate)),
+            new SizedBox(height: 20.0),
+            new RaisedButton(
+              onPressed: _handleSelectDate,
+              child: new Text('SELECT DATE')
+            ),
+          ],
+        ),
       )
     );
   }
