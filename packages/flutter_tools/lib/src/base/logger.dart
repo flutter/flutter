@@ -33,7 +33,10 @@ abstract class Logger {
   void printTrace(String message);
 
   /// Start an indeterminate progress display.
-  Status startProgress(String message);
+  ///
+  /// [message] is the message to display to the user; [progressId] provides an ID which can be
+  /// used to identify this type of progress (`hot.reload`, `hot.restart`, ...).
+  Status startProgress(String message, { String progressId });
 }
 
 class Status {
@@ -76,7 +79,7 @@ class StdoutLogger extends Logger {
   void printTrace(String message) { }
 
   @override
-  Status startProgress(String message) {
+  Status startProgress(String message, { String progressId }) {
     if (_status != null) {
       // Ignore nested progresses; return a no-op status object.
       return new Status();
@@ -119,7 +122,7 @@ class BufferLogger extends Logger {
   void printTrace(String message) => _trace.writeln(message);
 
   @override
-  Status startProgress(String message) {
+  Status startProgress(String message, { String progressId }) {
     printStatus(message);
     return new Status();
   }
@@ -151,7 +154,7 @@ class VerboseLogger extends Logger {
   }
 
   @override
-  Status startProgress(String message) {
+  Status startProgress(String message, { String progressId }) {
     printStatus(message);
     return new Status();
   }
