@@ -469,7 +469,7 @@ config("compiler") {
     defines += [ "HAVE_SYS_UIO_H" ]
 
     # Use gold for Android for most CPU architectures.
-    if (current_cpu == "x86" || current_cpu == "x64" || current_cpu == "arm") {
+    if (current_cpu == "x86" || current_cpu == "x64" || current_cpu == "arm" || current_cpu == "arm64") {
       ldflags += [ "-fuse-ld=gold" ]
       if (is_clang) {
         # Let clang find the ld.gold in the NDK.
@@ -502,6 +502,9 @@ config("compiler") {
       if (current_cpu == "arm") {
         cflags += [ "--target=arm-linux-androideabi" ]
         ldflags += [ "--target=arm-linux-androideabi" ]
+      } else if (current_cpu == "arm64") {
+        cflags += [ "--target=aarch64-linux-android" ]
+        ldflags += [ "--target=aarch64-linux-android" ]
       } else if (current_cpu == "x86") {
         cflags += [ "--target=i686-linux-androideabi" ]
         ldflags += [ "--target=i686-linux-androideabi" ]

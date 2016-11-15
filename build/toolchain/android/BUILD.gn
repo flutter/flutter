@@ -151,7 +151,7 @@ android_gcc_toolchains_helper("arm64") {
   android_ndk_sysroot = "$android_ndk_root/$arm64_android_sysroot_subdir"
   android_ndk_lib_dir = "usr/lib"
 
-  tool_prefix = "$arm64_android_toolchain_root/bin/arm-linux-androideabi-"
+  tool_prefix = "$arm64_android_toolchain_root/bin/aarch64-linux-android-"
   toolchain_cpu = "aarch64"
 }
 

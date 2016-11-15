@@ -94,7 +94,7 @@ if (is_android) {
 
   # Subdirectories inside android_ndk_root that contain the sysroot for the
   # associated platform.
-  if (current_cpu == "x64") {
+  if (current_cpu == "x64" || current_cpu == "arm64") {
     _android_api_level = 22
   } else {
     _android_api_level = 16
@@ -119,7 +119,7 @@ if (is_android) {
   arm_android_toolchain_root = "$android_ndk_root/toolchains/arm-linux-androideabi-${_android_toolchain_version}/prebuilt/${android_host_os}-${android_host_arch}"
   mips_android_toolchain_root = "$android_ndk_root/toolchains/mipsel-linux-android-${_android_toolchain_version}/prebuilt/${android_host_os}-${android_host_arch}"
   x86_64_android_toolchain_root = "$android_ndk_root/toolchains/x86_64-${_android_toolchain_version}/prebuilt/${android_host_os}-${android_host_arch}"
-  arm64_android_toolchain_root = "$android_ndk_root/toolchains/aarch64-${_android_toolchain_version}/prebuilt/${android_host_os}-${android_host_arch}"
+  arm64_android_toolchain_root = "$android_ndk_root/toolchains/aarch64-linux-android-${_android_toolchain_version}/prebuilt/${android_host_os}-${android_host_arch}"
   mips64_android_toolchain_root = "$android_ndk_root/toolchains/mips64el-${_android_toolchain_version}/prebuilt/${android_host_os}-${android_host_arch}"
 
   # Location of libgcc. This is only needed for the current GN toolchain, so we
