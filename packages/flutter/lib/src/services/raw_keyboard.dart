@@ -70,6 +70,7 @@ class RawKeyEventDataFuchsia extends RawKeyEventData {
   const RawKeyEventDataFuchsia({
     this.hidUsage: 0,
     this.codePoint: 0,
+    this.modifiers: 0,
   });
 
   /// The USB HID usage.
@@ -81,6 +82,12 @@ class RawKeyEventDataFuchsia extends RawKeyEventData {
   ///
   /// If there is no unicode code point, this value is zero.
   final int codePoint;
+
+  /// The modifiers that we present when the key event occured.
+  ///
+  /// See <https://fuchsia.googlesource.com/mozart/+/master/services/input/input_event_constants.fidl>
+  /// for the numerical values of the modifiers.
+  final int modifiers;
 }
 
 /// Base class for raw key events.
@@ -138,6 +145,7 @@ RawKeyEvent _toRawKeyEvent(Map<String, dynamic> message) {
       data = new RawKeyEventDataFuchsia(
         hidUsage: message['hidUsage'] ?? 0,
         codePoint: message['codePoint'] ?? 0,
+        modifiers: message['modifiers'] ?? 0,
       );
       break;
     default:

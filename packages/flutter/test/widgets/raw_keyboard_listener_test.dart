@@ -38,6 +38,7 @@ void main() {
       'keymap': 'fuchsia',
       'hidUsage': 0x04,
       'codePoint': 0x64,
+      'modifiers': 0x08,
     });
 
     await tester.idle();
@@ -48,5 +49,6 @@ void main() {
     RawKeyEventDataFuchsia typedData = events[0].data;
     expect(typedData.hidUsage, 0x04);
     expect(typedData.codePoint, 0x64);
+    expect(typedData.modifiers, 0x08);
   });
 }
