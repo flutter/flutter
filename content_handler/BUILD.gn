@@ -41,6 +41,7 @@ executable("content_handler") {
     "//lib/mtl",
     "//lib/tonic/mx",
     "//lib/zip",
+    "//third_party/rapidjson",
     "//third_party/skia",
 
     # TODO(abarth): We shouldn't need to depend on libdart_builtin but we fail

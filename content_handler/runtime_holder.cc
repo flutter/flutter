@@ -21,6 +21,9 @@
 #include "lib/ftl/time/time_delta.h"
 #include "lib/tonic/mx/mx_converter.h"
 #include "lib/zip/create_unzipper.h"
+#include "third_party/rapidjson/rapidjson/document.h"
+#include "third_party/rapidjson/rapidjson/stringbuffer.h"
+#include "third_party/rapidjson/rapidjson/writer.h"
 
 using tonic::DartConverter;
 using tonic::ToDart;
@@ -271,6 +274,35 @@ void RuntimeHolder::OnEvent(mozart::EventPtr event,
     runtime_->DispatchPointerDataPacket(packet);
 
     handled = true;
+  } else if (event->key_data) {
+    const char* type = nullptr;
+    if (event->action == mozart::EventType::KEY_PRESSED)
+      type = "keydown";
+    else if (event->action == mozart::EventType::KEY_RELEASED)
+      type = "keyup";
+
+    if (type) {
+      rapidjson::Document document;
+      auto& allocator = document.GetAllocator();
+      document.SetObject();
+      document.AddMember("type", rapidjson::Value(type, strlen(type)),
+                         allocator);
+      document.AddMember("keymap", rapidjson::Value("fuchsia"), allocator);
+      document.AddMember("hidUsage", event->key_data->hid_usage, allocator);
+      document.AddMember("codePoint", event->key_data->code_point, allocator);
+      document.AddMember("modifiers", event->key_data->modifiers, allocator);
+      rapidjson::StringBuffer buffer;
+      rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+      document.Accept(writer);
+
+      const uint8_t* data =
+          reinterpret_cast<const uint8_t*>(buffer.GetString());
+      runtime_->DispatchPlatformMessage(
+          ftl::MakeRefCounted<blink::PlatformMessage>(
+              "flutter/keyevent",
+              std::vector<uint8_t>(data, data + buffer.GetSize()), nullptr));
+      handled = true;
+    }
   }
   callback(handled);
 }
