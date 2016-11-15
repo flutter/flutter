@@ -63,9 +63,12 @@ class RunCommand extends RunCommandBase {
     argParser.addOption('packages',
         hide: !verboseHelp,
         help: 'Specify the path to the .packages file.');
-    argParser.addOption('project_root',
+    argParser.addOption('project-root',
         hide: !verboseHelp,
         help: 'Specify the project root directory.');
+    argParser.addOption('project-assets',
+        hide: !verboseHelp,
+        help: 'Specify the project assets relative to the root directory.');
     argParser.addFlag('machine',
         hide: !verboseHelp,
         help: 'Handle machine structured JSON command input\n'
@@ -219,8 +222,9 @@ class RunCommand extends RunCommandBase {
         debuggingOptions: options,
         benchmarkMode: argResults['benchmark'],
         applicationBinary: argResults['use-application-binary'],
-        projectRootPath: argResults['project_root'],
+        projectRootPath: argResults['project-root'],
         packagesFilePath: argResults['packages'],
+        projectAssets: argResults['project-assets']
       );
     } else {
       runner = new RunAndStayResident(
