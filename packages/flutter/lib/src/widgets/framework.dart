@@ -1929,7 +1929,10 @@ abstract class Element implements BuildContext {
   int get depth => _depth;
   int _depth;
 
-  static int _sort(BuildableElement a, BuildableElement b) {
+  /// Returns true if the element has been marked as needing rebuilding.
+  bool get dirty => false;
+
+  static int _sort(Element a, Element b) {
     if (a.depth < b.depth)
       return -1;
     if (b.depth < a.depth)
@@ -2667,6 +2670,7 @@ abstract class BuildableElement extends Element {
   BuildableElement(Widget widget) : super(widget);
 
   /// Returns true if the element has been marked as needing rebuilding.
+  @override
   bool get dirty => _dirty;
   bool _dirty = true;
 

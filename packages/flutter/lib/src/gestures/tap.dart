@@ -99,7 +99,7 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
   void resolve(GestureDisposition disposition) {
     if (_wonArenaForPrimaryPointer && disposition == GestureDisposition.rejected) {
       if (onTapCancel != null)
-        invokeCallback/*<Null>*/('onTapCancel', onTapCancel);
+        invokeCallback/*<Null>*/('onTapCancel', onTapCancel); // ignore: INVALID_CAST_FUNCTION_EXPR, https://github.com/dart-lang/sdk/issues/27504
       _reset();
     }
     super.resolve(disposition);
@@ -126,7 +126,7 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
     if (pointer == primaryPointer) {
       assert(state == GestureRecognizerState.defunct);
       if (onTapCancel != null)
-        invokeCallback/*<Null>*/('onTapCancel', onTapCancel);
+        invokeCallback/*<Null>*/('onTapCancel', onTapCancel); // ignore: INVALID_CAST_FUNCTION_EXPR, https://github.com/dart-lang/sdk/issues/27504
       _reset();
     }
   }
@@ -134,7 +134,7 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
   void _checkDown() {
     if (!_sentTapDown) {
       if (onTapDown != null)
-        invokeCallback/*<Null>*/('onTapDown', () => onTapDown(new TapDownDetails(globalPosition: initialPosition)));
+        invokeCallback/*<Null>*/('onTapDown', () => onTapDown(new TapDownDetails(globalPosition: initialPosition))); // ignore: INVALID_CAST_FUNCTION_EXPR, https://github.com/dart-lang/sdk/issues/27504
       _sentTapDown = true;
     }
   }
@@ -143,9 +143,9 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
     if (_wonArenaForPrimaryPointer && _finalPosition != null) {
       resolve(GestureDisposition.accepted);
       if (onTapUp != null)
-        invokeCallback/*<Null>*/('onTapUp', () => onTapUp(new TapUpDetails(globalPosition: _finalPosition)));
+        invokeCallback/*<Null>*/('onTapUp', () => onTapUp(new TapUpDetails(globalPosition: _finalPosition))); // ignore: INVALID_CAST_FUNCTION_EXPR, https://github.com/dart-lang/sdk/issues/27504
       if (onTap != null)
-        invokeCallback/*<Null>*/('onTap', onTap);
+        invokeCallback/*<Null>*/('onTap', onTap); // ignore: INVALID_CAST_FUNCTION_EXPR, https://github.com/dart-lang/sdk/issues/27504
       _reset();
     }
   }

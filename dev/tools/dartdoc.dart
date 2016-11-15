@@ -148,11 +148,12 @@ List<String> findPackageNames() {
 List<Directory> findPackages() {
   return new Directory('packages')
     .listSync()
-    .where((FileSystemEntity entity) => entity is Directory)
-    .where((Directory dir) {
-      File pubspec = new File('${dir.path}/pubspec.yaml');
-      bool nodoc = pubspec.readAsStringSync().contains('nodoc: true');
-      return !nodoc;
+    .where((FileSystemEntity entity) {
+      if (entity is! Directory)
+        return false;
+      File pubspec = new File('${entity.path}/pubspec.yaml');
+      // TODO(ianh): Use a real YAML parser here
+      return !pubspec.readAsStringSync().contains('nodoc: true');
     })
     .toList();
 }
@@ -160,7 +161,6 @@ List<Directory> findPackages() {
 Iterable<String> libraryRefs() sync* {
   for (Directory dir in findPackages()) {
     String dirName = path.basename(dir.path);
-
     for (FileSystemEntity file in new Directory('${dir.path}/lib').listSync()) {
       if (file is File && file.path.endsWith('.dart'))
         yield '$dirName/${path.basename(file.path)}';
