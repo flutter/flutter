@@ -5,14 +5,18 @@
 import 'dart:async';
 
 import '../base/common.dart';
+import '../base/context.dart';
 import '../base/os.dart';
 import '../base/process.dart';
 import '../dart/pub.dart';
 import '../dart/summary.dart';
 import '../cache.dart';
+import '../doctor.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
 import '../version.dart';
+
+Doctor get doctor => context[Doctor];
 
 class UpgradeCommand extends FlutterCommand {
   @override

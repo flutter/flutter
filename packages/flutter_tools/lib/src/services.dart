@@ -9,6 +9,8 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 import 'package:yaml/yaml.dart';
 
+import 'android/android_sdk.dart';
+import 'base/context.dart';
 import 'dart/package_map.dart';
 import 'globals.dart';
 
@@ -76,6 +78,7 @@ Future<Null> parseServiceConfigs(
 Future<String> getServiceFromUrl(
   String url, String rootDir, String serviceName, { bool unzip: false }
 ) async {
+  AndroidSdk androidSdk = context[AndroidSdk];
   if (url.startsWith("android-sdk:") && androidSdk != null) {
     // It's something shipped in the standard android SDK.
     return url.replaceAll('android-sdk:', '${androidSdk.directory}/');

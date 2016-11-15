@@ -14,10 +14,13 @@ import '../base/context.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
 import '../cache.dart';
+import '../device.dart';
 import '../dart/package_map.dart';
 import '../globals.dart';
 import '../toolchain.dart';
 import '../version.dart';
+
+DeviceManager get deviceManager => context[DeviceManager];
 
 const String kFlutterRootEnvironmentVariableName = 'FLUTTER_ROOT'; // should point to //flutter/ (root of flutter/flutter repo)
 const String kFlutterEngineEnvironmentVariableName = 'FLUTTER_ENGINE'; // should point to //engine/src/ (root of flutter/engine repo)

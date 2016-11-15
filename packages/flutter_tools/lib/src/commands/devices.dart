@@ -5,10 +5,15 @@
 import 'dart:async';
 
 import '../base/common.dart';
+import '../base/context.dart';
 import '../base/utils.dart';
 import '../device.dart';
+import '../doctor.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
+
+DeviceManager get deviceManager => context[DeviceManager];
+Doctor get doctor => context[Doctor];
 
 class DevicesCommand extends FlutterCommand {
   @override

@@ -2,22 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'android/android_sdk.dart';
 import 'base/config.dart';
 import 'base/context.dart';
 import 'base/logger.dart';
 import 'cache.dart';
-import 'device.dart';
-import 'doctor.dart';
 import 'toolchain.dart';
 import 'usage.dart';
 
-DeviceManager get deviceManager => context[DeviceManager];
 Logger get logger => context[Logger];
-AndroidSdk get androidSdk => context[AndroidSdk];
+
 Cache get cache => Cache.instance;
 Config get config => Config.instance;
-Doctor get doctor => context[Doctor];
 ToolConfiguration get tools => ToolConfiguration.instance;
 Usage get flutterUsage => Usage.instance;
 

@@ -8,6 +8,7 @@ import 'dart:io';
 
 import '../android/android_sdk.dart';
 import '../application_package.dart';
+import '../base/context.dart';
 import '../base/os.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
@@ -19,6 +20,8 @@ import '../protocol_discovery.dart';
 import 'adb.dart';
 import 'android.dart';
 import 'android_sdk.dart';
+
+AndroidSdk get androidSdk => context[AndroidSdk];
 
 const String _defaultAdbPath = 'adb';
 

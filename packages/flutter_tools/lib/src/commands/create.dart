@@ -9,12 +9,16 @@ import 'package:path/path.dart' as path;
 
 import '../android/android.dart' as android;
 import '../base/common.dart';
+import '../base/context.dart';
 import '../base/utils.dart';
 import '../cache.dart';
 import '../dart/pub.dart';
+import '../doctor.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
 import '../template.dart';
+
+Doctor get doctor => context[Doctor];
 
 class CreateCommand extends FlutterCommand {
   CreateCommand() {

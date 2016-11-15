@@ -9,10 +9,13 @@ import 'package:path/path.dart' as path;
 
 import 'android/android_workflow.dart';
 import 'base/common.dart';
+import 'base/context.dart';
 import 'device.dart';
 import 'globals.dart';
 import 'ios/ios_workflow.dart';
 import 'version.dart';
+
+DeviceManager get deviceManager => context[DeviceManager];
 
 const Map<String, String> _osNames = const <String, String>{
   'macos': 'Mac OS',

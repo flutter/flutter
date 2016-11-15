@@ -5,10 +5,13 @@
 import 'dart:async';
 import 'dart:io';
 
+import '../base/context.dart';
 import '../base/os.dart';
 import '../doctor.dart';
 import '../globals.dart';
 import 'android_sdk.dart';
+
+AndroidSdk get androidSdk => context[AndroidSdk];
 
 class AndroidWorkflow extends DoctorValidator implements Workflow {
   AndroidWorkflow() : super('Android toolchain - develop for Android devices');
