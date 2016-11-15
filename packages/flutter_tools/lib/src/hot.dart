@@ -99,6 +99,7 @@ class HotRunner extends ResidentRunner {
     this.applicationBinary,
     String projectRootPath,
     String packagesFilePath,
+    String projectAssets,
   }) : super(device,
              target: target,
              debuggingOptions: debuggingOptions,
@@ -106,6 +107,10 @@ class HotRunner extends ResidentRunner {
     _projectRootPath = projectRootPath ?? Directory.current.path;
     _packagesFilePath =
             packagesFilePath ?? path.absolute(PackageMap.globalPackagesPath);
+    if (projectAssets != null)
+      _bundle = new AssetBundle.fixed(_projectRootPath, projectAssets);
+    else
+      _bundle = new AssetBundle();
   }
 
   ApplicationPackage _package;
@@ -116,7 +121,8 @@ class HotRunner extends ResidentRunner {
   bool get prebuiltMode => applicationBinary != null;
   Set<String> _dartDependencies;
   int _observatoryPort;
-  final AssetBundle bundle = new AssetBundle();
+  AssetBundle _bundle;
+  AssetBundle get bundle => _bundle;
   final bool benchmarkMode;
   final Map<String, int> benchmarkData = new Map<String, int>();
 

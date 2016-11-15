@@ -52,9 +52,33 @@ class AssetBundle {
   static const String _kFontSetMaterial = 'material';
   static const String _kFontSetRoboto = 'roboto';
 
+  bool _fixed = false;
   DateTime _lastBuildTimestamp;
 
+  /// Constructs an [AssetBundle] that gathers the set of assets from the
+  /// flutter.yaml manifest.
+  AssetBundle();
+
+  /// Constructs an [AssetBundle] with a fixed set of assets.
+  /// [projectRoot] The absolute path to the project root.
+  /// [projectAssets] comma separated list of assets.
+  AssetBundle.fixed(String projectRoot, String projectAssets) {
+    _fixed = true;
+    if ((projectRoot == null) || (projectAssets == null))
+      return;
+
+    List<String> assets = projectAssets.split(',');
+    for (String asset in assets) {
+      final String assetPath = path.join(projectRoot, asset);
+      final String archivePath = asset;
+      entries.add(
+          new AssetBundleEntry.fromFile(archivePath, new File(assetPath)));
+    }
+  }
+
   bool needsBuild({String manifestPath: defaultManifestPath}) {
+    if (_fixed)
+      return false;
     if (_lastBuildTimestamp == null)
       return true;
 
