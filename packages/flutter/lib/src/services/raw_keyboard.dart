@@ -59,6 +59,30 @@ class RawKeyEventDataAndroid extends RawKeyEventData {
   final int metaState;
 }
 
+/// Platform-specific key event data for Fuchsia.
+///
+/// This object contains information about key events obtained from Fuchsia's
+/// KeyData interface.
+class RawKeyEventDataFuchsia extends RawKeyEventData {
+  /// Creates a key event data structure specific for Android.
+  ///
+  /// The [hidUsage] and [codePoint] arguments must not be null.
+  const RawKeyEventDataFuchsia({
+    this.hidUsage: 0,
+    this.codePoint: 0,
+  });
+
+  /// The USB HID usage.
+  ///
+  /// See <http://www.usb.org/developers/hidpage/Hut1_12v2.pdf>
+  final int hidUsage;
+
+  /// The unicode code point represented by the key event, if any.
+  ///
+  /// If there is no unicode code point, this value is zero.
+  final int codePoint;
+}
+
 /// Base class for raw key events.
 ///
 /// Raw key events pass through as much information as possible from the
@@ -96,7 +120,7 @@ class RawKeyUpEvent extends RawKeyEvent {
   }) : super(data: data);
 }
 
-RawKeyEvent _toRawKeyEvent(dynamic message) {
+RawKeyEvent _toRawKeyEvent(Map<String, dynamic> message) {
   RawKeyEventData data;
 
   String keymap = message['keymap'];
@@ -110,7 +134,15 @@ RawKeyEvent _toRawKeyEvent(dynamic message) {
         metaState: message['metaState'] ?? 0,
       );
       break;
+    case 'fuchsia':
+      data = new RawKeyEventDataFuchsia(
+        hidUsage: message['hidUsage'] ?? 0,
+        codePoint: message['codePoint'] ?? 0,
+      );
+      break;
     default:
+      // We don't yet implement raw key events on iOS, but we don't hit this
+      // exception because the engine never sends us these messages.
       throw new FlutterError('Unknown keymap for key events: $keymap');
   }
 
@@ -120,14 +152,15 @@ RawKeyEvent _toRawKeyEvent(dynamic message) {
       return new RawKeyDownEvent(data: data);
     case 'keyup':
       return new RawKeyUpEvent(data: data);
+    default:
+      throw new FlutterError('Unknown key event type: $type');
   }
-  throw new FlutterError('Unknown key event type: $type');
 }
 
 /// An interface for listening to raw key events.
 ///
 /// Raw key events pass through as much information as possible from the
-/// underlying platform's key events, which makes they provide a high level of
+/// underlying platform's key events, which makes them provide a high level of
 /// fidelity but a low level of portability.
 ///
 /// A [RawKeyboard] is useful for listening to raw key events and hardware
