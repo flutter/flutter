@@ -400,7 +400,7 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
     _syncAll(gestures);
     if (!config.excludeFromSemantics) {
       RenderSemanticsGestureHandler semanticsGestureHandler = context.findRenderObject();
-      context.visitChildElements((RenderObjectElement element) {
+      context.visitChildElements((Element element) {
         _GestureSemantics widget = element.widget;
         widget._updateHandlers(semanticsGestureHandler, _recognizers);
       });

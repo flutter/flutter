@@ -27,7 +27,7 @@ class MockClient extends BaseClient {
   /// Creates a [MockClient] with a handler that receives [Request]s and sends
   /// [Response]s.
   MockClient(MockClientHandler fn)
-    : this._((Request baseRequest, ByteStream bodyStream) {
+    : this._((BaseRequest baseRequest, ByteStream bodyStream) {
       return bodyStream.toBytes().then((Uint8List bodyBytes) {
         Request request = new Request(baseRequest.method, baseRequest.url)
             ..persistentConnection = baseRequest.persistentConnection
@@ -56,7 +56,7 @@ class MockClient extends BaseClient {
   /// Creates a [MockClient] with a handler that receives [StreamedRequest]s and
   /// sends [StreamedResponse]s.
   MockClient.streaming(MockClientStreamHandler fn)
-    : this._((Request request, ByteStream bodyStream) {
+    : this._((BaseRequest request, ByteStream bodyStream) {
       return fn(request, bodyStream).then((StreamedResponse response) {
         return new StreamedResponse(
             response.stream,
@@ -85,4 +85,4 @@ typedef Future<StreamedResponse> MockClientStreamHandler(
 
 /// A handler function that receives [Request]s and sends [Response]s. Note that
 /// [request] will be finalized.
-typedef Future<Response> MockClientHandler(Request request);
+typedef Future<Response> MockClientHandler(BaseRequest request);

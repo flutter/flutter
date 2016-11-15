@@ -342,7 +342,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
           stack: stack,
           context: 'running a test',
           library: 'Flutter test framework',
-          stackFilter: (List<String> frames) {
+          stackFilter: (Iterable<String> frames) {
             return FlutterError.defaultStackFilter(frames.skip(stackLinesToOmit));
           },
           informationCollector: (StringBuffer information) {
