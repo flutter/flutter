@@ -180,9 +180,9 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
             final Offset pixelsPerSecond = velocity.pixelsPerSecond;
             if (pixelsPerSecond.distanceSquared > kMaxFlingVelocity * kMaxFlingVelocity)
               velocity = new Velocity(pixelsPerSecond: (pixelsPerSecond / pixelsPerSecond.distance) * kMaxFlingVelocity);
-            invokeCallback/*<Null>*/('onEnd', () => onEnd(new ScaleEndDetails(velocity: velocity))); // ignore: INVALID_CAST_FUNCTION_EXPR, https://github.com/dart-lang/sdk/issues/27504
+            invokeCallback/*<Null>*/('onEnd', () => onEnd(new ScaleEndDetails(velocity: velocity))); // ignore: STRONG_MODE_INVALID_CAST_FUNCTION_EXPR, https://github.com/dart-lang/sdk/issues/27504
           } else {
-            invokeCallback/*<Null>*/('onEnd', () => onEnd(new ScaleEndDetails(velocity: Velocity.zero))); // ignore: INVALID_CAST_FUNCTION_EXPR, https://github.com/dart-lang/sdk/issues/27504
+            invokeCallback/*<Null>*/('onEnd', () => onEnd(new ScaleEndDetails(velocity: Velocity.zero))); // ignore: STRONG_MODE_INVALID_CAST_FUNCTION_EXPR, https://github.com/dart-lang/sdk/issues/27504
           }
         }
         _state = ScaleState.accepted;
@@ -200,11 +200,11 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
     if (_state == ScaleState.accepted && !configChanged) {
       _state = ScaleState.started;
       if (onStart != null)
-        invokeCallback/*<Null>*/('onStart', () => onStart(new ScaleStartDetails(focalPoint: focalPoint))); // ignore: INVALID_CAST_FUNCTION_EXPR, https://github.com/dart-lang/sdk/issues/27504
+        invokeCallback/*<Null>*/('onStart', () => onStart(new ScaleStartDetails(focalPoint: focalPoint))); // ignore: STRONG_MODE_INVALID_CAST_FUNCTION_EXPR, https://github.com/dart-lang/sdk/issues/27504
     }
 
     if (_state == ScaleState.started && onUpdate != null)
-      invokeCallback/*<Null>*/('onUpdate', () => onUpdate(new ScaleUpdateDetails(scale: _scaleFactor, focalPoint: focalPoint))); // ignore: INVALID_CAST_FUNCTION_EXPR, https://github.com/dart-lang/sdk/issues/27504
+      invokeCallback/*<Null>*/('onUpdate', () => onUpdate(new ScaleUpdateDetails(scale: _scaleFactor, focalPoint: focalPoint))); // ignore: STRONG_MODE_INVALID_CAST_FUNCTION_EXPR, https://github.com/dart-lang/sdk/issues/27504
   }
 
   @override

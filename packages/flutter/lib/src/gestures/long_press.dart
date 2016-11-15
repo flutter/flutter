@@ -26,7 +26,7 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
   void didExceedDeadline() {
     resolve(GestureDisposition.accepted);
     if (onLongPress != null)
-      invokeCallback/*<Null>*/('onLongPress', onLongPress); // ignore: INVALID_CAST_FUNCTION_EXPR, https://github.com/dart-lang/sdk/issues/27504
+      invokeCallback/*<Null>*/('onLongPress', onLongPress); // ignore: STRONG_MODE_INVALID_CAST_FUNCTION_EXPR, https://github.com/dart-lang/sdk/issues/27504
   }
 
   @override
