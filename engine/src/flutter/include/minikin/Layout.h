@@ -145,7 +145,7 @@ private:
         bool isRtl, LayoutContext* ctx);
 
     // Append another layout (for example, cached value) into this one
-    void appendLayout(Layout* src, size_t start);
+    void appendLayout(Layout* src, size_t start, float extraAdvance);
 
     std::vector<LayoutGlyph> mGlyphs;
     std::vector<float> mAdvances;

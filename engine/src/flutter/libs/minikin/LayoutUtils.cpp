@@ -20,13 +20,22 @@
 
 namespace minikin {
 
+const uint16_t CHAR_NBSP = 0x00A0;
+
+/*
+ * Determine whether the code unit is a word space for the purposes of justification.
+ */
+bool isWordSpace(uint16_t code_unit) {
+    return code_unit == ' ' || code_unit == CHAR_NBSP;
+}
+
 /**
  * For the purpose of layout, a word break is a boundary with no
  * kerning or complex script processing. This is necessarily a
  * heuristic, but should be accurate most of the time.
  */
-static bool isWordBreakAfter(int c) {
-    if (c == ' ' || (c >= 0x2000 && c <= 0x200a) || c == 0x3000) {
+static bool isWordBreakAfter(uint16_t c) {
+    if (isWordSpace(c) || (c >= 0x2000 && c <= 0x200a) || c == 0x3000) {
         // spaces
         return true;
     }
@@ -34,7 +43,7 @@ static bool isWordBreakAfter(int c) {
     return false;
 }
 
-static bool isWordBreakBefore(int c) {
+static bool isWordBreakBefore(uint16_t c) {
     // CJK ideographs (and yijing hexagram symbols)
     return isWordBreakAfter(c) || (c >= 0x3400 && c <= 0x9fff);
 }
