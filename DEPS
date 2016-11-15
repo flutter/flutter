@@ -28,7 +28,7 @@ vars = {
   # Note: When updating the Dart revision, ensure that all entries that are
   # dependencies of dart are also updated
   'dart_revision': '4d81fee396081f68ad33b59845fead0b905bc69d',
-  'dart_boringssl_gen_revision': '62c20247d582444cb2804f9ea4e3abaa6e47f6a5',
+  'dart_boringssl_gen_revision': 'cc6668818f096351db9b591af0d7d0e9dec04451',
   'dart_boringssl_revision': '8d343b44bbab829d1a28fdef650ca95f7db4412e',
   'dart_observatory_packages_revision': '26aad88f1c1915d39bbcbff3cad589e2402fdcf1',
   'dart_root_certificates_revision': 'aed07942ce98507d2be28cbd29e879525410c7fc',
@@ -45,7 +45,7 @@ allowed_hosts = [
 ]
 
 deps = {
-  'src': 'https://github.com/flutter/buildroot.git' + '@' + 'e7c562eeb565f87112719d1ae0eedb799c8bc4e0',
+  'src': 'https://github.com/flutter/buildroot.git' + '@' + 'a69330303690bbc10953ed1a662f37f1f3c7b2b9',
 
    # Fuchsia compatibility
    #
