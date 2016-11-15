@@ -164,10 +164,12 @@ class GridDemoPhotoItem extends StatelessWidget {
           appBar: new AppBar(
             title: new Text(photo.title)
           ),
-          body: new Hero(
-            tag: photo.tag,
-            child: new GridPhotoViewer(photo: photo),
-          )
+          body: new SizedBox.expand(
+            child: new Hero(
+              tag: photo.tag,
+              child: new GridPhotoViewer(photo: photo),
+            ),
+          ),
         );
       }
     ));
