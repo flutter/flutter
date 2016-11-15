@@ -7,8 +7,13 @@ This package contains the code for test framework and the tests. More generally
 the tests are referred to as "tasks" in the API, but since we primarily use it
 for testing, this document refers to them as "tests".
 
-You can see the continuous build results from the master branch at
-http://go/flutter-dashboard/build.html.
+If you have access to Google's internal network, you can see the continuous build results from the master branch at
+<http://go/flutter-dashboard/build.html>. (There is currently no public view of this data, unfortunately.)
+
+# Prerequisites
+
+You must set the `ANDROID_HOME` environment variable to run tests on Android. If you
+have a local build of the Flutter engine, then you have a copy of the Android SDK at `.../engine/src/third_party/android_tools/sdk`.
 
 # Running tests locally
 
@@ -20,8 +25,11 @@ reproduce a CI test failure locally.
 To run a test, use option `-t` (`--task`):
 
 ```sh
+# from the .../flutter/dev/devicelab directory
 dart bin/run.dart -t {NAME_OF_TEST}
 ```
+
+You can see the test names in the `manifest.yaml` file in this directory or by looking in `bin/tasks/`. Do not include the `.dart` file extension. For example, `dart bin/run.dart -t complex_layout__start_up`.
 
 To run multiple tests, repeat option `-t` (`--task`) multiple times:
 
@@ -41,10 +49,12 @@ To run tests from a specific stage, use option `-s` (`--stage`):
 dart bin/run.dart -s {NAME_OF_STAGE}
 ```
 
+Currently there are only two stages defined, `devicelab` and `devicelab_ios`.
+
 # Reproducing broken builds locally
 
 If a commit caused a test to fail,
-[the dashboard](http://go/flutter-dashboard/build.html) might look something
+[the dashboard](http://go/flutter-dashboard/build.html) (requires access to the Google network, sorry) might look something
 like this:
 
 ![Broken Test](images/broken-test.png)
