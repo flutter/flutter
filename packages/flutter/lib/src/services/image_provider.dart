@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io' show File;
 import 'dart:ui' show Size, Locale, hashValues;
 import 'dart:ui' as ui show Image;
 import 'dart:typed_data';
@@ -368,6 +369,68 @@ class NetworkImage extends ImageProvider<NetworkImage> {
 
   @override
   String toString() => '$runtimeType("$url", scale: $scale)';
+}
+
+/// Decodes the given [File] object as an image, associating it with the given
+/// scale.
+class FileImage extends ImageProvider<FileImage> {
+  /// Creates an object that decodes a [File] as an image.
+  ///
+  /// The arguments must not be null.
+  const FileImage(this.file, { this.scale: 1.0 });
+
+  /// The file to decode into an image.
+  final File file;
+
+  /// The scale to place in the [ImageInfo] object of the image.
+  final double scale;
+
+  @override
+  Future<FileImage> obtainKey(ImageConfiguration configuration) {
+    return new SynchronousFuture<FileImage>(this);
+  }
+
+  @override
+  ImageStreamCompleter load(FileImage key) {
+    return new OneFrameImageStreamCompleter(
+      _loadAsync(key),
+      informationCollector: (StringBuffer information) {
+        information.writeln('Path: ${file?.path}');
+      }
+    );
+  }
+
+  Future<ImageInfo> _loadAsync(FileImage key) async {
+    assert(key == this);
+
+    Uint8List bytes = await file.readAsBytes();
+    if (bytes.lengthInBytes == 0)
+      return null;
+
+    final ui.Image image = await decodeImageFromList(bytes);
+    if (image == null)
+      return null;
+
+    return new ImageInfo(
+      image: image,
+      scale: key.scale,
+    );
+  }
+
+  @override
+  bool operator ==(dynamic other) {
+    if (other.runtimeType != runtimeType)
+      return false;
+    final FileImage typedOther = other;
+    return file?.path == file?.path
+        && scale == typedOther.scale;
+  }
+
+  @override
+  int get hashCode => hashValues(file?.path, scale);
+
+  @override
+  String toString() => '$runtimeType("${file?.path}", scale: $scale)';
 }
 
 /// Fetches an image from an [AssetBundle], associating it with the given scale.
