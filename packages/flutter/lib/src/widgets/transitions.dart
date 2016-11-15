@@ -196,6 +196,9 @@ class RotationTransition extends AnimatedWidget {
 }
 
 /// Animates its own size and clips and aligns the child.
+///
+/// For a widget that automatically animates between the sizes of two children,
+/// fading between them, see [AnimatedCrossFade].
 class SizeTransition extends AnimatedWidget {
   /// Creates a size transition.
   ///
@@ -245,6 +248,9 @@ class SizeTransition extends AnimatedWidget {
 }
 
 /// Animates the opacity of a widget.
+///
+/// For a widget that automatically animates between the sizes of two children,
+/// fading between them, see [AnimatedCrossFade].
 class FadeTransition extends AnimatedWidget {
   /// Creates an opacity transition.
   ///
