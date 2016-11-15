@@ -124,7 +124,7 @@ def parse_args(args):
 
   parser.add_argument('--target-os', type=str, choices=['android', 'ios'])
   parser.add_argument('--android', dest='target_os', action='store_const', const='android')
-  parser.add_argument('--android-cpu', type=str, choices=['arm', 'x64', 'x86'], default='arm')
+  parser.add_argument('--android-cpu', type=str, choices=['arm', 'x64', 'x86', 'arm64'], default='arm')
   parser.add_argument('--ios', dest='target_os', action='store_const', const='ios')
   parser.add_argument('--simulator', action='store_true', default=False)
 
