@@ -28,6 +28,10 @@ void main()  {
     test('does not need a rebuild', () async {
       expect(new AssetBundle.fixed(null, null).needsBuild(), isFalse);
     });
+    test('empty string', () async {
+      AssetBundle ab = new AssetBundle.fixed('', '');
+      expect(ab.entries, isEmpty);
+    });
     test('single entry', () async {
       AssetBundle ab = new AssetBundle.fixed('', 'apple.txt');
       expect(ab.entries, isNotEmpty);
