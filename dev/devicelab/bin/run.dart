@@ -7,10 +7,13 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:args/args.dart';
+import 'package:path/path.dart' as path;
 
 import 'package:flutter_devicelab/framework/manifest.dart';
 import 'package:flutter_devicelab/framework/runner.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
+
+List<String> _taskNames = <String>[];
 
 /// Runs tasks.
 ///
@@ -28,24 +31,23 @@ Future<Null> main(List<String> rawArgs) async {
     return null;
   }
 
-  List<String> taskNames = <String>[];
-  if (args.wasParsed('task')) {
-    taskNames.addAll(args['task']);
-  } else if (args.wasParsed('stage')) {
-    String stageName = args['stage'];
-    List<ManifestTask> tasks = loadTaskManifest().tasks;
-    for (ManifestTask task in tasks) {
-      if (task.stage == stageName)
-        taskNames.add(task.name);
-    }
-  } else if (args.wasParsed('all')) {
-    List<ManifestTask> tasks = loadTaskManifest().tasks;
-    for (ManifestTask task in tasks) {
-      taskNames.add(task.name);
+  if (!args.wasParsed('task')) {
+    if (args.wasParsed('stage')) {
+      String stageName = args['stage'];
+      List<ManifestTask> tasks = loadTaskManifest().tasks;
+      for (ManifestTask task in tasks) {
+        if (task.stage == stageName)
+          _taskNames.add(task.name);
+      }
+    } else if (args.wasParsed('all')) {
+      List<ManifestTask> tasks = loadTaskManifest().tasks;
+      for (ManifestTask task in tasks) {
+        _taskNames.add(task.name);
+      }
     }
   }
 
-  if (taskNames.isEmpty) {
+  if (_taskNames.isEmpty) {
     stderr.writeln('Failed to find tasks to run based on supplied options.');
     exitCode = 1;
     return null;
@@ -53,7 +55,7 @@ Future<Null> main(List<String> rawArgs) async {
 
   bool silent = args['silent'];
 
-  for (String taskName in taskNames) {
+  for (String taskName in _taskNames) {
     section('Running task "$taskName"');
     Map<String, dynamic> result = await runTask(taskName, silent: silent);
 
@@ -73,9 +75,27 @@ final ArgParser _argParser = new ArgParser()
     abbr: 't',
     allowMultiple: true,
     splitCommas: true,
-    help: 'Name of the task to run. This option may be repeated to '
-    'specify multiple tasks. A task selected by name does not have to be '
-    'defined in manifest.yaml. It only needs a Dart executable in bin/tasks.',
+    help: 'Either:\n'
+        ' - the name of a task defined in manifest.yaml. Example: complex_layout__start_up.\n'
+        ' - the path to a Dart file corresponding to a task, which resides in bin/tasks. Example: bin/tasks/complex_layout__start_up.dart.\n'
+        '\n'
+        'This option may be repeated to specify multiple tasks.',
+    callback: (List<String> value) {
+      for (String nameOrPath in value) {
+        List<String> fragments = path.split(nameOrPath);
+        bool isDartFile = fragments.last.endsWith('.dart');
+
+        if (fragments.length == 1 && !isDartFile) {
+          // Not a path
+          _taskNames.add(nameOrPath);
+        } else if (!isDartFile || fragments.length != 3 || !_listsEqual(<String>['bin', 'tasks'], fragments.take(2).toList())) {
+          // Unsupported executable location
+          throw new FormatException('Invalid value for option -t (--task): $nameOrPath');
+        } else {
+          _taskNames.add(path.withoutExtension(fragments.last));
+        }
+      }
+    },
   )
   ..addOption(
     'stage',
@@ -106,3 +126,14 @@ final ArgParser _argParser = new ArgParser()
     negatable: true,
     defaultsTo: false,
   );
+
+bool _listsEqual(List<dynamic> a, List<dynamic> b) {
+  if (a.length != b.length) return false;
+
+  for (int i = 0; i < a.length; i++) {
+    if (a[i] != b[i])
+      return false;
+  }
+
+  return true;
+}
