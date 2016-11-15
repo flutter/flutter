@@ -653,27 +653,38 @@ float Layout::doLayoutWord(const uint16_t* buf, size_t start, size_t count, size
         Layout* layout, float* advances) {
     LayoutCache& cache = LayoutEngine::getInstance().layoutCache;
     LayoutCacheKey key(collection, ctx->paint, ctx->style, buf, start, count, bufSize, isRtl);
-    bool skipCache = ctx->paint.skipCache();
-    if (skipCache) {
+
+    float wordSpacing = count == 1 && isWordSpace(buf[start]) ? ctx->paint.wordSpacing : 0;
+
+    float advance;
+    if (ctx->paint.skipCache()) {
         Layout layoutForWord;
         key.doLayout(&layoutForWord, ctx, collection);
         if (layout) {
-            layout->appendLayout(&layoutForWord, bufStart);
+            layout->appendLayout(&layoutForWord, bufStart, wordSpacing);
         }
         if (advances) {
             layoutForWord.getAdvances(advances);
         }
-        return layoutForWord.getAdvance();
+        advance = layoutForWord.getAdvance();
     } else {
         Layout* layoutForWord = cache.get(key, ctx, collection);
         if (layout) {
-            layout->appendLayout(layoutForWord, bufStart);
+            layout->appendLayout(layoutForWord, bufStart, wordSpacing);
         }
         if (advances) {
             layoutForWord->getAdvances(advances);
         }
-        return layoutForWord->getAdvance();
+        advance = layoutForWord->getAdvance();
     }
+
+    if (wordSpacing != 0) {
+        advance += wordSpacing;
+        if (advances) {
+            advances[0] += wordSpacing;
+        }
+    }
+    return advance;
 }
 
 static void addFeatures(const string &str, vector<hb_feature_t>* features) {
@@ -855,7 +866,7 @@ void Layout::doLayoutRun(const uint16_t* buf, size_t start, size_t count, size_t
     mAdvance = x;
 }
 
-void Layout::appendLayout(Layout* src, size_t start) {
+void Layout::appendLayout(Layout* src, size_t start, float extraAdvance) {
     int fontMapStack[16];
     int* fontMap;
     if (src->mFaces.size() < sizeof(fontMapStack) / sizeof(fontMapStack[0])) {
@@ -879,11 +890,13 @@ void Layout::appendLayout(Layout* src, size_t start) {
     }
     for (size_t i = 0; i < src->mAdvances.size(); i++) {
         mAdvances[i + start] = src->mAdvances[i];
+        if (i == 0)
+          mAdvances[i + start] += extraAdvance;
     }
     MinikinRect srcBounds(src->mBounds);
     srcBounds.offset(x0, 0);
     mBounds.join(srcBounds);
-    mAdvance += src->mAdvance;
+    mAdvance += src->mAdvance + extraAdvance;
 
     if (fontMap != fontMapStack) {
         delete[] fontMap;

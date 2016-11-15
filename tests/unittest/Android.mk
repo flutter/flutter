@@ -81,6 +81,7 @@ LOCAL_SRC_FILES += \
     HbFontCacheTest.cpp \
     MinikinInternalTest.cpp \
     GraphemeBreakTests.cpp \
+    LayoutTest.cpp \
     LayoutUtilsTest.cpp \
     UnicodeUtilsTest.cpp \
     WordBreakerTests.cpp
@@ -88,6 +89,7 @@ LOCAL_SRC_FILES += \
 LOCAL_C_INCLUDES := \
     $(LOCAL_PATH)/../../libs/minikin/ \
     $(LOCAL_PATH)/../util \
+    external/freetype/include \
     external/harfbuzz_ng/src \
     external/libxml2/include \
     external/skia/src/core
