@@ -69,6 +69,8 @@ class AssetBundle {
 
     List<String> assets = projectAssets.split(',');
     for (String asset in assets) {
+      if (asset == '')
+        continue;
       final String assetPath = path.join(projectRoot, asset);
       final String archivePath = asset;
       entries.add(
