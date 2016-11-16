@@ -18,7 +18,7 @@ export 'package:flutter/services.dart' show TextInputType;
 const Duration _kTransitionDuration = const Duration(milliseconds: 200);
 const Curve _kTransitionCurve = Curves.fastOutSlowIn;
 
-/// A simple text field.
+/// A simple text input field.
 ///
 /// This widget is comparable to [Text] in that it does not include a margin
 /// or any decoration outside the text itself. It is useful for applications,
@@ -189,7 +189,7 @@ class InputContainer extends StatefulWidget {
   /// See [Icon], [ImageIcon].
   final Widget icon;
 
-  /// Text that appears above the child or over it if isEmpty is true.
+  /// Text that appears above the child or over it, if isEmpty is true.
   final String labelText;
 
   /// Text that appears over the child if isEmpty is true and labelText is null.
