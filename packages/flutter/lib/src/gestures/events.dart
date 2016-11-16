@@ -76,6 +76,7 @@ abstract class PointerEvent {
     this.timeStamp: Duration.ZERO,
     this.pointer: 0,
     this.kind: PointerDeviceKind.touch,
+    this.device: 0,
     this.position: Point.origin,
     this.delta: Offset.zero,
     this.buttons: 0,
@@ -102,6 +103,9 @@ abstract class PointerEvent {
 
   /// The kind of input device for which the event was generated.
   final PointerDeviceKind kind;
+
+  /// Unique identifier for the pointing device, reused across interactions.
+  final int device;
 
   /// Coordinate of the position of the pointer, in logical pixels in the global
   /// coordinate space.
@@ -219,6 +223,7 @@ abstract class PointerEvent {
              'timeStamp: $timeStamp, '
              'pointer: $pointer, '
              'kind: $kind, '
+             'device: $device, '
              'position: $position, '
              'delta: $delta, '
              'buttons: $buttons, '
@@ -250,8 +255,8 @@ class PointerAddedEvent extends PointerEvent {
   /// All of the argument must be non-null.
   const PointerAddedEvent({
     Duration timeStamp: Duration.ZERO,
-    int pointer: 0,
     PointerDeviceKind kind: PointerDeviceKind.touch,
+    int device: 0,
     Point position: Point.origin,
     bool obscured: false,
     double pressureMin: 1.0,
@@ -264,8 +269,8 @@ class PointerAddedEvent extends PointerEvent {
     double tilt: 0.0
   }) : super(
     timeStamp: timeStamp,
-    pointer: pointer,
     kind: kind,
+    device: device,
     position: position,
     obscured: obscured,
     pressureMin: pressureMin,
@@ -289,8 +294,8 @@ class PointerRemovedEvent extends PointerEvent {
   /// All of the argument must be non-null.
   const PointerRemovedEvent({
     Duration timeStamp: Duration.ZERO,
-    int pointer: 0,
     PointerDeviceKind kind: PointerDeviceKind.touch,
+    int device: 0,
     bool obscured: false,
     double pressureMin: 1.0,
     double pressureMax: 1.0,
@@ -299,8 +304,8 @@ class PointerRemovedEvent extends PointerEvent {
     double radiusMax: 0.0
   }) : super(
     timeStamp: timeStamp,
-    pointer: pointer,
     kind: kind,
+    device: device,
     position: null,
     obscured: obscured,
     pressureMin: pressureMin,
@@ -308,6 +313,57 @@ class PointerRemovedEvent extends PointerEvent {
     distanceMax: distanceMax,
     radiusMin: radiusMin,
     radiusMax: radiusMax
+  );
+}
+
+/// The pointer has moved with respect to the device while the pointer is not
+/// in contact with the device.
+///
+/// See also:
+///
+///  * [PointerMoveEvent], which reports movement while the pointer is in
+///    contact with the device.
+class PointerHoverEvent extends PointerEvent {
+  /// Creates a pointer hover event.
+  ///
+  /// All of the argument must be non-null.
+  const PointerHoverEvent({
+    Duration timeStamp: Duration.ZERO,
+    PointerDeviceKind kind: PointerDeviceKind.touch,
+    int device: 0,
+    Point position: Point.origin,
+    Offset delta: Offset.zero,
+    int buttons: 0,
+    bool obscured: false,
+    double pressureMin: 1.0,
+    double pressureMax: 1.0,
+    double distance: 0.0,
+    double distanceMax: 0.0,
+    double radiusMajor: 0.0,
+    double radiusMinor: 0.0,
+    double radiusMin: 0.0,
+    double radiusMax: 0.0,
+    double orientation: 0.0,
+    double tilt: 0.0
+  }) : super(
+    timeStamp: timeStamp,
+    kind: kind,
+    device: device,
+    position: position,
+    delta: delta,
+    buttons: buttons,
+    down: false,
+    obscured: obscured,
+    pressureMin: pressureMin,
+    pressureMax: pressureMax,
+    distance: distance,
+    distanceMax: distanceMax,
+    radiusMajor: radiusMajor,
+    radiusMinor: radiusMinor,
+    radiusMin: radiusMin,
+    radiusMax: radiusMax,
+    orientation: orientation,
+    tilt: tilt
   );
 }
 
@@ -320,6 +376,7 @@ class PointerDownEvent extends PointerEvent {
     Duration timeStamp: Duration.ZERO,
     int pointer: 0,
     PointerDeviceKind kind: PointerDeviceKind.touch,
+    int device: 0,
     Point position: Point.origin,
     int buttons: 0,
     bool obscured: false,
@@ -337,6 +394,7 @@ class PointerDownEvent extends PointerEvent {
     timeStamp: timeStamp,
     pointer: pointer,
     kind: kind,
+    device: device,
     position: position,
     buttons: buttons,
     down: true,
@@ -355,7 +413,13 @@ class PointerDownEvent extends PointerEvent {
   );
 }
 
-/// The pointer has moved with respect to the device.
+/// The pointer has moved with respect to the device while the pointer is in
+/// contact with the device.
+///
+/// See also:
+///
+///  * [PointerHoverEvent], which reports movement while the pointer is not in
+///    contact with the device.
 class PointerMoveEvent extends PointerEvent {
   /// Creates a pointer move event.
   ///
@@ -364,15 +428,14 @@ class PointerMoveEvent extends PointerEvent {
     Duration timeStamp: Duration.ZERO,
     int pointer: 0,
     PointerDeviceKind kind: PointerDeviceKind.touch,
+    int device: 0,
     Point position: Point.origin,
     Offset delta: Offset.zero,
     int buttons: 0,
-    bool down: false,
     bool obscured: false,
     double pressure: 1.0,
     double pressureMin: 1.0,
     double pressureMax: 1.0,
-    double distance: 0.0,
     double distanceMax: 0.0,
     double radiusMajor: 0.0,
     double radiusMinor: 0.0,
@@ -384,15 +447,16 @@ class PointerMoveEvent extends PointerEvent {
     timeStamp: timeStamp,
     pointer: pointer,
     kind: kind,
+    device: device,
     position: position,
     delta: delta,
     buttons: buttons,
-    down: down,
+    down: true,
     obscured: obscured,
     pressure: pressure,
     pressureMin: pressureMin,
     pressureMax: pressureMax,
-    distance: distance,
+    distance: 0.0,
     distanceMax: distanceMax,
     radiusMajor: radiusMajor,
     radiusMinor: radiusMinor,
@@ -412,6 +476,7 @@ class PointerUpEvent extends PointerEvent {
     Duration timeStamp: Duration.ZERO,
     int pointer: 0,
     PointerDeviceKind kind: PointerDeviceKind.touch,
+    int device: 0,
     Point position: Point.origin,
     int buttons: 0,
     bool obscured: false,
@@ -427,8 +492,10 @@ class PointerUpEvent extends PointerEvent {
     timeStamp: timeStamp,
     pointer: pointer,
     kind: kind,
+    device: device,
     position: position,
     buttons: buttons,
+    down: false,
     obscured: obscured,
     pressureMin: pressureMin,
     pressureMax: pressureMax,
@@ -450,6 +517,7 @@ class PointerCancelEvent extends PointerEvent {
     Duration timeStamp: Duration.ZERO,
     int pointer: 0,
     PointerDeviceKind kind: PointerDeviceKind.touch,
+    int device: 0,
     Point position: Point.origin,
     int buttons: 0,
     bool obscured: false,
@@ -465,8 +533,10 @@ class PointerCancelEvent extends PointerEvent {
     timeStamp: timeStamp,
     pointer: pointer,
     kind: kind,
+    device: device,
     position: position,
     buttons: buttons,
+    down: false,
     obscured: obscured,
     pressureMin: pressureMin,
     pressureMax: pressureMax,

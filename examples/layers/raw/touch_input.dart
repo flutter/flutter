@@ -79,15 +79,15 @@ void beginFrame(Duration timeStamp) {
 void handlePointerDataPacket(ui.PointerDataPacket packet) {
   // The pointer packet contains a number of pointer movements, which we iterate
   // through and process.
-  for (ui.PointerData pointer in packet.pointers) {
-    if (pointer.change == ui.PointerChange.down) {
+  for (ui.PointerData datum in packet.data) {
+    if (datum.change == ui.PointerChange.down) {
       // If the pointer went down, we change the color of the circle to blue.
       color = const ui.Color(0xFF0000FF);
       // Rather than calling paint() synchronously, we ask the engine to
       // schedule a frame. The engine will call onBeginFrame when it is actually
       // time to produce the frame.
       ui.window.scheduleFrame();
-    } else if (pointer.change == ui.PointerChange.up) {
+    } else if (datum.change == ui.PointerChange.up) {
       // Similarly, if the pointer went up, we change the color of the circle to
       // green and schedule a frame. It's harmless to call scheduleFrame many
       // times because the engine will ignore redundant requests up until the
