@@ -2410,7 +2410,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     List<String> description = <String>[];
     debugFillDescription(description);
     result += description
-      .expand((String description) => description.split('\n'))
+      .expand((String description) => debugWordWrap(description, 65, wrapIndent: '  '))
       .map/*<String>*/((String line) => "$descriptionPrefix$line\n")
       .join();
     if (childrenDescription == '')

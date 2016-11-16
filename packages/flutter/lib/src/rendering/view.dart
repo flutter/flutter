@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:developer';
+import 'dart:io' show Platform;
 import 'dart:ui' as ui show Scene, SceneBuilder, window;
 
 import 'package:vector_math/vector_math_64.dart';
@@ -171,8 +172,14 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   @override
   void debugFillDescription(List<String> description) {
     // call to ${super.debugFillDescription(prefix)} is omitted because the root superclasses don't include any interesting information for this class
+    assert(() {
+      description.add('debug mode enabled - ${Platform.operatingSystem}');
+      return true;
+    });
     description.add('window size: ${ui.window.physicalSize} (in physical pixels)');
     description.add('device pixel ratio: ${ui.window.devicePixelRatio} (physical pixels per logical pixel)');
     description.add('configuration: $configuration (in logical pixels)');
+    if (ui.window.semanticsEnabled)
+      description.add('semantics enabled');
   }
 }

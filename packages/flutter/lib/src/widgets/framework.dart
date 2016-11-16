@@ -2578,19 +2578,7 @@ abstract class Element implements BuildContext {
     }
     if (node != null)
       chain.add('\u22EF');
-    String result = '';
-    String line = '';
-    for (String link in chain) {
-      if (line != '')
-        line += ' \u2190 ';
-      if (link.length > 3 && line.length + link.length > 65) {
-        result += '$line\n';
-        line = '         ';
-      }
-      line += link;
-    }
-    result += line;
-    return result;
+    return chain.join(' \u2190 ');
   }
 
   /// A short, textual description of this element.
@@ -2637,8 +2625,8 @@ abstract class Element implements BuildContext {
     if (children.length > 0) {
       Element last = children.removeLast();
       for (Element child in children)
-        result += '${child.toStringDeep("$prefixOtherLines \u251C", "$prefixOtherLines \u2502")}';
-      result += '${last.toStringDeep("$prefixOtherLines \u2514", "$prefixOtherLines  ")}';
+        result += '${child.toStringDeep("$prefixOtherLines\u251C", "$prefixOtherLines\u2502")}';
+      result += '${last.toStringDeep("$prefixOtherLines\u2514", "$prefixOtherLines ")}';
     }
     return result;
   }
