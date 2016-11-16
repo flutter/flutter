@@ -20,10 +20,21 @@ const Curve _kTransitionCurve = Curves.fastOutSlowIn;
 
 /// A simple text field.
 ///
+/// This widget is comparable to [Text] in that it does not include a margin
+/// or any decoration outside the text itself. It is useful for applications,
+/// like a search box, that don't need any additional decoration. It should
+/// also be useful in custom widgets that support text input.
+///
+/// The [value] field must be updated each time the [onChanged] callback is
+/// invoked. Be sure to include the full [value] provided by the [onChanged]
+/// callback, or information like the current selection will be lost.
+///
+/// Requires one of its ancestors to be a [Material] widget.
+///
 /// See also:
 ///
-/// * [Input]
-/// * [InputContainer]
+/// * [Input], which adds a label, a divider below the text field, and support for
+///   an error message.
 class InputField extends StatefulWidget {
   InputField({
     Key key,
@@ -144,16 +155,17 @@ class _InputFieldState extends State<InputField> {
   }
 }
 
-/// Displays the visual elements of a material design text field. This
-/// widget's child is the input field widget itself.
+/// Displays the visual elements of a material design text field around an
+/// arbitrary child widget.
 ///
-/// Use InputContainer to create widgets that look and behaver like the [Input]
+/// Use InputContainer to create widgets that look and behave like the [Input]
 /// widget.
+///
+/// Requires one of its ancestors to be a [Material] widget.
 ///
 /// See also:
 ///
-///  * [InputField]
-///  * [Input]
+/// * [Input], which combines an [InputContainer] with an [InputField].
 class InputContainer extends StatefulWidget {
   InputContainer({
     Key key,
@@ -343,16 +355,14 @@ class _InputContainerState extends State<InputContainer> {
 
 /// A material design text input field.
 ///
-/// Requires one of its ancestors to be a [Material] widget.
-///
 /// The [value] field must be updated each time the [onChanged] callback is
 /// invoked. Be sure to include the full [value] provided by the [onChanged]
 /// callback, or information like the current selection will be lost.
 ///
+/// Requires one of its ancestors to be a [Material] widget.
+///
 /// See also:
 ///
-///  * [InputField]
-///  * [InputContainer]
 ///  * <https://material.google.com/components/text-fields.html>
 ///
 /// For a detailed guide on using the input widget, see:
@@ -363,7 +373,7 @@ class Input extends StatefulWidget {
   ///
   /// By default, the input uses a keyboard appropriate for text entry.
   //
-  // Note: If you change this constructor signature, please also update
+  //  If you change this constructor signature, please also update
   // InputContainer, InputFormField, InputField.
   Input({
     Key key,
@@ -452,6 +462,9 @@ class _InputState extends State<Input> {
       onTap: () {
         _inputFieldKey.currentState?.requestKeyboard();
       },
+      // Since the focusKey may have been created here, defer building the
+      // InputContainer until the focusKey's context has been set. This is
+      // necessary because we're passing the value of Focus.at() along.
       child: new Builder(
         builder: (BuildContext context) {
           final bool focused = Focus.at(focusKey.currentContext, autofocus: config.autofocus);
