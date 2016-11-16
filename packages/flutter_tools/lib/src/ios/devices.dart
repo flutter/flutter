@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:collection';
 import 'dart:convert';
 import 'dart:io';
 
@@ -75,7 +74,7 @@ class IOSDevice extends Device {
   @override
   final String name;
 
-  HashMap<ApplicationPackage, _IOSDeviceLogReader> _logReaders;
+  Map<ApplicationPackage, _IOSDeviceLogReader> _logReaders;
 
   _IOSDevicePortForwarder _portForwarder;
 
@@ -383,7 +382,7 @@ class IOSDevice extends Device {
 
   @override
   DeviceLogReader logReaderForApp(ApplicationPackage app) {
-    _logReaders ??= new HashMap<ApplicationPackage, _IOSDeviceLogReader>();
+    _logReaders ??= <ApplicationPackage, _IOSDeviceLogReader>{};
     return _logReaders.putIfAbsent(app, () => new _IOSDeviceLogReader(this, app));
   }
 
@@ -426,7 +425,7 @@ class _IOSDeviceLogReader extends DeviceLogReader {
     // iOS 9 format:  Runner[297] <Notice>:
     // iOS 10 format: Runner(libsystem_asl.dylib)[297] <Notice>:
     String appName = app == null ? '' : app.name.replaceAll('.app', '');
-    _lineRegex = new RegExp(r'${appName}(\(.*\))?\[[\d]+\] <[A-Za-z]+>: ');
+    _lineRegex = new RegExp(appName + r'(\(.*\))?\[[\d]+\] <[A-Za-z]+>: ');
   }
 
   final IOSDevice device;

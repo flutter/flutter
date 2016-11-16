@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:collection';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math' as math;
@@ -316,7 +315,7 @@ class IOSSimulator extends Device {
   @override
   bool get supportsHotMode => true;
 
-  HashMap<ApplicationPackage, _IOSSimulatorLogReader> _logReaders;
+  Map<ApplicationPackage, _IOSSimulatorLogReader> _logReaders;
   _IOSSimulatorDevicePortForwarder _portForwarder;
 
   String get xcrunPath => path.join('/usr', 'bin', 'xcrun');
@@ -560,7 +559,7 @@ class IOSSimulator extends Device {
 
   @override
   DeviceLogReader logReaderForApp(ApplicationPackage app) {
-    _logReaders ??= new HashMap<ApplicationPackage, _IOSSimulatorLogReader>();
+    _logReaders ??= <ApplicationPackage, _IOSSimulatorLogReader>{};
     return _logReaders.putIfAbsent(app, () => new _IOSSimulatorLogReader(this, app));
   }
 
