@@ -431,7 +431,7 @@ class IOSSimulator extends Device {
     ProtocolDiscovery observatoryDiscovery;
 
     if (debuggingOptions.debuggingEnabled)
-      observatoryDiscovery = new ProtocolDiscovery(logReaderForApp(app),
+      observatoryDiscovery = new ProtocolDiscovery(getLogReader(app: app),
                                                    ProtocolDiscovery.kObservatoryService);
 
     // Prepare launch arguments.
@@ -555,10 +555,7 @@ class IOSSimulator extends Device {
   String get sdkNameAndVersion => category;
 
   @override
-  DeviceLogReader get logReader => logReaderForApp(null);
-
-  @override
-  DeviceLogReader logReaderForApp(ApplicationPackage app) {
+  DeviceLogReader getLogReader({ApplicationPackage app}) {
     _logReaders ??= <ApplicationPackage, _IOSSimulatorLogReader>{};
     return _logReaders.putIfAbsent(app, () => new _IOSSimulatorLogReader(this, app));
   }

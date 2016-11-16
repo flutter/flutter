@@ -309,7 +309,7 @@ class IOSDevice extends Device {
       int localPort) async {
     Duration stepTimeout = const Duration(seconds: 60);
 
-    Future<int> remote = new ProtocolDiscovery(logReaderForApp(app), serviceName).nextPort();
+    Future<int> remote = new ProtocolDiscovery(getLogReader(app: app), serviceName).nextPort();
 
     int remotePort = await remote.timeout(stepTimeout,
         onTimeout: () {
@@ -378,10 +378,7 @@ class IOSDevice extends Device {
   String get _buildVersion => _getDeviceInfo(id, 'BuildVersion');
 
   @override
-  DeviceLogReader get logReader => logReaderForApp(null);
-
-  @override
-  DeviceLogReader logReaderForApp(ApplicationPackage app) {
+  DeviceLogReader getLogReader({ApplicationPackage app}) {
     _logReaders ??= <ApplicationPackage, _IOSDeviceLogReader>{};
     return _logReaders.putIfAbsent(app, () => new _IOSDeviceLogReader(this, app));
   }

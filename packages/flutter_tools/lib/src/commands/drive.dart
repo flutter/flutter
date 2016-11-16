@@ -303,7 +303,7 @@ Future<int> startApp(DriveCommand command) async {
   // Forward device log messages to the terminal window running the "drive" command.
   command._deviceLogSubscription = command
       .device
-      .logReaderForApp(package)
+      .getLogReader(app: package)
       .logLines
       .listen(printStatus);
 

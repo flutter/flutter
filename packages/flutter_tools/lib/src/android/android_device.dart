@@ -294,6 +294,7 @@ class AndroidDevice extends Device {
     ProtocolDiscovery observatoryDiscovery;
     ProtocolDiscovery diagnosticDiscovery;
 
+    DeviceLogReader logReader = getLogReader();
     if (options.debuggingEnabled) {
       observatoryDiscovery = new ProtocolDiscovery(logReader, ProtocolDiscovery.kObservatoryService);
       diagnosticDiscovery = new ProtocolDiscovery(logReader, ProtocolDiscovery.kDiagnosticService);
@@ -438,14 +439,10 @@ class AndroidDevice extends Device {
     runSync(adbCommandForDevice(<String>['logcat', '-c']));
   }
 
-  // The Android log reader isn't specific to an app.
   @override
-  DeviceLogReader logReaderForApp(_) => logReader;
-
-  @override
-  DeviceLogReader get logReader {
-    if (_logReader == null)
-      _logReader = new _AdbLogReader(this);
+  DeviceLogReader getLogReader({ApplicationPackage app}) {
+    // The Android log reader isn't app-specific.
+    _logReader ??= new _AdbLogReader(this);
     return _logReader;
   }
 
@@ -491,7 +488,7 @@ class AndroidDevice extends Device {
   Future<List<DiscoveredApp>> discoverApps() {
     RegExp discoverExp = new RegExp(r'DISCOVER: (.*)');
     List<DiscoveredApp> result = <DiscoveredApp>[];
-    StreamSubscription<String> logs = logReader.logLines.listen((String line) {
+    StreamSubscription<String> logs = getLogReader().logLines.listen((String line) {
       Match match = discoverExp.firstMatch(line);
       if (match != null) {
         Map<String, dynamic> app = JSON.decode(match.group(1));

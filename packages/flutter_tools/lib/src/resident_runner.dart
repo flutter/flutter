@@ -101,7 +101,7 @@ abstract class ResidentRunner {
     if (_loggingSubscription != null) {
       return;
     }
-    _loggingSubscription = device.logReaderForApp(app).logLines.listen((String line) {
+    _loggingSubscription = device.getLogReader(app: app).logLines.listen((String line) {
       if (!line.contains('Observatory listening on http') &&
           !line.contains('Diagnostic server listening on http'))
         printStatus(line);
