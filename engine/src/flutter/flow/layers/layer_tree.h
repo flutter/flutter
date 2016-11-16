@@ -23,8 +23,12 @@ class LayerTree {
 
   ~LayerTree();
 
+  // Raster includes both Preroll and Paint.
   void Raster(CompositorContext::ScopedFrame& frame,
               bool ignore_raster_cache = false);
+
+  void Preroll(CompositorContext::ScopedFrame& frame,
+               bool ignore_raster_cache = false);
 
 #if defined(OS_FUCHSIA)
   // TODO(abarth): Integrate scene updates with the rasterization pass so that
@@ -32,6 +36,8 @@ class LayerTree {
   // blending operations to child scene).
   void UpdateScene(mozart::SceneUpdate* update, mozart::Node* container);
 #endif
+
+  void Paint(CompositorContext::ScopedFrame& frame);
 
   Layer* root_layer() const { return root_layer_.get(); }
 
