@@ -34,12 +34,15 @@ ApplicationControllerImpl::ApplicationControllerImpl(
     return;
   }
 
-  if (startup_info->outgoing_services) {
+  // TODO(jeffbrown): Decide what to do with command-line arguments and
+  // startup handles.
+
+  if (startup_info->launch_info->services) {
     service_provider_bindings_.AddBinding(
-        this, std::move(startup_info->outgoing_services));
+        this, std::move(startup_info->launch_info->services));
   }
 
-  url_ = startup_info->url;
+  url_ = startup_info->launch_info->url;
   runtime_holder_.reset(new RuntimeHolder());
   runtime_holder_->Init(std::move(startup_info->environment),
                         fidl::GetProxy(&dart_service_provider_),
