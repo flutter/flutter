@@ -108,7 +108,7 @@ class _AppBarExpandedHeight extends InheritedWidget {
 ///
 /// An app bar consists of a toolbar and potentially other widgets, such as a
 /// [TabBar] and a [FlexibleSpaceBar]. App bars typically expose one or more
-/// common actions with [IconButtons]s which are optionally followed by a
+/// common actions with [IconButtons] which are optionally followed by a
 /// [PopupMenuButton] for less common operations.
 ///
 /// App bars are most commonly used in the [Scaffold.appBar] property, which
