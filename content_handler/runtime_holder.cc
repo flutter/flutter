@@ -263,28 +263,28 @@ void RuntimeHolder::OnEvent(mozart::EventPtr event,
   if (event->pointer_data) {
     blink::PointerData pointer_data;
     pointer_data.time_stamp = event->time_stamp;
-    pointer_data.pointer = event->pointer_data->pointer_id;
     pointer_data.change = GetChangeFromEventType(event->action);
     pointer_data.kind = GetKindFromEventKind(event->pointer_data->kind);
+    pointer_data.device = event->pointer_data->pointer_id;
     pointer_data.physical_x = event->pointer_data->x;
     pointer_data.physical_y = event->pointer_data->y;
 
     switch (pointer_data.change) {
       case blink::PointerData::Change::kDown:
-        down_pointers_.insert(pointer_data.pointer);
+        down_pointers_.insert(pointer_data.device);
         break;
       case blink::PointerData::Change::kCancel:
       case blink::PointerData::Change::kUp:
-        down_pointers_.erase(pointer_data.pointer);
+        down_pointers_.erase(pointer_data.device);
         break;
       case blink::PointerData::Change::kMove:
-        if (down_pointers_.count(pointer_data.pointer) == 0)
+        if (down_pointers_.count(pointer_data.device) == 0)
           pointer_data.change = blink::PointerData::Change::kHover;
         break;
       case blink::PointerData::Change::kAdd:
       case blink::PointerData::Change::kRemove:
       case blink::PointerData::Change::kHover:
-        FTL_DCHECK(down_pointers_.count(pointer_data.pointer) == 0);
+        FTL_DCHECK(down_pointers_.count(pointer_data.device) == 0);
         break;
     }
 

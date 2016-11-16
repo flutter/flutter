@@ -91,7 +91,7 @@ class RuntimeHolder : public blink::RuntimeDelegate,
   mozart::ViewPropertiesPtr view_properties_;
   uint32_t scene_version_ = mozart::kSceneVersionNone;
 
-  unordered_set<int> down_pointers_;
+  std::unordered_set<int> down_pointers_;
 
   bool pending_invalidation_ = false;
   OnInvalidationCallback deferred_invalidation_callback_;
