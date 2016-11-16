@@ -70,6 +70,8 @@ void layout(RenderBox box, {
 
 void pumpFrame({ EnginePhase phase: EnginePhase.layout }) {
   assert(renderer != null);
+  assert(renderer.renderView != null);
+  assert(renderer.renderView.child != null); // call layout() first!
   renderer.phase = phase;
   renderer.beginFrame();
 }

@@ -515,7 +515,10 @@ abstract class Constraints {
   bool debugAssertIsValid({
     bool isAppliedConstraint: false,
     InformationCollector informationCollector
-  });
+  }) {
+    assert(isNormalized);
+    return isNormalized;
+  }
 }
 
 /// Signature for a function that is called for each [RenderObject].
@@ -1296,7 +1299,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
 
   /// Calls visitor for each immediate child of this render object.
   ///
-  /// Override in subclasses with children and call the visitor for each child
+  /// Override in subclasses with children and call the visitor for each child.
   void visitChildren(RenderObjectVisitor visitor) { }
 
   /// The object responsible for creating this render object.
@@ -2606,6 +2609,9 @@ abstract class ContainerRenderObjectMixin<ChildType extends RenderObject, Parent
     }
   }
   /// Insert child into this render object's child list after the given child.
+  ///
+  /// If `after` is null, then this inserts the child at the start of the list,
+  /// and the child becomes the new [firstChild].
   void insert(ChildType child, { ChildType after }) {
     assert(child != this);
     assert(after != this);
@@ -2744,30 +2750,41 @@ abstract class ContainerRenderObjectMixin<ChildType extends RenderObject, Parent
   /// The last child in the child list.
   ChildType get lastChild => _lastChild;
 
+  /// The previous child before the given child in the child list.
+  ChildType childBefore(ChildType child) {
+    assert(child != null);
+    assert(child.parent == this);
+    final ParentDataType childParentData = child.parentData;
+    return childParentData.previousSibling;
+  }
+
   /// The next child after the given child in the child list.
   ChildType childAfter(ChildType child) {
+    assert(child != null);
+    assert(child.parent == this);
     final ParentDataType childParentData = child.parentData;
     return childParentData.nextSibling;
   }
 
   @override
   String debugDescribeChildren(String prefix) {
-    String result = '$prefix \u2502\n';
-    if (_firstChild != null) {
-      ChildType child = _firstChild;
+    if (firstChild != null) {
+      String result = '$prefix \u2502\n';
+      ChildType child = firstChild;
       int count = 1;
-      while (child != _lastChild) {
+      while (child != lastChild) {
         result += '${child.toStringDeep("$prefix \u251C\u2500child $count: ", "$prefix \u2502")}';
         count += 1;
         final ParentDataType childParentData = child.parentData;
         child = childParentData.nextSibling;
       }
       if (child != null) {
-        assert(child == _lastChild);
+        assert(child == lastChild);
         result += '${child.toStringDeep("$prefix \u2514\u2500child $count: ", "$prefix  ")}';
       }
+      return result;
     }
-    return result;
+    return '';
   }
 }
 

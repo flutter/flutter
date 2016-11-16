@@ -52,6 +52,14 @@ class RenderProxyBox extends RenderBox with RenderObjectWithChildMixin<RenderBox
 // TODO(ianh): Remove this class once https://github.com/dart-lang/sdk/issues/15101 is fixed
 abstract class RenderProxyBoxMixin implements RenderBox, RenderObjectWithChildMixin<RenderBox> {
   @override
+  void setupParentData(RenderObject child) {
+    // We don't actually use the offset argument in BoxParentData, so let's
+    // avoid allocating it at all.
+    if (child.parentData is! ParentData)
+      child.parentData = new ParentData();
+  }
+
+  @override
   double computeMinIntrinsicWidth(double height) {
     if (child != null)
       return child.getMinIntrinsicWidth(height);
@@ -100,6 +108,9 @@ abstract class RenderProxyBoxMixin implements RenderBox, RenderObjectWithChildMi
   bool hitTestChildren(HitTestResult result, { Point position }) {
     return child?.hitTest(result, position: position) ?? false;
   }
+
+  @override
+  void applyPaintTransform(RenderObject child, Matrix4 transform) { }
 
   @override
   void paint(PaintingContext context, Offset offset) {
