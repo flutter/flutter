@@ -94,14 +94,14 @@ PointerDataPacket _unpackPointerDataPacket(ByteData packet) {
   const int kBytesPerPointerData = _kPointerDataFieldCount * kStride;
   final int length = packet.lengthInBytes ~/ kBytesPerPointerData;
   assert(length * kBytesPerPointerData == packet.lengthInBytes);
-  List<PointerData> pointers = new List<PointerData>(length);
+  List<PointerData> data = new List<PointerData>(length);
   for (int i = 0; i < length; ++i) {
     int offset = i * _kPointerDataFieldCount;
-    pointers[i] = new PointerData(
+    data[i] = new PointerData(
       timeStamp: new Duration(microseconds: packet.getInt64(kStride * offset++, _kFakeHostEndian)),
-      pointer: packet.getInt64(kStride * offset++, _kFakeHostEndian),
       change: PointerChange.values[packet.getInt64(kStride * offset++, _kFakeHostEndian)],
       kind: PointerDeviceKind.values[packet.getInt64(kStride * offset++, _kFakeHostEndian)],
+      device: packet.getInt64(kStride * offset++, _kFakeHostEndian),
       physicalX: packet.getFloat64(kStride * offset++, _kFakeHostEndian),
       physicalY: packet.getFloat64(kStride * offset++, _kFakeHostEndian),
       buttons: packet.getInt64(kStride * offset++, _kFakeHostEndian),
@@ -120,5 +120,5 @@ PointerDataPacket _unpackPointerDataPacket(ByteData packet) {
     );
     assert(offset == (i + 1) * _kPointerDataFieldCount);
   }
-  return new PointerDataPacket(pointers: pointers);
+  return new PointerDataPacket(data: data);
 }

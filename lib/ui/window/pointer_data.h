@@ -16,6 +16,7 @@ struct alignas(8) PointerData {
     kCancel,
     kAdd,
     kRemove,
+    kHover,
     kDown,
     kMove,
     kUp,
@@ -30,9 +31,9 @@ struct alignas(8) PointerData {
   };
 
   int64_t time_stamp;
-  int64_t pointer;
   Change change;
   DeviceKind kind;
+  int64_t device;
   double physical_x;
   double physical_y;
   int64_t buttons;

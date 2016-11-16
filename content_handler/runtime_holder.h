@@ -7,6 +7,8 @@
 
 #include <mx/channel.h>
 
+#include <unordered_set>
+
 #include "apps/modular/services/application/application_environment.fidl.h"
 #include "apps/modular/services/application/service_provider.fidl.h"
 #include "apps/mozart/services/input/input_connection.fidl.h"
@@ -88,6 +90,8 @@ class RuntimeHolder : public blink::RuntimeDelegate,
   mozart::ViewPtr view_;
   mozart::ViewPropertiesPtr view_properties_;
   uint32_t scene_version_ = mozart::kSceneVersionNone;
+
+  unordered_set<int> down_pointers_;
 
   bool pending_invalidation_ = false;
   OnInvalidationCallback deferred_invalidation_callback_;

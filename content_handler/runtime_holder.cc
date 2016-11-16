@@ -269,6 +269,25 @@ void RuntimeHolder::OnEvent(mozart::EventPtr event,
     pointer_data.physical_x = event->pointer_data->x;
     pointer_data.physical_y = event->pointer_data->y;
 
+    switch (pointer_data.change) {
+      case blink::PointerData::Change::kDown:
+        down_pointers_.insert(pointer_data.pointer);
+        break;
+      case blink::PointerData::Change::kCancel:
+      case blink::PointerData::Change::kUp:
+        down_pointers_.erase(pointer_data.pointer);
+        break;
+      case blink::PointerData::Change::kMove:
+        if (down_pointers_.count(pointer_data.pointer) == 0)
+          pointer_data.change = blink::PointerData::Change::kHover;
+        break;
+      case blink::PointerData::Change::kAdd:
+      case blink::PointerData::Change::kRemove:
+      case blink::PointerData::Change::kHover:
+        FTL_DCHECK(down_pointers_.count(pointer_data.pointer) == 0);
+        break;
+    }
+
     blink::PointerDataPacket packet(1);
     packet.SetPointerData(0, pointer_data);
     runtime_->DispatchPointerDataPacket(packet);

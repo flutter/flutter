@@ -21,10 +21,15 @@ enum PointerChange {
   /// detection range or might have been disconnected from the system entirely.
   remove,
 
+  /// The pointer has moved with respect to the device while not in contact with
+  /// the device.
+  hover,
+
   /// The pointer has made contact with the device.
   down,
 
-  /// The pointer has moved with respect to the device.
+  /// The pointer has moved with respect to the device while in contact with the
+  /// device.
   move,
 
   /// The pointer has stopped making contact with the device.
@@ -51,9 +56,9 @@ class PointerData {
   /// Creates an object that represents the state of a pointer.
   const PointerData({
     this.timeStamp: Duration.ZERO,
-    this.pointer: 0,
     this.change: PointerChange.cancel,
     this.kind: PointerDeviceKind.touch,
+    this.device: 0,
     this.physicalX: 0.0,
     this.physicalY: 0.0,
     this.buttons: 0,
@@ -74,13 +79,14 @@ class PointerData {
   /// Time of event dispatch, relative to an arbitrary timeline.
   final Duration timeStamp;
 
-  /// Unique identifier for the pointer, potentially reused.
-  final int pointer;
-
+  /// How the pointer has changed since the last report.
   final PointerChange change;
 
   /// The kind of input device for which the event was generated.
   final PointerDeviceKind kind;
+
+  /// Unique identifier for the pointing device, reused across interactions.
+  final int device;
 
   /// X coordinate of the position of the pointer, in physical pixels in the
   /// global coordinate space.
@@ -188,9 +194,9 @@ class PointerData {
   String toStringFull() {
     return '$runtimeType('
              'timeStamp: $timeStamp, '
-             'pointer: $pointer, '
-             'change:: $change, '
+             'change: $change, '
              'kind: $kind, '
+             'device: $device, '
              'physicalX: $physicalX, '
              'physicalY: $physicalY, '
              'buttons: $buttons, '
@@ -212,10 +218,10 @@ class PointerData {
 /// A sequence of reports about the state of pointers.
 class PointerDataPacket {
   /// Creates a packet of pointer data reports.
-  const PointerDataPacket({ this.pointers: const <PointerData>[] });
+  const PointerDataPacket({ this.data: const <PointerData>[] });
 
   /// Data about the individual pointers in this packet.
   ///
   /// This list might contain multiple pieces of data about the same pointer.
-  final List<PointerData> pointers;
+  final List<PointerData> data;
 }
