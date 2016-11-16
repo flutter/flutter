@@ -265,9 +265,10 @@ public class FlutterView extends SurfaceView
     private static final int kPointerChangeCancel = 0;
     private static final int kPointerChangeAdd = 1;
     private static final int kPointerChangeRemove = 2;
-    private static final int kPointerChangeDown = 3;
-    private static final int kPointerChangeMove = 4;
-    private static final int kPointerChangeUp = 5;
+    private static final int kPointerChangeHover = 3;
+    private static final int kPointerChangeDown = 4;
+    private static final int kPointerChangeMove = 5;
+    private static final int kPointerChangeUp = 6;
 
     // Must match the PointerDeviceKind enum in pointer.dart.
     private static final int kPointerDeviceKindTouch = 0;
