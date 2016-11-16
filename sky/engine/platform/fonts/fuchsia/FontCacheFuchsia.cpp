@@ -119,6 +119,11 @@ sk_sp<SkTypeface> FontCache::createTypeface(
       [&response](fonts::FontResponsePtr r) { response = std::move(r); });
   font_provider.WaitForIncomingResponse();
 
+  FTL_DCHECK(response)
+      << "Unable to contact the font provider. Did you run "
+         "Flutter in an environment that has a font manager?\n"
+         "See <https://fuchsia.googlesource.com/modular/+/master/README.md>.";
+
   if (!response)
     return nullptr;
 
