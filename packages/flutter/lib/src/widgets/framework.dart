@@ -2039,9 +2039,11 @@ abstract class Element implements BuildContext {
   ///
   /// The following table summarises the above:
   ///
-  /// |                 | `newWidget == null`                 | `newWidget != null`                                            |
-  /// | `child == null` | Returns null.                       | Returns new [Element].                                         |
-  /// | `child != null` | Old child is removed, returns null. | Old child updated if possible, returns child or new [Element]. |
+  /// <table>
+  /// <tr><th><th>`newWidget == null`<th>`newWidget != null`
+  /// <tr><th>`child == null`<td>Returns null.<td>Returns new [Element].
+  /// <tr><th>`child != null`<td>Old child is removed, returns null.<td>Old child updated if possible, returns child or new [Element].
+  /// </table>
   @protected
   Element updateChild(Element child, Widget newWidget, dynamic newSlot) {
     if (newWidget == null) {
