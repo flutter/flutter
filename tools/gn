@@ -47,6 +47,7 @@ def to_gn_args(args):
     gn_args = {}
 
     gn_args['is_debug'] = args.unoptimized
+    gn_args['android_full_debug'] = args.target_os == 'android' and args.unoptimized
     gn_args['is_clang'] = True
 
     ios_target_cpu = 'arm64'
