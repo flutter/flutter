@@ -329,9 +329,9 @@ public class FlutterView extends SurfaceView
         long timeStamp = event.getEventTime() * 1000; // Convert from milliseconds to microseconds.
 
         packet.putLong(timeStamp); // time_stamp
-        packet.putLong(event.getPointerId(pointerIndex)); // pointer
         packet.putLong(pointerChange); // change
         packet.putLong(pointerKind); // kind
+        packet.putLong(event.getPointerId(pointerIndex)); // device
         packet.putDouble(event.getX(pointerIndex)); // physical_x
         packet.putDouble(event.getY(pointerIndex)); // physical_y
 

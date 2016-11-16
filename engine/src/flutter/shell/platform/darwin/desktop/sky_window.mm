@@ -39,6 +39,7 @@ static inline blink::PointerData::Change PointerChangeFromNSEventPhase(
 
 @implementation SkyWindow {
   std::unique_ptr<shell::PlatformViewMac> _platformView;
+  bool _mouseIsDown;
 }
 
 @synthesize renderSurface = _renderSurface;
@@ -117,6 +118,25 @@ static inline blink::PointerData::Change PointerChangeFromNSEventPhase(
   pointer_data.physical_y = location.y;
   pointer_data.pressure = 1.0;
   pointer_data.pressure_max = 1.0;
+
+  switch (pointer_data.change) {
+    case blink::PointerData::Change::kDown:
+      _mouseIsDown = true;
+      break;
+    case blink::PointerData::Change::kCancel:
+    case blink::PointerData::Change::kUp:
+      _mouseIsDown = false;
+      break;
+    case blink::PointerData::Change::kMove:
+      if (!_mouseIsDown)
+        pointer_data.change = blink::PointerData::Change::kHover;
+      break;
+    case blink::PointerData::Change::kAdd:
+    case blink::PointerData::Change::kRemove:
+    case blink::PointerData::Change::kHover:
+      FTL_DCHECK(!_mouseIsDown);
+      break;
+  }
 
   blink::Threads::UI()->PostTask(
       [ engine = _platformView->engine().GetWeakPtr(), pointer_data ] {

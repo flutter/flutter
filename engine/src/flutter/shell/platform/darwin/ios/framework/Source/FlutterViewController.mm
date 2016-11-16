@@ -267,21 +267,21 @@ static inline PointerChangeMapperPhase PointerChangePhaseFromUITouchPhase(
 
   int i = 0;
   for (UITouch* touch in touches) {
-    int touch_identifier = 0;
+    int device_id = 0;
 
     switch (eventTypePhase.second) {
       case Accessed:
-        touch_identifier = _touchMapper.identifierOf(touch);
+        device_id = _touchMapper.identifierOf(touch);
         break;
       case Added:
-        touch_identifier = _touchMapper.registerTouch(touch);
+        device_id = _touchMapper.registerTouch(touch);
         break;
       case Removed:
-        touch_identifier = _touchMapper.unregisterTouch(touch);
+        device_id = _touchMapper.unregisterTouch(touch);
         break;
     }
 
-    DCHECK(touch_identifier != 0);
+    DCHECK(device_id != 0);
     CGPoint windowCoordinates = [touch locationInView:nil];
 
     blink::PointerData pointer_data;
@@ -291,7 +291,7 @@ static inline PointerChangeMapperPhase PointerChangePhaseFromUITouchPhase(
     pointer_data.time_stamp = touch.timestamp * kMicrosecondsPerSecond;
     pointer_data.change = eventTypePhase.first;
     pointer_data.kind = blink::PointerData::DeviceKind::kTouch;
-    pointer_data.pointer = touch_identifier;
+    pointer_data.device = device_id;
     pointer_data.physical_x = windowCoordinates.x * scale;
     pointer_data.physical_y = windowCoordinates.y * scale;
     pointer_data.pressure = 1.0;
