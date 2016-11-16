@@ -164,8 +164,11 @@ abstract class Device {
 
   String get sdkNameAndVersion;
 
-  /// Get the log reader for this device.
+  /// Get the global log reader for this device.
   DeviceLogReader get logReader;
+
+  /// Get an app-specifc log reader for this device.
+  DeviceLogReader logReaderForApp(ApplicationPackage app);
 
   /// Get the port forwarder for this device.
   DevicePortForwarder get portForwarder;

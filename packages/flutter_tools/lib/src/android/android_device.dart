@@ -438,6 +438,10 @@ class AndroidDevice extends Device {
     runSync(adbCommandForDevice(<String>['logcat', '-c']));
   }
 
+  // The Android log reader isn't specific to an app.
+  @override
+  DeviceLogReader logReaderForApp(_) => logReader;
+
   @override
   DeviceLogReader get logReader {
     if (_logReader == null)

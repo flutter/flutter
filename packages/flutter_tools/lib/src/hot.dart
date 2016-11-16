@@ -226,7 +226,7 @@ class HotRunner extends ResidentRunner {
 
     Map<String, dynamic> platformArgs = new Map<String, dynamic>();
 
-    await startEchoingDeviceLog();
+    await startEchoingDeviceLog(_package);
 
     printTrace('Launching loader on ${device.name}...');
 

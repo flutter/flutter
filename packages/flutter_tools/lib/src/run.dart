@@ -119,7 +119,7 @@ class RunAndStayResident extends ResidentRunner {
     if (traceStartup != null)
       platformArgs = <String, dynamic>{ 'trace-startup': traceStartup };
 
-    await startEchoingDeviceLog();
+    await startEchoingDeviceLog(_package);
     if (_mainPath == null) {
       assert(prebuiltMode);
       printStatus('Running ${_package.displayName} on ${device.name}');

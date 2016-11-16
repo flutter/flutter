@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:collection';
 import 'dart:convert';
 import 'dart:io';
 
@@ -18,6 +19,8 @@ import 'mac.dart';
 const String _ideviceinstallerInstructions =
     'To work with iOS devices, please install ideviceinstaller.\n'
     'If you use homebrew, you can install it with "\$ brew install ideviceinstaller".';
+
+const Duration kPortForwardTimeout = const Duration(seconds: 10);
 
 class IOSDevices extends PollingDeviceDiscovery {
   IOSDevices() : super('IOSDevices');
@@ -72,7 +75,7 @@ class IOSDevice extends Device {
   @override
   final String name;
 
-  _IOSDeviceLogReader _logReader;
+  HashMap<ApplicationPackage, _IOSDeviceLogReader> _logReaders;
 
   _IOSDevicePortForwarder _portForwarder;
 
@@ -251,11 +254,13 @@ class IOSDevice extends Device {
       // ports post launch.
       printTrace("Debugging is enabled, connecting to observatory and the diagnostic server");
 
-      Future<int> forwardObsPort = _acquireAndForwardPort(ProtocolDiscovery.kObservatoryService,
+      Future<int> forwardObsPort = _acquireAndForwardPort(app,
+                                                          ProtocolDiscovery.kObservatoryService,
                                                           debuggingOptions.observatoryPort);
       Future<int> forwardDiagPort;
       if (debuggingOptions.buildMode == BuildMode.debug) {
-        forwardDiagPort = _acquireAndForwardPort(ProtocolDiscovery.kDiagnosticService,
+        forwardDiagPort = _acquireAndForwardPort(app,
+                                                 ProtocolDiscovery.kDiagnosticService,
                                                  debuggingOptions.diagnosticPort);
       } else {
         forwardDiagPort = new Future<int>.value(null);
@@ -272,7 +277,13 @@ class IOSDevice extends Device {
         }
 
         printTrace("Application launched on the device. Attempting to forward ports.");
-        return Future.wait(<Future<int>>[forwardObsPort, forwardDiagPort]);
+        return await Future.wait(<Future<int>>[forwardObsPort, forwardDiagPort])
+            .timeout(
+                kPortForwardTimeout,
+                onTimeout: () {
+                  throw new TimeoutException('Timeout while waiting to acquire and forward ports.');
+                },
+            );
       });
 
       printTrace("Local Observatory Port: ${ports[0]}");
@@ -293,10 +304,13 @@ class IOSDevice extends Device {
     return new LaunchResult.succeeded(observatoryPort: localObsPort, diagnosticPort: localDiagPort);
   }
 
-  Future<int> _acquireAndForwardPort(String serviceName, int localPort) async {
+  Future<int> _acquireAndForwardPort(
+      ApplicationPackage app,
+      String serviceName,
+      int localPort) async {
     Duration stepTimeout = const Duration(seconds: 60);
 
-    Future<int> remote = new ProtocolDiscovery(logReader, serviceName).nextPort();
+    Future<int> remote = new ProtocolDiscovery(logReaderForApp(app), serviceName).nextPort();
 
     int remotePort = await remote.timeout(stepTimeout,
         onTimeout: () {
@@ -365,11 +379,12 @@ class IOSDevice extends Device {
   String get _buildVersion => _getDeviceInfo(id, 'BuildVersion');
 
   @override
-  DeviceLogReader get logReader {
-    if (_logReader == null)
-      _logReader = new _IOSDeviceLogReader(this);
+  DeviceLogReader get logReader => logReaderForApp(null);
 
-    return _logReader;
+  @override
+  DeviceLogReader logReaderForApp(ApplicationPackage app) {
+    _logReaders ??= new HashMap<ApplicationPackage, _IOSDeviceLogReader>();
+    return _logReaders.putIfAbsent(app, () => new _IOSDeviceLogReader(this, app));
   }
 
   @override
@@ -398,11 +413,20 @@ class IOSDevice extends Device {
 }
 
 class _IOSDeviceLogReader extends DeviceLogReader {
-  _IOSDeviceLogReader(this.device) {
+  RegExp _lineRegex;
+
+  _IOSDeviceLogReader(this.device, ApplicationPackage app) {
     _linesController = new StreamController<String>.broadcast(
-     onListen: _start,
-     onCancel: _stop
-   );
+      onListen: _start,
+      onCancel: _stop
+    );
+
+    // Match for lines for the runner in syslog.
+    //
+    // iOS 9 format:  Runner[297] <Notice>:
+    // iOS 10 format: Runner(libsystem_asl.dylib)[297] <Notice>:
+    String appName = app == null ? '' : app.name.replaceAll('.app', '');
+    _lineRegex = new RegExp(r'${appName}(\(.*\))?\[[\d]+\] <[A-Za-z]+>: ');
   }
 
   final IOSDevice device;
@@ -429,14 +453,8 @@ class _IOSDeviceLogReader extends DeviceLogReader {
     });
   }
 
-  // Match for lines for the runner in syslog.
-  //
-  // iOS 9 format:  Runner[297] <Notice>:
-  // iOS 10 format: Runner(libsystem_asl.dylib)[297] <Notice>:
-  static final RegExp _runnerRegex = new RegExp(r'Runner(\(.*\))?\[[\d]+\] <[A-Za-z]+>: ');
-
   void _onLine(String line) {
-    Match match = _runnerRegex.firstMatch(line);
+    Match match = _lineRegex.firstMatch(line);
 
     if (match != null) {
       // Only display the log line after the initial device and executable information.

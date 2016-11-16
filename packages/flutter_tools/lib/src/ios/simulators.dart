@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:collection';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math' as math;
@@ -315,7 +316,7 @@ class IOSSimulator extends Device {
   @override
   bool get supportsHotMode => true;
 
-  _IOSSimulatorLogReader _logReader;
+  HashMap<ApplicationPackage, _IOSSimulatorLogReader> _logReaders;
   _IOSSimulatorDevicePortForwarder _portForwarder;
 
   String get xcrunPath => path.join('/usr', 'bin', 'xcrun');
@@ -431,7 +432,8 @@ class IOSSimulator extends Device {
     ProtocolDiscovery observatoryDiscovery;
 
     if (debuggingOptions.debuggingEnabled)
-      observatoryDiscovery = new ProtocolDiscovery(logReader, ProtocolDiscovery.kObservatoryService);
+      observatoryDiscovery = new ProtocolDiscovery(logReaderForApp(app),
+                                                   ProtocolDiscovery.kObservatoryService);
 
     // Prepare launch arguments.
     List<String> args = <String>[];
@@ -554,11 +556,12 @@ class IOSSimulator extends Device {
   String get sdkNameAndVersion => category;
 
   @override
-  DeviceLogReader get logReader {
-    if (_logReader == null)
-      _logReader = new _IOSSimulatorLogReader(this);
+  DeviceLogReader get logReader => logReaderForApp(null);
 
-    return _logReader;
+  @override
+  DeviceLogReader logReaderForApp(ApplicationPackage app) {
+    _logReaders ??= new HashMap<ApplicationPackage, _IOSSimulatorLogReader>();
+    return _logReaders.putIfAbsent(app, () => new _IOSSimulatorLogReader(this, app));
   }
 
   @override
@@ -629,13 +632,16 @@ class IOSSimulator extends Device {
 }
 
 class _IOSSimulatorLogReader extends DeviceLogReader {
-  _IOSSimulatorLogReader(this.device) {
+  String _appName;
+
+  _IOSSimulatorLogReader(this.device, ApplicationPackage app) {
     _linesController = new StreamController<String>.broadcast(
       onListen: () {
         _start();
       },
       onCancel: _stop
     );
+    _appName = app == null ? null : app.name.replaceAll('.app', '');
   }
 
   final IOSSimulator device;
@@ -712,8 +718,9 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
            && content.endsWith(']: 0x1'))
          return null;
 
-      if (category == 'Runner')
+      if (_appName != null && category == _appName) {
         return content;
+      }
       return '$category: $content';
     }
     match = _lastMessageSingleRegex.matchAsPrefix(string);
