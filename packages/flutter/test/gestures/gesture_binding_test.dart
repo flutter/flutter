@@ -34,7 +34,7 @@ void main() {
 
   test('Pointer tap events', () {
     ui.PointerDataPacket packet = new ui.PointerDataPacket(
-      pointers: <ui.PointerData>[
+      data: <ui.PointerData>[
         new ui.PointerData(change: ui.PointerChange.down),
         new ui.PointerData(change: ui.PointerChange.up),
       ]
@@ -51,7 +51,7 @@ void main() {
 
   test('Pointer move events', () {
     ui.PointerDataPacket packet = new ui.PointerDataPacket(
-      pointers: <ui.PointerData>[
+      data: <ui.PointerData>[
         new ui.PointerData(change: ui.PointerChange.down),
         new ui.PointerData(change: ui.PointerChange.move),
         new ui.PointerData(change: ui.PointerChange.up),
@@ -70,7 +70,7 @@ void main() {
 
   test('Synthetic move events', () {
     ui.PointerDataPacket packet = new ui.PointerDataPacket(
-      pointers: <ui.PointerData>[
+      data: <ui.PointerData>[
         new ui.PointerData(
           change: ui.PointerChange.down,
           physicalX: 1.0,
@@ -97,7 +97,7 @@ void main() {
 
   test('Pointer cancel events', () {
     ui.PointerDataPacket packet = new ui.PointerDataPacket(
-      pointers: <ui.PointerData>[
+      data: <ui.PointerData>[
         new ui.PointerData(change: ui.PointerChange.down),
         new ui.PointerData(change: ui.PointerChange.cancel),
       ]
@@ -114,7 +114,7 @@ void main() {
 
   test('Can cancel pointers', () {
     ui.PointerDataPacket packet = new ui.PointerDataPacket(
-      pointers: <ui.PointerData>[
+      data: <ui.PointerData>[
         new ui.PointerData(change: ui.PointerChange.down),
         new ui.PointerData(change: ui.PointerChange.up),
       ]

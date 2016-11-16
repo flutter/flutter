@@ -66,7 +66,6 @@ class TestPointer {
     return new PointerMoveEvent(
       timeStamp: timeStamp,
       pointer: pointer,
-      down: _isDown,
       position: newLocation,
       delta: delta
     );

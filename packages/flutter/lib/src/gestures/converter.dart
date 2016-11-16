@@ -36,6 +36,13 @@ class PointerEventConverter {
   // Map from platform pointer identifiers to PointerEvent pointer identifiers.
   static Map<int, _PointerState> _pointers = <int, _PointerState>{};
 
+  static _PointerState _ensureStateForPointer(ui.PointerData datum, Point position) {
+    return _pointers.putIfAbsent(
+      datum.device,
+      () => new _PointerState(position)
+    );
+  }
+
   /// Expand the given packet of pointer data into a sequence of framework pointer events.
   static Iterable<PointerEvent> expand(Iterable<ui.PointerData> data, double devicePixelRatio) sync* {
     for (ui.PointerData datum in data) {
@@ -43,19 +50,14 @@ class PointerEventConverter {
       final Duration timeStamp = datum.timeStamp;
       final PointerDeviceKind kind = datum.kind;
       switch (datum.change) {
-        case ui.PointerChange.down:
-          assert(!_pointers.containsKey(datum.pointer));
-          _PointerState state = _pointers.putIfAbsent(
-            datum.pointer,
-            () => new _PointerState(position)
-          );
+        case ui.PointerChange.add:
+          assert(!_pointers.containsKey(datum.device));
+          _PointerState state = _ensureStateForPointer(datum, position);
           assert(state.lastPosition == position);
-          state.startNewPointer();
-          state.setDown();
           yield new PointerAddedEvent(
             timeStamp: timeStamp,
-            pointer: state.pointer,
             kind: kind,
+            device: datum.device,
             position: position,
             obscured: datum.obscured,
             pressureMin: datum.pressureMin,
@@ -67,10 +69,108 @@ class PointerEventConverter {
             orientation: datum.orientation,
             tilt: datum.tilt
           );
+          break;
+        case ui.PointerChange.hover:
+          final bool alreadyAdded = _pointers.containsKey(datum.device);
+          _PointerState state = _ensureStateForPointer(datum, position);
+          assert(!state.down);
+          if (!alreadyAdded) {
+            assert(state.lastPosition == position);
+            yield new PointerAddedEvent(
+              timeStamp: timeStamp,
+              kind: kind,
+              device: datum.device,
+              position: position,
+              obscured: datum.obscured,
+              pressureMin: datum.pressureMin,
+              pressureMax: datum.pressureMax,
+              distance: datum.distance,
+              distanceMax: datum.distanceMax,
+              radiusMin: datum.radiusMin,
+              radiusMax: datum.radiusMax,
+              orientation: datum.orientation,
+              tilt: datum.tilt
+            );
+          }
+          Offset offset = position - state.lastPosition;
+          state.lastPosition = position;
+          yield new PointerHoverEvent(
+            timeStamp: timeStamp,
+            kind: kind,
+            device: datum.device,
+            position: position,
+            delta: offset,
+            buttons: datum.buttons,
+            obscured: datum.obscured,
+            pressureMin: datum.pressureMin,
+            pressureMax: datum.pressureMax,
+            distance: datum.distance,
+            distanceMax: datum.distanceMax,
+            radiusMajor: datum.radiusMajor,
+            radiusMinor: datum.radiusMajor,
+            radiusMin: datum.radiusMin,
+            radiusMax: datum.radiusMax,
+            orientation: datum.orientation,
+            tilt: datum.tilt
+          );
+          state.lastPosition = position;
+          break;
+        case ui.PointerChange.down:
+          final bool alreadyAdded = _pointers.containsKey(datum.device);
+          _PointerState state = _ensureStateForPointer(datum, position);
+          assert(!state.down);
+          if (!alreadyAdded) {
+            assert(state.lastPosition == position);
+            yield new PointerAddedEvent(
+              timeStamp: timeStamp,
+              kind: kind,
+              device: datum.device,
+              position: position,
+              obscured: datum.obscured,
+              pressureMin: datum.pressureMin,
+              pressureMax: datum.pressureMax,
+              distance: datum.distance,
+              distanceMax: datum.distanceMax,
+              radiusMin: datum.radiusMin,
+              radiusMax: datum.radiusMax,
+              orientation: datum.orientation,
+              tilt: datum.tilt
+            );
+          }
+          if (state.lastPosition != position) {
+            // Not all sources of pointer packets respect the invariant that
+            // they hover the pointer to the down location before sending the
+            // down event. We restore the invariant here for our clients.
+            Offset offset = position - state.lastPosition;
+            state.lastPosition = position;
+            yield new PointerHoverEvent(
+              timeStamp: timeStamp,
+              kind: kind,
+              device: datum.device,
+              position: position,
+              delta: offset,
+              buttons: datum.buttons,
+              obscured: datum.obscured,
+              pressureMin: datum.pressureMin,
+              pressureMax: datum.pressureMax,
+              distance: datum.distance,
+              distanceMax: datum.distanceMax,
+              radiusMajor: datum.radiusMajor,
+              radiusMinor: datum.radiusMajor,
+              radiusMin: datum.radiusMin,
+              radiusMax: datum.radiusMax,
+              orientation: datum.orientation,
+              tilt: datum.tilt
+            );
+            state.lastPosition = position;
+          }
+          state.startNewPointer();
+          state.setDown();
           yield new PointerDownEvent(
             timeStamp: timeStamp,
             pointer: state.pointer,
             kind: kind,
+            device: datum.device,
             position: position,
             buttons: datum.buttons,
             obscured: datum.obscured,
@@ -90,8 +190,8 @@ class PointerEventConverter {
           // If the service starts supporting hover pointers, then it must also
           // start sending us ADDED and REMOVED data points.
           // See also: https://github.com/flutter/flutter/issues/720
-          assert(_pointers.containsKey(datum.pointer));
-          _PointerState state = _pointers[datum.pointer];
+          assert(_pointers.containsKey(datum.device));
+          _PointerState state = _pointers[datum.device];
           assert(state.down);
           Offset offset = position - state.lastPosition;
           state.lastPosition = position;
@@ -99,15 +199,14 @@ class PointerEventConverter {
             timeStamp: timeStamp,
             pointer: state.pointer,
             kind: kind,
+            device: datum.device,
             position: position,
             delta: offset,
-            down: state.down,
             buttons: datum.buttons,
             obscured: datum.obscured,
             pressure: datum.pressure,
             pressureMin: datum.pressureMin,
             pressureMax: datum.pressureMax,
-            distance: datum.distance,
             distanceMax: datum.distanceMax,
             radiusMajor: datum.radiusMajor,
             radiusMinor: datum.radiusMajor,
@@ -119,8 +218,8 @@ class PointerEventConverter {
           break;
         case ui.PointerChange.up:
         case ui.PointerChange.cancel:
-          assert(_pointers.containsKey(datum.pointer));
-          _PointerState state = _pointers[datum.pointer];
+          assert(_pointers.containsKey(datum.device));
+          _PointerState state = _pointers[datum.device];
           assert(state.down);
           if (position != state.lastPosition) {
             // Not all sources of pointer packets respect the invariant that
@@ -134,15 +233,14 @@ class PointerEventConverter {
               timeStamp: timeStamp,
               pointer: state.pointer,
               kind: kind,
+              device: datum.device,
               position: position,
               delta: offset,
-              down: state.down,
               buttons: datum.buttons,
               obscured: datum.obscured,
               pressure: datum.pressure,
               pressureMin: datum.pressureMin,
               pressureMax: datum.pressureMax,
-              distance: datum.distance,
               distanceMax: datum.distanceMax,
               radiusMajor: datum.radiusMajor,
               radiusMinor: datum.radiusMajor,
@@ -160,6 +258,7 @@ class PointerEventConverter {
               timeStamp: timeStamp,
               pointer: state.pointer,
               kind: kind,
+              device: datum.device,
               position: position,
               buttons: datum.buttons,
               obscured: datum.obscured,
@@ -176,6 +275,7 @@ class PointerEventConverter {
               timeStamp: timeStamp,
               pointer: state.pointer,
               kind: kind,
+              device: datum.device,
               position: position,
               buttons: datum.buttons,
               obscured: datum.obscured,
@@ -189,10 +289,13 @@ class PointerEventConverter {
               tilt: datum.tilt
             );
           }
+          _pointers.remove(datum.device);
+          break;
+        case ui.PointerChange.remove:
           yield new PointerRemovedEvent(
             timeStamp: timeStamp,
-            pointer: state.pointer,
             kind: kind,
+            device: datum.device,
             obscured: datum.obscured,
             pressureMin: datum.pressureMin,
             pressureMax: datum.pressureMax,
@@ -200,7 +303,6 @@ class PointerEventConverter {
             radiusMin: datum.radiusMin,
             radiusMax: datum.radiusMax
           );
-          _pointers.remove(datum.pointer);
           break;
         default:
           // TODO(ianh): once https://github.com/flutter/flutter/issues/720 is
