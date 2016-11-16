@@ -1631,7 +1631,7 @@ abstract class RenderBox extends RenderObject {
   @override
   void performResize() {
     // default behavior for subclasses that have sizedByParent = true
-    size = constraints.constrain(Size.zero);
+    size = constraints.smallest;
     assert(!size.isInfinite);
   }
 
@@ -1657,7 +1657,7 @@ abstract class RenderBox extends RenderObject {
   /// given hit test result.
   ///
   /// The caller is responsible for transforming [position] into the local
-  /// coordinate space of the callee.  The callee is responsible for checking
+  /// coordinate space of the callee. The callee is responsible for checking
   /// whether the given position is within its bounds.
   ///
   /// Hit testing requires layout to be up-to-date but does not require painting
@@ -1712,7 +1712,7 @@ abstract class RenderBox extends RenderObject {
   /// Override this method to check whether any children are located at the
   /// given position.
   ///
-  /// Typically children should be hit tested in reverse paint order so that
+  /// Typically children should be hit-tested in reverse paint order so that
   /// hit tests at locations where children overlap hit the child that is
   /// visually "on top" (i.e., paints later).
   ///
@@ -1733,9 +1733,28 @@ abstract class RenderBox extends RenderObject {
   /// child's [parentData] in the [BoxParentData.offset] field.
   @override
   void applyPaintTransform(RenderObject child, Matrix4 transform) {
+    assert(child != null);
     assert(child.parent == this);
-    BoxParentData childParentData = child.parentData;
-    Offset offset = childParentData.offset;
+    assert(() {
+      if (child.parentData is! BoxParentData) {
+        throw new FlutterError(
+          '$runtimeType does not implement applyPaintTransform.\n'
+          'The following $runtimeType object:\n'
+          '  ${this.toStringShallow()}\n'
+          '...did not use a BoxParentData class for the parentData field of the following child:\n'
+          '  ${child.toStringShallow()}\n'
+          'The $runtimeType class inherits from RenderBox. '
+          'The default applyPaintTransform implementation provided by RenderBox assumes that the '
+          'children all use BoxParentData objects for their parentData field. '
+          'Since $runtimeType does not in fact use that ParentData class for its children, it must '
+          'provide an implementation of applyPaintTransform that supports the specific ParentData '
+          'subclass used by its children (which apparently is ${child.parentData.runtimeType}).'
+        );
+      }
+      return true;
+    });
+    final BoxParentData childParentData = child.parentData;
+    final Offset offset = childParentData.offset;
     transform.translate(offset.dx, offset.dy);
   }
 
