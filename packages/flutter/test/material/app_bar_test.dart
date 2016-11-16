@@ -179,4 +179,22 @@ void main() {
     expect(tester.getSize(title).width, equals(620.0));
   });
 
+  testWidgets('AppBar render at zero size', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new Center(
+        child: new Container(
+          height: 0.0,
+          width: 0.0,
+          child: new Scaffold(
+            appBar: new AppBar(
+              title: new Text('X')
+            )
+          )
+        )
+      )
+    );
+
+    Finder title = find.text('X');
+    expect(tester.getSize(title).isEmpty, isTrue);
+  });
 }
