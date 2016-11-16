@@ -2198,8 +2198,8 @@ abstract class Element implements BuildContext {
     });
     final Element parent = element._parent;
     if (parent != null) {
-      parent.deactivateChild(element);
       parent.forgetChild(element);
+      parent.deactivateChild(element);
     }
     assert(element._parent == null);
     owner._inactiveElements.remove(element);
@@ -2262,11 +2262,11 @@ abstract class Element implements BuildContext {
   ///
   /// This method (indirectly) calls [deactivate] on the child.
   ///
-  /// The caller is responsible from removing the child from its child model.
+  /// The caller is responsible for removing the child from its child model.
   /// Typically [deactivateChild] is called by the element itself while it is
   /// updating its child model; however, during [GlobalKey] reparenting, the new
-  /// parent proactively calls [deactivateChild] and then uses [forgetChild] to
-  /// update this object's child model.
+  /// parent proactively calls the old parent's [deactivateChild], first using
+  /// [forgetChild] to cause the old parent to update its child model.
   @protected
   void deactivateChild(Element child) {
     assert(child != null);
@@ -2289,9 +2289,8 @@ abstract class Element implements BuildContext {
   /// This updates the child model such that, e.g., [visitChildren] does not
   /// walk that child anymore.
   ///
-  /// The element must have already been deactivated (via [deactivateChild])
-  /// when this is called, meaning that it and its render object should both be
-  /// orphans (their respective parents should be null).
+  /// The element will still have a valid parent when this is called. After this
+  /// is called, [deactivateChild] is called to sever the link to this object.
   @protected
   void forgetChild(Element child);
 
