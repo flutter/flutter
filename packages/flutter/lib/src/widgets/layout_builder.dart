@@ -70,7 +70,7 @@ class _LayoutBuilderElement extends RenderObjectElement {
   }
 
   @override
-  void detachChild(Element child) {
+  void forgetChild(Element child) {
     assert(child == _child);
     _child = null;
   }

@@ -104,9 +104,9 @@ abstract class VirtualViewportElement extends RenderObjectElement {
   }
 
   @override
-  void detachChild(Element child) {
+  void forgetChild(Element child) {
     assert(() {
-      // TODO(ianh): implement detachChild for VirtualViewport
+      // TODO(ianh): implement forgetChild for VirtualViewport
       throw new FlutterError(
         '$runtimeType does not yet support GlobalKey reparenting of its children.\n'
         'As a temporary workaround, wrap the child with the GlobalKey in a '

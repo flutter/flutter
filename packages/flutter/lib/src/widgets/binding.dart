@@ -495,7 +495,7 @@ class RenderObjectToWidgetElement<T extends RenderObject> extends RootRenderObje
   }
 
   @override
-  void detachChild(Element child) {
+  void forgetChild(Element child) {
     assert(child == _child);
     _child = null;
   }
