@@ -13,7 +13,7 @@ dependencies:
   matcher: '>=0.12.0 <1.0.0'
   path: '^1.3.0'
   web_socket_channel: '^1.0.0'
-  vm_service_client: '^0.2.0'
+  vm_service_client: '0.2.2+2' # TODO(yegor): use the latest version
   flutter:
     sdk: flutter
   flutter_test:
