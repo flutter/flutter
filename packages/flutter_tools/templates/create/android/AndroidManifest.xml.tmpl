@@ -4,6 +4,10 @@
     android:versionName="0.0.1">
 
     <uses-sdk android:minSdkVersion="{{androidMinApiLevel}}" android:targetSdkVersion="21" />
+
+    <!-- The INTERNET permission is required for development. Specifically, flutter needs it to communicate with the running application
+         to allow setting breakpoints, to provide hot reload, etc.
+    -->
     <uses-permission android:name="android.permission.INTERNET"/>
 
     <application android:name="org.domokit.sky.shell.SkyApplication" android:label="{{projectName}}" android:icon="@mipmap/ic_launcher">
