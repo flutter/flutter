@@ -30,9 +30,9 @@ source_set("mac_desktop_platform") {
     "//flutter/shell/gpu",
     "//flutter/shell/platform/darwin/common",
     "//flutter/shell/testing",
-    "//flutter/skia",
     "//flutter/synchronization",
     "//lib/ftl",
+    "//third_party/skia",
   ]
 }
 

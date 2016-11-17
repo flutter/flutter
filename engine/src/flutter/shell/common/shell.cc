@@ -22,11 +22,11 @@
 #include "flutter/common/threads.h"
 #include "flutter/glue/task_runner_adaptor.h"
 #include "flutter/runtime/dart_init.h"
+#include "flutter/shell/common/diagnostic/diagnostic_server.h"
 #include "flutter/shell/common/engine.h"
 #include "flutter/shell/common/platform_view_service_protocol.h"
+#include "flutter/shell/common/skia_event_tracer_impl.h"
 #include "flutter/shell/common/switches.h"
-#include "flutter/shell/common/diagnostic/diagnostic_server.h"
-#include "flutter/skia/ext/event_tracer_impl.h"
 #include "lib/ftl/files/unique_fd.h"
 
 namespace shell {

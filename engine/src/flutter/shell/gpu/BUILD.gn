@@ -17,8 +17,9 @@ source_set("gpu") {
     "//flutter/flow",
     "//flutter/glue",
     "//flutter/shell/common",
-    "//flutter/skia",
     "//flutter/synchronization",
     "//lib/ftl",
+    "//third_party/skia",
+    "//third_party/skia:gpu",
   ]
 }

@@ -225,7 +225,7 @@ sk_sp<SkTypeface> AssetFontSelector::getTypefaceAsset(
     return nullptr;
   }
 
-  SkAutoTUnref<SkFontMgr> font_mgr(SkFontMgr::RefDefault());
+  sk_sp<SkFontMgr> font_mgr(SkFontMgr::RefDefault());
   SkMemoryStream* typeface_stream = new SkMemoryStream(
       typeface_asset->data.data(), typeface_asset->data.size());
   typeface_asset->typeface =
