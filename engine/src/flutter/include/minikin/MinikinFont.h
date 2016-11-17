@@ -45,8 +45,8 @@ class MinikinFont;
 // Possibly move into own .h file?
 // Note: if you add a field here, either add it to LayoutCacheKey or to skipCache()
 struct MinikinPaint {
-    MinikinPaint() : font(0), size(0), scaleX(0), skewX(0), letterSpacing(0), paintFlags(0),
-            fakery(), fontFeatureSettings() { }
+    MinikinPaint() : font(0), size(0), scaleX(0), skewX(0), letterSpacing(0), wordSpacing(0),
+            paintFlags(0), fakery(), hyphenEdit(), fontFeatureSettings() { }
 
     bool skipCache() const {
         return !fontFeatureSettings.empty();
@@ -57,6 +57,7 @@ struct MinikinPaint {
     float scaleX;
     float skewX;
     float letterSpacing;
+    float wordSpacing;
     uint32_t paintFlags;
     FontFakery fakery;
     HyphenEdit hyphenEdit;
