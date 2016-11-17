@@ -148,7 +148,7 @@ class Canvas : public ftl::RefCountedThreadSafe<Canvas>,
                     const tonic::Float32List& vertices,
                     const tonic::Float32List& texture_coordinates,
                     const tonic::Int32List& colors,
-                    SkXfermode::Mode transfer_mode,
+                    SkBlendMode blend_mode,
                     const tonic::Int32List& indices);
 
   void drawAtlas(const Paint& paint,
@@ -157,7 +157,7 @@ class Canvas : public ftl::RefCountedThreadSafe<Canvas>,
                  const tonic::Float32List& transforms,
                  const tonic::Float32List& rects,
                  const tonic::Int32List& colors,
-                 SkXfermode::Mode transfer_mode,
+                 SkBlendMode blend_mode,
                  const tonic::Float32List& cull_rect);
 
   SkCanvas* canvas() const { return canvas_; }

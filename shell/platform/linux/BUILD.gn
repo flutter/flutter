@@ -19,9 +19,9 @@ executable("linux") {
     "//flutter/shell/common",
     "//flutter/shell/gpu",
     "//flutter/shell/testing",
-    "//flutter/skia",
     "//lib/ftl",
     "//third_party/glfw",
+    "//third_party/skia",
   ]
 
   ldflags = [

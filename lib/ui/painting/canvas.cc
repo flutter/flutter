@@ -350,12 +350,10 @@ void Canvas::drawVertices(const Paint& paint,
                           const tonic::Float32List& vertices,
                           const tonic::Float32List& texture_coordinates,
                           const tonic::Int32List& colors,
-                          SkXfermode::Mode transfer_mode,
+                          SkBlendMode blend_mode,
                           const tonic::Int32List& indices) {
   if (!canvas_)
     return;
-
-  sk_sp<SkXfermode> transfer_mode_ptr = SkXfermode::Make(transfer_mode);
 
   std::vector<uint16_t> indices16;
   indices16.reserve(indices.num_elements());
@@ -372,7 +370,7 @@ void Canvas::drawVertices(const Paint& paint,
       vertices.num_elements() / 2,  // SkPoints have two floats.
       reinterpret_cast<const SkPoint*>(vertices.data()),
       reinterpret_cast<const SkPoint*>(texture_coordinates.data()),
-      reinterpret_cast<const SkColor*>(colors.data()), transfer_mode_ptr.get(),
+      reinterpret_cast<const SkColor*>(colors.data()), blend_mode,
       indices16.empty() ? nullptr : indices16.data(), indices16.size(),
       *paint.paint());
 }
@@ -383,7 +381,7 @@ void Canvas::drawAtlas(const Paint& paint,
                        const tonic::Float32List& transforms,
                        const tonic::Float32List& rects,
                        const tonic::Int32List& colors,
-                       SkXfermode::Mode transfer_mode,
+                       SkBlendMode blend_mode,
                        const tonic::Float32List& cull_rect) {
   if (!canvas_)
     return;
@@ -400,7 +398,7 @@ void Canvas::drawAtlas(const Paint& paint,
       reinterpret_cast<const SkRect*>(rects.data()),
       reinterpret_cast<const SkColor*>(colors.data()),
       rects.num_elements() / 4,  // SkRect have four floats.
-      transfer_mode, reinterpret_cast<const SkRect*>(cull_rect.data()),
+      blend_mode, reinterpret_cast<const SkRect*>(cull_rect.data()),
       paint.paint());
 }
 

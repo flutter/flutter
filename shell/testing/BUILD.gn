@@ -16,7 +16,7 @@ source_set("testing") {
     "//base",
     "//flutter/common",
     "//flutter/shell/common",
-    "//flutter/skia",
     "//lib/ftl",
+    "//third_party/skia",
   ]
 }

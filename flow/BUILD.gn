@@ -44,9 +44,10 @@ source_set("flow") {
   deps = [
     "//flutter/common",
     "//flutter/glue",
-    "//flutter/skia",
     "//flutter/synchronization",
     "//lib/ftl",
+    "//third_party/skia",
+    "//third_party/skia:gpu",
   ]
 
   if (is_fuchsia) {

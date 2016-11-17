@@ -2,8 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "flutter/shell/common/skia_event_tracer_impl.h"
+
 #include "base/trace_event/trace_event.h"
-#include "flutter/skia/ext/event_tracer_impl.h"
 #include "third_party/skia/include/utils/SkEventTracer.h"
 
 namespace skia {
@@ -65,7 +66,6 @@ void
 }
 
 }  // namespace skia
-
 
 void InitSkiaEventTracer() {
   // Initialize the binding to Skia's tracing events. Skia will

@@ -107,8 +107,8 @@ Paint DartConverter<Paint>::FromArguments(Dart_NativeArguments args,
 
   if (uint_data[kColorFilterIndex]) {
     SkColor color = uint_data[kColorFilterColorIndex];
-    SkXfermode::Mode transfer_mode =
-        static_cast<SkXfermode::Mode>(uint_data[kColorFilterTransferModeIndex]);
+    SkBlendMode transfer_mode =
+        static_cast<SkBlendMode>(uint_data[kColorFilterTransferModeIndex]);
     paint.setColorFilter(SkColorFilter::MakeModeFilter(color, transfer_mode));
   }
 

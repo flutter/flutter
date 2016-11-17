@@ -63,20 +63,20 @@ source_set("runtime") {
   ]
 
   deps = [
-    ":embedded_resources_cc",
-    "//dart/runtime:libdart",
     "//dart/runtime/bin:embedded_dart_io",
+    "//dart/runtime:libdart",
     "//flutter/assets",
     "//flutter/common",
     "//flutter/flow",
     "//flutter/glue",
     "//flutter/lib/io",
     "//flutter/lib/ui",
-    "//flutter/skia",
     "//flutter/sky/engine/platform",
     "//lib/ftl",
     "//lib/tonic",
     "//third_party/rapidjson",
+    "//third_party/skia",
+    ":embedded_resources_cc",
   ]
 
   if (flutter_runtime_mode != "release") {

@@ -303,7 +303,7 @@ public:
     void drawLineForDocumentMarker(const FloatPoint&, float width, DocumentMarkerLineStyle);
 
     void beginTransparencyLayer(float opacity, const FloatRect* = 0);
-    void beginLayer(float opacity, CompositeOperator, const FloatRect* = 0, ColorFilterObsolete = ColorFilterNone, SkImageFilter* = 0);
+    void beginLayer(float opacity, CompositeOperator, const FloatRect* = 0, ColorFilterObsolete = ColorFilterNone, sk_sp<SkImageFilter> = 0);
     void endLayer();
 
     bool hasShadow() const;

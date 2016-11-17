@@ -346,7 +346,7 @@ void GraphicsContext::beginTransparencyLayer(float opacity, const FloatRect* bou
     beginLayer(opacity, immutableState()->compositeOperator(), bounds);
 }
 
-void GraphicsContext::beginLayer(float opacity, CompositeOperator op, const FloatRect* bounds, ColorFilterObsolete colorFilter, SkImageFilter* imageFilter)
+void GraphicsContext::beginLayer(float opacity, CompositeOperator op, const FloatRect* bounds, ColorFilterObsolete colorFilter, sk_sp<SkImageFilter> imageFilter)
 {
     if (contextDisabled())
         return;

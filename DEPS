@@ -20,10 +20,11 @@
 vars = {
   'chromium_git': 'https://chromium.googlesource.com',
   'fuchsia_git': 'https://fuchsia.googlesource.com',
+  'skia_git': 'https://skia.googlesource.com',
   'github_git': 'https://github.com',
   'mojo_sdk_revision': '6b5fb1227c742f5ecc077486ebc029f2711c61fa',
   'base_revision': 'b2412302ed4e45bfb47d7b5c0c3418077009e1ce',
-  'skia_revision': 'bbe17a66705aff6f34a22adc0c12883dcb6161b3',
+  'skia_revision': '06a65e2799eaead18f778792801406aff4aec0d9',
 
   # Note: When updating the Dart revision, ensure that all entries that are
   # dependencies of dart are also updated
@@ -42,10 +43,11 @@ allowed_hosts = [
   'chromium.googlesource.com',
   'fuchsia.googlesource.com',
   'github.com',
+  'skia.googlesource.com',
 ]
 
 deps = {
-  'src': 'https://github.com/flutter/buildroot.git' + '@' + 'a69330303690bbc10953ed1a662f37f1f3c7b2b9',
+  'src': 'https://github.com/flutter/buildroot.git' + '@' + '8e0347319b586cc29650e5bd878ddf73a3a6823d',
 
    # Fuchsia compatibility
    #
@@ -112,13 +114,13 @@ deps = {
    Var('dart_root_certificates_revision'),
 
   'src/third_party/skia':
-   Var('chromium_git') + '/skia.git' + '@' +  Var('skia_revision'),
+   Var('skia_git') + '/skia.git' + '@' +  Var('skia_revision'),
 
   'src/third_party/yasm/source/patched-yasm':
    Var('chromium_git') + '/chromium/deps/yasm/patched-yasm.git' + '@' + '4671120cd8558ce62ee8672ebf3eb6f5216f909b',
 
-  'src/third_party/libjpeg_turbo':
-   Var('chromium_git') + '/chromium/deps/libjpeg_turbo.git' + '@' + '7260e4d8b8e1e40b17f03fafdf1cd83296900f76',
+  'src/third_party/libjpeg-turbo':
+   Var('skia_git') + '/third_party/libjpeg-turbo.git' + '@' + 'debddedc75850bcdeb8a57258572f48b802a4bb3',
 
    # Headers for Vulkan 1.0
    'src/third_party/vulkan':
@@ -146,8 +148,8 @@ deps_os = {
     'src/third_party/robolectric/lib':
       Var('chromium_git') + '/chromium/third_party/robolectric.git' + '@' + '6b63c99a8b6967acdb42cbed0adb067c80efc810',
 
-    'src/third_party/freetype-android/src':
-       Var('chromium_git') + '/chromium/src/third_party/freetype2.git' + '@' + 'e186230678ee8e4ea4ac4797ece8125761e3225a',
+    'src/third_party/freetype2':
+       Var('fuchsia_git') + '/third_party/freetype2' + '@' + '6cfcc4303b6fc7850f764e41f72a89d67e301f44',
   },
 }
 

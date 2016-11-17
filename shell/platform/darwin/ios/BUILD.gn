@@ -58,10 +58,10 @@ shared_library("flutter_framework_dylib") {
     "//flutter/shell/common",
     "//flutter/shell/gpu",
     "//flutter/shell/platform/darwin/common",
-    "//flutter/skia",
     "//flutter/sky/engine/platform",
     "//flutter/sky/engine/wtf",
     "//lib/ftl",
+    "//third_party/skia",
   ]
 
   defines = [

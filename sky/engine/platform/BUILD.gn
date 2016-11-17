@@ -247,8 +247,9 @@ source_set("platform") {
 
   public_deps = [
     "//flutter/common",
-    "//flutter/skia",
     "//flutter/sky/engine/wtf",
+    "//third_party/skia",
+    "//third_party/skia:gpu",
   ]
 
   if (!is_mac) {

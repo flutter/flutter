@@ -76,9 +76,10 @@ source_set("ui") {
     "//flutter/common",
     "//flutter/flow",
     "//flutter/glue",
-    "//flutter/skia",
     "//flutter/sky/engine",
     "//lib/tonic",
+    "//third_party/skia",
+    "//third_party/skia:gpu",
   ]
 
   if (is_android) {
