@@ -83,6 +83,12 @@ static const char* kDartProfilingArgs[] = {
     // default profile period to 100Hz. This number is suitable for older
     // Raspberry Pi devices but quite low for current smartphones.
     "--profile_period=1000",
+    // Disable Dart's built in profiler when building a debug build. This
+    // works around a race condition that would sometimes stop a crash's
+    // stack trace from being printed on Android.
+#ifndef NDEBUG
+    "--no-profiler",
+#endif
 #if (WTF_OS_IOS || WTF_OS_MACOSX)
     // On platforms where LLDB is the primary debugger, SIGPROF signals
     // overwhelm LLDB.
