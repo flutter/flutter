@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 
@@ -180,5 +182,107 @@ void main() {
     // pop transitions.
     await tester.pump();
     await tester.pump(const Duration(seconds: 1)); // finish the menu animation
+  });
+
+  testWidgets('Drop down button aligns selected menu item', (WidgetTester tester) async {
+    Key buttonKey = new UniqueKey();
+    List<String> items = <String>['one', 'two', 'wide three', 'four'];
+    String value = 'two';
+
+    Widget build() {
+      return new MaterialApp(
+        home: new Material(
+          child: new Center(
+            child: new DropdownButton<String>(
+              key: buttonKey,
+              value: value,
+              onChanged: (String value) { },
+              items: items.map((String item) {
+                return new DropdownMenuItem<String>(
+                  key: new ValueKey<String>(item),
+                  value: item,
+                  child: new Text(item),
+                );
+              }).toList(),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(build());
+    RenderBox buttonBox = tester.renderObject(find.byKey(buttonKey));
+    assert(buttonBox.attached);
+
+    await tester.tap(find.text('two'));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1)); // finish the menu animation
+
+    // The selected dropdown item is both in menu we just popped up, and in
+    // the IndexedStack contained by the dropdown button. Both of them should
+    // have the same origin and height as the dropdown button.
+    List<RenderObject> itemBoxes = tester.renderObjectList(find.byKey(new ValueKey<String>('two'))).toList();
+    expect(itemBoxes.length, equals(2));
+    for(RenderBox itemBox in itemBoxes) {
+      assert(itemBox.attached);
+      expect(buttonBox.localToGlobal(Point.origin), equals(itemBox.localToGlobal(Point.origin)));
+      expect(buttonBox.size.height, equals(itemBox.size.height));
+    }
+
+  });
+
+  testWidgets('Drop down button with isDense:true aligns selected menu item', (WidgetTester tester) async {
+    Key buttonKey = new UniqueKey();
+    List<String> items = <String>['one', 'two', 'three', 'four'];
+    String value = 'two';
+
+    Widget build() {
+      return new MaterialApp(
+        home: new Material(
+          child: new Center(
+            child: new DropdownButton<String>(
+              key: buttonKey,
+              value: value,
+              onChanged: (String value) { },
+              isDense: true,
+              items: items.map((String item) {
+                return new DropdownMenuItem<String>(
+                  key: new ValueKey<String>(item),
+                  value: item,
+                  child: new Text(item),
+                );
+              }).toList(),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(build());
+    RenderBox buttonBox = tester.renderObject(find.byKey(buttonKey));
+    assert(buttonBox.attached);
+
+    await tester.tap(find.text('two'));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1)); // finish the menu animation
+
+    // The selected dropdown item is both in menu we just popped up, and in
+    // the IndexedStack contained by the dropdown button. Both of them should
+    // have the same vertical center as the button.
+    List<RenderBox> itemBoxes = tester.renderObjectList(find.byKey(new ValueKey<String>('two'))).toList();
+    expect(itemBoxes.length, equals(2));
+
+    // When isDense is true, the button's height is reduced. The menu items'
+    // heights are not.
+    double menuItemHeight = itemBoxes.map((RenderBox box) => box.size.height).reduce(math.max);
+    expect(menuItemHeight, greaterThan(buttonBox.size.height));
+
+    for(RenderBox itemBox in itemBoxes) {
+      assert(itemBox.attached);
+      Point buttonBoxCenter = buttonBox.size.center(buttonBox.localToGlobal(Point.origin));
+      Point itemBoxCenter =  itemBox.size.center(itemBox.localToGlobal(Point.origin));
+      expect(buttonBoxCenter.y, equals(itemBoxCenter.y));
+    }
+
   });
 }
