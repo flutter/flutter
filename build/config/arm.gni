@@ -29,16 +29,6 @@ if (current_cpu == "arm" || current_cpu == "arm64") {
 
     # Whether to enable optional NEON code paths.
     arm_optionally_use_neon = false
-
-    if (is_android) {
-      arm_use_neon = false
-      arm_optionally_use_neon = true
-    }
-
-    if (is_ios) {
-      arm_use_neon = false
-      arm_optionally_use_neon = false
-    }
   }
 
   assert(arm_float_abi == "" || arm_float_abi == "hard" ||

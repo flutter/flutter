@@ -14,10 +14,10 @@ source_set("iccjpeg") {
 
   public_configs = [
     ":iccjpeg_config",
-    "//third_party/libjpeg:libjpeg_config",
+    "//third_party/libjpeg-turbo:libjpeg_config",
   ]
 
   deps = [
-    "//third_party:jpeg",
+    "//third_party/libjpeg-turbo:libjpeg",
   ]
 }

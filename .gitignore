@@ -43,7 +43,7 @@ Thumbs.db
 /third_party/colorama/src/
 /third_party/dart-sdk/
 /third_party/dejavu-fonts-ttf-2.34/ttf/*.ttf
-/third_party/freetype-android/src
+/third_party/freetype2/
 /third_party/go/tool/
 /third_party/gtest/
 /third_party/icu/
@@ -51,7 +51,7 @@ Thumbs.db
 /third_party/junit/src/
 /third_party/libc++/trunk/
 /third_party/libc++abi/trunk/
-/third_party/libjpeg_turbo/
+/third_party/libjpeg-turbo/
 /third_party/mockito/src/
 /third_party/pdfium/
 /third_party/pywebsocket/src/
