@@ -15,10 +15,7 @@ dependencies:
   file: ^0.1.0
   http: ^0.11.3
   json_rpc_2: ^2.0.0
-
-  # Versions 1.0.4 and below have duplicate pubspec map entries and will fail the build.
-  json_schema: 1.0.5
-
+  json_schema: 1.0.6
   linter: ^0.1.21
   meta: ^1.0.3
   mustache: ^0.2.5
