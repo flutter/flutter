@@ -301,7 +301,11 @@ Future<int> startApp(DriveCommand command) async {
   printTrace('Starting application.');
 
   // Forward device log messages to the terminal window running the "drive" command.
-  command._deviceLogSubscription = command.device.logReader.logLines.listen(printStatus);
+  command._deviceLogSubscription = command
+      .device
+      .getLogReader(app: package)
+      .logLines
+      .listen(printStatus);
 
   LaunchResult result = await command.device.startApp(
     package,

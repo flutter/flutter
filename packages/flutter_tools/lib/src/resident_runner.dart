@@ -8,6 +8,7 @@ import 'dart:io';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 
+import 'application_package.dart';
 import 'base/logger.dart';
 import 'build_info.dart';
 import 'device.dart';
@@ -96,11 +97,11 @@ abstract class ResidentRunner {
     });
   }
 
-  Future<Null> startEchoingDeviceLog() async {
+  Future<Null> startEchoingDeviceLog(ApplicationPackage app) async {
     if (_loggingSubscription != null) {
       return;
     }
-    _loggingSubscription = device.logReader.logLines.listen((String line) {
+    _loggingSubscription = device.getLogReader(app: app).logLines.listen((String line) {
       if (!line.contains('Observatory listening on http') &&
           !line.contains('Diagnostic server listening on http'))
         printStatus(line);

@@ -41,7 +41,7 @@ class LogsCommand extends FlutterCommand {
     if (argResults['clear'])
       device.clearLogs();
 
-    DeviceLogReader logReader = device.logReader;
+    DeviceLogReader logReader = device.getLogReader();
 
     Cache.releaseLockEarly();
 
