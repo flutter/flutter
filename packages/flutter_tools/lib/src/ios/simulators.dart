@@ -717,7 +717,7 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
           && content.endsWith(']: 0x1'))
          return null;
 
-      if (_appName == null || category in _enabledLogCategories)
+      if (_appName == null || _enabledLogCategories.contains(category))
         return '$category: $content';
       else if (category == _appName)
         return content;
