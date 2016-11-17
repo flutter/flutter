@@ -724,9 +724,13 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
 
       return null;
     }
-    match = _lastMessageSingleRegex.matchAsPrefix(string);
-    if (match != null)
+
+    if (_lastMessageSingleRegex.matchAsPrefix(string) != null)
       return null;
+
+    if (new RegExp(r'assertion failed: .* libxpc.dylib .* 0x7d$').matchAsPrefix(string) != null)
+      return null;
+
     return string;
   }
 
