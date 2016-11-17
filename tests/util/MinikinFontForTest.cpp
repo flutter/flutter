@@ -47,13 +47,17 @@ MinikinFontForTest::MinikinFontForTest(const std::string& font_path, sk_sp<SkTyp
 
 float MinikinFontForTest::GetHorizontalAdvance(uint32_t /* glyph_id */,
         const MinikinPaint& /* paint */) const {
-    LOG_ALWAYS_FATAL("MinikinFontForTest::GetHorizontalAdvance is not yet implemented");
-    return 0.0f;
+    // TODO: Make mock value configurable if necessary.
+    return 10.0f;
 }
 
-void MinikinFontForTest::GetBounds(MinikinRect* /* bounds */, uint32_t /* glyph_id */,
+void MinikinFontForTest::GetBounds(MinikinRect* bounds, uint32_t /* glyph_id */,
         const MinikinPaint& /* paint */) const {
-    LOG_ALWAYS_FATAL("MinikinFontForTest::GetBounds is not yet implemented");
+    // TODO: Make mock values configurable if necessary.
+    bounds->mLeft = 0.0f;
+    bounds->mTop = 0.0f;
+    bounds->mRight = 10.0f;
+    bounds->mBottom = 10.0f;
 }
 
 const void* MinikinFontForTest::GetTable(uint32_t tag, size_t* size,

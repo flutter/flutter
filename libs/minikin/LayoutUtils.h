@@ -21,6 +21,11 @@
 
 namespace minikin {
 
+/*
+ * Determine whether the code unit is a word space for the purposes of justification.
+ */
+bool isWordSpace(uint16_t code_unit);
+
 /**
  * Return offset of previous word break. It is either < offset or == 0.
  *
