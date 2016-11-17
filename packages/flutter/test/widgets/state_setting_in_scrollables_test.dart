@@ -25,7 +25,7 @@ class FooState extends State<Foo> {
             children: <Widget>[
               new GestureDetector(
                 onTap: () {
-                  setState(() {});
+                  setState(() { /* this is needed to trigger the original bug this is regression-testing */ });
                   scrollableKey.currentState.scrollBy(200.0, duration: const Duration(milliseconds: 500));
                 },
                 child: new DecoratedBox(
