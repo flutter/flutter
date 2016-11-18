@@ -113,6 +113,7 @@ class SnackBar extends StatelessWidget {
   SnackBar({
     Key key,
     this.content,
+    this.backgroundColor,
     this.action,
     this.duration: _kSnackBarDisplayDuration,
     this.animation
@@ -124,6 +125,9 @@ class SnackBar extends StatelessWidget {
   ///
   /// Typically a [Text] widget.
   final Widget content;
+
+  /// The Snackbar's background color. By default the color is dark grey.
+  final Color backgroundColor;
 
   /// (optional) An action that the user can take based on the snack bar.
   ///
@@ -201,7 +205,7 @@ class SnackBar extends StatelessWidget {
             },
             child: new Material(
               elevation: 6,
-              color: _kSnackBackground,
+              color: backgroundColor ?? _kSnackBackground,
               child: new Theme(
                 data: darkTheme,
                 child: new FadeTransition(
@@ -238,6 +242,7 @@ class SnackBar extends StatelessWidget {
     return new SnackBar(
       key: key ?? fallbackKey,
       content: content,
+      backgroundColor: backgroundColor,
       action: action,
       duration: duration,
       animation: newAnimation
