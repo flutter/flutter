@@ -22,7 +22,6 @@ vars = {
   'fuchsia_git': 'https://fuchsia.googlesource.com',
   'skia_git': 'https://skia.googlesource.com',
   'github_git': 'https://github.com',
-  'mojo_sdk_revision': '6b5fb1227c742f5ecc077486ebc029f2711c61fa',
   'base_revision': 'b2412302ed4e45bfb47d7b5c0c3418077009e1ce',
   'skia_revision': '06a65e2799eaead18f778792801406aff4aec0d9',
 
@@ -47,7 +46,7 @@ allowed_hosts = [
 ]
 
 deps = {
-  'src': 'https://github.com/flutter/buildroot.git' + '@' + 'f0135c944330591d01ffd0c685fb7ecd82253497',
+  'src': 'https://github.com/flutter/buildroot.git' + '@' + 'fa103279b858e49b8755fdecf2b4242067ca36cb',
 
    # Fuchsia compatibility
    #
@@ -63,9 +62,6 @@ deps = {
 
   'src/lib/zip':
    Var('fuchsia_git') + '/zip' + '@' + '92dc87ca645fe8e9f5151ef6dac86d8311a7222f',
-
-  'src/mojo/public':
-   Var('fuchsia_git') + '/mojo/public' + '@' + Var('mojo_sdk_revision'),
 
   'src/third_party/gtest':
    Var('fuchsia_git') + '/third_party/gtest' + '@' + 'c00f82917331efbbd27124b537e4ccc915a02b72',
