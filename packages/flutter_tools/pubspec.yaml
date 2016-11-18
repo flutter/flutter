@@ -24,7 +24,7 @@ dependencies:
   pub_semver: ^1.0.0
   stack_trace: ^1.4.0
   usage: ^2.2.1
-  vm_service_client: '0.2.2+4'
+  vm_service_client: '0.2.2+2' # TODO(yegor): use the latest version
   web_socket_channel: ^1.0.4
   xml: ^2.4.1
   yaml: ^2.1.3
