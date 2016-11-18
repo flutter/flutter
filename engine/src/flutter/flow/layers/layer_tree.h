@@ -34,7 +34,7 @@ class LayerTree {
   // TODO(abarth): Integrate scene updates with the rasterization pass so that
   // we can draw on top of child scenes (and so that we can apply clips and
   // blending operations to child scene).
-  void UpdateScene(mozart::SceneUpdate* update, mozart::Node* container);
+  void UpdateScene(SceneUpdateContext& context, mozart::Node* container);
 #endif
 
   void Paint(CompositorContext::ScopedFrame& frame);

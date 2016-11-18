@@ -127,7 +127,7 @@ void DiagnosticServer::SkiaPictureTask(Dart_Port port_id) {
 
   flow::CompositorContext compositor_context;
   flow::CompositorContext::ScopedFrame frame = compositor_context.AcquireFrame(
-      nullptr, *recorder.getRecordingCanvas(), false);
+      nullptr, recorder.getRecordingCanvas(), false);
   layer_tree->Raster(frame);
 
   sk_sp<SkPicture> picture = recorder.finishRecordingAsPicture();

@@ -29,7 +29,7 @@ class ChildSceneLayer : public Layer {
 
   void Preroll(PrerollContext* context, const SkMatrix& matrix) override;
   void Paint(PaintContext& context) override;
-  void UpdateScene(mozart::SceneUpdate* update,
+  void UpdateScene(SceneUpdateContext& context,
                    mozart::Node* container) override;
 
  private:

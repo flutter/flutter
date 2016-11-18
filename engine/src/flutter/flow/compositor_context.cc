@@ -30,18 +30,18 @@ void CompositorContext::EndFrame(ScopedFrame& frame,
 
 CompositorContext::ScopedFrame CompositorContext::AcquireFrame(
     GrContext* gr_context,
-    SkCanvas& canvas,
+    SkCanvas* canvas,
     bool instrumentation_enabled) {
   return ScopedFrame(*this, gr_context, canvas, instrumentation_enabled);
 }
 
 CompositorContext::ScopedFrame::ScopedFrame(CompositorContext& context,
                                             GrContext* gr_context,
-                                            SkCanvas& canvas,
+                                            SkCanvas* canvas,
                                             bool instrumentation_enabled)
     : context_(context),
       gr_context_(gr_context),
-      canvas_(&canvas),
+      canvas_(canvas),
       instrumentation_enabled_(instrumentation_enabled) {
   context_.BeginFrame(*this, instrumentation_enabled_);
 }

@@ -32,14 +32,20 @@ void LayerTree::Preroll(CompositorContext::ScopedFrame& frame,
       ignore_raster_cache ? nullptr : &frame.context().raster_cache(),
       frame.gr_context(), SkRect::MakeEmpty(),
   };
-  root_layer_->Preroll(&context, SkMatrix());
+  root_layer_->Preroll(&context, SkMatrix::I());
 }
 
 #if defined(OS_FUCHSIA)
-void LayerTree::UpdateScene(mozart::SceneUpdate* update,
+void LayerTree::UpdateScene(SceneUpdateContext& context,
                             mozart::Node* container) {
   TRACE_EVENT0("flutter", "LayerTree::UpdateScene");
-  root_layer_->UpdateScene(update, container);
+
+  if (root_layer_->needs_system_composite()) {
+    root_layer_->UpdateScene(context, container);
+  } else {
+    context.AddLayerToCurrentPaintTask(root_layer_.get());
+  }
+  context.FinalizeCurrentPaintTaskIfNeeded(container, SkMatrix::I());
 }
 #endif
 

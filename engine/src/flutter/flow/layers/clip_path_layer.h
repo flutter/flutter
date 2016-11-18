@@ -20,6 +20,11 @@ class ClipPathLayer : public ContainerLayer {
   void Preroll(PrerollContext* context, const SkMatrix& matrix) override;
   void Paint(PaintContext& context) override;
 
+#if defined(OS_FUCHSIA)
+  void UpdateScene(SceneUpdateContext& context,
+                   mozart::Node* container) override;
+#endif  // defined(OS_FUCHSIA)
+
  private:
   SkPath clip_path_;
 

@@ -146,8 +146,10 @@ void PlatformViewAndroid::RunBundleAndSnapshot(JNIEnv* env,
                                                jstring java_snapshot_override) {
   std::string bundle_path =
       base::android::ConvertJavaStringToUTF8(env, java_bundle_path);
-  std::string snapshot_override = java_snapshot_override ?
-      base::android::ConvertJavaStringToUTF8(env, java_snapshot_override) : "";
+  std::string snapshot_override =
+      java_snapshot_override
+          ? base::android::ConvertJavaStringToUTF8(env, java_snapshot_override)
+          : "";
 
   blink::Threads::UI()->PostTask(
       [ engine = engine_->GetWeakPtr(), bundle_path, snapshot_override ] {
@@ -497,7 +499,7 @@ void PlatformViewAndroid::GetBitmapGpuTask(ftl::AutoResetWaitableEvent* latch,
   flow::CompositorContext compositor_context;
   SkCanvas* canvas = surface->getCanvas();
   flow::CompositorContext::ScopedFrame frame =
-      compositor_context.AcquireFrame(nullptr, *canvas, false);
+      compositor_context.AcquireFrame(nullptr, canvas, false);
 
   canvas->clear(SK_ColorBLACK);
   layer_tree->Raster(frame);
