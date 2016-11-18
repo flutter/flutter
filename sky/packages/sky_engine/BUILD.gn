@@ -3,10 +3,10 @@
 # found in the LICENSE file.
 
 import("//dart/sdk/lib/rules.gni")
+import("//flutter/build/dart/rules.gni")
 import("//flutter/lib/jni/dart_jni.gni")
 import("//flutter/lib/ui/dart_ui.gni")
 import("//flutter/sky/engine/core/core.gni")
-import("//build/dart/rules.gni")
 
 copy("copy_sky_engine_authors") {
   sources = [
