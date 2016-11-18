@@ -22,6 +22,9 @@ executable("linux") {
     "//lib/ftl",
     "//third_party/glfw",
     "//third_party/skia",
+    # Required by FontCacheLinux. Not Skia. Skia uses a custom font manager
+    # that delegates to us.
+    "//third_party:fontconfig",
   ]
 
   ldflags = [
