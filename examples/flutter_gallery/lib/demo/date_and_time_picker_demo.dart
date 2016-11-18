@@ -108,14 +108,14 @@ class _DateTimePicker extends StatelessWidget {
   }
 }
 
-class DatePickerDemo extends StatefulWidget {
+class DateAndTimePickerDemo extends StatefulWidget {
   static const String routeName = '/date-and-time-pickers';
 
   @override
-  _DatePickerDemoState createState() => new _DatePickerDemoState();
+  _DateAndTimePickerDemoState createState() => new _DateAndTimePickerDemoState();
 }
 
-class _DatePickerDemoState extends State<DatePickerDemo> {
+class _DateAndTimePickerDemoState extends State<DateAndTimePickerDemo> {
   InputValue _eventName = InputValue.empty;
   InputValue _eventLocation = InputValue.empty;
   DateTime _fromDate = new DateTime.now();
