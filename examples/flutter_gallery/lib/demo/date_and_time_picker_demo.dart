@@ -23,7 +23,7 @@ class _InputDropdown extends StatelessWidget {
   final Widget child;
 
   @override
-  build(BuildContext context) {
+  Widget build(BuildContext context) {
     return new InkWell(
       onTap: onPressed,
       child: new InputContainer(
