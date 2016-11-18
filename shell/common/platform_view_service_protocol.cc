@@ -253,8 +253,9 @@ bool PlatformViewServiceProtocol::Screenshot(const char* method,
   if (bitmap.empty())
     return ErrorServer(json_object, "no screenshot available");
 
-  sk_sp<SkData> png(SkImageEncoder::EncodeData(
-      bitmap, SkImageEncoder::Type::kPNG_Type, SkImageEncoder::kDefaultQuality));
+  sk_sp<SkData> png(
+      SkImageEncoder::EncodeData(bitmap, SkImageEncoder::Type::kPNG_Type,
+                                 SkImageEncoder::kDefaultQuality));
 
   if (!png)
     return ErrorServer(json_object, "can not encode screenshot");
@@ -295,7 +296,7 @@ void PlatformViewServiceProtocol::ScreenshotGpuTask(SkBitmap* bitmap) {
   flow::CompositorContext compositor_context;
   SkCanvas* canvas = surface->getCanvas();
   flow::CompositorContext::ScopedFrame frame =
-      compositor_context.AcquireFrame(nullptr, *canvas, false);
+      compositor_context.AcquireFrame(nullptr, canvas, false);
 
   canvas->clear(SK_ColorBLACK);
   layer_tree->Raster(frame);

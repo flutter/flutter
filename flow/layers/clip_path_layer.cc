@@ -4,6 +4,11 @@
 
 #include "flutter/flow/layers/clip_path_layer.h"
 
+#if defined(OS_FUCHSIA)
+#include "apps/mozart/lib/skia/type_converters.h"
+#include "apps/mozart/services/composition/nodes.fidl.h"
+#endif  // defined(OS_FUCHSIA)
+
 namespace flow {
 
 ClipPathLayer::ClipPathLayer() {}
@@ -17,8 +22,21 @@ void ClipPathLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
   set_paint_bounds(context->child_paint_bounds);
 }
 
+#if defined(OS_FUCHSIA)
+
+void ClipPathLayer::UpdateScene(SceneUpdateContext& context,
+                                mozart::Node* container) {
+  auto node = mozart::Node::New();
+  node->content_clip = mozart::RectF::From(clip_path_.getBounds());
+  UpdateSceneChildrenInsideNode(context, container, std::move(node));
+}
+
+#endif  // defined(OS_FUCHSIA)
+
 void ClipPathLayer::Paint(PaintContext& context) {
   TRACE_EVENT0("flutter", "ClipPathLayer::Paint");
+  FTL_DCHECK(!needs_system_composite());
+
   SkAutoCanvasRestore save(&context.canvas, false);
   context.canvas.saveLayer(&paint_bounds(), nullptr);
   context.canvas.clipPath(clip_path_, true);

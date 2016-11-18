@@ -19,6 +19,11 @@ class OpacityLayer : public ContainerLayer {
  protected:
   void Paint(PaintContext& context) override;
 
+#if defined(OS_FUCHSIA)
+  void UpdateScene(SceneUpdateContext& context,
+                   mozart::Node* container) override;
+#endif  // defined(OS_FUCHSIA)
+
  private:
   int alpha_;
 

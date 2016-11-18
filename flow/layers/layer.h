@@ -10,6 +10,7 @@
 
 #include "flutter/flow/instrumentation.h"
 #include "flutter/flow/raster_cache.h"
+#include "flutter/flow/scene_update_context.h"
 #include "flutter/glue/trace_event.h"
 #include "lib/ftl/build_config.h"
 #include "lib/ftl/logging.h"
@@ -24,16 +25,9 @@
 #include "third_party/skia/include/core/SkRRect.h"
 #include "third_party/skia/include/core/SkXfermode.h"
 
-#if defined(OS_FUCHSIA)
-namespace mozart {
-class SceneUpdate;
-class Node;
-}  // namespace mozart
-#endif
-
 namespace flow {
-
 class ContainerLayer;
+
 class Layer {
  public:
   Layer();
@@ -56,13 +50,18 @@ class Layer {
   virtual void Paint(PaintContext& context) = 0;
 
 #if defined(OS_FUCHSIA)
-  virtual void UpdateScene(mozart::SceneUpdate* update,
+  virtual void UpdateScene(SceneUpdateContext& context,
                            mozart::Node* container);
 #endif
 
   ContainerLayer* parent() const { return parent_; }
 
   void set_parent(ContainerLayer* parent) { parent_ = parent; }
+
+  bool needs_system_composite() const { return needs_system_composite_; }
+  void set_needs_system_composite(bool value) {
+    needs_system_composite_ = value;
+  }
 
   // subclasses should assume this will be true by the time Paint() is called
   bool has_paint_bounds() const { return has_paint_bounds_; }
@@ -79,6 +78,7 @@ class Layer {
 
  private:
   ContainerLayer* parent_;
+  bool needs_system_composite_;
   bool has_paint_bounds_;  // if false, paint_bounds_ is not valid
   SkRect paint_bounds_;
 

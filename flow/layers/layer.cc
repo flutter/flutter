@@ -8,14 +8,20 @@
 
 namespace flow {
 
-Layer::Layer() : parent_(nullptr), has_paint_bounds_(false), paint_bounds_() {}
+Layer::Layer()
+    : parent_(nullptr),
+      needs_system_composite_(false),
+      has_paint_bounds_(false),
+      paint_bounds_() {}
 
-Layer::~Layer() {}
+Layer::~Layer() = default;
 
-void Layer::Preroll(PrerollContext* context, const SkMatrix& matrix) {}
+void Layer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
+  set_paint_bounds(SkRect::MakeEmpty());
+}
 
 #if defined(OS_FUCHSIA)
-void Layer::UpdateScene(mozart::SceneUpdate* update, mozart::Node* container) {}
+void Layer::UpdateScene(SceneUpdateContext& context, mozart::Node* container) {}
 #endif
 
 }  // namespace flow

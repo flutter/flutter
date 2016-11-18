@@ -25,8 +25,9 @@ void PictureLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
                                       matrix, is_complex_, will_change_);
   }
 
-  context->child_paint_bounds =
-      picture_->cullRect().makeOffset(offset_.x(), offset_.y());
+  SkRect bounds = picture_->cullRect().makeOffset(offset_.x(), offset_.y());
+  set_paint_bounds(bounds);
+  context->child_paint_bounds = bounds;
 }
 
 void PictureLayer::Paint(PaintContext& context) {

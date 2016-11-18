@@ -38,7 +38,7 @@ class CompositorContext {
 
     ScopedFrame(CompositorContext& context,
                 GrContext* gr_context,
-                SkCanvas& canvas,
+                SkCanvas* canvas,
                 bool instrumentation_enabled);
 
     friend class CompositorContext;
@@ -51,7 +51,7 @@ class CompositorContext {
   ~CompositorContext();
 
   ScopedFrame AcquireFrame(GrContext* gr_context,
-                           SkCanvas& canvas,
+                           SkCanvas* canvas,
                            bool instrumentation_enabled = true);
 
   void OnGrContextDestroyed();

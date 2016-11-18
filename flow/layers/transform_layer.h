@@ -16,8 +16,14 @@ class TransformLayer : public ContainerLayer {
 
   void set_transform(const SkMatrix& transform) { transform_ = transform; }
 
+ protected:
   void Preroll(PrerollContext* context, const SkMatrix& matrix) override;
   void Paint(PaintContext& context) override;
+
+#if defined(OS_FUCHSIA)
+  void UpdateScene(SceneUpdateContext& context,
+                   mozart::Node* container) override;
+#endif  // defined(OS_FUCHSIA)
 
  private:
   SkMatrix transform_;
