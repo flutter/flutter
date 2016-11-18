@@ -182,38 +182,6 @@ hooks = [
     'action': ['python', 'src/tools/dart/update.py'],
   },
   {
-    # Update LASTCHANGE. This is also run by export_tarball.py in
-    # src/tools/export_tarball - please keep them in sync.
-    'name': 'lastchange',
-    'pattern': '.',
-    'action': ['python', 'src/build/util/lastchange.py',
-               '-o', 'src/build/util/LASTCHANGE'],
-  },
-  # Pull binutils for linux, enabled debug fission for faster linking /
-  # debugging when used with clang on Ubuntu Precise.
-  # https://code.google.com/p/chromium/issues/detail?id=352046
-  {
-    'name': 'binutils',
-    'pattern': 'src/third_party/binutils',
-    'action': [
-        'python',
-        'src/third_party/binutils/download.py',
-    ],
-  },
-  # Pull eu-strip binaries using checked-in hashes.
-  {
-    'name': 'eu-strip',
-    'pattern': '.',
-    'action': [ 'download_from_google_storage',
-                '--no_resume',
-                '--quiet',
-                '--platform=linux*',
-                '--no_auth',
-                '--bucket', 'chromium-eu-strip',
-                '-s', 'src/build/linux/bin/eu-strip.sha1',
-    ],
-  },
-  {
     # Ensure that we don't accidentally reference any .pyc files whose
     # corresponding .py files have already been deleted.
     'name': 'remove_stale_pyc_files',
