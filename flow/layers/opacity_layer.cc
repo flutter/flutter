@@ -23,6 +23,7 @@ void OpacityLayer::UpdateScene(SceneUpdateContext& context,
   node->op = mozart::NodeOp::New();
   node->op->set_layer(mozart::LayerNodeOp::New());
   node->op->get_layer()->layer_rect = mozart::RectF::From(paint_bounds());
+  node->op->get_layer()->blend = mozart::Blend::New();
   node->op->get_layer()->blend->alpha = alpha_;
   UpdateSceneChildrenInsideNode(context, container, std::move(node));
 }

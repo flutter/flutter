@@ -19,6 +19,13 @@ void ChildSceneLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
   transform_.preTranslate(offset_.x(), offset_.y());
   float inverse_device_pixel_ratio = 1.f / device_pixel_ratio_;
   transform_.preScale(inverse_device_pixel_ratio, inverse_device_pixel_ratio);
+
+  SkRect bounds = SkRect::MakeXYWH(
+    offset_.x(), offset_.y(),
+    physical_size_.width() * inverse_device_pixel_ratio,
+    physical_size_.height() * inverse_device_pixel_ratio);
+  set_paint_bounds(bounds);
+  context->child_paint_bounds = bounds;
 }
 
 void ChildSceneLayer::Paint(PaintContext& context) {
