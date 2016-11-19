@@ -25,6 +25,8 @@ import '../widgets/semantics_tester.dart';
 // It's ok to do this in tests, but you really don't want to do it in
 // production code.
 
+const String tooltipText = 'TIP';
+
 void main() {
   testWidgets('Does tooltip end up in the right place - center', (WidgetTester tester) async {
     GlobalKey key = new GlobalKey();
@@ -40,7 +42,7 @@ void main() {
                     top: 0.0,
                     child: new Tooltip(
                       key: key,
-                      message: 'TIP',
+                      message: tooltipText,
                       height: 20.0,
                       padding: const EdgeInsets.all(5.0),
                       verticalOffset: 20.0,
@@ -70,10 +72,12 @@ void main() {
      *                   *
      *********************/
 
-    RenderBox tip = tester.renderObject(find.text('TIP')).parent.parent.parent.parent.parent;
+    RenderBox tip = tester.renderObject(find.text(tooltipText)).parent.parent.parent.parent.parent;
 
-    Point tipInGlobal = tip.localToGlobal(tip.size.topLeft(Point.origin));
-    expect(tipInGlobal.x, 284.5);
+    Point tipInGlobal = tip.localToGlobal(tip.size.topCenter(Point.origin));
+    // The exact position of the left side depends on the font the test framework
+    // happens to pick, so we don't test that.
+    expect(tipInGlobal.x, 300.0);
     expect(tipInGlobal.y, 20.0);
   });
 
@@ -91,7 +95,7 @@ void main() {
                     top: 0.0,
                     child: new Tooltip(
                       key: key,
-                      message: 'TIP',
+                      message: tooltipText,
                       height: 20.0,
                       padding: const EdgeInsets.all(5.0),
                       verticalOffset: 20.0,
@@ -121,7 +125,7 @@ void main() {
      *                   *
      *********************/
 
-    RenderBox tip = tester.renderObject(find.text('TIP')).parent.parent.parent.parent.parent;
+    RenderBox tip = tester.renderObject(find.text(tooltipText)).parent.parent.parent.parent.parent;
     expect(tip.size.height, equals(20.0)); // 10.0 height + 5.0 padding * 2 (top, bottom)
     expect(tip.localToGlobal(tip.size.topLeft(Point.origin)), equals(const Point(10.0, 20.0)));
   });
@@ -140,7 +144,7 @@ void main() {
                     top: 300.0,
                     child: new Tooltip(
                       key: key,
-                      message: 'TIP',
+                      message: tooltipText,
                       height: 100.0,
                       padding: const EdgeInsets.all(0.0),
                       verticalOffset: 100.0,
@@ -171,7 +175,7 @@ void main() {
      *                   *
      *********************/
 
-    RenderBox tip = tester.renderObject(find.text('TIP')).parent;
+    RenderBox tip = tester.renderObject(find.text(tooltipText)).parent;
     expect(tip.size.height, equals(100.0));
     expect(tip.localToGlobal(tip.size.topLeft(Point.origin)).y, equals(100.0));
     expect(tip.localToGlobal(tip.size.bottomRight(Point.origin)).y, equals(200.0));
@@ -191,7 +195,7 @@ void main() {
                     top: 299.0,
                     child: new Tooltip(
                       key: key,
-                      message: 'TIP',
+                      message: tooltipText,
                       height: 190.0,
                       padding: const EdgeInsets.all(0.0),
                       verticalOffset: 100.0,
@@ -233,7 +237,7 @@ void main() {
      *                   * }- 10.0 margin
      *********************/
 
-    RenderBox tip = tester.renderObject(find.text('TIP')).parent;
+    RenderBox tip = tester.renderObject(find.text(tooltipText)).parent;
     expect(tip.size.height, equals(190.0));
     expect(tip.localToGlobal(tip.size.topLeft(Point.origin)).y, equals(399.0));
     expect(tip.localToGlobal(tip.size.bottomRight(Point.origin)).y, equals(589.0));
@@ -253,7 +257,7 @@ void main() {
                     top: 300.0,
                     child: new Tooltip(
                       key: key,
-                      message: 'TIP',
+                      message: tooltipText,
                       height: 190.0,
                       padding: const EdgeInsets.all(0.0),
                       verticalOffset: 100.0,
@@ -283,7 +287,7 @@ void main() {
      *                   * }- 10.0 margin
      *********************/
 
-    RenderBox tip = tester.renderObject(find.text('TIP')).parent;
+    RenderBox tip = tester.renderObject(find.text(tooltipText)).parent;
     expect(tip.size.height, equals(190.0));
     expect(tip.localToGlobal(tip.size.topLeft(Point.origin)).y, equals(400.0));
     expect(tip.localToGlobal(tip.size.bottomRight(Point.origin)).y, equals(590.0));
@@ -303,7 +307,7 @@ void main() {
                     top: 300.0,
                     child: new Tooltip(
                       key: key,
-                      message: 'TIP',
+                      message: tooltipText,
                       height: 10.0,
                       padding: const EdgeInsets.all(0.0),
                       verticalOffset: 10.0,
@@ -334,7 +338,7 @@ void main() {
      *                   * }-10.0 margin
      *********************/
 
-    RenderBox tip = tester.renderObject(find.text('TIP')).parent;
+    RenderBox tip = tester.renderObject(find.text(tooltipText)).parent;
     expect(tip.size.height, equals(10.0));
     expect(tip.localToGlobal(tip.size.topLeft(Point.origin)).y, equals(310.0));
     expect(tip.localToGlobal(tip.size.bottomRight(Point.origin)).x, equals(790.0));
@@ -355,7 +359,7 @@ void main() {
                     top: 300.0,
                     child: new Tooltip(
                       key: key,
-                      message: 'TIP',
+                      message: tooltipText,
                       height: 10.0,
                       padding: const EdgeInsets.all(0.0),
                       verticalOffset: 10.0,
@@ -386,7 +390,7 @@ void main() {
      *                   * }-10.0 margin
      *********************/
 
-    RenderBox tip = tester.renderObject(find.text('TIP')).parent;
+    RenderBox tip = tester.renderObject(find.text(tooltipText)).parent;
     expect(tip.size.height, equals(10.0));
     expect(tip.localToGlobal(tip.size.topLeft(Point.origin)).y, equals(310.0));
     expect(tip.localToGlobal(tip.size.bottomRight(Point.origin)).x, equals(790.0));
@@ -398,7 +402,7 @@ void main() {
       new MaterialApp(
         home: new Center(
           child: new Tooltip(
-            message: 'TIP',
+            message: tooltipText,
             child: new Container(
               width: 100.0,
               height: 100.0,
@@ -416,17 +420,17 @@ void main() {
     await tester.pump(kLongPressTimeout);
     await tester.pump(const Duration(milliseconds: 10));
     await gesture.up();
-    expect(find.text('TIP'), findsOneWidget);
+    expect(find.text(tooltipText), findsOneWidget);
     await tester.tap(tooltip);
     await tester.pump(const Duration(milliseconds: 10));
     gesture = await tester.startGesture(tester.getCenter(tooltip));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
-    expect(find.text('TIP'), findsNothing);
+    expect(find.text(tooltipText), findsNothing);
     await tester.pump(kLongPressTimeout);
-    expect(find.text('TIP'), findsOneWidget);
+    expect(find.text(tooltipText), findsOneWidget);
     await tester.pump(kLongPressTimeout);
-    expect(find.text('TIP'), findsOneWidget);
+    expect(find.text(tooltipText), findsOneWidget);
     gesture.up();
   });
 
@@ -446,7 +450,7 @@ void main() {
                     top: 300.0,
                     child: new Tooltip(
                       key: key,
-                      message: 'TIP',
+                      message: tooltipText,
                       child: new Container(width: 0.0, height: 0.0)
                     )
                   ),
@@ -458,14 +462,14 @@ void main() {
       )
     );
 
-    expect(semantics, hasSemantics(new TestSemantics(id: 0, label: 'TIP')));
+    expect(semantics, hasSemantics(new TestSemantics(id: 0, label: tooltipText)));
 
     // before using "as dynamic" in your code, see note top of file
     (key.currentState as dynamic).ensureTooltipVisible(); // this triggers a rebuild of the semantics because the tree changes
 
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
-    expect(semantics, hasSemantics(new TestSemantics(id: 0, label: 'TIP')));
+    expect(semantics, hasSemantics(new TestSemantics(id: 0, label: tooltipText)));
 
     semantics.dispose();
   });
