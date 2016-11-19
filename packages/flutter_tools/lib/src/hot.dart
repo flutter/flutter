@@ -18,8 +18,6 @@ import 'base/process.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
 import 'cache.dart';
-import 'commands/build_apk.dart';
-import 'commands/install.dart';
 import 'dart/package_map.dart';
 import 'devfs.dart';
 import 'device.dart';
@@ -199,29 +197,6 @@ class HotRunner extends ResidentRunner {
     if (!_refreshDartDependencies()) {
       // Some kind of source level error or missing file in the Dart code.
       return 1;
-    }
-
-    // TODO(devoncarew): We shouldn't have to do type checks here.
-    if (shouldBuild && device is AndroidDevice) {
-      printTrace('Running build command.');
-
-      await buildApk(
-        device.platform,
-        target: target,
-        buildMode: debuggingOptions.buildMode
-      );
-    }
-
-    // TODO(devoncarew): Move this into the device.startApp() impls.
-    if (_package != null) {
-      printTrace("Stopping app '${_package.name}' on ${device.name}.");
-      await device.stopApp(_package);
-    }
-
-    if (prebuiltMode || device is AndroidDevice) {
-      printTrace('Running install command.');
-      if (!(installApp(device, _package, uninstall: false)))
-        return 1;
     }
 
     Map<String, dynamic> platformArgs = new Map<String, dynamic>();

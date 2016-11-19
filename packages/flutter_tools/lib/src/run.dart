@@ -10,8 +10,6 @@ import 'package:stack_trace/stack_trace.dart';
 
 import 'application_package.dart';
 import 'base/utils.dart';
-import 'commands/build_apk.dart';
-import 'commands/install.dart';
 import 'commands/trace.dart';
 import 'device.dart';
 import 'globals.dart';
@@ -90,30 +88,6 @@ class RunAndStayResident extends ResidentRunner {
     }
 
     Stopwatch startTime = new Stopwatch()..start();
-
-    // TODO(devoncarew): We shouldn't have to do type checks here.
-    if (shouldBuild && device is AndroidDevice) {
-      printTrace('Running build command.');
-
-      await buildApk(
-        device.platform,
-        target: target,
-        buildMode: debuggingOptions.buildMode
-      );
-    }
-
-    // TODO(devoncarew): Move this into the device.startApp() impls.
-    if (_package != null) {
-      printTrace('Stopping app "${_package.name}" on ${device.name}.');
-      await device.stopApp(_package);
-    }
-
-    // TODO(devoncarew): This fails for ios devices - we haven't built yet.
-    if (prebuiltMode || device is AndroidDevice) {
-      printTrace('Running install command.');
-      if (!(installApp(device, _package, uninstall: false)))
-        return 1;
-    }
 
     Map<String, dynamic> platformArgs;
     if (traceStartup != null)
