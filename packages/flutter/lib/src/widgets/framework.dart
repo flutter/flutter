@@ -10,11 +10,11 @@ import 'debug.dart';
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter/foundation.dart';
-import 'package:meta/meta.dart';
 
 export 'dart:ui' show hashValues, hashList;
-export 'package:flutter/rendering.dart' show RenderObject, RenderBox, debugPrint;
 export 'package:flutter/foundation.dart' show FlutterError;
+export 'package:flutter/foundation.dart' show VoidCallback, ValueChanged, ValueGetter, ValueSetter;
+export 'package:flutter/rendering.dart' show RenderObject, RenderBox, debugPrint;
 
 // KEYS
 

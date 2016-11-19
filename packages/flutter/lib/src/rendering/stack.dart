@@ -5,7 +5,7 @@
 import 'dart:math' as math;
 import 'dart:ui' show lerpDouble, hashValues;
 
-import 'package:meta/meta.dart';
+import 'package:flutter/foundation.dart';
 
 import 'box.dart';
 import 'object.dart';

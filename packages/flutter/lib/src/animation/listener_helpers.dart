@@ -4,7 +4,7 @@
 
 import 'dart:ui' show VoidCallback;
 
-import 'package:meta/meta.dart';
+import 'package:flutter/foundation.dart';
 
 import 'animation.dart';
 

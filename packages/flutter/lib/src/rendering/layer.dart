@@ -5,9 +5,9 @@
 import 'dart:ui' as ui show ImageFilter, Picture, SceneBuilder;
 import 'dart:ui' show Offset;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:vector_math/vector_math_64.dart';
-import 'package:meta/meta.dart';
 
 import 'debug.dart';
 

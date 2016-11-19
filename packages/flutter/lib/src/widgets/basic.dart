@@ -4,9 +4,9 @@
 
 import 'dart:ui' as ui show Image, ImageFilter;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:meta/meta.dart';
 
 import 'debug.dart';
 import 'framework.dart';
@@ -14,45 +14,45 @@ import 'framework.dart';
 export 'package:flutter/animation.dart';
 export 'package:flutter/painting.dart';
 export 'package:flutter/rendering.dart' show
-    Axis,
-    BoxConstraints,
-    CrossAxisAlignment,
-    CustomClipper,
-    CustomPainter,
-    FixedColumnCountGridDelegate,
-    FlexFit,
-    FlowDelegate,
-    FlowPaintingContext,
-    FractionalOffsetTween,
-    GridChildPlacement,
-    GridDelegate,
-    GridDelegateWithInOrderChildPlacement,
-    GridSpecification,
-    HitTestBehavior,
-    MainAxisAlignment,
-    MainAxisSize,
-    MaxTileWidthGridDelegate,
-    MultiChildLayoutDelegate,
-    Overflow,
-    PaintingContext,
-    PointerCancelEvent,
-    PointerCancelEventListener,
-    PointerDownEvent,
-    PointerDownEventListener,
-    PointerEvent,
-    PointerMoveEvent,
-    PointerMoveEventListener,
-    PointerUpEvent,
-    PointerUpEventListener,
-    RelativeRect,
-    ShaderCallback,
-    SingleChildLayoutDelegate,
-    TextOverflow,
-    ValueChanged,
-    ValueGetter,
-    ViewportAnchor,
-    ViewportDimensions,
-    ViewportDimensionsChangeCallback;
+  Axis,
+  BoxConstraints,
+  CrossAxisAlignment,
+  CustomClipper,
+  CustomPainter,
+  FixedColumnCountGridDelegate,
+  FlexFit,
+  FlowDelegate,
+  FlowPaintingContext,
+  FractionalOffsetTween,
+  GridChildPlacement,
+  GridDelegate,
+  GridDelegateWithInOrderChildPlacement,
+  GridSpecification,
+  HitTestBehavior,
+  MainAxisAlignment,
+  MainAxisSize,
+  MaxTileWidthGridDelegate,
+  MultiChildLayoutDelegate,
+  Overflow,
+  PaintingContext,
+  PointerCancelEvent,
+  PointerCancelEventListener,
+  PointerDownEvent,
+  PointerDownEventListener,
+  PointerEvent,
+  PointerMoveEvent,
+  PointerMoveEventListener,
+  PointerUpEvent,
+  PointerUpEventListener,
+  RelativeRect,
+  ShaderCallback,
+  SingleChildLayoutDelegate,
+  TextOverflow,
+  ValueChanged,
+  ValueGetter,
+  ViewportAnchor,
+  ViewportDimensions,
+  ViewportDimensionsChangeCallback;
 
 // PAINTING NODES
 

@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
-import 'package:meta/meta.dart';
 
 import 'framework.dart';
 
 export 'package:flutter/rendering.dart' show
-    AutoLayoutRect,
-    AutoLayoutDelegate;
+  AutoLayoutRect,
+  AutoLayoutDelegate;
 
 /// A widget that uses the cassowary constraint solver to automatically size and position children.
 class AutoLayout extends MultiChildRenderObjectWidget {

@@ -2,15 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:meta/meta.dart';
 
 import 'basic_types.dart';
 import 'edge_insets.dart';
 
+export 'package:flutter/services.dart' show ImageConfiguration;
+
 export 'basic_types.dart' show Point, Offset, Size;
 export 'edge_insets.dart' show EdgeInsets;
-export 'package:flutter/services.dart' show ImageConfiguration;
 
 // This group of classes is intended for painting in cartesian coordinates.
 

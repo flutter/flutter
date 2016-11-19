@@ -10,7 +10,6 @@ import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/http.dart' as http;
-import 'package:meta/meta.dart';
 
 import 'asset_bundle.dart';
 import 'image_cache.dart';

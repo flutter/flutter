@@ -5,7 +5,7 @@
 import 'dart:async';
 import 'dart:ui' show Point, Offset;
 
-import 'package:meta/meta.dart';
+import 'package:flutter/foundation.dart';
 
 import 'arena.dart';
 import 'binding.dart';

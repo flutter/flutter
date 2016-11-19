@@ -4,9 +4,9 @@
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart' show RenderEditable, SelectionChangedHandler, RenderEditablePaintOffsetNeededCallback;
 import 'package:flutter/services.dart';
-import 'package:meta/meta.dart';
 
 import 'basic.dart';
 import 'focus.dart';

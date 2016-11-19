@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cassowary.dart' as al; // "auto layout"
-import 'package:meta/meta.dart';
+import 'package:flutter/foundation.dart';
 
 import 'box.dart';
 import 'object.dart';

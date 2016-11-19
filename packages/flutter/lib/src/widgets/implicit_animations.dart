@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:meta/meta.dart';
+import 'package:flutter/foundation.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'basic.dart';
@@ -239,7 +239,7 @@ class AnimatedContainer extends ImplicitlyAnimatedWidget {
     this.width,
     this.height,
     Curve curve: Curves.linear,
-    @required Duration duration
+    @required Duration duration,
   }) : super(key: key, curve: curve, duration: duration) {
     assert(decoration == null || decoration.debugAssertIsValid());
     assert(foregroundDecoration == null || foregroundDecoration.debugAssertIsValid());
@@ -383,7 +383,7 @@ class AnimatedPositioned extends ImplicitlyAnimatedWidget {
     this.width,
     this.height,
     Curve curve: Curves.linear,
-    @required Duration duration
+    @required Duration duration,
   }) : super(key: key, curve: curve, duration: duration) {
     assert(left == null || right == null || width == null);
     assert(top == null || bottom == null || height == null);
@@ -518,7 +518,7 @@ class AnimatedOpacity extends ImplicitlyAnimatedWidget {
     this.child,
     this.opacity,
     Curve curve: Curves.linear,
-    @required Duration duration
+    @required Duration duration,
   }) : super(key: key, curve: curve, duration: duration) {
     assert(opacity != null && opacity >= 0.0 && opacity <= 1.0);
   }
@@ -575,7 +575,7 @@ class AnimatedDefaultTextStyle extends ImplicitlyAnimatedWidget {
     @required this.child,
     @required this.style,
     Curve curve: Curves.linear,
-    @required Duration duration
+    @required Duration duration,
   }) : super(key: key, curve: curve, duration: duration) {
     assert(style != null);
     assert(child != null);

@@ -4,7 +4,7 @@
 
 import 'dart:ui' as ui show window;
 
-import 'package:meta/meta.dart';
+import 'package:flutter/foundation.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'box.dart';
