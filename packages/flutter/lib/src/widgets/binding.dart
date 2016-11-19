@@ -7,11 +7,11 @@ import 'dart:developer' as developer;
 import 'dart:ui' as ui show window;
 import 'dart:ui' show AppLifecycleState, Locale;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
-import 'package:meta/meta.dart';
 
 import 'app.dart';
 import 'framework.dart';

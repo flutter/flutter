@@ -6,7 +6,6 @@ import 'dart:ui' as ui;
 import 'dart:ui' show Rect, SemanticsAction, SemanticsFlags;
 import 'dart:typed_data';
 
-import 'package:meta/meta.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:vector_math/vector_math_64.dart';

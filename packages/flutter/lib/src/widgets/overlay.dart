@@ -5,9 +5,9 @@
 import 'dart:async';
 import 'dart:collection';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:meta/meta.dart';
 
 import 'basic.dart';
 import 'debug.dart';

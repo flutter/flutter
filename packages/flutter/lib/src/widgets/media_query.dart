@@ -4,7 +4,7 @@
 
 import 'dart:ui' as ui;
 
-import 'package:meta/meta.dart';
+import 'package:flutter/foundation.dart';
 
 import 'basic.dart';
 import 'framework.dart';
@@ -107,7 +107,7 @@ class MediaQuery extends InheritedWidget {
   MediaQuery({
     Key key,
     @required this.data,
-    @required Widget child
+    @required Widget child,
   }) : super(key: key, child: child) {
     assert(child != null);
     assert(data != null);

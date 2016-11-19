@@ -9,7 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:meta/meta.dart';
+
 import 'package:vector_math/vector_math_64.dart';
 
 import 'debug.dart';
@@ -18,9 +18,9 @@ import 'node.dart';
 import 'semantics.dart';
 import 'binding.dart';
 
+export 'package:flutter/foundation.dart' show FlutterError, InformationCollector;
 export 'package:flutter/gestures.dart' show HitTestEntry, HitTestResult;
 export 'package:flutter/painting.dart';
-export 'package:flutter/foundation.dart' show FlutterError, InformationCollector;
 
 /// Base class for data associated with a [RenderObject] by its parent.
 ///

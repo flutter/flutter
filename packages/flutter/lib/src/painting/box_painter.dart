@@ -5,8 +5,8 @@
 import 'dart:math' as math;
 import 'dart:ui' as ui show Image, Gradient, lerpDouble;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:meta/meta.dart';
 
 import 'basic_types.dart';
 import 'decoration.dart';

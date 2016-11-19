@@ -5,8 +5,8 @@
 import 'debug.dart';
 import 'framework.dart';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
-import 'package:meta/meta.dart';
 
 /// The signature of the [LayoutBuilder] builder function.
 typedef Widget LayoutWidgetBuilder(BuildContext context, BoxConstraints constraints);

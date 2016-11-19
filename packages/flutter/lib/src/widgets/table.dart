@@ -4,23 +4,23 @@
 
 import 'dart:collection';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
-import 'package:meta/meta.dart';
 
 import 'debug.dart';
 import 'framework.dart';
 import 'image.dart';
 
 export 'package:flutter/rendering.dart' show
-    FixedColumnWidth,
-    FlexColumnWidth,
-    FractionColumnWidth,
-    IntrinsicColumnWidth,
-    MaxColumnWidth,
-    MinColumnWidth,
-    TableBorder,
-    TableCellVerticalAlignment,
-    TableColumnWidth;
+  FixedColumnWidth,
+  FlexColumnWidth,
+  FractionColumnWidth,
+  IntrinsicColumnWidth,
+  MaxColumnWidth,
+  MinColumnWidth,
+  TableBorder,
+  TableCellVerticalAlignment,
+  TableColumnWidth;
 
 /// A horizontal group of cells in a [Table].
 ///

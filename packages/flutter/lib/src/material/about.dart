@@ -5,7 +5,7 @@
 import 'dart:async';
 
 import 'package:flutter/widgets.dart';
-import 'package:meta/meta.dart';
+import 'package:flutter/foundation.dart';
 
 import 'app_bar.dart';
 import 'debug.dart';
