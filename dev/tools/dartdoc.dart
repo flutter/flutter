@@ -23,6 +23,23 @@ Future<Null> main(List<String> args) async {
   if (path.basename(Directory.current.path) == 'tools')
     Directory.current = Directory.current.parent.parent;
 
+  // Generate crossdart.json files for all the packages. If fails - ignore
+  // and proceed
+  for (String package in findPackageNames()) {
+    List<String> args = [
+        "global", "run", "crossdart",
+        "--input", path.join(Directory.current.path, "packages", package),
+        "--output", path.join(Directory.current.path, "packages", package),
+        "--hosted-url", "https://www.crossdart.info",
+        "--url-path-prefix", "p",
+        "--output-format", "json",
+        "--dart-sdk", path.join(Directory.current.path, "bin/cache/dart-sdk")];
+    Process crossdartProcess = await Process.start("pub", args);
+    printStream(crossdartProcess.stdout);
+    printStream(crossdartProcess.stderr);
+    await crossdartProcess.exitCode;
+  }
+
   // Create the pubspec.yaml file.
   StringBuffer buf = new StringBuffer('''
 name: Flutter
@@ -65,6 +82,7 @@ dependencies:
     '--dart-sdk', '../../bin/cache/dart-sdk',
     '--exclude', 'temp_doc',
     '--favicon=favicon.ico',
+    '--add-crossdart',
     '--use-categories'
   ];
 

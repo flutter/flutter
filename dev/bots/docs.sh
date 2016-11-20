@@ -6,6 +6,8 @@ set -e
 # so are we pinned to this old version until that bug is fixed.
 pub global activate dartdoc 0.9.7+1
 
+pub global activate crossdart
+
 # This script generates a unified doc set, and creates
 # a custom index.html, placing everything into dev/docs/doc
 (cd dev/tools; pub get)
