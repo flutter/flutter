@@ -103,7 +103,7 @@ void main() {
 
     tearDownAll(() async {
       if (driver != null)
-        driver.close();
+        await driver.close();
     });
 
     test('all demos', () async {
@@ -138,16 +138,15 @@ void main() {
       // that follows a 'Start Transition' event. The Gallery app adds a
       // 'Start Transition' event when a demo is launched (see GalleryItem).
       TimelineSummary summary = new TimelineSummary.summarize(timeline);
-      summary.writeSummaryToFile('transitions', pretty: true);
+      await summary.writeSummaryToFile('transitions', pretty: true);
       try {
-        saveDurationsHistogram(timeline.json['traceEvents']);
+        await saveDurationsHistogram(timeline.json['traceEvents']);
       } catch(_) {
-        summary.writeTimelineToFile('transitions', pretty: true);
+        await summary.writeTimelineToFile('transitions', pretty: true);
         print('ERROR: failed to extract transition events. Here is the full timeline:\n');
         print(await _fs.file('build/transitions.timeline.json').readAsString());
         rethrow;
       }
-
     }, timeout: new Timeout(new Duration(minutes: 5)));
   });
 }
