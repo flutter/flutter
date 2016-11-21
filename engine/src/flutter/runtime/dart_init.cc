@@ -78,24 +78,6 @@ const char kSnapshotAssetKey[] = "snapshot_blob.bin";
 
 namespace {
 
-static const char* kDartProfilingArgs[] = {
-    // Dart assumes ARM devices are insufficiently powerful and sets the
-    // default profile period to 100Hz. This number is suitable for older
-    // Raspberry Pi devices but quite low for current smartphones.
-    "--profile_period=1000",
-    // Disable Dart's built in profiler when building a debug build. This
-    // works around a race condition that would sometimes stop a crash's
-    // stack trace from being printed on Android.
-#ifndef NDEBUG
-    "--no-profiler",
-#endif
-#if (WTF_OS_IOS || WTF_OS_MACOSX)
-    // On platforms where LLDB is the primary debugger, SIGPROF signals
-    // overwhelm LLDB.
-    "--no-profiler",
-#endif
-};
-
 static const char* kDartMirrorsArgs[] = {
     "--enable_mirrors=false",
 };
@@ -555,6 +537,30 @@ static void EmbedderTimelineStopRecording() {
     g_tracing_callbacks->stop_tracing_callback();
 }
 
+static std::vector<const char*> ProfilingFlags(bool enable_profiling) {
+// Disable Dart's built in profiler when building a debug build. This
+// works around a race condition that would sometimes stop a crash's
+// stack trace from being printed on Android.
+#ifndef NDEBUG
+  enable_profiling = false;
+#endif
+
+  // We want to disable profiling by default because it overwhelms LLDB. But
+  // the VM enables the same by default. In either case, we have some profiling
+  // flags.
+  if (enable_profiling) {
+    return {
+        // Dart assumes ARM devices are insufficiently powerful and sets the
+        // default profile period to 100Hz. This number is suitable for older
+        // Raspberry Pi devices but quite low for current smartphones.
+        "--profile_period=1000",
+        // This is the default. But just be explicit.
+        "--profiler"};
+  } else {
+    return {"--no-profiler"};
+  }
+}
+
 void SetServiceIsolateHook(ServiceIsolateHook hook) {
   FTL_CHECK(!g_service_isolate_initialized);
   g_service_isolate_hook = hook;
@@ -596,7 +602,11 @@ void InitDartVM() {
   // it does not recognize, it exits immediately.
   args.push_back("--ignore-unrecognized-flags");
 
-  PushBackAll(&args, kDartProfilingArgs, arraysize(kDartProfilingArgs));
+  for (const auto& profiler_flag :
+       ProfilingFlags(settings.enable_dart_profiling)) {
+    args.push_back(profiler_flag);
+  }
+
   PushBackAll(&args, kDartMirrorsArgs, arraysize(kDartMirrorsArgs));
   PushBackAll(&args, kDartBackgroundCompilationArgs,
               arraysize(kDartBackgroundCompilationArgs));
