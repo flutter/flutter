@@ -163,10 +163,21 @@ abstract class ResidentRunner {
     return false;
   }
 
+  bool _processingTerminalRequest = false;
+
   Future<Null> processTerminalInput(String command) async {
-    bool handled = await _commonTerminalInputHandler(command);
-    if (!handled)
-      await handleTerminalCommand(command);
+    if (_processingTerminalRequest) {
+      printTrace('Ignoring terminal input: "$command" because we are busy.');
+      return;
+    }
+    _processingTerminalRequest = true;
+    try {
+      bool handled = await _commonTerminalInputHandler(command);
+      if (!handled)
+        await handleTerminalCommand(command);
+    } finally {
+      _processingTerminalRequest = false;
+    }
   }
 
   void appFinished() {
