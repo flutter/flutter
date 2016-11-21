@@ -4,15 +4,17 @@
 
 import("//flutter/build/dart/rules.gni")
 
-copy("copy_sky_services_license") {
-  sources = [
-    "//AUTHORS",
-    "//LICENSE",
-  ]
+if (!is_fuchsia) {
+  copy("copy_sky_services_license") {
+    sources = [
+      "//AUTHORS",
+      "//LICENSE",
+    ]
 
-  outputs = [
-    "$root_gen_dir/dart-pkg/sky_services/{{source_file_part}}",
-  ]
+    outputs = [
+      "$root_gen_dir/dart-pkg/sky_services/{{source_file_part}}",
+    ]
+  }
 }
 
 dart_pkg("sky_services") {
@@ -21,7 +23,9 @@ dart_pkg("sky_services") {
     "pubspec.yaml",
   ]
 
-  deps = [
-    ":copy_sky_services_license",
-  ]
+  if (!is_fuchsia) {
+    deps = [
+      ":copy_sky_services_license",
+    ]
+  }
 }

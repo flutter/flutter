@@ -8,14 +8,16 @@ import("//flutter/lib/jni/dart_jni.gni")
 import("//flutter/lib/ui/dart_ui.gni")
 import("//flutter/sky/engine/core/core.gni")
 
-copy("copy_sky_engine_authors") {
-  sources = [
-    "//AUTHORS",
-  ]
+if (!is_fuchsia) {
+  copy("copy_sky_engine_authors") {
+    sources = [
+      "//AUTHORS",
+    ]
 
-  outputs = [
-    "$root_gen_dir/dart-pkg/sky_engine/{{source_file_part}}",
-  ]
+    outputs = [
+      "$root_gen_dir/dart-pkg/sky_engine/{{source_file_part}}",
+    ]
+  }
 }
 
 dart_sdk_lib_copy("async") {
@@ -106,8 +108,11 @@ dart_pkg("sky_engine") {
     ":copy_dart_jni",
     ":copy_dart_sdk",
     ":copy_dart_ui",
-    ":copy_sky_engine_authors",
   ]
+
+  if (!is_fuchsia) {
+    deps += [ ":copy_sky_engine_authors" ]
+  }
 
   service_isolate_dir = "//dart/runtime/bin/vmservice"
   sdk_ext_directory = "$root_gen_dir/sky/bindings"
@@ -116,4 +121,14 @@ dart_pkg("sky_engine") {
     "$service_isolate_dir/loader.dart",
     "$service_isolate_dir/server.dart",
   ]
+}
+
+if (is_fuchsia) {
+  import("//build/dart/dart_package.gni")
+
+  dart_package("sky_engine_dart") {
+    package_name = "sky_engine"
+
+    source_dir = rebase_path("$root_gen_dir/dart-pkg/sky_engine/lib")
+  }
 }

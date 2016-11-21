@@ -10,8 +10,11 @@ group("sky") {
   deps = [
     "//flutter/sky/engine/wtf:unittests($host_toolchain)",
     "//flutter/sky/packages",
-    "//flutter/shell",
   ]
+
+  if (!is_fuchsia) {
+    deps += [ "//flutter/shell" ]
+  }
 
   if (dart_host_toolchain == host_toolchain) {
     deps += [ "//flutter/snapshotter($dart_host_toolchain)" ]
