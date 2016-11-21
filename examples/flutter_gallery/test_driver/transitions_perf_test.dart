@@ -31,7 +31,7 @@ final List<String> demoTitles = <String>[
   'Buttons',
   'Cards',
   'Chips',
-  'Date picker',
+  'Date and time pickers',
   'Dialog',
   'Expand/collapse list control',
   'Expansion panels',
@@ -52,7 +52,6 @@ final List<String> demoTitles = <String>[
   'Snackbar',
   'Tabs',
   'Text fields',
-  'Time picker',
   'Tooltips',
   // Style
   'Colors',
