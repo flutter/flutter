@@ -80,7 +80,7 @@ void main() {
     await tester.tap(find.byType(Scrollable));
     await tester.pump(const Duration(milliseconds: 50));
     expect(log, equals(<String>['tap 18', 'tap 31']));
-  });
+  }, skip: true); // Skipped due to https://github.com/flutter/flutter/issues/6961
 
   testWidgets('fling and wait and tap', (WidgetTester tester) async {
     List<String> log = <String>[];
@@ -102,5 +102,5 @@ void main() {
     await tester.tap(find.byType(Scrollable));
     await tester.pump(const Duration(milliseconds: 50));
     expect(log, equals(<String>['tap 18', 'tap 43']));
-  });
+  }, skip: true); // Skipped due to https://github.com/flutter/flutter/issues/6961
 }
