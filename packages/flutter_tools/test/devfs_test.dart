@@ -48,7 +48,7 @@ void main() {
       expect(devFSOperations.contains('writeFile test foo/bar.txt'), isTrue);
       // Need to delay between when we first write to a file and when
       // we modify it.
-      await new Future.delayed(new Duration(seconds: 1));
+      await new Future<Null>.delayed(new Duration(seconds: 1));
     });
     testUsingContext('modify existing file on local file system', () async {
       File file = new File(path.join(basePath, filePath));
