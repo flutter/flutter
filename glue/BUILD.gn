@@ -12,7 +12,7 @@ source_set("glue") {
     "//lib/ftl",
   ]
 
-  if (is_fuchsia) {
+  if (is_fuchsia || is_fuchsia_host) {
     sources += [
       "stack_trace_fuchsia.cc",
     ]
