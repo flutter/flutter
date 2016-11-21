@@ -51,7 +51,8 @@ class _DateTimePicker extends StatelessWidget {
     this.selectedDate,
     this.selectedTime,
     this.selectDate,
-    this.selectTime }) : super(key: key);
+    this.selectTime
+  }) : super(key: key);
 
   final String labelText;
   final DateTime selectedDate;
