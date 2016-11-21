@@ -18,6 +18,7 @@ const char kCacheDirPath[] = "cache-dir-path";
 const char kDartFlags[] = "dart-flags";
 const char kDeviceObservatoryPort[] = "observatory-port";
 const char kDisableObservatory[] = "disable-observatory";
+const char kEnableDartProfiling[] = "enable-dart-profiling";
 const char kEndlessTraceBuffer[] = "endless-trace-buffer";
 const char kFLX[] = "flx";
 const char kHelp[] = "help";

@@ -19,6 +19,7 @@ extern const char kCacheDirPath[];
 extern const char kDartFlags[];
 extern const char kDeviceObservatoryPort[];
 extern const char kDisableObservatory[];
+extern const char kEnableDartProfiling[];
 extern const char kEndlessTraceBuffer[];
 extern const char kFLX[];
 extern const char kHelp[];
