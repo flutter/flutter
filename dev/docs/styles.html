@@ -17,8 +17,12 @@
     -webkit-font-smoothing: auto;
   }
 
-  h1, h2, h3, h4, h5, h6 {
+  h1, h2 {
     font-weight: 300;
+  }
+
+  h3, h4, h5, h6 {
+    font-weight: 400;
   }
 
   h1 {
@@ -50,16 +54,22 @@
     font-size: inherit;
   }
 
+  .sidebar-offcanvas-left {
+    background-color: #fdfdfd;
+  }
+
+  @media screen and (max-width: 768px) {
+    .sidebar-offcanvas-left.active {
+      padding: 10px;
+    }
+  }
+
   .sidebar-offcanvas-left ol {
     padding: 0 16px 16px 0;
   }
 
   .sidebar h5 {
     display: none;
-  }
-
-  .sidebar-offcanvas-left {
-    background-color: inherit;
   }
 
   .sidebar-offcanvas-left h5 {
@@ -87,6 +97,10 @@
 
   code {
     background-color: inherit;
+    font-size: 1em; /* browsers default to smaller font for code */
+    font-weight: 300;
+    padding-left: 0; /* otherwise we get ragged left margins */
+    padding-right: 0;
   }
 
   dl.dl-horizontal dt {

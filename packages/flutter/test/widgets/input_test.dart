@@ -50,6 +50,12 @@ void main() {
     mockTextInput.enterText(text);
   }
 
+  Future<Null> showKeyboard(WidgetTester tester) async {
+    RawInputState editable = tester.state(find.byType(RawInput).first);
+    editable.requestKeyboard();
+    await tester.pump();
+  }
+
   // Returns the first RenderEditable.
   RenderEditable findRenderEditable(WidgetTester tester) {
     RenderObject root = tester.renderObject(find.byType(RawInput));
@@ -94,6 +100,7 @@ void main() {
     }
 
     await tester.pumpWidget(builder());
+    await showKeyboard(tester);
 
     RenderBox findInputBox() => tester.renderObject(find.byKey(inputKey));
 
@@ -134,6 +141,7 @@ void main() {
     }
 
     await tester.pumpWidget(builder());
+    await showKeyboard(tester);
 
     RawInputState editableText = tester.state(find.byType(RawInput));
 
@@ -179,6 +187,7 @@ void main() {
     }
 
     await tester.pumpWidget(builder());
+    await showKeyboard(tester);
 
     const String testValue = 'ABC';
     updateEditingState(new TextEditingState(
@@ -215,6 +224,7 @@ void main() {
     }
 
     await tester.pumpWidget(builder());
+    await showKeyboard(tester);
 
     String testValue = 'abc def ghi';
     enterText(testValue);
@@ -262,6 +272,7 @@ void main() {
     }
 
     await tester.pumpWidget(builder());
+    await showKeyboard(tester);
 
     String testValue = 'abc def ghi';
     enterText(testValue);
@@ -337,6 +348,7 @@ void main() {
     }
 
     await tester.pumpWidget(builder());
+    await showKeyboard(tester);
 
     String testValue = 'abc def ghi';
     enterText(testValue);
@@ -402,6 +414,7 @@ void main() {
     }
 
     await tester.pumpWidget(builder());
+    await showKeyboard(tester);
 
     String testValue = 'abc def ghi';
     enterText(testValue);
@@ -452,6 +465,7 @@ void main() {
     }
 
     await tester.pumpWidget(builder(3));
+    await showKeyboard(tester);
 
     RenderBox findInputBox() => tester.renderObject(find.byKey(inputKey));
 
@@ -514,6 +528,7 @@ void main() {
     }
 
     await tester.pumpWidget(builder());
+    await showKeyboard(tester);
 
     String testValue = kThreeLines;
     String cutValue = 'First line of stuff keeps going until abcdef ghijk. ';
@@ -605,6 +620,7 @@ void main() {
     }
 
     await tester.pumpWidget(builder());
+    await showKeyboard(tester);
 
     enterText(kFourLines);
     await tester.idle();
@@ -672,5 +688,69 @@ void main() {
     expect(newFirstPos.y, firstPos.y);
     expect(inputBox.hitTest(new HitTestResult(), position: inputBox.globalToLocal(newFirstPos)), isTrue);
     expect(inputBox.hitTest(new HitTestResult(), position: inputBox.globalToLocal(newFourthPos)), isFalse);
+  });
+
+  testWidgets('InputField smoke test', (WidgetTester tester) async {
+    InputValue inputValue = InputValue.empty;
+
+    Widget builder() {
+      return new Center(
+        child: new Material(
+          child: new InputField(
+            value: inputValue,
+            hintText: 'Placeholder',
+            onChanged: (InputValue value) { inputValue = value; }
+          )
+        )
+      );
+    }
+
+    await tester.pumpWidget(builder());
+    await showKeyboard(tester);
+
+    Future<Null> checkText(String testValue) async {
+      enterText(testValue);
+      await tester.idle();
+
+      // Check that the onChanged event handler fired.
+      expect(inputValue.text, equals(testValue));
+
+      return await tester.pumpWidget(builder());
+    }
+
+    checkText('Hello World');
+  });
+
+  testWidgets('InputField with global key', (WidgetTester tester) async {
+    GlobalKey inputFieldKey = new GlobalKey(debugLabel: 'inputFieldKey');
+    InputValue inputValue = InputValue.empty;
+
+    Widget builder() {
+      return new Center(
+        child: new Material(
+          child: new InputField(
+            key: inputFieldKey,
+            value: inputValue,
+            hintText: 'Placeholder',
+            onChanged: (InputValue value) { inputValue = value; }
+          )
+        )
+      );
+    }
+
+    await tester.pumpWidget(builder());
+    await showKeyboard(tester);
+
+    Future<Null> checkText(String testValue) async {
+      enterText(testValue);
+      await tester.idle();
+
+      // Check that the onChanged event handler fired.
+      expect(inputValue.text, equals(testValue));
+
+      return await tester.pumpWidget(builder());
+    }
+
+    checkText('Hello World');
   });
 }

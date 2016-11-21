@@ -51,5 +51,10 @@ export 'src/rendering/tweens.dart';
 export 'src/rendering/view.dart';
 export 'src/rendering/viewport.dart';
 
-export 'package:flutter/foundation.dart';
+export 'package:flutter/foundation.dart' show
+  VoidCallback,
+  ValueChanged,
+  ValueGetter,
+  ValueSetter;
+
 export 'package:vector_math/vector_math_64.dart' show Matrix4;

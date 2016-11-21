@@ -79,11 +79,11 @@ class ColorSwatchTabView extends StatelessWidget {
   }
 
   final ColorSwatch swatch;
-  final TextStyle blackTextStyle = Typography.black.body1;
-  final TextStyle whiteTextStyle = Typography.white.body1;
-
   @override
   Widget build(BuildContext context) {
+    final TextTheme textTheme = Theme.of(context).textTheme;
+    final TextStyle whiteTextStyle = textTheme.body1.copyWith(color: Colors.white);
+    final TextStyle blackTextStyle = textTheme.body1.copyWith(color: Colors.black);
     List<Widget> colorItems =  swatch.colors.keys.map((int index) {
       return new DefaultTextStyle(
         style: index > swatch.threshold ? whiteTextStyle : blackTextStyle,

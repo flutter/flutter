@@ -6,31 +6,22 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:path/path.dart' as path;
-
 import '../android/android_sdk.dart';
 import '../application_package.dart';
 import '../base/os.dart';
+import '../base/logger.dart';
 import '../base/process.dart';
 import '../build_info.dart';
-import '../dart/package_map.dart';
+import '../commands/build_apk.dart';
 import '../device.dart';
-import '../flx.dart' as flx;
 import '../globals.dart';
-import '../toolchain.dart';
-import '../vmservice.dart';
 import '../protocol_discovery.dart';
+
 import 'adb.dart';
 import 'android.dart';
 import 'android_sdk.dart';
 
 const String _defaultAdbPath = 'adb';
-
-// Path where the FLX bundle will be copied on the device.
-const String _deviceBundlePath = '/data/local/tmp/dev.flx';
-
-// Path where the snapshot will be copied on the device.
-const String _deviceSnapshotPath = '/data/local/tmp/dev_snapshot.bin';
 
 class AndroidDevices extends PollingDeviceDiscovery {
   AndroidDevices() : super('AndroidDevices');
@@ -114,6 +105,13 @@ class AndroidDevice extends Device {
 
     return _platform;
   }
+
+  @override
+  String get sdkNameAndVersion => 'Android $_sdkVersion (API $_apiVersion)';
+
+  String get _sdkVersion => _getProperty('ro.build.version.release');
+
+  String get _apiVersion => _getProperty('ro.build.version.sdk');
 
   _AdbLogReader _logReader;
   _AndroidDevicePortForwarder _portForwarder;
@@ -231,7 +229,9 @@ class AndroidDevice extends Device {
     if (!_checkForSupportedAdbVersion() || !_checkForSupportedAndroidVersion())
       return false;
 
+    Status status = logger.startProgress('Installing ${apk.apkPath}...');
     String installOut = runCheckedSync(adbCommandForDevice(<String>['install', '-r', apk.apkPath]));
+    status.stop();
     RegExp failureExp = new RegExp(r'^Failure.*$', multiLine: true);
     String failure = failureExp.stringMatch(installOut);
     if (failure != null) {
@@ -259,128 +259,16 @@ class AndroidDevice extends Device {
     return true;
   }
 
-  Future<Null> _forwardPort(String service, int devicePort, int port) async {
+  Future<int> _forwardPort(String service, int devicePort, int port) async {
     try {
       // Set up port forwarding for observatory.
       port = await portForwarder.forward(devicePort, hostPort: port);
-      printStatus('$service listening on http://127.0.0.1:$port');
+      printTrace('$service listening on http://127.0.0.1:$port');
+      return port;
     } catch (e) {
       printError('Unable to forward port $port: $e');
     }
-  }
-
-  Future<LaunchResult> startBundle(AndroidApk apk, String bundlePath, {
-    bool traceStartup: false,
-    String route,
-    DebuggingOptions options
-  }) async {
-    printTrace('$this startBundle');
-
-    if (bundlePath != null) {
-      if (!FileSystemEntity.isFileSync(bundlePath)) {
-        printError('Cannot find $bundlePath');
-        return new LaunchResult.failed();
-      }
-
-      runCheckedSync(
-          adbCommandForDevice(<String>['push', bundlePath, _deviceBundlePath]));
-    }
-
-    ProtocolDiscovery observatoryDiscovery;
-    ProtocolDiscovery diagnosticDiscovery;
-
-    if (options.debuggingEnabled) {
-      observatoryDiscovery = new ProtocolDiscovery(logReader, ProtocolDiscovery.kObservatoryService);
-      diagnosticDiscovery = new ProtocolDiscovery(logReader, ProtocolDiscovery.kDiagnosticService);
-    }
-
-    List<String> cmd;
-
-    if (bundlePath != null) {
-      // Specify in the RUN intent the path to the local bundle pushed.
-      cmd = adbCommandForDevice(<String>[
-        'shell', 'am', 'start',
-        '-a', 'android.intent.action.RUN',
-        '-d', _deviceBundlePath,
-        '-f', '0x20000000',  // FLAG_ACTIVITY_SINGLE_TOP
-        '--ez', 'enable-background-compilation', 'true',
-      ]);
-    } else {
-      cmd = adbCommandForDevice(<String>[
-        'shell', 'am', 'start',
-        '-a', 'android.intent.action.RUN',
-        '-f', '0x20000000',  // FLAG_ACTIVITY_SINGLE_TOP
-        '--ez', 'enable-background-compilation', 'true',
-      ]);
-    }
-
-    if (traceStartup)
-      cmd.addAll(<String>['--ez', 'trace-startup', 'true']);
-    if (route != null)
-      cmd.addAll(<String>['--es', 'route', route]);
-    if (options.debuggingEnabled) {
-      if (options.buildMode == BuildMode.debug)
-        cmd.addAll(<String>['--ez', 'enable-checked-mode', 'true']);
-      if (options.startPaused)
-        cmd.addAll(<String>['--ez', 'start-paused', 'true']);
-    }
-    cmd.add(apk.launchActivity);
-    String result = runCheckedSync(cmd);
-    // This invocation returns 0 even when it fails.
-    if (result.contains('Error: ')) {
-      printError(result.trim());
-      return new LaunchResult.failed();
-    }
-
-    if (!options.debuggingEnabled) {
-      return new LaunchResult.succeeded();
-    } else {
-      // Wait for the service protocol port here. This will complete once the
-      // device has printed "Observatory is listening on...".
-      printTrace('Waiting for observatory port to be available...');
-
-      try {
-        int observatoryDevicePort, diagnosticDevicePort;
-
-        if (options.buildMode == BuildMode.debug) {
-          Future<List<int>> scrapeServicePorts = Future.wait(
-            <Future<int>>[observatoryDiscovery.nextPort(), diagnosticDiscovery.nextPort()]
-          );
-          List<int> devicePorts = await scrapeServicePorts.timeout(new Duration(seconds: 20));
-          observatoryDevicePort = devicePorts[0];
-          diagnosticDevicePort = devicePorts[1];
-        } else {
-          observatoryDevicePort = await observatoryDiscovery.nextPort().timeout(new Duration(seconds: 20));
-        }
-
-        printTrace('observatory port = $observatoryDevicePort');
-        int observatoryLocalPort = await options.findBestObservatoryPort();
-        // TODO(devoncarew): Remember the forwarding information (so we can later remove the
-        // port forwarding).
-        await _forwardPort(ProtocolDiscovery.kObservatoryService, observatoryDevicePort, observatoryLocalPort);
-
-        int diagnosticLocalPort;
-        if (diagnosticDevicePort != null) {
-          printTrace('diagnostic port = $diagnosticDevicePort');
-          diagnosticLocalPort = await options.findBestDiagnosticPort();
-          await _forwardPort(ProtocolDiscovery.kDiagnosticService, diagnosticDevicePort, diagnosticLocalPort);
-        }
-
-        return new LaunchResult.succeeded(
-          observatoryPort: observatoryLocalPort,
-          diagnosticPort: diagnosticLocalPort
-        );
-      } catch (error) {
-        if (error is TimeoutException)
-          printError('Timed out while waiting for a debug connection.');
-        else
-          printError('Error waiting for a debug connection: $error');
-        return new LaunchResult.failed();
-      } finally {
-        observatoryDiscovery.cancel();
-        diagnosticDiscovery.cancel();
-      }
-    }
+    return null;
   }
 
   @override
@@ -396,99 +284,122 @@ class AndroidDevice extends Device {
     if (!_checkForSupportedAdbVersion() || !_checkForSupportedAndroidVersion())
       return new LaunchResult.failed();
 
-    String localBundlePath;
+    printTrace("Stopping app '${package.name}' on $name.");
+    await stopApp(package);
 
     if (!prebuiltApplication) {
-      localBundlePath = await flx.buildFlx(
-        mainPath: mainPath,
-        precompiledSnapshot: isAotBuildMode(debuggingOptions.buildMode),
-        includeRobotoFonts: false
+      printTrace('Building APK');
+      await buildApk(platform,
+          target: mainPath,
+          buildMode: debuggingOptions.buildMode
       );
-      if (localBundlePath == null)
-        return new LaunchResult.failed();
     }
 
-    printTrace('Starting bundle for $this.');
+    if (isAppInstalled(package)) {
+      printStatus('Uninstalling old version...');
+      if (!uninstallApp(package))
+        printError('Warning: uninstalling old version failed');
+    }
 
-    return startBundle(
-      package,
-      localBundlePath,
-      traceStartup: platformArgs['trace-startup'] ?? false,
-      route: route,
-      options: debuggingOptions
-    );
+    printTrace('Installing APK.');
+    if (!installApp(package)) {
+      printTrace('Error: Failed to install APK.');
+      return new LaunchResult.failed();
+    }
+
+    final bool traceStartup = platformArgs['trace-startup'] ?? false;
+    final AndroidApk apk = package;
+    printTrace('$this startApp');
+
+    ProtocolDiscovery observatoryDiscovery;
+    ProtocolDiscovery diagnosticDiscovery;
+
+    DeviceLogReader logReader = getLogReader();
+    if (debuggingOptions.debuggingEnabled) {
+      observatoryDiscovery = new ProtocolDiscovery(logReader, ProtocolDiscovery.kObservatoryService);
+      diagnosticDiscovery = new ProtocolDiscovery(logReader, ProtocolDiscovery.kDiagnosticService);
+    }
+
+    List<String> cmd;
+
+    cmd = adbCommandForDevice(<String>[
+      'shell', 'am', 'start',
+      '-a', 'android.intent.action.RUN',
+      '-f', '0x20000000',  // FLAG_ACTIVITY_SINGLE_TOP
+      '--ez', 'enable-background-compilation', 'true',
+    ]);
+
+    if (traceStartup)
+      cmd.addAll(<String>['--ez', 'trace-startup', 'true']);
+    if (route != null)
+      cmd.addAll(<String>['--es', 'route', route]);
+    if (debuggingOptions.debuggingEnabled) {
+      if (debuggingOptions.buildMode == BuildMode.debug)
+        cmd.addAll(<String>['--ez', 'enable-checked-mode', 'true']);
+      if (debuggingOptions.startPaused)
+        cmd.addAll(<String>['--ez', 'start-paused', 'true']);
+    }
+    cmd.add(apk.launchActivity);
+    String result = runCheckedSync(cmd);
+    // This invocation returns 0 even when it fails.
+    if (result.contains('Error: ')) {
+      printError(result.trim());
+      return new LaunchResult.failed();
+    }
+
+    if (!debuggingOptions.debuggingEnabled) {
+      return new LaunchResult.succeeded();
+    } else {
+      // Wait for the service protocol port here. This will complete once the
+      // device has printed "Observatory is listening on...".
+      printTrace('Waiting for observatory port to be available...');
+
+      try {
+        int observatoryDevicePort, diagnosticDevicePort;
+
+        if (debuggingOptions.buildMode == BuildMode.debug) {
+          Future<List<int>> scrapeServicePorts = Future.wait(
+              <Future<int>>[observatoryDiscovery.nextPort(), diagnosticDiscovery.nextPort()]
+          );
+          List<int> devicePorts = await scrapeServicePorts.timeout(new Duration(seconds: 20));
+          observatoryDevicePort = devicePorts[0];
+          diagnosticDevicePort = devicePorts[1];
+        } else {
+          observatoryDevicePort = await observatoryDiscovery.nextPort().timeout(new Duration(seconds: 20));
+        }
+
+        printTrace('observatory port on device: $observatoryDevicePort');
+        int observatoryLocalPort = await debuggingOptions.findBestObservatoryPort();
+        // TODO(devoncarew): Remember the forwarding information (so we can later remove the
+        // port forwarding).
+        observatoryLocalPort = await _forwardPort(ProtocolDiscovery.kObservatoryService, observatoryDevicePort, observatoryLocalPort);
+
+        int diagnosticLocalPort;
+        if (diagnosticDevicePort != null) {
+          printTrace('diagnostic port on device: $diagnosticDevicePort');
+          diagnosticLocalPort = await debuggingOptions.findBestDiagnosticPort();
+          diagnosticLocalPort = await _forwardPort(ProtocolDiscovery.kDiagnosticService, diagnosticDevicePort, diagnosticLocalPort);
+        }
+
+        return new LaunchResult.succeeded(
+            observatoryPort: observatoryLocalPort,
+            diagnosticPort: diagnosticLocalPort
+        );
+      } catch (error) {
+        if (error is TimeoutException)
+          printError('Timed out while waiting for a debug connection.');
+        else
+          printError('Error waiting for a debug connection: $error');
+        return new LaunchResult.failed();
+      } finally {
+        observatoryDiscovery.cancel();
+        diagnosticDiscovery.cancel();
+      }
+    }
   }
 
   @override
   bool get supportsHotMode => true;
-
-  @override
-  Future<bool> runFromFile(ApplicationPackage package,
-                           String scriptUri,
-                           String packagesUri) async {
-    AndroidApk apk = package;
-    List<String> cmd = adbCommandForDevice(<String>[
-      'shell', 'am', 'start',
-      '-a', 'android.intent.action.RUN',
-      '-d', _deviceBundlePath,
-      '-f', '0x20000000',  // FLAG_ACTIVITY_SINGLE_TOP
-    ]);
-    cmd.addAll(<String>['--es', 'file', scriptUri]);
-    cmd.addAll(<String>['--es', 'packages', packagesUri]);
-    cmd.add(apk.launchActivity);
-    String result = runCheckedSync(cmd);
-    if (result.contains('Error: ')) {
-      printError(result.trim());
-      return false;
-    }
-    return true;
-  }
-
-  @override
-  bool get supportsRestart => true;
-
-  @override
-  Future<bool> restartApp(
-    ApplicationPackage package,
-    LaunchResult result, {
-    String mainPath,
-    VMService observatory,
-    bool prebuiltApplication: false
-  }) async {
-    Directory tempDir = await Directory.systemTemp.createTemp('flutter_tools');
-
-    if (prebuiltApplication) {
-      return false;
-    }
-
-    try {
-      String snapshotPath = path.join(tempDir.path, 'snapshot_blob.bin');
-      int result = await flx.createSnapshot(
-        snapshotterPath: tools.getHostToolPath(HostTool.SkySnapshot),
-        mainPath: mainPath,
-        snapshotPath: snapshotPath,
-        packages: path.absolute(PackageMap.globalPackagesPath),
-     );
-
-      if (result != 0) {
-        printError('Failed to run the Flutter compiler; exit code: $result');
-        return false;
-      }
-
-      AndroidApk apk = package;
-      String androidActivity = apk.launchActivity;
-      bool success = await refreshSnapshot(androidActivity, snapshotPath);
-
-      if (!success) {
-        printError('Error refreshing snapshot on $this.');
-        return false;
-      }
-
-      return true;
-    } finally {
-      tempDir.deleteSync(recursive: true);
-    }
-  }
 
   @override
   Future<bool> stopApp(ApplicationPackage app) {
@@ -502,9 +413,9 @@ class AndroidDevice extends Device {
   }
 
   @override
-  DeviceLogReader get logReader {
-    if (_logReader == null)
-      _logReader = new _AdbLogReader(this);
+  DeviceLogReader getLogReader({ApplicationPackage app}) {
+    // The Android log reader isn't app-specific.
+    _logReader ??= new _AdbLogReader(this);
     return _logReader;
   }
 
@@ -516,6 +427,8 @@ class AndroidDevice extends Device {
     return _portForwarder;
   }
 
+  static RegExp _timeRegExp = new RegExp(r'^\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3}', multiLine: true);
+
   /// Return the most recent timestamp in the Android log or `null` if there is
   /// no available timestamp. The format can be passed to logcat's -T option.
   String get lastLogcatTimestamp {
@@ -523,51 +436,12 @@ class AndroidDevice extends Device {
       'logcat', '-v', 'time', '-t', '1'
     ]));
 
-    RegExp timeRegExp = new RegExp(r'^\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3}', multiLine: true);
-    Match timeMatch = timeRegExp.firstMatch(output);
+    Match timeMatch = _timeRegExp.firstMatch(output);
     return timeMatch?.group(0);
   }
 
   @override
   bool isSupported() => true;
-
-  Future<bool> refreshSnapshot(String activity, String snapshotPath) async {
-    if (!FileSystemEntity.isFileSync(snapshotPath)) {
-      printError('Cannot find $snapshotPath');
-      return false;
-    }
-
-    RunResult result = await runAsync(
-      adbCommandForDevice(<String>['push', snapshotPath, _deviceSnapshotPath])
-    );
-    if (result.exitCode != 0) {
-      printStatus(result.toString());
-      return false;
-    }
-
-    List<String> cmd = adbCommandForDevice(<String>[
-      'shell', 'am', 'start',
-      '-a', 'android.intent.action.RUN',
-      '-d', _deviceBundlePath,
-      '-f', '0x20000000',  // FLAG_ACTIVITY_SINGLE_TOP
-      '--es', 'snapshot', _deviceSnapshotPath,
-      activity,
-    ]);
-    result = await runAsync(cmd);
-    if (result.exitCode != 0) {
-      printStatus(result.toString());
-      return false;
-    }
-
-    final RegExp errorRegExp = new RegExp(r'^Error: .*$', multiLine: true);
-    Match errorMatch = errorRegExp.firstMatch(result.processResult.stdout);
-    if (errorMatch != null) {
-      printError(errorMatch.group(0));
-      return false;
-    }
-
-    return true;
-  }
 
   @override
   bool get supportsScreenshot => true;
@@ -587,7 +461,7 @@ class AndroidDevice extends Device {
   Future<List<DiscoveredApp>> discoverApps() {
     RegExp discoverExp = new RegExp(r'DISCOVER: (.*)');
     List<DiscoveredApp> result = <DiscoveredApp>[];
-    StreamSubscription<String> logs = logReader.logLines.listen((String line) {
+    StreamSubscription<String> logs = getLogReader().logLines.listen((String line) {
       Match match = discoverExp.firstMatch(line);
       if (match != null) {
         Map<String, dynamic> app = JSON.decode(match.group(1));
@@ -622,18 +496,24 @@ final RegExp _kDeviceRegex = new RegExp(r'^(\S+)\s+(\S+)(.*)');
 /// [mockAdbOutput] is public for testing.
 List<AndroidDevice> getAdbDevices({ String mockAdbOutput }) {
   List<AndroidDevice> devices = <AndroidDevice>[];
-  List<String> output;
+  String text;
 
   if (mockAdbOutput == null) {
     String adbPath = getAdbPath(androidSdk);
     if (adbPath == null)
       return <AndroidDevice>[];
-    output = runSync(<String>[adbPath, 'devices', '-l']).trim().split('\n');
+    text = runSync(<String>[adbPath, 'devices', '-l']);
   } else {
-    output = mockAdbOutput.trim().split('\n');
+    text = mockAdbOutput;
   }
 
-  for (String line in output) {
+  // Check for error messages from adb
+  if (!text.contains('List of devices')) {
+    printError(text);
+    return <AndroidDevice>[];
+  }
+
+  for (String line in text.trim().split('\n')) {
     // Skip lines like: * daemon started successfully *
     if (line.startsWith('* daemon '))
       continue;
@@ -699,8 +579,6 @@ class _AdbLogReader extends DeviceLogReader {
 
   final AndroidDevice device;
 
-  bool _lastWasFiltered = false;
-
   StreamController<String> _linesController;
   Process _process;
 
@@ -710,24 +588,24 @@ class _AdbLogReader extends DeviceLogReader {
   @override
   String get name => device.name;
 
+  DateTime _timeOrigin;
+
+  DateTime _adbTimestampToDateTime(String adbTimestamp) {
+    // The adb timestamp format is: mm-dd hours:minutes:seconds.milliseconds
+    // Dart's DateTime parse function accepts this format so long as we provide
+    // the year, resulting in:
+    // yyyy-mm-dd hours:minutes:seconds.milliseconds.
+    return DateTime.parse('${new DateTime.now().year}-$adbTimestamp');
+  }
+
   void _start() {
     // Start the adb logcat process.
-    List<String> args = <String>['logcat', '-v', 'tag'];
+    List<String> args = <String>['logcat', '-v', 'time'];
     String lastTimestamp = device.lastLogcatTimestamp;
-    if (lastTimestamp != null) {
-      bool supportsLastTimestamp = false;
-
-      // Check to see if this copy of adb supports -T.
-      try {
-        // "logcat: invalid option -- T", "Unrecognized Option"
-        // logcat -g will finish immediately; it will print an error to stdout if -T isn't supported.
-        String result = runSync(device.adbCommandForDevice(<String>['logcat', '-g', '-T', lastTimestamp]));
-        supportsLastTimestamp = !result.contains('logcat: invalid option') && !result.contains('Unrecognized Option');
-      } catch (_) { }
-
-      if (supportsLastTimestamp)
-        args.addAll(<String>['-T', lastTimestamp]);
-    }
+    if (lastTimestamp != null)
+        _timeOrigin = _adbTimestampToDateTime(lastTimestamp);
+    else
+        _timeOrigin = null;
     runCommand(device.adbCommandForDevice(args)).then((Process process) {
       _process = process;
       _process.stdout.transform(UTF8.decoder).transform(const LineSplitter()).listen(_onLine);
@@ -741,37 +619,62 @@ class _AdbLogReader extends DeviceLogReader {
   }
 
   // 'W/ActivityManager: '
-  static final RegExp _logFormat = new RegExp(r'^[VDIWEF]\/[^:]+:\s+');
+  static final RegExp _logFormat = new RegExp(r'^[VDIWEF]\/.{8,}:\s');
 
   static final List<RegExp> _whitelistedTags = <RegExp>[
     new RegExp(r'^[VDIWEF]\/flutter[^:]*:\s+', caseSensitive: false),
     new RegExp(r'^[IE]\/DartVM[^:]*:\s+'),
     new RegExp(r'^[WEF]\/AndroidRuntime:\s+'),
-    new RegExp(r'^[WEF]\/ActivityManager:\s+'),
+    new RegExp(r'^[WEF]\/ActivityManager:\s+.*(\bflutter\b|\bdomokit\b|\bsky\b)'),
     new RegExp(r'^[WEF]\/System\.err:\s+'),
     new RegExp(r'^[F]\/[\S^:]+:\s+')
   ];
 
-  void _onLine(String line) {
-    if (_logFormat.hasMatch(line)) {
-      // Filter out some noisy ActivityManager notifications.
-      if (line.startsWith('W/ActivityManager: getRunningAppProcesses'))
-        return;
+  // we default to true in case none of the log lines match
+  bool _acceptedLastLine = true;
 
+  // The format of the line is controlled by the '-v' parameter passed to
+  // adb logcat. We are currently passing 'time', which has the format:
+  // mm-dd hh:mm:ss.milliseconds Priority/Tag( PID): ....
+  void _onLine(String line) {
+    final Match timeMatch = AndroidDevice._timeRegExp.firstMatch(line);
+    if (timeMatch == null) {
+      return;
+    }
+    if (_timeOrigin != null) {
+      final String timestamp = timeMatch.group(0);
+      DateTime time = _adbTimestampToDateTime(timestamp);
+      if (time.isBefore(_timeOrigin)) {
+        // Ignore log messages before the origin.
+        return;
+      }
+    }
+    if (line.length == timeMatch.end) {
+      return;
+    }
+    // Chop off the time.
+    line = line.substring(timeMatch.end + 1);
+    if (_logFormat.hasMatch(line)) {
       // Filter on approved names and levels.
       for (RegExp regex in _whitelistedTags) {
         if (regex.hasMatch(line)) {
-          _lastWasFiltered = false;
+          _acceptedLastLine = true;
           _linesController.add(line);
           return;
         }
       }
-
-      _lastWasFiltered = true;
+      _acceptedLastLine = false;
+    } else if (line == '--------- beginning of system' ||
+               line == '--------- beginning of main' ) {
+      // hide the ugly adb logcat log boundaries at the start
+      _acceptedLastLine = false;
     } else {
-      // If it doesn't match the log pattern at all, pass it through.
-      if (!_lastWasFiltered)
+      // If it doesn't match the log pattern at all, then pass it through if we
+      // passed the last matching line through. It might be a multiline message.
+      if (_acceptedLastLine) {
         _linesController.add(line);
+        return;
+      }
     }
   }
 

@@ -60,6 +60,10 @@ Future<Null> pageRight(WidgetTester tester) {
 }
 
 void main() {
+  testWidgets('PageableList default control', (WidgetTester tester) async {
+    await tester.pumpWidget(new Center(child: new PageableList()));
+  });
+
   testWidgets('PageableList with itemsWrap: false', (WidgetTester tester) async {
     currentPage = null;
     await tester.pumpWidget(buildFrame());

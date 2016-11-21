@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
-import 'package:meta/meta.dart';
 
 import 'colors.dart';
 import 'constants.dart';
@@ -93,6 +93,12 @@ class ButtonTheme extends InheritedWidget {
   final EdgeInsets padding;
 
   /// The color from the closest instance of this class that encloses the given context.
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// ButtonTheme theme = ButtonTheme.of(context);
+  /// ```
   static ButtonTheme of(BuildContext context) {
     ButtonTheme result = context.inheritFromWidgetOfExactType(ButtonTheme);
     return result ?? const ButtonTheme();
@@ -152,11 +158,15 @@ class MaterialButton extends StatefulWidget {
   /// The z-coordinate at which to place this button.
   ///
   /// The following elevations have defined shadows: 1, 2, 3, 4, 6, 8, 9, 12, 16, 24
+  ///
+  /// Defaults to 0.
   final int elevation;
 
   /// The z-coordinate at which to place this button when highlighted.
   ///
   /// The following elevations have defined shadows: 1, 2, 3, 4, 6, 8, 9, 12, 16, 24
+  ///
+  /// Defaults to 0.
   final int highlightElevation;
 
   /// The smallest horizontal extent that the button will occupy.

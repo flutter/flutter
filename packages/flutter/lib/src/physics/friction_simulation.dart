@@ -72,7 +72,7 @@ class FrictionSimulation extends Simulation {
   bool isDone(double time) => dx(time).abs() < tolerance.velocity;
 }
 
-/// A [FrictionSimulation] that clamps the modelled particle to a specific range
+/// A [FrictionSimulation] that clamps the modeled particle to a specific range
 /// of values.
 class BoundedFrictionSimulation extends FrictionSimulation {
   /// Creates a [BoundedFrictionSimulation] with the given arguments, namely:

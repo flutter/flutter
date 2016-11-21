@@ -4,8 +4,8 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
-import 'package:meta/meta.dart';
 
 import 'framework.dart';
 import 'scroll_configuration.dart';
@@ -18,17 +18,19 @@ import 'virtual_viewport.dart';
 /// uses an [Iterable] list of children. That makes [ScrollableList] suitable
 /// for a large (but not extremely large or infinite) list of children.
 ///
-/// [ScrollableList] differs from [LazyBlock] in that [ScrollableList] requires
-/// each of its children to be the same size. That makes [ScrollableList] more
-/// efficient but less flexible than [LazyBlock].
+/// [ScrollableList] differs from [Block] and [LazyBlock] in that
+/// [ScrollableList] requires each of its children to be the same size. That
+/// makes [ScrollableList] more efficient but less flexible than [Block] and
+/// [LazyBlock].
 ///
 /// Prefer [ScrollableViewport] when there is only one child.
 ///
 /// See also:
 ///
-///  * [ScrollableLazyList].
-///  * [LazyBlock].
-///  * [ScrollableViewport].
+///  * [Block], which allows its children to have arbitrary sizes.
+///  * [ScrollableLazyList], a more efficient version of [ScrollableList].
+///  * [LazyBlock], a more efficient version of [Block].
+///  * [ScrollableViewport], which only has one child.
 class ScrollableList extends StatelessWidget {
   /// Creats a scrollable list of children that have equal size.
   ///
@@ -47,7 +49,7 @@ class ScrollableList extends StatelessWidget {
     @required this.itemExtent,
     this.itemsWrap: false,
     this.padding,
-    this.children
+    this.children: const <Widget>[],
   }) : super(key: key) {
     assert(scrollDirection != null);
     assert(scrollAnchor != null);
@@ -387,7 +389,7 @@ class ListViewport extends _VirtualListViewport with VirtualViewportFromIterable
     @required double itemExtent,
     bool itemsWrap: false,
     EdgeInsets padding,
-    this.children
+    this.children: const <Widget>[],
   }) : super(
     onExtentsChanged,
     scrollOffset,

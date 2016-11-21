@@ -7,6 +7,7 @@ import 'dart:io';
 
 import 'package:path/path.dart' as path;
 
+import '../base/common.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
 import '../base/utils.dart';
@@ -42,14 +43,12 @@ class BuildAotCommand extends BuildSubCommand {
   final String description = "Build an ahead-of-time compiled snapshot of your app's Dart code.";
 
   @override
-  Future<int> runCommand() async {
+  Future<Null> runCommand() async {
     await super.runCommand();
     String targetPlatform = argResults['target-platform'];
     TargetPlatform platform = getTargetPlatformForName(targetPlatform);
-    if (platform == null) {
-      printError('Unknown platform: $targetPlatform');
-      return 1;
-    }
+    if (platform == null)
+      throwToolExit('Unknown platform: $targetPlatform');
 
     String typeName = path.basename(tools.getEngineArtifactsDirectory(platform, getBuildMode()).path);
     Status status = logger.startProgress('Building AOT snapshot in ${getModeName(getBuildMode())} mode ($typeName)...');
@@ -60,13 +59,12 @@ class BuildAotCommand extends BuildSubCommand {
       outputPath: argResults['output-dir'],
       interpreter: argResults['interpreter']
     );
-    status.stop(showElapsedTime: true);
+    status.stop();
 
     if (outputPath == null)
-      return 1;
+      throwToolExit(null);
 
     printStatus('Built to $outputPath${Platform.pathSeparator}.');
-    return 0;
   }
 }
 
@@ -161,9 +159,6 @@ Future<String> _buildAotSnapshot(
     return null;
   }
 
-  String mojoPkg = _getSdkExtensionPath(packageMap, 'mojo');
-  String mojoInternalPath = path.join(mojoPkg, 'sdk_ext', 'internal.dart');
-
   String skyEnginePkg = _getSdkExtensionPath(packageMap, 'sky_engine');
   String uiPath = path.join(skyEnginePkg, 'dart_ui', 'ui.dart');
   String jniPath = path.join(skyEnginePkg, 'dart_jni', 'jni.dart');
@@ -173,7 +168,6 @@ Future<String> _buildAotSnapshot(
     genSnapshot,
     vmEntryPoints,
     ioEntryPoints,
-    mojoInternalPath,
     uiPath,
     jniPath,
     vmServicePath,
@@ -218,7 +212,6 @@ Future<String> _buildAotSnapshot(
     '--vm_isolate_snapshot=$vmIsolateSnapshot',
     '--isolate_snapshot=$isolateSnapshot',
     '--packages=${packageMap.packagesPath}',
-    '--url_mapping=dart:mojo.internal,$mojoInternalPath',
     '--url_mapping=dart:ui,$uiPath',
     '--url_mapping=dart:jni,$jniPath',
     '--url_mapping=dart:vmservice_sky,$vmServicePath',
@@ -238,6 +231,7 @@ Future<String> _buildAotSnapshot(
         '--instructions_blob=$instructionsBlob',
         '--embedder_entry_points_manifest=$vmEntryPointsAndroid',
         '--no-sim-use-hardfp',
+        '--no-use-integer-division',  // Not supported by the Pixel in 32-bit mode.
       ]);
       break;
     case TargetPlatform.ios:
@@ -270,37 +264,39 @@ Future<String> _buildAotSnapshot(
     printStatus('Building app.dylib...');
 
     // These names are known to from the engine.
-    const String kDartVmIsolateSnapshotBuffer = 'kDartVmIsolateSnapshotBuffer';
-    const String kDartIsolateSnapshotBuffer = 'kDartIsolateSnapshotBuffer';
+    String kVmIsolateSnapshot = 'kVmIsolateSnapshot';
+    String kIsolateSnapshot = 'kIsolateSnapshot';
 
-    runCheckedSync(<String>['mv', vmIsolateSnapshot, path.join(outputDir.path, kDartVmIsolateSnapshotBuffer)]);
-    runCheckedSync(<String>['mv', isolateSnapshot, path.join(outputDir.path, kDartIsolateSnapshotBuffer)]);
-
-    String kDartVmIsolateSnapshotBufferC = path.join(outputDir.path, '$kDartVmIsolateSnapshotBuffer.c');
-    String kDartIsolateSnapshotBufferC = path.join(outputDir.path, '$kDartIsolateSnapshotBuffer.c');
-
-    runCheckedSync(<String>[
-      'xxd', '--include', kDartVmIsolateSnapshotBuffer, path.basename(kDartVmIsolateSnapshotBufferC)
-    ], workingDirectory: outputDir.path);
-    runCheckedSync(<String>[
-      'xxd', '--include', kDartIsolateSnapshotBuffer, path.basename(kDartIsolateSnapshotBufferC)
-    ], workingDirectory: outputDir.path);
-
+    String kVmIsolateSnapshotC = path.join(outputDir.path, '$kVmIsolateSnapshot.c');
+    String kIsolateSnapshotC = path.join(outputDir.path, '$kIsolateSnapshot.c');
     String assemblyO = path.join(outputDir.path, 'snapshot_assembly.o');
-    String kDartVmIsolateSnapshotBufferO = path.join(outputDir.path, '$kDartVmIsolateSnapshotBuffer.o');
-    String kDartIsolateSnapshotBufferO = path.join(outputDir.path, '$kDartIsolateSnapshotBuffer.o');
+    String kVmIsolateSnapshotO = path.join(outputDir.path, '$kVmIsolateSnapshot.o');
+    String kIsolateSnapshotO = path.join(outputDir.path, '$kIsolateSnapshot.o');
 
     List<String> commonBuildOptions = <String>['-arch', 'arm64', '-miphoneos-version-min=8.0'];
-    if (!interpreter)
+
+    if (interpreter) {
+      runCheckedSync(<String>['mv', vmIsolateSnapshot, path.join(outputDir.path, kVmIsolateSnapshot)]);
+      runCheckedSync(<String>['mv', isolateSnapshot, path.join(outputDir.path, kIsolateSnapshot)]);
+
+      runCheckedSync(<String>[
+        'xxd', '--include', kVmIsolateSnapshot, path.basename(kVmIsolateSnapshotC)
+      ], workingDirectory: outputDir.path);
+      runCheckedSync(<String>[
+        'xxd', '--include', kIsolateSnapshot, path.basename(kIsolateSnapshotC)
+      ], workingDirectory: outputDir.path);
+
+      runCheckedSync(<String>['xcrun', 'cc']
+        ..addAll(commonBuildOptions)
+        ..addAll(<String>['-c', kVmIsolateSnapshotC, '-o', kVmIsolateSnapshotO]));
+      runCheckedSync(<String>['xcrun', 'cc']
+        ..addAll(commonBuildOptions)
+        ..addAll(<String>['-c', kIsolateSnapshotC, '-o', kIsolateSnapshotO]));
+    } else {
       runCheckedSync(<String>['xcrun', 'cc']
         ..addAll(commonBuildOptions)
         ..addAll(<String>['-c', assembly, '-o', assemblyO]));
-    runCheckedSync(<String>['xcrun', 'cc']
-      ..addAll(commonBuildOptions)
-      ..addAll(<String>['-c', kDartVmIsolateSnapshotBufferC, '-o', kDartVmIsolateSnapshotBufferO]));
-    runCheckedSync(<String>['xcrun', 'cc']
-      ..addAll(commonBuildOptions)
-      ..addAll(<String>['-c', kDartIsolateSnapshotBufferC, '-o', kDartIsolateSnapshotBufferO]));
+    }
 
     String appSo = path.join(outputDir.path, 'app.dylib');
 
@@ -312,11 +308,13 @@ Future<String> _buildAotSnapshot(
         '-Xlinker', '-rpath', '-Xlinker', '@loader_path/Frameworks',
         '-install_name', '@rpath/app.dylib',
         '-o', appSo,
-        kDartVmIsolateSnapshotBufferO,
-        kDartIsolateSnapshotBufferO,
     ]);
-    if (!interpreter)
+    if (interpreter) {
+      linkCommand.add(kVmIsolateSnapshotO);
+      linkCommand.add(kIsolateSnapshotO);
+    } else {
       linkCommand.add(assemblyO);
+    }
     runCheckedSync(linkCommand);
   }
 

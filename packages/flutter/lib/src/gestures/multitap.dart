@@ -191,7 +191,7 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
     _freezeTracker(tracker);
     _trackers.remove(tracker.pointer);
     if (onDoubleTap != null)
-      onDoubleTap();
+      invokeCallback/*<Null>*/('onDoubleTap', onDoubleTap); // ignore: STRONG_MODE_INVALID_CAST_FUNCTION_EXPR, https://github.com/dart-lang/sdk/issues/27504
     _reset();
   }
 
@@ -359,7 +359,7 @@ class MultiTapGestureRecognizer extends GestureRecognizer {
       longTapDelay: longTapDelay
     );
     if (onTapDown != null)
-      onTapDown(event.pointer, new TapDownDetails(globalPosition: event.position));
+      invokeCallback/*<Null>*/('onTapDown', () => onTapDown(event.pointer, new TapDownDetails(globalPosition: event.position))); // ignore: STRONG_MODE_INVALID_CAST_FUNCTION_EXPR, https://github.com/dart-lang/sdk/issues/27504
   }
 
   @override
@@ -380,19 +380,19 @@ class MultiTapGestureRecognizer extends GestureRecognizer {
     _gestureMap.remove(pointer);
     if (resolution == _TapResolution.tap) {
       if (onTapUp != null)
-        onTapUp(pointer, new TapUpDetails(globalPosition: globalPosition));
+        invokeCallback/*<Null>*/('onTapUp', () => onTapUp(pointer, new TapUpDetails(globalPosition: globalPosition))); // ignore: STRONG_MODE_INVALID_CAST_FUNCTION_EXPR, https://github.com/dart-lang/sdk/issues/27504
       if (onTap != null)
-        onTap(pointer);
+        invokeCallback/*<Null>*/('onTap', () => onTap(pointer)); // ignore: STRONG_MODE_INVALID_CAST_FUNCTION_EXPR, https://github.com/dart-lang/sdk/issues/27504
     } else {
       if (onTapCancel != null)
-        onTapCancel(pointer);
+        invokeCallback/*<Null>*/('onTapCancel', () => onTapCancel(pointer)); // ignore: STRONG_MODE_INVALID_CAST_FUNCTION_EXPR, https://github.com/dart-lang/sdk/issues/27504
     }
   }
 
   void _handleLongTap(int pointer, Point lastPosition) {
     assert(_gestureMap.containsKey(pointer));
     if (onLongTapDown != null)
-      onLongTapDown(pointer, new TapDownDetails(globalPosition: lastPosition));
+      invokeCallback/*<Null>*/('onLongTapDown', () => onLongTapDown(pointer, new TapDownDetails(globalPosition: lastPosition))); // ignore: STRONG_MODE_INVALID_CAST_FUNCTION_EXPR, https://github.com/dart-lang/sdk/issues/27504
   }
 
   @override

@@ -77,6 +77,8 @@ class GalleryHome extends StatefulWidget {
     this.onTimeDilationChanged,
     this.showPerformanceOverlay,
     this.onShowPerformanceOverlayChanged,
+    this.checkerboardRasterCacheImages,
+    this.onCheckerboardRasterCacheImagesChanged,
     this.onPlatformChanged,
   }) : super(key: key) {
     assert(onThemeChanged != null);
@@ -92,6 +94,9 @@ class GalleryHome extends StatefulWidget {
   final bool showPerformanceOverlay;
   final ValueChanged<bool> onShowPerformanceOverlayChanged;
 
+  final bool checkerboardRasterCacheImages;
+  final ValueChanged<bool> onCheckerboardRasterCacheImagesChanged;
+
   final ValueChanged<TargetPlatform> onPlatformChanged;
 
   @override
@@ -99,7 +104,7 @@ class GalleryHome extends StatefulWidget {
 }
 
 class GalleryHomeState extends State<GalleryHome> with SingleTickerProviderStateMixin {
-  static final Key _homeKey = new ValueKey<String>('Gallery Home');
+  static final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
   static final GlobalKey<ScrollableState> _scrollableKey = new GlobalKey<ScrollableState>();
 
   AnimationController _controller;
@@ -148,7 +153,7 @@ class GalleryHomeState extends State<GalleryHome> with SingleTickerProviderState
   Widget build(BuildContext context) {
     final double statusBarHeight = MediaQuery.of(context).padding.top;
     Widget home = new Scaffold(
-      key: _homeKey,
+      key: _scaffoldKey,
       scrollableKey: _scrollableKey,
       drawer: new GalleryDrawer(
         useLightTheme: config.useLightTheme,
@@ -157,6 +162,8 @@ class GalleryHomeState extends State<GalleryHome> with SingleTickerProviderState
         onTimeDilationChanged: config.onTimeDilationChanged,
         showPerformanceOverlay: config.showPerformanceOverlay,
         onShowPerformanceOverlayChanged: config.onShowPerformanceOverlayChanged,
+        checkerboardRasterCacheImages: config.checkerboardRasterCacheImages,
+        onCheckerboardRasterCacheImagesChanged: config.onCheckerboardRasterCacheImagesChanged,
         onPlatformChanged: config.onPlatformChanged,
       ),
       appBar: new AppBar(
@@ -166,7 +173,7 @@ class GalleryHomeState extends State<GalleryHome> with SingleTickerProviderState
           background: new Builder(
             builder: (BuildContext context) {
               return new _AppBarBackground(
-                animation: Scaffold.of(context)?.appBarAnimation
+                animation: _scaffoldKey.currentState.appBarAnimation
               );
             }
           )

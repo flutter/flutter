@@ -19,6 +19,9 @@ export 'dart:ui' show VoidCallback;
 /// Slows down animations by this factor to help in development.
 double get timeDilation => _timeDilation;
 double _timeDilation = 1.0;
+/// Setting the time dilation automatically calls [SchedulerBinding.resetEpoch]
+/// to ensure that time stamps seen by consumers of the scheduler binding are
+/// always increasing.
 set timeDilation(double value) {
   if (_timeDilation == value)
     return;
@@ -128,7 +131,7 @@ enum SchedulerPhase {
 /// Scheduler for running the following:
 ///
 /// * _Frame callbacks_, triggered by the system's
-///   [ui.window.onBeginFrame] callback, for synchronising the
+///   [ui.window.onBeginFrame] callback, for synchronizing the
 ///   application's behavior to the system's display. For example, the
 ///   rendering layer uses this to drive its rendering pipeline.
 ///
@@ -474,7 +477,8 @@ abstract class SchedulerBinding extends BindingBase {
   Duration _epochStart = Duration.ZERO;
   Duration _lastRawTimeStamp = Duration.ZERO;
 
-  /// Prepares the scheduler for a non-monotonic change to how time stamps are calcuated.
+  /// Prepares the scheduler for a non-monotonic change to how time stamps are
+  /// calcuated.
   ///
   /// Callbacks received from the scheduler assume that their time stamps are
   /// monotonically increasing. The raw time stamp passed to [handleBeginFrame]
@@ -483,13 +487,13 @@ abstract class SchedulerBinding extends BindingBase {
   /// to appear to run backwards.
   ///
   /// The [resetEpoch] function ensures that the time stamps are monotonic by
-  /// reseting the base time stamp used for future time stamp adjustments to the
+  /// resetting the base time stamp used for future time stamp adjustments to the
   /// current value. For example, if the [timeDilation] decreases, rather than
   /// scaling down the [Duration] since the beginning of time, [resetEpoch] will
   /// ensure that we only scale down the duration since [resetEpoch] was called.
   ///
-  /// Note: Setting [timeDilation] calls [resetEpoch] automatically. You don't
-  /// need to call [resetEpoch] yourself.
+  /// Setting [timeDilation] calls [resetEpoch] automatically. You don't need to
+  /// call [resetEpoch] yourself.
   void resetEpoch() {
     _epochStart = _adjustForEpoch(_lastRawTimeStamp);
     _firstRawTimeStampInEpoch = null;

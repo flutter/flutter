@@ -25,7 +25,7 @@ class _DriverBinding extends WidgetsFlutterBinding { // TODO(ianh): refactor so 
   @override
   void initServiceExtensions() {
     super.initServiceExtensions();
-    FlutterDriverExtension extension = new FlutterDriverExtension();
+    _FlutterDriverExtension extension = new _FlutterDriverExtension._();
     registerServiceExtension(
       name: _extensionMethodName,
       callback: extension.call
@@ -55,10 +55,10 @@ typedef Command CommandDeserializerCallback(Map<String, String> params);
 /// Runs the finder and returns the [Element] found, or `null`.
 typedef Finder FinderConstructor(SerializableFinder finder);
 
-class FlutterDriverExtension {
+class _FlutterDriverExtension {
   static final Logger _log = new Logger('FlutterDriverExtension');
 
-  FlutterDriverExtension() {
+  _FlutterDriverExtension._() {
     _commandHandlers.addAll(<String, CommandHandlerCallback>{
       'get_health': _getHealth,
       'tap': _tap,
@@ -88,11 +88,21 @@ class FlutterDriverExtension {
     });
   }
 
-  final WidgetController prober = new WidgetController(WidgetsBinding.instance);
+  final WidgetController _prober = new WidgetController(WidgetsBinding.instance);
   final Map<String, CommandHandlerCallback> _commandHandlers = <String, CommandHandlerCallback>{};
   final Map<String, CommandDeserializerCallback> _commandDeserializers = <String, CommandDeserializerCallback>{};
   final Map<String, FinderConstructor> _finders = <String, FinderConstructor>{};
 
+  /// Processes a driver command configured by [params] and returns a result
+  /// as an arbitrary JSON object.
+  ///
+  /// [params] must contain key "command" whose value is a string that
+  /// identifies the kind of the command and its corresponding
+  /// [CommandDeserializerCallback]. Other keys and values are specific to the
+  /// concrete implementation of [Command] and [CommandDeserializerCallback].
+  ///
+  /// The returned JSON is command specific. Generally the caller deserializes
+  /// the result into a subclass of [Result], but that's not strictly required.
   Future<Map<String, dynamic>> call(Map<String, String> params) async {
     try {
       String commandKind = params['command'];
@@ -181,7 +191,7 @@ class FlutterDriverExtension {
 
   Future<TapResult> _tap(Command command) async {
     Tap tapCommand = command;
-    await prober.tap(await _waitForElement(_createFinder(tapCommand.finder)));
+    await _prober.tap(await _waitForElement(_createFinder(tapCommand.finder)));
     return new TapResult();
   }
 
@@ -199,20 +209,20 @@ class FlutterDriverExtension {
     final int totalMoves = scrollCommand.duration.inMicroseconds * scrollCommand.frequency ~/ Duration.MICROSECONDS_PER_SECOND;
     Offset delta = new Offset(scrollCommand.dx, scrollCommand.dy) / totalMoves.toDouble();
     Duration pause = scrollCommand.duration ~/ totalMoves;
-    Point startLocation = prober.getCenter(target);
+    Point startLocation = _prober.getCenter(target);
     Point currentLocation = startLocation;
     TestPointer pointer = new TestPointer(1);
     HitTestResult hitTest = new HitTestResult();
 
-    prober.binding.hitTest(hitTest, startLocation);
-    prober.binding.dispatchEvent(pointer.down(startLocation), hitTest);
+    _prober.binding.hitTest(hitTest, startLocation);
+    _prober.binding.dispatchEvent(pointer.down(startLocation), hitTest);
     await new Future<Null>.value();  // so that down and move don't happen in the same microtask
     for (int moves = 0; moves < totalMoves; moves++) {
       currentLocation = currentLocation + delta;
-      prober.binding.dispatchEvent(pointer.move(currentLocation), hitTest);
+      _prober.binding.dispatchEvent(pointer.move(currentLocation), hitTest);
       await new Future<Null>.delayed(pause);
     }
-    prober.binding.dispatchEvent(pointer.up(), hitTest);
+    _prober.binding.dispatchEvent(pointer.up(), hitTest);
 
     return new ScrollResult();
   }

@@ -4,9 +4,9 @@
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart' show RenderEditable, SelectionChangedHandler, RenderEditablePaintOffsetNeededCallback;
 import 'package:flutter/services.dart';
-import 'package:meta/meta.dart';
 
 import 'basic.dart';
 import 'focus.dart';
@@ -118,14 +118,12 @@ class InputValue {
   }
 }
 
-/// A basic single-line input control.
+/// A basic text input control.
 ///
 /// This control is not intended to be used directly. Instead, consider using
 /// [Input], which provides focus management and material design.
-//
-// TODO(mpcomplete): rename RawInput since it can span multiple lines.
 class RawInput extends Scrollable {
-  /// Creates a basic single-line input control.
+  /// Creates a basic text input control.
   ///
   /// The [value] argument must not be null.
   RawInput({
@@ -275,8 +273,12 @@ class RawInputState extends ScrollableState<RawInput> implements TextInputClient
     return newScrollOffset;
   }
 
+  // True if the focus was explicitly requested last frame. This ensures we
+  // don't show the keyboard when focus defaults back to the RawInput.
+  bool _requestingFocus = false;
+
   void _attachOrDetachKeyboard(bool focused) {
-    if (focused && !_isAttachedToKeyboard) {
+    if (focused && !_isAttachedToKeyboard && _requestingFocus) {
       _textInputConnection = TextInput.attach(
           this, new TextInputConfiguration(inputType: config.keyboardType))
         ..setEditingState(_getTextEditingStateFromInputValue(_currentValue))
@@ -288,6 +290,7 @@ class RawInputState extends ScrollableState<RawInput> implements TextInputClient
       }
       _clearComposing();
     }
+    _requestingFocus = false;
   }
 
   void _clearComposing() {
@@ -308,6 +311,9 @@ class RawInputState extends ScrollableState<RawInput> implements TextInputClient
       _textInputConnection.show();
     } else {
       Focus.moveTo(config.focusKey);
+      setState(() {
+        _requestingFocus = true;
+      });
     }
   }
 

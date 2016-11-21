@@ -10,6 +10,7 @@ import 'package:meta/meta.dart';
 import '../build_info.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
+import '../base/common.dart';
 import '../base/utils.dart';
 import 'build_apk.dart';
 import 'build_aot.dart';
@@ -32,28 +33,26 @@ class BuildCommand extends FlutterCommand {
   final String description = 'Flutter build commands.';
 
   @override
-  Future<int> verifyThenRunCommand() async {
-    if (!commandValidator())
-      return 1;
+  Future<Null> verifyThenRunCommand() async {
+    commandValidator();
     return super.verifyThenRunCommand();
   }
 
   @override
-  Future<int> runCommand() => new Future<int>.value(0);
+  Future<Null> runCommand() async { }
 }
 
 abstract class BuildSubCommand extends FlutterCommand {
   @override
   @mustCallSuper
-  Future<int> verifyThenRunCommand() async {
-    if (!commandValidator())
-      return 1;
+  Future<Null> verifyThenRunCommand() async {
+    commandValidator();
     return super.verifyThenRunCommand();
   }
 
   @override
   @mustCallSuper
-  Future<int> runCommand() async {
+  Future<Null> runCommand() async {
     if (isRunningOnBot) {
       File dotPackages = new File('.packages');
       printStatus('Contents of .packages:');
@@ -69,7 +68,6 @@ abstract class BuildSubCommand extends FlutterCommand {
       else
         printError('File not found: ${pubspecLock.absolute.path}');
     }
-    return 0;
   }
 }
 
@@ -81,26 +79,23 @@ class BuildCleanCommand extends FlutterCommand {
   final String description = 'Delete the build/ directory.';
 
   @override
-  Future<int> verifyThenRunCommand() async {
-    if (!commandValidator())
-      return 1;
+  Future<Null> verifyThenRunCommand() async {
+    commandValidator();
     return super.verifyThenRunCommand();
   }
 
   @override
-  Future<int> runCommand() async {
+  Future<Null> runCommand() async {
     Directory buildDir = new Directory(getBuildDirectory());
     printStatus("Deleting '${buildDir.path}${Platform.pathSeparator}'.");
 
     if (!buildDir.existsSync())
-      return 0;
+      return;
 
     try {
       buildDir.deleteSync(recursive: true);
-      return 0;
     } catch (error) {
-      printError(error.toString());
-      return 1;
+      throwToolExit(error.toString());
     }
   }
 }

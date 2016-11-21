@@ -17,20 +17,16 @@ void main() {
       }));
     }
 
-    Map<String, dynamic> begin(int timeStamp) => <String, dynamic>{
-      'name': 'Engine::BeginFrame', 'ph': 'B', 'ts': timeStamp
-    };
-
-    Map<String, dynamic> end(int timeStamp) => <String, dynamic>{
-      'name': 'Engine::BeginFrame', 'ph': 'E', 'ts': timeStamp
+    Map<String, dynamic> frame(int timeStamp, int duration) => <String, dynamic>{
+      'name': 'Frame', 'ph': 'X', 'ts': timeStamp, 'dur': duration
     };
 
     group('frame_count', () {
       test('counts frames', () {
         expect(
           summarize(<Map<String, dynamic>>[
-            begin(1000), end(2000),
-            begin(3000), end(5000),
+            frame(1000, 1000),
+            frame(3000, 2000),
           ]).countFrames(),
           2
         );
@@ -45,30 +41,10 @@ void main() {
       test('computes average frame build time in milliseconds', () {
         expect(
           summarize(<Map<String, dynamic>>[
-            begin(1000), end(2000),
-            begin(3000), end(5000),
+            frame(1000, 1000),
+            frame(3000, 2000),
           ]).computeAverageFrameBuildTimeMillis(),
           1.5
-        );
-      });
-
-      test('skips leading "end" events', () {
-        expect(
-          summarize(<Map<String, dynamic>>[
-            end(1000),
-            begin(2000), end(4000),
-          ]).computeAverageFrameBuildTimeMillis(),
-          2.0
-        );
-      });
-
-      test('skips trailing "begin" events', () {
-        expect(
-          summarize(<Map<String, dynamic>>[
-            begin(2000), end(4000),
-            begin(5000),
-          ]).computeAverageFrameBuildTimeMillis(),
-          2.0
         );
       });
     });
@@ -81,35 +57,15 @@ void main() {
       test('computes worst frame build time in milliseconds', () {
         expect(
           summarize(<Map<String, dynamic>>[
-            begin(1000), end(2000),
-            begin(3000), end(5000),
+            frame(1000, 1000),
+            frame(3000, 2000),
           ]).computeWorstFrameBuildTimeMillis(),
           2.0
         );
         expect(
           summarize(<Map<String, dynamic>>[
-            begin(3000), end(5000),
-            begin(1000), end(2000),
-          ]).computeWorstFrameBuildTimeMillis(),
-          2.0
-        );
-      });
-
-      test('skips leading "end" events', () {
-        expect(
-          summarize(<Map<String, dynamic>>[
-            end(1000),
-            begin(2000), end(4000),
-          ]).computeWorstFrameBuildTimeMillis(),
-          2.0
-        );
-      });
-
-      test('skips trailing "begin" events', () {
-        expect(
-          summarize(<Map<String, dynamic>>[
-            begin(2000), end(4000),
-            begin(5000),
+            frame(3000, 2000),
+            frame(1000, 1000),
           ]).computeWorstFrameBuildTimeMillis(),
           2.0
         );
@@ -119,9 +75,9 @@ void main() {
     group('computeMissedFrameBuildBudgetCount', () {
       test('computes the number of missed build budgets', () {
         TimelineSummary summary = summarize(<Map<String, dynamic>>[
-          begin(1000), end(10000),
-          begin(11000), end(12000),
-          begin(13000), end(23000),
+          frame(1000, 9000),
+          frame(11000, 1000),
+          frame(13000, 10000),
         ]);
 
         expect(summary.countFrames(), 3);
@@ -133,9 +89,9 @@ void main() {
       test('computes and returns summary as JSON', () {
         expect(
           summarize(<Map<String, dynamic>>[
-            begin(1000), end(10000),
-            begin(11000), end(12000),
-            begin(13000), end(24000),
+            frame(1000, 9000),
+            frame(11000, 1000),
+            frame(13000, 11000),
           ]).summaryJson,
           <String, dynamic>{
             'average_frame_build_time_millis': 7.0,
@@ -167,9 +123,9 @@ void main() {
 
       test('writes summary to JSON file', () async {
         await summarize(<Map<String, dynamic>>[
-          begin(1000), end(10000),
-          begin(11000), end(12000),
-          begin(13000), end(24000),
+          frame(1000, 9000),
+          frame(11000, 1000),
+          frame(13000, 11000),
         ]).writeSummaryToFile('test', destinationDirectory: '/temp');
         String written =
             await fs.file('/temp/test.timeline_summary.json').readAsString();

@@ -12,7 +12,7 @@ import 'src/mocks.dart';
 
 void main() {
   group('install', () {
-    testUsingContext('returns 0 when Android is connected and ready for an install', () {
+    testUsingContext('returns 0 when Android is connected and ready for an install', () async {
       InstallCommand command = new InstallCommand();
       applyMocksToCommand(command);
 
@@ -21,12 +21,10 @@ void main() {
       when(device.installApp(any)).thenReturn(true);
       testDeviceManager.addDevice(device);
 
-      return createTestCommandRunner(command).run(<String>['install']).then((int code) {
-        expect(code, 0);
-      });
+      await createTestCommandRunner(command).run(<String>['install']);
     });
 
-    testUsingContext('returns 0 when iOS is connected and ready for an install', () {
+    testUsingContext('returns 0 when iOS is connected and ready for an install', () async {
       InstallCommand command = new InstallCommand();
       applyMocksToCommand(command);
 
@@ -35,9 +33,7 @@ void main() {
       when(device.installApp(any)).thenReturn(true);
       testDeviceManager.addDevice(device);
 
-      return createTestCommandRunner(command).run(<String>['install']).then((int code) {
-        expect(code, 0);
-      });
+      await createTestCommandRunner(command).run(<String>['install']);
     });
   });
 }

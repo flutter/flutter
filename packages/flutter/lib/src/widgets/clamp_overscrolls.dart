@@ -2,16 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:meta/meta.dart';
+import 'package:flutter/foundation.dart';
 
 import 'framework.dart';
 import 'scrollable.dart';
-
-/// Signature for building the contents of a scrollable widget.
-///
-/// Typically returns a tree of widgets that includes the viewport that will be
-/// scrolled to the given `scrollOffset`.
-typedef Widget ViewportBuilder(BuildContext context, ScrollableState state, double scrollOffset);
 
 /// A widget that controls whether viewport descendants will overscroll their contents.
 /// Overscrolling is clamped at the beginning or end or both according to the
@@ -103,6 +97,12 @@ class ClampOverscrolls extends InheritedWidget {
   }
 
   /// The closest instance of this class that encloses the given context.
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// ScrollableEdge edge = ClampOverscrolls.of(context).edge;
+  /// ```
   static ClampOverscrolls of(BuildContext context) {
     return context.inheritFromWidgetOfExactType(ClampOverscrolls);
   }

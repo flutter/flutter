@@ -5,9 +5,9 @@
 import 'dart:ui' as ui show ImageFilter, Picture, SceneBuilder;
 import 'dart:ui' show Offset;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:vector_math/vector_math_64.dart';
-import 'package:meta/meta.dart';
 
 import 'debug.dart';
 
@@ -134,7 +134,7 @@ class PictureLayer extends Layer {
   }
 }
 
-/// (mojo-only) A layer that represents content from another process.
+/// (Fuchsia-only) A layer that represents content from another process.
 class ChildSceneLayer extends Layer {
   /// Creates a layer that displays content rendered by another process.
   ///
@@ -188,12 +188,13 @@ class ChildSceneLayer extends Layer {
 class PerformanceOverlayLayer extends Layer {
   /// Creates a layer that displays a performance overlay.
   PerformanceOverlayLayer({
-    this.overlayRect,
-    this.optionsMask,
-    this.rasterizerThreshold
+    @required this.overlayRect,
+    @required this.optionsMask,
+    @required this.rasterizerThreshold,
+    @required this.checkerboardRasterCacheImages,
   });
 
-  /// The rectangle in this layer's coodinate system that the overlay should occupy.
+  /// The rectangle in this layer's coordinate system that the overlay should occupy.
   Rect overlayRect;
 
   /// The mask is created by shifting 1 by the index of the specific
@@ -205,11 +206,25 @@ class PerformanceOverlayLayer extends Layer {
   /// is suitable for capturing an SkPicture trace for further analysis.
   final int rasterizerThreshold;
 
+  /// Whether the raster cache should checkerboard cached entries.
+  ///
+  /// The compositor can sometimes decide to cache certain portions of the
+  /// widget hierarchy. Such portions typically don't change often from frame to
+  /// frame and are expensive to render. This can speed up overall rendering. However,
+  /// there is certain upfront cost to constructing these cache entries. And, if
+  /// the cache entries are not used very often, this cost may not be worth the
+  /// speedup in rendering of subsequent frames. If the developer wants to be certain
+  /// that populating the raster cache is not causing stutters, this option can be
+  /// set. Depending on the observations made, hints can be provided to the compositor
+  /// that aid it in making better decisions about caching.
+  final bool checkerboardRasterCacheImages;
+
   @override
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
     assert(optionsMask != null);
     builder.addPerformanceOverlay(optionsMask, overlayRect.shift(layerOffset));
     builder.setRasterizerTracingThreshold(rasterizerThreshold);
+    builder.setCheckerboardRasterCacheImages(checkerboardRasterCacheImages);
   }
 }
 

@@ -18,7 +18,8 @@ import 'theme.dart';
 ///
 /// Part of the material design [Drawer].
 ///
-/// Requires one of its ancestors to be a [Material] widget.
+/// Requires one of its ancestors to be a [Material] widget. This condition is
+/// satisfied by putting the [DrawerItem] in a [Drawer].
 ///
 /// See also:
 ///
@@ -52,6 +53,8 @@ class DrawerItem extends StatelessWidget {
   /// Called when the user taps this drawer item.
   ///
   /// If null, the drawer item is displayed as disabled.
+  ///
+  /// To close the [Drawer] when an item is pressed, call [Navigator.pop].
   final VoidCallback onPressed;
 
   /// Whether this drawer item is currently selected.
@@ -73,7 +76,7 @@ class DrawerItem extends StatelessWidget {
           return themeData.accentColor;
         if (onPressed == null)
           return Colors.white30;
-        return null; // use default icon theme colour unmodified
+        return null; // use default icon theme color unmodified
     }
     assert(themeData.brightness != null);
     return null;
@@ -113,18 +116,20 @@ class DrawerItem extends StatelessWidget {
         )
       );
     }
-    children.add(
-      new Flexible(
-        child: new Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: new AnimatedDefaultTextStyle(
-            style: _getTextStyle(themeData),
-            duration: kThemeChangeDuration,
-            child: child
+    if (child != null) {
+      children.add(
+        new Flexible(
+          child: new Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: new AnimatedDefaultTextStyle(
+              style: _getTextStyle(themeData),
+              duration: kThemeChangeDuration,
+              child: child
+            )
           )
         )
-      )
-    );
+      );
+    }
 
     return new MergeSemantics(
       child: new Container(

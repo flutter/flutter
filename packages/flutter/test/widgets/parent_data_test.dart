@@ -265,7 +265,7 @@ void main() {
 
     await tester.pumpWidget(
       new Container(
-        child: new Flex(
+        child: new Row(
           children: <Widget>[
             new Positioned(
               top: 6.0,

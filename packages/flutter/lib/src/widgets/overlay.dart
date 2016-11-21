@@ -5,9 +5,9 @@
 import 'dart:async';
 import 'dart:collection';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:meta/meta.dart';
 
 import 'basic.dart';
 import 'debug.dart';
@@ -209,6 +209,18 @@ class Overlay extends StatefulWidget {
   }
 
   /// The entries to include in the overlay initially.
+  ///
+  /// These entries are only used when the [OverlayState] is initialized. If you
+  /// are providing a new [Overlay] description for an overlay that's already in
+  /// the tree, then the new entries are ignored.
+  ///
+  /// To add entries to an [Overlay] that is already in the tree, use
+  /// [Overlay.of] to obtain the [OverlayState] (or assign a [GlobalKey] to the
+  /// [Overlay] widget and obtain the [OverlayState] via
+  /// [GlobalKey.currentState]), and then use [OverlayState.add] or
+  /// [OverlayState.addAll].
+  ///
+  /// To remove an entry from an [Overlay], use [OverlayEntry.remove].
   final List<OverlayEntry> initialEntries;
 
   /// The state from the closest instance of this class that encloses the given context.
@@ -218,6 +230,12 @@ class Overlay extends StatefulWidget {
   /// if not. The exception attempts to explain that the calling [Widget] (the
   /// one given by the [debugRequiredFor] argument) needs an [Overlay] to be
   /// present to function.
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// OverlayState overlay = Overlay.of(context);
+  /// ```
   static OverlayState of(BuildContext context, { Widget debugRequiredFor }) {
     OverlayState result = context.ancestorStateOfType(const TypeMatcher<OverlayState>());
     assert(() {
@@ -400,7 +418,7 @@ class _TheatreElement extends RenderObjectElement {
   static final Object _onstageSlot = new Object();
 
   List<Element> _offstage;
-  final Set<Element> _detachedOffstageChildren = new HashSet<Element>();
+  final Set<Element> _forgottenOffstageChildren = new HashSet<Element>();
 
   @override
   void insertChildRenderObject(RenderBox child, dynamic slot) {
@@ -444,7 +462,7 @@ class _TheatreElement extends RenderObjectElement {
     if (_onstage != null)
       visitor(_onstage);
     for (Element child in _offstage) {
-      if (!_detachedOffstageChildren.contains(child))
+      if (!_forgottenOffstageChildren.contains(child))
         visitor(child);
     }
   }
@@ -456,13 +474,13 @@ class _TheatreElement extends RenderObjectElement {
   }
 
   @override
-  bool detachChild(Element child) {
+  bool forgetChild(Element child) {
     if (child == _onstage) {
       _onstage = null;
     } else {
       assert(_offstage.contains(child));
-      assert(!_detachedOffstageChildren.contains(child));
-      _detachedOffstageChildren.add(child);
+      assert(!_forgottenOffstageChildren.contains(child));
+      _forgottenOffstageChildren.add(child);
     }
     return true;
   }
@@ -485,8 +503,8 @@ class _TheatreElement extends RenderObjectElement {
     super.update(newWidget);
     assert(widget == newWidget);
     _onstage = updateChild(_onstage, widget.onstage, _onstageSlot);
-    _offstage = updateChildren(_offstage, widget.offstage, detachedChildren: _detachedOffstageChildren);
-    _detachedOffstageChildren.clear();
+    _offstage = updateChildren(_offstage, widget.offstage, forgottenChildren: _forgottenOffstageChildren);
+    _forgottenOffstageChildren.clear();
   }
 }
 

@@ -37,6 +37,8 @@ export 'package:flutter/gestures.dart' show
 ///
 /// The `recognizer` argument is the gesture recognizer that currently occupies
 /// the slot for which a gesture recognizer is being created.
+///
+/// Used by [RawGestureDetector.gestures].
 typedef GestureRecognizer GestureRecognizerFactory(GestureRecognizer recognizer);
 
 /// A widget that detects gestures.
@@ -388,8 +390,8 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
         throw new FlutterError(
           'Unexpected call to replaceGestureRecognizers() method of RawGestureDetectorState.\n'
           'The replaceGestureRecognizers() method can only be called during the layout phase. '
-          'To set the gesture recognisers at other times, trigger a new build using setState() '
-          'and provide the new gesture recognisers as constructor arguments to the corresponding '
+          'To set the gesture recognizers at other times, trigger a new build using setState() '
+          'and provide the new gesture recognizers as constructor arguments to the corresponding '
           'RawGestureDetector or GestureDetector object.'
         );
       }
@@ -398,7 +400,7 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
     _syncAll(gestures);
     if (!config.excludeFromSemantics) {
       RenderSemanticsGestureHandler semanticsGestureHandler = context.findRenderObject();
-      context.visitChildElements((RenderObjectElement element) {
+      context.visitChildElements((Element element) {
         _GestureSemantics widget = element.widget;
         widget._updateHandlers(semanticsGestureHandler, _recognizers);
       });

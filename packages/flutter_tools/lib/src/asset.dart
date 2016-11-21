@@ -52,9 +52,35 @@ class AssetBundle {
   static const String _kFontSetMaterial = 'material';
   static const String _kFontSetRoboto = 'roboto';
 
+  bool _fixed = false;
   DateTime _lastBuildTimestamp;
 
+  /// Constructs an [AssetBundle] that gathers the set of assets from the
+  /// flutter.yaml manifest.
+  AssetBundle();
+
+  /// Constructs an [AssetBundle] with a fixed set of assets.
+  /// [projectRoot] The absolute path to the project root.
+  /// [projectAssets] comma separated list of assets.
+  AssetBundle.fixed(String projectRoot, String projectAssets) {
+    _fixed = true;
+    if ((projectRoot == null) || (projectAssets == null))
+      return;
+
+    List<String> assets = projectAssets.split(',');
+    for (String asset in assets) {
+      if (asset == '')
+        continue;
+      final String assetPath = path.join(projectRoot, asset);
+      final String archivePath = asset;
+      entries.add(
+          new AssetBundleEntry.fromFile(archivePath, new File(assetPath)));
+    }
+  }
+
   bool needsBuild({String manifestPath: defaultManifestPath}) {
+    if (_fixed)
+      return false;
     if (_lastBuildTimestamp == null)
       return true;
 
@@ -69,12 +95,20 @@ class AssetBundle {
     String manifestPath: defaultManifestPath,
     String workingDirPath,
     String packagesPath,
+    bool includeDefaultFonts: true,
     bool includeRobotoFonts: true,
     bool reportLicensedPackages: false
   }) async {
     workingDirPath ??= getAssetBuildDirectory();
     packagesPath ??= path.absolute(PackageMap.globalPackagesPath);
-    Object manifest = _loadFlutterYamlManifest(manifestPath);
+    Object manifest;
+    try {
+      manifest = _loadFlutterYamlManifest(manifestPath);
+    } catch (e) {
+      printStatus('Error detected in flutter.yaml:', emphasis: true);
+      printError(e);
+      return 1;
+    }
     if (manifest == null) {
       // No manifest file found for this application.
       return 0;
@@ -120,7 +154,7 @@ class AssetBundle {
     }
 
     List<_Asset> materialAssets = <_Asset>[];
-    if (usesMaterialDesign) {
+    if (usesMaterialDesign && includeDefaultFonts) {
       materialAssets.addAll(_getMaterialAssets(_kFontSetMaterial));
       if (includeRobotoFonts)
         materialAssets.addAll(_getMaterialAssets(_kFontSetRoboto));
@@ -135,7 +169,7 @@ class AssetBundle {
     entries.add(_createAssetManifest(assetVariants));
 
     AssetBundleEntry fontManifest =
-        _createFontManifest(manifestDescriptor, usesMaterialDesign, includeRobotoFonts);
+        _createFontManifest(manifestDescriptor, usesMaterialDesign, includeDefaultFonts, includeRobotoFonts);
     if (fontManifest != null)
       entries.add(fontManifest);
 
@@ -311,9 +345,10 @@ AssetBundleEntry _createAssetManifest(Map<_Asset, List<_Asset>> assetVariants) {
 
 AssetBundleEntry _createFontManifest(Map<String, dynamic> manifestDescriptor,
                              bool usesMaterialDesign,
+                             bool includeDefaultFonts,
                              bool includeRobotoFonts) {
   List<Map<String, dynamic>> fonts = <Map<String, dynamic>>[];
-  if (usesMaterialDesign) {
+  if (usesMaterialDesign && includeDefaultFonts) {
     fonts.addAll(_getMaterialFonts(AssetBundle._kFontSetMaterial));
     if (includeRobotoFonts)
       fonts.addAll(_getMaterialFonts(AssetBundle._kFontSetRoboto));
@@ -447,13 +482,8 @@ Future<int> _validateFlutterYamlManifest(Object manifest) async {
   if (validator.validate(manifest)) {
     return 0;
   } else {
-    if (validator.errors.length == 1) {
-      printError('Error in flutter.yaml: ${validator.errors.first}');
-    } else {
-      printError('Error in flutter.yaml:');
-      printError('  ' + validator.errors.join('\n  '));
-    }
-
+    printStatus('Error detected in flutter.yaml:', emphasis: true);
+    printError(validator.errors.join('\n'));
     return 1;
   }
 }

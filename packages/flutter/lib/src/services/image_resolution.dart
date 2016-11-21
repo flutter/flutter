@@ -197,5 +197,5 @@ class AssetImage extends AssetBundleImageProvider {
   int get hashCode => hashValues(name, bundle);
 
   @override
-  String toString() => '$runtimeType(bundle: $bundle, name: $name)';
+  String toString() => '$runtimeType(bundle: $bundle, name: "$name")';
 }

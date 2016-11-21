@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
-import 'package:meta/meta.dart';
 
 import 'binding.dart';
 
@@ -16,6 +15,18 @@ import 'binding.dart';
 typedef void TickerCallback(Duration elapsed);
 
 /// An interface implemented by classes that can vend [Ticker] objects.
+///
+/// Tickers can be used by any object that wants to be notified whenever a frame
+/// triggers, but are most commonly used indirectly via an
+/// [AnimationController]. [AnimationController]s need a [TickerProvider] to
+/// obtain their [Ticker]. If you are creating an [AnimationController] from a
+/// [State], then you can use the [TickerProviderStateMixin] and
+/// [SingleTickerProviderStateMixin] classes to obtain a suitable
+/// [TickerProvider]. The widget test framework [WidgetTester] object can be
+/// used as a ticker provider in the context of tests. In other contexts, you
+/// will have to either pass a [TickerProvider] from a higher level (e.g.
+/// indirectly from a [State] that mixes in [TickerProviderStateMixin]), or
+/// create a custom [TickerProvider] subclass.
 abstract class TickerProvider {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
@@ -35,6 +46,10 @@ abstract class TickerProvider {
 /// A [Ticker] can be silenced by setting [muted] to true. While silenced, time
 /// still elapses, and [start] and [stop] can still be called, but no callbacks
 /// are called.
+///
+/// By convention, the [start] and [stop] methods are used by the ticker's
+/// consumer, and the [muted] property is controlled by the [TickerProvider]
+/// that created the ticker.
 ///
 /// Tickers are driven by the [SchedulerBinding]. See
 /// [SchedulerBinding.scheduleFrameCallback].
@@ -64,6 +79,10 @@ class Ticker {
   ///
   /// When set to false, unsilences the ticker, potentially scheduling a frame
   /// to handle the next tick.
+  ///
+  /// By convention, the [muted] property is controlled by the object that
+  /// created the [Ticker] (typically a [TickerProvider]), not the object that
+  /// listens to the ticker's ticks.
   set muted(bool value) {
     if (value == muted)
       return;
@@ -75,7 +94,7 @@ class Ticker {
     }
   }
 
-  /// Whether this ticker has scheduled a call to call its callback
+  /// Whether this [Ticker] has scheduled a call to call its callback
   /// on the next frame.
   ///
   /// A ticker that is [muted] can be active (see [isActive]) yet not be
@@ -85,7 +104,7 @@ class Ticker {
   // and then this could return an accurate view of the actual scheduler.
   bool get isTicking => _completer != null && !muted;
 
-  /// Whether time is elapsing for this ticker. Becomes true when [start] is
+  /// Whether time is elapsing for this [Ticker]. Becomes true when [start] is
   /// called and false when [stop] is called.
   ///
   /// A ticker can be active yet not be actually ticking (i.e. not be calling
@@ -95,7 +114,7 @@ class Ticker {
 
   Duration _startTime;
 
-  /// Starts the clock for this ticker. If the ticker is not [muted], then this
+  /// Starts the clock for this [Ticker]. If the ticker is not [muted], then this
   /// also starts calling the ticker's callback once per animation frame.
   ///
   /// The returned future resolves once the ticker [stop]s ticking.
@@ -104,6 +123,9 @@ class Ticker {
   ///
   /// This method cannot be called while the ticker is active. To restart the
   /// ticker, first [stop] it.
+  ///
+  /// By convention, this method is used by the object that receives the ticks
+  /// (as opposed to the [TickerProvider] which created the ticker).
   Future<Null> start() {
     assert(() {
       if (isTicking) {
@@ -125,13 +147,16 @@ class Ticker {
     return _completer.future;
   }
 
-  /// Stops calling the ticker's callback.
+  /// Stops calling this [Ticker]'s callback.
   ///
   /// Causes the future returned by [start] to resolve.
   ///
   /// Calling this sets [isActive] to false.
   ///
   /// This method does nothing if called when the ticker is inactive.
+  ///
+  /// By convention, this method is used by the object that receives the ticks
+  /// (as opposed to the [TickerProvider] which created the ticker).
   void stop() {
     if (!isTicking)
       return;
@@ -153,7 +178,7 @@ class Ticker {
 
   int _animationId;
 
-  /// Whether this ticker has already scheduled a frame callback.
+  /// Whether this [Ticker] has already scheduled a frame callback.
   @protected
   bool get scheduled => _animationId != null;
 
@@ -166,6 +191,7 @@ class Ticker {
   /// * A tick has already been scheduled for the coming frame.
   /// * The ticker is not active ([start] has not been called).
   /// * The ticker is not ticking, e.g. because it is [muted] (see [isTicking]).
+  @protected
   bool get shouldScheduleTick => isTicking && !scheduled;
 
   void _tick(Duration timeStamp) {
@@ -210,8 +236,8 @@ class Ticker {
     assert(!shouldScheduleTick);
   }
 
-  /// Makes this ticker take the state of another ticker, and disposes the other
-  /// ticker.
+  /// Makes this [Ticker] take the state of another ticker, and disposes the
+  /// other ticker.
   ///
   /// This is useful if an object with a [Ticker] is given a new
   /// [TickerProvider] but needs to maintain continuity. In particular, this

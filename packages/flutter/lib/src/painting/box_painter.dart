@@ -5,8 +5,8 @@
 import 'dart:math' as math;
 import 'dart:ui' as ui show Image, Gradient, lerpDouble;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:meta/meta.dart';
 
 import 'basic_types.dart';
 import 'decoration.dart';
@@ -967,7 +967,7 @@ class BackgroundImage {
     this.repeat: ImageRepeat.noRepeat,
     this.centerSlice,
     this.colorFilter,
-    this.alignment
+    this.alignment,
   });
 
   /// The image to be painted into the background.
@@ -999,6 +999,8 @@ class BackgroundImage {
   /// An alignment of (0.0, 0.0) aligns the image to the top-left corner of its
   /// layout bounds.  An alignment of (1.0, 0.5) aligns the image to the middle
   /// of the right edge of its layout bounds.
+  ///
+  /// Defaults to [FractionalOffset.center].
   final FractionalOffset alignment;
 
   @override
@@ -1024,6 +1026,25 @@ class BackgroundImage {
 }
 
 /// An immutable description of how to paint a box.
+///
+/// The following example uses the [Container] widget from the widgets layer to
+/// draw a background image with a border:
+///
+/// ```dart
+/// new Container(
+///   decoration: new BoxDecoration(
+///     backgroundColor: const Color(0xff7c94b6),
+///     backgroundImage: new BackgroundImage(
+///       image: new ExactAssetImage('images/flowers.jpeg'),
+///       fit: ImageFit.cover,
+///     ),
+///     border: new Border.all(
+///       color: Colors.black,
+///       width: 8.0,
+///     ),
+///   ),
+/// )
+/// ```
 class BoxDecoration extends Decoration {
   /// Creates a box decoration.
   ///
@@ -1170,7 +1191,7 @@ class BoxDecoration extends Decoration {
   /// If the method is passed a non-empty string argument, then the output will
   /// span multiple lines, each prefixed by that argument.
   @override
-  String toString([String prefix = '']) {
+  String toString([String prefix = '', String indentPrefix]) {
     List<String> result = <String>[];
     if (backgroundColor != null)
       result.add('${prefix}backgroundColor: $backgroundColor');
@@ -1180,8 +1201,15 @@ class BoxDecoration extends Decoration {
       result.add('${prefix}border: $border');
     if (borderRadius != null)
       result.add('${prefix}borderRadius: $borderRadius');
-    if (boxShadow != null)
-      result.add('${prefix}boxShadow: ${boxShadow.map((BoxShadow shadow) => shadow.toString())}');
+    if (boxShadow != null) {
+      if (indentPrefix != null && boxShadow.length > 1) {
+        result.add('${prefix}boxShadow:');
+        for (BoxShadow shadow in boxShadow)
+          result.add('$indentPrefix$shadow');
+      } else {
+        result.add('${prefix}boxShadow: ${boxShadow.map((BoxShadow shadow) => shadow.toString()).join(", ")}');
+      }
+    }
     if (gradient != null)
       result.add('${prefix}gradient: $gradient');
     if (shape != BoxShape.rectangle)

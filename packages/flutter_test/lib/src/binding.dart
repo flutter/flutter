@@ -112,7 +112,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   void initInstances() {
     timeDilation = 1.0; // just in case the developer has artificially changed it for development
     http.Client.clientOverride = () {
-      return new http.MockClient((http.Request request){
+      return new http.MockClient((http.BaseRequest request) {
         return new Future<http.Response>.value(
           new http.Response("Mocked: Unavailable.", 404, request: request)
         );
@@ -342,7 +342,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
           stack: stack,
           context: 'running a test',
           library: 'Flutter test framework',
-          stackFilter: (List<String> frames) {
+          stackFilter: (Iterable<String> frames) {
             return FlutterError.defaultStackFilter(frames.skip(stackLinesToOmit));
           },
           informationCollector: (StringBuffer information) {

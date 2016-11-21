@@ -3,6 +3,7 @@
 Please tell us what you were doing and what went wrong. If you are running flutter tools from the command line, please try adding the `-v` or `--verbose` option to gather more information.
 
 If the problem is with your application's rendering, please attach a screenshot and any relevant source code.
+If you are getting an exception in the logs, and your code is implicated in the first few frames, then please include the source code for the functions involved.
 
 ## Logs
 

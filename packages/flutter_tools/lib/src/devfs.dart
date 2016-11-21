@@ -8,6 +8,7 @@ import 'dart:io';
 
 import 'package:path/path.dart' as path;
 
+import 'base/context.dart';
 import 'build_info.dart';
 import 'dart/package_map.dart';
 import 'asset.dart';
@@ -15,6 +16,15 @@ import 'globals.dart';
 import 'vmservice.dart';
 
 typedef void DevFSProgressReporter(int progress, int max);
+
+class DevFSConfig {
+  /// Should DevFS assume that symlink targets are stable?
+  bool cacheSymlinks = false;
+  /// Should DevFS assume that there are no symlinks to directories?
+  bool noDirectorySymlinks = false;
+}
+
+DevFSConfig get devFSConfig => context[DevFSConfig];
 
 // A file that has been added to a DevFS.
 class DevFSEntry {
@@ -30,10 +40,13 @@ class DevFSEntry {
   String get assetPath => bundleEntry.archivePath;
 
   final FileSystemEntity file;
+  FileSystemEntity _linkTarget;
   FileStat _fileStat;
   // When we scanned for files, did this still exist?
   bool _exists = false;
   DateTime get lastModified => _fileStat?.modified;
+  bool get _isSourceEntry => file == null;
+  bool get _isAssetEntry => bundleEntry != null;
   bool get stillExists {
     if (_isSourceEntry)
       return true;
@@ -67,19 +80,28 @@ class DevFSEntry {
   void _stat() {
     if (_isSourceEntry)
       return;
+    if (_linkTarget != null) {
+      // Stat the cached symlink target.
+      _fileStat = _linkTarget.statSync();
+      return;
+    }
     _fileStat = file.statSync();
     if (_fileStat.type == FileSystemEntityType.LINK) {
-      // Stat the link target.
+      // Resolve, stat, and maybe cache the symlink target.
       String resolved = file.resolveSymbolicLinksSync();
-      _fileStat = FileStat.statSync(resolved);
+      FileSystemEntity linkTarget = new File(resolved);
+      // Stat the link target.
+      _fileStat = linkTarget.statSync();
+      if (devFSConfig.cacheSymlinks) {
+        _linkTarget = linkTarget;
+      }
     }
   }
 
-  bool get _isSourceEntry => file == null;
-
-  bool get _isAssetEntry => bundleEntry != null;
-
   File _getFile() {
+    if (_linkTarget != null) {
+      return _linkTarget;
+    }
     if (file is Link) {
       // The link target.
       return new File(file.resolveSymbolicLinksSync());
@@ -222,14 +244,19 @@ class _DevFSHttpWriter {
 
   Future<Null> _scheduleWrite(DevFSEntry entry,
                               DevFSProgressReporter progressReporter) async {
-    HttpClientRequest request = await _client.putUrl(httpAddress);
-    request.headers.removeAll(HttpHeaders.ACCEPT_ENCODING);
-    request.headers.add('dev_fs_name', fsName);
-    request.headers.add('dev_fs_path', entry.devicePath);
-    Stream<List<int>> contents = entry.contentsAsCompressedStream();
-    await request.addStream(contents);
-    HttpClientResponse response = await request.close();
-    await response.drain();
+    try {
+      HttpClientRequest request = await _client.putUrl(httpAddress);
+      request.headers.removeAll(HttpHeaders.ACCEPT_ENCODING);
+      request.headers.add('dev_fs_name', fsName);
+      request.headers.add('dev_fs_path_b64',
+                          BASE64.encode(UTF8.encode(entry.devicePath)));
+      Stream<List<int>> contents = entry.contentsAsCompressedStream();
+      await request.addStream(contents);
+      HttpClientResponse response = await request.close();
+      await response.drain();
+    } catch (e, stackTrace) {
+      printError('Error writing "${entry.devicePath}" to DevFS: $e\n$stackTrace');
+    }
     if (progressReporter != null) {
       _done++;
       progressReporter(_done, _max);
@@ -247,20 +274,31 @@ class DevFS {
   /// Create a [DevFS] named [fsName] for the local files in [directory].
   DevFS(VMService serviceProtocol,
         String fsName,
-        this.rootDirectory)
+        this.rootDirectory, {
+        String packagesFilePath
+      })
     : _operations = new ServiceProtocolDevFSOperations(serviceProtocol),
       _httpWriter = new _DevFSHttpWriter(fsName, serviceProtocol),
-      fsName = fsName;
+      fsName = fsName {
+    _packagesFilePath =
+        packagesFilePath ?? path.join(rootDirectory.path, kPackagesFileName);
+  }
 
   DevFS.operations(this._operations,
                    this.fsName,
-                   this.rootDirectory)
-    : _httpWriter = null;
+                   this.rootDirectory, {
+                   String packagesFilePath,
+      })
+    : _httpWriter = null {
+    _packagesFilePath =
+        packagesFilePath ?? path.join(rootDirectory.path, kPackagesFileName);
+  }
 
   final DevFSOperations _operations;
   final _DevFSHttpWriter _httpWriter;
   final String fsName;
   final Directory rootDirectory;
+  String _packagesFilePath;
   final Map<String, DevFSEntry> _entries = <String, DevFSEntry>{};
   final Set<DevFSEntry> _dirtyEntries = new Set<DevFSEntry>();
   final Set<DevFSEntry> _deletedEntries = new Set<DevFSEntry>();
@@ -313,10 +351,10 @@ class DevFS {
                          fileFilter: fileFilter);
 
     printTrace('Scanning package files');
-    String packagesFilePath = path.join(rootDirectory.path, kPackagesFileName);
+
     StringBuffer sb;
-    if (FileSystemEntity.isFileSync(packagesFilePath)) {
-      PackageMap packageMap = new PackageMap(kPackagesFileName);
+    if (FileSystemEntity.isFileSync(_packagesFilePath)) {
+      PackageMap packageMap = new PackageMap(_packagesFilePath);
 
       for (String packageName in packageMap.map.keys) {
         Uri uri = packageMap.map[packageName];
@@ -485,12 +523,12 @@ class DevFS {
       Stream<FileSystemEntity> files =
           directory.list(recursive: recursive, followLinks: false);
       await for (FileSystemEntity file in files) {
-        if (file is Link) {
+        if (!devFSConfig.noDirectorySymlinks && (file is Link)) {
+          // Check if this is a symlink to a directory and skip it.
           final String linkPath = file.resolveSymbolicLinksSync();
           final FileSystemEntityType linkType =
               FileStat.statSync(linkPath).type;
           if (linkType == FileSystemEntityType.DIRECTORY) {
-            // Skip links to directories.
             continue;
           }
         }

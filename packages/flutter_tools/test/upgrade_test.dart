@@ -49,9 +49,8 @@ void main() {
 
       Future<Null> createProject() async {
         CreateCommand command = new CreateCommand();
-        CommandRunner runner = createTestCommandRunner(command);
-        int code = await runner.run(<String>['create', '--no-pub', temp.path]);
-        expect(code, 0);
+        CommandRunner<Null> runner = createTestCommandRunner(command);
+        await runner.run(<String>['create', '--no-pub', temp.path]);
       }
 
       testUsingContext('in project', () async {

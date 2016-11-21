@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import '../base/common.dart';
 import '../cache.dart';
 import '../device.dart';
 import '../globals.dart';
@@ -28,19 +29,19 @@ class LogsCommand extends FlutterCommand {
   Device device;
 
   @override
-  Future<int> verifyThenRunCommand() async {
+  Future<Null> verifyThenRunCommand() async {
     device = await findTargetDevice();
     if (device == null)
-      return 1;
+      throwToolExit(null);
     return super.verifyThenRunCommand();
   }
 
   @override
-  Future<int> runCommand() async {
+  Future<Null> runCommand() async {
     if (argResults['clear'])
       device.clearLogs();
 
-    DeviceLogReader logReader = device.logReader;
+    DeviceLogReader logReader = device.getLogReader();
 
     Cache.releaseLockEarly();
 
@@ -74,7 +75,6 @@ class LogsCommand extends FlutterCommand {
     int result = await exitCompleter.future;
     subscription.cancel();
     if (result != 0)
-      printError('Error listening to $logReader logs.');
-    return result;
+      throwToolExit('Error listening to $logReader logs.');
   }
 }

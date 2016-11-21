@@ -21,23 +21,31 @@ void main() {
       return scriptProcess.exitCode;
     }
 
-    test('Exits with code 0 when succeeds', () async {
+    test('exits with code 0 when succeeds', () async {
       expect(await runScript(<String>['smoke_test_success']), 0);
     });
 
-    test('Exits with code 1 when task throws', () async {
+    test('accepts file paths', () async {
+      expect(await runScript(<String>['bin/tasks/smoke_test_success.dart']), 0);
+    });
+
+    test('rejects invalid file paths', () async {
+      expect(await runScript(<String>['lib/framework/adb.dart']), 1);
+    });
+
+    test('exits with code 1 when task throws', () async {
       expect(await runScript(<String>['smoke_test_throws']), 1);
     });
 
-    test('Exits with code 1 when fails', () async {
+    test('exits with code 1 when fails', () async {
       expect(await runScript(<String>['smoke_test_failure']), 1);
     });
 
-    test('Exits with code 1 when fails to connect', () async {
+    test('exits with code 1 when fails to connect', () async {
       expect(await runScript(<String>['smoke_test_setup_failure']), 1);
     }, skip: true); // https://github.com/flutter/flutter/issues/5901
 
-    test('Exits with code 1 when results are mixed', () async {
+    test('exits with code 1 when results are mixed', () async {
       expect(
         await runScript(<String>[
           'smoke_test_failure',

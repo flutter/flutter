@@ -30,11 +30,11 @@ void main() {
     await tester.pump(); // Launch pesto
     await tester.pump(const Duration(seconds: 1)); // transition is complete
 
-    await tester.tap(find.text('Pesto Bruchetta'));
+    await tester.tap(find.text('Pesto Bruschetta'));
     await tester.pump(); // Launch the recipe page
     await tester.pump(const Duration(seconds: 1)); // transition is complete
 
-    await tester.scroll(find.text('Pesto Bruchetta'), const Offset(0.0, -300.0));
+    await tester.scroll(find.text('Pesto Bruschetta'), const Offset(0.0, -300.0));
     await tester.pump();
 
     Navigator.pop(find.byType(Scaffold).evaluate().single);

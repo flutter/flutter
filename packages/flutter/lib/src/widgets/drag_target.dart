@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:meta/meta.dart';
 
 import 'basic.dart';
 import 'binding.dart';
@@ -13,9 +13,13 @@ import 'framework.dart';
 import 'overlay.dart';
 
 /// Signature for determining whether the given data will be accepted by a [DragTarget].
+///
+/// Used by [DragTarget.onWillAccept].
 typedef bool DragTargetWillAccept<T>(T data);
 
 /// Signature for causing a [DragTarget] to accept the given data.
+///
+/// Used by [DragTarget.onAccept].
 typedef void DragTargetAccept<T>(T data);
 
 /// Signature for building children of a [DragTarget].
@@ -24,9 +28,13 @@ typedef void DragTargetAccept<T>(T data);
 /// over this [DragTarget] and that has passed [DragTarget.onWillAccept]. The
 /// `rejectedData` argument contains the list of drag data that is hovering over
 /// this [DragTarget] and that will not be accepted by the [DragTarget].
+///
+/// Used by [DragTarget.builder].
 typedef Widget DragTargetBuilder<T>(BuildContext context, List<T> candidateData, List<dynamic> rejectedData);
 
 /// Signature for when a [Draggable] is dropped without being accepted by a [DragTarget].
+///
+/// Used by [Draggable.onDraggableCanceled].
 typedef void DraggableCanceledCallback(Velocity velocity, Offset offset);
 
 /// Where the [Draggable] should be anchored during a drag.

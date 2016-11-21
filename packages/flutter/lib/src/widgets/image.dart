@@ -2,15 +2,20 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io' show Platform;
+import 'dart:io' show File, Platform;
 
-import 'package:meta/meta.dart';
-
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 import 'basic.dart';
 import 'framework.dart';
 import 'media_query.dart';
+
+export 'package:flutter/services.dart' show
+  AssetImage,
+  ExactAssetImage,
+  NetworkImage,
+  FileImage;
 
 /// Creates an [ImageConfiguration] based on the given [BuildContext] (and
 /// optionally size).
@@ -33,9 +38,10 @@ ImageConfiguration createLocalImageConfiguration(BuildContext context, { Size si
 /// specified:
 ///
 /// * [new Image], for obtaining an image from an [ImageProvider].
-/// * [new Image.network], for obtaining an image from a URL.
 /// * [new Image.asset], for obtaining an image from an [AssetBundle]
 ///   using a key.
+/// * [new Image.network], for obtaining an image from a URL.
+/// * [new Image.file], for obtaining an image from a [File].
 ///
 /// To automatically perform pixel-density-aware asset resolution, specify the
 /// image using an [AssetImage] and make sure that a [MaterialApp], [WidgetsApp],
@@ -84,6 +90,26 @@ class Image extends StatefulWidget {
     this.centerSlice,
     this.gaplessPlayback: false
   }) : image = new NetworkImage(src, scale: scale),
+       super(key: key);
+
+  /// Creates a widget that displays an [ImageStream] obtained from a [File].
+  ///
+  /// The [file], [scale], and [repeat] arguments must not be null.
+  ///
+  /// On Android, this may require the
+  /// `android.permission.READ_EXTERNAL_STORAGE` permission.
+  Image.file(File file, {
+    Key key,
+    double scale: 1.0,
+    this.width,
+    this.height,
+    this.color,
+    this.fit,
+    this.alignment,
+    this.repeat: ImageRepeat.noRepeat,
+    this.centerSlice,
+    this.gaplessPlayback: false
+  }) : image = new FileImage(file, scale: scale),
        super(key: key);
 
   /// Creates a widget that displays an [ImageStream] obtained from an asset

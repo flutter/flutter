@@ -12,6 +12,11 @@ import 'framework.dart';
 import 'overlay.dart';
 
 /// An opaque reference to a widget that can be mimicked.
+///
+/// Obtained from [MimicableState.startMimic].
+///
+/// This handle should be passed to a [Mimic] widget via its [Mimic.original]
+/// property.
 class MimicableHandle {
   MimicableHandle._(this._state);
 
@@ -27,6 +32,8 @@ class MimicableHandle {
 }
 
 /// An overlay entry that is mimicking another widget.
+///
+/// Obtained from [MimicableState.liftToOverlay].
 class MimicOverlayEntry {
   MimicOverlayEntry._(this._handle, this._overlay) {
     _initialGlobalBounds = _handle.globalBounds;
@@ -80,7 +87,8 @@ class MimicOverlayEntry {
    _overlayEntry?.markNeedsBuild();
  }
 
-  /// Remove this entry from the overlay and restore the widget to its original place in the tree.
+  /// Remove this entry from the overlay and restore the widget to its original
+  /// place in the tree.
   ///
   /// Once removed, the overlay entry cannot be used further.
   void dispose() {
@@ -127,11 +135,16 @@ class MimicOverlayEntry {
 }
 
 /// A widget that copies the appearance of another widget.
+///
+/// The other widget should be specified (via the [original] property) by
+/// providing a [MimicableHandle] obtained from [MimicableState.startMimic].
 class Mimic extends StatelessWidget {
   /// Creates a widget that copies the appearance of another widget.
   Mimic({ Key key, this.original }) : super(key: key);
 
   /// A handle to the widget that this widget should copy.
+  ///
+  /// Obtained from [MimicableState.startMimic].
   final MimicableHandle original;
 
   @override
@@ -145,7 +158,8 @@ class Mimic extends StatelessWidget {
 /// A widget that can be copied by a [Mimic].
 ///
 /// This widget's State, [MimicableState], contains an API for initiating the
-/// mimic operation.
+/// mimic operation. Typically you would obtain this state by assigning a
+/// [GlobalKey] to the [Mimicable] and then using [GlobalKey.currentState].
 class Mimicable extends StatefulWidget {
   /// Creates a widget that can be copies by a [Mimic].
   Mimicable({ Key key, this.child }) : super(key: key);
@@ -175,15 +189,17 @@ class MimicableState extends State<Mimicable> {
 
   /// Start the mimicking process.
   ///
-  /// The child of this object will no longer be built at this
-  /// location in the tree. Instead, this widget will build a
-  /// transparent placeholder with the same dimensions as the widget
-  /// had when the mimicking process started.
+  /// The child of this object will no longer be built at this location in the
+  /// tree. Instead, this widget will build a transparent placeholder with the
+  /// same dimensions as the widget had when the mimicking process started.
   ///
-  /// If you use startMimic(), it is your responsibility to do
-  /// something with the returned [MimicableHandle]; typically,
-  /// passing it to a [Mimic] widget. To mimic the child in the
-  /// [Overlay], consider using [liftToOverlay()] instead.
+  /// If you use [startMimic], it is your responsibility to do something with
+  /// the returned [MimicableHandle]; typically, passing it to a [Mimic] widget.
+  /// To mimic the child in the [Overlay], consider using [liftToOverlay()]
+  /// instead.
+  ///
+  /// To end the mimic process, call [MimicableHandle.stopMimic] on the returned
+  /// object.
   MimicableHandle startMimic() {
     assert(() {
       if (_placeholderSize != null) {
@@ -203,14 +219,16 @@ class MimicableState extends State<Mimicable> {
     return new MimicableHandle._(this);
   }
 
-  /// Start the mimicking process and mimic this object in the
-  /// enclosing [Overlay].
+  /// Start the mimicking process and mimic this object in the enclosing
+  /// [Overlay].
   ///
-  /// The child of this object will no longer be built at this
-  /// location in the tree. Instead, (1) this widget will build a
-  /// transparent placeholder with the same dimensions as the widget
-  /// had when the mimicking process started and (2) the child will be
-  /// placed in the enclosing overlay.
+  /// The child of this object will no longer be built at this location in the
+  /// tree. Instead, (1) this widget will build a transparent placeholder with
+  /// the same dimensions as the widget had when the mimicking process started
+  /// and (2) the child will be placed in the enclosing overlay.
+  ///
+  /// To end the mimic process, call [MimicOverlayEntry.dispose] on the returned
+  /// object.
   MimicOverlayEntry liftToOverlay() {
     OverlayState overlay = Overlay.of(context, debugRequiredFor: config);
     return new MimicOverlayEntry._(startMimic(), overlay);

@@ -25,7 +25,7 @@ const String kSnapshotFileName = 'flutter_tools.snapshot'; // in //flutter/bin/c
 const String kFlutterToolsScriptFileName = 'flutter_tools.dart'; // in //flutter/packages/flutter_tools/bin/
 const String kFlutterEnginePackageName = 'sky_engine';
 
-class FlutterCommandRunner extends CommandRunner {
+class FlutterCommandRunner extends CommandRunner<Null> {
   FlutterCommandRunner({ bool verboseHelp: false }) : super(
     'flutter',
     'Manage your Flutter app development.\n'
@@ -124,7 +124,7 @@ class FlutterCommandRunner extends CommandRunner {
   }
 
   @override
-  Future<dynamic> run(Iterable<String> args) {
+  Future<Null> run(Iterable<String> args) {
     // Have an invocation of 'build' print out it's sub-commands.
     if (args.length == 1 && args.first == 'build')
       args = <String>['build', '-h'];
@@ -133,7 +133,7 @@ class FlutterCommandRunner extends CommandRunner {
   }
 
   @override
-  Future<int> runCommand(ArgResults globalResults) async {
+  Future<Null> runCommand(ArgResults globalResults) async {
     // Check for verbose.
     if (globalResults['verbose'])
       context[Logger] = new VerboseLogger();
@@ -153,8 +153,7 @@ class FlutterCommandRunner extends CommandRunner {
     if (globalResults['suppress-analytics'])
       flutterUsage.suppressAnalytics = true;
 
-    if (!_checkFlutterCopy())
-      return 1;
+    _checkFlutterCopy();
 
     if (globalResults.wasParsed('packages'))
       PackageMap.globalPackagesPath = path.normalize(path.absolute(globalResults['packages']));
@@ -176,10 +175,10 @@ class FlutterCommandRunner extends CommandRunner {
     if (globalResults['version']) {
       flutterUsage.sendCommand('version');
       printStatus(FlutterVersion.getVersion(Cache.flutterRoot).toString());
-      return 0;
+      return;
     }
 
-    return await super.runCommand(globalResults);
+    await super.runCommand(globalResults);
   }
 
   String _tryEnginePath(String enginePath) {
@@ -285,7 +284,7 @@ class FlutterCommandRunner extends CommandRunner {
     return result;
   }
 
-  bool _checkFlutterCopy() {
+  void _checkFlutterCopy() {
     // If the current directory is contained by a flutter repo, check that it's
     // the same flutter that is currently running.
     String directory = path.normalize(path.absolute(Directory.current.path));
@@ -334,8 +333,6 @@ class FlutterCommandRunner extends CommandRunner {
         }
       }
     }
-
-    return true;
   }
 
   // Check if `bin/flutter` and `bin/cache/engine.stamp` exist.

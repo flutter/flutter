@@ -6,7 +6,7 @@ import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 
-CommandRunner createTestCommandRunner([FlutterCommand command]) {
+CommandRunner<Null> createTestCommandRunner([FlutterCommand command]) {
   FlutterCommandRunner runner  = new FlutterCommandRunner();
   if (command != null)
     runner.addCommand(command);

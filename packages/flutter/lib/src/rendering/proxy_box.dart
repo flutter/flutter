@@ -7,7 +7,7 @@ import 'dart:ui' as ui show ImageFilter;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/painting.dart';
-import 'package:meta/meta.dart';
+
 import 'package:vector_math/vector_math_64.dart';
 
 import 'box.dart';
@@ -51,6 +51,14 @@ class RenderProxyBox extends RenderBox with RenderObjectWithChildMixin<RenderBox
 /// impractical (e.g. because you want to mix in other classes as well).
 // TODO(ianh): Remove this class once https://github.com/dart-lang/sdk/issues/15101 is fixed
 abstract class RenderProxyBoxMixin implements RenderBox, RenderObjectWithChildMixin<RenderBox> {
+  @override
+  void setupParentData(RenderObject child) {
+    // We don't actually use the offset argument in BoxParentData, so let's
+    // avoid allocating it at all.
+    if (child.parentData is! ParentData)
+      child.parentData = new ParentData();
+  }
+
   @override
   double computeMinIntrinsicWidth(double height) {
     if (child != null)
@@ -100,6 +108,9 @@ abstract class RenderProxyBoxMixin implements RenderBox, RenderObjectWithChildMi
   bool hitTestChildren(HitTestResult result, { Point position }) {
     return child?.hitTest(result, position: position) ?? false;
   }
+
+  @override
+  void applyPaintTransform(RenderObject child, Matrix4 transform) { }
 
   @override
   void paint(PaintingContext context, Offset offset) {
@@ -1298,7 +1309,7 @@ class RenderDecoratedBox extends RenderProxyBox {
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     description.add('decoration:');
-    description.addAll(_decoration.toString("  ").split('\n'));
+    description.addAll(_decoration.toString('  ', '    ').split('\n'));
     description.add('configuration: $configuration');
   }
 }
@@ -1783,17 +1794,27 @@ abstract class CustomPainter {
 /// tree as needing a new layout during the callback (the layout for this frame
 /// has already happened).
 ///
+/// Custom painters normally size themselves to their child. If they do not have
+/// a child, they attempt to size themselves to the [preferredSize], which
+/// defaults to [Size.zero].
+///
 /// See also:
 ///
-///  * [CustomPainter]
-///  * [Canvas]
+///  * [CustomPainter], the class that custom painter delegates should extend.
+///  * [Canvas], the API provided to custom painter delegates.
 class RenderCustomPaint extends RenderProxyBox {
   /// Creates a render object that delegates its painting.
   RenderCustomPaint({
     CustomPainter painter,
     CustomPainter foregroundPainter,
-    RenderBox child
-  }) : _painter = painter, _foregroundPainter = foregroundPainter, super(child);
+    Size preferredSize: Size.zero,
+    RenderBox child,
+  }) : _painter = painter,
+       _foregroundPainter = foregroundPainter,
+       _preferredSize = preferredSize,
+       super(child) {
+    assert(preferredSize != null);
+  }
 
   /// The background custom paint delegate.
   ///
@@ -1860,6 +1881,23 @@ class RenderCustomPaint extends RenderProxyBox {
     }
   }
 
+  /// The size that this [RenderCustomPaint] should aim for, given the layout
+  /// constraints, if there is no child.
+  ///
+  /// Defaults to [Size.zero].
+  ///
+  /// If there's a child, this is ignored, and the size of the child is used
+  /// instead.
+  Size get preferredSize => _preferredSize;
+  Size _preferredSize;
+  set preferredSize (Size value) {
+    assert(value != null);
+    if (preferredSize == value)
+      return;
+    _preferredSize = value;
+    markNeedsLayout();
+  }
+
   @override
   void attach(PipelineOwner owner) {
     super.attach(owner);
@@ -1884,6 +1922,11 @@ class RenderCustomPaint extends RenderProxyBox {
   @override
   bool hitTestSelf(Point position) {
     return _painter != null && (_painter.hitTest(position) ?? true);
+  }
+
+  @override
+  void performResize() {
+    size = constraints.constrain(preferredSize);
   }
 
   void _paintWithPainter(Canvas canvas, Offset offset, CustomPainter painter) {
@@ -2322,6 +2365,12 @@ class RenderOffstage extends RenderProxyBox {
     if (offstage)
       return;
     super.visitChildrenForSemantics(visitor);
+  }
+
+  @override
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('offstage: $offstage');
   }
 }
 

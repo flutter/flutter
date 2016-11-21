@@ -5,11 +5,11 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
-import 'package:meta/meta.dart';
 
 import 'app_bar.dart';
 import 'colors.dart';
@@ -290,11 +290,9 @@ class _TabBarWrapper extends MultiChildRenderObjectWidget {
   }
 }
 
-/// Signature for building icons for tabs.
+/// Signature for building icons for [TabLabel]s.
 ///
-/// See also:
-///
-///  * [TabLabel]
+/// Used by [TabLabel.iconBuilder].
 typedef Widget TabLabelIconBuilder(BuildContext context, Color color);
 
 /// Each TabBar tab can display either a title [text], an icon, or both. An icon
@@ -507,6 +505,12 @@ class TabBarSelection<T> extends StatefulWidget {
   TabBarSelectionState<T> createState() => new TabBarSelectionState<T>();
 
   /// The state from the closest instance of this class that encloses the given context.
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// TabBarSelectionState<Foo> tabState = TabBarSelection.of/*<Foo>*/(context);
+  /// ```
   static TabBarSelectionState<dynamic/*=T*/> of/*<T>*/(BuildContext context) {
     return context.ancestorStateOfType(new TypeMatcher<TabBarSelectionState<dynamic/*=T*/>>());
   }

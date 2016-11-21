@@ -34,6 +34,21 @@ void main() {
     expect(Theme.of(tester.element(find.text('menuItem'))).brightness, equals(Brightness.dark));
   });
 
+  testWidgets('Fallback theme', (WidgetTester tester) async {
+    BuildContext capturedContext;
+    await tester.pumpWidget(
+      new Builder(
+        builder: (BuildContext context) {
+          capturedContext = context;
+          return new Container();
+        }
+      )
+    );
+
+    expect(Theme.of(capturedContext), equals(new ThemeData.fallback()));
+    expect(Theme.of(capturedContext, shadowThemeOnly: true), isNull);
+  });
+
   testWidgets('PopupMenu inherits shadowed app theme', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/5572
     final Key popupMenuButtonKey = new UniqueKey();

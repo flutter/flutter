@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
+
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
@@ -58,7 +60,7 @@ class _ToolbarLayout extends MultiChildLayoutDelegate {
     }
 
     if (hasChild(_ToolbarSlot.title)) {
-      final double maxWidth = size.width - kTitleLeft - actionsWidth;
+      final double maxWidth = math.max(size.width - kTitleLeft - actionsWidth, 0.0);
       final BoxConstraints constraints = new BoxConstraints.loose(size).copyWith(maxWidth: maxWidth);
       final Size titleSize = layoutChild(_ToolbarSlot.title, constraints);
       final double titleY = (size.height - titleSize.height) / 2.0;
@@ -108,7 +110,7 @@ class _AppBarExpandedHeight extends InheritedWidget {
 ///
 /// An app bar consists of a toolbar and potentially other widgets, such as a
 /// [TabBar] and a [FlexibleSpaceBar]. App bars typically expose one or more
-/// common actions with [IconButtons]s which are optionally followed by a
+/// common actions with [IconButton]s which are optionally followed by a
 /// [PopupMenuButton] for less common operations.
 ///
 /// App bars are most commonly used in the [Scaffold.appBar] property, which
@@ -125,11 +127,13 @@ class _AppBarExpandedHeight extends InheritedWidget {
 ///
 /// See also:
 ///
-///  * [Scaffold]
-///  * [TabBar]
-///  * [IconButton]
-///  * [PopupMenuButton]
-///  * [FlexibleSpaceBar]
+///  * [Scaffold], which displays the [AppBar] in its [Scaffold.appBar] slot.
+///  * [TabBar], which is typically placed in the [bottom] slot of the [AppBar]
+///    if the screen has multiple pages arranged in tabs.
+///  * [IconButton], which is used with [actions] to show buttons on the app bar.
+///  * [PopupMenuButton], to show a popup menu on the app bar, via [actions].
+///  * [FlexibleSpaceBar], which is used with [flexibleSpace] when the app bar
+///    can expand and collapse.
 ///  * <https://material.google.com/layout/structure.html#structure-toolbars>
 class AppBar extends StatelessWidget {
   /// Creates a material design app bar.
@@ -172,11 +176,29 @@ class AppBar extends StatelessWidget {
   /// of the app.
   final Widget title;
 
-  /// Widgets to display after the title widget.
+  /// Widgets to display after the [title] widget.
   ///
   /// Typically these widgets are [IconButton]s representing common operations.
   /// For less common operations, consider using a [PopupMenuButton] as the
   /// last action.
+  ///
+  /// For example:
+  ///
+  /// ```dart
+  /// return new Scaffold(
+  ///   appBar: new AppBar(
+  ///     title: new Text('Hello World'),
+  ///     actions: <Widget>[
+  ///       new IconButton(
+  ///         icon: new Icon(Icons.shopping_cart),
+  ///         tooltip: 'Open shopping cart',
+  ///         onPressed: _openCart,
+  ///       ),
+  ///     ]
+  ///   ),
+  ///   body: _buildBody(),
+  /// );
+  /// ```
   final List<Widget> actions;
 
   /// This widget is stacked behind the toolbar and the tabbar and it is not
@@ -194,6 +216,8 @@ class AppBar extends StatelessWidget {
   /// The z-coordinate at which to place this app bar.
   ///
   /// The following elevations have defined shadows: 1, 2, 3, 4, 6, 8, 9, 12, 16, 24
+  ///
+  /// Defaults to 4, the appropriate elevation for app bars.
   final int elevation;
 
   /// The color to use for the app bar's material. Typically this should be set

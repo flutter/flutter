@@ -9,6 +9,7 @@ import 'dart:io';
 import 'package:args/args.dart';
 import 'package:path/path.dart' as path;
 
+import '../base/common.dart';
 import '../base/logger.dart';
 import '../base/utils.dart';
 import '../cache.dart';
@@ -30,7 +31,7 @@ class AnalyzeContinuously extends AnalyzeBase {
   Status analysisStatus;
 
   @override
-  Future<int> analyze() async {
+  Future<Null> analyze() async {
     List<String> directories;
 
     if (argResults['flutter-repo']) {
@@ -53,8 +54,10 @@ class AnalyzeContinuously extends AnalyzeBase {
     await server.start();
     final int exitCode = await server.onExit;
 
-    printStatus('Analysis server exited with code $exitCode.');
-    return 0;
+    String message = 'Analysis server exited with code $exitCode.';
+    if (exitCode != 0)
+      throwToolExit(message, exitCode: exitCode);
+    printStatus(message);
   }
 
   void _handleAnalysisStatus(AnalysisServer server, bool isAnalyzing) {
@@ -66,7 +69,7 @@ class AnalyzeContinuously extends AnalyzeBase {
       analyzedPaths.clear();
       analysisTimer = new Stopwatch()..start();
     } else {
-      analysisStatus?.stop(showElapsedTime: true);
+      analysisStatus?.stop();
       analysisTimer.stop();
 
       logger.printStatus(terminal.clearScreen(), newline: false);

@@ -119,7 +119,7 @@ class _BottomNavigationDemoState extends State<BottomNavigationDemo>
     });
   }
 
-  Widget _buildBody() {
+  Widget _buildTransitionsStack() {
     final List<FadeTransition> transitions = <FadeTransition>[];
 
     for (NavigationIconView view in _navigationViews)
@@ -175,7 +175,9 @@ class _BottomNavigationDemoState extends State<BottomNavigationDemo>
           )
         ],
       ),
-      body: _buildBody(),
+      body: new Center(
+        child: _buildTransitionsStack()
+      ),
       bottomNavigationBar: botNavBar,
     );
   }

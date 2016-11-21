@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import '../base/common.dart';
 import '../base/os.dart';
 import '../base/process.dart';
 import '../dart/pub.dart';
@@ -21,14 +22,13 @@ class UpgradeCommand extends FlutterCommand {
   final String description = 'Upgrade your copy of Flutter.';
 
   @override
-  Future<int> runCommand() async {
+  Future<Null> runCommand() async {
     try {
       runCheckedSync(<String>[
         'git', 'rev-parse', '@{u}'
       ], workingDirectory: Cache.flutterRoot);
     } catch (e) {
-      printError('Unable to upgrade Flutter: no upstream repository configured.');
-      return 1;
+      throwToolExit('Unable to upgrade Flutter: no upstream repository configured.');
     }
 
     FlutterVersion version = new FlutterVersion(Cache.flutterRoot);
@@ -48,7 +48,7 @@ class UpgradeCommand extends FlutterCommand {
     );
 
     if (code != 0)
-      return code;
+      throwToolExit(null, exitCode: code);
 
     await buildUnlinkedForPackages(Cache.flutterRoot);
 
@@ -72,19 +72,13 @@ class UpgradeCommand extends FlutterCommand {
     String projRoot = findProjectRoot();
     if (projRoot != null) {
       printStatus('');
-      code = await pubGet(
-          directory: projRoot, upgrade: true, checkLastModified: false);
-
-      if (code != 0)
-        return code;
+      await pubGet(directory: projRoot, upgrade: true, checkLastModified: false);
     }
 
     // Run a doctor check in case system requirements have changed.
     printStatus('');
     printStatus('Running flutter doctor...');
     await doctor.diagnose();
-
-    return 0;
   }
 
   //  dev/benchmarks/complex_layout/lib/main.dart        |  24 +-

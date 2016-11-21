@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart' show defaultTargetPlatform;
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart' show timeDilation;
 
@@ -29,11 +30,15 @@ class GalleryApp extends StatefulWidget {
   GalleryApp({
     this.updateUrlFetcher,
     this.enablePerformanceOverlay: true,
+    this.checkerboardRasterCacheImages: true,
     Key key}
   ) : super(key: key);
 
   final UpdateUrlFetcher updateUrlFetcher;
+
   final bool enablePerformanceOverlay;
+
+  final bool checkerboardRasterCacheImages;
 
   @override
   GalleryAppState createState() => new GalleryAppState();
@@ -42,6 +47,7 @@ class GalleryApp extends StatefulWidget {
 class GalleryAppState extends State<GalleryApp> {
   bool _useLightTheme = true;
   bool _showPerformanceOverlay = false;
+  bool _checkerboardRasterCacheImages = false;
 
   TargetPlatform platform = defaultTargetPlatform;
 
@@ -58,6 +64,12 @@ class GalleryAppState extends State<GalleryApp> {
       onShowPerformanceOverlayChanged: config.enablePerformanceOverlay ? (bool value) {
         setState(() {
           _showPerformanceOverlay = value;
+        });
+      } : null,
+      checkerboardRasterCacheImages: _checkerboardRasterCacheImages,
+      onCheckerboardRasterCacheImagesChanged: config.checkerboardRasterCacheImages ? (bool value) {
+        setState(() {
+          _checkerboardRasterCacheImages = value;
         });
       } : null,
       onPlatformChanged: (TargetPlatform value) {
@@ -85,6 +97,7 @@ class GalleryAppState extends State<GalleryApp> {
       color: Colors.grey[500],
       theme: (_useLightTheme ? _kGalleryLightTheme : _kGalleryDarkTheme).copyWith(platform: platform),
       showPerformanceOverlay: _showPerformanceOverlay,
+      checkerboardRasterCacheImages: _checkerboardRasterCacheImages,
       routes: _kRoutes,
       home: home,
     );

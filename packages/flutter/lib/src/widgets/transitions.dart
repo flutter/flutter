@@ -4,7 +4,7 @@
 
 import 'dart:math' as math;
 
-import 'package:meta/meta.dart';
+import 'package:flutter/foundation.dart';
 import 'package:vector_math/vector_math_64.dart' show Matrix4;
 
 import 'basic.dart';
@@ -196,6 +196,9 @@ class RotationTransition extends AnimatedWidget {
 }
 
 /// Animates its own size and clips and aligns the child.
+///
+/// For a widget that automatically animates between the sizes of two children,
+/// fading between them, see [AnimatedCrossFade].
 class SizeTransition extends AnimatedWidget {
   /// Creates a size transition.
   ///
@@ -245,6 +248,9 @@ class SizeTransition extends AnimatedWidget {
 }
 
 /// Animates the opacity of a widget.
+///
+/// For a widget that automatically animates between the sizes of two children,
+/// fading between them, see [AnimatedCrossFade].
 class FadeTransition extends AnimatedWidget {
   /// Creates an opacity transition.
   ///
@@ -373,6 +379,10 @@ class RelativePositionedTransition extends AnimatedWidget {
 }
 
 /// A builder that builds a widget given a child.
+///
+/// The child should typically be part of the returned widget tree.
+///
+/// Used by [AnimatedBuilder.builder].
 typedef Widget TransitionBuilder(BuildContext context, Widget child);
 
 /// A general-purpose widget for building animations.

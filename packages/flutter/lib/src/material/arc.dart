@@ -5,8 +5,9 @@
 import 'dart:math' as math;
 import 'dart:ui' show hashValues, lerpDouble;
 
-import 'package:flutter/material.dart';
-import 'package:meta/meta.dart';
+import 'package:flutter/animation.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/painting.dart';
 
 // How close the begin and end points must be to an axis to be considered
 // vertical or horizontal.

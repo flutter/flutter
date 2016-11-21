@@ -18,7 +18,7 @@ class UpdatePackagesCommand extends FlutterCommand {
   UpdatePackagesCommand({ this.hidden: false }) {
     argParser.addFlag(
       'upgrade',
-      help: 'Run "pub upgrade" rather than "pub get".',
+      help: 'Ignores pubspec.lock and retrieves newer versions of packages.',
       defaultsTo: false
     );
   }
@@ -42,30 +42,23 @@ class UpdatePackagesCommand extends FlutterCommand {
     new File(path.join(coverageDir, 'lcov.info'))
       ..createSync(recursive: true)
       ..writeAsBytesSync(data, flush: true);
-    status.stop(showElapsedTime: true);
+    status.stop();
   }
 
   @override
-  Future<int> runCommand() async {
-    try {
-      final Stopwatch timer = new Stopwatch()..start();
-      int count = 0;
-      final bool upgrade = argResults['upgrade'];
+  Future<Null> runCommand() async {
+    final Stopwatch timer = new Stopwatch()..start();
+    int count = 0;
+    final bool upgrade = argResults['upgrade'];
 
-      for (Directory dir in runner.getRepoPackages()) {
-        int code = await pubGet(directory: dir.path, upgrade: upgrade, checkLastModified: false);
-        if (code != 0)
-          throw code;
-        count++;
-      }
-
-      await _downloadCoverageData();
-
-      final double seconds = timer.elapsedMilliseconds / 1000.0;
-      printStatus('\nRan \'pub\' $count time${count == 1 ? "" : "s"} and fetched coverage data in ${seconds.toStringAsFixed(1)}s.');
-      return 0;
-    } on int catch (code) {
-      return code;
+    for (Directory dir in runner.getRepoPackages()) {
+      await pubGet(directory: dir.path, upgrade: upgrade, checkLastModified: false);
+      count++;
     }
+
+    await _downloadCoverageData();
+
+    final double seconds = timer.elapsedMilliseconds / 1000.0;
+    printStatus('\nRan \'pub\' $count time${count == 1 ? "" : "s"} and fetched coverage data in ${seconds.toStringAsFixed(1)}s.');
   }
 }

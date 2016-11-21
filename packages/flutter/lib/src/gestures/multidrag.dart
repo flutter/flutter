@@ -5,7 +5,7 @@
 import 'dart:async';
 import 'dart:ui' show Point, Offset;
 
-import 'package:meta/meta.dart';
+import 'package:flutter/foundation.dart';
 
 import 'arena.dart';
 import 'binding.dart';
@@ -255,7 +255,7 @@ abstract class MultiDragGestureRecognizer<T extends MultiDragPointerState> exten
     assert(state._pendingDelta != null);
     Drag drag;
     if (onStart != null)
-      drag = onStart(initialPosition);
+      drag = invokeCallback/*<Drag>*/('onStart', () => onStart(initialPosition));
     if (drag != null) {
       state._startDrag(drag);
     } else {

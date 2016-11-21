@@ -167,7 +167,7 @@ class Cache {
         await _downloadFileToCache(url, cachedFile, unzip);
       } catch (e) {
         printError('Failed to fetch third-party artifact $url: $e');
-        throw e;
+        rethrow;
       }
     }
 
@@ -233,7 +233,7 @@ class MaterialFonts {
       Uri.parse(cache.getVersionFor(kName)), fontsDir, true
     ).then((_) {
       cache.setStampFor(kName, cache.getVersionFor(kName));
-      status.stop(showElapsedTime: true);
+      status.stop();
     }).whenComplete(() {
       status.cancel();
     });
@@ -245,14 +245,12 @@ class FlutterEngine {
   FlutterEngine(this.cache);
 
   static const String kName = 'engine';
-  static const String kFlutterServices = 'flutter_services';
   static const String kSkyEngine = 'sky_engine';
-  static const String kSkyServices = 'sky_services';
   static const String kSdkBundle = 'sdk.ds';
 
   final Cache cache;
 
-  List<String> _getPackageDirs() => const <String>[kSkyEngine, kSkyServices, kFlutterServices];
+  List<String> _getPackageDirs() => const <String>[kSkyEngine];
 
   List<String> _getEngineDirs() {
     List<String> dirs = <String>[
@@ -345,11 +343,10 @@ class FlutterEngine {
 
     Status summaryStatus = logger.startProgress('Building Dart SDK summary...');
     try {
-      String flutterServicesPath = path.join(pkgDir.path, kFlutterServices);
       String skyEnginePath = path.join(pkgDir.path, kSkyEngine);
-      buildSkyEngineSdkSummary(skyEnginePath, flutterServicesPath, kSdkBundle);
+      buildSkyEngineSdkSummary(skyEnginePath, kSdkBundle);
     } finally {
-      summaryStatus.stop(showElapsedTime: true);
+      summaryStatus.stop();
     }
 
     Directory engineDir = cache.getArtifactDirectory(kName);
@@ -392,7 +389,7 @@ class FlutterEngine {
   Future<Null> _downloadItem(String message, String url, Directory dest) {
     Status status = logger.startProgress(message);
     return Cache._downloadFileToCache(Uri.parse(url), dest, true).then((_) {
-      status.stop(showElapsedTime: true);
+      status.stop();
     }).whenComplete(() {
       status.cancel();
     });

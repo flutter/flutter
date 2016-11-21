@@ -6,7 +6,6 @@ import 'dart:async';
 
 import '../build_info.dart';
 import '../flx.dart';
-import '../globals.dart';
 import 'build.dart';
 
 class BuildFlxCommand extends BuildSubCommand {
@@ -38,11 +37,11 @@ class BuildFlxCommand extends BuildSubCommand {
     'they are used by some Flutter Android and iOS runtimes.';
 
   @override
-  Future<int> runCommand() async {
+  Future<Null> runCommand() async {
     await super.runCommand();
     String outputPath = argResults['output-file'];
 
-    return await build(
+    await build(
       mainPath: targetFile,
       manifestPath: argResults['manifest'],
       outputPath: outputPath,
@@ -53,12 +52,6 @@ class BuildFlxCommand extends BuildSubCommand {
       precompiledSnapshot: argResults['precompiled'],
       includeRobotoFonts: argResults['include-roboto-fonts'],
       reportLicensedPackages: argResults['report-licensed-packages']
-    ).then((int result) {
-      if (result == 0)
-        printStatus('Built $outputPath.');
-      else
-        printError('Error building $outputPath: $result.');
-      return result;
-    });
+    );
   }
 }

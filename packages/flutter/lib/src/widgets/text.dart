@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:meta/meta.dart';
+import 'package:flutter/foundation.dart';
 
 import 'basic.dart';
 import 'framework.dart';
@@ -83,6 +83,12 @@ class DefaultTextStyle extends InheritedWidget {
   ///
   /// If no such instance exists, returns an instance created by
   /// [DefaultTextStyle.fallback], which contains fallback values.
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// DefaultTextStyle style = DefaultTextStyle.of(context);
+  /// ```
   static DefaultTextStyle of(BuildContext context) {
     return context.inheritFromWidgetOfExactType(DefaultTextStyle) ?? const DefaultTextStyle.fallback();
   }

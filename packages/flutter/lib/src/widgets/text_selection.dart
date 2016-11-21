@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:meta/meta.dart';
 
 import 'basic.dart';
 import 'container.dart';
@@ -14,7 +14,6 @@ import 'gesture_detector.dart';
 import 'overlay.dart';
 import 'transitions.dart';
 
-// TODO(mpcomplete): Need one for [collapsed].
 /// Which type of selection handle to be displayed.
 ///
 /// With mixed-direction text, both handles may be the same type. Examples:
@@ -43,6 +42,12 @@ enum TextSelectionHandleType {
 /// [start] handle always moves the [start]/[baseOffset] of the selection.
 enum _TextSelectionHandlePosition { start, end }
 
+/// Signature for reporting changes to the selection component of an
+/// [InputValue] for the purposes of a [TextSelectionOverlay]. The [caretRect]
+/// argument gives the location of the caret in the coordinate space of the
+/// [RenderBox] given by the [TextSelectionOverlay.renderObject].
+///
+/// Used by [TextSelectionOverlay.onSelectionOverlayChanged].
 typedef void TextSelectionOverlayChanged(InputValue value, Rect caretRect);
 
 /// An interface for manipulating the selection, to be used by the implementor

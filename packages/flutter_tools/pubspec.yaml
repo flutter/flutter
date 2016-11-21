@@ -15,12 +15,7 @@ dependencies:
   file: ^0.1.0
   http: ^0.11.3
   json_rpc_2: ^2.0.0
-
-  # Version 1.0.4 has mysterious "pub get" spam about "drudge". If you update
-  # this dependency, be sure not to include 1.0.4 and to check the output of
-  # "pub get" for spam about "drudge".
-  json_schema: 1.0.3
-
+  json_schema: 1.0.6
   linter: ^0.1.21
   meta: ^1.0.3
   mustache: ^0.2.5
@@ -29,6 +24,7 @@ dependencies:
   pub_semver: ^1.0.0
   stack_trace: ^1.4.0
   usage: ^2.2.1
+  vm_service_client: '0.2.2+2' # TODO(yegor): use the latest version
   web_socket_channel: ^1.0.4
   xml: ^2.4.1
   yaml: ^2.1.3

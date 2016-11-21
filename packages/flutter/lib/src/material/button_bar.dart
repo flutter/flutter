@@ -18,10 +18,11 @@ import 'raised_button.dart';
 ///
 /// See also:
 ///
-///  * [RaisedButton]
-///  * [FlatButton]
-///  * [Dialog]
-///  * [ButtonTheme]
+///  * [RaisedButton], a kind of button.
+///  * [FlatButton], another kind of button.
+///  * [Card], at the bottom of which it is common to place a [ButtonBar].
+///  * [Dialog], which uses a [ButtonBar] for its actions.
+///  * [ButtonTheme], which configures the [ButtonBar].
 class ButtonBar extends StatelessWidget {
   /// Creates a button bar.
   ///
@@ -30,7 +31,7 @@ class ButtonBar extends StatelessWidget {
     Key key,
     this.alignment: MainAxisAlignment.end,
     this.mainAxisSize: MainAxisSize.max,
-    this.children
+    this.children: const <Widget>[],
   }) : super(key: key);
 
   /// How the children should be placed along the horizontal axis.

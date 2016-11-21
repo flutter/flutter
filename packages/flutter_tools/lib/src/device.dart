@@ -13,7 +13,6 @@ import 'base/os.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
 import 'globals.dart';
-import 'vmservice.dart';
 import 'ios/devices.dart';
 import 'ios/simulators.dart';
 
@@ -163,8 +162,12 @@ abstract class Device {
 
   TargetPlatform get platform;
 
-  /// Get the log reader for this device.
-  DeviceLogReader get logReader;
+  String get sdkNameAndVersion;
+
+  /// Get a log reader for this device.
+  /// If [app] is specified, this will return a log reader specific to that
+  /// application. Otherwise, a global log reader will be returned.
+  DeviceLogReader getLogReader({ApplicationPackage app});
 
   /// Get the port forwarder for this device.
   DevicePortForwarder get portForwarder;
@@ -187,30 +190,7 @@ abstract class Device {
   });
 
   /// Does this device implement support for hot reloading / restarting?
-  bool get supportsHotMode => false;
-
-  /// Run from a file. Necessary for hot mode.
-  Future<bool> runFromFile(ApplicationPackage package,
-                           String scriptUri,
-                           String packagesUri) {
-    throw 'runFromFile unsupported';
-  }
-
-  bool get supportsRestart => false;
-
-  bool get restartSendsFrameworkInitEvent => true;
-
-  /// Restart the given app; the application will already have been launched with
-  /// [startApp].
-  Future<bool> restartApp(
-    ApplicationPackage package,
-    LaunchResult result, {
-    String mainPath,
-    VMService observatory,
-    bool prebuiltApplication: false
-  }) async {
-    throw 'unsupported';
-  }
+  bool get supportsHotMode => true;
 
   /// Stop an app package on the current device.
   Future<bool> stopApp(ApplicationPackage app);
@@ -239,24 +219,36 @@ abstract class Device {
   String toString() => name;
 
   static Iterable<String> descriptions(List<Device> devices) {
-    int nameWidth = 0;
-    int idWidth = 0;
+    if (devices.isEmpty)
+      return <String>[];
 
+    // Extract device information
+    List<List<String>> table = <List<String>>[];
     for (Device device in devices) {
-      nameWidth = math.max(nameWidth, device.name.length);
-      idWidth = math.max(idWidth, device.id.length);
-    }
-
-    return devices.map((Device device) {
       String supportIndicator = device.isSupported() ? '' : ' (unsupported)';
       if (device.isLocalEmulator) {
         String type = device.platform == TargetPlatform.ios ? 'simulator' : 'emulator';
         supportIndicator += ' ($type)';
       }
-      return '${device.name.padRight(nameWidth)} • '
-             '${device.id.padRight(idWidth)} • '
-             '${getNameForTargetPlatform(device.platform)}$supportIndicator';
-    });
+      table.add(<String>[
+        device.name,
+        device.id,
+        '${getNameForTargetPlatform(device.platform)}',
+        '${device.sdkNameAndVersion}$supportIndicator',
+      ]);
+    }
+
+    // Calculate column widths
+    List<int> indices = new List<int>.generate(table[0].length - 1, (int i) => i);
+    List<int> widths = indices.map((int i) => 0).toList();
+    for (List<String> row in table) {
+      widths = indices.map((int i) => math.max(widths[i], row[i].length)).toList();
+    }
+
+    // Join columns into lines of text
+    return table.map((List<String> row) =>
+        indices.map((int i) => row[i].padRight(widths[i])).join(' • ') +
+        ' • ${row.last}');
   }
 
   static void printDevices(List<Device> devices) {

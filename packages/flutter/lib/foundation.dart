@@ -18,3 +18,10 @@ export 'src/foundation/listenable.dart';
 export 'src/foundation/platform.dart';
 export 'src/foundation/print.dart';
 export 'src/foundation/synchronous_future.dart';
+
+export 'package:meta/meta.dart' show
+  checked,
+  mustCallSuper,
+  optionalTypeArgs,
+  protected,
+  required;

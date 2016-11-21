@@ -5,8 +5,10 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 
+import 'application_package.dart';
 import 'base/logger.dart';
 import 'build_info.dart';
 import 'device.dart';
@@ -27,6 +29,11 @@ abstract class ResidentRunner {
   final bool usesTerminalUI;
   final Completer<int> _finished = new Completer<int>();
 
+  bool get isRunningDebug => debuggingOptions.buildMode == BuildMode.debug;
+  bool get isRunningProfile => debuggingOptions.buildMode == BuildMode.profile;
+  bool get isRunningRelease => debuggingOptions.buildMode == BuildMode.release;
+  bool get supportsServiceProtocol => isRunningDebug || isRunningProfile;
+
   VMService vmService;
   FlutterView currentView;
   StreamSubscription<String> _loggingSubscription;
@@ -34,11 +41,16 @@ abstract class ResidentRunner {
   /// Start the app and keep the process running during its lifetime.
   Future<int> run({
     Completer<DebugConnectionInfo> connectionInfoCompleter,
+    Completer<Null> appStartedCompleter,
     String route,
     bool shouldBuild: true
   });
 
-  Future<OperationResult> restart({ bool fullRestart: false, bool pauseAfterRestart: false });
+  bool get supportsRestart => false;
+
+  Future<OperationResult> restart({ bool fullRestart: false, bool pauseAfterRestart: false }) {
+    throw 'unsupported';
+  }
 
   Future<Null> stop() async {
     await stopEchoingDeviceLog();
@@ -71,6 +83,10 @@ abstract class ResidentRunner {
       await cleanupAfterSignal();
       exit(0);
     });
+    if (!supportsServiceProtocol)
+      return;
+    if (!supportsRestart)
+      return;
     ProcessSignal.SIGUSR1.watch().listen((ProcessSignal signal) async {
       printStatus('Caught SIGUSR1');
       await restart(fullRestart: false);
@@ -81,11 +97,11 @@ abstract class ResidentRunner {
     });
   }
 
-  Future<Null> startEchoingDeviceLog() async {
+  Future<Null> startEchoingDeviceLog(ApplicationPackage app) async {
     if (_loggingSubscription != null) {
       return;
     }
-    _loggingSubscription = device.logReader.logLines.listen((String line) {
+    _loggingSubscription = device.getLogReader(app: app).logLines.listen((String line) {
       if (!line.contains('Observatory listening on http') &&
           !line.contains('Diagnostic server listening on http'))
         printStatus(line);
@@ -106,12 +122,6 @@ abstract class ResidentRunner {
     vmService = await VMService.connect(port);
     printTrace('Connected to service protocol on port $port');
     await vmService.getVM();
-    vmService.onExtensionEvent.listen((ServiceEvent event) {
-      printTrace(event.toString());
-    });
-    vmService.onIsolateEvent.listen((ServiceEvent event) {
-      printTrace(event.toString());
-    });
 
     // Refresh the view list.
     await vmService.vm.refreshViews();
@@ -132,12 +142,16 @@ abstract class ResidentRunner {
 
     if (lower == 'h' || lower == '?' || character == AnsiTerminal.KEY_F1) {
       // F1, help
-      printHelp();
+      printHelp(details: true);
       return true;
     } else if (lower == 'w') {
+      if (!supportsServiceProtocol)
+        return true;
       await _debugDumpApp();
       return true;
     } else if (lower == 't') {
+      if (!supportsServiceProtocol)
+        return true;
       await _debugDumpRenderTree();
       return true;
     } else if (lower == 'q' || character == AnsiTerminal.KEY_F10) {
@@ -149,10 +163,21 @@ abstract class ResidentRunner {
     return false;
   }
 
+  bool _processingTerminalRequest = false;
+
   Future<Null> processTerminalInput(String command) async {
-    bool handled = await _commonTerminalInputHandler(command);
-    if (!handled)
-      await handleTerminalCommand(command);
+    if (_processingTerminalRequest) {
+      printTrace('Ignoring terminal input: "$command" because we are busy.');
+      return;
+    }
+    _processingTerminalRequest = true;
+    try {
+      bool handled = await _commonTerminalInputHandler(command);
+      if (!handled)
+        await handleTerminalCommand(command);
+    } finally {
+      _processingTerminalRequest = false;
+    }
   }
 
   void appFinished() {
@@ -170,9 +195,10 @@ abstract class ResidentRunner {
 
   void setupTerminal() {
     if (usesTerminalUI) {
-      if (!logger.quiet)
-        printHelp();
-
+      if (!logger.quiet) {
+        printStatus('');
+        printHelp(details: false);
+      }
       terminal.singleCharMode = true;
       terminal.onCharInput.listen((String code) {
         processTerminalInput(code);
@@ -204,7 +230,7 @@ abstract class ResidentRunner {
   /// Called right before we exit.
   Future<Null> cleanupAtFinish();
   /// Called to print help to the terminal.
-  void printHelp();
+  void printHelp({ @required bool details });
   /// Called when the runner should handle a terminal command.
   Future<Null> handleTerminalCommand(String code);
 }

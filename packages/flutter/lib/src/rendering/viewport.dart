@@ -4,7 +4,7 @@
 
 import 'dart:ui' as ui show window;
 
-import 'package:meta/meta.dart';
+import 'package:flutter/foundation.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'box.dart';
@@ -193,6 +193,8 @@ class RenderViewportBase extends RenderBox {
 }
 
 /// Signature for notifications about [RenderViewport] dimensions changing.
+///
+/// Used by [RenderViewport.onPaintOffsetUpdateNeeded].
 typedef Offset ViewportDimensionsChangeCallback(ViewportDimensions dimensions);
 
 /// A render object that's bigger on the inside.

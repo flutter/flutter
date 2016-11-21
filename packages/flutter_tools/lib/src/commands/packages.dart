@@ -4,9 +4,9 @@
 
 import 'dart:async';
 
+import '../base/common.dart';
 import '../base/os.dart';
 import '../dart/pub.dart';
-import '../globals.dart';
 import '../runner/flutter_command.dart';
 
 class PackagesCommand extends FlutterCommand {
@@ -25,14 +25,13 @@ class PackagesCommand extends FlutterCommand {
   final String description = 'Commands for managing Flutter packages.';
 
   @override
-  Future<int> verifyThenRunCommand() async {
-    if (!commandValidator())
-      return 1;
+  Future<Null> verifyThenRunCommand() async {
+    commandValidator();
     return super.verifyThenRunCommand();
   }
 
   @override
-  Future<int> runCommand() => new Future<int>.value(0);
+  Future<Null> runCommand() async { }
 }
 
 class PackagesGetCommand extends FlutterCommand {
@@ -53,26 +52,22 @@ class PackagesGetCommand extends FlutterCommand {
       "${runner.executableName} packages $name [<target directory>]";
 
   @override
-  Future<int> runCommand() async {
-    if (argResults.rest.length > 1) {
-      printStatus('Too many arguments.');
-      printStatus(usage);
-      return 1;
-    }
+  Future<Null> runCommand() async {
+    if (argResults.rest.length > 1)
+      throwToolExit('Too many arguments.\n$usage');
 
     String target = findProjectRoot(
         argResults.rest.length == 1 ? argResults.rest[0] : null);
-    if (target == null) {
-      printStatus('Expected to find project root starting at ' +
+    if (target == null)
+      throwToolExit(
+          'Expected to find project root starting at ' +
           (argResults.rest.length == 1
               ? argResults.rest[0]
-              : 'current working directory'));
-      printStatus(usage);
-      return 1;
-    }
+              : 'current working directory') +
+          '$usage');
 
     // TODO: If the user is using a local build, we should use the packages from their build instead of the cache.
 
-    return pubGet(directory: target, upgrade: upgrade, checkLastModified: false);
+    await pubGet(directory: target, upgrade: upgrade, checkLastModified: false);
   }
 }

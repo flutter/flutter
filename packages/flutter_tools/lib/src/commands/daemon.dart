@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import '../android/android_device.dart';
+import '../base/common.dart';
 import '../base/context.dart';
 import '../base/logger.dart';
 import '../base/utils.dart';
@@ -42,7 +43,7 @@ class DaemonCommand extends FlutterCommand {
   final bool hidden;
 
   @override
-  Future<int> runCommand() {
+  Future<Null> runCommand() {
     printStatus('Starting device daemon...');
 
     AppContext appContext = new AppContext();
@@ -51,30 +52,15 @@ class DaemonCommand extends FlutterCommand {
 
     Cache.releaseLockEarly();
 
-    return appContext.runInZone(() {
-      Stream<Map<String, dynamic>> commandStream = stdin
-        .transform(UTF8.decoder)
-        .transform(const LineSplitter())
-        .where((String line) => line.startsWith('[{') && line.endsWith('}]'))
-        .map((String line) {
-          line = line.substring(1, line.length - 1);
-          return JSON.decode(line);
-        });
+    return appContext.runInZone(() async {
+      Daemon daemon = new Daemon(
+          stdinCommandStream, stdoutCommandResponse,
+          daemonCommand: this, notifyingLogger: notifyingLogger);
 
-      Daemon daemon = new Daemon(commandStream, (Map<String, dynamic> command) {
-        stdout.writeln('[${JSON.encode(command, toEncodable: _jsonEncodeObject)}]');
-      }, daemonCommand: this, notifyingLogger: notifyingLogger);
-
-      return daemon.onExit;
+      int code = await daemon.onExit;
+      if (code != null)
+        throwToolExit(null, exitCode: code);
     }, onError: _handleError);
-  }
-
-  dynamic _jsonEncodeObject(dynamic object) {
-    if (object is Device)
-      return _deviceToMap(object);
-    if (object is OperationResult)
-      return _operationResultToMap(object);
-    return object;
   }
 
   dynamic _handleError(dynamic error, StackTrace stackTrace) {
@@ -306,6 +292,23 @@ class AppDomain extends Domain {
       throw "'$projectDirectory' does not exist";
 
     BuildMode buildMode = getBuildModeForName(mode) ?? BuildMode.debug;
+
+    AppInstance app = startApp(
+        device, projectDirectory, target, route,
+        buildMode, startPaused, enableHotReload);
+
+    return <String, dynamic>{
+      'appId': app.id,
+      'deviceId': device.id,
+      'directory': projectDirectory,
+      'supportsRestart': isRestartSupported(enableHotReload, device)
+    };
+  }
+
+  AppInstance startApp(
+      Device device, String projectDirectory, String target, String route,
+      BuildMode buildMode, bool startPaused, bool enableHotReload) {
+
     DebuggingOptions options;
 
     switch (buildMode) {
@@ -342,14 +345,12 @@ class AppDomain extends Domain {
       );
     }
 
-    bool supportsRestart = enableHotReload ? device.supportsHotMode : device.supportsRestart;
-
     AppInstance app = new AppInstance(_getNewAppId(), runner);
     _apps.add(app);
     _sendAppEvent(app, 'start', <String, dynamic>{
-      'deviceId': deviceId,
+      'deviceId': device.id,
       'directory': projectDirectory,
-      'supportsRestart': supportsRestart
+      'supportsRestart': isRestartSupported(enableHotReload, device)
     });
 
     Completer<DebugConnectionInfo> connectionInfoCompleter;
@@ -363,25 +364,32 @@ class AppDomain extends Domain {
         _sendAppEvent(app, 'debugPort', params);
       });
     }
-
-    app._runInZone(this, () {
-      runner.run(connectionInfoCompleter: connectionInfoCompleter, route: route).then((_) {
-        _sendAppEvent(app, 'stop');
-      }).catchError((dynamic error) {
-        _sendAppEvent(app, 'stop', <String, dynamic>{ 'error' : error.toString() });
-      }).whenComplete(() {
-        Directory.current = cwd;
-        _apps.remove(app);
-      });
+    Completer<Null> appStartedCompleter = new Completer<Null>();
+    appStartedCompleter.future.then((_) {
+      _sendAppEvent(app, 'started');
     });
 
-    return <String, dynamic>{
-      'appId': app.id,
-      'deviceId': deviceId,
-      'directory': projectDirectory,
-      'supportsRestart': supportsRestart
-    };
+    app._runInZone(this, () async {
+      try {
+        await runner.run(
+          connectionInfoCompleter: connectionInfoCompleter,
+          appStartedCompleter: appStartedCompleter,
+          route: route,
+        );
+        _sendAppEvent(app, 'stop');
+      } catch (error) {
+        _sendAppEvent(app, 'stop', <String, dynamic>{'error': error.toString()});
+      } finally {
+        Directory.current = cwd;
+        _apps.remove(app);
+      }
+    });
+
+    return app;
   }
+
+  bool isRestartSupported(bool enableHotReload, Device device) =>
+      enableHotReload && device.supportsHotMode;
 
   Future<OperationResult> restart(Map<String, dynamic> args) async {
     String appId = _getStringArg(args, 'appId', required: true);
@@ -561,6 +569,27 @@ class DeviceDomain extends Domain {
   }
 }
 
+Stream<Map<String, dynamic>> get stdinCommandStream => stdin
+  .transform(UTF8.decoder)
+  .transform(const LineSplitter())
+  .where((String line) => line.startsWith('[{') && line.endsWith('}]'))
+  .map((String line) {
+    line = line.substring(1, line.length - 1);
+    return JSON.decode(line);
+  });
+
+void stdoutCommandResponse(Map<String, dynamic> command) {
+  stdout.writeln('[${JSON.encode(command, toEncodable: _jsonEncodeObject)}]');
+}
+
+dynamic _jsonEncodeObject(dynamic object) {
+  if (object is Device)
+    return _deviceToMap(object);
+  if (object is OperationResult)
+    return _operationResultToMap(object);
+  return object;
+}
+
 Map<String, dynamic> _deviceToMap(Device device) {
   return <String, dynamic>{
     'id': device.id,
@@ -598,7 +627,7 @@ class NotifyingLogger extends Logger {
   }
 
   @override
-  void printStatus(String message, { bool emphasis: false, bool newline: true }) {
+  void printStatus(String message, { bool emphasis: false, bool newline: true, String ansiAlternative }) {
     _messageController.add(new LogMessage('status', message));
   }
 
@@ -608,7 +637,7 @@ class NotifyingLogger extends Logger {
   }
 
   @override
-  Status startProgress(String message) {
+  Status startProgress(String message, { String progressId }) {
     printStatus(message);
     return new Status();
   }
@@ -672,24 +701,31 @@ class _AppRunLogger extends Logger {
   }
 
   @override
-  void printStatus(String message, { bool emphasis: false, bool newline: true }) {
+  void printStatus(String message, { bool emphasis: false, bool newline: true, String ansiAlternative }) {
     _sendLogEvent(<String, dynamic>{ 'log': message });
   }
 
   @override
   void printTrace(String message) { }
 
+  Status _status;
+
   @override
-  Status startProgress(String message) {
+  Status startProgress(String message, { String progressId }) {
+    // Ignore nested progresses; return a no-op status object.
+    if (_status != null)
+      return new Status();
+
     int id = _nextProgressId++;
 
-    _sendLogEvent(<String, dynamic>{
-      'log': message,
-      'progress': true,
-      'id': id.toString()
+    _sendProgressEvent(<String, dynamic>{
+      'id': id.toString(),
+      'progressId': progressId,
+      'message': message,
     });
 
-    return new _AppLoggerStatus(this, id);
+    _status = new _AppLoggerStatus(this, id, progressId);
+    return _status;
   }
 
   void close() {
@@ -702,28 +738,38 @@ class _AppRunLogger extends Logger {
     else
       domain._sendAppEvent(app, 'log', event);
   }
+
+  void _sendProgressEvent(Map<String, dynamic> event) {
+    if (domain == null)
+      printStatus('event sent after app closed: $event');
+    else
+      domain._sendAppEvent(app, 'progress', event);
+  }
 }
 
 class _AppLoggerStatus implements Status {
-  _AppLoggerStatus(this.logger, this.id);
+  _AppLoggerStatus(this.logger, this.id, this.progressId);
 
   final _AppRunLogger logger;
   final int id;
+  final String progressId;
 
   @override
-  void stop({ bool showElapsedTime: false }) {
+  void stop({ bool showElapsedTime: true }) {
+    logger._status = null;
     _sendFinished();
   }
 
   @override
   void cancel() {
+    logger._status = null;
     _sendFinished();
   }
 
   void _sendFinished() {
-    logger._sendLogEvent(<String, dynamic>{
-      'progress': true,
+    logger._sendProgressEvent(<String, dynamic>{
       'id': id.toString(),
+      'progressId': progressId,
       'finished': true
     });
   }

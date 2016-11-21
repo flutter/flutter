@@ -16,7 +16,10 @@ const double _kCaretWidth = 1.0; // pixels
 
 final String _kZeroWidthSpace = new String.fromCharCode(0x200B);
 
-/// Called when the user changes the selection (including cursor location).
+/// Signature for the callback that reports when the user changes the selection
+/// (including the cursor location).
+///
+/// Used by [RenderEditable.onSelectionChanged].
 typedef void SelectionChangedHandler(TextSelection selection, RenderEditable renderObject, bool longPress);
 
 /// Represents a global screen coordinate of the point in a selection, and the
@@ -36,6 +39,12 @@ class TextSelectionPoint {
   final TextDirection direction;
 }
 
+/// Signature for the callback used by [RenderEditable] to determine the paint offset when
+/// the dimensions of the render box change.
+///
+/// The return value should be the new paint offset to use.
+///
+/// Used by [RenderEditable.onPaintOffsetUpdateNeeded].
 typedef Offset RenderEditablePaintOffsetNeededCallback(ViewportDimensions dimensions, Rect caretRect);
 
 /// A single line of editable text.
@@ -216,12 +225,12 @@ class RenderEditable extends RenderBox {
   ui.Paragraph _layoutTemplate;
   double get _preferredLineHeight {
     if (_layoutTemplate == null) {
-      ui.ParagraphBuilder builder = new ui.ParagraphBuilder()
+      ui.ParagraphBuilder builder = new ui.ParagraphBuilder(new ui.ParagraphStyle())
         ..pushStyle(text.style.getTextStyle(textScaleFactor: textScaleFactor))
         ..addText(_kZeroWidthSpace);
       // TODO(abarth): ParagraphBuilder#build's argument should be optional.
       // TODO(abarth): These min/max values should be the default for ui.Paragraph.
-      _layoutTemplate = builder.build(new ui.ParagraphStyle())
+      _layoutTemplate = builder.build()
         ..layout(new ui.ParagraphConstraints(width: double.INFINITY));
     }
     return _layoutTemplate.height;

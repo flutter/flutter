@@ -3,12 +3,13 @@
 // found in the LICENSE file.
 
 /// Timeline data recorded by the Flutter runtime.
-///
-/// The data is in the `chrome://tracing` format. It can be saved to a file
-/// and loaded in Chrome for visual inspection.
-///
-/// See https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview
 class Timeline {
+  /// Creates a timeline given JSON-encoded timeline data.
+  ///
+  /// [json] is in the `chrome://tracing` format. It can be saved to a file
+  /// and loaded in Chrome for visual inspection.
+  ///
+  /// See https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview
   factory Timeline.fromJson(Map<String, dynamic> json) {
     return new Timeline._(json, _parseEvents(json));
   }
@@ -24,6 +25,7 @@ class Timeline {
 
 /// A single timeline event.
 class TimelineEvent {
+  /// Creates a timeline event given JSON-encoded event data.
   factory TimelineEvent(Map<String, dynamic> json) {
     return new TimelineEvent._(
       json,

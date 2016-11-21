@@ -8,6 +8,7 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 
 import '../android/android.dart' as android;
+import '../base/common.dart';
 import '../base/utils.dart';
 import '../cache.dart';
 import '../dart/pub.dart';
@@ -19,7 +20,7 @@ class CreateCommand extends FlutterCommand {
   CreateCommand() {
     argParser.addFlag('pub',
       defaultsTo: true,
-      help: 'Whether to run "pub get" after the project has been created.'
+      help: 'Whether to run "flutter packages get" after the project has been created.'
     );
     argParser.addFlag(
       'with-driver-test',
@@ -45,23 +46,24 @@ class CreateCommand extends FlutterCommand {
   String get invocation => "${runner.executableName} $name <output directory>";
 
   @override
-  Future<int> runCommand() async {
-    if (argResults.rest.isEmpty) {
-      printStatus('No option specified for the output directory.');
-      printStatus(usage);
-      return 2;
-    }
+  Future<Null> runCommand() async {
+    if (argResults.rest.isEmpty)
+      throwToolExit('No option specified for the output directory.\n$usage', exitCode: 2);
 
     if (argResults.rest.length > 1) {
-      printStatus('Multiple output directories specified.');
-      return 2;
+      String message = 'Multiple output directories specified.';
+      for (String arg in argResults.rest) {
+        if (arg.startsWith('-')) {
+          message += '\nTry moving $arg to be immediately following $name';
+          break;
+        }
+      }
+      throwToolExit(message, exitCode: 2);
     }
 
-    if (Cache.flutterRoot == null) {
-      printError('Neither the --flutter-root command line flag nor the FLUTTER_ROOT environment\n'
-        'variable was specified. Unable to find package:flutter.');
-      return 2;
-    }
+    if (Cache.flutterRoot == null)
+      throwToolExit('Neither the --flutter-root command line flag nor the FLUTTER_ROOT environment\n'
+        'variable was specified. Unable to find package:flutter.', exitCode: 2);
 
     await Cache.instance.updateAll();
 
@@ -69,31 +71,25 @@ class CreateCommand extends FlutterCommand {
 
     String flutterPackagesDirectory = path.join(flutterRoot, 'packages');
     String flutterPackagePath = path.join(flutterPackagesDirectory, 'flutter');
-    if (!FileSystemEntity.isFileSync(path.join(flutterPackagePath, 'pubspec.yaml'))) {
-      printError('Unable to find package:flutter in $flutterPackagePath');
-      return 2;
-    }
+    if (!FileSystemEntity.isFileSync(path.join(flutterPackagePath, 'pubspec.yaml')))
+      throwToolExit('Unable to find package:flutter in $flutterPackagePath', exitCode: 2);
 
     String flutterDriverPackagePath = path.join(flutterRoot, 'packages', 'flutter_driver');
-    if (!FileSystemEntity.isFileSync(path.join(flutterDriverPackagePath, 'pubspec.yaml'))) {
-      printError('Unable to find package:flutter_driver in $flutterDriverPackagePath');
-      return 2;
-    }
+    if (!FileSystemEntity.isFileSync(path.join(flutterDriverPackagePath, 'pubspec.yaml')))
+      throwToolExit('Unable to find package:flutter_driver in $flutterDriverPackagePath', exitCode: 2);
 
     Directory projectDir = new Directory(argResults.rest.first);
     String dirPath = path.normalize(projectDir.absolute.path);
     String relativePath = path.relative(dirPath);
     String projectName = _normalizeProjectName(path.basename(dirPath));
 
-    if (_validateProjectDir(dirPath) != null) {
-      printError(_validateProjectDir(dirPath));
-      return 1;
-    }
+    String error =_validateProjectDir(dirPath, flutterRoot: flutterRoot);
+    if (error != null)
+      throwToolExit(error);
 
-    if (_validateProjectName(projectName) != null) {
-      printError(_validateProjectName(projectName));
-      return 1;
-    }
+    error = _validateProjectName(projectName);
+    if (error != null)
+      throwToolExit(error);
 
     int generatedCount = _renderTemplates(
       projectName,
@@ -106,11 +102,8 @@ class CreateCommand extends FlutterCommand {
 
     printStatus('');
 
-    if (argResults['pub']) {
-      int code = await pubGet(directory: dirPath);
-      if (code != 0)
-        return code;
-    }
+    if (argResults['pub'])
+      await pubGet(directory: dirPath);
 
     printStatus('');
 
@@ -141,8 +134,6 @@ Your main program file is lib/main.dart in the $relativePath directory.
         "directory in order to launch your app.");
       printStatus("Your main program file is: $relativePath/lib/main.dart");
     }
-
-    return 0;
   }
 
   int _renderTemplates(String projectName, String projectDescription, String dirPath,
@@ -236,17 +227,22 @@ String _validateProjectName(String projectName) {
 
 /// Return `null` if the project directory is legal. Return a validation message
 /// if we should disallow the directory name.
-String _validateProjectDir(String projectName) {
-  FileSystemEntityType type = FileSystemEntity.typeSync(projectName);
+String _validateProjectDir(String dirPath, { String flutterRoot }) {
+  if (path.isWithin(flutterRoot, dirPath)) {
+    return "Cannot create a project within the Flutter SDK.\n"
+      "Target directory '$dirPath' is within the Flutter SDK at '$flutterRoot'.";
+  }
+
+  FileSystemEntityType type = FileSystemEntity.typeSync(dirPath);
 
   if (type != FileSystemEntityType.NOT_FOUND) {
     switch(type) {
       case FileSystemEntityType.FILE:
         // Do not overwrite files.
-        return "Invalid project name: '$projectName' - file exists.";
+        return "Invalid project name: '$dirPath' - file exists.";
       case FileSystemEntityType.LINK:
         // Do not overwrite links.
-        return "Invalid project name: '$projectName' - refers to a link.";
+        return "Invalid project name: '$dirPath' - refers to a link.";
     }
   }
 

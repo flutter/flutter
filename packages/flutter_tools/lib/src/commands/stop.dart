@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import '../application_package.dart';
+import '../base/common.dart';
 import '../build_info.dart';
 import '../device.dart';
 import '../globals.dart';
@@ -20,24 +21,23 @@ class StopCommand extends FlutterCommand {
   Device device;
 
   @override
-  Future<int> verifyThenRunCommand() async {
-    if (!commandValidator())
-      return 1;
+  Future<Null> verifyThenRunCommand() async {
+    commandValidator();
     device = await findTargetDevice();
     if (device == null)
-      return 1;
+      throwToolExit(null);
     return super.verifyThenRunCommand();
   }
 
   @override
-  Future<int> runCommand() async {
+  Future<Null> runCommand() async {
     ApplicationPackage app = applicationPackages.getPackageForPlatform(device.platform);
     if (app == null) {
       String platformName = getNameForTargetPlatform(device.platform);
-      printError('No Flutter application for $platformName found in the current directory.');
-      return 1;
+      throwToolExit('No Flutter application for $platformName found in the current directory.');
     }
     printStatus('Stopping apps on ${device.name}.');
-    return await device.stopApp(app) ? 0 : 1;
+    if (!await device.stopApp(app))
+      throwToolExit(null);
   }
 }

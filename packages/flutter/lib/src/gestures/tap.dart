@@ -99,7 +99,7 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
   void resolve(GestureDisposition disposition) {
     if (_wonArenaForPrimaryPointer && disposition == GestureDisposition.rejected) {
       if (onTapCancel != null)
-        onTapCancel();
+        invokeCallback/*<Null>*/('onTapCancel', onTapCancel); // ignore: STRONG_MODE_INVALID_CAST_FUNCTION_EXPR, https://github.com/dart-lang/sdk/issues/27504
       _reset();
     }
     super.resolve(disposition);
@@ -126,7 +126,7 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
     if (pointer == primaryPointer) {
       assert(state == GestureRecognizerState.defunct);
       if (onTapCancel != null)
-        onTapCancel();
+        invokeCallback/*<Null>*/('onTapCancel', onTapCancel); // ignore: STRONG_MODE_INVALID_CAST_FUNCTION_EXPR, https://github.com/dart-lang/sdk/issues/27504
       _reset();
     }
   }
@@ -134,7 +134,7 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
   void _checkDown() {
     if (!_sentTapDown) {
       if (onTapDown != null)
-        onTapDown(new TapDownDetails(globalPosition: initialPosition));
+        invokeCallback/*<Null>*/('onTapDown', () => onTapDown(new TapDownDetails(globalPosition: initialPosition))); // ignore: STRONG_MODE_INVALID_CAST_FUNCTION_EXPR, https://github.com/dart-lang/sdk/issues/27504
       _sentTapDown = true;
     }
   }
@@ -143,9 +143,9 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
     if (_wonArenaForPrimaryPointer && _finalPosition != null) {
       resolve(GestureDisposition.accepted);
       if (onTapUp != null)
-        onTapUp(new TapUpDetails(globalPosition: _finalPosition));
+        invokeCallback/*<Null>*/('onTapUp', () => onTapUp(new TapUpDetails(globalPosition: _finalPosition))); // ignore: STRONG_MODE_INVALID_CAST_FUNCTION_EXPR, https://github.com/dart-lang/sdk/issues/27504
       if (onTap != null)
-        onTap();
+        invokeCallback/*<Null>*/('onTap', onTap); // ignore: STRONG_MODE_INVALID_CAST_FUNCTION_EXPR, https://github.com/dart-lang/sdk/issues/27504
       _reset();
     }
   }

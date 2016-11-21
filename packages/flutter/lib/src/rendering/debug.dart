@@ -76,6 +76,13 @@ bool debugPrintMarkNeedsLayoutStacks = false;
 /// Check the intrinsic sizes of each [RenderBox] during layout.
 bool debugCheckIntrinsicSizes = false;
 
+/// Adds [Timeline] events for every RenderObject painted.
+///
+/// For details on how to use [Timeline] events in the Dart Observatory to
+/// optimize your app, see https://fuchsia.googlesource.com/sysui/+/master/docs/performance.md
+bool debugProfilePaintsEnabled = false;
+
+
 /// Returns a list of strings representing the given transform in a format useful for [RenderObject.debugFillDescription].
 List<String> debugDescribeTransform(Matrix4 transform) {
   List<String> matrix = transform.toString().split('\n').map((String s) => '  $s').toList();

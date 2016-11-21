@@ -41,7 +41,7 @@ class PackageMap {
     String message = '$packagesPath does not exist.';
     String pubspecPath = path.absolute(path.dirname(packagesPath), 'pubspec.yaml');
     if (FileSystemEntity.isFileSync(pubspecPath))
-      message += '\nDid you run `pub get` in this directory?';
+      message += '\nDid you run "flutter packages get" in this directory?';
     else
       message += '\nDid you run this command from the same directory as your pubspec.yaml file?';
     return message;

@@ -2,15 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:meta/meta.dart';
 
 import 'basic_types.dart';
 import 'edge_insets.dart';
 
+export 'package:flutter/services.dart' show ImageConfiguration;
+
 export 'basic_types.dart' show Point, Offset, Size;
 export 'edge_insets.dart' show EdgeInsets;
-export 'package:flutter/services.dart' show ImageConfiguration;
 
 // This group of classes is intended for painting in cartesian coordinates.
 
@@ -79,8 +80,16 @@ abstract class Decoration {
   /// if it is a [BoxDecoration] with definitely no [BackgroundImage]).
   BoxPainter createBoxPainter([VoidCallback onChanged]);
 
+  /// Returns a string representation of this object.
+  ///
+  /// Every line of the output should be prefixed by `prefix`.
+  ///
+  /// If `indentPrefix` is non-null, then the description can be further split
+  /// into sublines, and each subline should be prefixed with `indentPrefix`
+  /// (rather that `prefix`). This is used, for example, by [BoxDecoration] for
+  /// the otherwise quite verbose [BoxShadow] descriptions.
   @override
-  String toString([String prefix = '']) => '$prefix$runtimeType';
+  String toString([String prefix = '', String indentPrefix ]) => '$prefix$runtimeType';
 }
 
 /// A stateful class that can paint a particular [Decoration].

@@ -5,11 +5,11 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:intl/date_symbols.dart';
 import 'package:intl/intl.dart';
-import 'package:meta/meta.dart';
 
 import 'button_bar.dart';
 import 'button.dart';
@@ -224,9 +224,7 @@ class DayPicker extends StatelessWidget {
 
         if (selectedDate.year == year && selectedDate.month == month && selectedDate.day == day) {
           // The selected day gets a circle background highlight, and a contrasting text color.
-          itemStyle = themeData.textTheme.body2.copyWith(
-            color: (themeData.brightness == Brightness.light) ? Colors.white : Colors.black87
-          );
+          itemStyle = themeData.accentTextTheme.body2;
           decoration = new BoxDecoration(
             backgroundColor: themeData.accentColor,
             shape: BoxShape.circle

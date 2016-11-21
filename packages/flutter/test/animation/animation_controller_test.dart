@@ -208,15 +208,58 @@ void main() {
     );
     expect(controller.toString(), hasOneLineDescription);
     controller.forward();
+    WidgetsBinding.instance.handleBeginFrame(const Duration(milliseconds: 10));
     WidgetsBinding.instance.handleBeginFrame(const Duration(milliseconds: 20));
-    WidgetsBinding.instance.handleBeginFrame(const Duration(milliseconds: 30));
     expect(controller.toString(), hasOneLineDescription);
-    WidgetsBinding.instance.handleBeginFrame(const Duration(milliseconds: 120));
+    WidgetsBinding.instance.handleBeginFrame(const Duration(milliseconds: 30));
     expect(controller.toString(), hasOneLineDescription);
     controller.reverse();
-    WidgetsBinding.instance.handleBeginFrame(const Duration(milliseconds: 20));
-    WidgetsBinding.instance.handleBeginFrame(const Duration(milliseconds: 30));
+    WidgetsBinding.instance.handleBeginFrame(const Duration(milliseconds: 40));
+    WidgetsBinding.instance.handleBeginFrame(const Duration(milliseconds: 50));
     expect(controller.toString(), hasOneLineDescription);
+    controller.stop();
+  });
+
+  test('velocity test - linear', () {
+    AnimationController controller = new AnimationController(
+      duration: const Duration(milliseconds: 1000),
+      vsync: const TestVSync(),
+    );
+
+    // mid-flight
+    controller.forward();
+    WidgetsBinding.instance.handleBeginFrame(const Duration(milliseconds: 0));
+    WidgetsBinding.instance.handleBeginFrame(const Duration(milliseconds: 500));
+    expect(controller.velocity, inInclusiveRange(0.9, 1.1));
+
+    // edges
+    controller.forward();
+    expect(controller.velocity, inInclusiveRange(0.4, 0.6));
+    WidgetsBinding.instance.handleBeginFrame(Duration.ZERO);
+    expect(controller.velocity, inInclusiveRange(0.4, 0.6));
+    WidgetsBinding.instance.handleBeginFrame(const Duration(milliseconds: 5));
+    expect(controller.velocity, inInclusiveRange(0.9, 1.1));
+
+    controller.forward(from: 0.5);
+    expect(controller.velocity, inInclusiveRange(0.4, 0.6));
+    WidgetsBinding.instance.handleBeginFrame(Duration.ZERO);
+    expect(controller.velocity, inInclusiveRange(0.4, 0.6));
+    WidgetsBinding.instance.handleBeginFrame(const Duration(milliseconds: 5));
+    expect(controller.velocity, inInclusiveRange(0.9, 1.1));
+
+    // stopped
+    controller.forward(from: 1.0);
+    expect(controller.velocity, 0.0);
+    WidgetsBinding.instance.handleBeginFrame(Duration.ZERO);
+    expect(controller.velocity, 0.0);
+    WidgetsBinding.instance.handleBeginFrame(const Duration(milliseconds: 500));
+    expect(controller.velocity, 0.0);
+
+    controller.forward();
+    WidgetsBinding.instance.handleBeginFrame(Duration.ZERO);
+    WidgetsBinding.instance.handleBeginFrame(const Duration(milliseconds: 1000));
+    expect(controller.velocity, 0.0);
+
     controller.stop();
   });
 }

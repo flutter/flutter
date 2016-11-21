@@ -7,7 +7,25 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter/material.dart';
 
 void main() {
-  testWidgets('TwoLeveList basics', (WidgetTester tester) async {
+  testWidgets('TwoLevelList default control', (WidgetTester tester) async {
+    await tester.pumpWidget(new Center(child: new TwoLevelList()));
+
+    await tester.pumpWidget(
+      new Material(
+        child: new Center(
+          child: new TwoLevelList(
+            children: <Widget>[
+              new TwoLevelSublist(
+                title: new Text('Title'),
+              )
+            ]
+          )
+        )
+      )
+    );
+  });
+
+  testWidgets('TwoLevelList basics', (WidgetTester tester) async {
     final Key topKey = new UniqueKey();
     final Key sublistKey = new UniqueKey();
     final Key bottomKey = new UniqueKey();

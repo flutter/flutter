@@ -5,7 +5,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/rendering.dart';
-import 'package:meta/meta.dart';
+import 'package:flutter/foundation.dart';
 
 import 'basic.dart';
 import 'framework.dart';
@@ -144,7 +144,7 @@ class LazyBlockChildren extends LazyBlockDelegate {
   ///
   /// The list of children must not be modified after being passed to this
   /// constructor.
-  LazyBlockChildren({ this.children }) {
+  LazyBlockChildren({ this.children: const <Widget>[] }) {
     assert(children != null);
   }
 
@@ -191,9 +191,13 @@ class LazyBlockChildren extends LazyBlockDelegate {
 /// [scrollOffset] is expensive because [LazyBlock] computes the size of every
 /// child between the old scroll offset and the new scroll offset.
 ///
-/// Prefer [ScrollableList] when all the children have the same size because
+/// Prefer [ScrollableLazyList] when all the children have the same size because
 /// it can use that property to be more efficient. Prefer [ScrollableViewport]
 /// when there is only one child.
+///
+/// Consider [Block] if you have a small number of children that will only
+/// scroll in unusual circumstances (e.g. when the user's device is smaller than
+/// expected).
 class LazyBlock extends StatelessWidget {
   /// Creates an infinite scrolling list of variable height children.
   ///
@@ -510,9 +514,9 @@ class _LazyBlockElement extends RenderObjectElement {
   }
 
   @override
-  void detachChild(Element child) {
+  void forgetChild(Element child) {
     assert(() {
-      // TODO(ianh): implement detachChild for LazyBlock
+      // TODO(ianh): implement forgetChild for LazyBlock
       throw new FlutterError(
         'LazyBlock does not yet support GlobalKey reparenting of its children.\n'
         'As a temporary workaround, wrap the child with the GlobalKey in a '

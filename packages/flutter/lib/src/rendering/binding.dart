@@ -8,7 +8,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
-import 'package:meta/meta.dart';
 
 import 'box.dart';
 import 'debug.dart';
@@ -138,7 +137,11 @@ abstract class RendererBinding extends BindingBase implements SchedulerBinding, 
   SemanticsHandle _semanticsHandle;
 
   void _handleSemanticsEnabledChanged() {
-    if (ui.window.semanticsEnabled) {
+    setSemanticsEnabled(ui.window.semanticsEnabled);
+  }
+
+  void setSemanticsEnabled(bool enabled) {
+    if (enabled) {
       _semanticsHandle ??= _pipelineOwner.ensureSemantics();
     } else {
       _semanticsHandle?.dispose();

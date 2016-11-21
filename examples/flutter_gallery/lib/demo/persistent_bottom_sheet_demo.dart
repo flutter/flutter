@@ -59,7 +59,7 @@ class _PersistentBottomSheetDemoState extends State<PersistentBottomSheetDemo> {
         content: new Text('You tapped the floating action button.'),
         actions: <Widget>[
           new FlatButton(
-            onPressed: () { Navigator.of(context).pop(); },
+            onPressed: () { Navigator.pop(context); },
             child: new Text('OK')
           )
         ]

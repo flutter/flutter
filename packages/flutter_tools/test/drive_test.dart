@@ -6,12 +6,11 @@ import 'dart:async';
 
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/android/android_device.dart';
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/commands/drive.dart';
 import 'package:flutter_tools/src/device.dart';
-import 'package:flutter_tools/src/globals.dart';
 import 'package:flutter_tools/src/ios/simulators.dart';
 import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
@@ -58,19 +57,19 @@ void main() {
       restoreTargetDeviceFinder();
     });
 
-    testUsingContext('returns 1 when test file is not found', () {
+    testUsingContext('returns 1 when test file is not found', () async {
       withMockDevice();
       List<String> args = <String>[
         'drive',
         '--target=/some/app/test/e2e.dart',
       ];
-      return createTestCommandRunner(command).run(args).then((int code) {
-        expect(code, 1);
-        BufferLogger buffer = logger;
-        expect(buffer.errorText, contains(
-          'Test file not found: /some/app/test_driver/e2e_test.dart'
-        ));
-      });
+      try {
+        await createTestCommandRunner(command).run(args);
+        fail('Expect exception');
+      } on ToolExit catch (e) {
+        expect(e.exitCode ?? 1, 1);
+        expect(e.message, contains('Test file not found: /some/app/test_driver/e2e_test.dart'));
+      }
     });
 
     testUsingContext('returns 1 when app fails to run', () async {
@@ -88,13 +87,13 @@ void main() {
         'drive',
         '--target=$testApp',
       ];
-      return createTestCommandRunner(command).run(args).then((int code) {
-        expect(code, 1);
-        BufferLogger buffer = logger;
-        expect(buffer.errorText, contains(
-          'Application failed to start. Will not run test. Quitting.'
-        ));
-      });
+      try {
+        await createTestCommandRunner(command).run(args);
+        fail('Expect exception');
+      } on ToolExit catch (e) {
+        expect(e.exitCode, 1);
+        expect(e.message, contains('Application failed to start (1). Will not run test. Quitting.'));
+      }
     });
 
     testUsingContext('returns 1 when app file is outside package', () async {
@@ -106,13 +105,15 @@ void main() {
         'drive',
         '--target=$appFile',
       ];
-      return createTestCommandRunner(command).run(args).then((int code) {
-        expect(code, 1);
-        BufferLogger buffer = logger;
-        expect(buffer.errorText, contains(
-          'Application file $appFile is outside the package directory $packageDir'
+      try {
+        await createTestCommandRunner(command).run(args);
+        fail('Expect exception');
+      } on ToolExit catch (e) {
+        expect(e.exitCode ?? 1, 1);
+        expect(testLogger.errorText, contains(
+          'Application file $appFile is outside the package directory $packageDir',
         ));
-      });
+      }
     });
 
     testUsingContext('returns 1 when app file is in the root dir', () async {
@@ -124,14 +125,16 @@ void main() {
         'drive',
         '--target=$appFile',
       ];
-      return createTestCommandRunner(command).run(args).then((int code) {
-        expect(code, 1);
-        BufferLogger buffer = logger;
-        expect(buffer.errorText, contains(
+      try {
+        await createTestCommandRunner(command).run(args);
+        fail('Expect exception');
+      } on ToolExit catch (e) {
+        expect(e.exitCode ?? 1, 1);
+        expect(testLogger.errorText, contains(
           'Application file main.dart must reside in one of the '
-          'sub-directories of the package structure, not in the root directory.'
+          'sub-directories of the package structure, not in the root directory.',
         ));
-      });
+      }
     });
 
     testUsingContext('returns 0 when test ends successfully', () async {
@@ -159,11 +162,8 @@ void main() {
         'drive',
         '--target=$testApp',
       ];
-      return createTestCommandRunner(command).run(args).then((int code) {
-        expect(code, 0);
-        BufferLogger buffer = logger;
-        expect(buffer.errorText, isEmpty);
-      });
+      await createTestCommandRunner(command).run(args);
+      expect(testLogger.errorText, isEmpty);
     });
 
     testUsingContext('returns exitCode set by test runner', () async {
@@ -175,9 +175,9 @@ void main() {
       appStarter = expectAsync((_) {
         return new Future<int>.value(0);
       });
-      testRunner = expectAsync((_) {
-        return new Future<int>.value(123);
-      });
+      testRunner = (_) {
+        throwToolExit(null, exitCode: 123);
+      };
       appStopper = expectAsync((_) {
         return new Future<int>.value(0);
       });
@@ -190,13 +190,14 @@ void main() {
         'drive',
         '--target=$testApp',
       ];
-      return createTestCommandRunner(command).run(args).then((int code) {
-        expect(code, 123);
-        BufferLogger buffer = logger;
-        expect(buffer.errorText, isEmpty);
-      });
+      try {
+        await createTestCommandRunner(command).run(args);
+        fail('Expect exception');
+      } on ToolExit catch (e) {
+        expect(e.exitCode ?? 1, 123);
+        expect(e.message, isNull);
+      }
     });
-
 
     group('findTargetDevice', () {
       testUsingContext('uses specified device', () async {

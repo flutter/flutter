@@ -29,7 +29,7 @@ abstract class GestureBinding extends BindingBase implements HitTestable, HitTes
   static GestureBinding _instance;
 
   void _handlePointerDataPacket(ui.PointerDataPacket packet) {
-    _pendingPointerEvents.addAll(PointerEventConverter.expand(packet.pointers, ui.window.devicePixelRatio));
+    _pendingPointerEvents.addAll(PointerEventConverter.expand(packet.data, ui.window.devicePixelRatio));
     _flushPointerEventQueue();
   }
 

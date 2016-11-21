@@ -4,8 +4,8 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
-import 'package:meta/meta.dart';
 
 import 'basic.dart';
 import 'debug.dart';
@@ -18,6 +18,9 @@ import 'framework.dart';
 ///  * The [containerExtent] is the exterior dimension of the viewport (i.e.,
 ///    the amount of the thing inside the viewport that is visible from outside
 ///    the viewport).
+///
+/// Used by [ScrollableGrid.onExtentsChanged],
+/// [ScrollableList.onExtentsChanged], etc.
 typedef void ExtentsChangedCallback(double contentExtent, double containerExtent);
 
 /// An abstract widget whose children are not all materialized.
@@ -101,9 +104,9 @@ abstract class VirtualViewportElement extends RenderObjectElement {
   }
 
   @override
-  void detachChild(Element child) {
+  void forgetChild(Element child) {
     assert(() {
-      // TODO(ianh): implement detachChild for VirtualViewport
+      // TODO(ianh): implement forgetChild for VirtualViewport
       throw new FlutterError(
         '$runtimeType does not yet support GlobalKey reparenting of its children.\n'
         'As a temporary workaround, wrap the child with the GlobalKey in a '
@@ -279,6 +282,8 @@ class _IterableWidgetProvider extends _WidgetProvider {
 }
 
 /// Signature of a callback that returns the sublist of widgets in the given range.
+///
+/// Used by [PageableList.itemBuilder], [ScrollableLazyList.itemBuilder], etc.
 typedef List<Widget> ItemListBuilder(BuildContext context, int start, int count);
 
 /// A VirtualViewport that represents its children using [ItemListBuilder].

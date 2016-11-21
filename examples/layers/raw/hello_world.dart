@@ -11,9 +11,9 @@ void beginFrame(Duration timeStamp) {
   final double devicePixelRatio = ui.window.devicePixelRatio;
   final ui.Size logicalSize = ui.window.physicalSize / devicePixelRatio;
 
-  final ui.ParagraphBuilder paragraphBuilder = new ui.ParagraphBuilder()
+  final ui.ParagraphBuilder paragraphBuilder = new ui.ParagraphBuilder(new ui.ParagraphStyle())
     ..addText('Hello, world.');
-  final ui.Paragraph paragraph = paragraphBuilder.build(new ui.ParagraphStyle())
+  final ui.Paragraph paragraph = paragraphBuilder.build()
     ..layout(new ui.ParagraphConstraints(width: logicalSize.width));
 
   final ui.Rect physicalBounds = ui.Point.origin & (logicalSize * devicePixelRatio);

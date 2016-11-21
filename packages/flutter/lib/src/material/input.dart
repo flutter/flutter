@@ -10,86 +10,56 @@ import 'debug.dart';
 import 'icon.dart';
 import 'icon_theme.dart';
 import 'icon_theme_data.dart';
-import 'material.dart';
 import 'text_selection.dart';
 import 'theme.dart';
 
 export 'package:flutter/services.dart' show TextInputType;
 
-/// A material design text input field.
+const Duration _kTransitionDuration = const Duration(milliseconds: 200);
+const Curve _kTransitionCurve = Curves.fastOutSlowIn;
+
+/// A simple text input field.
+///
+/// This widget is comparable to [Text] in that it does not include a margin
+/// or any decoration outside the text itself. It is useful for applications,
+/// like a search box, that don't need any additional decoration. It should
+/// also be useful in custom widgets that support text input.
+///
+/// The [value] field must be updated each time the [onChanged] callback is
+/// invoked. Be sure to include the full [value] provided by the [onChanged]
+/// callback, or information like the current selection will be lost.
 ///
 /// Requires one of its ancestors to be a [Material] widget.
 ///
-/// If the [Input] has a [Form] ancestor, the [formField] property must
-/// be specified. In this case, the [Input] keeps track of the value of
-/// the [Input] field automatically, and the initial value can be specified
-/// using the [value] property.
-///
-/// If the [Input] does not have a [Form] ancestor, then the [value]
-/// must be updated each time the [onChanged] callback is invoked.
-///
 /// See also:
 ///
-///  * <https://material.google.com/components/text-fields.html>
-///
-/// For a detailed guide on using the input widget, see:
-///
-/// * <https://flutter.io/text-input/>
-class Input extends StatefulWidget {
-  /// Creates a text input field.
-  ///
-  /// By default, the input uses a keyboard appropriate for text entry.
-  ///
-  /// The [formField] argument is required if the [Input] has an ancestor [Form].
-  Input({
+/// * [Input], which adds a label, a divider below the text field, and support for
+///   an error message.
+class InputField extends StatefulWidget {
+  InputField({
     Key key,
+    this.focusKey,
     this.value,
     this.keyboardType: TextInputType.text,
-    this.icon,
-    this.labelText,
     this.hintText,
-    this.errorText,
     this.style,
     this.hideText: false,
-    this.isDense: false,
-    this.autofocus: false,
     this.maxLines: 1,
-    this.formField,
     this.onChanged,
     this.onSubmitted,
   }) : super(key: key);
 
-  /// The text of the input field.
-  ///
-  /// If the [Input] is in a [Form], this is the initial value only.
-  ///
-  /// Otherwise, this is the current value, and must be updated every
-  /// time [onChanged] is called.
+  final GlobalKey focusKey;
+
+  /// The current state of text of the input field. This includes the selected
+  /// text, if any, among other things.
   final InputValue value;
 
   /// The type of keyboard to use for editing the text.
   final TextInputType keyboardType;
 
-  /// An icon to show adjacent to the input field.
-  ///
-  /// The size and color of the icon is configured automatically using an
-  /// [IconTheme] and therefore does not need to be explicitly given in the
-  /// icon widget.
-  ///
-  /// See [Icon], [ImageIcon].
-  final Widget icon;
-
-  /// Text to show above the input field.
-  final String labelText;
-
   /// Text to show inline in the input field when it would otherwise be empty.
   final String hintText;
-
-  /// Text to show when the input text is invalid.
-  ///
-  /// If this is set, then the [formField]'s [FormField.validator], if any, is
-  /// ignored.
-  final String errorText;
 
   /// The style to use for the text being edited.
   final TextStyle style;
@@ -100,83 +70,165 @@ class Input extends StatefulWidget {
   /// U+2022 BULLET characters (•).
   final bool hideText;
 
-  /// Whether the input field is part of a dense form (i.e., uses less vertical space).
-  final bool isDense;
-
-  /// Whether this input field should focus itself if nothing else is already focused.
-  final bool autofocus;
-
   /// The maximum number of lines for the text to span, wrapping if necessary.
   /// If this is 1 (the default), the text will not wrap, but will scroll
   /// horizontally instead.
   final int maxLines;
 
-  /// The [Form] entry for this input control. Required if the input is in a [Form].
-  /// Ignored otherwise.
-  ///
-  /// Putting an Input in a [Form] means the Input will keep track of its own value,
-  /// using the [value] property only as the field's initial value. It also means
-  /// that when any field in the [Form] changes, all the widgets in the form will be
-  /// rebuilt, so that each field's [FormField.validator] callback can be reevaluated.
-  final FormField<String> formField;
-
   /// Called when the text being edited changes.
   ///
-  /// If the [Input] is not in a [Form], the [value] must be updated each time [onChanged]
-  /// is invoked. (If there is a [Form], then the value is tracked in the [formField], and
-  /// this callback is purely advisory.)
-  ///
-  /// If the [Input] is in a [Form], this is called after the [formField] is updated.
+  /// The [value] must be updated each time [onChanged] is invoked.
   final ValueChanged<InputValue> onChanged;
 
   /// Called when the user indicates that they are done editing the text in the field.
-  ///
-  /// If the [Input] is in a [Form], this is called after the [formField] is notified.
   final ValueChanged<InputValue> onSubmitted;
 
   @override
-  _InputState createState() => new _InputState();
+  _InputFieldState createState() => new _InputFieldState();
 }
 
-const Duration _kTransitionDuration = const Duration(milliseconds: 200);
-const Curve _kTransitionCurve = Curves.fastOutSlowIn;
-
-class _InputState extends State<Input> {
+class _InputFieldState extends State<InputField> {
   GlobalKey<RawInputState> _rawInputKey = new GlobalKey<RawInputState>();
+  GlobalKey<RawInputState> _focusKey = new GlobalKey(debugLabel: "_InputFieldState _focusKey");
 
-  GlobalKey get focusKey => config.key is GlobalKey ? config.key : _rawInputKey;
+  GlobalKey get focusKey => config.focusKey ?? (config.key is GlobalKey ? config.key : _focusKey);
 
-  // Optional state to retain if we are inside a Form widget.
-  _FormFieldData _formData;
-
-  @override
-  void dispose() {
-    _formData?.dispose();
-    super.dispose();
+  void requestKeyboard() {
+    _rawInputKey.currentState?.requestKeyboard();
   }
 
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
-    ThemeData themeData = Theme.of(context);
-    BuildContext focusContext = focusKey.currentContext;
-    bool focused = focusContext != null && Focus.at(focusContext, autofocus: config.autofocus);
-    if (_formData == null) {
-      _formData = _FormFieldData.maybeCreate(context, this);
-    } else {
-      _formData = _formData.maybeDispose(context);
+    final InputValue value = config.value ?? InputValue.empty;
+    final ThemeData themeData = Theme.of(context);
+    final TextStyle textStyle = config.style ?? themeData.textTheme.subhead;
+
+    final List<Widget> stackChildren = <Widget>[
+      new GestureDetector(
+        key: focusKey == _focusKey ? _focusKey : null,
+        behavior: HitTestBehavior.opaque,
+        onTap: () {
+          requestKeyboard();
+        },
+        // Since the focusKey may have been created here, defer building the
+        // RawInput until the focusKey's context has been set. This is necessary
+        // because the RawInput will check the focus, like Focus.at(focusContext),
+        // when it builds.
+        child: new Builder(
+          builder: (BuildContext context) {
+            return new RawInput(
+              key: _rawInputKey,
+              value: value,
+              focusKey: focusKey,
+              style: textStyle,
+              hideText: config.hideText,
+              maxLines: config.maxLines,
+              cursorColor: themeData.textSelectionColor,
+              selectionColor: themeData.textSelectionColor,
+              selectionControls: materialTextSelectionControls,
+              platform: Theme.of(context).platform,
+              keyboardType: config.keyboardType,
+              onChanged: config.onChanged,
+              onSubmitted: config.onSubmitted,
+            );
+          }
+        ),
+      ),
+    ];
+
+    if (config.hintText != null && value.text.isEmpty) {
+
+      TextStyle hintStyle = textStyle.copyWith(color: themeData.hintColor);
+      stackChildren.add(
+        new Positioned(
+          left: 0.0,
+          top: textStyle.fontSize - hintStyle.fontSize,
+          child: new IgnorePointer(
+            child: new Text(config.hintText, style: hintStyle),
+          ),
+        ),
+      );
     }
-    InputValue value =  _formData?.value ?? config.value ?? InputValue.empty;
-    ValueChanged<InputValue> onChanged = _formData?.onChanged ?? config.onChanged;
-    ValueChanged<InputValue> onSubmitted = _formData?.onSubmitted ?? config.onSubmitted;
+
+    return new RepaintBoundary(child: new Stack(children: stackChildren));
+  }
+}
+
+/// Displays the visual elements of a material design text field around an
+/// arbitrary child widget.
+///
+/// Use InputContainer to create widgets that look and behave like the [Input]
+/// widget.
+///
+/// Requires one of its ancestors to be a [Material] widget.
+///
+/// See also:
+///
+/// * [Input], which combines an [InputContainer] with an [InputField].
+class InputContainer extends StatefulWidget {
+  InputContainer({
+    Key key,
+    this.focused: false,
+    this.isEmpty: false,
+    this.icon,
+    this.labelText,
+    this.hintText,
+    this.errorText,
+    this.style,
+    this.isDense: false,
+    this.child,
+  }) : super(key: key);
+
+  /// An icon to show adjacent to the input field.
+  ///
+  /// The size and color of the icon is configured automatically using an
+  /// [IconTheme] and therefore does not need to be explicitly given in the
+  /// icon widget.
+  ///
+  /// See [Icon], [ImageIcon].
+  final Widget icon;
+
+  /// Text that appears above the child or over it, if isEmpty is true.
+  final String labelText;
+
+  /// Text that appears over the child if isEmpty is true and labelText is null.
+  final String hintText;
+
+  /// Text that appears below the child. If errorText is non-null the divider
+  /// that appears below the child is red.
+  final String errorText;
+
+  /// The style to use for the hint. It's also used for the label when the label
+  /// appears over the child.
+  final TextStyle style;
+
+  /// Whether the input container is part of a dense form (i.e., uses less vertical space).
+  final bool isDense;
+
+  /// True if the hint and label should be displayed as if the child had the focus.
+  final bool focused;
+
+  /// Should the hint and label be displayed as if no value had been input
+  /// to the child.
+  final bool isEmpty;
+
+  final Widget child;
+
+  @override
+  _InputContainerState createState() => new _InputContainerState();
+}
+
+class _InputContainerState extends State<InputContainer> {
+  @override
+  Widget build(BuildContext context) {
+    assert(debugCheckHasMaterial(context));
+    ThemeData themeData = Theme.of(context);
     String errorText = config.errorText;
 
-    if (errorText == null && config.formField != null && config.formField.validator != null)
-      errorText = config.formField.validator(value.text);
-
-    TextStyle textStyle = config.style ?? themeData.textTheme.subhead;
+    final TextStyle textStyle = config.style ?? themeData.textTheme.subhead;
     Color activeColor = themeData.hintColor;
-    if (focused) {
+    if (config.focused) {
       switch (themeData.brightness) {
         case Brightness.dark:
           activeColor = themeData.accentColor;
@@ -190,41 +242,50 @@ class _InputState extends State<Input> {
 
     List<Widget> stackChildren = <Widget>[];
 
-    bool hasInlineLabel = config.labelText != null && !focused && !value.text.isNotEmpty;
+    // If we're not focused, there's not value, and labelText was provided,
+    // then the label appears where the hint would. And we will not show
+    // the hintText.
+    final bool hasInlineLabel = !config.focused && config.labelText != null && config.isEmpty;
 
     if (config.labelText != null) {
-      TextStyle labelStyle = hasInlineLabel ?
-        themeData.textTheme.subhead.copyWith(color: themeData.hintColor) :
+      final TextStyle labelStyle = hasInlineLabel ?
+        textStyle.copyWith(color: themeData.hintColor) :
         themeData.textTheme.caption.copyWith(color: activeColor);
 
-      double topPaddingIncrement = themeData.textTheme.caption.fontSize + (config.isDense ? 4.0 : 8.0);
+      final double topPaddingIncrement = themeData.textTheme.caption.fontSize + (config.isDense ? 4.0 : 8.0);
       double top = topPadding;
       if (hasInlineLabel)
         top += topPaddingIncrement + textStyle.fontSize - labelStyle.fontSize;
 
-      stackChildren.add(new AnimatedPositioned(
-        left: 0.0,
-        top: top,
-        duration: _kTransitionDuration,
-        curve: _kTransitionCurve,
-        child: new Text(config.labelText, style: labelStyle)
-      ));
+      stackChildren.add(
+        new AnimatedPositioned(
+          left: 0.0,
+          top: top,
+          duration: _kTransitionDuration,
+          curve: _kTransitionCurve,
+          child: new Text(config.labelText, style: labelStyle),
+        ),
+      );
 
       topPadding += topPaddingIncrement;
     }
 
-    if (config.hintText != null && value.text.isEmpty && !hasInlineLabel) {
-      TextStyle hintStyle = themeData.textTheme.subhead.copyWith(color: themeData.hintColor);
-      stackChildren.add(new Positioned(
-        left: 0.0,
-        top: topPadding + textStyle.fontSize - hintStyle.fontSize,
-        child: new Text(config.hintText, style: hintStyle)
-      ));
+    if (config.hintText != null && config.isEmpty && !hasInlineLabel) {
+      TextStyle hintStyle = textStyle.copyWith(color: themeData.hintColor);
+      stackChildren.add(
+        new Positioned(
+          left: 0.0,
+          top: topPadding + textStyle.fontSize - hintStyle.fontSize,
+          child: new IgnorePointer(
+            child: new Text(config.hintText, style: hintStyle),
+          ),
+        ),
+      );
     }
 
     Color borderColor = activeColor;
     double bottomPadding = 8.0;
-    double bottomBorder = focused ? 2.0 : 1.0;
+    double bottomBorder = config.focused ? 2.0 : 1.0;
     double bottomHeight = config.isDense ? 14.0 : 18.0;
 
     if (errorText != null) {
@@ -251,21 +312,7 @@ class _InputState extends State<Input> {
       decoration: new BoxDecoration(
         border: border,
       ),
-      child: new RawInput(
-        key: _rawInputKey,
-        value: value,
-        focusKey: focusKey,
-        style: textStyle,
-        hideText: config.hideText,
-        maxLines: config.maxLines,
-        cursorColor: themeData.textSelectionColor,
-        selectionColor: themeData.textSelectionColor,
-        selectionControls: materialTextSelectionControls,
-        platform: Theme.of(context).platform,
-        keyboardType: config.keyboardType,
-        onChanged: onChanged,
-        onSubmitted: onSubmitted,
-      )
+      child: config.child,
     ));
 
     if (errorText != null && !config.isDense) {
@@ -277,12 +324,12 @@ class _InputState extends State<Input> {
       ));
     }
 
-    Widget child = new Stack(children: stackChildren);
+    Widget textField = new Stack(children: stackChildren);
 
     if (config.icon != null) {
       double iconSize = config.isDense ? 18.0 : 24.0;
       double iconTop = topPadding + (textStyle.fontSize - iconSize) / 2.0;
-      child = new Row(
+      textField = new Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           new Container(
@@ -291,89 +338,202 @@ class _InputState extends State<Input> {
             child: new IconTheme.merge(
               context: context,
               data: new IconThemeData(
-                color: focused ? activeColor : Colors.black45,
+                color: config.focused ? activeColor : Colors.black45,
                 size: config.isDense ? 18.0 : 24.0
               ),
               child: config.icon
             )
           ),
-          new Flexible(child: child)
+          new Flexible(child: textField)
         ]
       );
     }
 
-    return new RepaintBoundary(
-      child: new GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: () => _rawInputKey.currentState?.requestKeyboard(),
-        child: child
-      )
+    return textField;
+  }
+}
+
+/// A material design text input field.
+///
+/// The [value] field must be updated each time the [onChanged] callback is
+/// invoked. Be sure to include the full [value] provided by the [onChanged]
+/// callback, or information like the current selection will be lost.
+///
+/// Requires one of its ancestors to be a [Material] widget.
+///
+/// See also:
+///
+///  * <https://material.google.com/components/text-fields.html>
+///
+/// For a detailed guide on using the input widget, see:
+///
+/// * <https://flutter.io/text-input/>
+class Input extends StatefulWidget {
+  /// Creates a text input field.
+  ///
+  /// By default, the input uses a keyboard appropriate for text entry.
+  //
+  //  If you change this constructor signature, please also update
+  // InputContainer, InputFormField, InputField.
+  Input({
+    Key key,
+    this.value,
+    this.keyboardType: TextInputType.text,
+    this.icon,
+    this.labelText,
+    this.hintText,
+    this.errorText,
+    this.style,
+    this.hideText: false,
+    this.isDense: false,
+    this.autofocus: false,
+    this.maxLines: 1,
+    this.onChanged,
+    this.onSubmitted,
+  }) : super(key: key);
+
+  /// The current state of text of the input field. This includes the selected
+  /// text, if any, among other things.
+  final InputValue value;
+
+  /// The type of keyboard to use for editing the text.
+  final TextInputType keyboardType;
+
+  /// An icon to show adjacent to the input field.
+  ///
+  /// The size and color of the icon is configured automatically using an
+  /// [IconTheme] and therefore does not need to be explicitly given in the
+  /// icon widget.
+  ///
+  /// See [Icon], [ImageIcon].
+  final Widget icon;
+
+  /// Text to show above the input field.
+  final String labelText;
+
+  /// Text to show inline in the input field when it would otherwise be empty.
+  final String hintText;
+
+  /// Text to show when the input text is invalid.
+  final String errorText;
+
+  /// The style to use for the text being edited.
+  final TextStyle style;
+
+  /// Whether to hide the text being edited (e.g., for passwords).
+  ///
+  /// When this is set to true, all the characters in the input are replaced by
+  /// U+2022 BULLET characters (•).
+  final bool hideText;
+
+  /// Whether the input field is part of a dense form (i.e., uses less vertical space).
+  final bool isDense;
+
+  /// Whether this input field should focus itself if nothing else is already focused.
+  final bool autofocus;
+
+  /// The maximum number of lines for the text to span, wrapping if necessary.
+  /// If this is 1 (the default), the text will not wrap, but will scroll
+  /// horizontally instead.
+  final int maxLines;
+
+  /// Called when the text being edited changes.
+  ///
+  /// The [value] must be updated each time [onChanged] is invoked.
+  final ValueChanged<InputValue> onChanged;
+
+  /// Called when the user indicates that they are done editing the text in the field.
+  final ValueChanged<InputValue> onSubmitted;
+
+  @override
+  _InputState createState() => new _InputState();
+}
+
+class _InputState extends State<Input> {
+  final GlobalKey<_InputFieldState> _inputFieldKey = new GlobalKey<_InputFieldState>();
+  final GlobalKey _focusKey = new GlobalKey();
+
+  GlobalKey get focusKey => config.key is GlobalKey ? config.key : _focusKey;
+
+  @override
+  Widget build(BuildContext context) {
+    return new GestureDetector(
+      key: focusKey == _focusKey ? _focusKey : null,
+      onTap: () {
+        _inputFieldKey.currentState?.requestKeyboard();
+      },
+      // Since the focusKey may have been created here, defer building the
+      // InputContainer until the focusKey's context has been set. This is
+      // necessary because we're passing the value of Focus.at() along.
+      child: new Builder(
+        builder: (BuildContext context) {
+          final bool focused = Focus.at(focusKey.currentContext, autofocus: config.autofocus);
+          final bool isEmpty = (config.value ?? InputValue.empty).text.isEmpty;
+          return new InputContainer(
+            focused: focused,
+            isEmpty: isEmpty,
+            icon: config.icon,
+            labelText: config.labelText,
+            hintText: config.hintText,
+            errorText: config.errorText,
+            style: config.style,
+            isDense: config.isDense,
+            child: new InputField(
+              key: _inputFieldKey,
+              focusKey: focusKey,
+              value: config.value,
+              style: config.style,
+              hideText: config.hideText,
+              maxLines: config.maxLines,
+              keyboardType: config.keyboardType,
+              onChanged: config.onChanged,
+              onSubmitted: config.onSubmitted,
+            ),
+          );
+        },
+      ),
     );
   }
 }
 
-// _FormFieldData is a helper class for _InputState for when the Input
-// is in a Form.
-//
-// An instance is created when the Input is put in a Form, and lives
-// until the Input is taken placed somewhere without a Form. (If the
-// Input is moved from one Form to another, the same _FormFieldData is
-// used for both forms).
-//
-// The _FormFieldData stores the value of the Input. Without a Form,
-// the Input is essentially stateless.
-
-class _FormFieldData {
-  _FormFieldData(this.inputState) {
-    assert(field != null);
-    value = inputState.config.value ?? new InputValue();
-  }
-
-  final _InputState inputState;
-  InputValue value;
-
-  FormField<String> get field => inputState.config.formField;
-
-  static _FormFieldData maybeCreate(BuildContext context, _InputState inputState) {
-    // Only create a _FormFieldData if this Input is a descendent of a Form.
-    if (FormScope.of(context) != null)
-      return new _FormFieldData(inputState);
-    return null;
-  }
-
-  _FormFieldData maybeDispose(BuildContext context) {
-    if (FormScope.of(context) != null)
-      return this;
-    dispose();
-    return null;
-  }
-
-  void dispose() {
-    value = null;
-  }
-
-  void onChanged(InputValue value) {
-    assert(value != null);
-    assert(field != null);
-    FormScope scope = FormScope.of(inputState.context);
-    assert(scope != null);
-    this.value = value;
-    if (field.setter != null)
-      field.setter(value.text);
-    if (inputState.config.onChanged != null)
-      inputState.config.onChanged(value);
-    scope.onFieldChanged();
-  }
-
-  void onSubmitted(InputValue value) {
-    assert(value != null);
-    assert(field != null);
-    FormScope scope = FormScope.of(inputState.context);
-    assert(scope != null);
-    if (scope.form.onSubmitted != null)
-      scope.form.onSubmitted();
-    if (inputState.config.onSubmitted != null)
-      inputState.config.onSubmitted(value);
-    scope.onFieldChanged();
-  }
+/// A [FormField] that contains an [Input].
+class InputFormField extends FormField<InputValue> {
+  InputFormField({
+    Key key,
+    GlobalKey focusKey,
+    TextInputType keyboardType: TextInputType.text,
+    Icon icon,
+    String labelText,
+    String hintText,
+    TextStyle style,
+    bool hideText: false,
+    bool isDense: false,
+    bool autofocus: false,
+    int maxLines: 1,
+    InputValue initialValue: InputValue.empty,
+    FormFieldSetter<InputValue> onSaved,
+    FormFieldValidator<InputValue> validator,
+  }) : super(
+    key: key,
+    initialValue: initialValue,
+    onSaved: onSaved,
+    validator: validator,
+    builder: (FormFieldState<InputValue> field) {
+      return new Input(
+        key: focusKey,
+        keyboardType: keyboardType,
+        icon: icon,
+        labelText: labelText,
+        hintText: hintText,
+        style: style,
+        hideText: hideText,
+        isDense: isDense,
+        autofocus: autofocus,
+        maxLines: maxLines,
+        value: field.value,
+        onChanged: field.onChanged,
+        errorText: field.errorText,
+      );
+    },
+  );
 }

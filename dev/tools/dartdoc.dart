@@ -74,11 +74,6 @@ dependencies:
     args.add(name.substring(0, name.length - 5));
   }
 
-  findSkyServicesLibraryNames().forEach((String libName) {
-    args.add('--include-external');
-    args.add(libName);
-  });
-
   process = await Process.start('pub', args, workingDirectory: 'dev/docs');
   printStream(process.stdout);
   printStream(process.stderr);
@@ -87,7 +82,22 @@ dependencies:
   if (exitCode != 0)
     exit(exitCode);
 
+  sanityCheckDocs();
+
   createIndexAndCleanup();
+}
+
+void sanityCheckDocs() {
+  List<String> canaries = <String>[
+    '$kDocRoot/api/material/Material-class.html',
+    '$kDocRoot/api/material/Tooltip-class.html',
+    '$kDocRoot/api/widgets/Widget-class.html',
+    '$kDocRoot/api/dart-ui/Canvas-class.html',
+  ];
+  for (String canary in canaries) {
+    if (!new File(canary).existsSync())
+      throw new Exception('Missing "$canary", which probably means the documentation failed to build correctly.');
+  }
 }
 
 /// Creates a custom index.html because we try to maintain old
@@ -131,21 +141,6 @@ void putRedirectInOldIndexLocation() {
   new File('$kDocRoot/flutter/index.html').writeAsStringSync(metaTag);
 }
 
-List<String> findSkyServicesLibraryNames() {
-  Directory skyServicesLocation = new Directory('bin/cache/pkg/sky_services/lib');
-  if (!skyServicesLocation.existsSync()) {
-    throw 'Did not find sky_services package location in ${skyServicesLocation.path}.';
-  }
-  return skyServicesLocation.listSync(followLinks: false, recursive: true)
-      .where((FileSystemEntity entity) {
-    return entity is File && entity.path.endsWith('.mojom.dart');
-  }).map((FileSystemEntity entity) {
-    String basename = path.basename(entity.path);
-    basename = basename.substring(0, basename.length-('.dart'.length));
-    return basename.replaceAll('.', '_');
-  });
-}
-
 List<String> findPackageNames() {
   return findPackages().map((Directory dir) => path.basename(dir.path)).toList();
 }
@@ -153,11 +148,12 @@ List<String> findPackageNames() {
 List<Directory> findPackages() {
   return new Directory('packages')
     .listSync()
-    .where((FileSystemEntity entity) => entity is Directory)
-    .where((Directory dir) {
-      File pubspec = new File('${dir.path}/pubspec.yaml');
-      bool nodoc = pubspec.readAsStringSync().contains('nodoc: true');
-      return !nodoc;
+    .where((FileSystemEntity entity) {
+      if (entity is! Directory)
+        return false;
+      File pubspec = new File('${entity.path}/pubspec.yaml');
+      // TODO(ianh): Use a real YAML parser here
+      return !pubspec.readAsStringSync().contains('nodoc: true');
     })
     .toList();
 }
@@ -165,7 +161,6 @@ List<Directory> findPackages() {
 Iterable<String> libraryRefs() sync* {
   for (Directory dir in findPackages()) {
     String dirName = path.basename(dir.path);
-
     for (FileSystemEntity file in new Directory('${dir.path}/lib').listSync()) {
       if (file is File && file.path.endsWith('.dart'))
         yield '$dirName/${path.basename(file.path)}';

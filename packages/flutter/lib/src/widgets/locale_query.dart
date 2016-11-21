@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:meta/meta.dart';
+import 'package:flutter/foundation.dart';
 
 import 'framework.dart';
 
@@ -24,6 +24,12 @@ class LocaleQuery extends InheritedWidget {
   final LocaleQueryData data;
 
   /// The data from the closest instance of this class that encloses the given context.
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// MyLocaleData data = LocaleQueryData.of(context);
+  /// ```
   static LocaleQueryData of(BuildContext context) {
     LocaleQuery query = context.inheritFromWidgetOfExactType(LocaleQuery);
     return query?.data;

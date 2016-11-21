@@ -10,6 +10,7 @@ import 'package:path/path.dart' as path;
 
 import '../android/android_sdk.dart';
 import '../android/gradle.dart';
+import '../base/common.dart';
 import '../base/file_system.dart' show ensureDirectoryExists;
 import '../base/logger.dart';
 import '../base/os.dart';
@@ -223,27 +224,23 @@ class BuildApkCommand extends BuildSubCommand {
   }
 
   @override
-  Future<int> runCommand() async {
+  Future<Null> runCommand() async {
     await super.runCommand();
 
     TargetPlatform targetPlatform = _getTargetPlatform(argResults['target-arch']);
-    if (targetPlatform != TargetPlatform.android_arm && getBuildMode() != BuildMode.debug) {
-      printError('Profile and release builds are only supported on ARM targets.');
-      return 1;
-    }
+    if (targetPlatform != TargetPlatform.android_arm && getBuildMode() != BuildMode.debug)
+      throwToolExit('Profile and release builds are only supported on ARM targets.');
 
     if (isProjectUsingGradle()) {
-      if (targetPlatform != TargetPlatform.android_arm) {
-        printError('Gradle builds only support ARM targets.');
-        return 1;
-      }
-      return await buildAndroidWithGradle(
+      if (targetPlatform != TargetPlatform.android_arm)
+        throwToolExit('Gradle builds only support ARM targets.');
+      await buildAndroidWithGradle(
         TargetPlatform.android_arm,
         getBuildMode(),
         target: targetFile
       );
     } else {
-      return await buildAndroid(
+      await buildAndroid(
         targetPlatform,
         getBuildMode(),
         force: true,
@@ -378,7 +375,7 @@ int _buildApk(
       artifactBuilder.directory, components.resources, buildMode
     );
 
-    int signResult = _signApk(builder, components, unalignedApk, keystore);
+    int signResult = _signApk(builder, components, unalignedApk, keystore, buildMode);
     if (signResult != 0)
       return signResult;
 
@@ -397,7 +394,11 @@ int _buildApk(
 }
 
 int _signApk(
-  _ApkBuilder builder, _ApkComponents components, File apk, ApkKeystoreInfo keystoreInfo
+  _ApkBuilder builder,
+  _ApkComponents components,
+  File apk,
+  ApkKeystoreInfo keystoreInfo,
+  BuildMode buildMode,
 ) {
   File keystore;
   String keystorePassword;
@@ -405,7 +406,12 @@ int _signApk(
   String keyPassword;
 
   if (keystoreInfo == null) {
-    printStatus('Warning: signing the APK using the debug keystore.');
+    if (buildMode == BuildMode.release) {
+      printStatus('Warning! Signing the APK using the debug keystore.');
+      printStatus('You will need a real keystore to distribute your application.');
+    } else {
+      printTrace('Signing the APK using the debug keystore.');
+    }
     keystore = components.debugKeystore;
     keystorePassword = _kDebugKeystorePassword;
     keyAlias = _kDebugKeystoreKeyAlias;
@@ -415,7 +421,7 @@ int _signApk(
     keystorePassword = keystoreInfo.password ?? '';
     keyAlias = keystoreInfo.keyAlias ?? '';
     if (keystorePassword.isEmpty || keyAlias.isEmpty) {
-      printError('Must provide a keystore password and a key alias.');
+      printError('You must provide a keystore password and a key alias.');
       return 1;
     }
     keyPassword = keystoreInfo.keyPassword ?? '';
@@ -468,7 +474,7 @@ bool _needsRebuild(
   return false;
 }
 
-Future<int> buildAndroid(
+Future<Null> buildAndroid(
   TargetPlatform platform,
   BuildMode buildMode, {
   bool force: false,
@@ -483,16 +489,13 @@ Future<int> buildAndroid(
   outputFile ??= _defaultOutputPath;
 
   // Validate that we can find an android sdk.
-  if (androidSdk == null) {
-    printError('No Android SDK found. Try setting the ANDROID_HOME environment variable.');
-    return 1;
-  }
+  if (androidSdk == null)
+    throwToolExit('No Android SDK found. Try setting the ANDROID_HOME environment variable.');
 
   List<String> validationResult = androidSdk.validateSdkWellFormed();
   if (validationResult.isNotEmpty) {
     validationResult.forEach(printError);
-    printError('Try re-installing or updating your Android SDK.');
-    return 1;
+    throwToolExit('Try re-installing or updating your Android SDK.');
   }
 
   Map<String, File> extraFiles = <String, File>{};
@@ -513,14 +516,12 @@ Future<int> buildAndroid(
       !force &&
       !_needsRebuild(outputFile, manifest, platform, buildMode, extraFiles)) {
     printTrace('APK up to date; skipping build step.');
-    return 0;
+    return;
   }
 
   if (resources != null) {
-    if (!FileSystemEntity.isDirectorySync(resources)) {
-      printError('Resources directory "$resources" not found.');
-      return 1;
-    }
+    if (!FileSystemEntity.isDirectorySync(resources))
+      throwToolExit('Resources directory "$resources" not found.');
   } else {
     if (FileSystemEntity.isDirectorySync(_kDefaultResourcesPath))
       resources = _kDefaultResourcesPath;
@@ -528,19 +529,16 @@ Future<int> buildAndroid(
 
   _ApkComponents components = await _findApkComponents(platform, buildMode, manifest, resources, extraFiles);
 
-  if (components == null) {
-    printError('Failure building APK: unable to find components.');
-    return 1;
-  }
+  if (components == null)
+    throwToolExit('Failure building APK: unable to find components.');
 
   String typeName = path.basename(tools.getEngineArtifactsDirectory(platform, buildMode).path);
   Status status = logger.startProgress('Building APK in ${getModeName(buildMode)} mode ($typeName)...');
 
   if (flxPath != null && flxPath.isNotEmpty) {
     if (!FileSystemEntity.isFileSync(flxPath)) {
-      printError('FLX does not exist: $flxPath');
-      printError('(Omit the --flx option to build the FLX automatically)');
-      return 1;
+      throwToolExit('FLX does not exist: $flxPath\n'
+        '(Omit the --flx option to build the FLX automatically)');
     }
   } else {
     // Build the FLX.
@@ -550,77 +548,65 @@ Future<int> buildAndroid(
       includeRobotoFonts: false);
 
     if (flxPath == null)
-      return 1;
+      throwToolExit(null);
   }
 
   // Build an AOT snapshot if needed.
   if (isAotBuildMode(buildMode) && aotPath == null) {
     aotPath = await buildAotSnapshot(findMainDartFile(target), platform, buildMode);
-    if (aotPath == null) {
-      printError('Failed to build AOT snapshot');
-      return 1;
-    }
+    if (aotPath == null)
+      throwToolExit('Failed to build AOT snapshot');
   }
 
   if (aotPath != null) {
-    if (!isAotBuildMode(buildMode)) {
-      printError('AOT snapshot can not be used in build mode $buildMode');
-      return 1;
-    }
-    if (!FileSystemEntity.isDirectorySync(aotPath)) {
-      printError('AOT snapshot does not exist: $aotPath');
-      return 1;
-    }
+    if (!isAotBuildMode(buildMode))
+      throwToolExit('AOT snapshot can not be used in build mode $buildMode');
+    if (!FileSystemEntity.isDirectorySync(aotPath))
+      throwToolExit('AOT snapshot does not exist: $aotPath');
     for (String aotFilename in kAotSnapshotFiles) {
       String aotFilePath = path.join(aotPath, aotFilename);
-      if (!FileSystemEntity.isFileSync(aotFilePath)) {
-        printError('Missing AOT snapshot file: $aotFilePath');
-        return 1;
-      }
+      if (!FileSystemEntity.isFileSync(aotFilePath))
+        throwToolExit('Missing AOT snapshot file: $aotFilePath');
       components.extraFiles['assets/$aotFilename'] = new File(aotFilePath);
     }
   }
 
   int result = _buildApk(platform, buildMode, components, flxPath, keystore, outputFile);
-  status.stop(showElapsedTime: true);
+  status.stop();
 
-  if (result == 0) {
-    File apkFile = new File(outputFile);
-    printStatus('Built $outputFile (${getSizeAsMB(apkFile.lengthSync())}).');
+  if (result != 0)
+    throwToolExit('Build APK failed ($result)', exitCode: result);
 
-    _writeBuildMetaEntry(
-      path.dirname(outputFile),
-      'targetBuildType',
-      _getTargetBuildTypeToken(platform, buildMode, new File(outputFile))
-    );
-  }
+  File apkFile = new File(outputFile);
+  printTrace('Built $outputFile (${getSizeAsMB(apkFile.lengthSync())}).');
 
-  return result;
+  _writeBuildMetaEntry(
+    path.dirname(outputFile),
+    'targetBuildType',
+    _getTargetBuildTypeToken(platform, buildMode, new File(outputFile))
+  );
 }
 
-Future<int> buildAndroidWithGradle(
+Future<Null> buildAndroidWithGradle(
   TargetPlatform platform,
   BuildMode buildMode, {
   bool force: false,
   String target
 }) async {
   // Validate that we can find an android sdk.
-  if (androidSdk == null) {
-    printError('No Android SDK found. Try setting the ANDROID_HOME environment variable.');
-    return 1;
-  }
+  if (androidSdk == null)
+    throwToolExit('No Android SDK found. Try setting the ANDROID_HOME environment variable.');
 
   List<String> validationResult = androidSdk.validateSdkWellFormed();
   if (validationResult.isNotEmpty) {
     validationResult.forEach(printError);
-    printError('Try re-installing or updating your Android SDK.');
-    return 1;
+    throwToolExit('Try re-installing or updating your Android SDK.');
   }
 
   return buildGradleProject(buildMode);
 }
 
-Future<int> buildApk(
+Future<Null> buildApk(
   TargetPlatform platform, {
   String target,
   BuildMode buildMode: BuildMode.debug
@@ -633,10 +619,8 @@ Future<int> buildApk(
       target: target
     );
   } else {
-    if (!FileSystemEntity.isFileSync(_kDefaultAndroidManifestPath)) {
-      printError('Cannot build APK: missing $_kDefaultAndroidManifestPath.');
-      return 1;
-    }
+    if (!FileSystemEntity.isFileSync(_kDefaultAndroidManifestPath))
+      throwToolExit('Cannot build APK: missing $_kDefaultAndroidManifestPath.');
 
     return await buildAndroid(
       platform,

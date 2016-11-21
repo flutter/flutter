@@ -6,7 +6,6 @@ import 'dart:ui' as ui;
 import 'dart:ui' show Rect, SemanticsAction, SemanticsFlags;
 import 'dart:typed_data';
 
-import 'package:meta/meta.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:vector_math/vector_math_64.dart';
@@ -44,6 +43,8 @@ typedef void SemanticsAnnotator(SemanticsNode semantics);
 /// Signature for a function that is called for each [SemanticsNode].
 ///
 /// Return false to stop visiting nodes.
+///
+/// Used by [SemanticsNode.visitChildren].
 typedef bool SemanticsNodeVisitor(SemanticsNode node);
 
 /// Summary information about a [SemanticsNode] object.
@@ -288,7 +289,7 @@ class SemanticsNode extends AbstractNode {
   bool get hasCheckedState => (_flags & SemanticsFlags.hasCheckedState.index) != 0;
   set hasCheckedState(bool value) => _setFlag(SemanticsFlags.hasCheckedState, value);
 
-  /// If this node has Boolean state that can be controlled by the user, whether that state is on or off, cooresponding to `true` and `false`, respectively.
+  /// If this node has Boolean state that can be controlled by the user, whether that state is on or off, corresponding to `true` and `false`, respectively.
   bool get isChecked => (_flags & SemanticsFlags.isChecked.index) != 0;
   set isChecked(bool value) => _setFlag(SemanticsFlags.isChecked, value);
 
@@ -370,6 +371,7 @@ class SemanticsNode extends AbstractNode {
   /// child list for the given frame at once instead of needing to process the
   /// changes incrementally as new children are compiled.
   void finalizeChildren() {
+    // The goal of this function is updating sawChange.
     if (_children != null) {
       for (SemanticsNode child in _children)
         child._dead = true;
@@ -471,8 +473,12 @@ class SemanticsNode extends AbstractNode {
     owner._detachedNodes.add(this);
     super.detach();
     if (_children != null) {
-      for (SemanticsNode child in _children)
-        child.detach();
+      for (SemanticsNode child in _children) {
+        // The list of children may be stale and may contain nodes that have
+        // been assigned to a different parent.
+        if (child.parent == this)
+          child.detach();
+      }
     }
   }
 

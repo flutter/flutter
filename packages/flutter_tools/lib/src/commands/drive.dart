@@ -90,48 +90,40 @@ class DriveCommand extends RunCommandBase {
   int get debugPort => int.parse(argResults['debug-port']);
 
   @override
-  Future<int> verifyThenRunCommand() async {
-    if (!commandValidator())
-      return 1;
+  Future<Null> verifyThenRunCommand() async {
+    commandValidator();
     return super.verifyThenRunCommand();
   }
 
   @override
-  Future<int> runCommand() async {
+  Future<Null> runCommand() async {
     String testFile = _getTestFile();
-    if (testFile == null) {
-      return 1;
-    }
+    if (testFile == null)
+      throwToolExit(null);
 
     this._device = await targetDeviceFinder();
-    if (device == null) {
-      return 1;
-    }
+    if (device == null)
+      throwToolExit(null);
 
-    if (await fs.type(testFile) != FileSystemEntityType.FILE) {
-      printError('Test file not found: $testFile');
-      return 1;
-    }
+    if (await fs.type(testFile) != FileSystemEntityType.FILE)
+      throwToolExit('Test file not found: $testFile');
 
     if (!argResults['use-existing-app']) {
       printStatus('Starting application: ${argResults["target"]}');
 
       if (getBuildMode() == BuildMode.release) {
         // This is because we need VM service to be able to drive the app.
-        printError(
+        throwToolExit(
           'Flutter Driver does not support running in release mode.\n'
           '\n'
           'Use --profile mode for testing application performance.\n'
           'Use --debug (default) mode for testing correctness (with assertions).'
         );
-        return 1;
       }
 
       int result = await appStarter(this);
-      if (result != 0) {
-        printError('Application failed to start. Will not run test. Quitting.');
-        return result;
-      }
+      if (result != 0)
+        throwToolExit('Application failed to start ($result). Will not run test. Quitting.', exitCode: result);
     } else {
       printStatus('Will connect to already running application instance.');
     }
@@ -139,11 +131,11 @@ class DriveCommand extends RunCommandBase {
     Cache.releaseLockEarly();
 
     try {
-      return await testRunner(<String>[testFile])
-        .catchError((dynamic error, dynamic stackTrace) {
-          printError('CAUGHT EXCEPTION: $error\n$stackTrace');
-          return 1;
-        });
+      await testRunner(<String>[testFile]);
+    } catch (error, stackTrace) {
+      if (error is ToolExit)
+        rethrow;
+      throwToolExit('CAUGHT EXCEPTION: $error\n$stackTrace');
     } finally {
       if (!argResults['keep-app-running'] && !argResults['use-existing-app']) {
         printStatus('Stopping application instance.');
@@ -285,14 +277,11 @@ Future<int> startApp(DriveCommand command) async {
   // TODO(devoncarew): We should remove the need to special case here.
   if (command.device is AndroidDevice) {
     printTrace('Building an APK.');
-    int result = await build_apk.buildApk(
+    await build_apk.buildApk(
       command.device.platform,
       target: command.targetFile,
       buildMode: command.getBuildMode()
     );
-
-    if (result != 0)
-      return result;
   }
 
   printTrace('Stopping previously running application, if any.');
@@ -312,7 +301,11 @@ Future<int> startApp(DriveCommand command) async {
   printTrace('Starting application.');
 
   // Forward device log messages to the terminal window running the "drive" command.
-  command._deviceLogSubscription = command.device.logReader.logLines.listen(printStatus);
+  command._deviceLogSubscription = command
+      .device
+      .getLogReader(app: package)
+      .logLines
+      .listen(printStatus);
 
   LaunchResult result = await command.device.startApp(
     package,
@@ -335,13 +328,13 @@ Future<int> startApp(DriveCommand command) async {
 }
 
 /// Runs driver tests.
-typedef Future<int> TestRunner(List<String> testArgs);
+typedef Future<Null> TestRunner(List<String> testArgs);
 TestRunner testRunner = runTests;
 void restoreTestRunner() {
   testRunner = runTests;
 }
 
-Future<int> runTests(List<String> testArgs) async {
+Future<Null> runTests(List<String> testArgs) async {
   printTrace('Running driver tests.');
 
   PackageMap.globalPackagesPath = path.normalize(path.absolute(PackageMap.globalPackagesPath));
@@ -349,7 +342,9 @@ Future<int> runTests(List<String> testArgs) async {
     ..add('--packages=${PackageMap.globalPackagesPath}')
     ..add('-rexpanded');
   String dartVmPath = path.join(dartSdkPath, 'bin', 'dart');
-  return await runCommandAndStreamOutput(<String>[dartVmPath]..addAll(args));
+  int result = await runCommandAndStreamOutput(<String>[dartVmPath]..addAll(args));
+  if (result != 0)
+    throwToolExit('Driver tests failed: $result', exitCode: result);
 }
 
 

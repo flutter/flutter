@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
+
 import 'dart:math' as math;
 import 'dart:typed_data';
-
-import 'package:meta/meta.dart';
 
 import 'box.dart';
 import 'object.dart';
@@ -531,6 +531,10 @@ class RenderGrid extends RenderVirtualViewport<GridParentData> {
   }
 
   /// The delegate that controls the layout of the children.
+  ///
+  /// For example, a [FixedColumnCountGridDelegate] for grids that have a fixed
+  /// number of columns or a [MaxTileWidthGridDelegate] for grids that have a
+  /// maximum tile width.
   ///
   /// If the new delegate is the same as the previous one, this does nothing.
   ///

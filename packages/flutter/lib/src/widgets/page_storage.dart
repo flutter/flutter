@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:meta/meta.dart';
+import 'package:flutter/foundation.dart';
 
 import 'framework.dart';
 
@@ -121,6 +121,12 @@ class PageStorage extends StatelessWidget {
   /// The bucket from the closest instance of this class that encloses the given context.
   ///
   /// Returns `null` if none exists.
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// PageStorageBucket bucket = PageStorage.of(context);
+  /// ```
   static PageStorageBucket of(BuildContext context) {
     PageStorage widget = context.ancestorWidgetOfExactType(PageStorage);
     return widget?.bucket;

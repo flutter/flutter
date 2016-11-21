@@ -57,6 +57,7 @@ class MaterialApp extends StatefulWidget {
     this.onLocaleChanged,
     this.debugShowMaterialGrid: false,
     this.showPerformanceOverlay: false,
+    this.checkerboardRasterCacheImages: false,
     this.showSemanticsDebugger: false,
     this.debugShowCheckedModeBanner: true
   }) : super(key: key) {
@@ -127,6 +128,9 @@ class MaterialApp extends StatefulWidget {
   /// Turns on a performance overlay.
   /// https://flutter.io/debugging/#performanceoverlay
   final bool showPerformanceOverlay;
+
+  /// Turns on checkerboarding of raster cache images.
+  final bool checkerboardRasterCacheImages;
 
   /// Turns on an overlay that shows the accessibility information
   /// reported by the framework.
@@ -264,6 +268,7 @@ class _MaterialAppState extends State<MaterialApp> {
         onGenerateRoute: _onGenerateRoute,
         onLocaleChanged: config.onLocaleChanged,
         showPerformanceOverlay: config.showPerformanceOverlay,
+        checkerboardRasterCacheImages: config.checkerboardRasterCacheImages,
         showSemanticsDebugger: config.showSemanticsDebugger,
         debugShowCheckedModeBanner: config.debugShowCheckedModeBanner
       )

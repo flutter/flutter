@@ -74,7 +74,11 @@ class WidgetController {
   /// * Use [firstWidget] if you expect to match several but only want the first.
   Iterable<Widget/*=T*/> widgetList/*<T extends Widget>*/(Finder finder) {
     TestAsyncUtils.guardSync();
-    return finder.evaluate().map/*<T>*/((Element element) => element.widget);
+    return finder.evaluate().map/*<T>*/((Element element) {
+      // TODO(ianh): simplify once the VM can infer the return type
+      dynamic/*=T*/ result = element.widget;
+      return result;
+    });
   }
 
 
@@ -130,7 +134,7 @@ class WidgetController {
     TestAsyncUtils.guardSync();
     return allElements
            .where((Element element) => element is StatefulElement)
-           .map((StatefulElement element) => element.state);
+           .map((StatefulElement element) => element.state); // ignore: STRONG_MODE_INVALID_CAST_FUNCTION_EXPR, https://github.com/dart-lang/sdk/issues/27827
   }
 
   /// The matching state in the widget tree.
@@ -219,7 +223,11 @@ class WidgetController {
   /// * Use [firstRenderObject] if you expect to match several but only want the first.
   Iterable<RenderObject/*=T*/> renderObjectList/*<T extends RenderObject>*/(Finder finder) {
     TestAsyncUtils.guardSync();
-    return finder.evaluate().map/*<T>*/((Element element) => element.renderObject);
+    return finder.evaluate().map/*<T>*/((Element element) {
+      // TODO(ianh): simplify once the VM can infer the return type
+      dynamic/*=T*/ result = element.renderObject;
+      return result;
+    });
   }
 
 

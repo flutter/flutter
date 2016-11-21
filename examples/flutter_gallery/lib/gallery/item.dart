@@ -91,10 +91,10 @@ final List<GalleryItem> kAllGalleryItems = <GalleryItem>[
     buildRoute: (BuildContext context) => new ChipDemo()
   ),
   new GalleryItem(
-    title: 'Date picker',
-    subtitle: 'Date selection widget',
-    routeName: DatePickerDemo.routeName,
-    buildRoute: (BuildContext context) => new DatePickerDemo()
+    title: 'Date and time pickers',
+    subtitle: 'Date and time selection widgets',
+    routeName: DateAndTimePickerDemo.routeName,
+    buildRoute: (BuildContext context) => new DateAndTimePickerDemo()
   ),
   new GalleryItem(
     title: 'Dialog',
@@ -215,12 +215,6 @@ final List<GalleryItem> kAllGalleryItems = <GalleryItem>[
     subtitle: 'Single line of editable text and numbers',
     routeName: TextFieldDemo.routeName,
     buildRoute: (BuildContext context) => new TextFieldDemo()
-  ),
-  new GalleryItem(
-    title: 'Time picker',
-    subtitle: 'Hour and minute selection widget',
-    routeName: TimePickerDemo.routeName,
-    buildRoute: (BuildContext context) => new TimePickerDemo()
   ),
   new GalleryItem(
     title: 'Tooltips',

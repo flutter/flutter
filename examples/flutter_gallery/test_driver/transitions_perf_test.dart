@@ -31,7 +31,7 @@ final List<String> demoTitles = <String>[
   'Buttons',
   'Cards',
   'Chips',
-  'Date picker',
+  'Date and time pickers',
   'Dialog',
   'Expand/collapse list control',
   'Expansion panels',
@@ -52,12 +52,13 @@ final List<String> demoTitles = <String>[
   'Snackbar',
   'Tabs',
   'Text fields',
-  'Time picker',
   'Tooltips',
   // Style
   'Colors',
   'Typography'
 ];
+
+final FileSystem _fs = new LocalFileSystem();
 
 Future<Null> saveDurationsHistogram(List<Map<String, dynamic>> events) async {
   final Map<String, List<int>> durations = new Map<String, List<int>>();
@@ -87,9 +88,8 @@ Future<Null> saveDurationsHistogram(List<Map<String, dynamic>> events) async {
 
   // Save the durations Map to a file.
   final String destinationDirectory = 'build';
-  final FileSystem fs = new LocalFileSystem();
-  await fs.directory(destinationDirectory).create(recursive: true);
-  final File file = fs.file(path.join(destinationDirectory, 'transition_durations.timeline.json'));
+  await _fs.directory(destinationDirectory).create(recursive: true);
+  final File file = _fs.file(path.join(destinationDirectory, 'transition_durations.timeline.json'));
   await file.writeAsString(new JsonEncoder.withIndent('  ').convert(durations));
 }
 
@@ -102,7 +102,7 @@ void main() {
 
     tearDownAll(() async {
       if (driver != null)
-        driver.close();
+        await driver.close();
     });
 
     test('all demos', () async {
@@ -136,8 +136,16 @@ void main() {
       // Save the duration (in microseconds) of the first timeline Frame event
       // that follows a 'Start Transition' event. The Gallery app adds a
       // 'Start Transition' event when a demo is launched (see GalleryItem).
-      saveDurationsHistogram(timeline.json['traceEvents']);
-
+      TimelineSummary summary = new TimelineSummary.summarize(timeline);
+      await summary.writeSummaryToFile('transitions', pretty: true);
+      try {
+        await saveDurationsHistogram(timeline.json['traceEvents']);
+      } catch(_) {
+        await summary.writeTimelineToFile('transitions', pretty: true);
+        print('ERROR: failed to extract transition events. Here is the full timeline:\n');
+        print(await _fs.file('build/transitions.timeline.json').readAsString());
+        rethrow;
+      }
     }, timeout: new Timeout(new Duration(minutes: 5)));
   });
 }

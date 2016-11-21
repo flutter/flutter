@@ -30,7 +30,7 @@ enum PageableListFlingBehavior {
 /// a value that shows a single page.
 ///
 /// [Pageable] uses different units for its scroll offset than [Scrollable]. One
-/// unit of scroll offset cooresponds to one child widget, which means a scroll
+/// unit of scroll offset corresponds to one child widget, which means a scroll
 /// offset of 2.75 indicates that the viewport is three quarters of the way
 /// between the child with index 2 and the child with index 3.
 ///
@@ -122,7 +122,7 @@ class PageableList extends Pageable {
     ValueChanged<int> onPageChanged,
     Duration duration: const Duration(milliseconds: 200),
     Curve curve: Curves.ease,
-    this.children
+    this.children: const <Widget>[],
   }) : super(
     key: key,
     initialScrollOffset: initialScrollOffset,
@@ -526,7 +526,7 @@ class _VirtualPageViewportElement extends VirtualViewportElement {
 ///
 /// Useful for [Pageable] widgets.
 ///
-/// One unit of start offset cooresponds to one child widget, which means a
+/// One unit of start offset corresponds to one child widget, which means a
 /// start offset of 2.75 indicates that the viewport is three quarters of the
 /// way between the child with index 2 and the child with index 3.
 ///
@@ -542,7 +542,7 @@ class PageViewport extends _VirtualPageViewport with VirtualViewportFromIterable
     Axis mainAxis: Axis.vertical,
     ViewportAnchor anchor: ViewportAnchor.start,
     bool itemsWrap: false,
-    this.children
+    this.children: const <Widget>[],
   }) : super(
     startOffset,
     mainAxis,
@@ -558,7 +558,7 @@ class PageViewport extends _VirtualPageViewport with VirtualViewportFromIterable
 ///
 /// Useful for [Pageable] widgets.
 ///
-/// One unit of start offset cooresponds to one child widget, which means a
+/// One unit of start offset corresponds to one child widget, which means a
 /// start offset of 2.75 indicates that the viewport is three quarters of the
 /// way between the child with index 2 and the child with index 3.
 ///

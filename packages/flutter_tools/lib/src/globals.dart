@@ -27,8 +27,15 @@ void printError(String message, [StackTrace stackTrace]) => logger.printError(me
 
 /// Display normal output of the command. This should be used for things like
 /// progress messages, success messages, or just normal command output.
-void printStatus(String message, { bool emphasis: false, bool newline: true }) {
-  logger.printStatus(message, emphasis: emphasis, newline: newline);
+///
+/// Set `emphasis` to true to make the output bold if it's supported.
+///
+/// Set `newline` to false to skip the trailing linefeed.
+///
+/// If `ansiAlternative` is provided, and the terminal supports color, that
+/// string will be printed instead of the message.
+void printStatus(String message, { bool emphasis: false, bool newline: true, String ansiAlternative }) {
+  logger.printStatus(message, emphasis: emphasis, newline: newline, ansiAlternative: ansiAlternative);
 }
 
 /// Use this for verbose tracing output. Users can turn this output on in order

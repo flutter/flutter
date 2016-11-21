@@ -34,11 +34,19 @@ const Duration _kBaseSettleDuration = const Duration(milliseconds: 246);
 /// Typically, the child of the drawer is a [Block] whose first child is a
 /// [DrawerHeader] that displays status information about the current user.
 ///
+/// The [Scaffold] automatically shows an appropriate [IconButton], and handles
+/// the edge-swipe gesture, to show the drawer.
+///
 /// See also:
 ///
-///  * [Scaffold.drawer]
-///  * [DrawerItem]
-///  * [DrawerHeader]
+///  * [Scaffold.drawer], where one specifies a [Drawer] so that it can be
+///    shown.
+///  * [Scaffold.of], to obtain the current [ScaffoldState], which manages the
+///    display and animation of the drawer.
+///  * [ScaffoldState.openDrawer], which displays its [Drawer], if any.
+///  * [Navigator.pop], which closes the drawer if it is open.
+///  * [DrawerItem], a widget for items in drawers.
+///  * [DrawerHeader], a widget for the top part of a drawer.
 ///  * <https://material.google.com/patterns/navigation-drawer.html>
 class Drawer extends StatelessWidget {
   /// Creates a material design drawer.
@@ -53,6 +61,8 @@ class Drawer extends StatelessWidget {
   /// The z-coordinate at which to place this drawer.
   ///
   /// The following elevations have defined shadows: 1, 2, 3, 4, 6, 8, 9, 12, 16, 24
+  ///
+  /// Defaults to 16, the appropriate elevation for drawers.
   final int elevation;
 
   /// The widget below this widget in the tree.
