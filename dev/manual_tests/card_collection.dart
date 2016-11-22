@@ -213,7 +213,7 @@ class CardCollectionState extends State<CardCollection> {
       onPressed: enabled ? callback : null,
       child: new Row(
         children: <Widget>[
-          new Flexible(child: new Text(label)),
+          new Expanded(child: new Text(label)),
           new Checkbox(
             value: value,
             onChanged: enabled ? (_) { callback(); } : null
@@ -229,7 +229,7 @@ class CardCollectionState extends State<CardCollection> {
       onPressed: enabled ? () { onChanged(itemValue); } : null,
       child: new Row(
         children: <Widget>[
-          new Flexible(child: new Text(label)),
+          new Expanded(child: new Text(label)),
           new Radio<Map<int, Color>>(
             value: itemValue,
             groupValue: currentValue,
@@ -246,7 +246,7 @@ class CardCollectionState extends State<CardCollection> {
       onPressed: enabled ? () { onChanged(itemValue); } : null,
       child: new Row(
         children: <Widget>[
-          new Flexible(child: new Text(label)),
+          new Expanded(child: new Text(label)),
           new Radio<DismissDirection>(
             value: itemValue,
             groupValue: currentValue,
@@ -263,7 +263,7 @@ class CardCollectionState extends State<CardCollection> {
       onPressed: enabled ? () { onChanged(itemValue); } : null,
       child: new Row(
         children: <Widget>[
-          new Flexible(child: new Text(label)),
+          new Expanded(child: new Text(label)),
           new Radio<TextAlign>(
             value: itemValue,
             groupValue: currentValue,
@@ -374,7 +374,7 @@ class CardCollectionState extends State<CardCollection> {
             child: new Row(
               children: <Widget>[
                 leftArrowIcon,
-                new Flexible(
+                new Expanded(
                   child: new Text(backgroundMessage,
                     style: backgroundTextStyle,
                     textAlign: TextAlign.center

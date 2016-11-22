@@ -576,7 +576,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
 
       if (!_isLast(i))
         children.add(
-          new Flexible(
+          new Expanded(
             child: new Container(
               margin: const EdgeInsets.symmetric(horizontal: 8.0),
               height: 1.0,
@@ -599,7 +599,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
             )
           )
         ),
-        new Flexible(
+        new Expanded(
           child: new ScrollableViewport(
             child: new Container(
               margin: const EdgeInsets.all(24.0),

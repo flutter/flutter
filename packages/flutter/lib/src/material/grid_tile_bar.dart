@@ -81,7 +81,7 @@ class GridTileBar extends StatelessWidget {
     );
     if (title != null && subtitle != null) {
       children.add(
-        new Flexible(
+        new Expanded(
           child: new Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -104,7 +104,7 @@ class GridTileBar extends StatelessWidget {
       );
     } else if (title != null || subtitle != null) {
       children.add(
-        new Flexible(
+        new Expanded(
           child: new DefaultTextStyle(
             style: darkTheme.textTheme.subhead,
             softWrap: false,

@@ -83,20 +83,17 @@ class IconsDemoState extends State<IconsDemo> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
-                  new Flexible(
-                    flex: 0,
-                    child: new Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: <Widget>[
-                        new Text('Size', style: textStyle),
-                        buildSizeLabel(18, textStyle),
-                        buildSizeLabel(24, textStyle),
-                        buildSizeLabel(36, textStyle),
-                        buildSizeLabel(48, textStyle)
-                      ]
-                    )
+                  new Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: <Widget>[
+                      new Text('Size', style: textStyle),
+                      buildSizeLabel(18, textStyle),
+                      buildSizeLabel(24, textStyle),
+                      buildSizeLabel(36, textStyle),
+                      buildSizeLabel(48, textStyle)
+                    ]
                   ),
-                  new Flexible(
+                  new Expanded(
                     child: new Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: <Widget>[
@@ -108,7 +105,7 @@ class IconsDemoState extends State<IconsDemo> {
                       ]
                     )
                   ),
-                  new Flexible(
+                  new Expanded(
                     child: new Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: <Widget>[
@@ -122,7 +119,7 @@ class IconsDemoState extends State<IconsDemo> {
                   )
                 ]
               ),
-              new Flexible(
+              new Expanded(
                 child: new Center(
                   child: new IconTheme(
                     data: new IconThemeData(opacity: 1.0),

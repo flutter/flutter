@@ -450,7 +450,7 @@ class DataTable extends StatelessWidget {
     final bool isLightTheme = Theme.of(context).brightness == Brightness.light;
     if (showEditIcon) {
       final Widget icon = new Icon(Icons.edit, size: 18.0);
-      label = new Flexible(child: label);
+      label = new Expanded(child: label);
       label = new Row(children: numeric ? <Widget>[ icon, label ] : <Widget>[ label, icon ]);
     }
     label = new Container(

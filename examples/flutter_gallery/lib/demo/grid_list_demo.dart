@@ -344,7 +344,7 @@ class GridListDemoState extends State<GridListDemo> {
       ),
       body: new Column(
         children: <Widget>[
-          new Flexible(
+          new Expanded(
             child: new ScrollableGrid(
               scrollableKey: _scrollableKey,
               delegate: new FixedColumnCountGridDelegate(

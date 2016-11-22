@@ -22,7 +22,7 @@ Widget buildFrame(ScrollableEdge clampedEdge) {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             new SizedBox(height: 100.0, child: new Text('top')),
-            new Flexible(child: new Container()),
+            new Expanded(child: new Container()),
             new SizedBox(height: 100.0, child: new Text('bottom')),
           ]
         )

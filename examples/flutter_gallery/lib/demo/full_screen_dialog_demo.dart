@@ -35,7 +35,7 @@ class DateTimeItem extends StatelessWidget {
       style: theme.textTheme.subhead,
       child: new Row(
         children: <Widget>[
-          new Flexible(
+          new Expanded(
             child: new Container(
               padding: const EdgeInsets.symmetric(vertical: 8.0),
               decoration: new BoxDecoration(

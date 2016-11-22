@@ -56,7 +56,7 @@ class OrderItem extends StatelessWidget {
                     )
                   )
                 ),
-                new Flexible(
+                new Expanded(
                   child: new Text(product.name, style: theme.featureTitleStyle)
                 )
               ]

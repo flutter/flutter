@@ -21,7 +21,7 @@ void main() {
         key: rowKey,
         children: <Widget>[
           new Container(key: child0Key, width: 100.0, height: 100.0),
-          new Flexible(child: new Container(key: child1Key, width: 100.0, height: 100.0)),
+          new Expanded(child: new Container(key: child1Key, width: 100.0, height: 100.0)),
           new Container(key: child2Key, width: 100.0, height: 100.0),
         ]
       )

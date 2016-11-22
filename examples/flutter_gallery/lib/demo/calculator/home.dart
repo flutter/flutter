@@ -122,12 +122,12 @@ class _CalculatorState extends State<Calculator> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
           // Give the key-pad 3/5 of the vertical space and the display 2/5.
-          new Flexible(
+          new Expanded(
             flex: 2,
             child: new CalcDisplay(content: _expression.toString())
           ),
           new Divider(height: 1.0),
-          new Flexible(
+          new Expanded(
             flex: 3,
             child: new KeyPad(calcState: this)
           )
@@ -170,7 +170,7 @@ class KeyPad extends StatelessWidget {
       child: new Material(
         child: new Row(
           children: <Widget>[
-            new Flexible(
+            new Expanded(
               // We set flex equal to the number of columns so that the main keypad
               // and the op keypad have sizes proportional to their number of
               // columns.
@@ -200,7 +200,7 @@ class KeyPad extends StatelessWidget {
                 ]
               )
             ),
-            new Flexible(
+            new Expanded(
               child: new Material(
                 color: themeData.backgroundColor,
                 child: new Column(
@@ -228,7 +228,7 @@ class KeyRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new Flexible(
+    return new Expanded(
       child: new Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: this.keys
@@ -246,7 +246,7 @@ class CalcKey extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Orientation orientation = MediaQuery.of(context).orientation;
-    return new Flexible(
+    return new Expanded(
       child: new InkResponse(
         onTap: this.onTap,
         child: new Center(

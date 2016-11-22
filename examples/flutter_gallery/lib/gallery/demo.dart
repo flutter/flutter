@@ -91,7 +91,7 @@ class TabbedComponentDemoScaffold extends StatelessWidget {
                     style: Theme.of(context).textTheme.subhead
                   )
                 ),
-                new Flexible(child: demo.widget)
+                new Expanded(child: demo.widget)
               ]
             );
           }).toList()

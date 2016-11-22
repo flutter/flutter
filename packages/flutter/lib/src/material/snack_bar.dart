@@ -163,7 +163,7 @@ class SnackBar extends StatelessWidget {
     );
     List<Widget> children = <Widget>[
       const SizedBox(width: _kSnackBarPadding),
-      new Flexible(
+      new Expanded(
         child: new Container(
           padding: const EdgeInsets.symmetric(vertical: _kSingleLineVerticalPadding),
           child: new DefaultTextStyle(

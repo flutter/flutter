@@ -37,7 +37,7 @@ class AdaptedGridItem extends StatelessWidget {
     return new Card(
       child: new Column(
         children: <Widget>[
-          new Flexible(
+          new Expanded(
             child: new Container(
               decoration: new BoxDecoration(
                 backgroundColor: Colors.lightBlueAccent[100]
@@ -48,7 +48,7 @@ class AdaptedGridItem extends StatelessWidget {
             margin: const EdgeInsets.only(left: 8.0),
             child: new Row(
               children: <Widget>[
-                new Flexible(
+                new Expanded(
                   child: new Text(name)
                 ),
                 new IconButton(
