@@ -36,6 +36,7 @@ dependencies:
 
   # Version from the vended Dart SDK as defined in `dependency_overrides`.
   analyzer: any
+  front_end: any
 
 dev_dependencies:
   mockito: ^1.0.0
@@ -47,3 +48,5 @@ dartdoc:
 dependency_overrides:
   analyzer:
     path: ../../bin/cache/dart-sdk/lib/analyzer
+  front_end:
+    path: ../../bin/cache/dart-sdk/lib/front_end
