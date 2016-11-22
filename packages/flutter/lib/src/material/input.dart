@@ -177,6 +177,7 @@ class InputContainer extends StatefulWidget {
     this.errorText,
     this.style,
     this.isDense: false,
+    this.hideDivider: false,
     this.child,
   }) : super(key: key);
 
@@ -212,6 +213,9 @@ class InputContainer extends StatefulWidget {
   /// Should the hint and label be displayed as if no value had been input
   /// to the child.
   final bool isEmpty;
+
+  /// Hide the divider that appears below the child and above the error text.
+  final bool hideDivider;
 
   final Widget child;
 
@@ -304,16 +308,26 @@ class _InputContainerState extends State<InputContainer> {
     );
     EdgeInsets margin = new EdgeInsets.only(bottom: bottomHeight - (bottomPadding + bottomBorder));
 
-    stackChildren.add(new AnimatedContainer(
-      margin: margin,
-      padding: padding,
-      duration: _kTransitionDuration,
-      curve: _kTransitionCurve,
-      decoration: new BoxDecoration(
-        border: border,
-      ),
-      child: config.child,
-    ));
+    Widget divider;
+    if (config.hideDivider) {
+      divider = new Container(
+        margin: margin,
+        padding: padding,
+        child: config.child,
+      );
+    } else {
+      divider = new AnimatedContainer(
+        margin: margin,
+        padding: padding,
+        duration: _kTransitionDuration,
+        curve: _kTransitionCurve,
+        decoration: new BoxDecoration(
+          border: border,
+        ),
+        child: config.child,
+      );
+    }
+    stackChildren.add(divider);
 
     if (errorText != null && !config.isDense) {
       TextStyle errorStyle = themeData.textTheme.caption.copyWith(color: themeData.errorColor);
@@ -385,6 +399,7 @@ class Input extends StatefulWidget {
     this.errorText,
     this.style,
     this.hideText: false,
+    this.hideDivider: false,
     this.isDense: false,
     this.autofocus: false,
     this.maxLines: 1,
@@ -414,6 +429,7 @@ class Input extends StatefulWidget {
   /// Text to show inline in the input field when it would otherwise be empty.
   final String hintText;
 
+
   /// Text to show when the input text is invalid.
   final String errorText;
 
@@ -425,6 +441,9 @@ class Input extends StatefulWidget {
   /// When this is set to true, all the characters in the input are replaced by
   /// U+2022 BULLET characters (•).
   final bool hideText;
+
+  /// Hide the divider that appears below the child and above the error text.
+  final bool hideDivider;
 
   /// Whether the input field is part of a dense form (i.e., uses less vertical space).
   final bool isDense;
@@ -478,6 +497,7 @@ class _InputState extends State<Input> {
             errorText: config.errorText,
             style: config.style,
             isDense: config.isDense,
+            hideDivider: config.hideDivider,
             child: new InputField(
               key: _inputFieldKey,
               focusKey: focusKey,
