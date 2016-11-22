@@ -120,11 +120,11 @@ class RunAndStayResident extends ResidentRunner {
     startTime.stop();
 
     if (_result.hasObservatory)
-      connectionInfoCompleter?.complete(new DebugConnectionInfo(_result.observatoryPort));
+      connectionInfoCompleter?.complete(new DebugConnectionInfo(_result.observatoryUri));
 
     // Connect to observatory.
     if (debuggingOptions.debuggingEnabled) {
-      await connectToServiceProtocol(_result.observatoryPort);
+      await connectToServiceProtocol(_result.observatoryUri);
     }
 
     printTrace('Application running.');
@@ -171,7 +171,7 @@ class RunAndStayResident extends ResidentRunner {
   void printHelp({ @required bool details }) {
     bool haveDetails = false;
     if (_result.hasObservatory)
-      printStatus('The Observatory debugger and profiler is available at: http://127.0.0.1:${_result.observatoryPort}/');
+      printStatus('The Observatory debugger and profiler is available at: ${_result.observatoryUri}');
     if (supportsServiceProtocol) {
       haveDetails = true;
       if (details) {

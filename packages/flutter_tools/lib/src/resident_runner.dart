@@ -115,12 +115,12 @@ abstract class ResidentRunner {
     _loggingSubscription = null;
   }
 
-  Future<Null> connectToServiceProtocol(int port) async {
+  Future<Null> connectToServiceProtocol(Uri uri) async {
     if (!debuggingOptions.debuggingEnabled) {
       return new Future<Null>.error('Error the service protocol is not enabled.');
     }
-    vmService = await VMService.connect(port);
-    printTrace('Connected to service protocol on port $port');
+    vmService = await VMService.connect(uri);
+    printTrace('Connected to service protocol: $uri');
     await vmService.getVM();
 
     // Refresh the view list.
@@ -271,8 +271,8 @@ String getMissingPackageHintForPlatform(TargetPlatform platform) {
 }
 
 class DebugConnectionInfo {
-  DebugConnectionInfo(this.port, { this.baseUri });
+  DebugConnectionInfo(this.uri, { this.baseUri });
 
-  final int port;
+  final Uri uri;
   final String baseUri;
 }
