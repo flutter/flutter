@@ -1534,7 +1534,10 @@ class Stack extends MultiChildRenderObjectWidget {
 
 /// A [Stack] that shows a single child from a list of children.
 ///
-/// The displayed child is the one with the given [index].
+/// The displayed child is the one with the given [index]. The stack is
+/// always as big as the largest child.
+///
+/// If value is null, then nothing is displayed.
 ///
 /// For more details, see [Stack].
 class IndexedStack extends Stack {
@@ -1546,9 +1549,7 @@ class IndexedStack extends Stack {
     FractionalOffset alignment: FractionalOffset.topLeft,
     this.index: 0,
     List<Widget> children: const <Widget>[],
-  }) : super(key: key, alignment: alignment, children: children) {
-    assert(index != null);
-  }
+  }) : super(key: key, alignment: alignment, children: children);
 
   /// The index of the child to show.
   final int index;

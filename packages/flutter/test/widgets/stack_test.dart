@@ -262,6 +262,33 @@ void main() {
     expect(renderBox.size.height, equals(12.0));
   });
 
+  testWidgets('IndexedStack with null index', (WidgetTester tester) async {
+    bool tapped;
+
+    await tester.pumpWidget(
+      new Center(
+        child: new IndexedStack(
+          index: null,
+          children: <Widget>[
+            new GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () { print("HELLO"); tapped = true; },
+              child: new SizedBox(
+                width: 200.0,
+                height: 200.0,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(IndexedStack));
+    RenderBox box = tester.renderObject(find.byType(IndexedStack));
+    expect(box.size, equals(const Size(200.0, 200.0)));
+    expect(tapped, isNull);
+  });
+
   testWidgets('Stack clip test', (WidgetTester tester) async {
     await tester.pumpWidget(
       new Center(

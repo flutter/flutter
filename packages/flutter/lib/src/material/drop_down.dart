@@ -540,13 +540,10 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> {
           children: <Widget>[
             // The button's size is defined by its largest menu item. If value is
             // null then an item does not appear.
-            new Opacity(
-              opacity: _selectedIndex == null ? 0.0 : 1.0,
-              child: new IndexedStack(
-                index: _selectedIndex ?? 0,
-                alignment: FractionalOffset.centerLeft,
-                children: config.items,
-              ),
+            new IndexedStack(
+              index: _selectedIndex,
+              alignment: FractionalOffset.centerLeft,
+              children: config.items,
             ),
             new Icon(Icons.arrow_drop_down,
               size: config.iconSize,
