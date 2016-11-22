@@ -8,8 +8,11 @@ import 'package:path/path.dart' as path;
 import 'package:pub_semver/pub_semver.dart';
 
 import '../base/common.dart';
+import '../base/context.dart';
 import '../base/os.dart';
 import '../globals.dart';
+
+AndroidSdk get androidSdk => context[AndroidSdk];
 
 const String kAndroidHome = 'ANDROID_HOME';
 
