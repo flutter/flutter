@@ -52,8 +52,9 @@ class _DropdownMenuPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    final double selectedItemOffset = selectedIndex * _kMenuItemHeight + _kMenuVerticalPadding.top;
     final Tween<double> top = new Tween<double>(
-      begin: (selectedIndex * _kMenuItemHeight + _kMenuVerticalPadding.top).clamp(0.0, size.height - _kMenuItemHeight),
+      begin: selectedItemOffset.clamp(0.0, size.height - _kMenuItemHeight),
       end: 0.0
     );
 
@@ -411,14 +412,14 @@ class DropdownButtonHideUnderline extends InheritedWidget {
 class DropdownButton<T> extends StatefulWidget {
   /// Creates a dropdown button.
   ///
-  /// The [items] must have distinct values and [value] must be among them.
+  /// The [items] must have distinct values and if [value] isn't null it must be among them.
   ///
   /// The [elevation] and [iconSize] arguments must not be null (they both have
   /// defaults, so do not need to be specified).
   DropdownButton({
     Key key,
     @required this.items,
-    @required this.value,
+    this.value,
     @required this.onChanged,
     this.elevation: 8,
     this.style,
@@ -426,13 +427,16 @@ class DropdownButton<T> extends StatefulWidget {
     this.isDense: false,
   }) : super(key: key) {
     assert(items != null);
-    assert(items.where((DropdownMenuItem<T> item) => item.value == value).length == 1);
+    assert(value == null ||
+      items.where((DropdownMenuItem<T> item) => item.value == value).length == 1);
   }
 
   /// The list of possible items to select among.
   final List<DropdownMenuItem<T>> items;
 
-  /// The currently selected item.
+  /// The currently selected item, or null if no item has been selected. If
+  /// value is null then the menu is popped up as if the first item was
+  /// selected.
   final T value;
 
   /// Called when the user selects an item.
@@ -470,22 +474,23 @@ class DropdownButton<T> extends StatefulWidget {
 }
 
 class _DropdownButtonState<T> extends State<DropdownButton<T>> {
+  int _selectedIndex;
+
   @override
   void initState() {
     super.initState();
     _updateSelectedIndex();
-    assert(_selectedIndex != null);
   }
 
  @override
   void didUpdateConfig(DropdownButton<T> oldConfig) {
-    if (config.items[_selectedIndex].value != config.value)
-      _updateSelectedIndex();
+    _updateSelectedIndex();
   }
 
-  int _selectedIndex;
-
   void _updateSelectedIndex() {
+    assert(config.value == null ||
+      config.items.where((DropdownMenuItem<T> item) => item.value == config.value).length == 1);
+    _selectedIndex = null;
     for (int itemIndex = 0; itemIndex < config.items.length; itemIndex++) {
       if (config.items[itemIndex].value == config.value) {
         _selectedIndex = itemIndex;
@@ -502,7 +507,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> {
     Navigator.push(context, new _DropdownRoute<T>(
       items: config.items,
       buttonRect: _kMenuHorizontalPadding.inflateRect(itemRect),
-      selectedIndex: _selectedIndex,
+      selectedIndex: _selectedIndex ?? 0,
       elevation: config.elevation,
       theme: Theme.of(context, shadowThemeOnly: true),
       style: _textStyle,
@@ -533,10 +538,12 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
+            // The button's size is defined by its largest menu item. If value is
+            // null then an item does not appear.
             new IndexedStack(
               index: _selectedIndex,
               alignment: FractionalOffset.centerLeft,
-              children: config.items
+              children: config.items,
             ),
             new Icon(Icons.arrow_drop_down,
               size: config.iconSize,

@@ -454,7 +454,7 @@ class RenderStack extends RenderBox
 class RenderIndexedStack extends RenderStack {
   /// Creates a stack render object that paints a single child.
   ///
-  /// The [index] argument must not be null.
+  /// If the [index] parameter is null, nothing is displayed.
   RenderIndexedStack({
     List<RenderBox> children,
     FractionalOffset alignment: FractionalOffset.topLeft,
@@ -462,15 +462,12 @@ class RenderIndexedStack extends RenderStack {
   }) : _index = index, super(
    children: children,
    alignment: alignment
-  ) {
-    assert(index != null);
-  }
+  );
 
-  /// The index of the child to show.
+  /// The index of the child to show, null if nothing is to be displayed.
   int get index => _index;
   int _index;
   set index (int value) {
-    assert(value != null);
     if (_index != value) {
       _index = value;
       markNeedsLayout();
@@ -478,6 +475,7 @@ class RenderIndexedStack extends RenderStack {
   }
 
   RenderBox _childAtIndex() {
+    assert(index != null);
     RenderBox child = firstChild;
     int i = 0;
     while (child != null && i < index) {
@@ -492,7 +490,7 @@ class RenderIndexedStack extends RenderStack {
 
   @override
   bool hitTestChildren(HitTestResult result, { Point position }) {
-    if (firstChild == null)
+    if (firstChild == null || index == null)
       return false;
     assert(position != null);
     RenderBox child = _childAtIndex();
@@ -504,7 +502,7 @@ class RenderIndexedStack extends RenderStack {
 
   @override
   void paintStack(PaintingContext context, Offset offset) {
-    if (firstChild == null)
+    if (firstChild == null || index == null)
       return;
     RenderBox child = _childAtIndex();
     final StackParentData childParentData = child.parentData;
