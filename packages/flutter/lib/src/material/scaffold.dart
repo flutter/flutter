@@ -292,13 +292,23 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 ///
 /// See also:
 ///
-///  * [AppBar]
-///  * [FloatingActionButton]
-///  * [Drawer]
-///  * [BottomNavigationBar]
-///  * [SnackBar]
-///  * [BottomSheet]
-///  * [ScaffoldState]
+///  * [AppBar], which is a horizontal bar typically shown at the top of an app
+///    using the [appBar] property.
+///  * [FloatingActionButton], which is a circular button typically shown in the
+///    bottom right corner of the app using the [floatingActionButton] property.
+///  * [Drawer], which is a vertical panel that is typically displayed to the
+///    left of the body (and often hidden on phones) using the [drawer]
+///    property.
+///  * [BottomNavigationBar], which is a horizontal array of buttons typically
+///    shown along the bottom of the app using the [bottomNavigationBar]
+///    property.
+///  * [SnackBar], which is a temporary notification typically shown near the
+///    bottom of the app using the [ScaffoldState.showSnackBar] method.
+///  * [BottomSheet], which is an overlay typically shown near the bottom of the
+///    app. A bottom sheet can either be persistent, in which case it is shown
+///    using the [ScaffoldState.showBottomSheet] method, or modal, in which case
+///    it is shown using the [showModalBottomSheet] function.
+///  * [ScaffoldState], which is the state associated with this widget.
 ///  * <https://material.google.com/layout/structure.html>
 class Scaffold extends StatefulWidget {
   /// Creates a visual scaffold for material design widgets.
@@ -341,7 +351,7 @@ class Scaffold extends StatefulWidget {
   /// [LazyScrollableList], or [MaterialList] as the body of the scaffold.
   final Widget body;
 
-  /// A button displayed on top of the [body].
+  /// A button displayed floating above [body], in the bottom right corner.
   ///
   /// Typically a [FloatingActionButton].
   final Widget floatingActionButton;
@@ -358,15 +368,23 @@ class Scaffold extends StatefulWidget {
   ///  * <https://material.google.com/components/buttons.html#buttons-persistent-footer-buttons>
   final List<Widget> persistentFooterButtons;
 
-  /// A panel displayed to the side of the [body], often hidden on mobile devices.
+  /// A panel displayed to the side of the [body], often hidden on mobile
+  /// devices.
+  ///
+  /// If the [appBar] lacks an [AppBar.leading] widget, the scaffold will add a
+  /// button that opens the drawer. The scaffold will also open the drawer if
+  /// the user drags from the left edge of the scaffold.
+  ///
+  /// In the uncommon case that you wish to open the drawer manually, use the
+  /// [ScaffoldState.openDrawer] function.
   ///
   /// Typically a [Drawer].
   final Widget drawer;
 
   /// A bottom navigation bar to display at the bottom of the scaffold.
   ///
-  /// Snack bars slide from underneath the botton navigation while bottom sheets
-  /// are stacked on top.
+  /// Snack bars slide from underneath the bottom navigation bar while bottom
+  /// sheets are stacked on top.
   final Widget bottomNavigationBar;
 
   /// The key of the primary [Scrollable] widget in the [body].
@@ -511,6 +529,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   /// drawer.
   ///
   /// To close the drawer once it is open, use [Navigator.pop].
+  ///
+  /// See [Scaffold.of] for information about how to obtain the [ScaffoldState].
   void openDrawer() {
     _drawerKey.currentState?.open();
   }
@@ -532,6 +552,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   ///
   /// To remove a [SnackBar] suddenly (without an animation), use
   /// [removeCurrentSnackBar].
+  ///
+  /// See [Scaffold.of] for information about how to obtain the [ScaffoldState].
   ScaffoldFeatureController<SnackBar, Null> showSnackBar(SnackBar snackbar) {
     _snackBarController ??= SnackBar.createAnimationController(vsync: this)
       ..addStatusListener(_handleSnackBarStatusChange);
@@ -626,8 +648,10 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   ///
   /// See also:
   ///
-  ///  * [BottomSheet]
-  ///  * [showModalBottomSheet]
+  ///  * [BottomSheet], which is the widget typicaly returned by the `builder`.
+  ///  * [showModalBottomSheet], which can be used to display a modal bottom
+  ///    sheet.
+  ///  * [Scaffold.of], for information about how to obtain the [ScaffoldState].
   ///  * <https://material.google.com/components/bottom-sheets.html#bottom-sheets-persistent-bottom-sheets>
   PersistentBottomSheetController<dynamic/*=T*/> showBottomSheet/*<T>*/(WidgetBuilder builder) {
     if (_currentBottomSheet != null) {
