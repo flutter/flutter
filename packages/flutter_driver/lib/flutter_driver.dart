@@ -11,6 +11,9 @@
 /// Protractor (Angular), Espresso (Android) or Earl Gray (iOS).
 library flutter_driver;
 
+export 'src/common.dart' show
+  testOutputsDirectory;
+
 export 'src/driver.dart' show
   find,
   CommonFinders,
