@@ -27,7 +27,7 @@ vars = {
 
   # Note: When updating the Dart revision, ensure that all entries that are
   # dependencies of dart are also updated
-  'dart_revision': 'deafdbf978d1128dde83b9779bdae6633d484d96',
+  'dart_revision': 'ed47486f6003eea8c6012d4ee1ea604c3dcd41f0',
   'dart_boringssl_gen_revision': '62c20247d582444cb2804f9ea4e3abaa6e47f6a5',
   'dart_boringssl_revision': '8d343b44bbab829d1a28fdef650ca95f7db4412e',
   'dart_observatory_packages_revision': '26aad88f1c1915d39bbcbff3cad589e2402fdcf1',

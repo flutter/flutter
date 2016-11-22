@@ -10,6 +10,7 @@
 
 #include "dart/runtime/include/dart_api.h"
 #include "dart/runtime/include/dart_native_api.h"
+#include "dart/runtime/include/dart_tools_api.h"
 #include "lib/ftl/arraysize.h"
 #include "lib/ftl/command_line.h"
 #include "lib/ftl/files/directory.h"
@@ -121,6 +122,49 @@ Dart_Handle HandleLibraryTag(Dart_LibraryTag tag,
   return GetLoader().HandleLibraryTag(tag, library, url);
 }
 
+static const char StubNativeFunctionName[] = "StubNativeFunction";
+
+void StubNativeFunction(Dart_NativeArguments arguments) {
+  // This is a stub function for the resolver
+  Dart_SetReturnValue(
+      arguments, Dart_NewApiError("<EMBEDDER DID NOT SETUP NATIVE RESOLVER>"));
+}
+
+static Dart_NativeFunction StubNativeLookup(Dart_Handle name,
+                                            int argument_count,
+                                            bool* auto_setup_scope) {
+  return &StubNativeFunction;
+}
+
+static const uint8_t* StubNativeSymbol(Dart_NativeFunction nf) {
+  return reinterpret_cast<const uint8_t*>(StubNativeFunctionName);
+}
+
+// Registers a dummy native symbol resolver on all loaded libraries that do not
+// already have a native symbol resolver. This is necessary because
+// `--compile-all` will try and resolve all native functions. The function
+// returned by the dummy native symbol resolver will never be invoked.
+static void SetupStubNativeResolvers() {
+  Dart_Handle library_ids = Dart_GetLibraryIds();
+  intptr_t library_ids_length;
+  DART_CHECK_VALID(Dart_ListLength(library_ids, &library_ids_length));
+  for (intptr_t i = 0; i < library_ids_length; i++) {
+    Dart_Handle library_id_handle = Dart_ListGetAt(library_ids, i);
+    DART_CHECK_VALID(library_id_handle);
+    int64_t library_id;
+    Dart_IntegerToInt64(library_id_handle, &library_id);
+    Dart_Handle library = Dart_GetLibraryFromId(library_id);
+    DART_CHECK_VALID(library);
+    Dart_NativeEntryResolver old_resolver = NULL;
+    DART_CHECK_VALID(Dart_GetNativeResolver(library, &old_resolver));
+    if (old_resolver == NULL) {
+      Dart_Handle result =
+          Dart_SetNativeResolver(library, &StubNativeLookup, &StubNativeSymbol);
+      DART_CHECK_VALID(result);
+    }
+  }
+}
+
 std::vector<char> CreateSnapshot() {
   uint8_t* buffer = nullptr;
   intptr_t size = 0;
@@ -216,19 +260,7 @@ int CreateSnapshot(const ftl::CommandLine& command_line) {
     return 1;
   }
 
-  const bool compile_all_mode = command_line.HasOption(kCompileAll, nullptr);
-  if (compile_all_mode) {
-    // Compile all the code loaded into the isolate. This will eagerly detect
-    // syntax errors.
-    Dart_Handle compile_all_results = Dart_CompileAll();
-    if (Dart_IsError(compile_all_results)) {
-      std::cerr << "error: Compilation errors detected:"
-                << std::endl
-                << Dart_GetError(compile_all_results)
-                << std::endl;
-      return 1;
-    }
-  }
+  SetupStubNativeResolvers();
 
   if (print_deps_mode) {
     if (Dart_IsError(load_result)) {
@@ -262,6 +294,22 @@ int CreateSnapshot(const ftl::CommandLine& command_line) {
       std::cerr << "error: Failed to write depfile to '" << depfile << "'."
                 << std::endl;
       return 1;
+    }
+
+    // Run compile-all *after* generating the snapshot to avoid adding
+    // unnecessary compilation related artifacts to the snapshot.
+    const bool compile_all_mode = command_line.HasOption(kCompileAll, nullptr);
+    if (compile_all_mode) {
+      // Compile all the code loaded into the isolate. This will eagerly detect
+      // syntax errors.
+      Dart_Handle compile_all_results = Dart_CompileAll();
+      if (Dart_IsError(compile_all_results)) {
+        std::cerr << "error: Compilation errors detected:"
+                  << std::endl
+                  << Dart_GetError(compile_all_results)
+                  << std::endl;
+        return 1;
+      }
     }
   }
 
