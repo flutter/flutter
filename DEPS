@@ -145,7 +145,7 @@ deps_os = {
       Var('chromium_git') + '/chromium/third_party/robolectric.git' + '@' + '6b63c99a8b6967acdb42cbed0adb067c80efc810',
 
     'src/third_party/freetype2':
-       Var('fuchsia_git') + '/third_party/freetype2' + '@' + '6cfcc4303b6fc7850f764e41f72a89d67e301f44',
+       Var('fuchsia_git') + '/third_party/freetype2' + '@' + 'e23a030e9b43c648249477fdf7bf5305d2cc8f59',
   },
 }
 
