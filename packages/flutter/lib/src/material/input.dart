@@ -311,7 +311,7 @@ class _InputContainerState extends State<InputContainer> {
     Widget divider;
     if (config.hideDivider) {
       divider = new Container(
-        margin: margin,
+        margin: margin + new EdgeInsets.only(bottom: bottomBorder),
         padding: padding,
         child: config.child,
       );
@@ -428,7 +428,6 @@ class Input extends StatefulWidget {
 
   /// Text to show inline in the input field when it would otherwise be empty.
   final String hintText;
-
 
   /// Text to show when the input text is invalid.
   final String errorText;
