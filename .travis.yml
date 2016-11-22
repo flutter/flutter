@@ -3,6 +3,7 @@ before_install:
   # sky_shell binary depends on /usr/lib/x86_64-linux-gnu/libstdc++.so.6 version GLIBCXX_3.4.18
   # if we don't specify this, the libstdc++6 we get is the wrong version
   - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
+  - sudo apt-get update -y
   - sudo apt-get install libstdc++6 -y
   - sudo apt-get install fonts-roboto -y
 install:
