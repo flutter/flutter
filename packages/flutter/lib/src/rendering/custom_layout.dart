@@ -20,12 +20,62 @@ class MultiChildLayoutParentData extends ContainerBoxParentDataMixin<RenderBox> 
 
 /// A delegate that controls the layout of multiple children.
 ///
+/// Delegates must be idempotent. Specifically, if two delegates are equal, then
+/// they must produce the same layout. To change the layout, replace the
+/// delegate with a different instance whose [shouldRelayout] returns true when
+/// given the previous instance.
+///
+/// Override [getSize] to control the overall size of the layout. The size of
+/// the layout cannot depend on layout properties of the children.
+///
+/// Override [performLayout] to size and position the children. An
+/// implementation of [performLayout] must call [layoutChild] exactly once for
+/// each child, but it may call [layoutChild] on children in an arbitrary order.
+/// Typically a delegate will use the size returned from [layoutChild] on one
+/// child to determine the constraints for [performLayout] on another child or
+/// to determine the offset for [positionChild] for that child or another child.
+///
+/// Override [shouldRelayout] to determine when the layout of the children needs
+/// to be recomputed when the delegate changes.
+///
 /// Used with [MultiChildCustomLayout], the widget for the
 /// [RenderCustomMultiChildLayoutBox] render object.
 ///
-/// Subclasses must override some or all of the methods
-/// marked "Override this method to..." to provide the constraints and
-/// positions of the children.
+/// ## Example
+///
+/// Below is an example implementation of [performLayout] that causes one widget
+/// to be the same size as another:
+///
+/// ```dart
+/// @override
+/// void performLayout(Size size) {
+///   Size followerSize = Size.zero;
+///
+///   if (hasChild(_Slots.leader) {
+///     followerSize = layoutChild(_Slots.leader, new BoxConstraints.loose(size));
+///     positionChild(_Slots.leader, Offset.zero);
+///   }
+///
+///   if (hasChild(_Slots.follower)) {
+///     layoutChild(_Slots.follower, new BoxConstraints.tight(followerSize));
+///     positionChild(_Slots.follower, new Offset(size.width - followerSize.width,
+///                                               size.height - followerSize.height));
+///   }
+/// }
+/// ```
+///
+/// The delegate gives the leader widget loose constraints, which means the
+/// child determines what size to be (subject to fitting within the given size).
+/// The delegate then remembers the size of that child and places it in the
+/// upper left corner.
+///
+/// The delegate then gives the follower widget tight constraints, forcing it to
+/// match the size of the leader widget. The delegate then places the follower
+/// widget in the bottom right corner.
+///
+/// The leader and follower widget will paint in the order they appear in the
+/// child list, regardless of the order in which [layoutChild] is called on
+/// them.
 abstract class MultiChildLayoutDelegate {
   Map<Object, RenderBox> _idToChild;
   Set<RenderBox> _debugChildrenNeedingLayout;
@@ -170,9 +220,10 @@ abstract class MultiChildLayoutDelegate {
   }
 
   /// Override this method to return the size of this object given the
-  /// incoming constraints. The size cannot reflect the instrinsic
-  /// sizes of the children. If this layout has a fixed width or
-  /// height the returned size can reflect that; the size will be
+  /// incoming constraints.
+  ///
+  /// The size cannot reflect the sizes of the children. If this layout has a
+  /// fixed width or height the returned size can reflect that; the size will be
   /// constrained to the given constraints.
   ///
   /// By default, attempts to size the box to the biggest size
@@ -180,14 +231,18 @@ abstract class MultiChildLayoutDelegate {
   Size getSize(BoxConstraints constraints) => constraints.biggest;
 
   /// Override this method to lay out and position all children given this
-  /// widget's size. This method must call [layoutChild] for each child. It
-  /// should also specify the final position of each child with [positionChild].
+  /// widget's size.
+  ///
+  /// This method must call [layoutChild] for each child. It should also specify
+  /// the final position of each child with [positionChild].
   void performLayout(Size size);
 
   /// Override this method to return true when the children need to be
-  /// laid out. This should compare the fields of the current delegate
-  /// and the given oldDelegate and return true if the fields are such
-  /// that the layout would be different.
+  /// laid out.
+  ///
+  /// This should compare the fields of the current delegate and the given
+  /// `oldDelegate` and return true if the fields are such that the layout would
+  /// be different.
   bool shouldRelayout(@checked MultiChildLayoutDelegate oldDelegate);
 
   /// Override this method to include additional information in the

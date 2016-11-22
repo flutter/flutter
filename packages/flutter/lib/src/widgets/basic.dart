@@ -605,7 +605,8 @@ class Padding extends SingleChildRenderObjectWidget {
 ///
 /// See also:
 ///
-///  * [CustomSingleChildLayout].
+///  * [CustomSingleChildLayout], which uses a delegate to control the layout of
+///    a single child.
 ///  * [Center], which is the same as [Align] but with the [alignment] always
 ///    set to [FractionalOffset.center].
 ///  * [FractionallySizedBox], which sizes its child based on a fraction of its own
@@ -690,13 +691,13 @@ class Center extends Align {
 ///
 /// See also:
 ///
-///  * [SingleChildLayoutDelegate]
-///  * [Align] (which sizes itself based on its child's size and positions
-///    the child according to a [FractionalOffset] value)
-///  * [FractionallySizedBox] (which sizes its child based on a fraction of its own
-///    size and positions the child according to a [FractionalOffset] value)
-///  * [CustomMultiChildLayout] (which uses a delegate to position multiple
-///    children)
+///  * [SingleChildLayoutDelegate], which controls the layout of the child.
+///  * [Align], which sizes itself based on its child's size and positions
+///    the child according to a [FractionalOffset] value.
+///  * [FractionallySizedBox], which sizes its child based on a fraction of its own
+///    size and positions the child according to a [FractionalOffset] value.
+///  * [CustomMultiChildLayout], which uses a delegate to position multiple
+///    children.
 class CustomSingleChildLayout extends SingleChildRenderObjectWidget {
   /// Creates a custom single child layout.
   ///
@@ -760,19 +761,31 @@ class LayoutId extends ParentDataWidget<CustomMultiChildLayout> {
   }
 }
 
-/// A widget that defers the layout of multiple children to a delegate.
+/// A widget that uses a delegate to size and position multiple children.
 ///
 /// The delegate can determine the layout constraints for each child and can
 /// decide where to position each child. The delegate can also determine the
 /// size of the parent, but the size of the parent cannot depend on the sizes of
 /// the children.
 ///
+/// [CustomMultiChildLayout] is appropriate when there are complex relationships
+/// between the size and positioning of a multiple widgets. To control the
+/// layout of a single child, [CustomSingleChildLayout] is more appropriate. For
+/// simple cases, such as aligning a widget to one or another edge, the [Stack]
+/// widget is more appropriate.
+///
+/// Each child must be wrapped in a [LayoutId] widget to identify the widget for
+/// the delegate.
+///
 /// See also:
 ///
-/// * [MultiChildLayoutDelegate]
-/// * [CustomSingleChildLayout] (which defers the layout of its single child to a delegate)
-/// * [Stack]
-/// * [Flow]
+/// * [MultiChildLayoutDelegate], for details about how to control the layout of
+///   the children.
+/// * [CustomSingleChildLayout], which uses a delegate to control the layout of
+///   a single child.
+/// * [Stack], which arranges children relative to the edges of the container.
+/// * [Flow], which provides paint-time control of its children using transform
+///   matrices.
 class CustomMultiChildLayout extends MultiChildRenderObjectWidget {
   /// Creates a custom multi-child layout.
   ///
@@ -1485,11 +1498,14 @@ class BlockBody extends MultiChildRenderObjectWidget {
 ///
 /// See also:
 ///
-///  * [Flow]
 ///  * [Align], which sizes itself based on its child's size and positions
 ///    the child according to a [FractionalOffset] value.
-///  * [CustomSingleChildLayout]
-///  * [CustomMultiChildLayout]
+///  * [CustomSingleChildLayout], which uses a delegate to control the layout of
+///    a single child.
+///  * [CustomMultiChildLayout], which uses a delegate to position multiple
+///    children.
+///  * [Flow], which provides paint-time control of its children using transform
+///    matrices.
 class Stack extends MultiChildRenderObjectWidget {
   /// Creates a stack layout widget.
   ///
@@ -2319,10 +2335,12 @@ class Expanded extends Flexible {
 ///
 /// See also:
 ///
-///  * [FlowDelegate]
-///  * [Stack]
-///  * [CustomSingleChildLayout]
-///  * [CustomMultiChildLayout]
+///  * [FlowDelegate], which controls the visual presentation of the children.
+///  * [Stack], which arranges children relative to the edges of the container.
+///  * [CustomSingleChildLayout], which uses a delegate to control the layout of
+///    a single child.
+///  * [CustomMultiChildLayout], which uses a delegate to position multiple
+///    children.
 class Flow extends MultiChildRenderObjectWidget {
   /// Creates a flow layout.
   ///
