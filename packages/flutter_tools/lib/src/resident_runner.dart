@@ -271,8 +271,9 @@ String getMissingPackageHintForPlatform(TargetPlatform platform) {
 }
 
 class DebugConnectionInfo {
-  DebugConnectionInfo(this.port, { this.baseUri });
+  DebugConnectionInfo({ this.port, this.wsUri, this.baseUri });
 
   final int port;
+  final String wsUri;
   final String baseUri;
 }
