@@ -9,6 +9,7 @@
 #include <string>
 
 #include "dart/runtime/include/dart_api.h"
+#include "dart/runtime/include/dart_native_api.h"
 #include "lib/ftl/arraysize.h"
 #include "lib/ftl/command_line.h"
 #include "lib/ftl/files/directory.h"
@@ -36,6 +37,7 @@ constexpr char kSnapshot[] = "snapshot";
 constexpr char kDepfile[] = "depfile";
 constexpr char kBuildOutput[] = "build-output";
 constexpr char kPrintDeps[] = "print-deps";
+constexpr char kCompileAll[] = "compile-all";
 
 const char* kDartArgs[] = {
     // clang-format off
@@ -205,6 +207,28 @@ int CreateSnapshot(const ftl::CommandLine& command_line) {
   Dart_Handle load_result =
       Dart_LoadScript(ToDart(main_dart), Dart_Null(),
                       ToDart(loader.Fetch(main_dart)), 0, 0);
+
+  if (Dart_IsError(load_result)) {
+    std::cerr << "error: Failed to load main script:"
+              << std::endl
+              << Dart_GetError(load_result)
+              << std::endl;
+    return 1;
+  }
+
+  const bool compile_all_mode = command_line.HasOption(kCompileAll, nullptr);
+  if (compile_all_mode) {
+    // Compile all the code loaded into the isolate. This will eagerly detect
+    // syntax errors.
+    Dart_Handle compile_all_results = Dart_CompileAll();
+    if (Dart_IsError(compile_all_results)) {
+      std::cerr << "error: Compilation errors detected:"
+                << std::endl
+                << Dart_GetError(compile_all_results)
+                << std::endl;
+      return 1;
+    }
+  }
 
   if (print_deps_mode) {
     if (Dart_IsError(load_result)) {
