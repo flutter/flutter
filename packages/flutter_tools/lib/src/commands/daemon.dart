@@ -358,9 +358,10 @@ class AppDomain extends Domain {
     if (options.debuggingEnabled) {
       connectionInfoCompleter = new Completer<DebugConnectionInfo>();
       connectionInfoCompleter.future.then((DebugConnectionInfo info) {
-        Map<String, dynamic> params = <String, dynamic>{ 'port': info.uri.port };
-        if (info.uri != null)
-          params['uri'] = info.uri.toString();
+        Map<String, dynamic> params = <String, dynamic>{
+          'port': info.httpUri.port,
+          'wsUri': info.wsUri.toString(),
+        };
         if (info.baseUri != null)
           params['baseUri'] = info.baseUri;
         _sendAppEvent(app, 'debugPort', params);

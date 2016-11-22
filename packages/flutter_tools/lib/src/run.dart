@@ -119,12 +119,16 @@ class RunAndStayResident extends ResidentRunner {
 
     startTime.stop();
 
-    if (_result.hasObservatory)
-      connectionInfoCompleter?.complete(new DebugConnectionInfo(_result.observatoryUri));
-
     // Connect to observatory.
     if (debuggingOptions.debuggingEnabled) {
       await connectToServiceProtocol(_result.observatoryUri);
+    }
+
+    if (_result.hasObservatory) {
+      connectionInfoCompleter?.complete(new DebugConnectionInfo(
+        httpUri: _result.observatoryUri,
+        wsUri: vmService.wsAddress,
+      ));
     }
 
     printTrace('Application running.');

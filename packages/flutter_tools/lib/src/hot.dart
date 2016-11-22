@@ -237,7 +237,11 @@ class HotRunner extends ResidentRunner {
       Uri baseUri = await _initDevFS();
       if (connectionInfoCompleter != null) {
         connectionInfoCompleter.complete(
-          new DebugConnectionInfo(_observatoryUri, baseUri: baseUri.toString())
+          new DebugConnectionInfo(
+            httpUri: _observatoryUri,
+            wsUri: vmService.wsAddress,
+            baseUri: baseUri.toString()
+          )
         );
       }
     } catch (error) {

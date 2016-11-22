@@ -60,7 +60,7 @@ final List<String> demoTitles = <String>[
 
 final FileSystem _fs = new LocalFileSystem();
 
-Future<Null> saveDurationsHistogram(List<Map<String, dynamic>> events) async {
+Future<Null> saveDurationsHistogram(List<Map<String, dynamic>> events, String outputPath) async {
   final Map<String, List<int>> durations = new Map<String, List<int>>();
   Map<String, dynamic> startEvent;
 
@@ -87,9 +87,7 @@ Future<Null> saveDurationsHistogram(List<Map<String, dynamic>> events) async {
   }
 
   // Save the durations Map to a file.
-  final String destinationDirectory = 'build';
-  await _fs.directory(destinationDirectory).create(recursive: true);
-  final File file = _fs.file(path.join(destinationDirectory, 'transition_durations.timeline.json'));
+  final File file = await _fs.file(outputPath).create(recursive: true);
   await file.writeAsString(new JsonEncoder.withIndent('  ').convert(durations));
 }
 
@@ -139,11 +137,12 @@ void main() {
       TimelineSummary summary = new TimelineSummary.summarize(timeline);
       await summary.writeSummaryToFile('transitions', pretty: true);
       try {
-        await saveDurationsHistogram(timeline.json['traceEvents']);
+        String histogramPath = path.join(testOutputsDirectory, 'transition_durations.timeline.json');
+        await saveDurationsHistogram(timeline.json['traceEvents'], histogramPath);
       } catch(_) {
         await summary.writeTimelineToFile('transitions', pretty: true);
         print('ERROR: failed to extract transition events. Here is the full timeline:\n');
-        print(await _fs.file('build/transitions.timeline.json').readAsString());
+        print(await _fs.file('$testOutputsDirectory/transitions.timeline.json').readAsString());
         rethrow;
       }
     }, timeout: new Timeout(new Duration(minutes: 5)));

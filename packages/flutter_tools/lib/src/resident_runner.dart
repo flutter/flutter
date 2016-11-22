@@ -271,8 +271,9 @@ String getMissingPackageHintForPlatform(TargetPlatform platform) {
 }
 
 class DebugConnectionInfo {
-  DebugConnectionInfo(this.uri, { this.baseUri });
+  DebugConnectionInfo({ this.httpUri, this.wsUri, this.baseUri });
 
-  final Uri uri;
+  final Uri httpUri;
+  final Uri wsUri;
   final String baseUri;
 }

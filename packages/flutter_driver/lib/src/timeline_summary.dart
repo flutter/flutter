@@ -12,7 +12,6 @@ import 'package:path/path.dart' as path;
 import 'common.dart';
 import 'timeline.dart';
 
-const String _kDefaultDirectory = 'build';
 final JsonEncoder _prettyEncoder = new JsonEncoder.withIndent('  ');
 
 /// The maximum amount of time considered safe to spend for a frame's build
@@ -88,7 +87,8 @@ class TimelineSummary {
 
   /// Writes all of the recorded timeline data to a file.
   Future<Null> writeTimelineToFile(String traceName,
-      {String destinationDirectory: _kDefaultDirectory, bool pretty: false}) async {
+      {String destinationDirectory, bool pretty: false}) async {
+    destinationDirectory ??= testOutputsDirectory;
     await fs.directory(destinationDirectory).create(recursive: true);
     File file = fs.file(path.join(destinationDirectory, '$traceName.timeline.json'));
     await file.writeAsString(_encodeJson(_timeline.json, pretty));
@@ -96,7 +96,8 @@ class TimelineSummary {
 
   /// Writes [summaryJson] to a file.
   Future<Null> writeSummaryToFile(String traceName,
-      {String destinationDirectory: _kDefaultDirectory, bool pretty: false}) async {
+      {String destinationDirectory, bool pretty: false}) async {
+    destinationDirectory ??= testOutputsDirectory;
     await fs.directory(destinationDirectory).create(recursive: true);
     File file = fs.file(path.join(destinationDirectory, '$traceName.timeline_summary.json'));
     await file.writeAsString(_encodeJson(summaryJson, pretty));

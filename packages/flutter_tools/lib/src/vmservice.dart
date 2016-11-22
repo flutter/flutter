@@ -14,7 +14,7 @@ import 'globals.dart';
 
 /// A connection to the Dart VM Service.
 class VMService {
-  VMService._(this.peer, this.httpAddress) {
+  VMService._(this.peer, this.httpAddress, this.wsAddress) {
     _vm = new VM._empty(this);
 
     peer.registerMethod('streamNotify', (rpc.Parameters event) {
@@ -37,9 +37,10 @@ class VMService {
     }
     rpc.Peer peer = new rpc.Peer(new IOWebSocketChannel(ws).cast());
     peer.listen();
-    return new VMService._(peer, httpUri);
+    return new VMService._(peer, httpUri, wsUri);
   }
   final Uri httpAddress;
+  final Uri wsAddress;
   final rpc.Peer peer;
 
   VM _vm;

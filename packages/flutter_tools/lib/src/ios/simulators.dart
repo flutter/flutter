@@ -683,19 +683,21 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
 
   static final RegExp _flutterRunnerRegex = new RegExp(r' FlutterRunner\[\d+\] ');
 
+  /// List of log categories to always show in the logs, even if this is an
+  /// app-secific [DeviceLogReader]. Add to this list to make the log output
+  /// more verbose.
+  static final List<String> _whitelistedLogCategories = <String>[
+    'CoreSimulatorBridge',
+  ];
+
   String _filterDeviceLine(String string) {
     Match match = _mapRegex.matchAsPrefix(string);
     if (match != null) {
-      // Filter out some messages that clearly aren't related to Flutter.
-      if (string.contains(': could not find icon for representation -> com.apple.'))
-        return null;
-
       String category = match.group(1);
       String content = match.group(2);
-      if (category == 'Game Center' || category == 'itunesstored' ||
-          category == 'nanoregistrylaunchd' || category == 'mstreamd' ||
-          category == 'syncdefaultsd' || category == 'companionappd' ||
-          category == 'searchd')
+
+      // Filter out some messages that clearly aren't related to Flutter.
+      if (string.contains(': could not find icon for representation -> com.apple.'))
         return null;
 
       if (category == 'CoreSimulatorBridge'
@@ -710,18 +712,25 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
         return null;
 
       // assertiond: assertion failed: 15E65 13E230: assertiond + 15801 [3C808658-78EC-3950-A264-79A64E0E463B]: 0x1
-      if (category == 'assertiond' && content.startsWith('assertion failed: ')
-           && content.endsWith(']: 0x1'))
+      if (category == 'assertiond'
+          && content.startsWith('assertion failed: ')
+          && content.endsWith(']: 0x1'))
          return null;
 
-      if (_appName != null && category == _appName) {
+      if (_appName == null || _whitelistedLogCategories.contains(category))
+        return '$category: $content';
+      else if (category == _appName)
         return content;
-      }
-      return '$category: $content';
-    }
-    match = _lastMessageSingleRegex.matchAsPrefix(string);
-    if (match != null)
+
       return null;
+    }
+
+    if (_lastMessageSingleRegex.matchAsPrefix(string) != null)
+      return null;
+
+    if (new RegExp(r'assertion failed: .* libxpc.dylib .* 0x7d$').matchAsPrefix(string) != null)
+      return null;
+
     return string;
   }
 
