@@ -145,15 +145,12 @@ static const uint8_t* StubNativeSymbol(Dart_NativeFunction nf) {
 // `--compile-all` will try and resolve all native functions. The function
 // returned by the dummy native symbol resolver will never be invoked.
 static void SetupStubNativeResolvers() {
-  Dart_Handle library_ids = Dart_GetLibraryIds();
-  intptr_t library_ids_length;
-  DART_CHECK_VALID(Dart_ListLength(library_ids, &library_ids_length));
-  for (intptr_t i = 0; i < library_ids_length; i++) {
-    Dart_Handle library_id_handle = Dart_ListGetAt(library_ids, i);
-    DART_CHECK_VALID(library_id_handle);
-    int64_t library_id;
-    Dart_IntegerToInt64(library_id_handle, &library_id);
-    Dart_Handle library = Dart_GetLibraryFromId(library_id);
+  Dart_Handle libraries = Dart_GetLoadedLibraries();
+  DART_CHECK_VALID(libraries);
+  intptr_t libraries_length;
+  DART_CHECK_VALID(Dart_ListLength(libraries, &libraries_length));
+  for (intptr_t i = 0; i < libraries_length; i++) {
+    Dart_Handle library = Dart_ListGetAt(libraries, i);
     DART_CHECK_VALID(library);
     Dart_NativeEntryResolver old_resolver = NULL;
     DART_CHECK_VALID(Dart_GetNativeResolver(library, &old_resolver));
