@@ -65,9 +65,7 @@ def to_gn_args(args):
         gn_args['target_os'] = 'ios'
         gn_args['ios_deployment_target'] = '7.0'
         gn_args['use_ios_simulator'] = args.simulator
-        if args.simulator:
-          gn_args['use_libjpeg_turbo'] = False
-        else:
+        if not args.simulator:
           # Always use AOT on iOS devices until the interpreter stabilizes
           aot = True
     else:
