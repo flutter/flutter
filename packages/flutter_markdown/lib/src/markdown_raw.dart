@@ -410,7 +410,7 @@ class _Block {
               width: listIndents.length * markdownStyle.listIndent,
               child: bullet
             ),
-            new Flexible(child: contents)
+            new Expanded(child: contents)
           ]
         );
       }

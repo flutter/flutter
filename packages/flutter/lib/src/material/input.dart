@@ -344,7 +344,7 @@ class _InputContainerState extends State<InputContainer> {
               child: config.icon
             )
           ),
-          new Flexible(child: textField)
+          new Expanded(child: textField)
         ]
       );
     }

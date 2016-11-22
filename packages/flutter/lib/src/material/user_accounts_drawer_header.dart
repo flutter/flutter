@@ -77,7 +77,7 @@ class _UserAccountsDrawerHeaderState extends State<UserAccountsDrawerHeader> {
       decoration: config.decoration,
       child: new Column(
         children: <Widget>[
-          new Flexible(
+          new Expanded(
             child: new Stack(
               children: <Widget>[
                 new Positioned(
@@ -137,7 +137,7 @@ class _UserAccountsDrawerHeaderState extends State<UserAccountsDrawerHeader> {
                           style: const TextStyle(color: Colors.white),
                           child: config.accountEmail
                         ),
-                        new Flexible(
+                        new Expanded(
                           child: new Align(
                             alignment: FractionalOffset.centerRight,
                             child: new Icon(

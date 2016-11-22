@@ -273,7 +273,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
     final List<Widget> headerWidgets = <Widget>[];
     double leftPadding = 24.0;
     if (_selectedRowCount == 0) {
-      headerWidgets.add(new Flexible(child: config.header));
+      headerWidgets.add(new Expanded(child: config.header));
       if (config.header is ButtonBar) {
         // We adjust the padding when a button bar is present, because the
         // ButtonBar introduces 2 pixels of outside padding, plus 2 pixels
@@ -285,9 +285,9 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
       }
     } else if (_selectedRowCount == 1) {
       // TODO(ianh): Real l10n.
-      headerWidgets.add(new Flexible(child: new Text('1 item selected')));
+      headerWidgets.add(new Expanded(child: new Text('1 item selected')));
     } else {
-      headerWidgets.add(new Flexible(child: new Text('$_selectedRowCount items selected')));
+      headerWidgets.add(new Expanded(child: new Text('$_selectedRowCount items selected')));
     }
     if (config.actions != null) {
       headerWidgets.addAll(

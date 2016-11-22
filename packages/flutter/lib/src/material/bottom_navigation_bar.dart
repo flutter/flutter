@@ -311,7 +311,7 @@ class BottomNavigationBarState extends State<BottomNavigationBar> with TickerPro
         );
         for (int i = 0; i < config.labels.length; i += 1) {
           children.add(
-            new Flexible(
+            new Expanded(
               child: new InkResponse(
                 onTap: () {
                   if (config.onTap != null)
@@ -376,7 +376,7 @@ class BottomNavigationBarState extends State<BottomNavigationBar> with TickerPro
         _computeWeight();
         for (int i = 0; i < config.labels.length; i += 1) {
           children.add(
-            new Flexible(
+            new Expanded(
               // Since Flexible only supports integers, we're using large
               // numbers in order to simulate floating point flex values.
               flex: (_flex(animations[i]) * 1000.0).round(),

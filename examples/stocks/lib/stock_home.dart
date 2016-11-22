@@ -153,7 +153,7 @@ class StockHomeState extends State<StockHome> {
           onPressed: () => _handleStockModeChange(StockMode.optimistic),
           child: new Row(
             children: <Widget>[
-              new Flexible(child: new Text('Optimistic')),
+              new Expanded(child: new Text('Optimistic')),
               new Radio<StockMode>(value: StockMode.optimistic, groupValue: config.configuration.stockMode, onChanged: _handleStockModeChange)
             ]
           )
@@ -163,7 +163,7 @@ class StockHomeState extends State<StockHome> {
           onPressed: () => _handleStockModeChange(StockMode.pessimistic),
           child: new Row(
             children: <Widget>[
-              new Flexible(child: new Text('Pessimistic')),
+              new Expanded(child: new Text('Pessimistic')),
               new Radio<StockMode>(value: StockMode.pessimistic, groupValue: config.configuration.stockMode, onChanged: _handleStockModeChange)
             ]
           )

@@ -23,7 +23,7 @@ class Rectangle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new Flexible(
+    return new Expanded(
       child: new Container(
         decoration: new BoxDecoration(backgroundColor: color)
       )

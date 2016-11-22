@@ -116,7 +116,7 @@ class ExpansionPanelList extends StatelessWidget {
 
       Row header = new Row(
         children: <Widget>[
-          new Flexible(
+          new Expanded(
             child: new AnimatedContainer(
               duration: animationDuration,
               curve: Curves.fastOutSlowIn,

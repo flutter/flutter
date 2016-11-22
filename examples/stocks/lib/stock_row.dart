@@ -54,22 +54,22 @@ class StockRow extends StatelessWidget {
                 child: new StockArrow(percentChange: stock.percentChange)
               )
             ),
-            new Flexible(
+            new Expanded(
               child: new Row(
                 children: <Widget>[
-                  new Flexible(
+                  new Expanded(
                     flex: 2,
                     child: new Text(
                       stock.symbol
                     )
                   ),
-                  new Flexible(
+                  new Expanded(
                     child: new Text(
                       lastSale,
                       textAlign: TextAlign.right
                     )
                   ),
-                  new Flexible(
+                  new Expanded(
                     child: new Text(
                       changeInPrice,
                       textAlign: TextAlign.right

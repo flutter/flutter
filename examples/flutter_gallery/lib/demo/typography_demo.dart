@@ -29,7 +29,7 @@ class TextStyleItem extends StatelessWidget {
             width: 72.0,
             child: new Text(name, style: nameStyle)
           ),
-          new Flexible(
+          new Expanded(
             child: new Text(text, style: style.copyWith(height: 1.0))
           )
         ]

@@ -86,7 +86,7 @@ class _DateTimePicker extends StatelessWidget {
     return new Row(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: <Widget>[
-        new Flexible(
+        new Expanded(
           flex: 4,
           child: new _InputDropdown(
             labelText: labelText,
@@ -96,7 +96,7 @@ class _DateTimePicker extends StatelessWidget {
           ),
         ),
         new SizedBox(width: 12.0),
-        new Flexible(
+        new Expanded(
           flex: 3,
           child: new _InputDropdown(
             valueText: selectedTime.toString(),

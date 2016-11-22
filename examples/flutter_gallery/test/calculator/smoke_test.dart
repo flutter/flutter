@@ -28,7 +28,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(seconds: 1)); // Wait until it has finished.
 
-    Finder display = find.widgetWithText(Flexible, '12');
+    Finder display = find.widgetWithText(Expanded, '12');
     expect(display, findsOneWidget);
   });
 }

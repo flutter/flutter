@@ -45,14 +45,14 @@ class DualHeaderWithHint extends StatelessWidget {
 
     return new Row(
       children: <Widget>[
-        new Flexible(
+        new Expanded(
           flex: 2,
           child: new Container(
             margin: const EdgeInsets.only(left: 24.0),
             child: new Text(name, style: textTheme.body1.copyWith(fontSize: 15.0))
           )
         ),
-        new Flexible(
+        new Expanded(
           flex: 3,
           child: new Container(
             margin: const EdgeInsets.only(left: 24.0),

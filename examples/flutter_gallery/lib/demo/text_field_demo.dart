@@ -110,7 +110,7 @@ class TextFieldDemoState extends State<TextFieldDemo> {
             new Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                new Flexible(
+                new Expanded(
                   child: new InputFormField(
                     key: _passwordFieldKey,
                     hintText: 'How do you log in?',
@@ -120,7 +120,7 @@ class TextFieldDemoState extends State<TextFieldDemo> {
                   )
                 ),
                 new SizedBox(width: 16.0),
-                new Flexible(
+                new Expanded(
                   child: new InputFormField(
                     hintText: 'How do you log in?',
                     labelText: 'Re-type Password',

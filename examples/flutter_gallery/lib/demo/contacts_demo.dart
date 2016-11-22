@@ -28,7 +28,7 @@ class _ContactCategory extends StatelessWidget {
               width: 72.0,
               child: new Icon(icon, color: themeData.primaryColor)
             ),
-            new Flexible(child: new Column(children: children))
+            new Expanded(child: new Column(children: children))
           ]
         )
       )
@@ -53,7 +53,7 @@ class _ContactItem extends StatelessWidget {
     columnChildren.add(new Text(lines.last, style: themeData.textTheme.caption));
 
     List<Widget> rowChildren = <Widget>[
-      new Flexible(
+      new Expanded(
         child: new Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: columnChildren

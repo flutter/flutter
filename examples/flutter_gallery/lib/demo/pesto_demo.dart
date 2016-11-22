@@ -253,7 +253,7 @@ class RecipeCard extends StatelessWidget {
               tag: recipe.imagePath,
               child: new Image.asset(recipe.imagePath, fit: ImageFit.contain)
             ),
-            new Flexible(
+            new Expanded(
               child: new Row(
                 children: <Widget>[
                   new Padding(
@@ -264,7 +264,7 @@ class RecipeCard extends StatelessWidget {
                       height: 48.0
                     )
                   ),
-                  new Flexible(
+                  new Expanded(
                     child: new Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.center,

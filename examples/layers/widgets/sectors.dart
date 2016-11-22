@@ -130,7 +130,7 @@ class SectorAppState extends State<SectorApp> {
             mainAxisAlignment: MainAxisAlignment.spaceAround
           )
         ),
-        new Flexible(
+        new Expanded(
           child: new Container(
             margin: new EdgeInsets.all(8.0),
             decoration: new BoxDecoration(

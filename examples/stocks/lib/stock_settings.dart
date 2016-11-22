@@ -108,7 +108,7 @@ class StockSettingsState extends State<StockSettings> {
         onPressed: () => _confirmOptimismChange(),
         child: new Row(
           children: <Widget>[
-            new Flexible(child: new Text('Everything is awesome')),
+            new Expanded(child: new Text('Everything is awesome')),
             new Checkbox(
               value: config.configuration.stockMode == StockMode.optimistic,
               onChanged: (bool value) => _confirmOptimismChange()
@@ -121,7 +121,7 @@ class StockSettingsState extends State<StockSettings> {
         onPressed: () { _handleBackupChanged(!(config.configuration.backupMode == BackupMode.enabled)); },
         child: new Row(
           children: <Widget>[
-            new Flexible(child: new Text('Back up stock list to the cloud')),
+            new Expanded(child: new Text('Back up stock list to the cloud')),
             new Switch(
               value: config.configuration.backupMode == BackupMode.enabled,
               onChanged: _handleBackupChanged
@@ -134,7 +134,7 @@ class StockSettingsState extends State<StockSettings> {
         onPressed: () { _handleShowPerformanceOverlayChanged(!config.configuration.showPerformanceOverlay); },
         child: new Row(
           children: <Widget>[
-            new Flexible(child: new Text('Show rendering performance overlay')),
+            new Expanded(child: new Text('Show rendering performance overlay')),
             new Switch(
               value: config.configuration.showPerformanceOverlay,
               onChanged: _handleShowPerformanceOverlayChanged
@@ -147,7 +147,7 @@ class StockSettingsState extends State<StockSettings> {
         onPressed: () { _handleShowSemanticsDebuggerChanged(!config.configuration.showSemanticsDebugger); },
         child: new Row(
           children: <Widget>[
-            new Flexible(child: new Text('Show semantics overlay')),
+            new Expanded(child: new Text('Show semantics overlay')),
             new Switch(
               value: config.configuration.showSemanticsDebugger,
               onChanged: _handleShowSemanticsDebuggerChanged
@@ -164,7 +164,7 @@ class StockSettingsState extends State<StockSettings> {
           onPressed: () { _handleShowGridChanged(!config.configuration.debugShowGrid); },
           child: new Row(
             children: <Widget>[
-              new Flexible(child: new Text('Show material grid (for debugging)')),
+              new Expanded(child: new Text('Show material grid (for debugging)')),
               new Switch(
                 value: config.configuration.debugShowGrid,
                 onChanged: _handleShowGridChanged
@@ -177,7 +177,7 @@ class StockSettingsState extends State<StockSettings> {
           onPressed: () { _handleShowSizesChanged(!config.configuration.debugShowSizes); },
           child: new Row(
             children: <Widget>[
-              new Flexible(child: new Text('Show construction lines (for debugging)')),
+              new Expanded(child: new Text('Show construction lines (for debugging)')),
               new Switch(
                 value: config.configuration.debugShowSizes,
                 onChanged: _handleShowSizesChanged
@@ -190,7 +190,7 @@ class StockSettingsState extends State<StockSettings> {
           onPressed: () { _handleShowBaselinesChanged(!config.configuration.debugShowBaselines); },
           child: new Row(
             children: <Widget>[
-              new Flexible(child: new Text('Show baselines (for debugging)')),
+              new Expanded(child: new Text('Show baselines (for debugging)')),
               new Switch(
                 value: config.configuration.debugShowBaselines,
                 onChanged: _handleShowBaselinesChanged
@@ -203,7 +203,7 @@ class StockSettingsState extends State<StockSettings> {
           onPressed: () { _handleShowLayersChanged(!config.configuration.debugShowLayers); },
           child: new Row(
             children: <Widget>[
-              new Flexible(child: new Text('Show layer boundaries (for debugging)')),
+              new Expanded(child: new Text('Show layer boundaries (for debugging)')),
               new Switch(
                 value: config.configuration.debugShowLayers,
                 onChanged: _handleShowLayersChanged
@@ -216,7 +216,7 @@ class StockSettingsState extends State<StockSettings> {
           onPressed: () { _handleShowPointersChanged(!config.configuration.debugShowPointers); },
           child: new Row(
             children: <Widget>[
-              new Flexible(child: new Text('Show pointer hit-testing (for debugging)')),
+              new Expanded(child: new Text('Show pointer hit-testing (for debugging)')),
               new Switch(
                 value: config.configuration.debugShowPointers,
                 onChanged: _handleShowPointersChanged
@@ -229,7 +229,7 @@ class StockSettingsState extends State<StockSettings> {
           onPressed: () { _handleShowRainbowChanged(!config.configuration.debugShowRainbow); },
           child: new Row(
             children: <Widget>[
-              new Flexible(child: new Text('Show repaint rainbow (for debugging)')),
+              new Expanded(child: new Text('Show repaint rainbow (for debugging)')),
               new Switch(
                 value: config.configuration.debugShowRainbow,
                 onChanged: _handleShowRainbowChanged

@@ -252,7 +252,7 @@ class AboutDialog extends StatelessWidget {
     List<Widget> body = <Widget>[];
     if (icon != null)
       body.add(new IconTheme(data: new IconThemeData(size: 48.0), child: icon));
-    body.add(new Flexible(
+    body.add(new Expanded(
       child: new Padding(
         padding: new EdgeInsets.symmetric(horizontal: 24.0),
         child: new BlockBody(

@@ -190,7 +190,7 @@ class ListItem extends StatelessWidget {
         ]
       );
     }
-    children.add(new Flexible(
+    children.add(new Expanded(
       child: center
     ));
 
