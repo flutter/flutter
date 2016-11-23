@@ -39,9 +39,7 @@ static_library("core") {
     "//flutter/sky/engine/wtf",
     "//lib/ftl",
     "//lib/tonic",
-    "//third_party/iccjpeg",
     "//third_party/libpng",
-    "//third_party/qcms",
     "//third_party/skia",
     "//third_party/zlib",
   ]
