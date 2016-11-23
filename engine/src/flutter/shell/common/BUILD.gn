@@ -114,7 +114,6 @@ source_set("common") {
     "//flutter/synchronization",
     "//lib/ftl",
     "//lib/tonic",
-    "//third_party/libjpeg",
     "//third_party/rapidjson",
     "//third_party/skia",
     "//third_party/skia:gpu",
