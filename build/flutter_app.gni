@@ -21,13 +21,21 @@ import("//build/dart/dart_package.gni")
 #
 #   deps (optional)
 #     List of Dart packages the application depends on.
+#
+#   analysis_options (optional)
+#     By default, a script to run the analyzer on the contents of the package is
+#     generated in the output directory. This parameter contains the path to an
+#     analysis options file for this target.
+#
+#   disable_analysis (optional)
+#     Prevents the analysis script from being generated.
 template("flutter_app") {
   assert(defined(invoker.main_dart), "Must define main_dart")
 
   dart_package_name = target_name + "_dart_package"
 
   dart_package(dart_package_name) {
-    forward_variables_from(invoker, [ "deps", "source_dir" ])
+    forward_variables_from(invoker, [ "analysis_options", "deps", "disable_analysis", "source_dir" ])
     if (defined(invoker.package_name)) {
       package_name = invoker.package_name
     } else {
