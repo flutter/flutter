@@ -334,4 +334,77 @@ void main() {
     expect(actionTextBottomLeft.x - textBottomRight.x, 24.0);
     expect(snackBarBottomRight.x - actionTextBottomRight.x, 24.0);
   });
+
+  testWidgets('SnackBarClosedReason', (WidgetTester tester) async {
+    final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
+    bool actionPressed = false;
+    SnackBarClosedReason closedReason;
+
+    await tester.pumpWidget(new MaterialApp(
+      home: new Scaffold(
+        key: scaffoldKey,
+        body: new Builder(
+          builder: (BuildContext context) {
+            return new GestureDetector(
+              onTap: () {
+                Scaffold.of(context).showSnackBar(new SnackBar(
+                  content: new Text('snack'),
+                  duration: new Duration(seconds: 2),
+                  action: new SnackBarAction(
+                    label: 'ACTION',
+                    onPressed: () {
+                      actionPressed = true;
+                    }
+                  ),
+                )).closed.then((SnackBarClosedReason reason) {
+                  closedReason = reason;
+                });
+              },
+              child: new Text('X')
+            );
+          },
+        )
+      )
+    ));
+
+    // Pop up the snack bar and then press its action button.
+    await tester.tap(find.text('X'));
+    await tester.pump(); // start animation
+    await tester.pump(const Duration(milliseconds: 750));
+
+    expect(actionPressed, isFalse);
+    await tester.tap(find.text('ACTION'));
+    expect(actionPressed, isTrue);
+
+    await tester.pump(const Duration(seconds: 1));
+    expect(closedReason, equals(SnackBarClosedReason.action));
+
+    // Pop up the snack bar and then remove it.
+    await tester.tap(find.text('X'));
+    await tester.pump(); // start animation
+    await tester.pump(const Duration(milliseconds: 750));
+    scaffoldKey.currentState.removeCurrentSnackBar();
+    await tester.pump(const Duration(seconds: 1));
+    expect(closedReason, equals(SnackBarClosedReason.remove));
+
+    // Pop up the snack bar and then hide it.
+    await tester.tap(find.text('X'));
+    await tester.pump(); // start animation
+    await tester.pump(const Duration(milliseconds: 750));
+    scaffoldKey.currentState.hideCurrentSnackBar();
+    await tester.pump(const Duration(seconds: 1));
+    expect(closedReason, equals(SnackBarClosedReason.hide));
+
+    // Pop up the snack bar and then let it time out.
+    await tester.tap(find.text('X'));
+    await tester.pump(); // schedule animation
+    await tester.pump(); // begin animation
+    await tester.pump(new Duration(milliseconds: 750)); // 0.75s // animation last frame; two second timer starts here
+    await tester.pump(new Duration(milliseconds: 750)); // 1.50s
+    await tester.pump(new Duration(milliseconds: 1500)); // timer triggers to dismiss snackbar, reverse animation is scheduled
+    await tester.pump(); // begin animation
+    await tester.pump(new Duration(milliseconds: 750)); // 3.75s // last frame of animation, snackbar removed from build
+    expect(closedReason, equals(SnackBarClosedReason.timeout));
+  });
+
 }

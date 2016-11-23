@@ -50,40 +50,6 @@ enum AppBarBehavior {
   under,
 }
 
-/// Specify how a [SnackBar] was closed.
-///
-/// The [showSnackBar] function returns a [ScaffoldFeatureController]. The value
-/// of the controller's closed property is a Future that resolves to a
-/// SnackBarClosedReason. Applications that need to now how a snackbar
-/// was closed can use this value.
-///
-/// Example:
-///
-/// ```dart
-/// Scaffold.of(context).showSnackBar(
-///   new SnackBar( ... )
-/// ).closed.then((SnackBarClosedReason reason) {
-///    ...
-/// });
-/// ```
-enum SnackBarClosedReason {
-  /// The snack bar was closed after the user tapped a [SnackBarAction].
-  action,
-
-  /// The snack bar was closed by a user's swipe.
-  swipe,
-
-  /// The snack bar was closed by the [ScaffoldFeatureController] close callback
-  /// or by calling [hideCurrentSnackBar] directly.
-  hide,
-
-  /// The snack bar was closed by an called to [removeCurrentSnackBar].
-  remove,
-
-  /// The snack bar was closed because its timer expired.
-  timeout,
-}
-
 enum _ScaffoldSlot {
   body,
   appBar,
