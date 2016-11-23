@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 const String _text1 =
   "Snackbars provide lightweight feedback about an operation by "
