@@ -22,6 +22,9 @@ import("//build/dart/dart_package.gni")
 #   deps (optional)
 #     List of Dart packages the application depends on.
 #
+#   manifest (optional)
+#     Path to the manifest file
+#
 #   analysis_options (optional)
 #     By default, a script to run the analyzer on the contents of the package is
 #     generated in the output directory. This parameter contains the path to an
@@ -122,6 +125,9 @@ template("flutter_app") {
     inputs = [
       snapshot_path,
     ]
+    if (defined(invoker.manifest)) {
+      inputs += [ rebase_path(invoker.manifest) ]
+    }
 
     outputs = [
       bundle_path,
@@ -151,6 +157,12 @@ template("flutter_app") {
       "--snapshot",
       rebase_path(snapshot_path),
     ]
+    if (defined(invoker.manifest)) {
+      args += [
+        "--manifest",
+        rebase_path(invoker.manifest)
+      ]
+    }
 
     deps = [
       ":$flutter_snapshot_name",
