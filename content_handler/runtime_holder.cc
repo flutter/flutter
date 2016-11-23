@@ -14,7 +14,6 @@
 #include "flutter/lib/ui/window/pointer_data_packet.h"
 #include "flutter/runtime/asset_font_selector.h"
 #include "flutter/runtime/dart_controller.h"
-#include "lib/fidl/dart/sdk_ext/src/handle_watcher.h"
 #include "lib/fidl/dart/sdk_ext/src/natives.h"
 #include "lib/ftl/functional/make_copyable.h"
 #include "lib/ftl/logging.h"
@@ -75,9 +74,6 @@ RuntimeHolder::RuntimeHolder()
       weak_factory_(this) {}
 
 RuntimeHolder::~RuntimeHolder() {
-  if (handle_watcher_)
-    fidl::dart::HandleWatcher::Stop(std::move(handle_watcher_));
-
   blink::Threads::Gpu()->PostTask(
       ftl::MakeCopyable([rasterizer = std::move(rasterizer_)](){
           // Deletes rasterizer.
@@ -191,8 +187,6 @@ void RuntimeHolder::DidCreateMainIsolate(Dart_Isolate isolate) {
 }
 
 void RuntimeHolder::InitFidlInternal() {
-  handle_watcher_ = fidl::dart::HandleWatcher::Start();
-
   fidl::InterfaceHandle<modular::ApplicationEnvironment> environment;
   environment_->Duplicate(GetProxy(&environment));
 
@@ -200,11 +194,6 @@ void RuntimeHolder::InitFidlInternal() {
 
   DART_CHECK_VALID(Dart_SetNativeResolver(
       fidl_internal, fidl::dart::NativeLookup, fidl::dart::NativeSymbol));
-
-  Dart_Handle handle_watcher_type =
-      Dart_GetType(fidl_internal, ToDart("HandleWatcher"), 0, nullptr);
-  DART_CHECK_VALID(Dart_SetField(handle_watcher_type, ToDart("controlHandle"),
-                                 Dart_NewInteger(handle_watcher_.get())));
 
   DART_CHECK_VALID(Dart_SetField(
       fidl_internal, ToDart("_environment"),
