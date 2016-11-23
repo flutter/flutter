@@ -207,6 +207,12 @@ void SceneBuilder::addChildScene(double dx,
 #if defined(OS_FUCHSIA)
   if (!m_currentLayer)
     return;
+
+  SkRect sceneRect = SkRect::MakeXYWH(dx, dy, physicalWidth / devicePixelRatio,
+                                      physicalHeight / devicePixelRatio);
+  if (!SkRect::Intersects(sceneRect, m_cullRects.top()))
+    return;
+
   std::unique_ptr<flow::ChildSceneLayer> layer(new flow::ChildSceneLayer());
   layer->set_offset(SkPoint::Make(dx, dy));
   layer->set_device_pixel_ratio(devicePixelRatio);
