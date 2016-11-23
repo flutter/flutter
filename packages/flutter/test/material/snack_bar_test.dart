@@ -130,7 +130,7 @@ void main() {
     int snackBarCount = 0;
     Key tapTarget = new Key('tap-target');
     int time;
-    ScaffoldFeatureController<SnackBar, Null> lastController;
+    ScaffoldFeatureController<SnackBar, SnackBarClosedReason> lastController;
     await tester.pumpWidget(new MaterialApp(
       home: new Scaffold(
         body: new Builder(
@@ -158,7 +158,7 @@ void main() {
     expect(find.text('bar2'), findsNothing);
     time = 1000;
     await tester.tap(find.byKey(tapTarget)); // queue bar1
-    ScaffoldFeatureController<SnackBar, Null> firstController = lastController;
+    ScaffoldFeatureController<SnackBar, SnackBarClosedReason> firstController = lastController;
     time = 2;
     await tester.tap(find.byKey(tapTarget)); // queue bar2
     expect(find.text('bar1'), findsNothing);

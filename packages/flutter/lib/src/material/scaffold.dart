@@ -50,6 +50,40 @@ enum AppBarBehavior {
   under,
 }
 
+/// Specify how a [SnackBar] was closed.
+///
+/// The [showSnackBar] function returns a [ScaffoldFeatureController]. The value
+/// of the controller's closed property is a Future that resolves to a
+/// SnackBarClosedReason. Applications that need to now how a snackbar
+/// was closed can use this value.
+///
+/// Example:
+///
+/// ```dart
+/// Scaffold.of(context).showSnackBar(
+///   new SnackBar( ... )
+/// ).closed.then((SnackBarClosedReason reason) {
+///    ...
+/// });
+/// ```
+enum SnackBarClosedReason {
+  /// The snack bar was closed after the user tapped a [SnackBarAction].
+  action,
+
+  /// The snack bar was closed by a user's swipe.
+  swipe,
+
+  /// The snack bar was closed by the [ScaffoldFeatureController] close callback
+  /// or by calling [hideCurrentSnackBar] directly.
+  hide,
+
+  /// The snack bar was closed by an called to [removeCurrentSnackBar].
+  remove,
+
+  /// The snack bar was closed because its timer expired.
+  timeout,
+}
+
 enum _ScaffoldSlot {
   body,
   appBar,
@@ -537,7 +571,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
 
   // SNACKBAR API
 
-  Queue<ScaffoldFeatureController<SnackBar, Null>> _snackBars = new Queue<ScaffoldFeatureController<SnackBar, Null>>();
+  Queue<ScaffoldFeatureController<SnackBar, SnackBarClosedReason>> _snackBars = new Queue<ScaffoldFeatureController<SnackBar, SnackBarClosedReason>>();
   AnimationController _snackBarController;
   Timer _snackBarTimer;
 
@@ -554,23 +588,23 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   /// [removeCurrentSnackBar].
   ///
   /// See [Scaffold.of] for information about how to obtain the [ScaffoldState].
-  ScaffoldFeatureController<SnackBar, Null> showSnackBar(SnackBar snackbar) {
+  ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showSnackBar(SnackBar snackbar) {
     _snackBarController ??= SnackBar.createAnimationController(vsync: this)
       ..addStatusListener(_handleSnackBarStatusChange);
     if (_snackBars.isEmpty) {
       assert(_snackBarController.isDismissed);
       _snackBarController.forward();
     }
-    ScaffoldFeatureController<SnackBar, Null> controller;
-    controller = new ScaffoldFeatureController<SnackBar, Null>._(
+    ScaffoldFeatureController<SnackBar, SnackBarClosedReason> controller;
+    controller = new ScaffoldFeatureController<SnackBar, SnackBarClosedReason>._(
       // We provide a fallback key so that if back-to-back snackbars happen to
       // match in structure, material ink splashes and highlights don't survive
       // from one to the next.
       snackbar.withAnimation(_snackBarController, fallbackKey: new UniqueKey()),
-      new Completer<Null>(),
+      new Completer<SnackBarClosedReason>(),
       () {
         assert(_snackBars.first == controller);
-        _hideSnackBar();
+        hideCurrentSnackBar(reason: SnackBarClosedReason.hide);
       },
       null // SnackBar doesn't use a builder function so setState() wouldn't rebuild it
     );
@@ -606,26 +640,30 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   ///
   /// The removed snack bar does not run its normal exit animation. If there are
   /// any queued snack bars, they begin their entrance animation immediately.
-  void removeCurrentSnackBar() {
+  void removeCurrentSnackBar({ SnackBarClosedReason reason: SnackBarClosedReason.remove }) {
+    assert(reason != null);
     if (_snackBars.isEmpty)
       return;
-    Completer<Null> completer = _snackBars.first._completer;
+    final Completer<SnackBarClosedReason> completer = _snackBars.first._completer;
     if (!completer.isCompleted)
-      completer.complete();
+      completer.complete(reason);
     _snackBarTimer?.cancel();
     _snackBarTimer = null;
     _snackBarController.value = 0.0;
   }
 
-  void _hideSnackBar() {
-    assert(_snackBarController.status == AnimationStatus.forward ||
-           _snackBarController.status == AnimationStatus.completed);
-    _snackBars.first._completer.complete();
+  /// Removes the current [SnackBar] by running its normal exit animation.
+  void hideCurrentSnackBar({ SnackBarClosedReason reason: SnackBarClosedReason.hide }) {
+    assert(reason != null);
+    if (_snackBars.isEmpty || _snackBarController.status == AnimationStatus.dismissed)
+      return;
+    final Completer<SnackBarClosedReason> completer = _snackBars.first._completer;
+    if (!completer.isCompleted)
+      completer.complete(reason);
     _snackBarController.reverse();
     _snackBarTimer?.cancel();
     _snackBarTimer = null;
   }
-
 
   // PERSISTENT BOTTOM SHEET API
 
@@ -922,7 +960,11 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       final ModalRoute<dynamic> route = ModalRoute.of(context);
       if (route == null || route.isCurrent) {
         if (_snackBarController.isCompleted && _snackBarTimer == null)
-          _snackBarTimer = new Timer(_snackBars.first._widget.duration, _hideSnackBar);
+          _snackBarTimer = new Timer(_snackBars.first._widget.duration, () {
+            assert(_snackBarController.status == AnimationStatus.forward ||
+                   _snackBarController.status == AnimationStatus.completed);
+            hideCurrentSnackBar(reason: SnackBarClosedReason.timeout);
+          });
       } else {
         _snackBarTimer?.cancel();
         _snackBarTimer = null;

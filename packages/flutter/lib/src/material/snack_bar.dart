@@ -77,6 +77,7 @@ class _SnackBarActionState extends State<SnackBarAction> {
       _haveTriggeredAction = true;
     });
     config.onPressed();
+    Scaffold.of(context).hideCurrentSnackBar(reason: SnackBarClosedReason.action);
   }
 
   @override
@@ -201,7 +202,7 @@ class SnackBar extends StatelessWidget {
             direction: DismissDirection.down,
             resizeDuration: null,
             onDismissed: (DismissDirection direction) {
-              Scaffold.of(context).removeCurrentSnackBar();
+              Scaffold.of(context).removeCurrentSnackBar(reason: SnackBarClosedReason.swipe);
             },
             child: new Material(
               elevation: 6,
