@@ -198,6 +198,9 @@ class IOSDevice extends Device {
         printError('');
         return new LaunchResult.failed();
       }
+    } else {
+      if (!installApp(app))
+        return new LaunchResult.failed();
     }
 
     // Step 2: Check that the application exists at the specified path.
