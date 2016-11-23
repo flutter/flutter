@@ -11,10 +11,10 @@
 
 #include "base/base64.h"
 #include "flutter/common/threads.h"
+#include "flutter/shell/common/picture_serializer.h"
 #include "flutter/shell/common/rasterizer.h"
 #include "flutter/shell/common/shell.h"
 #include "lib/ftl/memory/weak_ptr.h"
-#include "third_party/skia/include/core/SkImageEncoder.h"
 #include "third_party/skia/include/core/SkSurface.h"
 
 namespace shell {
@@ -235,6 +235,22 @@ bool PlatformViewServiceProtocol::ListViews(const char* method,
 const char* PlatformViewServiceProtocol::kScreenshotExtensionName =
     "_flutter.screenshot";
 
+static sk_sp<SkData> EncodeBitmapAsPNG(const SkBitmap& bitmap) {
+  if (bitmap.empty()) {
+    return nullptr;
+  }
+
+  SkPixmap pixmap;
+  if (!bitmap.peekPixels(&pixmap)) {
+    return nullptr;
+  }
+
+  PngPixelSerializer serializer;
+  sk_sp<SkData> data(serializer.encode(pixmap));
+
+  return data;
+}
+
 bool PlatformViewServiceProtocol::Screenshot(const char* method,
                                              const char** param_keys,
                                              const char** param_values,
@@ -250,12 +266,7 @@ bool PlatformViewServiceProtocol::Screenshot(const char* method,
 
   latch.Wait();
 
-  if (bitmap.empty())
-    return ErrorServer(json_object, "no screenshot available");
-
-  sk_sp<SkData> png(
-      SkImageEncoder::EncodeData(bitmap, SkImageEncoder::Type::kPNG_Type,
-                                 SkImageEncoder::kDefaultQuality));
+  sk_sp<SkData> png(EncodeBitmapAsPNG(bitmap));
 
   if (!png)
     return ErrorServer(json_object, "can not encode screenshot");
