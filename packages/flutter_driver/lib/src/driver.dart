@@ -16,6 +16,7 @@ import 'gesture.dart';
 import 'health.dart';
 import 'input.dart';
 import 'message.dart';
+import 'render_tree.dart';
 import 'timeline.dart';
 
 /// Timeline stream identifier.
@@ -242,6 +243,11 @@ class FlutterDriver {
   /// Checks the status of the Flutter Driver extension.
   Future<Health> checkHealth() async {
     return Health.fromJson(await _sendCommand(new GetHealth()));
+  }
+
+  /// Returns a dump of the render tree.
+  Future<RenderTree> getRenderTree() async {
+    return RenderTree.fromJson(await _sendCommand(new GetRenderTree()));
   }
 
   /// Taps at the center of the widget located by [finder].

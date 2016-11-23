@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart' show RendererBinding;
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -16,6 +17,7 @@ import 'gesture.dart';
 import 'health.dart';
 import 'input.dart';
 import 'message.dart';
+import 'render_tree.dart';
 
 const String _extensionMethodName = 'driver';
 const String _extensionMethod = 'ext.flutter.$_extensionMethodName';
@@ -61,6 +63,7 @@ class _FlutterDriverExtension {
   _FlutterDriverExtension._() {
     _commandHandlers.addAll(<String, CommandHandlerCallback>{
       'get_health': _getHealth,
+      'get_render_tree': _getRenderTree,
       'tap': _tap,
       'get_text': _getText,
       'scroll': _scroll,
@@ -72,6 +75,7 @@ class _FlutterDriverExtension {
 
     _commandDeserializers.addAll(<String, CommandDeserializerCallback>{
       'get_health': GetHealth.deserialize,
+      'get_render_tree': GetRenderTree.deserialize,
       'tap': Tap.deserialize,
       'get_text': GetText.deserialize,
       'scroll': Scroll.deserialize,
@@ -134,6 +138,10 @@ class _FlutterDriverExtension {
   }
 
   Future<Health> _getHealth(Command command) async => new Health(HealthStatus.ok);
+
+  Future<RenderTree> _getRenderTree(Command command) async {
+    return new RenderTree(RendererBinding.instance?.renderView?.toStringDeep());
+  }
 
   /// Runs `finder` repeatedly until it finds one or more [Element]s, or times out.
   ///
