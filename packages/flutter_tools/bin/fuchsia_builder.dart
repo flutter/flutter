@@ -19,7 +19,8 @@ const String _kOptionOutput = 'output-file';
 const String _kOptionHeader = 'header';
 const String _kOptionSnapshot = 'snapshot';
 const String _kOptionWorking = 'working-dir';
-const List<String> _kOptions = const <String>[
+const String _kOptionsManifest = 'manifest';
+const List<String> _kRequiredOptions = const <String>[
   _kOptionPackages,
   _kOptionOutput,
   _kOptionHeader,
@@ -35,9 +36,10 @@ Future<Null> main(List<String> args) async {
     ..addOption(_kOptionHeader, help: 'The header of the flx file')
     ..addOption(_kOptionSnapshot, help: 'The generated snapshot file')
     ..addOption(_kOptionWorking,
-        help: 'The directory where to put temporary files');
+        help: 'The directory where to put temporary files')
+    ..addOption(_kOptionsManifest, help: 'The manifest file');
   final ArgResults argResults = parser.parse(args);
-  if (_kOptions.any((String option) => !argResults.options.contains(option))) {
+  if (_kRequiredOptions.any((String option) => !argResults.options.contains(option))) {
     printError('Missing option! All options must be specified.');
     exit(1);
   }
@@ -49,7 +51,7 @@ Future<Null> main(List<String> args) async {
       snapshotFile: new File(argResults[_kOptionSnapshot]),
       workingDirPath: argResults[_kOptionWorking],
       packagesPath: argResults[_kOptionPackages],
-      manifestPath: defaultManifestPath,
+      manifestPath: argResults[_kOptionsManifest] ?? defaultManifestPath,
       includeDefaultFonts: false,
     );
   } on ToolExit catch (e) {
