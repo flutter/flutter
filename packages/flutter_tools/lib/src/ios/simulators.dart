@@ -426,6 +426,9 @@ class IOSSimulator extends Device {
       } on ToolExit {
         return new LaunchResult.failed();
       }
+    } else {
+      if (!installApp(app))
+        return new LaunchResult.failed();
     }
 
     ProtocolDiscovery observatoryDiscovery;
