@@ -45,7 +45,8 @@ void PlatformViewMac::SetupAndLoadDart() {
 
   base::CommandLine& command_line = *base::CommandLine::ForCurrentProcess();
 
-  std::string bundle_path = command_line.GetSwitchValueASCII(switches::kFLX);
+  std::string bundle_path =
+      command_line.GetSwitchValueASCII(FlagForSwitch(Switch::FLX));
   if (!bundle_path.empty()) {
     blink::Threads::UI()->PostTask(
         [ engine = engine().GetWeakPtr(), bundle_path ] {
@@ -59,7 +60,7 @@ void PlatformViewMac::SetupAndLoadDart() {
   if (args.size() > 0) {
     std::string main = args[0];
     std::string packages =
-        command_line.GetSwitchValueASCII(switches::kPackages);
+        command_line.GetSwitchValueASCII(FlagForSwitch(Switch::Packages));
     blink::Threads::UI()->PostTask(
         [ engine = engine().GetWeakPtr(), main, packages ] {
           if (engine)

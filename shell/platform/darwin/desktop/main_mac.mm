@@ -35,12 +35,13 @@ int main(int argc, const char* argv[]) {
   shell::PlatformMacMain(argc, argv, "");
 
   base::CommandLine& command_line = *base::CommandLine::ForCurrentProcess();
-  if (command_line.HasSwitch(shell::switches::kHelp)) {
-    shell::switches::PrintUsage("SkyShell");
+  if (command_line.HasSwitch(shell::FlagForSwitch(shell::Switch::Help))) {
+    shell::PrintUsage([NSProcessInfo processInfo].processName.UTF8String);
     return EXIT_SUCCESS;
   }
 
-  if (command_line.HasSwitch(shell::switches::kNonInteractive)) {
+  if (command_line.HasSwitch(
+          shell::FlagForSwitch(shell::Switch::NonInteractive))) {
     if (!shell::InitForTesting())
       return 1;
     base::MessageLoop::current()->Run();
