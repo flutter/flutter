@@ -17,6 +17,15 @@ group("flutter") {
       "//flutter/snapshotter($host_toolchain)",
     ]
   }
+
+  # If on the host, compile all unittests targets.
+  if (current_toolchain == host_toolchain) {
+    deps += [
+      "//flutter/sky/engine/wtf:wtf_unittests",
+      "//flutter/synchronization:synchronization_unittests",
+      "//lib/ftl:ftl_unittests",
+    ]
+  }
 }
 
 if (!is_fuchsia) {

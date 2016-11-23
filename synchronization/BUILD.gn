@@ -16,3 +16,14 @@ source_set("synchronization") {
     "//lib/ftl",
   ]
 }
+
+executable("synchronization_unittests") {
+  sources = [
+    "semaphore_unittest.cc",
+  ]
+
+  deps = [
+    ":synchronization",
+    "//flutter/testing",
+  ]
+}
