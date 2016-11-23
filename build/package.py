@@ -32,6 +32,7 @@ def main():
                       help='Path to application snapshot')
   parser.add_argument('--output-file', type=str, required=True,
                       help='Where to output application bundle')
+  parser.add_argument('--manifest', type=str, help='The application manifest')
 
   args = parser.parse_args()
 
@@ -39,7 +40,7 @@ def main():
   env['LD_LIBRARY_PATH'] = args.root
   env['FLUTTER_ROOT'] = args.flutter_root
 
-  result = subprocess.call([
+  call_args = [
     args.dart,
     '--packages=%s' % args.flutter_tools_packages,
     args.flutter_tools_main,
@@ -48,7 +49,11 @@ def main():
     '--snapshot=%s' % args.snapshot,
     '--output-file=%s' % args.output_file,
     '--header=#!fuchsia file:///system/apps/flutter_runner',
-  ], env=env, cwd=args.app_dir)
+  ]
+  if 'manifest' in args:
+    call_args.append('--manifest=%s' % args.manifest)
+
+  result = subprocess.call(call_args, env=env, cwd=args.app_dir)
 
   return result
 
