@@ -1,9 +1,0 @@
-qcms
-====
-
-Quick color management.
-
-Current limitations
------------
-- Only supports RGB and Gray colorspaces. e.g. no support for CMYK yet.
-- Only packed RGB and RGBA, K, and KA.
