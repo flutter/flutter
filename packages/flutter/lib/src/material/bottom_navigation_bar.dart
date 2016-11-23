@@ -251,7 +251,7 @@ class BottomNavigationBarState extends State<BottomNavigationBar> with TickerPro
     return (leftWeights + _flex(animations[index]) / 2.0) / allWeights;
   }
 
-  FractionalOffset cirleOffset(int index) {
+  FractionalOffset _circleOffset(int index) {
     final double iconSize = config.labels[index].icon.size ?? 24.0;
     final Tween<double> yOffsetTween = new Tween<double>(
       begin: (18.0 + iconSize / 2.0) / kBottomNavigationBarHeight, // 18dp + icon center
@@ -507,7 +507,7 @@ class _Circle {
   CurvedAnimation animation;
 
   FractionalOffset get offset {
-    return state.cirleOffset(index);
+    return state._circleOffset(index);
   }
 
   void dispose() {
