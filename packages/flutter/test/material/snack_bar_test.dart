@@ -371,17 +371,22 @@ void main() {
     await tester.tap(find.text('X'));
     await tester.pump(); // start animation
     await tester.pump(const Duration(milliseconds: 750));
-
     expect(actionPressed, isFalse);
     await tester.tap(find.text('ACTION'));
     expect(actionPressed, isTrue);
-
     await tester.pump(const Duration(seconds: 1));
     expect(closedReason, equals(SnackBarClosedReason.action));
 
+    // Pop up the snack bar and then swipe downwards to dismiss it.
+    await tester.tap(find.text('X'));
+    await tester.pump(const Duration(milliseconds: 750));
+    await tester.pump(const Duration(milliseconds: 750));
+    await tester.scroll(find.text('snack'), new Offset(0.0, 50.0));
+    await tester.pump();
+    expect(closedReason, equals(SnackBarClosedReason.swipe));
+
     // Pop up the snack bar and then remove it.
     await tester.tap(find.text('X'));
-    await tester.pump(); // start animation
     await tester.pump(const Duration(milliseconds: 750));
     scaffoldKey.currentState.removeCurrentSnackBar();
     await tester.pump(const Duration(seconds: 1));
@@ -389,7 +394,6 @@ void main() {
 
     // Pop up the snack bar and then hide it.
     await tester.tap(find.text('X'));
-    await tester.pump(); // start animation
     await tester.pump(const Duration(milliseconds: 750));
     scaffoldKey.currentState.hideCurrentSnackBar();
     await tester.pump(const Duration(seconds: 1));
@@ -397,13 +401,11 @@ void main() {
 
     // Pop up the snack bar and then let it time out.
     await tester.tap(find.text('X'));
-    await tester.pump(); // schedule animation
+    await tester.pump(new Duration(milliseconds: 750));
+    await tester.pump(new Duration(milliseconds: 750));
+    await tester.pump(new Duration(milliseconds: 1500));
     await tester.pump(); // begin animation
-    await tester.pump(new Duration(milliseconds: 750)); // 0.75s // animation last frame; two second timer starts here
-    await tester.pump(new Duration(milliseconds: 750)); // 1.50s
-    await tester.pump(new Duration(milliseconds: 1500)); // timer triggers to dismiss snackbar, reverse animation is scheduled
-    await tester.pump(); // begin animation
-    await tester.pump(new Duration(milliseconds: 750)); // 3.75s // last frame of animation, snackbar removed from build
+    await tester.pump(new Duration(milliseconds: 750));
     expect(closedReason, equals(SnackBarClosedReason.timeout));
   });
 
