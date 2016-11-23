@@ -20,7 +20,7 @@
       <excludeFolder url="file://$MODULE_DIR$/test/scheduler/packages" />
       <excludeFolder url="file://$MODULE_DIR$/test/services/packages" />
       <excludeFolder url="file://$MODULE_DIR$/test/ui/packages" />
-      <excludeFolder url="file://$MODULE_DIR$/test/widget/packages" />
+      <excludeFolder url="file://$MODULE_DIR$/test/widgets/packages" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
