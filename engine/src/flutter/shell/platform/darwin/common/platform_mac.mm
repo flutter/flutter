@@ -17,8 +17,8 @@
 #include "base/message_loop/message_loop.h"
 #include "base/trace_event/trace_event.h"
 #include "dart/runtime/include/dart_tools_api.h"
-#include "flutter/runtime/start_up.h"
 #include "flutter/common/threads.h"
+#include "flutter/runtime/start_up.h"
 #include "flutter/shell/common/shell.h"
 #include "flutter/shell/common/switches.h"
 #include "flutter/shell/common/tracing_controller.h"
@@ -39,7 +39,7 @@ static void InitializeLogging() {
 static void RedirectIOConnectionsToSyslog() {
 #if TARGET_OS_IPHONE
   if (base::CommandLine::ForCurrentProcess()->HasSwitch(
-          shell::switches::kNoRedirectToSyslog)) {
+          FlagForSwitch(Switch::NoRedirectToSyslog))) {
     return;
   }
 
@@ -68,7 +68,7 @@ class EmbedderState {
     InitializeLogging();
 
     base::CommandLine& command_line = *base::CommandLine::ForCurrentProcess();
-    if (command_line.HasSwitch(shell::switches::kTraceStartup)) {
+    if (command_line.HasSwitch(FlagForSwitch(Switch::TraceStartup))) {
       // Usually, all tracing within flutter is managed via the tracing
       // controller
       // The tracing controller is accessed via the shell instance. This means
@@ -167,23 +167,26 @@ bool AttemptLaunchFromCommandLineSwitches(Engine* engine) {
 
   auto command_line = *base::CommandLine::ForCurrentProcess();
 
-  if (command_line.HasSwitch(switches::kFLX) ||
-      command_line.HasSwitch(switches::kMainDartFile) ||
-      command_line.HasSwitch(switches::kPackages)) {
+  if (command_line.HasSwitch(FlagForSwitch(Switch::FLX)) ||
+      command_line.HasSwitch(FlagForSwitch(Switch::MainDartFile)) ||
+      command_line.HasSwitch(FlagForSwitch(Switch::Packages))) {
     // The main dart file, flx bundle and the package root must be specified in
     // one go. We dont want to end up in a situation where we take one value
     // from the command line and the others from user defaults. In case, any
     // new flags are specified, forget about all the old ones.
-    [defaults removeObjectForKey:@(switches::kFLX)];
-    [defaults removeObjectForKey:@(switches::kMainDartFile)];
-    [defaults removeObjectForKey:@(switches::kPackages)];
+    [defaults removeObjectForKey:@(FlagForSwitch(Switch::FLX))];
+    [defaults removeObjectForKey:@(FlagForSwitch(Switch::MainDartFile))];
+    [defaults removeObjectForKey:@(FlagForSwitch(Switch::Packages))];
 
     [defaults synchronize];
   }
 
-  std::string bundle_path = ResolveCommandLineLaunchFlag(switches::kFLX);
-  std::string main = ResolveCommandLineLaunchFlag(switches::kMainDartFile);
-  std::string packages = ResolveCommandLineLaunchFlag(switches::kPackages);
+  std::string bundle_path =
+      ResolveCommandLineLaunchFlag(FlagForSwitch(Switch::FLX));
+  std::string main =
+      ResolveCommandLineLaunchFlag(FlagForSwitch(Switch::MainDartFile));
+  std::string packages =
+      ResolveCommandLineLaunchFlag(FlagForSwitch(Switch::Packages));
 
   if (!FlagsValidForCommandLineLaunch(bundle_path, main, packages)) {
     return false;
@@ -192,9 +195,12 @@ bool AttemptLaunchFromCommandLineSwitches(Engine* engine) {
   // Save the newly resolved dart main file and the package root to user
   // defaults so that the next time the user launches the application in the
   // simulator without the tooling, the application boots up.
-  [defaults setObject:@(bundle_path.c_str()) forKey:@(switches::kFLX)];
-  [defaults setObject:@(main.c_str()) forKey:@(switches::kMainDartFile)];
-  [defaults setObject:@(packages.c_str()) forKey:@(switches::kPackages)];
+  [defaults setObject:@(bundle_path.c_str())
+               forKey:@(FlagForSwitch(Switch::FLX))];
+  [defaults setObject:@(main.c_str())
+               forKey:@(FlagForSwitch(Switch::MainDartFile))];
+  [defaults setObject:@(packages.c_str())
+               forKey:@(FlagForSwitch(Switch::Packages))];
 
   [defaults synchronize];
 

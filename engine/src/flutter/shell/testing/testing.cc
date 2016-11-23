@@ -14,7 +14,8 @@ bool InitForTesting() {
   base::CommandLine& command_line = *base::CommandLine::ForCurrentProcess();
 
   TestRunner::TestDescriptor test;
-  test.packages = command_line.GetSwitchValueASCII(switches::kPackages);
+  test.packages =
+      command_line.GetSwitchValueASCII(FlagForSwitch(Switch::Packages));
   auto args = command_line.GetArgs();
   if (args.empty())
     return false;

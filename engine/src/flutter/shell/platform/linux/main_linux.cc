@@ -24,7 +24,7 @@ int RunNonInteractive() {
   shell::Shell::InitStandalone();
 
   if (!shell::InitForTesting()) {
-    shell::switches::PrintUsage("sky_shell");
+    shell::PrintUsage("sky_shell");
     return 1;
   }
 
@@ -44,7 +44,8 @@ int RunInteractive() {
 
   shell::Shell::InitStandalone();
 
-  std::string target = command_line.GetSwitchValueASCII(shell::switches::kFLX);
+  std::string target = command_line.GetSwitchValueASCII(
+      shell::FlagForSwitch(shell::Switch::FLX));
 
   if (target.empty()) {
     // Alternatively, use the first positional argument.
@@ -90,12 +91,13 @@ int main(int argc, const char* argv[]) {
 
   base::CommandLine& command_line = *base::CommandLine::ForCurrentProcess();
 
-  if (command_line.HasSwitch(shell::switches::kHelp)) {
-    shell::switches::PrintUsage("sky_shell");
+  if (command_line.HasSwitch(shell::FlagForSwitch(shell::Switch::Help))) {
+    shell::PrintUsage("sky_shell");
     return 0;
   }
 
-  if (command_line.HasSwitch(shell::switches::kNonInteractive)) {
+  if (command_line.HasSwitch(
+          shell::FlagForSwitch(shell::Switch::NonInteractive))) {
     return RunNonInteractive();
   }
 

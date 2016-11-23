@@ -92,7 +92,7 @@ static NSURL* URLForSwitch(const char* name) {
     // Load directly from sources if the appropriate command line flags are
     // specified. If not, try loading from a script snapshot in the framework
     // bundle.
-    NSURL* flxURL = URLForSwitch(shell::switches::kFLX);
+    NSURL* flxURL = URLForSwitch(shell::FlagForSwitch(shell::Switch::FLX));
 
     if (flxURL == nil) {
       // If the URL was not specified on the command line, look inside the
@@ -102,8 +102,10 @@ static NSURL* URLForSwitch(const char* name) {
                      isDirectory:NO];
     }
 
-    NSURL* dartMainURL = URLForSwitch(shell::switches::kMainDartFile);
-    NSURL* dartPackagesURL = URLForSwitch(shell::switches::kPackages);
+    NSURL* dartMainURL =
+        URLForSwitch(shell::FlagForSwitch(shell::Switch::MainDartFile));
+    NSURL* dartPackagesURL =
+        URLForSwitch(shell::FlagForSwitch(shell::Switch::Packages));
 
     return [self initWithFLXArchive:flxURL
                            dartMain:dartMainURL
