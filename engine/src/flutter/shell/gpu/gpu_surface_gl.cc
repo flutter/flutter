@@ -85,6 +85,7 @@ bool GPUSurfaceGL::Setup() {
     flow::GLConnection connection;
     FTL_LOG(INFO) << "Failed to setup GL context. Aborting.";
     FTL_LOG(INFO) << connection.Description();
+    return false;
   }
 
   context_->setResourceCacheLimits(kMaxGaneshResourceCacheCount,

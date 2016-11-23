@@ -17,14 +17,12 @@ bool PngPixelSerializer::onUseEncodedData(const void*, size_t) {
 }
 
 SkData* PngPixelSerializer::onEncode(const SkPixmap& pixmap) {
-  SkBitmap bitmap;
+  SkDynamicMemoryWStream stream;
 
-  if (!bitmap.installPixels(pixmap)) {
-    return nullptr;
-  }
+  bool encode_result = SkEncodeImage(
+      &stream, pixmap, SkEncodedImageFormat::kPNG, 80 /* quality */);
 
-  return SkImageEncoder::EncodeData(bitmap, SkImageEncoder::Type::kPNG_Type,
-                                    SkImageEncoder::kDefaultQuality);
+  return encode_result ? stream.detachAsData().release() : nullptr;
 }
 
 void SerializePicture(const std::string& path, SkPicture* picture) {
