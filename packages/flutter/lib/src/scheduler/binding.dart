@@ -23,6 +23,7 @@ double _timeDilation = 1.0;
 /// to ensure that time stamps seen by consumers of the scheduler binding are
 /// always increasing.
 set timeDilation(double value) {
+  assert(value > 0.0);
   if (_timeDilation == value)
     return;
   // We need to resetEpoch first so that we capture start of the epoch with the
