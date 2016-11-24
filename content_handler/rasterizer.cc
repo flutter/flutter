@@ -70,6 +70,7 @@ void Rasterizer::Draw(std::unique_ptr<flow::LayerTree> layer_tree,
   // The image buffer's fence is signalled automatically when the surface
   // goes out of scope.
   context.ExecutePaintTasks(frame);
+  buffer_producer_->Tick();
 
   callback();
 }
