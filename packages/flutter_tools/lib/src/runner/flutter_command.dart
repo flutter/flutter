@@ -10,14 +10,19 @@ import 'package:meta/meta.dart';
 
 import '../application_package.dart';
 import '../base/common.dart';
+import '../base/context.dart';
 import '../build_info.dart';
 import '../dart/package_map.dart';
 import '../dart/pub.dart';
 import '../device.dart';
+import '../doctor.dart';
 import '../flx.dart' as flx;
 import '../globals.dart';
 import '../usage.dart';
 import 'flutter_command_runner.dart';
+
+DeviceManager get deviceManager => context[DeviceManager];
+Doctor get doctor => context[Doctor];
 
 typedef void Validator();
 

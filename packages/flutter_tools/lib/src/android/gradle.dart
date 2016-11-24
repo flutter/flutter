@@ -8,6 +8,7 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 
 import '../base/common.dart';
+import '../base/context.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/process.dart';
@@ -16,6 +17,8 @@ import '../build_info.dart';
 import '../cache.dart';
 import '../globals.dart';
 import 'android_sdk.dart';
+
+AndroidSdk get androidSdk => context[AndroidSdk];
 
 const String gradleManifestPath = 'android/app/src/main/AndroidManifest.xml';
 const String gradleAppOut = 'android/app/build/outputs/apk/app-debug.apk';

@@ -4,8 +4,11 @@
 
 import 'dart:async';
 
-import '../globals.dart';
+import '../base/context.dart';
+import '../doctor.dart';
 import '../runner/flutter_command.dart';
+
+Doctor get doctor => context[Doctor];
 
 class DoctorCommand extends FlutterCommand {
   @override

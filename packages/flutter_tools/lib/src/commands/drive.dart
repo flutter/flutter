@@ -10,6 +10,7 @@ import '../android/android_device.dart' show AndroidDevice;
 import '../application_package.dart';
 import '../base/file_system.dart';
 import '../base/common.dart';
+import '../base/context.dart';
 import '../base/os.dart';
 import '../base/process.dart';
 import '../build_info.dart';
@@ -22,6 +23,9 @@ import '../ios/simulators.dart' show SimControl, IOSSimulatorUtils;
 import '../resident_runner.dart';
 import 'build_apk.dart' as build_apk;
 import 'run.dart';
+
+
+DeviceManager get deviceManager => context[DeviceManager];
 
 /// Runs integration (a.k.a. end-to-end) tests.
 ///

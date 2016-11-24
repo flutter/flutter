@@ -3,78 +3,39 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'package:stack_trace/stack_trace.dart';
 
 final AppContext _defaultContext = new AppContext();
 
 typedef void ErrorHandler(dynamic error, StackTrace stackTrace);
 
-/// A singleton for application functionality. This singleton can be different
-/// on a per-Zone basis.
-AppContext get context {
-  AppContext currentContext = Zone.current['context'];
-  return currentContext == null ? _defaultContext : currentContext;
-}
+AppContext _context = _defaultContext;
+
+/// A singleton for the application functionality.
+AppContext get context => _context;
 
 class AppContext {
   Map<Type, dynamic> _instances = <Type, dynamic>{};
-  Zone _zone;
 
-  bool isSet(Type type) {
-    if (_instances.containsKey(type))
-      return true;
+  bool isSet(Type type) => _instances.containsKey(type);
 
-    AppContext parent = _calcParent(Zone.current);
-    return parent != null ? parent.isSet(type) : false;
-  }
+  dynamic getVariable(Type type) => _instances[type];
 
-  dynamic getVariable(Type type) {
-    if (_instances.containsKey(type))
-      return _instances[type];
-
-    AppContext parent = _calcParent(_zone ?? Zone.current);
-    return parent?.getVariable(type);
-  }
-
-  void setVariable(Type type, dynamic instance) {
-    _instances[type] = instance;
-  }
+  void setVariable(Type type, dynamic instance) => _instances[type] = instance;
 
   dynamic operator[](Type type) => getVariable(type);
 
   void operator[]=(Type type, dynamic instance) => setVariable(type, instance);
 
-  AppContext _calcParent(Zone zone) {
-    if (this == _defaultContext)
-      return null;
+  void clear() => _instances.clear();
 
-    Zone parentZone = zone.parent;
-    if (parentZone == null)
-      return _defaultContext;
-
-    AppContext deps = parentZone['context'];
-    if (deps == this) {
-      return _calcParent(parentZone);
-    } else {
-      return deps != null ? deps : _defaultContext;
-    }
-  }
-
+  /// Sets [this] to the current context and runs [method].
   dynamic runInZone(dynamic method(), {
     ZoneBinaryCallback<dynamic, dynamic, StackTrace> onError
   }) {
-    return runZoned(
-      () => _run(method),
-      zoneValues: <String, dynamic>{ 'context': this },
-      onError: onError
-    );
-  }
-
-  dynamic _run(dynamic method()) async {
-    try {
-      _zone = Zone.current;
+    _context = this;
+    return Chain.capture(() async {
       return await method();
-    } finally {
-      _zone = null;
-    }
+    }, onError: onError);
   }
 }

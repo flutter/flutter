@@ -42,6 +42,8 @@ import 'src/globals.dart';
 import 'src/hot.dart';
 import 'src/runner/flutter_command_runner.dart';
 
+Doctor get doctor => context[Doctor];
+
 /// Main entry point for commands.
 ///
 /// This function is intended to be used from the `flutter` command line tool.

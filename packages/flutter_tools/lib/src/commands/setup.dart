@@ -5,10 +5,14 @@
 import 'dart:async';
 
 import '../base/common.dart';
+import '../base/context.dart';
 import '../base/os.dart';
 import '../base/process.dart';
+import '../doctor.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
+
+Doctor get doctor => context[Doctor];
 
 /// This setup command will install dependencies necessary for Flutter development.
 ///

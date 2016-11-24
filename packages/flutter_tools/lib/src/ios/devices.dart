@@ -7,13 +7,17 @@ import 'dart:convert';
 import 'dart:io';
 
 import '../application_package.dart';
+import '../base/context.dart';
 import '../base/os.dart';
 import '../base/process.dart';
 import '../build_info.dart';
 import '../device.dart';
+import '../doctor.dart';
 import '../globals.dart';
 import '../protocol_discovery.dart';
 import 'mac.dart';
+
+Doctor get doctor => context[Doctor];
 
 const String _ideviceinstallerInstructions =
     'To work with iOS devices, please install ideviceinstaller.\n'
