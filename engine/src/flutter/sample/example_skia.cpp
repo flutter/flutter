@@ -141,7 +141,8 @@ int runMinikinTest() {
     paint.setStyle(SkPaint::kFill_Style);
     drawToSkia(&canvas, &paint, &layout, 10, 300);
 
-    SkImageEncoder::EncodeFile("/data/local/tmp/foo.png", bitmap, SkImageEncoder::kPNG_Type, 100);
+    SkFILEWStream file("/data/local/tmp/foo.png");
+    SkEncodeImage(&file, bitmap, SkEncodedImageFormat::kPNG, 100);
     return 0;
 }
 
