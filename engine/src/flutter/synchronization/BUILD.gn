@@ -18,6 +18,8 @@ source_set("synchronization") {
 }
 
 executable("synchronization_unittests") {
+  testonly = true
+
   sources = [
     "semaphore_unittest.cc",
   ]

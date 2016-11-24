@@ -3,6 +3,8 @@
 # found in the LICENSE file.
 
 source_set("testing") {
+  testonly = true
+
   sources = [
     "//flutter/testing/run_all_unittests.cc",
   ]
