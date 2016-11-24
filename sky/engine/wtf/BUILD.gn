@@ -237,10 +237,13 @@ executable("wtf_unittests") {
     "text/StringBuilderTest.cpp",
     "text/StringImplTest.cpp",
     "text/StringOperatorsTest.cpp",
-    "text/TextCodecReplacementTest.cpp",
     "text/TextCodecUTF8Test.cpp",
-    "text/WTFStringTest.cpp",
     "VectorTest.cpp",
+
+    # The following tests depend on either ICU or the locale. Disable them for
+    # now.
+    # "text/TextCodecReplacementTest.cpp",
+    # "text/WTFStringTest.cpp",
   ]
 
   configs += [
