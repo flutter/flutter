@@ -27,7 +27,7 @@ vars = {
 
   # Note: When updating the Dart revision, ensure that all entries that are
   # dependencies of dart are also updated
-  'dart_revision': 'ea94a5dcb0be8af3a3ead5d4be0813e55bd8920e',
+  'dart_revision': '93043a36621ae01a5384ac86e67557324c3f3a71',
   'dart_boringssl_gen_revision': '62c20247d582444cb2804f9ea4e3abaa6e47f6a5',
   'dart_boringssl_revision': '8d343b44bbab829d1a28fdef650ca95f7db4412e',
   'dart_observatory_packages_revision': '26aad88f1c1915d39bbcbff3cad589e2402fdcf1',
@@ -104,7 +104,7 @@ deps = {
    '/external/github.com/dart-lang/observatory_pub_packages' + '@' +
    Var('dart_observatory_packages_revision'),
 
-  'src/dart/third_party/root_certificates':
+  'src/third_party/root_certificates':
    Var('chromium_git') +
    '/external/github.com/dart-lang/root_certificates' + '@' +
    Var('dart_root_certificates_revision'),
