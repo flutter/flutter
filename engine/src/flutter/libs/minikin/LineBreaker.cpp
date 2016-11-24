@@ -22,6 +22,7 @@
 
 #include <android/log.h>
 
+#include "LayoutUtils.h"
 #include <minikin/Layout.h>
 #include <minikin/LineBreaker.h>
 
@@ -44,6 +45,9 @@ const float LAST_LINE_PENALTY_MULTIPLIER = 4.0f;
 // probably not the most appropriate method.
 const float LINE_PENALTY_MULTIPLIER = 2.0f;
 
+// Penalty assigned to shrinking the whitepsace.
+const float SHRINK_PENALTY_MULTIPLIER = 4.0f;
+
 // Very long words trigger O(n^2) behavior in hyphenation, so we disable hyphenation for
 // unreasonably long words. This is somewhat of a heuristic because extremely long words
 // are possible in some languages. This does mean that very long real words can get
@@ -53,6 +57,9 @@ const size_t LONGEST_HYPHENATED_WORD = 45;
 // When the text buffer is within this limit, capacity of vectors is retained at finish(),
 // to avoid allocation.
 const size_t MAX_TEXT_BUF_RETAIN = 32678;
+
+// Maximum amount that spaces can shrink, in justified text.
+const float SHRINKABILITY = 1.0 / 3.0;
 
 void LineBreaker::setLocale(const icu::Locale& locale, Hyphenator* hyphenator) {
     mWordBreaker.setLocale(locale);
@@ -66,7 +73,7 @@ void LineBreaker::setText() {
     // handle initial break here because addStyleRun may never be called
     mWordBreaker.next();
     mCandidates.clear();
-    Candidate cand = {0, 0, 0.0, 0.0, 0.0, 0.0, 0, 0};
+    Candidate cand = {0, 0, 0.0, 0.0, 0.0, 0.0, 0, 0, 0, 0};
     mCandidates.push_back(cand);
 
     // reset greedy breaker state
@@ -78,6 +85,7 @@ void LineBreaker::setText() {
     mBestScore = SCORE_INFTY;
     mPreBreak = 0;
     mFirstTabIndex = INT_MAX;
+    mSpaceCount = 0;
 }
 
 void LineBreaker::setLineWidths(float firstWidth, int firstWidthLineCount, float restWidth) {
@@ -137,7 +145,14 @@ float LineBreaker::addStyleRun(MinikinPaint* paint, const FontCollection* typefa
             hyphenPenalty *= 4.0; // TODO: Replace with a better value after some testing
         }
 
-        mLinePenalty = std::max(mLinePenalty, hyphenPenalty * LINE_PENALTY_MULTIPLIER);
+        if (mJustified) {
+            // Make hyphenation more aggressive for fully justified text (so that "normal" in
+            // justified mode is the same as "full" in ragged-right).
+            hyphenPenalty *= 0.25;
+        } else {
+            // Line penalty is zero for justified text.
+            mLinePenalty = std::max(mLinePenalty, hyphenPenalty * LINE_PENALTY_MULTIPLIER);
+        }
     }
 
     size_t current = (size_t)mWordBreaker.current();
@@ -145,6 +160,7 @@ float LineBreaker::addStyleRun(MinikinPaint* paint, const FontCollection* typefa
     size_t lastBreak = start;
     ParaWidth lastBreakWidth = mWidth;
     ParaWidth postBreak = mWidth;
+    size_t postSpaceCount = mSpaceCount;
     bool temporarilySkipHyphenation = false;
     for (size_t i = start; i < end; i++) {
         uint16_t c = mTextBuf[i];
@@ -156,9 +172,11 @@ float LineBreaker::addStyleRun(MinikinPaint* paint, const FontCollection* typefa
             // fall back to greedy; other modes don't know how to deal with tabs
             mStrategy = kBreakStrategy_Greedy;
         } else {
+            if (isWordSpace(c)) mSpaceCount += 1;
             mWidth += mCharWidths[i];
             if (!isLineEndSpace(c)) {
                 postBreak = mWidth;
+                postSpaceCount = mSpaceCount;
                 afterWord = i + 1;
             }
         }
@@ -196,11 +214,12 @@ float LineBreaker::addStyleRun(MinikinPaint* paint, const FontCollection* typefa
                         ParaWidth hyphPostBreak = lastBreakWidth + firstPartWidth;
                         paint->hyphenEdit = 0;
 
-                        const float secondPartWith = Layout::measureText(mTextBuf.data(), j,
+                        const float secondPartWidth = Layout::measureText(mTextBuf.data(), j,
                                 afterWord - j, mTextBuf.size(), bidiFlags, style, *paint,
                                 typeface, nullptr);
-                        ParaWidth hyphPreBreak = postBreak - secondPartWith;
-                        addWordBreak(j, hyphPreBreak, hyphPostBreak, hyphenPenalty, hyph);
+                        ParaWidth hyphPreBreak = postBreak - secondPartWidth;
+                        addWordBreak(j, hyphPreBreak, hyphPostBreak, postSpaceCount, postSpaceCount,
+                                hyphenPenalty, hyph);
                     }
                 }
             }
@@ -210,7 +229,7 @@ float LineBreaker::addStyleRun(MinikinPaint* paint, const FontCollection* typefa
             // Skip break for zero-width characters inside replacement span
             if (paint != nullptr || current == end || mCharWidths[current] > 0) {
                 float penalty = hyphenPenalty * mWordBreaker.breakBadness();
-                addWordBreak(current, mWidth, postBreak, penalty, 0);
+                addWordBreak(current, mWidth, postBreak, mSpaceCount, postSpaceCount, penalty, 0);
             }
             lastBreak = current;
             lastBreakWidth = mWidth;
@@ -224,7 +243,7 @@ float LineBreaker::addStyleRun(MinikinPaint* paint, const FontCollection* typefa
 // add a word break (possibly for a hyphenated fragment), and add desperate breaks if
 // needed (ie when word exceeds current line width)
 void LineBreaker::addWordBreak(size_t offset, ParaWidth preBreak, ParaWidth postBreak,
-        float penalty, uint8_t hyph) {
+        size_t preSpaceCount, size_t postSpaceCount, float penalty, uint8_t hyph) {
     Candidate cand;
     ParaWidth width = mCandidates.back().preBreak;
     if (postBreak - width > currentLineWidth()) {
@@ -239,6 +258,9 @@ void LineBreaker::addWordBreak(size_t offset, ParaWidth preBreak, ParaWidth post
                 cand.offset = i;
                 cand.preBreak = width;
                 cand.postBreak = width;
+                // postSpaceCount doesn't include trailing spaces
+                cand.preSpaceCount = postSpaceCount;
+                cand.postSpaceCount = postSpaceCount;
                 cand.penalty = SCORE_DESPERATE;
                 cand.hyphenEdit = 0;
 #if VERBOSE_DEBUG
@@ -255,6 +277,8 @@ void LineBreaker::addWordBreak(size_t offset, ParaWidth preBreak, ParaWidth post
     cand.preBreak = preBreak;
     cand.postBreak = postBreak;
     cand.penalty = penalty;
+    cand.preSpaceCount = preSpaceCount;
+    cand.postSpaceCount = postSpaceCount;
     cand.hyphenEdit = hyph;
 #if VERBOSE_DEBUG
     ALOGD("cand: %zd %g:%g", mCandidates.size(), cand.postBreak, cand.preBreak);
@@ -301,6 +325,18 @@ void LineBreaker::addReplacement(size_t start, size_t end, float width) {
     addStyleRun(nullptr, nullptr, FontStyle(), start, end, false);
 }
 
+// Get the width of a space. May return 0 if there are no spaces.
+// Note: if there are multiple different widths for spaces (for example, because of mixing of
+// fonts), it's only guaranteed to pick one.
+float LineBreaker::getSpaceWidth() const {
+    for (size_t i = 0; i < mTextBuf.size(); i++) {
+        if (isWordSpace(mTextBuf[i])) {
+            return mCharWidths[i];
+        }
+    }
+    return 0.0f;
+}
+
 float LineBreaker::currentLineWidth() const {
     return mLineWidths.getLineWidth(mBreaks.size());
 }
@@ -340,6 +376,10 @@ void LineBreaker::computeBreaksOptimal(bool isRectangle) {
     size_t active = 0;
     size_t nCand = mCandidates.size();
     float width = mLineWidths.getLineWidth(0);
+    float shortLineFactor = mJustified ? 0.75f : 0.5f;
+    float maxShrink = mJustified ? SHRINKABILITY * getSpaceWidth() : 0.0f;
+
+    // "i" iterates through candidates for the end of the line.
     for (size_t i = 1; i < nCand; i++) {
         bool atEnd = i == nCand - 1;
         float best = SCORE_INFTY;
@@ -353,6 +393,7 @@ void LineBreaker::computeBreaksOptimal(bool isRectangle) {
         ParaWidth leftEdge = mCandidates[i].postBreak - width;
         float bestHope = 0;
 
+        // "j" iterates through candidates for the beginning of the line.
         for (size_t j = active; j < i; j++) {
             if (!isRectangle) {
                 size_t lineNumber = mCandidates[j].lineNumber;
@@ -377,13 +418,24 @@ void LineBreaker::computeBreaksOptimal(bool isRectangle) {
             // breaks are considered.
             float widthScore = 0.0f;
             float additionalPenalty = 0.0f;
-            if (delta < 0) {
+            if ((atEnd || !mJustified) && delta < 0) {
                 widthScore = SCORE_OVERFULL;
             } else if (atEnd && mStrategy != kBreakStrategy_Balanced) {
                 // increase penalty for hyphen on last line
                 additionalPenalty = LAST_LINE_PENALTY_MULTIPLIER * mCandidates[j].penalty;
+                // Penalize very short (< 1 - shortLineFactor of total width) lines.
+                float underfill = delta - shortLineFactor * width;
+                widthScore = underfill > 0 ? underfill * underfill : 0;
             } else {
                 widthScore = delta * delta;
+                if (delta < 0) {
+                    if (-delta < maxShrink *
+                            (mCandidates[i].postSpaceCount - mCandidates[j].preSpaceCount)) {
+                        widthScore *= SHRINK_PENALTY_MULTIPLIER;
+                    } else {
+                        widthScore = SCORE_OVERFULL;
+                    }
+                }
             }
 
             if (delta < 0) {
@@ -440,6 +492,7 @@ void LineBreaker::finish() {
     mStrategy = kBreakStrategy_Greedy;
     mHyphenationFrequency = kHyphenationFrequency_Normal;
     mLinePenalty = 0.0f;
+    mJustified = false;
 }
 
 }  // namespace minikin
