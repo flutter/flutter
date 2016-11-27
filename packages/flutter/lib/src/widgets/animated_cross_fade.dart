@@ -11,20 +11,24 @@ import 'framework.dart';
 import 'ticker_provider.dart';
 import 'transitions.dart';
 
-/// Specifies which of the children to show. See [AnimatedCrossFade].
+/// Specifies which of two children to show. See [AnimatedCrossFade].
 ///
 /// The child that is shown will fade in, while the other will fade out.
 enum CrossFadeState {
-  /// Show the first child and hide the second.
+  /// Show the first child ([AnimatedCrossFade.firstChild]) and hide the second
+  /// ([AnimatedCrossFade.secondChild]]).
   showFirst,
-  /// Show the second child and hide the first.
-  showSecond
+  /// Show the second child ([AnimatedCrossFade.secondChild]) and hide the first
+  /// ([AnimatedCrossFade.firstChild]).
+  showSecond,
 }
 
-/// A widget that cross-fades between two children and animates itself between
-/// their sizes. The animation is controlled through the [crossFadeState]
-/// parameter. [firstCurve] and [secondCurve] represent the opacity curves of
-/// the two children. Note that [firstCurve] is inverted, i.e. it fades out when
+/// A widget that cross-fades between two given children and animates itself
+/// between their sizes.
+///
+/// The animation is controlled through the [crossFadeState] parameter.
+/// [firstCurve] and [secondCurve] represent the opacity curves of the two
+/// children. Note that [firstCurve] is inverted, i.e. it fades out when
 /// providing a growing curve like [Curves.linear]. [sizeCurve] is the curve
 /// used to animated between the size of the fading out child and the size of
 /// the fading in child.
@@ -82,8 +86,6 @@ class AnimatedCrossFade extends StatefulWidget {
 }
 
 class _AnimatedCrossFadeState extends State<AnimatedCrossFade> with TickerProviderStateMixin {
-  _AnimatedCrossFadeState() : super();
-
   AnimationController _controller;
   Animation<double> _firstAnimation;
   Animation<double> _secondAnimation;
