@@ -56,7 +56,7 @@ class TraceCommand extends FlutterCommand {
     int observatoryPort = int.parse(argResults['debug-port']);
 
     // TODO(danrubel): this will break if we move to the new observatory URL
-    // See https://github.com/flutter/flutter/issues/6843
+    // See https://github.com/flutter/flutter/issues/7038
     Uri observatoryUri = Uri.parse('http://127.0.0.1:$observatoryPort');
 
     Tracing tracing;

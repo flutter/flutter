@@ -25,7 +25,7 @@ class ProtocolDiscovery {
   StreamSubscription<String> _subscription;
 
   /// The [Future] returned by this function will complete when the next service
-  /// Uri port is found.
+  /// Uri is found.
   Future<Uri> nextUri() => _completer.future;
 
   void cancel() {
@@ -33,24 +33,21 @@ class ProtocolDiscovery {
   }
 
   void _onLine(String line) {
-    int portNumber = 0;
     Uri uri;
-    int index = line.indexOf('$_serviceName listening on http://');
+    String prefix = '$_serviceName listening on ';
+    int index = line.indexOf(prefix + 'http://');
     if (index >= 0) {
       try {
-        RegExp portExp = new RegExp(r"\d+.\d+.\d+.\d+:(\d+)");
-        String port = portExp.firstMatch(line).group(1);
-        portNumber = int.parse(port);
-        uri = Uri.parse(line, index + _serviceName.length + 14);
+        uri = Uri.parse(line, index + prefix.length);
       } catch (_) {
         // Ignore errors.
       }
     }
     if (uri != null)
-      _located(uri, portNumber);
+      _located(uri);
   }
 
-  void _located(Uri uri, int port) {
+  void _located(Uri uri) {
     assert(_completer != null);
     assert(!_completer.isCompleted);
 

@@ -259,7 +259,7 @@ class AndroidDevice extends Device {
     return true;
   }
 
-  Future<Uri> _forwardPort(String service, Uri deviceUri, int port) async {
+  Future<Uri> _forwardUriToNewPort(String service, Uri deviceUri, int port) async {
     try {
       // Set up port forwarding for observatory.
       port = await portForwarder.forward(deviceUri.port, hostPort: port);
@@ -359,27 +359,27 @@ class AndroidDevice extends Device {
         Uri observatoryDeviceUri, diagnosticDeviceUri;
 
         if (debuggingOptions.buildMode == BuildMode.debug) {
-          Future<List<Uri>> scrapeServicePorts = Future.wait(
+          Future<List<Uri>> scrapeServiceUris = Future.wait(
               <Future<Uri>>[observatoryDiscovery.nextUri(), diagnosticDiscovery.nextUri()]
           );
-          List<Uri> deviceUris = await scrapeServicePorts.timeout(new Duration(seconds: 20));
+          List<Uri> deviceUris = await scrapeServiceUris.timeout(new Duration(seconds: 20));
           observatoryDeviceUri = deviceUris[0];
           diagnosticDeviceUri = deviceUris[1];
         } else {
           observatoryDeviceUri = await observatoryDiscovery.nextUri().timeout(new Duration(seconds: 20));
         }
 
-        printTrace('observatory URI on device: $observatoryDeviceUri');
+        printTrace('Observatory Uri on device: $observatoryDeviceUri');
         int observatoryLocalPort = await debuggingOptions.findBestObservatoryPort();
         // TODO(devoncarew): Remember the forwarding information (so we can later remove the
         // port forwarding).
-        Uri observatoryLocalUri = await _forwardPort(ProtocolDiscovery.kObservatoryService, observatoryDeviceUri, observatoryLocalPort);
+        Uri observatoryLocalUri = await _forwardUriToNewPort(ProtocolDiscovery.kObservatoryService, observatoryDeviceUri, observatoryLocalPort);
 
         Uri diagnosticLocalUri;
         if (diagnosticDeviceUri != null) {
-          printTrace('diagnostic URI on device: $diagnosticDeviceUri');
+          printTrace('Diagnostic Server Uri on device: $diagnosticDeviceUri');
           int diagnosticLocalPort = await debuggingOptions.findBestDiagnosticPort();
-          diagnosticLocalUri = await _forwardPort(ProtocolDiscovery.kDiagnosticService, diagnosticDeviceUri, diagnosticLocalPort);
+          diagnosticLocalUri = await _forwardUriToNewPort(ProtocolDiscovery.kDiagnosticService, diagnosticDeviceUri, diagnosticLocalPort);
         }
 
         return new LaunchResult.succeeded(

@@ -256,14 +256,18 @@ class IOSDevice extends Device {
       // ports post launch.
       printTrace("Debugging is enabled, connecting to observatory and the diagnostic server");
 
-      Future<Uri> forwardObsUri = _acquireAndForwardPort(app,
-                                                         ProtocolDiscovery.kObservatoryService,
-                                                         debuggingOptions.observatoryPort);
+      Future<Uri> forwardObsUri = _acquireAndForwardUriToNewPort(
+        app,
+        ProtocolDiscovery.kObservatoryService,
+        debuggingOptions.observatoryPort,
+      );
       Future<Uri> forwardDiagUri;
       if (debuggingOptions.buildMode == BuildMode.debug) {
-        forwardDiagUri = _acquireAndForwardPort(app,
-                                                ProtocolDiscovery.kDiagnosticService,
-                                                debuggingOptions.diagnosticPort);
+        forwardDiagUri = _acquireAndForwardUriToNewPort(
+          app,
+          ProtocolDiscovery.kDiagnosticService,
+          debuggingOptions.diagnosticPort,
+        );
       } else {
         forwardDiagUri = new Future<Uri>.value(null);
       }
@@ -288,8 +292,8 @@ class IOSDevice extends Device {
             );
       });
 
-      printTrace("Local Observatory: ${uris[0]}");
-      printTrace("Local Diagnostic Server: ${uris[1]}");
+      printTrace("Observatory Uri on device: ${uris[0]}");
+      printTrace("Diagnostic Server Uri on device: ${uris[1]}");
 
       localObsUri = uris[0];
       localDiagUri = uris[1];
@@ -306,7 +310,7 @@ class IOSDevice extends Device {
     return new LaunchResult.succeeded(observatoryUri: localObsUri, diagnosticUri: localDiagUri);
   }
 
-  Future<Uri> _acquireAndForwardPort(
+  Future<Uri> _acquireAndForwardUriToNewPort(
       ApplicationPackage app,
       String serviceName,
       int localPort) async {
@@ -316,12 +320,12 @@ class IOSDevice extends Device {
 
     Uri remoteUri = await remote.timeout(stepTimeout,
         onTimeout: () {
-      printTrace("Timeout while attempting to retrieve remote URI for $serviceName");
+      printTrace("Timeout while attempting to retrieve remote Uri for $serviceName");
       return null;
     });
 
     if (remoteUri == null) {
-      printTrace("Could not read URI on device for $serviceName");
+      printTrace("Could not read Uri on device for $serviceName");
       return null;
     }
 

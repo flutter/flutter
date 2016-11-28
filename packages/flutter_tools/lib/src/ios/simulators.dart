@@ -477,7 +477,7 @@ class IOSSimulator extends Device {
         Uri deviceUri = await observatoryDiscovery
           .nextUri()
           .timeout(new Duration(seconds: 20));
-        printTrace('service protocol = $deviceUri');
+        printTrace('Observatory Uri on simulator: $deviceUri');
         printStatus('Observatory listening on $deviceUri');
         return new LaunchResult.succeeded(observatoryUri: deviceUri);
       } catch (error) {
