@@ -14,7 +14,7 @@ import 'globals.dart';
 
 /// A connection to the Dart VM Service.
 class VMService {
-  VMService._(this.peer, this.port, this.httpAddress) {
+  VMService._(this.peer, this.httpAddress, this.wsAddress) {
     _vm = new VM._empty(this);
 
     peer.registerMethod('streamNotify', (rpc.Parameters event) {
@@ -23,21 +23,24 @@ class VMService {
   }
 
   /// Connect to '127.0.0.1' at [port].
-  static Future<VMService> connect(int port) async {
-    Uri uri = new Uri(scheme: 'ws', host: '127.0.0.1', port: port, path: 'ws');
+  static Future<VMService> connect(Uri httpUri) async {
+    String wsPath = httpUri.path;
+    if (!wsPath.endsWith('/'))
+      wsPath += '/';
+    wsPath += 'ws';
+    Uri wsUri = httpUri.replace(scheme: 'ws', path: wsPath);
     WebSocket ws;
     try {
-      ws = await WebSocket.connect(uri.toString());
+      ws = await WebSocket.connect(wsUri.toString());
     } catch (e) {
-      return new Future<VMService>.error('Failed to connect to $uri\n  $e');
+      return new Future<VMService>.error('Failed to connect to $wsUri\n  $e');
     }
     rpc.Peer peer = new rpc.Peer(new IOWebSocketChannel(ws).cast());
     peer.listen();
-    Uri httpAddress = new Uri(scheme: 'http', host: '127.0.0.1', port: port);
-    return new VMService._(peer, port, httpAddress);
+    return new VMService._(peer, httpUri, wsUri);
   }
   final Uri httpAddress;
-  final int port;
+  final Uri wsAddress;
   final rpc.Peer peer;
 
   VM _vm;
