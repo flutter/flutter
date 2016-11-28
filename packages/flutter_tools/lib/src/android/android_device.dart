@@ -259,15 +259,14 @@ class AndroidDevice extends Device {
     return true;
   }
 
-  Future<Uri> _forwardUriToNewPort(String service, Uri deviceUri, int port) async {
+  Future<int> _forwardPort(String service, int devicePort, int port) async {
     try {
       // Set up port forwarding for observatory.
-      port = await portForwarder.forward(deviceUri.port, hostPort: port);
-      Uri localUri = deviceUri.replace(port: port);
-      printTrace('$service listening on $localUri');
-      return localUri;
+      port = await portForwarder.forward(devicePort, hostPort: port);
+      printTrace('$service listening on http://127.0.0.1:$port');
+      return port;
     } catch (e) {
-      printError('Unable to forward device port ${deviceUri.port} to $port: $e');
+      printError('Unable to forward port $port: $e');
     }
     return null;
   }
@@ -356,35 +355,35 @@ class AndroidDevice extends Device {
       printTrace('Waiting for observatory port to be available...');
 
       try {
-        Uri observatoryDeviceUri, diagnosticDeviceUri;
+        int observatoryDevicePort, diagnosticDevicePort;
 
         if (debuggingOptions.buildMode == BuildMode.debug) {
-          Future<List<Uri>> scrapeServiceUris = Future.wait(
-              <Future<Uri>>[observatoryDiscovery.nextUri(), diagnosticDiscovery.nextUri()]
+          Future<List<int>> scrapeServicePorts = Future.wait(
+              <Future<int>>[observatoryDiscovery.nextPort(), diagnosticDiscovery.nextPort()]
           );
-          List<Uri> deviceUris = await scrapeServiceUris.timeout(new Duration(seconds: 20));
-          observatoryDeviceUri = deviceUris[0];
-          diagnosticDeviceUri = deviceUris[1];
+          List<int> devicePorts = await scrapeServicePorts.timeout(new Duration(seconds: 20));
+          observatoryDevicePort = devicePorts[0];
+          diagnosticDevicePort = devicePorts[1];
         } else {
-          observatoryDeviceUri = await observatoryDiscovery.nextUri().timeout(new Duration(seconds: 20));
+          observatoryDevicePort = await observatoryDiscovery.nextPort().timeout(new Duration(seconds: 20));
         }
 
-        printTrace('Observatory Uri on device: $observatoryDeviceUri');
+        printTrace('observatory port on device: $observatoryDevicePort');
         int observatoryLocalPort = await debuggingOptions.findBestObservatoryPort();
         // TODO(devoncarew): Remember the forwarding information (so we can later remove the
         // port forwarding).
-        Uri observatoryLocalUri = await _forwardUriToNewPort(ProtocolDiscovery.kObservatoryService, observatoryDeviceUri, observatoryLocalPort);
+        observatoryLocalPort = await _forwardPort(ProtocolDiscovery.kObservatoryService, observatoryDevicePort, observatoryLocalPort);
 
-        Uri diagnosticLocalUri;
-        if (diagnosticDeviceUri != null) {
-          printTrace('Diagnostic Server Uri on device: $diagnosticDeviceUri');
-          int diagnosticLocalPort = await debuggingOptions.findBestDiagnosticPort();
-          diagnosticLocalUri = await _forwardUriToNewPort(ProtocolDiscovery.kDiagnosticService, diagnosticDeviceUri, diagnosticLocalPort);
+        int diagnosticLocalPort;
+        if (diagnosticDevicePort != null) {
+          printTrace('diagnostic port on device: $diagnosticDevicePort');
+          diagnosticLocalPort = await debuggingOptions.findBestDiagnosticPort();
+          diagnosticLocalPort = await _forwardPort(ProtocolDiscovery.kDiagnosticService, diagnosticDevicePort, diagnosticLocalPort);
         }
 
         return new LaunchResult.succeeded(
-            observatoryUri: observatoryLocalUri,
-            diagnosticUri: diagnosticLocalUri,
+            observatoryPort: observatoryLocalPort,
+            diagnosticPort: diagnosticLocalPort
         );
       } catch (error) {
         if (error is TimeoutException)
