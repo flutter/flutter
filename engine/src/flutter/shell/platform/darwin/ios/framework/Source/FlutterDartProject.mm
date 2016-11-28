@@ -97,9 +97,16 @@ static NSURL* URLForSwitch(const char* name) {
     if (flxURL == nil) {
       // If the URL was not specified on the command line, look inside the
       // FlutterApplication bundle.
-      flxURL =
-          [NSURL fileURLWithPath:[bundle pathForResource:@"app" ofType:@"flx"]
-                     isDirectory:NO];
+      NSString* flxPath = [self pathForFLXFromBundle:bundle];
+      if (flxPath != nil) {
+        flxURL = [NSURL fileURLWithPath:flxPath isDirectory:NO];
+      }
+    }
+
+    if (flxURL == nil) {
+      NSLog(@"Error: FLX file not present in bundle; unable to start app.");
+      [self release];
+      return nil;
     }
 
     NSURL* dartMainURL =
@@ -129,6 +136,16 @@ static NSURL* URLForSwitch(const char* name) {
     _vmTypeRequirement = VMTypeInterpreter;
     return;
   }
+}
+
+- (NSString*)pathForFLXFromBundle:(NSBundle*)bundle {
+  NSString* flxName = [bundle objectForInfoDictionaryKey:@"FLTFlxName"];
+  if (flxName == nil) {
+    // Default to "app.flx"
+    flxName = @"app";
+  }
+
+  return [bundle pathForResource:flxName ofType:@"flx"];
 }
 
 #pragma mark - Launching the project in a preconfigured engine.
@@ -198,9 +215,7 @@ static NSString* NSStringFromVMType(VMType type) {
     return;
   }
 
-  NSString* path =
-      [_precompiledDartBundle pathForResource:@"app" ofType:@"flx"];
-
+  NSString* path = [self pathForFLXFromBundle:_precompiledDartBundle];
   if (path.length == 0) {
     NSString* message =
         [NSString stringWithFormat:@"Could not find the 'app.flx' archive in "
