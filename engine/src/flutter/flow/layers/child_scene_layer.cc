@@ -9,9 +9,9 @@
 
 namespace flow {
 
-ChildSceneLayer::ChildSceneLayer() : device_pixel_ratio_(1.0f) {}
+ChildSceneLayer::ChildSceneLayer() = default;
 
-ChildSceneLayer::~ChildSceneLayer() {}
+ChildSceneLayer::~ChildSceneLayer() = default;
 
 void ChildSceneLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
   set_needs_system_composite(true);
@@ -20,10 +20,10 @@ void ChildSceneLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
   float inverse_device_pixel_ratio = 1.f / device_pixel_ratio_;
   transform_.preScale(inverse_device_pixel_ratio, inverse_device_pixel_ratio);
 
-  SkRect bounds = SkRect::MakeXYWH(
-    offset_.x(), offset_.y(),
-    physical_size_.width() * inverse_device_pixel_ratio,
-    physical_size_.height() * inverse_device_pixel_ratio);
+  SkRect bounds =
+      SkRect::MakeXYWH(offset_.x(), offset_.y(),
+                       physical_size_.width() * inverse_device_pixel_ratio,
+                       physical_size_.height() * inverse_device_pixel_ratio);
   set_paint_bounds(bounds);
   context->child_paint_bounds = bounds;
 }
@@ -42,6 +42,10 @@ void ChildSceneLayer::UpdateScene(SceneUpdateContext& context,
   resource->get_scene()->scene_token->value = scene_token_;
 
   auto node = mozart::Node::New();
+  if (!hittable_) {
+    node->hit_test_behavior = mozart::HitTestBehavior::New();
+    node->hit_test_behavior->prune = true;
+  }
   node->op = mozart::NodeOp::New();
   node->op->set_scene(mozart::SceneNodeOp::New());
   node->op->get_scene()->scene_resource_id =

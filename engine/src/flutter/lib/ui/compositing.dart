@@ -191,24 +191,29 @@ class SceneBuilder extends NativeFieldWrapperClass2 {
   /// Applications typically obtain scene tokens when embedding other views via
   /// the Fuchsia view manager, but this function is agnostic as to the source
   /// of scene token.
-  void addChildScene(Offset offset,
-                     double devicePixelRatio,
-                     int physicalWidth,
-                     int physicalHeight,
-                     int sceneToken) {
+  void addChildScene({
+    Offset offset: Offset.zero,
+    double devicePixelRatio: 1.0,
+    int physicalWidth: 0,
+    int physicalHeight: 0,
+    int sceneToken,
+    bool hittable: true,
+  }) {
     _addChildScene(offset.dx,
                    offset.dy,
                    devicePixelRatio,
                    physicalWidth,
                    physicalHeight,
-                   sceneToken);
+                   sceneToken,
+                   hittable);
   }
   void _addChildScene(double dx,
                       double dy,
                       double devicePixelRatio,
                       int physicalWidth,
                       int physicalHeight,
-                      int sceneToken) native "SceneBuilder_addChildScene";
+                      int sceneToken,
+                      bool hittable) native "SceneBuilder_addChildScene";
 
   /// Sets a threshold after which additional debugging information should be recorded.
   ///
