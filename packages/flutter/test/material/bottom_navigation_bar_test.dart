@@ -165,7 +165,7 @@ void main() {
     expect(actions.elementAt(3).localToGlobal(Point.origin), equals(originalOrigin));
   });
 
-  testWidgets('BottomNavigationBar inherits shadowed app theme', (WidgetTester tester) async {
+  testWidgets('BottomNavigationBar inherits shadowed app theme for shifting navbar', (WidgetTester tester) async {
     await tester.pumpWidget(
         new MaterialApp(
             theme: new ThemeData(brightness: Brightness.light),
@@ -174,6 +174,44 @@ void main() {
                 child: new Scaffold(
                     bottomNavigationBar: new BottomNavigationBar(
                         type: BottomNavigationBarType.shifting,
+                        labels: <DestinationLabel>[
+                          new DestinationLabel(
+                              icon: new Icon(Icons.ac_unit),
+                              title: new Text('AC')
+                          ),
+                          new DestinationLabel(
+                              icon: new Icon(Icons.access_alarm),
+                              title: new Text('Alarm')
+                          ),
+                          new DestinationLabel(
+                              icon: new Icon(Icons.access_time),
+                              title: new Text('Time')
+                          ),
+                          new DestinationLabel(
+                              icon: new Icon(Icons.add),
+                              title: new Text('Add')
+                          )
+                        ]
+                    )
+                )
+            )
+        )
+    );
+
+    await tester.tap(find.text('Alarm'));
+    await tester.pump(const Duration(seconds: 1));
+    expect(Theme.of(tester.element(find.text('Alarm'))).brightness, equals(Brightness.dark));
+  });
+
+  testWidgets('BottomNavigationBar inherits shadowed app theme for fixed navbar', (WidgetTester tester) async {
+    await tester.pumpWidget(
+        new MaterialApp(
+            theme: new ThemeData(brightness: Brightness.light),
+            home: new Theme(
+                data: new ThemeData(brightness: Brightness.dark),
+                child: new Scaffold(
+                    bottomNavigationBar: new BottomNavigationBar(
+                        type: BottomNavigationBarType.fixed,
                         labels: <DestinationLabel>[
                           new DestinationLabel(
                               icon: new Icon(Icons.ac_unit),
