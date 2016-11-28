@@ -341,7 +341,8 @@ class BottomNavigationBarState extends State<BottomNavigationBar> with TickerPro
                       alignment: FractionalOffset.bottomCenter,
                       child: new Container(
                         margin: const EdgeInsets.only(bottom: 10.0),
-                        child: new DefaultTextStyle(
+                        child: new DefaultTextStyle.merge(
+                          context: context,
                           style: new TextStyle(
                             fontSize: 14.0,
                             color: colorTween.evaluate(animations[i]),
@@ -411,7 +412,8 @@ class BottomNavigationBarState extends State<BottomNavigationBar> with TickerPro
                         margin: const EdgeInsets.only(bottom: 10.0),
                         child: new FadeTransition(
                           opacity: animations[i],
-                          child: new DefaultTextStyle(
+                          child: new DefaultTextStyle.merge(
+                            context: context,
                             style: new TextStyle(
                               fontSize: 14.0,
                               color: Colors.white
