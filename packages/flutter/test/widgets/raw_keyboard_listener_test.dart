@@ -51,4 +51,44 @@ void main() {
     expect(typedData.codePoint, 0x64);
     expect(typedData.modifiers, 0x08);
   });
+
+  testWidgets('Defunct listeners do not receive events',
+      (WidgetTester tester) async {
+    List<RawKeyEvent> events = <RawKeyEvent>[];
+
+    await tester.pumpWidget(new RawKeyboardListener(
+      focused: true,
+      onKey: (RawKeyEvent event) {
+        events.add(event);
+      },
+      child: new Container(),
+    ));
+
+    sendFakeKeyEvent(<String, dynamic>{
+      'type': 'keydown',
+      'keymap': 'fuchsia',
+      'hidUsage': 0x04,
+      'codePoint': 0x64,
+      'modifiers': 0x08,
+    });
+
+    await tester.idle();
+
+    expect(events.length, 1);
+    events.clear();
+
+    await tester.pumpWidget(new Container());
+
+    sendFakeKeyEvent(<String, dynamic>{
+      'type': 'keydown',
+      'keymap': 'fuchsia',
+      'hidUsage': 0x04,
+      'codePoint': 0x64,
+      'modifiers': 0x08,
+    });
+
+    await tester.idle();
+
+    expect(events.length, 0);
+  });
 }
