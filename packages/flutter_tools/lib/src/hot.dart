@@ -535,8 +535,7 @@ class HotRunner extends ResidentRunner {
     );
     printStatus('The Observatory debugger and profiler is available at: http://127.0.0.1:$_observatoryPort/');
     if (details) {
-      printStatus('To dump the widget hierarchy of the app (debugDumpApp), press "w".');
-      printStatus('To dump the rendering tree of the app (debugDumpRenderTree), press "t".');
+      printHelpDetails();
       printStatus('To repeat this help message, press "h" or F1. To quit, press "q", F10, or Ctrl-C.');
     } else {
       printStatus('For a more detailed help message, press "h" or F1. To quit, press "q", F10, or Ctrl-C.');

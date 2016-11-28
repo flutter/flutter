@@ -61,15 +61,19 @@ abstract class ResidentRunner {
   Future<Null> _debugDumpApp() async {
     if (vmService != null)
       await vmService.vm.refreshViews();
-
     await currentView.uiIsolate.flutterDebugDumpApp();
   }
 
   Future<Null> _debugDumpRenderTree() async {
     if (vmService != null)
       await vmService.vm.refreshViews();
-
     await currentView.uiIsolate.flutterDebugDumpRenderTree();
+  }
+
+  Future<Null> _debugToggleDebugPaintSizeEnabled() async {
+    if (vmService != null)
+      await vmService.vm.refreshViews();
+    await currentView.uiIsolate.flutterToggleDebugPaintSizeEnabled();
   }
 
   void registerSignalHandlers() {
@@ -154,6 +158,11 @@ abstract class ResidentRunner {
         return true;
       await _debugDumpRenderTree();
       return true;
+    } else if (lower == 'p') {
+      if (!supportsServiceProtocol)
+        return true;
+      await _debugToggleDebugPaintSizeEnabled();
+      return true;
     } else if (lower == 'q' || character == AnsiTerminal.KEY_F10) {
       // F10, exit
       await stop();
@@ -225,12 +234,19 @@ abstract class ResidentRunner {
     appFinished();
   }
 
+  /// Called to print help to the terminal.
+  void printHelp({ @required bool details });
+
+  void printHelpDetails() {
+    printStatus('To dump the widget hierarchy of the app (debugDumpApp), press "w".');
+    printStatus('To dump the rendering tree of the app (debugDumpRenderTree), press "t".');
+    printStatus('To toggle the display of construction lines (debugPaintSizeEnabled), press "p".');
+  }
+
   /// Called when a signal has requested we exit.
   Future<Null> cleanupAfterSignal();
   /// Called right before we exit.
   Future<Null> cleanupAtFinish();
-  /// Called to print help to the terminal.
-  void printHelp({ @required bool details });
   /// Called when the runner should handle a terminal command.
   Future<Null> handleTerminalCommand(String code);
 }
