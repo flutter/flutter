@@ -4,7 +4,6 @@
 
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 // This demo is based on
 // https://material.google.com/components/dialogs.html#dialogs-full-screen-dialogs

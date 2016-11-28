@@ -30,6 +30,40 @@ const Duration _kSnackBarDisplayDuration = const Duration(milliseconds: 1500);
 const Curve _snackBarHeightCurve = Curves.fastOutSlowIn;
 const Curve _snackBarFadeCurve = const Interval(0.72, 1.0, curve: Curves.fastOutSlowIn);
 
+/// Specify how a [SnackBar] was closed.
+///
+/// The [showSnackBar] function returns a [ScaffoldFeatureController]. The value
+/// of the controller's closed property is a Future that resolves to a
+/// SnackBarClosedReason. Applications that need to know how a snackbar
+/// was closed can use this value.
+///
+/// Example:
+///
+/// ```dart
+/// Scaffold.of(context).showSnackBar(
+///   new SnackBar( ... )
+/// ).closed.then((SnackBarClosedReason reason) {
+///    ...
+/// });
+/// ```
+enum SnackBarClosedReason {
+  /// The snack bar was closed after the user tapped a [SnackBarAction].
+  action,
+
+  /// The snack bar was closed by a user's swipe.
+  swipe,
+
+  /// The snack bar was closed by the [ScaffoldFeatureController] close callback
+  /// or by calling [hideCurrentSnackBar] directly.
+  hide,
+
+  /// The snack bar was closed by an call to [removeCurrentSnackBar].
+  remove,
+
+  /// The snack bar was closed because its timer expired.
+  timeout,
+}
+
 /// A button for a [SnackBar], known as an "action".
 ///
 /// Snack bar actions are always enabled. If you want to disable a snack bar
@@ -77,6 +111,7 @@ class _SnackBarActionState extends State<SnackBarAction> {
       _haveTriggeredAction = true;
     });
     config.onPressed();
+    Scaffold.of(context).hideCurrentSnackBar(reason: SnackBarClosedReason.action);
   }
 
   @override
@@ -201,7 +236,7 @@ class SnackBar extends StatelessWidget {
             direction: DismissDirection.down,
             resizeDuration: null,
             onDismissed: (DismissDirection direction) {
-              Scaffold.of(context).removeCurrentSnackBar();
+              Scaffold.of(context).removeCurrentSnackBar(reason: SnackBarClosedReason.swipe);
             },
             child: new Material(
               elevation: 6,

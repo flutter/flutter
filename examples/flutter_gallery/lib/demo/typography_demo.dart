@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 class TextStyleItem extends StatelessWidget {
   TextStyleItem({ Key key, this.name, this.style, this.text }) : super(key: key) {
