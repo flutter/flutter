@@ -810,6 +810,13 @@ class Isolate extends ServiceObjectOwner {
     return invokeFlutterExtensionRpcRaw('ext.flutter.debugDumpRenderTree');
   }
 
+  Future<Map<String, dynamic>> flutterToggleDebugPaintSizeEnabled() async {
+    Map<String, dynamic> state = await invokeFlutterExtensionRpcRaw('ext.flutter.debugPaint');
+    if (state != null && state.containsKey('enabled') && state['enabled'] is bool)
+      state = await invokeFlutterExtensionRpcRaw('ext.flutter.debugPaint', <String, dynamic>{ 'enabled': !state['enabled'] });
+    return state;
+  }
+
   static bool _isMethodNotFoundException(dynamic e) {
     return (e is rpc.RpcException) &&
            (e.code == rpc_error_code.METHOD_NOT_FOUND);
