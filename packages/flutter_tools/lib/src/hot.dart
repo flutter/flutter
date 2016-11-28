@@ -108,7 +108,7 @@ class HotRunner extends ResidentRunner {
   final String applicationBinary;
   bool get prebuiltMode => applicationBinary != null;
   Set<String> _dartDependencies;
-  Uri _observatoryUri;
+  int _observatoryPort;
   AssetBundle _bundle;
   AssetBundle get bundle => _bundle;
   final bool benchmarkMode;
@@ -216,9 +216,9 @@ class HotRunner extends ResidentRunner {
       return 2;
     }
 
-    _observatoryUri = result.observatoryUri;
+    _observatoryPort = result.observatoryPort;
     try {
-      await connectToServiceProtocol(_observatoryUri);
+      await connectToServiceProtocol(_observatoryPort);
     } catch (error) {
       printError('Error connecting to the service protocol: $error');
       return 2;
@@ -230,8 +230,8 @@ class HotRunner extends ResidentRunner {
       if (connectionInfoCompleter != null) {
         connectionInfoCompleter.complete(
           new DebugConnectionInfo(
-            httpUri: _observatoryUri,
-            wsUri: vmService.wsAddress,
+            port: _observatoryPort,
+            wsUri: 'ws://localhost:$_observatoryPort/ws',
             baseUri: baseUri.toString()
           )
         );
@@ -533,7 +533,7 @@ class HotRunner extends ResidentRunner {
       ansiAlternative: '$red$fire$bold  To hot reload your app on the fly, '
                        'press "r" or F5. To restart the app entirely, press "R".$reset'
     );
-    printStatus('The Observatory debugger and profiler is available at: $_observatoryUri');
+    printStatus('The Observatory debugger and profiler is available at: http://127.0.0.1:$_observatoryPort/');
     if (details) {
       printHelpDetails();
       printStatus('To repeat this help message, press "h" or F1. To quit, press "q", F10, or Ctrl-C.');

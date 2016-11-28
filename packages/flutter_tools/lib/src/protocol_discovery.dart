@@ -21,38 +21,37 @@ class ProtocolDiscovery {
   final DeviceLogReader _logReader;
   final String _serviceName;
 
-  Completer<Uri> _completer = new Completer<Uri>();
+  Completer<int> _completer = new Completer<int>();
   StreamSubscription<String> _subscription;
 
   /// The [Future] returned by this function will complete when the next service
-  /// Uri is found.
-  Future<Uri> nextUri() => _completer.future;
+  /// protocol port is found.
+  Future<int> nextPort() => _completer.future;
 
   void cancel() {
     _subscription.cancel();
   }
 
   void _onLine(String line) {
-    Uri uri;
+    int portNumber = 0;
     if (line.contains('$_serviceName listening on http://')) {
-      RegExp portExp = new RegExp(r"http://\d+.\d+.\d+.\d+:\d+\S*");
       try {
-        String match = portExp.stringMatch(line);
-        if (match != null)
-          uri = Uri.parse(match);
+        RegExp portExp = new RegExp(r"\d+.\d+.\d+.\d+:(\d+)");
+        String port = portExp.firstMatch(line).group(1);
+        portNumber = int.parse(port);
       } catch (_) {
         // Ignore errors.
       }
     }
-    if (uri != null)
-      _located(uri);
+    if (portNumber != 0)
+      _located(portNumber);
   }
 
-  void _located(Uri uri) {
+  void _located(int port) {
     assert(_completer != null);
     assert(!_completer.isCompleted);
 
-    _completer.complete(uri);
-    _completer = new Completer<Uri>();
+    _completer.complete(port);
+    _completer = new Completer<int>();
   }
 }

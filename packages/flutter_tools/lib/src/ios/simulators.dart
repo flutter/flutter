@@ -474,12 +474,12 @@ class IOSSimulator extends Device {
       printTrace('Waiting for observatory port to be available...');
 
       try {
-        Uri deviceUri = await observatoryDiscovery
-          .nextUri()
+        int devicePort = await observatoryDiscovery
+          .nextPort()
           .timeout(new Duration(seconds: 20));
-        printTrace('Observatory Uri on simulator: $deviceUri');
-        printStatus('Observatory listening on $deviceUri');
-        return new LaunchResult.succeeded(observatoryUri: deviceUri);
+        printTrace('service protocol port = $devicePort');
+        printStatus('Observatory listening on http://127.0.0.1:$devicePort');
+        return new LaunchResult.succeeded(observatoryPort: devicePort);
       } catch (error) {
         if (error is TimeoutException)
           printError('Timed out while waiting for a debug connection.');
