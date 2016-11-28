@@ -78,7 +78,6 @@ mozart::NodePtr SceneUpdateContext::FinalizeCurrentPaintTask(
   resource->get_image()->image = std::move(image);
 
   auto node = mozart::Node::New();
-  node->hit_test_behavior = mozart::HitTestBehavior::New();
   node->op = mozart::NodeOp::New();
   node->op->set_image(mozart::ImageNodeOp::New());
   node->op->get_image()->content_rect = mozart::RectF::From(bounds);

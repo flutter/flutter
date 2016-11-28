@@ -55,6 +55,7 @@ void Rasterizer::Draw(std::unique_ptr<flow::LayerTree> layer_tree,
 
   flow::SceneUpdateContext context(update.get(), buffer_producer_.get());
   auto root_node = mozart::Node::New();
+  root_node->hit_test_behavior = mozart::HitTestBehavior::New();
   layer_tree->UpdateScene(context, root_node.get());
   update->nodes.insert(mozart::kSceneRootNodeId, std::move(root_node));
 

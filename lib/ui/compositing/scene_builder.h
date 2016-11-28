@@ -59,7 +59,8 @@ class SceneBuilder : public ftl::RefCountedThreadSafe<SceneBuilder>,
                      double devicePixelRatio,
                      int physicalWidth,
                      int physicalHeight,
-                     uint32_t sceneToken);
+                     uint32_t sceneToken,
+                     bool hittable);
 
   void setRasterizerTracingThreshold(uint32_t frameInterval);
 
