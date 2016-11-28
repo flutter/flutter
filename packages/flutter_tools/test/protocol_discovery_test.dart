@@ -60,6 +60,13 @@ void main() {
       expect(uri.port, 54804);
       expect('$uri', 'http://127.0.0.1:54804/PTwjm8Ii8qg=/');
 
+      // Get next port future.
+      nextUri = discoverer.nextUri();
+      logReader.addLine('I/flutter : Observatory listening on http://somehost:54804/PTwjm8Ii8qg=/');
+      uri = await nextUri;
+      expect(uri.port, 54804);
+      expect('$uri', 'http://somehost:54804/PTwjm8Ii8qg=/');
+
       discoverer.cancel();
       logReader.dispose();
     });

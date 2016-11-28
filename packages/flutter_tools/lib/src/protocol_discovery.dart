@@ -34,17 +34,16 @@ class ProtocolDiscovery {
 
   void _onLine(String line) {
     Uri uri;
-    if (line.contains('$_serviceName listening on http://')) {
-      RegExp portExp = new RegExp(r"http://\d+.\d+.\d+.\d+:\d+\S*");
+    String prefix = '$_serviceName listening on ';
+    int index = line.indexOf(prefix + 'http://');
+    if (index >= 0) {
       try {
-        String match = portExp.stringMatch(line);
-        if (match != null)
-          uri = Uri.parse(match);
+        uri = Uri.parse(line.substring(index + prefix.length));
       } catch (_) {
         // Ignore errors.
       }
     }
-    if (uri != null)
+    if (uri != null && uri.port != 80)
       _located(uri);
   }
 
