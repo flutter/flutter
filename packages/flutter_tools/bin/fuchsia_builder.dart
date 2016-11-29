@@ -8,11 +8,14 @@ import 'dart:io';
 import 'package:args/args.dart';
 
 import '../lib/src/base/common.dart';
+import '../lib/src/base/config.dart';
 import '../lib/src/base/context.dart';
 import '../lib/src/base/logger.dart';
+import '../lib/src/base/os.dart';
 import '../lib/src/cache.dart';
 import '../lib/src/flx.dart';
 import '../lib/src/globals.dart';
+import '../lib/src/usage.dart';
 
 const String _kOptionPackages = 'packages';
 const String _kOptionOutput = 'output-file';
@@ -28,10 +31,16 @@ const List<String> _kRequiredOptions = const <String>[
   _kOptionWorking,
 ];
 
-void main(List<String> args) async {
+Future<Null> main(List<String> args) async {
   AppContext executableContext = new AppContext();
+  executableContext.setVariable(Logger, new StdoutLogger());
   executableContext.runInZone(() {
-    context[Logger] = new StdoutLogger();
+    // Initialize the context with some defaults.
+    context.putIfAbsent(Logger, () => new StdoutLogger());
+    context.putIfAbsent(Cache, () => new Cache());
+    context.putIfAbsent(Config, () => new Config());
+    context.putIfAbsent(OperatingSystemUtils, () => new OperatingSystemUtils());
+    context.putIfAbsent(Usage, () => new Usage());
     return run(args);
   });
 }

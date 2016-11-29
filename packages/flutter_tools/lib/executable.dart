@@ -9,10 +9,13 @@ import 'package:args/command_runner.dart';
 import 'package:stack_trace/stack_trace.dart';
 
 import 'src/base/common.dart';
+import 'src/base/config.dart';
 import 'src/base/context.dart';
 import 'src/base/logger.dart';
+import 'src/base/os.dart';
 import 'src/base/process.dart';
 import 'src/base/utils.dart';
+import 'src/cache.dart';
 import 'src/commands/analyze.dart';
 import 'src/commands/build.dart';
 import 'src/commands/channel.dart';
@@ -40,8 +43,12 @@ import 'src/device.dart';
 import 'src/doctor.dart';
 import 'src/globals.dart';
 import 'src/hot.dart';
-import 'src/usage.dart';
+import 'src/ios/mac.dart';
+import 'src/ios/simulators.dart';
 import 'src/runner/flutter_command_runner.dart';
+import 'src/toolchain.dart';
+import 'src/usage.dart';
+
 
 /// Main entry point for commands.
 ///
@@ -88,16 +95,19 @@ Future<Null> main(List<String> args) async {
   // Make the context current.
   _executableContext.runInZone(() {
     // Initialize the context with some defaults.
-    if (context[Logger] == null)
-      context[Logger] = new StdoutLogger();
-    if (context[DeviceManager] == null)
-      context[DeviceManager] = new DeviceManager();
-    if (context[DevFSConfig] == null)
-      context[DevFSConfig] = new DevFSConfig();
-    if (context[Doctor] == null)
-      context[Doctor] = new Doctor();
-    if (context[HotRunnerConfig] == null)
-      context[HotRunnerConfig] = new HotRunnerConfig();
+    context.putIfAbsent(Logger, () => new StdoutLogger());
+    context.putIfAbsent(DeviceManager, () => new DeviceManager());
+    context.putIfAbsent(DevFSConfig, () => new DevFSConfig());
+    context.putIfAbsent(Doctor, () => new Doctor());
+    context.putIfAbsent(HotRunnerConfig, () => new HotRunnerConfig());
+    context.putIfAbsent(Cache, () => new Cache());
+    context.putIfAbsent(ToolConfiguration, () => new ToolConfiguration());
+    context.putIfAbsent(Config, () => new Config());
+    context.putIfAbsent(OperatingSystemUtils, () => new OperatingSystemUtils());
+    context.putIfAbsent(XCode, () => new XCode());
+    context.putIfAbsent(IOSSimulatorUtils, () => new IOSSimulatorUtils());
+    context.putIfAbsent(SimControl, () => new SimControl());
+    context.putIfAbsent(Usage, () => new Usage());
 
     return Chain.capture/*<Future<Null>>*/(() async {
       await runner.run(args);
@@ -192,7 +202,7 @@ Future<String> _doctorText() async {
     BufferLogger logger = new BufferLogger();
     AppContext appContext = new AppContext();
 
-    appContext[Logger] = logger;
+    appContext.setVariable(Logger, logger);
 
     await appContext.runInZone(() => doctor.diagnose());
 

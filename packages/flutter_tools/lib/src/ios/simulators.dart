@@ -37,9 +37,7 @@ class IOSSimulators extends PollingDeviceDiscovery {
 
 class IOSSimulatorUtils {
   /// Returns [IOSSimulatorUtils] active in the current app context (i.e. zone).
-  static IOSSimulatorUtils get instance {
-    return context[IOSSimulatorUtils] ?? (context[IOSSimulatorUtils] = new IOSSimulatorUtils());
-  }
+  static IOSSimulatorUtils get instance => context[IOSSimulatorUtils];
 
   List<IOSSimulator> getAttachedDevices() {
     if (!XCode.instance.isInstalledAndMeetsVersionCheck)
@@ -54,7 +52,7 @@ class IOSSimulatorUtils {
 /// A wrapper around the `simctl` command line tool.
 class SimControl {
   /// Returns [SimControl] active in the current app context (i.e. zone).
-  static SimControl get instance => context[SimControl] ?? (context[SimControl] = new SimControl());
+  static SimControl get instance => context[SimControl];
 
   Future<bool> boot({ String deviceName }) async {
     if (_isAnyConnected())
