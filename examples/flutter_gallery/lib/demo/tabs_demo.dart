@@ -9,7 +9,6 @@ import 'package:flutter/material.dart';
 
 class _Page {
   _Page({ this.label });
-  final GlobalKey<ScrollableState> scrollableKey = new GlobalKey<ScrollableState>();
   final String label;
   String get id => label[0];
 }
@@ -140,7 +139,6 @@ class _TabsDemoState extends State<TabsDemo> {
        });
       },
       child: new Scaffold(
-        scrollableKey: _selectedPage.scrollableKey,
         appBar: new AppBar(
           title: new Text('Tabs and scrolling'),
           bottom: new TabBar<_Page>(
@@ -152,7 +150,6 @@ class _TabsDemoState extends State<TabsDemo> {
         body: new TabBarView<_Page>(
           children: _allPages.keys.map((_Page page) {
             return new ScrollableList(
-              scrollableKey: page.scrollableKey,
               padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
               itemExtent: _CardDataItem.height,
               children: _allPages[page].map((_CardData data) {
