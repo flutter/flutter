@@ -550,8 +550,10 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   ///
   /// To control how long a [SnackBar] remains visible, use [SnackBar.duration].
   ///
-  /// To remove a [SnackBar] suddenly (without an animation), use
-  /// [removeCurrentSnackBar].
+  /// To remove the [SnackBar] with an exit animation, use [hideCurrentSnackBar]
+  /// or call [ScaffoldFeatureController.close] on the returned
+  /// [ScaffoldFeatureController]. To remove a [SnackBar] suddenly (without an
+  /// animation), use [removeCurrentSnackBar].
   ///
   /// See [Scaffold.of] for information about how to obtain the [ScaffoldState].
   ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showSnackBar(SnackBar snackbar) {
