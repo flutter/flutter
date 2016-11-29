@@ -137,8 +137,10 @@ class FlutterCommandRunner extends CommandRunner<Null> {
   @override
   Future<Null> runCommand(ArgResults globalResults) async {
     // Check for verbose.
-    if (globalResults['verbose'])
-      context[Logger] = new VerboseLogger();
+    if (globalResults['verbose']) {
+      // Override the logger.
+      context.setVariable(Logger, new VerboseLogger());
+    }
 
     logger.quiet = globalResults['quiet'];
 
@@ -171,8 +173,7 @@ class FlutterCommandRunner extends CommandRunner<Null> {
     }
 
     // The Android SDK could already have been set by tests.
-    if (!context.isSet(AndroidSdk))
-      context[AndroidSdk] = AndroidSdk.locateAndroidSdk();
+    context.putIfAbsent(AndroidSdk, () => AndroidSdk.locateAndroidSdk());
 
     if (globalResults['version']) {
       flutterUsage.sendCommand('version');

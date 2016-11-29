@@ -14,19 +14,10 @@ import 'src/context.dart';
 void main() {
   group('ToolConfiguration', () {
     Directory tempDir;
-
-    setUp(() {
-      tempDir = Directory.systemTemp.createTempSync('flutter_temp');
-    });
-
-    tearDown(() {
-      tempDir.deleteSync(recursive: true);
-    });
+    tempDir = Directory.systemTemp.createTempSync('flutter_temp');
 
     testUsingContext('using cache', () {
-      ToolConfiguration toolConfig = new ToolConfiguration(
-        overrideCache: new Cache(rootOverride: tempDir)
-      );
+      ToolConfiguration toolConfig = new ToolConfiguration();
 
       expect(
         toolConfig.getEngineArtifactsDirectory(TargetPlatform.android_arm, BuildMode.debug).path,
@@ -36,6 +27,10 @@ void main() {
         toolConfig.getEngineArtifactsDirectory(TargetPlatform.android_arm, BuildMode.release).path,
         endsWith('cache/artifacts/engine/android-arm-release')
       );
+      expect(tempDir, isNotNull);
+      tempDir.deleteSync(recursive: true);
+    }, overrides: <Type, dynamic> {
+      Cache: new Cache(rootOverride: tempDir)
     });
 
     testUsingContext('using enginePath', () {

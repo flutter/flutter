@@ -32,11 +32,11 @@ void main() {
     setUp(() {
       appContext = new AppContext();
       notifyingLogger = new NotifyingLogger();
-      appContext[Logger] = notifyingLogger;
-      appContext[Doctor] = new Doctor();
+      appContext.setVariable(Logger, notifyingLogger);
+      appContext.setVariable(Doctor, new Doctor());
       if (Platform.isMacOS)
-        appContext[XCode] = new XCode();
-      appContext[DeviceManager] = new MockDeviceManager();
+        appContext.setVariable(XCode, new XCode());
+      appContext.setVariable(DeviceManager, new MockDeviceManager());
     });
 
     tearDown(() {

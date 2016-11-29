@@ -3,17 +3,19 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
 
+import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/hot.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:flutter_tools/src/ios/simulators.dart';
+import 'package:flutter_tools/src/toolchain.dart';
 import 'package:flutter_tools/src/usage.dart';
 
 import 'package:mockito/mockito.dart';
@@ -32,49 +34,33 @@ void testUsingContext(String description, dynamic testMethod(), {
   test(description, () async {
     AppContext testContext = new AppContext();
 
+    // Apply all overrides to the test context.
     overrides.forEach((Type type, dynamic value) {
-      testContext[type] = value;
+      testContext.setVariable(type, value);
     });
 
-    if (!overrides.containsKey(Logger))
-      testContext[Logger] = new BufferLogger();
-
-    if (!overrides.containsKey(DeviceManager))
-      testContext[DeviceManager] = new MockDeviceManager();
-
-    if (!overrides.containsKey(Doctor))
-      testContext[Doctor] = new MockDoctor();
-
-    if (!overrides.containsKey(SimControl))
-      testContext[SimControl] = new MockSimControl();
-
-    if (!overrides.containsKey(Usage))
-      testContext[Usage] = new MockUsage();
-
-    if (!overrides.containsKey(OperatingSystemUtils)) {
+    // Initialize the test context with some default mocks.
+    testContext.putIfAbsent(Logger, () => new BufferLogger());
+    testContext.putIfAbsent(DeviceManager, () => new MockDeviceManager());
+    testContext.putIfAbsent(DevFSConfig, () => new DevFSConfig());
+    testContext.putIfAbsent(Doctor, () => new MockDoctor());
+    testContext.putIfAbsent(HotRunnerConfig, () => new HotRunnerConfig());
+    testContext.putIfAbsent(Cache, () => new Cache());
+    testContext.putIfAbsent(ToolConfiguration, () => new ToolConfiguration());
+    testContext.putIfAbsent(Config, () => new Config());
+    testContext.putIfAbsent(OperatingSystemUtils, () {
       MockOperatingSystemUtils os = new MockOperatingSystemUtils();
       when(os.isWindows).thenReturn(false);
-      testContext[OperatingSystemUtils] = os;
-    }
-
-    if (!overrides.containsKey(DevFSConfig)) {
-      testContext[DevFSConfig] = new DevFSConfig();
-    }
-
-    if (!overrides.containsKey(HotRunnerConfig)) {
-      testContext[HotRunnerConfig] = new HotRunnerConfig();
-    }
-
-    if (!overrides.containsKey(IOSSimulatorUtils)) {
+      return os;
+    });
+    testContext.putIfAbsent(XCode, () => new XCode());
+    testContext.putIfAbsent(IOSSimulatorUtils, () {
       MockIOSSimulatorUtils mock = new MockIOSSimulatorUtils();
       when(mock.getAttachedDevices()).thenReturn(<IOSSimulator>[]);
-      testContext[IOSSimulatorUtils] = mock;
-    }
-
-    if (Platform.isMacOS) {
-      if (!overrides.containsKey(XCode))
-        testContext[XCode] = new XCode();
-    }
+      return mock;
+    });
+    testContext.putIfAbsent(SimControl, () => new MockSimControl());
+    testContext.putIfAbsent(Usage, () => new MockUsage());
 
     try {
       return await testContext.runInZone(testMethod);

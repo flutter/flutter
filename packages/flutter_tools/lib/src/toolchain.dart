@@ -25,18 +25,11 @@ const Map<HostTool, String> _kHostToolFileName = const <HostTool, String>{
 /// and the engine artifact directory for a given target platform. It is configurable
 /// via command-line arguments in order to support local engine builds.
 class ToolConfiguration {
-  /// [overrideCache] is configurable for testing.
-  ToolConfiguration({ Cache overrideCache }) {
-    _cache = overrideCache ?? cache;
-  }
+  ToolConfiguration();
 
-  Cache _cache;
+  Cache get cache => context[Cache];
 
-  static ToolConfiguration get instance {
-    if (context[ToolConfiguration] == null)
-      context[ToolConfiguration] = new ToolConfiguration();
-    return context[ToolConfiguration];
-  }
+  static ToolConfiguration get instance => context[ToolConfiguration];
 
   /// Override using the artifacts from the cache directory (--engine-src-path).
   String engineSrcPath;
@@ -63,14 +56,14 @@ class ToolConfiguration {
 
       // Create something like `android-arm` or `android-arm-release`.
       String dirName = getNameForTargetPlatform(platform) + suffix;
-      Directory engineDir = _cache.getArtifactDirectory('engine');
+      Directory engineDir = cache.getArtifactDirectory('engine');
       return new Directory(path.join(engineDir.path, dirName));
     }
   }
 
   String getHostToolPath(HostTool tool) {
     if (engineBuildPath == null) {
-      return path.join(_cache.getArtifactDirectory('engine').path,
+      return path.join(cache.getArtifactDirectory('engine').path,
                        getNameForHostPlatform(getCurrentHostPlatform()),
                        _kHostToolFileName[tool]);
     }

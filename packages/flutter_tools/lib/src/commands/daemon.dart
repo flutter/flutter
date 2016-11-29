@@ -48,7 +48,7 @@ class DaemonCommand extends FlutterCommand {
 
     AppContext appContext = new AppContext();
     NotifyingLogger notifyingLogger = new NotifyingLogger();
-    appContext[Logger] = notifyingLogger;
+    appContext.setVariable(Logger, notifyingLogger);
 
     Cache.releaseLockEarly();
 
@@ -674,7 +674,7 @@ class AppInstance {
       _logger = new _AppRunLogger(domain, this);
 
     AppContext appContext = new AppContext();
-    appContext[Logger] = _logger;
+    appContext.setVariable(Logger, _logger);
     return appContext.runInZone(method);
   }
 }

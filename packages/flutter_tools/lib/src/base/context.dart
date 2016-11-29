@@ -36,7 +36,15 @@ class AppContext {
 
   dynamic operator[](Type type) => getVariable(type);
 
-  void operator[]=(Type type, dynamic instance) => setVariable(type, instance);
+  dynamic putIfAbsent(Type type, dynamic ifAbsent()) {
+    dynamic value = getVariable(type);
+    if (value != null) {
+      return value;
+    }
+    value = ifAbsent();
+    setVariable(type, value);
+    return value;
+  }
 
   AppContext _calcParent(Zone zone) {
     Zone parentZone = zone.parent;
