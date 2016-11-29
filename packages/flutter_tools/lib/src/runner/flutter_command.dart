@@ -14,6 +14,7 @@ import '../build_info.dart';
 import '../dart/package_map.dart';
 import '../dart/pub.dart';
 import '../device.dart';
+import '../doctor.dart';
 import '../flx.dart' as flx;
 import '../globals.dart';
 import '../usage.dart';

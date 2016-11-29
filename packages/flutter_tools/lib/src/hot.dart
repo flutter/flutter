@@ -24,6 +24,7 @@ import 'globals.dart';
 import 'resident_runner.dart';
 import 'toolchain.dart';
 import 'vmservice.dart';
+import 'usage.dart';
 
 class HotRunnerConfig {
   /// Should the hot runner compute the minimal Dart dependencies?

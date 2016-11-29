@@ -10,6 +10,7 @@ import 'package:path/path.dart' as path;
 import 'package:yaml/yaml.dart';
 
 import 'dart/package_map.dart';
+import 'android/android_sdk.dart';
 import 'globals.dart';
 
 const String _kFlutterManifestPath = 'flutter.yaml';

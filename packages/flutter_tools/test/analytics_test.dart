@@ -9,7 +9,6 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/commands/config.dart';
 import 'package:flutter_tools/src/commands/doctor.dart';
-import 'package:flutter_tools/src/globals.dart';
 import 'package:flutter_tools/src/usage.dart';
 import 'package:test/test.dart';
 
@@ -19,16 +18,13 @@ import 'src/context.dart';
 void main() {
   group('analytics', () {
     Directory temp;
-    bool wasEnabled;
 
     setUp(() {
       Cache.flutterRoot = '../..';
-      wasEnabled = flutterUsage.enabled;
       temp = Directory.systemTemp.createTempSync('flutter_tools');
     });
 
     tearDown(() {
-      flutterUsage.enabled = wasEnabled;
       temp.deleteSync(recursive: true);
     });
 

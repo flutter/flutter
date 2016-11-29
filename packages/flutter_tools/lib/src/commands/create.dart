@@ -12,6 +12,7 @@ import '../base/common.dart';
 import '../base/utils.dart';
 import '../cache.dart';
 import '../dart/pub.dart';
+import '../doctor.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
 import '../template.dart';

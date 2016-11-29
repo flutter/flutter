@@ -9,12 +9,15 @@ import 'dart:math' as math;
 import 'android/android_device.dart';
 import 'application_package.dart';
 import 'base/common.dart';
+import 'base/context.dart';
 import 'base/os.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
 import 'globals.dart';
 import 'ios/devices.dart';
 import 'ios/simulators.dart';
+
+DeviceManager get deviceManager => context[DeviceManager];
 
 /// A class to get all available devices.
 class DeviceManager {

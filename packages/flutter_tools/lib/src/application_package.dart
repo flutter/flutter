@@ -7,6 +7,7 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 import 'package:xml/xml.dart' as xml;
 
+import 'android/android_sdk.dart';
 import 'android/gradle.dart';
 import 'base/os.dart' show os;
 import 'base/process.dart';

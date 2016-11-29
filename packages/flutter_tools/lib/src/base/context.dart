@@ -4,16 +4,11 @@
 
 import 'dart:async';
 
-final AppContext _defaultContext = new AppContext();
-
 typedef void ErrorHandler(dynamic error, StackTrace stackTrace);
 
 /// A singleton for application functionality. This singleton can be different
 /// on a per-Zone basis.
-AppContext get context {
-  AppContext currentContext = Zone.current['context'];
-  return currentContext == null ? _defaultContext : currentContext;
-}
+AppContext get context => Zone.current['context'];
 
 class AppContext {
   Map<Type, dynamic> _instances = <Type, dynamic>{};
@@ -44,18 +39,15 @@ class AppContext {
   void operator[]=(Type type, dynamic instance) => setVariable(type, instance);
 
   AppContext _calcParent(Zone zone) {
-    if (this == _defaultContext)
-      return null;
-
     Zone parentZone = zone.parent;
     if (parentZone == null)
-      return _defaultContext;
+      return null;
 
     AppContext deps = parentZone['context'];
     if (deps == this) {
       return _calcParent(parentZone);
     } else {
-      return deps != null ? deps : _defaultContext;
+      return deps;
     }
   }
 

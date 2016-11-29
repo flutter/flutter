@@ -40,6 +40,7 @@ import 'src/device.dart';
 import 'src/doctor.dart';
 import 'src/globals.dart';
 import 'src/hot.dart';
+import 'src/usage.dart';
 import 'src/runner/flutter_command_runner.dart';
 
 /// Main entry point for commands.
@@ -81,8 +82,12 @@ Future<Null> main(List<String> args) async {
     ..addCommand(new UpdatePackagesCommand(hidden: !verboseHelp))
     ..addCommand(new UpgradeCommand());
 
-  return Chain.capture/*<Future<Null>>*/(() async {
-    // Initialize globals.
+  // Construct a context.
+  AppContext _executableContext = new AppContext();
+
+  // Make the context current.
+  _executableContext.runInZone(() {
+    // Initialize the context with some defaults.
     if (context[Logger] == null)
       context[Logger] = new StdoutLogger();
     if (context[DeviceManager] == null)
@@ -94,56 +99,58 @@ Future<Null> main(List<String> args) async {
     if (context[HotRunnerConfig] == null)
       context[HotRunnerConfig] = new HotRunnerConfig();
 
-    await runner.run(args);
-    _exit(0);
-  }, onError: (dynamic error, Chain chain) {
-    if (error is UsageException) {
-      stderr.writeln(error.message);
-      stderr.writeln();
-      stderr.writeln(
-        "Run 'flutter -h' (or 'flutter <command> -h') for available "
-        "flutter commands and options."
-      );
-      // Argument error exit code.
-      _exit(64);
-    } else if (error is ToolExit) {
-      if (error.message != null)
+    return Chain.capture/*<Future<Null>>*/(() async {
+      await runner.run(args);
+      _exit(0);
+    }, onError: (dynamic error, Chain chain) {
+      if (error is UsageException) {
         stderr.writeln(error.message);
-      if (verbose) {
         stderr.writeln();
-        stderr.writeln(chain.terse.toString());
-        stderr.writeln();
-      }
-      _exit(error.exitCode ?? 1);
-    } else if (error is ProcessExit) {
-      // We've caught an exit code.
-      _exit(error.exitCode);
-    } else {
-      // We've crashed; emit a log report.
-      stderr.writeln();
-
-      flutterUsage.sendException(error, chain);
-
-      if (isRunningOnBot) {
-        // Print the stack trace on the bots - don't write a crash report.
-        stderr.writeln('$error');
-        stderr.writeln(chain.terse.toString());
-        _exit(1);
+        stderr.writeln(
+            "Run 'flutter -h' (or 'flutter <command> -h') for available "
+                "flutter commands and options."
+        );
+        // Argument error exit code.
+        _exit(64);
+      } else if (error is ToolExit) {
+        if (error.message != null)
+          stderr.writeln(error.message);
+        if (verbose) {
+          stderr.writeln();
+          stderr.writeln(chain.terse.toString());
+          stderr.writeln();
+        }
+        _exit(error.exitCode ?? 1);
+      } else if (error is ProcessExit) {
+        // We've caught an exit code.
+        _exit(error.exitCode);
       } else {
-        if (error is String)
-          stderr.writeln('Oops; flutter has exited unexpectedly: "$error".');
-        else
-          stderr.writeln('Oops; flutter has exited unexpectedly.');
+        // We've crashed; emit a log report.
+        stderr.writeln();
 
-        _createCrashReport(args, error, chain).then((File file) {
-          stderr.writeln(
-              'Crash report written to ${file.path};\n'
-              'please let us know at https://github.com/flutter/flutter/issues.'
-          );
+        flutterUsage.sendException(error, chain);
+
+        if (isRunningOnBot) {
+          // Print the stack trace on the bots - don't write a crash report.
+          stderr.writeln('$error');
+          stderr.writeln(chain.terse.toString());
           _exit(1);
-        });
+        } else {
+          if (error is String)
+            stderr.writeln('Oops; flutter has exited unexpectedly: "$error".');
+          else
+            stderr.writeln('Oops; flutter has exited unexpectedly.');
+
+          _createCrashReport(args, error, chain).then((File file) {
+            stderr.writeln(
+                'Crash report written to ${file.path};\n'
+                    'please let us know at https://github.com/flutter/flutter/issues.'
+            );
+            _exit(1);
+          });
+        }
       }
-    }
+    });
   });
 }
 

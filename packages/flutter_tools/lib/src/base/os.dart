@@ -13,11 +13,11 @@ import 'process.dart';
 
 /// Returns [OperatingSystemUtils] active in the current app context (i.e. zone).
 OperatingSystemUtils get os {
-  return context[OperatingSystemUtils] ?? (context[OperatingSystemUtils] = new OperatingSystemUtils._());
+  return context[OperatingSystemUtils] ?? (context[OperatingSystemUtils] = new OperatingSystemUtils());
 }
 
 abstract class OperatingSystemUtils {
-  factory OperatingSystemUtils._() {
+  factory OperatingSystemUtils() {
     if (Platform.isWindows) {
       return new _WindowsUtils();
     } else {
