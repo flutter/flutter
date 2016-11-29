@@ -6,7 +6,6 @@ import 'dart:io';
 
 import 'package:path/path.dart' as path;
 
-import 'base/context.dart';
 import 'base/utils.dart';
 import 'globals.dart';
 
@@ -119,11 +118,6 @@ HostPlatform getCurrentHostPlatform() {
 
 /// Returns the top-level build output directory.
 String getBuildDirectory() {
-  // TODO(johnmccutchan): Stop calling this function as part of setting
-  // up command line argument processing.
-  if (context == null)
-    return 'build';
-
   String buildDir = config.getValue('build-dir') ?? 'build';
   if (path.isAbsolute(buildDir)) {
     throw new Exception(

@@ -4,6 +4,7 @@
 
 import 'dart:io';
 
+import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/commands/analyze.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
@@ -25,6 +26,7 @@ void main() {
 
   group('analyze', () {
     testUsingContext('flutter analyze with two files with the same name', () async {
+
       File dartFileA = new File(path.join(tempDir.path, 'a.dart'));
       dartFileA.parent.createSync();
       dartFileA.writeAsStringSync('library test;');
@@ -39,6 +41,8 @@ void main() {
         expect(testLogger.statusText, startsWith('Analyzing 2 files...\nNo analyzer warnings!'));
       });
 
+    }, overrides: <Type, dynamic>{
+      OperatingSystemUtils: os
     });
   });
 }

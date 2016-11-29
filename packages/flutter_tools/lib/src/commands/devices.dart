@@ -7,7 +7,6 @@ import 'dart:async';
 import '../base/common.dart';
 import '../base/utils.dart';
 import '../device.dart';
-import '../doctor.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
 

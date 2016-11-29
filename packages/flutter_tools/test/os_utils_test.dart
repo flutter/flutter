@@ -4,8 +4,6 @@
 
 import 'dart:io';
 
-import 'src/context.dart';
-
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
@@ -22,7 +20,7 @@ void main() {
       temp.deleteSync(recursive: true);
     });
 
-    testUsingContext('makeExecutable', () async {
+    test('makeExecutable', () {
       File file = new File(path.join(temp.path, 'foo.script'));
       file.writeAsStringSync('hello world');
       os.makeExecutable(file);
@@ -33,8 +31,6 @@ void main() {
         // rwxr--r--
         expect(mode.substring(0, 3), endsWith('x'));
       }
-    }, overrides: <Type, dynamic> {
-      OperatingSystemUtils: new OperatingSystemUtils(),
     });
   });
 }
