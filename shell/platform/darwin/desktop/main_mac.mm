@@ -32,7 +32,7 @@ void AttachMessageLoopToMainRunLoop(void) {
 int main(int argc, const char* argv[]) {
   [SkyApplication sharedApplication];
 
-  shell::PlatformMacMain(argc, argv, "");
+  shell::PlatformMacMain(argc, argv, "", "");
 
   base::CommandLine& command_line = *base::CommandLine::ForCurrentProcess();
   if (command_line.HasSwitch(shell::FlagForSwitch(shell::Switch::Help))) {

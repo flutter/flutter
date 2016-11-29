@@ -58,7 +58,10 @@ class PlatformMessageResponseDarwin : public blink::PlatformMessageResponse {
 void FlutterInit(int argc, const char* argv[]) {
   NSBundle* bundle = [NSBundle bundleForClass:[FlutterViewController class]];
   NSString* icuDataPath = [bundle pathForResource:@"icudtl" ofType:@"dat"];
-  shell::PlatformMacMain(argc, argv, icuDataPath.UTF8String);
+  NSString* libraryName =
+      [[NSBundle mainBundle] objectForInfoDictionaryKey:@"FLTLibraryPath"];
+  shell::PlatformMacMain(argc, argv, icuDataPath.UTF8String,
+                         libraryName != nil ? libraryName.UTF8String : "");
 }
 
 @implementation FlutterViewController {
