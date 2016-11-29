@@ -52,7 +52,10 @@ static void RedirectIOConnectionsToSyslog() {
 
 class EmbedderState {
  public:
-  EmbedderState(int argc, const char* argv[], std::string icu_data_path) {
+  EmbedderState(int argc,
+                const char* argv[],
+                std::string icu_data_path,
+                std::string application_library_path) {
 #if TARGET_OS_IPHONE
     // This calls crashes on MacOS because we haven't run Dart_Initialize yet.
     // See https://github.com/flutter/flutter/issues/4006
@@ -90,7 +93,7 @@ class EmbedderState {
     embedder_message_loop_->Attach();
 #endif
 
-    shell::Shell::InitStandalone(icu_data_path);
+    shell::Shell::InitStandalone(icu_data_path, application_library_path);
   }
 
   ~EmbedderState() {
@@ -106,12 +109,16 @@ class EmbedderState {
   FTL_DISALLOW_COPY_AND_ASSIGN(EmbedderState);
 };
 
-void PlatformMacMain(int argc, const char* argv[], std::string icu_data_path) {
+void PlatformMacMain(int argc,
+                     const char* argv[],
+                     std::string icu_data_path,
+                     std::string application_library_path) {
   static std::unique_ptr<EmbedderState> g_embedder;
   static std::once_flag once_main;
 
   std::call_once(once_main, [&]() {
-    g_embedder = WTF::MakeUnique<EmbedderState>(argc, argv, icu_data_path);
+    g_embedder = WTF::MakeUnique<EmbedderState>(argc, argv, icu_data_path,
+                                                application_library_path);
   });
 }
 

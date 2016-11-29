@@ -107,7 +107,8 @@ Shell::Shell() {
 
 Shell::~Shell() {}
 
-void Shell::InitStandalone(std::string icu_data_path) {
+void Shell::InitStandalone(std::string icu_data_path,
+                           std::string application_library_path) {
   TRACE_EVENT0("flutter", "Shell::InitStandalone");
 
   ftl::UniqueFD icu_fd(
@@ -126,6 +127,7 @@ void Shell::InitStandalone(std::string icu_data_path) {
   base::CommandLine& command_line = *base::CommandLine::ForCurrentProcess();
 
   blink::Settings settings;
+  settings.application_library_path = application_library_path;
 
   // Enable Observatory
   settings.enable_observatory =

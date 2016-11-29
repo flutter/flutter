@@ -22,7 +22,8 @@ class Shell {
  public:
   ~Shell();
 
-  static void InitStandalone(std::string icu_data_path = "");
+  static void InitStandalone(std::string icu_data_path = "",
+                             std::string application_library_path = "");
   static void Init();
 
   static Shell& Shared();

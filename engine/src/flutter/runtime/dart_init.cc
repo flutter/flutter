@@ -399,12 +399,20 @@ void* _DartSymbolLookup(const char* symbol_name) {
     return nullptr;
   }
 
+  const char* application_library_path = kDartApplicationLibraryPath;
+  const Settings& settings = Settings::Get();
+  const std::string& application_library_path_setting =
+      settings.application_library_path;
+  if (!application_library_path_setting.empty()) {
+    application_library_path = application_library_path_setting.c_str();
+  }
+
   // First the application library is checked for the valid symbols. This
   // library may not necessarily exist. If it does exist, it is loaded and the
   // symbols resolved. Once the application library is loaded, there is
   // currently no provision to unload the same.
   void* symbol =
-      DartLookupSymbolInLibrary(symbol_name, kDartApplicationLibraryPath);
+      DartLookupSymbolInLibrary(symbol_name, application_library_path);
   if (symbol != nullptr) {
     return symbol;
   }
