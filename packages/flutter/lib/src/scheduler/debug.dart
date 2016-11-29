@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
+
+// Any changes to this file should be reflected in the debugAssertAllSchedulerVarsUnset()
+// function below.
+
 /// Print a banner at the beginning of each frame.
 ///
 /// Frames triggered by the engine and handler by the scheduler binding will
@@ -24,3 +29,21 @@ bool debugPrintBeginFrameBanner = false;
 /// Combined with [debugPrintBeginFrameBanner], this can be helpful for
 /// determining if code is running during a frame or between frames.
 bool debugPrintEndFrameBanner = false;
+
+/// Returns true if none of the scheduler library debug variables have been changed.
+///
+/// This function is used by the test framework to ensure that debug variables
+/// haven't been inadvertently changed.
+///
+/// See [https://docs.flutter.io/flutter/scheduler/scheduler-library.html] for
+/// a complete list.
+bool debugAssertAllSchedulerVarsUnset(String reason) {
+  assert(() {
+    if (debugPrintBeginFrameBanner ||
+        debugPrintEndFrameBanner) {
+      throw new FlutterError(reason);
+    }
+    return true;
+  });
+  return true;
+}
