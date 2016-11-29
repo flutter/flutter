@@ -8,8 +8,8 @@ import 'package:flutter/foundation.dart';
 import 'framework.dart';
 import 'table.dart';
 
-// WARNING: Any changes to this file should be reflected in the
-// debugAllWidgetVarsUnset() function below.
+// Any changes to this file should be reflected in the debugAllWidgetVarsUnset()
+// function below.
 
 /// Log the dirty widgets that are built each frame.
 ///
@@ -171,16 +171,23 @@ void debugWidgetBuilderValue(Widget widget, Widget built) {
   });
 }
 
-/// Returns true if none of the widget debug variables have been changed.
+/// Returns true if none of the widget library debug variables have been changed.
 ///
 /// This function is used by the test framework to ensure that debug variables
 /// haven't been inadvertently changed.
-bool debugAllWidgetVarsUnset() {
-  return !(
-    debugPrintRebuildDirtyWidgets ||
-    debugPrintBuildScope ||
-    debugPrintScheduleBuildForStacks ||
-    debugPrintGlobalKeyedWidgetLifecycle ||
-    debugProfileBuildsEnabled
-  );
+///
+/// See [https://docs.flutter.io/flutter/widgets/widgets-library.html] for
+/// a complete list.
+bool debugAllWidgetVarsUnset(String reason) {
+  assert(() {
+    if (debugPrintRebuildDirtyWidgets ||
+        debugPrintBuildScope ||
+        debugPrintScheduleBuildForStacks ||
+        debugPrintGlobalKeyedWidgetLifecycle ||
+        debugProfileBuildsEnabled) {
+      throw new FlutterError(reason);
+    }
+    return true;
+  });
+  return true;
 }

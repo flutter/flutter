@@ -7,8 +7,8 @@ import 'package:flutter/rendering.dart';
 
 export 'package:flutter/foundation.dart' show debugPrint;
 
-// WARNING: Any changes to this file should be reflected in the
-// debugAllRenderVarsUnset() function below.
+// Any changes to this file should be reflected in the debugAllRenderVarsUnset()
+// function below.
 
 const Color _kDebugPaintSizeColor = const Color(0xFF00FFFF);
 const Color _kDebugPaintSpacingColor = const Color(0x90909090);
@@ -105,31 +105,38 @@ List<String> debugDescribeTransform(Matrix4 transform) {
   return matrix;
 }
 
-/// Returns true if none of the rendering debug variables have been changed.
+/// Returns true if none of the rendering library debug variables have been changed.
 ///
 /// This function is used by the test framework to ensure that debug variables
 /// haven't been inadvertently changed.
-bool debugAllRenderVarsUnset() {
-  return !(
-      debugPaintSizeEnabled ||
-      debugPaintBaselinesEnabled ||
-      debugPaintLayerBordersEnabled ||
-      debugPaintPointersEnabled ||
-      debugRepaintRainbowEnabled ||
-      debugPrintMarkNeedsPaintStacks ||
-      debugPrintMarkNeedsLayoutStacks ||
-      debugCheckIntrinsicSizes ||
-      debugProfilePaintsEnabled ||
-      debugPaintSizeColor != _kDebugPaintSizeColor ||
-      debugPaintSpacingColor != _kDebugPaintSpacingColor ||
-      debugPaintPaddingColor != _kDebugPaintPaddingColor ||
-      debugPaintPaddingInnerEdgeColor != _kDebugPaintPaddingInnerEdgeColor ||
-      debugPaintArrowColor != _kDebugPaintArrowColor ||
-      debugPaintAlphabeticBaselineColor != _kDebugPaintAlphabeticBaselineColor ||
-      debugPaintIdeographicBaselineColor != _kDebugPaintIdeographicBaselineColor ||
-      debugPaintLayerBordersColor != _kDebugPaintLayerBordersColor ||
-      debugPaintPointersColorValue != _kDebugPaintPointersColorValue ||
-      debugCurrentRepaintColor != _kDebugCurrentRepaintColor ||
-      debugRepaintRainbowHueIncrement != _kDebugRepaintRainbowHueIncrement
-    );
+///
+/// See [https://docs.flutter.io/flutter/rendering/rendering-library.html] for
+/// a complete list.
+bool debugAllRenderVarsUnset(String reason) {
+  assert(() {
+    if (debugPaintSizeEnabled ||
+        debugPaintBaselinesEnabled ||
+        debugPaintLayerBordersEnabled ||
+        debugPaintPointersEnabled ||
+        debugRepaintRainbowEnabled ||
+        debugPrintMarkNeedsPaintStacks ||
+        debugPrintMarkNeedsLayoutStacks ||
+        debugCheckIntrinsicSizes ||
+        debugProfilePaintsEnabled ||
+        debugPaintSizeColor != _kDebugPaintSizeColor ||
+        debugPaintSpacingColor != _kDebugPaintSpacingColor ||
+        debugPaintPaddingColor != _kDebugPaintPaddingColor ||
+        debugPaintPaddingInnerEdgeColor != _kDebugPaintPaddingInnerEdgeColor ||
+        debugPaintArrowColor != _kDebugPaintArrowColor ||
+        debugPaintAlphabeticBaselineColor != _kDebugPaintAlphabeticBaselineColor ||
+        debugPaintIdeographicBaselineColor != _kDebugPaintIdeographicBaselineColor ||
+        debugPaintLayerBordersColor != _kDebugPaintLayerBordersColor ||
+        debugPaintPointersColorValue != _kDebugPaintPointersColorValue ||
+        debugCurrentRepaintColor != _kDebugCurrentRepaintColor ||
+        debugRepaintRainbowHueIncrement != _kDebugRepaintRainbowHueIncrement) {
+      throw new FlutterError(reason);
+    }
+    return true;
+  });
+  return true;
 }
