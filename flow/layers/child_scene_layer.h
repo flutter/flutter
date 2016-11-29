@@ -27,7 +27,7 @@ class ChildSceneLayer : public Layer {
 
   void set_scene_token(uint32_t scene_token) { scene_token_ = scene_token; }
 
-  void set_hittable(bool hittable) { hittable_ = hittable; }
+  void set_hit_testable(bool hit_testable) { hit_testable_ = hit_testable; }
 
   void Preroll(PrerollContext* context, const SkMatrix& matrix) override;
   void Paint(PaintContext& context) override;
@@ -39,7 +39,7 @@ class ChildSceneLayer : public Layer {
   float device_pixel_ratio_ = 1.0;
   SkISize physical_size_;
   uint32_t scene_token_ = 0;
-  bool hittable_ = true;
+  bool hit_testable_ = true;
   SkMatrix transform_;
 
   FTL_DISALLOW_COPY_AND_ASSIGN(ChildSceneLayer);

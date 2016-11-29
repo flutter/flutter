@@ -60,7 +60,7 @@ class SceneBuilder : public ftl::RefCountedThreadSafe<SceneBuilder>,
                      int physicalWidth,
                      int physicalHeight,
                      uint32_t sceneToken,
-                     bool hittable);
+                     bool hitTestable);
 
   void setRasterizerTracingThreshold(uint32_t frameInterval);
 

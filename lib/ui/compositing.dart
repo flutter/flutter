@@ -197,7 +197,7 @@ class SceneBuilder extends NativeFieldWrapperClass2 {
     int physicalWidth: 0,
     int physicalHeight: 0,
     int sceneToken,
-    bool hittable: true,
+    bool hitTestable: true,
   }) {
     _addChildScene(offset.dx,
                    offset.dy,
@@ -205,7 +205,7 @@ class SceneBuilder extends NativeFieldWrapperClass2 {
                    physicalWidth,
                    physicalHeight,
                    sceneToken,
-                   hittable);
+                   hitTestable);
   }
   void _addChildScene(double dx,
                       double dy,
@@ -213,7 +213,7 @@ class SceneBuilder extends NativeFieldWrapperClass2 {
                       int physicalWidth,
                       int physicalHeight,
                       int sceneToken,
-                      bool hittable) native "SceneBuilder_addChildScene";
+                      bool hitTestable) native "SceneBuilder_addChildScene";
 
   /// Sets a threshold after which additional debugging information should be recorded.
   ///

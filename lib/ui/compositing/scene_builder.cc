@@ -204,7 +204,7 @@ void SceneBuilder::addChildScene(double dx,
                                  int physicalWidth,
                                  int physicalHeight,
                                  uint32_t sceneToken,
-                                 bool hittable) {
+                                 bool hitTestable) {
 #if defined(OS_FUCHSIA)
   if (!m_currentLayer)
     return;
@@ -219,7 +219,7 @@ void SceneBuilder::addChildScene(double dx,
   layer->set_device_pixel_ratio(devicePixelRatio);
   layer->set_physical_size(SkISize::Make(physicalWidth, physicalHeight));
   layer->set_scene_token(sceneToken);
-  layer->set_hittable(hittable);
+  layer->set_hit_testable(hitTestable);
   m_currentLayer->Add(std::move(layer));
 #endif
 }
