@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// WARNING: Any changes to this file should be reflected in the
+// debugAllSchedulerVarsUnset() function below.
+
 /// Print a banner at the beginning of each frame.
 ///
 /// Frames triggered by the engine and handler by the scheduler binding will
@@ -24,3 +27,14 @@ bool debugPrintBeginFrameBanner = false;
 /// Combined with [debugPrintBeginFrameBanner], this can be helpful for
 /// determining if code is running during a frame or between frames.
 bool debugPrintEndFrameBanner = false;
+
+/// Returns true if none of the scheduler debug variables have been changed.
+///
+/// This function is used by the test framework to ensure that debug variables
+/// haven't been inadvertently changed.
+bool debugAllSchedulerVarsUnset() {
+  return !(
+      debugPrintBeginFrameBanner ||
+      debugPrintEndFrameBanner
+  );
+}
