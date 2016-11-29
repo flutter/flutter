@@ -7,6 +7,7 @@
 #include <thread>
 #include <utility>
 
+#include "apps/tracing/lib/trace/provider.h"
 #include "flutter/common/settings.h"
 #include "flutter/common/threads.h"
 #include "flutter/runtime/runtime_init.h"
@@ -28,7 +29,7 @@ void QuitMessageLoop() {
 App::App() {
   context_ = modular::ApplicationContext::CreateFromStartupInfo();
 
-  // TODO(abarth): Initialize tracing.
+  tracing::InitializeTracer(context_.get(), {});
 
   ftl::RefPtr<ftl::TaskRunner> gpu_task_runner;
   gpu_thread_ = mtl::CreateThread(&gpu_task_runner);

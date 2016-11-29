@@ -21,12 +21,13 @@ executable("content_handler") {
 
   deps = [
     "//apps/modular/lib/app",
+    "//apps/mozart/lib/skia:vmo",
     "//apps/mozart/services/buffers",
     "//apps/mozart/services/buffers/cpp",
     "//apps/mozart/services/composition",
     "//apps/mozart/services/input",
     "//apps/mozart/services/views",
-    "//apps/mozart/lib/skia:vmo",
+    "//apps/tracing/lib/trace:provider",
     "//dart/runtime/vm:libdart_platform",
     "//dart/runtime:libdart",
     "//flutter/assets",
