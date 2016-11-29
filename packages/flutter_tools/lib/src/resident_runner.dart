@@ -91,14 +91,25 @@ abstract class ResidentRunner {
       return;
     if (!supportsRestart)
       return;
-    ProcessSignal.SIGUSR1.watch().listen((ProcessSignal signal) async {
-      printStatus('Caught SIGUSR1');
-      await restart(fullRestart: false);
-    });
-    ProcessSignal.SIGUSR2.watch().listen((ProcessSignal signal) async {
-      printStatus('Caught SIGUSR2');
-      await restart(fullRestart: true);
-    });
+    ProcessSignal.SIGUSR1.watch().listen(_handleSignal);
+    ProcessSignal.SIGUSR2.watch().listen(_handleSignal);
+  }
+
+  bool _processingSignal = false;
+  Future<Null> _handleSignal(ProcessSignal signal) async {
+    if (_processingSignal) {
+      printTrace('Ignoring signal: "$signal" because we are busy.');
+      return;
+    }
+    _processingSignal = true;
+
+    final bool fullRestart = signal == ProcessSignal.SIGUSR2;
+
+    try {
+      await restart(fullRestart: fullRestart);
+    } finally {
+      _processingSignal = false;
+    }
   }
 
   Future<Null> startEchoingDeviceLog(ApplicationPackage app) async {
