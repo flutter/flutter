@@ -7,7 +7,7 @@ import 'package:flutter/rendering.dart';
 
 export 'package:flutter/foundation.dart' show debugPrint;
 
-// Any changes to this file should be reflected in the debugAllRenderVarsUnset()
+// Any changes to this file should be reflected in the debugAssertAllRenderVarsUnset()
 // function below.
 
 const Color _kDebugPaintSizeColor = const Color(0xFF00FFFF);
@@ -112,7 +112,7 @@ List<String> debugDescribeTransform(Matrix4 transform) {
 ///
 /// See [https://docs.flutter.io/flutter/rendering/rendering-library.html] for
 /// a complete list.
-bool debugAllRenderVarsUnset(String reason) {
+bool debugAssertAllRenderVarsUnset(String reason) {
   assert(() {
     if (debugPaintSizeEnabled ||
         debugPaintBaselinesEnabled ||

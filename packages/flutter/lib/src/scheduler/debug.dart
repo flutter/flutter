@@ -4,7 +4,7 @@
 
 import 'package:flutter/foundation.dart';
 
-// Any changes to this file should be reflected in the debugAllSchedulerVarsUnset()
+// Any changes to this file should be reflected in the debugAssertAllSchedulerVarsUnset()
 // function below.
 
 /// Print a banner at the beginning of each frame.
@@ -37,7 +37,7 @@ bool debugPrintEndFrameBanner = false;
 ///
 /// See [https://docs.flutter.io/flutter/scheduler/scheduler-library.html] for
 /// a complete list.
-bool debugAllSchedulerVarsUnset(String reason) {
+bool debugAssertAllSchedulerVarsUnset(String reason) {
   assert(() {
     if (debugPrintBeginFrameBanner ||
         debugPrintEndFrameBanner) {

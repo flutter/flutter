@@ -8,7 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'framework.dart';
 import 'table.dart';
 
-// Any changes to this file should be reflected in the debugAllWidgetVarsUnset()
+// Any changes to this file should be reflected in the debugAssertAllWidgetVarsUnset()
 // function below.
 
 /// Log the dirty widgets that are built each frame.
@@ -178,7 +178,7 @@ void debugWidgetBuilderValue(Widget widget, Widget built) {
 ///
 /// See [https://docs.flutter.io/flutter/widgets/widgets-library.html] for
 /// a complete list.
-bool debugAllWidgetVarsUnset(String reason) {
+bool debugAssertAllWidgetVarsUnset(String reason) {
   assert(() {
     if (debugPrintRebuildDirtyWidgets ||
         debugPrintBuildScope ||
