@@ -28,8 +28,15 @@ const List<String> _kRequiredOptions = const <String>[
   _kOptionWorking,
 ];
 
-Future<Null> main(List<String> args) async {
-  context[Logger] = new StdoutLogger();
+void main(List<String> args) async {
+  AppContext executableContext = new AppContext();
+  executableContext.runInZone(() {
+    context[Logger] = new StdoutLogger();
+    return run(args);
+  });
+}
+
+Future<Null> run(List<String> args) async {
   final ArgParser parser = new ArgParser()
     ..addOption(_kOptionPackages, help: 'The .packages file')
     ..addOption(_kOptionOutput, help: 'The generated flx file')
