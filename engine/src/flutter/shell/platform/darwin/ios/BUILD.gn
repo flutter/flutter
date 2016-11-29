@@ -53,6 +53,7 @@ shared_library("flutter_framework_dylib") {
   deps = [
     "//base:base",
     "//dart/runtime:libdart",
+    "//flutter/flow",
     "//flutter/glue",
     "//flutter/lib/ui",
     "//flutter/shell/common",
