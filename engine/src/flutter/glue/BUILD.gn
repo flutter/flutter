@@ -16,6 +16,10 @@ source_set("glue") {
     sources += [
       "stack_trace_fuchsia.cc",
     ]
+
+    public_deps = [
+      "//apps/tracing/lib/trace",
+    ]
   } else {
     sources += [
       "stack_trace_base.cc",
