@@ -345,8 +345,6 @@ class _RecipePageState extends State<RecipePage> {
   // adjusts based on the size of the screen. If the recipe sheet touches
   // the edge of the screen, use a slightly different layout.
   Widget _buildBody(BuildContext context) {
-    debugPaintSizeEnabled = false;
-    debugPaintPointersEnabled = true;
     final bool isFavorite = _favoriteRecipes.contains(config.recipe);
     final Size screenSize = MediaQuery.of(context).size;
     final bool fullWidth = (screenSize.width < _kRecipePageMaxWidth);
