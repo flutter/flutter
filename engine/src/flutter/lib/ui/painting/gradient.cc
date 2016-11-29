@@ -60,7 +60,7 @@ void CanvasGradient::initRadial(double center_x,
                                 const tonic::Int32List& colors,
                                 const tonic::Float32List& color_stops,
                                 SkShader::TileMode tile_mode) {
-  FTL_DCHECK(colors.num_elements() * 2 == color_stops.num_elements() ||
+  FTL_DCHECK(colors.num_elements() == color_stops.num_elements() ||
              color_stops.data() == nullptr);
 
   static_assert(sizeof(SkColor) == sizeof(int32_t),
