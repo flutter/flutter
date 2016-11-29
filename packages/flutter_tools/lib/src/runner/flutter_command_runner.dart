@@ -15,10 +15,8 @@ import '../base/logger.dart';
 import '../base/process.dart';
 import '../cache.dart';
 import '../dart/package_map.dart';
-import '../device.dart';
 import '../globals.dart';
 import '../toolchain.dart';
-import '../usage.dart';
 import '../version.dart';
 
 const String kFlutterRootEnvironmentVariableName = 'FLUTTER_ROOT'; // should point to //flutter/ (root of flutter/flutter repo)
