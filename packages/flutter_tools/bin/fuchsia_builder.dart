@@ -28,7 +28,7 @@ const List<String> _kRequiredOptions = const <String>[
   _kOptionWorking,
 ];
 
-void main(List<String> args) async {
+void main(List<String> args) {
   AppContext executableContext = new AppContext();
   executableContext.runInZone(() {
     context[Logger] = new StdoutLogger();
