@@ -58,6 +58,7 @@ Thumbs.db
 /third_party/rapidjson/
 /third_party/requests/src/
 /third_party/robolectric/lib/
+/third_party/root_certificates/
 /third_party/skia/
 /third_party/vulkan/
 /third_party/yasm/binaries/
