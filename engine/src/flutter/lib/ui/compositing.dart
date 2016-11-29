@@ -197,7 +197,7 @@ class SceneBuilder extends NativeFieldWrapperClass2 {
     int physicalWidth: 0,
     int physicalHeight: 0,
     int sceneToken,
-    bool hitTestable: true,
+    bool hitTestable: true
   }) {
     _addChildScene(offset.dx,
                    offset.dy,
