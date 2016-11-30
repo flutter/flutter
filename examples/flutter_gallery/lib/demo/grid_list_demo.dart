@@ -239,7 +239,6 @@ class GridListDemo extends StatefulWidget {
 }
 
 class GridListDemoState extends State<GridListDemo> {
-  static final GlobalKey<ScrollableState> _scrollableKey = new GlobalKey<ScrollableState>();
   GridDemoTileStyle _tileStyle = GridDemoTileStyle.twoLine;
 
   List<Photo> photos = <Photo>[
@@ -318,7 +317,6 @@ class GridListDemoState extends State<GridListDemo> {
   Widget build(BuildContext context) {
     final Orientation orientation = MediaQuery.of(context).orientation;
     return new Scaffold(
-      scrollableKey: _scrollableKey,
       appBar: new AppBar(
         title: new Text('Grid list'),
         actions: <Widget>[
@@ -345,7 +343,6 @@ class GridListDemoState extends State<GridListDemo> {
         children: <Widget>[
           new Expanded(
             child: new ScrollableGrid(
-              scrollableKey: _scrollableKey,
               delegate: new FixedColumnCountGridDelegate(
                 columnCount: (orientation == Orientation.portrait) ? 2 : 3,
                 rowSpacing: 4.0,

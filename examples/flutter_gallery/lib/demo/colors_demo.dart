@@ -9,7 +9,6 @@ const double kColorItemHeight = 48.0;
 class ColorSwatch {
   ColorSwatch({ this.name, this.colors, this.accentColors, this.threshold: 900});
 
-  final GlobalKey<ScrollableState> scrollableKey = new GlobalKey<ScrollableState>();
   final String name;
   final Map<int, Color> colors;
   final Map<int, Color> accentColors;
@@ -102,7 +101,6 @@ class ColorSwatchTabView extends StatelessWidget {
     }
 
     return new ScrollableList(
-      scrollableKey: swatch.scrollableKey,
       itemExtent: kColorItemHeight,
       children: colorItems
     );
@@ -119,26 +117,11 @@ class ColorsDemo extends StatefulWidget {
 }
 
 class _ColorsDemoState extends State<ColorsDemo> {
-
-  ColorSwatch _selectedSwatch;
-
-  @override
-  void initState() {
-    super.initState();
-    _selectedSwatch = colorSwatches.first;
-  }
-
   @override
   Widget build(BuildContext context) {
     return new TabBarSelection<ColorSwatch>(
       values: colorSwatches,
-      onChanged: (ColorSwatch value) {
-        setState(() {
-          _selectedSwatch = value;
-       });
-      },
       child: new Scaffold(
-        scrollableKey: _selectedSwatch.scrollableKey,
         appBar: new AppBar(
           elevation: 0,
           title: new Text('Colors'),
