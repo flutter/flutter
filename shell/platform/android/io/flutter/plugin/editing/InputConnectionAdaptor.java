@@ -24,12 +24,14 @@ class InputConnectionAdaptor extends BaseInputConnection {
 
     private FlutterView mView;
     private int mClient;
+    private TextInputPlugin mPlugin;
     private JSONObject mOutgoingState;
 
-    public InputConnectionAdaptor(FlutterView view, int client) {
+    public InputConnectionAdaptor(FlutterView view, int client, TextInputPlugin plugin) {
         super(view, true);
         mView = view;
         mClient = client;
+        mPlugin = plugin;
         mOutgoingState = new JSONObject();
     }
 
@@ -49,6 +51,8 @@ class InputConnectionAdaptor extends BaseInputConnection {
             message.put("method", "TextInputClient.updateEditingState");
             message.put("args", args);
             mView.sendPlatformMessage(MESSAGE_NAME, message.toString(), null);
+
+            mPlugin.setLatestEditingState(mOutgoingState);
         } catch (JSONException e) {
             Log.e(TAG, "Unexpected error serializing editing state", e);
         }

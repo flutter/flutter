@@ -30,7 +30,7 @@ public class TextInputPlugin extends JSONMessageListener {
     private final Activity mActivity;
     private int mClient = 0;
     private JSONObject mConfiguration;
-    private JSONObject mIncomingState;
+    private JSONObject mLatestState;
 
     public TextInputPlugin(Activity activity) {
         mActivity = activity;
@@ -74,15 +74,15 @@ public class TextInputPlugin extends JSONMessageListener {
             outAttrs.inputType = inputTypeFromTextInputType(mConfiguration.getString("inputType"));
             outAttrs.actionLabel = getStringOrNull(mConfiguration, "actionLabel");
             outAttrs.imeOptions = EditorInfo.IME_ACTION_DONE | EditorInfo.IME_FLAG_NO_FULLSCREEN;
-            InputConnectionAdaptor connection = new InputConnectionAdaptor(view, mClient);
-            if (mIncomingState != null) {
-                outAttrs.initialSelStart = mIncomingState.getInt("selectionBase");
-                outAttrs.initialSelEnd = mIncomingState.getInt("selectionExtent");
-                connection.getEditable().append(mIncomingState.getString("text"));
-                connection.setSelection(mIncomingState.getInt("selectionBase"),
-                                        mIncomingState.getInt("selectionExtent"));
-                connection.setComposingRegion(mIncomingState.getInt("composingBase"),
-                                              mIncomingState.getInt("composingExtent"));
+            InputConnectionAdaptor connection = new InputConnectionAdaptor(view, mClient, this);
+            if (mLatestState != null) {
+                outAttrs.initialSelStart = mLatestState.getInt("selectionBase");
+                outAttrs.initialSelEnd = mLatestState.getInt("selectionExtent");
+                connection.getEditable().append(mLatestState.getString("text"));
+                connection.setSelection(mLatestState.getInt("selectionBase"),
+                                        mLatestState.getInt("selectionExtent"));
+                connection.setComposingRegion(mLatestState.getInt("composingBase"),
+                                              mLatestState.getInt("composingExtent"));
             } else {
                 outAttrs.initialSelStart = 0;
                 outAttrs.initialSelEnd = 0;
@@ -107,7 +107,7 @@ public class TextInputPlugin extends JSONMessageListener {
     }
 
     private void setTextInputClient(FlutterView view, int client, JSONObject configuration) throws JSONException {
-        mIncomingState = null;
+        mLatestState = null;
         mClient = client;
         mConfiguration = configuration;
         InputMethodManager imm =
@@ -116,12 +116,16 @@ public class TextInputPlugin extends JSONMessageListener {
     }
 
     private void setTextInputEditingState(FlutterView view, JSONObject state) throws JSONException {
-        mIncomingState = state;
+        mLatestState = state;
         InputMethodManager imm =
                 (InputMethodManager) mActivity.getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.restartInput(view);
     }
 
+    void setLatestEditingState(JSONObject state) {
+        mLatestState = state;
+    }
+    
     private void clearTextInputClient() {
         mClient = 0;
     }
