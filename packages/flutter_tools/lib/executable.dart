@@ -96,6 +96,10 @@ Future<Null> main(List<String> args) async {
   // Make the context current.
   _executableContext.runInZone(() {
     // Initialize the context with some defaults.
+    // NOTE: Similar lists also exist in `bin/fuchsia_builder.dart` and
+    // `test/src/context.dart`. If you update this list of defaults, look
+    // in those locations as well to see if you need a similar update there.
+
     // Seed these context entries first since others depend on them
     context.putIfAbsent(ProcessManager, () => new ProcessManager());
     context.putIfAbsent(Logger, () => new StdoutLogger());
