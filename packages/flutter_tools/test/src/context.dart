@@ -28,17 +28,14 @@ BufferLogger get testLogger => context[Logger];
 MockDeviceManager get testDeviceManager => context[DeviceManager];
 MockDoctor get testDoctor => context[Doctor];
 
+typedef dynamic Generator();
+
 void testUsingContext(String description, dynamic testMethod(), {
   Timeout timeout,
-  Map<Type, dynamic> overrides: const <Type, dynamic>{}
+  Map<Type, Generator> overrides: const <Type, Generator>{}
 }) {
   test(description, () async {
     AppContext testContext = new AppContext();
-
-    // Apply all overrides to the test context.
-    overrides.forEach((Type type, dynamic value) {
-      testContext.setVariable(type, value);
-    });
 
     // Initialize the test context with some default mocks.
     // Seed these context entries first since others depend on them
@@ -68,7 +65,15 @@ void testUsingContext(String description, dynamic testMethod(), {
     testContext.putIfAbsent(Usage, () => new MockUsage());
 
     try {
-      return await testContext.runInZone(testMethod);
+      return await testContext.runInZone(() {
+        // Apply the overrides to the test context in the zone since their
+        // instantiation may reference items already stored on the context.
+        overrides.forEach((Type type, dynamic value()) {
+          context.setVariable(type, value());
+        });
+
+        return testMethod();
+      });
     } catch (error) {
       if (testContext[Logger] is BufferLogger) {
         BufferLogger bufferLogger = testContext[Logger];

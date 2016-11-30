@@ -49,8 +49,8 @@ void main() {
       runner = createTestCommandRunner(doctorCommand);
       await runner.run(<String>['doctor']);
       expect(count, 0);
-    }, overrides: <Type, dynamic>{
-      Usage: new Usage()
+    }, overrides: <Type, Generator>{
+      Usage: () => new Usage(),
     });
 
     // Ensure we con't send for the 'flutter config' command.
@@ -67,8 +67,8 @@ void main() {
       flutterUsage.enabled = true;
       await runner.run(<String>['config']);
       expect(count, 0);
-    }, overrides: <Type, dynamic>{
-      Usage: new Usage()
+    }, overrides: <Type, Generator>{
+      Usage: () => new Usage(),
     });
   });
 
@@ -79,8 +79,11 @@ void main() {
 
       await createTestCommandRunner().run(<String>['--version']);
       expect(count, 0);
-    }, overrides: <Type, dynamic>{
-      Usage: new Usage(settingsName: 'flutter_bot_test', versionOverride: 'dev/unknown')
+    }, overrides: <Type, Generator>{
+      Usage: () => new Usage(
+        settingsName: 'flutter_bot_test',
+        versionOverride: 'dev/unknown',
+      ),
     });
   });
 }
