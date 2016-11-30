@@ -126,18 +126,15 @@ class TravelDestinationItem extends StatelessWidget {
 }
 
 class CardsDemo extends StatelessWidget {
-  static final GlobalKey<ScrollableState> _scrollableKey = new GlobalKey<ScrollableState>();
   static const String routeName = '/cards';
 
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
-      scrollableKey: _scrollableKey,
       appBar: new AppBar(
         title: new Text('Travel stream')
       ),
       body: new ScrollableList(
-        scrollableKey: _scrollableKey,
         itemExtent: TravelDestinationItem.height,
         padding: const EdgeInsets.only(top: 8.0, left: 8.0, right: 8.0),
         children: destinations.map((TravelDestination destination) {

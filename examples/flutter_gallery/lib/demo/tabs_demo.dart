@@ -121,23 +121,10 @@ class TabsDemo extends StatefulWidget {
 }
 
 class _TabsDemoState extends State<TabsDemo> {
-  _Page _selectedPage;
-
-  @override
-  void initState() {
-    super.initState();
-    _selectedPage = _allPages.keys.first;
-  }
-
   @override
   Widget build(BuildContext context) {
     return new TabBarSelection<_Page>(
       values: _allPages.keys.toList(),
-      onChanged: (_Page value) {
-        setState(() {
-          _selectedPage = value;
-       });
-      },
       child: new Scaffold(
         appBar: new AppBar(
           title: new Text('Tabs and scrolling'),
