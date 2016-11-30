@@ -384,7 +384,7 @@ class Scaffold extends StatefulWidget {
 
   /// The color of the [Material] widget that underlies the entire Scaffold.
   ///
-  /// The theme's scaffoldBackgroundColor by default, see [ThemeData.scaffoldBackgroundColor].
+  /// The theme's [ThemeData.scaffoldBackgroundColor] by default.
   final Color backgroundColor;
 
   /// A bottom navigation bar to display at the bottom of the scaffold.
