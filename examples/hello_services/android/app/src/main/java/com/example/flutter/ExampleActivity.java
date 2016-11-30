@@ -76,20 +76,6 @@ public class ExampleActivity extends Activity {
         flutterView.onPostResume();
     }
 
-    @Override
-    protected void onNewIntent(Intent intent) {
-        // Reload the Flutter Dart code when the activity receives an intent
-        // from the "flutter refresh" command.
-        // This feature should only be enabled during development.  Use the
-        // debuggable flag as an indicator that we are in development mode.
-        if ((getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
-            if (Intent.ACTION_RUN.equals(intent.getAction())) {
-                flutterView.runFromBundle(intent.getDataString(),
-                                          intent.getStringExtra("snapshot"));
-            }
-        }
-    }
-
     private void sendGetRandom() {
         JSONObject message = new JSONObject();
         try {
