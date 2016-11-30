@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 class TravelDestination {
   const TravelDestination({ this.assetName, this.title, this.description });
@@ -83,7 +82,7 @@ class TravelDestinationItem extends StatelessWidget {
               )
             ),
             // description and share/expore buttons
-            new Flexible(
+            new Expanded(
               child: new Padding(
                 padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 0.0),
                 child: new DefaultTextStyle(

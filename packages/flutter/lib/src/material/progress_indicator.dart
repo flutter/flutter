@@ -333,7 +333,7 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator> w
     return new Container(
       constraints: new BoxConstraints(
         minWidth: _kMinCircularProgressIndicatorSize,
-        minHeight: _kMinCircularProgressIndicatorSize
+        minHeight: _kMinCircularProgressIndicatorSize,
       ),
       child: new CustomPaint(
         painter: new _CircularProgressIndicatorPainter(

@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 class TextStyleItem extends StatelessWidget {
   TextStyleItem({ Key key, this.name, this.style, this.text }) : super(key: key) {
@@ -29,7 +28,7 @@ class TextStyleItem extends StatelessWidget {
             width: 72.0,
             child: new Text(name, style: nameStyle)
           ),
-          new Flexible(
+          new Expanded(
             child: new Text(text, style: style.copyWith(height: 1.0))
           )
         ]

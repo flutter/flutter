@@ -7,8 +7,9 @@ import 'dart:math' as math;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 
+final List<String> menuItems = <String>['one', 'two', 'three', 'four'];
+
 Widget buildFrame({ Key buttonKey, String value: 'two',  ValueChanged<String> onChanged, bool isDense: false }) {
-  final List<String> items = <String>['one', 'two', 'three', 'four'];
   return new MaterialApp(
     home: new Material(
       child: new Center(
@@ -17,7 +18,7 @@ Widget buildFrame({ Key buttonKey, String value: 'two',  ValueChanged<String> on
           value: value,
           onChanged: onChanged,
           isDense: isDense,
-          items: items.map((String item) {
+          items: menuItems.map((String item) {
             return new DropdownMenuItem<String>(
               key: new ValueKey<String>(item),
               value: item,
@@ -265,4 +266,55 @@ void main() {
     // should have the same size and location.
     checkSelectedItemTextGeometry(tester, 'two');
   });
+
+  testWidgets('Size of DropdownButton with null value', (WidgetTester tester) async {
+    Key buttonKey = new UniqueKey();
+    String value;
+
+    Widget build() => buildFrame(buttonKey: buttonKey, value: value);
+
+    await tester.pumpWidget(build());
+    RenderBox buttonBoxNullValue = tester.renderObject(find.byKey(buttonKey));
+    assert(buttonBoxNullValue.attached);
+
+
+    value = 'three';
+    await tester.pumpWidget(build());
+    RenderBox buttonBox = tester.renderObject(find.byKey(buttonKey));
+    assert(buttonBox.attached);
+
+    // A DropDown button with a null value should be the same size as a
+    // one with a non-null value.
+    expect(buttonBox.localToGlobal(Point.origin), equals(buttonBoxNullValue.localToGlobal(Point.origin)));
+    expect(buttonBox.size, equals(buttonBoxNullValue.size));
+  });
+
+  testWidgets('Layout of a DropdownButton with null value', (WidgetTester tester) async {
+    Key buttonKey = new UniqueKey();
+    String value;
+
+    void onChanged(String newValue) {
+      value = newValue;
+    }
+
+    Widget build() => buildFrame(buttonKey: buttonKey, value: value, onChanged: onChanged);
+
+    await tester.pumpWidget(build());
+    RenderBox buttonBox = tester.renderObject(find.byKey(buttonKey));
+    assert(buttonBox.attached);
+
+    // Show the menu.
+    await tester.tap(find.byKey(buttonKey));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1)); // finish the menu animation
+
+    // Tap on item 'one', which must appear over the button.
+    await tester.tap(find.byKey(buttonKey));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1)); // finish the menu animation
+
+    await tester.pumpWidget(build());
+    expect(value, equals('one'));
+  });
+
 }

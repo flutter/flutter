@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 import 'drawer.dart';
 import 'item.dart';
@@ -80,6 +79,7 @@ class GalleryHome extends StatefulWidget {
     this.checkerboardRasterCacheImages,
     this.onCheckerboardRasterCacheImagesChanged,
     this.onPlatformChanged,
+    this.onSendFeedback,
   }) : super(key: key) {
     assert(onThemeChanged != null);
     assert(onTimeDilationChanged != null);
@@ -98,6 +98,8 @@ class GalleryHome extends StatefulWidget {
   final ValueChanged<bool> onCheckerboardRasterCacheImagesChanged;
 
   final ValueChanged<TargetPlatform> onPlatformChanged;
+
+  final VoidCallback onSendFeedback;
 
   @override
   GalleryHomeState createState() => new GalleryHomeState();
@@ -165,6 +167,7 @@ class GalleryHomeState extends State<GalleryHome> with SingleTickerProviderState
         checkerboardRasterCacheImages: config.checkerboardRasterCacheImages,
         onCheckerboardRasterCacheImagesChanged: config.onCheckerboardRasterCacheImagesChanged,
         onPlatformChanged: config.onPlatformChanged,
+        onSendFeedback: config.onSendFeedback,
       ),
       appBar: new AppBar(
         expandedHeight: _kFlexibleSpaceMaxHeight,

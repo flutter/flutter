@@ -48,7 +48,7 @@ class DaemonCommand extends FlutterCommand {
 
     AppContext appContext = new AppContext();
     NotifyingLogger notifyingLogger = new NotifyingLogger();
-    appContext[Logger] = notifyingLogger;
+    appContext.setVariable(Logger, notifyingLogger);
 
     Cache.releaseLockEarly();
 
@@ -58,8 +58,8 @@ class DaemonCommand extends FlutterCommand {
           daemonCommand: this, notifyingLogger: notifyingLogger);
 
       int code = await daemon.onExit;
-      if (code != null)
-        throwToolExit(null, exitCode: code);
+      if (code != 0)
+        throwToolExit('Daemon exited with non-zero exit code: $code', exitCode: code);
     }, onError: _handleError);
   }
 
@@ -358,7 +358,10 @@ class AppDomain extends Domain {
     if (options.debuggingEnabled) {
       connectionInfoCompleter = new Completer<DebugConnectionInfo>();
       connectionInfoCompleter.future.then((DebugConnectionInfo info) {
-        Map<String, dynamic> params = <String, dynamic>{ 'port': info.port };
+        Map<String, dynamic> params = <String, dynamic>{
+          'port': info.port,
+          'wsUri': info.wsUri
+        };
         if (info.baseUri != null)
           params['baseUri'] = info.baseUri;
         _sendAppEvent(app, 'debugPort', params);
@@ -671,7 +674,7 @@ class AppInstance {
       _logger = new _AppRunLogger(domain, this);
 
     AppContext appContext = new AppContext();
-    appContext[Logger] = _logger;
+    appContext.setVariable(Logger, _logger);
     return appContext.runInZone(method);
   }
 }

@@ -11,6 +11,7 @@ import '../base/os.dart';
 import '../base/process.dart';
 import '../build_info.dart';
 import '../device.dart';
+import '../doctor.dart';
 import '../globals.dart';
 import '../protocol_discovery.dart';
 import 'mac.dart';
@@ -198,6 +199,9 @@ class IOSDevice extends Device {
         printError('');
         return new LaunchResult.failed();
       }
+    } else {
+      if (!installApp(app))
+        return new LaunchResult.failed();
     }
 
     // Step 2: Check that the application exists at the specified path.

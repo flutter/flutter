@@ -17,6 +17,7 @@ class PestoDemo extends StatelessWidget {
 const String _kSmallLogoImage = 'packages/flutter_gallery_assets/pesto/logo_small.png';
 const String _kMediumLogoImage = 'packages/flutter_gallery_assets/pesto/logo_medium.png';
 const double _kAppBarHeight = 128.0;
+const double _kFabHalfSize = 28.0;  // TODO(mpcomplete): needs to adapt to screen size
 const double _kRecipePageMaxWidth = 500.0;
 
 final Set<Recipe> _favoriteRecipes = new Set<Recipe>();
@@ -24,7 +25,7 @@ final Set<Recipe> _favoriteRecipes = new Set<Recipe>();
 final ThemeData _kTheme = new ThemeData(
   brightness: Brightness.light,
   primarySwatch: Colors.teal,
-  accentColor: Colors.redAccent[200]
+  accentColor: Colors.redAccent[200],
 );
 
 class PestoHome extends StatelessWidget {
@@ -87,21 +88,21 @@ class _RecipeGridPageState extends State<RecipeGridPage> {
         key: scaffoldKey,
         scrollableKey: config.scrollableKey,
         appBarBehavior: AppBarBehavior.under,
-        appBar: buildAppBar(context, statusBarHeight),
+        appBar: _buildAppBar(context, statusBarHeight),
         floatingActionButton: new FloatingActionButton(
           child: new Icon(Icons.edit),
           onPressed: () {
             scaffoldKey.currentState.showSnackBar(new SnackBar(
               content: new Text('Not supported.')
             ));
-          }
+          },
         ),
-        body: buildBody(context, statusBarHeight)
+        body: _buildBody(context, statusBarHeight),
       )
     );
   }
 
-  Widget buildAppBar(BuildContext context, double statusBarHeight) {
+  Widget _buildAppBar(BuildContext context, double statusBarHeight) {
     return new AppBar(
       expandedHeight: _kAppBarHeight,
       actions: <Widget>[
@@ -112,8 +113,8 @@ class _RecipeGridPageState extends State<RecipeGridPage> {
             scaffoldKey.currentState.showSnackBar(new SnackBar(
               content: new Text('Not supported.')
             ));
-          }
-        )
+          },
+        ),
       ],
       flexibleSpace: new LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
@@ -125,18 +126,18 @@ class _RecipeGridPageState extends State<RecipeGridPage> {
           return new Padding(
             padding: new EdgeInsets.only(
               top: statusBarHeight + 0.5 * extraPadding,
-              bottom: extraPadding
+              bottom: extraPadding,
             ),
             child: new Center(
               child: new PestoLogo(height: logoHeight, t: t.clamp(0.0, 1.0))
-            )
+            ),
           );
-        }
-      )
+        },
+      ),
     );
   }
 
-  Widget buildBody(BuildContext context, double statusBarHeight) {
+  Widget _buildBody(BuildContext context, double statusBarHeight) {
     final EdgeInsets padding = new EdgeInsets.fromLTRB(8.0, 8.0 + _kAppBarHeight + statusBarHeight, 8.0, 8.0);
 
     return new ScrollableGrid(
@@ -152,14 +153,14 @@ class _RecipeGridPageState extends State<RecipeGridPage> {
           recipe: recipe,
           onTap: () { showRecipePage(context, recipe); }
         );
-      })
+      }),
     );
   }
 
   void showFavoritesPage(BuildContext context) {
     Navigator.push(context, new MaterialPageRoute<Null>(
       settings: const RouteSettings(name: "/pesto/favorites"),
-      builder: (BuildContext context) => new PestoFavorites()
+      builder: (BuildContext context) => new PestoFavorites(),
     ));
   }
 
@@ -169,9 +170,9 @@ class _RecipeGridPageState extends State<RecipeGridPage> {
       builder: (BuildContext context) {
         return new Theme(
           data: _kTheme.copyWith(platform: Theme.of(context).platform),
-          child: new RecipePage(recipe: recipe)
+          child: new RecipePage(recipe: recipe),
         );
-      }
+      },
     ));
   }
 }
@@ -200,7 +201,7 @@ class _PestoLogoState extends State<PestoLogo> {
   final Curve _textOpacity = const Interval(0.4, 1.0, curve: Curves.easeInOut);
   final RectTween _imageRectTween = new RectTween(
     begin: new Rect.fromLTWH(0.0, 0.0, kLogoWidth, kLogoHeight),
-    end: new Rect.fromLTWH(0.0, 0.0, kLogoWidth, kImageHeight)
+    end: new Rect.fromLTWH(0.0, 0.0, kLogoWidth, kImageHeight),
   );
 
   @override
@@ -215,18 +216,18 @@ class _PestoLogoState extends State<PestoLogo> {
           children: <Widget>[
             new Positioned.fromRect(
               rect: _imageRectTween.lerp(config.t),
-              child: new Image.asset(_kSmallLogoImage, fit: ImageFit.contain)
+              child: new Image.asset(_kSmallLogoImage, fit: ImageFit.contain),
             ),
             new Positioned.fromRect(
               rect: _textRectTween.lerp(config.t),
               child: new Opacity(
                 opacity: _textOpacity.transform(config.t),
                 child: new Text('PESTO', style: titleStyle, textAlign: TextAlign.center),
-              )
-            )
-          ]
-        )
-      )
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -253,7 +254,7 @@ class RecipeCard extends StatelessWidget {
               tag: recipe.imagePath,
               child: new Image.asset(recipe.imagePath, fit: ImageFit.contain)
             ),
-            new Flexible(
+            new Expanded(
               child: new Row(
                 children: <Widget>[
                   new Padding(
@@ -261,25 +262,25 @@ class RecipeCard extends StatelessWidget {
                     child: new Image.asset(
                       recipe.ingredientsImagePath,
                       width: 48.0,
-                      height: 48.0
-                    )
+                      height: 48.0,
+                    ),
                   ),
-                  new Flexible(
+                  new Expanded(
                     child: new Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
                         new Text(recipe.name, style: titleStyle, softWrap: false, overflow: TextOverflow.ellipsis),
                         new Text(recipe.author, style: authorStyle),
-                      ]
-                    )
-                  )
-                ]
-              )
-            )
-          ]
-        )
-      )
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -310,7 +311,7 @@ class _RecipePageState extends State<RecipePage> {
       appBarBehavior: AppBarBehavior.scroll,
       appBar: new AppBar(
         heroTag: _disableHeroTransition,
-        expandedHeight: _getAppBarHeight(context),
+        expandedHeight: _getAppBarHeight(context) - _kFabHalfSize,
         backgroundColor: Colors.transparent,
         elevation: 0,
         actions: <Widget>[
@@ -330,39 +331,38 @@ class _RecipePageState extends State<RecipePage> {
               gradient: new LinearGradient(
                 begin: const FractionalOffset(0.5, 0.0),
                 end: const FractionalOffset(0.5, 0.40),
-                colors: <Color>[const Color(0x60000000), const Color(0x00000000)]
+                colors: <Color>[const Color(0x60000000), const Color(0x00000000)],
               )
             )
           )
         ),
       ),
-      body: _buildContainer(context)
+      body: _buildBody(context),
     );
   }
 
   // The full page content with the recipe's image behind it. This
   // adjusts based on the size of the screen. If the recipe sheet touches
   // the edge of the screen, use a slightly different layout.
-  Widget _buildContainer(BuildContext context) {
+  Widget _buildBody(BuildContext context) {
     final bool isFavorite = _favoriteRecipes.contains(config.recipe);
     final Size screenSize = MediaQuery.of(context).size;
     final bool fullWidth = (screenSize.width < _kRecipePageMaxWidth);
     final double appBarHeight = _getAppBarHeight(context);
-    const double fabHalfSize = 28.0;  // TODO(mpcomplete): needs to adapt to screen size
     return new Stack(
       children: <Widget>[
         new Positioned(
           top: 0.0,
           left: 0.0,
           right: 0.0,
-          height: appBarHeight + fabHalfSize,
+          height: appBarHeight + _kFabHalfSize,
           child: new Hero(
             tag: config.recipe.imagePath,
             child: new Image.asset(
               config.recipe.imagePath,
-              fit: fullWidth ? ImageFit.fitWidth : ImageFit.cover
-            )
-          )
+              fit: fullWidth ? ImageFit.fitWidth : ImageFit.cover,
+            ),
+          ),
         ),
         new ClampOverscrolls(
           edge: ScrollableEdge.both,
@@ -373,27 +373,25 @@ class _RecipePageState extends State<RecipePage> {
                 padding: new EdgeInsets.only(top: appBarHeight),
                 child: new Stack(
                   children: <Widget>[
-                    new Padding(
-                      padding: new EdgeInsets.only(top: fabHalfSize),
-                      child: new SizedBox(
-                        width: fullWidth ? null : _kRecipePageMaxWidth,
-                        child: new RecipeSheet(recipe: config.recipe)
-                      )
+                    new Container(
+                      padding: new EdgeInsets.only(top: _kFabHalfSize),
+                      width: fullWidth ? null : _kRecipePageMaxWidth,
+                      child: new RecipeSheet(recipe: config.recipe),
                     ),
                     new Positioned(
                       right: 16.0,
                       child: new FloatingActionButton(
                         child: new Icon(isFavorite ? Icons.favorite : Icons.favorite_border),
-                        onPressed: _toggleFavorite
-                      )
-                    )
-                  ]
-                )
-              )
-            )
-          )
-        )
-      ]
+                        onPressed: _toggleFavorite,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -405,9 +403,9 @@ class _RecipePageState extends State<RecipePage> {
             padding: const EdgeInsets.only(right: 24.0),
             child: new Icon(icon, color: Colors.black54)
           ),
-          new Text(label, style: menuItemStyle)
-        ]
-      )
+          new Text(label, style: menuItemStyle),
+        ],
+      ),
     );
   }
 
@@ -497,9 +495,9 @@ class RecipeSheet extends StatelessWidget {
             (RecipeStep step) {
               return _buildItemRow(step.duration ?? '', step.description);
             }
-          ))
-        )
-      )
+          )),
+        ),
+      ),
     );
   }
 
@@ -508,13 +506,13 @@ class RecipeSheet extends StatelessWidget {
       children: <Widget>[
         new Padding(
           padding: const EdgeInsets.symmetric(vertical: 4.0),
-          child: new Text(left, style: itemAmountStyle)
+          child: new Text(left, style: itemAmountStyle),
         ),
         new Padding(
           padding: const EdgeInsets.symmetric(vertical: 4.0),
-          child: new Text(right, style: itemStyle)
-        )
-      ]
+          child: new Text(right, style: itemStyle),
+        ),
+      ],
     );
   }
 }
@@ -569,8 +567,8 @@ final List<Recipe> kPestoRecipes = <Recipe>[
     ],
     steps: const<RecipeStep>[
       const RecipeStep(description: 'Put in oven'),
-      const RecipeStep(duration: '45 min', description: 'Cook')
-    ]
+      const RecipeStep(duration: '45 min', description: 'Cook'),
+    ],
   ),
   const Recipe(
     name: 'Rustic purple mash',
@@ -587,8 +585,8 @@ final List<Recipe> kPestoRecipes = <Recipe>[
     ],
     steps: const<RecipeStep>[
       const RecipeStep(duration: '3 min', description: 'Stir'),
-      const RecipeStep(duration: '45 min', description: 'Cook')
-    ]
+      const RecipeStep(duration: '45 min', description: 'Cook'),
+    ],
   ),
   const Recipe(
     name: 'Bacon Sprouts',
@@ -606,8 +604,8 @@ final List<Recipe> kPestoRecipes = <Recipe>[
     ],
     steps: const<RecipeStep>[
       const RecipeStep(duration: '3 min', description: 'Stir'),
-      const RecipeStep(duration: '45 min', description: 'Cook')
-    ]
+      const RecipeStep(duration: '45 min', description: 'Cook'),
+    ],
   ),
   const Recipe(
     name: 'Oven Sausage',
@@ -621,8 +619,8 @@ final List<Recipe> kPestoRecipes = <Recipe>[
     ],
     steps: const<RecipeStep>[
       const RecipeStep(duration: '3 min', description: 'Stir'),
-      const RecipeStep(duration: '45 min', description: 'Cook')
-    ]
+      const RecipeStep(duration: '45 min', description: 'Cook'),
+    ],
   ),
   const Recipe(
     name: 'Chicken tostadas',
@@ -638,8 +636,8 @@ final List<Recipe> kPestoRecipes = <Recipe>[
     ],
     steps: const<RecipeStep>[
       const RecipeStep(duration: '3 min', description: 'Stir'),
-      const RecipeStep(duration: '45 min', description: 'Cook')
-    ]
+      const RecipeStep(duration: '45 min', description: 'Cook'),
+    ],
   ),
   const Recipe(
     name: 'Coconut rice',
@@ -657,7 +655,7 @@ final List<Recipe> kPestoRecipes = <Recipe>[
     steps: const<RecipeStep>[
       const RecipeStep(duration: '3 min', description: 'Stir'),
       const RecipeStep(duration: '45 min', description: 'Cook')
-    ]
+    ],
   ),
   const Recipe(
     name: 'Gin basil cocktail',
@@ -673,8 +671,8 @@ final List<Recipe> kPestoRecipes = <Recipe>[
     ],
     steps: const<RecipeStep>[
       const RecipeStep(duration: '3 min', description: 'Stir'),
-      const RecipeStep(duration: '45 min', description: 'Cook')
-    ]
+      const RecipeStep(duration: '45 min', description: 'Cook'),
+    ],
   ),
   const Recipe(
     name: 'Seared sesame fish',
@@ -692,8 +690,8 @@ final List<Recipe> kPestoRecipes = <Recipe>[
     ],
     steps: const<RecipeStep>[
       const RecipeStep(duration: '3 min', description: 'Stir'),
-      const RecipeStep(duration: '45 min', description: 'Cook')
-    ]
+      const RecipeStep(duration: '45 min', description: 'Cook'),
+    ],
   ),
   const Recipe(
     name: 'Herb artichoke',
@@ -711,8 +709,8 @@ final List<Recipe> kPestoRecipes = <Recipe>[
     ],
     steps: const<RecipeStep>[
       const RecipeStep(duration: '3 min', description: 'Stir'),
-      const RecipeStep(duration: '45 min', description: 'Cook')
-    ]
+      const RecipeStep(duration: '45 min', description: 'Cook'),
+    ],
   ),
   const Recipe(
     name: 'Pesto bruschetta',
@@ -732,8 +730,8 @@ final List<Recipe> kPestoRecipes = <Recipe>[
     ],
     steps: const<RecipeStep>[
       const RecipeStep(duration: '3 min', description: 'Stir'),
-      const RecipeStep(duration: '45 min', description: 'Cook')
-    ]
+      const RecipeStep(duration: '45 min', description: 'Cook'),
+    ],
   ),
   const Recipe(
     name: 'Garlic bok choy',
@@ -750,8 +748,8 @@ final List<Recipe> kPestoRecipes = <Recipe>[
     ],
     steps: const<RecipeStep>[
       const RecipeStep(duration: '3 min', description: 'Stir'),
-      const RecipeStep(duration: '45 min', description: 'Cook')
-    ]
+      const RecipeStep(duration: '45 min', description: 'Cook'),
+    ],
   ),
   const Recipe(
     name: 'Fresh Fettuccine',
@@ -769,8 +767,8 @@ final List<Recipe> kPestoRecipes = <Recipe>[
     ],
     steps: const<RecipeStep>[
       const RecipeStep(duration: '3 min', description: 'Stir'),
-      const RecipeStep(duration: '45 min', description: 'Cook')
-    ]
+      const RecipeStep(duration: '45 min', description: 'Cook'),
+    ],
   ),
   const Recipe(
     name: 'Sicilian-Style sardines',
@@ -788,7 +786,7 @@ final List<Recipe> kPestoRecipes = <Recipe>[
     ],
     steps: const<RecipeStep>[
       const RecipeStep(duration: '3 min', description: 'Stir'),
-      const RecipeStep(duration: '45 min', description: 'Cook')
-    ]
+      const RecipeStep(duration: '45 min', description: 'Cook'),
+    ],
   ),
 ];

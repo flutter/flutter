@@ -102,7 +102,7 @@ class PageableListAppState extends State<PageableListApp> {
           onPressed: toggleItemsWrap,
           child: new Row(
             children: <Widget>[
-              new Flexible(child: new Text('Scrolling wraps around')),
+              new Expanded(child: new Text('Scrolling wraps around')),
               // TODO(abarth): Actually make this checkbox change this value.
               new Checkbox(value: itemsWrap, onChanged: null)
             ]

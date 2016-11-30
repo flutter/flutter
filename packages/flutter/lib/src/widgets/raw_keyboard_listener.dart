@@ -82,12 +82,14 @@ class _RawKeyboardListenerState extends State<RawKeyboardListener> {
     if (_listening)
       return;
     RawKeyboard.instance.addListener(_handleRawKeyEvent);
+    _listening = true;
   }
 
   void _detachKeyboardIfAttached() {
     if (!_listening)
       return;
     RawKeyboard.instance.removeListener(_handleRawKeyEvent);
+    _listening = false;
   }
 
   void _handleRawKeyEvent(RawKeyEvent event) {

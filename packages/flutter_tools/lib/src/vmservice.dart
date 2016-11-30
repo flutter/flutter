@@ -759,11 +759,21 @@ class Isolate extends ServiceObjectOwner {
 
   static final int kIsolateReloadBarred = 1005;
 
-  Future<Map<String, dynamic>> reloadSources({ bool pause: false }) async {
+  Future<Map<String, dynamic>> reloadSources(
+      { bool pause: false,
+        String rootLibPath,
+        String packagesPath}) async {
     try {
-      Map<String, dynamic> response = await invokeRpcRaw(
-        '_reloadSources', <String, dynamic>{ 'pause': pause }
-      );
+      Map<String, dynamic> arguments = <String, dynamic>{
+        'pause': pause
+      };
+      if (rootLibPath != null) {
+        arguments['rootLibUri'] = rootLibPath;
+      }
+      if (packagesPath != null) {
+        arguments['packagesUri'] = packagesPath;
+      }
+      Map<String, dynamic> response = await invokeRpcRaw('_reloadSources', arguments);
       return response;
     } on rpc.RpcException catch(e) {
       return new Future<Map<String, dynamic>>.error(<String, dynamic>{
@@ -800,34 +810,11 @@ class Isolate extends ServiceObjectOwner {
     return invokeFlutterExtensionRpcRaw('ext.flutter.debugDumpRenderTree');
   }
 
-  // Loader page extension methods.
-
-  void flutterLoaderShowMessage(String message) {
-    // Invoke loaderShowMessage; ignore any returned errors.
-    invokeRpcRaw('ext.flutter.loaderShowMessage', <String, dynamic> {
-      'value': message
-    }).catchError((dynamic error) => null);
-  }
-
-  void flutterLoaderShowExplanation(String explanation) {
-    // Invoke loaderShowExplanation; ignore any returned errors.
-    invokeRpcRaw('ext.flutter.loaderShowExplanation', <String, dynamic> {
-      'value': explanation
-    }).catchError((dynamic error) => null);
-  }
-
-  void flutterLoaderSetProgress(double progress) {
-    // Invoke loaderSetProgress; ignore any returned errors.
-    invokeRpcRaw('ext.flutter.loaderSetProgress', <String, dynamic>{
-      'loaderSetProgress': progress
-    }).catchError((dynamic error) => null);
-  }
-
-  void flutterLoaderSetProgressMax(double max) {
-    // Invoke loaderSetProgressMax; ignore any returned errors.
-    invokeRpcRaw('ext.flutter.loaderSetProgressMax', <String, dynamic>{
-      'loaderSetProgressMax': max
-    }).catchError((dynamic error) => null);
+  Future<Map<String, dynamic>> flutterToggleDebugPaintSizeEnabled() async {
+    Map<String, dynamic> state = await invokeFlutterExtensionRpcRaw('ext.flutter.debugPaint');
+    if (state != null && state.containsKey('enabled') && state['enabled'] is bool)
+      state = await invokeFlutterExtensionRpcRaw('ext.flutter.debugPaint', <String, dynamic>{ 'enabled': !state['enabled'] });
+    return state;
   }
 
   static bool _isMethodNotFoundException(dynamic e) {

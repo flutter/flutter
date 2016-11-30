@@ -12,7 +12,7 @@ void main() {
     test('error', () async {
       AppContext context = new AppContext();
       BufferLogger mockLogger = new BufferLogger();
-      context[Logger] = mockLogger;
+      context.setVariable(Logger, mockLogger);
 
       await context.runInZone(() {
         printError('foo bar');
@@ -26,7 +26,7 @@ void main() {
     test('status', () async {
       AppContext context = new AppContext();
       BufferLogger mockLogger = new BufferLogger();
-      context[Logger] = mockLogger;
+      context.setVariable(Logger, mockLogger);
 
       await context.runInZone(() {
         printStatus('foo bar');
@@ -40,7 +40,7 @@ void main() {
     test('trace', () async {
       AppContext context = new AppContext();
       BufferLogger mockLogger = new BufferLogger();
-      context[Logger] = mockLogger;
+      context.setVariable(Logger, mockLogger);
 
       await context.runInZone(() {
         printTrace('foo bar');

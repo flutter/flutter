@@ -134,55 +134,6 @@ class PictureLayer extends Layer {
   }
 }
 
-/// (Fuchsia-only) A layer that represents content from another process.
-class ChildSceneLayer extends Layer {
-  /// Creates a layer that displays content rendered by another process.
-  ///
-  /// All of the arguments must not be null.
-  ChildSceneLayer({
-    this.offset,
-    this.devicePixelRatio,
-    this.physicalWidth,
-    this.physicalHeight,
-    this.sceneToken
-  });
-
-  /// Offset from parent in the parent's coordinate system.
-  Offset offset;
-
-  /// The number of physical pixels the child should produce for each logical pixel.
-  double devicePixelRatio;
-
-  /// The horizontal extent of the child, in physical pixels.
-  int physicalWidth;
-
-  /// The vertical extent of the child, in physical pixels.
-  int physicalHeight;
-
-  /// The composited scene that will contain the content rendered by the child.
-  int sceneToken;
-
-  @override
-  void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
-    builder.addChildScene(
-      offset + layerOffset,
-      devicePixelRatio,
-      physicalWidth,
-      physicalHeight,
-      sceneToken
-    );
-  }
-
-  @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('offset: $offset');
-    description.add('physicalWidth: $physicalWidth');
-    description.add('physicalHeight: $physicalHeight');
-    description.add('sceneToken: $sceneToken');
-  }
-}
-
 /// A layer that indicates to the compositor that it should display
 /// certain performance statistics within it.
 class PerformanceOverlayLayer extends Layer {

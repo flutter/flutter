@@ -17,4 +17,8 @@ dart_package("flutter") {
     "//third_party/dart-pkg/pub/meta",
     "//third_party/dart-pkg/pub/vector_math",
   ]
+
+  if (is_fuchsia) {
+    deps += [ "//flutter/sky/packages/sky_engine:sky_engine_dart" ]
+  }
 }

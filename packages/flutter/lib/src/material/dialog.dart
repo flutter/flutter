@@ -21,9 +21,9 @@ import 'theme.dart';
 ///
 /// See also:
 ///
-///  * [AlertDialog]
-///  * [SimpleDialog]
-///  * [showDialog]
+///  * [AlertDialog], for dialogs that have a message and some buttons.
+///  * [SimpleDialog], for dialogs that offer a variety of options.
+///  * [showDialog], which actually displays the dialog and returns its result.
 ///  * <https://material.google.com/components/dialogs.html>
 class Dialog extends StatelessWidget {
   /// Creates a dialog.
@@ -86,9 +86,9 @@ class Dialog extends StatelessWidget {
 ///
 /// See also:
 ///
-///  * [SimpleDialog]
-///  * [Dialog]
-///  * [showDialog]
+///  * [SimpleDialog], which handles the scrolling of the contents but has no [actions].
+///  * [Dialog], on which [AlertDialog] and [SimpleDialog] are based.
+///  * [showDialog], which actually displays the dialog and returns its result.
 ///  * <https://material.google.com/components/dialogs.html#dialogs-alerts>
 class AlertDialog extends StatelessWidget {
   /// Creates an alert dialog.
@@ -196,9 +196,9 @@ class AlertDialog extends StatelessWidget {
 ///
 /// See also:
 ///
-///  * [AlertDialog]
-///  * [Dialog]
-///  * [showDialog]
+///  * [AlertDialog], for dialogs that have a row of buttons below the body.
+///  * [Dialog], on which [SimpleDialog] and [AlertDialog] are based.
+///  * [showDialog], which actually displays the dialog and returns its result.
 ///  * <https://material.google.com/components/dialogs.html#dialogs-simple-dialogs>
 class SimpleDialog extends StatelessWidget {
   /// Creates a simple dialog.
@@ -320,7 +320,9 @@ class _DialogRoute<T> extends PopupRoute<T> {
 /// [Navigator.pop] when the dialog was closed.
 ///
 /// See also:
-///  * [Dialog]
+///  * [SimpleDialog], which handles the scrolling of the contents but has no [actions].
+///  * [AlertDialog], for dialogs that have a row of buttons below the body.
+///  * [Dialog], on which [SimpleDialog] and [AlertDialog] are based.
 ///  * <https://material.google.com/components/dialogs.html>
 Future<dynamic/*=T*/> showDialog/*<T>*/({ BuildContext context, Widget child }) {
   return Navigator.push(context, new _DialogRoute<dynamic/*=T*/>(

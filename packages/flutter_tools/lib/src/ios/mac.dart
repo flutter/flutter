@@ -56,7 +56,7 @@ class XCode {
   }
 
   /// Returns [XCode] active in the current app context.
-  static XCode get instance => context[XCode] ?? (context[XCode] = new XCode());
+  static XCode get instance => context[XCode];
 
   bool get isInstalledAndMeetsVersionCheck => isInstalled && xcodeVersionSatisfactory;
 

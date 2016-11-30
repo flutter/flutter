@@ -118,7 +118,7 @@ class DrawerItem extends StatelessWidget {
     }
     if (child != null) {
       children.add(
-        new Flexible(
+        new Expanded(
           child: new Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: new AnimatedDefaultTextStyle(

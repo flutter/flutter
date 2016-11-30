@@ -12,9 +12,11 @@ import '../base/os.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
 import '../build_info.dart';
+import '../commands/build_apk.dart';
 import '../device.dart';
 import '../globals.dart';
 import '../protocol_discovery.dart';
+
 import 'adb.dart';
 import 'android.dart';
 import 'android_sdk.dart';
@@ -281,6 +283,29 @@ class AndroidDevice extends Device {
   }) async {
     if (!_checkForSupportedAdbVersion() || !_checkForSupportedAndroidVersion())
       return new LaunchResult.failed();
+
+    printTrace("Stopping app '${package.name}' on $name.");
+    await stopApp(package);
+
+    if (!prebuiltApplication) {
+      printTrace('Building APK');
+      await buildApk(platform,
+          target: mainPath,
+          buildMode: debuggingOptions.buildMode
+      );
+    }
+
+    if (isAppInstalled(package)) {
+      printStatus('Uninstalling old version...');
+      if (!uninstallApp(package))
+        printError('Warning: uninstalling old version failed');
+    }
+
+    printTrace('Installing APK.');
+    if (!installApp(package)) {
+      printTrace('Error: Failed to install APK.');
+      return new LaunchResult.failed();
+    }
 
     final bool traceStartup = platformArgs['trace-startup'] ?? false;
     final AndroidApk apk = package;

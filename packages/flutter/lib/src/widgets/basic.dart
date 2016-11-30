@@ -605,7 +605,8 @@ class Padding extends SingleChildRenderObjectWidget {
 ///
 /// See also:
 ///
-///  * [CustomSingleChildLayout].
+///  * [CustomSingleChildLayout], which uses a delegate to control the layout of
+///    a single child.
 ///  * [Center], which is the same as [Align] but with the [alignment] always
 ///    set to [FractionalOffset.center].
 ///  * [FractionallySizedBox], which sizes its child based on a fraction of its own
@@ -690,13 +691,13 @@ class Center extends Align {
 ///
 /// See also:
 ///
-///  * [SingleChildLayoutDelegate]
-///  * [Align] (which sizes itself based on its child's size and positions
-///    the child according to a [FractionalOffset] value)
-///  * [FractionallySizedBox] (which sizes its child based on a fraction of its own
-///    size and positions the child according to a [FractionalOffset] value)
-///  * [CustomMultiChildLayout] (which uses a delegate to position multiple
-///    children)
+///  * [SingleChildLayoutDelegate], which controls the layout of the child.
+///  * [Align], which sizes itself based on its child's size and positions
+///    the child according to a [FractionalOffset] value.
+///  * [FractionallySizedBox], which sizes its child based on a fraction of its own
+///    size and positions the child according to a [FractionalOffset] value.
+///  * [CustomMultiChildLayout], which uses a delegate to position multiple
+///    children.
 class CustomSingleChildLayout extends SingleChildRenderObjectWidget {
   /// Creates a custom single child layout.
   ///
@@ -760,19 +761,31 @@ class LayoutId extends ParentDataWidget<CustomMultiChildLayout> {
   }
 }
 
-/// A widget that defers the layout of multiple children to a delegate.
+/// A widget that uses a delegate to size and position multiple children.
 ///
 /// The delegate can determine the layout constraints for each child and can
 /// decide where to position each child. The delegate can also determine the
 /// size of the parent, but the size of the parent cannot depend on the sizes of
 /// the children.
 ///
+/// [CustomMultiChildLayout] is appropriate when there are complex relationships
+/// between the size and positioning of a multiple widgets. To control the
+/// layout of a single child, [CustomSingleChildLayout] is more appropriate. For
+/// simple cases, such as aligning a widget to one or another edge, the [Stack]
+/// widget is more appropriate.
+///
+/// Each child must be wrapped in a [LayoutId] widget to identify the widget for
+/// the delegate.
+///
 /// See also:
 ///
-/// * [MultiChildLayoutDelegate]
-/// * [CustomSingleChildLayout] (which defers the layout of its single child to a delegate)
-/// * [Stack]
-/// * [Flow]
+/// * [MultiChildLayoutDelegate], for details about how to control the layout of
+///   the children.
+/// * [CustomSingleChildLayout], which uses a delegate to control the layout of
+///   a single child.
+/// * [Stack], which arranges children relative to the edges of the container.
+/// * [Flow], which provides paint-time control of its children using transform
+///   matrices.
 class CustomMultiChildLayout extends MultiChildRenderObjectWidget {
   /// Creates a custom multi-child layout.
   ///
@@ -1485,11 +1498,14 @@ class BlockBody extends MultiChildRenderObjectWidget {
 ///
 /// See also:
 ///
-///  * [Flow]
 ///  * [Align], which sizes itself based on its child's size and positions
 ///    the child according to a [FractionalOffset] value.
-///  * [CustomSingleChildLayout]
-///  * [CustomMultiChildLayout]
+///  * [CustomSingleChildLayout], which uses a delegate to control the layout of
+///    a single child.
+///  * [CustomMultiChildLayout], which uses a delegate to position multiple
+///    children.
+///  * [Flow], which provides paint-time control of its children using transform
+///    matrices.
 class Stack extends MultiChildRenderObjectWidget {
   /// Creates a stack layout widget.
   ///
@@ -1534,7 +1550,10 @@ class Stack extends MultiChildRenderObjectWidget {
 
 /// A [Stack] that shows a single child from a list of children.
 ///
-/// The displayed child is the one with the given [index].
+/// The displayed child is the one with the given [index]. The stack is
+/// always as big as the largest child.
+///
+/// If value is null, then nothing is displayed.
 ///
 /// For more details, see [Stack].
 class IndexedStack extends Stack {
@@ -1546,9 +1565,7 @@ class IndexedStack extends Stack {
     FractionalOffset alignment: FractionalOffset.topLeft,
     this.index: 0,
     List<Widget> children: const <Widget>[],
-  }) : super(key: key, alignment: alignment, children: children) {
-    assert(index != null);
-  }
+  }) : super(key: key, alignment: alignment, children: children);
 
   /// The index of the child to show.
   final int index;
@@ -1931,32 +1948,16 @@ class GridPlacementData<DataType> extends ParentDataWidget<GridRenderObjectWidge
   }
 }
 
-/// A widget that uses the flex layout algorithm for its children.
+/// A widget that displays its children in a one-dimensional array.
 ///
 /// The [Flex] widget allows you to control the axis along which the children are
 /// placed (horizontal or vertical). This is referred to as the _main axis_. If
 /// you know the main axis in advance, then consider using a [Row] (if it's
-/// horizontal) or [Column] (if it's vertical) instead, since that will be less
+/// horizontal) or [Column] (if it's vertical) instead, because that will be less
 /// verbose.
 ///
-/// Each child of a [Flex] widget is either flexible or inflexible. The [Flex]
-/// first lays out its inflexible children and subtracts their total length
-/// along the main axis to determine how much free space is available. The
-/// [Flex] then divides this free space among the flexible children in a ratio
-/// determined by their [Flexible.flex] properties. To control the flex of child
-/// widgets, see the [Flexible] widget.
-///
-/// The [mainAxisAlignment] property determines how the remaining free space (if
-/// any) in the main direction is allocated after the flexible children are
-/// dealt with. The [crossAxisAlignment] property determines how children are
-/// positioned in the cross direction.
-///
-/// By default, a [Flex] will size itself along the main axis to the maximum
-/// size permitted by its parent, unless that would be infinite (e.g. if it is
-/// in a [Block] with the same main axis), in which case it will shrink-wrap its
-/// children. The [mainAxisSize] property can be used to control this.
-///
-/// For more details about the flex layout algorithm, see [RenderFlex].
+/// To cause a child to expand to fill the available vertical space, wrap the
+/// child in an [Expanded] widget.
 ///
 /// The [Flex] widget does not scroll (and in general it is considered an error
 /// to have more children in a [Flex] than will fit in the available room). If
@@ -1965,6 +1966,41 @@ class GridPlacementData<DataType> extends ParentDataWidget<GridRenderObjectWidge
 ///
 /// If you only have one child, then rather than using [Flex], [Row], or
 /// [Column], consider using [Align] or [Center] to position the child.
+///
+/// ## Layout algorithm
+///
+/// Layout for a [Flex] proceeds in six steps:
+///
+/// 1. Layout each child a null or zero flex factor (e.g., those that are not
+///    [Expanded]) with unbounded main axis constraints and the incoming
+///    cross axis constraints. If the [crossAxisAlignment] is
+///    [CrossAxisAlignment.stretch], instead use tight cross axis constraints
+///    that match the incoming max extent in the cross axis.
+/// 2. Divide the remaining main axis space among the children with non-zero
+///    flex factors (e.g., those that are [Expanded]) according to their flex
+///    factor. For example, a child with a flex factor of 2.0 will receive twice
+///    the amount of main axis space as a child with a flex factor of 1.0.
+/// 3. Layout each of the remaining children with the same cross axis
+///    constraints as in step 1, but instead of using unbounded main axis
+///    constraints, use max axis constraints based on the amount of space
+///    allocated in step 2. Children with [Flexible.fit] properties that are
+///    [FlexFit.tight] are given tight constraints (i.e., forced to fill the
+///    allocated space), and children with [Flexible.fit] properties that are
+///    [FlexFit.loose] are given loose constraints (i.e., not forced to fill the
+///    allocated space).
+/// 4. The cross axis extent of the [Flex] is the maximum cross axis extent of
+///    the children (which will always satisfy the incoming constraints).
+/// 5. The main axis extent of the [Flex] is determined by the [mainAxisSize]
+///    property. If the [mainAxisSize] property is [MainAxisSize.max], then the
+///    main axis extent of the [Flex] is the max extent of the incoming main
+///    axis constraints. If the [mainAxisSize] property is [MainAxisSize.min],
+///    then the main axis extent of the [Flex] is the sum of the main axis
+///    extents of the children (subject to the incoming constraints).
+/// 6. Determine the position for each child according to the
+///    [mainAxisAlignment] and the [crossAxisAlignment]. For example, if the
+///    [mainAxisAlignment] is [MainAxisAlignment.spaceBetween], any main axis
+///    space that has not been allocated to children is divided evenly and
+///    placed between the children.
 class Flex extends MultiChildRenderObjectWidget {
   /// Creates a flex layout.
   ///
@@ -1998,6 +2034,10 @@ class Flex extends MultiChildRenderObjectWidget {
   final Axis direction;
 
   /// How the children should be placed along the main axis.
+  ///
+  /// For example, [MainAxisAlignment.start], the default, places the children
+  /// at the start (i.e., the left for a [Row] or the top for a [Column]) of the
+  /// main axis.
   final MainAxisAlignment mainAxisAlignment;
 
   /// How much space space should be occupied in the main axis.
@@ -2013,6 +2053,9 @@ class Flex extends MultiChildRenderObjectWidget {
   final MainAxisSize mainAxisSize;
 
   /// How the children should be placed along the cross axis.
+  ///
+  /// For example, [CrossAxisAlignment.center], the default, centers the
+  /// children in the cross axis (e.g., horizontally for a [Column]).
   final CrossAxisAlignment crossAxisAlignment;
 
   /// If aligning items according to their baseline, which baseline to use.
@@ -2040,26 +2083,10 @@ class Flex extends MultiChildRenderObjectWidget {
   }
 }
 
-/// A widget that lays out its children in a horizontal array.
+/// A widget that displays its children in a horizontal array.
 ///
-/// Each child of a [Row] widget is either flexible or inflexible. The [Row]
-/// first lays out its inflexible children and subtracts their total width to
-/// determine how much free space is available. The [Row] then divides this free
-/// space among the flexible children in a ratio determined by their
-/// [Flexible.flex] properties. To control the flex of child widgets, see the
-/// [Flexible] widget.
-///
-/// The [mainAxisAlignment] property determines how the remaining horizontal
-/// free space (if any) is allocated after the flexible children are dealt with.
-/// The [crossAxisAlignment] property determines how children are positioned
-/// vertically.
-///
-/// By default, a [Row] will size itself vertically to the maximum size
-/// permitted by its parent, unless that would be infinitely wide (e.g. if it is
-/// in a horizontal [Block]), in which case it will shrink-wrap its children.
-/// The [mainAxisSize] property can be used to control this.
-///
-/// For more details about the flex layout algorithm, see [RenderFlex].
+/// To cause a child to expand to fill the available horizontal space, wrap the
+/// child in an [Expanded] widget.
 ///
 /// The [Row] widget does not scroll (and in general it is considered an error
 /// to have more children in a [Row] than will fit in the available room). If
@@ -2070,6 +2097,39 @@ class Flex extends MultiChildRenderObjectWidget {
 ///
 /// If you only have one child, then consider using [Align] or [Center] to
 /// position the child.
+///
+/// ## Layout algorithm
+///
+/// Layout for a [Row] proceeds in six steps:
+///
+/// 1. Layout each child a null or zero flex factor (e.g., those that are not
+///    [Expanded]) with unbounded horizontal constraints and the incoming
+///    vertical constraints. If the [crossAxisAlignment] is
+///    [CrossAxisAlignment.stretch], instead use tight vertical constraints that
+///    match the incoming max height.
+/// 2. Divide the remaining horizontal space among the children with non-zero
+///    flex factors (e.g., those that are [Expanded]) according to their flex
+///    factor. For example, a child with a flex factor of 2.0 will receive twice
+///    the amount of horizontal space as a child with a flex factor of 1.0.
+/// 3. Layout each of the remaining children with the same vertical constraints
+///    as in step 1, but instead of using unbounded horizontal constraints, use
+///    horizontal constraints based on the amount of space allocated in step 2.
+///    Children with [Flexible.fit] properties that are [FlexFit.tight] are
+///    given tight constraints (i.e., forced to fill the allocated space), and
+///    children with [Flexible.fit] properties that are [FlexFit.loose] are
+///    given loose constraints (i.e., not forced to fill the allocated space).
+/// 4. The height of the [Row] is the maximum height of the children (which will
+///    always satisfy the incoming vertical constraints).
+/// 5. The width of the [Row] is determined by the [mainAxisSize] property. If
+///    the [mainAxisSize] property is [MainAxisSize.max], then the width of the
+///    [Row] is the max width of the incoming constraints. If the [mainAxisSize]
+///    property is [MainAxisSize.min], then the width of the [Row] is the sum
+///    of widths of the children (subject to the incoming constraints).
+/// 6. Determine the position for each child according to the
+///    [mainAxisAlignment] and the [crossAxisAlignment]. For example, if the
+///    [mainAxisAlignment] is [MainAxisAlignment.spaceBetween], any horizontal
+///    space that has not been allocated to children is divided evenly and
+///    placed between the children.
 class Row extends Flex {
   /// Creates a horizontal array of children.
   ///
@@ -2094,36 +2154,55 @@ class Row extends Flex {
   );
 }
 
-/// A widget that lays out its children in a vertical array.
+/// A widget that displays its children in a vertical array.
 ///
-/// Each child of a [Column] widget is either flexible or inflexible. The
-/// [Column] first lays out its inflexible children and subtracts their total
-/// height to determine how much free space is available. The [Column] then
-/// divides this free space among the flexible children in a ratio determined by
-/// their [Flexible.flex] properties. To control the flex of child widgets, see
-/// the [Flexible] widget.
+/// To cause a child to expand to fill the available vertical space, wrap the
+/// child in an [Expanded] widget.
 ///
-/// The [mainAxisAlignment] property determines how the remaining vertical free
-/// space (if any) is allocated after the flexible children are dealt with. The
-/// [crossAxisAlignment] property determines how children are positioned
-/// horizontally.
-///
-/// By default, a [Column] will size itself vertically to the maximum size
-/// permitted by its parent, unless that would be infinitely high (e.g. if it is
-/// in a vertical [Block]), in which case it will shrink-wrap its children. The
-/// [mainAxisSize] property can be used to control this.
-///
-/// For more details about the flex layout algorithm, see [RenderFlex].
-///
-/// The [Column] widget does not scroll (and in general it is considered an
-/// error to have more children in a [Column] than will fit in the available
-/// room). If you have a list of widgets and want them to be able to scroll if
-/// there is insufficient room, consider using a [Block].
+/// The [Column] widget does not scroll (and in general it is considered an error
+/// to have more children in a [Column] than will fit in the available room). If
+/// you have a line of widgets and want them to be able to scroll if there is
+/// insufficient room, consider using a [Block].
 ///
 /// For a horizontal variant, see [Row].
 ///
 /// If you only have one child, then consider using [Align] or [Center] to
 /// position the child.
+///
+/// ## Layout algorithm
+///
+/// Layout for a [Column] proceeds in six steps:
+///
+/// 1. Layout each child a null or zero flex factor (e.g., those that are not
+///    [Expanded]) with unbounded vertical constraints and the incoming
+///    horizontal constraints. If the [crossAxisAlignment] is
+///    [CrossAxisAlignment.stretch], instead use tight horizontal constraints
+///    that match the incoming max width.
+/// 2. Divide the remaining vertical space among the children with non-zero
+///    flex factors (e.g., those that are [Expanded]) according to their flex
+///    factor. For example, a child with a flex factor of 2.0 will receive twice
+///    the amount of vertical space as a child with a flex factor of 1.0.
+/// 3. Layout each of the remaining children with the same horizontal
+///    constraints as in step 1, but instead of using unbounded vertical
+///    constraints, use vertical constraints based on the amount of space
+///    allocated in step 2. Children with [Flexible.fit] properties that are
+///    [FlexFit.tight] are given tight constraints (i.e., forced to fill the
+///    allocated space), and children with [Flexible.fit] properties that are
+///    [FlexFit.loose] are given loose constraints (i.e., not forced to fill the
+///    allocated space).
+/// 4. The width of the [Column] is the maximum width of the children (which
+///    will always satisfy the incoming horizontal constraints).
+/// 5. The height of the [Column] is determined by the [mainAxisSize] property.
+///    If the [mainAxisSize] property is [MainAxisSize.max], then the height of
+///    the [Column] is the max height of the incoming constraints. If the
+///    [mainAxisSize] property is [MainAxisSize.min], then the height of the
+///    [Column] is the sum of heights of the children (subject to the incoming
+///    constraints).
+/// 6. Determine the position for each child according to the
+///    [mainAxisAlignment] and the [crossAxisAlignment]. For example, if the
+///    [mainAxisAlignment] is [MainAxisAlignment.spaceBetween], any vertical
+///    space that has not been allocated to children is divided evenly and
+///    placed between the children.
 class Column extends Flex {
   /// Creates a vertical array of children.
   ///
@@ -2161,7 +2240,7 @@ class Flexible extends ParentDataWidget<Flex> {
     Key key,
     this.flex: 1,
     this.fit: FlexFit.tight,
-    @required Widget child
+    @required Widget child,
   }) : super(key: key, child: child);
 
   /// The flex factor to use for this child
@@ -2211,6 +2290,29 @@ class Flexible extends ParentDataWidget<Flex> {
   }
 }
 
+/// A widget that expands a child of a [Row], [Column], or [Flex].
+///
+/// Using an [Expanded] widget to make a child of a [Row], [Column], or [Flex]
+/// expand to fill the available space in the main axis (e.g., horizontally for
+/// a [Row] or vertically for a [Column]). If multiple children are expanded,
+/// the available space is divided amoung them according to the [flex] factor.
+///
+/// An [Expanded] widget must be a descendant of a [Row], [Column], or [Flex],
+/// and the path from the [Flexible] widget to its enclosing [Row], [Column], or
+/// [Flex] must contain only [StatelessWidget]s or [StatefulWidget]s (not other
+/// kinds of widgets, like [RenderObjectWidget]s).
+class Expanded extends Flexible {
+  /// Creates a widget that expands a child of a [Row], [Column], or [Flex]
+  /// expand to fill the available space in the main axis.
+  Expanded({
+    Key key,
+    int flex: 1,
+    @required Widget child,
+  }) : super(key: key, flex: flex, fit: FlexFit.tight, child: child) {
+    assert(flex > 0);
+  }
+}
+
 /// A widget that implements the flow layout algorithm.
 ///
 /// Flow layouts are optimized for repositioning children using transformation
@@ -2233,10 +2335,12 @@ class Flexible extends ParentDataWidget<Flex> {
 ///
 /// See also:
 ///
-///  * [FlowDelegate]
-///  * [Stack]
-///  * [CustomSingleChildLayout]
-///  * [CustomMultiChildLayout]
+///  * [FlowDelegate], which controls the visual presentation of the children.
+///  * [Stack], which arranges children relative to the edges of the container.
+///  * [CustomSingleChildLayout], which uses a delegate to control the layout of
+///    a single child.
+///  * [CustomMultiChildLayout], which uses a delegate to position multiple
+///    children.
 class Flow extends MultiChildRenderObjectWidget {
   /// Creates a flow layout.
   ///

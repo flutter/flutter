@@ -146,8 +146,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
               value: dropdown1Value,
               onChanged: (String newValue) {
                 setState(() {
-                  if (newValue != null)
-                    dropdown1Value = newValue;
+                  dropdown1Value = newValue;
                 });
               },
               items: <String>[
@@ -172,8 +171,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
               value: dropdown2Value,
               onChanged: (String newValue) {
                 setState(() {
-                  if (newValue != null)
-                    dropdown2Value = newValue;
+                  dropdown2Value = newValue;
                 });
               },
               items: <String>['One', 'Two', 'Free', 'Four'].map((String value) {

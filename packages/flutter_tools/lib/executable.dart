@@ -9,10 +9,13 @@ import 'package:args/command_runner.dart';
 import 'package:stack_trace/stack_trace.dart';
 
 import 'src/base/common.dart';
+import 'src/base/config.dart';
 import 'src/base/context.dart';
 import 'src/base/logger.dart';
+import 'src/base/os.dart';
 import 'src/base/process.dart';
 import 'src/base/utils.dart';
+import 'src/cache.dart';
 import 'src/commands/analyze.dart';
 import 'src/commands/build.dart';
 import 'src/commands/channel.dart';
@@ -40,7 +43,12 @@ import 'src/device.dart';
 import 'src/doctor.dart';
 import 'src/globals.dart';
 import 'src/hot.dart';
+import 'src/ios/mac.dart';
+import 'src/ios/simulators.dart';
 import 'src/runner/flutter_command_runner.dart';
+import 'src/toolchain.dart';
+import 'src/usage.dart';
+
 
 /// Main entry point for commands.
 ///
@@ -81,69 +89,78 @@ Future<Null> main(List<String> args) async {
     ..addCommand(new UpdatePackagesCommand(hidden: !verboseHelp))
     ..addCommand(new UpgradeCommand());
 
-  return Chain.capture/*<Future<Null>>*/(() async {
-    // Initialize globals.
-    if (context[Logger] == null)
-      context[Logger] = new StdoutLogger();
-    if (context[DeviceManager] == null)
-      context[DeviceManager] = new DeviceManager();
-    if (context[DevFSConfig] == null)
-      context[DevFSConfig] = new DevFSConfig();
-    if (context[Doctor] == null)
-      context[Doctor] = new Doctor();
-    if (context[HotRunnerConfig] == null)
-      context[HotRunnerConfig] = new HotRunnerConfig();
+  // Construct a context.
+  AppContext _executableContext = new AppContext();
 
-    await runner.run(args);
-    _exit(0);
-  }, onError: (dynamic error, Chain chain) {
-    if (error is UsageException) {
-      stderr.writeln(error.message);
-      stderr.writeln();
-      stderr.writeln(
-        "Run 'flutter -h' (or 'flutter <command> -h') for available "
-        "flutter commands and options."
-      );
-      // Argument error exit code.
-      _exit(64);
-    } else if (error is ToolExit) {
-      if (error.message != null)
+  // Make the context current.
+  _executableContext.runInZone(() {
+    // Initialize the context with some defaults.
+    context.putIfAbsent(Logger, () => new StdoutLogger());
+    context.putIfAbsent(DeviceManager, () => new DeviceManager());
+    context.putIfAbsent(DevFSConfig, () => new DevFSConfig());
+    context.putIfAbsent(Doctor, () => new Doctor());
+    context.putIfAbsent(HotRunnerConfig, () => new HotRunnerConfig());
+    context.putIfAbsent(Cache, () => new Cache());
+    context.putIfAbsent(ToolConfiguration, () => new ToolConfiguration());
+    context.putIfAbsent(Config, () => new Config());
+    context.putIfAbsent(OperatingSystemUtils, () => new OperatingSystemUtils());
+    context.putIfAbsent(XCode, () => new XCode());
+    context.putIfAbsent(IOSSimulatorUtils, () => new IOSSimulatorUtils());
+    context.putIfAbsent(SimControl, () => new SimControl());
+    context.putIfAbsent(Usage, () => new Usage());
+
+    return Chain.capture/*<Future<Null>>*/(() async {
+      await runner.run(args);
+      _exit(0);
+    }, onError: (dynamic error, Chain chain) {
+      if (error is UsageException) {
         stderr.writeln(error.message);
-      if (verbose) {
         stderr.writeln();
-        stderr.writeln(chain.terse.toString());
-        stderr.writeln();
-      }
-      _exit(error.exitCode ?? 1);
-    } else if (error is ProcessExit) {
-      // We've caught an exit code.
-      _exit(error.exitCode);
-    } else {
-      // We've crashed; emit a log report.
-      stderr.writeln();
-
-      flutterUsage.sendException(error, chain);
-
-      if (isRunningOnBot) {
-        // Print the stack trace on the bots - don't write a crash report.
-        stderr.writeln('$error');
-        stderr.writeln(chain.terse.toString());
-        _exit(1);
+        stderr.writeln(
+            "Run 'flutter -h' (or 'flutter <command> -h') for available "
+                "flutter commands and options."
+        );
+        // Argument error exit code.
+        _exit(64);
+      } else if (error is ToolExit) {
+        if (error.message != null)
+          stderr.writeln(error.message);
+        if (verbose) {
+          stderr.writeln();
+          stderr.writeln(chain.terse.toString());
+          stderr.writeln();
+        }
+        _exit(error.exitCode ?? 1);
+      } else if (error is ProcessExit) {
+        // We've caught an exit code.
+        _exit(error.exitCode);
       } else {
-        if (error is String)
-          stderr.writeln('Oops; flutter has exited unexpectedly: "$error".');
-        else
-          stderr.writeln('Oops; flutter has exited unexpectedly.');
+        // We've crashed; emit a log report.
+        stderr.writeln();
 
-        _createCrashReport(args, error, chain).then((File file) {
-          stderr.writeln(
-              'Crash report written to ${file.path};\n'
-              'please let us know at https://github.com/flutter/flutter/issues.'
-          );
+        flutterUsage.sendException(error, chain);
+
+        if (isRunningOnBot) {
+          // Print the stack trace on the bots - don't write a crash report.
+          stderr.writeln('$error');
+          stderr.writeln(chain.terse.toString());
           _exit(1);
-        });
+        } else {
+          if (error is String)
+            stderr.writeln('Oops; flutter has exited unexpectedly: "$error".');
+          else
+            stderr.writeln('Oops; flutter has exited unexpectedly.');
+
+          _createCrashReport(args, error, chain).then((File file) {
+            stderr.writeln(
+                'Crash report written to ${file.path};\n'
+                    'please let us know at https://github.com/flutter/flutter/issues.'
+            );
+            _exit(1);
+          });
+        }
       }
-    }
+    });
   });
 }
 
@@ -185,7 +202,7 @@ Future<String> _doctorText() async {
     BufferLogger logger = new BufferLogger();
     AppContext appContext = new AppContext();
 
-    appContext[Logger] = logger;
+    appContext.setVariable(Logger, logger);
 
     await appContext.runInZone(() => doctor.diagnose());
 

@@ -717,7 +717,7 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: <Widget>[
                     header,
-                    new Flexible(child: picker),
+                    new Expanded(child: picker),
                     actions,
                   ]
                 )
@@ -735,7 +735,7 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
                       fit: FlexFit.loose,
                       child: new Column(
                         children: <Widget>[
-                          new Flexible(child: picker),
+                          new Expanded(child: picker),
                           actions,
                         ]
                       )

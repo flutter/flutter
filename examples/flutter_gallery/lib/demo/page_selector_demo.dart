@@ -55,7 +55,7 @@ class PageSelectorDemo extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween
                   )
                 ),
-                new Flexible(
+                new Expanded(
                   child: new TabBarView<IconData>(
                     children: icons.map((IconData icon) {
                       return new Container(

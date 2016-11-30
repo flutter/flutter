@@ -21,12 +21,12 @@ void main() {
             setState = setStateRef;
             return new Column(
               children: <Widget>[
-                new Flexible(
+                new Expanded(
                   child: new Center(
                     child: new FlutterLogo(size: 100.0),
                   ),
                 ),
-                new Flexible(
+                new Expanded(
                   child: new Builder(
                     builder: (BuildContext context) {
                       List<Widget> children = <Widget>[];
@@ -43,7 +43,7 @@ void main() {
                     },
                   ),
                 ),
-                new Flexible(
+                new Expanded(
                   child: new Block(
                     padding: new EdgeInsets.symmetric(horizontal: 24.0),
                     children: <Widget>[ new Text(explanation, textAlign: TextAlign.center) ]

@@ -251,6 +251,14 @@ class LicenseEntryWithLineBreaks extends LicenseEntry {
 /// The LICENSE files in each package can either consist of a single license, or
 /// can be in the format described above. In the latter case, each component
 /// license and list of package names is merged independently.
+///
+/// See also:
+///
+///  * [showAboutDialog], which shows a Material-style dialog with information
+///    about the application, including a button that shows a [LicensePage] that
+///    uses this API to select licenses to show.
+///  * [AboutDrawerItem], which is a widget to put in a [Drawer] which
+///    automatically calls [showAboutDialog].
 class LicenseRegistry {
   LicenseRegistry._();
 

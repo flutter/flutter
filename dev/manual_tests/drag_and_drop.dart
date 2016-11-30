@@ -242,8 +242,10 @@ class DragAndDropAppState extends State<DragAndDropApp> {
       ),
       body: new Column(
         children: <Widget>[
-          new Flexible(
+          new Expanded(
             child: new Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: <Widget>[
                 new ExampleDragSource(
                   color: Colors.yellow[300],
@@ -264,28 +266,26 @@ class DragAndDropAppState extends State<DragAndDropApp> {
                   child: new Text('above')
                 ),
               ],
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.spaceAround
             )
           ),
-          new Flexible(
+          new Expanded(
             child: new Row(
               children: <Widget>[
-                new Flexible(child: new ExampleDragTarget()),
-                new Flexible(child: new ExampleDragTarget()),
-                new Flexible(child: new ExampleDragTarget()),
-                new Flexible(child: new ExampleDragTarget()),
+                new Expanded(child: new ExampleDragTarget()),
+                new Expanded(child: new ExampleDragTarget()),
+                new Expanded(child: new ExampleDragTarget()),
+                new Expanded(child: new ExampleDragTarget()),
               ]
             )
           ),
-          new Flexible(
+          new Expanded(
             child: new Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: <Widget>[
                 new MovableBall(1, position, moveBall),
                 new MovableBall(2, position, moveBall),
                 new MovableBall(3, position, moveBall),
               ],
-              mainAxisAlignment: MainAxisAlignment.spaceAround
             )
           ),
         ]

@@ -81,7 +81,7 @@ class VendorItem extends StatelessWidget {
             )
           ),
           new SizedBox(width: 8.0),
-          new Flexible(
+          new Expanded(
             child: new Text(vendor.name, style: ShrineTheme.of(context).vendorItemStyle)
           )
         ]
@@ -192,7 +192,7 @@ class FeatureItem extends StatelessWidget {
                 child: new FeaturePriceItem(product: product)
               )
             ),
-            new Flexible(
+            new Expanded(
               child: new CustomMultiChildLayout(
                 delegate: new FeatureLayout(),
                 children: <Widget>[

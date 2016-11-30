@@ -61,15 +61,19 @@ abstract class ResidentRunner {
   Future<Null> _debugDumpApp() async {
     if (vmService != null)
       await vmService.vm.refreshViews();
-
     await currentView.uiIsolate.flutterDebugDumpApp();
   }
 
   Future<Null> _debugDumpRenderTree() async {
     if (vmService != null)
       await vmService.vm.refreshViews();
-
     await currentView.uiIsolate.flutterDebugDumpRenderTree();
+  }
+
+  Future<Null> _debugToggleDebugPaintSizeEnabled() async {
+    if (vmService != null)
+      await vmService.vm.refreshViews();
+    await currentView.uiIsolate.flutterToggleDebugPaintSizeEnabled();
   }
 
   void registerSignalHandlers() {
@@ -87,14 +91,25 @@ abstract class ResidentRunner {
       return;
     if (!supportsRestart)
       return;
-    ProcessSignal.SIGUSR1.watch().listen((ProcessSignal signal) async {
-      printStatus('Caught SIGUSR1');
-      await restart(fullRestart: false);
-    });
-    ProcessSignal.SIGUSR2.watch().listen((ProcessSignal signal) async {
-      printStatus('Caught SIGUSR2');
-      await restart(fullRestart: true);
-    });
+    ProcessSignal.SIGUSR1.watch().listen(_handleSignal);
+    ProcessSignal.SIGUSR2.watch().listen(_handleSignal);
+  }
+
+  bool _processingSignal = false;
+  Future<Null> _handleSignal(ProcessSignal signal) async {
+    if (_processingSignal) {
+      printTrace('Ignoring signal: "$signal" because we are busy.');
+      return;
+    }
+    _processingSignal = true;
+
+    final bool fullRestart = signal == ProcessSignal.SIGUSR2;
+
+    try {
+      await restart(fullRestart: fullRestart);
+    } finally {
+      _processingSignal = false;
+    }
   }
 
   Future<Null> startEchoingDeviceLog(ApplicationPackage app) async {
@@ -154,6 +169,11 @@ abstract class ResidentRunner {
         return true;
       await _debugDumpRenderTree();
       return true;
+    } else if (lower == 'p') {
+      if (!supportsServiceProtocol)
+        return true;
+      await _debugToggleDebugPaintSizeEnabled();
+      return true;
     } else if (lower == 'q' || character == AnsiTerminal.KEY_F10) {
       // F10, exit
       await stop();
@@ -163,10 +183,21 @@ abstract class ResidentRunner {
     return false;
   }
 
+  bool _processingTerminalRequest = false;
+
   Future<Null> processTerminalInput(String command) async {
-    bool handled = await _commonTerminalInputHandler(command);
-    if (!handled)
-      await handleTerminalCommand(command);
+    if (_processingTerminalRequest) {
+      printTrace('Ignoring terminal input: "$command" because we are busy.');
+      return;
+    }
+    _processingTerminalRequest = true;
+    try {
+      bool handled = await _commonTerminalInputHandler(command);
+      if (!handled)
+        await handleTerminalCommand(command);
+    } finally {
+      _processingTerminalRequest = false;
+    }
   }
 
   void appFinished() {
@@ -214,12 +245,19 @@ abstract class ResidentRunner {
     appFinished();
   }
 
+  /// Called to print help to the terminal.
+  void printHelp({ @required bool details });
+
+  void printHelpDetails() {
+    printStatus('To dump the widget hierarchy of the app (debugDumpApp), press "w".');
+    printStatus('To dump the rendering tree of the app (debugDumpRenderTree), press "t".');
+    printStatus('To toggle the display of construction lines (debugPaintSizeEnabled), press "p".');
+  }
+
   /// Called when a signal has requested we exit.
   Future<Null> cleanupAfterSignal();
   /// Called right before we exit.
   Future<Null> cleanupAtFinish();
-  /// Called to print help to the terminal.
-  void printHelp({ @required bool details });
   /// Called when the runner should handle a terminal command.
   Future<Null> handleTerminalCommand(String code);
 }
@@ -260,8 +298,9 @@ String getMissingPackageHintForPlatform(TargetPlatform platform) {
 }
 
 class DebugConnectionInfo {
-  DebugConnectionInfo(this.port, { this.baseUri });
+  DebugConnectionInfo({ this.port, this.wsUri, this.baseUri });
 
   final int port;
+  final String wsUri;
   final String baseUri;
 }

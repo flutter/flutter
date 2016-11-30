@@ -65,12 +65,13 @@ Future<Null> pubGet({
     throwToolExit('$directory: pub did not update .packages file (pubspec.yaml file has a newer timestamp)');
 }
 
-final RegExp _analyzerWarning = new RegExp(r'^! analyzer [^ ]+ from path \.\./\.\./bin/cache/dart-sdk/lib/analyzer$');
+final RegExp _analyzerWarning = new RegExp(r'^! \w+ [^ ]+ from path \.\./\.\./bin/cache/dart-sdk/lib/\w+$');
 
 String _filterOverrideWarnings(String message) {
-  // This function filters out these two messages:
+  // This function filters out these three messages:
   //   Warning: You are using these overridden dependencies:
   //   ! analyzer 0.29.0-alpha.0 from path ../../bin/cache/dart-sdk/lib/analyzer
+  //   ! front_end 0.1.0-alpha.0 from path ../../bin/cache/dart-sdk/lib/front_end
   if (message == 'Warning: You are using these overridden dependencies:')
     return null;
   if (message.contains(_analyzerWarning))

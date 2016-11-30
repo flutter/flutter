@@ -395,6 +395,15 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     assert(debugAssertNoTransientCallbacks(
       'An animation is still running even after the widget tree was disposed.'
     ));
+    assert(debugAssertAllRenderVarsUnset(
+      'The value of a rendering debug variable was changed by the test.'
+    ));
+    assert(debugAssertAllWidgetVarsUnset(
+      'The value of a widget debug variable was changed by the test.'
+    ));
+    assert(debugAssertAllSchedulerVarsUnset(
+      'The value of a scheduler debug variable was changed by the test.'
+    ));
   }
 
   /// Called by the [testWidgets] function after a test is executed.

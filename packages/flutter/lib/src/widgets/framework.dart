@@ -1512,6 +1512,12 @@ abstract class BuildContext {
   /// Calling this method is relatively expensive (O(N) in the depth of the
   /// tree). Only call this method if the distance from this widget to the
   /// desired ancestor is known to be small and bounded.
+  ///
+  /// Example:
+  ///
+  /// ```dart
+  /// context.ancestorStateOfType(const TypeMatcher<ScrollableState>());
+  /// ```
   State ancestorStateOfType(TypeMatcher matcher);
 
   /// Returns the [RenderObject] object of the nearest ancestor [RenderObjectWidget] widget

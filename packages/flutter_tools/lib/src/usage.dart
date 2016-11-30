@@ -16,6 +16,8 @@ import 'version.dart';
 
 const String _kFlutterUA = 'UA-67589403-6';
 
+Usage get flutterUsage => Usage.instance;
+
 class Usage {
   /// Create a new Usage instance; [versionOverride] is used for testing.
   Usage({ String settingsName: 'flutter', String versionOverride }) {
@@ -37,7 +39,7 @@ class Usage {
   }
 
   /// Returns [Usage] active in the current app context.
-  static Usage get instance => context[Usage] ?? (context[Usage] = new Usage());
+  static Usage get instance => context[Usage];
 
   Analytics _analytics;
 

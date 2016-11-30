@@ -4,7 +4,7 @@
 
 import 'dart:async';
 
-import '../globals.dart';
+import '../doctor.dart';
 import '../runner/flutter_command.dart';
 
 class DoctorCommand extends FlutterCommand {

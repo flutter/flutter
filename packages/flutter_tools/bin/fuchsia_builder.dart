@@ -8,18 +8,22 @@ import 'dart:io';
 import 'package:args/args.dart';
 
 import '../lib/src/base/common.dart';
+import '../lib/src/base/config.dart';
 import '../lib/src/base/context.dart';
 import '../lib/src/base/logger.dart';
+import '../lib/src/base/os.dart';
 import '../lib/src/cache.dart';
 import '../lib/src/flx.dart';
 import '../lib/src/globals.dart';
+import '../lib/src/usage.dart';
 
 const String _kOptionPackages = 'packages';
 const String _kOptionOutput = 'output-file';
 const String _kOptionHeader = 'header';
 const String _kOptionSnapshot = 'snapshot';
 const String _kOptionWorking = 'working-dir';
-const List<String> _kOptions = const <String>[
+const String _kOptionsManifest = 'manifest';
+const List<String> _kRequiredOptions = const <String>[
   _kOptionPackages,
   _kOptionOutput,
   _kOptionHeader,
@@ -28,16 +32,30 @@ const List<String> _kOptions = const <String>[
 ];
 
 Future<Null> main(List<String> args) async {
-  context[Logger] = new StdoutLogger();
+  AppContext executableContext = new AppContext();
+  executableContext.setVariable(Logger, new StdoutLogger());
+  executableContext.runInZone(() {
+    // Initialize the context with some defaults.
+    context.putIfAbsent(Logger, () => new StdoutLogger());
+    context.putIfAbsent(Cache, () => new Cache());
+    context.putIfAbsent(Config, () => new Config());
+    context.putIfAbsent(OperatingSystemUtils, () => new OperatingSystemUtils());
+    context.putIfAbsent(Usage, () => new Usage());
+    return run(args);
+  });
+}
+
+Future<Null> run(List<String> args) async {
   final ArgParser parser = new ArgParser()
     ..addOption(_kOptionPackages, help: 'The .packages file')
     ..addOption(_kOptionOutput, help: 'The generated flx file')
     ..addOption(_kOptionHeader, help: 'The header of the flx file')
     ..addOption(_kOptionSnapshot, help: 'The generated snapshot file')
     ..addOption(_kOptionWorking,
-        help: 'The directory where to put temporary files');
+        help: 'The directory where to put temporary files')
+    ..addOption(_kOptionsManifest, help: 'The manifest file');
   final ArgResults argResults = parser.parse(args);
-  if (_kOptions.any((String option) => !argResults.options.contains(option))) {
+  if (_kRequiredOptions.any((String option) => !argResults.options.contains(option))) {
     printError('Missing option! All options must be specified.');
     exit(1);
   }
@@ -49,7 +67,7 @@ Future<Null> main(List<String> args) async {
       snapshotFile: new File(argResults[_kOptionSnapshot]),
       workingDirPath: argResults[_kOptionWorking],
       packagesPath: argResults[_kOptionPackages],
-      manifestPath: defaultManifestPath,
+      manifestPath: argResults[_kOptionsManifest] ?? defaultManifestPath,
       includeDefaultFonts: false,
     );
   } on ToolExit catch (e) {
