@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
@@ -591,7 +592,8 @@ void main() {
     await tester.pumpWidget(builder());
     expect(inputValue.selection.isCollapsed, true);
     expect(inputValue.text, cutValue);
-  });
+  }, skip: Platform.isMacOS); // Skip due to https://github.com/flutter/flutter/issues/6961
+
 
   testWidgets('Can scroll multiline input', (WidgetTester tester) async {
     GlobalKey inputKey = new GlobalKey();
@@ -688,7 +690,7 @@ void main() {
     expect(newFirstPos.y, firstPos.y);
     expect(inputBox.hitTest(new HitTestResult(), position: inputBox.globalToLocal(newFirstPos)), isTrue);
     expect(inputBox.hitTest(new HitTestResult(), position: inputBox.globalToLocal(newFourthPos)), isFalse);
-  });
+  }, skip: Platform.isMacOS); // Skip due to https://github.com/flutter/flutter/issues/6961
 
   testWidgets('InputField smoke test', (WidgetTester tester) async {
     InputValue inputValue = InputValue.empty;
