@@ -256,14 +256,16 @@ class IOSDevice extends Device {
       // ports post launch.
       printTrace("Debugging is enabled, connecting to observatory and the diagnostic server");
 
-      Future<Uri> forwardObsUri = _acquireAndForwardUriToNewPort(
+      // TODO(danrubel): The Android device class does something similar to this code below.
+      // The various Device subclasses should be refactored and common code moved into the superclass.
+      Future<Uri> forwardObsUri = _acquireServiceUri(
         app,
         ProtocolDiscovery.kObservatoryService,
         debuggingOptions.observatoryPort,
       );
       Future<Uri> forwardDiagUri;
       if (debuggingOptions.buildMode == BuildMode.debug) {
-        forwardDiagUri = _acquireAndForwardUriToNewPort(
+        forwardDiagUri = _acquireServiceUri(
           app,
           ProtocolDiscovery.kDiagnosticService,
           debuggingOptions.diagnosticPort,
@@ -310,7 +312,7 @@ class IOSDevice extends Device {
     return new LaunchResult.succeeded(observatoryUri: localObsUri, diagnosticUri: localDiagUri);
   }
 
-  Future<Uri> _acquireAndForwardUriToNewPort(
+  Future<Uri> _acquireServiceUri(
       ApplicationPackage app,
       String serviceName,
       int localPort) async {

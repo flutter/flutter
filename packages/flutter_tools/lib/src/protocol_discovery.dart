@@ -43,7 +43,7 @@ class ProtocolDiscovery {
         // Ignore errors.
       }
     }
-    if (uri != null && uri.port != 80)
+    if (uri != null)
       _located(uri);
   }
 

@@ -37,9 +37,7 @@ void main() {
 
       // Get next port future.
       nextUri = discoverer.nextUri();
-      // Inject some bad lines.
-      logReader.addLine('Observatory listening on http://127.0.0.1');
-      logReader.addLine('Observatory listening on http://127.0.0.1:');
+      // Inject a bad line.
       logReader.addLine('Observatory listening on http://127.0.0.1:apple');
       Uri timeoutUri = Uri.parse('http://timeout');
       Uri actualUri = await nextUri.timeout(

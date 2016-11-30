@@ -8,6 +8,7 @@ import 'dart:io';
 
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:json_rpc_2/error_code.dart' as rpc_error_code;
+import 'package:path/path.dart' as path;
 import 'package:web_socket_channel/io.dart';
 
 import 'globals.dart';
@@ -24,11 +25,7 @@ class VMService {
 
   /// Connect to '127.0.0.1' at [port].
   static Future<VMService> connect(Uri httpUri) async {
-    String wsPath = httpUri.path;
-    if (!wsPath.endsWith('/'))
-      wsPath += '/';
-    wsPath += 'ws';
-    Uri wsUri = httpUri.replace(scheme: 'ws', path: wsPath);
+    Uri wsUri = httpUri.replace(scheme: 'ws', path: path.join(httpUri.path, 'ws'));
     WebSocket ws;
     try {
       ws = await WebSocket.connect(wsUri.toString());
