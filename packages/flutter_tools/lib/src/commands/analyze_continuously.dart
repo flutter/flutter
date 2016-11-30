@@ -11,6 +11,7 @@ import 'package:path/path.dart' as path;
 
 import '../base/common.dart';
 import '../base/logger.dart';
+import '../base/process_manager.dart';
 import '../base/utils.dart';
 import '../cache.dart';
 import '../dart/sdk.dart';
@@ -159,7 +160,7 @@ class AnalysisServer {
     List<String> args = <String>[snapshot, '--sdk', sdk];
 
     printTrace('dart ${args.join(' ')}');
-    _process = await Process.start(path.join(dartSdkPath, 'bin', 'dart'), args);
+    _process = await processManager.start(path.join(dartSdkPath, 'bin', 'dart'), args);
     _process.exitCode.whenComplete(() => _process = null);
 
     Stream<String> errorStream = _process.stderr.transform(UTF8.decoder).transform(const LineSplitter());

@@ -14,6 +14,7 @@ import 'src/base/context.dart';
 import 'src/base/logger.dart';
 import 'src/base/os.dart';
 import 'src/base/process.dart';
+import 'src/base/process_manager.dart';
 import 'src/base/utils.dart';
 import 'src/cache.dart';
 import 'src/commands/analyze.dart';
@@ -108,6 +109,7 @@ Future<Null> main(List<String> args) async {
     context.putIfAbsent(IOSSimulatorUtils, () => new IOSSimulatorUtils());
     context.putIfAbsent(SimControl, () => new SimControl());
     context.putIfAbsent(Usage, () => new Usage());
+    context.putIfAbsent(ProcessManager, () => new ProcessManager());
 
     return Chain.capture/*<Future<Null>>*/(() async {
       await runner.run(args);

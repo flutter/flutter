@@ -10,6 +10,7 @@ import 'package:test/src/executable.dart' as executable; // ignore: implementati
 
 import '../base/common.dart';
 import '../base/logger.dart';
+import '../base/process_manager.dart';
 import '../base/os.dart';
 import '../cache.dart';
 import '../dart/package_map.dart';
@@ -126,7 +127,7 @@ class TestCommand extends FlutterCommand {
       Directory tempDir = Directory.systemTemp.createTempSync('flutter_tools');
       try {
         File sourceFile = coverageFile.copySync(path.join(tempDir.path, 'lcov.source.info'));
-        ProcessResult result = Process.runSync('lcov', <String>[
+        ProcessResult result = processManager.runSync('lcov', <String>[
           '--add-tracefile', baseCoverageData,
           '--add-tracefile', sourceFile.path,
           '--output-file', coverageFile.path,
