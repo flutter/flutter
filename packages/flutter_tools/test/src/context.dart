@@ -8,6 +8,7 @@ import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
+import 'package:flutter_tools/src/base/process_manager.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/devfs.dart';
@@ -61,6 +62,7 @@ void testUsingContext(String description, dynamic testMethod(), {
     });
     testContext.putIfAbsent(SimControl, () => new MockSimControl());
     testContext.putIfAbsent(Usage, () => new MockUsage());
+    testContext.putIfAbsent(ProcessManager, () => new ProcessManager());
 
     try {
       return await testContext.runInZone(testMethod);
