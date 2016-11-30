@@ -45,6 +45,11 @@ dart_sdk_lib_copy("developer") {
   destination = "$root_gen_dir/dart-pkg/sky_engine/dart_sdk"
 }
 
+dart_sdk_lib_copy("internal") {
+  sdk_lib_name = "internal"
+  destination = "$root_gen_dir/dart-pkg/sky_engine/dart_sdk"
+}
+
 dart_sdk_lib_copy("io") {
   sdk_lib_name = "io"
   destination = "$root_gen_dir/dart-pkg/sky_engine/dart_sdk"
@@ -88,6 +93,7 @@ group("copy_dart_sdk") {
     ":convert",
     ":core",
     ":developer",
+    ":internal",
     ":io",
     ":isolate",
     ":math",

@@ -10,7 +10,11 @@ embedded_libs:
   "dart:math": "../dart_sdk/math/math.dart"
   "dart:typed_data": "../dart_sdk/typed_data/typed_data.dart"
   "dart:ui": "../dart_ui/ui.dart"
-  "dart:_internal": "../dart_sdk/_empty.dart"
+  # The internal library is needed as some implementations bleed into the public
+  # API, e.g. List being Iterable by virtue of implementing
+  # EfficientLengthIterable.
+  # Not including this library yields analysis errors.
+  "dart:_internal": "../dart_sdk/internal/internal.dart"
   "dart:nativewrappers": "../dart_sdk/_empty.dart"
 
 analyzer:
