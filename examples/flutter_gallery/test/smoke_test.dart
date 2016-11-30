@@ -49,7 +49,12 @@ Future<Null> smokeDemo(WidgetTester tester, String routeName) async {
 }
 
 Future<Null> runSmokeTest(WidgetTester tester) async {
-  await tester.pumpWidget(new GalleryApp());
+  bool hasFeedback = false;
+  void mockOnSendFeedback() {
+    hasFeedback = true;
+  }
+
+  await tester.pumpWidget(new GalleryApp(onSendFeedback: mockOnSendFeedback));
   await tester.pump(); // see https://github.com/flutter/flutter/issues/1865
   await tester.pump(); // triggers a frame
 
@@ -89,6 +94,12 @@ Future<Null> runSmokeTest(WidgetTester tester) async {
   await tester.tap(find.text('Light'));
   await tester.pump();
   await tester.pump(const Duration(seconds: 1)); // Wait until it's changed.
+
+  // send feedback
+  expect(hasFeedback, false);
+  await tester.tap(find.text('Send feedback'));
+  await tester.pump();
+  expect(hasFeedback, true);
 }
 
 void main() {

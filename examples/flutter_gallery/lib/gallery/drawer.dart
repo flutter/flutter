@@ -97,6 +97,7 @@ class GalleryDrawer extends StatelessWidget {
     this.checkerboardRasterCacheImages,
     this.onCheckerboardRasterCacheImagesChanged,
     this.onPlatformChanged,
+    this.onSendFeedback,
   }) : super(key: key) {
     assert(onThemeChanged != null);
     assert(onTimeDilationChanged != null);
@@ -115,6 +116,8 @@ class GalleryDrawer extends StatelessWidget {
   final ValueChanged<bool> onCheckerboardRasterCacheImagesChanged;
 
   final ValueChanged<TargetPlatform> onPlatformChanged;
+
+  final VoidCallback onSendFeedback;
 
   @override
   Widget build(BuildContext context) {
@@ -203,12 +206,12 @@ class GalleryDrawer extends StatelessWidget {
       )
     );
 
-    final Widget fileAnIssueItem = new DrawerItem(
+    final Widget sendFeedbackItem = new DrawerItem(
       icon: new Icon(Icons.report),
-      onPressed: () {
+      onPressed: onSendFeedback ?? () {
         UrlLauncher.launch('https://github.com/flutter/flutter/issues/new');
       },
-      child: new Text('File an issue')
+      child: new Text('Send feedback'),
     );
 
     final Widget aboutItem = new AboutDrawerItem(
@@ -264,7 +267,7 @@ class GalleryDrawer extends StatelessWidget {
       new Divider(),
       animateSlowlyItem,
       // index 8, optional: Performance Overlay
-      fileAnIssueItem,
+      sendFeedbackItem,
       aboutItem
     ];
 

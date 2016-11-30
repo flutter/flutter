@@ -31,6 +31,7 @@ class GalleryApp extends StatefulWidget {
     this.updateUrlFetcher,
     this.enablePerformanceOverlay: true,
     this.checkerboardRasterCacheImages: true,
+    this.onSendFeedback,
     Key key}
   ) : super(key: key);
 
@@ -39,6 +40,8 @@ class GalleryApp extends StatefulWidget {
   final bool enablePerformanceOverlay;
 
   final bool checkerboardRasterCacheImages;
+
+  final VoidCallback onSendFeedback;
 
   @override
   GalleryAppState createState() => new GalleryAppState();
@@ -83,6 +86,7 @@ class GalleryAppState extends State<GalleryApp> {
           timeDilation = value;
         });
       },
+      onSendFeedback: config.onSendFeedback,
     );
 
     if (config.updateUrlFetcher != null) {
