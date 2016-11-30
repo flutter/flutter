@@ -324,6 +324,7 @@ class Scaffold extends StatefulWidget {
     this.persistentFooterButtons,
     this.drawer,
     this.bottomNavigationBar,
+    this.backgroundColor,
     this.scrollableKey,
     this.appBarBehavior: AppBarBehavior.anchor,
     this.resizeToAvoidBottomPadding: true
@@ -380,6 +381,11 @@ class Scaffold extends StatefulWidget {
   ///
   /// Typically a [Drawer].
   final Widget drawer;
+
+  /// The color of the [Material] widget that underlies the entire Scaffold.
+  ///
+  /// The theme's canvas color by default.
+  final Color backgroundColor;
 
   /// A bottom navigation bar to display at the bottom of the scaffold.
   ///
@@ -1063,7 +1069,10 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       )
     );
 
-    return new Material(child: application);
+    return new Material(
+      color: config.backgroundColor,
+      child: application,
+    );
   }
 }
 
