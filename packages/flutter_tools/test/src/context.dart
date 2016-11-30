@@ -41,7 +41,11 @@ void testUsingContext(String description, dynamic testMethod(), {
     });
 
     // Initialize the test context with some default mocks.
+    // Seed these context entries first since others depend on them
+    testContext.putIfAbsent(ProcessManager, () => new ProcessManager());
     testContext.putIfAbsent(Logger, () => new BufferLogger());
+
+    // Order-independent context entries
     testContext.putIfAbsent(DeviceManager, () => new MockDeviceManager());
     testContext.putIfAbsent(DevFSConfig, () => new DevFSConfig());
     testContext.putIfAbsent(Doctor, () => new MockDoctor());
@@ -62,7 +66,6 @@ void testUsingContext(String description, dynamic testMethod(), {
     });
     testContext.putIfAbsent(SimControl, () => new MockSimControl());
     testContext.putIfAbsent(Usage, () => new MockUsage());
-    testContext.putIfAbsent(ProcessManager, () => new ProcessManager());
 
     try {
       return await testContext.runInZone(testMethod);

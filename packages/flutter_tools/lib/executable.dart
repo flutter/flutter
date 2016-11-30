@@ -96,7 +96,11 @@ Future<Null> main(List<String> args) async {
   // Make the context current.
   _executableContext.runInZone(() {
     // Initialize the context with some defaults.
+    // Seed these context entries first since others depend on them
+    context.putIfAbsent(ProcessManager, () => new ProcessManager());
     context.putIfAbsent(Logger, () => new StdoutLogger());
+
+    // Order-independent context entries
     context.putIfAbsent(DeviceManager, () => new DeviceManager());
     context.putIfAbsent(DevFSConfig, () => new DevFSConfig());
     context.putIfAbsent(Doctor, () => new Doctor());
@@ -109,7 +113,6 @@ Future<Null> main(List<String> args) async {
     context.putIfAbsent(IOSSimulatorUtils, () => new IOSSimulatorUtils());
     context.putIfAbsent(SimControl, () => new SimControl());
     context.putIfAbsent(Usage, () => new Usage());
-    context.putIfAbsent(ProcessManager, () => new ProcessManager());
 
     return Chain.capture/*<Future<Null>>*/(() async {
       await runner.run(args);
