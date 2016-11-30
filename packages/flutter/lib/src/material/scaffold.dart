@@ -384,7 +384,7 @@ class Scaffold extends StatefulWidget {
 
   /// The color of the [Material] widget that underlies the entire Scaffold.
   ///
-  /// The theme's canvas color by default.
+  /// The theme's scaffoldBackgroundColor by default, see [ThemeData.scaffoldBackgroundColor].
   final Color backgroundColor;
 
   /// A bottom navigation bar to display at the bottom of the scaffold.
@@ -1070,7 +1070,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     );
 
     return new Material(
-      color: config.backgroundColor,
+      color: config.backgroundColor ?? themeData.scaffoldBackgroundColor,
       child: application,
     );
   }
