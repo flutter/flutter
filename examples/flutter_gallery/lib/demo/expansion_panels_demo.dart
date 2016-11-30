@@ -10,7 +10,7 @@ enum _Location {
   Bermuda
 }
 
-typedef Widget DemoItemBodyBuilder(DemoItem<dynamic> item);
+typedef Widget DemoItemBodyBuilder<T>(DemoItem<T> item);
 typedef String ValueToString<T>(T value);
 
 class DualHeaderWithHint extends StatelessWidget {
@@ -145,7 +145,7 @@ class DemoItem<T> {
 
   final String name;
   final String hint;
-  final DemoItemBodyBuilder builder;
+  final DemoItemBodyBuilder<T> builder;
   final ValueToString<T> valueToString;
   T value;
   bool isExpanded = false;
@@ -182,7 +182,7 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
         value: 'Caribbean cruise',
         hint: 'Change trip name',
         valueToString: (String value) => value,
-        builder: (DemoItem<String> item) { // ignore: argument_type_not_assignable, https://github.com/flutter/flutter/issues/5771
+        builder: (DemoItem<String> item) {
           void close() {
             setState(() {
               item.isExpanded = false;
@@ -216,7 +216,7 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
         value: _Location.Bahamas,
         hint: 'Select location',
         valueToString: (_Location location) => location.toString().split(".")[1],
-        builder: (DemoItem<_Location> item) { // ignore: argument_type_not_assignable, https://github.com/flutter/flutter/issues/5771
+        builder: (DemoItem<_Location> item) {
           void close() {
             setState(() {
               item.isExpanded = false;
@@ -286,7 +286,7 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
         value: 80.0,
         hint: 'Select amount of sun',
         valueToString: (double amount) => '${amount.round()}',
-        builder: (DemoItem<double> item) { // ignore: argument_type_not_assignable, https://github.com/flutter/flutter/issues/5771
+        builder: (DemoItem<double> item) {
           void close() {
             setState(() {
               item.isExpanded = false;

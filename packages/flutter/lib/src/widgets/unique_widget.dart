@@ -25,7 +25,7 @@ abstract class UniqueWidget<T extends State<StatefulWidget>> extends StatefulWid
   /// The [key] argument cannot be null because it identifies the unique
   /// inflated instance of this widget.
   UniqueWidget({
-    @required GlobalKey key
+    @required GlobalKey<T> key
   }) : super(key: key) {
     assert(key != null);
   }
@@ -37,7 +37,7 @@ abstract class UniqueWidget<T extends State<StatefulWidget>> extends StatefulWid
   ///
   /// Might be null if the widget is not currently in the tree.
   T get currentState {
-    GlobalKey globalKey = key;
-    return globalKey.currentState; // ignore: return_of_invalid_type, https://github.com/flutter/flutter/issues/5771
+    GlobalKey<T> globalKey = key;
+    return globalKey.currentState;
   }
 }
