@@ -11,6 +11,7 @@ import '../application_package.dart';
 import '../base/os.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
+import '../base/process_manager.dart';
 import '../build_info.dart';
 import '../commands/build_apk.dart';
 import '../device.dart';
@@ -59,7 +60,7 @@ class AndroidDevice extends Device {
       try {
         // We pass an encoding of LATIN1 so that we don't try and interpret the
         // `adb shell getprop` result as UTF8.
-        ProcessResult result = Process.runSync(
+        ProcessResult result = processManager.runSync(
           propCommand.first,
           propCommand.sublist(1),
           stdoutEncoding: LATIN1

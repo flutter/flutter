@@ -15,6 +15,7 @@ import 'package:test/src/backend/test_platform.dart'; // ignore: implementation_
 import 'package:test/src/runner/plugin/platform.dart'; // ignore: implementation_imports
 import 'package:test/src/runner/plugin/hack_register_platform.dart' as hack; // ignore: implementation_imports
 
+import '../base/process_manager.dart';
 import '../dart/package_map.dart';
 import '../globals.dart';
 import 'coverage_collector.dart';
@@ -74,7 +75,7 @@ Future<Process> _startProcess(String mainPath, { String packages, int observator
     'FLUTTER_TEST': 'true',
     'FONTCONFIG_FILE': _fontConfigFile.path,
   };
-  return Process.start(executable, arguments, environment: environment);
+  return processManager.start(executable, arguments, environment: environment);
 }
 
 void _attachStandardStreams(Process process) {

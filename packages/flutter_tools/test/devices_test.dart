@@ -21,9 +21,9 @@ void main() {
       DevicesCommand command = new DevicesCommand();
       await createTestCommandRunner(command).run(<String>['devices']);
       expect(testLogger.statusText, contains('No devices detected'));
-    }, overrides: <Type, dynamic>{
-      AndroidSdk: null,
-      DeviceManager: new DeviceManager()
+    }, overrides: <Type, Generator>{
+      AndroidSdk: () => null,
+      DeviceManager: () => new DeviceManager(),
     });
   });
 }

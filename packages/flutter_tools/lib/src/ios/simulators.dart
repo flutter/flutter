@@ -13,6 +13,7 @@ import '../application_package.dart';
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/process.dart';
+import '../base/process_manager.dart';
 import '../build_info.dart';
 import '../device.dart';
 import '../flx.dart' as flx;
@@ -190,7 +191,7 @@ class SimControl {
 
     List<String> args = <String>['simctl', 'list', '--json', section.name];
     printTrace('$_xcrunPath ${args.join(' ')}');
-    ProcessResult results = Process.runSync(_xcrunPath, args);
+    ProcessResult results = processManager.runSync(_xcrunPath, args);
     if (results.exitCode != 0) {
       printError('Error executing simctl: ${results.exitCode}\n${results.stderr}');
       return <String, Map<String, dynamic>>{};

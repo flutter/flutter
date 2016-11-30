@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'process_manager.dart';
 import '../globals.dart';
 
 typedef String StringConverter(String string);
@@ -44,7 +45,7 @@ Future<Process> runCommand(List<String> cmd, {
   _traceCommand(cmd, workingDirectory: workingDirectory);
   String executable = cmd[0];
   List<String> arguments = cmd.length > 1 ? cmd.sublist(1) : <String>[];
-  Process process = await Process.start(
+  Process process = await processManager.start(
     executable,
     arguments,
     workingDirectory: workingDirectory,
@@ -108,13 +109,13 @@ Future<Null> runAndKill(List<String> cmd, Duration timeout) {
   Future<Process> proc = runDetached(cmd);
   return new Future<Null>.delayed(timeout, () async {
     printTrace('Intentionally killing ${cmd[0]}');
-    Process.killPid((await proc).pid);
+    processManager.killPid((await proc).pid);
   });
 }
 
 Future<Process> runDetached(List<String> cmd) {
   _traceCommand(cmd);
-  Future<Process> proc = Process.start(
+  Future<Process> proc = processManager.start(
     cmd[0], cmd.getRange(1, cmd.length).toList(),
     mode: ProcessStartMode.DETACHED
   );
@@ -126,7 +127,7 @@ Future<RunResult> runAsync(List<String> cmd, {
   bool allowReentrantFlutter: false
 }) async {
   _traceCommand(cmd, workingDirectory: workingDirectory);
-  ProcessResult results = await Process.run(
+  ProcessResult results = await processManager.run(
     cmd[0],
     cmd.getRange(1, cmd.length).toList(),
     workingDirectory: workingDirectory,
@@ -140,7 +141,7 @@ Future<RunResult> runAsync(List<String> cmd, {
 bool exitsHappy(List<String> cli) {
   _traceCommand(cli);
   try {
-    return Process.runSync(cli.first, cli.sublist(1)).exitCode == 0;
+    return processManager.runSync(cli.first, cli.sublist(1)).exitCode == 0;
   } catch (error) {
     return false;
   }
@@ -203,7 +204,7 @@ String _runWithLoggingSync(List<String> cmd, {
   bool hideStdout: false,
 }) {
   _traceCommand(cmd, workingDirectory: workingDirectory);
-  ProcessResult results = Process.runSync(
+  ProcessResult results = processManager.runSync(
     cmd[0],
     cmd.getRange(1, cmd.length).toList(),
     workingDirectory: workingDirectory,

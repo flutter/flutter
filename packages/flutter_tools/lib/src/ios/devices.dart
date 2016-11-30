@@ -9,6 +9,7 @@ import 'dart:io';
 import '../application_package.dart';
 import '../base/os.dart';
 import '../base/process.dart';
+import '../base/process_manager.dart';
 import '../build_info.dart';
 import '../device.dart';
 import '../doctor.dart';
@@ -514,7 +515,7 @@ class _IOSDevicePortForwarder extends DevicePortForwarder {
     Process process = forwardedPort.context;
 
     if (process != null) {
-      Process.killPid(process.pid);
+      processManager.killPid(process.pid);
     } else {
       printError("Forwarded port did not have a valid process");
     }
