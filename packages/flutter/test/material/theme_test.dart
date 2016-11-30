@@ -224,6 +224,4 @@ void main() {
     expect(materials[0].color, green); // app scaffold
     expect(materials[1].color, green); // dialog scaffold
   });
-
-
 }
