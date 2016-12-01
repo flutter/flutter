@@ -357,7 +357,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
     )
     .animate(new CurvedAnimation(
       parent: _sizeController,
-      curve: new Interval(0.0, 1.0 / _kDragSizeFactorLimit)
+      curve: const Interval(0.0, 1.0 / _kDragSizeFactorLimit)
     ));
 
     return new Listener(

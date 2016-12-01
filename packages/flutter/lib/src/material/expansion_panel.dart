@@ -154,8 +154,8 @@ class ExpansionPanelList extends StatelessWidget {
               new AnimatedCrossFade(
                 firstChild: new Container(height: 0.0),
                 secondChild: children[i].body,
-                firstCurve: new Interval(0.0, 0.6, curve: Curves.fastOutSlowIn),
-                secondCurve: new Interval(0.4, 1.0, curve: Curves.fastOutSlowIn),
+                firstCurve: const Interval(0.0, 0.6, curve: Curves.fastOutSlowIn),
+                secondCurve: const Interval(0.4, 1.0, curve: Curves.fastOutSlowIn),
                 sizeCurve: Curves.fastOutSlowIn,
                 crossFadeState: _isChildExpanded(i) ? CrossFadeState.showSecond : CrossFadeState.showFirst,
                 duration: animationDuration,
