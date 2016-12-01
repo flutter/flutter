@@ -395,6 +395,7 @@ class ThemeData {
   }) {
     return new ThemeData(
       brightness: brightness ?? this.brightness,
+      primarySwatch: primarySwatch,
       primaryColor: primaryColor ?? this.primaryColor,
       primaryColorBrightness: primaryColorBrightness ?? this.primaryColorBrightness,
       accentColor: accentColor ?? this.accentColor,
