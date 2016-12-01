@@ -191,3 +191,20 @@ bool debugAssertAllWidgetVarsUnset(String reason) {
   });
   return true;
 }
+
+/// Holds data used by debug tools to trace execution
+class DebugTraceData {
+  /// Holds where an entity was created from
+  final SourceLocation ctorCallsite;
+
+  DebugTraceData({this.ctorCallsite});
+}
+
+/// Represents a location in a source file
+class SourceLocation {
+  final String path;
+  final int line;
+  final int char;
+
+  const SourceLocation(this.path, this.line, this.char);
+}
