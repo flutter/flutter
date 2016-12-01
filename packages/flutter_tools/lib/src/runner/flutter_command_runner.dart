@@ -13,6 +13,7 @@ import '../android/android_sdk.dart';
 import '../base/context.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
+import '../base/process_manager.dart';
 import '../cache.dart';
 import '../dart/package_map.dart';
 import '../device.dart';
@@ -93,6 +94,14 @@ class FlutterCommandRunner extends CommandRunner<Null> {
             'Name of a build output within the engine out directory, if you are building Flutter locally.\n'
             'Use this to select a specific version of the engine if you have built multiple engine targets.\n'
             'This path is relative to --local-engine-src-path/out.');
+    argParser.addOption('record-to',
+        help:
+            'Enables recording of process invocations (including stdout and '
+            'stderr of all such invocations), and serializes that recording to '
+            'the specified location.\n'
+            'If the location is a folder, a ZIP file named `recording.zip` will'
+            'be created in that folder. Otherwise, a ZIP file will be created'
+            'with the path specified in this flag.');
   }
 
   @override
@@ -140,6 +149,19 @@ class FlutterCommandRunner extends CommandRunner<Null> {
     if (globalResults['verbose']) {
       // Override the logger.
       context.setVariable(Logger, new VerboseLogger());
+    }
+
+    if (globalResults['record-to'] != null) {
+      // Turn on recording
+      String recordToPath = globalResults['record-to'].trim();
+      FileSystemEntity recordTo;
+      if (recordToPath.isNotEmpty) {
+        recordTo = await FileSystemEntity.isDirectory(recordToPath)
+            ? new Directory(recordToPath)
+            : new File(recordToPath);
+      }
+      context.setVariable(ProcessManager,
+          new RecordingProcessManager(recordTo: recordTo));
     }
 
     logger.quiet = globalResults['quiet'];
