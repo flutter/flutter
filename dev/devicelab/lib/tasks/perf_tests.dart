@@ -20,6 +20,16 @@ TaskFunction createComplexLayoutScrollPerfTest({ @required DeviceOperatingSystem
   );
 }
 
+TaskFunction createComplexLayoutScrollMemoryTest({ @required DeviceOperatingSystem os }) {
+  return new MemoryTest(
+    '${flutterDirectory.path}/dev/benchmarks/complex_layout',
+    'test_driver/scroll_perf.dart',
+    'complex_layout_scroll_perf',
+    'com.yourcompany.complexLayout',
+    os: os,
+  );
+}
+
 TaskFunction createFlutterGalleryStartupTest({ @required DeviceOperatingSystem os }) {
   return new StartupTest(
     '${flutterDirectory.path}/examples/flutter_gallery',
@@ -169,6 +179,74 @@ class BuildTest {
         'aot_snapshot_size_instructions',
         'aot_snapshot_size_rodata',
         'aot_snapshot_size_total',
+      ]);
+    });
+  }
+}
+
+class MemoryTest {
+  MemoryTest(this.testDirectory, this.testTarget, this.timelineFileName, this.packageName, { this.os });
+
+  final String testDirectory;
+  final String testTarget;
+  final String timelineFileName;
+  final String packageName;
+  final DeviceOperatingSystem os;
+
+  Future<TaskResult> call() {
+    return inDirectory(testDirectory, () async {
+      Device device = await devices.workingDevice;
+      await device.unlock();
+      String deviceId = device.deviceId;
+      await flutter('packages', options: <String>['get']);
+
+      if (os == DeviceOperatingSystem.ios) {
+        // This causes an Xcode project to be created.
+        await flutter('build', options: <String>['ios', '--profile']);
+      }
+
+      int debugPort = await findAvailablePort();
+
+      await flutter('run', options: <String>[
+        '-v',
+        '--profile',
+        '--trace-startup', // wait for the first frame to render
+        '-t',
+        testTarget,
+        '-d',
+        deviceId,
+        '--debug-port',
+        debugPort.toString(),
+      ]);
+
+      Map<String, dynamic> startData = await device.getMemoryStats(packageName);
+
+      await flutter('drive', options: <String>[
+        '-v',
+        '-t',
+        testTarget,
+        '-d',
+        deviceId,
+        '--use-existing-app',
+        //'--keep-app-running',
+      ], env: <String, String> {
+        'VM_SERVICE_URL': 'http://localhost:$debugPort'
+      });
+
+      Map<String, dynamic> endData = await device.getMemoryStats(packageName);
+
+      Map<String, dynamic> data = <String, dynamic>{
+         'start_total_kb': startData['total_kb'],
+         'end_total_kb': endData['total_kb'],
+         'diff_total_kb': endData['total_kb'] - startData['total_kb'],
+      };
+
+      await device.stop(packageName);
+
+      return new TaskResult.success(data, benchmarkScoreKeys: <String>[
+        'start_total_kb',
+        'end_total_kb',
+        'diff_total_kb',
       ]);
     });
   }

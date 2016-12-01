@@ -109,6 +109,12 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["has-android-device"]
 
+  complex_layout_scroll_perf__memory:
+    description: >
+      Measures memory usage of the scroll performance test.
+    stage: devicelab
+    required_agent_capabilities: ["has-android-device"]
+
 
   # iOS on-device tests
 

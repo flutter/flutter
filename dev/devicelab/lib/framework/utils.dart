@@ -231,10 +231,10 @@ Future<String> eval(String executable, List<String> arguments,
 }
 
 Future<int> flutter(String command,
-    {List<String> options: const <String>[], bool canFail: false}) {
+    {List<String> options: const <String>[], bool canFail: false, Map<String, String> env}) {
   List<String> args = <String>[command]..addAll(options);
   return exec(path.join(flutterDirectory.path, 'bin', 'flutter'), args,
-      canFail: canFail);
+      canFail: canFail, env: env);
 }
 
 String get dartBin =>
@@ -403,4 +403,19 @@ Future<Null> runAndCaptureAsyncStacks(Future<Null> callback()) {
     completer.completeError(error, chain);
   });
   return completer.future;
+}
+
+/// Return an unused TCP port number.
+Future<int> findAvailablePort() async {
+  int port = 20000;
+  while (true) {
+    try {
+      ServerSocket socket =
+          await ServerSocket.bind(InternetAddress.LOOPBACK_IP_V4, port);
+      await socket.close();
+      return port;
+    } catch (_) {
+      port++;
+    }
+  }
 }

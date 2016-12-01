@@ -81,6 +81,12 @@ abstract class Device {
   ///
   /// Assumes the device doesn't have a secure unlock pattern.
   Future<Null> unlock();
+
+  /// Read memory statistics for a process.
+  Future<Map<String, dynamic>> getMemoryStats(String packageName);
+
+  /// Stop a process.
+  Future<Null> stop(String packageName);
 }
 
 class AndroidDeviceDiscovery implements DeviceDiscovery {
@@ -248,6 +254,20 @@ class AndroidDevice implements Device {
   Future<String> shellEval(String command, List<String> arguments, {Map<String, String> env}) {
     return eval(adbPath, <String>['shell', command]..addAll(arguments), env: env, canFail: false);
   }
+
+  @override
+  Future<Map<String, dynamic>> getMemoryStats(String packageName) async {
+    String meminfo = await shellEval('dumpsys', <String>['meminfo', packageName]);
+    Match match = new RegExp(r'TOTAL\s+(\d+)').firstMatch(meminfo);
+    return <String, dynamic>{
+      'total_kb': int.parse(match.group(1)),
+    };
+  }
+
+  @override
+  Future<Null> stop(String packageName) async {
+    return shellExec('am', <String>['force-stop', packageName]);
+  }
 }
 
 class IosDeviceDiscovery implements DeviceDiscovery {
@@ -344,6 +364,14 @@ class IosDevice implements Device {
 
   @override
   Future<Null> unlock() async {}
+
+  @override
+  Future<Map<String, dynamic>> getMemoryStats(String packageName) async {
+    throw 'Not implemented';
+  }
+
+  @override
+  Future<Null> stop(String packageName) async {}
 }
 
 /// Path to the `adb` executable.
