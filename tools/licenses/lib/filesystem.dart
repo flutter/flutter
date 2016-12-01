@@ -18,6 +18,7 @@ enum FileType {
   tar, // should be parsed as an archive and drilled into
   gz, // should be parsed as a single compressed file and exposed
   bzip2, // should be parsed as a single compressed file and exposed
+  metadata, // can be skipped entirely (e.g. Mac OS X ._foo files)
 }
 
 typedef List<int> Reader();
@@ -44,15 +45,23 @@ bool isMultiLicenseNotice(Reader reader) {
 }
 
 FileType identifyFile(String name, Reader reader) {
+  List<int> bytes;
   if ((path.split(name).reversed.take(6).toList().reversed.join('/') == 'third_party/icu/source/extra/uconv/README') || // This specific ICU README isn't in UTF-8.
       (path.split(name).reversed.take(6).toList().reversed.join('/') == 'third_party/icu/source/samples/uresb/sr.txt') || // This specific sample contains non-UTF-8 data (unlike other sr.txt files).
-      (path.split(name).reversed.take(4).toList().reversed.join('/') == 'freetype-android/src/builds/detect.mk') || // This specific sample contains non-UTF-8 data (unlike other .mk files).
-      (path.split(name).reversed.take(5).toList().reversed.join('/') == 'third_party/freetype-android/src/docs/FTL.TXT')) // This file has a copyright symbol in Latin1 in it
+      (path.split(name).reversed.take(2).toList().reversed.join('/') == 'builds/detect.mk') || // This specific freetype sample contains non-UTF-8 data (unlike other .mk files).
+      (path.split(name).reversed.take(5).toList().reversed.join('/') == 'third_party/freetype-android/src/docs/FTL.TXT') || // This file has a copyright symbol in Latin1 in it
+      (path.split(name).reversed.take(4).toList().reversed.join('/') == 'third_party/freetype2/docs/FTL.TXT')) // This file has a copyright symbol in Latin1 in it
     return FileType.latin1Text;
   if (path.split(name).reversed.take(6).toList().reversed.join('/') == 'dart/runtime/tests/vm/dart/bad_snapshot' || // Not any particular format
       path.split(name).reversed.take(8).toList().reversed.join('/') == 'third_party/android_tools/ndk/sources/cxx-stl/stlport/src/stlport.rc') // uses the word "copyright" but doesn't have a copyright header
     return FileType.binary;
-  switch (path.basename(name)) {
+  final String base = path.basename(name);
+  if (base.startsWith('._')) {
+    bytes ??= reader();
+    if (matchesSignature(bytes, <int>[0x00, 0x05, 0x16, 0x07, 0x00, 0x02, 0x00, 0x00, 0x4d, 0x61, 0x63, 0x20, 0x4f, 0x53, 0x20, 0x58]))
+      return FileType.metadata; // The ._* files in Mac OS X archives that gives icons and stuff
+  }
+  switch (base) {
     // Build files
     case 'DEPS': return FileType.text;
     case 'MANIFEST': return FileType.text;
@@ -80,7 +89,6 @@ FileType identifyFile(String name, Reader reader) {
     case 'tzdata': return FileType.binary;
     // Source files that don't use UTF-8
     case 'Messages_de_DE.properties': // has a few non-ASCII characters they forgot to escape (from gnu-libstdc++)
-    case 'bool_set': // has latin1 in a person's name in a comment
     case 'mmx_blendtmp.h': // author name in comment contains latin1 (mesa)
     case 'calling_convention.txt': // contains a soft hyphen instead of a real hyphen for some reason (mesa)
     // Character encoding data files
@@ -165,7 +173,6 @@ FileType identifyFile(String name, Reader reader) {
     // Other binary files
     case '.raw': return FileType.binary; // raw audio or graphical data
     case '.bin': return FileType.binary; // some sort of binary data
-    case '.dat': return FileType.binary; // some sort of binary data
     case '.rsc': return FileType.binary; // some sort of resource data
     case '.arsc': return FileType.binary; // Android compiled resources
     case '.apk': return FileType.zip; // Android Package
@@ -187,7 +194,7 @@ FileType identifyFile(String name, Reader reader) {
       // Since there's so few of them, and none have their own copyright statement, we just treat them as binary files.
       return FileType.binary;
   }
-  List<int> bytes = reader();
+  bytes ??= reader();
   assert(bytes.length > 0);
   if (matchesSignature(bytes, <int>[0x1F, 0x8B]))
     return FileType.gz; // GZip archive
@@ -417,6 +424,7 @@ class FileSystemDirectory extends IoNode implements Directory {
             case FileType.bzip2: yield new FileSystemBZip2File(fileEntity); break;
             case FileType.text: yield new FileSystemUTF8TextFile(fileEntity); break;
             case FileType.latin1Text: yield new FileSystemLatin1TextFile(fileEntity); break;
+            case FileType.metadata: break; // ignore this file
           }
         }
       }
@@ -510,6 +518,7 @@ class ArchiveDirectory extends IoNode implements Directory {
           case FileType.bzip2: _files.add(new ArchiveBZip2File(entryFullName, entry)); break;
           case FileType.text: _files.add(new ArchiveUTF8TextFile(entryFullName, entry)); break;
           case FileType.latin1Text: _files.add(new ArchiveLatin1TextFile(entryFullName, entry)); break;
+          case FileType.metadata: break; // ignore this file
         }
       }
     }
@@ -589,14 +598,13 @@ class InMemoryFile extends IoNode implements File {
       case FileType.bzip2: return new InMemoryBZip2File(fullName, bytes); break;
       case FileType.text: return new InMemoryUTF8TextFile(fullName, bytes); break;
       case FileType.latin1Text: return new InMemoryLatin1TextFile(fullName, bytes); break;
+      case FileType.metadata: break; // ignore this file
     }
     assert(false);
     return null;
   }
 
-  @override
   final List<int> _bytes;
-
 
   @override
   String get name => '<data>';
