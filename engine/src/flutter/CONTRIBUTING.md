@@ -52,6 +52,12 @@ target_os = ["android"]
  * If you're on Linux, run `sudo ./build/install-build-deps.sh`
  * If you're on Mac, install Oracle's Java JDK, version 1.7 or later.
  * If you're on Mac, install `ant`: `brew install ant`
+ * If you're planning on working on the [buildroot](https://github.com/flutter/buildroot) repository as well, and have a local checkout of that repository, run the following commands in the `src` directory to update your git remotes accordingly:
+ 
+ ```bash
+ git remote rename origin upstream
+ git remote add origin git@github.com:<your_name_here>/buildroot.git
+  ```
 
 Building and running the code
 -----------------------------
