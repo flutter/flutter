@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:io';
-import 'dart:async';
 
 import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/build_info.dart';
