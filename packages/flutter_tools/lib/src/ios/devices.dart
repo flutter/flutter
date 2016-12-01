@@ -287,13 +287,7 @@ class IOSDevice extends Device {
         }
 
         printTrace("Application launched on the device. Attempting to forward ports.");
-        return await Future.wait(<Future<Uri>>[forwardObsUri, forwardDiagUri])
-            .timeout(
-                kPortForwardTimeout,
-                onTimeout: () {
-                  throw new TimeoutException('Timeout while waiting to acquire and forward ports.');
-                },
-            );
+        return await Future.wait(<Future<Uri>>[forwardObsUri, forwardDiagUri]);
       });
 
       printTrace("Observatory Uri on device: ${uris[0]}");
@@ -318,20 +312,8 @@ class IOSDevice extends Device {
       ApplicationPackage app,
       String serviceName,
       int localPort) async {
-    Duration stepTimeout = const Duration(seconds: 60);
 
-    Future<Uri> remote = new ProtocolDiscovery(getLogReader(app: app), serviceName).nextUri();
-
-    Uri remoteUri = await remote.timeout(stepTimeout,
-        onTimeout: () {
-      printTrace("Timeout while attempting to retrieve remote Uri for $serviceName");
-      return null;
-    });
-
-    if (remoteUri == null) {
-      printTrace("Could not read Uri on device for $serviceName");
-      return null;
-    }
+    Uri remoteUri = await new ProtocolDiscovery(getLogReader(app: app), serviceName).nextUri();
 
     if ((localPort == null) || (localPort == 0)) {
       localPort = await findAvailablePort();

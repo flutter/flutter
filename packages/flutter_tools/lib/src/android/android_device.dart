@@ -349,14 +349,13 @@ class AndroidDevice extends Device {
         Uri observatoryDeviceUri, diagnosticDeviceUri;
 
         if (debuggingOptions.buildMode == BuildMode.debug) {
-          Future<List<Uri>> scrapeServiceUris = Future.wait(
+          List<Uri> deviceUris = await Future.wait(
               <Future<Uri>>[observatoryDiscovery.nextUri(), diagnosticDiscovery.nextUri()]
           );
-          List<Uri> deviceUris = await scrapeServiceUris.timeout(new Duration(seconds: 20));
           observatoryDeviceUri = deviceUris[0];
           diagnosticDeviceUri = deviceUris[1];
         } else if (debuggingOptions.buildMode == BuildMode.profile) {
-          observatoryDeviceUri = await observatoryDiscovery.nextUri().timeout(new Duration(seconds: 20));
+          observatoryDeviceUri = await observatoryDiscovery.nextUri();
         }
 
         printTrace('Observatory Uri on device: $observatoryDeviceUri');
@@ -379,10 +378,7 @@ class AndroidDevice extends Device {
             diagnosticUri: diagnosticHostUri,
         );
       } catch (error) {
-        if (error is TimeoutException)
-          printError('Timed out while waiting for a debug connection.');
-        else
-          printError('Error waiting for a debug connection: $error');
+        printError('Error waiting for a debug connection: $error');
         return new LaunchResult.failed();
       } finally {
         observatoryDiscovery.cancel();

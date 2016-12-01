@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'base/common.dart';
 import 'device.dart';
 
 /// Discover service protocol ports on devices.
@@ -26,7 +27,11 @@ class ProtocolDiscovery {
 
   /// The [Future] returned by this function will complete when the next service
   /// Uri is found.
-  Future<Uri> nextUri() => _completer.future;
+  Future<Uri> nextUri() => _completer.future.timeout(
+      const Duration(seconds: 60), onTimeout: () {
+        throwToolExit('Timeout while attempting to retrieve Uri for $_serviceName');
+      }
+  );
 
   void cancel() {
     _subscription.cancel();
