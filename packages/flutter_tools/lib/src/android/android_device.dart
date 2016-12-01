@@ -261,7 +261,7 @@ class AndroidDevice extends Device {
     return true;
   }
 
-  Future<int> _forwardPort(int hostPort, int devicePort) async {
+  Future<int> _forwardPort(int devicePort, {int hostPort}) async {
     try {
       hostPort = await portForwarder.forward(devicePort, hostPort: hostPort);
       printTrace('Forwarded host port $hostPort to device port $devicePort');
@@ -372,23 +372,23 @@ class AndroidDevice extends Device {
         }
 
         printTrace('Observatory Uri on device: $observatoryDeviceUri');
-        int observatoryLocalPort = await debuggingOptions.findBestObservatoryPort();
         // TODO(devoncarew): Remember the forwarding information (so we can later remove the
         // port forwarding).
-        observatoryLocalPort = await _forwardPort(observatoryLocalPort, observatoryDeviceUri.port);
-        Uri observatoryLocalUri = observatoryDeviceUri.replace(port: observatoryLocalPort);
+        int observatoryHostPort = await _forwardPort(observatoryDeviceUri.port,
+            hostPort: await debuggingOptions.findBestObservatoryPort());
+        Uri observatoryHostUri = observatoryDeviceUri.replace(port: observatoryHostPort);
 
-        Uri diagnosticLocalUri;
+        Uri diagnosticHostUri;
         if (diagnosticDeviceUri != null) {
           printTrace('Diagnostic Server Uri on device: $diagnosticDeviceUri');
-          int diagnosticLocalPort = await debuggingOptions.findBestDiagnosticPort();
-          diagnosticLocalPort = await _forwardPort(diagnosticLocalPort, diagnosticDeviceUri.port);
-          diagnosticLocalUri = diagnosticDeviceUri.replace(port: diagnosticLocalPort);
+          int diagnosticHostPort = await _forwardPort(diagnosticDeviceUri.port,
+              hostPort: await debuggingOptions.findBestDiagnosticPort());
+          diagnosticHostUri = diagnosticDeviceUri.replace(port: diagnosticHostPort);
         }
 
         return new LaunchResult.succeeded(
-            observatoryUri: observatoryLocalUri,
-            diagnosticUri: diagnosticLocalUri,
+            observatoryUri: observatoryHostUri,
+            diagnosticUri: diagnosticHostUri,
         );
       } catch (error) {
         if (error is TimeoutException)
