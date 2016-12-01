@@ -366,7 +366,7 @@ class AndroidDevice extends Device {
           List<Uri> deviceUris = await scrapeServiceUris.timeout(new Duration(seconds: 20));
           observatoryDeviceUri = deviceUris[0];
           diagnosticDeviceUri = deviceUris[1];
-        } else {
+        } else if (debuggingOptions.buildMode == BuildMode.profile) {
           observatoryDeviceUri = await observatoryDiscovery.nextUri().timeout(new Duration(seconds: 20));
         }
 
