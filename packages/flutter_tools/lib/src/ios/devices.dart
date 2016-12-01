@@ -338,17 +338,7 @@ class IOSDevice extends Device {
       printTrace("Auto selected local port to $localPort");
     }
 
-    int forwardResult = await portForwarder
-      .forward(remoteUri.port, hostPort: localPort)
-      .timeout(stepTimeout, onTimeout: () {
-        printTrace("Timeout while atempting to foward port for $serviceName");
-        return null;
-      });
-
-    if (forwardResult == null) {
-      printTrace("Could not foward remote $serviceName port $remoteUri to local port $localPort");
-      return null;
-    }
+    int forwardResult = await forwardPort(remoteUri.port, hostPort: localPort);
 
     Uri forwardUri = remoteUri.replace(port: forwardResult);
 

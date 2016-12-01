@@ -8,7 +8,6 @@ import 'dart:io';
 
 import '../android/android_sdk.dart';
 import '../application_package.dart';
-import '../base/common.dart';
 import '../base/os.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
@@ -261,17 +260,6 @@ class AndroidDevice extends Device {
     return true;
   }
 
-  Future<int> _forwardPort(int devicePort, {int hostPort}) async {
-    try {
-      hostPort = await portForwarder.forward(devicePort, hostPort: hostPort);
-      printTrace('Forwarded host port $hostPort to device port $devicePort');
-      return hostPort;
-    } catch (e) {
-      throw new ToolExit(
-          'Unable to forward host port $hostPort to device port $devicePort: $e');
-    }
-  }
-
   @override
   Future<LaunchResult> startApp(
     ApplicationPackage package,
@@ -374,14 +362,14 @@ class AndroidDevice extends Device {
         printTrace('Observatory Uri on device: $observatoryDeviceUri');
         // TODO(devoncarew): Remember the forwarding information (so we can later remove the
         // port forwarding).
-        int observatoryHostPort = await _forwardPort(observatoryDeviceUri.port,
+        int observatoryHostPort = await forwardPort(observatoryDeviceUri.port,
             hostPort: await debuggingOptions.findBestObservatoryPort());
         Uri observatoryHostUri = observatoryDeviceUri.replace(port: observatoryHostPort);
 
         Uri diagnosticHostUri;
         if (diagnosticDeviceUri != null) {
           printTrace('Diagnostic Server Uri on device: $diagnosticDeviceUri');
-          int diagnosticHostPort = await _forwardPort(diagnosticDeviceUri.port,
+          int diagnosticHostPort = await forwardPort(diagnosticDeviceUri.port,
               hostPort: await debuggingOptions.findBestDiagnosticPort());
           diagnosticHostUri = diagnosticDeviceUri.replace(port: diagnosticHostPort);
         }
