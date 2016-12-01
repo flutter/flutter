@@ -132,8 +132,8 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
 
   // https://en.wikipedia.org/wiki/Free_Four
   String dropdown1Value = 'Free';
-  String dropdown2Value = 'Four';
-  String dropdown3Value;
+  String dropdown2Value;
+  String dropdown3Value = 'Four';
 
   Widget buildDropdownButton() {
     return new Padding(
@@ -144,7 +144,28 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
           new ListItem(
             title: new Text('Simple dropdown:'),
             trailing: new DropdownButton<String>(
+              value: dropdown1Value,
+              onChanged: (String newValue) {
+                setState(() {
+                  dropdown1Value = newValue;
+                });
+              },
+              items: <String>['One', 'Two', 'Free', 'Four'].map((String value) {
+                return new DropdownMenuItem<String>(
+                  value: value,
+                  child: new Text(value),
+                );
+              }).toList(),
+            ),
+          ),
+          new SizedBox(
+            height: 24.0,
+          ),
+          new ListItem(
+            title: new Text('Dropdown with a hint:'),
+            trailing: new DropdownButton<String>(
               value: dropdown2Value,
+              hint: new Text('Choose'),
               onChanged: (String newValue) {
                 setState(() {
                   dropdown2Value = newValue;
@@ -162,33 +183,12 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
             height: 24.0,
           ),
           new ListItem(
-            title: new Text('Dropdown with a hint:'),
+            title: new Text('Scrollable dropdown:'),
             trailing: new DropdownButton<String>(
               value: dropdown3Value,
-              hint: new Text('Choose'),
               onChanged: (String newValue) {
                 setState(() {
                   dropdown3Value = newValue;
-                });
-              },
-              items: <String>['One', 'Two', 'Free', 'Four'].map((String value) {
-                return new DropdownMenuItem<String>(
-                  value: value,
-                  child: new Text(value),
-                );
-              }).toList(),
-            ),
-          ),
-          new SizedBox(
-            height: 24.0,
-          ),
-          new ListItem(
-            title: new Text('Scrollable dropdown:'),
-            trailing: new DropdownButton<String>(
-              value: dropdown1Value,
-              onChanged: (String newValue) {
-                setState(() {
-                  dropdown1Value = newValue;
                 });
               },
               items: <String>[

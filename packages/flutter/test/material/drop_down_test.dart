@@ -14,7 +14,8 @@ Widget buildFrame({
     String value: 'two',
     ValueChanged<String> onChanged,
     bool isDense: false,
-    Widget hint }) {
+    Widget hint,
+  }) {
   return new MaterialApp(
     home: new Material(
       child: new Center(

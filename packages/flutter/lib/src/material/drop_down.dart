@@ -537,7 +537,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> {
 
     // The width of the button and the menu are defined by the widest
     // item and the width of the hint.
-    final List<Widget> items = new List.from(config.items);
+    final List<Widget> items = new List<Widget>.from(config.items);
     int hintIndex;
     if (config.hint != null) {
       hintIndex = items.length;
