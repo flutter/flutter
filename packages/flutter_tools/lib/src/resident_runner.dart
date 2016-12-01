@@ -130,12 +130,12 @@ abstract class ResidentRunner {
     _loggingSubscription = null;
   }
 
-  Future<Null> connectToServiceProtocol(int port) async {
+  Future<Null> connectToServiceProtocol(Uri uri) async {
     if (!debuggingOptions.debuggingEnabled) {
       return new Future<Null>.error('Error the service protocol is not enabled.');
     }
-    vmService = await VMService.connect(port);
-    printTrace('Connected to service protocol on port $port');
+    vmService = await VMService.connect(uri);
+    printTrace('Connected to service protocol: $uri');
     await vmService.getVM();
 
     // Refresh the view list.
@@ -298,9 +298,11 @@ String getMissingPackageHintForPlatform(TargetPlatform platform) {
 }
 
 class DebugConnectionInfo {
-  DebugConnectionInfo({ this.port, this.wsUri, this.baseUri });
+  DebugConnectionInfo({ this.httpUri, this.wsUri, this.baseUri });
 
-  final int port;
-  final String wsUri;
+  // TODO(danrubel): the httpUri field should be removed as part of
+  // https://github.com/flutter/flutter/issues/7050
+  final Uri httpUri;
+  final Uri wsUri;
   final String baseUri;
 }

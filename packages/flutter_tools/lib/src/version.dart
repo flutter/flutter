@@ -5,6 +5,7 @@
 import 'dart:io';
 
 import 'base/process.dart';
+import 'base/process_manager.dart';
 import 'cache.dart';
 
 final Set<String> kKnownBranchNames = new Set<String>.from(<String>[
@@ -102,7 +103,7 @@ class FlutterVersion {
 }
 
 String _runSync(String executable, List<String> arguments, String cwd) {
-  ProcessResult results = Process.runSync(executable, arguments, workingDirectory: cwd);
+  ProcessResult results = processManager.runSync(executable, arguments, workingDirectory: cwd);
   return results.exitCode == 0 ? results.stdout.trim() : '';
 }
 

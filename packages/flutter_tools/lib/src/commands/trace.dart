@@ -55,10 +55,14 @@ class TraceCommand extends FlutterCommand {
   Future<Null> runCommand() async {
     int observatoryPort = int.parse(argResults['debug-port']);
 
+    // TODO(danrubel): this will break if we move to the new observatory URL
+    // See https://github.com/flutter/flutter/issues/7038
+    Uri observatoryUri = Uri.parse('http://127.0.0.1:$observatoryPort');
+
     Tracing tracing;
 
     try {
-      tracing = await Tracing.connect(observatoryPort);
+      tracing = await Tracing.connect(observatoryUri);
     } catch (error) {
       throwToolExit('Error connecting to observatory: $error');
     }
@@ -100,8 +104,8 @@ class TraceCommand extends FlutterCommand {
 class Tracing {
   Tracing(this.vmService);
 
-  static Future<Tracing> connect(int port) {
-    return VMService.connect(port).then((VMService observatory) => new Tracing(observatory));
+  static Future<Tracing> connect(Uri uri) {
+    return VMService.connect(uri).then((VMService observatory) => new Tracing(observatory));
   }
 
   final VMService vmService;

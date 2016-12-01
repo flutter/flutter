@@ -45,8 +45,8 @@ void main() {
       await onDone;
 
       expect(errorCount, 0);
-    }, overrides: <Type, dynamic>{
-      OperatingSystemUtils: os
+    }, overrides: <Type, Generator>{
+      OperatingSystemUtils: () => os
     });
   });
 
@@ -65,8 +65,8 @@ void main() {
     await onDone;
 
     expect(errorCount, 2);
-  }, overrides: <Type, dynamic>{
-    OperatingSystemUtils: os
+  }, overrides: <Type, Generator>{
+    OperatingSystemUtils: () => os
   });
 }
 

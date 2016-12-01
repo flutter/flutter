@@ -33,8 +33,8 @@ void main() {
         // rwxr--r--
         expect(mode.substring(0, 3), endsWith('x'));
       }
-    }, overrides: <Type, dynamic> {
-      OperatingSystemUtils: new OperatingSystemUtils(),
+    }, overrides: <Type, Generator> {
+      OperatingSystemUtils: () => new OperatingSystemUtils(),
     });
   });
 }

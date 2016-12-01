@@ -11,6 +11,7 @@ import 'package:path/path.dart' as path;
 import '../application_package.dart';
 import '../base/context.dart';
 import '../base/process.dart';
+import '../base/process_manager.dart';
 import '../build_info.dart';
 import '../flx.dart' as flx;
 import '../globals.dart';
@@ -39,7 +40,7 @@ class XCode {
       } else {
         try {
           printTrace('xcrun clang');
-          ProcessResult result = Process.runSync('/usr/bin/xcrun', <String>['clang']);
+          ProcessResult result = processManager.runSync('/usr/bin/xcrun', <String>['clang']);
 
           if (result.stdout != null && result.stdout.contains('license'))
             _eulaSigned = false;

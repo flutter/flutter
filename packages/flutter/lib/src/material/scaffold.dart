@@ -324,6 +324,7 @@ class Scaffold extends StatefulWidget {
     this.persistentFooterButtons,
     this.drawer,
     this.bottomNavigationBar,
+    this.backgroundColor,
     this.scrollableKey,
     this.appBarBehavior: AppBarBehavior.anchor,
     this.resizeToAvoidBottomPadding: true
@@ -380,6 +381,11 @@ class Scaffold extends StatefulWidget {
   ///
   /// Typically a [Drawer].
   final Widget drawer;
+
+  /// The color of the [Material] widget that underlies the entire Scaffold.
+  ///
+  /// The theme's [ThemeData.scaffoldBackgroundColor] by default.
+  final Color backgroundColor;
 
   /// A bottom navigation bar to display at the bottom of the scaffold.
   ///
@@ -550,8 +556,10 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   ///
   /// To control how long a [SnackBar] remains visible, use [SnackBar.duration].
   ///
-  /// To remove a [SnackBar] suddenly (without an animation), use
-  /// [removeCurrentSnackBar].
+  /// To remove the [SnackBar] with an exit animation, use [hideCurrentSnackBar]
+  /// or call [ScaffoldFeatureController.close] on the returned
+  /// [ScaffoldFeatureController]. To remove a [SnackBar] suddenly (without an
+  /// animation), use [removeCurrentSnackBar].
   ///
   /// See [Scaffold.of] for information about how to obtain the [ScaffoldState].
   ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showSnackBar(SnackBar snackbar) {
@@ -1061,7 +1069,10 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       )
     );
 
-    return new Material(child: application);
+    return new Material(
+      color: config.backgroundColor ?? themeData.scaffoldBackgroundColor,
+      child: application,
+    );
   }
 }
 

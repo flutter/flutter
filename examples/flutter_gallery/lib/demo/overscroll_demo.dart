@@ -78,7 +78,6 @@ class OverscrollDemoState extends State<OverscrollDemo> {
 
     return new Scaffold(
       key: _scaffoldKey,
-      scrollableKey: _scrollableKey,
       appBar: new AppBar(
         title: new Text('$indicatorTypeText'),
         actions: <Widget>[

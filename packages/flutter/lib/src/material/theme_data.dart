@@ -76,6 +76,7 @@ class ThemeData {
     Color accentColor,
     Brightness accentColorBrightness,
     Color canvasColor,
+    Color scaffoldBackgroundColor,
     Color cardColor,
     Color dividerColor,
     Color highlightColor,
@@ -109,6 +110,7 @@ class ThemeData {
     accentColorBrightness ??= isDark ? Brightness.light : Brightness.dark;
     final bool accentIsDark = accentColorBrightness == Brightness.dark;
     canvasColor ??= isDark ? Colors.grey[850] : Colors.grey[50];
+    scaffoldBackgroundColor ??= canvasColor;
     cardColor ??= isDark ? Colors.grey[800] : Colors.white;
     dividerColor ??= isDark ? const Color(0x1FFFFFFF) : const Color(0x1F000000);
     highlightColor ??= isDark ? _kDarkThemeHighlightColor : _kLightThemeHighlightColor;
@@ -140,6 +142,7 @@ class ThemeData {
       accentColor: accentColor,
       accentColorBrightness: accentColorBrightness,
       canvasColor: canvasColor,
+      scaffoldBackgroundColor: scaffoldBackgroundColor,
       cardColor: cardColor,
       dividerColor: dividerColor,
       highlightColor: highlightColor,
@@ -178,6 +181,7 @@ class ThemeData {
     this.accentColor,
     this.accentColorBrightness,
     this.canvasColor,
+    this.scaffoldBackgroundColor,
     this.cardColor,
     this.dividerColor,
     this.highlightColor,
@@ -207,6 +211,7 @@ class ThemeData {
     assert(accentColor != null);
     assert(accentColorBrightness != null);
     assert(canvasColor != null);
+    assert(scaffoldBackgroundColor != null);
     assert(cardColor != null);
     assert(dividerColor != null);
     assert(highlightColor != null);
@@ -269,9 +274,12 @@ class ThemeData {
   /// action button).
   final Brightness accentColorBrightness;
 
-  /// The color of [Material] when it is of infinite extent, e.g. the
-  /// body of a [Scaffold].
+  /// The default color of [MaterialType.canvas] [Material].
   final Color canvasColor;
+
+  /// The default color of the [Material] that underlies the [Scaffold]. The
+  /// background color for a typical material app or a page within the app.
+  final Color scaffoldBackgroundColor;
 
   /// The color of [Material] when it is used as a [Card].
   final Color cardColor;
@@ -361,6 +369,7 @@ class ThemeData {
     Color accentColor,
     Brightness accentColorBrightness,
     Color canvasColor,
+    Color scaffoldBackgroundColor,
     Color cardColor,
     Color dividerColor,
     Color highlightColor,
@@ -391,6 +400,7 @@ class ThemeData {
       accentColor: accentColor ?? this.accentColor,
       accentColorBrightness: accentColorBrightness ?? this.accentColorBrightness,
       canvasColor: canvasColor ?? this.canvasColor,
+      scaffoldBackgroundColor: scaffoldBackgroundColor ?? this.scaffoldBackgroundColor,
       cardColor: cardColor ?? this.cardColor,
       dividerColor: dividerColor ?? this.dividerColor,
       highlightColor: highlightColor ?? this.highlightColor,
@@ -423,6 +433,7 @@ class ThemeData {
       primaryColor: Color.lerp(begin.primaryColor, end.primaryColor, t),
       primaryColorBrightness: t < 0.5 ? begin.primaryColorBrightness : end.primaryColorBrightness,
       canvasColor: Color.lerp(begin.canvasColor, end.canvasColor, t),
+      scaffoldBackgroundColor: Color.lerp(begin.scaffoldBackgroundColor, end.scaffoldBackgroundColor, t),
       cardColor: Color.lerp(begin.cardColor, end.cardColor, t),
       dividerColor: Color.lerp(begin.dividerColor, end.dividerColor, t),
       highlightColor: Color.lerp(begin.highlightColor, end.highlightColor, t),
@@ -459,6 +470,7 @@ class ThemeData {
            (otherData.primaryColor == primaryColor) &&
            (otherData.primaryColorBrightness == primaryColorBrightness) &&
            (otherData.canvasColor == canvasColor) &&
+           (otherData.scaffoldBackgroundColor == scaffoldBackgroundColor) &&
            (otherData.cardColor == cardColor) &&
            (otherData.dividerColor == dividerColor) &&
            (otherData.highlightColor == highlightColor) &&
@@ -492,6 +504,7 @@ class ThemeData {
       primaryColor,
       primaryColorBrightness,
       canvasColor,
+      scaffoldBackgroundColor,
       cardColor,
       dividerColor,
       highlightColor,
@@ -506,8 +519,8 @@ class ThemeData {
       backgroundColor,
       accentColor,
       accentColorBrightness,
-      indicatorColor,
       hashValues( // Too many values.
+        indicatorColor,
         hintColor,
         errorColor,
         textTheme,

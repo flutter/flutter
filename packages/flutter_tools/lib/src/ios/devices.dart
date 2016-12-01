@@ -9,6 +9,7 @@ import 'dart:io';
 import '../application_package.dart';
 import '../base/os.dart';
 import '../base/process.dart';
+import '../base/process_manager.dart';
 import '../build_info.dart';
 import '../device.dart';
 import '../doctor.dart';
@@ -245,8 +246,8 @@ class IOSDevice extends Device {
     }
 
     int installationResult = -1;
-    int localObsPort;
-    int localDiagPort;
+    Uri localObsUri;
+    Uri localDiagUri;
 
     if (!debuggingOptions.debuggingEnabled) {
       // If debugging is not enabled, just launch the application and continue.
@@ -257,30 +258,36 @@ class IOSDevice extends Device {
       // ports post launch.
       printTrace("Debugging is enabled, connecting to observatory and the diagnostic server");
 
-      Future<int> forwardObsPort = _acquireAndForwardPort(app,
-                                                          ProtocolDiscovery.kObservatoryService,
-                                                          debuggingOptions.observatoryPort);
-      Future<int> forwardDiagPort;
+      // TODO(danrubel): The Android device class does something similar to this code below.
+      // The various Device subclasses should be refactored and common code moved into the superclass.
+      Future<Uri> forwardObsUri = _acquireServiceUri(
+        app,
+        ProtocolDiscovery.kObservatoryService,
+        debuggingOptions.observatoryPort,
+      );
+      Future<Uri> forwardDiagUri;
       if (debuggingOptions.buildMode == BuildMode.debug) {
-        forwardDiagPort = _acquireAndForwardPort(app,
-                                                 ProtocolDiscovery.kDiagnosticService,
-                                                 debuggingOptions.diagnosticPort);
+        forwardDiagUri = _acquireServiceUri(
+          app,
+          ProtocolDiscovery.kDiagnosticService,
+          debuggingOptions.diagnosticPort,
+        );
       } else {
-        forwardDiagPort = new Future<int>.value(null);
+        forwardDiagUri = new Future<Uri>.value(null);
       }
 
       Future<int> launch = runCommandAndStreamOutput(launchCommand, trace: true);
 
-      List<int> ports = await launch.then((int result) async {
+      List<Uri> uris = await launch.then((int result) async {
         installationResult = result;
 
         if (result != 0) {
           printTrace("Failed to launch the application on device.");
-          return <int>[null, null];
+          return <Uri>[null, null];
         }
 
         printTrace("Application launched on the device. Attempting to forward ports.");
-        return await Future.wait(<Future<int>>[forwardObsPort, forwardDiagPort])
+        return await Future.wait(<Future<Uri>>[forwardObsUri, forwardDiagUri])
             .timeout(
                 kPortForwardTimeout,
                 onTimeout: () {
@@ -289,11 +296,11 @@ class IOSDevice extends Device {
             );
       });
 
-      printTrace("Local Observatory Port: ${ports[0]}");
-      printTrace("Local Diagnostic Server Port: ${ports[1]}");
+      printTrace("Observatory Uri on device: ${uris[0]}");
+      printTrace("Diagnostic Server Uri on device: ${uris[1]}");
 
-      localObsPort = ports[0];
-      localDiagPort = ports[1];
+      localObsUri = uris[0];
+      localDiagUri = uris[1];
     }
 
     if (installationResult != 0) {
@@ -304,25 +311,25 @@ class IOSDevice extends Device {
       return new LaunchResult.failed();
     }
 
-    return new LaunchResult.succeeded(observatoryPort: localObsPort, diagnosticPort: localDiagPort);
+    return new LaunchResult.succeeded(observatoryUri: localObsUri, diagnosticUri: localDiagUri);
   }
 
-  Future<int> _acquireAndForwardPort(
+  Future<Uri> _acquireServiceUri(
       ApplicationPackage app,
       String serviceName,
       int localPort) async {
     Duration stepTimeout = const Duration(seconds: 60);
 
-    Future<int> remote = new ProtocolDiscovery(getLogReader(app: app), serviceName).nextPort();
+    Future<Uri> remote = new ProtocolDiscovery(getLogReader(app: app), serviceName).nextUri();
 
-    int remotePort = await remote.timeout(stepTimeout,
+    Uri remoteUri = await remote.timeout(stepTimeout,
         onTimeout: () {
-      printTrace("Timeout while attempting to retrieve remote port for $serviceName");
+      printTrace("Timeout while attempting to retrieve remote Uri for $serviceName");
       return null;
     });
 
-    if (remotePort == null) {
-      printTrace("Could not read port on device for $serviceName");
+    if (remoteUri == null) {
+      printTrace("Could not read Uri on device for $serviceName");
       return null;
     }
 
@@ -331,19 +338,22 @@ class IOSDevice extends Device {
       printTrace("Auto selected local port to $localPort");
     }
 
-    int forwardResult = await portForwarder.forward(remotePort,
-        hostPort: localPort).timeout(stepTimeout, onTimeout: () {
-      printTrace("Timeout while atempting to foward port for $serviceName");
-      return null;
-    });
+    int forwardResult = await portForwarder
+      .forward(remoteUri.port, hostPort: localPort)
+      .timeout(stepTimeout, onTimeout: () {
+        printTrace("Timeout while atempting to foward port for $serviceName");
+        return null;
+      });
 
     if (forwardResult == null) {
-      printTrace("Could not foward remote $serviceName port $remotePort to local port $localPort");
+      printTrace("Could not foward remote $serviceName port $remoteUri to local port $localPort");
       return null;
     }
 
-    printStatus('$serviceName listening on http://127.0.0.1:$localPort');
-    return localPort;
+    Uri forwardUri = remoteUri.replace(port: forwardResult);
+
+    printStatus('$serviceName listening on $forwardUri');
+    return forwardUri;
   }
 
   @override
@@ -514,7 +524,7 @@ class _IOSDevicePortForwarder extends DevicePortForwarder {
     Process process = forwardedPort.context;
 
     if (process != null) {
-      Process.killPid(process.pid);
+      processManager.killPid(process.pid);
     } else {
       printError("Forwarded port did not have a valid process");
     }

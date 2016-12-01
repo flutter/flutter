@@ -14,6 +14,7 @@ import 'src/base/context.dart';
 import 'src/base/logger.dart';
 import 'src/base/os.dart';
 import 'src/base/process.dart';
+import 'src/base/process_manager.dart';
 import 'src/base/utils.dart';
 import 'src/cache.dart';
 import 'src/commands/analyze.dart';
@@ -95,7 +96,15 @@ Future<Null> main(List<String> args) async {
   // Make the context current.
   _executableContext.runInZone(() {
     // Initialize the context with some defaults.
+    // NOTE: Similar lists also exist in `bin/fuchsia_builder.dart` and
+    // `test/src/context.dart`. If you update this list of defaults, look
+    // in those locations as well to see if you need a similar update there.
+
+    // Seed these context entries first since others depend on them
+    context.putIfAbsent(ProcessManager, () => new ProcessManager());
     context.putIfAbsent(Logger, () => new StdoutLogger());
+
+    // Order-independent context entries
     context.putIfAbsent(DeviceManager, () => new DeviceManager());
     context.putIfAbsent(DevFSConfig, () => new DevFSConfig());
     context.putIfAbsent(Doctor, () => new Doctor());

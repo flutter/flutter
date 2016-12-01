@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:io';
 
 import '../base/os.dart';
+import '../base/process_manager.dart';
 import '../doctor.dart';
 import '../globals.dart';
 import 'android_sdk.dart';
@@ -70,7 +71,7 @@ class AndroidWorkflow extends DoctorValidator implements Workflow {
         try {
           printTrace('java -version');
 
-          ProcessResult result = Process.runSync('java', <String>['-version']);
+          ProcessResult result = processManager.runSync('java', <String>['-version']);
           if (result.exitCode == 0) {
             javaVersion = result.stderr;
             List<String> versionLines = javaVersion.split('\n');

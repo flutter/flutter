@@ -29,8 +29,8 @@ void main() {
       );
       expect(tempDir, isNotNull);
       tempDir.deleteSync(recursive: true);
-    }, overrides: <Type, dynamic> {
-      Cache: new Cache(rootOverride: tempDir)
+    }, overrides: <Type, Generator> {
+      Cache: () => new Cache(rootOverride: tempDir),
     });
 
     testUsingContext('using enginePath', () {

@@ -10,7 +10,7 @@ enum _Location {
   Bermuda
 }
 
-typedef Widget DemoItemBodyBuilder(DemoItem<dynamic> item);
+typedef Widget DemoItemBodyBuilder<T>(DemoItem<T> item);
 typedef String ValueToString<T>(T value);
 
 class DualHeaderWithHint extends StatelessWidget {
@@ -49,8 +49,15 @@ class DualHeaderWithHint extends StatelessWidget {
           flex: 2,
           child: new Container(
             margin: const EdgeInsets.only(left: 24.0),
-            child: new Text(name, style: textTheme.body1.copyWith(fontSize: 15.0))
-          )
+            child: new FittedBox(
+              fit: ImageFit.scaleDown,
+              alignment: FractionalOffset.centerLeft,
+              child: new Text(
+                name,
+                style: textTheme.body1.copyWith(fontSize: 15.0),
+              ),
+            ),
+          ),
         ),
         new Expanded(
           flex: 3,
@@ -145,7 +152,7 @@ class DemoItem<T> {
 
   final String name;
   final String hint;
-  final DemoItemBodyBuilder builder;
+  final DemoItemBodyBuilder<T> builder;
   final ValueToString<T> valueToString;
   T value;
   bool isExpanded = false;
@@ -178,11 +185,11 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
 
     _demoItems = <DemoItem<dynamic>>[
       new DemoItem<String>(
-        name: 'Trip name',
+        name: 'Trip',
         value: 'Caribbean cruise',
         hint: 'Change trip name',
         valueToString: (String value) => value,
-        builder: (DemoItem<String> item) { // ignore: argument_type_not_assignable, https://github.com/flutter/flutter/issues/5771
+        builder: (DemoItem<String> item) {
           void close() {
             setState(() {
               item.isExpanded = false;
@@ -216,7 +223,7 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
         value: _Location.Bahamas,
         hint: 'Select location',
         valueToString: (_Location location) => location.toString().split(".")[1],
-        builder: (DemoItem<_Location> item) { // ignore: argument_type_not_assignable, https://github.com/flutter/flutter/issues/5771
+        builder: (DemoItem<_Location> item) {
           void close() {
             setState(() {
               item.isExpanded = false;
@@ -282,11 +289,11 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
         }
       ),
       new DemoItem<double>(
-        name: 'Sun amount',
+        name: 'Sun',
         value: 80.0,
-        hint: 'Select amount of sun',
+        hint: 'Select sun level',
         valueToString: (double amount) => '${amount.round()}',
-        builder: (DemoItem<double> item) { // ignore: argument_type_not_assignable, https://github.com/flutter/flutter/issues/5771
+        builder: (DemoItem<double> item) {
           void close() {
             setState(() {
               item.isExpanded = false;
