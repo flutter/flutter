@@ -363,7 +363,6 @@ class ThemeData {
   /// Creates a copy of this theme but with the given fields replaced with the new values.
   ThemeData copyWith({
     Brightness brightness,
-    Map<int, Color> primarySwatch,
     Color primaryColor,
     Brightness primaryColorBrightness,
     Color accentColor,
@@ -393,9 +392,11 @@ class ThemeData {
     IconThemeData accentIconTheme,
     TargetPlatform platform,
   }) {
+    // ThemeData objects are constructed by ThemeData.raw() and do not have
+    // any null-valued properties. All of the constructor parameters below
+    // will also be non-null and its why a primarySwatch parameter isn't needed.
     return new ThemeData(
       brightness: brightness ?? this.brightness,
-      primarySwatch: primarySwatch,
       primaryColor: primaryColor ?? this.primaryColor,
       primaryColorBrightness: primaryColorBrightness ?? this.primaryColorBrightness,
       accentColor: accentColor ?? this.accentColor,
