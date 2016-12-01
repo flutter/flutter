@@ -359,8 +359,8 @@ class AppDomain extends Domain {
       connectionInfoCompleter = new Completer<DebugConnectionInfo>();
       connectionInfoCompleter.future.then((DebugConnectionInfo info) {
         Map<String, dynamic> params = <String, dynamic>{
-          'port': info.port,
-          'wsUri': info.wsUri
+          'port': info.httpUri.port,
+          'wsUri': info.wsUri.toString(),
         };
         if (info.baseUri != null)
           params['baseUri'] = info.baseUri;
