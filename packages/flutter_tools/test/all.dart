@@ -26,6 +26,7 @@ import 'daemon_test.dart' as daemon_test;
 import 'devfs_test.dart' as devfs_test;
 import 'device_test.dart' as device_test;
 import 'devices_test.dart' as devices_test;
+import 'doctor_test.dart' as doctor_test;
 import 'drive_test.dart' as drive_test;
 import 'format_test.dart' as format_test;
 import 'install_test.dart' as install_test;
@@ -60,6 +61,7 @@ void main() {
   devfs_test.main();
   device_test.main();
   devices_test.main();
+  doctor_test.main();
   drive_test.main();
   format_test.main();
   install_test.main();

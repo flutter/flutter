@@ -1,0 +1,93 @@
+<idea-plugin version="2">
+  <id>io.flutter</id>
+  <name>Flutter</name>
+  <description>Support for developing Flutter applications. Flutter gives developers an easy and productive way to build and deploy cross-platform, high-performance mobile apps on both Android and iOS.</description>
+  <vendor url="https://github.com/flutter/flutter-intellij">flutter.io</vendor>
+
+  <category>Custom Languages</category>
+
+  <version>0.1.3</version>
+
+  <idea-version since-build="162.1" until-build="163.*"/>
+  
+<change-notes>
+<![CDATA[
+0.1.3:
+<ul>
+  <li>notifications for projects that look like Flutter apps but do not have Flutter enabled</li>
+  <li>improved Flutter preference UI and SDK configuration</li>
+  <li>IDEA version constraints to ensure that the plugin cannot be installed in incompatible IDEA versions</li>
+</ul>
+
+0.1.2:
+<ul>
+  <li>fixed device selector filtering</li>
+</ul>
+
+0.1.1:
+<ul>
+  <li>removed second (redundant) "open observatory" button</li>
+  <li>filtering to ensure the Flutter device selector only appears for Flutter projects</li>
+  <li>fixed hangs on app re-runs</li>
+</ul>
+
+0.1.0:
+<ul>
+  <li>initial alpha release</li>
+</ul>
+ ]]>
+ </change-notes>
+
+  <depends>Dart</depends>
+
+  <!-- Contributes IDEA-specific features and implementations. -->
+  <depends optional="true" config-file="idea-contribs.xml">com.intellij.modules.java</depends>
+
+  <!-- Everything following should be SmallIDE-friendly.-->
+  <!-- See: http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html -->
+
+  <actions>
+    <action id="Flutter.HotReloadFlutterAppKey" class="io.flutter.actions.HotReloadFlutterAppKeyAction" text="Flutter Hot Reload">
+      <keyboard-shortcut first-keystroke="ctrl F5" keymap="$default"/>
+    </action>
+    <action id="Flutter.RestartFlutterAppKey" class="io.flutter.actions.RestartFlutterAppKeyAction" text="Flutter Restart Application">
+      <keyboard-shortcut first-keystroke="ctrl shift F5" keymap="$default"/>
+    </action>
+    <group id="Flutter.MainToolbarActions">
+      <separator/>
+
+      <action id="Flutter.DeviceSelector" class="io.flutter.actions.DeviceSelectorAction"
+              description="Flutter Device Selection"
+              icon="FlutterIcons.Phone"/>
+    <separator/>
+      <add-to-group anchor="before" group-id="RunContextGroup" relative-to-action="RunConfiguration"/>
+      <add-to-group anchor="before" group-id="ToolbarRunGroup" relative-to-action="RunConfiguration"/>
+    </group>
+  </actions>
+
+  <extensions defaultExtensionNs="com.intellij">
+
+    <consoleInputFilterProvider implementation="io.flutter.run.daemon.DaemonJsonInputFilterProvider" />?
+    <postStartupActivity implementation="io.flutter.FlutterInitializer"/>
+    <applicationService serviceInterface="io.flutter.run.daemon.FlutterDaemonService"
+                        serviceImplementation="io.flutter.run.daemon.FlutterDaemonService"/>
+
+    <configurationType implementation="io.flutter.run.FlutterRunConfigurationType"/>
+    <runConfigurationProducer implementation="io.flutter.run.FlutterRunConfigurationProducer"/>
+    <programRunner implementation="io.flutter.run.FlutterRunner"/>
+
+    <moduleType id="FLUTTER_MODULE_TYPE" implementationClass="io.flutter.module.FlutterModuleType"/>
+
+    <projectService serviceInterface="io.flutter.settings.FlutterSettings" serviceImplementation="io.flutter.settings.FlutterSettings"/>
+
+    <!-- Plugin service with SmallIDE default, optionally overridden by product-specific implementations -->
+    <projectService serviceInterface="io.flutter.sdk.FlutterSdkService" serviceImplementation="io.flutter.sdk.FlutterSmallIDESdkService"
+                    overrides="false"/>
+
+    <console.folding implementation="io.flutter.console.FlutterConsoleFolding"/>
+
+    <applicationConfigurable groupId="language" instance="io.flutter.sdk.FlutterSettingsConfigurable"
+                             id="flutter.settings" key="flutter.title" bundle="io.flutter.FlutterBundle" nonDefaultProject="true"/>
+  </extensions>
+
+</idea-plugin>

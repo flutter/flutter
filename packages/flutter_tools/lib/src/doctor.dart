@@ -5,6 +5,8 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:archive/archive.dart';
+import 'dart:convert' show UTF8;
 import 'package:path/path.dart' as path;
 
 import 'android/android_workflow.dart';
@@ -292,8 +294,29 @@ abstract class IntelliJValidator extends DoctorValidator {
       ));
       return false;
     }
-    messages.add(new ValidationMessage('$title plugin installed'));
+    String version = _readPackageVersion(packageName);
+    messages.add(new ValidationMessage('$title plugin '
+        '${version != null ? "version $version" : "installed"}'));
     return true;
+  }
+
+  String _readPackageVersion(String packageName) {
+    String jarPath = packageName.endsWith('.jar')
+        ? path.join(pluginsPath, packageName)
+        : path.join(pluginsPath, packageName, 'lib', '$packageName.jar');
+    // TODO(danrubel) look for a better way to extract a single 2K file from the zip
+    // rather than reading the entire file into memory.
+    try {
+      Archive archive = new ZipDecoder().decodeBytes(new File(jarPath).readAsBytesSync());
+      ArchiveFile file = archive.findFile('META-INF/plugin.xml');
+      String content = UTF8.decode(file.content);
+      String versionStartTag = '<version>';
+      int start = content.indexOf(versionStartTag);
+      int end = content.indexOf('</version>', start);
+      return content.substring(start + versionStartTag.length, end);
+    } catch (_) {
+      return null;
+    }
   }
 
   bool hasPackage(String packageName) {
