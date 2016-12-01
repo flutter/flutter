@@ -28,7 +28,7 @@ Future<Map<String, dynamic>> runTask(String taskName, { bool silent: false }) as
   if (!file(taskExecutable).existsSync())
     throw 'Executable Dart file not found: $taskExecutable';
 
-  int vmServicePort = await _findAvailablePort();
+  int vmServicePort = await findAvailablePort();
   Process runner = await startProcess(dartBin, <String>[
     '--enable-vm-service=$vmServicePort',
     '--no-pause-isolates-on-exit',
@@ -115,20 +115,6 @@ Future<VMIsolate> _connectToRunnerIsolate(int vmServicePort) async {
       const Duration pauseBetweenRetries = const Duration(milliseconds: 200);
       print('Will retry in $pauseBetweenRetries.');
       await new Future<Null>.delayed(pauseBetweenRetries);
-    }
-  }
-}
-
-Future<int> _findAvailablePort() async {
-  int port = 20000;
-  while (true) {
-    try {
-      ServerSocket socket =
-          await ServerSocket.bind(InternetAddress.LOOPBACK_IP_V4, port);
-      await socket.close();
-      return port;
-    } catch (_) {
-      port++;
     }
   }
 }
