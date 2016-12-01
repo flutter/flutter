@@ -294,7 +294,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
         config.actions.map/*<Widget>*/((Widget widget) {
           return new Padding(
             // 8.0 is the default padding of an icon button
-            padding: new EdgeInsets.only(left: 24.0 - 8.0 * 2.0),
+            padding: const EdgeInsets.only(left: 24.0 - 8.0 * 2.0),
             child: widget
           );
         }).toList()
@@ -363,7 +363,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
                                          : themeData.textTheme.title.copyWith(fontWeight: FontWeight.w400),
             child: new IconTheme.merge(
               context: context,
-              data: new IconThemeData(
+              data: const IconThemeData(
                 opacity: 0.54
               ),
               child: new ButtonTheme.bar(
@@ -399,7 +399,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
             style: footerTextStyle,
             child: new IconTheme.merge(
               context: context,
-              data: new IconThemeData(
+              data: const IconThemeData(
                 opacity: 0.54
               ),
               child: new Container(

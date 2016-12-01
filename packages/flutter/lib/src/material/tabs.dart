@@ -402,7 +402,7 @@ class _Tab extends StatelessWidget {
 
     Container centeredLabel = new Container(
       child: new Center(child: labelContent, widthFactor: 1.0, heightFactor: 1.0),
-      constraints: new BoxConstraints(minWidth: _kMinTabWidth),
+      constraints: const BoxConstraints(minWidth: _kMinTabWidth),
       padding: _kTabLabelPadding
     );
 
@@ -512,7 +512,7 @@ class TabBarSelection<T> extends StatefulWidget {
   /// TabBarSelectionState<Foo> tabState = TabBarSelection.of/*<Foo>*/(context);
   /// ```
   static TabBarSelectionState<dynamic/*=T*/> of/*<T>*/(BuildContext context) {
-    return context.ancestorStateOfType(new TypeMatcher<TabBarSelectionState<dynamic/*=T*/>>());
+    return context.ancestorStateOfType(const TypeMatcher<TabBarSelectionState<dynamic/*=T*/>>());
   }
 
   @override
@@ -1302,7 +1302,7 @@ class TabPageSelector<T> extends StatelessWidget {
     return new Container(
       width: 12.0,
       height: 12.0,
-      margin: new EdgeInsets.all(4.0),
+      margin: const EdgeInsets.all(4.0),
       decoration: new BoxDecoration(
         backgroundColor: background,
         border: new Border.all(color: selectedColor.end),

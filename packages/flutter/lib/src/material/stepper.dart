@@ -310,8 +310,8 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
       return new AnimatedCrossFade(
         firstChild: _buildCircle(index, true),
         secondChild: _buildTriangle(index, true),
-        firstCurve: new Interval(0.0, 0.6, curve: Curves.fastOutSlowIn),
-        secondCurve: new Interval(0.4, 1.0, curve: Curves.fastOutSlowIn),
+        firstCurve: const Interval(0.0, 0.6, curve: Curves.fastOutSlowIn),
+        secondCurve: const Interval(0.4, 1.0, curve: Curves.fastOutSlowIn),
         sizeCurve: Curves.fastOutSlowIn,
         crossFadeState: config.steps[index].state == StepState.error ? CrossFadeState.showSecond : CrossFadeState.showFirst,
         duration: kThemeAnimationDuration,
@@ -503,8 +503,8 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
               ]
             )
           ),
-          firstCurve: new Interval(0.0, 0.6, curve: Curves.fastOutSlowIn),
-          secondCurve: new Interval(0.4, 1.0, curve: Curves.fastOutSlowIn),
+          firstCurve: const Interval(0.0, 0.6, curve: Curves.fastOutSlowIn),
+          secondCurve: const Interval(0.4, 1.0, curve: Curves.fastOutSlowIn),
           sizeCurve: Curves.fastOutSlowIn,
           crossFadeState: _isCurrent(index) ? CrossFadeState.showSecond : CrossFadeState.showFirst,
           duration: kThemeAnimationDuration,

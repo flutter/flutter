@@ -265,10 +265,10 @@ class AboutDialog extends StatelessWidget {
     final Widget icon = applicationIcon ?? _defaultApplicationIcon(context);
     List<Widget> body = <Widget>[];
     if (icon != null)
-      body.add(new IconTheme(data: new IconThemeData(size: 48.0), child: icon));
+      body.add(new IconTheme(data: const IconThemeData(size: 48.0), child: icon));
     body.add(new Expanded(
       child: new Padding(
-        padding: new EdgeInsets.symmetric(horizontal: 24.0),
+        padding: const EdgeInsets.symmetric(horizontal: 24.0),
         child: new BlockBody(
           children: <Widget>[
             new Text(name, style: Theme.of(context).textTheme.headline),
@@ -381,15 +381,15 @@ class _LicensePageState extends State<LicensePage> {
     await for (LicenseEntry license in LicenseRegistry.licenses) {
       setState(() {
         _licenses.add(new Padding(
-          padding: new EdgeInsets.symmetric(vertical: 18.0),
+          padding: const EdgeInsets.symmetric(vertical: 18.0),
           child: new Text(
             '🍀‬', // That's U+1F340. Could also use U+2766 (❦) if U+1F340 doesn't work everywhere.
             textAlign: TextAlign.center
           )
         ));
         _licenses.add(new Container(
-          decoration: new BoxDecoration(
-            border: new Border(bottom: new BorderSide(width: 0.0))
+          decoration: const BoxDecoration(
+            border: const Border(bottom: const BorderSide(width: 0.0))
           ),
           child: new Text(
             license.packages.join(', '),
@@ -400,7 +400,7 @@ class _LicensePageState extends State<LicensePage> {
         for (LicenseParagraph paragraph in license.paragraphs) {
           if (paragraph.indent == LicenseParagraph.centeredIndent) {
             _licenses.add(new Padding(
-              padding: new EdgeInsets.only(top: 16.0),
+              padding: const EdgeInsets.only(top: 16.0),
               child: new Text(
                 paragraph.text,
                 style: new TextStyle(fontWeight: FontWeight.bold),
@@ -438,7 +438,7 @@ class _LicensePageState extends State<LicensePage> {
     contents.addAll(_licenses);
     if (!_loaded) {
       contents.add(new Padding(
-        padding: new EdgeInsets.symmetric(vertical: 24.0),
+        padding: const EdgeInsets.symmetric(vertical: 24.0),
         child: new Center(
           child: new CircularProgressIndicator()
         )
@@ -452,7 +452,7 @@ class _LicensePageState extends State<LicensePage> {
         style: Theme.of(context).textTheme.caption,
         child: new Scrollbar(
           child: new LazyBlock(
-            padding: new EdgeInsets.symmetric(horizontal: 8.0, vertical: 12.0),
+            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 12.0),
             delegate: new LazyBlockChildren(
               children: contents
             )

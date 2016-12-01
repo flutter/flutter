@@ -35,6 +35,6 @@ class PlaceholderState extends State<Placeholder> {
   Widget build(BuildContext context) {
     if (_child != null)
       return child;
-    return new SizedBox(width: 0.0, height: 0.0);
+    return const SizedBox(width: 0.0, height: 0.0);
   }
 }

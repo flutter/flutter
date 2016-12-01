@@ -52,9 +52,9 @@ class Dialog extends StatelessWidget {
   Widget build(BuildContext context) {
     return new Center(
       child: new Container(
-        margin: new EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0),
+        margin: const EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0),
         child: new ConstrainedBox(
-          constraints: new BoxConstraints(minWidth: 280.0),
+          constraints: const BoxConstraints(minWidth: 280.0),
           child: new Material(
             elevation: 24,
             color: _getColor(context),

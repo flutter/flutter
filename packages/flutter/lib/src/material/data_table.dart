@@ -397,7 +397,7 @@ class DataTable extends StatelessWidget {
         down: sorted ? ascending : null,
         duration: _kSortArrowAnimationDuration
       );
-      final Widget arrowPadding = new SizedBox(width: _kSortArrowPadding);
+      final Widget arrowPadding = const SizedBox(width: _kSortArrowPadding);
       label = new Row(
         children: numeric ? <Widget>[ arrow, arrowPadding, label ]
                           : <Widget>[ label, arrowPadding, arrow ]

@@ -258,7 +258,7 @@ class _FlutterLogoPainter extends BoxPainter {
       )
     );
     _textPainter.layout();
-    final ui.TextBox textSize = _textPainter.getBoxesForSelection(new TextSelection(baseOffset: 0, extentOffset: kLabel.length)).single;
+    final ui.TextBox textSize = _textPainter.getBoxesForSelection(const TextSelection(baseOffset: 0, extentOffset: kLabel.length)).single;
     _textBoundingRect = new Rect.fromLTRB(textSize.left, textSize.top, textSize.right, textSize.bottom);
   }
 
