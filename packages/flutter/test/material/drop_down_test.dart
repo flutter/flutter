@@ -9,13 +9,20 @@ import 'package:flutter/material.dart';
 
 final List<String> menuItems = <String>['one', 'two', 'three', 'four'];
 
-Widget buildFrame({ Key buttonKey, String value: 'two',  ValueChanged<String> onChanged, bool isDense: false }) {
+Widget buildFrame({
+    Key buttonKey,
+    String value: 'two',
+    ValueChanged<String> onChanged,
+    bool isDense: false,
+    Widget hint,
+  }) {
   return new MaterialApp(
     home: new Material(
       child: new Center(
         child: new DropdownButton<String>(
           key: buttonKey,
           value: value,
+          hint: hint,
           onChanged: onChanged,
           isDense: isDense,
           items: menuItems.map((String item) {
@@ -315,6 +322,30 @@ void main() {
 
     await tester.pumpWidget(build());
     expect(value, equals('one'));
+  });
+
+  testWidgets('Size of DropdownButton with null value and a hint', (WidgetTester tester) async {
+    Key buttonKey = new UniqueKey();
+    String value;
+
+    // The hint will define the dropdown's width
+    Widget build() => buildFrame(buttonKey: buttonKey, value: value, hint: new Text('onetwothree'));
+
+    await tester.pumpWidget(build());
+    expect(find.text('onetwothree'), findsOneWidget);
+    RenderBox buttonBoxHintValue = tester.renderObject(find.byKey(buttonKey));
+    assert(buttonBoxHintValue.attached);
+
+
+    value = 'three';
+    await tester.pumpWidget(build());
+    RenderBox buttonBox = tester.renderObject(find.byKey(buttonKey));
+    assert(buttonBox.attached);
+
+    // A DropDown button with a null value and a hint should be the same size as a
+    // one with a non-null value.
+    expect(buttonBox.localToGlobal(Point.origin), equals(buttonBoxHintValue.localToGlobal(Point.origin)));
+    expect(buttonBox.size, equals(buttonBoxHintValue.size));
   });
 
 }

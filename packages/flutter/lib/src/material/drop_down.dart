@@ -420,6 +420,7 @@ class DropdownButton<T> extends StatefulWidget {
     Key key,
     @required this.items,
     this.value,
+    this.hint,
     @required this.onChanged,
     this.elevation: 8,
     this.style,
@@ -438,6 +439,9 @@ class DropdownButton<T> extends StatefulWidget {
   /// value is null then the menu is popped up as if the first item was
   /// selected.
   final T value;
+
+  /// Displayed if [value] is null.
+  final Widget hint;
 
   /// Called when the user selects an item.
   final ValueChanged<T> onChanged;
@@ -530,6 +534,21 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
+
+    // The width of the button and the menu are defined by the widest
+    // item and the width of the hint.
+    final List<Widget> items = new List<Widget>.from(config.items);
+    int hintIndex;
+    if (config.hint != null) {
+      hintIndex = items.length;
+      items.add(new DefaultTextStyle(
+        style: _textStyle.copyWith(color: Theme.of(context).hintColor),
+        child: new IgnorePointer(
+          child: config.hint,
+        ),
+      ));
+    }
+
     Widget result = new DefaultTextStyle(
       style: _textStyle,
       child: new SizedBox(
@@ -538,12 +557,12 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            // The button's size is defined by its largest menu item. If value is
-            // null then an item does not appear.
+            // If value is null (then _selectedIndex is null) then we display
+            // the hint or nothing at all.
             new IndexedStack(
-              index: _selectedIndex,
+              index: _selectedIndex ?? hintIndex,
               alignment: FractionalOffset.centerLeft,
-              children: config.items,
+              children: items,
             ),
             new Icon(Icons.arrow_drop_down,
               size: config.iconSize,
@@ -568,10 +587,10 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> {
               height: 1.0,
               decoration: const BoxDecoration(
                 border: const Border(bottom: const BorderSide(color: const Color(0xFFBDBDBD), width: 0.0))
-              )
-            )
-          )
-        ]
+              ),
+            ),
+          ),
+        ],
       );
     }
 
