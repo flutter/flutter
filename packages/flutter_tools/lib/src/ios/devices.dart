@@ -459,7 +459,7 @@ class _IOSDevicePortForwarder extends DevicePortForwarder {
 
     _forwardedPorts.add(forwardedPort);
 
-    return 1;
+    return hostPort;
   }
 
   @override
