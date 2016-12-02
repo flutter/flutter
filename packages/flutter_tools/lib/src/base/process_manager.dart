@@ -317,7 +317,7 @@ class RecordingProcessManager implements ProcessManager {
   Future<Null> _waitForRunningProcessesToExitWithTimeout({
     void onTimeout(int pid, Map<String, dynamic> manifestEntry),
   }) async {
-    await Future.wait(new List.from(_runningProcesses.values))
+    await Future.wait(new List<Future<int>>.from(_runningProcesses.values))
         .timeout(new Duration(milliseconds: 20), onTimeout: () {
           _runningProcesses.forEach((int pid, Future<int> future) {
             Map<String, dynamic> manifestEntry = _manifest

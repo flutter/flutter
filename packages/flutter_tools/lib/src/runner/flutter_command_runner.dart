@@ -99,9 +99,9 @@ class FlutterCommandRunner extends CommandRunner<Null> {
             'Enables recording of process invocations (including stdout and '
             'stderr of all such invocations), and serializes that recording to '
             'the specified location.\n'
-            'If the location is a folder, a ZIP file named `recording.zip` will'
-            'be created in that folder. Otherwise, a ZIP file will be created'
-            'with the path specified in this flag.');
+            'If the location is a directory, a ZIP file named `recording.zip` '
+            'will be created in that directory. Otherwise, a ZIP file will be '
+            'created with the path specified in this flag.');
   }
 
   @override
