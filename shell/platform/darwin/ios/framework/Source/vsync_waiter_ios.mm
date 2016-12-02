@@ -32,8 +32,12 @@
         displayLinkWithTarget:self
                      selector:@selector(onDisplayLink:)] retain];
     _displayLink.paused = YES;
-    [_displayLink addToRunLoop:[NSRunLoop currentRunLoop]
-                       forMode:NSRunLoopCommonModes];
+
+    blink::Threads::UI()->PostTask([client = [self retain]]() {
+      [client->_displayLink addToRunLoop:[NSRunLoop currentRunLoop]
+                                 forMode:NSRunLoopCommonModes];
+      [client release];
+    });
   }
 
   return self;
@@ -52,8 +56,7 @@
   _displayLink.paused = YES;
   auto callback = std::move(_pendingCallback);
   _pendingCallback = shell::VsyncWaiter::Callback();
-  blink::Threads::UI()->PostTask(
-      [callback, frame_time] { callback(frame_time); });
+  callback(frame_time);
 }
 
 - (void)dealloc {
