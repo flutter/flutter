@@ -348,6 +348,8 @@ class AndroidDevice extends Device {
     // device has printed "Observatory is listening on...".
     printTrace('Waiting for observatory port to be available...');
 
+    // TODO(danrubel) Waiting for observatory and diagnostic services
+    // can be made common across all devices.
     try {
       Uri observatoryUri, diagnosticUri;
 
