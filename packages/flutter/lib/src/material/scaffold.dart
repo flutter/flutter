@@ -342,7 +342,8 @@ class Scaffold extends StatefulWidget {
   /// The widget in the body of the scaffold is positioned at the top-left of
   /// the available space between the app bar and the bottom of the scaffold. To
   /// center this widget instead, consider putting it in a [Center] widget and
-  /// having that be the body.
+  /// having that be the body. To expand this widget instead, consider
+  /// putting it in a [SizedBox.expand].
   ///
   /// If you have a column of widgets that should normally fit on the screen,
   /// but may overflow and would in such cases need to scroll, consider using a
