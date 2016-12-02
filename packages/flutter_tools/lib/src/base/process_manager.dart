@@ -312,7 +312,7 @@ class RecordingProcessManager implements ProcessManager {
         Process.killPid(pid);
       });
     // Now that we explicitly signalled the processes that timed out asking
-    // then to shutdown, wait one more time for those processes to exit.
+    // them to shutdown, wait one more time for those processes to exit.
     await _waitForRunningProcessesToExitWithTimeout(
       onTimeout: (int pid, Map<String, dynamic> manifestEntry) {
         manifestEntry['notResponding'] = true;
