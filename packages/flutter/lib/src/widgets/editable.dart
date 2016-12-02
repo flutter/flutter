@@ -135,6 +135,7 @@ class RawInput extends Scrollable {
     this.cursorColor,
     this.textScaleFactor,
     int maxLines: 1,
+    this.autofocus: false,
     this.selectionColor,
     this.selectionControls,
     @required this.platform,
@@ -176,6 +177,11 @@ class RawInput extends Scrollable {
   /// If this is 1 (the default), the text will not wrap, but will scroll
   /// horizontally instead.
   final int maxLines;
+
+  /// Whether this input field should focus itself if nothing else is already focused.
+  /// If true, the keyboard will open as soon as this input obtains focus. Otherwise,
+  /// the keyboard is only shown after the user taps the text field.
+  final bool autofocus;
 
   /// The color to use when painting the selection.
   final Color selectionColor;
@@ -278,7 +284,7 @@ class RawInputState extends ScrollableState<RawInput> implements TextInputClient
   bool _requestingFocus = false;
 
   void _attachOrDetachKeyboard(bool focused) {
-    if (focused && !_isAttachedToKeyboard && _requestingFocus) {
+    if (focused && !_isAttachedToKeyboard && (_requestingFocus || config.autofocus)) {
       _textInputConnection = TextInput.attach(
           this, new TextInputConfiguration(inputType: config.keyboardType))
         ..setEditingState(_getTextEditingStateFromInputValue(_currentValue))
