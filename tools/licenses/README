@@ -1,0 +1,8 @@
+To update the sky_engine LICENSE file, run the following in this directory:
+
+```
+pub get
+gclient sync
+dart lib/main.dart ../../.. > ../../sky/packages/sky_engine/LICENSE
+dart --checked lib/main.dart ../../.. > ../../travis/licenses.golden
+```
