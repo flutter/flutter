@@ -52,6 +52,14 @@ TaskFunction createHelloWorldMemoryTest() {
   );
 }
 
+TaskFunction createGalleryNavigationMemoryTest() {
+  return new MemoryTest(
+    '${flutterDirectory.path}/examples/flutter_gallery',
+    'io.flutter.examples.gallery',
+    testTarget: 'test_driver/memory_nav.dart',
+  );
+}
+
 /// Measure application startup performance.
 class StartupTest {
   static const Duration _startupTimeout = const Duration(minutes: 2);
