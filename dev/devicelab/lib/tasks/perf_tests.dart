@@ -5,42 +5,36 @@
 import 'dart:async';
 import 'dart:convert' show JSON;
 
-import 'package:meta/meta.dart';
-
 import '../framework/adb.dart';
 import '../framework/framework.dart';
 import '../framework/utils.dart';
 
-TaskFunction createComplexLayoutScrollPerfTest({ @required DeviceOperatingSystem os }) {
+TaskFunction createComplexLayoutScrollPerfTest() {
   return new PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/complex_layout',
     'test_driver/scroll_perf.dart',
     'complex_layout_scroll_perf',
-    os: os,
   );
 }
 
-TaskFunction createComplexLayoutScrollMemoryTest({ @required DeviceOperatingSystem os }) {
+TaskFunction createComplexLayoutScrollMemoryTest() {
   return new MemoryTest(
     '${flutterDirectory.path}/dev/benchmarks/complex_layout',
     'test_driver/scroll_perf.dart',
     'complex_layout_scroll_perf',
     'com.yourcompany.complexLayout',
-    os: os,
   );
 }
 
-TaskFunction createFlutterGalleryStartupTest({ @required DeviceOperatingSystem os }) {
+TaskFunction createFlutterGalleryStartupTest() {
   return new StartupTest(
     '${flutterDirectory.path}/examples/flutter_gallery',
-    os: os,
   );
 }
 
-TaskFunction createComplexLayoutStartupTest({ @required DeviceOperatingSystem os }) {
+TaskFunction createComplexLayoutStartupTest() {
   return new StartupTest(
     '${flutterDirectory.path}/dev/benchmarks/complex_layout',
-    os: os,
   );
 }
 
@@ -56,19 +50,16 @@ TaskFunction createComplexLayoutBuildTest() {
 class StartupTest {
   static const Duration _startupTimeout = const Duration(minutes: 2);
 
-  StartupTest(this.testDirectory, { this.os }) {
-    deviceOperatingSystem = os;
-  }
+  StartupTest(this.testDirectory);
 
   final String testDirectory;
-  final DeviceOperatingSystem os;
 
   Future<TaskResult> call() async {
     return await inDirectory(testDirectory, () async {
       String deviceId = (await devices.workingDevice).deviceId;
       await flutter('packages', options: <String>['get']);
 
-      if (os == DeviceOperatingSystem.ios) {
+      if (deviceOperatingSystem == DeviceOperatingSystem.ios) {
         // This causes an Xcode project to be created.
         await flutter('build', options: <String>['ios', '--profile']);
       }
@@ -91,12 +82,11 @@ class StartupTest {
 /// performance.
 class PerfTest {
 
-  PerfTest(this.testDirectory, this.testTarget, this.timelineFileName, { this.os });
+  PerfTest(this.testDirectory, this.testTarget, this.timelineFileName);
 
   final String testDirectory;
   final String testTarget;
   final String timelineFileName;
-  final DeviceOperatingSystem os;
 
   Future<TaskResult> call() {
     return inDirectory(testDirectory, () async {
@@ -105,7 +95,7 @@ class PerfTest {
       String deviceId = device.deviceId;
       await flutter('packages', options: <String>['get']);
 
-      if (os == DeviceOperatingSystem.ios) {
+      if (deviceOperatingSystem == DeviceOperatingSystem.ios) {
         // This causes an Xcode project to be created.
         await flutter('build', options: <String>['ios', '--profile']);
       }
@@ -185,13 +175,12 @@ class BuildTest {
 }
 
 class MemoryTest {
-  MemoryTest(this.testDirectory, this.testTarget, this.timelineFileName, this.packageName, { this.os });
+  MemoryTest(this.testDirectory, this.testTarget, this.timelineFileName, this.packageName);
 
   final String testDirectory;
   final String testTarget;
   final String timelineFileName;
   final String packageName;
-  final DeviceOperatingSystem os;
 
   Future<TaskResult> call() {
     return inDirectory(testDirectory, () async {
@@ -200,7 +189,7 @@ class MemoryTest {
       String deviceId = device.deviceId;
       await flutter('packages', options: <String>['get']);
 
-      if (os == DeviceOperatingSystem.ios) {
+      if (deviceOperatingSystem == DeviceOperatingSystem.ios) {
         // This causes an Xcode project to be created.
         await flutter('build', options: <String>['ios', '--profile']);
       }

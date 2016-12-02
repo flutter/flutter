@@ -9,5 +9,6 @@ import 'package:flutter_devicelab/framework/adb.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
 
 Future<Null> main() async {
-  await task(createComplexLayoutStartupTest(os: DeviceOperatingSystem.android));
+  deviceOperatingSystem = DeviceOperatingSystem.android;
+  await task(createComplexLayoutStartupTest());
 }
