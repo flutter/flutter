@@ -171,6 +171,7 @@ class RecordingProcessManager implements ProcessManager {
       environment: environment,
       stdoutEncoding: stdoutEncoding,
       stderrEncoding: stderrEncoding,
+      exitCode: result.exitCode,
     ));
 
     String basename = _getBasename(result.pid, executable, arguments);
@@ -220,6 +221,7 @@ class RecordingProcessManager implements ProcessManager {
       environment: environment,
       stdoutEncoding: stdoutEncoding,
       stderrEncoding: stderrEncoding,
+      exitCode: result.exitCode,
     ));
 
     String basename = _getBasename(result.pid, executable, arguments);
@@ -260,6 +262,7 @@ class RecordingProcessManager implements ProcessManager {
       ProcessStartMode mode,
       Encoding stdoutEncoding,
       Encoding stderrEncoding,
+      int exitCode,
   }) {
     Map<String, dynamic> entry = <String, dynamic>{};
     if (pid != null) entry['pid'] = pid;
@@ -270,6 +273,7 @@ class RecordingProcessManager implements ProcessManager {
     if (mode != null) entry['mode'] = mode.toString();
     if (stdoutEncoding != null) entry['stdoutEncoding'] = stdoutEncoding.name;
     if (stderrEncoding != null) entry['stderrEncoding'] = stderrEncoding.name;
+    if (exitCode != null) entry['exitCode'] = exitCode;
     return entry;
   }
 
