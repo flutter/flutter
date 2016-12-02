@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import '../application_package.dart';
+import '../base/common.dart';
 import '../base/os.dart';
 import '../base/process.dart';
 import '../base/process_manager.dart';
@@ -260,18 +261,23 @@ class IOSDevice extends Device {
 
       // TODO(danrubel): The Android device class does something similar to this code below.
       // The various Device subclasses should be refactored and common code moved into the superclass.
-      Future<Uri> forwardObsUri = _acquireServiceUri(
-        app,
+      ProtocolDiscovery observatoryDiscovery = new ProtocolDiscovery(
+        getLogReader(app: app),
         ProtocolDiscovery.kObservatoryService,
-        debuggingOptions.observatoryPort,
-      );
+        portForwarder: portForwarder,
+        hostPort: debuggingOptions.observatoryPort,
+        defaultHostPort: kDefaultObservatoryPort);
+      ProtocolDiscovery diagnosticDiscovery = new ProtocolDiscovery(
+        getLogReader(app: app),
+        ProtocolDiscovery.kDiagnosticService,
+        portForwarder: portForwarder,
+        hostPort: debuggingOptions.diagnosticPort,
+        defaultHostPort: kDefaultDiagnosticPort);
+
+      Future<Uri> forwardObsUri = observatoryDiscovery.nextUri();
       Future<Uri> forwardDiagUri;
       if (debuggingOptions.buildMode == BuildMode.debug) {
-        forwardDiagUri = _acquireServiceUri(
-          app,
-          ProtocolDiscovery.kDiagnosticService,
-          debuggingOptions.diagnosticPort,
-        );
+        forwardDiagUri = diagnosticDiscovery.nextUri();
       } else {
         forwardDiagUri = new Future<Uri>.value(null);
       }
@@ -290,9 +296,6 @@ class IOSDevice extends Device {
         return await Future.wait(<Future<Uri>>[forwardObsUri, forwardDiagUri]);
       });
 
-      printTrace("Observatory Uri on device: ${uris[0]}");
-      printTrace("Diagnostic Server Uri on device: ${uris[1]}");
-
       localObsUri = uris[0];
       localDiagUri = uris[1];
     }
@@ -306,26 +309,6 @@ class IOSDevice extends Device {
     }
 
     return new LaunchResult.succeeded(observatoryUri: localObsUri, diagnosticUri: localDiagUri);
-  }
-
-  Future<Uri> _acquireServiceUri(
-      ApplicationPackage app,
-      String serviceName,
-      int localPort) async {
-
-    Uri remoteUri = await new ProtocolDiscovery(getLogReader(app: app), serviceName).nextUri();
-
-    if ((localPort == null) || (localPort == 0)) {
-      localPort = await findAvailablePort();
-      printTrace("Auto selected local port to $localPort");
-    }
-
-    int forwardResult = await forwardPort(remoteUri.port, hostPort: localPort);
-
-    Uri forwardUri = remoteUri.replace(port: forwardResult);
-
-    printStatus('$serviceName listening on $forwardUri');
-    return forwardUri;
   }
 
   @override

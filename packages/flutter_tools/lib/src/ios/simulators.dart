@@ -461,25 +461,23 @@ class IOSSimulator extends Device {
 
     if (!debuggingOptions.debuggingEnabled) {
       return new LaunchResult.succeeded();
-    } else {
-      // Wait for the service protocol port here. This will complete once the
-      // device has printed "Observatory is listening on..."
-      printTrace('Waiting for observatory port to be available...');
+    }
 
-      ProtocolDiscovery observatoryDiscovery = new ProtocolDiscovery(
-          getLogReader(app: app), ProtocolDiscovery.kObservatoryService);
+    // Wait for the service protocol port here. This will complete once the
+    // device has printed "Observatory is listening on..."
+    printTrace('Waiting for observatory port to be available...');
 
-      try {
-        Uri deviceUri = await observatoryDiscovery.nextUri();
-        printTrace('Observatory Uri on simulator: $deviceUri');
-        printStatus('Observatory listening on $deviceUri');
-        return new LaunchResult.succeeded(observatoryUri: deviceUri);
-      } catch (error) {
-        printError('Error waiting for a debug connection: $error');
-        return new LaunchResult.failed();
-      } finally {
-        observatoryDiscovery.cancel();
-      }
+    ProtocolDiscovery observatoryDiscovery = new ProtocolDiscovery(
+        getLogReader(app: app), ProtocolDiscovery.kObservatoryService);
+
+    try {
+      Uri deviceUri = await observatoryDiscovery.nextUri();
+      return new LaunchResult.succeeded(observatoryUri: deviceUri);
+    } catch (error) {
+      printError('Error waiting for a debug connection: $error');
+      return new LaunchResult.failed();
+    } finally {
+      observatoryDiscovery.cancel();
     }
   }
 
