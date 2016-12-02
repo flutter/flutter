@@ -25,9 +25,10 @@ void ContainerLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
 
 void ContainerLayer::PrerollChildren(PrerollContext* context,
                                      const SkMatrix& matrix) {
-  SkRect child_paint_bounds;
+  SkRect child_paint_bounds = SkRect::MakeEmpty();
   for (auto& layer : layers_) {
     PrerollContext child_context = *context;
+    FTL_DCHECK(child_context.child_paint_bounds.isEmpty());
     layer->Preroll(&child_context, matrix);
     if (layer->needs_system_composite())
       set_needs_system_composite(true);
