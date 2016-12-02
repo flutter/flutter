@@ -392,10 +392,7 @@ class ThemeData {
     IconThemeData accentIconTheme,
     TargetPlatform platform,
   }) {
-    // ThemeData objects are constructed by ThemeData.raw() and do not have
-    // any null-valued properties. All of the constructor parameters below
-    // will also be non-null and its why a primarySwatch parameter isn't needed.
-    return new ThemeData(
+    return new ThemeData.raw(
       brightness: brightness ?? this.brightness,
       primaryColor: primaryColor ?? this.primaryColor,
       primaryColorBrightness: primaryColorBrightness ?? this.primaryColorBrightness,
