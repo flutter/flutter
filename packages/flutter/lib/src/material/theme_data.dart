@@ -363,7 +363,6 @@ class ThemeData {
   /// Creates a copy of this theme but with the given fields replaced with the new values.
   ThemeData copyWith({
     Brightness brightness,
-    Map<int, Color> primarySwatch,
     Color primaryColor,
     Brightness primaryColorBrightness,
     Color accentColor,
@@ -393,7 +392,7 @@ class ThemeData {
     IconThemeData accentIconTheme,
     TargetPlatform platform,
   }) {
-    return new ThemeData(
+    return new ThemeData.raw(
       brightness: brightness ?? this.brightness,
       primaryColor: primaryColor ?? this.primaryColor,
       primaryColorBrightness: primaryColorBrightness ?? this.primaryColorBrightness,
