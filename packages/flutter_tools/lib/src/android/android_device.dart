@@ -307,18 +307,10 @@ class AndroidDevice extends Device {
     if (debuggingOptions.debuggingEnabled) {
       // TODO(devoncarew): Remember the forwarding information (so we can later remove the
       // port forwarding).
-      observatoryDiscovery = new ProtocolDiscovery(
-        getLogReader(),
-        ProtocolDiscovery.kObservatoryService,
-        portForwarder: portForwarder,
-        hostPort: debuggingOptions.observatoryPort,
-        defaultHostPort: kDefaultObservatoryPort);
-      diagnosticDiscovery = new ProtocolDiscovery(
-        getLogReader(),
-        ProtocolDiscovery.kDiagnosticService,
-        portForwarder: portForwarder,
-        hostPort: debuggingOptions.diagnosticPort,
-        defaultHostPort: kDefaultDiagnosticPort);
+      observatoryDiscovery = new ProtocolDiscovery.observatory(
+        getLogReader(), portForwarder: portForwarder, hostPort: debuggingOptions.observatoryPort);
+      diagnosticDiscovery = new ProtocolDiscovery.diagnosticService(
+        getLogReader(), portForwarder: portForwarder, hostPort: debuggingOptions.diagnosticPort);
     }
 
     List<String> cmd;

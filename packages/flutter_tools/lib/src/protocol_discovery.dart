@@ -21,6 +21,20 @@ class ProtocolDiscovery {
     assert(portForwarder == null || defaultHostPort != null);
   }
 
+  factory ProtocolDiscovery.observatory(DeviceLogReader logReader,
+          {DevicePortForwarder portForwarder, int hostPort}) =>
+      new ProtocolDiscovery(logReader, kObservatoryService,
+          portForwarder: portForwarder,
+          hostPort: hostPort,
+          defaultHostPort: kDefaultObservatoryPort);
+
+  factory ProtocolDiscovery.diagnosticService(DeviceLogReader logReader,
+          {DevicePortForwarder portForwarder, int hostPort}) =>
+      new ProtocolDiscovery(logReader, kDiagnosticService,
+          portForwarder: portForwarder,
+          hostPort: hostPort,
+          defaultHostPort: kDefaultDiagnosticPort);
+
   static const String kObservatoryService = 'Observatory';
   static const String kDiagnosticService = 'Diagnostic server';
 

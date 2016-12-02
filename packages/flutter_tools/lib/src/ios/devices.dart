@@ -261,18 +261,10 @@ class IOSDevice extends Device {
 
       // TODO(danrubel): The Android device class does something similar to this code below.
       // The various Device subclasses should be refactored and common code moved into the superclass.
-      ProtocolDiscovery observatoryDiscovery = new ProtocolDiscovery(
-        getLogReader(app: app),
-        ProtocolDiscovery.kObservatoryService,
-        portForwarder: portForwarder,
-        hostPort: debuggingOptions.observatoryPort,
-        defaultHostPort: kDefaultObservatoryPort);
-      ProtocolDiscovery diagnosticDiscovery = new ProtocolDiscovery(
-        getLogReader(app: app),
-        ProtocolDiscovery.kDiagnosticService,
-        portForwarder: portForwarder,
-        hostPort: debuggingOptions.diagnosticPort,
-        defaultHostPort: kDefaultDiagnosticPort);
+      ProtocolDiscovery observatoryDiscovery = new ProtocolDiscovery.observatory(
+        getLogReader(app: app), portForwarder: portForwarder, hostPort: debuggingOptions.observatoryPort);
+      ProtocolDiscovery diagnosticDiscovery = new ProtocolDiscovery.diagnosticService(
+        getLogReader(app: app), portForwarder: portForwarder, hostPort: debuggingOptions.diagnosticPort);
 
       Future<Uri> forwardObsUri = observatoryDiscovery.nextUri();
       Future<Uri> forwardDiagUri;

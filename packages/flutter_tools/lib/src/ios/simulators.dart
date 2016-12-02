@@ -467,9 +467,7 @@ class IOSSimulator extends Device {
     // device has printed "Observatory is listening on..."
     printTrace('Waiting for observatory port to be available...');
 
-    ProtocolDiscovery observatoryDiscovery = new ProtocolDiscovery(
-        getLogReader(app: app), ProtocolDiscovery.kObservatoryService);
-
+    ProtocolDiscovery observatoryDiscovery = new ProtocolDiscovery.observatory(getLogReader(app: app));
     try {
       Uri deviceUri = await observatoryDiscovery.nextUri();
       return new LaunchResult.succeeded(observatoryUri: deviceUri);
