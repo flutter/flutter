@@ -20,9 +20,8 @@ TaskFunction createComplexLayoutScrollPerfTest() {
 TaskFunction createComplexLayoutScrollMemoryTest() {
   return new MemoryTest(
     '${flutterDirectory.path}/dev/benchmarks/complex_layout',
-    'test_driver/scroll_perf.dart',
-    'complex_layout_scroll_perf',
     'com.yourcompany.complexLayout',
+    testTarget: 'test_driver/scroll_perf.dart',
   );
 }
 
@@ -44,6 +43,13 @@ TaskFunction createFlutterGalleryBuildTest() {
 
 TaskFunction createComplexLayoutBuildTest() {
   return new BuildTest('${flutterDirectory.path}/dev/benchmarks/complex_layout');
+}
+
+TaskFunction createHelloWorldMemoryTest() {
+  return new MemoryTest(
+    '${flutterDirectory.path}/examples/hello_world',
+    'io.flutter.examples.HelloWorld',
+  );
 }
 
 /// Measure application startup performance.
@@ -174,13 +180,17 @@ class BuildTest {
   }
 }
 
+/// Measure application memory usage.
 class MemoryTest {
-  MemoryTest(this.testDirectory, this.testTarget, this.timelineFileName, this.packageName);
+  MemoryTest(this.testDirectory, this.packageName, { this.testTarget });
 
   final String testDirectory;
-  final String testTarget;
-  final String timelineFileName;
   final String packageName;
+
+  /// Path to a flutter driver script that will run after starting the app.
+  ///
+  /// If not specified, then the test will start the app, gather statistics, and then exit.
+  final String testTarget;
 
   Future<TaskResult> call() {
     return inDirectory(testDirectory, () async {
@@ -196,47 +206,45 @@ class MemoryTest {
 
       int debugPort = await findAvailablePort();
 
-      await flutter('run', options: <String>[
+      List<String> runOptions = <String>[
         '-v',
         '--profile',
         '--trace-startup', // wait for the first frame to render
-        '-t',
-        testTarget,
         '-d',
         deviceId,
         '--debug-port',
         debugPort.toString(),
-      ]);
+      ];
+      if (testTarget != null)
+        runOptions.addAll(<String>['-t', testTarget]);
+      await flutter('run', options: runOptions);
 
       Map<String, dynamic> startData = await device.getMemoryStats(packageName);
 
-      await flutter('drive', options: <String>[
-        '-v',
-        '-t',
-        testTarget,
-        '-d',
-        deviceId,
-        '--use-existing-app',
-        //'--keep-app-running',
-      ], env: <String, String> {
-        'VM_SERVICE_URL': 'http://localhost:$debugPort'
-      });
-
-      Map<String, dynamic> endData = await device.getMemoryStats(packageName);
-
       Map<String, dynamic> data = <String, dynamic>{
          'start_total_kb': startData['total_kb'],
-         'end_total_kb': endData['total_kb'],
-         'diff_total_kb': endData['total_kb'] - startData['total_kb'],
       };
+
+      if (testTarget != null) {
+        await flutter('drive', options: <String>[
+          '-v',
+          '-t',
+          testTarget,
+          '-d',
+          deviceId,
+          '--use-existing-app',
+        ], env: <String, String> {
+          'VM_SERVICE_URL': 'http://localhost:$debugPort'
+        });
+
+        Map<String, dynamic> endData = await device.getMemoryStats(packageName);
+        data['end_total_kb'] = endData['total_kb'];
+        data['diff_total_kb'] = endData['total_kb'] - startData['total_kb'];
+      }
 
       await device.stop(packageName);
 
-      return new TaskResult.success(data, benchmarkScoreKeys: <String>[
-        'start_total_kb',
-        'end_total_kb',
-        'diff_total_kb',
-      ]);
+      return new TaskResult.success(data, benchmarkScoreKeys: data.keys.toList());
     });
   }
 }
