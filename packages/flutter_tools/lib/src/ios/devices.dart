@@ -294,6 +294,9 @@ class IOSDevice extends Device {
 
         printTrace("Application launched on the device. Attempting to forward ports.");
         return await Future.wait(<Future<Uri>>[forwardObsUri, forwardDiagUri]);
+      }).whenComplete(() {
+        observatoryDiscovery.cancel();
+        diagnosticDiscovery.cancel();
       });
 
       localObsUri = uris[0];
