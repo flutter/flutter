@@ -301,20 +301,21 @@ class RecordingProcessManager implements ProcessManager {
 
   /// Waits for all running processes to exit, and records their exit codes in
   /// the process manifest. Any process that doesn't exit in a timely fashion
-  /// will be killed (via `SIGTERM`) and have a `"timeout"` marker added to
-  /// their manifest. If such processes *still* don't exit in a timely fashion,
-  /// they'll have a `"doubleTimeout"` marker added to their manifest.
+  /// will have a `"daemon"` marker added to its manifest and be signalled with
+  /// `SIGTERM`. If such processes *still* don't exit in a timely fashion after
+  /// being signalled, they'll have a `"notResponding"` marker added to their
+  /// manifest.
   Future<Null> _waitForRunningProcessesToExit() async {
     await _waitForRunningProcessesToExitWithTimeout(
       onTimeout: (int pid, Map<String, dynamic> manifestEntry) {
-        manifestEntry['timeout'] = true;
+        manifestEntry['daemon'] = true;
         Process.killPid(pid);
       });
     // Now that we explicitly signalled the processes that timed out asking
     // then to shutdown, wait one more time for those processes to exit.
     await _waitForRunningProcessesToExitWithTimeout(
       onTimeout: (int pid, Map<String, dynamic> manifestEntry) {
-        manifestEntry['doubleTimeout'] = true;
+        manifestEntry['notResponding'] = true;
       });
   }
 
