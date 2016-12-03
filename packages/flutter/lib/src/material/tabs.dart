@@ -562,8 +562,12 @@ class TabBarSelectionState<T> extends State<TabBarSelection<T>> with SingleTicke
   @override
   void didUpdateConfig(TabBarSelection<T> oldConfig) {
     super.didUpdateConfig(oldConfig);
+    _previousValue = _value;
+    _value = config.value ?? values.first;
     if (values != oldConfig.values)
       _initValueToIndex();
+    if (!values.contains(_previousValue))
+      _previousValue = _value;
   }
 
   void _initValueToIndex() {
