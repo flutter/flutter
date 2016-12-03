@@ -115,6 +115,12 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["has-android-device"]
 
+  hello_world__memory:
+    description: >
+      Measures starting memory usage of the simplest Flutter app.
+    stage: devicelab
+    required_agent_capabilities: ["has-android-device"]
+
 
   # iOS on-device tests
 
