@@ -7,13 +7,17 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:archive/archive.dart';
+import 'package:collection/collection.dart';
 import 'package:intl/intl.dart';
 import 'package:path/path.dart' as path;
 
 import 'context.dart';
+import 'os.dart';
 import 'process.dart';
 
 ProcessManager get processManager => context[ProcessManager];
+
+const String _kManifestName = 'MANIFEST.txt';
 
 /// A class that manages the creation of operating system processes. This
 /// provides a lightweight wrapper around the underlying [Process] static
@@ -85,7 +89,7 @@ class RecordingProcessManager implements ProcessManager {
     'xcrun',
   ];
 
-  final FileSystemEntity _recordTo;
+  final String _recordTo;
   final ProcessManager _delegate = new ProcessManager();
   final Directory _tmpDir = Directory.systemTemp.createTempSync('flutter_tools_');
   final List<Map<String, dynamic>> _manifest = <Map<String, dynamic>>[];
@@ -102,8 +106,7 @@ class RecordingProcessManager implements ProcessManager {
   /// If [recordTo] is a file (or doesn't exist), it is taken to be the name
   /// of the ZIP file that will be created, and the containing folder will be
   /// created as needed.
-  RecordingProcessManager({FileSystemEntity recordTo})
-      : _recordTo = recordTo ?? Directory.current {
+  RecordingProcessManager(this._recordTo) {
     addShutdownHook(_onShutdown);
   }
 
@@ -122,8 +125,10 @@ class RecordingProcessManager implements ProcessManager {
       mode: mode,
     );
 
+    String basename = _getBasename(process.pid, executable, arguments);
     Map<String, dynamic> manifestEntry = _createManifestEntry(
       pid: process.pid,
+      basename: basename,
       executable: executable,
       arguments: arguments,
       workingDirectory: workingDirectory,
@@ -134,7 +139,7 @@ class RecordingProcessManager implements ProcessManager {
 
     _RecordingProcess result = new _RecordingProcess(
       manager: this,
-      basename: _getBasename(process.pid, executable, arguments),
+      basename: basename,
       delegate: process,
     );
     await result.startRecording();
@@ -163,8 +168,10 @@ class RecordingProcessManager implements ProcessManager {
       stderrEncoding: stderrEncoding,
     );
 
+    String basename = _getBasename(result.pid, executable, arguments);
     _manifest.add(_createManifestEntry(
       pid: result.pid,
+      basename: basename,
       executable: executable,
       arguments: arguments,
       workingDirectory: workingDirectory,
@@ -174,7 +181,6 @@ class RecordingProcessManager implements ProcessManager {
       exitCode: result.exitCode,
     ));
 
-    String basename = _getBasename(result.pid, executable, arguments);
     await _recordData(result.stdout, stdoutEncoding, '$basename.stdout');
     await _recordData(result.stderr, stderrEncoding, '$basename.stderr');
 
@@ -213,8 +219,10 @@ class RecordingProcessManager implements ProcessManager {
       stderrEncoding: stderrEncoding,
     );
 
+    String basename = _getBasename(result.pid, executable, arguments);
     _manifest.add(_createManifestEntry(
       pid: result.pid,
+      basename: basename,
       executable: executable,
       arguments: arguments,
       workingDirectory: workingDirectory,
@@ -224,7 +232,6 @@ class RecordingProcessManager implements ProcessManager {
       exitCode: result.exitCode,
     ));
 
-    String basename = _getBasename(result.pid, executable, arguments);
     _recordDataSync(result.stdout, stdoutEncoding, '$basename.stdout');
     _recordDataSync(result.stderr, stderrEncoding, '$basename.stderr');
 
@@ -255,6 +262,7 @@ class RecordingProcessManager implements ProcessManager {
   /// process invocation.
   Map<String, dynamic> _createManifestEntry({
       int pid,
+      String basename,
       String executable,
       List<String> arguments,
       String workingDirectory,
@@ -266,6 +274,7 @@ class RecordingProcessManager implements ProcessManager {
   }) {
     Map<String, dynamic> entry = <String, dynamic>{};
     if (pid != null) entry['pid'] = pid;
+    if (basename != null) entry['basename'] = basename;
     if (executable != null) entry['executable'] = executable;
     if (arguments != null) entry['arguments'] = arguments;
     if (workingDirectory != null) entry['workingDirectory'] = workingDirectory;
@@ -323,7 +332,7 @@ class RecordingProcessManager implements ProcessManager {
     void onTimeout(int pid, Map<String, dynamic> manifestEntry),
   }) async {
     await Future.wait(new List<Future<int>>.from(_runningProcesses.values))
-        .timeout(new Duration(milliseconds: 20), onTimeout: () {
+        .timeout(const Duration(milliseconds: 20), onTimeout: () {
           _runningProcesses.forEach((int pid, Future<int> future) {
             Map<String, dynamic> manifestEntry = _manifest
                 .firstWhere((Map<String, dynamic> entry) => entry['pid'] == pid);
@@ -336,7 +345,7 @@ class RecordingProcessManager implements ProcessManager {
   Future<Null> _writeManifestToDisk() async {
     JsonEncoder encoder = new JsonEncoder.withIndent('  ');
     String encodedManifest = encoder.convert(_manifest);
-    File manifestFile = await new File('${_tmpDir.path}/process-manifest.txt').create();
+    File manifestFile = await new File('${_tmpDir.path}/$_kManifestName').create();
     await manifestFile.writeAsString(encodedManifest, flush: true);
   }
 
@@ -351,10 +360,11 @@ class RecordingProcessManager implements ProcessManager {
   /// in the [new RecordingProcessManager] constructor.
   Future<File> _createZipFile() async {
     File zipFile;
-    if (await FileSystemEntity.type(_recordTo.path) == FileSystemEntityType.DIRECTORY) {
-      zipFile = new File('${_recordTo.path}/$kDefaultRecordTo');
+    String recordTo = _recordTo ?? Directory.current.path;
+    if (await FileSystemEntity.type(recordTo) == FileSystemEntityType.DIRECTORY) {
+      zipFile = new File('$recordTo/$kDefaultRecordTo');
     } else {
-      zipFile = new File(_recordTo.path);
+      zipFile = new File(recordTo);
       await new Directory(path.dirname(zipFile.path)).create(recursive: true);
     }
 
@@ -478,4 +488,275 @@ class _RecordingProcess implements Process {
 
   @override
   bool kill([ProcessSignal signal = ProcessSignal.SIGTERM]) => delegate.kill(signal);
+}
+
+/// a [ProcessManager] implementation that mocks out all process invocations
+/// by replaying a previously-recorded series of invocations, throwing an
+/// exception if the requested invocations substantively differ in any way
+/// from those in the recording.
+///
+/// Recordings are expected to be of the form produced by
+/// [RecordingProcessManager]. Namely, this includes:
+///
+/// - a [_kManifestName](manifest file) encoded as UTF-8 JSON that lists all
+///   invocations in order, along with the following metadata for each
+///   invocation:
+///   - `pid` (required): The process id integer.
+///   - `basename` (required): A string specifying the base filename from which
+///     the incovation's `stdout` and `stderr` files can be located.
+///   - `executable` (required): A string specifying the path to the executable
+///     command that kicked off the process.
+///   - `arguments` (required): A list of strings that were passed as arguments
+///     to the executable.
+///   - `workingDirectory` (required): The current working directory from which
+///     the process was spawned.
+///   - `environment` (required): A map from string environment variable keys
+///     to their corresponding string values.
+///   - `mode` (optional): A string specifying the [ProcessStartMode].
+///   - `stdoutEncoding` (optional): The name of the encoding scheme that was
+///     used in the `stdout` file. If unspecified, then the file was written
+///     as binary data.
+///   - `stderrEncoding` (optional): The name of the encoding scheme that was
+///     used in the `stderr` file. If unspecified, then the file was written
+///     as binary data.
+///   - `exitCode` (required): The exit code of the process, or null if the
+///     process was not responding.
+///   - `daemon` (optional): A boolean indicating that the process is to stay
+///     resident during the entire lifetime of the master Flutter tools process.
+/// - a `stdout` file for each process invocation. The location of this file
+///   can be derived from the `basename` manifest property like so:
+///   `'$basename.stdout'`.
+/// - a `stderr` file for each process invocation. The location of this file
+///   can be derived from the `basename` manifest property like so:
+///   `'$basename.stderr'`.
+///
+/// If [replayFrom] does not specify a valid file system path laid out as
+/// described above, an [ArgumentError] will be thrown.
+class ReplayProcessManager implements ProcessManager {
+  final List<Map<String, dynamic>> _manifest;
+  final Directory _dir;
+
+  ReplayProcessManager._(this._manifest, this._dir);
+
+  /// Creates a new `ReplayProcessManager` capable of replaying a recording at
+  /// the specified location.
+  ///
+  /// If [location] represents a file, it will be treated like a recording
+  /// ZIP file. If it points to a directory, it will be treated like an
+  /// unzipped recording. If [location] points to a non-existent file or
+  /// directory, an [ArgumentError] will be thrown.
+  static Future<ReplayProcessManager> create({String location}) async {
+    Directory dir;
+    switch (await FileSystemEntity.type(location)) {
+      case FileSystemEntityType.FILE:
+        dir = await Directory.systemTemp.createTemp('flutter_tools_');
+        os.unzip(new File(location), dir);
+        addShutdownHook(() async {
+          await dir.delete(recursive: true);
+        });
+        break;
+      case FileSystemEntityType.DIRECTORY:
+        dir = new Directory(location);
+        break;
+      case FileSystemEntityType.NOT_FOUND:
+        throw new ArgumentError.value(location, 'replayFrom');
+    }
+
+    File manifestFile = new File(path.join(dir.path, _kManifestName));
+    if (!(await manifestFile.exists()))
+      throw new ArgumentError('$_kManifestName not found.');
+
+    String content = await manifestFile.readAsString();
+    List<Map<String, dynamic>> manifest = new JsonDecoder().convert(content);
+
+    return new ReplayProcessManager._(manifest, dir);
+  }
+
+  @override
+  Future<Process> start(
+      String executable,
+      List<String> arguments,
+      {String workingDirectory,
+       Map<String, String> environment,
+       ProcessStartMode mode: ProcessStartMode.NORMAL}) async {
+    Map<String, dynamic> entry = _popEntry(executable, arguments);
+    _ReplayProcessResult result = await _ReplayProcessResult.create(_dir, entry);
+    return result.asProcess(entry['daemon'] ?? false);
+  }
+
+  @override
+  Future<ProcessResult> run(
+      String executable,
+      List<String> arguments,
+      {String workingDirectory,
+       Map<String, String> environment,
+       Encoding stdoutEncoding: SYSTEM_ENCODING,
+       Encoding stderrEncoding: SYSTEM_ENCODING}) async {
+    Map<String, dynamic> entry = _popEntry(executable, arguments,
+        stdoutEncoding: stdoutEncoding, stderrEncoding: stderrEncoding);
+    return await _ReplayProcessResult.create(_dir, entry);
+  }
+
+  @override
+  ProcessResult runSync(
+      String executable,
+      List<String> arguments,
+      {String workingDirectory,
+       Map<String, String> environment,
+       Encoding stdoutEncoding: SYSTEM_ENCODING,
+       Encoding stderrEncoding: SYSTEM_ENCODING}) {
+    Map<String, dynamic> entry = _popEntry(executable, arguments,
+        stdoutEncoding: stdoutEncoding, stderrEncoding: stderrEncoding);
+    return _ReplayProcessResult.createSync(_dir, entry);
+  }
+
+  Map<String, dynamic> _popEntry(String executable, List<String> arguments, {
+    Encoding stdoutEncoding,
+    Encoding stderrEncoding,
+  }) {
+    Function eq = const ListEquality().equals;
+    Map<String, dynamic> entry = _manifest.firstWhere(
+      (Map<String, dynamic> entry) {
+        // Ignore workingDirectory, environment, and mode, as they could
+        // theoretically yield false negatives.
+        return entry['executable'] == executable
+            && eq(entry['arguments'], arguments)
+            && entry['stdoutEncoding'] == stdoutEncoding?.name
+            && entry['stderrEncoding'] == stderrEncoding?.name
+            && !entry['invoked'];
+      },
+      orElse: () => null,
+    );
+
+    if (entry == null)
+      throw new StateError('No matching invocation found for $executable');
+
+    entry['invoked'] = true;
+    return entry;
+  }
+
+  @override
+  bool killPid(int pid, [ProcessSignal signal = ProcessSignal.SIGTERM]) {
+    throw new UnimplementedError();
+  }
+}
+
+/// A [ProcessResult] implementation that derives its data from a recording
+/// fragment.
+class _ReplayProcessResult implements ProcessResult {
+  @override
+  final int pid;
+
+  @override
+  final int exitCode;
+
+  @override
+  final dynamic stdout;
+
+  @override
+  final dynamic stderr;
+
+  _ReplayProcessResult._({this.pid, this.exitCode, this.stdout, this.stderr});
+
+  static Future<_ReplayProcessResult> create(
+    Directory dir,
+    Map<String, dynamic> entry,
+  ) async {
+    String basePath = path.join(dir.path, entry['basename']);
+    return new _ReplayProcessResult._(
+      pid: entry['pid'],
+      exitCode: entry['exitCode'],
+      stdout: (await _getData('$basePath.stdout', entry['stdoutEncoding'])),
+      stderr: (await _getData('$basePath.stderr', entry['stderrEncoding'])),
+    );
+  }
+
+  static Future<dynamic> _getData(String path, String encoding) async {
+    File file = new File(path);
+    assert(await file.exists());
+    return encoding == null
+        ? await file.readAsBytes()
+        : await file.readAsString(encoding: _getEncodingByName(encoding));
+  }
+
+  static _ReplayProcessResult createSync(
+    Directory dir,
+    Map<String, dynamic> entry,
+  ) {
+    String basePath = path.join(dir.path, entry['basename']);
+    return new _ReplayProcessResult._(
+      pid: entry['pid'],
+      exitCode: entry['exitCode'],
+      stdout: (_getDataSync('$basePath.stdout', entry['stdoutEncoding'])),
+      stderr: (_getDataSync('$basePath.stderr', entry['stderrEncoding'])),
+    );
+  }
+
+  static dynamic _getDataSync(String path, String encoding) {
+    File file = new File(path);
+    assert(file.existsSync());
+    return encoding == null
+        ? file.readAsBytesSync()
+        : file.readAsStringSync(encoding: _getEncodingByName(encoding));
+  }
+
+  static Encoding _getEncodingByName(String encoding) {
+    if (encoding == 'system')
+      return const SystemEncoding();
+    else if (encoding != null)
+      return Encoding.getByName(encoding);
+    return null;
+  }
+
+  Process asProcess(bool daemon) {
+    assert(stdout is List<int>);
+    assert(stderr is List<int>);
+    return new _ReplayProcess(this, daemon);
+  }
+}
+
+/// A [Process] implementation derives its data from a recording fragment.
+class _ReplayProcess implements Process {
+  @override
+  final int pid;
+
+  @override
+  final Stream<List<int>> stdout;
+
+  @override
+  final Stream<List<int>> stderr;
+
+  final int _exitCode;
+  final Completer<int> _exitCodeCompleter;
+
+  _ReplayProcess(_ReplayProcessResult result, bool daemon)
+      : pid = result.pid,
+        stdout = new Stream<List<int>>.fromIterable(<List<int>>[result.stdout]),
+        stderr = new Stream<List<int>>.fromIterable(<List<int>>[result.stderr]),
+        _exitCode = result.exitCode,
+        _exitCodeCompleter = daemon ? new Completer<int>() : null;
+
+  @override
+  Future<int> get exitCode => _exitCodeCompleter != null
+      ? _exitCodeCompleter.future
+      : new Future<int>.value(_exitCode);
+
+  @override
+  set exitCode(Future<int> exitCode) {
+    throw new UnsupportedError('set exitCode');
+  }
+
+  @override
+  IOSink get stdin {
+    throw new UnimplementedError();
+  }
+
+  @override
+  bool kill([ProcessSignal signal = ProcessSignal.SIGTERM]) {
+    if (_exitCodeCompleter != null) {
+      _exitCodeCompleter.complete(_exitCode);
+      return true;
+    }
+    return false;
+  }
 }

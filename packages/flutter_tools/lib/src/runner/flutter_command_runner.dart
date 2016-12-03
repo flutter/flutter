@@ -102,6 +102,15 @@ class FlutterCommandRunner extends CommandRunner<Null> {
             'If the location is a directory, a ZIP file named `recording.zip` '
             'will be created in that directory. Otherwise, a ZIP file will be '
             'created with the path specified in this flag.');
+    argParser.addOption('replay-from',
+        help:
+            'Enables mocking of process invocations by replaying their stdout '
+            ', stderr, and exit code from the specified recording (obtained '
+            'via --record-to).\n'
+            'If the location is a file, it is assumed to be a ZIP file '
+            'structured according to the output of --record-to. If the '
+            'location is a directory, it is assumed to be an unzipped version '
+            'of such a ZIP file.');
   }
 
   @override
@@ -152,16 +161,26 @@ class FlutterCommandRunner extends CommandRunner<Null> {
     }
 
     if (globalResults['record-to'] != null) {
-      // Turn on recording
-      String recordToPath = globalResults['record-to'].trim();
-      FileSystemEntity recordTo;
-      if (recordToPath.isNotEmpty) {
-        recordTo = await FileSystemEntity.isDirectory(recordToPath)
-            ? new Directory(recordToPath)
-            : new File(recordToPath);
-      }
+      // Turn on recording.
+      assert(globalResults['replay-from'] == null);
+      String recordTo = globalResults['record-to'].trim();
+      if (recordTo.isEmpty)
+        recordTo = null;
       context.setVariable(ProcessManager,
-          new RecordingProcessManager(recordTo: recordTo));
+          new RecordingProcessManager(recordTo));
+    }
+
+    if (globalResults['replay-from'] != null) {
+      // Turn on replay-based mocking.
+      assert(globalResults['record-to'] == null);
+      try {
+        context.setVariable(ProcessManager, await ReplayProcessManager.create(
+          location: globalResults['replay-from'].trim(),
+        ));
+      } on ArgumentError catch (_) {
+        printError('--replay-from must specify a valid file or directory.');
+        return;
+      }
     }
 
     logger.quiet = globalResults['quiet'];
