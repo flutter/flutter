@@ -294,16 +294,36 @@ static hb_bool_t harfbuzzGetGlyphHorizontalOrigin(hb_font_t* /* hbFont */, void*
     return true;
 }
 
-hb_font_funcs_t* getHbFontFuncs() {
-    static hb_font_funcs_t* hbFontFuncs = 0;
+hb_font_funcs_t* getHbFontFuncs(bool forColorBitmapFont) {
+    assertMinikinLocked();
 
-    if (hbFontFuncs == 0) {
-        hbFontFuncs = hb_font_funcs_create();
-        hb_font_funcs_set_glyph_h_advance_func(hbFontFuncs, harfbuzzGetGlyphHorizontalAdvance, 0, 0);
-        hb_font_funcs_set_glyph_h_origin_func(hbFontFuncs, harfbuzzGetGlyphHorizontalOrigin, 0, 0);
-        hb_font_funcs_make_immutable(hbFontFuncs);
+    static hb_font_funcs_t* hbFuncs = nullptr;
+    static hb_font_funcs_t* hbFuncsForColorBitmap = nullptr;
+
+    hb_font_funcs_t** funcs = forColorBitmapFont ? &hbFuncs : &hbFuncsForColorBitmap;
+    if (*funcs == nullptr) {
+        *funcs = hb_font_funcs_create();
+        if (forColorBitmapFont) {
+            // Override the h_advance function since we can't use HarfBuzz's implemenation. It may
+            // return the wrong value if the font uses hinting aggressively.
+            hb_font_funcs_set_glyph_h_advance_func(*funcs, harfbuzzGetGlyphHorizontalAdvance, 0, 0);
+        } else {
+            // Don't override the h_advance function since we use HarfBuzz's implementation for
+            // emoji for performance reasons.
+            // Note that it is technically possible for a TrueType font to have outline and embedded
+            // bitmap at the same time. We ignore modified advances of hinted outline glyphs in that
+            // case.
+        }
+        hb_font_funcs_set_glyph_h_origin_func(*funcs, harfbuzzGetGlyphHorizontalOrigin, 0, 0);
+        hb_font_funcs_make_immutable(*funcs);
     }
-    return hbFontFuncs;
+    return *funcs;
+}
+
+static bool isColorBitmapFont(hb_font_t* font) {
+    hb_face_t* face = hb_font_get_face(font);
+    HbBlob cbdt(hb_face_reference_table(face, HB_TAG('C', 'B', 'D', 'T')));
+    return cbdt.size() > 0;
 }
 
 static float HBFixedToFloat(hb_position_t v)
@@ -335,7 +355,7 @@ int Layout::findFace(FakedFont face, LayoutContext* ctx) {
     // corresponding hb_font object.
     if (ctx != NULL) {
         hb_font_t* font = getHbFontLocked(face.font);
-        hb_font_set_funcs(font, getHbFontFuncs(), &ctx->paint, 0);
+        hb_font_set_funcs(font, getHbFontFuncs(isColorBitmapFont(font)), &ctx->paint, 0);
         ctx->hbFonts.push_back(font);
     }
     return ix;
@@ -753,6 +773,8 @@ void Layout::doLayoutRun(const uint16_t* buf, size_t start, size_t count, size_t
         hb_font_set_ppem(hbFont, size * scaleX, size);
         hb_font_set_scale(hbFont, HBFloatToFixed(size * scaleX), HBFloatToFixed(size));
 
+        const bool is_color_bitmap_font = isColorBitmapFont(hbFont);
+
         // TODO: if there are multiple scripts within a font in an RTL run,
         // we need to reorder those runs. This is unlikely with our current
         // font stack, but should be done for correctness.
@@ -844,7 +866,19 @@ void Layout::doLayoutRun(const uint16_t* buf, size_t start, size_t count, size_t
                     xAdvance = roundf(xAdvance);
                 }
                 MinikinRect glyphBounds;
-                ctx->paint.font->GetBounds(&glyphBounds, glyph_ix, ctx->paint);
+                hb_glyph_extents_t extents = {};
+                if (is_color_bitmap_font && hb_font_get_glyph_extents(hbFont, glyph_ix, &extents)) {
+                    // Note that it is technically possible for a TrueType font to have outline and
+                    // embedded bitmap at the same time. We ignore modified bbox of hinted outline
+                    // glyphs in that case.
+                    glyphBounds.mLeft = roundf(HBFixedToFloat(extents.x_bearing));
+                    glyphBounds.mTop = roundf(HBFixedToFloat(-extents.y_bearing));
+                    glyphBounds.mRight = roundf(HBFixedToFloat(extents.x_bearing + extents.width));
+                    glyphBounds.mBottom =
+                            roundf(HBFixedToFloat(-extents.y_bearing - extents.height));
+                } else {
+                    ctx->paint.font->GetBounds(&glyphBounds, glyph_ix, ctx->paint);
+                }
                 glyphBounds.offset(x + xoff, y + yoff);
                 mBounds.join(glyphBounds);
                 if (info[i].cluster - start < count) {
