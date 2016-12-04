@@ -17,6 +17,8 @@ import 'process.dart';
 
 ProcessManager get processManager => context[ProcessManager];
 
+typedef bool ListsEqual<T>(List<T> list1, List<T> list2);
+
 const String _kManifestName = 'MANIFEST.txt';
 
 /// A class that manages the creation of operating system processes. This
@@ -614,13 +616,13 @@ class ReplayProcessManager implements ProcessManager {
     Encoding stdoutEncoding,
     Encoding stderrEncoding,
   }) {
-    Function eq = const ListEquality().equals;
+    ListsEqual<String> equal = const ListEquality<String>().equals;
     Map<String, dynamic> entry = _manifest.firstWhere(
       (Map<String, dynamic> entry) {
         // Ignore workingDirectory, environment, and mode, as they could
         // theoretically yield false negatives.
         return entry['executable'] == executable
-            && eq(entry['arguments'], arguments)
+            && equal(entry['arguments'], arguments)
             && entry['stdoutEncoding'] == stdoutEncoding?.name
             && entry['stderrEncoding'] == stderrEncoding?.name
             && !entry['invoked'];
