@@ -240,4 +240,40 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
     expect(Theme.of(tester.element(find.text('Alarm'))).brightness, equals(Brightness.dark));
   });
+
+  testWidgets('BottomNavigationBar iconSize test', (WidgetTester tester) async {
+    double builderIconSize;
+    await tester.pumpWidget(
+      new Scaffold(
+        bottomNavigationBar: new BottomNavigationBar(
+          iconSize: 12.0,
+          labels: <DestinationLabel>[
+            new DestinationLabel(
+              title: new Text('A'),
+              icon: new Icon(Icons.ac_unit),
+            ),
+            new DestinationLabel(
+              title: new Text('B'),
+              icon: new Builder(
+                builder: (BuildContext context) {
+                  builderIconSize = IconTheme.of(context).fallback().size;
+                  return new SizedBox(
+                    width: builderIconSize,
+                    height: builderIconSize,
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    RenderBox box = tester.renderObject(find.byType(Icon));
+    expect(box.size.width, equals(12.0));
+    expect(box.size.height, equals(12.0));
+    expect(builderIconSize, 12.0);
+  });
+
+
 }
