@@ -20,6 +20,7 @@ ProcessManager get processManager => context[ProcessManager];
 typedef bool ListsEqual<T>(List<T> list1, List<T> list2);
 
 const String _kManifestName = 'MANIFEST.txt';
+const ListsEqual<String> kListsEqual = const ListEquality<String>().equals;
 
 /// A class that manages the creation of operating system processes. This
 /// provides a lightweight wrapper around the underlying [Process] static
@@ -492,7 +493,7 @@ class _RecordingProcess implements Process {
   bool kill([ProcessSignal signal = ProcessSignal.SIGTERM]) => delegate.kill(signal);
 }
 
-/// a [ProcessManager] implementation that mocks out all process invocations
+/// A [ProcessManager] implementation that mocks out all process invocations
 /// by replaying a previously-recorded series of invocations, throwing an
 /// exception if the requested invocations substantively differ in any way
 /// from those in the recording.
@@ -574,7 +575,7 @@ class ReplayProcessManager implements ProcessManager {
     try {
       List<Map<String, dynamic>> manifest = new JsonDecoder().convert(content);
       return new ReplayProcessManager._(manifest, dir);
-    } on FormatException catch (_) {
+    } on FormatException {
       throw new ArgumentError('$_kManifestName is not a valid JSON file.');
     }
   }
@@ -625,13 +626,12 @@ class ReplayProcessManager implements ProcessManager {
     Encoding stdoutEncoding,
     Encoding stderrEncoding,
   }) {
-    ListsEqual<String> equal = const ListEquality<String>().equals;
     Map<String, dynamic> entry = _manifest.firstWhere(
       (Map<String, dynamic> entry) {
         // Ignore workingDirectory & environment, as they could
         // yield false negatives.
         return entry['executable'] == executable
-            && equal(entry['arguments'], arguments)
+            && kListsEqual(entry['arguments'], arguments)
             && entry['mode'] == mode?.toString()
             && entry['stdoutEncoding'] == stdoutEncoding?.name
             && entry['stderrEncoding'] == stderrEncoding?.name
@@ -649,7 +649,10 @@ class ReplayProcessManager implements ProcessManager {
 
   @override
   bool killPid(int pid, [ProcessSignal signal = ProcessSignal.SIGTERM]) {
-    throw new UnimplementedError();
+    throw new UnsupportedError(
+        "$runtimeType.killPid() has not been implemented because at the time "
+        "of its writing, it wasn't needed. If you're hitting this error, you "
+        "should implement it.");
   }
 }
 
@@ -685,7 +688,6 @@ class _ReplayProcessResult implements ProcessResult {
 
   static Future<dynamic> _getData(String path, String encoding) async {
     File file = new File(path);
-    assert(await file.exists());
     return encoding == null
         ? await file.readAsBytes()
         : await file.readAsString(encoding: _getEncodingByName(encoding));
@@ -706,7 +708,6 @@ class _ReplayProcessResult implements ProcessResult {
 
   static dynamic _getDataSync(String path, String encoding) {
     File file = new File(path);
-    assert(file.existsSync());
     return encoding == null
         ? file.readAsBytesSync()
         : file.readAsStringSync(encoding: _getEncodingByName(encoding));
