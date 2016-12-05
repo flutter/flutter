@@ -65,6 +65,7 @@ Future<Process> _startProcess(String mainPath, { String packages, int observator
     arguments.add('--disable-observatory');
   }
   arguments.addAll(<String>[
+    '--enable-dart-profiling',
     '--non-interactive',
     '--enable-checked-mode',
     '--packages=$packages',

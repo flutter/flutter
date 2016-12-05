@@ -214,7 +214,7 @@ class IOSDevice extends Device {
     }
 
     // Step 3: Attempt to install the application on the device.
-    List<String> launchArguments = <String>[];
+    List<String> launchArguments = <String>["--enable-dart-profiling"];
 
     if (debuggingOptions.startPaused)
       launchArguments.add("--start-paused");
