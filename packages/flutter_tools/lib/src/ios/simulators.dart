@@ -436,7 +436,7 @@ class IOSSimulator extends Device {
                                                    ProtocolDiscovery.kObservatoryService);
 
     // Prepare launch arguments.
-    List<String> args = <String>[];
+    List<String> args = <String>["--enable-dart-profiling"];
 
     if (!prebuiltApplication) {
       args.addAll(<String>[
