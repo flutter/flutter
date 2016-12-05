@@ -9,6 +9,6 @@ import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/tasks/size_tests.dart';
 
 Future<Null> main() async {
-  deviceOperatingSystem = DeviceOperatingSystem.android;
+  deviceOperatingSystem = DeviceOperatingSystem.ios;
   await task(createBasicMaterialAppSizeTest());
 }
