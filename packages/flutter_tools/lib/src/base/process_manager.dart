@@ -561,7 +561,7 @@ class ReplayProcessManager implements ProcessManager {
         dir = new Directory(location);
         break;
       case FileSystemEntityType.NOT_FOUND:
-        throw new ArgumentError.value(location, 'replayFrom');
+        throw new ArgumentError.value(location, 'location');
     }
 
     File manifestFile = new File(path.join(dir.path, _kManifestName));
@@ -722,26 +722,39 @@ class _ReplayProcess implements Process {
   @override
   final int pid;
 
-  @override
-  final Stream<List<int>> stdout;
-
-  @override
-  final Stream<List<int>> stderr;
-
+  final List<int> _stdout;
+  final List<int> _stderr;
+  final StreamController<List<int>> _stdoutController;
+  final StreamController<List<int>> _stderrController;
   final int _exitCode;
   final Completer<int> _exitCodeCompleter;
 
   _ReplayProcess(_ReplayProcessResult result, bool daemon)
       : pid = result.pid,
-        stdout = new Stream<List<int>>.fromIterable(<List<int>>[result.stdout]),
-        stderr = new Stream<List<int>>.fromIterable(<List<int>>[result.stderr]),
+        _stdout = result.stdout,
+        _stderr = result.stderr,
+        _stdoutController = new StreamController<List<int>>.broadcast(),
+        _stderrController = new StreamController<List<int>>.broadcast(),
         _exitCode = result.exitCode,
-        _exitCodeCompleter = daemon ? new Completer<int>() : null;
+        _exitCodeCompleter = new Completer<int>() {
+    // Produce stream events after a delay so that all interested parties have
+    // a chance to add themselves as listeners before we fire our stream events
+    // and terminate the process.
+    new Timer(const Duration(milliseconds: 50), () {
+      _stdoutController.add(_stdout);
+      _stderrController.add(_stderr);
+      kill();
+    });
+  }
 
   @override
-  Future<int> get exitCode => _exitCodeCompleter != null
-      ? _exitCodeCompleter.future
-      : new Future<int>.value(_exitCode);
+  Stream<List<int>> get stdout => _stdoutController.stream;
+
+  @override
+  Stream<List<int>> get stderr => _stderrController.stream;
+
+  @override
+  Future<int> get exitCode => _exitCodeCompleter.future;
 
   @override
   set exitCode(Future<int> exitCode) {
@@ -755,7 +768,7 @@ class _ReplayProcess implements Process {
 
   @override
   bool kill([ProcessSignal signal = ProcessSignal.SIGTERM]) {
-    if (_exitCodeCompleter != null) {
+    if (!_exitCodeCompleter.isCompleted) {
       _exitCodeCompleter.complete(_exitCode);
       return true;
     }
