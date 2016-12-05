@@ -59,9 +59,9 @@ class DestinationLabel {
 
   /// The icon of the label.
   ///
-  /// Typically the icon is an [Icon] widget.  If another type of widget is
-  /// provided then it should configure itself to match the current [IconTheme]
-  /// size and color.
+  /// Typically the icon is an [Icon] or an [IconImage] widget. If another type
+  /// of widget is provided then it should configure itself to match the current
+  /// [IconTheme] size and color.
   final Widget icon;
 
   /// The title of the label.
