@@ -91,6 +91,7 @@ void main() {
       return new Center(
         child: new Material(
           child: new Input(
+            autofocus: true,
             value: inputValue,
             key: inputKey,
             hintText: 'Placeholder',
@@ -101,7 +102,6 @@ void main() {
     }
 
     await tester.pumpWidget(builder());
-    await showKeyboard(tester);
 
     RenderBox findInputBox() => tester.renderObject(find.byKey(inputKey));
 

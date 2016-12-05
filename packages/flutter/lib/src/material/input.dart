@@ -45,6 +45,7 @@ class InputField extends StatefulWidget {
     this.style,
     this.hideText: false,
     this.maxLines: 1,
+    this.autofocus: false,
     this.onChanged,
     this.onSubmitted,
   }) : super(key: key);
@@ -74,6 +75,9 @@ class InputField extends StatefulWidget {
   /// If this is 1 (the default), the text will not wrap, but will scroll
   /// horizontally instead.
   final int maxLines;
+
+  /// Whether this input field should focus itself if nothing else is already focused.
+  final bool autofocus;
 
   /// Called when the text being edited changes.
   ///
@@ -124,6 +128,7 @@ class _InputFieldState extends State<InputField> {
               style: textStyle,
               hideText: config.hideText,
               maxLines: config.maxLines,
+              autofocus: config.autofocus,
               cursorColor: themeData.textSelectionColor,
               selectionColor: themeData.textSelectionColor,
               selectionControls: materialTextSelectionControls,
@@ -448,6 +453,10 @@ class Input extends StatefulWidget {
   final bool isDense;
 
   /// Whether this input field should focus itself if nothing else is already focused.
+  /// If true, the keyboard will open as soon as this input obtains focus. Otherwise,
+  /// the keyboard is only shown after the user taps the text field.
+  // See https://github.com/flutter/flutter/issues/7035 for the rationale for this
+  // keyboard behavior.
   final bool autofocus;
 
   /// The maximum number of lines for the text to span, wrapping if necessary.
@@ -504,6 +513,7 @@ class _InputState extends State<Input> {
               style: config.style,
               hideText: config.hideText,
               maxLines: config.maxLines,
+              autofocus: config.autofocus,
               keyboardType: config.keyboardType,
               onChanged: config.onChanged,
               onSubmitted: config.onSubmitted,
