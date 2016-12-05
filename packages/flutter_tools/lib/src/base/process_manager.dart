@@ -531,9 +531,6 @@ class _RecordingProcess implements Process {
 /// - a `stderr` file for each process invocation. The location of this file
 ///   can be derived from the `basename` manifest property like so:
 ///   `'$basename.stderr'`.
-///
-/// If [replayFrom] does not specify a valid file system path laid out as
-/// described above, an [ArgumentError] will be thrown.
 class ReplayProcessManager implements ProcessManager {
   final List<Map<String, dynamic>> _manifest;
   final Directory _dir;
@@ -565,13 +562,21 @@ class ReplayProcessManager implements ProcessManager {
     }
 
     File manifestFile = new File(path.join(dir.path, _kManifestName));
-    if (!(await manifestFile.exists()))
+    if (!(await manifestFile.exists())) {
+      // We use the existence of the manifest as a proxy for this being a
+      // valid replay directory. Namely, we don't validate the structure of the
+      // JSON within the manifest, and we don't validate the existence of
+      // all stdout and stderr files referenced in the manifest.
       throw new ArgumentError('$_kManifestName not found.');
+    }
 
     String content = await manifestFile.readAsString();
-    List<Map<String, dynamic>> manifest = new JsonDecoder().convert(content);
-
-    return new ReplayProcessManager._(manifest, dir);
+    try {
+      List<Map<String, dynamic>> manifest = new JsonDecoder().convert(content);
+      return new ReplayProcessManager._(manifest, dir);
+    } on FormatException catch (_) {
+      throw new ArgumentError('$_kManifestName is not a valid JSON file.');
+    }
   }
 
   @override
@@ -581,7 +586,7 @@ class ReplayProcessManager implements ProcessManager {
       {String workingDirectory,
        Map<String, String> environment,
        ProcessStartMode mode: ProcessStartMode.NORMAL}) async {
-    Map<String, dynamic> entry = _popEntry(executable, arguments);
+    Map<String, dynamic> entry = _popEntry(executable, arguments, mode: mode);
     _ReplayProcessResult result = await _ReplayProcessResult.create(_dir, entry);
     return result.asProcess(entry['daemon'] ?? false);
   }
@@ -612,17 +617,22 @@ class ReplayProcessManager implements ProcessManager {
     return _ReplayProcessResult.createSync(_dir, entry);
   }
 
+  /// Finds and returns the next entry in the process manifest that matches
+  /// the specified process arguments. Once found, it marks the manifest entry
+  /// as having been invoked and thus not eligible for invocation again.
   Map<String, dynamic> _popEntry(String executable, List<String> arguments, {
+    ProcessStartMode mode,
     Encoding stdoutEncoding,
     Encoding stderrEncoding,
   }) {
     ListsEqual<String> equal = const ListEquality<String>().equals;
     Map<String, dynamic> entry = _manifest.firstWhere(
       (Map<String, dynamic> entry) {
-        // Ignore workingDirectory, environment, and mode, as they could
-        // theoretically yield false negatives.
+        // Ignore workingDirectory & environment, as they could
+        // yield false negatives.
         return entry['executable'] == executable
             && equal(entry['arguments'], arguments)
+            && entry['mode'] == mode?.toString()
             && entry['stdoutEncoding'] == stdoutEncoding?.name
             && entry['stderrEncoding'] == stderrEncoding?.name
             && !(entry['invoked'] ?? false);
@@ -668,8 +678,8 @@ class _ReplayProcessResult implements ProcessResult {
     return new _ReplayProcessResult._(
       pid: entry['pid'],
       exitCode: entry['exitCode'],
-      stdout: (await _getData('$basePath.stdout', entry['stdoutEncoding'])),
-      stderr: (await _getData('$basePath.stderr', entry['stderrEncoding'])),
+      stdout: await _getData('$basePath.stdout', entry['stdoutEncoding']),
+      stderr: await _getData('$basePath.stderr', entry['stderrEncoding']),
     );
   }
 
@@ -743,7 +753,8 @@ class _ReplayProcess implements Process {
     new Timer(const Duration(milliseconds: 50), () {
       _stdoutController.add(_stdout);
       _stderrController.add(_stderr);
-      kill();
+      if (!daemon)
+        kill();
     });
   }
 
@@ -757,14 +768,10 @@ class _ReplayProcess implements Process {
   Future<int> get exitCode => _exitCodeCompleter.future;
 
   @override
-  set exitCode(Future<int> exitCode) {
-    throw new UnsupportedError('set exitCode');
-  }
+  set exitCode(Future<int> exitCode) => throw new UnsupportedError('set exitCode');
 
   @override
-  IOSink get stdin {
-    throw new UnimplementedError();
-  }
+  IOSink get stdin => throw new UnimplementedError();
 
   @override
   bool kill([ProcessSignal signal = ProcessSignal.SIGTERM]) {
