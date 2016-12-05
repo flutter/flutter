@@ -34,6 +34,9 @@ public class SkyActivity extends Activity {
         if (intent.getBooleanExtra("start-paused", false)) {
             args.add("--start-paused");
         }
+        if (intent.getBooleanExtra("enable-dart-profiling", false)) {
+            args.add("--enable-dart-profiling");
+        }
         if (!args.isEmpty()) {
             String[] argsArray = new String[args.size()];
             return args.toArray(argsArray);
