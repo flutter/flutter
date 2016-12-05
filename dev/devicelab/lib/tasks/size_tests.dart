@@ -7,6 +7,8 @@ import 'dart:io';
 import '../framework/framework.dart';
 import '../framework/utils.dart';
 
+import 'package:flutter_devicelab/framework/adb.dart';
+
 TaskFunction createBasicMaterialAppSizeTest() {
   return () async {
     const String sampleAppName = 'sample_flutter_app';
@@ -15,7 +17,7 @@ TaskFunction createBasicMaterialAppSizeTest() {
     if (await sampleDir.exists())
       rmTree(sampleDir);
 
-    int apkSizeInBytes;
+    int releaseSizeInBytes;
 
     await inDirectory(Directory.systemTemp, () async {
       await flutter('create', options: <String>[sampleAppName]);
@@ -26,13 +28,21 @@ TaskFunction createBasicMaterialAppSizeTest() {
       await inDirectory(sampleDir, () async {
         await flutter('packages', options: <String>['get']);
         await flutter('build', options: <String>['clean']);
-        await flutter('build', options: <String>['apk', '--release']);
-        apkSizeInBytes = await file('${sampleDir.path}/build/app.apk').length();
+
+        if (deviceOperatingSystem == DeviceOperatingSystem.ios) {
+          await flutter('build', options: <String>['ios', '--release']);
+          // IPAs are created manually AFAICT
+          await exec('tar', <String>['-zcf', 'build/app.ipa', 'build/ios/Release-iphoneos/Runner.app/']);
+          releaseSizeInBytes = await file('${sampleDir.path}/build/app.ipa').length();
+        } else {
+          await flutter('build', options: <String>['apk', '--release']);
+          releaseSizeInBytes = await file('${sampleDir.path}/build/app.apk').length();
+        }
       });
     });
 
     return new TaskResult.success(
-        <String, dynamic>{'release_size_in_bytes': apkSizeInBytes},
+        <String, dynamic>{'release_size_in_bytes': releaseSizeInBytes},
         benchmarkScoreKeys: <String>['release_size_in_bytes']);
   };
 }

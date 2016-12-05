@@ -52,7 +52,7 @@ tasks:
 
   basic_material_app__size:
     description: >
-      Measures the APK/IPA sizes of a basic material app.
+      Measures the APK size of a basic material app.
     stage: devicelab
     required_agent_capabilities: ["has-android-device"]
 
@@ -132,10 +132,10 @@ tasks:
     required_agent_capabilities: ["has-ios-device"]
 
   flutter_gallery_ios__start_up:
-    stage: devicelab_ios
-    required_agent_capabilities: ["has-ios-device"]
     description: >
       Measures the startup time of the Flutter Gallery app on iOS.
+    stage: devicelab_ios
+    required_agent_capabilities: ["has-ios-device"]
 
   complex_layout_ios__start_up:
     description: >
@@ -144,8 +144,14 @@ tasks:
     required_agent_capabilities: ["has-ios-device"]
 
   flutter_gallery_ios__transition_perf:
-    stage: devicelab_ios
-    required_agent_capabilities: ["has-ios-device"]
     description: >
       Measures the performance of screen transitions in Flutter Gallery on
       iOS.
+    stage: devicelab_ios
+    required_agent_capabilities: ["has-ios-device"]
+
+  basic_material_app_ios__size:
+    description: >
+      Measures the IPA size of a basic material app.
+    stage: devicelab_ios
+    required_agent_capabilities: ["has-android-device"]
