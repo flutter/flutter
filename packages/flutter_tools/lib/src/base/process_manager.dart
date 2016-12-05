@@ -625,7 +625,7 @@ class ReplayProcessManager implements ProcessManager {
             && equal(entry['arguments'], arguments)
             && entry['stdoutEncoding'] == stdoutEncoding?.name
             && entry['stderrEncoding'] == stderrEncoding?.name
-            && !entry['invoked'];
+            && !(entry['invoked'] ?? false);
       },
       orElse: () => null,
     );
