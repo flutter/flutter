@@ -20,7 +20,7 @@ ProcessManager get processManager => context[ProcessManager];
 typedef bool ListsEqual<T>(List<T> list1, List<T> list2);
 
 const String _kManifestName = 'MANIFEST.txt';
-const ListsEqual<String> kListsEqual = const ListEquality<String>().equals;
+final ListsEqual<String> kListsEqual = const ListEquality<String>().equals;
 
 /// A class that manages the creation of operating system processes. This
 /// provides a lightweight wrapper around the underlying [Process] static
