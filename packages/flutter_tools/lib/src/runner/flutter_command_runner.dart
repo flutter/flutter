@@ -10,6 +10,7 @@ import 'package:args/command_runner.dart';
 import 'package:path/path.dart' as path;
 
 import '../android/android_sdk.dart';
+import '../base/common.dart';
 import '../base/context.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
@@ -160,9 +161,12 @@ class FlutterCommandRunner extends CommandRunner<Null> {
       context.setVariable(Logger, new VerboseLogger());
     }
 
+    if (globalResults['record-to'] != null &&
+        globalResults['replay-from'] != null)
+      throwToolExit('--record-to and --replay-from cannot be used together.');
+
     if (globalResults['record-to'] != null) {
       // Turn on recording.
-      assert(globalResults['replay-from'] == null);
       String recordTo = globalResults['record-to'].trim();
       if (recordTo.isEmpty)
         recordTo = null;
@@ -172,14 +176,12 @@ class FlutterCommandRunner extends CommandRunner<Null> {
 
     if (globalResults['replay-from'] != null) {
       // Turn on replay-based mocking.
-      assert(globalResults['record-to'] == null);
       try {
         context.setVariable(ProcessManager, await ReplayProcessManager.create(
           globalResults['replay-from'].trim(),
         ));
-      } on ArgumentError catch (_) {
-        printError('--replay-from must specify a valid file or directory.');
-        return;
+      } on ArgumentError {
+        throwToolExit('--replay-from must specify a valid file or directory.');
       }
     }
 

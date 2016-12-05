@@ -743,13 +743,15 @@ class _ReplayProcess implements Process {
       : pid = result.pid,
         _stdout = result.stdout,
         _stderr = result.stderr,
-        _stdoutController = new StreamController<List<int>>.broadcast(),
-        _stderrController = new StreamController<List<int>>.broadcast(),
+        _stdoutController = new StreamController<List<int>>(),
+        _stderrController = new StreamController<List<int>>(),
         _exitCode = result.exitCode,
         _exitCodeCompleter = new Completer<int>() {
-    // Produce stream events after a delay so that all interested parties have
-    // a chance to add themselves as listeners before we fire our stream events
-    // and terminate the process.
+    // Produce stream events after a delay to allow all pending Flutter tools
+    // commands to have been issued before we start producing stdio. This
+    // prevents the case where our device log reader consumes all stdio before
+    // we've even started the app, thus causing the protocol discovery process
+    // to fail.
     new Timer(const Duration(milliseconds: 50), () {
       _stdoutController.add(_stdout);
       _stderrController.add(_stderr);
