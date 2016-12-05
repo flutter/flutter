@@ -175,7 +175,7 @@ class FlutterCommandRunner extends CommandRunner<Null> {
       assert(globalResults['record-to'] == null);
       try {
         context.setVariable(ProcessManager, await ReplayProcessManager.create(
-          location: globalResults['replay-from'].trim(),
+          globalResults['replay-from'].trim(),
         ));
       } on ArgumentError catch (_) {
         printError('--replay-from must specify a valid file or directory.');

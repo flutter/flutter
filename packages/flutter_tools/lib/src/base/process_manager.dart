@@ -547,7 +547,7 @@ class ReplayProcessManager implements ProcessManager {
   /// ZIP file. If it points to a directory, it will be treated like an
   /// unzipped recording. If [location] points to a non-existent file or
   /// directory, an [ArgumentError] will be thrown.
-  static Future<ReplayProcessManager> create({String location}) async {
+  static Future<ReplayProcessManager> create(String location) async {
     Directory dir;
     switch (await FileSystemEntity.type(location)) {
       case FileSystemEntityType.FILE:
