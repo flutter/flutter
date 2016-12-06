@@ -8,7 +8,6 @@ import 'dart:io';
 
 import '../android/android_sdk.dart';
 import '../application_package.dart';
-import '../base/common.dart';
 import '../base/os.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
@@ -261,17 +260,6 @@ class AndroidDevice extends Device {
     return true;
   }
 
-  Future<int> _forwardPort(int hostPort, int devicePort) async {
-    try {
-      hostPort = await portForwarder.forward(devicePort, hostPort: hostPort);
-      printTrace('Forwarded host port $hostPort to device port $devicePort');
-      return hostPort;
-    } catch (e) {
-      throw new ToolExit(
-          'Unable to forward host port $hostPort to device port $devicePort: $e');
-    }
-  }
-
   @override
   Future<LaunchResult> startApp(
     ApplicationPackage package,
@@ -315,10 +303,13 @@ class AndroidDevice extends Device {
     ProtocolDiscovery observatoryDiscovery;
     ProtocolDiscovery diagnosticDiscovery;
 
-    DeviceLogReader logReader = getLogReader();
     if (debuggingOptions.debuggingEnabled) {
-      observatoryDiscovery = new ProtocolDiscovery(logReader, ProtocolDiscovery.kObservatoryService);
-      diagnosticDiscovery = new ProtocolDiscovery(logReader, ProtocolDiscovery.kDiagnosticService);
+      // TODO(devoncarew): Remember the forwarding information (so we can later remove the
+      // port forwarding).
+      observatoryDiscovery = new ProtocolDiscovery.observatory(
+        getLogReader(), portForwarder: portForwarder, hostPort: debuggingOptions.observatoryPort);
+      diagnosticDiscovery = new ProtocolDiscovery.diagnosticService(
+        getLogReader(), portForwarder: portForwarder, hostPort: debuggingOptions.diagnosticPort);
     }
 
     List<String> cmd;
@@ -351,56 +342,37 @@ class AndroidDevice extends Device {
 
     if (!debuggingOptions.debuggingEnabled) {
       return new LaunchResult.succeeded();
-    } else {
-      // Wait for the service protocol port here. This will complete once the
-      // device has printed "Observatory is listening on...".
-      printTrace('Waiting for observatory port to be available...');
+    }
 
-      // TODO(danrubel): The iOS device class does something similar to this code below.
-      // The various Device subclasses should be refactored and common code moved into the superclass.
-      try {
-        Uri observatoryDeviceUri, diagnosticDeviceUri;
+    // Wait for the service protocol port here. This will complete once the
+    // device has printed "Observatory is listening on...".
+    printTrace('Waiting for observatory port to be available...');
 
-        if (debuggingOptions.buildMode == BuildMode.debug) {
-          Future<List<Uri>> scrapeServiceUris = Future.wait(
-              <Future<Uri>>[observatoryDiscovery.nextUri(), diagnosticDiscovery.nextUri()]
-          );
-          List<Uri> deviceUris = await scrapeServiceUris.timeout(new Duration(seconds: 20));
-          observatoryDeviceUri = deviceUris[0];
-          diagnosticDeviceUri = deviceUris[1];
-        } else if (debuggingOptions.buildMode == BuildMode.profile) {
-          observatoryDeviceUri = await observatoryDiscovery.nextUri().timeout(new Duration(seconds: 20));
-        }
+    // TODO(danrubel) Waiting for observatory and diagnostic services
+    // can be made common across all devices.
+    try {
+      Uri observatoryUri, diagnosticUri;
 
-        printTrace('Observatory Uri on device: $observatoryDeviceUri');
-        int observatoryLocalPort = await debuggingOptions.findBestObservatoryPort();
-        // TODO(devoncarew): Remember the forwarding information (so we can later remove the
-        // port forwarding).
-        observatoryLocalPort = await _forwardPort(observatoryLocalPort, observatoryDeviceUri.port);
-        Uri observatoryLocalUri = observatoryDeviceUri.replace(port: observatoryLocalPort);
-
-        Uri diagnosticLocalUri;
-        if (diagnosticDeviceUri != null) {
-          printTrace('Diagnostic Server Uri on device: $diagnosticDeviceUri');
-          int diagnosticLocalPort = await debuggingOptions.findBestDiagnosticPort();
-          diagnosticLocalPort = await _forwardPort(diagnosticLocalPort, diagnosticDeviceUri.port);
-          diagnosticLocalUri = diagnosticDeviceUri.replace(port: diagnosticLocalPort);
-        }
-
-        return new LaunchResult.succeeded(
-            observatoryUri: observatoryLocalUri,
-            diagnosticUri: diagnosticLocalUri,
+      if (debuggingOptions.buildMode == BuildMode.debug) {
+        List<Uri> deviceUris = await Future.wait(
+            <Future<Uri>>[observatoryDiscovery.nextUri(), diagnosticDiscovery.nextUri()]
         );
-      } catch (error) {
-        if (error is TimeoutException)
-          printError('Timed out while waiting for a debug connection.');
-        else
-          printError('Error waiting for a debug connection: $error');
-        return new LaunchResult.failed();
-      } finally {
-        observatoryDiscovery.cancel();
-        diagnosticDiscovery.cancel();
+        observatoryUri = deviceUris[0];
+        diagnosticUri = deviceUris[1];
+      } else if (debuggingOptions.buildMode == BuildMode.profile) {
+        observatoryUri = await observatoryDiscovery.nextUri();
       }
+
+      return new LaunchResult.succeeded(
+          observatoryUri: observatoryUri,
+          diagnosticUri: diagnosticUri,
+      );
+    } catch (error) {
+      printError('Error waiting for a debug connection: $error');
+      return new LaunchResult.failed();
+    } finally {
+      observatoryDiscovery.cancel();
+      diagnosticDiscovery.cancel();
     }
   }
 

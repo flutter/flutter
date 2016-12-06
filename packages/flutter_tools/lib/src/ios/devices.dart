@@ -260,18 +260,15 @@ class IOSDevice extends Device {
 
       // TODO(danrubel): The Android device class does something similar to this code below.
       // The various Device subclasses should be refactored and common code moved into the superclass.
-      Future<Uri> forwardObsUri = _acquireServiceUri(
-        app,
-        ProtocolDiscovery.kObservatoryService,
-        debuggingOptions.observatoryPort,
-      );
+      ProtocolDiscovery observatoryDiscovery = new ProtocolDiscovery.observatory(
+        getLogReader(app: app), portForwarder: portForwarder, hostPort: debuggingOptions.observatoryPort);
+      ProtocolDiscovery diagnosticDiscovery = new ProtocolDiscovery.diagnosticService(
+        getLogReader(app: app), portForwarder: portForwarder, hostPort: debuggingOptions.diagnosticPort);
+
+      Future<Uri> forwardObsUri = observatoryDiscovery.nextUri();
       Future<Uri> forwardDiagUri;
       if (debuggingOptions.buildMode == BuildMode.debug) {
-        forwardDiagUri = _acquireServiceUri(
-          app,
-          ProtocolDiscovery.kDiagnosticService,
-          debuggingOptions.diagnosticPort,
-        );
+        forwardDiagUri = diagnosticDiscovery.nextUri();
       } else {
         forwardDiagUri = new Future<Uri>.value(null);
       }
@@ -287,17 +284,11 @@ class IOSDevice extends Device {
         }
 
         printTrace("Application launched on the device. Attempting to forward ports.");
-        return await Future.wait(<Future<Uri>>[forwardObsUri, forwardDiagUri])
-            .timeout(
-                kPortForwardTimeout,
-                onTimeout: () {
-                  throw new TimeoutException('Timeout while waiting to acquire and forward ports.');
-                },
-            );
+        return await Future.wait(<Future<Uri>>[forwardObsUri, forwardDiagUri]);
+      }).whenComplete(() {
+        observatoryDiscovery.cancel();
+        diagnosticDiscovery.cancel();
       });
-
-      printTrace("Observatory Uri on device: ${uris[0]}");
-      printTrace("Diagnostic Server Uri on device: ${uris[1]}");
 
       localObsUri = uris[0];
       localDiagUri = uris[1];
@@ -312,48 +303,6 @@ class IOSDevice extends Device {
     }
 
     return new LaunchResult.succeeded(observatoryUri: localObsUri, diagnosticUri: localDiagUri);
-  }
-
-  Future<Uri> _acquireServiceUri(
-      ApplicationPackage app,
-      String serviceName,
-      int localPort) async {
-    Duration stepTimeout = const Duration(seconds: 60);
-
-    Future<Uri> remote = new ProtocolDiscovery(getLogReader(app: app), serviceName).nextUri();
-
-    Uri remoteUri = await remote.timeout(stepTimeout,
-        onTimeout: () {
-      printTrace("Timeout while attempting to retrieve remote Uri for $serviceName");
-      return null;
-    });
-
-    if (remoteUri == null) {
-      printTrace("Could not read Uri on device for $serviceName");
-      return null;
-    }
-
-    if ((localPort == null) || (localPort == 0)) {
-      localPort = await findAvailablePort();
-      printTrace("Auto selected local port to $localPort");
-    }
-
-    int forwardResult = await portForwarder
-      .forward(remoteUri.port, hostPort: localPort)
-      .timeout(stepTimeout, onTimeout: () {
-        printTrace("Timeout while atempting to foward port for $serviceName");
-        return null;
-      });
-
-    if (forwardResult == null) {
-      printTrace("Could not foward remote $serviceName port $remoteUri to local port $localPort");
-      return null;
-    }
-
-    Uri forwardUri = remoteUri.replace(port: forwardResult);
-
-    printStatus('$serviceName listening on $forwardUri');
-    return forwardUri;
   }
 
   @override
@@ -509,7 +458,7 @@ class _IOSDevicePortForwarder extends DevicePortForwarder {
 
     _forwardedPorts.add(forwardedPort);
 
-    return 1;
+    return hostPort;
   }
 
   @override

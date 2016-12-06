@@ -430,12 +430,6 @@ class IOSSimulator extends Device {
         return new LaunchResult.failed();
     }
 
-    ProtocolDiscovery observatoryDiscovery;
-
-    if (debuggingOptions.debuggingEnabled)
-      observatoryDiscovery = new ProtocolDiscovery(getLogReader(app: app),
-                                                   ProtocolDiscovery.kObservatoryService);
-
     // Prepare launch arguments.
     List<String> args = <String>["--enable-dart-profiling"];
 
@@ -467,27 +461,21 @@ class IOSSimulator extends Device {
 
     if (!debuggingOptions.debuggingEnabled) {
       return new LaunchResult.succeeded();
-    } else {
-      // Wait for the service protocol port here. This will complete once the
-      // device has printed "Observatory is listening on..."
-      printTrace('Waiting for observatory port to be available...');
+    }
 
-      try {
-        Uri deviceUri = await observatoryDiscovery
-          .nextUri()
-          .timeout(new Duration(seconds: 20));
-        printTrace('Observatory Uri on simulator: $deviceUri');
-        printStatus('Observatory listening on $deviceUri');
-        return new LaunchResult.succeeded(observatoryUri: deviceUri);
-      } catch (error) {
-        if (error is TimeoutException)
-          printError('Timed out while waiting for a debug connection.');
-        else
-          printError('Error waiting for a debug connection: $error');
-        return new LaunchResult.failed();
-      } finally {
-        observatoryDiscovery.cancel();
-      }
+    // Wait for the service protocol port here. This will complete once the
+    // device has printed "Observatory is listening on..."
+    printTrace('Waiting for observatory port to be available...');
+
+    ProtocolDiscovery observatoryDiscovery = new ProtocolDiscovery.observatory(getLogReader(app: app));
+    try {
+      Uri deviceUri = await observatoryDiscovery.nextUri();
+      return new LaunchResult.succeeded(observatoryUri: deviceUri);
+    } catch (error) {
+      printError('Error waiting for a debug connection: $error');
+      return new LaunchResult.failed();
+    } finally {
+      observatoryDiscovery.cancel();
     }
   }
 
