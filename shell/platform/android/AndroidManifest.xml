@@ -3,18 +3,18 @@
      Use of this source code is governed by a BSD-style license that can be
      found in the LICENSE file.
  -->
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="org.domokit.sky.shell" android:versionCode="1" android:versionName="0.0.1">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="io.flutter.app" android:versionCode="1" android:versionName="0.0.1">
 
     <uses-sdk android:minSdkVersion="14" android:targetSdkVersion="21" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-feature android:name="android.hardware.sensor.accelerometer" android:required="true" />
 
-    <application android:label="Sky Shell" android:name="SkyApplication" android:debuggable="true">
+    <application android:label="Flutter Shell" android:name="FlutterApplication" android:debuggable="true">
         <activity android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|layoutDirection"
                   android:hardwareAccelerated="true"
                   android:launchMode="standard"
-                  android:name="SkyActivity"
+                  android:name="FlutterActivity"
                   android:theme="@android:style/Theme.Black.NoTitleBar"
                   android:windowSoftInputMode="adjustResize">
             <intent-filter>

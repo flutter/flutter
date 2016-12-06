@@ -4,18 +4,12 @@
 
 package org.domokit.sky.shell;
 
-import android.app.Application;
-
-import io.flutter.view.FlutterMain;
+import io.flutter.app.FlutterApplication;
 
 /**
- * Sky implementation of {@link android.app.Application}, managing application-level global
- * initializations.
+ * Use io.flutter.app.FlutterActivity instead
+ * This class should be removed after Feb 2017
  */
-public class SkyApplication extends Application {
-    @Override
-    public void onCreate() {
-        super.onCreate();
-        FlutterMain.startInitialization(this);
-    }
+@Deprecated
+public class SkyApplication extends FlutterApplication {
 }

@@ -11,7 +11,7 @@
 #include "base/message_loop/message_loop.h"
 #include "flutter/shell/common/switches.h"
 #include "flutter/shell/platform/darwin/common/platform_mac.h"
-#include "flutter/shell/platform/darwin/desktop/sky_application.h"
+#include "flutter/shell/platform/darwin/desktop/flutter_application.h"
 #include "flutter/shell/testing/testing.h"
 
 namespace shell {
@@ -30,7 +30,7 @@ void AttachMessageLoopToMainRunLoop(void) {
 }  // namespace shell
 
 int main(int argc, const char* argv[]) {
-  [SkyApplication sharedApplication];
+  [FlutterApplication sharedApplication];
 
   shell::PlatformMacMain(argc, argv, "", "");
 

@@ -9,7 +9,7 @@
 	<key>CFBundleIconFile</key>
 	<string></string>
 	<key>CFBundleIdentifier</key>
-	<string>org.domokit.sky</string>
+	<string>io.flutter</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
@@ -29,6 +29,6 @@
 	<key>NSMainNibFile</key>
 	<string>sky_mac</string>
 	<key>NSPrincipalClass</key>
-	<string>SkyApplication</string>
+	<string>FlutterApplication</string>
 </dict>
 </plist>
