@@ -10,6 +10,7 @@ import 'package:args/command_runner.dart';
 import 'package:path/path.dart' as path;
 
 import '../android/android_sdk.dart';
+import '../base/common.dart';
 import '../base/context.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
@@ -102,6 +103,15 @@ class FlutterCommandRunner extends CommandRunner<Null> {
             'If the location is a directory, a ZIP file named `recording.zip` '
             'will be created in that directory. Otherwise, a ZIP file will be '
             'created with the path specified in this flag.');
+    argParser.addOption('replay-from',
+        help:
+            'Enables mocking of process invocations by replaying their stdout, '
+            'stderr, and exit code from the specified recording (obtained '
+            'via --record-to).\n'
+            'If the location is a file, it is assumed to be a ZIP file '
+            'structured according to the output of --record-to. If the '
+            'location is a directory, it is assumed to be an unzipped version '
+            'of such a ZIP file.');
   }
 
   @override
@@ -151,17 +161,28 @@ class FlutterCommandRunner extends CommandRunner<Null> {
       context.setVariable(Logger, new VerboseLogger());
     }
 
+    if (globalResults['record-to'] != null &&
+        globalResults['replay-from'] != null)
+      throwToolExit('--record-to and --replay-from cannot be used together.');
+
     if (globalResults['record-to'] != null) {
-      // Turn on recording
-      String recordToPath = globalResults['record-to'].trim();
-      FileSystemEntity recordTo;
-      if (recordToPath.isNotEmpty) {
-        recordTo = await FileSystemEntity.isDirectory(recordToPath)
-            ? new Directory(recordToPath)
-            : new File(recordToPath);
-      }
+      // Turn on recording.
+      String recordTo = globalResults['record-to'].trim();
+      if (recordTo.isEmpty)
+        recordTo = null;
       context.setVariable(ProcessManager,
-          new RecordingProcessManager(recordTo: recordTo));
+          new RecordingProcessManager(recordTo));
+    }
+
+    if (globalResults['replay-from'] != null) {
+      // Turn on replay-based mocking.
+      try {
+        context.setVariable(ProcessManager, await ReplayProcessManager.create(
+          globalResults['replay-from'].trim(),
+        ));
+      } on ArgumentError {
+        throwToolExit('--replay-from must specify a valid file or directory.');
+      }
     }
 
     logger.quiet = globalResults['quiet'];
