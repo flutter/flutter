@@ -114,8 +114,7 @@ class PlatformViewAndroid : public PlatformView {
 
   void ReleaseSurface();
 
-  void GetBitmapGpuTask(ftl::AutoResetWaitableEvent* latch,
-                        jobject* pixels_out,
+  void GetBitmapGpuTask(jobject* pixels_out,
                         SkISize* size_out);
 
   FTL_DISALLOW_COPY_AND_ASSIGN(PlatformViewAndroid);
