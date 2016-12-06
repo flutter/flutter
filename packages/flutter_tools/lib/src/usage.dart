@@ -85,7 +85,18 @@ class Usage {
 
   void sendException(dynamic exception, StackTrace trace) {
     if (!suppressAnalytics)
-      _analytics.sendException('${exception.runtimeType}; ${sanitizeStacktrace(trace)}');
+      _analytics.sendException(_shorten('${exception.runtimeType}; ${sanitizeStacktrace(trace)}'));
+  }
+
+  /// Shorten the exception information that is sent to Google Analytics
+  /// to get more information because Google Analytics truncates this to 100 char.
+  String _shorten(String text) {
+    /// TODO(danrubel) Gather more information about https://github.com/flutter/flutter/issues/5137
+    /// remove this code once that issue is resolved.
+    const String prefix = 'FileSystemException; dart:io/file_impl.dart 807 _RandomAccessFile.writeFromSync dart:io/stdio.dart ';
+    if (text.startsWith(prefix))
+      text = 'FSE:807 ' + text.substring(prefix.length);
+    return text;
   }
 
   /// Fires whenever analytics data is sent over the network; public for testing.
