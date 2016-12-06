@@ -430,9 +430,8 @@ class _TabsScrollBehavior extends BoundedBehavior {
     if (!isScrollable)
       return null;
 
-    double velocityPerSecond = velocity * 1000.0;
     return new BoundedFrictionSimulation(
-      _kTabBarScrollDrag, position, velocityPerSecond, minScrollOffset, maxScrollOffset
+      _kTabBarScrollDrag, position, velocity, minScrollOffset, maxScrollOffset
     );
   }
 
