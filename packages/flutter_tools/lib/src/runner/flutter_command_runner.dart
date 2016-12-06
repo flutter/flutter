@@ -105,8 +105,8 @@ class FlutterCommandRunner extends CommandRunner<Null> {
             'created with the path specified in this flag.');
     argParser.addOption('replay-from',
         help:
-            'Enables mocking of process invocations by replaying their stdout '
-            ', stderr, and exit code from the specified recording (obtained '
+            'Enables mocking of process invocations by replaying their stdout, '
+            'stderr, and exit code from the specified recording (obtained '
             'via --record-to).\n'
             'If the location is a file, it is assumed to be a ZIP file '
             'structured according to the output of --record-to. If the '

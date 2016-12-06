@@ -422,7 +422,8 @@ class IOSSimulator extends Device {
 
       try {
         await _setupUpdatedApplicationBundle(app);
-      } on ToolExit {
+      } on ToolExit catch (e) {
+        printError(e.message);
         return new LaunchResult.failed();
       }
     } else {
@@ -519,7 +520,7 @@ class IOSSimulator extends Device {
     // Step 2: Assert that the Xcode project was successfully built.
     IOSApp iosApp = app;
     Directory bundle = new Directory(iosApp.simulatorBundlePath);
-    bool bundleExists = await bundle.exists();
+    bool bundleExists = bundle.existsSync();
     if (!bundleExists)
       throwToolExit('Could not find the built application bundle at ${bundle.path}.');
 

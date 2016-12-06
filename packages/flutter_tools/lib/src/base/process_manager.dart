@@ -7,7 +7,6 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:archive/archive.dart';
-import 'package:collection/collection.dart';
 import 'package:intl/intl.dart';
 import 'package:path/path.dart' as path;
 
@@ -17,10 +16,15 @@ import 'process.dart';
 
 ProcessManager get processManager => context[ProcessManager];
 
-typedef bool ListsEqual<T>(List<T> list1, List<T> list2);
-
 const String _kManifestName = 'MANIFEST.txt';
-final ListsEqual<String> kListsEqual = const ListEquality<String>().equals;
+
+bool _areListsEqual/*<T>*/(List<dynamic/*=T*/> list1, List<dynamic/*=T*/> list2) {
+  int i = 0;
+  return list1 != null
+      && list2 != null
+      && list1.length == list2.length
+      && list1.every((dynamic element) => element == list2[i++]);
+}
 
 /// A class that manages the creation of operating system processes. This
 /// provides a lightweight wrapper around the underlying [Process] static
@@ -28,11 +32,12 @@ final ListsEqual<String> kListsEqual = const ListEquality<String>().equals;
 /// decorated for testing or debugging purposes.
 class ProcessManager {
   Future<Process> start(
-      String executable,
-      List<String> arguments,
-      {String workingDirectory,
-       Map<String, String> environment,
-       ProcessStartMode mode: ProcessStartMode.NORMAL}) {
+    String executable,
+    List<String> arguments, {
+    String workingDirectory,
+    Map<String, String> environment,
+    ProcessStartMode mode: ProcessStartMode.NORMAL,
+  }) {
     return Process.start(
       executable,
       arguments,
@@ -43,12 +48,13 @@ class ProcessManager {
   }
 
   Future<ProcessResult> run(
-      String executable,
-      List<String> arguments,
-      {String workingDirectory,
-       Map<String, String> environment,
-       Encoding stdoutEncoding: SYSTEM_ENCODING,
-       Encoding stderrEncoding: SYSTEM_ENCODING}) {
+    String executable,
+    List<String> arguments, {
+    String workingDirectory,
+    Map<String, String> environment,
+    Encoding stdoutEncoding: SYSTEM_ENCODING,
+    Encoding stderrEncoding: SYSTEM_ENCODING,
+  }) {
     return Process.run(
       executable,
       arguments,
@@ -60,12 +66,13 @@ class ProcessManager {
   }
 
   ProcessResult runSync(
-      String executable,
-      List<String> arguments,
-      {String workingDirectory,
-       Map<String, String> environment,
-       Encoding stdoutEncoding: SYSTEM_ENCODING,
-       Encoding stderrEncoding: SYSTEM_ENCODING}) {
+    String executable,
+    List<String> arguments, {
+    String workingDirectory,
+    Map<String, String> environment,
+    Encoding stdoutEncoding: SYSTEM_ENCODING,
+    Encoding stderrEncoding: SYSTEM_ENCODING,
+  }) {
     return Process.runSync(
       executable,
       arguments,
@@ -115,11 +122,12 @@ class RecordingProcessManager implements ProcessManager {
 
   @override
   Future<Process> start(
-      String executable,
-      List<String> arguments,
-      {String workingDirectory,
-       Map<String, String> environment,
-       ProcessStartMode mode: ProcessStartMode.NORMAL}) async {
+    String executable,
+    List<String> arguments, {
+    String workingDirectory,
+    Map<String, String> environment,
+    ProcessStartMode mode: ProcessStartMode.NORMAL,
+  }) async {
     Process process = await _delegate.start(
       executable,
       arguments,
@@ -156,12 +164,13 @@ class RecordingProcessManager implements ProcessManager {
 
   @override
   Future<ProcessResult> run(
-      String executable,
-      List<String> arguments,
-      {String workingDirectory,
-       Map<String, String> environment,
-       Encoding stdoutEncoding: SYSTEM_ENCODING,
-       Encoding stderrEncoding: SYSTEM_ENCODING}) async {
+    String executable,
+    List<String> arguments, {
+    String workingDirectory,
+    Map<String, String> environment,
+    Encoding stdoutEncoding: SYSTEM_ENCODING,
+    Encoding stderrEncoding: SYSTEM_ENCODING,
+  }) async {
     ProcessResult result = await _delegate.run(
       executable,
       arguments,
@@ -207,12 +216,13 @@ class RecordingProcessManager implements ProcessManager {
 
   @override
   ProcessResult runSync(
-      String executable,
-      List<String> arguments,
-      {String workingDirectory,
-       Map<String, String> environment,
-       Encoding stdoutEncoding: SYSTEM_ENCODING,
-       Encoding stderrEncoding: SYSTEM_ENCODING}) {
+    String executable,
+    List<String> arguments, {
+    String workingDirectory,
+    Map<String, String> environment,
+    Encoding stdoutEncoding: SYSTEM_ENCODING,
+    Encoding stderrEncoding: SYSTEM_ENCODING,
+  }) {
     ProcessResult result = _delegate.runSync(
       executable,
       arguments,
@@ -264,29 +274,29 @@ class RecordingProcessManager implements ProcessManager {
   /// Creates a JSON-encodable manifest entry representing the specified
   /// process invocation.
   Map<String, dynamic> _createManifestEntry({
-      int pid,
-      String basename,
-      String executable,
-      List<String> arguments,
-      String workingDirectory,
-      Map<String, String> environment,
-      ProcessStartMode mode,
-      Encoding stdoutEncoding,
-      Encoding stderrEncoding,
-      int exitCode,
+    int pid,
+    String basename,
+    String executable,
+    List<String> arguments,
+    String workingDirectory,
+    Map<String, String> environment,
+    ProcessStartMode mode,
+    Encoding stdoutEncoding,
+    Encoding stderrEncoding,
+    int exitCode,
   }) {
-    Map<String, dynamic> entry = <String, dynamic>{};
-    if (pid != null) entry['pid'] = pid;
-    if (basename != null) entry['basename'] = basename;
-    if (executable != null) entry['executable'] = executable;
-    if (arguments != null) entry['arguments'] = arguments;
-    if (workingDirectory != null) entry['workingDirectory'] = workingDirectory;
-    if (environment != null) entry['environment'] = environment;
-    if (mode != null) entry['mode'] = mode.toString();
-    if (stdoutEncoding != null) entry['stdoutEncoding'] = stdoutEncoding.name;
-    if (stderrEncoding != null) entry['stderrEncoding'] = stderrEncoding.name;
-    if (exitCode != null) entry['exitCode'] = exitCode;
-    return entry;
+    return new _ManifestEntryBuilder()
+      .add('pid', pid)
+      .add('basename', basename)
+      .add('executable', executable)
+      .add('arguments', arguments)
+      .add('workingDirectory', workingDirectory)
+      .add('environment', environment)
+      .add('mode', mode, () => mode.toString())
+      .add('stdoutEncoding', stdoutEncoding, () => stdoutEncoding.name)
+      .add('stderrEncoding', stderrEncoding, () => stderrEncoding.name)
+      .add('exitCode', exitCode)
+      .entry;
   }
 
   /// Returns a human-readable identifier for the specified executable.
@@ -364,7 +374,7 @@ class RecordingProcessManager implements ProcessManager {
   Future<File> _createZipFile() async {
     File zipFile;
     String recordTo = _recordTo ?? Directory.current.path;
-    if (await FileSystemEntity.type(recordTo) == FileSystemEntityType.DIRECTORY) {
+    if (FileSystemEntity.typeSync(recordTo) == FileSystemEntityType.DIRECTORY) {
       zipFile = new File('$recordTo/$kDefaultRecordTo');
     } else {
       zipFile = new File(recordTo);
@@ -373,8 +383,8 @@ class RecordingProcessManager implements ProcessManager {
 
     // Resolve collisions.
     String basename = path.basename(zipFile.path);
-    for (int i = 1; await zipFile.exists(); i++) {
-      assert(await FileSystemEntity.isFile(zipFile.path));
+    for (int i = 1; zipFile.existsSync(); i++) {
+      assert(FileSystemEntity.isFileSync(zipFile.path));
       String disambiguator = new NumberFormat('00').format(i);
       String newBasename = basename;
       if (basename.contains('.')) {
@@ -407,6 +417,21 @@ class RecordingProcessManager implements ProcessManager {
 
     await Future.wait(addAllFilesToArchive);
     return new ZipEncoder().encode(archive);
+  }
+}
+
+/// A lightweight class that provides a builder pattern for building a
+/// manifest entry.
+class _ManifestEntryBuilder {
+  Map<String, dynamic> entry;
+
+  /// Adds the specified key/value pair to the manifest entry iff the value
+  /// is non-null. If [jsonValue] is specified, its value will be used instead
+  /// of the raw value.
+  _ManifestEntryBuilder add(String name, dynamic value, [dynamic jsonValue()]) {
+    if (value != null)
+      entry[name] = jsonValue == null ? value : jsonValue();
+    return this;
   }
 }
 
@@ -547,7 +572,7 @@ class ReplayProcessManager implements ProcessManager {
   /// directory, an [ArgumentError] will be thrown.
   static Future<ReplayProcessManager> create(String location) async {
     Directory dir;
-    switch (await FileSystemEntity.type(location)) {
+    switch (FileSystemEntity.typeSync(location)) {
       case FileSystemEntityType.FILE:
         dir = await Directory.systemTemp.createTemp('flutter_tools_');
         os.unzip(new File(location), dir);
@@ -559,16 +584,18 @@ class ReplayProcessManager implements ProcessManager {
         dir = new Directory(location);
         break;
       case FileSystemEntityType.NOT_FOUND:
-        throw new ArgumentError.value(location, 'location');
+        throw new ArgumentError.value(location, 'location', 'Does not exist');
     }
 
     File manifestFile = new File(path.join(dir.path, _kManifestName));
-    if (!(await manifestFile.exists())) {
+    if (!manifestFile.existsSync()) {
       // We use the existence of the manifest as a proxy for this being a
       // valid replay directory. Namely, we don't validate the structure of the
       // JSON within the manifest, and we don't validate the existence of
       // all stdout and stderr files referenced in the manifest.
-      throw new ArgumentError('$_kManifestName not found.');
+      throw new ArgumentError.value(location, 'location',
+          'Does not represent a valid recording (it does not '
+          'contain $_kManifestName).');
     }
 
     String content = await manifestFile.readAsString();
@@ -582,40 +609,46 @@ class ReplayProcessManager implements ProcessManager {
 
   @override
   Future<Process> start(
-      String executable,
-      List<String> arguments,
-      {String workingDirectory,
-       Map<String, String> environment,
-       ProcessStartMode mode: ProcessStartMode.NORMAL}) async {
+    String executable,
+    List<String> arguments, {
+    String workingDirectory,
+    Map<String, String> environment,
+    ProcessStartMode mode: ProcessStartMode.NORMAL,
+  }) async {
     Map<String, dynamic> entry = _popEntry(executable, arguments, mode: mode);
-    _ReplayProcessResult result = await _ReplayProcessResult.create(_dir, entry);
+    _ReplayProcessResult result = await _ReplayProcessResult.create(
+        executable, arguments, _dir, entry);
     return result.asProcess(entry['daemon'] ?? false);
   }
 
   @override
   Future<ProcessResult> run(
-      String executable,
-      List<String> arguments,
-      {String workingDirectory,
-       Map<String, String> environment,
-       Encoding stdoutEncoding: SYSTEM_ENCODING,
-       Encoding stderrEncoding: SYSTEM_ENCODING}) async {
+    String executable,
+    List<String> arguments, {
+    String workingDirectory,
+    Map<String, String> environment,
+    Encoding stdoutEncoding: SYSTEM_ENCODING,
+    Encoding stderrEncoding: SYSTEM_ENCODING,
+  }) async {
     Map<String, dynamic> entry = _popEntry(executable, arguments,
         stdoutEncoding: stdoutEncoding, stderrEncoding: stderrEncoding);
-    return await _ReplayProcessResult.create(_dir, entry);
+    return await _ReplayProcessResult.create(
+        executable, arguments, _dir, entry);
   }
 
   @override
   ProcessResult runSync(
-      String executable,
-      List<String> arguments,
-      {String workingDirectory,
-       Map<String, String> environment,
-       Encoding stdoutEncoding: SYSTEM_ENCODING,
-       Encoding stderrEncoding: SYSTEM_ENCODING}) {
+    String executable,
+    List<String> arguments, {
+    String workingDirectory,
+    Map<String, String> environment,
+    Encoding stdoutEncoding: SYSTEM_ENCODING,
+    Encoding stderrEncoding: SYSTEM_ENCODING,
+  }) {
     Map<String, dynamic> entry = _popEntry(executable, arguments,
         stdoutEncoding: stdoutEncoding, stderrEncoding: stderrEncoding);
-    return _ReplayProcessResult.createSync(_dir, entry);
+    return _ReplayProcessResult.createSync(
+        executable, arguments, _dir, entry);
   }
 
   /// Finds and returns the next entry in the process manifest that matches
@@ -631,7 +664,7 @@ class ReplayProcessManager implements ProcessManager {
         // Ignore workingDirectory & environment, as they could
         // yield false negatives.
         return entry['executable'] == executable
-            && kListsEqual(entry['arguments'], arguments)
+            && _areListsEqual(entry['arguments'], arguments)
             && entry['mode'] == mode?.toString()
             && entry['stdoutEncoding'] == stdoutEncoding?.name
             && entry['stderrEncoding'] == stderrEncoding?.name
@@ -674,16 +707,22 @@ class _ReplayProcessResult implements ProcessResult {
   _ReplayProcessResult._({this.pid, this.exitCode, this.stdout, this.stderr});
 
   static Future<_ReplayProcessResult> create(
+    String executable,
+    List<String> arguments,
     Directory dir,
     Map<String, dynamic> entry,
   ) async {
     String basePath = path.join(dir.path, entry['basename']);
-    return new _ReplayProcessResult._(
-      pid: entry['pid'],
-      exitCode: entry['exitCode'],
-      stdout: await _getData('$basePath.stdout', entry['stdoutEncoding']),
-      stderr: await _getData('$basePath.stderr', entry['stderrEncoding']),
-    );
+    try {
+      return new _ReplayProcessResult._(
+        pid: entry['pid'],
+        exitCode: entry['exitCode'],
+        stdout: await _getData('$basePath.stdout', entry['stdoutEncoding']),
+        stderr: await _getData('$basePath.stderr', entry['stderrEncoding']),
+      );
+    } catch (e) {
+      throw new ProcessException(executable, arguments, e.toString());
+    }
   }
 
   static Future<dynamic> _getData(String path, String encoding) async {
@@ -694,16 +733,22 @@ class _ReplayProcessResult implements ProcessResult {
   }
 
   static _ReplayProcessResult createSync(
+    String executable,
+    List<String> arguments,
     Directory dir,
     Map<String, dynamic> entry,
   ) {
     String basePath = path.join(dir.path, entry['basename']);
-    return new _ReplayProcessResult._(
-      pid: entry['pid'],
-      exitCode: entry['exitCode'],
-      stdout: (_getDataSync('$basePath.stdout', entry['stdoutEncoding'])),
-      stderr: (_getDataSync('$basePath.stderr', entry['stderrEncoding'])),
-    );
+    try {
+      return new _ReplayProcessResult._(
+        pid: entry['pid'],
+        exitCode: entry['exitCode'],
+        stdout: _getDataSync('$basePath.stdout', entry['stdoutEncoding']),
+        stderr: _getDataSync('$basePath.stderr', entry['stderrEncoding']),
+      );
+    } catch (e) {
+      throw new ProcessException(executable, arguments, e.toString());
+    }
   }
 
   static dynamic _getDataSync(String path, String encoding) {
@@ -748,11 +793,22 @@ class _ReplayProcess implements Process {
         _stderrController = new StreamController<List<int>>(),
         _exitCode = result.exitCode,
         _exitCodeCompleter = new Completer<int>() {
-    // Produce stream events after a delay to allow all pending Flutter tools
-    // commands to have been issued before we start producing stdio. This
-    // prevents the case where our device log reader consumes all stdio before
-    // we've even started the app, thus causing the protocol discovery process
-    // to fail.
+    // Don't flush our stdio streams until we reach the outer event loop. This
+    // is necessary because some of our process invocations transform the stdio
+    // streams into broadcast streams (e.g. DeviceLogReader implementations),
+    // and delaying our stdio stream production until we reach the outer event
+    // loop allows all code running in the microtask loop to register as
+    // listeners on these streams before we flush them.
+    //
+    // TODO(tvolkert): Once https://github.com/flutter/flutter/issues/7166 is
+    //                 resolved, running on the outer event loop should be
+    //                 sufficient (as described above), and we should switch to
+    //                 Duration.ZERO. In the meantime, native file I/O
+    //                 operations are causing a Duration.ZERO callback here to
+    //                 run before our ProtocolDiscovery instantiation, and thus,
+    //                 we flush our stdio streams before our protocol discovery
+    //                 is listening on them (causing us to timeout waiting for
+    //                 the observatory port discovery).
     new Timer(const Duration(milliseconds: 50), () {
       _stdoutController.add(_stdout);
       _stderrController.add(_stderr);
