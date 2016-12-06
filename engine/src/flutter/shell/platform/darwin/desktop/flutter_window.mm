@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#import "sky_window.h"
+#import "flutter_window.h"
 
 #include "flutter/common/threads.h"
 #include "flutter/shell/gpu/gpu_surface_gl.h"
 #include "flutter/shell/platform/darwin/desktop/platform_view_mac.h"
 
-@interface SkyWindow ()<NSWindowDelegate>
+@interface FlutterWindow ()<NSWindowDelegate>
 
 @property(assign) IBOutlet NSOpenGLView* renderSurface;
 @property(getter=isSurfaceSetup) BOOL surfaceSetup;
@@ -37,7 +37,7 @@ static inline blink::PointerData::Change PointerChangeFromNSEventPhase(
   return blink::PointerData::Change::kCancel;
 }
 
-@implementation SkyWindow {
+@implementation FlutterWindow {
   std::unique_ptr<shell::PlatformViewMac> _platformView;
   bool _mouseIsDown;
 }
@@ -63,7 +63,7 @@ static inline blink::PointerData::Change PointerChangeFromNSEventPhase(
       std::make_unique<shell::GPUSurfaceGL>(_platformView.get()));
 }
 
-// TODO(eseidel): This does not belong in sky_window!
+// TODO(eseidel): This does not belong in flutter_window!
 // Probably belongs in NSApplicationDelegate didFinishLaunching.
 - (void)setupAndLoadDart {
   _platformView->SetupAndLoadDart();

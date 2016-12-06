@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef __SHELL_MAC_SKY_APPLICATION__
-#define __SHELL_MAC_SKY_APPLICATION__
+#ifndef __SHELL_PLATFORM_DARWIN_DESKTOP_FLUTTER_APPLICATION__
+#define __SHELL_PLATFORM_DARWIN_DESKTOP_FLUTTER_APPLICATION__
 
 #import <AppKit/AppKit.h>
 
@@ -12,7 +12,7 @@
 
 // A specific subclass of NSApplication is necessary on Mac in order to
 // interact correctly with the main runloop.
-@interface SkyApplication : NSApplication<CrAppProtocol, CrAppControlProtocol>
+@interface FlutterApplication : NSApplication<CrAppProtocol, CrAppControlProtocol>
 @end
 
-#endif /* defined(__SHELL_MAC_SKY_APPLICATION__) */
+#endif /* defined(__SHELL_PLATFORM_DARWIN_DESKTOP_FLUTTER_APPLICATION__) */

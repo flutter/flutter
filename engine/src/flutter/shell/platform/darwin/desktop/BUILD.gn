@@ -13,12 +13,12 @@ source_set("mac_desktop_platform") {
     "main_mac.mm",
     "platform_view_mac.h",
     "platform_view_mac.mm",
-    "sky_app_delegate.h",
-    "sky_app_delegate.m",
-    "sky_application.h",
-    "sky_application.mm",
-    "sky_window.h",
-    "sky_window.mm",
+    "flutter_app_delegate.h",
+    "flutter_app_delegate.m",
+    "flutter_application.h",
+    "flutter_application.mm",
+    "flutter_window.h",
+    "flutter_window.mm",
     "vsync_waiter_mac.cc",
     "vsync_waiter_mac.h",
   ]
@@ -57,7 +57,7 @@ resource_copy_mac("mac_desktop_resources") {
 mac_app("shell_application_bundle") {
   app_name = "SkyShell"
   info_plist = "Info.plist"
-  xibs = [ "sky_mac.xib" ]
+  xibs = [ "flutter_mac.xib" ]
 
   deps = [
     ":mac_desktop_platform",

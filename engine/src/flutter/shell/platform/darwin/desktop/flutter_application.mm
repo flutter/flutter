@@ -2,24 +2,24 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/shell/platform/darwin/desktop/sky_application.h"
+#include "flutter/shell/platform/darwin/desktop/flutter_application.h"
 
 #include "base/auto_reset.h"
 #include "base/logging.h"
 
-@implementation SkyApplication {
+@implementation FlutterApplication {
   BOOL handlingSendEvent_;
 }
 
 + (void)initialize {
-  if (self == [SkyApplication class]) {
-    NSApplication* app = [SkyApplication sharedApplication];
+  if (self == [FlutterApplication class]) {
+    NSApplication* app = [FlutterApplication sharedApplication];
     DCHECK([app conformsToProtocol:@protocol(CrAppControlProtocol)])
         << "Existing NSApp (class " << [[app className] UTF8String]
         << ") does not conform to required protocol.";
     DCHECK(base::MessagePumpMac::UsingCrApp())
         << "MessagePumpMac::Create() was called before "
-        << "+[SkyApplication initialize]";
+        << "+[FlutterApplication initialize]";
   }
 }
 

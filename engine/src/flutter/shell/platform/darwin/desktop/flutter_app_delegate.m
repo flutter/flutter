@@ -2,8 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#import <Cocoa/Cocoa.h>
+#import "flutter_app_delegate.h"
 
-@interface SkyWindow : NSWindow
+@interface FlutterAppDelegate ()
+
+@property(assign) IBOutlet NSWindow* window;
+
+@end
+
+@implementation FlutterAppDelegate
 
 @end

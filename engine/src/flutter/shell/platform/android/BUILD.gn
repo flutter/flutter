@@ -64,6 +64,8 @@ android_library("java") {
   visibility = [ ":*" ]
 
   java_files = [
+    "io/flutter/app/FlutterActivity.java",
+    "io/flutter/app/FlutterApplication.java",
     "io/flutter/plugin/common/ActivityLifecycleListener.java",
     "io/flutter/plugin/common/JSONMessageListener.java",
     "io/flutter/plugin/editing/InputConnectionAdaptor.java",
@@ -76,6 +78,7 @@ android_library("java") {
     "io/flutter/view/ResourceExtractor.java",
     "io/flutter/view/ResourcePaths.java",
     "io/flutter/view/VsyncWaiter.java",
+    # Deprecated classes provided for backwards compatibility
     "org/domokit/sky/shell/SkyActivity.java",
     "org/domokit/sky/shell/SkyApplication.java",
   ]
