@@ -127,6 +127,12 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["has-android-device"]
 
+  flutter_gallery__back_button_memory:
+    description: >
+      Measures memory usage after Android app suspend and resume.
+    stage: devicelab
+    required_agent_capabilities: ["has-android-device"]
+
 
   # iOS on-device tests
 

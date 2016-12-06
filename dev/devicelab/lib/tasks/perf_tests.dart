@@ -60,6 +60,13 @@ TaskFunction createGalleryNavigationMemoryTest() {
   );
 }
 
+TaskFunction createGalleryBackButtonMemoryTest() {
+  return new AndroidBackButtonMemoryTest(
+    '${flutterDirectory.path}/examples/flutter_gallery',
+    'io.flutter.examples.gallery',
+  );
+}
+
 /// Measure application startup performance.
 class StartupTest {
   static const Duration _startupTimeout = const Duration(minutes: 2);
@@ -249,6 +256,58 @@ class MemoryTest {
         data['end_total_kb'] = endData['total_kb'];
         data['diff_total_kb'] = endData['total_kb'] - startData['total_kb'];
       }
+
+      await device.stop(packageName);
+
+      return new TaskResult.success(data, benchmarkScoreKeys: data.keys.toList());
+    });
+  }
+}
+
+/// Measure application memory usage after pausing and resuming the app
+/// with the Android back button.
+class AndroidBackButtonMemoryTest {
+  final String testDirectory;
+  final String packageName;
+
+  AndroidBackButtonMemoryTest(this.testDirectory, this.packageName);
+
+  Future<TaskResult> call() {
+    return inDirectory(testDirectory, () async {
+      if (deviceOperatingSystem != DeviceOperatingSystem.android) {
+        throw 'This test is only supported on Android';
+      }
+
+      AndroidDevice device = await devices.workingDevice;
+      await device.unlock();
+      String deviceId = device.deviceId;
+      await flutter('packages', options: <String>['get']);
+
+      await flutter('run', options: <String>[
+        '-v',
+        '--profile',
+        '--trace-startup', // wait for the first frame to render
+        '-d',
+        deviceId,
+      ]);
+
+      Map<String, dynamic> startData = await device.getMemoryStats(packageName);
+
+      Map<String, dynamic> data = <String, dynamic>{
+         'start_total_kb': startData['total_kb'],
+      };
+
+      // Perform a series of back button suspend and resume cycles.
+      for (int i = 0; i < 10; i++) {
+        device.shellExec('input', <String>['keyevent', 'KEYCODE_BACK']);
+        await new Future<Null>.delayed(new Duration(milliseconds: 1000));
+        device.shellExec('am', <String>['start', '-n', 'io.flutter.examples.gallery/org.domokit.sky.shell.SkyActivity']);
+        await new Future<Null>.delayed(new Duration(milliseconds: 1000));
+      }
+
+      Map<String, dynamic> endData = await device.getMemoryStats(packageName);
+      data['end_total_kb'] = endData['total_kb'];
+      data['diff_total_kb'] = endData['total_kb'] - startData['total_kb'];
 
       await device.stop(packageName);
 
