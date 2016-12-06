@@ -451,6 +451,10 @@ class IOSSimulator extends Device {
       args.add("--observatory-port=$observatoryPort");
     }
 
+    ProtocolDiscovery observatoryDiscovery;
+    if (debuggingOptions.debuggingEnabled)
+      observatoryDiscovery = new ProtocolDiscovery.observatory(getLogReader(app: app));
+
     // Launch the updated application in the simulator.
     try {
       SimControl.instance.launch(id, app.id, args);
@@ -467,7 +471,6 @@ class IOSSimulator extends Device {
     // device has printed "Observatory is listening on..."
     printTrace('Waiting for observatory port to be available...');
 
-    ProtocolDiscovery observatoryDiscovery = new ProtocolDiscovery.observatory(getLogReader(app: app));
     try {
       Uri deviceUri = await observatoryDiscovery.nextUri();
       return new LaunchResult.succeeded(observatoryUri: deviceUri);
