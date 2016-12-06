@@ -8,8 +8,18 @@ android {
     lintOptions {
         disable 'InvalidPackage'
     }
+
+    defaultConfig {
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
 }
 
 flutter {
     source '../..'
+}
+
+dependencies {
+    androidTestCompile 'com.android.support:support-annotations:22.0.0'
+    androidTestCompile 'com.android.support.test:runner:0.5'
+    androidTestCompile 'com.android.support.test:rules:0.5'
 }
