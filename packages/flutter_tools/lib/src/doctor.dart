@@ -404,16 +404,25 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
       });
     }
 
-    for (FileSystemEntity dir in new Directory('/Applications').listSync()) {
-      if (dir is Directory) {
-        checkForIntelliJ(dir);
-        if (!dir.path.endsWith('.app')) {
-          for (FileSystemEntity subdir in dir.listSync()) {
-            if (subdir is Directory)
-              checkForIntelliJ(subdir);
+    try {
+      for (FileSystemEntity dir in new Directory('/Applications').listSync()) {
+        if (dir is Directory) {
+          checkForIntelliJ(dir);
+          if (!dir.path.endsWith('.app')) {
+            for (FileSystemEntity subdir in dir.listSync()) {
+              if (subdir is Directory)
+                checkForIntelliJ(subdir);
+            }
           }
         }
       }
+    } on FileSystemException catch (e) {
+      validators.add(new ValidatorWithResult(
+          'Cannot determine if IntelliJ is installed',
+          new ValidationResult(ValidationType.missing, <ValidationMessage>[
+             new ValidationMessage.error(e.message),
+          ]),
+      ));
     }
     return validators;
   }
@@ -467,4 +476,13 @@ class DeviceValidator extends DoctorValidator {
     }
     return new ValidationResult(ValidationType.installed, messages);
   }
+}
+
+class ValidatorWithResult extends DoctorValidator {
+  final ValidationResult result;
+
+  ValidatorWithResult(String title, this.result) : super(title);
+
+  @override
+  Future<ValidationResult> validate() async => result;
 }
