@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 
 class NavigationIconView {
   NavigationIconView({
-    Icon icon,
+    Widget icon,
     Widget title,
     Color color,
     TickerProvider vsync,
@@ -27,7 +27,7 @@ class NavigationIconView {
     );
   }
 
-  final Icon _icon;
+  final Widget _icon;
   final Color _color;
   final DestinationLabel destinationLabel;
   final AnimationController controller;
@@ -51,7 +51,28 @@ class NavigationIconView {
           begin: const FractionalOffset(0.0, 0.02), // Small offset from the top.
           end: FractionalOffset.topLeft,
         ).animate(_animation),
-        child: new Icon(_icon.icon, color: iconColor, size: 120.0),
+        child: new IconTheme(
+          data: new IconThemeData(
+            color: iconColor,
+            size: 120.0,
+          ),
+          child: _icon,
+        ),
+      ),
+    );
+  }
+}
+
+class CustomIcon extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final IconThemeData iconTheme = IconTheme.of(context).fallback();
+    return new Container(
+      margin: const EdgeInsets.all(4.0),
+      width: iconTheme.size - 8.0,
+      height: iconTheme.size - 8.0,
+      decoration: new BoxDecoration(
+        backgroundColor: iconTheme.color,
       ),
     );
   }
@@ -78,6 +99,12 @@ class _BottomNavigationDemoState extends State<BottomNavigationDemo>
         icon: new Icon(Icons.access_alarm),
         title: new Text('Alarm'),
         color: Colors.deepPurple[500],
+        vsync: this,
+      ),
+      new NavigationIconView(
+        icon: new CustomIcon(),
+        title: new Text('Box'),
+        color: Colors.deepOrange[500],
         vsync: this,
       ),
       new NavigationIconView(

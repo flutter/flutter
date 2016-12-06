@@ -11,7 +11,6 @@ import 'package:vector_math/vector_math_64.dart' show Vector3;
 
 import 'colors.dart';
 import 'constants.dart';
-import 'icon.dart';
 import 'icon_theme.dart';
 import 'icon_theme_data.dart';
 import 'ink_well.dart';
@@ -59,7 +58,11 @@ class DestinationLabel {
   }
 
   /// The icon of the label.
-  final Icon icon;
+  ///
+  /// Typically the icon is an [Icon] or an [IconImage] widget. If another type
+  /// of widget is provided then it should configure itself to match the current
+  /// [IconTheme] size and color.
+  final Widget icon;
 
   /// The title of the label.
   final Widget title;
@@ -104,15 +107,15 @@ class BottomNavigationBar extends StatefulWidget {
     this.onTap,
     this.currentIndex: 0,
     this.type: BottomNavigationBarType.fixed,
-    this.fixedColor
+    this.fixedColor,
+    this.iconSize: 24.0,
   }) : super(key: key) {
-    assert(this.labels != null);
-    assert(this.labels.length >= 2);
-    assert(0 <= currentIndex && currentIndex < this.labels.length);
-    assert(this.type != null);
-    assert(
-      this.type == BottomNavigationBarType.fixed || this.fixedColor == null
-    );
+    assert(labels != null);
+    assert(labels.length >= 2);
+    assert(0 <= currentIndex && currentIndex < labels.length);
+    assert(type != null);
+    assert(type == BottomNavigationBarType.fixed || fixedColor == null);
+    assert(iconSize != null);
   }
 
   /// The interactive labels laid out within the bottom navigation bar.
@@ -134,6 +137,13 @@ class BottomNavigationBar extends StatefulWidget {
   /// The color of the selected label when bottom navigation bar is
   /// [BottomNavigationBarType.fixed].
   final Color fixedColor;
+
+  /// The size of all of the [DestinationLabel] icons.
+  ///
+  /// This value is used to to configure the [IconTheme] for the navigation
+  /// bar. When a [DestinationLabel.icon] widget is not an [Icon] the widget
+  /// should configure itself to match the icon theme's size and color.
+  final double iconSize;
 
   @override
   BottomNavigationBarState createState() => new BottomNavigationBarState();
@@ -251,8 +261,8 @@ class BottomNavigationBarState extends State<BottomNavigationBar> with TickerPro
     return (leftWeights + _flex(animations[index]) / 2.0) / allWeights;
   }
 
-  FractionalOffset cirleOffset(int index) {
-    final double iconSize = config.labels[index].icon.size ?? 24.0;
+  FractionalOffset _circleOffset(int index) {
+    final double iconSize = config.iconSize;
     final Tween<double> yOffsetTween = new Tween<double>(
       begin: (18.0 + iconSize / 2.0) / kBottomNavigationBarHeight, // 18dp + icon center
       end: (6.0 + iconSize / 2.0) / kBottomNavigationBarHeight     // 6dp + icon center
@@ -332,6 +342,7 @@ class BottomNavigationBarState extends State<BottomNavigationBar> with TickerPro
                         child: new IconTheme(
                           data: new IconThemeData(
                             color: colorTween.evaluate(animations[i]),
+                            size: config.iconSize,
                           ),
                           child: config.labels[i].icon,
                         ),
@@ -400,7 +411,8 @@ class BottomNavigationBarState extends State<BottomNavigationBar> with TickerPro
                         ),
                         child: new IconTheme(
                           data: new IconThemeData(
-                            color: Colors.white
+                            color: Colors.white,
+                            size: config.iconSize,
                           ),
                           child: config.labels[i].icon,
                         ),
@@ -507,7 +519,7 @@ class _Circle {
   CurvedAnimation animation;
 
   FractionalOffset get offset {
-    return state.cirleOffset(index);
+    return state._circleOffset(index);
   }
 
   void dispose() {
