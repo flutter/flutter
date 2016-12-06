@@ -309,4 +309,43 @@ void main() {
     expect(find.text('RIGHT CHILD'), findsNothing);
   });
 
+  // A regression test for https://github.com/flutter/flutter/issues/7133
+  testWidgets('TabBar fling velocity', (WidgetTester tester) async {
+    List<String> tabs = <String>['AAAAAA', 'BBBBBB', 'CCCCCC', 'DDDDDD', 'EEEEEE', 'FFFFFF', 'GGGGGG', 'HHHHHH', 'IIIIII', 'JJJJJJ', 'KKKKKK', 'LLLLLL'];
+    int index = 0;
+
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Align(
+          alignment: FractionalOffset.topLeft,
+          child: new SizedBox(
+            width: 300.0,
+            height: 200.0,
+            child: new TabBarSelection<String>(
+              values: tabs,
+              child: new Scaffold(
+                appBar: new AppBar(
+                  title: new Text('tabs'),
+                  bottom: new TabBar<String>(
+                    isScrollable: true,
+                    labels: new Map<String, TabLabel>.fromIterable(tabs, value: (String tab) => new TabLabel(text: tab)),
+                  ),
+                ),
+                body: new TabBarView<String>(
+                  children: tabs.map((String name) => new Text('${index++}')).toList(),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // After a small slow fling to the left, we expect the second item to still be visible.
+    await tester.fling(find.text('AAAAAA'), new Offset(-25.0, 0.0), 100.0);
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1)); // finish the scroll animation
+    final RenderBox box = tester.renderObject(find.text('BBBBBB'));
+    expect(box.localToGlobal(Point.origin).x, greaterThan(0.0));
+  });
 }
