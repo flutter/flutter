@@ -93,7 +93,7 @@ class Usage {
   String _shorten(String text) {
     /// TODO(danrubel) Gather more information about https://github.com/flutter/flutter/issues/5137
     /// remove this code once that issue is resolved.
-    const prefix = 'FileSystemException; dart:io/file_impl.dart 807 _RandomAccessFile.writeFromSync dart:io/stdio.dart ';
+    const String prefix = 'FileSystemException; dart:io/file_impl.dart 807 _RandomAccessFile.writeFromSync dart:io/stdio.dart ';
     if (text.startsWith(prefix))
       text = 'FSE:807 ' + text.substring(prefix.length);
     return text;
