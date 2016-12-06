@@ -430,7 +430,8 @@ base::android::ScopedJavaLocalRef<jobject> PlatformViewAndroid::GetBitmap(
   jobject pixels_ref = nullptr;
   SkISize frame_size;
   blink::Threads::Gpu()->PostTask([this, &latch, &pixels_ref, &frame_size]() {
-    GetBitmapGpuTask(&latch, &pixels_ref, &frame_size);
+    GetBitmapGpuTask(&pixels_ref, &frame_size);
+    latch.Signal();
   });
 
   latch.Wait();
@@ -471,8 +472,7 @@ base::android::ScopedJavaLocalRef<jobject> PlatformViewAndroid::GetBitmap(
   return base::android::ScopedJavaLocalRef<jobject>(env, bitmap);
 }
 
-void PlatformViewAndroid::GetBitmapGpuTask(ftl::AutoResetWaitableEvent* latch,
-                                           jobject* pixels_out,
+void PlatformViewAndroid::GetBitmapGpuTask(jobject* pixels_out,
                                            SkISize* size_out) {
   flow::LayerTree* layer_tree = rasterizer_->GetLastLayerTree();
   if (layer_tree == nullptr)
@@ -519,8 +519,6 @@ void PlatformViewAndroid::GetBitmapGpuTask(ftl::AutoResetWaitableEvent* latch,
   *size_out = frame_size;
 
   base::android::DetachFromVM();
-
-  latch->Signal();
 }
 
 jstring GetObservatoryUri(JNIEnv* env, jclass clazz) {
