@@ -84,6 +84,8 @@ void main() {
     expect(selection.previousValue, equals('C'));
 
     await tester.pumpWidget(buildFrame(tabs: tabs, value: 'C' ,isScrollable: false));
+    expect(selection.value, equals('C'));
+    expect(selection.previousValue, equals('C'));
     await tester.tap(find.text('B'));
     await tester.pump();
     expect(selection.valueIsChanging, true);
@@ -95,15 +97,18 @@ void main() {
     expect(selection.previousIndex, equals(2));
 
     await tester.pumpWidget(buildFrame(tabs: tabs, value: 'C', isScrollable: false));
-    await tester.tap(find.text('C'));
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 1));
     expect(selection.value, equals('C'));
     expect(selection.previousValue, equals('B'));
-    expect(selection.index, equals(2));
-    expect(selection.previousIndex, equals(1));
+    await tester.tap(find.text('B'));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    expect(selection.value, equals('B'));
+    expect(selection.index, equals(1));
+    expect(selection.previousIndex, equals(2));
 
     await tester.pumpWidget(buildFrame(tabs: tabs, value: 'C', isScrollable: false));
+    expect(selection.value, equals('C'));
+    expect(selection.previousValue, equals('B'));
     await tester.tap(find.text('A'));
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
@@ -309,4 +314,29 @@ void main() {
     expect(find.text('RIGHT CHILD'), findsNothing);
   });
 
+  testWidgets('Reconfiguring TabBarSelection values', (WidgetTester tester) async {
+    Key tabBarKey = new Key('TabBar');
+    List<String> tabs0 = <String>['a', 'b', 'c', 'd'];
+    List<String> tabs1 = <String>['x', 'y', 'z'];
+
+    await tester.pumpWidget(buildFrame(tabs: tabs0, tabBarKey: tabBarKey));
+    TabBarSelectionState<String> selection = TabBarSelection.of(tester.element(find.text('a')));
+    expect(selection.values, equals(tabs0));
+    expect(selection.value, equals(tabs0.first));
+
+    await tester.pumpWidget(buildFrame(tabs: tabs1, value: 'y', tabBarKey: tabBarKey));
+    selection = TabBarSelection.of(tester.element(find.text('x')));
+    expect(selection.values, equals(tabs1));
+    expect(selection.value, 'y');
+    expect(selection.indexOf('x'), equals(0));
+    expect(selection.indexOf('y'), equals(1));
+    expect(selection.indexOf('z'), equals(2));
+    expect(find.text('x'), findsOneWidget);
+    expect(find.text('y'), findsOneWidget);
+    expect(find.text('z'), findsOneWidget);
+    expect(selection.index, equals(1));
+    expect(selection.previousIndex, equals(1));
+    expect(selection.value, equals('y'));
+    expect(selection.previousValue, equals('y'));
+  });
 }
