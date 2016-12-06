@@ -7,7 +7,6 @@ import 'dart:convert';
 import 'dart:io';
 
 import '../application_package.dart';
-import '../base/common.dart';
 import '../base/os.dart';
 import '../base/process.dart';
 import '../base/process_manager.dart';

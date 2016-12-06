@@ -8,7 +8,6 @@ import 'dart:io';
 
 import '../android/android_sdk.dart';
 import '../application_package.dart';
-import '../base/common.dart';
 import '../base/os.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
