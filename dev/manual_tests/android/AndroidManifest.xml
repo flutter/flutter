@@ -9,7 +9,7 @@
     <uses-permission android:name="android.permission.INTERNET"/>
 
     <application android:label="Flutter Manual Tests" android:name="io.flutter.app.FlutterApplication">
-        <activity android:configChanges="orientation|keyboardHidden|keyboard|screenSize" android:hardwareAccelerated="true" android:launchMode="singleTop" android:name="io.flutter.app.SkyActivity" android:theme="@android:style/Theme.Black.NoTitleBar">
+        <activity android:configChanges="orientation|keyboardHidden|keyboard|screenSize" android:hardwareAccelerated="true" android:launchMode="singleTop" android:name="io.flutter.app.FlutterActivity" android:theme="@android:style/Theme.Black.NoTitleBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
