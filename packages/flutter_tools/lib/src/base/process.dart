@@ -20,7 +20,7 @@ void addShutdownHook(ShutdownHook shutdownHook) {
 }
 
 Future<Null> runShutdownHooks() async {
-  List<ShutdownHook> hooks = new List.from(_shutdownHooks);
+  List<ShutdownHook> hooks = new List<ShutdownHook>.from(_shutdownHooks);
   _shutdownHooks.clear();
   for (ShutdownHook shutdownHook in hooks)
     await shutdownHook();
