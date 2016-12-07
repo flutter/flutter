@@ -85,6 +85,30 @@ void main() {
       });
     });
 
+    _testUsingContext('daemon.logMessage logToStdout', () async {
+      StringBuffer buffer = new StringBuffer();
+
+      await runZoned(() async {
+        return appContext.runInZone(() async {
+          StreamController<Map<String, dynamic>> commands = new StreamController<Map<String, dynamic>>();
+          StreamController<Map<String, dynamic>> responses = new StreamController<Map<String, dynamic>>();
+          daemon = new Daemon(
+            commands.stream,
+            (Map<String, dynamic> result) => responses.add(result),
+            notifyingLogger: notifyingLogger,
+            logToStdout: true
+          );
+          printStatus('daemon.logMessage test');
+          // Service the event loop.
+          await new Future<Null>.value();
+        });
+      }, zoneSpecification: new ZoneSpecification(print: (Zone self, ZoneDelegate parent, Zone zone, String line) {
+        buffer.writeln(line);
+      }));
+
+      expect(buffer.toString().trim(), 'daemon.logMessage test');
+    });
+
     _testUsingContext('daemon.shutdown', () async {
       StreamController<Map<String, dynamic>> commands = new StreamController<Map<String, dynamic>>();
       StreamController<Map<String, dynamic>> responses = new StreamController<Map<String, dynamic>>();
