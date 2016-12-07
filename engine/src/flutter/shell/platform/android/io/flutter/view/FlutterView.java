@@ -547,18 +547,29 @@ public class FlutterView extends SurfaceView
     private void handlePlatformMessage(String channel, String message, final int responseId) {
         OnMessageListener listener = mOnMessageListeners.get(channel);
         if (listener != null) {
-            nativeInvokePlatformMessageResponseCallback(mNativePlatformView, responseId, listener.onMessage(this, message));
+            String response = null;
+            try {
+                response = listener.onMessage(this, message);
+            } catch (Exception ex) {
+                Log.e(TAG, "Uncaught exception in message listener", ex);
+            }
+            nativeInvokePlatformMessageResponseCallback(mNativePlatformView, responseId, response);
             return;
         }
 
         OnMessageListenerAsync asyncListener = mAsyncOnMessageListeners.get(channel);
         if (asyncListener != null) {
-            asyncListener.onMessage(this, message, new MessageResponse() {
-                @Override
-                public void send(String response) {
-                    nativeInvokePlatformMessageResponseCallback(mNativePlatformView, responseId, response);
-                }
-            });
+            try {
+                asyncListener.onMessage(this, message, new MessageResponse() {
+                    @Override
+                    public void send(String response) {
+                        nativeInvokePlatformMessageResponseCallback(mNativePlatformView, responseId, response);
+                    }
+                });
+            } catch (Exception ex) {
+                Log.e(TAG, "Uncaught exception in async message listener", ex);
+                nativeInvokePlatformMessageResponseCallback(mNativePlatformView, responseId, null);
+            }
             return;
         }
 
@@ -572,8 +583,14 @@ public class FlutterView extends SurfaceView
     @CalledByNative
     private void handlePlatformMessageResponse(int responseId, String response) {
         MessageReplyCallback callback = mPendingResponses.remove(responseId);
-        if (callback != null)
-            callback.onReply(response);
+        if (callback != null) {
+            try {
+                callback.onReply(response);
+            } catch (Exception ex) {
+                Log.e(TAG, "Uncaught exception in message listener reply", ex);
+                return;
+            }
+        }
     }
 
     @CalledByNative
