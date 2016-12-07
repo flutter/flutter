@@ -8,7 +8,7 @@
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
 
-    <application android:name="org.domokit.sky.shell.SkyApplication" android:label="@string/app_name" >
+    <application android:name="io.flutter.app.FlutterApplication" android:label="@string/app_name" >
         <activity
             android:name=".ExampleActivity"
             android:launchMode="singleTop"

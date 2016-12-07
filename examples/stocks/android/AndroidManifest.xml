@@ -9,8 +9,8 @@
     <uses-sdk android:minSdkVersion="14" android:targetSdkVersion="21" />
     <uses-permission android:name="android.permission.INTERNET"/>
 
-    <application android:icon="@mipmap/ic_launcher" android:name="org.domokit.sky.shell.SkyApplication" android:label="Stocks">
-        <activity android:name="org.domokit.sky.shell.SkyActivity"
+    <application android:icon="@mipmap/ic_launcher" android:name="io.flutter.app.FlutterApplication" android:label="Stocks">
+        <activity android:name="io.flutter.app.FlutterActivity"
                   android:launchMode="singleTop"
                   android:theme="@android:style/Theme.Black.NoTitleBar"
                   android:configChanges="orientation|keyboardHidden|keyboard|screenSize"

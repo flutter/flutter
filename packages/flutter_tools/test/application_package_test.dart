@@ -13,7 +13,7 @@ void main() {
       ApkManifestData data = ApkManifestData.parseFromAaptBadging(_aaptData);
       expect(data, isNotNull);
       expect(data.packageName, 'io.flutter.gallery');
-      expect(data.launchableActivityName, 'org.domokit.sky.shell.SkyActivity');
+      expect(data.launchableActivityName, 'io.flutter.app.FlutterActivity');
     });
   });
 }
@@ -31,7 +31,7 @@ application-icon-480:'res/mipmap-xxhdpi-v4/ic_launcher.png'
 application-icon-640:'res/mipmap-xxxhdpi-v4/ic_launcher.png'
 application: label='Flutter Gallery' icon='res/mipmap-mdpi-v4/ic_launcher.png'
 application-debuggable
-launchable-activity: name='org.domokit.sky.shell.SkyActivity'  label='' icon=''
+launchable-activity: name='io.flutter.app.FlutterActivity'  label='' icon=''
 feature-group: label=''
   uses-feature: name='android.hardware.screen.portrait'
   uses-implied-feature: name='android.hardware.screen.portrait' reason='one or more activities have specified a portrait orientation'

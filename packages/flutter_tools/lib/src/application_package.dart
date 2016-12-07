@@ -285,7 +285,7 @@ class ApkManifestData {
       return null;
 
     // package: name='io.flutter.gallery' versionCode='1' versionName='0.0.1' platformBuildVersionName='NMR1'
-    // launchable-activity: name='org.domokit.sky.shell.SkyActivity'  label='' icon=''
+    // launchable-activity: name='io.flutter.app.FlutterActivity'  label='' icon=''
     Map<String, Map<String, String>> map = <String, Map<String, String>>{};
 
     for (String line in data.split('\n')) {
