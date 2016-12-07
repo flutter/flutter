@@ -1,0 +1,23 @@
+[
+  {
+    "pid": 100,
+    "basename": "001.sing.100",
+    "executable": "sing",
+    "arguments": [
+      "ppap"
+    ],
+    "mode": "ProcessStartMode.NORMAL",
+    "exitCode": 0
+  },
+  {
+    "pid": 101,
+    "basename": "002.dance.101",
+    "executable": "dance",
+    "arguments": [
+      "gangnam-style"
+    ],
+    "stdoutEncoding": "system",
+    "stderrEncoding": "system",
+    "exitCode": 2
+  }
+]

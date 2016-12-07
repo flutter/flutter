@@ -423,7 +423,7 @@ class RecordingProcessManager implements ProcessManager {
 /// A lightweight class that provides a builder pattern for building a
 /// manifest entry.
 class _ManifestEntryBuilder {
-  Map<String, dynamic> entry;
+  Map<String, dynamic> entry = <String, dynamic>{};
 
   /// Adds the specified key/value pair to the manifest entry iff the value
   /// is non-null. If [jsonValue] is specified, its value will be used instead
@@ -602,8 +602,8 @@ class ReplayProcessManager implements ProcessManager {
     try {
       List<Map<String, dynamic>> manifest = new JsonDecoder().convert(content);
       return new ReplayProcessManager._(manifest, dir);
-    } on FormatException {
-      throw new ArgumentError('$_kManifestName is not a valid JSON file.');
+    } on FormatException catch (e) {
+      throw new ArgumentError('$_kManifestName is not a valid JSON file: $e');
     }
   }
 
@@ -835,6 +835,8 @@ class _ReplayProcess implements Process {
   @override
   bool kill([ProcessSignal signal = ProcessSignal.SIGTERM]) {
     if (!_exitCodeCompleter.isCompleted) {
+      _stdoutController.close();
+      _stderrController.close();
       _exitCodeCompleter.complete(_exitCode);
       return true;
     }
