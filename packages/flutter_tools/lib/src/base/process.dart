@@ -15,15 +15,22 @@ typedef Future<dynamic> ShutdownHook();
 // TODO(ianh): We have way too many ways to run subprocesses in this project.
 
 List<ShutdownHook> _shutdownHooks = <ShutdownHook>[];
+bool _shutdownHooksRunning = false;
 void addShutdownHook(ShutdownHook shutdownHook) {
+  assert(!_shutdownHooksRunning);
   _shutdownHooks.add(shutdownHook);
 }
 
 Future<Null> runShutdownHooks() async {
   List<ShutdownHook> hooks = new List<ShutdownHook>.from(_shutdownHooks);
   _shutdownHooks.clear();
-  for (ShutdownHook shutdownHook in hooks)
-    await shutdownHook();
+  _shutdownHooksRunning = true;
+  try {
+    for (ShutdownHook shutdownHook in hooks)
+      await shutdownHook();
+  } finally {
+    _shutdownHooksRunning = false;
+  }
   assert(_shutdownHooks.isEmpty);
 }
 

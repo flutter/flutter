@@ -17,7 +17,7 @@ import 'package:test/test.dart';
 
 typedef bool Predicate<T>(T item);
 
-/// Decodes aUTF8-encoded byte array into a list of Strings, where each list
+/// Decodes a UTF8-encoded byte array into a list of Strings, where each list
 /// entry represents a line of text.
 List<String> _decode(List<int> data) =>
     const LineSplitter().convert(UTF8.decode(data));
@@ -41,13 +41,13 @@ void main() {
     });
 
     test('start', () async {
-      Process process = await manager.start('which', <String>['bash']);
+      Process process = await manager.start('echo', <String>['foo']);
       int pid = process.pid;
       int exitCode = await process.exitCode;
       List<int> stdout = await _consume(process.stdout);
       List<int> stderr = await _consume(process.stderr);
       expect(exitCode, 0);
-      expect(_decode(stdout), <String>['/bin/bash']);
+      expect(_decode(stdout), <String>['foo']);
       expect(stderr, isEmpty);
 
       // Force the recording to be written to disk.
@@ -63,13 +63,13 @@ void main() {
     });
 
     test('run', () async {
-      ProcessResult result = await manager.run('which', <String>['bash']);
+      ProcessResult result = await manager.run('echo', <String>['bar']);
       int pid = result.pid;
       int exitCode = result.exitCode;
       String stdout = result.stdout;
       String stderr = result.stderr;
       expect(exitCode, 0);
-      expect(stdout, '/bin/bash\n');
+      expect(stdout, 'bar\n');
       expect(stderr, isEmpty);
 
       // Force the recording to be written to disk.
@@ -85,13 +85,13 @@ void main() {
     });
 
     test('runSync', () async {
-      ProcessResult result = manager.runSync('which', <String>['bash']);
+      ProcessResult result = manager.runSync('echo', <String>['baz']);
       int pid = result.pid;
       int exitCode = result.exitCode;
       String stdout = result.stdout;
       String stderr = result.stderr;
       expect(exitCode, 0);
-      expect(stdout, '/bin/bash\n');
+      expect(stdout, 'baz\n');
       expect(stderr, isEmpty);
 
       // Force the recording to be written to disk.
@@ -156,9 +156,7 @@ Future<Null> runInMinimalContext(Future<dynamic> method()) async {
   context.putIfAbsent(ProcessManager, () => new ProcessManager());
   context.putIfAbsent(Logger, () => new BufferLogger());
   context.putIfAbsent(OperatingSystemUtils, () => new OperatingSystemUtils());
-  await context.runInZone(() {
-    return method();
-  });
+  await context.runInZone(method);
 }
 
 /// A testing utility class that encapsulates a recording.
