@@ -228,17 +228,27 @@ class DaemonDomain extends Domain {
     registerHandler('shutdown', shutdown);
 
     _subscription = daemon.notifyingLogger.onMessage.listen((LogMessage message) {
-      if (message.stackTrace != null) {
-        sendEvent('daemon.logMessage', <String, dynamic>{
-          'level': message.level,
-          'message': message.message,
-          'stackTrace': message.stackTrace.toString()
-        });
+      if (daemon.logToStdout) {
+        if (message.level == 'status') {
+          print(message.message);
+        } else if (message.level == 'error') {
+          stderr.writeln(message.message);
+          if (message.stackTrace != null)
+            stderr.writeln(message.stackTrace.toString().trimRight());
+        }
       } else {
-        sendEvent('daemon.logMessage', <String, dynamic>{
-          'level': message.level,
-          'message': message.message
-        });
+        if (message.stackTrace != null) {
+          sendEvent('daemon.logMessage', <String, dynamic>{
+            'level': message.level,
+            'message': message.message,
+            'stackTrace': message.stackTrace.toString()
+          });
+        } else {
+          sendEvent('daemon.logMessage', <String, dynamic>{
+            'level': message.level,
+            'message': message.message
+          });
+        }
       }
     });
   }
@@ -716,7 +726,7 @@ class _AppRunLogger extends Logger {
   @override
   void printStatus(String message, { bool emphasis: false, bool newline: true, String ansiAlternative }) {
     if (logToStdout) {
-      stdout.writeln(message);
+      print(message);
     } else {
       _sendLogEvent(<String, dynamic>{ 'log': message });
     }
