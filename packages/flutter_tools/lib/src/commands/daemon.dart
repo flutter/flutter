@@ -76,7 +76,8 @@ typedef Future<dynamic> CommandHandler(Map<String, dynamic> args);
 class Daemon {
   Daemon(Stream<Map<String, dynamic>> commandStream, this.sendCommand, {
     this.daemonCommand,
-    this.notifyingLogger
+    this.notifyingLogger,
+    this.logToStdout: false
   }) {
     // Set up domains.
     _registerDomain(daemonDomain = new DaemonDomain(this));
@@ -100,6 +101,7 @@ class Daemon {
   final DispatchCommand sendCommand;
   final DaemonCommand daemonCommand;
   final NotifyingLogger notifyingLogger;
+  final bool logToStdout;
 
   final Completer<int> _onExitCompleter = new Completer<int>();
   final Map<String, Domain> _domainMap = <String, Domain>{};
@@ -345,7 +347,7 @@ class AppDomain extends Domain {
       );
     }
 
-    AppInstance app = new AppInstance(_getNewAppId(), runner);
+    AppInstance app = new AppInstance(_getNewAppId(), runner: runner, logToStdout: daemon.logToStdout);
     _apps.add(app);
     _sendAppEvent(app, 'start', <String, dynamic>{
       'deviceId': device.id,
@@ -652,10 +654,11 @@ class NotifyingLogger extends Logger {
 
 /// A running application, started by this daemon.
 class AppInstance {
-  AppInstance(this.id, [this.runner]);
+  AppInstance(this.id, { this.runner, this.logToStdout = false });
 
   final String id;
   final ResidentRunner runner;
+  final bool logToStdout;
 
   _AppRunLogger _logger;
 
@@ -671,7 +674,7 @@ class AppInstance {
 
   dynamic _runInZone(AppDomain domain, dynamic method()) {
     if (_logger == null)
-      _logger = new _AppRunLogger(domain, this);
+      _logger = new _AppRunLogger(domain, this, logToStdout: logToStdout);
 
     AppContext appContext = new AppContext();
     appContext.setVariable(Logger, _logger);
@@ -681,31 +684,42 @@ class AppInstance {
 
 /// A [Logger] which sends log messages to a listening daemon client.
 class _AppRunLogger extends Logger {
-  _AppRunLogger(this.domain, this.app);
+  _AppRunLogger(this.domain, this.app, { this.logToStdout: false });
 
   AppDomain domain;
   final AppInstance app;
+  final bool logToStdout;
   int _nextProgressId = 0;
 
   @override
   void printError(String message, [StackTrace stackTrace]) {
-    if (stackTrace != null) {
-      _sendLogEvent(<String, dynamic>{
-        'log': message,
-        'stackTrace': stackTrace.toString(),
-        'error': true
-      });
+    if (logToStdout) {
+      stderr.writeln(message);
+      if (stackTrace != null)
+        stderr.writeln(stackTrace.toString().trimRight());
     } else {
-      _sendLogEvent(<String, dynamic>{
-        'log': message,
-        'error': true
-      });
+      if (stackTrace != null) {
+        _sendLogEvent(<String, dynamic>{
+          'log': message,
+          'stackTrace': stackTrace.toString(),
+          'error': true
+        });
+      } else {
+        _sendLogEvent(<String, dynamic>{
+          'log': message,
+          'error': true
+        });
+      }
     }
   }
 
   @override
   void printStatus(String message, { bool emphasis: false, bool newline: true, String ansiAlternative }) {
-    _sendLogEvent(<String, dynamic>{ 'log': message });
+    if (logToStdout) {
+      stdout.writeln(message);
+    } else {
+      _sendLogEvent(<String, dynamic>{ 'log': message });
+    }
   }
 
   @override
