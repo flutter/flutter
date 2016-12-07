@@ -103,10 +103,10 @@ static void AppendFlutterView(std::stringstream* stream,
                               int64_t isolate_id,
                               const std::string isolate_name) {
   *stream << "{\"type\":\"FlutterView\", \"id\": \"" << kViewIdPrefx << "0x"
-          << std::hex << view_id << std::dec;
+          << std::hex << view_id << std::dec << "\"";
   if (isolate_id != ILLEGAL_PORT) {
     // Append the isolate (if it exists).
-    *stream << "\","
+    *stream << ","
             << "\"isolate\":";
     AppendIsolateRef(stream, isolate_id, isolate_name);
   }
