@@ -100,7 +100,7 @@ void main() {
           );
           printStatus('daemon.logMessage test');
           // Service the event loop.
-          await new Future.value();
+          await new Future<Null>.value();
         });
       }, zoneSpecification: new ZoneSpecification(print: (Zone self, ZoneDelegate parent, Zone zone, String line) {
         buffer.writeln(line);

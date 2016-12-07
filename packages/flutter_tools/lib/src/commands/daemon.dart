@@ -230,6 +230,8 @@ class DaemonDomain extends Domain {
     _subscription = daemon.notifyingLogger.onMessage.listen((LogMessage message) {
       if (daemon.logToStdout) {
         if (message.level == 'status') {
+          // We use `print()` here instead of `stdout.writeln()` in order to
+          // capture the print output for testing.
           print(message.message);
         } else if (message.level == 'error') {
           stderr.writeln(message.message);
