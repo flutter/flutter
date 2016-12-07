@@ -203,9 +203,9 @@ class _RenderCheckbox extends RenderToggleable {
         ..style = PaintingStyle.stroke
         ..strokeWidth = _kStrokeWidth;
       Path path = new Path();
-      Point start = new Point(_kEdgeSize * 0.15, _kEdgeSize * 0.45);
-      Point mid = new Point(_kEdgeSize * 0.4, _kEdgeSize * 0.7);
-      Point end = new Point(_kEdgeSize * 0.85, _kEdgeSize * 0.25);
+      Point start = const Point(_kEdgeSize * 0.15, _kEdgeSize * 0.45);
+      Point mid = const Point(_kEdgeSize * 0.4, _kEdgeSize * 0.7);
+      Point end = const Point(_kEdgeSize * 0.85, _kEdgeSize * 0.25);
       Point drawStart = Point.lerp(start, mid, 1.0 - value);
       Point drawEnd = Point.lerp(mid, end, value);
       path.moveTo(offsetX + drawStart.x, offsetY + drawStart.y);

@@ -14,7 +14,7 @@ import 'term.dart';
 enum _SymbolType { invalid, external, slack, error, dummy, }
 
 class _Symbol {
-  const _Symbol(this.type);
+  _Symbol(this.type);
 
   final _SymbolType type;
 }

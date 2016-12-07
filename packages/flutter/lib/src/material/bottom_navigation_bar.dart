@@ -426,7 +426,7 @@ class BottomNavigationBarState extends State<BottomNavigationBar> with TickerPro
                           opacity: animations[i],
                           child: new DefaultTextStyle.merge(
                             context: context,
-                            style: new TextStyle(
+                            style: const TextStyle(
                               fontSize: 14.0,
                               color: Colors.white
                             ),
