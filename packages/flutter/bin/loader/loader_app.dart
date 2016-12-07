@@ -23,7 +23,7 @@ void main() {
               children: <Widget>[
                 new Expanded(
                   child: new Center(
-                    child: new FlutterLogo(size: 100.0),
+                    child: const FlutterLogo(size: 100.0),
                   ),
                 ),
                 new Expanded(
@@ -32,11 +32,11 @@ void main() {
                       List<Widget> children = <Widget>[];
                       children.add(new Text(
                         message,
-                        style: new TextStyle(fontSize: 24.0),
+                        style: const TextStyle(fontSize: 24.0),
                         textAlign: TextAlign.center
                       ));
                       if (progressMax >= 0.0) {
-                        children.add(new SizedBox(height: 18.0));
+                        children.add(const SizedBox(height: 18.0));
                         children.add(new Center(child: new CircularProgressIndicator(value: progressMax > 0 ? progress / progressMax : null)));
                       }
                       return new Block(children: children);
@@ -45,7 +45,7 @@ void main() {
                 ),
                 new Expanded(
                   child: new Block(
-                    padding: new EdgeInsets.symmetric(horizontal: 24.0),
+                    padding: const EdgeInsets.symmetric(horizontal: 24.0),
                     children: <Widget>[ new Text(explanation, textAlign: TextAlign.center) ]
                   ),
                 ),
