@@ -9,7 +9,7 @@ void main() {
   test('LicenseEntryWithLineBreaks - most cases', () {
     // There's some trailing spaces in this string.
     // To avoid IDEs stripping them, I've escaped them as \u0020.
-    List<LicenseParagraph> paragraphs = new LicenseEntryWithLineBreaks(null, '''
+    List<LicenseParagraph> paragraphs = const LicenseEntryWithLineBreaks(null, '''
 A
 A
 A
@@ -157,16 +157,16 @@ S
   });
 
   test('LicenseEntryWithLineBreaks - leading and trailing whitespace', () {
-    expect(new LicenseEntryWithLineBreaks(null, '    \n\n    ').paragraphs.toList(), isEmpty);
+    expect(const LicenseEntryWithLineBreaks(null, '    \n\n    ').paragraphs.toList(), isEmpty);
 
     List<LicenseParagraph> paragraphs;
 
-    paragraphs = new LicenseEntryWithLineBreaks(null, '    \nA\n    ').paragraphs.toList();
+    paragraphs = const LicenseEntryWithLineBreaks(null, '    \nA\n    ').paragraphs.toList();
     expect(paragraphs[0].text, 'A');
     expect(paragraphs[0].indent, 0);
     expect(paragraphs, hasLength(1));
 
-    paragraphs = new LicenseEntryWithLineBreaks(null, '\n\n\nA\n\n\n').paragraphs.toList();
+    paragraphs = const LicenseEntryWithLineBreaks(null, '\n\n\nA\n\n\n').paragraphs.toList();
     expect(paragraphs[0].text, 'A');
     expect(paragraphs[0].indent, 0);
     expect(paragraphs, hasLength(1));
@@ -175,12 +175,12 @@ S
   test('LicenseRegistry', () async {
     expect(await LicenseRegistry.licenses.toList(), isEmpty);
     LicenseRegistry.addLicense(() async* {
-      yield new LicenseEntryWithLineBreaks(null, 'A');
-      yield new LicenseEntryWithLineBreaks(null, 'B');
+      yield const LicenseEntryWithLineBreaks(null, 'A');
+      yield const LicenseEntryWithLineBreaks(null, 'B');
     });
     LicenseRegistry.addLicense(() async* {
-      yield new LicenseEntryWithLineBreaks(null, 'C');
-      yield new LicenseEntryWithLineBreaks(null, 'D');
+      yield const LicenseEntryWithLineBreaks(null, 'C');
+      yield const LicenseEntryWithLineBreaks(null, 'D');
     });
     expect(await LicenseRegistry.licenses.toList(), hasLength(4));
     List<LicenseEntry> licenses = await LicenseRegistry.licenses.toList();

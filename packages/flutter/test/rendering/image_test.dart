@@ -48,7 +48,7 @@ void main() {
 
     image = new RenderImage(image: new SquareImage());
     layout(image,
-          constraints: new BoxConstraints(
+          constraints: const BoxConstraints(
               minWidth: 25.0,
               minHeight: 25.0,
               maxWidth: 100.0,
@@ -58,7 +58,7 @@ void main() {
 
     image = new RenderImage(image: new WideImage());
     layout(image,
-           constraints: new BoxConstraints(
+           constraints: const BoxConstraints(
               minWidth: 5.0,
               minHeight: 30.0,
               maxWidth: 100.0,
@@ -68,7 +68,7 @@ void main() {
 
     image = new RenderImage(image: new TallImage());
     layout(image,
-           constraints: new BoxConstraints(
+           constraints: const BoxConstraints(
               minWidth: 50.0,
               minHeight: 5.0,
               maxWidth: 75.0,
@@ -78,7 +78,7 @@ void main() {
 
     image = new RenderImage(image: new WideImage());
     layout(image,
-           constraints: new BoxConstraints(
+           constraints: const BoxConstraints(
               minWidth: 5.0,
               minHeight: 5.0,
               maxWidth: 100.0,
@@ -88,7 +88,7 @@ void main() {
 
     image = new RenderImage(image: new WideImage());
     layout(image,
-           constraints: new BoxConstraints(
+           constraints: const BoxConstraints(
               minWidth: 5.0,
               minHeight: 5.0,
               maxWidth: 16.0,
@@ -98,7 +98,7 @@ void main() {
 
     image = new RenderImage(image: new TallImage());
     layout(image,
-           constraints: new BoxConstraints(
+           constraints: const BoxConstraints(
               minWidth: 5.0,
               minHeight: 5.0,
               maxWidth: 16.0,
@@ -108,7 +108,7 @@ void main() {
 
     image = new RenderImage(image: new SquareImage());
     layout(image,
-           constraints: new BoxConstraints(
+           constraints: const BoxConstraints(
               minWidth: 4.0,
               minHeight: 4.0,
               maxWidth: 8.0,
@@ -118,7 +118,7 @@ void main() {
 
     image = new RenderImage(image: new WideImage());
     layout(image,
-           constraints: new BoxConstraints(
+           constraints: const BoxConstraints(
               minWidth: 20.0,
               minHeight: 20.0,
               maxWidth: 30.0,
@@ -128,7 +128,7 @@ void main() {
 
     image = new RenderImage(image: new TallImage());
     layout(image,
-           constraints: new BoxConstraints(
+           constraints: const BoxConstraints(
               minWidth: 20.0,
               minHeight: 20.0,
               maxWidth: 30.0,
@@ -142,7 +142,7 @@ void main() {
 
     image = new RenderImage();
     layout(image,
-           constraints: new BoxConstraints(
+           constraints: const BoxConstraints(
              minWidth: 25.0,
              minHeight: 25.0,
              maxWidth: 100.0,
@@ -152,7 +152,7 @@ void main() {
 
     image = new RenderImage(width: 50.0);
     layout(image,
-           constraints: new BoxConstraints(
+           constraints: const BoxConstraints(
              minWidth: 25.0,
              minHeight: 25.0,
              maxWidth: 100.0,
@@ -162,7 +162,7 @@ void main() {
 
     image = new RenderImage(height: 50.0);
     layout(image,
-           constraints: new BoxConstraints(
+           constraints: const BoxConstraints(
              minWidth: 25.0,
              minHeight: 25.0,
              maxWidth: 100.0,
@@ -172,7 +172,7 @@ void main() {
 
     image = new RenderImage(width: 100.0, height: 100.0);
     layout(image,
-           constraints: new BoxConstraints(
+           constraints: const BoxConstraints(
              minWidth: 25.0,
              minHeight: 25.0,
              maxWidth: 75.0,

@@ -8,12 +8,12 @@ import 'package:test/test.dart';
 
 void main() {
   test('TextSpan equals', () {
-    TextSpan a1 = new TextSpan(text: 'a');
-    TextSpan a2 = new TextSpan(text: 'a');
+    TextSpan a1 = new TextSpan(text: 'a'); // ignore: prefer_const_constructor
+    TextSpan a2 = new TextSpan(text: 'a'); // ignore: prefer_const_constructor
     TextSpan b1 = new TextSpan(children: <TextSpan>[ a1 ]);
     TextSpan b2 = new TextSpan(children: <TextSpan>[ a2 ]);
-    TextSpan c1 = new TextSpan();
-    TextSpan c2 = new TextSpan();
+    TextSpan c1 = new TextSpan(); // ignore: prefer_const_constructor
+    TextSpan c2 = new TextSpan(); // ignore: prefer_const_constructor
 
     expect(a1 == a2, isTrue);
     expect(b1 == b2, isTrue);
@@ -29,20 +29,20 @@ void main() {
   });
 
   test('TextSpan', () {
-    final TextSpan test = new TextSpan(
+    final TextSpan test = const TextSpan(
       text: 'a',
-      style: new TextStyle(
+      style: const TextStyle(
         fontSize: 10.0
       ),
-      children: <TextSpan>[
-        new TextSpan(
+      children: const <TextSpan>[
+        const TextSpan(
           text: 'b',
-          children: <TextSpan>[
-            new TextSpan()
+          children: const <TextSpan>[
+            const TextSpan()
           ]
         ),
         null,
-        new TextSpan(
+        const TextSpan(
           text: 'c'
         ),
       ]

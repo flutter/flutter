@@ -10,10 +10,10 @@ import 'rendering_tester.dart';
 void main() {
   test('Basic grid layout test', () {
     List<RenderBox> children = <RenderBox>[
-      new RenderDecoratedBox(decoration: new BoxDecoration()),
-      new RenderDecoratedBox(decoration: new BoxDecoration()),
-      new RenderDecoratedBox(decoration: new BoxDecoration()),
-      new RenderDecoratedBox(decoration: new BoxDecoration())
+      new RenderDecoratedBox(decoration: const BoxDecoration()),
+      new RenderDecoratedBox(decoration: const BoxDecoration()),
+      new RenderDecoratedBox(decoration: const BoxDecoration()),
+      new RenderDecoratedBox(decoration: const BoxDecoration())
     ];
 
     RenderGrid grid = new RenderGrid(

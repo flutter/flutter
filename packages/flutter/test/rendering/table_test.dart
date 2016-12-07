@@ -45,7 +45,7 @@ void main() {
 
     pumpFrame();
 
-    expect(table.size, equals(new Size(100.0, 200.0)));
+    expect(table.size, equals(const Size(100.0, 200.0)));
 
     table.setChild(0, 0, sizedBox(10.0, 30.0));
     table.setChild(1, 0, sizedBox(20.0, 20.0));
@@ -53,7 +53,7 @@ void main() {
 
     pumpFrame();
 
-    expect(table.size, equals(new Size(130.0, 230.0)));
+    expect(table.size, equals(const Size(130.0, 230.0)));
   });
 
   test('Table test: removing cells', () {

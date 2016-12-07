@@ -224,7 +224,7 @@ void main() {
     // The selected dropdown item is both in menu we just popped up, and in
     // the IndexedStack contained by the dropdown button. Both of them should
     // have the same origin and height as the dropdown button.
-    List<RenderObject> itemBoxes = tester.renderObjectList(find.byKey(new ValueKey<String>('two'))).toList();
+    List<RenderObject> itemBoxes = tester.renderObjectList(find.byKey(const ValueKey<String>('two'))).toList();
     expect(itemBoxes.length, equals(2));
     for(RenderBox itemBox in itemBoxes) {
       assert(itemBox.attached);
@@ -254,7 +254,7 @@ void main() {
     // The selected dropdown item is both in menu we just popped up, and in
     // the IndexedStack contained by the dropdown button. Both of them should
     // have the same vertical center as the button.
-    List<RenderBox> itemBoxes = tester.renderObjectList(find.byKey(new ValueKey<String>('two'))).toList();
+    List<RenderBox> itemBoxes = tester.renderObjectList(find.byKey(const ValueKey<String>('two'))).toList();
     expect(itemBoxes.length, equals(2));
 
     // When isDense is true, the button's height is reduced. The menu items'

@@ -32,7 +32,7 @@ void main() {
     });
 
     await tester.pump(); // bottom sheet show animation starts
-    await tester.pump(new Duration(seconds: 1)); // animation done
+    await tester.pump(const Duration(seconds: 1)); // animation done
     expect(find.text('BottomSheet'), findsOneWidget);
     expect(showBottomSheetThenCalled, isFalse);
 
@@ -40,8 +40,8 @@ void main() {
     await tester.tap(find.text('BottomSheet'));
     await tester.pump(); // bottom sheet dismiss animation starts
     expect(showBottomSheetThenCalled, isTrue);
-    await tester.pump(new Duration(seconds: 1)); // last frame of animation (sheet is entirely off-screen, but still present)
-    await tester.pump(new Duration(seconds: 1)); // frame after the animation (sheet has been removed)
+    await tester.pump(const Duration(seconds: 1)); // last frame of animation (sheet is entirely off-screen, but still present)
+    await tester.pump(const Duration(seconds: 1)); // frame after the animation (sheet has been removed)
     expect(find.text('BottomSheet'), findsNothing);
 
     showBottomSheetThenCalled = false;
@@ -53,16 +53,16 @@ void main() {
       showBottomSheetThenCalled = true;
     });
     await tester.pump(); // bottom sheet show animation starts
-    await tester.pump(new Duration(seconds: 1)); // animation done
+    await tester.pump(const Duration(seconds: 1)); // animation done
     expect(find.text('BottomSheet'), findsOneWidget);
     expect(showBottomSheetThenCalled, isFalse);
 
     // Tap above the the bottom sheet to dismiss it
-    await tester.tapAt(new Point(20.0, 20.0));
+    await tester.tapAt(const Point(20.0, 20.0));
     await tester.pump(); // bottom sheet dismiss animation starts
     expect(showBottomSheetThenCalled, isTrue);
-    await tester.pump(new Duration(seconds: 1)); // animation done
-    await tester.pump(new Duration(seconds: 1)); // rebuild frame
+    await tester.pump(const Duration(seconds: 1)); // animation done
+    await tester.pump(const Duration(seconds: 1)); // rebuild frame
     expect(find.text('BottomSheet'), findsNothing);
   });
 
@@ -82,7 +82,7 @@ void main() {
 
     scaffoldKey.currentState.showBottomSheet((BuildContext context) {
       return new Container(
-        margin: new EdgeInsets.all(40.0),
+        margin: const EdgeInsets.all(40.0),
         child: new Text('BottomSheet')
       );
     }).closed.then((_) {
@@ -97,7 +97,7 @@ void main() {
     expect(showBottomSheetThenCalled, isFalse);
     expect(find.text('BottomSheet'), findsOneWidget);
 
-    await tester.pump(new Duration(seconds: 1)); // animation done
+    await tester.pump(const Duration(seconds: 1)); // animation done
 
     expect(showBottomSheetThenCalled, isFalse);
     expect(find.text('BottomSheet'), findsOneWidget);
@@ -113,7 +113,7 @@ void main() {
     expect(showBottomSheetThenCalled, isTrue);
     expect(find.text('BottomSheet'), findsOneWidget);
 
-    await tester.pump(new Duration(seconds: 1)); // animation done
+    await tester.pump(const Duration(seconds: 1)); // animation done
 
     expect(showBottomSheetThenCalled, isTrue);
     expect(find.text('BottomSheet'), findsNothing);
@@ -132,19 +132,19 @@ void main() {
 
     scaffoldKey.currentState.showBottomSheet((BuildContext context) {
       return new Container(
-        margin: new EdgeInsets.all(40.0),
+        margin: const EdgeInsets.all(40.0),
         child: new Text('BottomSheet')
       );
     });
 
     await tester.pump(); // bottom sheet show animation starts
-    await tester.pump(new Duration(seconds: 1)); // animation done
+    await tester.pump(const Duration(seconds: 1)); // animation done
     expect(find.text('BottomSheet'), findsOneWidget);
 
     await tester.fling(find.text('BottomSheet'), const Offset(0.0, 400.0), 1000.0);
     await tester.pump(); // drain the microtask queue (Future completion callback)
     await tester.pump(); // bottom sheet dismiss animation starts
-    await tester.pump(new Duration(seconds: 1)); // animation done
+    await tester.pump(const Duration(seconds: 1)); // animation done
 
     expect(find.text('BottomSheet'), findsNothing);
   });

@@ -33,10 +33,10 @@ void main() {
   setUp(ensureTestGestureBinding);
 
   test('Pointer tap events', () {
-    ui.PointerDataPacket packet = new ui.PointerDataPacket(
-      data: <ui.PointerData>[
-        new ui.PointerData(change: ui.PointerChange.down),
-        new ui.PointerData(change: ui.PointerChange.up),
+    ui.PointerDataPacket packet = const ui.PointerDataPacket(
+      data: const <ui.PointerData>[
+        const ui.PointerData(change: ui.PointerChange.down),
+        const ui.PointerData(change: ui.PointerChange.up),
       ]
     );
 
@@ -50,11 +50,11 @@ void main() {
   });
 
   test('Pointer move events', () {
-    ui.PointerDataPacket packet = new ui.PointerDataPacket(
-      data: <ui.PointerData>[
-        new ui.PointerData(change: ui.PointerChange.down),
-        new ui.PointerData(change: ui.PointerChange.move),
-        new ui.PointerData(change: ui.PointerChange.up),
+    ui.PointerDataPacket packet = const ui.PointerDataPacket(
+      data: const <ui.PointerData>[
+        const ui.PointerData(change: ui.PointerChange.down),
+        const ui.PointerData(change: ui.PointerChange.move),
+        const ui.PointerData(change: ui.PointerChange.up),
       ]
     );
 
@@ -69,14 +69,14 @@ void main() {
   });
 
   test('Synthetic move events', () {
-    ui.PointerDataPacket packet = new ui.PointerDataPacket(
-      data: <ui.PointerData>[
-        new ui.PointerData(
+    ui.PointerDataPacket packet = const ui.PointerDataPacket(
+      data: const <ui.PointerData>[
+        const ui.PointerData(
           change: ui.PointerChange.down,
           physicalX: 1.0,
           physicalY: 3.0,
         ),
-        new ui.PointerData(
+        const ui.PointerData(
           change: ui.PointerChange.up,
           physicalX: 10.0,
           physicalY: 15.0,
@@ -96,10 +96,10 @@ void main() {
   });
 
   test('Pointer cancel events', () {
-    ui.PointerDataPacket packet = new ui.PointerDataPacket(
-      data: <ui.PointerData>[
-        new ui.PointerData(change: ui.PointerChange.down),
-        new ui.PointerData(change: ui.PointerChange.cancel),
+    ui.PointerDataPacket packet = const ui.PointerDataPacket(
+      data: const <ui.PointerData>[
+        const ui.PointerData(change: ui.PointerChange.down),
+        const ui.PointerData(change: ui.PointerChange.cancel),
       ]
     );
 
@@ -113,10 +113,10 @@ void main() {
   });
 
   test('Can cancel pointers', () {
-    ui.PointerDataPacket packet = new ui.PointerDataPacket(
-      data: <ui.PointerData>[
-        new ui.PointerData(change: ui.PointerChange.down),
-        new ui.PointerData(change: ui.PointerChange.up),
+    ui.PointerDataPacket packet = const ui.PointerDataPacket(
+      data: const <ui.PointerData>[
+        const ui.PointerData(change: ui.PointerChange.down),
+        const ui.PointerData(change: ui.PointerChange.up),
       ]
     );
 

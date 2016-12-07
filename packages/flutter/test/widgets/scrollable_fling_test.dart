@@ -73,7 +73,7 @@ void main() {
     await tester.tap(find.byType(Scrollable));
     await tester.pump(const Duration(milliseconds: 50));
     expect(log, equals(<String>['tap 18']));
-    await tester.fling(find.byType(Scrollable), new Offset(0.0, -200.0), 1000.0);
+    await tester.fling(find.byType(Scrollable), const Offset(0.0, -200.0), 1000.0);
     await tester.pump(const Duration(milliseconds: 50));
     expect(log, equals(<String>['tap 18']));
     await tester.tap(find.byType(Scrollable));
@@ -96,7 +96,7 @@ void main() {
     await tester.tap(find.byType(Scrollable));
     await tester.pump(const Duration(milliseconds: 50));
     expect(log, equals(<String>['tap 18']));
-    await tester.fling(find.byType(Scrollable), new Offset(0.0, -200.0), 1000.0);
+    await tester.fling(find.byType(Scrollable), const Offset(0.0, -200.0), 1000.0);
     await tester.pump(const Duration(milliseconds: 50));
     expect(log, equals(<String>['tap 18']));
     await tester.pump(const Duration(seconds: 50));

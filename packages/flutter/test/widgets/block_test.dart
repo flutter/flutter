@@ -74,8 +74,8 @@ void main() {
             onTap: () { ++first; },
             child: new Container(
               height: 2000.0, // more than 600, the height of the test area
-              decoration: new BoxDecoration(
-                backgroundColor: new Color(0xFF00FF00)
+              decoration: const BoxDecoration(
+                backgroundColor: const Color(0xFF00FF00)
               )
             )
           ),
@@ -83,8 +83,8 @@ void main() {
             onTap: () { ++second; },
             child: new Container(
               height: 2000.0, // more than 600, the height of the test area
-              decoration: new BoxDecoration(
-                backgroundColor: new Color(0xFF0000FF)
+              decoration: const BoxDecoration(
+                backgroundColor: const Color(0xFF0000FF)
               )
             )
           )

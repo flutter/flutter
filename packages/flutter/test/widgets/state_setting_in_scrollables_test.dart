@@ -30,39 +30,39 @@ class FooState extends State<Foo> {
                   scrollableKey.currentState.scrollBy(200.0, duration: const Duration(milliseconds: 500));
                 },
                 child: new DecoratedBox(
-                  decoration: new BoxDecoration(backgroundColor: const Color(0)),
-                  child: new SizedBox(
+                  decoration: const BoxDecoration(backgroundColor: const Color(0)),
+                  child: const SizedBox(
                     height: 200.0,
                   ),
                 )
               ),
               new DecoratedBox(
-                decoration: new BoxDecoration(backgroundColor: const Color(0)),
-                child: new SizedBox(
+                decoration: const BoxDecoration(backgroundColor: const Color(0)),
+                child: const SizedBox(
                   height: 200.0,
                 ),
               ),
               new DecoratedBox(
-                decoration: new BoxDecoration(backgroundColor: const Color(0)),
-                child: new SizedBox(
+                decoration: const BoxDecoration(backgroundColor: const Color(0)),
+                child: const SizedBox(
                   height: 200.0,
                 ),
               ),
               new DecoratedBox(
-                decoration: new BoxDecoration(backgroundColor: const Color(0)),
-                child: new SizedBox(
+                decoration: const BoxDecoration(backgroundColor: const Color(0)),
+                child: const SizedBox(
                   height: 200.0,
                 ),
               ),
               new DecoratedBox(
-                decoration: new BoxDecoration(backgroundColor: const Color(0)),
-                child: new SizedBox(
+                decoration: const BoxDecoration(backgroundColor: const Color(0)),
+                child: const SizedBox(
                   height: 200.0,
                 ),
               ),
               new DecoratedBox(
-                decoration: new BoxDecoration(backgroundColor: const Color(0)),
-                child: new SizedBox(
+                decoration: const BoxDecoration(backgroundColor: const Color(0)),
+                child: const SizedBox(
                   height: 200.0,
                 ),
               ),

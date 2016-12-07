@@ -27,16 +27,16 @@ void main() {
 
   test('Flex and padding', () {
     RenderBox size = new RenderConstrainedBox(
-      additionalConstraints: new BoxConstraints().tighten(height: 100.0),
+      additionalConstraints: const BoxConstraints().tighten(height: 100.0),
     );
     RenderBox inner = new RenderDecoratedBox(
-      decoration: new BoxDecoration(
+      decoration: const BoxDecoration(
         backgroundColor: const Color(0xFF00FF00),
       ),
       child: size,
     );
     RenderBox padding = new RenderPadding(
-      padding: new EdgeInsets.all(50.0),
+      padding: const EdgeInsets.all(50.0),
       child: inner,
     );
     RenderBox flex = new RenderFlex(
@@ -45,7 +45,7 @@ void main() {
       crossAxisAlignment: CrossAxisAlignment.stretch,
     );
     RenderBox outer = new RenderDecoratedBox(
-      decoration: new BoxDecoration(
+      decoration: const BoxDecoration(
         backgroundColor: const Color(0xFF0000FF)
       ),
       child: flex,
@@ -67,14 +67,14 @@ void main() {
 
   test("should not have a 0 sized colored Box", () {
     RenderBox coloredBox = new RenderDecoratedBox(
-      decoration: new BoxDecoration(),
+      decoration: const BoxDecoration(),
     );
     RenderBox paddingBox = new RenderPadding(
       padding: const EdgeInsets.all(10.0),
       child: coloredBox,
     );
     RenderBox root = new RenderDecoratedBox(
-      decoration: new BoxDecoration(),
+      decoration: const BoxDecoration(),
       child: paddingBox,
     );
     layout(root);
@@ -84,7 +84,7 @@ void main() {
 
   test("reparenting should clear position", () {
     RenderDecoratedBox coloredBox = new RenderDecoratedBox(
-      decoration: new BoxDecoration(),
+      decoration: const BoxDecoration(),
     );
 
     RenderPadding paddedBox = new RenderPadding(

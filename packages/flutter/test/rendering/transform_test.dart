@@ -21,7 +21,7 @@ void main() {
       alignment: FractionalOffset.center,
       child: inner = new RenderSizedBox(const Size(100.0, 100.0)),
     );
-    layout(sizer, constraints: new BoxConstraints.tight(new Size(100.0, 100.0)), alignment: FractionalOffset.topLeft);
+    layout(sizer, constraints: new BoxConstraints.tight(const Size(100.0, 100.0)), alignment: FractionalOffset.topLeft);
     expect(inner.globalToLocal(const Point(0.0, 0.0)), equals(const Point(0.0, 0.0)));
     expect(inner.globalToLocal(const Point(100.0, 100.0)), equals(const Point(100.0, 100.0)));
     expect(inner.globalToLocal(const Point(25.0, 75.0)), equals(const Point(25.0, 75.0)));
@@ -38,11 +38,11 @@ void main() {
       transform: new Matrix4.identity(),
       alignment: FractionalOffset.center,
       child: new RenderPadding(
-        padding: new EdgeInsets.only(left: 20.0),
+        padding: const EdgeInsets.only(left: 20.0),
         child: inner = new RenderSizedBox(const Size(80.0, 100.0)),
       ),
     );
-    layout(sizer, constraints: new BoxConstraints.tight(new Size(100.0, 100.0)), alignment: FractionalOffset.topLeft);
+    layout(sizer, constraints: new BoxConstraints.tight(const Size(100.0, 100.0)), alignment: FractionalOffset.topLeft);
     expect(inner.globalToLocal(const Point(0.0, 0.0)), equals(const Point(-20.0, 0.0)));
     expect(inner.globalToLocal(const Point(100.0, 100.0)), equals(const Point(80.0, 100.0)));
     expect(inner.globalToLocal(const Point(25.0, 75.0)), equals(const Point(5.0, 75.0)));
@@ -60,7 +60,7 @@ void main() {
       alignment: FractionalOffset.center,
       child: inner = new RenderSizedBox(const Size(100.0, 100.0)),
     );
-    layout(sizer, constraints: new BoxConstraints.tight(new Size(100.0, 100.0)), alignment: FractionalOffset.topLeft);
+    layout(sizer, constraints: new BoxConstraints.tight(const Size(100.0, 100.0)), alignment: FractionalOffset.topLeft);
     expect(inner.globalToLocal(const Point(0.0, 0.0)), equals(const Point(-50.0, -200.0)));
     expect(inner.globalToLocal(const Point(100.0, 100.0)), equals(const Point(50.0, -100.0)));
     expect(inner.globalToLocal(const Point(25.0, 75.0)), equals(const Point(-25.0, -125.0)));
@@ -77,11 +77,11 @@ void main() {
       transform: new Matrix4.translationValues(50.0, 200.0, 0.0),
       alignment: FractionalOffset.center,
       child: new RenderPadding(
-        padding: new EdgeInsets.only(left: 20.0),
+        padding: const EdgeInsets.only(left: 20.0),
         child: inner = new RenderSizedBox(const Size(80.0, 100.0)),
       ),
     );
-    layout(sizer, constraints: new BoxConstraints.tight(new Size(100.0, 100.0)), alignment: FractionalOffset.topLeft);
+    layout(sizer, constraints: new BoxConstraints.tight(const Size(100.0, 100.0)), alignment: FractionalOffset.topLeft);
     expect(inner.globalToLocal(const Point(0.0, 0.0)), equals(const Point(-70.0, -200.0)));
     expect(inner.globalToLocal(const Point(100.0, 100.0)), equals(const Point(30.0, -100.0)));
     expect(inner.globalToLocal(const Point(25.0, 75.0)), equals(const Point(-45.0, -125.0)));
@@ -99,7 +99,7 @@ void main() {
       alignment: FractionalOffset.center,
       child: inner = new RenderSizedBox(const Size(100.0, 100.0)),
     );
-    layout(sizer, constraints: new BoxConstraints.tight(new Size(100.0, 100.0)), alignment: FractionalOffset.topLeft);
+    layout(sizer, constraints: new BoxConstraints.tight(const Size(100.0, 100.0)), alignment: FractionalOffset.topLeft);
     expect(round(inner.globalToLocal(const Point(0.0, 0.0))), equals(const Point(100.0, 100.0)));
     expect(round(inner.globalToLocal(const Point(100.0, 100.0))), equals(const Point(0.0, 0.0)));
     expect(round(inner.globalToLocal(const Point(25.0, 75.0))), equals(const Point(75.0, 25.0)));
@@ -116,11 +116,11 @@ void main() {
       transform: new Matrix4.rotationZ(math.PI),
       alignment: FractionalOffset.center,
       child: new RenderPadding(
-        padding: new EdgeInsets.only(left: 20.0),
+        padding: const EdgeInsets.only(left: 20.0),
         child: inner = new RenderSizedBox(const Size(80.0, 100.0)),
       ),
     );
-    layout(sizer, constraints: new BoxConstraints.tight(new Size(100.0, 100.0)), alignment: FractionalOffset.topLeft);
+    layout(sizer, constraints: new BoxConstraints.tight(const Size(100.0, 100.0)), alignment: FractionalOffset.topLeft);
     expect(round(inner.globalToLocal(const Point(0.0, 0.0))), equals(const Point(80.0, 100.0)));
     expect(round(inner.globalToLocal(const Point(100.0, 100.0))), equals(const Point(-20.0, 0.0)));
     expect(round(inner.globalToLocal(const Point(25.0, 75.0))), equals(const Point(55.0, 25.0)));
@@ -138,7 +138,7 @@ void main() {
       alignment: FractionalOffset.center,
       child: inner = new RenderSizedBox(const Size(100.0, 100.0)),
     );
-    layout(sizer, constraints: new BoxConstraints.tight(new Size(100.0, 100.0)), alignment: FractionalOffset.topLeft);
+    layout(sizer, constraints: new BoxConstraints.tight(const Size(100.0, 100.0)), alignment: FractionalOffset.topLeft);
 
     expect(round(inner.globalToLocal(const Point(25.0, 50.0))), equals(const Point(25.0, 50.0)));
     expect(inner.globalToLocal(const Point(25.0, 17.0)).y, greaterThan(0.0));
@@ -155,7 +155,7 @@ void main() {
       alignment: FractionalOffset.center,
       child: inner = new RenderSizedBox(const Size(100.0, 100.0)),
     );
-    layout(sizer, constraints: new BoxConstraints.tight(new Size(100.0, 100.0)), alignment: FractionalOffset.topLeft);
+    layout(sizer, constraints: new BoxConstraints.tight(const Size(100.0, 100.0)), alignment: FractionalOffset.topLeft);
 
     // the inner widget has a height of about half a pixel at this rotation, so
     // everything should end up around the middle of the outer box.

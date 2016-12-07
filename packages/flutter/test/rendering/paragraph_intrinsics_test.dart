@@ -8,8 +8,8 @@ import 'package:test/test.dart';
 void main() {
   test('block and paragraph intrinsics', () {
     final RenderParagraph paragraph = new RenderParagraph(
-      new TextSpan(
-        style: new TextStyle(height: 1.0),
+      const TextSpan(
+        style: const TextStyle(height: 1.0),
         text: 'Hello World'
       )
     );

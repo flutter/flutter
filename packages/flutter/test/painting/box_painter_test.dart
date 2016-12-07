@@ -7,7 +7,7 @@ import 'package:flutter/painting.dart';
 
 void main() {
   test("BorderSide control test", () {
-    BorderSide side1 = new BorderSide();
+    BorderSide side1 = const BorderSide();
     BorderSide side2 = side1.copyWith(
       color: const Color(0xFF00FFFF),
       width: 2.0,
@@ -55,13 +55,13 @@ void main() {
   });
 
   test("BoxShadow control test", () {
-    BoxShadow shadow1 = new BoxShadow(blurRadius: 4.0);
+    BoxShadow shadow1 = const BoxShadow(blurRadius: 4.0);
     BoxShadow shadow2 = BoxShadow.lerp(null, shadow1, 0.25);
     BoxShadow shadow3 = BoxShadow.lerp(shadow1, null, 0.25);
 
     expect(shadow1, hasOneLineDescription);
     expect(shadow1.hashCode, isNot(equals(shadow2.hashCode)));
-    expect(shadow1, equals(new BoxShadow(blurRadius: 4.0)));
+    expect(shadow1, equals(const BoxShadow(blurRadius: 4.0)));
 
     expect(shadow2.blurRadius, equals(1.0));
     expect(shadow3.blurRadius, equals(3.0));

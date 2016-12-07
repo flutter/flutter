@@ -13,7 +13,7 @@ class TestMultiChildLayoutDelegate extends MultiChildLayoutDelegate {
   Size getSize(BoxConstraints constraints) {
     if (!RenderObject.debugCheckingIntrinsics)
       getSizeConstraints = constraints;
-    return new Size(200.0, 300.0);
+    return const Size(200.0, 300.0);
   }
 
   Size performLayoutSize;
@@ -143,7 +143,7 @@ void main() {
     await tester.pumpWidget(new Center(
       child: new CustomMultiChildLayout(
         key: key,
-        delegate: new PreferredSizeDelegate(preferredSize: new Size(300.0, 200.0))
+        delegate: new PreferredSizeDelegate(preferredSize: const Size(300.0, 200.0))
       )
     ));
 
@@ -154,7 +154,7 @@ void main() {
     await tester.pumpWidget(new Center(
       child: new CustomMultiChildLayout(
         key: key,
-        delegate: new PreferredSizeDelegate(preferredSize: new Size(350.0, 250.0))
+        delegate: new PreferredSizeDelegate(preferredSize: const Size(350.0, 250.0))
       )
     ));
 

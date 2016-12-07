@@ -94,7 +94,7 @@ void main() {
       new ScrollableList(
         key: new GlobalKey(),
         itemExtent: 290.0,
-        padding: new EdgeInsets.fromLTRB(5.0, 20.0, 15.0, 10.0),
+        padding: const EdgeInsets.fromLTRB(5.0, 20.0, 15.0, 10.0),
         children: items.map((int item) {
           return new Container(
             child: new GestureDetector(
@@ -105,17 +105,17 @@ void main() {
         })
       )
     );
-    await tester.tapAt(new Point(200.0, 19.0));
+    await tester.tapAt(const Point(200.0, 19.0));
     expect(tapped, equals(<int>[]));
-    await tester.tapAt(new Point(200.0, 21.0));
+    await tester.tapAt(const Point(200.0, 21.0));
     expect(tapped, equals(<int>[0]));
-    await tester.tapAt(new Point(4.0, 400.0));
+    await tester.tapAt(const Point(4.0, 400.0));
     expect(tapped, equals(<int>[0]));
-    await tester.tapAt(new Point(6.0, 400.0));
+    await tester.tapAt(const Point(6.0, 400.0));
     expect(tapped, equals(<int>[0, 1]));
-    await tester.tapAt(new Point(800.0 - 14.0, 400.0));
+    await tester.tapAt(const Point(800.0 - 14.0, 400.0));
     expect(tapped, equals(<int>[0, 1]));
-    await tester.tapAt(new Point(800.0 - 16.0, 400.0));
+    await tester.tapAt(const Point(800.0 - 16.0, 400.0));
     expect(tapped, equals(<int>[0, 1, 1]));
   });
 
@@ -127,7 +127,7 @@ void main() {
         key: new GlobalKey(),
         itemExtent: 290.0,
         scrollAnchor: ViewportAnchor.end,
-        padding: new EdgeInsets.fromLTRB(5.0, 20.0, 15.0, 10.0),
+        padding: const EdgeInsets.fromLTRB(5.0, 20.0, 15.0, 10.0),
         children: items.map((int item) {
           return new Container(
             child: new GestureDetector(
@@ -138,17 +138,17 @@ void main() {
         })
       )
     );
-    await tester.tapAt(new Point(200.0, 600.0 - 9.0));
+    await tester.tapAt(const Point(200.0, 600.0 - 9.0));
     expect(tapped, equals(<int>[]));
-    await tester.tapAt(new Point(200.0, 600.0 - 11.0));
+    await tester.tapAt(const Point(200.0, 600.0 - 11.0));
     expect(tapped, equals(<int>[5]));
-    await tester.tapAt(new Point(4.0, 200.0));
+    await tester.tapAt(const Point(4.0, 200.0));
     expect(tapped, equals(<int>[5]));
-    await tester.tapAt(new Point(6.0, 200.0));
+    await tester.tapAt(const Point(6.0, 200.0));
     expect(tapped, equals(<int>[5, 4]));
-    await tester.tapAt(new Point(800.0 - 14.0, 200.0));
+    await tester.tapAt(const Point(800.0 - 14.0, 200.0));
     expect(tapped, equals(<int>[5, 4]));
-    await tester.tapAt(new Point(800.0 - 16.0, 200.0));
+    await tester.tapAt(const Point(800.0 - 16.0, 200.0));
     expect(tapped, equals(<int>[5, 4, 4]));
   });
 
@@ -179,7 +179,7 @@ void main() {
     expect(scrollableKey.currentState.scrollOffset, equals(0.0));
     expect(scrollableKey.currentState.virtualScrollOffset, lessThan(0.0));
 
-    await tester.tapAt(new Point(200.0, 100.0));
+    await tester.tapAt(const Point(200.0, 100.0));
     expect(tapped, equals(<int>[0]));
   });
 }

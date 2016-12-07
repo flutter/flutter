@@ -66,7 +66,7 @@ void main() {
           child: inner = new RenderFixedSize()
         )
       ),
-      constraints: new BoxConstraints(
+      constraints: const BoxConstraints(
         minWidth: 0.0,
         minHeight: 0.0,
         maxWidth: 1000.0,

@@ -15,27 +15,27 @@ void main() {
         return false;
       },
       child: new ScrollableViewport(
-        child: new SizedBox(height: 1200.0)
+        child: const SizedBox(height: 1200.0)
       )
     ));
 
-    TestGesture gesture = await tester.startGesture(new Point(100.0, 100.0));
+    TestGesture gesture = await tester.startGesture(const Point(100.0, 100.0));
     await tester.pump(const Duration(seconds: 1));
     expect(notification.kind, equals(ScrollNotificationKind.started));
     expect(notification.depth, equals(0));
     expect(notification.dragStartDetails, isNotNull);
-    expect(notification.dragStartDetails.globalPosition, equals(new Point(100.0, 100.0)));
+    expect(notification.dragStartDetails.globalPosition, equals(const Point(100.0, 100.0)));
     expect(notification.dragUpdateDetails, isNull);
     expect(notification.dragEndDetails, isNull);
 
-    await gesture.moveBy(new Offset(-10.0, -10.0));
+    await gesture.moveBy(const Offset(-10.0, -10.0));
     await tester.pump(const Duration(seconds: 1));
     expect(notification.kind, equals(ScrollNotificationKind.updated));
     expect(notification.depth, equals(0));
     expect(notification.dragStartDetails, isNull);
     expect(notification.dragUpdateDetails, isNotNull);
-    expect(notification.dragUpdateDetails.globalPosition, equals(new Point(90.0, 90.0)));
-    expect(notification.dragUpdateDetails.delta, equals(new Offset(0.0, -10.0)));
+    expect(notification.dragUpdateDetails.globalPosition, equals(const Point(90.0, 90.0)));
+    expect(notification.dragUpdateDetails.delta, equals(const Offset(0.0, -10.0)));
     expect(notification.dragEndDetails, isNull);
 
     await gesture.up();
@@ -71,16 +71,16 @@ void main() {
             },
             child: new Container(
               padding: const EdgeInsets.all(50.0),
-              child: new ScrollableViewport(child: new SizedBox(height: 1200.0))
+              child: new ScrollableViewport(child: const SizedBox(height: 1200.0))
             )
           )
         )
       )
     ));
 
-    TestGesture gesture = await tester.startGesture(new Point(100.0, 100.0));
+    TestGesture gesture = await tester.startGesture(const Point(100.0, 100.0));
     await tester.pump(const Duration(seconds: 1));
-    await gesture.moveBy(new Offset(-10.0, -10.0));
+    await gesture.moveBy(const Offset(-10.0, -10.0));
     await tester.pump(const Duration(seconds: 1));
     await gesture.up();
     await tester.pump(const Duration(seconds: 1));

@@ -10,7 +10,7 @@ void main() {
   testWidgets('Circles can have uniform borders', (WidgetTester tester) async {
     await tester.pumpWidget(
       new Container(
-        padding: new EdgeInsets.all(50.0),
+        padding: const EdgeInsets.all(50.0),
         decoration: new BoxDecoration(
           shape: BoxShape.circle,
           border: new Border.all(width: 10.0, color: const Color(0x80FF00FF)),

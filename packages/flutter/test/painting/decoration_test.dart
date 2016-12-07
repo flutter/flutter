@@ -47,8 +47,8 @@ class AsyncTestImageProvider extends ImageProvider<int> {
 
 void main() {
   test("Decoration.lerp()", () {
-    BoxDecoration a = new BoxDecoration(backgroundColor: const Color(0xFFFFFFFF));
-    BoxDecoration b = new BoxDecoration(backgroundColor: const Color(0x00000000));
+    BoxDecoration a = const BoxDecoration(backgroundColor: const Color(0xFFFFFFFF));
+    BoxDecoration b = const BoxDecoration(backgroundColor: const Color(0x00000000));
 
     BoxDecoration c = Decoration.lerp(a, b, 0.0);
     expect(c.backgroundColor, equals(a.backgroundColor));
@@ -71,7 +71,7 @@ void main() {
     });
 
     TestCanvas canvas = new TestCanvas();
-    ImageConfiguration imageConfiguration = new ImageConfiguration(size: Size.zero);
+    ImageConfiguration imageConfiguration = const ImageConfiguration(size: Size.zero);
     boxPainter.paint(canvas, Offset.zero, imageConfiguration);
 
     // The onChanged callback should not be invoked during the call to boxPainter.paint
@@ -90,7 +90,7 @@ void main() {
       });
 
       TestCanvas canvas = new TestCanvas();
-      ImageConfiguration imageConfiguration = new ImageConfiguration(size: Size.zero);
+      ImageConfiguration imageConfiguration = const ImageConfiguration(size: Size.zero);
       boxPainter.paint(canvas, Offset.zero, imageConfiguration);
 
       // The onChanged callback should be invoked asynchronously.

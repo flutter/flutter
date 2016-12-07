@@ -49,11 +49,11 @@ void main() {
     );
     expect(log, equals(<String>['getClip']));
 
-    await tester.tapAt(new Point(10.0, 10.0));
+    await tester.tapAt(const Point(10.0, 10.0));
     expect(log, equals(<String>['getClip']));
     log.clear();
 
-    await tester.tapAt(new Point(100.0, 100.0));
+    await tester.tapAt(const Point(100.0, 100.0));
     expect(log, equals(<String>['tap']));
     log.clear();
   });
@@ -69,11 +69,11 @@ void main() {
     );
     expect(log, equals(<String>[]));
 
-    await tester.tapAt(new Point(10.0, 10.0));
+    await tester.tapAt(const Point(10.0, 10.0));
     expect(log, equals(<String>[]));
     log.clear();
 
-    await tester.tapAt(new Point(400.0, 300.0));
+    await tester.tapAt(const Point(400.0, 300.0));
     expect(log, equals(<String>['tap']));
     log.clear();
   });
@@ -92,11 +92,11 @@ void main() {
     );
     expect(log, equals(<String>[]));
 
-    await tester.tapAt(new Point(10.0, 10.0));
+    await tester.tapAt(const Point(10.0, 10.0));
     expect(log, equals(<String>[]));
     log.clear();
 
-    await tester.tapAt(new Point(400.0, 300.0));
+    await tester.tapAt(const Point(400.0, 300.0));
     expect(log, equals(<String>['tap']));
     log.clear();
   });
@@ -120,10 +120,10 @@ void main() {
     );
     expect(log, equals(<String>['a']));
 
-    await tester.tapAt(new Point(10.0, 10.0));
+    await tester.tapAt(const Point(10.0, 10.0));
     expect(log, equals(<String>['a', 'tap']));
 
-    await tester.tapAt(new Point(100.0, 100.0));
+    await tester.tapAt(const Point(100.0, 100.0));
     expect(log, equals(<String>['a', 'tap']));
 
     await tester.pumpWidget(
@@ -216,10 +216,10 @@ void main() {
     );
     expect(log, equals(<String>['a', 'tap', 'a', 'b', 'c']));
 
-    await tester.tapAt(new Point(30.0, 30.0));
+    await tester.tapAt(const Point(30.0, 30.0));
     expect(log, equals(<String>['a', 'tap', 'a', 'b', 'c', 'tap']));
 
-    await tester.tapAt(new Point(100.0, 100.0));
+    await tester.tapAt(const Point(100.0, 100.0));
     expect(log, equals(<String>['a', 'tap', 'a', 'b', 'c', 'tap']));
   });
 

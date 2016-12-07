@@ -386,12 +386,12 @@ void main() {
     Expression e = new Expression(<Term>[t], 0.0);
 
     expect((c * c).value, 100);
-    expect(() => v * v, throwsA(new isInstanceOf<ParserException>()));
-    expect(() => v / v, throwsA(new isInstanceOf<ParserException>()));
-    expect(() => v * t, throwsA(new isInstanceOf<ParserException>()));
-    expect(() => v / t, throwsA(new isInstanceOf<ParserException>()));
-    expect(() => v * e, throwsA(new isInstanceOf<ParserException>()));
-    expect(() => v / e, throwsA(new isInstanceOf<ParserException>()));
+    expect(() => v * v, throwsA(const isInstanceOf<ParserException>()));
+    expect(() => v / v, throwsA(const isInstanceOf<ParserException>()));
+    expect(() => v * t, throwsA(const isInstanceOf<ParserException>()));
+    expect(() => v / t, throwsA(const isInstanceOf<ParserException>()));
+    expect(() => v * e, throwsA(const isInstanceOf<ParserException>()));
+    expect(() => v / e, throwsA(const isInstanceOf<ParserException>()));
     expect(() => v * c, returnsNormally);
     expect(() => v / c, returnsNormally);
   });

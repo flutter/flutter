@@ -76,14 +76,14 @@ void main() {
     expect(log, equals(<int>[0, 1, 2]));
 
     log.clear();
-    await tester.tapAt(new Point(20.0, 90.0));
+    await tester.tapAt(const Point(20.0, 90.0));
     expect(log, equals(<int>[1]));
 
     startOffset.value = 50.0;
     await tester.pump();
 
     log.clear();
-    await tester.tapAt(new Point(20.0, 90.0));
+    await tester.tapAt(const Point(20.0, 90.0));
     expect(log, equals(<int>[0]));
   });
 }

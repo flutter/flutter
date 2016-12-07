@@ -18,14 +18,14 @@ class TestCanvas implements Canvas {
 
 void main() {
   test('A Banner with a location of topLeft paints in the top left', () {
-    BannerPainter bannerPainter = new BannerPainter(
+    BannerPainter bannerPainter = const BannerPainter(
       message:"foo",
       location: BannerLocation.topLeft
     );
 
     TestCanvas canvas = new TestCanvas();
 
-    bannerPainter.paint(canvas, new Size(1000.0, 1000.0));
+    bannerPainter.paint(canvas, const Size(1000.0, 1000.0));
 
     Invocation translateCommand = canvas.invocations.firstWhere((Invocation invocation) {
       return invocation.memberName == #translate;
@@ -44,14 +44,14 @@ void main() {
   });
 
   test('A Banner with a location of topRight paints in the top right', () {
-    BannerPainter bannerPainter = new BannerPainter(
+    BannerPainter bannerPainter = const BannerPainter(
       message:"foo",
       location: BannerLocation.topRight
     );
 
     TestCanvas canvas = new TestCanvas();
 
-    bannerPainter.paint(canvas, new Size(1000.0, 1000.0));
+    bannerPainter.paint(canvas, const Size(1000.0, 1000.0));
 
     Invocation translateCommand = canvas.invocations.firstWhere((Invocation invocation) {
       return invocation.memberName == #translate;
@@ -70,14 +70,14 @@ void main() {
   });
 
   test('A Banner with a location of bottomLeft paints in the bottom left', () {
-    BannerPainter bannerPainter = new BannerPainter(
+    BannerPainter bannerPainter = const BannerPainter(
       message:"foo",
       location: BannerLocation.bottomLeft
     );
 
     TestCanvas canvas = new TestCanvas();
 
-    bannerPainter.paint(canvas, new Size(1000.0, 1000.0));
+    bannerPainter.paint(canvas, const Size(1000.0, 1000.0));
 
     Invocation translateCommand = canvas.invocations.firstWhere((Invocation invocation) {
       return invocation.memberName == #translate;
@@ -96,14 +96,14 @@ void main() {
   });
 
   test('A Banner with a location of bottomRight paints in the bottom right', () {
-    BannerPainter bannerPainter = new BannerPainter(
+    BannerPainter bannerPainter = const BannerPainter(
       message:"foo",
       location: BannerLocation.bottomRight
     );
 
     TestCanvas canvas = new TestCanvas();
 
-    bannerPainter.paint(canvas, new Size(1000.0, 1000.0));
+    bannerPainter.paint(canvas, const Size(1000.0, 1000.0));
 
     Invocation translateCommand = canvas.invocations.firstWhere((Invocation invocation) {
       return invocation.memberName == #translate;

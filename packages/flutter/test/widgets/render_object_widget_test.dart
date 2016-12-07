@@ -6,9 +6,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-final BoxDecoration kBoxDecorationA = new BoxDecoration();
-final BoxDecoration kBoxDecorationB = new BoxDecoration();
-final BoxDecoration kBoxDecorationC = new BoxDecoration();
+final BoxDecoration kBoxDecorationA = new BoxDecoration(); // ignore: prefer_const_constructor
+final BoxDecoration kBoxDecorationB = new BoxDecoration(); // ignore: prefer_const_constructor
+final BoxDecoration kBoxDecorationC = new BoxDecoration(); // ignore: prefer_const_constructor
 
 class TestWidget extends StatelessWidget {
   const TestWidget({ this.child });
@@ -26,9 +26,9 @@ class TestOrientedBox extends SingleChildRenderObjectWidget {
     Orientation orientation = MediaQuery.of(context).orientation;
     switch (orientation) {
       case Orientation.landscape:
-        return new BoxDecoration(backgroundColor: const Color(0xFF00FF00));
+        return const BoxDecoration(backgroundColor: const Color(0xFF00FF00));
       case Orientation.portrait:
-        return new BoxDecoration(backgroundColor: const Color(0xFF0000FF));
+        return const BoxDecoration(backgroundColor: const Color(0xFF0000FF));
     }
     assert(orientation != null);
     return null;
@@ -194,20 +194,20 @@ void main() {
     TestOrientedBox box = new TestOrientedBox(key: boxKey);
 
     await tester.pumpWidget(new MediaQuery(
-      data: new MediaQueryData(size: const Size(400.0, 300.0)),
+      data: const MediaQueryData(size: const Size(400.0, 300.0)),
       child: box
     ));
 
     RenderDecoratedBox renderBox = tester.renderObject(find.byKey(boxKey));
     BoxDecoration decoration = renderBox.decoration;
-    expect(decoration.backgroundColor, equals(new Color(0xFF00FF00)));
+    expect(decoration.backgroundColor, equals(const Color(0xFF00FF00)));
 
     await tester.pumpWidget(new MediaQuery(
-      data: new MediaQueryData(size: const Size(300.0, 400.0)),
+      data: const MediaQueryData(size: const Size(300.0, 400.0)),
       child: box
     ));
 
     decoration = renderBox.decoration;
-    expect(decoration.backgroundColor, equals(new Color(0xFF0000FF)));
+    expect(decoration.backgroundColor, equals(const Color(0xFF0000FF)));
   });
 }

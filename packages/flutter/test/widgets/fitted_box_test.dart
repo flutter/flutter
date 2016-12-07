@@ -35,8 +35,8 @@ void main() {
     expect(insideBox.size.width, 100.0);
     expect(insideBox.size.height, 50.0);
 
-    Point insidePoint = insideBox.localToGlobal(new Point(100.0, 50.0));
-    Point outsidePoint = outsideBox.localToGlobal(new Point(200.0, 100.0));
+    Point insidePoint = insideBox.localToGlobal(const Point(100.0, 50.0));
+    Point outsidePoint = outsideBox.localToGlobal(const Point(200.0, 100.0));
 
     expect(outsidePoint, equals(const Point(500.0, 350.0)));
     expect(insidePoint, equals(outsidePoint));
@@ -71,8 +71,8 @@ void main() {
     expect(insideBox.size.width, 100.0);
     expect(insideBox.size.height, 50.0);
 
-    Point insidePoint = insideBox.localToGlobal(new Point(100.0, 0.0));
-    Point outsidePoint = outsideBox.localToGlobal(new Point(200.0, 50.0));
+    Point insidePoint = insideBox.localToGlobal(const Point(100.0, 0.0));
+    Point outsidePoint = outsideBox.localToGlobal(const Point(200.0, 50.0));
 
     expect(insidePoint, equals(outsidePoint));
   });
@@ -107,8 +107,8 @@ void main() {
     expect(insideBox.size.width, 100.0);
     expect(insideBox.size.height, 50.0);
 
-    Point insidePoint = insideBox.localToGlobal(new Point(50.0, 25.0));
-    Point outsidePoint = outsideBox.localToGlobal(new Point(100.0, 100.0));
+    Point insidePoint = insideBox.localToGlobal(const Point(50.0, 25.0));
+    Point outsidePoint = outsideBox.localToGlobal(const Point(100.0, 100.0));
 
     expect(insidePoint, equals(outsidePoint));
   });

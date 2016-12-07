@@ -11,8 +11,8 @@ import 'package:flutter/widgets.dart';
 void main() {
   test('toString control test', () {
     expect(Curves.linear, hasOneLineDescription);
-    expect(new SawTooth(3), hasOneLineDescription);
-    expect(new Interval(0.25, 0.75), hasOneLineDescription);
+    expect(const SawTooth(3), hasOneLineDescription);
+    expect(const Interval(0.25, 0.75), hasOneLineDescription);
     expect(new Interval(0.25, 0.75, curve: Curves.ease), hasOneLineDescription);
   });
 
@@ -26,7 +26,7 @@ void main() {
   });
 
   test('Threshold has a threshold', () {
-    Curve step = new Threshold(0.25);
+    Curve step = const Threshold(0.25);
     expect(step.transform(0.0), 0.0);
     expect(step.transform(0.24), 0.0);
     expect(step.transform(0.25), 1.0);

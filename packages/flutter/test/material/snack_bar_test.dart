@@ -17,7 +17,7 @@ void main() {
               onTap: () {
                 Scaffold.of(context).showSnackBar(new SnackBar(
                   content: new Text(helloSnackBar),
-                  duration: new Duration(seconds: 2)
+                  duration: const Duration(seconds: 2)
                 ));
               },
               behavior: HitTestBehavior.opaque,
@@ -38,16 +38,16 @@ void main() {
     expect(find.text(helloSnackBar), findsOneWidget);
     await tester.pump(); // begin animation
     expect(find.text(helloSnackBar), findsOneWidget);
-    await tester.pump(new Duration(milliseconds: 750)); // 0.75s // animation last frame; two second timer starts here
+    await tester.pump(const Duration(milliseconds: 750)); // 0.75s // animation last frame; two second timer starts here
     expect(find.text(helloSnackBar), findsOneWidget);
-    await tester.pump(new Duration(milliseconds: 750)); // 1.50s
+    await tester.pump(const Duration(milliseconds: 750)); // 1.50s
     expect(find.text(helloSnackBar), findsOneWidget);
-    await tester.pump(new Duration(milliseconds: 750)); // 2.25s
+    await tester.pump(const Duration(milliseconds: 750)); // 2.25s
     expect(find.text(helloSnackBar), findsOneWidget);
-    await tester.pump(new Duration(milliseconds: 750)); // 3.00s // timer triggers to dismiss snackbar, reverse animation is scheduled
+    await tester.pump(const Duration(milliseconds: 750)); // 3.00s // timer triggers to dismiss snackbar, reverse animation is scheduled
     await tester.pump(); // begin animation
     expect(find.text(helloSnackBar), findsOneWidget); // frame 0 of dismiss animation
-    await tester.pump(new Duration(milliseconds: 750)); // 3.75s // last frame of animation, snackbar removed from build
+    await tester.pump(const Duration(milliseconds: 750)); // 3.75s // last frame of animation, snackbar removed from build
     expect(find.text(helloSnackBar), findsNothing);
   });
 
@@ -63,7 +63,7 @@ void main() {
                 snackBarCount += 1;
                 Scaffold.of(context).showSnackBar(new SnackBar(
                   content: new Text("bar$snackBarCount"),
-                  duration: new Duration(seconds: 2)
+                  duration: const Duration(seconds: 2)
                 ));
               },
               behavior: HitTestBehavior.opaque,
@@ -89,39 +89,39 @@ void main() {
     await tester.pump(); // begin animation
     expect(find.text('bar1'), findsOneWidget);
     expect(find.text('bar2'), findsNothing);
-    await tester.pump(new Duration(milliseconds: 750)); // 0.75s // animation last frame; two second timer starts here
+    await tester.pump(const Duration(milliseconds: 750)); // 0.75s // animation last frame; two second timer starts here
     expect(find.text('bar1'), findsOneWidget);
     expect(find.text('bar2'), findsNothing);
-    await tester.pump(new Duration(milliseconds: 750)); // 1.50s
+    await tester.pump(const Duration(milliseconds: 750)); // 1.50s
     expect(find.text('bar1'), findsOneWidget);
     expect(find.text('bar2'), findsNothing);
-    await tester.pump(new Duration(milliseconds: 750)); // 2.25s
+    await tester.pump(const Duration(milliseconds: 750)); // 2.25s
     expect(find.text('bar1'), findsOneWidget);
     expect(find.text('bar2'), findsNothing);
-    await tester.pump(new Duration(milliseconds: 750)); // 3.00s // timer triggers to dismiss snackbar, reverse animation is scheduled
+    await tester.pump(const Duration(milliseconds: 750)); // 3.00s // timer triggers to dismiss snackbar, reverse animation is scheduled
     await tester.pump(); // begin animation
     expect(find.text('bar1'), findsOneWidget);
     expect(find.text('bar2'), findsNothing);
-    await tester.pump(new Duration(milliseconds: 750)); // 3.75s // last frame of animation, snackbar removed from build, new snack bar put in its place
+    await tester.pump(const Duration(milliseconds: 750)); // 3.75s // last frame of animation, snackbar removed from build, new snack bar put in its place
     expect(find.text('bar1'), findsNothing);
     expect(find.text('bar2'), findsOneWidget);
     await tester.pump(); // begin animation
     expect(find.text('bar1'), findsNothing);
     expect(find.text('bar2'), findsOneWidget);
-    await tester.pump(new Duration(milliseconds: 750)); // 4.50s // animation last frame; two second timer starts here
+    await tester.pump(const Duration(milliseconds: 750)); // 4.50s // animation last frame; two second timer starts here
     expect(find.text('bar1'), findsNothing);
     expect(find.text('bar2'), findsOneWidget);
-    await tester.pump(new Duration(milliseconds: 750)); // 5.25s
+    await tester.pump(const Duration(milliseconds: 750)); // 5.25s
     expect(find.text('bar1'), findsNothing);
     expect(find.text('bar2'), findsOneWidget);
-    await tester.pump(new Duration(milliseconds: 750)); // 6.00s
+    await tester.pump(const Duration(milliseconds: 750)); // 6.00s
     expect(find.text('bar1'), findsNothing);
     expect(find.text('bar2'), findsOneWidget);
-    await tester.pump(new Duration(milliseconds: 750)); // 6.75s // timer triggers to dismiss snackbar, reverse animation is scheduled
+    await tester.pump(const Duration(milliseconds: 750)); // 6.75s // timer triggers to dismiss snackbar, reverse animation is scheduled
     await tester.pump(); // begin animation
     expect(find.text('bar1'), findsNothing);
     expect(find.text('bar2'), findsOneWidget);
-    await tester.pump(new Duration(milliseconds: 750)); // 7.50s // last frame of animation, snackbar removed from build, new snack bar put in its place
+    await tester.pump(const Duration(milliseconds: 750)); // 7.50s // last frame of animation, snackbar removed from build, new snack bar put in its place
     expect(find.text('bar1'), findsNothing);
     expect(find.text('bar2'), findsNothing);
   });
@@ -169,45 +169,45 @@ void main() {
     await tester.pump(); // begin animation
     expect(find.text('bar1'), findsOneWidget);
     expect(find.text('bar2'), findsNothing);
-    await tester.pump(new Duration(milliseconds: 750)); // 0.75s // animation last frame; two second timer starts here
+    await tester.pump(const Duration(milliseconds: 750)); // 0.75s // animation last frame; two second timer starts here
     expect(find.text('bar1'), findsOneWidget);
     expect(find.text('bar2'), findsNothing);
-    await tester.pump(new Duration(milliseconds: 750)); // 1.50s
+    await tester.pump(const Duration(milliseconds: 750)); // 1.50s
     expect(find.text('bar1'), findsOneWidget);
     expect(find.text('bar2'), findsNothing);
-    await tester.pump(new Duration(milliseconds: 750)); // 2.25s
+    await tester.pump(const Duration(milliseconds: 750)); // 2.25s
     expect(find.text('bar1'), findsOneWidget);
     expect(find.text('bar2'), findsNothing);
-    await tester.pump(new Duration(milliseconds: 10000)); // 12.25s
+    await tester.pump(const Duration(milliseconds: 10000)); // 12.25s
     expect(find.text('bar1'), findsOneWidget);
     expect(find.text('bar2'), findsNothing);
 
     firstController.close(); // snackbar is manually dismissed
 
-    await tester.pump(new Duration(milliseconds: 750)); // 13.00s // reverse animation is scheduled
+    await tester.pump(const Duration(milliseconds: 750)); // 13.00s // reverse animation is scheduled
     await tester.pump(); // begin animation
     expect(find.text('bar1'), findsOneWidget);
     expect(find.text('bar2'), findsNothing);
-    await tester.pump(new Duration(milliseconds: 750)); // 13.75s // last frame of animation, snackbar removed from build, new snack bar put in its place
+    await tester.pump(const Duration(milliseconds: 750)); // 13.75s // last frame of animation, snackbar removed from build, new snack bar put in its place
     expect(find.text('bar1'), findsNothing);
     expect(find.text('bar2'), findsOneWidget);
     await tester.pump(); // begin animation
     expect(find.text('bar1'), findsNothing);
     expect(find.text('bar2'), findsOneWidget);
-    await tester.pump(new Duration(milliseconds: 750)); // 14.50s // animation last frame; two second timer starts here
+    await tester.pump(const Duration(milliseconds: 750)); // 14.50s // animation last frame; two second timer starts here
     expect(find.text('bar1'), findsNothing);
     expect(find.text('bar2'), findsOneWidget);
-    await tester.pump(new Duration(milliseconds: 750)); // 15.25s
+    await tester.pump(const Duration(milliseconds: 750)); // 15.25s
     expect(find.text('bar1'), findsNothing);
     expect(find.text('bar2'), findsOneWidget);
-    await tester.pump(new Duration(milliseconds: 750)); // 16.00s
+    await tester.pump(const Duration(milliseconds: 750)); // 16.00s
     expect(find.text('bar1'), findsNothing);
     expect(find.text('bar2'), findsOneWidget);
-    await tester.pump(new Duration(milliseconds: 750)); // 16.75s // timer triggers to dismiss snackbar, reverse animation is scheduled
+    await tester.pump(const Duration(milliseconds: 750)); // 16.75s // timer triggers to dismiss snackbar, reverse animation is scheduled
     await tester.pump(); // begin animation
     expect(find.text('bar1'), findsNothing);
     expect(find.text('bar2'), findsOneWidget);
-    await tester.pump(new Duration(milliseconds: 750)); // 17.50s // last frame of animation, snackbar removed from build, new snack bar put in its place
+    await tester.pump(const Duration(milliseconds: 750)); // 17.50s // last frame of animation, snackbar removed from build, new snack bar put in its place
     expect(find.text('bar1'), findsNothing);
     expect(find.text('bar2'), findsNothing);
   });
@@ -224,7 +224,7 @@ void main() {
                 snackBarCount += 1;
                 Scaffold.of(context).showSnackBar(new SnackBar(
                   content: new Text("bar$snackBarCount"),
-                  duration: new Duration(seconds: 2)
+                  duration: const Duration(seconds: 2)
                 ));
               },
               behavior: HitTestBehavior.opaque,
@@ -250,8 +250,8 @@ void main() {
     await tester.pump(); // begin animation
     expect(find.text('bar1'), findsOneWidget);
     expect(find.text('bar2'), findsNothing);
-    await tester.pump(new Duration(milliseconds: 750)); // 0.75s // animation last frame; two second timer starts here
-    await tester.scroll(find.text('bar1'), new Offset(0.0, 50.0));
+    await tester.pump(const Duration(milliseconds: 750)); // 0.75s // animation last frame; two second timer starts here
+    await tester.scroll(find.text('bar1'), const Offset(0.0, 50.0));
     await tester.pump(); // bar1 dismissed, bar2 begins animating
     expect(find.text('bar1'), findsNothing);
     expect(find.text('bar2'), findsOneWidget);
@@ -267,7 +267,7 @@ void main() {
               onTap: () {
                 Scaffold.of(context).showSnackBar(new SnackBar(
                   content: new Text('I am a snack bar.'),
-                  duration: new Duration(seconds: 2),
+                  duration: const Duration(seconds: 2),
                   action: new SnackBarAction(
                     label: 'ACTION',
                     onPressed: () {
@@ -305,7 +305,7 @@ void main() {
               onTap: () {
                 Scaffold.of(context).showSnackBar(new SnackBar(
                   content: new Text('I am a snack bar.'),
-                  duration: new Duration(seconds: 2),
+                  duration: const Duration(seconds: 2),
                   action: new SnackBarAction(label: 'ACTION', onPressed: () {})
                 ));
               },
@@ -349,7 +349,7 @@ void main() {
               onTap: () {
                 Scaffold.of(context).showSnackBar(new SnackBar(
                   content: new Text('snack'),
-                  duration: new Duration(seconds: 2),
+                  duration: const Duration(seconds: 2),
                   action: new SnackBarAction(
                     label: 'ACTION',
                     onPressed: () {
@@ -381,7 +381,7 @@ void main() {
     await tester.tap(find.text('X'));
     await tester.pump(const Duration(milliseconds: 750));
     await tester.pump(const Duration(milliseconds: 750));
-    await tester.scroll(find.text('snack'), new Offset(0.0, 50.0));
+    await tester.scroll(find.text('snack'), const Offset(0.0, 50.0));
     await tester.pump();
     expect(closedReason, equals(SnackBarClosedReason.swipe));
 
@@ -401,11 +401,11 @@ void main() {
 
     // Pop up the snack bar and then let it time out.
     await tester.tap(find.text('X'));
-    await tester.pump(new Duration(milliseconds: 750));
-    await tester.pump(new Duration(milliseconds: 750));
-    await tester.pump(new Duration(milliseconds: 1500));
+    await tester.pump(const Duration(milliseconds: 750));
+    await tester.pump(const Duration(milliseconds: 750));
+    await tester.pump(const Duration(milliseconds: 1500));
     await tester.pump(); // begin animation
-    await tester.pump(new Duration(milliseconds: 750));
+    await tester.pump(const Duration(milliseconds: 750));
     expect(closedReason, equals(SnackBarClosedReason.timeout));
   });
 

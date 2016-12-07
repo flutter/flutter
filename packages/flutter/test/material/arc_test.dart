@@ -9,16 +9,16 @@ void main() {
   test('on-axis MaterialPointArcTween', () {
     MaterialPointArcTween tween = new MaterialPointArcTween(
       begin: Point.origin,
-      end: new Point(0.0, 10.0)
+      end: const Point(0.0, 10.0)
     );
-    expect(tween.lerp(0.5), equals(new Point(0.0, 5.0)));
+    expect(tween.lerp(0.5), equals(const Point(0.0, 5.0)));
     expect(tween, hasOneLineDescription);
 
     tween = new MaterialPointArcTween(
       begin: Point.origin,
-      end: new Point(10.0, 0.0)
+      end: const Point(10.0, 0.0)
     );
-    expect(tween.lerp(0.5), equals(new Point(5.0, 0.0)));
+    expect(tween.lerp(0.5), equals(const Point(5.0, 0.0)));
   });
 
   test('on-axis MaterialRectArcTween', () {

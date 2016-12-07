@@ -111,8 +111,8 @@ void main() {
     expect(tester.getSize(title).width, equals(800.0 - 72.0 - 8.0));
 
     actions = <Widget>[
-      new SizedBox(width: 100.0),
-      new SizedBox(width: 100.0)
+      const SizedBox(width: 100.0),
+      const SizedBox(width: 100.0)
     ];
     await tester.pumpWidget(buildApp());
 
@@ -171,8 +171,8 @@ void main() {
     leading = null;
     titleWidth = 620.0;
     actions = <Widget>[
-      new SizedBox(width: 45.0),
-      new SizedBox(width: 45.0)
+      const SizedBox(width: 45.0),
+      const SizedBox(width: 45.0)
     ];
     await tester.pumpWidget(buildApp());
     expect(tester.getTopLeft(title).x, 800 - 620 - 45 - 45 - 8);

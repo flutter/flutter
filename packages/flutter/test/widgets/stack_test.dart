@@ -199,8 +199,8 @@ void main() {
   testWidgets('Can set width and height', (WidgetTester tester) async {
     Key key = new Key('container');
 
-    BoxDecoration kBoxDecoration = new BoxDecoration(
-      backgroundColor: new Color(0xFF00FF00)
+    BoxDecoration kBoxDecoration = const BoxDecoration(
+      backgroundColor: const Color(0xFF00FF00)
     );
 
     await tester.pumpWidget(
@@ -273,7 +273,7 @@ void main() {
             new GestureDetector(
               behavior: HitTestBehavior.opaque,
               onTap: () { print("HELLO"); tapped = true; },
-              child: new SizedBox(
+              child: const SizedBox(
                 width: 200.0,
                 height: 200.0,
               ),

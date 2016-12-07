@@ -39,7 +39,7 @@ void main() {
       rect: new Rect.fromLTWH(50.0, 75.0, 200.0, 100.0),
       image: image,
       fit: ImageFit.cover,
-      alignment: new FractionalOffset(0.0, 0.5)
+      alignment: const FractionalOffset(0.0, 0.5)
     );
 
     Invocation command = canvas.invocations.firstWhere((Invocation invocation) {

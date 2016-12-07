@@ -255,14 +255,14 @@ void main() {
 
     await tester.pumpWidget(
       new LazyBlockViewport(
-        padding: new EdgeInsets.fromLTRB(7.0, 3.0, 5.0, 11.0),
+        padding: const EdgeInsets.fromLTRB(7.0, 3.0, 5.0, 11.0),
         delegate: new LazyBlockBuilder(builder: itemBuilder)
       )
     );
 
     RenderBox firstBox = tester.renderObject(find.text('0'));
     Point upperLeft = firstBox.localToGlobal(Point.origin);
-    expect(upperLeft, equals(new Point(7.0, 3.0)));
+    expect(upperLeft, equals(const Point(7.0, 3.0)));
     expect(firstBox.size.width, equals(800.0 - 12.0));
   });
 

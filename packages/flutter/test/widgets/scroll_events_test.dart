@@ -37,11 +37,11 @@ void main() {
     await tester.pumpWidget(_buildScroller(log: log));
 
     expect(log, equals(<String>[]));
-    TestGesture gesture = await tester.startGesture(new Point(100.0, 100.0));
+    TestGesture gesture = await tester.startGesture(const Point(100.0, 100.0));
     expect(log, equals(<String>['scrollstart']));
     await tester.pump(const Duration(seconds: 1));
     expect(log, equals(<String>['scrollstart']));
-    await gesture.moveBy(new Offset(-10.0, -10.0));
+    await gesture.moveBy(const Offset(-10.0, -10.0));
     expect(log, equals(<String>['scrollstart', 'scroll']));
     await tester.pump(const Duration(seconds: 1));
     expect(log, equals(<String>['scrollstart', 'scroll']));
@@ -138,15 +138,15 @@ void main() {
     await tester.pumpWidget(_buildScroller(key: scrollKey, log: log));
 
     expect(log, equals(<String>[]));
-    await tester.flingFrom(new Point(100.0, 100.0), new Offset(-50.0, -50.0), 500.0);
-    await tester.pump(new Duration(seconds: 1));
+    await tester.flingFrom(const Point(100.0, 100.0), const Offset(-50.0, -50.0), 500.0);
+    await tester.pump(const Duration(seconds: 1));
     log.removeWhere((String value) => value == 'scroll');
     expect(log, equals(<String>['scrollstart']));
-    await tester.flingFrom(new Point(100.0, 100.0), new Offset(-50.0, -50.0), 500.0);
+    await tester.flingFrom(const Point(100.0, 100.0), const Offset(-50.0, -50.0), 500.0);
     log.removeWhere((String value) => value == 'scroll');
     expect(log, equals(<String>['scrollstart', 'scrollend', 'scrollstart']));
-    await tester.pump(new Duration(seconds: 1));
-    await tester.pump(new Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
     log.removeWhere((String value) => value == 'scroll');
     expect(log, equals(<String>['scrollstart', 'scrollend', 'scrollstart', 'scrollend']));
   });
@@ -157,10 +157,10 @@ void main() {
     await tester.pumpWidget(_buildScroller(key: scrollKey, log: log));
 
     expect(log, equals(<String>[]));
-    await tester.flingFrom(new Point(100.0, 100.0), new Offset(50.0, 50.0), 500.0);
-    await tester.pump(new Duration(seconds: 1));
-    await tester.pump(new Duration(seconds: 1));
-    await tester.pump(new Duration(seconds: 1));
+    await tester.flingFrom(const Point(100.0, 100.0), const Offset(50.0, 50.0), 500.0);
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
     expect(log.first, equals('scrollstart'));
     expect(log.last, equals('scrollend'));
     log.removeWhere((String value) => value == 'scroll');

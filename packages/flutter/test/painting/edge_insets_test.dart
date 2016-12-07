@@ -8,8 +8,8 @@ import 'package:test/test.dart';
 
 void main() {
   test("EdgeInsets.lerp()", () {
-    EdgeInsets a = new EdgeInsets.all(10.0);
-    EdgeInsets b = new EdgeInsets.all(20.0);
+    EdgeInsets a = const EdgeInsets.all(10.0);
+    EdgeInsets b = const EdgeInsets.all(20.0);
     expect(EdgeInsets.lerp(a, b, 0.25), equals(a * 1.25));
     expect(EdgeInsets.lerp(a, b, 0.25), equals(b * 0.625));
     expect(EdgeInsets.lerp(a, b, 0.25), equals(a + const EdgeInsets.all(2.5)));

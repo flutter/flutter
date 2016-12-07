@@ -28,7 +28,7 @@ void main() {
     await tester.pumpWidget(new Row(children: <Widget>[
       new Wrapper(
         child: new LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
-          return new SizedBox();
+          return const SizedBox();
         }),
       ),
       new Wrapper(
@@ -53,7 +53,7 @@ void main() {
       new Wrapper(
         child: new Wrapper(
           child: new LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
-            return new SizedBox();
+            return const SizedBox();
           })
         )
       ),

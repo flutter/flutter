@@ -9,7 +9,7 @@ import 'package:flutter/rendering.dart';
 const Size _kTestViewSize = const Size(800.0, 600.0);
 
 class OffscreenRenderView extends RenderView {
-  OffscreenRenderView() : super(configuration: new ViewConfiguration(size: _kTestViewSize));
+  OffscreenRenderView() : super(configuration: const ViewConfiguration(size: _kTestViewSize));
 
   @override
   void compositeFrame() {

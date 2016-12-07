@@ -91,7 +91,7 @@ void main() {
     expect(find.byKey(secondKey), isOnstage);
     expect(find.byKey(secondKey), isNotInCard);
 
-    await tester.pump(new Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
 
     // t=1.032s for the journey. The journey has ended (it ends this frame, in
     // fact). The hero should now be in the new page, onstage. The original
@@ -139,7 +139,7 @@ void main() {
     expect(find.byKey(thirdKey), isOnstage);
     expect(find.byKey(thirdKey), isNotInCard);
 
-    await tester.pump(new Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
 
     // t=1.032s for the journey. The journey has ended (it ends this frame, in
     // fact). The hero should now be in the new page, onstage.
@@ -170,12 +170,12 @@ void main() {
     ));
 
     await tester.tap(find.text('two'));
-    await tester.pump(new Duration(milliseconds: 10));
+    await tester.pump(const Duration(milliseconds: 10));
 
     route.markNeedsBuild();
 
-    await tester.pump(new Duration(milliseconds: 10));
-    await tester.pump(new Duration(seconds: 1));
+    await tester.pump(const Duration(milliseconds: 10));
+    await tester.pump(const Duration(seconds: 1));
   });
 
   testWidgets('Heroes animation is fastOutSlowIn', (WidgetTester tester) async {
@@ -271,18 +271,18 @@ void main() {
     await tester.tap(find.text('foo', skipOffstage: false));
     expect(log, isEmpty);
 
-    await tester.pump(new Duration(milliseconds: 10));
+    await tester.pump(const Duration(milliseconds: 10));
     await tester.tap(find.text('foo', skipOffstage: false));
     expect(log, isEmpty);
     await tester.tap(find.text('bar', skipOffstage: false));
     expect(log, isEmpty);
 
-    await tester.pump(new Duration(milliseconds: 10));
+    await tester.pump(const Duration(milliseconds: 10));
     expect(find.text('foo'), findsNothing);
     await tester.tap(find.text('bar', skipOffstage: false));
     expect(log, isEmpty);
 
-    await tester.pump(new Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
     expect(find.text('foo'), findsNothing);
     await tester.tap(find.text('bar'));
     expect(log, equals(<String>['bar']));

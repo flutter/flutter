@@ -193,7 +193,7 @@ void main() {
     tester.route(down1);
     expect(tapRecognized, isFalse);
 
-    tester.async.elapse(new Duration(milliseconds: 500));
+    tester.async.elapse(const Duration(milliseconds: 500));
     expect(tapRecognized, isFalse);
     tester.route(up1);
     expect(tapRecognized, isTrue);

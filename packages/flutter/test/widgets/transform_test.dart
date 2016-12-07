@@ -19,8 +19,8 @@ void main() {
             child: new Container(
               width: 100.0,
               height: 100.0,
-              decoration: new BoxDecoration(
-                backgroundColor: new Color(0xFF0000FF),
+              decoration: const BoxDecoration(
+                backgroundColor: const Color(0xFF0000FF),
               ),
             ),
           ),
@@ -32,14 +32,14 @@ void main() {
               height: 100.0,
               child: new Transform(
                 transform: new Matrix4.diagonal3Values(0.5, 0.5, 1.0),
-                origin: new Offset(100.0, 50.0),
+                origin: const Offset(100.0, 50.0),
                 child: new GestureDetector(
                   onTap: () {
                     didReceiveTap = true;
                   },
                   child: new Container(
-                    decoration: new BoxDecoration(
-                      backgroundColor: new Color(0xFF00FFFF),
+                    decoration: const BoxDecoration(
+                      backgroundColor: const Color(0xFF00FFFF),
                     ),
                   ),
                 ),
@@ -51,9 +51,9 @@ void main() {
     );
 
     expect(didReceiveTap, isFalse);
-    await tester.tapAt(new Point(110.0, 110.0));
+    await tester.tapAt(const Point(110.0, 110.0));
     expect(didReceiveTap, isFalse);
-    await tester.tapAt(new Point(190.0, 150.0));
+    await tester.tapAt(const Point(190.0, 150.0));
     expect(didReceiveTap, isTrue);
   });
 
@@ -68,8 +68,8 @@ void main() {
             child: new Container(
               width: 100.0,
               height: 100.0,
-              decoration: new BoxDecoration(
-                backgroundColor: new Color(0xFF0000FF),
+              decoration: const BoxDecoration(
+                backgroundColor: const Color(0xFF0000FF),
               ),
             ),
           ),
@@ -81,14 +81,14 @@ void main() {
               height: 100.0,
               child: new Transform(
                 transform: new Matrix4.diagonal3Values(0.5, 0.5, 1.0),
-                alignment: new FractionalOffset(1.0, 0.5),
+                alignment: const FractionalOffset(1.0, 0.5),
                 child: new GestureDetector(
                   onTap: () {
                     didReceiveTap = true;
                   },
                   child: new Container(
-                    decoration: new BoxDecoration(
-                      backgroundColor: new Color(0xFF00FFFF),
+                    decoration: const BoxDecoration(
+                      backgroundColor: const Color(0xFF00FFFF),
                     ),
                   ),
                 ),
@@ -100,9 +100,9 @@ void main() {
     );
 
     expect(didReceiveTap, isFalse);
-    await tester.tapAt(new Point(110.0, 110.0));
+    await tester.tapAt(const Point(110.0, 110.0));
     expect(didReceiveTap, isFalse);
-    await tester.tapAt(new Point(190.0, 150.0));
+    await tester.tapAt(const Point(190.0, 150.0));
     expect(didReceiveTap, isTrue);
   });
 
@@ -116,8 +116,8 @@ void main() {
           child: new Container(
             width: 100.0,
             height: 100.0,
-            decoration: new BoxDecoration(
-              backgroundColor: new Color(0xFF0000FF),
+            decoration: const BoxDecoration(
+              backgroundColor: const Color(0xFF0000FF),
             ),
           ),
         ),
@@ -129,15 +129,15 @@ void main() {
             height: 100.0,
             child: new Transform(
               transform: new Matrix4.diagonal3Values(0.5, 0.5, 1.0),
-              origin: new Offset(100.0, 0.0),
-              alignment: new FractionalOffset(0.0, 0.5),
+              origin: const Offset(100.0, 0.0),
+              alignment: const FractionalOffset(0.0, 0.5),
               child: new GestureDetector(
                 onTap: () {
                   didReceiveTap = true;
                 },
                 child: new Container(
-                  decoration: new BoxDecoration(
-                    backgroundColor: new Color(0xFF00FFFF),
+                  decoration: const BoxDecoration(
+                    backgroundColor: const Color(0xFF00FFFF),
                   ),
                 ),
               ),
@@ -148,9 +148,9 @@ void main() {
     ));
 
     expect(didReceiveTap, isFalse);
-    await tester.tapAt(new Point(110.0, 110.0));
+    await tester.tapAt(const Point(110.0, 110.0));
     expect(didReceiveTap, isFalse);
-    await tester.tapAt(new Point(190.0, 150.0));
+    await tester.tapAt(const Point(190.0, 150.0));
     expect(didReceiveTap, isTrue);
   });
 
@@ -166,7 +166,7 @@ void main() {
               child: new Opacity(
                 opacity: 0.9,
                 child: new Container(
-                  decoration: new BoxDecoration(
+                  decoration: const BoxDecoration(
                     backgroundColor: const Color(0xFF00FF00),
                   ),
                 ),

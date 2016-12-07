@@ -17,7 +17,7 @@ void main() {
   test('toString control test', () {
     expect(kAlwaysCompleteAnimation.toString(), hasOneLineDescription);
     expect(kAlwaysDismissedAnimation.toString(), hasOneLineDescription);
-    expect(new AlwaysStoppedAnimation<double>(0.5).toString(), hasOneLineDescription);
+    expect(const AlwaysStoppedAnimation<double>(0.5).toString(), hasOneLineDescription);
     CurvedAnimation curvedAnimation = new CurvedAnimation(
       parent: kAlwaysDismissedAnimation,
       curve: Curves.ease

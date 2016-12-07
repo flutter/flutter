@@ -200,7 +200,7 @@ void main() {
                     showDialog(
                       context: context,
                       child: new Scaffold(
-                        body: new SizedBox(
+                        body: const SizedBox(
                           width: 200.0,
                           height: 200.0,
                         ),

@@ -10,12 +10,12 @@ void main() {
   testWidgets('AnimatedContainer control test', (WidgetTester tester) async {
     GlobalKey key = new GlobalKey();
 
-    BoxDecoration decorationA = new BoxDecoration(
-      backgroundColor: new Color(0xFF00FF00)
+    BoxDecoration decorationA = const BoxDecoration(
+      backgroundColor: const Color(0xFF00FF00)
     );
 
-    BoxDecoration decorationB = new BoxDecoration(
-      backgroundColor: new Color(0xFF0000FF)
+    BoxDecoration decorationB = const BoxDecoration(
+      backgroundColor: const Color(0xFF0000FF)
     );
 
     BoxDecoration actualDecoration;
@@ -54,41 +54,41 @@ void main() {
     await tester.pumpWidget(
       new AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        decoration: new BoxDecoration(
-          backgroundColor: new Color(0xFF00FF00)
+        decoration: const BoxDecoration(
+          backgroundColor: const Color(0xFF00FF00)
         )
       )
     );
     expect(tester.binding.transientCallbackCount, 0);
-    await tester.pump(new Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
     expect(tester.binding.transientCallbackCount, 0);
     await tester.pumpWidget(
       new AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        decoration: new BoxDecoration(
-          backgroundColor: new Color(0xFF00FF00)
+        decoration: const BoxDecoration(
+          backgroundColor: const Color(0xFF00FF00)
         )
       )
     );
     expect(tester.binding.transientCallbackCount, 0);
-    await tester.pump(new Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
     expect(tester.binding.transientCallbackCount, 0);
     await tester.pumpWidget(
       new AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        decoration: new BoxDecoration(
-          backgroundColor: new Color(0xFF0000FF)
+        decoration: const BoxDecoration(
+          backgroundColor: const Color(0xFF0000FF)
         )
       )
     );
     expect(tester.binding.transientCallbackCount, 1); // this is the only time an animation should have started!
-    await tester.pump(new Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
     expect(tester.binding.transientCallbackCount, 0);
     await tester.pumpWidget(
       new AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        decoration: new BoxDecoration(
-          backgroundColor: new Color(0xFF0000FF)
+        decoration: const BoxDecoration(
+          backgroundColor: const Color(0xFF0000FF)
         )
       )
     );
@@ -108,13 +108,13 @@ void main() {
     );
 
     await tester.pump();
-    await tester.pump(new Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 100));
 
     RenderBox text = tester.renderObject(find.text('X'));
     expect(text.size.width, equals(100.0));
     expect(text.size.height, equals(100.0));
 
-    await tester.pump(new Duration(milliseconds: 1000));
+    await tester.pump(const Duration(milliseconds: 1000));
 
     await tester.pumpWidget(
       new Center(
@@ -127,7 +127,7 @@ void main() {
       )
     );
     await tester.pump();
-    await tester.pump(new Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 100));
 
     text = tester.renderObject(find.text('X'));
     expect(text.size.width, greaterThan(110.0));
@@ -135,7 +135,7 @@ void main() {
     expect(text.size.height, greaterThan(110.0));
     expect(text.size.height, lessThan(190.0));
 
-    await tester.pump(new Duration(milliseconds: 1000));
+    await tester.pump(const Duration(milliseconds: 1000));
 
     expect(text.size.width, equals(200.0));
     expect(text.size.height, equals(200.0));
@@ -151,13 +151,13 @@ void main() {
       )
     );
     await tester.pump();
-    await tester.pump(new Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 100));
 
     expect(text.size.width, equals(200.0));
     expect(text.size.height, greaterThan(110.0));
     expect(text.size.height, lessThan(190.0));
 
-    await tester.pump(new Duration(milliseconds: 1000));
+    await tester.pump(const Duration(milliseconds: 1000));
 
     expect(text.size.width, equals(200.0));
     expect(text.size.height, equals(100.0));
