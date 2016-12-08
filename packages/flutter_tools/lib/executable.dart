@@ -94,7 +94,7 @@ Future<Null> main(List<String> args) async {
   AppContext _executableContext = new AppContext();
 
   // Make the context current.
-  _executableContext.runInZone(() {
+  await _executableContext.runInZone(() {
     // Initialize the context with some defaults.
     // NOTE: Similar lists also exist in `bin/fuchsia_builder.dart` and
     // `test/src/context.dart`. If you update this list of defaults, look

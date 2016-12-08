@@ -59,7 +59,7 @@ class AppContext {
         : parentContext;
   }
 
-  dynamic runInZone(dynamic method(), {
+  Future<dynamic> runInZone(dynamic method(), {
     ZoneBinaryCallback<dynamic, dynamic, StackTrace> onError
   }) {
     return runZoned(
@@ -69,7 +69,7 @@ class AppContext {
     );
   }
 
-  dynamic _run(dynamic method()) async {
+  Future<dynamic> _run(dynamic method()) async {
     Zone previousZone = _zone;
     try {
       _zone = Zone.current;
