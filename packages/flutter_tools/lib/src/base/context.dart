@@ -14,11 +14,13 @@ class AppContext {
   Map<Type, dynamic> _instances = <Type, dynamic>{};
   Zone _zone;
 
+  AppContext() : _zone = Zone.current;
+
   bool isSet(Type type) {
     if (_instances.containsKey(type))
       return true;
 
-    AppContext parent = _calcParent(Zone.current);
+    AppContext parent = _calcParent(_zone);
     return parent != null ? parent.isSet(type) : false;
   }
 
@@ -26,7 +28,7 @@ class AppContext {
     if (_instances.containsKey(type))
       return _instances[type];
 
-    AppContext parent = _calcParent(_zone ?? Zone.current);
+    AppContext parent = _calcParent(_zone);
     return parent?.getVariable(type);
   }
 
@@ -51,12 +53,10 @@ class AppContext {
     if (parentZone == null)
       return null;
 
-    AppContext deps = parentZone['context'];
-    if (deps == this) {
-      return _calcParent(parentZone);
-    } else {
-      return deps;
-    }
+    AppContext parentContext = parentZone['context'];
+    return parentContext == this
+        ? _calcParent(parentZone)
+        : parentContext;
   }
 
   dynamic runInZone(dynamic method(), {
@@ -70,11 +70,12 @@ class AppContext {
   }
 
   dynamic _run(dynamic method()) async {
+    Zone previousZone = _zone;
     try {
       _zone = Zone.current;
       return await method();
     } finally {
-      _zone = null;
+      _zone = previousZone;
     }
   }
 }
