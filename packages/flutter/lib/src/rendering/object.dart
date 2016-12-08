@@ -1022,7 +1022,7 @@ class PipelineOwner {
         if (node._needsPaint && node.owner == this)
           PaintingContext.repaintCompositedChild(node);
       }
-      assert(_nodesNeedingPaint.length == 0);
+      assert(_nodesNeedingPaint.isEmpty);
     } finally {
       _debugDoingPaint = false;
       Timeline.finishSync();

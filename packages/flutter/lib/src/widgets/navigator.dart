@@ -644,7 +644,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   /// The only route that cannot be popped off the navigator is the initial
   /// route.
   bool canPop() {
-    assert(_history.length > 0);
+    assert(_history.isNotEmpty);
     return _history.length > 1 || _history[0].willHandlePopInternally;
   }
 

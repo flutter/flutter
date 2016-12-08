@@ -773,7 +773,7 @@ class Solver {
   }
 
   Result _dualOptimize() {
-    while (_infeasibleRows.length != 0) {
+    while (_infeasibleRows.isNotEmpty) {
       _Symbol leaving = _infeasibleRows.removeLast();
       _Row row = _rows[leaving];
 

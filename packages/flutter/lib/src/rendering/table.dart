@@ -492,7 +492,7 @@ class RenderTable extends RenderBox {
     assert(rows == null || children == null);
     assert(defaultColumnWidth != null);
     assert(configuration != null);
-    _columns = columns ?? (children != null && children.length > 0 ? children.first.length : 0);
+    _columns = columns ?? (children != null && children.isNotEmpty ? children.first.length : 0);
     _rows = rows ?? 0;
     _children = new List<RenderBox>()..length = _columns * _rows;
     _columnWidths = columnWidths ?? new HashMap<int, TableColumnWidth>();
@@ -691,10 +691,10 @@ class RenderTable extends RenderBox {
       return;
     assert(columns >= 0);
     // consider the case of a newly empty table
-    if (columns == 0 || cells.length == 0) {
-      assert(cells == null || cells.length == 0);
+    if (columns == 0 || cells.isEmpty) {
+      assert(cells == null || cells.isEmpty);
       _columns = columns;
-      if (_children.length == 0) {
+      if (_children.isEmpty) {
         assert(_rows == 0);
         return;
       }
@@ -757,7 +757,7 @@ class RenderTable extends RenderBox {
         dropChild(oldChild);
     }
     _children.clear();
-    _columns = cells.length > 0 ? cells.first.length : 0;
+    _columns = cells.isNotEmpty ? cells.first.length : 0;
     _rows = 0;
     for (List<RenderBox> row in cells)
       addRow(row);
@@ -1282,7 +1282,7 @@ class RenderTable extends RenderBox {
     super.debugFillDescription(description);
     if (border != null)
       description.add('border: $border');
-    if (_columnWidths.length > 0)
+    if (_columnWidths.isNotEmpty)
       description.add('specified column widths: $_columnWidths');
     description.add('default column width: $defaultColumnWidth');
     description.add('table size: $columns\u00D7$rows');

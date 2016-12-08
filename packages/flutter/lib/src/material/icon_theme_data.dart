@@ -100,7 +100,7 @@ class IconThemeData {
       result.add('opacity: $_opacity');
     if (size != null)
       result.add('size: $size');
-    if (result.length == 0)
+    if (result.isEmpty)
       return '<no theme>';
     return result.join(', ');
   }

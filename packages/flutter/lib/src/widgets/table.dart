@@ -59,7 +59,7 @@ class TableRow {
       result.write('$decoration, ');
     if (children == null) {
       result.write('child list is null');
-    } else if (children.length == 0) {
+    } else if (children.isEmpty) {
       result.write('no children');
     } else {
       result.write('$children');
@@ -137,7 +137,7 @@ class Table extends RenderObjectWidget {
       return true;
     });
     assert(() {
-      if (children.length > 0) {
+      if (children.isNotEmpty) {
         final int cellCount = children.first.children.length;
         if (children.any((TableRow row) => row.children.length != cellCount)) {
           throw new FlutterError(
@@ -195,7 +195,7 @@ class Table extends RenderObjectWidget {
   @override
   RenderTable createRenderObject(BuildContext context) {
     return new RenderTable(
-      columns: children.length > 0 ? children[0].children.length : 0,
+      columns: children.isNotEmpty ? children[0].children.length : 0,
       rows: children.length,
       columnWidths: columnWidths,
       defaultColumnWidth: defaultColumnWidth,
@@ -209,7 +209,7 @@ class Table extends RenderObjectWidget {
 
   @override
   void updateRenderObject(BuildContext context, RenderTable renderObject) {
-    assert(renderObject.columns == (children.length > 0 ? children[0].children.length : 0));
+    assert(renderObject.columns == (children.isNotEmpty ? children[0].children.length : 0));
     assert(renderObject.rows == children.length);
     renderObject
       ..columnWidths = columnWidths
@@ -318,7 +318,7 @@ class _TableElement extends RenderObjectElement {
   void _updateRenderObjectChildren() {
     assert(renderObject != null);
     renderObject.setFlatChildren(
-      _children.length > 0 ? _children[0].children.length : 0,
+      _children.isNotEmpty ? _children[0].children.length : 0,
       _children.expand((_TableElementRow row) => row.children.map((Element child) => child.renderObject)).toList()
     );
   }

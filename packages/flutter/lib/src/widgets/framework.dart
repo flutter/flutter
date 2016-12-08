@@ -2365,7 +2365,7 @@ abstract class Element implements BuildContext {
     assert(widget != null);
     assert(depth != null);
     assert(_active);
-    if (_dependencies != null && _dependencies.length > 0) {
+    if (_dependencies != null && _dependencies.isNotEmpty) {
       for (InheritedElement dependency in _dependencies)
         dependency._dependents.remove(this);
       // For expediency, we don't actually clear the list here, even though it's
@@ -2629,7 +2629,7 @@ abstract class Element implements BuildContext {
     String result = '$prefixLineOne$this\n';
     List<Element> children = <Element>[];
     visitChildren(children.add);
-    if (children.length > 0) {
+    if (children.isNotEmpty) {
       Element last = children.removeLast();
       for (Element child in children)
         result += '${child.toStringDeep("$prefixOtherLines\u251C", "$prefixOtherLines\u2502")}';
@@ -2803,7 +2803,7 @@ abstract class BuildableElement extends Element {
 
   @override
   void activate() {
-    final bool hadDependencies = ((_dependencies != null && _dependencies.length > 0) || _hadUnsatisfiedDependencies);
+    final bool hadDependencies = ((_dependencies != null && _dependencies.isNotEmpty) || _hadUnsatisfiedDependencies);
     super.activate(); // clears _dependencies, and sets active to true
     if (_dirty) {
       if (_inDirtyList) {
