@@ -33,6 +33,7 @@ import 'install_test.dart' as install_test;
 import 'logs_test.dart' as logs_test;
 import 'os_utils_test.dart' as os_utils_test;
 import 'packages_test.dart' as packages_test;
+import 'process_manager_test.dart' as process_manager_test;
 import 'protocol_discovery_test.dart' as protocol_discovery_test;
 import 'run_test.dart' as run_test;
 import 'stop_test.dart' as stop_test;
@@ -68,6 +69,7 @@ void main() {
   logs_test.main();
   os_utils_test.main();
   packages_test.main();
+  process_manager_test.main();
   protocol_discovery_test.main();
   run_test.main();
   stop_test.main();
