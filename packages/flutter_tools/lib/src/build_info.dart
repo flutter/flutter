@@ -121,7 +121,7 @@ HostPlatform getCurrentHostPlatform() {
 String getBuildDirectory() {
   // TODO(johnmccutchan): Stop calling this function as part of setting
   // up command line argument processing.
-  if (context == null)
+  if (context == null || config == null)
     return 'build';
 
   String buildDir = config.getValue('build-dir') ?? 'build';
