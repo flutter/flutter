@@ -90,6 +90,10 @@ static const char* kDartBackgroundCompilationArgs[] = {
     "--background_compilation",
 };
 
+static const char* kDartWriteProtectCodeArgs[] = {
+    "--no_write_protect_code",
+};
+
 static const char* kDartCheckedModeArgs[] = {
     // clang-format off
     "--enable_asserts",
@@ -632,6 +636,14 @@ void InitDartVM() {
   // Enable checked mode if we are not running precompiled code. We run non-
   // precompiled code only in the debug product mode.
   const bool use_checked_mode = !IsRunningPrecompiledCode();
+#endif
+
+#if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
+  // Debug mode uses the JIT, disable code page write protection to avoid
+  // memory page protection changes before and after every compilation.
+  PushBackAll(&args,
+              kDartWriteProtectCodeArgs,
+              arraysize(kDartWriteProtectCodeArgs));
 #endif
 
   if (use_checked_mode)
