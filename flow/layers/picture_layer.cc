@@ -16,7 +16,9 @@ PictureLayer::~PictureLayer() {
   // The picture may contain references to textures that are associated
   // with the IO thread's context.
   SkPicture* picture = picture_.release();
-  blink::Threads::IO()->PostTask([picture]() { picture->unref(); });
+  if (picture) {
+    blink::Threads::IO()->PostTask([picture]() { picture->unref(); });
+  }
 }
 
 void PictureLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
