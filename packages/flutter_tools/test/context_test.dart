@@ -2,12 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:flutter_tools/src/base/context.dart' hide context;
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/globals.dart';
-import 'package:stack_trace/stack_trace.dart';
 import 'package:test/test.dart';
 
 void main() {
