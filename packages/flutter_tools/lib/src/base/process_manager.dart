@@ -301,7 +301,7 @@ class RecordingProcessManager implements ProcessManager {
 
   /// Returns a human-readable identifier for the specified executable.
   String _getBasename(int pid, String executable, List<String> arguments) {
-    String index = new NumberFormat('000').format(_manifest.length - 1);
+    String index = new NumberFormat('000').format(_manifest.length);
     String identifier = path.basename(executable);
     if (_kSkippableExecutables.contains(identifier)
         && arguments != null
@@ -674,7 +674,7 @@ class ReplayProcessManager implements ProcessManager {
     );
 
     if (entry == null)
-      throw new StateError('No matching invocation found for $executable');
+      throw new ProcessException(executable, arguments, 'No matching invocation found');
 
     entry['invoked'] = true;
     return entry;
