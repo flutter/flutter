@@ -1223,6 +1223,82 @@ void main() {
     await tester.tap(find.text('X'));
     expect(events, equals(<String>['tap']));
   });
+
+  testWidgets('Drag feedback with child anchor positions correctly', (WidgetTester tester) async {
+    await _testChildAnchorFeedbackPosition(tester: tester);
+  });
+
+  testWidgets('Drag feedback with child anchor within a non-global Overlay positions correctly', (WidgetTester tester) async {
+    await _testChildAnchorFeedbackPosition(tester: tester, left: 100.0, top: 100.0);
+  });
+}
+
+Future<Null> _testChildAnchorFeedbackPosition({WidgetTester tester, double top: 0.0, double left: 0.0}) async {
+  List<int> accepted = <int>[];
+  int dragStartedCount = 0;
+
+  await tester.pumpWidget(new Stack(children: <Widget>[
+    new Positioned(
+      left: left,
+      top: top,
+      right: 0.0,
+      bottom: 0.0,
+      child: new MaterialApp(
+        home: new Column(
+          children: <Widget>[
+            new Draggable<int>(
+              data: 1,
+              child: new Text('Source'),
+              feedback: new Text('Dragging'),
+              onDragStarted: () {
+                ++dragStartedCount;
+              },
+            ),
+            new DragTarget<int>(
+              builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
+                return new Container(height: 100.0, child: new Text('Target'));
+              },
+              onAccept: (int data) {
+                accepted.add(data);
+              }
+            ),
+          ]
+        )
+      )
+    )
+  ]));
+
+  expect(accepted, isEmpty);
+  expect(find.text('Source'), findsOneWidget);
+  expect(find.text('Dragging'), findsNothing);
+  expect(find.text('Target'), findsOneWidget);
+  expect(dragStartedCount, 0);
+
+  Point firstLocation = tester.getCenter(find.text('Source'));
+  TestGesture gesture = await tester.startGesture(firstLocation, pointer: 7);
+  await tester.pump();
+
+  expect(accepted, isEmpty);
+  expect(find.text('Source'), findsOneWidget);
+  expect(find.text('Dragging'), findsOneWidget);
+  expect(find.text('Target'), findsOneWidget);
+  expect(dragStartedCount, 1);
+
+
+  Point secondLocation = tester.getBottomRight(find.text('Target'));
+  await gesture.moveTo(secondLocation);
+  await tester.pump();
+
+  expect(accepted, isEmpty);
+  expect(find.text('Source'), findsOneWidget);
+  expect(find.text('Dragging'), findsOneWidget);
+  expect(find.text('Target'), findsOneWidget);
+  expect(dragStartedCount, 1);
+
+  Point feedbackTopLeft = tester.getTopLeft(find.text('Dragging'));
+  Point sourceTopLeft = tester.getTopLeft(find.text('Source'));
+  Offset dragOffset = secondLocation - firstLocation;
+  expect(feedbackTopLeft, equals(sourceTopLeft + dragOffset));
 }
 
 class DragTargetData { }
