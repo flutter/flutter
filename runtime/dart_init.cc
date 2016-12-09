@@ -90,7 +90,7 @@ static const char* kDartBackgroundCompilationArgs[] = {
     "--background_compilation",
 };
 
-static const char* kDartWriteProtectCodeArgs[] = {
+static const char* kDartWriteProtectCodeArgs[] FTL_ALLOW_UNUSED_TYPE = {
     "--no_write_protect_code",
 };
 
@@ -641,8 +641,7 @@ void InitDartVM() {
 #if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
   // Debug mode uses the JIT, disable code page write protection to avoid
   // memory page protection changes before and after every compilation.
-  PushBackAll(&args,
-              kDartWriteProtectCodeArgs,
+  PushBackAll(&args, kDartWriteProtectCodeArgs,
               arraysize(kDartWriteProtectCodeArgs));
 #endif
 
