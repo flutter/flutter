@@ -56,9 +56,9 @@ template("flutter_app") {
   flutter_snapshot_dir = get_label_info(flutter_snapshot_label, "root_out_dir")
   flutter_snapshot = "$flutter_snapshot_dir/sky_snapshot"
 
-  dart_binary_label = "//dart/runtime/bin:dart_no_observatory($host_toolchain)"
+  dart_binary_label = "//dart/runtime/bin:dart($host_toolchain)"
   dart_binary_dir = get_label_info(dart_binary_label, "root_out_dir")
-  dart_binary = "$dart_binary_dir/dart_no_observatory"
+  dart_binary = "$dart_binary_dir/dart"
 
   flutter_root = "//lib/flutter"
   flutter_tools_label = "$flutter_root/packages/flutter_tools"
