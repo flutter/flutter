@@ -72,6 +72,8 @@ abstract class BindingBase {
   /// be exposed as `MixinClassName.instance`, a static getter that returns
   /// `MixinClassName._instance`, a static field that is set by
   /// `initInstances()`.
+  @protected
+  @mustCallSuper
   void initInstances() {
     assert(!_debugInitialized);
     assert(() { _debugInitialized = true; return true; });
@@ -97,6 +99,8 @@ abstract class BindingBase {
   /// See also:
   ///
   ///  * <https://github.com/dart-lang/sdk/blob/master/runtime/vm/service/service.md#rpcs-requests-and-responses>
+  @protected
+  @mustCallSuper
   void initServiceExtensions() {
     assert(!_debugServiceExtensionsRegistered);
     registerSignalServiceExtension(
@@ -134,6 +138,7 @@ abstract class BindingBase {
   /// no value.
   ///
   /// Calls the `callback` callback when the service extension is called.
+  @protected
   void registerSignalServiceExtension({
     @required String name,
     @required VoidCallback callback
@@ -161,6 +166,7 @@ abstract class BindingBase {
   ///
   /// Calls the `setter` callback with the new value when the
   /// service extension method is called with a new value.
+  @protected
   void registerBoolServiceExtension({
     String name,
     @required ValueGetter<bool> getter,
@@ -190,6 +196,7 @@ abstract class BindingBase {
   ///
   /// Calls the `setter` callback with the new value when the
   /// service extension method is called with a new value.
+  @protected
   void registerNumericServiceExtension({
     @required String name,
     @required ValueGetter<double> getter,
@@ -218,6 +225,7 @@ abstract class BindingBase {
   ///
   /// Calls the `setter` callback with the new value when the
   /// service extension method is called with a new value.
+  @protected
   void registerStringServiceExtension({
     @required String name,
     @required ValueGetter<String> getter,
@@ -246,6 +254,7 @@ abstract class BindingBase {
   /// logs.
   ///
   /// The returned map will be mutated.
+  @protected
   void registerServiceExtension({
     @required String name,
     @required ServiceExtensionCallback callback
