@@ -95,21 +95,17 @@ class Engine : public blink::RuntimeDelegate {
   ftl::WeakPtr<PlatformView> platform_view_;
   std::unique_ptr<Animator> animator_;
   std::unique_ptr<blink::RuntimeController> runtime_;
-
   ftl::RefPtr<blink::PlatformMessage> pending_push_route_message_;
   blink::ViewportMetrics viewport_metrics_;
   std::string language_code_;
   std::string country_code_;
   bool semantics_enabled_ = false;
-
   // TODO(abarth): Unify these two behind a common interface.
   ftl::RefPtr<blink::ZipAssetStore> asset_store_;
   std::unique_ptr<blink::DirectoryAssetBundle> directory_asset_bundle_;
-
   // TODO(eseidel): This should move into an AnimatorStateMachine.
   bool activity_running_;
   bool have_surface_;
-
   ftl::WeakPtrFactory<Engine> weak_factory_;
 
   FTL_DISALLOW_COPY_AND_ASSIGN(Engine);

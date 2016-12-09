@@ -73,6 +73,13 @@ DEF_SWITCH(TraceStartup,
            "trace-startup",
            "Trace early application lifecycle. Automatically switches to an "
            "endless trace buffer.")
+DEF_SWITCH(UseTestFonts,
+           "use-test-fonts",
+           "Running tests that layout and measure text will not yield "
+           "consistent results across various platforms. Enabling this option "
+           "will make font resolution default to the Ahem test font on all "
+           "platforms (See https://www.w3.org/Style/CSS/Test/Fonts/Ahem/). "
+           "This option is only available on the desktop test shells.")
 DEF_SWITCHES_END
 
 void PrintUsage(const std::string& executable_name);

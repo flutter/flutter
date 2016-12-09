@@ -60,6 +60,10 @@ source_set("runtime") {
     "runtime_init.h",
     "start_up.cc",
     "start_up.h",
+    "test_font_data.cc",
+    "test_font_data.h",
+    "test_font_selector.cc",
+    "test_font_selector.h",
   ]
 
   deps = [
@@ -78,6 +82,14 @@ source_set("runtime") {
     "//third_party/skia",
     ":embedded_resources_cc",
   ]
+
+  defines = []
+
+  if (current_toolchain == host_toolchain) {
+    # Though the test font data is small, we dont want to add to the binary size
+    # on the device. We only add the same on the host test shells.
+    defines += ["EMBED_TEST_FONT_DATA=1"]
+  }
 
   if (flutter_runtime_mode != "release") {
     deps += [

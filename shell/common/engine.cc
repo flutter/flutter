@@ -6,17 +6,20 @@
 
 #include <sys/stat.h>
 #include <unistd.h>
+#include <memory>
 #include <utility>
 
 #include "flutter/assets/directory_asset_bundle.h"
 #include "flutter/assets/unzipper_provider.h"
 #include "flutter/assets/zip_asset_store.h"
+#include "flutter/common/settings.h"
 #include "flutter/common/threads.h"
 #include "flutter/glue/trace_event.h"
 #include "flutter/runtime/asset_font_selector.h"
 #include "flutter/runtime/dart_controller.h"
 #include "flutter/runtime/dart_init.h"
 #include "flutter/runtime/runtime_init.h"
+#include "flutter/runtime/test_font_selector.h"
 #include "flutter/shell/common/animator.h"
 #include "flutter/shell/common/platform_view.h"
 #include "flutter/sky/engine/public/web/Sky.h"
@@ -305,8 +308,11 @@ void Engine::ConfigureRuntime(const std::string& script_uri) {
 }
 
 void Engine::DidCreateMainIsolate(Dart_Isolate isolate) {
-  if (asset_store_)
+  if (blink::Settings::Get().use_test_fonts) {
+    blink::TestFontSelector::Install();
+  } else if (asset_store_) {
     blink::AssetFontSelector::Install(asset_store_);
+  }
 }
 
 void Engine::DidCreateSecondaryIsolate(Dart_Isolate isolate) {}
