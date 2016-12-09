@@ -119,7 +119,7 @@ void main() {
 
     // Just so we don't forget how to create a desc without the ratio.
     SpringSimulation other = new SpringSimulation(
-        new SpringDescription(mass: 1.0, springConstant: 100.0, damping: 20.0),
+        const SpringDescription(mass: 1.0, springConstant: 100.0, damping: 20.0),
         0.0, 20.0, 20.0);
     expect(other.type, SpringType.criticallyDamped);
   });
@@ -261,7 +261,7 @@ void main() {
       spring: spring,
       drag: 0.025,
     );
-    scroll.tolerance = new Tolerance(velocity: 45.0, distance: 1.5);
+    scroll.tolerance = const Tolerance(velocity: 45.0, distance: 1.5);
 
     expect(scroll.isDone(0.0), false);
     expect(scroll.x(0.0), closeTo(500.0, .0001));

@@ -18,7 +18,7 @@ void main() {
 
     expect(scrollable.scrollOffset, equals(0.0));
 
-    await tester.flingFrom(new Point(200.0, 300.0), new Offset(0.0, -200.0), 500.0);
+    await tester.flingFrom(const Point(200.0, 300.0), const Offset(0.0, -200.0), 500.0);
     await tester.pump();
     await tester.pump(const Duration(seconds: 5));
 
@@ -26,7 +26,7 @@ void main() {
 
     double oldOffset = scrollable.scrollOffset;
 
-    await tester.flingFrom(new Point(200.0, 300.0), new Offset(0.0, -200.0), 500.0);
+    await tester.flingFrom(const Point(200.0, 300.0), const Offset(0.0, -200.0), 500.0);
     await tester.pump();
     await tester.pump(const Duration(seconds: 5));
 

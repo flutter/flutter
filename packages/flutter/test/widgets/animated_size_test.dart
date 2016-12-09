@@ -22,7 +22,7 @@ void main() {
         child: new AnimatedSize(
           duration: const Duration(milliseconds: 200),
           vsync: tester,
-          child: new SizedBox(
+          child: const SizedBox(
             width: 100.0,
             height: 100.0
           )
@@ -37,9 +37,9 @@ void main() {
     await tester.pumpWidget(
       new Center(
         child: new AnimatedSize(
-          duration: new Duration(milliseconds: 200),
+          duration: const Duration(milliseconds: 200),
           vsync: tester,
-          child: new SizedBox(
+          child: const SizedBox(
             width: 200.0,
             height: 200.0
           )
@@ -64,9 +64,9 @@ void main() {
     await tester.pumpWidget(
       new Center(
         child: new AnimatedSize(
-          duration: new Duration(milliseconds: 200),
+          duration: const Duration(milliseconds: 200),
           vsync: tester,
-          child: new SizedBox(
+          child: const SizedBox(
             width: 100.0,
             height: 100.0
           )
@@ -98,7 +98,7 @@ void main() {
           child: new AnimatedSize(
             duration: const Duration(milliseconds: 200),
             vsync: tester,
-            child: new SizedBox(
+            child: const SizedBox(
               width: 100.0,
               height: 100.0
             )
@@ -119,7 +119,7 @@ void main() {
           child: new AnimatedSize(
             duration: const Duration(milliseconds: 200),
             vsync: tester,
-            child: new SizedBox(
+            child: const SizedBox(
               width: 200.0,
               height: 200.0
             )

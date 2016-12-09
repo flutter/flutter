@@ -206,7 +206,7 @@ void main() {
     GestureBinding.instance.gestureArena.sweep(1);
     expect(doubleTapRecognized, isFalse);
 
-    tester.async.elapse(new Duration(milliseconds: 5000));
+    tester.async.elapse(const Duration(milliseconds: 5000));
     tap.addPointer(down2);
     tester.closeArena(2);
     expect(doubleTapRecognized, isFalse);
@@ -240,7 +240,7 @@ void main() {
     GestureBinding.instance.gestureArena.sweep(1);
     expect(doubleTapRecognized, isFalse);
 
-    tester.async.elapse(new Duration(milliseconds: 5000));
+    tester.async.elapse(const Duration(milliseconds: 5000));
     tap.addPointer(down2);
     tester.closeArena(2);
     expect(doubleTapRecognized, isFalse);
@@ -252,7 +252,7 @@ void main() {
     GestureBinding.instance.gestureArena.sweep(2);
     expect(doubleTapRecognized, isFalse);
 
-    tester.async.elapse(new Duration(milliseconds: 100));
+    tester.async.elapse(const Duration(milliseconds: 100));
     tap.addPointer(down5);
     tester.closeArena(5);
     expect(doubleTapRecognized, isFalse);
@@ -281,7 +281,7 @@ void main() {
     tester.route(down1);
     expect(doubleTapRecognized, isFalse);
 
-    tester.async.elapse(new Duration(milliseconds: 1000));
+    tester.async.elapse(const Duration(milliseconds: 1000));
     tester.route(up1);
     expect(doubleTapRecognized, isFalse);
     GestureBinding.instance.gestureArena.sweep(1);

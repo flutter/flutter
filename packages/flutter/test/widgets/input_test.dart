@@ -80,7 +80,7 @@ void main() {
     List<TextSelectionPoint> endpoints = renderEditable.getEndpointsForSelection(
         new TextSelection.collapsed(offset: offset));
     expect(endpoints.length, 1);
-    return endpoints[0].point + new Offset(0.0, -2.0);
+    return endpoints[0].point + const Offset(0.0, -2.0);
   }
 
   testWidgets('Editable text has consistent size', (WidgetTester tester) async {
@@ -164,7 +164,7 @@ void main() {
     await checkCursorToggle();
 
     // Try the test again with a nonempty EditableText.
-    updateEditingState(new TextEditingState(
+    updateEditingState(const TextEditingState(
       text: 'X',
       selectionBase: 1,
       selectionExtent: 1,
@@ -191,7 +191,7 @@ void main() {
     await showKeyboard(tester);
 
     const String testValue = 'ABC';
-    updateEditingState(new TextEditingState(
+    updateEditingState(const TextEditingState(
       text: testValue,
       selectionBase: testValue.length,
       selectionExtent: testValue.length,
@@ -298,7 +298,7 @@ void main() {
     // Drag the right handle 2 letters to the right.
     // Note: use a small offset because the endpoint is on the very corner
     // of the handle.
-    Point handlePos = endpoints[1].point + new Offset(1.0, 1.0);
+    Point handlePos = endpoints[1].point + const Offset(1.0, 1.0);
     Point newHandlePos = textOffsetToPosition(tester, selection.extentOffset+2);
     gesture = await tester.startGesture(handlePos, pointer: 7);
     await tester.pump();
@@ -311,7 +311,7 @@ void main() {
     expect(inputValue.selection.extentOffset, selection.extentOffset+2);
 
     // Drag the left handle 2 letters to the left.
-    handlePos = endpoints[0].point + new Offset(-1.0, 1.0);
+    handlePos = endpoints[0].point + const Offset(-1.0, 1.0);
     newHandlePos = textOffsetToPosition(tester, selection.baseOffset-2);
     gesture = await tester.startGesture(handlePos, pointer: 7);
     await tester.pump();
@@ -362,7 +362,7 @@ void main() {
     RenderEditable renderEditable = findRenderEditable(tester);
     List<TextSelectionPoint> endpoints = renderEditable.getEndpointsForSelection(
         inputValue.selection);
-    await tester.tapAt(endpoints[0].point + new Offset(1.0, 1.0));
+    await tester.tapAt(endpoints[0].point + const Offset(1.0, 1.0));
     await tester.pumpWidget(builder());
 
     // SELECT ALL should select all the text.
@@ -381,7 +381,7 @@ void main() {
     await tester.pumpWidget(builder());
     renderEditable = findRenderEditable(tester);
     endpoints = renderEditable.getEndpointsForSelection(inputValue.selection);
-    await tester.tapAt(endpoints[0].point + new Offset(1.0, 1.0));
+    await tester.tapAt(endpoints[0].point + const Offset(1.0, 1.0));
     await tester.pumpWidget(builder());
 
     // PASTE right before the 'e'.
@@ -428,7 +428,7 @@ void main() {
     RenderEditable renderEditable = findRenderEditable(tester);
     List<TextSelectionPoint> endpoints = renderEditable.getEndpointsForSelection(
         inputValue.selection);
-    await tester.tapAt(endpoints[0].point + new Offset(1.0, 1.0));
+    await tester.tapAt(endpoints[0].point + const Offset(1.0, 1.0));
     await tester.pumpWidget(builder());
 
     // Toolbar should fade in. Starting at 0% opacity.
@@ -563,7 +563,7 @@ void main() {
     expect(endpoints.length, 2);
 
     // Drag the right handle to the third line, just after 'Third'.
-    Point handlePos = endpoints[1].point + new Offset(1.0, 1.0);
+    Point handlePos = endpoints[1].point + const Offset(1.0, 1.0);
     Point newHandlePos = textOffsetToPosition(tester, testValue.indexOf('Third') + 5);
     gesture = await tester.startGesture(handlePos, pointer: 7);
     await tester.pump();
@@ -576,7 +576,7 @@ void main() {
     expect(inputValue.selection.extentOffset, 108);
 
     // Drag the left handle to the first line, just after 'First'.
-    handlePos = endpoints[0].point + new Offset(-1.0, 1.0);
+    handlePos = endpoints[0].point + const Offset(-1.0, 1.0);
     newHandlePos = textOffsetToPosition(tester, testValue.indexOf('First') + 5);
     gesture = await tester.startGesture(handlePos, pointer: 7);
     await tester.pump();
@@ -642,11 +642,11 @@ void main() {
 
     TestGesture gesture = await tester.startGesture(firstPos, pointer: 7);
     await tester.pump();
-    await gesture.moveBy(new Offset(0.0, -1000.0));
+    await gesture.moveBy(const Offset(0.0, -1000.0));
     await tester.pump(const Duration(seconds: 2));
     // Wait and drag again to trigger https://github.com/flutter/flutter/issues/6329
     // (No idea why this is necessary, but the bug wouldn't repro without it.)
-    await gesture.moveBy(new Offset(0.0, -1000.0));
+    await gesture.moveBy(const Offset(0.0, -1000.0));
     await tester.pump(const Duration(seconds: 2));
     await gesture.up();
     await tester.pump();
@@ -674,11 +674,11 @@ void main() {
     expect(endpoints.length, 2);
 
     // Drag the left handle to the first line, just after 'First'.
-    Point handlePos = endpoints[0].point + new Offset(-1.0, 1.0);
+    Point handlePos = endpoints[0].point + const Offset(-1.0, 1.0);
     Point newHandlePos = textOffsetToPosition(tester, kFourLines.indexOf('First') + 5);
     gesture = await tester.startGesture(handlePos, pointer: 7);
     await tester.pump();
-    await gesture.moveTo(newHandlePos + new Offset(0.0, -10.0));
+    await gesture.moveTo(newHandlePos + const Offset(0.0, -10.0));
     await tester.pump();
     await gesture.up();
     await tester.pump();

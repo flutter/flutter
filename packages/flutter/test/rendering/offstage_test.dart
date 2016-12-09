@@ -21,7 +21,7 @@ void main() {
             onPaint: () { painted = true; }
           ),
           child: child = new RenderConstrainedBox(
-            additionalConstraints: new BoxConstraints.tightFor(height: 10.0, width: 10.0)
+            additionalConstraints: const BoxConstraints.tightFor(height: 10.0, width: 10.0)
           )
         )
       )

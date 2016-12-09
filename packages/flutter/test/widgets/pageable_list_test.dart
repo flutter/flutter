@@ -6,7 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-Size pageSize = new Size(600.0, 300.0);
+Size pageSize = const Size(600.0, 300.0);
 const List<int> defaultPages = const <int>[0, 1, 2, 3, 4, 5];
 final List<GlobalKey> globalKeys = defaultPages.map((_) => new GlobalKey()).toList();
 int currentPage;

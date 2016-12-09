@@ -211,7 +211,7 @@ void main() {
 
     await tester.pumpWidget(builder());
     TestGesture gesture = await tester.startGesture(tester.getCenter(find.text(tabs[0])));
-    await gesture.moveBy(new Offset(-600.0, 0.0));
+    await gesture.moveBy(const Offset(-600.0, 0.0));
     await tester.pump();
     expect(value, equals(tabs[0]));
     findStateMarkerState(tabs[1]).marker = 'marked';
@@ -225,7 +225,7 @@ void main() {
     // Move to the third tab.
 
     gesture = await tester.startGesture(tester.getCenter(find.text(tabs[1])));
-    await gesture.moveBy(new Offset(-600.0, 0.0));
+    await gesture.moveBy(const Offset(-600.0, 0.0));
     await gesture.up();
     await tester.pump();
     expect(findStateMarkerState(tabs[1]).marker, equals('marked'));
@@ -240,7 +240,7 @@ void main() {
     // Move back to the second tab.
 
     gesture = await tester.startGesture(tester.getCenter(find.text(tabs[2])));
-    await gesture.moveBy(new Offset(600.0, 0.0));
+    await gesture.moveBy(const Offset(600.0, 0.0));
     await tester.pump();
     StateMarkerState markerState = findStateMarkerState(tabs[1]);
     expect(markerState.marker, isNull);
@@ -267,7 +267,7 @@ void main() {
 
     // Fling to the left, switch from the 'LEFT' tab to the 'RIGHT'
     Point flingStart = tester.getCenter(find.text('LEFT CHILD'));
-    await tester.flingFrom(flingStart, new Offset(-200.0, 0.0), 10000.0);
+    await tester.flingFrom(flingStart, const Offset(-200.0, 0.0), 10000.0);
     await tester.pump();
     await tester.pump(const Duration(seconds: 1)); // finish the scroll animation
     expect(selection.value, equals('RIGHT'));
@@ -276,7 +276,7 @@ void main() {
 
     // Fling to the right, switch back to the 'LEFT' tab
     flingStart = tester.getCenter(find.text('RIGHT CHILD'));
-    await tester.flingFrom(flingStart, new Offset(200.0, 0.0), 10000.0);
+    await tester.flingFrom(flingStart, const Offset(200.0, 0.0), 10000.0);
     await tester.pump();
     await tester.pump(const Duration(seconds: 1)); // finish the scroll animation
     expect(selection.value, equals('LEFT'));
@@ -301,7 +301,7 @@ void main() {
     // a change to the selected tab, everything should just settle back to
     // to where it started.
     Point flingStart = tester.getCenter(find.text('LEFT CHILD'));
-    await tester.flingFrom(flingStart, new Offset(-200.0, 0.0), -10000.0);
+    await tester.flingFrom(flingStart, const Offset(-200.0, 0.0), -10000.0);
     await tester.pump();
     await tester.pump(const Duration(seconds: 1)); // finish the scroll animation
     expect(selection.value, equals('LEFT'));
@@ -342,7 +342,7 @@ void main() {
     );
 
     // After a small slow fling to the left, we expect the second item to still be visible.
-    await tester.fling(find.text('AAAAAA'), new Offset(-25.0, 0.0), 100.0);
+    await tester.fling(find.text('AAAAAA'), const Offset(-25.0, 0.0), 100.0);
     await tester.pump();
     await tester.pump(const Duration(seconds: 1)); // finish the scroll animation
     final RenderBox box = tester.renderObject(find.text('BBBBBB'));

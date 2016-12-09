@@ -24,7 +24,7 @@ void main() {
           return true;
         },
         child: new SizeChangedLayoutNotifier(
-          child: new SizedBox(
+          child: const SizedBox(
             width: 100.0,
             height: 100.0
           )
@@ -39,7 +39,7 @@ void main() {
           return true;
         },
         child: new SizeChangedLayoutNotifier(
-          child: new SizedBox(
+          child: const SizedBox(
             width: 200.0,
             height: 100.0
           )

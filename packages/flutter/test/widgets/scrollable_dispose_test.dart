@@ -17,10 +17,10 @@ void main() {
       right: new Container()
     ));
 
-    await tester.fling(find.byType(Scrollable), new Offset(0.0, -200.0), 1000.0);
+    await tester.fling(find.byType(Scrollable), const Offset(0.0, -200.0), 1000.0);
     await tester.pump();
 
     tester.state/*<FlipWidgetState>*/(find.byType(FlipWidget)).flip();
-    await tester.pump(new Duration(hours: 5));
+    await tester.pump(const Duration(hours: 5));
   });
 }

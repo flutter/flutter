@@ -62,7 +62,7 @@ Future<Null> performTest(WidgetTester tester, bool maintainState) async {
   Completer<Null> completer = new Completer<Null>();
   tester.state/*<ScrollableState>*/(find.byType(Scrollable)).scrollTo(1000.0).whenComplete(completer.complete);
   expect(completer.isCompleted, isFalse);
-  await tester.pump(new Duration(seconds: 1));
+  await tester.pump(const Duration(seconds: 1));
   expect(completer.isCompleted, isTrue);
 
   // we're 600 pixels high, each item is 100 pixels high, scroll position is
@@ -82,7 +82,7 @@ Future<Null> performTest(WidgetTester tester, bool maintainState) async {
 
   navigatorKey.currentState.pushNamed('/second');
   await tester.pump(); // navigating always takes two frames, one to start...
-  await tester.pump(new Duration(seconds: 1)); // ...and one to end the transition
+  await tester.pump(const Duration(seconds: 1)); // ...and one to end the transition
 
   // the second list is now visible, starting at 10000
   expect(find.text('10000'), findsOneWidget);
@@ -103,7 +103,7 @@ Future<Null> performTest(WidgetTester tester, bool maintainState) async {
   LazyListViewport viewport = tester.firstWidget(find.byType(LazyListViewport));
   expect(viewport.scrollOffset, equals(1000.0));
 
-  await tester.pump(new Duration(seconds: 1));
+  await tester.pump(const Duration(seconds: 1));
 
   // we're 600 pixels high, each item is 100 pixels high, scroll position is
   // 1000, so we should have exactly 6 items, 10..15.

@@ -288,7 +288,7 @@ void main() {
       new Table(
         children: <TableRow>[
           new TableRow(
-            key: new ValueKey<int>(1),
+            key: const ValueKey<int>(1),
             children: <Widget>[
               new StatefulBuilder(
                 builder: (BuildContext context, StateSetter setState) {
@@ -315,7 +315,7 @@ void main() {
             ]
           ),
           new TableRow(
-            key: new ValueKey<int>(1),
+            key: const ValueKey<int>(1),
             children: <Widget>[
               new StatefulBuilder(
                 builder: (BuildContext context, StateSetter setState) {

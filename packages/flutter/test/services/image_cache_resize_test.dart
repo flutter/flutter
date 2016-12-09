@@ -12,10 +12,10 @@ void main() {
 
     imageCache.maximumSize = 2;
 
-    TestImageInfo a = await extractOneFrame(new TestProvider(1, 1).resolve(ImageConfiguration.empty));
-    TestImageInfo b = await extractOneFrame(new TestProvider(2, 2).resolve(ImageConfiguration.empty));
-    TestImageInfo c = await extractOneFrame(new TestProvider(3, 3).resolve(ImageConfiguration.empty));
-    TestImageInfo d = await extractOneFrame(new TestProvider(1, 4).resolve(ImageConfiguration.empty));
+    TestImageInfo a = await extractOneFrame(const TestProvider(1, 1).resolve(ImageConfiguration.empty));
+    TestImageInfo b = await extractOneFrame(const TestProvider(2, 2).resolve(ImageConfiguration.empty));
+    TestImageInfo c = await extractOneFrame(const TestProvider(3, 3).resolve(ImageConfiguration.empty));
+    TestImageInfo d = await extractOneFrame(const TestProvider(1, 4).resolve(ImageConfiguration.empty));
     expect(a.value, equals(1));
     expect(b.value, equals(2));
     expect(c.value, equals(3));
@@ -23,18 +23,18 @@ void main() {
 
     imageCache.maximumSize = 0;
 
-    TestImageInfo e = await extractOneFrame(new TestProvider(1, 5).resolve(ImageConfiguration.empty));
+    TestImageInfo e = await extractOneFrame(const TestProvider(1, 5).resolve(ImageConfiguration.empty));
     expect(e.value, equals(5));
 
-    TestImageInfo f = await extractOneFrame(new TestProvider(1, 6).resolve(ImageConfiguration.empty));
+    TestImageInfo f = await extractOneFrame(const TestProvider(1, 6).resolve(ImageConfiguration.empty));
     expect(f.value, equals(6));
 
     imageCache.maximumSize = 3;
 
-    TestImageInfo g = await extractOneFrame(new TestProvider(1, 7).resolve(ImageConfiguration.empty));
+    TestImageInfo g = await extractOneFrame(const TestProvider(1, 7).resolve(ImageConfiguration.empty));
     expect(g.value, equals(7));
 
-    TestImageInfo h = await extractOneFrame(new TestProvider(1, 8).resolve(ImageConfiguration.empty));
+    TestImageInfo h = await extractOneFrame(const TestProvider(1, 8).resolve(ImageConfiguration.empty));
     expect(h.value, equals(7));
 
   });

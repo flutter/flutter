@@ -149,8 +149,8 @@ void main() {
     expect(find.text('Settings'), isOnstage);
 
     // Drag from left edge to invoke the gesture.
-    TestGesture gesture = await tester.startGesture(new Point(5.0, 100.0));
-    await gesture.moveBy(new Offset(50.0, 0.0));
+    TestGesture gesture = await tester.startGesture(const Point(5.0, 100.0));
+    await gesture.moveBy(const Offset(50.0, 0.0));
     await tester.pump();
 
     // Home is now visible.
@@ -180,8 +180,8 @@ void main() {
     expect(find.text('Settings'), isOnstage);
 
     // Drag from left edge to invoke the gesture.
-    TestGesture gesture = await tester.startGesture(new Point(5.0, 100.0));
-    await gesture.moveBy(new Offset(50.0, 0.0));
+    TestGesture gesture = await tester.startGesture(const Point(5.0, 100.0));
+    await gesture.moveBy(const Offset(50.0, 0.0));
     await tester.pump();
 
     expect(find.text('Home'), findsNothing);
@@ -255,7 +255,7 @@ void main() {
       '/': (_) => new Scaffold(
         key: containerKey1,
         body: new Container(
-          decoration: new BoxDecoration(backgroundColor: const Color(0xff00ffff)),
+          decoration: const BoxDecoration(backgroundColor: const Color(0xff00ffff)),
           child: new Hero(
             tag: kHeroTag,
             child: new Text('Home')
@@ -266,7 +266,7 @@ void main() {
         key: containerKey2,
         body: new Container(
           padding: const EdgeInsets.all(100.0),
-          decoration: new BoxDecoration(backgroundColor: const Color(0xffff00ff)),
+          decoration: const BoxDecoration(backgroundColor: const Color(0xffff00ff)),
           child: new Hero(
             tag: kHeroTag,
             child: new Text('Settings')
@@ -300,8 +300,8 @@ void main() {
     expect(find.text('Settings'), isOnstage);
 
     // Drag from left edge to invoke the gesture.
-    TestGesture gesture = await tester.startGesture(new Point(5.0, 100.0));
-    await gesture.moveBy(new Offset(50.0, 0.0));
+    TestGesture gesture = await tester.startGesture(const Point(5.0, 100.0));
+    await gesture.moveBy(const Offset(50.0, 0.0));
     await tester.pump();
 
     // Home is now visible.
@@ -343,8 +343,8 @@ void main() {
 
     // Drag from left edge to invoke the gesture. (near bottom so we grab
     // the Settings page as it comes up).
-    TestGesture gesture = await tester.startGesture(new Point(5.0, 550.0));
-    await gesture.moveBy(new Offset(500.0, 0.0));
+    TestGesture gesture = await tester.startGesture(const Point(5.0, 550.0));
+    await gesture.moveBy(const Offset(500.0, 0.0));
     await gesture.up();
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 1000));
@@ -355,8 +355,8 @@ void main() {
     expect(find.text('Settings'), isOnstage);
 
     // Try again now that we're settled.
-    gesture = await tester.startGesture(new Point(5.0, 550.0));
-    await gesture.moveBy(new Offset(500.0, 0.0));
+    gesture = await tester.startGesture(const Point(5.0, 550.0));
+    await gesture.moveBy(const Offset(500.0, 0.0));
     await gesture.up();
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 1000));
@@ -394,8 +394,8 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
 
     // Drag from left edge to invoke the gesture.
-    TestGesture gesture = await tester.startGesture(new Point(5.0, 100.0));
-    await gesture.moveBy(new Offset(500.0, 0.0));
+    TestGesture gesture = await tester.startGesture(const Point(5.0, 100.0));
+    await gesture.moveBy(const Offset(500.0, 0.0));
     await gesture.up();
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
@@ -416,7 +416,7 @@ void main() {
     await tester.pumpWidget(new MaterialApp(routes: routes));
 
     PageRoute<Null> route = new MaterialPageRoute<Null>(
-      settings: new RouteSettings(name: '/page'),
+      settings: const RouteSettings(name: '/page'),
       builder: (BuildContext context) => new Center(child: new Text('page')),
     );
 

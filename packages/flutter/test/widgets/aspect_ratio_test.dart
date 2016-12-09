@@ -27,8 +27,8 @@ Future<Size> _getSize(WidgetTester tester, BoxConstraints constraints, double as
 
 void main() {
   testWidgets('Aspect ratio control test', (WidgetTester tester) async {
-    expect(await _getSize(tester, new BoxConstraints.loose(new Size(500.0, 500.0)), 2.0), equals(new Size(500.0, 250.0)));
-    expect(await _getSize(tester, new BoxConstraints.loose(new Size(500.0, 500.0)), 0.5), equals(new Size(250.0, 500.0)));
+    expect(await _getSize(tester, new BoxConstraints.loose(const Size(500.0, 500.0)), 2.0), equals(const Size(500.0, 250.0)));
+    expect(await _getSize(tester, new BoxConstraints.loose(const Size(500.0, 500.0)), 0.5), equals(const Size(250.0, 500.0)));
   });
 
   testWidgets('Aspect ratio infinite width', (WidgetTester tester) async {
@@ -47,6 +47,6 @@ void main() {
       )
     );
     RenderBox box = tester.renderObject(find.byKey(childKey));
-    expect(box.size, equals(new Size(1200.0, 600.0)));
+    expect(box.size, equals(const Size(1200.0, 600.0)));
   });
 }

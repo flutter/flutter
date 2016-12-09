@@ -33,14 +33,14 @@ void main() {
     expect(updatedDragDelta, isNull);
     expect(didEndDrag, isFalse);
 
-    Point firstLocation = new Point(10.0, 10.0);
+    Point firstLocation = const Point(10.0, 10.0);
     TestGesture gesture = await tester.startGesture(firstLocation, pointer: 7);
     expect(didStartDrag, isTrue);
     didStartDrag = false;
     expect(updatedDragDelta, isNull);
     expect(didEndDrag, isFalse);
 
-    Point secondLocation = new Point(10.0, 9.0);
+    Point secondLocation = const Point(10.0, 9.0);
     await gesture.moveTo(secondLocation);
     expect(didStartDrag, isFalse);
     expect(updatedDragDelta, -1.0);
@@ -60,8 +60,8 @@ void main() {
     int gestureCount = 0;
     double dragDistance = 0.0;
 
-    Point downLocation = new Point(10.0, 10.0);
-    Point upLocation = new Point(10.0, 20.0);
+    Point downLocation = const Point(10.0, 10.0);
+    Point upLocation = const Point(10.0, 20.0);
 
     Widget widget = new GestureDetector(
       onVerticalDragUpdate: (DragUpdateDetails details) { dragDistance += details.primaryDelta; },
@@ -118,7 +118,7 @@ void main() {
     expect(panDelta, isNull);
     expect(didEndPan, isFalse);
 
-    await tester.scrollAt(new Point(10.0, 10.0), new Offset(20.0, 30.0));
+    await tester.scrollAt(const Point(10.0, 10.0), const Offset(20.0, 30.0));
 
     expect(didStartPan, isTrue);
     expect(panDelta.dx, 20.0);
@@ -164,28 +164,28 @@ void main() {
     didReceivePointerDown = false;
     didTap = false;
     await pumpWidgetTree(null);
-    await tester.tapAt(new Point(10.0, 10.0));
+    await tester.tapAt(const Point(10.0, 10.0));
     expect(didReceivePointerDown, isTrue);
     expect(didTap, isTrue);
 
     didReceivePointerDown = false;
     didTap = false;
     await pumpWidgetTree(HitTestBehavior.deferToChild);
-    await tester.tapAt(new Point(10.0, 10.0));
+    await tester.tapAt(const Point(10.0, 10.0));
     expect(didReceivePointerDown, isTrue);
     expect(didTap, isFalse);
 
     didReceivePointerDown = false;
     didTap = false;
     await pumpWidgetTree(HitTestBehavior.opaque);
-    await tester.tapAt(new Point(10.0, 10.0));
+    await tester.tapAt(const Point(10.0, 10.0));
     expect(didReceivePointerDown, isFalse);
     expect(didTap, isTrue);
 
     didReceivePointerDown = false;
     didTap = false;
     await pumpWidgetTree(HitTestBehavior.translucent);
-    await tester.tapAt(new Point(10.0, 10.0));
+    await tester.tapAt(const Point(10.0, 10.0));
     expect(didReceivePointerDown, isTrue);
     expect(didTap, isTrue);
 
@@ -203,7 +203,7 @@ void main() {
       )
     );
     expect(didTap, isFalse);
-    await tester.tapAt(new Point(10.0, 10.0));
+    await tester.tapAt(const Point(10.0, 10.0));
     expect(didTap, isTrue);
   });
 
@@ -220,7 +220,7 @@ void main() {
       )
     );
     expect(didTap, isFalse);
-    await tester.tapAt(new Point(10.0, 10.0));
+    await tester.tapAt(const Point(10.0, 10.0));
     expect(didTap, isFalse);
   });
 }

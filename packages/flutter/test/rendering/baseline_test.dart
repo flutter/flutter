@@ -17,7 +17,7 @@ void main() {
       child: parent = new RenderBaseline(
         baseline: 0.0,
         baselineType: TextBaseline.alphabetic,
-        child: child = new RenderSizedBox(new Size(100.0, 100.0))
+        child: child = new RenderSizedBox(const Size(100.0, 100.0))
       )
     );
     BoxParentData childParentData = child.parentData;
@@ -25,30 +25,30 @@ void main() {
     layout(root, phase: EnginePhase.layout);
     expect(childParentData.offset.dx, equals(0.0));
     expect(childParentData.offset.dy, equals(-100.0));
-    expect(parent.size, equals(new Size(100.0, 0.0)));
+    expect(parent.size, equals(const Size(100.0, 0.0)));
 
     parent.baseline = 25.0;
     pumpFrame(phase: EnginePhase.layout);
     expect(childParentData.offset.dx, equals(0.0));
     expect(childParentData.offset.dy, equals(-75.0));
-    expect(parent.size, equals(new Size(100.0, 25.0)));
+    expect(parent.size, equals(const Size(100.0, 25.0)));
 
     parent.baseline = 90.0;
     pumpFrame(phase: EnginePhase.layout);
     expect(childParentData.offset.dx, equals(0.0));
     expect(childParentData.offset.dy, equals(-10.0));
-    expect(parent.size, equals(new Size(100.0, 90.0)));
+    expect(parent.size, equals(const Size(100.0, 90.0)));
 
     parent.baseline = 100.0;
     pumpFrame(phase: EnginePhase.layout);
     expect(childParentData.offset.dx, equals(0.0));
     expect(childParentData.offset.dy, equals(0.0));
-    expect(parent.size, equals(new Size(100.0, 100.0)));
+    expect(parent.size, equals(const Size(100.0, 100.0)));
 
     parent.baseline = 110.0;
     pumpFrame(phase: EnginePhase.layout);
     expect(childParentData.offset.dx, equals(0.0));
     expect(childParentData.offset.dy, equals(10.0));
-    expect(parent.size, equals(new Size(100.0, 110.0)));
+    expect(parent.size, equals(const Size(100.0, 110.0)));
   });
 }

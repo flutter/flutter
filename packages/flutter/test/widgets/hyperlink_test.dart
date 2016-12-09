@@ -32,7 +32,7 @@ void main() {
                 text: 'xxxxxxxx',
                 recognizer: tapLeft
               ),
-              new TextSpan(text: 'yyyyyyyy'),
+              const TextSpan(text: 'yyyyyyyy'),
               new TextSpan(
                 text: 'zzzzzzzzz',
                 recognizer: tapRight
@@ -48,21 +48,21 @@ void main() {
     expect(didTapLeft, isFalse);
     expect(didTapRight, isFalse);
 
-    await tester.tapAt(box.localToGlobal(Point.origin) + new Offset(2.0, 2.0));
+    await tester.tapAt(box.localToGlobal(Point.origin) + const Offset(2.0, 2.0));
 
     expect(didTapLeft, isTrue);
     expect(didTapRight, isFalse);
 
     didTapLeft = false;
 
-    await tester.tapAt(box.localToGlobal(Point.origin) + new Offset(30.0, 2.0));
+    await tester.tapAt(box.localToGlobal(Point.origin) + const Offset(30.0, 2.0));
 
     expect(didTapLeft, isTrue);
     expect(didTapRight, isFalse);
 
     didTapLeft = false;
 
-    await tester.tapAt(box.localToGlobal(new Point(box.size.width, 0.0)) + new Offset(-2.0, 2.0));
+    await tester.tapAt(box.localToGlobal(new Point(box.size.width, 0.0)) + const Offset(-2.0, 2.0));
 
     expect(didTapLeft, isFalse);
     expect(didTapRight, isTrue);

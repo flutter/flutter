@@ -18,14 +18,14 @@ void main() {
           steps: <Step>[
             new Step(
               title: new Text('Step 1'),
-              content: new SizedBox(
+              content: const SizedBox(
                 width: 100.0,
                 height: 100.0
               )
             ),
             new Step(
               title: new Text('Step 2'),
-              content: new SizedBox(
+              content: const SizedBox(
                 width: 100.0,
                 height: 100.0
               )
@@ -47,14 +47,14 @@ void main() {
             steps: <Step>[
               new Step(
                 title: new Text('Step 1'),
-                content: new SizedBox(
+                content: const SizedBox(
                   width: 100.0,
                   height: 100.0
                 )
               ),
               new Step(
                 title: new Text('Step 2'),
-                content: new SizedBox(
+                content: const SizedBox(
                   width: 200.0,
                   height: 200.0
                 )
@@ -76,14 +76,14 @@ void main() {
             steps: <Step>[
               new Step(
                 title: new Text('Step 1'),
-                content: new SizedBox(
+                content: const SizedBox(
                   width: 100.0,
                   height: 100.0
                 )
               ),
               new Step(
                 title: new Text('Step 2'),
-                content: new SizedBox(
+                content: const SizedBox(
                   width: 200.0,
                   height: 200.0
                 )
@@ -111,7 +111,7 @@ void main() {
             steps: <Step>[
               new Step(
                 title: new Text('Step 1'),
-                content: new SizedBox(
+                content: const SizedBox(
                   width: 100.0,
                   height: 100.0
                 )
@@ -188,14 +188,14 @@ void main() {
           steps: <Step>[
             new Step(
               title: new Text('Step 1'),
-              content: new SizedBox(
+              content: const SizedBox(
                 width: 100.0,
                 height: 100.0
               )
             ),
             new Step(
               title: new Text('Step 2'),
-              content: new SizedBox(
+              content: const SizedBox(
                 width: 200.0,
                 height: 200.0
               )
@@ -224,7 +224,7 @@ void main() {
           steps: <Step>[
             new Step(
               title: new Text('Step 1'),
-              content: new SizedBox(
+              content: const SizedBox(
                 width: 100.0,
                 height: 100.0
               )
@@ -232,7 +232,7 @@ void main() {
             new Step(
               title: new Text('Step 2'),
               state: StepState.disabled,
-              content: new SizedBox(
+              content: const SizedBox(
                 width: 100.0,
                 height: 100.0
               )
@@ -253,21 +253,21 @@ void main() {
           steps: <Step>[
             new Step(
               title: new Text('Step 1'),
-              content: new SizedBox(
+              content: const SizedBox(
                 width: 100.0,
                 height: 300.0
               )
             ),
             new Step(
               title: new Text('Step 2'),
-              content: new SizedBox(
+              content: const SizedBox(
                 width: 100.0,
                 height: 300.0
               )
             ),
             new Step(
               title: new Text('Step 3'),
-              content: new SizedBox(
+              content: const SizedBox(
                 width: 100.0,
                 height: 100.0
               )
@@ -288,21 +288,21 @@ void main() {
           steps: <Step>[
             new Step(
               title: new Text('Step 1'),
-              content: new SizedBox(
+              content: const SizedBox(
                 width: 100.0,
                 height: 300.0
               )
             ),
             new Step(
               title: new Text('Step 2'),
-              content: new SizedBox(
+              content: const SizedBox(
                 width: 100.0,
                 height: 300.0
               )
             ),
             new Step(
               title: new Text('Step 3'),
-              content: new SizedBox(
+              content: const SizedBox(
                 width: 100.0,
                 height: 100.0
               )
@@ -312,7 +312,7 @@ void main() {
       )
     );
 
-    await tester.pump(new Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 100));
     expect(scrollableState.scrollOffset, greaterThan(0.0));
   });
 
@@ -325,14 +325,14 @@ void main() {
               new Step(
                 title: new Text('A'),
                 state: StepState.complete,
-                content: new SizedBox(
+                content: const SizedBox(
                   width: 100.0,
                   height: 100.0
                 )
               ),
               new Step(
                 title: new Text('B'),
-                content: new SizedBox(
+                content: const SizedBox(
                   width: 100.0,
                   height: 100.0
                 )
@@ -356,7 +356,7 @@ void main() {
               new Step(
                 title: new Text('A'),
                 state: StepState.error,
-                content: new SizedBox(
+                content: const SizedBox(
                   width: 100.0,
                   height: 100.0
                 )

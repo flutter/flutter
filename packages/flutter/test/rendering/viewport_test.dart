@@ -10,7 +10,7 @@ import 'rendering_tester.dart';
 void main() {
   test('Should be able to hit with positive paint offset', () {
     RenderBox green = new RenderDecoratedBox(
-      decoration: new BoxDecoration(
+      decoration: const BoxDecoration(
         backgroundColor: const Color(0xFF00FF00)
       ));
 
@@ -19,22 +19,22 @@ void main() {
       child: green);
 
     RenderBox red = new RenderDecoratedBox(
-      decoration: new BoxDecoration(
+      decoration: const BoxDecoration(
         backgroundColor: const Color(0xFFFF0000)
       ),
       child: size);
 
-    RenderViewport viewport = new RenderViewport(child: red, paintOffset: new Offset(0.0, 10.0));
+    RenderViewport viewport = new RenderViewport(child: red, paintOffset: const Offset(0.0, 10.0));
     layout(viewport);
 
     HitTestResult result;
 
     result = new HitTestResult();
-    renderer.renderView.hitTest(result, position: new Point(15.0, 0.0));
+    renderer.renderView.hitTest(result, position: const Point(15.0, 0.0));
     expect(result.path.first.target.runtimeType, equals(RenderView));
 
     result = new HitTestResult();
-    renderer.renderView.hitTest(result, position: new Point(15.0, 15.0));
+    renderer.renderView.hitTest(result, position: const Point(15.0, 15.0));
     expect(result.path.first.target, equals(green));
   });
 }

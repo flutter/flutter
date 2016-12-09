@@ -18,7 +18,7 @@ class TestLayout {
           onPaint: () { painted = true; }
         ),
         child: child = new RenderConstrainedBox(
-          additionalConstraints: new BoxConstraints.tightFor(height: 10.0, width: 10.0)
+          additionalConstraints: const BoxConstraints.tightFor(height: 10.0, width: 10.0)
         )
       )
     );
@@ -29,7 +29,7 @@ class TestLayout {
 }
 
 void main() {
-  final ViewConfiguration testConfiguration = new ViewConfiguration(
+  final ViewConfiguration testConfiguration = const ViewConfiguration(
     size: const Size(800.0, 600.0),
     devicePixelRatio: 1.0
   );

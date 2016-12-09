@@ -19,7 +19,7 @@ class TestTree {
       // relayout/repaint of the new parent node to satisfy the test.
       child: new RenderRepaintBoundary(
         child: new RenderConstrainedBox(
-          additionalConstraints: new BoxConstraints.tightFor(height: 20.0, width: 20.0),
+          additionalConstraints: const BoxConstraints.tightFor(height: 20.0, width: 20.0),
           child: new RenderRepaintBoundary(
             child: new RenderCustomPaint(
               painter: new TestCallbackPainter(
@@ -27,7 +27,7 @@ class TestTree {
               ),
               child: new RenderPositionedBox(
                 child: child = new RenderConstrainedBox(
-                  additionalConstraints: new BoxConstraints.tightFor(height: 20.0, width: 20.0)
+                  additionalConstraints: const BoxConstraints.tightFor(height: 20.0, width: 20.0)
                 )
               )
             )
@@ -63,7 +63,7 @@ class TestCompositingBitsTree {
               onPaint: () { painted = true; }
             ),
             child: child = new RenderConstrainedBox(
-              additionalConstraints: new BoxConstraints.tightFor(height: 20.0, width: 20.0)
+              additionalConstraints: const BoxConstraints.tightFor(height: 20.0, width: 20.0)
             )
           )
         )
@@ -87,7 +87,7 @@ void main() {
     expect(testTree.child.owner, isNull);
     // Dirty one of the elements
     testTree.child.additionalConstraints =
-      new BoxConstraints.tightFor(height: 5.0, width: 5.0);
+      const BoxConstraints.tightFor(height: 5.0, width: 5.0);
     // Lay out again
     layout(testTree.root, phase: EnginePhase.layout);
     expect(testTree.child.size, equals(const Size(5.0, 5.0)));

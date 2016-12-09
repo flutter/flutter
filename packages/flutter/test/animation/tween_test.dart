@@ -33,8 +33,8 @@ void main() {
   });
 
   test('SizeTween', () {
-    SizeTween tween = new SizeTween(begin: Size.zero, end: new Size(20.0, 30.0));
-    expect(tween.lerp(0.5), equals(new Size(10.0, 15.0)));
+    SizeTween tween = new SizeTween(begin: Size.zero, end: const Size(20.0, 30.0));
+    expect(tween.lerp(0.5), equals(const Size(10.0, 15.0)));
     expect(tween, hasOneLineDescription);
   });
 

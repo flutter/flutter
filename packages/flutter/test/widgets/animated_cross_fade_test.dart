@@ -11,11 +11,11 @@ void main() {
     await tester.pumpWidget(
       new Center(
         child: new AnimatedCrossFade(
-          firstChild: new SizedBox(
+          firstChild: const SizedBox(
             width: 100.0,
             height: 100.0
           ),
-          secondChild: new SizedBox(
+          secondChild: const SizedBox(
             width: 200.0,
             height: 200.0
           ),
@@ -33,11 +33,11 @@ void main() {
     await tester.pumpWidget(
       new Center(
         child: new AnimatedCrossFade(
-          firstChild: new SizedBox(
+          firstChild: const SizedBox(
             width: 100.0,
             height: 100.0
           ),
-          secondChild: new SizedBox(
+          secondChild: const SizedBox(
             width: 200.0,
             height: 200.0
           ),
@@ -59,11 +59,11 @@ void main() {
     await tester.pumpWidget(
       new Center(
         child: new AnimatedCrossFade(
-          firstChild: new SizedBox(
+          firstChild: const SizedBox(
             width: 100.0,
             height: 100.0
           ),
-          secondChild: new SizedBox(
+          secondChild: const SizedBox(
             width: 200.0,
             height: 200.0
           ),

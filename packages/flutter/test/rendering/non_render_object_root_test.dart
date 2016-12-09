@@ -48,7 +48,7 @@ void main() {
     RealRoot root = new RealRoot(
       child = new RenderPositionedBox(
         alignment: FractionalOffset.center,
-        child: new RenderSizedBox(new Size(100.0, 100.0))
+        child: new RenderSizedBox(const Size(100.0, 100.0))
       )
     );
     root.attach(new PipelineOwner());

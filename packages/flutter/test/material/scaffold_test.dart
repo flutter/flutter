@@ -15,10 +15,10 @@ void main() {
     ));
 
     RenderBox bodyBox = tester.renderObject(find.byKey(bodyKey));
-    expect(bodyBox.size, equals(new Size(800.0, 544.0)));
+    expect(bodyBox.size, equals(const Size(800.0, 544.0)));
 
     await tester.pumpWidget(new MediaQuery(
-      data: new MediaQueryData(padding: new EdgeInsets.only(bottom: 100.0)),
+      data: const MediaQueryData(padding: const EdgeInsets.only(bottom: 100.0)),
       child: new Scaffold(
         appBar: new AppBar(title: new Text('Title')),
         body: new Container(key: bodyKey)
@@ -26,10 +26,10 @@ void main() {
     ));
 
     bodyBox = tester.renderObject(find.byKey(bodyKey));
-    expect(bodyBox.size, equals(new Size(800.0, 444.0)));
+    expect(bodyBox.size, equals(const Size(800.0, 444.0)));
 
     await tester.pumpWidget(new MediaQuery(
-      data: new MediaQueryData(padding: new EdgeInsets.only(bottom: 100.0)),
+      data: const MediaQueryData(padding: const EdgeInsets.only(bottom: 100.0)),
       child: new Scaffold(
         appBar: new AppBar(title: new Text('Title')),
         body: new Container(key: bodyKey),
@@ -38,7 +38,7 @@ void main() {
     ));
 
     bodyBox = tester.renderObject(find.byKey(bodyKey));
-    expect(bodyBox.size, equals(new Size(800.0, 544.0)));
+    expect(bodyBox.size, equals(const Size(800.0, 544.0)));
   });
 
   testWidgets('Floating action animation', (WidgetTester tester) async {
@@ -137,7 +137,7 @@ void main() {
       new MaterialApp(
         theme: new ThemeData(platform: TargetPlatform.iOS),
         home: new MediaQuery(
-          data: new MediaQueryData(padding: const EdgeInsets.only(top: 25.0)), // status bar
+          data: const MediaQueryData(padding: const EdgeInsets.only(top: 25.0)), // status bar
           child: new Scaffold(
             scrollableKey: scrollableKey,
             appBar: new AppBar(
@@ -159,7 +159,7 @@ void main() {
     expect(scrollableKey.currentState.scrollOffset, equals(500.0));
     await tester.tapAt(const Point(100.0, 10.0));
     await tester.pump();
-    await tester.pump(new Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
     expect(scrollableKey.currentState.scrollOffset, equals(0.0));
   });
 
@@ -171,7 +171,7 @@ void main() {
       new MaterialApp(
         theme: new ThemeData(platform: TargetPlatform.android),
         home: new MediaQuery(
-          data: new MediaQueryData(padding: const EdgeInsets.only(top: 25.0)), // status bar
+          data: const MediaQueryData(padding: const EdgeInsets.only(top: 25.0)), // status bar
           child: new Scaffold(
             scrollableKey: scrollableKey,
             appBar: new AppBar(
@@ -193,7 +193,7 @@ void main() {
     expect(scrollableKey.currentState.scrollOffset, equals(500.0));
     await tester.tapAt(const Point(100.0, 10.0));
     await tester.pump();
-    await tester.pump(new Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
     expect(scrollableKey.currentState.scrollOffset, equals(500.0));
   });
 

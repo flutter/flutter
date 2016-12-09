@@ -8,8 +8,8 @@ import 'package:flutter/widgets.dart';
 void main() {
   testWidgets('BoxConstraintsTween control test', (WidgetTester tester) async {
     BoxConstraintsTween tween = new BoxConstraintsTween(
-      begin: new BoxConstraints.tight(new Size(20.0, 50.0)),
-      end: new BoxConstraints.tight(new Size(10.0, 30.0))
+      begin: new BoxConstraints.tight(const Size(20.0, 50.0)),
+      end: new BoxConstraints.tight(const Size(10.0, 30.0))
     );
     BoxConstraints result = tween.lerp(0.25);
     expect(result.minWidth, 17.5);
@@ -20,17 +20,17 @@ void main() {
 
   testWidgets('DecorationTween control test', (WidgetTester tester) async {
     DecorationTween tween = new DecorationTween(
-      begin: new BoxDecoration(backgroundColor: new Color(0xFF00FF00)),
-      end: new BoxDecoration(backgroundColor: new Color(0xFFFFFF00))
+      begin: const BoxDecoration(backgroundColor: const Color(0xFF00FF00)),
+      end: const BoxDecoration(backgroundColor: const Color(0xFFFFFF00))
     );
     BoxDecoration result = tween.lerp(0.25);
-    expect(result.backgroundColor, new Color(0xFF3FFF00));
+    expect(result.backgroundColor, const Color(0xFF3FFF00));
   });
 
   testWidgets('EdgeInsetsTween control test', (WidgetTester tester) async {
     EdgeInsetsTween tween = new EdgeInsetsTween(
-      begin: new EdgeInsets.symmetric(vertical: 50.0),
-      end: new EdgeInsets.only(top: 10.0, bottom: 30.0)
+      begin: const EdgeInsets.symmetric(vertical: 50.0),
+      end: const EdgeInsets.only(top: 10.0, bottom: 30.0)
     );
     EdgeInsets result = tween.lerp(0.25);
     expect(result.left, 0.0);

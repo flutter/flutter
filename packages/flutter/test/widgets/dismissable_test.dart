@@ -243,7 +243,7 @@ void main() {
 
     await tester.pumpWidget(widgetBuilder());
     Point location = tester.getTopLeft(find.text('0'));
-    Offset offset = new Offset(0.0, 5.0);
+    Offset offset = const Offset(0.0, 5.0);
     TestGesture gesture = await tester.startGesture(location, pointer: 5);
     await gesture.moveBy(offset);
     await tester.pumpWidget(widgetBuilder());
@@ -279,12 +279,12 @@ void main() {
     expect(find.text('2'), findsOneWidget);
     await dismissElement(tester, find.text('2'), gestureDirection: DismissDirection.startToEnd);
     await tester.pump(); // start the slide away
-    await tester.pump(new Duration(seconds: 1)); // finish the slide away
+    await tester.pump(const Duration(seconds: 1)); // finish the slide away
     expect(find.text('1'), findsOneWidget);
     expect(find.text('2'), findsNothing);
     await dismissElement(tester, find.text('1'), gestureDirection: DismissDirection.startToEnd);
     await tester.pump(); // start the slide away
-    await tester.pump(new Duration(seconds: 1)); // finish the slide away (at which point the child is no longer included in the tree)
+    await tester.pump(const Duration(seconds: 1)); // finish the slide away (at which point the child is no longer included in the tree)
     expect(find.text('1'), findsNothing);
     expect(find.text('2'), findsNothing);
   });

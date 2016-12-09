@@ -5,15 +5,15 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
-final BoxDecoration kBoxDecorationA = new BoxDecoration(
+final BoxDecoration kBoxDecorationA = const BoxDecoration(
   backgroundColor: const Color(0xFFFF0000)
 );
 
-final BoxDecoration kBoxDecorationB = new BoxDecoration(
+final BoxDecoration kBoxDecorationB = const BoxDecoration(
   backgroundColor: const Color(0xFF00FF00)
 );
 
-final BoxDecoration kBoxDecorationC = new BoxDecoration(
+final BoxDecoration kBoxDecorationC = const BoxDecoration(
   backgroundColor: const Color(0xFF0000FF)
 );
 

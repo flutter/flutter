@@ -13,8 +13,8 @@ class FirstWidget extends StatelessWidget {
         Navigator.pushNamed(context, '/second');
       },
       child: new Container(
-        decoration: new BoxDecoration(
-          backgroundColor: new Color(0xFFFFFF00)
+        decoration: const BoxDecoration(
+          backgroundColor: const Color(0xFFFFFF00)
         ),
         child: new Text('X')
       )
@@ -33,8 +33,8 @@ class SecondWidgetState extends State<SecondWidget> {
     return new GestureDetector(
       onTap: () => Navigator.pop(context),
       child: new Container(
-        decoration: new BoxDecoration(
-          backgroundColor: new Color(0xFFFF00FF)
+        decoration: const BoxDecoration(
+          backgroundColor: const Color(0xFFFF00FF)
         ),
         child: new Text('Y')
       )
@@ -127,7 +127,7 @@ void main() {
     );
     await tester.pumpWidget(widget);
     await tester.tap(find.byKey(targetKey));
-    expect(exception, new isInstanceOf<FlutterError>());
+    expect(exception, const isInstanceOf<FlutterError>());
     expect('$exception', startsWith('Navigator operation requested with a context'));
   });
 
