@@ -9,6 +9,7 @@ import 'dart:io';
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:json_rpc_2/error_code.dart' as rpc_error_code;
 import 'package:path/path.dart' as path;
+import 'package:stream_channel/stream_channel.dart';
 import 'package:web_socket_channel/io.dart';
 
 import 'globals.dart';
@@ -32,7 +33,7 @@ class VMService {
     } catch (e) {
       return new Future<VMService>.error('Failed to connect to $wsUri\n  $e');
     }
-    rpc.Peer peer = new rpc.Peer(new IOWebSocketChannel(ws).cast());
+    rpc.Peer peer = new rpc.Peer.withoutJson(jsonDocument.bind(new IOWebSocketChannel(ws).cast()));
     peer.listen();
     return new VMService._(peer, httpUri, wsUri);
   }
