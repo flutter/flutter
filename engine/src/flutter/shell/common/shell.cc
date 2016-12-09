@@ -178,6 +178,9 @@ void Shell::InitStandalone(std::string icu_data_path,
   settings.temp_directory_path =
       command_line.GetSwitchValueASCII(FlagForSwitch(Switch::CacheDirPath));
 
+  settings.use_test_fonts =
+      command_line.HasSwitch(FlagForSwitch(Switch::UseTestFonts));
+
   if (command_line.HasSwitch(FlagForSwitch(Switch::DartFlags))) {
     std::stringstream stream(
         command_line.GetSwitchValueNative(FlagForSwitch(Switch::DartFlags)));
