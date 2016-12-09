@@ -393,7 +393,7 @@ class _LicensePageState extends State<LicensePage> {
           ),
           child: new Text(
             license.packages.join(', '),
-            style: new TextStyle(fontWeight: FontWeight.bold),
+            style: const TextStyle(fontWeight: FontWeight.bold),
             textAlign: TextAlign.center
           )
         ));
@@ -403,7 +403,7 @@ class _LicensePageState extends State<LicensePage> {
               padding: const EdgeInsets.only(top: 16.0),
               child: new Text(
                 paragraph.text,
-                style: new TextStyle(fontWeight: FontWeight.bold),
+                style: const TextStyle(fontWeight: FontWeight.bold),
                 textAlign: TextAlign.center
               )
             ));

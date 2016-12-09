@@ -126,7 +126,7 @@ class GridTileBar extends StatelessWidget {
         data: darkTheme,
         child: new IconTheme.merge(
           context: context,
-          data: new IconThemeData(color: Colors.white),
+          data: const IconThemeData(color: Colors.white),
           child: new Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: children

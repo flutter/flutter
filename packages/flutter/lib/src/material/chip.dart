@@ -95,7 +95,7 @@ class Chip extends StatelessWidget {
           message: 'Delete "$label"',
           child: new Container(
             padding: const EdgeInsets.symmetric(horizontal: 4.0),
-            child: new Icon(
+            child: const Icon(
               Icons.cancel,
               size: 18.0,
               color: Colors.black54
