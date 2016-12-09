@@ -18,11 +18,6 @@ LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
 
-data_root_for_test_zip := $(TARGET_OUT_DATA)/DATA/
-minikin_tests_subpath_from_data := nativetest/minikin_tests
-minikin_tests_root_in_device := /data/$(minikin_tests_subpath_from_data)
-minikin_tests_root_for_test_zip := $(data_root_for_test_zip)/$(minikin_tests_subpath_from_data)
-
 font_src_files := \
     data/BoldItalic.ttf \
     data/Bold.ttf \
@@ -44,6 +39,12 @@ font_src_files := \
 
 LOCAL_MODULE := minikin_tests
 LOCAL_MODULE_TAGS := tests
+LOCAL_MODULE_CLASS := NATIVE_TESTS
+
+data_root_for_test_zip := $(local-intermediates-dir)/DATA
+minikin_tests_subpath_from_data := nativetest/minikin_tests
+minikin_tests_root_in_device := /data/$(minikin_tests_subpath_from_data)
+minikin_tests_root_for_test_zip := $(data_root_for_test_zip)/$(minikin_tests_subpath_from_data)
 
 GEN := $(addprefix $(minikin_tests_root_for_test_zip)/, $(font_src_files))
 $(GEN): PRIVATE_PATH := $(LOCAL_PATH)/../
