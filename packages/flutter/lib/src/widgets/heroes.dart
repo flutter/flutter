@@ -432,7 +432,7 @@ class _HeroParty {
   }
 
   void setAnimation(Animation<double> animation) {
-    assert(animation != null || _heroes.length == 0);
+    assert(animation != null || _heroes.isEmpty);
     if (animation != _currentAnimation) {
       _clearCurrentAnimation();
       _currentAnimation = animation;

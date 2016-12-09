@@ -476,7 +476,7 @@ class TabBarSelection<T> extends StatefulWidget {
     this.onChanged,
     @required this.child
   }) : super(key: key)  {
-    assert(values != null && values.length > 0);
+    assert(values != null && values.isNotEmpty);
     assert(new Set<T>.from(values).length == values.length);
     assert(value == null ? true : values.where((T e) => e == value).length == 1);
     assert(child != null);
@@ -847,7 +847,7 @@ class _TabBarState<T> extends ScrollableState<TabBar<T>> implements TabBarSelect
 
   @override
   void handleStatusChange(AnimationStatus status) {
-    if (config.labels.length == 0)
+    if (config.labels.isEmpty)
       return;
 
     if (_valueIsChanging && status == AnimationStatus.completed) {
@@ -861,7 +861,7 @@ class _TabBarState<T> extends ScrollableState<TabBar<T>> implements TabBarSelect
 
   @override
   void handleProgressChange() {
-    if (config.labels.length == 0 || _selection == null)
+    if (config.labels.isEmpty || _selection == null)
       return;
 
     if (_lastSelectedIndex != _selection.index) {

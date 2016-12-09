@@ -380,7 +380,7 @@ class BoxConstraints extends Constraints {
           affectedFieldsList.add('minHeight');
         if (maxHeight.isNaN)
           affectedFieldsList.add('maxHeight');
-        assert(affectedFieldsList.length > 0);
+        assert(affectedFieldsList.isNotEmpty);
         if (affectedFieldsList.length > 1)
           affectedFieldsList.add('and ${affectedFieldsList.removeLast()}');
         String whichFields = '';

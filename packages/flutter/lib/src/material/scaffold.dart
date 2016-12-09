@@ -930,7 +930,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     if (!config.resizeToAvoidBottomPadding)
       padding = new EdgeInsets.fromLTRB(padding.left, padding.top, padding.right, 0.0);
 
-    if (_snackBars.length > 0) {
+    if (_snackBars.isNotEmpty) {
       final ModalRoute<dynamic> route = ModalRoute.of(context);
       if (route == null || route.isCurrent) {
         if (_snackBarController.isCompleted && _snackBarTimer == null)

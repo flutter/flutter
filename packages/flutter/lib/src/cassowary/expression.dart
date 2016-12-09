@@ -39,7 +39,7 @@ class Expression extends EquationMember {
   Expression asExpression() => this;
 
   @override
-  bool get isConstant => terms.length == 0;
+  bool get isConstant => terms.isEmpty;
 
   @override
   double get value => terms.fold(constant, (double value, Term term) => value + term.value);

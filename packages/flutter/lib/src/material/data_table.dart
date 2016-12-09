@@ -259,7 +259,7 @@ class DataTable extends StatelessWidget {
   }) : columns = columns,
        _onlyTextColumn = _initOnlyTextColumn(columns), super(key: key) {
     assert(columns != null);
-    assert(columns.length > 0);
+    assert(columns.isNotEmpty);
     assert(sortColumnIndex == null || (sortColumnIndex >= 0 && sortColumnIndex < columns.length));
     assert(sortAscending != null);
     assert(rows != null);

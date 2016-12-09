@@ -69,7 +69,7 @@ class PaginatedDataTable extends StatefulWidget {
   }) : super(key: key) {
     assert(header != null);
     assert(columns != null);
-    assert(columns.length > 0);
+    assert(columns.isNotEmpty);
     assert(sortColumnIndex == null || (sortColumnIndex >= 0 && sortColumnIndex < columns.length));
     assert(sortAscending != null);
     assert(rowsPerPage != null);

@@ -62,12 +62,12 @@ void _debugPrintTask() {
     _debugPrintStopwatch.reset();
     _debugPrintedCharacters = 0;
   }
-  while (_debugPrintedCharacters < _kDebugPrintCapacity && _debugPrintBuffer.length > 0) {
+  while (_debugPrintedCharacters < _kDebugPrintCapacity && _debugPrintBuffer.isNotEmpty) {
     String line = _debugPrintBuffer.removeFirst();
     _debugPrintedCharacters += line.length; // TODO(ianh): Use the UTF-8 byte length instead
     print(line);
   }
-  if (_debugPrintBuffer.length > 0) {
+  if (_debugPrintBuffer.isNotEmpty) {
     _debugPrintScheduled = true;
     _debugPrintedCharacters = 0;
     new Timer(_kDebugPrintPauseTime, _debugPrintTask);

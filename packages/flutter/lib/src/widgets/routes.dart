@@ -319,7 +319,7 @@ abstract class LocalHistoryRoute<T> extends Route<T> {
 
   @override
   bool didPop(T result) {
-    if (_localHistory != null && _localHistory.length > 0) {
+    if (_localHistory != null && _localHistory.isNotEmpty) {
       LocalHistoryEntry entry = _localHistory.removeLast();
       assert(entry._owner == this);
       entry._owner = null;
@@ -331,7 +331,7 @@ abstract class LocalHistoryRoute<T> extends Route<T> {
 
   @override
   bool get willHandlePopInternally {
-    return _localHistory != null && _localHistory.length > 0;
+    return _localHistory != null && _localHistory.isNotEmpty;
   }
 }
 

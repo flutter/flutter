@@ -445,7 +445,7 @@ Future<dynamic/*=T*/> showMenu/*<T>*/({
   int elevation: 8
 }) {
   assert(context != null);
-  assert(items != null && items.length > 0);
+  assert(items != null && items.isNotEmpty);
   return Navigator.push(context, new _PopupMenuRoute<dynamic/*=T*/>(
     position: position,
     items: items,
