@@ -17,16 +17,24 @@ void main() {
       }));
     }
 
-    Map<String, dynamic> frame(int timeStamp, int duration) => <String, dynamic>{
+    Map<String, dynamic> build(int timeStamp, int duration) => <String, dynamic>{
       'name': 'Frame', 'ph': 'X', 'ts': timeStamp, 'dur': duration
+    };
+
+    Map<String, dynamic> begin(int timeStamp) => <String, dynamic>{
+      'name': 'GPURasterizer::Draw', 'ph': 'B', 'ts': timeStamp
+    };
+
+    Map<String, dynamic> end(int timeStamp) => <String, dynamic>{
+      'name': 'GPURasterizer::Draw', 'ph': 'E', 'ts': timeStamp
     };
 
     group('frame_count', () {
       test('counts frames', () {
         expect(
           summarize(<Map<String, dynamic>>[
-            frame(1000, 1000),
-            frame(3000, 2000),
+            build(1000, 1000),
+            build(3000, 2000),
           ]).countFrames(),
           2
         );
@@ -41,8 +49,8 @@ void main() {
       test('computes average frame build time in milliseconds', () {
         expect(
           summarize(<Map<String, dynamic>>[
-            frame(1000, 1000),
-            frame(3000, 2000),
+            build(1000, 1000),
+            build(3000, 2000),
           ]).computeAverageFrameBuildTimeMillis(),
           1.5
         );
@@ -57,15 +65,15 @@ void main() {
       test('computes worst frame build time in milliseconds', () {
         expect(
           summarize(<Map<String, dynamic>>[
-            frame(1000, 1000),
-            frame(3000, 2000),
+            build(1000, 1000),
+            build(3000, 2000),
           ]).computeWorstFrameBuildTimeMillis(),
           2.0
         );
         expect(
           summarize(<Map<String, dynamic>>[
-            frame(3000, 2000),
-            frame(1000, 1000),
+            build(3000, 2000),
+            build(1000, 1000),
           ]).computeWorstFrameBuildTimeMillis(),
           2.0
         );
@@ -75,9 +83,9 @@ void main() {
     group('computeMissedFrameBuildBudgetCount', () {
       test('computes the number of missed build budgets', () {
         TimelineSummary summary = summarize(<Map<String, dynamic>>[
-          frame(1000, 9000),
-          frame(11000, 1000),
-          frame(13000, 10000),
+          build(1000, 9000),
+          build(11000, 1000),
+          build(13000, 10000),
         ]);
 
         expect(summary.countFrames(), 3);
@@ -85,20 +93,118 @@ void main() {
       });
     });
 
+    group('average_frame_rasterizer_time_millis', () {
+      test('returns null when there is no data', () {
+        expect(summarize(<Map<String, dynamic>>[]).computeAverageFrameRasterizerTimeMillis(), isNull);
+      });
+
+      test('computes average frame rasterizer time in milliseconds', () {
+        expect(
+            summarize(<Map<String, dynamic>>[
+              begin(1000), end(2000),
+              begin(3000), end(5000),
+            ]).computeAverageFrameRasterizerTimeMillis(),
+            1.5
+        );
+      });
+
+      test('skips leading "end" events', () {
+        expect(
+            summarize(<Map<String, dynamic>>[
+              end(1000),
+              begin(2000), end(4000),
+            ]).computeAverageFrameRasterizerTimeMillis(),
+            2.0
+        );
+      });
+
+      test('skips trailing "begin" events', () {
+        expect(
+            summarize(<Map<String, dynamic>>[
+              begin(2000), end(4000),
+              begin(5000),
+            ]).computeAverageFrameRasterizerTimeMillis(),
+            2.0
+        );
+      });
+    });
+
+    group('worst_frame_rasterizer_time_millis', () {
+      test('returns null when there is no data', () {
+        expect(summarize(<Map<String, dynamic>>[]).computeWorstFrameRasterizerTimeMillis(), isNull);
+      });
+
+      test('computes worst frame rasterizer time in milliseconds', () {
+        expect(
+            summarize(<Map<String, dynamic>>[
+              begin(1000), end(2000),
+              begin(3000), end(5000),
+            ]).computeWorstFrameRasterizerTimeMillis(),
+            2.0
+        );
+        expect(
+            summarize(<Map<String, dynamic>>[
+              begin(3000), end(5000),
+              begin(1000), end(2000),
+            ]).computeWorstFrameRasterizerTimeMillis(),
+            2.0
+        );
+      });
+
+      test('skips leading "end" events', () {
+        expect(
+            summarize(<Map<String, dynamic>>[
+              end(1000),
+              begin(2000), end(4000),
+            ]).computeWorstFrameRasterizerTimeMillis(),
+            2.0
+        );
+      });
+
+      test('skips trailing "begin" events', () {
+        expect(
+            summarize(<Map<String, dynamic>>[
+              begin(2000), end(4000),
+              begin(5000),
+            ]).computeWorstFrameRasterizerTimeMillis(),
+            2.0
+        );
+      });
+    });
+
+    group('computeMissedFrameRasterizerBudgetCount', () {
+      test('computes the number of missed rasterizer budgets', () {
+        TimelineSummary summary = summarize(<Map<String, dynamic>>[
+          begin(1000), end(10000),
+          begin(11000), end(12000),
+          begin(13000), end(23000),
+        ]);
+
+        expect(summary.computeMissedFrameRasterizerBudgetCount(), 2);
+      });
+    });
+
     group('summaryJson', () {
       test('computes and returns summary as JSON', () {
         expect(
           summarize(<Map<String, dynamic>>[
-            frame(1000, 9000),
-            frame(11000, 1000),
-            frame(13000, 11000),
+            begin(1000), end(11000),
+            begin(11000), end(13000),
+            begin(13000), end(25000),
+            build(1000, 9000),
+            build(11000, 1000),
+            build(13000, 11000),
           ]).summaryJson,
           <String, dynamic>{
             'average_frame_build_time_millis': 7.0,
             'worst_frame_build_time_millis': 11.0,
             'missed_frame_build_budget_count': 2,
+            'average_frame_rasterizer_time_millis': 8.0,
+            'worst_frame_rasterizer_time_millis': 12.0,
+            'missed_frame_rasterizer_budget_count': 2,
             'frame_count': 3,
             'frame_build_times': <int>[9000, 1000, 11000],
+            'frame_rasterizer_times': <int>[10000, 2000, 12000],
           }
         );
       });
@@ -123,9 +229,12 @@ void main() {
 
       test('writes summary to JSON file', () async {
         await summarize(<Map<String, dynamic>>[
-          frame(1000, 9000),
-          frame(11000, 1000),
-          frame(13000, 11000),
+          begin(1000), end(11000),
+          begin(11000), end(13000),
+          begin(13000), end(25000),
+          build(1000, 9000),
+          build(11000, 1000),
+          build(13000, 11000),
         ]).writeSummaryToFile('test', destinationDirectory: '/temp');
         String written =
             await fs.file('/temp/test.timeline_summary.json').readAsString();
@@ -133,8 +242,12 @@ void main() {
           'average_frame_build_time_millis': 7.0,
           'worst_frame_build_time_millis': 11.0,
           'missed_frame_build_budget_count': 2,
+          'average_frame_rasterizer_time_millis': 8.0,
+          'worst_frame_rasterizer_time_millis': 12.0,
+          'missed_frame_rasterizer_budget_count': 2,
           'frame_count': 3,
           'frame_build_times': <int>[9000, 1000, 11000],
+          'frame_rasterizer_times': <int>[10000, 2000, 12000],
         });
       });
     });
