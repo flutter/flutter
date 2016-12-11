@@ -59,8 +59,8 @@ abstract class GestureRecognizer extends GestureArenaMember {
   /// Invoke a callback provided by the application, catching and logging any
   /// exceptions.
   @protected
-  dynamic/*=T*/ invokeCallback/*<T>*/(String name, RecognizerCallback<dynamic/*=T*/> callback) {
-    dynamic/*=T*/ result;
+  T invokeCallback<T>(String name, RecognizerCallback<T> callback) {
+    T result;
     try {
       result = callback();
     } catch (exception, stack) {

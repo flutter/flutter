@@ -278,12 +278,11 @@ String requireEnvVar(String name) {
   return value;
 }
 
-dynamic/*=T*/ requireConfigProperty/*<T>*/(
-    Map<String, dynamic/*<T>*/ > map, String propertyName) {
+T requireConfigProperty<T>(Map<String, dynamic> map, String propertyName) {
   if (!map.containsKey(propertyName))
     fail('Configuration property not found: $propertyName');
-
-  return map[propertyName];
+  T result = map[propertyName];
+  return result;
 }
 
 String jsonEncode(dynamic data) {

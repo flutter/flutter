@@ -411,7 +411,7 @@ class CardCollectionState extends State<CardCollection> {
       cardCollection = new ScrollableList(
         snapOffsetCallback: _snapToCenter ? _toSnapOffset : null,
         itemExtent: kFixedCardHeight,
-        children: _cardIndices.map/*<Widget>*/((int index) => _buildCard(context, index))
+        children: _cardIndices.map<Widget>((int index) => _buildCard(context, index))
       );
     } else {
       cardCollection = new LazyBlock(

@@ -23,7 +23,7 @@ void main() {
     expect(find.text('BottomSheet'), findsNothing);
 
     bool showBottomSheetThenCalled = false;
-    showModalBottomSheet/*<Null>*/(
+    showModalBottomSheet<Null>(
       context: savedContext,
       builder: (BuildContext context) => new Text('BottomSheet')
     ).then((Null result) {
@@ -45,7 +45,7 @@ void main() {
     expect(find.text('BottomSheet'), findsNothing);
 
     showBottomSheetThenCalled = false;
-    showModalBottomSheet/*<Null>*/(
+    showModalBottomSheet<Null>(
       context: savedContext,
       builder: (BuildContext context) => new Text('BottomSheet'),
     ).then((Null result) {

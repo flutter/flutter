@@ -27,7 +27,7 @@ class _PersistentBottomSheetDemoState extends State<PersistentBottomSheetDemo> {
     setState(() { // disable the button
       _showBottomSheetCallback = null;
     });
-    _scaffoldKey.currentState.showBottomSheet/*<Null>*/((BuildContext context) {
+    _scaffoldKey.currentState.showBottomSheet<Null>((BuildContext context) {
       final ThemeData themeData = Theme.of(context);
       return new Container(
         decoration: new BoxDecoration(

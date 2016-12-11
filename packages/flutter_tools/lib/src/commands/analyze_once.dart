@@ -183,7 +183,7 @@ class AnalyzeOnce extends AnalyzeBase {
       printError(error.asString());
       errorCount += 1;
     }
-    dumpErrors(errors.map/*<String>*/((AnalysisErrorDescription error) => error.asString()));
+    dumpErrors(errors.map<String>((AnalysisErrorDescription error) => error.asString()));
 
     stopwatch.stop();
     String elapsed = (stopwatch.elapsedMilliseconds / 1000.0).toStringAsFixed(1);

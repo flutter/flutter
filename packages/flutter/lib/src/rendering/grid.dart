@@ -643,7 +643,7 @@ class RenderGrid extends RenderVirtualViewport<GridParentData> {
     size = constraints.constrain(gridSize);
 
     if (callback != null)
-      invokeLayoutCallback/*<BoxConstraints>*/(callback);
+      invokeLayoutCallback<BoxConstraints>(callback);
 
     double gridTopPadding = 0.0;
     double gridLeftPadding = 0.0;

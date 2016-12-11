@@ -133,10 +133,10 @@ Widget buildImageAtRatio(String image, Key key, double ratio, bool inferSize) {
 }
 
 RenderImage getRenderImage(WidgetTester tester, Key key) {
-  return tester.renderObject/*<RenderImage>*/(find.byKey(key));
+  return tester.renderObject<RenderImage>(find.byKey(key));
 }
 TestImage getTestImage(WidgetTester tester, Key key) {
-  return tester.renderObject/*<RenderImage>*/(find.byKey(key)).image;
+  return tester.renderObject<RenderImage>(find.byKey(key)).image;
 }
 
 Future<Null> pumpTreeToLayout(WidgetTester tester, Widget widget) {

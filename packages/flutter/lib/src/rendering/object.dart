@@ -1824,7 +1824,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   ///
   /// This function can only be called during layout.
   @protected
-  void invokeLayoutCallback/*<T extends Constraints>*/(LayoutCallback/*<T>*/ callback) {
+  void invokeLayoutCallback<T extends Constraints>(LayoutCallback<T> callback) {
     assert(_debugMutationsLocked);
     assert(_debugDoingThisLayout);
     assert(!_doingThisLayoutWithCallback);
@@ -2413,7 +2413,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     debugFillDescription(description);
     result += description
       .expand((String description) => debugWordWrap(description, 65, wrapIndent: '  '))
-      .map/*<String>*/((String line) => "$descriptionPrefix$line\n")
+      .map<String>((String line) => "$descriptionPrefix$line\n")
       .join();
     if (childrenDescription == '')
       result += '$prefixOtherLines\n';

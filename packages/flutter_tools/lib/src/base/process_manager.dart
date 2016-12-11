@@ -19,7 +19,7 @@ ProcessManager get processManager => context[ProcessManager];
 
 const String _kManifestName = 'MANIFEST.txt';
 
-bool _areListsEqual/*<T>*/(List<dynamic/*=T*/> list1, List<dynamic/*=T*/> list2) {
+bool _areListsEqual<T>(List<T> list1, List<T> list2) {
   int i = 0;
   return list1 != null
       && list2 != null

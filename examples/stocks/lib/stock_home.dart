@@ -300,7 +300,7 @@ class StockHomeState extends State<StockHome> {
   }
 
   void _handleCreateCompany() {
-    showModalBottomSheet/*<Null>*/(
+    showModalBottomSheet<Null>(
       context: context,
       builder: (BuildContext context) => new _CreateCompanySheet()
     );

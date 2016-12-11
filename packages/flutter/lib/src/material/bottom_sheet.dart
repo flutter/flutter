@@ -256,10 +256,10 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
 ///  * [BottomSheet]
 ///  * [Scaffold.showBottomSheet]
 ///  * <https://material.google.com/components/bottom-sheets.html#bottom-sheets-modal-bottom-sheets>
-Future<dynamic/*=T*/> showModalBottomSheet/*<T>*/({ BuildContext context, WidgetBuilder builder }) {
+Future<T> showModalBottomSheet<T>({ BuildContext context, WidgetBuilder builder }) {
   assert(context != null);
   assert(builder != null);
-  return Navigator.push(context, new _ModalBottomSheetRoute<dynamic/*=T*/>(
+  return Navigator.push(context, new _ModalBottomSheetRoute<T>(
     builder: builder,
     theme: Theme.of(context, shadowThemeOnly: true),
   ));

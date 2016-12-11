@@ -34,11 +34,11 @@ class SynchronousFuture<T> implements Future<T> {
   Future<T> catchError(Function onError, { bool test(dynamic error) }) => new Completer<T>().future;
 
   @override
-  Future<dynamic/*=E*/> then/*<E>*/(dynamic f(T value), { Function onError }) {
+  Future<E> then<E>(dynamic f(T value), { Function onError }) {
     dynamic result = f(_value);
-    if (result is Future<dynamic/*=E*/>)
+    if (result is Future<E>)
       return result;
-    return new SynchronousFuture<dynamic/*=E*/>(result);
+    return new SynchronousFuture<E>(result);
   }
 
   @override

@@ -313,7 +313,7 @@ void main() {
         new Scaffold(body: new Container(key: testKey))
       );
       expect(tester.element(find.byKey(testKey)).size, const Size(800.0, 600.0));
-      expect(tester.renderObject/*<RenderBox>*/(find.byKey(testKey)).localToGlobal(Point.origin), const Point(0.0, 0.0));
+      expect(tester.renderObject<RenderBox>(find.byKey(testKey)).localToGlobal(Point.origin), const Point(0.0, 0.0));
     });
 
     testWidgets('body size with sized container', (WidgetTester tester) async {
@@ -322,7 +322,7 @@ void main() {
         new Scaffold(body: new Container(key: testKey, height: 100.0))
       );
       expect(tester.element(find.byKey(testKey)).size, const Size(800.0, 100.0));
-      expect(tester.renderObject/*<RenderBox>*/(find.byKey(testKey)).localToGlobal(Point.origin), const Point(0.0, 0.0));
+      expect(tester.renderObject<RenderBox>(find.byKey(testKey)).localToGlobal(Point.origin), const Point(0.0, 0.0));
     });
 
     testWidgets('body size with centered container', (WidgetTester tester) async {
@@ -331,7 +331,7 @@ void main() {
         new Scaffold(body: new Center(child: new Container(key: testKey)))
       );
       expect(tester.element(find.byKey(testKey)).size, const Size(800.0, 600.0));
-      expect(tester.renderObject/*<RenderBox>*/(find.byKey(testKey)).localToGlobal(Point.origin), const Point(0.0, 0.0));
+      expect(tester.renderObject<RenderBox>(find.byKey(testKey)).localToGlobal(Point.origin), const Point(0.0, 0.0));
     });
 
     testWidgets('body size with button', (WidgetTester tester) async {
@@ -340,7 +340,7 @@ void main() {
         new Scaffold(body: new FlatButton(key: testKey, onPressed: () { }, child: new Text('')))
       );
       expect(tester.element(find.byKey(testKey)).size, const Size(88.0, 36.0));
-      expect(tester.renderObject/*<RenderBox>*/(find.byKey(testKey)).localToGlobal(Point.origin), const Point(0.0, 0.0));
+      expect(tester.renderObject<RenderBox>(find.byKey(testKey)).localToGlobal(Point.origin), const Point(0.0, 0.0));
     });
   });
 }

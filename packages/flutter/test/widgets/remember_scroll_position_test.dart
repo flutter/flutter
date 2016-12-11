@@ -60,7 +60,7 @@ Future<Null> performTest(WidgetTester tester, bool maintainState) async {
   expect(find.text('100'), findsNothing);
 
   Completer<Null> completer = new Completer<Null>();
-  tester.state/*<ScrollableState>*/(find.byType(Scrollable)).scrollTo(1000.0).whenComplete(completer.complete);
+  tester.state<ScrollableState>(find.byType(Scrollable)).scrollTo(1000.0).whenComplete(completer.complete);
   expect(completer.isCompleted, isFalse);
   await tester.pump(const Duration(seconds: 1));
   expect(completer.isCompleted, isTrue);

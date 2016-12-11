@@ -52,7 +52,7 @@ class WidgetController {
   ///
   /// * Use [firstWidget] if you expect to match several widgets but only want the first.
   /// * Use [widgetList] if you expect to match several widgets and want all of them.
-  Widget/*=T*/ widget/*<T extends Widget>*/(Finder finder) {
+  T widget<T extends Widget>(Finder finder) {
     TestAsyncUtils.guardSync();
     return finder.evaluate().single.widget;
   }
@@ -63,7 +63,7 @@ class WidgetController {
   /// Throws a [StateError] if `finder` is empty.
   ///
   /// * Use [widget] if you only expect to match one widget.
-  Widget/*=T*/ firstWidget/*<T extends Widget>*/(Finder finder) {
+  T firstWidget<T extends Widget>(Finder finder) {
     TestAsyncUtils.guardSync();
     return finder.evaluate().first.widget;
   }
@@ -72,11 +72,10 @@ class WidgetController {
   ///
   /// * Use [widget] if you only expect to match one widget.
   /// * Use [firstWidget] if you expect to match several but only want the first.
-  Iterable<Widget/*=T*/> widgetList/*<T extends Widget>*/(Finder finder) {
+  Iterable<T> widgetList<T extends Widget>(Finder finder) {
     TestAsyncUtils.guardSync();
-    return finder.evaluate().map/*<T>*/((Element element) {
-      // TODO(ianh): simplify once the VM can infer the return type
-      dynamic/*=T*/ result = element.widget;
+    return finder.evaluate().map<T>((Element element) {
+      T result = element.widget;
       return result;
     });
   }
@@ -99,7 +98,7 @@ class WidgetController {
   ///
   /// * Use [firstElement] if you expect to match several elements but only want the first.
   /// * Use [elementList] if you expect to match several elements and want all of them.
-  Element/*=T*/ element/*<T extends Element>*/(Finder finder) {
+  T element<T extends Element>(Finder finder) {
     TestAsyncUtils.guardSync();
     return finder.evaluate().single;
   }
@@ -110,7 +109,7 @@ class WidgetController {
   /// Throws a [StateError] if `finder` is empty.
   ///
   /// * Use [element] if you only expect to match one element.
-  Element/*=T*/ firstElement/*<T extends Element>*/(Finder finder) {
+  T firstElement<T extends Element>(Finder finder) {
     TestAsyncUtils.guardSync();
     return finder.evaluate().first;
   }
@@ -119,7 +118,7 @@ class WidgetController {
   ///
   /// * Use [element] if you only expect to match one element.
   /// * Use [firstElement] if you expect to match several but only want the first.
-  Iterable<Element/*=T*/> elementList/*<T extends Element>*/(Finder finder) {
+  Iterable<T> elementList<T extends Element>(Finder finder) {
     TestAsyncUtils.guardSync();
     return finder.evaluate();
   }
@@ -144,9 +143,9 @@ class WidgetController {
   ///
   /// * Use [firstState] if you expect to match several states but only want the first.
   /// * Use [stateList] if you expect to match several states and want all of them.
-  State/*=T*/ state/*<T extends State>*/(Finder finder) {
+  T state<T extends State>(Finder finder) {
     TestAsyncUtils.guardSync();
-    return _stateOf/*<T>*/(finder.evaluate().single, finder);
+    return _stateOf<T>(finder.evaluate().single, finder);
   }
 
   /// The first matching state according to a depth-first pre-order
@@ -156,9 +155,9 @@ class WidgetController {
   /// matching widget has no state.
   ///
   /// * Use [state] if you only expect to match one state.
-  State/*=T*/ firstState/*<T extends State>*/(Finder finder) {
+  T firstState<T extends State>(Finder finder) {
     TestAsyncUtils.guardSync();
-    return _stateOf/*<T>*/(finder.evaluate().first, finder);
+    return _stateOf<T>(finder.evaluate().first, finder);
   }
 
   /// The matching states in the widget tree.
@@ -168,12 +167,12 @@ class WidgetController {
   ///
   /// * Use [state] if you only expect to match one state.
   /// * Use [firstState] if you expect to match several but only want the first.
-  Iterable<State/*=T*/> stateList/*<T extends State>*/(Finder finder) {
+  Iterable<T> stateList<T extends State>(Finder finder) {
     TestAsyncUtils.guardSync();
-    return finder.evaluate().map((Element element) => _stateOf/*<T>*/(element, finder));
+    return finder.evaluate().map((Element element) => _stateOf<T>(element, finder));
   }
 
-  State/*=T*/ _stateOf/*<T extends State>*/(Element element, Finder finder) {
+  T _stateOf<T extends State>(Element element, Finder finder) {
     TestAsyncUtils.guardSync();
     if (element is StatefulElement)
       return element.state;
@@ -201,7 +200,7 @@ class WidgetController {
   ///
   /// * Use [firstRenderObject] if you expect to match several render objects but only want the first.
   /// * Use [renderObjectList] if you expect to match several render objects and want all of them.
-  RenderObject/*=T*/ renderObject/*<T extends RenderObject>*/(Finder finder) {
+  T renderObject<T extends RenderObject>(Finder finder) {
     TestAsyncUtils.guardSync();
     return finder.evaluate().single.renderObject;
   }
@@ -212,7 +211,7 @@ class WidgetController {
   /// Throws a [StateError] if `finder` is empty.
   ///
   /// * Use [renderObject] if you only expect to match one render object.
-  RenderObject/*=T*/ firstRenderObject/*<T extends RenderObject>*/(Finder finder) {
+  T firstRenderObject<T extends RenderObject>(Finder finder) {
     TestAsyncUtils.guardSync();
     return finder.evaluate().first.renderObject;
   }
@@ -221,11 +220,10 @@ class WidgetController {
   ///
   /// * Use [renderObject] if you only expect to match one render object.
   /// * Use [firstRenderObject] if you expect to match several but only want the first.
-  Iterable<RenderObject/*=T*/> renderObjectList/*<T extends RenderObject>*/(Finder finder) {
+  Iterable<T> renderObjectList<T extends RenderObject>(Finder finder) {
     TestAsyncUtils.guardSync();
-    return finder.evaluate().map/*<T>*/((Element element) {
-      // TODO(ianh): simplify once the VM can infer the return type
-      dynamic/*=T*/ result = element.renderObject;
+    return finder.evaluate().map<T>((Element element) {
+      T result = element.renderObject;
       return result;
     });
   }
