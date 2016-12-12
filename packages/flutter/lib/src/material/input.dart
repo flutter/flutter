@@ -18,7 +18,10 @@ export 'package:flutter/services.dart' show TextInputType;
 const Duration _kTransitionDuration = const Duration(milliseconds: 200);
 const Curve _kTransitionCurve = Curves.fastOutSlowIn;
 
-/// A simple text input field.
+/// A simple undecorated text input field.
+///
+/// If you want decorations as specified in the Material spec (most likely),
+/// use [Input] instead.
 ///
 /// This widget is comparable to [Text] in that it does not include a margin
 /// or any decoration outside the text itself. It is useful for applications,
@@ -35,6 +38,7 @@ const Curve _kTransitionCurve = Curves.fastOutSlowIn;
 ///
 /// * [Input], which adds a label, a divider below the text field, and support for
 ///   an error message.
+/// * [RawInput], a text field that does not require [Material] design.
 class InputField extends StatefulWidget {
   InputField({
     Key key,
@@ -143,7 +147,6 @@ class _InputFieldState extends State<InputField> {
     ];
 
     if (config.hintText != null && value.text.isEmpty) {
-
       TextStyle hintStyle = textStyle.copyWith(color: themeData.hintColor);
       stackChildren.add(
         new Positioned(
@@ -373,13 +376,23 @@ class _InputContainerState extends State<InputContainer> {
 ///
 /// Requires one of its ancestors to be a [Material] widget.
 ///
+/// When using inside a [Form], consider using [InputFormField] instead.
+///
+/// Assuming that the input is already focused, the basic data flow for
+/// retrieving user input is:
+/// 1. User taps a character on the keyboard.
+/// 2. The [onChanged] callback is called with the current [InputValue].
+/// 3. Perform any necessary logic/validation on the current input value.
+/// 4. Update the state of the [Input] widget accordingly through [State.setState].
+///
+/// For most cases, we recommend that you use the [Input] class within a
+/// [StatefulWidget] so you can save and operate on the current value of the
+/// input.
+///
 /// See also:
 ///
 ///  * <https://material.google.com/components/text-fields.html>
-///
-/// For a detailed guide on using the input widget, see:
-///
-/// * <https://flutter.io/text-input/>
+///  * [InputFormField], which simplifies steps 2-4 above.
 class Input extends StatefulWidget {
   /// Creates a text input field.
   ///
@@ -520,6 +533,76 @@ class _InputState extends State<Input> {
 }
 
 /// A [FormField] that contains an [Input].
+///
+/// This is a convenience widget that simply wraps an [Input] widget in a
+/// [FormField]. The [FormField] maintains the current value of the [Input] so
+/// that you don't need to manage it yourself.
+///
+/// A [Form] ancestor is not required. The [Form] simply makes it easier to
+/// save, reset, or validate multiple fields at once. To use without a [Form],
+/// pass a [GlobalKey] to the constructor and use [GlobalKey.currentState] to
+/// save or reset the form field.
+///
+/// To see the use of [InputFormField], compare these two ways of a implementing
+/// a simple two text field form.
+///
+/// Using [InputFormField]:
+///
+/// ```dart
+/// String _firstName, _lastName;
+/// GlobalKey<FormState> _formKey = new GlobalKey<FormState>();
+/// ...
+/// new Form(
+///   key: _formKey,
+///   child: new Row(
+///     children: <Widget>[
+///       new InputFormField(
+///         labelText: 'First Name',
+///         onSaved: (InputValue value) { _firstName = value.text; }
+///       ),
+///       new InputFormField(
+///         labelText: 'Last Name',
+///         onSaved: (InputValue value) { _lastName = value.text; }
+///       ),
+///       new RaisedButton(
+///         child: new Text('SUBMIT'),
+///         // Instead of _formKey.currentState, you could wrap the
+///         // RaisedButton in a Builder widget to get access to a BuildContext,
+///         // and use Form.of(context).
+///         onPressed: () { _formKey.currentState.save(); },
+///       ),
+///    )
+///  )
+/// ```
+///
+/// Using [Input] directly:
+///
+/// ```dart
+/// String _firstName, _lastName;
+/// InputValue _firstNameValue = const InputValue();
+/// InputValue _lastNameValue = const InputValue();
+/// ...
+/// new Row(
+///   children: <Widget>[
+///     new Input(
+///       value: _firstNameValue,
+///       labelText: 'First Name',
+///       onChanged: (InputValue value) { setState( () { _firstNameValue = value; } ); }
+///     ),
+///     new Input(
+///       value: _lastNameValue,
+///       labelText: 'Last Name',
+///       onChanged: (InputValue value) { setState( () { _lastNameValue = value; } ); }
+///     ),
+///     new RaisedButton(
+///       child: new Text('SUBMIT'),
+///       onPressed: () {
+///         _firstName = _firstNameValue.text;
+///         _lastName = _lastNameValue.text;
+///       },
+///     ),
+///  )
+/// ```
 class InputFormField extends FormField<InputValue> {
   InputFormField({
     Key key,
