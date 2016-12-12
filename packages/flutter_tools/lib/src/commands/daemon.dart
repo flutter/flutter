@@ -337,6 +337,9 @@ class AppDomain extends Domain {
         throw 'unhandle build mode: $buildMode';
     }
 
+    if (device.isLocalEmulator && !isEmulatorBuildMode(buildMode))
+      throw '${toTitleCase(getModeName(buildMode))} mode is not supported for emulators.';
+
     // We change the current working directory for the duration of the `start` command.
     Directory cwd = Directory.current;
     Directory.current = new Directory(projectDirectory);
