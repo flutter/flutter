@@ -6,8 +6,15 @@ import 'package:flutter/foundation.dart';
 
 import 'framework.dart';
 
-/// A container for grouping together multiple form field widgets (e.g.
-/// [Input] widgets).
+/// An optional container for grouping together multiple form field widgets
+/// (e.g. [Input] widgets).
+///
+/// Each individual form field should be wrapped in a [FormField] widget, with
+/// the [Form] widget as a common ancestor of all of those. Call methods on
+/// [FormState] to save, reset, or validate each [FormField] that is a
+/// descendant of this [Form]. To obtain the [FormState], you may use [Form.of]
+/// with a context whose ancestor is the [Form], or pass a [GlobalKey] to the
+/// [Form] constructor and call [GlobalKey.currentState].
 class Form extends StatefulWidget {
   /// Creates a container for form fields.
   ///
@@ -141,6 +148,11 @@ typedef Widget FormFieldBuilder<T>(FormFieldState<T> field);
 /// Use a [GlobalKey] with [FormField] if you want to retrieve its current
 /// state, for example if you want one form field to depend on another.
 ///
+/// A [Form] ancestor is not required. The [Form] simply makes it easier to
+/// save, reset, or validate multiple fields at once. To use without a [Form],
+/// pass a [GlobalKey] to the constructor and use [GlobalKey.currentState] to
+/// save or reset the form field.
+///
 /// See also: [Form], [InputFormField]
 class FormField<T> extends StatefulWidget {
   FormField({
@@ -173,6 +185,8 @@ class FormField<T> extends StatefulWidget {
   FormFieldState<T> createState() => new FormFieldState<T>();
 }
 
+/// The current state of a [FormField]. Passed to the [FormFieldBuilder] method
+/// for use in constructing the form field's widget.
 class FormFieldState<T> extends State<FormField<T>> {
   T _value;
   String _errorText;
