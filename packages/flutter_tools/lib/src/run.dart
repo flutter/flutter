@@ -10,6 +10,7 @@ import 'package:stack_trace/stack_trace.dart';
 
 import 'application_package.dart';
 import 'base/utils.dart';
+import 'build_info.dart';
 import 'commands/trace.dart';
 import 'device.dart';
 import 'globals.dart';
@@ -94,11 +95,13 @@ class RunAndStayResident extends ResidentRunner {
       platformArgs = <String, dynamic>{ 'trace-startup': traceStartup };
 
     await startEchoingDeviceLog(_package);
+
+    String modeName = getModeName(debuggingOptions.buildMode);
     if (_mainPath == null) {
       assert(prebuiltMode);
-      printStatus('Running ${_package.displayName} on ${device.name}');
+      printStatus('Launching ${_package.displayName} on ${device.name} in $modeName mode...');
     } else {
-      printStatus('Running ${getDisplayPath(_mainPath)} on ${device.name}...');
+      printStatus('Launching ${getDisplayPath(_mainPath)} on ${device.name} in $modeName mode...');
     }
 
     _result = await device.startApp(

@@ -196,7 +196,8 @@ class HotRunner extends ResidentRunner {
 
     await startEchoingDeviceLog(_package);
 
-    printStatus('Launching ${getDisplayPath(_mainPath)} on ${device.name}...');
+    String modeName = getModeName(debuggingOptions.buildMode);
+    printStatus('Launching ${getDisplayPath(_mainPath)} on ${device.name} in $modeName mode...');
 
     // Start the application.
     Future<LaunchResult> futureResult = device.startApp(
