@@ -27,7 +27,7 @@
 	<key>NSHumanReadableCopyright</key>
 	<string>Copyright 2015 The Flutter Authors. All rights reserved.</string>
 	<key>NSMainNibFile</key>
-	<string>sky_mac</string>
+	<string>flutter_mac</string>
 	<key>NSPrincipalClass</key>
 	<string>FlutterApplication</string>
 </dict>
