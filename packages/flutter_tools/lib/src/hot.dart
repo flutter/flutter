@@ -447,7 +447,22 @@ class HotRunner extends ResidentRunner {
     final bool shouldReportReloadTime = !_runningFromSnapshot;
     Stopwatch reloadTimer = new Stopwatch();
     reloadTimer.start();
+    Stopwatch devFSTimer;
+    Stopwatch vmReloadTimer;
+    Stopwatch reassembleTimer;
+    if (benchmarkMode) {
+      devFSTimer = new Stopwatch();
+      devFSTimer.start();
+      vmReloadTimer = new Stopwatch();
+      reassembleTimer = new Stopwatch();
+    }
     bool updatedDevFS = await _updateDevFS();
+    if (benchmarkMode) {
+      devFSTimer.stop();
+      // Record time it took to synchronize to DevFS.
+      benchmarkData['hotReloadDevFSSyncMilliseconds'] =
+            devFSTimer.elapsed.inMilliseconds;
+    }
     if (!updatedDevFS)
       return new OperationResult(1, 'Dart Source Error');
     String reloadMessage;
@@ -457,6 +472,8 @@ class HotRunner extends ResidentRunner {
           _devFS.baseUri.resolve(entryPath).toFilePath();
       String devicePackagesPath =
           _devFS.baseUri.resolve('.packages').toFilePath();
+      if (benchmarkMode)
+        vmReloadTimer.start();
       Map<String, dynamic> reloadReport =
           await currentView.uiIsolate.reloadSources(
               pause: pause,
@@ -486,6 +503,14 @@ class HotRunner extends ResidentRunner {
       printError('Hot reload failed:\ncode = $errorCode\nmessage = $errorMessage\n$st');
       return new OperationResult(errorCode, errorMessage);
     }
+    if (benchmarkMode) {
+      // Record time it took for the VM to reload the sources.
+      vmReloadTimer.stop();
+      benchmarkData['hotReloadVMReloadMilliseconds'] =
+          vmReloadTimer.elapsed.inMilliseconds;
+    }
+    if (benchmarkMode)
+      reassembleTimer.start();
     // Reload the isolate.
     await currentView.uiIsolate.reload();
     // We are now running from source.
@@ -516,6 +541,11 @@ class HotRunner extends ResidentRunner {
                '${getElapsedAsMilliseconds(reloadTimer.elapsed)}.');
 
     if (benchmarkMode) {
+      // Record time it took for Flutter to reassemble the application.
+      reassembleTimer.stop();
+      benchmarkData['hotReloadFlutterReassembleMilliseconds'] =
+          reassembleTimer.elapsed.inMilliseconds;
+      // Record complete time it took for the reload.
       benchmarkData['hotReloadMillisecondsToFrame'] =
           reloadTimer.elapsed.inMilliseconds;
     }
