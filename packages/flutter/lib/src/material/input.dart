@@ -292,17 +292,10 @@ class _InputContainerState extends State<InputContainer> {
       );
     }
 
-    Color borderColor = activeColor;
-    double bottomPadding = 8.0;
-    double bottomBorder = config.focused ? 2.0 : 1.0;
+    Color borderColor = errorText == null ? activeColor : themeData.errorColor;
+    double bottomPadding = config.isDense ? 8.0 : 1.0;
+    double bottomBorder = 2.0;
     double bottomHeight = config.isDense ? 14.0 : 18.0;
-
-    if (errorText != null) {
-      borderColor = themeData.errorColor;
-      bottomBorder = 2.0;
-      if (!config.isDense)
-        bottomPadding = 1.0;
-    }
 
     EdgeInsets padding = new EdgeInsets.only(top: topPadding, bottom: bottomPadding);
     Border border = new Border(
@@ -334,12 +327,12 @@ class _InputContainerState extends State<InputContainer> {
     }
     stackChildren.add(divider);
 
-    if (errorText != null && !config.isDense) {
+    if (!config.isDense) {
       TextStyle errorStyle = themeData.textTheme.caption.copyWith(color: themeData.errorColor);
       stackChildren.add(new Positioned(
         left: 0.0,
         bottom: 0.0,
-        child: new Text(errorText, style: errorStyle)
+        child: new Text(errorText ?? '', style: errorStyle)
       ));
     }
 
@@ -450,6 +443,7 @@ class Input extends StatefulWidget {
   final bool hideDivider;
 
   /// Whether the input field is part of a dense form (i.e., uses less vertical space).
+  /// If true, [errorText] is not shown.
   final bool isDense;
 
   /// Whether this input field should focus itself if nothing else is already focused.
