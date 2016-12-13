@@ -29,6 +29,7 @@ import 'devices_test.dart' as devices_test;
 import 'doctor_test.dart' as doctor_test;
 import 'drive_test.dart' as drive_test;
 import 'format_test.dart' as format_test;
+import 'hot_test.dart' as hot_test;
 import 'install_test.dart' as install_test;
 import 'logs_test.dart' as logs_test;
 import 'os_utils_test.dart' as os_utils_test;
@@ -65,6 +66,7 @@ void main() {
   doctor_test.main();
   drive_test.main();
   format_test.main();
+  hot_test.main();
   install_test.main();
   logs_test.main();
   os_utils_test.main();
