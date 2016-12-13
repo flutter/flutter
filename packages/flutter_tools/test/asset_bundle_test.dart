@@ -61,4 +61,12 @@ void main()  {
       expect(assetContents, UTF8.decode(entry.contentsAsBytes()));
     });
   });
+
+  group('AssetBundle.build', () {
+    test('nonempty', () async {
+      AssetBundle ab = new AssetBundle();
+      expect(await ab.build(), 0);
+      expect(ab.entries.length, greaterThan(0));
+    });
+  });
 }
