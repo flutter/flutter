@@ -157,6 +157,9 @@ public class FlutterView extends SurfaceView
 
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
+        if (!isAttached())
+            return super.onKeyUp(keyCode, event);
+
         try {
             JSONObject message = new JSONObject();
             message.put("type", "keyup");
@@ -171,6 +174,9 @@ public class FlutterView extends SurfaceView
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (!isAttached())
+            return super.onKeyDown(keyCode, event);
+
         try {
             JSONObject message = new JSONObject();
             message.put("type", "keydown");
@@ -377,6 +383,9 @@ public class FlutterView extends SurfaceView
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+        if (!isAttached())
+            return false;
+
         // TODO(abarth): This version check might not be effective in some
         // versions of Android that statically compile code and will be upset
         // at the lack of |requestUnbufferedDispatch|. Instead, we should factor
@@ -419,6 +428,9 @@ public class FlutterView extends SurfaceView
 
     @Override
     public boolean onHoverEvent(MotionEvent event) {
+        if (!isAttached())
+            return false;
+
         boolean handled = handleAccessibilityHoverEvent(event);
         if (!handled) {
             // TODO(ianh): Expose hover events to the platform,
@@ -447,6 +459,10 @@ public class FlutterView extends SurfaceView
 
     private void attach() {
         mNativePlatformView = nativeAttach(this);
+    }
+
+    private boolean isAttached() {
+        return mNativePlatformView != 0;
     }
 
     private void preRun() {
