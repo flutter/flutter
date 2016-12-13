@@ -61,6 +61,9 @@ class GalleryTransitionTest {
       'average_frame_build_time_millis',
       'worst_frame_build_time_millis',
       'missed_frame_build_budget_count',
+      'average_frame_rasterizer_time_millis',
+      'worst_frame_rasterizer_time_millis',
+      'missed_frame_rasterizer_budget_count',
     ]);
   }
 }

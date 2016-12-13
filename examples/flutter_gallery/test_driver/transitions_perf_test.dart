@@ -60,8 +60,10 @@ final List<String> demoTitles = <String>[
 
 final FileSystem _fs = new LocalFileSystem();
 
+/// Extracts event data from [events] recorded by timeline, validates it, turns
+/// it into a histogram, and saves to a JSON file.
 Future<Null> saveDurationsHistogram(List<Map<String, dynamic>> events, String outputPath) async {
-  final Map<String, List<int>> durations = new Map<String, List<int>>();
+  final Map<String, List<int>> durations = <String, List<int>>{};
   Map<String, dynamic> startEvent;
 
   // Save the duration of the first frame after each 'Start Transition' event.
@@ -81,9 +83,42 @@ Future<Null> saveDurationsHistogram(List<Map<String, dynamic>> events, String ou
   // Verify that the durations data is valid.
   if (durations.keys.isEmpty)
     throw 'no "Start Transition" timeline events found';
-  for(String routeName in durations.keys) {
-    if (durations[routeName] == null || durations[routeName].length != 2)
-      throw 'invalid timeline data for $routeName transition';
+  Map<String, int> unexpectedValueCounts = <String, int>{};
+  durations.forEach((String routeName, List<int> values) {
+    if (values.length != 2) {
+      unexpectedValueCounts[routeName] = values.length;
+    }
+  });
+
+  if (unexpectedValueCounts.isNotEmpty) {
+    StringBuffer error = new StringBuffer('Some routes recorded wrong number of values (expected 2 values/route):\n\n');
+    unexpectedValueCounts.forEach((String routeName, int count) {
+      error.writeln(' - $routeName recorded $count values.');
+    });
+    error.writeln('\nFull event sequence:');
+    Iterator<Map<String, dynamic>> eventIter = events.iterator;
+    String lastEventName = '';
+    String lastRouteName = '';
+    while(eventIter.moveNext()) {
+      String eventName = eventIter.current['name'];
+
+      if (!<String>['Start Transition', 'Frame'].contains(eventName))
+        continue;
+
+      String routeName = eventName == 'Start Transition'
+        ? eventIter.current['args']['to']
+        : '';
+
+      if (eventName == lastEventName && routeName == lastRouteName) {
+        error.write('.');
+      } else {
+        error.write('\n - $eventName $routeName .');
+      }
+
+      lastEventName = eventName;
+      lastRouteName = routeName;
+    }
+    throw error;
   }
 
   // Save the durations Map to a file.
@@ -128,7 +163,8 @@ void main() {
         }
       },
       streams: const <TimelineStream>[
-        TimelineStream.dart
+        TimelineStream.dart,
+        TimelineStream.embedder,
       ]);
 
       // Save the duration (in microseconds) of the first timeline Frame event
@@ -136,15 +172,8 @@ void main() {
       // 'Start Transition' event when a demo is launched (see GalleryItem).
       TimelineSummary summary = new TimelineSummary.summarize(timeline);
       await summary.writeSummaryToFile('transitions', pretty: true);
-      try {
-        String histogramPath = path.join(testOutputsDirectory, 'transition_durations.timeline.json');
-        await saveDurationsHistogram(timeline.json['traceEvents'], histogramPath);
-      } catch(_) {
-        await summary.writeTimelineToFile('transitions', pretty: true);
-        print('ERROR: failed to extract transition events. Here is the full timeline:\n');
-        print(await _fs.file('$testOutputsDirectory/transitions.timeline.json').readAsString());
-        rethrow;
-      }
+      String histogramPath = path.join(testOutputsDirectory, 'transition_durations.timeline.json');
+      await saveDurationsHistogram(timeline.json['traceEvents'], histogramPath);
     }, timeout: new Timeout(new Duration(minutes: 5)));
   });
 }
