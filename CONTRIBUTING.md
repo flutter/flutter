@@ -137,8 +137,9 @@ Once the artifacts are built, you can start using them in your application by fo
 ### Desktop (Mac and Linux), for tests
 
  * `gclient sync` to update your dependencies.
- * `./flutter/tools/gn` to prepare your build files.
+ * `./flutter/tools/gn --unoptimized` to prepare your build files.
  * `ninja -C out/host_debug_unopt` to build a desktop unoptimized binary.
+ * `--unoptimized` disables C++ compiler optimizations and does not strip debug symbols. You may skip the flag and invoke `ninja -C out/host_debug` if you would rather have the native components optimized.
 
 To run the tests, you'll also need to clone [the main Flutter repository](https://github.com/flutter/flutter).
 See [the instructions for contributing](https://github.com/flutter/flutter/blob/master/CONTRIBUTING.md)
