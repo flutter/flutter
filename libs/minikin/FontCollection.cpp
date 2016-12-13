@@ -111,6 +111,8 @@ FontCollection::FontCollection(const vector<FontFamily*>& typefaces) :
     nTypefaces = mFamilies.size();
     LOG_ALWAYS_FATAL_IF(nTypefaces == 0,
         "Font collection must have at least one valid typeface");
+    LOG_ALWAYS_FATAL_IF(nTypefaces > 254,
+        "Up to 254 font families can be registered to collection.");
     size_t nPages = (mMaxChar + kPageMask) >> kLogCharsPerPage;
     size_t offset = 0;
     // TODO: Use variation selector map for mRanges construction.
@@ -124,11 +126,11 @@ FontCollection::FontCollection(const vector<FontFamily*>& typefaces) :
 #ifdef VERBOSE_DEBUG
         ALOGD("i=%zd: range start = %zd\n", i, offset);
 #endif
-        range->start = offset;
+        range->start = (uint8_t)offset;
         for (size_t j = 0; j < nTypefaces; j++) {
             if (lastChar[j] < (i + 1) << kLogCharsPerPage) {
                 FontFamily* family = mFamilies[j];
-                mFamilyVec.push_back(family);
+                mFamilyVec.push_back((uint8_t)j);
                 offset++;
                 uint32_t nextChar = family->getCoverage()->nextSetBit((i + 1) << kLogCharsPerPage);
 #ifdef VERBOSE_DEBUG
@@ -137,7 +139,7 @@ FontCollection::FontCollection(const vector<FontFamily*>& typefaces) :
                 lastChar[j] = nextChar;
             }
         }
-        range->end = offset;
+        range->end = (uint8_t)offset;
     }
 }
 
@@ -284,11 +286,10 @@ FontFamily* FontCollection::getFamilyForChar(uint32_t ch, uint32_t vs,
         return mFamilies[0];
     }
 
-    const std::vector<FontFamily*>& familyVec = (vs == 0) ? mFamilyVec : mFamilies;
     Range range = mRanges[ch >> kLogCharsPerPage];
 
     if (vs != 0) {
-        range = { 0, mFamilies.size() };
+        range = { 0, (uint8_t)mFamilies.size() };
     }
 
 #ifdef VERBOSE_DEBUG
@@ -297,7 +298,7 @@ FontFamily* FontCollection::getFamilyForChar(uint32_t ch, uint32_t vs,
     FontFamily* bestFamily = nullptr;
     uint32_t bestScore = kUnsupportedFontScore;
     for (size_t i = range.start; i < range.end; i++) {
-        FontFamily* family = familyVec[i];
+        FontFamily* family = vs == 0 ? mFamilies[mFamilyVec[i]] : mFamilies[i];
         const uint32_t score = calcFamilyScore(ch, vs, variant, langListId, family);
         if (score == kFirstFontScore) {
             // If the first font family supports the given character or variation sequence, always

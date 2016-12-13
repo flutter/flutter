@@ -58,8 +58,8 @@ private:
     static const int kPageMask = (1 << kLogCharsPerPage) - 1;
 
     struct Range {
-        size_t start;
-        size_t end;
+        uint8_t start;
+        uint8_t end;
     };
 
     FontFamily* getFamilyForChar(uint32_t ch, uint32_t vs, uint32_t langListId, int variant) const;
@@ -87,14 +87,14 @@ private:
     // This vector can't be empty.
     std::vector<FontFamily*> mFamilies;
 
-    // This vector contains pointers into mInstances
+    // This vector contains indices into mFamilies.
     // This vector can't be empty.
-    std::vector<FontFamily*> mFamilyVec;
+    std::vector<uint8_t> mFamilyVec;
 
     // This vector has pointers to the font family instance which has cmap 14 subtable.
     std::vector<FontFamily*> mVSFamilyVec;
 
-    // These are offsets into mInstanceVec, one range per page
+    // These are offsets into mFamilyVec, one range per page
     std::vector<Range> mRanges;
 };
 
