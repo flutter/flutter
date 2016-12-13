@@ -666,7 +666,7 @@
                 </menuItem>
             </items>
         </menu>
-        <window title="Flutter" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" releasedWhenClosed="NO" frameAutosaveName="Flutter Shell Mac" animationBehavior="default" id="QvC-M9-y7g" customClass="SkyWindow">
+        <window title="Flutter" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" releasedWhenClosed="NO" frameAutosaveName="Flutter Shell Mac" animationBehavior="default" id="QvC-M9-y7g" customClass="FlutterWindow">
             <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES"/>
             <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
             <rect key="contentRect" x="335" y="390" width="480" height="360"/>
