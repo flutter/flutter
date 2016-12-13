@@ -8,14 +8,48 @@ Color _scaleAlpha(Color a, double factor) {
   return a.withAlpha((a.alpha * factor).round());
 }
 
-/// An immutable 32 bit color value in ARGB
+/// An immutable 32 bit color value in ARGB format.
+///
+/// Consider the light teal of the Flutter logo. It is fully opaque, with a red
+/// channel value of 0x42 (66), a green channel value of 0xA5 (165), and a blue
+/// channel value of 0xF5 (245). In the common "hash syntax" for colour values,
+/// it would be described as `#42A5F5`.
+///
+/// Here are some ways it could be constructed:
+///
+/// ```dart
+/// Color c = const Color(0xFF42A5F5);
+/// Color c = const Color.fromARGB(0xFF, 0x42, 0xA5, 0xF5);
+/// Color c = const Color.fromARGB(255, 66, 165, 245);
+/// Color c = const Color.fromRGBO(66, 165, 245, 1.0);
+/// ```
+///
+/// If you are having a problem with `Color` wherein it seems your color is just
+/// not painting, check to make sure you are specifying the full 8 hexadecimal
+/// digits. If you only specify six, then the leading two digits are assumed to
+/// be zero, which means fully-transparent:
+///
+/// ```dart
+/// Color c1 = const Color(0xFFFFFF); // fully transparent white (invisible)
+/// Color c2 = const Color(0xFFFFFFFF); // fully opaque white (visible)
+/// ```
 class Color {
-  /// Construct a color from the lower 32 bits of an int.
+  /// Construct a color from the lower 32 bits of an [int].
   ///
-  /// Bits 24-31 are the alpha value.
-  /// Bits 16-23 are the red value.
-  /// Bits 8-15 are the green value.
-  /// Bits 0-7 are the blue value.
+  /// The bits are interpreted as follows:
+  ///
+  /// * Bits 24-31 are the alpha value.
+  /// * Bits 16-23 are the red value.
+  /// * Bits 8-15 are the green value.
+  /// * Bits 0-7 are the blue value.
+  ///
+  /// In other words, if AA is the alpha value in hex, RR the red value in hex,
+  /// GG the green value in hex, and BB the blue value in hex, a color can be
+  /// expressed as `const Color(0xAARRGGBB)`.
+  ///
+  /// For example, to get a fully opaque orange, you would use `const
+  /// Color(0xFFFF9000)` (`FF` for the alpha, `FF` for the red, `90` for the
+  /// green, and `00` for the blue).
   const Color(int value) : value = value & 0xFFFFFFFF;
 
   /// Construct a color from the lower 8 bits of four integers.
@@ -55,10 +89,12 @@ class Color {
 
   /// A 32 bit value representing this color.
   ///
-  /// Bits 24-31 are the alpha value.
-  /// Bits 16-23 are the red value.
-  /// Bits 8-15 are the green value.
-  /// Bits 0-7 are the blue value.
+  /// The bits are assigned as follows:
+  ///
+  /// * Bits 24-31 are the alpha value.
+  /// * Bits 16-23 are the red value.
+  /// * Bits 8-15 are the green value.
+  /// * Bits 0-7 are the blue value.
   final int value;
 
   /// The alpha channel of this color in an 8 bit value.
@@ -83,37 +119,37 @@ class Color {
   int get blue => (0x000000ff & value) >> 0;
 
   /// Returns a new color that matches this color with the alpha channel
-  /// replaced with a (which ranges from 0 to 255).
+  /// replaced with `a` (which ranges from 0 to 255).
   Color withAlpha(int a) {
     return new Color.fromARGB(a, red, green, blue);
   }
 
   /// Returns a new color that matches this color with the alpha channel
-  /// replaced with the given opacity (which ranges from 0.0 to 1.0).
+  /// replaced with the given `opacity` (which ranges from 0.0 to 1.0).
   Color withOpacity(double opacity) {
     assert(opacity >= 0.0 && opacity <= 1.0);
     return withAlpha((255.0 * opacity).round());
   }
 
   /// Returns a new color that matches this color with the red channel replaced
-  /// with r.
+  /// with `r`.
   Color withRed(int r) {
     return new Color.fromARGB(alpha, r, green, blue);
   }
 
   /// Returns a new color that matches this color with the green channel
-  /// replaced with g.
+  /// replaced with `g`.
   Color withGreen(int g) {
     return new Color.fromARGB(alpha, red, g, blue);
   }
 
   /// Returns a new color that matches this color with the blue channel replaced
-  /// with b.
+  /// with `b`.
   Color withBlue(int b) {
     return new Color.fromARGB(alpha, red, green, b);
   }
 
-  /// Linearly interpolate between two colors
+  /// Linearly interpolate between two colors.
   ///
   /// If either color is null, this function linearly interpolates from a
   /// transparent instance of the other color.
