@@ -659,10 +659,10 @@ class InputFormField extends FormField<InputValue> {
 class _AnimatedLabel extends ImplicitlyAnimatedWidget {
   _AnimatedLabel({
     Key key,
-    @required this.text,
-    @required this.style,
+    this.text,
+    this.style,
     Curve curve: Curves.linear,
-    @required Duration duration,
+    Duration duration,
   }) : super(key: key, curve: curve, duration: duration) {
     assert(style != null);
   }
