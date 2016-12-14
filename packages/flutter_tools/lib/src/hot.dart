@@ -394,7 +394,11 @@ class HotRunner extends ResidentRunner {
   }
 
   /// Returns [true] if the reload was successful.
-  bool _validateReloadReport(Map<String, dynamic> reloadReport) {
+  static bool validateReloadReport(Map<String, dynamic> reloadReport) {
+    if (reloadReport['type'] != 'ReloadReport') {
+      printError('Hot reload received invalid response: $reloadReport');
+      return false;
+    }
     if (!reloadReport['success']) {
       printError('Hot reload was rejected:');
       for (Map<String, dynamic> notice in reloadReport['details']['notices'])
@@ -479,7 +483,7 @@ class HotRunner extends ResidentRunner {
               pause: pause,
               rootLibPath: deviceEntryPath,
               packagesPath: devicePackagesPath);
-      if (!_validateReloadReport(reloadReport)) {
+      if (!validateReloadReport(reloadReport)) {
         // Reload failed.
         flutterUsage.sendEvent('hot', 'reload-reject');
         return new OperationResult(1, 'reload rejected');

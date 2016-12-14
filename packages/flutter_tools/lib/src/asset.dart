@@ -111,6 +111,7 @@ class AssetBundle {
     }
     if (manifest == null) {
       // No manifest file found for this application.
+      entries.add(new AssetBundleEntry.fromString('AssetManifest.json', '{}'));
       return 0;
     }
     if (manifest != null) {
