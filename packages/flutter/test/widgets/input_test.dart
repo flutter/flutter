@@ -770,7 +770,7 @@ void main() {
     GlobalKey inputKey = new GlobalKey();
     GlobalKey focusKey = new GlobalKey();
 
-    Widget inner_builder() {
+    Widget innerBuilder() {
       return new Center(
         child: new Material(
           child: new Focus(
@@ -790,7 +790,7 @@ void main() {
         )
       );
     }
-    Widget builder() => overlay(inner_builder());
+    Widget builder() => overlay(innerBuilder());
 
     await tester.pumpWidget(builder());
 
