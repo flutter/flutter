@@ -55,8 +55,11 @@ class _ToolbarLayout extends MultiChildLayoutDelegate {
 
     if (hasChild(_ToolbarSlot.actions)) {
       final BoxConstraints constraints = new BoxConstraints.loose(size);
-      actionsWidth = layoutChild(_ToolbarSlot.actions, constraints).width;
-      positionChild(_ToolbarSlot.actions, new Offset(size.width - actionsWidth, 0.0));
+      final Size actionsSize = layoutChild(_ToolbarSlot.actions, constraints);
+      final double actionsLeft = size.width - actionsSize.width;
+      final double actionsTop = (size.height - actionsSize.height) / 2.0;
+      actionsWidth = actionsSize.width;
+      positionChild(_ToolbarSlot.actions, new Offset(actionsLeft, actionsTop));
     }
 
     if (hasChild(_ToolbarSlot.title)) {
