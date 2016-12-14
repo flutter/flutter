@@ -20,14 +20,14 @@ class CoverageCollector {
   void collectCoverage({
     String host,
     int port,
-    Process processToKill
+    Process processToKill,
   }) {
     if (enabled) {
       assert(_jobs != null);
       _jobs.add(_startJob(
         host: host,
         port: port,
-        processToKill: processToKill
+        processToKill: processToKill,
       ));
     } else {
       processToKill.kill();
@@ -37,7 +37,7 @@ class CoverageCollector {
   Future<Null> _startJob({
     String host,
     int port,
-    Process processToKill
+    Process processToKill,
   }) async {
     int pid = processToKill.pid;
     printTrace('collecting coverage data from pid $pid on port $port');

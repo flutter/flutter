@@ -6,7 +6,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:path/path.dart' as path;
-import 'package:test/src/executable.dart' as executable; // ignore: implementation_imports
+import 'package:test/src/executable.dart' as test; // ignore: implementation_imports
 
 import '../base/common.dart';
 import '../base/logger.dart';
@@ -77,9 +77,9 @@ class TestCommand extends FlutterCommand {
         Directory.current = testDirectory;
       }
       printTrace('running test package with arguments: $testArgs');
-      await executable.main(testArgs);
+      await test.main(testArgs);
+      // test.main() sets dart:io's exitCode global.
       printTrace('test package returned with exit code $exitCode');
-
       return exitCode;
     } finally {
       Directory.current = currentDirectory;
@@ -164,10 +164,10 @@ class TestCommand extends FlutterCommand {
     if (argResults['coverage'])
       testArgs.insert(0, '--concurrency=1');
 
-    loader.installHook();
-    loader.shellPath = tools.getHostToolPath(HostTool.SkyShell);
-    if (!FileSystemEntity.isFileSync(loader.shellPath))
-      throwToolExit('Cannot find Flutter shell at ${loader.shellPath}');
+    final String shellPath = tools.getHostToolPath(HostTool.SkyShell) ?? Platform.environment['SKY_SHELL'];
+    if (!FileSystemEntity.isFileSync(shellPath))
+      throwToolExit('Cannot find Flutter shell at $shellPath');
+    loader.installHook(shellPath: shellPath);
 
     Cache.releaseLockEarly();
 
