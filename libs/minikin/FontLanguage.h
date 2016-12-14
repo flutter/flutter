@@ -24,9 +24,9 @@
 
 namespace minikin {
 
-// Due to the limits in font fallback score calculation, we can't use anything more than 17
+// Due to the limits in font fallback score calculation, we can't use anything more than 12
 // languages.
-const size_t FONT_LANGUAGES_LIMIT = 17;
+const size_t FONT_LANGUAGES_LIMIT = 12;
 class FontLanguages;
 
 // FontLanguage is a compact representation of a BCP 47 language tag. It

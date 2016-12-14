@@ -176,28 +176,41 @@ bool FontLanguage::supportsHbScript(hb_script_t script) const {
 }
 
 int FontLanguage::calcScoreFor(const FontLanguages& supported) const {
-    int score = 0;
+    bool languageScriptMatch = false;
+    bool subtagMatch = false;
+    bool scriptMatch = false;
+
     for (size_t i = 0; i < supported.size(); ++i) {
+        if (mEmojiStyle != EMSTYLE_EMPTY &&
+               mEmojiStyle == supported[i].mEmojiStyle) {
+            subtagMatch = true;
+            if (mLanguage == supported[i].mLanguage) {
+                return 4;
+            }
+        }
         if (isEqualScript(supported[i]) ||
                 supportsScript(supported[i].mSubScriptBits, mSubScriptBits)) {
+            scriptMatch = true;
             if (mLanguage == supported[i].mLanguage) {
-                return 2;
-            } else {
-                score = 1;
+                languageScriptMatch = true;
             }
         }
     }
 
-    if (score == 1) {
-        return score;
-    }
-
     if (supportsScript(supported.getUnionOfSubScriptBits(), mSubScriptBits)) {
-        // Gives score of 2 only if the language matches all of the font languages except for the
-        // exact match case handled above.
-        return (mLanguage == supported[0].mLanguage && supported.isAllTheSameLanguage()) ? 2 : 1;
+        scriptMatch = true;
+        if (mLanguage == supported[0].mLanguage && supported.isAllTheSameLanguage()) {
+            return 3;
+        }
     }
 
+    if (languageScriptMatch) {
+        return 3;
+    } else if (subtagMatch) {
+        return 2;
+    } else if (scriptMatch) {
+        return 1;
+    }
     return 0;
 }
 
