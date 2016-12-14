@@ -275,21 +275,31 @@ class _InputContainerState extends State<InputContainer> {
           top: top,
           duration: _kTransitionDuration,
           curve: _kTransitionCurve,
-          child: new Text(config.labelText, style: labelStyle),
+          child: new _AnimatedLabel(
+            text: config.labelText,
+            style: labelStyle,
+            duration: _kTransitionDuration,
+            curve: _kTransitionCurve,
+          )
         ),
       );
 
       topPadding += topPaddingIncrement;
     }
 
-    if (config.hintText != null && config.isEmpty && !hasInlineLabel) {
+    if (config.hintText != null) {
       TextStyle hintStyle = textStyle.copyWith(color: themeData.hintColor);
       stackChildren.add(
         new Positioned(
           left: 0.0,
           top: topPadding + textStyle.fontSize - hintStyle.fontSize,
-          child: new IgnorePointer(
-            child: new Text(config.hintText, style: hintStyle),
+          child: new AnimatedOpacity(
+            opacity: (config.isEmpty && !hasInlineLabel) ? 1.0 : 0.0,
+            duration: _kTransitionDuration,
+            curve: _kTransitionCurve,
+            child: new IgnorePointer(
+              child: new Text(config.hintText, style: hintStyle),
+            ),
           ),
         ),
       );
@@ -642,4 +652,60 @@ class InputFormField extends FormField<InputValue> {
       );
     },
   );
+}
+
+// Helper widget to smoothly animate the labelText of an Input, as it
+// transitions between inline and caption.
+class _AnimatedLabel extends ImplicitlyAnimatedWidget {
+  _AnimatedLabel({
+    Key key,
+    this.text,
+    this.style,
+    Curve curve: Curves.linear,
+    Duration duration,
+  }) : super(key: key, curve: curve, duration: duration) {
+    assert(style != null);
+  }
+
+  final String text;
+  final TextStyle style;
+
+  @override
+  _AnimatedLabelState createState() => new _AnimatedLabelState();
+
+  @override
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    '$style'.split('\n').forEach(description.add);
+  }
+}
+
+class _AnimatedLabelState extends AnimatedWidgetBaseState<_AnimatedLabel> {
+  TextStyleTween _style;
+
+  @override
+  void forEachTween(TweenVisitor<dynamic> visitor) {
+    _style = visitor(_style, config.style, (dynamic value) => new TextStyleTween(begin: value));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    TextStyle style = _style.evaluate(animation);
+    double scale = 1.0;
+    if (style.fontSize != config.style.fontSize) {
+      // While the fontSize is transitioning, use a scaled Transform as a
+      // fraction of the original fontSize. That way we get a smooth scaling
+      // effect with no snapping between discrete font sizes.
+      scale = style.fontSize / config.style.fontSize;
+      style = style.copyWith(fontSize: config.style.fontSize);
+    }
+
+    return new Transform(
+      transform: new Matrix4.identity()..scale(scale),
+      child: new Text(
+        config.text,
+        style: style,
+      )
+    );
+  }
 }

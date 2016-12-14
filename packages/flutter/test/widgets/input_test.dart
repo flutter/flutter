@@ -30,6 +30,16 @@ class MockClipboard {
   }
 }
 
+Widget overlay(Widget child) {
+  return new Overlay(
+    initialEntries: <OverlayEntry>[
+      new OverlayEntry(
+        builder: (BuildContext context) => child
+      )
+    ]
+  );
+}
+
 void main() {
   MockTextInput mockTextInput = new MockTextInput()..register();
   MockClipboard mockClipboard = new MockClipboard();
@@ -754,5 +764,50 @@ void main() {
     }
 
     checkText('Hello World');
+  });
+
+  testWidgets('Input label text animates', (WidgetTester tester) async {
+    GlobalKey inputKey = new GlobalKey();
+    GlobalKey focusKey = new GlobalKey();
+
+    Widget innerBuilder() {
+      return new Center(
+        child: new Material(
+          child: new Focus(
+            key: focusKey,
+            child: new Column(
+              children: <Widget>[
+                new Input(
+                  labelText: 'First'
+                ),
+                new Input(
+                  key: inputKey,
+                  labelText: 'Second'
+                ),
+              ]
+            )
+          )
+        )
+      );
+    }
+    Widget builder() => overlay(innerBuilder());
+
+    await tester.pumpWidget(builder());
+
+    Point pos = tester.getTopLeft(find.text('Second'));
+
+    // Focus the Input. The label should start animating upwards.
+    await tester.tap(find.byKey(inputKey));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+
+    Point newPos = tester.getTopLeft(find.text('Second'));
+    expect(newPos.y, lessThan(pos.y));
+
+    // Label should still be sliding upward.
+    await tester.pump(const Duration(milliseconds: 50));
+    pos = newPos;
+    newPos = tester.getTopLeft(find.text('Second'));
+    expect(newPos.y, lessThan(pos.y));
   });
 }
