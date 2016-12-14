@@ -780,6 +780,20 @@ TEST_F(FontCollectionItemizeTest, itemize_LanguageScore) {
         // Language match with unified subscript bits.
         { "zh-Hanb", { "zh-Hant", "zh-Bopo", "ja-Hant,ja-Bopo", "zh-Hant,zh-Bopo"}, 3 },
         { "zh-Hanb", { "zh-Hant", "zh-Bopo", "ja-Hant,zh-Bopo", "zh-Hant,zh-Bopo"}, 3 },
+
+        // Two elements subtag matching: language and subtag or language or script.
+        { "ja-Kana-u-em-emoji", { "zh-Hant", "ja-Kana"}, 1 },
+        { "ja-Kana-u-em-emoji", { "zh-Hant", "ja-Kana", "ja-Zsye"}, 2 },
+        { "ja-Zsym-u-em-emoji", { "ja-Kana", "ja-Zsym", "ja-Zsye"}, 2 },
+
+        // One element subtag matching: subtag only or script only.
+        { "en-Latn-u-em-emoji", { "ja-Latn", "ja-Zsye"}, 1 },
+        { "en-Zsym-u-em-emoji", { "ja-Zsym", "ja-Zsye"}, 1 },
+        { "en-Zsye-u-em-text", { "ja-Zsym", "ja-Zsye"}, 0 },
+
+        // Multiple languages list with subtags.
+        { "en-Latn,ja-Jpan-u-em-text", { "en-Latn", "en-Zsye", "en-Zsym"}, 0 },
+        { "en-Latn,en-Zsye,ja-Jpan-u-em-text", { "zh", "en-Zsye", "en-Zsym"}, 1 },
     };
 
     for (auto testCase : testCases) {
