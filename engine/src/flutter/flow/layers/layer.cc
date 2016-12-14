@@ -17,7 +17,9 @@ Layer::Layer()
 Layer::~Layer() = default;
 
 void Layer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
-  set_paint_bounds(SkRect::MakeEmpty());
+  if (!has_paint_bounds()) {
+    set_paint_bounds(SkRect::MakeEmpty());
+  }
 }
 
 #if defined(OS_FUCHSIA)
