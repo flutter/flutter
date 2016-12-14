@@ -67,7 +67,6 @@ Future<Process> _startProcess(String mainPath, { String packages, int observator
   arguments.addAll(<String>[
     '--enable-dart-profiling',
     '--non-interactive',
-    '--use-test-fonts',
     '--enable-checked-mode',
     '--packages=$packages',
     mainPath
