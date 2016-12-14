@@ -62,16 +62,14 @@ dependencies:
     'global', 'run', 'dartdoc',
     '--header', 'styles.html',
     '--header', 'analytics.html',
-    '--dart-sdk', '../../bin/cache/dart-sdk',
     '--exclude', 'temp_doc',
     '--favicon=favicon.ico',
     '--use-categories'
   ];
 
-  for (String libraryRef in libraryRefs()) {
-    String name = path.basename(libraryRef);
+  for (String libraryRef in libraryRefs(diskPath:true)) {
     args.add('--include-external');
-    args.add(name.substring(0, name.length - 5));
+    args.add(libraryRef);
   }
 
   process = await Process.start('pub', args, workingDirectory: 'dev/docs');
@@ -145,6 +143,7 @@ List<String> findPackageNames() {
   return findPackages().map((Directory dir) => path.basename(dir.path)).toList();
 }
 
+/// Finds all packages in the Flutter SDK
 List<Directory> findPackages() {
   return new Directory('packages')
     .listSync()
@@ -158,12 +157,19 @@ List<Directory> findPackages() {
     .toList();
 }
 
-Iterable<String> libraryRefs() sync* {
+/// Returns import or on-disk paths for all libraries in the Flutter SDK.
+///
+/// diskPath toggles between import paths vs. disk paths.
+Iterable<String> libraryRefs({bool diskPath: false}) sync* {
   for (Directory dir in findPackages()) {
     String dirName = path.basename(dir.path);
     for (FileSystemEntity file in new Directory('${dir.path}/lib').listSync()) {
-      if (file is File && file.path.endsWith('.dart'))
-        yield '$dirName/${path.basename(file.path)}';
+      if (file is File && file.path.endsWith('.dart')) {
+        if (diskPath)
+          yield '$dirName/lib/${path.basename(file.path)}';
+        else
+          yield '$dirName/${path.basename(file.path)}';
+      }
     }
   }
 }
