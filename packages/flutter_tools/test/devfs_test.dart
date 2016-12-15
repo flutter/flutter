@@ -10,6 +10,7 @@ import 'package:flutter_tools/src/devfs.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 
+import 'src/common.dart';
 import 'src/context.dart';
 import 'src/mocks.dart';
 
@@ -48,8 +49,8 @@ void main() {
     });
     testUsingContext('modify existing file on local file system', () async {
       File file = new File(path.join(basePath, filePath));
-      // Set the last modified time to 5 seconds ago.
-      Process.runSync('touch', <String>['-A', '-05', file.path]);
+      // Set the last modified time to 5 seconds in the past.
+      updateFileModificationTime(file.path, new DateTime.now(), -5);
       await devFS.update();
       await file.writeAsBytes(<int>[1, 2, 3, 4, 5, 6]);
       await devFS.update();

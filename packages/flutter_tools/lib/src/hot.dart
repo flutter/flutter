@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:meta/meta.dart';
@@ -14,15 +13,15 @@ import 'application_package.dart';
 import 'asset.dart';
 import 'base/context.dart';
 import 'base/logger.dart';
-import 'base/process.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
 import 'dart/package_map.dart';
+import 'dart/dependencies.dart';
 import 'devfs.dart';
 import 'device.dart';
 import 'globals.dart';
 import 'resident_runner.dart';
-import 'toolchain.dart';
+
 import 'vmservice.dart';
 import 'usage.dart';
 
@@ -36,47 +35,6 @@ class HotRunnerConfig {
 HotRunnerConfig get hotRunnerConfig => context[HotRunnerConfig];
 
 const bool kHotReloadDefault = true;
-
-class DartDependencySetBuilder {
-  DartDependencySetBuilder(this.mainScriptPath,
-                           this.projectRootPath,
-                           this.packagesFilePath);
-
-  final String mainScriptPath;
-  final String projectRootPath;
-  final String packagesFilePath;
-
-  Set<String> build() {
-    final String skySnapshotPath =
-        ToolConfiguration.instance.getHostToolPath(HostTool.SkySnapshot);
-
-    final List<String> args = <String>[
-      skySnapshotPath,
-      '--packages=$packagesFilePath',
-      '--print-deps',
-      mainScriptPath
-    ];
-
-    String output = runSyncAndThrowStdErrOnError(args);
-
-    final List<String> lines = LineSplitter.split(output).toList();
-    final Set<String> minimalDependencies = new Set<String>();
-    for (String line in lines) {
-      // We need to convert the uris so that they are relative to the project
-      // root and tweak package: uris so that they reflect their devFS location.
-      if (line.startsWith('package:')) {
-        // Swap out package: for packages/ because we place all package sources
-        // under packages/.
-        line = line.replaceFirst('package:', 'packages/');
-      } else {
-        // Ensure paths are relative to the project root.
-        line = path.relative(line, from: projectRootPath);
-      }
-      minimalDependencies.add(line);
-    }
-    return minimalDependencies;
-  }
-}
 
 class HotRunner extends ResidentRunner {
   HotRunner(
@@ -151,7 +109,18 @@ class HotRunner extends ResidentRunner {
         new DartDependencySetBuilder(
               _mainPath, _projectRootPath, _packagesFilePath);
     try {
-      _dartDependencies = dartDependencySetBuilder.build();
+      Set<String> dependencies = dartDependencySetBuilder.build();
+      _dartDependencies = new Set<String>();
+      for (String path in dependencies) {
+        // We need to tweak package: uris so that they reflect their devFS
+        // location.
+        if (path.startsWith('package:')) {
+          // Swap out package: for packages/ because we place all package
+          // sources under packages/.
+          path = path.replaceFirst('package:', 'packages/');
+        }
+        _dartDependencies.add(path);
+      }
     } catch (error) {
       printStatus('Error detected in application source code:', emphasis: true);
       printError(error);

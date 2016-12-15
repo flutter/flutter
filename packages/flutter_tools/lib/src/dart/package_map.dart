@@ -29,11 +29,26 @@ class PackageMap {
 
   final String packagesPath;
 
-  Map<String, Uri> get map {
+  /// Load and parses the .packages file.
+  void load() {
     _map ??= _parse(packagesPath);
+  }
+
+  Map<String, Uri> get map {
+    load();
     return _map;
   }
   Map<String, Uri> _map;
+
+  /// Returns the path to [packageUri].
+  String pathForPackage(Uri packageUri) {
+    assert(packageUri.scheme == 'package');
+    List<String> pathSegments = packageUri.pathSegments.toList();
+    String packageName = pathSegments.removeAt(0);
+    Uri packageBase = map[packageName];
+    String packageRelativePath = path.joinAll(pathSegments);
+    return packageBase.resolve(packageRelativePath).path;
+  }
 
   String checkValid() {
     if (FileSystemEntity.isFileSync(packagesPath))
