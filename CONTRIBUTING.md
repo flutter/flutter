@@ -129,7 +129,7 @@ Contributing code
 We gladly accept contributions via GitHub pull requests.
 
 Please peruse our
-[style guides](https://flutter.io/style-guide/) and
+[style guides](https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo) and
 [design principles](https://flutter.io/design-principles/) before
 working on anything non-trivial. These guidelines are intended to
 keep the code consistent and avoid common pitfalls.
