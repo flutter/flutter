@@ -6,7 +6,27 @@ import 'package:meta/meta.dart';
 
 import 'assertions.dart';
 import 'basic_types.dart';
-import 'listenable.dart';
+
+/// An object that maintains a list of listeners.
+abstract class Listenable {
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
+  const Listenable();
+
+  /// Return a [Listenable] that triggers when any of the given [Listenable]s
+  /// themselves trigger.
+  ///
+  /// The list must not be changed after this method has been called. Doing so
+  /// will lead to memory leaks or exceptions.
+  factory Listenable.merge(List<Listenable> listenables) = _MergingListenable;
+
+  /// Register a closure to be called when the object notifies its listeners.
+  void addListener(VoidCallback listener);
+
+  /// Remove a previously registered closure from the list of closures that the
+  /// object notifies.
+  void removeListener(VoidCallback listener);
+}
 
 /// A class that can be extended or mixed in that provides a change notification
 /// API using [VoidCallback] for notifications.
@@ -67,5 +87,21 @@ class ChangeNotifier extends Listenable {
         }
       }
     }
+  }
+}
+
+class _MergingListenable extends ChangeNotifier {
+  _MergingListenable(this._children) {
+    for (Listenable child in _children)
+      child.addListener(notifyListeners);
+  }
+
+  final List<Listenable> _children;
+
+  @override
+  void dispose() {
+    for (Listenable child in _children)
+      child.removeListener(notifyListeners);
+    super.dispose();
   }
 }
