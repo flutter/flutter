@@ -68,6 +68,27 @@ example code, as well as any changes to Dart code in the
 automatically be picked when you relaunch the app.  You can do the same for your
 own code by mimicking the `pubspec.yaml` files in the `examples` subdirectories.
 
+Running the analyzer
+--------------------
+
+When editing Flutter code, it's important to check the code with the analyzer. There are two
+main ways to run it. In either case you will want to run `flutter update-packages --upgrade`
+first, or you will get version conflict issues or bogus error messages about core clases like
+Offset from `dart:ui`.
+
+For a one-off, use `flutter analyze --flutter-repo`. This uses the `.analysis_options_repo` file
+at the root of the repository for its configuration.
+
+For continuous analysis, use `flutter analyze --flutter-repo --watch`. This uses normal
+`.analysis_options` files, and they can differ from package to package.
+
+If you want to see how many members are missing dartdocs, you should use the first option,
+providing the additional command `--dartdocs`.
+
+If you omit the `--flutter-repo` option you may end up in a confusing state because that will
+assume you want to check a single package and the flutter repository has several packages.
+
+
 Running the tests
 -----------------
 
@@ -91,14 +112,14 @@ If you've built [your own flutter engine](#working-on-the-engine-and-the-framewo
 if you built an engine in the `out/host_debug_unopt` directory, you can pass
 `--local-engine=host_debug_unopt` to run the tests in that engine.
 
-Note: Flutter tests are headless, you won't see any UI. You can use
+Flutter tests are headless, you won't see any UI. You can use
 `print` to generate console output or you can interact with the DartVM
 via observatory at [http://localhost:8181/](http://localhost:8181/).
 
 Adding a test
 -------------
 
-To add a test to the Flutter package, simply create a file whose name
+To add a test to the Flutter package, create a file whose name
 ends with `_test.dart` in the `packages/flutter/test` directory. The
 test should have a `main` function and use the `test` package.
 
@@ -107,15 +128,17 @@ Contributing code
 
 We gladly accept contributions via GitHub pull requests.
 
+Please peruse our
+[style guides](https://flutter.io/style-guide/) and
+[design principles](https://flutter.io/design-principles/) before
+working on anything non-trivial. These guidelines are intended to
+keep the code consistent and avoid common pitfalls.
+
 To start working on a patch:
 
  * `git fetch upstream`
  * `git checkout upstream/master -b name_of_your_branch`
- * Hack away. Please peruse our
- [style guides](https://flutter.io/style-guide/) and
- [design principles](https://flutter.io/design-principles/) before
- working on anything non-trivial. These guidelines are intended to
- keep the code consistent and avoid common pitfalls.
+ * Hack away.
  * `git commit -a -m "<your informative commit message>"`
  * `git push origin name_of_your_branch`
 
