@@ -2,13 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
+import 'dart:io' as system;
 
-// this is a test to make sure our tests actually catch failures
+// this is a test to make sure our tests consider engine crashes to be failures
 // see //flutter/dev/bots/test.sh
 
 void main() {
-  test('test smoke test -- this test SHOULD FAIL', () async {
-    expect(false, isTrue);
-  });
+  system.Process.killPid(system.pid, system.ProcessSignal.SIGSEGV);
 }
