@@ -18,7 +18,7 @@ LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
 
-font_src_files := \
+LOCAL_TEST_DATA := \
     data/BoldItalic.ttf \
     data/Bold.ttf \
     data/ColorEmojiFont.ttf \
@@ -40,20 +40,7 @@ LOCAL_MODULE := minikin_tests
 LOCAL_MODULE_TAGS := tests
 LOCAL_MODULE_CLASS := NATIVE_TESTS
 
-data_root_for_test_zip := $(local-intermediates-dir)/DATA
-minikin_tests_subpath_from_data := nativetest/minikin_tests
-minikin_tests_root_in_device := /data/$(minikin_tests_subpath_from_data)
-minikin_tests_root_for_test_zip := $(data_root_for_test_zip)/$(minikin_tests_subpath_from_data)
-
-GEN := $(addprefix $(minikin_tests_root_for_test_zip)/, $(font_src_files))
-$(GEN): PRIVATE_PATH := $(LOCAL_PATH)
-$(GEN): PRIVATE_CUSTOM_TOOL = cp $< $@
-$(GEN): $(minikin_tests_root_for_test_zip)/data/% : $(LOCAL_PATH)/data/%
-	$(transform-generated-source)
-LOCAL_GENERATED_SOURCES += $(GEN)
-
 LOCAL_STATIC_LIBRARIES := libminikin
-LOCAL_PICKUP_FILES := $(data_root_for_test_zip)
 
 # Shared libraries which are dependencies of minikin; these are not automatically
 # pulled in by the build system (and thus sadly must be repeated).
@@ -90,7 +77,9 @@ LOCAL_C_INCLUDES := \
     external/libxml2/include \
     external/skia/src/core
 
-LOCAL_CPPFLAGS += -Werror -Wall -Wextra \
-    -DkTestFontDir="\"$(minikin_tests_root_in_device)/data/\""
+LOCAL_CPPFLAGS += -Werror -Wall -Wextra
+
+LOCAL_CPPFLAGS_32 += -DkTestFontDir="\"/data/nativetest/minikin_tests/data/\""
+LOCAL_CPPFLAGS_64 += -DkTestFontDir="\"/data/nativetest64/minikin_tests/data/\""
 
 include $(BUILD_NATIVE_TEST)
