@@ -26,6 +26,7 @@ analyzer:
     todo: ignore
   exclude:
     - 'bin/cache/**'
+    - 'packages/flutter_tools/test/data/dart_dependencies_test/**'
 
 linter:
   rules:

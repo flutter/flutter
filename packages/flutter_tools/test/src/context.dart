@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/context.dart';
@@ -20,6 +21,7 @@ import 'package:flutter_tools/src/toolchain.dart';
 import 'package:flutter_tools/src/usage.dart';
 
 import 'package:mockito/mockito.dart';
+import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 
 /// Return the test logger. This assumes that the current Logger is a BufferLogger.
@@ -64,6 +66,9 @@ void testUsingContext(String description, dynamic testMethod(), {
     testContext.putIfAbsent(SimControl, () => new MockSimControl());
     testContext.putIfAbsent(Usage, () => new MockUsage());
 
+    final String basePath = path.dirname(Platform.script.path);
+    final String flutterRoot =
+        path.normalize(path.join(basePath, '..', '..', '..'));
     try {
       return await testContext.runInZone(() {
         // Apply the overrides to the test context in the zone since their
@@ -71,7 +76,9 @@ void testUsingContext(String description, dynamic testMethod(), {
         overrides.forEach((Type type, dynamic value()) {
           context.setVariable(type, value());
         });
-
+        // Provide a sane default for the flutterRoot directory. Individual
+        // tests can override this.
+        Cache.flutterRoot = flutterRoot;
         return testMethod();
       });
     } catch (error) {
