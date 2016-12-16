@@ -12,12 +12,12 @@ void main() {
     await tester.pumpWidget(
       new Scaffold(
         bottomNavigationBar: new BottomNavigationBar(
-          labels: <DestinationLabel>[
-            new DestinationLabel(
+          items: <BottomNavigationBarItem>[
+            new BottomNavigationBarItem(
               icon: new Icon(Icons.ac_unit),
               title: new Text('AC')
             ),
-            new DestinationLabel(
+            new BottomNavigationBarItem(
               icon: new Icon(Icons.access_alarm),
               title: new Text('Alarm')
             )
@@ -38,12 +38,12 @@ void main() {
     await tester.pumpWidget(
       new Scaffold(
         bottomNavigationBar: new BottomNavigationBar(
-          labels: <DestinationLabel>[
-            new DestinationLabel(
+          items: <BottomNavigationBarItem>[
+            new BottomNavigationBarItem(
               icon: new Icon(Icons.ac_unit),
               title: new Text('AC')
             ),
-            new DestinationLabel(
+            new BottomNavigationBarItem(
               icon: new Icon(Icons.access_alarm),
               title: new Text('Alarm')
             )
@@ -63,12 +63,12 @@ void main() {
       new Scaffold(
         bottomNavigationBar: new BottomNavigationBar(
           type: BottomNavigationBarType.shifting,
-          labels: <DestinationLabel>[
-            new DestinationLabel(
+          items: <BottomNavigationBarItem>[
+            new BottomNavigationBarItem(
               icon: new Icon(Icons.ac_unit),
               title: new Text('AC')
             ),
-            new DestinationLabel(
+            new BottomNavigationBarItem(
               icon: new Icon(Icons.access_alarm),
               title: new Text('Alarm')
             )
@@ -87,12 +87,12 @@ void main() {
         bottomNavigationBar: new BottomNavigationBar(
           currentIndex: 1,
           type: BottomNavigationBarType.shifting,
-          labels: <DestinationLabel>[
-            new DestinationLabel(
+          items: <BottomNavigationBarItem>[
+            new BottomNavigationBarItem(
               icon: new Icon(Icons.ac_unit),
               title: new Text('AC')
             ),
-            new DestinationLabel(
+            new BottomNavigationBarItem(
               icon: new Icon(Icons.access_alarm),
               title: new Text('Alarm')
             )
@@ -114,20 +114,20 @@ void main() {
       new Scaffold(
         bottomNavigationBar: new BottomNavigationBar(
           type: BottomNavigationBarType.shifting,
-          labels: <DestinationLabel>[
-            new DestinationLabel(
+          items: <BottomNavigationBarItem>[
+            new BottomNavigationBarItem(
               icon: new Icon(Icons.ac_unit),
               title: new Text('AC')
             ),
-            new DestinationLabel(
+            new BottomNavigationBarItem(
               icon: new Icon(Icons.access_alarm),
               title: new Text('Alarm')
             ),
-            new DestinationLabel(
+            new BottomNavigationBarItem(
               icon: new Icon(Icons.access_time),
               title: new Text('Time')
             ),
-            new DestinationLabel(
+            new BottomNavigationBarItem(
               icon: new Icon(Icons.add),
               title: new Text('Add')
             )
@@ -174,20 +174,20 @@ void main() {
                 child: new Scaffold(
                     bottomNavigationBar: new BottomNavigationBar(
                         type: BottomNavigationBarType.shifting,
-                        labels: <DestinationLabel>[
-                          new DestinationLabel(
+                        items: <BottomNavigationBarItem>[
+                          new BottomNavigationBarItem(
                               icon: new Icon(Icons.ac_unit),
                               title: new Text('AC')
                           ),
-                          new DestinationLabel(
+                          new BottomNavigationBarItem(
                               icon: new Icon(Icons.access_alarm),
                               title: new Text('Alarm')
                           ),
-                          new DestinationLabel(
+                          new BottomNavigationBarItem(
                               icon: new Icon(Icons.access_time),
                               title: new Text('Time')
                           ),
-                          new DestinationLabel(
+                          new BottomNavigationBarItem(
                               icon: new Icon(Icons.add),
                               title: new Text('Add')
                           )
@@ -212,20 +212,20 @@ void main() {
                 child: new Scaffold(
                     bottomNavigationBar: new BottomNavigationBar(
                         type: BottomNavigationBarType.fixed,
-                        labels: <DestinationLabel>[
-                          new DestinationLabel(
+                        items: <BottomNavigationBarItem>[
+                          new BottomNavigationBarItem(
                               icon: new Icon(Icons.ac_unit),
                               title: new Text('AC')
                           ),
-                          new DestinationLabel(
+                          new BottomNavigationBarItem(
                               icon: new Icon(Icons.access_alarm),
                               title: new Text('Alarm')
                           ),
-                          new DestinationLabel(
+                          new BottomNavigationBarItem(
                               icon: new Icon(Icons.access_time),
                               title: new Text('Time')
                           ),
-                          new DestinationLabel(
+                          new BottomNavigationBarItem(
                               icon: new Icon(Icons.add),
                               title: new Text('Add')
                           )
@@ -247,12 +247,12 @@ void main() {
       new Scaffold(
         bottomNavigationBar: new BottomNavigationBar(
           iconSize: 12.0,
-          labels: <DestinationLabel>[
-            new DestinationLabel(
+          items: <BottomNavigationBarItem>[
+            new BottomNavigationBarItem(
               title: new Text('A'),
               icon: new Icon(Icons.ac_unit),
             ),
-            new DestinationLabel(
+            new BottomNavigationBarItem(
               title: new Text('B'),
               icon: new Builder(
                 builder: (BuildContext context) {

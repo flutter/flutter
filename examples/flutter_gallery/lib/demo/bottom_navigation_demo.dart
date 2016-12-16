@@ -12,7 +12,7 @@ class NavigationIconView {
     TickerProvider vsync,
   }) : _icon = icon,
        _color = color,
-       destinationLabel = new DestinationLabel(
+       item = new BottomNavigationBarItem(
          icon: icon,
          title: title,
          backgroundColor: color,
@@ -29,7 +29,7 @@ class NavigationIconView {
 
   final Widget _icon;
   final Color _color;
-  final DestinationLabel destinationLabel;
+  final BottomNavigationBarItem item;
   final AnimationController controller;
   CurvedAnimation _animation;
 
@@ -165,8 +165,8 @@ class _BottomNavigationDemoState extends State<BottomNavigationDemo>
   @override
   Widget build(BuildContext context) {
     final BottomNavigationBar botNavBar = new BottomNavigationBar(
-      labels: _navigationViews
-          .map((NavigationIconView navigationView) => navigationView.destinationLabel)
+      items: _navigationViews
+          .map((NavigationIconView navigationView) => navigationView.item)
           .toList(),
       currentIndex: _currentIndex,
       type: _type,
