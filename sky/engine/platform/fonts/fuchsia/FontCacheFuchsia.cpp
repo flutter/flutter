@@ -6,7 +6,7 @@
 
 #include <limits>
 #include <magenta/syscalls.h>
-#include <mx/process.h>
+#include <mx/vmar.h>
 #include <mx/vmo.h>
 #include <utility>
 
@@ -59,7 +59,9 @@ fonts::FontSlant ToFontSlant(FontStyle style) {
 }
 
 void UnmapMemory(const void* buffer, void* context) {
-  mx::process::self().unmap_vm(reinterpret_cast<uintptr_t>(buffer), 0);
+  static_assert(sizeof(void*) == sizeof(uint64_t), "pointers aren't 64-bit");
+  const uint64_t size = reinterpret_cast<uint64_t>(context);
+  mx::vmar::root_self().unmap(reinterpret_cast<uintptr_t>(buffer), size);
 }
 
 sk_sp<SkData> MakeSkDataFromVMO(const mx::vmo& vmo) {
@@ -68,11 +70,11 @@ sk_sp<SkData> MakeSkDataFromVMO(const mx::vmo& vmo) {
   if (status != NO_ERROR || size > std::numeric_limits<size_t>::max())
     return nullptr;
   uintptr_t buffer = 0;
-  mx::process::self().map_vm(vmo, 0, size, &buffer, MX_VM_FLAG_PERM_READ);
+  mx::vmar::root_self().map(0, vmo, 0, size, MX_VM_FLAG_PERM_READ, &buffer);
   if (status != NO_ERROR)
     return nullptr;
   return SkData::MakeWithProc(reinterpret_cast<void*>(buffer), size,
-                              UnmapMemory, nullptr);
+                              UnmapMemory, reinterpret_cast<void*>(size));
 }
 
 fonts::FontProviderPtr* g_font_provider = nullptr;
