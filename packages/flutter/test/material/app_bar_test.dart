@@ -197,4 +197,40 @@ void main() {
     Finder title = find.text('X');
     expect(tester.getSize(title).isEmpty, isTrue);
   });
+
+  testWidgets('AppBar actions are vertically centered', (WidgetTester tester) async {
+    UniqueKey appBarKey = new UniqueKey();
+    UniqueKey leadingKey = new UniqueKey();
+    UniqueKey titleKey = new UniqueKey();
+    UniqueKey action0Key = new UniqueKey();
+    UniqueKey action1Key = new UniqueKey();
+
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Scaffold(
+          appBar: new AppBar(
+            key: appBarKey,
+            leading: new SizedBox(key: leadingKey, height: 50.0),
+            title: new SizedBox(key: titleKey, height: 40.0),
+            actions: <Widget>[
+              new SizedBox(key: action0Key, height: 20.0),
+              new SizedBox(key: action1Key, height: 30.0),
+            ],
+          ),
+        ),
+      )
+    );
+
+    // The vertical center of the widget with key, in global coordinates.
+    double yCenter(Key key) {
+      RenderBox box = tester.renderObject(find.byKey(appBarKey));
+      return box.localToGlobal(new Point(0.0, box.size.height / 2.0)).y;
+    }
+
+    expect(yCenter(appBarKey), equals(yCenter(leadingKey)));
+    expect(yCenter(appBarKey), equals(yCenter(titleKey)));
+    expect(yCenter(appBarKey), equals(yCenter(action0Key)));
+    expect(yCenter(appBarKey), equals(yCenter(action1Key)));
+  });
+
 }
