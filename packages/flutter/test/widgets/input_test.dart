@@ -810,4 +810,23 @@ void main() {
     newPos = tester.getTopLeft(find.text('Second'));
     expect(newPos.y, lessThan(pos.y));
   });
+
+  testWidgets('No space between Input icon and text', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new Center(
+        child: new Material(
+          child: new Input(
+            icon: new Icon(Icons.phone),
+            labelText: 'label',
+            value: InputValue.empty,
+          ),
+        ),
+      ),
+    );
+
+    final double iconRight = tester.getTopRight(find.byType(Icon)).x;
+    expect(iconRight, equals(tester.getTopLeft(find.text('label')).x));
+    expect(iconRight, equals(tester.getTopLeft(find.byType(InputField)).x));
+  });
+
 }
