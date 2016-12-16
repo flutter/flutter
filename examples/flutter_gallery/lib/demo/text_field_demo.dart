@@ -90,6 +90,7 @@ class TextFieldDemoState extends State<TextFieldDemo> {
               validator: _validateName,
               builder: (FormFieldState<InputValue> field) {
                 return new Input(
+                  icon: new Icon(Icons.person),
                   hintText: 'What do people call you?',
                   labelText: 'Name',
                   value: field.value,
@@ -99,6 +100,7 @@ class TextFieldDemoState extends State<TextFieldDemo> {
               },
             ),
             new InputFormField(
+              icon: new Icon(Icons.phone),
               hintText: 'Where can we reach you?',
               labelText: 'Phone Number',
               keyboardType: TextInputType.phone,
