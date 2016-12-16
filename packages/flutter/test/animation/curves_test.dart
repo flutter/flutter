@@ -91,4 +91,16 @@ void main() {
     expect(bounds[0], lessThan(0.0));
     expect(bounds[1], greaterThan(1.0));
   });
+
+  test('Decelerate does so', () {
+    expect(Curves.decelerate, hasOneLineDescription);
+
+    List<double> bounds = estimateBounds(Curves.decelerate);
+    expect(bounds[0], greaterThanOrEqualTo(0.0));
+    expect(bounds[1], lessThanOrEqualTo(1.0));
+
+    double d1 = Curves.decelerate.transform(0.2) - Curves.decelerate.transform(0.0);
+    double d2 = Curves.decelerate.transform(1.0) - Curves.decelerate.transform(0.8);
+    expect(d2, lessThan(d1));
+  });
 }
