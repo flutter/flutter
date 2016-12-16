@@ -30,11 +30,13 @@ class TextFieldDemoState extends State<TextFieldDemo> {
     ));
   }
 
+  bool _autovalidate = false;
   GlobalKey<FormState> _formKey = new GlobalKey<FormState>();
   GlobalKey<FormFieldState<InputValue>> _passwordFieldKey = new GlobalKey<FormFieldState<InputValue>>();
   void _handleSubmitted() {
     FormState form = _formKey.currentState;
-    if (form.hasErrors) {
+    if (!form.validate()) {
+      _autovalidate = true;  // Start validating on every change.
       showInSnackBar('Please fix the errors in red before submitting.');
     } else {
       form.save();
@@ -76,6 +78,7 @@ class TextFieldDemoState extends State<TextFieldDemo> {
       ),
       body: new Form(
         key: _formKey,
+        autovalidate: _autovalidate,
         child: new Block(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
           children: <Widget>[

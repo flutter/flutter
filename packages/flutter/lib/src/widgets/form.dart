@@ -22,6 +22,7 @@ class Form extends StatefulWidget {
   Form({
     Key key,
     @required this.child,
+    this.autovalidate: false,
   }) : super(key: key) {
     assert(child != null);
   }
@@ -41,6 +42,11 @@ class Form extends StatefulWidget {
 
   /// Root of the widget hierarchy that contains this form.
   final Widget child;
+
+  /// If true, form fields will validate and update their error text
+  /// immediately after every change. Otherwise, you must call
+  /// [FormState.validate] to validate.
+  final bool autovalidate;
 
   @override
   FormState createState() => new FormState();
@@ -68,6 +74,8 @@ class FormState extends State<Form> {
 
   @override
   Widget build(BuildContext context) {
+    if (config.autovalidate)
+      _validate();
     return new _FormScope(
       formState: this,
       generation: _generation,
@@ -75,13 +83,13 @@ class FormState extends State<Form> {
     );
   }
 
-  /// Saves every FormField that is a descendant of this Form.
+  /// Saves every [FormField] that is a descendant of this [Form].
   void save() {
     for (FormFieldState<dynamic> field in _fields)
       field.save();
   }
 
-  /// Resets every FormField that is a descendant of this Form back to its
+  /// Resets every [FormField] that is a descendant of this [Form] back to its
   /// initialState.
   void reset() {
     for (FormFieldState<dynamic> field in _fields)
@@ -89,13 +97,18 @@ class FormState extends State<Form> {
     _fieldDidChange();
   }
 
-  /// Returns true if any descendant FormField has an error, false otherwise.
-  bool get hasErrors {
-    for (FormFieldState<dynamic> field in _fields) {
-      if (field.hasError)
-        return true;
-    }
-    return false;
+  /// Validates every [FormField] that is a descendant of this [Form], and
+  /// returns true iff there are no errors.
+  bool validate() {
+    _fieldDidChange();
+    return _validate();
+  }
+
+  bool _validate() {
+    bool hasError = false;
+    for (FormFieldState<dynamic> field in _fields)
+      hasError = !field.validate() || hasError;
+    return !hasError;
   }
 }
 
@@ -161,6 +174,7 @@ class FormField<T> extends StatefulWidget {
     this.onSaved,
     this.validator,
     this.initialValue,
+    this.autovalidate: false,
   }) : super(key: key) {
     assert(builder != null);
   }
@@ -181,6 +195,12 @@ class FormField<T> extends StatefulWidget {
   /// An optional value to initialize the form field to, or null otherwise.
   final T initialValue;
 
+  /// If true, this form fields will validate and update its error text
+  /// immediately after every change. Otherwise, you must call
+  /// [FormFieldState.validate] to validate. If part of a [Form] that
+  /// autovalidates, this value will be ignored.
+  final bool autovalidate;
+
   @override
   FormFieldState<T> createState() => new FormFieldState<T>();
 }
@@ -194,8 +214,9 @@ class FormFieldState<T> extends State<FormField<T>> {
   /// The current value of the form field.
   T get value => _value;
 
-  /// The current validation error returned by [FormField]'s [validator]
-  /// callback, or null if no errors.
+  /// The current validation error returned by the [FormField.validator]
+  /// callback, or null if no errors have been triggered. This only updates when
+  /// [validate] is called.
   String get errorText => _errorText;
 
   /// True if this field has any validation errors.
@@ -213,6 +234,21 @@ class FormFieldState<T> extends State<FormField<T>> {
       _value = config.initialValue;
       _errorText = null;
     });
+  }
+
+  /// Calls [FormField.validator] to set the [errorText]. Returns true if there
+  /// were no errors.
+  bool validate() {
+    setState(() {
+      _validate();
+    });
+    return !hasError;
+  }
+
+  bool _validate() {
+    if (config.validator != null)
+      _errorText = config.validator(_value);
+    return !hasError;
   }
 
   /// Updates this field's state to the new value. Useful for responding to
@@ -238,9 +274,8 @@ class FormFieldState<T> extends State<FormField<T>> {
 
   @override
   Widget build(BuildContext context) {
-    if (config.validator != null)
-      _errorText = config.validator(_value);
-
+    if (config.autovalidate)
+      _validate();
     Form.of(context)?._register(this);
     return config.builder(this);
   }

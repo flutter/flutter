@@ -54,14 +54,17 @@ void main() {
     await checkText('');
   });
 
-  testWidgets('Validator sets the error text', (WidgetTester tester) async {
+  testWidgets('Validator sets the error text only when validate is called', (WidgetTester tester) async {
+    GlobalKey<FormState> formKey = new GlobalKey<FormState>();
     GlobalKey inputKey = new GlobalKey();
     String errorText(InputValue input) => input.text + '/error';
 
-    Widget builder() {
+    Widget builder(bool autovalidate) {
       return new Center(
         child: new Material(
           child: new Form(
+            key: formKey,
+            autovalidate: autovalidate,
             child: new InputFormField(
               key: inputKey,
               validator: errorText,
@@ -71,14 +74,28 @@ void main() {
       );
     }
 
-    await tester.pumpWidget(builder());
+    // Start off not autovalidating.
+    await tester.pumpWidget(builder(false));
     await showKeyboard(tester);
 
     Future<Null> checkErrorText(String testValue) async {
+      formKey.currentState.reset();
       enterText(testValue);
       await tester.idle();
+      await tester.pumpWidget(builder(false));
+
+      // We have to manually validate if we're not autovalidating.
+      expect(find.text(errorText(new InputValue(text: testValue))), findsNothing);
+      formKey.currentState.validate();
       await tester.pump();
-      // Check for a new Text widget with our error text.
+      expect(find.text(errorText(new InputValue(text: testValue))), findsOneWidget);
+
+      // Try again with autovalidation. Should validate immediately.
+      formKey.currentState.reset();
+      enterText(testValue);
+      await tester.idle();
+      await tester.pumpWidget(builder(true));
+
       expect(find.text(errorText(new InputValue(text: testValue))), findsOneWidget);
     }
 
@@ -98,6 +115,7 @@ void main() {
         child: new Material(
           child: new Form(
             key: formKey,
+            autovalidate: true,
             child: new Focus(
               key: focusKey,
               child: new Block(
@@ -195,21 +213,21 @@ void main() {
     await showKeyboard(tester);
 
     expect(fieldValue, isNull);
-    expect(formKey.currentState.hasErrors, isFalse);
+    expect(formKey.currentState.validate(), isTrue);
 
     enterText('Test');
     await tester.idle();
     await tester.pumpWidget(builder(false));
 
-    // Form wasn't saved, but validator runs immediately.
+    // Form wasn't saved yet.
     expect(fieldValue, null);
-    expect(formKey.currentState.hasErrors, isTrue);
+    expect(formKey.currentState.validate(), isFalse);
 
     formKey.currentState.save();
 
     // Now fieldValue is saved.
     expect(fieldValue, 'Test');
-    expect(formKey.currentState.hasErrors, isTrue);
+    expect(formKey.currentState.validate(), isFalse);
 
     // Now remove the field with an error.
     await tester.pumpWidget(builder(true));
@@ -217,6 +235,6 @@ void main() {
     // Reset the form. Should not crash.
     formKey.currentState.reset();
     formKey.currentState.save();
-    expect(formKey.currentState.hasErrors, isFalse);
+    expect(formKey.currentState.validate(), isTrue);
   });
 }
