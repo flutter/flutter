@@ -32,6 +32,7 @@ class NullRasterizer : public Rasterizer {
 
  private:
   ftl::WeakPtrFactory<NullRasterizer> weak_factory_;
+  std::unique_ptr<Surface> surface_;
 
   FTL_DISALLOW_COPY_AND_ASSIGN(NullRasterizer);
 };

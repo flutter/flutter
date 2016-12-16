@@ -31,6 +31,8 @@ class GPUSurfaceGL : public Surface {
 
   bool Setup() override;
 
+  void Teardown() override;
+
   bool IsValid() override;
 
   std::unique_ptr<SurfaceFrame> AcquireFrame(const SkISize& size) override;

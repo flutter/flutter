@@ -79,6 +79,10 @@ bool AndroidSurfaceGL::SetNativeWindowForOnScreenContext(
   return true;
 }
 
+void AndroidSurfaceGL::TeardownOnScreenContext() {
+  onscreen_context_ = nullptr;
+}
+
 bool AndroidSurfaceGL::IsValid() const {
   if (!onscreen_context_ || !offscreen_context_) {
     return false;

@@ -24,6 +24,8 @@ class AndroidSurfaceGL : public GPUSurfaceGLDelegate {
       AndroidNativeWindow window,
       PlatformView::SurfaceConfig onscreen_config);
 
+  void TeardownOnScreenContext();
+
   bool IsValid() const;
 
   SkISize OnScreenSurfaceSize() const;

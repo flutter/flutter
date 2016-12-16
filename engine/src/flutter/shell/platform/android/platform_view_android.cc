@@ -319,6 +319,7 @@ void PlatformViewAndroid::SetSemanticsEnabled(JNIEnv* env,
 
 void PlatformViewAndroid::ReleaseSurface() {
   NotifyDestroyed();
+  surface_gl_->TeardownOnScreenContext();
 }
 
 VsyncWaiter* PlatformViewAndroid::GetVsyncWaiter() {
