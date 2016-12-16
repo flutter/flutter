@@ -358,7 +358,7 @@ class _InputContainerState extends State<InputContainer> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           new Container(
-            margin: new EdgeInsets.only(right: 16.0, top: iconTop),
+            margin: new EdgeInsets.only(top: iconTop),
             width: config.isDense ? 40.0 : 48.0,
             child: new IconTheme.merge(
               context: context,
