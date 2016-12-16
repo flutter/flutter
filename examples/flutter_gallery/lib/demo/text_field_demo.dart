@@ -35,8 +35,8 @@ class TextFieldDemoState extends State<TextFieldDemo> {
   GlobalKey<FormFieldState<InputValue>> _passwordFieldKey = new GlobalKey<FormFieldState<InputValue>>();
   void _handleSubmitted() {
     FormState form = _formKey.currentState;
-    _autovalidate = true;  // Start validating on every change.
     if (!form.validate()) {
+      _autovalidate = true;  // Start validating on every change.
       showInSnackBar('Please fix the errors in red before submitting.');
     } else {
       form.save();
