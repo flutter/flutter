@@ -37,7 +37,7 @@ enum BottomNavigationBarType {
   shifting,
 }
 
-/// An interactive item within [BottomNavigationBar] with an icon
+/// An interactive destination label within [BottomNavigationBar] with an icon
 /// and title.
 ///
 /// See also:
@@ -78,10 +78,10 @@ class BottomNavigationBarItem {
 /// A material widget displayed at the bottom of an app for selecting among a
 /// small number of views.
 ///
-/// The bottom navigation bar consists of multiple item in the form of
-/// labels and/or icons laid out on top of a piece of material. It provides
-/// quick navigation between top-level views of an app and is typically used
-/// on mobile. For larger screens, side navigation may be a better fit.
+/// The bottom navigation bar consists of multiple items in the form of
+/// labels, icons, or both laid out on top of a piece of material. It provides
+/// quick navigation between the top-level views of an app. Note: for larger screens,
+/// side navigation may be a better fit.
 ///
 /// A bottom navigation bar is usually used in conjunction with [Scaffold] where
 /// it is provided as the [Scaffold.bottomNavigationBar] argument.
