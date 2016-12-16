@@ -94,6 +94,10 @@ bool GPUSurfaceGL::Setup() {
   return true;
 }
 
+void GPUSurfaceGL::Teardown() {
+  delegate_->GLContextClearCurrent();
+}
+
 bool GPUSurfaceGL::IsValid() {
   return context_ != nullptr;
 }

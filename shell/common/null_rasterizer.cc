@@ -12,12 +12,17 @@ void NullRasterizer::Setup(
     std::unique_ptr<Surface> surface_or_null,
     ftl::Closure rasterizer_continuation,
     ftl::AutoResetWaitableEvent* setup_completion_event) {
+  surface_ = std::move(surface_or_null);
   rasterizer_continuation();
   setup_completion_event->Signal();
 }
 
 void NullRasterizer::Teardown(
     ftl::AutoResetWaitableEvent* teardown_completion_event) {
+  if (surface_) {
+    surface_->Teardown();
+    surface_.reset();
+  }
   teardown_completion_event->Signal();
 }
 
