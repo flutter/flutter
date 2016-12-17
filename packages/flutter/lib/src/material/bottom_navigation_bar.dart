@@ -79,8 +79,8 @@ class BottomNavigationBarItem {
 /// small number of views.
 ///
 /// The bottom navigation bar consists of multiple items in the form of
-/// labels, icons, or both laid out on top of a piece of material. It provides
-/// quick navigation between the top-level views of an app. Note: for larger screens,
+/// labels, icons, or both, laid out on top of a piece of material. It provides
+/// quick navigation between the top-level views of an app. For larger screens,
 /// side navigation may be a better fit.
 ///
 /// A bottom navigation bar is usually used in conjunction with [Scaffold] where
