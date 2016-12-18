@@ -26,13 +26,13 @@ const double _kInactiveMaxWidth = 96.0;
 /// See also:
 ///
 ///  * [BottomNavigationBar]
-///  * [DestinationLabel]
+///  * [BottomNavigationBarItem]
 ///  * <https://material.google.com/components/bottom-navigation.html#bottom-navigation-specs>
 enum BottomNavigationBarType {
-  /// The [BottomNavigationBar]'s [DestinationLabel]s have fixed width.
+  /// The [BottomNavigationBar]'s [BottomNavigationBarItem]s have fixed width.
   fixed,
 
-  /// The location and size of the [BottomNavigationBar] [DestinationLabel]s
+  /// The location and size of the [BottomNavigationBar] [BottomNavigationBarItem]s
   /// animate larger when they are tapped.
   shifting,
 }
@@ -44,11 +44,11 @@ enum BottomNavigationBarType {
 ///
 ///  * [BottomNavigationBar]
 ///  * <https://material.google.com/components/bottom-navigation.html>
-class DestinationLabel {
-  /// Creates a label that is used with [BottomNavigationBar.labels].
+class BottomNavigationBarItem {
+  /// Creates an item that is used with [BottomNavigationBar.items].
   ///
   /// The arguments [icon] and [title] should not be null.
-  DestinationLabel({
+  BottomNavigationBarItem({
     @required this.icon,
     @required this.title,
     this.backgroundColor
@@ -57,20 +57,20 @@ class DestinationLabel {
     assert(this.title != null);
   }
 
-  /// The icon of the label.
+  /// The icon of the item.
   ///
   /// Typically the icon is an [Icon] or an [IconImage] widget. If another type
   /// of widget is provided then it should configure itself to match the current
   /// [IconTheme] size and color.
   final Widget icon;
 
-  /// The title of the label.
+  /// The title of the item.
   final Widget title;
 
   /// The color of the background radial animation.
   ///
   /// If the navigation bar's type is [BottomNavigationBarType.shifting], then
-  /// the entire bar is flooded with the [backgroundColor] when this label is
+  /// the entire bar is flooded with the [backgroundColor] when this item is
   /// tapped.
   final Color backgroundColor;
 }
@@ -78,70 +78,70 @@ class DestinationLabel {
 /// A material widget displayed at the bottom of an app for selecting among a
 /// small number of views.
 ///
-/// The bottom navigation bar consists of multiple destinations in the form of
-/// labels laid out on top of a piece of material. It provies quick navigation
-/// between top-level views of an app and is typically used on mobile. For
-/// larger screens, side navigation may be a better fit.
+/// The bottom navigation bar consists of multiple items in the form of
+/// labels, icons, or both, laid out on top of a piece of material. It provides
+/// quick navigation between the top-level views of an app. For larger screens,
+/// side navigation may be a better fit.
 ///
 /// A bottom navigation bar is usually used in conjunction with [Scaffold] where
 /// it is provided as the [Scaffold.bottomNavigationBar] argument.
 ///
 /// See also:
 ///
-///  * [DestinationLabel]
+///  * [BottomNavigationBarItem]
 ///  * [Scaffold]
 ///  * <https://material.google.com/components/bottom-navigation.html>
 class BottomNavigationBar extends StatefulWidget {
   /// Creates a bottom navigation bar, typically used in a [Scaffold] where it
   /// is provided as the [Scaffold.bottomNavigationBar] argument.
   ///
-  /// The arguments [labels] and [type] should not be null.
+  /// The arguments [items] and [type] should not be null.
   ///
-  /// The number of labels passed should be equal or greater than 2.
+  /// The number of items passed should be equal or greater than 2.
   ///
   /// Passing a null [fixedColor] will cause a fallback to the theme's primary
   /// color.
   BottomNavigationBar({
     Key key,
-    @required this.labels,
+    @required this.items,
     this.onTap,
     this.currentIndex: 0,
     this.type: BottomNavigationBarType.fixed,
     this.fixedColor,
     this.iconSize: 24.0,
   }) : super(key: key) {
-    assert(labels != null);
-    assert(labels.length >= 2);
-    assert(0 <= currentIndex && currentIndex < labels.length);
+    assert(items != null);
+    assert(items.length >= 2);
+    assert(0 <= currentIndex && currentIndex < items.length);
     assert(type != null);
     assert(type == BottomNavigationBarType.fixed || fixedColor == null);
     assert(iconSize != null);
   }
 
-  /// The interactive labels laid out within the bottom navigation bar.
-  final List<DestinationLabel> labels;
+  /// The interactive items laid out within the bottom navigation bar.
+  final List<BottomNavigationBarItem> items;
 
-  /// The callback that is called when a label is tapped.
+  /// The callback that is called when a item is tapped.
   ///
   /// The widget creating the bottom navigation bar needs to keep track of the
   /// current index and call `setState` to rebuild it with the newly provided
   /// index.
   final ValueChanged<int> onTap;
 
-  /// The index into [labels] of the current active label.
+  /// The index into [items] of the current active item.
   final int currentIndex;
 
   /// Defines the layout and behavior of a [BottomNavigationBar].
   final BottomNavigationBarType type;
 
-  /// The color of the selected label when bottom navigation bar is
+  /// The color of the selected item when bottom navigation bar is
   /// [BottomNavigationBarType.fixed].
   final Color fixedColor;
 
-  /// The size of all of the [DestinationLabel] icons.
+  /// The size of all of the [BottomNavigationBarItem] icons.
   ///
   /// This value is used to to configure the [IconTheme] for the navigation
-  /// bar. When a [DestinationLabel.icon] widget is not an [Icon] the widget
+  /// bar. When a [BottomNavigationBarItem.icon] widget is not an [Icon] the widget
   /// should configure itself to match the icon theme's size and color.
   final double iconSize;
 
@@ -164,13 +164,13 @@ class BottomNavigationBarState extends State<BottomNavigationBar> with TickerPro
   @override
   void initState() {
     super.initState();
-    _controllers = new List<AnimationController>.generate(config.labels.length, (int index) {
+    _controllers = new List<AnimationController>.generate(config.items.length, (int index) {
       return new AnimationController(
         duration: kThemeAnimationDuration,
         vsync: this,
       )..addListener(_rebuild);
     });
-    animations = new List<CurvedAnimation>.generate(config.labels.length, (int index) {
+    animations = new List<CurvedAnimation>.generate(config.items.length, (int index) {
       return new CurvedAnimation(
         parent: _controllers[index],
         curve: Curves.fastOutSlowIn,
@@ -178,7 +178,7 @@ class BottomNavigationBarState extends State<BottomNavigationBar> with TickerPro
       );
     });
     _controllers[config.currentIndex].value = 1.0;
-    _backgroundColor = config.labels[config.currentIndex].backgroundColor;
+    _backgroundColor = config.items[config.currentIndex].backgroundColor;
   }
 
   @override
@@ -192,7 +192,7 @@ class BottomNavigationBarState extends State<BottomNavigationBar> with TickerPro
 
   void _rebuild() {
     setState(() {
-      // Rebuilding when any of the controllers tick, i.e. when the labels are
+      // Rebuilding when any of the controllers tick, i.e. when the items are
       // animated.
     });
   }
@@ -201,9 +201,9 @@ class BottomNavigationBarState extends State<BottomNavigationBar> with TickerPro
     assert(config.type != null);
     switch (config.type) {
       case BottomNavigationBarType.fixed:
-        return config.labels.length * _kActiveMaxWidth;
+        return config.items.length * _kActiveMaxWidth;
       case BottomNavigationBarType.shifting:
-        return _kActiveMaxWidth + (config.labels.length - 1) * _kInactiveMaxWidth;
+        return _kActiveMaxWidth + (config.items.length - 1) * _kInactiveMaxWidth;
     }
     return null;
   }
@@ -216,7 +216,7 @@ class BottomNavigationBarState extends State<BottomNavigationBar> with TickerPro
   // Because of non-linear nature of the animations, the animations that are
   // currently animating might not add up to the flex weight we are expecting.
   // (1.5 + N - 1, since the max flex that the animating ones can have is 1.5)
-  // This causes instability in the animation when multiple labels are tapped.
+  // This causes instability in the animation when multiple items are tapped.
   // To solves this, we always store a weight that normalizes animating
   // animations such that their resulting flex values will add up to the desired
   // value.
@@ -254,7 +254,7 @@ class BottomNavigationBarState extends State<BottomNavigationBar> with TickerPro
     }
 
     final double allWeights = weightSum(animations);
-    // This weight corresponds to the left edge of the indexed label.
+    // This weight corresponds to the left edge of the indexed item.
     final double leftWeights = weightSum(animations.sublist(0, index));
 
     // Add half of its flex value in order to get the center.
@@ -275,12 +275,12 @@ class BottomNavigationBarState extends State<BottomNavigationBar> with TickerPro
   }
 
   void _pushCircle(int index) {
-    if (config.labels[index].backgroundColor != null)
+    if (config.items[index].backgroundColor != null)
       _circles.add(
         new _Circle(
           state: this,
           index: index,
-          color: config.labels[index].backgroundColor,
+          color: config.items[index].backgroundColor,
           vsync: this,
         )..controller.addStatusListener((AnimationStatus status) {
           if (status == AnimationStatus.completed) {
@@ -319,7 +319,7 @@ class BottomNavigationBarState extends State<BottomNavigationBar> with TickerPro
                 themeData.primaryColor : themeData.accentColor
           )
         );
-        for (int i = 0; i < config.labels.length; i += 1) {
+        for (int i = 0; i < config.items.length; i += 1) {
           children.add(
             new Expanded(
               child: new InkResponse(
@@ -344,7 +344,7 @@ class BottomNavigationBarState extends State<BottomNavigationBar> with TickerPro
                             color: colorTween.evaluate(animations[i]),
                             size: config.iconSize,
                           ),
-                          child: config.labels[i].icon,
+                          child: config.items[i].icon,
                         ),
                       ),
                     ),
@@ -366,7 +366,7 @@ class BottomNavigationBarState extends State<BottomNavigationBar> with TickerPro
                               ).evaluate(animations[i]),
                             )),
                             alignment: FractionalOffset.bottomCenter,
-                            child: config.labels[i].title,
+                            child: config.items[i].title,
                           ),
                         ),
                       ),
@@ -386,7 +386,7 @@ class BottomNavigationBarState extends State<BottomNavigationBar> with TickerPro
       case BottomNavigationBarType.shifting:
         final List<Widget> children = <Widget>[];
         _computeWeight();
-        for (int i = 0; i < config.labels.length; i += 1) {
+        for (int i = 0; i < config.items.length; i += 1) {
           children.add(
             new Expanded(
               // Since Flexible only supports integers, we're using large
@@ -414,7 +414,7 @@ class BottomNavigationBarState extends State<BottomNavigationBar> with TickerPro
                             color: Colors.white,
                             size: config.iconSize,
                           ),
-                          child: config.labels[i].icon,
+                          child: config.items[i].icon,
                         ),
                       ),
                     ),
@@ -430,7 +430,7 @@ class BottomNavigationBarState extends State<BottomNavigationBar> with TickerPro
                               fontSize: 14.0,
                               color: Colors.white
                             ),
-                            child: config.labels[i].title
+                            child: config.items[i].title
                           ),
                         ),
                       ),
