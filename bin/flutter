@@ -18,7 +18,13 @@ function follow_links() {
   echo "$PWD/${file##*/}"
 }
 
-PROG_NAME="$(follow_links "$BASH_SOURCE")"
+# Convert a filesystem path to a format usable by Dart's URI parser.
+function path_uri() {
+  # Reduce multiple leading slashes to a single slash.
+  echo $1 | sed -E -e "s,^/+,/,"
+}
+
+PROG_NAME="$(path_uri $(follow_links "$BASH_SOURCE"))"
 BIN_DIR="$(cd "${PROG_NAME%/*}" ; pwd -P)"
 export FLUTTER_ROOT="$(cd "${BIN_DIR}/.." ; pwd -P)"
 
