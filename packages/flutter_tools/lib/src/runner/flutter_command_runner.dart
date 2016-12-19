@@ -96,22 +96,19 @@ class FlutterCommandRunner extends CommandRunner<Null> {
             'Use this to select a specific version of the engine if you have built multiple engine targets.\n'
             'This path is relative to --local-engine-src-path/out.');
     argParser.addOption('record-to',
+        hide: !verboseHelp,
         help:
-            'Enables recording of process invocations (including stdout and '
-            'stderr of all such invocations), and serializes that recording to '
-            'the specified location.\n'
-            'If the location is a directory, a ZIP file named `recording.zip` '
-            'will be created in that directory. Otherwise, a ZIP file will be '
+            'Enables recording of process invocations (including stdout and stderr of all such invocations),\n'
+            'and serializes that recording to the specified location. If the location is a directory, a ZIP\n'
+            'file named `recording.zip` will be created in that directory. Otherwise, a ZIP file will be\n'
             'created with the path specified in this flag.');
     argParser.addOption('replay-from',
+        hide: !verboseHelp,
         help:
-            'Enables mocking of process invocations by replaying their stdout, '
-            'stderr, and exit code from the specified recording (obtained '
-            'via --record-to).\n'
-            'If the location is a file, it is assumed to be a ZIP file '
-            'structured according to the output of --record-to. If the '
-            'location is a directory, it is assumed to be an unzipped version '
-            'of such a ZIP file.');
+            'Enables mocking of process invocations by replaying their stdout, stderr, and exit code from\n'
+            'the specified recording (obtained via --record-to). If the location is a file, it is assumed to\n'
+            'be a ZIP file structured according to the output of --record-to. If the location is a directory,\n'
+            'it is assumed to be an unzipped version of such a ZIP file.');
   }
 
   @override
