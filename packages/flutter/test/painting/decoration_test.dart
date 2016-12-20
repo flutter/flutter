@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:ui' as ui show Image;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
@@ -13,8 +14,14 @@ import 'package:test/test.dart';
 import '../services/mocks_for_image_cache.dart';
 
 class TestCanvas implements Canvas {
+  TestCanvas([this.invocations]);
+
+  final List<Invocation> invocations;
+
   @override
-  void noSuchMethod(Invocation invocation) {}
+  void noSuchMethod(Invocation invocation) {
+    invocations?.add(invocation);
+  }
 }
 
 class SynchronousTestImageProvider extends ImageProvider<int> {
@@ -43,6 +50,43 @@ class AsyncTestImageProvider extends ImageProvider<int> {
       new Future<ImageInfo>.value(new TestImageInfo(key))
     );
   }
+}
+
+class BackgroundImageProvider extends ImageProvider<BackgroundImageProvider> {
+  final Completer<ImageInfo> _completer = new Completer<ImageInfo>();
+
+  @override
+  Future<BackgroundImageProvider> obtainKey(ImageConfiguration configuration) {
+    return new SynchronousFuture<BackgroundImageProvider>(this);
+  }
+
+  @override
+  ImageStream resolve(ImageConfiguration configuration) {
+    return super.resolve(configuration);
+  }
+
+  @override
+  ImageStreamCompleter load(BackgroundImageProvider key) {
+    return new OneFrameImageStreamCompleter(_completer.future);
+  }
+
+  void complete() {
+    _completer.complete(new ImageInfo(image: new TestImage()));
+  }
+
+  @override
+  String toString() => '$runtimeType($hashCode)';
+}
+
+class TestImage extends ui.Image {
+  @override
+  int get width => 100;
+
+  @override
+  int get height => 100;
+
+  @override
+  void dispose() { }
 }
 
 void main() {
@@ -98,5 +142,60 @@ void main() {
       async.flushMicrotasks();
       expect(onChangedCalled, equals(true));
     });
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/7289.
+  // A reference test would be better.
+  test("BoxDecoration backgroundImage clip", () {
+    void testDecoration({ BoxShape shape, BorderRadius borderRadius, bool expectClip}) {
+      new FakeAsync().run((FakeAsync async) {
+        BackgroundImageProvider imageProvider = new BackgroundImageProvider();
+        BackgroundImage backgroundImage = new BackgroundImage(image: imageProvider);
+
+        BoxDecoration boxDecoration = new BoxDecoration(
+          shape: shape,
+          borderRadius: borderRadius,
+          backgroundImage: backgroundImage,
+        );
+
+        List<Invocation> invocations = <Invocation>[];
+        TestCanvas canvas = new TestCanvas(invocations);
+        ImageConfiguration imageConfiguration = const ImageConfiguration(
+            size: const Size(100.0, 100.0)
+        );
+        bool onChangedCalled = false;
+        BoxPainter boxPainter = boxDecoration.createBoxPainter(() {
+          onChangedCalled = true;
+        });
+
+        // _BoxDecorationPainter._paintBackgroundImage() resolves the background
+        // image and adds a listener to the resolved image stream.
+        boxPainter.paint(canvas, Offset.zero, imageConfiguration);
+        imageProvider.complete();
+
+        // Run the listener which calls onChanged() which saves an internal
+        // reference to the TestImage.
+        async.flushMicrotasks();
+        expect(onChangedCalled, isTrue);
+        boxPainter.paint(canvas, Offset.zero, imageConfiguration);
+
+        // We expect a clip to preceed the drawImageRect call.
+        List<Invocation> commands = canvas.invocations.where((Invocation invocation) {
+          return invocation.memberName == #clipPath || invocation.memberName == #drawImageRect;
+        }).toList();
+        if (expectClip) { // We expect a clip to preceed the drawImageRect call.
+          expect(commands.length, 2);
+          expect(commands[0].memberName, equals(#clipPath));
+          expect(commands[1].memberName, equals(#drawImageRect));
+        } else {
+          expect(commands.length, 1);
+          expect(commands[0].memberName, equals(#drawImageRect));
+        }
+      });
+    }
+
+    testDecoration(shape: BoxShape.circle, expectClip: true);
+    testDecoration(borderRadius: new BorderRadius.all(const Radius.circular(16.0)), expectClip: true);
+    testDecoration(expectClip: false);
   });
 }

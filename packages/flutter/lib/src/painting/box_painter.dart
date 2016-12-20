@@ -1051,7 +1051,7 @@ class BoxDecoration extends Decoration {
   /// * If [backgroundColor] is null, this decoration does not paint a background color.
   /// * If [backgroundImage] is null, this decoration does not paint a background image.
   /// * If [border] is null, this decoration does not paint a border.
-  /// * If [borderRadius] is null, this decoration use more efficient background
+  /// * If [borderRadius] is null, this decoration uses more efficient background
   ///   painting commands. The [borderRadius] argument must be be null if [shape] is
   ///   [BoxShape.circle].
   /// * If [boxShadow] is null, this decoration does not paint a shadow.
@@ -1079,7 +1079,8 @@ class BoxDecoration extends Decoration {
   /// potentially with a border radius, or a circle).
   final Color backgroundColor;
 
-  /// An image to paint above the background color.
+  /// An image to paint above the background color. If [shape] is [BoxShape.circle]
+  /// then the image is clipped to the circle's boundary.
   final BackgroundImage backgroundImage;
 
   /// A border to draw above the background.
@@ -1333,6 +1334,17 @@ class _BoxDecorationPainter extends BoxPainter {
     final ui.Image image = _image?.image;
     if (image == null)
       return;
+
+    Path clipPath;
+    if (_decoration.shape == BoxShape.circle)
+      clipPath = new Path()..addOval(rect);
+    else if (_decoration.borderRadius != null)
+      clipPath = new Path()..addRRect(_decoration.borderRadius.toRRect(rect));
+    if (clipPath != null) {
+      canvas.save();
+      canvas.clipPath(clipPath);
+    }
+
     paintImage(
       canvas: canvas,
       rect: rect,
@@ -1342,6 +1354,9 @@ class _BoxDecorationPainter extends BoxPainter {
       fit: backgroundImage.fit,
       repeat: backgroundImage.repeat
     );
+
+    if (clipPath != null)
+      canvas.restore();
   }
 
   void _imageListener(ImageInfo value, bool synchronousCall) {
