@@ -147,10 +147,16 @@ void main() {
   // Regression test for https://github.com/flutter/flutter/issues/7289.
   // A reference test would be better.
   test("BoxDecoration backgroundImage clip", () {
-    void testClippedBoxDecoration(BoxDecoration boxDecoration) {
+    void testDecoration({ BoxShape shape, BorderRadius borderRadius, bool expectClip}) {
       new FakeAsync().run((FakeAsync async) {
         BackgroundImageProvider imageProvider = new BackgroundImageProvider();
         BackgroundImage backgroundImage = new BackgroundImage(image: imageProvider);
+
+        BoxDecoration boxDecoration = new BoxDecoration(
+          shape: shape,
+          borderRadius: borderRadius,
+          backgroundImage: backgroundImage,
+        );
 
         List<Invocation> invocations = <Invocation>[];
         TestCanvas canvas = new TestCanvas(invocations);
@@ -177,24 +183,19 @@ void main() {
         List<Invocation> commands = canvas.invocations.where((Invocation invocation) {
           return invocation.memberName == #clipPath || invocation.memberName == #drawImageRect;
         }).toList();
-        expect(commands.length, 2);
-        expect(commands[0].memberName, equals(#clipPath));
-        expect(commands[1].memberName, equals(#drawImageRect));
+        if (expectClip) { // We expect a clip to preceed the drawImageRect call.
+          expect(commands.length, 2);
+          expect(commands[0].memberName, equals(#clipPath));
+          expect(commands[1].memberName, equals(#drawImageRect));
+        } else {
+          expect(commands.length, 1);
+          expect(commands[0].memberName, equals(#drawImageRect));
+        }
       });
-
-      testClippedBoxDecoration(
-        new BoxDecoration(
-          shape: BoxShape.circle,
-          backgroundImage: backgroundImage,
-        ),
-      );
-
-      testClippedBoxDecoration(
-        new BoxDecoration(
-          borderRadius: new BorderRadius.all(const Radius.circular(16.0)),
-          backgroundImage: backgroundImage,
-        ),
-      );
     }
+
+    testDecoration(shape: BoxShape.circle, expectClip: true);
+    testDecoration(borderRadius: new BorderRadius.all(const Radius.circular(16.0)), expectClip: true);
+    testDecoration(expectClip: false);
   });
 }
