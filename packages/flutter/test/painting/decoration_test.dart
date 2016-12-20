@@ -146,45 +146,55 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/7289.
   // A reference test would be better.
-  test("BoxDecoration backgroundImage circle clip", () {
-    new FakeAsync().run((FakeAsync async) {
-      BackgroundImageProvider imageProvider = new BackgroundImageProvider();
-      BackgroundImage backgroundImage = new BackgroundImage(image: imageProvider);
+  test("BoxDecoration backgroundImage clip", () {
+    void testClippedBoxDecoration(BoxDecoration boxDecoration) {
+      new FakeAsync().run((FakeAsync async) {
+        BackgroundImageProvider imageProvider = new BackgroundImageProvider();
+        BackgroundImage backgroundImage = new BackgroundImage(image: imageProvider);
 
-      BoxDecoration boxDecoration = new BoxDecoration(
-        shape: BoxShape.circle,
-        backgroundImage: backgroundImage,
-      );
+        List<Invocation> invocations = <Invocation>[];
+        TestCanvas canvas = new TestCanvas(invocations);
+        ImageConfiguration imageConfiguration = const ImageConfiguration(
+            size: const Size(100.0, 100.0)
+        );
+        bool onChangedCalled = false;
+        BoxPainter boxPainter = boxDecoration.createBoxPainter(() {
+          onChangedCalled = true;
+        });
 
-      List<Invocation> invocations = <Invocation>[];
-      TestCanvas canvas = new TestCanvas(invocations);
-      ImageConfiguration imageConfiguration = const ImageConfiguration(
-          size: const Size(100.0, 100.0)
-      );
-      bool onChangedCalled = false;
-      BoxPainter boxPainter = boxDecoration.createBoxPainter(() {
-        onChangedCalled = true;
+        // _BoxDecorationPainter._paintBackgroundImage() resolves the background
+        // image and adds a listener to the resolved image stream.
+        boxPainter.paint(canvas, Offset.zero, imageConfiguration);
+        imageProvider.complete();
+
+        // Run the listener which calls onChanged() which saves an internal
+        // reference to the TestImage.
+        async.flushMicrotasks();
+        expect(onChangedCalled, isTrue);
+        boxPainter.paint(canvas, Offset.zero, imageConfiguration);
+
+        // We expect a clip to preceed the drawImageRect call.
+        List<Invocation> commands = canvas.invocations.where((Invocation invocation) {
+          return invocation.memberName == #clipPath || invocation.memberName == #drawImageRect;
+        }).toList();
+        expect(commands.length, 2);
+        expect(commands[0].memberName, equals(#clipPath));
+        expect(commands[1].memberName, equals(#drawImageRect));
       });
 
-      // _BoxDecorationPainter._paintBackgroundImage() resolves the background
-      // image and adds a listener to the resolved image stream.
-      boxPainter.paint(canvas, Offset.zero, imageConfiguration);
-      imageProvider.complete();
+      testClippedBoxDecoration(
+        new BoxDecoration(
+          shape: BoxShape.circle,
+          backgroundImage: backgroundImage,
+        ),
+      );
 
-      // Run the listener which calls onChanged() which saves an internal
-      // reference to the TestImage.
-      async.flushMicrotasks();
-      expect(onChangedCalled, isTrue);
-      boxPainter.paint(canvas, Offset.zero, imageConfiguration);
-
-      // We expect a clip - for the BoxShape.circle - to preceed
-      // the drawImageRect call.
-      List<Invocation> commands = canvas.invocations.where((Invocation invocation) {
-        return invocation.memberName == #clipPath || invocation.memberName == #drawImageRect;
-      }).toList();
-      expect(commands.length, equals(2));
-      expect(commands[0].memberName, equals(#clipPath));
-      expect(commands[1].memberName, equals(#drawImageRect));
-    });
+      testClippedBoxDecoration(
+        new BoxDecoration(
+          borderRadius: new BorderRadius.all(const Radius.circular(16.0)),
+          backgroundImage: backgroundImage,
+        ),
+      );
+    }
   });
 }

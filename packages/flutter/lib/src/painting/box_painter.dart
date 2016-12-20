@@ -1334,10 +1334,17 @@ class _BoxDecorationPainter extends BoxPainter {
     final ui.Image image = _image?.image;
     if (image == null)
       return;
-    if (_decoration.shape == BoxShape.circle) {
+
+    Path clipPath;
+    if (_decoration.shape == BoxShape.circle)
+      clipPath = new Path()..addOval(rect);
+    else if (_decoration.borderRadius != null)
+      clipPath = new Path()..addRRect(_decoration.borderRadius.toRRect(rect));
+    if (clipPath != null) {
       canvas.save();
-      canvas.clipPath(new Path()..addOval(rect));
+      canvas.clipPath(clipPath);
     }
+
     paintImage(
       canvas: canvas,
       rect: rect,
@@ -1347,7 +1354,8 @@ class _BoxDecorationPainter extends BoxPainter {
       fit: backgroundImage.fit,
       repeat: backgroundImage.repeat
     );
-    if (_decoration.shape == BoxShape.circle)
+
+    if (clipPath != null)
       canvas.restore();
   }
 
