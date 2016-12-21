@@ -33,6 +33,7 @@ final List<String> demoTitles = <String>[
   'Chips',
   'Date and time pickers',
   'Dialog',
+  'Drawer',
   'Expand/collapse list control',
   'Expansion panels',
   'Floating action button',

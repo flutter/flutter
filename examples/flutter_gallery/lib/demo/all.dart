@@ -12,6 +12,7 @@ export 'colors_demo.dart';
 export 'data_table_demo.dart';
 export 'date_and_time_picker_demo.dart';
 export 'dialog_demo.dart';
+export 'drawer_demo.dart';
 export 'expansion_panels_demo.dart';
 export 'grid_list_demo.dart';
 export 'icons_demo.dart';

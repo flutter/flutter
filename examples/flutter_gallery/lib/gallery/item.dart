@@ -103,6 +103,12 @@ final List<GalleryItem> kAllGalleryItems = <GalleryItem>[
     buildRoute: (BuildContext context) => new DialogDemo()
   ),
   new GalleryItem(
+    title: 'Drawer',
+    subtitle: 'Navigation drawer with a standard header',
+    routeName: DrawerDemo.routeName,
+    buildRoute: (BuildContext context) => new DrawerDemo()
+  ),
+  new GalleryItem(
     title: 'Expand/collapse list control',
     subtitle: 'List with one level of sublists',
     routeName: TwoLevelListDemo.routeName,
