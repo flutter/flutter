@@ -79,15 +79,13 @@ class _AccountDetails extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
     Widget accountNameLine = accountName == null ? null : new DefaultTextStyle(
-      style: const TextStyle(
-        fontWeight: FontWeight.w500,
-        color: Colors.white,
-      ),
+      style: theme.primaryTextTheme.body2,
       child: accountName,
     );
     Widget accountEmailLine = accountEmail == null ? null : new DefaultTextStyle(
-      style: const TextStyle(color: Colors.white),
+      style: theme.primaryTextTheme.body1,
       child: accountEmail,
     );
     if (onTap != null) {

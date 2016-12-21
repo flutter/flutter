@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2016 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -80,6 +80,7 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
         leading: new IconButton(
           icon: new Icon(_backIcon()),
           alignment: FractionalOffset.centerLeft,
+          tooltip: 'Back',
           onPressed: () {
             Navigator.pop(context);
           },
@@ -91,7 +92,7 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
           children: <Widget>[
             new UserAccountsDrawerHeader(
               accountName: new Text('Zach Widget'),
-              accountEmail: new Text('zach.widget@flutter.com'),
+              accountEmail: new Text('zach.widget@example.com'),
               currentAccountPicture: new CircleAvatar(backgroundImage: new AssetImage(_kAsset0)),
               otherAccountsPictures: <Widget>[
                 new CircleAvatar(backgroundImage: new AssetImage(_kAsset1)),
