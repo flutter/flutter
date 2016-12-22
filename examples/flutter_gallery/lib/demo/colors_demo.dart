@@ -116,29 +116,26 @@ class ColorsDemo extends StatefulWidget {
   _ColorsDemoState createState() => new _ColorsDemoState();
 }
 
-class _ColorsDemoState extends State<ColorsDemo> {
+class _ColorsDemoState extends State<ColorsDemo> with SingleTickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
-    return new TabBarSelection<ColorSwatch>(
-      values: colorSwatches,
+    return new DefaultTabController(
+      length: colorSwatches.length,
       child: new Scaffold(
         appBar: new AppBar(
           elevation: 0,
           title: new Text('Colors'),
-          bottom: new TabBar<ColorSwatch>(
+          bottom: new TabBar(
             isScrollable: true,
-            labels: new Map<ColorSwatch, TabLabel>.fromIterable(colorSwatches, value: (ColorSwatch swatch) {
-              return new TabLabel(text: swatch.name);
-            })
+            tabs: colorSwatches.map((ColorSwatch swatch) => new Tab(text: swatch.name)).toList(),
           )
         ),
-        body: new TabBarView<ColorSwatch>(
+        body: new TabBarView(
           children: colorSwatches.map((ColorSwatch swatch) {
             return new ColorSwatchTabView(swatch: swatch);
-          })
-          .toList()
-        )
-      )
+          }).toList(),
+        ),
+      ),
     );
   }
 }

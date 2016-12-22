@@ -10,6 +10,21 @@ enum TabsDemoStyle {
   textOnly
 }
 
+class _Page {
+  _Page({ this.icon, this.text });
+  final IconData icon;
+  final String text;
+}
+
+final List<_Page> _allPages = <_Page>[
+  new _Page(icon: Icons.event, text: 'EVENT'),
+  new _Page(icon: Icons.home, text: 'HOME'),
+  new _Page(icon: Icons.android, text: 'ANDROID'),
+  new _Page(icon: Icons.alarm, text: 'ALARM'),
+  new _Page(icon: Icons.face, text: 'FACE'),
+  new _Page(icon: Icons.language, text: 'LANGAUGE'),
+];
+
 class ScrollableTabsDemo extends StatefulWidget {
   static const String routeName = '/scrollable-tabs';
 
@@ -17,25 +32,7 @@ class ScrollableTabsDemo extends StatefulWidget {
   ScrollableTabsDemoState createState() => new ScrollableTabsDemoState();
 }
 
-class ScrollableTabsDemoState extends State<ScrollableTabsDemo> {
-  final List<IconData> icons = <IconData>[
-    Icons.event,
-    Icons.home,
-    Icons.android,
-    Icons.alarm,
-    Icons.face,
-    Icons.language,
-  ];
-
-  final Map<IconData, String> labels = <IconData, String>{
-    Icons.event: 'EVENT',
-    Icons.home: 'HOME',
-    Icons.android: 'ANDROID',
-    Icons.alarm: 'ALARM',
-    Icons.face: 'FACE',
-    Icons.language: 'LANGUAGE',
-  };
-
+class ScrollableTabsDemoState extends State<ScrollableTabsDemo> with SingleTickerProviderStateMixin {
   TabsDemoStyle _demoStyle = TabsDemoStyle.iconsAndText;
 
   void changeDemoStyle(TabsDemoStyle style) {
@@ -47,8 +44,8 @@ class ScrollableTabsDemoState extends State<ScrollableTabsDemo> {
   @override
   Widget build(BuildContext context) {
     final Color iconColor = Theme.of(context).accentColor;
-    return new TabBarSelection<IconData>(
-      values: icons,
+    return new DefaultTabController(
+      length: _allPages.length,
       child: new Scaffold(
         appBar: new AppBar(
           title: new Text('Scrollable tabs'),
@@ -68,44 +65,41 @@ class ScrollableTabsDemoState extends State<ScrollableTabsDemo> {
                   value: TabsDemoStyle.textOnly,
                   child: new Text('Text only')
                 ),
-              ]
-            )
+              ],
+            ),
           ],
-          bottom: new TabBar<IconData>(
+          bottom: new TabBar(
             isScrollable: true,
-            labels: new Map<IconData, TabLabel>.fromIterable(
-              icons,
-              value: (IconData icon) {
-                switch(_demoStyle) {
-                  case TabsDemoStyle.iconsAndText:
-                    return new TabLabel(text: labels[icon], icon: new Icon(icon));
-                  case TabsDemoStyle.iconsOnly:
-                    return new TabLabel(icon: new Icon(icon));
-                  case TabsDemoStyle.textOnly:
-                    return new TabLabel(text: labels[icon]);
-                }
+            tabs: _allPages.map((_Page page) {
+              switch(_demoStyle) {
+                case TabsDemoStyle.iconsAndText:
+                  return new Tab(text: page.text, icon: new Icon(page.icon));
+                case TabsDemoStyle.iconsOnly:
+                  return new Tab(icon: new Icon(page.icon));
+                case TabsDemoStyle.textOnly:
+                  return new Tab(text: page.text);
               }
-            )
-          )
+            }).toList(),
+          ),
         ),
-        body: new TabBarView<IconData>(
-          children: icons.map((IconData icon) {
+        body: new TabBarView(
+          children: _allPages.map((_Page page) {
             return new Container(
-              key: new ObjectKey(icon),
+              key: new ObjectKey(page.icon),
               padding: const EdgeInsets.all(12.0),
               child:new Card(
                 child: new Center(
                   child: new Icon(
-                    icon,
+                    page.icon,
                     color: iconColor,
-                    size: 128.0
-                  )
-                )
-              )
+                    size: 128.0,
+                  ),
+                ),
+              ),
             );
           }).toList()
-        )
-      )
+        ),
+      ),
     );
   }
 }

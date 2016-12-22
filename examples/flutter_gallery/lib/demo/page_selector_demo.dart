@@ -4,78 +4,89 @@
 
 import 'package:flutter/material.dart';
 
-class PageSelectorDemo extends StatelessWidget {
+class _PageSelector extends StatelessWidget {
+  _PageSelector({ this.icons });
 
-  static const String routeName = '/page-selector';
+  final List<IconData> icons;
 
   void _handleArrowButtonPress(BuildContext context, int delta) {
-    final TabBarSelectionState<IconData> selection = TabBarSelection.of/*<IconData>*/(context);
-    if (!selection.valueIsChanging)
-      selection.value = selection.values[(selection.index + delta).clamp(0, selection.values.length - 1)];
+    TabController controller = DefaultTabController.of(context);
+    if (!controller.indexIsChanging)
+      controller.animateTo(controller.index + delta);
   }
 
   @override
-  Widget build(BuildContext notUsed) { // Can't find the TabBarSelection from this context.
-    final List<IconData> icons = <IconData>[
-      Icons.event,
-      Icons.home,
-      Icons.android,
-      Icons.alarm,
-      Icons.face,
-      Icons.language,
-    ];
+  Widget build(BuildContext context) {
+    final TabController controller = DefaultTabController.of(context);
+    final Color color = Theme.of(context).accentColor;
+    return new Column(
+      children: <Widget>[
+        new Container(
+          margin: const EdgeInsets.only(top: 16.0),
+          child: new Row(
+            children: <Widget>[
+              new IconButton(
+                icon: new Icon(Icons.chevron_left),
+                color: color,
+                onPressed: () { _handleArrowButtonPress(context, -1); },
+                tooltip: 'Page back'
+              ),
+              new TabPageSelector(controller: controller),
+              new IconButton(
+                icon: new Icon(Icons.chevron_right),
+                color: color,
+                onPressed: () { _handleArrowButtonPress(context, 1); },
+                tooltip: 'Page forward'
+              )
+            ],
+            mainAxisAlignment: MainAxisAlignment.spaceBetween
+          )
+        ),
+        new Expanded(
+          child: new TabBarView(
+            children: icons.map((IconData icon) {
+              return new Container(
+                key: new ObjectKey(icon),
+                padding: const EdgeInsets.all(12.0),
+                child: new Card(
+                  child: new Center(
+                    child: new Icon(icon, size: 128.0, color: color)
+                  ),
+                ),
+              );
+            }).toList()
+          ),
+        ),
+      ],
+    );
+  }
+}
 
+class PageSelectorDemo extends StatefulWidget {
+  static const String routeName = '/page-selector';
+
+  @override
+  _PageSelectorDemoState createState() => new _PageSelectorDemoState();
+}
+
+class _PageSelectorDemoState extends State<PageSelectorDemo> with SingleTickerProviderStateMixin {
+  final List<IconData> icons = <IconData>[
+    Icons.event,
+    Icons.home,
+    Icons.android,
+    Icons.alarm,
+    Icons.face,
+    Icons.language,
+  ];
+
+  @override
+  Widget build(BuildContext context) {
     return new Scaffold(
       appBar: new AppBar(title: new Text('Page selector')),
-      body: new TabBarSelection<IconData>(
-        values: icons,
-        child: new Builder(
-          builder: (BuildContext context) {
-            final Color color = Theme.of(context).accentColor;
-            return new Column(
-              children: <Widget>[
-                new Container(
-                  margin: const EdgeInsets.only(top: 16.0),
-                  child: new Row(
-                    children: <Widget>[
-                      new IconButton(
-                        icon: new Icon(Icons.chevron_left),
-                        color: color,
-                        onPressed: () { _handleArrowButtonPress(context, -1); },
-                        tooltip: 'Page back'
-                      ),
-                      new TabPageSelector<IconData>(),
-                      new IconButton(
-                        icon: new Icon(Icons.chevron_right),
-                        color: color,
-                        onPressed: () { _handleArrowButtonPress(context, 1); },
-                        tooltip: 'Page forward'
-                      )
-                    ],
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween
-                  )
-                ),
-                new Expanded(
-                  child: new TabBarView<IconData>(
-                    children: icons.map((IconData icon) {
-                      return new Container(
-                        key: new ObjectKey(icon),
-                        padding: const EdgeInsets.all(12.0),
-                        child: new Card(
-                          child: new Center(
-                            child: new Icon(icon, size: 128.0, color: color)
-                          )
-                        )
-                      );
-                    })
-                    .toList()
-                  )
-                )
-              ]
-            );
-          }
-        )
-      )
+      body: new DefaultTabController(
+        length: icons.length,
+        child: new _PageSelector(icons: icons),
+      ),
     );
   }
 }

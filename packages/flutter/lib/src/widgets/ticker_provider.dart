@@ -115,7 +115,8 @@ abstract class SingleTickerProviderStateMixin implements State<dynamic>, TickerP
 
   @override
   void dependenciesChanged() {
-    _ticker.muted = !TickerMode.of(context);
+    if (_ticker != null)
+      _ticker.muted = !TickerMode.of(context);
     super.dependenciesChanged();
   }
 
