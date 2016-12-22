@@ -8,7 +8,7 @@ Things you will need
 
  * Linux or Mac OS X. (Windows is not yet supported.)
  * git (used for source version control).
- * An IDE. We recommend [Atom](https://github.com/flutter/engine/wiki/Using-Atom-with-Flutter).
+ * An IDE. We recommend [IntelliJ with the Flutter plugin](https://flutter.io/intellij-ide/).
  * An ssh client (used to authenticate with GitHub).
  * Chromium's [depot_tools](http://www.chromium.org/developers/how-tos/install-depot-tools) (make sure it's in your path). We use the `gclient` tool from depot_tools.
  * Python (used by many of our tools, including 'gclient').
