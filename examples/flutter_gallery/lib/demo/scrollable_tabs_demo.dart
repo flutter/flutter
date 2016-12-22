@@ -33,7 +33,20 @@ class ScrollableTabsDemo extends StatefulWidget {
 }
 
 class ScrollableTabsDemoState extends State<ScrollableTabsDemo> with SingleTickerProviderStateMixin {
+  TabController _controller;
   TabsDemoStyle _demoStyle = TabsDemoStyle.iconsAndText;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = new TabController(vsync: this, length: _allPages.length);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   void changeDemoStyle(TabsDemoStyle style) {
     setState(() {
@@ -44,61 +57,60 @@ class ScrollableTabsDemoState extends State<ScrollableTabsDemo> with SingleTicke
   @override
   Widget build(BuildContext context) {
     final Color iconColor = Theme.of(context).accentColor;
-    return new DefaultTabController(
-      length: _allPages.length,
-      child: new Scaffold(
-        appBar: new AppBar(
-          title: new Text('Scrollable tabs'),
-          actions: <Widget>[
-            new PopupMenuButton<TabsDemoStyle>(
-              onSelected: changeDemoStyle,
-              itemBuilder: (BuildContext context) => <PopupMenuItem<TabsDemoStyle>>[
-                new PopupMenuItem<TabsDemoStyle>(
-                  value: TabsDemoStyle.iconsAndText,
-                  child: new Text('Icons and text')
-                ),
-                new PopupMenuItem<TabsDemoStyle>(
-                  value: TabsDemoStyle.iconsOnly,
-                  child: new Text('Icons only')
-                ),
-                new PopupMenuItem<TabsDemoStyle>(
-                  value: TabsDemoStyle.textOnly,
-                  child: new Text('Text only')
-                ),
-              ],
-            ),
-          ],
-          bottom: new TabBar(
-            isScrollable: true,
-            tabs: _allPages.map((_Page page) {
-              switch(_demoStyle) {
-                case TabsDemoStyle.iconsAndText:
-                  return new Tab(text: page.text, icon: new Icon(page.icon));
-                case TabsDemoStyle.iconsOnly:
-                  return new Tab(icon: new Icon(page.icon));
-                case TabsDemoStyle.textOnly:
-                  return new Tab(text: page.text);
-              }
-            }).toList(),
+    return new Scaffold(
+      appBar: new AppBar(
+        title: new Text('Scrollable tabs'),
+        actions: <Widget>[
+          new PopupMenuButton<TabsDemoStyle>(
+            onSelected: changeDemoStyle,
+            itemBuilder: (BuildContext context) => <PopupMenuItem<TabsDemoStyle>>[
+              new PopupMenuItem<TabsDemoStyle>(
+                value: TabsDemoStyle.iconsAndText,
+                child: new Text('Icons and text')
+              ),
+              new PopupMenuItem<TabsDemoStyle>(
+                value: TabsDemoStyle.iconsOnly,
+                child: new Text('Icons only')
+              ),
+              new PopupMenuItem<TabsDemoStyle>(
+                value: TabsDemoStyle.textOnly,
+                child: new Text('Text only')
+              ),
+            ],
           ),
+        ],
+        bottom: new TabBar(
+          controller: _controller,
+          isScrollable: true,
+          tabs: _allPages.map((_Page page) {
+            switch(_demoStyle) {
+              case TabsDemoStyle.iconsAndText:
+                return new Tab(text: page.text, icon: new Icon(page.icon));
+              case TabsDemoStyle.iconsOnly:
+                return new Tab(icon: new Icon(page.icon));
+              case TabsDemoStyle.textOnly:
+                return new Tab(text: page.text);
+            }
+          }).toList(),
         ),
-        body: new TabBarView(
-          children: _allPages.map((_Page page) {
-            return new Container(
-              key: new ObjectKey(page.icon),
-              padding: const EdgeInsets.all(12.0),
-              child:new Card(
-                child: new Center(
-                  child: new Icon(
-                    page.icon,
-                    color: iconColor,
-                    size: 128.0,
-                  ),
+      ),
+      body: new TabBarView(
+        controller: _controller,
+        children: _allPages.map((_Page page) {
+          return new Container(
+            key: new ObjectKey(page.icon),
+            padding: const EdgeInsets.all(12.0),
+            child:new Card(
+              child: new Center(
+                child: new Icon(
+                  page.icon,
+                  color: iconColor,
+                  size: 128.0,
                 ),
               ),
-            );
-          }).toList()
-        ),
+            ),
+          );
+        }).toList()
       ),
     );
   }

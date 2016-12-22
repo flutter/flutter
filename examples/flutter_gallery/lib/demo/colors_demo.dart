@@ -107,16 +107,9 @@ class ColorSwatchTabView extends StatelessWidget {
   }
 }
 
-class ColorsDemo extends StatefulWidget {
-  ColorsDemo({ Key key }) : super(key: key);
-
+class ColorsDemo extends StatelessWidget {
   static const String routeName = '/colors';
 
-  @override
-  _ColorsDemoState createState() => new _ColorsDemoState();
-}
-
-class _ColorsDemoState extends State<ColorsDemo> with SingleTickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return new DefaultTabController(
