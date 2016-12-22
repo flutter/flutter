@@ -120,21 +120,19 @@ class TabsDemo extends StatefulWidget {
   _TabsDemoState createState() => new _TabsDemoState();
 }
 
-class _TabsDemoState extends State<TabsDemo> {
+class _TabsDemoState extends State<TabsDemo> with SingleTickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
-    return new TabBarSelection<_Page>(
-      values: _allPages.keys.toList(),
+    return new DefaultTabController(
+      length: _allPages.length,
       child: new Scaffold(
         appBar: new AppBar(
           title: new Text('Tabs and scrolling'),
-          bottom: new TabBar<_Page>(
-            labels: new Map<_Page, TabLabel>.fromIterable(_allPages.keys, value: (_Page page) {
-              return new TabLabel(text: page.label);
-            })
-          )
+          bottom: new TabBar(
+            tabs: _allPages.keys.map((_Page page) => new Tab(text: page.label)).toList(),
+          ),
         ),
-        body: new TabBarView<_Page>(
+        body: new TabBarView(
           children: _allPages.keys.map((_Page page) {
             return new ScrollableList(
               padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
@@ -144,11 +142,11 @@ class _TabsDemoState extends State<TabsDemo> {
                   padding: const EdgeInsets.symmetric(vertical: 8.0),
                   child: new _CardDataItem(page: page, data: data)
                 );
-              }).toList()
+              }).toList(),
             );
-          }).toList()
-        )
-      )
+          }).toList(),
+        ),
+      ),
     );
   }
 }

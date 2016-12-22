@@ -412,8 +412,6 @@ class AnimationDemo extends StatefulWidget {
 }
 
 class _AnimationDemoState extends State<AnimationDemo> with TickerProviderStateMixin {
-  static final GlobalKey<TabBarSelectionState<_ArcDemo>> _tabsKey = new GlobalKey<TabBarSelectionState<_ArcDemo>>();
-
   List<_ArcDemo> _allDemos;
 
   @override
@@ -435,8 +433,7 @@ class _AnimationDemoState extends State<AnimationDemo> with TickerProviderStateM
     ];
   }
 
-  Future<Null> _play() async {
-    _ArcDemo demo = _tabsKey.currentState.value;
+  Future<Null> _play(_ArcDemo demo) async {
     await demo.controller.forward();
     if (demo.key.currentState != null && demo.key.currentState.mounted)
       demo.controller.reverse();
@@ -444,23 +441,26 @@ class _AnimationDemoState extends State<AnimationDemo> with TickerProviderStateM
 
   @override
   Widget build(BuildContext context) {
-    return new TabBarSelection<_ArcDemo>(
-      key: _tabsKey,
-      values: _allDemos,
+    return new DefaultTabController(
+      length: _allDemos.length,
       child: new Scaffold(
         appBar: new AppBar(
           title: new Text('Animation'),
-          bottom: new TabBar<_ArcDemo>(
-            labels: new Map<_ArcDemo, TabLabel>.fromIterable(_allDemos, value: (_ArcDemo demo) {
-              return new TabLabel(text: demo.title);
-            })
-          )
+          bottom: new TabBar(
+            tabs: _allDemos.map((_ArcDemo demo) => new Tab(text: demo.title)).toList(),
+          ),
         ),
-        floatingActionButton: new FloatingActionButton(
-          onPressed: _play,
-          child: new Icon(Icons.refresh)
+        floatingActionButton: new Builder(
+          builder: (BuildContext context) {
+            return new FloatingActionButton(
+              child: new Icon(Icons.refresh),
+              onPressed: () {
+                _play(_allDemos[DefaultTabController.of(context).index]);
+              },
+            );
+          },
         ),
-        body: new TabBarView<_ArcDemo>(
+        body: new TabBarView(
           children: _allDemos.map((_ArcDemo demo) => demo.builder(demo)).toList()
         )
       )
