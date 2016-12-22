@@ -492,16 +492,17 @@ class _TabBarState extends State<TabBar> {
     if (_controller != null)
       _controller.animation.removeListener(_handleTick);
     _controller = config.controller ?? DefaultTabController.of(context);
-    assert(_controller != null);
-    _controller.animation.addListener(_handleTick);
+    if (_controller != null) {
+      _controller.animation.addListener(_handleTick);
+      _indicatorPainter = new _IndicatorPainter(_controller);
+      _currentIndex = _controller.index;
+    }
   }
 
   @override
   void dependenciesChanged() {
     super.dependenciesChanged();
     _initTabController();
-    _indicatorPainter = new _IndicatorPainter(_controller);
-    _currentIndex = _controller.index;
   }
 
   @override
@@ -512,7 +513,8 @@ class _TabBarState extends State<TabBar> {
 
   @override
   void dispose() {
-    _controller.animation.removeListener(_handleTick);
+    if (_controller != null)
+      _controller.animation.removeListener(_handleTick);
     super.dispose();
   }
 
