@@ -275,11 +275,9 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
                 child: new Align(
                   alignment: FractionalOffset.centerRight,
                   widthFactor: _controller.value,
-                  child: new RepaintBoundary(
-                    child: new Focus(
-                      key: _drawerKey,
-                      child: config.child
-                    )
+                  child: new Focus(
+                    key: _drawerKey,
+                    child: config.child
                   )
                 )
               )
