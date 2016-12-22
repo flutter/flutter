@@ -494,8 +494,9 @@ class _TabBarState extends State<TabBar> {
     _controller = config.controller ?? DefaultTabController.of(context);
     if (_controller != null) {
       _controller.animation.addListener(_handleTick);
-      _indicatorPainter = new _IndicatorPainter(_controller);
       _currentIndex = _controller.index;
+      final List<double> offsets = _indicatorPainter?.tabOffsets;
+      _indicatorPainter = new _IndicatorPainter(_controller)..tabOffsets = offsets;
     }
   }
 
@@ -507,6 +508,7 @@ class _TabBarState extends State<TabBar> {
 
   @override
   void didUpdateConfig(TabBar oldConfig) {
+    super.didUpdateConfig(oldConfig);
     if (config.controller != oldConfig.controller)
       _initTabController();
   }
@@ -743,8 +745,8 @@ class _TabBarViewState extends State<TabBarView> {
     if (_controller != null)
       _controller.animation.removeListener(_handleTick);
     _controller = config.controller ?? DefaultTabController.of(context);
-    assert(_controller != null);
-    _controller.animation.addListener(_handleTick);
+    if (_controller != null)
+      _controller.animation.addListener(_handleTick);
   }
 
   @override
@@ -757,13 +759,16 @@ class _TabBarViewState extends State<TabBarView> {
   void dependenciesChanged() {
     super.dependenciesChanged();
     _initTabController();
-    _currentIndex = _controller.index;
+    _currentIndex = _controller?.index;
   }
 
   @override
   void didUpdateConfig(TabBarView oldConfig) {
+    super.didUpdateConfig(oldConfig);
     if (config.controller != oldConfig.controller)
       _initTabController();
+    if (config.children != oldConfig.children && !_warpUnderway)
+      _children = config.children;
   }
 
   @override

@@ -62,15 +62,9 @@ class _PageSelector extends StatelessWidget {
   }
 }
 
-class PageSelectorDemo extends StatefulWidget {
+class PageSelectorDemo extends StatelessWidget {
   static const String routeName = '/page-selector';
-
-  @override
-  _PageSelectorDemoState createState() => new _PageSelectorDemoState();
-}
-
-class _PageSelectorDemoState extends State<PageSelectorDemo> with SingleTickerProviderStateMixin {
-  final List<IconData> icons = <IconData>[
+  static final List<IconData> icons = <IconData>[
     Icons.event,
     Icons.home,
     Icons.android,

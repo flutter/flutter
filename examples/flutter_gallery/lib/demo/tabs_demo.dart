@@ -111,16 +111,9 @@ class _CardDataItem extends StatelessWidget {
   }
 }
 
-class TabsDemo extends StatefulWidget {
-  TabsDemo({ Key key }) : super(key: key);
-
+class TabsDemo extends StatelessWidget {
   static const String routeName = '/tabs';
 
-  @override
-  _TabsDemoState createState() => new _TabsDemoState();
-}
-
-class _TabsDemoState extends State<TabsDemo> with SingleTickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return new DefaultTabController(
