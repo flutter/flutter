@@ -22,3 +22,6 @@ const Duration kRadialReactionDuration = const Duration(milliseconds: 200);
 
 /// The value of the alpha channel to use when drawing a circular material ink response.
 const int kRadialReactionAlpha = 0x33;
+
+/// The duration
+const Duration kTabScrollDuration = const Duration(milliseconds: 200);

@@ -71,6 +71,7 @@ export 'src/material/snack_bar.dart';
 export 'src/material/stepper.dart';
 export 'src/material/switch.dart';
 export 'src/material/tabs.dart';
+export 'src/material/tab_controller.dart';
 export 'src/material/theme.dart';
 export 'src/material/theme_data.dart';
 export 'src/material/time_picker.dart';
