@@ -8,11 +8,12 @@ import 'package:flutter/widgets.dart';
 import 'constants.dart';
 
 class TabController extends ChangeNotifier {
-  TabController({ int initialIndex: 0, this.length, TickerProvider vsync })
+  TabController({ int initialIndex: 0, @required this.length, @required TickerProvider vsync })
     : _index = initialIndex,
       _previousIndex = initialIndex,
       _animationController = new AnimationController(
-        value: 0.5,
+        value: initialIndex.toDouble(),
+        upperBound: (length - 1).toDouble(),
         vsync: vsync
    ) {
     assert(length != null && length > 1);
@@ -50,21 +51,19 @@ class TabController extends ChangeNotifier {
     _previousIndex = index;
     _index = value;
     _animationController
-      ..value = 0.0
-      ..animateTo(1.0, duration: duration, curve: curve).then((_) {
-        _animationController.value = 0.5;
+      ..animateTo(_index.toDouble(), duration: duration, curve: curve).then((_) {
         _indexIsChanging = false;
       });
   }
 
-  double get offset => 2.0 * _animationController.value - 1.0;
+  double get offset => _animationController.value - _index.toDouble();
   set offset(double value) {
     assert(value != null);
     assert(value >= -1.0 && value <= 1.0);
     assert(!indexIsChanging);
     if (value == offset)
       return;
-    _animationController.value = (value + 1.0) / 2.0;
+    _animationController.value = value + _index.toDouble();
   }
 
   @override

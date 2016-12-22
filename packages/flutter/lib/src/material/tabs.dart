@@ -204,29 +204,19 @@ class _TabLabelBar extends Flex {
   }
 }
 
-class _IndicatorRectTween extends Animatable<Rect> {
-  _IndicatorRectTween(this.left, this.middle, this.right) {
-    assert(middle != null);
-    assert(left != null || right != null);
-  }
+double _indexChangeProgress(TabController controller) {
+  if (!controller.indexIsChanging)
+    return 1.0;
 
-  final Rect left;
-  final Rect middle;
-  final Rect right;
-
-  @override
-  Rect evaluate(Animation<double> animation) {
-    final double t = animation.value;
-    if (t == 0.0)
-      return left ?? middle;
-    if (t == 1.0)
-      return right ?? middle;
-    if (t == 0.5)
-      return middle;
-    if (t < 0.5)
-      return left == null ? middle : Rect.lerp(left, middle, t * 2.0);
-    return right == null ? middle : Rect.lerp(middle, right, (t - 0.5) * 2.0);
-  }
+  final double controllValue = controller.animation.value;
+  final double previousIndex = controller.previousIndex.toDouble();
+  final double currentIndex = controller.index.toDouble();
+  if (controllValue == previousIndex)
+    return 0.0;
+  else if (controllValue == currentIndex)
+    return 1.0;
+  else
+    return (controllValue - previousIndex).abs() / (currentIndex - previousIndex).abs();
 }
 
 class _IndicatorPainter extends CustomPainter {
@@ -255,21 +245,28 @@ class _IndicatorPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     if (controller.indexIsChanging) {
-      if (indicatorTween == null || controller.index != currentIndex) {
-        indicatorTween = new RectTween(
-          begin: currentRect ?? indicatorRect(size, currentIndex),
-          end: indicatorRect(size, controller.index),
-        );
-        currentIndex = controller.index;
-      }
+      final Rect targetRect = indicatorRect(size, controller.index);
+      currentRect = Rect.lerp(currentRect ?? targetRect, targetRect, _indexChangeProgress(controller));
+      currentIndex = controller.index;
     } else {
-      indicatorTween = new _IndicatorRectTween(
-        currentIndex > 0 ? indicatorRect(size, currentIndex - 1) : null,
-        indicatorRect(size, currentIndex),
-        currentIndex < maxTabIndex ? indicatorRect(size, currentIndex + 1) : null,
-      );
+      final Rect left = currentIndex > 0 ? indicatorRect(size, currentIndex - 1) : null;
+      final Rect middle = indicatorRect(size, currentIndex);
+      final Rect right = currentIndex < maxTabIndex ? indicatorRect(size, currentIndex + 1) : null;
+
+      final double index = controller.index.toDouble();
+      final double value = controller.animation.value;
+      if (value == index - 1.0)
+        currentRect = left ?? middle;
+      else if (value == index + 1.0)
+        currentRect = right ?? middle;
+      else if (value == index)
+         currentRect = middle;
+      else if (value < index)
+        currentRect = left == null ? middle : Rect.lerp(middle, left, index - value);
+      else
+        currentRect = right == null ? middle : Rect.lerp(middle, right, value - index);
     }
-    currentRect = indicatorTween.evaluate(controller.animation);
+    assert(currentRect != null);
     canvas.drawRect(currentRect, new Paint()..color = color);
   }
 
@@ -290,29 +287,16 @@ class _IndicatorPainter extends CustomPainter {
   }
 }
 
-class _TabScrollOffsetTween extends Animatable<double> {
-  _TabScrollOffsetTween(this.left, this.middle, this.right) {
-    assert(middle != null);
-    assert(left != null || right != null);
-  }
+class _ChangeAnimation extends Animation<double> with AnimationWithParentMixin<double> {
+  _ChangeAnimation(this.controller);
 
-  final double left;
-  final double middle;
-  final double right;
+  final TabController controller;
 
   @override
-  double evaluate(Animation<double> animation) {
-    final double t = animation.value;
-    if (t == 0.0)
-      return left ?? middle;
-    if (t == 1.0)
-      return right ?? middle;
-    if (t == 0.5)
-      return middle;
-    if (t < 0.5)
-      return left == null ? middle : lerpDouble(left, middle, t * 2.0);
-    return right == null ? middle : lerpDouble(middle, right, (t - 0.5) * 2.0);
-  }
+  Animation<double> get parent => controller.animation;
+
+  @override
+  double get value => _indexChangeProgress(controller);
 }
 
 class TabBar extends StatefulWidget implements AppBarBottomWidget {
@@ -360,8 +344,8 @@ class _TabBarState extends State<TabBar> {
   final GlobalKey<ScrollableState> viewportKey = new GlobalKey<ScrollableState>();
 
   TabController _controller;
+  _ChangeAnimation _changeAnimation;
   _IndicatorPainter _indicatorPainter;
-  double _currentOffset = 0.0; // TBD compute at initState time based on controller.index
   int _currentIndex;
 
   void _initTabController() {
@@ -370,6 +354,7 @@ class _TabBarState extends State<TabBar> {
     _controller = config.controller ?? DefaultTabController.of(context);
     if (_controller != null) {
       _controller.animation.addListener(_handleTick);
+      _changeAnimation = new  _ChangeAnimation(_controller);
       _currentIndex = _controller.index;
       final List<double> offsets = _indicatorPainter?.tabOffsets;
       _indicatorPainter = new _IndicatorPainter(_controller)..tabOffsets = offsets;
@@ -411,32 +396,49 @@ class _TabBarState extends State<TabBar> {
       .clamp(scrollBehavior.minScrollOffset, scrollBehavior.maxScrollOffset);
   }
 
+  void _scrollToCurrentIndex() {
+    final ScrollableState viewport = viewportKey.currentState;
+    final double offset = _tabCenteredScrollOffset(viewport, _currentIndex);
+    viewport.scrollTo(offset, duration: kTabScrollDuration);
+  }
+
+  void _scrollToControllerValue() {
+    final ScrollableState viewport = viewportKey.currentState;
+    final double left = _currentIndex > 0 ? _tabCenteredScrollOffset(viewport, _currentIndex - 1) : null;
+    final double middle = _tabCenteredScrollOffset(viewport, _currentIndex);
+    final double right = _currentIndex < maxTabIndex ? _tabCenteredScrollOffset(viewport, _currentIndex + 1) : null;
+
+    final double index = _controller.index.toDouble();
+    final double value = _controller.animation.value;
+    double offset;
+    if (value == index - 1.0)
+      offset = left ?? middle;
+    else if (value == index + 1.0)
+      offset = right ?? middle;
+    else if (value == index)
+       offset = middle;
+    else if (value < index)
+      offset = left == null ? middle : lerpDouble(middle, left, index - value);
+    else
+      offset = right == null ? middle : lerpDouble(middle, right, value - index);
+
+    viewport.scrollTo(offset, duration: kTabScrollDuration);
+  }
+
   void _handleTick() {
     if (_controller.indexIsChanging) {
       setState(() {
-        // Rebuild so that the tab label colors reflect the
-        // new selected tab index.
+        // Rebuild so that the tab label colors reflect the selected tab index.
+        // The first build for a new _controller.index value will also trigger
+        // a scroll to center the selected tab.
       });
     } else if (config.isScrollable) {
-      final int currentIndex = _controller.index;
-      final ScrollableState viewport = viewportKey.currentState;
-      _TabScrollOffsetTween tween = new _TabScrollOffsetTween(
-        currentIndex > 0 ? _tabCenteredScrollOffset(viewport, currentIndex - 1) : null,
-        _tabCenteredScrollOffset(viewport, currentIndex),
-        currentIndex < maxTabIndex ? _tabCenteredScrollOffset(viewport, currentIndex + 1) : null
-      );
-      viewport.scrollTo(tween.evaluate(_controller.animation));
+      _scrollToControllerValue();
     }
   }
 
   void _saveTabOffsets(List<double> tabOffsets) {
     _indicatorPainter.tabOffsets = tabOffsets;
-  }
-
-  void _scrollToCenter(int tabIndex) {
-    final ScrollableState viewport = viewportKey.currentState;
-    _currentOffset = _tabCenteredScrollOffset(viewport, tabIndex);
-    viewport.scrollTo(_currentOffset, duration: kTabScrollDuration);
   }
 
   void _handleTap(int index) {
@@ -462,7 +464,7 @@ class _TabBarState extends State<TabBar> {
     if (_controller.index != _currentIndex) {
       _currentIndex = _controller.index;
       if (config.isScrollable)
-        _scrollToCenter(_currentIndex);
+        _scrollToCurrentIndex();
     }
 
     final List<Widget> wrappedTabs = new List<Widget>.from(config.tabs, growable: false);
@@ -471,13 +473,13 @@ class _TabBarState extends State<TabBar> {
     if (_controller.indexIsChanging) {
       assert(_currentIndex != previousIndex);
       wrappedTabs[_currentIndex] = new _TabStyle(
-        animation: _controller.animation,
+        animation: _changeAnimation,
         selected: true,
         labelColor: config.labelColor,
         child: wrappedTabs[_currentIndex],
       );
       wrappedTabs[previousIndex] = new _TabStyle(
-        animation: _controller.animation,
+        animation: _changeAnimation,
         selected: false,
         labelColor: config.labelColor,
         child: wrappedTabs[previousIndex],
