@@ -7,17 +7,18 @@ import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 
 import 'app_bar.dart';
 import 'colors.dart';
+import 'constants.dart';
 import 'debug.dart';
 import 'icon.dart';
 import 'icon_theme.dart';
 import 'icon_theme_data.dart';
 import 'ink_well.dart';
 import 'material.dart';
+import 'tab_controller.dart';
 import 'theme.dart';
 
 const double _kTabHeight = 46.0;
@@ -26,131 +27,6 @@ const double _kTabIndicatorHeight = 2.0;
 const double _kMinTabWidth = 72.0;
 const double _kMaxTabWidth = 264.0;
 const EdgeInsets _kTabLabelPadding = const EdgeInsets.symmetric(horizontal: 12.0);
-const Duration _kTabScrollDuration = const Duration(milliseconds: 200);
-
-class TabController {
-  TabController({ int initialIndex: 0, this.length, TickerProvider vsync })
-    : _index = initialIndex,
-      _previousIndex = initialIndex,
-      _animationController = new AnimationController(
-        value: 0.5,
-        vsync: vsync
-   ) {
-    assert(length != null && length > 1);
-    assert(initialIndex != null && initialIndex >= 0 && initialIndex < length);
-  }
-
-  final AnimationController _animationController;
-  Animation<double> get animation => _animationController.view;
-
-  final int length;
-
-  int get previousIndex => _previousIndex;
-  int _previousIndex;
-
-  bool _indexIsChanging = false;
-  bool get indexIsChanging => _indexIsChanging;
-
-  int get index => _index;
-  int _index;
-
-  void animateTo(int value, { Duration duration: _kTabScrollDuration, Curve curve: Curves.ease }) {
-    assert(value != null);
-    assert(value >= 0 && value < length);
-    if (value == _index)
-      return;
-    _indexIsChanging = true;
-    _previousIndex = index;
-    _index = value;
-    _animationController
-      ..value = 0.0
-      ..animateTo(1.0, duration: duration, curve: curve).then((_) {
-        _animationController.value = 0.5;
-        _indexIsChanging = false;
-      });
-  }
-
-  double get offset => 2.0 * _animationController.value - 1.0;
-  set offset(double value) {
-    assert(value != null);
-    assert(value >= -1.0 && value <= 1.0);
-    assert(!indexIsChanging);
-    if (value == offset)
-      return;
-    _animationController.value = (value + 1.0) / 2.0;
-  }
-
-  void dispose() {
-    _animationController.dispose();
-  }
-}
-
-class _TabControllerScope extends InheritedWidget {
-  _TabControllerScope({
-    Key key,
-    this.controller,
-    this.enabled,
-    Widget child
-  }) : super(key: key, child: child);
-
-  final TabController controller;
-  final bool enabled;
-
-  @override
-  bool updateShouldNotify(_TabControllerScope old) {
-    return enabled != old.enabled || controller != old.controller;
-  }
-}
-
-class DefaultTabController extends StatefulWidget {
-  DefaultTabController({
-    Key key,
-    @required this.length,
-    this.initialIndex: 0,
-    this.child
-  }) : super(key: key);
-
-  final int length;
-  final int initialIndex;
-  final Widget child;
-
-  static TabController of(BuildContext context) {
-    _TabControllerScope scope = context.inheritFromWidgetOfExactType(_TabControllerScope);
-    return scope?.controller;
-  }
-
-  @override
-  _DefaultTabControllerState createState() => new _DefaultTabControllerState();
-}
-
-class _DefaultTabControllerState extends State<DefaultTabController> with SingleTickerProviderStateMixin {
-  TabController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = new TabController(
-      vsync: this,
-      length: config.length,
-      initialIndex: config.initialIndex,
-    );
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return new _TabControllerScope(
-      controller: _controller,
-      enabled: TickerMode.of(context),
-      child: config.child,
-    );
-  }
-}
 
 class Tab extends StatelessWidget {
   Tab({
@@ -560,7 +436,7 @@ class _TabBarState extends State<TabBar> {
   void _scrollToCenter(int tabIndex) {
     final ScrollableState viewport = viewportKey.currentState;
     _currentOffset = _tabCenteredScrollOffset(viewport, tabIndex);
-    viewport.scrollTo(_currentOffset, duration: _kTabScrollDuration);
+    viewport.scrollTo(_currentOffset, duration: kTabScrollDuration);
   }
 
   void _handleTap(int index) {
@@ -796,7 +672,7 @@ class _TabBarViewState extends State<TabBarView> {
 
     final int previousIndex = _controller.previousIndex;
     if ((_currentIndex - previousIndex).abs() == 1)
-      return viewport.scrollTo(_currentIndex.toDouble(), duration: _kTabScrollDuration);
+      return viewport.scrollTo(_currentIndex.toDouble(), duration: kTabScrollDuration);
 
     assert((_currentIndex - previousIndex).abs() > 1);
     double initialScroll;
@@ -812,7 +688,7 @@ class _TabBarViewState extends State<TabBarView> {
       }
     });
     await viewport.scrollTo(initialScroll);
-    await viewport.scrollTo(_currentIndex.toDouble(), duration: _kTabScrollDuration);
+    await viewport.scrollTo(_currentIndex.toDouble(), duration: kTabScrollDuration);
     setState(() {
       _warpUnderway = false;
       _children = config.children;

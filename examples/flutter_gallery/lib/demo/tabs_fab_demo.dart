@@ -49,10 +49,7 @@ class _TabsFabDemoState extends State<TabsFabDemo> with SingleTickerProviderStat
   void initState() {
     super.initState();
     _controller = new TabController(vsync: this, length: _allPages.length);
-    _controller.animation.addStatusListener((AnimationStatus status) {
-      if (status == AnimationStatus.completed)
-        _handleTabSelection(_allPages[_controller.index]);
-    });
+    _controller.addOnChangedListener(_handleTabSelection);
     _selectedPage = _allPages[0];
   }
 
@@ -62,9 +59,9 @@ class _TabsFabDemoState extends State<TabsFabDemo> with SingleTickerProviderStat
     super.dispose();
   }
 
-  void _handleTabSelection(_Page page) {
+  void _handleTabSelection() {
     setState(() {
-      _selectedPage = page;
+      _selectedPage = _allPages[_controller.index];
     });
   }
 
