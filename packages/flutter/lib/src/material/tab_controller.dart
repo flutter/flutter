@@ -7,7 +7,7 @@ import 'package:flutter/widgets.dart';
 
 import 'constants.dart';
 
-class TabController {
+class TabController extends ChangeNotifier {
   TabController({ int initialIndex: 0, this.length, TickerProvider vsync })
     : _index = initialIndex,
       _previousIndex = initialIndex,
@@ -17,13 +17,21 @@ class TabController {
    ) {
     assert(length != null && length > 1);
     assert(initialIndex != null && initialIndex >= 0 && initialIndex < length);
+    _animationController.addStatusListener(_statusListener);
+  }
+
+  void _statusListener(AnimationStatus status) {
+    if (status == AnimationStatus.completed)
+      notifyListeners();
   }
 
   final AnimationController _animationController;
   Animation<double> get animation => _animationController.view;
 
+  /// The number of tabs. Must be 2 or more.
   final int length;
 
+  /// The index of the previously selected tab, initially the same as [index].
   int get previousIndex => _previousIndex;
   int _previousIndex;
 
@@ -59,16 +67,10 @@ class TabController {
     _animationController.value = (value + 1.0) / 2.0;
   }
 
-  void addOnChangedListener(VoidCallback onChanged) {
-    _animationController.addStatusListener(new _OnChangedStatusListener(onChanged));
-  }
-
-  void removeOnChangedListener(VoidCallback onChanged) {
-    _animationController.removeStatusListener(new _OnChangedStatusListener(onChanged));
-  }
-
+  @override
   void dispose() {
     _animationController.dispose();
+    super.dispose();
   }
 }
 
@@ -87,23 +89,6 @@ class _TabControllerScope extends InheritedWidget {
   bool updateShouldNotify(_TabControllerScope old) {
     return enabled != old.enabled || controller != old.controller;
   }
-}
-
-class _OnChangedStatusListener extends Function {
-  _OnChangedStatusListener(this.onChanged);
-
-  final VoidCallback onChanged;
-
-  void call(AnimationStatus status) {
-    if (status == AnimationStatus.completed)
-      onChanged();
-  }
-
-  @override
-  bool operator ==(dynamic other) => onChanged == other;
-
-  @override
-  int get hashCode => onChanged.hashCode;
 }
 
 class DefaultTabController extends StatefulWidget {

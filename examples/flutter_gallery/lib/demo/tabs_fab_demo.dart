@@ -49,7 +49,7 @@ class _TabsFabDemoState extends State<TabsFabDemo> with SingleTickerProviderStat
   void initState() {
     super.initState();
     _controller = new TabController(vsync: this, length: _allPages.length);
-    _controller.addOnChangedListener(_handleTabSelection);
+    _controller.addListener(_handleTabSelection);
     _selectedPage = _allPages[0];
   }
 
