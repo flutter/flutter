@@ -426,6 +426,9 @@ class _TabBarState extends State<TabBar> {
   }
 
   void _handleTick() {
+    if (!mounted)
+      return;
+
     if (_controller.indexIsChanging) {
       setState(() {
         // Rebuild so that the tab label colors reflect the selected tab index.
@@ -667,6 +670,8 @@ class _TabBarViewState extends State<TabBarView> {
 
   Future<Null> _warpToCurrentIndex() async {
     assert(_controller.indexIsChanging);
+    if (!mounted)
+      return new Future<Null>.value();
 
     final ScrollableState viewport = viewportKey.currentState;
     if (viewport.scrollOffset == _currentIndex.toDouble())
@@ -725,7 +730,7 @@ class _TabBarViewState extends State<TabBarView> {
         final double integralScrollOffset = scrollable.scrollOffset.floorToDouble();
         if (integralScrollOffset == scrollable.scrollOffset) {
           _offsetBias = 0.0;
-          // The animaion duration is short since the tab indicator and this
+          // The animation duration is short since the tab indicator and this
           // pageable list have already moved.
           _controller.animateTo(
             integralScrollOffset.floor(),
