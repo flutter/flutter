@@ -7,6 +7,16 @@ import 'package:flutter/widgets.dart';
 
 import 'constants.dart';
 
+/// Coordinates the tab selection between a [TabBar] and a [TabBarView].
+///
+/// The [index] property is the index of the selected tab and the [animation]
+/// represents the current scroll positions of the tab bar and the tar bar view.
+/// The selected tab's index can be changed with [animateTo].
+///
+/// See also:
+///
+/// * [DefaultTabController], which simplifies sharing a TabController with
+/// its [TabBar] and a [TabBarView] descendants.
 class TabController extends ChangeNotifier {
   TabController({ int initialIndex: 0, @required this.length, @required TickerProvider vsync })
     : _index = initialIndex,
@@ -26,22 +36,33 @@ class TabController extends ChangeNotifier {
       notifyListeners();
   }
 
+  /// An animation whose value represents the current position of the
+  /// selected tab indicator. The animation's value ranges from 0.0
+  /// to [length] - 1.0.
   final AnimationController _animationController;
   Animation<double> get animation => _animationController.view;
 
-  /// The number of tabs. Must be 2 or more.
+  /// The total number of tabs. Must be at least two.
   final int length;
+
+  /// The index of the currently selected tab. Change the currently selected
+  /// tab with [animateTo].
+  int get index => _index;
+  int _index;
 
   /// The index of the previously selected tab, initially the same as [index].
   int get previousIndex => _previousIndex;
   int _previousIndex;
 
-  bool _indexIsChanging = false;
+  /// True if we're animating from [previousIndex] to [index].
   bool get indexIsChanging => _indexIsChanging;
+  bool _indexIsChanging = false;
 
-  int get index => _index;
-  int _index;
-
+  /// Immediately sets [index] and [previousIndex] and then plays the
+  /// [animation] from its current value to [index].
+  ///
+  /// While the animation is running [indexIsChanging] is true. When the
+  /// animation completes [offset] will be 0.0.
   void animateTo(int value, { Duration duration: kTabScrollDuration, Curve curve: Curves.ease }) {
     assert(value != null);
     assert(value >= 0 && value < length);
@@ -56,6 +77,13 @@ class TabController extends ChangeNotifier {
       });
   }
 
+  /// The difference between the [animation]'s value and [index]. The [value]
+  /// must be between -1.0 and 1.0.
+  ///
+  /// This property is typically set by the [TabBarView] when the user
+  /// drags left or right. A value between -1.0 and 0.0 implies that the
+  /// TabBarView has been dragged to the left. Similarly a value between
+  /// 0.0 and 1.0 implies that the TabBarView has been dragged to the right.
   double get offset => _animationController.value - _index.toDouble();
   set offset(double value) {
     assert(value != null);
