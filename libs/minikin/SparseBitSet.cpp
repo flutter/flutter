@@ -14,9 +14,13 @@
  * limitations under the License.
  */
 
-#include <cutils/log.h>
+#define LOG_TAG "SparseBitSet"
+
 #include <stddef.h>
 #include <string.h>
+
+#include <android/log.h>
+
 #include <minikin/SparseBitSet.h>
 
 namespace android {

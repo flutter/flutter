@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
+#define LOG_TAG "Minikin"
+
 #include "MinikinFontForTest.h"
 
 #include <minikin/MinikinFont.h>
 
 #include <SkTypeface.h>
 
-#include <cutils/log.h>
+#include <android/log.h>
 
 MinikinFontForTest::MinikinFontForTest(const std::string& font_path) :
     MinikinFontForTest(font_path, SkTypeface::CreateFromFile(font_path.c_str())) {
