@@ -15,29 +15,28 @@
  */
 
 #define LOG_TAG "Minikin"
-#include <cutils/log.h>
-
-#include <math.h>
 
 #include <algorithm>
 #include <fstream>
 #include <iostream>  // for debugging
+#include <math.h>
 #include <string>
+#include <unicode/ubidi.h>
 #include <vector>
 
+#include <android/log.h>
 #include <utils/JenkinsHash.h>
 #include <utils/LruCache.h>
 #include <utils/Singleton.h>
 #include <utils/String16.h>
 
-#include <unicode/ubidi.h>
 #include <hb-icu.h>
 #include <hb-ot.h>
 
 #include "FontLanguage.h"
 #include "FontLanguageListCache.h"
-#include "LayoutUtils.h"
 #include "HbFontCache.h"
+#include "LayoutUtils.h"
 #include "MinikinInternal.h"
 #include <minikin/MinikinFontFreeType.h>
 #include <minikin/Layout.h>

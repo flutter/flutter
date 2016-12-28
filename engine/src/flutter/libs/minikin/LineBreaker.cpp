@@ -16,10 +16,11 @@
 
 #define VERBOSE_DEBUG 0
 
+#define LOG_TAG "Minikin"
+
 #include <limits>
 
-#define LOG_TAG "Minikin"
-#include <cutils/log.h>
+#include <android/log.h>
 
 #include <minikin/Layout.h>
 #include <minikin/LineBreaker.h>

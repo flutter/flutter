@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
-
 #include "HbFontCache.h"
 
-#include <cutils/log.h>
-#include <hb.h>
+#include <android/log.h>
+#include <gtest/gtest.h>
 #include <utils/Mutex.h>
+
+#include <hb.h>
 
 #include "MinikinInternal.h"
 #include "MinikinFontForTest.h"

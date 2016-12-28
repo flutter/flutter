@@ -18,12 +18,13 @@
 
 #include "FontLanguageListCache.h"
 
-#include <cutils/log.h>
 #include <unicode/uloc.h>
 #include <unordered_set>
 
-#include "MinikinInternal.h"
+#include <android/log.h>
+
 #include "FontLanguage.h"
+#include "MinikinInternal.h"
 
 namespace minikin {
 

@@ -18,10 +18,11 @@
 
 #include "HbFontCache.h"
 
-#include <cutils/log.h>
+#include <android/log.h>
+#include <utils/LruCache.h>
+
 #include <hb.h>
 #include <hb-ot.h>
-#include <utils/LruCache.h>
 
 #include <minikin/MinikinFont.h>
 #include "MinikinInternal.h"

@@ -14,14 +14,21 @@
  * limitations under the License.
  */
 
+#define LOG_TAG "Minikin"
+
 #include "MinikinFontForTest.h"
 
 #include <minikin/MinikinFont.h>
 
-#include <cutils/log.h>
 #include <fcntl.h>
-#include <sys/stat.h>
 #include <sys/mman.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
+
+#include <string>
+
+#include <android/log.h>
 
 namespace minikin {
 
