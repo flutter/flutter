@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 
+#define LOG_TAG "Minikin"
+
 #include <libxml/tree.h>
+#include <unistd.h>
 
-#include <minikin/FontCollection.h>
-#include <minikin/FontFamily.h>
-
-#include <cutils/log.h>
+#include <android/log.h>
 
 #include "FontLanguage.h"
 #include "MinikinFontForTest.h"
+#include <minikin/FontCollection.h>
+#include <minikin/FontFamily.h>
 
 android::FontCollection* getFontCollection(const char* fontDir, const char* fontXml) {
     xmlDoc* doc = xmlReadFile(fontXml, NULL, 0);
