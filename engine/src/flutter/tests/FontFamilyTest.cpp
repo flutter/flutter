@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
-
 #include <minikin/FontFamily.h>
 
-#include <cutils/log.h>
+#include <android/log.h>
+#include <gtest/gtest.h>
 
 #include "FontLanguageListCache.h"
 #include "ICUTestBase.h"

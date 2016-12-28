@@ -15,7 +15,8 @@
  */
 
 #define LOG_TAG "Minikin"
-#include <cutils/log.h>
+
+#include <android/log.h>
 
 #include <minikin/WordBreaker.h>
 #include "MinikinInternal.h"
