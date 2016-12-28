@@ -17,10 +17,11 @@
 // Determine coverage of font given its raw "cmap" OpenType table
 
 #define LOG_TAG "Minikin"
-#include <cutils/log.h>
 
 #include <vector>
 using std::vector;
+
+#include <log/log.h>
 
 #include <minikin/SparseBitSet.h>
 #include <minikin/CmapCoverage.h>

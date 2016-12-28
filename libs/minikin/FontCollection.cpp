@@ -17,9 +17,10 @@
 // #define VERBOSE_DEBUG
 
 #define LOG_TAG "Minikin"
-#include <cutils/log.h>
+
 #include <algorithm>
 
+#include <android/log.h>
 #include "unicode/unistr.h"
 #include "unicode/unorm2.h"
 
