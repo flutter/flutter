@@ -54,21 +54,21 @@ FontCollection *makeFontCollection() {
         "/system/fonts/Roboto-LightItalic.ttf"
     };
 
-    FontFamily *family = new FontFamily();
+    std::vector<Font> fonts;
     for (size_t i = 0; i < sizeof(fns)/sizeof(fns[0]); i++) {
         const char *fn = fns[i];
         sk_sp<SkTypeface> skFace = SkTypeface::MakeFromFile(fn);
         MinikinFont *font = new MinikinFontSkia(std::move(skFace));
-        family->addFont(font);
+        fonts.push_back(Font(font, FontStyle()));
     }
+    FontFamily *family = new FontFamily(std::move(fonts));
     typefaces.push_back(family);
 
 #if 1
-    family = new FontFamily();
     const char *fn = "/system/fonts/DroidSansDevanagari-Regular.ttf";
     sk_sp<SkTypeface> skFace = SkTypeface::MakeFromFile(fn);
     MinikinFont *font = new MinikinFontSkia(std::move(skFace));
-    family->addFont(font);
+    family = new FontFamily(std::vector<Font>({ Font(font, FontStyle()) }));
     typefaces.push_back(family);
 #endif
 

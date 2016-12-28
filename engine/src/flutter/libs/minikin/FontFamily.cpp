@@ -64,45 +64,51 @@ uint32_t FontStyle::pack(int variant, int weight, bool italic) {
     return (weight & kWeightMask) | (italic ? kItalicMask : 0) | (variant << kVariantShift);
 }
 
-FontFamily::FontFamily() : FontFamily(0 /* variant */) {
+Font::Font(MinikinFont* typeface, FontStyle style)
+    : typeface(typeface), style(style) {
+    typeface->Ref();
 }
 
-FontFamily::FontFamily(int variant) : FontFamily(FontLanguageListCache::kEmptyListId, variant) {
+Font::Font(Font&& o) {
+    typeface = o.typeface;
+    style = o.style;
+    o.typeface = nullptr;
+}
+
+Font::Font(const Font& o) {
+    typeface = o.typeface;
+    typeface->Ref();
+    style = o.style;
+}
+
+Font::~Font() {
+    if (typeface == nullptr) {
+        return;
+    }
+    typeface->UnrefLocked();
+}
+
+FontFamily::FontFamily(std::vector<Font>&& fonts) : FontFamily(0 /* variant */, std::move(fonts)) {
+}
+
+FontFamily::FontFamily(int variant, std::vector<Font>&& fonts)
+    : FontFamily(FontLanguageListCache::kEmptyListId, variant, std::move(fonts)) {
+}
+
+FontFamily::FontFamily(uint32_t langId, int variant, std::vector<Font>&& fonts)
+    : mLangId(langId), mVariant(variant), mFonts(std::move(fonts)), mHasVSTable(false) {
+    computeCoverage();
 }
 
 FontFamily::~FontFamily() {
-    for (size_t i = 0; i < mFonts.size(); i++) {
-        mFonts[i].typeface->UnrefLocked();
-    }
 }
 
-bool FontFamily::addFont(MinikinFont* typeface) {
+bool FontFamily::analyzeStyle(MinikinFont* typeface, int* weight, bool* italic) {
     android::AutoMutex _l(gMinikinLock);
     const uint32_t os2Tag = MinikinFont::MakeTag('O', 'S', '/', '2');
     HbBlob os2Table(getFontTable(typeface, os2Tag));
     if (os2Table.get() == nullptr) return false;
-    int weight;
-    bool italic;
-    if (analyzeStyle(os2Table.get(), os2Table.size(), &weight, &italic)) {
-        //ALOGD("analyzed weight = %d, italic = %s", weight, italic ? "true" : "false");
-        FontStyle style(weight, italic);
-        addFontLocked(typeface, style);
-        return true;
-    } else {
-        ALOGD("failed to analyze style");
-    }
-    return false;
-}
-
-void FontFamily::addFont(MinikinFont* typeface, FontStyle style) {
-    android::AutoMutex _l(gMinikinLock);
-    addFontLocked(typeface, style);
-}
-
-void FontFamily::addFontLocked(MinikinFont* typeface, FontStyle style) {
-    typeface->RefLocked();
-    mFonts.push_back(Font(typeface, style));
-    mCoverageValid = false;
+    return ::minikin::analyzeStyle(os2Table.get(), os2Table.size(), weight, italic);
 }
 
 // Compute a matching metric between two styles - 0 is an exact match
@@ -146,18 +152,6 @@ FakedFont FontFamily::getClosestMatch(FontStyle style) const {
     return result;
 }
 
-size_t FontFamily::getNumFonts() const {
-    return mFonts.size();
-}
-
-MinikinFont* FontFamily::getFont(size_t index) const {
-    return mFonts[index].typeface;
-}
-
-FontStyle FontFamily::getStyle(size_t index) const {
-    return mFonts[index].style;
-}
-
 bool FontFamily::isColorEmojiFamily() const {
     const FontLanguages& languageList = FontLanguageListCache::getById(mLangId);
     for (size_t i = 0; i < languageList.size(); ++i) {
@@ -168,30 +162,24 @@ bool FontFamily::isColorEmojiFamily() const {
     return false;
 }
 
-const SparseBitSet* FontFamily::getCoverage() {
-    if (!mCoverageValid) {
-        const FontStyle defaultStyle;
-        MinikinFont* typeface = getClosestMatch(defaultStyle).font;
-        const uint32_t cmapTag = MinikinFont::MakeTag('c', 'm', 'a', 'p');
-        HbBlob cmapTable(getFontTable(typeface, cmapTag));
-        if (cmapTable.get() == nullptr) {
-            ALOGE("Could not get cmap table size!\n");
-            // Note: This means we will retry on the next call to getCoverage, as we can't store
-            //       the failure. This is fine, as we assume this doesn't really happen in practice.
-            return nullptr;
-        }
-        // TODO: Error check?
-        CmapCoverage::getCoverage(mCoverage, cmapTable.get(), cmapTable.size(), &mHasVSTable);
-#ifdef VERBOSE_DEBUG
-        ALOGD("font coverage length=%d, first ch=%x\n", mCoverage.length(),
-                mCoverage.nextSetBit(0));
-#endif
-        mCoverageValid = true;
+void FontFamily::computeCoverage() {
+    android::AutoMutex _l(gMinikinLock);
+    const FontStyle defaultStyle;
+    MinikinFont* typeface = getClosestMatch(defaultStyle).font;
+    const uint32_t cmapTag = MinikinFont::MakeTag('c', 'm', 'a', 'p');
+    HbBlob cmapTable(getFontTable(typeface, cmapTag));
+    if (cmapTable.get() == nullptr) {
+        ALOGE("Could not get cmap table size!\n");
+        return;
     }
-    return &mCoverage;
+    // TODO: Error check?
+    CmapCoverage::getCoverage(mCoverage, cmapTable.get(), cmapTable.size(), &mHasVSTable);
+#ifdef VERBOSE_DEBUG
+    ALOGD("font coverage length=%d, first ch=%x\n", mCoverage.length(), mCoverage.nextSetBit(0));
+#endif
 }
 
-bool FontFamily::hasGlyph(uint32_t codepoint, uint32_t variationSelector) {
+bool FontFamily::hasGlyph(uint32_t codepoint, uint32_t variationSelector) const {
     assertMinikinLocked();
     if (variationSelector != 0 && !mHasVSTable) {
         // Early exit if the variation selector is specified but the font doesn't have a cmap format
@@ -206,11 +194,6 @@ bool FontFamily::hasGlyph(uint32_t codepoint, uint32_t variationSelector) {
     bool result = hb_font_get_glyph(font, codepoint, variationSelector, &unusedGlyph);
     hb_font_destroy(font);
     return result;
-}
-
-bool FontFamily::hasVSTable() const {
-    LOG_ALWAYS_FATAL_IF(!mCoverageValid, "Do not call this method before getCoverage() call");
-    return mHasVSTable;
 }
 
 }  // namespace minikin
