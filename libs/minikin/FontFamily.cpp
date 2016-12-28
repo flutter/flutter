@@ -16,24 +16,24 @@
 
 #define LOG_TAG "Minikin"
 
-#include <cutils/log.h>
-#include <stdlib.h>
 #include <stdint.h>
+#include <stdlib.h>
 #include <string.h>
+
+#include <android/log.h>
+#include <utils/JenkinsHash.h>
 
 #include <hb.h>
 #include <hb-ot.h>
-
-#include <utils/JenkinsHash.h>
 
 #include "FontLanguage.h"
 #include "FontLanguageListCache.h"
 #include "HbFontCache.h"
 #include "MinikinInternal.h"
-#include <minikin/MinikinFont.h>
 #include <minikin/AnalyzeStyle.h>
 #include <minikin/CmapCoverage.h>
 #include <minikin/FontFamily.h>
+#include <minikin/MinikinFont.h>
 
 using std::vector;
 

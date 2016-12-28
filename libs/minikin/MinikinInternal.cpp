@@ -15,12 +15,13 @@
  */
 
 // Definitions internal to Minikin
+#define LOG_TAG "Minikin"
 
 #include "MinikinInternal.h"
 #include "HbFontCache.h"
 #include "generated/UnicodeData.h"
 
-#include <cutils/log.h>
+#include <android/log.h>
 
 namespace android {
 
