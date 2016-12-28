@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
+#define LOG_TAG "Minikin"
+
+#include <android/log.h>
 #include <gtest/gtest.h>
+
 #include "ICUTestBase.h"
 #include "UnicodeUtils.h"
 #include <minikin/WordBreaker.h>
 #include <unicode/locid.h>
 #include <unicode/uclean.h>
 #include <unicode/udata.h>
-
-#define LOG_TAG "Minikin"
-#include <cutils/log.h>
 
 #ifndef NELEM
 #define NELEM(x) ((sizeof(x) / sizeof((x)[0])))
