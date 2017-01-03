@@ -62,7 +62,7 @@ class PlatformMessageResponseAndroid : public blink::PlatformMessageResponse {
 }  // namespace
 
 PlatformViewAndroid::PlatformViewAndroid()
-    : PlatformView(std::make_unique<GPURasterizer>()) {
+    : PlatformView(std::make_unique<GPURasterizer>(nullptr)) {
   CreateEngine();
 
   // Create the GL surface so that we can setup the resource context.
@@ -497,7 +497,7 @@ void PlatformViewAndroid::GetBitmapGpuTask(jobject* pixels_out,
   sk_sp<SkSurface> surface = SkSurface::MakeRasterDirect(
       image_info, pixels, frame_size.width() * sizeof(jint));
 
-  flow::CompositorContext compositor_context;
+  flow::CompositorContext compositor_context(nullptr);
   SkCanvas* canvas = surface->getCanvas();
   flow::CompositorContext::ScopedFrame frame =
       compositor_context.AcquireFrame(nullptr, canvas, false);

@@ -16,7 +16,7 @@ class Surface;
 
 class GPURasterizer : public Rasterizer {
  public:
-  GPURasterizer();
+  GPURasterizer(std::unique_ptr<flow::ProcessInfo> info);
 
   ~GPURasterizer() override;
 

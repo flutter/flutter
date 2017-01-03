@@ -8,7 +8,8 @@
 
 namespace flow {
 
-CompositorContext::CompositorContext() = default;
+CompositorContext::CompositorContext(std::unique_ptr<ProcessInfo> info)
+    : process_info_(std::move(info)) {}
 
 CompositorContext::~CompositorContext() = default;
 
@@ -17,6 +18,10 @@ void CompositorContext::BeginFrame(ScopedFrame& frame,
   if (enable_instrumentation) {
     frame_count_.Increment();
     frame_time_.Start();
+
+    if (process_info_ && process_info_->SampleNow()) {
+      memory_usage_.Add(process_info_->GetResidentMemorySize());
+    }
   }
 }
 

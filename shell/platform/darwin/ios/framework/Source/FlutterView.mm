@@ -72,7 +72,7 @@ void SnapshotRasterizer(ftl::WeakPtr<shell::Rasterizer> rasterizer,
   SkCanvas canvas(bitmap);
 
   {
-    flow::CompositorContext compositor_context;
+    flow::CompositorContext compositor_context(nullptr);
     auto frame = compositor_context.AcquireFrame(nullptr, &canvas,
                                                  false /* instrumentation */);
     layer_tree->Raster(frame, false /* ignore raster cache. */);

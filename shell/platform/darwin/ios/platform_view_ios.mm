@@ -14,6 +14,7 @@
 #include "base/trace_event/trace_event.h"
 #include "flutter/common/threads.h"
 #include "flutter/shell/gpu/gpu_rasterizer.h"
+#include "flutter/shell/platform/darwin/common/process_info_mac.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/vsync_waiter_ios.h"
 #include "lib/ftl/synchronization/waitable_event.h"
 
@@ -271,7 +272,8 @@ class IOSGLContext {
 };
 
 PlatformViewIOS::PlatformViewIOS(CAEAGLLayer* layer)
-    : PlatformView(std::make_unique<GPURasterizer>()),
+    : PlatformView(
+          std::make_unique<GPURasterizer>(std::make_unique<ProcessInfoMac>())),
       context_(std::make_unique<IOSGLContext>(surface_config_, layer)),
       weak_factory_(this) {
   CreateEngine();

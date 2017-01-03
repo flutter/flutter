@@ -9,6 +9,7 @@
 #include <string>
 
 #include "flutter/flow/instrumentation.h"
+#include "flutter/flow/process_info.h"
 #include "flutter/flow/raster_cache.h"
 #include "lib/ftl/macros.h"
 #include "third_party/skia/include/core/SkCanvas.h"
@@ -46,7 +47,7 @@ class CompositorContext {
     FTL_DISALLOW_COPY_AND_ASSIGN(ScopedFrame);
   };
 
-  CompositorContext();
+  CompositorContext(std::unique_ptr<ProcessInfo> info);
 
   ~CompositorContext();
 
@@ -62,13 +63,17 @@ class CompositorContext {
 
   const Stopwatch& frame_time() const { return frame_time_; }
 
-  Stopwatch& engine_time() { return engine_time_; };
+  Stopwatch& engine_time() { return engine_time_; }
+
+  const CounterValues& memory_usage() const { return memory_usage_; }
 
  private:
   RasterCache raster_cache_;
+  std::unique_ptr<ProcessInfo> process_info_;
   Counter frame_count_;
   Stopwatch frame_time_;
   Stopwatch engine_time_;
+  CounterValues memory_usage_;
 
   void BeginFrame(ScopedFrame& frame, bool enable_instrumentation);
 

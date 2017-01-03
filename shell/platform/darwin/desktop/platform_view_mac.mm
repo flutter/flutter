@@ -13,13 +13,15 @@
 #include "flutter/shell/common/switches.h"
 #include "flutter/shell/gpu/gpu_rasterizer.h"
 #include "flutter/shell/platform/darwin/common/platform_mac.h"
+#include "flutter/shell/platform/darwin/common/process_info_mac.h"
 #include "flutter/shell/platform/darwin/desktop/vsync_waiter_mac.h"
 #include "lib/ftl/synchronization/waitable_event.h"
 
 namespace shell {
 
 PlatformViewMac::PlatformViewMac(NSOpenGLView* gl_view)
-    : PlatformView(std::make_unique<GPURasterizer>()),
+    : PlatformView(
+          std::make_unique<GPURasterizer>(std::make_unique<ProcessInfoMac>())),
       opengl_view_([gl_view retain]),
       resource_loading_context_([[NSOpenGLContext alloc]
           initWithFormat:gl_view.pixelFormat
