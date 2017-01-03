@@ -108,7 +108,8 @@ void SceneUpdateContext::ExecutePaintTasks(
     FTL_DCHECK(task.surface);
     SkCanvas* canvas = task.surface->getCanvas();
     Layer::PaintContext context = {*canvas, frame.context().frame_time(),
-                                   frame.context().engine_time()};
+                                   frame.context().engine_time(),
+                                   frame.context().memory_usage()};
 
     canvas->clear(SK_ColorTRANSPARENT);
     canvas->scale(task.scaleX, task.scaleY);

@@ -12,7 +12,7 @@
 
 namespace flutter_runner {
 
-Rasterizer::Rasterizer() {}
+Rasterizer::Rasterizer() : compositor_context_(nullptr) {}
 
 Rasterizer::~Rasterizer() {}
 
