@@ -13,9 +13,7 @@ source_set("glue") {
   ]
 
   if (is_fuchsia || is_fuchsia_host) {
-    sources += [
-      "stack_trace_fuchsia.cc",
-    ]
+    sources += [ "stack_trace_fuchsia.cc" ]
 
     public_deps = [
       "//apps/tracing/lib/trace",
@@ -27,8 +25,6 @@ source_set("glue") {
       "task_runner_adaptor.h",
     ]
 
-    deps += [
-      "//base",
-    ]
+    deps += [ "//base" ]
   }
 }

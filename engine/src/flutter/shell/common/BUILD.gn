@@ -57,7 +57,7 @@ template("dart_embedder_resources") {
 
 dart_embedder_resources("generate_embedder_diagnostic_server_resources_cc") {
   inputs = [
-    "//flutter/shell/common/diagnostic/diagnostic_server.dart"
+    "//flutter/shell/common/diagnostic/diagnostic_server.dart",
   ]
   root_prefix = "//flutter/shell/common/diagnostic/"
   output = "$target_gen_dir/embedder_diagnostic_server_resources.cc"
@@ -100,10 +100,11 @@ source_set("common") {
   ]
 
   deps = [
+    ":generate_embedder_diagnostic_server_resources_cc",
     "//base",
     "//base:i18n",
-    "//dart/runtime/vm:libdart_platform",
     "//dart/runtime:libdart",
+    "//dart/runtime/vm:libdart_platform",
     "//flutter/assets",
     "//flutter/common",
     "//flutter/flow",
@@ -117,6 +118,5 @@ source_set("common") {
     "//third_party/rapidjson",
     "//third_party/skia",
     "//third_party/skia:gpu",
-    ":generate_embedder_diagnostic_server_resources_cc",
   ]
 }

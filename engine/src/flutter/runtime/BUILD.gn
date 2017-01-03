@@ -5,37 +5,44 @@
 import("//flutter/common/config.gni")
 
 vmservice_sources_gypi =
-  exec_script("//build/gypi_to_gn.py",
-      [ rebase_path("//dart/runtime/bin/vmservice/vmservice_sources.gypi") ],
-      "scope",
-      [ rebase_path("//dart/runtime/bin/vmservice/vmservice_sources.gypi") ])
+    exec_script(
+        "//build/gypi_to_gn.py",
+        [ rebase_path("//dart/runtime/bin/vmservice/vmservice_sources.gypi") ],
+        "scope",
+        [ rebase_path("//dart/runtime/bin/vmservice/vmservice_sources.gypi") ])
 
 action("gen_embedded_resources_cc") {
   script = "//dart/runtime/tools/create_resources.py"
   output_file = "$target_gen_dir/embedded_resources.cc"
-  outputs = [ output_file ]
+  outputs = [
+    output_file,
+  ]
 
   inputs = rebase_path(vmservice_sources_gypi.sources,
                        "",
                        "//dart/runtime/bin/vmservice")
 
   args = [
-    "--output",
-    rebase_path(output_file),
-    "--outer_namespace",
-    "flutter",
-    "--inner_namespace",
-    "runtime",
-    "--table_name",
-    "flutter_embedded_service_isolate",
-    "--root_prefix",
-    rebase_path("//dart/runtime/bin/"),
-  ] + rebase_path(inputs)
+           "--output",
+           rebase_path(output_file),
+           "--outer_namespace",
+           "flutter",
+           "--inner_namespace",
+           "runtime",
+           "--table_name",
+           "flutter_embedded_service_isolate",
+           "--root_prefix",
+           rebase_path("//dart/runtime/bin/"),
+         ] + rebase_path(inputs)
 }
 
 source_set("embedded_resources_cc") {
-  sources = [ "$target_gen_dir/embedded_resources.cc" ]
-  deps = [ ":gen_embedded_resources_cc" ]
+  sources = [
+    "$target_gen_dir/embedded_resources.cc",
+  ]
+  deps = [
+    ":gen_embedded_resources_cc",
+  ]
 }
 
 source_set("runtime") {
@@ -67,8 +74,9 @@ source_set("runtime") {
   ]
 
   deps = [
-    "//dart/runtime/bin:embedded_dart_io",
+    ":embedded_resources_cc",
     "//dart/runtime:libdart",
+    "//dart/runtime/bin:embedded_dart_io",
     "//flutter/assets",
     "//flutter/common",
     "//flutter/flow",
@@ -80,7 +88,6 @@ source_set("runtime") {
     "//lib/tonic",
     "//third_party/rapidjson",
     "//third_party/skia",
-    ":embedded_resources_cc",
   ]
 
   defines = []
@@ -88,27 +95,21 @@ source_set("runtime") {
   if (current_toolchain == host_toolchain) {
     # Though the test font data is small, we dont want to add to the binary size
     # on the device. We only add the same on the host test shells.
-    defines += ["EMBED_TEST_FONT_DATA=1"]
+    defines += [ "EMBED_TEST_FONT_DATA=1" ]
   }
 
   if (flutter_runtime_mode != "release") {
-    deps += [
-      "//lib/tonic/debugger",
-    ]
+    deps += [ "//lib/tonic/debugger" ]
   }
 
   if (is_android) {
-    deps += [
-      "//flutter/lib/jni",
-    ]
+    deps += [ "//flutter/lib/jni" ]
   }
 
   # On iOS (device), precompiled snapshots contain the instruction buffer.
   # Generation of the same requires all application specific script code to be
   # specified up front. In such cases, there can be no generic snapshot.
   if (!is_ios || use_ios_simulator) {
-    deps += [
-      "//flutter/lib/snapshot",
-    ]
+    deps += [ "//flutter/lib/snapshot" ]
   }
 }

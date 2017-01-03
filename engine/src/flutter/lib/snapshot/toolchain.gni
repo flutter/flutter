@@ -2,10 +2,10 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-import("//flutter/common/config.gni") # for flutter_aot
+import("//flutter/common/config.gni")  # for flutter_aot
 
 if (target_os == "ios") {
-  import("//build/config/ios/ios_sdk.gni") # For use_ios_simulator
+  import("//build/config/ios/ios_sdk.gni")  # For use_ios_simulator
 }
 
 dart_host_toolchain = host_toolchain

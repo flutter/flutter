@@ -103,11 +103,11 @@ group("copy_dart_sdk") {
 
 dart_pkg("sky_engine") {
   sources = [
+    "LICENSE",
+    "README.md",
     "dart_sdk/_empty.dart",
     "lib/_embedder.yaml",
-    "README.md",
     "pubspec.yaml",
-    "LICENSE"
   ]
 
   deps = [

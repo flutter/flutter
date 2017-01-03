@@ -23,13 +23,9 @@ shared_library("flutter_framework_dylib") {
     "framework/Headers/FlutterMacros.h",
     "framework/Headers/FlutterMessageListener.h",
     "framework/Headers/FlutterViewController.h",
-    "framework/Source/accessibility_bridge.h",
-    "framework/Source/accessibility_bridge.mm",
-    "framework/Source/flutter_touch_mapper.h",
-    "framework/Source/flutter_touch_mapper.mm",
     "framework/Source/FlutterAppDelegate.mm",
-    "framework/Source/FlutterDartProject_Internal.h",
     "framework/Source/FlutterDartProject.mm",
+    "framework/Source/FlutterDartProject_Internal.h",
     "framework/Source/FlutterDartSource.h",
     "framework/Source/FlutterDartSource.mm",
     "framework/Source/FlutterJSONMessageListener.mm",
@@ -41,6 +37,10 @@ shared_library("flutter_framework_dylib") {
     "framework/Source/FlutterView.h",
     "framework/Source/FlutterView.mm",
     "framework/Source/FlutterViewController.mm",
+    "framework/Source/accessibility_bridge.h",
+    "framework/Source/accessibility_bridge.mm",
+    "framework/Source/flutter_touch_mapper.h",
+    "framework/Source/flutter_touch_mapper.mm",
     "framework/Source/platform_message_router.h",
     "framework/Source/platform_message_router.mm",
     "framework/Source/vsync_waiter_ios.h",
@@ -48,7 +48,6 @@ shared_library("flutter_framework_dylib") {
     "platform_view_ios.h",
     "platform_view_ios.mm",
   ]
-
 
   deps = [
     "//base:base",
@@ -65,9 +64,7 @@ shared_library("flutter_framework_dylib") {
     "//third_party/skia",
   ]
 
-  defines = [
-    "FLUTTER_FRAMEWORK"
-  ]
+  defines = [ "FLUTTER_FRAMEWORK" ]
 
   libs = [
     "UIKit.framework",
@@ -80,8 +77,12 @@ shared_library("flutter_framework_dylib") {
 
 copy("framework_dylib") {
   visibility = [ ":*" ]
-  sources = [ "$root_out_dir/libFlutter.dylib" ]
-  outputs = [ "$_flutter_framework_dir/Flutter" ]
+  sources = [
+    "$root_out_dir/libFlutter.dylib",
+  ]
+  outputs = [
+    "$_flutter_framework_dir/Flutter",
+  ]
 
   deps = [
     ":flutter_framework_dylib",
@@ -93,8 +94,12 @@ action("framework_install_name") {
   stamp_file = "$root_out_dir/flutter_install_name_stamp"
   script = "//flutter/sky/tools/change_install_name.py"
 
-  inputs = [ "$_flutter_framework_dir/Flutter" ]
-  outputs = [ stamp_file ]
+  inputs = [
+    "$_flutter_framework_dir/Flutter",
+  ]
+  outputs = [
+    stamp_file,
+  ]
 
   args = [
     "--dylib",
@@ -106,20 +111,28 @@ action("framework_install_name") {
   ]
 
   deps = [
-    ":framework_dylib"
+    ":framework_dylib",
   ]
 }
 
 copy("framework_info_plist") {
   visibility = [ ":*" ]
-  sources = [ "framework/Info.plist" ]
-  outputs = [ "$_flutter_framework_dir/Info.plist" ]
+  sources = [
+    "framework/Info.plist",
+  ]
+  outputs = [
+    "$_flutter_framework_dir/Info.plist",
+  ]
 }
 
 copy("framework_module_map") {
   visibility = [ ":*" ]
-  sources = [ "framework/module.modulemap" ]
-  outputs = [ "$_flutter_framework_dir/Modules/module.modulemap" ]
+  sources = [
+    "framework/module.modulemap",
+  ]
+  outputs = [
+    "$_flutter_framework_dir/Modules/module.modulemap",
+  ]
 }
 
 copy("framework_headers") {
@@ -134,7 +147,9 @@ copy("framework_headers") {
     "framework/Headers/FlutterMessageListener.h",
     "framework/Headers/FlutterViewController.h",
   ]
-  outputs = [ "$_flutter_framework_dir/Headers/{{source_file_part}}" ]
+  outputs = [
+    "$_flutter_framework_dir/Headers/{{source_file_part}}",
+  ]
 }
 
 copy("framework_icu") {
@@ -144,7 +159,9 @@ copy("framework_icu") {
     "//third_party/icu/android/icudtl.dat",
   ]
   set_sources_assignment_filter(sources_assignment_filter)
-  outputs = [ "$_flutter_framework_dir/{{source_file_part}}" ]
+  outputs = [
+    "$_flutter_framework_dir/{{source_file_part}}",
+  ]
 }
 
 group("flutter_framework") {

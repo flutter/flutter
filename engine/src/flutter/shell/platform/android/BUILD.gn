@@ -38,6 +38,7 @@ shared_library("sky_shell") {
   ]
 
   deps = [
+    ":jni_headers",
     "//base",
     "//dart/runtime:libdart",
     "//flutter/common",
@@ -50,7 +51,6 @@ shared_library("sky_shell") {
     "//flutter/vulkan",
     "//lib/ftl",
     "//third_party/skia",
-    ":jni_headers",
   ]
 
   ldflags = [
@@ -78,6 +78,7 @@ android_library("java") {
     "io/flutter/view/ResourceExtractor.java",
     "io/flutter/view/ResourcePaths.java",
     "io/flutter/view/VsyncWaiter.java",
+
     # Deprecated classes provided for backwards compatibility
     "org/domokit/sky/shell/SkyActivity.java",
     "org/domokit/sky/shell/SkyApplication.java",
@@ -113,9 +114,9 @@ android_apk("android") {
   flutter_dist_jar = "$root_build_dir/flutter.jar"
 
   deps = [
-    "//base:base_java",
     ":assets",
     ":java",
     ":sky_shell",
+    "//base:base_java",
   ]
 }

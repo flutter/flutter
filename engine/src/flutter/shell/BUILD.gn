@@ -3,5 +3,7 @@
 # found in the LICENSE file.
 
 group("shell") {
-  deps = [ "platform" ]
+  deps = [
+    "platform",
+  ]
 }

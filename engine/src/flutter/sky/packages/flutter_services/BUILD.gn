@@ -3,5 +3,7 @@
 # found in the LICENSE file.
 
 group("flutter_services") {
-  deps = [ "//flutter/sky/packages/sky_services" ]
+  deps = [
+    "//flutter/sky/packages/sky_services",
+  ]
 }
