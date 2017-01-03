@@ -55,4 +55,45 @@ void main() {
     await tester.tap(find.text('OK'));
     expect(didPressOk, true);
   });
+  
+  testWidgets('Dialog background color', (WidgetTester tester) async {
+
+    await tester.pumpWidget(
+      new MaterialApp(
+        theme: new ThemeData(brightness: Brightness.dark),
+        home: new Material(
+          child: new Builder(
+            builder: (BuildContext context) {
+              return new Center(
+                child: new RaisedButton(
+                  child: new Text('X'),
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      child: new AlertDialog(
+                        content: new Text('Y'),
+                        actions: <Widget>[
+                        ]
+                      )
+                    );
+                  }
+                )
+              );
+            }
+          )
+        )
+      )
+    );
+
+    await tester.tap(find.text('X'));
+    await tester.pump(); // start animation
+    await tester.pump(const Duration(seconds: 1));
+
+    StatefulElement widget = tester.element(find.byType(Material).last);
+    Material materialconfig = widget.state.config;
+    //first and second expect check that the material is the dialog's one
+    expect(materialconfig.type, MaterialType.card);
+    expect(materialconfig.elevation, 24);
+    expect(materialconfig.color, Colors.grey[800]);
+  });
 }

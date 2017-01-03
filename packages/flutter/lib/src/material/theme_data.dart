@@ -89,6 +89,7 @@ class ThemeData {
     Color textSelectionColor,
     Color textSelectionHandleColor,
     Color backgroundColor,
+    Color dialogBackgroundColor,
     Color indicatorColor,
     Color hintColor,
     Color errorColor,
@@ -124,6 +125,7 @@ class ThemeData {
     textSelectionColor ??= isDark ? accentColor : primarySwatch[200];
     textSelectionHandleColor ??= isDark ? Colors.tealAccent[400] : primarySwatch[300];
     backgroundColor ??= isDark ? Colors.grey[700] : primarySwatch[200];
+    dialogBackgroundColor ??= isDark ? Colors.grey[800] : Colors.white;
     indicatorColor ??= accentColor == primaryColor ? Colors.white : accentColor;
     hintColor ??= isDark ? const Color(0x42FFFFFF) : const Color(0x4C000000);
     errorColor ??= Colors.red[700];
@@ -155,6 +157,7 @@ class ThemeData {
       textSelectionColor: textSelectionColor,
       textSelectionHandleColor: textSelectionHandleColor,
       backgroundColor: backgroundColor,
+      dialogBackgroundColor: dialogBackgroundColor,
       indicatorColor: indicatorColor,
       hintColor: hintColor,
       errorColor: errorColor,
@@ -194,6 +197,7 @@ class ThemeData {
     this.textSelectionColor,
     this.textSelectionHandleColor,
     this.backgroundColor,
+    this.dialogBackgroundColor,
     this.indicatorColor,
     this.hintColor,
     this.errorColor,
@@ -212,6 +216,7 @@ class ThemeData {
     assert(accentColorBrightness != null);
     assert(canvasColor != null);
     assert(scaffoldBackgroundColor != null);
+    assert(dialogBackgroundColor != null);
     assert(cardColor != null);
     assert(dividerColor != null);
     assert(highlightColor != null);
@@ -327,6 +332,9 @@ class ThemeData {
   /// remaining part of a progress bar.
   final Color backgroundColor;
 
+  /// The background color of [Dialog] elements.
+  final Color dialogBackgroundColor;
+  
   /// The color of the selected tab indicator in a tab bar.
   final Color indicatorColor;
 
@@ -381,6 +389,7 @@ class ThemeData {
     Color textSelectionColor,
     Color textSelectionHandleColor,
     Color backgroundColor,
+    Color dialogBackgroundColor,
     Color indicatorColor,
     Color hintColor,
     Color errorColor,
@@ -412,6 +421,7 @@ class ThemeData {
       textSelectionColor: textSelectionColor ?? this.textSelectionColor,
       textSelectionHandleColor: textSelectionHandleColor ?? this.textSelectionHandleColor,
       backgroundColor: backgroundColor ?? this.backgroundColor,
+      dialogBackgroundColor: dialogBackgroundColor ?? this.dialogBackgroundColor,
       indicatorColor: indicatorColor ?? this.indicatorColor,
       hintColor: hintColor ?? this.hintColor,
       errorColor: errorColor ?? this.errorColor,
@@ -445,6 +455,7 @@ class ThemeData {
       textSelectionColor: Color.lerp(begin.textSelectionColor, end.textSelectionColor, t),
       textSelectionHandleColor: Color.lerp(begin.textSelectionHandleColor, end.textSelectionHandleColor, t),
       backgroundColor: Color.lerp(begin.backgroundColor, end.backgroundColor, t),
+      dialogBackgroundColor: Color.lerp(begin.dialogBackgroundColor, end.dialogBackgroundColor, t),
       accentColor: Color.lerp(begin.accentColor, end.accentColor, t),
       accentColorBrightness: t < 0.5 ? begin.accentColorBrightness : end.accentColorBrightness,
       indicatorColor: Color.lerp(begin.indicatorColor, end.indicatorColor, t),
@@ -482,6 +493,7 @@ class ThemeData {
            (otherData.textSelectionColor == textSelectionColor) &&
            (otherData.textSelectionHandleColor == textSelectionHandleColor) &&
            (otherData.backgroundColor == backgroundColor) &&
+           (otherData.dialogBackgroundColor == dialogBackgroundColor) &&
            (otherData.accentColor == accentColor) &&
            (otherData.accentColorBrightness == accentColorBrightness) &&
            (otherData.indicatorColor == indicatorColor) &&
@@ -520,6 +532,7 @@ class ThemeData {
       accentColorBrightness,
       hashValues( // Too many values.
         indicatorColor,
+        dialogBackgroundColor,
         hintColor,
         errorColor,
         textTheme,
