@@ -304,7 +304,7 @@ void PlatformViewServiceProtocol::ScreenshotGpuTask(SkBitmap* bitmap) {
   sk_sp<SkSurface> surface = SkSurface::MakeRasterDirect(
       bitmap->info(), bitmap->getPixels(), bitmap->rowBytes());
 
-  flow::CompositorContext compositor_context;
+  flow::CompositorContext compositor_context(nullptr);
   SkCanvas* canvas = surface->getCanvas();
   flow::CompositorContext::ScopedFrame frame =
       compositor_context.AcquireFrame(nullptr, canvas, false);

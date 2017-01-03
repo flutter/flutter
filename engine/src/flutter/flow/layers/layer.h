@@ -21,8 +21,8 @@
 #include "third_party/skia/include/core/SkMatrix.h"
 #include "third_party/skia/include/core/SkPath.h"
 #include "third_party/skia/include/core/SkPicture.h"
-#include "third_party/skia/include/core/SkRect.h"
 #include "third_party/skia/include/core/SkRRect.h"
+#include "third_party/skia/include/core/SkRect.h"
 #include "third_party/skia/include/core/SkXfermode.h"
 
 namespace flow {
@@ -45,6 +45,7 @@ class Layer {
     SkCanvas& canvas;
     const Stopwatch& frame_time;
     const Stopwatch& engine_time;
+    const CounterValues& memory_usage;
   };
 
   virtual void Paint(PaintContext& context) = 0;

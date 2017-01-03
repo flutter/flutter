@@ -10,9 +10,9 @@
 #include "flutter/flow/compositor_context.h"
 #include "flutter/runtime/embedder_resources.h"
 #include "flutter/shell/common/engine.h"
+#include "flutter/shell/common/picture_serializer.h"
 #include "flutter/shell/common/rasterizer.h"
 #include "flutter/shell/common/shell.h"
-#include "flutter/shell/common/picture_serializer.h"
 #include "lib/ftl/logging.h"
 #include "lib/tonic/dart_binding_macros.h"
 #include "lib/tonic/dart_library_natives.h"
@@ -125,7 +125,7 @@ void DiagnosticServer::SkiaPictureTask(Dart_Port port_id) {
   recorder.beginRecording(SkRect::MakeWH(layer_tree->frame_size().width(),
                                          layer_tree->frame_size().height()));
 
-  flow::CompositorContext compositor_context;
+  flow::CompositorContext compositor_context(nullptr);
   flow::CompositorContext::ScopedFrame frame = compositor_context.AcquireFrame(
       nullptr, recorder.getRecordingCanvas(), false);
   layer_tree->Raster(frame);

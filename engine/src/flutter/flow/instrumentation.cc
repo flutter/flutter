@@ -5,6 +5,7 @@
 #include "flutter/flow/instrumentation.h"
 
 #include <algorithm>
+#include <limits>
 
 #include "third_party/skia/include/core/SkPath.h"
 
@@ -17,6 +18,8 @@ Stopwatch::Stopwatch() : start_(ftl::TimePoint::Now()), current_sample_(0) {
   const ftl::TimeDelta delta = ftl::TimeDelta::Zero();
   laps_.resize(kMaxSamples, delta);
 }
+
+Stopwatch::~Stopwatch() = default;
 
 void Stopwatch::Start() {
   start_ = ftl::TimePoint::Now();
@@ -153,6 +156,93 @@ void Stopwatch::Visualize(SkCanvas& canvas, const SkRect& rect) const {
                         bottom, paint);
 }
 
-Stopwatch::~Stopwatch() = default;
+CounterValues::CounterValues() : current_sample_(kMaxSamples - 1) {
+  values_.resize(kMaxSamples, 0);
+}
+
+CounterValues::~CounterValues() = default;
+
+void CounterValues::Add(int64_t value) {
+  current_sample_ = (current_sample_ + 1) % kMaxSamples;
+  values_[current_sample_] = value;
+}
+
+void CounterValues::Visualize(SkCanvas& canvas, const SkRect& rect) const {
+  size_t max_bytes = GetMaxValue();
+
+  if (max_bytes == 0) {
+    // The backend for this counter probably did not fill in any values.
+    return;
+  }
+
+  size_t min_bytes = GetMinValue();
+
+  SkPaint paint;
+
+  // Paint the background.
+  paint.setColor(0x99FFFFFF);
+  canvas.drawRect(rect, paint);
+
+  // Establish the graph position.
+  const SkScalar x = rect.x();
+  const SkScalar y = rect.y();
+  const SkScalar width = rect.width();
+  const SkScalar height = rect.height();
+  const SkScalar bottom = y + height;
+  const SkScalar right = x + width;
+
+  // Prepare a path for the data.
+  SkPath path;
+  path.moveTo(x, bottom);
+
+  for (size_t i = 0; i < kMaxSamples; ++i) {
+    int64_t current_bytes = values_[i];
+    double ratio =
+        (double)(current_bytes - min_bytes) / (max_bytes - min_bytes);
+    path.lineTo(x + (((double)(i) / (double)kMaxSamples) * width),
+                y + ((1.0 - ratio) * height));
+  }
+
+  path.rLineTo(100, 0);
+  path.lineTo(right, bottom);
+  path.close();
+
+  // Draw the graph.
+  paint.setColor(0xAA0000FF);
+  canvas.drawPath(path, paint);
+
+  // Paint the vertical marker for the current frame.
+  const double sample_unit_width = (1.0 / kMaxSamples);
+  const double sample_margin_unit_width = sample_unit_width / 6.0;
+  const double sample_margin_width = width * sample_margin_unit_width;
+  paint.setStyle(SkPaint::Style::kFill_Style);
+  paint.setColor(SK_ColorGRAY);
+  double sample_x =
+      x + width * (static_cast<double>(current_sample_) / kMaxSamples) -
+      sample_margin_width;
+  canvas.drawRectCoords(sample_x, y, sample_x + width * sample_unit_width +
+                                         sample_margin_width * 2,
+                        bottom, paint);
+}
+
+int64_t CounterValues::GetCurrentValue() const {
+  return values_[current_sample_];
+}
+
+int64_t CounterValues::GetMaxValue() const {
+  auto max = std::numeric_limits<int64_t>::min();
+  for (size_t i = 0; i < kMaxSamples; ++i) {
+    max = std::max<int64_t>(max, values_[i]);
+  }
+  return max;
+}
+
+int64_t CounterValues::GetMinValue() const {
+  auto min = std::numeric_limits<int64_t>::max();
+  for (size_t i = 0; i < kMaxSamples; ++i) {
+    min = std::min<int64_t>(min, values_[i]);
+  }
+  return min;
+}
 
 }  // namespace flow
