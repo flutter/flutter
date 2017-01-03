@@ -9,8 +9,12 @@ if (is_android) {
     source = "//flutter/sky/packages/flutter_services"
     dest = "$root_build_dir/dist/packages/flutter_services"
 
-    inputs = [ source ]
-    outputs = [ dest ]
+    inputs = [
+      source,
+    ]
+    outputs = [
+      dest,
+    ]
 
     args = [
       "--source",
@@ -29,8 +33,12 @@ if (is_android) {
     source = "$root_gen_dir/dart-pkg/sky_engine"
     dest = "$root_build_dir/dist/packages/sky_engine"
 
-    inputs = [ source ]
-    outputs = [ dest ]
+    inputs = [
+      source,
+    ]
+    outputs = [
+      dest,
+    ]
 
     args = [
       "--source",
@@ -51,8 +59,12 @@ if (is_android) {
     source = "$root_gen_dir/dart-pkg/sky_services"
     dest = "$root_build_dir/dist/packages/sky_services"
 
-    inputs = [ source ]
-    outputs = [ dest ]
+    inputs = [
+      source,
+    ]
+    outputs = [
+      dest,
+    ]
 
     args = [
       "--source",

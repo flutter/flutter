@@ -20,14 +20,13 @@ executable("linux") {
     "//flutter/shell/gpu",
     "//flutter/shell/testing",
     "//lib/ftl",
-    "//third_party/glfw",
-    "//third_party/skia",
+
     # Required by FontCacheLinux. Not Skia. Skia uses a custom font manager
     # that delegates to us.
     "//third_party:fontconfig",
+    "//third_party/glfw",
+    "//third_party/skia",
   ]
 
-  ldflags = [
-    "-lGL",
-  ]
+  ldflags = [ "-lGL" ]
 }

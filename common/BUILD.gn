@@ -20,7 +20,5 @@ source_set("common") {
     "//lib/ftl",
   ]
 
-  public_configs = [
-    ":flutter_config"
-  ]
+  public_configs = [ ":flutter_config" ]
 }

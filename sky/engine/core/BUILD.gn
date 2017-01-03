@@ -5,7 +5,10 @@
 import("//flutter/common/config.gni")
 import("//flutter/sky/engine/core/core.gni")
 
-visibility = [ "//flutter/sky/engine/*", "//flutter/sky/shell/*" ]
+visibility = [
+  "//flutter/sky/engine/*",
+  "//flutter/sky/shell/*",
+]
 
 static_library("core") {
   output_name = "sky_core"
@@ -20,9 +23,7 @@ static_library("core") {
 
   if (flutter_runtime_mode != "release" && !is_fuchsia) {
     # Only include observatory assets in non-release modes.
-    deps += [
-      "//dart/runtime/observatory:embedded_observatory_archive",
-    ]
+    deps += [ "//dart/runtime/observatory:embedded_observatory_archive" ]
   }
 
   configs += [
@@ -45,20 +46,14 @@ static_library("core") {
   ]
 
   if (!is_fuchsia) {
-    public_deps += [
-      "//base",
-    ]
+    public_deps += [ "//base" ]
   }
 
   if (flutter_runtime_mode != "release") {
-    public_deps += [
-      "//lib/tonic/debugger",
-    ]
+    public_deps += [ "//lib/tonic/debugger" ]
   }
 
   if (is_android) {
-    public_deps += [
-      "//flutter/lib/jni",
-    ]
+    public_deps += [ "//flutter/lib/jni" ]
   }
 }

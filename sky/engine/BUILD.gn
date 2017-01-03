@@ -19,15 +19,11 @@ config("config") {
     "$root_out_dir",
   ]
 
-  cflags = [
-    "-Wno-inconsistent-missing-override",
-  ]
+  cflags = [ "-Wno-inconsistent-missing-override" ]
 
   if (is_fuchsia) {
     # TODO(abarth): Remove once the kernel support unmapping memory properly.
-    defines = [
-      "MEMORY_TOOL_REPLACES_ALLOCATOR",
-    ]
+    defines = [ "MEMORY_TOOL_REPLACES_ALLOCATOR" ]
   }
 }
 
@@ -42,9 +38,7 @@ config("non_test_config") {
 }
 
 group("engine") {
-  public_configs = [
-    ":config",
-  ]
+  public_configs = [ ":config" ]
 
   public_deps = [
     "//flutter/sky/engine/core",

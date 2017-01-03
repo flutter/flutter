@@ -5,7 +5,9 @@
 group("flutter") {
   testonly = true
 
-  deps = [ "//flutter/sky" ]
+  deps = [
+    "//flutter/sky",
+  ]
 
   if (is_fuchsia) {
     deps += [
@@ -29,7 +31,6 @@ group("flutter") {
 }
 
 if (!is_fuchsia) {
-
   group("dist") {
     testonly = true
 
@@ -37,5 +38,4 @@ if (!is_fuchsia) {
       "//flutter/sky/dist",
     ]
   }
-
 }

@@ -204,9 +204,8 @@ template("dart_packages") {
   }
 
   # Determine list of packages.
-  list_script = rebase_path("build/dart/dart/tools/fetch_dart_packages.py",
-                            ".",
-                            "//")
+  list_script =
+      rebase_path("build/dart/dart/tools/fetch_dart_packages.py", ".", "//")
   packages = exec_script(list_script,
                          [
                            "--directory",

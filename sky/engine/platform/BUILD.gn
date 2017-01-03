@@ -273,15 +273,11 @@ source_set("platform") {
   }
 
   if (is_android) {
-    sources += [
-      "fonts/android/FontCacheAndroid.cpp",
-    ]
+    sources += [ "fonts/android/FontCacheAndroid.cpp" ]
   }
 
   if (is_linux && !is_android) {
-    sources += [
-      "fonts/linux/FontCacheLinux.cpp",
-    ]
+    sources += [ "fonts/linux/FontCacheLinux.cpp" ]
   }
 
   if (is_fuchsia) {
@@ -290,9 +286,7 @@ source_set("platform") {
       "fonts/fuchsia/FontCacheFuchsia.h",
     ]
 
-    deps += [
-      "//apps/fonts/services",
-    ]
+    deps += [ "//apps/fonts/services" ]
   }
 
   configs += [
@@ -310,9 +304,7 @@ source_set("platform") {
   if (is_android) {
     # Add in some Linux files also shared with Android.
     set_sources_assignment_filter([])
-    sources += [
-      "fonts/linux/FontPlatformDataLinux.cpp",
-    ]
+    sources += [ "fonts/linux/FontPlatformDataLinux.cpp" ]
     set_sources_assignment_filter(sources_assignment_filter)
   }
 }

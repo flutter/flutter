@@ -227,6 +227,7 @@ executable("wtf_unittests") {
     "StringExtrasTest.cpp",
     "StringHasherTest.cpp",
     "TemporaryChangeTest.cpp",
+    "VectorTest.cpp",
     "testing/RunAllTests.cpp",
     "testing/WTFTestHelpers.cpp",
     "testing/WTFTestHelpers.h",
@@ -238,7 +239,6 @@ executable("wtf_unittests") {
     "text/StringImplTest.cpp",
     "text/StringOperatorsTest.cpp",
     "text/TextCodecUTF8Test.cpp",
-    "VectorTest.cpp",
 
     # The following tests depend on either ICU or the locale. Disable them for
     # now.
@@ -253,6 +253,7 @@ executable("wtf_unittests") {
 
   deps = [
     ":wtf",
+
     # Does not use //flutter/testing because it needs and provides its own main
     # function in RunAllTests.cpp.
     "//third_party/gtest",

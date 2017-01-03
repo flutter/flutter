@@ -38,7 +38,13 @@ template("flutter_app") {
   dart_package_name = target_name + "_dart_package"
 
   dart_package(dart_package_name) {
-    forward_variables_from(invoker, [ "analysis_options", "deps", "disable_analysis", "source_dir" ])
+    forward_variables_from(invoker,
+                           [
+                             "analysis_options",
+                             "deps",
+                             "disable_analysis",
+                             "source_dir",
+                           ])
     if (defined(invoker.package_name)) {
       package_name = invoker.package_name
     } else {
@@ -108,7 +114,6 @@ template("flutter_app") {
       rebase_path(depfile_path),
       "--build-output",
       rebase_path(snapshot_path, root_build_dir),
-
     ]
 
     deps = [
@@ -160,7 +165,7 @@ template("flutter_app") {
     if (defined(invoker.manifest)) {
       args += [
         "--manifest",
-        rebase_path(invoker.manifest)
+        rebase_path(invoker.manifest),
       ]
     }
 

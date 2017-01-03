@@ -19,8 +19,6 @@ source_set("web") {
   ]
 
   if (is_fuchsia) {
-    deps += [
-      "//lib/mtl/tasks",
-    ]
+    deps += [ "//lib/mtl/tasks" ]
   }
 }
