@@ -332,9 +332,17 @@ class TabBar extends StatefulWidget implements AppBarBottomWidget {
   /// the color of the theme's body2 text color is used.
   final Color labelColor;
 
-  // TBD: this is a non-working hack.
   @override
-  double get bottomHeight => _kTextAndIconTabHeight + _kTabIndicatorHeight;
+  double get bottomHeight {
+    for (Widget widget in tabs) {
+      if (widget is Tab) {
+        final Tab tab = widget;
+        if (tab.text != null && tab.icon != null)
+          return _kTextAndIconTabHeight + _kTabIndicatorHeight;
+      }
+    }
+    return _kTabHeight + _kTabIndicatorHeight;
+  }
 
   @override
   _TabBarState createState() => new _TabBarState();
@@ -777,9 +785,9 @@ class TabPageSelector extends StatelessWidget {
     if (tabController.indexIsChanging) {
       // The selection's animation is animating from previousValue to value.
       if (tabController.index == tabIndex)
-        background = selectedColor.evaluate(animation);
+        background = selectedColor.lerp(_indexChangeProgress(tabController));
       else if (tabController.previousIndex == tabIndex)
-        background = previousColor.evaluate(animation);
+        background = previousColor.lerp(_indexChangeProgress(tabController));
       else
         background = selectedColor.begin;
     } else {
