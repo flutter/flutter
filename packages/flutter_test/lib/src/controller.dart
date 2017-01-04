@@ -267,6 +267,26 @@ class WidgetController {
     });
   }
 
+  /// Dispatch a pointer down / pointer up sequence (with a delay of
+  /// [kLongPressTimeout] + [kPressTimeout] between the two events) at the
+  /// center of the given widget, assuming it is exposed. If the center of the
+  /// widget is not exposed, this might send events to another
+  /// object.
+  Future<Null> longPress(Finder finder, { int pointer: 1 }) {
+    return longPressAt(getCenter(finder), pointer: pointer);
+  }
+
+  /// Dispatch a pointer down / pointer up sequence at the given location with
+  /// a delay of [kLongPressTimeout] + [kPressTimeout] between the two events.
+  Future<Null> longPressAt(Point location, { int pointer: 1 }) {
+    return TestAsyncUtils.guard(() async {
+      TestGesture gesture = await startGesture(location, pointer: pointer);
+      await pump(kLongPressTimeout + kPressTimeout);
+      await gesture.up();
+      return null;
+    });
+  }
+
   /// Attempts a fling gesture starting from the center of the given
   /// widget, moving the given distance, reaching the given velocity.
   ///

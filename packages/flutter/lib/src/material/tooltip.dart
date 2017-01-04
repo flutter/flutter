@@ -110,18 +110,6 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       _removeEntry();
   }
 
-  @override
-  void didUpdateConfig(Tooltip oldConfig) {
-    super.didUpdateConfig(oldConfig);
-    if (_entry != null &&
-        (config.message != oldConfig.message ||
-         config.height != oldConfig.height ||
-         config.padding != oldConfig.padding ||
-         config.verticalOffset != oldConfig.verticalOffset ||
-         config.preferBelow != oldConfig.preferBelow))
-      _entry.markNeedsBuild();
-  }
-
   void ensureTooltipVisible() {
     if (_entry != null) {
       _timer?.cancel();
@@ -129,22 +117,24 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       _controller.forward();
       return;  // Already visible.
     }
-    RenderBox box = context.findRenderObject();
-    Point target = box.localToGlobal(box.size.center(Point.origin));
-    _entry = new OverlayEntry(builder: (BuildContext context) {
-      return new _TooltipOverlay(
-        message: config.message,
-        height: config.height,
-        padding: config.padding,
-        animation: new CurvedAnimation(
-          parent: _controller,
-          curve: Curves.fastOutSlowIn
-        ),
-        target: target,
-        verticalOffset: config.verticalOffset,
-        preferBelow: config.preferBelow
-      );
-    });
+    final RenderBox box = context.findRenderObject();
+    final Point target = box.localToGlobal(box.size.center(Point.origin));
+    // We create this widget outside of the overlay entry's builder to prevent
+    // updated values from happening to leak into the overlay when the overlay
+    // rebuilds.
+    final Widget overlay = new _TooltipOverlay(
+      message: config.message,
+      height: config.height,
+      padding: config.padding,
+      animation: new CurvedAnimation(
+        parent: _controller,
+        curve: Curves.fastOutSlowIn
+      ),
+      target: target,
+      verticalOffset: config.verticalOffset,
+      preferBelow: config.preferBelow
+    );
+    _entry = new OverlayEntry(builder: (BuildContext context) => overlay);
     Overlay.of(context, debugRequiredFor: config).insert(_entry);
     GestureBinding.instance.pointerRouter.addGlobalRoute(_handlePointerEvent);
     _controller.forward();

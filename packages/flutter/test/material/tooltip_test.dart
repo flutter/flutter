@@ -473,4 +473,36 @@ void main() {
 
     semantics.dispose();
   });
+
+  testWidgets('Tooltip overlay does not update', (WidgetTester tester) async {
+    Widget buildApp(String text) {
+      return new MaterialApp(
+        home: new Center(
+          child: new Tooltip(
+            message: text,
+            child: new Container(
+              width: 100.0,
+              height: 100.0,
+              decoration: new BoxDecoration(
+                backgroundColor: Colors.green[500]
+              )
+            )
+          )
+        )
+      );
+    }
+
+    await tester.pumpWidget(buildApp(tooltipText));
+    await tester.longPress(find.byType(Tooltip));
+    expect(find.text(tooltipText), findsOneWidget);
+    await tester.pumpWidget(buildApp('NEW'));
+    expect(find.text(tooltipText), findsOneWidget);
+    await tester.tapAt(const Point(5.0, 5.0));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.text(tooltipText), findsNothing);
+    await tester.longPress(find.byType(Tooltip));
+    expect(find.text(tooltipText), findsNothing);
+  });
+
 }
