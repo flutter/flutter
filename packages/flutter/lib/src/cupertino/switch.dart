@@ -119,23 +119,23 @@ class _CupertinoSwitchRenderObjectWidget extends LeafRenderObjectWidget {
 }
 
 
-const double _kTrackHeight = 25.0;
-const double _kTrackWidth = 42.0;
+const double _kTrackWidth = 51.0;
+const double _kTrackHeight = 31.0;
 const double _kTrackRadius = _kTrackHeight / 2.0;
 const double _kTrackInnerStart = _kTrackHeight / 2.0;
 const double _kTrackInnerEnd = _kTrackWidth - _kTrackInnerStart;
 const double _kTrackInnerLength = _kTrackInnerEnd - _kTrackInnerStart;
-const double _kThumbRadius = 11.0;
-const double _kThumbExtension = 6.0;
-const double _kSwitchWidth = 56.0;
-const double _kSwitchHeight = 36.0;
+const double _kThumbRadius = 14.0;
+const double _kThumbExtension = 7.0;
+const double _kSwitchWidth = 59.0;
+const double _kSwitchHeight = 39.0;
 
-const Color _kTrackColor = const Color(0xFFDDDDDD);
+const Color _kTrackColor = const Color(0xFFE5E5E5);
 const Color _kThumbColor = const Color(0xFFFFFFFF);
-const Color _kThumbShadowColor = const Color(0x4C000000);
+const Color _kThumbShadowColor = const Color(0x2C000000);
 const Duration _kReactionDuration = const Duration(milliseconds: 300);
 const Duration _kToggleDuration = const Duration(milliseconds: 200);
-final MaskFilter _kShadowMaskFilter = new MaskFilter.blur(BlurStyle.normal, BoxShadow.convertRadiusToSigma(3.0));
+final MaskFilter _kShadowMaskFilter = new MaskFilter.blur(BlurStyle.normal, BoxShadow.convertRadiusToSigma(1.0));
 
 class _RenderCupertinoSwitch extends RenderConstrainedBox implements SemanticsActionHandler {
   _RenderCupertinoSwitch({
@@ -363,7 +363,7 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox implements SemanticsAc
     final double currentReactionValue = _reaction.value;
 
     final Color trackColor = _value ? activeColor : _kTrackColor;
-    final double borderThickness = 1.0 + (_kTrackRadius - 1.0) *  math.max(currentReactionValue, currentPosition);
+    final double borderThickness = 1.5 + (_kTrackRadius - 1.5) * math.max(currentReactionValue, currentPosition);
 
     final Paint paint = new Paint()
       ..color = trackColor;
@@ -398,6 +398,7 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox implements SemanticsAc
     paint
       ..color = _kThumbShadowColor
       ..maskFilter = _kShadowMaskFilter;
+    canvas.drawRRect(thumbRRect, paint);
     canvas.drawRRect(thumbRRect.shift(const Offset(0.0, 3.0)), paint);
 
     paint
