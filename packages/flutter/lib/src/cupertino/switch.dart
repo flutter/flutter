@@ -10,6 +10,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:meta/meta.dart';
 
+import 'thumb_painter.dart';
+
 /// An iOS-style switch.
 ///
 /// Used to toggle the on/off state of a single setting.
@@ -118,24 +120,18 @@ class _CupertinoSwitchRenderObjectWidget extends LeafRenderObjectWidget {
   }
 }
 
-
 const double _kTrackWidth = 51.0;
 const double _kTrackHeight = 31.0;
 const double _kTrackRadius = _kTrackHeight / 2.0;
 const double _kTrackInnerStart = _kTrackHeight / 2.0;
 const double _kTrackInnerEnd = _kTrackWidth - _kTrackInnerStart;
 const double _kTrackInnerLength = _kTrackInnerEnd - _kTrackInnerStart;
-const double _kThumbRadius = 14.0;
-const double _kThumbExtension = 7.0;
 const double _kSwitchWidth = 59.0;
 const double _kSwitchHeight = 39.0;
 
 const Color _kTrackColor = const Color(0xFFE5E5E5);
-const Color _kThumbColor = const Color(0xFFFFFFFF);
-const Color _kThumbShadowColor = const Color(0x2C000000);
 const Duration _kReactionDuration = const Duration(milliseconds: 300);
 const Duration _kToggleDuration = const Duration(milliseconds: 200);
-final MaskFilter _kShadowMaskFilter = new MaskFilter.blur(BlurStyle.normal, BoxShadow.convertRadiusToSigma(1.0));
 
 class _RenderCupertinoSwitch extends RenderConstrainedBox implements SemanticsActionHandler {
   _RenderCupertinoSwitch({
@@ -355,6 +351,8 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox implements SemanticsAc
       _handleTap();
   }
 
+  final CupertinoThumbPainter _thumbPainter = new CupertinoThumbPainter();
+
   @override
   void paint(PaintingContext context, Offset offset) {
     final Canvas canvas = context.canvas;
@@ -378,33 +376,25 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox implements SemanticsAc
     final RRect innerRRect = new RRect.fromRectAndRadius(trackRect.deflate(borderThickness), const Radius.circular(_kTrackRadius));
     canvas.drawDRRect(outerRRect, innerRRect, paint);
 
-    final double currentThumbExtension = _kThumbExtension * currentReactionValue;
+    final double currentThumbExtension = CupertinoThumbPainter.extension * currentReactionValue;
     final double thumbLeft = lerpDouble(
-      trackRect.left + _kTrackInnerStart - _kThumbRadius,
-      trackRect.left + _kTrackInnerEnd - _kThumbRadius - currentThumbExtension,
+      trackRect.left + _kTrackInnerStart - CupertinoThumbPainter.radius,
+      trackRect.left + _kTrackInnerEnd - CupertinoThumbPainter.radius - currentThumbExtension,
       currentPosition,
     );
     final double thumbRight = lerpDouble(
-      trackRect.left + _kTrackInnerStart + _kThumbRadius + currentThumbExtension,
-      trackRect.left + _kTrackInnerEnd + _kThumbRadius,
+      trackRect.left + _kTrackInnerStart + CupertinoThumbPainter.radius + currentThumbExtension,
+      trackRect.left + _kTrackInnerEnd + CupertinoThumbPainter.radius,
       currentPosition,
     );
     final double thumbCenterY = offset.dy + size.height / 2.0;
 
-    final RRect thumbRRect = new RRect.fromRectAndRadius(new Rect.fromLTRB(
-        thumbLeft, thumbCenterY - _kThumbRadius, thumbRight, thumbCenterY + _kThumbRadius
-    ), const Radius.circular(_kThumbRadius));
-
-    paint
-      ..color = _kThumbShadowColor
-      ..maskFilter = _kShadowMaskFilter;
-    canvas.drawRRect(thumbRRect, paint);
-    canvas.drawRRect(thumbRRect.shift(const Offset(0.0, 3.0)), paint);
-
-    paint
-      ..color = _kThumbColor
-      ..maskFilter = null;
-    canvas.drawRRect(thumbRRect, paint);
+    _thumbPainter.paint(canvas, new Rect.fromLTRB(
+      thumbLeft,
+      thumbCenterY - CupertinoThumbPainter.radius,
+      thumbRight,
+      thumbCenterY + CupertinoThumbPainter.radius,
+    ));
   }
 
   @override
