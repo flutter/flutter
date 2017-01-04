@@ -161,8 +161,13 @@ def main(argv):
   command = [
     '%s/buildtools/%s/gn' % (SRC_ROOT, subdir),
     'gen',
-    '--check'
+    '--check',
   ]
+
+  if sys.platform == 'darwin':
+    # On the Mac, also generate Xcode projects for ease of editing.
+    command.append('--ide=xcode')
+
   gn_args = to_command_line(to_gn_args(args))
   out_dir = get_out_dir(args)
   print "gn gen --check in %s" % out_dir
