@@ -9,6 +9,7 @@
       <excludeFolder url="file://$MODULE_DIR$/packages" />
       <excludeFolder url="file://$MODULE_DIR$/test/animation/packages" />
       <excludeFolder url="file://$MODULE_DIR$/test/cassowary/packages" />
+      <excludeFolder url="file://$MODULE_DIR$/test/cupertino/packages" />
       <excludeFolder url="file://$MODULE_DIR$/test/engine/packages" />
       <excludeFolder url="file://$MODULE_DIR$/test/examples/packages" />
       <excludeFolder url="file://$MODULE_DIR$/test/foundation/packages" />
