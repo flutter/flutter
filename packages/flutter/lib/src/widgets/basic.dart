@@ -2820,6 +2820,11 @@ class RepaintBoundary extends SingleChildRenderObjectWidget {
 /// When [ignoringSemantics] is `true`, the subtree will be invisible to
 /// the semantics layer (and thus e.g. accessibility tools). If
 /// [ignoringSemantics] is null, it uses the value of [ignoring].
+///
+/// See also:
+///
+///  * [AbsorbPointer], which also prevents its children from receiving pointer
+///    events but is itself visible to hit testing.
 class IgnorePointer extends SingleChildRenderObjectWidget {
   /// Creates a widget that is invisible to hit testing.
   ///
@@ -2876,6 +2881,11 @@ class IgnorePointer extends SingleChildRenderObjectWidget {
 /// during layout and paints its child as usual. It just prevents its children
 /// from being the target of located events, because it returns `true` from
 /// [hitTest].
+///
+/// See also:
+///
+///  * [IgnorePointer], which also prevents its children from receiving pointer
+///    events but is itself invisible to hit testing.
 class AbsorbPointer extends SingleChildRenderObjectWidget {
   /// Creates a widget that absorbs pointers during hit testing.
   ///
