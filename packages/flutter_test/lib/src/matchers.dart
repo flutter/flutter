@@ -62,8 +62,8 @@ const Matcher isNotInCard = const _IsNotInCard();
 /// Asserts that an object's toString() is a plausible one-line description.
 ///
 /// Specifically, this matcher checks that the string does not contains newline
-/// characters, and does not have leading or trailing whitespace, and is not
-/// empty.
+/// characters, and does not have leading or trailing whitespace, is not
+/// empty, and does not contain the default `Instance of ...` string.
 const Matcher hasOneLineDescription = const _HasOneLineDescription();
 
 /// Asserts that two [double]s are equal, within some tolerated error.
@@ -242,6 +242,7 @@ class _HasOneLineDescription extends Matcher {
     String description = object.toString();
     return description.isNotEmpty
         && !description.contains('\n')
+        && !description.contains('Instance of ')
         && description.trim() == description;
   }
 

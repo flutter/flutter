@@ -5,6 +5,14 @@
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('hasOneLineDescription', () {
+    expect('Hello', hasOneLineDescription);
+    expect('Hello\nHello', isNot(hasOneLineDescription));
+    expect(' Hello', isNot(hasOneLineDescription));
+    expect('Hello ', isNot(hasOneLineDescription));
+    expect(new Object(), isNot(hasOneLineDescription));
+  });
+
   test('moreOrLessEquals', () {
     expect(0.0, moreOrLessEquals(1e-11));
     expect(1e-11, moreOrLessEquals(0.0));
