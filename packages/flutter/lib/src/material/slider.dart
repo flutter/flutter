@@ -355,7 +355,6 @@ class _RenderSlider extends RenderConstrainedBox implements SemanticsActionHandl
       _currentDragValue = (globalToLocal(details.globalPosition).x - _kReactionRadius) / _trackLength;
       onChanged(_discretizedCurrentDragValue);
       _reactionController.forward();
-      markNeedsPaint();
     }
   }
 
@@ -371,7 +370,6 @@ class _RenderSlider extends RenderConstrainedBox implements SemanticsActionHandl
       _active = false;
       _currentDragValue = 0.0;
       _reactionController.reverse();
-      markNeedsPaint();
     }
   }
 
@@ -490,14 +488,15 @@ class _RenderSlider extends RenderConstrainedBox implements SemanticsActionHandl
 
   @override
   void performAction(SemanticsAction action) {
+    final double unit = divisions != null ? 1.0 / divisions : _kAdjustmentUnit;
     switch (action) {
       case SemanticsAction.increase:
         if (isInteractive)
-          onChanged((value + _kAdjustmentUnit).clamp(0.0, 1.0));
+          onChanged((value + unit).clamp(0.0, 1.0));
         break;
       case SemanticsAction.decrease:
         if (isInteractive)
-          onChanged((value - _kAdjustmentUnit).clamp(0.0, 1.0));
+          onChanged((value - unit).clamp(0.0, 1.0));
         break;
       default:
         assert(false);

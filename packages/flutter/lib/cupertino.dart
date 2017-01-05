@@ -7,4 +7,6 @@
 /// To use, import `package:flutter/cupertino.dart`.
 library cupertino;
 
+export 'src/cupertino/slider.dart';
 export 'src/cupertino/switch.dart';
+export 'src/cupertino/thumb_painter.dart';
