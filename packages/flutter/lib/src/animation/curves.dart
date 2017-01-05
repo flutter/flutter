@@ -16,7 +16,8 @@ abstract class Curve {
 
   /// Returns the value of the curve at point `t`.
   ///
-  /// The value of `t` must be between 0.0 and 1.0, inclusive.
+  /// The value of `t` must be between 0.0 and 1.0, inclusive. Subclasses should
+  /// assert that this is true.
   double transform(double t);
 
   /// Returns a new curve that is the reversed inversion of this one.
@@ -54,6 +55,7 @@ class SawTooth extends Curve {
 
   @override
   double transform(double t) {
+    assert(t >= 0.0 && t <= 1.0);
     if (t == 1.0)
       return 1.0;
     t *= count;
@@ -84,6 +86,7 @@ class Interval extends Curve {
 
   @override
   double transform(double t) {
+    assert(t >= 0.0 && t <= 1.0);
     assert(begin >= 0.0);
     assert(begin <= 1.0);
     assert(end >= 0.0);
@@ -119,6 +122,7 @@ class Threshold extends Curve {
 
   @override
   double transform(double t) {
+    assert(t >= 0.0 && t <= 1.0);
     assert(threshold >= 0.0);
     assert(threshold <= 1.0);
     if (t == 0.0 || t == 1.0)
@@ -180,6 +184,7 @@ class Cubic extends Curve {
 
   @override
   double transform(double t) {
+    assert(t >= 0.0 && t <= 1.0);
     double start = 0.0;
     double end = 1.0;
     while (true) {
@@ -235,6 +240,7 @@ class _DecelerateCurve extends Curve {
 
   @override
   double transform(double t) {
+    assert(t >= 0.0 && t <= 1.0);
     // Intended to match the behavior of:
     // https://android.googlesource.com/platform/frameworks/base/+/master/core/java/android/view/animation/DecelerateInterpolator.java
     // ...as of December 2016.
@@ -268,6 +274,7 @@ class _BounceInCurve extends Curve {
 
   @override
   double transform(double t) {
+    assert(t >= 0.0 && t <= 1.0);
     return 1.0 - _bounce(1.0 - t);
   }
 }
@@ -280,6 +287,7 @@ class _BounceOutCurve extends Curve {
 
   @override
   double transform(double t) {
+    assert(t >= 0.0 && t <= 1.0);
     return _bounce(t);
   }
 }
@@ -292,6 +300,7 @@ class _BounceInOutCurve extends Curve {
 
   @override
   double transform(double t) {
+    assert(t >= 0.0 && t <= 1.0);
     if (t < 0.5)
       return (1.0 - _bounce(1.0 - t)) * 0.5;
     else
@@ -314,6 +323,7 @@ class ElasticInCurve extends Curve {
 
   @override
   double transform(double t) {
+    assert(t >= 0.0 && t <= 1.0);
     double s = period / 4.0;
     t = t - 1.0;
     return -math.pow(2.0, 10.0 * t) * math.sin((t - s) * (math.PI * 2.0) / period);
@@ -337,6 +347,7 @@ class ElasticOutCurve extends Curve {
 
   @override
   double transform(double t) {
+    assert(t >= 0.0 && t <= 1.0);
     double s = period / 4.0;
     return math.pow(2.0, -10 * t) * math.sin((t - s) * (math.PI * 2.0) / period) + 1.0;
   }
@@ -359,6 +370,7 @@ class ElasticInOutCurve extends Curve {
 
   @override
   double transform(double t) {
+    assert(t >= 0.0 && t <= 1.0);
     double s = period / 4.0;
     t = 2.0 * t - 1.0;
     if (t < 0.0)
