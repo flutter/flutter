@@ -449,7 +449,8 @@ class _TabBarState extends State<TabBar> {
   }
 
   void _saveTabOffsets(List<double> tabOffsets) {
-    _indicatorPainter.tabOffsets = tabOffsets;
+    if (_indicatorPainter != null)
+      _indicatorPainter.tabOffsets = tabOffsets;
   }
 
   void _handleTap(int index) {
@@ -459,49 +460,54 @@ class _TabBarState extends State<TabBar> {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData themeData = Theme.of(context);
-    _indicatorPainter.color = config.indicatorColor ?? themeData.indicatorColor;
-    if (_indicatorPainter.color == Material.of(context).color) {
-      // ThemeData tries to avoid this by having indicatorColor avoid being the
-      // primaryColor. However, it's possible that the tab bar is on a
-      // Material that isn't the primaryColor. In that case, if the indicator
-      // color ends up clashing, then this overrides it. When that happens,
-      // automatic transitions of the theme will likely look ugly as the
-      // indicator color suddenly snaps to white at one end, but it's not clear
-      // how to avoid that any further.
-      _indicatorPainter.color = Colors.white;
-    }
-
-    if (_controller.index != _currentIndex) {
-      _currentIndex = _controller.index;
-      if (config.isScrollable)
-        _scrollToCurrentIndex();
-    }
-
     final List<Widget> wrappedTabs = new List<Widget>.from(config.tabs, growable: false);
-    final int previousIndex = _controller.previousIndex;
 
-    if (_controller.indexIsChanging) {
-      assert(_currentIndex != previousIndex);
-      wrappedTabs[_currentIndex] = new _TabStyle(
-        animation: _changeAnimation,
-        selected: true,
-        labelColor: config.labelColor,
-        child: wrappedTabs[_currentIndex],
-      );
-      wrappedTabs[previousIndex] = new _TabStyle(
-        animation: _changeAnimation,
-        selected: false,
-        labelColor: config.labelColor,
-        child: wrappedTabs[previousIndex],
-      );
-    } else {
-      wrappedTabs[_currentIndex] = new _TabStyle(
-        animation: kAlwaysCompleteAnimation,
-        selected: true,
-        labelColor: config.labelColor,
-        child: wrappedTabs[_currentIndex],
-      );
+    // If the controller was provided by DefaultTabController and we're part
+    // of a Hero (typically the AppBar), then we will not be able to find the
+    // controller during a Hero transition. See https://github.com/flutter/flutter/issues/213.
+    if (_controller != null) {
+      _indicatorPainter.color = config.indicatorColor ?? Theme.of(context).indicatorColor;
+      if (_indicatorPainter.color == Material.of(context).color) {
+        // ThemeData tries to avoid this by having indicatorColor avoid being the
+        // primaryColor. However, it's possible that the tab bar is on a
+        // Material that isn't the primaryColor. In that case, if the indicator
+        // color ends up clashing, then this overrides it. When that happens,
+        // automatic transitions of the theme will likely look ugly as the
+        // indicator color suddenly snaps to white at one end, but it's not clear
+        // how to avoid that any further.
+        _indicatorPainter.color = Colors.white;
+      }
+
+      if (_controller.index != _currentIndex) {
+        _currentIndex = _controller.index;
+        if (config.isScrollable)
+          _scrollToCurrentIndex();
+      }
+
+      final int previousIndex = _controller.previousIndex;
+
+      if (_controller.indexIsChanging) {
+        assert(_currentIndex != previousIndex);
+        wrappedTabs[_currentIndex] = new _TabStyle(
+          animation: _changeAnimation,
+          selected: true,
+          labelColor: config.labelColor,
+          child: wrappedTabs[_currentIndex],
+        );
+        wrappedTabs[previousIndex] = new _TabStyle(
+          animation: _changeAnimation,
+          selected: false,
+          labelColor: config.labelColor,
+          child: wrappedTabs[previousIndex],
+        );
+      } else {
+        wrappedTabs[_currentIndex] = new _TabStyle(
+          animation: kAlwaysCompleteAnimation,
+          selected: true,
+          labelColor: config.labelColor,
+          child: wrappedTabs[_currentIndex],
+        );
+      }
     }
 
     // Add the tap handler to each tab. If the tab bar is scrollable

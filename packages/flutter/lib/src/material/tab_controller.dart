@@ -28,12 +28,6 @@ class TabController extends ChangeNotifier {
    ) {
     assert(length != null && length > 1);
     assert(initialIndex != null && initialIndex >= 0 && initialIndex < length);
-    _animationController.addStatusListener(_statusListener);
-  }
-
-  void _statusListener(AnimationStatus status) {
-    if (status == AnimationStatus.completed)
-      notifyListeners();
   }
 
   /// An animation whose value represents the current position of the
@@ -45,16 +39,44 @@ class TabController extends ChangeNotifier {
   /// The total number of tabs. Must be at least two.
   final int length;
 
-  /// The index of the currently selected tab. Change the currently selected
-  /// tab with [animateTo].
+  void _changeIndex(int value, { Duration duration, Curve curve }) {
+    assert(value != null);
+    assert(value >= 0 && value < length);
+    assert(duration == null ? curve == null : true);
+    if (value == _index)
+      return;
+    _indexIsChanging = true;
+    _previousIndex = index;
+    _index = value;
+    if (duration != null) {
+      _animationController
+        ..animateTo(_index.toDouble(), duration: duration, curve: curve).then((_) {
+          _indexIsChanging = false;
+          notifyListeners();
+        });
+    } else {
+      _indexIsChanging = false;
+      _animationController.value = _index.toDouble();
+      notifyListeners();
+    }
+  }
+
+  /// The index of the currently selected tab. Changing the index also updates
+  /// [previousIndex], sets the [animation]'s value, resets [indexIsChanging]
+  /// to false, and notifies listeners.
+  ///
+  /// To change the currently selected tab and play the [animation] use [animateTo].
   int get index => _index;
   int _index;
+  set index(int value) {
+    _changeIndex(value);
+  }
 
-  /// The index of the previously selected tab, initially the same as [index].
+  /// The index of the previously selected tab. Initially the same as [index].
   int get previousIndex => _previousIndex;
   int _previousIndex;
 
-  /// True if we're animating from [previousIndex] to [index].
+  /// True while we're animating from [previousIndex] to [index].
   bool get indexIsChanging => _indexIsChanging;
   bool _indexIsChanging = false;
 
@@ -64,17 +86,7 @@ class TabController extends ChangeNotifier {
   /// While the animation is running [indexIsChanging] is true. When the
   /// animation completes [offset] will be 0.0.
   void animateTo(int value, { Duration duration: kTabScrollDuration, Curve curve: Curves.ease }) {
-    assert(value != null);
-    assert(value >= 0 && value < length);
-    if (value == _index)
-      return;
-    _indexIsChanging = true;
-    _previousIndex = index;
-    _index = value;
-    _animationController
-      ..animateTo(_index.toDouble(), duration: duration, curve: curve).then((_) {
-        _indexIsChanging = false;
-      });
+    _changeIndex(value, duration: duration, curve: curve);
   }
 
   /// The difference between the [animation]'s value and [index]. The [value]
@@ -118,6 +130,7 @@ class _TabControllerScope extends InheritedWidget {
   }
 }
 
+/// The [TabController] for descendant widgets that don't specify one explicitly.
 class DefaultTabController extends StatefulWidget {
   DefaultTabController({
     Key key,
@@ -130,6 +143,7 @@ class DefaultTabController extends StatefulWidget {
   final int initialIndex;
   final Widget child;
 
+  /// The closest instance of this class that encloses the given context.
   static TabController of(BuildContext context) {
     _TabControllerScope scope = context.inheritFromWidgetOfExactType(_TabControllerScope);
     return scope?.controller;
