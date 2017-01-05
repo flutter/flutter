@@ -133,8 +133,10 @@ void main() {
     HorizontalDragGestureRecognizer drag = new HorizontalDragGestureRecognizer();
 
     Velocity velocity;
+    double primaryVelocity;
     drag.onEnd = (DragEndDetails details) {
       velocity = details.velocity;
+      primaryVelocity = details.primaryVelocity;
     };
 
     TestPointer pointer = new TestPointer(5);
@@ -155,7 +157,16 @@ void main() {
     tester.route(pointer.move(const Point(120.0, 25.0), timeStamp: const Duration(milliseconds: 20)));
     tester.route(pointer.up(timeStamp: const Duration(milliseconds: 20)));
     expect(velocity.pixelsPerSecond.dx, inInclusiveRange(0.99 * kMaxFlingVelocity, kMaxFlingVelocity));
+    expect(velocity.pixelsPerSecond.dy, moreOrLessEquals(0.0));
+    expect(primaryVelocity, velocity.pixelsPerSecond.dx);
 
     drag.dispose();
+  });
+
+  testGesture('Drag details', (GestureTester tester) {
+    expect(new DragDownDetails(), hasOneLineDescription);
+    expect(new DragStartDetails(), hasOneLineDescription);
+    expect(new DragUpdateDetails(globalPosition: Point.origin), hasOneLineDescription);
+    expect(new DragEndDetails(), hasOneLineDescription);
   });
 }
