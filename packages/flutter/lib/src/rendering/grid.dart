@@ -520,7 +520,7 @@ class RenderGrid extends RenderVirtualViewport<GridParentData> {
     int virtualChildBase: 0,
     int virtualChildCount,
     Offset paintOffset: Offset.zero,
-    LayoutCallback callback
+    LayoutCallback<BoxConstraints> callback
   }) : _delegate = delegate, _virtualChildBase = virtualChildBase, super(
     virtualChildCount: virtualChildCount,
     paintOffset: paintOffset,
@@ -643,7 +643,7 @@ class RenderGrid extends RenderVirtualViewport<GridParentData> {
     size = constraints.constrain(gridSize);
 
     if (callback != null)
-      invokeLayoutCallback(callback);
+      invokeLayoutCallback/*<BoxConstraints>*/(callback);
 
     double gridTopPadding = 0.0;
     double gridLeftPadding = 0.0;

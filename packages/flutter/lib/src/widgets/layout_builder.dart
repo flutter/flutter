@@ -151,12 +151,12 @@ class _LayoutBuilderElement extends RenderObjectElement {
 
 class _RenderLayoutBuilder extends RenderBox with RenderObjectWithChildMixin<RenderBox> {
   _RenderLayoutBuilder({
-    LayoutCallback callback,
+    LayoutCallback<BoxConstraints> callback,
   }) : _callback = callback;
 
-  LayoutCallback get callback => _callback;
-  LayoutCallback _callback;
-  set callback(LayoutCallback value) {
+  LayoutCallback<BoxConstraints> get callback => _callback;
+  LayoutCallback<BoxConstraints> _callback;
+  set callback(LayoutCallback<BoxConstraints> value) {
     if (value == _callback)
       return;
     _callback = value;
