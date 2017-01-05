@@ -78,9 +78,11 @@ class Image extends StatefulWidget {
   /// Creates a widget that displays an [ImageStream] obtained from the network.
   ///
   /// The [src], [scale], and [repeat] arguments must not be null.
+  /// The NetworkImageLoadingListener is used to listen loading success or failure.
   Image.network(String src, {
     Key key,
     double scale: 1.0,
+    NetworkImageLoadingListener networkImageLoadingListener: null,
     this.width,
     this.height,
     this.color,
@@ -89,7 +91,8 @@ class Image extends StatefulWidget {
     this.repeat: ImageRepeat.noRepeat,
     this.centerSlice,
     this.gaplessPlayback: false
-  }) : image = new NetworkImage(src, scale: scale),
+  }) : image = new NetworkImage(src, scale: scale,
+    networkImageLoadingListener: networkImageLoadingListener),
        super(key: key);
 
   /// Creates a widget that displays an [ImageStream] obtained from a [File].
