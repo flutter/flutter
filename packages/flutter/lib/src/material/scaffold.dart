@@ -465,6 +465,16 @@ class Scaffold extends StatefulWidget {
   /// }
   /// ```
   ///
+  /// A more efficient solution is to split your build function into several
+  /// widgets. This introduces a new context from which you can obtain the
+  /// [Scaffold]. In this solution, you would have an outer widget that creates
+  /// the [Scaffold] populated by instances of your new inner widgets, and then
+  /// in these inner widgets you would use [Scaffold.of].
+  ///
+  /// A less elegant but more expedient solution is assign a [GlobalKey] to the
+  /// [Scaffold], then use the `key.currentState` property to obtain the
+  /// [ScaffoldState] rather than using the [Scaffold.of] function.
+  ///
   /// If there is no [Scaffold] in scope, then this will throw an exception.
   /// To return null if there is no [Scaffold], then pass `nullOk: true`.
   static ScaffoldState of(BuildContext context, { bool nullOk: false }) {
