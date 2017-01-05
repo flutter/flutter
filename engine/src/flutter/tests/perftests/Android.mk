@@ -22,6 +22,7 @@ perftest_src_files := \
   ../util/MinikinFontForTest.cpp \
   ../util/UnicodeUtils.cpp \
   FontCollection.cpp \
+  FontFamily.cpp \
   FontLanguage.cpp \
   GraphemeBreak.cpp \
   Hyphenator.cpp \
