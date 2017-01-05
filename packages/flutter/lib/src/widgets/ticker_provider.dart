@@ -92,6 +92,10 @@ abstract class SingleTickerProviderStateMixin implements State<dynamic>, TickerP
       );
     });
     _ticker = new Ticker(onTick, debugLabel: 'created by $this');
+    // We assume that this is called from initState, build, or some sort of
+    // event handler, and that thus TickerMode.of(context) would return true. We
+    // can't actually check that here because if we're in initState then we're
+    // not allowed to do inheritance checks yet.
     return _ticker;
   }
 
@@ -115,7 +119,8 @@ abstract class SingleTickerProviderStateMixin implements State<dynamic>, TickerP
 
   @override
   void dependenciesChanged() {
-    _ticker.muted = !TickerMode.of(context);
+    if (_ticker != null)
+      _ticker.muted = !TickerMode.of(context);
     super.dependenciesChanged();
   }
 
