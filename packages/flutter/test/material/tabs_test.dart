@@ -129,7 +129,6 @@ void main() {
     expect(controller.index, 0);
   });
 
-
   testWidgets('Scrollable TabBar tap centers selected tab', (WidgetTester tester) async {
     List<String> tabs = <String>['AAAAAA', 'BBBBBB', 'CCCCCC', 'DDDDDD', 'EEEEEE', 'FFFFFF', 'GGGGGG', 'HHHHHH', 'IIIIII', 'JJJJJJ', 'KKKKKK', 'LLLLLL'];
     Key tabBarKey = new Key('TabBar');
@@ -170,7 +169,6 @@ void main() {
     expect(controller.index, 0);
   });
 
-  /*
   testWidgets('TabBarView maintains state', (WidgetTester tester) async {
     List<String> tabs = <String>['AAAAAA', 'BBBBBB', 'CCCCCC', 'DDDDDD', 'EEEEEE'];
     String value = tabs[0];
@@ -192,16 +190,11 @@ void main() {
     }
 
     StateMarkerState findStateMarkerState(String name) {
-      print(name);
       return tester.state(find.widgetWithText(StateMarker, name));
     }
 
     await tester.pumpWidget(builder());
     TabController controller = DefaultTabController.of(tester.element(find.text('AAAAAA')));
-    controller.animation.addStatusListener((AnimationStatus status) {
-      if (status == AnimationStatus.completed)
-        value = tabs[controller.index];
-    });
 
     TestGesture gesture = await tester.startGesture(tester.getCenter(find.text(tabs[0])));
     await gesture.moveBy(const Offset(-600.0, 0.0));
@@ -211,6 +204,7 @@ void main() {
     await gesture.up();
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
+    value = tabs[controller.index];
     expect(value, equals(tabs[1]));
     await tester.pumpWidget(builder());
     expect(findStateMarkerState(tabs[1]).marker, equals('marked'));
@@ -223,6 +217,7 @@ void main() {
     await tester.pump();
     expect(findStateMarkerState(tabs[1]).marker, equals('marked'));
     await tester.pump(const Duration(seconds: 1));
+    value = tabs[controller.index];
     expect(value, equals(tabs[2]));
     await tester.pumpWidget(builder());
 
@@ -241,11 +236,11 @@ void main() {
     await gesture.up();
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
+    value = tabs[controller.index];
     expect(value, equals(tabs[1]));
     await tester.pumpWidget(builder());
     expect(findStateMarkerState(tabs[1]).marker, equals('marked'));
   });
-  */
 
   testWidgets('TabBar left/right fling', (WidgetTester tester) async {
     List<String> tabs = <String>['LEFT', 'RIGHT'];
