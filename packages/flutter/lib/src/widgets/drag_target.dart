@@ -62,7 +62,17 @@ enum DragAnchor {
 /// When a draggable widget recognizes the start of a drag gesture, it displays
 /// a [feedback] widget that tracks the user's finger across the screen. If the
 /// user lifts their finger while on top of a [DragTarget], that target is given
-/// the opportunity to accept the [data] carried by the draggble.
+/// the opportunity to accept the [data] carried by the draggable.
+///
+/// On multitouch devices, multiple drags can occur simultaneously because there
+/// can be multiple pointers in contact with the device at once. To limit the
+/// number of simultaneous drags, use the [maxSimultaneousDrags] property. The
+/// default is to allow an unlimited number of simultaneous drags.
+///
+/// This widget displays [child] when zero drags are under way. If
+/// [childWhenDragging] is non-null, this widget instead displays
+/// [childWhenDragging] when one or more drags are underway. Otherwise, this
+/// widget always displays [child].
 ///
 /// See also:
 ///
@@ -95,16 +105,34 @@ class Draggable<T> extends StatefulWidget {
   final T data;
 
   /// The widget below this widget in the tree.
+  ///
+  /// This widget displays [child] when zero drags are under way. If
+  /// [childWhenDragging] is non-null, this widget instead displays
+  /// [childWhenDragging] when one or more drags are underway. Otherwise, this
+  /// widget always displays [child].
+  ///
+  /// The [feedback] widget is shown under the pointer when a drag is under way.
+  ///
+  /// To limit the number of simultaneous drags on multitouch devices, see
+  /// [maxSimultaneousDrags].
   final Widget child;
 
-  /// The widget to show instead of [child] when a drag is under way.
+  /// The widget to display instead of [child] when one or more drags are under way.
   ///
-  /// If this is null, then [child] will be used instead (and so the
-  /// drag source representation will change while a drag is under
+  /// If this is null, then this widget will always display [child] (and so the
+  /// drag source representation will not change while a drag is under
   /// way).
+  ///
+  /// The [feedback] widget is shown under the pointer when a drag is under way.
+  ///
+  /// To limit the number of simultaneous drags on multitouch devices, see
+  /// [maxSimultaneousDrags].
   final Widget childWhenDragging;
 
   /// The widget to show under the pointer when a drag is under way.
+  ///
+  /// See [child] and [childWhenDragging] for information about what is shown
+  /// at the location of the [Draggable] itself when a drag is under way.
   final Widget feedback;
 
   /// The feedbackOffset can be used to set the hit test target point for the
@@ -136,6 +164,9 @@ class Draggable<T> extends StatefulWidget {
   /// When null, no limit is applied. Set this to 1 if you want to only allow
   /// the drag source to have one item dragged at a time. Set this to 0 if you
   /// want to prevent the draggable from actually being dragged.
+  ///
+  /// If you set this property to 1, consider supplying an "empty" widget for
+  /// [childWhenDragging] to create the illusion of actually moving [child].
   final int maxSimultaneousDrags;
 
   /// Called when the draggable starts being dragged.
