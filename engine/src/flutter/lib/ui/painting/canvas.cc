@@ -34,7 +34,6 @@ IMPLEMENT_WRAPPERTYPEINFO(ui, Canvas);
   V(Canvas, rotate)                 \
   V(Canvas, skew)                   \
   V(Canvas, transform)              \
-  V(Canvas, setMatrix)              \
   V(Canvas, clipRect)               \
   V(Canvas, clipRRect)              \
   V(Canvas, clipPath)               \
@@ -145,12 +144,6 @@ void Canvas::transform(const tonic::Float64List& matrix4) {
   if (!canvas_)
     return;
   canvas_->concat(ToSkMatrix(matrix4));
-}
-
-void Canvas::setMatrix(const tonic::Float64List& matrix4) {
-  if (!canvas_)
-    return;
-  canvas_->setMatrix(ToSkMatrix(matrix4));
 }
 
 void Canvas::clipRect(double left, double top, double right, double bottom) {
