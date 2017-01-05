@@ -23,9 +23,7 @@ class MaskFilter : public ftl::RefCountedThreadSafe<MaskFilter>,
 
  public:
   ~MaskFilter() override;
-  static ftl::RefPtr<MaskFilter> Create(unsigned style,
-                                        double sigma,
-                                        unsigned flags);
+  static ftl::RefPtr<MaskFilter> Create(unsigned style, double sigma);
 
   const sk_sp<SkMaskFilter>& filter() { return filter_; }
 

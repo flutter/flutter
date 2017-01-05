@@ -53,7 +53,6 @@ class Canvas : public ftl::RefCountedThreadSafe<Canvas>,
   void rotate(double radians);
   void skew(double sx, double sy);
   void transform(const tonic::Float64List& matrix4);
-  void setMatrix(const tonic::Float64List& matrix4);
 
   void clipRect(double left, double top, double right, double bottom);
   void clipRRect(const RRect& rrect);

@@ -22,15 +22,13 @@ IMPLEMENT_WRAPPERTYPEINFO(ui, MaskFilter);
 
 void MaskFilter::RegisterNatives(tonic::DartLibraryNatives* natives) {
   natives->Register({
-      {"MaskFilter_constructor", MaskFilter_constructor, 4, true},
+      {"MaskFilter_constructor", MaskFilter_constructor, 3, true},
   });
 }
 
-ftl::RefPtr<MaskFilter> MaskFilter::Create(unsigned style,
-                                           double sigma,
-                                           unsigned flags) {
+ftl::RefPtr<MaskFilter> MaskFilter::Create(unsigned style, double sigma) {
   return ftl::MakeRefCounted<MaskFilter>(
-      SkBlurMaskFilter::Make(static_cast<SkBlurStyle>(style), sigma, flags));
+      SkBlurMaskFilter::Make(static_cast<SkBlurStyle>(style), sigma));
 }
 
 MaskFilter::MaskFilter(sk_sp<SkMaskFilter> filter)

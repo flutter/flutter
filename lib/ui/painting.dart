@@ -844,36 +844,11 @@ class MaskFilter extends NativeFieldWrapperClass2 {
   /// zero. The sigma corresponds to very roughly half the radius of the effect
   /// in pixels.
   ///
-  /// If the `ignoreTransform` argument is set, then the current transform is
-  /// ignored when computing the blur. This makes the operation cheaper, but
-  /// lowers the quality of the effect. In particular, it means that the sigma
-  /// will be relative to the device pixel coordinate space, rather than the
-  /// logical pixel coordinate space, which means the blur will look different
-  /// on different devices.
-  ///
-  /// If the `highQuality` argument is set, then the quality of the blur may be
-  /// slightly improved, at the cost of making the operation even more
-  /// expensive.
-  ///
-  /// Even in the best conditions and with the lowest quality settings, a blur
-  /// is an expensive operation and blurs should therefore be used sparingly.
-  MaskFilter.blur(BlurStyle style, double sigma, {
-    bool ignoreTransform: false,
-    bool highQuality: false
-  }) {
-    _constructor(style.index, sigma, _makeBlurFlags(ignoreTransform, highQuality));
+  /// A blur is an expensive operation and should therefore be used sparingly.
+  MaskFilter.blur(BlurStyle style, double sigma) {
+    _constructor(style.index, sigma);
   }
-  void _constructor(int style, double sigma, int flags) native "MaskFilter_constructor";
-
-  // Convert constructor parameters to the SkBlurMaskFilter::BlurFlags type.
-  static int _makeBlurFlags(bool ignoreTransform, bool highQuality) {
-    int flags = 0;
-    if (ignoreTransform)
-      flags |= 0x01;
-    if (highQuality)
-      flags |= 0x02;
-    return flags;
-  }
+  void _constructor(int style, double sigma) native "MaskFilter_constructor";
 }
 
 /// A description of a color filter to apply when drawing a shape or compositing
@@ -1116,7 +1091,7 @@ enum PointMode {
 /// A canvas has a current transformation matrix which is applied to all
 /// operations. Initially, the transformation matrix is the identity transform.
 /// It can be modified using the [translate], [scale], [rotate], [skew],
-/// [transform], and [setMatrix] methods.
+/// and [transform] methods.
 ///
 /// A canvas also has a current clip region which is applied to all operations.
 /// Initially, the clip region is infinite. It can be modified using the
@@ -1230,15 +1205,6 @@ class Canvas extends NativeFieldWrapperClass2 {
     _transform(matrix4);
   }
   void _transform(Float64List matrix4) native "Canvas_transform";
-
-  /// Replaces the current transform with the specified 4⨉4 transformation
-  /// matrix specified as a list of values in column-major order.
-  void setMatrix(Float64List matrix4) {
-    if (matrix4.length != 16)
-      throw new ArgumentError("[matrix4] must have 16 entries.");
-    _setMatrix(matrix4);
-  }
-  void _setMatrix(Float64List matrix4) native "Canvas_setMatrix";
 
   /// Reduces the clip region to the intersection of the current clip and the
   /// given rectangle.
