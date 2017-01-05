@@ -16,7 +16,7 @@ inline PlatformViewGLFW* ToPlatformView(GLFWwindow* window) {
 }
 
 PlatformViewGLFW::PlatformViewGLFW()
-    : PlatformView(std::make_unique<GPURasterizer>()),
+    : PlatformView(std::make_unique<GPURasterizer>(nullptr)),
       valid_(false),
       glfw_window_(nullptr),
       buttons_(0) {
