@@ -269,7 +269,8 @@ class AndroidDevice extends Device {
     String route,
     DebuggingOptions debuggingOptions,
     Map<String, dynamic> platformArgs,
-    bool prebuiltApplication: false
+    bool prebuiltApplication: false,
+    bool applicationNeedsRebuild: false,
   }) async {
     if (!_checkForSupportedAdbVersion() || !_checkForSupportedAndroidVersion())
       return new LaunchResult.failed();
@@ -281,7 +282,8 @@ class AndroidDevice extends Device {
       printTrace('Building APK');
       await buildApk(platform,
           target: mainPath,
-          buildMode: debuggingOptions.buildMode
+          buildMode: debuggingOptions.buildMode,
+          applicationNeedsRebuild: applicationNeedsRebuild
       );
     }
 

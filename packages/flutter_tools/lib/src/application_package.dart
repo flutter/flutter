@@ -27,6 +27,8 @@ abstract class ApplicationPackage {
 
   String get displayName => name;
 
+  String get packagePath => null;
+
   @override
   String toString() => displayName;
 }
@@ -118,6 +120,9 @@ class AndroidApk extends ApplicationPackage {
       launchActivity: launchActivity
     );
   }
+
+  @override
+  String get packagePath => apkPath;
 
   @override
   String get name => path.basename(apkPath);

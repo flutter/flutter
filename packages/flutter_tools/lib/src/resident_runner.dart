@@ -7,11 +7,19 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 
+
 import 'application_package.dart';
+
 import 'base/file_system.dart';
 import 'base/io.dart';
+
+import 'asset.dart';
+
 import 'base/logger.dart';
 import 'build_info.dart';
+import 'dart/dependencies.dart';
+import 'dart/package_map.dart';
+import 'dependency_checker.dart';
 import 'device.dart';
 import 'globals.dart';
 import 'vmservice.dart';
@@ -21,14 +29,35 @@ abstract class ResidentRunner {
   ResidentRunner(this.device, {
     this.target,
     this.debuggingOptions,
-    this.usesTerminalUI: true
-  });
+    this.usesTerminalUI: true,
+    String projectRootPath,
+    String packagesFilePath,
+    String projectAssets,
+  }) {
+    _mainPath = findMainDartFile(target);
+    _projectRootPath = projectRootPath ?? fs.currentDirectory;
+    _packagesFilePath =
+        packagesFilePath ?? path.absolute(PackageMap.globalPackagesPath);
+    if (projectAssets != null)
+      _assetBundle = new AssetBundle.fixed(_projectRootPath, projectAssets);
+    else
+      _assetBundle = new AssetBundle();
+  }
 
   final Device device;
   final String target;
   final DebuggingOptions debuggingOptions;
   final bool usesTerminalUI;
   final Completer<int> _finished = new Completer<int>();
+  String _packagesFilePath;
+  String get packagesFilePath => _packagesFilePath;
+  String _projectRootPath;
+  String get projectRootPath => _projectRootPath;
+  String _mainPath;
+  String get mainPath => _mainPath;
+  AssetBundle _assetBundle;
+  AssetBundle get assetBundle => _assetBundle;
+  ApplicationPackage package;
 
   bool get isRunningDebug => debuggingOptions.buildMode == BuildMode.debug;
   bool get isRunningProfile => debuggingOptions.buildMode == BuildMode.profile;
@@ -231,6 +260,27 @@ abstract class ResidentRunner {
     int exitCode = await _finished.future;
     await cleanupAtFinish();
     return exitCode;
+  }
+
+  bool hasDirtyDependencies() {
+    DartDependencySetBuilder dartDependencySetBuilder =
+        new DartDependencySetBuilder(
+            mainPath, projectRootPath, packagesFilePath);
+    DependencyChecker dependencyChecker =
+        new DependencyChecker(dartDependencySetBuilder, assetBundle);
+    String path = package.packagePath;
+    if (path == null) {
+      return true;
+    }
+    final FileStat stat = fs.file(path).statSync();
+    if (stat.type != FileSystemEntityType.FILE) {
+      return true;
+    }
+    if (!fs.file(path).existsSync()) {
+      return true;
+    }
+    final DateTime lastBuildTime = stat.modified;
+    return dependencyChecker.check(lastBuildTime);
   }
 
   Future<Null> preStop() async { }

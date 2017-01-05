@@ -29,8 +29,6 @@ class RunAndStayResident extends ResidentRunner {
              debuggingOptions: debuggingOptions,
              usesTerminalUI: usesTerminalUI);
 
-  ApplicationPackage _package;
-  String _mainPath;
   LaunchResult _result;
   final bool traceStartup;
   final String applicationBinary;
@@ -46,7 +44,6 @@ class RunAndStayResident extends ResidentRunner {
   }) {
     // Don't let uncaught errors kill the process.
     return Chain.capture(() {
-      assert(shouldBuild == !prebuiltMode);
       return _run(
         traceStartup: traceStartup,
         connectionInfoCompleter: connectionInfoCompleter,
@@ -67,9 +64,8 @@ class RunAndStayResident extends ResidentRunner {
     bool shouldBuild: true
   }) async {
     if (!prebuiltMode) {
-      _mainPath = findMainDartFile(target);
-      if (!fs.isFileSync(_mainPath)) {
-        String message = 'Tried to run $_mainPath, but that file does not exist.';
+      if (!fs.isFileSync(mainPath)) {
+        String message = 'Tried to run $mainPath, but that file does not exist.';
         if (target == null)
           message += '\nConsider using the -t option to specify the Dart file to start.';
         printError(message);
@@ -77,9 +73,9 @@ class RunAndStayResident extends ResidentRunner {
       }
     }
 
-    _package = getApplicationPackageForPlatform(device.platform, applicationBinary: applicationBinary);
+    package = getApplicationPackageForPlatform(device.platform, applicationBinary: applicationBinary);
 
-    if (_package == null) {
+    if (package == null) {
       String message = 'No application found for ${device.platform}.';
       String hint = getMissingPackageHintForPlatform(device.platform);
       if (hint != null)
@@ -94,24 +90,25 @@ class RunAndStayResident extends ResidentRunner {
     if (traceStartup != null)
       platformArgs = <String, dynamic>{ 'trace-startup': traceStartup };
 
-    await startEchoingDeviceLog(_package);
+    await startEchoingDeviceLog(package);
 
     String modeName = getModeName(debuggingOptions.buildMode);
-    if (_mainPath == null) {
+    if (mainPath == null) {
       assert(prebuiltMode);
-      printStatus('Launching ${_package.displayName} on ${device.name} in $modeName mode...');
+      printStatus('Launching ${package.displayName} on ${device.name} in $modeName mode...');
     } else {
-      printStatus('Launching ${getDisplayPath(_mainPath)} on ${device.name} in $modeName mode...');
+      printStatus('Launching ${getDisplayPath(mainPath)} on ${device.name} in $modeName mode...');
     }
 
     _result = await device.startApp(
-      _package,
+      package,
       debuggingOptions.buildMode,
-      mainPath: _mainPath,
+      mainPath: mainPath,
       debuggingOptions: debuggingOptions,
       platformArgs: platformArgs,
       route: route,
-      prebuiltApplication: prebuiltMode
+      prebuiltApplication: prebuiltMode,
+      applicationNeedsRebuild: shouldBuild || hasDirtyDependencies()
     );
 
     if (!_result.started) {
@@ -195,6 +192,6 @@ class RunAndStayResident extends ResidentRunner {
   Future<Null> preStop() async {
     // If we're running in release mode, stop the app using the device logic.
     if (vmService == null)
-      await device.stopApp(_package);
+      await device.stopApp(package);
   }
 }

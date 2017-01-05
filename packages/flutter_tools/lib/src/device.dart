@@ -205,7 +205,8 @@ abstract class Device {
     String route,
     DebuggingOptions debuggingOptions,
     Map<String, dynamic> platformArgs,
-    bool prebuiltApplication: false
+    bool prebuiltApplication: false,
+    bool applicationNeedsRebuild: false
   });
 
   /// Does this device implement support for hot reloading / restarting?

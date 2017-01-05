@@ -61,6 +61,7 @@ class DependencyChecker {
         return true;
       }
     }
+    printTrace('DependencyChecker: nothing is modified after $threshold.');
     return false;
   }
 }
