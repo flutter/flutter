@@ -5,6 +5,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../rendering/mock_canvas.dart';
+
 enum RadiusType {
   Sharp,
   Shifting,
@@ -57,27 +59,6 @@ BorderRadius getBorderRadius(WidgetTester tester, int index) {
   BoxDecoration boxDecoration = container.decoration;
 
   return boxDecoration.borderRadius;
-}
-
-class TestCanvas implements Canvas {
-  final List<Invocation> invocations = <Invocation>[];
-
-  @override
-  void noSuchMethod(Invocation invocation) {
-    invocations.add(invocation);
-  }
-}
-
-class TestPaintingContext implements PaintingContext {
-  TestPaintingContext(this.canvas);
-
-  @override
-  final Canvas canvas;
-
-  @override
-  void noSuchMethod(Invocation invocation) {
-
-  }
 }
 
 void main() {
@@ -223,9 +204,9 @@ void main() {
     );
 
     RenderBox box = tester.renderObject(find.byType(MergeableMaterial));
-    TestCanvas canvas = new TestCanvas();
+    MockCanvas canvas = new MockCanvas();
 
-    box.paint(new TestPaintingContext(canvas), Offset.zero);
+    box.paint(new MockPaintingContext(canvas), Offset.zero);
 
     final Invocation drawCommand = canvas.invocations.firstWhere((Invocation invocation) {
       return invocation.memberName == #drawRRect;
