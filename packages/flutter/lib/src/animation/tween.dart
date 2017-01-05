@@ -74,31 +74,46 @@ class _ChainedEvaluation<T> extends Animatable<T> {
 ///
 /// [Tween] is useful if you want to interpolate across a range.
 ///
-/// To use a [Tween] object with an animation, call the [Tween] object's `animate()` method and
-/// pass it the [Animation] object that you want to modify.
+/// To use a [Tween] object with an animation, call the [Tween] object's
+/// `animate()` method and pass it the [Animation] object that you want to
+/// modify.
 ///
-/// You can chain [Tween] objects together using the `chain()` method, so that a single
-/// [Animation] object is configured by multiple [Tween] objects called in succession. This is
-/// different than calling the `animate()` method twice, which results in two [Animation]
-/// separate objects, each configured with a single [Tween].
+/// You can chain [Tween] objects together using the `chain()` method, so that a
+/// single [Animation] object is configured by multiple [Tween] objects called
+/// in succession. This is different than calling the `animate()` method twice,
+/// which results in two [Animation] separate objects, each configured with a
+/// single [Tween].
 class Tween<T extends dynamic> extends Animatable<T> {
   /// Creates a tween.
   ///
-  /// The [begin] and [end] arguments must not be null.
+  /// The [begin] and [end] properties must be non-null before the tween is
+  /// first used, but the arguments can be null if the values are going to be
+  /// filled in later.
   Tween({ this.begin, this.end });
 
   /// The value this variable has at the beginning of the animation.
+  ///
+  /// Must be non-null before this [Tween] is evaluated.
   T begin;
 
   /// The value this variable has at the end of the animation.
+  ///
+  /// Must be non-null before this [Tween] is evaluated.
   T end;
 
   /// Returns the value this variable has at the given animation clock value.
+  ///
+  /// The [begin] and [end] properties must be non-null by the time this method
+  /// is called.
   T lerp(double t) => begin + (end - begin) * t;
 
   /// Returns the interpolated value for the current value of the given animation.
   ///
-  /// This method returns `begin` and `end` when the animation values are 0.0 or 1.0, respectively.
+  /// This method returns `begin` and `end` when the animation values are 0.0 or
+  /// 1.0, respectively.
+  ///
+  /// The [begin] and [end] properties must be non-null by the time this method
+  /// is called with an animation that is not at 0.0 or 1.0.
   @override
   T evaluate(Animation<double> animation) {
     final double t = animation.value;
@@ -120,7 +135,9 @@ class Tween<T extends dynamic> extends Animatable<T> {
 class ColorTween extends Tween<Color> {
   /// Creates a color tween.
   ///
-  /// The [begin] and [end] arguments must not be null.
+  /// The [begin] and [end] properties must be non-null before the tween is
+  /// first used, but the arguments can be null if the values are going to be
+  /// filled in later.
   ColorTween({ Color begin, Color end }) : super(begin: begin, end: end);
 
   @override
@@ -134,7 +151,9 @@ class ColorTween extends Tween<Color> {
 class SizeTween extends Tween<Size> {
   /// Creates a size tween.
   ///
-  /// The [begin] and [end] arguments must not be null.
+  /// The [begin] and [end] properties must be non-null before the tween is
+  /// first used, but the arguments can be null if the values are going to be
+  /// filled in later.
   SizeTween({ Size begin, Size end }) : super(begin: begin, end: end);
 
   @override
@@ -148,7 +167,9 @@ class SizeTween extends Tween<Size> {
 class RectTween extends Tween<Rect> {
   /// Creates a rect tween.
   ///
-  /// The [begin] and [end] arguments must not be null.
+  /// The [begin] and [end] properties must be non-null before the tween is
+  /// first used, but the arguments can be null if the values are going to be
+  /// filled in later.
   RectTween({ Rect begin, Rect end }) : super(begin: begin, end: end);
 
   @override
@@ -167,7 +188,9 @@ class RectTween extends Tween<Rect> {
 class IntTween extends Tween<int> {
   /// Creates an int tween.
   ///
-  /// The [begin] and [end] arguments must not be null.
+  /// The [begin] and [end] properties must be non-null before the tween is
+  /// first used, but the arguments can be null if the values are going to be
+  /// filled in later.
   IntTween({ int begin, int end }) : super(begin: begin, end: end);
 
   // The inherited lerp() function doesn't work with ints because it multiplies
@@ -188,7 +211,9 @@ class IntTween extends Tween<int> {
 class StepTween extends Tween<int> {
   /// Creates a step tween.
   ///
-  /// The [begin] and [end] arguments must not be null.
+  /// The [begin] and [end] properties must be non-null before the tween is
+  /// first used, but the arguments can be null if the values are going to be
+  /// filled in later.
   StepTween({ int begin, int end }) : super(begin: begin, end: end);
 
   // The inherited lerp() function doesn't work with ints because it multiplies
