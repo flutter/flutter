@@ -222,11 +222,11 @@ class StockHomeState extends State<StockHome> {
           ]
         )
       ],
-      bottom: new TabBar<StockHomeTab>(
-        labels: <StockHomeTab, TabLabel>{
-          StockHomeTab.market: new TabLabel(text: StockStrings.of(context).market()),
-          StockHomeTab.portfolio: new TabLabel(text: StockStrings.of(context).portfolio())
-        }
+      bottom: new TabBar(
+        tabs: <Widget>[
+          new Tab(text: StockStrings.of(context).market()),
+          new Tab(text: StockStrings.of(context).portfolio()),
+        ]
       )
     );
   }
@@ -318,14 +318,14 @@ class StockHomeState extends State<StockHome> {
 
   @override
   Widget build(BuildContext context) {
-    return new TabBarSelection<StockHomeTab>(
-      values: <StockHomeTab>[StockHomeTab.market, StockHomeTab.portfolio],
+    return new DefaultTabController(
+      length: 2,
       child: new Scaffold(
         key: _scaffoldKey,
         appBar: _isSearching ? buildSearchBar() : buildAppBar(),
         floatingActionButton: buildFloatingActionButton(),
         drawer: _buildDrawer(context),
-        body: new TabBarView<StockHomeTab>(
+        body: new TabBarView(
           children: <Widget>[
             _buildStockTab(context, StockHomeTab.market, config.symbols),
             _buildStockTab(context, StockHomeTab.portfolio, portfolioSymbols),

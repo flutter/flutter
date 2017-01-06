@@ -470,12 +470,12 @@ class ItemGalleryBox extends StatelessWidget {
 
     return new SizedBox(
       height: 200.0,
-      child: new TabBarSelection<String>(
-        values: tabNames,
+      child: new DefaultTabController(
+        length: tabNames.length,
         child: new Column(
           children: <Widget>[
             new Expanded(
-              child: new TabBarView<String>(
+              child: new TabBarView(
                 children: tabNames.map((String tabName) {
                   return new Container(
                     key: new Key('Tab $index - $tabName'),
@@ -521,7 +521,7 @@ class ItemGalleryBox extends StatelessWidget {
               )
             ),
             new Container(
-              child: new TabPageSelector<String>()
+              child: new TabPageSelector()
             )
           ]
         )
