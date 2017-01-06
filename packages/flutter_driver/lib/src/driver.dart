@@ -314,6 +314,30 @@ class FlutterDriver {
     return BASE64.decode(result['screenshot']);
   }
 
+  /// Returns the Flags set in the Dart VM as JSON.
+  ///
+  /// See the complete documentation for `getFlagList` Dart VM service method
+  /// [here][getFlagList].
+  ///
+  /// Example return value:
+  ///
+  ///     [
+  ///       {
+  ///         "name": "timeline_recorder",
+  ///         "comment": "Select the timeline recorder used. Valid values: ring, endless, startup, and systrace.",
+  ///         "modified": false,
+  ///         "_flagType": "String",
+  ///         "valueAsString": "ring"
+  ///       },
+  ///       ...
+  ///     ]
+  ///
+  /// [getFlagList]: https://github.com/dart-lang/sdk/blob/master/runtime/vm/service/service.md#getflaglist
+  Future<List<Map<String, dynamic>>> getVmFlags() async {
+    Map<String, dynamic> result = await _peer.sendRequest('getFlagList');
+    return result['flags'];
+  }
+
   /// Starts recording performance traces.
   Future<Null> startTracing({List<TimelineStream> streams: _defaultStreams}) async {
     assert(streams != null && streams.length > 0);
