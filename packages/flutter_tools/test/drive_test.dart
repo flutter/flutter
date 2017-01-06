@@ -4,7 +4,7 @@
 
 import 'dart:async';
 
-import 'package:file/file.dart';
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_device.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -34,6 +34,8 @@ void main() {
       command = new DriveCommand();
       applyMocksToCommand(command);
       useInMemoryFileSystem(cwd: '/some/app');
+      fs.directory('test').createSync();
+      fs.directory('test_driver').createSync();
       targetDeviceFinder = () {
         throw 'Unexpected call to targetDeviceFinder';
       };

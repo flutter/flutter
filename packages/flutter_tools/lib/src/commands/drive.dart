@@ -155,7 +155,7 @@ class DriveCommand extends RunCommandBase {
     String appFile = path.normalize(targetFile);
 
     // This command extends `flutter start` and therefore CWD == package dir
-    String packageDir = getCurrentDirectory();
+    String packageDir = fs.currentDirectory.path;
 
     // Make appFile path relative to package directory because we are looking
     // for the corresponding test file relative to it.
