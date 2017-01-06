@@ -261,7 +261,12 @@ class _StdLogger extends Logger {
   @override
   void logError(String message, [Exception exception]) =>
       errorSink.writeln(message);
+
   @override
-  void logInformation(String message, [Exception exception]) =>
+  void logInformation(String message, [Exception exception]) {
+    // TODO: remove once addressed in analzyer (http://dartbug.com/28285)
+    if (message != 'No definition of type FutureOr') {
       outSink.writeln(message);
+    }
+  }
 }
