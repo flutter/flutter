@@ -21,7 +21,7 @@ import org.chromium.base.TraceEvent;
  * Base class for activities that use Flutter.
  */
 public class FlutterActivity extends Activity {
-    private FlutterView mView;
+    private FlutterView flutterView;
 
     private String[] getArgsFromIntent(Intent intent) {
         // Before adding more entries to this list, consider that arbitrary
@@ -60,8 +60,8 @@ public class FlutterActivity extends Activity {
 
         String[] args = getArgsFromIntent(getIntent());
         FlutterMain.ensureInitializationComplete(getApplicationContext(), args);
-        mView = new FlutterView(this);
-        setContentView(mView);
+        flutterView = new FlutterView(this);
+        setContentView(flutterView);
 
         onFlutterReady();
     }
@@ -71,16 +71,16 @@ public class FlutterActivity extends Activity {
      */
     @Override
     protected void onDestroy() {
-        if (mView != null) {
-            mView.destroy();
+        if (flutterView != null) {
+            flutterView.destroy();
         }
         super.onDestroy();
     }
 
     @Override
     public void onBackPressed() {
-        if (mView != null) {
-            mView.popRoute();
+        if (flutterView != null) {
+            flutterView.popRoute();
             return;
         }
         super.onBackPressed();
@@ -89,16 +89,16 @@ public class FlutterActivity extends Activity {
     @Override
     protected void onPause() {
         super.onPause();
-        if (mView != null) {
-            mView.onPause();
+        if (flutterView != null) {
+            flutterView.onPause();
         }
     }
 
     @Override
     protected void onPostResume() {
         super.onPostResume();
-        if (mView != null) {
-            mView.onPostResume();
+        if (flutterView != null) {
+            flutterView.onPostResume();
         }
     }
 
@@ -113,7 +113,7 @@ public class FlutterActivity extends Activity {
         }
         String appBundlePath = FlutterMain.findAppBundlePath(getApplicationContext());
         if (appBundlePath != null) {
-            mView.runFromBundle(appBundlePath, null);
+            flutterView.runFromBundle(appBundlePath, null);
             return;
         }
     }
@@ -133,13 +133,21 @@ public class FlutterActivity extends Activity {
               appBundlePath =
                   FlutterMain.findAppBundlePath(getApplicationContext());
             }
-            mView.runFromBundle(appBundlePath,
+            flutterView.runFromBundle(appBundlePath,
                                 intent.getStringExtra("snapshot"));
             if (route != null)
-                mView.pushRoute(route);
+                flutterView.pushRoute(route);
             return true;
         }
 
         return false;
+    }
+
+    /**
+     * Returns the Flutter view used by this activity, may be null before
+     * onCreate was called.
+     */
+    public FlutterView getFlutterView() {
+      return flutterView;
     }
 }
