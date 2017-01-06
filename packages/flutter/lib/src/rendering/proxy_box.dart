@@ -2552,7 +2552,8 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
         if (onHorizontalDragUpdate != null) {
           final double primaryDelta = size.width * -scrollFactor;
           onHorizontalDragUpdate(new DragUpdateDetails(
-            delta: new Offset(primaryDelta, 0.0), primaryDelta: primaryDelta
+            delta: new Offset(primaryDelta, 0.0), primaryDelta: primaryDelta,
+            globalPosition: localToGlobal(size.center(Point.origin)),
           ));
         }
         break;
@@ -2560,7 +2561,8 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
         if (onHorizontalDragUpdate != null) {
           final double primaryDelta = size.width * scrollFactor;
           onHorizontalDragUpdate(new DragUpdateDetails(
-            delta: new Offset(primaryDelta, 0.0), primaryDelta: primaryDelta
+            delta: new Offset(primaryDelta, 0.0), primaryDelta: primaryDelta,
+            globalPosition: localToGlobal(size.center(Point.origin)),
           ));
         }
         break;
@@ -2568,7 +2570,8 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
         if (onVerticalDragUpdate != null) {
           final double primaryDelta = size.height * -scrollFactor;
           onVerticalDragUpdate(new DragUpdateDetails(
-            delta: new Offset(0.0, primaryDelta), primaryDelta: primaryDelta
+            delta: new Offset(0.0, primaryDelta), primaryDelta: primaryDelta,
+            globalPosition: localToGlobal(size.center(Point.origin)),
           ));
         }
         break;
@@ -2576,7 +2579,8 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
         if (onVerticalDragUpdate != null) {
           final double primaryDelta = size.height * scrollFactor;
           onVerticalDragUpdate(new DragUpdateDetails(
-            delta: new Offset(0.0, primaryDelta), primaryDelta: primaryDelta
+            delta: new Offset(0.0, primaryDelta), primaryDelta: primaryDelta,
+            globalPosition: localToGlobal(size.center(Point.origin)),
           ));
         }
         break;

@@ -84,7 +84,10 @@ abstract class MultiDragPointerState {
     if (_client != null) {
       assert(pendingDelta == null);
       // Call client last to avoid reentrancy.
-      _client.update(new DragUpdateDetails(delta: event.delta));
+      _client.update(new DragUpdateDetails(
+        delta: event.delta,
+        globalPosition: event.position,
+      ));
     } else {
       assert(pendingDelta != null);
       _pendingDelta += event.delta;
@@ -124,7 +127,10 @@ abstract class MultiDragPointerState {
     assert(client != null);
     assert(pendingDelta != null);
     _client = client;
-    final DragUpdateDetails details = new DragUpdateDetails(delta: pendingDelta);
+    final DragUpdateDetails details = new DragUpdateDetails(
+      delta: pendingDelta,
+      globalPosition: initialPosition,
+    );
     _pendingDelta = null;
     // Call client last to avoid reentrancy.
     _client.update(details);
