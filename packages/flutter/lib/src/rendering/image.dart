@@ -95,12 +95,12 @@ class RenderImage extends RenderBox {
 
   ColorFilter _colorFilter;
 
-  // Should we make the transfer mode configurable?
+  // Should we make the blend mode configurable?
   void _updateColorFilter() {
     if (_color == null)
       _colorFilter = null;
     else
-      _colorFilter = new ColorFilter.mode(_color, TransferMode.srcIn);
+      _colorFilter = new ColorFilter.mode(_color, BlendMode.srcIn);
   }
 
   /// If non-null, apply this color filter to the image before painting.

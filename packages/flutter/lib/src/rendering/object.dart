@@ -390,7 +390,7 @@ class PaintingContext {
   ///   in the coordinate system of the caller.
   /// * `maskRect` is the region of the canvas (in the coodinate system of the
   ///   caller) in which to apply the mask.
-  /// * `transferMode` is the [TransferMode] to use when applying the shader to
+  /// * `blendMode` is the [BlendMode] to use when applying the shader to
   ///   the painting done by `painter`.
   /// * `painter` is a callback that will paint with the mask applied. This
   ///   function calls the `painter` synchronously.
@@ -399,12 +399,12 @@ class PaintingContext {
   /// [RenderObject.alwaysNeedsCompositing] property to return true. That informs
   /// ancestor render objects that this render object will include a composited
   /// layer, which causes them to use composited clips, for example.
-  void pushShaderMask(Offset offset, Shader shader, Rect maskRect, TransferMode transferMode, PaintingContextCallback painter) {
+  void pushShaderMask(Offset offset, Shader shader, Rect maskRect, BlendMode blendMode, PaintingContextCallback painter) {
     _stopRecordingIfNeeded();
     final ShaderMaskLayer shaderLayer = new ShaderMaskLayer(
       shader: shader,
       maskRect: maskRect,
-      transferMode: transferMode
+      blendMode: blendMode,
     );
     _appendLayer(shaderLayer);
     final PaintingContext childContext = new PaintingContext._(shaderLayer, _paintBounds);
