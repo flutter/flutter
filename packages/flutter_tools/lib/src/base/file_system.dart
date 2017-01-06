@@ -7,6 +7,7 @@ import 'dart:io' as io;
 import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:file/memory.dart';
+import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 
 import 'context.dart';
@@ -29,27 +30,27 @@ final ExitFunction _defaultExitFunction = ([int exitCode]) {
   io.exit(exitCode);
 };
 
+ExitFunction _exitFunction = _defaultExitFunction;
+
 /// Exits the process.
-ExitFunction exit = _defaultExitFunction;
+///
+/// During tests, this may be set to a testing-friendly value by calling
+/// [setExitFunctionForTests] (and then restored with [restoreExitFunction]).
+ExitFunction get exit => _exitFunction;
 
-/// Restores [fs] to the default local disk-based implementation.
-void restoreFileSystem() {
-  //context.setVariable(FileSystem, new LocalFileSystem());
-  exit = _defaultExitFunction;
-}
-
-/// Uses in-memory replacments for `dart:io` functionality. Useful in tests.
-void useInMemoryFileSystem({ String cwd: '/', ExitFunction exitFunction }) {
-  /*
-  context.setVariable(FileSystem, new MemoryFileSystem());
-  if (!fs.directory(cwd).existsSync()) {
-    fs.directory(cwd).createSync(recursive: true);
-  }
-  fs.currentDirectory = cwd;
-  */
-  exit = exitFunction ?? ([int exitCode]) {
+/// Sets the [exit] function to a function that throws an exception rather
+/// than exiting the process; intended for testing purposes.
+@visibleForTesting
+void setExitFunctionForTests([ExitFunction exitFunction]) {
+  _exitFunction = exitFunction ?? ([int exitCode]) {
     throw new Exception('Exited with code $exitCode');
   };
+}
+
+/// Restores the [exit] function to the `dart:io` implementation.
+@visibleForTesting
+void restoreExitFunction() {
+  _exitFunction = _defaultExitFunction;
 }
 
 /// Create the ancestor directories of a file path if they do not already exist.

@@ -42,7 +42,7 @@ void main() {
       memoryFileSystem.directory('test_driver').createSync();
       memoryFileSystem.file('pubspec.yaml').createSync();
       memoryFileSystem.file('.packages').createSync();
-      useInMemoryFileSystem(); // TODO: rename
+      setExitFunctionForTests();
       targetDeviceFinder = () {
         throw 'Unexpected call to targetDeviceFinder';
       };
@@ -59,7 +59,7 @@ void main() {
 
     tearDown(() {
       command = null;
-      restoreFileSystem(); // TODO: rename
+      restoreExitFunction();
       restoreAppStarter();
       restoreAppStopper();
       restoreTestRunner();
