@@ -7,7 +7,7 @@ import 'package:flutter/widgets.dart';
 
 import 'constants.dart';
 
-/// Coordinates the tab selection between a [TabBar] and a [TabBarView].
+/// Coordinates tab selection between a [TabBar] and a [TabBarView].
 ///
 /// The [index] property is the index of the selected tab and the [animation]
 /// represents the current scroll positions of the tab bar and the tar bar view.
@@ -18,6 +18,7 @@ import 'constants.dart';
 /// * [DefaultTabController], which simplifies sharing a TabController with
 /// its [TabBar] and a [TabBarView] descendants.
 class TabController extends ChangeNotifier {
+  /// Creates an object that manages the state required by [TabBar] and a [TabBarView].
   TabController({ int initialIndex: 0, @required this.length, @required TickerProvider vsync })
     : _index = initialIndex,
       _previousIndex = initialIndex,
@@ -30,13 +31,18 @@ class TabController extends ChangeNotifier {
     assert(initialIndex != null && initialIndex >= 0 && initialIndex < length);
   }
 
-  /// An animation whose value represents the current position of the
-  /// selected tab indicator. The animation's value ranges from 0.0
-  /// to [length] - 1.0.
+  /// An animation whose value represents the current position of the [TabBar]'s
+  /// selected tab indicator as well as the scrollOffsets of the [TabBar]
+  /// and [TabBarView].
+  ///
+  /// The animation's value ranges from 0.0 to [length] - 1.0. After the
+  /// selected tab is changed, the animation's value equals [index]. The
+  /// animation's value can be [offset] by +/- 1.0 to reflect [TabBarView]
+  /// drag scrolling.
   final AnimationController _animationController;
   Animation<double> get animation => _animationController.view;
 
-  /// The total number of tabs. Must be at least two.
+  /// The total number of tabs. Must be greater than one.
   final int length;
 
   void _changeIndex(int value, { Duration duration, Curve curve }) {
@@ -55,8 +61,9 @@ class TabController extends ChangeNotifier {
           notifyListeners();
         });
     } else {
-      _indexIsChanging = false;
+      _indexIsChanging = true;
       _animationController.value = _index.toDouble();
+      _indexIsChanging = false;
       notifyListeners();
     }
   }
@@ -89,8 +96,8 @@ class TabController extends ChangeNotifier {
     _changeIndex(value, duration: duration, curve: curve);
   }
 
-  /// The difference between the [animation]'s value and [index]. The [value]
-  /// must be between -1.0 and 1.0.
+  /// The difference between the [animation]'s value and [index]. The offset
+  /// value must be between -1.0 and 1.0.
   ///
   /// This property is typically set by the [TabBarView] when the user
   /// drags left or right. A value between -1.0 and 0.0 implies that the
@@ -139,11 +146,22 @@ class DefaultTabController extends StatefulWidget {
     this.child
   }) : super(key: key);
 
+  /// The total number of tabs. Must be greater than one.
   final int length;
+
+  /// The initial index of the selected tab.
   final int initialIndex;
+
+  /// This widget's child. Often a [Scaffold] whose [AppBar] includes a [TabBar].
   final Widget child;
 
   /// The closest instance of this class that encloses the given context.
+  ///
+  /// Typical usage:
+  ///
+  /// ```dart
+  /// TabController controller = DefaultTabBarController.of(context);
+  /// ```
   static TabController of(BuildContext context) {
     _TabControllerScope scope = context.inheritFromWidgetOfExactType(_TabControllerScope);
     return scope?.controller;

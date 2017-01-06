@@ -40,6 +40,43 @@ Widget buildFrame({ List<String> tabs, String value, bool isScrollable: false, K
   );
 }
 
+typedef Widget TabControllerFrameBuilder(BuildContext context, TabController controller);
+
+class TabControllerFrame extends StatefulWidget {
+  TabControllerFrame({ this.length, this.initialIndex, this.builder });
+
+  final int length;
+  final int initialIndex;
+  final TabControllerFrameBuilder builder;
+
+  @override
+  TabControllerFrameState createState() => new TabControllerFrameState();
+}
+
+class TabControllerFrameState extends State<TabControllerFrame> with SingleTickerProviderStateMixin {
+  TabController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = new TabController(
+      vsync: this,
+      length: config.length,
+      initialIndex: config.initialIndex,
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return config.builder(context, _controller);
+  }
+}
 
 Widget buildLeftRightApp({ List<String> tabs, String value }) {
   return new MaterialApp(
@@ -337,4 +374,109 @@ void main() {
     final RenderBox box = tester.renderObject(find.text('BBBBBB'));
     expect(box.localToGlobal(Point.origin).x, greaterThan(0.0));
   });
+
+  testWidgets('TabController change notification', (WidgetTester tester) async {
+    List<String> tabs = <String>['LEFT', 'RIGHT'];
+
+    await tester.pumpWidget(buildLeftRightApp(tabs: tabs, value: 'LEFT'));
+    TabController controller = DefaultTabController.of(tester.element(find.text('LEFT')));
+
+    expect(controller, isNotNull);
+    expect(controller.index, 0);
+
+    String value;
+    controller.addListener(() {
+      value = tabs[controller.index];
+    });
+
+    // TODO(hixie) - the new scrolling framework should eliminate most of the pump
+    // calls that follow. Currently they exist to complete chains of future.then
+    // in the implementation.
+
+    await tester.tap(find.text('RIGHT'));
+    await tester.pump(); // start the animation
+    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(value, 'RIGHT');
+
+    await tester.tap(find.text('LEFT'));
+    await tester.pump(); // start the animation
+    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(value, 'LEFT');
+
+    Point leftFlingStart = tester.getCenter(find.text('LEFT CHILD'));
+    await tester.flingFrom(leftFlingStart, const Offset(-200.0, 0.0), 10000.0);
+    await tester.pump(); // start the animation
+    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(value, 'RIGHT');
+
+    Point rightFlingStart = tester.getCenter(find.text('RIGHT CHILD'));
+    await tester.flingFrom(rightFlingStart, const Offset(200.0, 0.0), 10000.0);
+    await tester.pump(); // start the animation
+    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(value, 'LEFT');
+  });
+
+  testWidgets('Explicit TabController', (WidgetTester tester) async {
+    List<String> tabs = <String>['LEFT', 'RIGHT'];
+    TabController tabController;
+
+    Widget buildTabControllerFrame(BuildContext context, TabController controller) {
+      tabController = controller;
+      return new MaterialApp(
+        theme: new ThemeData(platform: TargetPlatform.android),
+        home: new Scaffold(
+          appBar: new AppBar(
+            title: new Text('tabs'),
+            bottom: new TabBar(
+              controller: controller,
+              tabs: tabs.map((String tab) => new Tab(text: tab)).toList(),
+            ),
+          ),
+          body: new TabBarView(
+            controller: controller,
+            children: <Widget>[
+              new Center(child: new Text('LEFT CHILD')),
+              new Center(child: new Text('RIGHT CHILD'))
+            ]
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(new TabControllerFrame(
+      builder: buildTabControllerFrame,
+      length: tabs.length,
+      initialIndex: 1,
+    ));
+
+    expect(find.text('LEFT'), findsOneWidget);
+    expect(find.text('RIGHT'), findsOneWidget);
+    expect(find.text('LEFT CHILD'), findsNothing);
+    expect(find.text('RIGHT CHILD'), findsOneWidget);
+    expect(tabController.index, 1);
+    expect(tabController.previousIndex, 1);
+    expect(tabController.indexIsChanging, false);
+    expect(tabController.animation.value, 1.0);
+    expect(tabController.animation.status, AnimationStatus.completed);
+
+    tabController.index = 0;
+    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(find.text('LEFT CHILD'), findsOneWidget);
+    expect(find.text('RIGHT CHILD'), findsNothing);
+
+    tabController.index = 1;
+    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(find.text('LEFT CHILD'), findsNothing);
+    expect(find.text('RIGHT CHILD'), findsOneWidget);
+  });
+
+
 }

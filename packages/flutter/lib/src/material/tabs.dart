@@ -13,7 +13,6 @@ import 'app_bar.dart';
 import 'colors.dart';
 import 'constants.dart';
 import 'debug.dart';
-import 'icon.dart';
 import 'icon_theme.dart';
 import 'icon_theme_data.dart';
 import 'ink_well.dart';
@@ -28,7 +27,18 @@ const double _kMinTabWidth = 72.0;
 const double _kMaxTabWidth = 264.0;
 const EdgeInsets _kTabLabelPadding = const EdgeInsets.symmetric(horizontal: 12.0);
 
+/// A material design [TabBar] tab. If both [icon] and [text] are
+/// provided, the text is displayed below the icon.
+///
+/// See also:
+///
+///  * [TabBar] - displays a row of tabs.
+///  * [TabBarView] - the view of the currently selected tab.
+///  * [TabController] - coordinates tab selection between a [TabBar] and a [TabBarView].
+///  * <https://material.google.com/components/tabs.html>
 class Tab extends StatelessWidget {
+  /// Creates a material design [TabBar] tab. At least one of [text] and [icon]
+  /// must be non-null.
   Tab({
     Key key,
     this.text,
@@ -37,8 +47,11 @@ class Tab extends StatelessWidget {
     assert(text != null || icon != null);
   }
 
+  /// The text to display as the tab's label.
   final String text;
-  final Icon icon;
+
+  /// An icon to display as the tab's label.
+  final Widget icon;
 
   Widget _buildLabelText() {
     return new Text(text, softWrap: false, overflow: TextOverflow.fade);
@@ -220,11 +233,9 @@ double _indexChangeProgress(TabController controller) {
 }
 
 class _IndicatorPainter extends CustomPainter {
-  _IndicatorPainter(this.controller)
-    : currentIndex = controller.index, super(repaint: controller.animation);
+  _IndicatorPainter(this.controller) : super(repaint: controller.animation);
 
   TabController controller;
-  int currentIndex;
   List<double> tabOffsets;
   Color color;
   Animatable<Rect> indicatorTween;
@@ -247,8 +258,8 @@ class _IndicatorPainter extends CustomPainter {
     if (controller.indexIsChanging) {
       final Rect targetRect = indicatorRect(size, controller.index);
       currentRect = Rect.lerp(currentRect ?? targetRect, targetRect, _indexChangeProgress(controller));
-      currentIndex = controller.index;
     } else {
+      final int currentIndex = controller.index;
       final Rect left = currentIndex > 0 ? indicatorRect(size, currentIndex - 1) : null;
       final Rect middle = indicatorRect(size, currentIndex);
       final Rect right = currentIndex < maxTabIndex ? indicatorRect(size, currentIndex + 1) : null;
@@ -299,22 +310,31 @@ class _ChangeAnimation extends Animation<double> with AnimationWithParentMixin<d
   double get value => _indexChangeProgress(controller);
 }
 
+/// A material design widget that displays a horizontal row of tabs. Typically
+/// created as part of an [AppBar] and in conjuction with a [TabBarView].
+///
+/// If a [TabController] is not provided, then there must be a [DefaultTabController]
+/// ancestor.
+///
+/// Requires one of its ancestors to be a [Material] widget
 class TabBar extends StatefulWidget implements AppBarBottomWidget {
   TabBar({
     Key key,
     @required this.tabs,
+    this.controller,
     this.isScrollable: false,
     this.indicatorColor,
     this.labelColor,
-    this.controller,
   }) : super(key: key) {
     assert(tabs != null && tabs.length > 1);
     assert(isScrollable != null);
   }
 
-  final TabController controller;
-
+  /// Typically a list of [Tab] widgets.
   final List<Widget> tabs;
+
+  /// This widget's selection and animation state.
+  final TabController controller;
 
   /// Whether this tab bar can be scrolled horizontally.
   ///
@@ -430,7 +450,7 @@ class _TabBarState extends State<TabBar> {
     else
       offset = right == null ? middle : lerpDouble(middle, right, value - index);
 
-    viewport.scrollTo(offset, duration: kTabScrollDuration);
+    viewport.scrollTo(offset);
   }
 
   void _handleTick() {
@@ -551,16 +571,16 @@ class _TabBarState extends State<TabBar> {
   }
 }
 
-// TODO(hansmuller: prevent the pageable list from being dragged more then
-// one page in either direction.
 class _PageableTabBarView extends PageableList {
   _PageableTabBarView({
     Key key,
     List<Widget> children,
+    double initialScrollOffset: 0.0,
   }) : super(
     key: key,
     scrollDirection: Axis.horizontal,
     children: children,
+    initialScrollOffset: initialScrollOffset,
   );
 
   @override
@@ -601,25 +621,27 @@ class _PageableTabBarViewState extends PageableListState<_PageableTabBarView> {
   }
 }
 
-/// TBD
+/// A pageable list that displays the widget which corresponds to the currently
+/// selected tab. Typically used in conjuction with a [TabBar].
 ///
-///
-/// See also:
-///
-///  * [TabBarSelection]
-///  * [TabBar]
-///  * <https://material.google.com/components/tabs.html>
+/// If a [TabController] is not provided, then there must be a [DefaultTabController]
+/// ancestor.
 class TabBarView extends StatefulWidget {
-  /// Creates a widget that displays the contents of a tab.
+  /// Creates a pageable list with one child per tab.
   ///
-  /// The [children] argument must not be null and must not be empty.
+  /// The length of [children] must be the same as the [controller]'s length.
   TabBarView({
     Key key,
     this.children,
     this.controller,
-  }) : super(key: key); // TBD: how to verify that tabCount is the same as TabBar's tabs.length? And that it's intrinsically valid
+  }) : super(key: key) {
+    assert(children != null && children.length > 1);
+  }
 
+  /// This widget's selection and animation state.
   final TabController controller;
+
+  /// One widget per tab.
   final List<Widget> children;
 
   @override
@@ -683,7 +705,6 @@ class _TabBarViewState extends State<TabBarView> {
   }
 
   Future<Null> _warpToCurrentIndex() async {
-    assert(_controller.indexIsChanging);
     if (!mounted)
       return new Future<Null>.value();
 
@@ -767,17 +788,22 @@ class _TabBarViewState extends State<TabBarView> {
       child: new _PageableTabBarView(
         key: viewportKey,
         children: _children,
+        initialScrollOffset: (_controller?.index ?? 0).toDouble(),
       ),
     );
   }
 }
 
-/// TBD
+/// Displays a row of small circular indicators, one per tab. The selected
+/// tab's indicator is highlighted. Often used in conjuction with a [TabBarView].
 ///
+/// If a [TabController] is not provided, then there must be a [DefaultTabController]
+/// ancestor.
 class TabPageSelector extends StatelessWidget {
-  /// TBD
+  /// Creates a compact widget that indicates which tab has been selected.
   TabPageSelector({ Key key, this.controller }) : super(key: key);
 
+  /// This widget's selection and animation state.
   final TabController controller;
 
   Widget _buildTabIndicator(
