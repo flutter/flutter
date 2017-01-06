@@ -26,7 +26,7 @@ constexpr int kStrokeCapIndex = 5;
 constexpr int kFilterQualityIndex = 6;
 constexpr int kColorFilterIndex = 7;
 constexpr int kColorFilterColorIndex = 8;
-constexpr int kColorFilterTransferModeIndex = 9;
+constexpr int kColorFilterBlendModeIndex = 9;
 constexpr size_t kDataByteCount = 40;
 
 constexpr int kMaskFilterIndex = 0;
@@ -84,9 +84,9 @@ Paint DartConverter<Paint>::FromArguments(Dart_NativeArguments args,
 
   uint32_t encoded_blend_mode = uint_data[kBlendModeIndex];
   if (encoded_blend_mode) {
-    uint32_t transfer_mode =
+    uint32_t blend_mode =
         encoded_blend_mode ^ static_cast<uint32_t>(SkBlendMode::kSrcOver);
-    paint.setBlendMode(static_cast<SkBlendMode>(transfer_mode));
+    paint.setBlendMode(static_cast<SkBlendMode>(blend_mode));
   }
 
   uint32_t style = uint_data[kStyleIndex];
@@ -107,9 +107,9 @@ Paint DartConverter<Paint>::FromArguments(Dart_NativeArguments args,
 
   if (uint_data[kColorFilterIndex]) {
     SkColor color = uint_data[kColorFilterColorIndex];
-    SkBlendMode transfer_mode =
-        static_cast<SkBlendMode>(uint_data[kColorFilterTransferModeIndex]);
-    paint.setColorFilter(SkColorFilter::MakeModeFilter(color, transfer_mode));
+    SkBlendMode blend_mode =
+        static_cast<SkBlendMode>(uint_data[kColorFilterBlendModeIndex]);
+    paint.setColorFilter(SkColorFilter::MakeModeFilter(color, blend_mode));
   }
 
   result.is_null_ = false;
