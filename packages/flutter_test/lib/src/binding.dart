@@ -334,7 +334,12 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
         // _this_ zone, the test framework would find this zone was the current
         // zone and helpfully throw the error in this zone, causing us to be
         // directly called again.
-        final String treeDump = renderViewElement?.toStringDeep() ?? '<no tree>';
+        String treeDump;
+        try {
+          treeDump = renderViewElement?.toStringDeep() ?? '<no tree>';
+        } catch (exception) {
+          treeDump = '<additional error caught while dumping tree: $exception>';
+        }
         final StringBuffer expectLine = new StringBuffer();
         final int stackLinesToOmit = reportExpectCall(stack, expectLine);
         FlutterError.reportError(new FlutterErrorDetails(

@@ -237,7 +237,7 @@ class RenderParagraph extends RenderBox {
       if (_overflowShader != null) {
         canvas.translate(offset.dx, offset.dy);
         Paint paint = new Paint()
-          ..transferMode = TransferMode.modulate
+          ..blendMode = BlendMode.modulate
           ..shader = _overflowShader;
         canvas.drawRect(Point.origin & size, paint);
       }

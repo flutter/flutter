@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../rendering/mock_canvas.dart';
+
 void main() {
   testWidgets('Slider can move when tapped', (WidgetTester tester) async {
     Key sliderKey = new UniqueKey();
@@ -23,12 +25,12 @@ void main() {
                   setState(() {
                     value = newValue;
                   });
-                }
-              )
-            )
+                },
+              ),
+            ),
           );
-        }
-      )
+        },
+      ),
     );
 
     expect(value, equals(0.0));
@@ -57,12 +59,12 @@ void main() {
                   setState(() {
                     value = newValue;
                   });
-                }
-              )
-            )
+                },
+              ),
+            ),
           );
-        }
-      )
+        },
+      ),
     );
 
     expect(value, equals(0.0));
@@ -81,5 +83,39 @@ void main() {
     await tester.pump(const Duration(milliseconds: 200));
     // Animation complete.
     expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
+  });
+
+  testWidgets('Slider can draw an open thumb at min',
+      (WidgetTester tester) async {
+    Widget buildApp(bool thumbOpenAtMin) {
+      return new Material(
+        child: new Center(
+          child: new Slider(
+            value: 0.0,
+            thumbOpenAtMin: thumbOpenAtMin,
+            onChanged: (double newValue) {},
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildApp(false));
+
+    final RenderBox sliderBox =
+        tester.firstRenderObject<RenderBox>(find.byType(Slider));
+
+    Paint getThumbPaint() {
+      final MockCanvas canvas = new MockCanvas();
+      sliderBox.paint(new MockPaintingContext(canvas), Offset.zero);
+      final Invocation drawCommand =
+          canvas.invocations.where((Invocation invocation) {
+        return invocation.memberName == #drawCircle;
+      }).single;
+      return drawCommand.positionalArguments[2];
+    }
+
+    expect(getThumbPaint().style, equals(PaintingStyle.fill));
+    await tester.pumpWidget(buildApp(true));
+    expect(getThumbPaint().style, equals(PaintingStyle.stroke));
   });
 }

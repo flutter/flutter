@@ -470,9 +470,9 @@ class OpacityLayer extends ContainerLayer {
 class ShaderMaskLayer extends ContainerLayer {
   /// Creates a shader mask layer.
   ///
-  /// The [shader], [maskRect], and [transferMode] properties must be non-null
+  /// The [shader], [maskRect], and [blendMode] properties must be non-null
   /// before the compositing phase of the pipeline.
-  ShaderMaskLayer({ this.shader, this.maskRect, this.transferMode });
+  ShaderMaskLayer({ this.shader, this.maskRect, this.blendMode });
 
   /// The shader to apply to the children.
   Shader shader;
@@ -480,12 +480,12 @@ class ShaderMaskLayer extends ContainerLayer {
   /// The size of the shader.
   Rect maskRect;
 
-  /// The tranfer mode to apply when blending the shader with the children.
-  TransferMode transferMode;
+  /// The blend mode to apply when blending the shader with the children.
+  BlendMode blendMode;
 
   @override
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
-    builder.pushShaderMask(shader, maskRect.shift(layerOffset), transferMode);
+    builder.pushShaderMask(shader, maskRect.shift(layerOffset), blendMode);
     addChildrenToScene(builder, layerOffset);
     builder.pop();
   }
@@ -495,7 +495,7 @@ class ShaderMaskLayer extends ContainerLayer {
     super.debugFillDescription(description);
     description.add('shader: $shader');
     description.add('maskRect: $maskRect');
-    description.add('transferMode: $transferMode');
+    description.add('blendMode: $blendMode');
   }
 }
 

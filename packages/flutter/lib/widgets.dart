@@ -10,7 +10,6 @@ library widgets;
 export 'src/widgets/animated_cross_fade.dart';
 export 'src/widgets/animated_size.dart';
 export 'src/widgets/app.dart';
-export 'src/widgets/auto_layout.dart';
 export 'src/widgets/banner.dart';
 export 'src/widgets/basic.dart';
 export 'src/widgets/binding.dart';

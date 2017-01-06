@@ -3,4 +3,4 @@ description: Various repository development tools for flutter.
 
 dependencies:
   args: ^0.13.4
-  path: ^1.3.0
+  path: ^1.4.0

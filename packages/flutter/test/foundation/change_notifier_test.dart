@@ -121,20 +121,44 @@ void main() {
     final List<String> log = <String>[];
 
     final Listenable merged = new Listenable.merge(<Listenable>[source1, source2]);
+    final VoidCallback listener1 = () { log.add('listener1'); };
+    final VoidCallback listener2 = () { log.add('listener2'); };
+
+    merged.addListener(listener1);
+    source1.notify();
+    source2.notify();
+    source3.notify();
+    expect(log, <String>['listener1', 'listener1']);
+    log.clear();
+
+    merged.removeListener(listener1);
+    source1.notify();
+    source2.notify();
+    source3.notify();
+    expect(log, isEmpty);
+    log.clear();
+
+    merged.addListener(listener1);
+    merged.addListener(listener2);
+    source1.notify();
+    source2.notify();
+    source3.notify();
+    expect(log, <String>['listener1', 'listener2', 'listener1', 'listener2']);
+    log.clear();
+  });
+
+  testWidgets('Merging change notifiers ignores null', (WidgetTester tester) async {
+    final TestNotifier source1 = new TestNotifier();
+    final TestNotifier source2 = new TestNotifier();
+    final List<String> log = <String>[];
+
+    final Listenable merged = new Listenable.merge(<Listenable>[null, source1, null, source2, null]);
     final VoidCallback listener = () { log.add('listener'); };
 
     merged.addListener(listener);
     source1.notify();
     source2.notify();
-    source3.notify();
     expect(log, <String>['listener', 'listener']);
-    log.clear();
-
-    merged.removeListener(listener);
-    source1.notify();
-    source2.notify();
-    source3.notify();
-    expect(log, isEmpty);
     log.clear();
   });
 }

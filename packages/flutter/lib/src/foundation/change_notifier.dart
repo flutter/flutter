@@ -18,6 +18,8 @@ abstract class Listenable {
   ///
   /// The list must not be changed after this method has been called. Doing so
   /// will lead to memory leaks or exceptions.
+  ///
+  /// The list may contain `null`s; they are ignored.
   factory Listenable.merge(List<Listenable> listenables) = _MergingListenable;
 
   /// Register a closure to be called when the object notifies its listeners.
@@ -93,7 +95,7 @@ class ChangeNotifier extends Listenable {
 class _MergingListenable extends ChangeNotifier {
   _MergingListenable(this._children) {
     for (Listenable child in _children)
-      child.addListener(notifyListeners);
+      child?.addListener(notifyListeners);
   }
 
   final List<Listenable> _children;
@@ -101,7 +103,7 @@ class _MergingListenable extends ChangeNotifier {
   @override
   void dispose() {
     for (Listenable child in _children)
-      child.removeListener(notifyListeners);
+      child?.removeListener(notifyListeners);
     super.dispose();
   }
 }

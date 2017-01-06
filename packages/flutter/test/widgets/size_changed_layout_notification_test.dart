@@ -18,33 +18,37 @@ void main() {
     bool notified = false;
 
     await tester.pumpWidget(
-      new NotificationListener<LayoutChangedNotification>(
-        onNotification: (LayoutChangedNotification notification) {
-          notified = true;
-          return true;
-        },
-        child: new SizeChangedLayoutNotifier(
-          child: const SizedBox(
-            width: 100.0,
-            height: 100.0
-          )
-        )
-      )
+      new Center(
+        child: new NotificationListener<LayoutChangedNotification>(
+          onNotification: (LayoutChangedNotification notification) {
+            throw new Exception('Should not reach this point.');
+          },
+          child: new SizeChangedLayoutNotifier(
+            child: const SizedBox(
+              width: 100.0,
+              height: 100.0,
+            ),
+          ),
+        ),
+      ),
     );
 
     await tester.pumpWidget(
-      new NotificationListener<LayoutChangedNotification>(
-        onNotification: (LayoutChangedNotification notification) {
-          notified = true;
-          return true;
-        },
-        child: new SizeChangedLayoutNotifier(
-          child: const SizedBox(
-            width: 200.0,
-            height: 100.0
-          )
-        )
-      )
+      new Center(
+        child: new NotificationListener<LayoutChangedNotification>(
+          onNotification: (LayoutChangedNotification notification) {
+            expect(notification, new isInstanceOf<SizeChangedLayoutNotification>());
+            notified = true;
+            return true;
+          },
+          child: new SizeChangedLayoutNotifier(
+            child: const SizedBox(
+              width: 200.0,
+              height: 100.0,
+            ),
+          ),
+        ),
+      ),
     );
 
     expect(notified, isTrue);

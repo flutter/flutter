@@ -6,8 +6,8 @@ import 'dart:async';
 
 import 'platform_messages.dart';
 
-/// A service that can be implemented by the host application and the
-/// Flutter framework to exchange application-specific messages.
+/// Deprecated. Use [PlatformMessages] instead.
+@deprecated
 class HostMessages {
   /// Send a message to the host application.
   static Future<String> sendToHost(String channel, [String message = '']) {

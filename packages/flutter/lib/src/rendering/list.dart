@@ -33,7 +33,7 @@ class RenderList extends RenderVirtualViewport<ListParentData> {
     Offset paintOffset: Offset.zero,
     Axis mainAxis: Axis.vertical,
     ViewportAnchor anchor: ViewportAnchor.start,
-    LayoutCallback callback
+    LayoutCallback<BoxConstraints> callback
   }) : _itemExtent = itemExtent,
        _padding = padding,
        super(
@@ -153,7 +153,7 @@ class RenderList extends RenderVirtualViewport<ListParentData> {
     }
 
     if (callback != null)
-      invokeLayoutCallback(callback);
+      invokeLayoutCallback/*<BoxConstraints>*/(callback);
 
     double itemWidth;
     double itemHeight;

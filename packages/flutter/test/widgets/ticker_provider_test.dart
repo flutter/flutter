@@ -50,4 +50,20 @@ void main() {
     await tester.pump(const Duration(seconds: 5));
     expect(tester.binding.transientCallbackCount, 1);
   });
+
+  testWidgets('SingleTickerProviderStateMixin can handle not being used', (WidgetTester tester) async {
+    await tester.pumpWidget(new BoringTickerTest());
+    await tester.pumpWidget(new Container());
+    // the test is that this doesn't crash, like it used to...
+  });
+}
+
+class BoringTickerTest extends StatefulWidget {
+  @override
+  _BoringTickerTestState createState() => new _BoringTickerTestState();
+}
+
+class _BoringTickerTestState extends State<BoringTickerTest> with SingleTickerProviderStateMixin {
+  @override
+  Widget build(BuildContext context) => new Container();
 }
