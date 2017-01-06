@@ -2790,6 +2790,7 @@ class RepaintBoundary extends SingleChildRenderObjectWidget {
   /// The key for the [RepaintBoundary] is derived either from the child's key
   /// (if the child has a non-null key) or from the given `childIndex`.
   factory RepaintBoundary.wrap(Widget child, int childIndex) {
+    assert(child != null);
     Key key = child.key != null ? new ValueKey<Key>(child.key) : new ValueKey<int>(childIndex);
     return new RepaintBoundary(key: key, child: child);
   }
