@@ -38,14 +38,14 @@ class SceneBuilder : public ftl::RefCountedThreadSafe<SceneBuilder>,
   void pushClipRRect(const RRect& rrect);
   void pushClipPath(const CanvasPath* path);
   void pushOpacity(int alpha);
-  void pushColorFilter(int color, int transferMode);
+  void pushColorFilter(int color, int blendMode);
   void pushBackdropFilter(ImageFilter* filter);
   void pushShaderMask(Shader* shader,
                       double maskRectLeft,
                       double maskRectRight,
                       double maskRectTop,
                       double maskRectBottom,
-                      int transferMode);
+                      int blendMode);
   void pop();
 
   void addPerformanceOverlay(uint64_t enabledOptions,

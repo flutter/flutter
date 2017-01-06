@@ -90,13 +90,13 @@ class SceneBuilder extends NativeFieldWrapperClass2 {
   /// Pushes a color filter operation onto the operation stack.
   ///
   /// The given color is applied to the objects' rasterization using the given
-  /// transfer mode.
+  /// blend mode.
   ///
   /// See [pop] for details about the operation stack.
-  void pushColorFilter(Color color, TransferMode transferMode) {
-    _pushColorFilter(color.value, transferMode.index);
+  void pushColorFilter(Color color, BlendMode blendMode) {
+    _pushColorFilter(color.value, blendMode.index);
   }
-  void _pushColorFilter(int color, int transferMode) native "SceneBuilder_pushColorFilter";
+  void _pushColorFilter(int color, int blendMode) native "SceneBuilder_pushColorFilter";
 
   /// Pushes a backdrop filter operation onto the operation stack.
   ///
@@ -109,23 +109,23 @@ class SceneBuilder extends NativeFieldWrapperClass2 {
   /// Pushes a shader mask operation onto the operation stack.
   ///
   /// The given shader is applied to the object's rasterization in the given
-  /// rectangle using the given transfer mode.
+  /// rectangle using the given blend mode.
   ///
   /// See [pop] for details about the operation stack.
-  void pushShaderMask(Shader shader, Rect maskRect, TransferMode transferMode) {
+  void pushShaderMask(Shader shader, Rect maskRect, BlendMode blendMode) {
     _pushShaderMask(shader,
                     maskRect.left,
                     maskRect.right,
                     maskRect.top,
                     maskRect.bottom,
-                    transferMode.index);
+                    blendMode.index);
   }
   void _pushShaderMask(Shader shader,
                        double maskRectLeft,
                        double maskRectRight,
                        double maskRectTop,
                        double maskRectBottom,
-                       int transferMode) native "SceneBuilder_pushShaderMask";
+                       int blendMode) native "SceneBuilder_pushShaderMask";
 
   /// Ends the effect of the most recently pushed operation.
   ///

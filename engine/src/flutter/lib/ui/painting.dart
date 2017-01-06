@@ -191,8 +191,8 @@ class Color {
 ///
 /// [![Open Skia fiddle to view image.](https://flutter.io/images/transfer_mode.png)](https://fiddle.skia.org/c/864acd0659c7a866ea7296a3184b8bdd)
 ///
-/// See [Paint.transferMode].
-enum TransferMode {
+/// See [Paint.blendMode].
+enum BlendMode {
   // This list comes from Skia's SkXfermode.h and the values (order) should be
   // kept in sync.
   // See: https://skia.org/user/api/skpaint#SkXfermode
@@ -324,25 +324,25 @@ class Paint {
   final ByteData _data = new ByteData(_kDataByteCount);
   static const int _kIsAntiAliasIndex = 0;
   static const int _kColorIndex = 1;
-  static const int _kTransferModeIndex = 2;
+  static const int _kBlendModeIndex = 2;
   static const int _kStyleIndex = 3;
   static const int _kStrokeWidthIndex = 4;
   static const int _kStrokeCapIndex = 5;
   static const int _kFilterQualityIndex = 6;
   static const int _kColorFilterIndex = 7;
   static const int _kColorFilterColorIndex = 8;
-  static const int _kColorFilterTransferModeIndex = 9;
+  static const int _kColorFilterBlendModeIndex = 9;
 
   static const int _kIsAntiAliasOffset = _kIsAntiAliasIndex << 2;
   static const int _kColorOffset = _kColorIndex << 2;
-  static const int _kTransferModeOffset = _kTransferModeIndex << 2;
+  static const int _kBlendModeOffset = _kBlendModeIndex << 2;
   static const int _kStyleOffset = _kStyleIndex << 2;
   static const int _kStrokeWidthOffset = _kStrokeWidthIndex << 2;
   static const int _kStrokeCapOffset = _kStrokeCapIndex << 2;
   static const int _kFilterQualityOffset = _kFilterQualityIndex << 2;
   static const int _kColorFilterOffset = _kColorFilterIndex << 2;
   static const int _kColorFilterColorOffset = _kColorFilterColorIndex << 2;
-  static const int _kColorFilterTransferModeOffset = _kColorFilterTransferModeIndex << 2;
+  static const int _kColorFilterBlendModeOffset = _kColorFilterBlendModeIndex << 2;
   // If you add more fields, remember to update _kDataByteCount.
   static const int _kDataByteCount = 40;
 
@@ -390,9 +390,9 @@ class Paint {
     _data.setInt32(_kColorOffset, encoded, _kFakeHostEndian);
   }
 
-  static final int _kTransferModeDefault = TransferMode.srcOver.index;
+  static final int _kBlendModeDefault = BlendMode.srcOver.index;
 
-  /// A transfer mode to apply when a shape is drawn or a layer is composited.
+  /// A blend mode to apply when a shape is drawn or a layer is composited.
   ///
   /// The source colors are from the shape being drawn (e.g. from
   /// [Canvas.drawPath]) or layer being composited (the graphics that were drawn
@@ -402,15 +402,15 @@ class Paint {
   /// The destination colors are from the background onto which the shape or
   /// layer is being composited.
   ///
-  /// Defaults to [TransferMode.srcOver].
-  TransferMode get transferMode {
-    final int encoded = _data.getInt32(_kTransferModeOffset, _kFakeHostEndian);
-    return TransferMode.values[encoded ^ _kTransferModeDefault];
+  /// Defaults to [BlendMode.srcOver].
+  BlendMode get blendMode {
+    final int encoded = _data.getInt32(_kBlendModeOffset, _kFakeHostEndian);
+    return BlendMode.values[encoded ^ _kBlendModeDefault];
   }
-  set transferMode(TransferMode value) {
+  set blendMode(BlendMode value) {
     assert(value != null);
-    final int encoded = value.index ^ _kTransferModeDefault;
-    _data.setInt32(_kTransferModeOffset, encoded, _kFakeHostEndian);
+    final int encoded = value.index ^ _kBlendModeDefault;
+    _data.setInt32(_kBlendModeOffset, encoded, _kFakeHostEndian);
   }
 
   /// Whether to paint inside shapes, the edges of shapes, or both.
@@ -513,20 +513,20 @@ class Paint {
       return null;
     return new ColorFilter.mode(
       new Color(_data.getInt32(_kColorFilterColorOffset, _kFakeHostEndian)),
-      TransferMode.values[_data.getInt32(_kColorFilterTransferModeOffset, _kFakeHostEndian)]
+      BlendMode.values[_data.getInt32(_kColorFilterBlendModeOffset, _kFakeHostEndian)]
     );
   }
   set colorFilter(ColorFilter value) {
     if (value == null) {
       _data.setInt32(_kColorFilterOffset, 0, _kFakeHostEndian);
       _data.setInt32(_kColorFilterColorOffset, 0, _kFakeHostEndian);
-      _data.setInt32(_kColorFilterTransferModeOffset, 0, _kFakeHostEndian);
+      _data.setInt32(_kColorFilterBlendModeOffset, 0, _kFakeHostEndian);
     } else {
       assert(value._color != null);
-      assert(value._transferMode != null);
+      assert(value._blendMode != null);
       _data.setInt32(_kColorFilterOffset, 1, _kFakeHostEndian);
       _data.setInt32(_kColorFilterColorOffset, value._color.value, _kFakeHostEndian);
-      _data.setInt32(_kColorFilterTransferModeOffset, value._transferMode.index, _kFakeHostEndian);
+      _data.setInt32(_kColorFilterBlendModeOffset, value._blendMode.index, _kFakeHostEndian);
     }
   }
 
@@ -556,8 +556,8 @@ class Paint {
         result.write('${semicolon}no color');
       semicolon = '; ';
     }
-    if (transferMode != TransferMode.srcOver) {
-      result.write('$semicolon$transferMode');
+    if (blendMode != BlendMode.srcOver) {
+      result.write('$semicolon$blendMode');
       semicolon = '; ';
     }
     if (colorFilter != null) {
@@ -860,18 +860,18 @@ class MaskFilter extends NativeFieldWrapperClass2 {
 /// Instances of this class are used with [Paint.colorFilter] on [Paint]
 /// objects.
 class ColorFilter {
-  /// Creates a color filter that applies the transfer mode given as the second
+  /// Creates a color filter that applies the blend mode given as the second
   /// argument. The source color is the one given as the first argument, and the
   /// destination color is the one from the layer being composited.
   ///
   /// The output of this filter is then composited into the background according
-  /// to the [Paint.transferMode], using the output of this filter as the source
+  /// to the [Paint.blendMode], using the output of this filter as the source
   /// and the background as the destination.
-  ColorFilter.mode(Color color, TransferMode transferMode)
-    : _color = color, _transferMode = transferMode;
+  ColorFilter.mode(Color color, BlendMode blendMode)
+    : _color = color, _blendMode = blendMode;
 
   final Color _color;
-  final TransferMode _transferMode;
+  final BlendMode _blendMode;
 
   @override
   bool operator ==(dynamic other) {
@@ -879,14 +879,14 @@ class ColorFilter {
       return false;
     final ColorFilter typedOther = other;
     return _color == typedOther._color &&
-           _transferMode == typedOther._transferMode;
+           _blendMode == typedOther._blendMode;
   }
 
   @override
-  int get hashCode => hashValues(_color, _transferMode);
+  int get hashCode => hashValues(_color, _blendMode);
 
   @override
-  String toString() => "ColorFilter($_color, $TransferMode)";
+  String toString() => "ColorFilter($_color, $_blendMode)";
 }
 
 /// A filter operation to apply to a raster image.
@@ -1133,7 +1133,7 @@ class Canvas extends NativeFieldWrapperClass2 {
   /// Saves a copy of the current transform and clip on the save stack, and then
   /// creates a new group which subsequent calls will become a part of. When the
   /// save stack is later popped, the group will be flattened into a layer and
-  /// have the given `paint`'s [Paint.colorFilter] and [Paint.transferMode]
+  /// have the given `paint`'s [Paint.colorFilter] and [Paint.blendMode]
   /// applied.
   ///
   /// This lets you create composite effects, for example making a group of
@@ -1226,12 +1226,12 @@ class Canvas extends NativeFieldWrapperClass2 {
   void clipPath(Path path) native "Canvas_clipPath";
 
   /// Paints the given [Color] onto the canvas, applying the given
-  /// [TransferMode], with the given color being the source and the background
+  /// [BlendMode], with the given color being the source and the background
   /// being the destination.
-  void drawColor(Color color, TransferMode transferMode) {
-    _drawColor(color.value, transferMode.index);
+  void drawColor(Color color, BlendMode blendMode) {
+    _drawColor(color.value, blendMode.index);
   }
-  void _drawColor(int color, int transferMode) native "Canvas_drawColor";
+  void _drawColor(int color, int blendMode) native "Canvas_drawColor";
 
   /// Draws a line between the given [Point]s using the given paint. The line is
   /// stroked, the value of the [Paint.style] is ignored for this call.
@@ -1247,7 +1247,7 @@ class Canvas extends NativeFieldWrapperClass2 {
 
   /// Fills the canvas with the given [Paint].
   ///
-  /// To fill the canvas with a solid color and transfer mode, consider
+  /// To fill the canvas with a solid color and blend mode, consider
   /// [drawColor] instead.
   void drawPaint(Paint paint) => _drawPaint(paint._objects, paint._data);
   void _drawPaint(List<dynamic> paintObjects, ByteData paintData) native "Canvas_drawPaint";
@@ -1451,7 +1451,7 @@ class Canvas extends NativeFieldWrapperClass2 {
                     List<Point> vertices,
                     List<Point> textureCoordinates,
                     List<Color> colors,
-                    TransferMode transferMode,
+                    BlendMode blendMode,
                     List<int> indicies,
                     Paint paint) {
     final int vertexCount = vertices.length;
@@ -1468,7 +1468,7 @@ class Canvas extends NativeFieldWrapperClass2 {
 
     _drawVertices(
       paint._objects, paint._data, vertexMode.index, vertexBuffer,
-      textureCoordinateBuffer, colorBuffer, transferMode.index, indexBuffer
+      textureCoordinateBuffer, colorBuffer, blendMode.index, indexBuffer
     );
   }
   void _drawVertices(List<dynamic> paintObjects,
@@ -1477,7 +1477,7 @@ class Canvas extends NativeFieldWrapperClass2 {
                      Float32List vertices,
                      Float32List textureCoordinates,
                      Int32List colors,
-                     int transferMode,
+                     int blendMode,
                      Int32List indicies) native "Canvas_drawVertices";
 
   // TODO(eseidel): Paint should be optional, but optional doesn't work.
@@ -1485,7 +1485,7 @@ class Canvas extends NativeFieldWrapperClass2 {
                  List<RSTransform> transforms,
                  List<Rect> rects,
                  List<Color> colors,
-                 TransferMode transferMode,
+                 BlendMode blendMode,
                  Rect cullRect,
                  Paint paint) {
     final int rectCount = rects.length;
@@ -1520,7 +1520,7 @@ class Canvas extends NativeFieldWrapperClass2 {
 
     _drawAtlas(
       paint._objects, paint._data, atlas, rstTransformBuffer, rectBuffer,
-      colorBuffer, transferMode.index, cullRectBuffer
+      colorBuffer, blendMode.index, cullRectBuffer
     );
   }
   void _drawAtlas(List<dynamic> paintObjects,
@@ -1529,7 +1529,7 @@ class Canvas extends NativeFieldWrapperClass2 {
                   Float32List rstTransforms,
                   Float32List rects,
                   Int32List colors,
-                  int transferMode,
+                  int blendMode,
                   Float32List cullRect) native "Canvas_drawAtlas";
 }
 
