@@ -7,12 +7,13 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 void main() {
-  testWidgets('Can hit test flex children of stacks', (WidgetTester tester) async {
+  testWidgets('Can hit test flex children of stacks',
+      (WidgetTester tester) async {
     bool didReceiveTap = false;
     await tester.pumpWidget(
       new Container(
         decoration: const BoxDecoration(
-          backgroundColor: const Color(0xFF00FF00)
+          backgroundColor: const Color(0xFF00FF00),
         ),
         child: new Stack(
           children: <Widget>[
@@ -27,24 +28,34 @@ void main() {
                     },
                     child: new Container(
                       decoration: const BoxDecoration(
-                        backgroundColor: const Color(0xFF0000FF)
-                      ),
+                          backgroundColor: const Color(0xFF0000FF)),
                       width: 100.0,
                       height: 100.0,
                       child: new Center(
-                        child: new Text('X')
-                      )
-                    )
-                  )
-                ]
-              )
-            )
-          ]
-        )
-      )
+                        child: new Text('X'),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
 
     await tester.tap(find.text('X'));
     expect(didReceiveTap, isTrue);
+  });
+
+  testWidgets('Can pass null for flex', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new Row(
+        children: <Widget>[
+          new Expanded(flex: null, child: new Text('one')),
+          new Flexible(flex: null, child: new Text('two')),
+        ],
+      ),
+    );
   });
 }
