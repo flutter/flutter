@@ -21,7 +21,7 @@ static_library("core") {
     "//flutter/sky/engine/platform",
   ]
 
-  if (flutter_runtime_mode != "release" && !is_fuchsia) {
+  if (flutter_runtime_mode != "release") {
     # Only include observatory assets in non-release modes.
     deps += [ "//dart/runtime/observatory:embedded_observatory_archive" ]
   }
