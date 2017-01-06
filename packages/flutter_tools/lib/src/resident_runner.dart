@@ -3,12 +3,13 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
+import 'dart:io' as io;
 
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 
 import 'application_package.dart';
+import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'build_info.dart';
 import 'device.dart';
@@ -77,12 +78,12 @@ abstract class ResidentRunner {
   }
 
   void registerSignalHandlers() {
-    ProcessSignal.SIGINT.watch().listen((ProcessSignal signal) async {
+    io.ProcessSignal.SIGINT.watch().listen((io.ProcessSignal signal) async {
       _resetTerminal();
       await cleanupAfterSignal();
       exit(0);
     });
-    ProcessSignal.SIGTERM.watch().listen((ProcessSignal signal) async {
+    io.ProcessSignal.SIGTERM.watch().listen((io.ProcessSignal signal) async {
       _resetTerminal();
       await cleanupAfterSignal();
       exit(0);
@@ -91,19 +92,19 @@ abstract class ResidentRunner {
       return;
     if (!supportsRestart)
       return;
-    ProcessSignal.SIGUSR1.watch().listen(_handleSignal);
-    ProcessSignal.SIGUSR2.watch().listen(_handleSignal);
+    io.ProcessSignal.SIGUSR1.watch().listen(_handleSignal);
+    io.ProcessSignal.SIGUSR2.watch().listen(_handleSignal);
   }
 
   bool _processingSignal = false;
-  Future<Null> _handleSignal(ProcessSignal signal) async {
+  Future<Null> _handleSignal(io.ProcessSignal signal) async {
     if (_processingSignal) {
       printTrace('Ignoring signal: "$signal" because we are busy.');
       return;
     }
     _processingSignal = true;
 
-    final bool fullRestart = signal == ProcessSignal.SIGUSR2;
+    final bool fullRestart = signal == io.ProcessSignal.SIGUSR2;
 
     try {
       await restart(fullRestart: fullRestart);
@@ -279,7 +280,7 @@ String findMainDartFile([String target]) {
   if (target == null)
     target = '';
   String targetPath = path.absolute(target);
-  if (FileSystemEntity.isDirectorySync(targetPath))
+  if (fs.isDirectorySync(targetPath))
     return path.join(targetPath, 'lib', 'main.dart');
   else
     return targetPath;

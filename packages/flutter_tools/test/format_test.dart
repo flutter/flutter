@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
 
 import 'package:args/command_runner.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/commands/format.dart';
@@ -21,7 +21,7 @@ void main() {
 
     setUp(() {
       Cache.disableLocking();
-      temp = Directory.systemTemp.createTempSync('flutter_tools');
+      temp = fs.systemTempDirectory.createTempSync('flutter_tools');
     });
 
     tearDown(() {
@@ -38,7 +38,7 @@ void main() {
     testUsingContext('a file', () async {
       await createProject();
 
-      File srcFile = new File(path.join(temp.path, 'lib', 'main.dart'));
+      File srcFile = fs.file(path.join(temp.path, 'lib', 'main.dart'));
       String original = srcFile.readAsStringSync();
       srcFile.writeAsStringSync(original.replaceFirst('main()', 'main(  )'));
 

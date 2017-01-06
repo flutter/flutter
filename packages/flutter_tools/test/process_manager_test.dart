@@ -4,10 +4,11 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
+import 'dart:io' as io;
 
 import 'package:archive/archive.dart';
 import 'package:flutter_tools/src/base/context.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/process.dart';
@@ -32,7 +33,7 @@ void main() {
     ProcessManager manager;
 
     setUp(() {
-      tmp = Directory.systemTemp.createTempSync('flutter_tools_');
+      tmp = fs.systemTempDirectory.createTempSync('flutter_tools_');
       manager = new RecordingProcessManager(tmp.path);
     });
 
@@ -41,7 +42,7 @@ void main() {
     });
 
     test('start', () async {
-      Process process = await manager.start('echo', <String>['foo']);
+      io.Process process = await manager.start('echo', <String>['foo']);
       int pid = process.pid;
       int exitCode = await process.exitCode;
       List<int> stdout = await _consume(process.stdout);
@@ -63,7 +64,7 @@ void main() {
     });
 
     test('run', () async {
-      ProcessResult result = await manager.run('echo', <String>['bar']);
+      io.ProcessResult result = await manager.run('echo', <String>['bar']);
       int pid = result.pid;
       int exitCode = result.exitCode;
       String stdout = result.stdout;
@@ -85,7 +86,7 @@ void main() {
     });
 
     test('runSync', () async {
-      ProcessResult result = manager.runSync('echo', <String>['baz']);
+      io.ProcessResult result = manager.runSync('echo', <String>['baz']);
       int pid = result.pid;
       int exitCode = result.exitCode;
       String stdout = result.stdout;
@@ -112,7 +113,7 @@ void main() {
 
     setUp(() async {
       await runInMinimalContext(() async {
-        Directory dir = new Directory('test/data/process_manager/replay');
+        Directory dir = fs.directory('test/data/process_manager/replay');
         manager = await ReplayProcessManager.create(dir.path);
       });
     });
@@ -123,7 +124,7 @@ void main() {
     });
 
     test('start', () async {
-      Process process = await manager.start('sing', <String>['ppap']);
+      io.Process process = await manager.start('sing', <String>['ppap']);
       int exitCode = await process.exitCode;
       List<int> stdout = await _consume(process.stdout);
       List<int> stderr = await _consume(process.stderr);
@@ -134,7 +135,7 @@ void main() {
     });
 
     test('run', () async {
-      ProcessResult result = await manager.run('dance', <String>['gangnam-style']);
+      io.ProcessResult result = await manager.run('dance', <String>['gangnam-style']);
       expect(result.pid, 101);
       expect(result.exitCode, 2);
       expect(result.stdout, '');
@@ -142,7 +143,7 @@ void main() {
     });
 
     test('runSync', () {
-      ProcessResult result = manager.runSync('dance', <String>['gangnam-style']);
+      io.ProcessResult result = manager.runSync('dance', <String>['gangnam-style']);
       expect(result.pid, 101);
       expect(result.exitCode, 2);
       expect(result.stdout, '');
@@ -153,6 +154,7 @@ void main() {
 
 Future<Null> runInMinimalContext(Future<dynamic> method()) async {
   AppContext context = new AppContext();
+  context.putIfAbsent(FileSystem, () => new LocalFileSystem());
   context.putIfAbsent(ProcessManager, () => new ProcessManager());
   context.putIfAbsent(Logger, () => new BufferLogger());
   context.putIfAbsent(OperatingSystemUtils, () => new OperatingSystemUtils());
@@ -167,7 +169,7 @@ class _Recording {
   _Recording(this.file, this._archive);
 
   static _Recording readFrom(Directory dir) {
-    File file = new File(path.join(
+    File file = fs.file(path.join(
         dir.path, RecordingProcessManager.kDefaultRecordTo));
     Archive archive = new ZipDecoder().decodeBytes(file.readAsBytesSync());
     return new _Recording(file, archive);
@@ -194,7 +196,7 @@ class _Recording {
     Encoding encoding;
     if (encodingName != null)
       encoding = encodingName == 'system'
-          ? const SystemEncoding()
+          ? const io.SystemEncoding()
           : Encoding.getByName(encodingName);
     return _getFileContent('$basename.$type', encoding);
   }

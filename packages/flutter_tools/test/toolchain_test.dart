@@ -2,8 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
-
+import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/toolchain.dart';
@@ -14,7 +13,7 @@ import 'src/context.dart';
 void main() {
   group('ToolConfiguration', () {
     Directory tempDir;
-    tempDir = Directory.systemTemp.createTempSync('flutter_temp');
+    tempDir = fs.systemTempDirectory.createTempSync('flutter_temp');
 
     testUsingContext('using cache', () {
       ToolConfiguration toolConfig = new ToolConfiguration();

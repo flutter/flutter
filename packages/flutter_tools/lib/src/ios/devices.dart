@@ -4,9 +4,10 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
+import 'dart:io' as io;
 
 import '../application_package.dart';
+import '../base/file_system.dart';
 import '../base/os.dart';
 import '../base/process.dart';
 import '../base/process_manager.dart';
@@ -27,7 +28,7 @@ class IOSDevices extends PollingDeviceDiscovery {
   IOSDevices() : super('IOSDevices');
 
   @override
-  bool get supportsPlatform => Platform.isMacOS;
+  bool get supportsPlatform => io.Platform.isMacOS;
 
   @override
   List<Device> pollingGetDevices() => IOSDevice.getAttachedDevices();
@@ -124,7 +125,7 @@ class IOSDevice extends Device {
       try {
         command = runCheckedSync(<String>['which', command]).trim();
       } catch (e) {
-        if (Platform.isMacOS) {
+        if (io.Platform.isMacOS) {
           printError('$command not found. $macInstructions');
         } else {
           printError('Cannot control iOS devices or simulators. $command is not available on your platform.');
@@ -150,7 +151,7 @@ class IOSDevice extends Device {
   @override
   bool installApp(ApplicationPackage app) {
     IOSApp iosApp = app;
-    Directory bundle = new Directory(iosApp.deviceBundlePath);
+    Directory bundle = fs.directory(iosApp.deviceBundlePath);
     if (!bundle.existsSync()) {
       printError("Could not find application bundle at ${bundle.path}; have you run 'flutter build ios'?");
       return false;
@@ -207,7 +208,7 @@ class IOSDevice extends Device {
 
     // Step 2: Check that the application exists at the specified path.
     IOSApp iosApp = app;
-    Directory bundle = new Directory(iosApp.deviceBundlePath);
+    Directory bundle = fs.directory(iosApp.deviceBundlePath);
     if (!bundle.existsSync()) {
       printError('Could not find the built application bundle at ${bundle.path}.');
       return new LaunchResult.failed();
@@ -312,7 +313,7 @@ class IOSDevice extends Device {
   }
 
   Future<bool> pushFile(ApplicationPackage app, String localFile, String targetFile) async {
-    if (Platform.isMacOS) {
+    if (io.Platform.isMacOS) {
       runSync(<String>[
         pusherPath,
         '-t',
@@ -391,7 +392,7 @@ class _IOSDeviceLogReader extends DeviceLogReader {
   final IOSDevice device;
 
   StreamController<String> _linesController;
-  Process _process;
+  io.Process _process;
 
   @override
   Stream<String> get logLines => _linesController.stream;
@@ -400,7 +401,7 @@ class _IOSDeviceLogReader extends DeviceLogReader {
   String get name => device.name;
 
   void _start() {
-    runCommand(<String>[device.loggerPath]).then((Process process) {
+    runCommand(<String>[device.loggerPath]).then((io.Process process) {
       _process = process;
       _process.stdout.transform(UTF8.decoder).transform(const LineSplitter()).listen(_onLine);
       _process.stderr.transform(UTF8.decoder).transform(const LineSplitter()).listen(_onLine);
@@ -444,7 +445,7 @@ class _IOSDevicePortForwarder extends DevicePortForwarder {
     }
 
     // Usage: iproxy LOCAL_TCP_PORT DEVICE_TCP_PORT UDID
-    Process process = await runCommand(<String>[
+    io.Process process = await runCommand(<String>[
       device.iproxyPath,
       hostPort.toString(),
       devicePort.toString(),
@@ -470,7 +471,7 @@ class _IOSDevicePortForwarder extends DevicePortForwarder {
 
     printTrace("Unforwarding port $forwardedPort");
 
-    Process process = forwardedPort.context;
+    io.Process process = forwardedPort.context;
 
     if (process != null) {
       processManager.killPid(process.pid);

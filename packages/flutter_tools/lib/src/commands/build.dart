@@ -3,10 +3,11 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
+import 'dart:io' as io;
 
 import 'package:meta/meta.dart';
 
+import '../base/file_system.dart';
 import '../build_info.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
@@ -54,14 +55,14 @@ abstract class BuildSubCommand extends FlutterCommand {
   @mustCallSuper
   Future<Null> runCommand() async {
     if (isRunningOnBot) {
-      File dotPackages = new File('.packages');
+      File dotPackages = fs.file('.packages');
       printStatus('Contents of .packages:');
       if (dotPackages.existsSync())
         printStatus(dotPackages.readAsStringSync());
       else
         printError('File not found: ${dotPackages.absolute.path}');
 
-      File pubspecLock = new File('pubspec.lock');
+      File pubspecLock = fs.file('pubspec.lock');
       printStatus('Contents of pubspec.lock:');
       if (pubspecLock.existsSync())
         printStatus(pubspecLock.readAsStringSync());
@@ -86,8 +87,8 @@ class BuildCleanCommand extends FlutterCommand {
 
   @override
   Future<Null> runCommand() async {
-    Directory buildDir = new Directory(getBuildDirectory());
-    printStatus("Deleting '${buildDir.path}${Platform.pathSeparator}'.");
+    Directory buildDir = fs.directory(getBuildDirectory());
+    printStatus("Deleting '${buildDir.path}${io.Platform.pathSeparator}'.");
 
     if (!buildDir.existsSync())
       return;

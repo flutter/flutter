@@ -2,20 +2,21 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
+import 'dart:io' as io;
 
-import 'src/context.dart';
-
+import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
+
+import 'src/context.dart';
 
 void main() {
   group('OperatingSystemUtils', () {
     Directory temp;
 
     setUp(() {
-      temp = Directory.systemTemp.createTempSync('flutter_tools');
+      temp = fs.systemTempDirectory.createTempSync('flutter_tools');
     });
 
     tearDown(() {
@@ -23,12 +24,12 @@ void main() {
     });
 
     testUsingContext('makeExecutable', () async {
-      File file = new File(path.join(temp.path, 'foo.script'));
+      File file = fs.file(path.join(temp.path, 'foo.script'));
       file.writeAsStringSync('hello world');
       os.makeExecutable(file);
 
       // Skip this test on windows.
-      if (!Platform.isWindows) {
+      if (!io.Platform.isWindows) {
         String mode = file.statSync().modeString();
         // rwxr--r--
         expect(mode.substring(0, 3), endsWith('x'));

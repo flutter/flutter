@@ -4,10 +4,11 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
+import 'dart:io' as io;
 
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/base/common.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/dart/sdk.dart';
@@ -22,7 +23,7 @@ void main() {
     Directory temp;
 
     setUp(() {
-      temp = Directory.systemTemp.createTempSync('flutter_tools');
+      temp = fs.systemTempDirectory.createTempSync('flutter_tools');
     });
 
     tearDown(() {
@@ -48,14 +49,14 @@ void main() {
       await runner.run(<String>['create', '--no-pub', temp.path]);
 
       void expectExists(String relPath) {
-        expect(FileSystemEntity.isFileSync('${temp.path}/$relPath'), true);
+        expect(fs.isFileSync('${temp.path}/$relPath'), true);
       }
       expectExists('lib/main.dart');
       for (FileSystemEntity file in temp.listSync(recursive: true)) {
         if (file is File && file.path.endsWith('.dart')) {
           String original= file.readAsStringSync();
 
-          Process process = await Process.start(
+          io.Process process = await io.Process.start(
               sdkBinaryName('dartfmt'),
               <String>[file.path],
               workingDirectory: temp.path,
@@ -101,7 +102,7 @@ void main() {
       Cache.flutterRoot = '../..';
       CreateCommand command = new CreateCommand();
       CommandRunner<Null> runner = createTestCommandRunner(command);
-      File existingFile = new File("${temp.path.toString()}/bad");
+      File existingFile = fs.file("${temp.path.toString()}/bad");
       if (!existingFile.existsSync()) existingFile.createSync();
       try {
         await runner.run(<String>['create', existingFile.path]);
@@ -123,9 +124,9 @@ Future<Null> _createAndAnalyzeProject(Directory dir, List<String> createArgs) as
   await runner.run(args);
 
   String mainPath = path.join(dir.path, 'lib', 'main.dart');
-  expect(new File(mainPath).existsSync(), true);
+  expect(fs.file(mainPath).existsSync(), true);
   String flutterToolsPath = path.absolute(path.join('bin', 'flutter_tools.dart'));
-  ProcessResult exec = Process.runSync(
+  io.ProcessResult exec = io.Process.runSync(
     '$dartSdkPath/bin/dart', <String>[flutterToolsPath, 'analyze'],
     workingDirectory: dir.path
   );

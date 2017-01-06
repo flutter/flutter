@@ -2,12 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
-
 import 'package:archive/archive.dart';
 import 'package:path/path.dart' as path;
 
 import 'asset.dart';
+import 'base/file_system.dart';
 import 'base/process.dart';
 
 abstract class ZipBuilder {
@@ -66,7 +65,7 @@ class _ZipToolBuilder extends ZipBuilder {
 
     for (AssetBundleEntry entry in entries) {
       List<int> data = entry.contentsAsBytes();
-      File file = new File(path.join(zipBuildDir.path, entry.archivePath));
+      File file = fs.file(path.join(zipBuildDir.path, entry.archivePath));
       file.parent.createSync(recursive: true);
       file.writeAsBytesSync(data);
     }

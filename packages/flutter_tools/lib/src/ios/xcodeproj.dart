@@ -2,10 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
-
 import 'package:path/path.dart' as path;
 
+import '../base/file_system.dart';
 import '../base/process.dart';
 import '../build_info.dart';
 import '../cache.dart';
@@ -23,7 +22,7 @@ void updateXcodeGeneratedProperties(String projectPath, BuildMode mode, String t
   localsBuffer.writeln('FLUTTER_ROOT=$flutterRoot');
 
   // This holds because requiresProjectRoot is true for this command
-  String applicationRoot = path.normalize(Directory.current.path);
+  String applicationRoot = path.normalize(fs.currentDirectory.path);
   localsBuffer.writeln('FLUTTER_APPLICATION_PATH=$applicationRoot');
 
   // Relative to FLUTTER_APPLICATION_PATH, which is [Directory.current].
@@ -43,7 +42,7 @@ void updateXcodeGeneratedProperties(String projectPath, BuildMode mode, String t
   if (tools.isLocalEngine)
     localsBuffer.writeln('LOCAL_ENGINE=${tools.engineBuildPath}');
 
-  File localsFile = new File(path.join(projectPath, 'ios', 'Flutter', 'Generated.xcconfig'));
+  File localsFile = fs.file(path.join(projectPath, 'ios', 'Flutter', 'Generated.xcconfig'));
   localsFile.createSync(recursive: true);
   localsFile.writeAsStringSync(localsBuffer.toString());
 }

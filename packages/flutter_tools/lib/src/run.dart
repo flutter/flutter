@@ -3,12 +3,12 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
 
 import 'package:meta/meta.dart';
 import 'package:stack_trace/stack_trace.dart';
 
 import 'application_package.dart';
+import 'base/file_system.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
 import 'commands/trace.dart';
@@ -68,7 +68,7 @@ class RunAndStayResident extends ResidentRunner {
   }) async {
     if (!prebuiltMode) {
       _mainPath = findMainDartFile(target);
-      if (!FileSystemEntity.isFileSync(_mainPath)) {
+      if (!fs.isFileSync(_mainPath)) {
         String message = 'Tried to run $_mainPath, but that file does not exist.';
         if (target == null)
           message += '\nConsider using the -t option to specify the Dart file to start.';
