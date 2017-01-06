@@ -34,6 +34,8 @@ void main() {
       command = new DriveCommand();
       applyMocksToCommand(command);
       useInMemoryFileSystem(cwd: '/some/app');
+      fs.directory('test').createSync();
+      fs.directory('test_driver').createSync();
       targetDeviceFinder = () {
         throw 'Unexpected call to targetDeviceFinder';
       };
