@@ -4,28 +4,19 @@
 
 import 'dart:io' as dart_io;
 
-import 'package:file/io.dart';
-import 'package:file/sync_io.dart';
+import 'package:file/file.dart';
+import 'package:file/local.dart';
+import 'package:file/memory.dart';
 import 'package:path/path.dart' as path;
 
-export 'package:file/io.dart';
-export 'package:file/sync_io.dart';
+export 'package:file/file.dart';
+export 'package:file/local.dart';
 
 /// Currently active implementation of the file system.
 ///
 /// By default it uses local disk-based implementation. Override this in tests
 /// with [MemoryFileSystem].
 FileSystem fs = new LocalFileSystem();
-SyncFileSystem syncFs = new SyncLocalFileSystem();
-
-typedef String CurrentDirectoryGetter();
-
-final CurrentDirectoryGetter _defaultCurrentDirectoryGetter = () {
-  return dart_io.Directory.current.path;
-};
-
-/// Points to the current working directory (like `pwd`).
-CurrentDirectoryGetter getCurrentDirectory = _defaultCurrentDirectoryGetter;
 
 /// Exits the process with the given [exitCode].
 typedef void ExitFunction([int exitCode]);
@@ -37,20 +28,16 @@ final ExitFunction _defaultExitFunction = ([int exitCode]) {
 /// Exits the process.
 ExitFunction exit = _defaultExitFunction;
 
-/// Restores [fs] and [syncFs] to the default local disk-based implementation.
+/// Restores [fs] to the default local disk-based implementation.
 void restoreFileSystem() {
   fs = new LocalFileSystem();
-  syncFs = new SyncLocalFileSystem();
-  getCurrentDirectory = _defaultCurrentDirectoryGetter;
   exit = _defaultExitFunction;
 }
 
 /// Uses in-memory replacments for `dart:io` functionality. Useful in tests.
 void useInMemoryFileSystem({ String cwd: '/', ExitFunction exitFunction }) {
-  MemoryFileSystem memFs = new MemoryFileSystem();
-  fs = memFs;
-  syncFs = new SyncMemoryFileSystem(backedBy: memFs.storage);
-  getCurrentDirectory = () => cwd;
+  fs = new MemoryFileSystem();
+  fs.currentDirectory = cwd;
   exit = exitFunction ?? ([int exitCode]) {
     throw new Exception('Exited with code $exitCode');
   };
@@ -60,9 +47,9 @@ void useInMemoryFileSystem({ String cwd: '/', ExitFunction exitFunction }) {
 void ensureDirectoryExists(String filePath) {
   String dirPath = path.dirname(filePath);
 
-  if (syncFs.type(dirPath) == FileSystemEntityType.DIRECTORY)
+  if (fs.typeSync(dirPath) == FileSystemEntityType.DIRECTORY)
     return;
-  syncFs.directory(dirPath).create(recursive: true);
+  fs.directory(dirPath).createSync(recursive: true);
 }
 
 /// Recursively copies a folder from `srcPath` to `destPath`

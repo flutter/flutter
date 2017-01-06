@@ -5,7 +5,8 @@
 import 'dart:io' show Platform;
 
 import 'package:file/file.dart';
-import 'package:file/io.dart';
+import 'package:file/local.dart';
+import 'package:file/memory.dart';
 
 /// The file system implementation used by this library.
 ///
