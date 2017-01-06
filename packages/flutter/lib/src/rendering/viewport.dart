@@ -358,7 +358,7 @@ abstract class RenderVirtualViewport<T extends ContainerBoxParentDataMixin<Rende
   /// The [paintOffset] and [mainAxis] arguments must not be null.
   RenderVirtualViewport({
     int virtualChildCount,
-    LayoutCallback callback,
+    LayoutCallback<BoxConstraints> callback,
     Offset paintOffset: Offset.zero,
     Axis mainAxis: Axis.vertical,
     ViewportAnchor anchor: ViewportAnchor.start
@@ -382,9 +382,9 @@ abstract class RenderVirtualViewport<T extends ContainerBoxParentDataMixin<Rende
   ///
   /// Typically the callback will mutate the child list appropriately, for
   /// example so the child list contains only visible children.
-  LayoutCallback get callback => _callback;
-  LayoutCallback _callback;
-  set callback(LayoutCallback value) {
+  LayoutCallback<BoxConstraints> get callback => _callback;
+  LayoutCallback<BoxConstraints> _callback;
+  set callback(LayoutCallback<BoxConstraints> value) {
     if (value == _callback)
       return;
     _callback = value;
