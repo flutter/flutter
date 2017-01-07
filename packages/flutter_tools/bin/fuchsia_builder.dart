@@ -3,13 +3,14 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
+import 'dart:io' as io;
 
 import 'package:args/args.dart';
 
 import '../lib/src/base/common.dart';
 import '../lib/src/base/config.dart';
 import '../lib/src/base/context.dart';
+import '../lib/src/base/file_system.dart';
 import '../lib/src/base/logger.dart';
 import '../lib/src/base/os.dart';
 import '../lib/src/base/process_manager.dart';
@@ -37,6 +38,7 @@ Future<Null> main(List<String> args) async {
   executableContext.setVariable(Logger, new StdoutLogger());
   executableContext.runInZone(() {
     // Initialize the context with some defaults.
+    context.putIfAbsent(FileSystem, () => new LocalFileSystem());
     context.putIfAbsent(ProcessManager, () => new ProcessManager());
     context.putIfAbsent(Logger, () => new StdoutLogger());
     context.putIfAbsent(Cache, () => new Cache());
@@ -61,12 +63,12 @@ Future<Null> run(List<String> args) async {
     printError('Missing option! All options must be specified.');
     exit(1);
   }
-  Cache.flutterRoot = Platform.environment['FLUTTER_ROOT'];
+  Cache.flutterRoot = io.Platform.environment['FLUTTER_ROOT'];
   String outputPath = argResults[_kOptionOutput];
   try {
     await assemble(
       outputPath: outputPath,
-      snapshotFile: new File(argResults[_kOptionSnapshot]),
+      snapshotFile: fs.file(argResults[_kOptionSnapshot]),
       workingDirPath: argResults[_kOptionWorking],
       packagesPath: argResults[_kOptionPackages],
       manifestPath: argResults[_kOptionsManifest] ?? defaultManifestPath,
@@ -85,7 +87,7 @@ Future<Null> run(List<String> args) async {
 
 int _addHeader(String outputPath, String header) {
   try {
-    final File outputFile = new File(outputPath);
+    final File outputFile = fs.file(outputPath);
     final List<int> content = outputFile.readAsBytesSync();
     outputFile.writeAsStringSync('$header\n');
     outputFile.writeAsBytesSync(content, mode: FileMode.APPEND);

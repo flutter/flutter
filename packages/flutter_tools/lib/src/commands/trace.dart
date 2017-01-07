@@ -4,11 +4,11 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:path/path.dart' as path;
 
 import '../base/common.dart';
+import '../base/file_system.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
@@ -90,9 +90,9 @@ class TraceCommand extends FlutterCommand {
     File localFile;
 
     if (argResults['out'] != null) {
-      localFile = new File(argResults['out']);
+      localFile = fs.file(argResults['out']);
     } else {
-      localFile = getUniqueFile(Directory.current, 'trace', 'json');
+      localFile = getUniqueFile(fs.currentDirectory, 'trace', 'json');
     }
 
     await localFile.writeAsString(JSON.encode(timeline));
@@ -161,7 +161,7 @@ class Tracing {
 /// store it to build/start_up_info.json.
 Future<Null> downloadStartupTrace(VMService observatory) async {
   String traceInfoFilePath = path.join(getBuildDirectory(), 'start_up_info.json');
-  File traceInfoFile = new File(traceInfoFilePath);
+  File traceInfoFile = fs.file(traceInfoFilePath);
 
   // Delete old startup data, if any.
   if (await traceInfoFile.exists())

@@ -4,12 +4,13 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
+import 'dart:io' as io;
 
 import 'package:json_schema/json_schema.dart';
 import 'package:path/path.dart' as path;
 import 'package:yaml/yaml.dart';
 
+import 'base/file_system.dart';
 import 'build_info.dart';
 import 'cache.dart';
 import 'dart/package_map.dart';
@@ -74,7 +75,7 @@ class AssetBundle {
       final String assetPath = path.join(projectRoot, asset);
       final String archivePath = asset;
       entries.add(
-          new AssetBundleEntry.fromFile(archivePath, new File(assetPath)));
+          new AssetBundleEntry.fromFile(archivePath, fs.file(assetPath)));
     }
   }
 
@@ -84,7 +85,7 @@ class AssetBundle {
     if (_lastBuildTimestamp == null)
       return true;
 
-    FileStat stat = new File(manifestPath).statSync();
+    FileStat stat = fs.file(manifestPath).statSync();
     if (stat.type == FileSystemEntityType.NOT_FOUND)
       return true;
 
@@ -206,7 +207,7 @@ class _Asset {
   final String source;
 
   File get assetFile {
-    return new File(source != null ? '$base/$source' : '$base/$relativePath');
+    return fs.file(source != null ? '$base/$source' : '$base/$relativePath');
   }
 
   bool get assetFileExists => assetFile.existsSync();
@@ -228,7 +229,7 @@ Map<String, dynamic> _readMaterialFontsManifest() {
   String fontsPath = path.join(path.absolute(Cache.flutterRoot),
       'packages', 'flutter_tools', 'schema', 'material_fonts.yaml');
 
-  return loadYaml(new File(fontsPath).readAsStringSync());
+  return loadYaml(fs.file(fontsPath).readAsStringSync());
 }
 
 final Map<String, dynamic> _materialFontsManifest = _readMaterialFontsManifest();
@@ -280,7 +281,7 @@ Future<AssetBundleEntry> _obtainLicenses(
   for (String packageName in packageMap.map.keys) {
     final Uri package = packageMap.map[packageName];
     if (package != null && package.scheme == 'file') {
-      final File file = new File.fromUri(package.resolve('../LICENSE'));
+      final File file = fs.file(package.resolve('../LICENSE'));
       if (file.existsSync()) {
         final List<String> rawLicenses =
             (await file.readAsString()).split(_licenseSeparator);
@@ -377,7 +378,7 @@ Map<_Asset, List<_Asset>> _parseAssets(
     return result;
 
   excludeDirs = excludeDirs.map(
-    (String exclude) => path.absolute(exclude) + Platform.pathSeparator).toList();
+    (String exclude) => path.absolute(exclude) + io.Platform.pathSeparator).toList();
 
   if (manifestDescriptor.containsKey('assets')) {
     for (String asset in manifestDescriptor['assets']) {
@@ -394,12 +395,12 @@ Map<_Asset, List<_Asset>> _parseAssets(
       // Find asset variants
       String assetPath = baseAsset.assetFile.path;
       String assetFilename = path.basename(assetPath);
-      Directory assetDir = new Directory(path.dirname(assetPath));
+      Directory assetDir = fs.directory(path.dirname(assetPath));
 
       List<FileSystemEntity> files = assetDir.listSync(recursive: true);
 
       for (FileSystemEntity entity in files) {
-        if (!FileSystemEntity.isFileSync(entity.path))
+        if (!fs.isFileSync(entity.path))
           continue;
 
         // Exclude any files in the given directories.
@@ -446,7 +447,7 @@ _Asset _resolveAsset(
   String assetBase,
   String asset
 ) {
-  if (asset.startsWith('packages/') && !FileSystemEntity.isFileSync(path.join(assetBase, asset))) {
+  if (asset.startsWith('packages/') && !fs.isFileSync(path.join(assetBase, asset))) {
     // Convert packages/flutter_gallery_assets/clouds-0.png to clouds-0.png.
     String packageKey = asset.substring(9);
     String relativeAsset = asset;
@@ -459,7 +460,7 @@ _Asset _resolveAsset(
 
     Uri uri = packageMap.map[packageKey];
     if (uri != null && uri.scheme == 'file') {
-      File file = new File.fromUri(uri);
+      File file = fs.file(uri);
       return new _Asset(base: file.path, assetEntry: asset, relativePath: relativeAsset);
     }
   }
@@ -468,9 +469,9 @@ _Asset _resolveAsset(
 }
 
 dynamic _loadFlutterYamlManifest(String manifestPath) {
-  if (manifestPath == null || !FileSystemEntity.isFileSync(manifestPath))
+  if (manifestPath == null || !fs.isFileSync(manifestPath))
     return null;
-  String manifestDescriptor = new File(manifestPath).readAsStringSync();
+  String manifestDescriptor = fs.file(manifestPath).readAsStringSync();
   return loadYaml(manifestDescriptor);
 }
 

@@ -3,15 +3,16 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
-import 'dart:io';
+import 'dart:io' as io;
 
 import 'package:path/path.dart' as path;
 
 import 'context.dart';
+import 'file_system.dart';
 
 class Config {
   Config([File configFile]) {
-    _configFile = configFile ?? new File(path.join(_userHomeDir(), '.flutter_settings'));
+    _configFile = configFile ?? fs.file(path.join(_userHomeDir(), '.flutter_settings'));
     if (_configFile.existsSync())
       _values = JSON.decode(_configFile.readAsStringSync());
   }
@@ -45,7 +46,7 @@ class Config {
 }
 
 String _userHomeDir() {
-  String envKey = Platform.operatingSystem == 'windows' ? 'APPDATA' : 'HOME';
-  String value = Platform.environment[envKey];
+  String envKey = io.Platform.operatingSystem == 'windows' ? 'APPDATA' : 'HOME';
+  String value = io.Platform.environment[envKey];
   return value == null ? '.' : value;
 }

@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
 
 import 'package:args/command_runner.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/commands/packages.dart';
 import 'package:test/test.dart';
@@ -18,7 +18,7 @@ void main() {
     Directory temp;
 
     setUp(() {
-      temp = Directory.systemTemp.createTempSync('flutter_tools');
+      temp = fs.systemTempDirectory.createTempSync('flutter_tools');
     });
 
     tearDown(() {
@@ -42,7 +42,7 @@ void main() {
     }
 
     void expectExists(String relPath) {
-      expect(FileSystemEntity.isFileSync('${temp.path}/$relPath'), true);
+      expect(fs.isFileSync('${temp.path}/$relPath'), true);
     }
 
     // Verify that we create a project that is well-formed.

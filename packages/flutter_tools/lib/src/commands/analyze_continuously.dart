@@ -4,12 +4,13 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
+import 'dart:io' as io;
 
 import 'package:args/args.dart';
 import 'package:path/path.dart' as path;
 
 import '../base/common.dart';
+import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/process_manager.dart';
 import '../base/utils.dart';
@@ -42,8 +43,8 @@ class AnalyzeContinuously extends AnalyzeBase {
       for (String projectPath in directories)
         printTrace('  ${path.relative(projectPath)}');
     } else {
-      directories = <String>[Directory.current.path];
-      analysisTarget = Directory.current.path;
+      directories = <String>[fs.currentDirectory.path];
+      analysisTarget = fs.currentDirectory.path;
     }
 
     AnalysisServer server = new AnalysisServer(dartSdkPath, directories);
@@ -78,7 +79,7 @@ class AnalyzeContinuously extends AnalyzeBase {
       // Remove errors for deleted files, sort, and print errors.
       final List<AnalysisError> errors = <AnalysisError>[];
       for (String path in analysisErrors.keys.toList()) {
-        if (FileSystemEntity.isFileSync(path)) {
+        if (fs.isFileSync(path)) {
           errors.addAll(analysisErrors[path]);
         } else {
           analysisErrors.remove(path);
@@ -149,7 +150,7 @@ class AnalysisServer {
   final String sdk;
   final List<String> directories;
 
-  Process _process;
+  io.Process _process;
   StreamController<bool> _analyzingController = new StreamController<bool>.broadcast();
   StreamController<FileAnalysisErrors> _errorsController = new StreamController<FileAnalysisErrors>.broadcast();
 

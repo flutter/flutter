@@ -2,9 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
-
 import 'package:flutter_tools/src/base/config.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 
@@ -12,8 +11,8 @@ void main() {
   Config config;
 
   setUp(() {
-    Directory tempDiretory = Directory.systemTemp.createTempSync('flutter_test');
-    File file = new File(path.join(tempDiretory.path, '.settings'));
+    Directory tempDiretory = fs.systemTempDirectory.createTempSync('flutter_test');
+    File file = fs.file(path.join(tempDiretory.path, '.settings'));
     config = new Config(file);
   });
 

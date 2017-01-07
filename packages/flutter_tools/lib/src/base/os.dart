@@ -3,12 +3,13 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
+import 'dart:io' as io;
 
 import 'package:archive/archive.dart';
 import 'package:path/path.dart' as path;
 
 import 'context.dart';
+import 'file_system.dart';
 import 'process.dart';
 import 'process_manager.dart';
 
@@ -17,7 +18,7 @@ OperatingSystemUtils get os => context[OperatingSystemUtils];
 
 abstract class OperatingSystemUtils {
   factory OperatingSystemUtils() {
-    if (Platform.isWindows) {
+    if (io.Platform.isWindows) {
       return new _WindowsUtils();
     } else {
       return new _PosixUtils();
@@ -26,14 +27,14 @@ abstract class OperatingSystemUtils {
 
   OperatingSystemUtils._private();
 
-  String get operatingSystem => Platform.operatingSystem;
+  String get operatingSystem => io.Platform.operatingSystem;
 
   bool get isMacOS => operatingSystem == 'macos';
   bool get isWindows => operatingSystem == 'windows';
   bool get isLinux => operatingSystem == 'linux';
 
   /// Make the given file executable. This may be a no-op on some platforms.
-  ProcessResult makeExecutable(File file);
+  io.ProcessResult makeExecutable(File file);
 
   /// Return the path (with symlinks resolved) to the given executable, or `null`
   /// if `which` was not able to locate the binary.
@@ -49,7 +50,7 @@ class _PosixUtils extends OperatingSystemUtils {
   _PosixUtils() : super._private();
 
   @override
-  ProcessResult makeExecutable(File file) {
+  io.ProcessResult makeExecutable(File file) {
     return processManager.runSync('chmod', <String>['a+x', file.path]);
   }
 
@@ -57,11 +58,11 @@ class _PosixUtils extends OperatingSystemUtils {
   /// to locate the binary.
   @override
   File which(String execName) {
-    ProcessResult result = processManager.runSync('which', <String>[execName]);
+    io.ProcessResult result = processManager.runSync('which', <String>[execName]);
     if (result.exitCode != 0)
       return null;
     String path = result.stdout.trim().split('\n').first.trim();
-    return new File(path);
+    return fs.file(path);
   }
 
   // unzip -o -q zipfile -d dest
@@ -73,7 +74,7 @@ class _PosixUtils extends OperatingSystemUtils {
   @override
   File makePipe(String path) {
     runSync(<String>['mkfifo', path]);
-    return new File(path);
+    return fs.file(path);
   }
 }
 
@@ -82,16 +83,16 @@ class _WindowsUtils extends OperatingSystemUtils {
 
   // This is a no-op.
   @override
-  ProcessResult makeExecutable(File file) {
-    return new ProcessResult(0, 0, null, null);
+  io.ProcessResult makeExecutable(File file) {
+    return new io.ProcessResult(0, 0, null, null);
   }
 
   @override
   File which(String execName) {
-    ProcessResult result = processManager.runSync('where', <String>[execName]);
+    io.ProcessResult result = processManager.runSync('where', <String>[execName]);
     if (result.exitCode != 0)
       return null;
-    return new File(result.stdout.trim().split('\n').first.trim());
+    return fs.file(result.stdout.trim().split('\n').first.trim());
   }
 
   @override
@@ -103,7 +104,7 @@ class _WindowsUtils extends OperatingSystemUtils {
       if (!archiveFile.isFile || archiveFile.name.endsWith('/'))
         continue;
 
-      File destFile = new File(path.join(targetDirectory.path, archiveFile.name));
+      File destFile = fs.file(path.join(targetDirectory.path, archiveFile.name));
       if (!destFile.parent.existsSync())
         destFile.parent.createSync(recursive: true);
       destFile.writeAsBytesSync(archiveFile.content);
@@ -117,7 +118,7 @@ class _WindowsUtils extends OperatingSystemUtils {
 }
 
 Future<int> findAvailablePort() async {
-  ServerSocket socket = await ServerSocket.bind(InternetAddress.LOOPBACK_IP_V4, 0);
+  io.ServerSocket socket = await io.ServerSocket.bind(io.InternetAddress.LOOPBACK_IP_V4, 0);
   int port = socket.port;
   await socket.close();
   return port;
@@ -142,7 +143,7 @@ Future<int> findPreferredPort(int defaultPort, { int searchStep: 2 }) async {
 
 Future<bool> _isPortAvailable(int port) async {
   try {
-    ServerSocket socket = await ServerSocket.bind(InternetAddress.LOOPBACK_IP_V4, port);
+    io.ServerSocket socket = await io.ServerSocket.bind(io.InternetAddress.LOOPBACK_IP_V4, port);
     await socket.close();
     return true;
   } catch (error) {
@@ -156,11 +157,11 @@ Future<bool> _isPortAvailable(int port) async {
 /// or if the project root is the flutter repository root.
 String findProjectRoot([String directory]) {
   const String kProjectRootSentinel = 'pubspec.yaml';
-  directory ??= Directory.current.path;
+  directory ??= fs.currentDirectory.path;
   while (true) {
-    if (FileSystemEntity.isFileSync(path.join(directory, kProjectRootSentinel)))
+    if (fs.isFileSync(path.join(directory, kProjectRootSentinel)))
       return directory;
-    String parent = FileSystemEntity.parentOf(directory);
+    String parent = path.dirname(directory);
     if (directory == parent) return null;
     directory = parent;
   }

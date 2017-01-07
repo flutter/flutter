@@ -4,7 +4,7 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
+import 'dart:io' as io;
 import 'dart:math' as math;
 
 import 'package:path/path.dart' as path;
@@ -12,6 +12,7 @@ import 'package:path/path.dart' as path;
 import '../application_package.dart';
 import '../base/common.dart';
 import '../base/context.dart';
+import '../base/file_system.dart';
 import '../base/process.dart';
 import '../base/process_manager.dart';
 import '../build_info.dart';
@@ -30,7 +31,7 @@ class IOSSimulators extends PollingDeviceDiscovery {
   IOSSimulators() : super('IOSSimulators');
 
   @override
-  bool get supportsPlatform => Platform.isMacOS;
+  bool get supportsPlatform => io.Platform.isMacOS;
 
   @override
   List<Device> pollingGetDevices() => IOSSimulatorUtils.instance.getAttachedDevices();
@@ -191,7 +192,7 @@ class SimControl {
 
     List<String> args = <String>['simctl', 'list', '--json', section.name];
     printTrace('$_xcrunPath ${args.join(' ')}');
-    ProcessResult results = processManager.runSync(_xcrunPath, args);
+    io.ProcessResult results = processManager.runSync(_xcrunPath, args);
     if (results.exitCode != 0) {
       printError('Error executing simctl: ${results.exitCode}\n${results.stderr}');
       return <String, Map<String, dynamic>>{};
@@ -358,7 +359,7 @@ class IOSSimulator extends Device {
 
   @override
   bool isSupported() {
-    if (!Platform.isMacOS) {
+    if (!io.Platform.isMacOS) {
       _supportMessage = "Not supported on a non Mac host";
       return false;
     }
@@ -510,7 +511,7 @@ class IOSSimulator extends Device {
 
     // Step 2: Assert that the Xcode project was successfully built.
     IOSApp iosApp = app;
-    Directory bundle = new Directory(iosApp.simulatorBundlePath);
+    Directory bundle = fs.directory(iosApp.simulatorBundlePath);
     bool bundleExists = bundle.existsSync();
     if (!bundleExists)
       throwToolExit('Could not find the built application bundle at ${bundle.path}.');
@@ -530,7 +531,7 @@ class IOSSimulator extends Device {
 
   Future<bool> pushFile(
       ApplicationPackage app, String localFile, String targetFile) async {
-    if (Platform.isMacOS) {
+    if (io.Platform.isMacOS) {
       String simulatorHomeDirectory = _getSimulatorAppHomeDirectory(app);
       runCheckedSync(<String>['cp', localFile, path.join(simulatorHomeDirectory, targetFile)]);
       return true;
@@ -564,7 +565,7 @@ class IOSSimulator extends Device {
 
   @override
   void clearLogs() {
-    File logFile = new File(logFilePath);
+    File logFile = fs.file(logFilePath);
     if (logFile.existsSync()) {
       RandomAccessFile randomFile = logFile.openSync(mode: FileMode.WRITE);
       randomFile.truncateSync(0);
@@ -573,7 +574,7 @@ class IOSSimulator extends Device {
   }
 
   void ensureLogsExists() {
-    File logFile = new File(logFilePath);
+    File logFile = fs.file(logFilePath);
     if (!logFile.existsSync())
       logFile.writeAsBytesSync(<int>[]);
   }
@@ -583,7 +584,7 @@ class IOSSimulator extends Device {
 
   @override
   Future<bool> takeScreenshot(File outputFile) async {
-    Directory desktopDir = new Directory(path.join(homeDirPath, 'Desktop'));
+    Directory desktopDir = fs.directory(path.join(homeDirPath, 'Desktop'));
 
     // 'Simulator Screen Shot Mar 25, 2016, 2.59.43 PM.png'
 
@@ -639,8 +640,8 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
   StreamController<String> _linesController;
 
   // We log from two files: the device and the system log.
-  Process _deviceProcess;
-  Process _systemProcess;
+  io.Process _deviceProcess;
+  io.Process _systemProcess;
 
   @override
   Stream<String> get logLines => _linesController.stream;

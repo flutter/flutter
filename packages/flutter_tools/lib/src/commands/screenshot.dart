@@ -3,12 +3,13 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
+import 'dart:io' as io;
 
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as path;
 
 import '../base/common.dart';
+import '../base/file_system.dart';
 import '../base/utils.dart';
 import '../device.dart';
 import '../globals.dart';
@@ -72,7 +73,7 @@ class ScreenshotCommand extends FlutterCommand {
   Future<Null> runCommand() async {
     File outputFile;
     if (argResults.wasParsed(_kOut))
-      outputFile = new File(argResults[_kOut]);
+      outputFile = fs.file(argResults[_kOut]);
 
     if (argResults[_kSkia] != null) {
       return runSkia(outputFile);
@@ -82,7 +83,7 @@ class ScreenshotCommand extends FlutterCommand {
   }
 
   Future<Null> runScreenshot(File outputFile) async {
-    outputFile ??= getUniqueFile(Directory.current, 'flutter', 'png');
+    outputFile ??= getUniqueFile(fs.currentDirectory, 'flutter', 'png');
     try {
       if (!await device.takeScreenshot(outputFile))
         throwToolExit('Screenshot failed');
@@ -105,10 +106,10 @@ class ScreenshotCommand extends FlutterCommand {
     http.StreamedResponse skpResponse;
     try {
       skpResponse = await new http.Request('GET', skpUri).send();
-    } on SocketException catch (e) {
+    } on io.SocketException catch (e) {
       throwToolExit('Skia screenshot failed: $skpUri\n$e\n\n$errorHelpText');
     }
-    if (skpResponse.statusCode != HttpStatus.OK) {
+    if (skpResponse.statusCode != io.HttpStatus.OK) {
       String error = await skpResponse.stream.toStringStream().join();
       throwToolExit('Error: $error\n\n$errorHelpText');
     }
@@ -121,10 +122,10 @@ class ScreenshotCommand extends FlutterCommand {
           'file', skpResponse.stream, skpResponse.contentLength));
 
       http.StreamedResponse postResponse = await postRequest.send();
-      if (postResponse.statusCode != HttpStatus.OK)
+      if (postResponse.statusCode != io.HttpStatus.OK)
         throwToolExit('Failed to post Skia picture to skiaserve.\n\n$errorHelpText');
     } else {
-      outputFile ??= getUniqueFile(Directory.current, 'flutter', 'skp');
+      outputFile ??= getUniqueFile(fs.currentDirectory, 'flutter', 'skp');
       IOSink sink = outputFile.openWrite();
       await sink.addStream(skpResponse.stream);
       await sink.close();

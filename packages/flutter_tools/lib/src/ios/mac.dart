@@ -4,12 +4,13 @@
 
 import 'dart:async';
 import 'dart:convert' show JSON;
-import 'dart:io';
+import 'dart:io' as io;
 
 import 'package:path/path.dart' as path;
 
 import '../application_package.dart';
 import '../base/context.dart';
+import '../base/file_system.dart';
 import '../base/process.dart';
 import '../base/process_manager.dart';
 import '../build_info.dart';
@@ -40,7 +41,7 @@ class XCode {
       } else {
         try {
           printTrace('xcrun clang');
-          ProcessResult result = processManager.runSync('/usr/bin/xcrun', <String>['clang']);
+          io.ProcessResult result = processManager.runSync('/usr/bin/xcrun', <String>['clang']);
 
           if (result.stdout != null && result.stdout.contains('license'))
             _eulaSigned = false;
@@ -107,7 +108,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   bool buildForDevice,
   bool codesign: true
 }) async {
-  String flutterProjectPath = Directory.current.path;
+  String flutterProjectPath = fs.currentDirectory.path;
   updateXcodeGeneratedProperties(flutterProjectPath, mode, target);
 
   if (!_checkXcodeVersion())
@@ -116,7 +117,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   // Before the build, all service definitions must be updated and the dylibs
   // copied over to a location that is suitable for Xcodebuild to find them.
 
-  await _addServicesToBundle(new Directory(app.appDirectory));
+  await _addServicesToBundle(fs.directory(app.appDirectory));
 
   List<String> commands = <String>[
     '/usr/bin/env',
@@ -128,7 +129,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     'ONLY_ACTIVE_ARCH=YES',
   ];
 
-  List<FileSystemEntity> contents = new Directory(app.appDirectory).listSync();
+  List<FileSystemEntity> contents = fs.directory(app.appDirectory).listSync();
   for (FileSystemEntity entity in contents) {
     if (path.extension(entity.path) == '.xcworkspace') {
       commands.addAll(<String>[
@@ -180,7 +181,7 @@ Future<XcodeBuildResult> buildXcodeProject({
 }
 
 void diagnoseXcodeBuildFailure(XcodeBuildResult result) {
-  File plistFile = new File('ios/Runner/Info.plist');
+  File plistFile = fs.file('ios/Runner/Info.plist');
   if (plistFile.existsSync()) {
     String plistContent = plistFile.readAsStringSync();
     if (plistContent.contains('com.yourcompany')) {
@@ -219,7 +220,7 @@ final RegExp _xcodeVersionRegExp = new RegExp(r'Xcode (\d+)\..*');
 final String _xcodeRequirement = 'Xcode 7.0 or greater is required to develop for iOS.';
 
 bool _checkXcodeVersion() {
-  if (!Platform.isMacOS)
+  if (!io.Platform.isMacOS)
     return false;
   try {
     String version = runCheckedSync(<String>['xcodebuild', '-version']);
@@ -245,12 +246,12 @@ Future<Null> _addServicesToBundle(Directory bundle) async {
   printTrace("Found ${services.length} service definition(s).");
 
   // Step 2: Copy framework dylibs to the correct spot for xcodebuild to pick up.
-  Directory frameworksDirectory = new Directory(path.join(bundle.path, "Frameworks"));
+  Directory frameworksDirectory = fs.directory(path.join(bundle.path, "Frameworks"));
   await _copyServiceFrameworks(services, frameworksDirectory);
 
   // Step 3: Copy the service definitions manifest at the correct spot for
   //         xcodebuild to pick up.
-  File manifestFile = new File(path.join(bundle.path, "ServiceDefinitions.json"));
+  File manifestFile = fs.file(path.join(bundle.path, "ServiceDefinitions.json"));
   _copyServiceDefinitionsManifest(services, manifestFile);
 }
 
@@ -259,7 +260,7 @@ Future<Null> _copyServiceFrameworks(List<Map<String, String>> services, Director
   frameworksDirectory.createSync(recursive: true);
   for (Map<String, String> service in services) {
     String dylibPath = await getServiceFromUrl(service['ios-framework'], service['root'], service['name']);
-    File dylib = new File(dylibPath);
+    File dylib = fs.file(dylibPath);
     printTrace("Copying ${dylib.path} into bundle.");
     if (!dylib.existsSync()) {
       printError("The service dylib '${dylib.path}' does not exist.");

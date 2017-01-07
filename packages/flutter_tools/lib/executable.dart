@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
+import 'dart:io' as io;
 
 import 'package:args/command_runner.dart';
 import 'package:stack_trace/stack_trace.dart';
@@ -11,6 +11,7 @@ import 'package:stack_trace/stack_trace.dart';
 import 'src/base/common.dart';
 import 'src/base/config.dart';
 import 'src/base/context.dart';
+import 'src/base/file_system.dart';
 import 'src/base/logger.dart';
 import 'src/base/os.dart';
 import 'src/base/process.dart';
@@ -101,6 +102,7 @@ Future<Null> main(List<String> args) async {
     // in those locations as well to see if you need a similar update there.
 
     // Seed these context entries first since others depend on them
+    context.putIfAbsent(FileSystem, () => new LocalFileSystem());
     context.putIfAbsent(ProcessManager, () => new ProcessManager());
     context.putIfAbsent(Logger, () => new StdoutLogger());
 
@@ -123,9 +125,9 @@ Future<Null> main(List<String> args) async {
       _exit(0);
     }, onError: (dynamic error, Chain chain) {
       if (error is UsageException) {
-        stderr.writeln(error.message);
-        stderr.writeln();
-        stderr.writeln(
+        io.stderr.writeln(error.message);
+        io.stderr.writeln();
+        io.stderr.writeln(
             "Run 'flutter -h' (or 'flutter <command> -h') for available "
                 "flutter commands and options."
         );
@@ -133,11 +135,11 @@ Future<Null> main(List<String> args) async {
         _exit(64);
       } else if (error is ToolExit) {
         if (error.message != null)
-          stderr.writeln(error.message);
+          io.stderr.writeln(error.message);
         if (verbose) {
-          stderr.writeln();
-          stderr.writeln(chain.terse.toString());
-          stderr.writeln();
+          io.stderr.writeln();
+          io.stderr.writeln(chain.terse.toString());
+          io.stderr.writeln();
         }
         _exit(error.exitCode ?? 1);
       } else if (error is ProcessExit) {
@@ -145,23 +147,23 @@ Future<Null> main(List<String> args) async {
         _exit(error.exitCode);
       } else {
         // We've crashed; emit a log report.
-        stderr.writeln();
+        io.stderr.writeln();
 
         flutterUsage.sendException(error, chain);
 
         if (isRunningOnBot) {
           // Print the stack trace on the bots - don't write a crash report.
-          stderr.writeln('$error');
-          stderr.writeln(chain.terse.toString());
+          io.stderr.writeln('$error');
+          io.stderr.writeln(chain.terse.toString());
           _exit(1);
         } else {
           if (error is String)
-            stderr.writeln('Oops; flutter has exited unexpectedly: "$error".');
+            io.stderr.writeln('Oops; flutter has exited unexpectedly: "$error".');
           else
-            stderr.writeln('Oops; flutter has exited unexpectedly.');
+            io.stderr.writeln('Oops; flutter has exited unexpectedly.');
 
           _createCrashReport(args, error, chain).then((File file) {
-            stderr.writeln(
+            io.stderr.writeln(
                 'Crash report written to ${file.path};\n'
                     'please let us know at https://github.com/flutter/flutter/issues.'
             );
@@ -174,7 +176,7 @@ Future<Null> main(List<String> args) async {
 }
 
 Future<File> _createCrashReport(List<String> args, dynamic error, Chain chain) async {
-  File crashFile = getUniqueFile(Directory.current, 'flutter', 'log');
+  File crashFile = getUniqueFile(fs.currentDirectory, 'flutter', 'log');
 
   StringBuffer buffer = new StringBuffer();
 
@@ -194,7 +196,7 @@ Future<File> _createCrashReport(List<String> args, dynamic error, Chain chain) a
     crashFile.writeAsStringSync(buffer.toString());
   } on FileSystemException catch (_) {
     // Fallback to the system temporary directory.
-    crashFile = getUniqueFile(Directory.systemTemp, 'flutter', 'log');
+    crashFile = getUniqueFile(fs.systemTempDirectory, 'flutter', 'log');
     try {
       crashFile.writeAsStringSync(buffer.toString());
     } on FileSystemException catch (e) {

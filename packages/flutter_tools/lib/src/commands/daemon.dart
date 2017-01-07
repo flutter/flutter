@@ -4,11 +4,12 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
+import 'dart:io' as io;
 
 import '../android/android_device.dart';
 import '../base/common.dart';
 import '../base/context.dart';
+import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
@@ -119,7 +120,7 @@ class Daemon {
     dynamic id = request['id'];
 
     if (id == null) {
-      stderr.writeln('no id for request: $request');
+      io.stderr.writeln('no id for request: $request');
       return;
     }
 
@@ -234,9 +235,9 @@ class DaemonDomain extends Domain {
           // capture the print output for testing.
           print(message.message);
         } else if (message.level == 'error') {
-          stderr.writeln(message.message);
+          io.stderr.writeln(message.message);
           if (message.stackTrace != null)
-            stderr.writeln(message.stackTrace.toString().trimRight());
+            io.stderr.writeln(message.stackTrace.toString().trimRight());
         }
       } else {
         if (message.stackTrace != null) {
@@ -302,7 +303,7 @@ class AppDomain extends Domain {
     if (device == null)
       throw "device '$deviceId' not found";
 
-    if (!FileSystemEntity.isDirectorySync(projectDirectory))
+    if (!fs.isDirectorySync(projectDirectory))
       throw "'$projectDirectory' does not exist";
 
     BuildMode buildMode = getBuildModeForName(mode) ?? BuildMode.debug;
@@ -341,8 +342,8 @@ class AppDomain extends Domain {
       throw '${toTitleCase(getModeName(buildMode))} mode is not supported for emulators.';
 
     // We change the current working directory for the duration of the `start` command.
-    Directory cwd = Directory.current;
-    Directory.current = new Directory(projectDirectory);
+    Directory cwd = fs.currentDirectory;
+    fs.currentDirectory = fs.directory(projectDirectory);
 
     ResidentRunner runner;
 
@@ -400,7 +401,7 @@ class AppDomain extends Domain {
       } catch (error) {
         _sendAppEvent(app, 'stop', <String, dynamic>{'error': error.toString()});
       } finally {
-        Directory.current = cwd;
+        fs.currentDirectory = cwd;
         _apps.remove(app);
       }
     });
@@ -589,7 +590,7 @@ class DeviceDomain extends Domain {
   }
 }
 
-Stream<Map<String, dynamic>> get stdinCommandStream => stdin
+Stream<Map<String, dynamic>> get stdinCommandStream => io.stdin
   .transform(UTF8.decoder)
   .transform(const LineSplitter())
   .where((String line) => line.startsWith('[{') && line.endsWith('}]'))
@@ -599,7 +600,7 @@ Stream<Map<String, dynamic>> get stdinCommandStream => stdin
   });
 
 void stdoutCommandResponse(Map<String, dynamic> command) {
-  stdout.writeln('[${JSON.encode(command, toEncodable: _jsonEncodeObject)}]');
+  io.stdout.writeln('[${JSON.encode(command, toEncodable: _jsonEncodeObject)}]');
 }
 
 dynamic _jsonEncodeObject(dynamic object) {
@@ -709,9 +710,9 @@ class _AppRunLogger extends Logger {
   @override
   void printError(String message, [StackTrace stackTrace]) {
     if (logToStdout) {
-      stderr.writeln(message);
+      io.stderr.writeln(message);
       if (stackTrace != null)
-        stderr.writeln(stackTrace.toString().trimRight());
+        io.stderr.writeln(stackTrace.toString().trimRight());
     } else {
       if (stackTrace != null) {
         _sendLogEvent(<String, dynamic>{

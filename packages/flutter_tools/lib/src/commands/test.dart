@@ -3,12 +3,13 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
+import 'dart:io' as io;
 
 import 'package:path/path.dart' as path;
 import 'package:test/src/executable.dart' as test; // ignore: implementation_imports
 
 import '../base/common.dart';
+import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/process_manager.dart';
 import '../base/os.dart';
@@ -39,7 +40,7 @@ class TestCommand extends FlutterCommand {
       help: 'Where to store coverage information (if coverage is enabled).'
     );
     commandValidator = () {
-      if (!FileSystemEntity.isFileSync('pubspec.yaml')) {
+      if (!fs.isFileSync('pubspec.yaml')) {
         throwToolExit(
           'Error: No pubspec.yaml file found in the current working directory.\n'
           'Run this command from the root of your project. Test files must be\n'
@@ -58,31 +59,31 @@ class TestCommand extends FlutterCommand {
   Iterable<String> _findTests(Directory directory) {
     return directory.listSync(recursive: true, followLinks: false)
                     .where((FileSystemEntity entity) => entity.path.endsWith('_test.dart') &&
-                      FileSystemEntity.isFileSync(entity.path))
+                      fs.isFileSync(entity.path))
                     .map((FileSystemEntity entity) => path.absolute(entity.path));
   }
 
   Directory get _currentPackageTestDir {
     // We don't scan the entire package, only the test/ subdirectory, so that
     // files with names like like "hit_test.dart" don't get run.
-    return new Directory('test');
+    return fs.directory('test');
   }
 
   Future<int> _runTests(List<String> testArgs, Directory testDirectory) async {
-    Directory currentDirectory = Directory.current;
+    Directory currentDirectory = fs.currentDirectory;
     try {
       if (testDirectory != null) {
         printTrace('switching to directory $testDirectory to run tests');
         PackageMap.globalPackagesPath = path.normalize(path.absolute(PackageMap.globalPackagesPath));
-        Directory.current = testDirectory;
+        fs.currentDirectory = testDirectory;
       }
       printTrace('running test package with arguments: $testArgs');
       await test.main(testArgs);
       // test.main() sets dart:io's exitCode global.
-      printTrace('test package returned with exit code $exitCode');
-      return exitCode;
+      printTrace('test package returned with exit code ${io.exitCode}');
+      return io.exitCode;
     } finally {
-      Directory.current = currentDirectory;
+      fs.currentDirectory = currentDirectory;
     }
   }
 
@@ -94,7 +95,7 @@ class TestCommand extends FlutterCommand {
       return false;
 
     String coveragePath = argResults['coverage-path'];
-    File coverageFile = new File(coveragePath)
+    File coverageFile = fs.file(coveragePath)
       ..createSync(recursive: true)
       ..writeAsStringSync(coverageData, flush: true);
     printTrace('wrote coverage data to $coveragePath (size=${coverageData.length})');
@@ -109,7 +110,7 @@ class TestCommand extends FlutterCommand {
         return false;
       }
 
-      if (!FileSystemEntity.isFileSync(baseCoverageData)) {
+      if (!fs.isFileSync(baseCoverageData)) {
         printError('Missing "$baseCoverageData". Unable to merge coverage data.');
         return false;
       }
@@ -124,10 +125,10 @@ class TestCommand extends FlutterCommand {
         return false;
       }
 
-      Directory tempDir = Directory.systemTemp.createTempSync('flutter_tools');
+      Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_tools');
       try {
         File sourceFile = coverageFile.copySync(path.join(tempDir.path, 'lcov.source.info'));
-        ProcessResult result = processManager.runSync('lcov', <String>[
+        io.ProcessResult result = processManager.runSync('lcov', <String>[
           '--add-tracefile', baseCoverageData,
           '--add-tracefile', sourceFile.path,
           '--output-file', coverageFile.path,
@@ -164,8 +165,8 @@ class TestCommand extends FlutterCommand {
     if (argResults['coverage'])
       testArgs.insert(0, '--concurrency=1');
 
-    final String shellPath = tools.getHostToolPath(HostTool.SkyShell) ?? Platform.environment['SKY_SHELL'];
-    if (!FileSystemEntity.isFileSync(shellPath))
+    final String shellPath = tools.getHostToolPath(HostTool.SkyShell) ?? io.Platform.environment['SKY_SHELL'];
+    if (!fs.isFileSync(shellPath))
       throwToolExit('Cannot find Flutter shell at $shellPath');
     loader.installHook(shellPath: shellPath);
 

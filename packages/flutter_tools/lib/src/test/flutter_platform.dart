@@ -4,7 +4,7 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
+import 'dart:io' as io;
 import 'dart:math' as math;
 
 import 'package:path/path.dart' as path;
@@ -14,13 +14,14 @@ import 'package:test/src/backend/test_platform.dart'; // ignore: implementation_
 import 'package:test/src/runner/plugin/platform.dart'; // ignore: implementation_imports
 import 'package:test/src/runner/plugin/hack_register_platform.dart' as hack; // ignore: implementation_imports
 
+import '../base/file_system.dart';
 import '../base/process_manager.dart';
 import '../dart/package_map.dart';
 import '../globals.dart';
 import 'coverage_collector.dart';
 
 const Duration _kTestStartupTimeout = const Duration(seconds: 5);
-final InternetAddress _kHost = InternetAddress.LOOPBACK_IP_V4;
+final io.InternetAddress _kHost = io.InternetAddress.LOOPBACK_IP_V4;
 
 void installHook({ String shellPath }) {
   hack.registerPlatformPlugin(<TestPlatform>[TestPlatform.vm], () => new FlutterPlatform(shellPath: shellPath));
@@ -61,19 +62,19 @@ class FlutterPlatform extends PlatformPlugin {
       controller.sink.done.then((_) { controllerSinkClosed = true; });
 
       // Prepare our WebSocket server to talk to the engine subproces.
-      HttpServer server = await HttpServer.bind(_kHost, 0);
+      io.HttpServer server = await io.HttpServer.bind(_kHost, 0);
       finalizers.add(() async { await server.close(force: true); });
-      Completer<WebSocket> webSocket = new Completer<WebSocket>();
-      server.listen((HttpRequest request) {
-        webSocket.complete(WebSocketTransformer.upgrade(request));
+      Completer<io.WebSocket> webSocket = new Completer<io.WebSocket>();
+      server.listen((io.HttpRequest request) {
+        webSocket.complete(io.WebSocketTransformer.upgrade(request));
       });
 
       // Prepare a temporary directory to store the Dart file that will talk to us.
-      Directory temporaryDirectory = Directory.systemTemp.createTempSync('dart_test_listener');
+      Directory temporaryDirectory = fs.systemTempDirectory.createTempSync('dart_test_listener');
       finalizers.add(() async { temporaryDirectory.deleteSync(recursive: true); });
 
       // Prepare the Dart file that will talk to us and start the test.
-      File listenerFile = new File('${temporaryDirectory.path}/listener.dart');
+      File listenerFile = fs.file('${temporaryDirectory.path}/listener.dart');
       listenerFile.createSync();
       listenerFile.writeAsStringSync(_generateTestMain(
         testUrl: path.toUri(path.absolute(testPath)).toString(),
@@ -90,7 +91,7 @@ class FlutterPlatform extends PlatformPlugin {
       }
 
       // Start the engine subprocess.
-      Process process = await _startProcess(
+      io.Process process = await _startProcess(
         shellPath,
         listenerFile.path,
         packages: PackageMap.globalPackagesPath,
@@ -119,7 +120,7 @@ class FlutterPlatform extends PlatformPlugin {
       _InitialResult initialResult = await Future.any(<Future<_InitialResult>>[
         process.exitCode.then<_InitialResult>((int exitCode) { return _InitialResult.crashed; }),
         new Future<_InitialResult>.delayed(_kTestStartupTimeout, () { return _InitialResult.timedOut; }),
-        webSocket.future.then<_InitialResult>((WebSocket webSocket) { return _InitialResult.connected; }),
+        webSocket.future.then<_InitialResult>((io.WebSocket webSocket) { return _InitialResult.connected; }),
       ]);
 
       switch (initialResult) {
@@ -137,7 +138,7 @@ class FlutterPlatform extends PlatformPlugin {
           await controller.sink.done;
           break;
         case _InitialResult.connected:
-          WebSocket testSocket = await webSocket.future;
+          io.WebSocket testSocket = await webSocket.future;
 
           Completer<Null> harnessDone = new Completer<Null>();
           StreamSubscription<dynamic> harnessToTest = controller.stream.listen(
@@ -248,15 +249,15 @@ void main() {
     sb.writeln('  <cachedir>/var/cache/fontconfig</cachedir>');
     sb.writeln('</fontconfig>');
 
-    Directory fontsDir = Directory.systemTemp.createTempSync('flutter_fonts');
-    _cachedFontConfig = new File('${fontsDir.path}/fonts.conf');
+    Directory fontsDir = fs.systemTempDirectory.createTempSync('flutter_fonts');
+    _cachedFontConfig = fs.file('${fontsDir.path}/fonts.conf');
     _cachedFontConfig.createSync();
     _cachedFontConfig.writeAsStringSync(sb.toString());
     return _cachedFontConfig;
   }
 
 
-  Future<Process> _startProcess(String executable, String testPath, { String packages, int observatoryPort }) {
+  Future<io.Process> _startProcess(String executable, String testPath, { String packages, int observatoryPort }) {
     assert(executable != null); // Please provide the path to the shell in the SKY_SHELL environment variable.
     List<String> arguments = <String>[];
     if (observatoryPort != null) {
@@ -279,7 +280,7 @@ void main() {
     return processManager.start(executable, arguments, environment: environment);
   }
 
-  void _pipeStandardStreamsToConsole(Process process) {
+  void _pipeStandardStreamsToConsole(io.Process process) {
     for (Stream<List<int>> stream in
         <Stream<List<int>>>[process.stderr, process.stdout]) {
       stream.transform(UTF8.decoder)

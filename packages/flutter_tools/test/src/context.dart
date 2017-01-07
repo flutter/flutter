@@ -7,6 +7,7 @@ import 'dart:io';
 
 import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/context.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/process_manager.dart';
@@ -41,6 +42,7 @@ void testUsingContext(String description, dynamic testMethod(), {
 
     // Initialize the test context with some default mocks.
     // Seed these context entries first since others depend on them
+    testContext.putIfAbsent(FileSystem, () => new LocalFileSystem());
     testContext.putIfAbsent(ProcessManager, () => new ProcessManager());
     testContext.putIfAbsent(Logger, () => new BufferLogger());
 
