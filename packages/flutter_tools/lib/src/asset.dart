@@ -281,7 +281,7 @@ Future<AssetBundleEntry> _obtainLicenses(
   for (String packageName in packageMap.map.keys) {
     final Uri package = packageMap.map[packageName];
     if (package != null && package.scheme == 'file') {
-      final File file = fs.file(package.resolve('../LICENSE').toFilePath());
+      final File file = fs.file(package.resolve('../LICENSE'));
       if (file.existsSync()) {
         final List<String> rawLicenses =
             (await file.readAsString()).split(_licenseSeparator);
@@ -460,7 +460,7 @@ _Asset _resolveAsset(
 
     Uri uri = packageMap.map[packageKey];
     if (uri != null && uri.scheme == 'file') {
-      File file = fs.file(uri.toFilePath());
+      File file = fs.file(uri);
       return new _Asset(base: file.path, assetEntry: asset, relativePath: relativeAsset);
     }
   }

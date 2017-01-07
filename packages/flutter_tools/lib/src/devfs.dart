@@ -369,7 +369,7 @@ class DevFS {
         // path imports within the project's own code.
         final String packagesDirectoryName =
             isProjectPackage ? 'packages/$packageName' : null;
-        Directory directory = fs.directory(uri.toFilePath());
+        Directory directory = fs.directory(uri);
         bool packageExists =
             await _scanDirectory(directory,
                                  directoryName: directoryName,
