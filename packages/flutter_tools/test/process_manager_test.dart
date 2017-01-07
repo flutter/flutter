@@ -4,11 +4,11 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io' as io;
 
 import 'package:archive/archive.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/process.dart';
@@ -42,7 +42,7 @@ void main() {
     });
 
     test('start', () async {
-      io.Process process = await manager.start('echo', <String>['foo']);
+      Process process = await manager.start('echo', <String>['foo']);
       int pid = process.pid;
       int exitCode = await process.exitCode;
       List<int> stdout = await _consume(process.stdout);
@@ -64,7 +64,7 @@ void main() {
     });
 
     test('run', () async {
-      io.ProcessResult result = await manager.run('echo', <String>['bar']);
+      ProcessResult result = await manager.run('echo', <String>['bar']);
       int pid = result.pid;
       int exitCode = result.exitCode;
       String stdout = result.stdout;
@@ -86,7 +86,7 @@ void main() {
     });
 
     test('runSync', () async {
-      io.ProcessResult result = manager.runSync('echo', <String>['baz']);
+      ProcessResult result = manager.runSync('echo', <String>['baz']);
       int pid = result.pid;
       int exitCode = result.exitCode;
       String stdout = result.stdout;
@@ -124,7 +124,7 @@ void main() {
     });
 
     test('start', () async {
-      io.Process process = await manager.start('sing', <String>['ppap']);
+      Process process = await manager.start('sing', <String>['ppap']);
       int exitCode = await process.exitCode;
       List<int> stdout = await _consume(process.stdout);
       List<int> stderr = await _consume(process.stderr);
@@ -135,7 +135,7 @@ void main() {
     });
 
     test('run', () async {
-      io.ProcessResult result = await manager.run('dance', <String>['gangnam-style']);
+      ProcessResult result = await manager.run('dance', <String>['gangnam-style']);
       expect(result.pid, 101);
       expect(result.exitCode, 2);
       expect(result.stdout, '');
@@ -143,7 +143,7 @@ void main() {
     });
 
     test('runSync', () {
-      io.ProcessResult result = manager.runSync('dance', <String>['gangnam-style']);
+      ProcessResult result = manager.runSync('dance', <String>['gangnam-style']);
       expect(result.pid, 101);
       expect(result.exitCode, 2);
       expect(result.stdout, '');
@@ -196,7 +196,7 @@ class _Recording {
     Encoding encoding;
     if (encodingName != null)
       encoding = encodingName == 'system'
-          ? const io.SystemEncoding()
+          ? SYSTEM_ENCODING
           : Encoding.getByName(encodingName);
     return _getFileContent('$basename.$type', encoding);
   }

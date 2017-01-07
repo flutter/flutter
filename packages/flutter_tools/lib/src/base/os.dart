@@ -3,13 +3,13 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io' as io;
 
 import 'package:archive/archive.dart';
 import 'package:path/path.dart' as path;
 
 import 'context.dart';
 import 'file_system.dart';
+import 'io.dart';
 import 'process.dart';
 import 'process_manager.dart';
 
@@ -18,7 +18,7 @@ OperatingSystemUtils get os => context[OperatingSystemUtils];
 
 abstract class OperatingSystemUtils {
   factory OperatingSystemUtils() {
-    if (io.Platform.isWindows) {
+    if (Platform.isWindows) {
       return new _WindowsUtils();
     } else {
       return new _PosixUtils();
@@ -27,14 +27,14 @@ abstract class OperatingSystemUtils {
 
   OperatingSystemUtils._private();
 
-  String get operatingSystem => io.Platform.operatingSystem;
+  String get operatingSystem => Platform.operatingSystem;
 
   bool get isMacOS => operatingSystem == 'macos';
   bool get isWindows => operatingSystem == 'windows';
   bool get isLinux => operatingSystem == 'linux';
 
   /// Make the given file executable. This may be a no-op on some platforms.
-  io.ProcessResult makeExecutable(File file);
+  ProcessResult makeExecutable(File file);
 
   /// Return the path (with symlinks resolved) to the given executable, or `null`
   /// if `which` was not able to locate the binary.
@@ -50,7 +50,7 @@ class _PosixUtils extends OperatingSystemUtils {
   _PosixUtils() : super._private();
 
   @override
-  io.ProcessResult makeExecutable(File file) {
+  ProcessResult makeExecutable(File file) {
     return processManager.runSync('chmod', <String>['a+x', file.path]);
   }
 
@@ -58,7 +58,7 @@ class _PosixUtils extends OperatingSystemUtils {
   /// to locate the binary.
   @override
   File which(String execName) {
-    io.ProcessResult result = processManager.runSync('which', <String>[execName]);
+    ProcessResult result = processManager.runSync('which', <String>[execName]);
     if (result.exitCode != 0)
       return null;
     String path = result.stdout.trim().split('\n').first.trim();
@@ -83,13 +83,13 @@ class _WindowsUtils extends OperatingSystemUtils {
 
   // This is a no-op.
   @override
-  io.ProcessResult makeExecutable(File file) {
-    return new io.ProcessResult(0, 0, null, null);
+  ProcessResult makeExecutable(File file) {
+    return new ProcessResult(0, 0, null, null);
   }
 
   @override
   File which(String execName) {
-    io.ProcessResult result = processManager.runSync('where', <String>[execName]);
+    ProcessResult result = processManager.runSync('where', <String>[execName]);
     if (result.exitCode != 0)
       return null;
     return fs.file(result.stdout.trim().split('\n').first.trim());
@@ -118,7 +118,7 @@ class _WindowsUtils extends OperatingSystemUtils {
 }
 
 Future<int> findAvailablePort() async {
-  io.ServerSocket socket = await io.ServerSocket.bind(io.InternetAddress.LOOPBACK_IP_V4, 0);
+  ServerSocket socket = await ServerSocket.bind(InternetAddress.LOOPBACK_IP_V4, 0);
   int port = socket.port;
   await socket.close();
   return port;
@@ -143,7 +143,7 @@ Future<int> findPreferredPort(int defaultPort, { int searchStep: 2 }) async {
 
 Future<bool> _isPortAvailable(int port) async {
   try {
-    io.ServerSocket socket = await io.ServerSocket.bind(io.InternetAddress.LOOPBACK_IP_V4, port);
+    ServerSocket socket = await ServerSocket.bind(InternetAddress.LOOPBACK_IP_V4, port);
     await socket.close();
     return true;
   } catch (error) {

@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io' as io;
 
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/dart/sdk.dart';
 import 'package:path/path.dart' as path;
@@ -36,7 +36,7 @@ Future<Null> _testFile(String testName, int wantedExitCode) async {
   final String fullTestExpectation = path.join(manualTestsDirectory, 'flutter_test', '${testName}_expectation.txt');
   final File expectationFile = fs.file(fullTestExpectation);
   expect(expectationFile.existsSync(), true);
-  final io.ProcessResult exec = await io.Process.run(
+  final ProcessResult exec = await Process.run(
     path.join(dartSdkPath, 'bin', 'dart'),
     <String>[
       path.absolute(path.join('bin', 'flutter_tools.dart')),

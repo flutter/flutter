@@ -4,10 +4,10 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io' as io;
 
 import '../application_package.dart';
 import '../base/file_system.dart';
+import '../base/io.dart';
 import '../base/os.dart';
 import '../base/process.dart';
 import '../base/process_manager.dart';
@@ -28,7 +28,7 @@ class IOSDevices extends PollingDeviceDiscovery {
   IOSDevices() : super('IOSDevices');
 
   @override
-  bool get supportsPlatform => io.Platform.isMacOS;
+  bool get supportsPlatform => Platform.isMacOS;
 
   @override
   List<Device> pollingGetDevices() => IOSDevice.getAttachedDevices();
@@ -125,7 +125,7 @@ class IOSDevice extends Device {
       try {
         command = runCheckedSync(<String>['which', command]).trim();
       } catch (e) {
-        if (io.Platform.isMacOS) {
+        if (Platform.isMacOS) {
           printError('$command not found. $macInstructions');
         } else {
           printError('Cannot control iOS devices or simulators. $command is not available on your platform.');
@@ -313,7 +313,7 @@ class IOSDevice extends Device {
   }
 
   Future<bool> pushFile(ApplicationPackage app, String localFile, String targetFile) async {
-    if (io.Platform.isMacOS) {
+    if (Platform.isMacOS) {
       runSync(<String>[
         pusherPath,
         '-t',
@@ -392,7 +392,7 @@ class _IOSDeviceLogReader extends DeviceLogReader {
   final IOSDevice device;
 
   StreamController<String> _linesController;
-  io.Process _process;
+  Process _process;
 
   @override
   Stream<String> get logLines => _linesController.stream;
@@ -401,7 +401,7 @@ class _IOSDeviceLogReader extends DeviceLogReader {
   String get name => device.name;
 
   void _start() {
-    runCommand(<String>[device.loggerPath]).then((io.Process process) {
+    runCommand(<String>[device.loggerPath]).then((Process process) {
       _process = process;
       _process.stdout.transform(UTF8.decoder).transform(const LineSplitter()).listen(_onLine);
       _process.stderr.transform(UTF8.decoder).transform(const LineSplitter()).listen(_onLine);
@@ -445,7 +445,7 @@ class _IOSDevicePortForwarder extends DevicePortForwarder {
     }
 
     // Usage: iproxy LOCAL_TCP_PORT DEVICE_TCP_PORT UDID
-    io.Process process = await runCommand(<String>[
+    Process process = await runCommand(<String>[
       device.iproxyPath,
       hostPort.toString(),
       devicePort.toString(),
@@ -471,7 +471,7 @@ class _IOSDevicePortForwarder extends DevicePortForwarder {
 
     printTrace("Unforwarding port $forwardedPort");
 
-    io.Process process = forwardedPort.context;
+    Process process = forwardedPort.context;
 
     if (process != null) {
       processManager.killPid(process.pid);

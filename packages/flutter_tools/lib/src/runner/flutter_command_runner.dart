@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io' as io;
 
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
@@ -13,6 +12,7 @@ import '../android/android_sdk.dart';
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
+import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
 import '../base/process_manager.dart';
@@ -118,12 +118,12 @@ class FlutterCommandRunner extends CommandRunner<Null> {
   }
 
   static String get _defaultFlutterRoot {
-    if (io.Platform.environment.containsKey(kFlutterRootEnvironmentVariableName))
-      return io.Platform.environment[kFlutterRootEnvironmentVariableName];
+    if (Platform.environment.containsKey(kFlutterRootEnvironmentVariableName))
+      return Platform.environment[kFlutterRootEnvironmentVariableName];
     try {
-      if (io.Platform.script.scheme == 'data')
+      if (Platform.script.scheme == 'data')
         return '../..'; // we're running as a test
-      String script = io.Platform.script.toFilePath();
+      String script = Platform.script.toFilePath();
       if (path.basename(script) == kSnapshotFileName)
         return path.dirname(path.dirname(path.dirname(script)));
       if (path.basename(script) == kFlutterToolsScriptFileName)
@@ -192,7 +192,7 @@ class FlutterCommandRunner extends CommandRunner<Null> {
     // enginePath's initialiser uses it).
     Cache.flutterRoot = path.normalize(path.absolute(globalResults['flutter-root']));
 
-    if (io.Platform.environment['FLUTTER_ALREADY_LOCKED'] != 'true')
+    if (Platform.environment['FLUTTER_ALREADY_LOCKED'] != 'true')
       await Cache.lock();
 
     if (globalResults['suppress-analytics'])
@@ -232,7 +232,7 @@ class FlutterCommandRunner extends CommandRunner<Null> {
   }
 
   String _findEnginePath(ArgResults globalResults) {
-    String engineSourcePath = globalResults['local-engine-src-path'] ?? io.Platform.environment[kFlutterEngineEnvironmentVariableName];
+    String engineSourcePath = globalResults['local-engine-src-path'] ?? Platform.environment[kFlutterEngineEnvironmentVariableName];
 
     if (engineSourcePath == null && globalResults['local-engine'] != null) {
       try {

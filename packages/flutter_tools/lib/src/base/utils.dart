@@ -4,21 +4,21 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io' as io;
 import 'dart:math' show Random;
 
 import 'package:crypto/crypto.dart';
 import 'package:path/path.dart' as path;
 
 import 'file_system.dart';
+import 'io.dart';
 
 bool get isRunningOnBot {
   // https://docs.travis-ci.com/user/environment-variables/#Default-Environment-Variables
   // CHROME_HEADLESS is one property set on Flutter's Chrome Infra bots.
   return
-    io.Platform.environment['TRAVIS'] == 'true' ||
-    io.Platform.environment['CONTINUOUS_INTEGRATION'] == 'true' ||
-    io.Platform.environment['CHROME_HEADLESS'] == '1';
+    Platform.environment['TRAVIS'] == 'true' ||
+    Platform.environment['CONTINUOUS_INTEGRATION'] == 'true' ||
+    Platform.environment['CHROME_HEADLESS'] == '1';
 }
 
 String hex(List<int> bytes) {
@@ -93,7 +93,7 @@ String getElapsedAsMilliseconds(Duration duration) {
 /// Return a relative path if [fullPath] is contained by the cwd, else return an
 /// absolute path.
 String getDisplayPath(String fullPath) {
-  String cwd = fs.currentDirectory.path + io.Platform.pathSeparator;
+  String cwd = fs.currentDirectory.path + Platform.pathSeparator;
   return fullPath.startsWith(cwd) ?  fullPath.substring(cwd.length) : fullPath;
 }
 

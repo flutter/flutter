@@ -4,12 +4,12 @@
 
 import 'dart:async';
 import 'dart:convert' show BASE64, UTF8;
-import 'dart:io' as io;
 
 import 'package:path/path.dart' as path;
 
 import 'base/context.dart';
 import 'base/file_system.dart';
+import 'base/io.dart';
 import 'build_info.dart';
 import 'dart/package_map.dart';
 import 'asset.dart';
@@ -127,7 +127,7 @@ class DevFSEntry {
   }
 
   Stream<List<int>> contentsAsCompressedStream() {
-    return contentsAsStream().transform(io.GZIP.encoder);
+    return contentsAsStream().transform(GZIP.encoder);
   }
 }
 
@@ -214,13 +214,13 @@ class _DevFSHttpWriter {
   int _inFlight = 0;
   List<DevFSEntry> _outstanding;
   Completer<Null> _completer;
-  io.HttpClient _client;
+  HttpClient _client;
   int _done;
   int _max;
 
   Future<Null> write(Set<DevFSEntry> entries,
                      {DevFSProgressReporter progressReporter}) async {
-    _client = new io.HttpClient();
+    _client = new HttpClient();
     _client.maxConnectionsPerHost = kMaxInFlight;
     _completer = new Completer<Null>();
     _outstanding = entries.toList();
@@ -246,14 +246,14 @@ class _DevFSHttpWriter {
   Future<Null> _scheduleWrite(DevFSEntry entry,
                               DevFSProgressReporter progressReporter) async {
     try {
-      io.HttpClientRequest request = await _client.putUrl(httpAddress);
-      request.headers.removeAll(io.HttpHeaders.ACCEPT_ENCODING);
+      HttpClientRequest request = await _client.putUrl(httpAddress);
+      request.headers.removeAll(HttpHeaders.ACCEPT_ENCODING);
       request.headers.add('dev_fs_name', fsName);
       request.headers.add('dev_fs_path_b64',
                           BASE64.encode(UTF8.encode(entry.devicePath)));
       Stream<List<int>> contents = entry.contentsAsCompressedStream();
       await request.addStream(contents);
-      io.HttpClientResponse response = await request.close();
+      HttpClientResponse response = await request.close();
       await response.drain();
     } catch (e, stackTrace) {
       printError('Error writing "${entry.devicePath}" to DevFS: $e\n$stackTrace');

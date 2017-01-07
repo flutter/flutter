@@ -4,7 +4,6 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io' as io;
 import 'dart:math' as math;
 
 import 'package:path/path.dart' as path;
@@ -15,13 +14,14 @@ import 'package:test/src/runner/plugin/platform.dart'; // ignore: implementation
 import 'package:test/src/runner/plugin/hack_register_platform.dart' as hack; // ignore: implementation_imports
 
 import '../base/file_system.dart';
+import '../base/io.dart';
 import '../base/process_manager.dart';
 import '../dart/package_map.dart';
 import '../globals.dart';
 import 'coverage_collector.dart';
 
 const Duration _kTestStartupTimeout = const Duration(seconds: 5);
-final io.InternetAddress _kHost = io.InternetAddress.LOOPBACK_IP_V4;
+final InternetAddress _kHost = InternetAddress.LOOPBACK_IP_V4;
 
 void installHook({ String shellPath }) {
   hack.registerPlatformPlugin(<TestPlatform>[TestPlatform.vm], () => new FlutterPlatform(shellPath: shellPath));
@@ -62,11 +62,11 @@ class FlutterPlatform extends PlatformPlugin {
       controller.sink.done.then((_) { controllerSinkClosed = true; });
 
       // Prepare our WebSocket server to talk to the engine subproces.
-      io.HttpServer server = await io.HttpServer.bind(_kHost, 0);
+      HttpServer server = await HttpServer.bind(_kHost, 0);
       finalizers.add(() async { await server.close(force: true); });
-      Completer<io.WebSocket> webSocket = new Completer<io.WebSocket>();
-      server.listen((io.HttpRequest request) {
-        webSocket.complete(io.WebSocketTransformer.upgrade(request));
+      Completer<WebSocket> webSocket = new Completer<WebSocket>();
+      server.listen((HttpRequest request) {
+        webSocket.complete(WebSocketTransformer.upgrade(request));
       });
 
       // Prepare a temporary directory to store the Dart file that will talk to us.
@@ -91,7 +91,7 @@ class FlutterPlatform extends PlatformPlugin {
       }
 
       // Start the engine subprocess.
-      io.Process process = await _startProcess(
+      Process process = await _startProcess(
         shellPath,
         listenerFile.path,
         packages: PackageMap.globalPackagesPath,
@@ -120,7 +120,7 @@ class FlutterPlatform extends PlatformPlugin {
       _InitialResult initialResult = await Future.any(<Future<_InitialResult>>[
         process.exitCode.then<_InitialResult>((int exitCode) { return _InitialResult.crashed; }),
         new Future<_InitialResult>.delayed(_kTestStartupTimeout, () { return _InitialResult.timedOut; }),
-        webSocket.future.then<_InitialResult>((io.WebSocket webSocket) { return _InitialResult.connected; }),
+        webSocket.future.then<_InitialResult>((WebSocket webSocket) { return _InitialResult.connected; }),
       ]);
 
       switch (initialResult) {
@@ -138,7 +138,7 @@ class FlutterPlatform extends PlatformPlugin {
           await controller.sink.done;
           break;
         case _InitialResult.connected:
-          io.WebSocket testSocket = await webSocket.future;
+          WebSocket testSocket = await webSocket.future;
 
           Completer<Null> harnessDone = new Completer<Null>();
           StreamSubscription<dynamic> harnessToTest = controller.stream.listen(
@@ -213,7 +213,7 @@ class FlutterPlatform extends PlatformPlugin {
   }) {
     return '''
 import 'dart:convert';
-import 'dart:io';
+import '../base/io.dart';
 
 import 'package:stream_channel/stream_channel.dart';
 import 'package:test/src/runner/plugin/remote_platform_helpers.dart';
@@ -257,7 +257,7 @@ void main() {
   }
 
 
-  Future<io.Process> _startProcess(String executable, String testPath, { String packages, int observatoryPort }) {
+  Future<Process> _startProcess(String executable, String testPath, { String packages, int observatoryPort }) {
     assert(executable != null); // Please provide the path to the shell in the SKY_SHELL environment variable.
     List<String> arguments = <String>[];
     if (observatoryPort != null) {
@@ -280,7 +280,7 @@ void main() {
     return processManager.start(executable, arguments, environment: environment);
   }
 
-  void _pipeStandardStreamsToConsole(io.Process process) {
+  void _pipeStandardStreamsToConsole(Process process) {
     for (Stream<List<int>> stream in
         <Stream<List<int>>>[process.stderr, process.stdout]) {
       stream.transform(UTF8.decoder)

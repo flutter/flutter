@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io' as io;
 
 import 'package:args/command_runner.dart';
 import 'package:stack_trace/stack_trace.dart';
@@ -12,6 +11,7 @@ import 'src/base/common.dart';
 import 'src/base/config.dart';
 import 'src/base/context.dart';
 import 'src/base/file_system.dart';
+import 'src/base/io.dart';
 import 'src/base/logger.dart';
 import 'src/base/os.dart';
 import 'src/base/process.dart';
@@ -125,9 +125,9 @@ Future<Null> main(List<String> args) async {
       _exit(0);
     }, onError: (dynamic error, Chain chain) {
       if (error is UsageException) {
-        io.stderr.writeln(error.message);
-        io.stderr.writeln();
-        io.stderr.writeln(
+        stderr.writeln(error.message);
+        stderr.writeln();
+        stderr.writeln(
             "Run 'flutter -h' (or 'flutter <command> -h') for available "
                 "flutter commands and options."
         );
@@ -135,11 +135,11 @@ Future<Null> main(List<String> args) async {
         _exit(64);
       } else if (error is ToolExit) {
         if (error.message != null)
-          io.stderr.writeln(error.message);
+          stderr.writeln(error.message);
         if (verbose) {
-          io.stderr.writeln();
-          io.stderr.writeln(chain.terse.toString());
-          io.stderr.writeln();
+          stderr.writeln();
+          stderr.writeln(chain.terse.toString());
+          stderr.writeln();
         }
         _exit(error.exitCode ?? 1);
       } else if (error is ProcessExit) {
@@ -147,23 +147,23 @@ Future<Null> main(List<String> args) async {
         _exit(error.exitCode);
       } else {
         // We've crashed; emit a log report.
-        io.stderr.writeln();
+        stderr.writeln();
 
         flutterUsage.sendException(error, chain);
 
         if (isRunningOnBot) {
           // Print the stack trace on the bots - don't write a crash report.
-          io.stderr.writeln('$error');
-          io.stderr.writeln(chain.terse.toString());
+          stderr.writeln('$error');
+          stderr.writeln(chain.terse.toString());
           _exit(1);
         } else {
           if (error is String)
-            io.stderr.writeln('Oops; flutter has exited unexpectedly: "$error".');
+            stderr.writeln('Oops; flutter has exited unexpectedly: "$error".');
           else
-            io.stderr.writeln('Oops; flutter has exited unexpectedly.');
+            stderr.writeln('Oops; flutter has exited unexpectedly.');
 
           _createCrashReport(args, error, chain).then((File file) {
-            io.stderr.writeln(
+            stderr.writeln(
                 'Crash report written to ${file.path};\n'
                     'please let us know at https://github.com/flutter/flutter/issues.'
             );

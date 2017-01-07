@@ -2,14 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io' as io;
-
 import 'package:path/path.dart' as path;
 import 'package:pub_semver/pub_semver.dart';
 
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
+import '../base/io.dart';
 import '../base/os.dart';
 import '../globals.dart';
 
@@ -65,12 +64,12 @@ class AndroidSdk {
 
   static AndroidSdk locateAndroidSdk() {
     String androidHomeDir;
-    if (io.Platform.environment.containsKey(kAndroidHome)) {
-      androidHomeDir = io.Platform.environment[kAndroidHome];
-    } else if (io.Platform.isLinux) {
+    if (Platform.environment.containsKey(kAndroidHome)) {
+      androidHomeDir = Platform.environment[kAndroidHome];
+    } else if (Platform.isLinux) {
       if (homeDirPath != null)
         androidHomeDir = '$homeDirPath/Android/Sdk';
-    } else if (io.Platform.isMacOS) {
+    } else if (Platform.isMacOS) {
       if (homeDirPath != null)
         androidHomeDir = '$homeDirPath/Library/Android/sdk';
     }

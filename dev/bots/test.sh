@@ -6,12 +6,26 @@ trap detect_error_on_exit EXIT HUP INT QUIT TERM
 
 detect_error_on_exit() {
     exit_code=$?
-    set +x
+    { set +x; } 2>/dev/null
     if [[ $exit_code -ne 0 ]]; then
         echo -e "\x1B[31m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\x1B[0m"
         echo -e "\x1B[1mError:\x1B[31m script exited early due to error ($exit_code)\x1B[0m"
         echo -e "\x1B[31m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\x1B[0m"
     fi
+}
+
+check_for_dart_io() {
+    { set +x; } 2>/dev/null
+    (
+        cd packages/flutter_tools
+        for f in $(grep -Erl '^import.*dart:io' lib bin test); do
+            if [[ "$f" != "lib/src/base/io.dart" ]]; then
+                echo -e "\x1B[31mError: $f imports 'dart:io'; import 'lib/src/base/io.dart' instead\x1B[0m"
+                exit 1
+            fi
+        done
+    )
+    set -ex
 }
 
 set -ex
@@ -40,6 +54,7 @@ SRC_ROOT=$PWD
 (cd packages/flutter_driver; dart -c test/all.dart)
 (cd packages/flutter_test; flutter test)
 (cd packages/flutter_tools; FLUTTER_ROOT=$SRC_ROOT dart -c test/all.dart)
+check_for_dart_io
 
 (cd dev/devicelab; dart -c test/all.dart)
 (cd dev/manual_tests; flutter test)

@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
-
 import 'package:path/path.dart' as path;
+
+import 'io.dart';
 
 const int kDefaultObservatoryPort = 8100;
 const int kDefaultDiagnosticPort  = 8101;

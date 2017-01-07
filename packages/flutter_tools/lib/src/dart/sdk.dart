@@ -2,10 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
-
 import 'package:path/path.dart' as path;
 
+import '../base/io.dart';
 import '../cache.dart';
 
 /// Locate the Dart SDK.

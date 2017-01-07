@@ -3,16 +3,16 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io' as io;
 
 import 'package:meta/meta.dart';
 
+import '../base/common.dart';
 import '../base/file_system.dart';
+import '../base/io.dart';
+import '../base/utils.dart';
 import '../build_info.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
-import '../base/common.dart';
-import '../base/utils.dart';
 import 'build_apk.dart';
 import 'build_aot.dart';
 import 'build_flx.dart';
@@ -88,7 +88,7 @@ class BuildCleanCommand extends FlutterCommand {
   @override
   Future<Null> runCommand() async {
     Directory buildDir = fs.directory(getBuildDirectory());
-    printStatus("Deleting '${buildDir.path}${io.Platform.pathSeparator}'.");
+    printStatus("Deleting '${buildDir.path}${Platform.pathSeparator}'.");
 
     if (!buildDir.existsSync())
       return;

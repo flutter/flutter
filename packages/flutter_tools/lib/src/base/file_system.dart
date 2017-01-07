@@ -2,12 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io' as io;
-
 import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:file/memory.dart';
-import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 
 import 'context.dart';
@@ -23,41 +20,11 @@ const FileSystem _kLocalFs = const LocalFileSystem();
 /// with [MemoryFileSystem].
 FileSystem get fs => context == null ? _kLocalFs : context[FileSystem];
 
-/// Exits the process with the given [exitCode].
-typedef void ExitFunction([int exitCode]);
-
-final ExitFunction _defaultExitFunction = ([int exitCode]) {
-  io.exit(exitCode);
-};
-
-ExitFunction _exitFunction = _defaultExitFunction;
-
-/// Exits the process.
-///
-/// During tests, this may be set to a testing-friendly value by calling
-/// [setExitFunctionForTests] (and then restored with [restoreExitFunction]).
-ExitFunction get exit => _exitFunction;
-
-/// Sets the [exit] function to a function that throws an exception rather
-/// than exiting the process; intended for testing purposes.
-@visibleForTesting
-void setExitFunctionForTests([ExitFunction exitFunction]) {
-  _exitFunction = exitFunction ?? ([int exitCode]) {
-    throw new Exception('Exited with code $exitCode');
-  };
-}
-
-/// Restores the [exit] function to the `dart:io` implementation.
-@visibleForTesting
-void restoreExitFunction() {
-  _exitFunction = _defaultExitFunction;
-}
-
 /// Create the ancestor directories of a file path if they do not already exist.
 void ensureDirectoryExists(String filePath) {
   String dirPath = path.dirname(filePath);
 
-  if (fs.typeSync(dirPath) == FileSystemEntityType.DIRECTORY)
+  if (fs.isDirectorySync(dirPath))
     return;
   fs.directory(dirPath).createSync(recursive: true);
 }

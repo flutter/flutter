@@ -4,14 +4,14 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io' as io;
 
 import 'package:archive/archive.dart';
 import 'package:intl/intl.dart';
 import 'package:path/path.dart' as path;
 
 import 'context.dart';
-import 'file_system.dart';
+import 'file_system.dart' hide IOSink;
+import 'io.dart';
 import 'os.dart';
 import 'process.dart';
 
@@ -32,14 +32,14 @@ bool _areListsEqual/*<T>*/(List<dynamic/*=T*/> list1, List<dynamic/*=T*/> list2)
 /// methods to allow the implementation of these methods to be mocked out or
 /// decorated for testing or debugging purposes.
 class ProcessManager {
-  Future<io.Process> start(
+  Future<Process> start(
     String executable,
     List<String> arguments, {
     String workingDirectory,
     Map<String, String> environment,
-    io.ProcessStartMode mode: io.ProcessStartMode.NORMAL,
+    ProcessStartMode mode: ProcessStartMode.NORMAL,
   }) {
-    return io.Process.start(
+    return Process.start(
       executable,
       arguments,
       workingDirectory: workingDirectory,
@@ -48,15 +48,15 @@ class ProcessManager {
     );
   }
 
-  Future<io.ProcessResult> run(
+  Future<ProcessResult> run(
     String executable,
     List<String> arguments, {
     String workingDirectory,
     Map<String, String> environment,
-    Encoding stdoutEncoding: io.SYSTEM_ENCODING,
-    Encoding stderrEncoding: io.SYSTEM_ENCODING,
+    Encoding stdoutEncoding: SYSTEM_ENCODING,
+    Encoding stderrEncoding: SYSTEM_ENCODING,
   }) {
-    return io.Process.run(
+    return Process.run(
       executable,
       arguments,
       workingDirectory: workingDirectory,
@@ -66,15 +66,15 @@ class ProcessManager {
     );
   }
 
-  io.ProcessResult runSync(
+  ProcessResult runSync(
     String executable,
     List<String> arguments, {
     String workingDirectory,
     Map<String, String> environment,
-    Encoding stdoutEncoding: io.SYSTEM_ENCODING,
-    Encoding stderrEncoding: io.SYSTEM_ENCODING,
+    Encoding stdoutEncoding: SYSTEM_ENCODING,
+    Encoding stderrEncoding: SYSTEM_ENCODING,
   }) {
-    return io.Process.runSync(
+    return Process.runSync(
       executable,
       arguments,
       workingDirectory: workingDirectory,
@@ -84,8 +84,8 @@ class ProcessManager {
     );
   }
 
-  bool killPid(int pid, [io.ProcessSignal signal = io.ProcessSignal.SIGTERM]) {
-    return io.Process.killPid(pid, signal);
+  bool killPid(int pid, [ProcessSignal signal = ProcessSignal.SIGTERM]) {
+    return Process.killPid(pid, signal);
   }
 }
 
@@ -122,14 +122,14 @@ class RecordingProcessManager implements ProcessManager {
   }
 
   @override
-  Future<io.Process> start(
+  Future<Process> start(
     String executable,
     List<String> arguments, {
     String workingDirectory,
     Map<String, String> environment,
-    io.ProcessStartMode mode: io.ProcessStartMode.NORMAL,
+    ProcessStartMode mode: ProcessStartMode.NORMAL,
   }) async {
-    io.Process process = await _delegate.start(
+    Process process = await _delegate.start(
       executable,
       arguments,
       workingDirectory: workingDirectory,
@@ -164,15 +164,15 @@ class RecordingProcessManager implements ProcessManager {
   }
 
   @override
-  Future<io.ProcessResult> run(
+  Future<ProcessResult> run(
     String executable,
     List<String> arguments, {
     String workingDirectory,
     Map<String, String> environment,
-    Encoding stdoutEncoding: io.SYSTEM_ENCODING,
-    Encoding stderrEncoding: io.SYSTEM_ENCODING,
+    Encoding stdoutEncoding: SYSTEM_ENCODING,
+    Encoding stderrEncoding: SYSTEM_ENCODING,
   }) async {
-    io.ProcessResult result = await _delegate.run(
+    ProcessResult result = await _delegate.run(
       executable,
       arguments,
       workingDirectory: workingDirectory,
@@ -216,15 +216,15 @@ class RecordingProcessManager implements ProcessManager {
   }
 
   @override
-  io.ProcessResult runSync(
+  ProcessResult runSync(
     String executable,
     List<String> arguments, {
     String workingDirectory,
     Map<String, String> environment,
-    Encoding stdoutEncoding: io.SYSTEM_ENCODING,
-    Encoding stderrEncoding: io.SYSTEM_ENCODING,
+    Encoding stdoutEncoding: SYSTEM_ENCODING,
+    Encoding stderrEncoding: SYSTEM_ENCODING,
   }) {
-    io.ProcessResult result = _delegate.runSync(
+    ProcessResult result = _delegate.runSync(
       executable,
       arguments,
       workingDirectory: workingDirectory,
@@ -268,7 +268,7 @@ class RecordingProcessManager implements ProcessManager {
   }
 
   @override
-  bool killPid(int pid, [io.ProcessSignal signal = io.ProcessSignal.SIGTERM]) {
+  bool killPid(int pid, [ProcessSignal signal = ProcessSignal.SIGTERM]) {
     return _delegate.killPid(pid, signal);
   }
 
@@ -281,7 +281,7 @@ class RecordingProcessManager implements ProcessManager {
     List<String> arguments,
     String workingDirectory,
     Map<String, String> environment,
-    io.ProcessStartMode mode,
+    ProcessStartMode mode,
     Encoding stdoutEncoding,
     Encoding stderrEncoding,
     int exitCode,
@@ -332,7 +332,7 @@ class RecordingProcessManager implements ProcessManager {
     await _waitForRunningProcessesToExitWithTimeout(
       onTimeout: (int pid, Map<String, dynamic> manifestEntry) {
         manifestEntry['daemon'] = true;
-        io.Process.killPid(pid);
+        Process.killPid(pid);
       });
     // Now that we explicitly signalled the processes that timed out asking
     // them to shutdown, wait one more time for those processes to exit.
@@ -438,8 +438,8 @@ class _ManifestEntryBuilder {
 
 /// A [Process] implementation that records `stdout` and `stderr` stream events
 /// to disk before forwarding them on to the underlying stream listener.
-class _RecordingProcess implements io.Process {
-  final io.Process delegate;
+class _RecordingProcess implements Process {
+  final Process delegate;
   final String basename;
   final RecordingProcessManager manager;
 
@@ -507,7 +507,7 @@ class _RecordingProcess implements io.Process {
   }
 
   @override
-  io.IOSink get stdin {
+  IOSink get stdin {
     // We don't currently support recording `stdin`.
     return delegate.stdin;
   }
@@ -516,7 +516,7 @@ class _RecordingProcess implements io.Process {
   int get pid => delegate.pid;
 
   @override
-  bool kill([io.ProcessSignal signal = io.ProcessSignal.SIGTERM]) => delegate.kill(signal);
+  bool kill([ProcessSignal signal = ProcessSignal.SIGTERM]) => delegate.kill(signal);
 }
 
 /// A [ProcessManager] implementation that mocks out all process invocations
@@ -609,12 +609,12 @@ class ReplayProcessManager implements ProcessManager {
   }
 
   @override
-  Future<io.Process> start(
+  Future<Process> start(
     String executable,
     List<String> arguments, {
     String workingDirectory,
     Map<String, String> environment,
-    io.ProcessStartMode mode: io.ProcessStartMode.NORMAL,
+    ProcessStartMode mode: ProcessStartMode.NORMAL,
   }) async {
     Map<String, dynamic> entry = _popEntry(executable, arguments, mode: mode);
     _ReplayProcessResult result = await _ReplayProcessResult.create(
@@ -623,13 +623,13 @@ class ReplayProcessManager implements ProcessManager {
   }
 
   @override
-  Future<io.ProcessResult> run(
+  Future<ProcessResult> run(
     String executable,
     List<String> arguments, {
     String workingDirectory,
     Map<String, String> environment,
-    Encoding stdoutEncoding: io.SYSTEM_ENCODING,
-    Encoding stderrEncoding: io.SYSTEM_ENCODING,
+    Encoding stdoutEncoding: SYSTEM_ENCODING,
+    Encoding stderrEncoding: SYSTEM_ENCODING,
   }) async {
     Map<String, dynamic> entry = _popEntry(executable, arguments,
         stdoutEncoding: stdoutEncoding, stderrEncoding: stderrEncoding);
@@ -638,13 +638,13 @@ class ReplayProcessManager implements ProcessManager {
   }
 
   @override
-  io.ProcessResult runSync(
+  ProcessResult runSync(
     String executable,
     List<String> arguments, {
     String workingDirectory,
     Map<String, String> environment,
-    Encoding stdoutEncoding: io.SYSTEM_ENCODING,
-    Encoding stderrEncoding: io.SYSTEM_ENCODING,
+    Encoding stdoutEncoding: SYSTEM_ENCODING,
+    Encoding stderrEncoding: SYSTEM_ENCODING,
   }) {
     Map<String, dynamic> entry = _popEntry(executable, arguments,
         stdoutEncoding: stdoutEncoding, stderrEncoding: stderrEncoding);
@@ -656,7 +656,7 @@ class ReplayProcessManager implements ProcessManager {
   /// the specified process arguments. Once found, it marks the manifest entry
   /// as having been invoked and thus not eligible for invocation again.
   Map<String, dynamic> _popEntry(String executable, List<String> arguments, {
-    io.ProcessStartMode mode,
+    ProcessStartMode mode,
     Encoding stdoutEncoding,
     Encoding stderrEncoding,
   }) {
@@ -675,14 +675,14 @@ class ReplayProcessManager implements ProcessManager {
     );
 
     if (entry == null)
-      throw new io.ProcessException(executable, arguments, 'No matching invocation found');
+      throw new ProcessException(executable, arguments, 'No matching invocation found');
 
     entry['invoked'] = true;
     return entry;
   }
 
   @override
-  bool killPid(int pid, [io.ProcessSignal signal = io.ProcessSignal.SIGTERM]) {
+  bool killPid(int pid, [ProcessSignal signal = ProcessSignal.SIGTERM]) {
     throw new UnsupportedError(
         "$runtimeType.killPid() has not been implemented because at the time "
         "of its writing, it wasn't needed. If you're hitting this error, you "
@@ -692,7 +692,7 @@ class ReplayProcessManager implements ProcessManager {
 
 /// A [ProcessResult] implementation that derives its data from a recording
 /// fragment.
-class _ReplayProcessResult implements io.ProcessResult {
+class _ReplayProcessResult implements ProcessResult {
   @override
   final int pid;
 
@@ -722,7 +722,7 @@ class _ReplayProcessResult implements io.ProcessResult {
         stderr: await _getData('$basePath.stderr', entry['stderrEncoding']),
       );
     } catch (e) {
-      throw new io.ProcessException(executable, arguments, e.toString());
+      throw new ProcessException(executable, arguments, e.toString());
     }
   }
 
@@ -748,7 +748,7 @@ class _ReplayProcessResult implements io.ProcessResult {
         stderr: _getDataSync('$basePath.stderr', entry['stderrEncoding']),
       );
     } catch (e) {
-      throw new io.ProcessException(executable, arguments, e.toString());
+      throw new ProcessException(executable, arguments, e.toString());
     }
   }
 
@@ -761,13 +761,13 @@ class _ReplayProcessResult implements io.ProcessResult {
 
   static Encoding _getEncodingByName(String encoding) {
     if (encoding == 'system')
-      return const io.SystemEncoding();
+      return SYSTEM_ENCODING;
     else if (encoding != null)
       return Encoding.getByName(encoding);
     return null;
   }
 
-  io.Process asProcess(bool daemon) {
+  Process asProcess(bool daemon) {
     assert(stdout is List<int>);
     assert(stderr is List<int>);
     return new _ReplayProcess(this, daemon);
@@ -775,7 +775,7 @@ class _ReplayProcessResult implements io.ProcessResult {
 }
 
 /// A [Process] implementation derives its data from a recording fragment.
-class _ReplayProcess implements io.Process {
+class _ReplayProcess implements Process {
   @override
   final int pid;
 
@@ -831,10 +831,10 @@ class _ReplayProcess implements io.Process {
   set exitCode(Future<int> exitCode) => throw new UnsupportedError('set exitCode');
 
   @override
-  io.IOSink get stdin => throw new UnimplementedError();
+  IOSink get stdin => throw new UnimplementedError();
 
   @override
-  bool kill([io.ProcessSignal signal = io.ProcessSignal.SIGTERM]) {
+  bool kill([ProcessSignal signal = ProcessSignal.SIGTERM]) {
     if (!_exitCodeCompleter.isCompleted) {
       _stdoutController.close();
       _stderrController.close();
