@@ -321,9 +321,13 @@ class AppDomain extends Domain {
   }
 
   AppInstance startApp(
-      Device device, String projectDirectory, String target, String route,
-      BuildMode buildMode, bool startPaused, bool enableHotReload) {
-
+    Device device, String projectDirectory, String target, String route,
+    BuildMode buildMode, bool startPaused, bool enableHotReload, {
+    String applicationBinary,
+    String projectRootPath,
+    String packagesFilePath,
+    String projectAssets,
+  }) {
     DebuggingOptions options;
 
     switch (buildMode) {
@@ -352,14 +356,19 @@ class AppDomain extends Domain {
         device,
         target: target,
         debuggingOptions: options,
-        usesTerminalUI: false
+        usesTerminalUI: false,
+        applicationBinary: applicationBinary,
+        projectRootPath: projectRootPath,
+        packagesFilePath: packagesFilePath,
+        projectAssets: projectAssets
       );
     } else {
       runner = new RunAndStayResident(
         device,
         target: target,
         debuggingOptions: options,
-        usesTerminalUI: false
+        usesTerminalUI: false,
+        applicationBinary: applicationBinary,
       );
     }
 
