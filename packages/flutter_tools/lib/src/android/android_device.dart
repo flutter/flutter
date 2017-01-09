@@ -4,12 +4,13 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 
 import '../android/android_sdk.dart';
 import '../application_package.dart';
-import '../base/os.dart';
+import '../base/file_system.dart';
+import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/os.dart';
 import '../base/process.dart';
 import '../base/process_manager.dart';
 import '../build_info.dart';
@@ -201,7 +202,7 @@ class AndroidDevice extends Device {
 
   String _getSourceSha1(ApplicationPackage app) {
     AndroidApk apk = app;
-    File shaFile = new File('${apk.apkPath}.sha1');
+    File shaFile = fs.file('${apk.apkPath}.sha1');
     return shaFile.existsSync() ? shaFile.readAsStringSync() : '';
   }
 
@@ -222,7 +223,7 @@ class AndroidDevice extends Device {
   @override
   bool installApp(ApplicationPackage app) {
     AndroidApk apk = app;
-    if (!FileSystemEntity.isFileSync(apk.apkPath)) {
+    if (!fs.isFileSync(apk.apkPath)) {
       printError('"${apk.apkPath}" does not exist.');
       return false;
     }

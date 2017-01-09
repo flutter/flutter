@@ -2,8 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
-
+import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/commands/analyze.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
@@ -16,7 +15,7 @@ void main() {
   Directory tempDir;
 
   setUp(() {
-    tempDir = Directory.systemTemp.createTempSync('analysis_duplicate_names_test');
+    tempDir = fs.systemTempDirectory.createTempSync('analysis_duplicate_names_test');
   });
 
   tearDown(() {
@@ -25,10 +24,10 @@ void main() {
 
   group('analyze', () {
     testUsingContext('flutter analyze with two files with the same name', () async {
-      File dartFileA = new File(path.join(tempDir.path, 'a.dart'));
+      File dartFileA = fs.file(path.join(tempDir.path, 'a.dart'));
       dartFileA.parent.createSync();
       dartFileA.writeAsStringSync('library test;');
-      File dartFileB = new File(path.join(tempDir.path, 'b.dart'));
+      File dartFileB = fs.file(path.join(tempDir.path, 'b.dart'));
       dartFileB.writeAsStringSync('library test;');
 
       AnalyzeCommand command = new AnalyzeCommand();

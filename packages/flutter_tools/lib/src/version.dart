@@ -2,8 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
-
+import 'base/io.dart';
 import 'base/process.dart';
 import 'base/process_manager.dart';
 import 'cache.dart';

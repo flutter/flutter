@@ -3,11 +3,12 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
 
 import 'package:path/path.dart' as path;
 
 import '../base/common.dart';
+import '../base/file_system.dart';
+import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
 import '../base/utils.dart';
@@ -142,7 +143,7 @@ Future<String> _buildAotSnapshot(
     }
   }
 
-  Directory outputDir = new Directory(outputPath);
+  Directory outputDir = fs.directory(outputPath);
   outputDir.createSync(recursive: true);
   String vmIsolateSnapshot = path.join(outputDir.path, 'snapshot_aot_vmisolate');
   String isolateSnapshot = path.join(outputDir.path, 'snapshot_aot_isolate');
@@ -201,7 +202,7 @@ Future<String> _buildAotSnapshot(
       assert(false);
   }
 
-  List<String> missingFiles = filePaths.where((String p) => !FileSystemEntity.isFileSync(p)).toList();
+  List<String> missingFiles = filePaths.where((String p) => !fs.isFileSync(p)).toList();
   if (missingFiles.isNotEmpty) {
     printError('Missing files: $missingFiles');
     return null;

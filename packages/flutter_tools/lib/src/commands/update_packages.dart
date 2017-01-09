@@ -3,10 +3,10 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
 
 import 'package:path/path.dart' as path;
 
+import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/net.dart';
 import '../cache.dart';
@@ -36,10 +36,10 @@ class UpdatePackagesCommand extends FlutterCommand {
     Status status = logger.startProgress("Downloading lcov data for package:flutter...");
     final List<int> data = await fetchUrl(Uri.parse('https://storage.googleapis.com/flutter_infra/flutter/coverage/lcov.info'));
     final String coverageDir = path.join(Cache.flutterRoot, 'packages/flutter/coverage');
-    new File(path.join(coverageDir, 'lcov.base.info'))
+    fs.file(path.join(coverageDir, 'lcov.base.info'))
       ..createSync(recursive: true)
       ..writeAsBytesSync(data, flush: true);
-    new File(path.join(coverageDir, 'lcov.info'))
+    fs.file(path.join(coverageDir, 'lcov.info'))
       ..createSync(recursive: true)
       ..writeAsBytesSync(data, flush: true);
     status.stop();

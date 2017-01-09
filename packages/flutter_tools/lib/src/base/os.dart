@@ -3,12 +3,13 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
 
 import 'package:archive/archive.dart';
 import 'package:path/path.dart' as path;
 
 import 'context.dart';
+import 'file_system.dart';
+import 'io.dart';
 import 'process.dart';
 import 'process_manager.dart';
 
@@ -61,7 +62,7 @@ class _PosixUtils extends OperatingSystemUtils {
     if (result.exitCode != 0)
       return null;
     String path = result.stdout.trim().split('\n').first.trim();
-    return new File(path);
+    return fs.file(path);
   }
 
   // unzip -o -q zipfile -d dest
@@ -73,7 +74,7 @@ class _PosixUtils extends OperatingSystemUtils {
   @override
   File makePipe(String path) {
     runSync(<String>['mkfifo', path]);
-    return new File(path);
+    return fs.file(path);
   }
 }
 
@@ -91,7 +92,7 @@ class _WindowsUtils extends OperatingSystemUtils {
     ProcessResult result = processManager.runSync('where', <String>[execName]);
     if (result.exitCode != 0)
       return null;
-    return new File(result.stdout.trim().split('\n').first.trim());
+    return fs.file(result.stdout.trim().split('\n').first.trim());
   }
 
   @override
@@ -103,7 +104,7 @@ class _WindowsUtils extends OperatingSystemUtils {
       if (!archiveFile.isFile || archiveFile.name.endsWith('/'))
         continue;
 
-      File destFile = new File(path.join(targetDirectory.path, archiveFile.name));
+      File destFile = fs.file(path.join(targetDirectory.path, archiveFile.name));
       if (!destFile.parent.existsSync())
         destFile.parent.createSync(recursive: true);
       destFile.writeAsBytesSync(archiveFile.content);
@@ -156,11 +157,11 @@ Future<bool> _isPortAvailable(int port) async {
 /// or if the project root is the flutter repository root.
 String findProjectRoot([String directory]) {
   const String kProjectRootSentinel = 'pubspec.yaml';
-  directory ??= Directory.current.path;
+  directory ??= fs.currentDirectory.path;
   while (true) {
-    if (FileSystemEntity.isFileSync(path.join(directory, kProjectRootSentinel)))
+    if (fs.isFileSync(path.join(directory, kProjectRootSentinel)))
       return directory;
-    String parent = FileSystemEntity.parentOf(directory);
+    String parent = path.dirname(directory);
     if (directory == parent) return null;
     directory = parent;
   }

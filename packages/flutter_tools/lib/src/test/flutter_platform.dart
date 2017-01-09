@@ -4,7 +4,6 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:path/path.dart' as path;
@@ -14,6 +13,8 @@ import 'package:test/src/backend/test_platform.dart'; // ignore: implementation_
 import 'package:test/src/runner/plugin/platform.dart'; // ignore: implementation_imports
 import 'package:test/src/runner/plugin/hack_register_platform.dart' as hack; // ignore: implementation_imports
 
+import '../base/file_system.dart';
+import '../base/io.dart';
 import '../base/process_manager.dart';
 import '../dart/package_map.dart';
 import '../globals.dart';
@@ -69,11 +70,11 @@ class FlutterPlatform extends PlatformPlugin {
       });
 
       // Prepare a temporary directory to store the Dart file that will talk to us.
-      Directory temporaryDirectory = Directory.systemTemp.createTempSync('dart_test_listener');
+      Directory temporaryDirectory = fs.systemTempDirectory.createTempSync('dart_test_listener');
       finalizers.add(() async { temporaryDirectory.deleteSync(recursive: true); });
 
       // Prepare the Dart file that will talk to us and start the test.
-      File listenerFile = new File('${temporaryDirectory.path}/listener.dart');
+      File listenerFile = fs.file('${temporaryDirectory.path}/listener.dart');
       listenerFile.createSync();
       listenerFile.writeAsStringSync(_generateTestMain(
         testUrl: path.toUri(path.absolute(testPath)).toString(),
@@ -212,7 +213,7 @@ class FlutterPlatform extends PlatformPlugin {
   }) {
     return '''
 import 'dart:convert';
-import 'dart:io';
+import 'dart:io'; // ignore: dart_io_import
 
 import 'package:stream_channel/stream_channel.dart';
 import 'package:test/src/runner/plugin/remote_platform_helpers.dart';
@@ -248,8 +249,8 @@ void main() {
     sb.writeln('  <cachedir>/var/cache/fontconfig</cachedir>');
     sb.writeln('</fontconfig>');
 
-    Directory fontsDir = Directory.systemTemp.createTempSync('flutter_fonts');
-    _cachedFontConfig = new File('${fontsDir.path}/fonts.conf');
+    Directory fontsDir = fs.systemTempDirectory.createTempSync('flutter_fonts');
+    _cachedFontConfig = fs.file('${fontsDir.path}/fonts.conf');
     _cachedFontConfig.createSync();
     _cachedFontConfig.writeAsStringSync(sb.toString());
     return _cachedFontConfig;

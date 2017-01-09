@@ -2,10 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
-
 import 'package:path/path.dart' as path;
 
+import '../base/file_system.dart';
 import '../base/process.dart';
 
 const String kCFBundleIdentifierKey = "CFBundleIdentifier";
@@ -18,7 +17,7 @@ String getValueFromFile(String plistFilePath, String key) {
   // 'defaults' requires the path to be absolute and without the 'plist'
   // extension.
 
-  if (!FileSystemEntity.isFileSync(plistFilePath))
+  if (!fs.isFileSync(plistFilePath))
     return null;
 
   String normalizedPlistPath = path.withoutExtension(path.absolute(plistFilePath));

@@ -3,12 +3,13 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
 
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 
 import 'application_package.dart';
+import 'base/file_system.dart';
+import 'base/io.dart';
 import 'base/logger.dart';
 import 'build_info.dart';
 import 'device.dart';
@@ -279,7 +280,7 @@ String findMainDartFile([String target]) {
   if (target == null)
     target = '';
   String targetPath = path.absolute(target);
-  if (FileSystemEntity.isDirectorySync(targetPath))
+  if (fs.isDirectorySync(targetPath))
     return path.join(targetPath, 'lib', 'main.dart');
   else
     return targetPath;

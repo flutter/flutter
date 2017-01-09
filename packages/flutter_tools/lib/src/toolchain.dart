@@ -2,11 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
-
 import 'package:path/path.dart' as path;
 
 import 'base/context.dart';
+import 'base/file_system.dart';
 import 'build_info.dart';
 import 'cache.dart';
 import 'globals.dart';
@@ -50,14 +49,14 @@ class ToolConfiguration {
 
   Directory _getEngineArtifactsDirectory(TargetPlatform platform, BuildMode mode) {
     if (engineBuildPath != null) {
-      return new Directory(engineBuildPath);
+      return fs.directory(engineBuildPath);
     } else {
       String suffix = mode != BuildMode.debug ? '-${getModeName(mode)}' : '';
 
       // Create something like `android-arm` or `android-arm-release`.
       String dirName = getNameForTargetPlatform(platform) + suffix;
       Directory engineDir = cache.getArtifactDirectory('engine');
-      return new Directory(path.join(engineDir.path, dirName));
+      return fs.directory(path.join(engineDir.path, dirName));
     }
   }
 
@@ -70,7 +69,7 @@ class ToolConfiguration {
 
     if (tool == HostTool.SkySnapshot) {
       String clangPath = path.join(engineBuildPath, 'clang_x64', 'sky_snapshot');
-      if (FileSystemEntity.isFileSync(clangPath))
+      if (fs.isFileSync(clangPath))
         return clangPath;
       return path.join(engineBuildPath, 'sky_snapshot');
     } else if (tool == HostTool.SkyShell) {

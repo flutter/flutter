@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
 
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
@@ -12,6 +11,7 @@ import 'package:stack_trace/stack_trace.dart';
 import 'application_package.dart';
 import 'asset.dart';
 import 'base/context.dart';
+import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
@@ -51,7 +51,7 @@ class HotRunner extends ResidentRunner {
              target: target,
              debuggingOptions: debuggingOptions,
              usesTerminalUI: usesTerminalUI) {
-    _projectRootPath = projectRootPath ?? Directory.current.path;
+    _projectRootPath = projectRootPath ?? fs.currentDirectory.path;
     _packagesFilePath =
             packagesFilePath ?? path.absolute(PackageMap.globalPackagesPath);
     if (projectAssets != null)
@@ -136,7 +136,7 @@ class HotRunner extends ResidentRunner {
     bool shouldBuild: true
   }) async {
     _mainPath = findMainDartFile(target);
-    if (!FileSystemEntity.isFileSync(_mainPath)) {
+    if (!fs.isFileSync(_mainPath)) {
       String message = 'Tried to run $_mainPath, but that file does not exist.';
       if (target == null)
         message += '\nConsider using the -t option to specify the Dart file to start.';
@@ -241,7 +241,7 @@ class HotRunner extends ResidentRunner {
       await _cleanupDevFS();
       await stopEchoingDeviceLog();
       await stopApp();
-      File benchmarkOutput = new File('hot_benchmark.json');
+      File benchmarkOutput = fs.file('hot_benchmark.json');
       benchmarkOutput.writeAsStringSync(toPrettyJson(benchmarkData));
     }
 
@@ -267,7 +267,7 @@ class HotRunner extends ResidentRunner {
     String fsName = path.basename(_projectRootPath);
     _devFS = new DevFS(vmService,
                        fsName,
-                       new Directory(_projectRootPath),
+                       fs.directory(_projectRootPath),
                        packagesFilePath: _packagesFilePath);
     return _devFS.create();
   }

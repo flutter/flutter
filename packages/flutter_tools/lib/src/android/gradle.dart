@@ -3,11 +3,11 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
 
 import 'package:path/path.dart' as path;
 
 import '../base/common.dart';
+import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/process.dart';
@@ -21,13 +21,13 @@ const String gradleManifestPath = 'android/app/src/main/AndroidManifest.xml';
 const String gradleAppOut = 'android/app/build/outputs/apk/app-debug.apk';
 
 bool isProjectUsingGradle() {
-  return FileSystemEntity.isFileSync('android/build.gradle');
+  return fs.isFileSync('android/build.gradle');
 }
 
 String locateSystemGradle({ bool ensureExecutable: true }) {
   String gradle = _locateSystemGradle();
   if (ensureExecutable && gradle != null) {
-    File file = new File(gradle);
+    File file = fs.file(gradle);
     if (file.existsSync())
       os.makeExecutable(file);
   }
@@ -38,7 +38,7 @@ String _locateSystemGradle() {
   // See if the user has explicitly configured gradle-dir.
   String gradleDir = config.getValue('gradle-dir');
   if (gradleDir != null) {
-    if (FileSystemEntity.isFileSync(gradleDir))
+    if (fs.isFileSync(gradleDir))
       return gradleDir;
     return path.join(gradleDir, 'bin', 'gradle');
   }
@@ -48,7 +48,7 @@ String _locateSystemGradle() {
 
   if (studioPath == null && os.isMacOS) {
     final String kDefaultMacPath = '/Applications/Android Studio.app';
-    if (FileSystemEntity.isDirectorySync(kDefaultMacPath))
+    if (fs.isDirectorySync(kDefaultMacPath))
       studioPath = kDefaultMacPath;
   }
 
@@ -57,13 +57,13 @@ String _locateSystemGradle() {
     if (os.isMacOS && !studioPath.endsWith('Contents'))
       studioPath = path.join(studioPath, 'Contents');
 
-    Directory dir = new Directory(path.join(studioPath, 'gradle'));
+    Directory dir = fs.directory(path.join(studioPath, 'gradle'));
     if (dir.existsSync()) {
       // We find the first valid gradle directory.
       for (FileSystemEntity entity in dir.listSync()) {
         if (entity is Directory && path.basename(entity.path).startsWith('gradle-')) {
           String executable = path.join(entity.path, 'bin', 'gradle');
-          if (FileSystemEntity.isFileSync(executable))
+          if (fs.isFileSync(executable))
             return executable;
         }
       }
@@ -82,9 +82,9 @@ String _locateSystemGradle() {
 String locateProjectGradlew({ bool ensureExecutable: true }) {
   final String path = 'android/gradlew';
 
-  if (FileSystemEntity.isFileSync(path)) {
+  if (fs.isFileSync(path)) {
     if (ensureExecutable)
-      os.makeExecutable(new File(path));
+      os.makeExecutable(fs.file(path));
     return path;
   } else {
     return null;
@@ -93,7 +93,7 @@ String locateProjectGradlew({ bool ensureExecutable: true }) {
 
 Future<Null> buildGradleProject(BuildMode buildMode) async {
   // Create android/local.properties.
-  File localProperties = new File('android/local.properties');
+  File localProperties = fs.file('android/local.properties');
   if (!localProperties.existsSync()) {
     localProperties.writeAsStringSync(
       'sdk.dir=${androidSdk.directory}\n'
@@ -120,7 +120,7 @@ Future<Null> buildGradleProject(BuildMode buildMode) async {
     }
 
     // Stamp the android/app/build.gradle file with the current android sdk and build tools version.
-    File appGradleFile = new File('android/app/build.gradle');
+    File appGradleFile = fs.file('android/app/build.gradle');
     if (appGradleFile.existsSync()) {
       _GradleFile gradleFile = new _GradleFile.parse(appGradleFile);
       AndroidSdkVersion sdkVersion = androidSdk.latestVersion;
@@ -152,7 +152,7 @@ Future<Null> buildGradleProject(BuildMode buildMode) async {
   // Run 'gradlew build'.
   Status status = logger.startProgress('Running \'gradlew build\'...');
   int exitcode = await runCommandAndStreamOutput(
-    <String>[new File('android/gradlew').absolute.path, 'build'],
+    <String>[fs.file('android/gradlew').absolute.path, 'build'],
     workingDirectory: 'android',
     allowReentrantFlutter: true
   );
@@ -161,7 +161,7 @@ Future<Null> buildGradleProject(BuildMode buildMode) async {
   if (exitcode != 0)
     throwToolExit('Gradlew failed: $exitcode', exitCode: exitcode);
 
-  File apkFile = new File(gradleAppOut);
+  File apkFile = fs.file(gradleAppOut);
   printStatus('Built $gradleAppOut (${getSizeAsMB(apkFile.lengthSync())}).');
 }
 

@@ -3,9 +3,10 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
 
 import '../base/common.dart';
+import '../base/file_system.dart';
+import '../base/io.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
@@ -174,7 +175,7 @@ class RunCommand extends RunCommandBase {
       AppInstance app;
       try {
         app = daemon.appDomain.startApp(
-          device, Directory.current.path, targetFile, route,
+          device, fs.currentDirectory.path, targetFile, route,
           getBuildMode(), argResults['start-paused'], hotMode);
       } catch (error) {
         throwToolExit(error.toString());
@@ -217,7 +218,7 @@ class RunCommand extends RunCommandBase {
     String pidFile = argResults['pid-file'];
     if (pidFile != null) {
       // Write our pid to the file.
-      new File(pidFile).writeAsStringSync(pid.toString());
+      fs.file(pidFile).writeAsStringSync(pid.toString());
     }
     ResidentRunner runner;
 

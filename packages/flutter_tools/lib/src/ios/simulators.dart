@@ -4,7 +4,6 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:path/path.dart' as path;
@@ -12,6 +11,8 @@ import 'package:path/path.dart' as path;
 import '../application_package.dart';
 import '../base/common.dart';
 import '../base/context.dart';
+import '../base/file_system.dart';
+import '../base/io.dart';
 import '../base/process.dart';
 import '../base/process_manager.dart';
 import '../build_info.dart';
@@ -510,7 +511,7 @@ class IOSSimulator extends Device {
 
     // Step 2: Assert that the Xcode project was successfully built.
     IOSApp iosApp = app;
-    Directory bundle = new Directory(iosApp.simulatorBundlePath);
+    Directory bundle = fs.directory(iosApp.simulatorBundlePath);
     bool bundleExists = bundle.existsSync();
     if (!bundleExists)
       throwToolExit('Could not find the built application bundle at ${bundle.path}.');
@@ -564,7 +565,7 @@ class IOSSimulator extends Device {
 
   @override
   void clearLogs() {
-    File logFile = new File(logFilePath);
+    File logFile = fs.file(logFilePath);
     if (logFile.existsSync()) {
       RandomAccessFile randomFile = logFile.openSync(mode: FileMode.WRITE);
       randomFile.truncateSync(0);
@@ -573,7 +574,7 @@ class IOSSimulator extends Device {
   }
 
   void ensureLogsExists() {
-    File logFile = new File(logFilePath);
+    File logFile = fs.file(logFilePath);
     if (!logFile.existsSync())
       logFile.writeAsBytesSync(<int>[]);
   }
@@ -583,7 +584,7 @@ class IOSSimulator extends Device {
 
   @override
   Future<bool> takeScreenshot(File outputFile) async {
-    Directory desktopDir = new Directory(path.join(homeDirPath, 'Desktop'));
+    Directory desktopDir = fs.directory(path.join(homeDirPath, 'Desktop'));
 
     // 'Simulator Screen Shot Mar 25, 2016, 2.59.43 PM.png'
 

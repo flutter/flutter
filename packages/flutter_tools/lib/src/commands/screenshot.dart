@@ -3,12 +3,13 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
 
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as path;
 
 import '../base/common.dart';
+import '../base/file_system.dart';
+import '../base/io.dart' hide IOSink;
 import '../base/utils.dart';
 import '../device.dart';
 import '../globals.dart';
@@ -72,7 +73,7 @@ class ScreenshotCommand extends FlutterCommand {
   Future<Null> runCommand() async {
     File outputFile;
     if (argResults.wasParsed(_kOut))
-      outputFile = new File(argResults[_kOut]);
+      outputFile = fs.file(argResults[_kOut]);
 
     if (argResults[_kSkia] != null) {
       return runSkia(outputFile);
@@ -82,7 +83,7 @@ class ScreenshotCommand extends FlutterCommand {
   }
 
   Future<Null> runScreenshot(File outputFile) async {
-    outputFile ??= getUniqueFile(Directory.current, 'flutter', 'png');
+    outputFile ??= getUniqueFile(fs.currentDirectory, 'flutter', 'png');
     try {
       if (!await device.takeScreenshot(outputFile))
         throwToolExit('Screenshot failed');
@@ -124,7 +125,7 @@ class ScreenshotCommand extends FlutterCommand {
       if (postResponse.statusCode != HttpStatus.OK)
         throwToolExit('Failed to post Skia picture to skiaserve.\n\n$errorHelpText');
     } else {
-      outputFile ??= getUniqueFile(Directory.current, 'flutter', 'skp');
+      outputFile ??= getUniqueFile(fs.currentDirectory, 'flutter', 'skp');
       IOSink sink = outputFile.openWrite();
       await sink.addStream(skpResponse.stream);
       await sink.close();

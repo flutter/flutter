@@ -2308,9 +2308,7 @@ class Expanded extends Flexible {
     Key key,
     int flex: 1,
     @required Widget child,
-  }) : super(key: key, flex: flex, fit: FlexFit.tight, child: child) {
-    assert(flex > 0);
-  }
+  }) : super(key: key, flex: flex, fit: FlexFit.tight, child: child);
 }
 
 /// A widget that implements the flow layout algorithm.
