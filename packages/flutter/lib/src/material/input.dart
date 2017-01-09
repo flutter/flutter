@@ -650,7 +650,8 @@ class InputFormField extends FormField<InputValue> {
         value: field.value,
         onChanged: (InputValue value) {
           field.onChanged(value);
-          if (onChanged != null) onChanged(value);
+          if (onChanged != null)
+            onChanged(value);
         },
         errorText: field.errorText,
       );
