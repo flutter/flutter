@@ -42,9 +42,7 @@ class TabbedComponentDemoScaffold extends StatelessWidget {
   final String title;
 
   void _showExampleCode(BuildContext context) {
-    //TabBarSelectionState<ComponentDemoTabData> selection = TabBarSelection.of(context);
     String tag = demos[DefaultTabController.of(context).index].exampleCodeTag;
-    //String tag = selection.value?.exampleCodeTag;
     if (tag != null) {
       Navigator.push(context, new MaterialPageRoute<FullScreenCodeDialog>(
         builder: (BuildContext context) => new FullScreenCodeDialog(exampleCodeTag: tag)

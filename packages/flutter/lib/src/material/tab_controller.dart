@@ -16,7 +16,7 @@ import 'constants.dart';
 /// See also:
 ///
 /// * [DefaultTabController], which simplifies sharing a TabController with
-/// its [TabBar] and a [TabBarView] descendants.
+///   its [TabBar] and a [TabBarView] descendants.
 class TabController extends ChangeNotifier {
   /// Creates an object that manages the state required by [TabBar] and a [TabBarView].
   TabController({ int initialIndex: 0, @required this.length, @required TickerProvider vsync })
@@ -104,13 +104,13 @@ class TabController extends ChangeNotifier {
   /// TabBarView has been dragged to the left. Similarly a value between
   /// 0.0 and 1.0 implies that the TabBarView has been dragged to the right.
   double get offset => _animationController.value - _index.toDouble();
-  set offset(double value) {
-    assert(value != null);
-    assert(value >= -1.0 && value <= 1.0);
+  set offset(double newOffset) {
+    assert(newOffset != null);
+    assert(newOffset >= -1.0 && newOffset <= 1.0);
     assert(!indexIsChanging);
-    if (value == offset)
+    if (newOffset == offset)
       return;
-    _animationController.value = value + _index.toDouble();
+    _animationController.value = newOffset + _index.toDouble();
   }
 
   @override
