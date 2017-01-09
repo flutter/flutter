@@ -4,11 +4,11 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io' as io;
 
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/dart/sdk.dart';
@@ -56,7 +56,7 @@ void main() {
         if (file is File && file.path.endsWith('.dart')) {
           String original= file.readAsStringSync();
 
-          io.Process process = await io.Process.start(
+          Process process = await Process.start(
               sdkBinaryName('dartfmt'),
               <String>[file.path],
               workingDirectory: temp.path,
@@ -126,7 +126,7 @@ Future<Null> _createAndAnalyzeProject(Directory dir, List<String> createArgs) as
   String mainPath = path.join(dir.path, 'lib', 'main.dart');
   expect(fs.file(mainPath).existsSync(), true);
   String flutterToolsPath = path.absolute(path.join('bin', 'flutter_tools.dart'));
-  io.ProcessResult exec = io.Process.runSync(
+  ProcessResult exec = Process.runSync(
     '$dartSdkPath/bin/dart', <String>[flutterToolsPath, 'analyze'],
     workingDirectory: dir.path
   );

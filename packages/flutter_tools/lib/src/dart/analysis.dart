@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:collection';
-import 'dart:io' as io;
 
 import 'package:analyzer/error/error.dart';
 import 'package:analyzer/file_system/file_system.dart' as file_system;
@@ -27,7 +26,8 @@ import 'package:path/path.dart' as path;
 import 'package:plugin/manager.dart';
 import 'package:plugin/plugin.dart';
 
-import '../base/file_system.dart';
+import '../base/file_system.dart' hide IOSink;
+import '../base/io.dart';
 
 class AnalysisDriver {
   Set<Source> _analyzedSources = new HashSet<Source>();
@@ -240,10 +240,10 @@ class DriverOptions extends AnalysisOptionsImpl {
   Map<Object, Object> analysisOptions;
 
   /// Out sink for logging.
-  io.IOSink outSink = io.stdout;
+  IOSink outSink = stdout;
 
   /// Error sink for logging.
-  io.IOSink errorSink = io.stderr;
+  IOSink errorSink = stderr;
 }
 
 class PackageInfo {
@@ -269,8 +269,8 @@ class PackageInfo {
 }
 
 class _StdLogger extends Logger {
-  final io.IOSink outSink;
-  final io.IOSink errorSink;
+  final IOSink outSink;
+  final IOSink errorSink;
   _StdLogger({this.outSink, this.errorSink});
 
   @override

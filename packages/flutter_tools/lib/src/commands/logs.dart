@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
 
 import '../base/common.dart';
+import '../base/io.dart';
 import '../cache.dart';
 import '../device.dart';
 import '../globals.dart';

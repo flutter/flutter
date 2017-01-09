@@ -3,12 +3,12 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io' as io;
 
 import 'package:path/path.dart' as path;
 
 import '../base/common.dart';
 import '../base/file_system.dart';
+import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
 import '../base/utils.dart';
@@ -65,7 +65,7 @@ class BuildAotCommand extends BuildSubCommand {
     if (outputPath == null)
       throwToolExit(null);
 
-    printStatus('Built to $outputPath${io.Platform.pathSeparator}.');
+    printStatus('Built to $outputPath${Platform.pathSeparator}.');
   }
 }
 

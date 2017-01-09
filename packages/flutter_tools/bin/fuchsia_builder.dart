@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io' as io;
 
 import 'package:args/args.dart';
 
@@ -11,6 +10,7 @@ import '../lib/src/base/common.dart';
 import '../lib/src/base/config.dart';
 import '../lib/src/base/context.dart';
 import '../lib/src/base/file_system.dart';
+import '../lib/src/base/io.dart';
 import '../lib/src/base/logger.dart';
 import '../lib/src/base/os.dart';
 import '../lib/src/base/process_manager.dart';
@@ -63,7 +63,7 @@ Future<Null> run(List<String> args) async {
     printError('Missing option! All options must be specified.');
     exit(1);
   }
-  Cache.flutterRoot = io.Platform.environment['FLUTTER_ROOT'];
+  Cache.flutterRoot = Platform.environment['FLUTTER_ROOT'];
   String outputPath = argResults[_kOptionOutput];
   try {
     await assemble(

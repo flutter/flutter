@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
 
 import 'package:args/command_runner.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/create.dart';
@@ -40,7 +40,7 @@ void main() {
       Directory temp;
 
       setUp(() async {
-        temp = Directory.systemTemp.createTempSync('flutter_tools');
+        temp = fs.systemTempDirectory.createTempSync('flutter_tools');
       });
 
       tearDown(() {

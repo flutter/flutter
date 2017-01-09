@@ -3,13 +3,13 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io' as io;
 
 import 'package:path/path.dart' as path;
 import 'package:test/src/executable.dart' as test; // ignore: implementation_imports
 
 import '../base/common.dart';
 import '../base/file_system.dart';
+import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/process_manager.dart';
 import '../base/os.dart';
@@ -80,8 +80,8 @@ class TestCommand extends FlutterCommand {
       printTrace('running test package with arguments: $testArgs');
       await test.main(testArgs);
       // test.main() sets dart:io's exitCode global.
-      printTrace('test package returned with exit code ${io.exitCode}');
-      return io.exitCode;
+      printTrace('test package returned with exit code $exitCode');
+      return exitCode;
     } finally {
       fs.currentDirectory = currentDirectory;
     }
@@ -128,7 +128,7 @@ class TestCommand extends FlutterCommand {
       Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_tools');
       try {
         File sourceFile = coverageFile.copySync(path.join(tempDir.path, 'lcov.source.info'));
-        io.ProcessResult result = processManager.runSync('lcov', <String>[
+        ProcessResult result = processManager.runSync('lcov', <String>[
           '--add-tracefile', baseCoverageData,
           '--add-tracefile', sourceFile.path,
           '--output-file', coverageFile.path,
@@ -165,7 +165,7 @@ class TestCommand extends FlutterCommand {
     if (argResults['coverage'])
       testArgs.insert(0, '--concurrency=1');
 
-    final String shellPath = tools.getHostToolPath(HostTool.SkyShell) ?? io.Platform.environment['SKY_SHELL'];
+    final String shellPath = tools.getHostToolPath(HostTool.SkyShell) ?? Platform.environment['SKY_SHELL'];
     if (!fs.isFileSync(shellPath))
       throwToolExit('Cannot find Flutter shell at $shellPath');
     loader.installHook(shellPath: shellPath);

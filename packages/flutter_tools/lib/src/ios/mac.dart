@@ -4,13 +4,13 @@
 
 import 'dart:async';
 import 'dart:convert' show JSON;
-import 'dart:io' as io;
 
 import 'package:path/path.dart' as path;
 
 import '../application_package.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
+import '../base/io.dart';
 import '../base/process.dart';
 import '../base/process_manager.dart';
 import '../build_info.dart';
@@ -41,7 +41,7 @@ class XCode {
       } else {
         try {
           printTrace('xcrun clang');
-          io.ProcessResult result = processManager.runSync('/usr/bin/xcrun', <String>['clang']);
+          ProcessResult result = processManager.runSync('/usr/bin/xcrun', <String>['clang']);
 
           if (result.stdout != null && result.stdout.contains('license'))
             _eulaSigned = false;
@@ -220,7 +220,7 @@ final RegExp _xcodeVersionRegExp = new RegExp(r'Xcode (\d+)\..*');
 final String _xcodeRequirement = 'Xcode 7.0 or greater is required to develop for iOS.';
 
 bool _checkXcodeVersion() {
-  if (!io.Platform.isMacOS)
+  if (!Platform.isMacOS)
     return false;
   try {
     String version = runCheckedSync(<String>['xcodebuild', '-version']);

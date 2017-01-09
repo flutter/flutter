@@ -4,7 +4,6 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io' as io;
 import 'dart:math' as math;
 
 import 'package:path/path.dart' as path;
@@ -13,6 +12,7 @@ import '../application_package.dart';
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
+import '../base/io.dart';
 import '../base/process.dart';
 import '../base/process_manager.dart';
 import '../build_info.dart';
@@ -31,7 +31,7 @@ class IOSSimulators extends PollingDeviceDiscovery {
   IOSSimulators() : super('IOSSimulators');
 
   @override
-  bool get supportsPlatform => io.Platform.isMacOS;
+  bool get supportsPlatform => Platform.isMacOS;
 
   @override
   List<Device> pollingGetDevices() => IOSSimulatorUtils.instance.getAttachedDevices();
@@ -192,7 +192,7 @@ class SimControl {
 
     List<String> args = <String>['simctl', 'list', '--json', section.name];
     printTrace('$_xcrunPath ${args.join(' ')}');
-    io.ProcessResult results = processManager.runSync(_xcrunPath, args);
+    ProcessResult results = processManager.runSync(_xcrunPath, args);
     if (results.exitCode != 0) {
       printError('Error executing simctl: ${results.exitCode}\n${results.stderr}');
       return <String, Map<String, dynamic>>{};
@@ -359,7 +359,7 @@ class IOSSimulator extends Device {
 
   @override
   bool isSupported() {
-    if (!io.Platform.isMacOS) {
+    if (!Platform.isMacOS) {
       _supportMessage = "Not supported on a non Mac host";
       return false;
     }
@@ -531,7 +531,7 @@ class IOSSimulator extends Device {
 
   Future<bool> pushFile(
       ApplicationPackage app, String localFile, String targetFile) async {
-    if (io.Platform.isMacOS) {
+    if (Platform.isMacOS) {
       String simulatorHomeDirectory = _getSimulatorAppHomeDirectory(app);
       runCheckedSync(<String>['cp', localFile, path.join(simulatorHomeDirectory, targetFile)]);
       return true;
@@ -640,8 +640,8 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
   StreamController<String> _linesController;
 
   // We log from two files: the device and the system log.
-  io.Process _deviceProcess;
-  io.Process _systemProcess;
+  Process _deviceProcess;
+  Process _systemProcess;
 
   @override
   Stream<String> get logLines => _linesController.stream;

@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io' as io;
 
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/dart/summary.dart';
@@ -11,6 +10,7 @@ import 'package:path/path.dart' as path;
 
 import 'base/context.dart';
 import 'base/file_system.dart';
+import 'base/io.dart';
 import 'base/logger.dart';
 import 'base/net.dart';
 import 'base/os.dart';
@@ -84,7 +84,7 @@ class Cache {
 
   static String get dartSdkVersion {
     if (_dartSdkVersion == null) {
-      _dartSdkVersion = io.Platform.version;
+      _dartSdkVersion = Platform.version;
     }
     return _dartSdkVersion;
   }
@@ -264,9 +264,9 @@ class FlutterEngine {
 
     if (cache.includeAllPlatforms)
       dirs.addAll(<String>['ios', 'ios-profile', 'ios-release', 'linux-x64']);
-    else if (io.Platform.isMacOS)
+    else if (Platform.isMacOS)
       dirs.addAll(<String>['ios', 'ios-profile', 'ios-release']);
-    else if (io.Platform.isLinux)
+    else if (Platform.isLinux)
       dirs.add('linux-x64');
 
     return dirs;
@@ -278,9 +278,9 @@ class FlutterEngine {
       return <List<String>>[]
         ..addAll(_osxToolsDirs)
         ..addAll(_linuxToolsDirs);
-    else if (io.Platform.isMacOS)
+    else if (Platform.isMacOS)
       return _osxToolsDirs;
-    else if (io.Platform.isLinux)
+    else if (Platform.isLinux)
       return _linuxToolsDirs;
     else
       return <List<String>>[];

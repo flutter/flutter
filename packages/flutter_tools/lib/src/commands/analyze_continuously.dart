@@ -4,13 +4,13 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io' as io;
 
 import 'package:args/args.dart';
 import 'package:path/path.dart' as path;
 
 import '../base/common.dart';
 import '../base/file_system.dart';
+import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/process_manager.dart';
 import '../base/utils.dart';
@@ -150,7 +150,7 @@ class AnalysisServer {
   final String sdk;
   final List<String> directories;
 
-  io.Process _process;
+  Process _process;
   StreamController<bool> _analyzingController = new StreamController<bool>.broadcast();
   StreamController<FileAnalysisErrors> _errorsController = new StreamController<FileAnalysisErrors>.broadcast();
 

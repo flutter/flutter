@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io' as io;
 
 import 'package:archive/archive.dart';
 import 'dart:convert' show UTF8;
@@ -13,6 +12,7 @@ import 'android/android_workflow.dart';
 import 'base/common.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
+import 'base/io.dart';
 import 'device.dart';
 import 'globals.dart';
 import 'ios/ios_workflow.dart';
@@ -27,7 +27,7 @@ const Map<String, String> _osNames = const <String, String>{
 };
 
 String osName() {
-  String os = io.Platform.operatingSystem;
+  String os = Platform.operatingSystem;
   return _osNames.containsKey(os) ? _osNames[os] : os;
 }
 
@@ -124,7 +124,7 @@ class Doctor {
       else
         printStatus('${result.leadingBox} ${validator.title}');
 
-      final String separator = io.Platform.isWindows ? ' ' : '•';
+      final String separator = Platform.isWindows ? ' ' : '•';
 
       for (ValidationMessage message in result.messages) {
         String text = message.message.replaceAll('\n', '\n      ');
@@ -182,7 +182,7 @@ class ValidationResult {
     if (type == ValidationType.missing)
       return '[x]';
     else if (type == ValidationType.installed)
-      return io.Platform.isWindows ? '[+]' : '[✓]';
+      return Platform.isWindows ? '[+]' : '[✓]';
     else
       return '[-]';
   }
@@ -217,7 +217,7 @@ class _FlutterValidator extends DoctorValidator {
     messages.add(new ValidationMessage('Engine revision ${version.engineRevisionShort}'));
     messages.add(new ValidationMessage('Tools Dart version ${version.dartSdkVersion}'));
 
-    if (io.Platform.isWindows) {
+    if (Platform.isWindows) {
       valid = ValidationType.missing;
 
       messages.add(new ValidationMessage.error(
@@ -254,9 +254,9 @@ abstract class IntelliJValidator extends DoctorValidator {
   };
 
   static Iterable<DoctorValidator> get installedValidators {
-    if (io.Platform.isLinux)
+    if (Platform.isLinux)
       return IntelliJValidatorOnLinux.installed;
-    if (io.Platform.isMacOS)
+    if (Platform.isMacOS)
       return IntelliJValidatorOnMac.installed;
     // TODO(danrubel): add support for Windows
     return <DoctorValidator>[];

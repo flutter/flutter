@@ -4,11 +4,11 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io' as io;
 
 import '../android/android_sdk.dart';
 import '../application_package.dart';
 import '../base/file_system.dart';
+import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/process.dart';
@@ -61,7 +61,7 @@ class AndroidDevice extends Device {
       try {
         // We pass an encoding of LATIN1 so that we don't try and interpret the
         // `adb shell getprop` result as UTF8.
-        io.ProcessResult result = processManager.runSync(
+        ProcessResult result = processManager.runSync(
           propCommand.first,
           propCommand.sublist(1),
           stdoutEncoding: LATIN1
@@ -559,7 +559,7 @@ class _AdbLogReader extends DeviceLogReader {
   final AndroidDevice device;
 
   StreamController<String> _linesController;
-  io.Process _process;
+  Process _process;
 
   @override
   Stream<String> get logLines => _linesController.stream;
@@ -585,7 +585,7 @@ class _AdbLogReader extends DeviceLogReader {
         _timeOrigin = _adbTimestampToDateTime(lastTimestamp);
     else
         _timeOrigin = null;
-    runCommand(device.adbCommandForDevice(args)).then((io.Process process) {
+    runCommand(device.adbCommandForDevice(args)).then((Process process) {
       _process = process;
       _process.stdout.transform(UTF8.decoder).transform(const LineSplitter()).listen(_onLine);
       _process.stderr.transform(UTF8.decoder).transform(const LineSplitter()).listen(_onLine);

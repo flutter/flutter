@@ -3,12 +3,12 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
-import 'dart:io' as io;
 
 import 'package:path/path.dart' as path;
 
 import 'context.dart';
 import 'file_system.dart';
+import 'io.dart';
 
 class Config {
   Config([File configFile]) {
@@ -46,7 +46,7 @@ class Config {
 }
 
 String _userHomeDir() {
-  String envKey = io.Platform.operatingSystem == 'windows' ? 'APPDATA' : 'HOME';
-  String value = io.Platform.environment[envKey];
+  String envKey = Platform.operatingSystem == 'windows' ? 'APPDATA' : 'HOME';
+  String value = Platform.environment[envKey];
   return value == null ? '.' : value;
 }

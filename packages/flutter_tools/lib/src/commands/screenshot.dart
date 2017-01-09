@@ -3,13 +3,13 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io' as io;
 
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as path;
 
 import '../base/common.dart';
 import '../base/file_system.dart';
+import '../base/io.dart' hide IOSink;
 import '../base/utils.dart';
 import '../device.dart';
 import '../globals.dart';
@@ -106,10 +106,10 @@ class ScreenshotCommand extends FlutterCommand {
     http.StreamedResponse skpResponse;
     try {
       skpResponse = await new http.Request('GET', skpUri).send();
-    } on io.SocketException catch (e) {
+    } on SocketException catch (e) {
       throwToolExit('Skia screenshot failed: $skpUri\n$e\n\n$errorHelpText');
     }
-    if (skpResponse.statusCode != io.HttpStatus.OK) {
+    if (skpResponse.statusCode != HttpStatus.OK) {
       String error = await skpResponse.stream.toStringStream().join();
       throwToolExit('Error: $error\n\n$errorHelpText');
     }
@@ -122,7 +122,7 @@ class ScreenshotCommand extends FlutterCommand {
           'file', skpResponse.stream, skpResponse.contentLength));
 
       http.StreamedResponse postResponse = await postRequest.send();
-      if (postResponse.statusCode != io.HttpStatus.OK)
+      if (postResponse.statusCode != HttpStatus.OK)
         throwToolExit('Failed to post Skia picture to skiaserve.\n\n$errorHelpText');
     } else {
       outputFile ??= getUniqueFile(fs.currentDirectory, 'flutter', 'skp');

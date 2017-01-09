@@ -4,7 +4,6 @@
 
 import 'dart:async';
 import 'dart:convert' show BASE64;
-import 'dart:io';
 
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:json_rpc_2/error_code.dart' as rpc_error_code;
@@ -12,6 +11,7 @@ import 'package:path/path.dart' as path;
 import 'package:stream_channel/stream_channel.dart';
 import 'package:web_socket_channel/io.dart';
 
+import 'base/io.dart';
 import 'globals.dart';
 
 /// The default VM service request timeout.

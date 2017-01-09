@@ -4,12 +4,12 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io' as io;
 
 import '../android/android_device.dart';
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
+import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
@@ -120,7 +120,7 @@ class Daemon {
     dynamic id = request['id'];
 
     if (id == null) {
-      io.stderr.writeln('no id for request: $request');
+      stderr.writeln('no id for request: $request');
       return;
     }
 
@@ -235,9 +235,9 @@ class DaemonDomain extends Domain {
           // capture the print output for testing.
           print(message.message);
         } else if (message.level == 'error') {
-          io.stderr.writeln(message.message);
+          stderr.writeln(message.message);
           if (message.stackTrace != null)
-            io.stderr.writeln(message.stackTrace.toString().trimRight());
+            stderr.writeln(message.stackTrace.toString().trimRight());
         }
       } else {
         if (message.stackTrace != null) {
@@ -590,7 +590,7 @@ class DeviceDomain extends Domain {
   }
 }
 
-Stream<Map<String, dynamic>> get stdinCommandStream => io.stdin
+Stream<Map<String, dynamic>> get stdinCommandStream => stdin
   .transform(UTF8.decoder)
   .transform(const LineSplitter())
   .where((String line) => line.startsWith('[{') && line.endsWith('}]'))
@@ -600,7 +600,7 @@ Stream<Map<String, dynamic>> get stdinCommandStream => io.stdin
   });
 
 void stdoutCommandResponse(Map<String, dynamic> command) {
-  io.stdout.writeln('[${JSON.encode(command, toEncodable: _jsonEncodeObject)}]');
+  stdout.writeln('[${JSON.encode(command, toEncodable: _jsonEncodeObject)}]');
 }
 
 dynamic _jsonEncodeObject(dynamic object) {
@@ -710,9 +710,9 @@ class _AppRunLogger extends Logger {
   @override
   void printError(String message, [StackTrace stackTrace]) {
     if (logToStdout) {
-      io.stderr.writeln(message);
+      stderr.writeln(message);
       if (stackTrace != null)
-        io.stderr.writeln(stackTrace.toString().trimRight());
+        stderr.writeln(stackTrace.toString().trimRight());
     } else {
       if (stackTrace != null) {
         _sendLogEvent(<String, dynamic>{

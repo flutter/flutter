@@ -4,9 +4,10 @@
 
 import 'dart:async';
 import 'dart:convert' show ASCII;
-import 'dart:io';
 
 import 'package:stack_trace/stack_trace.dart';
+
+import 'io.dart';
 
 final AnsiTerminal terminal = new AnsiTerminal();
 

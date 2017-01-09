@@ -3,10 +3,10 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io' as io;
 
 import '../base/common.dart';
 import '../base/file_system.dart';
+import '../base/io.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
@@ -218,7 +218,7 @@ class RunCommand extends RunCommandBase {
     String pidFile = argResults['pid-file'];
     if (pidFile != null) {
       // Write our pid to the file.
-      fs.file(pidFile).writeAsStringSync(io.pid.toString());
+      fs.file(pidFile).writeAsStringSync(pid.toString());
     }
     ResidentRunner runner;
 
