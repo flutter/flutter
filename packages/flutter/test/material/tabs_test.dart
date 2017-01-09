@@ -43,7 +43,7 @@ Widget buildFrame({ List<String> tabs, String value, bool isScrollable: false, K
 typedef Widget TabControllerFrameBuilder(BuildContext context, TabController controller);
 
 class TabControllerFrame extends StatefulWidget {
-  TabControllerFrame({ this.length, this.initialIndex, this.builder });
+  TabControllerFrame({ this.length, this.initialIndex: 0, this.builder });
 
   final int length;
   final int initialIndex;
@@ -478,5 +478,71 @@ void main() {
     expect(find.text('RIGHT CHILD'), findsOneWidget);
   });
 
+  testWidgets('TabController listener resets index', (WidgetTester tester) async {
+    // This is a regression test for the scenario brought up here
+    // https://github.com/flutter/flutter/pull/7387#pullrequestreview-15630946
+
+    List<String> tabs = <String>['A', 'B', 'C'];
+    TabController tabController;
+
+    Widget buildTabControllerFrame(BuildContext context, TabController controller) {
+      tabController = controller;
+      return new MaterialApp(
+        theme: new ThemeData(platform: TargetPlatform.android),
+        home: new Scaffold(
+          appBar: new AppBar(
+            title: new Text('tabs'),
+            bottom: new TabBar(
+              controller: controller,
+              tabs: tabs.map((String tab) => new Tab(text: tab)).toList(),
+            ),
+          ),
+          body: new TabBarView(
+            controller: controller,
+            children: <Widget>[
+              new Center(child: new Text('CHILD A')),
+              new Center(child: new Text('CHILD B')),
+              new Center(child: new Text('CHILD C')),
+            ]
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(new TabControllerFrame(
+      builder: buildTabControllerFrame,
+      length: tabs.length,
+    ));
+
+    tabController.animation.addListener(() {
+      if (tabController.animation.status == AnimationStatus.forward)
+        tabController.index = 2;
+      expect(tabController.indexIsChanging, true);
+    });
+
+    expect(tabController.index, 0);
+    expect(tabController.indexIsChanging, false);
+
+    tabController.animateTo(1, duration: const Duration(milliseconds: 200), curve: Curves.linear);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(tabController.index, 2);
+    expect(tabController.indexIsChanging, false);
+  });
+
+  testWidgets('TabBarView child disposed during animation', (WidgetTester tester) async {
+    // This is a regression test for the scenario brought up here
+    // https://github.com/flutter/flutter/pull/7387#discussion_r95089191x
+
+    List<String> tabs = <String>['LEFT', 'RIGHT'];
+    await tester.pumpWidget(buildLeftRightApp(tabs: tabs, value: 'LEFT'));
+
+    // Fling to the left, switch from the 'LEFT' tab to the 'RIGHT'
+    Point flingStart = tester.getCenter(find.text('LEFT CHILD'));
+    await tester.flingFrom(flingStart, const Offset(-200.0, 0.0), 10000.0);
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1)); // finish the scroll animation
+  });
 
 }

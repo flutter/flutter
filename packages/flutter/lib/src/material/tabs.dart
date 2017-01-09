@@ -380,9 +380,13 @@ class _TabBarState extends State<TabBar> {
   int _currentIndex;
 
   void _updateTabController() {
+    TabController newController = config.controller ?? DefaultTabController.of(context);
+    if (newController == _controller)
+      return;
+
     if (_controller != null)
       _controller.animation.removeListener(_handleTick);
-    _controller = config.controller ?? DefaultTabController.of(context);
+    _controller = newController;
     if (_controller != null) {
       _controller.animation.addListener(_handleTick);
       _changeAnimation = new _ChangeAnimation(_controller);
@@ -458,8 +462,7 @@ class _TabBarState extends State<TabBar> {
   }
 
   void _handleTick() {
-    if (!mounted)
-      return;
+    assert(mounted);
 
     if (_controller.indexIsChanging) {
       setState(() {
@@ -473,8 +476,7 @@ class _TabBarState extends State<TabBar> {
   }
 
   void _saveTabOffsets(List<double> tabOffsets) {
-    if (_indicatorPainter != null)
-      _indicatorPainter.tabOffsets = tabOffsets;
+    _indicatorPainter?.tabOffsets = tabOffsets;
   }
 
   void _handleTap(int index) {
@@ -538,9 +540,8 @@ class _TabBarState extends State<TabBar> {
     // then give all of the tabs equal flexibility so that their widths
     // reflect the intrinsic width of their labels.
     for (int index = 0; index < config.tabs.length; index++) {
-      final int tabIndex = index;
       wrappedTabs[index] = new InkWell(
-        onTap: () { _handleTap(tabIndex); },
+        onTap: () { _handleTap(index); },
         child: wrappedTabs[index],
       );
       if (!config.isScrollable)
@@ -663,12 +664,16 @@ class _TabBarViewState extends State<TabBarView> {
   double _offsetAnchor;
   double _offsetBias = 0.0;
   int _currentIndex;
-  bool _warpUnderway = false;
+  int _warpUnderwayCount = 0;
 
   void _updateTabController() {
+    TabController newController = config.controller ?? DefaultTabController.of(context);
+    if (newController == _controller)
+      return;
+
     if (_controller != null)
       _controller.animation.removeListener(_handleTick);
-    _controller = config.controller ?? DefaultTabController.of(context);
+    _controller = newController;
     if (_controller != null)
       _controller.animation.addListener(_handleTick);
   }
@@ -691,7 +696,7 @@ class _TabBarViewState extends State<TabBarView> {
     super.didUpdateConfig(oldConfig);
     if (config.controller != oldConfig.controller)
       _updateTabController();
-    if (config.children != oldConfig.children && !_warpUnderway)
+    if (config.children != oldConfig.children && _warpUnderwayCount == 0)
       _children = config.children;
   }
 
@@ -728,7 +733,7 @@ class _TabBarViewState extends State<TabBarView> {
     assert((_currentIndex - previousIndex).abs() > 1);
     double initialScroll;
     setState(() {
-      _warpUnderway = true;
+      _warpUnderwayCount += 1;
       _children = new List<Widget>.from(config.children, growable: false);
       if (_currentIndex > previousIndex) {
         _children[_currentIndex - 1] = _children[previousIndex];
@@ -738,17 +743,24 @@ class _TabBarViewState extends State<TabBarView> {
         initialScroll = (_currentIndex + 1).toDouble();
       }
     });
+
     await viewport.scrollTo(initialScroll);
+    if (!mounted)
+      return new Future<Null>.value();
+
     await viewport.scrollTo(_currentIndex.toDouble(), duration: kTabScrollDuration);
+    if (!mounted)
+      return new Future<Null>.value();
+
     setState(() {
-      _warpUnderway = false;
+      _warpUnderwayCount -= 1;
       _children = config.children;
     });
   }
 
   // Called when the _PageableTabBarView scrolls
   bool _handleScrollNotification(ScrollNotification notification) {
-    if (_warpUnderway)
+    if (_warpUnderwayCount > 0)
       return false;
 
     final ScrollableState scrollable = notification.scrollable;

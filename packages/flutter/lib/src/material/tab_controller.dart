@@ -49,28 +49,29 @@ class TabController extends ChangeNotifier {
     assert(value != null);
     assert(value >= 0 && value < length);
     assert(duration == null ? curve == null : true);
+    assert(_indexIsChangingCount >= 0);
     if (value == _index)
       return;
-    _indexIsChanging = true;
     _previousIndex = index;
     _index = value;
     if (duration != null) {
+      _indexIsChangingCount += 1;
       _animationController
         ..animateTo(_index.toDouble(), duration: duration, curve: curve).then((_) {
-          _indexIsChanging = false;
+          _indexIsChangingCount -= 1;
           notifyListeners();
         });
     } else {
-      _indexIsChanging = true;
+      _indexIsChangingCount += 1;
       _animationController.value = _index.toDouble();
-      _indexIsChanging = false;
+      _indexIsChangingCount -= 1;
       notifyListeners();
     }
   }
 
   /// The index of the currently selected tab. Changing the index also updates
-  /// [previousIndex], sets the [animation]'s value, resets [indexIsChanging]
-  /// to false, and notifies listeners.
+  /// [previousIndex], sets the [animation]'s value to index, resets
+  /// [indexIsChanging] to false, and notifies listeners.
   ///
   /// To change the currently selected tab and play the [animation] use [animateTo].
   int get index => _index;
@@ -84,8 +85,8 @@ class TabController extends ChangeNotifier {
   int _previousIndex;
 
   /// True while we're animating from [previousIndex] to [index].
-  bool get indexIsChanging => _indexIsChanging;
-  bool _indexIsChanging = false;
+  bool get indexIsChanging => _indexIsChangingCount != 0;
+  int _indexIsChangingCount = 0;
 
   /// Immediately sets [index] and [previousIndex] and then plays the
   /// [animation] from its current value to [index].
