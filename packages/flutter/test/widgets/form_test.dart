@@ -54,6 +54,37 @@ void main() {
     await checkText('');
   });
 
+  testWidgets('onChanged callback is called', (WidgetTester tester) async {
+    String fieldValue;
+
+    Widget builder() {
+      return new Center(
+        child: new Material(
+          child: new Form(
+            child: new InputFormField(
+              onChanged: (InputValue value) { fieldValue = value.text; },
+            ),
+          )
+        )
+      );
+    }
+
+    await tester.pumpWidget(builder());
+    await showKeyboard(tester);
+
+    expect(fieldValue, isNull);
+
+    Future<Null> checkText(String testValue) async {
+      enterText(testValue);
+      await tester.idle();
+      // pump'ing is unnecessary because callback happens regardless of frames
+      expect(fieldValue, equals(testValue));
+    }
+
+    await checkText('Test');
+    await checkText('');
+  });
+
   testWidgets('Validator sets the error text only when validate is called', (WidgetTester tester) async {
     GlobalKey<FormState> formKey = new GlobalKey<FormState>();
     GlobalKey inputKey = new GlobalKey();
