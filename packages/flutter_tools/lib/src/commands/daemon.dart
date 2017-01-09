@@ -360,7 +360,7 @@ class AppDomain extends Domain {
         applicationBinary: applicationBinary,
         projectRootPath: projectRootPath,
         packagesFilePath: packagesFilePath,
-        projectAssets: projectAssets
+        projectAssets: projectAssets,
       );
     } else {
       runner = new RunAndStayResident(
