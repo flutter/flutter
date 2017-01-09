@@ -20,7 +20,7 @@
 
 #include <algorithm>
 
-#include <android/log.h>
+#include <log/log.h>
 #include "unicode/unistr.h"
 #include "unicode/unorm2.h"
 
