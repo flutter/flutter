@@ -130,11 +130,9 @@ abstract class SingleTickerProviderStateMixin implements State<dynamic>, TickerP
     if (_ticker != null) {
       if (_ticker.isActive && _ticker.muted)
         description.add('ticker active but muted');
-      else
-      if (_ticker.isActive)
+      else if (_ticker.isActive)
         description.add('ticker active');
-      else
-      if (_ticker.muted)
+      else if (_ticker.muted)
         description.add('ticker inactive and muted');
       else
         description.add('ticker inactive');
