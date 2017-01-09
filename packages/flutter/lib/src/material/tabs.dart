@@ -825,6 +825,9 @@ class TabPageSelector extends StatelessWidget {
   TabPageSelector({ Key key, this.controller }) : super(key: key);
 
   /// This widget's selection and animation state.
+  ///
+  /// If [TabController] is not provided, then the value of [DefaultTabController.of]
+  /// will be used.
   final TabController controller;
 
   Widget _buildTabIndicator(
