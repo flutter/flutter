@@ -127,6 +127,12 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["has-android-device"]
 
+  microbenchmarks:
+    description: >
+      Runs benchmarks from dev/benchmarks/microbenchmarks.
+    stage: devicelab
+    required_agent_capabilities: ["has-android-device"]
+
 
   # iOS on-device tests
 
