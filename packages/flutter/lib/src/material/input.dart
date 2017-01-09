@@ -629,6 +629,7 @@ class InputFormField extends FormField<InputValue> {
     InputValue initialValue: InputValue.empty,
     FormFieldSetter<InputValue> onSaved,
     FormFieldValidator<InputValue> validator,
+    ValueChanged<InputValue> onChanged,
   }) : super(
     key: key,
     initialValue: initialValue,
@@ -647,7 +648,11 @@ class InputFormField extends FormField<InputValue> {
         autofocus: autofocus,
         maxLines: maxLines,
         value: field.value,
-        onChanged: field.onChanged,
+        onChanged: (InputValue value) {
+          field.onChanged(value);
+          if (onChanged != null)
+            onChanged(value);
+        },
         errorText: field.errorText,
       );
     },
