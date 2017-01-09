@@ -74,15 +74,15 @@ class _FlutterDriverExtension {
     });
 
     _commandDeserializers.addAll(<String, CommandDeserializerCallback>{
-      'get_health': GetHealth.deserialize,
-      'get_render_tree': GetRenderTree.deserialize,
-      'tap': Tap.deserialize,
-      'get_text': GetText.deserialize,
-      'scroll': Scroll.deserialize,
-      'scrollIntoView': ScrollIntoView.deserialize,
-      'setInputText': SetInputText.deserialize,
-      'submitInputText': SubmitInputText.deserialize,
-      'waitFor': WaitFor.deserialize,
+      'get_health': (Map<String, dynamic> json) => new GetHealth.deserialize(json),
+      'get_render_tree': (Map<String, dynamic> json) => new GetRenderTree.deserialize(json),
+      'tap': (Map<String, dynamic> json) => new Tap.deserialize(json),
+      'get_text': (Map<String, dynamic> json) => new GetText.deserialize(json),
+      'scroll': (Map<String, dynamic> json) => new Scroll.deserialize(json),
+      'scrollIntoView': (Map<String, dynamic> json) => new ScrollIntoView.deserialize(json),
+      'setInputText': (Map<String, dynamic> json) => new SetInputText.deserialize(json),
+      'submitInputText': (Map<String, dynamic> json) => new SubmitInputText.deserialize(json),
+      'waitFor': (Map<String, dynamic> json) => new WaitFor.deserialize(json),
     });
 
     _finders.addAll(<String, FinderConstructor>{
@@ -108,19 +108,32 @@ class _FlutterDriverExtension {
   /// The returned JSON is command specific. Generally the caller deserializes
   /// the result into a subclass of [Result], but that's not strictly required.
   Future<Map<String, dynamic>> call(Map<String, String> params) async {
+    String commandKind = params['command'];
     try {
-      String commandKind = params['command'];
       CommandHandlerCallback commandHandler = _commandHandlers[commandKind];
       CommandDeserializerCallback commandDeserializer =
           _commandDeserializers[commandKind];
       if (commandHandler == null || commandDeserializer == null)
         throw 'Extension $_extensionMethod does not support command $commandKind';
       Command command = commandDeserializer(params);
-      return (await commandHandler(command)).toJson();
+      Result response = await commandHandler(command).timeout(command.timeout);
+      return _makeResponse(response.toJson());
+    } on TimeoutException catch (error, stackTrace) {
+      String msg = 'Timeout while executing $commandKind: $error\n$stackTrace';
+     _log.error(msg);
+      return _makeResponse(msg, isError: true);
     } catch (error, stackTrace) {
-      _log.error('Uncaught extension error: $error\n$stackTrace');
-      rethrow;
+      String msg = 'Uncaught extension error while executing $commandKind: $error\n$stackTrace';
+      _log.error(msg);
+      return _makeResponse(msg, isError: true);
     }
+  }
+
+  Map<String, dynamic> _makeResponse(dynamic response, {bool isError: false}) {
+    return <String, dynamic>{
+      'isError': isError,
+      'response': response,
+    };
   }
 
   Stream<Duration> _onFrameReadyStream;
