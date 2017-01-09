@@ -213,8 +213,8 @@ class FlutterPlatform extends PlatformPlugin {
   }) {
     return '''
 import 'dart:convert';
-import '../base/io.dart';
 
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:stream_channel/stream_channel.dart';
 import 'package:test/src/runner/plugin/remote_platform_helpers.dart';
 import 'package:test/src/runner/vm/catch_isolate_errors.dart';
