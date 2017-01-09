@@ -164,7 +164,6 @@ class FlutterPlatform extends PlatformPlugin {
           harnessToTest.cancel();
           testToHarness.cancel();
 
-          assert(!controllerSinkClosed);
           switch (testResult) {
             case _TestResult.crashed:
               int exitCode = await process.exitCode;
