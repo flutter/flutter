@@ -144,7 +144,6 @@ class AlertDialog extends StatelessWidget {
 
     if (content != null) {
       children.add(new Flexible(
-        fit: FlexFit.loose,
         child: new Padding(
           padding: contentPadding ?? const EdgeInsets.fromLTRB(24.0, 20.0, 24.0, 24.0),
           child: new DefaultTextStyle(
@@ -244,7 +243,6 @@ class SimpleDialog extends StatelessWidget {
 
     if (children != null) {
       body.add(new Flexible(
-        fit: FlexFit.loose,
         child: new Block(
           padding: contentPadding ?? const EdgeInsets.fromLTRB(0.0, 12.0, 0.0, 16.0),
           children: children

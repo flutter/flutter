@@ -732,7 +732,6 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
                   children: <Widget>[
                     header,
                     new Flexible(
-                      fit: FlexFit.loose,
                       child: new Column(
                         children: <Widget>[
                           new Expanded(child: picker),

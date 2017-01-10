@@ -545,7 +545,7 @@ class _TabBarState extends State<TabBar> {
         child: wrappedTabs[index],
       );
       if (!config.isScrollable)
-        wrappedTabs[index] = new Flexible(child: wrappedTabs[index]);
+        wrappedTabs[index] = new Expanded(child: wrappedTabs[index]);
     }
 
     Widget tabBar = new CustomPaint(
