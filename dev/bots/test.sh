@@ -14,27 +14,6 @@ detect_error_on_exit() {
     fi
 }
 
-check_for_dart_io() {
-    { set +x; } 2>/dev/null
-    (
-        cd packages/flutter_tools
-        for f in $(grep -Erl '^import.*dart:io' lib bin test); do
-            if [[ "$f" == "lib/src/base/io.dart" ]]; then
-                continue
-            fi
-
-            IFS=$'\n' matches=( $(grep -E '^import.*dart:io' $f) )
-            for match in "${matches[@]}"; do
-                if [[ "$match" != *"ignore: dart_io_import"* ]]; then
-                    echo -e "\x1B[31mError: $f imports 'dart:io'; import 'lib/src/base/io.dart' instead\x1B[0m"
-                    exit 1
-                fi
-            done
-        done
-    )
-    set -ex
-}
-
 set -ex
 
 # analyze all the Dart code in the repo
@@ -61,7 +40,6 @@ SRC_ROOT=$PWD
 (cd packages/flutter_driver; dart -c test/all.dart)
 (cd packages/flutter_test; flutter test)
 (cd packages/flutter_tools; FLUTTER_ROOT=$SRC_ROOT dart -c test/all.dart)
-check_for_dart_io
 
 (cd dev/devicelab; dart -c test/all.dart)
 (cd dev/manual_tests; flutter test)
