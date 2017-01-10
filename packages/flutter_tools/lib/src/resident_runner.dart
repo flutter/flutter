@@ -35,7 +35,7 @@ abstract class ResidentRunner {
     String projectAssets,
   }) {
     _mainPath = findMainDartFile(target);
-    _projectRootPath = projectRootPath ?? fs.currentDirectory;
+    _projectRootPath = projectRootPath ?? fs.currentDirectory.toString();
     _packagesFilePath =
         packagesFilePath ?? path.absolute(PackageMap.globalPackagesPath);
     if (projectAssets != null)
