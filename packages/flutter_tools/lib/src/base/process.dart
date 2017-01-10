@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'file_system.dart';
 import 'io.dart';
 import 'process_manager.dart';
 import '../globals.dart';
@@ -202,7 +203,7 @@ void _traceCommand(List<String> args, { String workingDirectory }) {
   if (workingDirectory == null)
     printTrace(argsText);
   else
-    printTrace("[$workingDirectory${Platform.pathSeparator}] $argsText");
+    printTrace("[$workingDirectory${fs.pathSeparator}] $argsText");
 }
 
 String _runWithLoggingSync(List<String> cmd, {
