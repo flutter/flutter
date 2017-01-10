@@ -10,7 +10,6 @@ import 'package:path/path.dart' as path;
 import 'package:yaml/yaml.dart';
 
 import 'base/file_system.dart';
-import 'base/io.dart';
 import 'build_info.dart';
 import 'cache.dart';
 import 'dart/package_map.dart';
@@ -378,7 +377,7 @@ Map<_Asset, List<_Asset>> _parseAssets(
     return result;
 
   excludeDirs = excludeDirs.map(
-    (String exclude) => path.absolute(exclude) + Platform.pathSeparator).toList();
+    (String exclude) => path.absolute(exclude) + fs.pathSeparator).toList();
 
   if (manifestDescriptor.containsKey('assets')) {
     for (String asset in manifestDescriptor['assets']) {

@@ -93,7 +93,7 @@ String getElapsedAsMilliseconds(Duration duration) {
 /// Return a relative path if [fullPath] is contained by the cwd, else return an
 /// absolute path.
 String getDisplayPath(String fullPath) {
-  String cwd = fs.currentDirectory.path + Platform.pathSeparator;
+  String cwd = fs.currentDirectory.path + fs.pathSeparator;
   return fullPath.startsWith(cwd) ?  fullPath.substring(cwd.length) : fullPath;
 }
 
