@@ -15,4 +15,5 @@ export 'src/matchers.dart';
 export 'src/test_async_utils.dart';
 export 'src/stack_manipulation.dart';
 export 'src/test_pointer.dart';
+export 'src/test_vsync.dart';
 export 'src/widget_tester.dart';
