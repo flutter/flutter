@@ -48,6 +48,19 @@ void main() {
     expect(didReceiveTap, isTrue);
   });
 
+  testWidgets('Flexible defaults to loose', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new Row(
+        children: <Widget>[
+          new Flexible(child: new SizedBox(width: 100.0, height: 200.0)),
+        ],
+      ),
+    );
+
+    RenderBox box = tester.renderObject(find.byType(SizedBox));
+    expect(box.size.width, 100.0);
+  });
+
   testWidgets('Can pass null for flex', (WidgetTester tester) async {
     await tester.pumpWidget(
       new Row(
