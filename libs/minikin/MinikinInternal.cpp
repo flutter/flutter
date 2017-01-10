@@ -21,7 +21,7 @@
 #include "HbFontCache.h"
 #include "generated/UnicodeData.h"
 
-#include <android/log.h>
+#include <log/log.h>
 
 namespace minikin {
 

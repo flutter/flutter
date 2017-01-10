@@ -28,7 +28,7 @@
 
 #include <string>
 
-#include <android/log.h>
+#include <log/log.h>
 
 namespace minikin {
 

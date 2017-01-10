@@ -19,7 +19,7 @@
 #include <libxml/tree.h>
 #include <unistd.h>
 
-#include <android/log.h>
+#include <log/log.h>
 
 #include "FontLanguage.h"
 #include "MinikinFontForTest.h"

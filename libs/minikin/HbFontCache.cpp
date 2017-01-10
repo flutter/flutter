@@ -18,7 +18,7 @@
 
 #include "HbFontCache.h"
 
-#include <android/log.h>
+#include <log/log.h>
 #include <utils/LruCache.h>
 
 #include <hb.h>
