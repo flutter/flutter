@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -19,6 +20,7 @@ Future<Null> main() async {
   await benchmarkWidgets((WidgetTester tester) async {
     stocks.main();
     await tester.pump(); // Start startup animation
+    new Timer(const Duration(milliseconds: 1100), () { });  // workaround for https://github.com/flutter/flutter/issues/7433
     await tester.pump(const Duration(seconds: 1)); // Complete startup animation
     await tester.tapAt(new Point(20.0, 20.0)); // Open drawer
     await tester.pump(); // Start drawer animation
