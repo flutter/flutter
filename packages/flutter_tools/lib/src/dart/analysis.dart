@@ -266,9 +266,7 @@ class _StdLogger extends Logger {
 
   @override
   void logInformation(String message, [Exception exception]) {
-    // TODO: remove once addressed in analzyer (http://dartbug.com/28285)
-    if (message != 'No definition of type FutureOr') {
-      outSink.writeln(message);
-    }
+    // TODO(pq): remove once addressed in analyzer (http://dartbug.com/28285)
+    if (message != 'No definition of type FutureOr') outSink.writeln(message);
   }
 }
