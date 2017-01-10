@@ -255,8 +255,8 @@ class _DevFSHttpWriter {
       await request.addStream(contents);
       HttpClientResponse response = await request.close();
       await response.drain();
-    } catch (e, stackTrace) {
-      printError('Error writing "${entry.devicePath}" to DevFS: $e\n$stackTrace');
+    } catch (e) {
+      printError('Error writing "${entry.devicePath}" to DevFS: $e');
     }
     if (progressReporter != null) {
       _done++;
