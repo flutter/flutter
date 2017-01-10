@@ -22,7 +22,7 @@
 
 #include <SkTypeface.h>
 
-#include <android/log.h>
+#include <log/log.h>
 
 MinikinFontForTest::MinikinFontForTest(const std::string& font_path) :
     MinikinFontForTest(font_path, SkTypeface::CreateFromFile(font_path.c_str())) {
