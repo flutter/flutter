@@ -105,7 +105,7 @@ class FlutterPlatform extends PlatformPlugin {
         subprocessActive = false;
         if (!controllerSinkClosed && exitCode != 0) {
           String message = _getErrorMessage(_getExitCodeMessage(exitCode, 'after tests finished'), testPath, shellPath);
-          controller.sink.addError(new Exception(message));
+          controller.sink.addError(message);
         }
       });
 
@@ -127,13 +127,13 @@ class FlutterPlatform extends PlatformPlugin {
         case _InitialResult.crashed:
           int exitCode = await process.exitCode;
           String message = _getErrorMessage(_getExitCodeMessage(exitCode, 'before connecting to test harness'), testPath, shellPath);
-          controller.sink.addError(new Exception(message));
+          controller.sink.addError(message);
           controller.sink.close();
           await controller.sink.done;
           break;
         case _InitialResult.timedOut:
           String message = _getErrorMessage('Test never connected to test harness.', testPath, shellPath);
-          controller.sink.addError(new Exception(message));
+          controller.sink.addError(message);
           controller.sink.close();
           await controller.sink.done;
           break;
@@ -169,7 +169,7 @@ class FlutterPlatform extends PlatformPlugin {
               int exitCode = await process.exitCode;
               subprocessActive = false;
               String message = _getErrorMessage(_getExitCodeMessage(exitCode, 'before test harness closed its WebSocket'), testPath, shellPath);
-              controller.sink.addError(new Exception(message));
+              controller.sink.addError(message);
               controller.sink.close();
               await controller.sink.done;
               break;
@@ -214,8 +214,12 @@ class FlutterPlatform extends PlatformPlugin {
 import 'dart:convert';
 import 'dart:io'; // ignore: dart_io_import
 
-import 'package:stream_channel/stream_channel.dart';
+// We import this library first in order to trigger an import error for
+// package:test (rather than package:stream_channel) when the developer forgets
+// to add a dependency on package:test.
 import 'package:test/src/runner/plugin/remote_platform_helpers.dart';
+
+import 'package:stream_channel/stream_channel.dart';
 import 'package:test/src/runner/vm/catch_isolate_errors.dart';
 
 import '$testUrl' as test;
@@ -285,7 +289,9 @@ void main() {
       stream.transform(UTF8.decoder)
         .transform(const LineSplitter())
         .listen((String line) {
-          if (line != null)
+          if (line.startsWith('error: Unable to read Dart source \'package:test/'))
+            printError('\n\nFailed to load test harness. Are you missing a dependency on flutter_test?\n');
+          else if (line != null)
             printStatus('Shell: $line');
         });
     }

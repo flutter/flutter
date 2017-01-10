@@ -1,0 +1,4 @@
+name: missing_dependency_tests
+dependencies:
+  flutter:
+    sdk: flutter
