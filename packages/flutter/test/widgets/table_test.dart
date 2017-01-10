@@ -6,6 +6,18 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
+class TestStatefulWidget extends StatefulWidget {
+  TestStatefulWidget({ Key key }) : super(key: key);
+
+  @override
+  TestStatefulWidgetState createState() => new TestStatefulWidgetState();
+}
+
+class TestStatefulWidgetState extends State<TestStatefulWidget> {
+  @override
+  Widget build(BuildContext context) => new Container();
+}
+
 void main() {
   testWidgets('Table widget - control test', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -331,5 +343,159 @@ void main() {
     expect(contexts.length, equals(2));
     expect(contexts[0], equals(contexts[1]));
   });
+
+  testWidgets('Table widget - keyed rows', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new Table(
+        children: <TableRow>[
+          new TableRow(
+            key: const ValueKey<int>(1),
+            children: <Widget>[
+              new TestStatefulWidget(key: const ValueKey<int>(11)),
+              new TestStatefulWidget(key: const ValueKey<int>(12)),
+            ],
+          ),
+          new TableRow(
+            key: const ValueKey<int>(2),
+            children: <Widget>[
+              new TestStatefulWidget(key: const ValueKey<int>(21)),
+              new TestStatefulWidget(key: const ValueKey<int>(22)),
+            ],
+          ),
+        ]
+      )
+    );
+
+    TestStatefulWidgetState state11 = tester.state(find.byKey(const ValueKey<int>(11)));
+    TestStatefulWidgetState state12 = tester.state(find.byKey(const ValueKey<int>(12)));
+    TestStatefulWidgetState state21 = tester.state(find.byKey(const ValueKey<int>(21)));
+    TestStatefulWidgetState state22 = tester.state(find.byKey(const ValueKey<int>(22)));
+
+    expect(state11.mounted, isTrue);
+    expect(state12.mounted, isTrue);
+    expect(state21.mounted, isTrue);
+    expect(state22.mounted, isTrue);
+
+    await tester.pumpWidget(
+      new Table(
+        children: <TableRow>[
+          new TableRow(
+            key: const ValueKey<int>(2),
+            children: <Widget>[
+              new TestStatefulWidget(key: const ValueKey<int>(21)),
+              new TestStatefulWidget(key: const ValueKey<int>(22)),
+            ],
+          ),
+        ]
+      )
+    );
+
+    expect(state11.mounted, isFalse);
+    expect(state12.mounted, isFalse);
+    expect(state21.mounted, isTrue);
+    expect(state22.mounted, isTrue);
+  });
+
+  testWidgets('Table widget - global key reparenting', (WidgetTester tester) async {
+    GlobalKey key = new GlobalKey();
+    Key tableKey = new UniqueKey();
+
+    await tester.pumpWidget(
+      new Column(
+        children: <Widget> [
+          new Expanded(
+            key: tableKey,
+            child: new Table(
+              children: <TableRow>[
+                new TableRow(
+                  children: <Widget>[
+                    new Container(key: const ValueKey<int>(1)),
+                    new TestStatefulWidget(key: key),
+                    new Container(key: const ValueKey<int>(2)),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+
+    RenderTable table = tester.renderObject(find.byType(Table));
+    expect(table.row(0).length, 3);
+
+    await tester.pumpWidget(
+      new Column(
+        children: <Widget> [
+          new Expanded(child: new TestStatefulWidget(key: key)),
+          new Expanded(
+            key: tableKey,
+            child: new Table(
+              children: <TableRow>[
+                new TableRow(
+                  children: <Widget>[
+                    new Container(key: const ValueKey<int>(1)),
+                    new Container(key: const ValueKey<int>(2)),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+
+    expect(tester.renderObject(find.byType(Table)), equals(table));
+    expect(table.row(0).length, 2);
+
+    await tester.pumpWidget(
+      new Column(
+        children: <Widget> [
+          new Expanded(
+            key: tableKey,
+            child: new Table(
+              children: <TableRow>[
+                new TableRow(
+                  children: <Widget>[
+                    new Container(key: const ValueKey<int>(1)),
+                    new TestStatefulWidget(key: key),
+                    new Container(key: const ValueKey<int>(2)),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+
+    expect(tester.renderObject(find.byType(Table)), equals(table));
+    expect(table.row(0).length, 3);
+
+    await tester.pumpWidget(
+      new Column(
+        children: <Widget> [
+          new Expanded(
+            key: tableKey,
+            child: new Table(
+              children: <TableRow>[
+                new TableRow(
+                  children: <Widget>[
+                    new Container(key: const ValueKey<int>(1)),
+                    new Container(key: const ValueKey<int>(2)),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          new Expanded(child: new TestStatefulWidget(key: key)),
+        ],
+      ),
+    );
+
+    expect(tester.renderObject(find.byType(Table)), equals(table));
+    expect(table.row(0).length, 2);
+  });
+
   // TODO(ianh): Test handling of TableCell object
 }

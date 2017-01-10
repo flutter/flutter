@@ -401,13 +401,13 @@ class _TextSelectionHandleOverlayState extends State<_TextSelectionHandleOverlay
     if (config.selection.isCollapsed)
       return TextSelectionHandleType.collapsed;
 
+    assert(endpoint.direction != null);
     switch (endpoint.direction) {
       case TextDirection.ltr:
         return ltrType;
       case TextDirection.rtl:
         return rtlType;
     }
-    assert(endpoint.direction != null);
     return null;
   }
 }

@@ -7,10 +7,13 @@ import 'package:flutter/material.dart';
 
 void main() {
   testWidgets('TickerMode', (WidgetTester tester) async {
-    await tester.pumpWidget(new TickerMode(
+    Widget widget = new TickerMode(
       enabled: false,
       child: new LinearProgressIndicator()
-    ));
+    );
+    expect(widget.toString, isNot(throwsException));
+
+    await tester.pumpWidget(widget);
 
     expect(tester.binding.transientCallbackCount, 0);
 
@@ -52,7 +55,10 @@ void main() {
   });
 
   testWidgets('SingleTickerProviderStateMixin can handle not being used', (WidgetTester tester) async {
-    await tester.pumpWidget(new BoringTickerTest());
+    Widget widget = new BoringTickerTest();
+    expect(widget.toString, isNot(throwsException));
+
+    await tester.pumpWidget(widget);
     await tester.pumpWidget(new Container());
     // the test is that this doesn't crash, like it used to...
   });
