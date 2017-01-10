@@ -1759,42 +1759,6 @@ final List<RegExp> csNotices = <RegExp>[
     r' \* Modifications are under the same license as the original code \(see above\)\n'
     r' \* ----------------------------------------------------------------------------'
   ),
-
-  // // dart/third_party/boringssl/src/crypto/bn/rsaz_exp.h
-  // // TODO(ianh): remove this before checkin
-  // new RegExp(
-  //   r'()()'
-  //   r"/\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\n"
-  //   r"\* Copyright\(c\) 2012, Intel Corp\.                                             \n"
-  //   r"\* Developers and authors:                                                    \n"
-  //   r"\* Shay Gueron \(1, 2\), and Vlad Krasnov \(1\)                                   \n"
-  //   r"\* \(1\) Intel Corporation, Israel Development Center, Haifa, Israel                               \n"
-  //   r"\* \(2\) University of Haifa, Israel                                              \n"
-  //   r"\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\n"
-  //   r"\* LICENSE:                                                                \n"
-  //   r"\* This submission to OpenSSL is to be made available under the OpenSSL  \n"
-  //   r"\* license, and only to the OpenSSL project, in order to allow integration    \n"
-  //   r"\* into the publicly distributed code\. \n"
-  //   r"\* The use of this code, or portions of this code, or concepts embedded in\n"
-  //   r"\* this code, or modification of this code and/or algorithm\(s\) in it, or the\n"
-  //   r"\* use of this code for any other purpose than stated above, requires special\n"
-  //   r"\* licensing\.                                                                  \n"
-  //   r"\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\n"
-  //   r"\* DISCLAIMER:                                                                \n"
-  //   r"\* THIS SOFTWARE IS PROVIDED BY THE CONTRIBUTORS AND THE COPYRIGHT OWNERS     \n"
-  //   r"\* ``AS IS''\. ANY EXPRESSED OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED \n"
-  //   r"\* TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR \n"
-  //   r"\* PURPOSE ARE DISCLAIMED\. IN NO EVENT SHALL THE CONTRIBUTORS OR THE COPYRIGHT\n"
-  //   r"\* OWNERS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, \n"
-  //   r"\* OR CONSEQUENTIAL DAMAGES \(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF    \n"
-  //   r"\* SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS   \n"
-  //   r"\* INTERRUPTION\) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN    \n"
-  //   r"\* CONTRACT, STRICT LIABILITY, OR TORT \(INCLUDING NEGLIGENCE OR OTHERWISE\)    \n"
-  //   r"\* ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE \n"
-  //   r"\* POSSIBILITY OF SUCH DAMAGE\.                                                \n"
-  //   r"\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*/\n"
-  // ),
-
 ];
 
 
