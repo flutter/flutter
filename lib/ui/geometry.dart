@@ -356,6 +356,9 @@ class Size extends OffsetBase {
   /// See also [Rect.bottomRight].
   Point bottomRight(Point origin) => new Point(origin.x + width, origin.y + height);
 
+  /// A size with the width and height swapped.
+  Size get flipped => new Size(height, width);
+
   /// Linearly interpolate between two sizes
   ///
   /// If either size is null, this function interpolates from [Offset.zero].
