@@ -176,7 +176,11 @@ class RunCommand extends RunCommandBase {
       try {
         app = daemon.appDomain.startApp(
           device, fs.currentDirectory.path, targetFile, route,
-          getBuildMode(), argResults['start-paused'], hotMode);
+          getBuildMode(), argResults['start-paused'], hotMode,
+          applicationBinary: argResults['use-application-binary'],
+          projectRootPath: argResults['project-root'],
+          packagesFilePath: argResults['packages'],
+          projectAssets: argResults['project-assets']);
       } catch (error) {
         throwToolExit(error.toString());
       }
