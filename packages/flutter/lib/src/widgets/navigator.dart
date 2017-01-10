@@ -234,9 +234,12 @@ typedef bool RoutePredicate(Route<dynamic> route);
 /// Many apps have a navigator near the top of their widget hierarchy in order
 /// to display their logical history using an [Overlay] with the most recently
 /// visited pages visually on top of the older pages. Using this pattern lets
-/// the navigator visually transition from one page to another by the widgets
+/// the navigator visually transition from one page to another by moving the widgets
 /// around in the overlay. Similarly, the navigator can be used to show a dialog
 /// by positioning the dialog widget above the current page.
+///
+/// Although you can create an navigator directly, it's most common to refer to the
+/// navigator created by a [WidgetsApp] or a [MaterialApp] with [Navigator.of].
 class Navigator extends StatefulWidget {
   /// Creates a widget that maintains a stack-based history of child widgets.
   ///
