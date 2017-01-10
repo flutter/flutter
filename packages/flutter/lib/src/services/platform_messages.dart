@@ -155,9 +155,13 @@ class PlatformMessages {
   /// The given callback will replace the currently registered callback (if any).
   /// To remove the mock handler, pass `null` as the `handler` argument.
   static void setMockStringMessageHandler(String channel, Future<String> handler(String message)) {
-    setMockBinaryMessageHandler(channel, (ByteData message) async {
-      return _encodeUTF8(await handler(_decodeUTF8(message)));
-    });
+    if (handler == null) {
+      setMockBinaryMessageHandler(channel, null);
+    } else {
+      setMockBinaryMessageHandler(channel, (ByteData message) async {
+        return _encodeUTF8(await handler(_decodeUTF8(message)));
+      });
+    }
   }
 
   /// Sets a message handler that intercepts outgoing messages in JSON form.
@@ -165,8 +169,12 @@ class PlatformMessages {
   /// The given callback will replace the currently registered callback (if any).
   /// To remove the mock handler, pass `null` as the `handler` argument.
   static void setMockJSONMessageHandler(String channel, Future<dynamic> handler(dynamic message)) {
-    setMockStringMessageHandler(channel, (String message) async {
-      return _encodeJSON(await handler(_decodeJSON(message)));
-    });
+    if (handler == null) {
+      setMockStringMessageHandler(channel, null);
+    } else {
+      setMockStringMessageHandler(channel, (String message) async {
+        return _encodeJSON(await handler(_decodeJSON(message)));
+      });
+    }
   }
 }
