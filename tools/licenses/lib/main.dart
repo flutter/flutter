@@ -1505,6 +1505,8 @@ class RepositoryAndroidToolsDirectory extends RepositoryDirectory {
   bool shouldRecurse(fs.IoNode entry) {
     return entry.name != 'VERSION_LINUX_SDK'
         && entry.name != 'VERSION_LINUX_NDK'
+        && entry.name != 'VERSION_MACOSX_SDK'
+        && entry.name != 'VERSION_MACOSX_NDK'
         && super.shouldRecurse(entry);
   }
 
