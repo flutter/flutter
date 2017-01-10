@@ -483,7 +483,8 @@ Future<Null> buildAndroid(
   String target,
   String flxPath,
   String aotPath,
-  ApkKeystoreInfo keystore
+  ApkKeystoreInfo keystore,
+  bool applicationNeedsRebuild: false
 }) async {
   outputFile ??= _defaultOutputPath;
 
@@ -508,12 +509,14 @@ Future<Null> buildAndroid(
     }
   }
 
+  final bool needRebuild =
+      applicationNeedsRebuild ||
+          _needsRebuild(outputFile, manifest, platform, buildMode, extraFiles);
+
   // In debug (JIT) mode, the snapshot lives in the FLX, and we can skip the APK
   // rebuild if none of the resources in the APK are stale.
   // In AOT modes, the snapshot lives in the APK, so the APK must be rebuilt.
-  if (!isAotBuildMode(buildMode) &&
-      !force &&
-      !_needsRebuild(outputFile, manifest, platform, buildMode, extraFiles)) {
+  if (!isAotBuildMode(buildMode) && !force && !needRebuild) {
     printTrace('APK up to date; skipping build step.');
     return;
   }
@@ -608,7 +611,8 @@ Future<Null> buildAndroidWithGradle(
 Future<Null> buildApk(
   TargetPlatform platform, {
   String target,
-  BuildMode buildMode: BuildMode.debug
+  BuildMode buildMode: BuildMode.debug,
+  bool applicationNeedsRebuild: false,
 }) async {
   if (isProjectUsingGradle()) {
     return await buildAndroidWithGradle(
@@ -625,7 +629,8 @@ Future<Null> buildApk(
       platform,
       buildMode,
       force: false,
-      target: target
+      target: target,
+      applicationNeedsRebuild: applicationNeedsRebuild,
     );
   }
 }

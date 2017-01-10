@@ -9,13 +9,12 @@ import 'package:path/path.dart' as path;
 import 'package:stack_trace/stack_trace.dart';
 
 import 'application_package.dart';
-import 'asset.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
-import 'dart/package_map.dart';
+
 import 'dart/dependencies.dart';
 import 'devfs.dart';
 import 'device.dart';
@@ -50,26 +49,16 @@ class HotRunner extends ResidentRunner {
   }) : super(device,
              target: target,
              debuggingOptions: debuggingOptions,
-             usesTerminalUI: usesTerminalUI) {
-    _projectRootPath = projectRootPath ?? fs.currentDirectory.path;
-    _packagesFilePath =
-            packagesFilePath ?? path.absolute(PackageMap.globalPackagesPath);
-    if (projectAssets != null)
-      _bundle = new AssetBundle.fixed(_projectRootPath, projectAssets);
-    else
-      _bundle = new AssetBundle();
-  }
+             usesTerminalUI: usesTerminalUI,
+             projectRootPath: projectRootPath,
+             packagesFilePath: packagesFilePath,
+             projectAssets: projectAssets);
 
-  ApplicationPackage _package;
-  String _mainPath;
-  String _projectRootPath;
-  String _packagesFilePath;
   final String applicationBinary;
   bool get prebuiltMode => applicationBinary != null;
   Set<String> _dartDependencies;
   Uri _observatoryUri;
-  AssetBundle _bundle;
-  AssetBundle get bundle => _bundle;
+
   final bool benchmarkMode;
   final Map<String, int> benchmarkData = new Map<String, int>();
   // The initial launch is from a snapshot.
@@ -83,7 +72,6 @@ class HotRunner extends ResidentRunner {
     bool shouldBuild: true
   }) {
     // Don't let uncaught errors kill the process.
-    assert(shouldBuild == !prebuiltMode);
     return Chain.capture(() {
       return _run(
         connectionInfoCompleter: connectionInfoCompleter,
@@ -107,7 +95,7 @@ class HotRunner extends ResidentRunner {
     }
     DartDependencySetBuilder dartDependencySetBuilder =
         new DartDependencySetBuilder(
-              _mainPath, _projectRootPath, _packagesFilePath);
+              mainPath, projectRootPath, packagesFilePath);
     try {
       Set<String> dependencies = dartDependencySetBuilder.build();
       _dartDependencies = new Set<String>();
@@ -135,18 +123,17 @@ class HotRunner extends ResidentRunner {
     String route,
     bool shouldBuild: true
   }) async {
-    _mainPath = findMainDartFile(target);
-    if (!fs.isFileSync(_mainPath)) {
-      String message = 'Tried to run $_mainPath, but that file does not exist.';
+    if (!fs.isFileSync(mainPath)) {
+      String message = 'Tried to run $mainPath, but that file does not exist.';
       if (target == null)
         message += '\nConsider using the -t option to specify the Dart file to start.';
       printError(message);
       return 1;
     }
 
-    _package = getApplicationPackageForPlatform(device.platform, applicationBinary: applicationBinary);
+    package = getApplicationPackageForPlatform(device.platform, applicationBinary: applicationBinary);
 
-    if (_package == null) {
+    if (package == null) {
       String message = 'No application found for ${device.platform}.';
       String hint = getMissingPackageHintForPlatform(device.platform);
       if (hint != null)
@@ -163,20 +150,21 @@ class HotRunner extends ResidentRunner {
 
     Map<String, dynamic> platformArgs = new Map<String, dynamic>();
 
-    await startEchoingDeviceLog(_package);
+    await startEchoingDeviceLog(package);
 
     String modeName = getModeName(debuggingOptions.buildMode);
-    printStatus('Launching ${getDisplayPath(_mainPath)} on ${device.name} in $modeName mode...');
+    printStatus('Launching ${getDisplayPath(mainPath)} on ${device.name} in $modeName mode...');
 
     // Start the application.
     Future<LaunchResult> futureResult = device.startApp(
-      _package,
+      package,
       debuggingOptions.buildMode,
-      mainPath: _mainPath,
+      mainPath: mainPath,
       debuggingOptions: debuggingOptions,
       platformArgs: platformArgs,
       route: route,
-      prebuiltApplication: prebuiltMode
+      prebuiltApplication: prebuiltMode,
+      applicationNeedsRebuild: shouldBuild || hasDirtyDependencies()
     );
 
     LaunchResult result = await futureResult;
@@ -264,11 +252,11 @@ class HotRunner extends ResidentRunner {
   DevFS _devFS;
 
   Future<Uri> _initDevFS() {
-    String fsName = path.basename(_projectRootPath);
+    String fsName = path.basename(projectRootPath);
     _devFS = new DevFS(vmService,
                        fsName,
-                       fs.directory(_projectRootPath),
-                       packagesFilePath: _packagesFilePath);
+                       fs.directory(projectRootPath),
+                       packagesFilePath: packagesFilePath);
     return _devFS.create();
   }
 
@@ -277,16 +265,16 @@ class HotRunner extends ResidentRunner {
       // Did not update DevFS because of a Dart source error.
       return false;
     }
-    final bool rebuildBundle = bundle.needsBuild();
+    final bool rebuildBundle = assetBundle.needsBuild();
     if (rebuildBundle) {
       printTrace('Updating assets');
-      int result = await bundle.build();
+      int result = await assetBundle.build();
       if (result != 0)
         return false;
     }
     Status devFSStatus = logger.startProgress('Syncing files to device...');
     await _devFS.update(progressReporter: progressReporter,
-                        bundle: bundle,
+                        bundle: assetBundle,
                         bundleDirty: rebuildBundle,
                         fileFilter: _dartDependencies);
     devFSStatus.stop();
@@ -329,7 +317,7 @@ class HotRunner extends ResidentRunner {
 
   Future<Null> _launchFromDevFS(ApplicationPackage package,
                                 String mainScript) async {
-    String entryPath = path.relative(mainScript, from: _projectRootPath);
+    String entryPath = path.relative(mainScript, from: projectRootPath);
     String deviceEntryPath =
         _devFS.baseUri.resolve(entryPath).toFilePath();
     String devicePackagesPath =
@@ -347,7 +335,7 @@ class HotRunner extends ResidentRunner {
     bool updatedDevFS = await _updateDevFS();
     if (!updatedDevFS)
       return new OperationResult(1, 'Dart Source Error');
-    await _launchFromDevFS(_package, _mainPath);
+    await _launchFromDevFS(package, mainPath);
     restartTimer.stop();
     printTrace('Restart performed in '
         '${getElapsedAsMilliseconds(restartTimer.elapsed)}.');
@@ -440,7 +428,7 @@ class HotRunner extends ResidentRunner {
       return new OperationResult(1, 'Dart Source Error');
     String reloadMessage;
     try {
-      String entryPath = path.relative(_mainPath, from: _projectRootPath);
+      String entryPath = path.relative(mainPath, from: projectRootPath);
       String deviceEntryPath =
           _devFS.baseUri.resolve(entryPath).toFilePath();
       String devicePackagesPath =
