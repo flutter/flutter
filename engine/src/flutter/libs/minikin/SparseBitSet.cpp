@@ -19,7 +19,7 @@
 #include <stddef.h>
 #include <string.h>
 
-#include <android/log.h>
+#include <log/log.h>
 
 #include <minikin/SparseBitSet.h>
 

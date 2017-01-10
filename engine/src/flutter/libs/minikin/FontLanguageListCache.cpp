@@ -21,7 +21,7 @@
 #include <unicode/uloc.h>
 #include <unordered_set>
 
-#include <android/log.h>
+#include <log/log.h>
 
 #include "FontLanguage.h"
 #include "MinikinInternal.h"

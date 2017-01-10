@@ -20,7 +20,7 @@
 
 #include <limits>
 
-#include <android/log.h>
+#include <log/log.h>
 
 #include <minikin/Layout.h>
 #include <minikin/LineBreaker.h>
