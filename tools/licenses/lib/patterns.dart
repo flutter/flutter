@@ -4,7 +4,7 @@
 
 // COMMON PATTERNS
 
-// TODO(ianh): factor out the indent pattern which is duplicated everywhere
+const String kIndent = r'^((?:[-;#<!.\\"/* ]*(?:REM[-;#<!.\\"/* ]*)?[-;#<!.\"/*]+)?)( *)';
 
 final RegExp stripDecorations = new RegExp(
   r'^((?:(?:[-;#<!.\\"/* ]*(?:REM[-;#<!.\\"/* ]*)?[-;#<!.\"/*]+)?)(?:(?: |\t)*))(.*?)[ */]*$',
@@ -201,7 +201,8 @@ final List<RegExp> csNoCopyrights = <RegExp>[
   ),
 
   new RegExp(
-    r'^((?:[-;#<!.\\"/* ]*(?:REM[-;#<!.\\"/* ]*)?[-;#<!.\"/*]+)?)( *)These constants were taken from version 3 of the DWARF standard, *\n'
+    kIndent +
+    r'These constants were taken from version 3 of the DWARF standard, *\n'
     r'^\1\2which is Copyright \(c\) 2005 Free Standards Group, and *\n'
     r'^\1\2Copyright \(c\) 1992, 1993 UNIX International, Inc\. *\n',
     multiLine: true,
@@ -210,7 +211,7 @@ final List<RegExp> csNoCopyrights = <RegExp>[
 
   // Freetype
   new RegExp(
-    r'^((?:[-;#<!.\\"/* ]*(?:REM[-;#<!.\\"/* ]*)?[-;#<!.\"/*]+)?)( *)' +
+    kIndent +
     (r'This is a dummy file, used to please the build system\. It is never included by the auto-fitter sources\.'.replaceAll(' ', _linebreak)),
     multiLine: true,
     caseSensitive: false
@@ -218,7 +219,7 @@ final List<RegExp> csNoCopyrights = <RegExp>[
 
   // Freetype
   new RegExp(
-    r'^((?:[-;#<!.\\"/* ]*(?:REM[-;#<!.\\"/* ]*)?[-;#<!.\"/*]+)?)( *)' +
+    kIndent +
     (
       r'This software was written by Alexander Peslyak in 2001\. No copyright is '
       r'claimed, and the software is hereby placed in the public domain\. In case '
@@ -280,7 +281,7 @@ final List<LicenseFileReferencePattern> csReferencesByFilename = <LicenseFileRef
     fileIndex: 3,
     needsCopyright: true,
     pattern: new RegExp(
-      r'^((?:[-;#<!.\\"/* ]*(?:REM[-;#<!.\\"/* ]*)?[-;#<!.\"/*]+)?)( *)' +
+      kIndent +
       r'This code is released under the libpng license. For conditions of distribution and use, see the disclaimer and license in (png.h)\b'.replaceAll(' ', _linebreak),
       multiLine: true,
       caseSensitive: false
@@ -293,7 +294,7 @@ final List<LicenseFileReferencePattern> csReferencesByFilename = <LicenseFileRef
     indentPrefixIndex: 2,
     fileIndex: 3,
     pattern: new RegExp(
-      r'^((?:[-;#<!.\\"/* ]*(?:REM[-;#<!.\\"/* ]*)?[-;#<!.\"/*]+)?)( *)' +
+      kIndent +
       r'Use of this source(?: code)? is governed by a BS?D-style license that can be found in the '.replaceAll(' ', _linebreak) +
       r'([^ ]+) file\b(?! or at)',
       multiLine: true,
@@ -309,7 +310,8 @@ final List<LicenseFileReferencePattern> csReferencesByFilename = <LicenseFileRef
     authorIndex: 4,
     fileIndex: 5,
     pattern: new RegExp(
-      r'^((?:[-;#<!.\\"/* ]*(?:REM[-;#<!.\\"/* ]*)?[-;#<!.\"/*]+)?)( *)(Copyright .+(the .+ authors)\. +All rights reserved.) +' +
+      kIndent +
+      r'(Copyright .+(the .+ authors)\. +All rights reserved.) +' +
       r'Use of this source(?: code)? is governed by a BS?D-style license that can be found in the '.replaceAll(' ', _linebreak) +
       r'([^ ]+) file\b(?! or at)',
       multiLine: true,
@@ -342,7 +344,7 @@ final List<LicenseFileReferencePattern> csReferencesByFilename = <LicenseFileRef
     indentPrefixIndex: 2,
     fileIndex: 3,
     pattern: new RegExp(
-      r'^((?:[-;#<!.\\"/* ]*(?:REM[-;#<!.\\"/* ]*)?[-;#<!.\"/*]+)?)( *)For conditions of distribution and use, see (?:the accompanying|copyright notice in)? ([-_.a-zA-Z0-9]+)',
+      kIndent + r'For conditions of distribution and use, see (?:the accompanying|copyright notice in)? ([-_.a-zA-Z0-9]+)',
       multiLine: true,
       caseSensitive: false,
     )
@@ -354,7 +356,7 @@ final List<LicenseFileReferencePattern> csReferencesByFilename = <LicenseFileRef
     indentPrefixIndex: 2,
     fileIndex: 3,
     pattern: new RegExp(
-      r'^((?:[-;#<!.\\"/* ]*(?:REM[-;#<!.\\"/* ]*)?[-;#<!.\"/*]+)?)( *)See the file ([^ ]+) for copying permission\.',
+      kIndent + r'See the file ([^ ]+) for copying permission\.',
       multiLine: true,
       caseSensitive: false,
     )
@@ -366,7 +368,8 @@ final List<LicenseFileReferencePattern> csReferencesByFilename = <LicenseFileRef
     indentPrefixIndex: 2,
     fileIndex: 3,
     pattern: new RegExp(
-      r'^((?:[-;#<!.\\"/* ]*(?:REM[-;#<!.\\"/* ]*)?[-;#<!.\"/*]+)?)( *)This is free software. You are permitted to copy, distribute, or modify *\n'
+      kIndent +
+      r'This is free software. You are permitted to copy, distribute, or modify *\n'
       r'^\1\2it under the terms of the MIT/X license \(contained in the ([^ ]+) file *\n'
       r'^\1\2with this distribution\.\)',
       multiLine: true,
@@ -380,7 +383,7 @@ final List<LicenseFileReferencePattern> csReferencesByFilename = <LicenseFileRef
     indentPrefixIndex: 2,
     fileIndex: 3,
     pattern: new RegExp(
-      r'^((?:[-;#<!.\\"/* ]*(?:REM[-;#<!.\\"/* ]*)?[-;#<!.\"/*]+)?)( *)' +
+      kIndent +
       r'This file (?:is part of the FreeType project, and )?may only be used,? '
       r'modified,? and distributed under the terms of the FreeType project '
       r'license, (LICENSE\.TXT). By continuing to use, modify, or distribute this '
@@ -397,7 +400,7 @@ final List<LicenseFileReferencePattern> csReferencesByFilename = <LicenseFileRef
     indentPrefixIndex: 2,
     fileIndex: 3,
     pattern: new RegExp(
-      r'^((?:[-;#<!.\\"/* ]*(?:REM[-;#<!.\\"/* ]*)?[-;#<!.\"/*]+)?)( *)' +
+      kIndent +
       r'This software, and all works of authorship, whether in source or '
       r'object code form as indicated by the copyright notice\(s\) included '
       r'herein \(collectively, the "Work"\) is made available, and may only be '
@@ -434,7 +437,7 @@ final List<LicenseFileReferencePattern> csReferencesByFilename = <LicenseFileRef
     indentPrefixIndex: 2,
     fileIndex: 3,
     pattern: new RegExp(
-      r'^((?:[-;#<!.\\"/* ]*(?:REM[-;#<!.\\"/* ]*)?[-;#<!.\"/*]+)?)( *):license: [A-Z0-9]+, see (.+) for more details\.',
+      kIndent + r':license: [A-Z0-9]+, see (.+) for more details\.',
       multiLine: true,
       caseSensitive: false,
     )
@@ -446,7 +449,7 @@ final List<LicenseFileReferencePattern> csReferencesByFilename = <LicenseFileRef
     indentPrefixIndex: 2,
     fileIndex: 3,
     pattern: new RegExp(
-      r'^((?:[-;#<!.\\"/* ]*(?:REM[-;#<!.\\"/* ]*)?[-;#<!.\"/*]+)?)( *)Released under [^ ]+ license\. +See ([^ ]+) for details\.$',
+      kIndent + r'Released under [^ ]+ license\. +See ([^ ]+) for details\.$',
       multiLine: true,
       caseSensitive: false,
     )
@@ -458,7 +461,7 @@ final List<LicenseFileReferencePattern> csReferencesByFilename = <LicenseFileRef
     indentPrefixIndex: 2,
     fileIndex: 3,
     pattern: new RegExp(
-      r'^((?:[-;#<!.\\"/* ]*(?:REM[-;#<!.\\"/* ]*)?[-;#<!.\"/*]+)?)( *)(?:Copy: )?See ([A-Z0-9]+) for the status of this software\.?',
+      kIndent + r'(?:Copy: )?See ([A-Z0-9]+) for the status of this software\.?',
       multiLine: true,
       caseSensitive: false,
     )
@@ -471,7 +474,8 @@ final List<LicenseFileReferencePattern> csReferencesByFilename = <LicenseFileRef
     fileIndex: 3,
     needsCopyright: false,
     pattern: new RegExp(
-      r'^((?:[-;#<!.\\"/* ]*(?:REM[-;#<!.\\"/* ]*)?[-;#<!.\"/*]+)?)( *)// This file is dual licensed under the MIT and the University of Illinois Open *\n'
+      kIndent +
+      r'// This file is dual licensed under the MIT and the University of Illinois Open *\n'
       r'^\1\2// Source Licenses. See (LICENSE\.TXT) for details\.',
       multiLine: true,
       caseSensitive: false,
@@ -485,7 +489,7 @@ final List<LicenseFileReferencePattern> csReferencesByFilename = <LicenseFileRef
     fileIndex: 3,
     needsCopyright: true,
     pattern: new RegExp(
-      r'^((?:[-;#<!.\\"/* ]*(?:REM[-;#<!.\\"/* ]*)?[-;#<!.\"/*]+)?)( *)' +
+      kIndent +
       r'Licensed under the OpenSSL license \(the "License"\)\. You may not use '
       r'this file except in compliance with the License\. You can obtain a copy '
       r'in the file (LICENSE) in the source distribution or at '
@@ -508,20 +512,20 @@ final List<RegExp> csReferencesByType = <RegExp>[
 
   // Seen in Jinja files, markupsafe files
   new RegExp(
-    r'^((?:[-;#<!.\\"/* ]*(?:REM[-;#<!.\\"/* ]*)?[-;#<!.\"/*]+)?)( *):license: ([A-Z0-9]+)',
+    kIndent + r':license: ([A-Z0-9]+)',
     multiLine: true,
     caseSensitive: false
   ),
 
   new RegExp(
-    r'^((?:[-;#<!.\\"/* ]*(?:REM[-;#<!.\\"/* ]*)?[-;#<!.\"/*]+)?)( *)' +
+    kIndent +
     r'This software is made available under the terms of the (ICU) License -- ICU 1\.\8\.1 and later\.'.replaceAll(' ', _linebreak),
     multiLine: true,
     caseSensitive: false
   ),
 
   new RegExp(
-    r'^((?:[-;#<!.\\"/* ]*(?:REM[-;#<!.\\"/* ]*)?[-;#<!.\"/*]+)?)( *)' +
+    kIndent +
     (
       r'(?:@APPLE_LICENSE_HEADER_START@)? '
       r'This file contains Original Code and/or Modifications of Original Code '
@@ -568,7 +572,7 @@ final List<MultipleVersionedLicenseReferencePattern> csReferencesByUrl = <Multip
     versionIndicies: const <int, int>{ 3:4 },
     checkLocalFirst: false,
     pattern: new RegExp(
-      r'^((?:[-;#<!.\\"/* ]*(?:REM[-;#<!.\\"/* ]*)?[-;#<!.\"/*]+)?)( *)Licensed under the (Academic Free License) version (3\.0)',
+      kIndent + r'Licensed under the (Academic Free License) version (3\.0)',
       multiLine: true,
       caseSensitive: false,
     )
@@ -606,7 +610,8 @@ final List<MultipleVersionedLicenseReferencePattern> csReferencesByUrl = <Multip
     licenseIndices: const <int>[3],
     checkLocalFirst: false,
     pattern: new RegExp(
-      r'^((?:[-;#<!.\\"/* ]*(?:REM[-;#<!.\\"/* ]*)?[-;#<!.\"/*]+)?)( *)Licensed under the Apache License, Version 2\.0 \(the "License"\); *\n'
+      kIndent +
+      r'Licensed under the Apache License, Version 2\.0 \(the "License"\); *\n'
       r'^\1\2you may not use this file except in compliance with the License\. *\n'
       r'^\1\2You may obtain a copy of the License at *\n'
       r'^(?:(?:\1\2? *)? *\n)*'
@@ -629,7 +634,8 @@ final List<MultipleVersionedLicenseReferencePattern> csReferencesByUrl = <Multip
     licenseIndices: const <int>[3],
     checkLocalFirst: false,
     pattern: new RegExp(
-      r'^((?:[-;#<!.\\"/* ]*(?:REM[-;#<!.\\"/* ]*)?[-;#<!.\"/*]+)?)( *)Use of this source code is governed by a BS?D-style *\n'
+      kIndent +
+      r'Use of this source code is governed by a BS?D-style *\n'
       r'^\1\2license that can be found in the LICENSE file or at *\n'
       r'^\1\2(https://developers.google.com/open-source/licenses/bsd)',
       multiLine: true,
@@ -645,7 +651,8 @@ final List<MultipleVersionedLicenseReferencePattern> csReferencesByUrl = <Multip
     licenseIndices: const <int>[3],
     checkLocalFirst: false,
     pattern: new RegExp(
-      r'^((?:[-;#<!.\\"/* ]*(?:REM[-;#<!.\\"/* ]*)?[-;#<!.\"/*]+)?)( *)Licensed under the MIT License \(the "License"\); you may not use this file except *\n'
+      kIndent +
+      r'Licensed under the MIT License \(the "License"\); you may not use this file except *\n'
       r'^\1\2in compliance with the License(?:\.|->) You may obtain a copy of the License at *\n'
       r'^\1\n'
       r'^\1\2(http://opensource(?:\.|->)org/licenses/MIT) *\n'
@@ -666,7 +673,8 @@ final List<MultipleVersionedLicenseReferencePattern> csReferencesByUrl = <Multip
     licenseIndices: const <int>[3],
     checkLocalFirst: false,
     pattern: new RegExp(
-      r'^((?:[-;#<!.\\"/* ]*(?:REM[-;#<!.\\"/* ]*)?[-;#<!.\"/*]+)?)( *)This code may only be used under the BSD style license found at (http://polymer.github.io/LICENSE.txt)$',
+      kIndent +
+      r'This code may only be used under the BSD style license found at (http://polymer.github.io/LICENSE.txt)$',
       multiLine: true,
       caseSensitive: false,
     )
@@ -680,7 +688,8 @@ final List<MultipleVersionedLicenseReferencePattern> csReferencesByUrl = <Multip
     versionIndicies: const <int, int>{3:4},
     checkLocalFirst: false,
     pattern: new RegExp(
-      r'^((?:[-;#<!.\\"/* ]*(?:REM[-;#<!.\\"/* ]*)?[-;#<!.\"/*]+)?)( *)This file is dual licensed. +It may be redistributed and/or modified *\n'
+      kIndent +
+      r'This file is dual licensed. +It may be redistributed and/or modified *\n'
       r'^\1\2under the terms of the (Apache) (2\.0) License OR version 2 of the GNU *\n'
       r'^\1\2General Public License\.',
       multiLine: true,
@@ -696,7 +705,8 @@ final List<MultipleVersionedLicenseReferencePattern> csReferencesByUrl = <Multip
     licenseIndices: const <int>[5, 6],
     versionIndicies: const <int, int>{5:3, 6:4},
     pattern: new RegExp(
-      r'^((?:[-;#<!.\\"/* ]*(?:REM[-;#<!.\\"/* ]*)?[-;#<!.\"/*]+)?)( *)This file is part of the GNU ISO C\+\+ Library\. +This library is free *\n'
+      kIndent +
+      r'This file is part of the GNU ISO C\+\+ Library\. +This library is free *\n'
       r'^\1\2software; you can redistribute _?_?it and/or modify _?_?it under the terms *\n'
       r'^\1\2of the GNU General Public License as published by the Free Software *\n'
       r'^\1\2Foundation; either version (3), or \(at your option\) any later *\n'
@@ -728,7 +738,8 @@ final List<MultipleVersionedLicenseReferencePattern> csReferencesByUrl = <Multip
     licenseIndices: const <int>[5, 6],
     versionIndicies: const <int, int>{5:3, 6:4},
     pattern: new RegExp(
-      r'^((?:[-;#<!.\\"/* ]*(?:REM[-;#<!.\\"/* ]*)?[-;#<!.\"/*]+)?)( *)This file is part of the GNU ISO C\+\+ Library\. +This library is free *\n'
+      kIndent +
+      r'This file is part of the GNU ISO C\+\+ Library\. +This library is free *\n'
       r'^\1\2software; you can redistribute it and/or modify it under the *\n'
       r'^\1\2terms of the GNU General Public License as published by the *\n'
       r'^\1\2Free Software Foundation; either version (3), or \(at your option\) *\n'
@@ -760,7 +771,8 @@ final List<MultipleVersionedLicenseReferencePattern> csReferencesByUrl = <Multip
     licenseIndices: const <int>[6, 4],
     versionIndicies: const <int, int>{6:3, 4:5},
     pattern: new RegExp(
-      r'^((?:[-;#<!.\\"/* ]*(?:REM[-;#<!.\\"/* ]*)?[-;#<!.\"/*]+)?)( *)This file is part of the GNU ISO C\+\+ Library\. +This library is free *\n'
+      kIndent +
+      r'This file is part of the GNU ISO C\+\+ Library\. +This library is free *\n'
       r'^\1\2software; you can redistribute it and/or modify it under the *\n'
       r'^\1\2terms of the GNU General Public License as published by the *\n'
       r'^\1\2Free Software Foundation; either version (3), or \(at your option\) *\n' // group 3 is the version of the gpl
@@ -791,7 +803,8 @@ final List<MultipleVersionedLicenseReferencePattern> csReferencesByUrl = <Multip
     licenseIndices: const <int>[5, 6],
     versionIndicies: const <int, int>{5:3, 6:4},
     pattern: new RegExp(
-      r'^((?:[-;#<!.\\"/* ]*(?:REM[-;#<!.\\"/* ]*)?[-;#<!.\"/*]+)?)( *)This file is part of GCC. *\n'
+      kIndent +
+      r'This file is part of GCC. *\n'
       r'^(?:(?:\1\2? *)? *\n)*'
       r'^\1\2GCC is free software; you can redistribute it and/or modify it under *\n'
       r'^\1\2the terms of the GNU General Public License as published by the Free *\n'
@@ -824,7 +837,8 @@ final List<MultipleVersionedLicenseReferencePattern> csReferencesByUrl = <Multip
     licenseIndices: const <int>[5, 6],
     versionIndicies: const <int, int>{ 5:3, 6:4 },
     pattern: new RegExp(
-      r'^((?:[-;#<!.\\"/* ]*(?:REM[-;#<!.\\"/* ]*)?[-;#<!.\"/*]+)?)( *)This file is part of GCC. *\n'
+      kIndent +
+      r'This file is part of GCC. *\n'
       r'^(?:(?:\1\2? *)? *\n)*'
       r'^\1\2GCC is free software; you can redistribute it and/or modify *\n'
       r'^\1\2it under the terms of the GNU General Public License as published by *\n'
@@ -857,7 +871,8 @@ final List<MultipleVersionedLicenseReferencePattern> csReferencesByUrl = <Multip
     licenseIndices: const <int>[4],
     versionIndicies: const <int, int>{ 4:3 },
     pattern: new RegExp(
-      r'^((?:[-;#<!.\\"/* ]*(?:REM[-;#<!.\\"/* ]*)?[-;#<!.\"/*]+)?)( *)This library is free software; you can redistribute it and/or *\n'
+      kIndent +
+      r'This library is free software; you can redistribute it and/or *\n'
       r'^\1\2modify it under the terms of the GNU Library General Public *\n'
       r'^\1\2License as published by the Free Software Foundation; either *\n'
       r'^\1\2version (2) of the License, or \(at your option\) any later version\. *\n'
@@ -884,7 +899,8 @@ final List<MultipleVersionedLicenseReferencePattern> csReferencesByUrl = <Multip
     licenseIndices: const <int>[4],
     versionIndicies: const <int, int>{ 4:3 },
     pattern: new RegExp(
-      r'^((?:[-;#<!.\\"/* ]*(?:REM[-;#<!.\\"/* ]*)?[-;#<!.\"/*]+)?)( *)Licensed under the Academic Free License version 2.0 *\n'
+      kIndent +
+      r'Licensed under the Academic Free License version 2.0 *\n'
       r'^\1\2Or under the following terms: *\n'
       r'^(?:(?:\1\2? *)? *\n)*'
       r'^\1\2This library is free software; you can redistribute it and/or *\n'
@@ -914,7 +930,8 @@ final List<MultipleVersionedLicenseReferencePattern> csReferencesByUrl = <Multip
     licenseIndices: const <int>[4],
     versionIndicies: const <int, int>{ 4:3 },
     pattern: new RegExp(
-      r'^((?:[-;#<!.\\"/* ]*(?:REM[-;#<!.\\"/* ]*)?[-;#<!.\"/*]+)?)( *)This Source Code Form is subject to the terms of the Mozilla Public *\n'
+      kIndent +
+      r'This Source Code Form is subject to the terms of the Mozilla Public *\n'
       r'^\1\2License, v\. (2.0)\. +If a copy of the MPL was not distributed with this *\n'
       r'^\1\2file, You can obtain one at (http://mozilla\.org/MPL/2\.0/)\.',
       multiLine: true,
@@ -930,7 +947,8 @@ final List<MultipleVersionedLicenseReferencePattern> csReferencesByUrl = <Multip
     licenseIndices: const <int>[3],
     versionIndicies: const <int, int>{ 3:4 },
     pattern: new RegExp(
-      r'^((?:[-;#<!.\\"/* ]*(?:REM[-;#<!.\\"/* ]*)?[-;#<!.\"/*]+)?)( *)(?:Version: [GMPL/012. ]+ *\n'
+      kIndent +
+      r'(?:Version: [GMPL/012. ]+ *\n'
       r'^(?:(?:\1\2? *)? *\n)*'
       r'^\1\2)?The contents of this file are subject to the Mozilla Public License Version *\n'
       r'^\1\2(?:1\.1) \(the "License"\); you may not use this file except in compliance with *\n'
@@ -983,7 +1001,8 @@ final List<MultipleVersionedLicenseReferencePattern> csReferencesByUrl = <Multip
     licenseIndices: const <int>[4],
     versionIndicies: const <int, int>{ 4:3 },
     pattern: new RegExp(
-      r'^((?:[-;#<!.\\"/* ]*(?:REM[-;#<!.\\"/* ]*)?[-;#<!.\"/*]+)?)( *)This library is free software; you can redistribute it and/or *\n'
+      kIndent +
+      r'This library is free software; you can redistribute it and/or *\n'
       r'^\1\2modify it under the terms of the GNU Lesser General Public *\n'
       r'^\1\2License as published by the Free Software Foundation; either *\n'
       r'^\1\2version (2\.1) of the License, or \(at your option\) any later version\. *\n'
@@ -1027,7 +1046,8 @@ final List<RegExp> csLicenses = <RegExp>[
 
   // BoringSSL
   new RegExp(
-    r'^((?:[-;#<!.\\"/* ]*(?:REM[-;#<!.\\"/* ]*)?[-;#<!.\"/*]+)?)( *)Redistribution and use in source and binary forms, with or without *\n'
+    kIndent +
+    r'Redistribution and use in source and binary forms, with or without *\n'
     r'^\1\2modification, are permitted provided that the following conditions *\n'
     r'^\1\2are met: *\n'
     r'^(?:(?:\1\2? *)? *\n)*'
@@ -1075,7 +1095,8 @@ final List<RegExp> csLicenses = <RegExp>[
   ),
 
   new RegExp(
-    r'^((?:[-;#<!.\\"/* ]*(?:REM[-;#<!.\\"/* ]*)?[-;#<!.\"/*]+)?)( *)(?:This package is an SSL implementation written *\n'
+    kIndent +
+    r'(?:This package is an SSL implementation written *\n'
     r'^\1\2by Eric Young \(eay@cryptsoft\.com\)\. *\n'
     r'^\1\2The implementation was written so as to conform with Netscapes SSL\. *\n'
     r'^(?:(?:\1\2?g? *)? *\n)*'
@@ -1132,7 +1153,7 @@ final List<RegExp> csLicenses = <RegExp>[
   ),
 
   new RegExp(
-    r'^((?:[-;#<!.\\"/* ]*(?:REM[-;#<!.\\"/* ]*)?[-;#<!.\"/*]+)?)( *)' +
+    kIndent +
     (
       r'License to copy and use this software is granted provided that it '
       r'is identified as the "RSA Data Security, Inc\. MD5 Message-Digest '
@@ -1157,7 +1178,7 @@ final List<RegExp> csLicenses = <RegExp>[
   // BSD-DERIVED LICENSES
 
   new RegExp(
-    r'^((?:[-;#<!.\\"/* ]*(?:REM[-;#<!.\\"/* ]*)?[-;#<!.\"/*]+)?)( *)' +
+    kIndent +
     (
       'Redistribution and use in source and binary forms, with or without '
       'modification, are permitted provided that the following conditions are met:'
@@ -1295,7 +1316,7 @@ final List<RegExp> csLicenses = <RegExp>[
   // Seen in libjpeg-turbo
   // TODO(ianh): Mark License as not needing to be shown
   new RegExp(
-    r'^((?:[-;#<!.\\"/* ]*(?:REM[-;#<!.\\"/* ]*)?[-;#<!.\"/*]+)?)( *)'
+    kIndent +
     r"This software is provided 'as-is', without any express or implied *\n"
     r'^\1\2warranty\. +In no event will the authors be held liable for any damages *\n'
     r'^\1\2arising from the use of this software\. *\n'
@@ -1317,7 +1338,7 @@ final List<RegExp> csLicenses = <RegExp>[
 
   // seen in GLFW
   new RegExp(
-    r'^((?:[-;#<!.\\"/* ]*(?:REM[-;#<!.\\"/* ]*)?[-;#<!.\"/*]+)?)( *)'
+    kIndent +
     r"This software is provided 'as-is', without any express or implied *\n"
     r'^\1\2warranty\. +In no event will the authors be held liable for any damages *\n'
     r'^\1\2arising from the use of this software\. *\n'
@@ -1345,8 +1366,7 @@ final List<RegExp> csLicenses = <RegExp>[
 
   // Seen in Mesa
   new RegExp(
-    r'^((?:[-;#<!.\\"/* ]*(?:REM[-;#<!.\\"/* ]*)?[-;#<!.\"/*]+)?)( *)'
-    +
+    kIndent +
     (
       r'Permission is hereby granted, free of charge, to any person obtaining '
       r'a copy of this software and(?: /or)? associated documentation files \(the "(?:Software|Materials) "\), '
@@ -1419,7 +1439,8 @@ final List<RegExp> csLicenses = <RegExp>[
   // OTHER BRIEF LICENSES
 
   new RegExp(
-    r'^((?:[-;#<!.\\"/* ]*(?:REM[-;#<!.\\"/* ]*)?[-;#<!.\"/*]+)?)( *)Permission to use, copy, modify, and distribute this software for any *\n'
+    kIndent +
+    r'Permission to use, copy, modify, and distribute this software for any *\n'
     r'^(?:\1\2)?purpose with or without fee is hereby granted, provided that the above *\n'
     r'^(?:\1\2)?copyright notice and this permission notice appear in all copies(?:, and that *\n'
     r'^(?:\1\2)?the name of .+ not be used in advertising or *\n'
@@ -1440,7 +1461,8 @@ final List<RegExp> csLicenses = <RegExp>[
 
   // Seen in the NDK
   new RegExp(
-    r'^((?:[-;#<!.\\"/* ]*(?:REM[-;#<!.\\"/* ]*)?[-;#<!.\"/*]+)?)( *)Permission to use, copy, modify, and/or distribute this software for any *\n'
+    kIndent +
+    r'Permission to use, copy, modify, and/or distribute this software for any *\n'
     r'^\1\2purpose with or without fee is hereby granted, provided that the above *\n'
     r'^\1\2copyright notice and this permission notice appear in all copies\. *\n'
     r'^(?:(?:\1\2? *)? *\n)*'
@@ -1457,7 +1479,8 @@ final List<RegExp> csLicenses = <RegExp>[
 
   // seen in GLFW
   new RegExp(
-    r'^((?:[-;#<!.\\"/* ]*(?:REM[-;#<!.\\"/* ]*)?[-;#<!.\"/*]+)?)( *)Permission to use, copy, modify, and distribute this software for any *\n'
+    kIndent +
+    r'Permission to use, copy, modify, and distribute this software for any *\n'
     r'^\1\2purpose with or without fee is hereby granted, provided that the above *\n'
     r'^\1\2copyright notice and this permission notice appear in all copies\. *\n'
     r'^(?:(?:\1\2? *)? *\n)*'
@@ -1471,7 +1494,8 @@ final List<RegExp> csLicenses = <RegExp>[
 
   // seen in GLFW, base
   new RegExp(
-    r'^((?:[-;#<!.\\"/* ]*(?:REM[-;#<!.\\"/* ]*)?[-;#<!.\"/*]+)?)( *)Permission to use, copy, modify, and distribute this software for any *\n'
+    kIndent +
+    r'Permission to use, copy, modify, and distribute this software for any *\n'
     r'^\1\2purpose without fee is hereby granted, provided that this entire notice *\n'
     r'^\1\2is included in all copies of any software which is or includes a copy *\n'
     r'^\1\2or modification of this software and in all copies of the supporting *\n'
@@ -1487,7 +1511,8 @@ final List<RegExp> csLicenses = <RegExp>[
 
   // harfbuzz
   new RegExp(
-    r'^((?:[-;#<!.\\"/* ]*(?:REM[-;#<!.\\"/* ]*)?[-;#<!.\"/*]+)?)( *)Permission is hereby granted, without written agreement and without *\n'
+    kIndent +
+    r'Permission is hereby granted, without written agreement and without *\n'
     r'^\1\2license or royalty fees, to use, copy, modify, and distribute this *\n'
     r'^\1\2software and its documentation for any purpose, provided that the *\n'
     r'^\1\2above copyright notice and the following two paragraphs appear in *\n'
@@ -1510,7 +1535,8 @@ final List<RegExp> csLicenses = <RegExp>[
 
   // NDK
   new RegExp(
-    r'^((?:[-;#<!.\\"/* ]*(?:REM[-;#<!.\\"/* ]*)?[-;#<!.\"/*]+)?)( *)Permission to use, copy, modify and distribute this software and *\n'
+    kIndent +
+    r'Permission to use, copy, modify and distribute this software and *\n'
     r'^\1\2its documentation is hereby granted, provided that both the copyright *\n'
     r'^\1\2notice and this permission notice appear in all copies of the *\n'
     r'^\1\2software, derivative works or modified versions, and any portions *\n'
@@ -1535,7 +1561,7 @@ final List<RegExp> csLicenses = <RegExp>[
 
   // seen in Android NDK gnu-libstdc++
   new RegExp(
-    r'^((?:[-;#<!.\\"/* ]*(?:REM[-;#<!.\\"/* ]*)?[-;#<!.\"/*]+)?)( *)' +
+    kIndent +
     (
       r'Permission to use, copy, modify, (?:distribute and sell|sell, and distribute) this software '
       r'(?:and its documentation for any purpose )?is hereby granted without fee, '
@@ -1557,7 +1583,8 @@ final List<RegExp> csLicenses = <RegExp>[
 
   // Seen in Android NDK
   new RegExp(
-    r'^((?:[-;#<!.\\"/* ]*(?:REM[-;#<!.\\"/* ]*)?[-;#<!.\"/*]+)?)( *)Developed at (?:SunPro|SunSoft), a Sun Microsystems, Inc. business. *\n'
+    kIndent +
+    r'Developed at (?:SunPro|SunSoft), a Sun Microsystems, Inc. business. *\n'
     r'^\1\2Permission to use, copy, modify, and distribute this *\n'
     r'^\1\2software is freely granted, provided that this notice *\n'
     r'^\1\2is preserved.',
@@ -1567,7 +1594,8 @@ final List<RegExp> csLicenses = <RegExp>[
 
   // Seen in Android NDK (stlport)
   new RegExp(
-    r'^((?:[-;#<!.\\"/* ]*(?:REM[-;#<!.\\"/* ]*)?[-;#<!.\"/*]+)?)( *)This material is provided "as is", with absolutely no warranty expressed *\n'
+    kIndent +
+    r'This material is provided "as is", with absolutely no warranty expressed *\n'
     r'^\1\2or implied\. +Any use is at your own risk\. *\n'
     r'^(?:(?:\1\2? *)? *\n)*'
     r'^\1\2Permission to use or copy this software for any purpose is hereby granted *\n'
@@ -1581,7 +1609,7 @@ final List<RegExp> csLicenses = <RegExp>[
 
   // freetype2.
   new RegExp(
-    r'^((?:[-;#<!.\\"/* ]*(?:REM[-;#<!.\\"/* ]*)?[-;#<!.\"/*]+)?)( *)' +
+    kIndent +
     (
       r'Permission to use, copy, modify, distribute, and sell this software and its '
       r'documentation for any purpose is hereby granted without fee, provided that '
@@ -1608,7 +1636,8 @@ final List<RegExp> csLicenses = <RegExp>[
   // TODO(ianh): File a bug on what happens if you replace the // with a #
   // ICU
   new RegExp(
-    r'^((?:[-;#<!.\\"/* ]*(?:REM[-;#<!.\\"/* ]*)?[-;#<!.\"/*]+)?)( *)This file is provided as-is by Unicode, Inc\. \(The Unicode Consortium\)\. *\n'
+    kIndent +
+    r'This file is provided as-is by Unicode, Inc\. \(The Unicode Consortium\)\. *\n'
     r'^\1\2No claims are made as to fitness for any particular purpose\. +No *\n'
     r'^\1\2warranties of any kind are expressed or implied\. +The recipient *\n'
     r'^\1\2agrees to determine applicability of information provided\. +If this *\n'
@@ -1627,7 +1656,8 @@ final List<RegExp> csLicenses = <RegExp>[
 
   // OpenSSL
   new RegExp(
-    r'^((?:[-;#<!.\\"/* ]*(?:REM[-;#<!.\\"/* ]*)?[-;#<!.\"/*]+)?)( *)The portions of the attached software \("Contribution"\) is developed by *\n'
+    kIndent +
+    r'The portions of the attached software \("Contribution"\) is developed by *\n'
     r'^\1\2Nokia Corporation and is licensed pursuant to the OpenSSL open source *\n'
     r'^\1\2license\. *\n'
     r'^(?:(?:\1\2? *)? *\n)*'
@@ -1661,7 +1691,8 @@ final List<RegExp> csNotices = <RegExp>[
   // should have two groups, prefixes 1 and 2
 
   new RegExp(
-    r'^((?:[-;#<!.\\"/* ]*(?:REM[-;#<!.\\"/* ]*)?[-;#<!.\"/*]+)?)( *)The Graphics Interchange Format\(c\) is the copyright property of CompuServe *\n'
+    kIndent +
+    r'The Graphics Interchange Format\(c\) is the copyright property of CompuServe *\n'
     r'^\1\2Incorporated\. +Only CompuServe Incorporated is authorized to define, redefine, *\n'
     r'^\1\2enhance, alter, modify or change in any way the definition of the format\. *\n'
     r'^(?:(?:\1\2? *)? *\n)*'
@@ -1728,7 +1759,8 @@ final List<RegExp> csNotices = <RegExp>[
 
   // Advice for this was "text verbatim".
   new RegExp(
-    r'^((?:[-;#<!.\\"/* ]*(?:REM[-;#<!.\\"/* ]*)?[-;#<!.\"/*]+)?)( *)Copyright \(c\) 2015-2016 Khronos Group\. This work is licensed under a\n'
+    kIndent +
+    r'Copyright \(c\) 2015-2016 Khronos Group\. This work is licensed under a\n'
     r'\1\2Creative Commons Attribution 4\.0 International License; see\n'
     r'\1\2http://creativecommons\.org/licenses/by/4\.0/',
     multiLine: true,
@@ -1738,7 +1770,8 @@ final List<RegExp> csNotices = <RegExp>[
   // by analogy to the above one
   // seen in jsr305
   new RegExp(
-    r'^((?:[-;#<!.\\"/* ]*(?:REM[-;#<!.\\"/* ]*)?[-;#<!.\"/*]+)?)( *)Copyright .+\n'
+    kIndent +
+    r'Copyright .+\n'
     r'\1\2Released under the Creative Commons Attribution License\n'
     r'\1\2 *\(?http://creativecommons\.org/licenses/by/2\.5/?\)?\n'
     r'\1\2Official home: .+',
@@ -1791,8 +1824,7 @@ final List<ForwardReferencePattern> csForwardReferenceLicenses = <ForwardReferen
     firstPrefixIndex: 1,
     indentPrefixIndex: 2,
     pattern: new RegExp(
-      r'^((?:[-;#<!.\\"/* ]*(?:REM[-;#<!.\\"/* ]*)?[-;#<!.\"/*]+)?)( *)'
-      r'(?:'
+      kIndent + r'(?:'
       +
       (
         r'Portions of the attached software \("Contribution"\) are developed by .+ and are contributed to the OpenSSL project\.'
