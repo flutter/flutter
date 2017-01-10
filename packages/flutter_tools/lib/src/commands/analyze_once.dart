@@ -153,7 +153,7 @@ class AnalyzeOnce extends AnalyzeBase {
     options.packageMap = packages;
     options.analysisOptionsFile = flutterRepo
         ? path.join(Cache.flutterRoot, '.analysis_options_repo')
-        : path.join(Cache.flutterRoot, '.analysis_options_user');
+        : path.join(Cache.flutterRoot, 'packages', 'flutter', 'lib', 'analysis_options_user.yaml');
     AnalysisDriver analyzer = new AnalysisDriver(options);
 
     // TODO(pq): consider error handling
