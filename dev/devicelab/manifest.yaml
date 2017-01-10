@@ -166,4 +166,10 @@ tasks:
     description: >
       Measures the IPA size of a basic material app.
     stage: devicelab_ios
-    required_agent_capabilities: ["has-android-device"]
+    required_agent_capabilities: ["has-ios-device"]
+
+  microbenchmarks_ios:
+    description: >
+      Runs benchmarks from dev/benchmarks/microbenchmarks on iOS.
+    stage: devicelab_ios
+    required_agent_capabilities: ["has-ios-device"]
