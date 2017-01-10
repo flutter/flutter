@@ -173,6 +173,7 @@ class AnalysisServer {
     // Available options (many of these are obsolete):
     //   enableAsync, enableDeferredLoading, enableEnums, enableNullAwareOperators,
     //   enableSuperMixins, generateDart2jsHints, generateHints, generateLints
+    // TODO(danrubel): remove this once all projects have .analysis_options file
     _sendCommand('analysis.updateOptions', <String, dynamic>{
       'options': <String, dynamic>{
         'enableSuperMixins': true
@@ -285,6 +286,32 @@ class AnalysisError implements Comparable<AnalysisError> {
   int get startLine => json['location']['startLine'];
   int get startColumn => json['location']['startColumn'];
   int get offset => json['location']['offset'];
+
+  @override
+  bool operator ==(dynamic other) {
+
+    bool equals(Map<String, dynamic> map1, Map<String, dynamic> map2) {
+      if (map1.length != map2.length)
+        return false;
+      for (String key in map1.keys) {
+        dynamic value1 = map1[key];
+        dynamic value2 = map2[key];
+        if (value1 is Map<String, dynamic>) {
+          if (value2 is! Map<String, dynamic>)
+            return false;
+          return equals(value1, value2);
+        }
+        if (value1 != value2)
+          return false;
+      }
+      return true;
+    }
+
+    return (other is AnalysisError) ? equals(json, other.json) : false;
+  }
+
+  @override
+  int get hashCode => json.keys.fold(0, (int h, String k) => h + k.hashCode);
 
   @override
   int compareTo(AnalysisError other) {

@@ -3,12 +3,17 @@
 // found in the LICENSE file.
 
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:path/path.dart' as path;
 
 void createSampleProject(Directory directory, { bool brokenCode: false }) {
   File pubspecFile = fs.file(path.join(directory.path, 'pubspec.yaml'));
+  String pathToFlutterPackage = path.join(Cache.flutterRoot, 'packages', 'flutter');
   pubspecFile.writeAsStringSync('''
 name: foo_project
+dependencies:
+  flutter:
+    path: $pathToFlutterPackage
 ''');
 
   File optionsFile = fs.file(path.join(directory.path, '.analysis_options'));
