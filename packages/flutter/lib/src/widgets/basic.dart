@@ -2229,17 +2229,27 @@ class Column extends Flex {
 
 /// A widget that controls how a child of a [Row], [Column], or [Flex] flexes.
 ///
+/// Using a [Flexible] widget gives a child of a [Row], [Column], or [Flex]
+/// the flexibility to expand to fill the available space in the main axis
+/// (e.g., horizontally for a [Row] or vertically for a [Column]), but, unlike
+/// [Expanded], [Flexible] does not require the child to fill the available
+/// space.
+///
 /// A [Flexible] widget must be a descendant of a [Row], [Column], or [Flex],
 /// and the path from the [Flexible] widget to its enclosing [Row], [Column], or
 /// [Flex] must contain only [StatelessWidget]s or [StatefulWidget]s (not other
 /// kinds of widgets, like [RenderObjectWidget]s).
+///
+/// See also:
+///
+///  * [Expanded], which forces the child to expand to fill the available space.
 class Flexible extends ParentDataWidget<Flex> {
   /// Creates a widget that controls how a child of a [Row], [Column], or [Flex]
   /// flexes.
   Flexible({
     Key key,
     this.flex: 1,
-    this.fit: FlexFit.tight,
+    this.fit: FlexFit.loose,
     @required Widget child,
   }) : super(key: key, child: child);
 
@@ -2292,15 +2302,19 @@ class Flexible extends ParentDataWidget<Flex> {
 
 /// A widget that expands a child of a [Row], [Column], or [Flex].
 ///
-/// Using an [Expanded] widget to make a child of a [Row], [Column], or [Flex]
+/// Using an [Expanded] widget makes a child of a [Row], [Column], or [Flex]
 /// expand to fill the available space in the main axis (e.g., horizontally for
 /// a [Row] or vertically for a [Column]). If multiple children are expanded,
 /// the available space is divided amoung them according to the [flex] factor.
 ///
 /// An [Expanded] widget must be a descendant of a [Row], [Column], or [Flex],
-/// and the path from the [Flexible] widget to its enclosing [Row], [Column], or
+/// and the path from the [Expanded] widget to its enclosing [Row], [Column], or
 /// [Flex] must contain only [StatelessWidget]s or [StatefulWidget]s (not other
 /// kinds of widgets, like [RenderObjectWidget]s).
+///
+/// See also:
+///
+///  * [Flexible], which does not force the child to fill the available space.
 class Expanded extends Flexible {
   /// Creates a widget that expands a child of a [Row], [Column], or [Flex]
   /// expand to fill the available space in the main axis.
