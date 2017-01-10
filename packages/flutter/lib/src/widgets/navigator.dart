@@ -238,7 +238,7 @@ typedef bool RoutePredicate(Route<dynamic> route);
 /// around in the overlay. Similarly, the navigator can be used to show a dialog
 /// by positioning the dialog widget above the current page.
 ///
-/// Although you can create an navigator directly, it's most common to refer to the
+/// Although you can create a navigator directly, it's most common to refer to the
 /// navigator created by a [WidgetsApp] or a [MaterialApp] with [Navigator.of].
 class Navigator extends StatefulWidget {
   /// Creates a widget that maintains a stack-based history of child widgets.
