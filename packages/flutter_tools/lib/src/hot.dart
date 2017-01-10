@@ -111,7 +111,7 @@ class HotRunner extends ResidentRunner {
       }
     } catch (error) {
       printStatus('Error detected in application source code:', emphasis: true);
-      printError(error);
+      printError('$error');
       return false;
     }
     return true;
