@@ -160,6 +160,24 @@ class TextSpan {
     return buffer.toString();
   }
 
+  /// Returns the UTF-16 code unit at the given index in the flattened string.
+  /// Returns null if the index is out of bounds.
+  int codeUnitAt(int index) {
+    if (index < 0)
+      return null;
+    int offset = 0;
+    int result;
+    visitTextSpan((TextSpan span) {
+      if (index - offset < span.text.length) {
+        result = span.text.codeUnitAt(index - offset);
+        return false;
+      }
+      offset += span.text.length;
+      return true;
+    });
+    return result;
+  }
+
   @override
   String toString([String prefix = '']) {
     StringBuffer buffer = new StringBuffer();
