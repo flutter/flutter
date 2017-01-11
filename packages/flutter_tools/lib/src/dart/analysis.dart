@@ -7,6 +7,7 @@ import 'dart:collection';
 import 'package:analyzer/error/error.dart';
 import 'package:analyzer/file_system/file_system.dart' as file_system;
 import 'package:analyzer/file_system/physical_file_system.dart';
+import 'package:analyzer/plugin/options.dart';
 import 'package:analyzer/source/analysis_options_provider.dart';
 import 'package:analyzer/source/error_processor.dart';
 import 'package:analyzer/source/package_map_resolver.dart';
@@ -18,6 +19,7 @@ import 'package:analyzer/src/generated/source.dart'; // ignore: implementation_i
 import 'package:analyzer/src/generated/source_io.dart'; // ignore: implementation_imports
 import 'package:analyzer/src/task/options.dart'; // ignore: implementation_imports
 import 'package:cli_util/cli_util.dart' as cli_util;
+import 'package:linter/src/plugin/linter_plugin.dart'; // ignore: implementation_imports
 import 'package:package_config/packages.dart' show Packages;
 import 'package:package_config/src/packages_impl.dart' show MapPackages; // ignore: implementation_imports
 import 'package:path/path.dart' as path;
@@ -136,28 +138,39 @@ class AnalysisDriver {
   }
 
   bool _isFiltered(AnalysisError error) {
-    ErrorProcessor processor = ErrorProcessor.getProcessor(context.analysisOptions, error);
+    ErrorProcessor processor = ErrorProcessor.getProcessor(context, error);
     // Filtered errors are processed to a severity of `null`.
     return processor != null && processor.severity == null;
   }
 
   void _processAnalysisOptions(
-    AnalysisContext context, AnalysisOptions analysisOptions) {
-    String optionsPath = options.analysisOptionsFile;
-    if (optionsPath != null) {
-      file_system.File file =
-           PhysicalResourceProvider.INSTANCE.getFile(optionsPath);
-      Map<Object, Object> optionMap =
-          analysisOptionsProvider.getOptionsFromFile(file);
-      if (optionMap != null) {
-        applyToAnalysisOptions(context.analysisOptions, optionMap);
+      AnalysisContext context, AnalysisOptions analysisOptions) {
+    List<OptionsProcessor> optionsProcessors =
+        AnalysisEngine.instance.optionsPlugin.optionsProcessors;
+    try {
+      String optionsPath = options.analysisOptionsFile;
+      if (optionsPath != null) {
+        file_system.File file =
+            PhysicalResourceProvider.INSTANCE.getFile(optionsPath);
+        Map<Object, Object> optionMap =
+            analysisOptionsProvider.getOptionsFromFile(file);
+        optionsProcessors.forEach(
+            (OptionsProcessor p) => p.optionsProcessed(context, optionMap));
+        if (optionMap != null) {
+          configureContextOptions(context, optionMap);
+        }
       }
+    } on Exception catch (e) {
+      optionsProcessors.forEach((OptionsProcessor p) => p.onError(e));
     }
   }
 
   void _processPlugins() {
     List<Plugin> plugins = <Plugin>[];
     plugins.addAll(AnalysisEngine.instance.requiredPlugins);
+    plugins.add(AnalysisEngine.instance.commandLinePlugin);
+    plugins.add(AnalysisEngine.instance.optionsPlugin);
+    plugins.add(linterPlugin);
     ExtensionManager manager = new ExtensionManager();
     manager.processPlugins(plugins);
   }
@@ -263,10 +276,7 @@ class _StdLogger extends Logger {
   @override
   void logError(String message, [Exception exception]) =>
       errorSink.writeln(message);
-
   @override
-  void logInformation(String message, [Exception exception]) {
-    // TODO(pq): remove once addressed in analyzer (http://dartbug.com/28285)
-    if (message != 'No definition of type FutureOr') outSink.writeln(message);
-  }
+  void logInformation(String message, [Exception exception]) =>
+      outSink.writeln(message);
 }
