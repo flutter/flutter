@@ -491,6 +491,7 @@ class _RecordingProcess implements Process {
   @override
   Future<int> get exitCode => delegate.exitCode;
 
+  // ignore: annotate_overridden_members
   set exitCode(Future<int> exitCode) => throw new UnsupportedError('set exitCode');
 
   @override
@@ -826,6 +827,7 @@ class _ReplayProcess implements Process {
   @override
   Future<int> get exitCode => _exitCodeCompleter.future;
 
+  // ignore: annotate_overridden_members
   set exitCode(Future<int> exitCode) => throw new UnsupportedError('set exitCode');
 
   @override
