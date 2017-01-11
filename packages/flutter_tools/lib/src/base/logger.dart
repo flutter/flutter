@@ -223,7 +223,7 @@ class AnsiTerminal {
   set singleCharMode(bool value) {
     try {
       stdin.lineMode = !value;
-    } catch (error) {
+    } on IOException {
       // This can throw for some terminals; we ignore the error.
     }
   }
