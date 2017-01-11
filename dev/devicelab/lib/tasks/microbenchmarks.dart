@@ -41,10 +41,7 @@ TaskFunction createMicrobenchmarkTask() {
     allResults.addAll(await _runMicrobench('lib/stocks/layout_bench.dart'));
     allResults.addAll(await _runMicrobench('lib/stocks/build_bench.dart'));
     allResults.addAll(await _runMicrobench('lib/gestures/velocity_tracker_bench.dart'));
-    if (deviceOperatingSystem == DeviceOperatingSystem.android) {
-      // TODO(yjbanov): Run on iOS when https://github.com/flutter/flutter/issues/7433 is fixed.
-      allResults.addAll(await _runMicrobench('lib/stocks/animation_bench.dart'));
-    }
+    allResults.addAll(await _runMicrobench('lib/stocks/animation_bench.dart'));
 
     return new TaskResult.success(allResults, benchmarkScoreKeys: allResults.keys.toList());
   };
