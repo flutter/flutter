@@ -325,7 +325,7 @@ class RepositoryLibPngLicenseFile extends RepositorySingleLicenseFile {
     if (!contents.contains('COPYRIGHT NOTICE, DISCLAIMER, and LICENSE:') ||
         !contents.contains('png') ||
         !contents.contains('END OF COPYRIGHT NOTICE, DISCLAIMER, and LICENSE.'))
-      throw 'unexpected libpng license file contents:\n----8<----$contents\n----<8----';
+      throw 'unexpected libpng license file contents:\n----8<----\n$contents\n----<8----';
   }
 
   @override
@@ -345,7 +345,7 @@ class RepositoryBlankLicenseFile extends RepositorySingleLicenseFile {
   static void _verifyLicense(fs.TextFile io, String sanityCheck) {
     final String contents = io.readString();
     if (!contents.contains(sanityCheck))
-      throw 'unexpected file contents; wanted "$sanityCheck", but got:\n----8<----$contents\n----<8----';
+      throw 'unexpected file contents; wanted "$sanityCheck", but got:\n----8<----\n$contents\n----<8----';
   }
 
   @override
