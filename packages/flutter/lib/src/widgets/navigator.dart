@@ -238,13 +238,15 @@ typedef bool RoutePredicate(Route<dynamic> route);
 /// around in the overlay. Similarly, the navigator can be used to show a dialog
 /// by positioning the dialog widget above the current page.
 ///
-/// ## Navigator basics: displaying a full-screen route
+/// ## Using the Navigator
 ///
 /// Mobile apps typically reveal their contents via full-screen elements
 /// called "screens" or "pages". In Flutter these elements are called
 /// routes and they're managed by a [Navigator] widget. The navigator
 /// manages a stack of [Route] objects and provides methods for managing
 /// the stack, like [Navigator.push] and [Navigator.pop].
+///
+/// ### Displaying a full-screen route
 ///
 /// Although you can create a navigator directly, it's most common to use
 /// the navigator created by a [WidgetsApp] or a [MaterialApp] widget. You
@@ -254,7 +256,7 @@ typedef bool RoutePredicate(Route<dynamic> route);
 /// home becomes the route at the bottom of the Navigator's stack. It's
 /// what you see when the app is launched.
 ///
-/// ```
+/// ```dart
 /// void main() {
 ///   runApp(new MaterialApp(home: new MyAppHome()));
 /// }
@@ -264,7 +266,7 @@ typedef bool RoutePredicate(Route<dynamic> route);
 /// [MaterialPageRoute] with a builder function that creates whatever you
 /// want to appear on the screen. For example:
 ///
-/// ```
+/// ```dart
 /// Navigator.of(context).push(new MaterialPageRoute(
 ///   builder: (BuildContext context) {
 ///     return new Scaffold(
@@ -289,7 +291,7 @@ typedef bool RoutePredicate(Route<dynamic> route);
 /// As you can see, the new route can be popped, revealing the app's home
 /// page, with the Navigator's pop method:
 ///
-/// ```
+/// ```dart
 /// Navigator.of(context).pop();
 /// ```
 ///
@@ -299,7 +301,7 @@ typedef bool RoutePredicate(Route<dynamic> route);
 /// [Navigator.pop] to be called. On Android, pressing the system back
 /// button does the same thing.
 ///
-/// ## Using named navigator routes
+/// ### Using named navigator routes
 ///
 /// Mobile apps often manage a large number of routes and it's often
 /// easiest to refer to them by name. The [MaterialApp] can be created
@@ -307,7 +309,7 @@ typedef bool RoutePredicate(Route<dynamic> route);
 /// a builder function that will create it. The [MaterialApp] uses this
 /// map to create a value for its navigator's [onGenerateRoute] callback.
 ///
-/// ```
+/// ```dart
 /// void main() {
 ///   runApp(new MaterialApp(
 ///     home: new MyAppHome(),
@@ -321,11 +323,11 @@ typedef bool RoutePredicate(Route<dynamic> route);
 /// ```
 ///
 /// To show a route by name:
-/// ```
+/// ```dart
 /// Navigator.of(context).pushNamed('B');
 /// ```
 ///
-/// ## Defining a popup route
+/// ### Defining a popup route
 ///
 /// Routes don't have to obscure the entire screen. [PopupRoute]s cover
 /// the screen with a barrierColor that can be only partially opaque to
@@ -344,7 +346,7 @@ typedef bool RoutePredicate(Route<dynamic> route);
 /// behavior of the route's modal barrier. Here's an example that rotates
 /// and fades its child when the route appears or disappears.
 ///
-/// ```
+/// ```dart
 /// class _MyPopupRoute extends PopupRoute<Null> {
 ///   _MyPopupRoute({ this.child, this.color });
 ///
@@ -384,7 +386,7 @@ typedef bool RoutePredicate(Route<dynamic> route);
 /// just pass an instance of our [PopupRoute] subclass to
 /// [Navigator.push]:
 ///
-/// ```
+/// ```dart
 /// Navigator.of(context).push(new _MyPopupRoute(
 ///   color: Theme.of(context).primaryColor.withOpacity(0.15),
 ///   child: new Center(
