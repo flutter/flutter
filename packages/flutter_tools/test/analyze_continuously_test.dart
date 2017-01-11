@@ -30,7 +30,7 @@ void main() {
   });
 
   group('analyze --watch', () {
-    testUsingContext('AnalysisServer success', () async {
+    testUsingContext('success', () async {
       createSampleProject(tempDir);
 
       await pubGet(directory: tempDir.path);
@@ -48,33 +48,45 @@ void main() {
     }, overrides: <Type, Generator>{
       OperatingSystemUtils: () => os
     });
-  });
 
-  testUsingContext('AnalysisServer errors', () async {
-    createSampleProject(tempDir, brokenCode: true);
+    testUsingContext('errors', () async {
+      createSampleProject(tempDir, brokenCode: true);
 
-    await pubGet(directory: tempDir.path);
+      await pubGet(directory: tempDir.path);
 
-    server = new AnalysisServer(dartSdkPath, <String>[tempDir.path]);
+      server = new AnalysisServer(dartSdkPath, <String>[tempDir.path]);
 
-    // Analysis server returns multiple instances of the same error
-    // thus use a Set to remove duplicates.
-    Set<AnalysisError> errorsFound = new Set<AnalysisError>();
-    Future<bool> onDone = server.onAnalyzing.where((bool analyzing) => analyzing == false).first;
-    server.onErrors.listen((FileAnalysisErrors errors) => errorsFound.addAll(errors.errors));
+      // Analysis server returns multiple instances of the same error
+      // thus use a Set to remove duplicates.
+      Set<AnalysisError> errorsFound = new Set<AnalysisError>();
+      Future<bool> onDone = server.onAnalyzing.where((bool analyzing) => analyzing == false).first;
+      server.onErrors.listen((FileAnalysisErrors errors) => errorsFound.addAll(errors.errors));
 
-    await server.start();
-    await onDone;
+      void expectError(String text) {
+        for (AnalysisError err in errorsFound) {
+          if (err.message.contains(text))
+            return;
+        }
+        String errorMsgText = '';
+        for (AnalysisError err in errorsFound) {
+          errorMsgText += '\n  ${err.message}';
+        }
+        fail('Expected\n  $text\nbut found$errorMsgText');
+      }
 
-    // Expect 2 errors... one language error and one linter error
-    // for a rule that is defined in the flutter user analysis options file
-    int expectedErrorCount = 2;
-    if (errorsFound.length != expectedErrorCount) {
-      print('Expected $expectedErrorCount errors, but found:');
-      for (AnalysisError e in errorsFound) print(e);
-      fail('Unexpected number of errors');
-    }
-  }, overrides: <Type, Generator>{
-    OperatingSystemUtils: () => os
+      await server.start();
+      await onDone;
+
+      // language warning
+      expectError('The function \'prints\' isn\'t defined.');
+      // expect lint specified in flutter user analysis options
+      expectError('Avoid empty else statements.');
+      // expect lint specified in user's options file
+      expectError('Only throw instances of classes extending either Exception or Error');
+
+      expect(errorsFound, hasLength(3));
+    }, overrides: <Type, Generator>{
+      OperatingSystemUtils: () => os
+    });
   });
 }

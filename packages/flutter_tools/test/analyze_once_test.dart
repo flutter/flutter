@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/os.dart';
@@ -31,46 +33,81 @@ void main() {
     return server?.dispose();
   });
 
-  group('analyze once', () {
-    testUsingContext('success', () async {
-      createSampleProject(tempDir);
-
-      await pubGet(directory: tempDir.path);
-
-      AnalyzeCommand command = new AnalyzeCommand();
-      applyMocksToCommand(command);
-      return createTestCommandRunner(command).run(
-          <String>['analyze', path.join(tempDir.path, 'lib', 'main.dart')]
-      ).then((_) {
-        expect(testLogger.statusText, contains('No analyzer warnings!'));
-        expect(testLogger.errorText, isEmpty);
-      });
-    }, overrides: <Type, Generator>{
-      OperatingSystemUtils: () => os
-    });
-  });
-
-  testUsingContext('errors', () async {
-    createSampleProject(tempDir, brokenCode: true);
+  Future<dynamic> _runAnalyze(List<String> args, checkResults(), {bool brokenCode: false}) async {
+    createSampleProject(tempDir, brokenCode: brokenCode);
 
     await pubGet(directory: tempDir.path);
 
     AnalyzeCommand command = new AnalyzeCommand();
     applyMocksToCommand(command);
-    bool toolExited = false;
+    Directory originalDir = fs.currentDirectory;
+    fs.currentDirectory = tempDir.path;
     return createTestCommandRunner(command).run(
         <String>['analyze', path.join(tempDir.path, 'lib', 'main.dart')]
-    ).catchError((_) {
-      toolExited = true;
-    }, test: (dynamic e) => e is ToolExit).then((_) {
-      // expect lint specified in flutter user analysis options
-      expect(testLogger.errorText, contains('Avoid empty else statements.'));
-      expect(testLogger.errorText, contains('Avoid empty statements.'));
-      // language warning
-      expect(testLogger.errorText, contains('The function \'prints\' isn\'t defined.'));
-      expect(toolExited, true);
+    ).then((_) {
+      checkResults();
+    }).whenComplete(() {
+      fs.currentDirectory = originalDir;
     });
-  }, overrides: <Type, Generator>{
-    OperatingSystemUtils: () => os
+  }
+
+  group('analyze once', () {
+    group('success', () {
+      testUsingContext('directory', () {
+        List<String> args = <String>[];
+        return _runAnalyze(args, () {
+          expect(testLogger.statusText, contains('No issues found'));
+          expect(testLogger.errorText, isEmpty);
+        });
+      }, overrides: <Type, Generator>{
+        OperatingSystemUtils: () => os
+      });
+
+      testUsingContext('one file', () {
+        List<String> args = <String>[path.join(tempDir.path, 'lib', 'main.dart')];
+        return _runAnalyze(args, () {
+          expect(testLogger.statusText, contains('No issues found'));
+          expect(testLogger.errorText, isEmpty);
+        });
+      }, overrides: <Type, Generator>{
+        OperatingSystemUtils: () => os
+      });
+    });
+
+    group('errors', () {
+      testUsingContext('directory', () {
+        List<String> args = <String>[];
+        return _runAnalyze(args, () {
+          String allText = testLogger.statusText + '\n' + testLogger.errorText;
+          // language warning
+          expect(allText, contains('The function \'prints\' isn\'t defined.'));
+          // expect lint specified in flutter user analysis options
+          expect(allText, contains('Avoid empty else statements.'));
+          expect(allText, contains('Avoid empty statements.'));
+          // expect lint specified in user's options file
+          expect(allText, contains('Only throw instances of classes extending either Exception or Error'));
+          expect(allText, contains('1 error and 3 lints found.'));
+        }, brokenCode: true);
+      }, overrides: <Type, Generator>{
+        OperatingSystemUtils: () => os
+      });
+
+      testUsingContext('one file', () {
+        List<String> args = <String>[path.join(tempDir.path, 'lib', 'main.dart')];
+        return _runAnalyze(args, () {
+          String allText = testLogger.statusText + '\n' + testLogger.errorText;
+          // language warning
+          expect(allText, contains('The function \'prints\' isn\'t defined.'));
+          // expect lint specified in flutter user analysis options
+          expect(allText, contains('Avoid empty else statements.'));
+          expect(allText, contains('Avoid empty statements.'));
+          // expect lint specified in user's options file
+          expect(allText, contains('Only throw instances of classes extending either Exception or Error'));
+          expect(allText, contains('1 error and 3 lints found.'));
+        }, brokenCode: true);
+      }, overrides: <Type, Generator>{
+        OperatingSystemUtils: () => os
+      });
+    });
   });
 }

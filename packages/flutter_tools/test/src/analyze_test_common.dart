@@ -19,11 +19,16 @@ dependencies:
   File optionsFile = fs.file(path.join(directory.path, '.analysis_options'));
   optionsFile.writeAsStringSync('''
 include: package:flutter/analysis_options_user.yaml
+
+linter:
+  rules:
+    - only_throw_errors
 ''');
 
   // If brokenCode flag is true, then include
   // * language error - unknown method "prints"
   // * lint defined in flutter user analysis options - avoid empty else
+  // * lint defined in user's analysis options file - only throw errors
   File dartFile = fs.file(path.join(directory.path, 'lib', 'main.dart'));
   dartFile.parent.createSync();
   dartFile.writeAsStringSync('''
@@ -31,6 +36,7 @@ void main() {
   print('hello world');
   ${brokenCode ? 'prints("hello world");' : ''}
   ${brokenCode ? 'if (0==0) print("equals"); else;' : ''}
+  ${brokenCode ? 'if (0==0) throw "an error message";' : ''}
 }
 ''');
 }
