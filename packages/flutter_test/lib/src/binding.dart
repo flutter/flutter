@@ -11,7 +11,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/http.dart' as http;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:meta/meta.dart';
 import 'package:quiver/testing/async.dart';
@@ -84,8 +83,8 @@ const Size _kDefaultTestViewportSize = const Size(800.0, 600.0);
 abstract class TestWidgetsFlutterBinding extends BindingBase
   with SchedulerBinding,
        GestureBinding,
-       ServicesBinding,
        RendererBinding,
+       // Services binding omitted to avoid dragging in the licenses code.
        WidgetsBinding {
   /// Creates and initializes the binding. This function is
   /// idempotent; calling it a second time will just return the

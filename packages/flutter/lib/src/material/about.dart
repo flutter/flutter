@@ -379,6 +379,8 @@ class _LicensePageState extends State<LicensePage> {
 
   Future<Null> _initLicenses() async {
     await for (LicenseEntry license in LicenseRegistry.licenses) {
+      if (!mounted)
+        return;
       setState(() {
         _licenses.add(new Padding(
           padding: const EdgeInsets.symmetric(vertical: 18.0),

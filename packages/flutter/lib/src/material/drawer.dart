@@ -133,10 +133,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   @override
   void dispose() {
     _historyEntry?.remove();
-    _controller
-      ..removeListener(_animationChanged)
-      ..removeStatusListener(_animationStatusChanged)
-      ..stop();
+    _controller.dispose();
     super.dispose();
   }
 
