@@ -21,7 +21,6 @@ import 'render_tree.dart';
 
 const String _extensionMethodName = 'driver';
 const String _extensionMethod = 'ext.flutter.$_extensionMethodName';
-const Duration _kDefaultTimeout = const Duration(seconds: 5);
 
 class _DriverBinding extends WidgetsFlutterBinding { // TODO(ianh): refactor so we're not extending a concrete binding
   @override
@@ -156,9 +155,7 @@ class _FlutterDriverExtension {
     return new RenderTree(RendererBinding.instance?.renderView?.toStringDeep());
   }
 
-  /// Runs `finder` repeatedly until it finds one or more [Element]s, or times out.
-  ///
-  /// The timeout is five seconds.
+  /// Runs `finder` repeatedly until it finds one or more [Element]s.
   Future<Finder> _waitForElement(Finder finder) {
     // Short-circuit if the element is already on the UI
     if (finder.precache())
@@ -168,15 +165,9 @@ class _FlutterDriverExtension {
     Completer<Finder> completer = new Completer<Finder>();
     StreamSubscription<Duration> subscription;
 
-    Timer timeout = new Timer(_kDefaultTimeout, () {
-      subscription.cancel();
-      completer.completeError('Timed out waiting for ${finder.description}');
-    });
-
     subscription = _onFrameReady.listen((Duration duration) {
       if (finder.precache()) {
         subscription.cancel();
-        timeout.cancel();
         completer.complete(finder);
       }
     });

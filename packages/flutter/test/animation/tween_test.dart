@@ -6,8 +6,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/animation.dart';
 import 'package:flutter/widgets.dart';
 
-import 'animation_tester.dart';
-
 void main() {
   test('Can chain tweens', () {
     Tween<double> tween = new Tween<double>(begin: 0.30, end: 0.50);

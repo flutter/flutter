@@ -14,7 +14,10 @@ void main() {
     await tester.pumpWidget(
       new Builder(
         builder: (BuildContext context) {
-          size = MediaQuery.of(context).size;
+          final MediaQueryData data = MediaQuery.of(context);
+          expect(data, hasOneLineDescription);
+          expect(data.hashCode, equals(data.copyWith().hashCode));
+          size = data.size;
           return new Container();
         }
       )

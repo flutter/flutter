@@ -96,6 +96,11 @@ Future<Null> runNavigatorTest(
 }
 
 void main() {
+  testWidgets('Route settings', (WidgetTester tester) async {
+    RouteSettings settings = const RouteSettings(name: 'A');
+    expect(settings, hasOneLineDescription);
+  });
+
   testWidgets('Route management - push, replace, pop', (WidgetTester tester) async {
     GlobalKey<NavigatorState> navigatorKey = new GlobalKey<NavigatorState>();
     await tester.pumpWidget(new Navigator(
@@ -320,6 +325,7 @@ void main() {
         'B: didChangeNext C',
       ]
     );
+    expect(routeC.isActive, isTrue);
     TestRoute routeB;
     await runNavigatorTest(
       tester,

@@ -263,7 +263,6 @@ class DayPicker extends StatelessWidget {
             )
           ),
           new Flexible(
-            fit: FlexFit.loose,
             child: new CustomGrid(
               delegate: _kDayPickerGridDelegate,
               children: labels
@@ -594,7 +593,6 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
   @override
   Widget build(BuildContext context) {
     Widget picker = new Flexible(
-      fit: FlexFit.loose,
       child: new SizedBox(
         height: _kMaxDayPickerHeight,
         child: _buildPicker(),
@@ -644,7 +642,6 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
                   children: <Widget>[
                     header,
                     new Flexible(
-                      fit: FlexFit.loose,
                       child: new SizedBox(
                         width: _kMonthPickerLandscapeWidth,
                         child: new Column(

@@ -8,7 +8,6 @@ import 'package:meta/meta.dart';
 
 import '../base/common.dart';
 import '../base/file_system.dart';
-import '../base/io.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../globals.dart';
@@ -88,7 +87,7 @@ class BuildCleanCommand extends FlutterCommand {
   @override
   Future<Null> runCommand() async {
     Directory buildDir = fs.directory(getBuildDirectory());
-    printStatus("Deleting '${buildDir.path}${Platform.pathSeparator}'.");
+    printStatus("Deleting '${buildDir.path}${fs.pathSeparator}'.");
 
     if (!buildDir.existsSync())
       return;
