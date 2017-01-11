@@ -52,11 +52,21 @@
 - (void)onDisplayLink:(CADisplayLink*)link {
   _traceCounter = !_traceCounter;
   TRACE_COUNTER1("flutter", "OnDisplayLink", _traceCounter);
-  ftl::TimePoint frame_time = ftl::TimePoint::Now();
   _displayLink.paused = YES;
-  auto callback = std::move(_pendingCallback);
-  _pendingCallback = shell::VsyncWaiter::Callback();
-  callback(frame_time);
+
+  // Note: Even though we know we are on the UI thread already (since the
+  // display link was scheduled on the UI thread in the contructor), we use
+  // the PostTask mechanism because the callback may have side-effects that need
+  // to be addressed via a task observer. Invoking the callback by itself
+  // bypasses such task observers.
+  //
+  // We are not using the PostTask for thread switching, but to make task
+  // observers work.
+  blink::Threads::UI()->PostTask([callback = _pendingCallback]() {
+    callback(ftl::TimePoint::Now());
+  });
+
+  _pendingCallback = nullptr;
 }
 
 - (void)dealloc {
@@ -77,7 +87,7 @@ VsyncWaiterIOS::~VsyncWaiterIOS() {
 }
 
 void VsyncWaiterIOS::AsyncWaitForVsync(Callback callback) {
-  [client_ await:std::move(callback)];
+  [client_ await:callback];
 }
 
 }  // namespace shell
