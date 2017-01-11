@@ -2,13 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
-
 import 'package:path/path.dart' as path;
 import 'package:xml/xml.dart' as xml;
 
 import 'android/android_sdk.dart';
 import 'android/gradle.dart';
+import 'base/file_system.dart';
 import 'base/os.dart' show os;
 import 'base/process.dart';
 import 'build_info.dart';
@@ -27,6 +26,8 @@ abstract class ApplicationPackage {
   String get name;
 
   String get displayName => name;
+
+  String get packagePath => null;
 
   @override
   String toString() => displayName;
@@ -89,10 +90,10 @@ class AndroidApk extends ApplicationPackage {
       apkPath = path.join(getAndroidBuildDirectory(), 'app.apk');
     }
 
-    if (!FileSystemEntity.isFileSync(manifestPath))
+    if (!fs.isFileSync(manifestPath))
       return null;
 
-    String manifestString = new File(manifestPath).readAsStringSync();
+    String manifestString = fs.file(manifestPath).readAsStringSync();
     xml.XmlDocument document = xml.parse(manifestString);
 
     Iterable<xml.XmlElement> manifests = document.findElements('manifest');
@@ -121,6 +122,9 @@ class AndroidApk extends ApplicationPackage {
   }
 
   @override
+  String get packagePath => apkPath;
+
+  @override
   String get name => path.basename(apkPath);
 }
 
@@ -135,10 +139,10 @@ abstract class IOSApp extends ApplicationPackage {
   factory IOSApp.fromIpa(String applicationBinary) {
     Directory bundleDir;
     try {
-      Directory tempDir = Directory.systemTemp.createTempSync('flutter_app_');
+      Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_app_');
       addShutdownHook(() async => await tempDir.delete(recursive: true));
-      os.unzip(new File(applicationBinary), tempDir);
-      Directory payloadDir = new Directory(path.join(tempDir.path, 'Payload'));
+      os.unzip(fs.file(applicationBinary), tempDir);
+      Directory payloadDir = fs.directory(path.join(tempDir.path, 'Payload'));
       bundleDir = payloadDir.listSync().singleWhere(_isBundleDirectory);
     } on StateError catch (e, stackTrace) {
       printError('Invalid prebuilt iOS binary: ${e.toString()}', stackTrace);

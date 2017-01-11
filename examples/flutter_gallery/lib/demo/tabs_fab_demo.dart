@@ -4,6 +4,12 @@
 
 import 'package:flutter/material.dart';
 
+const String _explanatoryText =
+  "When the Scaffold's floating action button changes, the new button fades and "
+  "turns into view. In this demo, changing tabs can cause the app to be rebuilt "
+  "with a FloatingActionButton that the Scaffold distinguishes from the others "
+  "by its key.";
+
 class _Page {
   _Page({ this.label, this.colors, this.icon });
 
@@ -11,7 +17,6 @@ class _Page {
   final Map<int, Color> colors;
   final IconData icon;
 
-  TabLabel get tabLabel => new TabLabel(text: label.toUpperCase());
   Color get labelColor => colors != null ? colors[300] : Colors.grey[300];
   bool get fabDefined => colors != null && icon != null;
   Color get fabColor => colors[400];
@@ -19,11 +24,13 @@ class _Page {
   Key get fabKey => new ValueKey<Color>(fabColor);
 }
 
-const String _explanatoryText =
-  "When the Scaffold's floating action button changes, the new button fades and "
-  "turns into view. In this demo, changing tabs can cause the app to be rebuilt "
-  "with a FloatingActionButton that the Scaffold distinguishes from the others "
-  "by its key.";
+final List<_Page> _allPages = <_Page>[
+  new _Page(label: 'Blue', colors: Colors.indigo, icon: Icons.add),
+  new _Page(label: 'Eco', colors: Colors.green, icon: Icons.create),
+  new _Page(label: 'No'),
+  new _Page(label: 'Teal', colors: Colors.teal, icon: Icons.add),
+  new _Page(label: 'Red', colors: Colors.red, icon: Icons.create),
+];
 
 class TabsFabDemo extends StatefulWidget {
   static const String routeName = '/tabs-fab';
@@ -32,31 +39,34 @@ class TabsFabDemo extends StatefulWidget {
   _TabsFabDemoState createState() => new _TabsFabDemoState();
 }
 
-class _TabsFabDemoState extends State<TabsFabDemo> {
-  final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
-  final List<_Page> pages = <_Page>[
-    new _Page(label: 'Blue', colors: Colors.indigo, icon: Icons.add),
-    new _Page(label: 'Eco', colors: Colors.green, icon: Icons.create),
-    new _Page(label: 'No'),
-    new _Page(label: 'Teal', colors: Colors.teal, icon: Icons.add),
-    new _Page(label: 'Red', colors: Colors.red, icon: Icons.create),
-  ];
-  _Page selectedPage;
+class _TabsFabDemoState extends State<TabsFabDemo> with SingleTickerProviderStateMixin {
+  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+
+  TabController _controller;
+  _Page _selectedPage;
 
   @override
   void initState() {
     super.initState();
-    selectedPage = pages[0];
+    _controller = new TabController(vsync: this, length: _allPages.length);
+    _controller.addListener(_handleTabSelection);
+    _selectedPage = _allPages[0];
   }
 
-  void _handleTabSelection(_Page page) {
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _handleTabSelection() {
     setState(() {
-      selectedPage = page;
+      _selectedPage = _allPages[_controller.index];
     });
   }
 
   void _showExplanatoryText() {
-    scaffoldKey.currentState.showBottomSheet((BuildContext context) {
+    _scaffoldKey.currentState.showBottomSheet((BuildContext context) {
       return new Container(
         decoration: new BoxDecoration(
           border: new Border(top: new BorderSide(color: Theme.of(context).dividerColor))
@@ -93,26 +103,26 @@ class _TabsFabDemoState extends State<TabsFabDemo> {
 
   @override
   Widget build(BuildContext context) {
-    return new TabBarSelection<_Page>(
-      values: pages,
-      onChanged: _handleTabSelection,
-      child: new Scaffold(
-        key: scaffoldKey,
-        appBar: new AppBar(
-          title: new Text('FAB per tab'),
-          bottom: new TabBar<_Page>(
-            labels: new Map<_Page, TabLabel>.fromIterable(pages, value: (_Page page) => page.tabLabel)
-          )
-        ),
-        floatingActionButton: !selectedPage.fabDefined ? null : new FloatingActionButton(
-          key: selectedPage.fabKey,
-          tooltip: 'Show explanation',
-          backgroundColor: selectedPage.fabColor,
-          child: selectedPage.fabIcon,
-          onPressed: _showExplanatoryText
-        ),
-        body: new TabBarView<_Page>(children: pages.map(buildTabView).toList())
-      )
+    return new Scaffold(
+      key: _scaffoldKey,
+      appBar: new AppBar(
+        title: new Text('FAB per tab'),
+        bottom: new TabBar(
+          controller: _controller,
+          tabs: _allPages.map((_Page page) => new Tab(text: page.label.toUpperCase())).toList(),
+        )
+      ),
+      floatingActionButton: !_selectedPage.fabDefined ? null : new FloatingActionButton(
+        key: _selectedPage.fabKey,
+        tooltip: 'Show explanation',
+        backgroundColor: _selectedPage.fabColor,
+        child: _selectedPage.fabIcon,
+        onPressed: _showExplanatoryText
+      ),
+      body: new TabBarView(
+        controller: _controller,
+        children: _allPages.map(buildTabView).toList()
+      ),
     );
   }
 }

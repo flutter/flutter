@@ -2,10 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
-
 import 'globals.dart';
 
+import 'base/file_system.dart';
 import 'dart/dependencies.dart';
 import 'dart/package_map.dart';
 import 'asset.dart';
@@ -51,7 +50,7 @@ class DependencyChecker {
 
     // Check all dependency modification times.
     for (String path in _dependencies) {
-      File file = new File(path);
+      File file = fs.file(path);
       FileStat stat = file.statSync();
       if (stat.type == FileSystemEntityType.NOT_FOUND) {
         printTrace('DependencyChecker: Error stating $path.');
@@ -62,6 +61,7 @@ class DependencyChecker {
         return true;
       }
     }
+    printTrace('DependencyChecker: nothing is modified after $threshold.');
     return false;
   }
 }

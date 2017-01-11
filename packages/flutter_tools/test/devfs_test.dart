@@ -2,11 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
-
 import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/devfs.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 
@@ -25,9 +24,9 @@ void main() {
   assetBundle.entries.add(new AssetBundleEntry.fromString('a.txt', ''));
   group('devfs', () {
     testUsingContext('create local file system', () async {
-      tempDir = Directory.systemTemp.createTempSync();
+      tempDir = fs.systemTempDirectory.createTempSync();
       basePath = tempDir.path;
-      File file = new File(path.join(basePath, filePath));
+      File file = fs.file(path.join(basePath, filePath));
       await file.parent.create(recursive: true);
       file.writeAsBytesSync(<int>[1, 2, 3]);
     });
@@ -41,14 +40,14 @@ void main() {
       expect(devFSOperations.contains('writeFile test bar/foo.txt'), isTrue);
     });
     testUsingContext('add new file to local file system', () async {
-      File file = new File(path.join(basePath, filePath2));
+      File file = fs.file(path.join(basePath, filePath2));
       await file.parent.create(recursive: true);
       file.writeAsBytesSync(<int>[1, 2, 3, 4, 5, 6, 7]);
       await devFS.update();
       expect(devFSOperations.contains('writeFile test foo/bar.txt'), isTrue);
     });
     testUsingContext('modify existing file on local file system', () async {
-      File file = new File(path.join(basePath, filePath));
+      File file = fs.file(path.join(basePath, filePath));
       // Set the last modified time to 5 seconds in the past.
       updateFileModificationTime(file.path, new DateTime.now(), -5);
       await devFS.update();
@@ -57,7 +56,7 @@ void main() {
       expect(devFSOperations.contains('writeFile test bar/foo.txt'), isTrue);
     });
     testUsingContext('delete a file from the local file system', () async {
-      File file = new File(path.join(basePath, filePath));
+      File file = fs.file(path.join(basePath, filePath));
       await file.delete();
       await devFS.update();
       expect(devFSOperations.contains('deleteFile test bar/foo.txt'), isTrue);

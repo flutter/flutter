@@ -397,7 +397,7 @@ class _RenderLazyBlock extends RenderVirtualViewport<_LazyBlockParentData> {
   _RenderLazyBlock({
     Offset paintOffset: Offset.zero,
     Axis mainAxis: Axis.vertical,
-    LayoutCallback callback
+    LayoutCallback<BoxConstraints> callback
   }) : super(
     paintOffset: paintOffset,
     mainAxis: mainAxis,

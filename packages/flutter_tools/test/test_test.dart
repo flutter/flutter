@@ -3,8 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
 
+import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/dart/sdk.dart';
 import 'package:path/path.dart' as path;
@@ -16,24 +17,31 @@ import 'src/context.dart';
 
 void main() {
   group('test', () {
+    final String automatedTestsDirectory = path.join('..', '..', 'dev', 'automated_tests');
+    final String flutterTestDirectory = path.join(automatedTestsDirectory, 'flutter_test');
+
     testUsingContext('TestAsyncUtils guarded function test', () async {
       Cache.flutterRoot = '../..';
-      return _testFile('test_async_utils_guarded', 1);
+      return _testFile('test_async_utils_guarded', 1, automatedTestsDirectory, flutterTestDirectory);
     });
     testUsingContext('TestAsyncUtils unguarded function test', () async {
       Cache.flutterRoot = '../..';
-      return _testFile('test_async_utils_unguarded', 1);
+      return _testFile('test_async_utils_unguarded', 1, automatedTestsDirectory, flutterTestDirectory);
+    });
+    testUsingContext('Missing flutter_test dependency', () async {
+      final String missingDependencyTests = path.join('..', '..', 'dev', 'missing_dependency_tests');
+      Cache.flutterRoot = '../..';
+      return _testFile('trivial', 1, missingDependencyTests, missingDependencyTests);
     });
   }, timeout: new Timeout(const Duration(seconds: 5)));
 }
 
-Future<Null> _testFile(String testName, int wantedExitCode) async {
-  final String manualTestsDirectory = path.join('..', '..', 'dev', 'automated_tests');
-  final String fullTestName = path.join(manualTestsDirectory, 'flutter_test', '${testName}_test.dart');
-  final File testFile = new File(fullTestName);
+Future<Null> _testFile(String testName, int wantedExitCode, String workingDirectory, String testDirectory) async {
+  final String fullTestName = path.join(testDirectory, '${testName}_test.dart');
+  final File testFile = fs.file(fullTestName);
   expect(testFile.existsSync(), true);
-  final String fullTestExpectation = path.join(manualTestsDirectory, 'flutter_test', '${testName}_expectation.txt');
-  final File expectationFile = new File(fullTestExpectation);
+  final String fullTestExpectation = path.join(testDirectory, '${testName}_expectation.txt');
+  final File expectationFile = fs.file(fullTestExpectation);
   expect(expectationFile.existsSync(), true);
   final ProcessResult exec = await Process.run(
     path.join(dartSdkPath, 'bin', 'dart'),
@@ -43,14 +51,17 @@ Future<Null> _testFile(String testName, int wantedExitCode) async {
       '--no-color',
       fullTestName
     ],
-    workingDirectory: manualTestsDirectory
+    workingDirectory: workingDirectory
   );
   expect(exec.exitCode, wantedExitCode);
   final List<String> output = exec.stdout.split('\n');
-  final List<String> expectations = new File(fullTestExpectation).readAsLinesSync();
+  output.add('<<stderr>>');
+  output.addAll(exec.stderr.split('\n'));
+  final List<String> expectations = fs.file(fullTestExpectation).readAsLinesSync();
   bool allowSkip = false;
   int expectationLineNumber = 0;
   int outputLineNumber = 0;
+  bool haveSeenStdErrMarker = false;
   while (expectationLineNumber < expectations.length) {
     expect(output, hasLength(greaterThan(outputLineNumber)));
     final String expectationLine = expectations[expectationLineNumber];
@@ -67,10 +78,15 @@ Future<Null> _testFile(String testName, int wantedExitCode) async {
       }
       allowSkip = false;
     }
+    if (expectationLine == '<<stderr>>') {
+      expect(haveSeenStdErrMarker, isFalse);
+      haveSeenStdErrMarker = true;
+    }
     expect(outputLine, matches(expectationLine));
     expectationLineNumber += 1;
     outputLineNumber += 1;
   }
   expect(allowSkip, isFalse);
-  expect(exec.stderr, '');
+  if (!haveSeenStdErrMarker)
+    expect(exec.stderr, '');
 }

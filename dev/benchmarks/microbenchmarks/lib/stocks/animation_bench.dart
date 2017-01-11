@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -10,6 +11,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:stocks/main.dart' as stocks;
 import 'package:stocks/stock_data.dart' as stock_data;
+
+import '../common.dart';
 
 const Duration kBenchmarkTime = const Duration(seconds: 15);
 
@@ -73,10 +76,32 @@ Future<Null> main() async {
     }
   });
 
-  print('Stock animation (ran for ${(wallClockWatch.elapsedMicroseconds / (1000 * 1000)).toStringAsFixed(1)}s):');
-  print('  Opening first frame average time: ${(totalOpenFrameElapsedMicroseconds / (totalOpenIterationCount)).toStringAsFixed(1)}µs per frame ($totalOpenIterationCount frames)');
-  print('  Closing first frame average time: ${(totalCloseFrameElapsedMicroseconds / (totalCloseIterationCount)).toStringAsFixed(1)}µs per frame ($totalCloseIterationCount frames)');
-  print('  Subsequent frames average time: ${(totalSubsequentFramesElapsedMicroseconds / (totalSubsequentFramesIterationCount)).toStringAsFixed(1)}µs per frame ($totalSubsequentFramesIterationCount frames)');
+  BenchmarkResultPrinter printer = new BenchmarkResultPrinter();
+  printer.addResult(
+    description: 'Stock animation',
+    value: wallClockWatch.elapsedMicroseconds / (1000 * 1000),
+    unit: 's',
+    name: 'stock_animation_total_run_time',
+  );
+  printer.addResult(
+    description: '  Opening first frame average time',
+    value: totalOpenFrameElapsedMicroseconds / totalOpenIterationCount,
+    unit: 'µs per frame ($totalOpenIterationCount frames)',
+    name: 'stock_animation_open_first_frame_average',
+  );
+  printer.addResult(
+    description: '  Closing first frame average time',
+    value: totalCloseFrameElapsedMicroseconds / totalCloseIterationCount,
+    unit: 'µs per frame ($totalCloseIterationCount frames)',
+    name: 'stock_animation_close_first_frame_average',
+  );
+  printer.addResult(
+    description: '  Subsequent frames average time',
+    value: totalSubsequentFramesElapsedMicroseconds / totalSubsequentFramesIterationCount,
+    unit: 'µs per frame ($totalSubsequentFramesIterationCount frames)',
+    name: 'stock_animation_subsequent_frame_average',
+  );
+  printer.printToStdout();
 
   exit(0);
 }

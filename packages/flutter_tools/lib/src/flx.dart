@@ -3,13 +3,12 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
 
 import 'package:path/path.dart' as path;
 
 import 'asset.dart';
 import 'base/common.dart';
-import 'base/file_system.dart' show ensureDirectoryExists;
+import 'base/file_system.dart';
 import 'base/process.dart';
 import 'dart/package_map.dart';
 import 'build_info.dart';
@@ -107,7 +106,7 @@ Future<Null> build({
     if (result != 0)
       throwToolExit('Failed to run the Flutter compiler. Exit code: $result', exitCode: result);
 
-    snapshotFile = new File(snapshotPath);
+    snapshotFile = fs.file(snapshotPath);
   }
 
   return assemble(
@@ -162,7 +161,7 @@ Future<Null> assemble({
   ensureDirectoryExists(outputPath);
 
   printTrace('Encoding zip file to $outputPath');
-  zipBuilder.createZip(new File(outputPath), new Directory(workingDirPath));
+  zipBuilder.createZip(fs.file(outputPath), fs.directory(workingDirPath));
 
   printTrace('Built $outputPath.');
 }

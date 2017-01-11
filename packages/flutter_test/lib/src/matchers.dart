@@ -62,9 +62,20 @@ const Matcher isNotInCard = const _IsNotInCard();
 /// Asserts that an object's toString() is a plausible one-line description.
 ///
 /// Specifically, this matcher checks that the string does not contains newline
-/// characters, and does not have leading or trailing whitespace, and is not
-/// empty.
+/// characters, and does not have leading or trailing whitespace, is not
+/// empty, and does not contain the default `Instance of ...` string.
 const Matcher hasOneLineDescription = const _HasOneLineDescription();
+
+/// Asserts that two [double]s are equal, within some tolerated error.
+///
+/// Two values are considered equal if the difference between them is within
+/// 1e-10 of the larger one. This is an arbitrary value which can be adjusted
+/// using the `epsilon` argument. This matcher is intended to compare floating
+/// point numbers that are the result of different sequences of operations, such
+/// that they may have accumulated slightly different errors.
+Matcher moreOrLessEquals(double value, { double epsilon: 1e-10 }) {
+  return new _MoreOrLessEquals(value, epsilon);
+}
 
 class _FindsWidgetMatcher extends Matcher {
   const _FindsWidgetMatcher(this.min, this.max);
@@ -231,9 +242,30 @@ class _HasOneLineDescription extends Matcher {
     String description = object.toString();
     return description.isNotEmpty
         && !description.contains('\n')
+        && !description.contains('Instance of ')
         && description.trim() == description;
   }
 
   @override
   Description describe(Description description) => description.add('one line description');
+}
+
+class _MoreOrLessEquals extends Matcher {
+  const _MoreOrLessEquals(this.value, this.epsilon);
+
+  final double value;
+  final double epsilon;
+
+  @override
+  bool matches(Object object, Map<dynamic, dynamic> matchState) {
+    if (object is! double)
+      return false;
+    if (object == value)
+      return true;
+    final double test = object;
+    return (test - value).abs() <= epsilon;
+  }
+
+  @override
+  Description describe(Description description) => description.add('$value (±$epsilon)');
 }

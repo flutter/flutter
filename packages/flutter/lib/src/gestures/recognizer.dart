@@ -16,6 +16,10 @@ import 'pointer_router.dart';
 
 export 'pointer_router.dart' show PointerRouter;
 
+/// Generic signature for callbacks passed to
+/// [GestureRecognizer.invokeCallback]. This allows the
+/// [GestureRecognizer.invokeCallback] mechanism to be generically used with
+/// anonymous functions that return objects of particular types.
 typedef T RecognizerCallback<T>();
 
 /// The base class that all GestureRecognizers should inherit from.
@@ -51,7 +55,8 @@ abstract class GestureRecognizer extends GestureArenaMember {
   /// recognizer looks for, like 'tap' or 'horizontal drag'.
   String toStringShort() => toString();
 
-  /// Invoke a callback provided by the application and log any exceptions.
+  /// Invoke a callback provided by the application, catching and logging any
+  /// exceptions.
   @protected
   dynamic/*=T*/ invokeCallback/*<T>*/(String name, RecognizerCallback<dynamic/*=T*/> callback) {
     dynamic/*=T*/ result;

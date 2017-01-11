@@ -89,7 +89,7 @@ class CupertinoSlider extends StatefulWidget {
   /// ```
   final ValueChanged<double> onChanged;
 
-  /// The minium value the user can select.
+  /// The minimum value the user can select.
   ///
   /// Defaults to 0.0.
   final double min;

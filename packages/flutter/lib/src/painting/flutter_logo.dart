@@ -306,7 +306,7 @@ class _FlutterLogoPainter extends BoxPainter {
     );
     final Paint trianglePaint = new Paint()
       ..shader = triangleGradient
-      ..transferMode = TransferMode.multiply;
+      ..blendMode = BlendMode.multiply;
 
     final ui.Gradient rectangleGradient = new ui.Gradient.linear(
       const <Point>[
@@ -328,7 +328,7 @@ class _FlutterLogoPainter extends BoxPainter {
     );
     final Paint rectanglePaint = new Paint()
       ..shader = rectangleGradient
-      ..transferMode = TransferMode.multiply;
+      ..blendMode = BlendMode.multiply;
 
     // Draw the basic shape.
     final Path topBeam = new Path()
@@ -432,7 +432,7 @@ class _FlutterLogoPainter extends BoxPainter {
         new Paint()
           ..colorFilter = new ColorFilter.mode(
             const Color(0xFFFFFFFF).withOpacity(_config._opacity),
-            TransferMode.modulate,
+            BlendMode.modulate,
           )
       );
     }
@@ -481,7 +481,7 @@ class _FlutterLogoPainter extends BoxPainter {
         _textPainter.paint(canvas, Offset.zero);
         if (_config._position > -1.0) {
           canvas.drawRect(_textBoundingRect.inflate(_textBoundingRect.width * 0.5), new Paint()
-            ..transferMode = TransferMode.modulate
+            ..blendMode = BlendMode.modulate
             ..shader = new ui.Gradient.linear(
               <Point>[new Point(_textBoundingRect.width * -0.5, 0.0), new Point(_textBoundingRect.width * 1.5, 0.0)],
               <Color>[const Color(0xFFFFFFFF), const Color(0xFFFFFFFF), const Color(0x00FFFFFF), const Color(0x00FFFFFF)],

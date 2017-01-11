@@ -72,6 +72,20 @@ class MediaQueryData {
     return size.width > size.height ? Orientation.landscape : Orientation.portrait;
   }
 
+  MediaQueryData copyWith({
+    Size size,
+    double devicePixelRatio,
+    double textScaleFactor,
+    EdgeInsets padding,
+  }) {
+    return new MediaQueryData(
+      size: size ?? this.size,
+      devicePixelRatio: devicePixelRatio ?? this.devicePixelRatio,
+      textScaleFactor: textScaleFactor ?? this.textScaleFactor,
+      padding: padding ?? this.padding,
+    );
+  }
+
   @override
   bool operator ==(Object other) {
     if (other.runtimeType != runtimeType)

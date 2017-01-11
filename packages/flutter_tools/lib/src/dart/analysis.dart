@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:collection';
-import 'dart:io';
 
 import 'package:analyzer/error/error.dart';
 import 'package:analyzer/file_system/file_system.dart' as file_system;
@@ -26,6 +25,9 @@ import 'package:package_config/src/packages_impl.dart' show MapPackages; // igno
 import 'package:path/path.dart' as path;
 import 'package:plugin/manager.dart';
 import 'package:plugin/plugin.dart';
+
+import '../base/file_system.dart' hide IOSink;
+import '../base/io.dart';
 
 class AnalysisDriver {
   Set<Source> _analyzedSources = new HashSet<Source>();
@@ -97,7 +99,7 @@ class AnalysisDriver {
 
     // Create our list of resolvers.
     List<UriResolver> resolvers = <UriResolver>[];
-    
+
     // Look for an embedder.
     EmbedderYamlLocator locator = new EmbedderYamlLocator(packageMap);
     if (locator.embedderYamls.isNotEmpty) {
@@ -123,7 +125,7 @@ class AnalysisDriver {
     if (options.packageRootPath != null) {
       ContextBuilderOptions builderOptions = new ContextBuilderOptions();
       builderOptions.defaultPackagesDirectoryPath = options.packageRootPath;
-      ContextBuilder builder = new ContextBuilder(resourceProvider, null, null, 
+      ContextBuilder builder = new ContextBuilder(resourceProvider, null, null,
           options: builderOptions);
       PackageMapUriResolver packageUriResolver = new PackageMapUriResolver(resourceProvider,
           builder.convertPackagesToMap(builder.createPackageMap('')));
@@ -183,7 +185,7 @@ class AnalysisDriverException implements Exception {
 }
 
 class AnalysisErrorDescription {
-  static Directory cwd = Directory.current.absolute;
+  static Directory cwd = fs.currentDirectory.absolute;
 
   final AnalysisError error;
   final LineInfo line;

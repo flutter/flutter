@@ -4,7 +4,6 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:path/path.dart' as path;
@@ -14,6 +13,8 @@ import 'package:test/src/backend/test_platform.dart'; // ignore: implementation_
 import 'package:test/src/runner/plugin/platform.dart'; // ignore: implementation_imports
 import 'package:test/src/runner/plugin/hack_register_platform.dart' as hack; // ignore: implementation_imports
 
+import '../base/file_system.dart';
+import '../base/io.dart';
 import '../base/process_manager.dart';
 import '../dart/package_map.dart';
 import '../globals.dart';
@@ -69,11 +70,11 @@ class FlutterPlatform extends PlatformPlugin {
       });
 
       // Prepare a temporary directory to store the Dart file that will talk to us.
-      Directory temporaryDirectory = Directory.systemTemp.createTempSync('dart_test_listener');
+      Directory temporaryDirectory = fs.systemTempDirectory.createTempSync('dart_test_listener');
       finalizers.add(() async { temporaryDirectory.deleteSync(recursive: true); });
 
       // Prepare the Dart file that will talk to us and start the test.
-      File listenerFile = new File('${temporaryDirectory.path}/listener.dart');
+      File listenerFile = fs.file('${temporaryDirectory.path}/listener.dart');
       listenerFile.createSync();
       listenerFile.writeAsStringSync(_generateTestMain(
         testUrl: path.toUri(path.absolute(testPath)).toString(),
@@ -104,7 +105,7 @@ class FlutterPlatform extends PlatformPlugin {
         subprocessActive = false;
         if (!controllerSinkClosed && exitCode != 0) {
           String message = _getErrorMessage(_getExitCodeMessage(exitCode, 'after tests finished'), testPath, shellPath);
-          controller.sink.addError(new Exception(message));
+          controller.sink.addError(message);
         }
       });
 
@@ -126,13 +127,13 @@ class FlutterPlatform extends PlatformPlugin {
         case _InitialResult.crashed:
           int exitCode = await process.exitCode;
           String message = _getErrorMessage(_getExitCodeMessage(exitCode, 'before connecting to test harness'), testPath, shellPath);
-          controller.sink.addError(new Exception(message));
+          controller.sink.addError(message);
           controller.sink.close();
           await controller.sink.done;
           break;
         case _InitialResult.timedOut:
           String message = _getErrorMessage('Test never connected to test harness.', testPath, shellPath);
-          controller.sink.addError(new Exception(message));
+          controller.sink.addError(message);
           controller.sink.close();
           await controller.sink.done;
           break;
@@ -163,13 +164,12 @@ class FlutterPlatform extends PlatformPlugin {
           harnessToTest.cancel();
           testToHarness.cancel();
 
-          assert(!controllerSinkClosed);
           switch (testResult) {
             case _TestResult.crashed:
               int exitCode = await process.exitCode;
               subprocessActive = false;
               String message = _getErrorMessage(_getExitCodeMessage(exitCode, 'before test harness closed its WebSocket'), testPath, shellPath);
-              controller.sink.addError(new Exception(message));
+              controller.sink.addError(message);
               controller.sink.close();
               await controller.sink.done;
               break;
@@ -212,10 +212,14 @@ class FlutterPlatform extends PlatformPlugin {
   }) {
     return '''
 import 'dart:convert';
-import 'dart:io';
+import 'dart:io'; // ignore: dart_io_import
+
+// We import this library first in order to trigger an import error for
+// package:test (rather than package:stream_channel) when the developer forgets
+// to add a dependency on package:test.
+import 'package:test/src/runner/plugin/remote_platform_helpers.dart';
 
 import 'package:stream_channel/stream_channel.dart';
-import 'package:test/src/runner/plugin/remote_platform_helpers.dart';
 import 'package:test/src/runner/vm/catch_isolate_errors.dart';
 
 import '$testUrl' as test;
@@ -248,8 +252,8 @@ void main() {
     sb.writeln('  <cachedir>/var/cache/fontconfig</cachedir>');
     sb.writeln('</fontconfig>');
 
-    Directory fontsDir = Directory.systemTemp.createTempSync('flutter_fonts');
-    _cachedFontConfig = new File('${fontsDir.path}/fonts.conf');
+    Directory fontsDir = fs.systemTempDirectory.createTempSync('flutter_fonts');
+    _cachedFontConfig = fs.file('${fontsDir.path}/fonts.conf');
     _cachedFontConfig.createSync();
     _cachedFontConfig.writeAsStringSync(sb.toString());
     return _cachedFontConfig;
@@ -285,7 +289,9 @@ void main() {
       stream.transform(UTF8.decoder)
         .transform(const LineSplitter())
         .listen((String line) {
-          if (line != null)
+          if (line.startsWith('error: Unable to read Dart source \'package:test/'))
+            printError('\n\nFailed to load test harness. Are you missing a dependency on flutter_test?\n');
+          else if (line != null)
             printStatus('Shell: $line');
         });
     }

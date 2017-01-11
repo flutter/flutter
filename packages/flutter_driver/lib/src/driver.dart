@@ -98,7 +98,7 @@ class FlutterDriver {
   static const String _kFlutterExtensionMethod = 'ext.flutter.driver';
   static const String _kSetVMTimelineFlagsMethod = '_setVMTimelineFlags';
   static const String _kGetVMTimelineMethod = '_getVMTimeline';
-  static const Duration _kDefaultTimeout = const Duration(seconds: 5);
+  static const Duration _kRpcGraceTime = const Duration(seconds: 2);
 
   /// Connects to a Flutter application.
   ///
@@ -227,10 +227,17 @@ class FlutterDriver {
   final VMIsolateRef _appIsolate;
 
   Future<Map<String, dynamic>> _sendCommand(Command command) async {
-    Map<String, String> parameters = <String, String>{'command': command.kind}
-      ..addAll(command.serialize());
+    Map<String, dynamic> response;
     try {
-      return await _appIsolate.invokeExtension(_kFlutterExtensionMethod, parameters);
+       response = await _appIsolate
+          .invokeExtension(_kFlutterExtensionMethod, command.serialize())
+          .timeout(command.timeout + _kRpcGraceTime);
+    } on TimeoutException catch (error, stackTrace) {
+      throw new DriverError(
+        'Failed to fulfill ${command.runtimeType}: Flutter application not responding',
+        error,
+        stackTrace
+      );
     } catch (error, stackTrace) {
       throw new DriverError(
         'Failed to fulfill ${command.runtimeType} due to remote error',
@@ -238,6 +245,9 @@ class FlutterDriver {
         stackTrace
       );
     }
+    if (response['isError'])
+      throw new DriverError('Error in Flutter application: ${response['response']}');
+    return response['response'];
   }
 
   /// Checks the status of the Flutter Driver extension.
@@ -275,7 +285,7 @@ class FlutterDriver {
   }
 
   /// Waits until [finder] locates the target.
-  Future<Null> waitFor(SerializableFinder finder, {Duration timeout: _kDefaultTimeout}) async {
+  Future<Null> waitFor(SerializableFinder finder, {Duration timeout}) async {
     await _sendCommand(new WaitFor(finder, timeout: timeout));
     return null;
   }
@@ -312,6 +322,30 @@ class FlutterDriver {
   Future<List<int>> screenshot() async {
     Map<String, dynamic> result = await _peer.sendRequest('_flutter.screenshot');
     return BASE64.decode(result['screenshot']);
+  }
+
+  /// Returns the Flags set in the Dart VM as JSON.
+  ///
+  /// See the complete documentation for `getFlagList` Dart VM service method
+  /// [here][getFlagList].
+  ///
+  /// Example return value:
+  ///
+  ///     [
+  ///       {
+  ///         "name": "timeline_recorder",
+  ///         "comment": "Select the timeline recorder used. Valid values: ring, endless, startup, and systrace.",
+  ///         "modified": false,
+  ///         "_flagType": "String",
+  ///         "valueAsString": "ring"
+  ///       },
+  ///       ...
+  ///     ]
+  ///
+  /// [getFlagList]: https://github.com/dart-lang/sdk/blob/master/runtime/vm/service/service.md#getflaglist
+  Future<List<Map<String, dynamic>>> getVmFlags() async {
+    Map<String, dynamic> result = await _peer.sendRequest('getFlagList');
+    return result['flags'];
   }
 
   /// Starts recording performance traces.

@@ -517,7 +517,6 @@ abstract class SchedulerBinding extends BindingBase {
   ///
   /// This is only valid while [handleBeginFrame] is running, i.e. while a frame
   /// is being produced.
-  // TODO(ianh): Replace this when fixing https://github.com/flutter/flutter/issues/5469
   Duration get currentFrameTimeStamp {
     assert(_currentFrameTimeStamp != null);
     return _currentFrameTimeStamp;

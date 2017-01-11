@@ -57,13 +57,15 @@ class Slider extends StatefulWidget {
     this.max: 1.0,
     this.divisions,
     this.label,
-    this.activeColor
+    this.activeColor,
+    this.thumbOpenAtMin: false,
   }) : super(key: key) {
     assert(value != null);
     assert(min != null);
     assert(max != null);
     assert(value >= min && value <= max);
     assert(divisions == null || divisions > 0);
+    assert(thumbOpenAtMin != null);
   }
 
   /// The currently selected value for this slider.
@@ -99,7 +101,7 @@ class Slider extends StatefulWidget {
   /// ```
   final ValueChanged<double> onChanged;
 
-  /// The minium value the user can select.
+  /// The minimum value the user can select.
   ///
   /// Defaults to 0.0.
   final double min;
@@ -126,6 +128,19 @@ class Slider extends StatefulWidget {
   /// Defaults to accent color of the current [Theme].
   final Color activeColor;
 
+  /// Whether the thumb should be an open circle when the slider is at its minimum position.
+  ///
+  /// When this property is false, the thumb does not change when it the slider
+  /// reaches its minimum position.
+  ///
+  /// This property is useful, for example, when the minimum value represents a
+  /// qualitatively different state. For a slider that controls the volume of
+  /// a sound, for example, the minimum value represents "no sound at all,"
+  /// which is qualitatively different from even a very soft sound.
+  ///
+  /// Defaults to false.
+  final bool thumbOpenAtMin;
+
   @override
   _SliderState createState() => new _SliderState();
 }
@@ -145,6 +160,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
       divisions: config.divisions,
       label: config.label,
       activeColor: config.activeColor ?? theme.accentColor,
+      thumbOpenAtMin: config.thumbOpenAtMin,
       textTheme: theme.accentTextTheme,
       onChanged: config.onChanged != null ? _handleChanged : null,
       vsync: this,
@@ -159,6 +175,7 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
     this.divisions,
     this.label,
     this.activeColor,
+    this.thumbOpenAtMin,
     this.textTheme,
     this.onChanged,
     this.vsync,
@@ -168,20 +185,24 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
   final int divisions;
   final String label;
   final Color activeColor;
+  final bool thumbOpenAtMin;
   final TextTheme textTheme;
   final ValueChanged<double> onChanged;
   final TickerProvider vsync;
 
   @override
-  _RenderSlider createRenderObject(BuildContext context) => new _RenderSlider(
-    value: value,
-    divisions: divisions,
-    label: label,
-    activeColor: activeColor,
-    textTheme: textTheme,
-    onChanged: onChanged,
-    vsync: vsync,
-  );
+  _RenderSlider createRenderObject(BuildContext context) {
+    return new _RenderSlider(
+      value: value,
+      divisions: divisions,
+      label: label,
+      activeColor: activeColor,
+      thumbOpenAtMin: thumbOpenAtMin,
+      textTheme: textTheme,
+      onChanged: onChanged,
+      vsync: vsync,
+    );
+  }
 
   @override
   void updateRenderObject(BuildContext context, _RenderSlider renderObject) {
@@ -190,10 +211,11 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
       ..divisions = divisions
       ..label = label
       ..activeColor = activeColor
+      ..thumbOpenAtMin = thumbOpenAtMin
       ..textTheme = textTheme
       ..onChanged = onChanged;
-    // Ticker provider cannot change since there's a 1:1 relationship between
-    // the _SliderRenderObjectWidget object and the _SliderState object.
+      // Ticker provider cannot change since there's a 1:1 relationship between
+      // the _SliderRenderObjectWidget object and the _SliderState object.
   }
 }
 
@@ -235,12 +257,14 @@ class _RenderSlider extends RenderConstrainedBox implements SemanticsActionHandl
     int divisions,
     String label,
     Color activeColor,
+    bool thumbOpenAtMin,
     TextTheme textTheme,
     this.onChanged,
     TickerProvider vsync,
   }) : _value = value,
        _divisions = divisions,
        _activeColor = activeColor,
+       _thumbOpenAtMin = thumbOpenAtMin,
        _textTheme = textTheme,
         super(additionalConstraints: _getAdditionalConstraints(label)) {
     assert(value != null && value >= 0.0 && value <= 1.0);
@@ -314,6 +338,15 @@ class _RenderSlider extends RenderConstrainedBox implements SemanticsActionHandl
     if (value == _activeColor)
       return;
     _activeColor = value;
+    markNeedsPaint();
+  }
+
+  bool get thumbOpenAtMin => _thumbOpenAtMin;
+  bool _thumbOpenAtMin;
+  set thumbOpenAtMin(bool value) {
+    if (value == _thumbOpenAtMin)
+      return;
+    _thumbOpenAtMin = value;
     markNeedsPaint();
   }
 
@@ -464,7 +497,7 @@ class _RenderSlider extends RenderConstrainedBox implements SemanticsActionHandl
 
     Paint thumbPaint = primaryPaint;
     double thumbRadiusDelta = 0.0;
-    if (value == 0.0) {
+    if (value == 0.0 && thumbOpenAtMin) {
       thumbPaint = trackPaint;
       // This is destructive to trackPaint.
       thumbPaint

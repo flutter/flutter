@@ -4,13 +4,13 @@
 
 import 'dart:async';
 import 'dart:collection';
-import 'dart:io';
 
 import 'package:args/args.dart';
 import 'package:path/path.dart' as path;
 import 'package:yaml/yaml.dart' as yaml;
 
 import '../base/common.dart';
+import '../base/file_system.dart';
 import '../cache.dart';
 import '../dart/analysis.dart';
 import '../globals.dart';
@@ -36,11 +36,11 @@ class AnalyzeOnce extends AnalyzeBase {
     for (String file in argResults.rest.toList()) {
       file = path.normalize(path.absolute(file));
       String root = path.rootPrefix(file);
-      dartFiles.add(new File(file));
+      dartFiles.add(fs.file(file));
       while (file != root) {
         file = path.dirname(file);
-        if (FileSystemEntity.isFileSync(path.join(file, 'pubspec.yaml'))) {
-          pubSpecDirectories.add(new Directory(file));
+        if (fs.isFileSync(path.join(file, 'pubspec.yaml'))) {
+          pubSpecDirectories.add(fs.directory(file));
           break;
         }
       }
@@ -54,7 +54,7 @@ class AnalyzeOnce extends AnalyzeBase {
 
     if (currentDirectory  && !flutterRepo) {
       // ./*.dart
-      Directory currentDirectory = new Directory('.');
+      Directory currentDirectory = fs.directory('.');
       bool foundOne = false;
       for (FileSystemEntity entry in currentDirectory.listSync()) {
         if (isDartFile(entry)) {
@@ -68,7 +68,7 @@ class AnalyzeOnce extends AnalyzeBase {
 
     if (currentPackage && !flutterRepo) {
       // **/.*dart
-      Directory currentDirectory = new Directory('.');
+      Directory currentDirectory = fs.directory('.');
       _collectDartFiles(currentDirectory, dartFiles);
       pubSpecDirectories.add(currentDirectory);
     }
@@ -89,18 +89,18 @@ class AnalyzeOnce extends AnalyzeBase {
     PackageDependencyTracker dependencies = new PackageDependencyTracker();
     for (Directory directory in pubSpecDirectories) {
       String pubSpecYamlPath = path.join(directory.path, 'pubspec.yaml');
-      File pubSpecYamlFile = new File(pubSpecYamlPath);
+      File pubSpecYamlFile = fs.file(pubSpecYamlPath);
       if (pubSpecYamlFile.existsSync()) {
         // we are analyzing the actual canonical source for this package;
         // make sure we remember that, in case all the packages are actually
         // pointing elsewhere somehow.
-        yaml.YamlMap pubSpecYaml = yaml.loadYaml(new File(pubSpecYamlPath).readAsStringSync());
+        yaml.YamlMap pubSpecYaml = yaml.loadYaml(fs.file(pubSpecYamlPath).readAsStringSync());
         String packageName = pubSpecYaml['name'];
         String packagePath = path.normalize(path.absolute(path.join(directory.path, 'lib')));
         dependencies.addCanonicalCase(packageName, packagePath, pubSpecYamlPath);
       }
       String dotPackagesPath = path.join(directory.path, '.packages');
-      File dotPackages = new File(dotPackagesPath);
+      File dotPackages = fs.file(dotPackagesPath);
       if (dotPackages.existsSync()) {
         // this directory has opinions about what we should be using
         dotPackages
@@ -228,7 +228,7 @@ class AnalyzeOnce extends AnalyzeBase {
 
   List<File> _collectDartFiles(Directory dir, List<File> collected, {FileFilter exclude}) {
     // Bail out in case of a .dartignore.
-    if (FileSystemEntity.isFileSync(path.join(path.dirname(dir.path), '.dartignore')))
+    if (fs.isFileSync(path.join(path.dirname(dir.path), '.dartignore')))
       return collected;
 
     for (FileSystemEntity entity in dir.listSync(recursive: false, followLinks: false)) {

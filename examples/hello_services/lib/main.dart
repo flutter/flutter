@@ -49,7 +49,7 @@ class _HelloServicesState extends State<HelloServices> {
 
   Future<Null> _getLocation() async {
     final Map<String, String> message = <String, String>{'provider': 'network'};
-    final Map<String, dynamic> reply = await HostMessages.sendJSON('getLocation', message);
+    final Map<String, dynamic> reply = await PlatformMessages.sendJSON('getLocation', message);
     // If the widget was removed from the tree while the message was in flight,
     // we want to discard the reply rather than calling setState to update our
     // non-existent appearance.
@@ -65,5 +65,5 @@ class _HelloServicesState extends State<HelloServices> {
 void main() {
   runApp(new HelloServices());
 
-  HostMessages.addJSONMessageHandler('getRandom', handleGetRandom);
+  PlatformMessages.setJSONMessageHandler('getRandom', handleGetRandom);
 }

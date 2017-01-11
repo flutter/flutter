@@ -4,13 +4,14 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:archive/archive.dart';
 import 'package:intl/intl.dart';
 import 'package:path/path.dart' as path;
 
 import 'context.dart';
+import 'file_system.dart' hide IOSink;
+import 'io.dart';
 import 'os.dart';
 import 'process.dart';
 
@@ -101,7 +102,7 @@ class RecordingProcessManager implements ProcessManager {
 
   final String _recordTo;
   final ProcessManager _delegate = new ProcessManager();
-  final Directory _tmpDir = Directory.systemTemp.createTempSync('flutter_tools_');
+  final Directory _tmpDir = fs.systemTempDirectory.createTempSync('flutter_tools_');
   final List<Map<String, dynamic>> _manifest = <Map<String, dynamic>>[];
   final Map<int, Future<int>> _runningProcesses = <int, Future<int>>{};
 
@@ -201,7 +202,7 @@ class RecordingProcessManager implements ProcessManager {
 
   Future<Null> _recordData(dynamic data, Encoding encoding, String basename) async {
     String path = '${_tmpDir.path}/$basename';
-    File file = await new File(path).create();
+    File file = await fs.file(path).create();
     RandomAccessFile recording = await file.open(mode: FileMode.WRITE);
     try {
       if (encoding == null)
@@ -253,7 +254,7 @@ class RecordingProcessManager implements ProcessManager {
 
   void _recordDataSync(dynamic data, Encoding encoding, String basename) {
     String path = '${_tmpDir.path}/$basename';
-    File file = new File(path)..createSync();
+    File file = fs.file(path)..createSync();
     RandomAccessFile recording = file.openSync(mode: FileMode.WRITE);
     try {
       if (encoding == null)
@@ -358,7 +359,7 @@ class RecordingProcessManager implements ProcessManager {
   Future<Null> _writeManifestToDisk() async {
     JsonEncoder encoder = new JsonEncoder.withIndent('  ');
     String encodedManifest = encoder.convert(_manifest);
-    File manifestFile = await new File('${_tmpDir.path}/$_kManifestName').create();
+    File manifestFile = await fs.file('${_tmpDir.path}/$_kManifestName').create();
     await manifestFile.writeAsString(encodedManifest, flush: true);
   }
 
@@ -373,18 +374,18 @@ class RecordingProcessManager implements ProcessManager {
   /// in the [new RecordingProcessManager] constructor.
   Future<File> _createZipFile() async {
     File zipFile;
-    String recordTo = _recordTo ?? Directory.current.path;
-    if (FileSystemEntity.typeSync(recordTo) == FileSystemEntityType.DIRECTORY) {
-      zipFile = new File('$recordTo/$kDefaultRecordTo');
+    String recordTo = _recordTo ?? fs.currentDirectory.path;
+    if (fs.isDirectorySync(recordTo)) {
+      zipFile = fs.file('$recordTo/$kDefaultRecordTo');
     } else {
-      zipFile = new File(recordTo);
-      await new Directory(path.dirname(zipFile.path)).create(recursive: true);
+      zipFile = fs.file(recordTo);
+      await fs.directory(path.dirname(zipFile.path)).create(recursive: true);
     }
 
     // Resolve collisions.
     String basename = path.basename(zipFile.path);
     for (int i = 1; zipFile.existsSync(); i++) {
-      assert(FileSystemEntity.isFileSync(zipFile.path));
+      assert(fs.isFileSync(zipFile.path));
       String disambiguator = new NumberFormat('00').format(i);
       String newBasename = basename;
       if (basename.contains('.')) {
@@ -394,7 +395,7 @@ class RecordingProcessManager implements ProcessManager {
       } else {
         newBasename += '-$disambiguator';
       }
-      zipFile = new File(path.join(path.dirname(zipFile.path), newBasename));
+      zipFile = fs.file(path.join(path.dirname(zipFile.path), newBasename));
     }
 
     return await zipFile.create();
@@ -404,7 +405,7 @@ class RecordingProcessManager implements ProcessManager {
   Future<List<int>> _getRecordingZipBytes() async {
     Archive archive = new Archive();
     Stream<FileSystemEntity> files = _tmpDir.list(recursive: true)
-        .where((FileSystemEntity entity) => FileSystemEntity.isFileSync(entity.path));
+        .where((FileSystemEntity entity) => fs.isFileSync(entity.path));
     List<Future<dynamic>> addAllFilesToArchive = <Future<dynamic>>[];
     await files.forEach((FileSystemEntity entity) {
       File file = entity;
@@ -464,7 +465,7 @@ class _RecordingProcess implements Process {
     String suffix,
   ) async {
     String path = '${manager._tmpDir.path}/$basename.$suffix';
-    File file = await new File(path).create();
+    File file = await fs.file(path).create();
     RandomAccessFile recording = await file.open(mode: FileMode.WRITE);
     stream.listen(
       (List<int> data) {
@@ -490,8 +491,10 @@ class _RecordingProcess implements Process {
   @override
   Future<int> get exitCode => delegate.exitCode;
 
-  @override
-  set exitCode(Future<int> exitCode) => delegate.exitCode = exitCode;
+  // TODO(tvolkert): Remove this once the dart sdk in both the target and
+  // the host have picked up dart-lang/sdk@e5a16b1
+  @override // ignore: OVERRIDE_ON_NON_OVERRIDING_SETTER
+  set exitCode(Future<int> exitCode) => throw new UnsupportedError('set exitCode');
 
   @override
   Stream<List<int>> get stdout {
@@ -572,22 +575,22 @@ class ReplayProcessManager implements ProcessManager {
   /// directory, an [ArgumentError] will be thrown.
   static Future<ReplayProcessManager> create(String location) async {
     Directory dir;
-    switch (FileSystemEntity.typeSync(location)) {
+    switch (fs.typeSync(location)) {
       case FileSystemEntityType.FILE:
-        dir = await Directory.systemTemp.createTemp('flutter_tools_');
-        os.unzip(new File(location), dir);
+        dir = await fs.systemTempDirectory.createTemp('flutter_tools_');
+        os.unzip(fs.file(location), dir);
         addShutdownHook(() async {
           await dir.delete(recursive: true);
         });
         break;
       case FileSystemEntityType.DIRECTORY:
-        dir = new Directory(location);
+        dir = fs.directory(location);
         break;
       case FileSystemEntityType.NOT_FOUND:
         throw new ArgumentError.value(location, 'location', 'Does not exist');
     }
 
-    File manifestFile = new File(path.join(dir.path, _kManifestName));
+    File manifestFile = fs.file(path.join(dir.path, _kManifestName));
     if (!manifestFile.existsSync()) {
       // We use the existence of the manifest as a proxy for this being a
       // valid replay directory. Namely, we don't validate the structure of the
@@ -726,7 +729,7 @@ class _ReplayProcessResult implements ProcessResult {
   }
 
   static Future<dynamic> _getData(String path, String encoding) async {
-    File file = new File(path);
+    File file = fs.file(path);
     return encoding == null
         ? await file.readAsBytes()
         : await file.readAsString(encoding: _getEncodingByName(encoding));
@@ -752,7 +755,7 @@ class _ReplayProcessResult implements ProcessResult {
   }
 
   static dynamic _getDataSync(String path, String encoding) {
-    File file = new File(path);
+    File file = fs.file(path);
     return encoding == null
         ? file.readAsBytesSync()
         : file.readAsStringSync(encoding: _getEncodingByName(encoding));
@@ -760,7 +763,7 @@ class _ReplayProcessResult implements ProcessResult {
 
   static Encoding _getEncodingByName(String encoding) {
     if (encoding == 'system')
-      return const SystemEncoding();
+      return SYSTEM_ENCODING;
     else if (encoding != null)
       return Encoding.getByName(encoding);
     return null;
@@ -826,7 +829,9 @@ class _ReplayProcess implements Process {
   @override
   Future<int> get exitCode => _exitCodeCompleter.future;
 
-  @override
+  // TODO(tvolkert): Remove this once the dart sdk in both the target and
+  // the host have picked up dart-lang/sdk@e5a16b1
+  @override // ignore: OVERRIDE_ON_NON_OVERRIDING_SETTER
   set exitCode(Future<int> exitCode) => throw new UnsupportedError('set exitCode');
 
   @override

@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
 
 import 'package:args/command_runner.dart';
 import 'package:stack_trace/stack_trace.dart';
@@ -11,6 +10,8 @@ import 'package:stack_trace/stack_trace.dart';
 import 'src/base/common.dart';
 import 'src/base/config.dart';
 import 'src/base/context.dart';
+import 'src/base/file_system.dart';
+import 'src/base/io.dart';
 import 'src/base/logger.dart';
 import 'src/base/os.dart';
 import 'src/base/process.dart';
@@ -101,6 +102,7 @@ Future<Null> main(List<String> args) async {
     // in those locations as well to see if you need a similar update there.
 
     // Seed these context entries first since others depend on them
+    context.putIfAbsent(FileSystem, () => new LocalFileSystem());
     context.putIfAbsent(ProcessManager, () => new ProcessManager());
     context.putIfAbsent(Logger, () => new StdoutLogger());
 
@@ -174,7 +176,7 @@ Future<Null> main(List<String> args) async {
 }
 
 Future<File> _createCrashReport(List<String> args, dynamic error, Chain chain) async {
-  File crashFile = getUniqueFile(Directory.current, 'flutter', 'log');
+  File crashFile = getUniqueFile(fs.currentDirectory, 'flutter', 'log');
 
   StringBuffer buffer = new StringBuffer();
 
@@ -194,7 +196,7 @@ Future<File> _createCrashReport(List<String> args, dynamic error, Chain chain) a
     crashFile.writeAsStringSync(buffer.toString());
   } on FileSystemException catch (_) {
     // Fallback to the system temporary directory.
-    crashFile = getUniqueFile(Directory.systemTemp, 'flutter', 'log');
+    crashFile = getUniqueFile(fs.systemTempDirectory, 'flutter', 'log');
     try {
       crashFile.writeAsStringSync(buffer.toString());
     } on FileSystemException catch (e) {

@@ -47,4 +47,7 @@ abstract class Simulation {
   /// asymptote itself could not be seen, it would be pointless to continue. The
   /// tolerance defines how to determine if the difference could not be seen.
   Tolerance tolerance = Tolerance.defaultTolerance;
+
+  @override
+  String toString() => '$runtimeType';
 }

@@ -2,9 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
-
 import 'package:flutter_tools/src/android/android_sdk.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 
@@ -53,7 +52,7 @@ void main() {
 }
 
 Directory _createSdkDirectory({ bool withAndroidN: false }) {
-  Directory dir = Directory.systemTemp.createTempSync('android-sdk');
+  Directory dir = fs.systemTempDirectory.createTempSync('android-sdk');
 
   _createSdkFile(dir, 'platform-tools/adb');
 
@@ -72,6 +71,6 @@ Directory _createSdkDirectory({ bool withAndroidN: false }) {
 }
 
 void _createSdkFile(Directory dir, String filePath) {
-  File file = new File(path.join(dir.path, filePath));
+  File file = fs.file(path.join(dir.path, filePath));
   file.createSync(recursive: true);
 }

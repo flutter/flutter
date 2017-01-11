@@ -4,11 +4,12 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 
 import '../android/android_device.dart';
 import '../base/common.dart';
 import '../base/context.dart';
+import '../base/file_system.dart';
+import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
@@ -302,7 +303,7 @@ class AppDomain extends Domain {
     if (device == null)
       throw "device '$deviceId' not found";
 
-    if (!FileSystemEntity.isDirectorySync(projectDirectory))
+    if (!fs.isDirectorySync(projectDirectory))
       throw "'$projectDirectory' does not exist";
 
     BuildMode buildMode = getBuildModeForName(mode) ?? BuildMode.debug;
@@ -320,9 +321,13 @@ class AppDomain extends Domain {
   }
 
   AppInstance startApp(
-      Device device, String projectDirectory, String target, String route,
-      BuildMode buildMode, bool startPaused, bool enableHotReload) {
-
+    Device device, String projectDirectory, String target, String route,
+    BuildMode buildMode, bool startPaused, bool enableHotReload, {
+    String applicationBinary,
+    String projectRootPath,
+    String packagesFilePath,
+    String projectAssets,
+  }) {
     DebuggingOptions options;
 
     switch (buildMode) {
@@ -341,8 +346,8 @@ class AppDomain extends Domain {
       throw '${toTitleCase(getModeName(buildMode))} mode is not supported for emulators.';
 
     // We change the current working directory for the duration of the `start` command.
-    Directory cwd = Directory.current;
-    Directory.current = new Directory(projectDirectory);
+    Directory cwd = fs.currentDirectory;
+    fs.currentDirectory = fs.directory(projectDirectory);
 
     ResidentRunner runner;
 
@@ -351,14 +356,19 @@ class AppDomain extends Domain {
         device,
         target: target,
         debuggingOptions: options,
-        usesTerminalUI: false
+        usesTerminalUI: false,
+        applicationBinary: applicationBinary,
+        projectRootPath: projectRootPath,
+        packagesFilePath: packagesFilePath,
+        projectAssets: projectAssets,
       );
     } else {
       runner = new RunAndStayResident(
         device,
         target: target,
         debuggingOptions: options,
-        usesTerminalUI: false
+        usesTerminalUI: false,
+        applicationBinary: applicationBinary,
       );
     }
 
@@ -400,7 +410,7 @@ class AppDomain extends Domain {
       } catch (error) {
         _sendAppEvent(app, 'stop', <String, dynamic>{'error': error.toString()});
       } finally {
-        Directory.current = cwd;
+        fs.currentDirectory = cwd;
         _apps.remove(app);
       }
     });

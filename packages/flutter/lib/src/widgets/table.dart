@@ -269,7 +269,15 @@ class _TableElement extends RenderObjectElement {
 
   @override
   void removeChildRenderObject(RenderObject child) {
-    assert(_debugWillReattachChildren);
+    assert(() {
+      if (_debugWillReattachChildren)
+        return true;
+      for (Element forgottenChild in _forgottenChildren) {
+        if (forgottenChild.renderObject == child)
+          return true;
+      }
+      return false;
+    });
     TableCellParentData childParentData = child.parentData;
     renderObject.setChild(childParentData.x, childParentData.y, null);
   }

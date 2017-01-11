@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
 
+import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/commands/analyze_continuously.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
@@ -21,7 +21,7 @@ void main() {
 
   setUp(() {
     FlutterCommandRunner.initFlutterRoot();
-    tempDir = Directory.systemTemp.createTempSync('analysis_test');
+    tempDir = fs.systemTempDirectory.createTempSync('analysis_test');
   });
 
   tearDown(() {
@@ -71,12 +71,12 @@ void main() {
 }
 
 void _createSampleProject(Directory directory, { bool brokenCode: false }) {
-  File pubspecFile = new File(path.join(directory.path, 'pubspec.yaml'));
+  File pubspecFile = fs.file(path.join(directory.path, 'pubspec.yaml'));
   pubspecFile.writeAsStringSync('''
 name: foo_project
 ''');
 
-  File dartFile = new File(path.join(directory.path, 'lib', 'main.dart'));
+  File dartFile = fs.file(path.join(directory.path, 'lib', 'main.dart'));
   dartFile.parent.createSync();
   dartFile.writeAsStringSync('''
 void main() {

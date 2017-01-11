@@ -3,10 +3,10 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
 
 import '../globals.dart';
 import 'common.dart';
+import 'io.dart';
 
 const int kNetworkProblemExitCode = 50;
 
