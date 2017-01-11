@@ -253,7 +253,7 @@ typedef bool RoutePredicate(Route<dynamic> route);
 /// can refer to that navigator with [Navigator.of].
 ///
 /// A MaterialApp is the simplest way to set things up. The MaterialApp's
-/// home becomes the route at the bottom of the Navigator's stack. It's
+/// home becomes the route at the bottom of the Navigator's stack. It is
 /// what you see when the app is launched.
 ///
 /// ```dart
@@ -336,7 +336,7 @@ typedef bool RoutePredicate(Route<dynamic> route);
 ///
 /// There are Flutter functions which create and show popup routes. For
 /// example: [showDialog], [showMenu], and [showBottomSheet]. There are also
-/// Flutter widgets which create popup routes, like [PopupMenuButton],
+/// Flutter widgets which create popup routes, like [PopupMenuButton] and
 /// [DropdownButton]. These functions and widgets create internal
 /// subclasses of PopupRoute and use the Naviagator's push and pop methods
 /// to show and dismiss them.
