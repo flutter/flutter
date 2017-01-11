@@ -491,7 +491,9 @@ class _RecordingProcess implements Process {
   @override
   Future<int> get exitCode => delegate.exitCode;
 
-  // ignore: annotate_overridden_members
+  // TODO(tvolkert): Remove this once the dart sdk in both the target and
+  // the host have picked up dart-lang/sdk@e5a16b1
+  @override // ignore: OVERRIDE_ON_NON_OVERRIDING_SETTER
   set exitCode(Future<int> exitCode) => throw new UnsupportedError('set exitCode');
 
   @override
@@ -827,7 +829,9 @@ class _ReplayProcess implements Process {
   @override
   Future<int> get exitCode => _exitCodeCompleter.future;
 
-  // ignore: annotate_overridden_members
+  // TODO(tvolkert): Remove this once the dart sdk in both the target and
+  // the host have picked up dart-lang/sdk@e5a16b1
+  @override // ignore: OVERRIDE_ON_NON_OVERRIDING_SETTER
   set exitCode(Future<int> exitCode) => throw new UnsupportedError('set exitCode');
 
   @override
