@@ -43,7 +43,7 @@ class WidgetsApp extends StatefulWidget {
     @required this.onGenerateRoute,
     this.title,
     this.textStyle,
-    this.color,
+    @required this.color,
     this.navigatorObserver,
     this.initialRoute,
     this.onLocaleChanged,
@@ -52,6 +52,7 @@ class WidgetsApp extends StatefulWidget {
     this.showSemanticsDebugger: false,
     this.debugShowCheckedModeBanner: true
   }) : super(key: key) {
+    assert(color != null);
     assert(onGenerateRoute != null);
     assert(showPerformanceOverlay != null);
     assert(checkerboardRasterCacheImages != null);

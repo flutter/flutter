@@ -1601,26 +1601,6 @@ class BuildOwner {
   bool _scheduledFlushDirtyElements = false;
   bool _dirtyElementsNeedsResorting; // null means we're not in a buildScope
 
-  /// Flags the dirty elements list as needing resorting.
-  ///
-  /// This should only be called while a [buildScope] is actively rebuilding the
-  /// widget tree.
-  void markNeedsToResortDirtyElements() {
-    assert(() {
-      if (debugPrintScheduleBuildForStacks)
-        debugPrintStack(label: 'markNeedsToResortDirtyElements() called; _dirtyElementsNeedsResorting was $_dirtyElementsNeedsResorting (now true); dirty list is: $_dirtyElements');
-      if (_dirtyElementsNeedsResorting == null) {
-        throw new FlutterError(
-          'markNeedsToResortDirtyElements() called inappropriately.\n'
-          'The markNeedsToResortDirtyElements() method should only be called while the '
-          'buildScope() method is actively rebuilding the widget tree.'
-        );
-      }
-      return true;
-    });
-    _dirtyElementsNeedsResorting = true;
-  }
-
   /// Adds an element to the dirty elements list so that it will be rebuilt
   /// when [WidgetsBinding.beginFrame] calls [buildScope].
   void scheduleBuildFor(BuildableElement element) {
@@ -1630,22 +1610,6 @@ class BuildOwner {
     assert(() {
       if (debugPrintScheduleBuildForStacks)
         debugPrintStack(label: 'scheduleBuildFor() called for $element${_dirtyElements.contains(element) ? " (ALREADY IN LIST)" : ""}');
-      if (element._inDirtyList) {
-        throw new FlutterError(
-          'scheduleBuildFor() called for a widget for which a build was already scheduled.\n'
-          'The method was called for the following element:\n'
-          '  $element\n'
-          'The current dirty list consists of:\n'
-          '  $_dirtyElements\n'
-          'This usually indicates that a widget was rebuilt outside the build phase (thus '
-          'marking the element as clean even though it is still in the dirty list). '
-          'This should not be possible and is probably caused by a bug in the widgets framework. '
-          'Please report it: https://github.com/flutter/flutter/issues/new\n'
-          'To debug this issue, consider setting the debugPrintScheduleBuildForStacks and '
-          'debugPrintBuildDirtyElements flags to true and looking for a call to scheduleBuildFor '
-          'for a widget that is labeled "ALREADY IN LIST".'
-        );
-      }
       if (!element.dirty) {
         throw new FlutterError(
           'scheduleBuildFor() called for a widget that is not marked as dirty.\n'
@@ -1660,6 +1624,22 @@ class BuildOwner {
       }
       return true;
     });
+    if (element._inDirtyList) {
+      assert(() {
+        if (debugPrintScheduleBuildForStacks)
+          debugPrintStack(label: 'markNeedsToResortDirtyElements() called; _dirtyElementsNeedsResorting was $_dirtyElementsNeedsResorting (now true); dirty list is: $_dirtyElements');
+        if (_dirtyElementsNeedsResorting == null) {
+          throw new FlutterError(
+              'markNeedsToResortDirtyElements() called inappropriately.\n'
+                  'The markNeedsToResortDirtyElements() method should only be called while the '
+                  'buildScope() method is actively rebuilding the widget tree.'
+          );
+        }
+        return true;
+      });
+      _dirtyElementsNeedsResorting = true;
+      return;
+    }
     if (!_scheduledFlushDirtyElements && onBuildScheduled != null) {
       _scheduledFlushDirtyElements = true;
       onBuildScheduled();
@@ -2807,13 +2787,8 @@ abstract class BuildableElement extends Element {
   void activate() {
     final bool hadDependencies = ((_dependencies != null && _dependencies.isNotEmpty) || _hadUnsatisfiedDependencies);
     super.activate(); // clears _dependencies, and sets active to true
-    if (_dirty) {
-      if (_inDirtyList) {
-        owner.markNeedsToResortDirtyElements();
-      } else {
-        owner.scheduleBuildFor(this);
-      }
-    }
+    if (_dirty)
+      owner.scheduleBuildFor(this);
     if (hadDependencies)
       dependenciesChanged();
   }
