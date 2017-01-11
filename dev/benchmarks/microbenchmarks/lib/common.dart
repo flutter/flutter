@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert' show JsonEncoder;
+import 'dart:convert' show JSON;
 
 import 'package:meta/meta.dart';
 
@@ -46,8 +46,8 @@ class BenchmarkResultPrinter {
   }
 
   String _printJson() {
-    const JsonEncoder encoder = const JsonEncoder.withIndent('  ');
-    return encoder.convert(new Map<String, double>.fromIterable(_results,
+    return JSON.encode(new Map<String, double>.fromIterable(
+      _results,
       key: (_BenchmarkResult result) => result.name,
       value: (_BenchmarkResult result) => result.value,
     ));

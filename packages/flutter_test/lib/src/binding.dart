@@ -632,6 +632,8 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
       super.handleBeginFrame(rawTimeStamp);
     if (_expectingFrame) {
       assert(_pendingFrame != null);
+      // TODO(yjbanov): workaroud for https://github.com/flutter/flutter/issues/7433
+      Timer.run(() {});  // forces runtime to flush Completer.complete() microtask
       _pendingFrame.complete(); // unlocks the test API
       _pendingFrame = null;
       _expectingFrame = false;
