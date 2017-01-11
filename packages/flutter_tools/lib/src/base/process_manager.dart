@@ -492,9 +492,6 @@ class _RecordingProcess implements Process {
   Future<int> get exitCode => delegate.exitCode;
 
   @override
-  set exitCode(Future<int> exitCode) => delegate.exitCode = exitCode;
-
-  @override
   Stream<List<int>> get stdout {
     assert(_started);
     return _stdoutController.stream;
@@ -826,9 +823,6 @@ class _ReplayProcess implements Process {
 
   @override
   Future<int> get exitCode => _exitCodeCompleter.future;
-
-  @override
-  set exitCode(Future<int> exitCode) => throw new UnsupportedError('set exitCode');
 
   @override
   IOSink get stdin => throw new UnimplementedError();
