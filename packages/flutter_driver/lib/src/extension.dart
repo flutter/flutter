@@ -168,6 +168,9 @@ class _FlutterDriverExtension {
     subscription = _onFrameReady.listen((Duration duration) {
       if (finder.precache()) {
         subscription.cancel();
+        // TODO(goderbauer): Remove workaround for https://github.com/flutter/flutter/issues/7433
+        Timer.run(() {});
+        // end workaround
         completer.complete(finder);
       }
     });
