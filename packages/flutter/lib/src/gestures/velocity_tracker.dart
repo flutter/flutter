@@ -25,28 +25,32 @@ abstract class _VelocityTrackerStrategy {
 }
 
 class _Movement {
-  Duration eventTime = Duration.ZERO;
-  Point position = Point.origin;
+  const _Movement(this.eventTime, this.position);
+
+  final Duration eventTime;
+  final Point position;
+
+  @override
+  String toString() => 'Movement($position at $eventTime)';
 }
 
 class _LeastSquaresVelocityTrackerStrategy extends _VelocityTrackerStrategy {
-  static const int kHistorySize = 20;
-  static const int kHorizonMilliseconds = 100;
-
   _LeastSquaresVelocityTrackerStrategy(this.degree);
 
   final int degree;
+
   final List<_Movement> _movements = new List<_Movement>(kHistorySize);
   int _index = 0;
+
+  static const int kHistorySize = 20;
+  static const int kHorizonMilliseconds = 40;
 
   @override
   void addMovement(Duration timeStamp, Point position) {
     _index += 1;
     if (_index == kHistorySize)
       _index = 0;
-    _Movement movement = _getMovement(_index);
-    movement.eventTime = timeStamp;
-    movement.position = position;
+    _movements[_index] = new _Movement(timeStamp, position);
   }
 
   @override
@@ -58,9 +62,15 @@ class _LeastSquaresVelocityTrackerStrategy extends _VelocityTrackerStrategy {
     List<double> time = new List<double>();
     int m = 0;
     int index = _index;
-    _Movement newestMovement = _getMovement(index);
+
+    _Movement newestMovement = _movements[index];
+    if (newestMovement == null)
+      return null;
+
     do {
-      _Movement movement = _getMovement(index);
+      _Movement movement = _movements[index];
+      if (movement == null)
+        break;
 
       double age = (newestMovement.eventTime - movement.eventTime).inMilliseconds.toDouble();
       if (age > kHorizonMilliseconds)
@@ -75,9 +85,6 @@ class _LeastSquaresVelocityTrackerStrategy extends _VelocityTrackerStrategy {
 
       m += 1;
     } while (m < kHistorySize);
-
-    if (m == 0) // because we broke out of the loop above after age > kHorizonMilliseconds
-      return null; // no data
 
     // Calculate a least squares polynomial fit.
     int n = degree;
@@ -116,15 +123,6 @@ class _LeastSquaresVelocityTrackerStrategy extends _VelocityTrackerStrategy {
   @override
   void clear() {
     _index = -1;
-  }
-
-  _Movement _getMovement(int i) {
-    _Movement result = _movements[i];
-    if (result == null) {
-      result = new _Movement();
-      _movements[i] = result;
-    }
-    return result;
   }
 
 }
@@ -184,25 +182,26 @@ class Velocity {
 /// The quality of the velocity estimation will be better if more data
 /// points have been received.
 class VelocityTracker {
-
-  /// The maximum length of time between two move events to allow
-  /// before assuming the pointer stopped.
-  static const Duration kAssumePointerMoveStoppedTime = const Duration(milliseconds: 40);
-
   /// Creates a velocity tracker.
   VelocityTracker() : _strategy = _createStrategy();
 
-  Duration _lastTimeStamp = const Duration();
+  // VelocityTracker is designed to easily be adapted to using different
+  // algorithms in the future, potentially picking algorithms on the fly based
+  // on hardware or other environment factors.
+  //
+  // For now, though, we just use the _LeastSquaresVelocityTrackerStrategy
+  // defined above.
+
+  // TODO(ianh): Simplify this. We don't see to need multiple stategies.
+
+  static _VelocityTrackerStrategy _createStrategy() {
+    return new _LeastSquaresVelocityTrackerStrategy(2);
+  }
+
   _VelocityTrackerStrategy _strategy;
 
   /// Add a given position corresponding to a specific time.
-  ///
-  /// If [kAssumePointerMoveStoppedTime] has elapsed since the last
-  /// call, then earlier data will be discarded.
   void addPosition(Duration timeStamp, Point position) {
-    if (timeStamp - _lastTimeStamp >= kAssumePointerMoveStoppedTime)
-      _strategy.clear();
-    _lastTimeStamp = timeStamp;
     _strategy.addMovement(timeStamp, position);
   }
 
@@ -224,9 +223,5 @@ class VelocityTracker {
       );
     }
     return null;
-  }
-
-  static _VelocityTrackerStrategy _createStrategy() {
-    return new _LeastSquaresVelocityTrackerStrategy(2);
   }
 }

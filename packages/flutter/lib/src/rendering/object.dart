@@ -390,7 +390,7 @@ class PaintingContext {
   ///   in the coordinate system of the caller.
   /// * `maskRect` is the region of the canvas (in the coodinate system of the
   ///   caller) in which to apply the mask.
-  /// * `transferMode` is the [TransferMode] to use when applying the shader to
+  /// * `blendMode` is the [BlendMode] to use when applying the shader to
   ///   the painting done by `painter`.
   /// * `painter` is a callback that will paint with the mask applied. This
   ///   function calls the `painter` synchronously.
@@ -399,12 +399,12 @@ class PaintingContext {
   /// [RenderObject.alwaysNeedsCompositing] property to return true. That informs
   /// ancestor render objects that this render object will include a composited
   /// layer, which causes them to use composited clips, for example.
-  void pushShaderMask(Offset offset, Shader shader, Rect maskRect, TransferMode transferMode, PaintingContextCallback painter) {
+  void pushShaderMask(Offset offset, Shader shader, Rect maskRect, BlendMode blendMode, PaintingContextCallback painter) {
     _stopRecordingIfNeeded();
     final ShaderMaskLayer shaderLayer = new ShaderMaskLayer(
       shader: shader,
       maskRect: maskRect,
-      transferMode: transferMode
+      blendMode: blendMode,
     );
     _appendLayer(shaderLayer);
     final PaintingContext childContext = new PaintingContext._(shaderLayer, _paintBounds);
@@ -529,7 +529,7 @@ typedef void RenderObjectVisitor(RenderObject child);
 /// Signature for a function that is called during layout.
 ///
 /// Used by [RenderObject.invokeLayoutCallback].
-typedef void LayoutCallback(Constraints constraints);
+typedef void LayoutCallback<T extends Constraints>(T constraints);
 
 class _SemanticsGeometry {
   _SemanticsGeometry() : transform = new Matrix4.identity();
@@ -1314,9 +1314,8 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       context: 'during $method()',
       renderObject: this,
       informationCollector: (StringBuffer information) {
-        information.writeln('The following RenderObject was being processed when the exception was fired:\n  $this');
-        if (debugCreator != null)
-          information.writeln('This RenderObject had the following creator information:\n  $debugCreator');
+        information.writeln('The following RenderObject was being processed when the exception was fired:');
+        information.writeln('  ${toStringShallow('\n  ')}');
         List<String> descendants = <String>[];
         const int maxDepth = 5;
         int depth = 0;
@@ -1825,7 +1824,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   ///
   /// This function can only be called during layout.
   @protected
-  void invokeLayoutCallback(LayoutCallback callback) {
+  void invokeLayoutCallback/*<T extends Constraints>*/(LayoutCallback/*<T>*/ callback) {
     assert(_debugMutationsLocked);
     assert(_debugDoingThisLayout);
     assert(!_doingThisLayoutWithCallback);
@@ -2428,14 +2427,14 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   ///
   /// This includes the same information for this RenderObject as given by
   /// [toStringDeep], but does not recurse to any children.
-  String toStringShallow() {
+  String toStringShallow([String joiner = '; ']) {
     RenderObject debugPreviousActiveLayout = _debugActiveLayout;
     _debugActiveLayout = null;
     StringBuffer result = new StringBuffer();
-    result.write('$this; ');
+    result.write('${this}$joiner'); // TODO(ianh): https://github.com/dart-lang/sdk/issues/28206
     List<String> description = <String>[];
     debugFillDescription(description);
-    result.write(description.join('; '));
+    result.write(description.join(joiner));
     _debugActiveLayout = debugPreviousActiveLayout;
     return result.toString();
   }

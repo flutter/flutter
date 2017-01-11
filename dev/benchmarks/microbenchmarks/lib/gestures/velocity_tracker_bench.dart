@@ -6,6 +6,8 @@ import 'dart:io';
 import 'package:flutter/gestures.dart';
 import 'data/velocity_tracker_data.dart';
 
+import '../common.dart';
+
 const int _kNumIters = 10000;
 
 void main() {
@@ -22,6 +24,14 @@ void main() {
     }
   }
   watch.stop();
-  print('Velocity tracker: ${(watch.elapsedMicroseconds / _kNumIters).toStringAsFixed(1)}µs per iteration');
+
+  BenchmarkResultPrinter printer = new BenchmarkResultPrinter();
+  printer.addResult(
+    description: 'Velocity tracker',
+    value: watch.elapsedMicroseconds / _kNumIters,
+    unit: 'µs per iteration',
+    name: 'velocity_tracker_iteration',
+  );
+  printer.printToStdout();
   exit(0);
 }

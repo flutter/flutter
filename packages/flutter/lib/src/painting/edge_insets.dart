@@ -100,7 +100,7 @@ class EdgeInsets {
   Size get collapsedSize => new Size(horizontal, vertical);
 
   /// An EdgeInsets with top and bottom as well as left and right flipped.
-  EdgeInsets get flipped => new EdgeInsets.fromLTRB(left, top, right, bottom);
+  EdgeInsets get flipped => new EdgeInsets.fromLTRB(right, bottom, left, top);
 
   /// Returns a new rect that is bigger than the given rect in each direction by
   /// the amount of inset in each direction. Specifically, the left edge of the

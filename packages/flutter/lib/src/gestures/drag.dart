@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
+
 import 'arena.dart';
 import 'recognizer.dart';
 import 'constants.dart';
@@ -14,7 +16,14 @@ enum _DragState {
   accepted,
 }
 
-/// Details for [GestureDragDownCallback].
+/// Details object for callbacks that use [GestureDragDownCallback].
+///
+/// See also:
+///
+/// * [DragGestureRecognizer.onDown], which uses [GestureDragDownCallback].
+/// * [DragStartDetails], the details for [GestureDragStartCallback].
+/// * [DragUpdateDetails], the details for [GestureDragUpdateCallback].
+/// * [DragEndDetails], the details for [GestureDragEndCallback].
 class DragDownDetails {
   /// Creates details for a [GestureDragDownCallback].
   ///
@@ -24,15 +33,30 @@ class DragDownDetails {
   }
 
   /// The global position at which the pointer contacted the screen.
+  ///
+  /// Defaults to the origin if not specified in the constructor.
   final Point globalPosition;
+
+  @override
+  String toString() => '$runtimeType($globalPosition)';
 }
 
-/// Signature for when a pointer has contacted the screen and might begin to move.
+/// Signature for when a pointer has contacted the screen and might begin to
+/// move.
+///
+/// The `details` object provides the position of the touch.
 ///
 /// See [DragGestureRecognizer.onDown].
 typedef void GestureDragDownCallback(DragDownDetails details);
 
-/// Details for [GestureDragStartCallback].
+/// Details object for callbacks that use [GestureDragStartCallback].
+///
+/// See also:
+///
+/// * [DragGestureRecognizer.onStart], which uses [GestureDragStartCallback].
+/// * [DragDownDetails], the details for [GestureDragDownCallback].
+/// * [DragUpdateDetails], the details for [GestureDragUpdateCallback].
+/// * [DragEndDetails], the details for [GestureDragEndCallback].
 class DragStartDetails {
   /// Creates details for a [GestureDragStartCallback].
   ///
@@ -42,15 +66,30 @@ class DragStartDetails {
   }
 
   /// The global position at which the pointer contacted the screen.
+  ///
+  /// Defaults to the origin if not specified in the constructor.
   final Point globalPosition;
+
+  @override
+  String toString() => '$runtimeType($globalPosition)';
 }
 
 /// Signature for when a pointer has contacted the screen and has begun to move.
 ///
+/// The `details` object provides the position of the touch when it first
+/// touched the surface.
+///
 /// See [DragGestureRecognizer.onStart].
 typedef void GestureDragStartCallback(DragStartDetails details);
 
-/// Details for [GestureDragUpdateCallback].
+/// Details object for callbacks that use [GestureDragUpdateCallback].
+///
+/// See also:
+///
+/// * [DragGestureRecognizer.onUpdate], which uses [GestureDragUpdateCallback].
+/// * [DragDownDetails], the details for [GestureDragDownCallback].
+/// * [DragStartDetails], the details for [GestureDragStartCallback].
+/// * [DragEndDetails], the details for [GestureDragEndCallback].
 class DragUpdateDetails {
   /// Creates details for a [DragUpdateDetails].
   ///
@@ -58,10 +97,12 @@ class DragUpdateDetails {
   ///
   /// If [primaryDelta] is non-null, then its value must match one of the
   /// coordinates of [delta] and the other coordinate must be zero.
+  ///
+  /// The [globalPosition] argument must be provided and must not be null.
   DragUpdateDetails({
     this.delta: Offset.zero,
     this.primaryDelta,
-    this.globalPosition
+    @required this.globalPosition
   }) {
     assert(primaryDelta == null
         || (primaryDelta == delta.dx && delta.dy == 0.0)
@@ -73,6 +114,8 @@ class DragUpdateDetails {
   /// If the [GestureDragUpdateCallback] is for a one-dimensional drag (e.g.,
   /// a horizontal or vertical drag), then this offset contains only the delta
   /// in that direction (i.e., the coordinate in the other direction is zero).
+  ///
+  /// Defaults to zero if not specified in the constructor.
   final Offset delta;
 
   /// The amount the pointer has moved along the primary axis since the previous
@@ -83,29 +126,67 @@ class DragUpdateDetails {
   /// [delta] along the primary axis (e.g., horizontal or vertical,
   /// respectively). Otherwise, if the [GestureDragUpdateCallback] is for a
   /// two-dimensional drag (e.g., a pan), then this value is null.
+  ///
+  /// Defaults to null if not specified in the constructor.
   final double primaryDelta;
 
-  /// The pointer's global position.
+  /// The pointer's global position when it triggered this update.
   final Point globalPosition;
+
+  @override
+  String toString() => '$runtimeType($delta)';
 }
 
 /// Signature for when a pointer that is in contact with the screen and moving
 /// has moved again.
 ///
+/// The `details` object provides the position of the touch and the distance it
+/// has travelled since the last update.
+///
 /// See [DragGestureRecognizer.onUpdate].
 typedef void GestureDragUpdateCallback(DragUpdateDetails details);
 
-/// Details for [GestureDragEndCallback].
+/// Details object for callbacks that use [GestureDragEndCallback].
+///
+/// See also:
+///
+/// * [DragGestureRecognizer.onEnd], which uses [GestureDragEndCallback].
+/// * [DragDownDetails], the details for [GestureDragDownCallback].
+/// * [DragStartDetails], the details for [GestureDragStartCallback].
+/// * [DragUpdateDetails], the details for [GestureDragUpdateCallback].
 class DragEndDetails {
   /// Creates details for a [GestureDragEndCallback].
   ///
   /// The [velocity] argument must not be null.
-  DragEndDetails({ this.velocity: Velocity.zero }) {
+  DragEndDetails({
+    this.velocity: Velocity.zero,
+    this.primaryVelocity,
+  }) {
     assert(velocity != null);
+    assert(primaryVelocity == null
+        || primaryVelocity == velocity.pixelsPerSecond.dx
+        || primaryVelocity == velocity.pixelsPerSecond.dy);
   }
 
   /// The velocity the pointer was moving when it stopped contacting the screen.
+  ///
+  /// Defaults to zero if not specified in the constructor.
   final Velocity velocity;
+
+  /// The velocity the pointer was moving along the primary axis when it stopped
+  /// contacting the screen, in logical pixels per second.
+  ///
+  /// If the [GestureDragEndCallback] is for a one-dimensional drag (e.g., a
+  /// horizontal or vertical drag), then this value contains the component of
+  /// [velocity] along the primary axis (e.g., horizontal or vertical,
+  /// respectively). Otherwise, if the [GestureDragEndCallback] is for a
+  /// two-dimensional drag (e.g., a pan), then this value is null.
+  ///
+  /// Defaults to null if not specified in the constructor.
+  final double primaryVelocity;
+
+  @override
+  String toString() => '$runtimeType($velocity)';
 }
 
 /// Signature for when a pointer that was previously in contact with the screen
@@ -147,17 +228,29 @@ bool _isFlingGesture(Velocity velocity) {
 ///  * [PanGestureRecognizer]
 abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   /// A pointer has contacted the screen and might begin to move.
+  ///
+  /// The position of the pointer is provided in the callback's `details`
+  /// argument, which is a [DragDownDetails] object.
   GestureDragDownCallback onDown;
 
   /// A pointer has contacted the screen and has begun to move.
+  ///
+  /// The position of the pointer is provided in the callback's `details`
+  /// argument, which is a [DragStartDetails] object.
   GestureDragStartCallback onStart;
 
   /// A pointer that is in contact with the screen and moving has moved again.
+  ///
+  /// The distance travelled by the pointer since the last update is provided in
+  /// the callback's `details` argument, which is a [DragUpdateDetails] object.
   GestureDragUpdateCallback onUpdate;
 
   /// A pointer that was previously in contact with the screen and moving is no
   /// longer in contact with the screen and was moving at a specific velocity
   /// when it stopped contacting the screen.
+  ///
+  /// The velocity is provided in the callback's `details` argument, which is a
+  /// [DragEndDetails] object.
   GestureDragEndCallback onEnd;
 
   /// The pointer that previously triggered [onDown] did not complete.
@@ -168,7 +261,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   Offset _pendingDragOffset;
 
   Offset _getDeltaForDetails(Offset delta);
-  double _getPrimaryDeltaForDetails(Offset delta);
+  double _getPrimaryValueFromOffset(Offset value);
   bool get _hasSufficientPendingDragDeltaToAccept;
 
   Map<int, VelocityTracker> _velocityTrackers = new Map<int, VelocityTracker>();
@@ -198,8 +291,8 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
         if (onUpdate != null) {
           invokeCallback/*<Null>*/('onUpdate', () => onUpdate(new DragUpdateDetails( // ignore: STRONG_MODE_INVALID_CAST_FUNCTION_EXPR, https://github.com/dart-lang/sdk/issues/27504
             delta: _getDeltaForDetails(delta),
-            primaryDelta: _getPrimaryDeltaForDetails(delta),
-            globalPosition: event.position
+            primaryDelta: _getPrimaryValueFromOffset(delta),
+            globalPosition: event.position,
           )));
         }
       } else {
@@ -217,12 +310,16 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
       _state = _DragState.accepted;
       Offset delta = _pendingDragOffset;
       _pendingDragOffset = Offset.zero;
-      if (onStart != null)
-        invokeCallback/*<Null>*/('onStart', () => onStart(new DragStartDetails(globalPosition: _initialPosition))); // ignore: STRONG_MODE_INVALID_CAST_FUNCTION_EXPR, https://github.com/dart-lang/sdk/issues/27504
+      if (onStart != null) {
+        invokeCallback/*<Null>*/('onStart', () => onStart(new DragStartDetails( // ignore: STRONG_MODE_INVALID_CAST_FUNCTION_EXPR, https://github.com/dart-lang/sdk/issues/27504
+          globalPosition: _initialPosition,
+        )));
+      }
       if (delta != Offset.zero && onUpdate != null) {
         invokeCallback/*<Null>*/('onUpdate', () => onUpdate(new DragUpdateDetails( // ignore: STRONG_MODE_INVALID_CAST_FUNCTION_EXPR, https://github.com/dart-lang/sdk/issues/27504
           delta: _getDeltaForDetails(delta),
-          primaryDelta: _getPrimaryDeltaForDetails(delta)
+          primaryDelta: _getPrimaryValueFromOffset(delta),
+          globalPosition: _initialPosition,
         )));
       }
     }
@@ -253,9 +350,15 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
         final Offset pixelsPerSecond = velocity.pixelsPerSecond;
         if (pixelsPerSecond.distanceSquared > kMaxFlingVelocity * kMaxFlingVelocity)
           velocity = new Velocity(pixelsPerSecond: (pixelsPerSecond / pixelsPerSecond.distance) * kMaxFlingVelocity);
-        invokeCallback/*<Null>*/('onEnd', () => onEnd(new DragEndDetails(velocity: velocity))); // ignore: STRONG_MODE_INVALID_CAST_FUNCTION_EXPR, https://github.com/dart-lang/sdk/issues/27504
+        invokeCallback/*<Null>*/('onEnd', () => onEnd(new DragEndDetails( // ignore: STRONG_MODE_INVALID_CAST_FUNCTION_EXPR, https://github.com/dart-lang/sdk/issues/27504
+          velocity: velocity,
+          primaryVelocity: _getPrimaryValueFromOffset(velocity.pixelsPerSecond),
+        )));
       } else {
-        invokeCallback/*<Null>*/('onEnd', () => onEnd(new DragEndDetails(velocity: Velocity.zero))); // ignore: STRONG_MODE_INVALID_CAST_FUNCTION_EXPR, https://github.com/dart-lang/sdk/issues/27504
+        invokeCallback/*<Null>*/('onEnd', () => onEnd(new DragEndDetails( // ignore: STRONG_MODE_INVALID_CAST_FUNCTION_EXPR, https://github.com/dart-lang/sdk/issues/27504
+          velocity: Velocity.zero,
+          primaryVelocity: 0.0,
+        )));
       }
     }
     _velocityTrackers.clear();
@@ -283,7 +386,7 @@ class VerticalDragGestureRecognizer extends DragGestureRecognizer {
   Offset _getDeltaForDetails(Offset delta) => new Offset(0.0, delta.dy);
 
   @override
-  double _getPrimaryDeltaForDetails(Offset delta) => delta.dy;
+  double _getPrimaryValueFromOffset(Offset value) => value.dy;
 
   @override
   String toStringShort() => 'vertical drag';
@@ -304,7 +407,7 @@ class HorizontalDragGestureRecognizer extends DragGestureRecognizer {
   Offset _getDeltaForDetails(Offset delta) => new Offset(delta.dx, 0.0);
 
   @override
-  double _getPrimaryDeltaForDetails(Offset delta) => delta.dx;
+  double _getPrimaryValueFromOffset(Offset value) => value.dx;
 
   @override
   String toStringShort() => 'horizontal drag';
@@ -326,7 +429,7 @@ class PanGestureRecognizer extends DragGestureRecognizer {
   Offset _getDeltaForDetails(Offset delta) => delta;
 
   @override
-  double _getPrimaryDeltaForDetails(Offset delta) => null;
+  double _getPrimaryValueFromOffset(Offset value) => null;
 
   @override
   String toStringShort() => 'pan';

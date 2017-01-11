@@ -3,11 +3,11 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
 
 import 'package:path/path.dart' as path;
 
 import '../base/common.dart';
+import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
 import '../cache.dart';
@@ -21,7 +21,8 @@ bool _shouldRunPubGet({ File pubSpecYaml, File dotPackages }) {
   if (pubSpecYaml.lastModifiedSync().isAfter(dotPackagesLastModified))
     return true;
   File flutterToolsStamp = Cache.instance.getStampFileFor('flutter_tools');
-  if (flutterToolsStamp.lastModifiedSync().isAfter(dotPackagesLastModified))
+  if (flutterToolsStamp.existsSync() &&
+      flutterToolsStamp.lastModifiedSync().isAfter(dotPackagesLastModified))
     return true;
   return false;
 }
@@ -33,10 +34,10 @@ Future<Null> pubGet({
   bool checkLastModified: true
 }) async {
   if (directory == null)
-    directory = Directory.current.path;
+    directory = fs.currentDirectory.path;
 
-  File pubSpecYaml = new File(path.join(directory, 'pubspec.yaml'));
-  File dotPackages = new File(path.join(directory, '.packages'));
+  File pubSpecYaml = fs.file(path.join(directory, 'pubspec.yaml'));
+  File dotPackages = fs.file(path.join(directory, '.packages'));
 
   if (!pubSpecYaml.existsSync()) {
     if (!skipIfAbsent)

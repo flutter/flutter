@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -5,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:stocks/main.dart' as stocks;
 import 'package:stocks/stock_data.dart' as stock_data;
+
+import '../common.dart';
 
 const Duration kBenchmarkTime = const Duration(seconds: 15);
 
@@ -18,6 +21,7 @@ Future<Null> main() async {
   await benchmarkWidgets((WidgetTester tester) async {
     stocks.main();
     await tester.pump(); // Start startup animation
+    new Timer(const Duration(milliseconds: 1100), () { });  // workaround for https://github.com/flutter/flutter/issues/7433
     await tester.pump(const Duration(seconds: 1)); // Complete startup animation
     await tester.tapAt(new Point(20.0, 20.0)); // Open drawer
     await tester.pump(); // Start drawer animation
@@ -36,6 +40,13 @@ Future<Null> main() async {
     watch.stop();
   });
 
-  print('Stock build: ${(watch.elapsedMicroseconds / iterations).toStringAsFixed(1)}µs per iteration');
+  BenchmarkResultPrinter printer = new BenchmarkResultPrinter();
+  printer.addResult(
+    description: 'Stock build',
+    value: watch.elapsedMicroseconds / iterations,
+    unit: 'µs per iteration',
+    name: 'stock_build_iteration',
+  );
+  printer.printToStdout();
   exit(0);
 }

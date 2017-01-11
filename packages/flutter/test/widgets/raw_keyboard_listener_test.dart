@@ -19,6 +19,7 @@ void sendFakeKeyEvent(Map<String, dynamic> data) {
 void main() {
   testWidgets('Can dispose without keyboard', (WidgetTester tester) async {
     await tester.pumpWidget(new RawKeyboardListener(child: new Container()));
+    await tester.pumpWidget(new RawKeyboardListener(child: new Container()));
     await tester.pumpWidget(new Container());
   });
 

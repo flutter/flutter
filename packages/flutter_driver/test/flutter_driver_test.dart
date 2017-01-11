@@ -35,7 +35,7 @@ void main() {
       when(mockVM.isolates).thenReturn(<VMRunnableIsolate>[mockIsolate]);
       when(mockIsolate.loadRunnable()).thenReturn(mockIsolate);
       when(mockIsolate.invokeExtension(any, any))
-          .thenReturn(new Future<Map<String, dynamic>>.value(<String, String>{'status': 'ok'}));
+          .thenReturn(makeMockResponse(<String, dynamic>{'status': 'ok'}));
       vmServiceConnectFunction = (String url) {
         return new Future<VMServiceClientConnection>.value(
           new VMServiceClientConnection(mockClient, null)
@@ -106,9 +106,8 @@ void main() {
     });
 
     test('checks the health of the driver extension', () async {
-      when(mockIsolate.invokeExtension(any, any)).thenReturn(new Future<Map<String, dynamic>>.value(<String, dynamic>{
-        'status': 'ok',
-      }));
+      when(mockIsolate.invokeExtension(any, any)).thenReturn(
+          makeMockResponse(<String, dynamic>{'status': 'ok'}));
       Health result = await driver.checkHealth();
       expect(result.status, HealthStatus.ok);
     });
@@ -128,11 +127,12 @@ void main() {
         when(mockIsolate.invokeExtension(any, any)).thenAnswer((Invocation i) {
           expect(i.positionalArguments[1], <String, String>{
             'command': 'tap',
+            'timeout': '5000',
             'finderType': 'ByValueKey',
             'keyValueString': 'foo',
             'keyValueType': 'String'
           });
-          return new Future<Null>.value();
+          return makeMockResponse(<String, dynamic>{});
         });
         await driver.tap(find.byValueKey('foo'));
       });
@@ -147,10 +147,11 @@ void main() {
         when(mockIsolate.invokeExtension(any, any)).thenAnswer((Invocation i) {
           expect(i.positionalArguments[1], <String, dynamic>{
             'command': 'tap',
+            'timeout': '5000',
             'finderType': 'ByText',
             'text': 'foo',
           });
-          return new Future<Map<String, dynamic>>.value();
+          return makeMockResponse(<String, dynamic>{});
         });
         await driver.tap(find.text('foo'));
       });
@@ -165,11 +166,12 @@ void main() {
         when(mockIsolate.invokeExtension(any, any)).thenAnswer((Invocation i) {
           expect(i.positionalArguments[1], <String, dynamic>{
             'command': 'get_text',
+            'timeout': '5000',
             'finderType': 'ByValueKey',
             'keyValueString': '123',
             'keyValueType': 'int'
           });
-          return new Future<Map<String, dynamic>>.value(<String, String>{
+          return makeMockResponse(<String, String>{
             'text': 'hello'
           });
         });
@@ -191,7 +193,7 @@ void main() {
             'text': 'foo',
             'timeout': '1000',
           });
-          return new Future<Map<String, dynamic>>.value(<String, dynamic>{});
+          return makeMockResponse(<String, dynamic>{});
         });
         await driver.waitFor(find.byTooltip('foo'), timeout: new Duration(seconds: 1));
       });
@@ -279,6 +281,45 @@ void main() {
         expect(timeline.events.single.name, 'test event');
       });
     });
+
+    group('sendCommand error conditions', () {
+      test('local timeout', () async {
+        when(mockIsolate.invokeExtension(any, any)).thenAnswer((Invocation i) {
+          // completer never competed to trigger timeout
+          return new Completer<Map<String, dynamic>>().future;
+        });
+        try {
+          await driver.waitFor(find.byTooltip('foo'), timeout: new Duration(milliseconds: 100));
+          fail('expected an exception');
+        } catch(error) {
+          expect(error is DriverError, isTrue);
+          expect(error.message, 'Failed to fulfill WaitFor: Flutter application not responding');
+        }
+      });
+
+      test('remote error', () async {
+        when(mockIsolate.invokeExtension(any, any)).thenAnswer((Invocation i) {
+          return makeMockResponse(<String, dynamic>{
+            'message': 'This is a failure'
+          }, isError: true);
+        });
+        try {
+          await driver.waitFor(find.byTooltip('foo'));
+          fail('expected an exception');
+        } catch(error) {
+          expect(error is DriverError, isTrue);
+          expect(error.message, 'Error in Flutter application: {message: This is a failure}');
+        }
+      });
+    });
+  });
+}
+
+Future<Map<String, dynamic>> makeMockResponse(
+    Map<String, dynamic> response, {bool isError: false}) {
+  return new Future<Map<String, dynamic>>.value(<String, dynamic>{
+    'isError': isError,
+    'response': response
   });
 }
 

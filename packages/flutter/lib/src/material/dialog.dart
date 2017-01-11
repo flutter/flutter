@@ -34,6 +34,7 @@ class Dialog extends StatelessWidget {
     this.child,
   }) : super(key: key);
 
+  /// The widget below this widget in the tree.
   final Widget child;
 
   Color _getColor(BuildContext context) {
@@ -137,29 +138,28 @@ class AlertDialog extends StatelessWidget {
         padding: titlePadding ?? new EdgeInsets.fromLTRB(24.0, 24.0, 24.0, content == null ? 20.0 : 0.0),
         child: new DefaultTextStyle(
           style: Theme.of(context).textTheme.title,
-          child: title
-        )
+          child: title,
+        ),
       ));
     }
 
     if (content != null) {
       children.add(new Flexible(
-        fit: FlexFit.loose,
         child: new Padding(
           padding: contentPadding ?? const EdgeInsets.fromLTRB(24.0, 20.0, 24.0, 24.0),
           child: new DefaultTextStyle(
             style: Theme.of(context).textTheme.subhead,
-            child: content
-          )
-        )
+            child: content,
+          ),
+        ),
       ));
     }
 
     if (actions != null) {
       children.add(new ButtonTheme.bar(
         child: new ButtonBar(
-          children: actions
-        )
+          children: actions,
+        ),
       ));
     }
 
@@ -168,9 +168,9 @@ class AlertDialog extends StatelessWidget {
         child: new Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: children
-        )
-      )
+          children: children,
+        ),
+      ),
     );
   }
 }
@@ -244,7 +244,6 @@ class SimpleDialog extends StatelessWidget {
 
     if (children != null) {
       body.add(new Flexible(
-        fit: FlexFit.loose,
         child: new Block(
           padding: contentPadding ?? const EdgeInsets.fromLTRB(0.0, 12.0, 0.0, 16.0),
           children: children

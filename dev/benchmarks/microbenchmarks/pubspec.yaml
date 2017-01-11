@@ -1,6 +1,7 @@
 name: microbenchmarks
 description: A new flutter project.
 dependencies:
+  meta: ^1.0.3
   flutter:
     sdk: flutter
   flutter_test:

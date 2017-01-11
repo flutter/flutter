@@ -132,4 +132,46 @@ void main() {
     expect(events[0].runtimeType, equals(PointerDownEvent));
     expect(events[1].runtimeType, equals(PointerCancelEvent));
   });
+
+  test('Can expand add and hover pointers', () {
+    ui.PointerDataPacket packet = const ui.PointerDataPacket(
+      data: const <ui.PointerData>[
+        const ui.PointerData(change: ui.PointerChange.add, device: 24),
+        const ui.PointerData(change: ui.PointerChange.hover, device: 24),
+        const ui.PointerData(change: ui.PointerChange.remove, device: 24),
+        const ui.PointerData(change: ui.PointerChange.hover, device: 24),
+      ]
+    );
+
+    List<PointerEvent> events = PointerEventConverter.expand(
+      packet.data, ui.window.devicePixelRatio).toList();
+
+    expect(events.length, 5);
+    expect(events[0].runtimeType, equals(PointerAddedEvent));
+    expect(events[1].runtimeType, equals(PointerHoverEvent));
+    expect(events[2].runtimeType, equals(PointerRemovedEvent));
+    expect(events[3].runtimeType, equals(PointerAddedEvent));
+    expect(events[4].runtimeType, equals(PointerHoverEvent));
+  });
+
+  test('Synthetic hover and cancel for misplaced down and remove', () {
+    ui.PointerDataPacket packet = const ui.PointerDataPacket(
+      data: const <ui.PointerData>[
+        const ui.PointerData(change: ui.PointerChange.add, device: 25, physicalX: 10.0, physicalY: 10.0),
+        const ui.PointerData(change: ui.PointerChange.down, device: 25, physicalX: 15.0, physicalY: 17.0),
+        const ui.PointerData(change: ui.PointerChange.remove, device: 25),
+      ]
+    );
+
+    List<PointerEvent> events = PointerEventConverter.expand(
+      packet.data, ui.window.devicePixelRatio).toList();
+
+    expect(events.length, 5);
+    expect(events[0].runtimeType, equals(PointerAddedEvent));
+    expect(events[1].runtimeType, equals(PointerHoverEvent));
+    expect(events[1].delta, equals(const Offset(5.0, 7.0) / ui.window.devicePixelRatio));
+    expect(events[2].runtimeType, equals(PointerDownEvent));
+    expect(events[3].runtimeType, equals(PointerCancelEvent));
+    expect(events[4].runtimeType, equals(PointerRemovedEvent));
+  });
 }

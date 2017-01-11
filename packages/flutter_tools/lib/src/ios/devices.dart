@@ -4,9 +4,10 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 
 import '../application_package.dart';
+import '../base/file_system.dart';
+import '../base/io.dart';
 import '../base/os.dart';
 import '../base/process.dart';
 import '../base/process_manager.dart';
@@ -150,7 +151,7 @@ class IOSDevice extends Device {
   @override
   bool installApp(ApplicationPackage app) {
     IOSApp iosApp = app;
-    Directory bundle = new Directory(iosApp.deviceBundlePath);
+    Directory bundle = fs.directory(iosApp.deviceBundlePath);
     if (!bundle.existsSync()) {
       printError("Could not find application bundle at ${bundle.path}; have you run 'flutter build ios'?");
       return false;
@@ -185,7 +186,8 @@ class IOSDevice extends Device {
     String route,
     DebuggingOptions debuggingOptions,
     Map<String, dynamic> platformArgs,
-    bool prebuiltApplication: false
+    bool prebuiltApplication: false,
+    bool applicationNeedsRebuild: false,
   }) async {
     if (!prebuiltApplication) {
       // TODO(chinmaygarde): Use checked, mainPath, route.
@@ -207,7 +209,7 @@ class IOSDevice extends Device {
 
     // Step 2: Check that the application exists at the specified path.
     IOSApp iosApp = app;
-    Directory bundle = new Directory(iosApp.deviceBundlePath);
+    Directory bundle = fs.directory(iosApp.deviceBundlePath);
     if (!bundle.existsSync()) {
       printError('Could not find the built application bundle at ${bundle.path}.');
       return new LaunchResult.failed();

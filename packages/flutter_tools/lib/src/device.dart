@@ -3,13 +3,13 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
 import 'dart:math' as math;
 
 import 'android/android_device.dart';
 import 'application_package.dart';
 import 'base/common.dart';
 import 'base/context.dart';
+import 'base/file_system.dart';
 import 'base/os.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
@@ -205,7 +205,8 @@ abstract class Device {
     String route,
     DebuggingOptions debuggingOptions,
     Map<String, dynamic> platformArgs,
-    bool prebuiltApplication: false
+    bool prebuiltApplication: false,
+    bool applicationNeedsRebuild: false
   });
 
   /// Does this device implement support for hot reloading / restarting?

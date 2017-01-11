@@ -1,6 +1,6 @@
 name: flutter_test
 dependencies:
-  quiver: ^0.21.4
+  quiver: ^0.24.0
 
   # The flutter tools depend on very specific internal implementation
   # details of the 'test' package, which change between versions, so

@@ -2,9 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
-
 import 'package:args/command_runner.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/commands/config.dart';
@@ -21,7 +20,7 @@ void main() {
 
     setUp(() {
       Cache.flutterRoot = '../..';
-      temp = Directory.systemTemp.createTempSync('flutter_tools');
+      temp = fs.systemTempDirectory.createTempSync('flutter_tools');
     });
 
     tearDown(() {

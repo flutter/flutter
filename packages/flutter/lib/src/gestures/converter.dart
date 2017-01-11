@@ -289,9 +289,30 @@ class PointerEventConverter {
               tilt: datum.tilt
             );
           }
-          _pointers.remove(datum.device);
           break;
         case ui.PointerChange.remove:
+          assert(_pointers.containsKey(datum.device));
+          _PointerState state = _pointers[datum.device];
+          if (state.down) {
+            yield new PointerCancelEvent(
+              timeStamp: timeStamp,
+              pointer: state.pointer,
+              kind: kind,
+              device: datum.device,
+              position: position,
+              buttons: datum.buttons,
+              obscured: datum.obscured,
+              pressureMin: datum.pressureMin,
+              pressureMax: datum.pressureMax,
+              distance: datum.distance,
+              distanceMax: datum.distanceMax,
+              radiusMin: datum.radiusMin,
+              radiusMax: datum.radiusMax,
+              orientation: datum.orientation,
+              tilt: datum.tilt
+            );
+          }
+          _pointers.remove(datum.device);
           yield new PointerRemovedEvent(
             timeStamp: timeStamp,
             kind: kind,

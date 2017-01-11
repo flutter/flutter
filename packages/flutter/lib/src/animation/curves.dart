@@ -6,7 +6,7 @@ import 'dart:math' as math;
 
 /// A mapping of the unit interval to the unit interval.
 ///
-/// A curve must map 0.0 to 0.0 and 1.0 to 1.0.
+/// A curve must map t=0.0 to 0.0 and t=1.0 to 1.0.
 ///
 /// See [Curves] for a collection of common animation curves.
 abstract class Curve {
@@ -18,6 +18,8 @@ abstract class Curve {
   ///
   /// The value of `t` must be between 0.0 and 1.0, inclusive. Subclasses should
   /// assert that this is true.
+  ///
+  /// A curve must map t=0.0 to 0.0 and t=1.0 to 1.0.
   double transform(double t);
 
   /// Returns a new curve that is the reversed inversion of this one.

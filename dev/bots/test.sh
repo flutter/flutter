@@ -6,7 +6,7 @@ trap detect_error_on_exit EXIT HUP INT QUIT TERM
 
 detect_error_on_exit() {
     exit_code=$?
-    set +x
+    { set +x; } 2>/dev/null
     if [[ $exit_code -ne 0 ]]; then
         echo -e "\x1B[31m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\x1B[0m"
         echo -e "\x1B[1mError:\x1B[31m script exited early due to error ($exit_code)\x1B[0m"

@@ -6,8 +6,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/animation.dart';
 import 'package:flutter/widgets.dart';
 
-import 'animation_tester.dart';
-
 void main() {
   setUp(() {
     WidgetsFlutterBinding.ensureInitialized();
@@ -15,16 +13,16 @@ void main() {
   });
 
   test('toString control test', () {
-    expect(kAlwaysCompleteAnimation.toString(), hasOneLineDescription);
-    expect(kAlwaysDismissedAnimation.toString(), hasOneLineDescription);
-    expect(const AlwaysStoppedAnimation<double>(0.5).toString(), hasOneLineDescription);
+    expect(kAlwaysCompleteAnimation, hasOneLineDescription);
+    expect(kAlwaysDismissedAnimation, hasOneLineDescription);
+    expect(const AlwaysStoppedAnimation<double>(0.5), hasOneLineDescription);
     CurvedAnimation curvedAnimation = new CurvedAnimation(
       parent: kAlwaysDismissedAnimation,
       curve: Curves.ease
     );
-    expect(curvedAnimation.toString(), hasOneLineDescription);
+    expect(curvedAnimation, hasOneLineDescription);
     curvedAnimation.reverseCurve = Curves.elasticOut;
-    expect(curvedAnimation.toString(), hasOneLineDescription);
+    expect(curvedAnimation, hasOneLineDescription);
     AnimationController controller = new AnimationController(
       duration: const Duration(milliseconds: 500),
       vsync: const TestVSync(),
@@ -37,7 +35,7 @@ void main() {
       curve: Curves.ease,
       reverseCurve: Curves.elasticOut
     );
-    expect(curvedAnimation.toString(), hasOneLineDescription);
+    expect(curvedAnimation, hasOneLineDescription);
     controller.stop();
   });
 
@@ -45,9 +43,9 @@ void main() {
     ProxyAnimation animation = new ProxyAnimation();
     expect(animation.value, 0.0);
     expect(animation.status, AnimationStatus.dismissed);
-    expect(animation.toString(), hasOneLineDescription);
+    expect(animation, hasOneLineDescription);
     animation.parent = kAlwaysDismissedAnimation;
-    expect(animation.toString(), hasOneLineDescription);
+    expect(animation, hasOneLineDescription);
   });
 
   test('ProxyAnimation set parent generates value changed', () {
@@ -88,7 +86,7 @@ void main() {
     expect(didReceiveCallback, isFalse);
     controller.value = 0.7;
     expect(didReceiveCallback, isFalse);
-    expect(animation.toString(), hasOneLineDescription);
+    expect(animation, hasOneLineDescription);
   });
 
   test('TrainHoppingAnimation', () {
@@ -107,11 +105,11 @@ void main() {
       });
     expect(didSwitchTrains, isFalse);
     expect(animation.value, 0.5);
-    expect(animation.toString(), hasOneLineDescription);
+    expect(animation, hasOneLineDescription);
     nextTrain.value = 0.25;
     expect(didSwitchTrains, isTrue);
     expect(animation.value, 0.25);
-    expect(animation.toString(), hasOneLineDescription);
+    expect(animation, hasOneLineDescription);
     expect(animation.toString(), contains('no next'));
   });
 }

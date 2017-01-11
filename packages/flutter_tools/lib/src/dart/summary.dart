@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io' as io;
 
 import 'package:analyzer/file_system/file_system.dart';
 import 'package:analyzer/file_system/physical_file_system.dart';
@@ -14,6 +13,9 @@ import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/globals.dart';
 import 'package:path/path.dart' as pathos;
 import 'package:yaml/src/yaml_node.dart'; // ignore: implementation_imports
+
+import '../base/file_system.dart' as file;
+import '../base/io.dart';
 
 /// Given the [skyEnginePath], locate corresponding `_embedder.yaml` and compose
 /// the full embedded Dart SDK, and build the [outBundleName] file with its
@@ -46,13 +48,13 @@ void buildSkyEngineSdkSummary(String skyEnginePath, String outBundleName) {
   // Build.
   List<int> bytes = new SummaryBuilder(sources, sdk.context, true).build();
   String outputPath = pathos.join(skyEnginePath, outBundleName);
-  new io.File(outputPath).writeAsBytesSync(bytes);
+  file.fs.file(outputPath).writeAsBytesSync(bytes);
 }
 
 Future<Null> buildUnlinkedForPackages(String flutterPath) async {
   PhysicalResourceProvider provider = PhysicalResourceProvider.INSTANCE;
   PubSummaryManager manager =
-      new PubSummaryManager(provider, '__unlinked_${io.pid}.ds');
+      new PubSummaryManager(provider, '__unlinked_$pid.ds');
 
   Folder flutterFolder = provider.getFolder(flutterPath);
 

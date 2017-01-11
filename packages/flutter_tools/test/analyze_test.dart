@@ -2,8 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
-
+import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/analyze_base.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
@@ -17,7 +16,7 @@ void main() {
 
   setUp(() {
     FlutterCommandRunner.initFlutterRoot();
-    tempDir = Directory.systemTemp.createTempSync('analysis_test');
+    tempDir = fs.systemTempDirectory.createTempSync('analysis_test');
   });
 
   tearDown(() {
@@ -33,16 +32,16 @@ void main() {
       expect(inRepo(<String>[Cache.flutterRoot]), isTrue);
       expect(inRepo(<String>[path.join(Cache.flutterRoot, 'foo')]), isTrue);
       // Relative paths
-      String oldWorkingDirectory = path.current;
+      String oldWorkingDirectory = fs.currentDirectory.path;
       try {
-        Directory.current = Cache.flutterRoot;
+        fs.currentDirectory = Cache.flutterRoot;
         expect(inRepo(<String>['.']), isTrue);
         expect(inRepo(<String>['foo']), isTrue);
-        Directory.current = tempDir.path;
+        fs.currentDirectory = tempDir.path;
         expect(inRepo(<String>['.']), isFalse);
         expect(inRepo(<String>['foo']), isFalse);
       } finally {
-        Directory.current = oldWorkingDirectory;
+        fs.currentDirectory = oldWorkingDirectory;
       }
       // Ensure no exceptions
       inRepo(null);

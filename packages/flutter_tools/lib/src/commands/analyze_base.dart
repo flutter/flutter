@@ -3,11 +3,11 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
 
 import 'package:args/args.dart';
 import 'package:path/path.dart' as path;
 
+import '../base/file_system.dart';
 import '../base/utils.dart';
 import '../cache.dart';
 import '../globals.dart';
@@ -25,7 +25,7 @@ abstract class AnalyzeBase {
   void dumpErrors(Iterable<String> errors) {
     if (argResults['write'] != null) {
       try {
-        final RandomAccessFile resultsFile = new File(argResults['write']).openSync(mode: FileMode.WRITE);
+        final RandomAccessFile resultsFile = fs.file(argResults['write']).openSync(mode: FileMode.WRITE);
         try {
           resultsFile.lockSync();
           resultsFile.writeStringSync(errors.join('\n'));
@@ -45,7 +45,7 @@ abstract class AnalyzeBase {
       'issues': errorCount,
       'missingDartDocs': membersMissingDocumentation
     };
-    new File(benchmarkOut).writeAsStringSync(toPrettyJson(data));
+    fs.file(benchmarkOut).writeAsStringSync(toPrettyJson(data));
     printStatus('Analysis benchmark written to $benchmarkOut ($data).');
   }
 
@@ -58,7 +58,7 @@ bool inRepo(List<String> fileList) {
   if (fileList == null || fileList.isEmpty)
     fileList = <String>[path.current];
   String root = path.normalize(path.absolute(Cache.flutterRoot));
-  String prefix = root + Platform.pathSeparator;
+  String prefix = root + fs.pathSeparator;
   for (String file in fileList) {
     file = path.normalize(path.absolute(file));
     if (file == root || file.startsWith(prefix))

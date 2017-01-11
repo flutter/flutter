@@ -49,6 +49,7 @@ class _DepthFirstChildIterator implements Iterator<Element> {
   }
 
   static Iterable<Element> _reverseChildrenOf(Element element, bool skipOffstage) {
+    assert(element != null);
     final List<Element> children = <Element>[];
     if (skipOffstage) {
       element.visitChildrenForSemantics(children.add);

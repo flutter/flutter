@@ -4,10 +4,11 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:archive/archive.dart';
 import 'package:flutter_tools/src/base/context.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/process.dart';
@@ -32,7 +33,7 @@ void main() {
     ProcessManager manager;
 
     setUp(() {
-      tmp = Directory.systemTemp.createTempSync('flutter_tools_');
+      tmp = fs.systemTempDirectory.createTempSync('flutter_tools_');
       manager = new RecordingProcessManager(tmp.path);
     });
 
@@ -112,7 +113,7 @@ void main() {
 
     setUp(() async {
       await runInMinimalContext(() async {
-        Directory dir = new Directory('test/data/process_manager/replay');
+        Directory dir = fs.directory('test/data/process_manager/replay');
         manager = await ReplayProcessManager.create(dir.path);
       });
     });
@@ -153,6 +154,7 @@ void main() {
 
 Future<Null> runInMinimalContext(Future<dynamic> method()) async {
   AppContext context = new AppContext();
+  context.putIfAbsent(FileSystem, () => new LocalFileSystem());
   context.putIfAbsent(ProcessManager, () => new ProcessManager());
   context.putIfAbsent(Logger, () => new BufferLogger());
   context.putIfAbsent(OperatingSystemUtils, () => new OperatingSystemUtils());
@@ -167,7 +169,7 @@ class _Recording {
   _Recording(this.file, this._archive);
 
   static _Recording readFrom(Directory dir) {
-    File file = new File(path.join(
+    File file = fs.file(path.join(
         dir.path, RecordingProcessManager.kDefaultRecordTo));
     Archive archive = new ZipDecoder().decodeBytes(file.readAsBytesSync());
     return new _Recording(file, archive);
@@ -194,7 +196,7 @@ class _Recording {
     Encoding encoding;
     if (encodingName != null)
       encoding = encodingName == 'system'
-          ? const SystemEncoding()
+          ? SYSTEM_ENCODING
           : Encoding.getByName(encodingName);
     return _getFileContent('$basename.$type', encoding);
   }

@@ -3,13 +3,13 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
 
 import 'package:args/command_runner.dart';
 import 'package:meta/meta.dart';
 
 import '../application_package.dart';
 import '../base/common.dart';
+import '../base/file_system.dart';
 import '../build_info.dart';
 import '../dart/package_map.dart';
 import '../dart/pub.dart';
@@ -207,7 +207,7 @@ abstract class FlutterCommand extends Command<Null> {
   void commonCommandValidator() {
     if (!PackageMap.isUsingCustomPackagesPath) {
       // Don't expect a pubspec.yaml file if the user passed in an explicit .packages file path.
-      if (!FileSystemEntity.isFileSync('pubspec.yaml')) {
+      if (!fs.isFileSync('pubspec.yaml')) {
         throw new ToolExit('Error: No pubspec.yaml file found.\n'
           'This command should be run from the root of your Flutter project.\n'
           'Do not run this command from the root of your git clone of Flutter.');
@@ -216,7 +216,7 @@ abstract class FlutterCommand extends Command<Null> {
 
     if (_usesTargetOption) {
       String targetPath = targetFile;
-      if (!FileSystemEntity.isFileSync(targetPath))
+      if (!fs.isFileSync(targetPath))
         throw new ToolExit('Target file "$targetPath" not found.');
     }
 

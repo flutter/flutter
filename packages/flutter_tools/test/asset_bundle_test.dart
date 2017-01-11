@@ -2,19 +2,20 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
 import 'dart:convert';
 import 'package:flutter_tools/src/asset.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 
 void main()  {
   // Create a temporary directory and write a single file into it.
-  Directory tempDir = Directory.systemTemp.createTempSync();
+  FileSystem fs = new LocalFileSystem();
+  Directory tempDir = fs.systemTempDirectory.createTempSync();
   String projectRoot = tempDir.path;
   String assetPath = 'banana.txt';
   String assetContents = 'banana';
-  File tempFile = new File(path.join(projectRoot, assetPath));
+  File tempFile = fs.file(path.join(projectRoot, assetPath));
   tempFile.parent.createSync(recursive: true);
   tempFile.writeAsBytesSync(UTF8.encode(assetContents));
 

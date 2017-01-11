@@ -4,11 +4,12 @@
 
 import 'dart:async';
 import 'dart:convert' show BASE64, UTF8;
-import 'dart:io';
 
 import 'package:path/path.dart' as path;
 
 import 'base/context.dart';
+import 'base/file_system.dart';
+import 'base/io.dart';
 import 'build_info.dart';
 import 'dart/package_map.dart';
 import 'asset.dart';
@@ -89,7 +90,7 @@ class DevFSEntry {
     if (_fileStat.type == FileSystemEntityType.LINK) {
       // Resolve, stat, and maybe cache the symlink target.
       String resolved = file.resolveSymbolicLinksSync();
-      FileSystemEntity linkTarget = new File(resolved);
+      FileSystemEntity linkTarget = fs.file(resolved);
       // Stat the link target.
       _fileStat = linkTarget.statSync();
       if (devFSConfig.cacheSymlinks) {
@@ -104,7 +105,7 @@ class DevFSEntry {
     }
     if (file is Link) {
       // The link target.
-      return new File(file.resolveSymbolicLinksSync());
+      return fs.file(file.resolveSymbolicLinksSync());
     }
     return file;
   }
@@ -254,8 +255,8 @@ class _DevFSHttpWriter {
       await request.addStream(contents);
       HttpClientResponse response = await request.close();
       await response.drain();
-    } catch (e, stackTrace) {
-      printError('Error writing "${entry.devicePath}" to DevFS: $e\n$stackTrace');
+    } catch (e) {
+      printError('Error writing "${entry.devicePath}" to DevFS: $e');
     }
     if (progressReporter != null) {
       _done++;
@@ -353,7 +354,7 @@ class DevFS {
     printTrace('Scanning package files');
 
     StringBuffer sb;
-    if (FileSystemEntity.isFileSync(_packagesFilePath)) {
+    if (fs.isFileSync(_packagesFilePath)) {
       PackageMap packageMap = new PackageMap(_packagesFilePath);
 
       for (String packageName in packageMap.map.keys) {
@@ -368,7 +369,7 @@ class DevFS {
         // path imports within the project's own code.
         final String packagesDirectoryName =
             isProjectPackage ? 'packages/$packageName' : null;
-        Directory directory = new Directory.fromUri(uri);
+        Directory directory = fs.directory(uri);
         bool packageExists =
             await _scanDirectory(directory,
                                  directoryName: directoryName,
@@ -527,7 +528,7 @@ class DevFS {
           // Check if this is a symlink to a directory and skip it.
           final String linkPath = file.resolveSymbolicLinksSync();
           final FileSystemEntityType linkType =
-              FileStat.statSync(linkPath).type;
+              fs.statSync(linkPath).type;
           if (linkType == FileSystemEntityType.DIRECTORY) {
             continue;
           }

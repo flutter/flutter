@@ -4,11 +4,11 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:path/path.dart' as path;
 import 'package:yaml/yaml.dart';
 
+import 'base/file_system.dart';
 import 'dart/package_map.dart';
 import 'android/android_sdk.dart';
 import 'globals.dart';
@@ -18,9 +18,9 @@ const String _kFlutterServicesManifestPath = 'flutter_services.yaml';
 
 dynamic _loadYamlFile(String path) {
   printTrace("Looking for YAML at '$path'");
-  if (!FileSystemEntity.isFileSync(path))
+  if (!fs.isFileSync(path))
     return null;
-  String manifestString = new File(path).readAsStringSync();
+  String manifestString = fs.file(path).readAsStringSync();
   return loadYaml(manifestString);
 }
 
@@ -69,7 +69,7 @@ Future<Null> parseServiceConfigs(
 
     if (jars != null && serviceConfig['jars'] is Iterable) {
       for (String jar in serviceConfig['jars'])
-        jars.add(new File(await getServiceFromUrl(jar, serviceRoot, service, unzip: false)));
+        jars.add(fs.file(await getServiceFromUrl(jar, serviceRoot, service, unzip: false)));
     }
   }
 }
@@ -106,7 +106,7 @@ File generateServiceDefinitions(
       }).toList();
 
   Map<String, dynamic> json = <String, dynamic>{ 'services': services };
-  File servicesFile = new File(path.join(dir, 'services.json'));
+  File servicesFile = fs.file(path.join(dir, 'services.json'));
   servicesFile.writeAsStringSync(JSON.encode(json), mode: FileMode.WRITE, flush: true);
   return servicesFile;
 }

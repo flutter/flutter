@@ -3,11 +3,12 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
 
 import 'package:coverage/coverage.dart';
 import 'package:path/path.dart' as path;
 
+import '../base/file_system.dart';
+import '../base/io.dart';
 import '../dart/package_map.dart';
 import '../globals.dart';
 
@@ -67,7 +68,7 @@ class CoverageCollector {
       return null;
     if (formatter == null) {
       Resolver resolver = new Resolver(packagesPath: PackageMap.globalPackagesPath);
-      String packagePath = Directory.current.path;
+      String packagePath = fs.currentDirectory.path;
       List<String> reportOn = <String>[path.join(packagePath, 'lib')];
       formatter = new LcovFormatter(resolver, reportOn: reportOn, basePath: packagePath);
     }
