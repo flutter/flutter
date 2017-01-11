@@ -147,6 +147,8 @@ class LineBreaker {
 
         void setStrategy(BreakStrategy strategy) { mStrategy = strategy; }
 
+        void setJustified(bool justified) { mJustified = justified; }
+
         HyphenationFrequency getHyphenationFrequency() const { return mHyphenationFrequency; }
 
         void setHyphenationFrequency(HyphenationFrequency frequency) {
@@ -194,18 +196,22 @@ class LineBreaker {
             float penalty;  // penalty of this break (for example, hyphen penalty)
             float score;  // best score found for this break
             size_t lineNumber;  // only updated for non-constant line widths
+            size_t preSpaceCount;  // preceding space count before breaking
+            size_t postSpaceCount;  // preceding space count after breaking
             uint8_t hyphenEdit;
         };
 
         float currentLineWidth() const;
 
-        void addWordBreak(size_t offset, ParaWidth preBreak, ParaWidth postBreak, float penalty,
-                uint8_t hyph);
+        void addWordBreak(size_t offset, ParaWidth preBreak, ParaWidth postBreak,
+                size_t preSpaceCount, size_t postSpaceCount, float penalty, uint8_t hyph);
 
         void addCandidate(Candidate cand);
 
         // push an actual break to the output. Takes care of setting flags for tab
         void pushBreak(int offset, float width, uint8_t hyph);
+
+        float getSpaceWidth() const;
 
         void computeBreaksGreedy();
 
@@ -223,6 +229,7 @@ class LineBreaker {
         // layout parameters
         BreakStrategy mStrategy = kBreakStrategy_Greedy;
         HyphenationFrequency mHyphenationFrequency = kHyphenationFrequency_Normal;
+        bool mJustified;
         LineWidths mLineWidths;
         TabStops mTabStops;
 
@@ -241,6 +248,7 @@ class LineBreaker {
         float mBestScore;
         ParaWidth mPreBreak;  // prebreak of last break
         int mFirstTabIndex;
+        size_t mSpaceCount;
 };
 
 }  // namespace minikin
