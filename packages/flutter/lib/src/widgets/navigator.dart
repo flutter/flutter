@@ -314,9 +314,9 @@ typedef bool RoutePredicate(Route<dynamic> route);
 ///   runApp(new MaterialApp(
 ///     home: new MyAppHome(),
 ///     routes: <String, WidgetBuilder> {
-///       'A': (BuildContext context) => new MyPage(title: 'A'),
-///       'B': (BuildContext context) => new MyPage(title: 'B'),
-///       'C': (BuildContext context) => new MyPage(title: 'C'),
+///       '/a': (BuildContext context) => new MyPage(title: 'page A'),
+///       '/b': (BuildContext context) => new MyPage(title: 'page B'),
+///       '/c': (BuildContext context) => new MyPage(title: 'page C'),
 ///     },
 ///   ));
 /// }
@@ -324,8 +324,11 @@ typedef bool RoutePredicate(Route<dynamic> route);
 ///
 /// To show a route by name:
 /// ```dart
-/// Navigator.of(context).pushNamed('B');
+/// Navigator.of(context).pushNamed('/b');
 /// ```
+///
+/// The app's home page route is named '/' by default and other routes are
+/// given pathnames by convention.
 ///
 /// ### Defining a popup route
 ///
@@ -334,14 +337,14 @@ typedef bool RoutePredicate(Route<dynamic> route);
 /// allow the current screen to show through. Popup routes are "modal"
 /// because they block input to the widgets below.
 ///
-/// There are Flutter functions which create and show popup routes. For
+/// There are functions which create and show popup routes. For
 /// example: [showDialog], [showMenu], and [showBottomSheet]. There are also
-/// Flutter widgets which create popup routes, like [PopupMenuButton] and
+/// widgets which create popup routes, like [PopupMenuButton] and
 /// [DropdownButton]. These functions and widgets create internal
 /// subclasses of PopupRoute and use the Naviagator's push and pop methods
 /// to show and dismiss them.
 ///
-/// You can create your own subclass of PopupRoute to control the animated
+/// You can create your own subclass of [PopupRoute] to control the animated
 /// transition employed to show the route, as well as the color and
 /// behavior of the route's modal barrier. Here's an example that rotates
 /// and fades its child when the route appears or disappears.
