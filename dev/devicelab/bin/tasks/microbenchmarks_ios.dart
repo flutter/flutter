@@ -8,8 +8,8 @@ import 'package:flutter_devicelab/framework/adb.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/tasks/microbenchmarks.dart';
 
-/// Runs microbenchmarks on Android.
+/// Runs microbenchmarks on iOS.
 Future<Null> main() async {
-  deviceOperatingSystem = DeviceOperatingSystem.android;
+  deviceOperatingSystem = DeviceOperatingSystem.ios;
   await task(createMicrobenchmarkTask());
 }
