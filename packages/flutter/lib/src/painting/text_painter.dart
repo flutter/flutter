@@ -212,8 +212,16 @@ class TextPainter {
     canvas.drawParagraph(_paragraph, offset);
   }
 
+  bool _isUtf16Surrogate(int value) {
+    return value & 0xF800 == 0xD800;
+  }
+
   Offset _getOffsetFromUpstream(int offset, Rect caretPrototype) {
-    List<ui.TextBox> boxes = _paragraph.getBoxesForRange(offset - 1, offset);
+    int prevCodeUnit = _text.codeUnitAt(offset - 1);
+    if (prevCodeUnit == null)
+      return null;
+    int prevRuneOffset = _isUtf16Surrogate(prevCodeUnit) ? offset - 2 : offset - 1;
+    List<ui.TextBox> boxes = _paragraph.getBoxesForRange(prevRuneOffset, offset);
     if (boxes.isEmpty)
       return null;
     ui.TextBox box = boxes[0];
@@ -223,7 +231,11 @@ class TextPainter {
   }
 
   Offset _getOffsetFromDownstream(int offset, Rect caretPrototype) {
-    List<ui.TextBox> boxes = _paragraph.getBoxesForRange(offset, offset + 1);
+    int nextCodeUnit = _text.codeUnitAt(offset + 1);
+    if (nextCodeUnit == null)
+      return null;
+    int nextRuneOffset = _isUtf16Surrogate(nextCodeUnit) ? offset + 2 : offset + 1;
+    List<ui.TextBox> boxes = _paragraph.getBoxesForRange(offset, nextRuneOffset);
     if (boxes.isEmpty)
       return null;
     ui.TextBox box = boxes[0];
