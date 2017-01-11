@@ -151,7 +151,7 @@ abstract class GlobalKey<T extends State<StatefulWidget>> extends Key {
   void _register(Element element) {
     assert(() {
       if (_registry.containsKey(this)) {
-        int oldCount = _debugDuplicates.putIfAbsent(this, () => 1);
+        final int oldCount = _debugDuplicates.putIfAbsent(this, () => 1);
         assert(oldCount >= 1);
         _debugDuplicates[this] = oldCount + 1;
       }
@@ -163,7 +163,7 @@ abstract class GlobalKey<T extends State<StatefulWidget>> extends Key {
   void _unregister(Element element) {
     assert(() {
       if (_registry.containsKey(this) && _debugDuplicates.containsKey(this)) {
-        int oldCount = _debugDuplicates[this];
+        final int oldCount = _debugDuplicates[this];
         assert(oldCount >= 2);
         if (oldCount == 2) {
           _debugDuplicates.remove(this);
@@ -257,17 +257,19 @@ abstract class GlobalKey<T extends State<StatefulWidget>> extends Key {
       for (GlobalKey key in _removedKeys) {
         if (!_registry.containsKey(key) && _removeListeners.containsKey(key)) {
           Set<GlobalKeyRemoveListener> localListeners = new HashSet<GlobalKeyRemoveListener>.from(_removeListeners[key]);
-          for (GlobalKeyRemoveListener listener in localListeners)
-            listener(key);
+          for (GlobalKeyRemoveListener listener in localListeners) {
+            try {
+              listener(key);
+            } catch (e, stack) {
+              _debugReportException('while notifying GlobalKey listener', e, stack);
+            }
+          }
         }
       }
-    } catch (e, stack) {
-      _debugReportException('while notifying GlobalKey listeners', e, stack);
     } finally {
       _removedKeys.clear();
     }
   }
-
 }
 
 /// A global key with a debugging label.

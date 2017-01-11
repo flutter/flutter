@@ -525,7 +525,6 @@ class _GestureSemantics extends SingleChildRenderObjectWidget {
         return;
       }
     }
-    assert(false);
   }
 
   void _handleVerticalDragUpdate(DragUpdateDetails updateDetails) {
@@ -553,7 +552,6 @@ class _GestureSemantics extends SingleChildRenderObjectWidget {
         return;
       }
     }
-    assert(false);
   }
 
   @override

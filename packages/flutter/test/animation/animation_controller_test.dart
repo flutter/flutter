@@ -6,8 +6,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/animation.dart';
 import 'package:flutter/widgets.dart';
 
-import 'animation_tester.dart';
-
 void main() {
   setUp(() {
     WidgetsFlutterBinding.ensureInitialized();
@@ -206,17 +204,17 @@ void main() {
       duration: const Duration(milliseconds: 100),
       vsync: const TestVSync(),
     );
-    expect(controller.toString(), hasOneLineDescription);
+    expect(controller, hasOneLineDescription);
     controller.forward();
     WidgetsBinding.instance.handleBeginFrame(const Duration(milliseconds: 10));
     WidgetsBinding.instance.handleBeginFrame(const Duration(milliseconds: 20));
-    expect(controller.toString(), hasOneLineDescription);
+    expect(controller, hasOneLineDescription);
     WidgetsBinding.instance.handleBeginFrame(const Duration(milliseconds: 30));
-    expect(controller.toString(), hasOneLineDescription);
+    expect(controller, hasOneLineDescription);
     controller.reverse();
     WidgetsBinding.instance.handleBeginFrame(const Duration(milliseconds: 40));
     WidgetsBinding.instance.handleBeginFrame(const Duration(milliseconds: 50));
-    expect(controller.toString(), hasOneLineDescription);
+    expect(controller, hasOneLineDescription);
     controller.stop();
   });
 
