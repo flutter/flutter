@@ -33,9 +33,10 @@ const TextStyle _errorTextStyle = const TextStyle(
 ///
 /// See also:
 ///
-///  * [WidgetsApp]
-///  * [Scaffold]
-///  * [MaterialPageRoute]
+///  * [Scaffold], which provides standard app elements like an [AppBar] and a [Drawer].
+///  * [Navigator], which is used to manage the app's stack of pages.
+///  * [MaterialPageRoute], which defines an app page that transitions in a material-specific way.
+///  * [WidgetsApp], which defines the basic app elements but does not depend on the material library.
 class MaterialApp extends StatefulWidget {
 
   /// Creates a MaterialApp.

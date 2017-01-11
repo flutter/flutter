@@ -238,9 +238,165 @@ typedef bool RoutePredicate(Route<dynamic> route);
 /// around in the overlay. Similarly, the navigator can be used to show a dialog
 /// by positioning the dialog widget above the current page.
 ///
-/// Although you can create a navigator directly, it's most common to use the
-/// navigator created by a [WidgetsApp] or a [MaterialApp] widget. You can refer to
-/// that navigator with [Navigator.of].
+/// ## Using the Navigator
+///
+/// Mobile apps typically reveal their contents via full-screen elements
+/// called "screens" or "pages". In Flutter these elements are called
+/// routes and they're managed by a [Navigator] widget. The navigator
+/// manages a stack of [Route] objects and provides methods for managing
+/// the stack, like [Navigator.push] and [Navigator.pop].
+///
+/// ### Displaying a full-screen route
+///
+/// Although you can create a navigator directly, it's most common to use
+/// the navigator created by a [WidgetsApp] or a [MaterialApp] widget. You
+/// can refer to that navigator with [Navigator.of].
+///
+/// A MaterialApp is the simplest way to set things up. The MaterialApp's
+/// home becomes the route at the bottom of the Navigator's stack. It is
+/// what you see when the app is launched.
+///
+/// ```dart
+/// void main() {
+///   runApp(new MaterialApp(home: new MyAppHome()));
+/// }
+/// ```
+///
+/// To push a new route on the stack you can create an instance of
+/// [MaterialPageRoute] with a builder function that creates whatever you
+/// want to appear on the screen. For example:
+///
+/// ```dart
+/// Navigator.of(context).push(new MaterialPageRoute(
+///   builder: (BuildContext context) {
+///     return new Scaffold(
+///       appBar: new AppBar(title: new Text('My Page')),
+///       body: new Center(
+///         child: new FlatButton(
+///           child: new Text('POP'),
+///           onPressed: () {
+///             Navigator.of(context).pop();
+///           },
+///         ),
+///       ),
+///     );
+///   },
+/// ));
+/// ```
+///
+/// The route defines its widget with a builder function instead of a
+/// child widget because it will be built and rebuilt in different
+/// contexts depending on when it's pushed and popped.
+///
+/// As you can see, the new route can be popped, revealing the app's home
+/// page, with the Navigator's pop method:
+///
+/// ```dart
+/// Navigator.of(context).pop();
+/// ```
+///
+/// It usually isn't necessary to provide a widget that pops the Navigator
+/// in a route with a Scaffold because the Scaffold automatically adds a
+/// 'back' button to its AppBar. Pressing the back button causes
+/// [Navigator.pop] to be called. On Android, pressing the system back
+/// button does the same thing.
+///
+/// ### Using named navigator routes
+///
+/// Mobile apps often manage a large number of routes and it's often
+/// easiest to refer to them by name. The [MaterialApp] can be created
+/// with a `Map<String, WidgetBuilder>` which maps from a route's name to
+/// a builder function that will create it. The [MaterialApp] uses this
+/// map to create a value for its navigator's [onGenerateRoute] callback.
+///
+/// ```dart
+/// void main() {
+///   runApp(new MaterialApp(
+///     home: new MyAppHome(),
+///     routes: <String, WidgetBuilder> {
+///       '/a': (BuildContext context) => new MyPage(title: 'page A'),
+///       '/b': (BuildContext context) => new MyPage(title: 'page B'),
+///       '/c': (BuildContext context) => new MyPage(title: 'page C'),
+///     },
+///   ));
+/// }
+/// ```
+///
+/// To show a route by name:
+/// ```dart
+/// Navigator.of(context).pushNamed('/b');
+/// ```
+///
+/// The app's home page route is named '/' by default and other routes are
+/// given pathnames by convention.
+///
+/// ### Defining a popup route
+///
+/// Routes don't have to obscure the entire screen. [PopupRoute]s cover
+/// the screen with a barrierColor that can be only partially opaque to
+/// allow the current screen to show through. Popup routes are "modal"
+/// because they block input to the widgets below.
+///
+/// There are functions which create and show popup routes. For
+/// example: [showDialog], [showMenu], and [showBottomSheet]. There are also
+/// widgets which create popup routes, like [PopupMenuButton] and
+/// [DropdownButton]. These functions and widgets create internal
+/// subclasses of PopupRoute and use the Naviagator's push and pop methods
+/// to show and dismiss them.
+///
+/// You can create your own subclass of [PopupRoute] to control the animated
+/// transition employed to show the route, as well as the color and
+/// behavior of the route's modal barrier. Here's an example that rotates
+/// and fades its child when the route appears or disappears.
+///
+/// ```dart
+/// class _MyPopupRoute extends PopupRoute<Null> {
+///   _MyPopupRoute({ this.child, this.color });
+///
+///   final Widget child;
+///   final Color color;
+///
+///   @override
+///   Duration get transitionDuration => const Duration(milliseconds: 500);
+///
+///   @override
+///   bool get barrierDismissable => true;
+///
+///   @override
+///   Color get barrierColor => color;
+///
+///   @override
+///   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> forwardAnimation) {
+///     return child;
+///   }
+///
+///   @override
+///   Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> forwardAnimation, Widget child) {
+///     return new FadeTransition(
+///       opacity: animation,
+///       child: new RotationTransition(
+///         turns: new Tween<double>(begin: 0.5, end: 1.0).animate(animation),
+///         child: child,
+///       ),
+///     );
+///   }
+/// }
+/// ```
+///
+/// The PopupRoute is built in two parts, the "page" and the
+/// "transitions". The page becomes a descendant of the child passed to
+/// the `buildTransitions` method. To show a route defined this way, we
+/// just pass an instance of our [PopupRoute] subclass to
+/// [Navigator.push]:
+///
+/// ```dart
+/// Navigator.of(context).push(new _MyPopupRoute(
+///   color: Theme.of(context).primaryColor.withOpacity(0.15),
+///   child: new Center(
+///     child: new Text('My Popup'),
+///   ),
+/// ));
+/// ```
 class Navigator extends StatefulWidget {
   /// Creates a widget that maintains a stack-based history of child widgets.
   ///
