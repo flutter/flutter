@@ -2,9 +2,7 @@
 set -e
 
 # Install dartdoc.
-# Versions after 0.9.7+1 suffer from https://github.com/dart-lang/dartdoc/issues/1236
-# so are we pinned to this old version until that bug is fixed.
-pub global activate dartdoc 0.9.7+1
+pub global activate dartdoc
 
 # This script generates a unified doc set, and creates
 # a custom index.html, placing everything into dev/docs/doc
