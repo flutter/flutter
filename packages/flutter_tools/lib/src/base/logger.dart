@@ -221,7 +221,11 @@ class AnsiTerminal {
   String clearScreen() => supportsColor ? _clear : '\n\n';
 
   set singleCharMode(bool value) {
-    stdin.lineMode = !value;
+    try {
+      stdin.lineMode = !value;
+    } catch (error) {
+      // This can throw for some terminals; we ignore the error.
+    }
   }
 
   /// Return keystrokes from the console.
