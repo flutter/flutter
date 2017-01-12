@@ -14,10 +14,10 @@ import '../globals.dart';
 
 /// A class that's used to collect coverage data during tests.
 class CoverageCollector {
+  CoverageCollector._();
+
   /// The singleton instance of the coverage collector.
   static final CoverageCollector instance = new CoverageCollector._();
-
-  CoverageCollector._();
 
   /// By default, coverage collection is not enabled. Set [enabled] to true
   /// to turn on coverage collection.
@@ -28,8 +28,9 @@ class CoverageCollector {
   /// begin collecting coverage data until [CoverageCollectionTask.start] is
   /// called.
   ///
-  /// This should be called after a process has been started so that this
-  /// collector knows to wait for the task in [finalizeCoverage].
+  /// When a process is spawned to accumulate code coverage data, this method
+  /// should be called before the process terminates so that this collector
+  /// knows to wait for the coverage data in [finalizeCoverage].
   ///
   /// If this collector is not [enabled], the task will still be added to the
   /// pending queue. Only when the task is started will the enabled state of
@@ -39,7 +40,7 @@ class CoverageCollector {
     int port,
     Process processToKill,
   }) {
-    final CoverageCollectionTask task = new CoverageCollectionTask(
+    final CoverageCollectionTask task = new CoverageCollectionTask._(
       this,
       host,
       port,
@@ -114,7 +115,7 @@ class CoverageCollectionTask {
   final int _port;
   final Process _processToKill;
 
-  CoverageCollectionTask(
+  CoverageCollectionTask._(
     this._collector,
     this._host,
     this._port,
