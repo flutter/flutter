@@ -39,17 +39,6 @@ int32_t tailoredGraphemeClusterBreak(uint32_t c) {
             || c == 0xFEFF                  // BOM
             || ((c | 0x7F) == 0xE007F))     // recently undeprecated tag characters in Plane 14
         return U_GCB_EXTEND;
-    // UTC-approved characters for the Prepend class, per
-    // http://www.unicode.org/L2/L2015/15183r-graph-cluster-brk.txt
-    // These should be removed when our copy of ICU gets updated to Unicode 9.0 (~2016 or 2017).
-    else if ((0x0600 <= c && c <= 0x0605) // Arabic subtending marks
-            || c == 0x06DD                // ARABIC SUBTENDING MARK
-            || c == 0x070F                // SYRIAC ABBREVIATION MARK
-            || c == 0x0D4E                // MALAYALAM LETTER DOT REPH
-            || c == 0x110BD               // KAITHI NUMBER SIGN
-            || c == 0x111C2               // SHARADA SIGN JIHVAMULIYA
-            || c == 0x111C3)              // SHARADA SIGN UPADHMANIYA
-        return U_GCB_PREPEND;
     // THAI CHARACTER SARA AM is treated as a normal letter by most other implementations: they
     // allow a grapheme break before it.
     else if (c == 0x0E33)
@@ -59,7 +48,7 @@ int32_t tailoredGraphemeClusterBreak(uint32_t c) {
 }
 
 // Returns true for all characters whose IndicSyllabicCategory is Pure_Killer.
-// From http://www.unicode.org/Public/8.0.0/ucd/IndicSyllabicCategory.txt
+// From http://www.unicode.org/Public/9.0.0/ucd/IndicSyllabicCategory.txt
 bool isPureKiller(uint32_t c) {
     return (c == 0x0E3A || c == 0x0E4E || c == 0x0F84 || c == 0x103A || c == 0x1714 || c == 0x1734
             || c == 0x17D1 || c == 0x1BAA || c == 0x1BF2 || c == 0x1BF3 || c == 0xA806
@@ -132,8 +121,8 @@ bool GraphemeBreak::isGraphemeBreak(const uint16_t* buf, size_t start, size_t co
         // The number 4 comes from the number of code units in a whole flag.
         return (offset - 2 - offset_back) % 4 == 0;
     }
-    // Rule GB9, x Extend; Rule GB9a, x SpacingMark; Rule GB9b, Prepend x
-    if (p2 == U_GCB_EXTEND || p2 == U_GCB_SPACING_MARK || p1 == U_GCB_PREPEND) {
+    // Rule GB9, x (Extend | ZWJ); Rule GB9a, x SpacingMark; Rule GB9b, Prepend x
+    if (p2 == U_GCB_EXTEND || p2 == U_GCB_ZWJ || p2 == U_GCB_SPACING_MARK || p1 == U_GCB_PREPEND) {
         return false;
     }
     // Cluster indic syllables together (tailoring of UAX #29)
@@ -150,7 +139,7 @@ bool GraphemeBreak::isGraphemeBreak(const uint16_t* buf, size_t start, size_t co
         return false;
     }
     // Tailoring: make emoji sequences with ZWJ a single grapheme cluster
-    if (c1 == 0x200D && isEmoji(c2) && offset_back > start) {
+    if (p1 == U_GCB_ZWJ && isEmoji(c2) && offset_back > start) {
         // look at character before ZWJ to see that both can participate in an emoji zwj sequence
         uint32_t c0 = 0;
         U16_PREV(buf, start, offset_back, c0);
@@ -164,6 +153,10 @@ bool GraphemeBreak::isGraphemeBreak(const uint16_t* buf, size_t start, size_t co
     }
     // Proposed Rule GB9c from http://www.unicode.org/L2/L2016/16011r3-break-prop-emoji.pdf
     // E_Base x E_Modifier
+    // TODO: Migrate to Rule GB10 and Rule GB11 with fixing following test cases in
+    //       GraphemeBreak.tailoring and GraphemeBreak.emojiModifiers (Bug: 34211654)
+    // U+0628 U+200D U+2764 is expected to have grapheme boundary after U+200D.
+    // U+270C U+FE0E U+1F3FB is expected to have grapheme boundary after U+200D.
     if (isEmojiModifier(c2)) {
         if (c1 == 0xFE0F && offset_back > start) {
             // skip over emoji variation selector
