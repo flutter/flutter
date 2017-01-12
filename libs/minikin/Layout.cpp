@@ -304,15 +304,15 @@ hb_font_funcs_t* getHbFontFuncs(bool forColorBitmapFont) {
     if (*funcs == nullptr) {
         *funcs = hb_font_funcs_create();
         if (forColorBitmapFont) {
-            // Override the h_advance function since we can't use HarfBuzz's implemenation. It may
-            // return the wrong value if the font uses hinting aggressively.
-            hb_font_funcs_set_glyph_h_advance_func(*funcs, harfbuzzGetGlyphHorizontalAdvance, 0, 0);
-        } else {
             // Don't override the h_advance function since we use HarfBuzz's implementation for
             // emoji for performance reasons.
             // Note that it is technically possible for a TrueType font to have outline and embedded
             // bitmap at the same time. We ignore modified advances of hinted outline glyphs in that
             // case.
+        } else {
+            // Override the h_advance function since we can't use HarfBuzz's implemenation. It may
+            // return the wrong value if the font uses hinting aggressively.
+            hb_font_funcs_set_glyph_h_advance_func(*funcs, harfbuzzGetGlyphHorizontalAdvance, 0, 0);
         }
         hb_font_funcs_set_glyph_h_origin_func(*funcs, harfbuzzGetGlyphHorizontalOrigin, 0, 0);
         hb_font_funcs_make_immutable(*funcs);
