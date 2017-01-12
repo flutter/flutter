@@ -6,7 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Floating Action Button control test', (WidgetTester tester) async {
+  testWidgets('Floating Action Button control test',
+      (WidgetTester tester) async {
     bool didPressButton = false;
     await tester.pumpWidget(
       new Center(
@@ -14,13 +15,30 @@ void main() {
           onPressed: () {
             didPressButton = true;
           },
-          child: new Icon(Icons.add)
-        )
-      )
+          child: new Icon(Icons.add),
+        ),
+      ),
     );
 
     expect(didPressButton, isFalse);
     await tester.tap(find.byType(Icon));
     expect(didPressButton, isTrue);
+  });
+
+  testWidgets('Floating Action Button tooltip', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Scaffold(
+          floatingActionButton: new FloatingActionButton(
+            onPressed: null,
+            tooltip: 'Add',
+            child: new Icon(Icons.add),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(Icon));
+    expect(find.byTooltip('Add'), findsOneWidget);
   });
 }
