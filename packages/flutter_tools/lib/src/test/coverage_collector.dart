@@ -12,26 +12,9 @@ import '../base/io.dart';
 import '../dart/package_map.dart';
 import '../globals.dart';
 
-/// Class that represents a pending task of coverage data collection.
-/// Instances of this class are obtained when a process starts running code
-/// by calling [CoverageCollector.addTask]. Then, when the code has run to
-/// completion (all the coverage data has been recorded), the task is started
-/// to actually collect the coverage data.
-abstract class CoverageCollectionTask {
-  /// Starts the task of collecting coverage. Returns a future that completes
-  /// when coverage has been collected.
-  ///
-  /// This should be called when the code whose coverage data is being
-  /// collected has been run to completion so that all coverage data has been
-  /// recorded.
-  Future<Null> start();
-
-  /// Indicates whether the task has been started or not.
-  bool get isStarted;
-}
-
-/// Singleton class that's used to collect coverage data during tests.
+/// A class that's used to collect coverage data during tests.
 class CoverageCollector {
+  /// The singleton instance of the coverage collector.
   static final CoverageCollector instance = new CoverageCollector._();
 
   CoverageCollector._();
@@ -45,6 +28,9 @@ class CoverageCollector {
   /// begin collecting coverage data until [CoverageCollectionTask.start] is
   /// called.
   ///
+  /// This should be called after a process has been started so that this
+  /// collector knows to wait for the task in [finalizeCoverage].
+  ///
   /// If this collector is not [enabled], the task will still be added to the
   /// pending queue. Only when the task is started will the enabled state of
   /// the collector be consulted.
@@ -53,33 +39,24 @@ class CoverageCollector {
     int port,
     Process processToKill,
   }) {
-    final _Task task = new _Task(this, host, port, processToKill);
-    _tasks.add(task.future);
+    final CoverageCollectionTask task = new CoverageCollectionTask(
+      this,
+      host,
+      port,
+      processToKill,
+    );
+    _tasks.add(task._future);
     return task;
   }
 
   List<Future<Null>> _tasks = <Future<Null>>[];
   Map<String, dynamic> _globalHitmap;
 
-  Future<Null> _startTask(_Task task) async {
-    assert(!task.isStarted);
-    if (!enabled) {
-      task.processToKill.kill();
-      return;
-    }
-
-    int pid = task.processToKill.pid;
-    printTrace('collecting coverage data from pid $pid on port ${task.port}');
-    Map<String, dynamic> data = await collect(task.host, task.port, false, false);
-    printTrace('done collecting coverage data from pid $pid');
-    task.processToKill.kill();
-    Map<String, dynamic> hitmap = createHitmap(data['coverage']);
+  void _addHitmap(Map<String, dynamic> hitmap) {
     if (_globalHitmap == null)
       _globalHitmap = hitmap;
     else
       mergeHitmaps(hitmap, _globalHitmap);
-    printTrace('done merging data from pid $pid into global coverage map');
-    task._completer.complete();
   }
 
   /// Returns a future that completes once all tasks have finished.
@@ -88,20 +65,19 @@ class CoverageCollector {
   /// If [timeout] is specified, the future will timeout (with a
   /// [TimeoutException]) after the specified duration.
   Future<Null> finishPendingTasks({ Duration timeout }) {
-    Future<Null> future = Future.wait(_tasks, eagerError: true);
-    if (timeout != null) {
+    Future<dynamic> future = Future.wait(_tasks, eagerError: true);
+    if (timeout != null)
       future = future.timeout(timeout);
-    }
     return future;
   }
 
   /// Returns a future that will complete with the formatted coverage data
   /// (using [formatter]) once all coverage data has been collected.
   ///
-  /// Note: this will not start any collection tasks. It us up to the caller
-  /// of [addTask] to maintain a reference to the [CoverageCollectionTask]
-  /// and call `start` on the task once the code in question has run. Failure
-  /// to do so will keep this future from completing.
+  /// This will not start any collection tasks. It us up to the caller of
+  /// [addTask] to maintain a reference to the [CoverageCollectionTask] and
+  /// call `start` on the task once the code in question has run. Failure to do
+  /// so will cause this method to wait indefinitely for the task.
   ///
   /// If [timeout] is specified, the future will timeout (with a
   /// [TimeoutException]) after the specified duration.
@@ -126,28 +102,64 @@ class CoverageCollector {
   }
 }
 
-class _Task implements CoverageCollectionTask {
+/// A class that represents a pending task of coverage data collection.
+/// Instances of this class are obtained when a process starts running code
+/// by calling [CoverageCollector.addTask]. Then, when the code has run to
+/// completion (all the coverage data has been recorded), the task is started
+/// to actually collect the coverage data.
+class CoverageCollectionTask {
   final Completer<Null> _completer = new Completer<Null>();
-  final CoverageCollector collector;
-  final String host;
-  final int port;
-  final Process processToKill;
+  final CoverageCollector _collector;
+  final String _host;
+  final int _port;
+  final Process _processToKill;
+
+  CoverageCollectionTask(
+    this._collector,
+    this._host,
+    this._port,
+    this._processToKill,
+  );
 
   bool _started = false;
 
-  _Task(this.collector, this.host, this.port, this.processToKill);
+  Future<Null> get _future => _completer.future;
 
-  @override
-  Future<Null> start() {
-    if (!_started) {
-      _started = true;
-      collector._startTask(this);
+  /// Starts the task of collecting coverage.
+  ///
+  /// This should be called when the code whose coverage data is being collected
+  /// has been run to completion so that all coverage data has been recorded.
+  /// Failure to do so will cause [CoverageCollector.finalizeCoverage] to wait
+  /// indefinitely for the task to complete.
+  ///
+  /// Each task may only be started once.
+  void start() {
+    assert(!_started);
+    _started = true;
+
+    if (!_collector.enabled) {
+      _processToKill.kill();
+      _completer.complete();
+      return;
     }
-    return future;
+
+    int pid = _processToKill.pid;
+    printTrace('collecting coverage data from pid $pid on port $_port');
+    collect(_host, _port, false, false).then(
+      (Map<dynamic, dynamic> data) {
+        printTrace('done collecting coverage data from pid $pid');
+        _processToKill.kill();
+        try {
+          _collector._addHitmap(createHitmap(data['coverage']));
+          printTrace('done merging data from pid $pid into global coverage map');
+          _completer.complete();
+        } catch (error, stackTrace) {
+          _completer.completeError(error, stackTrace);
+        }
+      },
+      onError: (dynamic error, StackTrace stackTrace) {
+        _completer.completeError(error, stackTrace);
+      },
+    );
   }
-
-  @override
-  bool get isStarted => _started;
-
-  Future<Null> get future => _completer.future;
 }
