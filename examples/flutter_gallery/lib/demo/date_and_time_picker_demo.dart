@@ -117,8 +117,6 @@ class DateAndTimePickerDemo extends StatefulWidget {
 }
 
 class _DateAndTimePickerDemoState extends State<DateAndTimePickerDemo> {
-  InputValue _eventName = InputValue.empty;
-  InputValue _eventLocation = InputValue.empty;
   DateTime _fromDate = new DateTime.now();
   TimeOfDay _fromTime = const TimeOfDay(hour: 7, minute: 28);
   DateTime _toDate = new DateTime.now();
@@ -138,25 +136,13 @@ class _DateAndTimePickerDemoState extends State<DateAndTimePickerDemo> {
             child: new Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
-                new Input(
+                new InputFormField(
                   labelText: 'Event name',
-                  value: _eventName,
                   style: Theme.of(context).textTheme.display1,
-                  onChanged: (InputValue newValue) {
-                    setState(() {
-                      _eventName = newValue;
-                    });
-                  },
                 ),
-                new Input(
+                new InputFormField(
                   labelText: 'Location',
-                  value: _eventLocation,
                   style: Theme.of(context).textTheme.display1.copyWith(fontSize: 20.0),
-                  onChanged: (InputValue newValue) {
-                    setState(() {
-                      _eventLocation = newValue;
-                    });
-                  },
                 ),
                 new _DateTimePicker(
                   labelText: 'From',

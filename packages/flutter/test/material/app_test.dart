@@ -43,7 +43,7 @@ void main() {
     await tester.pumpWidget(new MaterialApp(
       home: new Material(
         child: new Center(
-          child: new Input(key: inputKey, autofocus: true)
+          child: new InputFormField(key: inputKey, autofocus: true)
         )
       )
     ));
