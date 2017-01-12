@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter_tools/src/base/context.dart' hide context;
+import 'package:flutter_tools/src/base/context.dart' as pkg;
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/globals.dart';
 import 'package:test/test.dart';
@@ -74,6 +75,27 @@ void main() {
             expect(innerContext.getVariable(String), isNull);
           });
         });
+      });
+    });
+
+    test('overriddenValuesInNestedZones', () async {
+      expect(pkg.context, isNull);
+      AppContext outerContext = new AppContext();
+      outerContext.setVariable(String, 'outer');
+      outerContext.runInZone(() async {
+        expect(pkg.context[String], 'outer');
+        AppContext middleContext = new AppContext();
+        middleContext.setVariable(String, 'middle');
+        middleContext.runInZone(() async {
+          expect(pkg.context[String], 'middle');
+          AppContext innerContext = new AppContext();
+          innerContext.setVariable(String, 'inner');
+          innerContext.runInZone(() async {
+            expect(pkg.context[String], 'inner');
+          });
+          expect(pkg.context[String], 'middle');
+        });
+        expect(pkg.context[String], 'outer');
       });
     });
   });
