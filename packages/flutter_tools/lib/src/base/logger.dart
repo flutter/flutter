@@ -214,7 +214,7 @@ class AnsiTerminal {
   static const String _reset = '\u001B[0m';
   static const String _clear = '\u001B[2J\u001B[H';
 
-  static const int _eNoTty = 25;
+  static const int _ENOTTY = 25;
 
   bool supportsColor;
 
@@ -228,10 +228,10 @@ class AnsiTerminal {
     } catch (error) {
       // TODO(tvolkert): Change this to explicitly catch `StdinException`
       // once our analysis runs against SDK 1.22 (when `StdinException` was
-      // introduced). Doing so will all proper dereferencing of `osError`.
+      // introduced). Doing so will allow proper dereferencing of `osError`.
       bool ignore = false;
       try {
-        if (error.osError?.errorCode == _eNoTty) {
+        if (error.osError?.errorCode == _ENOTTY) {
           // This can throw for some terminals; we ignore the error.
           ignore = true;
         }
