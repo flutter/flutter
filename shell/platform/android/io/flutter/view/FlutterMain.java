@@ -83,6 +83,7 @@ public class FlutterMain {
     private static boolean sInitialized = false;
     private static ResourceExtractor sResourceExtractor;
     private static boolean sIsPrecompiled;
+    private static Settings sSettings;
 
     private static final class ImmutableSetBuilder<T> {
         static <T> ImmutableSetBuilder<T> newInstance() {
@@ -111,10 +112,34 @@ public class FlutterMain {
         }
     }
 
+    public static class Settings {
+        private String logTag;
+
+        public String getLogTag() {
+            return logTag;
+        }
+
+        /**
+         * Set the tag associated with Flutter app log messages.
+         */
+        public void setLogTag(String tag) {
+            logTag = tag;
+        }
+    }
+
     /**
      * Starts initialization of the native system.
      */
     public static void startInitialization(Context applicationContext) {
+        startInitialization(applicationContext, new Settings());
+    }
+
+    /**
+     * Starts initialization of the native system.
+     */
+    public static void startInitialization(Context applicationContext, Settings settings) {
+        sSettings = settings;
+
         long initStartTimestampMillis = SystemClock.uptimeMillis();
         initConfig(applicationContext);
         initJavaUtils(applicationContext);
@@ -155,6 +180,10 @@ public class FlutterMain {
             } else {
                 shellArgs.add("--cache-dir-path=" +
                     PathUtils.getCacheDirectory(applicationContext));
+            }
+
+            if (sSettings.getLogTag() != null) {
+                shellArgs.add("--log-tag=" + sSettings.getLogTag());
             }
 
             nativeInit(applicationContext, shellArgs.toArray(new String[0]));

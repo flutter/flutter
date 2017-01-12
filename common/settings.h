@@ -30,6 +30,7 @@ struct Settings {
   std::string application_library_path;
   std::string temp_directory_path;
   std::vector<std::string> dart_flags;
+  std::string log_tag = "flutter";
 
   static const Settings& Get();
   static void Set(const Settings& settings);
