@@ -5,15 +5,10 @@
     <content url="file://$MODULE_DIR$">
       <excludeFolder url="file://$MODULE_DIR$/.pub" />
       <excludeFolder url="file://$MODULE_DIR$/bin/packages" />
-      <excludeFolder url="file://$MODULE_DIR$/build" />
       <excludeFolder url="file://$MODULE_DIR$/packages" />
-      <excludeFolder url="file://$MODULE_DIR$/test/data/dart_dependencies_test/good/.pub" />
-      <excludeFolder url="file://$MODULE_DIR$/test/data/dart_dependencies_test/good/build" />
       <excludeFolder url="file://$MODULE_DIR$/test/data/dart_dependencies_test/good/lib/packages" />
       <excludeFolder url="file://$MODULE_DIR$/test/data/dart_dependencies_test/good/packages" />
       <excludeFolder url="file://$MODULE_DIR$/test/data/dart_dependencies_test/packages" />
-      <excludeFolder url="file://$MODULE_DIR$/test/data/dart_dependencies_test/syntax_error/.pub" />
-      <excludeFolder url="file://$MODULE_DIR$/test/data/dart_dependencies_test/syntax_error/build" />
       <excludeFolder url="file://$MODULE_DIR$/test/data/dart_dependencies_test/syntax_error/packages" />
       <excludeFolder url="file://$MODULE_DIR$/test/data/intellij/packages" />
       <excludeFolder url="file://$MODULE_DIR$/test/data/intellij/plugins/Dart/lib/packages" />
