@@ -557,8 +557,7 @@ class VM extends ServiceObjectOwner {
     }
   }
 
-  // Note that this function does not reload the isolate if it's found
-  // in the cache.
+  // This function does not reload the isolate if it's found in the cache.
   Future<Isolate> getIsolate(String isolateId) {
     if (!loaded) {
       // Trigger a VM load, then get the isolate. Ignore any errors.
