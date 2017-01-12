@@ -59,7 +59,14 @@ final List<String> demoTitles = <String>[
   'Typography'
 ];
 
+// Subset of [demoTitles] that needs frameSync turned off.
+final List<String> unsynchedDemoTitles = <String>[
+  'Progress indicators',
+];
+
 final FileSystem _fs = new LocalFileSystem();
+
+const Duration kWaitBetweenActions = const Duration(milliseconds: 250);
 
 /// Extracts event data from [events] recorded by timeline, validates it, turns
 /// it into a histogram, and saves to a JSON file.
@@ -144,7 +151,7 @@ void main() {
         // Expand the demo category submenus.
         for (String category in demoCategories.reversed) {
           await driver.tap(find.text(category));
-          await new Future<Null>.delayed(new Duration(milliseconds: 500));
+          await new Future<Null>.delayed(kWaitBetweenActions);
         }
         // Scroll each demo menu item into view, launch the demo and
         // return to the demo menu 2x.
@@ -152,13 +159,20 @@ void main() {
           print('Testing "$demoTitle" demo');
           SerializableFinder menuItem = find.text(demoTitle);
           await driver.scrollIntoView(menuItem);
-          await new Future<Null>.delayed(new Duration(milliseconds: 500));
+          await new Future<Null>.delayed(kWaitBetweenActions);
 
           for(int i = 0; i < 2; i += 1) {
             await driver.tap(menuItem); // Launch the demo
-            await new Future<Null>.delayed(new Duration(milliseconds: 500));
-            await driver.tap(find.byTooltip('Back'));
-            await new Future<Null>.delayed(new Duration(milliseconds: 1000));
+            await new Future<Null>.delayed(kWaitBetweenActions);
+            if (!unsynchedDemoTitles.contains(demoTitle)) {
+              await driver.tap(find.byTooltip('Back'));
+            } else {
+              await driver.runUnsynchronized(() async {
+                await new Future<Null>.delayed(kWaitBetweenActions);
+                await driver.tap(find.byTooltip('Back'));
+              });
+            }
+            await new Future<Null>.delayed(kWaitBetweenActions);
           }
           print('Success');
         }

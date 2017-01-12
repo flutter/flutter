@@ -18,6 +18,7 @@ import 'health.dart';
 import 'input.dart';
 import 'message.dart';
 import 'render_tree.dart';
+import 'frame_sync.dart';
 
 const String _extensionMethodName = 'driver';
 const String _extensionMethod = 'ext.flutter.$_extensionMethodName';
@@ -65,6 +66,7 @@ class _FlutterDriverExtension {
       'get_render_tree': _getRenderTree,
       'tap': _tap,
       'get_text': _getText,
+      'set_frame_sync': _setFrameSync,
       'scroll': _scroll,
       'scrollIntoView': _scrollIntoView,
       'setInputText': _setInputText,
@@ -73,15 +75,16 @@ class _FlutterDriverExtension {
     });
 
     _commandDeserializers.addAll(<String, CommandDeserializerCallback>{
-      'get_health': (Map<String, dynamic> json) => new GetHealth.deserialize(json),
-      'get_render_tree': (Map<String, dynamic> json) => new GetRenderTree.deserialize(json),
-      'tap': (Map<String, dynamic> json) => new Tap.deserialize(json),
-      'get_text': (Map<String, dynamic> json) => new GetText.deserialize(json),
-      'scroll': (Map<String, dynamic> json) => new Scroll.deserialize(json),
-      'scrollIntoView': (Map<String, dynamic> json) => new ScrollIntoView.deserialize(json),
-      'setInputText': (Map<String, dynamic> json) => new SetInputText.deserialize(json),
-      'submitInputText': (Map<String, dynamic> json) => new SubmitInputText.deserialize(json),
-      'waitFor': (Map<String, dynamic> json) => new WaitFor.deserialize(json),
+      'get_health': (Map<String, String> params) => new GetHealth.deserialize(params),
+      'get_render_tree': (Map<String, String> params) => new GetRenderTree.deserialize(params),
+      'tap': (Map<String, String> params) => new Tap.deserialize(params),
+      'get_text': (Map<String, String> params) => new GetText.deserialize(params),
+      'set_frame_sync': (Map<String, String> params) => new SetFrameSync.deserialize(params),
+      'scroll': (Map<String, String> params) => new Scroll.deserialize(params),
+      'scrollIntoView': (Map<String, String> params) => new ScrollIntoView.deserialize(params),
+      'setInputText': (Map<String, String> params) => new SetInputText.deserialize(params),
+      'submitInputText': (Map<String, String> params) => new SubmitInputText.deserialize(params),
+      'waitFor': (Map<String, String> params) => new WaitFor.deserialize(params),
     });
 
     _finders.addAll(<String, FinderConstructor>{
@@ -95,6 +98,10 @@ class _FlutterDriverExtension {
   final Map<String, CommandHandlerCallback> _commandHandlers = <String, CommandHandlerCallback>{};
   final Map<String, CommandDeserializerCallback> _commandDeserializers = <String, CommandDeserializerCallback>{};
   final Map<String, FinderConstructor> _finders = <String, FinderConstructor>{};
+
+  /// With [_frameSync] enabled, Flutter Driver will wait to perform an action
+  /// until there are no pending frames in the app under test.
+  bool _frameSync = true;
 
   /// Processes a driver command configured by [params] and returns a result
   /// as an arbitrary JSON object.
@@ -119,7 +126,7 @@ class _FlutterDriverExtension {
       return _makeResponse(response.toJson());
     } on TimeoutException catch (error, stackTrace) {
       String msg = 'Timeout while executing $commandKind: $error\n$stackTrace';
-     _log.error(msg);
+      _log.error(msg);
       return _makeResponse(msg, isError: true);
     } catch (error, stackTrace) {
       String msg = 'Uncaught extension error while executing $commandKind: $error\n$stackTrace';
@@ -135,44 +142,36 @@ class _FlutterDriverExtension {
     };
   }
 
-  Stream<Duration> _onFrameReadyStream;
-  Stream<Duration> get _onFrameReady {
-    if (_onFrameReadyStream == null) {
-      // Lazy-initialize the frame callback because the renderer is not yet
-      // available at the time the extension is registered.
-      StreamController<Duration> frameReadyController = new StreamController<Duration>.broadcast(sync: true);
-      SchedulerBinding.instance.addPersistentFrameCallback((Duration timestamp) {
-        frameReadyController.add(timestamp);
-      });
-      _onFrameReadyStream = frameReadyController.stream;
-    }
-    return _onFrameReadyStream;
-  }
-
   Future<Health> _getHealth(Command command) async => new Health(HealthStatus.ok);
 
   Future<RenderTree> _getRenderTree(Command command) async {
     return new RenderTree(RendererBinding.instance?.renderView?.toStringDeep());
   }
 
-  /// Runs `finder` repeatedly until it finds one or more [Element]s.
-  Future<Finder> _waitForElement(Finder finder) {
-    // Short-circuit if the element is already on the UI
-    if (finder.precache())
-      return new Future<Finder>.value(finder);
-
-    // No element yet, so we retry on frames rendered in the future.
-    Completer<Finder> completer = new Completer<Finder>();
-    StreamSubscription<Duration> subscription;
-
-    subscription = _onFrameReady.listen((Duration duration) {
-      if (finder.precache()) {
-        subscription.cancel();
-        completer.complete(finder);
-      }
-    });
-
+  // Waits until at the end of a frame the provided [condition] is [true].
+  Future<Null> _waitUntilFrame(bool condition(), [Completer<Null> completer]) {
+    completer ??= new Completer<Null>();
+    if (!condition()) {
+      SchedulerBinding.instance.addPostFrameCallback((Duration timestamp) {
+        _waitUntilFrame(condition, completer);
+      });
+    } else {
+      completer.complete();
+    }
     return completer.future;
+  }
+
+  /// Runs `finder` repeatedly until it finds one or more [Element]s.
+  Future<Finder> _waitForElement(Finder finder) async {
+    if (_frameSync)
+      await _waitUntilFrame(() => SchedulerBinding.instance.transientCallbackCount == 0);
+
+    await _waitUntilFrame(() => finder.precache());
+
+    if (_frameSync)
+      await _waitUntilFrame(() => SchedulerBinding.instance.transientCallbackCount == 0);
+
+    return finder;
   }
 
   Finder _createByTextFinder(ByText arguments) {
@@ -242,7 +241,7 @@ class _FlutterDriverExtension {
   Future<ScrollResult> _scrollIntoView(Command command) async {
     ScrollIntoView scrollIntoViewCommand = command;
     Finder target = await _waitForElement(_createFinder(scrollIntoViewCommand.finder));
-    await Scrollable.ensureVisible(target.evaluate().single);
+    await Scrollable.ensureVisible(target.evaluate().single, duration: const Duration(milliseconds: 100));
     return new ScrollResult();
   }
 
@@ -268,5 +267,11 @@ class _FlutterDriverExtension {
     // TODO(yjbanov): support more ways to read text
     Text text = target.evaluate().single.widget;
     return new GetTextResult(text.data);
+  }
+
+  Future<SetFrameSyncResult> _setFrameSync(Command command) async {
+    SetFrameSync setFrameSyncCommand = command;
+    _frameSync = setFrameSyncCommand.enabled;
+    return new SetFrameSyncResult();
   }
 }
