@@ -5,8 +5,8 @@
 import 'dart:async';
 import 'dart:convert' show BASE64;
 
-import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:json_rpc_2/error_code.dart' as rpc_error_code;
+import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:path/path.dart' as path;
 import 'package:stream_channel/stream_channel.dart';
 import 'package:web_socket_channel/io.dart';
@@ -557,7 +557,7 @@ class VM extends ServiceObjectOwner {
     }
   }
 
-  // Note that this function does not reload the isolate if it found
+  // Note that this function does not reload the isolate if it's found
   // in the cache.
   Future<Isolate> getIsolate(String isolateId) {
     if (!loaded) {
@@ -587,8 +587,8 @@ class VM extends ServiceObjectOwner {
 
   /// Invoke the RPC and return a ServiceObject response.
   Future<ServiceObject> invokeRpc(
-      String method, [Map<String, dynamic> params]) async {
-    Map<String, dynamic> response = await invokeRpcRaw(method, params);
+      String method, { Map<String, dynamic> params, Duration timeout }) async {
+    Map<String, dynamic> response = await invokeRpcRaw(method, params, timeout);
     ServiceObject serviceObject = new ServiceObject._fromMap(this, response);
     if ((serviceObject != null) && (serviceObject._canCache)) {
       String serviceObjectId = serviceObject.id;
@@ -657,7 +657,7 @@ class VM extends ServiceObjectOwner {
                                String packages,
                                String assetsDirectory) {
     return invokeRpc('_flutter.runInView',
-                    <String, dynamic> {
+                    params: <String, dynamic> {
                       'viewId': viewId,
                       'mainScript': main,
                       'packagesFile': packages,
@@ -683,7 +683,7 @@ class VM extends ServiceObjectOwner {
   }
 
   Future<Null> refreshViews() async {
-    await vmService.vm.invokeRpc('_flutter.listViews');
+    await vmService.vm.invokeRpc('_flutter.listViews', timeout: kLongRequestTimeout);
   }
 
   FlutterView get mainView {
@@ -808,9 +808,9 @@ class Isolate extends ServiceObjectOwner {
   // Invoke a flutter extension method, if the flutter extension is not
   // available, returns null.
   Future<Map<String, dynamic>> invokeFlutterExtensionRpcRaw(
-      String method, [Map<String, dynamic> params]) async {
+      String method, { Map<String, dynamic> params, Duration timeout }) async {
     try {
-      return await invokeRpcRaw(method, params);
+      return await invokeRpcRaw(method, params, timeout);
     } on rpc.RpcException catch (e) {
       // If an application is not using the framework
       if (e.code == rpc_error_code.METHOD_NOT_FOUND)
@@ -832,13 +832,15 @@ class Isolate extends ServiceObjectOwner {
   Future<Map<String, dynamic>> flutterToggleDebugPaintSizeEnabled() async {
     Map<String, dynamic> state = await invokeFlutterExtensionRpcRaw('ext.flutter.debugPaint');
     if (state != null && state.containsKey('enabled') && state['enabled'] is bool)
-      state = await invokeFlutterExtensionRpcRaw('ext.flutter.debugPaint', <String, dynamic>{ 'enabled': !state['enabled'] });
+      state = await invokeFlutterExtensionRpcRaw('ext.flutter.debugPaint',
+          params: <String, dynamic>{ 'enabled': !state['enabled'] });
     return state;
   }
 
   // Reload related extension methods.
   Future<Map<String, dynamic>> flutterReassemble() async {
-    return await invokeFlutterExtensionRpcRaw('ext.flutter.reassemble');
+    return await invokeFlutterExtensionRpcRaw('ext.flutter.reassemble',
+        timeout: kLongRequestTimeout);
   }
 
   Future<bool> flutterFrameworkPresent() async {
@@ -851,7 +853,7 @@ class Isolate extends ServiceObjectOwner {
 
   Future<Map<String, dynamic>> flutterEvictAsset(String assetPath) async {
     return await invokeFlutterExtensionRpcRaw('ext.flutter.evict',
-        <String, dynamic>{
+        params: <String, dynamic>{
           'value': assetPath
         }
     );
