@@ -3,7 +3,13 @@
 // found in the LICENSE file.
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
+
+class TestState extends State<StatefulWidget> {
+  @override
+  Widget build(BuildContext context) => null;
+}
 
 void main() {
   testWidgets('UniqueKey control test', (WidgetTester tester) async {
@@ -18,6 +24,19 @@ void main() {
     Key keyA = new ObjectKey(a);
     Key keyA2 = new ObjectKey(a);
     Key keyB = new ObjectKey(b);
+
+    expect(keyA, hasOneLineDescription);
+    expect(keyA, equals(keyA2));
+    expect(keyA.hashCode, equals(keyA2.hashCode));
+    expect(keyA, isNot(equals(keyB)));
+  });
+
+  testWidgets('GlobalObjectKey control test', (WidgetTester tester) async {
+    Object a = new Object();
+    Object b = new Object();
+    Key keyA = new GlobalObjectKey(a);
+    Key keyA2 = new GlobalObjectKey(a);
+    Key keyB = new GlobalObjectKey(b);
 
     expect(keyA, hasOneLineDescription);
     expect(keyA, equals(keyA2));
@@ -55,7 +74,7 @@ void main() {
       ],
     ));
 
-    expect(tester.takeException(), isNotNull);
+    expect(tester.takeException(), isFlutterError);
   });
 
   testWidgets('GlobalKey notification exception handling', (WidgetTester tester) async {
@@ -77,5 +96,51 @@ void main() {
 
     expect(tester.takeException(), isNotNull);
     expect(didReceiveCallback, isTrue);
+  });
+
+  testWidgets('Defunct setState throws exception', (WidgetTester tester) async {
+    StateSetter setState;
+
+    await tester.pumpWidget(new StatefulBuilder(
+      builder: (BuildContext context, StateSetter setter) {
+        setState = setter;
+        return new Container();
+      },
+    ));
+
+    // Control check that setState doesn't throw an exception.
+    setState(() { });
+
+    await tester.pumpWidget(new Container());
+
+    expect(() { setState(() { }); }, throwsFlutterError);
+  });
+
+  testWidgets('State toString', (WidgetTester tester) async {
+    TestState state = new TestState();
+    expect(state.toString(), contains('no config'));
+  });
+
+  testWidgets('debugPrintGlobalKeyedWidgetLifecycle control test', (WidgetTester tester) async {
+    expect(debugPrintGlobalKeyedWidgetLifecycle, isFalse);
+
+    final DebugPrintCallback oldCallback = debugPrint;
+    debugPrintGlobalKeyedWidgetLifecycle = true;
+
+    List<String> log = <String>[];
+    debugPrint = (String message, { int wrapWidth }) {
+      log.add(message);
+    };
+
+    GlobalKey key = new GlobalKey();
+    await tester.pumpWidget(new Container(key: key));
+    expect(log, isEmpty);
+    await tester.pumpWidget(new Placeholder());
+    debugPrint = oldCallback;
+    debugPrintGlobalKeyedWidgetLifecycle = false;
+
+    expect(log.length, equals(2));
+    expect(log[0], matches('Deactivated'));
+    expect(log[1], matches('Discarding .+ from inactive elements list.'));
   });
 }
