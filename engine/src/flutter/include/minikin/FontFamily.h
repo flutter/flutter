@@ -19,6 +19,7 @@
 
 #include <vector>
 #include <string>
+#include <unordered_set>
 #include <hb.h>
 
 #include <utils/TypeHelpers.h>
@@ -98,6 +99,8 @@ struct FakedFont {
     FontFakery fakery;
 };
 
+typedef uint32_t AxisTag;
+
 struct Font {
     Font(MinikinFont* typeface, FontStyle style);
     Font(Font&& o);
@@ -106,6 +109,13 @@ struct Font {
 
     MinikinFont* typeface;
     FontStyle style;
+    std::unordered_set<AxisTag> supportedAxes;
+};
+
+struct FontVariation {
+    FontVariation(AxisTag axisTag, float value) : axisTag(axisTag), value(value) {}
+    AxisTag axisTag;
+    float value;
 };
 
 class FontFamily : public MinikinRefCounted {
@@ -129,6 +139,7 @@ public:
     MinikinFont* getFont(size_t index) const { return mFonts[index].typeface; }
     FontStyle getStyle(size_t index) const { return mFonts[index].style; }
     bool isColorEmojiFamily() const;
+    const std::unordered_set<AxisTag>& supportedAxes() const { return mSupportedAxes; }
 
     // Get Unicode coverage.
     const SparseBitSet& getCoverage() const { return mCoverage; }
@@ -140,12 +151,16 @@ public:
     // Returns true if this font family has a variaion sequence table (cmap format 14 subtable).
     bool hasVSTable() const { return mHasVSTable; }
 
+    // Creates new FontFamily based on this family while applying font variations. Returns nullptr
+    // if none of variations apply to this family.
+    FontFamily* createFamilyWithVariation(const std::vector<FontVariation>& variations) const;
+
 private:
     void computeCoverage();
-
     uint32_t mLangId;
     int mVariant;
     std::vector<Font> mFonts;
+    std::unordered_set<AxisTag> mSupportedAxes;
 
     SparseBitSet mCoverage;
     bool mHasVSTable;
