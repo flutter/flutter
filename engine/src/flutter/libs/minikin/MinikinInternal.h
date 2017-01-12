@@ -65,9 +65,7 @@ public:
     }
 
     size_t size() const {
-        unsigned int length = 0;
-        hb_blob_get_data(mBlob, &length);
-        return (size_t)length;
+        return (size_t)hb_blob_get_length(mBlob);
     }
 
 private:
