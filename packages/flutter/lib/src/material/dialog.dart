@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:flutter/widgets.dart';
+import 'package:meta/meta.dart';
 
 import 'button.dart';
 import 'button_bar.dart';
@@ -315,7 +316,10 @@ class _DialogRoute<T> extends PopupRoute<T> {
 ///  * [AlertDialog], for dialogs that have a row of buttons below the body.
 ///  * [Dialog], on which [SimpleDialog] and [AlertDialog] are based.
 ///  * <https://material.google.com/components/dialogs.html>
-Future<dynamic/*=T*/> showDialog/*<T>*/({ BuildContext context, Widget child }) {
+Future<dynamic/*=T*/> showDialog/*<T>*/({
+  @required BuildContext context,
+  @required Widget child
+}) {
   return Navigator.push(context, new _DialogRoute<dynamic/*=T*/>(
     child: child,
     theme: Theme.of(context, shadowThemeOnly: true),

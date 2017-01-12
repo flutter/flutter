@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:intl/intl.dart';
 
 void main() {
   testWidgets('tap-select a day', (WidgetTester tester) async {
@@ -112,4 +113,94 @@ void main() {
     await tester.pump(const Duration(seconds: 5));
   });
 
+  Future<Null> preparePicker(WidgetTester tester, Future<Null> callback(Future<DateTime> date)) async {
+    BuildContext buttonContext;
+    await tester.pumpWidget(new MaterialApp(
+      home: new Material(
+        child: new Builder(
+          builder: (BuildContext context) {
+            return new RaisedButton(
+              onPressed: () {
+                buttonContext = context;
+              },
+              child: new Text('Go'),
+            );
+          },
+        ),
+      ),
+    ));
+
+    await tester.tap(find.text('Go'));
+    expect(buttonContext, isNotNull);
+
+    Future<DateTime> date = showDatePicker(
+      context: buttonContext,
+      initialDate: new DateTime(2016, DateTime.JANUARY, 15),
+      firstDate: new DateTime(2001, DateTime.JANUARY, 1),
+      lastDate: new DateTime(2031, DateTime.DECEMBER, 31),
+    );
+
+    await tester.pumpUntilNoTransientCallbacks(const Duration(seconds: 1));
+    await callback(date);
+
+    // TODO(abarth): Remove this call once https://github.com/flutter/flutter/issues/7457 is fixed.
+    await tester.pumpUntilNoTransientCallbacks(const Duration(seconds: 1));
+  }
+
+  testWidgets('Initial date is the default', (WidgetTester tester) async {
+    await preparePicker(tester, (Future<DateTime> date) async {
+      await tester.tap(find.text('OK'));
+      expect(await date, equals(new DateTime(2016, DateTime.JANUARY, 15)));
+    });
+  });
+
+  testWidgets('Can cancel', (WidgetTester tester) async {
+    await preparePicker(tester, (Future<DateTime> date) async {
+      await tester.tap(find.text('CANCEL'));
+      expect(await date, isNull);
+    });
+  });
+
+  testWidgets('Can select a day', (WidgetTester tester) async {
+    await preparePicker(tester, (Future<DateTime> date) async {
+      await tester.tap(find.text('12'));
+      await tester.tap(find.text('OK'));
+      expect(await date, equals(new DateTime(2016, DateTime.JANUARY, 12)));
+    });
+  });
+
+  testWidgets('Can select a month', (WidgetTester tester) async {
+    await preparePicker(tester, (Future<DateTime> date) async {
+      await tester.tap(find.byTooltip('Previous month'));
+      await tester.pumpUntilNoTransientCallbacks(const Duration(seconds: 1));
+      await tester.tap(find.text('25'));
+      await tester.tap(find.text('OK'));
+      expect(await date, equals(new DateTime(2015, DateTime.DECEMBER, 25)));
+    });
+  });
+
+  testWidgets('Can select a year', (WidgetTester tester) async {
+    await preparePicker(tester, (Future<DateTime> date) async {
+      await tester.tap(find.text('2016'));
+      await tester.pump();
+      await tester.tap(find.text('2006'));
+      await tester.tap(find.text('OK'));
+      expect(await date, equals(new DateTime(2006, DateTime.JANUARY, 15)));
+    });
+  });
+
+  testWidgets('Can select a year and then a day', (WidgetTester tester) async {
+    await preparePicker(tester, (Future<DateTime> date) async {
+      await tester.tap(find.text('2016'));
+      await tester.pump();
+      await tester.tap(find.text('2005'));
+      await tester.pump();
+      String dayLabel = new DateFormat('E, MMM\u00a0d').format(new DateTime(2005, DateTime.JANUARY, 15));
+      await tester.tap(find.text(dayLabel));
+      await tester.pump();
+      await tester.tap(find.text('19'));
+      await tester.tap(find.text('OK'));
+      expect(await date, equals(new DateTime(2005, DateTime.JANUARY, 19)));
+    });
+  });
 }
