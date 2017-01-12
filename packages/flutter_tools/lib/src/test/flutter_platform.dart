@@ -87,7 +87,7 @@ class FlutterPlatform extends PlatformPlugin {
         // TODO(ianh): the random number on the next line is a landmine that will eventually
         // cause a hard-to-find bug...
         observatoryPort = CoverageCollector.instance.observatoryPort ?? new math.Random().nextInt(30000) + 2000;
-        await CoverageCollector.instance.finishActiveTasks();
+        await CoverageCollector.instance.finishPendingTasks();
       }
 
       // Start the engine subprocess.
@@ -187,8 +187,7 @@ class FlutterPlatform extends PlatformPlugin {
           break;
       }
 
-      if (!coverageTask.isStarted)
-        coverageTask.start();
+      coverageTask.start();
       subprocessActive = false;
     } catch (e, stack) {
       if (!controllerSinkClosed) {

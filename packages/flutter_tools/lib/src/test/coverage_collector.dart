@@ -24,8 +24,6 @@ abstract class CoverageCollectionTask {
   /// This should be called when the code whose coverage data is being
   /// collected has been run to completion so that all coverage data has been
   /// recorded.
-  ///
-  /// A task may only be started once.
   Future<Null> start();
 
   /// Indicates whether the task has been started or not.
@@ -45,8 +43,7 @@ class CoverageCollector {
 
   /// Adds a coverage collection tasks to the pending queue. The task will not
   /// begin collecting coverage data until [CoverageCollectionTask.start] is
-  /// called or [finalizeCoverage] is called (which implicitly starts all
-  /// pending tasks).
+  /// called.
   ///
   /// If this collector is not [enabled], the task will still be added to the
   /// pending queue. Only when the task is started will the enabled state of
@@ -56,16 +53,16 @@ class CoverageCollector {
     int port,
     Process processToKill,
   }) {
-    _Task task = new _Task(this, host, port, processToKill);
-    _pendingTasks.add(task);
+    final _Task task = new _Task(this, host, port, processToKill);
+    _tasks.add(task.future);
     return task;
   }
 
-  Set<_Task> _pendingTasks = new Set<_Task>();
-  List<Future<Null>> _activeTasks = <Future<Null>>[];
+  List<Future<Null>> _tasks = <Future<Null>>[];
   Map<String, dynamic> _globalHitmap;
 
   Future<Null> _startTask(_Task task) async {
+    assert(!task.isStarted);
     if (!enabled) {
       task.processToKill.kill();
       return;
@@ -82,26 +79,40 @@ class CoverageCollector {
     else
       mergeHitmaps(hitmap, _globalHitmap);
     printTrace('done merging data from pid $pid into global coverage map');
+    task._completer.complete();
   }
 
-  /// Returns a future that completes once all started tasks are finished.
+  /// Returns a future that completes once all tasks have finished.
   /// This will not start any tasks that were not already started.
-  Future<Null> finishActiveTasks() async {
-    await Future.wait(_activeTasks, eagerError: true);
+  ///
+  /// If [timeout] is specified, the future will timeout (with a
+  /// [TimeoutException]) after the specified duration.
+  Future<Null> finishPendingTasks({ Duration timeout }) {
+    Future<Null> future = Future.wait(_tasks, eagerError: true);
+    if (timeout != null) {
+      future = future.timeout(timeout);
+    }
+    return future;
   }
 
-  /// Completes all pending collection of coverage data. This will start any
-  /// tasks that have not yet been started. Returns a future that will complete
-  /// with the formatted coverage data (using [formatter]) once all coverage
-  /// data has been collected.
+  /// Returns a future that will complete with the formatted coverage data
+  /// (using [formatter]) once all coverage data has been collected.
+  ///
+  /// Note: this will not start any collection tasks. It us up to the caller
+  /// of [addTask] to maintain a reference to the [CoverageCollectionTask]
+  /// and call `start` on the task once the code in question has run. Failure
+  /// to do so will keep this future from completing.
+  ///
+  /// If [timeout] is specified, the future will timeout (with a
+  /// [TimeoutException]) after the specified duration.
   ///
   /// This must only be called if this collector is [enabled].
-  Future<String> finalizeCoverage({ Formatter formatter }) async {
+  Future<String> finalizeCoverage({
+    Formatter formatter,
+    Duration timeout,
+  }) async {
     assert(enabled);
-    while (_pendingTasks.isNotEmpty) {
-      _pendingTasks.first.start();
-    }
-    await finishActiveTasks();
+    await finishPendingTasks(timeout: timeout);
     printTrace('formating coverage data');
     if (_globalHitmap == null)
       return null;
@@ -116,22 +127,27 @@ class CoverageCollector {
 }
 
 class _Task implements CoverageCollectionTask {
+  final Completer<Null> _completer = new Completer<Null>();
   final CoverageCollector collector;
   final String host;
   final int port;
   final Process processToKill;
 
+  bool _started = false;
+
   _Task(this.collector, this.host, this.port, this.processToKill);
 
   @override
   Future<Null> start() {
-    if (!collector._pendingTasks.remove(this))
-      throw new AssertionError();
-    Future<Null> future = collector._startTask(this);
-    collector._activeTasks.add(future);
+    if (!_started) {
+      _started = true;
+      collector._startTask(this);
+    }
     return future;
   }
 
   @override
-  bool get isStarted => !collector._pendingTasks.contains(this);
+  bool get isStarted => _started;
+
+  Future<Null> get future => _completer.future;
 }
