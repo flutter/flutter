@@ -11,6 +11,7 @@
 #include "dart/runtime/bin/embedded_dart_io.h"
 #include "dart/runtime/include/dart_api.h"
 #include "dart/runtime/include/dart_tools_api.h"
+#include "flutter/common/settings.h"
 #include "lib/ftl/build_config.h"
 #include "lib/ftl/logging.h"
 #include "lib/tonic/converter/dart_converter.h"
@@ -152,7 +153,8 @@ void Logger_PrintString(Dart_NativeArguments args) {
 #if defined(OS_ANDROID)
     // In addition to writing to the stdout, write to the logcat so that the
     // message is discoverable when running on an unrooted device.
-    __android_log_print(ANDROID_LOG_INFO, "flutter", "%.*s", (int)length,
+    const char* tag = Settings::Get().log_tag.c_str();
+    __android_log_print(ANDROID_LOG_INFO, tag, "%.*s", (int)length,
                         chars);
 #elif __APPLE__
     syslog(1 /* LOG_ALERT */, "%.*s", (int)length, chars);

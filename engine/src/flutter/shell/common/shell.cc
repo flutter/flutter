@@ -189,6 +189,11 @@ void Shell::InitStandalone(std::string icu_data_path,
       settings.dart_flags.push_back(*it);
   }
 
+  if (command_line.HasSwitch(FlagForSwitch(Switch::LogTag))) {
+    settings.log_tag = command_line.GetSwitchValueASCII(
+        FlagForSwitch(Switch::LogTag));
+  }
+
   blink::Settings::Set(settings);
 
   Init();
