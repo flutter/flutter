@@ -327,7 +327,7 @@ final List<LicenseFileReferencePattern> csReferencesByFilename = <LicenseFileRef
     authorIndex: 4,
     fileIndex: 5,
     pattern: new RegExp(
-      r'^(((?:[-;#<!.\\"/* ]*(?:REM[-;#<!.\\"/* ]*)?[-;#<!.\"/*]+)?)( *)' +
+      r'(' + kIndent +
       r'Copyright .+(the .+ authors)\[?\. '
       r'Please see the AUTHORS file for details. All rights (?:re|solve)served\. '
       r'Use of this source(?: code)? is governed by a BS?D-style license '
@@ -1858,7 +1858,7 @@ final List<ForwardReferencePattern> csForwardReferenceLicenses = <ForwardReferen
     firstPrefixIndex: 1,
     indentPrefixIndex: 2,
     pattern: new RegExp(
-      r'((?:[-;#<!.\\"/* ]*(?:REM[-;#<!.\\"/* ]*)?[-;#<!.\"/*]+)?)( *)Use is subject to license terms\.$',
+      kIndent + r'Use is subject to license terms\.$',
       multiLine: true,
       caseSensitive: false,
     ),
