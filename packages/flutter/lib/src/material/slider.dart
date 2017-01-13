@@ -269,10 +269,15 @@ class _RenderSlider extends RenderConstrainedBox implements SemanticsActionHandl
         super(additionalConstraints: _getAdditionalConstraints(label)) {
     assert(value != null && value >= 0.0 && value <= 1.0);
     this.label = label;
+    GestureArenaTeam team = new GestureArenaTeam();
     _drag = new HorizontalDragGestureRecognizer()
+      ..team = team
       ..onStart = _handleDragStart
       ..onUpdate = _handleDragUpdate
       ..onEnd = _handleDragEnd;
+    _tap = new TapGestureRecognizer()
+      ..team = team
+      ..onTapUp = _handleTapUp;
     _reactionController = new AnimationController(
       duration: kRadialReactionDuration,
       vsync: vsync,
@@ -370,23 +375,28 @@ class _RenderSlider extends RenderConstrainedBox implements SemanticsActionHandl
   final TextPainter _labelPainter = new TextPainter();
 
   HorizontalDragGestureRecognizer _drag;
+  TapGestureRecognizer _tap;
   bool _active = false;
   double _currentDragValue = 0.0;
 
-  double get _discretizedCurrentDragValue {
-    double dragValue = _currentDragValue.clamp(0.0, 1.0);
-    if (divisions != null)
-      dragValue = (dragValue * divisions).round() / divisions;
-    return dragValue;
+  bool get isInteractive => onChanged != null;
+
+  double _getValueFromGlobalPosition(Point globalPosition) {
+    return (globalToLocal(globalPosition).x - _kReactionRadius) / _trackLength;
   }
 
-  bool get isInteractive => onChanged != null;
+  double _discretize(double value) {
+    double result = value.clamp(0.0, 1.0);
+    if (divisions != null)
+      result = (result * divisions).round() / divisions;
+    return result;
+  }
 
   void _handleDragStart(DragStartDetails details) {
     if (isInteractive) {
       _active = true;
-      _currentDragValue = (globalToLocal(details.globalPosition).x - _kReactionRadius) / _trackLength;
-      onChanged(_discretizedCurrentDragValue);
+      _currentDragValue = _getValueFromGlobalPosition(details.globalPosition);
+      onChanged(_discretize(_currentDragValue));
       _reactionController.forward();
     }
   }
@@ -394,7 +404,7 @@ class _RenderSlider extends RenderConstrainedBox implements SemanticsActionHandl
   void _handleDragUpdate(DragUpdateDetails details) {
     if (isInteractive) {
       _currentDragValue += details.primaryDelta / _trackLength;
-      onChanged(_discretizedCurrentDragValue);
+      onChanged(_discretize(_currentDragValue));
     }
   }
 
@@ -406,14 +416,22 @@ class _RenderSlider extends RenderConstrainedBox implements SemanticsActionHandl
     }
   }
 
+  void _handleTapUp(TapUpDetails details) {
+    if (isInteractive && !_active)
+      onChanged(_discretize(_getValueFromGlobalPosition(details.globalPosition)));
+  }
+
   @override
   bool hitTestSelf(Point position) => true;
 
   @override
   void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
     assert(debugHandleEvent(event, entry));
-    if (event is PointerDownEvent && isInteractive)
+    if (event is PointerDownEvent && isInteractive) {
+      // We need to add the drag first so that it has priority.
       _drag.addPointer(event);
+      _tap.addPointer(event);
+    }
   }
 
   @override
