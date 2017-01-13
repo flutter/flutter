@@ -66,6 +66,17 @@ abstract class Route<T> {
   @mustCallSuper
   void didReplace(Route<dynamic> oldRoute) { }
 
+
+  /// Returns false if this route wants to veto a [Navigator.pop]. This method is
+  /// called by [Naviagtor.willPop].
+  ///
+  /// See also:
+  ///
+  /// * [Form], which provides an `onWillPop` callback that uses this mechanism.
+  Future<bool> willPop() {
+    return new Future<bool>.value(true);
+  }
+
   /// A request was made to pop this route. If the route can handle it
   /// internally (e.g. because it has its own stack of internal state) then
   /// return false, otherwise return true. Returning false will prevent the
@@ -461,6 +472,20 @@ class Navigator extends StatefulWidget {
     return Navigator.of(context).push(route);
   }
 
+  /// Returns the value of the current route's `willPop` method. This method is
+  /// typically called before a user-initiated [pop]. For example on Android it's
+  /// called by the binding for the system's back button.
+  ///
+  /// See also:
+  ///
+  /// * [Form], which provides an `onWillPop` callback that enables the form
+  ///   to veto a [pop] initiated by the app's back button.
+  /// * [ModalRoute], which provides a `scopedWillPopCallback` that can be used
+  ///   to define the route's `willPop` method.
+  static Future<bool> willPop(BuildContext context) {
+    return Navigator.of(context).willPop();
+  }
+
   /// Pop a route off the navigator that most tightly encloses the given context.
   ///
   /// Tries to removes the current route, calling its didPop() method. If that
@@ -742,6 +767,25 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     });
     assert(() { _debugLocked = false; return true; });
   }
+
+  /// Returns the value of the current route's `willPop` method. This method is
+  /// typically called before a user-initiated [pop]. For example on Android it's
+  /// called by the binding for the system's back button.
+  ///
+  /// See also:
+  ///
+  /// * [Form], which provides an `onWillPop` callback that enables the form
+  ///   to veto a [pop] initiated by the app's back button.
+  /// * [ModalRoute], which provides a `scopedWillPopCallback` that can be used
+  ///   to define the route's `willPop` method.
+  Future<bool> willPop() async {
+    final Route<dynamic> route = _history.last;
+    assert(route._navigator == this);
+    if (!await route.willPop() && route.isCurrent)
+      return new Future<bool>.value(false);
+    return new Future<bool>.value(true);
+  }
+
 
   /// Removes the top route in the [Navigator]'s history.
   ///

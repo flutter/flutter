@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 class TextFieldDemo extends StatefulWidget {
@@ -31,6 +33,7 @@ class TextFieldDemoState extends State<TextFieldDemo> {
   }
 
   bool _autovalidate = false;
+  bool _formWasEdited = false;
   GlobalKey<FormState> _formKey = new GlobalKey<FormState>();
   GlobalKey<FormFieldState<InputValue>> _passwordFieldKey = new GlobalKey<FormFieldState<InputValue>>();
   void _handleSubmitted() {
@@ -45,6 +48,7 @@ class TextFieldDemoState extends State<TextFieldDemo> {
   }
 
   String _validateName(InputValue value) {
+    _formWasEdited = true;
     if (value.text.isEmpty)
       return 'Name is required.';
     RegExp nameExp = new RegExp(r'^[A-za-z ]+$');
@@ -54,6 +58,7 @@ class TextFieldDemoState extends State<TextFieldDemo> {
   }
 
   String _validatePhoneNumber(InputValue value) {
+    _formWasEdited = true;
     RegExp phoneExp = new RegExp(r'^\d\d\d-\d\d\d\-\d\d\d\d$');
     if (!phoneExp.hasMatch(value.text))
       return '###-###-#### - Please enter a valid phone number.';
@@ -61,12 +66,37 @@ class TextFieldDemoState extends State<TextFieldDemo> {
   }
 
   String _validatePassword(InputValue value) {
+    _formWasEdited = true;
     FormFieldState<InputValue> passwordField = _passwordFieldKey.currentState;
     if (passwordField.value == null || passwordField.value.text.isEmpty)
       return 'Please choose a password.';
     if (passwordField.value.text != value.text)
       return 'Passwords don\'t match';
     return null;
+  }
+
+  Future<bool> _warnUserAboutInvalidData() {
+    final FormState form = _formKey.currentState;
+    if (!_formWasEdited || form.validate())
+      return new Future<bool>.value(true);
+
+    return showDialog(
+      context: context,
+      child: new AlertDialog(
+        title: new Text('This form has errors'),
+        content: new Text('Really leave this form?'),
+        actions: <Widget> [
+          new FlatButton(
+            child: new Text('YES'),
+            onPressed: () { Navigator.of(context).pop(true); },
+          ),
+          new FlatButton(
+            child: new Text('NO'),
+            onPressed: () { Navigator.of(context).pop(false); },
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -79,6 +109,7 @@ class TextFieldDemoState extends State<TextFieldDemo> {
       body: new Form(
         key: _formKey,
         autovalidate: _autovalidate,
+        onWillPop: _warnUserAboutInvalidData,
         child: new Block(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
           children: <Widget>[

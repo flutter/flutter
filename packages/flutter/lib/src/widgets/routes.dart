@@ -363,6 +363,11 @@ class _ModalScopeStatus extends InheritedWidget {
   }
 }
 
+/// Signature for a callback that verifies that it's OK to call [Navigator.pop].
+///
+/// Used by [Form.onWillPop], [ModalRoute.scopedWillPopCallback];
+typedef Future<bool> WillPopCallback();
+
 class _ModalScope extends StatefulWidget {
   _ModalScope({
     Key key,
@@ -378,6 +383,9 @@ class _ModalScope extends StatefulWidget {
 }
 
 class _ModalScopeState extends State<_ModalScope> {
+  /// See scopedWillPopCallback in ModalRoute.
+  WillPopCallback willPopCallback;
+
   @override
   void initState() {
     super.initState();
@@ -618,6 +626,56 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   Animation<double> get forwardAnimation => _forwardAnimationProxy;
   ProxyAnimation _forwardAnimationProxy;
 
+  /// If this route [isCurrent] then return the value of the
+  /// [scopedWillPopCallback]. Otherwise return false.
+  ///
+  /// Typically this method is not overridden because applications usually
+  /// don't create modal routes directly, they use higher level primitives
+  /// like [showDialog].  The [scopedWillPopCallback] makes it possible for a
+  /// ModalRoute's descendant to define the value of `willPop`.
+  ///
+  /// See also:
+  ///
+  /// * [Form], which provides an `onWillPop` callback that uses this mechanism.
+  @override
+  Future<bool> willPop() async {
+    if (!isCurrent)
+      return new Future<bool>.value(false);
+    assert(_scopeKey?.currentState != null);
+    final WillPopCallback callback = _scopeKey.currentState.willPopCallback;
+    return callback != null ? callback() : new Future<bool>.value(true);
+  }
+
+  /// Enables this route to veto attempts by the user to dismiss it. This
+  /// property may only be set when this route [isCurrent].
+  ///
+  /// This callback is typically set by a stateful descendant of the modal route.
+  /// A stateful widget shown in a modal route, like the child passed to
+  /// [showDialog], can look up its modal route and set this callback in its
+  /// `dependenciesChanged` method:
+  ///
+  /// ```dart
+  /// @override
+  /// void dependenciesChanged() {
+  ///  super.dependenciesChanged();
+  ///  final ModalRoute<Null> route = ModalRoute.of(context);
+  ///  if (route.isCurrent)
+  ///    route.scopedWillPopCallback = askTheUserIfTheyAreSure;
+  /// }
+  /// ```
+  ///
+  /// A typical application of this callback would be to warn the user about
+  /// unsaved [Form] data if the user attempts to back out of the form.
+  ///
+  /// See also:
+  ///
+  /// * [Form], which provides an `onWillPop` callback that uses this mechanism.
+  WillPopCallback get scopedWillPopCallback => _scopeKey?.currentState?.willPopCallback;
+  set scopedWillPopCallback(WillPopCallback callback) {
+    assert(isCurrent);
+    assert(_scopeKey?.currentState != null);
+    _scopeKey.currentState.willPopCallback = callback;
+  }
 
   // Internals
 

@@ -5,6 +5,7 @@
 import 'package:flutter/foundation.dart';
 
 import 'framework.dart';
+import 'routes.dart';
 
 /// An optional container for grouping together multiple form field widgets
 /// (e.g. [Input] widgets).
@@ -23,6 +24,7 @@ class Form extends StatefulWidget {
     Key key,
     @required this.child,
     this.autovalidate: false,
+    this.onWillPop,
   }) : super(key: key) {
     assert(child != null);
   }
@@ -48,6 +50,13 @@ class Form extends StatefulWidget {
   /// [FormState.validate] to validate.
   final bool autovalidate;
 
+  /// Enables the form to veto attempts by the user to dismiss the [ModalRoute]
+  /// that contains the form.
+  ///
+  /// If the callback returns a Future that resolves to false, the form's route
+  /// will not be dimissed.
+  WillPopCallback onWillPop;
+
   @override
   FormState createState() => new FormState();
 }
@@ -56,8 +65,23 @@ class FormState extends State<Form> {
   int _generation = 0;
   Set<FormFieldState<dynamic>> _fields = new Set<FormFieldState<dynamic>>();
 
-  /// Called when a form field has changed. This will cause all form fields
-  /// to rebuild, useful if form fields have interdependencies.
+  @override
+  void dependenciesChanged() {
+    super.dependenciesChanged();
+    final ModalRoute<Null> route = ModalRoute.of(context);
+    if (route != null && route.isCurrent)
+      route.scopedWillPopCallback = config.onWillPop;
+  }
+
+  @override
+  void didUpdateConfig(Form oldConfig) {
+    final ModalRoute<Null> route = ModalRoute.of(context);
+    if (config.onWillPop != oldConfig.onWillPop && route != null && route.isCurrent)
+      route.scopedWillPopCallback = config.onWillPop;
+  }
+
+  // Called when a form field has changed. This will cause all form fields
+  // to rebuild, useful if form fields have interdependencies.
   void _fieldDidChange() {
     setState(() {
       ++_generation;
