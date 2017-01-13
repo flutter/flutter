@@ -498,7 +498,15 @@ class ScrollableState<T extends Scrollable> extends State<T> with SingleTickerPr
     if (duration == null) {
       _stop();
       _setScrollOffset(newScrollOffset, details: details);
-      return new Future<Null>.value();
+      // The viewpoint change is completed at the end of the next frame.
+      Completer<Null> completer = new Completer<Null>();
+      SchedulerBinding.instance.addPostFrameCallback((Duration timestamp) {
+        // TODO(goderbauer): workaround for https://github.com/flutter/flutter/issues/7433
+        Timer.run(() {});
+        // end workaround
+        completer.complete();
+      });
+      return completer.future;
     }
 
     assert(duration > Duration.ZERO);
