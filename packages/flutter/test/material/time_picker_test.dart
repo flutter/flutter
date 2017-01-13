@@ -37,18 +37,13 @@ class _TimePickerLauncher extends StatelessWidget {
 Future<Point> startPicker(WidgetTester tester, ValueChanged<TimeOfDay> onChanged) async {
   await tester.pumpWidget(new _TimePickerLauncher(onChanged: onChanged));
   await tester.tap(find.text('X'));
-
-  await tester.pump(); // start animation
-  await tester.pump(const Duration(seconds: 1));
-
+  await tester.pumpUntilNoTransientCallbacks(const Duration(seconds: 1));
   return tester.getCenter(find.byKey(new Key('time-picker-dial')));
 }
 
 Future<Null> finishPicker(WidgetTester tester) async {
   await tester.tap(find.text('OK'));
-
-  await tester.pump(); // start animation
-  await tester.pump(const Duration(seconds: 1));
+  await tester.pumpUntilNoTransientCallbacks(const Duration(seconds: 1));
 }
 
 void main() {

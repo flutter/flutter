@@ -23,8 +23,8 @@ class TestImageInfo implements ImageInfo {
   String toString() => '$runtimeType($value)';
 }
 
-class TestProvider extends ImageProvider<int> {
-  const TestProvider(this.key, this.imageValue);
+class TestImageProvider extends ImageProvider<int> {
+  const TestImageProvider(this.key, this.imageValue);
   final int key;
   final int imageValue;
 

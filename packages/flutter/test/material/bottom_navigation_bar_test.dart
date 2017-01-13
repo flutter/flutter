@@ -256,7 +256,7 @@ void main() {
               title: new Text('B'),
               icon: new Builder(
                 builder: (BuildContext context) {
-                  builderIconSize = IconTheme.of(context).fallback().size;
+                  builderIconSize = IconTheme.of(context).size;
                   return new SizedBox(
                     width: builderIconSize,
                     height: builderIconSize,
