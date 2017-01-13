@@ -128,7 +128,7 @@ class Ticker {
   /// (as opposed to the [TickerProvider] which created the ticker).
   Future<Null> start() {
     assert(() {
-      if (isTicking) {
+      if (isActive) {
         throw new FlutterError(
           'A ticker was started twice.\n'
           'A ticker that is already active cannot be started again without first stopping it.\n'
@@ -158,7 +158,7 @@ class Ticker {
   /// By convention, this method is used by the object that receives the ticks
   /// (as opposed to the [TickerProvider] which created the ticker).
   void stop() {
-    if (!isTicking)
+    if (!isActive)
       return;
 
     // We take the _completer into a local variable so that isTicking is false
@@ -167,7 +167,7 @@ class Ticker {
     Completer<Null> localCompleter = _completer;
     _completer = null;
     _startTime = null;
-    assert(!isTicking);
+    assert(!isActive);
 
     unscheduleTick();
     localCompleter.complete();
@@ -246,7 +246,7 @@ class Ticker {
   ///
   /// This ticker must not be active when this method is called.
   void absorbTicker(Ticker originalTicker) {
-    assert(!isTicking);
+    assert(!isActive);
     assert(_completer == null);
     assert(_startTime == null);
     assert(_animationId == null);
