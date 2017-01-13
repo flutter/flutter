@@ -214,6 +214,8 @@ class AnsiTerminal {
   static const String _reset = '\u001B[0m';
   static const String _clear = '\u001B[2J\u001B[H';
 
+  static const int _ENOTTY = 25;
+
   bool supportsColor;
 
   String bolden(String str) => supportsColor ? '$_bold$str$_reset' : str;
@@ -223,8 +225,19 @@ class AnsiTerminal {
   set singleCharMode(bool value) {
     try {
       stdin.lineMode = !value;
-    } on IOException {
-      // This can throw for some terminals; we ignore the error.
+    } catch (error) {
+      // TODO(tvolkert): Change this to explicitly catch `StdinException`
+      // once our analysis runs against SDK 1.22 (when `StdinException` was
+      // introduced). Doing so will allow proper dereferencing of `osError`.
+      bool ignore = false;
+      try {
+        if (error.osError?.errorCode == _ENOTTY) {
+          // This can throw for some terminals; we ignore the error.
+          ignore = true;
+        }
+      } on NoSuchMethodError {}
+      if (!ignore)
+        rethrow;
     }
   }
 
