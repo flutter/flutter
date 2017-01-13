@@ -22,4 +22,5 @@ export 'src/gestures/pointer_router.dart';
 export 'src/gestures/recognizer.dart';
 export 'src/gestures/scale.dart';
 export 'src/gestures/tap.dart';
+export 'src/gestures/team.dart';
 export 'src/gestures/velocity_tracker.dart';

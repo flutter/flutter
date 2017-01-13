@@ -13,6 +13,7 @@ import 'binding.dart';
 import 'constants.dart';
 import 'events.dart';
 import 'pointer_router.dart';
+import 'team.dart';
 
 export 'pointer_router.dart' show PointerRouter;
 
@@ -128,6 +129,31 @@ abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
     super.dispose();
   }
 
+  /// The team that this recognizer belongs to, if any.
+  ///
+  /// If [team] is null, this recognizer competes directly in the
+  /// [GestureArenaManager] to recognize a sequence of pointer events as a
+  /// gesture. If [team] is non-null, this recognizer competes in the arena in
+  /// a group with other recognizers on the same team.
+  ///
+  /// A recognizer can be assigned to a team only when it is not participating
+  /// in the arena. For example, a common time to assign a recognizer to a team
+  /// is shortly after creating the recognizer.
+  GestureArenaTeam get team => _team;
+  GestureArenaTeam _team;
+  set team(GestureArenaTeam value) {
+    assert(_entries.isEmpty);
+    assert(_trackedPointers.isEmpty);
+    assert(_team == null);
+    _team = value;
+  }
+
+  GestureArenaEntry _addPointerToArena(int pointer) {
+    if (_team != null)
+      return _team.add(pointer, this);
+    return GestureBinding.instance.gestureArena.add(pointer, this);
+  }
+
   /// Causes events related to the given pointer ID to be routed to this recognizer.
   ///
   /// The pointer events are delivered to [handleEvent].
@@ -138,7 +164,7 @@ abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
     GestureBinding.instance.pointerRouter.addRoute(pointer, handleEvent);
     _trackedPointers.add(pointer);
     assert(!_entries.containsValue(pointer));
-    _entries[pointer] = GestureBinding.instance.gestureArena.add(pointer, this);
+    _entries[pointer] = _addPointerToArena(pointer);
   }
 
   /// Stops events related to the given pointer ID from being routed to this recognizer.
