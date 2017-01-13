@@ -247,7 +247,8 @@ class FlutterEngine {
 
   static const String kName = 'engine';
   static const String kSkyEngine = 'sky_engine';
-  static const String kSdkBundle = 'sdk.ds';
+  static const String kSdkBundleSpec = 'spec.sum';
+  static const String kSdkBundleStrong = 'strong.sum';
 
   final Cache cache;
 
@@ -309,7 +310,10 @@ class FlutterEngine {
         return false;
     }
 
-    if (!fs.file(path.join(pkgDir.path, kSkyEngine, kSdkBundle)).existsSync())
+    if (!fs.file(path.join(pkgDir.path, kSkyEngine, kSdkBundleSpec)).existsSync())
+      return false;
+
+    if (!fs.file(path.join(pkgDir.path, kSkyEngine, kSdkBundleStrong)).existsSync())
       return false;
 
     Directory engineDir = cache.getArtifactDirectory(kName);
@@ -342,12 +346,20 @@ class FlutterEngine {
       await pubGet(directory: pkgPath);
     }
 
-    Status summaryStatus = logger.startProgress('Building Dart SDK summary...');
+    Status summarySpecStatus = logger.startProgress('Building Dart SDK spec summary...');
     try {
       String skyEnginePath = path.join(pkgDir.path, kSkyEngine);
-      buildSkyEngineSdkSummary(skyEnginePath, kSdkBundle);
+      buildSkyEngineSdkSummary(skyEnginePath, kSdkBundleSpec, false);
     } finally {
-      summaryStatus.stop();
+      summarySpecStatus.stop();
+    }
+
+    Status summaryStrongStatus = logger.startProgress('Building Dart strong SDK summary...');
+    try {
+      String skyEnginePath = path.join(pkgDir.path, kSkyEngine);
+      buildSkyEngineSdkSummary(skyEnginePath, kSdkBundleStrong, true);
+    } finally {
+      summaryStrongStatus.stop();
     }
 
     Directory engineDir = cache.getArtifactDirectory(kName);

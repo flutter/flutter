@@ -19,8 +19,8 @@ import '../base/io.dart';
 
 /// Given the [skyEnginePath], locate corresponding `_embedder.yaml` and compose
 /// the full embedded Dart SDK, and build the [outBundleName] file with its
-/// linked summary.
-void buildSkyEngineSdkSummary(String skyEnginePath, String outBundleName) {
+/// linked [strong] or spec summary.
+void buildSkyEngineSdkSummary(String skyEnginePath, String outBundleName, bool strong) {
   ResourceProvider resourceProvider = PhysicalResourceProvider.INSTANCE;
 
   Map<String, List<Folder>> packageMap = <String, List<Folder>>{
@@ -46,7 +46,7 @@ void buildSkyEngineSdkSummary(String skyEnginePath, String outBundleName) {
   List<Source> sources = sdk.uris.map(sdk.mapDartUri).toList();
 
   // Build.
-  List<int> bytes = new SummaryBuilder(sources, sdk.context, true).build();
+  List<int> bytes = new SummaryBuilder(sources, sdk.context, strong).build();
   String outputPath = pathos.join(skyEnginePath, outBundleName);
   file.fs.file(outputPath).writeAsBytesSync(bytes);
 }
