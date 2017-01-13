@@ -14,6 +14,6 @@ else
     echo "For more information, see the script in:"
     echo "  https://github.com/flutter/engine/tree/master/tools/licenses"
     echo ""
-    diff -u6 flutter/travis/licenses.golden out/license-script-output
+    diff -U 6 flutter/travis/licenses.golden out/license-script-output
     exit 1
 fi
