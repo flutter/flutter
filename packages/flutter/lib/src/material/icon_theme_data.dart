@@ -19,6 +19,14 @@ class IconThemeData {
   /// is clamped between 0.0 and 1.0.
   const IconThemeData({ this.color, double opacity, this.size }) : _opacity = opacity;
 
+  /// Creates an icon them with some reasonable default values.
+  ///
+  /// The [color] is black, the [opacity] is 1.0, and the [size] is 24.0.
+  const IconThemeData.fallback()
+    : color = const Color(0xFF000000),
+      _opacity = 1.0,
+      size = 24.0;
+
   /// Creates a copy of this icon theme but with the given fields replaced with
   /// the new values.
   IconThemeData copyWith({ Color color, double opacity, double size }) {
@@ -42,22 +50,8 @@ class IconThemeData {
     );
   }
 
-  /// Creates an icon theme that is identical to this icon theme but with
-  /// any null fields filled in. Specific fallbacks can be given, but in their
-  /// absence, this method defaults to black, fully opaque, and size 24.0.
-  IconThemeData fallback({
-    Color color: const Color(0xFF000000),
-    double opacity: 1.0,
-    double size: 24.0
-  }) {
-    if (this.color != null && this.opacity != null && this.size != null)
-      return this;
-    return new IconThemeData(
-      color: this.color ?? color,
-      opacity: this.opacity ?? opacity,
-      size: this.size ?? size
-    );
-  }
+  /// Whether all the properties of this object are non-null.
+  bool get isConcrete => color != null && opacity != null && size != null;
 
   /// The default color for icons.
   final Color color;
