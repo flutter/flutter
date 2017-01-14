@@ -31,8 +31,10 @@ import 'theme.dart';
 ///
 /// See also:
 ///
-///  * [RaisedButton]
-///  * [DropdownButton]
+///  * [RaisedButton], which is a button that hovers above the containing
+///    material.
+///  * [DropdownButton], which offers the user a choice of a number of options.
+///  * [SimpleDialogOption], which is used in [SimpleDialog]s.
 ///  * <https://material.google.com/components/buttons.html>
 class FlatButton extends StatelessWidget {
   /// Creates a flat button.
