@@ -73,9 +73,7 @@ abstract class Route<T> {
   /// See also:
   ///
   /// * [Form], which provides an `onWillPop` callback that uses this mechanism.
-  Future<bool> willPop() {
-    return new Future<bool>.value(true);
-  }
+  Future<bool> willPop() async => true;
 
   /// A request was made to pop this route. If the route can handle it
   /// internally (e.g. because it has its own stack of internal state) then
@@ -776,16 +774,13 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   ///
   /// * [Form], which provides an `onWillPop` callback that enables the form
   ///   to veto a [pop] initiated by the app's back button.
-  /// * [ModalRoute], which provides a `scopedWillPopCallback` that can be used
-  ///   to define the route's `willPop` method.
+  /// * [ModalRoute], which has as a `willPop` method that can be defined
+  ///   by a list of [WillPopCallback]s.
   Future<bool> willPop() async {
     final Route<dynamic> route = _history.last;
     assert(route._navigator == this);
-    if (!await route.willPop() && route.isCurrent)
-      return new Future<bool>.value(false);
-    return new Future<bool>.value(true);
+    return route.willPop();
   }
-
 
   /// Removes the top route in the [Navigator]'s history.
   ///

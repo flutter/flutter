@@ -148,8 +148,8 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
     NavigatorState navigator = _navigator.currentState;
     assert(navigator != null);
     if (!await navigator.willPop())
-      return new Future<bool>.value(true);
-    return new Future<bool>.value(mounted && navigator.pop());
+      return true;
+    return mounted && navigator.pop();
   }
 
   @override

@@ -204,7 +204,7 @@ class MaterialPageRoute<T> extends PageRoute<T> {
   NavigationGestureController startPopGesture(NavigatorState navigator) {
     // If attempts to dismiss this route might be vetoed, then do not
     // allow the user to dismiss the route with a swipe.
-    if (scopedWillPopCallback != null)
+    if (hasScopedWillPopCallback)
       return null;
     if (controller.status != AnimationStatus.completed)
       return null;

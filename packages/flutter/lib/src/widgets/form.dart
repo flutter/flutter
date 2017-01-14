@@ -54,7 +54,7 @@ class Form extends StatefulWidget {
   /// that contains the form.
   ///
   /// If the callback returns a Future that resolves to false, the form's route
-  /// will not be dimissed.
+  /// will not be popped.
   WillPopCallback onWillPop;
 
   @override
@@ -68,16 +68,24 @@ class FormState extends State<Form> {
   @override
   void dependenciesChanged() {
     super.dependenciesChanged();
-    final ModalRoute<Null> route = ModalRoute.of(context);
-    if (route != null && route.isCurrent)
-      route.scopedWillPopCallback = config.onWillPop;
+    final ModalRoute<dynamic> route = ModalRoute.of(context);
+    if (route != null && route.isCurrent) {
+      // If it's the same ModalRoute, avoid adding our callback twice.
+      if (config.onWillPop != null) {
+        route.removeScopedWillPopCallback(config.onWillPop);
+        route.addScopedWillPopCallback(config.onWillPop);
+      }
+    }
   }
 
   @override
   void didUpdateConfig(Form oldConfig) {
-    final ModalRoute<Null> route = ModalRoute.of(context);
-    if (config.onWillPop != oldConfig.onWillPop && route != null && route.isCurrent)
-      route.scopedWillPopCallback = config.onWillPop;
+    final ModalRoute<dynamic> route = ModalRoute.of(context);
+    if (config.onWillPop != oldConfig.onWillPop && route != null) {
+      route.removeScopedWillPopCallback(oldConfig.onWillPop);
+      if (config.onWillPop != null)
+        route.addScopedWillPopCallback(config.onWillPop);
+    }
   }
 
   // Called when a form field has changed. This will cause all form fields

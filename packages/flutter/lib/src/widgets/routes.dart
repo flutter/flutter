@@ -365,7 +365,8 @@ class _ModalScopeStatus extends InheritedWidget {
 
 /// Signature for a callback that verifies that it's OK to call [Navigator.pop].
 ///
-/// Used by [Form.onWillPop], [ModalRoute.scopedWillPopCallback];
+/// Used by [Form.onWillPop], [ModalRoute.addScopedWillPopCallback], and
+/// [ModalRoute.removeScopedWillPopCallback].
 typedef Future<bool> WillPopCallback();
 
 class _ModalScope extends StatefulWidget {
@@ -383,8 +384,8 @@ class _ModalScope extends StatefulWidget {
 }
 
 class _ModalScopeState extends State<_ModalScope> {
-  /// See scopedWillPopCallback in ModalRoute.
-  WillPopCallback willPopCallback;
+  // See addScopedWillPopCallback, removeScopedWillPopCallback in ModalRoute.
+  List<WillPopCallback> willPopCallbacks = <WillPopCallback>[];
 
   @override
   void initState() {
@@ -402,7 +403,16 @@ class _ModalScopeState extends State<_ModalScope> {
   void dispose() {
     config.route.animation?.removeStatusListener(_animationStatusChanged);
     config.route.forwardAnimation?.removeStatusListener(_animationStatusChanged);
+    willPopCallbacks = const <WillPopCallback>[];
     super.dispose();
+  }
+
+  void addWillPopCallback(WillPopCallback callback) {
+    willPopCallbacks.add(callback);
+  }
+
+  void removeWillPopCallback(WillPopCallback callback) {
+    willPopCallbacks.remove(callback);
   }
 
   void _animationStatusChanged(AnimationStatus status) {
@@ -626,41 +636,44 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   Animation<double> get forwardAnimation => _forwardAnimationProxy;
   ProxyAnimation _forwardAnimationProxy;
 
-  /// If this route [isCurrent] then return the value of the
-  /// [scopedWillPopCallback]. Otherwise return false.
+  /// Return the value of the first callback added with
+  /// [addScopedWillPopCallback] that returns false. Otherwise return true.
   ///
   /// Typically this method is not overridden because applications usually
   /// don't create modal routes directly, they use higher level primitives
-  /// like [showDialog].  The [scopedWillPopCallback] makes it possible for a
-  /// ModalRoute's descendant to define the value of `willPop`.
+  /// like [showDialog]. The scoped [WillPopCallback] list makes it possible
+  /// for ModalRoute descendants to collectively define the value of `willPop`.
   ///
   /// See also:
   ///
   /// * [Form], which provides an `onWillPop` callback that uses this mechanism.
+  /// * [addScopedWillPopCallback], which adds a callback to the list this
+  ///   method checks.
+  /// * [removeScopedWillPopCallback], which removes a callback from the list
+  ///   this method checks.
   @override
   Future<bool> willPop() async {
-    if (!isCurrent)
-      return new Future<bool>.value(false);
-    assert(_scopeKey?.currentState != null);
-    final WillPopCallback callback = _scopeKey.currentState.willPopCallback;
-    return callback != null ? callback() : new Future<bool>.value(true);
+    final _ModalScopeState scope = _scopeKey?.currentState;
+    assert(scope != null);
+    for (WillPopCallback callback in new List<WillPopCallback>.from(scope.willPopCallbacks)) {
+      if (!await callback())
+        return false;
+    }
+    return true;
   }
 
-  /// Enables this route to veto attempts by the user to dismiss it. This
-  /// property may only be set when this route [isCurrent].
+  /// Enables this route to veto attempts by the user to dismiss it.
   ///
-  /// This callback is typically set by a stateful descendant of the modal route.
+  /// This callback is typically added by a stateful descendant of the modal route.
   /// A stateful widget shown in a modal route, like the child passed to
-  /// [showDialog], can look up its modal route and set this callback in its
+  /// [showDialog], can look up its modal route and then add a callback int its
   /// `dependenciesChanged` method:
   ///
   /// ```dart
   /// @override
   /// void dependenciesChanged() {
   ///  super.dependenciesChanged();
-  ///  final ModalRoute<Null> route = ModalRoute.of(context);
-  ///  if (route.isCurrent)
-  ///    route.scopedWillPopCallback = askTheUserIfTheyAreSure;
+  ///  ModalRoute.of(context).addScopedWillPopCallback(askTheUserIfTheyAreSure);
   /// }
   /// ```
   ///
@@ -670,11 +683,28 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// See also:
   ///
   /// * [Form], which provides an `onWillPop` callback that uses this mechanism.
-  WillPopCallback get scopedWillPopCallback => _scopeKey?.currentState?.willPopCallback;
-  set scopedWillPopCallback(WillPopCallback callback) {
-    assert(isCurrent);
+  /// * [willPop], which runs the callbacks added with this method.
+  /// * [removeScopedWillPopCallback], which removes a callback from the list
+  ///   that [willPop] checks.
+  void addScopedWillPopCallback(WillPopCallback callback) {
     assert(_scopeKey?.currentState != null);
-    _scopeKey.currentState.willPopCallback = callback;
+    _scopeKey.currentState.addWillPopCallback(callback);
+  }
+
+  /// Remove one of the callbacks run by [willPop].
+  ///
+  /// See also:
+  ///
+  /// * [Form], which provides an `onWillPop` callback that uses this mechanism.
+  /// * [addScopedWillPopCallback], which adds callback to the list
+  ///   checked by [willPop].
+  void removeScopedWillPopCallback(WillPopCallback callback) {
+    assert(_scopeKey?.currentState != null);
+    _scopeKey.currentState.removeWillPopCallback(callback);
+  }
+
+  bool get hasScopedWillPopCallback {
+    return _scopeKey?.currentState == null || _scopeKey.currentState.willPopCallbacks.length > 0;
   }
 
   // Internals

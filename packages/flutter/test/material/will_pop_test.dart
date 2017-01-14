@@ -17,11 +17,8 @@ class SamplePageState extends State<SamplePage> {
   void dependenciesChanged() {
     super.dependenciesChanged();
     final ModalRoute<Null> route = ModalRoute.of(context);
-    if (route.isCurrent) {
-      route.scopedWillPopCallback = () {
-        return new Future<bool>.value(willPopValue);
-      };
-    }
+    if (route.isCurrent)
+      route.addScopedWillPopCallback(() async => willPopValue);
   }
 
   @override
@@ -50,7 +47,7 @@ class SampleForm extends StatelessWidget {
 }
 
 void main() {
-  testWidgets('ModalRoute.scopedWillPopupCallback can inhibit back button', (WidgetTester tester) async {
+  testWidgets('ModalRoute scopedWillPopupCallback can inhibit back button', (WidgetTester tester) async {
     await tester.pumpWidget(
       new MaterialApp(
         home: new Scaffold(
@@ -126,16 +123,12 @@ void main() {
 
     willPopValue = false;
     await tester.tap(find.byTooltip('Back'));
-    await tester.pump();
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 1));
+    await tester.pumpUntilNoTransientCallbacks(const Duration(seconds: 1));
     expect(find.text('Sample Form'), findsOneWidget);
 
     willPopValue = true;
     await tester.tap(find.byTooltip('Back'));
-    await tester.pump();
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 1));
+    await tester.pumpUntilNoTransientCallbacks(const Duration(seconds: 1));
     expect(find.text('Sample Form'), findsNothing);
   });
 }
