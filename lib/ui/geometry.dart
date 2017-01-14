@@ -580,6 +580,9 @@ class Rect {
   /// Negative areas are considered empty.
   bool get isEmpty => left >= right || top >= bottom;
 
+  /// Whether all coordinates of this rectangle are finite.
+  bool get isFinite => left.isFinite && top.isFinite && right.isFinite && bottom.isFinite;
+
   /// The lesser of the magnitudes of the width and the height of this
   /// rectangle.
   double get shortestSide {
