@@ -10,6 +10,7 @@ import 'package:meta/meta.dart';
 import 'button.dart';
 import 'button_bar.dart';
 import 'colors.dart';
+import 'ink_well.dart';
 import 'material.dart';
 import 'theme.dart';
 
@@ -176,6 +177,50 @@ class AlertDialog extends StatelessWidget {
   }
 }
 
+/// An option used in a [SimpleDialog].
+///
+/// A simple dialog offers the user a choice between several options. This
+/// widget is commonly used to represent each of the options. If the user
+/// selects this option, the widget will call the [onPressed] callback, which
+/// typically uses [Navigator.pop] to close the dialog.
+///
+/// See also:
+///
+///  * [SimpleDialog], for a dialog in which to use this widget.
+///  * [showDialog], which actually displays the dialog and returns its result.
+///  * [FlatButton], which are commonly used as actions in other kinds of
+///    dialogs, such as [AlertDialog]s.
+///  * <https://material.google.com/components/dialogs.html#dialogs-simple-dialogs>
+class SimpleDialogOption extends StatelessWidget {
+  /// Creates an option for a [SimpleDialog].
+  SimpleDialogOption({
+    Key key,
+    this.onPressed,
+    this.child,
+  }) : super(key: key);
+
+  /// The callback that is called when this option is selected.
+  ///
+  /// If this is set to null, the option cannot be selected.
+  final VoidCallback onPressed;
+
+  /// The widget below this widget in the tree.
+  ///
+  /// Typically a [Text] widget.
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return new InkWell(
+      onTap: onPressed,
+      child: new Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 24.0),
+        child: child
+      ),
+    );
+  }
+}
+
 /// A simple material design dialog.
 ///
 /// A simple dialog offers the user a choice between several options. A simple
@@ -189,6 +234,7 @@ class AlertDialog extends StatelessWidget {
 ///
 /// See also:
 ///
+///  * [SimpleDialogOption], which are options used in this type of dialog.
 ///  * [AlertDialog], for dialogs that have a row of buttons below the body.
 ///  * [Dialog], on which [SimpleDialog] and [AlertDialog] are based.
 ///  * [showDialog], which actually displays the dialog and returns its result.
@@ -220,8 +266,7 @@ class SimpleDialog extends StatelessWidget {
   /// The (optional) content of the dialog is displayed in a [Block] underneath
   /// the title.
   ///
-  /// The children are assumed to have 8.0 pixels of vertical and 24.0 pixels of
-  /// horizontal padding internally.
+  /// Typically a list of [SimpleDialogOption]s.
   final List<Widget> children;
 
   /// Padding around the content.
