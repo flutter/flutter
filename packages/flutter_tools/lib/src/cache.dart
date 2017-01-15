@@ -354,7 +354,7 @@ class FlutterEngine {
       summarySpecStatus.stop();
     }
 
-    Status summaryStrongStatus = logger.startProgress('Building Dart strong SDK summary...');
+    Status summaryStrongStatus = logger.startProgress('Building Dart SDK strong summary...');
     try {
       String skyEnginePath = path.join(pkgDir.path, kSkyEngine);
       buildSkyEngineSdkSummary(skyEnginePath, kSdkBundleStrong, true);
