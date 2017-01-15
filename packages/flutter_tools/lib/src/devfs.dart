@@ -27,8 +27,21 @@ class DevFSConfig {
 
 DevFSConfig get devFSConfig => context[DevFSConfig];
 
+/// Common superclass for content copied to the device.
+abstract class DevFSContent {
+  int get size;
+
+  Future<List<int>> contentsAsBytes();
+
+  Stream<List<int>> contentsAsStream();
+
+  Stream<List<int>> contentsAsCompressedStream() {
+    return contentsAsStream().transform(GZIP.encoder);
+  }
+}
+
 // A file that has been added to a DevFS.
-class DevFSEntry {
+class DevFSEntry extends DevFSContent {
   DevFSEntry(this.devicePath, this.file)
       : bundleEntry = null;
 
@@ -136,8 +149,8 @@ class DevFSEntry {
 abstract class DevFSOperations {
   Future<Uri> create(String fsName);
   Future<dynamic> destroy(String fsName);
-  Future<dynamic> writeFile(String fsName, DevFSEntry entry);
-  Future<dynamic> deleteFile(String fsName, DevFSEntry entry);
+  Future<dynamic> writeFile(String fsName, String devicePath, DevFSContent content);
+  Future<dynamic> deleteFile(String fsName, String devicePath);
   Future<dynamic> writeSource(String fsName,
                               String devicePath,
                               String contents);
@@ -163,10 +176,10 @@ class ServiceProtocolDevFSOperations implements DevFSOperations {
   }
 
   @override
-  Future<dynamic> writeFile(String fsName, DevFSEntry entry) async {
+  Future<dynamic> writeFile(String fsName, String devicePath, DevFSContent content) async {
     List<int> bytes;
     try {
-      bytes = await entry.contentsAsBytes();
+      bytes = await content.contentsAsBytes();
     } catch (e) {
       return e;
     }
@@ -175,16 +188,16 @@ class ServiceProtocolDevFSOperations implements DevFSOperations {
       return await vmService.vm.invokeRpcRaw('_writeDevFSFile',
                                              <String, dynamic> {
                                                 'fsName': fsName,
-                                                'path': entry.devicePath,
+                                                'path': devicePath,
                                                 'fileContents': fileContents
                                              });
     } catch (e) {
-      printTrace('DevFS: Failed to write ${entry.devicePath}: $e');
+      printTrace('DevFS: Failed to write $devicePath: $e');
     }
   }
 
   @override
-  Future<dynamic> deleteFile(String fsName, DevFSEntry entry) async {
+  Future<dynamic> deleteFile(String fsName, String devicePath) async {
     // TODO(johnmccutchan): Add file deletion to the devFS protocol.
   }
 
@@ -410,7 +423,7 @@ class DevFS {
       printTrace('Removing deleted files');
       for (DevFSEntry entry in _deletedEntries) {
         Future<Map<String, dynamic>> operation =
-            _operations.deleteFile(fsName, entry);
+            _operations.deleteFile(fsName, entry.devicePath);
         if (operation != null)
           _pendingOperations.add(operation);
       }
@@ -432,7 +445,7 @@ class DevFS {
         // Make service protocol requests for each.
         for (DevFSEntry entry in _dirtyEntries) {
           Future<Map<String, dynamic>> operation =
-              _operations.writeFile(fsName, entry);
+              _operations.writeFile(fsName, entry.devicePath, entry);
           if (operation != null)
             _pendingOperations.add(operation);
         }
