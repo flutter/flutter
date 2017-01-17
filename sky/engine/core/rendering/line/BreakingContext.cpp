@@ -62,6 +62,8 @@ InlineIterator BreakingContext::handleEndOfLine()
         } while (!m_lineBreak.atEnd() && isEmptyInline(m_lineBreak.object()));
     }
 
+    m_lineInfo.incrementLineIndex();
+
     return m_lineBreak;
 }
 

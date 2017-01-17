@@ -23,7 +23,6 @@
 #include "flutter/sky/engine/wtf/Vector.h"
 #include "flutter/sky/engine/wtf/unicode/CharacterNames.h"
 
-
 namespace blink {
 
 using namespace WTF::Unicode;

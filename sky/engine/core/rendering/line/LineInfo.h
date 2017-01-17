@@ -36,6 +36,7 @@ public:
         , m_isEmpty(true)
         , m_previousLineBrokeCleanly(true)
         , m_runsFromLeadingWhitespace(0)
+        , m_lineIndex(0)
     { }
 
     bool isFirstLine() const { return m_isFirstLine; }
@@ -53,6 +54,9 @@ public:
         m_isEmpty = empty;
     }
 
+    void incrementLineIndex() { ++m_lineIndex; }
+    int lineIndex() const { return m_lineIndex; }
+
     void setPreviousLineBrokeCleanly(bool previousLineBrokeCleanly) { m_previousLineBrokeCleanly = previousLineBrokeCleanly; }
 
 private:
@@ -61,6 +65,7 @@ private:
     bool m_isEmpty;
     bool m_previousLineBrokeCleanly;
     unsigned m_runsFromLeadingWhitespace;
+    int m_lineIndex;
 };
 
 }

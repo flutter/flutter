@@ -384,6 +384,7 @@ Int32List _encodeParagraphStyle(TextAlign textAlign,
                                 String fontFamily,
                                 double fontSize,
                                 double lineHeight,
+                                int maxLines,
                                 String ellipsis) {
   Int32List result = new Int32List(5);
   if (textAlign != null) {
@@ -414,8 +415,12 @@ Int32List _encodeParagraphStyle(TextAlign textAlign,
     result[0] |= 1 << 7;
     // Passed separately to native.
   }
-  if (ellipsis != null) {
+  if (maxLines != null) {
     result[0] |= 1 << 8;
+    // Passed separately to native.
+  }
+  if (ellipsis != null) {
+    result[0] |= 1 << 9;
     // Passed separately to native.
   }
   return result;
@@ -441,6 +446,7 @@ class ParagraphStyle {
     String fontFamily,
     double fontSize,
     double lineHeight,
+    int maxLines,
     String ellipsis
   }) : _encoded = _encodeParagraphStyle(textAlign,
                                         fontWeight,
@@ -449,10 +455,12 @@ class ParagraphStyle {
                                         fontFamily,
                                         fontSize,
                                         lineHeight,
+                                        maxLines,
                                         ellipsis),
        _fontFamily = fontFamily,
        _fontSize = fontSize,
        _lineHeight = lineHeight,
+       _maxLines = maxLines,
        _ellipsis = ellipsis {
     assert(lineCount == null);
   }
@@ -461,6 +469,7 @@ class ParagraphStyle {
   final String _fontFamily;
   final double _fontSize;
   final double _lineHeight;
+  final int _maxLines;
   final String _ellipsis;
 
   bool operator ==(dynamic other) {
@@ -472,6 +481,7 @@ class ParagraphStyle {
     if ( _fontFamily != typedOther._fontFamily ||
         _fontSize != typedOther._fontSize ||
         _lineHeight != typedOther._lineHeight ||
+        _maxLines != typedOther._maxLines ||
         _ellipsis != typedOther._ellipsis)
      return false;
     for (int index = 0; index < _encoded.length; index += 1) {
@@ -481,7 +491,7 @@ class ParagraphStyle {
     return true;
   }
 
-  int get hashCode => hashValues(hashList(_encoded), _lineHeight);
+  int get hashCode => hashValues(hashList(_encoded), _lineHeight, _maxLines, _ellipsis);
 
   String toString() {
     return 'ParagraphStyle('
@@ -492,7 +502,8 @@ class ParagraphStyle {
              'fontFamily: ${  _encoded[0] & 0x20 == 0x20 ? _fontFamily                      : "unspecified"}, '
              'fontSize: ${    _encoded[0] & 0x40 == 0x40 ? _fontSize                        : "unspecified"}, '
              'lineHeight: ${  _encoded[0] & 0x80 == 0x80 ? "${_lineHeight}x"                : "unspecified"}, '
-             'ellipsis: ${    _encoded[0] & 0x100 == 0x100 ? "\"$_ellipsis\""                : "unspecified"}'
+             'maxLines: ${    _encoded[0] & 0x100 == 0x100 ? _maxLines                      : "unspecified"}, '
+             'ellipsis: ${    _encoded[0] & 0x200 == 0x200 ? "\"$_ellipsis\""               : "unspecified"}'
            ')';
   }
 }
@@ -716,8 +727,8 @@ abstract class Paragraph extends NativeFieldWrapperClass2 {
 class ParagraphBuilder extends NativeFieldWrapperClass2 {
   /// Creates a [ParagraphBuilder] object, which is used to create a
   /// [Paragraph].
-  ParagraphBuilder(ParagraphStyle style) { _constructor(style._encoded, style._fontFamily, style._fontSize, style._lineHeight, style._ellipsis); }
-  void _constructor(Int32List encoded, String fontFamily, double fontSize, double lineHeight, String ellipsis) native "ParagraphBuilder_constructor";
+  ParagraphBuilder(ParagraphStyle style) { _constructor(style._encoded, style._fontFamily, style._fontSize, style._lineHeight, style._maxLines, style._ellipsis); }
+  void _constructor(Int32List encoded, String fontFamily, double fontSize, double lineHeight, int maxLines, String ellipsis) native "ParagraphBuilder_constructor";
 
   /// Applies the given style to the added text until [pop] is called.
   ///

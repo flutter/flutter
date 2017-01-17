@@ -84,7 +84,6 @@ public:
 
     void increment();
 
-    void handleBR();
     void handleOutOfFlowPositioned(Vector<RenderBox*>& positionedObjects);
     void handleEmptyInline();
     void handleReplaced();
@@ -223,26 +222,6 @@ inline void BreakingContext::increment()
 
     m_current.moveToStartOf(m_nextObject);
     m_atStart = false;
-}
-
-inline void BreakingContext::handleBR()
-{
-    if (m_width.fitsOnLine()) {
-        RenderObject* br = m_current.object();
-        m_lineBreak.moveToStartOf(br);
-        m_lineBreak.increment();
-
-        // A <br> always breaks a line, so don't let the line be collapsed
-        // away. Also, the space at the end of a line with a <br> does not
-        // get collapsed away. It only does this if the previous line broke
-        // cleanly. Otherwise the <br> has no effect on whether the line is
-        // empty or not.
-        if (m_startingNewParagraph)
-            m_lineInfo.setEmpty(false, m_block, &m_width);
-        m_trailingObjects.clear();
-        m_lineInfo.setPreviousLineBrokeCleanly(true);
-    }
-    m_atEnd = true;
 }
 
 inline LayoutUnit borderPaddingMarginStart(RenderInline* child)
@@ -467,12 +446,16 @@ inline bool BreakingContext::handleText(WordMeasurements& wordMeasurements, bool
 
     float hyphenWidth = 0;
 
-    bool ellipsizeMode = !m_blockStyle->ellipsis().isEmpty();
+    bool ellipsizeMode = false;
     float ellipsisWidth = 0;
     unsigned ellipsisBreakOffset = 0;
-    if (ellipsizeMode) {
-        ASSERT(breakAll);
-        ellipsisWidth = measureEllipsisWidth(renderText, font, m_blockStyle->ellipsis().string());
+    if (m_lineInfo.lineIndex() == m_blockStyle->maxLines() - 1 ||
+        m_blockStyle->maxLines() == INT_MAX) {
+        ellipsizeMode = !m_blockStyle->ellipsis().isEmpty();
+        if (ellipsizeMode) {
+            ellipsisWidth = measureEllipsisWidth(renderText, font, m_blockStyle->ellipsis().string());
+            breakAll = true;
+        }
     }
 
     if (m_renderTextInfo.m_text != renderText) {
@@ -629,6 +612,7 @@ inline bool BreakingContext::handleText(WordMeasurements& wordMeasurements, bool
                 m_lineBreak.moveTo(m_current.object(), m_current.offset(), m_current.nextBreakablePosition());
                 m_lineBreak.increment();
                 m_lineInfo.setPreviousLineBrokeCleanly(true);
+                m_lineInfo.incrementLineIndex(); // caller only calls this if we return false
                 return true;
             }
 

@@ -40,6 +40,7 @@ StyleRareNonInheritedData::StyleRareNonInheritedData()
     , m_textDecorationColor(StyleColor::currentColor())
     , m_order(RenderStyle::initialOrder())
     , m_objectPosition(RenderStyle::initialObjectPosition())
+    , m_maxLines(INT_MAX)
     , m_transformStyle3D(RenderStyle::initialTransformStyle3D())
     , m_alignContent(RenderStyle::initialAlignContent())
     , m_alignItems(RenderStyle::initialAlignItems())
@@ -79,6 +80,7 @@ StyleRareNonInheritedData::StyleRareNonInheritedData(const StyleRareNonInherited
     , m_textDecorationColor(o.m_textDecorationColor)
     , m_order(o.m_order)
     , m_objectPosition(o.m_objectPosition)
+    , m_maxLines(o.m_maxLines)
     , m_transformStyle3D(o.m_transformStyle3D)
     , m_alignContent(o.m_alignContent)
     , m_alignItems(o.m_alignItems)
@@ -122,6 +124,7 @@ bool StyleRareNonInheritedData::operator==(const StyleRareNonInheritedData& o) c
         && m_textDecorationColor == o.m_textDecorationColor
         && m_order == o.m_order
         && m_objectPosition == o.m_objectPosition
+        && m_maxLines == o.m_maxLines
         && m_transformStyle3D == o.m_transformStyle3D
         && m_alignContent == o.m_alignContent
         && m_alignItems == o.m_alignItems

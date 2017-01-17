@@ -645,6 +645,7 @@ public:
 
     // Flutter property getters
     const AtomicString& ellipsis() const { return rareNonInheritedData->m_ellipsis; }
+    int maxLines() const { return rareNonInheritedData->m_maxLines; }
 
 // attribute setter methods
 
@@ -905,6 +906,7 @@ public:
 
     // Flutter property setters
     void setEllipsis(const AtomicString& e) { SET_VAR(rareNonInheritedData, m_ellipsis, e); }
+    void setMaxLines(int m) { SET_VAR(rareNonInheritedData, m_maxLines, m); }
 
     static ClipPathOperation* initialClipPath() { return 0; }
 

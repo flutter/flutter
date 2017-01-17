@@ -88,6 +88,7 @@ public:
     LengthPoint m_objectPosition;
 
     AtomicString m_ellipsis;
+    int m_maxLines;
 
     unsigned m_transformStyle3D : 1; // ETransformStyle3D
 
