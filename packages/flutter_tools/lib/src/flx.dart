@@ -11,6 +11,7 @@ import 'base/common.dart';
 import 'base/file_system.dart';
 import 'base/process.dart';
 import 'dart/package_map.dart';
+import 'devfs.dart';
 import 'build_info.dart';
 import 'globals.dart';
 import 'toolchain.dart';
@@ -156,12 +157,12 @@ Future<Null> assemble({
   zipBuilder.entries.addAll(assetBundle.entries);
 
   if (snapshotFile != null)
-    zipBuilder.addEntry(new AssetBundleEntry.fromFile(_kSnapshotKey, snapshotFile));
+    zipBuilder.entries[_kSnapshotKey] = new DevFSFileContent(snapshotFile);
 
   ensureDirectoryExists(outputPath);
 
   printTrace('Encoding zip file to $outputPath');
-  zipBuilder.createZip(fs.file(outputPath), fs.directory(workingDirPath));
+  await zipBuilder.createZip(fs.file(outputPath), fs.directory(workingDirPath));
 
   printTrace('Built $outputPath.');
 }

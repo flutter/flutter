@@ -21,7 +21,7 @@ void main() {
   MockDevFSOperations devFSOperations = new MockDevFSOperations();
   DevFS devFS;
   AssetBundle assetBundle = new AssetBundle();
-  assetBundle.entries.add(new AssetBundleEntry.fromString('a.txt', ''));
+  assetBundle.entries['a.txt'] = new DevFSStringContent('');
   group('devfs', () {
     testUsingContext('create local file system', () async {
       tempDir = fs.systemTempDirectory.createTempSync();
@@ -67,7 +67,7 @@ void main() {
           'writeFile test ${getAssetBuildDirectory()}/a.txt'), isTrue);
     });
     testUsingContext('add a file to the asset bundle', () async {
-      assetBundle.entries.add(new AssetBundleEntry.fromString('b.txt', ''));
+      assetBundle.entries['b.txt'] = new DevFSStringContent('');
       await devFS.update(bundle: assetBundle, bundleDirty: true);
       expect(devFSOperations.contains(
           'writeFile test ${getAssetBuildDirectory()}/b.txt'), isTrue);

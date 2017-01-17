@@ -12,11 +12,20 @@ import 'package:yaml/yaml.dart';
 import 'base/file_system.dart';
 import 'build_info.dart';
 import 'cache.dart';
+import 'devfs.dart';
 import 'dart/package_map.dart';
 import 'globals.dart';
 
 /// An entry in an asset bundle.
 class AssetBundleEntry {
+  factory AssetBundleEntry.fromContent(String archivePath, DevFSContent content) {
+    if (content is DevFSStringContent)
+      return new AssetBundleEntry.fromString(archivePath, content.string);
+    if (content is DevFSFileContent)
+      return new AssetBundleEntry.fromFile(archivePath, content.file);
+    throw 'unsupported type';
+  }
+
   /// An entry backed by a File.
   AssetBundleEntry.fromFile(this.archivePath, this.file)
       : _contents = null;
@@ -46,7 +55,7 @@ class AssetBundleEntry {
 
 /// A bundle of assets.
 class AssetBundle {
-  final Set<AssetBundleEntry> entries = new Set<AssetBundleEntry>();
+  final Map<String, DevFSContent> entries = <String, DevFSContent>{};
 
   static const String defaultManifestPath = 'flutter.yaml';
   static const String _kFontSetMaterial = 'material';
@@ -73,8 +82,7 @@ class AssetBundle {
         continue;
       final String assetPath = path.join(projectRoot, asset);
       final String archivePath = asset;
-      entries.add(
-          new AssetBundleEntry.fromFile(archivePath, fs.file(assetPath)));
+      entries[archivePath] = new DevFSFileContent(fs.file(assetPath));
     }
   }
 
@@ -111,7 +119,7 @@ class AssetBundle {
     }
     if (manifest == null) {
       // No manifest file found for this application.
-      entries.add(new AssetBundleEntry.fromString('AssetManifest.json', '{}'));
+      entries['AssetManifest.json'] = new DevFSStringContent('{}');
       return 0;
     }
     if (manifest != null) {
@@ -141,16 +149,11 @@ class AssetBundle {
         manifestDescriptor['uses-material-design'];
 
     for (_Asset asset in assetVariants.keys) {
-      AssetBundleEntry assetEntry = _createAssetEntry(asset);
-      if (assetEntry == null)
-        return 1;
-      entries.add(assetEntry);
-
+      assert(asset.assetFileExists);
+      entries[asset.assetEntry] = new DevFSFileContent(asset.assetFile);
       for (_Asset variant in assetVariants[asset]) {
-        AssetBundleEntry variantEntry = _createAssetEntry(variant);
-        if (variantEntry == null)
-          return 1;
-        entries.add(variantEntry);
+        assert(variant.assetFileExists);
+        entries[variant.assetEntry] = new DevFSFileContent(variant.assetFile);
       }
     }
 
@@ -161,29 +164,27 @@ class AssetBundle {
         materialAssets.addAll(_getMaterialAssets(_kFontSetRoboto));
     }
     for (_Asset asset in materialAssets) {
-      AssetBundleEntry assetEntry = _createAssetEntry(asset);
-      if (assetEntry == null)
-        return 1;
-      entries.add(assetEntry);
+      assert(asset.assetFileExists);
+      entries[asset.assetEntry] = new DevFSFileContent(asset.assetFile);
     }
 
-    entries.add(_createAssetManifest(assetVariants));
+    entries['AssetManifest.json'] = _createAssetManifest(assetVariants);
 
-    AssetBundleEntry fontManifest =
+    DevFSContent fontManifest =
         _createFontManifest(manifestDescriptor, usesMaterialDesign, includeDefaultFonts, includeRobotoFonts);
     if (fontManifest != null)
-      entries.add(fontManifest);
+      entries['FontManifest.json'] = fontManifest;
 
     // TODO(ianh): Only do the following line if we've changed packages or if our LICENSE file changed
-    entries.add(await _obtainLicenses(packageMap, assetBasePath, reportPackages: reportLicensedPackages));
+    entries['LICENSE'] = await _obtainLicenses(packageMap, assetBasePath, reportPackages: reportLicensedPackages);
 
     return 0;
   }
 
   void dump() {
     printTrace('Dumping AssetBundle:');
-    for (AssetBundleEntry entry in entries) {
-      printTrace(entry.archivePath);
+    for (String archivePath in entries.keys.toList()..sort()) {
+      printTrace(archivePath);
     }
   }
 }
@@ -257,7 +258,7 @@ List<_Asset> _getMaterialAssets(String fontSet) {
 final String _licenseSeparator = '\n' + ('-' * 80) + '\n';
 
 /// Returns a AssetBundleEntry representing the license file.
-Future<AssetBundleEntry> _obtainLicenses(
+Future<DevFSContent> _obtainLicenses(
   PackageMap packageMap,
   String assetBase,
   { bool reportPackages }
@@ -323,17 +324,10 @@ Future<AssetBundleEntry> _obtainLicenses(
 
   final String combinedLicenses = combinedLicensesList.join(_licenseSeparator);
 
-  return new AssetBundleEntry.fromString('LICENSE', combinedLicenses);
+  return new DevFSStringContent(combinedLicenses);
 }
 
-
-/// Create a [AssetBundleEntry] from the given [_Asset]; the asset must exist.
-AssetBundleEntry _createAssetEntry(_Asset asset) {
-  assert(asset.assetFileExists);
-  return new AssetBundleEntry.fromFile(asset.assetEntry, asset.assetFile);
-}
-
-AssetBundleEntry _createAssetManifest(Map<_Asset, List<_Asset>> assetVariants) {
+DevFSContent _createAssetManifest(Map<_Asset, List<_Asset>> assetVariants) {
   Map<String, List<String>> json = <String, List<String>>{};
   for (_Asset main in assetVariants.keys) {
     List<String> variants = <String>[];
@@ -341,10 +335,10 @@ AssetBundleEntry _createAssetManifest(Map<_Asset, List<_Asset>> assetVariants) {
       variants.add(variant.relativePath);
     json[main.relativePath] = variants;
   }
-  return new AssetBundleEntry.fromString('AssetManifest.json', JSON.encode(json));
+  return new DevFSStringContent(JSON.encode(json));
 }
 
-AssetBundleEntry _createFontManifest(Map<String, dynamic> manifestDescriptor,
+DevFSContent _createFontManifest(Map<String, dynamic> manifestDescriptor,
                              bool usesMaterialDesign,
                              bool includeDefaultFonts,
                              bool includeRobotoFonts) {
@@ -358,7 +352,7 @@ AssetBundleEntry _createFontManifest(Map<String, dynamic> manifestDescriptor,
     fonts.addAll(manifestDescriptor['fonts']);
   if (fonts.isEmpty)
     return null;
-  return new AssetBundleEntry.fromString('FontManifest.json', JSON.encode(fonts));
+  return new DevFSStringContent(JSON.encode(fonts));
 }
 
 /// Given an assetBase location and a flutter.yaml manifest, return a map of

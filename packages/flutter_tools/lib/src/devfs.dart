@@ -27,6 +27,82 @@ class DevFSConfig {
 
 DevFSConfig get devFSConfig => context[DevFSConfig];
 
+// File content to be copied to the device.
+class DevFSFileContent extends DevFSContent {
+  DevFSFileContent(this.file);
+
+  final FileSystemEntity file;
+  FileSystemEntity _linkTarget;
+  FileStat _fileStat;
+
+  File _getFile() {
+    if (_linkTarget != null) {
+      return _linkTarget;
+    }
+    if (file is Link) {
+      // The link target.
+      return fs.file(file.resolveSymbolicLinksSync());
+    }
+    return file;
+  }
+
+  void _stat() {
+    if (_linkTarget != null) {
+      // Stat the cached symlink target.
+      _fileStat = _linkTarget.statSync();
+      return;
+    }
+    _fileStat = file.statSync();
+    if (_fileStat.type == FileSystemEntityType.LINK) {
+      // Resolve, stat, and maybe cache the symlink target.
+      String resolved = file.resolveSymbolicLinksSync();
+      FileSystemEntity linkTarget = fs.file(resolved);
+      // Stat the link target.
+      _fileStat = linkTarget.statSync();
+      if (devFSConfig.cacheSymlinks) {
+        _linkTarget = linkTarget;
+      }
+    }
+  }
+
+  @override
+  int get size {
+    if (_fileStat == null)
+      _stat();
+    return _fileStat.size;
+  }
+
+  @override
+  Future<List<int>> contentsAsBytes() => _getFile().readAsBytes();
+
+  @override
+  Stream<List<int>> contentsAsStream() => _getFile().openRead();
+}
+
+/// Byte content to be copied to the device.
+class DevFSByteContent extends DevFSContent {
+  DevFSByteContent(this.bytes);
+
+  final List<int> bytes;
+
+  @override
+  int get size => bytes.length;
+
+  @override
+  Future<List<int>> contentsAsBytes() async => bytes;
+
+  @override
+  Stream<List<int>> contentsAsStream() =>
+      new Stream<List<int>>.fromIterable(<List<int>>[bytes]);
+}
+
+/// String content to be copied to the device.
+class DevFSStringContent extends DevFSByteContent {
+  DevFSStringContent(String string) : string = string, super(UTF8.encode(string));
+
+  final String string;
+}
+
 /// Common superclass for content copied to the device.
 abstract class DevFSContent {
   int get size;
@@ -80,6 +156,7 @@ class DevFSEntry extends DevFSContent {
     return _fileStat.modified.isAfter(_oldFileStat.modified);
   }
 
+  @override
   int get size {
     if (_isSourceEntry) {
       return bundleEntry.contentsLength;
@@ -123,6 +200,7 @@ class DevFSEntry extends DevFSContent {
     return file;
   }
 
+  @override
   Future<List<int>> contentsAsBytes() async {
     if (_isSourceEntry)
       return bundleEntry.contentsAsBytes();
@@ -130,6 +208,7 @@ class DevFSEntry extends DevFSContent {
     return file.readAsBytes();
   }
 
+  @override
   Stream<List<int>> contentsAsStream() {
     if (_isSourceEntry) {
       return new Stream<List<int>>.fromIterable(
@@ -139,6 +218,7 @@ class DevFSEntry extends DevFSContent {
     return file.openRead();
   }
 
+  @override
   Stream<List<int>> contentsAsCompressedStream() {
     return contentsAsStream().transform(GZIP.encoder);
   }
@@ -398,13 +478,14 @@ class DevFS {
     if (bundle != null) {
       printTrace('Scanning asset files');
       // Synchronize asset bundle.
-      for (AssetBundleEntry entry in bundle.entries) {
+      bundle.entries.forEach((String archivePath, DevFSContent content) {
+        AssetBundleEntry entry = new AssetBundleEntry.fromContent(archivePath, content);
         // We write the assets into the AssetBundle working dir so that they
         // are in the same location in DevFS and the iOS simulator.
         final String devicePath =
             path.join(getAssetBuildDirectory(), entry.archivePath);
         _scanBundleEntry(devicePath, entry, bundleDirty);
-      }
+      });
     }
     // Handle deletions.
     printTrace('Scanning for deleted files');

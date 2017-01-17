@@ -2,10 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:archive/archive.dart';
 import 'package:path/path.dart' as path;
 
-import 'asset.dart';
+import 'devfs.dart';
 import 'base/file_system.dart';
 import 'base/process.dart';
 
@@ -20,27 +22,32 @@ abstract class ZipBuilder {
 
   ZipBuilder._();
 
-  List<AssetBundleEntry> entries = <AssetBundleEntry>[];
+  Map<String, DevFSContent> entries = <String, DevFSContent>{};
 
-  void addEntry(AssetBundleEntry entry) => entries.add(entry);
-
-  void createZip(File outFile, Directory zipBuildDir);
+  Future<Null> createZip(File outFile, Directory zipBuildDir);
 }
 
 class _ArchiveZipBuilder extends ZipBuilder {
   _ArchiveZipBuilder() : super._();
 
   @override
-  void createZip(File outFile, Directory zipBuildDir) {
+  Future<Null> createZip(File outFile, Directory zipBuildDir) async {
     Archive archive = new Archive();
 
-    for (AssetBundleEntry entry in entries) {
-      List<int> data = entry.contentsAsBytes();
-      archive.addFile(new ArchiveFile.noCompress(entry.archivePath, data.length, data));
-    }
+    Completer<Null> finished = new Completer<Null>();
+    int count = entries.length;
+    entries.forEach((String archivePath, DevFSContent content) {
+      content.contentsAsBytes().then((List<int> data) {
+        archive.addFile(new ArchiveFile.noCompress(archivePath, data.length, data));
+        --count;
+        if (count == 0)
+          finished.complete();
+      });
+    });
+    await finished.future;
 
     List<int> zipData = new ZipEncoder().encode(archive);
-    outFile.writeAsBytesSync(zipData);
+    await outFile.writeAsBytes(zipData);
   }
 }
 
@@ -48,11 +55,11 @@ class _ZipToolBuilder extends ZipBuilder {
   _ZipToolBuilder() : super._();
 
   @override
-  void createZip(File outFile, Directory zipBuildDir) {
+  Future<Null> createZip(File outFile, Directory zipBuildDir) async {
     // If there are no assets, then create an empty zip file.
     if (entries.isEmpty) {
       List<int> zipData = new ZipEncoder().encode(new Archive());
-      outFile.writeAsBytesSync(zipData);
+      await outFile.writeAsBytes(zipData);
       return;
     }
 
@@ -63,23 +70,33 @@ class _ZipToolBuilder extends ZipBuilder {
       zipBuildDir.deleteSync(recursive: true);
     zipBuildDir.createSync(recursive: true);
 
-    for (AssetBundleEntry entry in entries) {
-      List<int> data = entry.contentsAsBytes();
-      File file = fs.file(path.join(zipBuildDir.path, entry.archivePath));
-      file.parent.createSync(recursive: true);
-      file.writeAsBytesSync(data);
-    }
+    Completer<Null> finished = new Completer<Null>();
+    int count = entries.length;
+    entries.forEach((String archivePath, DevFSContent content) {
+      content.contentsAsBytes().then((List<int> data) {
+        File file = fs.file(path.join(zipBuildDir.path, archivePath));
+        file.parent.createSync(recursive: true);
+        file.writeAsBytes(data).then((_) {
+          --count;
+          if (count == 0)
+            finished.complete();
+        });
+      });
+    });
+    await finished.future;
 
-    if (_getCompressedNames().isNotEmpty) {
+    Iterable<String> compressedNames = _getCompressedNames();
+    if (compressedNames.isNotEmpty) {
       runCheckedSync(
-        <String>['zip', '-q', outFile.absolute.path]..addAll(_getCompressedNames()),
+        <String>['zip', '-q', outFile.absolute.path]..addAll(compressedNames),
         workingDirectory: zipBuildDir.path
       );
     }
 
-    if (_getStoredNames().isNotEmpty) {
+    Iterable<String> storedNames = _getStoredNames();
+    if (storedNames.isNotEmpty) {
       runCheckedSync(
-        <String>['zip', '-q', '-0', outFile.absolute.path]..addAll(_getStoredNames()),
+        <String>['zip', '-q', '-0', outFile.absolute.path]..addAll(storedNames),
         workingDirectory: zipBuildDir.path
       );
     }
@@ -87,21 +104,14 @@ class _ZipToolBuilder extends ZipBuilder {
 
   static const List<String> _kNoCompressFileExtensions = const <String>['.png', '.jpg'];
 
-  bool isAssetCompressed(AssetBundleEntry entry) {
+  bool isAssetCompressed(String archivePath) {
     return !_kNoCompressFileExtensions.any(
-        (String extension) => entry.archivePath.endsWith(extension)
+        (String extension) => archivePath.endsWith(extension)
     );
   }
 
-  Iterable<String> _getCompressedNames() {
-    return entries
-      .where(isAssetCompressed)
-      .map((AssetBundleEntry entry) => entry.archivePath);
-  }
+  Iterable<String> _getCompressedNames() => entries.keys.where(isAssetCompressed);
 
-  Iterable<String> _getStoredNames() {
-    return entries
-      .where((AssetBundleEntry entry) => !isAssetCompressed(entry))
-      .map((AssetBundleEntry entry) => entry.archivePath);
-  }
+  Iterable<String> _getStoredNames() => entries.keys
+      .where((String archivePath) => !isAssetCompressed(archivePath));
 }
