@@ -27,6 +27,21 @@ class DevFSConfig {
 
 DevFSConfig get devFSConfig => context[DevFSConfig];
 
+/// Common superclass for content copied to the device.
+abstract class DevFSContent {
+  int get size;
+
+  Future<List<int>> contentsAsBytes();
+
+  Stream<List<int>> contentsAsStream();
+
+  Stream<List<int>> contentsAsCompressedStream() {
+    return contentsAsStream().transform(GZIP.encoder);
+  }
+
+  bool get isStringEntry => false;
+}
+
 // File content to be copied to the device.
 class DevFSFileContent extends DevFSContent {
   DevFSFileContent(this.file);
@@ -101,19 +116,9 @@ class DevFSStringContent extends DevFSByteContent {
   DevFSStringContent(String string) : string = string, super(UTF8.encode(string));
 
   final String string;
-}
 
-/// Common superclass for content copied to the device.
-abstract class DevFSContent {
-  int get size;
-
-  Future<List<int>> contentsAsBytes();
-
-  Stream<List<int>> contentsAsStream();
-
-  Stream<List<int>> contentsAsCompressedStream() {
-    return contentsAsStream().transform(GZIP.encoder);
-  }
+  @override
+  bool get isStringEntry => true;
 }
 
 // A file that has been added to a DevFS.
@@ -121,13 +126,12 @@ class DevFSEntry extends DevFSContent {
   DevFSEntry(this.devicePath, this.file)
       : bundleEntry = null;
 
-  DevFSEntry.bundle(this.devicePath, AssetBundleEntry bundleEntry)
-      : bundleEntry = bundleEntry,
-        file = bundleEntry.file;
+  DevFSEntry.bundle(this.devicePath, String archivePath, DevFSContent content)
+      : bundleEntry = content,
+        file = content is DevFSFileContent ? content.file : null;
 
   final String devicePath;
-  final AssetBundleEntry bundleEntry;
-  String get assetPath => bundleEntry.archivePath;
+  final DevFSContent bundleEntry;
 
   final FileSystemEntity file;
   FileSystemEntity _linkTarget;
@@ -136,7 +140,6 @@ class DevFSEntry extends DevFSContent {
   bool _exists = false;
   DateTime get lastModified => _fileStat?.modified;
   bool get _isSourceEntry => file == null;
-  bool get _isAssetEntry => bundleEntry != null;
   bool get stillExists {
     if (_isSourceEntry)
       return true;
@@ -159,7 +162,7 @@ class DevFSEntry extends DevFSContent {
   @override
   int get size {
     if (_isSourceEntry) {
-      return bundleEntry.contentsLength;
+      return bundleEntry.size;
     } else {
       if (_fileStat == null) {
         _stat();
@@ -210,10 +213,8 @@ class DevFSEntry extends DevFSContent {
 
   @override
   Stream<List<int>> contentsAsStream() {
-    if (_isSourceEntry) {
-      return new Stream<List<int>>.fromIterable(
-          <List<int>>[bundleEntry.contentsAsBytes()]);
-    }
+    if (_isSourceEntry)
+      return bundleEntry.contentsAsStream();
     final File file = _getFile();
     return file.openRead();
   }
@@ -474,12 +475,7 @@ class DevFS {
       printTrace('Scanning asset files');
       // Synchronize asset bundle.
       bundle.entries.forEach((String archivePath, DevFSContent content) {
-        AssetBundleEntry entry = new AssetBundleEntry.fromContent(archivePath, content);
-        // We write the assets into the AssetBundle working dir so that they
-        // are in the same location in DevFS and the iOS simulator.
-        final String devicePath =
-            path.join(getAssetBuildDirectory(), entry.archivePath);
-        _scanBundleEntry(devicePath, entry, bundleDirty);
+        _scanBundleEntry(archivePath, content, bundleDirty);
       });
     }
     // Handle deletions.
@@ -553,27 +549,23 @@ class DevFS {
     }
   }
 
-  void _scanBundleEntry(String devicePath,
-                        AssetBundleEntry assetBundleEntry,
-                        bool bundleDirty) {
-    DevFSEntry entry = _entries[devicePath];
-    if (entry == null) {
-      // New file.
-      entry = new DevFSEntry.bundle(devicePath, assetBundleEntry);
-      _entries[devicePath] = entry;
-    }
+  void _scanBundleEntry(String archivePath, DevFSContent content, bool bundleDirty) {
+    // We write the assets into the AssetBundle working dir so that they
+    // are in the same location in DevFS and the iOS simulator.
+    final String devicePath = path.join(getAssetBuildDirectory(), archivePath);
+
+    DevFSEntry entry = _entries.putIfAbsent(devicePath, () =>
+        new DevFSEntry.bundle(devicePath, archivePath, content));
     entry._exists = true;
-    if (!bundleDirty && assetBundleEntry.isStringEntry) {
+    if (!bundleDirty && content.isStringEntry) {
       // String bundle entries are synthetic files that only change if the
       // bundle itself changes. Skip them if the bundle is not dirty.
       return;
     }
-    bool needsWrite = entry.isModified;
-    if (needsWrite) {
+    if (entry.isModified) {
       if (_dirtyEntries.add(entry)) {
         _bytes += entry.size;
-        if (entry._isAssetEntry)
-          dirtyAssetPaths.add(entry.assetPath);
+        dirtyAssetPaths.add(archivePath);
       }
     }
   }

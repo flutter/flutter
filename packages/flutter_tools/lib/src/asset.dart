@@ -16,43 +16,6 @@ import 'devfs.dart';
 import 'dart/package_map.dart';
 import 'globals.dart';
 
-/// An entry in an asset bundle.
-class AssetBundleEntry {
-  factory AssetBundleEntry.fromContent(String archivePath, DevFSContent content) {
-    if (content is DevFSStringContent)
-      return new AssetBundleEntry.fromString(archivePath, content.string);
-    if (content is DevFSFileContent)
-      return new AssetBundleEntry.fromFile(archivePath, content.file);
-    throw 'unsupported type';
-  }
-
-  /// An entry backed by a File.
-  AssetBundleEntry.fromFile(this.archivePath, this.file)
-      : _contents = null;
-
-  /// An entry backed by a String.
-  AssetBundleEntry.fromString(this.archivePath, this._contents)
-      : file = null;
-
-  /// The path within the bundle.
-  final String archivePath;
-
-  /// The payload.
-  List<int> contentsAsBytes() {
-    if (_contents != null) {
-      return UTF8.encode(_contents);
-    } else {
-      return file.readAsBytesSync();
-    }
-  }
-
-  bool get isStringEntry => _contents != null;
-  int get contentsLength => _contents.length;
-
-  final File file;
-  final String _contents;
-}
-
 /// A bundle of assets.
 class AssetBundle {
   final Map<String, DevFSContent> entries = <String, DevFSContent>{};
@@ -257,7 +220,7 @@ List<_Asset> _getMaterialAssets(String fontSet) {
 
 final String _licenseSeparator = '\n' + ('-' * 80) + '\n';
 
-/// Returns a AssetBundleEntry representing the license file.
+/// Returns a DevFSContent representing the license file.
 Future<DevFSContent> _obtainLicenses(
   PackageMap packageMap,
   String assetBase,
