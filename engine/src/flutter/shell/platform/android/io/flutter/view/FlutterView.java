@@ -457,6 +457,21 @@ public class FlutterView extends SurfaceView
         return super.onApplyWindowInsets(insets);
     }
 
+    @Override
+    @SuppressWarnings("deprecation")
+    protected boolean fitSystemWindows(Rect insets) {
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT) {
+            mMetrics.physicalPaddingTop = insets.top;
+            mMetrics.physicalPaddingRight = insets.right;
+            mMetrics.physicalPaddingBottom = insets.bottom;
+            mMetrics.physicalPaddingLeft = insets.left;
+            updateViewportMetrics();
+            return true;
+        } else {
+            return super.fitSystemWindows(insets);
+        }
+    }
+
     private void attach() {
         mNativePlatformView = nativeAttach(this);
     }
