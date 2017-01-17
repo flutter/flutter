@@ -395,7 +395,7 @@ class DevFS {
   String _packagesFilePath;
   final Map<String, DevFSEntry> _entries = <String, DevFSEntry>{};
   final Set<DevFSEntry> _dirtyEntries = new Set<DevFSEntry>();
-  final Set<DevFSEntry> dirtyAssetEntries = new Set<DevFSEntry>();
+  final Set<String> dirtyAssetPaths = new Set<String>();
 
   final List<Future<Map<String, dynamic>>> _pendingOperations =
       new List<Future<Map<String, dynamic>>>();
@@ -425,8 +425,6 @@ class DevFS {
     });
     // Clear the dirt entries list.
     _dirtyEntries.clear();
-    // Clear the dirty asset entries.
-    dirtyAssetEntries.clear();
   }
 
   Future<dynamic> update({ DevFSProgressReporter progressReporter,
@@ -575,7 +573,7 @@ class DevFS {
       if (_dirtyEntries.add(entry)) {
         _bytes += entry.size;
         if (entry._isAssetEntry)
-          dirtyAssetEntries.add(entry);
+          dirtyAssetPaths.add(entry.assetPath);
       }
     }
   }
