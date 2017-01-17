@@ -1024,21 +1024,65 @@ class RepositoryDirectory extends RepositoryEntry implements LicenseSource {
 
   @override
   License nearestLicenseOfType(LicenseType type) {
+    License result = _nearestAncestorLicenseWithType(type);
+    if (result == null) {
+      for (RepositoryDirectory directory in _subdirectories) {
+        result = directory._localLicenseWithType(type);
+        if (result != null)
+          break;
+      }
+    }
+    result ??= _fullWalkUpForLicenseWithType(type);
+    return result;
+  }
+
+  /// Searches the current and all parent directories (up to the license root)
+  /// for a license of the specified type.
+  License _nearestAncestorLicenseWithType(type) {
+    License result = _localLicenseWithType(type);
+    if (result != null)
+      return result;
+    if (_canGoUp(null))
+      return parent._nearestAncestorLicenseWithType(type);
+    return null;
+  }
+
+  /// Searches all subdirectories below the current license root for a license
+  /// of the specified type.
+  License _fullWalkUpForLicenseWithType(LicenseType type) {
+    return _canGoUp(null)
+            ? parent._fullWalkUpForLicenseWithType(type)
+            : _fullWalkDownForLicenseWithType(type);
+  }
+
+  /// Searches the current directory and all subdirectories for a license of
+  /// the specified type.
+  License _fullWalkDownForLicenseWithType(LicenseType type) {
+    License result = _localLicenseWithType(type);
+    if (result == null) {
+      for (RepositoryDirectory directory in _subdirectories) {
+        result = directory._fullWalkDownForLicenseWithType(type);
+        if (result != null)
+          break;
+      }
+    }
+    return result;
+  }
+
+  /// Searches the current directory for licenses of the specified type.
+  License _localLicenseWithType(LicenseType type) {
     List<License> licenses = _licenses.expand/*License*/((RepositoryLicenseFile license) sync* {
       License result = license.licenseOfType(type);
       if (result != null)
         yield result;
     }).toList();
-    if (licenses.isEmpty) {
-      if (_canGoUp(null))
-        return parent.nearestLicenseOfType(type);
-      return null;
-    }
     if (licenses.length > 1) {
       print('unexpectedly found multiple matching licenses in $name of type $type');
       return null;
     }
-    return licenses.single;
+    if (licenses.isNotEmpty)
+      return licenses.single;
+    return null;
   }
 
   @override
