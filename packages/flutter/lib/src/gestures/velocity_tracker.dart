@@ -43,7 +43,7 @@ class _LeastSquaresVelocityTrackerStrategy extends _VelocityTrackerStrategy {
   int _index = 0;
 
   static const int kHistorySize = 20;
-  static const int kHorizonMilliseconds = 40;
+  static const int kHorizonMilliseconds = 100;
 
   @override
   void addMovement(Duration timeStamp, Point position) {
