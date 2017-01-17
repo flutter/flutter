@@ -118,8 +118,9 @@ void FontCollection::init(const vector<std::shared_ptr<FontFamily>>& typefaces) 
     nTypefaces = mFamilies.size();
     LOG_ALWAYS_FATAL_IF(nTypefaces == 0,
         "Font collection must have at least one valid typeface");
+    LOG_ALWAYS_FATAL_IF(nTypefaces > 254,
+        "Font collection may only have up to 254 font families.");
     size_t nPages = (mMaxChar + kPageMask) >> kLogCharsPerPage;
-    size_t offset = 0;
     // TODO: Use variation selector map for mRanges construction.
     // A font can have a glyph for a base code point and variation selector pair but no glyph for
     // the base code point without variation selector. The family won't be listed in the range in
@@ -131,12 +132,11 @@ void FontCollection::init(const vector<std::shared_ptr<FontFamily>>& typefaces) 
 #ifdef VERBOSE_DEBUG
         ALOGD("i=%zd: range start = %zd\n", i, offset);
 #endif
-        range->start = offset;
+        range->start = mFamilyVec.size();
         for (size_t j = 0; j < nTypefaces; j++) {
             if (lastChar[j] < (i + 1) << kLogCharsPerPage) {
                 const std::shared_ptr<FontFamily>& family = mFamilies[j];
-                mFamilyVec.push_back(family);
-                offset++;
+                mFamilyVec.push_back(static_cast<uint8_t>(j));
                 uint32_t nextChar = family->getCoverage().nextSetBit((i + 1) << kLogCharsPerPage);
 #ifdef VERBOSE_DEBUG
                 ALOGD("nextChar = %d (j = %zd)\n", nextChar, j);
@@ -144,8 +144,11 @@ void FontCollection::init(const vector<std::shared_ptr<FontFamily>>& typefaces) 
                 lastChar[j] = nextChar;
             }
         }
-        range->end = offset;
+        range->end = mFamilyVec.size();
     }
+    // See the comment in Range for more details.
+    LOG_ALWAYS_FATAL_IF(mFamilyVec.size() >= 0xFFFF,
+        "Exceeded the maximum indexable cmap coverage.");
 }
 
 // Special scores for the font fallback.
@@ -286,11 +289,10 @@ const std::shared_ptr<FontFamily>& FontCollection::getFamilyForChar(uint32_t ch,
         return mFamilies[0];
     }
 
-    const std::vector<std::shared_ptr<FontFamily>>& familyVec = (vs == 0) ? mFamilyVec : mFamilies;
     Range range = mRanges[ch >> kLogCharsPerPage];
 
     if (vs != 0) {
-        range = { 0, mFamilies.size() };
+        range = { 0, static_cast<uint16_t>(mFamilies.size()) };
     }
 
 #ifdef VERBOSE_DEBUG
@@ -299,7 +301,8 @@ const std::shared_ptr<FontFamily>& FontCollection::getFamilyForChar(uint32_t ch,
     int bestFamilyIndex = -1;
     uint32_t bestScore = kUnsupportedFontScore;
     for (size_t i = range.start; i < range.end; i++) {
-        const std::shared_ptr<FontFamily>& family = familyVec[i];
+        const std::shared_ptr<FontFamily>& family =
+                vs == 0 ? mFamilies[mFamilyVec[i]] : mFamilies[i];
         const uint32_t score = calcFamilyScore(ch, vs, variant, langListId, family);
         if (score == kFirstFontScore) {
             // If the first font family supports the given character or variation sequence, always
@@ -325,7 +328,7 @@ const std::shared_ptr<FontFamily>& FontCollection::getFamilyForChar(uint32_t ch,
         }
         return mFamilies[0];
     }
-    return familyVec[bestFamilyIndex];
+    return vs == 0 ? mFamilies[mFamilyVec[bestFamilyIndex]] : mFamilies[bestFamilyIndex];
 }
 
 const uint32_t NBSP = 0x00A0;

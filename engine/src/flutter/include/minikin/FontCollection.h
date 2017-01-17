@@ -59,9 +59,14 @@ private:
     static const int kLogCharsPerPage = 8;
     static const int kPageMask = (1 << kLogCharsPerPage) - 1;
 
+    // mFamilyVec holds the indices of the mFamilies and mRanges holds the range of indices of
+    // mFamilyVec. The maximum number of pages is 0x10FF (U+10FFFF >> 8). The maximum number of
+    // the fonts is 0xFF. Thus, technically the maximum length of mFamilyVec is 0x10EE01
+    // (0x10FF * 0xFF). However, in practice, 16-bit integers are enough since most fonts supports
+    // only limited range of code points.
     struct Range {
-        size_t start;
-        size_t end;
+        uint16_t start;
+        uint16_t end;
     };
 
     // Initialize the FontCollection.
@@ -96,10 +101,12 @@ private:
 
     // Following two vectors are pre-calculated tables for resolving coverage faster.
     // For example, to iterate over all fonts which support Unicode code point U+XXYYZZ,
-    // iterate font families from mFamilyVec[mRanges[0xXXYY].start] to
+    // iterate font families index from mFamilyVec[mRanges[0xXXYY].start] to
     // mFamilyVec[mRange[0xXXYY].end] instead of whole mFamilies.
+    // This vector contains indices into mFamilies.
+    // This vector can't be empty.
     std::vector<Range> mRanges;
-    std::vector<std::shared_ptr<FontFamily>> mFamilyVec;
+    std::vector<uint8_t> mFamilyVec;
 
     // This vector has pointers to the font family instances which have cmap 14 subtables.
     std::vector<std::shared_ptr<FontFamily>> mVSFamilyVec;
