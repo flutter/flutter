@@ -72,4 +72,22 @@ void main() {
     expect(integers, equals(<int>[1, 2, 3, 4, 5]));
     expect(yieldCount, equals(5));
   });
+
+  test('The Caching Iterable: take and skip', () {
+    Iterable<int> integers = new CachingIterable<int>(range(1, 5).iterator);
+    expect(yieldCount, equals(0));
+
+    Iterable<int> secondTwo = integers.skip(1).take(2);
+
+    expect(yieldCount, equals(0));
+    expect(secondTwo, equals(<int>[2, 3]));
+    expect(yieldCount, equals(3));
+
+    Iterable<int> result = integers.takeWhile((int i) => i < 4).skipWhile((int i) => i < 3);
+
+    expect(result, equals(<int>[3]));
+    expect(yieldCount, equals(4));
+    expect(integers, equals(<int>[1, 2, 3, 4, 5]));
+    expect(yieldCount, equals(5));
+  });
 }

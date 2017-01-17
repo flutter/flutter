@@ -41,4 +41,12 @@ void main() {
     expect(tween.lerp(0.5), 7);
     expect(tween.lerp(0.7), 8);
   });
+
+  test('RectTween', () {
+    Rect a = new Rect.fromLTWH(5.0, 3.0, 7.0, 11.0);
+    Rect b = new Rect.fromLTWH(8.0, 12.0, 14.0, 18.0);
+    RectTween tween = new RectTween(begin: a, end: b);
+    expect(tween.lerp(0.5), equals(Rect.lerp(a, b, 0.5)));
+    expect(tween, hasOneLineDescription);
+  });
 }

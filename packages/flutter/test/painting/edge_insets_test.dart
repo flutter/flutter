@@ -20,6 +20,9 @@ void main() {
     expect(insets.collapsedSize, const Size(16.0, 20.0));
     expect(insets.flipped, const EdgeInsets.fromLTRB(11.0, 13.0, 5.0, 7.0));
 
+    expect(insets.along(Axis.horizontal), equals(16.0));
+    expect(insets.along(Axis.vertical), equals(20.0));
+
     expect(insets.inflateRect(new Rect.fromLTRB(23.0, 32.0, 124.0, 143.0)),
            new Rect.fromLTRB(18.0, 25.0, 135.0, 156.0));
 
@@ -42,5 +45,9 @@ void main() {
     expect(EdgeInsets.lerp(a, b, 0.25), equals(b * 0.625));
     expect(EdgeInsets.lerp(a, b, 0.25), equals(a + const EdgeInsets.all(2.5)));
     expect(EdgeInsets.lerp(a, b, 0.25), equals(b - const EdgeInsets.all(7.5)));
+
+    expect(EdgeInsets.lerp(null, null, 0.25), isNull);
+    expect(EdgeInsets.lerp(null, b, 0.25), equals(b * 0.25));
+    expect(EdgeInsets.lerp(a, null, 0.25), equals(a * 0.75));
   });
 }

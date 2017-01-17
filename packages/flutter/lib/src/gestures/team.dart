@@ -33,9 +33,11 @@ class _CombiningGestureArenaMember extends GestureArenaMember {
     assert(_pointer == pointer);
     assert(_winner != null || _members.isNotEmpty);
     _close();
-    _winner ??= _members.removeAt(0);
-    for (GestureArenaMember member in _members)
-      member.rejectGesture(pointer);
+    _winner ??= _members[0];
+    for (GestureArenaMember member in _members) {
+      if (member != _winner)
+        member.rejectGesture(pointer);
+    }
     _winner.acceptGesture(pointer);
   }
 
@@ -72,7 +74,7 @@ class _CombiningGestureArenaMember extends GestureArenaMember {
         _entry.resolve(disposition);
     } else {
       assert(disposition == GestureDisposition.accepted);
-      _winner ?? member;
+      _winner ??= member;
       _entry.resolve(disposition);
     }
   }

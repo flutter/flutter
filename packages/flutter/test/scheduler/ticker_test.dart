@@ -66,4 +66,17 @@ void main() {
     expect(ticker.isTicking, isFalse);
     expect(ticker.isActive, isFalse);
   });
+
+  testWidgets('Ticker control test', (WidgetTester tester) async {
+    Ticker ticker;
+
+    void testFunction() {
+      ticker = new Ticker(null);
+    }
+
+    testFunction();
+
+    expect(ticker, hasOneLineDescription);
+    expect(ticker.toString(debugIncludeStack: true), contains('testFunction'));
+  });
 }
