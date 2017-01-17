@@ -395,7 +395,6 @@ class DevFS {
   String _packagesFilePath;
   final Map<String, DevFSEntry> _entries = <String, DevFSEntry>{};
   final Set<DevFSEntry> _dirtyEntries = new Set<DevFSEntry>();
-  final Set<DevFSEntry> _deletedEntries = new Set<DevFSEntry>();
   final Set<DevFSEntry> dirtyAssetEntries = new Set<DevFSEntry>();
 
   final List<Future<Map<String, dynamic>>> _pendingOperations =
@@ -426,8 +425,6 @@ class DevFS {
     });
     // Clear the dirt entries list.
     _dirtyEntries.clear();
-    // Clear the deleted entries list.
-    _deletedEntries.clear();
     // Clear the dirty asset entries.
     dirtyAssetEntries.clear();
   }
@@ -492,25 +489,18 @@ class DevFS {
     final List<String> toRemove = new List<String>();
     _entries.forEach((String path, DevFSEntry entry) {
       if (!entry._exists) {
-        _deletedEntries.add(entry);
-        toRemove.add(path);
-      }
-    });
-    for (int i = 0; i < toRemove.length; i++) {
-      _entries.remove(toRemove[i]);
-    }
-
-    if (_deletedEntries.length > 0) {
-      printTrace('Removing deleted files');
-      for (DevFSEntry entry in _deletedEntries) {
         Future<Map<String, dynamic>> operation =
             _operations.deleteFile(fsName, entry.devicePath);
         if (operation != null)
           _pendingOperations.add(operation);
+        toRemove.add(path);
       }
+    });
+    if (toRemove.isNotEmpty) {
+      printTrace('Removing deleted files');
+      toRemove.forEach(_entries.remove);
       await Future.wait(_pendingOperations);
       _pendingOperations.clear();
-      _deletedEntries.clear();
     }
 
     if (_dirtyEntries.length > 0) {
