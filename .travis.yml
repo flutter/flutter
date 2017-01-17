@@ -13,9 +13,7 @@ install:
 before_script:
   - ./dev/bots/setup.sh
 script:
-  - ./dev/bots/test.sh
-after_success:
-  - (cd packages/flutter && coveralls-lcov coverage/lcov.info)
+  - ./dev/bots/entry.sh
 cache:
   directories:
     - $HOME/.pub-cache

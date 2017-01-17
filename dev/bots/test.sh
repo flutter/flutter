@@ -61,5 +61,4 @@ if [ -n "$COVERAGE_FLAG" ]; then
   $GSUTIL cp packages/flutter/coverage/lcov.info $STORAGE_URL
 fi
 
-# generate the API docs, upload them
-dev/bots/docs.sh
+(cd packages/flutter && coveralls-lcov coverage/lcov.info)
