@@ -13,7 +13,7 @@ class TestDrag extends Drag {
 void main() {
   setUp(ensureGestureBinding);
 
-  testGesture('Should recognize pan', (GestureTester tester) {
+  testGesture('MultiDrag control test', (GestureTester tester) {
     DelayedMultiDragGestureRecognizer drag = new DelayedMultiDragGestureRecognizer();
 
     bool didStartDrag = false;

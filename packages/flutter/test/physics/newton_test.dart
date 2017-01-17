@@ -70,6 +70,20 @@ void main() {
     expect(friction.dx(1.0), closeTo(endVelocity, epsilon));
   });
 
+  test('BoundedFrictionSimulation control test', () {
+    BoundedFrictionSimulation friction = new BoundedFrictionSimulation(0.3, 100.0, 400.0, 50.0, 150.0);
+
+    friction.tolerance = const Tolerance(velocity: 1.0);
+
+    expect(friction.isDone(0.0), false);
+    expect(friction.x(0.0), 100);
+    expect(friction.dx(0.0), 400.0);
+
+    expect(friction.x(1.0), equals(150.0));
+
+    expect(friction.isDone(1.0), true);
+  });
+
   test('test_gravity', () {
     GravitySimulation gravity = new GravitySimulation(200.0, 100.0, 600.0, 0.0);
 
