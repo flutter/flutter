@@ -1536,3 +1536,72 @@ const List<PointerEvent> velocityEventData = const <PointerEvent>[
     position: const Point(241.14285278320312, 451.4285583496094)
   ),
 ];
+
+const List<PointerEvent> interruptedVelocityEventData = const <PointerEvent>[
+  const PointerDownEvent(
+    timeStamp: const Duration(milliseconds: 216698321),
+    pointer: 13,
+    position: const Point(250.0, 306.0)
+  ),
+
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216698328),
+    pointer: 13,
+    position: const Point(250.0, 306.0)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216698344),
+    pointer: 13,
+    position: const Point(249.14285278320312, 314.0)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216698351),
+    pointer: 13,
+    position: const Point(247.42857360839844, 319.4285583496094)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216698359),
+    pointer: 13,
+    position: const Point(245.14285278320312, 326.8571472167969)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216698366),
+    pointer: 13,
+    position: const Point(241.7142791748047, 339.4285583496094)
+  ),
+
+  // The pointer "stops" here because we've introduced a 40+ms gap
+  // in the move event stream. See kAssumePointerMoveStoppedMilliseconds
+  // in velocity_tracker.dart.
+
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216698374 + 40),
+    pointer: 13,
+    position: const Point(238.57142639160156, 355.71429443359375)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216698382 + 40),
+    pointer: 13,
+    position: const Point(236.2857208251953, 374.28570556640625)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216698390 + 40),
+    pointer: 13,
+    position: const Point(235.14285278320312, 396.5714416503906)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216698398 + 40),
+    pointer: 13,
+    position: const Point(236.57142639160156, 421.4285583496094)
+  ),
+  const PointerMoveEvent(
+    timeStamp: const Duration(milliseconds: 216698406 + 40),
+    pointer: 13,
+    position: const Point(241.14285278320312, 451.4285583496094)
+  ),
+  const PointerUpEvent(
+    timeStamp: const Duration(milliseconds: 216698421 + 40),
+    pointer: 13,
+    position: const Point(241.14285278320312, 451.4285583496094)
+  ),
+];
