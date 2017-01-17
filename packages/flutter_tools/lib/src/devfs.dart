@@ -29,6 +29,12 @@ DevFSConfig get devFSConfig => context[DevFSConfig];
 
 /// Common superclass for content copied to the device.
 abstract class DevFSContent {
+  bool _exists = false;
+
+  /// Return `true` if this is the first time this method is called
+  /// or if the entry has been modified since this method was last called.
+  bool get isModified;
+
   int get size;
 
   Future<List<int>> contentsAsBytes();
@@ -81,6 +87,13 @@ class DevFSFileContent extends DevFSContent {
   }
 
   @override
+  bool get isModified {
+    FileStat _oldFileStat = _fileStat;
+    _stat();
+    return _oldFileStat == null || _fileStat.modified.isAfter(_oldFileStat.modified);
+  }
+
+  @override
   int get size {
     if (_fileStat == null)
       _stat();
@@ -99,6 +112,16 @@ class DevFSByteContent extends DevFSContent {
   DevFSByteContent(this.bytes);
 
   final List<int> bytes;
+
+  bool _isModified = true;
+
+  /// Return `true` only once so that the content is written to the device only once.
+  @override
+  bool get isModified {
+    bool modified = _isModified;
+    _isModified = false;
+    return modified;
+  }
 
   @override
   int get size => bytes.length;
@@ -137,7 +160,6 @@ class DevFSEntry extends DevFSContent {
   FileSystemEntity _linkTarget;
   FileStat _fileStat;
   // When we scanned for files, did this still exist?
-  bool _exists = false;
   DateTime get lastModified => _fileStat?.modified;
   bool get _isSourceEntry => file == null;
   bool get stillExists {
@@ -396,7 +418,8 @@ class DevFS {
   String _packagesFilePath;
   final Map<String, DevFSEntry> _entries = <String, DevFSEntry>{};
   final Set<DevFSEntry> _dirtyEntries = new Set<DevFSEntry>();
-  final Set<String> dirtyAssetPaths = new Set<String>();
+  final Set<String> assetPathsToEvict = new Set<String>();
+  final Map<String, DevFSContent> _assets = <String, DevFSContent>{};
 
   final List<Future<Map<String, dynamic>>> _pendingOperations =
       new List<Future<Map<String, dynamic>>>();
@@ -420,10 +443,6 @@ class DevFS {
   void _reset() {
     // Reset the dirty byte count.
     _bytes = 0;
-    // Mark all entries as possibly deleted.
-    _entries.forEach((String path, DevFSEntry entry) {
-      entry._exists = false;
-    });
     // Clear the dirt entries list.
     _dirtyEntries.clear();
   }
@@ -433,6 +452,14 @@ class DevFS {
                            bool bundleDirty: false,
                            Set<String> fileFilter}) async {
     _reset();
+
+    // Mark all entries as possibly deleted.
+    _entries.forEach((String path, DevFSEntry entry) {
+      entry._exists = false;
+      if (entry.bundleEntry != null)
+        entry.bundleEntry._exists = false;
+    });
+
     printTrace('DevFS: Starting sync from $rootDirectory');
     logger.printTrace('Scanning project files');
     Directory directory = rootDirectory;
@@ -471,12 +498,18 @@ class DevFS {
         }
       }
     }
+
     if (bundle != null) {
       printTrace('Scanning asset files');
-      // Synchronize asset bundle.
       bundle.entries.forEach((String archivePath, DevFSContent content) {
         _scanBundleEntry(archivePath, content, bundleDirty);
       });
+      _assets.forEach((String archivePath, DevFSContent content) {
+        if (!content._exists) {
+          assetPathsToEvict.add(archivePath);
+        }
+      });
+      _assets..clear()..addAll(bundle.entries);
     }
     // Handle deletions.
     printTrace('Scanning for deleted files');
@@ -557,15 +590,11 @@ class DevFS {
     DevFSEntry entry = _entries.putIfAbsent(devicePath, () =>
         new DevFSEntry.bundle(devicePath, archivePath, content));
     entry._exists = true;
-    if (!bundleDirty && content.isStringEntry) {
-      // String bundle entries are synthetic files that only change if the
-      // bundle itself changes. Skip them if the bundle is not dirty.
-      return;
-    }
-    if (entry.isModified) {
+    entry.bundleEntry._exists = true;
+    if (entry.bundleEntry.isModified || bundleDirty) {
       if (_dirtyEntries.add(entry)) {
         _bytes += entry.size;
-        dirtyAssetPaths.add(archivePath);
+        assetPathsToEvict.add(archivePath);
       }
     }
   }

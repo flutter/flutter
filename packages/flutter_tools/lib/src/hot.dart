@@ -287,14 +287,14 @@ class HotRunner extends ResidentRunner {
   }
 
   Future<Null> _evictDirtyAssets() async {
-    if (_devFS.dirtyAssetPaths.isEmpty)
+    if (_devFS.assetPathsToEvict.isEmpty)
       return;
     if (currentView.uiIsolate == null)
       throw 'Application isolate not found';
-    for (String assetPath in _devFS.dirtyAssetPaths) {
+    for (String assetPath in _devFS.assetPathsToEvict) {
       await currentView.uiIsolate.flutterEvictAsset(assetPath);
     }
-    _devFS.dirtyAssetPaths.clear();
+    _devFS.assetPathsToEvict.clear();
   }
 
   Future<Null> _cleanupDevFS() async {

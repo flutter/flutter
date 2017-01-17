@@ -13,6 +13,7 @@ import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/ios/simulators.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:mockito/mockito.dart';
+import 'package:test/test.dart';
 
 class MockApplicationPackageStore extends ApplicationPackageStore {
   MockApplicationPackageStore() : super(
@@ -76,6 +77,12 @@ void applyMocksToCommand(FlutterCommand command) {
 
 class MockDevFSOperations implements DevFSOperations {
   final List<String> messages = new List<String>();
+
+  void expectMessages(List<String> expectedMessages) {
+    List<String> actualMessages = new List<String>.from(messages);
+    messages.clear();
+    expect(actualMessages, orderedEquals(expectedMessages));
+  }
 
   bool contains(String match) {
     print('Checking for `$match` in:');
