@@ -10,5 +10,5 @@ else if [ "$DART_SDK_CANARY" = "true" ]; then
   dev/bots/sdk_canary.sh
 else
   # run tests
-  dev/bots/docs.sh
+  dev/bots/test.sh
 fi
