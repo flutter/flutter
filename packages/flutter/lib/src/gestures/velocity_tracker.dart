@@ -43,7 +43,14 @@ class _LeastSquaresVelocityTrackerStrategy extends _VelocityTrackerStrategy {
   int _index = 0;
 
   static const int kHistorySize = 20;
+
+  // On iOS we're not necccessarily seeing all of the motion events. See:
+  // https://github.com/flutter/flutter/issues/4737#issuecomment-241076994
   static const int kHorizonMilliseconds = 100;
+
+  // The maximum length of time between two move events to allow
+  // before assuming the pointer stopped.
+  static const int kAssumePointerMoveStoppedMilliseconds = 40;
 
   @override
   void addMovement(Duration timeStamp, Point position) {
@@ -64,6 +71,7 @@ class _LeastSquaresVelocityTrackerStrategy extends _VelocityTrackerStrategy {
     int index = _index;
 
     _Movement newestMovement = _movements[index];
+    _Movement previousMovement = newestMovement;
     if (newestMovement == null)
       return null;
 
@@ -73,7 +81,9 @@ class _LeastSquaresVelocityTrackerStrategy extends _VelocityTrackerStrategy {
         break;
 
       double age = (newestMovement.eventTime - movement.eventTime).inMilliseconds.toDouble();
-      if (age > kHorizonMilliseconds)
+      double delta = (movement.eventTime - previousMovement.eventTime).inMilliseconds.toDouble();
+      previousMovement = movement;
+      if (age > kHorizonMilliseconds || delta > kAssumePointerMoveStoppedMilliseconds)
         break;
 
       Point position = movement.position;
