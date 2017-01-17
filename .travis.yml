@@ -14,6 +14,10 @@ before_script:
   - ./dev/bots/setup.sh
 script:
   - ./dev/bots/entry.sh
+env:
+  - MAIN_BOT=true
+  - DART_SDK_CANARY=true
+  - BUILD_DOCS=true
 cache:
   directories:
     - $HOME/.pub-cache
