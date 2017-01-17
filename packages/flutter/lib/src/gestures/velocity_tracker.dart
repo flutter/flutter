@@ -34,6 +34,9 @@ class _Movement {
   String toString() => 'Movement($position at $eventTime)';
 }
 
+// TODO: On iOS we're not necccessarily seeing all of the motion events. See:
+// https://github.com/flutter/flutter/issues/4737#issuecomment-241076994
+
 class _LeastSquaresVelocityTrackerStrategy extends _VelocityTrackerStrategy {
   _LeastSquaresVelocityTrackerStrategy(this.degree);
 
@@ -43,9 +46,6 @@ class _LeastSquaresVelocityTrackerStrategy extends _VelocityTrackerStrategy {
   int _index = 0;
 
   static const int kHistorySize = 20;
-
-  // On iOS we're not necccessarily seeing all of the motion events. See:
-  // https://github.com/flutter/flutter/issues/4737#issuecomment-241076994
   static const int kHorizonMilliseconds = 100;
 
   // The maximum length of time between two move events to allow before
@@ -81,7 +81,7 @@ class _LeastSquaresVelocityTrackerStrategy extends _VelocityTrackerStrategy {
         break;
 
       double age = (newestMovement.eventTime - movement.eventTime).inMilliseconds.toDouble();
-      double delta = (movement.eventTime - previousMovement.eventTime).inMilliseconds.toDouble();
+      double delta = (movement.eventTime - previousMovement.eventTime).inMilliseconds.abs().toDouble();
       previousMovement = movement;
       if (age > kHorizonMilliseconds || delta > kAssumePointerMoveStoppedMilliseconds)
         break;
