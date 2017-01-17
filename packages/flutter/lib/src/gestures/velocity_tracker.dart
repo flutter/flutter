@@ -48,8 +48,8 @@ class _LeastSquaresVelocityTrackerStrategy extends _VelocityTrackerStrategy {
   // https://github.com/flutter/flutter/issues/4737#issuecomment-241076994
   static const int kHorizonMilliseconds = 100;
 
-  // The maximum length of time between two move events to allow
-  // before assuming the pointer stopped.
+  // The maximum length of time between two move events to allow before
+  // assuming the pointer stopped.
   static const int kAssumePointerMoveStoppedMilliseconds = 40;
 
   @override
