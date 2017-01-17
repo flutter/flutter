@@ -328,18 +328,18 @@ class _DevFSHttpWriter {
   static const int kMaxInFlight = 6;
 
   int _inFlight = 0;
-  List<DevFSEntry> _outstanding;
+  Map<String, DevFSContent> _outstanding;
   Completer<Null> _completer;
   HttpClient _client;
   int _done;
   int _max;
 
-  Future<Null> write(Set<DevFSEntry> entries,
+  Future<Null> write(Map<String, DevFSContent> entries,
                      {DevFSProgressReporter progressReporter}) async {
     _client = new HttpClient();
     _client.maxConnectionsPerHost = kMaxInFlight;
     _completer = new Completer<Null>();
-    _outstanding = entries.toList();
+    _outstanding = new Map<String, DevFSContent>.from(entries);
     _done = 0;
     _max = _outstanding.length;
     _scheduleWrites(progressReporter);
@@ -349,30 +349,32 @@ class _DevFSHttpWriter {
 
   void _scheduleWrites(DevFSProgressReporter progressReporter) {
     while (_inFlight < kMaxInFlight) {
-       if (_outstanding.length == 0) {
+      if (_outstanding.length == 0) {
         // Finished.
         break;
       }
-      DevFSEntry entry = _outstanding.removeLast();
-      _scheduleWrite(entry, progressReporter);
+      String devicePath = _outstanding.keys.first;
+      DevFSContent content = _outstanding.remove(devicePath);
+      _scheduleWrite(devicePath, content, progressReporter);
       _inFlight++;
     }
   }
 
-  Future<Null> _scheduleWrite(DevFSEntry entry,
+  Future<Null> _scheduleWrite(String devicePath,
+                              DevFSContent content,
                               DevFSProgressReporter progressReporter) async {
     try {
       HttpClientRequest request = await _client.putUrl(httpAddress);
       request.headers.removeAll(HttpHeaders.ACCEPT_ENCODING);
       request.headers.add('dev_fs_name', fsName);
       request.headers.add('dev_fs_path_b64',
-                          BASE64.encode(UTF8.encode(entry.devicePath)));
-      Stream<List<int>> contents = entry.contentsAsCompressedStream();
+                          BASE64.encode(UTF8.encode(devicePath)));
+      Stream<List<int>> contents = content.contentsAsCompressedStream();
       await request.addStream(contents);
       HttpClientResponse response = await request.close();
       await response.drain();
     } catch (e) {
-      printError('Error writing "${entry.devicePath}" to DevFS: $e');
+      printError('Error writing "$devicePath" to DevFS: $e');
     }
     if (progressReporter != null) {
       _done++;
@@ -417,9 +419,10 @@ class DevFS {
   final Directory rootDirectory;
   String _packagesFilePath;
   final Map<String, DevFSEntry> _entries = <String, DevFSEntry>{};
-  final Set<DevFSEntry> _dirtyEntries = new Set<DevFSEntry>();
-  final Set<String> assetPathsToEvict = new Set<String>();
+  final Map<String, DevFSContent> _dirtyEntries = <String, DevFSContent>{};
+
   final Map<String, DevFSContent> _assets = <String, DevFSContent>{};
+  final Set<String> assetPathsToEvict = new Set<String>();
 
   final List<Future<Map<String, dynamic>>> _pendingOperations =
       new List<Future<Map<String, dynamic>>>();
@@ -541,12 +544,12 @@ class DevFS {
         }
       } else {
         // Make service protocol requests for each.
-        for (DevFSEntry entry in _dirtyEntries) {
+        _dirtyEntries.forEach((String devicePath, DevFSContent content) {
           Future<Map<String, dynamic>> operation =
-              _operations.writeFile(fsName, entry.devicePath, entry);
+              _operations.writeFile(fsName, devicePath, content);
           if (operation != null)
             _pendingOperations.add(operation);
-        }
+        });
         if (progressReporter != null) {
           final int max = _pendingOperations.length;
           int complete = 0;
@@ -575,10 +578,9 @@ class DevFS {
       _entries[devicePath] = entry;
     }
     entry._exists = true;
-    bool needsWrite = entry.isModified;
-    if (needsWrite) {
-      if (_dirtyEntries.add(entry))
-        _bytes += entry.size;
+    if (entry.isModified) {
+      _dirtyEntries[devicePath] = entry;
+      _bytes += entry.size;
     }
   }
 
@@ -592,10 +594,9 @@ class DevFS {
     entry._exists = true;
     entry.bundleEntry._exists = true;
     if (entry.bundleEntry.isModified || bundleDirty) {
-      if (_dirtyEntries.add(entry)) {
-        _bytes += entry.size;
-        assetPathsToEvict.add(archivePath);
-      }
+      _dirtyEntries[devicePath] = entry;
+      _bytes += entry.size;
+      assetPathsToEvict.add(archivePath);
     }
   }
 
