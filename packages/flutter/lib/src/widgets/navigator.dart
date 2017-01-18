@@ -80,8 +80,12 @@ abstract class Route<T> {
   /// return false, otherwise return true. Returning false will prevent the
   /// default behavior of NavigatorState.pop().
   ///
-  /// If this is called, the Navigator will not call dispose(). It is the
-  /// responsibility of the Route to later call dispose().
+  /// When this function returns true, the navigator removes this route from
+  /// the history but does not yet call [dispose]. Instead, it is the route's
+  /// responsibility to call [NavigatorState.finalizeRoute], which will in turn
+  /// call [dispose] on the route. This sequence lets the route perform an
+  /// exit animation (or some other visual effect) after being popped but prior
+  /// to being disposed.
   @protected
   @mustCallSuper
   bool didPop(T result) {
@@ -108,11 +112,21 @@ abstract class Route<T> {
 
   /// The route should remove its overlays and free any other resources.
   ///
-  /// A call to didPop() implies that the Route should call dispose() itself,
-  /// but it is possible for dispose() to be called directly (e.g. if the route
-  /// is replaced, or if the navigator itself is disposed).
+  /// This route is no longer referenced by the navigator.
   @mustCallSuper
-  void dispose() { }
+  @protected
+  void dispose() {
+    assert(() {
+      if (_navigator == null) {
+        throw new FlutterError(
+          '$runtimeType.dipose() called more than once.\n'
+          'A given route cannot be disposed more than once.'
+        );
+      }
+      return true;
+    });
+    _navigator = null;
+  }
 
   /// If the route's transition can be popped via a user gesture (e.g. the iOS
   /// back gesture), this should return a controller object that can be used to
@@ -123,18 +137,13 @@ abstract class Route<T> {
   /// a [WillPopCallback] was defined for the route, then it may make sense
   /// to disable the pop gesture. For example, the iOS back gesture is disabled
   /// when [ModalRoute.hasScopedWillCallback] is true.
-  NavigationGestureController startPopGesture(NavigatorState navigator) {
-    return null;
-  }
+  NavigationGestureController startPopGesture() => null;
 
   /// Whether this route is the top-most route on the navigator.
   ///
   /// If this is true, then [isActive] is also true.
   bool get isCurrent {
-    if (_navigator == null)
-      return false;
-    assert(_navigator._history.contains(this));
-    return _navigator._history.last == this;
+    return _navigator != null && _navigator._history.last == this;
   }
 
   /// Whether this route is on the navigator.
@@ -146,10 +155,7 @@ abstract class Route<T> {
   /// rendered. It is even possible for the route to be active but for the stateful
   /// widgets within the route to not be instatiated. See [ModalRoute.maintainState].
   bool get isActive {
-    if (_navigator == null)
-      return false;
-    assert(_navigator._history.contains(this));
-    return true;
+    return _navigator != null && _navigator._history.contains(this);
   }
 }
 
@@ -208,6 +214,7 @@ abstract class NavigationGestureController {
   /// Configures the NavigationGestureController and tells the given [Navigator] that
   /// a gesture has started.
   NavigationGestureController(this._navigator) {
+    assert(_navigator != null);
     // Disable Hero transitions until the gesture is complete.
     _navigator.didStartUserGesture();
   }
@@ -223,6 +230,7 @@ abstract class NavigationGestureController {
   /// Must be called when the gesture is done.
   ///
   /// Calling this method notifies the navigator that the gesture has completed.
+  @mustCallSuper
   void dispose() {
     _navigator.didStopUserGesture();
     _navigator = null;
@@ -596,6 +604,7 @@ class Navigator extends StatefulWidget {
 class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   final GlobalKey<OverlayState> _overlayKey = new GlobalKey<OverlayState>();
   final List<Route<dynamic>> _history = new List<Route<dynamic>>();
+  final Set<Route<dynamic>> _poppedRoutes = new Set<Route<dynamic>>();
 
   @override
   void initState() {
@@ -622,10 +631,11 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     assert(!_debugLocked);
     assert(() { _debugLocked = true; return true; });
     config.observer?._navigator = null;
-    for (Route<dynamic> route in _history) {
+    final List<Route<dynamic>> doomed = _poppedRoutes.toList()..addAll(_history);
+    for (Route<dynamic> route in doomed)
       route.dispose();
-      route._navigator = null;
-    }
+    _poppedRoutes.clear();
+    _history.clear();
     super.dispose();
     assert(() { _debugLocked = false; return true; });
   }
@@ -726,7 +736,6 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       if (index > 0)
         _history[index - 1].didChangeNext(newRoute);
       oldRoute.dispose();
-      oldRoute._navigator = null;
     });
     assert(() { _debugLocked = false; return true; });
   }
@@ -766,7 +775,6 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       if (index > 0)
         _history[index - 1].didChangeNext(newRoute);
       targetRoute.dispose();
-      targetRoute._navigator = null;
     });
     assert(() { _debugLocked = false; return true; });
   }
@@ -815,9 +823,13 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
           // can't do that for themselves, even if they have changed their own
           // state (e.g. ModalScope.isCurrent).
           _history.removeLast();
+          // If route._navigator is null, the route called finalizeRoute from
+          // didPop, which means the route has already been disposed and doesn't
+          // need to be added to _poppedRoutes for later disposal.
+          if (route._navigator != null)
+            _poppedRoutes.add(route);
           _history.last.didPopNext(route);
           config.observer?.didPop(route, _history.last);
-          route._navigator = null;
         });
       } else {
         assert(() { _debugLocked = false; return true; });
@@ -829,6 +841,22 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     assert(() { _debugLocked = false; return true; });
     _cancelActivePointers();
     return true;
+  }
+
+  /// Complete the lifecycle for a route that has been popped off the navigator.
+  ///
+  /// When the navigator pops a route, the navigator retains a reference to the
+  /// route in order to call [Route.dispose] if the navigator itself is removed
+  /// from the tree. When the route is finished with any exit animation, the
+  /// route should call this function to complete its lifecycle (e.g., to
+  /// receive a call to [Route.dispose]).
+  ///
+  /// The given `route` must have already received a call to [Route.didPop].
+  /// This function may be called directly from [Route.didPop] if [Route.didPop]
+  /// will return `true`.
+  void finalizeRoute(Route<dynamic> route) {
+    _poppedRoutes.remove(route);
+    route.dispose();
   }
 
   /// Repeatedly calls [pop] until the given `predicate` returns true.
@@ -855,7 +883,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   /// Starts a gesture that results in popping the navigator.
   NavigationGestureController startPopGesture() {
     if (canPop())
-      return _history.last.startPopGesture(this);
+      return _history.last.startPopGesture();
     return null;
   }
 

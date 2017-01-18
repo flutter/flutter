@@ -142,9 +142,6 @@ void main() {
 
     await tester.pumpUntilNoTransientCallbacks(const Duration(seconds: 1));
     await callback(date);
-
-    // TODO(abarth): Remove this call once https://github.com/flutter/flutter/issues/7457 is fixed.
-    await tester.pumpUntilNoTransientCallbacks(const Duration(seconds: 1));
   }
 
   testWidgets('Initial date is the default', (WidgetTester tester) async {

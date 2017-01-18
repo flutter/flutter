@@ -35,39 +35,32 @@ abstract class OverlayRoute<T> extends Route<T> {
     super.install(insertionPoint);
   }
 
-  /// Controls whether [didPop] calls [finished].
+  /// Controls whether [didPop] calls [NavigatorState.finalizeRoute].
   ///
   /// If true, this route removes its overlay entries during [didPop].
-  /// Subclasses can override this getter if they want to delay the [finished]
-  /// call (for example to animate the route's exit before removing it from the
+  /// Subclasses can override this getter if they want to delay finalization
+  /// (for example to animate the route's exit before removing it from the
   /// overlay).
+  ///
+  /// Subclasses that return false from [finishedWhenPopped] are responsible for
+  /// calling [NavigatorState.finalizeRoute] themselves.
   @protected
   bool get finishedWhenPopped => true;
 
   @override
   bool didPop(T result) {
+    final bool returnValue = super.didPop(result);
+    assert(returnValue);
     if (finishedWhenPopped)
-      finished();
-    return super.didPop(result);
-  }
-
-  /// Clears out the overlay entries.
-  ///
-  /// This method is intended to be used by subclasses who don't call
-  /// super.didPop() because they want to have control over the timing of the
-  /// overlay removal.
-  ///
-  /// Do not call this method outside of this context.
-  @protected
-  void finished() {
-    for (OverlayEntry entry in _overlayEntries)
-      entry.remove();
-    _overlayEntries.clear();
+      navigator.finalizeRoute(this);
+    return returnValue;
   }
 
   @override
   void dispose() {
-    finished();
+    for (OverlayEntry entry in _overlayEntries)
+      entry.remove();
+    _overlayEntries.clear();
     super.dispose();
   }
 }
@@ -93,7 +86,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   bool get opaque;
 
   @override
-  bool get finishedWhenPopped => false;
+  bool get finishedWhenPopped => _controller.status == AnimationStatus.dismissed;
 
   /// The animation that drives the route's transition and the previous route's
   /// forward transition.
@@ -143,8 +136,14 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
         break;
       case AnimationStatus.dismissed:
         assert(!overlayEntries.first.opaque);
-        finished(); // clear the overlays
-        assert(overlayEntries.isEmpty);
+        // We might still be the current route if a subclass is controlling the
+        // the transition and hits the dismissed status. For example, the iOS
+        // back gesture drives this animation to the dismissed status before
+        // popping the navigator.
+        if (!isCurrent) {
+          navigator.finalizeRoute(this);
+          assert(overlayEntries.isEmpty);
+        }
         break;
     }
   }
@@ -240,14 +239,9 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   bool canTransitionFrom(TransitionRoute<dynamic> nextRoute) => true;
 
   @override
-  void finished() {
-    super.finished();
-    _transitionCompleter.complete(_result);
-  }
-
-  @override
   void dispose() {
     _controller.dispose();
+    _transitionCompleter.complete(_result);
     super.dispose();
   }
 
