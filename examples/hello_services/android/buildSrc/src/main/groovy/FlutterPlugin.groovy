@@ -134,10 +134,10 @@ class FlutterTask extends DefaultTask {
         return project.copySpec {
             from "${intermediateDir}/app.flx"
             if (buildMode != 'debug') {
-                from "${intermediateDir}/snapshot_aot_instr"
-                from "${intermediateDir}/snapshot_aot_isolate"
-                from "${intermediateDir}/snapshot_aot_rodata"
-                from "${intermediateDir}/snapshot_aot_vmisolate"
+                from "${intermediateDir}/vm_snapshot_data"
+                from "${intermediateDir}/vm_snapshot_instr"
+                from "${intermediateDir}/isolate_snapshot_data"
+                from "${intermediateDir}/isolate_snapshot_instr"
             }
         }
     }
