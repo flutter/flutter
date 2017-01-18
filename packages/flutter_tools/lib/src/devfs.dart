@@ -145,9 +145,6 @@ abstract class DevFSOperations {
   Future<dynamic> destroy(String fsName);
   Future<dynamic> writeFile(String fsName, String devicePath, DevFSContent content);
   Future<dynamic> deleteFile(String fsName, String devicePath);
-  Future<dynamic> writeSource(String fsName,
-                              String devicePath,
-                              String contents);
 }
 
 /// An implementation of [DevFSOperations] that speaks to the
@@ -193,19 +190,6 @@ class ServiceProtocolDevFSOperations implements DevFSOperations {
   @override
   Future<dynamic> deleteFile(String fsName, String devicePath) async {
     // TODO(johnmccutchan): Add file deletion to the devFS protocol.
-  }
-
-  @override
-  Future<dynamic> writeSource(String fsName,
-                              String devicePath,
-                              String contents) async {
-    String fileContents = BASE64.encode(UTF8.encode(contents));
-    return await vmService.vm.invokeRpcRaw('_writeDevFSFile',
-                                           <String, dynamic> {
-                                              'fsName': fsName,
-                                              'path': devicePath,
-                                              'fileContents': fileContents
-                                           });
   }
 }
 
@@ -355,9 +339,8 @@ class DevFS {
                          fileFilter: fileFilter);
 
     printTrace('Scanning package files');
-
-    StringBuffer sb;
     if (fs.isFileSync(_packagesFilePath)) {
+      StringBuffer sb;
       PackageMap packageMap = new PackageMap(_packagesFilePath);
 
       for (String packageName in packageMap.map.keys) {
@@ -384,6 +367,8 @@ class DevFS {
           sb.writeln('$packageName:$directoryName');
         }
       }
+      if (sb != null)
+        _entries['.packages'] = new DevFSStringContent(sb.toString());
     }
 
     if (bundle != null) {
@@ -447,9 +432,6 @@ class DevFS {
       }
       _dirtyEntries.clear();
     }
-
-    if (sb != null)
-      await _operations.writeSource(fsName, '.packages', sb.toString());
 
     printTrace('DevFS: Sync finished');
   }

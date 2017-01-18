@@ -112,11 +112,4 @@ class MockDevFSOperations implements DevFSOperations {
   Future<dynamic> deleteFile(String fsName, String devicePath) async {
     messages.add('deleteFile $fsName $devicePath');
   }
-
-  @override
-  Future<dynamic> writeSource(String fsName,
-                              String devicePath,
-                              String contents) async {
-    messages.add('writeSource $fsName $devicePath');
-  }
 }
