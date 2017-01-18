@@ -4,9 +4,9 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io' as io;
 
 import 'package:flutter_tools/src/asset.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -218,7 +218,7 @@ void main() {
 
 class MockVMService extends BasicMock implements VMService {
   Uri _httpAddress;
-  io.HttpServer _server;
+  HttpServer _server;
   MockVM _vm;
 
   MockVMService() {
@@ -232,15 +232,14 @@ class MockVMService extends BasicMock implements VMService {
   VM get vm => _vm;
 
   Future<Null> setUp() async {
-    _server = await io.HttpServer.bind(io.InternetAddress.LOOPBACK_IP_V4, 0);
+    _server = await HttpServer.bind(InternetAddress.LOOPBACK_IP_V4, 0);
     _httpAddress = Uri.parse('http://127.0.0.1:${_server.port}');
-    _server.listen((io.HttpRequest request) {
+    _server.listen((HttpRequest request) {
       String fsName = request.headers.value('dev_fs_name');
       String devicePath = UTF8.decode(BASE64.decode(request.headers.value('dev_fs_path_b64')));
       messages.add('writeFile $fsName $devicePath');
       request.drain().then((_) {
         request.response
-          ..headers.contentType = new io.ContentType("text", "plain", charset: "utf-8")
           ..write('Got it')
           ..close();
       });
