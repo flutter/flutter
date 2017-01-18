@@ -273,7 +273,7 @@ class HotRunner extends ResidentRunner {
         return false;
     }
     Status devFSStatus = logger.startProgress('Syncing files to device...');
-    await _devFS.update(progressReporter: progressReporter,
+    int bytes = await _devFS.update(progressReporter: progressReporter,
                         bundle: assetBundle,
                         bundleDirty: rebuildBundle,
                         fileFilter: _dartDependencies);
@@ -282,7 +282,7 @@ class HotRunner extends ResidentRunner {
       // Clear the set after the sync so they are recomputed next time.
       _dartDependencies = null;
     }
-    printTrace('Synced ${getSizeAsMB(_devFS.bytes)}.');
+    printTrace('Synced ${getSizeAsMB(bytes)}.');
     return true;
   }
 

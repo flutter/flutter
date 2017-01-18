@@ -537,7 +537,13 @@ class DevFS {
         sb.writeln('$packageName:$directoryName');
       }
     }
-    if (sb != null)
+    if (sb != null) {
+      DevFSContent content = _entries['.packages'];
+      if (content is DevFSStringContent && content.string == sb.toString()) {
+        content._exists = true;
+        return;
+      }
       _entries['.packages'] = new DevFSStringContent(sb.toString());
+    }
   }
 }
