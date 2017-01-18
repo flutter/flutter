@@ -3,11 +3,14 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
+import 'dart:io' as io;
 
 import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/vmservice.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 
@@ -18,13 +21,18 @@ import 'src/mocks.dart';
 void main() {
   final String filePath = 'bar/foo.txt';
   final String filePath2 = 'foo/bar.txt';
-  final Directory tempDir = _newTempDir();
-  final String basePath = tempDir.path;
-  MockDevFSOperations devFSOperations = new MockDevFSOperations();
+  Directory tempDir;
+  String basePath;
   DevFS devFS;
-  AssetBundle assetBundle = new AssetBundle();
-  assetBundle.entries['a.txt'] = new DevFSStringContent('abc');
-  group('devfs', () {
+  final AssetBundle assetBundle = new AssetBundle();
+
+  group('devfs local', () {
+    MockDevFSOperations devFSOperations = new MockDevFSOperations();
+
+    setUpAll(() {
+      tempDir = _newTempDir();
+      basePath = tempDir.path;
+    });
     tearDownAll(_cleanupTempDirs);
 
     testUsingContext('create dev file system', () async {
@@ -98,7 +106,8 @@ void main() {
       expect(devFS.assetPathsToEvict, isEmpty);
       expect(bytes, 51);
     });
-    testUsingContext('add file in an asset bundle', () async {
+    testUsingContext('add an asset bundle', () async {
+      assetBundle.entries['a.txt'] = new DevFSStringContent('abc');
       int bytes = await devFS.update(bundle: assetBundle, bundleDirty: true);
       devFSOperations.expectMessages(<String>[
         'writeFile test ${getAssetBuildDirectory()}/a.txt',
@@ -116,7 +125,7 @@ void main() {
         'writeFile test ${getAssetBuildDirectory()}/b.txt',
       ]);
       expect(devFS.assetPathsToEvict, unorderedMatches(<String>[
-          'a.txt', 'b.txt']));
+        'a.txt', 'b.txt']));
       devFS.assetPathsToEvict.clear();
       expect(bytes, 7);
     });
@@ -127,7 +136,7 @@ void main() {
         'writeFile test ${getAssetBuildDirectory()}/c.txt',
       ]);
       expect(devFS.assetPathsToEvict, unorderedMatches(<String>[
-          'c.txt']));
+        'c.txt']));
       devFS.assetPathsToEvict.clear();
       expect(bytes, 2);
     });
@@ -149,16 +158,126 @@ void main() {
         'deleteFile test ${getAssetBuildDirectory()}/b.txt',
       ]);
       expect(devFS.assetPathsToEvict, unorderedMatches(<String>[
-          'a.txt', 'b.txt'
-          ]));
+        'a.txt', 'b.txt'
+      ]));
       devFS.assetPathsToEvict.clear();
       expect(bytes, 0);
     });
     testUsingContext('delete dev file system', () async {
       await devFS.destroy();
+      devFSOperations.expectMessages(<String>['destroy test']);
+      expect(devFS.assetPathsToEvict, isEmpty);
+    });
+  });
+
+  group('devfs remote', () {
+    MockVMService vmService;
+
+    setUpAll(() async {
+      tempDir = _newTempDir();
+      basePath = tempDir.path;
+      vmService = new MockVMService();
+      await vmService.setUp();
+    });
+    tearDownAll(() async {
+      await vmService.tearDown();
+      _cleanupTempDirs();
+    });
+
+    testUsingContext('create dev file system', () async {
+      // simulate workspace
+      File file = fs.file(path.join(basePath, filePath));
+      await file.parent.create(recursive: true);
+      file.writeAsBytesSync(<int>[1, 2, 3]);
+
+      // simulate package
+      await _createPackage('somepkg', 'somefile.txt');
+
+      devFS = new DevFS(vmService, 'test', tempDir);
+      await devFS.create();
+      vmService.expectMessages(<String>['create test']);
+      expect(devFS.assetPathsToEvict, isEmpty);
+
+      int bytes = await devFS.update();
+      vmService.expectMessages(<String>[
+        'writeFile test .packages',
+        'writeFile test bar/foo.txt',
+        'writeFile test packages/somepkg/somefile.txt',
+      ]);
+      expect(devFS.assetPathsToEvict, isEmpty);
+      expect(bytes, 31);
+    }, timeout: new Timeout(new Duration(seconds: 5)));
+
+    testUsingContext('delete dev file system', () async {
+      await devFS.destroy();
+      vmService.expectMessages(<String>['_deleteDevFS {fsName: test}']);
+      expect(devFS.assetPathsToEvict, isEmpty);
     });
   });
 }
+
+class MockVMService extends BasicMock implements VMService {
+  Uri _httpAddress;
+  io.HttpServer _server;
+  MockVM _vm;
+
+  MockVMService() {
+    _vm = new MockVM(this);
+  }
+
+  @override
+  Uri get httpAddress => _httpAddress;
+
+  @override
+  VM get vm => _vm;
+
+  Future<Null> setUp() async {
+    _server = await io.HttpServer.bind(io.InternetAddress.LOOPBACK_IP_V4, 0);
+    _httpAddress = Uri.parse('http://127.0.0.1:${_server.port}');
+    _server.listen((io.HttpRequest request) {
+      String fsName = request.headers.value('dev_fs_name');
+      String devicePath = UTF8.decode(BASE64.decode(request.headers.value('dev_fs_path_b64')));
+      messages.add('writeFile $fsName $devicePath');
+      request.drain().then((_) {
+        request.response
+          ..headers.contentType = new io.ContentType("text", "plain", charset: "utf-8")
+          ..write('Got it')
+          ..close();
+      });
+    });
+  }
+
+  Future<Null> tearDown() async {
+    await _server.close();
+  }
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+class MockVM implements VM {
+  final MockVMService _service;
+  final Uri _baseUri = Uri.parse('file:///tmp/devfs/test');
+
+  MockVM(this._service);
+
+  @override
+  Future<Map<String, dynamic>> createDevFS(String fsName) async {
+    _service.messages.add('create $fsName');
+    return <String, dynamic>{'uri': '$_baseUri'};
+  }
+
+  @override
+  Future<Map<String, dynamic>> invokeRpcRaw(
+      String method, [Map<String, dynamic> params, Duration timeout]) async {
+    _service.messages.add('$method $params');
+    return <String, dynamic>{'success': true};
+  }
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
 
 final List<Directory> _tempDirs = <Directory>[];
 final Map <String, Directory> _packages = <String, Directory>{};

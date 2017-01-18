@@ -75,7 +75,8 @@ void applyMocksToCommand(FlutterCommand command) {
     ..commandValidator = () => true;
 }
 
-class MockDevFSOperations implements DevFSOperations {
+/// Common functionality for tracking mock interaction
+class BasicMock {
   final List<String> messages = new List<String>();
 
   void expectMessages(List<String> expectedMessages) {
@@ -91,7 +92,9 @@ class MockDevFSOperations implements DevFSOperations {
     messages.clear();
     return result;
   }
+}
 
+class MockDevFSOperations extends BasicMock implements DevFSOperations {
   @override
   Future<Uri> create(String fsName) async {
     messages.add('create $fsName');
