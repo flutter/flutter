@@ -936,7 +936,7 @@ class _IntrinsicDimensionsCacheEntry {
 /// these classes, however, you must implement the algorithm yourself.
 abstract class RenderBox extends RenderObject {
   @override
-  void setupParentData(RenderObject child) {
+  void setupParentData(@checked RenderObject child) {
     if (child.parentData is! BoxParentData)
       child.parentData = new BoxParentData();
   }
@@ -1823,7 +1823,7 @@ abstract class RenderBox extends RenderObject {
   /// ```
   // TODO(ianh): Fix the type of the argument here once https://github.com/dart-lang/sdk/issues/25232 is fixed
   @override
-  void handleEvent(PointerEvent event, HitTestEntry entry) {
+  void handleEvent(PointerEvent event, @checked HitTestEntry entry) {
     super.handleEvent(event, entry);
   }
 

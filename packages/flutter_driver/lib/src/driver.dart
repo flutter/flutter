@@ -285,7 +285,7 @@ class FlutterDriver {
     if (_printCommunication)
       _log.info(message);
     if (_logCommunicationToFile) {
-      f.File file = fs.file(p.join(testOutputsDirectory, 'flutter_driver_commands_${_driverId}.log'));
+      f.File file = fs.file(p.join(testOutputsDirectory, 'flutter_driver_commands_$_driverId.log'));
       file.createSync(recursive: true); // no-op if file exists
       file.writeAsStringSync('${new DateTime.now()} $message\n', mode: f.FileMode.APPEND, flush: true);
     }
