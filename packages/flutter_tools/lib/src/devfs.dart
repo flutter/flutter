@@ -294,7 +294,6 @@ class DevFS {
   final Directory rootDirectory;
   String _packagesFilePath;
   final Map<String, DevFSContent> _entries = <String, DevFSContent>{};
-  final Map<String, DevFSContent> _dirtyEntries = <String, DevFSContent>{};
   final Set<String> assetPathsToEvict = new Set<String>();
 
   final List<Future<Map<String, dynamic>>> _pendingOperations =
@@ -320,33 +319,28 @@ class DevFS {
                            AssetBundle bundle,
                            bool bundleDirty: false,
                            Set<String> fileFilter}) async {
-    // Reset the dirty byte count.
-    _bytes = 0;
-    // Clear the dirt entries list.
-    _dirtyEntries.clear();
-
     // Mark all entries as possibly deleted.
     _entries.forEach((String devicePath, DevFSContent content) {
       content._exists = false;
     });
 
+    // Scan workspace, packages, and assets
     printTrace('DevFS: Starting sync from $rootDirectory');
     logger.printTrace('Scanning project files');
     await _scanDirectory(rootDirectory,
                          recursive: true,
                          fileFilter: fileFilter);
-
     if (fs.isFileSync(_packagesFilePath)) {
       printTrace('Scanning package files');
       await _scanPackages(fileFilter);
     }
-
     if (bundle != null) {
       printTrace('Scanning asset files');
       bundle.entries.forEach((String archivePath, DevFSContent content) {
         _scanBundleEntry(archivePath, content, bundleDirty);
       });
     }
+
     // Handle deletions.
     printTrace('Scanning for deleted files');
     String assetBuildDirPrefix = getAssetBuildDirectory() + path.separator;
@@ -371,18 +365,32 @@ class DevFS {
       _pendingOperations.clear();
     }
 
-    if (_dirtyEntries.length > 0) {
+    // Update modified files
+    _bytes = 0;
+    Map<String, DevFSContent> dirtyEntries = <String, DevFSContent>{};
+    _entries.forEach((String devicePath, DevFSContent content) {
+      String archivePath;
+      if (devicePath.startsWith(assetBuildDirPrefix))
+        archivePath = devicePath.substring(assetBuildDirPrefix.length);
+      if (content.isModified || (bundleDirty && archivePath != null)) {
+        dirtyEntries[devicePath] = content;
+        _bytes += content.size;
+        if (archivePath != null)
+          assetPathsToEvict.add(archivePath);
+      }
+    });
+    if (dirtyEntries.length > 0) {
       printTrace('Updating files');
       if (_httpWriter != null) {
         try {
-          await _httpWriter.write(_dirtyEntries,
+          await _httpWriter.write(dirtyEntries,
                                   progressReporter: progressReporter);
         } catch (e) {
           printError("Could not update files on device: $e");
         }
       } else {
         // Make service protocol requests for each.
-        _dirtyEntries.forEach((String devicePath, DevFSContent content) {
+        dirtyEntries.forEach((String devicePath, DevFSContent content) {
           Future<Map<String, dynamic>> operation =
               _operations.writeFile(fsName, devicePath, content);
           if (operation != null)
@@ -399,7 +407,6 @@ class DevFS {
         await Future.wait(_pendingOperations, eagerError: true);
         _pendingOperations.clear();
       }
-      _dirtyEntries.clear();
     }
 
     printTrace('DevFS: Sync finished');
@@ -408,10 +415,6 @@ class DevFS {
   void _scanFile(String devicePath, FileSystemEntity file) {
     DevFSContent content = _entries.putIfAbsent(devicePath, () => new DevFSFileContent(file));
     content._exists = true;
-    if (content.isModified) {
-      _dirtyEntries[devicePath] = content;
-      _bytes += content.size;
-    }
   }
 
   void _scanBundleEntry(String archivePath, DevFSContent content, bool bundleDirty) {
@@ -421,11 +424,6 @@ class DevFS {
 
     _entries[devicePath] = content;
     content._exists = true;
-    if (content.isModified || bundleDirty) {
-      _dirtyEntries[devicePath] = content;
-      _bytes += content.size;
-      assetPathsToEvict.add(archivePath);
-    }
   }
 
   bool _shouldIgnore(String devicePath) {
@@ -539,10 +537,7 @@ class DevFS {
         sb.writeln('$packageName:$directoryName');
       }
     }
-    if (sb != null) {
-      DevFSContent content = new DevFSStringContent(sb.toString());
-      _entries['.packages'] = content;
-      _dirtyEntries['.packages'] = content;
-    }
+    if (sb != null)
+      _entries['.packages'] = new DevFSStringContent(sb.toString());
   }
 }
