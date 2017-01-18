@@ -299,8 +299,6 @@ class DevFS {
   final List<Future<Map<String, dynamic>>> _pendingOperations =
       new List<Future<Map<String, dynamic>>>();
 
-  int _bytes = 0;
-  int get bytes => _bytes;
   Uri _baseUri;
   Uri get baseUri => _baseUri;
 
@@ -315,7 +313,8 @@ class DevFS {
     return _operations.destroy(fsName);
   }
 
-  Future<dynamic> update({ DevFSProgressReporter progressReporter,
+  /// Update files on the device and return the number of bytes sync'd
+  Future<int> update({ DevFSProgressReporter progressReporter,
                            AssetBundle bundle,
                            bool bundleDirty: false,
                            Set<String> fileFilter}) async {
@@ -366,7 +365,7 @@ class DevFS {
     }
 
     // Update modified files
-    _bytes = 0;
+    int numBytes = 0;
     Map<String, DevFSContent> dirtyEntries = <String, DevFSContent>{};
     _entries.forEach((String devicePath, DevFSContent content) {
       String archivePath;
@@ -374,7 +373,7 @@ class DevFS {
         archivePath = devicePath.substring(assetBuildDirPrefix.length);
       if (content.isModified || (bundleDirty && archivePath != null)) {
         dirtyEntries[devicePath] = content;
-        _bytes += content.size;
+        numBytes += content.size;
         if (archivePath != null)
           assetPathsToEvict.add(archivePath);
       }
@@ -410,6 +409,7 @@ class DevFS {
     }
 
     printTrace('DevFS: Sync finished');
+    return numBytes;
   }
 
   void _scanFile(String devicePath, FileSystemEntity file) {

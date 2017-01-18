@@ -41,73 +41,81 @@ void main() {
       devFSOperations.expectMessages(<String>['create test']);
       expect(devFS.assetPathsToEvict, isEmpty);
 
-      await devFS.update();
+      int bytes = await devFS.update();
       devFSOperations.expectMessages(<String>[
         'writeFile test .packages',
         'writeFile test bar/foo.txt',
         'writeFile test packages/somepkg/somefile.txt',
       ]);
       expect(devFS.assetPathsToEvict, isEmpty);
+      expect(bytes, 31);
     });
     testUsingContext('add new file to local file system', () async {
       File file = fs.file(path.join(basePath, filePath2));
       await file.parent.create(recursive: true);
       file.writeAsBytesSync(<int>[1, 2, 3, 4, 5, 6, 7]);
-      await devFS.update();
+      int bytes = await devFS.update();
       devFSOperations.expectMessages(<String>[
         'writeFile test .packages',
         'writeFile test foo/bar.txt',
       ]);
       expect(devFS.assetPathsToEvict, isEmpty);
+      expect(bytes, 32);
     });
     testUsingContext('modify existing file on local file system', () async {
       File file = fs.file(path.join(basePath, filePath));
       // Set the last modified time to 5 seconds in the past.
       updateFileModificationTime(file.path, new DateTime.now(), -5);
-      await devFS.update();
+      int bytes = await devFS.update();
       devFSOperations.expectMessages(<String>[
         'writeFile test .packages',
       ]);
       expect(devFS.assetPathsToEvict, isEmpty);
+      expect(bytes, 25);
+
       await file.writeAsBytes(<int>[1, 2, 3, 4, 5, 6]);
-      await devFS.update();
+      bytes = await devFS.update();
       devFSOperations.expectMessages(<String>[
         'writeFile test bar/foo.txt',
         'writeFile test .packages',
       ]);
       expect(devFS.assetPathsToEvict, isEmpty);
+      expect(bytes, 31);
     });
     testUsingContext('delete a file from the local file system', () async {
       File file = fs.file(path.join(basePath, filePath));
       await file.delete();
-      await devFS.update();
+      int bytes = await devFS.update();
       devFSOperations.expectMessages(<String>[
         'writeFile test .packages',
         'deleteFile test bar/foo.txt',
       ]);
       expect(devFS.assetPathsToEvict, isEmpty);
+      expect(bytes, 25);
     });
     testUsingContext('add new package', () async {
       await _createPackage('newpkg', 'anotherfile.txt');
-      await devFS.update();
+      int bytes = await devFS.update();
       devFSOperations.expectMessages(<String>[
         'writeFile test .packages',
         'writeFile test packages/newpkg/anotherfile.txt',
       ]);
       expect(devFS.assetPathsToEvict, isEmpty);
+      expect(bytes, 51);
     });
     testUsingContext('add file in an asset bundle', () async {
-      await devFS.update(bundle: assetBundle, bundleDirty: true);
+      int bytes = await devFS.update(bundle: assetBundle, bundleDirty: true);
       devFSOperations.expectMessages(<String>[
         'writeFile test .packages',
         'writeFile test ${getAssetBuildDirectory()}/a.txt',
       ]);
       expect(devFS.assetPathsToEvict, unorderedMatches(<String>['a.txt']));
       devFS.assetPathsToEvict.clear();
+      expect(bytes, 48);
     });
     testUsingContext('add a file to the asset bundle - bundleDirty', () async {
       assetBundle.entries['b.txt'] = new DevFSStringContent('');
-      await devFS.update(bundle: assetBundle, bundleDirty: true);
+      int bytes = await devFS.update(bundle: assetBundle, bundleDirty: true);
       // Expect entire asset bundle written because bundleDirty is true
       devFSOperations.expectMessages(<String>[
         'writeFile test .packages',
@@ -117,10 +125,11 @@ void main() {
       expect(devFS.assetPathsToEvict, unorderedMatches(<String>[
           'a.txt', 'b.txt']));
       devFS.assetPathsToEvict.clear();
+      expect(bytes, 48);
     });
     testUsingContext('add a file to the asset bundle', () async {
       assetBundle.entries['c.txt'] = new DevFSStringContent('');
-      await devFS.update(bundle: assetBundle);
+      int bytes = await devFS.update(bundle: assetBundle);
       devFSOperations.expectMessages(<String>[
         'writeFile test .packages',
         'writeFile test ${getAssetBuildDirectory()}/c.txt',
@@ -128,20 +137,22 @@ void main() {
       expect(devFS.assetPathsToEvict, unorderedMatches(<String>[
           'c.txt']));
       devFS.assetPathsToEvict.clear();
+      expect(bytes, 48);
     });
     testUsingContext('delete a file from the asset bundle', () async {
       assetBundle.entries.remove('c.txt');
-      await devFS.update(bundle: assetBundle);
+      int bytes = await devFS.update(bundle: assetBundle);
       devFSOperations.expectMessages(<String>[
         'writeFile test .packages',
         'deleteFile test ${getAssetBuildDirectory()}/c.txt',
       ]);
       expect(devFS.assetPathsToEvict, unorderedMatches(<String>['c.txt']));
       devFS.assetPathsToEvict.clear();
+      expect(bytes, 48);
     });
     testUsingContext('delete all files from the asset bundle', () async {
       assetBundle.entries.clear();
-      await devFS.update(bundle: assetBundle, bundleDirty: true);
+      int bytes = await devFS.update(bundle: assetBundle, bundleDirty: true);
       devFSOperations.expectMessages(<String>[
         'writeFile test .packages',
         'deleteFile test ${getAssetBuildDirectory()}/a.txt',
@@ -151,6 +162,7 @@ void main() {
           'a.txt', 'b.txt'
           ]));
       devFS.assetPathsToEvict.clear();
+      expect(bytes, 48);
     });
     testUsingContext('delete dev file system', () async {
       await devFS.destroy();
