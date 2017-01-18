@@ -29,7 +29,7 @@ DevFSConfig get devFSConfig => context[DevFSConfig];
 
 /// Common superclass for content copied to the device.
 abstract class DevFSContent {
-  bool _exists = false;
+  bool _exists = true;
 
   /// Return `true` if this is the first time this method is called
   /// or if the entry has been modified since this method was last called.
@@ -336,37 +336,9 @@ class DevFS {
                          recursive: true,
                          fileFilter: fileFilter);
 
-    printTrace('Scanning package files');
     if (fs.isFileSync(_packagesFilePath)) {
-      StringBuffer sb;
-      PackageMap packageMap = new PackageMap(_packagesFilePath);
-
-      for (String packageName in packageMap.map.keys) {
-        Uri uri = packageMap.map[packageName];
-        // This project's own package.
-        final bool isProjectPackage = uri.toString() == 'lib/';
-        final String directoryName =
-            isProjectPackage ? 'lib' : 'packages/$packageName';
-        // If this is the project's package, we need to pass both
-        // package:<package_name> and lib/ as paths to be checked against
-        // the filter because we must support both package: imports and relative
-        // path imports within the project's own code.
-        final String packagesDirectoryName =
-            isProjectPackage ? 'packages/$packageName' : null;
-        Directory directory = fs.directory(uri);
-        bool packageExists =
-            await _scanDirectory(directory,
-                                 directoryName: directoryName,
-                                 recursive: true,
-                                 packagesDirectoryName: packagesDirectoryName,
-                                 fileFilter: fileFilter);
-        if (packageExists) {
-          sb ??= new StringBuffer();
-          sb.writeln('$packageName:$directoryName');
-        }
-      }
-      if (sb != null)
-        _entries['.packages'] = new DevFSStringContent(sb.toString());
+      printTrace('Scanning package files');
+      await _scanPackages(fileFilter);
     }
 
     if (bundle != null) {
@@ -537,5 +509,40 @@ class DevFS {
       return false;
     }
     return true;
+  }
+
+  Future<Null> _scanPackages(Set<String> fileFilter) async {
+    StringBuffer sb;
+    PackageMap packageMap = new PackageMap(_packagesFilePath);
+
+    for (String packageName in packageMap.map.keys) {
+      Uri uri = packageMap.map[packageName];
+      // This project's own package.
+      final bool isProjectPackage = uri.toString() == 'lib/';
+      final String directoryName =
+          isProjectPackage ? 'lib' : 'packages/$packageName';
+      // If this is the project's package, we need to pass both
+      // package:<package_name> and lib/ as paths to be checked against
+      // the filter because we must support both package: imports and relative
+      // path imports within the project's own code.
+      final String packagesDirectoryName =
+          isProjectPackage ? 'packages/$packageName' : null;
+      Directory directory = fs.directory(uri);
+      bool packageExists =
+          await _scanDirectory(directory,
+                               directoryName: directoryName,
+                               recursive: true,
+                               packagesDirectoryName: packagesDirectoryName,
+                               fileFilter: fileFilter);
+      if (packageExists) {
+        sb ??= new StringBuffer();
+        sb.writeln('$packageName:$directoryName');
+      }
+    }
+    if (sb != null) {
+      DevFSContent content = new DevFSStringContent(sb.toString());
+      _entries['.packages'] = content;
+      _dirtyEntries['.packages'] = content;
+    }
   }
 }

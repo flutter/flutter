@@ -81,7 +81,7 @@ class MockDevFSOperations implements DevFSOperations {
   void expectMessages(List<String> expectedMessages) {
     List<String> actualMessages = new List<String>.from(messages);
     messages.clear();
-    expect(actualMessages, orderedEquals(expectedMessages));
+    expect(actualMessages, unorderedEquals(expectedMessages));
   }
 
   bool contains(String match) {
