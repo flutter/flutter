@@ -11,6 +11,8 @@ import 'basic_types.dart';
 import 'text_editing.dart';
 import 'text_span.dart';
 
+final String _kZeroWidthSpace = new String.fromCharCode(0x200B);
+
 /// An object that paints a [TextSpan] tree into a [Canvas].
 ///
 /// To use a [TextPainter], follow these steps:
@@ -34,8 +36,9 @@ class TextPainter {
     TextSpan text,
     TextAlign textAlign,
     double textScaleFactor: 1.0,
+    int maxLines,
     String ellipsis,
-  }) : _text = text, _textAlign = textAlign, _textScaleFactor = textScaleFactor, _ellipsis = ellipsis {
+  }) : _text = text, _textAlign = textAlign, _textScaleFactor = textScaleFactor, _maxLines = maxLines, _ellipsis = ellipsis {
     assert(text == null || text.debugAssertIsValid());
     assert(textScaleFactor != null);
   }
@@ -50,6 +53,8 @@ class TextPainter {
     assert(value == null || value.debugAssertIsValid());
     if (_text == value)
       return;
+    if (_text?.style != value?.style)
+      _layoutTemplate = null;
     _text = value;
     _paragraph = null;
     _needsLayout = true;
@@ -95,6 +100,32 @@ class TextPainter {
     _needsLayout = true;
   }
 
+  /// An optional maximum number of lines for the text to span, wrapping if necessary.
+  /// If the text exceeds the given number of lines, it will be truncated according
+  /// to [overflow].
+  int get maxLines => _maxLines;
+  int _maxLines;
+  set maxLines(int value) {
+    if (_maxLines == value)
+      return;
+    _maxLines = value;
+    _paragraph = null;
+    _needsLayout = true;
+  }
+
+  ui.Paragraph _layoutTemplate;
+  double get preferredLineHeight {
+    assert(text != null);
+    if (_layoutTemplate == null) {
+      ui.ParagraphBuilder builder = new ui.ParagraphBuilder(new ui.ParagraphStyle());
+      if (text.style != null)
+        builder.pushStyle(text.style.getTextStyle(textScaleFactor: textScaleFactor));
+      builder.addText(_kZeroWidthSpace);
+      _layoutTemplate = builder.build()
+        ..layout(new ui.ParagraphConstraints(width: double.INFINITY));
+    }
+    return _layoutTemplate.height;
+  }
 
   // Unfortunately, using full precision floating point here causes bad layouts
   // because floating point math isn't associative. If we add and subtract
@@ -162,6 +193,11 @@ class TextPainter {
     return null;
   }
 
+  bool get didExceedMaxLines {
+    assert(!_needsLayout);
+    return _paragraph.didExceedMaxLines;
+  }
+
   double _lastMinWidth;
   double _lastMaxWidth;
 
@@ -179,9 +215,14 @@ class TextPainter {
       ui.ParagraphStyle paragraphStyle = _text.style?.getParagraphStyle(
         textAlign: textAlign,
         textScaleFactor: textScaleFactor,
+        maxLines: _maxLines,
         ellipsis: _ellipsis,
       );
-      paragraphStyle ??= new ui.ParagraphStyle();
+      paragraphStyle ??= new ui.ParagraphStyle(
+        textAlign: textAlign,
+        maxLines: maxLines,
+        ellipsis: ellipsis,
+      );
       ui.ParagraphBuilder builder = new ui.ParagraphBuilder(paragraphStyle);
       _text.build(builder, textScaleFactor: textScaleFactor);
       _paragraph = builder.build();

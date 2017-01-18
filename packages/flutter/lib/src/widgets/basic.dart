@@ -2442,7 +2442,8 @@ class RichText extends LeafRenderObjectWidget {
     this.textAlign,
     this.softWrap: true,
     this.overflow: TextOverflow.clip,
-    this.textScaleFactor: 1.0
+    this.textScaleFactor: 1.0,
+    this.maxLines,
   }) : super(key: key) {
     assert(text != null);
     assert(softWrap != null);
@@ -2470,13 +2471,19 @@ class RichText extends LeafRenderObjectWidget {
   /// the specified font size.
   final double textScaleFactor;
 
+  /// An optional maximum number of lines for the text to span, wrapping if necessary.
+  /// If the text exceeds the given number of lines, it will be truncated according
+  /// to [overflow].
+  final int maxLines;
+
   @override
   RenderParagraph createRenderObject(BuildContext context) {
     return new RenderParagraph(text,
       textAlign: textAlign,
       softWrap: softWrap,
       overflow: overflow,
-      textScaleFactor: textScaleFactor
+      textScaleFactor: textScaleFactor,
+      maxLines: maxLines,
     );
   }
 
@@ -2487,7 +2494,8 @@ class RichText extends LeafRenderObjectWidget {
       ..textAlign = textAlign
       ..softWrap = softWrap
       ..overflow = overflow
-      ..textScaleFactor = textScaleFactor;
+      ..textScaleFactor = textScaleFactor
+      ..maxLines = maxLines;
   }
 }
 
