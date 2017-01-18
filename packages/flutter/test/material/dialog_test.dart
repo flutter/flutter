@@ -55,7 +55,7 @@ void main() {
     await tester.tap(find.text('OK'));
     expect(didPressOk, true);
   });
-  
+
   testWidgets('Dialog background color', (WidgetTester tester) async {
 
     await tester.pumpWidget(
@@ -71,18 +71,18 @@ void main() {
                     showDialog(
                       context: context,
                       child: new AlertDialog(
+                        title: new Text('Title'),
                         content: new Text('Y'),
-                        actions: <Widget>[
-                        ]
-                      )
+                        actions: <Widget>[ ],
+                      ),
                     );
-                  }
-                )
+                  },
+                ),
               );
-            }
-          )
-        )
-      )
+            },
+          ),
+        ),
+      ),
     );
 
     await tester.tap(find.text('X'));
@@ -95,5 +95,50 @@ void main() {
     expect(materialconfig.type, MaterialType.card);
     expect(materialconfig.elevation, 24);
     expect(materialconfig.color, Colors.grey[800]);
+  });
+
+  testWidgets('Simple dialog control test', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Material(
+          child: new Center(
+            child: new RaisedButton(
+              onPressed: null,
+              child: new Text('Go'),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    BuildContext context = tester.element(find.text('Go'));
+
+    Future<int> result = showDialog(
+      context: context,
+      child: new SimpleDialog(
+        title: new Text('Title'),
+        children: <Widget>[
+          new SimpleDialogOption(
+            onPressed: () {
+              Navigator.pop(context, 42);
+            },
+            child: new Text('First option'),
+          ),
+          new SimpleDialogOption(
+            child: new Text('Second option'),
+          ),
+        ],
+      ),
+    );
+
+    await tester.pumpUntilNoTransientCallbacks(const Duration(seconds: 1));
+    expect(find.text('Title'), findsOneWidget);
+    await tester.tap(find.text('First option'));
+
+    expect(await result, equals(42));
+
+    // TODO(abarth): Remove once https://github.com/flutter/flutter/issues/7457
+    // is fixed.
+    await tester.pumpUntilNoTransientCallbacks(const Duration(seconds: 1));
   });
 }

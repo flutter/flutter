@@ -118,4 +118,52 @@ void main() {
     await tester.pumpWidget(buildApp(true));
     expect(getThumbPaint().style, equals(PaintingStyle.stroke));
   });
+
+  testWidgets('Slider can tap in vertical scroller',
+      (WidgetTester tester) async {
+    double value = 0.0;
+    await tester.pumpWidget(new Material(
+      child: new Block(
+        children: <Widget>[
+          new Slider(
+            value: value,
+            onChanged: (double newValue) {
+              value = newValue;
+            },
+          ),
+          new Container(
+            height: 2000.0,
+          ),
+        ],
+      ),
+    ));
+
+    await tester.tap(find.byType(Slider));
+    expect(value, equals(0.5));
+  });
+
+  testWidgets('Slider drags immediately', (WidgetTester tester) async {
+    double value = 0.0;
+    await tester.pumpWidget(new Material(
+      child: new Center(
+        child: new Slider(
+          value: value,
+          onChanged: (double newValue) {
+            value = newValue;
+          },
+        ),
+      ),
+    ));
+
+    Point center = tester.getCenter(find.byType(Slider));
+    TestGesture gesture = await tester.startGesture(center);
+
+    expect(value, equals(0.5));
+
+    await gesture.moveBy(new Offset(1.0, 0.0));
+
+    expect(value, greaterThan(0.5));
+
+    await gesture.up();
+  });
 }

@@ -87,10 +87,13 @@ dependencies:
 
 void sanityCheckDocs() {
   List<String> canaries = <String>[
+    '$kDocRoot/api/dart-io/File-class.html',
+    '$kDocRoot/api/dart-ui/Canvas-class.html',
+    '$kDocRoot/api/dart-ui/Canvas/drawRect.html',
+    '$kDocRoot/api/flutter_test/WidgetTester/pumpWidget.html',
     '$kDocRoot/api/material/Material-class.html',
     '$kDocRoot/api/material/Tooltip-class.html',
     '$kDocRoot/api/widgets/Widget-class.html',
-    '$kDocRoot/api/dart-ui/Canvas-class.html',
   ];
   for (String canary in canaries) {
     if (!new File(canary).existsSync())

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show Paragraph, ParagraphBuilder, ParagraphConstraints, ParagraphStyle, TextBox;
+import 'dart:ui' as ui show TextBox;
 
 import 'package:flutter/gestures.dart';
 
@@ -88,9 +88,6 @@ class RenderEditable extends RenderBox {
   set text(TextSpan value) {
     if (_textPainter.text == value)
       return;
-    TextSpan oldStyledText = _textPainter.text;
-    if (oldStyledText.style != value.style)
-      _layoutTemplate = null;
     _textPainter.text = value;
     markNeedsLayout();
   }
@@ -115,7 +112,9 @@ class RenderEditable extends RenderBox {
     markNeedsPaint();
   }
 
-  /// Whether to paint the cursor.
+  /// The maximum number of lines for the text to span, wrapping if necessary.
+  /// If this is 1 (the default), the text will not wrap, but will extend
+  /// indefinitely instead.
   int get maxLines => _maxLines;
   int _maxLines;
   set maxLines(int value) {
@@ -222,19 +221,7 @@ class RenderEditable extends RenderBox {
 
   Size _contentSize;
 
-  ui.Paragraph _layoutTemplate;
-  double get _preferredLineHeight {
-    if (_layoutTemplate == null) {
-      ui.ParagraphBuilder builder = new ui.ParagraphBuilder(new ui.ParagraphStyle())
-        ..pushStyle(text.style.getTextStyle(textScaleFactor: textScaleFactor))
-        ..addText(_kZeroWidthSpace);
-      // TODO(abarth): ParagraphBuilder#build's argument should be optional.
-      // TODO(abarth): These min/max values should be the default for ui.Paragraph.
-      _layoutTemplate = builder.build()
-        ..layout(new ui.ParagraphConstraints(width: double.INFINITY));
-    }
-    return _layoutTemplate.height;
-  }
+  double get _preferredLineHeight => _textPainter.preferredLineHeight;
 
   double get _maxContentWidth {
     return _maxLines > 1 ?

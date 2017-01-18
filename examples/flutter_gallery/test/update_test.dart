@@ -33,7 +33,9 @@ void main() {
     expect(backButton, findsOneWidget);
     await tester.tap(backButton);
     await tester.pump(); // Start the pop "back" operation.
+    await tester.pump(); // Complete the willPop() Future.
     await tester.pump(const Duration(seconds: 1)); // transition is complete
+    //await tester.pumpUntilNoTransientCallbacks(const Duration(seconds: 1));
 
     expect(find.text('UPDATE'), findsNothing);
   });

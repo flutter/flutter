@@ -66,6 +66,12 @@ const Matcher isNotInCard = const _IsNotInCard();
 /// empty, and does not contain the default `Instance of ...` string.
 const Matcher hasOneLineDescription = const _HasOneLineDescription();
 
+/// A matcher for functions that throw [FlutterError].
+const Matcher throwsFlutterError = const Throws(isFlutterError);
+
+/// A matcher for [FlutterError].
+const Matcher isFlutterError = const isInstanceOf<FlutterError>();
+
 /// Asserts that two [double]s are equal, within some tolerated error.
 ///
 /// Two values are considered equal if the difference between them is within

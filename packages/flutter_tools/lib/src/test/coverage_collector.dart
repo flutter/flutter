@@ -12,57 +12,84 @@ import '../base/io.dart';
 import '../dart/package_map.dart';
 import '../globals.dart';
 
+/// A class that's used to collect coverage data during tests.
 class CoverageCollector {
-  static final CoverageCollector instance = new CoverageCollector();
+  CoverageCollector._();
 
+  /// The singleton instance of the coverage collector.
+  static final CoverageCollector instance = new CoverageCollector._();
+
+  /// By default, coverage collection is not enabled. Set [enabled] to true
+  /// to turn on coverage collection.
   bool enabled = false;
   int observatoryPort;
 
-  void collectCoverage({
+  /// Adds a coverage collection tasks to the pending queue. The task will not
+  /// begin collecting coverage data until [CoverageCollectionTask.start] is
+  /// called.
+  ///
+  /// When a process is spawned to accumulate code coverage data, this method
+  /// should be called before the process terminates so that this collector
+  /// knows to wait for the coverage data in [finalizeCoverage].
+  ///
+  /// If this collector is not [enabled], the task will still be added to the
+  /// pending queue. Only when the task is started will the enabled state of
+  /// the collector be consulted.
+  CoverageCollectionTask addTask({
     String host,
     int port,
     Process processToKill,
   }) {
-    if (enabled) {
-      assert(_jobs != null);
-      _jobs.add(_startJob(
-        host: host,
-        port: port,
-        processToKill: processToKill,
-      ));
-    } else {
-      processToKill.kill();
-    }
+    final CoverageCollectionTask task = new CoverageCollectionTask._(
+      this,
+      host,
+      port,
+      processToKill,
+    );
+    _tasks.add(task._future);
+    return task;
   }
 
-  Future<Null> _startJob({
-    String host,
-    int port,
-    Process processToKill,
-  }) async {
-    int pid = processToKill.pid;
-    printTrace('collecting coverage data from pid $pid on port $port');
-    Map<String, dynamic> data = await collect(host, port, false, false);
-    printTrace('done collecting coverage data from pid $pid');
-    processToKill.kill();
-    Map<String, dynamic> hitmap = createHitmap(data['coverage']);
+  List<Future<Null>> _tasks = <Future<Null>>[];
+  Map<String, dynamic> _globalHitmap;
+
+  void _addHitmap(Map<String, dynamic> hitmap) {
     if (_globalHitmap == null)
       _globalHitmap = hitmap;
     else
       mergeHitmaps(hitmap, _globalHitmap);
-    printTrace('done merging data from pid $pid into global coverage map');
   }
 
-  Future<Null> finishPendingJobs() async {
-    await Future.wait(_jobs.toList(), eagerError: true);
+  /// Returns a future that completes once all tasks have finished.
+  /// This will not start any tasks that were not already started.
+  ///
+  /// If [timeout] is specified, the future will timeout (with a
+  /// [TimeoutException]) after the specified duration.
+  Future<Null> finishPendingTasks({ Duration timeout }) {
+    Future<dynamic> future = Future.wait(_tasks, eagerError: true);
+    if (timeout != null)
+      future = future.timeout(timeout);
+    return future;
   }
 
-  List<Future<Null>> _jobs = <Future<Null>>[];
-  Map<String, dynamic> _globalHitmap;
-
-  Future<String> finalizeCoverage({ Formatter formatter }) async {
+  /// Returns a future that will complete with the formatted coverage data
+  /// (using [formatter]) once all coverage data has been collected.
+  ///
+  /// This will not start any collection tasks. It us up to the caller of
+  /// [addTask] to maintain a reference to the [CoverageCollectionTask] and
+  /// call `start` on the task once the code in question has run. Failure to do
+  /// so will cause this method to wait indefinitely for the task.
+  ///
+  /// If [timeout] is specified, the future will timeout (with a
+  /// [TimeoutException]) after the specified duration.
+  ///
+  /// This must only be called if this collector is [enabled].
+  Future<String> finalizeCoverage({
+    Formatter formatter,
+    Duration timeout,
+  }) async {
     assert(enabled);
-    await finishPendingJobs();
+    await finishPendingTasks(timeout: timeout);
     printTrace('formating coverage data');
     if (_globalHitmap == null)
       return null;
@@ -73,5 +100,67 @@ class CoverageCollector {
       formatter = new LcovFormatter(resolver, reportOn: reportOn, basePath: packagePath);
     }
     return await formatter.format(_globalHitmap);
+  }
+}
+
+/// A class that represents a pending task of coverage data collection.
+/// Instances of this class are obtained when a process starts running code
+/// by calling [CoverageCollector.addTask]. Then, when the code has run to
+/// completion (all the coverage data has been recorded), the task is started
+/// to actually collect the coverage data.
+class CoverageCollectionTask {
+  final Completer<Null> _completer = new Completer<Null>();
+  final CoverageCollector _collector;
+  final String _host;
+  final int _port;
+  final Process _processToKill;
+
+  CoverageCollectionTask._(
+    this._collector,
+    this._host,
+    this._port,
+    this._processToKill,
+  );
+
+  bool _started = false;
+
+  Future<Null> get _future => _completer.future;
+
+  /// Starts the task of collecting coverage.
+  ///
+  /// This should be called when the code whose coverage data is being collected
+  /// has been run to completion so that all coverage data has been recorded.
+  /// Failure to do so will cause [CoverageCollector.finalizeCoverage] to wait
+  /// indefinitely for the task to complete.
+  ///
+  /// Each task may only be started once.
+  void start() {
+    assert(!_started);
+    _started = true;
+
+    if (!_collector.enabled) {
+      _processToKill.kill();
+      _completer.complete();
+      return;
+    }
+
+    int pid = _processToKill.pid;
+    printTrace('collecting coverage data from pid $pid on port $_port');
+    collect(_host, _port, false, false).then(
+      (Map<dynamic, dynamic> data) {
+        printTrace('done collecting coverage data from pid $pid');
+        _processToKill.kill();
+        try {
+          _collector._addHitmap(createHitmap(data['coverage']));
+          printTrace('done merging data from pid $pid into global coverage map');
+          _completer.complete();
+        } catch (error, stackTrace) {
+          _completer.completeError(error, stackTrace);
+        }
+      },
+      onError: (dynamic error, StackTrace stackTrace) {
+        _completer.completeError(error, stackTrace);
+      },
+    );
   }
 }

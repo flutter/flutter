@@ -33,14 +33,16 @@ class RenderParagraph extends RenderBox {
     TextAlign textAlign,
     bool softWrap: true,
     TextOverflow overflow: TextOverflow.clip,
-    double textScaleFactor: 1.0
+    double textScaleFactor: 1.0,
+    int maxLines,
   }) : _softWrap = softWrap,
        _overflow = overflow,
        _textPainter = new TextPainter(
-           text: text,
-           textAlign: textAlign,
-           textScaleFactor: textScaleFactor,
-           ellipsis: overflow == TextOverflow.ellipsis ? _kEllipsis : null,
+         text: text,
+         textAlign: textAlign,
+         textScaleFactor: textScaleFactor,
+         maxLines: maxLines,
+         ellipsis: overflow == TextOverflow.ellipsis ? _kEllipsis : null,
        ) {
     assert(text != null);
     assert(text.debugAssertIsValid());
@@ -110,9 +112,25 @@ class RenderParagraph extends RenderBox {
     markNeedsLayout();
   }
 
+  /// An optional maximum number of lines for the text to span, wrapping if necessary.
+  /// If the text exceeds the given number of lines, it will be truncated according
+  /// to [overflow].
+  int get maxLines => _textPainter.maxLines;
+  set maxLines(int value) {
+    if (_textPainter.maxLines == value)
+      return;
+    _textPainter.maxLines = value;
+    _overflowShader = null;
+    markNeedsLayout();
+  }
+
   void _layoutText({ double minWidth: 0.0, double maxWidth: double.INFINITY }) {
-    bool wrap = _softWrap || _overflow == TextOverflow.ellipsis;
+    bool wrap = _softWrap || (_overflow == TextOverflow.ellipsis && maxLines == null);
     _textPainter.layout(minWidth: minWidth, maxWidth: wrap ? maxWidth : double.INFINITY);
+  }
+
+  void _layoutTextWithConstraints(BoxConstraints constraints) {
+    _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
   }
 
   @override
@@ -147,7 +165,7 @@ class RenderParagraph extends RenderBox {
     assert(!needsLayout);
     assert(constraints != null);
     assert(constraints.debugAssertIsValid());
-    _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
+    _layoutTextWithConstraints(constraints);
     return _textPainter.computeDistanceToActualBaseline(baseline);
   }
 
@@ -159,7 +177,7 @@ class RenderParagraph extends RenderBox {
     assert(debugHandleEvent(event, entry));
     if (event is! PointerDownEvent)
       return;
-    _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
+    _layoutTextWithConstraints(constraints);
     Offset offset = entry.localPosition.toOffset();
     TextPosition position = _textPainter.getPositionForOffset(offset);
     TextSpan span = _textPainter.text.getSpanForPosition(position);
@@ -171,7 +189,7 @@ class RenderParagraph extends RenderBox {
 
   @override
   void performLayout() {
-    _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
+    _layoutTextWithConstraints(constraints);
     // We grab _textPainter.size here because assigning to `size` will trigger
     // us to validate our intrinsic sizes, which will change _textPainter's
     // layout because the intrinsic size calculations are destructive.
@@ -179,30 +197,40 @@ class RenderParagraph extends RenderBox {
     size = constraints.constrain(textSize);
 
     final bool didOverflowWidth = size.width < textSize.width;
+    final bool didOverflowHeight = _textPainter.didExceedMaxLines;
     // TODO(abarth): We're only measuring the sizes of the line boxes here. If
     // the glyphs draw outside the line boxes, we might think that there isn't
     // visual overflow when there actually is visual overflow. This can become
     // a problem if we start having horizontal overflow and introduce a clip
     // that affects the actual (but undetected) vertical overflow.
-    _hasVisualOverflow = didOverflowWidth || size.height < textSize.height;
-    if (didOverflowWidth) {
+    _hasVisualOverflow = didOverflowWidth || didOverflowHeight;
+    if (_hasVisualOverflow) {
       switch (_overflow) {
         case TextOverflow.clip:
         case TextOverflow.ellipsis:
           _overflowShader = null;
           break;
         case TextOverflow.fade:
-          TextPainter fadeWidthPainter = new TextPainter(
+          TextPainter fadeSizePainter = new TextPainter(
             text: new TextSpan(style: _textPainter.text.style, text: '\u2026'),
             textScaleFactor: textScaleFactor
           )..layout();
-          final double fadeEnd = size.width;
-          final double fadeStart = fadeEnd - fadeWidthPainter.width;
-          // TODO(abarth): This shader has an LTR bias.
-          _overflowShader = new ui.Gradient.linear(
-            <Point>[new Point(fadeStart, 0.0), new Point(fadeEnd, 0.0)],
-            <Color>[const Color(0xFFFFFFFF), const Color(0x00FFFFFF)]
-          );
+          if (didOverflowWidth) {
+            final double fadeEnd = size.width;
+            final double fadeStart = fadeEnd - fadeSizePainter.width;
+            // TODO(abarth): This shader has an LTR bias.
+            _overflowShader = new ui.Gradient.linear(
+              <Point>[new Point(fadeStart, 0.0), new Point(fadeEnd, 0.0)],
+              <Color>[const Color(0xFFFFFFFF), const Color(0x00FFFFFF)]
+            );
+          } else {
+            final double fadeEnd = size.height;
+            final double fadeStart = fadeEnd - fadeSizePainter.height / 2.0;
+            _overflowShader = new ui.Gradient.linear(
+              <Point>[new Point(0.0, fadeStart), new Point(0.0, fadeEnd)],
+              <Color>[const Color(0xFFFFFFFF), const Color(0x00FFFFFF)]
+            );
+          }
           break;
       }
     } else {
@@ -222,7 +250,7 @@ class RenderParagraph extends RenderBox {
     //
     // If you remove this call, make sure that changing the textAlign still
     // works properly.
-    _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
+    _layoutTextWithConstraints(constraints);
     final Canvas canvas = context.canvas;
     if (_hasVisualOverflow) {
       final Rect bounds = offset & size;
@@ -243,6 +271,52 @@ class RenderParagraph extends RenderBox {
       }
       canvas.restore();
     }
+  }
+
+  /// Returns the offset at which to paint the caret.
+  ///
+  /// Valid only after [layout].
+  Offset getOffsetForCaret(TextPosition position, Rect caretPrototype) {
+    assert(!needsLayout);
+    _layoutTextWithConstraints(constraints);
+    return _textPainter.getOffsetForCaret(position, caretPrototype);
+  }
+
+  /// Returns a list of rects that bound the given selection.
+  ///
+  /// A given selection might have more than one rect if this text painter
+  /// contains bidirectional text because logically contiguous text might not be
+  /// visually contiguous.
+  ///
+  /// Valid only after [layout].
+  List<ui.TextBox> getBoxesForSelection(TextSelection selection) {
+    assert(!needsLayout);
+    _layoutTextWithConstraints(constraints);
+    return _textPainter.getBoxesForSelection(selection);
+  }
+
+  /// Returns the position within the text for the given pixel offset.
+  ///
+  /// Valid only after [layout].
+  TextPosition getPositionForOffset(Offset offset) {
+    assert(!needsLayout);
+    _layoutTextWithConstraints(constraints);
+    return _textPainter.getPositionForOffset(offset);
+  }
+
+  /// Returns the text range of the word at the given offset. Characters not
+  /// part of a word, such as spaces, symbols, and punctuation, have word breaks
+  /// on both sides. In such cases, this method will return a text range that
+  /// contains the given text position.
+  ///
+  /// Word boundaries are defined more precisely in Unicode Standard Annex #29
+  /// <http://www.unicode.org/reports/tr29/#Word_Boundaries>.
+  ///
+  /// Valid only after [layout].
+  TextRange getWordBoundary(TextPosition position) {
+    assert(!needsLayout);
+    _layoutTextWithConstraints(constraints);
+    return _textPainter.getWordBoundary(position);
   }
 
   @override

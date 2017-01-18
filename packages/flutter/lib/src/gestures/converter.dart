@@ -49,6 +49,7 @@ class PointerEventConverter {
       final Point position = new Point(datum.physicalX, datum.physicalY) / devicePixelRatio;
       final Duration timeStamp = datum.timeStamp;
       final PointerDeviceKind kind = datum.kind;
+      assert(datum.change != null);
       switch (datum.change) {
         case ui.PointerChange.add:
           assert(!_pointers.containsKey(datum.device));
@@ -325,10 +326,6 @@ class PointerEventConverter {
             radiusMax: datum.radiusMax
           );
           break;
-        default:
-          // TODO(ianh): once https://github.com/flutter/flutter/issues/720 is
-          // done, add real support for PointerAddedEvent and PointerRemovedEvent
-          assert(false);
       }
     }
   }

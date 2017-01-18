@@ -84,7 +84,7 @@ void main() {
     log.clear();
   });
 
-  testWidgets('ChangeNotifier with mutating listener', (WidgetTester tester) async {
+  test('ChangeNotifier with mutating listener', () {
     final TestNotifier test = new TestNotifier();
     final List<String> log = <String>[];
 
@@ -114,7 +114,7 @@ void main() {
     log.clear();
   });
 
-  testWidgets('Merging change notifiers', (WidgetTester tester) async {
+  test('Merging change notifiers', () {
     final TestNotifier source1 = new TestNotifier();
     final TestNotifier source2 = new TestNotifier();
     final TestNotifier source3 = new TestNotifier();
@@ -147,7 +147,7 @@ void main() {
     log.clear();
   });
 
-  testWidgets('Merging change notifiers ignores null', (WidgetTester tester) async {
+  test('Merging change notifiers ignores null', () {
     final TestNotifier source1 = new TestNotifier();
     final TestNotifier source2 = new TestNotifier();
     final List<String> log = <String>[];
@@ -160,5 +160,34 @@ void main() {
     source2.notify();
     expect(log, <String>['listener', 'listener']);
     log.clear();
+  });
+
+  test('Can dispose merged notifier', () {
+    final TestNotifier source1 = new TestNotifier();
+    final TestNotifier source2 = new TestNotifier();
+    final List<String> log = <String>[];
+
+    final ChangeNotifier merged = new Listenable.merge(<Listenable>[source1, source2]);
+    final VoidCallback listener = () { log.add('listener'); };
+
+    merged.addListener(listener);
+    source1.notify();
+    source2.notify();
+    expect(log, <String>['listener', 'listener']);
+    log.clear();
+    merged.dispose();
+
+    source1.notify();
+    source2.notify();
+    expect(log, isEmpty);
+  });
+
+  test('Cannot use a disposed ChangeNotifier', () {
+    final TestNotifier source = new TestNotifier();
+    source.dispose();
+    expect(() { source.addListener(null); }, throwsFlutterError);
+    expect(() { source.removeListener(null); }, throwsFlutterError);
+    expect(() { source.dispose(); }, throwsFlutterError);
+    expect(() { source.notify(); }, throwsFlutterError);
   });
 }

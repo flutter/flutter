@@ -200,8 +200,21 @@ class MaterialPageRoute<T> extends PageRoute<T> {
 
   _CupertinoBackGestureController _backGestureController;
 
+  /// Support for dismissing this route with a horizontal swipe is enabled
+  /// for [TargetPlatform.iOS]. If attempts to dismiss this route might be
+  /// vetoed because a [WillPopCallback] was defined for the route then the
+  /// platform-specific back gesture is disabled.
+  ///
+  /// See also:
+  ///
+  ///  * [hasScopedWillPopCallback], which is true if a `willPop` callback
+  ///    is defined for this route.
   @override
   NavigationGestureController startPopGesture(NavigatorState navigator) {
+    // If attempts to dismiss this route might be vetoed, then do not
+    // allow the user to dismiss the route with a swipe.
+    if (hasScopedWillPopCallback)
+      return null;
     if (controller.status != AnimationStatus.completed)
       return null;
     assert(_backGestureController == null);

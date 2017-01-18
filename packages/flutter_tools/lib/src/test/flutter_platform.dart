@@ -87,7 +87,7 @@ class FlutterPlatform extends PlatformPlugin {
         // TODO(ianh): the random number on the next line is a landmine that will eventually
         // cause a hard-to-find bug...
         observatoryPort = CoverageCollector.instance.observatoryPort ?? new math.Random().nextInt(30000) + 2000;
-        await CoverageCollector.instance.finishPendingJobs();
+        await CoverageCollector.instance.finishPendingTasks();
       }
 
       // Start the engine subprocess.
@@ -108,6 +108,12 @@ class FlutterPlatform extends PlatformPlugin {
           controller.sink.addError(message);
         }
       });
+
+      CoverageCollectionTask coverageTask = CoverageCollector.instance.addTask(
+        host: _kHost.address,
+        port: observatoryPort,
+        processToKill: process, // This kills the subprocess whether coverage is enabled or not.
+      );
 
       // Pipe stdout and stderr from the subprocess to our printStatus console.
       _pipeStandardStreamsToConsole(process);
@@ -181,11 +187,7 @@ class FlutterPlatform extends PlatformPlugin {
           break;
       }
 
-      CoverageCollector.instance.collectCoverage(
-        host: _kHost.address,
-        port: observatoryPort,
-        processToKill: process, // This kills the subprocess whether coverage is enabled or not.
-      );
+      coverageTask.start();
       subprocessActive = false;
     } catch (e, stack) {
       if (!controllerSinkClosed) {

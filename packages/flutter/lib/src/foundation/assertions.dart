@@ -339,7 +339,7 @@ class FlutterError extends AssertionError {
 void debugPrintStack({ String label, int maxFrames }) {
   if (label != null)
     debugPrint(label);
-  List<String> lines = StackTrace.current.toString().trimRight().split('\n');
+  Iterable<String> lines = StackTrace.current.toString().trimRight().split('\n');
   if (maxFrames != null)
     lines = lines.take(maxFrames);
   debugPrint(FlutterError.defaultStackFilter(lines).join('\n'));

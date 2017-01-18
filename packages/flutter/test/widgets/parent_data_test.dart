@@ -257,7 +257,7 @@ void main() {
         ]
       )
     );
-    expect(tester.takeException(), isNotNull);
+    expect(tester.takeException(), isFlutterError);
 
     await tester.pumpWidget(new Stack());
 
@@ -276,7 +276,7 @@ void main() {
         )
       )
     );
-    expect(tester.takeException(), isNotNull);
+    expect(tester.takeException(), isFlutterError);
 
     await tester.pumpWidget(
       new Stack()
@@ -338,5 +338,21 @@ void main() {
     checkTree(tester, <TestParentData>[
       new TestParentData(top: 10.0, left: 10.0),
     ]);
+  });
+
+  testWidgets('Parent data invalid ancestor', (WidgetTester tester) async {
+    await tester.pumpWidget(new Row(
+      children: <Widget>[
+        new Stack(
+          children: <Widget>[
+            new Expanded(
+              child: new Container()
+            ),
+          ],
+        ),
+      ],
+    ));
+
+    expect(tester.takeException(), isFlutterError);
   });
 }

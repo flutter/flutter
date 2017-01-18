@@ -19,4 +19,44 @@ void main() {
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.light);
     expect(tester.binding.microtaskCount, equals(0));
   });
+
+  test('setPreferredOrientations control test', () async {
+    List<String> log = <String>[];
+
+    PlatformMessages.setMockStringMessageHandler('flutter/platform', (String message) async {
+      log.add(message);
+    });
+
+    await SystemChrome.setPreferredOrientations(<DeviceOrientation>[
+      DeviceOrientation.portraitUp,
+    ]);
+
+    expect(log, equals(<String>['{"method":"SystemChrome.setPreferredOrientations","args":[["DeviceOrientation.portraitUp"]]}']));
+  });
+
+  test('setApplicationSwitcherDescription control test', () async {
+    List<String> log = <String>[];
+
+    PlatformMessages.setMockStringMessageHandler('flutter/platform', (String message) async {
+      log.add(message);
+    });
+
+    await SystemChrome.setApplicationSwitcherDescription(
+      new ApplicationSwitcherDescription(label: 'Example label', primaryColor: 0xFF00FF00)
+    );
+
+    expect(log, equals(<String>['{"method":"SystemChrome.setApplicationSwitcherDescription","args":[{"label":"Example label","primaryColor":4278255360}]}']));
+  });
+
+  test('setEnabledSystemUIOverlays control test', () async {
+    List<String> log = <String>[];
+
+    PlatformMessages.setMockStringMessageHandler('flutter/platform', (String message) async {
+      log.add(message);
+    });
+
+    await SystemChrome.setEnabledSystemUIOverlays(<SystemUiOverlay>[SystemUiOverlay.top]);
+
+    expect(log, equals(<String>['{"method":"SystemChrome.setEnabledSystemUIOverlays","args":[["SystemUiOverlay.top"]]}']));
+  });
 }

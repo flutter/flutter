@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/widgets.dart';
+import 'package:meta/meta.dart';
 
 import 'constants.dart';
 import 'debug.dart';
@@ -104,7 +105,7 @@ class ListItem extends StatelessWidget {
   /// See also:
   ///
   /// * [Divider], which you can use to obtain this effect manually.
-  static Iterable<Widget> divideItems({ BuildContext context, Iterable<Widget> items, Color color }) sync* {
+  static Iterable<Widget> divideItems({ BuildContext context, @required Iterable<Widget> items, Color color }) sync* {
     assert(items != null);
     assert(color != null || context != null);
 

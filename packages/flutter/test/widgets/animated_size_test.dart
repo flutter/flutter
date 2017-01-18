@@ -24,10 +24,10 @@ void main() {
           vsync: tester,
           child: const SizedBox(
             width: 100.0,
-            height: 100.0
-          )
-        )
-      )
+            height: 100.0,
+          ),
+        ),
+      ),
     );
 
     RenderBox box = tester.renderObject(find.byType(AnimatedSize));
@@ -41,10 +41,10 @@ void main() {
           vsync: tester,
           child: const SizedBox(
             width: 200.0,
-            height: 200.0
-          )
-        )
-      )
+            height: 200.0,
+          ),
+        ),
+      ),
     );
 
     await tester.pump(const Duration(milliseconds: 100));
@@ -68,10 +68,10 @@ void main() {
           vsync: tester,
           child: const SizedBox(
             width: 100.0,
-            height: 100.0
-          )
-        )
-      )
+            height: 100.0,
+          ),
+        ),
+      ),
     );
 
     await tester.pump(const Duration(milliseconds: 100));
@@ -100,11 +100,11 @@ void main() {
             vsync: tester,
             child: const SizedBox(
               width: 100.0,
-              height: 100.0
-            )
-          )
-        )
-      )
+              height: 100.0,
+            ),
+          ),
+        ),
+      ),
     );
 
     RenderBox box = tester.renderObject(find.byType(AnimatedSize));
@@ -121,11 +121,11 @@ void main() {
             vsync: tester,
             child: const SizedBox(
               width: 200.0,
-              height: 200.0
-            )
-          )
-        )
-      )
+              height: 200.0,
+            ),
+          ),
+        ),
+      ),
     );
 
     await tester.pump(const Duration(milliseconds: 100));
@@ -143,10 +143,10 @@ void main() {
           child: new AnimatedContainer(
             duration: const Duration(milliseconds: 100),
             width: 100.0,
-            height: 100.0
-          )
-        )
-      )
+            height: 100.0,
+          ),
+        ),
+      ),
     );
 
     RenderBox box = tester.renderObject(find.byType(AnimatedSize));
@@ -161,10 +161,10 @@ void main() {
           child: new AnimatedContainer(
             duration: const Duration(milliseconds: 100),
             width: 200.0,
-            height: 200.0
-          )
-        )
-      )
+            height: 200.0,
+          ),
+        ),
+      ),
     );
 
     await tester.pump(const Duration(milliseconds: 1)); // register change
@@ -175,5 +175,38 @@ void main() {
     box = tester.renderObject(find.byType(AnimatedSize));
     expect(box.size.width, equals(200.0));
     expect(box.size.height, equals(200.0));
+  });
+
+  testWidgets('AnimatedSize resync', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new Center(
+        child: new AnimatedSize(
+          duration: const Duration(milliseconds: 200),
+          vsync: const TestVSync(),
+          child: new SizedBox(
+            width: 100.0,
+            height: 100.0,
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpWidget(
+      new Center(
+        child: new AnimatedSize(
+          duration: const Duration(milliseconds: 200),
+          vsync: tester,
+          child: new SizedBox(
+            width: 200.0,
+            height: 100.0,
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump(const Duration(milliseconds: 100));
+
+    RenderBox box = tester.renderObject(find.byType(AnimatedSize));
+    expect(box.size.width, equals(150.0));
   });
 }

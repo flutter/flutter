@@ -11,9 +11,9 @@ import 'theme.dart';
 ///
 /// In the material design language, this represents a divider.
 ///
-/// Dividers can be used in lists and [Drawer]s to separate content vertically.
-/// To create a one-pixel divider between items in a list, consider using
-/// [ListItem.divideItems], which is optimized for this case.
+/// Dividers can be used in lists, [Drawer]s, and elsewhere to separate content
+/// vertically. To create a one-pixel divider between items in a list, consider
+/// using [ListItem.divideItems], which is optimized for this case.
 ///
 /// The box's total height is controlled by [height]. The appropriate padding is
 /// automatically computed from the height.

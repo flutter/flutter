@@ -672,10 +672,10 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
 ///  * [showTimePicker]
 ///  * <https://material.google.com/components/pickers.html#pickers-date-pickers>
 Future<DateTime> showDatePicker({
-  BuildContext context,
-  DateTime initialDate,
-  DateTime firstDate,
-  DateTime lastDate
+  @required BuildContext context,
+  @required DateTime initialDate,
+  @required DateTime firstDate,
+  @required DateTime lastDate
 }) async {
   return await showDialog(
     context: context,

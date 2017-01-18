@@ -156,7 +156,7 @@ void main() {
 
   testWidgets('Setting parent state during build is forbidden', (WidgetTester tester) async {
     await tester.pumpWidget(new BadWidgetParent());
-    expect(tester.takeException(), isNotNull);
+    expect(tester.takeException(), isFlutterError);
     await tester.pumpWidget(new Container());
   });
 

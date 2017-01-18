@@ -4,19 +4,40 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import '../services/mocks_for_image_cache.dart';
+
+const ImageProvider _kImage = const TestImageProvider(21, 42);
 
 void main() {
   testWidgets('ImageIcon sizing - no theme, default size', (WidgetTester tester) async {
     await tester.pumpWidget(
       new Center(
-        child: const ImageIcon(null)
+        child: const ImageIcon(_kImage)
       )
     );
 
     RenderBox renderObject = tester.renderObject(find.byType(ImageIcon));
     expect(renderObject.size, equals(const Size.square(24.0)));
+    expect(find.byType(Image), findsOneWidget);
+  });
+
+  testWidgets('Icon opacity', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new Center(
+        child: new IconTheme(
+          data: new IconThemeData(opacity: 0.5),
+          child: const ImageIcon(_kImage),
+        ),
+      ),
+    );
+
+    Image image = tester.widget(find.byType(Image));
+    expect(image, isNotNull);
+    expect(image.color.alpha, equals(128));
   });
 
   testWidgets('ImageIcon sizing - no theme, explicit size', (WidgetTester tester) async {

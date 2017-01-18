@@ -2,26 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:flutter/foundation.dart';
 import 'package:quiver/testing/async.dart';
 import 'package:test/test.dart';
 
-List<String> captureOutput(VoidCallback fn) {
-  List<String> log = <String>[];
-
-  runZoned(fn, zoneSpecification: new ZoneSpecification(
-    print: (Zone self,
-            ZoneDelegate parent,
-            Zone zone,
-            String line) {
-              log.add(line);
-            },
-  ));
-
-  return log;
-}
+import 'capture_output.dart';
 
 void main() {
   test('debugPrint', () {

@@ -233,6 +233,7 @@ class TextStyle {
       TextAlign textAlign,
       double textScaleFactor: 1.0,
       String ellipsis,
+      int maxLines,
    }) {
     return new ui.ParagraphStyle(
       textAlign: textAlign,
@@ -241,6 +242,7 @@ class TextStyle {
       fontFamily: fontFamily,
       fontSize: fontSize == null ? null : fontSize * textScaleFactor,
       lineHeight: height,
+      maxLines: maxLines,
       ellipsis: ellipsis,
     );
   }

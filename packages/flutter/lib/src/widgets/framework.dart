@@ -3456,7 +3456,7 @@ abstract class RenderObjectElement extends BuildableElement {
   }
 
   @override
-  void update(RenderObjectWidget newWidget) {
+  void update(@checked RenderObjectWidget newWidget) {
     super.update(newWidget);
     assert(widget == newWidget);
     assert(() { _debugUpdateRenderObjectOwner(); return true; });

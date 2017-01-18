@@ -34,7 +34,7 @@ abstract class WidgetsBindingObserver {
   /// box, and false otherwise. The [WidgetsApp] widget uses this
   /// mechanism to notify the [Navigator] widget that it should pop
   /// its current route if possible.
-  bool didPopRoute() => false;
+  Future<bool> didPopRoute() => new Future<bool>.value(false);
 
   /// Called when the application's dimensions change. For example,
   /// when a phone is rotated.
@@ -158,9 +158,9 @@ abstract class WidgetsBinding extends BindingBase implements GestureBinding, Ren
   /// [WidgetsApp] uses this in conjunction with a [Navigator] to
   /// cause the back button to close dialog boxes, return from modal
   /// pages, and so forth.
-  void handlePopRoute() {
-    for (WidgetsBindingObserver observer in _observers) {
-      if (observer.didPopRoute())
+  Future<Null> handlePopRoute() async {
+    for (WidgetsBindingObserver observer in  new List<WidgetsBindingObserver>.from(_observers)) {
+      if (await observer.didPopRoute())
         return;
     }
     SystemNavigator.pop();
