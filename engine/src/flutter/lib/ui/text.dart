@@ -693,8 +693,12 @@ abstract class Paragraph extends NativeFieldWrapperClass2 {
   double get alphabeticBaseline native "Paragraph_alphabeticBaseline";
 
   /// The distance from the top of the paragraph to the ideographic
-   /// baseline of the first line, in logical pixels.
+  /// baseline of the first line, in logical pixels.
   double get ideographicBaseline native "Paragraph_ideographicBaseline";
+
+  /// True if there is more vertical content, but the text was truncated
+  /// because we reached [ParagraphStyle.maxLines] lines of text.
+  bool get didExceedMaxLines native "Paragraph_didExceedMaxLines";
 
   /// Computes the size and position of each glyph in the paragraph.
   void layout(ParagraphConstraints constraints) => _layout(constraints.width);

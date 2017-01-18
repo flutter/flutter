@@ -7,6 +7,7 @@
 #include "flutter/common/threads.h"
 #include "flutter/sky/engine/core/rendering/PaintInfo.h"
 #include "flutter/sky/engine/core/rendering/RenderText.h"
+#include "flutter/sky/engine/core/rendering/RenderParagraph.h"
 #include "flutter/sky/engine/core/rendering/style/RenderStyle.h"
 #include "flutter/sky/engine/platform/fonts/FontCache.h"
 #include "flutter/sky/engine/platform/graphics/GraphicsContext.h"
@@ -30,6 +31,7 @@ IMPLEMENT_WRAPPERTYPEINFO(ui, Paragraph);
   V(Paragraph, maxIntrinsicWidth)   \
   V(Paragraph, alphabeticBaseline)  \
   V(Paragraph, ideographicBaseline) \
+  V(Paragraph, didExceedMaxLines) \
   V(Paragraph, layout)              \
   V(Paragraph, paint)               \
   V(Paragraph, getWordBoundary)     \
@@ -73,6 +75,13 @@ double Paragraph::alphabeticBaseline() {
 double Paragraph::ideographicBaseline() {
   return firstChildBox()->firstLineBoxBaseline(
       FontBaselineOrAuto(IdeographicBaseline));
+}
+
+bool Paragraph::didExceedMaxLines() {
+  RenderBox* box = firstChildBox();
+  ASSERT(box->isRenderParagraph());
+  RenderParagraph* paragraph = static_cast<RenderParagraph*>(box);
+  return paragraph->didExceedMaxLines();
 }
 
 void Paragraph::layout(double width) {
