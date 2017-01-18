@@ -76,11 +76,13 @@ public class TextInputPlugin extends JSONMessageListener {
             outAttrs.imeOptions = EditorInfo.IME_ACTION_DONE | EditorInfo.IME_FLAG_NO_FULLSCREEN;
             InputConnectionAdaptor connection = new InputConnectionAdaptor(view, mClient, this);
             if (mLatestState != null) {
-                outAttrs.initialSelStart = mLatestState.getInt("selectionBase");
-                outAttrs.initialSelEnd = mLatestState.getInt("selectionExtent");
+                int selectionBase = mLatestState.getInt("selectionBase");
+                int selectionExtent = mLatestState.getInt("selectionExtent");
+                outAttrs.initialSelStart = selectionBase;
+                outAttrs.initialSelEnd = selectionExtent;
                 connection.getEditable().append(mLatestState.getString("text"));
-                connection.setSelection(mLatestState.getInt("selectionBase"),
-                                        mLatestState.getInt("selectionExtent"));
+                connection.setSelection(Math.max(selectionBase, 0),
+                                        Math.max(selectionExtent, 0));
                 connection.setComposingRegion(mLatestState.getInt("composingBase"),
                                               mLatestState.getInt("composingExtent"));
             } else {
