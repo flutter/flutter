@@ -29,7 +29,11 @@ class SamplePageState extends State<SamplePage> {
   }
 }
 
+int willPopCount = 0;
+
 class SampleForm extends StatelessWidget {
+  SampleForm({ Key key }) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
@@ -37,6 +41,7 @@ class SampleForm extends StatelessWidget {
       body: new SizedBox.expand(
         child: new Form(
           onWillPop: () {
+            willPopCount += 1;
             return new Future<bool>.value(willPopValue);
           },
           child: new InputFormField(),
@@ -93,8 +98,8 @@ void main() {
   });
 
   testWidgets('Form.willPop can inhibit back button', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      new MaterialApp(
+    Widget buildFrame() {
+      return new MaterialApp(
         home: new Scaffold(
           appBar: new AppBar(title: new Text('Home')),
           body: new Builder(
@@ -112,8 +117,10 @@ void main() {
             },
           ),
         ),
-      ),
-    );
+      );
+    }
+
+    await tester.pumpWidget(buildFrame());
 
     await tester.tap(find.text('X'));
     await tester.pump();
@@ -122,13 +129,21 @@ void main() {
     expect(find.text('Sample Form'), findsOneWidget);
 
     willPopValue = false;
+    willPopCount = 0;
     await tester.tap(find.byTooltip('Back'));
-    await tester.pumpUntilNoTransientCallbacks(const Duration(seconds: 1));
+    await tester.pump(); // Start the pop "back" operation.
+    await tester.pump(); // Complete the willPop() Future.
+    await tester.pump(const Duration(seconds: 1)); // Wait until it has finished.
     expect(find.text('Sample Form'), findsOneWidget);
+    expect(willPopCount, 1);
 
     willPopValue = true;
+    willPopCount = 0;
     await tester.tap(find.byTooltip('Back'));
-    await tester.pumpUntilNoTransientCallbacks(const Duration(seconds: 1));
+    await tester.pump(); // Start the pop "back" operation.
+    await tester.pump(); // Complete the willPop() Future.
+    await tester.pump(const Duration(seconds: 1)); // Wait until it has finished.
     expect(find.text('Sample Form'), findsNothing);
+    expect(willPopCount, 1);
   });
 }

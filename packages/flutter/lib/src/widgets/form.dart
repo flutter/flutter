@@ -69,12 +69,11 @@ class FormState extends State<Form> {
   void dependenciesChanged() {
     super.dependenciesChanged();
     final ModalRoute<dynamic> route = ModalRoute.of(context);
-    if (route != null && route.isCurrent) {
-      // If it's the same ModalRoute, avoid adding our callback twice.
-      if (config.onWillPop != null) {
-        route.removeScopedWillPopCallback(config.onWillPop);
-        route.addScopedWillPopCallback(config.onWillPop);
-      }
+    if (route != null && config.onWillPop != null) {
+      // Avoid adding our callback twice by removing it first.
+      //route.removeScopedWillPopCallback(config.onWillPop);
+      route.removeScopedWillPopCallback(config.onWillPop);
+      route.addScopedWillPopCallback(config.onWillPop);
     }
   }
 
@@ -82,7 +81,8 @@ class FormState extends State<Form> {
   void didUpdateConfig(Form oldConfig) {
     final ModalRoute<dynamic> route = ModalRoute.of(context);
     if (config.onWillPop != oldConfig.onWillPop && route != null) {
-      route.removeScopedWillPopCallback(oldConfig.onWillPop);
+      if (oldConfig.onWillPop != null)
+        route.removeScopedWillPopCallback(oldConfig.onWillPop);
       if (config.onWillPop != null)
         route.addScopedWillPopCallback(config.onWillPop);
     }

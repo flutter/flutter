@@ -403,15 +403,17 @@ class _ModalScopeState extends State<_ModalScope> {
   void dispose() {
     config.route.animation?.removeStatusListener(_animationStatusChanged);
     config.route.forwardAnimation?.removeStatusListener(_animationStatusChanged);
-    willPopCallbacks = const <WillPopCallback>[];
+    willPopCallbacks = null;
     super.dispose();
   }
 
   void addWillPopCallback(WillPopCallback callback) {
+    assert(mounted);
     willPopCallbacks.add(callback);
   }
 
   void removeWillPopCallback(WillPopCallback callback) {
+    assert(mounted);
     willPopCallbacks.remove(callback);
   }
 
@@ -653,7 +655,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///   this method checks.
   @override
   Future<bool> willPop() async {
-    final _ModalScopeState scope = _scopeKey?.currentState;
+    final _ModalScopeState scope = _scopeKey.currentState;
     assert(scope != null);
     for (WillPopCallback callback in new List<WillPopCallback>.from(scope.willPopCallbacks)) {
       if (!await callback())
@@ -666,7 +668,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///
   /// This callback is typically added by a stateful descendant of the modal route.
   /// A stateful widget shown in a modal route, like the child passed to
-  /// [showDialog], can look up its modal route and then add a callback int its
+  /// [showDialog], can look up its modal route and then add a callback in its
   /// `dependenciesChanged` method:
   ///
   /// ```dart
@@ -680,6 +682,10 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// A typical application of this callback would be to warn the user about
   /// unsaved [Form] data if the user attempts to back out of the form.
   ///
+  /// This callback runs asynchronously and it's possible that it will be called
+  /// after its route has been disposed. The callback should check [mounted] before
+  /// doing anything.
+  ///
   /// See also:
   ///
   /// * [Form], which provides an `onWillPop` callback that uses this mechanism.
@@ -687,7 +693,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// * [removeScopedWillPopCallback], which removes a callback from the list
   ///   that [willPop] checks.
   void addScopedWillPopCallback(WillPopCallback callback) {
-    assert(_scopeKey?.currentState != null);
+    assert(_scopeKey.currentState != null);
     _scopeKey.currentState.addWillPopCallback(callback);
   }
 
@@ -699,12 +705,12 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// * [addScopedWillPopCallback], which adds callback to the list
   ///   checked by [willPop].
   void removeScopedWillPopCallback(WillPopCallback callback) {
-    assert(_scopeKey?.currentState != null);
+    assert(_scopeKey.currentState != null);
     _scopeKey.currentState.removeWillPopCallback(callback);
   }
 
   bool get hasScopedWillPopCallback {
-    return _scopeKey?.currentState == null || _scopeKey.currentState.willPopCallbacks.length > 0;
+    return _scopeKey.currentState == null || _scopeKey.currentState.willPopCallbacks.length > 0;
   }
 
   // Internals

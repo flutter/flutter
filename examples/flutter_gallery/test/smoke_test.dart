@@ -43,7 +43,9 @@ Future<Null> smokeDemo(WidgetTester tester, String routeName) async {
   Finder backButton = find.byTooltip('Back');
   expect(backButton, findsOneWidget);
   await tester.tap(backButton);
-  await tester.pumpUntilNoTransientCallbacks(const Duration(seconds: 1));
+  await tester.pump(); // Start the pop "back" operation.
+  await tester.pump(); // Complete the willPop() Future.
+  await tester.pump(const Duration(seconds: 1)); // Wait until it has finished.
   return null;
 }
 

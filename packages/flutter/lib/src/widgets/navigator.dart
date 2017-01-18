@@ -118,6 +118,11 @@ abstract class Route<T> {
   /// back gesture), this should return a controller object that can be used to
   /// control the transition animation's progress. Otherwise, it should return
   /// null.
+  ///
+  /// If attempts to dismiss this route might be vetoed, for example because
+  /// a [WillPopCallback] was defined for the route, then it may make sense
+  /// to disable the pop gesture. For example, the iOS back gesture is disabled
+  /// when [ModalRoute.hasScopedWillCallback] is true.
   NavigationGestureController startPopGesture(NavigatorState navigator) {
     return null;
   }
