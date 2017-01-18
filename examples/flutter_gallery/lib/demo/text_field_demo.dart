@@ -80,7 +80,7 @@ class TextFieldDemoState extends State<TextFieldDemo> {
     if (!_formWasEdited || form.validate())
       return new Future<bool>.value(true);
 
-    return showDialog(
+    return showDialog/*<bool>*/(
       context: context,
       child: new AlertDialog(
         title: new Text('This form has errors'),

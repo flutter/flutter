@@ -71,7 +71,6 @@ class FormState extends State<Form> {
     final ModalRoute<dynamic> route = ModalRoute.of(context);
     if (route != null && config.onWillPop != null) {
       // Avoid adding our callback twice by removing it first.
-      //route.removeScopedWillPopCallback(config.onWillPop);
       route.removeScopedWillPopCallback(config.onWillPop);
       route.addScopedWillPopCallback(config.onWillPop);
     }
