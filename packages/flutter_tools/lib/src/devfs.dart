@@ -44,8 +44,6 @@ abstract class DevFSContent {
   Stream<List<int>> contentsAsCompressedStream() {
     return contentsAsStream().transform(GZIP.encoder);
   }
-
-  bool get isStringEntry => false;
 }
 
 // File content to be copied to the device.
@@ -139,9 +137,6 @@ class DevFSStringContent extends DevFSByteContent {
   DevFSStringContent(String string) : string = string, super(UTF8.encode(string));
 
   final String string;
-
-  @override
-  bool get isStringEntry => true;
 }
 
 /// Abstract DevFS operations interface.
@@ -339,18 +334,14 @@ class DevFS {
     return _operations.destroy(fsName);
   }
 
-  void _reset() {
-    // Reset the dirty byte count.
-    _bytes = 0;
-    // Clear the dirt entries list.
-    _dirtyEntries.clear();
-  }
-
   Future<dynamic> update({ DevFSProgressReporter progressReporter,
                            AssetBundle bundle,
                            bool bundleDirty: false,
                            Set<String> fileFilter}) async {
-    _reset();
+    // Reset the dirty byte count.
+    _bytes = 0;
+    // Clear the dirt entries list.
+    _dirtyEntries.clear();
 
     // Mark all entries as possibly deleted.
     _entries.forEach((String devicePath, DevFSContent content) {
@@ -359,8 +350,7 @@ class DevFS {
 
     printTrace('DevFS: Starting sync from $rootDirectory');
     logger.printTrace('Scanning project files');
-    Directory directory = rootDirectory;
-    await _scanDirectory(directory,
+    await _scanDirectory(rootDirectory,
                          recursive: true,
                          fileFilter: fileFilter);
 
