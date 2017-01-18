@@ -295,8 +295,6 @@ class DevFS {
   String _packagesFilePath;
   final Map<String, DevFSContent> _entries = <String, DevFSContent>{};
   final Map<String, DevFSContent> _dirtyEntries = <String, DevFSContent>{};
-
-  final Map<String, DevFSContent> _assets = <String, DevFSContent>{};
   final Set<String> assetPathsToEvict = new Set<String>();
 
   final List<Future<Map<String, dynamic>>> _pendingOperations =
@@ -376,15 +374,10 @@ class DevFS {
       bundle.entries.forEach((String archivePath, DevFSContent content) {
         _scanBundleEntry(archivePath, content, bundleDirty);
       });
-      _assets.forEach((String archivePath, DevFSContent content) {
-        if (!content._exists) {
-          assetPathsToEvict.add(archivePath);
-        }
-      });
-      _assets..clear()..addAll(bundle.entries);
     }
     // Handle deletions.
     printTrace('Scanning for deleted files');
+    String assetBuildDirPrefix = getAssetBuildDirectory() + path.separator;
     final List<String> toRemove = new List<String>();
     _entries.forEach((String devicePath, DevFSContent content) {
       if (!content._exists) {
@@ -393,6 +386,10 @@ class DevFS {
         if (operation != null)
           _pendingOperations.add(operation);
         toRemove.add(devicePath);
+        if (devicePath.startsWith(assetBuildDirPrefix)) {
+          String archivePath = devicePath.substring(assetBuildDirPrefix.length);
+          assetPathsToEvict.add(archivePath);
+        }
       }
     });
     if (toRemove.isNotEmpty) {
