@@ -144,110 +144,6 @@ class DevFSStringContent extends DevFSByteContent {
   bool get isStringEntry => true;
 }
 
-// A file that has been added to a DevFS.
-class DevFSEntry extends DevFSContent {
-  DevFSEntry(this.devicePath, this.file)
-      : bundleEntry = null;
-
-  DevFSEntry.bundle(this.devicePath, String archivePath, DevFSContent content)
-      : bundleEntry = content,
-        file = content is DevFSFileContent ? content.file : null;
-
-  final String devicePath;
-  final DevFSContent bundleEntry;
-
-  final FileSystemEntity file;
-  FileSystemEntity _linkTarget;
-  FileStat _fileStat;
-  // When we scanned for files, did this still exist?
-  DateTime get lastModified => _fileStat?.modified;
-  bool get _isSourceEntry => file == null;
-  bool get stillExists {
-    if (_isSourceEntry)
-      return true;
-    _stat();
-    return _fileStat.type != FileSystemEntityType.NOT_FOUND;
-  }
-  bool get isModified {
-    if (_isSourceEntry)
-      return true;
-
-    if (_fileStat == null) {
-      _stat();
-      return true;
-    }
-    FileStat _oldFileStat = _fileStat;
-    _stat();
-    return _fileStat.modified.isAfter(_oldFileStat.modified);
-  }
-
-  @override
-  int get size {
-    if (_isSourceEntry) {
-      return bundleEntry.size;
-    } else {
-      if (_fileStat == null) {
-        _stat();
-      }
-      return _fileStat.size;
-    }
-  }
-
-  void _stat() {
-    if (_isSourceEntry)
-      return;
-    if (_linkTarget != null) {
-      // Stat the cached symlink target.
-      _fileStat = _linkTarget.statSync();
-      return;
-    }
-    _fileStat = file.statSync();
-    if (_fileStat.type == FileSystemEntityType.LINK) {
-      // Resolve, stat, and maybe cache the symlink target.
-      String resolved = file.resolveSymbolicLinksSync();
-      FileSystemEntity linkTarget = fs.file(resolved);
-      // Stat the link target.
-      _fileStat = linkTarget.statSync();
-      if (devFSConfig.cacheSymlinks) {
-        _linkTarget = linkTarget;
-      }
-    }
-  }
-
-  File _getFile() {
-    if (_linkTarget != null) {
-      return _linkTarget;
-    }
-    if (file is Link) {
-      // The link target.
-      return fs.file(file.resolveSymbolicLinksSync());
-    }
-    return file;
-  }
-
-  @override
-  Future<List<int>> contentsAsBytes() async {
-    if (_isSourceEntry)
-      return bundleEntry.contentsAsBytes();
-    final File file = _getFile();
-    return file.readAsBytes();
-  }
-
-  @override
-  Stream<List<int>> contentsAsStream() {
-    if (_isSourceEntry)
-      return bundleEntry.contentsAsStream();
-    final File file = _getFile();
-    return file.openRead();
-  }
-
-  @override
-  Stream<List<int>> contentsAsCompressedStream() {
-    return contentsAsStream().transform(GZIP.encoder);
-  }
-}
-
-
 /// Abstract DevFS operations interface.
 abstract class DevFSOperations {
   Future<Uri> create(String fsName);
@@ -418,7 +314,7 @@ class DevFS {
   final String fsName;
   final Directory rootDirectory;
   String _packagesFilePath;
-  final Map<String, DevFSEntry> _entries = <String, DevFSEntry>{};
+  final Map<String, DevFSContent> _entries = <String, DevFSContent>{};
   final Map<String, DevFSContent> _dirtyEntries = <String, DevFSContent>{};
 
   final Map<String, DevFSContent> _assets = <String, DevFSContent>{};
@@ -457,10 +353,8 @@ class DevFS {
     _reset();
 
     // Mark all entries as possibly deleted.
-    _entries.forEach((String path, DevFSEntry entry) {
-      entry._exists = false;
-      if (entry.bundleEntry != null)
-        entry.bundleEntry._exists = false;
+    _entries.forEach((String devicePath, DevFSContent content) {
+      content._exists = false;
     });
 
     printTrace('DevFS: Starting sync from $rootDirectory');
@@ -517,13 +411,13 @@ class DevFS {
     // Handle deletions.
     printTrace('Scanning for deleted files');
     final List<String> toRemove = new List<String>();
-    _entries.forEach((String path, DevFSEntry entry) {
-      if (!entry._exists) {
+    _entries.forEach((String devicePath, DevFSContent content) {
+      if (!content._exists) {
         Future<Map<String, dynamic>> operation =
-            _operations.deleteFile(fsName, entry.devicePath);
+            _operations.deleteFile(fsName, devicePath);
         if (operation != null)
           _pendingOperations.add(operation);
-        toRemove.add(path);
+        toRemove.add(devicePath);
       }
     });
     if (toRemove.isNotEmpty) {
@@ -571,16 +465,11 @@ class DevFS {
   }
 
   void _scanFile(String devicePath, FileSystemEntity file) {
-    DevFSEntry entry = _entries[devicePath];
-    if (entry == null) {
-      // New file.
-      entry = new DevFSEntry(devicePath, file);
-      _entries[devicePath] = entry;
-    }
-    entry._exists = true;
-    if (entry.isModified) {
-      _dirtyEntries[devicePath] = entry;
-      _bytes += entry.size;
+    DevFSContent content = _entries.putIfAbsent(devicePath, () => new DevFSFileContent(file));
+    content._exists = true;
+    if (content.isModified) {
+      _dirtyEntries[devicePath] = content;
+      _bytes += content.size;
     }
   }
 
@@ -589,13 +478,11 @@ class DevFS {
     // are in the same location in DevFS and the iOS simulator.
     final String devicePath = path.join(getAssetBuildDirectory(), archivePath);
 
-    DevFSEntry entry = _entries.putIfAbsent(devicePath, () =>
-        new DevFSEntry.bundle(devicePath, archivePath, content));
-    entry._exists = true;
-    entry.bundleEntry._exists = true;
-    if (entry.bundleEntry.isModified || bundleDirty) {
-      _dirtyEntries[devicePath] = entry;
-      _bytes += entry.size;
+    _entries[devicePath] = content;
+    content._exists = true;
+    if (content.isModified || bundleDirty) {
+      _dirtyEntries[devicePath] = content;
+      _bytes += content.size;
       assetPathsToEvict.add(archivePath);
     }
   }
