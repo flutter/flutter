@@ -770,6 +770,11 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
 
   bool _shouldShowBackArrow;
 
+  Future<Null> _back() async {
+    if (await Navigator.willPop(context) && mounted)
+      Navigator.pop(context);
+  }
+
   Widget _getModifiedAppBar({ EdgeInsets padding, int elevation}) {
     AppBar appBar = config.appBar;
     if (appBar == null)
@@ -800,7 +805,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
           leading = new IconButton(
             icon: new Icon(backIcon),
             alignment: FractionalOffset.centerLeft,
-            onPressed: () => Navigator.pop(context),
+            onPressed: _back,
             tooltip: 'Back' // TODO(ianh): Figure out how to localize this string
           );
         }
