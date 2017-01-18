@@ -54,6 +54,8 @@ public:
         return obj->isOutOfFlowPositioned() && !obj->style()->isOriginalDisplayInlineType() && !obj->container()->isRenderInline();
     }
 
+    bool didExceedMaxLines() const { return m_didExceedMaxLines; }
+
     // TODO(ojan): Remove the need for these.
     using RenderBlock::lineBoxes;
     using RenderBlock::firstLineBox;
@@ -103,6 +105,8 @@ private:
     void determineEndPosition(LineLayoutState&, RootInlineBox* startBox, InlineIterator& cleanLineStart, BidiStatus& cleanLineBidiStatus);
     bool checkPaginationAndFloatsAtEndLine(LineLayoutState&);
     bool matchedEndLine(LineLayoutState&, const InlineBidiResolver&, const InlineIterator& endLineStart, const BidiStatus& endLineStatus);
+
+    bool m_didExceedMaxLines;
 };
 
 DEFINE_RENDER_OBJECT_TYPE_CASTS(RenderParagraph, isRenderParagraph());

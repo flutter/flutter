@@ -28,6 +28,7 @@ namespace blink {
 using namespace WTF::Unicode;
 
 RenderParagraph::RenderParagraph()
+    : m_didExceedMaxLines(false)
 {
 }
 
@@ -855,8 +856,9 @@ void RenderParagraph::layoutRunsAndFloatsInRange(LineLayoutState& layoutState,
     bool checkForEndLineMatch = layoutState.endLine();
     RenderTextInfo renderTextInfo;
     VerticalPositionCache verticalPositionCache;
-
     LineBreaker lineBreaker(this);
+
+    m_didExceedMaxLines = false;
 
     while (!endOfLine.atEnd()) {
         // FIXME: Is this check necessary before the first iteration or can it be moved to the end?
@@ -880,7 +882,8 @@ void RenderParagraph::layoutRunsAndFloatsInRange(LineLayoutState& layoutState,
         endOfLine = lineBreaker.nextLineBreak(resolver, layoutState.lineInfo(), renderTextInfo,
             lastFloatFromPreviousLine, wordMeasurements);
         renderTextInfo.m_lineBreakIterator.resetPriorContext();
-        if (resolver.position().atEnd()) {
+        m_didExceedMaxLines = layoutState.lineInfo().lineIndex() > styleToUse->maxLines() && !layoutState.lineInfo().isEmpty();
+        if (resolver.position().atEnd() || m_didExceedMaxLines) {
             // FIXME: We shouldn't be creating any runs in nextLineBreak to begin with!
             // Once BidiRunList is separated from BidiResolver this will not be needed.
             resolver.runs().deleteRuns();
@@ -934,6 +937,7 @@ void RenderParagraph::layoutRunsAndFloatsInRange(LineLayoutState& layoutState,
 
         // Limit ellipsized text to a single line.
         if (lineBreaker.lineWasEllipsized()) {
+            m_didExceedMaxLines = true;
             resolver.setPosition(InlineIterator(resolver.position().root(), 0, 0), 0);
             break;
         }
