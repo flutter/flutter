@@ -18,7 +18,7 @@ export 'src/widgets/container.dart';
 export 'src/widgets/debug.dart';
 export 'src/widgets/dismissable.dart';
 export 'src/widgets/drag_target.dart';
-export 'src/widgets/editable.dart';
+export 'src/widgets/editable_text.dart';
 export 'src/widgets/focus.dart';
 export 'src/widgets/form.dart';
 export 'src/widgets/framework.dart';

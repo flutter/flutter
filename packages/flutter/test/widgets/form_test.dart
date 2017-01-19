@@ -15,7 +15,7 @@ void main() {
   }
 
   Future<Null> showKeyboard(WidgetTester tester) async {
-    RawInputState editable = tester.state(find.byType(RawInput).first);
+    EditableTextState editable = tester.state(find.byType(EditableText).first);
     editable.requestKeyboard();
     await tester.pump();
   }
@@ -207,7 +207,7 @@ void main() {
     expect(mockTextInput.editingState['text'], equals(initialValue));
 
     // initial value should also be visible in the raw input line
-    RawInputState editableText = tester.state(find.byType(RawInput));
+    EditableTextState editableText = tester.state(find.byType(EditableText));
     expect(editableText.config.value.text, equals(initialValue));
 
     // sanity check, make sure we can still edit the text and everything updates

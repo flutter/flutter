@@ -38,7 +38,7 @@ const Curve _kTransitionCurve = Curves.fastOutSlowIn;
 ///
 /// * [Input], which adds a label, a divider below the text field, and support for
 ///   an error message.
-/// * [RawInput], a text field that does not require [Material] design.
+/// * [EditableText], a text field that does not require [Material] design.
 class InputField extends StatefulWidget {
   InputField({
     Key key,
@@ -96,13 +96,13 @@ class InputField extends StatefulWidget {
 }
 
 class _InputFieldState extends State<InputField> {
-  GlobalKey<RawInputState> _rawInputKey = new GlobalKey<RawInputState>();
-  GlobalKey<RawInputState> _focusKey = new GlobalKey(debugLabel: "_InputFieldState _focusKey");
+  GlobalKey<EditableTextState> _editableTextKey = new GlobalKey<EditableTextState>();
+  GlobalKey<EditableTextState> _focusKey = new GlobalKey(debugLabel: "_InputFieldState _focusKey");
 
   GlobalKey get focusKey => config.focusKey ?? (config.key is GlobalKey ? config.key : _focusKey);
 
   void requestKeyboard() {
-    _rawInputKey.currentState?.requestKeyboard();
+    _editableTextKey.currentState?.requestKeyboard();
   }
 
   @override
@@ -120,13 +120,13 @@ class _InputFieldState extends State<InputField> {
           requestKeyboard();
         },
         // Since the focusKey may have been created here, defer building the
-        // RawInput until the focusKey's context has been set. This is necessary
-        // because the RawInput will check the focus, like Focus.at(focusContext),
-        // when it builds.
+        // EditableText until the focusKey's context has been set. This is
+        // necessary because the EditableText will check the focus, like
+        // Focus.at(focusContext), when it builds.
         child: new Builder(
           builder: (BuildContext context) {
-            return new RawInput(
-              key: _rawInputKey,
+            return new EditableText(
+              key: _editableTextKey,
               value: value,
               focusKey: focusKey,
               style: textStyle,
