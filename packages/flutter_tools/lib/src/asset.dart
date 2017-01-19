@@ -21,8 +21,11 @@ class AssetBundle {
   final Map<String, DevFSContent> entries = <String, DevFSContent>{};
 
   static const String defaultManifestPath = 'flutter.yaml';
+  static const String _kAssetManifestJson = 'AssetManifest.json';
+  static const String _kFontManifestJson = 'FontManifest.json';
   static const String _kFontSetMaterial = 'material';
   static const String _kFontSetRoboto = 'roboto';
+  static const String _kLICENSE = 'LICENSE';
 
   bool _fixed = false;
   DateTime _lastBuildTimestamp;
@@ -82,7 +85,7 @@ class AssetBundle {
     }
     if (manifest == null) {
       // No manifest file found for this application.
-      entries['AssetManifest.json'] = new DevFSStringContent('{}');
+      entries[_kAssetManifestJson] = new DevFSStringContent('{}');
       return 0;
     }
     if (manifest != null) {
@@ -131,15 +134,15 @@ class AssetBundle {
       entries[asset.assetEntry] = new DevFSFileContent(asset.assetFile);
     }
 
-    entries['AssetManifest.json'] = _createAssetManifest(assetVariants);
+    entries[_kAssetManifestJson] = _createAssetManifest(assetVariants);
 
     DevFSContent fontManifest =
         _createFontManifest(manifestDescriptor, usesMaterialDesign, includeDefaultFonts, includeRobotoFonts);
     if (fontManifest != null)
-      entries['FontManifest.json'] = fontManifest;
+      entries[_kFontManifestJson] = fontManifest;
 
     // TODO(ianh): Only do the following line if we've changed packages or if our LICENSE file changed
-    entries['LICENSE'] = await _obtainLicenses(packageMap, assetBasePath, reportPackages: reportLicensedPackages);
+    entries[_kLICENSE] = await _obtainLicenses(packageMap, assetBasePath, reportPackages: reportLicensedPackages);
 
     return 0;
   }

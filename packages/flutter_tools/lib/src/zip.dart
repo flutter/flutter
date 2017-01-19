@@ -34,7 +34,7 @@ class _ArchiveZipBuilder extends ZipBuilder {
   Future<Null> createZip(File outFile, Directory zipBuildDir) async {
     Archive archive = new Archive();
 
-    Completer<Null> finished = new Completer<Null>();
+    final Completer<Null> finished = new Completer<Null>();
     int count = entries.length;
     entries.forEach((String archivePath, DevFSContent content) {
       content.contentsAsBytes().then((List<int> data) {
@@ -70,7 +70,7 @@ class _ZipToolBuilder extends ZipBuilder {
       zipBuildDir.deleteSync(recursive: true);
     zipBuildDir.createSync(recursive: true);
 
-    Completer<Null> finished = new Completer<Null>();
+    final Completer<Null> finished = new Completer<Null>();
     int count = entries.length;
     entries.forEach((String archivePath, DevFSContent content) {
       content.contentsAsBytes().then((List<int> data) {
@@ -85,7 +85,7 @@ class _ZipToolBuilder extends ZipBuilder {
     });
     await finished.future;
 
-    Iterable<String> compressedNames = _getCompressedNames();
+    final Iterable<String> compressedNames = _getCompressedNames();
     if (compressedNames.isNotEmpty) {
       runCheckedSync(
         <String>['zip', '-q', outFile.absolute.path]..addAll(compressedNames),
@@ -93,7 +93,7 @@ class _ZipToolBuilder extends ZipBuilder {
       );
     }
 
-    Iterable<String> storedNames = _getStoredNames();
+    final Iterable<String> storedNames = _getStoredNames();
     if (storedNames.isNotEmpty) {
       runCheckedSync(
         <String>['zip', '-q', '-0', outFile.absolute.path]..addAll(storedNames),

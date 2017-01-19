@@ -107,11 +107,18 @@ class DevFSFileContent extends DevFSContent {
 
 /// Byte content to be copied to the device.
 class DevFSByteContent extends DevFSContent {
-  DevFSByteContent(this.bytes);
+  DevFSByteContent(this._bytes);
 
-  final List<int> bytes;
+  List<int> _bytes;
 
   bool _isModified = true;
+
+  List<int> get bytes => _bytes;
+
+  set bytes(List<int> newBytes) {
+    _bytes = newBytes;
+    _isModified = true;
+  }
 
   /// Return `true` only once so that the content is written to the device only once.
   @override
@@ -122,21 +129,33 @@ class DevFSByteContent extends DevFSContent {
   }
 
   @override
-  int get size => bytes.length;
+  int get size => _bytes.length;
 
   @override
-  Future<List<int>> contentsAsBytes() async => bytes;
+  Future<List<int>> contentsAsBytes() async => _bytes;
 
   @override
   Stream<List<int>> contentsAsStream() =>
-      new Stream<List<int>>.fromIterable(<List<int>>[bytes]);
+      new Stream<List<int>>.fromIterable(<List<int>>[_bytes]);
 }
 
 /// String content to be copied to the device.
 class DevFSStringContent extends DevFSByteContent {
-  DevFSStringContent(String string) : string = string, super(UTF8.encode(string));
+  DevFSStringContent(String string) : _string = string, super(UTF8.encode(string));
 
-  final String string;
+  String _string;
+
+  String get string => _string;
+
+  set string(String newString) {
+    _string = newString;
+    super.bytes = UTF8.encode(_string);
+  }
+
+  @override
+  set bytes(List<int> newBytes) {
+    string = UTF8.decode(newBytes);
+  }
 }
 
 /// Abstract DevFS operations interface.
@@ -319,9 +338,9 @@ class DevFS {
                            bool bundleDirty: false,
                            Set<String> fileFilter}) async {
     // Mark all entries as possibly deleted.
-    _entries.forEach((String devicePath, DevFSContent content) {
+    for (DevFSContent content in _entries.values) {
       content._exists = false;
-    });
+    }
 
     // Scan workspace, packages, and assets
     printTrace('DevFS: Starting sync from $rootDirectory');

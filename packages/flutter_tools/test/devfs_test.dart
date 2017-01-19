@@ -26,6 +26,36 @@ void main() {
   DevFS devFS;
   final AssetBundle assetBundle = new AssetBundle();
 
+  group('DevFSContent', () {
+    test('bytes', () {
+      DevFSByteContent content = new DevFSByteContent(<int>[4, 5, 6]);
+      expect(content.bytes, orderedEquals(<int>[4, 5, 6]));
+      expect(content.isModified, isTrue);
+      expect(content.isModified, isFalse);
+      content.bytes = <int>[7, 8, 9, 2];
+      expect(content.bytes, orderedEquals(<int>[7, 8, 9, 2]));
+      expect(content.isModified, isTrue);
+      expect(content.isModified, isFalse);
+    });
+    test('string', () {
+      DevFSStringContent content = new DevFSStringContent('some string');
+      expect(content.string, 'some string');
+      expect(content.bytes, orderedEquals(UTF8.encode('some string')));
+      expect(content.isModified, isTrue);
+      expect(content.isModified, isFalse);
+      content.string = 'another string';
+      expect(content.string, 'another string');
+      expect(content.bytes, orderedEquals(UTF8.encode('another string')));
+      expect(content.isModified, isTrue);
+      expect(content.isModified, isFalse);
+      content.bytes = UTF8.encode('foo bar');
+      expect(content.string, 'foo bar');
+      expect(content.bytes, orderedEquals(UTF8.encode('foo bar')));
+      expect(content.isModified, isTrue);
+      expect(content.isModified, isFalse);
+    });
+  });
+
   group('devfs local', () {
     MockDevFSOperations devFSOperations = new MockDevFSOperations();
 
