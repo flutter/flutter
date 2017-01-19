@@ -9,7 +9,6 @@ import '../base/os.dart';
 import '../base/process.dart';
 import '../cache.dart';
 import '../dart/pub.dart';
-import '../dart/summary.dart';
 import '../doctor.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
@@ -50,8 +49,6 @@ class UpgradeCommand extends FlutterCommand {
 
     if (code != 0)
       throwToolExit(null, exitCode: code);
-
-    await buildUnlinkedForPackages(Cache.flutterRoot);
 
     // Check for and download any engine and pkg/ updates.
     // We run the 'flutter' shell script re-entrantly here
