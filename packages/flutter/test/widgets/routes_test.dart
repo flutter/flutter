@@ -55,7 +55,7 @@ class TestRoute extends LocalHistoryRoute<String> {
     log('didPop $result');
     bool returnValue;
     if (returnValue = super.didPop(result))
-      dispose();
+      navigator.finalizeRoute(this);
     return returnValue;
   }
 

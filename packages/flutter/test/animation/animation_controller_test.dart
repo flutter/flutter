@@ -260,4 +260,13 @@ void main() {
 
     controller.stop();
   });
+
+  test('Disposed AnimationController toString works', () {
+    AnimationController controller = new AnimationController(
+      duration: const Duration(milliseconds: 100),
+      vsync: const TestVSync(),
+    );
+    controller.dispose();
+    expect(controller, hasOneLineDescription);
+  });
 }

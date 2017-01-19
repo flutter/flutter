@@ -210,7 +210,7 @@ class AnimationController extends Animation<double>
   /// controller's ticker might get muted, in which case the animation
   /// controller's callbacks will no longer fire even though time is continuing
   /// to pass. See [Ticker.muted] and [TickerMode].
-  bool get isAnimating => _ticker.isActive;
+  bool get isAnimating => _ticker != null && _ticker.isActive;
 
   _AnimationDirection _direction;
 
@@ -361,7 +361,17 @@ class AnimationController extends Animation<double>
   /// after this method is called.
   @override
   void dispose() {
+    assert(() {
+      if (_ticker == null) {
+        throw new FlutterError(
+          'AnimationController.dispose() called more than once.\n'
+          'A given AnimationController cannot be disposed more than once.'
+        );
+      }
+      return true;
+    });
     _ticker.dispose();
+    _ticker = null;
     super.dispose();
   }
 
@@ -392,10 +402,10 @@ class AnimationController extends Animation<double>
   @override
   String toStringDetails() {
     String paused = isAnimating ? '' : '; paused';
-    String silenced = _ticker.muted ? '; silenced' : '';
+    String ticker = _ticker == null ? '; DISPOSED' : (_ticker.muted ? '; silenced' : '');
     String label = debugLabel == null ? '' : '; for $debugLabel';
     String more = '${super.toStringDetails()} ${value.toStringAsFixed(3)}';
-    return '$more$paused$silenced$label';
+    return '$more$paused$ticker$label';
   }
 }
 

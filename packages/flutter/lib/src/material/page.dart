@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/widgets.dart';
+import 'package:meta/meta.dart';
+
 import 'material.dart';
 import 'theme.dart';
 
@@ -109,29 +111,45 @@ class _CupertinoTransitionCurve extends Curve {
 // animation progress. Used for iOS back gesture.
 class _CupertinoBackGestureController extends NavigationGestureController {
   _CupertinoBackGestureController({
-    NavigatorState navigator,
-    this.controller,
-    this.onDisposed,
-  }) : super(navigator);
+    @required NavigatorState navigator,
+    @required this.controller,
+    @required this.onDisposed,
+  }) : super(navigator) {
+    assert(controller != null);
+    assert(onDisposed != null);
+  }
 
   AnimationController controller;
-  VoidCallback onDisposed;
+  final VoidCallback onDisposed;
 
   @override
   void dispose() {
-    super.dispose();
-    onDisposed();
     controller.removeStatusListener(handleStatusChanged);
     controller = null;
+    onDisposed();
+    super.dispose();
   }
 
   @override
   void dragUpdate(double delta) {
+    // This assert can be triggered the Scaffold is reparented out of the route
+    // associated with this gesture controller and continues to feed it events.
+    // TODO(abarth): Change the ownership of the gesture controller so that the
+    // object feeding it these events (e.g., the Scaffold) is responsible for
+    // calling dispose on it as well.
+    assert(controller != null);
     controller.value -= delta;
   }
 
   @override
   bool dragEnd(double velocity) {
+    // This assert can be triggered the Scaffold is reparented out of the route
+    // associated with this gesture controller and continues to feed it events.
+    // TODO(abarth): Change the ownership of the gesture controller so that the
+    // object feeding it these events (e.g., the Scaffold) is responsible for
+    // calling dispose on it as well.
+    assert(controller != null);
+
     if (velocity.abs() >= _kMinFlingVelocity) {
       controller.fling(velocity: -velocity);
     } else if (controller.value <= 0.5) {
@@ -142,17 +160,28 @@ class _CupertinoBackGestureController extends NavigationGestureController {
 
     // Don't end the gesture until the transition completes.
     final AnimationStatus status = controller.status;
-    handleStatusChanged(controller.status);
+    handleStatusChanged(status);
     controller?.addStatusListener(handleStatusChanged);
 
     return (status == AnimationStatus.reverse || status == AnimationStatus.dismissed);
   }
 
   void handleStatusChanged(AnimationStatus status) {
-    if (status == AnimationStatus.dismissed)
+    // This can happen if an earlier status listener ends up calling dispose()
+    // on this object.
+    // TODO(abarth): Consider changing AnimationController not to call listeners
+    // that were removed while calling other listeners.
+    // See <https://github.com/flutter/flutter/issues/7533>.
+    if (controller == null)
+      return;
+
+    if (status == AnimationStatus.dismissed) {
       navigator.pop();
-    if (status == AnimationStatus.dismissed || status == AnimationStatus.completed)
+      assert(controller == null);
+    } else if (status == AnimationStatus.completed) {
       dispose();
+      assert(controller == null);
+    }
   }
 }
 
@@ -210,7 +239,7 @@ class MaterialPageRoute<T> extends PageRoute<T> {
   ///  * [hasScopedWillPopCallback], which is true if a `willPop` callback
   ///    is defined for this route.
   @override
-  NavigationGestureController startPopGesture(NavigatorState navigator) {
+  NavigationGestureController startPopGesture() {
     // If attempts to dismiss this route might be vetoed, then do not
     // allow the user to dismiss the route with a swipe.
     if (hasScopedWillPopCallback)

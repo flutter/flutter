@@ -136,9 +136,5 @@ void main() {
     await tester.tap(find.text('First option'));
 
     expect(await result, equals(42));
-
-    // TODO(abarth): Remove once https://github.com/flutter/flutter/issues/7457
-    // is fixed.
-    await tester.pumpUntilNoTransientCallbacks(const Duration(seconds: 1));
   });
 }
