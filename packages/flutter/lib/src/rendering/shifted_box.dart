@@ -736,18 +736,54 @@ class RenderFractionallySizedOverflowBox extends RenderAligningShiftedBox {
 }
 
 /// A delegate for computing the layout of a render object with a single child.
-class SingleChildLayoutDelegate {
-  /// Returns the size of this object given the incoming constraints.
+abstract class SingleChildLayoutDelegate {
+  // TODO(abarth): This class should take a Listenable to drive relayout.
+
+  /// The size of this object given the incoming constraints.
+  ///
+  /// Defaults to the biggest size that satifies the given constraints.
   Size getSize(BoxConstraints constraints) => constraints.biggest;
 
-  /// Returns the box constraints for the child given the incoming constraints.
+  /// The constraints for the child given the incoming constraints.
+  ///
+  /// During layout, the child is given the layout constraints returned by this
+  /// function. The child is required to pick a size for itself that satisfies
+  /// these constraints.
+  ///
+  /// Defaults to the given constraints.
   BoxConstraints getConstraintsForChild(BoxConstraints constraints) => constraints;
 
-  /// Returns the position where the child should be placed given the size of this object and the size of the child.
+  /// The position where the child should be placed.
+  ///
+  /// The `size` argument is the size of the parent, which might be different
+  /// from the value returned by [getSize] if that size doesn't satisfy the
+  /// constraints passed to [getSize]. The `childSize` argument is the size of
+  /// the child, which will satisfy the constraints returned by
+  /// [getConstraintsForChild].
+  ///
+  /// Defaults to positioning the child in the upper left corner of the parent.
   Offset getPositionForChild(Size size, Size childSize) => Offset.zero;
 
-  /// Override this method to return true when the child needs to be laid out.
-  bool shouldRelayout(@checked SingleChildLayoutDelegate oldDelegate) => true;
+  /// Called whenever a new instance of the custom layout delegate class is
+  /// provided to the [RenderCustomSingleChildLayoutBox] object, or any time
+  /// that a new [CustomSingleChildLayout] object is created with a new instance
+  /// of the custom layout delegate class (which amounts to the same thing,
+  /// because the latter is implemented in terms of the former).
+  ///
+  /// If the new instance represents different information than the old
+  /// instance, then the method should return `true`, otherwise it should return
+  /// `false`.
+  ///
+  /// If the method returns `false`, then the [getSize],
+  /// [getConstraintsForChild], and [getPositionForChild] calls might be
+  /// optimized away.
+  ///
+  /// It's possible that the layout methods will get called even if
+  /// [shouldRelayout] returns `false` (e.g. if an ancestor changed its layout).
+  /// It's also possible that the layout method will get called
+  /// without [shouldRelayout] being called at all (e.g. if the parent changes
+  /// size).
+  bool shouldRelayout(@checked SingleChildLayoutDelegate oldDelegate);
 }
 
 /// Defers the layout of its single child to a delegate.
@@ -820,15 +856,8 @@ class RenderCustomSingleChildLayoutBox extends RenderShiftedBox {
   }
 
   @override
-  bool get sizedByParent => true;
-
-  @override
-  void performResize() {
-    size = _getSize(constraints);
-  }
-
-  @override
   void performLayout() {
+    size = _getSize(constraints);
     if (child != null) {
       BoxConstraints childConstraints = delegate.getConstraintsForChild(constraints);
       assert(childConstraints.debugAssertIsValid(isAppliedConstraint: true));
