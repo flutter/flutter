@@ -113,22 +113,12 @@ class TextFieldDemoState extends State<TextFieldDemo> {
         child: new Block(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
           children: <Widget>[
-            // It's simpler to use an TextField, as below, but a FormField
-            // that builds an Input is equivalent.
-            new FormField<InputValue>(
-              initialValue: InputValue.empty,
+            new TextField(
+              icon: new Icon(Icons.person),
+              hintText: 'What do people call you?',
+              labelText: 'Name',
               onSaved: (InputValue val) { person.name = val.text; },
               validator: _validateName,
-              builder: (FormFieldState<InputValue> field) {
-                return new Input(
-                  icon: new Icon(Icons.person),
-                  hintText: 'What do people call you?',
-                  labelText: 'Name',
-                  value: field.value,
-                  onChanged: field.onChanged,
-                  errorText: field.errorText
-                );
-              },
             ),
             new TextField(
               icon: new Icon(Icons.phone),

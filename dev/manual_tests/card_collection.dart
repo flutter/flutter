@@ -304,9 +304,8 @@ class CardCollectionState extends State<CardCollection> {
           padding: const EdgeInsets.all(kCardMargins),
           child: _editable ?
             new Center(
-              child: new Input(
+              child: new TextField(
                 key: new GlobalObjectKey(cardModel),
-                value: cardModel.inputValue,
                 onChanged: (InputValue value) {
                   setState(() {
                     cardModel.inputValue = value;
