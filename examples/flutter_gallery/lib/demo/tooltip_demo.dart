@@ -33,7 +33,7 @@ class TooltipDemo extends StatelessWidget {
                     child: new Icon(
                       Icons.call,
                       size: 18.0,
-                      color: theme.primaryColor
+                      color: theme.iconTheme.color
                     )
                   ),
                   new Text(' icon.', style: theme.textTheme.subhead)
@@ -43,7 +43,7 @@ class TooltipDemo extends StatelessWidget {
                 child: new IconButton(
                   size: 48.0,
                   icon: new Icon(Icons.call),
-                  color: theme.primaryColor,
+                  color: theme.iconTheme.color,
                   tooltip: 'Place a phone call',
                   onPressed: () {
                     Scaffold.of(context).showSnackBar(new SnackBar(
