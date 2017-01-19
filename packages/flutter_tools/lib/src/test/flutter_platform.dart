@@ -20,7 +20,19 @@ import '../dart/package_map.dart';
 import '../globals.dart';
 import 'coverage_collector.dart';
 
+/// The timeout we give the test process to connect to the test harness
+/// once the process has been started.
 const Duration _kTestStartupTimeout = const Duration(seconds: 5);
+
+/// The timeout we give the operating system to start the test process
+/// once it's been instructed to do so. When the OS is under severe load,
+/// it throttles processes but will start them eventually.
+const Duration _kTestProcessTimeout = const Duration(minutes: 5);
+
+/// Message logged by the test process to signal that it has started.
+const String _kStartTimeoutTimerMessage = 'msg:startTime';
+
+/// The address at which our WebSocket server resides.
 final InternetAddress _kHost = InternetAddress.LOOPBACK_IP_V4;
 
 void installHook({ String shellPath }) {
@@ -115,8 +127,21 @@ class FlutterPlatform extends PlatformPlugin {
         processToKill: process, // This kills the subprocess whether coverage is enabled or not.
       );
 
+      Completer<Null> timeout = new Completer<Null>();
+
       // Pipe stdout and stderr from the subprocess to our printStatus console.
-      _pipeStandardStreamsToConsole(process);
+      _pipeStandardStreamsToConsole(process, handleLine: (String line) {
+        bool handled = false;
+        if (line == _kStartTimeoutTimerMessage) {
+          // This message signals that the sky_shell process has started, and
+          // it triggers the countdown of our test startup timeout. The CPU may
+          // be throttled, which can cause a long delay in starting the process,
+          // and we don't want to hold that against the process itself.
+          new Future<_InitialResult>.delayed(_kTestStartupTimeout, () => timeout.complete());
+          handled = true;
+        }
+        return handled;
+      });
 
       // At this point, three things can happen next:
       // The engine could crash, in which case process.exitCode will complete.
@@ -124,9 +149,10 @@ class FlutterPlatform extends PlatformPlugin {
       // The local test harness could get bored of us.
 
       _InitialResult initialResult = await Future.any(<Future<_InitialResult>>[
-        process.exitCode.then<_InitialResult>((int exitCode) { return _InitialResult.crashed; }),
-        new Future<_InitialResult>.delayed(_kTestStartupTimeout, () { return _InitialResult.timedOut; }),
-        webSocket.future.then<_InitialResult>((WebSocket webSocket) { return _InitialResult.connected; }),
+        process.exitCode.then<_InitialResult>((int exitCode) => _InitialResult.crashed),
+        timeout.future.then<_InitialResult>((Null _) => _InitialResult.timedOut),
+        new Future<_InitialResult>.delayed(_kTestProcessTimeout, () => _InitialResult.timedOut),
+        webSocket.future.then<_InitialResult>((WebSocket webSocket) => _InitialResult.connected),
       ]);
 
       switch (initialResult) {
@@ -227,6 +253,7 @@ import 'package:test/src/runner/vm/catch_isolate_errors.dart';
 import '$testUrl' as test;
 
 void main() {
+  print('$_kStartTimeoutTimerMessage');
   String server = Uri.decodeComponent('$encodedWebsocketUrl');
   StreamChannel channel = serializeSuite(() {
     catchIsolateErrors();
@@ -285,13 +312,18 @@ void main() {
     return processManager.start(executable, arguments, environment: environment);
   }
 
-  void _pipeStandardStreamsToConsole(Process process) {
+  void _pipeStandardStreamsToConsole(
+    Process process, {
+    bool handleLine(String line),
+  }) {
     for (Stream<List<int>> stream in
         <Stream<List<int>>>[process.stderr, process.stdout]) {
       stream.transform(UTF8.decoder)
         .transform(const LineSplitter())
         .listen((String line) {
-          if (line.startsWith('error: Unable to read Dart source \'package:test/'))
+          if (handleLine != null && handleLine(line))
+            return;
+          else if (line.startsWith('error: Unable to read Dart source \'package:test/'))
             printError('\n\nFailed to load test harness. Are you missing a dependency on flutter_test?\n');
           else if (line != null)
             printStatus('Shell: $line');
