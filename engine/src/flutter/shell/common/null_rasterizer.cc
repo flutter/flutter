@@ -20,7 +20,6 @@ void NullRasterizer::Setup(
 void NullRasterizer::Teardown(
     ftl::AutoResetWaitableEvent* teardown_completion_event) {
   if (surface_) {
-    surface_->Teardown();
     surface_.reset();
   }
   teardown_completion_event->Signal();
