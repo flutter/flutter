@@ -7,8 +7,11 @@ import 'dart:collection';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+import 'package:meta/meta.dart';
 
 import 'debug.dart';
+import 'ink_highlight.dart';
+import 'ink_splash.dart';
 import 'material.dart';
 import 'theme.dart';
 
@@ -88,6 +91,7 @@ class InkResponse extends StatefulWidget {
   /// specialize [InkResponse] for unusual cases. For example,
   /// [TableRowInkWell] implements this method to verify that the widget is
   /// in a table.
+  @mustCallSuper
   bool debugCheckContext(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     return true;
@@ -108,9 +112,9 @@ class _InkResponseState<T extends InkResponse> extends State<T> {
       return;
     if (value) {
       if (_lastHighlight == null) {
-        RenderBox referenceBox = context.findRenderObject();
-        assert(Material.of(context) != null);
-        _lastHighlight = Material.of(context).highlightAt(
+        final RenderBox referenceBox = context.findRenderObject();
+        _lastHighlight = new InkHighlight(
+          controller: Material.of(context),
           referenceBox: referenceBox,
           color: Theme.of(context).highlightColor,
           shape: config.highlightShape,
@@ -118,7 +122,7 @@ class _InkResponseState<T extends InkResponse> extends State<T> {
           onRemoved: () {
             assert(_lastHighlight != null);
             _lastHighlight = null;
-          }
+          },
         );
       } else {
         _lastHighlight.activate();
@@ -132,11 +136,11 @@ class _InkResponseState<T extends InkResponse> extends State<T> {
   }
 
   void _handleTapDown(TapDownDetails details) {
-    RenderBox referenceBox = context.findRenderObject();
-    assert(Material.of(context) != null);
+    final RenderBox referenceBox = context.findRenderObject();
+    final RectCallback rectCallback = config.getRectCallback(referenceBox);
     InkSplash splash;
-    RectCallback rectCallback = config.getRectCallback(referenceBox);
-    splash = Material.of(context).splashAt(
+    splash = new InkSplash(
+      controller: Material.of(context),
       referenceBox: referenceBox,
       position: referenceBox.globalToLocal(details.globalPosition),
       color: Theme.of(context).splashColor,
@@ -189,7 +193,7 @@ class _InkResponseState<T extends InkResponse> extends State<T> {
   @override
   void deactivate() {
     if (_splashes != null) {
-      Set<InkSplash> splashes = _splashes;
+      final Set<InkSplash> splashes = _splashes;
       _splashes = null;
       for (InkSplash splash in splashes)
         splash.dispose();
@@ -219,7 +223,7 @@ class _InkResponseState<T extends InkResponse> extends State<T> {
 
 }
 
-/// A rectangular area of a Material that responds to touch.
+/// A rectangular area of a [Material] that responds to touch.
 ///
 /// Must have an ancestor [Material] widget in which to cause ink reactions.
 ///

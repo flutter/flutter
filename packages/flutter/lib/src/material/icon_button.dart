@@ -136,7 +136,7 @@ class IconButton extends StatelessWidget {
         maxHeight: size,
         child: new ConstrainedBox(
           constraints: new BoxConstraints.loose(
-            new Size.square(math.max(size, InkSplash.defaultRadius * 2.0))
+            new Size.square(math.max(size, Material.defaultSplashRadius * 2.0))
           ),
           child: new Align(
             alignment: alignment,
@@ -161,7 +161,7 @@ class IconButton extends StatelessWidget {
     return new InkResponse(
       onTap: onPressed,
       child: result,
-      radius: math.max(size, InkSplash.defaultRadius),
+      radius: math.max(size, Material.defaultSplashRadius),
     );
   }
 
