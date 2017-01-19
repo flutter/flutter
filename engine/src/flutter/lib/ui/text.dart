@@ -90,7 +90,10 @@ enum TextAlign {
   right,
 
   /// Align the text in the center of the container
-  center
+  center,
+
+  /// Stretch each line of text to fill the width of the container
+  justify
 }
 
 /// A horizontal line used for aligning text
