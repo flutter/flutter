@@ -2007,9 +2007,13 @@ class RepositoryBoringSSLSourceDirectory extends RepositoryDirectory {
   }
 }
 
+/// The BoringSSL license file.
+///
+/// This license includes 23 lines of informational header text that are not
+/// part of the copyright notices and can be skipped.
 class RepositoryOpenSSLLicenseFile extends RepositorySingleLicenseFile {
   RepositoryOpenSSLLicenseFile(RepositoryDirectory parent, fs.TextFile io)
-    : super(parent, io, new License.message(io.readString(), LicenseType.openssl, origin: io.fullName)) {
+    : super(parent, io, new License.message(LineSplitter.split(io.readString()).skip(23).join('\n'), LicenseType.openssl, origin: io.fullName)) {
     _verifyLicense(io);
   }
 

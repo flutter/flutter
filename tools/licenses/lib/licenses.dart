@@ -77,6 +77,8 @@ LicenseType convertBodyToType(String body) {
     return LicenseType.gpl;
   if (body.startsWith(lrAPSL))
     return LicenseType.apsl;
+  if (body.contains(lrOpenSSL))
+    return LicenseType.openssl;
   if (body.contains(lrBSD))
     return LicenseType.bsd;
   if (body.contains(lrMIT))
