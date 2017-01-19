@@ -67,7 +67,6 @@ void GPURasterizer::Clear(SkColor color, const SkISize& size) {
 void GPURasterizer::Teardown(
     ftl::AutoResetWaitableEvent* teardown_completion_event) {
   if (surface_) {
-    surface_->Teardown();
     surface_.reset();
   }
   last_layer_tree_.reset();

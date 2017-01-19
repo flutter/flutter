@@ -39,8 +39,6 @@ class Surface {
 
   virtual bool Setup() = 0;
 
-  virtual void Teardown() = 0;
-
   virtual bool IsValid() = 0;
 
   virtual std::unique_ptr<SurfaceFrame> AcquireFrame(const SkISize& size) = 0;

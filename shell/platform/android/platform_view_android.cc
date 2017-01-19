@@ -319,6 +319,15 @@ void PlatformViewAndroid::SetSemanticsEnabled(JNIEnv* env,
 
 void PlatformViewAndroid::ReleaseSurface() {
   NotifyDestroyed();
+
+  ftl::AutoResetWaitableEvent latch;
+  blink::Threads::Gpu()->PostTask([this, &latch]() {
+    if (surface_gl_->IsValid())
+      surface_gl_->GLContextClearCurrent();
+    latch.Signal();
+  });
+  latch.Wait();
+
   surface_gl_->TeardownOnScreenContext();
 }
 
