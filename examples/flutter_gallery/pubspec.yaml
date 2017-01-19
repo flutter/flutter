@@ -6,8 +6,6 @@ dependencies:
 
   flutter:
     sdk: flutter
-  flutter_markdown:
-    sdk: flutter
 
   # Also update dev/benchmarks/complex_layout/pubspec.yaml
   flutter_gallery_assets:
