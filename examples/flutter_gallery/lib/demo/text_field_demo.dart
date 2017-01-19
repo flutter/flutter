@@ -113,7 +113,7 @@ class TextFieldDemoState extends State<TextFieldDemo> {
         child: new Block(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
           children: <Widget>[
-            // It's simpler to use an InputFormField, as below, but a FormField
+            // It's simpler to use an TextField, as below, but a FormField
             // that builds an Input is equivalent.
             new FormField<InputValue>(
               initialValue: InputValue.empty,
@@ -130,7 +130,7 @@ class TextFieldDemoState extends State<TextFieldDemo> {
                 );
               },
             ),
-            new InputFormField(
+            new TextField(
               icon: new Icon(Icons.phone),
               hintText: 'Where can we reach you?',
               labelText: 'Phone Number',
@@ -138,7 +138,7 @@ class TextFieldDemoState extends State<TextFieldDemo> {
               onSaved: (InputValue val) { person.phoneNumber = val.text; },
               validator: _validatePhoneNumber,
             ),
-            new InputFormField(
+            new TextField(
               hintText: 'Tell us about yourself (optional)',
               labelText: 'Life story',
               maxLines: 3,
@@ -147,7 +147,7 @@ class TextFieldDemoState extends State<TextFieldDemo> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 new Expanded(
-                  child: new InputFormField(
+                  child: new TextField(
                     key: _passwordFieldKey,
                     hintText: 'How do you log in?',
                     labelText: 'New Password',
@@ -157,7 +157,7 @@ class TextFieldDemoState extends State<TextFieldDemo> {
                 ),
                 new SizedBox(width: 16.0),
                 new Expanded(
-                  child: new InputFormField(
+                  child: new TextField(
                     hintText: 'How do you log in?',
                     labelText: 'Re-type Password',
                     hideText: true,
