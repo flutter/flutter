@@ -46,7 +46,7 @@ class SampleForm extends StatelessWidget {
             willPopCount += 1;
             return callback();
           },
-          child: new InputFormField(),
+          child: new TextField(),
         ),
       ),
     );

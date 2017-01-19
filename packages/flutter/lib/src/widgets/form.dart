@@ -197,7 +197,10 @@ typedef Widget FormFieldBuilder<T>(FormFieldState<T> field);
 /// pass a [GlobalKey] to the constructor and use [GlobalKey.currentState] to
 /// save or reset the form field.
 ///
-/// See also: [Form], [InputFormField]
+/// See also:
+///
+///  * [Form], which is the widget that aggregates the form fields.
+///  * [TextField], which is a commonly used form field for entering text.
 class FormField<T> extends StatefulWidget {
   FormField({
     Key key,

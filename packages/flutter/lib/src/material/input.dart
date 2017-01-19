@@ -386,7 +386,7 @@ class _InputContainerState extends State<InputContainer> {
 ///
 /// Requires one of its ancestors to be a [Material] widget.
 ///
-/// When using inside a [Form], consider using [InputFormField] instead.
+/// When using inside a [Form], consider using [TextField] instead.
 ///
 /// Assuming that the input is already focused, the basic data flow for
 /// retrieving user input is:
@@ -402,14 +402,14 @@ class _InputContainerState extends State<InputContainer> {
 /// See also:
 ///
 ///  * <https://material.google.com/components/text-fields.html>
-///  * [InputFormField], which simplifies steps 2-4 above.
+///  * [TextField], which simplifies steps 2-4 above.
 class Input extends StatefulWidget {
   /// Creates a text input field.
   ///
   /// By default, the input uses a keyboard appropriate for text entry.
   //
-  //  If you change this constructor signature, please also update
-  // InputContainer, InputFormField, InputField.
+  // If you change this constructor signature, please also update
+  // InputContainer, TextField, InputField.
   Input({
     Key key,
     this.value,
@@ -553,10 +553,10 @@ class _InputState extends State<Input> {
 /// pass a [GlobalKey] to the constructor and use [GlobalKey.currentState] to
 /// save or reset the form field.
 ///
-/// To see the use of [InputFormField], compare these two ways of a implementing
+/// To see the use of [TextField], compare these two ways of a implementing
 /// a simple two text field form.
 ///
-/// Using [InputFormField]:
+/// Using [TextField]:
 ///
 /// ```dart
 /// String _firstName, _lastName;
@@ -566,11 +566,11 @@ class _InputState extends State<Input> {
 ///   key: _formKey,
 ///   child: new Row(
 ///     children: <Widget>[
-///       new InputFormField(
+///       new TextField(
 ///         labelText: 'First Name',
 ///         onSaved: (InputValue value) { _firstName = value.text; }
 ///       ),
-///       new InputFormField(
+///       new TextField(
 ///         labelText: 'Last Name',
 ///         onSaved: (InputValue value) { _lastName = value.text; }
 ///       ),
@@ -613,8 +613,8 @@ class _InputState extends State<Input> {
 ///     ),
 ///  )
 /// ```
-class InputFormField extends FormField<InputValue> {
-  InputFormField({
+class TextField extends FormField<InputValue> {
+  TextField({
     Key key,
     GlobalKey focusKey,
     TextInputType keyboardType: TextInputType.text,
