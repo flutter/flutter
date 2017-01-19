@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:collection';
+
 import 'package:meta/meta.dart';
 
 import 'assertions.dart';
@@ -37,11 +39,11 @@ abstract class Listenable {
 /// It is O(N) for adding and removing listeners and O(N²) for dispatching
 /// notifications (where N is the number of listeners).
 class ChangeNotifier extends Listenable {
-  List<VoidCallback> _listeners;
+  Set<VoidCallback> _listeners = new LinkedHashSet<VoidCallback>();
 
   bool _debugAssertNotDisposed() {
     assert(() {
-      if (_listeners == const <VoidCallback>[]) {
+      if (_listeners == null) {
         throw new FlutterError(
           'A $runtimeType was used after being disposed.\n'
           'Once you have called dispose() on a $runtimeType, it can no longer be used.'
@@ -58,7 +60,6 @@ class ChangeNotifier extends Listenable {
   @override
   void addListener(VoidCallback listener) {
     assert(_debugAssertNotDisposed);
-    _listeners ??= <VoidCallback>[];
     _listeners.add(listener);
   }
 
@@ -71,7 +72,7 @@ class ChangeNotifier extends Listenable {
   @override
   void removeListener(VoidCallback listener) {
     assert(_debugAssertNotDisposed);
-    _listeners?.remove(listener);
+    _listeners.remove(listener);
   }
 
   /// Discards any resources used by the object. After this is called, the
@@ -83,7 +84,7 @@ class ChangeNotifier extends Listenable {
   @mustCallSuper
   void dispose() {
     assert(_debugAssertNotDisposed);
-    _listeners = const <VoidCallback>[];
+    _listeners = null;
   }
 
   /// Call all the registered listeners.
@@ -101,7 +102,7 @@ class ChangeNotifier extends Listenable {
   void notifyListeners() {
     assert(_debugAssertNotDisposed);
     if (_listeners != null) {
-      List<VoidCallback> localListeners = new List<VoidCallback>.from(_listeners);
+      final List<VoidCallback> localListeners = new List<VoidCallback>.from(_listeners);
       for (VoidCallback listener in localListeners) {
         try {
           if (_listeners.contains(listener))

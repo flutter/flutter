@@ -24,12 +24,12 @@ void main() {
     test.addListener(listener);
     test.addListener(listener);
     test.notify();
-    expect(log, <String>['listener', 'listener']);
+    expect(log, <String>['listener']);
     log.clear();
 
     test.removeListener(listener);
     test.notify();
-    expect(log, <String>['listener']);
+    expect(log, <String>[]);
     log.clear();
 
     test.removeListener(listener);
@@ -79,7 +79,7 @@ void main() {
     test.removeListener(listener2);
     test.addListener(listener2);
     test.notify();
-    expect(log, <String>['badListener', 'listener1', 'listener2']);
+    expect(log, <String>['badListener', 'listener2']);
     expect(tester.takeException(), isNullThrownError);
     log.clear();
   });
@@ -110,7 +110,7 @@ void main() {
     log.clear();
 
     test.notify();
-    expect(log, <String>['listener2', 'listener4', 'listener4']);
+    expect(log, <String>['listener2', 'listener4']);
     log.clear();
   });
 
