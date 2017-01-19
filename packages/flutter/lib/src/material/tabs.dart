@@ -875,8 +875,8 @@ class TabPageSelector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Color color = Theme.of(context).accentColor;
-    final ColorTween selectedColor = new ColorTween(begin: backgroundColor, end: color);
-    final ColorTween previousColor = new ColorTween(begin: color, end: backgroundColor);
+    final ColorTween selectedColor = new ColorTween(begin: emptyIndicatorFillColor, end: color);
+    final ColorTween previousColor = new ColorTween(begin: color, end: emptyIndicatorFillColor);
     final TabController tabController = controller ?? DefaultTabController.of(context);
     final Animation<double> animation = new CurvedAnimation(
       parent: tabController.animation,
