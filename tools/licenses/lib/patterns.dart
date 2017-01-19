@@ -550,6 +550,24 @@ final List<RegExp> csReferencesByType = <RegExp>[
 
 ];
 
+final List<RegExp> csReferencesByTypeNoCopyright = <RegExp>[
+
+  // used with _tryReferenceByType
+  // groups 1 and 2 are the prefix, group 3 is the license type
+
+  new RegExp(
+    kIndent +
+    r'Written by Andy Polyakov <appro@openssl\.org> for the OpenSSL '
+    r'project\. The module is, however, dual licensed under (OpenSSL) and '
+    r'CRYPTOGAMS licenses depending on where you obtain it\. For further '
+    r'details see http://www\.openssl\.org/~appro/cryptogams/\. '
+    r'Permission to use under GPL terms is granted\.'.replaceAll(' ', _linebreak),
+    multiLine: true,
+    caseSensitive: false
+  ),
+
+];
+
 class MultipleVersionedLicenseReferencePattern {
   MultipleVersionedLicenseReferencePattern({ this.firstPrefixIndex, this.indentPrefixIndex, this.licenseIndices, this.versionIndicies, this.checkLocalFirst: true, this.pattern });
   final int firstPrefixIndex;

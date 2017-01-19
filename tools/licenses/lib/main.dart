@@ -1993,10 +1993,37 @@ class RepositoryBoringSSLSourceDirectory extends RepositoryDirectory {
   }
 
   @override
+  RepositoryFile createFile(fs.IoNode entry) {
+    if (entry.name == 'LICENSE')
+      return new RepositoryOpenSSLLicenseFile(this, entry);
+    return super.createFile(entry);
+  }
+
+  @override
   RepositoryDirectory createSubdirectory(fs.Directory entry) {
     if (entry.name == 'third_party')
       return new RepositoryBoringSSLThirdPartyDirectory(this, entry);
     return super.createSubdirectory(entry);
+  }
+}
+
+class RepositoryOpenSSLLicenseFile extends RepositorySingleLicenseFile {
+  RepositoryOpenSSLLicenseFile(RepositoryDirectory parent, fs.TextFile io)
+    : super(parent, io, new License.message(io.readString(), LicenseType.openssl, origin: io.fullName)) {
+    _verifyLicense(io);
+  }
+
+  static void _verifyLicense(fs.TextFile io) {
+    final String contents = io.readString();
+    if (!contents.contains('BoringSSL is a fork of OpenSSL. As such, large parts of it fall under OpenSSL'))
+      throw 'unexpected OpenSSL license file contents:\n----8<----\n$contents\n----<8----';
+  }
+
+  @override
+  License licenseOfType(LicenseType type) {
+    if (type == LicenseType.openssl)
+      return license;
+    return null;
   }
 }
 
