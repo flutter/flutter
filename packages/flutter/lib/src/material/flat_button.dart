@@ -21,8 +21,8 @@ import 'theme.dart';
 /// corners. Avoid using flat buttons where they would blend in with other
 /// content, for example in the middle of lists.
 ///
-/// If the [onPressed] callback is not specified or null, then the button will
-/// be disabled, will not react to touch, and will be colored as specified by
+/// If the [onPressed] callback is null, then the button will be disabled,
+/// will not react to touch, and will be colored as specified by
 /// the [disabledColor] property instead of the [color] property. If you are
 /// trying to change the button's [color] and it is not having any effect, check
 /// that you are passing a non-null [onPressed] handler.
