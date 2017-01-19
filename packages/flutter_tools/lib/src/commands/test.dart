@@ -32,7 +32,7 @@ class TestCommand extends FlutterCommand {
     argParser.addFlag('merge-coverage',
       defaultsTo: false,
       negatable: false,
-      help: 'Whether to merge converage data with "coverage/lcov.base.info". '
+      help: 'Whether to merge converage data with "coverage/lcov.base.info".\n'
             'Implies collecting coverage data. (Requires lcov)'
     );
     argParser.addOption('coverage-path',
@@ -93,6 +93,7 @@ class TestCommand extends FlutterCommand {
       timeout: new Duration(seconds: 30),
     );
     status.stop();
+    printTrace('coverage information collection complete');
     if (coverageData == null)
       return false;
 
@@ -146,40 +147,42 @@ class TestCommand extends FlutterCommand {
 
   @override
   Future<Null> runCommand() async {
-    List<String> testArgs = argResults.rest.map((String testPath) => path.absolute(testPath)).toList();
+    List<String> testArgs = <String>[];
 
     commandValidator();
 
-    Directory testDir;
+    if (!terminal.supportsColor)
+      testArgs.addAll(<String>['--no-color', '-rexpanded']);
 
-    if (testArgs.isEmpty) {
+    CoverageCollector collector;
+    if (argResults['coverage'] || argResults['merge-coverage']) {
+      collector = new CoverageCollector();
+      testArgs.add('--concurrency=1');
+    }
+
+    testArgs.add('--');
+
+    Directory testDir;
+    List<String> files = argResults.rest.map((String testPath) => path.absolute(testPath)).toList();
+    if (files.isEmpty) {
       testDir = _currentPackageTestDir;
       if (!testDir.existsSync())
         throwToolExit("Test directory '${testDir.path}' not found.");
-
       testArgs.addAll(_findTests(testDir));
+    } else {
+      testArgs.addAll(files);
     }
-
-    testArgs.insert(0, '--');
-    if (!terminal.supportsColor)
-      testArgs.insertAll(0, <String>['--no-color', '-rexpanded']);
-
-    if (argResults['coverage'])
-      testArgs.insert(0, '--concurrency=1');
 
     final String shellPath = tools.getHostToolPath(HostTool.SkyShell) ?? Platform.environment['SKY_SHELL'];
     if (!fs.isFileSync(shellPath))
       throwToolExit('Cannot find Flutter shell at $shellPath');
-    loader.installHook(shellPath: shellPath);
+    loader.installHook(shellPath: shellPath, collector: collector);
 
     Cache.releaseLockEarly();
 
-    CoverageCollector collector = CoverageCollector.instance;
-    collector.enabled = argResults['coverage'] || argResults['merge-coverage'];
-
     int result = await _runTests(testArgs, testDir);
 
-    if (collector.enabled) {
+    if (collector != null) {
       if (!await _collectCoverageData(collector, mergeCoverageData: argResults['merge-coverage']))
         throwToolExit(null);
     }

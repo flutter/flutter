@@ -36,13 +36,16 @@ DART_SDK_PATH="$FLUTTER_ROOT/bin/cache/dart-sdk"
 
 DART="$DART_SDK_PATH/bin/dart"
 
+# To debug the tool, you can uncomment the following line to enable checked mode and set an observatory port:
+# FLUTTER_TOOL_ARGS="--observe=65432 --checked"
+
 (
   if hash flock 2>/dev/null; then
     flock 3 # ensures that we don't simultaneously update Dart in multiple parallel instances
     # some platforms (e.g. Mac) don't have flock or any reliable alternative
   fi
   REVISION=`(cd "$FLUTTER_ROOT"; git rev-parse HEAD)`
-  if [ ! -f "$SNAPSHOT_PATH" ] || [ ! -f "$STAMP_PATH" ] || [ `cat "$STAMP_PATH"` != "$REVISION" ] || [ "$FLUTTER_TOOLS_DIR/pubspec.yaml" -nt "$FLUTTER_TOOLS_DIR/pubspec.lock" ]; then
+  if [ ! -f "$SNAPSHOT_PATH" ] || [ ! -s "$STAMP_PATH" ] || [ `cat "$STAMP_PATH"` != "$REVISION" ] || [ "$FLUTTER_TOOLS_DIR/pubspec.yaml" -nt "$FLUTTER_TOOLS_DIR/pubspec.lock" ]; then
     mkdir -p "$FLUTTER_ROOT/bin/cache"
     touch "$FLUTTER_ROOT/bin/cache/.dartignore"
     "$FLUTTER_ROOT/bin/internal/update_dart_sdk.sh"
@@ -56,7 +59,7 @@ DART="$DART_SDK_PATH/bin/dart"
 ) 3< "$PROG_NAME"
 
 set +e
-"$DART" "$SNAPSHOT_PATH" "$@"
+"$DART" $FLUTTER_TOOL_ARGS "$SNAPSHOT_PATH" "$@"
 
 # The VM exits with code 253 if the snapshot version is out-of-date.
 # If it is, we need to snapshot it again.
@@ -67,4 +70,4 @@ fi
 
 set -e
 "$DART" --snapshot="$SNAPSHOT_PATH" --packages="$FLUTTER_TOOLS_DIR/.packages" "$SCRIPT_PATH"
-"$DART" "$SNAPSHOT_PATH" "$@"
+"$DART" $FLUTTER_TOOL_ARGS "$SNAPSHOT_PATH" "$@"
