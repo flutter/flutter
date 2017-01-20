@@ -27,6 +27,9 @@ final String _kZeroWidthSpace = new String.fromCharCode(0x200B);
 /// If the width of the area into which the text is being painted
 /// changes, return to step 2. If the text to be painted changes,
 /// return to step 1.
+///
+/// The default text style is white. To change the color of the text,
+/// pass a [TextStyle] object to the [TextSpan] in `text`.
 class TextPainter {
   /// Creates a text painter that paints the given text.
   ///
@@ -47,6 +50,8 @@ class TextPainter {
   bool _needsLayout = true;
 
   /// The (potentially styled) text to paint.
+  ///
+  /// After this is set, you must call [layout] before the next call to [paint].
   TextSpan get text => _text;
   TextSpan _text;
   set text(TextSpan value) {
@@ -61,6 +66,8 @@ class TextPainter {
   }
 
   /// How the text should be aligned horizontally.
+  ///
+  /// After this is set, you must call [layout] before the next call to [paint].
   TextAlign get textAlign => _textAlign;
   TextAlign _textAlign;
   set textAlign(TextAlign value) {
@@ -75,6 +82,8 @@ class TextPainter {
   ///
   /// For example, if the text scale factor is 1.5, text will be 50% larger than
   /// the specified font size.
+  ///
+  /// After this is set, you must call [layout] before the next call to [paint].
   double get textScaleFactor => _textScaleFactor;
   double _textScaleFactor;
   set textScaleFactor(double value) {
@@ -89,6 +98,8 @@ class TextPainter {
   /// The string used to ellipsize overflowing text.  Setting this to a nonempty
   /// string will cause this string to be substituted for the remaining text
   /// if the text can not fit within the specificed maximum width.
+  ///
+  /// After this is set, you must call [layout] before the next call to [paint].
   String get ellipsis => _ellipsis;
   String _ellipsis;
   set ellipsis(String value) {
@@ -103,6 +114,8 @@ class TextPainter {
   /// An optional maximum number of lines for the text to span, wrapping if necessary.
   /// If the text exceeds the given number of lines, it will be truncated according
   /// to [overflow].
+  ///
+  /// After this is set, you must call [layout] before the next call to [paint].
   int get maxLines => _maxLines;
   int _maxLines;
   set maxLines(int value) {
@@ -240,6 +253,15 @@ class TextPainter {
   /// Paints the text onto the given canvas at the given offset.
   ///
   /// Valid only after [layout] has been called.
+  ///
+  /// If you cannot see the text being painted, check that your text color does
+  /// not conflict with the background on which you are drawing. The default
+  /// text color is white (to contrast with the default black background color),
+  /// so if you are writing an application with a white background, the text
+  /// will not be visible by default.
+  ///
+  /// To set the text style, specify a [TextStyle] when creating the [TextSpan]
+  /// that you pass to the [TextPainter] constructor or to the [text] property.
   void paint(Canvas canvas, Offset offset) {
     assert(() {
       if (_needsLayout) {
