@@ -18,11 +18,10 @@ import 'theme.dart';
 /// in long busy lists of content, or in wide spaces. Avoid using raised buttons
 /// on already-raised content such as dialogs or cards.
 ///
-/// If the [onPressed] callback is not specified or null, then the button will
-/// be disabled and by default will appear like a flat button in the
-/// [disabledColor]. If you are trying to change the button's [color] and it is
-/// not having any effect, check that you are passing a non-null [onPressed]
-/// handler.
+/// If the [onPressed] callback is null, then the button will be disabled and by
+/// default will appear like a flat button in the [disabledColor]. If you are
+/// trying to change the button's [color] and it is not having any effect, check
+/// that you are passing a non-null [onPressed] handler.
 ///
 /// Requires one of its ancestors to be a [Material] widget.
 ///

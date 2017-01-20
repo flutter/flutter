@@ -25,8 +25,8 @@ import 'tooltip.dart';
 /// Icon buttons are commonly used in the [AppBar.actions] field, but they can
 /// be used in many other places as well.
 ///
-/// If the [onPressed] callback is not specified or null, then the button will
-/// be disabled, will not react to touch.
+/// If the [onPressed] callback is null, then the button will be disabled and
+/// will not react to touch.
 ///
 /// Requires one of its ancestors to be a [Material] widget.
 ///

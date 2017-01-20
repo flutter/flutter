@@ -29,8 +29,8 @@ final Object _kDefaultHeroTag = new Object();
 /// buttons should be used for positive actions such as "create", "share", or
 /// "navigate".
 ///
-/// If the [onPressed] callback is not specified or null, then the button will
-/// be disabled and will not react to touch.
+/// If the [onPressed] callback is null, then the button will be disabled and
+/// will not react to touch.
 ///
 /// See also:
 ///
