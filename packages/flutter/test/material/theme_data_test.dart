@@ -6,6 +6,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('Theme data control test', () {
+    ThemeData dark = new ThemeData.dark();
+
+    expect(dark, hasOneLineDescription);
+    expect(dark, equals(dark.copyWith()));
+    expect(dark.hashCode, equals(dark.copyWith().hashCode));
+
+    ThemeData light = new ThemeData.light();
+    ThemeData dawn = ThemeData.lerp(dark, light, 0.25);
+
+    expect(dawn.brightness, Brightness.dark);
+    expect(dawn.primaryColor, Color.lerp(dark.primaryColor, light.primaryColor, 0.25));
+  });
+
   test('Defaults to the default typography for the platform', () {
     for (TargetPlatform platform in TargetPlatform.values) {
       ThemeData theme = new ThemeData(platform: platform);
