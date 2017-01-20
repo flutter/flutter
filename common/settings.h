@@ -17,6 +17,8 @@ struct Settings {
   // Port on target will be auto selected by the OS. A message will be printed
   // on the target with the port after it has been selected.
   uint32_t observatory_port = 0;
+  bool enable_diagnostic = false;
+  uint32_t diagnostic_port = 0;
   bool start_paused = false;
   bool trace_startup = false;
   bool endless_trace_buffer = false;

@@ -42,6 +42,18 @@ bool IsViewInvalid(const ftl::WeakPtr<PlatformView>& platform_view) {
   return !platform_view;
 }
 
+template <typename T> bool GetSwitchValue(const base::CommandLine& command_line,
+                                          Switch sw, T* result) {
+  auto port_string = command_line.GetSwitchValueASCII(FlagForSwitch(sw));
+  std::stringstream stream(port_string);
+  T value = 0;
+  if (stream >> value) {
+    *result = value;
+    return true;
+  }
+  return false;
+}
+
 class NonDiscardableMemory : public base::DiscardableMemory {
  public:
   explicit NonDiscardableMemory(size_t size) : data_(new uint8_t[size]) {}
@@ -66,8 +78,8 @@ base::LazyInstance<NonDiscardableMemoryAllocator> g_discardable;
 void ServiceIsolateHook(bool running_precompiled) {
   if (!running_precompiled) {
     const blink::Settings& settings = blink::Settings::Get();
-    if (settings.enable_observatory)
-      DiagnosticServer::Start();
+    if (settings.enable_diagnostic)
+      DiagnosticServer::Start(settings.diagnostic_port);
   }
 }
 
@@ -135,16 +147,23 @@ void Shell::InitStandalone(std::string icu_data_path,
 
   // Set Observatory Port
   if (command_line.HasSwitch(FlagForSwitch(Switch::DeviceObservatoryPort))) {
-    auto port_string = command_line.GetSwitchValueASCII(
-        FlagForSwitch(Switch::DeviceObservatoryPort));
-    std::stringstream stream(port_string);
-    uint32_t port = 0;
-    if (stream >> port) {
-      settings.observatory_port = port;
-    } else {
+    if (!GetSwitchValue(command_line, Switch::DeviceObservatoryPort,
+                        &settings.observatory_port)) {
       FTL_LOG(INFO)
           << "Observatory port specified was malformed. Will default to "
           << settings.observatory_port;
+    }
+  }
+
+  settings.enable_diagnostic =
+      !command_line.HasSwitch(FlagForSwitch(Switch::DisableDiagnostic));
+
+  if (command_line.HasSwitch(FlagForSwitch(Switch::DeviceDiagnosticPort))) {
+    if (!GetSwitchValue(command_line, Switch::DeviceDiagnosticPort,
+                        &settings.diagnostic_port)) {
+      FTL_LOG(INFO)
+          << "Diagnostic port specified was malformed. Will default to "
+          << settings.diagnostic_port;
     }
   }
 

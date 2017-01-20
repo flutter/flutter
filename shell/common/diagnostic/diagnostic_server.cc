@@ -31,6 +31,7 @@ using tonic::DartLibraryNatives;
 using blink::EmbedderResources;
 using tonic::DartInvokeField;
 using tonic::LogIfError;
+using tonic::ToDart;
 
 namespace {
 
@@ -60,7 +61,7 @@ void SendNull(Dart_Port port_id) {
 
 DART_NATIVE_CALLBACK_STATIC(DiagnosticServer, HandleSkiaPictureRequest);
 
-void DiagnosticServer::Start() {
+void DiagnosticServer::Start(uint32_t port) {
   if (!g_natives) {
     g_natives = new DartLibraryNatives();
     g_natives->Register({
@@ -91,7 +92,7 @@ void DiagnosticServer::Start() {
 
   FTL_CHECK(!LogIfError(Dart_FinalizeLoading(false)));
 
-  DartInvokeField(Dart_RootLibrary(), "diagnosticServerStart", {});
+  DartInvokeField(Dart_RootLibrary(), "diagnosticServerStart", {ToDart(port)});
 }
 
 void DiagnosticServer::HandleSkiaPictureRequest(Dart_Handle send_port) {
