@@ -5,7 +5,9 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter/painting.dart';
-import 'package:test/test.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+import '../rendering/mock_canvas.dart';
 
 void main() {
   test("TextPainter caret test", () {
@@ -26,5 +28,10 @@ void main() {
     painter.layout();
     caretOffset = painter.getOffsetForCaret(new ui.TextPosition(offset: text.length), ui.Rect.zero);
     expect(caretOffset.dx, painter.width);
+  });
+
+  test("TextPainter error test", () {
+    TextPainter painter = new TextPainter();
+    expect(() { painter.paint(new MockCanvas(), Offset.zero); }, throwsFlutterError);
   });
 }
