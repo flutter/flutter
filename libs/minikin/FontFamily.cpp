@@ -28,11 +28,10 @@
 
 #include "FontLanguage.h"
 #include "FontLanguageListCache.h"
-#include "FontUtils.h"
 #include "HbFontCache.h"
 #include "MinikinInternal.h"
+#include <minikin/AnalyzeStyle.h>
 #include <minikin/CmapCoverage.h>
-#include <minikin/MinikinFont.h>
 #include <minikin/FontFamily.h>
 #include <minikin/MinikinFont.h>
 
@@ -67,30 +66,19 @@ uint32_t FontStyle::pack(int variant, int weight, bool italic) {
 
 Font::Font(MinikinFont* typeface, FontStyle style)
     : typeface(typeface), style(style) {
-    android::AutoMutex _l(gMinikinLock);
-    typeface->RefLocked();
-
-    const uint32_t fvarTag = MinikinFont::MakeTag('f', 'v', 'a', 'r');
-    HbBlob fvarTable(getFontTable(typeface, fvarTag));
-    if (fvarTable.size() == 0) {
-        return;
-    }
-
-    analyzeAxes(fvarTable.get(), fvarTable.size(), &supportedAxes);
+    typeface->Ref();
 }
 
 Font::Font(Font&& o) {
     typeface = o.typeface;
     style = o.style;
     o.typeface = nullptr;
-    supportedAxes = std::move(o.supportedAxes);
 }
 
 Font::Font(const Font& o) {
     typeface = o.typeface;
     typeface->Ref();
     style = o.style;
-    supportedAxes = o.supportedAxes;
 }
 
 Font::~Font() {
@@ -186,10 +174,9 @@ void FontFamily::computeCoverage() {
     }
     // TODO: Error check?
     CmapCoverage::getCoverage(mCoverage, cmapTable.get(), cmapTable.size(), &mHasVSTable);
-
-    for (size_t i = 0; i < mFonts.size(); ++i) {
-        mSupportedAxes.insert(mFonts[i].supportedAxes.begin(), mFonts[i].supportedAxes.end());
-    }
+#ifdef VERBOSE_DEBUG
+    ALOGD("font coverage length=%d, first ch=%x\n", mCoverage.length(), mCoverage.nextSetBit(0));
+#endif
 }
 
 bool FontFamily::hasGlyph(uint32_t codepoint, uint32_t variationSelector) const {
@@ -207,50 +194,6 @@ bool FontFamily::hasGlyph(uint32_t codepoint, uint32_t variationSelector) const 
     bool result = hb_font_get_glyph(font, codepoint, variationSelector, &unusedGlyph);
     hb_font_destroy(font);
     return result;
-}
-
-FontFamily* FontFamily::createFamilyWithVariation(
-        const std::vector<FontVariation>& variations) const {
-    if (variations.empty() || mSupportedAxes.empty()) {
-        return nullptr;
-    }
-
-    bool hasSupportedAxis = false;
-    for (const FontVariation& variation : variations) {
-        if (mSupportedAxes.find(variation.axisTag) != mSupportedAxes.end()) {
-            hasSupportedAxis = true;
-            break;
-        }
-    }
-    if (!hasSupportedAxis) {
-        // None of variation axes are suppored by this family.
-        return nullptr;
-    }
-
-    std::vector<Font> fonts;
-    for (const Font& font : mFonts) {
-        bool supportedVariations = false;
-        if (!font.supportedAxes.empty()) {
-            for (const FontVariation& variation : variations) {
-                if (font.supportedAxes.find(variation.axisTag) != font.supportedAxes.end()) {
-                    supportedVariations = true;
-                    break;
-                }
-            }
-        }
-        MinikinFont* minikinFont = nullptr;
-        if (supportedVariations) {
-            minikinFont = font.typeface->createFontWithVariation(variations);
-        }
-        if (minikinFont == nullptr) {
-            minikinFont = font.typeface;
-            minikinFont->Ref();
-        }
-        fonts.push_back(Font(minikinFont, font.style));
-        minikinFont->Unref();
-    }
-
-    return new FontFamily(mLangId, mVariant, std::move(fonts));
 }
 
 }  // namespace minikin

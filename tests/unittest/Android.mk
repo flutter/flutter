@@ -27,7 +27,6 @@ LOCAL_TEST_DATA := \
     data/Italic.ttf \
     data/Ja.ttf \
     data/Ko.ttf \
-    data/MultiAxis.ttf \
     data/NoCmapFormat14.ttf \
     data/NoGlyphFont.ttf \
     data/Regular.ttf \

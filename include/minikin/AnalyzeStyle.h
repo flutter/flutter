@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 The Android Open Source Project
+ * Copyright (C) 2013 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,12 @@
  * limitations under the License.
  */
 
-#ifndef MINIKIN_FONT_UTILS_H
-#define MINIKIN_FONT_UTILS_H
-
-#include <unordered_set>
+#ifndef MINIKIN_ANALYZE_STYLE_H
+#define MINIKIN_ANALYZE_STYLE_H
 
 namespace minikin {
 
 bool analyzeStyle(const uint8_t* os2_data, size_t os2_size, int* weight, bool* italic);
-void analyzeAxes(const uint8_t* fvar_data, size_t fvar_size, std::unordered_set<uint32_t>* axes);
 
 }  // namespace minikin
 
