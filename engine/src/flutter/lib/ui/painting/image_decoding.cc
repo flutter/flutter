@@ -46,7 +46,7 @@ sk_sp<SkImage> DecodeImage(std::vector<uint8_t> buffer) {
   if (sk_sp<SkImage> image = flow::TextureImageCreate(context, *generator))
     return image;
 
-  // The, as a fallback, try to create a regular Skia managed image. These
+  // Then, as a fallback, try to create a regular Skia managed image. These
   // don't require a context ready.
   return flow::BitmapImageCreate(*generator);
 }

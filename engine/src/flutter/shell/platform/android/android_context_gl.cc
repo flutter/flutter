@@ -134,20 +134,21 @@ static EGLResult<EGLSurface> CreatePBufferSurface(EGLDisplay display,
   return {surface != EGL_NO_SURFACE, surface};
 }
 
-static EGLResult<EGLSurface> CreateSurface(EGLDisplay display,
-                                           EGLConfig config,
-                                           const AndroidNativeWindow& window) {
-  return window.IsValid()
-             ? CreateWindowSurface(display, config, window.handle())
+static EGLResult<EGLSurface> CreateSurface(
+    EGLDisplay display,
+    EGLConfig config,
+    ftl::RefPtr<AndroidNativeWindow> window) {
+  return window && window->IsValid()
+             ? CreateWindowSurface(display, config, window->handle())
              : CreatePBufferSurface(display, config);
 }
 
 AndroidContextGL::AndroidContextGL(ftl::RefPtr<AndroidEnvironmentGL> env,
-                                   AndroidNativeWindow window,
+                                   ftl::RefPtr<AndroidNativeWindow> window,
                                    PlatformView::SurfaceConfig config,
                                    const AndroidContextGL* share_context)
     : environment_(env),
-      window_(std::move(window)),
+      window_(window),
       config_(nullptr),
       surface_(EGL_NO_SURFACE),
       context_(EGL_NO_CONTEXT),
@@ -199,10 +200,7 @@ AndroidContextGL::AndroidContextGL(ftl::RefPtr<AndroidEnvironmentGL> env,
 AndroidContextGL::AndroidContextGL(ftl::RefPtr<AndroidEnvironmentGL> env,
                                    PlatformView::SurfaceConfig config,
                                    const AndroidContextGL* share_context)
-    : AndroidContextGL(env,
-                       AndroidNativeWindow{nullptr},
-                       config,
-                       share_context) {}
+    : AndroidContextGL(env, nullptr, config, share_context) {}
 
 AndroidContextGL::~AndroidContextGL() {
   if (!TeardownContext(environment_->Display(), context_)) {

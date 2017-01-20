@@ -2,15 +2,22 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//flutter/shell/config.gni")
+
 source_set("gpu") {
   sources = [
     "gpu_rasterizer.cc",
     "gpu_rasterizer.h",
     "gpu_surface_gl.cc",
     "gpu_surface_gl.h",
-    "gpu_surface_vulkan.cc",
-    "gpu_surface_vulkan.h",
   ]
+
+  if (shell_enable_vulkan) {
+    sources += [
+      "gpu_surface_vulkan.cc",
+      "gpu_surface_vulkan.h",
+    ]
+  }
 
   deps = [
     "//flutter/common",
@@ -22,4 +29,10 @@ source_set("gpu") {
     "//third_party/skia",
     "//third_party/skia:gpu",
   ]
+
+  if (shell_enable_vulkan) {
+    deps += [
+      "//flutter/vulkan",
+    ]
+  }
 }

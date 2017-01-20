@@ -2,6 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//flutter/shell/config.gni")
 import("//build/config/android/config.gni")
 import("//build/config/android/rules.gni")
 
@@ -26,6 +27,8 @@ shared_library("sky_shell") {
     "android_environment_gl.h",
     "android_native_window.cc",
     "android_native_window.h",
+    "android_surface.cc",
+    "android_surface.h",
     "android_surface_gl.cc",
     "android_surface_gl.h",
     "flutter_main.cc",
@@ -48,10 +51,22 @@ shared_library("sky_shell") {
     "//flutter/runtime",
     "//flutter/shell/common",
     "//flutter/shell/gpu",
-    "//flutter/vulkan",
     "//lib/ftl",
     "//third_party/skia",
   ]
+
+  defines = []
+
+  if (shell_enable_vulkan) {
+    sources += [
+      "android_surface_vulkan.cc",
+      "android_surface_vulkan.h",
+    ]
+
+    deps += [ "//flutter/vulkan" ]
+
+    defines += [ "SHELL_ENABLE_VULKAN" ]
+  }
 
   ldflags = [
     "-landroid",

@@ -2,34 +2,36 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "vulkan_backbuffer.h"
+#include "flutter/vulkan/vulkan_backbuffer.h"
 
 #include <limits>
 
+#include "flutter/vulkan/vulkan_proc_table.h"
+#include "third_party/skia/include/gpu/vk/GrVkTypes.h"
+#include "third_party/skia/src/gpu/vk/GrVkUtil.h"
+
 namespace vulkan {
 
-VulkanBackbuffer::VulkanBackbuffer(VulkanProcTable& p_vk,
-                                   VulkanHandle<VkDevice>& device,
-                                   VulkanHandle<VkCommandPool>& pool,
-                                   VulkanHandle<VkImage> image)
+VulkanBackbuffer::VulkanBackbuffer(const VulkanProcTable& p_vk,
+                                   const VulkanHandle<VkDevice>& device,
+                                   const VulkanHandle<VkCommandPool>& pool)
     : vk(p_vk),
       device_(device),
-      pool_(pool),
-      image_(std::move(image)),
+      usage_command_buffer_(p_vk, device, pool),
+      render_command_buffer_(p_vk, device, pool),
       valid_(false) {
-  if (!device_ || !pool_ || !image_) {
+  if (!usage_command_buffer_.IsValid() || !render_command_buffer_.IsValid()) {
+    FTL_DLOG(INFO) << "Command buffers were not valid.";
     return;
   }
 
   if (!CreateSemaphores()) {
-    return;
-  }
-
-  if (!CreateTransitionBuffers()) {
+    FTL_DLOG(INFO) << "Could not create semaphores.";
     return;
   }
 
   if (!CreateFences()) {
+    FTL_DLOG(INFO) << "Could not create fences.";
     return;
   }
 
@@ -37,7 +39,7 @@ VulkanBackbuffer::VulkanBackbuffer(VulkanProcTable& p_vk,
 }
 
 VulkanBackbuffer::~VulkanBackbuffer() {
-  WaitFences();
+  FTL_ALLOW_UNUSED_LOCAL(WaitFences());
 }
 
 bool VulkanBackbuffer::IsValid() const {
@@ -52,45 +54,18 @@ bool VulkanBackbuffer::CreateSemaphores() {
   };
 
   auto semaphore_collect = [this](VkSemaphore semaphore) {
-    vk.destroySemaphore(device_, semaphore, nullptr);
+    vk.DestroySemaphore(device_, semaphore, nullptr);
   };
 
   for (size_t i = 0; i < semaphores_.size(); i++) {
     VkSemaphore semaphore = VK_NULL_HANDLE;
 
-    if (vk.createSemaphore(device_, &create_info, nullptr, &semaphore) !=
-        VK_SUCCESS) {
+    if (VK_CALL_LOG_ERROR(vk.CreateSemaphore(device_, &create_info, nullptr,
+                                             &semaphore)) != VK_SUCCESS) {
       return false;
     }
 
     semaphores_[i] = {semaphore, semaphore_collect};
-  }
-
-  return true;
-}
-
-bool VulkanBackbuffer::CreateTransitionBuffers() {
-  const VkCommandBufferAllocateInfo allocate_info = {
-      .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
-      .pNext = nullptr,
-      .commandPool = pool_,
-      .level = VK_COMMAND_BUFFER_LEVEL_PRIMARY,
-      .commandBufferCount = 1,
-  };
-
-  auto buffer_collect = [this](VkCommandBuffer buffer) {
-    vk.freeCommandBuffers(device_, pool_, 1, &buffer);
-  };
-
-  for (size_t i = 0; i < transition_buffers_.size(); i++) {
-    VkCommandBuffer buffer = VK_NULL_HANDLE;
-
-    if (vk.allocateCommandBuffers(device_, &allocate_info, &buffer) !=
-        VK_SUCCESS) {
-      return false;
-    }
-
-    transition_buffers_[i] = {buffer, buffer_collect};
   }
 
   return true;
@@ -104,13 +79,14 @@ bool VulkanBackbuffer::CreateFences() {
   };
 
   auto fence_collect = [this](VkFence fence) {
-    vk.destroyFence(device_, fence, nullptr);
+    vk.DestroyFence(device_, fence, nullptr);
   };
 
   for (size_t i = 0; i < use_fences_.size(); i++) {
     VkFence fence = VK_NULL_HANDLE;
 
-    if (vk.createFence(device_, &create_info, nullptr, &fence) != VK_SUCCESS) {
+    if (VK_CALL_LOG_ERROR(vk.CreateFence(device_, &create_info, nullptr,
+                                         &fence)) != VK_SUCCESS) {
       return false;
     }
 
@@ -120,15 +96,52 @@ bool VulkanBackbuffer::CreateFences() {
   return true;
 }
 
-void VulkanBackbuffer::WaitFences() {
+bool VulkanBackbuffer::WaitFences() {
   VkFence fences[use_fences_.size()];
 
   for (size_t i = 0; i < use_fences_.size(); i++) {
     fences[i] = use_fences_[i];
   }
 
-  vk.waitForFences(device_, static_cast<uint32_t>(use_fences_.size()), fences,
-                   true, std::numeric_limits<uint64_t>::max());
+  return VK_CALL_LOG_ERROR(vk.WaitForFences(
+             device_, static_cast<uint32_t>(use_fences_.size()), fences, true,
+             std::numeric_limits<uint64_t>::max())) == VK_SUCCESS;
+}
+
+bool VulkanBackbuffer::ResetFences() {
+  VkFence fences[use_fences_.size()];
+
+  for (size_t i = 0; i < use_fences_.size(); i++) {
+    fences[i] = use_fences_[i];
+  }
+
+  return VK_CALL_LOG_ERROR(vk.ResetFences(
+             device_, static_cast<uint32_t>(use_fences_.size()), fences)) ==
+         VK_SUCCESS;
+}
+
+const VulkanHandle<VkFence>& VulkanBackbuffer::GetUsageFence() const {
+  return use_fences_[0];
+}
+
+const VulkanHandle<VkFence>& VulkanBackbuffer::GetRenderFence() const {
+  return use_fences_[1];
+}
+
+const VulkanHandle<VkSemaphore>& VulkanBackbuffer::GetUsageSemaphore() const {
+  return semaphores_[0];
+}
+
+const VulkanHandle<VkSemaphore>& VulkanBackbuffer::GetRenderSemaphore() const {
+  return semaphores_[1];
+}
+
+VulkanCommandBuffer& VulkanBackbuffer::GetUsageCommandBuffer() {
+  return usage_command_buffer_;
+}
+
+VulkanCommandBuffer& VulkanBackbuffer::GetRenderCommandBuffer() {
+  return render_command_buffer_;
 }
 
 }  // namespace vulkan

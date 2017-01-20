@@ -2,24 +2,66 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+config("vulkan_config") {
+  if (is_fuchsia) {
+    include_dirs =
+        [ "//third_party/vulkan_loader_and_validation_layers/include" ]
+  } else {
+    include_dirs = [ "//third_party/vulkan/src" ]
+  }
+}
+
 source_set("vulkan") {
   sources = [
+    "vulkan_application.cc",
+    "vulkan_application.h",
     "vulkan_backbuffer.cc",
     "vulkan_backbuffer.h",
+    "vulkan_command_buffer.cc",
+    "vulkan_command_buffer.h",
+    "vulkan_debug_report.cc",
+    "vulkan_debug_report.h",
+    "vulkan_device.cc",
+    "vulkan_device.h",
     "vulkan_handle.cc",
     "vulkan_handle.h",
+    "vulkan_image.cc",
+    "vulkan_image.h",
+    "vulkan_interface.cc",
     "vulkan_interface.h",
+    "vulkan_native_surface.cc",
+    "vulkan_native_surface.h",
     "vulkan_proc_table.cc",
     "vulkan_proc_table.h",
     "vulkan_surface.cc",
     "vulkan_surface.h",
-    "vulkan_surface_android.cc",
-    "vulkan_surface_android.h",
+    "vulkan_swapchain.cc",
+    "vulkan_swapchain.h",
+    "vulkan_utilities.cc",
+    "vulkan_utilities.h",
     "vulkan_window.cc",
     "vulkan_window.h",
   ]
 
+  if (is_android) {
+    sources += [
+      "vulkan_native_surface_android.cc",
+      "vulkan_native_surface_android.h",
+    ]
+  }
+
+  if (is_fuchsia) {
+    sources += [
+      "vulkan_native_surface_magma.cc",
+      "vulkan_native_surface_magma.h",
+    ]
+  }
+
   deps = [
     "//lib/ftl",
+    "//third_party/skia",
+    "//third_party/skia:gpu",
   ]
+
+  public_configs = [ ":vulkan_config" ]
 }

@@ -6,16 +6,7 @@
 
 namespace shell {
 
-AndroidNativeWindow::AndroidNativeWindow(Handle window) : window_(window) {
-  if (window_ != nullptr) {
-    ANativeWindow_acquire(window_);
-  }
-}
-
-AndroidNativeWindow::AndroidNativeWindow(AndroidNativeWindow&& o)
-    : window_(o.window_) {
-  o.window_ = nullptr;
-}
+AndroidNativeWindow::AndroidNativeWindow(Handle window) : window_(window) {}
 
 AndroidNativeWindow::~AndroidNativeWindow() {
   if (window_ != nullptr) {
@@ -30,6 +21,12 @@ bool AndroidNativeWindow::IsValid() const {
 
 AndroidNativeWindow::Handle AndroidNativeWindow::handle() const {
   return window_;
+}
+
+SkISize AndroidNativeWindow::GetSize() const {
+  return window_ == nullptr ? SkISize::Make(0, 0)
+                            : SkISize::Make(ANativeWindow_getWidth(window_),
+                                            ANativeWindow_getHeight(window_));
 }
 
 }  // namespace shell

@@ -16,23 +16,6 @@
 namespace shell {
 
 class AndroidContextGL : public ftl::RefCountedThreadSafe<AndroidContextGL> {
- private:
-  /// Creates a window surface context tied to the window handle for on-screen
-  /// rendering.
-  // MakeRefCounted
-  AndroidContextGL(ftl::RefPtr<AndroidEnvironmentGL> env,
-                   AndroidNativeWindow window,
-                   PlatformView::SurfaceConfig config,
-                   const AndroidContextGL* share_context = nullptr);
-
-  /// Creates a pbuffer surface context for offscreen rendering.
-  // MakeRefCounted
-  AndroidContextGL(ftl::RefPtr<AndroidEnvironmentGL> env,
-                   PlatformView::SurfaceConfig config,
-                   const AndroidContextGL* share_context = nullptr);
-
-  ~AndroidContextGL();
-
  public:
   ftl::RefPtr<AndroidEnvironmentGL> Environment() const;
 
@@ -50,11 +33,25 @@ class AndroidContextGL : public ftl::RefCountedThreadSafe<AndroidContextGL> {
 
  private:
   ftl::RefPtr<AndroidEnvironmentGL> environment_;
-  AndroidNativeWindow window_;
+  ftl::RefPtr<AndroidNativeWindow> window_;
   EGLConfig config_;
   EGLSurface surface_;
   EGLContext context_;
   bool valid_;
+
+  /// Creates a window surface context tied to the window handle for on-screen
+  /// rendering.
+  AndroidContextGL(ftl::RefPtr<AndroidEnvironmentGL> env,
+                   ftl::RefPtr<AndroidNativeWindow> window,
+                   PlatformView::SurfaceConfig config,
+                   const AndroidContextGL* share_context = nullptr);
+
+  /// Creates a pbuffer surface context for offscreen rendering.
+  AndroidContextGL(ftl::RefPtr<AndroidEnvironmentGL> env,
+                   PlatformView::SurfaceConfig config,
+                   const AndroidContextGL* share_context = nullptr);
+
+  ~AndroidContextGL();
 
   FRIEND_MAKE_REF_COUNTED(AndroidContextGL);
   FRIEND_REF_COUNTED_THREAD_SAFE(AndroidContextGL);

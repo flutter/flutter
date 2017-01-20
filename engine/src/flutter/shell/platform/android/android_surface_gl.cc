@@ -3,7 +3,10 @@
 // found in the LICENSE file.
 
 #include "flutter/shell/platform/android/android_surface_gl.h"
+
 #include <utility>
+
+#include "flutter/common/threads.h"
 #include "lib/ftl/logging.h"
 #include "lib/ftl/memory/ref_ptr.h"
 
@@ -46,40 +49,25 @@ AndroidSurfaceGL::AndroidSurfaceGL(
   offscreen_context_ = GlobalResourceLoadingContext(offscreen_config);
 
   if (!offscreen_context_ || !offscreen_context_->IsValid()) {
-    FTL_LOG(ERROR) << "Unable to create an offscreen EGL context";
-    FTL_LOG(ERROR) << "If you are running in an Android emulator, make sure that OpenGL is enabled";
     offscreen_context_ = nullptr;
   }
 }
 
 AndroidSurfaceGL::~AndroidSurfaceGL() = default;
 
-bool AndroidSurfaceGL::SetNativeWindowForOnScreenContext(
-    AndroidNativeWindow window,
-    PlatformView::SurfaceConfig onscreen_config) {
-  // In any case, we want to get rid of our current onscreen context.
-  onscreen_context_ = nullptr;
-
-  // If the offscreen context has not been setup, we dont have the sharegroup.
-  // So bail.
-  if (!offscreen_context_ || !offscreen_context_->IsValid()) {
-    return false;
-  }
-
-  // Create the onscreen context.
-  onscreen_context_ = ftl::MakeRefCounted<AndroidContextGL>(
-      offscreen_context_->Environment(), std::move(window), onscreen_config,
-      offscreen_context_.get() /* sharegroup */);
-
-  if (!onscreen_context_->IsValid()) {
-    onscreen_context_ = nullptr;
-    return false;
-  }
-
-  return true;
+bool AndroidSurfaceGL::IsOffscreenContextValid() const {
+  return offscreen_context_ && offscreen_context_->IsValid();
 }
 
 void AndroidSurfaceGL::TeardownOnScreenContext() {
+  ftl::AutoResetWaitableEvent latch;
+  blink::Threads::Gpu()->PostTask([this, &latch]() {
+    if (IsValid()) {
+      GLContextClearCurrent();
+    }
+    latch.Signal();
+  });
+  latch.Wait();
   onscreen_context_ = nullptr;
 }
 
@@ -89,6 +77,16 @@ bool AndroidSurfaceGL::IsValid() const {
   }
 
   return onscreen_context_->IsValid() && offscreen_context_->IsValid();
+}
+
+std::unique_ptr<Surface> AndroidSurfaceGL::CreateGPUSurface() {
+  auto surface = std::make_unique<GPUSurfaceGL>(this);
+
+  if (!surface->Setup()) {
+    return nullptr;
+  }
+
+  return surface;
 }
 
 SkISize AndroidSurfaceGL::OnScreenSurfaceSize() const {
@@ -101,9 +99,33 @@ bool AndroidSurfaceGL::OnScreenSurfaceResize(const SkISize& size) const {
   return onscreen_context_->Resize(size);
 }
 
-bool AndroidSurfaceGL::GLOffscreenContextMakeCurrent() {
+bool AndroidSurfaceGL::ResourceContextMakeCurrent() {
   FTL_DCHECK(offscreen_context_ && offscreen_context_->IsValid());
   return offscreen_context_->MakeCurrent();
+}
+
+bool AndroidSurfaceGL::SetNativeWindow(ftl::RefPtr<AndroidNativeWindow> window,
+                                       PlatformView::SurfaceConfig config) {
+  // In any case, we want to get rid of our current onscreen context.
+  onscreen_context_ = nullptr;
+
+  // If the offscreen context has not been setup, we dont have the sharegroup.
+  // So bail.
+  if (!offscreen_context_ || !offscreen_context_->IsValid()) {
+    return false;
+  }
+
+  // Create the onscreen context.
+  onscreen_context_ = ftl::MakeRefCounted<AndroidContextGL>(
+      offscreen_context_->Environment(), std::move(window), config,
+      offscreen_context_.get() /* sharegroup */);
+
+  if (!onscreen_context_->IsValid()) {
+    onscreen_context_ = nullptr;
+    return false;
+  }
+
+  return true;
 }
 
 bool AndroidSurfaceGL::GLContextMakeCurrent() {

@@ -5,12 +5,20 @@
 #ifndef FLUTTER_VULKAN_VULKAN_PROC_TABLE_H_
 #define FLUTTER_VULKAN_VULKAN_PROC_TABLE_H_
 
+#include "flutter/vulkan/vulkan_handle.h"
+#include "flutter/vulkan/vulkan_interface.h"
 #include "lib/ftl/macros.h"
-#include "vulkan_interface.h"
+#include "lib/ftl/memory/ref_counted.h"
+#include "lib/ftl/memory/ref_ptr.h"
+#include "third_party/skia/include/core/SkRefCnt.h"
+#include "third_party/skia/include/gpu/vk/GrVkInterface.h"
 
 namespace vulkan {
 
-class VulkanProcTable {
+class VulkanProcTable : public ftl::RefCountedThreadSafe<VulkanProcTable> {
+  FRIEND_REF_COUNTED_THREAD_SAFE(VulkanProcTable);
+  FRIEND_MAKE_REF_COUNTED(VulkanProcTable);
+
  public:
   template <class T>
   class Proc {
@@ -26,6 +34,11 @@ class VulkanProcTable {
       return *this;
     }
 
+    Proc operator=(PFN_vkVoidFunction proc) {
+      proc_ = reinterpret_cast<Proto>(proc);
+      return *this;
+    }
+
     operator bool() const { return proc_ != nullptr; }
 
     operator T() const { return proc_; }
@@ -34,49 +47,89 @@ class VulkanProcTable {
     T proc_;
   };
 
-  VulkanProcTable();
-
-  ~VulkanProcTable();
+  bool HasAcquiredMandatoryProcAddresses() const;
 
   bool IsValid() const;
 
-  Proc<PFN_vkCreateInstance> createInstance;
-  Proc<PFN_vkDestroyInstance> destroyInstance;
-  Proc<PFN_vkEnumeratePhysicalDevices> enumeratePhysicalDevices;
-  Proc<PFN_vkCreateDevice> createDevice;
-  Proc<PFN_vkDestroyDevice> destroyDevice;
-  Proc<PFN_vkGetDeviceQueue> getDeviceQueue;
-  Proc<PFN_vkGetPhysicalDeviceSurfaceCapabilitiesKHR>
-      getPhysicalDeviceSurfaceCapabilitiesKHR;
-  Proc<PFN_vkGetPhysicalDeviceSurfaceFormatsKHR>
-      getPhysicalDeviceSurfaceFormatsKHR;
-  Proc<PFN_vkCreateSwapchainKHR> createSwapchainKHR;
-  Proc<PFN_vkGetSwapchainImagesKHR> getSwapchainImagesKHR;
-  Proc<PFN_vkGetPhysicalDeviceSurfacePresentModesKHR>
-      getPhysicalDeviceSurfacePresentModesKHR;
-  Proc<PFN_vkDestroySurfaceKHR> destroySurfaceKHR;
-  Proc<PFN_vkDestroySwapchainKHR> destroySwapchainKHR;
-  Proc<PFN_vkCreateCommandPool> createCommandPool;
-  Proc<PFN_vkDestroyCommandPool> destroyCommandPool;
-  Proc<PFN_vkCreateSemaphore> createSemaphore;
-  Proc<PFN_vkDestroySemaphore> destroySemaphore;
-  Proc<PFN_vkAllocateCommandBuffers> allocateCommandBuffers;
-  Proc<PFN_vkFreeCommandBuffers> freeCommandBuffers;
-  Proc<PFN_vkCreateFence> createFence;
-  Proc<PFN_vkDestroyFence> destroyFence;
-  Proc<PFN_vkWaitForFences> waitForFences;
+  bool AreInstanceProcsSetup() const;
 
+  bool AreDeviceProcsSetup() const;
+
+  bool SetupInstanceProcAddresses(const VulkanHandle<VkInstance>& instance);
+
+  bool SetupDeviceProcAddresses(const VulkanHandle<VkDevice>& device);
+
+  sk_sp<GrVkInterface> CreateSkiaInterface() const;
+
+#define DEFINE_PROC(name) Proc<PFN_vk##name> name;
+
+  DEFINE_PROC(AcquireNextImageKHR);
+  DEFINE_PROC(AllocateCommandBuffers);
+  DEFINE_PROC(BeginCommandBuffer);
+  DEFINE_PROC(CmdPipelineBarrier);
+  DEFINE_PROC(CreateCommandPool);
+  DEFINE_PROC(CreateDebugReportCallbackEXT);
+  DEFINE_PROC(CreateDevice);
+  DEFINE_PROC(CreateFence);
+  DEFINE_PROC(CreateInstance);
+  DEFINE_PROC(CreateSemaphore);
+  DEFINE_PROC(CreateSwapchainKHR);
+  DEFINE_PROC(DestroyCommandPool);
+  DEFINE_PROC(DestroyDebugReportCallbackEXT);
+  DEFINE_PROC(DestroyDevice);
+  DEFINE_PROC(DestroyFence);
+  DEFINE_PROC(DestroyInstance);
+  DEFINE_PROC(DestroySemaphore);
+  DEFINE_PROC(DestroySurfaceKHR);
+  DEFINE_PROC(DestroySwapchainKHR);
+  DEFINE_PROC(DeviceWaitIdle);
+  DEFINE_PROC(EndCommandBuffer);
+  DEFINE_PROC(EnumerateDeviceLayerProperties);
+  DEFINE_PROC(EnumerateInstanceExtensionProperties);
+  DEFINE_PROC(EnumerateInstanceLayerProperties);
+  DEFINE_PROC(EnumeratePhysicalDevices);
+  DEFINE_PROC(FreeCommandBuffers);
+  DEFINE_PROC(GetDeviceProcAddr);
+  DEFINE_PROC(GetDeviceQueue);
+  DEFINE_PROC(GetInstanceProcAddr);
+  DEFINE_PROC(GetPhysicalDeviceFeatures);
+  DEFINE_PROC(GetPhysicalDeviceQueueFamilyProperties);
+  DEFINE_PROC(GetPhysicalDeviceSurfaceCapabilitiesKHR);
+  DEFINE_PROC(GetPhysicalDeviceSurfaceFormatsKHR);
+  DEFINE_PROC(GetPhysicalDeviceSurfacePresentModesKHR);
+  DEFINE_PROC(GetSwapchainImagesKHR);
+  DEFINE_PROC(QueuePresentKHR);
+  DEFINE_PROC(QueueSubmit);
+  DEFINE_PROC(ResetCommandBuffer);
+  DEFINE_PROC(ResetFences);
+  DEFINE_PROC(WaitForFences);
+  DEFINE_PROC(GetPhysicalDeviceSurfaceSupportKHR);
 #if OS_ANDROID
-  Proc<PFN_vkCreateAndroidSurfaceKHR> createAndroidSurfaceKHR;
+  DEFINE_PROC(CreateAndroidSurfaceKHR);
 #endif  // OS_ANDROID
+#if OS_FUCHSIA
+  DEFINE_PROC(CreateMagmaSurfaceKHR);
+  DEFINE_PROC(GetPhysicalDeviceMagmaPresentationSupportKHR);
+#endif  // OS_FUCHSIA
+
+#undef DEFINE_PROC
 
  private:
-  bool valid_;
   void* handle_;
+  bool acquired_mandatory_proc_addresses_;
+  VulkanHandle<VkInstance> instance_;
+  VulkanHandle<VkDevice> device_;
 
+  VulkanProcTable();
+  ~VulkanProcTable();
   bool OpenLibraryHandle();
+  bool SetupLoaderProcAddresses();
   bool CloseLibraryHandle();
-  bool AcquireProcs();
+  PFN_vkVoidFunction AcquireProc(
+      const char* proc_name,
+      const VulkanHandle<VkInstance>& instance) const;
+  PFN_vkVoidFunction AcquireProc(const char* proc_name,
+                                 const VulkanHandle<VkDevice>& device) const;
 
   FTL_DISALLOW_COPY_AND_ASSIGN(VulkanProcTable);
 };

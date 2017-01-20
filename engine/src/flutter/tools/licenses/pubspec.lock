@@ -7,6 +7,12 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.0.27"
+  args:
+    description:
+      name: args
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.13.7"
   charcode:
     description:
       name: charcode
