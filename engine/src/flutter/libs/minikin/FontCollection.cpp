@@ -103,9 +103,6 @@ FontCollection::FontCollection(const vector<FontFamily*>& typefaces) :
         }
         mMaxChar = max(mMaxChar, coverage.length());
         lastChar.push_back(coverage.nextSetBit(0));
-
-        const std::unordered_set<AxisTag>& supportedAxes = family->supportedAxes();
-        mSupportedAxes.insert(supportedAxes.begin(), supportedAxes.end());
     }
     nTypefaces = mFamilies.size();
     LOG_ALWAYS_FATAL_IF(nTypefaces == 0,
@@ -462,42 +459,6 @@ MinikinFont* FontCollection::baseFont(FontStyle style) {
 
 FakedFont FontCollection::baseFontFaked(FontStyle style) {
     return mFamilies[0]->getClosestMatch(style);
-}
-
-FontCollection* FontCollection::createCollectionWithVariation(
-        const std::vector<FontVariation>& variations) {
-    if (variations.empty() || mSupportedAxes.empty()) {
-        return nullptr;
-    }
-
-    bool hasSupportedAxis = false;
-    for (const FontVariation& variation : variations) {
-        if (mSupportedAxes.find(variation.axisTag) != mSupportedAxes.end()) {
-            hasSupportedAxis = true;
-            break;
-        }
-    }
-    if (!hasSupportedAxis) {
-        // None of variation axes are supported by this font collection.
-        return nullptr;
-    }
-
-    std::vector<FontFamily*> families;
-    for (FontFamily* family : mFamilies) {
-        FontFamily* newFamily = family->createFamilyWithVariation(variations);
-        if (newFamily) {
-            families.push_back(newFamily);
-        } else {
-            family->Ref();
-            families.push_back(family);
-        }
-    }
-
-    FontCollection* result = new FontCollection(families);
-    for (FontFamily* family : families) {
-        family->Unref();
-    }
-    return result;
 }
 
 uint32_t FontCollection::getId() const {

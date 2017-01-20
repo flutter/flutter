@@ -18,7 +18,6 @@
 #define MINIKIN_FONT_COLLECTION_H
 
 #include <vector>
-#include <unordered_set>
 
 #include <minikin/MinikinRefCounted.h>
 #include <minikin/MinikinFont.h>
@@ -51,10 +50,6 @@ public:
 
     // Get base font with fakery information (fake bold could affect metrics)
     FakedFont baseFontFaked(FontStyle style);
-
-    // Creates new FontCollection based on this collection while applying font variations. Returns
-    // nullptr if none of variations apply to this collection.
-    FontCollection* createCollectionWithVariation(const std::vector<FontVariation>& variations);
 
     uint32_t getId() const;
 
@@ -101,9 +96,6 @@ private:
 
     // These are offsets into mInstanceVec, one range per page
     std::vector<Range> mRanges;
-
-    // Set of supported axes in this collection.
-    std::unordered_set<AxisTag> mSupportedAxes;
 };
 
 }  // namespace minikin
