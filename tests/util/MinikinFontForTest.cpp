@@ -34,11 +34,9 @@ namespace minikin {
 
 static int uniqueId = 0;  // TODO: make thread safe if necessary.
 
-MinikinFontForTest::MinikinFontForTest(const std::string& font_path, int index,
-        const std::vector<FontVariation>& variations) :
+MinikinFontForTest::MinikinFontForTest(const std::string& font_path, int index) :
         MinikinFont(uniqueId++),
         mFontPath(font_path),
-        mVariations(variations),
         mFontIndex(index) {
     int fd = open(font_path.c_str(), O_RDONLY);
     LOG_ALWAYS_FATAL_IF(fd == -1);
@@ -67,11 +65,6 @@ void MinikinFontForTest::GetBounds(MinikinRect* bounds, uint32_t /* glyph_id */,
     bounds->mTop = 0.0f;
     bounds->mRight = 10.0f;
     bounds->mBottom = 10.0f;
-}
-
-MinikinFont* MinikinFontForTest::createFontWithVariation(
-        const std::vector<FontVariation>& variations) const {
-    return new MinikinFontForTest(mFontPath, mFontIndex, variations);
 }
 
 }  // namespace minikin
