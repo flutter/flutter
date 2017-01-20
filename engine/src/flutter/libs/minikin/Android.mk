@@ -30,12 +30,12 @@ $(UNICODE_EMOJI_H):
 
 include $(CLEAR_VARS)
 minikin_src_files := \
+    AnalyzeStyle.cpp \
     CmapCoverage.cpp \
     FontCollection.cpp \
     FontFamily.cpp \
     FontLanguage.cpp \
     FontLanguageListCache.cpp \
-    FontUtils.cpp \
     GraphemeBreak.cpp \
     HbFontCache.cpp \
     Hyphenator.cpp \

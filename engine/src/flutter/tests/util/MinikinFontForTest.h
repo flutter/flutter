@@ -25,10 +25,7 @@ namespace minikin {
 
 class MinikinFontForTest : public MinikinFont {
 public:
-    MinikinFontForTest(const std::string& font_path, int index,
-            const std::vector<FontVariation>& variations);
-    MinikinFontForTest(const std::string& font_path, int index)
-            : MinikinFontForTest(font_path, index, std::vector<FontVariation>()) {}
+    MinikinFontForTest(const std::string& font_path, int index);
     MinikinFontForTest(const std::string& font_path) : MinikinFontForTest(font_path, 0) {}
     virtual ~MinikinFontForTest();
 
@@ -38,19 +35,15 @@ public:
             const MinikinPaint& paint) const;
 
     const std::string& fontPath() const { return mFontPath; }
-    const std::vector<FontVariation>& variations() const { return mVariations; }
-
     const void* GetFontData() const { return mFontData; }
     size_t GetFontSize() const { return mFontSize; }
     int GetFontIndex() const { return mFontIndex; }
-    MinikinFont* createFontWithVariation(const std::vector<FontVariation>& variations) const;
 private:
     MinikinFontForTest() = delete;
     MinikinFontForTest(const MinikinFontForTest&) = delete;
     MinikinFontForTest& operator=(MinikinFontForTest&) = delete;
 
     const std::string mFontPath;
-    const std::vector<FontVariation> mVariations;
     const int mFontIndex;
     void* mFontData;
     size_t mFontSize;
