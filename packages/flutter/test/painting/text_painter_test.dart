@@ -7,8 +7,6 @@ import 'dart:ui' as ui;
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/mock_canvas.dart';
-
 void main() {
   test("TextPainter caret test", () {
     TextPainter painter = new TextPainter();
@@ -32,6 +30,6 @@ void main() {
 
   test("TextPainter error test", () {
     TextPainter painter = new TextPainter();
-    expect(() { painter.paint(new MockCanvas(), Offset.zero); }, throwsFlutterError);
+    expect(() { painter.paint(null, Offset.zero); }, throwsFlutterError);
   });
 }
