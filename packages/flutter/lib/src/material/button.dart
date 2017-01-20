@@ -230,6 +230,7 @@ class _MaterialButtonState extends State<MaterialButton> {
           }
       }
     } else {
+      assert(_colorBrightness != null);
       switch (_colorBrightness) {
         case Brightness.light:
           return Colors.black26;
@@ -237,7 +238,6 @@ class _MaterialButtonState extends State<MaterialButton> {
           return Colors.white30;
       }
     }
-    assert(_colorBrightness != null);
     return null;
   }
 

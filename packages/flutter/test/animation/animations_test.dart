@@ -6,6 +6,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/animation.dart';
 import 'package:flutter/widgets.dart';
 
+class BogusCurve extends Curve {
+  @override
+  double transform(double t) => 100.0;
+}
+
 void main() {
   setUp(() {
     WidgetsFlutterBinding.ensureInitialized();
@@ -113,7 +118,6 @@ void main() {
     expect(animation.toString(), contains('no next'));
   });
 
-
   test('AnimationMean control test', () {
     AnimationController left = new AnimationController(
       value: 0.5,
@@ -147,5 +151,14 @@ void main() {
 
     expect(mean.value, equals(0.50));
     expect(log, isEmpty);
+  });
+
+  test('CurvedAnimation with bogus curve', () {
+    AnimationController controller = new AnimationController(
+      vsync: const TestVSync(),
+    );
+    CurvedAnimation curved = new CurvedAnimation(parent: controller, curve: new BogusCurve());
+
+    expect(() { curved.value; }, throwsFlutterError);
   });
 }

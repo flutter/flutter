@@ -42,7 +42,9 @@ class SynchronousFuture<T> implements Future<T> {
   }
 
   @override
-  Future<T> timeout(Duration timeLimit, { dynamic onTimeout() }) => new Completer<T>().future;
+  Future<T> timeout(Duration timeLimit, { dynamic onTimeout() }) {
+    return new Future<T>.value(_value).timeout(timeLimit, onTimeout: onTimeout);
+  }
 
   @override
   Future<T> whenComplete(dynamic action()) {

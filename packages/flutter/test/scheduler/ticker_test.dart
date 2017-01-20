@@ -23,6 +23,8 @@ void main() {
     expect(ticker.isActive, isTrue);
     expect(tickCount, equals(0));
 
+    expect(ticker.start, throwsFlutterError);
+
     await tester.pump(const Duration(milliseconds: 10));
 
     expect(tickCount, equals(1));
