@@ -440,7 +440,7 @@ class AppDomain extends Domain {
   Future<OperationResult> callServiceExtension(Map<String, dynamic> args) async {
     String appId = _getStringArg(args, 'appId', required: true);
     String methodName = _getStringArg(args, 'methodName');
-    Map<String, dynamic> params = args['params'] ?? <String, dynamic>{};
+    Map<String, String> params = args['params'] ?? <String, String>{};
 
     AppInstance app = _getApp(appId);
     if (app == null)

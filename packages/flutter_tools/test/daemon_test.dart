@@ -167,6 +167,33 @@ void main() {
       commands.close();
     });
 
+    _testUsingContext('daemon.callServiceExtension', () async {
+      DaemonCommand command = new DaemonCommand();
+      applyMocksToCommand(command);
+
+      StreamController<Map<String, dynamic>> commands = new StreamController<Map<String, dynamic>>();
+      StreamController<Map<String, dynamic>> responses = new StreamController<Map<String, dynamic>>();
+      daemon = new Daemon(
+          commands.stream,
+              (Map<String, dynamic> result) => responses.add(result),
+          daemonCommand: command,
+          notifyingLogger: notifyingLogger
+      );
+
+      commands.add(<String, dynamic>{
+        'id': 0,
+        'method': 'app.callServiceExtension',
+        'params': <String, String> {
+          'methodName': 'ext.flutter.debugPaint'
+        }
+      });
+      Map<String, dynamic> response = await responses.stream.where(_notEvent).first;
+      expect(response['id'], 0);
+      expect(response['error'], contains('appId is required'));
+      responses.close();
+      commands.close();
+    });
+
     _testUsingContext('daemon.stop', () async {
       DaemonCommand command = new DaemonCommand();
       applyMocksToCommand(command);
