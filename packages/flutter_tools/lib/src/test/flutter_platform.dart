@@ -13,6 +13,7 @@ import 'package:test/src/backend/test_platform.dart'; // ignore: implementation_
 import 'package:test/src/runner/plugin/platform.dart'; // ignore: implementation_imports
 import 'package:test/src/runner/plugin/hack_register_platform.dart' as hack; // ignore: implementation_imports
 
+import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/process_manager.dart';
@@ -42,10 +43,25 @@ const String _kStartTimeoutTimerMessage = 'sky_shell test process has entered ma
 /// processes will host the Observatory server.
 final InternetAddress _kHost = InternetAddress.LOOPBACK_IP_V4;
 
-void installHook({ @required String shellPath, CoverageCollector collector }) {
+/// Configure the `test` package to work with Flutter.
+///
+/// On systems where each [FlutterPlatform] is only used to run one test suite
+/// (that is, one Dart file with a `*_test.dart` file name and a single `void
+/// main()`), you can set an observatory port and a diagnostic port explicitly.
+void installHook({
+  @required String shellPath,
+  CoverageCollector collector,
+  int observatoryPort,
+  int diagnosticPort,
+}) {
   hack.registerPlatformPlugin(
     <TestPlatform>[TestPlatform.vm],
-    () => new FlutterPlatform(shellPath: shellPath, collector: collector),
+    () => new FlutterPlatform(
+      shellPath: shellPath,
+      collector: collector,
+      explicitObservatoryPort: observatoryPort,
+      explicitDiagnosticPort: diagnosticPort,
+    ),
   );
 }
 
@@ -54,12 +70,14 @@ enum _TestResult { crashed, harnessBailed, testBailed }
 typedef Future<Null> _Finalizer();
 
 class FlutterPlatform extends PlatformPlugin {
-  FlutterPlatform({ this.shellPath, this.collector }) {
+  FlutterPlatform({ this.shellPath, this.collector, this.explicitObservatoryPort, this.explicitDiagnosticPort }) {
     assert(shellPath != null);
   }
 
   final String shellPath;
   final CoverageCollector collector;
+  final int explicitObservatoryPort;
+  final int explicitDiagnosticPort;
 
   // Each time loadChannel() is called, we spin up a local WebSocket server,
   // then spin up the engine in a subprocess. We pass the engine a Dart file
@@ -68,8 +86,16 @@ class FlutterPlatform extends PlatformPlugin {
   // crashes, we inject an error into that stream. When the process closes,
   // we clean everything up.
 
+  int _testCount = 0;
+
   @override
   StreamChannel<dynamic> loadChannel(String testPath, TestPlatform platform) {
+    if (explicitObservatoryPort != null || explicitDiagnosticPort != null) {
+      if (_testCount > 0)
+        throwToolExit('installHook() was called with an observatory port or a diagnostic port (or both) but then more than one test suite was run.');
+    }
+    int ourTestCount = _testCount;
+    _testCount += 1;
     StreamController<dynamic> localController = new StreamController<dynamic>();
     StreamController<dynamic> remoteController = new StreamController<dynamic>();
     Completer<Null> testCompleteCompleter = new Completer<Null>();
@@ -85,17 +111,13 @@ class FlutterPlatform extends PlatformPlugin {
       localController.stream,
       remoteSink,
     );
-    _startTest(testPath, localChannel).whenComplete(() {
+    _startTest(testPath, localChannel, ourTestCount).whenComplete(() {
       testCompleteCompleter.complete();
     });
     return remoteChannel;
   }
 
-  int _testCount = 0;
-
-  Future<Null> _startTest(String testPath, StreamChannel<dynamic> controller) async {
-    int ourTestCount = _testCount;
-    _testCount += 1;
+  Future<Null> _startTest(String testPath, StreamChannel<dynamic> controller, int ourTestCount) async {
     printTrace('test $ourTestCount: starting test $testPath');
 
     final List<_Finalizer> finalizers = <_Finalizer>[];
@@ -150,6 +172,8 @@ class FlutterPlatform extends PlatformPlugin {
         listenerFile.path,
         packages: PackageMap.globalPackagesPath,
         enableObservatory: collector != null,
+        observatoryPort: explicitObservatoryPort,
+        diagnosticPort: explicitDiagnosticPort,
       );
       subprocessActive = true;
       finalizers.add(() async {
@@ -172,10 +196,11 @@ class FlutterPlatform extends PlatformPlugin {
       int processObservatoryPort;
       _pipeStandardStreamsToConsole(
         process,
-        storeObservatoryPort: (int observatoryPort) {
+        storeObservatoryPort: (int detectedPort) {
           assert(processObservatoryPort == null);
-          printTrace('test $ourTestCount: using observatory port $observatoryPort from pid ${process.pid} to collect coverage');
-          processObservatoryPort = observatoryPort;
+          assert(explicitObservatoryPort == null || explicitObservatoryPort == detectedPort);
+          printTrace('test $ourTestCount: using observatory port $detectedPort from pid ${process.pid} to collect coverage');
+          processObservatoryPort = detectedPort;
         },
         startTimeoutTimer: () {
           new Future<_InitialResult>.delayed(_kTestStartupTimeout, () => timeout.complete());
@@ -377,12 +402,33 @@ void main() {
     return _cachedFontConfig;
   }
 
-
-  Future<Process> _startProcess(String executable, String testPath, { String packages, bool enableObservatory: false }) {
+  Future<Process> _startProcess(
+    String executable,
+    String testPath, {
+    String packages,
+    bool enableObservatory: false,
+    int observatoryPort,
+    int diagnosticPort,
+  }) {
     assert(executable != null); // Please provide the path to the shell in the SKY_SHELL environment variable.
     List<String> arguments = <String>[];
-    if (!enableObservatory)
-      arguments.add('--disable-observatory');
+    if (enableObservatory) {
+      // Some systems drive the FlutterPlatform class in an unusual way, where
+      // only one test file is processed at a time, and the operating
+      // environment hands out specific ports ahead of time in a cooperative
+      // manner, where we're only allowed to open ports that were given to us in
+      // advance like this. For those esoteric systems, we have this feature
+      // whereby you can create FlutterPlatform with a pair of ports.
+      //
+      // I mention this only so that you won't be tempted, as I was, to apply
+      // the obvious simplification to this code and remove this entire feature.
+      if (observatoryPort != null)
+        arguments.add('--observatory-port=$observatoryPort');
+      if (diagnosticPort != null)
+        arguments.add('--diagnostic-port=$diagnosticPort');
+    } else {
+      arguments.addAll(<String>['--disable-observatory', '--disable-diagnostic']);
+    }
     arguments.addAll(<String>[
       '--enable-dart-profiling',
       '--non-interactive',
@@ -404,7 +450,7 @@ void main() {
   void _pipeStandardStreamsToConsole(
     Process process, {
     void startTimeoutTimer(),
-    void storeObservatoryPort(int port)
+    void storeObservatoryPort(int port),
   }) {
     for (Stream<List<int>> stream in
         <Stream<List<int>>>[process.stderr, process.stdout]) {
