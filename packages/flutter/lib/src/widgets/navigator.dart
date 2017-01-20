@@ -460,7 +460,8 @@ class Navigator extends StatefulWidget {
   /// The route name will be passed to that navigator's [onGenerateRoute]
   /// callback. The returned route will be pushed into the navigator.
   ///
-  /// Returns a Future that completes when the pushed route is popped.
+  /// Returns a [Future] that completes to the `result` value passed to [pop]
+  /// when the pushed route is popped off the navigator.
   ///
   /// Typical usage is as follows:
   ///
@@ -471,14 +472,19 @@ class Navigator extends StatefulWidget {
     return Navigator.of(context).pushNamed(routeName);
   }
 
-  /// Push a route onto the navigator that most tightly encloses the given context.
+  /// Adds the given route to the history of the navigator that most tightly
+  /// encloses the given context, and transitions to it.
   ///
-  /// Adds the given route to the Navigator's history, and transitions to it.
-  /// The route will have didPush() and didChangeNext() called on it; the
-  /// previous route, if any, will have didChangeNext() called on it; and the
-  /// Navigator observer, if any, will have didPush() called on it.
+  /// The new route and the previous route (if any) are notified (see
+  /// [Route.didPush] and [Route.didChangeNext]). If the [Navigator] has an
+  /// [Navigator.observer], it will be notified as well (see
+  /// [NavigatorObserver.didPush]).
   ///
-  /// Returns a Future that completes when the pushed route is popped.
+  /// Ongoing gestures within the current route are canceled when a new route is
+  /// pushed.
+  ///
+  /// Returns a [Future] that completes to the `result` value passed to [pop]
+  /// when the pushed route is popped off the navigator.
   static Future<dynamic> push(BuildContext context, Route<dynamic> route) {
     return Navigator.of(context).push(route);
   }
@@ -559,7 +565,8 @@ class Navigator extends StatefulWidget {
   /// route. The type of `result`, if provided, must match the type argument of
   /// the class of the current route. (In practice, this is usually "dynamic".)
   ///
-  /// Returns a Future that completes when the pushed route is popped.
+  /// Returns a [Future] that completes to the `result` value passed to [pop]
+  /// when the pushed route is popped off the navigator.
   ///
   /// Typical usage is as follows:
   ///
@@ -653,10 +660,19 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
 
   bool _debugLocked = false; // used to prevent re-entrant calls to push, pop, and friends
 
-  /// Looks up the route with the given name using [Navigator.onGenerateRoute],
-  /// and then [push]es that route.
+  /// Push a named route onto the navigator.
   ///
-  /// Returns a Future that completes when the pushed route is popped.
+  /// The route name will be passed to [Navigator.onGenerateRoute]. The returned
+  /// route will be pushed into the navigator.
+  ///
+  /// Returns a [Future] that completes to the `result` value passed to [pop]
+  /// when the pushed route is popped off the navigator.
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// Navigator.of(context).pushNamed('/nyc/1776');
+  /// ```
   Future<dynamic> pushNamed(String name) {
     assert(!_debugLocked);
     assert(name != null);
@@ -680,7 +696,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   /// Ongoing gestures within the current route are canceled when a new route is
   /// pushed.
   ///
-  /// Returns a Future that completes when the pushed route is popped.
+  /// Returns a [Future] that completes to the `result` value passed to [pop]
+  /// when the pushed route is popped off the navigator.
   Future<dynamic> push(Route<dynamic> route) {
     assert(!_debugLocked);
     assert(() { _debugLocked = true; return true; });
