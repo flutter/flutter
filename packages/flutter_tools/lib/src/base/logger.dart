@@ -215,6 +215,14 @@ class AnsiTerminal {
   static const String _clear = '\u001B[2J\u001B[H';
 
   static const int _ENOTTY = 25;
+  static const int _ENETRESET = 102;
+
+  /// Setting the line mode can throw for some terminals (with "Operation not
+  /// supported on socket"), but the error can be safely ignored.
+  static const List<int> _lineModeIgnorableErrors = const <int>[
+    _ENOTTY,
+    _ENETRESET,
+  ];
 
   bool supportsColor;
 
@@ -231,8 +239,7 @@ class AnsiTerminal {
       // introduced). Doing so will allow proper dereferencing of `osError`.
       bool ignore = false;
       try {
-        if (error.osError?.errorCode == _ENOTTY) {
-          // This can throw for some terminals; we ignore the error.
+        if (_lineModeIgnorableErrors.contains(error.osError?.errorCode)) {
           ignore = true;
         }
       } on NoSuchMethodError {}
