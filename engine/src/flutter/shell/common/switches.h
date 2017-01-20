@@ -43,6 +43,13 @@ DEF_SWITCH(DisableObservatory,
            "disable-observatory",
            "Disable the Dart Observatory. The observatory is never available "
            "in release mode.")
+DEF_SWITCH(DeviceDiagnosticPort,
+           "diagnostic-port",
+           "A custom diagnostic server port.")
+DEF_SWITCH(DisableDiagnostic,
+           "disable-diagnostic",
+           "Disable the diagnostic server. The diagnostic server is never "
+           "available in release mode.")
 DEF_SWITCH(EnableDartProfiling,
            "enable-dart-profiling",
            "Enable Dart profiling. Profiling information can be viewed from "

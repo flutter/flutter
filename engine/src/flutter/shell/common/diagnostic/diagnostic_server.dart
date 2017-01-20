@@ -11,8 +11,8 @@ import 'dart:typed_data';
 void handleSkiaPictureRequest(SendPort sendPort)
     native 'DiagnosticServer_HandleSkiaPictureRequest';
 
-void diagnosticServerStart() {
-  HttpServer.bind('127.0.0.1', 0).then((HttpServer server) {
+void diagnosticServerStart(int port) {
+  HttpServer.bind('127.0.0.1', port).then((HttpServer server) {
     server.listen(dispatchRequest, cancelOnError: true);
 
     String ip = server.address.address.toString();
