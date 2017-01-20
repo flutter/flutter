@@ -668,14 +668,14 @@ TEST_F(FontCollectionItemizeTest, itemize_vs_sequence_but_no_base_char) {
     const std::string kVSTestFont = kTestFontDir "VarioationSelectorTest-Regular.ttf";
 
     std::vector<FontFamily*> families;
+    FontFamily* family1 = new FontFamily(VARIANT_DEFAULT);
     MinikinAutoUnref<MinikinFont> font(new MinikinFontForTest(kLatinFont));
-    FontFamily* family1 = new FontFamily(VARIANT_DEFAULT,
-            std::vector<Font>{ Font(font.get(), FontStyle()) });
+    family1->addFont(font.get());
     families.push_back(family1);
 
+    FontFamily* family2 = new FontFamily(VARIANT_DEFAULT);
     MinikinAutoUnref<MinikinFont> font2(new MinikinFontForTest(kVSTestFont));
-    FontFamily* family2 = new FontFamily(VARIANT_DEFAULT,
-            std::vector<Font>{ Font(font2.get(), FontStyle()) });
+    family2->addFont(font2.get());
     families.push_back(family2);
 
     FontCollection collection(families);
@@ -811,11 +811,11 @@ TEST_F(FontCollectionItemizeTest, itemize_LanguageScore) {
         std::vector<FontFamily*> families;
 
         // Prepare first font which doesn't supports U+9AA8
+        FontFamily* firstFamily = new FontFamily(
+                FontStyle::registerLanguageList("und"), 0 /* variant */);
         MinikinAutoUnref<MinikinFont> firstFamilyMinikinFont(
                 new MinikinFontForTest(kNoGlyphFont));
-        FontFamily* firstFamily = new FontFamily(
-                FontStyle::registerLanguageList("und"), 0 /* variant */,
-                std::vector<Font>({ Font(firstFamilyMinikinFont.get(), FontStyle()) }));
+        firstFamily->addFont(firstFamilyMinikinFont.get());
         families.push_back(firstFamily);
 
         // Prepare font families
@@ -824,10 +824,10 @@ TEST_F(FontCollectionItemizeTest, itemize_LanguageScore) {
         std::unordered_map<MinikinFont*, int> fontLangIdxMap;
 
         for (size_t i = 0; i < testCase.fontLanguages.size(); ++i) {
-            MinikinAutoUnref<MinikinFont> minikin_font(new MinikinFontForTest(kJAFont));
             FontFamily* family = new FontFamily(
-                    FontStyle::registerLanguageList(testCase.fontLanguages[i]), 0 /* variant */,
-                    std::vector<Font>({ Font(minikin_font.get(), FontStyle()) }));
+                    FontStyle::registerLanguageList(testCase.fontLanguages[i]), 0 /* variant */);
+            MinikinAutoUnref<MinikinFont> minikin_font(new MinikinFontForTest(kJAFont));
+            family->addFont(minikin_font.get());
             families.push_back(family);
             fontLangIdxMap.insert(std::make_pair(minikin_font.get(), i));
         }
@@ -1417,12 +1417,13 @@ TEST_F(FontCollectionItemizeTest, itemizeShouldKeepOrderForVS) {
     MinikinAutoUnref<MinikinFont> fontA(new MinikinFontForTest(kZH_HansFont));
     MinikinAutoUnref<MinikinFont> fontB(new MinikinFontForTest(kZH_HansFont));
 
-    MinikinAutoUnref<FontFamily> dummyFamily(new FontFamily(
-            std::vector<Font>({ Font(dummyFont.get(), FontStyle()) })));
-    MinikinAutoUnref<FontFamily> familyA(new FontFamily(
-            std::vector<Font>({ Font(fontA.get(), FontStyle()) })));
-    MinikinAutoUnref<FontFamily> familyB(new FontFamily(
-            std::vector<Font>({ Font(fontB.get(), FontStyle()) })));
+    MinikinAutoUnref<FontFamily> dummyFamily(new FontFamily());
+    MinikinAutoUnref<FontFamily> familyA(new FontFamily());
+    MinikinAutoUnref<FontFamily> familyB(new FontFamily());
+
+    dummyFamily->addFont(dummyFont.get());
+    familyA->addFont(fontA.get());
+    familyB->addFont(fontB.get());
 
     std::vector<FontFamily*> families =
             { dummyFamily.get(), familyA.get(), familyB.get() };
@@ -1452,12 +1453,13 @@ TEST_F(FontCollectionItemizeTest, itemizeShouldKeepOrderForVS2) {
     MinikinAutoUnref<MinikinFont> noCmapFormat14Font(
             new MinikinFontForTest(kNoCmapFormat14Font));
 
-    MinikinAutoUnref<FontFamily> dummyFamily(new FontFamily(
-            std::vector<Font>({ Font(dummyFont.get(), FontStyle()) })));
-    MinikinAutoUnref<FontFamily> hasCmapFormat14Family(new FontFamily(
-            std::vector<Font>({ Font(hasCmapFormat14Font.get(), FontStyle()) })));
-    MinikinAutoUnref<FontFamily> noCmapFormat14Family(new FontFamily(
-            std::vector<Font>({ Font(noCmapFormat14Font.get(), FontStyle()) })));
+    MinikinAutoUnref<FontFamily> dummyFamily(new FontFamily());
+    MinikinAutoUnref<FontFamily> hasCmapFormat14Family(new FontFamily());
+    MinikinAutoUnref<FontFamily> noCmapFormat14Family(new FontFamily());
+
+    dummyFamily->addFont(dummyFont.get());
+    hasCmapFormat14Family->addFont(hasCmapFormat14Font.get());
+    noCmapFormat14Family->addFont(noCmapFormat14Font.get());
 
     std::vector<FontFamily*> families =
             { dummyFamily.get(), hasCmapFormat14Family.get(), noCmapFormat14Family.get() };

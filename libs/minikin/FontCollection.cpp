@@ -96,13 +96,17 @@ FontCollection::FontCollection(const vector<FontFamily*>& typefaces) :
             continue;
         }
         family->RefLocked();
-        const SparseBitSet& coverage = family->getCoverage();
+        const SparseBitSet* coverage = family->getCoverage();
+        if (coverage == nullptr) {
+            family->UnrefLocked();
+            continue;
+        }
         mFamilies.push_back(family);  // emplace_back would be better
         if (family->hasVSTable()) {
             mVSFamilyVec.push_back(family);
         }
-        mMaxChar = max(mMaxChar, coverage.length());
-        lastChar.push_back(coverage.nextSetBit(0));
+        mMaxChar = max(mMaxChar, coverage->length());
+        lastChar.push_back(coverage->nextSetBit(0));
     }
     nTypefaces = mFamilies.size();
     LOG_ALWAYS_FATAL_IF(nTypefaces == 0,
@@ -126,7 +130,7 @@ FontCollection::FontCollection(const vector<FontFamily*>& typefaces) :
                 FontFamily* family = mFamilies[j];
                 mFamilyVec.push_back(family);
                 offset++;
-                uint32_t nextChar = family->getCoverage().nextSetBit((i + 1) << kLogCharsPerPage);
+                uint32_t nextChar = family->getCoverage()->nextSetBit((i + 1) << kLogCharsPerPage);
 #ifdef VERBOSE_DEBUG
                 ALOGD("nextChar = %d (j = %zd)\n", nextChar, j);
 #endif
@@ -193,7 +197,7 @@ uint32_t FontCollection::calcFamilyScore(uint32_t ch, uint32_t vs, int variant, 
 //   variation sequence's base character.
 uint32_t FontCollection::calcCoverageScore(uint32_t ch, uint32_t vs, FontFamily* fontFamily) const {
     const bool hasVSGlyph = (vs != 0) && fontFamily->hasGlyph(ch, vs);
-    if (!hasVSGlyph && !fontFamily->getCoverage().get(ch)) {
+    if (!hasVSGlyph && !fontFamily->getCoverage()->get(ch)) {
         // The font doesn't support either variation sequence or even the base character.
         return kUnsupportedFontScore;
     }
@@ -412,7 +416,7 @@ void FontCollection::itemize(const uint16_t *string, size_t string_size, FontSty
         if (lastFamily != nullptr) {
             if (isStickyWhitelisted(ch)) {
                 // Continue using existing font as long as it has coverage and is whitelisted
-                shouldContinueRun = lastFamily->getCoverage().get(ch);
+                shouldContinueRun = lastFamily->getCoverage()->get(ch);
             } else if (isVariationSelector(ch)) {
                 // Always continue if the character is a variation selector.
                 shouldContinueRun = true;
@@ -432,7 +436,7 @@ void FontCollection::itemize(const uint16_t *string, size_t string_size, FontSty
                 if (utf16Pos != 0 &&
                         ((U_GET_GC_MASK(ch) & U_GC_M_MASK) != 0 ||
                          (isEmojiModifier(ch) && isEmojiBase(prevCh))) &&
-                        family && family->getCoverage().get(prevCh)) {
+                        family && family->getCoverage()->get(prevCh)) {
                     const size_t prevChLength = U16_LENGTH(prevCh);
                     run->end -= prevChLength;
                     if (run->start == run->end) {
