@@ -142,7 +142,7 @@ void main() {
     await tester.pump();
     // This check depends on route '/3' being move offstage by the HeroController's
     // NavigatorObserver. Currently we don't support two Hero transitions running at once.
-    // TODO(hansmuller) : restore this check.
+    // TODO(hansmuller): restore this check.
     // expect(state(), equals('BDE')); // transition 1<-2 is at 0.6, 1->3 is at 0.0
     expect(state(skipOffstage: false), equals('BDEF')); // F is offstage since we're at 0.0
 
@@ -169,7 +169,7 @@ void main() {
     await tester.pump();
     // This check depends on route '/4' being move offstage by the HeroController's
     // NavigatorObserver. Currently we don't support two Hero transitions running at once.
-    // TODO(hansmuller) : restore this check.
+    // TODO(hansmuller): restore this check.
     // expect(state(), equals('BCF')); // transition 1<-3 is at 0.2, 1->4 is at 0.0
     expect(state(skipOffstage: false), equals('BCFG')); // G is offstage
 
