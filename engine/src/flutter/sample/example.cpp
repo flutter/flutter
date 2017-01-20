@@ -45,9 +45,9 @@ FontCollection *makeFontCollection() {
         "/system/fonts/Roboto-LightItalic.ttf"
     };
 
+    FontFamily *family = new FontFamily();
     FT_Face face;
     FT_Error error;
-    std::vector<Font> fonts;
     for (size_t i = 0; i < sizeof(fns)/sizeof(fns[0]); i++) {
         const char *fn = fns[i];
         printf("adding %s\n", fn);
@@ -56,16 +56,16 @@ FontCollection *makeFontCollection() {
             printf("error loading %s, %d\n", fn, error);
         }
         MinikinFont *font = new MinikinFontFreeType(face);
-        fonts.push_back(Font(font, FontStyle()));
+        family->addFont(font);
     }
-    FontFamily *family = new FontFamily(std::move(fonts));
     typefaces.push_back(family);
 
 #if 1
+    family = new FontFamily();
     const char *fn = "/system/fonts/DroidSansDevanagari-Regular.ttf";
     error = FT_New_Face(library, fn, 0, &face);
     MinikinFont *font = new MinikinFontFreeType(face);
-    family = new FontFamily(std::vector<Font>({ Font(font, FontStyle()) }));
+    family->addFont(font);
     typefaces.push_back(family);
 #endif
 

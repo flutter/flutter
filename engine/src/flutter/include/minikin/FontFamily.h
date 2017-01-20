@@ -98,61 +98,64 @@ struct FakedFont {
     FontFakery fakery;
 };
 
-struct Font {
-    Font(MinikinFont* typeface, FontStyle style);
-    Font(Font&& o);
-    Font(const Font& o);
-    ~Font();
-
-    MinikinFont* typeface;
-    FontStyle style;
-};
-
 class FontFamily : public MinikinRefCounted {
 public:
-    explicit FontFamily(std::vector<Font>&& fonts);
-    FontFamily(int variant, std::vector<Font>&& fonts);
-    FontFamily(uint32_t langId, int variant, std::vector<Font>&& fonts);
+    FontFamily();
+
+    explicit FontFamily(int variant);
+
+    FontFamily(uint32_t langId, int variant)
+        : mLangId(langId),
+        mVariant(variant),
+        mHasVSTable(false),
+        mCoverageValid(false) {
+    }
 
     ~FontFamily();
 
-    // TODO: Good to expose FontUtil.h.
-    static bool analyzeStyle(MinikinFont* typeface, int* weight, bool* italic);
+    // Add font to family, extracting style information from the font
+    bool addFont(MinikinFont* typeface);
 
+    void addFont(MinikinFont* typeface, FontStyle style);
     FakedFont getClosestMatch(FontStyle style) const;
 
     uint32_t langId() const { return mLangId; }
     int variant() const { return mVariant; }
 
     // API's for enumerating the fonts in a family. These don't guarantee any particular order
-    size_t getNumFonts() const { return mFonts.size(); }
-    MinikinFont* getFont(size_t index) const { return mFonts[index].typeface; }
-    FontStyle getStyle(size_t index) const { return mFonts[index].style; }
+    size_t getNumFonts() const;
+    MinikinFont* getFont(size_t index) const;
+    FontStyle getStyle(size_t index) const;
     bool isColorEmojiFamily() const;
 
-    // Get Unicode coverage.
-    const SparseBitSet& getCoverage() const { return mCoverage; }
+    // Get Unicode coverage. Lifetime of returned bitset is same as receiver. May return nullptr on
+    // error.
+    const SparseBitSet* getCoverage();
 
     // Returns true if the font has a glyph for the code point and variation selector pair.
     // Caller should acquire a lock before calling the method.
-    bool hasGlyph(uint32_t codepoint, uint32_t variationSelector) const;
+    bool hasGlyph(uint32_t codepoint, uint32_t variationSelector);
 
     // Returns true if this font family has a variaion sequence table (cmap format 14 subtable).
-    bool hasVSTable() const { return mHasVSTable; }
+    bool hasVSTable() const;
 
 private:
-    void computeCoverage();
+    void addFontLocked(MinikinFont* typeface, FontStyle style);
 
+    class Font {
+    public:
+        Font(MinikinFont* typeface, FontStyle style) :
+            typeface(typeface), style(style) { }
+        MinikinFont* typeface;
+        FontStyle style;
+    };
     uint32_t mLangId;
     int mVariant;
     std::vector<Font> mFonts;
 
     SparseBitSet mCoverage;
     bool mHasVSTable;
-
-    // Forbid copying and assignment.
-    FontFamily(const FontFamily&) = delete;
-    void operator=(const FontFamily&) = delete;
+    bool mCoverageValid;
 };
 
 }  // namespace minikin

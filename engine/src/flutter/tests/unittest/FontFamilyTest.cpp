@@ -464,10 +464,8 @@ void expectVSGlyphs(FontFamily* family, uint32_t codepoint, const std::set<uint3
 TEST_F(FontFamilyTest, hasVariationSelectorTest) {
     MinikinAutoUnref<MinikinFontForTest>
             minikinFont(new MinikinFontForTest(kVsTestFont));
-    MinikinAutoUnref<FontFamily> family(
-            new FontFamily(std::vector<Font>{
-                    Font(minikinFont.get(), FontStyle())
-            }));
+    MinikinAutoUnref<FontFamily> family(new FontFamily);
+    family->addFont(minikinFont.get());
 
     android::AutoMutex _l(gMinikinLock);
 
@@ -480,23 +478,23 @@ TEST_F(FontFamilyTest, hasVariationSelectorTest) {
     const uint32_t kVS20 = 0xE0103;
 
     const uint32_t kSupportedChar1 = 0x82A6;
-    EXPECT_TRUE(family->getCoverage().get(kSupportedChar1));
+    EXPECT_TRUE(family->getCoverage()->get(kSupportedChar1));
     expectVSGlyphs(family.get(), kSupportedChar1, std::set<uint32_t>({kVS1, kVS17, kVS18, kVS19}));
 
     const uint32_t kSupportedChar2 = 0x845B;
-    EXPECT_TRUE(family->getCoverage().get(kSupportedChar2));
+    EXPECT_TRUE(family->getCoverage()->get(kSupportedChar2));
     expectVSGlyphs(family.get(), kSupportedChar2, std::set<uint32_t>({kVS2, kVS18, kVS19, kVS20}));
 
     const uint32_t kNoVsSupportedChar = 0x537F;
-    EXPECT_TRUE(family->getCoverage().get(kNoVsSupportedChar));
+    EXPECT_TRUE(family->getCoverage()->get(kNoVsSupportedChar));
     expectVSGlyphs(family.get(), kNoVsSupportedChar, std::set<uint32_t>());
 
     const uint32_t kVsOnlySupportedChar = 0x717D;
-    EXPECT_FALSE(family->getCoverage().get(kVsOnlySupportedChar));
+    EXPECT_FALSE(family->getCoverage()->get(kVsOnlySupportedChar));
     expectVSGlyphs(family.get(), kVsOnlySupportedChar, std::set<uint32_t>({kVS3, kVS19, kVS20}));
 
     const uint32_t kNotSupportedChar = 0x845C;
-    EXPECT_FALSE(family->getCoverage().get(kNotSupportedChar));
+    EXPECT_FALSE(family->getCoverage()->get(kNotSupportedChar));
     expectVSGlyphs(family.get(), kNotSupportedChar, std::set<uint32_t>());
 }
 
@@ -520,9 +518,11 @@ TEST_F(FontFamilyTest, hasVSTableTest) {
 
         MinikinAutoUnref<MinikinFontForTest> minikinFont(
                 new MinikinFontForTest(testCase.fontPath));
-        MinikinAutoUnref<FontFamily> family(new FontFamily(
-                std::vector<Font>{ Font(minikinFont.get(), FontStyle()) }));
+        MinikinAutoUnref<FontFamily> family(new FontFamily);
+        family->addFont(minikinFont.get());
         android::AutoMutex _l(gMinikinLock);
+        family->getCoverage();
+
         EXPECT_EQ(testCase.hasVSTable, family->hasVSTable());
     }
 }

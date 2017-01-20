@@ -48,7 +48,16 @@ FontCollection* getFontCollection(const char* fontDir, const char* fontXml) {
             }
         }
 
-        std::vector<Font> fonts;
+        xmlChar* lang = xmlGetProp(familyNode, (const xmlChar*)"lang");
+        FontFamily* family;
+        if (lang == nullptr) {
+            family = new FontFamily(variant);
+        } else {
+            uint32_t langId = FontStyle::registerLanguageList(
+                    std::string((const char*)lang, xmlStrlen(lang)));
+            family = new FontFamily(langId, variant);
+        }
+
         for (xmlNode* fontNode = familyNode->children; fontNode; fontNode = fontNode->next) {
             if (xmlStrcmp(fontNode->name, (const xmlChar*)"font") != 0) {
                 continue;
@@ -71,22 +80,12 @@ FontCollection* getFontCollection(const char* fontDir, const char* fontXml) {
             if (index == nullptr) {
                 MinikinAutoUnref<MinikinFontForTest>
                         minikinFont(new MinikinFontForTest(fontPath));
-                fonts.push_back(Font(minikinFont.get(), FontStyle(weight, italic)));
+                family->addFont(minikinFont.get(), FontStyle(weight, italic));
             } else {
                 MinikinAutoUnref<MinikinFontForTest>
                         minikinFont(new MinikinFontForTest(fontPath, atoi((const char*)index)));
-                fonts.push_back(Font(minikinFont.get(), FontStyle(weight, italic)));
+                family->addFont(minikinFont.get(), FontStyle(weight, italic));
             }
-        }
-
-        xmlChar* lang = xmlGetProp(familyNode, (const xmlChar*)"lang");
-        FontFamily* family;
-        if (lang == nullptr) {
-            family = new FontFamily(variant, std::move(fonts));
-        } else {
-            uint32_t langId = FontStyle::registerLanguageList(
-                    std::string((const char*)lang, xmlStrlen(lang)));
-            family = new FontFamily(langId, variant, std::move(fonts));
         }
         families.push_back(family);
     }
