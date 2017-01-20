@@ -34,9 +34,11 @@ abstract class AnimationLazyListenerMixin implements _ListenerMixin {
   }
 
   /// Called when the number of listeners changes from zero to one.
+  @protected
   void didStartListening();
 
   /// Called when the number of listeners changes from one to zero.
+  @protected
   void didStopListening();
 
   /// Whether there are any listeners.
@@ -61,7 +63,7 @@ abstract class AnimationEagerListenerMixin implements _ListenerMixin {
 /// A mixin that implements the addListener/removeListener protocol and notifies
 /// all the registered listeners when notifyListeners is called.
 abstract class AnimationLocalListenersMixin extends _ListenerMixin {
-  final List<VoidCallback> _listeners = <VoidCallback>[];
+  final ObserverList<VoidCallback> _listeners = new ObserverList<VoidCallback>();
 
   /// Calls the listener every time the value of the animation changes.
   ///
@@ -84,9 +86,24 @@ abstract class AnimationLocalListenersMixin extends _ListenerMixin {
   /// If listeners are added or removed during this function, the modifications
   /// will not change which listeners are called during this iteration.
   void notifyListeners() {
-    List<VoidCallback> localListeners = new List<VoidCallback>.from(_listeners);
-    for (VoidCallback listener in localListeners)
-      listener();
+    final List<VoidCallback> localListeners = new List<VoidCallback>.from(_listeners);
+    for (VoidCallback listener in localListeners) {
+      try {
+        if (_listeners.contains(listener))
+          listener();
+      } catch (exception, stack) {
+        FlutterError.reportError(new FlutterErrorDetails(
+          exception: exception,
+          stack: stack,
+          library: 'animation library',
+          context: 'while notifying listeners for $runtimeType',
+          informationCollector: (StringBuffer information) {
+            information.writeln('The $runtimeType notifying listeners was:');
+            information.write('  $this');
+          }
+        ));
+      }
+    }
   }
 }
 
@@ -94,7 +111,7 @@ abstract class AnimationLocalListenersMixin extends _ListenerMixin {
 /// and notifies all the registered listeners when notifyStatusListeners is
 /// called.
 abstract class AnimationLocalStatusListenersMixin extends _ListenerMixin {
-  final List<AnimationStatusListener> _statusListeners = <AnimationStatusListener>[];
+  final ObserverList<AnimationStatusListener> _statusListeners = new ObserverList<AnimationStatusListener>();
 
   /// Calls listener every time the status of the animation changes.
   ///
@@ -117,8 +134,23 @@ abstract class AnimationLocalStatusListenersMixin extends _ListenerMixin {
   /// If listeners are added or removed during this function, the modifications
   /// will not change which listeners are called during this iteration.
   void notifyStatusListeners(AnimationStatus status) {
-    List<AnimationStatusListener> localListeners = new List<AnimationStatusListener>.from(_statusListeners);
-    for (AnimationStatusListener listener in localListeners)
-      listener(status);
+    final List<AnimationStatusListener> localListeners = new List<AnimationStatusListener>.from(_statusListeners);
+    for (AnimationStatusListener listener in localListeners) {
+      try {
+        if (_statusListeners.contains(listener))
+          listener(status);
+      } catch (exception, stack) {
+        FlutterError.reportError(new FlutterErrorDetails(
+          exception: exception,
+          stack: stack,
+          library: 'animation library',
+          context: 'while notifying status listeners for $runtimeType',
+          informationCollector: (StringBuffer information) {
+            information.writeln('The $runtimeType notifying status listeners was:');
+            information.write('  $this');
+          }
+        ));
+      }
+    }
   }
 }

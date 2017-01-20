@@ -178,16 +178,12 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
       parent: controller,
       curve: Curves.fastOutSlowIn
     );
-
-    startAnimation.addListener(_handleTick);
-    endAnimation.addListener(_handleTick);
-
     final CurvedAnimation gapAnimation = new CurvedAnimation(
       parent: controller,
       curve: Curves.fastOutSlowIn
     );
 
-    gapAnimation.addListener(_handleTick);
+    controller.addListener(_handleTick);
 
     _animationTuples[gap.key] = new _AnimationTuple(
       controller: controller,

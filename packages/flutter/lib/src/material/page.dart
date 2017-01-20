@@ -167,14 +167,6 @@ class _CupertinoBackGestureController extends NavigationGestureController {
   }
 
   void handleStatusChanged(AnimationStatus status) {
-    // This can happen if an earlier status listener ends up calling dispose()
-    // on this object.
-    // TODO(abarth): Consider changing AnimationController not to call listeners
-    // that were removed while calling other listeners.
-    // See <https://github.com/flutter/flutter/issues/7533>.
-    if (controller == null)
-      return;
-
     if (status == AnimationStatus.dismissed) {
       navigator.pop();
       assert(controller == null);
