@@ -5,58 +5,61 @@
 #ifndef FLUTTER_VULKAN_VULKAN_WINDOW_H_
 #define FLUTTER_VULKAN_VULKAN_WINDOW_H_
 
-#include <utility>
+#include <memory>
 #include <tuple>
+#include <utility>
 #include <vector>
 
+#include "flutter/vulkan/vulkan_proc_table.h"
+#include "lib/ftl/compiler_specific.h"
 #include "lib/ftl/macros.h"
-#include "vulkan_handle.h"
-#include "vulkan_proc_table.h"
-#include "vulkan_backbuffer.h"
-#include "vulkan_surface.h"
+#include "third_party/skia/include/core/SkRefCnt.h"
+#include "third_party/skia/include/core/SkSize.h"
+#include "third_party/skia/include/core/SkSurface.h"
+#include "third_party/skia/include/gpu/GrContext.h"
+#include "third_party/skia/include/gpu/vk/GrVkBackendContext.h"
 
 namespace vulkan {
 
+class VulkanNativeSurface;
+class VulkanDevice;
+class VulkanSurface;
+class VulkanSwapchain;
+class VulkanImage;
+class VulkanApplication;
+class VulkanBackbuffer;
+
 class VulkanWindow {
  public:
-  VulkanWindow(std::unique_ptr<VulkanSurface> platform_surface);
+  VulkanWindow(ftl::RefPtr<VulkanProcTable> proc_table,
+               std::unique_ptr<VulkanNativeSurface> native_surface);
 
   ~VulkanWindow();
 
   bool IsValid() const;
 
+  GrContext* GetSkiaGrContext();
+
+  sk_sp<SkSurface> AcquireSurface();
+
+  bool SwapBuffers();
+
  private:
   bool valid_;
-  VulkanProcTable vk;
-  VulkanHandle<VkInstance> instance_;
-  std::unique_ptr<VulkanSurface> platform_surface_;
-  VulkanHandle<VkSurfaceKHR> surface_;
-  VulkanHandle<VkPhysicalDevice> physical_device_;
-  VulkanHandle<VkDevice> device_;
-  VulkanHandle<VkQueue> queue_;
-  VulkanHandle<VkSwapchainKHR> swapchain_;
-  std::vector<std::unique_ptr<VulkanBackbuffer>> backbuffers_;
-  VulkanHandle<VkCommandPool> command_pool_;
+  ftl::RefPtr<VulkanProcTable> vk;
+  std::unique_ptr<VulkanApplication> application_;
+  std::unique_ptr<VulkanDevice> logical_device_;
+  std::unique_ptr<VulkanSurface> surface_;
+  std::unique_ptr<VulkanSwapchain> swapchain_;
+  sk_sp<GrVkBackendContext> skia_vk_backend_context_;
+  sk_sp<GrContext> skia_gr_context_;
 
-  bool CreateInstance();
+  bool CreateSkiaGrContext();
 
-  bool CreateSurface();
+  sk_sp<GrVkBackendContext> CreateSkiaBackendContext();
 
-  bool SelectPhysicalDevice();
-
-  bool CreateLogicalDevice();
-
-  bool AcquireDeviceQueue();
-
-  bool CreateSwapChain();
-
-  bool SetupBuffers();
-
-  bool CreateCommandPool();
-
-  std::pair<bool, VkSurfaceFormatKHR> ChooseSurfaceFormat();
-
-  std::pair<bool, VkPresentModeKHR> ChoosePresentMode();
+  FTL_WARN_UNUSED_RESULT
+  bool RecreateSwapchain();
 
   FTL_DISALLOW_COPY_AND_ASSIGN(VulkanWindow);
 };

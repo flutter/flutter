@@ -2,49 +2,84 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "vulkan_window.h"
+#include "flutter/vulkan/vulkan_window.h"
+
+#include <memory>
+#include <string>
+
+#include "flutter/vulkan/vulkan_application.h"
+#include "flutter/vulkan/vulkan_device.h"
+#include "flutter/vulkan/vulkan_native_surface.h"
+#include "flutter/vulkan/vulkan_surface.h"
+#include "flutter/vulkan/vulkan_swapchain.h"
+#include "third_party/skia/include/gpu/GrContext.h"
+#include "third_party/skia/include/gpu/vk/GrVkInterface.h"
 
 namespace vulkan {
 
-VulkanWindow::VulkanWindow(std::unique_ptr<VulkanSurface> platform_surface)
-    : valid_(false), platform_surface_(std::move(platform_surface)) {
-  if (platform_surface_ == nullptr || !platform_surface_->IsValid()) {
+VulkanWindow::VulkanWindow(ftl::RefPtr<VulkanProcTable> proc_table,
+                           std::unique_ptr<VulkanNativeSurface> native_surface)
+    : valid_(false), vk(std::move(proc_table)) {
+  if (!vk || !vk->HasAcquiredMandatoryProcAddresses()) {
+    FTL_DLOG(INFO) << "Proc table has not acquired mandatory proc addresses.";
     return;
   }
 
-  if (!vk.IsValid()) {
+  if (native_surface == nullptr || !native_surface->IsValid()) {
+    FTL_DLOG(INFO) << "Native surface is invalid.";
     return;
   }
 
-  if (!CreateInstance()) {
+  // Create the application instance.
+
+  std::vector<std::string> extensions = {
+      VK_KHR_SURFACE_EXTENSION_NAME,      // parent extension
+      native_surface->GetExtensionName()  // child extension
+  };
+
+  application_ = std::make_unique<VulkanApplication>(*vk, "Flutter",
+                                                     std::move(extensions));
+
+  if (!application_->IsValid() || !vk->AreInstanceProcsSetup()) {
+    // Make certain the application instance was created and it setup the
+    // instance proc table entries.
+    FTL_DLOG(INFO) << "Instance proc addresses have not been setup.";
     return;
   }
 
-  if (!CreateSurface()) {
+  // Create the device.
+
+  logical_device_ = application_->AcquireFirstCompatibleLogicalDevice();
+
+  if (logical_device_ == nullptr || !logical_device_->IsValid() ||
+      !vk->AreDeviceProcsSetup()) {
+    // Make certain the device was created and it setup the device proc table
+    // entries.
+    FTL_DLOG(INFO) << "Device proc addresses have not been setup.";
     return;
   }
 
-  if (!SelectPhysicalDevice()) {
+  // Create the logical surface from the native platform surface.
+
+  surface_ = std::make_unique<VulkanSurface>(*vk, *application_,
+                                             std::move(native_surface));
+
+  if (!surface_->IsValid()) {
+    FTL_DLOG(INFO) << "Vulkan surface is invalid.";
     return;
   }
 
-  if (!CreateLogicalDevice()) {
+  // Create the Skia GrContext.
+
+  if (!CreateSkiaGrContext()) {
+    FTL_DLOG(INFO) << "Could not create Skia context.";
     return;
   }
 
-  if (!CreateSwapChain()) {
-    return;
-  }
+  // Create the swapchain.
 
-  if (!AcquireDeviceQueue()) {
-    return;
-  }
-
-  if (!CreateCommandPool()) {
-    return;
-  }
-
-  if (!SetupBuffers()) {
+  if (!RecreateSwapchain()) {
+    FTL_DLOG(INFO) << "Could not setup the swapchain initially.";
     return;
   }
 
@@ -57,352 +92,162 @@ bool VulkanWindow::IsValid() const {
   return valid_;
 }
 
-bool VulkanWindow::CreateInstance() {
-  const VkApplicationInfo info = {
-      .sType = VK_STRUCTURE_TYPE_APPLICATION_INFO,
-      .pNext = nullptr,
-      .pApplicationName = "FlutterEngine",
-      .applicationVersion = VK_MAKE_VERSION(1, 0, 0),
-      .pEngineName = "FlutterEngine",
-      .engineVersion = VK_MAKE_VERSION(1, 0, 0),
-      .apiVersion = VK_MAKE_VERSION(1, 0, 0),
-  };
+GrContext* VulkanWindow::GetSkiaGrContext() {
+  return skia_gr_context_.get();
+}
 
-  const char* extensions[] = {
-      VK_KHR_SURFACE_EXTENSION_NAME, platform_surface_->ExtensionName(),
-  };
+bool VulkanWindow::CreateSkiaGrContext() {
+  auto backend_context = CreateSkiaBackendContext();
 
-  const VkInstanceCreateInfo create_info = {
-      .sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
-      .pNext = nullptr,
-      .flags = 0,
-      .pApplicationInfo = &info,
-      .enabledLayerCount = 0,
-      .ppEnabledLayerNames = nullptr,
-      .enabledExtensionCount = sizeof(extensions) / sizeof(const char*),
-      .ppEnabledExtensionNames = extensions,
-  };
-
-  VkInstance instance = VK_NULL_HANDLE;
-  if (vk.createInstance(&create_info, nullptr, &instance) != VK_SUCCESS) {
+  if (backend_context == nullptr) {
     return false;
   }
 
-  instance_ = {instance,
-               [this](VkInstance i) { vk.destroyInstance(i, nullptr); }};
+  sk_sp<GrContext> context(GrContext::Create(
+      kVulkan_GrBackend,
+      reinterpret_cast<GrBackendContext>(backend_context.get())));
+
+  if (context == nullptr) {
+    return false;
+  }
+
+  skia_vk_backend_context_ = backend_context;
+  skia_gr_context_ = context;
 
   return true;
 }
 
-bool VulkanWindow::CreateSurface() {
-  if (!instance_) {
-    return false;
+sk_sp<GrVkBackendContext> VulkanWindow::CreateSkiaBackendContext() {
+  auto interface = vk->CreateSkiaInterface();
+
+  if (interface == nullptr || !interface->validate(0)) {
+    return nullptr;
   }
 
-  VkSurfaceKHR surface = platform_surface_->CreateSurfaceHandle(vk, instance_);
-
-  if (surface == VK_NULL_HANDLE) {
-    return false;
+  uint32_t skia_features = 0;
+  if (!logical_device_->GetPhysicalDeviceFeaturesSkia(&skia_features)) {
+    return nullptr;
   }
 
-  surface_ = {surface, [this](VkSurfaceKHR surface) {
-                vk.destroySurfaceKHR(instance_, surface, nullptr);
-              }};
-
-  return true;
+  auto context = sk_make_sp<GrVkBackendContext>();
+  context->fInstance = application_->GetInstance();
+  context->fPhysicalDevice = logical_device_->GetPhysicalDeviceHandle();
+  context->fDevice = logical_device_->GetHandle();
+  context->fQueue = logical_device_->GetQueueHandle();
+  context->fGraphicsQueueIndex = logical_device_->GetGraphicsQueueIndex();
+  context->fMinAPIVersion = application_->GetAPIVersion();
+  context->fExtensions = kKHR_surface_GrVkExtensionFlag |
+                         kKHR_swapchain_GrVkExtensionFlag |
+                         surface_->GetNativeSurface().GetSkiaExtensionName();
+  context->fFeatures = skia_features;
+  context->fInterface.reset(interface.release());
+  return context;
 }
 
-bool VulkanWindow::SelectPhysicalDevice() {
-  if (instance_ == nullptr) {
-    return false;
+sk_sp<SkSurface> VulkanWindow::AcquireSurface() {
+  if (!IsValid()) {
+    FTL_DLOG(INFO) << "Surface is invalid.";
+    return nullptr;
   }
 
-  uint32_t device_count = 0;
-  if (vk.enumeratePhysicalDevices(instance_, &device_count, nullptr) !=
-      VK_SUCCESS) {
-    return false;
-  }
+  auto surface_size = surface_->GetSize();
 
-  if (device_count == 0) {
-    // No available devices.
-    return false;
-  }
-
-  VkPhysicalDevice devices[device_count];
-
-  if (vk.enumeratePhysicalDevices(instance_, &device_count, devices) !=
-      VK_SUCCESS) {
-    return false;
-  }
-
-  // Pick the first one available.
-  physical_device_ = {devices[0], {}};
-  return true;
-}
-
-bool VulkanWindow::CreateLogicalDevice() {
-  if (physical_device_ == nullptr) {
-    return false;
-  }
-
-  float priorities[] = {1.0f};
-
-  const VkDeviceQueueCreateInfo queue_create = {
-      .sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
-      .pNext = nullptr,
-      .flags = 0,
-      .queueFamilyIndex = 0,
-      .queueCount = 1,
-      .pQueuePriorities = priorities,
-  };
-
-  const char* extensions[] = {
-      VK_KHR_SWAPCHAIN_EXTENSION_NAME,
-  };
-
-  const VkDeviceCreateInfo create_info = {
-      .sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
-      .pNext = nullptr,
-      .flags = 0,
-      .queueCreateInfoCount = 1,
-      .pQueueCreateInfos = &queue_create,
-      .enabledLayerCount = 0,
-      .ppEnabledLayerNames = nullptr,
-      .enabledExtensionCount = sizeof(extensions) / sizeof(const char*),
-      .ppEnabledExtensionNames = extensions,
-      .pEnabledFeatures = nullptr,
-  };
-
-  VkDevice device = VK_NULL_HANDLE;
-
-  if (vk.createDevice(physical_device_, &create_info, nullptr, &device) !=
-      VK_SUCCESS) {
-    return false;
-  }
-
-  device_ = {device,
-             [this](VkDevice device) { vk.destroyDevice(device, nullptr); }};
-
-  return true;
-}
-
-bool VulkanWindow::AcquireDeviceQueue() {
-  if (device_ == nullptr) {
-    return false;
-  }
-
-  VkQueue queue = VK_NULL_HANDLE;
-  vk.getDeviceQueue(device_, 0, 0, &queue);
-
-  if (queue == VK_NULL_HANDLE) {
-    return false;
-  }
-
-  queue_ = {queue, {}};
-
-  return true;
-}
-
-std::pair<bool, VkSurfaceFormatKHR> VulkanWindow::ChooseSurfaceFormat() {
-  if (!physical_device_ || !surface_) {
-    return {false, {}};
-  }
-
-  uint32_t format_count = 0;
-  if (vk.getPhysicalDeviceSurfaceFormatsKHR(
-          physical_device_, surface_, &format_count, nullptr) != VK_SUCCESS) {
-    return {false, {}};
-  }
-
-  if (format_count == 0) {
-    return {false, {}};
-  }
-
-  VkSurfaceFormatKHR formats[format_count];
-  if (vk.getPhysicalDeviceSurfaceFormatsKHR(
-          physical_device_, surface_, &format_count, formats) != VK_SUCCESS) {
-    return {false, {}};
-  }
-
-  for (uint32_t i = 0; i < format_count; i++) {
-    if (formats[i].format == VK_FORMAT_R8G8B8A8_UNORM) {
-      return {true, formats[i]};
+  // This check is theoretically unnecessary as the swapchain should report that
+  // the surface is out-of-date and perform swapchain recreation at the new
+  // configuration. However, on Android, the swapchain never reports that it is
+  // of date. Hence this extra check. Platforms that don't have this issue, or,
+  // cant report this information (which is optional anyway), report a zero
+  // size.
+  if (surface_size != SkISize::Make(0, 0) &&
+      surface_size != swapchain_->GetSize()) {
+    FTL_DLOG(INFO) << "Swapchain and surface sizes are out of sync. Recreating "
+                      "swapchain.";
+    if (!RecreateSwapchain()) {
+      FTL_DLOG(INFO) << "Could not recreate swapchain.";
+      valid_ = false;
+      return nullptr;
     }
   }
 
-  return {false, {}};
-}
+  while (true) {
+    sk_sp<SkSurface> surface;
+    auto acquire_result = VulkanSwapchain::AcquireStatus::ErrorSurfaceLost;
 
-std::pair<bool, VkPresentModeKHR> VulkanWindow::ChoosePresentMode() {
-  if (!physical_device_ || !surface_) {
-    return {false, {}};
-  }
+    std::tie(acquire_result, surface) = swapchain_->AcquireSurface();
 
-  uint32_t modes_count = 0;
-
-  if (vk.getPhysicalDeviceSurfacePresentModesKHR(
-          physical_device_, surface_, &modes_count, nullptr) != VK_SUCCESS) {
-    return {false, {}};
-  }
-
-  if (modes_count == 0) {
-    return {false, {}};
-  }
-
-  VkPresentModeKHR modes[modes_count];
-
-  if (vk.getPhysicalDeviceSurfacePresentModesKHR(
-          physical_device_, surface_, &modes_count, modes) != VK_SUCCESS) {
-    return {false, {}};
-  }
-
-  for (uint32_t i = 0; i < modes_count; i++) {
-    if (modes[i] == VK_PRESENT_MODE_MAILBOX_KHR) {
-      return {true, modes[i]};
-    }
-  }
-
-  return {true, VK_PRESENT_MODE_FIFO_KHR};
-}
-
-bool VulkanWindow::CreateSwapChain() {
-  if (!device_ || !surface_) {
-    return false;
-  }
-
-  // Query Capabilities
-
-  VkSurfaceCapabilitiesKHR capabilities = {0};
-  if (vk.getPhysicalDeviceSurfaceCapabilitiesKHR(physical_device_, surface_,
-                                                 &capabilities) != VK_SUCCESS) {
-    return false;
-  }
-
-  // Query Format
-
-  VkSurfaceFormatKHR format = {};
-  bool query_result = false;
-
-  std::tie(query_result, format) = ChooseSurfaceFormat();
-
-  if (!query_result) {
-    return false;
-  }
-
-  // Query Present Mode
-
-  VkPresentModeKHR presentMode = VK_PRESENT_MODE_FIFO_KHR;
-  std::tie(query_result, presentMode) = ChoosePresentMode();
-
-  if (!query_result) {
-    return false;
-  }
-
-  // Construct the Swapchain
-
-  const VkSwapchainCreateInfoKHR create_info = {
-      .sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,
-      .pNext = nullptr,
-      .flags = 0,
-      .surface = surface_,
-      .minImageCount = capabilities.minImageCount,
-      .imageFormat = format.format,
-      .imageColorSpace = format.colorSpace,
-      .imageExtent = capabilities.currentExtent,
-      .imageArrayLayers = 1,
-      .imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
-      .imageSharingMode = VK_SHARING_MODE_EXCLUSIVE,
-      .queueFamilyIndexCount = 0,
-      .pQueueFamilyIndices = nullptr,
-      .preTransform = VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR,
-      .compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR,
-      .presentMode = presentMode,
-      .clipped = VK_FALSE,
-      .oldSwapchain = VK_NULL_HANDLE,
-  };
-
-  VkSwapchainKHR swapchain = VK_NULL_HANDLE;
-
-  if (vk.createSwapchainKHR(device_, &create_info, nullptr, &swapchain) !=
-      VK_SUCCESS) {
-    return false;
-  }
-
-  swapchain_ = {swapchain, [this](VkSwapchainKHR swapchain) {
-                  vk.destroySwapchainKHR(device_, swapchain, nullptr);
-                }};
-
-  return true;
-}
-
-bool VulkanWindow::SetupBuffers() {
-  if (!device_ || !swapchain_) {
-    return false;
-  }
-
-  uint32_t count = 0;
-  if (vk.getSwapchainImagesKHR(device_, swapchain_, &count, nullptr) !=
-      VK_SUCCESS) {
-    return false;
-  }
-
-  if (count == 0) {
-    return false;
-  }
-
-  VkImage images[count];
-
-  if (vk.getSwapchainImagesKHR(device_, swapchain_, &count, images) !=
-      VK_SUCCESS) {
-    return false;
-  }
-
-  if (count == 0) {
-    return false;
-  }
-
-  auto image_collector = [](VkImage image) {
-    // We are only just getting references to images owned by the swapchain.
-    // There is no ownership change.
-  };
-
-  backbuffers_.clear();
-
-  for (uint32_t i = 0; i < count; i++) {
-    std::unique_ptr<VulkanBackbuffer> backbuffer(new VulkanBackbuffer(
-        vk, device_, command_pool_, {images[i], image_collector}));
-
-    if (!backbuffer->IsValid()) {
-      return false;
+    if (acquire_result == VulkanSwapchain::AcquireStatus::Success) {
+      // Successfully acquired a surface from the swapchain. Nothing more to do.
+      return surface;
     }
 
-    backbuffers_.emplace_back(std::move(backbuffer));
+    if (acquire_result == VulkanSwapchain::AcquireStatus::ErrorSurfaceLost) {
+      // Surface is lost. This is an unrecoverable error.
+      FTL_DLOG(INFO) << "Swapchain reported surface was lost.";
+      return nullptr;
+    }
+
+    if (acquire_result ==
+        VulkanSwapchain::AcquireStatus::ErrorSurfaceOutOfDate) {
+      // Surface out of date. Recreate the swapchain at the new configuration.
+      if (RecreateSwapchain()) {
+        // Swapchain was recreated, try surface acquisition again.
+        continue;
+      } else {
+        // Could not recreate the swapchain at the new configuration.
+        FTL_DLOG(INFO) << "Swapchain reported surface was out of date but "
+                          "could not recreate the swapchain at the new "
+                          "configuration.";
+        valid_ = false;
+        return nullptr;
+      }
+    }
+
+    break;
   }
 
-  return true;
+  FTL_DCHECK(false) << "Unhandled VulkanSwapchain::AcquireResult";
+  return nullptr;
 }
 
-bool VulkanWindow::CreateCommandPool() {
-  if (!device_) {
+bool VulkanWindow::SwapBuffers() {
+  if (!IsValid()) {
+    FTL_DLOG(INFO) << "Window was invalid.";
     return false;
   }
 
-  const VkCommandPoolCreateInfo create_info = {
-      .sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
-      .pNext = nullptr,
-      .flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
-      .queueFamilyIndex = 0,
-  };
+  return swapchain_->Submit();
+}
 
-  VkCommandPool command_pool = VK_NULL_HANDLE;
-  if (vk.createCommandPool(device_, &create_info, nullptr, &command_pool) !=
-      VK_SUCCESS) {
+bool VulkanWindow::RecreateSwapchain() {
+  // This way, we always lose our reference to the old swapchain. Even if we
+  // cannot create a new one to replace it.
+  auto old_swapchain = std::move(swapchain_);
+
+  if (!vk->IsValid()) {
     return false;
   }
 
-  command_pool_ = {command_pool, [this](VkCommandPool pool) {
-                     vk.destroyCommandPool(device_, pool, nullptr);
-                   }};
+  if (logical_device_ == nullptr || !logical_device_->IsValid()) {
+    return false;
+  }
+
+  if (surface_ == nullptr || !surface_->IsValid()) {
+    return false;
+  }
+
+  if (skia_gr_context_ == nullptr) {
+    return false;
+  }
+
+  auto swapchain = std::make_unique<VulkanSwapchain>(
+      *vk, *logical_device_, *surface_, skia_gr_context_.get(),
+      std::move(old_swapchain), logical_device_->GetGraphicsQueueIndex());
+
+  if (!swapchain->IsValid()) {
+    return false;
+  }
+
+  swapchain_ = std::move(swapchain);
   return true;
 }
 

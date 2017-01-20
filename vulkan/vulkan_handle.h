@@ -7,9 +7,9 @@
 
 #include <functional>
 
+#include "lib/ftl/logging.h"
 #include "lib/ftl/macros.h"
 #include "vulkan_interface.h"
-#include "lib/ftl/logging.h"
 
 namespace vulkan {
 
@@ -21,7 +21,7 @@ class VulkanHandle {
 
   VulkanHandle() : handle_(VK_NULL_HANDLE) {}
 
-  VulkanHandle(Handle handle, Disposer disposer)
+  VulkanHandle(Handle handle, Disposer disposer = nullptr)
       : handle_(handle), disposer_(disposer) {}
 
   VulkanHandle(VulkanHandle&& other)
@@ -58,7 +58,9 @@ class VulkanHandle {
     if (handle_ == VK_NULL_HANDLE) {
       return;
     }
-    disposer_(handle_);
+    if (disposer_) {
+      disposer_(handle_);
+    }
     handle_ = VK_NULL_HANDLE;
     disposer_ = nullptr;
   }

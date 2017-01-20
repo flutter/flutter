@@ -7,42 +7,55 @@
 
 #include <array>
 
+#include "flutter/vulkan/vulkan_command_buffer.h"
+#include "flutter/vulkan/vulkan_handle.h"
+#include "lib/ftl/compiler_specific.h"
 #include "lib/ftl/macros.h"
-#include "vulkan_proc_table.h"
-#include "vulkan_handle.h"
+#include "third_party/skia/include/core/SkSize.h"
+#include "third_party/skia/include/core/SkSurface.h"
 
 namespace vulkan {
 
 class VulkanBackbuffer {
  public:
-  VulkanBackbuffer(VulkanProcTable& vk,
-                   VulkanHandle<VkDevice>& device,
-                   VulkanHandle<VkCommandPool>& pool,
-                   VulkanHandle<VkImage> image);
+  VulkanBackbuffer(const VulkanProcTable& vk,
+                   const VulkanHandle<VkDevice>& device,
+                   const VulkanHandle<VkCommandPool>& pool);
 
   ~VulkanBackbuffer();
 
   bool IsValid() const;
 
+  FTL_WARN_UNUSED_RESULT
+  bool WaitFences();
+
+  FTL_WARN_UNUSED_RESULT
+  bool ResetFences();
+
+  const VulkanHandle<VkFence>& GetUsageFence() const;
+
+  const VulkanHandle<VkFence>& GetRenderFence() const;
+
+  const VulkanHandle<VkSemaphore>& GetUsageSemaphore() const;
+
+  const VulkanHandle<VkSemaphore>& GetRenderSemaphore() const;
+
+  VulkanCommandBuffer& GetUsageCommandBuffer();
+
+  VulkanCommandBuffer& GetRenderCommandBuffer();
+
  private:
-  VulkanProcTable& vk;
-  VulkanHandle<VkDevice>& device_;
-  VulkanHandle<VkCommandPool>& pool_;
-  VulkanHandle<VkImage> image_;
-
-  bool valid_;
-
+  const VulkanProcTable& vk;
+  const VulkanHandle<VkDevice>& device_;
   std::array<VulkanHandle<VkSemaphore>, 2> semaphores_;
-  std::array<VulkanHandle<VkCommandBuffer>, 2> transition_buffers_;
   std::array<VulkanHandle<VkFence>, 2> use_fences_;
+  VulkanCommandBuffer usage_command_buffer_;
+  VulkanCommandBuffer render_command_buffer_;
+  bool valid_;
 
   bool CreateSemaphores();
 
-  bool CreateTransitionBuffers();
-
   bool CreateFences();
-
-  void WaitFences();
 
   FTL_DISALLOW_COPY_AND_ASSIGN(VulkanBackbuffer);
 };

@@ -5,14 +5,54 @@
 #ifndef FLUTTER_VULKAN_VULKAN_INTERFACE_H_
 #define FLUTTER_VULKAN_VULKAN_INTERFACE_H_
 
-#define VK_NO_PROTOTYPES 1
+#include <string>
 
 #include "lib/ftl/build_config.h"
+#include "lib/ftl/logging.h"
+
+#define VULKAN_LINK_STATICALLY OS_FUCHSIA
 
 #if OS_ANDROID
+#ifndef VK_USE_PLATFORM_ANDROID_KHR
 #define VK_USE_PLATFORM_ANDROID_KHR 1
+#endif  // VK_USE_PLATFORM_ANDROID_KHR
 #endif  // OS_ANDROID
 
-#include "third_party/vulkan/src/vulkan/vulkan.h"
+#if OS_FUCHSIA
+#ifndef VK_USE_PLATFORM_MAGMA_KHR
+#define VK_USE_PLATFORM_MAGMA_KHR 1
+#endif  // VK_USE_PLATFORM_MAGMA_KHR
+#endif  // OS_FUCHSIA
+
+#if !VULKAN_LINK_STATICALLY
+#define VK_NO_PROTOTYPES 1
+#endif  // !VULKAN_LINK_STATICALLY
+
+#include <vulkan/vulkan.h>
+
+#ifndef NDEBUG
+
+#define VK_CALL_LOG_ERROR(expression)                      \
+  ({                                                       \
+    __typeof__(expression) _rc = (expression);             \
+    if (_rc != VK_SUCCESS) {                               \
+      FTL_DLOG(INFO) << "Vulkan call '" << #expression     \
+                     << "' failed with error "             \
+                     << vulkan::VulkanResultToString(_rc); \
+    }                                                      \
+    _rc;                                                   \
+  })
+
+#else  // NDEBUG
+
+#define VK_CALL_LOG_ERROR(expression) (expression)
+
+#endif  // NDEBUG
+
+namespace vulkan {
+
+std::string VulkanResultToString(VkResult result);
+
+}  // namespace vulkan
 
 #endif  // FLUTTER_VULKAN_VULKAN_INTERFACE_H_

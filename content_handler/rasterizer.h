@@ -7,9 +7,7 @@
 
 #include <memory>
 
-#include "apps/mozart/services/buffers/cpp/buffer_producer.h"
 #include "apps/mozart/services/composition/scenes.fidl.h"
-#include "flutter/flow/compositor_context.h"
 #include "flutter/flow/layers/layer_tree.h"
 #include "lib/ftl/functional/closure.h"
 #include "lib/ftl/macros.h"
@@ -18,19 +16,14 @@ namespace flutter_runner {
 
 class Rasterizer {
  public:
-  Rasterizer();
-  ~Rasterizer();
+  virtual ~Rasterizer();
 
-  void SetScene(fidl::InterfaceHandle<mozart::Scene> scene);
+  static std::unique_ptr<Rasterizer> Create();
 
-  void Draw(std::unique_ptr<flow::LayerTree> layer_tree, ftl::Closure callback);
+  virtual void SetScene(fidl::InterfaceHandle<mozart::Scene> scene) = 0;
 
- private:
-  mozart::ScenePtr scene_;
-  std::unique_ptr<mozart::BufferProducer> buffer_producer_;
-  flow::CompositorContext compositor_context_;
-
-  FTL_DISALLOW_COPY_AND_ASSIGN(Rasterizer);
+  virtual void Draw(std::unique_ptr<flow::LayerTree> layer_tree,
+                    ftl::Closure callback) = 0;
 };
 
 }  // namespace flutter_runner

@@ -22,37 +22,6 @@ static const int kMaxGaneshResourceCacheCount = 2048;
 // GPU cache.
 static const size_t kMaxGaneshResourceCacheBytes = 96 * 1024 * 1024;
 
-GPUSurfaceFrameGL::GPUSurfaceFrameGL(sk_sp<SkSurface> surface,
-                                     SubmitCallback submit_callback)
-    : surface_(surface), submit_callback_(submit_callback) {}
-
-GPUSurfaceFrameGL::~GPUSurfaceFrameGL() {
-  if (submit_callback_) {
-    // Dropping without a Submit. Callback with nullptr so that the current
-    // context on the thread is cleared.
-    submit_callback_(nullptr);
-  }
-}
-
-SkCanvas* GPUSurfaceFrameGL::SkiaCanvas() {
-  return surface_->getCanvas();
-}
-
-bool GPUSurfaceFrameGL::PerformSubmit() {
-  if (submit_callback_ == nullptr) {
-    return false;
-  }
-
-  FLUTTER_THREAD_CHECKER_CHECK(checker_);
-
-  if (submit_callback_(surface_->getCanvas())) {
-    surface_ = nullptr;
-    return true;
-  }
-
-  return false;
-}
-
 GPUSurfaceGL::GPUSurfaceGL(GPUSurfaceGLDelegate* delegate)
     : delegate_(delegate), weak_factory_(this) {}
 
@@ -91,6 +60,8 @@ bool GPUSurfaceGL::Setup() {
   context_->setResourceCacheLimits(kMaxGaneshResourceCacheCount,
                                    kMaxGaneshResourceCacheBytes);
 
+  delegate_->GLContextClearCurrent();
+
   return true;
 }
 
@@ -103,6 +74,10 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceGL::AcquireFrame(const SkISize& size) {
     return nullptr;
   }
 
+  if (!delegate_->GLContextMakeCurrent()) {
+    return nullptr;
+  }
+
   sk_sp<SkSurface> surface = AcquireSurface(size);
 
   if (surface == nullptr) {
@@ -111,13 +86,11 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceGL::AcquireFrame(const SkISize& size) {
 
   auto weak_this = weak_factory_.GetWeakPtr();
 
-  GPUSurfaceFrameGL::SubmitCallback submit_callback =
-      [weak_this](SkCanvas* canvas) {
-        return weak_this ? weak_this->PresentSurface(canvas) : false;
-      };
+  SurfaceFrame::SubmitCallback submit_callback = [weak_this](SkCanvas* canvas) {
+    return weak_this ? weak_this->PresentSurface(canvas) : false;
+  };
 
-  return std::unique_ptr<GPUSurfaceFrameGL>(
-      new GPUSurfaceFrameGL(surface, submit_callback));
+  return std::make_unique<SurfaceFrame>(surface, submit_callback);
 }
 
 bool GPUSurfaceGL::PresentSurface(SkCanvas* canvas) {

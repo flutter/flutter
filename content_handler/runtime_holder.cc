@@ -85,7 +85,8 @@ void RuntimeHolder::Init(
     fidl::InterfaceRequest<modular::ServiceProvider> outgoing_services,
     std::vector<char> bundle) {
   FTL_DCHECK(!rasterizer_);
-  rasterizer_.reset(new Rasterizer());
+  rasterizer_ = Rasterizer::Create();
+  FTL_DCHECK(rasterizer_);
 
   environment_.Bind(std::move(environment));
   environment_->GetServices(fidl::GetProxy(&environment_services_));

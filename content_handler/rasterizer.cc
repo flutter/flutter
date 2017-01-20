@@ -4,76 +4,32 @@
 
 #include "flutter/content_handler/rasterizer.h"
 
-#include <utility>
+#include "flutter/content_handler/software_rasterizer.h"
 
-#include "apps/mozart/lib/skia/skia_vmo_surface.h"
-#include "lib/ftl/logging.h"
-#include "third_party/skia/include/core/SkCanvas.h"
+#if FLUTTER_ENABLE_VULKAN
+#include "flutter/content_handler/vulkan_rasterizer.h"
+#endif  // FLUTTER_ENABLE_VULKAN
 
 namespace flutter_runner {
 
-Rasterizer::Rasterizer() : compositor_context_(nullptr) {}
+Rasterizer::~Rasterizer() = default;
 
-Rasterizer::~Rasterizer() {}
+std::unique_ptr<Rasterizer> Rasterizer::Create() {
+#if FLUTTER_ENABLE_VULKAN
+  auto vulkan_rasterizer = std::make_unique<VulkanRasterizer>();
 
-void Rasterizer::SetScene(fidl::InterfaceHandle<mozart::Scene> scene) {
-  scene_.Bind(std::move(scene));
-  buffer_producer_.reset(new mozart::BufferProducer());
-}
-
-void Rasterizer::Draw(std::unique_ptr<flow::LayerTree> layer_tree,
-                      ftl::Closure callback) {
-  FTL_DCHECK(layer_tree);
-  if (!scene_) {
-    callback();
-    return;
+  if (!vulkan_rasterizer->IsValid()) {
+    FTL_DLOG(INFO) << "Could not initialize a valid vulkan rasterizer. "
+                      "Attempting to fallback to the software rasterizer.";
+    return std::make_unique<SoftwareRasterizer>();
   }
 
-  const SkISize& frame_size = layer_tree->frame_size();
+  FTL_DLOG(INFO) << "Successfully initialized a valid vulkan rasterizer.";
 
-  auto update = mozart::SceneUpdate::New();
-  // TODO(abarth): Support incremental updates.
-  update->clear_resources = true;
-  update->clear_nodes = true;
-
-  if (frame_size.isEmpty()) {
-    update->nodes.insert(mozart::kSceneRootNodeId, mozart::Node::New());
-    // Publish the updated scene contents.
-    // TODO(jeffbrown): We should set the metadata's presentation_time here too.
-    scene_->Update(std::move(update));
-    auto metadata = mozart::SceneMetadata::New();
-    metadata->version = layer_tree->scene_version();
-    scene_->Publish(std::move(metadata));
-    callback();
-    return;
-  }
-
-  flow::CompositorContext::ScopedFrame frame =
-      compositor_context_.AcquireFrame(nullptr, nullptr);
-
-  layer_tree->Preroll(frame);
-
-  flow::SceneUpdateContext context(update.get(), buffer_producer_.get());
-  auto root_node = mozart::Node::New();
-  root_node->hit_test_behavior = mozart::HitTestBehavior::New();
-  layer_tree->UpdateScene(context, root_node.get());
-  update->nodes.insert(mozart::kSceneRootNodeId, std::move(root_node));
-
-  // Publish the updated scene contents.
-  // TODO(jeffbrown): We should set the metadata's presentation_time here too.
-  scene_->Update(std::move(update));
-  auto metadata = mozart::SceneMetadata::New();
-  metadata->version = layer_tree->scene_version();
-  scene_->Publish(std::move(metadata));
-
-  // Draw the contents of the scene to a surface.
-  // We do this after publishing to take advantage of pipelining.
-  // The image buffer's fence is signalled automatically when the surface
-  // goes out of scope.
-  context.ExecutePaintTasks(frame);
-  buffer_producer_->Tick();
-
-  callback();
+  return vulkan_rasterizer;
+#else  // FLUTTER_ENABLE_VULKAN
+  return std::make_unique<SoftwareRasterizer>();
+#endif  // FLUTTER_ENABLE_VULKAN
 }
 
 }  // namespace flutter_runner

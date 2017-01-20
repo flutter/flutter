@@ -4,33 +4,28 @@
 
 #include "flutter/shell/platform/android/platform_view_android.h"
 
-#include <android/native_window.h>
 #include <android/native_window_jni.h>
 #include <sys/resource.h>
 #include <sys/time.h>
 #include <sys/types.h>
-#include <unistd.h>
-#include <memory>
+
 #include <utility>
-#include "base/android/jni_android.h"
+
 #include "base/android/jni_array.h"
 #include "base/android/jni_string.h"
-#include "base/bind.h"
-#include "base/location.h"
-#include "base/trace_event/trace_event.h"
 #include "flutter/common/threads.h"
-#include "flutter/flow/compositor_context.h"
 #include "flutter/runtime/dart_service_isolate.h"
-#include "flutter/shell/common/engine.h"
-#include "flutter/shell/common/shell.h"
 #include "flutter/shell/gpu/gpu_rasterizer.h"
+#include "flutter/shell/platform/android/android_surface_gl.h"
 #include "flutter/shell/platform/android/vsync_waiter_android.h"
 #include "jni/FlutterView_jni.h"
 #include "lib/ftl/functional/make_copyable.h"
-#include "third_party/skia/include/core/SkSurface.h"
+
+#if SHELL_ENABLE_VULKAN
+#include "flutter/shell/platform/android/android_surface_vulkan.h"
+#endif  // SHELL_ENABLE_VULKAN
 
 namespace shell {
-namespace {
 
 class PlatformMessageResponseAndroid : public blink::PlatformMessageResponse {
   FRIEND_MAKE_REF_COUNTED(PlatformMessageResponseAndroid);
@@ -59,18 +54,56 @@ class PlatformMessageResponseAndroid : public blink::PlatformMessageResponse {
   ftl::WeakPtr<PlatformView> view_;
 };
 
-}  // namespace
+static std::unique_ptr<AndroidSurface> InitializePlatformSurfaceGL() {
+  const PlatformView::SurfaceConfig offscreen_config = {
+      .red_bits = 8,
+      .green_bits = 8,
+      .blue_bits = 8,
+      .alpha_bits = 8,
+      .depth_bits = 0,
+      .stencil_bits = 0,
+  };
+  auto surface = std::make_unique<AndroidSurfaceGL>(offscreen_config);
+  return surface->IsOffscreenContextValid() ? std::move(surface) : nullptr;
+}
+
+static std::unique_ptr<AndroidSurface> InitializePlatformSurfaceVulkan() {
+#if SHELL_ENABLE_VULKAN
+  auto surface = std::make_unique<AndroidSurfaceVulkan>();
+  return surface->IsValid() ? std::move(surface) : nullptr;
+#else   // SHELL_ENABLE_VULKAN
+  return nullptr;
+#endif  // SHELL_ENABLE_VULKAN
+}
+
+static std::unique_ptr<AndroidSurface> InitializePlatformSurface() {
+  if (auto surface = InitializePlatformSurfaceVulkan()) {
+    FTL_DLOG(INFO) << "Vulkan surface initialized.";
+    return surface;
+  }
+
+  FTL_DLOG(INFO)
+      << "Could not initialize Vulkan surface. Falling back to OpenGL.";
+
+  if (auto surface = InitializePlatformSurfaceGL()) {
+    FTL_DLOG(INFO) << "GL surface initialized.";
+    return surface;
+  }
+
+  FTL_CHECK(false) << "Could not initialize either the Vulkan or OpenGL "
+                      "surface backends. Flutter requires a GPU to render.";
+  return nullptr;
+}
 
 PlatformViewAndroid::PlatformViewAndroid()
-    : PlatformView(std::make_unique<GPURasterizer>(nullptr)) {
+    : PlatformView(std::make_unique<GPURasterizer>(nullptr)),
+      android_surface_(InitializePlatformSurface()) {
   CreateEngine();
 
-  // Create the GL surface so that we can setup the resource context.
-  PlatformView::SurfaceConfig offscreen_config;
-  offscreen_config.stencil_bits = 0;
-  surface_gl_ = std::make_unique<AndroidSurfaceGL>(offscreen_config);
-
+  // Eagerly setup the IO thread context. We have already setup the surface.
   SetupResourceContextOnIOThread();
+
+  UpdateThreadPriorities();
 }
 
 PlatformViewAndroid::~PlatformViewAndroid() = default;
@@ -88,43 +121,37 @@ void PlatformViewAndroid::SurfaceCreated(JNIEnv* env,
   // ANativeWindow_fromSurface are released immediately. This is needed as a
   // workaround for https://code.google.com/p/android/issues/detail?id=68174
   base::android::ScopedJavaLocalFrame scoped_local_reference_frame(env);
-  ANativeWindow* window = ANativeWindow_fromSurface(env, jsurface);
 
-  // Use the default onscreen configuration.
-  PlatformView::SurfaceConfig onscreen_config;
+  auto native_window = ftl::MakeRefCounted<AndroidNativeWindow>(
+      ANativeWindow_fromSurface(env, jsurface));
 
-  if (!surface_gl_->SetNativeWindowForOnScreenContext(window,
-                                                      onscreen_config)) {
-    LOG(INFO) << "Could not create the OpenGL Android Surface.";
-  }
-
-  ANativeWindow_release(window);
-
-  if (!surface_gl_->IsValid()) {
+  if (!native_window->IsValid()) {
     return;
   }
 
-  NotifyCreated(
-      std::make_unique<GPUSurfaceGL>(surface_gl_.get()),  // GPU surface
-      [this, backgroundColor] {
-        if (surface_gl_)
-          rasterizer().Clear(backgroundColor,
-                             surface_gl_->OnScreenSurfaceSize());
-      });
+  if (!android_surface_->SetNativeWindow(native_window)) {
+    return;
+  }
 
-  UpdateThreadPriorities();
+  std::unique_ptr<Surface> gpu_surface = android_surface_->CreateGPUSurface();
+
+  if (gpu_surface == nullptr || !gpu_surface->IsValid()) {
+    return;
+  }
+
+  NotifyCreated(std::move(gpu_surface), [
+    this, backgroundColor, native_window_size = native_window->GetSize()
+  ] { rasterizer().Clear(backgroundColor, native_window_size); });
 }
 
 void PlatformViewAndroid::SurfaceChanged(JNIEnv* env,
                                          jobject obj,
                                          jint width,
                                          jint height) {
-  if (!surface_gl_) {
-    return;
-  }
-
   blink::Threads::Gpu()->PostTask([this, width, height]() {
-    surface_gl_->OnScreenSurfaceResize(SkISize::Make(width, height));
+    if (android_surface_) {
+      android_surface_->OnScreenSurfaceResize(SkISize::Make(width, height));
+    }
   });
 }
 
@@ -319,16 +346,7 @@ void PlatformViewAndroid::SetSemanticsEnabled(JNIEnv* env,
 
 void PlatformViewAndroid::ReleaseSurface() {
   NotifyDestroyed();
-
-  ftl::AutoResetWaitableEvent latch;
-  blink::Threads::Gpu()->PostTask([this, &latch]() {
-    if (surface_gl_->IsValid())
-      surface_gl_->GLContextClearCurrent();
-    latch.Signal();
-  });
-  latch.Wait();
-
-  surface_gl_->TeardownOnScreenContext();
+  android_surface_->TeardownOnScreenContext();
 }
 
 VsyncWaiter* PlatformViewAndroid::GetVsyncWaiter() {
@@ -338,7 +356,7 @@ VsyncWaiter* PlatformViewAndroid::GetVsyncWaiter() {
 }
 
 bool PlatformViewAndroid::ResourceContextMakeCurrent() {
-  return surface_gl_ ? surface_gl_->GLOffscreenContextMakeCurrent() : false;
+  return android_surface_->ResourceContextMakeCurrent();
 }
 
 void PlatformViewAndroid::UpdateSemantics(
