@@ -546,8 +546,6 @@ class HeroController extends NavigatorObserver {
 
   void _handleQuestFinished() {
     _removeHeroesFromOverlay();
-    assert(!_questsEnabled);
-    _questsEnabled = true;
   }
 
   Rect _getAnimationArea(BuildContext context) {
@@ -609,6 +607,7 @@ class HeroController extends NavigatorObserver {
       );
     }
 
+    _questsEnabled = true;
     _clearPendingHeroQuest();
   }
 
