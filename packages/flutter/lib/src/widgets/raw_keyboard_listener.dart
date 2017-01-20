@@ -14,17 +14,17 @@ import 'framework.dart';
 /// hardware buttons that are represented as keys. Typically used by games and
 /// other apps that use keyboards for purposes other than text entry.
 ///
-/// For text entry, consider using a [RawInput], which integrates with
+/// For text entry, consider using a [EditableText], which integrates with
 /// on-screen keyboards and input method editors (IMEs).
 ///
 /// See also:
 ///
-///  * [RawInput], which should be used instead of this widget for text
+///  * [EditableText], which should be used instead of this widget for text
 ///    entry.
 class RawKeyboardListener extends StatefulWidget {
   /// Creates a widget that receives raw keyboard events.
   ///
-  /// For text entry, consider using a [RawInput], which integrates with
+  /// For text entry, consider using a [EditableText], which integrates with
   /// on-screen keyboards and input method editors (IMEs).
   RawKeyboardListener({
     Key key,

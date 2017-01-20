@@ -8,7 +8,7 @@ import 'package:flutter/scheduler.dart';
 
 import 'basic.dart';
 import 'container.dart';
-import 'editable.dart';
+import 'editable_text.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
 import 'overlay.dart';
