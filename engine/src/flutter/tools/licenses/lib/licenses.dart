@@ -170,8 +170,9 @@ abstract class License implements Comparable<License> {
         case LicenseType.eclipse:
         case LicenseType.ijg:
         case LicenseType.apsl:
-        case LicenseType.openssl:
           return new MessageLicense._(body, type, origin: origin);
+        case LicenseType.openssl:
+          return new MultiLicense._(body, type, origin: origin);
         case LicenseType.libpng:
           return new BlankLicense._(body, type, origin: origin);
       }
@@ -283,11 +284,13 @@ abstract class License implements Comparable<License> {
           case LicenseType.eclipse:
           case LicenseType.ijg:
           case LicenseType.apsl:
-          case LicenseType.openssl:
             assert(this is MessageLicense);
             break;
           case LicenseType.libpng:
             assert(this is BlankLicense);
+            break;
+          case LicenseType.openssl:
+            assert(this is MultiLicense);
             break;
         }
       } on AssertionError {
@@ -348,7 +351,7 @@ abstract class License implements Comparable<License> {
     _libraries.add(libraryName);
   }
 
-  Iterable<License> expandTemplate(String copyright, { String origin });
+  Iterable<License> expandTemplate(String copyright, String licenseBody, { String origin });
 
   @override
   int compareTo(License other) => toString().compareTo(other.toString());
@@ -697,8 +700,8 @@ class _LicenseMatch {
   final bool missingCopyrights;
 }
 
-Iterable<_LicenseMatch> _expand(License template, String copyright, int start, int end, { String debug: '', String origin }) sync* {
-  List<License> results = template.expandTemplate(_reformat(copyright), origin: origin).toList();
+Iterable<_LicenseMatch> _expand(License template, String copyright, String body, int start, int end, { String debug: '', String origin }) sync* {
+  List<License> results = template.expandTemplate(_reformat(copyright), body, origin: origin).toList();
   if (results.isEmpty)
     throw 'license could not be expanded';
   yield new _LicenseMatch(results.first, start, end, debug: 'expanding template for $debug');
@@ -735,7 +738,8 @@ Iterable<_LicenseMatch> _tryReferenceByFilename(String body, LicenseFileReferenc
       if (template == null)
         throw 'failed to find template $filename in $parentDirectory (authors=$authors)';
       assert(_reformat(copyright) != '');
-      yield* _expand(template, copyright, match.start, match.end, debug: '_tryReferenceByFilename (with explicit copyright) looking for $filename', origin: origin);
+      String entireLicense = body.substring(match.start, match.end);
+      yield* _expand(template, copyright, entireLicense, match.start, match.end, debug: '_tryReferenceByFilename (with explicit copyright) looking for $filename', origin: origin);
     }
   } else {
     for (_PartialLicenseMatch match in _findLicenseBlocks(body, pattern.pattern, pattern.firstPrefixIndex, pattern.indentPrefixIndex, needsCopyright: pattern.needsCopyright)) {
@@ -752,7 +756,7 @@ Iterable<_LicenseMatch> _tryReferenceByFilename(String body, LicenseFileReferenc
       if (match.getCopyrights() == '') {
         yield new _LicenseMatch(template, match.start, match.end, debug: '_tryReferenceByFilename (with failed copyright search) looking for $filename');
       } else {
-        yield* _expand(template, match.getCopyrights(), match.start, match.end, debug: '_tryReferenceByFilename (with successful copyright search) looking for $filename', origin: origin);
+        yield* _expand(template, match.getCopyrights(), match.getEntireLicense(), match.start, match.end, debug: '_tryReferenceByFilename (with successful copyright search) looking for $filename', origin: origin);
       }
     }
   }
@@ -769,7 +773,10 @@ Iterable<_LicenseMatch> _tryReferenceByType(String body, RegExp pattern, License
       assert(needsCopyright && copyrights.isNotEmpty || !needsCopyright && copyrights.isEmpty);
       return true;
     });
-    yield* _expand(template, match.getCopyrights(), match.start, match.end, debug: '_tryReferenceByType', origin: origin);
+    if (needsCopyright)
+      yield* _expand(template, match.getCopyrights(), match.getEntireLicense(), match.start, match.end, debug: '_tryReferenceByType', origin: origin);
+    else
+      yield new _LicenseMatch(template, match.start, match.end, debug: '_tryReferenceByType (without copyrights) for type $type');
   }
 }
 
@@ -813,7 +820,7 @@ Iterable<_LicenseMatch> _tryForwardReferencePattern(String fileContents, Forward
         'forward license reference to unexpected license\n'
         'license:\n---\n${template.body}\n---\nexpected pattern:\n---\n${pattern.targetPattern}\n---';
     }
-    yield* _expand(template, match.getCopyrights(), match.start, match.end, debug: '_tryForwardReferencePattern', origin: origin);
+    yield* _expand(template, match.getCopyrights(), match.getEntireLicense(), match.start, match.end, debug: '_tryForwardReferencePattern', origin: origin);
   }
 }
 
@@ -907,7 +914,7 @@ License interpretAsRedirectLicense(String fileContents, LicenseSource parentDire
 class MessageLicense extends License {
   MessageLicense._(String body, LicenseType type, { String origin }) : super._(body, type, origin: origin);
   @override
-  Iterable<License> expandTemplate(String copyright, { String origin }) sync* {
+  Iterable<License> expandTemplate(String copyright, String licenseBody, { String origin }) sync* {
     yield this;
   }
 }
@@ -921,9 +928,20 @@ class TemplateLicense extends License {
   String _conditions;
 
   @override
-  Iterable<License> expandTemplate(String copyright, { String origin }) sync* {
+  Iterable<License> expandTemplate(String copyright, String licenseBody, { String origin }) sync* {
     _conditions ??= _splitLicense(body).getConditions();
     yield new License.fromCopyrightAndLicense(copyright, _conditions, type, origin: '$origin + ${this.origin}');
+  }
+}
+
+// the kind of license that expands to two license blocks a main license and the referring block (e.g. OpenSSL)
+class MultiLicense extends License {
+  MultiLicense._(String body, LicenseType type, { String origin }) : super._(body, type, origin: origin);
+
+  @override
+  Iterable<License> expandTemplate(String copyright, String licenseBody, { String origin }) sync* {
+    yield new License.fromBody(body, origin: '$origin + ${this.origin}');
+    yield new License.fromBody(licenseBody, origin: '$origin + ${this.origin}');
   }
 }
 
@@ -932,7 +950,7 @@ class UniqueLicense extends License {
   UniqueLicense._(String body, LicenseType type, { String origin, bool yesWeKnowWhatItLooksLikeButItIsNot: false })
     : super._(body, type, origin: origin, yesWeKnowWhatItLooksLikeButItIsNot: yesWeKnowWhatItLooksLikeButItIsNot);
   @override
-  Iterable<License> expandTemplate(String copyright, { String origin }) sync* {
+  Iterable<License> expandTemplate(String copyright, String licenseBody, { String origin }) sync* {
     throw 'attempted to expand non-template license with "$copyright"\ntemplate was: $this';
   }
 }
@@ -941,7 +959,7 @@ class UniqueLicense extends License {
 class BlankLicense extends License {
   BlankLicense._(String body, LicenseType type, { String origin }) : super._(body, type, origin: origin);
   @override
-  Iterable<License> expandTemplate(String copyright, { String origin }) sync* {
+  Iterable<License> expandTemplate(String copyright, String licenseBody, { String origin }) sync* {
     yield this;
   }
   @override
