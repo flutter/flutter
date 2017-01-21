@@ -65,6 +65,13 @@ void main() {
     expect(find.text('Pirate license'), findsOneWidget);
   });
 
+  testWidgets('About box logic defaults to executable name for app name', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new Material(child: new AboutDrawerItem()),
+    );
+    expect(find.text('About sky_shell'), findsOneWidget);
+  });
+
   testWidgets('AboutDrawerItem control test', (WidgetTester tester) async {
     List<String> log = <String>[];
 

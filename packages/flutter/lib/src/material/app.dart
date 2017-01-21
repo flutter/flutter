@@ -67,6 +67,7 @@ class MaterialApp extends StatefulWidget {
     assert(!routes.containsKey(Navigator.defaultRouteName) || (home == null));
     assert(routes.containsKey(Navigator.defaultRouteName) || (home != null) || (onGenerateRoute != null));
  }
+
   /// A one-line description of this app for use in the window manager.
   final String title;
 
