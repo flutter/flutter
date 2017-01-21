@@ -265,20 +265,39 @@ class _TestRecordingCanvas implements Canvas {
   @override
   void save() {
     _saveCount += 1;
-    super.save(); // ends up in noSuchMethod
+    _invocations.add(new _MethodCall(#save));
   }
 
   @override
   void restore() {
     _saveCount -= 1;
     assert(_saveCount >= 0);
-    super.restore(); // ends up in noSuchMethod
+    _invocations.add(new _MethodCall(#restore));
   }
 
   @override
   void noSuchMethod(Invocation invocation) {
     _invocations.add(invocation);
   }
+}
+
+class _MethodCall implements Invocation {
+  _MethodCall(this._name);
+  final Symbol _name;
+  @override
+  bool get isAccessor => false;
+  @override
+  bool get isGetter => false;
+  @override
+  bool get isMethod => true;
+  @override
+  bool get isSetter => false;
+  @override
+  Symbol get memberName => _name;
+  @override
+  Map<Symbol, dynamic> get namedArguments => <Symbol, dynamic>{};
+  @override
+  List<dynamic> get positionalArguments => <dynamic>[];
 }
 
 class _TestRecordingPaintingContext implements PaintingContext {

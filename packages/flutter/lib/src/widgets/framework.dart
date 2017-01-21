@@ -12,9 +12,9 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/foundation.dart';
 
 export 'dart:ui' show hashValues, hashList;
-export 'package:flutter/foundation.dart' show FlutterError;
+export 'package:flutter/foundation.dart' show FlutterError, debugPrint, debugPrintStack;
 export 'package:flutter/foundation.dart' show VoidCallback, ValueChanged, ValueGetter, ValueSetter;
-export 'package:flutter/rendering.dart' show RenderObject, RenderBox, debugPrint;
+export 'package:flutter/rendering.dart' show RenderObject, RenderBox, debugDumpRenderTree;
 
 // KEYS
 
@@ -3863,6 +3863,13 @@ class MultiChildRenderObjectElement extends RenderObjectElement {
 
   @override
   MultiChildRenderObjectWidget get widget => super.widget;
+
+  /// The current list of children of this element.
+  ///
+  /// This list is filtered to hide elements that have been forgotten (using
+  /// [forgetChild]).
+  @protected
+  Iterable<Element> get children => _children.where((Element child) => !_forgottenChildren.contains(child));
 
   List<Element> _children;
   // We keep a set of forgotten children to avoid O(n^2) work walking _children

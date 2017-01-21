@@ -98,6 +98,7 @@ void main() {
     expect(didReceiveCallback, isTrue);
   });
 
+
   testWidgets('Defunct setState throws exception', (WidgetTester tester) async {
     StateSetter setState;
 
@@ -142,5 +143,24 @@ void main() {
     expect(log.length, equals(2));
     expect(log[0], matches('Deactivated'));
     expect(log[1], matches('Discarding .+ from inactive elements list.'));
+  });
+
+  testWidgets('MultiChildRenderObjectElement.children', (WidgetTester tester) async {
+    GlobalKey key0, key1, key2;
+    await tester.pumpWidget(new Column(
+      key: key0 = new GlobalKey(),
+      children: <Widget>[
+        new Container(),
+        new Container(key: key1 = new GlobalKey()),
+        new Container(child: new Container()),
+        new Container(key: key2 = new GlobalKey()),
+        new Container(),
+      ],
+    ));
+    MultiChildRenderObjectElement element = key0.currentContext;
+    expect(
+      element.children.map((Element element) => element.widget.key), // ignore: INVALID_USE_OF_PROTECTED_MEMBER
+      <Key>[null, key1, null, key2, null],
+    );
   });
 }

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/rendering.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'arc.dart';
@@ -212,6 +213,18 @@ class _ScrollLikeMountainViewDelegate extends ScrollConfigurationDelegate {
   bool updateShouldNotify(ScrollConfigurationDelegate old) => false;
 }
 
+class _MaterialScrollBehavior extends ViewportScrollBehavior {
+  @override
+  TargetPlatform getPlatform(BuildContext context) {
+    return Theme.of(context).platform;
+  }
+
+  @override
+  Color getGlowColor(BuildContext context) {
+    return Theme.of(context).accentColor;
+  }
+}
+
 class _MaterialAppState extends State<MaterialApp> {
   HeroController _heroController;
 
@@ -288,8 +301,13 @@ class _MaterialAppState extends State<MaterialApp> {
       return true;
     });
 
-    return new ScrollConfiguration(
+    result = new ScrollConfiguration(
       delegate: _getScrollDelegate(theme.platform),
+      child: result
+    );
+
+    return new ScrollConfiguration2(
+      delegate: new _MaterialScrollBehavior(),
       child: result
     );
   }

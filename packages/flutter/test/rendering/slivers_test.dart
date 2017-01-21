@@ -8,6 +8,13 @@ import 'package:test/test.dart';
 import 'rendering_tester.dart';
 
 void main() {
+  test('RenderViewport2 basic test - no children', () {
+    RenderViewport2 root = new RenderViewport2();
+    layout(root);
+    root.offset = new ViewportOffset.fixed(900.0);
+    pumpFrame();
+  });
+
   test('RenderViewport2 basic test - down', () {
     RenderBox a, b, c, d, e;
     RenderViewport2 root = new RenderViewport2(
@@ -199,8 +206,6 @@ void main() {
     expect(e.localToGlobal(const Point(0.0, 0.0)), const Point(-300.0, 0.0));
   });
 
-  // TODO(ianh): test positioning when the children are too big to fit in the main axis
-  // TODO(ianh): test shrinkWrap
   // TODO(ianh): test anchor
   // TODO(ianh): test offset
   // TODO(ianh): test center
