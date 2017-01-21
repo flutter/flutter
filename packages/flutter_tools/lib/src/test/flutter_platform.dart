@@ -182,7 +182,9 @@ class FlutterPlatform extends PlatformPlugin {
           process.kill();
           final int exitCode = await process.exitCode;
           subprocessActive = false;
-          if (!controllerSinkClosed && exitCode != -15) {
+          if (!controllerSinkClosed && exitCode != -15) { // ProcessSignal.SIGTERM
+            // We expect SIGTERM (15) because we tried to terminate it.
+            // It's negative because signals are returned as negative exit codes.
             String message = _getErrorMessage(_getExitCodeMessage(exitCode, 'after tests finished'), testPath, shellPath);
             controller.sink.addError(message);
           }
