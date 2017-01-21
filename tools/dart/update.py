@@ -12,8 +12,9 @@ was downloaded. Rolling works by updating LINUX_64_SDK to a new URL.
 
 import os
 import shutil
-import subprocess
 import sys
+import urllib
+import zipfile
 
 # How to roll the dart sdk: Just change this url! We write this to the stamp
 # file after we download, and then check the stamp file for differences.
@@ -32,18 +33,6 @@ STAMP_FILE = os.path.join(DART_SDK_DIR, 'STAMP_FILE')
 LIBRARIES_FILE = os.path.join(DART_SDK_DIR,'dart-sdk',
                               'lib', '_internal', 'libraries.dart')
 PATCH_FILE = os.path.join(MOJO_DIR, 'tools', 'dart', 'patch_sdk.diff')
-
-def RunCommand(command, fail_hard=True):
-  """Run command and return success (True) or failure; or if fail_hard is
-     True, exit on failure."""
-
-  print 'Running %s' % (str(command))
-  if subprocess.call(command, shell=False) == 0:
-    return True
-  print 'Failed.'
-  if fail_hard:
-    sys.exit(1)
-  return False
 
 def main():
   # Only get the SDK if we don't have a stamp for or have an out of date stamp
@@ -77,27 +66,14 @@ def main():
       shutil.rmtree(DART_SDK_DIR)
     os.mkdir(DART_SDK_DIR)
 
-    # Download the Linux x64 based Dart SDK.
-    # '-C -': Resume transfer if possible.
-    # '--location': Follow Location: redirects.
-    # '-o': Output file.
-    curl_command = ['curl',
-                    '-C', '-',
-                    '--location',
-                    '-o', output_file,
-                    sdk_url]
-    if not RunCommand(curl_command, fail_hard=False):
-      print "Failed to get dart sdk from server."
-      return 1
+    urllib.urlretrieve(sdk_url, output_file)
+    print(output_file)
+    with zipfile.ZipFile(output_file, 'r') as zip_ref:
+      zip_ref.extractall(DART_SDK_DIR)
 
     # Write our stamp file so we don't redownload the sdk.
     with open(STAMP_FILE, "w") as stamp_file:
       stamp_file.write(sdk_url)
-
-  unzip_command = ['unzip', '-o', '-q', output_file, '-d', DART_SDK_DIR]
-  if not RunCommand(unzip_command, fail_hard=False):
-    print "Failed to unzip the dart sdk."
-    return 1
 
   return 0
 

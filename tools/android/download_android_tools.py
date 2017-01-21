@@ -49,7 +49,8 @@ def VersionStampName(tools_name):
   elif sys.platform == 'darwin':
     return 'VERSION_MACOSX_' + tools_name.upper()
   else:
-    raise Exception('Unsupported platform: ' + sys.platform)
+    print('NOTE: Will not download android tools. Unsupported platform: ' + sys.platform)
+    sys.exit(0)
 
 def UpdateTools(tools_name):
   """Downloads zipped tools from Google Cloud Storage and extracts them,
