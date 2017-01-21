@@ -2013,7 +2013,7 @@ class RepositoryBoringSSLSourceDirectory extends RepositoryDirectory {
 /// part of the copyright notices and can be skipped.
 class RepositoryOpenSSLLicenseFile extends RepositorySingleLicenseFile {
   RepositoryOpenSSLLicenseFile(RepositoryDirectory parent, fs.TextFile io)
-    : super(parent, io, new License.message(LineSplitter.split(io.readString()).skip(23).join('\n'), LicenseType.openssl, origin: io.fullName)) {
+    : super(parent, io, new License.fromBodyAndType(LineSplitter.split(io.readString()).skip(23).join('\n'), LicenseType.openssl, origin: io.fullName)) {
     _verifyLicense(io);
   }
 
