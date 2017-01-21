@@ -219,10 +219,11 @@ class DataCell {
 ///
 /// See also:
 ///
-///  * [DataColumn]
-///  * [DataRow]
-///  * [DataCell]
-///  * [PaginatedDataTable]
+///  * [DataColumn], which describes a column in the data table.
+///  * [DataRow], which contains the data for a row in the data table.
+///  * [DataCell], which contains the data for a single cell in the data table.
+///  * [PaginatedDataTable], which shows part of the data in a data table and
+///    provides controls for paging through the remainder of the data.
 ///  * <https://material.google.com/components/data-tables.html>
 class DataTable extends StatelessWidget {
   /// Creates a widget describing a data table.
