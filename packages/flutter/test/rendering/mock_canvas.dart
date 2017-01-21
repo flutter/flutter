@@ -6,6 +6,22 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:test/test.dart';
 
+/// Matches [RenderObject]s that paint a display list that matches the canvas
+/// calls described by the pattern.
+///
+/// To specify the pattern, call the methods on the returned object. For example:
+///
+/// ```dart
+///  expect(myRenderObject, paints..circle(radius: 10.0)..circle(radius: 20.0));
+/// ```
+///
+/// This particular pattern would verify that the render object `myRenderObject`
+/// paints, among other things, two circles of radius 10.0 and 20.0 (in that
+/// order).
+///
+/// See [PaintPattern] for a discussion of the semantics of paint patterns.
+PaintPattern get paints => new _TestRecordingCanvasPatternMatcher();
+
 /// Signature for [PaintPattern.something] predicate argument.
 ///
 /// Used by the [paints] matcher.
@@ -120,22 +136,6 @@ abstract class PaintPattern {
   /// describing the problem.
   void something(PaintPatternPredicate predicate);
 }
-
-/// Matches [RenderObject]s that paint a display list that matches the canvas
-/// calls described by the pattern.
-///
-/// To specify the pattern, call the methods on the returned object. For example:
-///
-/// ```dart
-///  expect(myRenderObject, paints..circle(radius: 10.0)..circle(radius: 20.0));
-/// ```
-///
-/// This particular pattern would verify that the render object `myRenderObject`
-/// paints, among other things, two circles of radius 10.0 and 20.0 (in that
-/// order).
-///
-/// See [PaintPattern] for a discussion of the semantics of paint patterns.
-PaintPattern get paints => new _TestRecordingCanvasPatternMatcher();
 
 class _TestRecordingCanvasPatternMatcher extends Matcher implements PaintPattern {
   final List<_PaintPredicate> _predicates = <_PaintPredicate>[];
