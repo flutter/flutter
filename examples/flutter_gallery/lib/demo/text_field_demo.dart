@@ -141,7 +141,7 @@ class TextFieldDemoState extends State<TextFieldDemo> {
                     key: _passwordFieldKey,
                     hintText: 'How do you log in?',
                     labelText: 'New Password',
-                    hideText: true,
+                    obscureText: true,
                     onSaved: (InputValue val) { person.password = val.text; }
                   )
                 ),
@@ -150,7 +150,7 @@ class TextFieldDemoState extends State<TextFieldDemo> {
                   child: new TextField(
                     hintText: 'How do you log in?',
                     labelText: 'Re-type Password',
-                    hideText: true,
+                    obscureText: true,
                     validator: _validatePassword,
                   )
                 )

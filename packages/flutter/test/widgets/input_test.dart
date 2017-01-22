@@ -182,7 +182,7 @@ void main() {
     await checkCursorToggle();
   });
 
-  testWidgets('hideText control test', (WidgetTester tester) async {
+  testWidgets('obscureText control test', (WidgetTester tester) async {
     GlobalKey inputKey = new GlobalKey();
 
     Widget builder() {
@@ -190,7 +190,7 @@ void main() {
         child: new Material(
           child: new Input(
             key: inputKey,
-            hideText: true,
+            obscureText: true,
             hintText: 'Placeholder'
           )
         )

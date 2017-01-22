@@ -47,7 +47,7 @@ class InputField extends StatefulWidget {
     this.keyboardType: TextInputType.text,
     this.hintText,
     this.style,
-    this.hideText: false,
+    this.obscureText: false,
     this.maxLines: 1,
     this.autofocus: false,
     this.onChanged,
@@ -73,7 +73,9 @@ class InputField extends StatefulWidget {
   ///
   /// When this is set to true, all the characters in the input are replaced by
   /// U+2022 BULLET characters (•).
-  final bool hideText;
+  ///
+  /// Defaults to false.
+  final bool obscureText;
 
   /// The maximum number of lines for the text to span, wrapping if necessary.
   /// If this is 1 (the default), the text will not wrap, but will scroll
@@ -81,6 +83,8 @@ class InputField extends StatefulWidget {
   final int maxLines;
 
   /// Whether this input field should focus itself if nothing else is already focused.
+  ///
+  /// Defaults to false.
   final bool autofocus;
 
   /// Called when the text being edited changes.
@@ -130,7 +134,7 @@ class _InputFieldState extends State<InputField> {
               value: value,
               focusKey: focusKey,
               style: textStyle,
-              hideText: config.hideText,
+              obscureText: config.obscureText,
               maxLines: config.maxLines,
               autofocus: config.autofocus,
               cursorColor: themeData.textSelectionColor,
@@ -185,7 +189,7 @@ class InputContainer extends StatefulWidget {
     this.errorText,
     this.style,
     this.isDense: false,
-    this.hideDivider: false,
+    this.showDivider: true,
     this.child,
   }) : super(key: key);
 
@@ -213,17 +217,25 @@ class InputContainer extends StatefulWidget {
   final TextStyle style;
 
   /// Whether the input container is part of a dense form (i.e., uses less vertical space).
+  ///
+  /// Defaults to false.
   final bool isDense;
 
   /// True if the hint and label should be displayed as if the child had the focus.
+  ///
+  /// Defaults to false.
   final bool focused;
 
   /// Should the hint and label be displayed as if no value had been input
   /// to the child.
+  ///
+  /// Defaults to false.
   final bool isEmpty;
 
-  /// Hide the divider that appears below the child and above the error text.
-  final bool hideDivider;
+  /// Whether to show a divider below the child and above the error text.
+  ///
+  /// Defaults to true.
+  final bool showDivider;
 
   final Widget child;
 
@@ -320,7 +332,7 @@ class _InputContainerState extends State<InputContainer> {
     EdgeInsets margin = new EdgeInsets.only(bottom: bottomHeight - (bottomPadding + bottomBorder));
 
     Widget divider;
-    if (config.hideDivider) {
+    if (!config.showDivider) {
       divider = new Container(
         margin: margin + new EdgeInsets.only(bottom: bottomBorder),
         padding: padding,
@@ -419,8 +431,8 @@ class Input extends StatefulWidget {
     this.hintText,
     this.errorText,
     this.style,
-    this.hideText: false,
-    this.hideDivider: false,
+    this.obscureText: false,
+    this.showDivider: true,
     this.isDense: false,
     this.autofocus: false,
     this.maxLines: 1,
@@ -460,18 +472,26 @@ class Input extends StatefulWidget {
   ///
   /// When this is set to true, all the characters in the input are replaced by
   /// U+2022 BULLET characters (•).
-  final bool hideText;
+  ///
+  /// Defaults to false.
+  final bool obscureText;
 
-  /// Hide the divider that appears below the child and above the error text.
-  final bool hideDivider;
+  /// Whether to show a divider below the child and above the error text.
+  ///
+  /// Defaults to true.
+  final bool showDivider;
 
   /// Whether the input field is part of a dense form (i.e., uses less vertical space).
   /// If true, [errorText] is not shown.
+  ///
+  /// Defaults to false.
   final bool isDense;
 
   /// Whether this input field should focus itself if nothing else is already focused.
   /// If true, the keyboard will open as soon as this input obtains focus. Otherwise,
   /// the keyboard is only shown after the user taps the text field.
+  ///
+  /// Defaults to false.
   // See https://github.com/flutter/flutter/issues/7035 for the rationale for this
   // keyboard behavior.
   final bool autofocus;
@@ -522,13 +542,13 @@ class _InputState extends State<Input> {
             errorText: config.errorText,
             style: config.style,
             isDense: config.isDense,
-            hideDivider: config.hideDivider,
+            showDivider: config.showDivider,
             child: new InputField(
               key: _inputFieldKey,
               focusKey: focusKey,
               value: config.value,
               style: config.style,
-              hideText: config.hideText,
+              obscureText: config.obscureText,
               maxLines: config.maxLines,
               autofocus: config.autofocus,
               keyboardType: config.keyboardType,
@@ -622,7 +642,7 @@ class TextField extends FormField<InputValue> {
     String labelText,
     String hintText,
     TextStyle style,
-    bool hideText: false,
+    bool obscureText: false,
     bool isDense: false,
     bool autofocus: false,
     int maxLines: 1,
@@ -643,7 +663,7 @@ class TextField extends FormField<InputValue> {
         labelText: labelText,
         hintText: hintText,
         style: style,
-        hideText: hideText,
+        obscureText: obscureText,
         isDense: isDense,
         autofocus: autofocus,
         maxLines: maxLines,
