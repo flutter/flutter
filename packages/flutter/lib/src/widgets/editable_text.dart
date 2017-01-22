@@ -143,7 +143,7 @@ class EditableText extends Scrollable {
     Key key,
     @required this.value,
     this.focusKey,
-    this.hideText: false,
+    this.obscureText: false,
     this.style,
     this.cursorColor,
     this.textScaleFactor,
@@ -170,7 +170,9 @@ class EditableText extends Scrollable {
   final GlobalKey focusKey;
 
   /// Whether to hide the text being edited (e.g., for passwords).
-  final bool hideText;
+  ///
+  /// Defaults to false.
+  final bool obscureText;
 
   /// The text style to use for the editable text.
   final TextStyle style;
@@ -194,6 +196,8 @@ class EditableText extends Scrollable {
   /// Whether this input field should focus itself if nothing else is already focused.
   /// If true, the keyboard will open as soon as this input obtains focus. Otherwise,
   /// the keyboard is only shown after the user taps the text field.
+  ///
+  /// Defaults to false.
   final bool autofocus;
 
   /// The color to use when painting the selection.
@@ -469,7 +473,7 @@ class EditableTextState extends ScrollableState<EditableText> implements TextInp
         maxLines: config.maxLines,
         selectionColor: config.selectionColor,
         textScaleFactor: config.textScaleFactor ?? MediaQuery.of(context).textScaleFactor,
-        hideText: config.hideText,
+        obscureText: config.obscureText,
         onSelectionChanged: _handleSelectionChanged,
         paintOffset: scrollOffsetToPixelDelta(scrollOffset),
         onPaintOffsetUpdateNeeded: _handlePaintOffsetUpdateNeeded
@@ -488,7 +492,7 @@ class _Editable extends LeafRenderObjectWidget {
     this.maxLines,
     this.selectionColor,
     this.textScaleFactor,
-    this.hideText,
+    this.obscureText,
     this.onSelectionChanged,
     this.paintOffset,
     this.onPaintOffsetUpdateNeeded
@@ -501,7 +505,7 @@ class _Editable extends LeafRenderObjectWidget {
   final int maxLines;
   final Color selectionColor;
   final double textScaleFactor;
-  final bool hideText;
+  final bool obscureText;
   final SelectionChangedHandler onSelectionChanged;
   final Offset paintOffset;
   final RenderEditablePaintOffsetNeededCallback onPaintOffsetUpdateNeeded;
@@ -538,7 +542,7 @@ class _Editable extends LeafRenderObjectWidget {
   }
 
   TextSpan get _styledTextSpan {
-    if (!hideText && value.composing.isValid) {
+    if (!obscureText && value.composing.isValid) {
       TextStyle composingStyle = style.merge(
         const TextStyle(decoration: TextDecoration.underline)
       );
@@ -556,7 +560,7 @@ class _Editable extends LeafRenderObjectWidget {
     }
 
     String text = value.text;
-    if (hideText)
+    if (obscureText)
       text = new String.fromCharCodes(new List<int>.filled(text.length, 0x2022));
     return new TextSpan(style: style, text: text);
   }
