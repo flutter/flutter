@@ -163,10 +163,10 @@ const List<_Diagonal> _allDiagonals = const <_Diagonal>[
 typedef dynamic _KeyFunc<T>(T input);
 
 // Select the element for which the key function returns the maximum value.
-dynamic/*=T*/ _maxBy/*<T>*/(Iterable<dynamic/*=T*/> input, _KeyFunc/*<T>*/ keyFunc) {
-  dynamic/*=T*/ maxValue;
+T _maxBy<T>(Iterable<T> input, _KeyFunc<T> keyFunc) {
+  T maxValue;
   dynamic maxKey;
-  for (dynamic/*=T*/ value in input) {
+  for (T value in input) {
     dynamic key = keyFunc(value);
     if (maxKey == null || key > maxKey) {
       maxValue = value;
@@ -200,7 +200,7 @@ class MaterialRectArcTween extends RectTween {
     assert(begin != null);
     assert(end != null);
     final Offset centersVector = end.center - begin.center;
-    _diagonal = _maxBy/*<_Diagonal>*/(_allDiagonals, (_Diagonal d) => _diagonalSupport(centersVector, d));
+    _diagonal = _maxBy<_Diagonal>(_allDiagonals, (_Diagonal d) => _diagonalSupport(centersVector, d));
     _beginArc = new MaterialPointArcTween(
       begin: _cornerFor(begin, _diagonal.beginId),
       end: _cornerFor(end, _diagonal.beginId)

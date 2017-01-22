@@ -676,12 +676,12 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   ///    sheet.
   ///  * [Scaffold.of], for information about how to obtain the [ScaffoldState].
   ///  * <https://material.google.com/components/bottom-sheets.html#bottom-sheets-persistent-bottom-sheets>
-  PersistentBottomSheetController<dynamic/*=T*/> showBottomSheet/*<T>*/(WidgetBuilder builder) {
+  PersistentBottomSheetController<T> showBottomSheet<T>(WidgetBuilder builder) {
     if (_currentBottomSheet != null) {
       _currentBottomSheet.close();
       assert(_currentBottomSheet == null);
     }
-    Completer<dynamic/*=T*/> completer = new Completer<dynamic/*=T*/>();
+    Completer<T> completer = new Completer<T>();
     GlobalKey<_PersistentBottomSheetState> bottomSheetKey = new GlobalKey<_PersistentBottomSheetState>();
     AnimationController controller = BottomSheet.createAnimationController(this)
       ..forward();
@@ -717,7 +717,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     );
     ModalRoute.of(context).addLocalHistoryEntry(entry);
     setState(() {
-      _currentBottomSheet = new PersistentBottomSheetController<dynamic/*=T*/>._(
+      _currentBottomSheet = new PersistentBottomSheetController<T>._(
         bottomSheet,
         completer,
         () => entry.remove(),

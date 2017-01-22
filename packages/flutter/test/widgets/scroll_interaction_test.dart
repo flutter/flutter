@@ -14,7 +14,7 @@ void main() {
     ));
 
     ScrollableState scrollable =
-      tester.state/*<ScrollableState>*/(find.byType(Scrollable));
+      tester.state<ScrollableState>(find.byType(Scrollable));
 
     expect(scrollable.scrollOffset, equals(0.0));
 

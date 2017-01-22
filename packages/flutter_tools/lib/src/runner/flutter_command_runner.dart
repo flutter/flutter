@@ -323,7 +323,7 @@ class FlutterCommandRunner extends CommandRunner<Null> {
     // And since analyzer refuses to look at paths that end in "packages/":
     result.addAll(
       _gatherProjectPaths(path.join(rootPath, 'packages'))
-      .map/*<Directory>*/((String path) => fs.directory(path))
+      .map<Directory>((String path) => fs.directory(path))
     );
     return result;
   }

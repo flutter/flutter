@@ -221,13 +221,13 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
   DataRow _getBlankRowFor(int index) {
     return new DataRow.byIndex(
       index: index,
-      cells: config.columns.map/*<DataCell>*/((DataColumn column) => DataCell.empty).toList()
+      cells: config.columns.map<DataCell>((DataColumn column) => DataCell.empty).toList()
     );
   }
 
   DataRow _getProgressIndicatorRowFor(int index) {
     bool haveProgressIndicator = false;
-    final List<DataCell> cells = config.columns.map/*<DataCell>*/((DataColumn column) {
+    final List<DataCell> cells = config.columns.map<DataCell>((DataColumn column) {
       if (!column.numeric) {
         haveProgressIndicator = true;
         return new DataCell(new CircularProgressIndicator());
@@ -291,7 +291,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
     }
     if (config.actions != null) {
       headerWidgets.addAll(
-        config.actions.map/*<Widget>*/((Widget widget) {
+        config.actions.map<Widget>((Widget widget) {
           return new Padding(
             // 8.0 is the default padding of an icon button
             padding: const EdgeInsets.only(left: 24.0 - 8.0 * 2.0),
@@ -307,7 +307,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
     if (config.onRowsPerPageChanged != null) {
       List<Widget> availableRowsPerPage = config.availableRowsPerPage
         .where((int value) => value <= _rowCount)
-        .map/*<DropdownMenuItem<int>>*/((int value) {
+        .map<DropdownMenuItem<int>>((int value) {
           return new DropdownMenuItem<int>(
             value: value,
             child: new Text('$value')

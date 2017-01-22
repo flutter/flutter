@@ -77,15 +77,15 @@ class DesertDataSource extends DataTableSource {
     new Desert('Coconut slice and KitKat',             677, 41.0,  72,  8.5,  63, 12, 12),
   ];
 
-  void _sort/*<T>*/(Comparable<dynamic/*=T*/> getField(Desert d), bool ascending) {
+  void _sort<T>(Comparable<T> getField(Desert d), bool ascending) {
     _deserts.sort((Desert a, Desert b) {
       if (!ascending) {
         final Desert c = a;
         a = b;
         b = c;
       }
-      final Comparable<dynamic/*=T*/> aValue = getField(a);
-      final Comparable<dynamic/*=T*/> bValue = getField(b);
+      final Comparable<T> aValue = getField(a);
+      final Comparable<T> bValue = getField(b);
       return Comparable.compare(aValue, bValue);
     });
     notifyListeners();
@@ -153,8 +153,8 @@ class _DataTableDemoState extends State<DataTableDemo> {
   bool _sortAscending = true;
   DesertDataSource _desertsDataSource = new DesertDataSource();
 
-  void _sort/*<T>*/(Comparable<dynamic/*=T*/> getField(Desert d), int columnIndex, bool ascending) {
-    _desertsDataSource._sort/*<T>*/(getField, ascending);
+  void _sort<T>(Comparable<T> getField(Desert d), int columnIndex, bool ascending) {
+    _desertsDataSource._sort<T>(getField, ascending);
     setState(() {
       _sortColumnIndex = columnIndex;
       _sortAscending = ascending;
@@ -178,44 +178,44 @@ class _DataTableDemoState extends State<DataTableDemo> {
             columns: <DataColumn>[
               new DataColumn(
                 label: new Text('Dessert (100g serving)'),
-                onSort: (int columnIndex, bool ascending) => _sort/*<String>*/((Desert d) => d.name, columnIndex, ascending)
+                onSort: (int columnIndex, bool ascending) => _sort<String>((Desert d) => d.name, columnIndex, ascending)
               ),
               new DataColumn(
                 label: new Text('Calories'),
                 tooltip: 'The total amount of food energy in the given serving size.',
                 numeric: true,
-                onSort: (int columnIndex, bool ascending) => _sort/*<num>*/((Desert d) => d.calories, columnIndex, ascending)
+                onSort: (int columnIndex, bool ascending) => _sort<num>((Desert d) => d.calories, columnIndex, ascending)
               ),
               new DataColumn(
                 label: new Text('Fat (g)'),
                 numeric: true,
-                onSort: (int columnIndex, bool ascending) => _sort/*<num>*/((Desert d) => d.fat, columnIndex, ascending)
+                onSort: (int columnIndex, bool ascending) => _sort<num>((Desert d) => d.fat, columnIndex, ascending)
               ),
               new DataColumn(
                 label: new Text('Carbs (g)'),
                 numeric: true,
-                onSort: (int columnIndex, bool ascending) => _sort/*<num>*/((Desert d) => d.carbs, columnIndex, ascending)
+                onSort: (int columnIndex, bool ascending) => _sort<num>((Desert d) => d.carbs, columnIndex, ascending)
               ),
               new DataColumn(
                 label: new Text('Protein (g)'),
                 numeric: true,
-                onSort: (int columnIndex, bool ascending) => _sort/*<num>*/((Desert d) => d.protein, columnIndex, ascending)
+                onSort: (int columnIndex, bool ascending) => _sort<num>((Desert d) => d.protein, columnIndex, ascending)
               ),
               new DataColumn(
                 label: new Text('Sodium (mg)'),
                 numeric: true,
-                onSort: (int columnIndex, bool ascending) => _sort/*<num>*/((Desert d) => d.sodium, columnIndex, ascending)
+                onSort: (int columnIndex, bool ascending) => _sort<num>((Desert d) => d.sodium, columnIndex, ascending)
               ),
               new DataColumn(
                 label: new Text('Calcium (%)'),
                 tooltip: 'The amount of calcium as a percentage of the recommended daily amount.',
                 numeric: true,
-                onSort: (int columnIndex, bool ascending) => _sort/*<num>*/((Desert d) => d.calcium, columnIndex, ascending)
+                onSort: (int columnIndex, bool ascending) => _sort<num>((Desert d) => d.calcium, columnIndex, ascending)
               ),
               new DataColumn(
                 label: new Text('Iron (%)'),
                 numeric: true,
-                onSort: (int columnIndex, bool ascending) => _sort/*<num>*/((Desert d) => d.iron, columnIndex, ascending)
+                onSort: (int columnIndex, bool ascending) => _sort<num>((Desert d) => d.iron, columnIndex, ascending)
               ),
             ],
             source: _desertsDataSource

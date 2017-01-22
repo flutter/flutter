@@ -196,7 +196,7 @@ class FlutterDriver {
       // option, then the VM service extension is not registered yet. Wait for
       // it to be registered.
       Future<dynamic> whenResumed = resumeLeniently();
-      Future<dynamic> whenServiceExtensionReady = Future.any/*<dynamic>*/(<Future<dynamic>>[
+      Future<dynamic> whenServiceExtensionReady = Future.any<dynamic>(<Future<dynamic>>[
         waitForServiceExtension(),
         // We will never receive the extension event if the user does not
         // register it. If that happens time out.
@@ -452,9 +452,9 @@ class FlutterDriver {
   /// With frame sync disabled, its the responsibility of the test author to
   /// ensure that no action is performed while the app is undergoing a
   /// transition to avoid flakiness.
-  Future<dynamic/*=T*/> runUnsynchronized/*<T>*/(Future<dynamic/*=T*/> action()) async {
+  Future<T> runUnsynchronized<T>(Future<T> action()) async {
     await _sendCommand(new SetFrameSync(false));
-    dynamic/*=T*/ result;
+    T result;
     try {
       result = await action();
     } finally {

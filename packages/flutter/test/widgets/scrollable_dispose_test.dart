@@ -20,7 +20,7 @@ void main() {
     await tester.fling(find.byType(Scrollable), const Offset(0.0, -200.0), 1000.0);
     await tester.pump();
 
-    tester.state/*<FlipWidgetState>*/(find.byType(FlipWidget)).flip();
+    tester.state<FlipWidgetState>(find.byType(FlipWidget)).flip();
     await tester.pump(const Duration(hours: 5));
   });
 }

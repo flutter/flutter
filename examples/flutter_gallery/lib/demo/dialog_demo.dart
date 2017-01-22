@@ -65,12 +65,12 @@ class DialogDemoState extends State<DialogDemo> {
     _selectedTime = new TimeOfDay(hour: now.hour, minute: now.minute);
   }
 
-  void showDemoDialog/*<T>*/({ BuildContext context, Widget child }) {
-    showDialog/*<T>*/(
+  void showDemoDialog<T>({ BuildContext context, Widget child }) {
+    showDialog<T>(
       context: context,
       child: child
     )
-    .then((dynamic/*=T*/ value) { // The value passed to Navigator.pop() or null.
+    .then((T value) { // The value passed to Navigator.pop() or null.
       if (value != null) {
         _scaffoldKey.currentState.showSnackBar(new SnackBar(
           content: new Text('You selected: $value')
@@ -95,7 +95,7 @@ class DialogDemoState extends State<DialogDemo> {
           new RaisedButton(
             child: new Text('ALERT'),
             onPressed: () {
-              showDemoDialog/*<DialogDemoAction>*/(
+              showDemoDialog<DialogDemoAction>(
                 context: context,
                 child: new AlertDialog(
                   content: new Text(
@@ -119,7 +119,7 @@ class DialogDemoState extends State<DialogDemo> {
           new RaisedButton(
             child: new Text('ALERT WITH TITLE'),
             onPressed: () {
-              showDemoDialog/*<DialogDemoAction>*/(
+              showDemoDialog<DialogDemoAction>(
                 context: context,
                 child: new AlertDialog(
                   title: new Text('Use Google\'s location service?'),
@@ -144,7 +144,7 @@ class DialogDemoState extends State<DialogDemo> {
           new RaisedButton(
             child: new Text('SIMPLE'),
             onPressed: () {
-              showDemoDialog/*<String>*/(
+              showDemoDialog<String>(
                 context: context,
                 child: new SimpleDialog(
                   title: new Text('Set backup account'),

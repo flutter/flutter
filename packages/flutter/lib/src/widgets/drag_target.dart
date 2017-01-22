@@ -375,8 +375,8 @@ class DragTarget<T> extends StatefulWidget {
   _DragTargetState<T> createState() => new _DragTargetState<T>();
 }
 
-List/*<T>*/ _mapAvatarsToData/*<T>*/(List/*<_DragAvatar<T>>*/ avatars) {
-  return avatars.map/*<T>*/((_DragAvatar/*<T>*/ avatar) => avatar.data).toList();
+List<T> _mapAvatarsToData<T>(List<_DragAvatar<T>> avatars) {
+  return avatars.map<T>((_DragAvatar<T> avatar) => avatar.data).toList();
 }
 
 class _DragTargetState<T> extends State<DragTarget<T>> {
@@ -423,7 +423,7 @@ class _DragTargetState<T> extends State<DragTarget<T>> {
     return new MetaData(
       metaData: this,
       behavior: HitTestBehavior.translucent,
-      child: config.builder(context, _mapAvatarsToData/*<T>*/(_candidateAvatars), _mapAvatarsToData(_rejectedAvatars))
+      child: config.builder(context, _mapAvatarsToData<T>(_candidateAvatars), _mapAvatarsToData(_rejectedAvatars))
     );
   }
 }

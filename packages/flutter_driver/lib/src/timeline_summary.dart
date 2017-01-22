@@ -160,7 +160,7 @@ class TimelineSummary {
     if (events.length == 0)
       return null;
 
-    int total = events.fold/*<int>*/(0, (int t, TimedEvent e) => t + e.duration.inMilliseconds);
+    int total = events.fold<int>(0, (int t, TimedEvent e) => t + e.duration.inMilliseconds);
     return total / events.length;
   }
 
@@ -169,7 +169,7 @@ class TimelineSummary {
       return null;
 
     return events
-        .map/*<double>*/((TimedEvent e) => e.duration.inMilliseconds.toDouble())
+        .map<double>((TimedEvent e) => e.duration.inMilliseconds.toDouble())
         .reduce((double a, double b) => math.max(a, b));
   }
 

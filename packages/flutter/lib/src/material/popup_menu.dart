@@ -437,16 +437,16 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
 /// menu. The following elevations have defined shadows: 1, 2, 3, 4, 6, 8, 9,
 /// 12, 16, 24. The elevation defaults to 8, the appropriate elevation for popup
 /// menus.
-Future<dynamic/*=T*/> showMenu/*<T>*/({
+Future<T> showMenu<T>({
   BuildContext context,
   RelativeRect position,
-  List<PopupMenuEntry<dynamic/*=T*/>> items,
-  dynamic/*=T*/ initialValue,
+  List<PopupMenuEntry<T>> items,
+  T initialValue,
   int elevation: 8
 }) {
   assert(context != null);
   assert(items != null && items.isNotEmpty);
-  return Navigator.push(context, new _PopupMenuRoute<dynamic/*=T*/>(
+  return Navigator.push(context, new _PopupMenuRoute<T>(
     position: position,
     items: items,
     initialValue: initialValue,
@@ -525,7 +525,7 @@ class _PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
   void showButtonMenu() {
     final RenderBox renderBox = context.findRenderObject();
     final Point topLeft = renderBox.localToGlobal(Point.origin);
-    showMenu/*<T>*/(
+    showMenu<T>(
       context: context,
       elevation: config.elevation,
       items: config.itemBuilder(context),

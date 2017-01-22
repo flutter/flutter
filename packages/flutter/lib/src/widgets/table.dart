@@ -100,7 +100,7 @@ class Table extends RenderObjectWidget {
     this.textBaseline
   }) : children = children,
        _rowDecorations = children.any((TableRow row) => row.decoration != null)
-                         ? children.map/*<Decoration>*/((TableRow row) => row.decoration).toList(growable: false)
+                         ? children.map<Decoration>((TableRow row) => row.decoration).toList(growable: false)
                          : null,
        super(key: key) {
     assert(children != null);
@@ -246,7 +246,7 @@ class _TableElement extends RenderObjectElement {
     _children = widget.children.map((TableRow row) {
       return new _TableElementRow(
         key: row.key,
-        children: row.children.map/*<Element>*/((Widget child) {
+        children: row.children.map<Element>((Widget child) {
           assert(child != null);
           return inflateWidget(child, null);
         }).toList(growable: false)

@@ -21,10 +21,10 @@ Future<Null> test(WidgetTester tester, double offset, { double anchor: 0.0 }) {
 }
 
 void verify(WidgetTester tester, List<Point> idealPositions, List<bool> idealVisibles) {
-  List<Point> actualPositions = tester.renderObjectList/*<RenderBox>*/(find.byType(SizedBox)).map/*<Point>*/(
+  List<Point> actualPositions = tester.renderObjectList<RenderBox>(find.byType(SizedBox)).map<Point>(
     (RenderBox target) => target.localToGlobal(const Point(0.0, 0.0))
   ).toList();
-  List<bool> actualVisibles = tester.renderObjectList/*<RenderSliverToBoxAdapter>*/(find.byType(SliverToBoxAdapter)).map/*<bool>*/(
+  List<bool> actualVisibles = tester.renderObjectList<RenderSliverToBoxAdapter>(find.byType(SliverToBoxAdapter)).map<bool>(
     (RenderSliverToBoxAdapter target) => target.geometry.visible
   ).toList();
   expect(actualPositions, equals(idealPositions));
@@ -34,7 +34,7 @@ void verify(WidgetTester tester, List<Point> idealPositions, List<bool> idealVis
 void main() {
   testWidgets('Viewport2 basic test', (WidgetTester tester) async {
     await test(tester, 0.0);
-    expect(tester.renderObject/*<RenderBox>*/(find.byType(Viewport2)).size, equals(const Size(800.0, 600.0)));
+    expect(tester.renderObject<RenderBox>(find.byType(Viewport2)).size, equals(const Size(800.0, 600.0)));
     verify(tester, <Point>[
       const Point(0.0, 0.0),
       const Point(0.0, 400.0),
@@ -73,7 +73,7 @@ void main() {
 
   testWidgets('Viewport2 anchor test', (WidgetTester tester) async {
     await test(tester, 0.0, anchor: 100.0);
-    expect(tester.renderObject/*<RenderBox>*/(find.byType(Viewport2)).size, equals(const Size(800.0, 600.0)));
+    expect(tester.renderObject<RenderBox>(find.byType(Viewport2)).size, equals(const Size(800.0, 600.0)));
     verify(tester, <Point>[
       const Point(0.0, 100.0),
       const Point(0.0, 500.0),

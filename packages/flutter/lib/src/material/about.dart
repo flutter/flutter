@@ -147,7 +147,7 @@ void showAboutDialog({
   String applicationLegalese,
   List<Widget> children
 }) {
-  showDialog/*<Null>*/(
+  showDialog<Null>(
     context: context,
     child: new AboutDialog(
       applicationName: applicationName,

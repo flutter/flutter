@@ -89,10 +89,10 @@ class FooScrollConfiguration extends ScrollConfigurationDelegate {
 void main() {
   testWidgets('https://github.com/flutter/flutter/issues/5630', (WidgetTester tester) async {
     await tester.pumpWidget(new Foo());
-    expect(tester.state/*<ScrollableState>*/(find.byType(Scrollable)).scrollOffset, 0.0);
+    expect(tester.state<ScrollableState>(find.byType(Scrollable)).scrollOffset, 0.0);
     await tester.tap(find.byType(GestureDetector).first);
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
-    expect(tester.state/*<ScrollableState>*/(find.byType(Scrollable)).scrollOffset, 200.0);
+    expect(tester.state<ScrollableState>(find.byType(Scrollable)).scrollOffset, 200.0);
   });
 }
