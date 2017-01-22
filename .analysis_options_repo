@@ -25,10 +25,9 @@ analyzer:
     strong_mode_down_cast_composite: ignore
     # allow having TODOs in the code
     todo: ignore
-  exclude:
-    - 'bin/cache/**'
-    - 'dev/missing_dependency_tests/**'
-    - 'packages/flutter_tools/test/data/dart_dependencies_test/**'
+  # `flutter analyze` (without `--watch`) just ignores directories
+  # that contain a .dartignore file, and this file does not have any
+  # effect on what files are actually analyzed.
 
 linter:
   rules:
