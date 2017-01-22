@@ -70,7 +70,7 @@ class DialogDemoState extends State<DialogDemo> {
       context: context,
       child: child
     )
-    .then((T value) { // The value passed to Navigator.pop() or null.
+    .then<Null>((T value) { // The value passed to Navigator.pop() or null.
       if (value != null) {
         _scaffoldKey.currentState.showSnackBar(new SnackBar(
           content: new Text('You selected: $value')
@@ -178,7 +178,7 @@ class DialogDemoState extends State<DialogDemo> {
                 context: context,
                 initialTime: _selectedTime
               )
-              .then((TimeOfDay value) {
+              .then<Null>((TimeOfDay value) {
                 if (value != null && value != _selectedTime) {
                   _selectedTime = value;
                   _scaffoldKey.currentState.showSnackBar(new SnackBar(

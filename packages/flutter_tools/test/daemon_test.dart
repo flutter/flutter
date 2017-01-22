@@ -118,7 +118,7 @@ void main() {
         notifyingLogger: notifyingLogger
       );
       commands.add(<String, dynamic>{'id': 0, 'method': 'daemon.shutdown'});
-      return daemon.onExit.then((int code) {
+      return daemon.onExit.then<Null>((int code) {
         responses.close();
         commands.close();
         expect(code, 0);

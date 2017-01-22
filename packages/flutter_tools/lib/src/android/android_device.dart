@@ -587,12 +587,11 @@ class _AdbLogReader extends DeviceLogReader {
         _timeOrigin = _adbTimestampToDateTime(lastTimestamp);
     else
         _timeOrigin = null;
-    runCommand(device.adbCommandForDevice(args)).then((Process process) {
+    runCommand(device.adbCommandForDevice(args)).then<Null>((Process process) {
       _process = process;
       _process.stdout.transform(UTF8.decoder).transform(const LineSplitter()).listen(_onLine);
       _process.stderr.transform(UTF8.decoder).transform(const LineSplitter()).listen(_onLine);
-
-      _process.exitCode.then((int code) {
+      _process.exitCode.whenComplete(() {
         if (_linesController.hasListener)
           _linesController.close();
       });

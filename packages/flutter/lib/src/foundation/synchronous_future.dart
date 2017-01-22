@@ -51,7 +51,7 @@ class SynchronousFuture<T> implements Future<T> {
     try {
       dynamic result = action();
       if (result is Future)
-        return result.then((_) => _value);
+        return result.then<T>((dynamic value) => _value);
       return this;
     } catch (e, stack) {
       return new Future<T>.error(e, stack);

@@ -56,7 +56,7 @@ abstract class AssetBundle {
   ///
   /// Implementations may cache the result, so a particular key should only be
   /// used with one parser for the lifetime of the asset bundle.
-  Future<dynamic> loadStructuredData(String key, Future<dynamic> parser(String value));
+  Future<dynamic> loadStructuredData<T>(String key, Future<T> parser(String value));
 
   /// If this is a caching asset bundle, and the given key describes a cached
   /// asset, then evict the asset from the cache so that the next time it is
@@ -100,7 +100,7 @@ class NetworkAssetBundle extends AssetBundle {
   /// The result is not cached. The parser is run each time the resource is
   /// fetched.
   @override
-  Future<dynamic> loadStructuredData(String key, Future<dynamic> parser(String value)) async {
+  Future<dynamic> loadStructuredData<T>(String key, Future<T> parser(String value)) async {
     assert(key != null);
     assert(parser != null);
     return parser(await loadString(key));
@@ -149,14 +149,14 @@ abstract class CachingAssetBundle extends AssetBundle {
   /// subsequent calls will be a [SynchronousFuture], which resolves its
   /// callback synchronously.
   @override
-  Future<dynamic> loadStructuredData(String key, Future<dynamic> parser(String value)) {
+  Future<dynamic> loadStructuredData<T>(String key, Future<T> parser(String value)) {
     assert(key != null);
     assert(parser != null);
     if (_structuredDataCache.containsKey(key))
       return _structuredDataCache[key];
     Completer<dynamic> completer;
     Future<dynamic> result;
-    loadString(key, cache: false).then(parser).then((dynamic value) {
+    loadString(key, cache: false).then<T>(parser).then<Null>((T value) {
       result = new SynchronousFuture<dynamic>(value);
       _structuredDataCache[key] = result;
       if (completer != null) {

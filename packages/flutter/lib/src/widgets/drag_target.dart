@@ -423,7 +423,7 @@ class _DragTargetState<T> extends State<DragTarget<T>> {
     return new MetaData(
       metaData: this,
       behavior: HitTestBehavior.translucent,
-      child: config.builder(context, _mapAvatarsToData<T>(_candidateAvatars), _mapAvatarsToData(_rejectedAvatars))
+      child: config.builder(context, _mapAvatarsToData<T>(_candidateAvatars), _mapAvatarsToData<dynamic>(_rejectedAvatars))
     );
   }
 }

@@ -26,7 +26,7 @@ void main() {
     showModalBottomSheet<Null>(
       context: savedContext,
       builder: (BuildContext context) => new Text('BottomSheet')
-    ).then((Null result) {
+    ).then<Null>((Null result) {
       expectSync(result, isNull);
       showBottomSheetThenCalled = true;
     });
@@ -48,7 +48,7 @@ void main() {
     showModalBottomSheet<Null>(
       context: savedContext,
       builder: (BuildContext context) => new Text('BottomSheet'),
-    ).then((Null result) {
+    ).then<Null>((Null result) {
       expectSync(result, isNull);
       showBottomSheetThenCalled = true;
     });
@@ -80,12 +80,12 @@ void main() {
     expect(showBottomSheetThenCalled, isFalse);
     expect(find.text('BottomSheet'), findsNothing);
 
-    scaffoldKey.currentState.showBottomSheet((BuildContext context) {
+    scaffoldKey.currentState.showBottomSheet<Null>((BuildContext context) {
       return new Container(
         margin: const EdgeInsets.all(40.0),
         child: new Text('BottomSheet')
       );
-    }).closed.then((_) {
+    }).closed.whenComplete(() {
       showBottomSheetThenCalled = true;
     });
 
@@ -130,7 +130,7 @@ void main() {
       )
     ));
 
-    scaffoldKey.currentState.showBottomSheet((BuildContext context) {
+    scaffoldKey.currentState.showBottomSheet<Null>((BuildContext context) {
       return new Container(
         margin: const EdgeInsets.all(40.0),
         child: new Text('BottomSheet')

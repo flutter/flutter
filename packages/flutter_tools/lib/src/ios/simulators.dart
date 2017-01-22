@@ -663,7 +663,7 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
     _systemProcess.stdout.transform(UTF8.decoder).transform(const LineSplitter()).listen(_onSystemLine);
     _systemProcess.stderr.transform(UTF8.decoder).transform(const LineSplitter()).listen(_onSystemLine);
 
-    _deviceProcess.exitCode.then((int code) {
+    _deviceProcess.exitCode.whenComplete(() {
       if (_linesController.hasListener)
         _linesController.close();
     });

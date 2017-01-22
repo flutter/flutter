@@ -167,7 +167,7 @@ void main() {
             if (!unsynchedDemoTitles.contains(demoTitle)) {
               await driver.tap(find.byTooltip('Back'));
             } else {
-              await driver.runUnsynchronized(() async {
+              await driver.runUnsynchronized<Future<Null>>(() async {
                 await new Future<Null>.delayed(kWaitBetweenActions);
                 await driver.tap(find.byTooltip('Back'));
               });

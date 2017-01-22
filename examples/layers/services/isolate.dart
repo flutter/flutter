@@ -137,12 +137,12 @@ class CalculationManager {
     // the root bundle (see https://github.com/flutter/flutter/issues/3294).
     // However, the loading process is asynchronous, so the UI will not block
     // while the file is loaded.
-    rootBundle.loadString('services/data.json').then((String data) {
+    rootBundle.loadString('services/data.json').then<Null>((String data) {
       if (isRunning) {
-        CalculationMessage message = new CalculationMessage(data, _receivePort.sendPort);
+        final CalculationMessage message = new CalculationMessage(data, _receivePort.sendPort);
         // Spawn an isolate to JSON-parse the file contents. The JSON parsing
         // is synchronous, so if done in the main isolate, the UI would block.
-        Isolate.spawn(_calculate, message).then((Isolate isolate) {
+        Isolate.spawn(_calculate, message).then<Null>((Isolate isolate) {
           if (!isRunning) {
             isolate.kill(priority: Isolate.IMMEDIATE);
           } else {

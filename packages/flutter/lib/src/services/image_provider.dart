@@ -163,7 +163,7 @@ abstract class ImageProvider<T> {
     assert(configuration != null);
     final ImageStream stream = new ImageStream();
     T obtainedKey;
-    obtainKey(configuration).then((T key) {
+    obtainKey(configuration).then<Null>((T key) {
       obtainedKey = key;
       stream.setCompleter(imageCache.putIfAbsent(key, () => load(key)));
     }).catchError(

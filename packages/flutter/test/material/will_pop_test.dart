@@ -65,7 +65,7 @@ void main() {
                 child: new FlatButton(
                   child: new Text('X'),
                   onPressed: () {
-                    showDialog(
+                    showDialog<Null>(
                       context: context,
                       child: new SamplePage(),
                     );

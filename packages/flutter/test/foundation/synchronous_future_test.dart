@@ -12,13 +12,13 @@ void main() {
     Future<int> future = new SynchronousFuture<int>(42);
 
     int result;
-    future.then((int value) { result = value; });
+    future.then<Null>((int value) { result = value; });
 
     expect(result, equals(42));
     result = null;
 
     Future<int> futureWithTimeout = future.timeout(const Duration(milliseconds: 1));
-    futureWithTimeout.then((int value) { result = value; });
+    futureWithTimeout.then<Null>((int value) { result = value; });
     expect(result, isNull);
     await futureWithTimeout;
     expect(result, equals(42));

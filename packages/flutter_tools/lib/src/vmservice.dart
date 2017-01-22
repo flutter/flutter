@@ -561,7 +561,7 @@ class VM extends ServiceObjectOwner {
   Future<Isolate> getIsolate(String isolateId) {
     if (!loaded) {
       // Trigger a VM load, then get the isolate. Ignore any errors.
-      return load().then((_) => getIsolate(isolateId)).catchError((_) => null);
+      return load().then<Isolate>((ServiceObject serviceObject) => getIsolate(isolateId)).catchError((dynamic error) => null);
     }
     return new Future<Isolate>.value(_isolateCache[isolateId]);
   }
