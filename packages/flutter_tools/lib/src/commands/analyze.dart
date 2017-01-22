@@ -16,12 +16,14 @@ typedef bool FileFilter(FileSystemEntity entity);
 class AnalyzeCommand extends FlutterCommand {
   AnalyzeCommand({bool verboseHelp: false}) {
     argParser.addFlag('flutter-repo', help: 'Include all the examples and tests from the Flutter repository.', defaultsTo: false);
-    argParser.addFlag('current-directory', help: 'Include all the Dart files in the current directory, if any.', defaultsTo: true);
-    argParser.addFlag('current-package', help: 'Include the lib/main.dart file from the current directory, if any.', defaultsTo: true);
     argParser.addFlag('dartdocs', help: 'List every public member that is lacking documentation (only examines files in the Flutter repository).', defaultsTo: false);
     argParser.addFlag('watch', help: 'Run analysis continuously, watching the filesystem for changes.', negatable: false);
     argParser.addOption('write', valueHelp: 'file', help: 'Also output the results to a file. This is useful with --watch if you want a file to always contain the latest results.');
     argParser.addOption('dart-sdk', valueHelp: 'path-to-sdk', help: 'The path to the Dart SDK.', hide: !verboseHelp);
+
+    // Hidden and deprecated
+    argParser.addFlag('current-directory', hide: !verboseHelp, help: 'Include all the Dart files in the current directory, if any.', defaultsTo: true);
+    argParser.addFlag('current-package', hide: !verboseHelp, help: 'Include the lib/main.dart file from the current directory, if any.', defaultsTo: true);
 
     // Hidden option to enable a benchmarking mode.
     argParser.addFlag('benchmark', negatable: false, hide: !verboseHelp, help: 'Also output the analysis time');

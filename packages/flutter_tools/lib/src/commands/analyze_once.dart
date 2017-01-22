@@ -11,6 +11,7 @@ import 'package:yaml/yaml.dart' as yaml;
 
 import '../base/common.dart';
 import '../base/file_system.dart';
+import '../base/process.dart';
 import '../cache.dart';
 import '../dart/analysis.dart';
 import '../globals.dart';
@@ -46,43 +47,28 @@ class AnalyzeOnce extends AnalyzeBase {
       }
     }
 
-    bool currentDirectory = argResults['current-directory'] && (argResults.wasParsed('current-directory') || dartFiles.isEmpty);
-    bool currentPackage = argResults['current-package'] && (argResults.wasParsed('current-package') || dartFiles.isEmpty);
     bool flutterRepo = argResults['flutter-repo'] || inRepo(argResults.rest);
 
-    //TODO (pq): revisit package and directory defaults
-
-    if (currentDirectory  && !flutterRepo) {
-      // ./*.dart
-      Directory currentDirectory = fs.directory('.');
-      bool foundOne = false;
-      for (FileSystemEntity entry in currentDirectory.listSync()) {
-        if (isDartFile(entry)) {
-          dartFiles.add(entry);
-          foundOne = true;
-        }
-      }
-      if (foundOne)
-        pubSpecDirectories.add(currentDirectory);
-    }
-
-    if (currentPackage && !flutterRepo) {
-      // **/.*dart
-      Directory currentDirectory = fs.directory('.');
-      _collectDartFiles(currentDirectory, dartFiles);
-      pubSpecDirectories.add(currentDirectory);
+    // Use dartanalyzer directly when possible
+    if (!flutterRepo) {
+      String dartanalyzer = path.join(
+          Cache.flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', 'dartanalyzer');
+      List<String> cmd = <String>[dartanalyzer];
+      cmd.addAll(argResults.rest.toList());
+      if (cmd.length < 2)
+        cmd.add('.');
+      await runCommandAndStreamOutput(cmd);
+      return;
     }
 
     // TODO(ianh): Fix the intl package resource generator
     // TODO(pq): extract this regexp from the exclude in options
     RegExp stockExampleFiles = new RegExp('examples/stocks/lib/i18n/.*\.dart\$');
 
-    if (flutterRepo) {
-      for (Directory dir in repoPackages) {
-        _collectDartFiles(dir, dartFiles,
-            exclude: (FileSystemEntity entity) => stockExampleFiles.hasMatch(entity.path));
-        pubSpecDirectories.add(dir);
-      }
+    for (Directory dir in repoPackages) {
+      _collectDartFiles(dir, dartFiles,
+          exclude: (FileSystemEntity entity) => stockExampleFiles.hasMatch(entity.path));
+      pubSpecDirectories.add(dir);
     }
 
     // determine what all the various .packages files depend on
@@ -151,9 +137,8 @@ class AnalyzeOnce extends AnalyzeBase {
     DriverOptions options = new DriverOptions();
     options.dartSdkPath = argResults['dart-sdk'];
     options.packageMap = packages;
-    options.analysisOptionsFile = flutterRepo
-        ? path.join(Cache.flutterRoot, '.analysis_options_repo')
-        : path.join(Cache.flutterRoot, '.analysis_options_user');
+    options.analysisOptionsFile = path.join(Cache.flutterRoot, '.analysis_options_repo');
+
     AnalysisDriver analyzer = new AnalysisDriver(options);
 
     // TODO(pq): consider error handling
@@ -193,13 +178,13 @@ class AnalyzeOnce extends AnalyzeBase {
 
     if (errorCount > 0) {
       // we consider any level of error to be an error exit (we don't report different levels)
-      if (membersMissingDocumentation > 0 && flutterRepo)
+      if (membersMissingDocumentation > 0)
         throwToolExit('[lint] $membersMissingDocumentation public ${ membersMissingDocumentation == 1 ? "member lacks" : "members lack" } documentation (ran in ${elapsed}s)');
       else
         throwToolExit('(Ran in ${elapsed}s)');
     }
     if (argResults['congratulate']) {
-      if (membersMissingDocumentation > 0 && flutterRepo) {
+      if (membersMissingDocumentation > 0) {
         printStatus('No analyzer warnings! (ran in ${elapsed}s; $membersMissingDocumentation public ${ membersMissingDocumentation == 1 ? "member lacks" : "members lack" } documentation)');
       } else {
         printStatus('No analyzer warnings! (ran in ${elapsed}s)');
