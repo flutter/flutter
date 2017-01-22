@@ -13,6 +13,7 @@ import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/ios/simulators.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:mockito/mockito.dart';
+import 'package:test/test.dart';
 
 class MockApplicationPackageStore extends ApplicationPackageStore {
   MockApplicationPackageStore() : super(
@@ -74,8 +75,15 @@ void applyMocksToCommand(FlutterCommand command) {
     ..commandValidator = () => true;
 }
 
-class MockDevFSOperations implements DevFSOperations {
+/// Common functionality for tracking mock interaction
+class BasicMock {
   final List<String> messages = new List<String>();
+
+  void expectMessages(List<String> expectedMessages) {
+    List<String> actualMessages = new List<String>.from(messages);
+    messages.clear();
+    expect(actualMessages, unorderedEquals(expectedMessages));
+  }
 
   bool contains(String match) {
     print('Checking for `$match` in:');
@@ -84,7 +92,9 @@ class MockDevFSOperations implements DevFSOperations {
     messages.clear();
     return result;
   }
+}
 
+class MockDevFSOperations extends BasicMock implements DevFSOperations {
   @override
   Future<Uri> create(String fsName) async {
     messages.add('create $fsName');
@@ -97,19 +107,12 @@ class MockDevFSOperations implements DevFSOperations {
   }
 
   @override
-  Future<dynamic> writeFile(String fsName, DevFSEntry entry) async {
-    messages.add('writeFile $fsName ${entry.devicePath}');
+  Future<dynamic> writeFile(String fsName, String devicePath, DevFSContent content) async {
+    messages.add('writeFile $fsName $devicePath');
   }
 
   @override
-  Future<dynamic> deleteFile(String fsName, DevFSEntry entry) async {
-    messages.add('deleteFile $fsName ${entry.devicePath}');
-  }
-
-  @override
-  Future<dynamic> writeSource(String fsName,
-                              String devicePath,
-                              String contents) async {
-    messages.add('writeSource $fsName $devicePath');
+  Future<dynamic> deleteFile(String fsName, String devicePath) async {
+    messages.add('deleteFile $fsName $devicePath');
   }
 }
