@@ -22,8 +22,18 @@ import 'icons.dart';
 import 'progress_indicator.dart';
 import 'theme.dart';
 
-/// A wrapper for [DataTable] that obtains data lazily from a [DataTableSource]
-/// and displays it one page at a time. The widget is presented as a [Card].
+/// A material design data table that shows data using multiple pages.
+///
+/// A paginated data table shows [rowsPerPage] rows of data per page and
+/// provies controls for showing other pages.
+///
+/// Data is read lazily from from a [DataTableSource]. The widget is presented
+/// as a [Card].
+///
+/// See also:
+///
+///  * [DataTable], which is not paginated.
+///  * <https://material.io/guidelines/components/data-tables.html#data-tables-tables-within-cards>
 class PaginatedDataTable extends StatefulWidget {
   /// Creates a widget describing a paginated [DataTable] on a [Card].
   ///
