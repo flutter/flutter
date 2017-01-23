@@ -66,6 +66,29 @@ class ThirdWidget extends StatelessWidget {
   }
 }
 
+class OnTapPage extends StatelessWidget {
+  OnTapPage({ Key key, this.id, this.onTap }) : super(key: key);
+
+  final String id;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return new Scaffold(
+      appBar: new AppBar(title: new Text('Page $id')),
+      body: new GestureDetector(
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
+        child: new Container(
+          child: new Center(
+            child: new Text(id, style: Theme.of(context).textTheme.display2),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 void main() {
   testWidgets('Can navigator navigate to and from a stateful widget', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
@@ -209,4 +232,32 @@ void main() {
   //   await gesture.up();
   //   expect(log, equals(<String>['left']));
   // });
+
+  testWidgets('popAndPushNamed', (WidgetTester tester) async {
+    final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+       '/': (BuildContext context) => new OnTapPage(id: '/', onTap: () { Navigator.pushNamed(context, '/A'); }),
+      '/A': (BuildContext context) => new OnTapPage(id: 'A', onTap: () { Navigator.popAndPushNamed(context, '/B'); }),
+      '/B': (BuildContext context) => new OnTapPage(id: 'B', onTap: () { Navigator.pop(context); }),
+    };
+
+    await tester.pumpWidget(new MaterialApp(routes: routes));
+    expect(find.text('/'), findsOneWidget);
+    expect(find.text('A', skipOffstage: false), findsNothing);
+    expect(find.text('B', skipOffstage: false), findsNothing);
+
+    await tester.tap(find.text('/'));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.text('/'), findsNothing);
+    expect(find.text('A'), findsOneWidget);
+    expect(find.text('B'), findsNothing);
+
+    await tester.tap(find.text('A'));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.text('/'), findsNothing);
+    expect(find.text('A'), findsNothing);
+    expect(find.text('B'), findsOneWidget);
+
+  });
 }
