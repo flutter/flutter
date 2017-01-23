@@ -607,7 +607,7 @@ class HeroController extends NavigatorObserver {
       );
     }
 
-    _questsEnabled = true;
+    //_questsEnabled = true;
     _clearPendingHeroQuest();
   }
 
@@ -615,5 +615,6 @@ class HeroController extends NavigatorObserver {
     _from = null;
     _to = null;
     _animation = null;
+    _questsEnabled = true;
   }
 }
