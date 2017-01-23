@@ -6,6 +6,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('TextTheme control test', () {
+    Typography typography = new Typography(platform: TargetPlatform.android);
+    expect(typography.black, equals(typography.black.copyWith()));
+    expect(typography.black, equals(typography.black.apply()));
+    expect(typography.black.hashCode, equals(typography.black.copyWith().hashCode));
+    expect(typography.black, isNot(equals(typography.white)));
+  });
+
   test('Typography is defined for all target platforms', () {
     for (TargetPlatform platform in TargetPlatform.values) {
       Typography typography = new Typography(platform: platform);

@@ -7,6 +7,23 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 void main() {
+  testWidgets('AnimatedContainer.debugFillDescription', (WidgetTester tester) async {
+    AnimatedContainer container = new AnimatedContainer(
+      constraints: const BoxConstraints.tightFor(width: 17.0, height: 23.0),
+      decoration: const BoxDecoration(backgroundColor: const Color(0xFF00FF00)),
+      foregroundDecoration: const BoxDecoration(backgroundColor: const Color(0x7F0000FF)),
+      margin: const EdgeInsets.all(10.0),
+      padding: const EdgeInsets.all(7.0),
+      transform: new Matrix4.translationValues(4.0, 3.0, 0.0),
+      width: 50.0,
+      height: 75.0,
+      curve: Curves.ease,
+      duration: const Duration(milliseconds: 200),
+    );
+
+    expect(container, hasOneLineDescription);
+  });
+
   testWidgets('AnimatedContainer control test', (WidgetTester tester) async {
     GlobalKey key = new GlobalKey();
 
