@@ -57,7 +57,7 @@ def to_gn_args(args):
 
     gn_args['is_debug'] = args.unoptimized
     gn_args['android_full_debug'] = args.target_os == 'android' and args.unoptimized
-    gn_args['is_clang'] = True
+    gn_args['is_clang'] = not sys.platform.startswith(('cygwin', 'win'))
 
     ios_target_cpu = 'arm64'
 
@@ -189,7 +189,7 @@ def main(argv):
   if gn_call_result == 0:
     # Generate/Replace the compile commands database in out.
     compile_cmd_gen_cmd = [
-      '%s/buildtools/%s/ninja' % (SRC_ROOT, subdir),
+      'ninja',
       '-C',
       out_dir,
       '-t',
