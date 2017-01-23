@@ -136,7 +136,9 @@ void DartController::CreateIsolateFor(const std::string& script_uri,
   char* error = nullptr;
   Dart_Isolate isolate = Dart_CreateIsolate(
       script_uri.c_str(), "main",
-      reinterpret_cast<uint8_t*>(DART_SYMBOL(kIsolateSnapshot)), nullptr,
+      reinterpret_cast<uint8_t*>(DART_SYMBOL(kDartIsolateSnapshotData)),
+      reinterpret_cast<uint8_t*>(DART_SYMBOL(kDartIsolateSnapshotInstructions)),
+      nullptr,
       static_cast<tonic::DartState*>(state.get()), &error);
   FTL_CHECK(isolate) << error;
   ui_dart_state_ = state.release();

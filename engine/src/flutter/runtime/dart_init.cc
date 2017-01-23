@@ -198,7 +198,9 @@ Dart_Isolate ServiceIsolateCreateCallback(const char* script_uri,
   tonic::DartState* dart_state = new tonic::DartState();
   Dart_Isolate isolate = Dart_CreateIsolate(
       script_uri, "main",
-      reinterpret_cast<const uint8_t*>(DART_SYMBOL(kIsolateSnapshot)), nullptr,
+      reinterpret_cast<const uint8_t*>(DART_SYMBOL(kDartIsolateSnapshotData)),
+      reinterpret_cast<const uint8_t*>(DART_SYMBOL(kDartIsolateSnapshotInstructions)),
+      nullptr,
       dart_state, error);
   FTL_CHECK(isolate) << error;
   dart_state->SetIsolate(isolate);
@@ -276,7 +278,9 @@ Dart_Isolate IsolateCreateCallback(const char* script_uri,
 
   Dart_Isolate isolate = Dart_CreateIsolate(
       script_uri, main,
-      reinterpret_cast<uint8_t*>(DART_SYMBOL(kIsolateSnapshot)), nullptr,
+      reinterpret_cast<uint8_t*>(DART_SYMBOL(kDartIsolateSnapshotData)),
+      reinterpret_cast<uint8_t*>(DART_SYMBOL(kDartIsolateSnapshotInstructions)),
+      nullptr,
       dart_state, error);
   FTL_CHECK(isolate) << error;
   dart_state->SetIsolate(isolate);
@@ -373,10 +377,10 @@ DartJniIsolateData* GetDartJniDataForCurrentIsolate() {
 
 #if DART_ALLOW_DYNAMIC_RESOLUTION
 
-constexpr char kVmIsolateSnapshotName[] = "kVmIsolateSnapshot";
-constexpr char kIsolateSnapshotName[] = "kIsolateSnapshot";
-constexpr char kInstructionsSnapshotName[] = "kInstructionsSnapshot";
-constexpr char kDataSnapshotName[] = "kDataSnapshot";
+constexpr char kDartVmSnapshotDataName[] = "kDartVmSnapshotData";
+constexpr char kDartVmSnapshotInstructionsName[] = "kDartVmSnapshotInstructions";
+constexpr char kDartIsolateSnapshotDataName[] = "kDartIsolateSnapshotData";
+constexpr char kDartIsolateSnapshotInstructionsName[] = "kDartIsolateSnapshotInstructions";
 
 #if OS(IOS)
 
@@ -437,14 +441,14 @@ struct SymbolAsset {
 };
 
 static SymbolAsset g_symbol_assets[] = {
-    {kVmIsolateSnapshotName, "snapshot_aot_vmisolate", false,
-     offsetof(Settings, aot_vm_isolate_snapshot_file_name)},
-    {kIsolateSnapshotName, "snapshot_aot_isolate", false,
-     offsetof(Settings, aot_isolate_snapshot_file_name)},
-    {kInstructionsSnapshotName, "snapshot_aot_instr", true,
-     offsetof(Settings, aot_instructions_blob_file_name)},
-    {kDataSnapshotName, "snapshot_aot_rodata", false,
-     offsetof(Settings, aot_rodata_blob_file_name)},
+    {kDartVmSnapshotDataName, "vm_snapshot_data", false,
+     offsetof(Settings, aot_vm_snapshot_data_filename)},
+    {kDartVmSnapshotInstructionsName, "vm_snapshot_instr", true,
+     offsetof(Settings, aot_vm_snapshot_instr_filename)},
+    {kDartIsolateSnapshotDataName, "isolate_snapshot_data", false,
+     offsetof(Settings, aot_isolate_snapshot_data_filename)},
+    {kDartIsolateSnapshotInstructionsName, "isolate_snapshot_instr", true,
+     offsetof(Settings, aot_isolate_snapshot_instr_filename)},
 };
 
 // Resolve a precompiled snapshot symbol by mapping the corresponding asset
@@ -498,28 +502,12 @@ void* _DartSymbolLookup(const char* symbol_name) {
 
 #endif
 
-static const uint8_t* PrecompiledInstructionsSymbolIfPresent() {
-  return reinterpret_cast<uint8_t*>(DART_SYMBOL(kInstructionsSnapshot));
-}
-
-static const uint8_t* PrecompiledDataSnapshotSymbolIfPresent() {
-  return reinterpret_cast<uint8_t*>(DART_SYMBOL(kDataSnapshot));
-}
-
 bool IsRunningPrecompiledCode() {
   TRACE_EVENT0("flutter", __func__);
-  return PrecompiledInstructionsSymbolIfPresent() != nullptr;
+  return Dart_IsPrecompiledRuntime();
 }
 
 #else  // DART_ALLOW_DYNAMIC_RESOLUTION
-
-static const uint8_t* PrecompiledInstructionsSymbolIfPresent() {
-  return nullptr;
-}
-
-static const uint8_t* PrecompiledDataSnapshotSymbolIfPresent() {
-  return nullptr;
-}
 
 bool IsRunningPrecompiledCode() {
   return false;
@@ -691,10 +679,10 @@ void InitDartVM() {
     TRACE_EVENT0("flutter", "Dart_Initialize");
     Dart_InitializeParams params = {};
     params.version = DART_INITIALIZE_PARAMS_CURRENT_VERSION;
-    params.vm_isolate_snapshot =
-        reinterpret_cast<uint8_t*>(DART_SYMBOL(kVmIsolateSnapshot));
-    params.instructions_snapshot = PrecompiledInstructionsSymbolIfPresent();
-    params.data_snapshot = PrecompiledDataSnapshotSymbolIfPresent();
+    params.vm_snapshot_data =
+        reinterpret_cast<uint8_t*>(DART_SYMBOL(kDartVmSnapshotData));
+    params.vm_snapshot_instructions =
+        reinterpret_cast<uint8_t*>(DART_SYMBOL(kDartVmSnapshotInstructions));
     params.create = IsolateCreateCallback;
     params.shutdown = IsolateShutdownCallback;
     params.thread_exit = ThreadExitCallback;

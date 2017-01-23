@@ -181,18 +181,14 @@ void Shell::InitStandalone(std::string icu_data_path,
 
   settings.aot_snapshot_path =
       command_line.GetSwitchValueASCII(FlagForSwitch(Switch::AotSnapshotPath));
-
-  settings.aot_isolate_snapshot_file_name = command_line.GetSwitchValueASCII(
-      FlagForSwitch(Switch::AotIsolateSnapshot));
-
-  settings.aot_vm_isolate_snapshot_file_name = command_line.GetSwitchValueASCII(
-      FlagForSwitch(Switch::AotVmIsolateSnapshot));
-
-  settings.aot_instructions_blob_file_name = command_line.GetSwitchValueASCII(
-      FlagForSwitch(Switch::AotInstructionsBlob));
-
-  settings.aot_rodata_blob_file_name =
-      command_line.GetSwitchValueASCII(FlagForSwitch(Switch::AotRodataBlob));
+  settings.aot_vm_snapshot_data_filename = command_line.GetSwitchValueASCII(
+      FlagForSwitch(Switch::AotVmSnapshotData));
+  settings.aot_vm_snapshot_instr_filename = command_line.GetSwitchValueASCII(
+      FlagForSwitch(Switch::AotVmSnapshotInstructions));
+  settings.aot_isolate_snapshot_data_filename = command_line.GetSwitchValueASCII(
+      FlagForSwitch(Switch::AotIsolateSnapshotData));
+  settings.aot_isolate_snapshot_instr_filename = command_line.GetSwitchValueASCII(
+      FlagForSwitch(Switch::AotIsolateSnapshotInstructions));
 
   settings.temp_directory_path =
       command_line.GetSwitchValueASCII(FlagForSwitch(Switch::CacheDirPath));

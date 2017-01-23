@@ -10,12 +10,16 @@
 // generated snapshot binary file for the vm isolate.
 // This string forms the content of the dart vm isolate snapshot which
 // is loaded into the vm isolate.
-const uint8_t kVmIsolateSnapshot[]
+const uint8_t kDartVmSnapshotData[]
     __attribute__((visibility("default"), aligned(8), used)) = { %s };
+const uint8_t kDartVmSnapshotInstructions[]
+    __attribute__((visibility("default"), aligned(8), used)) = {};
 
 // The string on the next line will be filled in with the contents of the
 // generated snapshot binary file for a regular dart isolate.
 // This string forms the content of a regular dart isolate snapshot which
 // is loaded into an isolate when it is created.
-const uint8_t kIsolateSnapshot[]
+const uint8_t kDartIsolateSnapshotData[]
     __attribute__((visibility("default"), aligned(8), used)) = { %s };
+const uint8_t kDartIsolateSnapshotInstructions[]
+    __attribute__((visibility("default"), aligned(8), used)) = {};

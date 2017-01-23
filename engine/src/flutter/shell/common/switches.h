@@ -20,17 +20,11 @@ namespace shell {
 // clang-format on
 
 DEF_SWITCHES_START
-DEF_SWITCH(AotInstructionsBlob,
-           "instructions-blob",
-           "Path to the instructions snapshot blob.")
-DEF_SWITCH(AotIsolateSnapshot,
-           "isolate-snapshot",
-           "Path to the isolate snapshot blob.")
-DEF_SWITCH(AotRodataBlob, "rodata-blob", "Path to the rodata blob.")
 DEF_SWITCH(AotSnapshotPath, "aot-snapshot-path", "Path to the AOT snapshot.")
-DEF_SWITCH(AotVmIsolateSnapshot,
-           "vm-isolate-snapshot",
-           "Path to the VM isolate snapshot.")
+DEF_SWITCH(AotVmSnapshotData, "vm-snapshot-data", "")
+DEF_SWITCH(AotVmSnapshotInstructions, "vm-snapshot-instr", "")
+DEF_SWITCH(AotIsolateSnapshotData, "isolate-snapshot-data", "")
+DEF_SWITCH(AotIsolateSnapshotInstructions, "isolate-snapshot-instr", "")
 DEF_SWITCH(CacheDirPath, "cache-dir-path", "Path to the cache directory.")
 DEF_SWITCH(DartFlags,
            "dart-flags",
