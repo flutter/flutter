@@ -84,8 +84,11 @@ class PaginatedDataTable extends StatefulWidget {
     assert(sortAscending != null);
     assert(rowsPerPage != null);
     assert(rowsPerPage > 0);
-    assert(availableRowsPerPage != null);
-    assert(availableRowsPerPage.contains(rowsPerPage));
+    assert(() {
+      if (onRowsPerPageChanged != null)
+        assert(availableRowsPerPage != null && availableRowsPerPage.contains(rowsPerPage));
+      return true;
+    });
     assert(source != null);
   }
 
@@ -346,6 +349,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
       new IconButton(
         icon: new Icon(Icons.chevron_left),
         padding: EdgeInsets.zero,
+        tooltip: 'Previous page',
         onPressed: _firstRowIndex <= 0 ? null : () {
           pageTo(math.max(_firstRowIndex - config.rowsPerPage, 0));
         }
@@ -354,6 +358,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
       new IconButton(
         icon: new Icon(Icons.chevron_right),
         padding: EdgeInsets.zero,
+        tooltip: 'Next page',
         onPressed: (!_rowCountApproximate && (_firstRowIndex + config.rowsPerPage >= _rowCount)) ? null : () {
           pageTo(_firstRowIndex + config.rowsPerPage);
         }
@@ -363,7 +368,8 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
 
     // CARD
     return new Card(
-      child: new BlockBody(
+      child: new Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
           new DefaultTextStyle(
             // These typographic styles aren't quite the regular ones. We pick the closest ones from the regular
