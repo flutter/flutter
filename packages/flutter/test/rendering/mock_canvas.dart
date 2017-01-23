@@ -89,17 +89,17 @@ abstract class PaintPattern {
   /// See also: [save], [restore].
   void saveRestore();
 
-  /// Indicates that a circle is expected next.
+  /// Indicates that a rectangle is expected next.
   ///
-  /// The next circle is examined. Any arguments that are passed to this method
-  /// are compared to the actual [Canvas.drawCircle] call's arguments and any
-  /// mismatches result in failure.
+  /// The next rectangle is examined. Any arguments that are passed to this
+  /// method are compared to the actual [Canvas.drawRect] call's arguments
+  /// and any mismatches result in failure.
   ///
-  /// If no call to [Canvas.drawCircle] was made, then this results in failure.
+  /// If no call to [Canvas.drawRect] was made, then this results in failure.
   ///
   /// Any calls made between the last matched call (if any) and the
-  /// [Canvas.drawCircle] call are ignored.
-  void circle({ double x, double y, double radius, Color color, bool hasMaskFilter, PaintingStyle style });
+  /// [Canvas.drawRect] call are ignored.
+  void rect({ Rect rect, Color color });
 
   /// Indicates that a rounded rectangle is expected next.
   ///
@@ -112,6 +112,18 @@ abstract class PaintPattern {
   /// Any calls made between the last matched call (if any) and the
   /// [Canvas.drawRRect] call are ignored.
   void rrect({ RRect rrect, Color color, bool hasMaskFilter, PaintingStyle style });
+
+  /// Indicates that a circle is expected next.
+  ///
+  /// The next circle is examined. Any arguments that are passed to this method
+  /// are compared to the actual [Canvas.drawCircle] call's arguments and any
+  /// mismatches result in failure.
+  ///
+  /// If no call to [Canvas.drawCircle] was made, then this results in failure.
+  ///
+  /// Any calls made between the last matched call (if any) and the
+  /// [Canvas.drawCircle] call are ignored.
+  void circle({ double x, double y, double radius, Color color, bool hasMaskFilter, PaintingStyle style });
 
   /// Provides a custom matcher.
   ///
@@ -171,13 +183,19 @@ class _TestRecordingCanvasPatternMatcher extends Matcher implements PaintPattern
   }
 
   @override
-  void circle({ double x, double y, double radius, Color color, bool hasMaskFilter, PaintingStyle style }) {
-    _predicates.add(new _CirclePaintPredicate(x: x, y: y, radius: radius, color: color, hasMaskFilter: hasMaskFilter, style: style));
+  void rect({ Rect rect, Color color, bool hasMaskFilter, PaintingStyle style }) {
+    _predicates.add(new _RectPaintPredicate(rect: rect, color: color, hasMaskFilter: hasMaskFilter, style: style));
   }
 
   @override
   void rrect({ RRect rrect, Color color, bool hasMaskFilter, PaintingStyle style }) {
     _predicates.add(new _RRectPaintPredicate(rrect: rrect, color: color, hasMaskFilter: hasMaskFilter, style: style));
+  }
+
+
+  @override
+  void circle({ double x, double y, double radius, Color color, bool hasMaskFilter, PaintingStyle style }) {
+    _predicates.add(new _CirclePaintPredicate(x: x, y: y, radius: radius, color: color, hasMaskFilter: hasMaskFilter, style: style));
   }
 
   @override
@@ -307,6 +325,11 @@ class _TestRecordingPaintingContext implements PaintingContext {
   final Canvas canvas;
 
   @override
+  void paintChild(RenderObject child, Offset offset) {
+    child.paint(this, offset);
+  }
+
+  @override
   void noSuchMethod(Invocation invocation) {
   }
 }
@@ -392,6 +415,56 @@ abstract class _DrawCommandPaintPredicate extends _PaintPredicate {
   }
 }
 
+class _OneParameterPaintPredicate<T> extends _DrawCommandPaintPredicate {
+  _OneParameterPaintPredicate(Symbol symbol, String name, {
+    @required this.expected,
+    @required Color color,
+    @required bool hasMaskFilter,
+    @required PaintingStyle style
+  }) : super(
+    symbol, name, 2, 1, color: color, hasMaskFilter: hasMaskFilter, style: style);
+
+  final T expected;
+
+  @override
+  void verifyArguments(List<dynamic> arguments) {
+    super.verifyArguments(arguments);
+    final T actual = arguments[0];
+    if (expected != null && actual != expected)
+      throw 'called $methodName with ${T.runtimeType}, $actual, which was not exactly the expected ${T.runtimeType} ($expected).';
+  }
+
+  @override
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    if (expected != null)
+      description.add('${T.runtimeType}: $expected');
+  }
+}
+
+
+class _RectPaintPredicate extends _OneParameterPaintPredicate<Rect> {
+  _RectPaintPredicate({ Rect rect, Color color, bool hasMaskFilter, PaintingStyle style }) : super(
+    #drawRect,
+    'a rectangle',
+    expected: rect,
+    color: color,
+    hasMaskFilter: hasMaskFilter,
+    style: style,
+  );
+}
+
+class _RRectPaintPredicate extends _OneParameterPaintPredicate<RRect> {
+  _RRectPaintPredicate({ RRect rrect, Color color, bool hasMaskFilter, PaintingStyle style }) : super(
+    #drawRRect,
+    'a rounded rectangle',
+    expected: rrect,
+    color: color,
+    hasMaskFilter: hasMaskFilter,
+    style: style,
+  );
+}
+
 class _CirclePaintPredicate extends _DrawCommandPaintPredicate {
   _CirclePaintPredicate({ this.x, this.y, this.radius, Color color, bool hasMaskFilter, PaintingStyle style }) : super(
     #drawCircle, 'a circle', 3, 2, color: color, hasMaskFilter: hasMaskFilter, style: style
@@ -433,29 +506,6 @@ class _CirclePaintPredicate extends _DrawCommandPaintPredicate {
     }
     if (radius != null)
       description.add('radius ${radius.toStringAsFixed(1)}');
-  }
-}
-
-class _RRectPaintPredicate extends _DrawCommandPaintPredicate {
-  _RRectPaintPredicate({ this.rrect, Color color, bool hasMaskFilter, PaintingStyle style }) : super(
-    #drawRRect, 'a rounded rectangle', 2, 1, color: color, hasMaskFilter: hasMaskFilter, style: style
-  );
-
-  final RRect rrect;
-
-  @override
-  void verifyArguments(List<dynamic> arguments) {
-    super.verifyArguments(arguments);
-    final RRect rrectArgument = arguments[0];
-    if (rrect != null && rrectArgument != rrect)
-      throw 'called $methodName with an rrect, $rrectArgument, which was not exactly the expected rrect ($rrect).';
-  }
-
-  @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    if (rrect != null)
-      description.add('$rrect');
   }
 }
 

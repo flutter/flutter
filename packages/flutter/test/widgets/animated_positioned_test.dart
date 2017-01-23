@@ -7,6 +7,19 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 void main() {
+  testWidgets('AnimatedPositioned.fromRect control test', (WidgetTester tester) async {
+    AnimatedPositioned positioned = new AnimatedPositioned.fromRect(
+      rect: new Rect.fromLTWH(7.0, 5.0, 12.0, 16.0),
+      duration: const Duration(milliseconds: 200),
+    );
+
+    expect(positioned.left, equals(7.0));
+    expect(positioned.top, equals(5.0));
+    expect(positioned.width, equals(12.0));
+    expect(positioned.height, equals(16.0));
+    expect(positioned, hasOneLineDescription);
+  });
+
   testWidgets('AnimatedPositioned - basics', (WidgetTester tester) async {
     GlobalKey key = new GlobalKey();
 

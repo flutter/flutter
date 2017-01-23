@@ -277,6 +277,43 @@ class TextTheme {
       button: TextStyle.lerp(begin.button, end.button, t)
     );
   }
+
+  @override
+  bool operator ==(dynamic other) {
+    if (identical(this, other))
+      return true;
+    if (other is! TextTheme)
+      return false;
+    final TextTheme typedOther = other;
+    return display4 == typedOther.display4 &&
+           display3 == typedOther.display3 &&
+           display2 == typedOther.display2 &&
+           display1 == typedOther.display1 &&
+           headline == typedOther.headline &&
+           title == typedOther.title &&
+           subhead == typedOther.subhead &&
+           body2 == typedOther.body2 &&
+           body1 == typedOther.body1 &&
+           caption == typedOther.caption &&
+           button == typedOther.button;
+  }
+
+  @override
+  int get hashCode {
+    return hashValues(
+      display4,
+      display3,
+      display2,
+      display1,
+      headline,
+      title,
+      subhead,
+      body2,
+      body1,
+      caption,
+      button,
+    );
+  }
 }
 
 /// The two material design text themes.

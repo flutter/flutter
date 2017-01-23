@@ -6,6 +6,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('ThemeDataTween control test', () {
+    ThemeData light = new ThemeData.light();
+    ThemeData dark = new ThemeData.light();
+    ThemeDataTween tween = new ThemeDataTween(begin: light, end: dark);
+    expect(tween.lerp(0.25), equals(ThemeData.lerp(light, dark, 0.25)));
+  });
+
   testWidgets('PopupMenu inherits app theme', (WidgetTester tester) async {
     final Key popupMenuButtonKey = new UniqueKey();
     await tester.pumpWidget(
