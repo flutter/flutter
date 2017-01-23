@@ -120,7 +120,7 @@ class AnalyzeContinuously extends AnalyzeBase {
 
       if (firstAnalysis && isBenchmarking) {
         writeBenchmark(analysisTimer, issueCount, -1); // TODO(ianh): track members missing dartdocs instead of saying -1
-        server.dispose().then((_) => exit(issueCount > 0 ? 1 : 0));
+        server.dispose().whenComplete(() { exit(issueCount > 0 ? 1 : 0); });
       }
 
       firstAnalysis = false;

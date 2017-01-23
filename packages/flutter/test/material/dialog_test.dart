@@ -18,7 +18,7 @@ void main() {
                 child: new RaisedButton(
                   child: new Text('X'),
                   onPressed: () {
-                    showDialog(
+                    showDialog<Null>(
                       context: context,
                       child: new AlertDialog(
                         content: new Container(
@@ -68,7 +68,7 @@ void main() {
                 child: new RaisedButton(
                   child: new Text('X'),
                   onPressed: () {
-                    showDialog(
+                    showDialog<Null>(
                       context: context,
                       child: new AlertDialog(
                         title: new Text('Title'),

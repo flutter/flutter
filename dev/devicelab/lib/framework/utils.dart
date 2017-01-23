@@ -166,7 +166,7 @@ Future<Process> startProcess(String executable, List<String> arguments,
   ProcessInfo procInfo = new ProcessInfo(command, proc);
   _runningProcesses.add(procInfo);
 
-  proc.exitCode.then((_) {
+  proc.exitCode.whenComplete(() {
     _runningProcesses.remove(procInfo);
   });
 

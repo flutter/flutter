@@ -124,7 +124,7 @@ class FlutterPlatform extends PlatformPlugin {
     bool subprocessActive = false;
     bool controllerSinkClosed = false;
     try {
-      controller.sink.done.then((_) { controllerSinkClosed = true; });
+      controller.sink.done.whenComplete(() { controllerSinkClosed = true; });
 
       // Prepare our WebSocket server to talk to the engine subproces.
       HttpServer server = await HttpServer.bind(_kHost, 0);
@@ -524,10 +524,10 @@ class _FlutterPlatformStreamSinkWrapper<S> implements StreamSink<S> {
 
   @override
   Future<dynamic> close() {
-   Future.wait(<Future<dynamic>>[
+   Future.wait<dynamic>(<Future<dynamic>>[
       _parent.close(),
       _shellProcessClosed,
-    ]).then(
+    ]).then<Null>(
       (List<dynamic> value) {
         _done.complete();
       },

@@ -402,12 +402,11 @@ class _IOSDeviceLogReader extends DeviceLogReader {
   String get name => device.name;
 
   void _start() {
-    runCommand(<String>[device.loggerPath]).then((Process process) {
+    runCommand(<String>[device.loggerPath]).then<Null>((Process process) {
       _process = process;
       _process.stdout.transform(UTF8.decoder).transform(const LineSplitter()).listen(_onLine);
       _process.stderr.transform(UTF8.decoder).transform(const LineSplitter()).listen(_onLine);
-
-      _process.exitCode.then((int code) {
+      _process.exitCode.whenComplete(() {
         if (_linesController.hasListener)
           _linesController.close();
       });

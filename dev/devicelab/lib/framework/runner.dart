@@ -37,7 +37,7 @@ Future<Map<String, dynamic>> runTask(String taskName, { bool silent: false }) as
 
   bool runnerFinished = false;
 
-  runner.exitCode.then((_) {
+  runner.exitCode.whenComplete(() {
     runnerFinished = true;
   });
 

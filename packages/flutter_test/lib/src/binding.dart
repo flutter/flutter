@@ -360,7 +360,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
         ));
         assert(_parentZone != null);
         assert(_pendingExceptionDetails != null);
-        _parentZone.run(_testCompletionHandler);
+        _parentZone.run<Null>(_testCompletionHandler);
       }
     );
     _parentZone = Zone.current;

@@ -65,7 +65,7 @@ class StockSettingsState extends State<StockSettings> {
         _handleOptimismChanged(false);
         break;
       case StockMode.pessimistic:
-        showDialog(
+        showDialog<bool>(
           context: context,
           child: new AlertDialog(
             title: new Text("Change mode?"),
@@ -85,7 +85,7 @@ class StockSettingsState extends State<StockSettings> {
               ),
             ]
           )
-        ).then(_handleOptimismChanged);
+        ).then<Null>(_handleOptimismChanged);
         break;
     }
   }

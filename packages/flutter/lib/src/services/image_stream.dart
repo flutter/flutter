@@ -239,7 +239,7 @@ class OneFrameImageStreamCompleter extends ImageStreamCompleter {
   /// FlutterErrorDetails]).
   OneFrameImageStreamCompleter(Future<ImageInfo> image, { InformationCollector informationCollector }) {
     assert(image != null);
-    image.then(setImage, onError: (dynamic error, StackTrace stack) {
+    image.then<Null>(setImage, onError: (dynamic error, StackTrace stack) {
       FlutterError.reportError(new FlutterErrorDetails(
         exception: error,
         stack: stack,

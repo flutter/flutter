@@ -35,7 +35,7 @@ class CoverageCollector {
 
     int pid = process.pid;
     int exitCode;
-    process.exitCode.then((int code) {
+    process.exitCode.then<Null>((int code) {
       exitCode = code;
     });
 

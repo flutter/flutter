@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-typedef Widget TextTransformer(String name, String text);
+typedef Widget _TextTransformer(String name, String text);
 
 // From https://en.wikiquote.org/wiki/2001:_A_Space_Odyssey_(film)
 const String _kDialogText = '''
@@ -84,7 +84,7 @@ class _StyledTextDemoState extends State<StyledTextDemo> {
     _toText = toStyledText;
   }
 
-  TextTransformer _toText;
+  _TextTransformer _toText;
 
   void _handleTap() {
     setState(() {
@@ -95,7 +95,7 @@ class _StyledTextDemoState extends State<StyledTextDemo> {
   @override
   Widget build(BuildContext context) {
     List<Widget> lines = _kNameLines
-      .map((List<String> nameAndText) => Function.apply(_toText, nameAndText))
+      .map<Widget>((List<String> nameAndText) => _toText(nameAndText[0], nameAndText[1]))
       .toList();
 
     List<Widget> children = <Widget>[];

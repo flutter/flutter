@@ -19,7 +19,7 @@ class InsideState extends State<Inside> {
     );
   }
 
-  void _handlePointerDown(_) {
+  void _handlePointerDown(PointerDownEvent event) {
     setState(() { });
   }
 }
@@ -42,7 +42,7 @@ class MiddleState extends State<Middle> {
     );
   }
 
-  void _handlePointerDown(_) {
+  void _handlePointerDown(PointerDownEvent event) {
     setState(() { });
   }
 }

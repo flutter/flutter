@@ -48,7 +48,7 @@ class DateTimeItem extends StatelessWidget {
                     firstDate: date.subtract(const Duration(days: 30)),
                     lastDate: date.add(const Duration(days: 30))
                   )
-                  .then((DateTime value) {
+                  .then<Null>((DateTime value) {
                     onChanged(new DateTime(value.year, value.month, value.day, time.hour, time.minute));
                   });
                 },
@@ -74,7 +74,7 @@ class DateTimeItem extends StatelessWidget {
                   context: context,
                   initialTime: time
                 )
-                .then((TimeOfDay value) {
+                .then<Null>((TimeOfDay value) {
                   onChanged(new DateTime(date.year, date.month, date.day, value.hour, value.minute));
                 });
               },
@@ -112,7 +112,7 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
     final ThemeData theme = Theme.of(context);
     final TextStyle dialogTextStyle = theme.textTheme.subhead.copyWith(color: theme.textTheme.caption.color);
 
-    showDialog(
+    showDialog<DismissDialogAction>(
       context: context,
       child: new AlertDialog(
         content: new Text(

@@ -232,7 +232,7 @@ class MaterialFonts {
 
     return Cache._downloadFileToCache(
       Uri.parse(cache.getVersionFor(kName)), fontsDir, true
-    ).then((_) {
+    ).then<Null>((Null value) {
       cache.setStampFor(kName, cache.getVersionFor(kName));
       status.stop();
     }).whenComplete(() {
@@ -401,7 +401,7 @@ class FlutterEngine {
 
   Future<Null> _downloadItem(String message, String url, Directory dest) {
     Status status = logger.startProgress(message);
-    return Cache._downloadFileToCache(Uri.parse(url), dest, true).then((_) {
+    return Cache._downloadFileToCache(Uri.parse(url), dest, true).then<Null>((Null value) {
       status.stop();
     }).whenComplete(() {
       status.cancel();

@@ -268,7 +268,7 @@ class MockVMService extends BasicMock implements VMService {
       String fsName = request.headers.value('dev_fs_name');
       String devicePath = UTF8.decode(BASE64.decode(request.headers.value('dev_fs_path_b64')));
       messages.add('writeFile $fsName $devicePath');
-      request.drain().then((_) {
+      request.drain<List<int>>().then<Null>((List<int> value) {
         request.response
           ..write('Got it')
           ..close();

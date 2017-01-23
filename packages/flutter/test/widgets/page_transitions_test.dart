@@ -29,7 +29,7 @@ class PersistentBottomSheetTestState extends State<PersistentBottomSheetTest> {
     _scaffoldKey.currentState.showBottomSheet<Null>((BuildContext context) {
       return new Text('bottomSheet');
     })
-    .closed.then((_) {
+    .closed.whenComplete(() {
       setState(() {
         setStateCalled = true;
       });
@@ -421,13 +421,13 @@ void main() {
     );
 
     int popCount = 0;
-    route.popped.then((_) {
-      ++popCount;
+    route.popped.whenComplete(() {
+      popCount += 1;
     });
 
     int completeCount = 0;
-    route.completed.then((_) {
-      ++completeCount;
+    route.completed.whenComplete(() {
+      completeCount += 1;
     });
 
     expect(popCount, 0);

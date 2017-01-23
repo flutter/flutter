@@ -338,7 +338,7 @@ abstract class PageableState<T extends Pageable> extends ScrollableState<T> {
       .then(_notifyPageChanged);
   }
 
-  void _notifyPageChanged(_) {
+  void _notifyPageChanged(Null value) {
     if (config.onPageChanged != null)
       config.onPageChanged(_scrollOffsetToPageIndex(scrollOffset));
   }
