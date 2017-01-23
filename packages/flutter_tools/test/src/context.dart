@@ -10,7 +10,6 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
-import 'package:flutter_tools/src/base/process_manager.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/devfs.dart';
@@ -23,6 +22,7 @@ import 'package:flutter_tools/src/usage.dart';
 
 import 'package:mockito/mockito.dart';
 import 'package:path/path.dart' as path;
+import 'package:process/process.dart';
 import 'package:test/test.dart';
 
 /// Return the test logger. This assumes that the current Logger is a BufferLogger.
@@ -43,7 +43,7 @@ void testUsingContext(String description, dynamic testMethod(), {
     // Initialize the test context with some default mocks.
     // Seed these context entries first since others depend on them
     testContext.putIfAbsent(FileSystem, () => new LocalFileSystem());
-    testContext.putIfAbsent(ProcessManager, () => new ProcessManager());
+    testContext.putIfAbsent(ProcessManager, () => new LocalProcessManager());
     testContext.putIfAbsent(Logger, () => new BufferLogger());
 
     // Order-independent context entries

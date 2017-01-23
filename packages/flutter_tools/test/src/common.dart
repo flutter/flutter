@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 
 import 'package:args/command_runner.dart';
+import 'package:process/process.dart';
 
 import 'package:flutter_tools/src/base/context.dart';
-import 'package:flutter_tools/src/base/process_manager.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 
