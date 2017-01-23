@@ -135,7 +135,7 @@ void main() {
                 builder: (BuildContext context) {
                   return new RaisedButton(
                     onPressed: () {
-                      showModalBottomSheet(
+                      showModalBottomSheet<Null>(
                         context: context,
                         builder: (BuildContext context) => new Text('bottomSheet'),
                       );
@@ -172,7 +172,7 @@ void main() {
                 builder: (BuildContext context) {
                   return new RaisedButton(
                     onPressed: () {
-                      showDialog(
+                      showDialog<Null>(
                         context: context,
                         child: new Text('dialog'),
                       );
@@ -204,7 +204,7 @@ void main() {
               builder: (BuildContext context) {
                 return new GestureDetector(
                   onTap: () {
-                    showDialog(
+                    showDialog<Null>(
                       context: context,
                       child: new Scaffold(
                         body: const SizedBox(

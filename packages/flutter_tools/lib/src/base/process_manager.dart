@@ -410,13 +410,14 @@ class RecordingProcessManager implements ProcessManager {
     await files.forEach((FileSystemEntity entity) {
       File file = entity;
       Future<dynamic> readAsBytes = file.readAsBytes();
-      addAllFilesToArchive.add(readAsBytes.then((List<int> data) {
+      addAllFilesToArchive.add(readAsBytes.then<Null>((List<int> data) {
         archive.addFile(new ArchiveFile.noCompress(
-          path.basename(file.path), data.length, data));
+          path.basename(file.path), data.length, data)
+        );
       }));
     });
 
-    await Future.wait(addAllFilesToArchive);
+    await Future.wait<dynamic>(addAllFilesToArchive);
     return new ZipEncoder().encode(archive);
   }
 }

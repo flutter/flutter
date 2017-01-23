@@ -47,13 +47,13 @@ void main() {
       targetDeviceFinder = () {
         throw 'Unexpected call to targetDeviceFinder';
       };
-      appStarter = (_) {
+      appStarter = (DriveCommand command) {
         throw 'Unexpected call to appStarter';
       };
-      testRunner = (_) {
+      testRunner = (List<String> testArgs) {
         throw 'Unexpected call to testRunner';
       };
-      appStopper = (_) {
+      appStopper = (DriveCommand command) {
         throw 'Unexpected call to appStopper';
       };
     });
@@ -86,14 +86,14 @@ void main() {
 
     testUsingContext('returns 1 when app fails to run', () async {
       withMockDevice();
-      appStarter = expectAsync((_) async => 1);
+      appStarter = expectAsync((DriveCommand command) async => 1);
 
       String testApp = '/some/app/test_driver/e2e.dart';
       String testFile = '/some/app/test_driver/e2e_test.dart';
 
       MemoryFileSystem memFs = memoryFileSystem;
-      await memFs.file(testApp).writeAsString('main() {}');
-      await memFs.file(testFile).writeAsString('main() {}');
+      await memFs.file(testApp).writeAsString('main() { }');
+      await memFs.file(testFile).writeAsString('main() { }');
 
       List<String> args = <String>[
         'drive',
@@ -155,14 +155,14 @@ void main() {
       String testApp = '/some/app/test/e2e.dart';
       String testFile = '/some/app/test_driver/e2e_test.dart';
 
-      appStarter = expectAsync((_) {
+      appStarter = expectAsync((DriveCommand command) {
         return new Future<int>.value(0);
       });
       testRunner = expectAsync((List<String> testArgs) {
         expect(testArgs, <String>[testFile]);
         return new Future<int>.value(0);
       });
-      appStopper = expectAsync((_) {
+      appStopper = expectAsync((DriveCommand command) {
         return new Future<int>.value(0);
       });
 
@@ -186,13 +186,13 @@ void main() {
       String testApp = '/some/app/test/e2e.dart';
       String testFile = '/some/app/test_driver/e2e_test.dart';
 
-      appStarter = expectAsync((_) {
+      appStarter = expectAsync((DriveCommand command) {
         return new Future<int>.value(0);
       });
-      testRunner = (_) {
+      testRunner = (List<String> testArgs) {
         throwToolExit(null, exitCode: 123);
       };
-      appStopper = expectAsync((_) {
+      appStopper = expectAsync((DriveCommand command) {
         return new Future<int>.value(0);
       });
 

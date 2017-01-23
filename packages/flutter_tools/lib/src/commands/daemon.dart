@@ -171,7 +171,7 @@ abstract class Domain {
       if (_handlers.containsKey(command))
         return _handlers[command](args);
       throw 'command not understood: $name.$command';
-    }).then((dynamic result) {
+    }).then<Null>((dynamic result) {
       if (result == null) {
         _send(<String, dynamic>{'id': id});
       } else {
@@ -386,7 +386,7 @@ class AppDomain extends Domain {
 
     if (options.debuggingEnabled) {
       connectionInfoCompleter = new Completer<DebugConnectionInfo>();
-      connectionInfoCompleter.future.then((DebugConnectionInfo info) {
+      connectionInfoCompleter.future.then<Null>((DebugConnectionInfo info) {
         Map<String, dynamic> params = <String, dynamic>{
           'port': info.httpUri.port,
           'wsUri': info.wsUri.toString(),
@@ -397,7 +397,7 @@ class AppDomain extends Domain {
       });
     }
     Completer<Null> appStartedCompleter = new Completer<Null>();
-    appStartedCompleter.future.then((_) {
+    appStartedCompleter.future.then<Null>((Null value) {
       _sendAppEvent(app, 'started');
     });
 

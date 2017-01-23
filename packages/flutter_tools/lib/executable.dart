@@ -162,7 +162,7 @@ Future<Null> main(List<String> args) async {
           else
             stderr.writeln('Oops; flutter has exited unexpectedly.');
 
-          _createCrashReport(args, error, chain).then((File file) {
+          _createCrashReport(args, error, chain).then<Null>((File file) {
             stderr.writeln(
                 'Crash report written to ${file.path};\n'
                     'please let us know at https://github.com/flutter/flutter/issues.'

@@ -557,7 +557,7 @@ class AbsoluteBallisticScrollActivity extends ScrollActivity {
     )
       ..addListener(_tick)
       ..animateWith(simulation)
-       .then(_end);
+       .whenComplete(_end);
   }
 
   @override
@@ -587,7 +587,7 @@ class AbsoluteBallisticScrollActivity extends ScrollActivity {
       position.beginIdleActivity();
   }
 
-  void _end(Null value) {
+  void _end() {
     position.beginIdleActivity();
   }
 
@@ -636,7 +636,7 @@ class AbsoluteDrivenScrollActivity extends ScrollActivity {
     )
       ..addListener(_tick)
       ..animateTo(to, duration: duration, curve: curve)
-       .then(_end);
+       .whenComplete(_end);
   }
 
   @override
@@ -659,7 +659,7 @@ class AbsoluteDrivenScrollActivity extends ScrollActivity {
       position.beginIdleActivity();
   }
 
-  void _end(Null value) {
+  void _end() {
     position.beginBallisticActivity(velocity);
   }
 

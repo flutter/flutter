@@ -163,7 +163,7 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
   @override
   void didChangeLocale(Locale locale) {
     if (config.onLocaleChanged != null) {
-      config.onLocaleChanged(locale).then((LocaleQueryData data) {
+      config.onLocaleChanged(locale).then<Null>((LocaleQueryData data) {
         if (mounted)
           setState(() { _localeData = data; });
       });

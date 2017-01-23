@@ -1312,7 +1312,7 @@ class ScrollableState<T extends Scrollable> extends State<T> with SingleTickerPr
       config.onScroll(_scrollOffset);
   }
 
-  void _handleDragDown(_) {
+  void _handleDragDown(DragDownDetails details) {
     setState(() {
       _stop();
     });
@@ -1356,7 +1356,7 @@ class ScrollableState<T extends Scrollable> extends State<T> with SingleTickerPr
 
   void _handleDragEnd(DragEndDetails details) {
     final double scrollVelocity = pixelDeltaToScrollOffset(details.velocity.pixelsPerSecond);
-    fling(scrollVelocity).then((Null _) {
+    fling(scrollVelocity).then<Null>((Null value) {
       _endScroll(details: details);
     });
   }

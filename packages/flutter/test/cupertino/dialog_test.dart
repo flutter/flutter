@@ -17,7 +17,7 @@ void main() {
             builder: (BuildContext context) {
               return new RaisedButton(
                 onPressed: () {
-                  showDialog(
+                  showDialog<Null>(
                     context: context,
                     child: new CupertinoAlertDialog(
                       title: new Text('The title'),

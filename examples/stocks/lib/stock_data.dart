@@ -72,7 +72,7 @@ class StockDataFetcher {
   void _fetchNextChunk() {
     if (!actuallyFetchData)
       return;
-    http.get(_urlToFetch(_nextChunk++)).then((http.Response response) {
+    http.get(_urlToFetch(_nextChunk++)).then<Null>((http.Response response) {
       String json = response.body;
       if (json == null) {
         print("Failed to load stock data chunk ${_nextChunk - 1}");

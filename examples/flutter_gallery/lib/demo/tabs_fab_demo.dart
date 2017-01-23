@@ -66,7 +66,7 @@ class _TabsFabDemoState extends State<TabsFabDemo> with SingleTickerProviderStat
   }
 
   void _showExplanatoryText() {
-    _scaffoldKey.currentState.showBottomSheet((BuildContext context) {
+    _scaffoldKey.currentState.showBottomSheet<Null>((BuildContext context) {
       return new Container(
         decoration: new BoxDecoration(
           border: new Border(top: new BorderSide(color: Theme.of(context).dividerColor))

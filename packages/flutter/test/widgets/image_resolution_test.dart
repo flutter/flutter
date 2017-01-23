@@ -87,8 +87,8 @@ class TestAssetImage extends AssetImage {
   @override
   Future<ImageInfo> loadAsync(AssetBundleImageKey key) {
     ImageInfo result;
-    key.bundle.load(key.name).then((ByteData data) {
-      decodeImage(data).then((ui.Image image) {
+    key.bundle.load(key.name).then<Null>((ByteData data) {
+      decodeImage(data).then<Null>((ui.Image image) {
         result = new ImageInfo(image: image, scale: key.scale);
       });
     });

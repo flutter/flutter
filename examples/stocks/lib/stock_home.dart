@@ -105,7 +105,7 @@ class StockHomeState extends State<StockHome> {
         });
         break;
       case _StockMenuItem.refresh:
-        showDialog(
+        showDialog<Null>(
           context: context,
           child: new _NotImplementedDialog()
         );
@@ -267,7 +267,7 @@ class StockHomeState extends State<StockHome> {
         Navigator.pushNamed(context, '/stock/${stock.symbol}');
       },
       onShow: (Stock stock) {
-        _scaffoldKey.currentState.showBottomSheet((BuildContext context) => new StockSymbolBottomSheet(stock: stock));
+        _scaffoldKey.currentState.showBottomSheet<Null>((BuildContext context) => new StockSymbolBottomSheet(stock: stock));
       }
     );
   }

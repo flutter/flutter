@@ -46,7 +46,7 @@ class TestAssetBundle extends AssetBundle {
   }
 
   @override
-  Future<dynamic> loadStructuredData(String key, Future<dynamic> parser(String value)) async {
+  Future<dynamic> loadStructuredData<T>(String key, Future<T> parser(String value)) async {
     return parser(await loadString(key));
   }
 

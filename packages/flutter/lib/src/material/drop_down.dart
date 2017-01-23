@@ -515,7 +515,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> {
       elevation: config.elevation,
       theme: Theme.of(context, shadowThemeOnly: true),
       style: _textStyle,
-    )).then((_DropdownRouteResult<T> newValue) {
+    )).then<Null>((_DropdownRouteResult<T> newValue) {
       if (!mounted || newValue == null)
         return;
       if (config.onChanged != null)

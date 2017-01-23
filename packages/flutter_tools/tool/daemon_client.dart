@@ -70,7 +70,7 @@ Future<Null> main() async {
     stdout.write('> ');
   });
 
-  daemon.exitCode.then((int code) {
+  daemon.exitCode.then<Null>((int code) {
     print('daemon exiting ($code)');
     exit(code);
   });

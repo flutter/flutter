@@ -266,7 +266,7 @@ class _DevFSHttpWriter {
       Stream<List<int>> contents = content.contentsAsCompressedStream();
       await request.addStream(contents);
       HttpClientResponse response = await request.close();
-      await response.drain();
+      await response.drain<Null>();
     } catch (e) {
       printError('Error writing "$devicePath" to DevFS: $e');
     }
@@ -417,7 +417,10 @@ class DevFS {
         if (progressReporter != null) {
           final int max = _pendingOperations.length;
           int complete = 0;
-          _pendingOperations.forEach((Future<dynamic> f) => f.then((dynamic v) {
+          _pendingOperations.forEach((Future<dynamic> f) => f.whenComplete(() {
+            // TODO(ianh): If one of the pending operations fail, we'll keep
+            // calling progressReporter long after update() has completed its
+            // future, assuming that doesn't crash the app.
             complete += 1;
             progressReporter(complete, max);
           }));
