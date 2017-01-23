@@ -13,9 +13,11 @@ install:
 before_script:
   - ./dev/bots/setup.sh
 script:
-  - ./dev/bots/test.sh
-after_success:
-  - (cd packages/flutter && coveralls-lcov coverage/lcov.info)
+  - ./dev/bots/entry.sh
+env:
+  - MAIN_BOT=true
+  - DART_SDK_CANARY=true
+  - BUILD_DOCS=true
 cache:
   directories:
     - $HOME/.pub-cache

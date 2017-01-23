@@ -1,11 +1,14 @@
 #!/bin/bash
 set -e
 
+# analyze all the Dart code in the repo
+flutter analyze --flutter-repo
+
 # Install dartdoc.
 pub global activate dartdoc 0.9.10
 
-# This script generates a unified doc set, and creates
-# a custom index.html, placing everything into dev/docs/doc
+# This script generates a unified doc set, and creates a custom index.html,
+# placing everything into dev/docs/doc
 (cd dev/tools; pub get)
 FLUTTER_ROOT=$PWD dart dev/tools/dartdoc.dart
 

@@ -59,15 +59,3 @@ SRC_ROOT=$PWD
 # generate and analyze our large sample app
 dart dev/tools/mega_gallery.dart
 (cd dev/benchmarks/mega_gallery; flutter analyze --watch --benchmark)
-
-if [ -n "$COVERAGE_FLAG" ]; then
-  GSUTIL=$HOME/google-cloud-sdk/bin/gsutil
-  GCLOUD=$HOME/google-cloud-sdk/bin/gcloud
-
-  $GCLOUD auth activate-service-account --key-file ../gcloud_key_file.json
-  STORAGE_URL=gs://flutter_infra/flutter/coverage/lcov.info
-  $GSUTIL cp packages/flutter/coverage/lcov.info $STORAGE_URL
-fi
-
-# generate the API docs, upload them
-dev/bots/docs.sh
