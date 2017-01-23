@@ -265,9 +265,7 @@ Future<String> _buildAotSnapshot(
 
     // These names are known to from the engine.
     String kVmSnapshotData = 'kDartVmSnapshotData';
-    String kVmSnapshotInstructions = 'kDartVmSnapshotInstructions';
     String kIsolateSnapshotData = 'kDartIsolateSnapshotData';
-    String kIsolateSnapshotInstructions = 'kDartIsolateSnapshotInstructions';
 
     String kVmSnapshotDataC = path.join(outputDir.path, '$kVmSnapshotData.c');
     String kIsolateSnapshotDataC = path.join(outputDir.path, '$kIsolateSnapshotData.c');
