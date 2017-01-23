@@ -3,5 +3,5 @@ repositories {
 }
 
 dependencies {
-  compile "com.android.tools.build:gradle:2.1.0"
+  compile "com.android.tools.build:gradle:2.2.3"
 }
