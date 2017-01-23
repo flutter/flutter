@@ -33,7 +33,7 @@ vars = {
   'dart_observatory_packages_revision': '26aad88f1c1915d39bbcbff3cad589e2402fdcf1',
   'dart_root_certificates_revision': '0068d8911140e591ebb750af296e81940a9906f5',
 
-  'buildtools_revision': '1f4c1c3bd3bd4c991e6565a0dc509c8d8a3f90b4',
+  'buildtools_revision': '5655267acc2b1c672aec43bfbd28c645908fcd74',
 }
 
 # Only these hosts are allowed for dependencies in this DEPS file.
@@ -46,7 +46,7 @@ allowed_hosts = [
 ]
 
 deps = {
-  'src': 'https://github.com/flutter/buildroot.git' + '@' + '8bdd40871339d8297b2681bbe218543d80ceda1b',
+  'src': 'https://github.com/flutter/buildroot.git' + '@' + '62de2ab9a1e6ffdaec93b74f6e0b4adf57c3f571',
 
    # Fuchsia compatibility
    #
@@ -118,6 +118,9 @@ deps = {
   'src/third_party/libjpeg-turbo':
    Var('skia_git') + '/third_party/libjpeg-turbo.git' + '@' + 'debddedc75850bcdeb8a57258572f48b802a4bb3',
 
+  'src/third_party/gyp':
+   Var('chromium_git') + '/external/gyp.git' + '@' + '6ee91ad8659871916f9aa840d42e1513befdf638',
+
    # Headers for Vulkan 1.0
    'src/third_party/vulkan':
    Var('github_git') + '/KhronosGroup/Vulkan-Docs.git' + '@' + 'e29c2489e238509c41aeb8c7bce9d669a496344b',
@@ -163,6 +166,12 @@ hooks = [
     ],
   },
   {
+    # Update the Windows toolchain if necessary.
+    'name': 'win_toolchain',
+    'pattern': '.',
+    'action': ['python', 'src/build/vs_toolchain.py', 'update'],
+  },
+  {
     'name': 'download_android_tools',
     'pattern': '.',
     'action': [
@@ -171,9 +180,9 @@ hooks = [
     ],
   },
   {
-    'name': 'clang',
+    'name': 'buildtools',
     'pattern': '.',
-    'action': ['/bin/bash', 'src/buildtools/update.sh', '--toolchain', '--ninja', '--gn'],
+    'action': ['python', 'src/tools/buildtools/update.py'],
   },
   {
     # Pull dart sdk if needed

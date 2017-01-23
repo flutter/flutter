@@ -1887,6 +1887,7 @@ class RepositoryRootThirdPartyDirectory extends RepositoryGenericThirdPartyDirec
     return entry.name != 'appurify-python' // only used by tests
         && entry.name != 'dart-sdk' // redundant with //engine/dart; https://github.com/flutter/flutter/issues/2618
         && entry.name != 'firebase' // only used by bots; https://github.com/flutter/flutter/issues/3722
+        && entry.name != 'gyp' // build-time only
         && entry.name != 'jinja2' // build-time code generation
         && entry.name != 'junit' // only mentioned in build files, not used
         && entry.name != 'libxml' // dependency of the testing system that we don't actually use
