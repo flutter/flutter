@@ -172,43 +172,8 @@ class RenderPadding extends RenderShiftedBox {
   void debugPaintSize(PaintingContext context, Offset offset) {
     super.debugPaintSize(context, offset);
     assert(() {
-      Paint paint;
-      if (child != null && !child.size.isEmpty) {
-        Path path;
-        paint = new Paint()
-          ..color = debugPaintPaddingColor;
-        path = new Path()
-          ..moveTo(offset.dx, offset.dy)
-          ..lineTo(offset.dx + size.width, offset.dy)
-          ..lineTo(offset.dx + size.width, offset.dy + size.height)
-          ..lineTo(offset.dx, offset.dy + size.height)
-          ..close()
-          ..moveTo(offset.dx + padding.left, offset.dy + padding.top)
-          ..lineTo(offset.dx + padding.left, offset.dy + size.height - padding.bottom)
-          ..lineTo(offset.dx + size.width - padding.right, offset.dy + size.height - padding.bottom)
-          ..lineTo(offset.dx + size.width - padding.right, offset.dy + padding.top)
-          ..close();
-        context.canvas.drawPath(path, paint);
-        paint = new Paint()
-          ..color = debugPaintPaddingInnerEdgeColor;
-        const double kOutline = 2.0;
-        path = new Path()
-          ..moveTo(offset.dx + math.max(padding.left - kOutline, 0.0), offset.dy + math.max(padding.top - kOutline, 0.0))
-          ..lineTo(offset.dx + math.min(size.width - padding.right + kOutline, size.width), offset.dy + math.max(padding.top - kOutline, 0.0))
-          ..lineTo(offset.dx + math.min(size.width - padding.right + kOutline, size.width), offset.dy + math.min(size.height - padding.bottom + kOutline, size.height))
-          ..lineTo(offset.dx + math.max(padding.left - kOutline, 0.0), offset.dy + math.min(size.height - padding.bottom + kOutline, size.height))
-          ..close()
-          ..moveTo(offset.dx + padding.left, offset.dy + padding.top)
-          ..lineTo(offset.dx + padding.left, offset.dy + size.height - padding.bottom)
-          ..lineTo(offset.dx + size.width - padding.right, offset.dy + size.height - padding.bottom)
-          ..lineTo(offset.dx + size.width - padding.right, offset.dy + padding.top)
-          ..close();
-        context.canvas.drawPath(path, paint);
-      } else {
-        paint = new Paint()
-          ..color = debugPaintSpacingColor;
-        context.canvas.drawRect(offset & size, paint);
-      }
+      final Rect outerRect = offset & size;
+      debugPaintPadding(context.canvas, outerRect, child != null ? padding.deflateRect(outerRect) : null);
       return true;
     });
   }

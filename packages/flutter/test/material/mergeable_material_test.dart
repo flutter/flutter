@@ -203,13 +203,14 @@ void main() {
       )
     );
 
-    RenderBox box = tester.renderObject(find.byType(MergeableMaterial));
-
     final BoxShadow boxShadow = kElevationToShadow[2][0];
     final RRect rrect = kMaterialEdges[MaterialType.card].toRRect(
       new Rect.fromLTRB(0.0, 0.0, 800.0, 100.0)
     );
-    expect(box, paints..rrect(rrect: rrect, color: boxShadow.color, hasMaskFilter: true));
+    expect(
+      find.byType(MergeableMaterial),
+      paints..rrect(rrect: rrect, color: boxShadow.color, hasMaskFilter: true),
+    );
   });
 
   testWidgets('MergeableMaterial merge gap', (WidgetTester tester) async {
