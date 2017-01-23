@@ -23,7 +23,7 @@ assert(is_win)
 # "environment.x86" and "environment.x64" to the build directory and return a
 # list to us.
 gyp_win_tool_path =
-    rebase_path("//tools/gyp/pylib/gyp/win_tool.py", root_build_dir)
+    rebase_path("//third_party/gyp/pylib/gyp/win_tool.py", root_build_dir)
 
 toolchain_data = exec_script("setup_toolchain.py",
                              [
@@ -45,16 +45,10 @@ if (use_goma) {
   goma_prefix = ""
 }
 
-# This value will be inherited in the toolchain below.
-concurrent_links = exec_script("../get_concurrent_links.py", [], "value")
-
 # Parameters:
 #  current_cpu: current_cpu to pass as a build arg
 #  environment: File name of environment file.
 template("msvc_toolchain") {
-  if (defined(invoker.concurrent_links)) {
-    concurrent_links = invoker.concurrent_links
-  }
 
   env = invoker.environment
 
@@ -205,7 +199,7 @@ template("msvc_toolchain") {
 
     # When invoking this toolchain not as the default one, these args will be
     # passed to the build. They are ignored when this is the default toolchain.
-    toolchain_args() {
+    toolchain_args = {
       current_cpu = invoker.current_cpu
       if (defined(invoker.is_clang)) {
         is_clang = invoker.is_clang

@@ -579,11 +579,7 @@ set_defaults("test") {
 
 if (is_win) {
   # On windows we use the same toolchain for host and target by default.
-  if (is_clang) {
-    host_toolchain = "//build/toolchain/win:clang_$current_cpu"
-  } else {
-    host_toolchain = "//build/toolchain/win:$current_cpu"
-  }
+  host_toolchain = "//build/toolchain/win:$current_cpu"
   set_default_toolchain("$host_toolchain")
 } else if (is_android) {
   if (host_os == "linux") {

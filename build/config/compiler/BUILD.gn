@@ -34,13 +34,6 @@ declare_args() {
   # information to analyze.
   # Requires profiling to be set to true.
   enable_full_stack_frames_for_profiling = false
-
-  if (is_win) {
-    # Whether the VS xtree header has been patched to disable warning 4702. If
-    # it has, then we don't need to disable 4702 (unreachable code warning).
-    # The patch is preapplied to the internal toolchain and hence all bots.
-    msvs_xtree_patched = false
-  }
 }
 
 # default_include_dirs ---------------------------------------------------------
@@ -55,7 +48,6 @@ config("default_include_dirs") {
   ]
 }
 
-# TODO(GYP): is_ubsan, is_ubsan_vptr
 if (!is_win) {
   using_sanitizer = is_asan || is_lsan || is_tsan || is_msan
 }
@@ -87,40 +79,6 @@ config("compiler") {
       "/GS",  # Enable buffer security checking.
       "/FS",  # Preserve previous PDB behavior.
     ]
-
-    # Building with Clang on Windows is a work in progress and very
-    # experimental. See crbug.com/82385.
-    # Keep this in sync with the similar block in build/common.gypi
-    if (is_clang) {
-      cflags += [
-        # Many files use intrinsics without including this header.
-        # TODO(hans): Fix those files, or move this to sub-GYPs.
-        "/FIIntrin.h",
-      ]
-
-      if (visual_studio_version == "2013") {
-        cflags += [ "-fmsc-version=1800" ]
-      } else if (visual_studio_version == "2015") {
-        cflags += [ "-fmsc-version=1900" ]
-      }
-
-      if (current_cpu == "x86") {
-        cflags += [
-          "/fallback",
-          "-m32",
-        ]
-      } else {
-        cflags += [ "-m64" ]
-      }
-      if (exec_script("//build/win/use_ansi_codes.py", [], "trim string") ==
-          "True") {
-        cflags += [
-          # cmd.exe doesn't understand ANSI escape codes by default,
-          # so only enable them if something emulating them is around.
-          "-fansi-escape-codes",
-        ]
-      }
-    }
   } else {
     # Common GCC compiler flags setup.
     # --------------------------------
@@ -203,12 +161,6 @@ config("compiler") {
       # TODO(kulakowski) remove when fnl no longer uses gcc
       cflags += [ "-Wno-maybe-uninitialized" ]
     }
-  }
-
-  if (!is_clang) {
-    color_diagnostics_flag = [ "-fdiagnostics-color=always" ]
-    cflags_cc += color_diagnostics_flag
-    cflags_objcc += color_diagnostics_flag
   }
 
   if (is_clang && is_debug) {
@@ -436,6 +388,8 @@ config("compiler") {
   # Tracked in https://fuchsia.atlassian.net/browse/TO-61
   if (is_linux && current_cpu == "x86") {
     cc_std = [ "-std=c++11" ]
+  } else if (is_win) {
+    cc_std = [ "/std:c++14" ]
   } else {
     cc_std = [ "-std=c++14" ]
   }
@@ -542,30 +496,13 @@ config("runtime_library") {
   lib_dirs = []
   libs = []
 
-  if (is_component_build) {
-    # Component mode: dynamic CRT.
-    defines += [ "COMPONENT_BUILD" ]
-    if (is_win) {
-      # Since the library is shared, it requires exceptions or will give errors
-      # about things not matching, so keep exceptions on.
-      if (is_debug) {
-        cflags += [ "/MDd" ]
-      } else {
-        cflags += [ "/MD" ]
-      }
-    }
-  } else {
-    # Static CRT.
-    if (is_win) {
-      if (is_debug) {
-        cflags += [ "/MTd" ]
-      } else {
-        cflags += [ "/MT" ]
-      }
-    }
-  }
-
+  # Static CRT.
   if (is_win) {
+    if (is_debug) {
+      cflags += [ "/MTd" ]
+    } else {
+      cflags += [ "/MT" ]
+    }
     defines += [
       "__STD_C",
       "_CRT_RAND_S",
@@ -664,108 +601,21 @@ config("runtime_library") {
 default_warning_flags = []
 default_warning_flags_cc = []
 if (is_win) {
-  if (!is_clang || current_cpu != "x86") {
+  if (current_cpu != "x86") {
     default_warning_flags += [ "/WX" ]  # Treat warnings as errors.
   }
 
   default_warning_flags += [
-    # Warnings permanently disabled:
-
-    # TODO(GYP) The GYP build doesn't have this globally enabled but disabled
-    # for a bunch of individual targets. Re-enable this globally when those
-    # targets are fixed.
-    "/wd4018",  # Comparing signed and unsigned values.
-
-    # C4127: conditional expression is constant
-    # This warning can in theory catch dead code and other problems, but
-    # triggers in far too many desirable cases where the conditional
-    # expression is either set by macros or corresponds some legitimate
-    # compile-time constant expression (due to constant template args,
-    # conditionals comparing the sizes of different types, etc.).  Some of
-    # these can be worked around, but it's not worth it.
-    "/wd4127",
-
-    # C4251: 'identifier' : class 'type' needs to have dll-interface to be
-    #        used by clients of class 'type2'
-    # This is necessary for the shared library build.
-    "/wd4251",
-
-    # C4351: new behavior: elements of array 'array' will be default
-    #        initialized
-    # This is a silly "warning" that basically just alerts you that the
-    # compiler is going to actually follow the language spec like it's
-    # supposed to, instead of not following it like old buggy versions did.
-    # There's absolutely no reason to turn this on.
-    "/wd4351",
-
-    # C4355: 'this': used in base member initializer list
-    # It's commonly useful to pass |this| to objects in a class' initializer
-    # list.  While this warning can catch real bugs, most of the time the
-    # constructors in question don't attempt to call methods on the passed-in
-    # pointer (until later), and annotating every legit usage of this is
-    # simply more hassle than the warning is worth.
-    "/wd4355",
-
-    # C4503: 'identifier': decorated name length exceeded, name was
-    #        truncated
-    # This only means that some long error messages might have truncated
-    # identifiers in the presence of lots of templates.  It has no effect on
-    # program correctness and there's no real reason to waste time trying to
-    # prevent it.
-    "/wd4503",
-
-    # Warning C4589 says: "Constructor of abstract class ignores
-    # initializer for virtual base class." Disable this warning because it
-    # is flaky in VS 2015 RTM. It triggers on compiler generated
-    # copy-constructors in some cases.
-    "/wd4589",
-
-    # C4611: interaction between 'function' and C++ object destruction is
-    #        non-portable
-    # This warning is unavoidable when using e.g. setjmp/longjmp.  MSDN
-    # suggests using exceptions instead of setjmp/longjmp for C++, but
-    # Chromium code compiles without exception support.  We therefore have to
-    # use setjmp/longjmp for e.g. JPEG decode error handling, which means we
-    # have to turn off this warning (and be careful about how object
-    # destruction happens in such cases).
-    "/wd4611",
-
-    # Warnings to evaluate and possibly fix/reenable later:
-
-    "/wd4100",  # Unreferenced formal function parameter.
-    "/wd4121",  # Alignment of a member was sensitive to packing.
-    "/wd4244",  # Conversion: possible loss of data.
-    "/wd4481",  # Nonstandard extension: override specifier.
-    "/wd4505",  # Unreferenced local function has been removed.
-    "/wd4510",  # Default constructor could not be generated.
-    "/wd4512",  # Assignment operator could not be generated.
-    "/wd4610",  # Class can never be instantiated, constructor required.
-    "/wd4996",  # Deprecated function warning.
+    # Permanent.
+    "/wd4091",  # typedef warning from dbghelp.h
+    # Investigate.
+    "/wd4312",  # int to pointer of greater size conversion.
+    "/wd4838",  # Narrowing conversion required.
+    "/wd4172",  # Returning address of local.
+    "/wd4005",  # Redefinition of macros for PRId64 etc.
+    "/wd4311",  # Pointer truncation from PVOID to DWORD.
+    "/wd4477",  # Format string requires wchar_t*
   ]
-
-  # VS xtree header file needs to be patched or 4702 (unreachable code
-  # warning) is reported if _HAS_EXCEPTIONS=0. Disable the warning if xtree is
-  # not patched.
-  if (!msvs_xtree_patched &&
-      exec_script("../../win_is_xtree_patched.py", [], "value") == 0) {
-    default_warning_flags += [ "/wd4702" ]  # Unreachable code.
-  }
-
-  # Building with Clang on Windows is a work in progress and very
-  # experimental. See crbug.com/82385.
-  # Keep this in sync with the similar block in build/common.gypi
-  if (is_clang) {
-    default_warning_flags += [
-      # TODO(hans): Make this list shorter eventually, http://crbug.com/504657
-      "-Qunused-arguments",  # http://crbug.com/504658
-      "-Wno-microsoft",  # http://crbug.com/505296
-      "-Wno-switch",  # http://crbug.com/505308
-      "-Wno-unknown-pragmas",  # http://crbug.com/505314
-      "-Wno-unused-function",  # http://crbug.com/505316
-      "-Wno-unused-value",  # http://crbug.com/505318
-      "-Wno-unused-local-typedef",  # http://crbug.com/411648
-    ]
-  }
 } else {
   # Common GCC warning setup.
   default_warning_flags += [
@@ -877,7 +727,7 @@ if (is_clang) {
 
 config("chromium_code") {
   if (is_win) {
-    cflags = [ "/W4" ]  # Warning level 4.
+    cflags = []
   } else {
     cflags = [
       "-Wall",
@@ -912,12 +762,6 @@ config("no_chromium_code") {
   defines = []
 
   if (is_win) {
-    cflags += [
-      "/W3",  # Warning level 3.
-      "/wd4800",  # Disable warning when forcing value to bool.
-      "/wd4267",  # TODO(jschuh): size_t to int.
-      "/wd4996",  # Deprecated function warning.
-    ]
     defines += [
       "_CRT_NONSTDC_NO_WARNINGS",
       "_CRT_NONSTDC_NO_DEPRECATE",
