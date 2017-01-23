@@ -84,6 +84,7 @@ class DriveCommand extends RunCommandBase {
   Device get device => _device;
 
   /// Subscription to log messages printed on the device or simulator.
+  // ignore: cancel_subscriptions
   StreamSubscription<String> _deviceLogSubscription;
 
   int get debugPort => int.parse(argResults['debug-port']);

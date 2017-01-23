@@ -132,6 +132,7 @@ class FlutterError extends AssertionError {
   ///
   /// All sentences in the error should be correctly punctuated (i.e.,
   /// do end the error message with a period).
+  @override
   final String message;
 
   @override
