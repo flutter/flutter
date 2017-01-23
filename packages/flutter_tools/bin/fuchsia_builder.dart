@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:args/args.dart';
+import 'package:process/process.dart';
 
 import '../lib/src/base/common.dart';
 import '../lib/src/base/config.dart';
@@ -13,7 +14,6 @@ import '../lib/src/base/file_system.dart';
 import '../lib/src/base/io.dart';
 import '../lib/src/base/logger.dart';
 import '../lib/src/base/os.dart';
-import '../lib/src/base/process_manager.dart';
 import '../lib/src/cache.dart';
 import '../lib/src/flx.dart';
 import '../lib/src/globals.dart';
@@ -39,7 +39,7 @@ Future<Null> main(List<String> args) async {
   executableContext.runInZone(() {
     // Initialize the context with some defaults.
     context.putIfAbsent(FileSystem, () => new LocalFileSystem());
-    context.putIfAbsent(ProcessManager, () => new ProcessManager());
+    context.putIfAbsent(ProcessManager, () => new LocalProcessManager());
     context.putIfAbsent(Logger, () => new StdoutLogger());
     context.putIfAbsent(Cache, () => new Cache());
     context.putIfAbsent(Config, () => new Config());

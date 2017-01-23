@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:args/command_runner.dart';
+import 'package:process/process.dart';
 import 'package:stack_trace/stack_trace.dart';
 
 import 'src/base/common.dart';
@@ -15,7 +16,6 @@ import 'src/base/io.dart';
 import 'src/base/logger.dart';
 import 'src/base/os.dart';
 import 'src/base/process.dart';
-import 'src/base/process_manager.dart';
 import 'src/base/utils.dart';
 import 'src/cache.dart';
 import 'src/commands/analyze.dart';
@@ -103,7 +103,7 @@ Future<Null> main(List<String> args) async {
 
     // Seed these context entries first since others depend on them
     context.putIfAbsent(FileSystem, () => new LocalFileSystem());
-    context.putIfAbsent(ProcessManager, () => new ProcessManager());
+    context.putIfAbsent(ProcessManager, () => new LocalProcessManager());
     context.putIfAbsent(Logger, () => new StdoutLogger());
 
     // Order-independent context entries
