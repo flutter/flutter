@@ -7,7 +7,6 @@ import 'dart:collection';
 import 'package:analyzer/error/error.dart';
 import 'package:analyzer/file_system/file_system.dart' as file_system;
 import 'package:analyzer/file_system/physical_file_system.dart';
-import 'package:analyzer/plugin/options.dart';
 import 'package:analyzer/source/analysis_options_provider.dart';
 import 'package:analyzer/source/error_processor.dart';
 import 'package:analyzer/source/package_map_resolver.dart';
@@ -18,8 +17,8 @@ import 'package:analyzer/src/generated/java_io.dart'; // ignore: implementation_
 import 'package:analyzer/src/generated/source.dart'; // ignore: implementation_imports
 import 'package:analyzer/src/generated/source_io.dart'; // ignore: implementation_imports
 import 'package:analyzer/src/task/options.dart'; // ignore: implementation_imports
+import 'package:linter/src/rules.dart' as linter; // ignore: implementation_imports
 import 'package:cli_util/cli_util.dart' as cli_util;
-import 'package:linter/src/plugin/linter_plugin.dart'; // ignore: implementation_imports
 import 'package:package_config/packages.dart' show Packages;
 import 'package:package_config/src/packages_impl.dart' show MapPackages; // ignore: implementation_imports
 import 'package:path/path.dart' as path;
@@ -30,6 +29,12 @@ import '../base/file_system.dart' hide IOSink;
 import '../base/io.dart';
 
 class AnalysisDriver {
+  AnalysisDriver(this.options) {
+    AnalysisEngine.instance.logger =
+        new _StdLogger(outSink: options.outSink, errorSink: options.errorSink);
+    _processPlugins();
+  }
+
   Set<Source> _analyzedSources = new HashSet<Source>();
 
   AnalysisOptionsProvider analysisOptionsProvider =
@@ -40,11 +45,6 @@ class AnalysisDriver {
   AnalysisContext context;
 
   DriverOptions options;
-  AnalysisDriver(this.options) {
-    AnalysisEngine.instance.logger =
-        new _StdLogger(outSink: options.outSink, errorSink: options.errorSink);
-    _processPlugins();
-  }
 
   String get sdkDir => options.dartSdkPath ?? cli_util.getSdkDir().path;
 
@@ -53,9 +53,8 @@ class AnalysisDriver {
     List<AnalysisErrorDescription> errors = <AnalysisErrorDescription>[];
     for (AnalysisErrorInfo info in infos) {
       for (AnalysisError error in info.errors) {
-        if (!_isFiltered(error)) {
+        if (!_isFiltered(error))
           errors.add(new AnalysisErrorDescription(error, info.lineInfo));
-        }
       }
     }
     return errors;
@@ -63,7 +62,8 @@ class AnalysisDriver {
 
   List<AnalysisErrorInfo> _analyze(Iterable<File> files) {
     context = AnalysisEngine.instance.createAnalysisContext();
-    _processAnalysisOptions(context, options);
+    _processAnalysisOptions();
+    context.analysisOptions = options;
     PackageInfo packageInfo = new PackageInfo(options.packageMap);
     List<UriResolver> resolvers = _getResolvers(context, packageInfo.asMap());
     context.sourceFactory =
@@ -96,7 +96,6 @@ class AnalysisDriver {
   List<UriResolver> _getResolvers(InternalAnalysisContext context,
       Map<String, List<file_system.Folder>> packageMap) {
 
-
     // Create our list of resolvers.
     List<UriResolver> resolvers = <UriResolver>[];
 
@@ -108,9 +107,6 @@ class AnalysisDriver {
       // Fail fast if no URI mappings are found.
       assert(sdk.libraryMap.size() > 0);
       sdk.analysisOptions = context.analysisOptions;
-      // TODO(pq): re-enable once we have a proper story for SDK summaries
-      // in the presence of embedders (https://github.com/dart-lang/sdk/issues/26467).
-      sdk.useSummary = false;
 
       resolvers.add(new DartUriResolver(sdk));
     } else {
@@ -138,58 +134,48 @@ class AnalysisDriver {
   }
 
   bool _isFiltered(AnalysisError error) {
-    ErrorProcessor processor = ErrorProcessor.getProcessor(context, error);
+    ErrorProcessor processor = ErrorProcessor.getProcessor(context.analysisOptions, error);
     // Filtered errors are processed to a severity of `null`.
     return processor != null && processor.severity == null;
   }
 
-  void _processAnalysisOptions(
-      AnalysisContext context, AnalysisOptions analysisOptions) {
-    List<OptionsProcessor> optionsProcessors =
-        AnalysisEngine.instance.optionsPlugin.optionsProcessors;
-    try {
-      String optionsPath = options.analysisOptionsFile;
-      if (optionsPath != null) {
-        file_system.File file =
-            PhysicalResourceProvider.INSTANCE.getFile(optionsPath);
-        Map<Object, Object> optionMap =
-            analysisOptionsProvider.getOptionsFromFile(file);
-        optionsProcessors.forEach(
-            (OptionsProcessor p) => p.optionsProcessed(context, optionMap));
-        if (optionMap != null) {
-          configureContextOptions(context, optionMap);
-        }
-      }
-    } on Exception catch (e) {
-      optionsProcessors.forEach((OptionsProcessor p) => p.onError(e));
+  void _processAnalysisOptions() {
+    String optionsPath = options.analysisOptionsFile;
+    if (optionsPath != null) {
+      file_system.File file =
+           PhysicalResourceProvider.INSTANCE.getFile(optionsPath);
+      Map<Object, Object> optionMap =
+          analysisOptionsProvider.getOptionsFromFile(file);
+      if (optionMap != null)
+        applyToAnalysisOptions(options, optionMap);
     }
   }
 
   void _processPlugins() {
     List<Plugin> plugins = <Plugin>[];
     plugins.addAll(AnalysisEngine.instance.requiredPlugins);
-    plugins.add(AnalysisEngine.instance.commandLinePlugin);
-    plugins.add(AnalysisEngine.instance.optionsPlugin);
-    plugins.add(linterPlugin);
     ExtensionManager manager = new ExtensionManager();
     manager.processPlugins(plugins);
+    linter.registerLintRules();
   }
 }
 
 class AnalysisDriverException implements Exception {
-  final String message;
   AnalysisDriverException([this.message]);
+
+  final String message;
 
   @override
   String toString() => message == null ? 'Exception' : 'Exception: $message';
 }
 
 class AnalysisErrorDescription {
+  AnalysisErrorDescription(this.error, this.line);
+
   static Directory cwd = fs.currentDirectory.absolute;
 
   final AnalysisError error;
   final LineInfo line;
-  AnalysisErrorDescription(this.error, this.line);
 
   ErrorCode get errorCode => error.errorCode;
 
@@ -216,7 +202,6 @@ class AnalysisErrorDescription {
 }
 
 class DriverOptions extends AnalysisOptionsImpl {
-
   DriverOptions() {
     // Set defaults.
     lint = true;
@@ -235,9 +220,6 @@ class DriverOptions extends AnalysisOptionsImpl {
 
   /// The path to analysis options.
   String analysisOptionsFile;
-
-  /// Analysis options map.
-  Map<Object, Object> analysisOptions;
 
   /// Out sink for logging.
   IOSink outSink = stdout;
@@ -260,23 +242,28 @@ class PackageInfo {
   }
 
   Packages _packages;
-  HashMap<String, List<file_system.Folder>> _map =
-      new HashMap<String, List<file_system.Folder>>();
 
   Map<String, List<file_system.Folder>> asMap() => _map;
+  HashMap<String, List<file_system.Folder>> _map =
+      new HashMap<String, List<file_system.Folder>>();
 
   Packages asPackages() => _packages;
 }
 
 class _StdLogger extends Logger {
+  _StdLogger({this.outSink, this.errorSink});
+
   final IOSink outSink;
   final IOSink errorSink;
-  _StdLogger({this.outSink, this.errorSink});
 
   @override
   void logError(String message, [Exception exception]) =>
       errorSink.writeln(message);
+
   @override
-  void logInformation(String message, [Exception exception]) =>
+  void logInformation(String message, [Exception exception]) {
+    // TODO(pq): remove once addressed in analyzer (http://dartbug.com/28285)
+    if (message != 'No definition of type FutureOr')
       outSink.writeln(message);
+  }
 }

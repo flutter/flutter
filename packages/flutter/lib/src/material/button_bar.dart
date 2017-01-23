@@ -57,7 +57,7 @@ class ButtonBar extends StatelessWidget {
       child: new Row(
         mainAxisAlignment: alignment,
         mainAxisSize: mainAxisSize,
-        children: children.map/*<Widget>*/((Widget child) {
+        children: children.map<Widget>((Widget child) {
           return new Padding(
             padding: new EdgeInsets.symmetric(horizontal: paddingUnit),
             child: child

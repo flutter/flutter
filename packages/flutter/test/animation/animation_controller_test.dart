@@ -260,4 +260,27 @@ void main() {
 
     controller.stop();
   });
+
+  test('Disposed AnimationController toString works', () {
+    AnimationController controller = new AnimationController(
+      duration: const Duration(milliseconds: 100),
+      vsync: const TestVSync(),
+    );
+    controller.dispose();
+    expect(controller, hasOneLineDescription);
+  });
+
+  test('AnimationController error handling', () {
+    AnimationController controller = new AnimationController(
+      vsync: const TestVSync(),
+    );
+
+    expect(controller.forward, throwsFlutterError);
+    expect(controller.reverse, throwsFlutterError);
+    expect(() { controller.animateTo(0.5); }, throwsFlutterError);
+    expect(controller.repeat, throwsFlutterError);
+
+    controller.dispose();
+    expect(controller.dispose, throwsFlutterError);
+  });
 }

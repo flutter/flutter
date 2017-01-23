@@ -62,14 +62,14 @@ void main() {
   }
 
   Future<Null> showKeyboard(WidgetTester tester) async {
-    RawInputState editable = tester.state(find.byType(RawInput).first);
+    EditableTextState editable = tester.state(find.byType(EditableText).first);
     editable.requestKeyboard();
     await tester.pump();
   }
 
   // Returns the first RenderEditable.
   RenderEditable findRenderEditable(WidgetTester tester) {
-    RenderObject root = tester.renderObject(find.byType(RawInput));
+    RenderObject root = tester.renderObject(find.byType(EditableText));
     expect(root, isNotNull);
 
     RenderEditable renderEditable;
@@ -154,7 +154,7 @@ void main() {
     await tester.pumpWidget(builder());
     await showKeyboard(tester);
 
-    RawInputState editableText = tester.state(find.byType(RawInput));
+    EditableTextState editableText = tester.state(find.byType(EditableText));
 
     // Check that the cursor visibility toggles after each blink interval.
     Future<Null> checkCursorToggle() async {
@@ -182,7 +182,7 @@ void main() {
     await checkCursorToggle();
   });
 
-  testWidgets('hideText control test', (WidgetTester tester) async {
+  testWidgets('obscureText control test', (WidgetTester tester) async {
     GlobalKey inputKey = new GlobalKey();
 
     Widget builder() {
@@ -190,7 +190,7 @@ void main() {
         child: new Material(
           child: new Input(
             key: inputKey,
-            hideText: true,
+            obscureText: true,
             hintText: 'Placeholder'
           )
         )

@@ -205,7 +205,7 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
                   onCancel: () { Form.of(context).reset(); close(); },
                   child: new Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: new InputFormField(
+                    child: new TextField(
                       hintText: item.hint,
                       labelText: item.name,
                       initialValue: new InputValue(text: item.value),

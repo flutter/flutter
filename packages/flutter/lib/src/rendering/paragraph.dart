@@ -33,14 +33,16 @@ class RenderParagraph extends RenderBox {
     TextAlign textAlign,
     bool softWrap: true,
     TextOverflow overflow: TextOverflow.clip,
-    double textScaleFactor: 1.0
+    double textScaleFactor: 1.0,
+    int maxLines,
   }) : _softWrap = softWrap,
        _overflow = overflow,
        _textPainter = new TextPainter(
-           text: text,
-           textAlign: textAlign,
-           textScaleFactor: textScaleFactor,
-           ellipsis: overflow == TextOverflow.ellipsis ? _kEllipsis : null,
+         text: text,
+         textAlign: textAlign,
+         textScaleFactor: textScaleFactor,
+         maxLines: maxLines,
+         ellipsis: overflow == TextOverflow.ellipsis ? _kEllipsis : null,
        ) {
     assert(text != null);
     assert(text.debugAssertIsValid());
@@ -110,8 +112,20 @@ class RenderParagraph extends RenderBox {
     markNeedsLayout();
   }
 
+  /// An optional maximum number of lines for the text to span, wrapping if necessary.
+  /// If the text exceeds the given number of lines, it will be truncated according
+  /// to [overflow].
+  int get maxLines => _textPainter.maxLines;
+  set maxLines(int value) {
+    if (_textPainter.maxLines == value)
+      return;
+    _textPainter.maxLines = value;
+    _overflowShader = null;
+    markNeedsLayout();
+  }
+
   void _layoutText({ double minWidth: 0.0, double maxWidth: double.INFINITY }) {
-    bool wrap = _softWrap || _overflow == TextOverflow.ellipsis;
+    bool wrap = _softWrap || (_overflow == TextOverflow.ellipsis && maxLines == null);
     _textPainter.layout(minWidth: minWidth, maxWidth: wrap ? maxWidth : double.INFINITY);
   }
 
@@ -183,30 +197,40 @@ class RenderParagraph extends RenderBox {
     size = constraints.constrain(textSize);
 
     final bool didOverflowWidth = size.width < textSize.width;
+    final bool didOverflowHeight = _textPainter.didExceedMaxLines;
     // TODO(abarth): We're only measuring the sizes of the line boxes here. If
     // the glyphs draw outside the line boxes, we might think that there isn't
     // visual overflow when there actually is visual overflow. This can become
     // a problem if we start having horizontal overflow and introduce a clip
     // that affects the actual (but undetected) vertical overflow.
-    _hasVisualOverflow = didOverflowWidth || size.height < textSize.height;
-    if (didOverflowWidth) {
+    _hasVisualOverflow = didOverflowWidth || didOverflowHeight;
+    if (_hasVisualOverflow) {
       switch (_overflow) {
         case TextOverflow.clip:
         case TextOverflow.ellipsis:
           _overflowShader = null;
           break;
         case TextOverflow.fade:
-          TextPainter fadeWidthPainter = new TextPainter(
+          TextPainter fadeSizePainter = new TextPainter(
             text: new TextSpan(style: _textPainter.text.style, text: '\u2026'),
             textScaleFactor: textScaleFactor
           )..layout();
-          final double fadeEnd = size.width;
-          final double fadeStart = fadeEnd - fadeWidthPainter.width;
-          // TODO(abarth): This shader has an LTR bias.
-          _overflowShader = new ui.Gradient.linear(
-            <Point>[new Point(fadeStart, 0.0), new Point(fadeEnd, 0.0)],
-            <Color>[const Color(0xFFFFFFFF), const Color(0x00FFFFFF)]
-          );
+          if (didOverflowWidth) {
+            final double fadeEnd = size.width;
+            final double fadeStart = fadeEnd - fadeSizePainter.width;
+            // TODO(abarth): This shader has an LTR bias.
+            _overflowShader = new ui.Gradient.linear(
+              <Point>[new Point(fadeStart, 0.0), new Point(fadeEnd, 0.0)],
+              <Color>[const Color(0xFFFFFFFF), const Color(0x00FFFFFF)]
+            );
+          } else {
+            final double fadeEnd = size.height;
+            final double fadeStart = fadeEnd - fadeSizePainter.height / 2.0;
+            _overflowShader = new ui.Gradient.linear(
+              <Point>[new Point(0.0, fadeStart), new Point(0.0, fadeEnd)],
+              <Color>[const Color(0xFFFFFFFF), const Color(0x00FFFFFF)]
+            );
+          }
           break;
       }
     } else {

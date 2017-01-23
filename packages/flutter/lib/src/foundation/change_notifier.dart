@@ -6,6 +6,7 @@ import 'package:meta/meta.dart';
 
 import 'assertions.dart';
 import 'basic_types.dart';
+import 'observer_list.dart';
 
 /// An object that maintains a list of listeners.
 abstract class Listenable {
@@ -32,30 +33,57 @@ abstract class Listenable {
 
 /// A class that can be extended or mixed in that provides a change notification
 /// API using [VoidCallback] for notifications.
+///
+/// [ChangeNotifier] is optimised for small numbers (one or two) of listeners.
+/// It is O(N) for adding and removing listeners and O(N²) for dispatching
+/// notifications (where N is the number of listeners).
 class ChangeNotifier extends Listenable {
-  List<VoidCallback> _listeners;
+  ObserverList<VoidCallback> _listeners = new ObserverList<VoidCallback>();
+
+  bool _debugAssertNotDisposed() {
+    assert(() {
+      if (_listeners == null) {
+        throw new FlutterError(
+          'A $runtimeType was used after being disposed.\n'
+          'Once you have called dispose() on a $runtimeType, it can no longer be used.'
+        );
+      }
+      return true;
+    });
+    return true;
+  }
 
   /// Register a closure to be called when the object changes.
+  ///
+  /// This method must not be called after [dispose] has been called.
   @override
   void addListener(VoidCallback listener) {
-    _listeners ??= <VoidCallback>[];
+    assert(_debugAssertNotDisposed);
     _listeners.add(listener);
   }
 
   /// Remove a previously registered closure from the list of closures that are
   /// notified when the object changes.
+  ///
+  /// If the given listener is not registered, the call is ignored.
+  ///
+  /// This method must not be called after [dispose] has been called.
   @override
   void removeListener(VoidCallback listener) {
-    _listeners?.remove(listener);
+    assert(_debugAssertNotDisposed);
+    _listeners.remove(listener);
   }
 
-  /// Discards any resources used by the object. After this is called, the object
-  /// is not in a usable state and should be discarded.
+  /// Discards any resources used by the object. After this is called, the
+  /// object is not in a usable state and should be discarded (calls to
+  /// [addListener] and [removeListener] will throw after the object is
+  /// disposed).
   ///
   /// This method should only be called by the object's owner.
   @mustCallSuper
   void dispose() {
-    _listeners = const <VoidCallback>[];
+    assert(_debugAssertNotDisposed);
+    _listeners = null;
   }
 
   /// Call all the registered listeners.
@@ -67,10 +95,13 @@ class ChangeNotifier extends Listenable {
   ///
   /// Exceptions thrown by listeners will be caught and reported using
   /// [FlutterError.reportError].
+  ///
+  /// This method must not be called after [dispose] has been called.
   @protected
   void notifyListeners() {
+    assert(_debugAssertNotDisposed);
     if (_listeners != null) {
-      List<VoidCallback> localListeners = new List<VoidCallback>.from(_listeners);
+      final List<VoidCallback> localListeners = new List<VoidCallback>.from(_listeners);
       for (VoidCallback listener in localListeners) {
         try {
           if (_listeners.contains(listener))

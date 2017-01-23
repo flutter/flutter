@@ -71,7 +71,7 @@ void main() {
     expect(StatefulCreationCounterState.creationCount, 0);
     await tester.pumpWidget(new Bar());
     expect(StatefulCreationCounterState.creationCount, 1);
-    BarState s = tester.state/*<BarState>*/(find.byType(Bar));
+    BarState s = tester.state<BarState>(find.byType(Bar));
     s.trigger();
     await tester.pump();
     expect(StatefulCreationCounterState.creationCount, 1);

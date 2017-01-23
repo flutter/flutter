@@ -11,7 +11,6 @@ import 'package:flutter/scheduler.dart';
 
 import 'animation.dart';
 import 'curves.dart';
-import 'forces.dart';
 import 'listener_helpers.dart';
 
 /// The direction in which an animation is running.
@@ -22,6 +21,17 @@ enum _AnimationDirection {
   /// The animation is running backwards, from end to beginning.
   reverse,
 }
+
+final SpringDescription _kFlingSpringDescription = new SpringDescription.withDampingRatio(
+  mass: 1.0,
+  springConstant: 500.0,
+  ratio: 1.0,
+);
+
+const Tolerance _kFlingTolerance = const Tolerance(
+  velocity: double.INFINITY,
+  distance: 0.01,
+);
 
 /// A controller for an animation.
 ///
@@ -200,7 +210,7 @@ class AnimationController extends Animation<double>
   /// controller's ticker might get muted, in which case the animation
   /// controller's callbacks will no longer fire even though time is continuing
   /// to pass. See [Ticker.muted] and [TickerMode].
-  bool get isAnimating => _ticker.isActive;
+  bool get isAnimating => _ticker != null && _ticker.isActive;
 
   _AnimationDirection _direction;
 
@@ -305,13 +315,16 @@ class AnimationController extends Animation<double>
     return animateWith(new _RepeatingSimulation(min, max, period));
   }
 
-  /// Flings the timeline with an optional force (defaults to a critically
-  /// damped spring within [lowerBound] and [upperBound]) and initial velocity.
+  /// Drives the animation with a critically damped spring (within [lowerBound] and [upperBound]) and initial velocity.
+  ///
   /// If velocity is positive, the animation will complete, otherwise it will dismiss.
-  Future<Null> fling({ double velocity: 1.0, Force force }) {
-    force ??= kDefaultSpringForce.copyWith(left: lowerBound, right: upperBound);
+  Future<Null> fling({ double velocity: 1.0 }) {
     _direction = velocity < 0.0 ? _AnimationDirection.reverse : _AnimationDirection.forward;
-    return animateWith(force.release(value, velocity));
+    final double target = velocity < 0.0 ? lowerBound - _kFlingTolerance.distance
+                                         : upperBound + _kFlingTolerance.distance;
+    Simulation simulation = new SpringSimulation(_kFlingSpringDescription, value, target, velocity)
+      ..tolerance = _kFlingTolerance;
+    return animateWith(simulation);
   }
 
   /// Drives the animation according to the given simulation.
@@ -348,7 +361,17 @@ class AnimationController extends Animation<double>
   /// after this method is called.
   @override
   void dispose() {
+    assert(() {
+      if (_ticker == null) {
+        throw new FlutterError(
+          'AnimationController.dispose() called more than once.\n'
+          'A given AnimationController cannot be disposed more than once.'
+        );
+      }
+      return true;
+    });
     _ticker.dispose();
+    _ticker = null;
     super.dispose();
   }
 
@@ -379,10 +402,10 @@ class AnimationController extends Animation<double>
   @override
   String toStringDetails() {
     String paused = isAnimating ? '' : '; paused';
-    String silenced = _ticker.muted ? '; silenced' : '';
+    String ticker = _ticker == null ? '; DISPOSED' : (_ticker.muted ? '; silenced' : '');
     String label = debugLabel == null ? '' : '; for $debugLabel';
     String more = '${super.toStringDetails()} ${value.toStringAsFixed(3)}';
-    return '$more$paused$silenced$label';
+    return '$more$paused$ticker$label';
   }
 }
 

@@ -141,12 +141,15 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
     super.dispose();
   }
 
+  // On Android: the user has pressed the back button.
   @override
-  bool didPopRoute() {
+  Future<bool> didPopRoute() async {
     assert(mounted);
     NavigatorState navigator = _navigator.currentState;
     assert(navigator != null);
-    return navigator.pop();
+    if (!await navigator.willPop())
+      return true;
+    return mounted && navigator.pop();
   }
 
   @override

@@ -73,14 +73,9 @@ class AnalyzeOnce extends AnalyzeBase {
       pubSpecDirectories.add(currentDirectory);
     }
 
-    // TODO(ianh): Fix the intl package resource generator
-    // TODO(pq): extract this regexp from the exclude in options
-    RegExp stockExampleFiles = new RegExp('examples/stocks/lib/i18n/.*\.dart\$');
-
     if (flutterRepo) {
       for (Directory dir in repoPackages) {
-        _collectDartFiles(dir, dartFiles,
-            exclude: (FileSystemEntity entity) => stockExampleFiles.hasMatch(entity.path));
+        _collectDartFiles(dir, dartFiles);
         pubSpecDirectories.add(dir);
       }
     }
@@ -164,7 +159,6 @@ class AnalyzeOnce extends AnalyzeBase {
     for (AnalysisErrorDescription error in errors) {
       bool shouldIgnore = false;
       if (error.errorCode.name == 'public_member_api_docs') {
-        // https://github.com/dart-lang/linter/issues/207
         // https://github.com/dart-lang/linter/issues/208
         if (isFlutterLibrary(error.source.fullName)) {
           if (!argResults['dartdocs']) {
@@ -175,15 +169,12 @@ class AnalyzeOnce extends AnalyzeBase {
           shouldIgnore = true;
         }
       }
-      // TODO(ianh): Fix the Dart mojom compiler
-      if (error.source.fullName.endsWith('.mojom.dart'))
-        shouldIgnore = true;
       if (shouldIgnore)
         continue;
       printError(error.asString());
       errorCount += 1;
     }
-    dumpErrors(errors.map/*<String>*/((AnalysisErrorDescription error) => error.asString()));
+    dumpErrors(errors.map<String>((AnalysisErrorDescription error) => error.asString()));
 
     stopwatch.stop();
     String elapsed = (stopwatch.elapsedMilliseconds / 1000.0).toStringAsFixed(1);
@@ -226,18 +217,18 @@ class AnalyzeOnce extends AnalyzeBase {
     return true;
   }
 
-  List<File> _collectDartFiles(Directory dir, List<File> collected, {FileFilter exclude}) {
+  List<File> _collectDartFiles(Directory dir, List<File> collected) {
     // Bail out in case of a .dartignore.
-    if (fs.isFileSync(path.join(path.dirname(dir.path), '.dartignore')))
+    if (fs.isFileSync(path.join(dir.path, '.dartignore')))
       return collected;
 
     for (FileSystemEntity entity in dir.listSync(recursive: false, followLinks: false)) {
-      if (isDartFile(entity) && (exclude == null || !exclude(entity)))
+      if (isDartFile(entity))
         collected.add(entity);
       if (entity is Directory) {
         String name = path.basename(entity.path);
         if (!name.startsWith('.') && name != 'packages')
-          _collectDartFiles(entity, collected, exclude: exclude);
+          _collectDartFiles(entity, collected);
       }
     }
 

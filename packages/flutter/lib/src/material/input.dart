@@ -38,7 +38,7 @@ const Curve _kTransitionCurve = Curves.fastOutSlowIn;
 ///
 /// * [Input], which adds a label, a divider below the text field, and support for
 ///   an error message.
-/// * [RawInput], a text field that does not require [Material] design.
+/// * [EditableText], a text field that does not require [Material] design.
 class InputField extends StatefulWidget {
   InputField({
     Key key,
@@ -47,7 +47,7 @@ class InputField extends StatefulWidget {
     this.keyboardType: TextInputType.text,
     this.hintText,
     this.style,
-    this.hideText: false,
+    this.obscureText: false,
     this.maxLines: 1,
     this.autofocus: false,
     this.onChanged,
@@ -73,7 +73,9 @@ class InputField extends StatefulWidget {
   ///
   /// When this is set to true, all the characters in the input are replaced by
   /// U+2022 BULLET characters (•).
-  final bool hideText;
+  ///
+  /// Defaults to false.
+  final bool obscureText;
 
   /// The maximum number of lines for the text to span, wrapping if necessary.
   /// If this is 1 (the default), the text will not wrap, but will scroll
@@ -81,6 +83,8 @@ class InputField extends StatefulWidget {
   final int maxLines;
 
   /// Whether this input field should focus itself if nothing else is already focused.
+  ///
+  /// Defaults to false.
   final bool autofocus;
 
   /// Called when the text being edited changes.
@@ -96,13 +100,13 @@ class InputField extends StatefulWidget {
 }
 
 class _InputFieldState extends State<InputField> {
-  GlobalKey<RawInputState> _rawInputKey = new GlobalKey<RawInputState>();
-  GlobalKey<RawInputState> _focusKey = new GlobalKey(debugLabel: "_InputFieldState _focusKey");
+  GlobalKey<EditableTextState> _editableTextKey = new GlobalKey<EditableTextState>();
+  GlobalKey<EditableTextState> _focusKey = new GlobalKey(debugLabel: "_InputFieldState _focusKey");
 
   GlobalKey get focusKey => config.focusKey ?? (config.key is GlobalKey ? config.key : _focusKey);
 
   void requestKeyboard() {
-    _rawInputKey.currentState?.requestKeyboard();
+    _editableTextKey.currentState?.requestKeyboard();
   }
 
   @override
@@ -120,17 +124,17 @@ class _InputFieldState extends State<InputField> {
           requestKeyboard();
         },
         // Since the focusKey may have been created here, defer building the
-        // RawInput until the focusKey's context has been set. This is necessary
-        // because the RawInput will check the focus, like Focus.at(focusContext),
-        // when it builds.
+        // EditableText until the focusKey's context has been set. This is
+        // necessary because the EditableText will check the focus, like
+        // Focus.at(focusContext), when it builds.
         child: new Builder(
           builder: (BuildContext context) {
-            return new RawInput(
-              key: _rawInputKey,
+            return new EditableText(
+              key: _editableTextKey,
               value: value,
               focusKey: focusKey,
               style: textStyle,
-              hideText: config.hideText,
+              obscureText: config.obscureText,
               maxLines: config.maxLines,
               autofocus: config.autofocus,
               cursorColor: themeData.textSelectionColor,
@@ -185,7 +189,7 @@ class InputContainer extends StatefulWidget {
     this.errorText,
     this.style,
     this.isDense: false,
-    this.hideDivider: false,
+    this.showDivider: true,
     this.child,
   }) : super(key: key);
 
@@ -213,17 +217,25 @@ class InputContainer extends StatefulWidget {
   final TextStyle style;
 
   /// Whether the input container is part of a dense form (i.e., uses less vertical space).
+  ///
+  /// Defaults to false.
   final bool isDense;
 
   /// True if the hint and label should be displayed as if the child had the focus.
+  ///
+  /// Defaults to false.
   final bool focused;
 
   /// Should the hint and label be displayed as if no value had been input
   /// to the child.
+  ///
+  /// Defaults to false.
   final bool isEmpty;
 
-  /// Hide the divider that appears below the child and above the error text.
-  final bool hideDivider;
+  /// Whether to show a divider below the child and above the error text.
+  ///
+  /// Defaults to true.
+  final bool showDivider;
 
   final Widget child;
 
@@ -320,7 +332,7 @@ class _InputContainerState extends State<InputContainer> {
     EdgeInsets margin = new EdgeInsets.only(bottom: bottomHeight - (bottomPadding + bottomBorder));
 
     Widget divider;
-    if (config.hideDivider) {
+    if (!config.showDivider) {
       divider = new Container(
         margin: margin + new EdgeInsets.only(bottom: bottomBorder),
         padding: padding,
@@ -386,7 +398,7 @@ class _InputContainerState extends State<InputContainer> {
 ///
 /// Requires one of its ancestors to be a [Material] widget.
 ///
-/// When using inside a [Form], consider using [InputFormField] instead.
+/// When using inside a [Form], consider using [TextField] instead.
 ///
 /// Assuming that the input is already focused, the basic data flow for
 /// retrieving user input is:
@@ -402,14 +414,14 @@ class _InputContainerState extends State<InputContainer> {
 /// See also:
 ///
 ///  * <https://material.google.com/components/text-fields.html>
-///  * [InputFormField], which simplifies steps 2-4 above.
+///  * [TextField], which simplifies steps 2-4 above.
 class Input extends StatefulWidget {
   /// Creates a text input field.
   ///
   /// By default, the input uses a keyboard appropriate for text entry.
   //
-  //  If you change this constructor signature, please also update
-  // InputContainer, InputFormField, InputField.
+  // If you change this constructor signature, please also update
+  // InputContainer, TextField, InputField.
   Input({
     Key key,
     this.value,
@@ -419,8 +431,8 @@ class Input extends StatefulWidget {
     this.hintText,
     this.errorText,
     this.style,
-    this.hideText: false,
-    this.hideDivider: false,
+    this.obscureText: false,
+    this.showDivider: true,
     this.isDense: false,
     this.autofocus: false,
     this.maxLines: 1,
@@ -460,18 +472,26 @@ class Input extends StatefulWidget {
   ///
   /// When this is set to true, all the characters in the input are replaced by
   /// U+2022 BULLET characters (•).
-  final bool hideText;
+  ///
+  /// Defaults to false.
+  final bool obscureText;
 
-  /// Hide the divider that appears below the child and above the error text.
-  final bool hideDivider;
+  /// Whether to show a divider below the child and above the error text.
+  ///
+  /// Defaults to true.
+  final bool showDivider;
 
   /// Whether the input field is part of a dense form (i.e., uses less vertical space).
   /// If true, [errorText] is not shown.
+  ///
+  /// Defaults to false.
   final bool isDense;
 
   /// Whether this input field should focus itself if nothing else is already focused.
   /// If true, the keyboard will open as soon as this input obtains focus. Otherwise,
   /// the keyboard is only shown after the user taps the text field.
+  ///
+  /// Defaults to false.
   // See https://github.com/flutter/flutter/issues/7035 for the rationale for this
   // keyboard behavior.
   final bool autofocus;
@@ -522,13 +542,13 @@ class _InputState extends State<Input> {
             errorText: config.errorText,
             style: config.style,
             isDense: config.isDense,
-            hideDivider: config.hideDivider,
+            showDivider: config.showDivider,
             child: new InputField(
               key: _inputFieldKey,
               focusKey: focusKey,
               value: config.value,
               style: config.style,
-              hideText: config.hideText,
+              obscureText: config.obscureText,
               maxLines: config.maxLines,
               autofocus: config.autofocus,
               keyboardType: config.keyboardType,
@@ -553,10 +573,10 @@ class _InputState extends State<Input> {
 /// pass a [GlobalKey] to the constructor and use [GlobalKey.currentState] to
 /// save or reset the form field.
 ///
-/// To see the use of [InputFormField], compare these two ways of a implementing
+/// To see the use of [TextField], compare these two ways of a implementing
 /// a simple two text field form.
 ///
-/// Using [InputFormField]:
+/// Using [TextField]:
 ///
 /// ```dart
 /// String _firstName, _lastName;
@@ -566,11 +586,11 @@ class _InputState extends State<Input> {
 ///   key: _formKey,
 ///   child: new Row(
 ///     children: <Widget>[
-///       new InputFormField(
+///       new TextField(
 ///         labelText: 'First Name',
 ///         onSaved: (InputValue value) { _firstName = value.text; }
 ///       ),
-///       new InputFormField(
+///       new TextField(
 ///         labelText: 'Last Name',
 ///         onSaved: (InputValue value) { _lastName = value.text; }
 ///       ),
@@ -613,8 +633,8 @@ class _InputState extends State<Input> {
 ///     ),
 ///  )
 /// ```
-class InputFormField extends FormField<InputValue> {
-  InputFormField({
+class TextField extends FormField<InputValue> {
+  TextField({
     Key key,
     GlobalKey focusKey,
     TextInputType keyboardType: TextInputType.text,
@@ -622,7 +642,7 @@ class InputFormField extends FormField<InputValue> {
     String labelText,
     String hintText,
     TextStyle style,
-    bool hideText: false,
+    bool obscureText: false,
     bool isDense: false,
     bool autofocus: false,
     int maxLines: 1,
@@ -643,7 +663,7 @@ class InputFormField extends FormField<InputValue> {
         labelText: labelText,
         hintText: hintText,
         style: style,
-        hideText: hideText,
+        obscureText: obscureText,
         isDense: isDense,
         autofocus: autofocus,
         maxLines: maxLines,

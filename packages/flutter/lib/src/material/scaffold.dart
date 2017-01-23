@@ -676,12 +676,12 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   ///    sheet.
   ///  * [Scaffold.of], for information about how to obtain the [ScaffoldState].
   ///  * <https://material.google.com/components/bottom-sheets.html#bottom-sheets-persistent-bottom-sheets>
-  PersistentBottomSheetController<dynamic/*=T*/> showBottomSheet/*<T>*/(WidgetBuilder builder) {
+  PersistentBottomSheetController<T> showBottomSheet<T>(WidgetBuilder builder) {
     if (_currentBottomSheet != null) {
       _currentBottomSheet.close();
       assert(_currentBottomSheet == null);
     }
-    Completer<dynamic/*=T*/> completer = new Completer<dynamic/*=T*/>();
+    Completer<T> completer = new Completer<T>();
     GlobalKey<_PersistentBottomSheetState> bottomSheetKey = new GlobalKey<_PersistentBottomSheetState>();
     AnimationController controller = BottomSheet.createAnimationController(this)
       ..forward();
@@ -717,7 +717,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     );
     ModalRoute.of(context).addLocalHistoryEntry(entry);
     setState(() {
-      _currentBottomSheet = new PersistentBottomSheetController<dynamic/*=T*/>._(
+      _currentBottomSheet = new PersistentBottomSheetController<T>._(
         bottomSheet,
         completer,
         () => entry.remove(),
@@ -770,6 +770,11 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
 
   bool _shouldShowBackArrow;
 
+  Future<Null> _back() async {
+    if (await Navigator.willPop(context) && mounted)
+      Navigator.pop(context);
+  }
+
   Widget _getModifiedAppBar({ EdgeInsets padding, int elevation}) {
     AppBar appBar = config.appBar;
     if (appBar == null)
@@ -800,7 +805,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
           leading = new IconButton(
             icon: new Icon(backIcon),
             alignment: FractionalOffset.centerLeft,
-            onPressed: () => Navigator.pop(context),
+            onPressed: _back,
             tooltip: 'Back' // TODO(ianh): Figure out how to localize this string
           );
         }

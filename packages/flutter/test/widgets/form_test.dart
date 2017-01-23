@@ -15,7 +15,7 @@ void main() {
   }
 
   Future<Null> showKeyboard(WidgetTester tester) async {
-    RawInputState editable = tester.state(find.byType(RawInput).first);
+    EditableTextState editable = tester.state(find.byType(EditableText).first);
     editable.requestKeyboard();
     await tester.pump();
   }
@@ -29,7 +29,7 @@ void main() {
         child: new Material(
           child: new Form(
             key: formKey,
-            child: new InputFormField(
+            child: new TextField(
               onSaved: (InputValue value) { fieldValue = value.text; },
             ),
           )
@@ -61,7 +61,7 @@ void main() {
       return new Center(
         child: new Material(
           child: new Form(
-            child: new InputFormField(
+            child: new TextField(
               onChanged: (InputValue value) { fieldValue = value.text; },
             ),
           )
@@ -96,7 +96,7 @@ void main() {
           child: new Form(
             key: formKey,
             autovalidate: autovalidate,
-            child: new InputFormField(
+            child: new TextField(
               key: inputKey,
               validator: errorText,
             ),
@@ -151,10 +151,10 @@ void main() {
               key: focusKey,
               child: new Block(
                 children: <Widget>[
-                  new InputFormField(
+                  new TextField(
                     key: fieldKey
                   ),
-                  new InputFormField(
+                  new TextField(
                     validator: errorText,
                   ),
                 ]
@@ -190,7 +190,7 @@ void main() {
       return new Center(
         child: new Material(
           child: new Form(
-            child: new InputFormField(
+            child: new TextField(
               key: inputKey,
               initialValue: new InputValue(text: initialValue),
             ),
@@ -207,7 +207,7 @@ void main() {
     expect(mockTextInput.editingState['text'], equals(initialValue));
 
     // initial value should also be visible in the raw input line
-    RawInputState editableText = tester.state(find.byType(RawInput));
+    EditableTextState editableText = tester.state(find.byType(EditableText));
     expect(editableText.config.value.text, equals(initialValue));
 
     // sanity check, make sure we can still edit the text and everything updates
@@ -229,7 +229,7 @@ void main() {
         child: new Material(
           child: new Form(
             key: formKey,
-            child: remove ? new Container() : new InputFormField(
+            child: remove ? new Container() : new TextField(
               key: fieldKey,
               autofocus: true,
               onSaved: (InputValue value) { fieldValue = value.text; },

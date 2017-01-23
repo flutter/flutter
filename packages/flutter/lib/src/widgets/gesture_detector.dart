@@ -454,7 +454,7 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
     if (_recognizers == null) {
       description.add('DISPOSED');
     } else {
-      List<String> gestures = _recognizers.values.map/*<String>*/((GestureRecognizer recognizer) => recognizer.toStringShort()).toList();
+      List<String> gestures = _recognizers.values.map<String>((GestureRecognizer recognizer) => recognizer.toStringShort()).toList();
       if (gestures.isEmpty)
         gestures.add('<none>');
       description.add('gestures: ${gestures.join(", ")}');

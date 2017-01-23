@@ -191,7 +191,7 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
     _freezeTracker(tracker);
     _trackers.remove(tracker.pointer);
     if (onDoubleTap != null)
-      invokeCallback/*<Null>*/('onDoubleTap', onDoubleTap); // ignore: STRONG_MODE_INVALID_CAST_FUNCTION_EXPR, https://github.com/dart-lang/sdk/issues/27504
+      invokeCallback<Null>('onDoubleTap', onDoubleTap); // ignore: STRONG_MODE_INVALID_CAST_FUNCTION_EXPR, https://github.com/dart-lang/sdk/issues/27504
     _reset();
   }
 
@@ -221,12 +221,6 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
   String toStringShort() => 'double tap';
 }
 
-
-enum _TapResolution {
-  tap,
-  cancel
-}
-
 /// TapGesture represents a full gesture resulting from a single tap sequence,
 /// as part of a [MultiTapGestureRecognizer]. Tap gestures are passive, meaning
 /// that they will not preempt any other arena member in play.
@@ -246,7 +240,7 @@ class _TapGesture extends _TapTracker {
     if (longTapDelay > Duration.ZERO) {
       _timer = new Timer(longTapDelay, () {
         _timer = null;
-        gestureRecognizer._handleLongTap(event.pointer, _lastPosition);
+        gestureRecognizer._dispatchLongTap(event.pointer, _lastPosition);
       });
     }
   }
@@ -289,7 +283,7 @@ class _TapGesture extends _TapTracker {
 
   void reject() {
     stopTrackingPointer(handleEvent);
-    gestureRecognizer._resolveTap(pointer, _TapResolution.cancel, null);
+    gestureRecognizer._dispatchCancel(pointer);
   }
 
   void cancel() {
@@ -303,9 +297,8 @@ class _TapGesture extends _TapTracker {
 
   void _check() {
     if (_wonArena && _finalPosition != null)
-      gestureRecognizer._resolveTap(pointer, _TapResolution.tap, _finalPosition);
+      gestureRecognizer._dispatchTap(pointer, _finalPosition);
   }
-
 }
 
 /// Recognizes taps on a per-pointer basis.
@@ -359,45 +352,47 @@ class MultiTapGestureRecognizer extends GestureRecognizer {
       longTapDelay: longTapDelay
     );
     if (onTapDown != null)
-      invokeCallback/*<Null>*/('onTapDown', () => onTapDown(event.pointer, new TapDownDetails(globalPosition: event.position))); // ignore: STRONG_MODE_INVALID_CAST_FUNCTION_EXPR, https://github.com/dart-lang/sdk/issues/27504
+      invokeCallback<Null>('onTapDown', () => onTapDown(event.pointer, new TapDownDetails(globalPosition: event.position))); // ignore: STRONG_MODE_INVALID_CAST_FUNCTION_EXPR, https://github.com/dart-lang/sdk/issues/27504
   }
 
   @override
   void acceptGesture(int pointer) {
     assert(_gestureMap.containsKey(pointer));
-    _gestureMap[pointer]?.accept();
-    assert(!_gestureMap.containsKey(pointer));
+    _gestureMap[pointer].accept();
   }
 
   @override
   void rejectGesture(int pointer) {
     assert(_gestureMap.containsKey(pointer));
-    _gestureMap[pointer]?.reject();
+    _gestureMap[pointer].reject();
     assert(!_gestureMap.containsKey(pointer));
   }
 
-  void _resolveTap(int pointer, _TapResolution resolution, Point globalPosition) {
+  void _dispatchCancel(int pointer) {
+    assert(_gestureMap.containsKey(pointer));
     _gestureMap.remove(pointer);
-    if (resolution == _TapResolution.tap) {
-      if (onTapUp != null)
-        invokeCallback/*<Null>*/('onTapUp', () => onTapUp(pointer, new TapUpDetails(globalPosition: globalPosition))); // ignore: STRONG_MODE_INVALID_CAST_FUNCTION_EXPR, https://github.com/dart-lang/sdk/issues/27504
-      if (onTap != null)
-        invokeCallback/*<Null>*/('onTap', () => onTap(pointer)); // ignore: STRONG_MODE_INVALID_CAST_FUNCTION_EXPR, https://github.com/dart-lang/sdk/issues/27504
-    } else {
-      if (onTapCancel != null)
-        invokeCallback/*<Null>*/('onTapCancel', () => onTapCancel(pointer)); // ignore: STRONG_MODE_INVALID_CAST_FUNCTION_EXPR, https://github.com/dart-lang/sdk/issues/27504
-    }
+    if (onTapCancel != null)
+      invokeCallback<Null>('onTapCancel', () => onTapCancel(pointer)); // ignore: STRONG_MODE_INVALID_CAST_FUNCTION_EXPR, https://github.com/dart-lang/sdk/issues/27504
   }
 
-  void _handleLongTap(int pointer, Point lastPosition) {
+  void _dispatchTap(int pointer, Point globalPosition) {
+    assert(_gestureMap.containsKey(pointer));
+    _gestureMap.remove(pointer);
+    if (onTapUp != null)
+      invokeCallback<Null>('onTapUp', () => onTapUp(pointer, new TapUpDetails(globalPosition: globalPosition))); // ignore: STRONG_MODE_INVALID_CAST_FUNCTION_EXPR, https://github.com/dart-lang/sdk/issues/27504
+    if (onTap != null)
+      invokeCallback<Null>('onTap', () => onTap(pointer)); // ignore: STRONG_MODE_INVALID_CAST_FUNCTION_EXPR, https://github.com/dart-lang/sdk/issues/27504
+  }
+
+  void _dispatchLongTap(int pointer, Point lastPosition) {
     assert(_gestureMap.containsKey(pointer));
     if (onLongTapDown != null)
-      invokeCallback/*<Null>*/('onLongTapDown', () => onLongTapDown(pointer, new TapDownDetails(globalPosition: lastPosition))); // ignore: STRONG_MODE_INVALID_CAST_FUNCTION_EXPR, https://github.com/dart-lang/sdk/issues/27504
+      invokeCallback<Null>('onLongTapDown', () => onLongTapDown(pointer, new TapDownDetails(globalPosition: lastPosition))); // ignore: STRONG_MODE_INVALID_CAST_FUNCTION_EXPR, https://github.com/dart-lang/sdk/issues/27504
   }
 
   @override
   void dispose() {
-    List<_TapGesture> localGestures = new List<_TapGesture>.from(_gestureMap.values);
+    final List<_TapGesture> localGestures = new List<_TapGesture>.from(_gestureMap.values);
     for (_TapGesture gesture in localGestures)
       gesture.cancel();
     // Rejection of each gesture should cause it to be removed from our map

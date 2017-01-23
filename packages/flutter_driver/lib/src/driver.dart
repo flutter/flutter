@@ -4,20 +4,23 @@
 
 import 'dart:async';
 import 'dart:convert';
+import 'package:file/file.dart' as f;
 import 'dart:io';
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:meta/meta.dart';
+import 'package:path/path.dart' as p;
 import 'package:vm_service_client/vm_service_client.dart';
 import 'package:web_socket_channel/io.dart';
 
+import 'common.dart';
 import 'error.dart';
 import 'find.dart';
+import 'frame_sync.dart';
 import 'gesture.dart';
 import 'health.dart';
 import 'input.dart';
 import 'message.dart';
 import 'render_tree.dart';
-import 'frame_sync.dart';
 import 'timeline.dart';
 
 /// Timeline stream identifier.
@@ -94,12 +97,18 @@ class FlutterDriver {
   /// Creates a driver that uses a connection provided by the given
   /// [_serviceClient], [_peer] and [_appIsolate].
   @visibleForTesting
-  FlutterDriver.connectedTo(this._serviceClient, this._peer, this._appIsolate);
+  FlutterDriver.connectedTo(this._serviceClient, this._peer, this._appIsolate,
+      { bool printCommunication: false, bool logCommunicationToFile: true })
+      : _printCommunication = printCommunication,
+        _logCommunicationToFile = logCommunicationToFile,
+        _driverId = _nextDriverId++;
 
   static const String _kFlutterExtensionMethod = 'ext.flutter.driver';
   static const String _kSetVMTimelineFlagsMethod = '_setVMTimelineFlags';
   static const String _kGetVMTimelineMethod = '_getVMTimeline';
   static const Duration _kRpcGraceTime = const Duration(seconds: 2);
+
+  static int _nextDriverId = 0;
 
   /// Connects to a Flutter application.
   ///
@@ -108,7 +117,15 @@ class FlutterDriver {
   /// [dartVmServiceUrl] is the URL to Dart observatory (a.k.a. VM service). If
   /// not specified, the URL specified by the `VM_SERVICE_URL` environment
   /// variable is used, or 'http://localhost:8183'.
-  static Future<FlutterDriver> connect({String dartVmServiceUrl}) async {
+  ///
+  /// [printCommunication] determines whether the command communication between
+  /// the test and the app should be printed to stdout.
+  ///
+  /// [logCommunicationToFile] determines whether the command communication
+  /// between the test and the app should be logged to `flutter_driver_commands.log`.
+  static Future<FlutterDriver> connect({ String dartVmServiceUrl,
+                                         bool printCommunication: false,
+                                         bool logCommunicationToFile: true }) async {
     dartVmServiceUrl ??= Platform.environment['VM_SERVICE_URL'];
     dartVmServiceUrl ??= 'http://localhost:8183';
 
@@ -137,7 +154,11 @@ class FlutterDriver {
       isolate = await vm.isolates.first.loadRunnable();
     }
 
-    FlutterDriver driver = new FlutterDriver.connectedTo(client, connection.peer, isolate);
+    FlutterDriver driver = new FlutterDriver.connectedTo(
+        client, connection.peer, isolate,
+        printCommunication: printCommunication,
+        logCommunicationToFile: logCommunicationToFile
+    );
 
     // Attempts to resume the isolate, but does not crash if it fails because
     // the isolate is already resumed. There could be a race with other tools,
@@ -175,7 +196,7 @@ class FlutterDriver {
       // option, then the VM service extension is not registered yet. Wait for
       // it to be registered.
       Future<dynamic> whenResumed = resumeLeniently();
-      Future<dynamic> whenServiceExtensionReady = Future.any/*<dynamic>*/(<Future<dynamic>>[
+      Future<dynamic> whenServiceExtensionReady = Future.any<dynamic>(<Future<dynamic>>[
         waitForServiceExtension(),
         // We will never receive the extension event if the user does not
         // register it. If that happens time out.
@@ -220,19 +241,28 @@ class FlutterDriver {
     return driver;
   }
 
+  /// The unique ID of this driver instance.
+  final int _driverId;
   /// Client connected to the Dart VM running the Flutter application
   final VMServiceClient _serviceClient;
   /// JSON-RPC client useful for sending raw JSON requests.
   final rpc.Peer _peer;
   /// The main isolate hosting the Flutter application
   final VMIsolateRef _appIsolate;
+  /// Whether to print communication between host and app to `stdout`.
+  final bool _printCommunication;
+  /// Whether to log communication between host and app to `flutter_driver_commands.log`.
+  final bool _logCommunicationToFile;
 
   Future<Map<String, dynamic>> _sendCommand(Command command) async {
     Map<String, dynamic> response;
     try {
-       response = await _appIsolate
-          .invokeExtension(_kFlutterExtensionMethod, command.serialize())
+      Map<String, String> serialized = command.serialize();
+      _logCommunication('>>> $serialized');
+      response = await _appIsolate
+          .invokeExtension(_kFlutterExtensionMethod, serialized)
           .timeout(command.timeout + _kRpcGraceTime);
+      _logCommunication('<<< $response');
     } on TimeoutException catch (error, stackTrace) {
       throw new DriverError(
         'Failed to fulfill ${command.runtimeType}: Flutter application not responding',
@@ -249,6 +279,16 @@ class FlutterDriver {
     if (response['isError'])
       throw new DriverError('Error in Flutter application: ${response['response']}');
     return response['response'];
+  }
+
+  void _logCommunication(String message)  {
+    if (_printCommunication)
+      _log.info(message);
+    if (_logCommunicationToFile) {
+      f.File file = fs.file(p.join(testOutputsDirectory, 'flutter_driver_commands_$_driverId.log'));
+      file.createSync(recursive: true); // no-op if file exists
+      file.writeAsStringSync('${new DateTime.now()} $message\n', mode: f.FileMode.APPEND, flush: true);
+    }
   }
 
   /// Checks the status of the Flutter Driver extension.
@@ -412,9 +452,9 @@ class FlutterDriver {
   /// With frame sync disabled, its the responsibility of the test author to
   /// ensure that no action is performed while the app is undergoing a
   /// transition to avoid flakiness.
-  Future<dynamic/*=T*/> runUnsynchronized/*<T>*/(Future<dynamic/*=T*/> action()) async {
+  Future<T> runUnsynchronized<T>(Future<T> action()) async {
     await _sendCommand(new SetFrameSync(false));
-    dynamic/*=T*/ result;
+    T result;
     try {
       result = await action();
     } finally {

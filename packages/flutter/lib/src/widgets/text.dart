@@ -20,6 +20,7 @@ class DefaultTextStyle extends InheritedWidget {
     this.textAlign,
     this.softWrap: true,
     this.overflow: TextOverflow.clip,
+    this.maxLines,
     Widget child
   }) : super(key: key, child: child) {
     assert(style != null);
@@ -35,6 +36,7 @@ class DefaultTextStyle extends InheritedWidget {
     : style = const TextStyle(),
       textAlign = null,
       softWrap = true,
+      maxLines = null,
       overflow = TextOverflow.clip;
 
   /// Creates a default text style that inherits from the given [BuildContext].
@@ -50,6 +52,7 @@ class DefaultTextStyle extends InheritedWidget {
     TextAlign textAlign,
     bool softWrap,
     TextOverflow overflow,
+    int maxLines,
     Widget child
   }) {
     assert(context != null);
@@ -61,6 +64,7 @@ class DefaultTextStyle extends InheritedWidget {
       textAlign: textAlign ?? parent.textAlign,
       softWrap: softWrap ?? parent.softWrap,
       overflow: overflow ?? parent.overflow,
+      maxLines: maxLines ?? parent.maxLines,
       child: child
     );
   }
@@ -78,6 +82,11 @@ class DefaultTextStyle extends InheritedWidget {
 
   /// How visual overflow should be handled.
   final TextOverflow overflow;
+
+  /// An optional maximum number of lines for the text to span, wrapping if necessary.
+  /// If the text exceeds the given number of lines, it will be truncated according
+  /// to [overflow].
+  final int maxLines;
 
   /// The closest instance of this class that encloses the given context.
   ///
@@ -134,7 +143,8 @@ class Text extends StatelessWidget {
     this.textAlign,
     this.softWrap,
     this.overflow,
-    this.textScaleFactor
+    this.textScaleFactor,
+    this.maxLines,
   }) : super(key: key) {
     assert(data != null);
   }
@@ -168,6 +178,11 @@ class Text extends StatelessWidget {
   /// Defaults to [MediaQuery.textScaleFactor].
   final double textScaleFactor;
 
+  /// An optional maximum number of lines the text is allowed to take up.
+  /// If the text exceeds the given number of lines, it will be truncated according
+  /// to [overflow].
+  final int maxLines;
+
   @override
   Widget build(BuildContext context) {
     DefaultTextStyle defaultTextStyle = DefaultTextStyle.of(context);
@@ -179,6 +194,7 @@ class Text extends StatelessWidget {
       softWrap: softWrap ?? defaultTextStyle.softWrap,
       overflow: overflow ?? defaultTextStyle.overflow,
       textScaleFactor: textScaleFactor ?? MediaQuery.of(context).textScaleFactor,
+      maxLines: maxLines ?? defaultTextStyle.maxLines,
       text: new TextSpan(
         style: effectiveTextStyle,
         text: data

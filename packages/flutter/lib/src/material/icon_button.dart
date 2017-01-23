@@ -25,8 +25,8 @@ import 'tooltip.dart';
 /// Icon buttons are commonly used in the [AppBar.actions] field, but they can
 /// be used in many other places as well.
 ///
-/// If the [onPressed] callback is not specified or null, then the button will
-/// be disabled, will not react to touch.
+/// If the [onPressed] callback is null, then the button will be disabled and
+/// will not react to touch.
 ///
 /// Requires one of its ancestors to be a [Material] widget.
 ///
@@ -136,7 +136,7 @@ class IconButton extends StatelessWidget {
         maxHeight: size,
         child: new ConstrainedBox(
           constraints: new BoxConstraints.loose(
-            new Size.square(math.max(size, InkSplash.defaultRadius * 2.0))
+            new Size.square(math.max(size, Material.defaultSplashRadius * 2.0))
           ),
           child: new Align(
             alignment: alignment,
@@ -161,7 +161,7 @@ class IconButton extends StatelessWidget {
     return new InkResponse(
       onTap: onPressed,
       child: result,
-      radius: math.max(size, InkSplash.defaultRadius),
+      radius: math.max(size, Material.defaultSplashRadius),
     );
   }
 

@@ -72,4 +72,64 @@ void main() {
     TextRange range85 = paragraph.getWordBoundary(new TextPosition(offset: 75));
     expect(range85.textInside(_kText), equals('Queen\'s'));
   });
+
+  test('overflow test', () {
+    RenderParagraph paragraph = new RenderParagraph(
+      new TextSpan(text: 'This is\na wrapping test. It should wrap at manual newlines, and if softWrap is true, also at spaces.'),
+      maxLines: 1,
+      softWrap: true,
+    );
+
+    void relayoutWith({int maxLines, bool softWrap, TextOverflow overflow}) {
+      paragraph
+        ..maxLines = maxLines
+        ..softWrap = softWrap
+        ..overflow = overflow;
+      pumpFrame();
+    }
+
+    // Lay out in a narrow box to force wrapping.
+    layout(paragraph, constraints: new BoxConstraints(maxWidth: 50.0));
+    double lineHeight = paragraph.size.height;
+
+    relayoutWith(maxLines: 3, softWrap: true, overflow: TextOverflow.clip);
+    expect(paragraph.size.height, equals(3 * lineHeight));
+
+    relayoutWith(maxLines: null, softWrap: true, overflow: TextOverflow.clip);
+    expect(paragraph.size.height, greaterThan(5 * lineHeight));
+
+    // Try again with ellipsis overflow. We can't test that the ellipsis are
+    // drawn, but we can test the sizing.
+    relayoutWith(maxLines: 1, softWrap: true, overflow: TextOverflow.ellipsis);
+    expect(paragraph.size.height, equals(lineHeight));
+
+    relayoutWith(maxLines: 3, softWrap: true, overflow: TextOverflow.ellipsis);
+    expect(paragraph.size.height, equals(3 * lineHeight));
+
+    // This is the one weird case. If maxLines is null, we would expect to allow
+    // infinite wrapping. However, if we did, we'd never know when to append an
+    // ellipsis, so this really means "append ellipsis as soon as we exceed the
+    // width".
+    relayoutWith(maxLines: null, softWrap: true, overflow: TextOverflow.ellipsis);
+    expect(paragraph.size.height, equals(2 * lineHeight));
+
+    // Now with no soft wrapping.
+    relayoutWith(maxLines: 1, softWrap: false, overflow: TextOverflow.clip);
+    expect(paragraph.size.height, equals(lineHeight));
+
+    relayoutWith(maxLines: 3, softWrap: false, overflow: TextOverflow.clip);
+    expect(paragraph.size.height, equals(2 * lineHeight));
+
+    relayoutWith(maxLines: null, softWrap: false, overflow: TextOverflow.clip);
+    expect(paragraph.size.height, equals(2 * lineHeight));
+
+    relayoutWith(maxLines: 1, softWrap: false, overflow: TextOverflow.ellipsis);
+    expect(paragraph.size.height, equals(lineHeight));
+
+    relayoutWith(maxLines: 3, softWrap: false, overflow: TextOverflow.ellipsis);
+    expect(paragraph.size.height, equals(2 * lineHeight));
+
+    relayoutWith(maxLines: null, softWrap: false, overflow: TextOverflow.ellipsis);
+    expect(paragraph.size.height, equals(2 * lineHeight));
+  });
 }

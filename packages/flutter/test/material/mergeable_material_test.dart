@@ -204,21 +204,12 @@ void main() {
     );
 
     RenderBox box = tester.renderObject(find.byType(MergeableMaterial));
-    MockCanvas canvas = new MockCanvas();
 
-    box.paint(new MockPaintingContext(canvas), Offset.zero);
-
-    final Invocation drawCommand = canvas.invocations.firstWhere((Invocation invocation) {
-      return invocation.memberName == #drawRRect;
-    });
     final BoxShadow boxShadow = kElevationToShadow[2][0];
     final RRect rrect = kMaterialEdges[MaterialType.card].toRRect(
       new Rect.fromLTRB(0.0, 0.0, 800.0, 100.0)
     );
-
-    expect(drawCommand.positionalArguments[0], equals(rrect));
-    expect(drawCommand.positionalArguments[1].color, equals(boxShadow.color));
-    expect(drawCommand.positionalArguments[1].maskFilter, isNotNull);
+    expect(box, paints..rrect(rrect: rrect, color: boxShadow.color, hasMaskFilter: true));
   });
 
   testWidgets('MergeableMaterial merge gap', (WidgetTester tester) async {

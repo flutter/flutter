@@ -5,6 +5,7 @@
 import 'dart:convert';
 import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/devfs.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 
@@ -37,29 +38,26 @@ void main()  {
       AssetBundle ab = new AssetBundle.fixed('', 'apple.txt');
       expect(ab.entries, isNotEmpty);
       expect(ab.entries.length, 1);
-      AssetBundleEntry entry = ab.entries.first;
-      expect(entry, isNotNull);
-      expect(entry.archivePath, 'apple.txt');
+      String archivePath = ab.entries.keys.first;
+      expect(archivePath, isNotNull);
+      expect(archivePath, 'apple.txt');
     });
     test('two entries', () async {
       AssetBundle ab = new AssetBundle.fixed('', 'apple.txt,packages/flutter_gallery_assets/shrine/products/heels.png');
       expect(ab.entries, isNotEmpty);
       expect(ab.entries.length, 2);
-      AssetBundleEntry firstEntry = ab.entries.first;
-      expect(firstEntry, isNotNull);
-      expect(firstEntry.archivePath, 'apple.txt');
-      AssetBundleEntry lastEntry = ab.entries.last;
-      expect(lastEntry, isNotNull);
-      expect(lastEntry.archivePath, 'packages/flutter_gallery_assets/shrine/products/heels.png');
+      List<String> archivePaths = ab.entries.keys.toList()..sort();
+      expect(archivePaths[0], 'apple.txt');
+      expect(archivePaths[1], 'packages/flutter_gallery_assets/shrine/products/heels.png');
     });
     test('file contents', () async {
       AssetBundle ab = new AssetBundle.fixed(projectRoot, assetPath);
       expect(ab.entries, isNotEmpty);
       expect(ab.entries.length, 1);
-      AssetBundleEntry entry = ab.entries.first;
-      expect(entry, isNotNull);
-      expect(entry.archivePath, assetPath);
-      expect(assetContents, UTF8.decode(entry.contentsAsBytes()));
+      String archivePath = ab.entries.keys.first;
+      DevFSContent content = ab.entries[archivePath];
+      expect(archivePath, assetPath);
+      expect(assetContents, UTF8.decode(await content.contentsAsBytes()));
     });
   });
 

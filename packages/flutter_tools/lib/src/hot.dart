@@ -273,7 +273,7 @@ class HotRunner extends ResidentRunner {
         return false;
     }
     Status devFSStatus = logger.startProgress('Syncing files to device...');
-    await _devFS.update(progressReporter: progressReporter,
+    int bytes = await _devFS.update(progressReporter: progressReporter,
                         bundle: assetBundle,
                         bundleDirty: rebuildBundle,
                         fileFilter: _dartDependencies);
@@ -282,18 +282,19 @@ class HotRunner extends ResidentRunner {
       // Clear the set after the sync so they are recomputed next time.
       _dartDependencies = null;
     }
-    printTrace('Synced ${getSizeAsMB(_devFS.bytes)}.');
+    printTrace('Synced ${getSizeAsMB(bytes)}.');
     return true;
   }
 
   Future<Null> _evictDirtyAssets() async {
-    if (_devFS.dirtyAssetEntries.length == 0)
+    if (_devFS.assetPathsToEvict.isEmpty)
       return;
     if (currentView.uiIsolate == null)
       throw 'Application isolate not found';
-    for (DevFSEntry entry in _devFS.dirtyAssetEntries) {
-      await currentView.uiIsolate.flutterEvictAsset(entry.assetPath);
+    for (String assetPath in _devFS.assetPathsToEvict) {
+      await currentView.uiIsolate.flutterEvictAsset(assetPath);
     }
+    _devFS.assetPathsToEvict.clear();
   }
 
   Future<Null> _cleanupDevFS() async {

@@ -261,7 +261,7 @@ abstract class MultiDragGestureRecognizer<T extends MultiDragPointerState> exten
     assert(state._pendingDelta != null);
     Drag drag;
     if (onStart != null)
-      drag = invokeCallback/*<Drag>*/('onStart', () => onStart(initialPosition));
+      drag = invokeCallback<Drag>('onStart', () => onStart(initialPosition));
     if (drag != null) {
       state._startDrag(drag);
     } else {

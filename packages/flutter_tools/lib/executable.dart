@@ -120,7 +120,7 @@ Future<Null> main(List<String> args) async {
     context.putIfAbsent(SimControl, () => new SimControl());
     context.putIfAbsent(Usage, () => new Usage());
 
-    return Chain.capture/*<Future<Null>>*/(() async {
+    return Chain.capture<Future<Null>>(() async {
       await runner.run(args);
       _exit(0);
     }, onError: (dynamic error, Chain chain) {

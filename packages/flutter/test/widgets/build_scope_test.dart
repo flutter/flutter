@@ -206,7 +206,7 @@ void main() {
     middle = part2;
     await tester.pumpWidget(part1);
 
-    for (StatefulWrapperState state in tester.stateList/*<StatefulWrapperState>*/(find.byType(StatefulWrapper))) {
+    for (StatefulWrapperState state in tester.stateList<StatefulWrapperState>(find.byType(StatefulWrapper))) {
       expect(state.built, isNotNull);
       state.oldBuilt = state.built;
       state.trigger();
@@ -219,7 +219,7 @@ void main() {
     didMiddle = false;
     await tester.pumpWidget(part2);
 
-    for (StatefulWrapperState state in tester.stateList/*<StatefulWrapperState>*/(find.byType(StatefulWrapper))) {
+    for (StatefulWrapperState state in tester.stateList<StatefulWrapperState>(find.byType(StatefulWrapper))) {
       expect(state.built, isNotNull);
       expect(state.built, isNot(equals(state.oldBuilt)));
     }

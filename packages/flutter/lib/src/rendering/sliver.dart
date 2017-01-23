@@ -97,6 +97,19 @@ enum AxisDirection {
   left,
 }
 
+Axis axisDirectionToAxis(AxisDirection axisDirection) {
+  assert(axisDirection != null);
+  switch (axisDirection) {
+    case AxisDirection.up:
+    case AxisDirection.down:
+      return Axis.vertical;
+    case AxisDirection.left:
+    case AxisDirection.right:
+      return Axis.horizontal;
+  }
+  return null;
+}
+
 AxisDirection applyGrowthDirectionToAxisDirection(AxisDirection axisDirection, GrowthDirection growthDirection) {
   assert(axisDirection != null);
   assert(growthDirection != null);
@@ -241,18 +254,7 @@ class SliverConstraints extends Constraints {
     return null;
   }
 
-  Axis get axis {
-    assert(axisDirection != null);
-    switch (axisDirection) {
-      case AxisDirection.up:
-      case AxisDirection.down:
-        return Axis.vertical;
-      case AxisDirection.left:
-      case AxisDirection.right:
-        return Axis.horizontal;
-    }
-    return null;
-  }
+  Axis get axis => axisDirectionToAxis(axisDirection);
 
   /// Return what the [growthDirection] would be if the [axisDirection] was
   /// either [AxisDirection.down] or [AxisDirection.right].
@@ -352,7 +354,6 @@ class SliverConstraints extends Constraints {
 
   @override
   int get hashCode {
-    assert(debugAssertIsValid());
     return hashValues(axis, growthDirection, scrollOffset, overlap, remainingPaintExtent, crossAxisExtent);
   }
 
@@ -413,7 +414,7 @@ class SliverGeometry {
   /// The (estimated) total paint extent that this sliver would be able to
   /// provide if the [SliverConstraints.remainingPaintExtent] was infinite.
   ///
-  /// This is used for shrink-wrapping (see [RenderViewport2.shrinkWrap]).
+  /// This is used by viewports that implement shrink-wrapping.
   ///
   /// By definition, this cannot be less than [paintExtent].
   final double maxPaintExtent;
@@ -1067,15 +1068,6 @@ abstract class ViewportOffset extends ChangeNotifier {
   /// typically be 0.0 and the maximum scroll extent will typically be 20.0,
   /// because there's only 20.0 pixels of actual scroll slack.
   ///
-  /// The scroll extents also have any fixed scroll extents added to them. For
-  /// example, if there's 100.0 pixels of scrollable content, 20.0 pixels of
-  /// fixed content (e.g. a pinned heading), and the viewport is 80.0 pixels
-  /// high, then the minimum scroll extent will typically be 0.0 and the maximum
-  /// scroll extent will typically be 40.0. The fixed content essentially
-  /// shrinks the viewport to 60.0 pixels, which means there's 40.0 pixels of
-  /// content off screen when it is scroll to the top, and thus there's 40.0
-  /// pixels of content that can be scrolled into view.
-  ///
   /// If applying the content dimensions changes the scroll offset, return
   /// false. Otherwise, return true. If you return false, the [RenderViewport2]
   /// will be laid out again with the new scroll offset. This is expensive.
@@ -1155,13 +1147,11 @@ class RenderViewport2 extends RenderBox with ContainerRenderObjectMixin<RenderSl
   /// list, if any, is used.
   RenderViewport2({
     AxisDirection axisDirection: AxisDirection.down,
-    bool shrinkWrap: false,
     double anchor: 0.0,
     ViewportOffset offset,
     List<RenderSliver> children,
     RenderSliver center,
   }) : _axisDirection = axisDirection,
-       _shrinkWrap = shrinkWrap,
        _anchor = anchor,
        _offset = offset ?? new ViewportOffset.zero(),
        _center = center {
@@ -1169,7 +1159,6 @@ class RenderViewport2 extends RenderBox with ContainerRenderObjectMixin<RenderSl
     if (center == null && firstChild != null)
       _center = firstChild;
     assert(axisDirection != null);
-    assert(shrinkWrap != null);
     assert(anchor != null);
     assert(anchor >= 0.0 && anchor <= 1.0);
   }
@@ -1184,28 +1173,10 @@ class RenderViewport2 extends RenderBox with ContainerRenderObjectMixin<RenderSl
     markNeedsLayout();
   }
 
-  Axis get axis {
-    assert(axisDirection != null);
-    switch (axisDirection) {
-      case AxisDirection.up:
-      case AxisDirection.down:
-        return Axis.vertical;
-      case AxisDirection.left:
-      case AxisDirection.right:
-        return Axis.horizontal;
-    }
-    return null;
-  }
+  Axis get axis => axisDirectionToAxis(axisDirection);
 
-  bool get shrinkWrap => _shrinkWrap;
-  bool _shrinkWrap;
-  set shrinkWrap(bool value) {
-    assert(value != null);
-    if (value == _shrinkWrap)
-      return;
-    _shrinkWrap = value;
-    markNeedsLayout();
-  }
+  // TODO(ianh): Extract the shrink-wrap logic into a separate viewport class.
+  bool _shrinkWrap = false;
 
   double get anchor => _anchor;
   double _anchor;
@@ -1221,7 +1192,7 @@ class RenderViewport2 extends RenderBox with ContainerRenderObjectMixin<RenderSl
   ViewportOffset get offset => _offset;
   ViewportOffset _offset;
   set offset(ViewportOffset value) {
-    value ??= new ViewportOffset.zero();
+    assert(value != null);
     if (value == _offset)
       return;
     if (attached)
@@ -1231,6 +1202,31 @@ class RenderViewport2 extends RenderBox with ContainerRenderObjectMixin<RenderSl
     _offset = value;
     if (attached)
       _offset.addListener(markNeedsLayout);
+    if (hasSize) {
+      assert(_minScrollExtent != null);
+      assert(_maxScrollExtent != null);
+      assert(anchor != null);
+      // If we already have a size, then we should re-report the dimensions
+      // to the new ViewportOffset. If we don't then we'll report them when
+      // we establish the dimensions later, so don't worry about it now.
+      double effectiveExtent;
+      switch (axis) {
+        case Axis.vertical:
+          effectiveExtent = size.height;
+          break;
+        case Axis.horizontal:
+          effectiveExtent = size.width;
+          break;
+      }
+      assert(effectiveExtent != null);
+      offset.applyViewportDimension(effectiveExtent);
+      if (offset.applyContentDimensions(
+            // when updating this, also update similar code in performLayout()
+            math.min(0.0, _minScrollExtent + effectiveExtent * anchor),
+            math.max(0.0, _maxScrollExtent - effectiveExtent * (1.0 - anchor)),
+         ))
+       markNeedsLayout();
+    }
   }
 
   RenderSliver get center => _center;
@@ -1256,19 +1252,19 @@ class RenderViewport2 extends RenderBox with ContainerRenderObjectMixin<RenderSl
 
   @override
   void detach() {
-    super.detach();
     _offset.removeListener(markNeedsLayout);
+    super.detach();
   }
 
   @override
   bool get isRepaintBoundary => true;
 
   @override
-  bool get sizedByParent => !shrinkWrap;
+  bool get sizedByParent => !_shrinkWrap;
 
   @override
   void performResize() {
-    assert(!shrinkWrap);
+    assert(!_shrinkWrap);
     assert(constraints.hasBoundedHeight && constraints.hasBoundedWidth);
     size = constraints.biggest;
     switch (axis) {
@@ -1288,9 +1284,10 @@ class RenderViewport2 extends RenderBox with ContainerRenderObjectMixin<RenderSl
 
   @override
   void performLayout() {
+    assert(!_shrinkWrap || anchor == 0.0);
     if (center == null) {
       assert(firstChild == null);
-      if (shrinkWrap) {
+      if (_shrinkWrap) {
         switch (axis) {
           case Axis.vertical:
             size = new Size(constraints.maxWidth, 0.0);
@@ -1301,6 +1298,9 @@ class RenderViewport2 extends RenderBox with ContainerRenderObjectMixin<RenderSl
         }
         offset.applyViewportDimension(0.0);
       }
+      _minScrollExtent = 0.0;
+      _maxScrollExtent = 0.0;
+      _shrinkWrapExtent = 0.0;
       offset.applyContentDimensions(0.0, 0.0);
       return;
     }
@@ -1308,19 +1308,21 @@ class RenderViewport2 extends RenderBox with ContainerRenderObjectMixin<RenderSl
 
     double extent;
     double crossExtent;
-    if (shrinkWrap) {
-      assert(constraints.hasBoundedHeight && constraints.hasBoundedWidth);
+    if (_shrinkWrap) {
       switch (axis) {
         case Axis.vertical:
+          assert(constraints.hasBoundedWidth);
           extent = constraints.maxHeight;
           crossExtent = constraints.maxWidth;
           break;
         case Axis.horizontal:
+          assert(constraints.hasBoundedHeight);
           extent = constraints.maxWidth;
           crossExtent = constraints.maxHeight;
           break;
       }
     } else {
+      assert(constraints.hasBoundedHeight && constraints.hasBoundedWidth);
       switch (axis) {
         case Axis.vertical:
           extent = size.height;
@@ -1343,7 +1345,7 @@ class RenderViewport2 extends RenderBox with ContainerRenderObjectMixin<RenderSl
       if (correction != 0.0) {
         offset.correctBy(correction);
       } else {
-        if (shrinkWrap) {
+        if (_shrinkWrap) {
           switch (axis) {
             case Axis.vertical:
               effectiveExtent = constraints.constrainHeight(_shrinkWrapExtent);
@@ -1363,16 +1365,17 @@ class RenderViewport2 extends RenderBox with ContainerRenderObjectMixin<RenderSl
               break;
           }
         }
+        // when updating this, also update similar code in offset setter
         if (offset.applyContentDimensions(
               math.min(0.0, _minScrollExtent + effectiveExtent * anchor),
-              math.max(0.0, _maxScrollExtent - effectiveExtent * (1.0 - anchor)
-           )))
+              math.max(0.0, _maxScrollExtent - effectiveExtent * (1.0 - anchor))
+           ))
           break;
       }
     } while (true);
 
-    assert(shrinkWrap != sizedByParent);
-    if (shrinkWrap) {
+    assert(_shrinkWrap != sizedByParent);
+    if (_shrinkWrap) {
       switch (axis) {
         case Axis.vertical:
           size = new Size(crossExtent, effectiveExtent);
@@ -1385,6 +1388,11 @@ class RenderViewport2 extends RenderBox with ContainerRenderObjectMixin<RenderSl
   }
 
   double _attemptLayout(double extent, double crossExtent, double correctedOffset) {
+    assert(!extent.isNaN);
+    assert(extent >= 0.0);
+    assert(crossExtent.isFinite);
+    assert(crossExtent >= 0.0);
+    assert(correctedOffset.isFinite);
     _minScrollExtent = 0.0;
     _maxScrollExtent = 0.0;
     _shrinkWrapExtent = 0.0;
@@ -1431,6 +1439,8 @@ class RenderViewport2 extends RenderBox with ContainerRenderObjectMixin<RenderSl
     GrowthDirection growthDirection,
     _Advancer advance,
   ) {
+    assert(scrollOffset.isFinite);
+    assert(scrollOffset >= 0.0);
     ScrollDirection adjustedUserScrollDirection;
     switch (growthDirection) {
       case GrowthDirection.forward:
@@ -1454,6 +1464,7 @@ class RenderViewport2 extends RenderBox with ContainerRenderObjectMixin<RenderSl
     double maxPaintOffset = layoutOffset;
     double initialLayoutOffset = layoutOffset;
     while (child != null) {
+      assert(scrollOffset >= 0.0);
       child.layout(new SliverConstraints(
         axisDirection: axisDirection,
         growthDirection: growthDirection,
@@ -1654,7 +1665,7 @@ class RenderViewport2 extends RenderBox with ContainerRenderObjectMixin<RenderSl
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     description.add('$axisDirection');
-    if (shrinkWrap)
+    if (_shrinkWrap)
       description.add('shrink-wrap enabled');
     description.add('anchor: $anchor');
     description.add('offset: $offset');
@@ -1714,7 +1725,7 @@ class RenderViewport2 extends RenderBox with ContainerRenderObjectMixin<RenderSl
 class RenderSliverToBoxAdapter extends RenderSliver with RenderObjectWithChildMixin<RenderBox>, RenderSliverHelpers {
   /// Creates a [RenderSliver] that wraps a [RenderBox].
   RenderSliverToBoxAdapter({
-    RenderBox child
+    RenderBox child,
   }) {
     this.child = child;
   }

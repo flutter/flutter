@@ -5,6 +5,7 @@
 import 'package:flutter/foundation.dart';
 
 import 'framework.dart';
+import 'routes.dart';
 
 /// An optional container for grouping together multiple form field widgets
 /// (e.g. [Input] widgets).
@@ -23,6 +24,7 @@ class Form extends StatefulWidget {
     Key key,
     @required this.child,
     this.autovalidate: false,
+    this.onWillPop,
   }) : super(key: key) {
     assert(child != null);
   }
@@ -48,6 +50,13 @@ class Form extends StatefulWidget {
   /// [FormState.validate] to validate.
   final bool autovalidate;
 
+  /// Enables the form to veto attempts by the user to dismiss the [ModalRoute]
+  /// that contains the form.
+  ///
+  /// If the callback returns a Future that resolves to false, the form's route
+  /// will not be popped.
+  WillPopCallback onWillPop;
+
   @override
   FormState createState() => new FormState();
 }
@@ -56,8 +65,30 @@ class FormState extends State<Form> {
   int _generation = 0;
   Set<FormFieldState<dynamic>> _fields = new Set<FormFieldState<dynamic>>();
 
-  /// Called when a form field has changed. This will cause all form fields
-  /// to rebuild, useful if form fields have interdependencies.
+  @override
+  void dependenciesChanged() {
+    super.dependenciesChanged();
+    final ModalRoute<dynamic> route = ModalRoute.of(context);
+    if (route != null && config.onWillPop != null) {
+      // Avoid adding our callback twice by removing it first.
+      route.removeScopedWillPopCallback(config.onWillPop);
+      route.addScopedWillPopCallback(config.onWillPop);
+    }
+  }
+
+  @override
+  void didUpdateConfig(Form oldConfig) {
+    final ModalRoute<dynamic> route = ModalRoute.of(context);
+    if (config.onWillPop != oldConfig.onWillPop && route != null) {
+      if (oldConfig.onWillPop != null)
+        route.removeScopedWillPopCallback(oldConfig.onWillPop);
+      if (config.onWillPop != null)
+        route.addScopedWillPopCallback(config.onWillPop);
+    }
+  }
+
+  // Called when a form field has changed. This will cause all form fields
+  // to rebuild, useful if form fields have interdependencies.
   void _fieldDidChange() {
     setState(() {
       ++_generation;
@@ -166,7 +197,10 @@ typedef Widget FormFieldBuilder<T>(FormFieldState<T> field);
 /// pass a [GlobalKey] to the constructor and use [GlobalKey.currentState] to
 /// save or reset the form field.
 ///
-/// See also: [Form], [InputFormField]
+/// See also:
+///
+///  * [Form], which is the widget that aggregates the form fields.
+///  * [TextField], which is a commonly used form field for entering text.
 class FormField<T> extends StatefulWidget {
   FormField({
     Key key,

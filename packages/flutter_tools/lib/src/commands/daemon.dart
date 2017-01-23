@@ -22,6 +22,7 @@ import '../ios/simulators.dart';
 import '../resident_runner.dart';
 import '../run.dart';
 import '../runner/flutter_command.dart';
+import '../vmservice.dart';
 
 const String protocolVersion = '0.2.0';
 
@@ -280,6 +281,7 @@ class AppDomain extends Domain {
   AppDomain(Daemon daemon) : super(daemon, 'app') {
     registerHandler('start', start);
     registerHandler('restart', restart);
+    registerHandler('callServiceExtension', callServiceExtension);
     registerHandler('stop', stop);
     registerHandler('discover', discover);
   }
@@ -433,6 +435,26 @@ class AppDomain extends Domain {
     return app._runInZone(this, () {
       return app.restart(fullRestart: fullRestart, pauseAfterRestart: pauseAfterRestart);
     });
+  }
+
+  Future<OperationResult> callServiceExtension(Map<String, dynamic> args) async {
+    String appId = _getStringArg(args, 'appId', required: true);
+    String methodName = _getStringArg(args, 'methodName');
+    Map<String, String> params = args['params'] ?? <String, String>{};
+
+    AppInstance app = _getApp(appId);
+    if (app == null)
+      throw "app '$appId' not found";
+
+    Isolate isolate = app.runner.currentView.uiIsolate;
+    Map<String, dynamic> result = await isolate.invokeFlutterExtensionRpcRaw(methodName, params: params);
+    if (result == null)
+      return new OperationResult(1, 'method not available: $methodName');
+
+    if (result.containsKey('error'))
+      return new OperationResult(1, result['error']);
+    else
+      return OperationResult.ok;
   }
 
   Future<bool> stop(Map<String, dynamic> args) async {

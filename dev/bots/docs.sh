@@ -2,7 +2,7 @@
 set -e
 
 # Install dartdoc.
-pub global activate dartdoc 0.9.9
+pub global activate dartdoc 0.9.10
 
 # This script generates a unified doc set, and creates
 # a custom index.html, placing everything into dev/docs/doc

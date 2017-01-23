@@ -302,9 +302,12 @@ class AndroidBackButtonMemoryTest {
 
       // Perform a series of back button suspend and resume cycles.
       for (int i = 0; i < 10; i++) {
-        device.shellExec('input', <String>['keyevent', 'KEYCODE_BACK']);
+        await device.shellExec('input', <String>['keyevent', 'KEYCODE_BACK']);
         await new Future<Null>.delayed(new Duration(milliseconds: 1000));
-        device.shellExec('am', <String>['start', '-n', 'io.flutter.examples.gallery/org.domokit.sky.shell.SkyActivity']);
+        String output = await device.shellEval('am', <String>['start', '-n', 'io.flutter.examples.gallery/io.flutter.app.FlutterActivity']);
+        print(output);
+        if (output.contains('Error'))
+          return new TaskResult.failure('unable to launch activity');
         await new Future<Null>.delayed(new Duration(milliseconds: 1000));
       }
 

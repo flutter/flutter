@@ -161,8 +161,8 @@ class CachingIterable<E> extends IterableBase<E> {
   }
 
   @override
-  Iterable<dynamic/*=T*/> map/*<T>*/(/*=T*/ f(E e)) {
-    return new CachingIterable<dynamic/*=T*/>(super.map/*<T>*/(f).iterator);
+  Iterable<T> map<T>(T f(E e)) {
+    return new CachingIterable<T>(super.map<T>(f).iterator);
   }
 
   @override
@@ -171,8 +171,8 @@ class CachingIterable<E> extends IterableBase<E> {
   }
 
   @override
-  Iterable<dynamic/*=T*/> expand/*<T>*/(Iterable/*<T>*/ f(E element)) {
-    return new CachingIterable<dynamic/*=T*/>(super.expand/*<T>*/(f).iterator);
+  Iterable<T> expand<T>(Iterable<T> f(E element)) {
+    return new CachingIterable<T>(super.expand<T>(f).iterator);
   }
 
   @override

@@ -50,7 +50,7 @@ TextEditingState _getTextEditingStateFromInputValue(InputValue value) {
   );
 }
 
-/// Configuration information for an input field.
+/// Configuration information for a text input field.
 ///
 /// An [InputValue] contains the text for the input field as well as the
 /// selection extent and the composing range.
@@ -118,19 +118,32 @@ class InputValue {
   }
 }
 
-/// A basic text input control.
+/// A basic text input field.
 ///
-/// This control is not intended to be used directly. Instead, consider using
-/// [Input], which provides focus management and material design.
-class RawInput extends Scrollable {
+/// This widget interacts with the [TextInput] service to let the user edit the
+/// text it contains. It also provides scrolling, selection, and cursor
+/// movement. This widget does not provide any focus management (e.g.,
+/// tap-to-focus).
+///
+/// Rather than using this widget directly, consider using [InputField], which
+/// adds tap-to-focus and cut, copy, and paste commands, or [TextField], which
+/// is a full-featured, material-design text input field with placeholder text,
+/// labels, and [Form] integration.
+///
+/// See also:
+///
+///  * [InputField], which adds tap-to-focus and cut, copy, and paste commands.
+///  * [TextField], which is a full-featured, material-design text input field
+///    with placeholder text, labels, and [Form] integration.
+class EditableText extends Scrollable {
   /// Creates a basic text input control.
   ///
   /// The [value] argument must not be null.
-  RawInput({
+  EditableText({
     Key key,
     @required this.value,
     this.focusKey,
-    this.hideText: false,
+    this.obscureText: false,
     this.style,
     this.cursorColor,
     this.textScaleFactor,
@@ -157,7 +170,9 @@ class RawInput extends Scrollable {
   final GlobalKey focusKey;
 
   /// Whether to hide the text being edited (e.g., for passwords).
-  final bool hideText;
+  ///
+  /// Defaults to false.
+  final bool obscureText;
 
   /// The text style to use for the editable text.
   final TextStyle style;
@@ -181,6 +196,8 @@ class RawInput extends Scrollable {
   /// Whether this input field should focus itself if nothing else is already focused.
   /// If true, the keyboard will open as soon as this input obtains focus. Otherwise,
   /// the keyboard is only shown after the user taps the text field.
+  ///
+  /// Defaults to false.
   final bool autofocus;
 
   /// The color to use when painting the selection.
@@ -205,11 +222,11 @@ class RawInput extends Scrollable {
   final ValueChanged<InputValue> onSubmitted;
 
   @override
-  RawInputState createState() => new RawInputState();
+  EditableTextState createState() => new EditableTextState();
 }
 
-/// State for a [RawInput].
-class RawInputState extends ScrollableState<RawInput> implements TextInputClient {
+/// State for a [EditableText].
+class EditableTextState extends ScrollableState<EditableText> implements TextInputClient {
   Timer _cursorTimer;
   bool _showCursor = false;
 
@@ -230,7 +247,7 @@ class RawInputState extends ScrollableState<RawInput> implements TextInputClient
   }
 
   @override
-  void didUpdateConfig(RawInput oldConfig) {
+  void didUpdateConfig(EditableText oldConfig) {
     if (_currentValue != config.value) {
       _currentValue = config.value;
       if (_isAttachedToKeyboard)
@@ -280,7 +297,7 @@ class RawInputState extends ScrollableState<RawInput> implements TextInputClient
   }
 
   // True if the focus was explicitly requested last frame. This ensures we
-  // don't show the keyboard when focus defaults back to the RawInput.
+  // don't show the keyboard when focus defaults back to the EditableText.
   bool _requestingFocus = false;
 
   void _attachOrDetachKeyboard(bool focused) {
@@ -456,7 +473,7 @@ class RawInputState extends ScrollableState<RawInput> implements TextInputClient
         maxLines: config.maxLines,
         selectionColor: config.selectionColor,
         textScaleFactor: config.textScaleFactor ?? MediaQuery.of(context).textScaleFactor,
-        hideText: config.hideText,
+        obscureText: config.obscureText,
         onSelectionChanged: _handleSelectionChanged,
         paintOffset: scrollOffsetToPixelDelta(scrollOffset),
         onPaintOffsetUpdateNeeded: _handlePaintOffsetUpdateNeeded
@@ -475,7 +492,7 @@ class _Editable extends LeafRenderObjectWidget {
     this.maxLines,
     this.selectionColor,
     this.textScaleFactor,
-    this.hideText,
+    this.obscureText,
     this.onSelectionChanged,
     this.paintOffset,
     this.onPaintOffsetUpdateNeeded
@@ -488,7 +505,7 @@ class _Editable extends LeafRenderObjectWidget {
   final int maxLines;
   final Color selectionColor;
   final double textScaleFactor;
-  final bool hideText;
+  final bool obscureText;
   final SelectionChangedHandler onSelectionChanged;
   final Offset paintOffset;
   final RenderEditablePaintOffsetNeededCallback onPaintOffsetUpdateNeeded;
@@ -525,7 +542,7 @@ class _Editable extends LeafRenderObjectWidget {
   }
 
   TextSpan get _styledTextSpan {
-    if (!hideText && value.composing.isValid) {
+    if (!obscureText && value.composing.isValid) {
       TextStyle composingStyle = style.merge(
         const TextStyle(decoration: TextDecoration.underline)
       );
@@ -543,7 +560,7 @@ class _Editable extends LeafRenderObjectWidget {
     }
 
     String text = value.text;
-    if (hideText)
+    if (obscureText)
       text = new String.fromCharCodes(new List<int>.filled(text.length, 0x2022));
     return new TextSpan(style: style, text: text);
   }

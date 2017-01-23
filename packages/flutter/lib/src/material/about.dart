@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io' show Platform;
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter/foundation.dart';
@@ -69,9 +70,7 @@ class AboutDrawerItem extends StatelessWidget {
   /// [child]) and as the caption of the [AboutDialog] that is shown.
   ///
   /// Defaults to the value of [Title.title], if a [Title] widget can be found.
-  /// Otherwise, defaults to "this Flutter application".
-  // TODO(ianh): once https://github.com/flutter/flutter/issues/3648 is fixed:
-  // /// Otherwise, defaults to [Platform.resolvedExecutable].
+  /// Otherwise, defaults to [Platform.resolvedExecutable].
   final String applicationName;
 
   /// The version of this build of the application.
@@ -148,7 +147,7 @@ void showAboutDialog({
   String applicationLegalese,
   List<Widget> children
 }) {
-  showDialog/*<Null>*/(
+  showDialog<Null>(
     context: context,
     child: new AboutDialog(
       applicationName: applicationName,
@@ -223,9 +222,7 @@ class AboutDialog extends StatelessWidget {
   /// The name of the application.
   ///
   /// Defaults to the value of [Title.title], if a [Title] widget can be found.
-  /// Otherwise, defaults to "this Flutter application".
-  // TODO(ianh): once https://github.com/flutter/flutter/issues/3648 is fixed:
-  // /// Otherwise, defaults to [Platform.resolvedExecutable].
+  /// Otherwise, defaults to [Platform.resolvedExecutable].
   final String applicationName;
 
   /// The version of this build of the application.
@@ -343,9 +340,7 @@ class LicensePage extends StatefulWidget {
   /// The name of the application.
   ///
   /// Defaults to the value of [Title.title], if a [Title] widget can be found.
-  /// Otherwise, defaults to "this Flutter application".
-  // TODO(ianh): once https://github.com/flutter/flutter/issues/3648 is fixed:
-  // /// Otherwise, defaults to [Platform.resolvedExecutable].
+  /// Otherwise, defaults to [Platform.resolvedExecutable].
   final String applicationName;
 
   /// The version of this build of the application.
@@ -467,11 +462,7 @@ class _LicensePageState extends State<LicensePage> {
 
 String _defaultApplicationName(BuildContext context) {
   Title ancestorTitle = context.ancestorWidgetOfExactType(Title);
-  return ancestorTitle?.title ?? 'this Flutter application';
-  // TODO(ianh): once https://github.com/flutter/flutter/issues/3648 is fixed,
-  // replace the string in the previous line with:
-  //   Platform.resolvedExecutable.split(Platform.pathSeparator).last
-  // (then fix the dartdocs in the classes above)
+  return ancestorTitle?.title ?? Platform.resolvedExecutable.split(Platform.pathSeparator).last;
 }
 
 String _defaultApplicationVersion(BuildContext context) {

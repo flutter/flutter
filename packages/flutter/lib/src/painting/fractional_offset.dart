@@ -141,7 +141,7 @@ class FractionalOffset {
     if (a == null)
       return new FractionalOffset(b.dx * t, b.dy * t);
     if (b == null)
-      return new FractionalOffset(b.dx * (1.0 - t), b.dy * (1.0 - t));
+      return new FractionalOffset(a.dx * (1.0 - t), a.dy * (1.0 - t));
     return new FractionalOffset(ui.lerpDouble(a.dx, b.dx, t), ui.lerpDouble(a.dy, b.dy, t));
   }
 

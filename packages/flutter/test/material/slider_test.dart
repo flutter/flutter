@@ -104,19 +104,11 @@ void main() {
     final RenderBox sliderBox =
         tester.firstRenderObject<RenderBox>(find.byType(Slider));
 
-    Paint getThumbPaint() {
-      final MockCanvas canvas = new MockCanvas();
-      sliderBox.paint(new MockPaintingContext(canvas), Offset.zero);
-      final Invocation drawCommand =
-          canvas.invocations.where((Invocation invocation) {
-        return invocation.memberName == #drawCircle;
-      }).single;
-      return drawCommand.positionalArguments[2];
-    }
-
-    expect(getThumbPaint().style, equals(PaintingStyle.fill));
+    expect(sliderBox, paints..circle(style: PaintingStyle.fill));
+    expect(sliderBox, isNot(paints..circle()..circle()));
     await tester.pumpWidget(buildApp(true));
-    expect(getThumbPaint().style, equals(PaintingStyle.stroke));
+    expect(sliderBox, paints..circle(style: PaintingStyle.stroke));
+    expect(sliderBox, isNot(paints..circle()..circle()));
   });
 
   testWidgets('Slider can tap in vertical scroller',

@@ -153,7 +153,7 @@ class RenderList extends RenderVirtualViewport<ListParentData> {
     }
 
     if (callback != null)
-      invokeLayoutCallback/*<BoxConstraints>*/(callback);
+      invokeLayoutCallback<BoxConstraints>(callback);
 
     double itemWidth;
     double itemHeight;

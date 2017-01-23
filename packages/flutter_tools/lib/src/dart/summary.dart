@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:analyzer/file_system/file_system.dart';
 import 'package:analyzer/file_system/physical_file_system.dart';
 import 'package:analyzer/src/context/builder.dart'; // ignore: implementation_imports
@@ -7,20 +5,16 @@ import 'package:analyzer/src/dart/sdk/sdk.dart'; // ignore: implementation_impor
 import 'package:analyzer/src/generated/engine.dart'; // ignore: implementation_imports
 import 'package:analyzer/src/generated/source.dart'; // ignore: implementation_imports
 import 'package:analyzer/src/summary/summary_file_builder.dart'; // ignore: implementation_imports
-import 'package:analyzer/src/summary/pub_summary.dart'; // ignore: implementation_imports
-import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/globals.dart';
 import 'package:path/path.dart' as pathos;
 import 'package:yaml/src/yaml_node.dart'; // ignore: implementation_imports
 
 import '../base/file_system.dart' as file;
-import '../base/io.dart';
 
 /// Given the [skyEnginePath], locate corresponding `_embedder.yaml` and compose
 /// the full embedded Dart SDK, and build the [outBundleName] file with its
-/// linked summary.
-void buildSkyEngineSdkSummary(String skyEnginePath, String outBundleName) {
+/// linked [strong] or spec summary.
+void buildSkyEngineSdkSummary(String skyEnginePath, String outBundleName, bool strong) {
   ResourceProvider resourceProvider = PhysicalResourceProvider.INSTANCE;
 
   Map<String, List<Folder>> packageMap = <String, List<Folder>>{
@@ -46,57 +40,7 @@ void buildSkyEngineSdkSummary(String skyEnginePath, String outBundleName) {
   List<Source> sources = sdk.uris.map(sdk.mapDartUri).toList();
 
   // Build.
-  List<int> bytes = new SummaryBuilder(sources, sdk.context, true).build();
+  List<int> bytes = new SummaryBuilder(sources, sdk.context, strong).build();
   String outputPath = pathos.join(skyEnginePath, outBundleName);
   file.fs.file(outputPath).writeAsBytesSync(bytes);
-}
-
-Future<Null> buildUnlinkedForPackages(String flutterPath) async {
-  PhysicalResourceProvider provider = PhysicalResourceProvider.INSTANCE;
-  PubSummaryManager manager =
-      new PubSummaryManager(provider, '__unlinked_$pid.ds');
-
-  Folder flutterFolder = provider.getFolder(flutterPath);
-
-  // Build in packages/.
-  Folder packagesFolder = flutterFolder.getChildAssumingFolder('packages');
-  await _buildUnlinkedForDirectChildren(manager, packagesFolder);
-
-  // Build in bin/cache/pkg/.
-  Folder pkgFolder = flutterFolder
-      .getChildAssumingFolder('bin')
-      .getChildAssumingFolder('cache')
-      .getChildAssumingFolder('pkg');
-  await _buildUnlinkedForDirectChildren(manager, pkgFolder);
-}
-
-Future<Null> _buildUnlinkedForDirectChildren(
-  PubSummaryManager manager,
-  Folder packagesFolder
-) async {
-  for (Resource child in packagesFolder.getChildren()) {
-    if (child is Folder)
-      await _buildUnlinkedForPackage(manager, child);
-  }
-}
-
-Future<Null> _buildUnlinkedForPackage(
-  PubSummaryManager manager,
-  Folder packageFolder
-) async {
-  if (packageFolder.exists) {
-    String name = packageFolder.shortName;
-    File pubspecFile = packageFolder.getChildAssumingFile('pubspec.yaml');
-    Folder libFolder = packageFolder.getChildAssumingFolder('lib');
-    if (pubspecFile.exists && libFolder.exists) {
-      await pubGet(directory: packageFolder.path);
-      Status status =
-          logger.startProgress('Building unlinked bundles for $name...');
-      try {
-        await manager.computeUnlinkedForFolder(name, libFolder);
-      } finally {
-        status.stop();
-      }
-    }
-  }
 }

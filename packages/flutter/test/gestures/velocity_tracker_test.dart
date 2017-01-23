@@ -59,4 +59,16 @@ void main() {
     expect(velocity1.hashCode, isNot(equals(velocity2.hashCode)));
     expect(velocity1, hasOneLineDescription);
   });
+
+  test('Interrupted velocity estimation', () {
+    // Regression test for https://github.com/flutter/flutter/pull/7510
+    VelocityTracker tracker = new VelocityTracker();
+    for (PointerEvent event in interruptedVelocityEventData) {
+      if (event is PointerDownEvent || event is PointerMoveEvent)
+        tracker.addPosition(event.timeStamp, event.position);
+      if (event is PointerUpEvent) {
+        _checkVelocity(tracker.getVelocity(), const Offset(649.5, 3890.3));
+      }
+    }
+  });
 }

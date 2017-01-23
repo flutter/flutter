@@ -290,8 +290,7 @@ class StockHomeState extends State<StockHome> {
         onPressed: _handleSearchEnd,
         tooltip: 'Back'
       ),
-      title: new Input(
-        value: _searchQuery,
+      title: new TextField(
         autofocus: true,
         hintText: 'Search stocks',
         onChanged: _handleSearchQueryChanged
@@ -301,7 +300,7 @@ class StockHomeState extends State<StockHome> {
   }
 
   void _handleCreateCompany() {
-    showModalBottomSheet/*<Null>*/(
+    showModalBottomSheet<Null>(
       context: context,
       builder: (BuildContext context) => new _CreateCompanySheet()
     );
@@ -336,30 +335,15 @@ class StockHomeState extends State<StockHome> {
   }
 }
 
-class _CreateCompanySheet extends StatefulWidget {
-  @override
-  _CreateCompanySheetState createState() => new _CreateCompanySheetState();
-}
-
-class _CreateCompanySheetState extends State<_CreateCompanySheet> {
-  InputValue _companyName = InputValue.empty;
-
-  void _handleCompanyNameChanged(InputValue value) {
-    setState(() {
-      _companyName = value;
-    });
-  }
-
+class _CreateCompanySheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // TODO(ianh): Fill this out.
     return new Column(
       children: <Widget>[
-        new Input(
+        new TextField(
           autofocus: true,
           hintText: 'Company Name',
-          value: _companyName,
-          onChanged: _handleCompanyNameChanged
         ),
       ]
     );

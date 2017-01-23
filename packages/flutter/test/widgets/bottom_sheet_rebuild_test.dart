@@ -18,7 +18,7 @@ void main() {
       )
     ));
 
-    bottomSheet = scaffoldKey.currentState.showBottomSheet/*<Null>*/((_) {
+    bottomSheet = scaffoldKey.currentState.showBottomSheet<Null>((_) {
       return new Builder(
         builder: (BuildContext context) {
           buildCount += 1;

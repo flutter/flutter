@@ -40,13 +40,13 @@ void main() {
       },
     ));
     expect(tester.binding.transientCallbackCount, 1);
-    tester.state/*<NavigatorState>*/(find.byType(Navigator)).pushNamed('/test');
+    tester.state<NavigatorState>(find.byType(Navigator)).pushNamed('/test');
     expect(tester.binding.transientCallbackCount, 2);
     await tester.pump();
     expect(tester.binding.transientCallbackCount, 2);
     await tester.pump(const Duration(seconds: 5));
     expect(tester.binding.transientCallbackCount, 0);
-    tester.state/*<NavigatorState>*/(find.byType(Navigator)).pop();
+    tester.state<NavigatorState>(find.byType(Navigator)).pop();
     expect(tester.binding.transientCallbackCount, 1);
     await tester.pump();
     expect(tester.binding.transientCallbackCount, 2);
