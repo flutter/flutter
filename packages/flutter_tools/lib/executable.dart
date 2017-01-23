@@ -30,7 +30,6 @@ import 'src/commands/drive.dart';
 import 'src/commands/format.dart';
 import 'src/commands/install.dart';
 import 'src/commands/logs.dart';
-import 'src/commands/setup.dart';
 import 'src/commands/packages.dart';
 import 'src/commands/precache.dart';
 import 'src/commands/run.dart';
@@ -84,7 +83,6 @@ Future<Null> main(List<String> args) async {
     ..addCommand(new PrecacheCommand())
     ..addCommand(new RunCommand(verboseHelp: verboseHelp))
     ..addCommand(new ScreenshotCommand())
-    ..addCommand(new SetupCommand(hidden: !verboseHelp))
     ..addCommand(new StopCommand())
     ..addCommand(new TestCommand())
     ..addCommand(new TraceCommand())
