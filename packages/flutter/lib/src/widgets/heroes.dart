@@ -607,7 +607,6 @@ class HeroController extends NavigatorObserver {
       );
     }
 
-    //_questsEnabled = true;
     _clearPendingHeroQuest();
   }
 
