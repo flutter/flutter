@@ -45,20 +45,22 @@ final InternetAddress _kHost = InternetAddress.LOOPBACK_IP_V4;
 
 /// Configure the `test` package to work with Flutter.
 ///
-/// On systems where each [FlutterPlatform] is only used to run one test suite
+/// On systems where each [_FlutterPlatform] is only used to run one test suite
 /// (that is, one Dart file with a `*_test.dart` file name and a single `void
 /// main()`), you can set an observatory port and a diagnostic port explicitly.
 void installHook({
   @required String shellPath,
   CoverageCollector collector,
+  bool debuggerMode: false,
   int observatoryPort,
   int diagnosticPort,
 }) {
   hack.registerPlatformPlugin(
     <TestPlatform>[TestPlatform.vm],
-    () => new FlutterPlatform(
+    () => new _FlutterPlatform(
       shellPath: shellPath,
       collector: collector,
+      debuggerMode: debuggerMode,
       explicitObservatoryPort: observatoryPort,
       explicitDiagnosticPort: diagnosticPort,
     ),
@@ -69,13 +71,14 @@ enum _InitialResult { crashed, timedOut, connected }
 enum _TestResult { crashed, harnessBailed, testBailed }
 typedef Future<Null> _Finalizer();
 
-class FlutterPlatform extends PlatformPlugin {
-  FlutterPlatform({ this.shellPath, this.collector, this.explicitObservatoryPort, this.explicitDiagnosticPort }) {
+class _FlutterPlatform extends PlatformPlugin {
+  _FlutterPlatform({ this.shellPath, this.collector, this.debuggerMode, this.explicitObservatoryPort, this.explicitDiagnosticPort }) {
     assert(shellPath != null);
   }
 
   final String shellPath;
   final CoverageCollector collector;
+  final bool debuggerMode;
   final int explicitObservatoryPort;
   final int explicitDiagnosticPort;
 
@@ -90,9 +93,9 @@ class FlutterPlatform extends PlatformPlugin {
 
   @override
   StreamChannel<dynamic> loadChannel(String testPath, TestPlatform platform) {
-    if (explicitObservatoryPort != null || explicitDiagnosticPort != null) {
+    if (explicitObservatoryPort != null || explicitDiagnosticPort != null || debuggerMode) {
       if (_testCount > 0)
-        throwToolExit('installHook() was called with an observatory port or a diagnostic port (or both) but then more than one test suite was run.');
+        throwToolExit('installHook() was called with an observatory port, a diagnostic port, both, or debugger mode enabled, but then more than one test suite was run.');
     }
     int ourTestCount = _testCount;
     _testCount += 1;
@@ -171,7 +174,8 @@ class FlutterPlatform extends PlatformPlugin {
         shellPath,
         listenerFile.path,
         packages: PackageMap.globalPackagesPath,
-        enableObservatory: collector != null,
+        enableObservatory: collector != null || debuggerMode,
+        startPaused: debuggerMode,
         observatoryPort: explicitObservatoryPort,
         diagnosticPort: explicitDiagnosticPort,
       );
@@ -198,10 +202,18 @@ class FlutterPlatform extends PlatformPlugin {
       int processObservatoryPort;
       _pipeStandardStreamsToConsole(
         process,
-        storeObservatoryPort: (int detectedPort) {
+        reportObservatoryPort: (int detectedPort) {
           assert(processObservatoryPort == null);
-          assert(explicitObservatoryPort == null || explicitObservatoryPort == detectedPort);
-          printTrace('test $ourTestCount: using observatory port $detectedPort from pid ${process.pid} to collect coverage');
+          assert(explicitObservatoryPort == null ||
+                 explicitObservatoryPort == detectedPort);
+          if (debuggerMode) {
+            printStatus('The test process has been started.');
+            printStatus('You can now connect to it using observatory. To connect, load the following Web site in your browser:');
+            printStatus('  http://${_kHost.address}:$detectedPort/');
+            printStatus('You should first set appropriate breakpoints, then resume the test in the debugger.');
+          } else {
+            printTrace('test $ourTestCount: using observatory port $detectedPort from pid ${process.pid} to collect coverage');
+          }
           processObservatoryPort = detectedPort;
         },
         startTimeoutTimer: () {
@@ -409,18 +421,20 @@ void main() {
     String testPath, {
     String packages,
     bool enableObservatory: false,
+    bool startPaused: false,
     int observatoryPort,
     int diagnosticPort,
   }) {
     assert(executable != null); // Please provide the path to the shell in the SKY_SHELL environment variable.
+    assert(!startPaused || enableObservatory);
     List<String> arguments = <String>[];
     if (enableObservatory) {
-      // Some systems drive the FlutterPlatform class in an unusual way, where
+      // Some systems drive the _FlutterPlatform class in an unusual way, where
       // only one test file is processed at a time, and the operating
       // environment hands out specific ports ahead of time in a cooperative
       // manner, where we're only allowed to open ports that were given to us in
       // advance like this. For those esoteric systems, we have this feature
-      // whereby you can create FlutterPlatform with a pair of ports.
+      // whereby you can create _FlutterPlatform with a pair of ports.
       //
       // I mention this only so that you won't be tempted, as I was, to apply
       // the obvious simplification to this code and remove this entire feature.
@@ -428,6 +442,8 @@ void main() {
         arguments.add('--observatory-port=$observatoryPort');
       if (diagnosticPort != null)
         arguments.add('--diagnostic-port=$diagnosticPort');
+      if (startPaused)
+        arguments.add('--start-paused');
     } else {
       arguments.addAll(<String>['--disable-observatory', '--disable-diagnostic']);
     }
@@ -452,7 +468,7 @@ void main() {
   void _pipeStandardStreamsToConsole(
     Process process, {
     void startTimeoutTimer(),
-    void storeObservatoryPort(int port),
+    void reportObservatoryPort(int port),
   }) {
     for (Stream<List<int>> stream in
         <Stream<List<int>>>[process.stderr, process.stdout]) {
@@ -470,8 +486,8 @@ void main() {
               printTrace('Shell: $line');
               try {
                 int port = int.parse(line.substring(observatoryPortString.length, line.length - 1)); // last character is a slash
-                if (storeObservatoryPort != null)
-                  storeObservatoryPort(port);
+                if (reportObservatoryPort != null)
+                  reportObservatoryPort(port);
               } catch (error) {
                 printError('Could not parse shell observatory port message: $error');
               }

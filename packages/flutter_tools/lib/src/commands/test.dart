@@ -24,6 +24,14 @@ import '../toolchain.dart';
 class TestCommand extends FlutterCommand {
   TestCommand() {
     usesPubOption();
+    argParser.addFlag('start-paused',
+        defaultsTo: false,
+        negatable: false,
+        help: 'Start in a paused mode and wait for a debugger to connect.\n'
+              'You must specify a single test file to run, explicitly.\n'
+              'Instructions for connecting with a debugger and printed to the\n'
+              'console once the test has started.'
+    );
     argParser.addFlag('coverage',
       defaultsTo: false,
       negatable: false,
@@ -164,19 +172,27 @@ class TestCommand extends FlutterCommand {
 
     Directory testDir;
     List<String> files = argResults.rest.map((String testPath) => path.absolute(testPath)).toList();
-    if (files.isEmpty) {
+    if (argResults['start-paused']) {
+      if (files.length != 1)
+        throwToolExit('When using --start-paused, you must specify a single test file to run.', exitCode: 1);
+    } else if (files.isEmpty) {
       testDir = _currentPackageTestDir;
       if (!testDir.existsSync())
-        throwToolExit("Test directory '${testDir.path}' not found.");
-      testArgs.addAll(_findTests(testDir));
-    } else {
-      testArgs.addAll(files);
+        throwToolExit('Test directory "${testDir.path}" not found.');
+      files = _findTests(testDir);
+      if (files.isEmpty) {
+        throwToolExit(
+          'Test directory "${testDir.path}" does not appear to contain any test files.\n'
+          'Test files must be in that directory and end with the pattern "_test.dart".'
+        );
+      }
     }
+    testArgs.addAll(files);
 
     final String shellPath = tools.getHostToolPath(HostTool.SkyShell) ?? Platform.environment['SKY_SHELL'];
     if (!fs.isFileSync(shellPath))
       throwToolExit('Cannot find Flutter shell at $shellPath');
-    loader.installHook(shellPath: shellPath, collector: collector);
+    loader.installHook(shellPath: shellPath, collector: collector, debuggerMode: argResults['start-paused']);
 
     Cache.releaseLockEarly();
 
