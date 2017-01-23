@@ -40,29 +40,29 @@ public class FlutterMain {
 
     // Must match values in sky::shell::switches
     private static final String AOT_SNAPSHOT_PATH_KEY = "aot-snapshot-path";
-    private static final String AOT_ISOLATE_KEY = "isolate-snapshot";
-    private static final String AOT_VM_ISOLATE_KEY = "vm-isolate-snapshot";
-    private static final String AOT_INSTRUCTIONS_KEY = "instructions-blob";
-    private static final String AOT_RODATA_KEY = "rodata-blob";
+    private static final String AOT_VM_SNAPSHOT_DATA_KEY = "vm-snapshot-data";
+    private static final String AOT_VM_SNAPSHOT_INSTR_KEY = "vm-snapshot-instr";
+    private static final String AOT_ISOLATE_SNAPSHOT_DATA_KEY = "isolate-snapshot-data";
+    private static final String AOT_ISOLATE_SNAPSHOT_INSTR_KEY = "isolate-snapshot-instr";
     private static final String FLX_KEY = "flx";
 
     // XML Attribute keys supported in AndroidManifest.xml
-    public static final String PUBLIC_AOT_ISOLATE_KEY =
-        FlutterMain.class.getName() + '.' + AOT_ISOLATE_KEY;
-    public static final String PUBLIC_AOT_VM_ISOLATE_KEY =
-        FlutterMain.class.getName() + '.' + AOT_VM_ISOLATE_KEY;
-    public static final String PUBLIC_AOT_INSTRUCTIONS_KEY =
-        FlutterMain.class.getName() + '.' + AOT_INSTRUCTIONS_KEY;
-    public static final String PUBLIC_AOT_RODATA_KEY =
-        FlutterMain.class.getName() + '.' + AOT_RODATA_KEY;
+    public static final String PUBLIC_AOT_VM_SNAPSHOT_DATA_KEY =
+        FlutterMain.class.getName() + '.' + AOT_VM_SNAPSHOT_DATA_KEY;
+    public static final String PUBLIC_AOT_VM_SNAPSHOT_INSTR_KEY =
+        FlutterMain.class.getName() + '.' + AOT_VM_SNAPSHOT_INSTR_KEY;
+    public static final String PUBLIC_AOT_ISOLATE_SNAPSHOT_DATA_KEY =
+        FlutterMain.class.getName() + '.' + AOT_ISOLATE_SNAPSHOT_DATA_KEY;
+    public static final String PUBLIC_AOT_ISOLATE_SNAPSHOT_INSTR_KEY =
+        FlutterMain.class.getName() + '.' + AOT_ISOLATE_SNAPSHOT_INSTR_KEY;
     public static final String PUBLIC_FLX_KEY =
         FlutterMain.class.getName() + '.' + FLX_KEY;
 
     // Resource names used for components of the precompiled snapshot.
-    private static final String DEFAULT_AOT_ISOLATE = "snapshot_aot_isolate";
-    private static final String DEFAULT_AOT_VM_ISOLATE = "snapshot_aot_vmisolate";
-    private static final String DEFAULT_AOT_INSTRUCTIONS = "snapshot_aot_instr";
-    private static final String DEFAULT_AOT_RODATA = "snapshot_aot_rodata";
+    private static final String DEFAULT_AOT_VM_SNAPSHOT_DATA = "vm_snapshot_data";
+    private static final String DEFAULT_AOT_VM_SNAPSHOT_INSTR = "vm_snapshot_instr";
+    private static final String DEFAULT_AOT_ISOLATE_SNAPSHOT_DATA = "isolate_snapshot_data";
+    private static final String DEFAULT_AOT_ISOLATE_SNAPSHOT_INSTR = "isolate_snapshot_instr";
     private static final String DEFAULT_FLX = "app.flx";
 
     private static final String MANIFEST = "flutter.yaml";
@@ -74,10 +74,10 @@ public class FlutterMain {
         .build();
 
     // Mutable because default values can be overridden via config properties
-    private static String sAotIsolate = DEFAULT_AOT_ISOLATE;
-    private static String sAotVmIsolate = DEFAULT_AOT_VM_ISOLATE;
-    private static String sAotInstructions = DEFAULT_AOT_INSTRUCTIONS;
-    private static String sAotRodata = DEFAULT_AOT_RODATA;
+    private static String sAotVmSnapshotData = DEFAULT_AOT_VM_SNAPSHOT_DATA;
+    private static String sAotVmSnapshotInstr = DEFAULT_AOT_VM_SNAPSHOT_INSTR;
+    private static String sAotIsolateSnapshotData = DEFAULT_AOT_ISOLATE_SNAPSHOT_DATA;
+    private static String sAotIsolateSnapshotInstr = DEFAULT_AOT_ISOLATE_SNAPSHOT_INSTR;
     private static String sFlx = DEFAULT_FLX;
 
     private static boolean sInitialized = false;
@@ -173,10 +173,10 @@ public class FlutterMain {
             if (sIsPrecompiled) {
                 shellArgs.add("--" + AOT_SNAPSHOT_PATH_KEY + "=" +
                     PathUtils.getDataDirectory(applicationContext));
-                shellArgs.add("--" + AOT_ISOLATE_KEY + "=" + sAotIsolate);
-                shellArgs.add("--" + AOT_VM_ISOLATE_KEY + "=" + sAotVmIsolate);
-                shellArgs.add("--" + AOT_INSTRUCTIONS_KEY + "=" + sAotInstructions);
-                shellArgs.add("--" + AOT_RODATA_KEY + "=" + sAotRodata);
+                shellArgs.add("--" + AOT_VM_SNAPSHOT_DATA_KEY + "=" + sAotVmSnapshotData);
+                shellArgs.add("--" + AOT_VM_SNAPSHOT_INSTR_KEY + "=" + sAotVmSnapshotInstr);
+                shellArgs.add("--" + AOT_ISOLATE_SNAPSHOT_DATA_KEY + "=" + sAotIsolateSnapshotData);
+                shellArgs.add("--" + AOT_ISOLATE_SNAPSHOT_INSTR_KEY + "=" + sAotIsolateSnapshotInstr);
             } else {
                 shellArgs.add("--cache-dir-path=" +
                     PathUtils.getCacheDirectory(applicationContext));
@@ -207,12 +207,10 @@ public class FlutterMain {
             Bundle metadata = applicationContext.getPackageManager().getApplicationInfo(
                 applicationContext.getPackageName(), PackageManager.GET_META_DATA).metaData;
             if (metadata != null) {
-                sAotIsolate = metadata.getString(PUBLIC_AOT_ISOLATE_KEY, DEFAULT_AOT_ISOLATE);
-                sAotVmIsolate = metadata.getString(PUBLIC_AOT_VM_ISOLATE_KEY,
-                    DEFAULT_AOT_VM_ISOLATE);
-                sAotInstructions = metadata.getString(PUBLIC_AOT_INSTRUCTIONS_KEY,
-                    DEFAULT_AOT_INSTRUCTIONS);
-                sAotRodata = metadata.getString(PUBLIC_AOT_RODATA_KEY, DEFAULT_AOT_RODATA);
+                sAotVmSnapshotData = metadata.getString(PUBLIC_AOT_VM_SNAPSHOT_DATA_KEY, DEFAULT_AOT_VM_SNAPSHOT_DATA);
+                sAotVmSnapshotInstr = metadata.getString(PUBLIC_AOT_VM_SNAPSHOT_INSTR_KEY, DEFAULT_AOT_VM_SNAPSHOT_INSTR);
+                sAotIsolateSnapshotData = metadata.getString(PUBLIC_AOT_ISOLATE_SNAPSHOT_DATA_KEY, DEFAULT_AOT_ISOLATE_SNAPSHOT_DATA);
+                sAotIsolateSnapshotInstr = metadata.getString(PUBLIC_AOT_ISOLATE_SNAPSHOT_INSTR_KEY, DEFAULT_AOT_ISOLATE_SNAPSHOT_INSTR);
                 sFlx = metadata.getString(PUBLIC_FLX_KEY, DEFAULT_FLX);
             }
         } catch (PackageManager.NameNotFoundException e) {
@@ -230,10 +228,10 @@ public class FlutterMain {
         new ResourceCleaner(context).start();
         sResourceExtractor = new ResourceExtractor(context)
             .addResources(SKY_RESOURCES)
-            .addResource(sAotIsolate)
-            .addResource(sAotVmIsolate)
-            .addResource(sAotInstructions)
-            .addResource(sAotRodata)
+            .addResource(sAotVmSnapshotData)
+            .addResource(sAotVmSnapshotInstr)
+            .addResource(sAotIsolateSnapshotData)
+            .addResource(sAotIsolateSnapshotInstr)
             .addResource(sFlx)
             .start();
     }
@@ -267,10 +265,10 @@ public class FlutterMain {
     private static void initAot(Context applicationContext) {
         Set<String> assets = listRootAssets(applicationContext);
         sIsPrecompiled = assets.containsAll(Arrays.asList(
-            sAotIsolate,
-            sAotVmIsolate,
-            sAotInstructions,
-            sAotRodata
+            sAotVmSnapshotData,
+            sAotVmSnapshotInstr,
+            sAotIsolateSnapshotData,
+            sAotIsolateSnapshotInstr
         ));
     }
 
