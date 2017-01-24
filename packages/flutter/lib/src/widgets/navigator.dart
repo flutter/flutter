@@ -53,9 +53,10 @@ abstract class Route<T> {
   void install(OverlayEntry insertionPoint) { }
 
   /// Called after install() when the route is pushed onto the navigator.
+  ///
+  /// The returned value resolves when the push transition is complete.
   @protected
-  @mustCallSuper
-  void didPush() { }
+  Future<Null> didPush() => new Future<Null>.value();
 
   /// When this route is popped (see [Navigator.pop]) if the result isn't
   /// specified or if it's null, this value will be used instead.
@@ -65,7 +66,6 @@ abstract class Route<T> {
   @protected
   @mustCallSuper
   void didReplace(Route<dynamic> oldRoute) { }
-
 
   /// Returns false if this route wants to veto a [Navigator.pop]. This method is
   /// called by [Naviagtor.willPop].
@@ -579,6 +579,41 @@ class Navigator extends StatefulWidget {
     return navigator.pushNamed(routeName);
   }
 
+  /// Replace the current route by pushing the route named [routeName] and then
+  /// disposing the previous route.
+  ///
+  /// The route name will be passed to the navigator's [onGenerateRoute]
+  /// callback. The returned route will be pushed into the navigator.
+  ///
+  /// Returns a [Future] that completes to the `result` value passed to [pop]
+  /// when the pushed route is popped off the navigator.
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// Navigator.of(context).pushReplacementNamed('/jouett/1781');
+  /// ```
+  static Future<dynamic> pushReplacementNamed(BuildContext context, String routeName, { dynamic result }) {
+    return Navigator.of(context).pushReplacementNamed(routeName, result: result);
+  }
+
+  /// Replace the current route by pushing [route] and then disposing the
+  /// current route.
+  ///
+  /// The new route and the route below the new route (if any) are notified
+  /// (see [Route.didPush] and [Route.didChangeNext]). The navigator observer
+  /// is not notified about the old route. The old route is disposed (see
+  /// [Route.dispose]).
+  ///
+  /// If a [result] is provided, it will be the return value of the old route,
+  /// as if the old route had been popped.
+  ///
+  /// Returns a [Future] that completes to the `result` value passed to [pop]
+  /// when the pushed route is popped off the navigator.
+  static Future<dynamic> pushReplacement(BuildContext context, Route<dynamic> route, { dynamic result }) {
+    return Navigator.of(context).pushReplacement(route, result: result);
+  }
+
   /// The state from the closest instance of this class that encloses the given context.
   ///
   /// Typical usage is as follows:
@@ -660,6 +695,19 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
 
   bool _debugLocked = false; // used to prevent re-entrant calls to push, pop, and friends
 
+  Route<dynamic> _routeNamed(String name) {
+    assert(!_debugLocked);
+    assert(name != null);
+    final RouteSettings settings = new RouteSettings(name: name);
+    Route<dynamic> route = config.onGenerateRoute(settings);
+    if (route == null) {
+      assert(config.onUnknownRoute != null);
+      route = config.onUnknownRoute(settings);
+      assert(route != null);
+    }
+    return route;
+  }
+
   /// Push a named route onto the navigator.
   ///
   /// The route name will be passed to [Navigator.onGenerateRoute]. The returned
@@ -674,16 +722,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   /// Navigator.of(context).pushNamed('/nyc/1776');
   /// ```
   Future<dynamic> pushNamed(String name) {
-    assert(!_debugLocked);
-    assert(name != null);
-    RouteSettings settings = new RouteSettings(name: name);
-    Route<dynamic> route = config.onGenerateRoute(settings);
-    if (route == null) {
-      assert(config.onUnknownRoute != null);
-      route = config.onUnknownRoute(settings);
-      assert(route != null);
-    }
-    return push(route);
+    return push(_routeNamed(name));
   }
 
   /// Adds the given route to the navigator's history, and transitions to it.
@@ -740,7 +779,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     assert(newRoute.overlayEntries.isEmpty);
     assert(!overlay.debugIsVisible(oldRoute.overlayEntries.last));
     setState(() {
-      int index = _history.indexOf(oldRoute);
+      final int index = _history.indexOf(oldRoute);
       assert(index >= 0);
       newRoute._navigator = this;
       newRoute.install(oldRoute.overlayEntries.last);
@@ -755,6 +794,61 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       oldRoute.dispose();
     });
     assert(() { _debugLocked = false; return true; });
+  }
+
+  /// Push the [newRoute] and dispose the old current Route.
+  ///
+  /// The new route and the route below the new route (if any) are notified
+  /// (see [Route.didPush] and [Route.didChangeNext]). The navigator observer
+  /// is not notified about the old route. The old route is disposed (see
+  /// [Route.dispose]).
+  ///
+  /// If a [result] is provided, it will be the return value of the old route,
+  /// as if the old route had been popped.
+  Future<dynamic> pushReplacement(Route<dynamic> newRoute, { dynamic result }) {
+    assert(!_debugLocked);
+    assert(() { _debugLocked = true; return true; });
+    final Route<dynamic> oldRoute = _history.last;
+    assert(oldRoute != null && oldRoute._navigator == this);
+    assert(oldRoute.overlayEntries.isNotEmpty);
+    assert(newRoute._navigator == null);
+    assert(newRoute.overlayEntries.isEmpty);
+
+    setState(() {
+      int index = _history.length - 1;
+      assert(index >= 0);
+      assert(_history.indexOf(oldRoute) == index);
+      newRoute._navigator = this;
+      newRoute.install(_currentOverlayEntry);
+      _history[index] = newRoute;
+      newRoute.didPush().then<dynamic>((Null _) {
+        // The old route's exit is not animated. We're assuming that the
+        // new route completely obscures the old one.
+        if (mounted) {
+          oldRoute
+            .._popCompleter.complete(result ?? oldRoute.currentResult)
+            ..dispose();
+        }
+      });
+      newRoute.didChangeNext(null);
+      if (index > 0)
+        _history[index - 1].didChangeNext(newRoute);
+      config.observer?.didPush(newRoute, oldRoute);
+    });
+    assert(() { _debugLocked = false; return true; });
+    _cancelActivePointers();
+    return newRoute.popped;
+  }
+
+  /// Push the route named [name] and dispose the old current route.
+  ///
+  /// The route name will be passed to [Navigator.onGenerateRoute]. The returned
+  /// route will be pushed into the navigator.
+  ///
+  /// Returns a [Future] that completes to the `result` value passed to [pop]
+  /// when the pushed route is popped off the navigator.
+  Future<dynamic> pushReplacementNamed(String name, { dynamic result }) {
+    return pushReplacement(_routeNamed(name), result: result);
   }
 
   /// Replaces a route that is not currently visible with a new route.
