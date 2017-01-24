@@ -62,6 +62,7 @@ class AndroidWorkflow extends DoctorValidator implements Workflow {
       }
 
       List<String> validationResult = androidSdk.validateSdkWellFormed();
+      // Empty result means SDK is well formated.
 
       if (validationResult.isEmpty) {
         const String _kJdkDownload = 'https://www.oracle.com/technetwork/java/javase/downloads/';
@@ -93,7 +94,7 @@ class AndroidWorkflow extends DoctorValidator implements Workflow {
           }
         } else {
           messages.add(new ValidationMessage.error(
-            'No Java SDK found; you can download Java from $_kJdkDownload.'
+            'No Java Development Kit (JDK) found; you can download the JDK from $_kJdkDownload.'
           ));
         }
       } else {
