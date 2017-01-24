@@ -137,4 +137,16 @@ std::string RuntimeController::GetIsolateName() {
   return dart_controller_->dart_state()->debug_name();
 }
 
+bool RuntimeController::HasLivePorts() {
+  if (!dart_controller_) {
+    return false;
+  }
+  UIDartState* dart_state = dart_controller_->dart_state();
+  if (!dart_state) {
+    return false;
+  }
+  DartState::Scope scope(dart_state);
+  return Dart_HasLivePorts();
+}
+
 }  // namespace blink

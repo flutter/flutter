@@ -59,6 +59,8 @@ class Engine : public blink::RuntimeDelegate {
 
   std::string GetUIIsolateName();
 
+  bool UIIsolateHasLivePorts();
+
   void OnOutputSurfaceCreated(const ftl::Closure& gpu_continuation);
   void OnOutputSurfaceDestroyed(const ftl::Closure& gpu_continuation);
   void SetViewportMetrics(const blink::ViewportMetrics& metrics);
