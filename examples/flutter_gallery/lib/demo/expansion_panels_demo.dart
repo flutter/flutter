@@ -334,7 +334,7 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
   Widget build(BuildContext context) {
     return new Scaffold(
       appBar: new AppBar(title: new Text('Expansion panels')),
-      body: new ScrollableViewport(
+      body: new SingleChildScrollView(
         child: new Container(
           margin: const EdgeInsets.all(24.0),
           child: new ExpansionPanelList(
