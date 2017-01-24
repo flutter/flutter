@@ -352,22 +352,16 @@ class FlutterCommandRunner extends CommandRunner<Null> {
         Uri rootUri = flutterUri.resolve('../../..');
         String flutterPath = path.normalize(fs.file(rootUri).absolute.path);
 
-        if (!fs.isDirectorySync(rootUri.path)){
-          // Remove the .packages file that now points to an obsolete SDK location.
-          fs.file(kPackagesFileName).deleteSync();
-          printError(
-            'Warning: the \'flutter\' tool previously referenced in your pubspec.yaml is no longer available.\n'
-            'This can happen if you deleted the location of your previous flutter tools.\n'
-            'Please run \'flutter packages get\' again'
-          );
-        } else if (!_compareResolvedPaths(flutterPath, Cache.flutterRoot)) {
+        if (!fs.isDirectorySync(rootUri.path) ||
+            !_compareResolvedPaths(flutterPath, Cache.flutterRoot)) {
           printError(
             'Warning: the \'flutter\' tool you are currently running is different from the one referenced in your pubspec.yaml:\n'
             '  running Flutter  : ${Cache.flutterRoot}\n'
             '  pubspec reference: $flutterPath\n'
-            'This can happen when you have multiple copies of flutter installed. Please check your system path to verify\n'
-            'that you\'re running the expected version (run \'flutter --version\' to see which flutter is on your path). You\n'
-            'can also change which flutter your project points to by editing the \'flutter:\' path in your pubspec.yaml file.\n'
+            'This can happen when you moved, deleted or have multiple copies of flutter installed.\n'
+            'Please check your system path to verify that you\'re running the expected version\n'
+            '(run \'flutter --version\' to see which flutter is on your path). You can also change\n'
+            'which flutter your project points to by editing the \'flutter:\' path in your pubspec.yaml file.\n'
           );
         }
       }
