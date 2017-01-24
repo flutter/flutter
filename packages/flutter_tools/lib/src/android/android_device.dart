@@ -275,6 +275,11 @@ class AndroidDevice extends Device {
     if (!_checkForSupportedAdbVersion() || !_checkForSupportedAndroidVersion())
       return new LaunchResult.failed();
 
+    if (platform != TargetPlatform.android_arm && mode != BuildMode.debug) {
+      printError('Profile and release builds are only supported on ARM targets.');
+      return new LaunchResult.failed();
+    }
+
     printTrace("Stopping app '${package.name}' on $name.");
     await stopApp(package);
 

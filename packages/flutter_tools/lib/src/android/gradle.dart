@@ -18,10 +18,42 @@ import '../globals.dart';
 import 'android_sdk.dart';
 
 const String gradleManifestPath = 'android/app/src/main/AndroidManifest.xml';
-const String gradleAppOut = 'android/app/build/outputs/apk/app-debug.apk';
+const String gradleAppOutV1 = 'android/app/build/outputs/apk/app-debug.apk';
+const String gradleAppOutV2 = 'android/app/build/outputs/apk/app.apk';
+const String gradleAppOutDir = 'android/app/build/outputs/apk';
+
+enum FlutterPluginVersion {
+  none,
+  v1,
+  v2,
+}
 
 bool isProjectUsingGradle() {
   return fs.isFileSync('android/build.gradle');
+}
+
+FlutterPluginVersion get flutterPluginVersion {
+  File plugin = fs.file('android/buildSrc/src/main/groovy/FlutterPlugin.groovy');
+  if (!plugin.existsSync()) {
+    return FlutterPluginVersion.none;
+  }
+  String packageLine = plugin.readAsLinesSync().skip(4).first;
+  if (packageLine == "package io.flutter.gradle") {
+    return FlutterPluginVersion.v2;
+  }
+  return FlutterPluginVersion.v1;
+}
+
+String get gradleAppOut {
+  switch (flutterPluginVersion) {
+    case FlutterPluginVersion.none:
+      // Fall through. Pretend we're v1, and just go with it.
+    case FlutterPluginVersion.v1:
+      return gradleAppOutV1;
+    case FlutterPluginVersion.v2:
+      return gradleAppOutV2;
+  }
+  return null;
 }
 
 String locateSystemGradle({ bool ensureExecutable: true }) {
@@ -91,29 +123,14 @@ String locateProjectGradlew({ bool ensureExecutable: true }) {
   }
 }
 
-Future<Null> buildGradleProject(BuildMode buildMode) async {
-  // Create android/local.properties.
-  File localProperties = fs.file('android/local.properties');
-  if (!localProperties.existsSync()) {
-    localProperties.writeAsStringSync(
-      'sdk.dir=${androidSdk.directory}\n'
-      'flutter.sdk=${Cache.flutterRoot}\n'
-    );
-  }
-
-  // Update the local.settings file with the build mode.
-  // TODO(devoncarew): It would be nicer if we could pass this information in via a cli flag.
-  SettingsFile settings = new SettingsFile.parseFromFile(localProperties);
-  settings.values['flutter.buildMode'] = getModeName(buildMode);
-  settings.writeContents(localProperties);
-
+Future<String> ensureGradlew() async {
   String gradlew = locateProjectGradlew();
 
   if (gradlew == null) {
     String gradle = locateSystemGradle();
     if (gradle == null) {
       throwToolExit(
-        'Unable to locate gradle. Please configure the path to gradle using \'flutter config --gradle-dir\'.'
+          'Unable to locate gradle. Please configure the path to gradle using \'flutter config --gradle-dir\'.'
       );
     } else {
       printTrace('Using gradle from $gradle.');
@@ -130,12 +147,15 @@ Future<Null> buildGradleProject(BuildMode buildMode) async {
     }
 
     // Run 'gradle wrapper'.
+    List<String> command = logger.isVerbose
+        ? <String>[gradle, 'wrapper']
+        : <String>[gradle, '-q', 'wrapper'];
     try {
       Status status = logger.startProgress('Running \'gradle wrapper\'...');
       int exitcode = await runCommandAndStreamOutput(
-        <String>[gradle, 'wrapper'],
-        workingDirectory: 'android',
-        allowReentrantFlutter: true
+          command,
+          workingDirectory: 'android',
+          allowReentrantFlutter: true
       );
       status.stop();
       if (exitcode != 0)
@@ -145,24 +165,87 @@ Future<Null> buildGradleProject(BuildMode buildMode) async {
     }
 
     gradlew = locateProjectGradlew();
-    if (gradlew == null)
+    if (gradlew == null) {
       throwToolExit('Unable to build android/gradlew.');
+    }
   }
 
+  return gradlew;
+}
+
+Future<Null> buildGradleProject(BuildMode buildMode) async {
+  // Create android/local.properties.
+  File localProperties = fs.file('android/local.properties');
+  if (!localProperties.existsSync()) {
+    localProperties.writeAsStringSync(
+        'sdk.dir=${androidSdk.directory}\n'
+        'flutter.sdk=${Cache.flutterRoot}\n'
+    );
+  }
+  // Update the local.properties file with the build mode.
+  // FlutterPlugin v1 reads local.properties to determine build mode. Plugin v2
+  // uses the standard Android way to determine what to build, but we still
+  // update local.properties, in case we want to use it in the future.
+  String buildModeName = getModeName(buildMode);
+  SettingsFile settings = new SettingsFile.parseFromFile(localProperties);
+  settings.values['flutter.buildMode'] = buildModeName;
+  settings.writeContents(localProperties);
+
+  String gradlew = await ensureGradlew();
+
+  switch (flutterPluginVersion) {
+    case FlutterPluginVersion.none:
+      // Fall through. Pretend it's v1, and just go for it.
+    case FlutterPluginVersion.v1:
+      return buildGradleProjectV1(gradlew);
+    case FlutterPluginVersion.v2:
+      return buildGradleProjectV2(gradlew, buildModeName);
+  }
+}
+
+Future<Null> buildGradleProjectV1(String gradlew) async {
   // Run 'gradlew build'.
   Status status = logger.startProgress('Running \'gradlew build\'...');
   int exitcode = await runCommandAndStreamOutput(
-    <String>[fs.file('android/gradlew').absolute.path, 'build'],
+    <String>[fs.file(gradlew).absolute.path, 'build'],
     workingDirectory: 'android',
     allowReentrantFlutter: true
   );
   status.stop();
 
-  if (exitcode != 0)
+  if (exitcode != 0) {
     throwToolExit('Gradlew failed: $exitcode', exitCode: exitcode);
+  }
 
-  File apkFile = fs.file(gradleAppOut);
-  printStatus('Built $gradleAppOut (${getSizeAsMB(apkFile.lengthSync())}).');
+  File apkFile = fs.file(gradleAppOutV1);
+  printStatus('Built $gradleAppOutV1 (${getSizeAsMB(apkFile.lengthSync())}).');
+}
+
+Future<Null> buildGradleProjectV2(String gradlew, String buildModeName) async {
+  String assembleTask = "assemble${toTitleCase(buildModeName)}";
+
+  // Run 'gradlew assemble<BuildMode>'.
+  Status status = logger.startProgress('Running \'gradlew $assembleTask\'...');
+  String gradlewPath = fs.file(gradlew).absolute.path;
+  List<String> command = logger.isVerbose
+      ? <String>[gradlewPath, assembleTask]
+      : <String>[gradlewPath, '-q', assembleTask];
+  int exitcode = await runCommandAndStreamOutput(
+      command,
+      workingDirectory: 'android',
+      allowReentrantFlutter: true
+  );
+  status.stop();
+
+  if (exitcode != 0) {
+    throwToolExit('Gradlew failed: $exitcode', exitCode: exitcode);
+  }
+
+  String apkFilename = 'app-$buildModeName.apk';
+  File apkFile = fs.file('$gradleAppOutDir/$apkFilename');
+  // Copy the APK to app.apk, so `flutter run`, `flutter install`, etc. can find it.
+  apkFile.copySync('$gradleAppOutDir/app.apk');
+  printStatus('Built $apkFilename (${getSizeAsMB(apkFile.lengthSync())}).');
 }
 
 class _GradleFile {
