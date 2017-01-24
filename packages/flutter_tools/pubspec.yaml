@@ -22,7 +22,7 @@ dependencies:
   mustache: ^0.2.5
   package_config: '>=0.1.5 <2.0.0'
   path: ^1.4.0
-  process: ^1.0.0
+  process: 1.0.0
   pub_semver: ^1.0.0
   stack_trace: ^1.4.0
   usage: ^2.2.1
