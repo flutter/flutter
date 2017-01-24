@@ -427,7 +427,7 @@ void main() {
   }) {
     assert(executable != null); // Please provide the path to the shell in the SKY_SHELL environment variable.
     assert(!startPaused || enableObservatory);
-    List<String> arguments = <String>[];
+    List<String> command = <String>[executable];
     if (enableObservatory) {
       // Some systems drive the _FlutterPlatform class in an unusual way, where
       // only one test file is processed at a time, and the operating
@@ -439,27 +439,27 @@ void main() {
       // I mention this only so that you won't be tempted, as I was, to apply
       // the obvious simplification to this code and remove this entire feature.
       if (observatoryPort != null)
-        arguments.add('--observatory-port=$observatoryPort');
+        command.add('--observatory-port=$observatoryPort');
       if (diagnosticPort != null)
-        arguments.add('--diagnostic-port=$diagnosticPort');
+        command.add('--diagnostic-port=$diagnosticPort');
       if (startPaused)
-        arguments.add('--start-paused');
+        command.add('--start-paused');
     } else {
-      arguments.addAll(<String>['--disable-observatory', '--disable-diagnostic']);
+      command.addAll(<String>['--disable-observatory', '--disable-diagnostic']);
     }
-    arguments.addAll(<String>[
+    command.addAll(<String>[
       '--enable-dart-profiling',
       '--non-interactive',
       '--enable-checked-mode',
       '--packages=$packages',
       testPath,
     ]);
-    printTrace('$executable ${arguments.join(' ')}');
+    printTrace(command.join(' '));
     Map<String, String> environment = <String, String>{
       'FLUTTER_TEST': 'true',
       'FONTCONFIG_FILE': _fontConfigFile.path,
     };
-    return processManager.start(executable, arguments, environment: environment);
+    return processManager.start(command, environment: environment);
   }
 
   String get observatoryPortString => 'Observatory listening on http://${_kHost.address}:';

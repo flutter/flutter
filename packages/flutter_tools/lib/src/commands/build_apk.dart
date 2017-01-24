@@ -29,7 +29,7 @@ const String _kDefaultAndroidManifestPath = 'android/AndroidManifest.xml';
 const String _kDefaultResourcesPath = 'android/res';
 const String _kDefaultAssetsPath = 'android/assets';
 
-const String _kFlutterManifestPath = 'flutter.yaml';
+const String _kFlutterManifestPath = 'pubspec.yaml';
 const String _kPackagesStatusPath = '.packages';
 
 // Alias of the key provided in the Chromium debug keystore

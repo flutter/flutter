@@ -3,6 +3,15 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+
+# ---------------------------------- NOTE ---------------------------------- #
+#
+# Please keep the logic in this file consistent with the logic in the
+# `update_dart_sdk.ps1` script in the same directory to ensure that Flutter
+# continues to work across all platforms!
+#
+# -------------------------------------------------------------------------- #
+
 set -e
 
 FLUTTER_ROOT="$(dirname "$(dirname "$(dirname "${BASH_SOURCE[0]}")")")"

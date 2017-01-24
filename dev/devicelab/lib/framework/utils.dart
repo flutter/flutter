@@ -237,6 +237,14 @@ Future<int> flutter(String command,
       canFail: canFail, env: env);
 }
 
+/// Runs a `flutter` command and returns the standard output as a string.
+Future<String> evalFlutter(String command,
+    {List<String> options: const <String>[], bool canFail: false, Map<String, String> env}) {
+  List<String> args = <String>[command]..addAll(options);
+  return eval(path.join(flutterDirectory.path, 'bin', 'flutter'), args,
+      canFail: canFail, env: env);
+}
+
 String get dartBin =>
     path.join(flutterDirectory.path, 'bin', 'cache', 'dart-sdk', 'bin', 'dart');
 

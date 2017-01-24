@@ -51,14 +51,14 @@ class _PosixUtils extends OperatingSystemUtils {
 
   @override
   ProcessResult makeExecutable(File file) {
-    return processManager.runSync('chmod', <String>['a+x', file.path]);
+    return processManager.runSync(<String>['chmod', 'a+x', file.path]);
   }
 
   /// Return the path to the given executable, or `null` if `which` was not able
   /// to locate the binary.
   @override
   File which(String execName) {
-    ProcessResult result = processManager.runSync('which', <String>[execName]);
+    ProcessResult result = processManager.runSync(<String>['which', execName]);
     if (result.exitCode != 0)
       return null;
     String path = result.stdout.trim().split('\n').first.trim();
@@ -89,7 +89,7 @@ class _WindowsUtils extends OperatingSystemUtils {
 
   @override
   File which(String execName) {
-    ProcessResult result = processManager.runSync('where', <String>[execName]);
+    ProcessResult result = processManager.runSync(<String>['where', execName]);
     if (result.exitCode != 0)
       return null;
     return fs.file(result.stdout.trim().split('\n').first.trim());

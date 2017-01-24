@@ -1,0 +1,46 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "pubspec.yaml",
+    "type": "object",
+    "additionalProperties": true,
+    "properties": {
+        "name": { "type": "string" },
+        "flutter": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "uses-material-design": { "type": "boolean" },
+                "assets": {
+                    "type": "array",
+                    "items": { "type": "string" }
+                },
+                "services": {
+                    "type": "array",
+                    "items": { "type": "string" }
+                },
+                "fonts": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                            "family": { "type": "string" },
+                            "fonts": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "asset": { "type": "string" },
+                                        "weight": { "enum": [ 100, 200, 300, 400, 500, 600, 700, 800, 900 ] },
+                                        "style": { "enum": [ "normal", "italic" ] }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

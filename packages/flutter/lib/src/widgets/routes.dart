@@ -164,10 +164,9 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   }
 
   @override
-  void didPush() {
+  Future<Null> didPush() {
     _animation.addStatusListener(_handleStatusChanged);
-    _controller.forward();
-    super.didPush();
+    return _controller.forward();
   }
 
   @override
@@ -559,7 +558,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   }
 
   @override
-  void didPush() {
+  Future<Null> didPush() {
     if (!settings.isInitialRoute) {
       BuildContext overlayContext = navigator.overlay?.context;
       assert(() {
@@ -574,7 +573,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
       });
       Focus.moveScopeTo(focusKey, context: overlayContext);
     }
-    super.didPush();
+    return super.didPush();
   }
 
   @override

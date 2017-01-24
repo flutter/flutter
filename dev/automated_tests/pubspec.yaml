@@ -4,3 +4,5 @@ dependencies:
     sdk: flutter
   flutter_test:
     sdk: flutter
+flutter:
+  uses-material-design: true

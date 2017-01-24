@@ -19,7 +19,7 @@ import 'zip.dart';
 
 const String defaultMainPath = 'lib/main.dart';
 const String defaultAssetBasePath = '.';
-const String defaultManifestPath = 'flutter.yaml';
+const String defaultManifestPath = 'pubspec.yaml';
 String get defaultFlxOutputPath => path.join(getBuildDirectory(), 'app.flx');
 String get defaultSnapshotPath => path.join(getBuildDirectory(), 'snapshot_blob.bin');
 String get defaultDepfilePath => path.join(getBuildDirectory(), 'snapshot_blob.bin.d');

@@ -26,7 +26,10 @@ void main() {
     return new TaskResult.successFromFile(benchmarkFile,
         benchmarkScoreKeys: <String>[
           'hotReloadMillisecondsToFrame',
-          'hotRestartMillisecondsToFrame'
+          'hotRestartMillisecondsToFrame',
+          'hotReloadDevFSSyncMilliseconds',
+          'hotReloadFlutterReassembleMilliseconds',
+          'hotReloadVMReloadMilliseconds',
         ]);
   });
 }
