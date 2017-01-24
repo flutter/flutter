@@ -52,7 +52,8 @@ abstract class Route<T> {
   @mustCallSuper
   void install(OverlayEntry insertionPoint) { }
 
-  /// Called after install() when the route is pushed onto the navigator.
+  /// Called after install() when the route is pushed onto the navigator. The
+  /// returned value resolves when the push transition is complete.
   @protected
   Future<Null> didPush() => new Future<Null>.value();
 
