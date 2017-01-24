@@ -342,14 +342,22 @@ static inline PointerChangeMapperPhase PointerChangePhaseFromUITouchPhase(
 }
 
 - (void)viewDidLayoutSubviews {
-  CGSize size = self.view.bounds.size;
+  CGSize viewSize = self.view.bounds.size;
+  CGFloat statusBarPadding = 0.0;
   CGFloat scale = [UIScreen mainScreen].scale;
 
+  if (self.parentViewController == nil) {
+    // If we're the root view controller, apply any padding necessary for the
+    // status bar. If we're not the root view controller, assume the root view
+    // controller has dealt with it.
+    CGSize sbSize = [UIApplication sharedApplication].statusBarFrame.size;
+    statusBarPadding = sbSize.height - self.view.frame.origin.y;
+  }
+
   _viewportMetrics.device_pixel_ratio = scale;
-  _viewportMetrics.physical_width = size.width * scale;
-  _viewportMetrics.physical_height = size.height * scale;
-  _viewportMetrics.physical_padding_top =
-      [UIApplication sharedApplication].statusBarFrame.size.height * scale;
+  _viewportMetrics.physical_width = viewSize.width * scale;
+  _viewportMetrics.physical_height = viewSize.height * scale;
+  _viewportMetrics.physical_padding_top = statusBarPadding * scale;
   [self updateViewportMetrics];
 }
 
