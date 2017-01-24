@@ -1,0 +1,17 @@
+# Copyright 2017 The Fuchsia Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//flutter/build/flutter_app.gni")
+
+assert(is_fuchsia)
+
+flutter_app("flutter_gallery") {
+  main_dart = "lib/main.dart"
+
+  deps = [
+    "//lib/flutter/packages/flutter",
+  ]
+
+  # TODO(chinmaygarde): Assets must be packaged in the FLX.
+}
