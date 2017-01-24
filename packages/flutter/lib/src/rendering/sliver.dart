@@ -1145,22 +1145,26 @@ class RenderViewport2 extends RenderBox with ContainerRenderObjectMixin<RenderSl
   ///
   /// If the [center] is not specified, then the first child in the `children`
   /// list, if any, is used.
+  ///
+  /// The [offset] must be specified. For testing purposes, consider passing a
+  /// [new ViewportOffset.zero] or [new ViewportOffset.fixed].
   RenderViewport2({
     AxisDirection axisDirection: AxisDirection.down,
     double anchor: 0.0,
-    ViewportOffset offset,
+    @required ViewportOffset offset,
     List<RenderSliver> children,
     RenderSliver center,
   }) : _axisDirection = axisDirection,
        _anchor = anchor,
-       _offset = offset ?? new ViewportOffset.zero(),
+       _offset = offset,
        _center = center {
-    addAll(children);
-    if (center == null && firstChild != null)
-      _center = firstChild;
+    assert(offset != null);
     assert(axisDirection != null);
     assert(anchor != null);
     assert(anchor >= 0.0 && anchor <= 1.0);
+    addAll(children);
+    if (center == null && firstChild != null)
+      _center = firstChild;
   }
 
   AxisDirection get axisDirection => _axisDirection;

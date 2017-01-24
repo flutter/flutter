@@ -13,6 +13,7 @@ export 'src/widgets/app.dart';
 export 'src/widgets/banner.dart';
 export 'src/widgets/basic.dart';
 export 'src/widgets/binding.dart';
+export 'src/widgets/block.dart';
 export 'src/widgets/clamp_overscrolls.dart';
 export 'src/widgets/container.dart';
 export 'src/widgets/debug.dart';
