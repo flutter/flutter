@@ -695,6 +695,19 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
 
   bool _debugLocked = false; // used to prevent re-entrant calls to push, pop, and friends
 
+  Route<dynamic> _routeNamed(String name) {
+    assert(!_debugLocked);
+    assert(name != null);
+    final RouteSettings settings = new RouteSettings(name: name);
+    Route<dynamic> route = config.onGenerateRoute(settings);
+    if (route == null) {
+      assert(config.onUnknownRoute != null);
+      route = config.onUnknownRoute(settings);
+      assert(route != null);
+    }
+    return route;
+  }
+
   /// Push a named route onto the navigator.
   ///
   /// The route name will be passed to [Navigator.onGenerateRoute]. The returned
@@ -709,16 +722,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   /// Navigator.of(context).pushNamed('/nyc/1776');
   /// ```
   Future<dynamic> pushNamed(String name) {
-    assert(!_debugLocked);
-    assert(name != null);
-    RouteSettings settings = new RouteSettings(name: name);
-    Route<dynamic> route = config.onGenerateRoute(settings);
-    if (route == null) {
-      assert(config.onUnknownRoute != null);
-      route = config.onUnknownRoute(settings);
-      assert(route != null);
-    }
-    return push(route);
+    return push(_routeNamed(name));
   }
 
   /// Adds the given route to the navigator's history, and transitions to it.
@@ -777,7 +781,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     setState(() {
       int index = _history.length - 1;
       assert(index >= 0);
-      assert(indexOf(oldRoute) == index);
+      assert(_history.indexOf(oldRoute) == index);
       newRoute._navigator = this;
       newRoute.install(oldRoute.overlayEntries.last);
       _history[index] = newRoute;
@@ -844,16 +848,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   /// Returns a [Future] that completes to the `result` value passed to [pop]
   /// when the pushed route is popped off the navigator.
   Future<dynamic> pushReplacementNamed(String name, { dynamic result }) {
-    assert(!_debugLocked);
-    assert(name != null);
-    final RouteSettings settings = new RouteSettings(name: name);
-    Route<dynamic> newRoute = config.onGenerateRoute(settings);
-    if (newRoute == null) {
-      assert(config.onUnknownRoute != null);
-      newRoute = config.onUnknownRoute(settings);
-      assert(newRoute != null);
-    }
-    return pushReplacement(newRoute, result: result);
+    return pushReplacement(_routeNamed(name), result: result);
   }
 
   /// Replaces a route that is not currently visible with a new route.
