@@ -358,7 +358,7 @@ class FlutterCommandRunner extends CommandRunner<Null> {
           printError(
             'Warning: the \'flutter\' tool previously referenced in your pubspec.yaml is no longer available.\n'
             'This can happen if you deleted the location of your previous flutter tools.\n'
-            'Please run \'flutter update-packages\' again'
+            'Please run \'flutter packages get\' again'
           );
         } else if (!_compareResolvedPaths(flutterPath, Cache.flutterRoot)) {
           printError(
