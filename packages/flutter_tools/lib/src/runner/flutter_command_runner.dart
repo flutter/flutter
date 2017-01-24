@@ -352,7 +352,15 @@ class FlutterCommandRunner extends CommandRunner<Null> {
         Uri rootUri = flutterUri.resolve('../../..');
         String flutterPath = path.normalize(fs.file(rootUri).absolute.path);
 
-        if (!_compareResolvedPaths(flutterPath, Cache.flutterRoot)) {
+        if (!fs.isDirectorySync(rootUri.path)){
+          // Remove the .packages file that now points to an obsolete SDK location.
+          fs.file(kPackagesFileName).deleteSync();
+          printError(
+            'Warning: the \'flutter\' tool previously referenced in your pubspec.yaml is no longer available.\n'
+            'This can happen if you deleted the location of your previous flutter tools.\n'
+            'Please run \'flutter update-packages\' again'
+          );
+        } else if (!_compareResolvedPaths(flutterPath, Cache.flutterRoot)) {
           printError(
             'Warning: the \'flutter\' tool you are currently running is different from the one referenced in your pubspec.yaml:\n'
             '  running Flutter  : ${Cache.flutterRoot}\n'
