@@ -1,6 +1,0 @@
-name: complex_layout
-uses-material-design: true
-assets:
-  - packages/flutter_gallery_assets/ali_connors.png
-  - packages/flutter_gallery_assets/ali_connors_sml.png
-  - packages/flutter_gallery_assets/top_10_australian_beaches.png

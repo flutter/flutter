@@ -21,8 +21,15 @@ import 'theme.dart';
 /// Available icons are shown on this page: <https://design.google.com/icons/>
 ///
 /// To use this class, make sure you set `uses-material-design: true` in your
-/// project's `flutter.yaml` file. This ensures that the MaterialIcons font is
-/// included in your application. This font is used to display the icons.
+/// project's `pubspec.yaml` file in the `flutter` section. This ensures that
+/// the MaterialIcons font is included in your application. This font is used to
+/// display the icons. For example:
+///
+/// ```yaml
+/// name: my_awesome_application
+/// flutter:
+///   uses-material-design: true
+/// ```
 ///
 /// See also:
 ///

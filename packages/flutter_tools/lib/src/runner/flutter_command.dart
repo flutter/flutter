@@ -208,9 +208,28 @@ abstract class FlutterCommand extends Command<Null> {
     if (!PackageMap.isUsingCustomPackagesPath) {
       // Don't expect a pubspec.yaml file if the user passed in an explicit .packages file path.
       if (!fs.isFileSync('pubspec.yaml')) {
-        throw new ToolExit('Error: No pubspec.yaml file found.\n'
+        throw new ToolExit(
+          'Error: No pubspec.yaml file found.\n'
           'This command should be run from the root of your Flutter project.\n'
-          'Do not run this command from the root of your git clone of Flutter.');
+          'Do not run this command from the root of your git clone of Flutter.'
+        );
+      }
+      if (fs.isFileSync('flutter.yaml')) {
+        throw new ToolExit(
+          'Please merge your flutter.yaml into your pubspec.yaml.\n\n'
+          'We have changed from having separate flutter.yaml and pubspec.yaml\n'
+          'files to having just one pubspec.yaml file. Transitioning is simple:\n'
+          'add a line that just says "flutter:" to your pubspec.yaml file, and\n'
+          'move everything from your current flutter.yaml file into the\n'
+          'pubspec.yaml file, below that line, with everything indented by two\n'
+          'extra spaces compared to how it was in the flutter.yaml file. Then, if\n'
+          'you had a "name:" line, move that to the top of your "pubspec.yaml"\n'
+          'file (you may already have one there), so that there is only one\n'
+          '"name:" line. Finally, delete the flutter.yaml file.\n\n'
+          'For an example of what a new-style pubspec.yaml file might look like,\n'
+          'check out the Flutter Gallery pubspec.yaml:\n'
+          'https://github.com/flutter/flutter/blob/master/examples/flutter_gallery/pubspec.yaml\n'
+        );
       }
     }
 
