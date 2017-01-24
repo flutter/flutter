@@ -352,7 +352,7 @@ class FlutterCommandRunner extends CommandRunner<Null> {
         Uri rootUri = flutterUri.resolve('../../..');
         String flutterPath = path.normalize(fs.file(rootUri).absolute.path);
 
-        if (!fs.isDirectorySync(rootUri.path) ||
+        if (!fs.isDirectorySync(flutterPath) ||
             !_compareResolvedPaths(flutterPath, Cache.flutterRoot)) {
           printError(
             'Warning: the \'flutter\' tool you are currently running is different from the one referenced in your pubspec.yaml:\n'
