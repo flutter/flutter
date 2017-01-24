@@ -52,8 +52,9 @@ abstract class Route<T> {
   @mustCallSuper
   void install(OverlayEntry insertionPoint) { }
 
-  /// Called after install() when the route is pushed onto the navigator. The
-  /// returned value resolves when the push transition is complete.
+  /// Called after install() when the route is pushed onto the navigator.
+  ///
+  /// The returned value resolves when the push transition is complete.
   @protected
   Future<Null> didPush() => new Future<Null>.value();
 
@@ -578,10 +579,37 @@ class Navigator extends StatefulWidget {
     return navigator.pushNamed(routeName);
   }
 
+  /// Replace the current route by pushing the route named [routeName] and then
+  /// disposing the previous route.
+  ///
+  /// The route name will be passed to the navigator's [onGenerateRoute]
+  /// callback. The returned route will be pushed into the navigator.
+  ///
+  /// Returns a [Future] that completes to the `result` value passed to [pop]
+  /// when the pushed route is popped off the navigator.
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// Navigator.of(context).pushReplacementNamed('/jouett/1781');
+  /// ```
   static Future<dynamic> pushReplacementNamed(BuildContext context, String routeName, { dynamic result }) {
     return Navigator.of(context).pushReplacementNamed(routeName, result: result);
   }
 
+  /// Replace the current route by pushing [route] and then disposing the
+  /// current route.
+  ///
+  /// The new route and the route below the new route (if any) are notified
+  /// (see [Route.didPush] and [Route.didChangeNext]). The navigator observer
+  /// is not notified about the old route. The old route is disposed (see
+  /// [Route.dispose]).
+  ///
+  /// If a [result] is provided, it will be the return value of the old route,
+  /// as if the old route had been popped.
+  ///
+  /// Returns a [Future] that completes to the `result` value passed to [pop]
+  /// when the pushed route is popped off the navigator.
   static Future<dynamic> pushReplacement(BuildContext context, Route<dynamic> route, { dynamic result }) {
     return Navigator.of(context).pushReplacement(route, result: result);
   }
@@ -747,8 +775,9 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     assert(newRoute.overlayEntries.isEmpty);
     assert(!overlay.debugIsVisible(oldRoute.overlayEntries.last));
     setState(() {
-      int index = _history.indexOf(oldRoute);
+      int index = _history.length - 1;
       assert(index >= 0);
+      assert(indexOf(oldRoute) == index);
       newRoute._navigator = this;
       newRoute.install(oldRoute.overlayEntries.last);
       _history[index] = newRoute;
@@ -776,7 +805,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   Future<dynamic> pushReplacement(Route<dynamic> newRoute, { dynamic result }) {
     assert(!_debugLocked);
     assert(() { _debugLocked = true; return true; });
-    final Route<dynamic> oldRoute = _history.isNotEmpty ? _history.last : null;
+    final Route<dynamic> oldRoute = _history.last;
     assert(oldRoute != null && oldRoute._navigator == this);
     assert(oldRoute.overlayEntries.isNotEmpty);
     assert(newRoute._navigator == null);
@@ -791,9 +820,11 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       newRoute.didPush().then<dynamic>((Null _) {
         // The old route's exit is not animated. We're assuming that the
         // new route completely obscures the old one.
-        oldRoute
-          .._popCompleter.complete(result ?? oldRoute.currentResult)
-          ..dispose();
+        if (mounted) {
+          oldRoute
+            .._popCompleter.complete(result ?? oldRoute.currentResult)
+            ..dispose();
+        }
       });
       newRoute.didChangeNext(null);
       if (index > 0)
@@ -812,12 +843,6 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   ///
   /// Returns a [Future] that completes to the `result` value passed to [pop]
   /// when the pushed route is popped off the navigator.
-  ///
-  /// Typical usage is as follows:
-  ///
-  /// ```dart
-  /// Navigator.of(context).pushReplacementNamed('/nyc/1776');
-  /// ```
   Future<dynamic> pushReplacementNamed(String name, { dynamic result }) {
     assert(!_debugLocked);
     assert(name != null);
