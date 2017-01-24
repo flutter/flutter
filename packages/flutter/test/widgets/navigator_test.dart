@@ -89,6 +89,26 @@ class OnTapPage extends StatelessWidget {
   }
 }
 
+class StringRoute extends PageRoute<String> {
+  StringRoute(RouteSettings settings, this.builder) : super(settings: settings);
+
+  final WidgetBuilder builder;
+
+  @override
+  bool get maintainState => true;
+
+  @override
+  Duration get transitionDuration => const Duration(milliseconds: 300);
+
+  @override
+  Color get barrierColor => null;
+
+  @override
+  Widget buildPage(BuildContext context, Animation<double> __, Animation<double> ___) {
+    return builder(context);
+  }
+}
+
 void main() {
   testWidgets('Can navigator navigate to and from a stateful widget', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
@@ -258,6 +278,71 @@ void main() {
     expect(find.text('/'), findsNothing);
     expect(find.text('A'), findsNothing);
     expect(find.text('B'), findsOneWidget);
+  });
 
+  testWidgets('replaceNamed', (WidgetTester tester) async {
+    final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+       '/': (BuildContext context) => new OnTapPage(id: '/', onTap: () { Navigator.replaceNamed(context, '/A'); }),
+      '/A': (BuildContext context) => new OnTapPage(id: 'A', onTap: () { Navigator.replaceNamed(context, '/B'); }),
+      '/B': (BuildContext context) => new OnTapPage(id: 'B'),
+    };
+
+    await tester.pumpWidget(new MaterialApp(routes: routes));
+    await tester.tap(find.text('/')); // replaceNamed('/A')
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.text('/'), findsNothing);
+    expect(find.text('A'), findsOneWidget);
+
+    await tester.tap(find.text('A')); // replaceNamed('/B')
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.text('/'), findsNothing);
+    expect(find.text('A'), findsNothing);
+    expect(find.text('B'), findsOneWidget);
+  });
+
+  testWidgets('replaceNamed returned value', (WidgetTester tester) async {
+    Future<String> value;
+
+    final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+       '/': (BuildContext context) => new OnTapPage(id: '/', onTap: () { Navigator.pushNamed(context, '/A'); }),
+      '/A': (BuildContext context) => new OnTapPage(id: 'A', onTap: () { value = Navigator.replaceNamed(context, '/B', result: 'B'); }),
+      '/B': (BuildContext context) => new OnTapPage(id: 'B', onTap: () { Navigator.pop(context, 'B'); }),
+    };
+
+    await tester.pumpWidget(new MaterialApp(
+      onGenerateRoute: (RouteSettings settings) {
+        return new StringRoute(settings, (BuildContext context) => routes[settings.name](context));
+      }
+    ));
+
+    expect(find.text('/'), findsOneWidget);
+    expect(find.text('A', skipOffstage: false), findsNothing);
+    expect(find.text('B', skipOffstage: false), findsNothing);
+
+    await tester.tap(find.text('/')); // pushNamed('/A'), stack becomes /, /A
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.text('/'), findsNothing);
+    expect(find.text('A'), findsOneWidget);
+    expect(find.text('B'), findsNothing);
+
+    await tester.tap(find.text('A')); // replaceNamed('/B'), stack becomes /, /B
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.text('/'), findsNothing);
+    expect(find.text('A'), findsNothing);
+    expect(find.text('B'), findsOneWidget);
+
+    await tester.tap(find.text('B')); // pop, stack becomes /
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.text('/'), findsOneWidget);
+    expect(find.text('A'), findsNothing);
+    expect(find.text('B'), findsNothing);
+
+    String replaceNamedValue = await value; // replaceNamed result was 'B'
+    expect(replaceNamedValue, 'B');
   });
 }

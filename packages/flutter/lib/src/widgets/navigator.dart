@@ -54,8 +54,7 @@ abstract class Route<T> {
 
   /// Called after install() when the route is pushed onto the navigator.
   @protected
-  @mustCallSuper
-  void didPush() { }
+  Future<Null> didPush() => new Future<Null>.value();
 
   /// When this route is popped (see [Navigator.pop]) if the result isn't
   /// specified or if it's null, this value will be used instead.
@@ -65,7 +64,6 @@ abstract class Route<T> {
   @protected
   @mustCallSuper
   void didReplace(Route<dynamic> oldRoute) { }
-
 
   /// Returns false if this route wants to veto a [Navigator.pop]. This method is
   /// called by [Naviagtor.willPop].
@@ -579,6 +577,10 @@ class Navigator extends StatefulWidget {
     return navigator.pushNamed(routeName);
   }
 
+  static Future<dynamic> replaceNamed(BuildContext context, String routeName, { dynamic result }) {
+    return Navigator.of(context).replaceNamed(routeName, result: result);
+  }
+
   /// The state from the closest instance of this class that encloses the given context.
   ///
   /// Typical usage is as follows:
@@ -755,6 +757,40 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       oldRoute.dispose();
     });
     assert(() { _debugLocked = false; return true; });
+  }
+
+  Future<dynamic> replaceNamed(String name, { dynamic result }) {
+    assert(!_debugLocked);
+    assert(() { _debugLocked = true; return true; });
+    final Route<dynamic> oldRoute = _history.isNotEmpty ? _history.last : null;
+    assert(oldRoute != null && oldRoute._navigator == this);
+    assert(oldRoute.overlayEntries.isNotEmpty);
+
+    assert(name != null);
+    final RouteSettings settings = new RouteSettings(name: name);
+    final Route<dynamic> newRoute = config.onGenerateRoute(settings);
+    assert(newRoute._navigator == null);
+    assert(newRoute.overlayEntries.isEmpty);
+
+    setState(() {
+      final int index = _history.indexOf(oldRoute);
+      assert(index >= 0);
+      newRoute._navigator = this;
+      newRoute.install(_currentOverlayEntry);
+      _history[index] = newRoute;
+      newRoute.didPush().then<dynamic>((Null _) {
+        // The old route's exit is not animated. We're assuming that the
+        // new route completely obscures the od one.
+        oldRoute
+          .._popCompleter.complete(result ?? oldRoute.currentResult)
+          ..dispose();
+      });
+      newRoute.didChangeNext(null);
+      config.observer?.didPush(newRoute, oldRoute);
+    });
+    assert(() { _debugLocked = false; return true; });
+    _cancelActivePointers();
+    return newRoute.popped;
   }
 
   /// Replaces a route that is not currently visible with a new route.
