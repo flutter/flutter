@@ -1,99 +1,69 @@
-# Copyright 2015 The Chromium Authors. All rights reserved.
+# Copyright 2017 The Chromium Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-# How to use this script:
-#  - Allow the execution of PowerShell scripts (ByPass, etc.), for example:
-#     Set-ExecutionPolicy Unrestricted
-#  - Invoke any flutter command: Flutter.ps1 doctor
-#  - Force the path to Dart SDK: Flutter.ps1 -DartPath "c:\tools\dart\"
 
-[CmdletBinding()]
-param (
-  [Parameter(Mandatory=$False)]
-  [string]$DartPath,
-  [Parameter(Mandatory=$False)]
-  [switch]$Diag,
-  [parameter(mandatory=$False, position=1, ValueFromRemainingArguments=$true)]
-  $Remaining
-)
+# ---------------------------------- NOTE ---------------------------------- #
+#
+# Please keep the logic in this file consistent with the logic in the
+# `flutter` script in the same directory to ensure that Flutter continues to
+# work across all platforms!
+#
+# -------------------------------------------------------------------------- #
 
-# This function creates a snapshot of the latest version of flutter framework
-function Do-Snapshot
-{
-	Set-Location $flutterToolsDir
-	Write-Host "Info: Updating flutter tool..."
-	Invoke-Expression "pub.bat get $(&{If($Diag) {"--verbose"}})" 
-	Set-Location $flutterDir
-	# Allows us to check if sky_engine's REVISION is correct
-	Write-Host "Info: Updating sky engine..."
-	Invoke-Expression "pub.bat get $(&{If($Diag) {"--verbose"}})"
-	Set-Location $flutterRoot
-	Invoke-Expression "$dartExe --snapshot=`"$snapshotPath`" `"$scriptPath`" --packages=`"$flutterToolsDir\.packages`""
-	$revision | Out-File  $stampPath
-}
+$ErrorActionPreference = "Stop"
 
-# Save the current location
-Push-Location
+$progName = split-path -parent $MyInvocation.MyCommand.Definition
+$flutterRoot = (get-item $progName ).parent.FullName
+$env:FLUTTER_ROOT = $flutterRoot
 
-# Get the parent directory
-$scriptPath = split-path -parent $MyInvocation.MyCommand.Definition
-$flutterRoot = (get-item $scriptPath ).parent.FullName
+$flutterToolsDir =  "$flutterRoot\packages\flutter_tools"
+$snapshotPath = "$flutterRoot\bin\cache\flutter_tools.snapshot"
+$stampPath = "$flutterRoot\bin\cache\flutter_tools.stamp"
+$scriptPath = "$flutterToolsDir\bin\flutter_tools.dart"
+$dartSdkPath = "$flutterRoot\bin\cache\dart-sdk"
 
-$flutterToolsDir = $flutterRoot + '\packages\flutter_tools'
-$flutterDir = $flutterRoot + '\packages\flutter'
-$snapshotPath = $flutterRoot + '\bin\cache\flutter_tools.snapshot'
-$stampPath = $flutterRoot + '\bin\cache\flutter_tools.stamp'
-$scriptPath = $flutterToolsDir + '\bin\flutter_tools.dart'
-$dartExe = [io.path]::combine($DartPath, 'dart.exe')
-
-# Set current working directory to the flutter directory
-Set-Location $flutterRoot
+$dart = "$dartSdkPath\bin\dart.exe"
+$pub = "$dartSdkPath\bin\pub.bat"
 
 # Test if Git is available on the Host
 if ((Get-Command "git.exe" -ErrorAction SilentlyContinue) -eq $null) { 
-   Write-Host "Error: Unable to find git.exe in your PATH"
-   Pop-Location
+   Write-Host "Error: Unable to find git.exe in your PATH."
    exit
 }
 # Test if the flutter directory is a git clone (otherwise git rev-parse HEAD would fail)
-if (-not (Test-Path '.git')) {
-   Write-Host "Error: The flutter directory is not a clone of the GH project"
-   Pop-Location
-   exit
-}
-# Test if pub.bat is available on the Host
-if ((Get-Command "pub.bat" -ErrorAction SilentlyContinue) -eq $null) { 
-   Write-Host "Error: Unable to find Dart SDK in your PATH"
-   Pop-Location
+if (-not (Test-Path "$flutterRoot\.git")) {
+   Write-Host "Error: The Flutter directory is not a clone of the GitHub project."
    exit
 }
 
-# Check if the snapshot version is out-of-date.
+Push-Location
+Set-Location $flutterRoot
 $revision = Invoke-Expression "git rev-parse HEAD"
-if ( (-not (Test-Path $snapshotPath)) -Or (-not (Test-Path $stampPath)) ) {
-	Write-Host "Info: Snapshot doesn't exist"
-	Do-Snapshot
-}
-$stampValue = Get-Content $stampPath | Where-Object {$_ -match '\S'}
-if ($stampValue -ne $revision) {
-	Write-Host "Info: Timestamp differs from revision"
-	Do-Snapshot
-}
-$yamltLastWriteTime = (ls "$flutterToolsDir\pubspec.yaml").LastWriteTime
-$locktLastWriteTime = (ls "$flutterToolsDir\pubspec.lock").LastWriteTime
-if ($locktLastWriteTime -lt $yamltLastWriteTime) {
-	Write-Host "Info: Mismatch between yaml and lock files"
-	Do-Snapshot
+Pop-Location
+
+if (!(Test-Path $snapshotPath) `
+        -or !(Test-Path $stampPath) `
+        -or ((Get-Content $stampPath) -ne  $revision) `
+        -or !(Test-Path "$flutterToolsDir\pubspec.lock") `
+        -or ((ls "$flutterToolsDir\pubspec.lock").LastWriteTime -lt (ls "$flutterToolsDir\pubspec.yaml").LastWriteTime)) {
+    New-Item "$flutterRoot\bin\cache" -force -type directory | Out-Null
+    New-Item "$flutterRoot\bin\cache\.dartignore" -force -type file | Out-Null
+    Invoke-Expression "$flutterRoot\bin\internal\update_dart_sdk.ps1"
+
+    Write-Host "Building flutter tool..."
+    Set-Location $flutterToolsDir
+    if (Test-Path "$flutterToolsDir\pubspec.lock") { Remove-Item "$flutterToolsDir\pubspec.lock" }
+    Invoke-Expression "$pub get --verbosity=error --no-packages-dir" 
+    Set-Location $flutterRoot
+    Invoke-Expression "$dart --snapshot=`"$snapshotPath`" `"$scriptPath`" --packages=`"$flutterToolsDir\.packages`""
+    $revision | Out-File  $stampPath
 }
 
-# Go back to last working directory
-Pop-Location
-Invoke-Expression "$dartExe `"$snapshotPath`" $Remaining"
+Invoke-Expression "$dart `"$snapshotPath`" $args"
 
 # The VM exits with code 253 if the snapshot version is out-of-date.
 if ($LASTEXITCODE -eq 253) {
-	Write-Host "Info: VM exited with code 253, we need to snapshot it again."
-	Invoke-Expression "$dartExe --snapshot=`"$snapshotPath`" `"$scriptPath`" --packages=`"$flutterToolsDir\.packages`""
-	Invoke-Expression "$dartExe `"$snapshotPath`" $Remaining"
+    Invoke-Expression "$dart --snapshot=`"$snapshotPath`" `"$scriptPath`" --packages=`"$flutterToolsDir\.packages`""
+    Invoke-Expression "$dart `"$snapshotPath`" $args"
 }
