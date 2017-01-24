@@ -49,6 +49,7 @@ export 'src/widgets/scroll_behavior.dart';
 export 'src/widgets/scroll_configuration.dart';
 export 'src/widgets/scroll_notification.dart';
 export 'src/widgets/scroll_simulation.dart';
+export 'src/widgets/scroll_view.dart';
 export 'src/widgets/scrollable.dart';
 export 'src/widgets/scrollable_grid.dart';
 export 'src/widgets/scrollable_list.dart';

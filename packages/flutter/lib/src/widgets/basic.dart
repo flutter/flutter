@@ -2709,6 +2709,28 @@ class SliverToBoxAdapter extends SingleChildRenderObjectWidget {
     Widget child,
   }) : super(key: key, child: child);
 
+  /// Wraps the given child in a [SliverToBoxAdapter].
+  ///
+  /// The key for the [SliverToBoxAdapter] is derived either from the child's key
+  /// (if the child has a non-null key) or from the given `childIndex`.
+  factory SliverToBoxAdapter.wrap(Widget child, int childIndex) {
+    assert(child != null);
+    final Key key = child.key != null ? new ValueKey<Key>(child.key) : new ValueKey<int>(childIndex);
+    return new SliverToBoxAdapter(key: key, child: child);
+  }
+
+  /// Wraps each of the given children in [SliverToBoxAdapter]s.
+  ///
+  /// The key for each [SliverToBoxAdapter] is derived either from the wrapped
+  /// child's key (if the wrapped child has a non-null key) or from the wrapped
+  /// child's index in the list.
+  static List<SliverToBoxAdapter> wrapAll(List<Widget> widgets) {
+    final List<SliverToBoxAdapter> result = new List<SliverToBoxAdapter>(widgets.length);
+    for (int i = 0; i < result.length; ++i)
+      result[i] = new SliverToBoxAdapter.wrap(widgets[i], i);
+    return result;
+  }
+
   @override
   RenderSliverToBoxAdapter createRenderObject(BuildContext context) => new RenderSliverToBoxAdapter();
 }
@@ -2821,7 +2843,7 @@ class RepaintBoundary extends SingleChildRenderObjectWidget {
   /// (if the child has a non-null key) or from the given `childIndex`.
   factory RepaintBoundary.wrap(Widget child, int childIndex) {
     assert(child != null);
-    Key key = child.key != null ? new ValueKey<Key>(child.key) : new ValueKey<int>(childIndex);
+    final Key key = child.key != null ? new ValueKey<Key>(child.key) : new ValueKey<int>(childIndex);
     return new RepaintBoundary(key: key, child: child);
   }
 
@@ -2831,7 +2853,7 @@ class RepaintBoundary extends SingleChildRenderObjectWidget {
   /// child's key (if the wrapped child has a non-null key) or from the wrapped
   /// child's index in the list.
   static List<RepaintBoundary> wrapAll(List<Widget> widgets) {
-    List<RepaintBoundary> result = new List<RepaintBoundary>(widgets.length);
+    final List<RepaintBoundary> result = new List<RepaintBoundary>(widgets.length);
     for (int i = 0; i < result.length; ++i)
       result[i] = new RepaintBoundary.wrap(widgets[i], i);
     return result;
