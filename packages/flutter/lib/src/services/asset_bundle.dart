@@ -21,8 +21,18 @@ import 'platform_messages.dart';
 ///
 /// Applications have a [rootBundle], which contains the resources that were
 /// packaged with the application when it was built. To add resources to the
-/// [rootBundle] for your application, add them to the `assets` section of your
-/// `flutter.yaml` manifest.
+/// [rootBundle] for your application, add them to the `assets` subsection of
+/// the `flutter` section of your application's `pubspec.yaml` manifest.
+///
+/// For example:
+///
+/// ```yaml
+/// name: my_awesome_application
+/// flutter:
+///   assets:
+///    - images/hamilton.jpeg
+///    - images/lafayette.jpeg
+/// ```
 ///
 /// Rather than accessing the [rootBundle] global static directly, consider
 /// obtaining the [AssetBundle] for the current [BuildContext] using
@@ -202,8 +212,18 @@ AssetBundle _initRootBundle() {
 ///
 /// The [rootBundle] contains the resources that were packaged with the
 /// application when it was built. To add resources to the [rootBundle] for your
-/// application, add them to the `assets` section of your `flutter.yaml`
-/// manifest.
+/// application, add them to the `assets` subsection of the `flutter` section of
+/// your application's `pubspec.yaml` manifest.
+///
+/// For example:
+///
+/// ```yaml
+/// name: my_awesome_application
+/// flutter:
+///   assets:
+///    - images/hamilton.jpeg
+///    - images/lafayette.jpeg
+/// ```
 ///
 /// Rather than using [rootBundle] directly, consider obtaining the
 /// [AssetBundle] for the current [BuildContext] using [DefaultAssetBundle.of].

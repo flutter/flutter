@@ -20,7 +20,7 @@ import 'globals.dart';
 class AssetBundle {
   final Map<String, DevFSContent> entries = <String, DevFSContent>{};
 
-  static const String defaultManifestPath = 'flutter.yaml';
+  static const String defaultManifestPath = 'pubspec.yaml';
   static const String _kAssetManifestJson = 'AssetManifest.json';
   static const String _kFontManifestJson = 'FontManifest.json';
   static const String _kFontSetMaterial = 'material';
@@ -31,7 +31,7 @@ class AssetBundle {
   DateTime _lastBuildTimestamp;
 
   /// Constructs an [AssetBundle] that gathers the set of assets from the
-  /// flutter.yaml manifest.
+  /// pubspec.yaml manifest.
   AssetBundle();
 
   /// Constructs an [AssetBundle] with a fixed set of assets.
@@ -77,9 +77,9 @@ class AssetBundle {
     packagesPath ??= path.absolute(PackageMap.globalPackagesPath);
     Object manifest;
     try {
-      manifest = _loadFlutterYamlManifest(manifestPath);
+      manifest = _loadFlutterManifest(manifestPath);
     } catch (e) {
-      printStatus('Error detected in flutter.yaml:', emphasis: true);
+      printStatus('Error detected in pubspec.yaml:', emphasis: true);
       printError(e);
       return 1;
     }
@@ -89,12 +89,12 @@ class AssetBundle {
       return 0;
     }
     if (manifest != null) {
-     int result = await _validateFlutterYamlManifest(manifest);
+     int result = await _validateFlutterManifest(manifest);
      if (result != 0)
        return result;
     }
     Map<String, dynamic> manifestDescriptor = manifest;
-    assert(manifestDescriptor != null);
+    manifestDescriptor = manifestDescriptor['flutter'] ?? <String, dynamic>{};
     String assetBasePath = path.dirname(path.absolute(manifestPath));
 
     _lastBuildTimestamp = new DateTime.now();
@@ -112,6 +112,7 @@ class AssetBundle {
       return 1;
 
     final bool usesMaterialDesign = (manifestDescriptor != null) &&
+        manifestDescriptor.containsKey('uses-material-design') &&
         manifestDescriptor['uses-material-design'];
 
     for (_Asset asset in assetVariants.keys) {
@@ -321,8 +322,8 @@ DevFSContent _createFontManifest(Map<String, dynamic> manifestDescriptor,
   return new DevFSStringContent(JSON.encode(fonts));
 }
 
-/// Given an assetBase location and a flutter.yaml manifest, return a map of
-/// assets to asset variants.
+/// Given an assetBase location and a pubspec.yaml Flutter manifest, return a
+/// map of assets to asset variants.
 ///
 /// Returns `null` on missing assets.
 Map<_Asset, List<_Asset>> _parseAssets(
@@ -344,7 +345,7 @@ Map<_Asset, List<_Asset>> _parseAssets(
       _Asset baseAsset = _resolveAsset(packageMap, assetBase, asset);
 
       if (!baseAsset.assetFileExists) {
-        printError('Error: unable to locate asset entry in flutter.yaml: "$asset".');
+        printError('Error: unable to locate asset entry in pubspec.yaml: "$asset".');
         return null;
       }
 
@@ -389,7 +390,7 @@ Map<_Asset, List<_Asset>> _parseAssets(
 
         _Asset baseAsset = _resolveAsset(packageMap, assetBase, asset);
         if (!baseAsset.assetFileExists) {
-          printError('Error: unable to locate asset entry in flutter.yaml: "$asset".');
+          printError('Error: unable to locate asset entry in pubspec.yaml: "$asset".');
           return null;
         }
 
@@ -427,23 +428,23 @@ _Asset _resolveAsset(
   return new _Asset(base: assetBase, relativePath: asset);
 }
 
-dynamic _loadFlutterYamlManifest(String manifestPath) {
+dynamic _loadFlutterManifest(String manifestPath) {
   if (manifestPath == null || !fs.isFileSync(manifestPath))
     return null;
   String manifestDescriptor = fs.file(manifestPath).readAsStringSync();
   return loadYaml(manifestDescriptor);
 }
 
-Future<int> _validateFlutterYamlManifest(Object manifest) async {
+Future<int> _validateFlutterManifest(Object manifest) async {
   String schemaPath = path.join(path.absolute(Cache.flutterRoot),
-      'packages', 'flutter_tools', 'schema', 'flutter_yaml.json');
+      'packages', 'flutter_tools', 'schema', 'pubspec_yaml.json');
   Schema schema = await Schema.createSchemaFromUrl('file://$schemaPath');
 
   Validator validator = new Validator(schema);
   if (validator.validate(manifest)) {
     return 0;
   } else {
-    printStatus('Error detected in flutter.yaml:', emphasis: true);
+    printStatus('Error detected in pubspec.yaml:', emphasis: true);
     printError(validator.errors.join('\n'));
     return 1;
   }

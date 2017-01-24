@@ -13,7 +13,7 @@ import 'dart/package_map.dart';
 import 'android/android_sdk.dart';
 import 'globals.dart';
 
-const String _kFlutterManifestPath = 'flutter.yaml';
+const String _kFlutterManifestPath = 'pubspec.yaml';
 const String _kFlutterServicesManifestPath = 'flutter_services.yaml';
 
 dynamic _loadYamlFile(String path) {
@@ -24,7 +24,7 @@ dynamic _loadYamlFile(String path) {
   return loadYaml(manifestString);
 }
 
-/// Loads all services specified in `flutter.yaml`. Parses each service config file,
+/// Loads all services specified in `pubspec.yaml`. Parses each service config file,
 /// storing meta data in [services] and the list of jar files in [jars].
 Future<Null> parseServiceConfigs(
   List<Map<String, String>> services, { List<File> jars }
@@ -40,8 +40,9 @@ Future<Null> parseServiceConfigs(
   dynamic manifest;
   try {
     manifest = _loadYamlFile(_kFlutterManifestPath);
+    manifest = manifest['flutter'];
   } catch (e) {
-    printStatus('Error detected in flutter.yaml:', emphasis: true);
+    printStatus('Error detected in pubspec.yaml:', emphasis: true);
     printError(e);
     return;
   }
