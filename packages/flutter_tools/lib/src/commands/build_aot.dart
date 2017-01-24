@@ -215,6 +215,7 @@ Future<String> _buildAotSnapshot(
     '--url_mapping=dart:ui,$uiPath',
     '--url_mapping=dart:jni,$jniPath',
     '--url_mapping=dart:vmservice_sky,$vmServicePath',
+    '--print_snapshot_sizes',
   ];
 
   if (!interpreter) {

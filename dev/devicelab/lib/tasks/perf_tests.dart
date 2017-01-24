@@ -164,37 +164,41 @@ class BuildTest {
       await flutter('packages', options: <String>['get']);
 
       Stopwatch watch = new Stopwatch()..start();
-      await flutter('build', options: <String>[
+      String buildLog = await evalFlutter('build', options: <String>[
         'aot',
+        '-v',
         '--profile',
         '--no-pub',
         '--target-platform', 'android-arm'  // Generate blobs instead of assembly.
       ]);
       watch.stop();
 
-      int vmisolateSize = file("$testDirectory/build/aot/snapshot_aot_vmisolate").lengthSync();
-      int isolateSize = file("$testDirectory/build/aot/snapshot_aot_isolate").lengthSync();
-      int instructionsSize = file("$testDirectory/build/aot/snapshot_aot_instr").lengthSync();
-      int rodataSize = file("$testDirectory/build/aot/snapshot_aot_rodata").lengthSync();
-      int totalSize = vmisolateSize + isolateSize + instructionsSize + rodataSize;
+      RegExp metricExpression = new RegExp(r'([a-zA-Z]+)\(CodeSize\)\: (\d+)');
 
-      Map<String, dynamic> data = <String, dynamic>{
-        'aot_snapshot_build_millis': watch.elapsedMilliseconds,
-        'aot_snapshot_size_vmisolate': vmisolateSize,
-        'aot_snapshot_size_isolate': isolateSize,
-        'aot_snapshot_size_instructions': instructionsSize,
-        'aot_snapshot_size_rodata': rodataSize,
-        'aot_snapshot_size_total': totalSize,
-      };
-      return new TaskResult.success(data, benchmarkScoreKeys: <String>[
-        'aot_snapshot_build_millis',
-        'aot_snapshot_size_vmisolate',
-        'aot_snapshot_size_isolate',
-        'aot_snapshot_size_instructions',
-        'aot_snapshot_size_rodata',
-        'aot_snapshot_size_total',
-      ]);
+      Map<String, dynamic> data = new Map<String, dynamic>.fromIterable(
+        metricExpression.allMatches(buildLog),
+        key: (Match m) => _sdkNameToMetricName(m.group(1)),
+        value: (Match m) => int.parse(m.group(2)),
+      );
+      data['aot_snapshot_build_millis'] = watch.elapsedMilliseconds;
+
+      return new TaskResult.success(data, benchmarkScoreKeys: data.keys.toList());
     });
+  }
+
+  static String _sdkNameToMetricName(String sdkName) {
+    const Map<String, String> kSdkNameToMetricNameMapping = const <String, String> {
+      'VMIsolate': 'aot_snapshot_size_vmisolate',
+      'Isolate': 'aot_snapshot_size_isolate',
+      'ReadOnlyData': 'aot_snapshot_size_rodata',
+      'Instructions': 'aot_snapshot_size_instructions',
+      'Total': 'aot_snapshot_size_total',
+    };
+
+    if (!kSdkNameToMetricNameMapping.containsKey(sdkName))
+      throw 'Unrecognized SDK snapshot metric name: $sdkName';
+
+    return kSdkNameToMetricNameMapping[sdkName];
   }
 }
 
