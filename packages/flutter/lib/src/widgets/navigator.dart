@@ -779,9 +779,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     assert(newRoute.overlayEntries.isEmpty);
     assert(!overlay.debugIsVisible(oldRoute.overlayEntries.last));
     setState(() {
-      int index = _history.length - 1;
+      final int index = _history.indexOf(oldRoute);
       assert(index >= 0);
-      assert(_history.indexOf(oldRoute) == index);
       newRoute._navigator = this;
       newRoute.install(oldRoute.overlayEntries.last);
       _history[index] = newRoute;
@@ -816,8 +815,9 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     assert(newRoute.overlayEntries.isEmpty);
 
     setState(() {
-      final int index = _history.indexOf(oldRoute);
+      int index = _history.length - 1;
       assert(index >= 0);
+      assert(_history.indexOf(oldRoute) == index);
       newRoute._navigator = this;
       newRoute.install(_currentOverlayEntry);
       _history[index] = newRoute;
