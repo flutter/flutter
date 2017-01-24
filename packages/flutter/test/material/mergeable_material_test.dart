@@ -65,7 +65,7 @@ void main() {
   testWidgets('MergeableMaterial empty', (WidgetTester tester) async {
     await tester.pumpWidget(
       new Scaffold(
-        body: new ScrollableViewport(
+        body: new SingleChildScrollView(
           child: new MergeableMaterial()
         )
       )
@@ -78,7 +78,7 @@ void main() {
   testWidgets('MergeableMaterial update slice', (WidgetTester tester) async {
     await tester.pumpWidget(
       new Scaffold(
-        body: new ScrollableViewport(
+        body: new SingleChildScrollView(
           child: new MergeableMaterial(
             children: <MergeableMaterialItem>[
               new MaterialSlice(
@@ -99,7 +99,7 @@ void main() {
 
     await tester.pumpWidget(
       new Scaffold(
-        body: new ScrollableViewport(
+        body: new SingleChildScrollView(
           child: new MergeableMaterial(
             children: <MergeableMaterialItem>[
               new MaterialSlice(
@@ -122,7 +122,7 @@ void main() {
   testWidgets('MergeableMaterial swap slices', (WidgetTester tester) async {
     await tester.pumpWidget(
       new Scaffold(
-        body: new ScrollableViewport(
+        body: new SingleChildScrollView(
           child: new MergeableMaterial(
             children: <MergeableMaterialItem>[
               new MaterialSlice(
@@ -152,7 +152,7 @@ void main() {
 
     await tester.pumpWidget(
       new Scaffold(
-        body: new ScrollableViewport(
+        body: new SingleChildScrollView(
           child: new MergeableMaterial(
             children: <MergeableMaterialItem>[
               new MaterialSlice(
@@ -187,7 +187,7 @@ void main() {
   testWidgets('MergeableMaterial paints shadows', (WidgetTester tester) async {
     await tester.pumpWidget(
       new Scaffold(
-        body: new ScrollableViewport(
+        body: new SingleChildScrollView(
           child: new MergeableMaterial(
             children: <MergeableMaterialItem>[
               new MaterialSlice(
@@ -215,7 +215,7 @@ void main() {
   testWidgets('MergeableMaterial merge gap', (WidgetTester tester) async {
     await tester.pumpWidget(
       new Scaffold(
-        body: new ScrollableViewport(
+        body: new SingleChildScrollView(
           child: new MergeableMaterial(
             children: <MergeableMaterialItem>[
               new MaterialSlice(
@@ -249,7 +249,7 @@ void main() {
 
     await tester.pumpWidget(
       new Scaffold(
-        body: new ScrollableViewport(
+        body: new SingleChildScrollView(
           child: new MergeableMaterial(
             children: <MergeableMaterialItem>[
               new MaterialSlice(
@@ -288,7 +288,7 @@ void main() {
   testWidgets('MergeableMaterial separate slices', (WidgetTester tester) async {
     await tester.pumpWidget(
       new Scaffold(
-        body: new ScrollableViewport(
+        body: new SingleChildScrollView(
           child: new MergeableMaterial(
             children: <MergeableMaterialItem>[
               new MaterialSlice(
@@ -318,7 +318,7 @@ void main() {
 
     await tester.pumpWidget(
       new Scaffold(
-        body: new ScrollableViewport(
+        body: new SingleChildScrollView(
           child: new MergeableMaterial(
             children: <MergeableMaterialItem>[
               new MaterialSlice(
@@ -360,7 +360,7 @@ void main() {
   testWidgets('MergeableMaterial separate merge seaparate', (WidgetTester tester) async {
     await tester.pumpWidget(
       new Scaffold(
-        body: new ScrollableViewport(
+        body: new SingleChildScrollView(
           child: new MergeableMaterial(
             children: <MergeableMaterialItem>[
               new MaterialSlice(
@@ -390,7 +390,7 @@ void main() {
 
     await tester.pumpWidget(
       new Scaffold(
-        body: new ScrollableViewport(
+        body: new SingleChildScrollView(
           child: new MergeableMaterial(
             children: <MergeableMaterialItem>[
               new MaterialSlice(
@@ -430,7 +430,7 @@ void main() {
 
     await tester.pumpWidget(
       new Scaffold(
-        body: new ScrollableViewport(
+        body: new SingleChildScrollView(
           child: new MergeableMaterial(
             children: <MergeableMaterialItem>[
               new MaterialSlice(
@@ -467,7 +467,7 @@ void main() {
 
     await tester.pumpWidget(
       new Scaffold(
-        body: new ScrollableViewport(
+        body: new SingleChildScrollView(
           child: new MergeableMaterial(
             children: <MergeableMaterialItem>[
               new MaterialSlice(
@@ -509,7 +509,7 @@ void main() {
   testWidgets('MergeableMaterial insert slice', (WidgetTester tester) async {
     await tester.pumpWidget(
       new Scaffold(
-        body: new ScrollableViewport(
+        body: new SingleChildScrollView(
           child: new MergeableMaterial(
             children: <MergeableMaterialItem>[
               new MaterialSlice(
@@ -539,7 +539,7 @@ void main() {
 
     await tester.pumpWidget(
       new Scaffold(
-        body: new ScrollableViewport(
+        body: new SingleChildScrollView(
           child: new MergeableMaterial(
             children: <MergeableMaterialItem>[
               new MaterialSlice(
@@ -577,7 +577,7 @@ void main() {
   testWidgets('MergeableMaterial remove slice', (WidgetTester tester) async {
     await tester.pumpWidget(
       new Scaffold(
-        body: new ScrollableViewport(
+        body: new SingleChildScrollView(
           child: new MergeableMaterial(
             children: <MergeableMaterialItem>[
               new MaterialSlice(
@@ -614,7 +614,7 @@ void main() {
 
     await tester.pumpWidget(
       new Scaffold(
-        body: new ScrollableViewport(
+        body: new SingleChildScrollView(
           child: new MergeableMaterial(
             children: <MergeableMaterialItem>[
               new MaterialSlice(
@@ -646,7 +646,7 @@ void main() {
   testWidgets('MergeableMaterial insert chunk', (WidgetTester tester) async {
     await tester.pumpWidget(
       new Scaffold(
-        body: new ScrollableViewport(
+        body: new SingleChildScrollView(
           child: new MergeableMaterial(
             children: <MergeableMaterialItem>[
               new MaterialSlice(
@@ -676,7 +676,7 @@ void main() {
 
     await tester.pumpWidget(
       new Scaffold(
-        body: new ScrollableViewport(
+        body: new SingleChildScrollView(
           child: new MergeableMaterial(
             children: <MergeableMaterialItem>[
               new MaterialSlice(
@@ -730,7 +730,7 @@ void main() {
   testWidgets('MergeableMaterial remove chunk', (WidgetTester tester) async {
     await tester.pumpWidget(
       new Scaffold(
-        body: new ScrollableViewport(
+        body: new SingleChildScrollView(
           child: new MergeableMaterial(
             children: <MergeableMaterialItem>[
               new MaterialSlice(
@@ -775,7 +775,7 @@ void main() {
 
     await tester.pumpWidget(
       new Scaffold(
-        body: new ScrollableViewport(
+        body: new SingleChildScrollView(
           child: new MergeableMaterial(
             children: <MergeableMaterialItem>[
               new MaterialSlice(
@@ -814,7 +814,7 @@ void main() {
   testWidgets('MergeableMaterial replace gap with chunk', (WidgetTester tester) async {
     await tester.pumpWidget(
       new Scaffold(
-        body: new ScrollableViewport(
+        body: new SingleChildScrollView(
           child: new MergeableMaterial(
             children: <MergeableMaterialItem>[
               new MaterialSlice(
@@ -848,7 +848,7 @@ void main() {
 
     await tester.pumpWidget(
       new Scaffold(
-        body: new ScrollableViewport(
+        body: new SingleChildScrollView(
           child: new MergeableMaterial(
             children: <MergeableMaterialItem>[
               new MaterialSlice(
@@ -902,7 +902,7 @@ void main() {
   testWidgets('MergeableMaterial replace chunk with gap', (WidgetTester tester) async {
     await tester.pumpWidget(
       new Scaffold(
-        body: new ScrollableViewport(
+        body: new SingleChildScrollView(
           child: new MergeableMaterial(
             children: <MergeableMaterialItem>[
               new MaterialSlice(
@@ -947,7 +947,7 @@ void main() {
 
     await tester.pumpWidget(
       new Scaffold(
-        body: new ScrollableViewport(
+        body: new SingleChildScrollView(
           child: new MergeableMaterial(
             children: <MergeableMaterialItem>[
               new MaterialSlice(
@@ -1001,7 +1001,7 @@ void main() {
   testWidgets('MergeableMaterial dividers', (WidgetTester tester) async {
     await tester.pumpWidget(
       new Scaffold(
-        body: new ScrollableViewport(
+        body: new SingleChildScrollView(
           child: new MergeableMaterial(
             hasDividers: true,
             children: <MergeableMaterialItem>[
@@ -1049,7 +1049,7 @@ void main() {
 
     await tester.pumpWidget(
       new Scaffold(
-        body: new ScrollableViewport(
+        body: new SingleChildScrollView(
           child: new MergeableMaterial(
             hasDividers: true,
             children: <MergeableMaterialItem>[

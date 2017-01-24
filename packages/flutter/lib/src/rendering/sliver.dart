@@ -239,21 +239,6 @@ class SliverConstraints extends Constraints {
   /// width of the viewport.
   final double crossAxisExtent;
 
-  Offset get scrollOffsetAsOffset {
-    assert(axisDirection != null);
-    switch (axisDirection) {
-      case AxisDirection.up:
-        return new Offset(0.0, -scrollOffset);
-      case AxisDirection.down:
-        return new Offset(0.0, scrollOffset);
-      case AxisDirection.left:
-        return new Offset(-scrollOffset, 0.0);
-      case AxisDirection.right:
-        return new Offset(scrollOffset, 0.0);
-    }
-    return null;
-  }
-
   Axis get axis => axisDirectionToAxis(axisDirection);
 
   /// Return what the [growthDirection] would be if the [axisDirection] was
@@ -1037,6 +1022,13 @@ abstract class ViewportOffset extends ChangeNotifier {
   ViewportOffset();
   factory ViewportOffset.fixed(double value) = _FixedViewportOffset;
   factory ViewportOffset.zero() = _FixedViewportOffset.zero;
+
+  /// The number of pixels to offset the children in the opposite of the axis direction.
+  ///
+  /// For example, if the axis direction is down, then the pixel value
+  /// represents the number of logical pixels to move the children _up_ the
+  /// screen. Similarly, if the axis direction is left, then the pixels value
+  /// represents the number of logical pixesl to move the children to _right_.
   double get pixels;
 
   /// Called when the viewport's extents are established.

@@ -244,7 +244,7 @@ void main() {
     await tester.pumpWidget(
       new MaterialApp(
         home: new Scaffold(
-          body: new ScrollableViewport(
+          body: new SingleChildScrollView(
             child: new Container(
               decoration: new BoxDecoration(
                 backgroundColor: Colors.amber[500],

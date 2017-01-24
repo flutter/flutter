@@ -400,7 +400,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
               )
             )
           ),
-          new ScrollableViewport(
+          new SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: new DataTable(
               key: _tableKey,
