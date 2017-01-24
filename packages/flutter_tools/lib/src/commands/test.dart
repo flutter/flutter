@@ -139,7 +139,8 @@ class TestCommand extends FlutterCommand {
       Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_tools');
       try {
         File sourceFile = coverageFile.copySync(path.join(tempDir.path, 'lcov.source.info'));
-        ProcessResult result = processManager.runSync('lcov', <String>[
+        ProcessResult result = processManager.runSync(<String>[
+          'lcov',
           '--add-tracefile', baseCoverageData,
           '--add-tracefile', sourceFile.path,
           '--output-file', coverageFile.path,
