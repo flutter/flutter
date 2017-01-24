@@ -14,22 +14,57 @@
 #include "flutter/shell/gpu/gpu_surface_gl.h"
 #include "flutter/shell/platform/linux/message_pump_glfw.h"
 #include "flutter/shell/platform/linux/platform_view_glfw.h"
+#include "flutter/shell/testing/test_runner.h"
 #include "flutter/shell/testing/testing.h"
+#include "flutter/sky/engine/public/web/Sky.h"
 
 namespace {
 
-int RunNonInteractive() {
+// Checks whether the engine's main Dart isolate has no pending work.  If so,
+// then exit the given message loop.
+class ScriptCompletionTaskObserver : public base::MessageLoop::TaskObserver {
+ public:
+  ScriptCompletionTaskObserver(base::MessageLoop& main_message_loop)
+      : main_message_loop_(main_message_loop), prev_live_(false) {}
+
+  void WillProcessTask(const base::PendingTask& pending_task) override {}
+
+  void DidProcessTask(const base::PendingTask& pending_task) override {
+    shell::TestRunner& test_runner = shell::TestRunner::Shared();
+    bool live = test_runner.platform_view().engine().UIIsolateHasLivePorts();
+    if (prev_live_ && !live)
+      main_message_loop_.PostTask(FROM_HERE,
+                                  main_message_loop_.QuitWhenIdleClosure());
+    prev_live_ = live;
+  }
+
+ private:
+  base::MessageLoop& main_message_loop_;
+  bool prev_live_;
+};
+
+void RunNonInteractive() {
   base::MessageLoop message_loop;
 
   shell::Shell::InitStandalone();
 
+  // Note that this task observer must be added after the observer that drains
+  // the microtask queue.
+  ScriptCompletionTaskObserver task_observer(message_loop);
+  blink::Threads::UI()->PostTask([&task_observer] {
+    base::MessageLoop::current()->AddTaskObserver(&task_observer);
+  });
+
   if (!shell::InitForTesting()) {
     shell::PrintUsage("sky_shell");
-    return 1;
+    exit(1);
   }
 
   message_loop.Run();
-  return 0;
+
+  // The script has completed and the engine may not be in a clean state,
+  // so just stop the process.
+  exit(0);
 }
 
 static bool IsDartFile(const std::string& path) {
@@ -98,7 +133,8 @@ int main(int argc, const char* argv[]) {
 
   if (command_line.HasSwitch(
           shell::FlagForSwitch(shell::Switch::NonInteractive))) {
-    return RunNonInteractive();
+    RunNonInteractive();
+    return 0;
   }
 
   return RunInteractive();

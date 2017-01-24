@@ -26,6 +26,8 @@ class TestRunner {
 
   void Run(const TestDescriptor& test);
 
+  PlatformView& platform_view() { return *platform_view_; }
+
  private:
   TestRunner();
   ~TestRunner();

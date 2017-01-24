@@ -44,6 +44,8 @@ class RuntimeController : public WindowClient, public IsolateClient {
 
   std::string GetIsolateName();
 
+  bool HasLivePorts();
+
  private:
   explicit RuntimeController(RuntimeDelegate* client);
 

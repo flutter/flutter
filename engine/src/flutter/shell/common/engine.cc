@@ -155,6 +155,12 @@ std::string Engine::GetUIIsolateName() {
   return runtime_->GetIsolateName();
 }
 
+bool Engine::UIIsolateHasLivePorts() {
+  if (!runtime_)
+    return false;
+  return runtime_->HasLivePorts();
+}
+
 void Engine::OnOutputSurfaceCreated(const ftl::Closure& gpu_continuation) {
   blink::Threads::Gpu()->PostTask(gpu_continuation);
   have_surface_ = true;
