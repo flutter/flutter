@@ -577,8 +577,12 @@ class Navigator extends StatefulWidget {
     return navigator.pushNamed(routeName);
   }
 
-  static Future<dynamic> replaceNamed(BuildContext context, String routeName, { dynamic result }) {
-    return Navigator.of(context).replaceNamed(routeName, result: result);
+  static Future<dynamic> pushReplacementNamed(BuildContext context, String routeName, { dynamic result }) {
+    return Navigator.of(context).pushReplacementNamed(routeName, result: result);
+  }
+
+  static Future<dynamic> pushReplacement(BuildContext context, Route<dynamic> route, { dynamic result }) {
+    return Navigator.of(context).pushReplacement(route, result: result);
   }
 
   /// The state from the closest instance of this class that encloses the given context.
@@ -759,16 +763,21 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     assert(() { _debugLocked = false; return true; });
   }
 
-  Future<dynamic> replaceNamed(String name, { dynamic result }) {
+  /// Push the [newRoute] and dispose the old current Route.
+  ///
+  /// The new route and the route below the new route (if any) are notified
+  /// (see [Route.didPush] and [Route.didChangeNext]). The navigator observer
+  /// is not notified about the old route. The old route is disposed (see
+  /// [Route.dispose]).
+  ///
+  /// If a [result] is provided, it will be the return value of the old route,
+  /// as if the old route had been popped.
+  Future<dynamic> pushReplacement(Route<dynamic> newRoute, { dynamic result }) {
     assert(!_debugLocked);
     assert(() { _debugLocked = true; return true; });
     final Route<dynamic> oldRoute = _history.isNotEmpty ? _history.last : null;
     assert(oldRoute != null && oldRoute._navigator == this);
     assert(oldRoute.overlayEntries.isNotEmpty);
-
-    assert(name != null);
-    final RouteSettings settings = new RouteSettings(name: name);
-    final Route<dynamic> newRoute = config.onGenerateRoute(settings);
     assert(newRoute._navigator == null);
     assert(newRoute.overlayEntries.isEmpty);
 
@@ -780,17 +789,45 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       _history[index] = newRoute;
       newRoute.didPush().then<dynamic>((Null _) {
         // The old route's exit is not animated. We're assuming that the
-        // new route completely obscures the od one.
+        // new route completely obscures the old one.
         oldRoute
           .._popCompleter.complete(result ?? oldRoute.currentResult)
           ..dispose();
       });
       newRoute.didChangeNext(null);
+      if (index > 0)
+        _history[index - 1].didChangeNext(newRoute);
       config.observer?.didPush(newRoute, oldRoute);
     });
     assert(() { _debugLocked = false; return true; });
     _cancelActivePointers();
     return newRoute.popped;
+  }
+
+  /// Push the route named [name] and dispose the old current route.
+  ///
+  /// The route name will be passed to [Navigator.onGenerateRoute]. The returned
+  /// route will be pushed into the navigator.
+  ///
+  /// Returns a [Future] that completes to the `result` value passed to [pop]
+  /// when the pushed route is popped off the navigator.
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// Navigator.of(context).pushReplacementNamed('/nyc/1776');
+  /// ```
+  Future<dynamic> pushReplacementNamed(String name, { dynamic result }) {
+    assert(!_debugLocked);
+    assert(name != null);
+    final RouteSettings settings = new RouteSettings(name: name);
+    Route<dynamic> newRoute = config.onGenerateRoute(settings);
+    if (newRoute == null) {
+      assert(config.onUnknownRoute != null);
+      newRoute = config.onUnknownRoute(settings);
+      assert(newRoute != null);
+    }
+    return pushReplacement(newRoute, result: result);
   }
 
   /// Replaces a route that is not currently visible with a new route.

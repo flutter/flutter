@@ -282,8 +282,8 @@ void main() {
 
   testWidgets('replaceNamed', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-       '/': (BuildContext context) => new OnTapPage(id: '/', onTap: () { Navigator.replaceNamed(context, '/A'); }),
-      '/A': (BuildContext context) => new OnTapPage(id: 'A', onTap: () { Navigator.replaceNamed(context, '/B'); }),
+       '/': (BuildContext context) => new OnTapPage(id: '/', onTap: () { Navigator.pushReplacementNamed(context, '/A'); }),
+      '/A': (BuildContext context) => new OnTapPage(id: 'A', onTap: () { Navigator.pushReplacementNamed(context, '/B'); }),
       '/B': (BuildContext context) => new OnTapPage(id: 'B'),
     };
 
@@ -307,7 +307,7 @@ void main() {
 
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
        '/': (BuildContext context) => new OnTapPage(id: '/', onTap: () { Navigator.pushNamed(context, '/A'); }),
-      '/A': (BuildContext context) => new OnTapPage(id: 'A', onTap: () { value = Navigator.replaceNamed(context, '/B', result: 'B'); }),
+      '/A': (BuildContext context) => new OnTapPage(id: 'A', onTap: () { value = Navigator.pushReplacementNamed(context, '/B', result: 'B'); }),
       '/B': (BuildContext context) => new OnTapPage(id: 'B', onTap: () { Navigator.pop(context, 'B'); }),
     };
 
