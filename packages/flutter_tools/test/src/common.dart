@@ -29,5 +29,5 @@ void updateFileModificationTime(String path,
       '${modificationTime.minute.toString().padLeft(2, "0")}'
       '.${modificationTime.second.toString().padLeft(2, "0")}';
   ProcessManager processManager = context[ProcessManager];
-  processManager.runSync('touch', <String>['-t', argument, path]);
+  processManager.runSync(<String>['touch', '-t', argument, path]);
 }

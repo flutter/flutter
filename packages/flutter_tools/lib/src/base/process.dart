@@ -54,11 +54,8 @@ Future<Process> runCommand(List<String> cmd, {
   Map<String, String> environment
 }) async {
   _traceCommand(cmd, workingDirectory: workingDirectory);
-  String executable = cmd[0];
-  List<String> arguments = cmd.length > 1 ? cmd.sublist(1) : <String>[];
   Process process = await processManager.start(
-    executable,
-    arguments,
+    cmd,
     workingDirectory: workingDirectory,
     environment: _environment(allowReentrantFlutter, environment)
   );
@@ -127,8 +124,8 @@ Future<Null> runAndKill(List<String> cmd, Duration timeout) {
 Future<Process> runDetached(List<String> cmd) {
   _traceCommand(cmd);
   Future<Process> proc = processManager.start(
-    cmd[0], cmd.getRange(1, cmd.length).toList(),
-    mode: ProcessStartMode.DETACHED
+    cmd,
+    mode: ProcessStartMode.DETACHED,
   );
   return proc;
 }
@@ -139,10 +136,9 @@ Future<RunResult> runAsync(List<String> cmd, {
 }) async {
   _traceCommand(cmd, workingDirectory: workingDirectory);
   ProcessResult results = await processManager.run(
-    cmd[0],
-    cmd.getRange(1, cmd.length).toList(),
+    cmd,
     workingDirectory: workingDirectory,
-    environment: _environment(allowReentrantFlutter)
+    environment: _environment(allowReentrantFlutter),
   );
   RunResult runResults = new RunResult(results);
   printTrace(runResults.toString());
@@ -152,7 +148,7 @@ Future<RunResult> runAsync(List<String> cmd, {
 bool exitsHappy(List<String> cli) {
   _traceCommand(cli);
   try {
-    return processManager.runSync(cli.first, cli.sublist(1)).exitCode == 0;
+    return processManager.runSync(cli).exitCode == 0;
   } catch (error) {
     return false;
   }
@@ -216,10 +212,9 @@ String _runWithLoggingSync(List<String> cmd, {
 }) {
   _traceCommand(cmd, workingDirectory: workingDirectory);
   ProcessResult results = processManager.runSync(
-    cmd[0],
-    cmd.getRange(1, cmd.length).toList(),
+    cmd,
     workingDirectory: workingDirectory,
-    environment: _environment(allowReentrantFlutter)
+    environment: _environment(allowReentrantFlutter),
   );
 
   printTrace('Exit code ${results.exitCode} from: ${cmd.join(' ')}');

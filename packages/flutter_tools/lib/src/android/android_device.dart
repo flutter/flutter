@@ -62,8 +62,7 @@ class AndroidDevice extends Device {
         // We pass an encoding of LATIN1 so that we don't try and interpret the
         // `adb shell getprop` result as UTF8.
         ProcessResult result = processManager.runSync(
-          propCommand.first,
-          propCommand.sublist(1),
+          propCommand,
           stdoutEncoding: LATIN1
         );
         if (result.exitCode == 0) {

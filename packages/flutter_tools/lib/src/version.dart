@@ -74,7 +74,7 @@ class FlutterVersion {
 
   /// A date String describing the last framework commit.
   static String get frameworkCommitDate {
-    return _runSync('git', <String>['log', '-n', '1', '--pretty=format:%ad', '--date=format:%Y-%m-%d %H:%M:%S'], Cache.flutterRoot);
+    return _runSync(<String>['git', 'log', '-n', '1', '--pretty=format:%ad', '--date=format:%Y-%m-%d %H:%M:%S'], Cache.flutterRoot);
   }
 
   static FlutterVersion getVersion([String flutterRoot]) {
@@ -85,10 +85,10 @@ class FlutterVersion {
   static String getVersionString({ bool whitelistBranchName: false }) {
     final String cwd = Cache.flutterRoot;
 
-    String commit = _shortGitRevision(_runSync('git', <String>['rev-parse', 'HEAD'], cwd));
+    String commit = _shortGitRevision(_runSync(<String>['git', 'rev-parse', 'HEAD'], cwd));
     commit = commit.isEmpty ? 'unknown' : commit;
 
-    String branch = _runSync('git', <String>['rev-parse', '--abbrev-ref', 'HEAD'], cwd);
+    String branch = _runSync(<String>['git', 'rev-parse', '--abbrev-ref', 'HEAD'], cwd);
     branch = branch == 'HEAD' ? 'master' : branch;
 
     if (whitelistBranchName || branch.isEmpty) {
@@ -101,8 +101,8 @@ class FlutterVersion {
   }
 }
 
-String _runSync(String executable, List<String> arguments, String cwd) {
-  ProcessResult results = processManager.runSync(executable, arguments, workingDirectory: cwd);
+String _runSync(List<String> command, String cwd) {
+  ProcessResult results = processManager.runSync(command, workingDirectory: cwd);
   return results.exitCode == 0 ? results.stdout.trim() : '';
 }
 

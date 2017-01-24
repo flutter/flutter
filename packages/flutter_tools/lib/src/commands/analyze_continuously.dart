@@ -158,10 +158,15 @@ class AnalysisServer {
 
   Future<Null> start() async {
     String snapshot = path.join(sdk, 'bin/snapshots/analysis_server.dart.snapshot');
-    List<String> args = <String>[snapshot, '--sdk', sdk];
+    List<String> command = <String>[
+      path.join(dartSdkPath, 'bin', 'dart'),
+      snapshot,
+      '--sdk',
+      sdk,
+    ];
 
-    printTrace('dart ${args.join(' ')}');
-    _process = await processManager.start(path.join(dartSdkPath, 'bin', 'dart'), args);
+    printTrace('dart ${command.skip(1).join(' ')}');
+    _process = await processManager.start(command);
     _process.exitCode.whenComplete(() => _process = null);
 
     Stream<String> errorStream = _process.stderr.transform(UTF8.decoder).transform(const LineSplitter());

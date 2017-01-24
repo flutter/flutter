@@ -190,9 +190,9 @@ class SimControl {
     //   },
     //   "pairs": { ... },
 
-    List<String> args = <String>['simctl', 'list', '--json', section.name];
-    printTrace('$_xcrunPath ${args.join(' ')}');
-    ProcessResult results = processManager.runSync(_xcrunPath, args);
+    List<String> command = <String>[_xcrunPath, 'simctl', 'list', '--json', section.name];
+    printTrace(command.join(' '));
+    ProcessResult results = processManager.runSync(command);
     if (results.exitCode != 0) {
       printError('Error executing simctl: ${results.exitCode}\n${results.stderr}');
       return <String, Map<String, dynamic>>{};

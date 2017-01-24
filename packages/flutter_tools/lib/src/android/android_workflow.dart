@@ -71,7 +71,7 @@ class AndroidWorkflow extends DoctorValidator implements Workflow {
         try {
           printTrace('java -version');
 
-          ProcessResult result = processManager.runSync('java', <String>['-version']);
+          ProcessResult result = processManager.runSync(<String>['java', '-version']);
           if (result.exitCode == 0) {
             javaVersion = result.stderr;
             List<String> versionLines = javaVersion.split('\n');
