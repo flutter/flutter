@@ -12,4 +12,6 @@ flutter_app("flutter_gallery") {
   deps = [
     "//lib/flutter/packages/flutter",
   ]
+
+  # TODO(chinmaygarde): Assets must be packaged in the FLX.
 }
