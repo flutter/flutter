@@ -101,10 +101,7 @@ Individual tests can also be run directly, e.g. `flutter test lib/my_app_test.da
 
 Flutter tests use [package:flutter_test](https://github.com/flutter/flutter/tree/master/packages/flutter_test) which provides flutter-specific extensions on top of [package:test](https://pub.dartlang.org/packages/test).
 
-`flutter test` runs tests inside the flutter shell.  Some packages inside the flutter repository can be run inside the dart command line VM as well as the flutter shell, `packages/flutter_tools` is one such example:
-
- * `cd packages/flutter_tools`
- * `dart test/all.dart`
+`flutter test` runs tests inside the flutter shell.
 
 To run all the tests for the entire Flutter repository, the same way that Travis runs them, run `dev/bots/test.sh`.
 
@@ -122,6 +119,24 @@ Adding a test
 To add a test to the Flutter package, create a file whose name
 ends with `_test.dart` in the `packages/flutter/test` directory. The
 test should have a `main` function and use the `test` package.
+
+Working with flutter tools
+--------------------------
+
+The flutter shell tools itself is built when you run flutter for the first time and each time
+you run `flutter upgrade`. If you want to alter and re-test the shell tool's behavior itself,
+delete `bin/cache/flutter_tools.*` so that the shell tool will be rebuilt from Dart sources
+in `packages/flutter_tools`.
+
+flutter_tools' tests run inside the dart command line VM rather than recursively in the
+flutter shell. To run the test:
+
+* `cd packages/flutter_tools`
+* `dart test/all.dart`
+
+The pre-built shell tool runs with the observatory (thus debugging) off by default.
+To enable the observatory on the shell tool, uncomment the `FLUTTER_TOOL_ARGS` line in the
+`bin/flutter` shell script.
 
 Contributing code
 -----------------
