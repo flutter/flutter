@@ -368,9 +368,9 @@ typedef bool RoutePredicate(Route<dynamic> route);
 /// bool value = await Navigator.of(context).push(new MaterialPageRoute<bool>(
 ///   builder: (BuildContext context) {
 ///     return new Center(
-///       child: new FlatButton(
+///       child: new GestureDetector(
 ///         child: new Text('OK'),
-///         onPressed: () { Navigator.of(context).pop(true); }
+///         onTap: () { Navigator.of(context).pop(true); }
 ///       ),
 ///     );
 ///   }
