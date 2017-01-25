@@ -43,11 +43,10 @@ void copyDirectorySync(Directory srcDir, Directory destDir) {
     String newPath = path.join(destDir.path, path.basename(entity.path));
     if (entity is File) {
       File newFile = destDir.fileSystem.file(newPath);
-      newFile.createSync();
       newFile.writeAsBytesSync(entity.readAsBytesSync());
     } else if (entity is Directory) {
       copyDirectorySync(
-        srcDir.fileSystem.directory(entity.path), destDir.fileSystem.directory(newPath));
+        entity, destDir.fileSystem.directory(newPath));
     } else {
       throw new Exception('${entity.path} is neither File nor Directory');
     }
