@@ -31,12 +31,22 @@ Color debugPaintSizeColor = _kDebugPaintSizeColor;
 
 /// The color to use when painting some boxes that just add space (e.g. an empty
 /// RenderConstrainedBox or RenderPadding).
+///
+/// Used by, among other methods, [debugPaintPadding], which is called by
+/// [RenderPadding.debugPaintSize] when [debugPaintSizeEnabled] is true.
 Color debugPaintSpacingColor = _kDebugPaintSpacingColor;
 
 /// The color to use when painting RenderPadding edges.
+///
+/// Used by, among other methods, [debugPaintPadding], which is called by
+/// [RenderPadding.debugPaintSize] when [debugPaintSizeEnabled] is true.
 Color debugPaintPaddingColor = _kDebugPaintPaddingColor;
 
-/// The color to use when painting RenderPadding edges.
+/// The color to use when painting RenderPadding edges. This color is painted on
+/// top of [debugPaintPaddingColor].
+///
+/// Used by, among other methods, [debugPaintPadding], which is called by
+/// [RenderPadding.debugPaintSize] when [debugPaintSizeEnabled] is true.
 Color debugPaintPaddingInnerEdgeColor = _kDebugPaintPaddingInnerEdgeColor;
 
 /// The color to use when painting the arrows used to show RenderPositionedBox alignment.
@@ -103,6 +113,35 @@ List<String> debugDescribeTransform(Matrix4 transform) {
   List<String> matrix = transform.toString().split('\n').map((String s) => '  $s').toList();
   matrix.removeLast();
   return matrix;
+}
+
+void _debugDrawDoubleRect(Canvas canvas, Rect outerRect, Rect innerRect, Color color) {
+  final Path path = new Path()
+    ..fillType = PathFillType.evenOdd
+    ..addRect(outerRect)
+    ..addRect(innerRect);
+  final Paint paint = new Paint()
+    ..color = color;
+  canvas.drawPath(path, paint);
+}
+
+/// Paint padding using the [debugPaintPaddingColor],
+/// [debugPaintPaddingInnerEdgeColor], and [debugPaintSpacingColor] colors.
+///
+/// Called by [RenderPadding.debugPaintSize] when [debugPaintSizeEnabled] is
+/// true.
+void debugPaintPadding(Canvas canvas, Rect outerRect, Rect innerRect, { double outlineWidth: 2.0 }) {
+  assert(() {
+    if (innerRect != null && !innerRect.isEmpty) {
+      _debugDrawDoubleRect(canvas, outerRect, innerRect, debugPaintPaddingColor);
+      _debugDrawDoubleRect(canvas, innerRect.inflate(outlineWidth).intersect(outerRect), innerRect, debugPaintPaddingInnerEdgeColor);
+    } else {
+      final Paint paint = new Paint()
+        ..color = debugPaintSpacingColor;
+      canvas.drawRect(outerRect, paint);
+    }
+    return true;
+  });
 }
 
 /// Returns true if none of the rendering library debug variables have been changed.
