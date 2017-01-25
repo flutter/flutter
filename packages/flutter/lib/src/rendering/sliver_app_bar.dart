@@ -210,6 +210,7 @@ abstract class RenderSliverScrollingAppBar extends RenderSliverAppBar {
       scrollExtent: maxExtent,
       paintExtent: paintExtent.clamp(0.0, constraints.remainingPaintExtent),
       maxPaintExtent: maxExtent,
+      hasVisualOverflow: true, // Conservatively say we do have overflow to avoid complexity.
     );
     _childPosition = math.min(0.0, paintExtent - childExtent);
   }
@@ -240,6 +241,7 @@ abstract class RenderSliverPinnedAppBar extends RenderSliverAppBar {
       paintExtent: math.min(constraints.overlap + childExtent, constraints.remainingPaintExtent),
       layoutExtent: (maxExtent - constraints.scrollOffset).clamp(0.0, constraints.remainingPaintExtent),
       maxPaintExtent: constraints.overlap + maxExtent,
+      hasVisualOverflow: true, // Conservatively say we do have overflow to avoid complexity.
     );
   }
 
@@ -289,6 +291,7 @@ abstract class RenderSliverFloatingAppBar extends RenderSliverAppBar {
       paintExtent: paintExtent.clamp(0.0, constraints.remainingPaintExtent),
       layoutExtent: layoutExtent,
       maxPaintExtent: maxExtent,
+      hasVisualOverflow: true, // Conservatively say we do have overflow to avoid complexity.
     );
     _childPosition = math.min(0.0, paintExtent - childExtent);
     _lastActualScrollOffset = constraints.scrollOffset;

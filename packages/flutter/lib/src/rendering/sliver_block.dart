@@ -497,6 +497,8 @@ abstract class RenderSliverBlock extends RenderSliver
       scrollExtent: estimatedTotalExtent,
       paintExtent: paintedExtent,
       maxPaintExtent: estimatedTotalExtent,
+      // Conservative to avoid flickering away the clip during scroll.
+      hasVisualOverflow: endScrollOffset > targetEndScrollOffset || constraints.scrollOffset > 0.0,
     );
 
     assert(_currentlyUpdatingChildIndex == null);

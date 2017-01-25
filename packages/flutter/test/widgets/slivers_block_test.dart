@@ -6,6 +6,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
+import '../rendering/mock_canvas.dart';
+
 Future<Null> test(WidgetTester tester, double offset) {
   return tester.pumpWidget(new Viewport2(
     offset: new ViewportOffset.fixed(offset),
@@ -155,5 +157,105 @@ void main() {
       const Point(0.0, 251.0),
       const Point(0.0, 504.0),
     ], 'acb');
+  });
+
+  testWidgets('Viewport2 overflow clipping of SliverToBoxAdapter', (WidgetTester tester) async {
+    await tester.pumpWidget(new Viewport2(
+      offset: new ViewportOffset.zero(),
+      children: <Widget>[
+        new SliverToBoxAdapter(
+          child: new SizedBox(height: 400.0, child: new Text('a')),
+        ),
+      ],
+    ));
+
+    expect(find.byType(Viewport2), isNot(paints..clipRect()));
+
+    await tester.pumpWidget(new Viewport2(
+      offset: new ViewportOffset.fixed(100.0),
+      children: <Widget>[
+        new SliverToBoxAdapter(
+          child: new SizedBox(height: 400.0, child: new Text('a')),
+        ),
+      ],
+    ));
+
+    expect(find.byType(Viewport2), paints..clipRect());
+
+    await tester.pumpWidget(new Viewport2(
+      offset: new ViewportOffset.fixed(100.0),
+      children: <Widget>[
+        new SliverToBoxAdapter(
+          child: new SizedBox(height: 4000.0, child: new Text('a')),
+        ),
+      ],
+    ));
+
+    expect(find.byType(Viewport2), paints..clipRect());
+
+    await tester.pumpWidget(new Viewport2(
+      offset: new ViewportOffset.zero(),
+      children: <Widget>[
+        new SliverToBoxAdapter(
+          child: new SizedBox(height: 4000.0, child: new Text('a')),
+        ),
+      ],
+    ));
+
+    expect(find.byType(Viewport2), paints..clipRect());
+  });
+
+  testWidgets('Viewport2 overflow clipping of SliverBlock', (WidgetTester tester) async {
+    await tester.pumpWidget(new Viewport2(
+      offset: new ViewportOffset.zero(),
+      children: <Widget>[
+        new SliverBlock(
+          delegate: new SliverBlockChildListDelegate(<Widget>[
+            new SizedBox(height: 400.0, child: new Text('a')),
+          ]),
+        ),
+      ],
+    ));
+
+    expect(find.byType(Viewport2), isNot(paints..clipRect()));
+
+    await tester.pumpWidget(new Viewport2(
+      offset: new ViewportOffset.fixed(100.0),
+      children: <Widget>[
+        new SliverBlock(
+          delegate: new SliverBlockChildListDelegate(<Widget>[
+            new SizedBox(height: 400.0, child: new Text('a')),
+          ]),
+        ),
+      ],
+    ));
+
+    expect(find.byType(Viewport2), paints..clipRect());
+
+    await tester.pumpWidget(new Viewport2(
+      offset: new ViewportOffset.fixed(100.0),
+      children: <Widget>[
+        new SliverBlock(
+          delegate: new SliverBlockChildListDelegate(<Widget>[
+            new SizedBox(height: 4000.0, child: new Text('a')),
+          ]),
+        ),
+      ],
+    ));
+
+    expect(find.byType(Viewport2), paints..clipRect());
+
+    await tester.pumpWidget(new Viewport2(
+      offset: new ViewportOffset.zero(),
+      children: <Widget>[
+        new SliverBlock(
+          delegate: new SliverBlockChildListDelegate(<Widget>[
+            new SizedBox(height: 4000.0, child: new Text('a')),
+          ]),
+        ),
+      ],
+    ));
+
+    expect(find.byType(Viewport2), paints..clipRect());
   });
 }
