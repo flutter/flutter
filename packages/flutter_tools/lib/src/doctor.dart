@@ -124,7 +124,7 @@ class Doctor {
       else
         printStatus('${result.leadingBox} ${validator.title}');
 
-      final String separator = Platform.isWindows ? ' ' : '•';
+      final String separator = '•';
 
       for (ValidationMessage message in result.messages) {
         String text = message.message.replaceAll('\n', '\n      ');
@@ -182,7 +182,7 @@ class ValidationResult {
     if (type == ValidationType.missing)
       return '[x]';
     else if (type == ValidationType.installed)
-      return Platform.isWindows ? '[+]' : '[✓]';
+      return Platform.isWindows ? '[√]' : '[✓]';
     else
       return '[-]';
   }
@@ -254,11 +254,10 @@ abstract class IntelliJValidator extends DoctorValidator {
   };
 
   static Iterable<DoctorValidator> get installedValidators {
-    if (Platform.isLinux)
-      return IntelliJValidatorOnLinux.installed;
+    if (Platform.isLinux || Platform.isWindows)
+      return IntelliJValidatorOnLinuxAndWindows.installed;
     if (Platform.isMacOS)
       return IntelliJValidatorOnMac.installed;
-    // TODO(danrubel): add support for Windows
     return <DoctorValidator>[];
   }
 
@@ -328,8 +327,8 @@ abstract class IntelliJValidator extends DoctorValidator {
   }
 }
 
-class IntelliJValidatorOnLinux extends IntelliJValidator {
-  IntelliJValidatorOnLinux(String title, this.version, this.installPath, this.pluginsPath) : super(title);
+class IntelliJValidatorOnLinuxAndWindows extends IntelliJValidator {
+  IntelliJValidatorOnLinuxAndWindows(String title, this.version, this.installPath, this.pluginsPath) : super(title);
 
   @override
   String version;
@@ -344,11 +343,11 @@ class IntelliJValidatorOnLinux extends IntelliJValidator {
     if (homeDirPath == null) return validators;
 
     void addValidator(String title, String version, String installPath, String pluginsPath) {
-      IntelliJValidatorOnLinux validator =
-        new IntelliJValidatorOnLinux(title, version, installPath, pluginsPath);
+      IntelliJValidatorOnLinuxAndWindows validator =
+        new IntelliJValidatorOnLinuxAndWindows(title, version, installPath, pluginsPath);
       for (int index = 0; index < validators.length; ++index) {
         DoctorValidator other = validators[index];
-        if (other is IntelliJValidatorOnLinux && validator.installPath == other.installPath) {
+        if (other is IntelliJValidatorOnLinuxAndWindows && validator.installPath == other.installPath) {
           if (validator.version.compareTo(other.version) > 0)
             validators[index] = validator;
           return;

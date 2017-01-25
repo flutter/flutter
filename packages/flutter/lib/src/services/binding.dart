@@ -14,7 +14,7 @@ import 'platform_messages.dart';
 /// Listens for platform messages and directs them to [PlatformMessages].
 ///
 /// The ServicesBinding also registers a [LicenseEntryCollector] that exposes
-/// the licenses found in the LICENSE file stored at the root of the asset
+/// the licenses found in the `LICENSE` file stored at the root of the asset
 /// bundle.
 abstract class ServicesBinding extends BindingBase {
   @override

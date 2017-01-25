@@ -30,15 +30,17 @@ dynamic _decodeJSON(String message) {
 
 typedef Future<ByteData> _PlatformMessageHandler(ByteData message);
 
-/// Sends message to and receives messages from the underlying platform.
+/// Sends message to and receives messages from platform plugins.
+///
+/// See: <https://flutter.io/platform-services/>
 class PlatformMessages {
   PlatformMessages._();
 
-  /// Handlers for incoming platform messages.
+  // Handlers for incoming messages from platform plugins.
   static final Map<String, _PlatformMessageHandler> _handlers =
       <String, _PlatformMessageHandler>{};
 
-  /// Mock handlers that intercept and respond to outgoing messages.
+  // Mock handlers that intercept and respond to outgoing messages.
   static final Map<String, _PlatformMessageHandler> _mockHandlers =
       <String, _PlatformMessageHandler>{};
 
@@ -85,7 +87,10 @@ class PlatformMessages {
     }
   }
 
-  /// Send a binary message to the host application.
+  /// Send a binary message to the platform plugins on the given channel.
+  ///
+  /// Returns a [Future] which completes to the received response, undecoded, in
+  /// binary form.
   static Future<ByteData> sendBinary(String channel, ByteData message) {
     final _PlatformMessageHandler handler = _mockHandlers[channel];
     if (handler != null)
@@ -93,16 +98,37 @@ class PlatformMessages {
     return _sendPlatformMessage(channel, message);
   }
 
-  /// Send a string message to the host application.
+  /// Send a string message to the platform plugins on the given channel.
+  ///
+  /// The message is encoded as UTF-8.
+  ///
+  /// Returns a [Future] which completes to the received response, decoded as a
+  /// UTF-8 string, or to an error, if the decoding fails.
   static Future<String> sendString(String channel, String message) async {
     return _decodeUTF8(await sendBinary(channel, _encodeUTF8(message)));
   }
 
-  /// Sends a JSON-encoded message to the host application and JSON-decodes the response.
+  /// Send a JSON-encoded message to the platform plugins on the given channel.
+  ///
+  /// The message is encoded as JSON, then the JSON is encoded as UTF-8.
+  ///
+  /// Returns a [Future] which completes to the received response, decoded as a
+  /// UTF-8-encoded JSON representation of a JSON value (a [String], [bool],
+  /// [double], [List], or [Map]), or to an error, if the decoding fails.
   static Future<dynamic> sendJSON(String channel, dynamic json) async {
     return _decodeJSON(await sendString(channel, _encodeJSON(json)));
   }
 
+  /// Send a method call to the platform plugins on the given channel.
+  ///
+  /// Method calls are encoded as a JSON object with two keys, `method` with the
+  /// string given in the `method` argument, and `args` with the arguments given
+  /// in the `args` optional argument, as a JSON list. This JSON object is then
+  /// encoded as a UTF-8 string.
+  ///
+  /// The response from the method call is decoded as UTF-8, then the UTF-8 is
+  /// decoded as JSON. The returned [Future] completes to this fully decoded
+  /// response, or to an error, if the decoding fails.
   static Future<dynamic> invokeMethod(String channel, String method, [ List<dynamic> args = const <Null>[] ]) {
     return sendJSON(channel, <String, dynamic>{
       'method': method,
@@ -110,39 +136,56 @@ class PlatformMessages {
     });
   }
 
-  /// Set a callback for receiving binary messages from the platform.
+  /// Set a callback for receiving messages from the platform plugins on the
+  /// given channel, without decoding them.
   ///
-  /// The given callback will replace the currently registered callback (if any).
+  /// The given callback will replace the currently registered callback for that
+  /// channel, if any.
+  ///
+  /// The handler's return value, if non-null, is sent as a response, unencoded.
   static void setBinaryMessageHandler(String channel, Future<ByteData> handler(ByteData message)) {
     _handlers[channel] = handler;
   }
 
-  /// Set a callback for receiving string messages from the platform.
+  /// Set a callback for receiving messages from the platform plugins on the
+  /// given channel, decoding the data as UTF-8.
   ///
-  /// The given callback will replace the currently registered callback (if any).
+  /// The given callback will replace the currently registered callback for that
+  /// channel, if any.
+  ///
+  /// The handler's return value, if non-null, is sent as a response, encoded as
+  /// a UTF-8 string.
   static void setStringMessageHandler(String channel, Future<String> handler(String message)) {
     setBinaryMessageHandler(channel, (ByteData message) async {
       return _encodeUTF8(await handler(_decodeUTF8(message)));
     });
   }
 
-  /// Set a callback for receiving JSON messages from the platform.
+  /// Set a callback for receiving messages from the platform plugins on the
+  /// given channel, decoding the data as UTF-8 JSON.
   ///
-  /// Messages received are decoded as JSON before being passed to the given
-  /// callback. The result of the callback is encoded as JSON before being
-  /// returned as the response to the message.
+  /// The given callback will replace the currently registered callback for that
+  /// channel, if any.
   ///
-  /// The given callback will replace the currently registered callback (if any).
+  /// The handler's return value, if non-null, is sent as a response, encoded as
+  /// JSON and then as a UTF-8 string.
   static void setJSONMessageHandler(String channel, Future<dynamic> handler(dynamic message)) {
     setStringMessageHandler(channel, (String message) async {
       return _encodeJSON(await handler(_decodeJSON(message)));
     });
   }
 
-  /// Sets a message handler that intercepts outgoing messages in binary form.
+  /// Set a mock callback for intercepting messages from the `send*` methods on
+  /// this class, on the given channel, without decoding them.
   ///
-  /// The given callback will replace the currently registered callback (if any).
-  /// To remove the mock handler, pass `null` as the `handler` argument.
+  /// The given callback will replace the currently registered mock callback for
+  /// that channel, if any. To remove the mock handler, pass `null` as the
+  /// `handler` argument.
+  ///
+  /// The handler's return value, if non-null, is used as a response, unencoded.
+  ///
+  /// This is intended for testing. Messages intercepted in this manner are not
+  /// sent to platform plugins.
   static void setMockBinaryMessageHandler(String channel, Future<ByteData> handler(ByteData message)) {
     if (handler == null)
       _mockHandlers.remove(channel);
@@ -150,10 +193,18 @@ class PlatformMessages {
       _mockHandlers[channel] = handler;
   }
 
-  /// Sets a message handler that intercepts outgoing messages in string form.
+  /// Set a mock callback for intercepting messages from the `send*` methods on
+  /// this class, on the given channel, decoding them as UTF-8.
   ///
-  /// The given callback will replace the currently registered callback (if any).
-  /// To remove the mock handler, pass `null` as the `handler` argument.
+  /// The given callback will replace the currently registered mock callback for
+  /// that channel, if any. To remove the mock handler, pass `null` as the
+  /// `handler` argument.
+  ///
+  /// The handler's return value, if non-null, is used as a response, encoded as
+  /// UTF-8.
+  ///
+  /// This is intended for testing. Messages intercepted in this manner are not
+  /// sent to platform plugins.
   static void setMockStringMessageHandler(String channel, Future<String> handler(String message)) {
     if (handler == null) {
       setMockBinaryMessageHandler(channel, null);
@@ -164,10 +215,18 @@ class PlatformMessages {
     }
   }
 
-  /// Sets a message handler that intercepts outgoing messages in JSON form.
+  /// Set a mock callback for intercepting messages from the `send*` methods on
+  /// this class, on the given channel, decoding them as UTF-8 JSON.
   ///
-  /// The given callback will replace the currently registered callback (if any).
-  /// To remove the mock handler, pass `null` as the `handler` argument.
+  /// The given callback will replace the currently registered mock callback for
+  /// that channel, if any. To remove the mock handler, pass `null` as the
+  /// `handler` argument.
+  ///
+  /// The handler's return value, if non-null, is used as a response, encoded as
+  /// UTF-8 JSON.
+  ///
+  /// This is intended for testing. Messages intercepted in this manner are not
+  /// sent to platform plugins.
   static void setMockJSONMessageHandler(String channel, Future<dynamic> handler(dynamic message)) {
     if (handler == null) {
       setMockStringMessageHandler(channel, null);
