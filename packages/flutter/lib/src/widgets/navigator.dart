@@ -289,7 +289,7 @@ typedef bool RoutePredicate(Route<dynamic> route);
 /// want to appear on the screen. For example:
 ///
 /// ```dart
-/// Navigator.of(context).push(new MaterialPageRoute(
+/// Navigator.of(context).push(new MaterialPageRoute<Null>(
 ///   builder: (BuildContext context) {
 ///     return new Scaffold(
 ///       appBar: new AppBar(title: new Text('My Page')),
@@ -334,7 +334,7 @@ typedef bool RoutePredicate(Route<dynamic> route);
 /// ```dart
 /// void main() {
 ///   runApp(new MaterialApp(
-///     home: new MyAppHome(),
+///     home: new MyAppHome(), // becomes the route named '/'
 ///     routes: <String, WidgetBuilder> {
 ///       '/a': (BuildContext context) => new MyPage(title: 'page A'),
 ///       '/b': (BuildContext context) => new MyPage(title: 'page B'),
@@ -352,7 +352,39 @@ typedef bool RoutePredicate(Route<dynamic> route);
 /// The app's home page route is named '/' by default and other routes are
 /// given pathnames by convention.
 ///
-/// ### Defining a popup route
+/// ### Routes can return a value
+///
+/// When a route is pushed to ask the user for a value, the value can be
+/// returned via the [pop] method's result parameter.
+///
+/// Methods that push a route return a Future. The Future resolves when
+/// the route is popped and the Future's value is the [pop] method's result
+/// parameter.
+///
+/// For example if we wanted to ask the user to press 'OK' to confirm an
+/// operation we could `await` the result of [Navigator.push]:
+///
+/// ```
+/// bool value = await Navigator.of(context).push(new MaterialPageRoute<bool>(
+///   builder: (BuildContext context) {
+///     return new Center(
+///       child: new FlatButton(
+///         child: new Text('OK'),
+///         onPressed: () { Navigator.of(context).pop(true); }
+///       ),
+///     );
+///   }
+/// ));
+/// ```
+/// If the user presses 'OK' then value will be true. If the user backs
+/// out of the route, for example by pressing the Scaffold's back button,
+/// the value will be null.
+///
+/// When a route is used to return a value, the route's type parameter
+/// must match the type of [pop]'s result. That's why we've used
+/// `MaterialPageRoute<bool>` instead of `MaterialPageRoute<Null>`.
+///
+/// ### Popup routes
 ///
 /// Routes don't have to obscure the entire screen. [PopupRoute]s cover
 /// the screen with a barrierColor that can be only partially opaque to
@@ -360,40 +392,34 @@ typedef bool RoutePredicate(Route<dynamic> route);
 /// because they block input to the widgets below.
 ///
 /// There are functions which create and show popup routes. For
-/// example: [showDialog], [showMenu], and [showBottomSheet]. There are also
-/// widgets which create popup routes, like [PopupMenuButton] and
-/// [DropdownButton]. These functions and widgets create internal
-/// subclasses of PopupRoute and use the Naviagator's push and pop methods
-/// to show and dismiss them.
+/// example: [showDialog], [showMenu], and [showBottomSheet]. These
+/// functions return their pushed route's Future as described above.
+/// Callers can await the returned value to take an action when the
+/// route is popped, or to discover the route's value.
 ///
-/// You can create your own subclass of [PopupRoute] to control the animated
-/// transition employed to show the route, as well as the color and
-/// behavior of the route's modal barrier. Here's an example that rotates
-/// and fades its child when the route appears or disappears.
+/// There are also widgets which create popup routes, like [PopupMenuButton] and
+/// [DropdownButton]. These widgets create internal subclasses of PopupRoute
+/// and use the Naviagator's push and pop methods to show and dismiss them.
+///
+/// ### Custom routes
+///
+/// You can create your own subclass of one the widget library route classes
+/// like [PopupRoute], [ModalRoute], or [PageRoute], to control the animated
+/// transition employed to show the route, the color and behavior of the route's
+/// modal barrier, and other aspects of the route.
+///
+/// The PageRouteBuilder class makes it possible to define a custom route
+/// in terms of callbacks. Here's an example that rotates and fades its child
+/// when the route appears or disappears. This route does not obscure the entire
+/// screen because it specifies `opaque: false`, just as a popup route does.
 ///
 /// ```dart
-/// class _MyPopupRoute extends PopupRoute<Null> {
-///   _MyPopupRoute({ this.child, this.color });
-///
-///   final Widget child;
-///   final Color color;
-///
-///   @override
-///   Duration get transitionDuration => const Duration(milliseconds: 500);
-///
-///   @override
-///   bool get barrierDismissable => true;
-///
-///   @override
-///   Color get barrierColor => color;
-///
-///   @override
-///   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> forwardAnimation) {
-///     return child;
-///   }
-///
-///   @override
-///   Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> forwardAnimation, Widget child) {
+/// Navigator.of(context).push(new PageRouteBuilder(
+///   opaque: false,
+///   pageBuilder: (BuildContext context, _, __) {
+///     return new Center(child: new Text('My PageRoute'));
+///   },
+///   transitionsBuilder: (_, Animation<double> animation, __, Widget child) {
 ///     return new FadeTransition(
 ///       opacity: animation,
 ///       child: new RotationTransition(
@@ -402,23 +428,14 @@ typedef bool RoutePredicate(Route<dynamic> route);
 ///       ),
 ///     );
 ///   }
-/// }
-/// ```
-///
-/// The PopupRoute is built in two parts, the "page" and the
-/// "transitions". The page becomes a descendant of the child passed to
-/// the `buildTransitions` method. To show a route defined this way, we
-/// just pass an instance of our [PopupRoute] subclass to
-/// [Navigator.push]:
-///
-/// ```dart
-/// Navigator.of(context).push(new _MyPopupRoute(
-///   color: Theme.of(context).primaryColor.withOpacity(0.15),
-///   child: new Center(
-///     child: new Text('My Popup'),
-///   ),
 /// ));
 /// ```
+/// The page route is built in two parts, the "page" and the
+/// "transitions". The page becomes a descendant of the child passed to
+/// the `buildTransitions` method. Typically the page is only built once,
+/// because it doesn't depend on its animation parameters (elided with `_`
+/// and `__` in this example). The transition is built on every frame
+/// for its duration.
 class Navigator extends StatefulWidget {
   /// Creates a widget that maintains a stack-based history of child widgets.
   ///
