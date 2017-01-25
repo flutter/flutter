@@ -607,12 +607,27 @@ typedef void ImageDecoderCallback(Image result);
 void decodeImageFromList(Uint8List list, ImageDecoderCallback callback)
     native "decodeImageFromList";
 
-/// Determines how the interior of a [Path] is calculated.
+/// Determines the winding rule that decides how the interior of a [Path] is
+/// calculated.
+///
+/// This enum is used by the [Path.fillType] property.
 enum PathFillType {
   /// The interior is defined by a non-zero sum of signed edge crossings.
-  winding,
+  ///
+  /// For a given point, the point is considered to be on the inside of the path
+  /// if a line drawn from the point to infinity crosses lines going clockwise
+  /// around the point a different number of times than it crosses lines going
+  /// counter-clockwise around that point.
+  ///
+  /// See: <https://en.wikipedia.org/wiki/Nonzero-rule>
+  nonZero,
 
   /// The interior is defined by an odd number of edge crossings.
+  ///
+  /// For a given point, the point is considered to be on the inside of the path
+  /// if a line drawn from the point to infinity crosses an odd number of lines.
+  ///
+  /// See: <https://en.wikipedia.org/wiki/Even-odd_rule>
   evenOdd,
 }
 
@@ -625,9 +640,7 @@ enum PathFillType {
 /// self-intersect.
 ///
 /// Closed subpaths enclose a (possibly discontiguous) region of the
-/// plane based on whether a line from a given point on the plane to a
-/// point at infinity intersects the path an even (non-enclosed) or an
-/// odd (enclosed) number of times.
+/// plane based on the current [fillType].
 ///
 /// The _current point_ is initially at the origin. After each
 /// operation adding a segment to a subpath, the current point is
@@ -641,8 +654,10 @@ class Path extends NativeFieldWrapperClass2 {
   void _constructor() native "Path_constructor";
 
   /// Determines how the interior of this path is calculated.
+  ///
+  /// Defaults to the non-zero winding rule, [PathFillType.nonZero].
   PathFillType get fillType => PathFillType.values[_getFillType()];
-  set fillType (PathFillType value) => _setFillType(value.index);
+  set fillType(PathFillType value) => _setFillType(value.index);
 
   int _getFillType() native "Path_getFillType";
   void _setFillType(int fillType) native "Path_setFillType";
