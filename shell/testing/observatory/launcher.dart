@@ -42,6 +42,7 @@ class ShellLauncher {
   final List<String> args = [
     '--observatory-port=0',
     '--non-interactive',
+    '--run-forever',
   ];
   final String shellExecutablePath;
   final String mainDartPath;

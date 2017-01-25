@@ -43,7 +43,7 @@ class ScriptCompletionTaskObserver : public base::MessageLoop::TaskObserver {
   bool prev_live_;
 };
 
-void RunNonInteractive() {
+void RunNonInteractive(bool run_forever) {
   base::MessageLoop message_loop;
 
   shell::Shell::InitStandalone();
@@ -51,9 +51,11 @@ void RunNonInteractive() {
   // Note that this task observer must be added after the observer that drains
   // the microtask queue.
   ScriptCompletionTaskObserver task_observer(message_loop);
-  blink::Threads::UI()->PostTask([&task_observer] {
-    base::MessageLoop::current()->AddTaskObserver(&task_observer);
-  });
+  if (!run_forever) {
+    blink::Threads::UI()->PostTask([&task_observer] {
+      base::MessageLoop::current()->AddTaskObserver(&task_observer);
+    });
+  }
 
   if (!shell::InitForTesting()) {
     shell::PrintUsage("sky_shell");
@@ -133,7 +135,9 @@ int main(int argc, const char* argv[]) {
 
   if (command_line.HasSwitch(
           shell::FlagForSwitch(shell::Switch::NonInteractive))) {
-    RunNonInteractive();
+    bool run_forever = command_line.HasSwitch(
+        shell::FlagForSwitch(shell::Switch::RunForever));
+    RunNonInteractive(run_forever);
     return 0;
   }
 
