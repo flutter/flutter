@@ -161,7 +161,7 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
           )
         ]
       ),
-      body: new Block(
+      body: new ScrollView(
         children: leaveBehindItems.map(buildItem).toList()
       )
     );

@@ -121,63 +121,65 @@ class StockHomeState extends State<StockHome> {
 
   Widget _buildDrawer(BuildContext context) {
     return new Drawer(
-      child: new Block(children: <Widget>[
-        new DrawerHeader(child: new Center(child: new Text('Stocks'))),
-        new DrawerItem(
-          icon: new Icon(Icons.assessment),
-          selected: true,
-          child: new Text('Stock List')
-        ),
-        new DrawerItem(
-          icon: new Icon(Icons.account_balance),
-          onPressed: null,
-          child: new Text('Account Balance')
-        ),
-        new DrawerItem(
-          icon: new Icon(Icons.dvr),
-          onPressed: () {
-            try {
-              debugDumpApp();
-              debugDumpRenderTree();
-              debugDumpLayerTree();
-              debugDumpSemanticsTree();
-            } catch (e, stack) {
-              debugPrint('Exception while dumping app:\n$e\n$stack');
-            }
-          },
-          child: new Text('Dump App to Console')
-        ),
-        new Divider(),
-        new DrawerItem(
-          icon: new Icon(Icons.thumb_up),
-          onPressed: () => _handleStockModeChange(StockMode.optimistic),
-          child: new Row(
-            children: <Widget>[
-              new Expanded(child: new Text('Optimistic')),
-              new Radio<StockMode>(value: StockMode.optimistic, groupValue: config.configuration.stockMode, onChanged: _handleStockModeChange)
-            ]
-          )
-        ),
-        new DrawerItem(
-          icon: new Icon(Icons.thumb_down),
-          onPressed: () => _handleStockModeChange(StockMode.pessimistic),
-          child: new Row(
-            children: <Widget>[
-              new Expanded(child: new Text('Pessimistic')),
-              new Radio<StockMode>(value: StockMode.pessimistic, groupValue: config.configuration.stockMode, onChanged: _handleStockModeChange)
-            ]
-          )
-        ),
-        new Divider(),
-        new DrawerItem(
-          icon: new Icon(Icons.settings),
-          onPressed: _handleShowSettings,
-          child: new Text('Settings')),
-        new DrawerItem(
-          icon: new Icon(Icons.help),
-          onPressed: _handleShowAbout,
-          child: new Text('About'))
-      ])
+      child: new ScrollView(
+        children: <Widget>[
+          new DrawerHeader(child: new Center(child: new Text('Stocks'))),
+          new DrawerItem(
+            icon: new Icon(Icons.assessment),
+            selected: true,
+            child: new Text('Stock List')
+          ),
+          new DrawerItem(
+            icon: new Icon(Icons.account_balance),
+            onPressed: null,
+            child: new Text('Account Balance')
+          ),
+          new DrawerItem(
+            icon: new Icon(Icons.dvr),
+            onPressed: () {
+              try {
+                debugDumpApp();
+                debugDumpRenderTree();
+                debugDumpLayerTree();
+                debugDumpSemanticsTree();
+              } catch (e, stack) {
+                debugPrint('Exception while dumping app:\n$e\n$stack');
+              }
+            },
+            child: new Text('Dump App to Console')
+          ),
+          new Divider(),
+          new DrawerItem(
+            icon: new Icon(Icons.thumb_up),
+            onPressed: () => _handleStockModeChange(StockMode.optimistic),
+            child: new Row(
+              children: <Widget>[
+                new Expanded(child: new Text('Optimistic')),
+                new Radio<StockMode>(value: StockMode.optimistic, groupValue: config.configuration.stockMode, onChanged: _handleStockModeChange)
+              ]
+            )
+          ),
+          new DrawerItem(
+            icon: new Icon(Icons.thumb_down),
+            onPressed: () => _handleStockModeChange(StockMode.pessimistic),
+            child: new Row(
+              children: <Widget>[
+                new Expanded(child: new Text('Pessimistic')),
+                new Radio<StockMode>(value: StockMode.pessimistic, groupValue: config.configuration.stockMode, onChanged: _handleStockModeChange)
+              ]
+            )
+          ),
+          new Divider(),
+          new DrawerItem(
+            icon: new Icon(Icons.settings),
+            onPressed: _handleShowSettings,
+            child: new Text('Settings')),
+          new DrawerItem(
+            icon: new Icon(Icons.help),
+            onPressed: _handleShowAbout,
+            child: new Text('About'))
+        ]
+      )
     );
   }
 

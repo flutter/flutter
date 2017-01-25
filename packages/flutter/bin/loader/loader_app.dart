@@ -39,7 +39,7 @@ void main() {
                         children.add(const SizedBox(height: 18.0));
                         children.add(new Center(child: new CircularProgressIndicator(value: progressMax > 0 ? progress / progressMax : null)));
                       }
-                      return new Block(children: children);
+                      return new ScrollView(children: children);
                     },
                   ),
                 ),
