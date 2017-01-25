@@ -123,19 +123,19 @@ test should have a `main` function and use the `test` package.
 Working with flutter tools
 --------------------------
 
-The flutter shell tools itself is built when you run `flutter` for the first time and each time
-you run `flutter upgrade`. If you want to alter and re-test the shell tool's behavior itself,
-delete `bin/cache/flutter_tools.*` so that the shell tool will be rebuilt from Dart sources
+The flutter tools itself is built when you run `flutter` for the first time and each time
+you run `flutter upgrade`. If you want to alter and re-test the tool's behavior itself,
+locally commit your tool changes in git and the tool will be rebuilt from Dart sources
 in `packages/flutter_tools` the next time you run `flutter`.
 
-flutter_tools' tests run inside the dart command line VM rather than recursively in the
+flutter_tools' tests run inside the Dart command line VM rather than in the
 flutter shell. To run the test:
 
 * `cd packages/flutter_tools`
 * `dart test/all.dart`
 
-The pre-built shell tool runs with the observatory (thus debugging) off by default.
-To enable the observatory on the shell tool, uncomment the `FLUTTER_TOOL_ARGS` line in the
+The pre-built flutter tool doesn't run with the observatory on by default.
+To enable the observatory on the tool, uncomment the `FLUTTER_TOOL_ARGS` line in the
 `bin/flutter` shell script.
 
 Contributing code
