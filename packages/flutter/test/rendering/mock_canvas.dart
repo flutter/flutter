@@ -107,6 +107,18 @@ abstract class PaintPattern {
   /// See also: [save], [restore].
   void saveRestore();
 
+  /// Indicates that a rectangular clip.
+  ///
+  /// The next rectangular clip is examined. Any arguments that are passed to
+  /// this method are compared to the actual [Canvas.clipRect] call's argument
+  /// and any mismatches result in failure.
+  ///
+  /// If no call to [Canvas.clipRect] was made, then this results in failure.
+  ///
+  /// Any calls made between the last matched call (if any) and the
+  /// [Canvas.clipRect] call are ignored.
+  void clipRect({ Rect rect });
+
   /// Indicates that a rectangle is expected next.
   ///
   /// The next rectangle is examined. Any arguments that are passed to this
@@ -225,6 +237,11 @@ class _TestRecordingCanvasPatternMatcher extends Matcher implements PaintPattern
   @override
   void saveRestore() {
     _predicates.add(new _SaveRestorePairPaintPredicate());
+  }
+
+  @override
+  void clipRect({ Rect rect }) {
+    _predicates.add(new _FunctionPaintPredicate(#clipRect, <dynamic>[rect]));
   }
 
   @override
@@ -397,6 +414,14 @@ class _TestRecordingPaintingContext implements PaintingContext {
   @override
   void paintChild(RenderObject child, Offset offset) {
     child.paint(this, offset);
+  }
+
+  @override
+  void pushClipRect(bool needsCompositing, Offset offset, Rect clipRect, PaintingContextCallback painter) {
+    canvas.save();
+    canvas.clipRect(clipRect.shift(offset));
+    painter(this, offset);
+    canvas.restore();
   }
 
   @override

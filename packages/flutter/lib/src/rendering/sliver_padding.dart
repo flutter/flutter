@@ -232,6 +232,7 @@ class RenderSliverPadding extends RenderSliver with RenderObjectWithChildMixin<R
         mainAxisPaddingPaintExtent + childLayoutGeometry.paintExtent,
         beforePaddingPaintExtent + childLayoutGeometry.hitTestExtent,
       ),
+      hasVisualOverflow: childLayoutGeometry.hasVisualOverflow,
     );
 
     final SliverPhysicalParentData childParentData = child.parentData;
