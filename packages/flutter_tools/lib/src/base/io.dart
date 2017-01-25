@@ -41,7 +41,6 @@ export 'dart:io'
         HttpServer,
         HttpStatus,
         pid,
-        Platform,
         Process,
         ProcessException,
         ProcessResult,

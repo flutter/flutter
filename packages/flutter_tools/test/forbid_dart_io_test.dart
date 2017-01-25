@@ -3,12 +3,12 @@
 // found in the LICENSE file.
 
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:test/test.dart';
 
 void main() {
   setUp(() {
-    String flutterRoot = Platform.environment['FLUTTER_ROOT'];
+    String flutterRoot = platform.environment['FLUTTER_ROOT'];
     assert(fs.currentDirectory.path == '$flutterRoot/packages/flutter_tools');
   });
 

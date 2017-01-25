@@ -14,6 +14,7 @@ import '../lib/src/base/file_system.dart';
 import '../lib/src/base/io.dart';
 import '../lib/src/base/logger.dart';
 import '../lib/src/base/os.dart';
+import '../lib/src/base/platform.dart';
 import '../lib/src/cache.dart';
 import '../lib/src/flx.dart';
 import '../lib/src/globals.dart';
@@ -38,6 +39,7 @@ Future<Null> main(List<String> args) async {
   executableContext.setVariable(Logger, new StdoutLogger());
   executableContext.runInZone(() {
     // Initialize the context with some defaults.
+    context.putIfAbsent(Platform, () => new LocalPlatform());
     context.putIfAbsent(FileSystem, () => new LocalFileSystem());
     context.putIfAbsent(ProcessManager, () => new LocalProcessManager());
     context.putIfAbsent(Logger, () => new StdoutLogger());
@@ -63,7 +65,7 @@ Future<Null> run(List<String> args) async {
     printError('Missing option! All options must be specified.');
     exit(1);
   }
-  Cache.flutterRoot = Platform.environment['FLUTTER_ROOT'];
+  Cache.flutterRoot = platform.environment['FLUTTER_ROOT'];
   String outputPath = argResults[_kOptionOutput];
   try {
     await assemble(
