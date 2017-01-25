@@ -341,23 +341,38 @@ static inline PointerChangeMapperPhase PointerChangePhaseFromUITouchPhase(
   });
 }
 
+- (bool)isWindowFullscreen {
+  UIWindow *window = self.view.window;
+  return CGRectEqualToRect(window.frame, window.screen.bounds);
+}
+
+- (CGFloat)statusBarPadding {
+  // If we're a child of a containing view, let the container apply padding.
+  if (self.parentViewController != nil) {
+    return 0.0;
+  }
+
+  // If not fullscreen, assume we don't want padding.
+  if (![self isWindowFullscreen]) {
+    return 0.0;
+  }
+
+  UIScreen *screen = self.view.window.screen;
+  CGRect statusFrame = [UIApplication sharedApplication].statusBarFrame;
+  CGRect viewFrame = [self.view convertRect:self.view.bounds
+                          toCoordinateSpace:screen.coordinateSpace];
+  CGFloat padding = statusFrame.origin.y + statusFrame.size.height - viewFrame.origin.y;
+  return MAX(padding, 0.0);
+}
+
 - (void)viewDidLayoutSubviews {
   CGSize viewSize = self.view.bounds.size;
-  CGFloat statusBarPadding = 0.0;
   CGFloat scale = [UIScreen mainScreen].scale;
-
-  if (self.parentViewController == nil) {
-    // If we're the root view controller, apply any padding necessary for the
-    // status bar. If we're not the root view controller, assume the root view
-    // controller has dealt with it.
-    CGSize sbSize = [UIApplication sharedApplication].statusBarFrame.size;
-    statusBarPadding = sbSize.height - self.view.frame.origin.y;
-  }
 
   _viewportMetrics.device_pixel_ratio = scale;
   _viewportMetrics.physical_width = viewSize.width * scale;
   _viewportMetrics.physical_height = viewSize.height * scale;
-  _viewportMetrics.physical_padding_top = statusBarPadding * scale;
+  _viewportMetrics.physical_padding_top = [self statusBarPadding] * scale;
   [self updateViewportMetrics];
 }
 
