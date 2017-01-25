@@ -123,10 +123,10 @@ test should have a `main` function and use the `test` package.
 Working with flutter tools
 --------------------------
 
-The flutter shell tools itself is built when you run flutter for the first time and each time
+The flutter shell tools itself is built when you run `flutter` for the first time and each time
 you run `flutter upgrade`. If you want to alter and re-test the shell tool's behavior itself,
 delete `bin/cache/flutter_tools.*` so that the shell tool will be rebuilt from Dart sources
-in `packages/flutter_tools`.
+in `packages/flutter_tools` the next time you run `flutter`.
 
 flutter_tools' tests run inside the dart command line VM rather than recursively in the
 flutter shell. To run the test:
