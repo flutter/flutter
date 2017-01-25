@@ -1,0 +1,93 @@
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/widgets.dart';
+
+const List<String> _kStates = const <String>[
+  'Alabama',
+  'Alaska',
+  'Arizona',
+  'Arkansas',
+  'California',
+  'Colorado',
+  'Connecticut',
+  'Delaware',
+  'Florida',
+  'Georgia',
+  'Hawaii',
+  'Idaho',
+  'Illinois',
+  'Indiana',
+  'Iowa',
+  'Kansas',
+  'Kentucky',
+  'Louisiana',
+  'Maine',
+  'Maryland',
+  'Massachusetts',
+  'Michigan',
+  'Minnesota',
+  'Mississippi',
+  'Missouri',
+  'Montana',
+  'Nebraska',
+  'Nevada',
+  'New Hampshire',
+  'New Jersey',
+  'New Mexico',
+  'New York',
+  'North Carolina',
+  'North Dakota',
+  'Ohio',
+  'Oklahoma',
+  'Oregon',
+  'Pennsylvania',
+  'Rhode Island',
+  'South Carolina',
+  'South Dakota',
+  'Tennessee',
+  'Texas',
+  'Utah',
+  'Vermont',
+  'Virginia',
+  'Washington',
+  'West Virginia',
+  'Wisconsin',
+  'Wyoming',
+];
+
+void main() {
+  testWidgets('ScrollView control test', (WidgetTester tester) async {
+    List<String> log = <String>[];
+
+    await tester.pumpWidget(new ScrollView(
+      children: _kStates.map<Widget>((String state) {
+        return new Container(
+          height: 200.0,
+          child: new GestureDetector(
+            onTap: () {
+              log.add(state);
+            },
+            child: new Text(state),
+          ),
+        );
+      }).toList()
+    ));
+
+    await tester.tap(find.text('Alabama'));
+    expect(log, equals(<String>['Alabama']));
+    log.clear();
+
+    await tester.tap(find.text('Nevada'));
+    expect(log, isEmpty);
+
+    await tester.scroll(find.text('Alabama'), const Offset(0.0, -4000.0));
+    await tester.pump();
+
+    await tester.tap(find.text('Massachusetts'));
+    expect(log, equals(<String>['Massachusetts']));
+    log.clear();
+  });
+}

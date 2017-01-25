@@ -484,6 +484,7 @@ class Scrollable2 extends StatefulWidget {
 
   final Key center;
 
+  /// The slivers that define the viewport contents.
   final List<Widget> children;
 
   Axis get axis => axisDirectionToAxis(axisDirection);
@@ -710,8 +711,9 @@ class Scrollable2State extends State<Scrollable2> with TickerProviderStateMixin 
   }
 }
 
-
+////////////////////////////////////////////////////////////////////////////////
 // DELETE EVERYTHING BELOW THIS LINE WHEN REMOVING LEGACY SCROLLING CODE
+////////////////////////////////////////////////////////////////////////////////
 
 /// Identifies one or both limits of a [Scrollable] in terms of its scrollDirection.
 enum ScrollableEdge {
