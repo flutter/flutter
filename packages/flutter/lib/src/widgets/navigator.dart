@@ -361,8 +361,8 @@ typedef bool RoutePredicate(Route<dynamic> route);
 /// the route is popped and the Future's value is the [pop] method's result
 /// parameter.
 ///
-/// For example if we wanted to ask the to press 'OK' to confirm an
-/// operation we could await the result of [Navigator.push]:
+/// For example if we wanted to ask the user to press 'OK' to confirm an
+/// operation we could `await` the result of [Navigator.push]:
 ///
 /// ```
 /// bool value = await Navigator.of(context).push(new MaterialPageRoute<bool>(
