@@ -11,7 +11,7 @@ void main() {
     bool isExpanded;
 
     await tester.pumpWidget(
-      new ScrollableViewport(
+      new SingleChildScrollView(
         child: new ExpansionPanelList(
           expansionCallback: (int _index, bool _isExpanded) {
             index = _index;
@@ -42,7 +42,7 @@ void main() {
 
     // now expand the child panel
     await tester.pumpWidget(
-      new ScrollableViewport(
+      new SingleChildScrollView(
         child: new ExpansionPanelList(
           expansionCallback: (int _index, bool _isExpanded) {
             index = _index;

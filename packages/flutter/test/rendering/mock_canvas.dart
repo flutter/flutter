@@ -4,10 +4,22 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
-import 'package:test/test.dart';
+import 'package:flutter_test/flutter_test.dart';
 
-/// Matches [RenderObject]s that paint a display list that matches the canvas
-/// calls described by the pattern.
+/// Matches objects or functions that paint a display list that matches the
+/// canvas calls described by the pattern.
+///
+/// Specifically, this can be applied to [RenderObject]s, [Finder]s that
+/// correspond to a single [RenderObject], and functions that have either of the
+/// following signatures:
+///
+/// ```dart
+/// void function(PaintingContext context, Offset offset);
+/// void function(Canvas canvas);
+/// ```
+///
+/// In the case of functions that take a [PaintingContext] and an [Offset], the
+/// [paints] matcher will always pass a zero offset.
 ///
 /// To specify the pattern, call the methods on the returned object. For example:
 ///
@@ -33,6 +45,12 @@ PaintPattern get paints => new _TestRecordingCanvasPatternMatcher();
 /// if (methodName == #drawCircle) { ... }
 /// ```
 typedef bool PaintPatternPredicate(Symbol methodName, List<dynamic> arguments);
+
+/// The signature of [RenderObject.paint] functions.
+typedef void _ContextPainterFunction(PaintingContext context, Offset offset);
+
+/// The signature of functions that paint directly on a canvas.
+typedef void _CanvasPainterFunction(Canvas canvas);
 
 /// Builder interface for patterns used to match display lists (canvas calls).
 ///
@@ -125,6 +143,21 @@ abstract class PaintPattern {
   /// [Canvas.drawCircle] call are ignored.
   void circle({ double x, double y, double radius, Color color, bool hasMaskFilter, PaintingStyle style });
 
+  /// Indicates that a path is expected next.
+  ///
+  /// The next path is examined. Any arguments that are passed to this method
+  /// are compared to the actual [Canvas.drawPath] call's `paint` argument, and
+  /// any mismatches result in failure.
+  ///
+  /// There is currently no way to check the actual path itself.
+  // See https://github.com/flutter/flutter/issues/93 which tracks that issue.
+  ///
+  /// If no call to [Canvas.drawPath] was made, then this results in failure.
+  ///
+  /// Any calls made between the last matched call (if any) and the
+  /// [Canvas.drawPath] call are ignored.
+  void path({ Color color, bool hasMaskFilter, PaintingStyle style });
+
   /// Provides a custom matcher.
   ///
   /// Each method call after the last matched call (if any) will be passed to
@@ -192,10 +225,14 @@ class _TestRecordingCanvasPatternMatcher extends Matcher implements PaintPattern
     _predicates.add(new _RRectPaintPredicate(rrect: rrect, color: color, hasMaskFilter: hasMaskFilter, style: style));
   }
 
-
   @override
   void circle({ double x, double y, double radius, Color color, bool hasMaskFilter, PaintingStyle style }) {
     _predicates.add(new _CirclePaintPredicate(x: x, y: y, radius: radius, color: color, hasMaskFilter: hasMaskFilter, style: style));
+  }
+
+  @override
+  void path({ Color color, bool hasMaskFilter, PaintingStyle style }) {
+    _predicates.add(new _PathPaintPredicate(color: color, hasMaskFilter: hasMaskFilter, style: style));
   }
 
   @override
@@ -205,12 +242,28 @@ class _TestRecordingCanvasPatternMatcher extends Matcher implements PaintPattern
 
   @override
   bool matches(Object object, Map<dynamic, dynamic> matchState) {
-    if (object is! RenderObject)
-      return false;
     final _TestRecordingCanvas canvas = new _TestRecordingCanvas();
     final _TestRecordingPaintingContext context = new _TestRecordingPaintingContext(canvas);
-    final RenderObject renderObject = object;
-    renderObject.paint(context, Offset.zero);
+    if (object is _ContextPainterFunction) {
+      final _ContextPainterFunction function = object;
+      function(context, Offset.zero);
+    } else if (object is _CanvasPainterFunction) {
+      final _CanvasPainterFunction function = object;
+      function(canvas);
+    } else {
+      if (object is Finder) {
+        TestAsyncUtils.guardSync();
+        final Finder finder = object;
+        object = finder.evaluate().single.renderObject;
+      }
+      if (object is RenderObject) {
+        final RenderObject renderObject = object;
+        renderObject.paint(context, Offset.zero);
+      } else {
+        matchState[this] = 'was not one of the supported objects for the "paints" matcher.';
+        return false;
+      }
+    }
     final StringBuffer description = new StringBuffer();
     final bool result = _evaluatePredicates(canvas._invocations, description);
     if (!result) {
@@ -226,7 +279,7 @@ class _TestRecordingCanvasPatternMatcher extends Matcher implements PaintPattern
 
   @override
   Description describe(Description description) {
-    description.add('RenderObject painting: ');
+    description.add('Object or closure painting: ');
     return description.addAll(
       '', ', ', '',
       _predicates.map((_PaintPredicate predicate) => predicate.toString()),
@@ -387,7 +440,7 @@ abstract class _DrawCommandPaintPredicate extends _PaintPredicate {
       if (hasMaskFilter)
         throw 'called $methodName with a paint that did not have a mask filter, despite expecting one.';
       else
-        throw 'called $methodName with a paint that did had a mask filter, despite not expecting one.';
+        throw 'called $methodName with a paint that did have a mask filter, despite not expecting one.';
     }
     if (style != null && paintArgument.style != style)
       throw 'called $methodName with a paint whose style, ${paintArgument.style}, was not exactly the expected style ($style).';
@@ -437,8 +490,13 @@ class _OneParameterPaintPredicate<T> extends _DrawCommandPaintPredicate {
   @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
-    if (expected != null)
-      description.add('${T.runtimeType}: $expected');
+    if (expected != null) {
+      if (expected.toString().contains(T.toString())) {
+        description.add('$expected');
+      } else {
+        description.add('$T: $expected');
+      }
+    }
   }
 }
 
@@ -507,6 +565,12 @@ class _CirclePaintPredicate extends _DrawCommandPaintPredicate {
     if (radius != null)
       description.add('radius ${radius.toStringAsFixed(1)}');
   }
+}
+
+class _PathPaintPredicate extends _DrawCommandPaintPredicate {
+  _PathPaintPredicate({ Color color, bool hasMaskFilter, PaintingStyle style }) : super(
+    #drawPath, 'a path', 2, 1, color: color, hasMaskFilter: hasMaskFilter, style: style
+  );
 }
 
 class _SomethingPaintPredicate extends _PaintPredicate {

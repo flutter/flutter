@@ -350,6 +350,15 @@ abstract class ScrollBehavior2 {
 
   Widget wrap(BuildContext context, Widget child, AxisDirection axisDirection);
 
+  Widget createViewport({
+    Key key,
+    AxisDirection axisDirection: AxisDirection.down,
+    double anchor: 0.0,
+    ViewportOffset offset,
+    Key center,
+    List<Widget> children: const <Widget>[],
+  });
+
   /// Returns a new instance of the ScrollPosition class that this
   /// ScrollBehavior2 subclass creates.
   ///
@@ -378,6 +387,48 @@ abstract class ScrollBehavior2 {
 
   @override
   String toString() => '$runtimeType';
+}
+
+abstract class ScrollBehavior2Proxy extends ScrollBehavior2 {
+  ScrollBehavior2Proxy(this.parent) {
+    assert(parent != null);
+  }
+
+  final ScrollBehavior2 parent;
+
+  @override
+  Widget wrap(BuildContext context, Widget child, AxisDirection axisDirection) {
+    return parent.wrap(context, child, axisDirection);
+  }
+
+  @override
+  Widget createViewport({
+    Key key,
+    AxisDirection axisDirection: AxisDirection.down,
+    double anchor: 0.0,
+    ViewportOffset offset,
+    Key center,
+    List<Widget> children: const <Widget>[],
+  }) {
+    return parent.createViewport(
+      key: key,
+      axisDirection: axisDirection,
+      anchor: anchor,
+      offset: offset,
+      center: center,
+      children: children,
+    );
+  }
+
+  @override
+  ScrollPosition createScrollPosition(BuildContext context, Scrollable2State state, ScrollPosition oldPosition) {
+    return parent.createScrollPosition(context, state, oldPosition);
+  }
+
+  @override
+  bool shouldNotify(@checked ScrollBehavior2Proxy oldDelegate) {
+    return parent.shouldNotify(oldDelegate.parent);
+  }
 }
 
 class ScrollConfiguration2 extends InheritedWidget {
@@ -440,9 +491,8 @@ class Scrollable2 extends StatefulWidget {
   @override
   Scrollable2State createState() => new Scrollable2State();
 
-  ScrollBehavior2 getScrollBehavior(BuildContext context) {
-    return scrollBehavior
-        ?? ScrollConfiguration2.of(context)
+  static ScrollBehavior2 getScrollBehavior(BuildContext context) {
+    return ScrollConfiguration2.of(context)
         ?? new ViewportScrollBehavior();
   }
 
@@ -495,7 +545,7 @@ class Scrollable2State extends State<Scrollable2> with TickerProviderStateMixin 
 
   // only call this from places that will definitely trigger a rebuild
   void _updatePosition() {
-    _scrollBehavior = config.getScrollBehavior(context);
+    _scrollBehavior = config.scrollBehavior ?? Scrollable2.getScrollBehavior(context);
     final ScrollPosition oldPosition = position;
     _position = _scrollBehavior.createScrollPosition(context, this, oldPosition);
     assert(position != null);
@@ -640,7 +690,7 @@ class Scrollable2State extends State<Scrollable2> with TickerProviderStateMixin 
       child: new IgnorePointer(
         key: _ignorePointerKey,
         ignoring: _shouldIgnorePointer,
-        child: new Viewport2(
+        child: _scrollBehavior.createViewport(
           key: _viewportKey,
           axisDirection: config.axisDirection,
           anchor: config.anchor,

@@ -20,6 +20,7 @@ import 'scroll_simulation.dart';
 import 'notification_listener.dart';
 import 'scroll_notification.dart';
 import 'scrollable.dart';
+import 'viewport.dart';
 
 /// Scrolling logic delegate for lists and other unremarkable scrollable
 /// viewports.
@@ -75,6 +76,25 @@ class ViewportScrollBehavior extends ScrollBehavior2 {
         );
     }
     return null;
+  }
+
+  @override
+  Widget createViewport({
+    Key key,
+    AxisDirection axisDirection: AxisDirection.down,
+    double anchor: 0.0,
+    ViewportOffset offset,
+    Key center,
+    List<Widget> children: const <Widget>[],
+  }) {
+    return new Viewport2(
+      key: key,
+      axisDirection: axisDirection,
+      anchor: anchor,
+      offset: offset,
+      center: center,
+      children: children,
+    );
   }
 
   @override
