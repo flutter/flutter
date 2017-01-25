@@ -89,26 +89,6 @@ class OnTapPage extends StatelessWidget {
   }
 }
 
-class StringRoute extends PageRoute<String> {
-  StringRoute(RouteSettings settings, this.builder) : super(settings: settings);
-
-  final WidgetBuilder builder;
-
-  @override
-  bool get maintainState => true;
-
-  @override
-  Duration get transitionDuration => const Duration(milliseconds: 300);
-
-  @override
-  Color get barrierColor => null;
-
-  @override
-  Widget buildPage(BuildContext context, Animation<double> __, Animation<double> ___) {
-    return builder(context);
-  }
-}
-
 void main() {
   testWidgets('Can navigator navigate to and from a stateful widget', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
@@ -313,7 +293,12 @@ void main() {
 
     await tester.pumpWidget(new MaterialApp(
       onGenerateRoute: (RouteSettings settings) {
-        return new StringRoute(settings, (BuildContext context) => routes[settings.name](context));
+        return new PageRouteBuilder<String>(
+          settings: settings,
+          pageBuilder: (BuildContext context, Animation<double> _, Animation<double> __) {
+            return routes[settings.name](context);
+          },
+        );
       }
     ));
 
