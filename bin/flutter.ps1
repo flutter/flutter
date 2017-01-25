@@ -60,6 +60,10 @@ if (!(Test-Path $snapshotPath) `
     $revision | Out-File  $stampPath
 }
 
+# Switch PowerShell to UTF8 encoding for Dart.
+$encoding = [Console]::OutputEncoding
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+
 Invoke-Expression "$dart `"$snapshotPath`" $args"
 
 # The VM exits with code 253 if the snapshot version is out-of-date.
@@ -67,3 +71,6 @@ if ($LASTEXITCODE -eq 253) {
     Invoke-Expression "$dart --snapshot=`"$snapshotPath`" `"$scriptPath`" --packages=`"$flutterToolsDir\.packages`""
     Invoke-Expression "$dart `"$snapshotPath`" $args"
 }
+
+# Reset PowerShell to whatever the user's encoding was.
+[Console]::OutputEncoding = $encoding
