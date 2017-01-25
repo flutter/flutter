@@ -16,10 +16,11 @@ class Viewport2 extends MultiChildRenderObjectWidget {
     Key key,
     this.axisDirection: AxisDirection.down,
     this.anchor: 0.0,
-    this.offset,
+    @required this.offset,
     this.center,
     List<Widget> children: const <Widget>[],
   }) : super(key: key, children: children) {
+    assert(offset != null);
     assert(center == null || children.where((Widget child) => child.key == center).length == 1);
   }
 

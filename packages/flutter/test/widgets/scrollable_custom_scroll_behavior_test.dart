@@ -71,12 +71,34 @@ class TestScrollPosition extends ScrollPosition {
 class TestScrollBehavior extends ScrollBehavior2 {
   TestScrollBehavior(this.extentMultiplier);
   final double extentMultiplier;
+
   @override
   Widget wrap(BuildContext context, Widget child, AxisDirection axisDirection) => child;
+
+  @override
+  Widget createViewport({
+    Key key,
+    AxisDirection axisDirection: AxisDirection.down,
+    double anchor: 0.0,
+    ViewportOffset offset,
+    Key center,
+    List<Widget> children: const <Widget>[],
+  }) {
+    return new Viewport2(
+      key: key,
+      axisDirection: axisDirection,
+      anchor: anchor,
+      offset: offset,
+      center: center,
+      children: children,
+    );
+  }
+
   @override
   ScrollPosition createScrollPosition(BuildContext context, Scrollable2State state, ScrollPosition oldPosition) {
     return new TestScrollPosition(extentMultiplier, state, ViewportScrollBehavior.defaultScrollTolerances, oldPosition);
   }
+
   @override
   bool shouldNotify(TestScrollBehavior oldDelegate) {
     return extentMultiplier != oldDelegate.extentMultiplier;

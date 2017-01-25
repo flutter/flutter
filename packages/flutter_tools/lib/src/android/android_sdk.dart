@@ -68,10 +68,13 @@ class AndroidSdk {
       androidHomeDir = Platform.environment[kAndroidHome];
     } else if (Platform.isLinux) {
       if (homeDirPath != null)
-        androidHomeDir = '$homeDirPath/Android/Sdk';
+        androidHomeDir = path.join(homeDirPath, 'Android', 'Sdk');
     } else if (Platform.isMacOS) {
       if (homeDirPath != null)
-        androidHomeDir = '$homeDirPath/Library/Android/sdk';
+        androidHomeDir = path.join(homeDirPath, 'Library', 'Android', 'sdk');
+    } else if (Platform.isWindows) {
+      if (homeDirPath != null)
+        androidHomeDir = path.join(homeDirPath, 'AppData', 'Local', 'Android', 'sdk');
     }
 
     if (androidHomeDir != null) {
@@ -127,7 +130,7 @@ class AndroidSdk {
   }
 
   String getPlatformToolsPath(String binaryName) {
-    return path.join(directory, 'platform-tools', binaryName);
+    return path.join(directory, 'platform-tools', os.getExecutableName(binaryName));
   }
 
   void _init() {
@@ -218,7 +221,7 @@ class AndroidSdkVersion implements Comparable<AndroidSdkVersion> {
 
   String get aaptPath => getBuildToolsPath('aapt');
 
-  String get dxPath => getBuildToolsPath('dx');
+  String get dxPath => getBuildToolsPath('dx', winExtension: 'bat');
 
   String get zipalignPath => getBuildToolsPath('zipalign');
 
@@ -239,11 +242,11 @@ class AndroidSdkVersion implements Comparable<AndroidSdkVersion> {
   }
 
   String getPlatformsPath(String itemName) {
-    return path.join(sdk.directory, 'platforms', platformVersionName, itemName);
+    return path.join(sdk.directory, 'platforms', platformVersionName, os.getExecutableName(itemName));
   }
 
-  String getBuildToolsPath(String binaryName) {
-    return path.join(sdk.directory, 'build-tools', buildToolsVersionName, binaryName);
+  String getBuildToolsPath(String binaryName, { String winExtension }) {
+    return path.join(sdk.directory, 'build-tools', buildToolsVersionName, os.getExecutableName(binaryName, winExtension: winExtension));
   }
 
   @override

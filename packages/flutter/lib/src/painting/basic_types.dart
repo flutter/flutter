@@ -17,6 +17,7 @@ export 'dart:ui' show
   Paint,
   PaintingStyle,
   Path,
+  PathFillType,
   Point,
   Radius,
   RRect,

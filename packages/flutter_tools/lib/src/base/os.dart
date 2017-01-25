@@ -44,6 +44,13 @@ abstract class OperatingSystemUtils {
   File makePipe(String path);
 
   void unzip(File file, Directory targetDirectory);
+
+  /// Returns the name of the [binaryName] executable.
+  /// 
+  /// No-op on most OS.
+  /// On Windows it returns [binaryName].[winExtension], if [winExtension] is
+  /// specified, or [binaryName].exe otherwise.
+  String getExecutableName(String binaryName, { String winExtension });
 }
 
 class _PosixUtils extends OperatingSystemUtils {
@@ -76,6 +83,9 @@ class _PosixUtils extends OperatingSystemUtils {
     runSync(<String>['mkfifo', path]);
     return fs.file(path);
   }
+
+  @override
+  String getExecutableName(String binaryName, { String winExtension }) => binaryName;
 }
 
 class _WindowsUtils extends OperatingSystemUtils {
@@ -114,6 +124,14 @@ class _WindowsUtils extends OperatingSystemUtils {
   @override
   File makePipe(String path) {
     throw new UnsupportedError('makePipe is not implemented on Windows.');
+  }
+
+  @override
+  String getExecutableName(String binaryName, { String winExtension }) {
+    winExtension ??= 'exe';
+    if (path.extension(binaryName).isEmpty && winExtension.isNotEmpty)
+      return '$binaryName.$winExtension';
+    return binaryName;
   }
 }
 

@@ -132,7 +132,7 @@ class FullScreenCodeDialogState extends State<FullScreenCodeDialog> {
         child: new CircularProgressIndicator()
       );
     } else {
-      body = new ScrollableViewport(
+      body = new SingleChildScrollView(
         child: new Padding(
           padding: new EdgeInsets.all(16.0),
           child: new RichText(

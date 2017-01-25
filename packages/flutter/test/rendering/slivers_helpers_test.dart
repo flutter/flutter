@@ -31,7 +31,6 @@ void main() {
     expect(a.hashCode, equals(b.hashCode));
     expect(a.toString(), equals(b.toString()));
     expect(a, hasOneLineDescription);
-    expect(a.scrollOffsetAsOffset, equals(const Offset(0.0, 0.0)));
     expect(a.normalizedGrowthDirection, equals(GrowthDirection.forward));
 
     SliverConstraints c = a.copyWith(
@@ -53,21 +52,16 @@ void main() {
       crossAxisExtent: 40.0,
     );
     expect(c, equals(d));
-    expect(c.scrollOffsetAsOffset, equals(const Offset(0.0, -10.0)));
     expect(c.normalizedGrowthDirection, equals(GrowthDirection.forward));
-    expect(d.scrollOffsetAsOffset, equals(const Offset(0.0, -10.0)));
     expect(d.normalizedGrowthDirection, equals(GrowthDirection.forward));
 
     SliverConstraints e = d.copyWith(axisDirection: AxisDirection.right);
-    expect(e.scrollOffsetAsOffset, equals(const Offset(10.0, 0.0)));
     expect(e.normalizedGrowthDirection, equals(GrowthDirection.reverse));
 
     SliverConstraints f = d.copyWith(axisDirection: AxisDirection.left);
-    expect(f.scrollOffsetAsOffset, equals(const Offset(-10.0, 0.0)));
     expect(f.normalizedGrowthDirection, equals(GrowthDirection.forward));
 
     SliverConstraints g = d.copyWith(growthDirection: GrowthDirection.forward);
-    expect(g.scrollOffsetAsOffset, equals(const Offset(0.0, -10.0)));
     expect(g.normalizedGrowthDirection, equals(GrowthDirection.reverse));
   });
 

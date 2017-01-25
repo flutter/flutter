@@ -45,6 +45,7 @@ export 'src/rendering/rotated_box.dart';
 export 'src/rendering/semantics.dart';
 export 'src/rendering/shifted_box.dart';
 export 'src/rendering/sliver.dart';
+export 'src/rendering/sliver_block.dart';
 export 'src/rendering/stack.dart';
 export 'src/rendering/table.dart';
 export 'src/rendering/tweens.dart';
