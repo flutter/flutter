@@ -143,7 +143,19 @@ class MockSimControl extends Mock implements SimControl {
   }
 }
 
-class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {}
+class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {
+  // TODO(goderbauer): Calls to the executable should be mocked out.
+  //     That way it wouldn't really matter what the mock returns here.
+  @override
+  String getExecutableName(String binaryName, { String winExtension }) {
+    if (!Platform.isWindows)
+      return binaryName;
+    winExtension ??= 'exe';
+    if (path.extension(binaryName).isEmpty && winExtension.isNotEmpty)
+      return '$binaryName.$winExtension';
+    return binaryName;
+  }
+}
 
 class MockIOSSimulatorUtils extends Mock implements IOSSimulatorUtils {}
 
