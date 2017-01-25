@@ -10,6 +10,56 @@ import 'package:flutter/scheduler.dart';
 
 import 'framework.dart';
 import 'basic.dart';
+import 'scrollable.dart';
+
+class ScrollView extends StatelessWidget {
+  ScrollView({
+    Key key,
+    this.scrollDirection: Axis.vertical,
+    this.anchor: 0.0,
+    this.initialScrollOffset: 0.0,
+    this.scrollBehavior,
+    this.center,
+    this.children,
+  }) : super(key: key);
+
+  final Axis scrollDirection;
+
+  final double anchor;
+
+  final double initialScrollOffset;
+
+  final ScrollBehavior2 scrollBehavior;
+
+  final Key center;
+
+  final List<Widget> children;
+
+  AxisDirection _getDirection(BuildContext context) {
+    // TODO(abarth): Consider reading direction.
+    switch (scrollDirection) {
+      case Axis.horizontal:
+        return AxisDirection.right;
+      case Axis.vertical:
+        return AxisDirection.down;
+    }
+    return null;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return new Scrollable2(
+      axisDirection: _getDirection(context),
+      anchor: anchor,
+      initialScrollOffset: initialScrollOffset,
+      scrollBehavior: scrollBehavior,
+      center: center,
+      children: <Widget>[
+        new SliverBlock(delegate: new SliverBlockChildListDelegate(children)),
+      ],
+    );
+  }
+}
 
 abstract class SliverBlockDelegate {
   /// Abstract const constructor. This constructor enables subclasses to provide

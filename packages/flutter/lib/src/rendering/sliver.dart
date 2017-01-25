@@ -999,14 +999,19 @@ abstract class RenderSliverHelpers implements RenderSliver {
   /// Calling this for a child that is not visible is not valid.
   @protected
   void applyPaintTransformForBoxChild(RenderBox child, Matrix4 transform) {
-    final double sign = _getRightWayUp(constraints) ? 1.0 : -1.0;
+    final bool rightWayUp = _getRightWayUp(constraints);
+    double delta = childPosition(child);
     assert(constraints.axis != null);
     switch (constraints.axis) {
       case Axis.horizontal:
-        transform.translate(childPosition(child) * sign, 0.0);
+        if (!rightWayUp)
+          delta = geometry.paintExtent - child.size.width - delta;
+        transform.translate(delta, 0.0);
         break;
       case Axis.vertical:
-        transform.translate(0.0, childPosition(child) * sign);
+        if (!rightWayUp)
+          delta = geometry.paintExtent - child.size.height - delta;
+        transform.translate(0.0, delta);
         break;
     }
   }

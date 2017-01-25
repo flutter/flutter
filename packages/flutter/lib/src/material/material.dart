@@ -376,8 +376,8 @@ abstract class InkFeature {
     assert(referenceBox.attached);
     assert(!_debugDisposed);
     // find the chain of renderers from us to the feature's referenceBox
-    final List<RenderBox> descendants = <RenderBox>[referenceBox];
-    RenderBox node = referenceBox;
+    final List<RenderObject> descendants = <RenderObject>[referenceBox];
+    RenderObject node = referenceBox;
     while (node != _controller) {
       node = node.parent;
       assert(node != null);

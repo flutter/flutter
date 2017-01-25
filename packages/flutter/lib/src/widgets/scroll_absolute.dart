@@ -608,7 +608,7 @@ class AbsoluteBallisticScrollActivity extends ScrollActivity {
   }
 
   void _end() {
-    position.beginIdleActivity();
+    position?.beginIdleActivity();
   }
 
   @override
