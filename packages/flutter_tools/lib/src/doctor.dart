@@ -124,7 +124,7 @@ class Doctor {
       else
         printStatus('${result.leadingBox} ${validator.title}');
 
-      final String separator = Platform.isWindows ? ' ' : '•';
+      final String separator = '•';
 
       for (ValidationMessage message in result.messages) {
         String text = message.message.replaceAll('\n', '\n      ');
@@ -182,7 +182,7 @@ class ValidationResult {
     if (type == ValidationType.missing)
       return '[x]';
     else if (type == ValidationType.installed)
-      return Platform.isWindows ? '[+]' : '[✓]';
+      return Platform.isWindows ? '[√]' : '[✓]';
     else
       return '[-]';
   }
