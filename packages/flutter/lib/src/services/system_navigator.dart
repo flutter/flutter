@@ -13,10 +13,12 @@ class SystemNavigator {
   /// Instructs the system navigator to remove this activity from the stack and
   /// return to the previous activity.
   ///
-  /// Platform Specific Notes:
+  /// On iOS, calls to this method are ignored because Apple's human interface
+  /// guidelines state that applications should not exit themselves.
   ///
-  ///   On iOS, this is a no-op because Apple's human interface guidelines state
-  ///   that applications should not exit themselves.
+  /// This method should be preferred over calling `dart:io`'s [exit] method, as
+  /// the latter may cause the underlying platform to act as if the application
+  /// had crashed.
   static Future<Null> pop() async {
     await PlatformMessages.invokeMethod('flutter/platform', 'SystemNavigator.pop');
   }
