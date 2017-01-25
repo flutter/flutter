@@ -329,7 +329,7 @@ class SliverConstraints extends Constraints {
       return false;
     final SliverConstraints typedOther = other;
     assert(typedOther.debugAssertIsValid());
-    return axis == typedOther.axis &&
+    return axisDirection == typedOther.axisDirection &&
            growthDirection == typedOther.growthDirection &&
            scrollOffset == typedOther.scrollOffset &&
            overlap == typedOther.overlap &&
@@ -339,7 +339,7 @@ class SliverConstraints extends Constraints {
 
   @override
   int get hashCode {
-    return hashValues(axis, growthDirection, scrollOffset, overlap, remainingPaintExtent, crossAxisExtent);
+    return hashValues(axisDirection, growthDirection, scrollOffset, overlap, remainingPaintExtent, crossAxisExtent);
   }
 
   @override
@@ -684,8 +684,6 @@ abstract class RenderSliver extends RenderObject {
   /// [RenderViewport2.axisDirection], so values will typically be positive.
   double get centerOffsetAdjustment => 0.0;
 
-  void didScroll(double delta, Point focus) { }
-
   /// Determines the set of render objects located at the given position.
   ///
   /// Returns true if the given point is contained in this render object or one
@@ -820,10 +818,30 @@ abstract class RenderSliver extends RenderObject {
     });
   }
 
+  /// This returns a [Size] with dimensions relative to the leading edge of the
+  /// sliver, specifically the same offset that is given to the [paint] method.
+  /// This means that the dimensions may be negative.
+  @protected
+  Size getAbsoluteSizeRelativeToOrigin() {
+    assert(geometry != null);
+    assert(!needsLayout);
+    switch (applyGrowthDirectionToAxisDirection(constraints.axisDirection, constraints.growthDirection)) {
+      case AxisDirection.up:
+        return new Size(constraints.crossAxisExtent, -geometry.paintExtent);
+      case AxisDirection.right:
+        return new Size(geometry.paintExtent, constraints.crossAxisExtent);
+      case AxisDirection.down:
+        return new Size(constraints.crossAxisExtent, geometry.paintExtent);
+      case AxisDirection.left:
+        return new Size(-geometry.paintExtent, constraints.crossAxisExtent);
+    }
+    return null;
+  }
+
   void _debugDrawArrow(Canvas canvas, Paint paint, Point p0, Point p1, GrowthDirection direction) {
     assert(() {
       if (p0 == p1)
-        return;
+        return true;
       assert(p0.x == p1.x || p0.y == p1.y); // must be axis-aligned
       final double d = (p1 - p0).distance * 0.2;
       Point temp;
@@ -853,6 +871,7 @@ abstract class RenderSliver extends RenderObject {
           ..lineTo(p1.x - dx2, p1.y - dy2),
         paint
       );
+      return true;
     });
   }
 
@@ -862,7 +881,7 @@ abstract class RenderSliver extends RenderObject {
       if (debugPaintSizeEnabled) {
         final double strokeWidth = math.min(4.0, geometry.paintExtent / 30.0);
         final Paint paint = new Paint()
-          ..color = const Color(0xFF33CC33)
+          ..color = debugPaintSliverArrowColor
           ..strokeWidth = strokeWidth
           ..style = PaintingStyle.stroke
           ..maskFilter = new MaskFilter.blur(BlurStyle.solid, strokeWidth);

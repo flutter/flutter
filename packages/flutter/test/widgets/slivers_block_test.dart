@@ -24,13 +24,13 @@ Future<Null> test(WidgetTester tester, double offset) {
 }
 
 void verify(WidgetTester tester, List<Point> answerKey, String text) {
-  List<Point> testAnswers = tester.renderObjectList/*<RenderBox>*/(find.byType(SizedBox)).map/*<Point>*/(
+  List<Point> testAnswers = tester.renderObjectList<RenderBox>(find.byType(SizedBox)).map<Point>(
     (RenderBox target) => target.localToGlobal(const Point(0.0, 0.0))
   ).toList();
   expect(testAnswers, equals(answerKey));
   final String foundText =
-    tester.widgetList/*<Text>*/(find.byType(Text))
-    .map/*<String>*/((Text widget) => widget.data)
+    tester.widgetList<Text>(find.byType(Text))
+    .map<String>((Text widget) => widget.data)
     .reduce((String value, String element) => value + element);
   expect(foundText, equals(text));
 }
@@ -38,7 +38,7 @@ void verify(WidgetTester tester, List<Point> answerKey, String text) {
 void main() {
   testWidgets('Viewport2+SliverBlock basic test', (WidgetTester tester) async {
     await test(tester, 0.0);
-    expect(tester.renderObject/*<RenderBox>*/(find.byType(Viewport2)).size, equals(const Size(800.0, 600.0)));
+    expect(tester.renderObject<RenderBox>(find.byType(Viewport2)).size, equals(const Size(800.0, 600.0)));
     verify(tester, <Point>[
       const Point(0.0, 0.0),
       const Point(0.0, 400.0),

@@ -1439,6 +1439,45 @@ class Viewport extends SingleChildRenderObjectWidget {
 }
 
 
+// SLIVERS
+
+class SliverToBoxAdapter extends SingleChildRenderObjectWidget {
+  SliverToBoxAdapter({
+    Key key,
+    Widget child,
+  }) : super(key: key, child: child);
+
+  @override
+  RenderSliverToBoxAdapter createRenderObject(BuildContext context) => new RenderSliverToBoxAdapter();
+}
+
+class SliverPadding extends SingleChildRenderObjectWidget {
+  SliverPadding({
+    Key key,
+    @required this.padding,
+    Widget child,
+  }) : super(key: key, child: child) {
+    assert(padding != null);
+  }
+
+  final EdgeInsets padding;
+
+  @override
+  RenderSliverPadding createRenderObject(BuildContext context) => new RenderSliverPadding(padding: padding);
+
+  @override
+  void updateRenderObject(BuildContext context, RenderSliverPadding renderObject) {
+    renderObject.padding = padding;
+  }
+
+  @override
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('padding: $padding');
+  }
+}
+
+
 // LAYOUT NODES
 
 /// A widget that uses the block layout algorithm for its children.
@@ -2701,16 +2740,6 @@ class WidgetToRenderBoxAdapter extends LeafRenderObjectWidget {
     if (onBuild != null)
       onBuild();
   }
-}
-
-class SliverToBoxAdapter extends SingleChildRenderObjectWidget {
-  SliverToBoxAdapter({
-    Key key,
-    Widget child,
-  }) : super(key: key, child: child);
-
-  @override
-  RenderSliverToBoxAdapter createRenderObject(BuildContext context) => new RenderSliverToBoxAdapter();
 }
 
 
