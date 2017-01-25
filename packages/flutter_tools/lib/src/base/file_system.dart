@@ -29,23 +29,25 @@ void ensureDirectoryExists(String filePath) {
   fs.directory(dirPath).createSync(recursive: true);
 }
 
-/// Recursively copies a folder from `srcPath` to `destPath`
-void copyFolderSync(String srcPath, String destPath) {
-  Directory srcDir = fs.directory(srcPath);
+/// Recursively copies `srcDir` to `destDir`.
+///
+/// Creates `destDir` if needed.
+void copyDirectorySync(Directory srcDir, Directory destDir) {
   if (!srcDir.existsSync())
     throw new Exception('Source directory "${srcDir.path}" does not exist, nothing to copy');
 
-  Directory destDir = fs.directory(destPath);
   if (!destDir.existsSync())
     destDir.createSync(recursive: true);
 
   srcDir.listSync().forEach((FileSystemEntity entity) {
     String newPath = path.join(destDir.path, path.basename(entity.path));
     if (entity is File) {
-      File newFile = fs.file(newPath);
+      File newFile = destDir.fileSystem.file(newPath);
+      newFile.createSync();
       newFile.writeAsBytesSync(entity.readAsBytesSync());
     } else if (entity is Directory) {
-      copyFolderSync(entity.path, newPath);
+      copyDirectorySync(
+        srcDir.fileSystem.directory(entity.path), destDir.fileSystem.directory(newPath));
     } else {
       throw new Exception('${entity.path} is neither File nor Directory');
     }
