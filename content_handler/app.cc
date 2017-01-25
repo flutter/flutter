@@ -15,7 +15,6 @@
 #include "lib/ftl/macros.h"
 #include "lib/ftl/tasks/task_runner.h"
 #include "lib/mtl/tasks/message_loop.h"
-#include "lib/mtl/threading/create_thread.h"
 
 namespace flutter_runner {
 namespace {
@@ -31,18 +30,22 @@ App::App() {
 
   tracing::InitializeTracer(context_.get(), {});
 
-  ftl::RefPtr<ftl::TaskRunner> gpu_task_runner;
-  gpu_thread_ = mtl::CreateThread(&gpu_task_runner);
+  gpu_thread_ = std::make_unique<Thread>();
+  io_thread_ = std::make_unique<Thread>();
 
-  ftl::RefPtr<ftl::TaskRunner> ui_task_runner(
-      mtl::MessageLoop::GetCurrent()->task_runner());
+  FTL_CHECK(gpu_thread_->IsValid()) << "Must be able to create the GPU thread";
+  FTL_CHECK(io_thread_->IsValid()) << "Must be able to create the IO thread";
 
-  ftl::RefPtr<ftl::TaskRunner> io_task_runner;
-  io_thread_ = mtl::CreateThread(&io_task_runner);
+  auto ui_task_runner = mtl::MessageLoop::GetCurrent()->task_runner();
+  auto gpu_task_runner = gpu_thread_->TaskRunner();
+  auto io_task_runner = io_thread_->TaskRunner();
 
   // Notice that the Platform and UI threads are actually the same.
-  blink::Threads::Set(blink::Threads(ui_task_runner, gpu_task_runner,
-                                     ui_task_runner, io_task_runner));
+  blink::Threads::Set(blink::Threads(ui_task_runner,   // Platform
+                                     gpu_task_runner,  // GPU
+                                     ui_task_runner,   // UI
+                                     io_task_runner    // IO
+                                     ));
   blink::Settings::Set(blink::Settings());
   blink::InitRuntime();
 
@@ -56,7 +59,8 @@ App::App() {
 }
 
 App::~App() {
-  StopThreads();
+  blink::Threads::Gpu()->PostTask(QuitMessageLoop);
+  blink::Threads::IO()->PostTask(QuitMessageLoop);
 }
 
 void App::StartApplication(
@@ -76,13 +80,6 @@ void App::Destroy(ApplicationControllerImpl* controller) {
   if (it == controllers_.end())
     return;
   controllers_.erase(it);
-}
-
-void App::StopThreads() {
-  blink::Threads::Gpu()->PostTask(QuitMessageLoop);
-  blink::Threads::IO()->PostTask(QuitMessageLoop);
-  gpu_thread_.join();
-  io_thread_.join();
 }
 
 }  // namespace flutter_runner

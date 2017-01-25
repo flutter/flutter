@@ -18,6 +18,8 @@ executable("content_handler") {
     "app.h",
     "application_controller_impl.cc",
     "application_controller_impl.h",
+    "content_handler_thread.cc",
+    "content_handler_thread.h",
     "main.cc",
     "rasterizer.cc",
     "rasterizer.h",

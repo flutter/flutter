@@ -6,12 +6,12 @@
 #define FLUTTER_CONTENT_HANDLER_APP_H_
 
 #include <memory>
-#include <thread>
 #include <unordered_set>
 
 #include "apps/modular/lib/app/application_context.h"
 #include "apps/modular/services/application/application_runner.fidl.h"
 #include "flutter/content_handler/application_controller_impl.h"
+#include "flutter/content_handler/content_handler_thread.h"
 #include "lib/ftl/macros.h"
 
 namespace flutter_runner {
@@ -31,14 +31,10 @@ class App : public modular::ApplicationRunner {
   void Destroy(ApplicationControllerImpl* controller);
 
  private:
-  void StopThreads();
-
   std::unique_ptr<modular::ApplicationContext> context_;
-  std::thread gpu_thread_;
-  std::thread io_thread_;
-
+  std::unique_ptr<Thread> gpu_thread_;
+  std::unique_ptr<Thread> io_thread_;
   fidl::BindingSet<modular::ApplicationRunner> runner_bindings_;
-
   std::unordered_map<ApplicationControllerImpl*,
                      std::unique_ptr<ApplicationControllerImpl>>
       controllers_;
