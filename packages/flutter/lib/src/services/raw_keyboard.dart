@@ -16,6 +16,7 @@ import 'platform_messages.dart';
 /// See also:
 ///
 ///  * [RawKeyEventDataAndroid]
+ //  * [RawKeyEventDataFuchsia]
 ///  * [RawKeyEvent]
 ///  * [RawKeyDownEvent]
 ///  * [RawKeyUpEvent]
@@ -28,7 +29,7 @@ abstract class RawKeyEventData {
 /// Platform-specific key event data for Android.
 ///
 /// This object contains information about key events obtained from Android's
-/// KeyEvent interface.
+/// `KeyEvent` interface.
 class RawKeyEventDataAndroid extends RawKeyEventData {
   /// Creates a key event data structure specific for Android.
   ///
@@ -61,7 +62,7 @@ class RawKeyEventDataAndroid extends RawKeyEventData {
 /// Platform-specific key event data for Fuchsia.
 ///
 /// This object contains information about key events obtained from Fuchsia's
-/// KeyData interface.
+/// `KeyData` interface.
 class RawKeyEventDataFuchsia extends RawKeyEventData {
   /// Creates a key event data structure specific for Android.
   ///
@@ -77,9 +78,9 @@ class RawKeyEventDataFuchsia extends RawKeyEventData {
   /// See <http://www.usb.org/developers/hidpage/Hut1_12v2.pdf>
   final int hidUsage;
 
-  /// The unicode code point represented by the key event, if any.
+  /// The Unicode code point represented by the key event, if any.
   ///
-  /// If there is no unicode code point, this value is zero.
+  /// If there is no Unicode code point, this value is zero.
   final int codePoint;
 
   /// The modifiers that we present when the key event occured.
