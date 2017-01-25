@@ -163,7 +163,8 @@ abstract class Device {
   // supported by Flutter, and, if not, why.
   String supportMessage() => isSupported() ? "Supported" : "Unsupported";
 
-  // TODO(tvolkert): Rename to `targetPlatform`
+  // TODO(tvolkert): Rename to `targetPlatform`, and remove the "as p"
+  // aliases on the `platform.dart` imports where applicable.
   TargetPlatform get platform;
 
   String get sdkNameAndVersion;
