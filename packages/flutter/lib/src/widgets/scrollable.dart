@@ -304,7 +304,9 @@ abstract class ScrollActivity {
   bool get isScrolling;
 
   @mustCallSuper
-  void dispose() { }
+  void dispose() {
+    _position = null;
+  }
 
   @override
   String toString() => '$runtimeType';
