@@ -484,7 +484,7 @@ class _OneParameterPaintPredicate<T> extends _DrawCommandPaintPredicate {
     super.verifyArguments(arguments);
     final T actual = arguments[0];
     if (expected != null && actual != expected)
-      throw 'called $methodName with ${T.runtimeType}, $actual, which was not exactly the expected ${T.runtimeType} ($expected).';
+      throw 'called $methodName with $T, $actual, which was not exactly the expected $T ($expected).';
   }
 
   @override
