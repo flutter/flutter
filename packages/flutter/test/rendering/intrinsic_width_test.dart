@@ -79,6 +79,40 @@ void main() {
     expect(parent.getMaxIntrinsicHeight(double.INFINITY), equals(200.0));
   });
 
+  test('IntrinsicWidth without a child', () {
+    RenderBox parent = new RenderIntrinsicWidth();
+    layout(parent,
+      constraints: const BoxConstraints(
+        minWidth: 5.0,
+        minHeight: 8.0,
+        maxWidth: 500.0,
+        maxHeight: 800.0
+      )
+    );
+    expect(parent.size.width, equals(5.0));
+    expect(parent.size.height, equals(8.0));
+
+    expect(parent.getMinIntrinsicWidth(0.0), equals(0.0));
+    expect(parent.getMaxIntrinsicWidth(0.0), equals(0.0));
+    expect(parent.getMinIntrinsicHeight(0.0), equals(0.0));
+    expect(parent.getMaxIntrinsicHeight(0.0), equals(0.0));
+
+    expect(parent.getMinIntrinsicWidth(10.0), equals(0.0));
+    expect(parent.getMaxIntrinsicWidth(10.0), equals(0.0));
+    expect(parent.getMinIntrinsicHeight(10.0), equals(0.0));
+    expect(parent.getMaxIntrinsicHeight(10.0), equals(0.0));
+
+    expect(parent.getMinIntrinsicWidth(80.0), equals(0.0));
+    expect(parent.getMaxIntrinsicWidth(80.0), equals(0.0));
+    expect(parent.getMinIntrinsicHeight(80.0), equals(0.0));
+    expect(parent.getMaxIntrinsicHeight(80.0), equals(0.0));
+
+    expect(parent.getMinIntrinsicWidth(double.INFINITY), equals(0.0));
+    expect(parent.getMaxIntrinsicWidth(double.INFINITY), equals(0.0));
+    expect(parent.getMinIntrinsicHeight(double.INFINITY), equals(0.0));
+    expect(parent.getMaxIntrinsicHeight(double.INFINITY), equals(0.0));
+  });
+
   test('Shrink-wrapping width (stepped width)', () {
     RenderBox child = new RenderTestBox(const BoxConstraints(minWidth: 10.0, maxWidth: 100.0, minHeight: 20.0, maxHeight: 200.0));
     RenderBox parent = new RenderIntrinsicWidth(child: child, stepWidth: 47.0);
@@ -217,6 +251,40 @@ void main() {
     expect(parent.getMaxIntrinsicWidth(double.INFINITY), equals(100.0));
     expect(parent.getMinIntrinsicHeight(double.INFINITY), equals(200.0));
     expect(parent.getMaxIntrinsicHeight(double.INFINITY), equals(200.0));
+  });
+
+  test('IntrinsicHeight without a child', () {
+    RenderBox parent = new RenderIntrinsicHeight();
+    layout(parent,
+      constraints: const BoxConstraints(
+        minWidth: 5.0,
+        minHeight: 8.0,
+        maxWidth: 500.0,
+        maxHeight: 800.0
+      )
+    );
+    expect(parent.size.width, equals(5.0));
+    expect(parent.size.height, equals(8.0));
+
+    expect(parent.getMinIntrinsicWidth(0.0), equals(0.0));
+    expect(parent.getMaxIntrinsicWidth(0.0), equals(0.0));
+    expect(parent.getMinIntrinsicHeight(0.0), equals(0.0));
+    expect(parent.getMaxIntrinsicHeight(0.0), equals(0.0));
+
+    expect(parent.getMinIntrinsicWidth(10.0), equals(0.0));
+    expect(parent.getMaxIntrinsicWidth(10.0), equals(0.0));
+    expect(parent.getMinIntrinsicHeight(10.0), equals(0.0));
+    expect(parent.getMaxIntrinsicHeight(10.0), equals(0.0));
+
+    expect(parent.getMinIntrinsicWidth(80.0), equals(0.0));
+    expect(parent.getMaxIntrinsicWidth(80.0), equals(0.0));
+    expect(parent.getMinIntrinsicHeight(80.0), equals(0.0));
+    expect(parent.getMaxIntrinsicHeight(80.0), equals(0.0));
+
+    expect(parent.getMinIntrinsicWidth(double.INFINITY), equals(0.0));
+    expect(parent.getMaxIntrinsicWidth(double.INFINITY), equals(0.0));
+    expect(parent.getMinIntrinsicHeight(double.INFINITY), equals(0.0));
+    expect(parent.getMaxIntrinsicHeight(double.INFINITY), equals(0.0));
   });
 
   test('Padding and boring intrinsics', () {
