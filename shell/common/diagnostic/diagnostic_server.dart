@@ -17,7 +17,7 @@ void diagnosticServerStart(int port) {
 
     String ip = server.address.address.toString();
     String port = server.port.toString();
-    print('Diagnostic server listening on http://$ip:$port');
+    print('Diagnostic server listening on http://$ip:$port/');
   });
 }
 
