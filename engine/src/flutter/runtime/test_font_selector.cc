@@ -26,7 +26,7 @@ PassRefPtr<FontData> TestFontSelector::getFontData(
     return test_font_data_;
   }
 
-  auto typeface = SkTypeface::MakeFromStream(GetTestFontData().get());
+  auto typeface = SkTypeface::MakeFromStream(GetTestFontData().release());
 
   FontPlatformData platform_data(typeface, "Ahem", 14.0, false, false,
                                  FontOrientation::Horizontal, false);
