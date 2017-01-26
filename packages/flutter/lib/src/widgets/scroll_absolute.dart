@@ -462,9 +462,9 @@ abstract class ClampingAbsoluteScrollPositionMixIn implements AbsoluteScrollPosi
   Simulation createBallisticSimulation(double velocity) {
     if (outOfRange) {
       if (pixels > maxScrollExtent)
-        return new ScrollSpringSimulation(_defaultScrollSpring, pixels, maxScrollExtent, velocity);
+        return new ScrollSpringSimulation(_defaultScrollSpring, pixels, maxScrollExtent, math.min(0.0, velocity));
       if (pixels < minScrollExtent)
-        return new ScrollSpringSimulation(_defaultScrollSpring, pixels, minScrollExtent, velocity);
+        return new ScrollSpringSimulation(_defaultScrollSpring, pixels, minScrollExtent, math.max(0.0, velocity));
       assert(false);
     }
     if (!atEdge && velocity.abs() >= scrollTolerances.velocity) {
