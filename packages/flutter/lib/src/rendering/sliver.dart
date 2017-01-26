@@ -329,7 +329,7 @@ class SliverConstraints extends Constraints {
       return false;
     final SliverConstraints typedOther = other;
     assert(typedOther.debugAssertIsValid());
-    return axis == typedOther.axis &&
+    return axisDirection == typedOther.axisDirection &&
            growthDirection == typedOther.growthDirection &&
            scrollOffset == typedOther.scrollOffset &&
            overlap == typedOther.overlap &&
@@ -339,7 +339,7 @@ class SliverConstraints extends Constraints {
 
   @override
   int get hashCode {
-    return hashValues(axis, growthDirection, scrollOffset, overlap, remainingPaintExtent, crossAxisExtent);
+    return hashValues(axisDirection, growthDirection, scrollOffset, overlap, remainingPaintExtent, crossAxisExtent);
   }
 
   @override
@@ -364,6 +364,7 @@ class SliverGeometry {
     this.maxPaintExtent: 0.0,
     double hitTestExtent,
     bool visible,
+    this.hasVisualOverflow: false,
     this.scrollOffsetCorrection: 0.0
   }) : layoutExtent = layoutExtent ?? paintExtent,
        hitTestExtent = hitTestExtent ?? paintExtent,
@@ -416,6 +417,13 @@ class SliverGeometry {
   /// false if [paintExtent] is zero.
   final bool visible;
 
+  /// Whether this sliver has visual overflow.
+  ///
+  /// By default, this is false, which means the viewport does not need to clip
+  /// its children. If any slivers have visual overflow, the viewport will apply
+  /// a clip to its children.
+  final bool hasVisualOverflow;
+
   /// If this is non-zero after [RenderSliver.performLayout] returns, the scroll
   /// offset will be adjusted by the parent and then the entire layout of the
   /// parent will be rerun.
@@ -451,6 +459,7 @@ class SliverGeometry {
     assert(hitTestExtent != null);
     assert(hitTestExtent >= 0.0);
     assert(visible != null);
+    assert(hasVisualOverflow != null);
     assert(scrollOffsetCorrection != null);
     assert(scrollOffsetCorrection == 0.0);
     return true;
@@ -481,6 +490,8 @@ class SliverGeometry {
       buffer.write('maxPaintExtent: ${maxPaintExtent.toStringAsFixed(1)}, ');
       if (hitTestExtent != paintExtent)
         buffer.write('hitTestExtent: ${hitTestExtent.toStringAsFixed(1)}, ');
+      if (hasVisualOverflow)
+        buffer.write('hasVisualOverflow: true, ');
       buffer.write('scrollOffsetCorrection: ${scrollOffsetCorrection.toStringAsFixed(1)}');
     buffer.write(')');
     return buffer.toString();
@@ -684,8 +695,6 @@ abstract class RenderSliver extends RenderObject {
   /// [RenderViewport2.axisDirection], so values will typically be positive.
   double get centerOffsetAdjustment => 0.0;
 
-  void didScroll(double delta, Point focus) { }
-
   /// Determines the set of render objects located at the given position.
   ///
   /// Returns true if the given point is contained in this render object or one
@@ -820,10 +829,30 @@ abstract class RenderSliver extends RenderObject {
     });
   }
 
+  /// This returns a [Size] with dimensions relative to the leading edge of the
+  /// sliver, specifically the same offset that is given to the [paint] method.
+  /// This means that the dimensions may be negative.
+  @protected
+  Size getAbsoluteSizeRelativeToOrigin() {
+    assert(geometry != null);
+    assert(!needsLayout);
+    switch (applyGrowthDirectionToAxisDirection(constraints.axisDirection, constraints.growthDirection)) {
+      case AxisDirection.up:
+        return new Size(constraints.crossAxisExtent, -geometry.paintExtent);
+      case AxisDirection.right:
+        return new Size(geometry.paintExtent, constraints.crossAxisExtent);
+      case AxisDirection.down:
+        return new Size(constraints.crossAxisExtent, geometry.paintExtent);
+      case AxisDirection.left:
+        return new Size(-geometry.paintExtent, constraints.crossAxisExtent);
+    }
+    return null;
+  }
+
   void _debugDrawArrow(Canvas canvas, Paint paint, Point p0, Point p1, GrowthDirection direction) {
     assert(() {
       if (p0 == p1)
-        return;
+        return true;
       assert(p0.x == p1.x || p0.y == p1.y); // must be axis-aligned
       final double d = (p1 - p0).distance * 0.2;
       Point temp;
@@ -853,6 +882,7 @@ abstract class RenderSliver extends RenderObject {
           ..lineTo(p1.x - dx2, p1.y - dy2),
         paint
       );
+      return true;
     });
   }
 
@@ -862,7 +892,7 @@ abstract class RenderSliver extends RenderObject {
       if (debugPaintSizeEnabled) {
         final double strokeWidth = math.min(4.0, geometry.paintExtent / 30.0);
         final Paint paint = new Paint()
-          ..color = const Color(0xFF33CC33)
+          ..color = debugPaintSliverArrowColor
           ..strokeWidth = strokeWidth
           ..style = PaintingStyle.stroke
           ..maskFilter = new MaskFilter.blur(BlurStyle.solid, strokeWidth);
@@ -999,14 +1029,19 @@ abstract class RenderSliverHelpers implements RenderSliver {
   /// Calling this for a child that is not visible is not valid.
   @protected
   void applyPaintTransformForBoxChild(RenderBox child, Matrix4 transform) {
-    final double sign = _getRightWayUp(constraints) ? 1.0 : -1.0;
+    final bool rightWayUp = _getRightWayUp(constraints);
+    double delta = childPosition(child);
     assert(constraints.axis != null);
     switch (constraints.axis) {
       case Axis.horizontal:
-        transform.translate(childPosition(child) * sign, 0.0);
+        if (!rightWayUp)
+          delta = geometry.paintExtent - child.size.width - delta;
+        transform.translate(delta, 0.0);
         break;
       case Axis.vertical:
-        transform.translate(0.0, childPosition(child) * sign);
+        if (!rightWayUp)
+          delta = geometry.paintExtent - child.size.height - delta;
+        transform.translate(0.0, delta);
         break;
     }
   }
@@ -1277,6 +1312,7 @@ class RenderViewport2 extends RenderBox with ContainerRenderObjectMixin<RenderSl
   double _minScrollExtent;
   double _maxScrollExtent;
   double _shrinkWrapExtent;
+  bool _hasVisualOverflow = false;
 
   @override
   void performLayout() {
@@ -1297,6 +1333,7 @@ class RenderViewport2 extends RenderBox with ContainerRenderObjectMixin<RenderSl
       _minScrollExtent = 0.0;
       _maxScrollExtent = 0.0;
       _shrinkWrapExtent = 0.0;
+      _hasVisualOverflow = false;
       offset.applyContentDimensions(0.0, 0.0);
       return;
     }
@@ -1392,6 +1429,7 @@ class RenderViewport2 extends RenderBox with ContainerRenderObjectMixin<RenderSl
     _minScrollExtent = 0.0;
     _maxScrollExtent = 0.0;
     _shrinkWrapExtent = 0.0;
+    _hasVisualOverflow = false;
 
     // centerOffset is the offset from the leading edge of the RenderViewport2
     // to the zero scroll offset (the line between the forward slivers and the
@@ -1502,6 +1540,9 @@ class RenderViewport2 extends RenderBox with ContainerRenderObjectMixin<RenderSl
       }
       _shrinkWrapExtent += childLayoutGeometry.maxPaintExtent;
 
+      if (childLayoutGeometry.hasVisualOverflow)
+        _hasVisualOverflow = true;
+
       // move on to the next child
       assert(child.parentData == childParentData);
       child = advance(child);
@@ -1535,17 +1576,11 @@ class RenderViewport2 extends RenderBox with ContainerRenderObjectMixin<RenderSl
     childParentData.applyPaintTransform(transform);
   }
 
-  @override
-  void paint(PaintingContext context, Offset offset) {
-    if (center == null) {
-      assert(firstChild == null);
-      return;
-    }
+  void _paintContents(PaintingContext context, Offset offset) {
     assert(center.parent == this);
     assert(firstChild != null);
-    RenderSliver child;
-    // TODO(ianh): if we have content beyond our max extents, clip
-    child = firstChild;
+
+    RenderSliver child = firstChild;
     while (child != center) {
       if (child.geometry.visible) {
         final SliverPhysicalParentData childParentData = child.parentData;
@@ -1562,6 +1597,20 @@ class RenderViewport2 extends RenderBox with ContainerRenderObjectMixin<RenderSl
       if (child == center)
         break;
       child = childBefore(child);
+    }
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    if (center == null) {
+      assert(firstChild == null);
+      return;
+    }
+
+    if (_hasVisualOverflow) {
+      context.pushClipRect(needsCompositing, offset, Point.origin & size, _paintContents);
+    } else {
+      _paintContents(context, offset);
     }
   }
 
@@ -1757,6 +1806,7 @@ class RenderSliverToBoxAdapter extends RenderSliver with RenderObjectWithChildMi
       paintExtent: paintedChildSize,
       maxPaintExtent: childExtent,
       hitTestExtent: paintedChildSize,
+      hasVisualOverflow: childExtent > constraints.remainingPaintExtent || constraints.scrollOffset > 0.0,
     );
 
     final SliverPhysicalParentData childParentData = child.parentData;

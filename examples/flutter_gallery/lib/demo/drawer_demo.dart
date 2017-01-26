@@ -88,7 +88,7 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
         title: new Text('Navigation drawer'),
       ),
       drawer: new Drawer(
-        child: new Block(
+        child: new ScrollView(
           children: <Widget>[
             new UserAccountsDrawerHeader(
               accountName: new Text('Zach Widget'),

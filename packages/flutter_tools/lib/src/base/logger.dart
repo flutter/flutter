@@ -8,6 +8,7 @@ import 'dart:convert' show ASCII;
 import 'package:stack_trace/stack_trace.dart';
 
 import 'io.dart';
+import 'platform.dart';
 
 final AnsiTerminal terminal = new AnsiTerminal();
 
@@ -202,7 +203,7 @@ enum _LogType {
 class AnsiTerminal {
   AnsiTerminal() {
     // TODO(devoncarew): This detection does not work for Windows.
-    String term = Platform.environment['TERM'];
+    String term = platform.environment['TERM'];
     supportsColor = term != null && term != 'dumb';
   }
 

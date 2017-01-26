@@ -50,6 +50,6 @@ void main() {
   });
 
   testWidgets('Can be placed in an infinite box', (WidgetTester tester) async {
-    await tester.pumpWidget(new Block(children: <Widget>[new Container()]));
+    await tester.pumpWidget(new ScrollView(children: <Widget>[new Container()]));
   });
 }

@@ -305,6 +305,6 @@ class GalleryDrawer extends StatelessWidget {
       ));
     }
 
-    return new Drawer(child: new Block(children: allDrawerItems));
+    return new Drawer(child: new ScrollView(children: allDrawerItems));
   }
 }

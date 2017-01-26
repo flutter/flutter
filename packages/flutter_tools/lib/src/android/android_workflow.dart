@@ -6,6 +6,7 @@ import 'dart:async';
 
 import '../base/io.dart';
 import '../base/os.dart';
+import '../base/platform.dart';
 import '../base/process_manager.dart';
 import '../doctor.dart';
 import '../globals.dart';
@@ -30,8 +31,8 @@ class AndroidWorkflow extends DoctorValidator implements Workflow {
     String sdkVersionText;
 
     if (androidSdk == null) {
-      if (Platform.environment.containsKey(kAndroidHome)) {
-        String androidHomeDir = Platform.environment[kAndroidHome];
+      if (platform.environment.containsKey(kAndroidHome)) {
+        String androidHomeDir = platform.environment[kAndroidHome];
         messages.add(new ValidationMessage.error(
           '$kAndroidHome = $androidHomeDir\n'
           'but Android Studio / Android SDK not found at this location.'
@@ -56,8 +57,8 @@ class AndroidWorkflow extends DoctorValidator implements Workflow {
         ));
       }
 
-      if (Platform.environment.containsKey(kAndroidHome)) {
-        String androidHomeDir = Platform.environment[kAndroidHome];
+      if (platform.environment.containsKey(kAndroidHome)) {
+        String androidHomeDir = platform.environment[kAndroidHome];
         messages.add(new ValidationMessage('$kAndroidHome = $androidHomeDir'));
       }
 

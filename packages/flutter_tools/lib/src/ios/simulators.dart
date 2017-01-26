@@ -13,6 +13,7 @@ import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
+import '../base/platform.dart' as p;
 import '../base/process.dart';
 import '../base/process_manager.dart';
 import '../build_info.dart';
@@ -31,7 +32,7 @@ class IOSSimulators extends PollingDeviceDiscovery {
   IOSSimulators() : super('IOSSimulators');
 
   @override
-  bool get supportsPlatform => Platform.isMacOS;
+  bool get supportsPlatform => p.platform.isMacOS;
 
   @override
   List<Device> pollingGetDevices() => IOSSimulatorUtils.instance.getAttachedDevices();
@@ -359,7 +360,7 @@ class IOSSimulator extends Device {
 
   @override
   bool isSupported() {
-    if (!Platform.isMacOS) {
+    if (!p.platform.isMacOS) {
       _supportMessage = "Not supported on a non Mac host";
       return false;
     }
@@ -532,7 +533,7 @@ class IOSSimulator extends Device {
 
   Future<bool> pushFile(
       ApplicationPackage app, String localFile, String targetFile) async {
-    if (Platform.isMacOS) {
+    if (p.platform.isMacOS) {
       String simulatorHomeDirectory = _getSimulatorAppHomeDirectory(app);
       runCheckedSync(<String>['cp', localFile, path.join(simulatorHomeDirectory, targetFile)]);
       return true;

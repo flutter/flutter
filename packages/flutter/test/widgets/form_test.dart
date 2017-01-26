@@ -149,7 +149,7 @@ void main() {
             autovalidate: true,
             child: new Focus(
               key: focusKey,
-              child: new Block(
+              child: new ScrollView(
                 children: <Widget>[
                   new TextField(
                     key: fieldKey

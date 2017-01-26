@@ -13,11 +13,6 @@ class UrlLauncher {
 
   /// Parse the specified URL string and delegate handling of the same to the
   /// underlying platform.
-  ///
-  /// Arguments:
-  ///
-  /// * [urlString]: The URL string to be parsed by the underlying platform and
-  ///   before it attempts to launch the same.
   static Future<Null> launch(String urlString) async {
     await PlatformMessages.invokeMethod(
       'flutter/platform',

@@ -19,22 +19,20 @@ void main() {
               builder: (BuildContext context, StateSetter setState) {
                 return new Positioned(
                   width: 400.0,
-                  child: new Block(
-                    children: <Widget>[
-                      new Material(
-                        child: new MonthPicker(
-                          firstDate: new DateTime(0),
-                          lastDate: new DateTime(9999),
-                          key: _datePickerKey,
-                          selectedDate: _selectedDate,
-                          onChanged: (DateTime value) {
-                            setState(() {
-                              _selectedDate = value;
-                            });
-                          }
-                        )
+                  child: new SingleChildScrollView(
+                    child: new Material(
+                      child: new MonthPicker(
+                        firstDate: new DateTime(0),
+                        lastDate: new DateTime(9999),
+                        key: _datePickerKey,
+                        selectedDate: _selectedDate,
+                        onChanged: (DateTime value) {
+                          setState(() {
+                            _selectedDate = value;
+                          });
+                        }
                       )
-                    ]
+                    )
                   )
                 );
               }
@@ -91,15 +89,13 @@ void main() {
                 return new IntrinsicWidth(
                   child: new IntrinsicHeight(
                     child: new Material(
-                      child: new Block(
-                        children: <Widget>[
-                          new MonthPicker(
-                            firstDate: new DateTime(0),
-                            lastDate: new DateTime(9999),
-                            onChanged: (DateTime value) { },
-                            selectedDate: new DateTime(2000, DateTime.JANUARY, 1)
-                          )
-                        ]
+                      child: new SingleChildScrollView(
+                        child: new MonthPicker(
+                          firstDate: new DateTime(0),
+                          lastDate: new DateTime(9999),
+                          onChanged: (DateTime value) { },
+                          selectedDate: new DateTime(2000, DateTime.JANUARY, 1)
+                        )
                       )
                     )
                   )

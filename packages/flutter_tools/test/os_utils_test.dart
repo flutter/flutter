@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/os.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 
@@ -28,7 +28,7 @@ void main() {
       os.makeExecutable(file);
 
       // Skip this test on windows.
-      if (!Platform.isWindows) {
+      if (!platform.isWindows) {
         String mode = file.statSync().modeString();
         // rwxr--r--
         expect(mode.substring(0, 3), endsWith('x'));

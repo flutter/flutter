@@ -509,7 +509,7 @@ class _GestureSemantics extends SingleChildRenderObjectWidget {
         if (recognizer.onUpdate != null)
           recognizer.onUpdate(updateDetails);
         if (recognizer.onEnd != null)
-          recognizer.onEnd(new DragEndDetails());
+          recognizer.onEnd(new DragEndDetails(primaryVelocity: 0.0));
         return;
       }
     }
@@ -536,7 +536,7 @@ class _GestureSemantics extends SingleChildRenderObjectWidget {
         if (recognizer.onUpdate != null)
           recognizer.onUpdate(updateDetails);
         if (recognizer.onEnd != null)
-          recognizer.onEnd(new DragEndDetails());
+          recognizer.onEnd(new DragEndDetails(primaryVelocity: 0.0));
         return;
       }
     }

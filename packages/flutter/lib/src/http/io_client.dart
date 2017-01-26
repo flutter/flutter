@@ -62,7 +62,7 @@ class IOClient extends BaseClient {
       });
 
       return new StreamedResponse(
-          DelegatingStream.typed<List<int>>(response).handleError((dynamic error) =>
+          DelegatingStream.typed/*<List<int>>*/(response).handleError((dynamic error) =>
               throw new ClientException(error.message, error.uri),
               test: (dynamic error) => io.isHttpException(error)),
           response.statusCode,

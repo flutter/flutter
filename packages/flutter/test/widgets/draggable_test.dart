@@ -312,7 +312,7 @@ void main() {
     Point firstLocation, secondLocation, thirdLocation;
 
     await tester.pumpWidget(new MaterialApp(
-      home: new Block(
+      home: new ScrollView(
         children: <Widget>[
           new DragTarget<int>(
             builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
@@ -409,7 +409,7 @@ void main() {
     await gesture.up();
     await tester.pump();
     expect(events, equals(<String>[]));
-    expect(tester.getCenter(find.text('Target')).y, lessThan(0.0));
+    expect(find.text('Target'), findsNothing);
     events.clear();
   });
 
@@ -418,7 +418,7 @@ void main() {
     Point firstLocation, secondLocation, thirdLocation;
 
     await tester.pumpWidget(new MaterialApp(
-      home: new Block(
+      home: new ScrollView(
         scrollDirection: Axis.horizontal,
         children: <Widget>[
           new DragTarget<int>(
@@ -516,7 +516,7 @@ void main() {
     await gesture.up();
     await tester.pump();
     expect(events, equals(<String>[]));
-    expect(tester.getCenter(find.text('Target')).x, lessThan(0.0));
+    expect(find.text('Target'), findsNothing);
     events.clear();
   });
 

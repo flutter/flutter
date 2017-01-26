@@ -18,7 +18,7 @@ void main() {
             title: new Text('Home'),
           ),
           drawer: new Drawer(
-            child: new Block(
+            child: new ScrollView(
               children: <Widget>[
                 new AboutDrawerItem(
                   applicationVersion: '0.1.2',

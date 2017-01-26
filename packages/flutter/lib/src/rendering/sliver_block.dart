@@ -497,6 +497,8 @@ abstract class RenderSliverBlock extends RenderSliver
       scrollExtent: estimatedTotalExtent,
       paintExtent: paintedExtent,
       maxPaintExtent: estimatedTotalExtent,
+      // Conservative to avoid flickering away the clip during scroll.
+      hasVisualOverflow: endScrollOffset > targetEndScrollOffset || constraints.scrollOffset > 0.0,
     );
 
     assert(_currentlyUpdatingChildIndex == null);
@@ -506,10 +508,8 @@ abstract class RenderSliverBlock extends RenderSliver
   bool hitTestChildren(HitTestResult result, { @required double mainAxisPosition, @required double crossAxisPosition }) {
     RenderBox child = lastChild;
     while (child != null) {
-      if (child != null) {
-        if (hitTestBoxChild(result, child, mainAxisPosition: mainAxisPosition, crossAxisPosition: crossAxisPosition))
-          return true;
-      }
+      if (hitTestBoxChild(result, child, mainAxisPosition: mainAxisPosition, crossAxisPosition: crossAxisPosition))
+        return true;
       child = childBefore(child);
     }
     return false;
@@ -517,46 +517,12 @@ abstract class RenderSliverBlock extends RenderSliver
 
   @override
   double childPosition(RenderBox child) {
-    return offsetOf(child);
+    return offsetOf(child) - constraints.scrollOffset;
   }
-
-  // TODO(ianh): There's a lot of duplicate code in the next two functions,
-  // but I don't see a good way to avoid it, since both functions are hot.
 
   @override
   void applyPaintTransform(RenderObject child, Matrix4 transform) {
-    // coordinate system origin here is at the top-left corner, regardless of our axis direction.
-    // originOffset gives us the delta from the real origin to the origin in the axis direction.
-    Offset unitOffset, originOffset;
-    bool addExtent;
-    switch (applyGrowthDirectionToAxisDirection(constraints.axisDirection, constraints.growthDirection)) {
-      case AxisDirection.up:
-        unitOffset = const Offset(0.0, -1.0);
-        originOffset = new Offset(0.0, geometry.paintExtent);
-        addExtent = true;
-        break;
-      case AxisDirection.right:
-        unitOffset = const Offset(1.0, 0.0);
-        originOffset = Offset.zero;
-        addExtent = false;
-        break;
-      case AxisDirection.down:
-        unitOffset = const Offset(0.0, 1.0);
-        originOffset = Offset.zero;
-        addExtent = false;
-        break;
-      case AxisDirection.left:
-        unitOffset = const Offset(-1.0, 0.0);
-        originOffset = new Offset(geometry.paintExtent, 0.0);
-        addExtent = true;
-        break;
-    }
-    assert(unitOffset != null);
-    assert(addExtent != null);
-    Offset childOffset = originOffset + unitOffset * (offsetOf(child) - constraints.scrollOffset);
-    if (addExtent)
-      childOffset += unitOffset * paintExtentOf(child);
-    transform.translate(childOffset.dx, childOffset.dy);
+    applyPaintTransformForBoxChild(child, transform);
   }
 
   @override
@@ -593,7 +559,7 @@ abstract class RenderSliverBlock extends RenderSliver
     assert(addExtent != null);
     RenderBox child = firstChild;
     while (child != null) {
-      Offset childOffset = originOffset + unitOffset * (offsetOf(child) - constraints.scrollOffset);
+      Offset childOffset = originOffset + unitOffset * childPosition(child);
       if (addExtent)
         childOffset += unitOffset * paintExtentOf(child);
       context.paintChild(child, childOffset);

@@ -4,7 +4,7 @@
 
 import 'package:path/path.dart' as path;
 
-import '../base/io.dart';
+import '../base/platform.dart';
 import '../cache.dart';
 
 /// Locate the Dart SDK.
@@ -16,5 +16,5 @@ String get dartSdkPath {
 /// ==> `pub.bat`.  The default SDK location can be overridden with a specified
 /// [sdkLocation].
 String sdkBinaryName(String name, { String sdkLocation }) {
-  return path.absolute(path.join(sdkLocation ?? dartSdkPath, 'bin', Platform.isWindows ? '$name.bat' : name));
+  return path.absolute(path.join(sdkLocation ?? dartSdkPath, 'bin', platform.isWindows ? '$name.bat' : name));
 }

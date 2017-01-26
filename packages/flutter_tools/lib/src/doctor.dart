@@ -3,16 +3,16 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert' show UTF8;
 
 import 'package:archive/archive.dart';
-import 'dart:convert' show UTF8;
 import 'package:path/path.dart' as path;
 
 import 'android/android_workflow.dart';
 import 'base/common.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
-import 'base/io.dart';
+import 'base/platform.dart';
 import 'device.dart';
 import 'globals.dart';
 import 'ios/ios_workflow.dart';
@@ -27,7 +27,7 @@ const Map<String, String> _osNames = const <String, String>{
 };
 
 String osName() {
-  String os = Platform.operatingSystem;
+  String os = platform.operatingSystem;
   return _osNames.containsKey(os) ? _osNames[os] : os;
 }
 
@@ -182,7 +182,7 @@ class ValidationResult {
     if (type == ValidationType.missing)
       return '[x]';
     else if (type == ValidationType.installed)
-      return Platform.isWindows ? '[√]' : '[✓]';
+      return platform.isWindows ? '[√]' : '[✓]';
     else
       return '[-]';
   }
@@ -217,7 +217,7 @@ class _FlutterValidator extends DoctorValidator {
     messages.add(new ValidationMessage('Engine revision ${version.engineRevisionShort}'));
     messages.add(new ValidationMessage('Tools Dart version ${version.dartSdkVersion}'));
 
-    if (Platform.isWindows) {
+    if (platform.isWindows) {
       valid = ValidationType.missing;
 
       messages.add(new ValidationMessage.error(
@@ -254,9 +254,9 @@ abstract class IntelliJValidator extends DoctorValidator {
   };
 
   static Iterable<DoctorValidator> get installedValidators {
-    if (Platform.isLinux || Platform.isWindows)
+    if (platform.isLinux || platform.isWindows)
       return IntelliJValidatorOnLinuxAndWindows.installed;
-    if (Platform.isMacOS)
+    if (platform.isMacOS)
       return IntelliJValidatorOnMac.installed;
     return <DoctorValidator>[];
   }

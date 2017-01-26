@@ -25,6 +25,7 @@ dart_package("flutter_tools") {
     "//third_party/dart-pkg/pub/mustache",
     "//third_party/dart-pkg/pub/package_config",
     "//third_party/dart-pkg/pub/path",
+    "//third_party/dart-pkg/pub/platform",
     "//third_party/dart-pkg/pub/process",
     "//third_party/dart-pkg/pub/pub_semver",
     "//third_party/dart-pkg/pub/stack_trace",

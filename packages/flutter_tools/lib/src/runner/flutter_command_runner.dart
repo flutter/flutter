@@ -12,8 +12,8 @@ import '../android/android_sdk.dart';
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
-import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/process_manager.dart';
 import '../cache.dart';
@@ -117,12 +117,12 @@ class FlutterCommandRunner extends CommandRunner<Null> {
   }
 
   static String get _defaultFlutterRoot {
-    if (Platform.environment.containsKey(kFlutterRootEnvironmentVariableName))
-      return Platform.environment[kFlutterRootEnvironmentVariableName];
+    if (platform.environment.containsKey(kFlutterRootEnvironmentVariableName))
+      return platform.environment[kFlutterRootEnvironmentVariableName];
     try {
-      if (Platform.script.scheme == 'data')
+      if (platform.script.scheme == 'data')
         return '../..'; // we're running as a test
-      String script = Platform.script.toFilePath();
+      String script = platform.script.toFilePath();
       if (path.basename(script) == kSnapshotFileName)
         return path.dirname(path.dirname(path.dirname(script)));
       if (path.basename(script) == kFlutterToolsScriptFileName)
@@ -179,7 +179,7 @@ class FlutterCommandRunner extends CommandRunner<Null> {
     // enginePath's initialiser uses it).
     Cache.flutterRoot = path.normalize(path.absolute(globalResults['flutter-root']));
 
-    if (Platform.environment['FLUTTER_ALREADY_LOCKED'] != 'true')
+    if (platform.environment['FLUTTER_ALREADY_LOCKED'] != 'true')
       await Cache.lock();
 
     if (globalResults['suppress-analytics'])
@@ -219,7 +219,7 @@ class FlutterCommandRunner extends CommandRunner<Null> {
   }
 
   String _findEnginePath(ArgResults globalResults) {
-    String engineSourcePath = globalResults['local-engine-src-path'] ?? Platform.environment[kFlutterEngineEnvironmentVariableName];
+    String engineSourcePath = globalResults['local-engine-src-path'] ?? platform.environment[kFlutterEngineEnvironmentVariableName];
 
     if (engineSourcePath == null && globalResults['local-engine'] != null) {
       try {

@@ -7,9 +7,9 @@ import 'dart:async';
 import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/devfs.dart';
@@ -42,6 +42,7 @@ void testUsingContext(String description, dynamic testMethod(), {
 
     // Initialize the test context with some default mocks.
     // Seed these context entries first since others depend on them
+    testContext.putIfAbsent(Platform, () => new LocalPlatform());
     testContext.putIfAbsent(FileSystem, () => new LocalFileSystem());
     testContext.putIfAbsent(ProcessManager, () => new LocalProcessManager());
     testContext.putIfAbsent(Logger, () => new BufferLogger());
@@ -68,7 +69,7 @@ void testUsingContext(String description, dynamic testMethod(), {
     testContext.putIfAbsent(SimControl, () => new MockSimControl());
     testContext.putIfAbsent(Usage, () => new MockUsage());
 
-    final String basePath = path.dirname(Platform.script.path);
+    final String basePath = path.dirname(platform.script.path);
     final String flutterRoot =
         path.normalize(path.join(basePath, '..', '..', '..'));
     try {
@@ -143,7 +144,19 @@ class MockSimControl extends Mock implements SimControl {
   }
 }
 
-class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {}
+class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {
+  // TODO(goderbauer): Calls to the executable should be mocked out.
+  //     That way it wouldn't really matter what the mock returns here.
+  @override
+  String getExecutableName(String binaryName, { String winExtension }) {
+    if (!platform.isWindows)
+      return binaryName;
+    winExtension ??= 'exe';
+    if (path.extension(binaryName).isEmpty && winExtension.isNotEmpty)
+      return '$binaryName.$winExtension';
+    return binaryName;
+  }
+}
 
 class MockIOSSimulatorUtils extends Mock implements IOSSimulatorUtils {}
 

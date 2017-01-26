@@ -14,7 +14,8 @@ const Color _kDebugPaintSizeColor = const Color(0xFF00FFFF);
 const Color _kDebugPaintSpacingColor = const Color(0x90909090);
 const Color _kDebugPaintPaddingColor = const Color(0x900090FF);
 const Color _kDebugPaintPaddingInnerEdgeColor = const Color(0xFF0090FF);
-const Color _kDebugPaintArrowColor = const Color(0xFFFFFF00);
+const Color _kDebugPaintBoxArrowColor = const Color(0xFFFFFF00);
+const Color _kDebugPaintSliverArrowColor = const Color(0xFF33CC33);
 const Color _kDebugPaintAlphabeticBaselineColor = const Color(0xFF00FF00);
 const Color _kDebugPaintIdeographicBaselineColor = const Color(0xFFFFD000);
 const Color _kDebugPaintLayerBordersColor = const Color(0xFFFF9800);
@@ -23,34 +24,37 @@ const HSVColor _kDebugCurrentRepaintColor = const HSVColor.fromAHSV(0.4, 60.0, 1
 const double _kDebugRepaintRainbowHueIncrement = 2.0;
 
 /// Causes each RenderBox to paint a box around its bounds, and some extra
-/// boxes, such as RenderPadding, to draw construction lines.
+/// boxes, such as [RenderPadding], to draw construction lines.
 bool debugPaintSizeEnabled = false;
 
 /// The color to use when painting RenderObject bounds.
 Color debugPaintSizeColor = _kDebugPaintSizeColor;
 
 /// The color to use when painting some boxes that just add space (e.g. an empty
-/// RenderConstrainedBox or RenderPadding).
+/// RenderConstrainedBox or [RenderPadding]).
 ///
 /// Used by, among other methods, [debugPaintPadding], which is called by
 /// [RenderPadding.debugPaintSize] when [debugPaintSizeEnabled] is true.
 Color debugPaintSpacingColor = _kDebugPaintSpacingColor;
 
-/// The color to use when painting RenderPadding edges.
+/// The color to use when painting [RenderPadding] edges.
 ///
 /// Used by, among other methods, [debugPaintPadding], which is called by
 /// [RenderPadding.debugPaintSize] when [debugPaintSizeEnabled] is true.
 Color debugPaintPaddingColor = _kDebugPaintPaddingColor;
 
-/// The color to use when painting RenderPadding edges. This color is painted on
+/// The color to use when painting [RenderPadding] edges. This color is painted on
 /// top of [debugPaintPaddingColor].
 ///
 /// Used by, among other methods, [debugPaintPadding], which is called by
 /// [RenderPadding.debugPaintSize] when [debugPaintSizeEnabled] is true.
 Color debugPaintPaddingInnerEdgeColor = _kDebugPaintPaddingInnerEdgeColor;
 
-/// The color to use when painting the arrows used to show RenderPositionedBox alignment.
-Color debugPaintArrowColor = _kDebugPaintArrowColor;
+/// The color to use when painting the arrows used to show [RenderPositionedBox] alignment.
+Color debugPaintBoxArrowColor = _kDebugPaintBoxArrowColor;
+
+/// The color to use when painting the arrows used to show [RenderSliver] alignment.
+Color debugPaintSliverArrowColor = _kDebugPaintSliverArrowColor;
 
 /// Causes each RenderBox to paint a line at each of its baselines.
 bool debugPaintBaselinesEnabled = false;
@@ -166,7 +170,8 @@ bool debugAssertAllRenderVarsUnset(String reason) {
         debugPaintSpacingColor != _kDebugPaintSpacingColor ||
         debugPaintPaddingColor != _kDebugPaintPaddingColor ||
         debugPaintPaddingInnerEdgeColor != _kDebugPaintPaddingInnerEdgeColor ||
-        debugPaintArrowColor != _kDebugPaintArrowColor ||
+        debugPaintBoxArrowColor != _kDebugPaintBoxArrowColor ||
+        debugPaintSliverArrowColor != _kDebugPaintSliverArrowColor ||
         debugPaintAlphabeticBaselineColor != _kDebugPaintAlphabeticBaselineColor ||
         debugPaintIdeographicBaselineColor != _kDebugPaintIdeographicBaselineColor ||
         debugPaintLayerBordersColor != _kDebugPaintLayerBordersColor ||

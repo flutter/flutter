@@ -126,20 +126,22 @@ void main() {
     await tester.pumpWidget(
       new SemanticsDebugger(
         child: new Material(
-          child: new Block(children: <Widget>[
-            new RaisedButton(
-              onPressed: () {
-                log.add('top');
-              },
-              child: new Text('TOP'),
-            ),
-            new RaisedButton(
-              onPressed: () {
-                log.add('bottom');
-              },
-              child: new Text('BOTTOM'),
-            ),
-          ]),
+          child: new ScrollView(
+            children: <Widget>[
+              new RaisedButton(
+                onPressed: () {
+                  log.add('top');
+                },
+                child: new Text('TOP'),
+              ),
+              new RaisedButton(
+                onPressed: () {
+                  log.add('bottom');
+                },
+                child: new Text('BOTTOM'),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -158,7 +160,7 @@ void main() {
 
     await tester.pumpWidget(
       new SemanticsDebugger(
-        child: new Block(
+        child: new ScrollView(
           children: <Widget>[
             new Container(
               key: childKey,
@@ -173,22 +175,22 @@ void main() {
 
     expect(tester.getTopLeft(find.byKey(childKey)).y, equals(0.0));
 
-    await tester.fling(find.byType(Block), const Offset(0.0, -200.0), 200.0);
+    await tester.fling(find.byType(ScrollView), const Offset(0.0, -200.0), 200.0);
     await tester.pump();
 
     expect(tester.getTopLeft(find.byKey(childKey)).y, equals(-480.0));
 
-    await tester.fling(find.byType(Block), const Offset(200.0, 0.0), 200.0);
+    await tester.fling(find.byType(ScrollView), const Offset(200.0, 0.0), 200.0);
     await tester.pump();
 
     expect(tester.getTopLeft(find.byKey(childKey)).y, equals(-480.0));
 
-    await tester.fling(find.byType(Block), const Offset(-200.0, 0.0), 200.0);
+    await tester.fling(find.byType(ScrollView), const Offset(-200.0, 0.0), 200.0);
     await tester.pump();
 
     expect(tester.getTopLeft(find.byKey(childKey)).y, equals(-480.0));
 
-    await tester.fling(find.byType(Block), const Offset(0.0, 200.0), 200.0);
+    await tester.fling(find.byType(ScrollView), const Offset(0.0, 200.0), 200.0);
     await tester.pump();
 
     expect(tester.getTopLeft(find.byKey(childKey)).y, equals(0.0));
@@ -245,7 +247,7 @@ void main() {
     await tester.pumpWidget(
       new SemanticsDebugger(
         child: new Material(
-          child: new Block(
+          child: new ScrollView(
             children: <Widget>[
               new Checkbox(
                 key: keyTop,

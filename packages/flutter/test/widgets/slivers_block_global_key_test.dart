@@ -37,13 +37,13 @@ Future<Null> test(WidgetTester tester, double offset, List<int> keys) {
 }
 
 void verify(WidgetTester tester, List<Point> answerKey, String text) {
-  List<Point> testAnswers = tester.renderObjectList/*<RenderBox>*/(find.byType(SizedBox)).map/*<Point>*/(
+  List<Point> testAnswers = tester.renderObjectList<RenderBox>(find.byType(SizedBox)).map<Point>(
     (RenderBox target) => target.localToGlobal(const Point(0.0, 0.0))
   ).toList();
   expect(testAnswers, equals(answerKey));
   final String foundText =
-    tester.widgetList/*<Text>*/(find.byType(Text))
-    .map/*<String>*/((Text widget) => widget.data)
+    tester.widgetList<Text>(find.byType(Text))
+    .map<String>((Text widget) => widget.data)
     .reduce((String value, String element) => value + element);
   expect(foundText, equals(text));
 }

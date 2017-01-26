@@ -197,7 +197,7 @@ class RenderConstrainedBox extends RenderProxyBox {
   /// The [additionalConstraints] argument must not be null and must be valid.
   RenderConstrainedBox({
     RenderBox child,
-    BoxConstraints additionalConstraints
+    @required BoxConstraints additionalConstraints,
   }) : _additionalConstraints = additionalConstraints, super(child) {
     assert(additionalConstraints != null);
     assert(additionalConstraints.debugAssertIsValid());
@@ -386,7 +386,7 @@ class RenderAspectRatio extends RenderProxyBox {
   /// The [aspectRatio] argument must be a finite, positive value.
   RenderAspectRatio({
     RenderBox child,
-    double aspectRatio
+    @required double aspectRatio,
   }) : _aspectRatio = aspectRatio, super(child) {
     assert(aspectRatio != null);
     assert(aspectRatio > 0.0);
@@ -776,9 +776,9 @@ class RenderShaderMask extends RenderProxyBox {
   ///
   /// The [shaderCallback] and [blendMode] arguments must not be null.
   RenderShaderMask({
-    ShaderCallback shaderCallback,
+    RenderBox child,
+    @required ShaderCallback shaderCallback,
     BlendMode blendMode: BlendMode.modulate,
-    RenderBox child
   }) : _shaderCallback = shaderCallback, _blendMode = blendMode, super(child) {
     assert(shaderCallback != null);
     assert(blendMode != null);

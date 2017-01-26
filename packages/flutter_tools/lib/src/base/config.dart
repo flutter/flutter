@@ -8,7 +8,7 @@ import 'package:path/path.dart' as path;
 
 import 'context.dart';
 import 'file_system.dart';
-import 'io.dart';
+import 'platform.dart';
 
 class Config {
   Config([File configFile]) {
@@ -46,7 +46,7 @@ class Config {
 }
 
 String _userHomeDir() {
-  String envKey = Platform.operatingSystem == 'windows' ? 'APPDATA' : 'HOME';
-  String value = Platform.environment[envKey];
+  String envKey = platform.operatingSystem == 'windows' ? 'APPDATA' : 'HOME';
+  String value = platform.environment[envKey];
   return value == null ? '.' : value;
 }

@@ -10,6 +10,7 @@ import 'package:path/path.dart' as path;
 import 'context.dart';
 import 'file_system.dart';
 import 'io.dart';
+import 'platform.dart';
 import 'process.dart';
 import 'process_manager.dart';
 
@@ -18,7 +19,7 @@ OperatingSystemUtils get os => context[OperatingSystemUtils];
 
 abstract class OperatingSystemUtils {
   factory OperatingSystemUtils() {
-    if (Platform.isWindows) {
+    if (platform.isWindows) {
       return new _WindowsUtils();
     } else {
       return new _PosixUtils();
@@ -27,8 +28,9 @@ abstract class OperatingSystemUtils {
 
   OperatingSystemUtils._private();
 
-  String get operatingSystem => Platform.operatingSystem;
 
+  // TODO(tvolkert): Remove these and migrate callers to Platform
+  String get operatingSystem => platform.operatingSystem;
   bool get isMacOS => operatingSystem == 'macos';
   bool get isWindows => operatingSystem == 'windows';
   bool get isLinux => operatingSystem == 'linux';
@@ -46,7 +48,7 @@ abstract class OperatingSystemUtils {
   void unzip(File file, Directory targetDirectory);
 
   /// Returns the name of the [binaryName] executable.
-  /// 
+  ///
   /// No-op on most OS.
   /// On Windows it returns [binaryName].[winExtension], if [winExtension] is
   /// specified, or [binaryName].exe otherwise.

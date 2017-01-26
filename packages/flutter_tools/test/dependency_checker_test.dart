@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/commands/devices.dart';
 import 'package:flutter_tools/src/dart/dependencies.dart';
 import 'package:flutter_tools/src/dependency_checker.dart';
@@ -14,7 +14,7 @@ import 'src/context.dart';
 
 void main()  {
   group('DependencyChecker', () {
-    final String basePath = path.dirname(Platform.script.path);
+    final String basePath = path.dirname(platform.script.path);
     final String dataPath = path.join(basePath, 'data', 'dart_dependencies_test');
 
     testUsingContext('good', () {

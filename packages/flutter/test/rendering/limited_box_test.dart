@@ -9,7 +9,7 @@ import 'package:test/test.dart';
 import 'rendering_tester.dart';
 
 void main() {
-  test('parent max size is unconstrained', () {
+  test('LimitedBox: parent max size is unconstrained', () {
     RenderBox child = new RenderConstrainedBox(
       additionalConstraints: const BoxConstraints.tightFor(width: 300.0, height: 400.0)
     );
@@ -29,7 +29,7 @@ void main() {
     expect(child.size.height, 200.0);
   });
 
-  test('parent maxWidth is unconstrained', () {
+  test('LimitedBox: parent maxWidth is unconstrained', () {
     RenderBox child = new RenderConstrainedBox(
       additionalConstraints: const BoxConstraints.tightFor(width: 300.0, height: 400.0)
     );
@@ -49,7 +49,7 @@ void main() {
     expect(child.size.height, 500.0);
   });
 
-  test('parent maxHeight is unconstrained', () {
+  test('LimitedBox: parent maxHeight is unconstrained', () {
     RenderBox child = new RenderConstrainedBox(
       additionalConstraints: const BoxConstraints.tightFor(width: 300.0, height: 400.0)
     );
@@ -68,5 +68,21 @@ void main() {
 
     expect(child.size.width, 500.0);
     expect(child.size.height, 200.0);
+  });
+
+  test('LimitedBox: no child', () {
+    RenderBox box;
+    RenderBox parent = new RenderConstrainedOverflowBox(
+      minWidth: 10.0,
+      maxWidth: 500.0,
+      minHeight: 0.0,
+      maxHeight: double.INFINITY,
+      child: box = new RenderLimitedBox(
+        maxWidth: 100.0,
+        maxHeight: 200.0,
+      )
+    );
+    layout(parent);
+    expect(box.size, const Size(10.0, 0.0));
   });
 }

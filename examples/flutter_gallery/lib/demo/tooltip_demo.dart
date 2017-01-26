@@ -22,7 +22,7 @@ class TooltipDemo extends StatelessWidget {
       ),
       body: new Builder(
         builder: (BuildContext context) {
-          return new Block(
+          return new ScrollView(
             children: <Widget>[
               new Text(_introText, style: theme.textTheme.subhead),
               new Row(

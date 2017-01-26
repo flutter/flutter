@@ -5,7 +5,7 @@
 import 'package:path/path.dart' as path;
 
 import 'base/context.dart';
-import 'base/io.dart';
+import 'base/platform.dart';
 import 'base/utils.dart';
 import 'globals.dart';
 
@@ -106,9 +106,9 @@ TargetPlatform getTargetPlatformForName(String platform) {
 }
 
 HostPlatform getCurrentHostPlatform() {
-  if (Platform.isMacOS)
+  if (platform.isMacOS)
     return HostPlatform.darwin_x64;
-  if (Platform.isLinux)
+  if (platform.isLinux)
     return HostPlatform.linux_x64;
 
   printError('Unsupported host platform, defaulting to Linux');

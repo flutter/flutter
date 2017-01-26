@@ -589,7 +589,7 @@ class GalleryDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return new Drawer(
-      child: new Block(
+      child: new ScrollView(
         children: <Widget>[
           new FancyDrawerHeader(),
           new DrawerItem(
