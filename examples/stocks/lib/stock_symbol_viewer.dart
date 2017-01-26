@@ -73,22 +73,20 @@ class StockSymbolPage extends StatelessWidget {
       appBar: new AppBar(
         title: new Text(stock.name)
       ),
-      body: new Block(
-        children: <Widget>[
-          new Container(
-            margin: new EdgeInsets.all(20.0),
-            child: new Card(
-              child: new _StockSymbolView(
-                stock: stock,
-                arrow: new Hero(
-                  tag: stock,
-                  turns: 2,
-                  child: new StockArrow(percentChange: stock.percentChange)
-                )
+      body: new SingleChildScrollView(
+        child: new Container(
+          margin: new EdgeInsets.all(20.0),
+          child: new Card(
+            child: new _StockSymbolView(
+              stock: stock,
+              arrow: new Hero(
+                tag: stock,
+                turns: 2,
+                child: new StockArrow(percentChange: stock.percentChange)
               )
             )
           )
-        ]
+        )
       )
     );
   }

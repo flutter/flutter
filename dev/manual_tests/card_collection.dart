@@ -123,33 +123,35 @@ class CardCollectionState extends State<CardCollection> {
     return new Drawer(
       child: new IconTheme(
         data: const IconThemeData(color: Colors.black),
-        child: new Block(children: <Widget>[
-          new DrawerHeader(child: new Center(child: new Text('Options'))),
-          buildDrawerCheckbox("Make card labels editable", _editable, _toggleEditable),
-          buildDrawerCheckbox("Snap fling scrolls to center", _snapToCenter, _toggleSnapToCenter),
-          buildDrawerCheckbox("Fixed size cards", _fixedSizeCards, _toggleFixedSizeCards),
-          buildDrawerCheckbox("Let the sun shine", _sunshine, _toggleSunshine),
-          buildDrawerCheckbox("Vary font sizes", _varyFontSizes, _toggleVaryFontSizes, enabled: !_editable),
-          new Divider(),
-          buildDrawerColorRadioItem("Deep Purple", Colors.deepPurple, _primaryColor, _selectColor),
-          buildDrawerColorRadioItem("Green", Colors.green, _primaryColor, _selectColor),
-          buildDrawerColorRadioItem("Amber", Colors.amber, _primaryColor, _selectColor),
-          buildDrawerColorRadioItem("Teal", Colors.teal, _primaryColor, _selectColor),
-          new Divider(),
-          buildDrawerDirectionRadioItem("Dismiss horizontally", DismissDirection.horizontal, _dismissDirection, _changeDismissDirection, icon: Icons.code),
-          buildDrawerDirectionRadioItem("Dismiss left", DismissDirection.endToStart, _dismissDirection, _changeDismissDirection, icon: Icons.arrow_back),
-          buildDrawerDirectionRadioItem("Dismiss right", DismissDirection.startToEnd, _dismissDirection, _changeDismissDirection, icon: Icons.arrow_forward),
-          new Divider(),
-          buildFontRadioItem("Left-align text", TextAlign.left, _textAlign, _changeTextAlign, icon: Icons.format_align_left, enabled: !_editable),
-          buildFontRadioItem("Center-align text", TextAlign.center, _textAlign, _changeTextAlign, icon: Icons.format_align_center, enabled: !_editable),
-          buildFontRadioItem("Right-align text", TextAlign.right, _textAlign, _changeTextAlign, icon: Icons.format_align_right, enabled: !_editable),
-          new Divider(),
-          new DrawerItem(
-            icon: new Icon(Icons.dvr),
-            onPressed: () { debugDumpApp(); debugDumpRenderTree(); },
-            child: new Text('Dump App to Console')
-          ),
-        ])
+        child: new ScrollView(
+          children: <Widget>[
+            new DrawerHeader(child: new Center(child: new Text('Options'))),
+            buildDrawerCheckbox("Make card labels editable", _editable, _toggleEditable),
+            buildDrawerCheckbox("Snap fling scrolls to center", _snapToCenter, _toggleSnapToCenter),
+            buildDrawerCheckbox("Fixed size cards", _fixedSizeCards, _toggleFixedSizeCards),
+            buildDrawerCheckbox("Let the sun shine", _sunshine, _toggleSunshine),
+            buildDrawerCheckbox("Vary font sizes", _varyFontSizes, _toggleVaryFontSizes, enabled: !_editable),
+            new Divider(),
+            buildDrawerColorRadioItem("Deep Purple", Colors.deepPurple, _primaryColor, _selectColor),
+            buildDrawerColorRadioItem("Green", Colors.green, _primaryColor, _selectColor),
+            buildDrawerColorRadioItem("Amber", Colors.amber, _primaryColor, _selectColor),
+            buildDrawerColorRadioItem("Teal", Colors.teal, _primaryColor, _selectColor),
+            new Divider(),
+            buildDrawerDirectionRadioItem("Dismiss horizontally", DismissDirection.horizontal, _dismissDirection, _changeDismissDirection, icon: Icons.code),
+            buildDrawerDirectionRadioItem("Dismiss left", DismissDirection.endToStart, _dismissDirection, _changeDismissDirection, icon: Icons.arrow_back),
+            buildDrawerDirectionRadioItem("Dismiss right", DismissDirection.startToEnd, _dismissDirection, _changeDismissDirection, icon: Icons.arrow_forward),
+            new Divider(),
+            buildFontRadioItem("Left-align text", TextAlign.left, _textAlign, _changeTextAlign, icon: Icons.format_align_left, enabled: !_editable),
+            buildFontRadioItem("Center-align text", TextAlign.center, _textAlign, _changeTextAlign, icon: Icons.format_align_center, enabled: !_editable),
+            buildFontRadioItem("Right-align text", TextAlign.right, _textAlign, _changeTextAlign, icon: Icons.format_align_right, enabled: !_editable),
+            new Divider(),
+            new DrawerItem(
+              icon: new Icon(Icons.dvr),
+              onPressed: () { debugDumpApp(); debugDumpRenderTree(); },
+              child: new Text('Dump App to Console')
+            ),
+          ]
+        )
       )
     );
   }
