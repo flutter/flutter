@@ -255,7 +255,7 @@ class MemoryTest {
           '-d',
           deviceId,
           '--use-existing-app',
-        ], env: <String, String> {
+        ], environment: <String, String> {
           'VM_SERVICE_URL': 'http://localhost:$debugPort'
         });
 

@@ -47,9 +47,14 @@ TaskFunction createMicrobenchmarkTask() {
   };
 }
 
-Future<Process> _startFlutter({String command = 'run', List<String> options: const <String>[], bool canFail: false, Map<String, String> env}) {
+Future<Process> _startFlutter({
+  String command = 'run',
+  List<String> options: const <String>[],
+  bool canFail: false,
+  Map<String, String> environment,
+}) {
   List<String> args = <String>['run']..addAll(options);
-  return startProcess(path.join(flutterDirectory.path, 'bin', 'flutter'), args, env: env);
+  return startProcess(path.join(flutterDirectory.path, 'bin', 'flutter'), args, environment: environment);
 }
 
 Future<Map<String, double>> _readJsonResults(Process process) {
