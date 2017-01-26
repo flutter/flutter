@@ -13,6 +13,8 @@ executable("content_handler") {
 
   defines = []
 
+  libs = []
+
   sources = [
     "app.cc",
     "app.h",
@@ -63,7 +65,11 @@ executable("content_handler") {
   if (flutter_enable_vulkan) {
     defines += [ "FLUTTER_ENABLE_VULKAN" ]
 
+    libs += [ "hid" ]
+
     sources += [
+      "direct_input.cc",
+      "direct_input.h",
       "vulkan_rasterizer.cc",
       "vulkan_rasterizer.h",
     ]

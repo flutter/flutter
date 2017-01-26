@@ -19,10 +19,14 @@
 #include "flutter/lib/ui/window/viewport_metrics.h"
 #include "flutter/runtime/runtime_controller.h"
 #include "flutter/runtime/runtime_delegate.h"
+#include "lib/fidl/cpp/bindings/binding.h"
 #include "lib/ftl/functional/closure.h"
 #include "lib/ftl/macros.h"
 #include "lib/ftl/memory/weak_ptr.h"
-#include "lib/fidl/cpp/bindings/binding.h"
+
+#if FLUTTER_ENABLE_VULKAN
+#include "flutter/content_handler/direct_input.h"
+#endif  // FLUTTER_ENABLE_VULKAN
 
 namespace flutter_runner {
 class Rasterizer;
@@ -85,6 +89,9 @@ class RuntimeHolder : public blink::RuntimeDelegate,
   mozart::ViewManagerPtr view_manager_;
   fidl::Binding<mozart::ViewListener> view_listener_binding_;
   fidl::Binding<mozart::InputListener> input_listener_binding_;
+#if FLUTTER_ENABLE_VULKAN
+  std::unique_ptr<DirectInput> direct_input_;
+#endif  // FLUTTER_ENABLE_VULKAN
   mozart::InputConnectionPtr input_connection_;
   mozart::ViewPtr view_;
   mozart::ViewPropertiesPtr view_properties_;

@@ -128,6 +128,15 @@ void RuntimeHolder::CreateView(
   input_listener_binding_.Bind(GetProxy(&input_listener));
   input_connection_->SetListener(std::move(input_listener));
 
+#if FLUTTER_ENABLE_VULKAN
+  direct_input_ = std::make_unique<DirectInput>(
+      [this](const blink::PointerDataPacket& packet) -> void {
+        runtime_->DispatchPointerDataPacket(packet);
+      });
+  FTL_DCHECK(direct_input_->IsValid());
+  direct_input_->WaitForReadAvailability();
+#endif  // FLUTTER_ENABLE_VULKAN
+
   mozart::ScenePtr scene;
   view_->CreateScene(fidl::GetProxy(&scene));
   blink::Threads::Gpu()->PostTask(ftl::MakeCopyable([
