@@ -188,19 +188,19 @@ void main() {
 
 
   testWidgets('TabBar can be scrolled independent of the selection', (WidgetTester tester) async {
-    List<String> tabs = <String>['AAAAAA', 'BBBBBB', 'CCCCCC', 'DDDDDD', 'EEEEEE', 'FFFFFF', 'GGGGGG', 'HHHHHH', 'IIIIII', 'JJJJJJ', 'KKKKKK', 'LLLLLL'];
+    List<String> tabs = <String>['AAAA', 'BBBB', 'CCCC', 'DDDD', 'EEEE', 'FFFF', 'GGGG', 'HHHH', 'IIII', 'JJJJ', 'KKKK', 'LLLL'];
     Key tabBarKey = new Key('TabBar');
-    await tester.pumpWidget(buildFrame(tabs: tabs, value: 'AAAAAA', isScrollable: true, tabBarKey: tabBarKey));
-    TabController controller = DefaultTabController.of(tester.element(find.text('AAAAAA')));
+    await tester.pumpWidget(buildFrame(tabs: tabs, value: 'AAAA', isScrollable: true, tabBarKey: tabBarKey));
+    TabController controller = DefaultTabController.of(tester.element(find.text('AAAA')));
     expect(controller, isNotNull);
     expect(controller.index, 0);
 
     // Fling-scroll the TabBar to the left
-    expect(tester.getCenter(find.text('HHHHHH')).x, lessThan(700.0));
+    expect(tester.getCenter(find.text('HHHH')).x, lessThan(700.0));
     await tester.fling(find.byKey(tabBarKey), const Offset(-200.0, 0.0), 10000.0);
     await tester.pump();
     await tester.pump(const Duration(seconds: 1)); // finish the scroll animation
-    expect(tester.getCenter(find.text('HHHHHH')).x, lessThan(500.0));
+    expect(tester.getCenter(find.text('HHHH')).x, lessThan(500.0));
 
     // Scrolling the TabBar doesn't change the selection
     expect(controller.index, 0);
