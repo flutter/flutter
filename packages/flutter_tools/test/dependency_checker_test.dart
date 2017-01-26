@@ -2,7 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/commands/devices.dart';
 import 'package:flutter_tools/src/dart/dependencies.dart';
 import 'package:flutter_tools/src/dependency_checker.dart';
 import 'package:path/path.dart' as path;
@@ -14,6 +18,13 @@ void main()  {
   group('DependencyChecker', () {
     final String basePath = path.dirname(platform.script.path);
     final String dataPath = path.join(basePath, 'data', 'dart_dependencies_test');
+    MemoryFileSystem testFileSystem;
+
+    setUp(() {
+      Cache.disableLocking();
+      testFileSystem = new MemoryFileSystem();
+    });
+
     testUsingContext('good', () {
       final String testPath = path.join(dataPath, 'good');
       final String mainPath = path.join(testPath, 'main.dart');
@@ -66,6 +77,25 @@ void main()  {
       // Dependencies are considered dirty because there is a syntax error in
       // the .dart file.
       expect(dependencyChecker.check(baseTime), isTrue);
+    });
+
+    /// Test a flutter tool move.
+    ///
+    /// Tests that the flutter tool doesn't crash and displays a warning when its own location
+    /// changed since it was last referenced to in a package's .packages file.
+    testUsingContext('moved flutter sdk', () async {
+      String destinationPath = '/some/test/location';
+      // Copy the golden input and let the test run in an isolated temporary in-memory file system.
+      copyDirectorySync(
+        new LocalFileSystem().directory(path.join(dataPath, 'changed_sdk_location')),
+        fs.directory(destinationPath));
+      fs.currentDirectory = destinationPath;
+
+      // Doesn't matter what commands we run. Arbitrarily list devices here.
+      await createTestCommandRunner(new DevicesCommand()).run(<String>['devices']);
+      expect(testLogger.errorText, contains('.packages'));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => testFileSystem,
     });
   });
 }

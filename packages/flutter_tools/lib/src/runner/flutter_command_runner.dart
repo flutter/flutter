@@ -352,14 +352,28 @@ class FlutterCommandRunner extends CommandRunner<Null> {
         Uri rootUri = flutterUri.resolve('../../..');
         String flutterPath = path.normalize(fs.file(rootUri).absolute.path);
 
-        if (!_compareResolvedPaths(flutterPath, Cache.flutterRoot)) {
+        if (!fs.isDirectorySync(flutterPath)) {
           printError(
-            'Warning: the \'flutter\' tool you are currently running is different from the one referenced in your pubspec.yaml:\n'
-            '  running Flutter  : ${Cache.flutterRoot}\n'
-            '  pubspec reference: $flutterPath\n'
-            'This can happen when you have multiple copies of flutter installed. Please check your system path to verify\n'
-            'that you\'re running the expected version (run \'flutter --version\' to see which flutter is on your path). You\n'
-            'can also change which flutter your project points to by editing the \'flutter:\' path in your pubspec.yaml file.\n'
+            'Warning! This package referenced a Flutter repository via the .packages file that is\n'
+            'no longer available. The repository from which the \'flutter\' tool is currently\n'
+            'executing will be used instead.\n'
+            '  running Flutter tool: ${Cache.flutterRoot}\n'
+            '  previous reference  : $flutterPath\n'
+            'This can happen if you deleted or moved your copy of the Flutter repository, or\n'
+            'if it was on a volume that is no longer mounted or has been mounted at a\n'
+            'different location. Please check your system path to verify that you are running\n'
+            'the expected version (run \'flutter --version\' to see which flutter is on your path).\n'
+          );
+        } else if (!_compareResolvedPaths(flutterPath, Cache.flutterRoot)) {
+          printError(
+            'Warning! The \'flutter\' tool you are currently running is from a different Flutter\n'
+            'repository than the one last used by this package. The repository from which the\n'
+            '\'flutter\' tool is currently executing will be used instead.\n'
+            '  running Flutter tool: ${Cache.flutterRoot}\n'
+            '  previous reference  : $flutterPath\n'
+            'This can happen when you have multiple copies of flutter installed. Please check\n'
+            'your system path to verify that you are running the expected version (run\n'
+            '\'flutter --version\' to see which flutter is on your path).\n'
           );
         }
       }

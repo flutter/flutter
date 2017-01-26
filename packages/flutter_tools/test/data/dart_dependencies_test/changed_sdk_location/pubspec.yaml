@@ -1,0 +1,5 @@
+name: sdk-move-test
+
+dependencies:
+  flutter:
+    sdk: flutter

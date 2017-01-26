@@ -25,7 +25,7 @@ void main() {
       String targetPath = '/some/non-existent/target';
       Directory targetDirectory = targetMemoryFs.directory(targetPath);
       copyDirectorySync(sourceDirectory, targetDirectory);
-      
+
       expect(targetDirectory.existsSync(), true);
       targetMemoryFs.currentDirectory = targetPath;
       expect(targetMemoryFs.directory('empty_directory').existsSync(), true);
