@@ -6,6 +6,7 @@ import 'dart:async';
 
 import '../base/io.dart';
 import '../base/os.dart';
+import '../base/platform.dart';
 import '../base/process.dart';
 import '../doctor.dart';
 import 'mac.dart';
@@ -16,7 +17,7 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
   IOSWorkflow() : super('iOS toolchain - develop for iOS devices');
 
   @override
-  bool get appliesToHostPlatform => Platform.isMacOS;
+  bool get appliesToHostPlatform => platform.isMacOS;
 
   // We need xcode (+simctl) to list simulator devices, and idevice_id to list real devices.
   @override

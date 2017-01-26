@@ -11,6 +11,7 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/platform.dart';
 import '../base/process_manager.dart';
 import '../base/os.dart';
 import '../cache.dart';
@@ -190,7 +191,7 @@ class TestCommand extends FlutterCommand {
     }
     testArgs.addAll(files);
 
-    final String shellPath = tools.getHostToolPath(HostTool.SkyShell) ?? Platform.environment['SKY_SHELL'];
+    final String shellPath = tools.getHostToolPath(HostTool.SkyShell) ?? platform.environment['SKY_SHELL'];
     if (!fs.isFileSync(shellPath))
       throwToolExit('Cannot find Flutter shell at $shellPath');
     loader.installHook(shellPath: shellPath, collector: collector, debuggerMode: argResults['start-paused']);

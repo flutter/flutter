@@ -5,8 +5,8 @@
 import 'dart:async';
 
 import 'package:flutter_tools/src/base/context.dart';
-import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/commands/daemon.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/doctor.dart';
@@ -32,9 +32,10 @@ void main() {
     setUp(() {
       appContext = new AppContext();
       notifyingLogger = new NotifyingLogger();
+      appContext.setVariable(Platform, new LocalPlatform());
       appContext.setVariable(Logger, notifyingLogger);
       appContext.setVariable(Doctor, new Doctor());
-      if (Platform.isMacOS)
+      if (platform.isMacOS)
         appContext.setVariable(XCode, new XCode());
       appContext.setVariable(DeviceManager, new MockDeviceManager());
     });

@@ -11,6 +11,7 @@ import '../application_package.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
+import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/process_manager.dart';
 import '../build_info.dart';
@@ -220,7 +221,7 @@ final RegExp _xcodeVersionRegExp = new RegExp(r'Xcode (\d+)\..*');
 final String _xcodeRequirement = 'Xcode 7.0 or greater is required to develop for iOS.';
 
 bool _checkXcodeVersion() {
-  if (!Platform.isMacOS)
+  if (!platform.isMacOS)
     return false;
   try {
     String version = runCheckedSync(<String>['xcodebuild', '-version']);

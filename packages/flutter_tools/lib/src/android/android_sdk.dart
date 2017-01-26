@@ -8,8 +8,8 @@ import 'package:pub_semver/pub_semver.dart';
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
-import '../base/io.dart';
 import '../base/os.dart';
+import '../base/platform.dart';
 import '../globals.dart';
 
 AndroidSdk get androidSdk => context[AndroidSdk];
@@ -64,15 +64,15 @@ class AndroidSdk {
 
   static AndroidSdk locateAndroidSdk() {
     String androidHomeDir;
-    if (Platform.environment.containsKey(kAndroidHome)) {
-      androidHomeDir = Platform.environment[kAndroidHome];
-    } else if (Platform.isLinux) {
+    if (platform.environment.containsKey(kAndroidHome)) {
+      androidHomeDir = platform.environment[kAndroidHome];
+    } else if (platform.isLinux) {
       if (homeDirPath != null)
         androidHomeDir = path.join(homeDirPath, 'Android', 'Sdk');
-    } else if (Platform.isMacOS) {
+    } else if (platform.isMacOS) {
       if (homeDirPath != null)
         androidHomeDir = path.join(homeDirPath, 'Library', 'Android', 'sdk');
-    } else if (Platform.isWindows) {
+    } else if (platform.isWindows) {
       if (homeDirPath != null)
         androidHomeDir = path.join(homeDirPath, 'AppData', 'Local', 'Android', 'sdk');
     }

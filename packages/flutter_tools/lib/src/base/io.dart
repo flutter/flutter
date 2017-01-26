@@ -11,16 +11,20 @@
 /// access with mockable (or in-memory) file systems, making our tests hermetic
 /// vis-a-vis file system access.
 ///
-/// To ensure that all file system access within Flutter tools goes through the
-/// proper APIs, we forbid direct imports of `dart:io` (via a test), forcing
-/// all callers to instead import this file, which exports the blessed subset
-/// of `dart:io` that is legal to use in Flutter tools.
+/// We also use `package:platform` to provide an abstraction away from the
+/// static methods in the `dart:io` `Platform` class (see `platform.dart`). As
+/// such, do not export Platform from this file!
 ///
-/// Because of the nature of this file, it is important that **no file APIs
-/// be exported from `dart:io` in this file**! Moreover, be careful about any
-/// additional exports that you add to this file, as doing so will increase the
-/// API surface that we have to test in Flutter tools, and the APIs in `dart:io`
-/// can sometimes be hard to use in tests.
+/// To ensure that all file system and platform API access within Flutter tools
+/// goes through the proper APIs, we forbid direct imports of `dart:io` (via a
+/// test), forcing all callers to instead import this file, which exports the
+/// blessed subset of `dart:io` that is legal to use in Flutter tools.
+///
+/// Because of the nature of this file, it is important that **platform and file
+/// APIs not be exported from `dart:io` in this file**! Moreover, be careful
+/// about any additional exports that you add to this file, as doing so will
+/// increase the API surface that we have to test in Flutter tools, and the APIs
+/// in `dart:io` can sometimes be hard to use in tests.
 import 'dart:io' as io show exit, exitCode;
 
 import 'package:meta/meta.dart';
@@ -28,7 +32,10 @@ import 'package:meta/meta.dart';
 export 'dart:io'
     show
         BytesBuilder,
+        // Directory         NO! Use `file_system.dart`
         exitCode,
+        // File              NO! Use `file_system.dart`
+        // FileSystemEntity  NO! Use `file_system.dart`
         GZIP,
         InternetAddress,
         IOException,
@@ -40,13 +47,15 @@ export 'dart:io'
         HttpRequest,
         HttpServer,
         HttpStatus,
+        // Link              NO! Use `file_system.dart`
         pid,
-        Platform,
+        // Platform          NO! use `platform.dart`
         Process,
         ProcessException,
         ProcessResult,
         ProcessSignal,
         ProcessStartMode,
+        // RandomAccessFile  NO! Use `file_system.dart`
         ServerSocket,
         stderr,
         stdin,

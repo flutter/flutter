@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/dart/dependencies.dart';
 import 'package:flutter_tools/src/dependency_checker.dart';
 import 'package:path/path.dart' as path;
@@ -12,7 +12,7 @@ import 'src/context.dart';
 
 void main()  {
   group('DependencyChecker', () {
-    final String basePath = path.dirname(Platform.script.path);
+    final String basePath = path.dirname(platform.script.path);
     final String dataPath = path.join(basePath, 'data', 'dart_dependencies_test');
     testUsingContext('good', () {
       final String testPath = path.join(dataPath, 'good');
