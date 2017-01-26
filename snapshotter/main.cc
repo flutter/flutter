@@ -24,10 +24,10 @@
 #include "lib/tonic/file_loader/file_loader.h"
 
 extern "C" {
-extern const uint8_t* kDartVmSnapshotData;
-extern const uint8_t* kDartVmSnapshotInstructions;
-extern const uint8_t* kDartIsolateSnapshotData;
-extern const uint8_t* kDartIsolateSnapshotInstructions;
+extern const uint8_t kDartVmSnapshotData[];
+extern const uint8_t kDartVmSnapshotInstructions[];
+extern const uint8_t kDartIsolateSnapshotData[];
+extern const uint8_t kDartIsolateSnapshotInstructions[];
 }
 
 namespace {
