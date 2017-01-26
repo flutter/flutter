@@ -16,8 +16,8 @@ void main() {
           ),
           height: 200.0,
           width: 300.0,
-          child: new Scrollbar(
-            child: new Block(
+          child: new Scrollbar2(
+            child: new ScrollView(
               children: <Widget>[
                 new Container(height: 40.0, child: new Text('0')),
                 new Container(height: 40.0, child: new Text('1')),
@@ -35,13 +35,13 @@ void main() {
     );
 
     SchedulerBinding.instance.debugAssertNoTransientCallbacks('Building a list with a scrollbar triggered an animation.');
-    await tester.tap(find.byType(Block));
+    await tester.tap(find.byType(ScrollView));
     SchedulerBinding.instance.debugAssertNoTransientCallbacks('Tapping a block with a scrollbar triggered an animation.');
     await tester.pump(const Duration(milliseconds: 200));
     await tester.pump(const Duration(milliseconds: 200));
     await tester.pump(const Duration(milliseconds: 200));
     await tester.pump(const Duration(milliseconds: 200));
-    await tester.scroll(find.byType(Block), const Offset(0.0, -10.0));
+    await tester.scroll(find.byType(ScrollView), const Offset(0.0, -10.0));
     expect(SchedulerBinding.instance.transientCallbackCount, greaterThan(0));
     await tester.pump(const Duration(milliseconds: 200));
     await tester.pump(const Duration(milliseconds: 200));
