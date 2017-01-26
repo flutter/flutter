@@ -63,14 +63,13 @@ class ProtocolDiscovery {
       hostPort = await portForwarder
           .forward(devicePort, hostPort: hostPort)
           .timeout(const Duration(seconds: 60), onTimeout: () {
-            throwToolExit('Timeout while atempting to foward device port $devicePort');
+            throwToolExit('Timeout while atempting to foward device port $devicePort for $_serviceName');
           });
-      printTrace('Forwarded host port $hostPort to device port $devicePort');
+      printTrace('Forwarded host port $hostPort to device port $devicePort for $_serviceName');
       hostUri = deviceUri.replace(port: hostPort);
     } else {
       hostUri = deviceUri;
     }
-    printStatus('$_serviceName listening on $hostUri');
     return hostUri;
   }
 

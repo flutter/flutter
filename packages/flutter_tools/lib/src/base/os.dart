@@ -163,6 +163,7 @@ Future<int> findPreferredPort(int defaultPort, { int searchStep: 2 }) async {
 
 Future<bool> _isPortAvailable(int port) async {
   try {
+    // TODO(ianh): This is super racy.
     ServerSocket socket = await ServerSocket.bind(InternetAddress.LOOPBACK_IP_V4, port);
     await socket.close();
     return true;

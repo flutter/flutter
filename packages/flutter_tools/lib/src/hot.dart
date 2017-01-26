@@ -183,7 +183,6 @@ class HotRunner extends ResidentRunner {
       return 2;
     }
 
-
     try {
       Uri baseUri = await _initDevFS();
       if (connectionInfoCompleter != null) {

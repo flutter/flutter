@@ -65,10 +65,7 @@ class DriveCommand extends RunCommandBase {
         'the application running after tests are done.'
     );
 
-    argParser.addOption('debug-port',
-      defaultsTo: kDefaultDrivePort.toString(),
-      help: 'Listen to the given port for a debug connection.'
-    );
+    usesPortOptions();
   }
 
   @override
@@ -87,7 +84,8 @@ class DriveCommand extends RunCommandBase {
   // ignore: cancel_subscriptions
   StreamSubscription<String> _deviceLogSubscription;
 
-  int get debugPort => int.parse(argResults['debug-port']);
+  int get observatoryPort => int.parse(argResults['observatory-port']);
+  int get diagnosticPort => int.parse(argResults['diagnostic-port']);
 
   @override
   Future<Null> verifyThenRunCommand() async {
@@ -315,7 +313,8 @@ Future<int> startApp(DriveCommand command) async {
     debuggingOptions: new DebuggingOptions.enabled(
       command.getBuildMode(),
       startPaused: true,
-      observatoryPort: command.debugPort
+      observatoryPort: command.observatoryPort,
+      diagnosticPort: command.diagnosticPort,
     ),
     platformArgs: platformArgs
   );
