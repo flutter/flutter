@@ -36,7 +36,7 @@ extern void* kDartIsolateSnapshotData;
 extern void* kDartIsolateSnapshotInstructions;
 }
 
-#define DART_SYMBOL(symbol) (symbol)
+#define DART_SYMBOL(symbol) (&symbol)
 
 #endif  // DART_ALLOW_DYNAMIC_RESOLUTION
 
