@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'data_table_test.dart' show Dessert, kDesserts;
+import 'data_table_test_utils.dart';
 
 class TestDataSource extends DataTableSource {
   int get generation => _generation;
