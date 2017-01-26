@@ -1606,7 +1606,6 @@ class BuildOwner {
   void scheduleBuildFor(BuildableElement element) {
     assert(element != null);
     assert(element.owner == this);
-    assert(element._inDirtyList == _dirtyElements.contains(element));
     assert(() {
       if (debugPrintScheduleBuildForStacks)
         debugPrintStack(label: 'scheduleBuildFor() called for $element${_dirtyElements.contains(element) ? " (ALREADY IN LIST)" : ""}');
@@ -1944,18 +1943,18 @@ abstract class Element implements BuildContext {
   bool _active = false;
 
   void _reassemble() {
-    assert(_active);
     visitChildren((Element child) {
       child._reassemble();
     });
   }
 
   bool _debugIsInScope(Element target) {
-    assert(target != null);
-    if (target == this)
-      return true;
-    if (_parent != null)
-      return _parent._debugIsInScope(target);
+    Element current = this;
+    while (current != null) {
+      if (target == current)
+        return true;
+      current = current._parent;
+    }
     return false;
   }
 
@@ -2099,13 +2098,15 @@ abstract class Element implements BuildContext {
   /// This function is called only during the "active" lifecycle state.
   @mustCallSuper
   void update(@checked Widget newWidget) {
-    assert(_debugLifecycleState == _ElementLifecycle.active);
-    assert(widget != null);
-    assert(newWidget != null);
-    assert(newWidget != widget);
-    assert(depth != null);
-    assert(_active);
-    assert(Widget.canUpdate(widget, newWidget));
+    // This code is hot when hot reloading, so we try to
+    // only call _AssertionError._evaluateAssertion once.
+    assert(_debugLifecycleState == _ElementLifecycle.active
+        && widget != null
+        && newWidget != null
+        && newWidget != widget
+        && depth != null
+        && _active
+        && Widget.canUpdate(widget, newWidget));
     _widget = newWidget;
   }
 
@@ -2795,7 +2796,6 @@ abstract class BuildableElement extends Element {
 
   @override
   void _reassemble() {
-    assert(_active); // otherwise markNeedsBuild is a no-op
     markNeedsBuild();
     super._reassemble();
   }
