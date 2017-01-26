@@ -2,7 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/commands/devices.dart';
 import 'package:flutter_tools/src/dart/dependencies.dart';
 import 'package:flutter_tools/src/dependency_checker.dart';
 import 'package:path/path.dart' as path;
@@ -14,6 +16,7 @@ void main()  {
   group('DependencyChecker', () {
     final String basePath = path.dirname(Platform.script.path);
     final String dataPath = path.join(basePath, 'data', 'dart_dependencies_test');
+
     testUsingContext('good', () {
       final String testPath = path.join(dataPath, 'good');
       final String mainPath = path.join(testPath, 'main.dart');
@@ -66,6 +69,18 @@ void main()  {
       // Dependencies are considered dirty because there is a syntax error in
       // the .dart file.
       expect(dependencyChecker.check(baseTime), isTrue);
+    });
+
+    /// Test a flutter tool move.
+    ///
+    /// Tests that the flutter tool doesn't crash and displays a warning when its own location
+    /// changed since it was last referenced to in a package's .packages file.
+    testUsingContext('moved flutter sdk', () async {
+      fs.currentDirectory = path.join(dataPath, 'changed_sdk_location');
+
+      // Doesn't matter what commands we run. Arbitrarily list devices here.
+      await createTestCommandRunner(new DevicesCommand()).run(<String>['devices']);
+      expect(testLogger.errorText, contains('.packages'));
     });
   });
 }
