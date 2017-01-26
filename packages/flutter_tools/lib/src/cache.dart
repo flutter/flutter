@@ -254,49 +254,53 @@ class FlutterEngine {
 
   List<String> _getPackageDirs() => const <String>[kSkyEngine];
 
-  List<String> _getEngineDirs() {
-    List<String> dirs = <String>[
-      'android-arm',
-      'android-arm-profile',
-      'android-arm-release',
-      'android-x64',
-      'android-x86',
-    ];
-
-    if (cache.includeAllPlatforms)
-      dirs.addAll(<String>['ios', 'ios-profile', 'ios-release', 'linux-x64']);
-    else if (platform.isMacOS)
-      dirs.addAll(<String>['ios', 'ios-profile', 'ios-release']);
-    else if (platform.isLinux)
-      dirs.add('linux-x64');
-
-    return dirs;
-  }
-
   // Return a list of (cache directory path, download URL path) tuples.
-  List<List<String>> _getToolsDirs() {
+  List<List<String>> _getBinaryDirs() {
+    List<List<String>> binaryDirs = <List<String>>[];
+
     if (cache.includeAllPlatforms)
-      return <List<String>>[]
-        ..addAll(_osxToolsDirs)
-        ..addAll(_linuxToolsDirs);
-    else if (platform.isMacOS)
-      return _osxToolsDirs;
+      binaryDirs
+        ..addAll(_osxBinaryDirs)
+        ..addAll(_linuxBinaryDirs)
+        ..addAll(_androidBinaryDirs)
+        ..addAll(_iosBinaryDirs);
     else if (platform.isLinux)
-      return _linuxToolsDirs;
-    else
-      return <List<String>>[];
+      binaryDirs
+        ..addAll(_linuxBinaryDirs)
+        ..addAll(_androidBinaryDirs);
+    else if (platform.isMacOS)
+      binaryDirs
+        ..addAll(_osxBinaryDirs)
+        ..addAll(_androidBinaryDirs)
+        ..addAll(_iosBinaryDirs);
+
+    return binaryDirs;
   }
 
-  List<List<String>> get _osxToolsDirs => <List<String>>[
+  List<List<String>> get _osxBinaryDirs => <List<String>>[
     <String>['darwin-x64', 'darwin-x64/artifacts.zip'],
     <String>['android-arm-profile/darwin-x64', 'android-arm-profile/darwin-x64.zip'],
     <String>['android-arm-release/darwin-x64', 'android-arm-release/darwin-x64.zip'],
   ];
 
-  List<List<String>> get _linuxToolsDirs => <List<String>>[
+  List<List<String>> get _linuxBinaryDirs => <List<String>>[
     <String>['linux-x64', 'linux-x64/artifacts.zip'],
     <String>['android-arm-profile/linux-x64', 'android-arm-profile/linux-x64.zip'],
     <String>['android-arm-release/linux-x64', 'android-arm-release/linux-x64.zip'],
+  ];
+
+  List<List<String>> get _androidBinaryDirs => <List<String>>[
+    <String>['android-x86', 'android-x86/artifacts.zip'],
+    <String>['android-x64', 'android-x64/artifacts.zip'],
+    <String>['android-arm', 'android-arm/artifacts.zip'],
+    <String>['android-arm-profile', 'android-arm-profile/artifacts.zip'],
+    <String>['android-arm-release', 'android-arm-release/artifacts.zip'],
+  ];
+
+  List<List<String>> get _iosBinaryDirs => <List<String>>[
+    <String>['ios', 'ios/artifacts.zip'],
+    <String>['ios-profile', 'ios-profile/artifacts.zip'],
+    <String>['ios-release', 'ios-release/artifacts.zip'],
   ];
 
   bool isUpToDate() {
@@ -317,13 +321,7 @@ class FlutterEngine {
       return false;
 
     Directory engineDir = cache.getArtifactDirectory(kName);
-    for (String dirName in _getEngineDirs()) {
-      Directory dir = fs.directory(path.join(engineDir.path, dirName));
-      if (!dir.existsSync())
-        return false;
-    }
-
-    for (List<String> toolsDir in _getToolsDirs()) {
+    for (List<String> toolsDir in _getBinaryDirs()) {
       Directory dir = fs.directory(path.join(engineDir.path, toolsDir[0]));
       if (!dir.existsSync())
         return false;
@@ -366,24 +364,20 @@ class FlutterEngine {
     if (engineDir.existsSync())
       engineDir.deleteSync(recursive: true);
 
-    for (String dirName in _getEngineDirs()) {
-      Directory dir = fs.directory(path.join(engineDir.path, dirName));
-      await _downloadItem('Downloading engine artifacts $dirName...',
-        url + dirName + '/artifacts.zip', dir);
+    for (List<String> toolsDir in _getBinaryDirs()) {
+      String cacheDir = toolsDir[0];
+      String urlPath = toolsDir[1];
+      Directory dir = fs.directory(path.join(engineDir.path, cacheDir));
+      await _downloadItem('Downloading $cacheDir tools...', url + urlPath, dir);
+
+      _makeFilesExecutable(dir);
+
       File frameworkZip = fs.file(path.join(dir.path, 'Flutter.framework.zip'));
       if (frameworkZip.existsSync()) {
         Directory framework = fs.directory(path.join(dir.path, 'Flutter.framework'));
         framework.createSync();
         os.unzip(frameworkZip, framework);
       }
-    }
-
-    for (List<String> toolsDir in _getToolsDirs()) {
-      String cacheDir = toolsDir[0];
-      String urlPath = toolsDir[1];
-      Directory dir = fs.directory(path.join(engineDir.path, cacheDir));
-      await _downloadItem('Downloading $cacheDir tools...', url + urlPath, dir);
-      _makeFilesExecutable(dir);
     }
 
     cache.setStampFor(kName, cache.getVersionFor(kName));
