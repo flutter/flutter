@@ -151,8 +151,10 @@ void DirectInput::PerformRead() {
     pointer_data.kind = blink::PointerData::DeviceKind::kTouch;
     pointer_data.device = touch_identifier;
 
-    pointer_data.physical_x = finger.x / 2.0;
-    pointer_data.physical_y = finger.y / 2.0;
+    pointer_data.physical_x = ((static_cast<float>(finger.x) / ACER12_X_MAX) *
+                               viewport_metrics_.physical_width);
+    pointer_data.physical_y = ((static_cast<float>(finger.y) / ACER12_Y_MAX) *
+                               viewport_metrics_.physical_height);
 
     bool down = !!acer12_finger_id_tswitch(finger.finger_id);
 
@@ -229,6 +231,10 @@ ftl::UniqueFD DirectInput::GetTouchFileDescriptor() {
 
   ::closedir(dir);
   return {};
+}
+
+void DirectInput::SetViewportMetrics(blink::ViewportMetrics metrics) {
+  viewport_metrics_ = metrics;
 }
 
 }  // namespace flutter_runner

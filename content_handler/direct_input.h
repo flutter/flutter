@@ -10,6 +10,7 @@
 #include <vector>
 
 #include "flutter/lib/ui/window/pointer_data_packet.h"
+#include "flutter/lib/ui/window/viewport_metrics.h"
 #include "lib/fidl/c/waiter/async_waiter.h"
 #include "lib/ftl/files/unique_fd.h"
 #include "lib/ftl/macros.h"
@@ -31,6 +32,8 @@ class DirectInput {
 
   void CancelWaitForReadAvailability();
 
+  void SetViewportMetrics(blink::ViewportMetrics metrics);
+
  private:
   DirectInputCallback callback_;
   bool valid_;
@@ -39,6 +42,7 @@ class DirectInput {
   std::vector<uint8_t> read_buffer_;
   FidlAsyncWaitID last_wait_;
   std::set<int64_t> touch_ids_;
+  blink::ViewportMetrics viewport_metrics_;
 
   static ftl::UniqueFD GetTouchFileDescriptor();
 

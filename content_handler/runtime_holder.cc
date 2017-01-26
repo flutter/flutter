@@ -146,6 +146,9 @@ void RuntimeHolder::CreateView(
   runtime_ = blink::RuntimeController::Create(this);
   runtime_->CreateDartController(script_uri);
   runtime_->SetViewportMetrics(viewport_metrics_);
+#if FLUTTER_ENABLE_VULKAN
+  direct_input_->SetViewportMetrics(viewport_metrics_);
+#endif  // FLUTTER_ENABLE_VULKAN
   runtime_->dart_controller()->RunFromSnapshot(snapshot.data(),
                                                snapshot.size());
 }
@@ -341,6 +344,11 @@ void RuntimeHolder::OnInvalidation(mozart::ViewInvalidationPtr invalidation,
     // TODO(abarth): Use view_properties_->display_metrics->device_pixel_ratio
     // once that's reasonable.
     runtime_->SetViewportMetrics(viewport_metrics_);
+#if FLUTTER_ENABLE_VULKAN
+    if (direct_input_) {
+      direct_input_->SetViewportMetrics(viewport_metrics_);
+    }
+#endif  // FLUTTER_ENABLE_VULKAN
   }
 
   // Remember the scene version for rendering.
