@@ -134,8 +134,8 @@ flutter shell. To run the test:
 * `cd packages/flutter_tools`
 * `dart test/all.dart`
 
-The pre-built flutter tool doesn't run with the observatory on by default.
-To enable debugging and the observatory on the `flutter` tool, uncomment the
+The pre-built flutter tool runs in release mode with the observatory off by default.
+To enable debugging mode and the observatory on the `flutter` tool, uncomment the
 `FLUTTER_TOOL_ARGS` line in the `bin/flutter` shell script.
 
 Contributing code
