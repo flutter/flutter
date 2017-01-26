@@ -59,7 +59,7 @@ Future<Map<String, dynamic>> runTask(String taskName, { bool silent: false }) as
 
   String waitingFor = 'connection';
   try {
-    VMIsolate isolate = await _connectToRunnerIsolate(vmServicePort);
+    VMIsolateRef isolate = await _connectToRunnerIsolate(vmServicePort);
     waitingFor = 'task completion';
     Map<String, dynamic> taskResult =
         await isolate.invokeExtension('ext.cocoonRunTask').timeout(taskTimeoutWithGracePeriod);
@@ -80,7 +80,7 @@ Future<Map<String, dynamic>> runTask(String taskName, { bool silent: false }) as
   }
 }
 
-Future<VMIsolate> _connectToRunnerIsolate(int vmServicePort) async {
+Future<VMIsolateRef> _connectToRunnerIsolate(int vmServicePort) async {
   String url = 'ws://localhost:$vmServicePort/ws';
   DateTime started = new DateTime.now();
 
@@ -99,7 +99,7 @@ Future<VMIsolate> _connectToRunnerIsolate(int vmServicePort) async {
       // Look up the isolate.
       VMServiceClient client = new VMServiceClient.connect(url);
       VM vm = await client.getVM();
-      VMIsolate isolate = vm.isolates.single;
+      VMIsolateRef isolate = vm.isolates.single;
       String response = await isolate.invokeExtension('ext.cocoonRunnerReady');
       if (response != 'ready') throw 'not ready yet';
       return isolate;
