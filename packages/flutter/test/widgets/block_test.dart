@@ -119,4 +119,16 @@ void main() {
     await tester.pumpWidget(buildBlock());
     expect(key.currentState.scrollOffset, 0.0);
   });
+
+  testWidgets('SliverBlockChildListDelegate.estimateScrollOffsetExtent hits end', (WidgetTester tester) async {
+    SliverBlockChildListDelegate delegate = new SliverBlockChildListDelegate(<Widget>[
+      new Container(),
+      new Container(),
+      new Container(),
+      new Container(),
+      new Container(),
+    ]);
+
+    expect(delegate.estimateScrollOffsetExtent(3, 4, 25.0, 26.0), equals(26.0));
+  });
 }

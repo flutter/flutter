@@ -78,7 +78,13 @@ abstract class SliverBlockDelegate {
     double leadingScrollOffset,
     double trailingScrollOffset,
   ) {
-    return childCount * (trailingScrollOffset - leadingScrollOffset) / (lastIndex - firstIndex + 1);
+    final int childCount = this.childCount;
+    if (lastIndex == childCount - 1)
+      return trailingScrollOffset;
+    final int reifiedCount = lastIndex - firstIndex + 1;
+    final double averageExtent = (trailingScrollOffset - leadingScrollOffset) / reifiedCount;
+    final int remainingCount = childCount - lastIndex - 1;
+    return trailingScrollOffset + averageExtent * remainingCount;
   }
 }
 
