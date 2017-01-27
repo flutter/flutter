@@ -66,6 +66,7 @@ Engine::Engine(PlatformView* platform_view)
           platform_view->rasterizer().GetWeakRasterizerPtr(),
           platform_view->GetVsyncWaiter(),
           this)),
+      load_script_error_(tonic::kNoError),
       activity_running_(false),
       have_surface_(false),
       weak_factory_(this) {}
@@ -127,7 +128,8 @@ void Engine::RunBundleAndSource(const std::string& bundle_path,
   if (!bundle_path.empty())
     ConfigureAssetBundle(bundle_path);
   ConfigureRuntime(GetScriptUriFromPath(main));
-  runtime_->dart_controller()->RunFromSource(main, packages_path);
+  load_script_error_ =
+      runtime_->dart_controller()->RunFromSource(main, packages_path);
 }
 
 void Engine::BeginFrame(ftl::TimePoint frame_time) {
@@ -159,6 +161,16 @@ bool Engine::UIIsolateHasLivePorts() {
   if (!runtime_)
     return false;
   return runtime_->HasLivePorts();
+}
+
+tonic::DartErrorHandleType Engine::GetUIIsolateLastError() {
+  if (!runtime_)
+    return tonic::kNoError;
+  return runtime_->GetLastError();
+}
+
+tonic::DartErrorHandleType Engine::GetLoadScriptError() {
+  return load_script_error_;
 }
 
 void Engine::OnOutputSurfaceCreated(const ftl::Closure& gpu_continuation) {

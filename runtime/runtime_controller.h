@@ -41,10 +41,9 @@ class RuntimeController : public WindowClient, public IsolateClient {
   void DispatchSemanticsAction(int32_t id, SemanticsAction action);
 
   Dart_Port GetMainPort();
-
   std::string GetIsolateName();
-
   bool HasLivePorts();
+  tonic::DartErrorHandleType GetLastError();
 
  private:
   explicit RuntimeController(RuntimeDelegate* client);
