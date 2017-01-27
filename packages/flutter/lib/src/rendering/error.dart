@@ -2,15 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show Paragraph, ParagraphBuilder, ParagraphConstraints, ParagraphStyle, TextStyle;
+import 'dart:ui' as ui show Paragraph, ParagraphBuilder, ParagraphConstraints, ParagraphStyle, TextStyle, window;
 
 import 'box.dart';
 import 'object.dart';
 
 const double _kMaxWidth = 100000.0;
 const double _kMaxHeight = 100000.0;
-/// This is a simplified estimate to offset the text from the top of the screen.
-const double _statusBarHeight = 24.0;
 
 /// A render object used as a placeholder when an error occurs.
 ///
@@ -52,6 +50,7 @@ class RenderErrorBox extends RenderBox {
 
   /// The message to attempt to display at paint time.
   final String message;
+  final double systemTopPadding = ui.window.padding.top;
 
   ui.Paragraph _paragraph;
 
@@ -89,7 +88,7 @@ class RenderErrorBox extends RenderBox {
 
   /// The paragraph style to use when painting [RenderErrorBox] objects.
   static ui.ParagraphStyle paragraphStyle = new ui.ParagraphStyle(
-    lineHeight: 0.7 // TODO(ianh): https://github.com/flutter/flutter/issues/2460 will affect this
+    lineHeight: 0.7
   );
 
   @override
@@ -107,7 +106,13 @@ class RenderErrorBox extends RenderBox {
           width = size.width;
         }
         _paragraph.layout(new ui.ParagraphConstraints(width: width));
-        context.canvas.drawParagraph(_paragraph, offset.translate(0.0, _statusBarHeight));
+
+        // Heuristically offset the top of the text to prevent system status bar overlap if the
+        // widget is tall enough and likely to overlap.
+        if (size.height > 3 * systemTopPadding) {
+          offset = offset.translate(0.0, systemTopPadding);
+        }
+        context.canvas.drawParagraph(_paragraph, offset);
       }
     } catch (e) { }
   }
