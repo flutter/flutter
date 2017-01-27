@@ -24,14 +24,12 @@ void verifyActualBoxPosition(WidgetTester tester, Finder finder, int index, Rect
 
 void main() {
   testWidgets('Sliver appbars - pinned', (WidgetTester tester) async {
-    final GlobalKey<Scrollable2State> scrollableKey = new GlobalKey<Scrollable2State>();
     const double bigHeight = 550.0;
     GlobalKey key1, key2, key3, key4, key5;
     await tester.pumpWidget(
-      new Scrollable2(
-        key: scrollableKey,
+      new ScrollableViewport2(
         axisDirection: AxisDirection.down,
-        children: <Widget>[
+        slivers: <Widget>[
           new BigSliver(key: key1 = new GlobalKey(), height: bigHeight),
           new SliverAppBar(key: key2 = new GlobalKey(), delegate: new TestDelegate(), pinned: true),
           new SliverAppBar(key: key3 = new GlobalKey(), delegate: new TestDelegate(), pinned: true),
@@ -40,7 +38,7 @@ void main() {
         ],
       ),
     );
-    AbsoluteScrollPosition position = scrollableKey.currentState.position;
+    AbsoluteScrollPosition position = tester.state<Scrollable2State>(find.byType(Scrollable2)).position;
     final double max = bigHeight * 3.0 + new TestDelegate().maxExtent * 2.0 - 600.0; // 600 is the height of the test viewport
     assert(max < 10000.0);
     expect(max, 1450.0);
@@ -60,14 +58,12 @@ void main() {
   });
 
   testWidgets('Sliver appbars - pinned with slow scroll', (WidgetTester tester) async {
-    final GlobalKey<Scrollable2State> scrollableKey = new GlobalKey<Scrollable2State>();
     const double bigHeight = 550.0;
     GlobalKey key1, key2, key3, key4, key5;
     await tester.pumpWidget(
-      new Scrollable2(
-        key: scrollableKey,
+      new ScrollableViewport2(
         axisDirection: AxisDirection.down,
-        children: <Widget>[
+        slivers: <Widget>[
           new BigSliver(key: key1 = new GlobalKey(), height: bigHeight),
           new SliverAppBar(key: key2 = new GlobalKey(), delegate: new TestDelegate(), pinned: true),
           new SliverAppBar(key: key3 = new GlobalKey(), delegate: new TestDelegate(), pinned: true),
@@ -76,7 +72,7 @@ void main() {
         ],
       ),
     );
-    AbsoluteScrollPosition position = scrollableKey.currentState.position;
+    AbsoluteScrollPosition position = tester.state<Scrollable2State>(find.byType(Scrollable2)).position;
     verifyPaintPosition(key1, new Offset(0.0, 0.0), true);
     verifyPaintPosition(key2, new Offset(0.0, 550.0), true);
     verifyPaintPosition(key3, new Offset(0.0, 600.0), false);
@@ -152,14 +148,12 @@ void main() {
   });
 
   testWidgets('Sliver appbars - pinned with less overlap', (WidgetTester tester) async {
-    final GlobalKey<Scrollable2State> scrollableKey = new GlobalKey<Scrollable2State>();
     const double bigHeight = 650.0;
     GlobalKey key1, key2, key3, key4, key5;
     await tester.pumpWidget(
-      new Scrollable2(
-        key: scrollableKey,
+      new ScrollableViewport2(
         axisDirection: AxisDirection.down,
-        children: <Widget>[
+        slivers: <Widget>[
           new BigSliver(key: key1 = new GlobalKey(), height: bigHeight),
           new SliverAppBar(key: key2 = new GlobalKey(), delegate: new TestDelegate(), pinned: true),
           new SliverAppBar(key: key3 = new GlobalKey(), delegate: new TestDelegate(), pinned: true),
@@ -168,7 +162,7 @@ void main() {
         ],
       ),
     );
-    AbsoluteScrollPosition position = scrollableKey.currentState.position;
+    AbsoluteScrollPosition position = tester.state<Scrollable2State>(find.byType(Scrollable2)).position;
     final double max = bigHeight * 3.0 + new TestDelegate().maxExtent * 2.0 - 600.0; // 600 is the height of the test viewport
     assert(max < 10000.0);
     expect(max, 1750.0);

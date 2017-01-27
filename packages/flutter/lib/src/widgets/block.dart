@@ -19,7 +19,6 @@ class ScrollView extends StatelessWidget {
     this.scrollDirection: Axis.vertical,
     this.anchor: 0.0,
     this.initialScrollOffset: 0.0,
-    this.scrollBehavior,
     this.center,
     this.children,
   }) : super(key: key);
@@ -31,8 +30,6 @@ class ScrollView extends StatelessWidget {
   final double anchor;
 
   final double initialScrollOffset;
-
-  final ScrollBehavior2 scrollBehavior;
 
   final Key center;
 
@@ -56,13 +53,12 @@ class ScrollView extends StatelessWidget {
     if (padding != null)
       sliver = new SliverPadding(padding: padding, child: sliver);
 
-    return new Scrollable2(
+    return new ScrollableViewport2(
       axisDirection: _getDirection(context),
       anchor: anchor,
       initialScrollOffset: initialScrollOffset,
-      scrollBehavior: scrollBehavior,
       center: center,
-      children: <Widget>[ sliver ],
+      slivers: <Widget>[ sliver ],
     );
   }
 }

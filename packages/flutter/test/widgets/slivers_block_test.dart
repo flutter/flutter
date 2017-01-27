@@ -11,7 +11,7 @@ import '../rendering/mock_canvas.dart';
 Future<Null> test(WidgetTester tester, double offset) {
   return tester.pumpWidget(new Viewport2(
     offset: new ViewportOffset.fixed(offset),
-    children: <Widget>[
+    slivers: <Widget>[
       new SliverBlock(
         delegate: new SliverBlockChildListDelegate(<Widget>[
           new SizedBox(height: 400.0, child: new Text('a')),
@@ -76,7 +76,7 @@ void main() {
     ViewportOffset offset = new ViewportOffset.zero();
     await tester.pumpWidget(new Viewport2(
       offset: offset,
-      children: <Widget>[
+      slivers: <Widget>[
         new SliverBlock(
           delegate: new SliverBlockChildListDelegate(<Widget>[
             new SizedBox(height: 251.0, child: new Text('a')),
@@ -93,7 +93,7 @@ void main() {
     ], 'abc');
     await tester.pumpWidget(new Viewport2(
       offset: offset,
-      children: <Widget>[
+      slivers: <Widget>[
         new SliverBlock(
           delegate: new SliverBlockChildListDelegate(<Widget>[
             new SizedBox(key: key1, height: 253.0, child: new Text('c')),
@@ -110,7 +110,7 @@ void main() {
     ], 'cab');
     await tester.pumpWidget(new Viewport2(
       offset: offset,
-      children: <Widget>[
+      slivers: <Widget>[
         new SliverBlock(
           delegate: new SliverBlockChildListDelegate(<Widget>[
             new SizedBox(height: 251.0, child: new Text('a')),
@@ -127,7 +127,7 @@ void main() {
     ], 'acb');
     await tester.pumpWidget(new Viewport2(
       offset: offset,
-      children: <Widget>[
+      slivers: <Widget>[
         new SliverBlock(
           delegate: new SliverBlockChildListDelegate(<Widget>[
             new SizedBox(height: 251.0, child: new Text('a')),
@@ -142,7 +142,7 @@ void main() {
     ], 'ab');
     await tester.pumpWidget(new Viewport2(
       offset: offset,
-      children: <Widget>[
+      slivers: <Widget>[
         new SliverBlock(
           delegate: new SliverBlockChildListDelegate(<Widget>[
             new SizedBox(height: 251.0, child: new Text('a')),
@@ -162,7 +162,7 @@ void main() {
   testWidgets('Viewport2 overflow clipping of SliverToBoxAdapter', (WidgetTester tester) async {
     await tester.pumpWidget(new Viewport2(
       offset: new ViewportOffset.zero(),
-      children: <Widget>[
+      slivers: <Widget>[
         new SliverToBoxAdapter(
           child: new SizedBox(height: 400.0, child: new Text('a')),
         ),
@@ -173,7 +173,7 @@ void main() {
 
     await tester.pumpWidget(new Viewport2(
       offset: new ViewportOffset.fixed(100.0),
-      children: <Widget>[
+      slivers: <Widget>[
         new SliverToBoxAdapter(
           child: new SizedBox(height: 400.0, child: new Text('a')),
         ),
@@ -184,7 +184,7 @@ void main() {
 
     await tester.pumpWidget(new Viewport2(
       offset: new ViewportOffset.fixed(100.0),
-      children: <Widget>[
+      slivers: <Widget>[
         new SliverToBoxAdapter(
           child: new SizedBox(height: 4000.0, child: new Text('a')),
         ),
@@ -195,7 +195,7 @@ void main() {
 
     await tester.pumpWidget(new Viewport2(
       offset: new ViewportOffset.zero(),
-      children: <Widget>[
+      slivers: <Widget>[
         new SliverToBoxAdapter(
           child: new SizedBox(height: 4000.0, child: new Text('a')),
         ),
@@ -208,7 +208,7 @@ void main() {
   testWidgets('Viewport2 overflow clipping of SliverBlock', (WidgetTester tester) async {
     await tester.pumpWidget(new Viewport2(
       offset: new ViewportOffset.zero(),
-      children: <Widget>[
+      slivers: <Widget>[
         new SliverBlock(
           delegate: new SliverBlockChildListDelegate(<Widget>[
             new SizedBox(height: 400.0, child: new Text('a')),
@@ -221,7 +221,7 @@ void main() {
 
     await tester.pumpWidget(new Viewport2(
       offset: new ViewportOffset.fixed(100.0),
-      children: <Widget>[
+      slivers: <Widget>[
         new SliverBlock(
           delegate: new SliverBlockChildListDelegate(<Widget>[
             new SizedBox(height: 400.0, child: new Text('a')),
@@ -234,7 +234,7 @@ void main() {
 
     await tester.pumpWidget(new Viewport2(
       offset: new ViewportOffset.fixed(100.0),
-      children: <Widget>[
+      slivers: <Widget>[
         new SliverBlock(
           delegate: new SliverBlockChildListDelegate(<Widget>[
             new SizedBox(height: 4000.0, child: new Text('a')),
@@ -247,7 +247,7 @@ void main() {
 
     await tester.pumpWidget(new Viewport2(
       offset: new ViewportOffset.zero(),
-      children: <Widget>[
+      slivers: <Widget>[
         new SliverBlock(
           delegate: new SliverBlockChildListDelegate(<Widget>[
             new SizedBox(height: 4000.0, child: new Text('a')),

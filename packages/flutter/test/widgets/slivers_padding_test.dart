@@ -10,7 +10,7 @@ Future<Null> test(WidgetTester tester, double offset, EdgeInsets padding, AxisDi
   return tester.pumpWidget(new Viewport2(
     offset: new ViewportOffset.fixed(offset),
     axisDirection: axisDirection,
-    children: <Widget>[
+    slivers: <Widget>[
       new SliverToBoxAdapter(child: new SizedBox(width: 400.0, height: 400.0, child: new Text('before'))),
       new SliverPadding(
         padding: padding,
@@ -163,7 +163,7 @@ void main() {
   testWidgets('Viewport2+SliverPadding no child', (WidgetTester tester) async {
     await tester.pumpWidget(new Viewport2(
       offset: new ViewportOffset.fixed(0.0),
-      children: <Widget>[
+      slivers: <Widget>[
         new SliverPadding(padding: new EdgeInsets.all(100.0)),
         new SliverToBoxAdapter(child: new SizedBox(width: 400.0, height: 400.0, child: new Text('x'))),
       ],
@@ -176,7 +176,7 @@ void main() {
     await tester.pumpWidget(new Viewport2(
       axisDirection: AxisDirection.left,
       offset: new ViewportOffset.fixed(0.0),
-      children: <Widget>[
+      slivers: <Widget>[
         new SliverPadding(padding: new EdgeInsets.fromLTRB(90.0, 1.0, 110.0, 2.0)),
         new SliverToBoxAdapter(child: new SizedBox(width: 201.0, child: new Text('x'))),
       ],
@@ -186,7 +186,7 @@ void main() {
     await tester.pumpWidget(new Viewport2(
       axisDirection: AxisDirection.left,
       offset: new ViewportOffset.fixed(0.0),
-      children: <Widget>[
+      slivers: <Widget>[
         new SliverPadding(padding: new EdgeInsets.fromLTRB(110.0, 1.0, 80.0, 2.0)),
         new SliverToBoxAdapter(child: new SizedBox(width: 201.0, child: new Text('x'))),
       ],
@@ -199,7 +199,7 @@ void main() {
     await tester.pumpWidget(new Viewport2(
       axisDirection: AxisDirection.up,
       offset: new ViewportOffset.fixed(0.0),
-      children: <Widget>[
+      slivers: <Widget>[
         new SliverPadding(padding: new EdgeInsets.fromLTRB(1.0, 2.0, 4.0, 8.0)),
       ],
     ));
@@ -207,7 +207,7 @@ void main() {
     await tester.pumpWidget(new Viewport2(
       axisDirection: AxisDirection.down,
       offset: new ViewportOffset.fixed(0.0),
-      children: <Widget>[
+      slivers: <Widget>[
         new SliverPadding(padding: new EdgeInsets.fromLTRB(1.0, 2.0, 4.0, 8.0)),
       ],
     ));
@@ -215,7 +215,7 @@ void main() {
     await tester.pumpWidget(new Viewport2(
       axisDirection: AxisDirection.right,
       offset: new ViewportOffset.fixed(0.0),
-      children: <Widget>[
+      slivers: <Widget>[
         new SliverPadding(padding: new EdgeInsets.fromLTRB(1.0, 2.0, 4.0, 8.0)),
       ],
     ));
@@ -223,7 +223,7 @@ void main() {
     await tester.pumpWidget(new Viewport2(
       axisDirection: AxisDirection.left,
       offset: new ViewportOffset.fixed(0.0),
-      children: <Widget>[
+      slivers: <Widget>[
         new SliverPadding(padding: new EdgeInsets.fromLTRB(1.0, 2.0, 4.0, 8.0)),
       ],
     ));
@@ -231,7 +231,7 @@ void main() {
     await tester.pumpWidget(new Viewport2(
       axisDirection: AxisDirection.left,
       offset: new ViewportOffset.fixed(99999.9),
-      children: <Widget>[
+      slivers: <Widget>[
         new SliverPadding(padding: new EdgeInsets.fromLTRB(1.0, 2.0, 4.0, 8.0)),
       ],
     ));

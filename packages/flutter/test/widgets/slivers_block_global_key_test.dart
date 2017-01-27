@@ -26,7 +26,7 @@ Future<Null> test(WidgetTester tester, double offset, List<int> keys) {
   globalGeneration += 1;
   return tester.pumpWidget(new Viewport2(
     offset: new ViewportOffset.fixed(offset),
-    children: <Widget>[
+    slivers: <Widget>[
       new SliverBlock(
         delegate: new SliverBlockChildListDelegate(keys.map((int key) {
           return new SizedBox(key: new GlobalObjectKey(key), height: 100.0, child: new GenerationText(key));

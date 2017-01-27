@@ -24,20 +24,18 @@ void verifyActualBoxPosition(WidgetTester tester, Finder finder, int index, Rect
 
 void main() {
   testWidgets('Sliver appbars - floating - scroll offset doesn\'t change', (WidgetTester tester) async {
-    final GlobalKey<Scrollable2State> scrollableKey = new GlobalKey<Scrollable2State>();
     const double bigHeight = 1000.0;
     await tester.pumpWidget(
-      new Scrollable2(
-        key: scrollableKey,
+      new ScrollableViewport2(
         axisDirection: AxisDirection.down,
-        children: <Widget>[
+        slivers: <Widget>[
           new BigSliver(height: bigHeight),
           new SliverAppBar(delegate: new TestDelegate(), floating: true),
           new BigSliver(height: bigHeight),
         ],
       ),
     );
-    AbsoluteScrollPosition position = scrollableKey.currentState.position;
+    AbsoluteScrollPosition position = tester.state<Scrollable2State>(find.byType(Scrollable2)).position;
     final double max = bigHeight * 2.0 + new TestDelegate().maxExtent - 600.0; // 600 is the height of the test viewport
     assert(max < 10000.0);
     expect(max, 1600.0);
@@ -52,22 +50,20 @@ void main() {
   });
 
   testWidgets('Sliver appbars - floating - normal behavior works', (WidgetTester tester) async {
-    final GlobalKey<Scrollable2State> scrollableKey = new GlobalKey<Scrollable2State>();
     final TestDelegate delegate = new TestDelegate();
     const double bigHeight = 1000.0;
     GlobalKey key1, key2, key3;
     await tester.pumpWidget(
-      new Scrollable2(
-        key: scrollableKey,
+      new ScrollableViewport2(
         axisDirection: AxisDirection.down,
-        children: <Widget>[
+        slivers: <Widget>[
           new BigSliver(key: key1 = new GlobalKey(), height: bigHeight),
           new SliverAppBar(key: key2 = new GlobalKey(), delegate: delegate, floating: true),
           new BigSliver(key: key3 = new GlobalKey(), height: bigHeight),
         ],
       ),
     );
-    AbsoluteScrollPosition position = scrollableKey.currentState.position;
+    AbsoluteScrollPosition position = tester.state<Scrollable2State>(find.byType(Scrollable2)).position;
 
     verifyPaintPosition(key1, new Offset(0.0, 0.0), true);
     verifyPaintPosition(key2, new Offset(0.0, 600.0), false);
@@ -124,22 +120,20 @@ void main() {
   });
 
   testWidgets('Sliver appbars - floating - no floating behavior when animating', (WidgetTester tester) async {
-    final GlobalKey<Scrollable2State> scrollableKey = new GlobalKey<Scrollable2State>();
     final TestDelegate delegate = new TestDelegate();
     const double bigHeight = 1000.0;
     GlobalKey key1, key2, key3;
     await tester.pumpWidget(
-      new Scrollable2(
-        key: scrollableKey,
+      new ScrollableViewport2(
         axisDirection: AxisDirection.down,
-        children: <Widget>[
+        slivers: <Widget>[
           new BigSliver(key: key1 = new GlobalKey(), height: bigHeight),
           new SliverAppBar(key: key2 = new GlobalKey(), delegate: delegate, floating: true),
           new BigSliver(key: key3 = new GlobalKey(), height: bigHeight),
         ],
       ),
     );
-    AbsoluteScrollPosition position = scrollableKey.currentState.position;
+    AbsoluteScrollPosition position = tester.state<Scrollable2State>(find.byType(Scrollable2)).position;
 
     verifyPaintPosition(key1, new Offset(0.0, 0.0), true);
     verifyPaintPosition(key2, new Offset(0.0, 600.0), false);
@@ -159,22 +153,20 @@ void main() {
   });
 
   testWidgets('Sliver appbars - floating - floating behavior when dragging down', (WidgetTester tester) async {
-    final GlobalKey<Scrollable2State> scrollableKey = new GlobalKey<Scrollable2State>();
     final TestDelegate delegate = new TestDelegate();
     const double bigHeight = 1000.0;
     GlobalKey key1, key2, key3;
     await tester.pumpWidget(
-      new Scrollable2(
-        key: scrollableKey,
+      new ScrollableViewport2(
         axisDirection: AxisDirection.down,
-        children: <Widget>[
+        slivers: <Widget>[
           new BigSliver(key: key1 = new GlobalKey(), height: bigHeight),
           new SliverAppBar(key: key2 = new GlobalKey(), delegate: delegate, floating: true),
           new BigSliver(key: key3 = new GlobalKey(), height: bigHeight),
         ],
       ),
     );
-    AbsoluteScrollPosition position = scrollableKey.currentState.position;
+    AbsoluteScrollPosition position = tester.state<Scrollable2State>(find.byType(Scrollable2)).position;
 
     verifyPaintPosition(key1, new Offset(0.0, 0.0), true);
     verifyPaintPosition(key2, new Offset(0.0, 600.0), false);
