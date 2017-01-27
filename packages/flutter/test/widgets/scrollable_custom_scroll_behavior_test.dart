@@ -76,25 +76,6 @@ class TestScrollBehavior extends ScrollBehavior2 {
   Widget wrap(BuildContext context, Widget child, AxisDirection axisDirection) => child;
 
   @override
-  Widget createViewport({
-    Key key,
-    AxisDirection axisDirection: AxisDirection.down,
-    double anchor: 0.0,
-    ViewportOffset offset,
-    Key center,
-    List<Widget> children: const <Widget>[],
-  }) {
-    return new Viewport2(
-      key: key,
-      axisDirection: axisDirection,
-      anchor: anchor,
-      offset: offset,
-      center: center,
-      children: children,
-    );
-  }
-
-  @override
   ScrollPosition createScrollPosition(BuildContext context, Scrollable2State state, ScrollPosition oldPosition) {
     return new TestScrollPosition(extentMultiplier, state, ViewportScrollBehavior.defaultScrollTolerances, oldPosition);
   }
@@ -107,22 +88,21 @@ class TestScrollBehavior extends ScrollBehavior2 {
 
 void main() {
   testWidgets('Changing the scroll behavior dynamically', (WidgetTester tester) async {
-    GlobalKey<Scrollable2State> key = new GlobalKey<Scrollable2State>();
-    await tester.pumpWidget(new Scrollable2(
-      key: key,
+    await tester.pumpWidget(new ScrollableViewport2(
       scrollBehavior: new TestScrollBehavior(1.0),
-      children: <Widget>[
+      slivers: <Widget>[
         new SliverToBoxAdapter(child: new SizedBox(height: 2000.0)),
       ],
     ));
-    expect(key.currentState.position.getMetrics().extentInside, 1.0);
-    await tester.pumpWidget(new Scrollable2(
-      key: key,
+    Scrollable2State state = tester.state(find.byType(Scrollable2));
+
+    expect(state.position.getMetrics().extentInside, 1.0);
+    await tester.pumpWidget(new ScrollableViewport2(
       scrollBehavior: new TestScrollBehavior(2.0),
-      children: <Widget>[
+      slivers: <Widget>[
         new SliverToBoxAdapter(child: new SizedBox(height: 2000.0)),
       ],
     ));
-    expect(key.currentState.position.getMetrics().extentInside, 2.0);
+    expect(state.position.getMetrics().extentInside, 2.0);
   });
 }

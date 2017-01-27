@@ -10,7 +10,7 @@ Future<Null> test(WidgetTester tester, double offset, { double anchor: 0.0 }) {
   return tester.pumpWidget(new Viewport2(
     anchor: anchor / 600.0,
     offset: new ViewportOffset.fixed(offset),
-    children: <Widget>[
+    slivers: <Widget>[
       new SliverToBoxAdapter(child: new SizedBox(height: 400.0)),
       new SliverToBoxAdapter(child: new SizedBox(height: 400.0)),
       new SliverToBoxAdapter(child: new SizedBox(height: 400.0)),

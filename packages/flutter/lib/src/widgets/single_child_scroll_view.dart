@@ -40,38 +40,18 @@ class SingleChildScrollView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ScrollBehavior2 scrollBehavior = new _SingleChildScrollViewBehavior(
-      Scrollable2.getScrollBehavior(context)
-    );
+    final AxisDirection axisDirection = _getDirection(context);
     return new Scrollable2(
-      axisDirection: _getDirection(context),
-      initialScrollOffset: initialScrollOffset,
-      scrollBehavior: scrollBehavior,
-      children: child == null ? const <Widget>[] : <Widget>[ child ],
-    );
-  }
-}
-
-class _SingleChildScrollViewBehavior extends ScrollBehavior2Proxy {
-  _SingleChildScrollViewBehavior(ScrollBehavior2 parent) : super(parent);
-
-  @override
-  Widget createViewport({
-    Key key,
-    AxisDirection axisDirection: AxisDirection.down,
-    double anchor: 0.0,
-    ViewportOffset offset,
-    Key center,
-    List<Widget> children: const <Widget>[],
-  }) {
-    assert(anchor == 0.0);
-    assert(center == null);
-    assert(children.length <= 1);
-    return new _SingleChildViewport(
-      key: key,
       axisDirection: axisDirection,
-      offset: offset,
-      child: children.isEmpty ? null : children[0],
+      initialScrollOffset: initialScrollOffset,
+      viewportBuilder: (BuildContext context, ViewportOffset offset) {
+        return new _SingleChildViewport(
+          key: key,
+          axisDirection: axisDirection,
+          offset: offset,
+          child: child,
+        );
+      },
     );
   }
 }

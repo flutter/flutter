@@ -11,8 +11,8 @@ Future<Null> pumpTest(WidgetTester tester, TargetPlatform platform) async {
     theme: new ThemeData(
       platform: platform,
     ),
-    home: new Scrollable2(
-      children: <Widget>[
+    home: new ScrollableViewport2(
+      slivers: <Widget>[
         new SliverToBoxAdapter(child: new SizedBox(height: 2000.0)),
       ],
     ),

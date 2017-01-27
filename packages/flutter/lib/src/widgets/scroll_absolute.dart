@@ -79,25 +79,6 @@ class ViewportScrollBehavior extends ScrollBehavior2 {
   }
 
   @override
-  Widget createViewport({
-    Key key,
-    AxisDirection axisDirection: AxisDirection.down,
-    double anchor: 0.0,
-    ViewportOffset offset,
-    Key center,
-    List<Widget> children: const <Widget>[],
-  }) {
-    return new Viewport2(
-      key: key,
-      axisDirection: axisDirection,
-      anchor: anchor,
-      offset: offset,
-      center: center,
-      children: children,
-    );
-  }
-
-  @override
   ScrollPosition createScrollPosition(BuildContext context, Scrollable2State state, ScrollPosition oldPosition) {
     switch (getPlatform(context)) {
       case TargetPlatform.iOS:

@@ -18,13 +18,11 @@ void verifyPaintPosition(GlobalKey key, Offset ideal) {
 
 void main() {
   testWidgets('Sliver protocol', (WidgetTester tester) async {
-    final GlobalKey<Scrollable2State> scrollableKey = new GlobalKey<Scrollable2State>();
     GlobalKey key1, key2, key3, key4, key5;
     await tester.pumpWidget(
-      new Scrollable2(
-        key: scrollableKey,
+      new ScrollableViewport2(
         axisDirection: AxisDirection.down,
-        children: <Widget>[
+        slivers: <Widget>[
           new BigSliver(key: key1 = new GlobalKey()),
           new OverlappingSliver(key: key2 = new GlobalKey()),
           new OverlappingSliver(key: key3 = new GlobalKey()),
@@ -33,7 +31,7 @@ void main() {
         ],
       ),
     );
-    AbsoluteScrollPosition position = scrollableKey.currentState.position;
+    AbsoluteScrollPosition position = tester.state<Scrollable2State>(find.byType(Scrollable2)).position;
     final double max = RenderBigSliver.height * 3.0 + (RenderOverlappingSliver.totalHeight) * 2.0 - 600.0; // 600 is the height of the test viewport
     assert(max < 10000.0);
     expect(max, 1450.0);

@@ -131,7 +131,7 @@ abstract class ScrollPosition extends ViewportOffset {
   @protected
   void dispatchNotification(Notification notification) {
     assert(state.mounted);
-    notification.dispatch(state._viewportKey.currentContext);
+    notification.dispatch(state._gestureDetectorKey.currentContext);
   }
 
   @override
@@ -352,15 +352,6 @@ abstract class ScrollBehavior2 {
 
   Widget wrap(BuildContext context, Widget child, AxisDirection axisDirection);
 
-  Widget createViewport({
-    Key key,
-    AxisDirection axisDirection: AxisDirection.down,
-    double anchor: 0.0,
-    ViewportOffset offset,
-    Key center,
-    List<Widget> children: const <Widget>[],
-  });
-
   /// Returns a new instance of the ScrollPosition class that this
   /// ScrollBehavior2 subclass creates.
   ///
@@ -391,48 +382,6 @@ abstract class ScrollBehavior2 {
   String toString() => '$runtimeType';
 }
 
-abstract class ScrollBehavior2Proxy extends ScrollBehavior2 {
-  ScrollBehavior2Proxy(this.parent) {
-    assert(parent != null);
-  }
-
-  final ScrollBehavior2 parent;
-
-  @override
-  Widget wrap(BuildContext context, Widget child, AxisDirection axisDirection) {
-    return parent.wrap(context, child, axisDirection);
-  }
-
-  @override
-  Widget createViewport({
-    Key key,
-    AxisDirection axisDirection: AxisDirection.down,
-    double anchor: 0.0,
-    ViewportOffset offset,
-    Key center,
-    List<Widget> children: const <Widget>[],
-  }) {
-    return parent.createViewport(
-      key: key,
-      axisDirection: axisDirection,
-      anchor: anchor,
-      offset: offset,
-      center: center,
-      children: children,
-    );
-  }
-
-  @override
-  ScrollPosition createScrollPosition(BuildContext context, Scrollable2State state, ScrollPosition oldPosition) {
-    return parent.createScrollPosition(context, state, oldPosition);
-  }
-
-  @override
-  bool shouldNotify(@checked ScrollBehavior2Proxy oldDelegate) {
-    return parent.shouldNotify(oldDelegate.parent);
-  }
-}
-
 class ScrollConfiguration2 extends InheritedWidget {
   const ScrollConfiguration2({
     Key key,
@@ -455,26 +404,82 @@ class ScrollConfiguration2 extends InheritedWidget {
   }
 }
 
-class Scrollable2 extends StatefulWidget {
-  Scrollable2({
+class ScrollableViewport2 extends StatelessWidget {
+  ScrollableViewport2({
     Key key,
+    this.initialScrollOffset: 0.0,
     this.axisDirection: AxisDirection.down,
     this.anchor: 0.0,
-    this.initialScrollOffset: 0.0,
-    this.scrollBehavior,
     this.center,
-    this.children,
-  }) : super (key: key) {
-    assert(axisDirection != null);
-    assert(anchor != null);
-    assert(initialScrollOffset != null);
+    this.scrollBehavior,
+    this.slivers: const <Widget>[],
+  }) {
+    assert(slivers != null);
   }
+
+  final double initialScrollOffset;
 
   final AxisDirection axisDirection;
 
   final double anchor;
 
+  final Key center;
+
+  final ScrollBehavior2 scrollBehavior;
+
+  final List<Widget> slivers;
+
+  Axis get axis => axisDirectionToAxis(axisDirection);
+
+  @override
+  Widget build(BuildContext context) {
+    return new Scrollable2(
+      initialScrollOffset: initialScrollOffset,
+      axisDirection: axisDirection,
+      scrollBehavior: scrollBehavior,
+      viewportBuilder: (BuildContext context, ViewportOffset offset) {
+        return new Viewport2(
+          axisDirection: axisDirection,
+          anchor: anchor,
+          offset: offset,
+          center: center,
+          slivers: slivers,
+        );
+      }
+    );
+  }
+
+  @override
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('$axisDirection');
+    if (anchor != 0.0)
+      description.add('anchor: ${anchor.toStringAsFixed(1)}');
+    if (initialScrollOffset != 0.0)
+      description.add('initialScrollOffset: ${initialScrollOffset.toStringAsFixed(1)}');
+    if (center != null)
+      description.add('center: $center');
+  }
+}
+
+typedef Widget ViewportBuilder(BuildContext context, ViewportOffset position);
+
+class Scrollable2 extends StatefulWidget {
+  Scrollable2({
+    Key key,
+    this.initialScrollOffset: 0.0,
+    this.axisDirection: AxisDirection.down,
+    this.scrollBehavior,
+    @required this.viewportBuilder,
+  }) : super (key: key) {
+    assert(axisDirection != null);
+    assert(initialScrollOffset != null);
+    assert(viewportBuilder != null);
+  }
+
   final double initialScrollOffset;
+
+  final AxisDirection axisDirection;
 
   /// The delegate that creates the [ScrollPosition] and wraps the viewport
   /// in extra widgets (e.g. for overscroll effects).
@@ -484,9 +489,7 @@ class Scrollable2 extends StatefulWidget {
   /// [ScrollConfiguration2] in scope, a new [ViewportScrollBehavior] is used.
   final ScrollBehavior2 scrollBehavior;
 
-  final Key center;
-
-  final List<Widget> children;
+  final ViewportBuilder viewportBuilder;
 
   Axis get axis => axisDirectionToAxis(axisDirection);
 
@@ -509,8 +512,6 @@ class Scrollable2 extends StatefulWidget {
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     description.add('$axisDirection');
-    if (anchor != 0.0)
-      description.add('anchor: ${anchor.toStringAsFixed(1)}');
     if (initialScrollOffset != 0.0)
       description.add('initialScrollOffset: ${initialScrollOffset.toStringAsFixed(1)}');
     if (scrollBehavior != null) {
@@ -518,8 +519,6 @@ class Scrollable2 extends StatefulWidget {
     } else {
       description.add('scrollBehavior: use inherited ScrollBehavior2');
     }
-    if (center != null)
-      description.add('center: $center');
   }
 }
 
@@ -552,9 +551,9 @@ class Scrollable2State extends State<Scrollable2> with TickerProviderStateMixin 
     _position = _scrollBehavior.createScrollPosition(context, this, oldPosition);
     assert(position != null);
     if (oldPosition != null) {
-      // It's important that we not do this until after the RenderViewport2
-      // object has had a chance to unregister its listeners from the old
-      // position. So, schedule a microtask to do it.
+      // It's important that we not do this until after the viewport has had a
+      // chance to unregister its listeners from the old position. So, schedule
+      // a microtask to do it.
       scheduleMicrotask(oldPosition.dispose);
     }
   }
@@ -583,7 +582,6 @@ class Scrollable2State extends State<Scrollable2> with TickerProviderStateMixin 
 
   final GlobalKey<RawGestureDetectorState> _gestureDetectorKey = new GlobalKey<RawGestureDetectorState>();
   final GlobalKey _ignorePointerKey = new GlobalKey();
-  final GlobalKey _viewportKey = new GlobalKey();
 
   // This field is set during layout, and then reused until the next time it is set.
   Map<Type, GestureRecognizerFactory> _gestureRecognizers = const <Type, GestureRecognizerFactory>{};
@@ -692,14 +690,7 @@ class Scrollable2State extends State<Scrollable2> with TickerProviderStateMixin 
       child: new IgnorePointer(
         key: _ignorePointerKey,
         ignoring: _shouldIgnorePointer,
-        child: _scrollBehavior.createViewport(
-          key: _viewportKey,
-          axisDirection: config.axisDirection,
-          anchor: config.anchor,
-          offset: position,
-          center: config.center,
-          children: config.children,
-        ),
+        child: config.viewportBuilder(context, position),
       ),
     );
     return _scrollBehavior.wrap(context, result, config.axisDirection);

@@ -18,8 +18,8 @@ class Viewport2 extends MultiChildRenderObjectWidget {
     this.anchor: 0.0,
     @required this.offset,
     this.center,
-    List<Widget> children: const <Widget>[],
-  }) : super(key: key, children: children) {
+    List<Widget> slivers: const <Widget>[],
+  }) : super(key: key, children: slivers) {
     assert(offset != null);
     assert(center == null || children.where((Widget child) => child.key == center).length == 1);
   }
