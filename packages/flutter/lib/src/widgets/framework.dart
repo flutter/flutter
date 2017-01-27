@@ -2820,9 +2820,6 @@ typedef Widget WidgetBuilder(BuildContext context);
 /// Used by [LazyBlockBuilder.builder].
 typedef Widget IndexedWidgetBuilder(BuildContext context, int index);
 
-// See ComponentElement._builder.
-Widget _buildNothing(BuildContext context) => null;
-
 /// An [Element] that composes other [Element]s.
 ///
 /// Rather than creating a [RenderObject] directly, a [ComponentElement] creates
@@ -2832,10 +2829,6 @@ Widget _buildNothing(BuildContext context) => null;
 abstract class ComponentElement extends BuildableElement {
   /// Creates an element that uses the given widget as its configuration.
   ComponentElement(Widget widget) : super(widget);
-
-  // Initializing this field with _buildNothing helps the compiler prove that
-  // this field always holds a closure.
-  WidgetBuilder _builder = _buildNothing;
 
   Element _child;
 
@@ -2869,13 +2862,13 @@ abstract class ComponentElement extends BuildableElement {
     assert(_debugSetAllowIgnoredCallsToMarkNeedsBuild(true));
     Widget built;
     try {
-      built = _builder(this);
+      built = build();
       debugWidgetBuilderValue(widget, built);
     } catch (e, stack) {
       _debugReportException('building $this', e, stack);
       built = new ErrorWidget(e);
     } finally {
-      // We delay marking the element as clean until after calling _builder so
+      // We delay marking the element as clean until after calling build() so
       // that attempts to markNeedsBuild() during build() will be ignored.
       _dirty = false;
       assert(_debugSetAllowIgnoredCallsToMarkNeedsBuild(false));
@@ -2896,6 +2889,9 @@ abstract class ComponentElement extends BuildableElement {
     });
   }
 
+  @protected
+  Widget build();
+
   @override
   void visitChildren(ElementVisitor visitor) {
     if (_child != null)
@@ -2912,26 +2908,20 @@ abstract class ComponentElement extends BuildableElement {
 /// An [Element] that uses a [StatelessWidget] as its configuration.
 class StatelessElement extends ComponentElement {
   /// Creates an element that uses the given widget as its configuration.
-  StatelessElement(StatelessWidget widget) : super(widget) {
-    _builder = widget.build;
-  }
+  StatelessElement(StatelessWidget widget) : super(widget);
 
   @override
   StatelessWidget get widget => super.widget;
 
   @override
+  Widget build() => widget.build(this);
+
+  @override
   void update(StatelessWidget newWidget) {
     super.update(newWidget);
     assert(widget == newWidget);
-    _builder = widget.build;
     _dirty = true;
     rebuild();
-  }
-
-  @override
-  void _reassemble() {
-    _builder = widget.build;
-    super._reassemble();
   }
 }
 
@@ -2953,12 +2943,13 @@ class StatefulElement extends ComponentElement {
     });
     assert(_state._element == null);
     _state._element = this;
-    assert(_builder == _buildNothing);
-    _builder = _state.build;
     assert(_state._config == null);
     _state._config = widget;
     assert(_state._debugLifecycleState == _StateLifecycle.created);
   }
+
+  @override
+  Widget build() => state.build(this);
 
   /// The [State] instance associated with this location in the tree.
   ///
@@ -2970,7 +2961,6 @@ class StatefulElement extends ComponentElement {
 
   @override
   void _reassemble() {
-    _builder = state.build;
     state.reassemble();
     super._reassemble();
   }
@@ -3100,20 +3090,13 @@ class StatefulElement extends ComponentElement {
 /// An [Element] that uses a [ProxyElement] as its configuration.
 abstract class ProxyElement extends ComponentElement {
   /// Initializes fields for subclasses.
-  ProxyElement(ProxyWidget widget) : super(widget) {
-    _builder = _build;
-  }
+  ProxyElement(ProxyWidget widget) : super(widget);
 
   @override
   ProxyWidget get widget => super.widget;
 
-  Widget _build(BuildContext context) => widget.child;
-
   @override
-  void _reassemble() {
-    _builder = _build;
-    super._reassemble();
-  }
+  Widget build() => widget.child;
 
   @override
   void update(ProxyWidget newWidget) {

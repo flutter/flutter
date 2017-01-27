@@ -1095,9 +1095,6 @@ class PipelineOwner {
   }
 }
 
-// See _performLayout.
-void _doNothing() { }
-
 /// An object in the render tree.
 ///
 /// The [RenderObject] class hierarchy is the core of the rendering
@@ -1212,7 +1209,6 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   /// Initializes internal fields for subclasses.
   RenderObject() {
     _needsCompositing = isRepaintBoundary || alwaysNeedsCompositing;
-    _performLayout = performLayout;
   }
 
   /// Cause the entire subtree rooted at the given [RenderObject] to be marked
@@ -1227,7 +1223,6 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   ///
   /// * [BindingBase.reassembleApplication].
   void reassemble() {
-    _performLayout = performLayout;
     markNeedsLayout();
     markNeedsCompositingBitsUpdate();
     markNeedsPaint();
@@ -1608,7 +1603,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       return true;
     });
     try {
-      _performLayout();
+      performLayout();
       markNeedsSemanticsUpdate();
     } catch (e, stack) {
       _debugReportException('performLayout', e, stack);
@@ -1732,7 +1727,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       return true;
     });
     try {
-      _performLayout();
+      performLayout();
       markNeedsSemanticsUpdate();
       assert(() { debugAssertDoesMeetConstraints(); return true; });
     } catch (e, stack) {
@@ -1802,11 +1797,6 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   /// information without informing this render object.
   @protected
   void performLayout();
-
-  // We cache a closure to performLayout so that the callsite is monomorphic.
-  // Initializing this field with _buildNothing helps the compiler prove that
-  // this field always holds a closure.
-  VoidCallback _performLayout = _doNothing;
 
   /// Allows mutations to be made to this object's child list (and any
   /// descendants) as well as to any other dirty nodes in the render tree owned
