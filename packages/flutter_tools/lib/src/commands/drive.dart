@@ -84,9 +84,6 @@ class DriveCommand extends RunCommandBase {
   // ignore: cancel_subscriptions
   StreamSubscription<String> _deviceLogSubscription;
 
-  int get observatoryPort => int.parse(argResults['observatory-port']);
-  int get diagnosticPort => int.parse(argResults['diagnostic-port']);
-
   @override
   Future<Null> verifyThenRunCommand() async {
     commandValidator();

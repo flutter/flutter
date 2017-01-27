@@ -189,24 +189,6 @@ class RunCommand extends RunCommandBase {
       return null;
     }
 
-    int observatoryPort;
-    if (argResults['observatory-port'] != null) {
-      try {
-        observatoryPort = int.parse(argResults['observatory-port']);
-      } catch (error) {
-        throwToolExit('Invalid port for `--observatory-port`: $error');
-      }
-    }
-
-    int diagnosticPort;
-    if (argResults['diagnostic-port'] != null) {
-      try {
-        diagnosticPort = int.parse(argResults['diagnostic-port']);
-      } catch (error) {
-        throwToolExit('Invalid port for `--diagnostic-port`: $error');
-      }
-    }
-
     if (device.isLocalEmulator && !isEmulatorBuildMode(getBuildMode()))
       throwToolExit('${toTitleCase(getModeName(getBuildMode()))} mode is not supported for emulators.');
 
