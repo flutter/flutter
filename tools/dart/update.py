@@ -69,7 +69,10 @@ def main():
     urllib.urlretrieve(sdk_url, output_file)
     print(output_file)
     with zipfile.ZipFile(output_file, 'r') as zip_ref:
-      zip_ref.extractall(DART_SDK_DIR)
+      for zip_info in zip_ref.infolist():
+        zip_ref.extract(zip_info, path=DART_SDK_DIR)
+        mode = (zip_info.external_attr >> 16) & 0xFFF
+        os.chmod(os.path.join(DART_SDK_DIR, zip_info.filename), mode)
 
     # Write our stamp file so we don't redownload the sdk.
     with open(STAMP_FILE, "w") as stamp_file:
