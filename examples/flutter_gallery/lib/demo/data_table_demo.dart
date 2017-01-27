@@ -165,7 +165,7 @@ class _DataTableDemoState extends State<DataTableDemo> {
   Widget build(BuildContext context) {
     return new Scaffold(
       appBar: new AppBar(title: new Text('Data tables')),
-      body: new Block(
+      body: new ScrollView(
         padding: const EdgeInsets.all(20.0),
         children: <Widget>[
           new PaginatedDataTable(

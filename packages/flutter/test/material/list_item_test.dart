@@ -32,7 +32,7 @@ void main() {
       home: new Material(
         child: new Builder(
           builder: (BuildContext context) {
-            return new Block(
+            return new ScrollView(
               children: ListItem.divideItems(
                 context: context,
                 items: titles.map((String title) => new ListItem(title: new Text(title))),

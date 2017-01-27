@@ -89,7 +89,7 @@ class DialogDemoState extends State<DialogDemo> {
       appBar: new AppBar(
         title: new Text('Dialogs')
       ),
-      body: new Block(
+      body: new ScrollView(
         padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 72.0),
         children: <Widget>[
           new RaisedButton(

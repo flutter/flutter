@@ -15,6 +15,7 @@ import 'scrollable.dart';
 class ScrollView extends StatelessWidget {
   ScrollView({
     Key key,
+    this.padding,
     this.scrollDirection: Axis.vertical,
     this.anchor: 0.0,
     this.initialScrollOffset: 0.0,
@@ -22,6 +23,8 @@ class ScrollView extends StatelessWidget {
     this.center,
     this.children,
   }) : super(key: key);
+
+  final EdgeInsets padding;
 
   final Axis scrollDirection;
 
@@ -48,15 +51,18 @@ class ScrollView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Widget sliver = new SliverBlock(delegate: new SliverBlockChildListDelegate(children));
+
+    if (padding != null)
+      sliver = new SliverPadding(padding: padding, child: sliver);
+
     return new Scrollable2(
       axisDirection: _getDirection(context),
       anchor: anchor,
       initialScrollOffset: initialScrollOffset,
       scrollBehavior: scrollBehavior,
       center: center,
-      children: <Widget>[
-        new SliverBlock(delegate: new SliverBlockChildListDelegate(children)),
-      ],
+      children: <Widget>[ sliver ],
     );
   }
 }
