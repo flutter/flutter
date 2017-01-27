@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_tools/src/hot.dart';
+import 'package:flutter_tools/src/run_hot.dart';
 import 'package:test/test.dart';
 
 import 'src/context.dart';
