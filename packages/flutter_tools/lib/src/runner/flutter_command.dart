@@ -63,41 +63,6 @@ abstract class FlutterCommand extends Command<Null> {
     _usesPubOption = true;
   }
 
-  void usesPortOptions() {
-    argParser.addOption('observatory-port',
-        help: 'Listen to the given port for an observatory debugger connection.\n'
-              'Specifying port 0 will find a random free port.\n'
-              'Defaults to the first available port after $kDefaultObservatoryPort.'
-    );
-    argParser.addOption('diagnostic-port',
-        help: 'Listen to the given port for a diagnostic connection.\n'
-              'Specifying port 0 will find a random free port.\n'
-              'Defaults to the first available port after $kDefaultDiagnosticPort.'
-    );
-  }
-
-  int get observatoryPort {
-    if (argResults['observatory-port'] != null) {
-      try {
-        return int.parse(argResults['observatory-port']);
-      } catch (error) {
-        throwToolExit('Invalid port for `--observatory-port`: $error');
-      }
-    }
-    return null;
-  }
-
-  int get diagnosticPort {
-    if (argResults['diagnostic-port'] != null) {
-      try {
-        return int.parse(argResults['diagnostic-port']);
-      } catch (error) {
-        throwToolExit('Invalid port for `--diagnostic-port`: $error');
-      }
-    }
-    return null;
-  }
-
   void addBuildModeFlags({ bool defaultToRelease: true }) {
     defaultBuildMode = defaultToRelease ? BuildMode.release : BuildMode.debug;
 

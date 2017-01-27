@@ -16,18 +16,20 @@ import 'device.dart';
 import 'globals.dart';
 import 'resident_runner.dart';
 
-class RunAndStayResident extends ResidentRunner {
-  RunAndStayResident(
+class ColdRunner extends ResidentRunner {
+  ColdRunner(
     Device device, {
     String target,
     DebuggingOptions debuggingOptions,
     bool usesTerminalUI: true,
     this.traceStartup: false,
-    this.applicationBinary
+    this.applicationBinary,
+    bool stayResident,
   }) : super(device,
              target: target,
              debuggingOptions: debuggingOptions,
-             usesTerminalUI: usesTerminalUI);
+             usesTerminalUI: usesTerminalUI,
+             stayResident: stayResident);
 
   LaunchResult _result;
   final bool traceStartup;
@@ -147,14 +149,17 @@ class RunAndStayResident extends ResidentRunner {
         return 2;
       }
       appFinished();
-    } else {
+    } else if (stayResident) {
       setupTerminal();
       registerSignalHandlers();
     }
 
     appStartedCompleter?.complete();
 
-    return waitForAppToFinish();
+    if (stayResident)
+      return waitForAppToFinish();
+    await cleanupAtFinish();
+    return 0;
   }
 
   @override

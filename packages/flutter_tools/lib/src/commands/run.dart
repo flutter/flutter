@@ -20,6 +20,7 @@ import '../runner/flutter_command.dart';
 import 'daemon.dart';
 
 abstract class RunCommandBase extends FlutterCommand {
+  // Used by run and drive commands.
   RunCommandBase() {
     addBuildModeFlags(defaultToRelease: false);
     argParser.addFlag('trace-startup',
@@ -29,10 +30,47 @@ abstract class RunCommandBase extends FlutterCommand {
     argParser.addOption('route',
         help: 'Which route to load when running the app.');
     usesTargetOption();
+    usesPortOptions();
+    usesPubOption();
   }
 
   bool get traceStartup => argResults['trace-startup'];
   String get route => argResults['route'];
+
+  void usesPortOptions() {
+    argParser.addOption('observatory-port',
+        help: 'Listen to the given port for an observatory debugger connection.\n'
+              'Specifying port 0 will find a random free port.\n'
+              'Defaults to the first available port after $kDefaultObservatoryPort.'
+    );
+    argParser.addOption('diagnostic-port',
+        help: 'Listen to the given port for a diagnostic connection.\n'
+              'Specifying port 0 will find a random free port.\n'
+              'Defaults to the first available port after $kDefaultDiagnosticPort.'
+    );
+  }
+
+  int get observatoryPort {
+    if (argResults['observatory-port'] != null) {
+      try {
+        return int.parse(argResults['observatory-port']);
+      } catch (error) {
+        throwToolExit('Invalid port for `--observatory-port`: $error');
+      }
+    }
+    return null;
+  }
+
+  int get diagnosticPort {
+    if (argResults['diagnostic-port'] != null) {
+      try {
+        return int.parse(argResults['diagnostic-port']);
+      } catch (error) {
+        throwToolExit('Invalid port for `--diagnostic-port`: $error');
+      }
+    }
+    return null;
+  }
 }
 
 class RunCommand extends RunCommandBase {
@@ -50,7 +88,6 @@ class RunCommand extends RunCommandBase {
         defaultsTo: false,
         negatable: false,
         help: 'Start in a paused mode and wait for a debugger to connect.');
-    usesPortOptions();
     argParser.addFlag('build',
         defaultsTo: true,
         help: 'If necessary, build the app before running.');
@@ -73,23 +110,19 @@ class RunCommand extends RunCommandBase {
         hide: !verboseHelp,
         help: 'Handle machine structured JSON command input\n'
               'and provide output and progress in machine friendly format.');
-    usesPubOption();
-
-    // Option to enable hot reloading.
-    argParser.addFlag(
-      'hot',
-      negatable: true,
-      defaultsTo: kHotReloadDefault,
-      help: 'Run with support for hot reloading.'
-    );
-
-    // Option to write the pid to a file.
-    argParser.addOption(
-      'pid-file',
-      help: 'Specify a file to write the process id to.\n'
-            'You can send SIGUSR1 to trigger a hot reload\n'
-            'and SIGUSR2 to trigger a full restart.'
-    );
+    argParser.addFlag('hot',
+        negatable: true,
+        defaultsTo: kHotReloadDefault,
+        help: 'Run with support for hot reloading.');
+    argParser.addOption('pid-file',
+        help: 'Specify a file to write the process id to.\n'
+              'You can send SIGUSR1 to trigger a hot reload\n'
+              'and SIGUSR2 to trigger a full restart.');
+    argParser.addFlag('resident',
+        negatable: true,
+        defaultsTo: true,
+        hide: !verboseHelp,
+        help: 'Stay resident after launching the application.');
 
     // Hidden option to enable a benchmarking mode. This will run the given
     // application, measure the startup time and the app restart time, write the
@@ -149,6 +182,8 @@ class RunCommand extends RunCommandBase {
 
   bool get runningWithPrebuiltApplication =>
       argResults['use-application-binary'] != null;
+
+  bool get stayResident => argResults['resident'];
 
   @override
   Future<Null> verifyThenRunCommand() async {
@@ -226,15 +261,17 @@ class RunCommand extends RunCommandBase {
         applicationBinary: argResults['use-application-binary'],
         projectRootPath: argResults['project-root'],
         packagesFilePath: argResults['packages'],
-        projectAssets: argResults['project-assets']
+        projectAssets: argResults['project-assets'],
+        stayResident: stayResident,
       );
     } else {
-      runner = new RunAndStayResident(
+      runner = new ColdRunner(
         device,
         target: targetFile,
         debuggingOptions: options,
         traceStartup: traceStartup,
-        applicationBinary: argResults['use-application-binary']
+        applicationBinary: argResults['use-application-binary'],
+        stayResident: stayResident,
       );
     }
 

@@ -365,7 +365,7 @@ class AppDomain extends Domain {
         projectAssets: projectAssets,
       );
     } else {
-      runner = new RunAndStayResident(
+      runner = new ColdRunner(
         device,
         target: target,
         debuggingOptions: options,
