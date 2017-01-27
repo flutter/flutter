@@ -143,9 +143,8 @@ abstract class ResidentRunner {
   }
 
   Future<Null> startEchoingDeviceLog(ApplicationPackage app) async {
-    if (_loggingSubscription != null) {
+    if (_loggingSubscription != null)
       return;
-    }
     _loggingSubscription = device.getLogReader(app: app).logLines.listen((String line) {
       if (!line.contains('Observatory listening on http') &&
           !line.contains('Diagnostic server listening on http'))

@@ -50,8 +50,7 @@ class RunCommand extends RunCommandBase {
         defaultsTo: false,
         negatable: false,
         help: 'Start in a paused mode and wait for a debugger to connect.');
-    argParser.addOption('debug-port',
-        help: 'Listen to the given port for a debug connection (defaults to $kDefaultObservatoryPort).');
+    usesPortOptions();
     argParser.addFlag('build',
         defaultsTo: true,
         help: 'If necessary, build the app before running.');
@@ -190,12 +189,21 @@ class RunCommand extends RunCommandBase {
       return null;
     }
 
-    int debugPort;
-    if (argResults['debug-port'] != null) {
+    int observatoryPort;
+    if (argResults['observatory-port'] != null) {
       try {
-        debugPort = int.parse(argResults['debug-port']);
+        observatoryPort = int.parse(argResults['observatory-port']);
       } catch (error) {
-        throwToolExit('Invalid port for `--debug-port`: $error');
+        throwToolExit('Invalid port for `--observatory-port`: $error');
+      }
+    }
+
+    int diagnosticPort;
+    if (argResults['diagnostic-port'] != null) {
+      try {
+        diagnosticPort = int.parse(argResults['diagnostic-port']);
+      } catch (error) {
+        throwToolExit('Invalid port for `--diagnostic-port`: $error');
       }
     }
 
@@ -210,7 +218,8 @@ class RunCommand extends RunCommandBase {
       options = new DebuggingOptions.enabled(
         getBuildMode(),
         startPaused: argResults['start-paused'],
-        observatoryPort: debugPort
+        observatoryPort: observatoryPort,
+        diagnosticPort: diagnosticPort,
       );
     }
 

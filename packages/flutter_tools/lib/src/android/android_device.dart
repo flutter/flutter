@@ -445,7 +445,7 @@ class AndroidDevice extends Device {
       Match match = discoverExp.firstMatch(line);
       if (match != null) {
         Map<String, dynamic> app = JSON.decode(match.group(1));
-        result.add(new DiscoveredApp(app['id'], app['observatoryPort']));
+        result.add(new DiscoveredApp(app['id'], app['observatoryPort'], app['diagnosticPort']));
       }
     });
 

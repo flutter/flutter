@@ -485,7 +485,8 @@ class AppDomain extends Domain {
     return apps.map((DiscoveredApp app) {
       return <String, dynamic>{
         'id': app.id,
-        'observatoryDevicePort': app.observatoryPort
+        'observatoryDevicePort': app.observatoryPort,
+        'diagnosticDevicePort': app.diagnosticPort,
       };
     }).toList();
   }

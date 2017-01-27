@@ -313,6 +313,8 @@ class DebuggingOptions {
   /// Return the user specified diagnostic port. If that isn't available,
   /// return [kDefaultDiagnosticPort], or a port close to that one.
   Future<int> findBestDiagnosticPort() {
+    if (hasDiagnosticPort)
+      return new Future<int>.value(diagnosticPort);
     return findPreferredPort(diagnosticPort ?? kDefaultDiagnosticPort);
   }
 }
@@ -378,7 +380,8 @@ abstract class DeviceLogReader {
 
 /// Describes an app running on the device.
 class DiscoveredApp {
-  DiscoveredApp(this.id, this.observatoryPort);
+  DiscoveredApp(this.id, this.observatoryPort, this.diagnosticPort);
   final String id;
   final int observatoryPort;
+  final int diagnosticPort;
 }
