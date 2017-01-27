@@ -433,7 +433,7 @@ class Border {
         path = new Path();
         path.moveTo(rect.left, rect.bottom);
         path.lineTo(rect.left, rect.top);
-        if (right.width == 0.0) {
+        if (left.width == 0.0) {
           paint.style = PaintingStyle.stroke;
         } else {
           paint.style = PaintingStyle.fill;
