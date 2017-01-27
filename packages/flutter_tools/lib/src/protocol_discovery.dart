@@ -49,16 +49,16 @@ class ProtocolDiscovery {
 
   /// The [Future] returned by this function will complete when the next service
   /// Uri is found.
-  Future<Uri> nextUri() async {
-    Uri deviceUri = await _completer.future.timeout(
+  Future<Uri> nextUrl() async {
+    Uri deviceUrl = await _completer.future.timeout(
       const Duration(seconds: 60), onTimeout: () {
-        throwToolExit('Timeout while attempting to retrieve Uri for $_serviceName');
+        throwToolExit('Timeout while attempting to retrieve URL for $_serviceName');
       }
     );
-    printTrace('$_serviceName Uri on device: $deviceUri');
-    Uri hostUri;
+    printTrace('$_serviceName URL on device: $deviceUrl');
+    Uri hostUrl;
     if (portForwarder != null) {
-      int devicePort = deviceUri.port;
+      int devicePort = deviceUrl.port;
       hostPort ??= await findPreferredPort(defaultHostPort);
       hostPort = await portForwarder
           .forward(devicePort, hostPort: hostPort)
@@ -66,11 +66,11 @@ class ProtocolDiscovery {
             throwToolExit('Timeout while atempting to foward device port $devicePort for $_serviceName');
           });
       printTrace('Forwarded host port $hostPort to device port $devicePort for $_serviceName');
-      hostUri = deviceUri.replace(port: hostPort);
+      hostUrl = deviceUrl.replace(port: hostPort);
     } else {
-      hostUri = deviceUri;
+      hostUrl = deviceUrl;
     }
-    return hostUri;
+    return hostUrl;
   }
 
   void cancel() {
@@ -78,25 +78,25 @@ class ProtocolDiscovery {
   }
 
   void _onLine(String line) {
-    Uri uri;
+    Uri url;
     String prefix = '$_serviceName listening on ';
     int index = line.indexOf(prefix + 'http://');
     if (index >= 0) {
       try {
-        uri = Uri.parse(line.substring(index + prefix.length));
+        url = Uri.parse(line.substring(index + prefix.length));
       } catch (_) {
         // Ignore errors.
       }
     }
-    if (uri != null)
-      _located(uri);
+    if (url != null)
+      _located(url);
   }
 
-  void _located(Uri uri) {
+  void _located(Uri url) {
     assert(_completer != null);
     assert(!_completer.isCompleted);
 
-    _completer.complete(uri);
+    _completer.complete(url);
     _completer = new Completer<Uri>();
   }
 }

@@ -249,8 +249,8 @@ class IOSDevice extends Device {
     }
 
     int installationResult = -1;
-    Uri localObsUri;
-    Uri localDiagUri;
+    Uri localObservatoryUrl;
+    Uri localDiagnosticUrl;
 
     if (!debuggingOptions.debuggingEnabled) {
       // If debugging is not enabled, just launch the application and continue.
@@ -268,17 +268,17 @@ class IOSDevice extends Device {
       ProtocolDiscovery diagnosticDiscovery = new ProtocolDiscovery.diagnosticService(
         getLogReader(app: app), portForwarder: portForwarder, hostPort: debuggingOptions.diagnosticPort);
 
-      Future<Uri> forwardObsUri = observatoryDiscovery.nextUri();
-      Future<Uri> forwardDiagUri;
+      Future<Uri> forwardObservatoryUrl = observatoryDiscovery.nextUrl();
+      Future<Uri> forwardDiagnosticUrl;
       if (debuggingOptions.buildMode == BuildMode.debug) {
-        forwardDiagUri = diagnosticDiscovery.nextUri();
+        forwardDiagnosticUrl = diagnosticDiscovery.nextUrl();
       } else {
-        forwardDiagUri = new Future<Uri>.value(null);
+        forwardDiagnosticUrl = new Future<Uri>.value(null);
       }
 
       Future<int> launch = runCommandAndStreamOutput(launchCommand, trace: true);
 
-      List<Uri> uris = await launch.then((int result) async {
+      List<Uri> urls = await launch.then((int result) async {
         installationResult = result;
 
         if (result != 0) {
@@ -287,14 +287,14 @@ class IOSDevice extends Device {
         }
 
         printTrace("Application launched on the device. Attempting to forward ports.");
-        return await Future.wait(<Future<Uri>>[forwardObsUri, forwardDiagUri]);
+        return await Future.wait(<Future<Uri>>[forwardObservatoryUrl, forwardDiagnosticUrl]);
       }).whenComplete(() {
         observatoryDiscovery.cancel();
         diagnosticDiscovery.cancel();
       });
 
-      localObsUri = uris[0];
-      localDiagUri = uris[1];
+      localObservatoryUrl = urls[0];
+      localDiagnosticUrl = urls[1];
     }
 
     if (installationResult != 0) {
@@ -305,7 +305,7 @@ class IOSDevice extends Device {
       return new LaunchResult.failed();
     }
 
-    return new LaunchResult.succeeded(observatoryUri: localObsUri, diagnosticUri: localDiagUri);
+    return new LaunchResult.succeeded(observatoryUrl: localObservatoryUrl, diagnosticUrl: localDiagnosticUrl);
   }
 
   @override

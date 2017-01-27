@@ -352,11 +352,11 @@ String getMissingPackageHintForPlatform(TargetPlatform platform) {
 }
 
 class DebugConnectionInfo {
-  DebugConnectionInfo({ this.httpUri, this.wsUri, this.baseUri });
+  DebugConnectionInfo({ this.httpUrl, this.wsUrl, this.baseUrl });
 
-  // TODO(danrubel): the httpUri field should be removed as part of
+  // TODO(danrubel): the httpUrl field should be removed as part of
   // https://github.com/flutter/flutter/issues/7050
-  final Uri httpUri;
-  final Uri wsUri;
-  final String baseUri;
+  final Uri httpUrl;
+  final Uri wsUrl;
+  final String baseUrl;
 }

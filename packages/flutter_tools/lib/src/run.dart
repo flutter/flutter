@@ -122,14 +122,13 @@ class ColdRunner extends ResidentRunner {
     startTime.stop();
 
     // Connect to observatory.
-    if (debuggingOptions.debuggingEnabled) {
-      await connectToServiceProtocol(_result.observatoryUri);
-    }
+    if (debuggingOptions.debuggingEnabled)
+      await connectToServiceProtocol(_result.observatoryUrl);
 
     if (_result.hasObservatory) {
       connectionInfoCompleter?.complete(new DebugConnectionInfo(
-        httpUri: _result.observatoryUri,
-        wsUri: vmService.wsAddress,
+        httpUrl: _result.observatoryUrl,
+        wsUrl: vmService.wsAddress,
       ));
     }
 
@@ -180,7 +179,7 @@ class ColdRunner extends ResidentRunner {
   void printHelp({ @required bool details }) {
     bool haveDetails = false;
     if (_result.hasObservatory)
-      printStatus('The Observatory debugger and profiler is available at: ${_result.observatoryUri}');
+      printStatus('The Observatory debugger and profiler is available at: ${_result.observatoryUrl}');
     if (supportsServiceProtocol) {
       haveDetails = true;
       if (details)

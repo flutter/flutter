@@ -59,7 +59,7 @@ class HotRunner extends ResidentRunner {
   final String applicationBinary;
   bool get prebuiltMode => applicationBinary != null;
   Set<String> _dartDependencies;
-  Uri _observatoryUri;
+  Uri _observatoryUrl;
 
   final bool benchmarkMode;
   final Map<String, int> benchmarkData = new Map<String, int>();
@@ -102,7 +102,7 @@ class HotRunner extends ResidentRunner {
       Set<String> dependencies = dartDependencySetBuilder.build();
       _dartDependencies = new Set<String>();
       for (String path in dependencies) {
-        // We need to tweak package: uris so that they reflect their devFS
+        // We need to tweak package: urls so that they reflect their devFS
         // location.
         if (path.startsWith('package:')) {
           // Swap out package: for packages/ because we place all package
@@ -177,22 +177,22 @@ class HotRunner extends ResidentRunner {
       return 2;
     }
 
-    _observatoryUri = result.observatoryUri;
+    _observatoryUrl = result.observatoryUrl;
     try {
-      await connectToServiceProtocol(_observatoryUri);
+      await connectToServiceProtocol(_observatoryUrl);
     } catch (error) {
       printError('Error connecting to the service protocol: $error');
       return 2;
     }
 
     try {
-      Uri baseUri = await _initDevFS();
+      Uri baseUrl = await _initDevFS();
       if (connectionInfoCompleter != null) {
         connectionInfoCompleter.complete(
           new DebugConnectionInfo(
-            httpUri: _observatoryUri,
-            wsUri: vmService.wsAddress,
-            baseUri: baseUri.toString()
+            httpUrl: _observatoryUrl,
+            wsUrl: vmService.wsAddress,
+            baseUrl: baseUrl.toString()
           )
         );
       }
@@ -325,11 +325,11 @@ class HotRunner extends ResidentRunner {
                                 String mainScript) async {
     String entryPath = path.relative(mainScript, from: projectRootPath);
     String deviceEntryPath =
-        _devFS.baseUri.resolve(entryPath).toFilePath();
+        _devFS.baseUrl.resolve(entryPath).toFilePath();
     String devicePackagesPath =
-        _devFS.baseUri.resolve('.packages').toFilePath();
+        _devFS.baseUrl.resolve('.packages').toFilePath();
     String deviceAssetsDirectoryPath =
-        _devFS.baseUri.resolve(getAssetBuildDirectory()).toFilePath();
+        _devFS.baseUrl.resolve(getAssetBuildDirectory()).toFilePath();
     await _launchInView(deviceEntryPath,
                         devicePackagesPath,
                         deviceAssetsDirectoryPath);
@@ -436,9 +436,9 @@ class HotRunner extends ResidentRunner {
     try {
       String entryPath = path.relative(mainPath, from: projectRootPath);
       String deviceEntryPath =
-          _devFS.baseUri.resolve(entryPath).toFilePath();
+          _devFS.baseUrl.resolve(entryPath).toFilePath();
       String devicePackagesPath =
-          _devFS.baseUri.resolve('.packages').toFilePath();
+          _devFS.baseUrl.resolve('.packages').toFilePath();
       if (benchmarkMode)
         vmReloadTimer.start();
       Map<String, dynamic> reloadReport =
@@ -532,7 +532,7 @@ class HotRunner extends ResidentRunner {
       ansiAlternative: '$red$fire$bold  To hot reload your app on the fly, '
                        'press "r" or F5. To restart the app entirely, press "R".$reset'
     );
-    printStatus('The Observatory debugger and profiler is available at: $_observatoryUri');
+    printStatus('The Observatory debugger and profiler is available at: $_observatoryUrl');
     if (details) {
       printHelpDetails();
       printStatus('To repeat this help message, press "h" or F1. To quit, press "q", F10, or Ctrl-C.');

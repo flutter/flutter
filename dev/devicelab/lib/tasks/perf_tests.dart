@@ -254,10 +254,8 @@ class MemoryTest {
           testTarget,
           '-d',
           deviceId,
-          '--use-existing-app',
-        ], environment: <String, String> {
-          'VM_SERVICE_URL': 'http://localhost:$observatoryPort'
-        });
+          '--use-existing-app=http://localhost:$observatoryPort',
+        ]);
 
         Map<String, dynamic> endData = await device.getMemoryStats(packageName);
         data['end_total_kb'] = endData['total_kb'];

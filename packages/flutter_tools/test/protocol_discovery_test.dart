@@ -19,53 +19,53 @@ void main() {
           new ProtocolDiscovery(logReader, ProtocolDiscovery.kObservatoryService);
 
       // Get next port future.
-      Future<Uri> nextUri = discoverer.nextUri();
-      expect(nextUri, isNotNull);
+      Future<Uri> nextUrl = discoverer.nextUrl();
+      expect(nextUrl, isNotNull);
 
       // Inject some lines.
       logReader.addLine('HELLO WORLD');
       logReader.addLine('Observatory listening on http://127.0.0.1:9999');
       // Await the port.
-      Uri uri = await nextUri;
-      expect(uri.port, 9999);
-      expect('$uri', 'http://127.0.0.1:9999');
+      Uri url = await nextUrl;
+      expect(url.port, 9999);
+      expect('$url', 'http://127.0.0.1:9999');
 
       // Get next port future.
-      nextUri = discoverer.nextUri();
+      nextUrl = discoverer.nextUrl();
       logReader.addLine('Observatory listening on http://127.0.0.1:3333');
-      uri = await nextUri;
-      expect(uri.port, 3333);
-      expect('$uri', 'http://127.0.0.1:3333');
+      url = await nextUrl;
+      expect(url.port, 3333);
+      expect('$url', 'http://127.0.0.1:3333');
 
       // Get next port future.
-      nextUri = discoverer.nextUri();
+      nextUrl = discoverer.nextUrl();
       // Inject a bad line.
       logReader.addLine('Observatory listening on http://127.0.0.1:apple');
-      Uri timeoutUri = Uri.parse('http://timeout');
-      Uri actualUri = await nextUri.timeout(
-          const Duration(milliseconds: 100), onTimeout: () => timeoutUri);
-      expect(actualUri, timeoutUri);
+      Uri timeoutUrl = Uri.parse('http://timeout');
+      Uri actualUrl = await nextUrl.timeout(
+          const Duration(milliseconds: 100), onTimeout: () => timeoutUrl);
+      expect(actualUrl, timeoutUrl);
 
       // Get next port future.
-      nextUri = discoverer.nextUri();
+      nextUrl = discoverer.nextUrl();
       logReader.addLine('I/flutter : Observatory listening on http://127.0.0.1:52584');
-      uri = await nextUri;
-      expect(uri.port, 52584);
-      expect('$uri', 'http://127.0.0.1:52584');
+      url = await nextUrl;
+      expect(url.port, 52584);
+      expect('$url', 'http://127.0.0.1:52584');
 
       // Get next port future.
-      nextUri = discoverer.nextUri();
+      nextUrl = discoverer.nextUrl();
       logReader.addLine('I/flutter : Observatory listening on http://127.0.0.1:54804/PTwjm8Ii8qg=/');
-      uri = await nextUri;
-      expect(uri.port, 54804);
-      expect('$uri', 'http://127.0.0.1:54804/PTwjm8Ii8qg=/');
+      url = await nextUrl;
+      expect(url.port, 54804);
+      expect('$url', 'http://127.0.0.1:54804/PTwjm8Ii8qg=/');
 
       // Get next port future.
-      nextUri = discoverer.nextUri();
+      nextUrl = discoverer.nextUrl();
       logReader.addLine('I/flutter : Observatory listening on http://somehost:54804/PTwjm8Ii8qg=/');
-      uri = await nextUri;
-      expect(uri.port, 54804);
-      expect('$uri', 'http://somehost:54804/PTwjm8Ii8qg=/');
+      url = await nextUrl;
+      expect(url.port, 54804);
+      expect('$url', 'http://somehost:54804/PTwjm8Ii8qg=/');
 
       discoverer.cancel();
       logReader.dispose();
@@ -80,11 +80,11 @@ void main() {
           defaultHostPort: 54777);
 
       // Get next port future.
-      Future<Uri> nextUri = discoverer.nextUri();
+      Future<Uri> nextUrl = discoverer.nextUrl();
       logReader.addLine('I/flutter : Observatory listening on http://somehost:54804/PTwjm8Ii8qg=/');
-      Uri uri = await nextUri;
-      expect(uri.port, 54777);
-      expect('$uri', 'http://somehost:54777/PTwjm8Ii8qg=/');
+      Uri url = await nextUrl;
+      expect(url.port, 54777);
+      expect('$url', 'http://somehost:54777/PTwjm8Ii8qg=/');
 
       discoverer.cancel();
       logReader.dispose();
@@ -100,11 +100,11 @@ void main() {
           defaultHostPort: 192);
 
       // Get next port future.
-      Future<Uri> nextUri = discoverer.nextUri();
+      Future<Uri> nextUrl = discoverer.nextUrl();
       logReader.addLine('I/flutter : Observatory listening on http://somehost:54804/PTwjm8Ii8qg=/');
-      Uri uri = await nextUri;
-      expect(uri.port, 1243);
-      expect('$uri', 'http://somehost:1243/PTwjm8Ii8qg=/');
+      Uri url = await nextUrl;
+      expect(url.port, 1243);
+      expect('$url', 'http://somehost:1243/PTwjm8Ii8qg=/');
 
       discoverer.cancel();
       logReader.dispose();
