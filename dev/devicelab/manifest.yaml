@@ -68,6 +68,11 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["has-android-device"]
 
+  technical_debt__cost:
+    description: >
+      Estimates our technical debt (TODOs, analyzer ignores, etc).
+    stage: devicelab
+    required_agent_capabilities: ["has-android-device"]
 
   # Android on-device tests
 

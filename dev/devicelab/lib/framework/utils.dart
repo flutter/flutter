@@ -157,20 +157,28 @@ Future<DateTime> getFlutterRepoCommitTimestamp(String commit) {
   });
 }
 
-Future<Process> startProcess(String executable, List<String> arguments,
-    {Map<String, String> env}) async {
+Future<Process> startProcess(
+  String executable,
+  List<String> arguments, {
+  Map<String, String> environment,
+  String workingDirectory,
+}) async {
   String command = '$executable ${arguments?.join(" ") ?? ""}';
   print('Executing: $command');
-  Process proc = await Process.start(executable, arguments,
-      environment: env, workingDirectory: cwd);
-  ProcessInfo procInfo = new ProcessInfo(command, proc);
-  _runningProcesses.add(procInfo);
+  Process process = await Process.start(
+    executable,
+    arguments,
+    environment: environment,
+    workingDirectory: workingDirectory ?? cwd,
+  );
+  ProcessInfo processInfo = new ProcessInfo(command, process);
+  _runningProcesses.add(processInfo);
 
-  proc.exitCode.whenComplete(() {
-    _runningProcesses.remove(procInfo);
+  process.exitCode.whenComplete(() {
+    _runningProcesses.remove(processInfo);
   });
 
-  return proc;
+  return process;
 }
 
 Future<Null> forceQuitRunningProcesses() async {
@@ -191,20 +199,24 @@ Future<Null> forceQuitRunningProcesses() async {
 }
 
 /// Executes a command and returns its exit code.
-Future<int> exec(String executable, List<String> arguments,
-    {Map<String, String> env, bool canFail: false}) async {
-  Process proc = await startProcess(executable, arguments, env: env);
+Future<int> exec(
+  String executable,
+  List<String> arguments, {
+  Map<String, String> environment,
+  bool canFail: false,
+}) async {
+  Process process = await startProcess(executable, arguments, environment: environment);
 
-  proc.stdout
+  process.stdout
       .transform(UTF8.decoder)
       .transform(const LineSplitter())
       .listen(print);
-  proc.stderr
+  process.stderr
       .transform(UTF8.decoder)
       .transform(const LineSplitter())
       .listen(stderr.writeln);
 
-  int exitCode = await proc.exitCode;
+  int exitCode = await process.exitCode;
 
   if (exitCode != 0 && !canFail)
     fail('Executable failed with exit code $exitCode.');
@@ -215,14 +227,18 @@ Future<int> exec(String executable, List<String> arguments,
 /// Executes a command and returns its standard output as a String.
 ///
 /// Standard error is redirected to the current process' standard error stream.
-Future<String> eval(String executable, List<String> arguments,
-    {Map<String, String> env, bool canFail: false}) async {
-  Process proc = await startProcess(executable, arguments, env: env);
-  proc.stderr.listen((List<int> data) {
+Future<String> eval(
+  String executable,
+  List<String> arguments, {
+  Map<String, String> environment,
+  bool canFail: false,
+}) async {
+  Process process = await startProcess(executable, arguments, environment: environment);
+  process.stderr.listen((List<int> data) {
     stderr.add(data);
   });
-  String output = await UTF8.decodeStream(proc.stdout);
-  int exitCode = await proc.exitCode;
+  String output = await UTF8.decodeStream(process.stdout);
+  int exitCode = await process.exitCode;
 
   if (exitCode != 0 && !canFail)
     fail('Executable failed with exit code $exitCode.');
@@ -230,19 +246,25 @@ Future<String> eval(String executable, List<String> arguments,
   return output.trimRight();
 }
 
-Future<int> flutter(String command,
-    {List<String> options: const <String>[], bool canFail: false, Map<String, String> env}) {
+Future<int> flutter(String command, {
+  List<String> options: const <String>[],
+  bool canFail: false,
+  Map<String, String> environment,
+}) {
   List<String> args = <String>[command]..addAll(options);
   return exec(path.join(flutterDirectory.path, 'bin', 'flutter'), args,
-      canFail: canFail, env: env);
+      canFail: canFail, environment: environment);
 }
 
 /// Runs a `flutter` command and returns the standard output as a string.
-Future<String> evalFlutter(String command,
-    {List<String> options: const <String>[], bool canFail: false, Map<String, String> env}) {
+Future<String> evalFlutter(String command, {
+  List<String> options: const <String>[],
+  bool canFail: false,
+  Map<String, String> environment,
+}) {
   List<String> args = <String>[command]..addAll(options);
   return eval(path.join(flutterDirectory.path, 'bin', 'flutter'), args,
-      canFail: canFail, env: env);
+      canFail: canFail, environment: environment);
 }
 
 String get dartBin =>

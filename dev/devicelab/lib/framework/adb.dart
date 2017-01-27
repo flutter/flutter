@@ -246,13 +246,13 @@ class AndroidDevice implements Device {
   }
 
   /// Executes [command] on `adb shell` and returns its exit code.
-  Future<Null> shellExec(String command, List<String> arguments, {Map<String, String> env}) async {
-    await exec(adbPath, <String>['shell', command]..addAll(arguments), env: env, canFail: false);
+  Future<Null> shellExec(String command, List<String> arguments, { Map<String, String> environment }) async {
+    await exec(adbPath, <String>['shell', command]..addAll(arguments), environment: environment, canFail: false);
   }
 
   /// Executes [command] on `adb shell` and returns its standard output as a [String].
-  Future<String> shellEval(String command, List<String> arguments, {Map<String, String> env}) {
-    return eval(adbPath, <String>['shell', command]..addAll(arguments), env: env, canFail: false);
+  Future<String> shellEval(String command, List<String> arguments, { Map<String, String> environment }) {
+    return eval(adbPath, <String>['shell', command]..addAll(arguments), environment: environment, canFail: false);
   }
 
   @override
