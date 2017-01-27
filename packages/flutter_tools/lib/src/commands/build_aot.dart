@@ -9,6 +9,7 @@ import 'package:path/path.dart' as path;
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
+import '../base/os.dart';
 import '../base/process.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
@@ -118,16 +119,17 @@ Future<String> _buildAotSnapshot(
   String entryPointsDir, dartEntryPointsDir, snapshotterDir, genSnapshot;
 
   String engineSrc = tools.engineSrcPath;
+  String genSnapshotExecutable = os.getExecutableName('gen_snapshot');
   if (engineSrc != null) {
     entryPointsDir  = path.join(engineSrc, 'flutter', 'runtime');
     dartEntryPointsDir = path.join(engineSrc, 'dart', 'runtime', 'bin');
     snapshotterDir = path.join(engineSrc, 'flutter', 'lib', 'snapshot');
     String engineOut = tools.getEngineArtifactsDirectory(platform, buildMode).path;
     if (platform == TargetPlatform.ios) {
-      genSnapshot = path.join(engineOut, 'clang_x64', 'gen_snapshot');
+      genSnapshot = path.join(engineOut, 'clang_x64', genSnapshotExecutable);
     } else {
       String host32BitToolchain = getCurrentHostPlatform() == HostPlatform.darwin_x64 ? 'clang_i386' : 'clang_x86';
-      genSnapshot = path.join(engineOut, host32BitToolchain, 'gen_snapshot');
+      genSnapshot = path.join(engineOut, host32BitToolchain, genSnapshotExecutable);
     }
   } else {
     String artifactsDir = tools.getEngineArtifactsDirectory(platform, buildMode).path;
@@ -135,10 +137,10 @@ Future<String> _buildAotSnapshot(
     dartEntryPointsDir = entryPointsDir;
     snapshotterDir = entryPointsDir;
     if (platform == TargetPlatform.ios) {
-      genSnapshot = path.join(artifactsDir, 'gen_snapshot');
+      genSnapshot = path.join(artifactsDir, genSnapshotExecutable);
     } else {
       String hostToolsDir = path.join(artifactsDir, getNameForHostPlatform(getCurrentHostPlatform()));
-      genSnapshot = path.join(hostToolsDir, 'gen_snapshot');
+      genSnapshot = path.join(hostToolsDir, genSnapshotExecutable);
     }
   }
 

@@ -45,6 +45,7 @@ bool isEmulatorBuildMode(BuildMode mode) => mode == BuildMode.debug;
 enum HostPlatform {
   darwin_x64,
   linux_x64,
+  windows_x64,
 }
 
 String getNameForHostPlatform(HostPlatform platform) {
@@ -53,6 +54,8 @@ String getNameForHostPlatform(HostPlatform platform) {
       return 'darwin-x64';
     case HostPlatform.linux_x64:
       return 'linux-x64';
+    case HostPlatform.windows_x64:
+      return 'windows-x64';
   }
   assert(false);
   return null;
@@ -110,6 +113,8 @@ HostPlatform getCurrentHostPlatform() {
     return HostPlatform.darwin_x64;
   if (platform.isLinux)
     return HostPlatform.linux_x64;
+  if (platform.isWindows)
+    return HostPlatform.windows_x64;
 
   printError('Unsupported host platform, defaulting to Linux');
 
