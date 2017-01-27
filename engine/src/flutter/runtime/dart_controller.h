@@ -9,6 +9,7 @@
 
 #include "dart/runtime/include/dart_api.h"
 #include "lib/ftl/macros.h"
+#include "lib/tonic/logging/dart_error.h"
 
 namespace blink {
 class UIDartState;
@@ -20,7 +21,8 @@ class DartController {
 
   void RunFromPrecompiledSnapshot();
   void RunFromSnapshot(const uint8_t* buffer, size_t size);
-  void RunFromSource(const std::string& main, const std::string& packages);
+  tonic::DartErrorHandleType RunFromSource(const std::string& main,
+                                           const std::string& packages);
 
   void CreateIsolateFor(const std::string& script_uri,
                         std::unique_ptr<UIDartState> ui_dart_state);

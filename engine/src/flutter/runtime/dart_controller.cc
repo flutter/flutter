@@ -120,15 +120,18 @@ void DartController::RunFromSnapshot(const uint8_t* buffer, size_t size) {
     exit(1);
 }
 
-void DartController::RunFromSource(const std::string& main,
-                                   const std::string& packages) {
+tonic::DartErrorHandleType DartController::RunFromSource(
+    const std::string& main, const std::string& packages) {
   tonic::DartState::Scope scope(dart_state());
   tonic::FileLoader& loader = dart_state()->file_loader();
   if (!packages.empty() && !loader.LoadPackagesMap(ResolvePath(packages)))
     FTL_LOG(WARNING) << "Failed to load package map: " << packages;
-  LogIfError(loader.LoadScript(main));
+  Dart_Handle result = loader.LoadScript(main);
+  LogIfError(result);
+  tonic::DartErrorHandleType error = tonic::GetErrorHandleType(result);
   if (SendStartMessage(Dart_RootLibrary()))
     exit(1);
+  return error;
 }
 
 void DartController::CreateIsolateFor(const std::string& script_uri,

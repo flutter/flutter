@@ -17,31 +17,59 @@
 #include "flutter/shell/testing/test_runner.h"
 #include "flutter/shell/testing/testing.h"
 #include "flutter/sky/engine/public/web/Sky.h"
+#include "lib/tonic/dart_microtask_queue.h"
 
 namespace {
+
+// Exit codes used by the Dart command line tool.
+const int kApiErrorExitCode = 253;
+const int kCompilationErrorExitCode = 254;
+const int kErrorExitCode = 255;
 
 // Checks whether the engine's main Dart isolate has no pending work.  If so,
 // then exit the given message loop.
 class ScriptCompletionTaskObserver : public base::MessageLoop::TaskObserver {
  public:
   ScriptCompletionTaskObserver(base::MessageLoop& main_message_loop)
-      : main_message_loop_(main_message_loop), prev_live_(false) {}
+      : main_message_loop_(main_message_loop),
+        prev_live_(false),
+        last_error_(tonic::kNoError) {}
 
   void WillProcessTask(const base::PendingTask& pending_task) override {}
 
   void DidProcessTask(const base::PendingTask& pending_task) override {
     shell::TestRunner& test_runner = shell::TestRunner::Shared();
     bool live = test_runner.platform_view().engine().UIIsolateHasLivePorts();
-    if (prev_live_ && !live)
+    if (prev_live_ && !live) {
+      last_error_ = test_runner.platform_view().engine().GetUIIsolateLastError();
       main_message_loop_.PostTask(FROM_HERE,
                                   main_message_loop_.QuitWhenIdleClosure());
+    }
     prev_live_ = live;
+  }
+
+  tonic::DartErrorHandleType last_error() {
+    return last_error_;
   }
 
  private:
   base::MessageLoop& main_message_loop_;
   bool prev_live_;
+  tonic::DartErrorHandleType last_error_;
 };
+
+int ConvertErrorTypeToExitCode(tonic::DartErrorHandleType error) {
+  switch (error) {
+    case tonic::kCompilationErrorType:
+      return kCompilationErrorExitCode;
+    case tonic::kApiErrorType:
+      return kApiErrorExitCode;
+    case tonic::kUnknownErrorType:
+      return kErrorExitCode;
+    default:
+      return 0;
+  }
+}
 
 void RunNonInteractive(bool run_forever) {
   base::MessageLoop message_loop;
@@ -64,9 +92,16 @@ void RunNonInteractive(bool run_forever) {
 
   message_loop.Run();
 
+  shell::TestRunner& test_runner = shell::TestRunner::Shared();
+  tonic::DartErrorHandleType error = test_runner.platform_view().engine().GetLoadScriptError();
+  if (error == tonic::kNoError)
+    error = task_observer.last_error();
+  if (error == tonic::kNoError)
+    error = tonic::DartMicrotaskQueue::GetLastError();
+
   // The script has completed and the engine may not be in a clean state,
   // so just stop the process.
-  exit(0);
+  exit(ConvertErrorTypeToExitCode(error));
 }
 
 static bool IsDartFile(const std::string& path) {

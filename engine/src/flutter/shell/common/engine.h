@@ -56,10 +56,10 @@ class Engine : public blink::RuntimeDelegate {
                      const std::string& bundle);
 
   Dart_Port GetUIIsolateMainPort();
-
   std::string GetUIIsolateName();
-
   bool UIIsolateHasLivePorts();
+  tonic::DartErrorHandleType GetUIIsolateLastError();
+  tonic::DartErrorHandleType GetLoadScriptError();
 
   void OnOutputSurfaceCreated(const ftl::Closure& gpu_continuation);
   void OnOutputSurfaceDestroyed(const ftl::Closure& gpu_continuation);
@@ -97,6 +97,7 @@ class Engine : public blink::RuntimeDelegate {
   ftl::WeakPtr<PlatformView> platform_view_;
   std::unique_ptr<Animator> animator_;
   std::unique_ptr<blink::RuntimeController> runtime_;
+  tonic::DartErrorHandleType load_script_error_;
   ftl::RefPtr<blink::PlatformMessage> pending_push_route_message_;
   blink::ViewportMetrics viewport_metrics_;
   std::string language_code_;
