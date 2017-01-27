@@ -165,6 +165,8 @@ Future<Process> startProcess(
 }) async {
   String command = '$executable ${arguments?.join(" ") ?? ""}';
   print('Executing: $command');
+  environment ??= <String, String>{};
+  environment['BOT'] = 'true';
   Process process = await Process.start(
     executable,
     arguments,
