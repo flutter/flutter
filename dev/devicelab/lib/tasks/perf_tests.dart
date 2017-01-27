@@ -226,7 +226,7 @@ class MemoryTest {
         await flutter('build', options: <String>['ios', '--profile']);
       }
 
-      int debugPort = await findAvailablePort();
+      int observatoryPort = await findAvailablePort();
 
       List<String> runOptions = <String>[
         '-v',
@@ -234,8 +234,8 @@ class MemoryTest {
         '--trace-startup', // wait for the first frame to render
         '-d',
         deviceId,
-        '--debug-port',
-        debugPort.toString(),
+        '--observatory-port',
+        observatoryPort.toString(),
       ];
       if (testTarget != null)
         runOptions.addAll(<String>['-t', testTarget]);
@@ -256,7 +256,7 @@ class MemoryTest {
           deviceId,
           '--use-existing-app',
         ], environment: <String, String> {
-          'VM_SERVICE_URL': 'http://localhost:$debugPort'
+          'VM_SERVICE_URL': 'http://localhost:$observatoryPort'
         });
 
         Map<String, dynamic> endData = await device.getMemoryStats(packageName);
