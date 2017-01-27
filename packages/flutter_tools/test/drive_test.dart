@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_device.dart';
 import 'package:flutter_tools/src/base/common.dart';
@@ -50,7 +48,7 @@ void main() {
       appStarter = (DriveCommand command) {
         throw 'Unexpected call to appStarter';
       };
-      testRunner = (List<String> testArgs) {
+      testRunner = (List<String> testArgs, String observatoryUri) {
         throw 'Unexpected call to testRunner';
       };
       appStopper = (DriveCommand command) {
@@ -86,7 +84,7 @@ void main() {
 
     testUsingContext('returns 1 when app fails to run', () async {
       withMockDevice();
-      appStarter = expectAsync((DriveCommand command) async => 1);
+      appStarter = expectAsync((DriveCommand command) async => null);
 
       String testApp = '/some/app/test_driver/e2e.dart';
       String testFile = '/some/app/test_driver/e2e_test.dart';
@@ -104,7 +102,7 @@ void main() {
         fail('Expect exception');
       } on ToolExit catch (e) {
         expect(e.exitCode, 1);
-        expect(e.message, contains('Application failed to start (1). Will not run test. Quitting.'));
+        expect(e.message, contains('Application failed to start. Will not run test. Quitting.'));
       }
     }, overrides: <Type, Generator>{
       FileSystem: () => memoryFileSystem,
@@ -155,15 +153,15 @@ void main() {
       String testApp = '/some/app/test/e2e.dart';
       String testFile = '/some/app/test_driver/e2e_test.dart';
 
-      appStarter = expectAsync((DriveCommand command) {
-        return new Future<int>.value(0);
+      appStarter = expectAsync((DriveCommand command) async {
+        return new LaunchResult.succeeded();
       });
-      testRunner = expectAsync((List<String> testArgs) {
+      testRunner = expectAsync((List<String> testArgs, String observatoryUri) async {
         expect(testArgs, <String>[testFile]);
-        return new Future<int>.value(0);
+        return null;
       });
-      appStopper = expectAsync((DriveCommand command) {
-        return new Future<int>.value(0);
+      appStopper = expectAsync((DriveCommand command) async {
+        return true;
       });
 
       MemoryFileSystem memFs = memoryFileSystem;
@@ -186,14 +184,14 @@ void main() {
       String testApp = '/some/app/test/e2e.dart';
       String testFile = '/some/app/test_driver/e2e_test.dart';
 
-      appStarter = expectAsync((DriveCommand command) {
-        return new Future<int>.value(0);
+      appStarter = expectAsync((DriveCommand command) async {
+        return new LaunchResult.succeeded();
       });
-      testRunner = (List<String> testArgs) {
+      testRunner = (List<String> testArgs, String observatoryUri) async {
         throwToolExit(null, exitCode: 123);
       };
-      appStopper = expectAsync((DriveCommand command) {
-        return new Future<int>.value(0);
+      appStopper = expectAsync((DriveCommand command) async {
+        return true;
       });
 
       MemoryFileSystem memFs = memoryFileSystem;
