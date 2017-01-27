@@ -116,7 +116,7 @@ class FlutterDriver {
   ///
   /// [dartVmServiceUrl] is the URL to Dart observatory (a.k.a. VM service). If
   /// not specified, the URL specified by the `VM_SERVICE_URL` environment
-  /// variable is used, or 'http://localhost:8183'.
+  /// variable is used. One or the other must be specified.
   ///
   /// [printCommunication] determines whether the command communication between
   /// the test and the app should be printed to stdout.
@@ -127,7 +127,14 @@ class FlutterDriver {
                                          bool printCommunication: false,
                                          bool logCommunicationToFile: true }) async {
     dartVmServiceUrl ??= Platform.environment['VM_SERVICE_URL'];
-    dartVmServiceUrl ??= 'http://localhost:8183';
+
+    if (dartVmServiceUrl == null) {
+      throw new DriverError(
+        'Could not determine URL to connect to application.\n'
+        'Either the VM_SERVICE_URL environment variable should be set, or an explicit\n'
+        'URL should be provided to the FlutterDriver.connect() method.'
+      );
+    }
 
     // Connect to Dart VM servcies
     _log.info('Connecting to Flutter application at $dartVmServiceUrl');

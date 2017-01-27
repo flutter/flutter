@@ -318,17 +318,17 @@ class DevFS {
   final List<Future<Map<String, dynamic>>> _pendingOperations =
       new List<Future<Map<String, dynamic>>>();
 
-  Uri _baseUri;
-  Uri get baseUri => _baseUri;
+  Uri _baseUrl;
+  Uri get baseUrl => _baseUrl;
 
   Future<Uri> create() async {
-    _baseUri = await _operations.create(fsName);
-    printTrace('DevFS: Created new filesystem on the device ($_baseUri)');
-    return _baseUri;
+    _baseUrl = await _operations.create(fsName);
+    printTrace('DevFS: Created new filesystem on the device ($_baseUrl)');
+    return _baseUrl;
   }
 
   Future<dynamic> destroy() {
-    printTrace('DevFS: Deleted filesystem on the device ($_baseUri)');
+    printTrace('DevFS: Deleted filesystem on the device ($_baseUrl)');
     return _operations.destroy(fsName);
   }
 
@@ -536,9 +536,9 @@ class DevFS {
     PackageMap packageMap = new PackageMap(_packagesFilePath);
 
     for (String packageName in packageMap.map.keys) {
-      Uri uri = packageMap.map[packageName];
+      Uri url = packageMap.map[packageName];
       // This project's own package.
-      final bool isProjectPackage = uri.toString() == 'lib/';
+      final bool isProjectPackage = url.toString() == 'lib/';
       final String directoryName =
           isProjectPackage ? 'lib' : 'packages/$packageName';
       // If this is the project's package, we need to pass both
@@ -547,7 +547,7 @@ class DevFS {
       // path imports within the project's own code.
       final String packagesDirectoryName =
           isProjectPackage ? 'packages/$packageName' : null;
-      Directory directory = fs.directory(uri);
+      Directory directory = fs.directory(url);
       bool packageExists =
           await _scanDirectory(directory,
                                directoryName: directoryName,

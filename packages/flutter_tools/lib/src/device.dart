@@ -320,22 +320,22 @@ class DebuggingOptions {
 }
 
 class LaunchResult {
-  LaunchResult.succeeded({ this.observatoryUri, this.diagnosticUri }) : started = true;
-  LaunchResult.failed() : started = false, observatoryUri = null, diagnosticUri = null;
+  LaunchResult.succeeded({ this.observatoryUrl, this.diagnosticUrl }) : started = true;
+  LaunchResult.failed() : started = false, observatoryUrl = null, diagnosticUrl = null;
 
-  bool get hasObservatory => observatoryUri != null;
+  bool get hasObservatory => observatoryUrl != null;
 
   final bool started;
-  final Uri observatoryUri;
-  final Uri diagnosticUri;
+  final Uri observatoryUrl;
+  final Uri diagnosticUrl;
 
   @override
   String toString() {
     StringBuffer buf = new StringBuffer('started=$started');
-    if (observatoryUri != null)
-      buf.write(', observatory=$observatoryUri');
-    if (diagnosticUri != null)
-      buf.write(', diagnostic=$diagnosticUri');
+    if (observatoryUrl != null)
+      buf.write(', observatory=$observatoryUrl');
+    if (diagnosticUrl != null)
+      buf.write(', diagnostic=$diagnosticUrl');
     return buf.toString();
   }
 }

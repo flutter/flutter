@@ -353,21 +353,21 @@ class AndroidDevice extends Device {
     // TODO(danrubel) Waiting for observatory and diagnostic services
     // can be made common across all devices.
     try {
-      Uri observatoryUri, diagnosticUri;
+      Uri observatoryUrl, diagnosticUrl;
 
       if (debuggingOptions.buildMode == BuildMode.debug) {
-        List<Uri> deviceUris = await Future.wait(
-            <Future<Uri>>[observatoryDiscovery.nextUri(), diagnosticDiscovery.nextUri()]
+        List<Uri> deviceUrls = await Future.wait(
+            <Future<Uri>>[observatoryDiscovery.nextUrl(), diagnosticDiscovery.nextUrl()]
         );
-        observatoryUri = deviceUris[0];
-        diagnosticUri = deviceUris[1];
+        observatoryUrl = deviceUrls[0];
+        diagnosticUrl = deviceUrls[1];
       } else if (debuggingOptions.buildMode == BuildMode.profile) {
-        observatoryUri = await observatoryDiscovery.nextUri();
+        observatoryUrl = await observatoryDiscovery.nextUrl();
       }
 
       return new LaunchResult.succeeded(
-          observatoryUri: observatoryUri,
-          diagnosticUri: diagnosticUri,
+          observatoryUrl: observatoryUrl,
+          diagnosticUrl: diagnosticUrl,
       );
     } catch (error) {
       printError('Error waiting for a debug connection: $error');
