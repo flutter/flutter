@@ -45,14 +45,14 @@ import 'run.dart';
 /// exit code.
 class DriveCommand extends RunCommandBase {
   DriveCommand() {
-    usesPubOption();
     argParser.addFlag(
       'keep-app-running',
       negatable: true,
       defaultsTo: false,
       help:
-        'Will keep the Flutter application running when done testing. By '
-        'default Flutter Driver stops the application after tests are finished.'
+        'Will keep the Flutter application running when done testing.\n'
+        'By default, Flutter drive stops the application after tests are finished.\n'
+        'Ignored if --use-existing-app is specified.'
     );
 
     argParser.addFlag(
@@ -64,8 +64,6 @@ class DriveCommand extends RunCommandBase {
         'already running instance. This will also cause the driver to keep '
         'the application running after tests are done.'
     );
-
-    usesPortOptions();
   }
 
   @override

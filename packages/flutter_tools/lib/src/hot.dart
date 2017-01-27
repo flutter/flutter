@@ -46,13 +46,15 @@ class HotRunner extends ResidentRunner {
     String projectRootPath,
     String packagesFilePath,
     String projectAssets,
+    bool stayResident,
   }) : super(device,
              target: target,
              debuggingOptions: debuggingOptions,
              usesTerminalUI: usesTerminalUI,
              projectRootPath: projectRootPath,
              packagesFilePath: packagesFilePath,
-             projectAssets: projectAssets);
+             projectAssets: projectAssets,
+             stayResident: stayResident);
 
   final String applicationBinary;
   bool get prebuiltMode => applicationBinary != null;
@@ -207,9 +209,10 @@ class HotRunner extends ResidentRunner {
     await vmService.vm.refreshViews();
     printTrace('Connected to ${vmService.vm.mainView}.');
 
-    setupTerminal();
-
-    registerSignalHandlers();
+    if (stayResident) {
+      setupTerminal();
+      registerSignalHandlers();
+    }
 
     appStartedCompleter?.complete();
 
@@ -232,7 +235,10 @@ class HotRunner extends ResidentRunner {
       benchmarkOutput.writeAsStringSync(toPrettyJson(benchmarkData));
     }
 
-    return waitForAppToFinish();
+    if (stayResident)
+      return waitForAppToFinish();
+    await cleanupAtFinish();
+    return 0;
   }
 
   @override

@@ -33,6 +33,7 @@ abstract class ResidentRunner {
     String projectRootPath,
     String packagesFilePath,
     String projectAssets,
+    this.stayResident,
   }) {
     _mainPath = findMainDartFile(target);
     _projectRootPath = projectRootPath ?? fs.currentDirectory.path;
@@ -48,6 +49,7 @@ abstract class ResidentRunner {
   final String target;
   final DebuggingOptions debuggingOptions;
   final bool usesTerminalUI;
+  final bool stayResident;
   final Completer<int> _finished = new Completer<int>();
   String _packagesFilePath;
   String get packagesFilePath => _packagesFilePath;
@@ -107,6 +109,7 @@ abstract class ResidentRunner {
   }
 
   void registerSignalHandlers() {
+    assert(stayResident);
     ProcessSignal.SIGINT.watch().listen((ProcessSignal signal) async {
       _resetTerminal();
       await cleanupAfterSignal();
@@ -243,6 +246,7 @@ abstract class ResidentRunner {
   }
 
   void setupTerminal() {
+    assert(stayResident);
     if (usesTerminalUI) {
       if (!logger.quiet) {
         printStatus('');
