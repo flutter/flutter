@@ -12,6 +12,7 @@
 // Empty implementation of UIApplicationDelegate, for simple apps
 // that don't need to customize the application delegate.
 FLUTTER_EXPORT
+__attribute__((deprecated("subclass UIResponder<UIApplicationDelegate>")))
 @interface FlutterAppDelegate : UIResponder<UIApplicationDelegate>
 
 @property(strong, nonatomic) UIWindow* window;
