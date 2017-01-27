@@ -69,7 +69,7 @@ void main() {
     AbsoluteScrollPosition position = scrollableKey.currentState.position;
     position.animate(to: RenderBigSliver.height + delegate.maxExtent - 5.0, curve: Curves.linear, duration: const Duration(minutes: 1));
     await tester.pumpUntilNoTransientCallbacks(const Duration(milliseconds: 1000));
-    RenderBox box = tester.renderObject/*<RenderBox>*/(find.byType(Container));
+    RenderBox box = tester.renderObject<RenderBox>(find.byType(Container));
     Rect rect = new Rect.fromPoints(box.localToGlobal(Point.origin), box.localToGlobal(box.size.bottomRight(Point.origin)));
     expect(rect, equals(new Rect.fromLTWH(0.0, -195.0, 800.0, 200.0)));
   });

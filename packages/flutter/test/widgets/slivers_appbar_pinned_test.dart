@@ -17,7 +17,7 @@ void verifyPaintPosition(GlobalKey key, Offset ideal, bool visible) {
 }
 
 void verifyActualBoxPosition(WidgetTester tester, Finder finder, int index, Rect ideal) {
-  RenderBox box = tester.renderObjectList/*<RenderBox>*/(finder).elementAt(index);
+  RenderBox box = tester.renderObjectList<RenderBox>(finder).elementAt(index);
   Rect rect = new Rect.fromPoints(box.localToGlobal(Point.origin), box.localToGlobal(box.size.bottomRight(Point.origin)));
   expect(rect, equals(ideal));
 }
