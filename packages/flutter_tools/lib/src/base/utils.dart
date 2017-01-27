@@ -17,6 +17,7 @@ bool get isRunningOnBot {
   // CHROME_HEADLESS is one property set on Flutter's Chrome Infra bots.
   return
     platform.environment['TRAVIS'] == 'true' ||
+    platform.environment['BOT'] == 'true' ||
     platform.environment['CONTINUOUS_INTEGRATION'] == 'true' ||
     platform.environment['CHROME_HEADLESS'] == '1';
 }
