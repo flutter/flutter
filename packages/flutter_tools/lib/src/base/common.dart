@@ -8,7 +8,6 @@ import 'platform.dart';
 
 const int kDefaultObservatoryPort = 8100;
 const int kDefaultDiagnosticPort  = 8101;
-const int kDefaultDrivePort       = 8183;
 
 /// Return the absolute path of the user's home directory
 String get homeDirPath {

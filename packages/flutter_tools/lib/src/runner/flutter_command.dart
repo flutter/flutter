@@ -76,6 +76,28 @@ abstract class FlutterCommand extends Command<Null> {
     );
   }
 
+  int get observatoryPort {
+    if (argResults['observatory-port'] != null) {
+      try {
+        return int.parse(argResults['observatory-port']);
+      } catch (error) {
+        throwToolExit('Invalid port for `--observatory-port`: $error');
+      }
+    }
+    return null;
+  }
+
+  int get diagnosticPort {
+    if (argResults['diagnostic-port'] != null) {
+      try {
+        return int.parse(argResults['diagnostic-port']);
+      } catch (error) {
+        throwToolExit('Invalid port for `--diagnostic-port`: $error');
+      }
+    }
+    return null;
+  }
+
   void addBuildModeFlags({ bool defaultToRelease: true }) {
     defaultBuildMode = defaultToRelease ? BuildMode.release : BuildMode.debug;
 
