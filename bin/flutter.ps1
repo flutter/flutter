@@ -52,10 +52,13 @@ if (!(Test-Path $snapshotPath) `
     Invoke-Expression "$flutterRoot\bin\internal\update_dart_sdk.ps1"
 
     Write-Host "Building flutter tool..."
-    Set-Location $flutterToolsDir
     if (Test-Path "$flutterToolsDir\pubspec.lock") { Remove-Item "$flutterToolsDir\pubspec.lock" }
+    
+    Push-Location
+    Set-Location $flutterToolsDir
     Invoke-Expression "$pub get --verbosity=error --no-packages-dir" 
-    Set-Location $flutterRoot
+    Pop-Location
+
     Invoke-Expression "$dart --snapshot=`"$snapshotPath`" `"$scriptPath`" --packages=`"$flutterToolsDir\.packages`""
     $revision | Out-File  $stampPath
 }

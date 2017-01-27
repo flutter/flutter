@@ -212,7 +212,7 @@ List<_Asset> _getMaterialAssets(String fontSet) {
     for (Map<String, dynamic> font in family['fonts']) {
       String assetKey = font['asset'];
       result.add(new _Asset(
-        base: '${Cache.flutterRoot}/bin/cache/artifacts/material_fonts',
+        base: path.join(Cache.flutterRoot, 'bin', 'cache', 'artifacts', 'material_fonts'),
         source: path.basename(assetKey),
         relativePath: assetKey
       ));
@@ -438,7 +438,7 @@ dynamic _loadFlutterManifest(String manifestPath) {
 Future<int> _validateFlutterManifest(Object manifest) async {
   String schemaPath = path.join(path.absolute(Cache.flutterRoot),
       'packages', 'flutter_tools', 'schema', 'pubspec_yaml.json');
-  Schema schema = await Schema.createSchemaFromUrl('file://$schemaPath');
+  Schema schema = await Schema.createSchemaFromUrl(path.toUri(schemaPath).toString());
 
   Validator validator = new Validator(schema);
   if (validator.validate(manifest)) {
