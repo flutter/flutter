@@ -9,6 +9,8 @@ import 'object.dart';
 
 const double _kMaxWidth = 100000.0;
 const double _kMaxHeight = 100000.0;
+/// This is a simplified estimate to offset the text from the top of the screen.
+const double _statusBarHeight = 24.0;
 
 /// A render object used as a placeholder when an error occurs.
 ///
@@ -79,14 +81,15 @@ class RenderErrorBox extends RenderBox {
 
   /// The text style to use when painting [RenderErrorBox] objects.
   static ui.TextStyle textStyle = new ui.TextStyle(
-    color: const Color(0xFFFFFF00),
+    color: const Color(0xFFFFFF66),
     fontFamily: 'monospace',
-    fontSize: 7.0
+    fontSize: 10.0,
+    fontWeight: FontWeight.bold
   );
 
   /// The paragraph style to use when painting [RenderErrorBox] objects.
   static ui.ParagraphStyle paragraphStyle = new ui.ParagraphStyle(
-    lineHeight: 0.25 // TODO(ianh): https://github.com/flutter/flutter/issues/2460 will affect this
+    lineHeight: 0.7 // TODO(ianh): https://github.com/flutter/flutter/issues/2460 will affect this
   );
 
   @override
@@ -104,7 +107,7 @@ class RenderErrorBox extends RenderBox {
           width = size.width;
         }
         _paragraph.layout(new ui.ParagraphConstraints(width: width));
-        context.canvas.drawParagraph(_paragraph, offset);
+        context.canvas.drawParagraph(_paragraph, offset.translate(0.0, _statusBarHeight));
       }
     } catch (e) { }
   }
