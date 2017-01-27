@@ -272,21 +272,13 @@ class _MaterialButtonState extends State<MaterialButton> {
         )
       )
     );
-    if (elevation > 0 || config.color != null) {
-      contents = new Material(
-        type: MaterialType.button,
-        color: config.color,
-        elevation: elevation,
-        textStyle: style,
-        child: contents
-      );
-    } else {
-      contents = new AnimatedDefaultTextStyle(
-        style: style,
-        duration: kThemeChangeDuration,
-        child: contents
-      );
-    }
+    contents = new Material(
+      type: MaterialType.button,
+      color: config.color,
+      elevation: elevation,
+      textStyle: style,
+      child: contents
+    );
     return new ConstrainedBox(
       constraints: new BoxConstraints(
         minWidth: config.minWidth ?? buttonTheme.minWidth,
