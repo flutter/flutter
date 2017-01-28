@@ -451,6 +451,7 @@ void main() {
       '--enable-dart-profiling',
       '--non-interactive',
       '--enable-checked-mode',
+      '--use-test-fonts',
       '--packages=$packages',
       testPath,
     ]);
