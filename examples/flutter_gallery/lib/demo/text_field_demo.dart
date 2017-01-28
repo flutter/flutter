@@ -116,20 +116,20 @@ class TextFieldDemoState extends State<TextFieldDemo> {
             new TextField(
               icon: new Icon(Icons.person),
               hintText: 'What do people call you?',
-              labelText: 'Name',
+              labelText: 'Name *',
               onSaved: (InputValue val) { person.name = val.text; },
               validator: _validateName,
             ),
             new TextField(
               icon: new Icon(Icons.phone),
               hintText: 'Where can we reach you?',
-              labelText: 'Phone Number',
+              labelText: 'Phone Number *',
               keyboardType: TextInputType.phone,
               onSaved: (InputValue val) { person.phoneNumber = val.text; },
               validator: _validatePhoneNumber,
             ),
             new TextField(
-              hintText: 'Tell us about yourself (optional)',
+              hintText: 'Tell us about yourself',
               labelText: 'Life story',
               maxLines: 3,
             ),
@@ -140,7 +140,7 @@ class TextFieldDemoState extends State<TextFieldDemo> {
                   child: new TextField(
                     key: _passwordFieldKey,
                     hintText: 'How do you log in?',
-                    labelText: 'New Password',
+                    labelText: 'New Password *',
                     obscureText: true,
                     onSaved: (InputValue val) { person.password = val.text; }
                   )
@@ -149,7 +149,7 @@ class TextFieldDemoState extends State<TextFieldDemo> {
                 new Expanded(
                   child: new TextField(
                     hintText: 'How do you log in?',
-                    labelText: 'Re-type Password',
+                    labelText: 'Re-type Password *',
                     obscureText: true,
                     validator: _validatePassword,
                   )
@@ -163,7 +163,11 @@ class TextFieldDemoState extends State<TextFieldDemo> {
                 child: new Text('SUBMIT'),
                 onPressed: _handleSubmitted,
               ),
-            )
+            ),
+            new Container(
+              padding: const EdgeInsets.only(top: 20.0),
+              child: new Text('* indicates required field', style: Theme.of(context).textTheme.caption),
+            ),
           ]
         )
       )
