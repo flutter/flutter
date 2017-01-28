@@ -127,11 +127,11 @@ class ContactsDemoState extends State<ContactsDemo> {
               itemBuilder: (BuildContext context) => <PopupMenuItem<AppBarBehavior>>[
                 new PopupMenuItem<AppBarBehavior>(
                   value: AppBarBehavior.scroll,
-                  child: new Text('Toolbar scrolls away')
+                  child: new Text('App bar scrolls away')
                 ),
                 new PopupMenuItem<AppBarBehavior>(
                   value: AppBarBehavior.under,
-                  child: new Text('Toolbar stays put')
+                  child: new Text('App bar stays put')
                 )
               ]
             )
