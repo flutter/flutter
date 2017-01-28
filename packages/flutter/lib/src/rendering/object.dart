@@ -1439,6 +1439,24 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   }
 
   /// Whether this render object's layout information is dirty.
+  ///
+  /// This is only set in debug mode. In general, render objects should not need
+  /// to condition their runtime behavior on whether they are dirty or not,
+  /// since they should only be marked dirty immediately prior to being laid
+  /// out and painted.
+  bool get debugNeedsLayout {
+    bool result;
+    assert(() {
+      result = _needsLayout;
+      return true;
+    });
+    return result;
+  }
+  @Deprecated(
+    'If you are using needsLayout for an assert, switch to debugNeedsLayout. '
+    'If you are using it for actual runtime logic, please contact the Flutter '
+    'team to let us know what your use case is. We intend to remove this getter.'
+  )
   bool get needsLayout => _needsLayout;
   bool _needsLayout = true;
 
@@ -1505,9 +1523,9 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   /// parent; when the parent is laid out, it will call the child's [layout]
   /// method and thus the child will be laid out as well.
   ///
-  /// Once [markNeedsLayout] has been called on a render object, [needsLayout]
-  /// returns true for that render object until just after the pipeline owner
-  /// has called [layout] on the render object.
+  /// Once [markNeedsLayout] has been called on a render object,
+  /// [debugNeedsLayout] returns true for that render object until just after
+  /// the pipeline owner has called [layout] on the render object.
   ///
   /// ## Special cases
   ///
@@ -1685,7 +1703,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       _debugCanParentUseSize = parentUsesSize;
       return true;
     });
-    if (!needsLayout && constraints == _constraints && relayoutBoundary == _relayoutBoundary) {
+    if (!_needsLayout && constraints == _constraints && relayoutBoundary == _relayoutBoundary) {
       assert(() {
         // in case parentUsesSize changed since the last invocation, set size
         // to itself, so it has the right internal debug values.

@@ -1428,7 +1428,7 @@ abstract class RenderBox extends RenderObject {
   /// are only allowed to call this from the parent of this box during
   /// that parent's [performLayout] or [paint] functions.
   double getDistanceToBaseline(TextBaseline baseline, { bool onlyReal: false }) {
-    assert(!needsLayout);
+    assert(!debugNeedsLayout);
     assert(!_debugDoingBaseline);
     assert(() {
       final RenderObject parent = this.parent;
@@ -1493,7 +1493,7 @@ abstract class RenderBox extends RenderObject {
     assert(constraints != null);
     assert(() {
       if (!hasSize) {
-        assert(!needsLayout); // this is called in the size= setter during layout, but in that case we have a size
+        assert(!debugNeedsLayout); // this is called in the size= setter during layout, but in that case we have a size
         String contract;
         if (sizedByParent)
           contract = 'Because this RenderBox has sizedByParent set to true, it must set its size in performResize().\n';
@@ -1669,7 +1669,7 @@ abstract class RenderBox extends RenderObject {
   /// even through it does not [paint] its children.
   bool hitTest(HitTestResult result, { @required Point position }) {
     assert(() {
-      if (needsLayout) {
+      if (debugNeedsLayout) {
         throw new FlutterError(
           'Cannot hit test a dirty render box.\n'
           'The hitTest() method was called on this RenderBox:\n'
@@ -1958,7 +1958,7 @@ abstract class RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, Pare
   /// Useful when the children are displayed vertically in the same order they
   /// appear in the child list.
   double defaultComputeDistanceToFirstActualBaseline(TextBaseline baseline) {
-    assert(!needsLayout);
+    assert(!debugNeedsLayout);
     ChildType child = firstChild;
     while (child != null) {
       final ParentDataType childParentData = child.parentData;
@@ -1975,7 +1975,7 @@ abstract class RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, Pare
   /// Useful when the vertical position of the children isn't determined by the
   /// order in the child list.
   double defaultComputeDistanceToHighestActualBaseline(TextBaseline baseline) {
-    assert(!needsLayout);
+    assert(!debugNeedsLayout);
     double result;
     ChildType child = firstChild;
     while (child != null) {

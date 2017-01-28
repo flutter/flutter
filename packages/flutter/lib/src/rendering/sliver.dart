@@ -835,7 +835,7 @@ abstract class RenderSliver extends RenderObject {
   @protected
   Size getAbsoluteSizeRelativeToOrigin() {
     assert(geometry != null);
-    assert(!needsLayout);
+    assert(!debugNeedsLayout);
     switch (applyGrowthDirectionToAxisDirection(constraints.axisDirection, constraints.growthDirection)) {
       case AxisDirection.up:
         return new Size(constraints.crossAxisExtent, -geometry.paintExtent);

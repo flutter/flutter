@@ -138,7 +138,7 @@ abstract class VirtualViewportElement extends RenderObjectElement {
     _widgetProvider.didUpdateWidget(oldWidget, newWidget);
     super.update(newWidget);
     updateRenderObject(oldWidget);
-    if (!renderObject.needsLayout)
+    if (!renderObject.needsLayout) // ignore: DEPRECATED_MEMBER_USE, this code will all be going away once the scrolling refactor is done
       _materializeChildren();
   }
 
@@ -157,7 +157,7 @@ abstract class VirtualViewportElement extends RenderObjectElement {
 
       // If we don't already need layout, we need to request a layout if the
       // viewport has shifted to expose new children.
-      if (!renderObject.needsLayout) {
+      if (!renderObject.needsLayout) { // ignore: DEPRECATED_MEMBER_USE, this code will all be going away once the scrolling refactor is done
         final double startOffset = widget.startOffset;
         bool shouldLayout = false;
         if (startOffsetBase != null) {

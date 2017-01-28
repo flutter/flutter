@@ -50,7 +50,7 @@ abstract class RenderShiftedBox extends RenderBox with RenderObjectWithChildMixi
   double computeDistanceToActualBaseline(TextBaseline baseline) {
     double result;
     if (child != null) {
-      assert(!needsLayout);
+      assert(!debugNeedsLayout);
       result = child.getDistanceToActualBaseline(baseline);
       final BoxParentData childParentData = child.parentData;
       if (result != null)
@@ -230,7 +230,7 @@ abstract class RenderAligningShiftedBox extends RenderShiftedBox {
   /// this object's own size has been set.
   void alignChild() {
     assert(child != null);
-    assert(!child.needsLayout);
+    assert(!child.debugNeedsLayout);
     assert(child.hasSize);
     assert(hasSize);
     final BoxParentData childParentData = child.parentData;
