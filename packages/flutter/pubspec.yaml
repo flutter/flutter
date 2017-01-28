@@ -21,6 +21,7 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  mockito: ^1.0.0
 
 environment:
   sdk: '>=1.19.0 <2.0.0'

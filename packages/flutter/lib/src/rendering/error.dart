@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:ui' as ui show Paragraph, ParagraphBuilder, ParagraphConstraints, ParagraphStyle, TextStyle, window;
 
 import 'box.dart';
@@ -50,7 +51,9 @@ class RenderErrorBox extends RenderBox {
 
   /// The message to attempt to display at paint time.
   final String message;
-  final double systemTopPadding = ui.window.padding.top;
+  final double systemTopPadding = Zone.current['systemTopPadding'] == null
+      ? ui.window.padding.top
+      : Zone.current['systemTopPadding'];
 
   ui.Paragraph _paragraph;
 
@@ -109,9 +112,8 @@ class RenderErrorBox extends RenderBox {
 
         // Heuristically offset the top of the text to prevent system status bar overlap if the
         // widget is tall enough and likely to overlap.
-        if (size.height > 3 * systemTopPadding) {
+        if (size.height > 3 * systemTopPadding)
           offset = offset.translate(0.0, systemTopPadding);
-        }
         context.canvas.drawParagraph(_paragraph, offset);
       }
     } catch (e) { }
