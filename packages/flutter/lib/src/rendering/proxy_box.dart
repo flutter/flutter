@@ -1653,7 +1653,7 @@ class RenderFractionalTranslation extends RenderProxyBox {
 
   @override
   bool hitTest(HitTestResult result, { Point position }) {
-    assert(!needsLayout);
+    assert(!debugNeedsLayout);
     if (transformHitTests)
       position = new Point(position.x - translation.dx * size.width, position.y - translation.dy * size.height);
     return super.hitTest(result, position: position);
@@ -1661,7 +1661,7 @@ class RenderFractionalTranslation extends RenderProxyBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    assert(!needsLayout);
+    assert(!debugNeedsLayout);
     if (child != null)
       super.paint(context, offset + translation.alongSize(size));
   }

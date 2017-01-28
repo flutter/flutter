@@ -2458,7 +2458,7 @@ abstract class Element implements BuildContext {
         );
       }
       final RenderBox box = renderObject;
-      if (!box.hasSize || box.needsLayout) {
+      if (!box.hasSize || box.debugNeedsLayout) {
         throw new FlutterError(
           'Cannot get size from a render object that has not been through layout.\n'
           'The size of this render object has not yet been determined because '
