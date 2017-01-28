@@ -11,12 +11,12 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
-import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/devfs.dart';
+import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/doctor.dart';
-import 'package:flutter_tools/src/hot.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:flutter_tools/src/ios/simulators.dart';
+import 'package:flutter_tools/src/run_hot.dart';
 import 'package:flutter_tools/src/toolchain.dart';
 import 'package:flutter_tools/src/usage.dart';
 
