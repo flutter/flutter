@@ -8,19 +8,31 @@ import 'package:test/test.dart';
 
 import 'rendering_tester.dart';
 
-class RenderSliverBlockTest extends RenderSliverBlock {
-  RenderSliverBlockTest({
+class TestRenderSliverBoxChildManager extends RenderSliverBoxChildManager {
+  TestRenderSliverBoxChildManager({
     this.children,
   });
 
+  RenderSliverBlock _renderObject;
   List<RenderBox> children;
+
+  RenderSliverBlock createRenderObject() {
+    assert(_renderObject == null);
+    _renderObject = new RenderSliverBlock(childManager: this);
+    return _renderObject;
+  }
 
   @override
   void createChild(int index, { @required RenderBox after }) {
     assert(index >= 0);
     if (index < 0 || index >= children.length)
       return null;
-    insert(children[index], after: after);
+    _renderObject.insert(children[index], after: after);
+  }
+
+  @override
+  void removeChild(RenderBox child) {
+    _renderObject.remove(child);
   }
 
   @override
@@ -39,19 +51,20 @@ void main() {
   test('RenderSliverBlock basic test - down', () {
     RenderObject inner;
     RenderBox a, b, c, d, e;
+    TestRenderSliverBoxChildManager childManager = new TestRenderSliverBoxChildManager(
+      children: <RenderBox>[
+        a = new RenderSizedBox(const Size(100.0, 400.0)),
+        b = new RenderSizedBox(const Size(100.0, 400.0)),
+        c = new RenderSizedBox(const Size(100.0, 400.0)),
+        d = new RenderSizedBox(const Size(100.0, 400.0)),
+        e = new RenderSizedBox(const Size(100.0, 400.0)),
+      ],
+    );
     RenderViewport2 root = new RenderViewport2(
       axisDirection: AxisDirection.down,
       offset: new ViewportOffset.zero(),
       children: <RenderSliver>[
-        inner = new RenderSliverBlockTest(
-          children: <RenderBox>[
-            a = new RenderSizedBox(const Size(100.0, 400.0)),
-            b = new RenderSizedBox(const Size(100.0, 400.0)),
-            c = new RenderSizedBox(const Size(100.0, 400.0)),
-            d = new RenderSizedBox(const Size(100.0, 400.0)),
-            e = new RenderSizedBox(const Size(100.0, 400.0)),
-          ],
-        ),
+        inner = childManager.createRenderObject(),
       ],
     );
     layout(root);
@@ -112,19 +125,20 @@ void main() {
   test('RenderSliverBlock basic test - up', () {
     RenderObject inner;
     RenderBox a, b, c, d, e;
+    TestRenderSliverBoxChildManager childManager = new TestRenderSliverBoxChildManager(
+      children: <RenderBox>[
+        a = new RenderSizedBox(const Size(100.0, 400.0)),
+        b = new RenderSizedBox(const Size(100.0, 400.0)),
+        c = new RenderSizedBox(const Size(100.0, 400.0)),
+        d = new RenderSizedBox(const Size(100.0, 400.0)),
+        e = new RenderSizedBox(const Size(100.0, 400.0)),
+      ],
+    );
     RenderViewport2 root = new RenderViewport2(
       axisDirection: AxisDirection.up,
       offset: new ViewportOffset.zero(),
       children: <RenderSliver>[
-        inner = new RenderSliverBlockTest(
-          children: <RenderBox>[
-            a = new RenderSizedBox(const Size(100.0, 400.0)),
-            b = new RenderSizedBox(const Size(100.0, 400.0)),
-            c = new RenderSizedBox(const Size(100.0, 400.0)),
-            d = new RenderSizedBox(const Size(100.0, 400.0)),
-            e = new RenderSizedBox(const Size(100.0, 400.0)),
-          ],
-        ),
+        inner = childManager.createRenderObject(),
       ],
     );
     layout(root);

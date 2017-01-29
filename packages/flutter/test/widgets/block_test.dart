@@ -121,7 +121,7 @@ void main() {
   });
 
   testWidgets('SliverBlockChildListDelegate.estimateScrollOffsetExtent hits end', (WidgetTester tester) async {
-    SliverBlockChildListDelegate delegate = new SliverBlockChildListDelegate(<Widget>[
+    SliverChildListDelegate delegate = new SliverChildListDelegate(<Widget>[
       new Container(),
       new Container(),
       new Container(),

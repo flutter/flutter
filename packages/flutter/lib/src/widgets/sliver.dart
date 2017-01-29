@@ -6,71 +6,18 @@ import 'dart:collection' show SplayTreeMap, HashMap;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/scheduler.dart';
 
 import 'framework.dart';
 import 'basic.dart';
-import 'scrollable.dart';
 
-class ScrollView extends StatelessWidget {
-  ScrollView({
-    Key key,
-    this.padding,
-    this.scrollDirection: Axis.vertical,
-    this.anchor: 0.0,
-    this.initialScrollOffset: 0.0,
-    this.center,
-    this.children,
-  }) : super(key: key);
-
-  final EdgeInsets padding;
-
-  final Axis scrollDirection;
-
-  final double anchor;
-
-  final double initialScrollOffset;
-
-  final Key center;
-
-  final List<Widget> children;
-
-  AxisDirection _getDirection(BuildContext context) {
-    // TODO(abarth): Consider reading direction.
-    switch (scrollDirection) {
-      case Axis.horizontal:
-        return AxisDirection.right;
-      case Axis.vertical:
-        return AxisDirection.down;
-    }
-    return null;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    Widget sliver = new SliverBlock(delegate: new SliverBlockChildListDelegate(children));
-
-    if (padding != null)
-      sliver = new SliverPadding(padding: padding, child: sliver);
-
-    return new ScrollableViewport2(
-      axisDirection: _getDirection(context),
-      anchor: anchor,
-      initialScrollOffset: initialScrollOffset,
-      center: center,
-      slivers: <Widget>[ sliver ],
-    );
-  }
-}
-
-abstract class SliverBlockDelegate {
+abstract class SliverChildDelegate {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
-  const SliverBlockDelegate();
+  const SliverChildDelegate();
 
   Widget build(BuildContext context, int index);
 
-  bool shouldRebuild(@checked SliverBlockDelegate oldDelegate);
+  bool shouldRebuild(@checked SliverChildDelegate oldDelegate);
 
   int get childCount;
 
@@ -102,10 +49,10 @@ abstract class SliverBlockDelegate {
 // /// always visible (and thus there is nothing to be gained by building it on
 // /// demand). For example, the body of a dialog box might fit both of these
 // /// conditions.
-class SliverBlockChildListDelegate extends SliverBlockDelegate {
+class SliverChildListDelegate extends SliverChildDelegate {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
-  const SliverBlockChildListDelegate(this.children);
+  const SliverChildListDelegate(this.children);
 
   final List<Widget> children;
 
@@ -118,7 +65,7 @@ class SliverBlockChildListDelegate extends SliverBlockDelegate {
   }
 
   @override
-  bool shouldRebuild(@checked SliverBlockChildListDelegate oldDelegate) {
+  bool shouldRebuild(@checked SliverChildListDelegate oldDelegate) {
     return children != oldDelegate.children;
   }
 
@@ -126,21 +73,21 @@ class SliverBlockChildListDelegate extends SliverBlockDelegate {
   int get childCount => children.length;
 }
 
-class SliverBlock extends RenderObjectWidget {
-  SliverBlock({
+abstract class SliverMultiBoxAdaptorWidget extends RenderObjectWidget {
+  SliverMultiBoxAdaptorWidget({
     Key key,
     @required this.delegate,
   }) : super(key: key) {
     assert(delegate != null);
   }
 
-  final SliverBlockDelegate delegate;
+  final SliverChildDelegate delegate;
 
   @override
-  _SliverBlockElement createElement() => new _SliverBlockElement(this);
+  SliverMultiBoxAdaptorElement createElement() => new SliverMultiBoxAdaptorElement(this);
 
   @override
-  _RenderSliverBlockForWidgets createRenderObject(BuildContext context) => new _RenderSliverBlockForWidgets();
+  RenderSliverMultiBoxAdaptor createRenderObject(BuildContext context);
 
   @override
   void debugFillDescription(List<String> description) {
@@ -149,33 +96,55 @@ class SliverBlock extends RenderObjectWidget {
   }
 }
 
-class _SliverBlockElement extends RenderObjectElement {
-  _SliverBlockElement(SliverBlock widget) : super(widget);
+class SliverBlock extends SliverMultiBoxAdaptorWidget {
+  SliverBlock({
+    Key key,
+    @required SliverChildDelegate delegate,
+  }) : super(key: key, delegate: delegate);
 
   @override
-  SliverBlock get widget => super.widget;
+  RenderSliverBlock createRenderObject(BuildContext context) {
+    final SliverMultiBoxAdaptorElement element = context;
+    return new RenderSliverBlock(childManager: element);
+  }
+}
+
+class SliverList extends SliverMultiBoxAdaptorWidget {
+  SliverList({
+    Key key,
+    @required SliverChildDelegate delegate,
+    @required this.itemExtent,
+  }) : super(key: key, delegate: delegate);
+
+  final double itemExtent;
 
   @override
-  _RenderSliverBlockForWidgets get renderObject => super.renderObject;
-
-  @override
-  void mount(Element parent, dynamic newSlot) {
-    super.mount(parent, newSlot);
-    renderObject._element = this;
+  RenderSliverList createRenderObject(BuildContext context) {
+    final SliverMultiBoxAdaptorElement element = context;
+    return new RenderSliverList(childManager: element, itemExtent: itemExtent);
   }
 
   @override
-  void unmount() {
-    super.unmount();
-    renderObject._element = null;
+  void updateRenderObject(BuildContext context, RenderSliverList renderObject) {
+    renderObject.itemExtent = itemExtent;
   }
+}
+
+class SliverMultiBoxAdaptorElement extends RenderObjectElement implements RenderSliverBoxChildManager {
+  SliverMultiBoxAdaptorElement(SliverMultiBoxAdaptorWidget widget) : super(widget);
 
   @override
-  void update(SliverBlock newWidget) {
-    final SliverBlock oldWidget = widget;
+  SliverMultiBoxAdaptorWidget get widget => super.widget;
+
+  @override
+  RenderSliverMultiBoxAdaptor get renderObject => super.renderObject;
+
+  @override
+  void update(SliverMultiBoxAdaptorWidget newWidget) {
+    final SliverMultiBoxAdaptorWidget oldWidget = widget;
     super.update(newWidget);
-    final SliverBlockDelegate newDelegate = newWidget.delegate;
-    final SliverBlockDelegate oldDelegate = oldWidget.delegate;
+    final SliverChildDelegate newDelegate = newWidget.delegate;
+    final SliverChildDelegate oldDelegate = oldWidget.delegate;
     if (newDelegate != oldDelegate &&
         (newDelegate.runtimeType != oldDelegate.runtimeType || newDelegate.shouldRebuild(oldDelegate)))
       performRebuild();
@@ -203,7 +172,7 @@ class _SliverBlockElement extends RenderObjectElement {
       // block widget.)
       for (int index in _childElements.keys.toList()) {
         Element newChild;
-        renderObject._rebuild(index, () {
+        renderObject.allowAdditionsFor(index, () {
           newChild = updateChild(_childElements[index], _build(index), index);
         });
         if (newChild != null) {
@@ -227,7 +196,9 @@ class _SliverBlockElement extends RenderObjectElement {
     });
   }
 
-  void _createChild(int index, bool insertFirst) {
+  @override
+  void createChild(int index, { @required RenderBox after }) {
+    final bool insertFirst = after == null;
     assert(!_debugOpenToChanges);
     owner.buildScope(this, () {
       assert(insertFirst || _childElements[index-1] != null);
@@ -255,14 +226,16 @@ class _SliverBlockElement extends RenderObjectElement {
     _childElements.remove(child.slot);
   }
 
-  void _removeChild(int index) {
+  @override
+  void removeChild(RenderBox child) {
+    final int index = renderObject.indexOf(child);
     assert(!_debugOpenToChanges);
     assert(index >= 0);
     owner.buildScope(this, () {
       assert(_childElements.containsKey(index));
       assert(() { _debugOpenToChanges = true; return true; });
       try {
-        Element result = updateChild(_childElements[index], null, index);
+        final Element result = updateChild(_childElements[index], null, index);
         assert(result == null);
       } finally {
         assert(() { _debugOpenToChanges = false; return true; });
@@ -273,11 +246,27 @@ class _SliverBlockElement extends RenderObjectElement {
   }
 
   @override
+  double estimateScrollOffsetExtent({
+    int firstIndex,
+    int lastIndex,
+    double leadingScrollOffset,
+    double trailingScrollOffset,
+  }) {
+    assert(lastIndex >= firstIndex);
+    return widget.delegate.estimateScrollOffsetExtent(
+      firstIndex,
+      lastIndex,
+      leadingScrollOffset,
+      trailingScrollOffset
+    );
+  }
+
+  @override
   void insertChildRenderObject(@checked RenderObject child, int slot) {
     assert(_debugOpenToChanges);
     renderObject.insert(child, after: _currentBeforeChild);
     assert(() {
-      SliverBlockParentData childParentData = child.parentData;
+      SliverMultiBoxAdaptorParentData childParentData = child.parentData;
       assert(slot == childParentData.index);
       return true;
     });
@@ -302,37 +291,5 @@ class _SliverBlockElement extends RenderObjectElement {
    // the visitor:
    assert(!_childElements.values.any((Element child) => child == null));
     _childElements.values.toList().forEach(visitor);
-  }
-}
-
-class _RenderSliverBlockForWidgets extends RenderSliverBlock {
-  _SliverBlockElement _element;
-
-  @override
-  void createChild(int index, { @required RenderBox after }) {
-    assert(_element != null);
-    _element._createChild(index, after == null);
-  }
-
-  @override
-  void removeChild(RenderBox child) {
-    assert(_element != null);
-    _element._removeChild(indexOf(child));
-  }
-
-  void _rebuild(int index, VoidCallback callback) {
-    allowAdditionsFor(index, callback);
-  }
-
-  @override
-  double estimateScrollOffsetExtent({
-    int firstIndex,
-    int lastIndex,
-    double leadingScrollOffset,
-    double trailingScrollOffset,
-  }) {
-    assert(lastIndex >= firstIndex);
-    assert(_element != null);
-    return _element.widget.delegate.estimateScrollOffsetExtent(firstIndex, lastIndex, leadingScrollOffset, trailingScrollOffset);
   }
 }
