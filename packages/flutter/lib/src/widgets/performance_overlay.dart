@@ -19,7 +19,7 @@ import 'framework.dart';
 ///
 /// The simplest way to show the performance overlay is to set
 /// [MaterialApp.showPerformanceOverlay] or [WidgetsApp.showPerformanceOverlay]
-/// to `true`.
+/// to true.
 class PerformanceOverlay extends LeafRenderObjectWidget {
   // TODO(abarth): We should have a page on the web site with a screenshot and
   // an explanation of all the various readouts.

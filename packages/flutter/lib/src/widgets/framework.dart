@@ -347,7 +347,7 @@ class TypeMatcher<T> {
   /// Creates a type matcher for the given type parameter.
   const TypeMatcher();
 
-  /// Returns `true` if the given object is of type `T`.
+  /// Returns true if the given object is of type `T`.
   bool check(dynamic object) => object is T;
 }
 
@@ -397,6 +397,13 @@ abstract class Widget {
   /// new widget). Otherwise, the old element is removed from the tree, the new
   /// widget is inflated into an element, and the new element is inserted into the
   /// tree.
+  ///
+  /// Using a [GlobalKey] as the widget's [key] allows the element to be moved
+  /// around the tree (changing parent) without losing state. When a new widget
+  /// is found (its key and type do not match a previous widget in the same
+  /// location), but there was a widget with that same global key elsewhere in
+  /// the tree in the previous frame, then that widget's element is moved to the
+  /// new location.
   final Key key;
 
   /// Inflates this configuration to a concrete instance.
@@ -443,6 +450,10 @@ abstract class Widget {
   /// An element that uses a given widget as its configuration can be updated to
   /// use another widget as its configuration if, and only if, the two widgets
   /// have [runtimeType] and [key] properties that are [operator==].
+  ///
+  /// If the widgets have no key (their key is null), then they are considered a
+  /// match if they have the same type, even if their children are completely
+  /// different.
   static bool canUpdate(Widget oldWidget, Widget newWidget) {
     return oldWidget.runtimeType == newWidget.runtimeType
         && oldWidget.key == newWidget.key;

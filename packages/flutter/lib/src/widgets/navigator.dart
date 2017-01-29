@@ -981,7 +981,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   ///
   /// The given `route` must have already received a call to [Route.didPop].
   /// This function may be called directly from [Route.didPop] if [Route.didPop]
-  /// will return `true`.
+  /// will return true.
   void finalizeRoute(Route<dynamic> route) {
     _poppedRoutes.remove(route);
     route.dispose();

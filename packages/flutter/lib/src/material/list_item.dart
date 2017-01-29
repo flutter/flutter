@@ -21,6 +21,11 @@ import 'theme.dart';
 /// is true then the overall height of this list item and the size of the
 /// [DefaultTextStyle]s that wrap the [title] and [subtitle] widget are reduced.
 ///
+/// List items are always a fixed height (which height depends on how
+/// [isThreeLine], [dense], and [subtitle] are configured); they do not grow in
+/// height based on their contents. If you are looking for a widget that allows
+/// for arbitrary layout in a row, consider [Row].
+///
 /// List items are typically used in [MaterialList]s or in [Card]s.
 ///
 /// Requires one of its ancestors to be a [Material] widget.
@@ -84,7 +89,7 @@ class ListItem extends StatelessWidget {
 
   /// Whether this list item is interactive.
   ///
-  /// If `false`, this list item is styled with the disabled color from the
+  /// If false, this list item is styled with the disabled color from the
   /// current [Theme] and the [onTap] and [onLongPress] callbacks are
   /// inoperative.
   final bool enabled;

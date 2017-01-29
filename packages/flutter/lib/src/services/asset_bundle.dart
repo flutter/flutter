@@ -54,10 +54,10 @@ abstract class AssetBundle {
 
   /// Retrieve a string from the asset bundle.
   ///
-  /// If the `cache` argument is set to `false`, then the data will not be
+  /// If the `cache` argument is set to false, then the data will not be
   /// cached, and reading the data may bypass the cache. This is useful if the
   /// caller is going to be doing its own caching. (It might not be cached if
-  /// it's set to `true` either, that depends on the asset bundle
+  /// it's set to true either, that depends on the asset bundle
   /// implementation.)
   Future<String> loadString(String key, { bool cache: true });
 
