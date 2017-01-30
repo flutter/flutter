@@ -13,7 +13,7 @@ Future<Null> test(WidgetTester tester, double offset) {
     offset: new ViewportOffset.fixed(offset),
     slivers: <Widget>[
       new SliverBlock(
-        delegate: new SliverBlockChildListDelegate(<Widget>[
+        delegate: new SliverChildListDelegate(<Widget>[
           new SizedBox(height: 400.0, child: new Text('a')),
           new SizedBox(height: 400.0, child: new Text('b')),
           new SizedBox(height: 400.0, child: new Text('c')),
@@ -78,7 +78,7 @@ void main() {
       offset: offset,
       slivers: <Widget>[
         new SliverBlock(
-          delegate: new SliverBlockChildListDelegate(<Widget>[
+          delegate: new SliverChildListDelegate(<Widget>[
             new SizedBox(height: 251.0, child: new Text('a')),
             new SizedBox(height: 252.0, child: new Text('b')),
             new SizedBox(key: key1, height: 253.0, child: new Text('c')),
@@ -95,7 +95,7 @@ void main() {
       offset: offset,
       slivers: <Widget>[
         new SliverBlock(
-          delegate: new SliverBlockChildListDelegate(<Widget>[
+          delegate: new SliverChildListDelegate(<Widget>[
             new SizedBox(key: key1, height: 253.0, child: new Text('c')),
             new SizedBox(height: 251.0, child: new Text('a')),
             new SizedBox(height: 252.0, child: new Text('b')),
@@ -112,7 +112,7 @@ void main() {
       offset: offset,
       slivers: <Widget>[
         new SliverBlock(
-          delegate: new SliverBlockChildListDelegate(<Widget>[
+          delegate: new SliverChildListDelegate(<Widget>[
             new SizedBox(height: 251.0, child: new Text('a')),
             new SizedBox(key: key1, height: 253.0, child: new Text('c')),
             new SizedBox(height: 252.0, child: new Text('b')),
@@ -129,7 +129,7 @@ void main() {
       offset: offset,
       slivers: <Widget>[
         new SliverBlock(
-          delegate: new SliverBlockChildListDelegate(<Widget>[
+          delegate: new SliverChildListDelegate(<Widget>[
             new SizedBox(height: 251.0, child: new Text('a')),
             new SizedBox(height: 252.0, child: new Text('b')),
           ]),
@@ -144,7 +144,7 @@ void main() {
       offset: offset,
       slivers: <Widget>[
         new SliverBlock(
-          delegate: new SliverBlockChildListDelegate(<Widget>[
+          delegate: new SliverChildListDelegate(<Widget>[
             new SizedBox(height: 251.0, child: new Text('a')),
             new SizedBox(key: key1, height: 253.0, child: new Text('c')),
             new SizedBox(height: 252.0, child: new Text('b')),
@@ -210,7 +210,7 @@ void main() {
       offset: new ViewportOffset.zero(),
       slivers: <Widget>[
         new SliverBlock(
-          delegate: new SliverBlockChildListDelegate(<Widget>[
+          delegate: new SliverChildListDelegate(<Widget>[
             new SizedBox(height: 400.0, child: new Text('a')),
           ]),
         ),
@@ -223,7 +223,7 @@ void main() {
       offset: new ViewportOffset.fixed(100.0),
       slivers: <Widget>[
         new SliverBlock(
-          delegate: new SliverBlockChildListDelegate(<Widget>[
+          delegate: new SliverChildListDelegate(<Widget>[
             new SizedBox(height: 400.0, child: new Text('a')),
           ]),
         ),
@@ -236,7 +236,7 @@ void main() {
       offset: new ViewportOffset.fixed(100.0),
       slivers: <Widget>[
         new SliverBlock(
-          delegate: new SliverBlockChildListDelegate(<Widget>[
+          delegate: new SliverChildListDelegate(<Widget>[
             new SizedBox(height: 4000.0, child: new Text('a')),
           ]),
         ),
@@ -249,7 +249,7 @@ void main() {
       offset: new ViewportOffset.zero(),
       slivers: <Widget>[
         new SliverBlock(
-          delegate: new SliverBlockChildListDelegate(<Widget>[
+          delegate: new SliverChildListDelegate(<Widget>[
             new SizedBox(height: 4000.0, child: new Text('a')),
           ]),
         ),
