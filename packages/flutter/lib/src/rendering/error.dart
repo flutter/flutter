@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-import 'dart:ui' as ui show Paragraph, ParagraphBuilder, ParagraphConstraints, ParagraphStyle, TextStyle, window;
+import 'dart:ui' as ui show Paragraph, ParagraphBuilder, ParagraphConstraints, ParagraphStyle, TextStyle;
 
 import 'box.dart';
 import 'object.dart';
 
 const double _kMaxWidth = 100000.0;
 const double _kMaxHeight = 100000.0;
+const String line = '\n──────────────────────\n\n';
 
 /// A render object used as a placeholder when an error occurs.
 ///
@@ -43,7 +43,9 @@ class RenderErrorBox extends RenderBox {
         // see the paragraph.dart file and the RenderParagraph class.
         ui.ParagraphBuilder builder = new ui.ParagraphBuilder(paragraphStyle);
         builder.pushStyle(textStyle);
-        builder.addText(message);
+        builder.addText(
+          '$message$line$message$line$message$line$message$line$message$line$message$line'
+          '$message$line$message$line$message$line$message$line$message$line$message');
         _paragraph = builder.build();
       }
     } catch (e) { }
@@ -51,9 +53,6 @@ class RenderErrorBox extends RenderBox {
 
   /// The message to attempt to display at paint time.
   final String message;
-  final double systemTopPadding = Zone.current['systemTopPadding'] == null
-      ? ui.window.padding.top
-      : Zone.current['systemTopPadding'];
 
   ui.Paragraph _paragraph;
 
@@ -85,13 +84,13 @@ class RenderErrorBox extends RenderBox {
   static ui.TextStyle textStyle = new ui.TextStyle(
     color: const Color(0xFFFFFF66),
     fontFamily: 'monospace',
-    fontSize: 10.0,
+    fontSize: 14.0,
     fontWeight: FontWeight.bold
   );
 
   /// The paragraph style to use when painting [RenderErrorBox] objects.
   static ui.ParagraphStyle paragraphStyle = new ui.ParagraphStyle(
-    lineHeight: 0.7
+    lineHeight: 0.85
   );
 
   @override
@@ -110,10 +109,6 @@ class RenderErrorBox extends RenderBox {
         }
         _paragraph.layout(new ui.ParagraphConstraints(width: width));
 
-        // Heuristically offset the top of the text to prevent system status bar overlap if the
-        // widget is tall enough and likely to overlap.
-        if (size.height > 3 * systemTopPadding)
-          offset = offset.translate(0.0, systemTopPadding);
         context.canvas.drawParagraph(_paragraph, offset);
       }
     } catch (e) { }
