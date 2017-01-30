@@ -59,7 +59,7 @@ class TwoLevelListItem extends StatelessWidget {
 
   /// Whether this list item is interactive.
   ///
-  /// If `false`, this list item is styled with the disabled color from the
+  /// If false, this list item is styled with the disabled color from the
   /// current [Theme] and the [onTap] and [onLongPress] callbacks are
   /// inoperative.
   final bool enabled;
@@ -128,7 +128,7 @@ class TwoLevelSublist extends StatefulWidget {
   ///
   /// When the sublist starts expanding, this function is called with the value
   /// `true`. When the sublist starts collapsing, this function is called with
-  /// the value `false`.
+  /// the value false.
   final ValueChanged<bool> onOpenChanged;
 
   /// The widgets that are displayed when the sublist expands.

@@ -68,6 +68,19 @@ class ChangeNotifier extends Listenable {
   /// If the given listener is not registered, the call is ignored.
   ///
   /// This method must not be called after [dispose] has been called.
+  ///
+  /// If a listener had been added twice, and is removed once during an
+  /// iteration (i.e. in response to a notification), it will still be called
+  /// again. If, on the other hand, it is removed as many times as it was
+  /// registered, then it will no longer be called. This odd behavior is the
+  /// result of the [ChangeNotifier] not being able to determine which listener
+  /// is being removed, since they are identical, and therefore conservatively
+  /// still calling all the listeners when it knows that any are still
+  /// registered.
+  ///
+  /// This surprising behavior can be unexpectedly observed when registering a
+  /// listener on two separate objects which are both forwarding all
+  /// registrations to a common upstream object.
   @override
   void removeListener(VoidCallback listener) {
     assert(_debugAssertNotDisposed);
@@ -97,6 +110,10 @@ class ChangeNotifier extends Listenable {
   /// [FlutterError.reportError].
   ///
   /// This method must not be called after [dispose] has been called.
+  ///
+  /// Surprising behavior can result when reentrantly removing a listener (i.e.
+  /// in response to a notification) that has been registered multiple times.
+  /// See the discussion at [removeListener].
   @protected
   void notifyListeners() {
     assert(_debugAssertNotDisposed);
