@@ -61,7 +61,7 @@ abstract class RenderSliverBoxChildManager {
   /// Must return the total distance from the start of the child with the
   /// earliest possible index to the end of the child with the last possible
   /// index.
-  double estimateScrollOffsetExtent({
+  double estimateMaxScrollOffset(SliverConstraints constraints, {
     int firstIndex,
     int lastIndex,
     double leadingScrollOffset,
@@ -304,7 +304,7 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
   }
 
   @override
-  double childPosition(RenderBox child) {
+  double childMainAxisPosition(RenderBox child) {
     return offsetOf(child) - constraints.scrollOffset;
   }
 
@@ -319,37 +319,46 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
       return;
     // offset is to the top-left corner, regardless of our axis direction.
     // originOffset gives us the delta from the real origin to the origin in the axis direction.
-    Offset unitOffset, originOffset;
+    Offset mainAxisUnit, crossAxisUnit, originOffset;
     bool addExtent;
     switch (applyGrowthDirectionToAxisDirection(constraints.axisDirection, constraints.growthDirection)) {
       case AxisDirection.up:
-        unitOffset = const Offset(0.0, -1.0);
+        mainAxisUnit = const Offset(0.0, -1.0);
+        crossAxisUnit = const Offset(1.0, 0.0);
         originOffset = offset + new Offset(0.0, geometry.paintExtent);
         addExtent = true;
         break;
       case AxisDirection.right:
-        unitOffset = const Offset(1.0, 0.0);
+        mainAxisUnit = const Offset(1.0, 0.0);
+        crossAxisUnit = const Offset(0.0, 1.0);
         originOffset = offset;
         addExtent = false;
         break;
       case AxisDirection.down:
-        unitOffset = const Offset(0.0, 1.0);
+        mainAxisUnit = const Offset(0.0, 1.0);
+        crossAxisUnit = const Offset(1.0, 0.0);
         originOffset = offset;
         addExtent = false;
         break;
       case AxisDirection.left:
-        unitOffset = const Offset(-1.0, 0.0);
+        mainAxisUnit = const Offset(-1.0, 0.0);
+        crossAxisUnit = const Offset(0.0, 1.0);
         originOffset = offset + new Offset(geometry.paintExtent, 0.0);
         addExtent = true;
         break;
     }
-    assert(unitOffset != null);
+    assert(mainAxisUnit != null);
     assert(addExtent != null);
     RenderBox child = firstChild;
     while (child != null) {
-      Offset childOffset = originOffset + unitOffset * childPosition(child);
+      final double mainAxisDelta = childMainAxisPosition(child);
+      final double crossAxisDelta = childCrossAxisPosition(child);
+      Offset childOffset = new Offset(
+        originOffset.dx + mainAxisUnit.dx * mainAxisDelta + crossAxisUnit.dx * crossAxisDelta,
+        originOffset.dy + mainAxisUnit.dy * mainAxisDelta + crossAxisUnit.dy * crossAxisDelta,
+      );
       if (addExtent)
-        childOffset += unitOffset * paintExtentOf(child);
+        childOffset += mainAxisUnit * paintExtentOf(child);
       context.paintChild(child, childOffset);
       child = childAfter(child);
     }
