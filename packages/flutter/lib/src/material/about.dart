@@ -285,8 +285,8 @@ class AboutDialog extends StatelessWidget {
     if (children != null)
       body.addAll(children);
     return new AlertDialog(
-      content: new Block(
-        children: body
+      content: new SingleChildScrollView(
+        child: new BlockBody(children: body),
       ),
       actions: <Widget>[
         new FlatButton(

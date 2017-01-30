@@ -6,6 +6,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
+import 'test_widgets.dart';
+
 class TestScrollPosition extends ScrollPosition {
   TestScrollPosition(
     this.extentMultiplier,
@@ -88,7 +90,7 @@ class TestScrollBehavior extends ScrollBehavior2 {
 
 void main() {
   testWidgets('Changing the scroll behavior dynamically', (WidgetTester tester) async {
-    await tester.pumpWidget(new ScrollableViewport2(
+    await tester.pumpWidget(new TestScrollable(
       scrollBehavior: new TestScrollBehavior(1.0),
       slivers: <Widget>[
         new SliverToBoxAdapter(child: new SizedBox(height: 2000.0)),
@@ -97,7 +99,7 @@ void main() {
     Scrollable2State state = tester.state(find.byType(Scrollable2));
 
     expect(state.position.getMetrics().extentInside, 1.0);
-    await tester.pumpWidget(new ScrollableViewport2(
+    await tester.pumpWidget(new TestScrollable(
       scrollBehavior: new TestScrollBehavior(2.0),
       slivers: <Widget>[
         new SliverToBoxAdapter(child: new SizedBox(height: 2000.0)),

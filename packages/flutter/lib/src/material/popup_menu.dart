@@ -292,15 +292,15 @@ class _PopupMenu<T> extends StatelessWidget {
     Widget child = new ConstrainedBox(
       constraints: const BoxConstraints(
         minWidth: _kMenuMinWidth,
-        maxWidth: _kMenuMaxWidth
+        maxWidth: _kMenuMaxWidth,
       ),
       child: new IntrinsicWidth(
         stepWidth: _kMenuWidthStep,
-        child: new Block(
-          children: children,
+        child: new SingleChildScrollView(
           padding: const EdgeInsets.symmetric(
             vertical: _kMenuVerticalPadding
-          )
+          ),
+          child: new BlockBody(children: children),
         )
       )
     );
@@ -317,9 +317,9 @@ class _PopupMenu<T> extends StatelessWidget {
               alignment: FractionalOffset.topRight,
               widthFactor: width.evaluate(route.animation),
               heightFactor: height.evaluate(route.animation),
-              child: child
-            )
-          )
+              child: child,
+            ),
+          ),
         );
       },
       child: child

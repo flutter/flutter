@@ -263,7 +263,6 @@ class TwoLevelList extends StatelessWidget {
   /// The [type] argument must not be null.
   TwoLevelList({
     Key key,
-    this.scrollableKey,
     this.children: const <Widget>[],
     this.type: MaterialListType.twoLine,
     this.padding
@@ -279,18 +278,15 @@ class TwoLevelList extends StatelessWidget {
   /// The kind of [ListItem] contained in this list.
   final MaterialListType type;
 
-  /// The key to use for the underlying scrollable widget.
-  final Key scrollableKey;
-
   /// The amount of space by which to inset the children inside the viewport.
   final EdgeInsets padding;
 
   @override
   Widget build(BuildContext context) {
-    return new Block(
+    return new ScrollView(
       padding: padding,
+      shrinkWrap: true,
       children: KeyedSubtree.ensureUniqueKeysForList(children),
-      scrollableKey: scrollableKey
     );
   }
 }

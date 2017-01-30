@@ -134,4 +134,7 @@ class RenderSizedBox extends RenderBox {
 
   @override
   void performLayout() { }
+
+  @override
+  bool hitTestSelf(Point position) => true;
 }

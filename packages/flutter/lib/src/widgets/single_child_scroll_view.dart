@@ -10,10 +10,18 @@ import 'basic.dart';
 import 'framework.dart';
 import 'scrollable.dart';
 
+// ///
+// /// The viewport will shrink-wrap the child in both axes.
+// ///
+// /// See also:
+// ///  * [ScrollView], which handles multiple children in a scrolling list.
+// ///  * [ScrollGrid], which handles multiple children in a scrolling grid.
+// ///  * [Scrollable2], which handles arbitrary scrolling effects.
 class SingleChildScrollView extends StatelessWidget {
   SingleChildScrollView({
     Key key,
     this.scrollDirection: Axis.vertical,
+    this.padding,
     this.initialScrollOffset: 0.0,
     this.child,
   }) : super(key: key) {
@@ -22,6 +30,8 @@ class SingleChildScrollView extends StatelessWidget {
   }
 
   final Axis scrollDirection;
+
+  final EdgeInsets padding;
 
   final double initialScrollOffset;
 
@@ -41,6 +51,9 @@ class SingleChildScrollView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final AxisDirection axisDirection = _getDirection(context);
+    Widget contents = child;
+    if (padding != null)
+      contents = new Padding(padding: padding, child: contents);
     return new Scrollable2(
       axisDirection: axisDirection,
       initialScrollOffset: initialScrollOffset,
@@ -49,7 +62,7 @@ class SingleChildScrollView extends StatelessWidget {
           key: key,
           axisDirection: axisDirection,
           offset: offset,
-          child: child,
+          child: contents,
         );
       },
     );

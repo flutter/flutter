@@ -40,7 +40,8 @@ class ListDemoState extends State<ListDemo> {
         decoration: new BoxDecoration(
           border: new Border(top: new BorderSide(color: Colors.black26))
         ),
-        child: new Block(
+        child: new ScrollView(
+          shrinkWrap: true,
           children: <Widget>[
             new ListItem(
               dense: true,

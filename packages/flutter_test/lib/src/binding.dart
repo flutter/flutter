@@ -18,8 +18,8 @@ import 'package:quiver/time.dart';
 import 'package:test/test.dart' as test_package;
 import 'package:vector_math/vector_math_64.dart';
 
-import 'test_async_utils.dart';
 import 'stack_manipulation.dart';
+import 'test_async_utils.dart';
 
 /// Phases that can be reached by [WidgetTester.pumpWidget] and
 /// [TestWidgetsFlutterBinding.pump].
