@@ -80,7 +80,7 @@ abstract class MaterialInkController {
 /// Material is the central metaphor in material design. Each piece of material
 /// exists at a given elevation, which influences how that piece of material
 /// visually relates to other pieces of material and how that material casts
-/// shadows on other pieces of material.
+/// shadows.
 ///
 /// Most user interface elements are either conceptually printed on a piece of
 /// material or themselves made of material. Material reacts to user input using
