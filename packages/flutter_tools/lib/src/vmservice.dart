@@ -147,7 +147,7 @@ void _upgradeCollection(dynamic collection,
   if (collection is ServiceMap) {
     return;
   }
-  if (collection is Map) {
+  if (collection is Map<String, dynamic>) {
     _upgradeMap(collection, owner);
   } else if (collection is List) {
     _upgradeList(collection, owner);
@@ -156,11 +156,11 @@ void _upgradeCollection(dynamic collection,
 
 void _upgradeMap(Map<String, dynamic> map, ServiceObjectOwner owner) {
   map.forEach((String k, dynamic v) {
-    if ((v is Map) && _isServiceMap(v)) {
+    if ((v is Map<String, dynamic>) && _isServiceMap(v)) {
       map[k] = owner.getFromMap(v);
     } else if (v is List) {
       _upgradeList(v, owner);
-    } else if (v is Map) {
+    } else if (v is Map<String, dynamic>) {
       _upgradeMap(v, owner);
     }
   });
@@ -169,11 +169,11 @@ void _upgradeMap(Map<String, dynamic> map, ServiceObjectOwner owner) {
 void _upgradeList(List<dynamic> list, ServiceObjectOwner owner) {
   for (int i = 0; i < list.length; i++) {
     dynamic v = list[i];
-    if ((v is Map) && _isServiceMap(v)) {
+    if ((v is Map<String, dynamic>) && _isServiceMap(v)) {
       list[i] = owner.getFromMap(v);
     } else if (v is List) {
       _upgradeList(v, owner);
-    } else if (v is Map) {
+    } else if (v is Map<String, dynamic>) {
       _upgradeMap(v, owner);
     }
   }
@@ -888,9 +888,9 @@ class ServiceMap extends ServiceObject implements Map<String, dynamic> {
   @override
   bool containsKey(Object k) => _map.containsKey(k);
   @override
-  void forEach(Function f) => _map.forEach(f);
+  void forEach(void f(String key, dynamic value)) => _map.forEach(f);
   @override
-  dynamic putIfAbsent(String key, Function ifAbsent) => _map.putIfAbsent(key, ifAbsent);
+  dynamic putIfAbsent(String key, dynamic ifAbsent()) => _map.putIfAbsent(key, ifAbsent);
   @override
   void remove(Object key) => _map.remove(key);
   @override

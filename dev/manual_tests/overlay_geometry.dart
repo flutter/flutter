@@ -163,8 +163,9 @@ class OverlayGeometryAppState extends State<OverlayGeometryApp> {
     });
   }
 
-  void handleTapUp(GlobalKey target, Point globalPosition) {
+  void handleTapUp(Key t, Point globalPosition) {
     setState(() {
+      GlobalKey target = t;
       markers[MarkerType.touch] = globalPosition;
       final RenderBox box = target.currentContext.findRenderObject();
       markers[MarkerType.topLeft] = box.localToGlobal(new Point(0.0, 0.0));
