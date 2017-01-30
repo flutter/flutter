@@ -46,7 +46,7 @@ class HotRunner extends ResidentRunner {
     String projectRootPath,
     String packagesFilePath,
     String projectAssets,
-    bool stayResident,
+    bool stayResident: true,
   }) : super(device,
              target: target,
              debuggingOptions: debuggingOptions,
