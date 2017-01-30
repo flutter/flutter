@@ -10,7 +10,7 @@ final Key blockKey = new Key('test');
 void main() {
   testWidgets('Cannot scroll a non-overflowing block', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Block(
+      new ScrollView(
         key: blockKey,
         children: <Widget>[
           new Container(
@@ -35,7 +35,7 @@ void main() {
 
   testWidgets('Can scroll an overflowing block', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Block(
+      new ScrollView(
         key: blockKey,
         children: <Widget>[
           new Container(
@@ -118,5 +118,17 @@ void main() {
     }
     await tester.pumpWidget(buildBlock());
     expect(key.currentState.scrollOffset, 0.0);
+  });
+
+  testWidgets('SliverBlockChildListDelegate.estimateScrollOffsetExtent hits end', (WidgetTester tester) async {
+    SliverChildListDelegate delegate = new SliverChildListDelegate(<Widget>[
+      new Container(),
+      new Container(),
+      new Container(),
+      new Container(),
+      new Container(),
+    ]);
+
+    expect(delegate.estimateScrollOffsetExtent(3, 4, 25.0, 26.0), equals(26.0));
   });
 }

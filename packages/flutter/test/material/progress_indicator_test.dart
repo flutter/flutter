@@ -50,9 +50,9 @@ void main() {
   });
 
   testWidgets('LinearProgressIndicator causes a repaint when it changes', (WidgetTester tester) async {
-    await tester.pumpWidget(new Block(children: <Widget>[new LinearProgressIndicator(value: 0.0)]));
+    await tester.pumpWidget(new ScrollView(children: <Widget>[new LinearProgressIndicator(value: 0.0)]));
     List<Layer> layers1 = tester.layers;
-    await tester.pumpWidget(new Block(children: <Widget>[new LinearProgressIndicator(value: 0.5)]));
+    await tester.pumpWidget(new ScrollView(children: <Widget>[new LinearProgressIndicator(value: 0.5)]));
     List<Layer> layers2 = tester.layers;
     expect(layers1, isNot(equals(layers2)));
   });

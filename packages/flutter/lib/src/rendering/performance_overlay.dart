@@ -55,7 +55,7 @@ enum PerformanceOverlayOption {
 ///
 /// The simplest way to show the performance overlay is to set
 /// [MaterialApp.showPerformanceOverlay] or [WidgetsApp.showPerformanceOverlay]
-/// to `true`.
+/// to true.
 class RenderPerformanceOverlay extends RenderBox {
   /// Creates a performance overlay render object.
   ///

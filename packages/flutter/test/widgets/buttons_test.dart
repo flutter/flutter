@@ -17,7 +17,7 @@ void main() {
         child: new Center(
           child: new FlatButton(
             onPressed: () { },
-            child: new Text('Hello')
+            child: new Text('ABC')
           )
         )
       )
@@ -30,7 +30,7 @@ void main() {
           new TestSemantics(
             id: 1,
             actions: SemanticsAction.tap.index,
-            label: 'Hello',
+            label: 'ABC',
             rect: new Rect.fromLTRB(0.0, 0.0, 88.0, 36.0),
             transform: new Matrix4.translationValues(356.0, 282.0, 0.0)
           )

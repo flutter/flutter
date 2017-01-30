@@ -24,8 +24,8 @@ Future<Null> slowDrag(WidgetTester tester, Point start, Offset offset) async {
 void main() {
   testWidgets('Overscroll indicator color', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Scrollable2(
-        children: <Widget>[
+      new ScrollableViewport2(
+        slivers: <Widget>[
           new SliverToBoxAdapter(child: new SizedBox(height: 2000.0)),
         ],
       ),
@@ -57,8 +57,8 @@ void main() {
 
   testWidgets('Overscroll indicator changes side when you drag on the other side', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Scrollable2(
-        children: <Widget>[
+      new ScrollableViewport2(
+        slivers: <Widget>[
           new SliverToBoxAdapter(child: new SizedBox(height: 2000.0)),
         ],
       ),
@@ -92,8 +92,8 @@ void main() {
 
   testWidgets('Overscroll indicator changes side when you shift sides', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Scrollable2(
-        children: <Widget>[
+      new ScrollableViewport2(
+        slivers: <Widget>[
           new SliverToBoxAdapter(child: new SizedBox(height: 2000.0)),
         ],
       ),
@@ -125,9 +125,9 @@ void main() {
   group('Flipping direction of scrollable doesn\'t change overscroll behavior', () {
     testWidgets('down', (WidgetTester tester) async {
       await tester.pumpWidget(
-        new Scrollable2(
+        new ScrollableViewport2(
           axisDirection: AxisDirection.down,
-          children: <Widget>[
+          slivers: <Widget>[
             new SliverToBoxAdapter(child: new SizedBox(height: 20.0)),
           ],
         ),
@@ -142,9 +142,9 @@ void main() {
 
     testWidgets('up', (WidgetTester tester) async {
       await tester.pumpWidget(
-        new Scrollable2(
+        new ScrollableViewport2(
           axisDirection: AxisDirection.up,
-          children: <Widget>[
+          slivers: <Widget>[
             new SliverToBoxAdapter(child: new SizedBox(height: 20.0)),
           ],
         ),
@@ -160,9 +160,9 @@ void main() {
 
   testWidgets('Overscroll in both directions', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Scrollable2(
+      new ScrollableViewport2(
         axisDirection: AxisDirection.down,
-        children: <Widget>[
+        slivers: <Widget>[
           new SliverToBoxAdapter(child: new SizedBox(height: 20.0)),
         ],
       ),
@@ -180,9 +180,9 @@ void main() {
 
   testWidgets('Overscroll horizontally', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Scrollable2(
+      new ScrollableViewport2(
         axisDirection: AxisDirection.right,
-        children: <Widget>[
+        slivers: <Widget>[
           new SliverToBoxAdapter(child: new SizedBox(height: 20.0)),
         ],
       ),
@@ -203,10 +203,10 @@ void main() {
     RenderObject painter;
 
     await tester.pumpWidget(
-      new Scrollable2(
+      new ScrollableViewport2(
         axisDirection: AxisDirection.left,
         scrollBehavior: new TestScrollBehavior1(),
-        children: <Widget>[
+        slivers: <Widget>[
           new SliverToBoxAdapter(child: new SizedBox(height: 20.0)),
         ],
       ),
@@ -218,10 +218,10 @@ void main() {
 
     await tester.pumpUntilNoTransientCallbacks(const Duration(seconds: 1));
     await tester.pumpWidget(
-      new Scrollable2(
+      new ScrollableViewport2(
         axisDirection: AxisDirection.right,
         scrollBehavior: new TestScrollBehavior2(),
-        children: <Widget>[
+        slivers: <Widget>[
           new SliverToBoxAdapter(child: new SizedBox(height: 20.0)),
         ],
       ),

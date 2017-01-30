@@ -540,7 +540,7 @@ class RenderGrid extends RenderVirtualViewport<GridParentData> {
   ///
   /// If the new delegate is the same class as the previous one, then the new
   /// delegate has its [GridDelegate.shouldRelayout] called; if the result is
-  /// `true`, then the delegate will be called.
+  /// true, then the delegate will be called.
   ///
   /// If the new delegate is a different class than the previous one, then the
   /// delegate will be called.

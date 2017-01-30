@@ -16,11 +16,11 @@ import '../build_info.dart';
 import '../cache.dart';
 import '../device.dart';
 import '../globals.dart';
-import '../hot.dart';
 import '../ios/devices.dart';
 import '../ios/simulators.dart';
 import '../resident_runner.dart';
-import '../run.dart';
+import '../run_cold.dart';
+import '../run_hot.dart';
 import '../runner/flutter_command.dart';
 import '../vmservice.dart';
 
@@ -365,7 +365,7 @@ class AppDomain extends Domain {
         projectAssets: projectAssets,
       );
     } else {
-      runner = new RunAndStayResident(
+      runner = new ColdRunner(
         device,
         target: target,
         debuggingOptions: options,

@@ -52,6 +52,12 @@ abstract class LocalKey extends Key {
 ///
 /// A [ValueKey<T>] is equal to another [ValueKey<T>] if, and only if, their
 /// values are [operator==].
+///
+/// This class can be subclassed to create value keys that will not be equal to
+/// other value keys that happen to use the same value. If the subclass is
+/// private, this results in a value key type that cannot collide with keys from
+/// other sources, which could be useful, for example, if the keys are being
+/// used as fallbacks in the same scope as keys supplied from another widget.
 class ValueKey<T> extends LocalKey {
   /// Creates a key that delgates its [operator==] to the given value.
   const ValueKey(this.value);
@@ -61,18 +67,27 @@ class ValueKey<T> extends LocalKey {
 
   @override
   bool operator ==(dynamic other) {
-    if (other is! ValueKey<T>)
+    if (other.runtimeType != runtimeType)
       return false;
     final ValueKey<T> typedOther = other;
     return value == typedOther.value;
   }
 
   @override
-  int get hashCode => value.hashCode;
+  int get hashCode => hashValues(runtimeType, value);
 
   @override
-  String toString() => '[\'$value\']';
+  String toString() {
+    final String valueString = T == String ? '<\'$value\'>' : '<$value>';
+    // The crazy on the next line is a workaround for
+    // https://github.com/dart-lang/sdk/issues/28548
+    if (runtimeType == new _TypeLiteral<ValueKey<T>>().type)
+      return '[$valueString]';
+    return '[$T $valueString]';
+  }
 }
+
+class _TypeLiteral<T> { Type get type => T; }
 
 /// A key that is only equal to itself.
 class UniqueKey extends LocalKey {
@@ -96,17 +111,21 @@ class ObjectKey extends LocalKey {
 
   @override
   bool operator ==(dynamic other) {
-    if (other is! ObjectKey)
+    if (other.runtimeType != runtimeType)
       return false;
     final ObjectKey typedOther = other;
     return identical(value, typedOther.value);
   }
 
   @override
-  int get hashCode => identityHashCode(value);
+  int get hashCode => hashValues(runtimeType, identityHashCode(value));
 
   @override
-  String toString() => '[${value.runtimeType}(${value.hashCode})]';
+  String toString() {
+    if (runtimeType == ObjectKey)
+      return '[${value.runtimeType}@${value.hashCode}]';
+    return '[$runtimeType ${value.runtimeType}@${value.hashCode}]';
+  }
 }
 
 /// Signature for a callback when a global key is removed from the tree.
@@ -286,13 +305,19 @@ class LabeledGlobalKey<T extends State<StatefulWidget>> extends GlobalKey<T> {
   final String _debugLabel;
 
   @override
-  String toString() => '[GlobalKey ${_debugLabel != null ? _debugLabel : hashCode}]';
+  String toString() {
+    if (this.runtimeType == LabeledGlobalKey)
+      return '[GlobalKey ${_debugLabel ?? hashCode}]';
+    return '[$runtimeType ${_debugLabel ?? hashCode}]';
+  }
 }
 
 /// A global key that takes its identity from the object used as its value.
 ///
 /// Used to tie the identity of a widget to the identity of an object used to
 /// generate that widget.
+///
+/// Any [GlobalObjectKey] created for the same value will match.
 @optionalTypeArgs
 class GlobalObjectKey<T extends State<StatefulWidget>> extends GlobalKey<T> {
   /// Creates a global key that uses [identical] on [value] for its [operator==].
@@ -303,7 +328,7 @@ class GlobalObjectKey<T extends State<StatefulWidget>> extends GlobalKey<T> {
 
   @override
   bool operator ==(dynamic other) {
-    if (other is! GlobalObjectKey<T>)
+    if (other.runtimeType != runtimeType)
       return false;
     final GlobalObjectKey<T> typedOther = other;
     return identical(value, typedOther.value);
@@ -313,7 +338,7 @@ class GlobalObjectKey<T extends State<StatefulWidget>> extends GlobalKey<T> {
   int get hashCode => identityHashCode(value);
 
   @override
-  String toString() => '[$runtimeType ${value.runtimeType}(${value.hashCode})]';
+  String toString() => '[$runtimeType ${value.runtimeType}@${value.hashCode}]';
 }
 
 /// This class is a work-around for the "is" operator not accepting a variable value as its right operand
@@ -322,7 +347,7 @@ class TypeMatcher<T> {
   /// Creates a type matcher for the given type parameter.
   const TypeMatcher();
 
-  /// Returns `true` if the given object is of type `T`.
+  /// Returns true if the given object is of type `T`.
   bool check(dynamic object) => object is T;
 }
 
@@ -372,6 +397,13 @@ abstract class Widget {
   /// new widget). Otherwise, the old element is removed from the tree, the new
   /// widget is inflated into an element, and the new element is inserted into the
   /// tree.
+  ///
+  /// Using a [GlobalKey] as the widget's [key] allows the element to be moved
+  /// around the tree (changing parent) without losing state. When a new widget
+  /// is found (its key and type do not match a previous widget in the same
+  /// location), but there was a widget with that same global key elsewhere in
+  /// the tree in the previous frame, then that widget's element is moved to the
+  /// new location.
   final Key key;
 
   /// Inflates this configuration to a concrete instance.
@@ -418,6 +450,10 @@ abstract class Widget {
   /// An element that uses a given widget as its configuration can be updated to
   /// use another widget as its configuration if, and only if, the two widgets
   /// have [runtimeType] and [key] properties that are [operator==].
+  ///
+  /// If the widgets have no key (their key is null), then they are considered a
+  /// match if they have the same type, even if their children are completely
+  /// different.
   static bool canUpdate(Widget oldWidget, Widget newWidget) {
     return oldWidget.runtimeType == newWidget.runtimeType
         && oldWidget.key == newWidget.key;
@@ -2458,7 +2494,7 @@ abstract class Element implements BuildContext {
         );
       }
       final RenderBox box = renderObject;
-      if (!box.hasSize || box.needsLayout) {
+      if (!box.hasSize || box.debugNeedsLayout) {
         throw new FlutterError(
           'Cannot get size from a render object that has not been through layout.\n'
           'The size of this render object has not yet been determined because '
@@ -2820,9 +2856,6 @@ typedef Widget WidgetBuilder(BuildContext context);
 /// Used by [LazyBlockBuilder.builder].
 typedef Widget IndexedWidgetBuilder(BuildContext context, int index);
 
-// See ComponentElement._builder.
-Widget _buildNothing(BuildContext context) => null;
-
 /// An [Element] that composes other [Element]s.
 ///
 /// Rather than creating a [RenderObject] directly, a [ComponentElement] creates
@@ -2832,10 +2865,6 @@ Widget _buildNothing(BuildContext context) => null;
 abstract class ComponentElement extends BuildableElement {
   /// Creates an element that uses the given widget as its configuration.
   ComponentElement(Widget widget) : super(widget);
-
-  // Initializing this field with _buildNothing helps the compiler prove that
-  // this field always holds a closure.
-  WidgetBuilder _builder = _buildNothing;
 
   Element _child;
 
@@ -2869,13 +2898,13 @@ abstract class ComponentElement extends BuildableElement {
     assert(_debugSetAllowIgnoredCallsToMarkNeedsBuild(true));
     Widget built;
     try {
-      built = _builder(this);
+      built = build();
       debugWidgetBuilderValue(widget, built);
     } catch (e, stack) {
       _debugReportException('building $this', e, stack);
       built = new ErrorWidget(e);
     } finally {
-      // We delay marking the element as clean until after calling _builder so
+      // We delay marking the element as clean until after calling build() so
       // that attempts to markNeedsBuild() during build() will be ignored.
       _dirty = false;
       assert(_debugSetAllowIgnoredCallsToMarkNeedsBuild(false));
@@ -2896,6 +2925,9 @@ abstract class ComponentElement extends BuildableElement {
     });
   }
 
+  @protected
+  Widget build();
+
   @override
   void visitChildren(ElementVisitor visitor) {
     if (_child != null)
@@ -2912,26 +2944,20 @@ abstract class ComponentElement extends BuildableElement {
 /// An [Element] that uses a [StatelessWidget] as its configuration.
 class StatelessElement extends ComponentElement {
   /// Creates an element that uses the given widget as its configuration.
-  StatelessElement(StatelessWidget widget) : super(widget) {
-    _builder = widget.build;
-  }
+  StatelessElement(StatelessWidget widget) : super(widget);
 
   @override
   StatelessWidget get widget => super.widget;
 
   @override
+  Widget build() => widget.build(this);
+
+  @override
   void update(StatelessWidget newWidget) {
     super.update(newWidget);
     assert(widget == newWidget);
-    _builder = widget.build;
     _dirty = true;
     rebuild();
-  }
-
-  @override
-  void _reassemble() {
-    _builder = widget.build;
-    super._reassemble();
   }
 }
 
@@ -2953,12 +2979,13 @@ class StatefulElement extends ComponentElement {
     });
     assert(_state._element == null);
     _state._element = this;
-    assert(_builder == _buildNothing);
-    _builder = _state.build;
     assert(_state._config == null);
     _state._config = widget;
     assert(_state._debugLifecycleState == _StateLifecycle.created);
   }
+
+  @override
+  Widget build() => state.build(this);
 
   /// The [State] instance associated with this location in the tree.
   ///
@@ -2970,7 +2997,6 @@ class StatefulElement extends ComponentElement {
 
   @override
   void _reassemble() {
-    _builder = state.build;
     state.reassemble();
     super._reassemble();
   }
@@ -3100,20 +3126,13 @@ class StatefulElement extends ComponentElement {
 /// An [Element] that uses a [ProxyElement] as its configuration.
 abstract class ProxyElement extends ComponentElement {
   /// Initializes fields for subclasses.
-  ProxyElement(ProxyWidget widget) : super(widget) {
-    _builder = _build;
-  }
+  ProxyElement(ProxyWidget widget) : super(widget);
 
   @override
   ProxyWidget get widget => super.widget;
 
-  Widget _build(BuildContext context) => widget.child;
-
   @override
-  void _reassemble() {
-    _builder = _build;
-    super._reassemble();
-  }
+  Widget build() => widget.child;
 
   @override
   void update(ProxyWidget newWidget) {

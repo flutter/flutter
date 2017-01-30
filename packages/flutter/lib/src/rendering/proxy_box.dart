@@ -909,15 +909,15 @@ abstract class CustomClipper<T> {
   /// the same thing, because the latter is implemented in terms of the former).
   ///
   /// If the new instance represents different information than the old
-  /// instance, then the method should return `true`, otherwise it should return
-  /// `false`.
+  /// instance, then the method should return true, otherwise it should return
+  /// false.
   ///
-  /// If the method returns `false`, then the [getClip] call might be optimized
+  /// If the method returns false, then the [getClip] call might be optimized
   /// away.
   ///
   /// It's possible that the [getClip] method will get called even if
-  /// [shouldReclip] returns `false` or if the [getClip] method is never called
-  /// at all (e.g. if the box changes size).
+  /// [shouldReclip] returns false or if the [shouldReclip] method is never
+  /// called at all (e.g. if the box changes size).
   bool shouldReclip(@checked CustomClipper<T> oldClipper);
 }
 
@@ -1361,8 +1361,8 @@ class RenderTransform extends RenderProxyBox {
     markNeedsPaint();
   }
 
-  /// When set to `true`, hit tests are performed based on the position of the
-  /// child as it is painted. When set to `false`, hit tests are performed
+  /// When set to true, hit tests are performed based on the position of the
+  /// child as it is painted. When set to false, hit tests are performed
   /// ignoring the transformation.
   ///
   /// applyPaintTransform(), and therefore localToGlobal() and globalToLocal(),
@@ -1643,8 +1643,8 @@ class RenderFractionalTranslation extends RenderProxyBox {
     markNeedsPaint();
   }
 
-  /// When set to `true`, hit tests are performed based on the position of the
-  /// child as it is painted. When set to `false`, hit tests are performed
+  /// When set to true, hit tests are performed based on the position of the
+  /// child as it is painted. When set to false, hit tests are performed
   /// ignoring the transformation.
   ///
   /// applyPaintTransform(), and therefore localToGlobal() and globalToLocal(),
@@ -1653,7 +1653,7 @@ class RenderFractionalTranslation extends RenderProxyBox {
 
   @override
   bool hitTest(HitTestResult result, { Point position }) {
-    assert(!needsLayout);
+    assert(!debugNeedsLayout);
     if (transformHitTests)
       position = new Point(position.x - translation.dx * size.width, position.y - translation.dy * size.height);
     return super.hitTest(result, position: position);
@@ -1661,7 +1661,7 @@ class RenderFractionalTranslation extends RenderProxyBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    assert(!needsLayout);
+    assert(!debugNeedsLayout);
     if (child != null)
       super.paint(context, offset + translation.alongSize(size));
   }
@@ -1745,14 +1745,14 @@ abstract class CustomPainter {
   /// implemented in terms of the former).
   ///
   /// If the new instance represents different information than the old
-  /// instance, then the method should return `true`, otherwise it should return
-  /// `false`.
+  /// instance, then the method should return true, otherwise it should return
+  /// false.
   ///
-  /// If the method returns `false`, then the [paint] call might be optimized
+  /// If the method returns false, then the [paint] call might be optimized
   /// away.
   ///
   /// It's possible that the [paint] method will get called even if
-  /// [shouldRepaint] returns `false` (e.g. if an ancestor or descendant needed to
+  /// [shouldRepaint] returns false (e.g. if an ancestor or descendant needed to
   /// be repainted). It's also possible that the [paint] method will get called
   /// without [shouldRepaint] being called at all (e.g. if the box changes
   /// size).
@@ -1760,7 +1760,7 @@ abstract class CustomPainter {
   /// If a custom delegate has a particularly expensive paint function such that
   /// repaints should be avoided as much as possible, a [RepaintBoundary] or
   /// [RenderRepaintBoundary] (or other render object with [isRepaintBoundary]
-  /// set to `true`) might be helpful.
+  /// set to true) might be helpful.
   bool shouldRepaint(@checked CustomPainter oldDelegate);
 
   /// Called whenever a hit test is being performed on an object that is using
@@ -1772,8 +1772,8 @@ abstract class CustomPainter {
   /// The default behavior is to consider all points to be hits for
   /// background painters, and no points to be hits for foreground painters.
   ///
-  /// Return `true` if the given position corresponds to a point on the drawn
-  /// image that should be considered a "hit", `false` if it corresponds to a
+  /// Return true if the given position corresponds to a point on the drawn
+  /// image that should be considered a "hit", false if it corresponds to a
   /// point that should be considered outside the painted image, and null to use
   /// the default behavior.
   bool hitTest(Point position) => null;
@@ -1829,7 +1829,7 @@ class RenderCustomPaint extends RenderProxyBox {
   ///
   /// If the new delegate is the same class as the previous one, then the new
   /// delegate has its [CustomPainter.shouldRepaint] called; if the result is
-  /// `true`, then the delegate will be called.
+  /// true, then the delegate will be called.
   ///
   /// If the new delegate is a different class than the previous one, then the
   /// delegate will be called.
@@ -1854,7 +1854,7 @@ class RenderCustomPaint extends RenderProxyBox {
   ///
   /// If the new delegate is the same class as the previous one, then the new
   /// delegate has its [CustomPainter.shouldRepaint] called; if the result is
-  /// `true`, then the delegate will be called.
+  /// true, then the delegate will be called.
   ///
   /// If the new delegate is a different class than the previous one, then the
   /// delegate will be called.
@@ -2192,12 +2192,12 @@ class RenderRepaintBoundary extends RenderProxyBox {
 
 /// A render object that is invisible during hit testing.
 ///
-/// When [ignoring] is `true`, this render object (and its subtree) is invisible
+/// When [ignoring] is true, this render object (and its subtree) is invisible
 /// to hit testing. It still consumes space during layout and paints its child
 /// as usual. It just cannot be the target of located events, because its render
-/// object returns `false` from [hitTest].
+/// object returns false from [hitTest].
 ///
-/// When [ignoringSemantics] is `true`, the subtree will be invisible to
+/// When [ignoringSemantics] is true, the subtree will be invisible to
 /// the semantics layer (and thus e.g. accessibility tools). If
 /// [ignoringSemantics] is null, it uses the value of [ignoring].
 class RenderIgnorePointer extends RenderProxyBox {
@@ -2378,11 +2378,11 @@ class RenderOffstage extends RenderProxyBox {
 
 /// A render object that absorbs pointers during hit testing.
 ///
-/// When [absorbing] is `true`, this render object prevents its subtree from
+/// When [absorbing] is true, this render object prevents its subtree from
 /// receiving pointer events by terminating hit testing at itself. It still
 /// consumes space during layout and paints its child as usual. It just prevents
 /// its children from being the target of located events, because its render
-/// object returns `true` from [hitTest].
+/// object returns true from [hitTest].
 class RenderAbsorbPointer extends RenderProxyBox {
   /// Creates a render object that absorbs pointers during hit testing.
   ///
@@ -2611,11 +2611,11 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     assert(container != null);
   }
 
-  /// If 'container' is `true`, this RenderObject will introduce a new
+  /// If 'container' is true, this RenderObject will introduce a new
   /// node in the semantics tree. Otherwise, the semantics will be
   /// merged with the semantics of any ancestors.
   ///
-  /// The 'container' flag is implicitly set to `true` on the immediate
+  /// The 'container' flag is implicitly set to true on the immediate
   /// semantics-providing descendants of a node where multiple
   /// children have semantics or have descendants providing semantics.
   /// In other words, the semantics of siblings are not merged. To
@@ -2631,7 +2631,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     markNeedsSemanticsUpdate();
   }
 
-  /// If non-null, sets the "hasCheckedState" semantic to `true` and the
+  /// If non-null, sets the "hasCheckedState" semantic to true and the
   /// "isChecked" semantic to the given value.
   bool get checked => _checked;
   bool _checked;

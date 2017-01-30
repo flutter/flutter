@@ -21,6 +21,11 @@ import 'theme.dart';
 /// corners. Avoid using flat buttons where they would blend in with other
 /// content, for example in the middle of lists.
 ///
+/// Material design flat buttons have an all-caps label, some internal padding,
+/// and some defined dimensions. To have a part of your application be
+/// interactive, with ink splashes, without also committing to these stylistic
+/// choices, consider using [InkWell] instead.
+///
 /// If the [onPressed] callback is null, then the button will be disabled,
 /// will not react to touch, and will be colored as specified by
 /// the [disabledColor] property instead of the [color] property. If you are
@@ -35,6 +40,7 @@ import 'theme.dart';
 ///    material.
 ///  * [DropdownButton], which offers the user a choice of a number of options.
 ///  * [SimpleDialogOption], which is used in [SimpleDialog]s.
+///  * [InkWell], which implements the ink splash part of a flat button.
 ///  * <https://material.google.com/components/buttons.html>
 class FlatButton extends StatelessWidget {
   /// Creates a flat button.

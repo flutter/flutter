@@ -83,7 +83,7 @@ class MenuDemoState extends State<MenuDemo> {
           )
         ]
       ),
-      body: new Block(
+      body: new ScrollView(
         padding: const EdgeInsets.symmetric(vertical: 8.0),
         children: <Widget>[
           // Pressing the PopupMenuButton on the right of this item shows

@@ -62,7 +62,7 @@ void main() {
   testWidgets('ScrollView control test', (WidgetTester tester) async {
     List<String> log = <String>[];
 
-    await tester.pumpWidget(new ClipRect(child: new ScrollView(
+    await tester.pumpWidget(new ScrollView(
       children: _kStates.map<Widget>((String state) {
         return new GestureDetector(
           onTap: () {
@@ -77,7 +77,7 @@ void main() {
           ),
         );
       }).toList()
-    )));
+    ));
 
     await tester.tap(find.text('Alabama'));
     expect(log, equals(<String>['Alabama']));
@@ -94,5 +94,33 @@ void main() {
     await tester.tap(find.text('Massachusetts'));
     expect(log, equals(<String>['Massachusetts']));
     log.clear();
+  });
+
+  testWidgets('ScrollView restart ballistic activity out of range', (WidgetTester tester) async {
+    Widget buildScrollView(int n) {
+      return new ScrollView(
+        children: _kStates.take(n).map<Widget>((String state) {
+          return new Container(
+            height: 200.0,
+            decoration: const BoxDecoration(
+              backgroundColor: const Color(0xFF0000FF),
+            ),
+            child: new Text(state),
+          );
+        }).toList()
+      );
+    }
+
+    await tester.pumpWidget(buildScrollView(30));
+    await tester.fling(find.byType(ScrollView), const Offset(0.0, -4000.0), 4000.0);
+    await tester.pumpWidget(buildScrollView(15));
+    await tester.pump(const Duration(milliseconds: 10));
+    await tester.pump(const Duration(milliseconds: 10));
+    await tester.pump(const Duration(milliseconds: 10));
+    await tester.pump(const Duration(milliseconds: 10));
+    await tester.pumpUntilNoTransientCallbacks(const Duration(milliseconds: 100));
+
+    Viewport2 viewport = tester.widget(find.byType(Viewport2));
+    expect(viewport.offset.pixels, equals(2400.0));
   });
 }

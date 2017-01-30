@@ -90,7 +90,7 @@ class RenderRotatedBox extends RenderBox with RenderObjectWithChildMixin<RenderB
 
   @override
   bool hitTestChildren(HitTestResult result, { Point position }) {
-    assert(_paintTransform != null || needsLayout || child == null);
+    assert(_paintTransform != null || debugNeedsLayout || child == null);
     if (child == null || _paintTransform == null)
       return false;
     Matrix4 inverse = new Matrix4.inverted(_paintTransform);

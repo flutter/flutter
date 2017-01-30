@@ -124,14 +124,12 @@ class Doctor {
       else
         printStatus('${result.leadingBox} ${validator.title}');
 
-      final String separator = '•';
-
       for (ValidationMessage message in result.messages) {
         String text = message.message.replaceAll('\n', '\n      ');
         if (message.isError) {
           printStatus('    x $text', emphasis: true);
         } else {
-          printStatus('    $separator $text');
+          printStatus('    • $text');
         }
       }
     }
@@ -180,9 +178,9 @@ class ValidationResult {
 
   String get leadingBox {
     if (type == ValidationType.missing)
-      return '[x]';
+      return '[✗]';
     else if (type == ValidationType.installed)
-      return platform.isWindows ? '[√]' : '[✓]';
+      return '[✓]';
     else
       return '[-]';
   }

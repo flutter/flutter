@@ -30,9 +30,9 @@ void main() {
     expect(grid.size.width, equals(200.0), reason: "grid width");
     expect(grid.size.height, equals(200.0), reason: "grid height");
 
-    expect(grid.needsLayout, equals(false));
+    expect(grid.debugNeedsLayout, false);
     grid.delegate = new MaxTileWidthGridDelegate(maxTileWidth: 60.0);
-    expect(grid.needsLayout, equals(true));
+    expect(grid.debugNeedsLayout, true);
 
     pumpFrame();
 

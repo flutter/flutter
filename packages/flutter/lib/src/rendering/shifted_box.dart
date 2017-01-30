@@ -50,7 +50,7 @@ abstract class RenderShiftedBox extends RenderBox with RenderObjectWithChildMixi
   double computeDistanceToActualBaseline(TextBaseline baseline) {
     double result;
     if (child != null) {
-      assert(!needsLayout);
+      assert(!debugNeedsLayout);
       result = child.getDistanceToActualBaseline(baseline);
       final BoxParentData childParentData = child.parentData;
       if (result != null)
@@ -230,7 +230,7 @@ abstract class RenderAligningShiftedBox extends RenderShiftedBox {
   /// this object's own size has been set.
   void alignChild() {
     assert(child != null);
-    assert(!child.needsLayout);
+    assert(!child.debugNeedsLayout);
     assert(child.hasSize);
     assert(hasSize);
     final BoxParentData childParentData = child.parentData;
@@ -736,15 +736,15 @@ abstract class SingleChildLayoutDelegate {
   /// because the latter is implemented in terms of the former).
   ///
   /// If the new instance represents different information than the old
-  /// instance, then the method should return `true`, otherwise it should return
-  /// `false`.
+  /// instance, then the method should return true, otherwise it should return
+  /// false.
   ///
-  /// If the method returns `false`, then the [getSize],
+  /// If the method returns false, then the [getSize],
   /// [getConstraintsForChild], and [getPositionForChild] calls might be
   /// optimized away.
   ///
   /// It's possible that the layout methods will get called even if
-  /// [shouldRelayout] returns `false` (e.g. if an ancestor changed its layout).
+  /// [shouldRelayout] returns false (e.g. if an ancestor changed its layout).
   /// It's also possible that the layout method will get called
   /// without [shouldRelayout] being called at all (e.g. if the parent changes
   /// size).

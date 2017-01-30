@@ -179,7 +179,7 @@ class _HeroState extends State<Hero> implements _HeroHandle {
     assert(mounted);
     final RenderBox renderObject = context.findRenderObject();
     assert(renderObject != null);
-    assert(!renderObject.needsLayout);
+    assert(!renderObject.debugNeedsLayout);
     assert(renderObject.hasSize);
     if (_placeholderSize == null) {
       // We are a "from" hero, about to depart on a quest.
