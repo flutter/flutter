@@ -464,7 +464,7 @@ class AppDomain extends Domain {
     if (app == null)
       throw "app '$appId' not found";
 
-    return app.stop().timeout(new Duration(seconds: 5)).then((_) {
+    return app.stop().timeout(new Duration(seconds: 5)).then<bool>((_) {
       return true;
     }).catchError((dynamic error) {
       _sendAppEvent(app, 'log', <String, dynamic>{ 'log': '$error', 'error': true });
