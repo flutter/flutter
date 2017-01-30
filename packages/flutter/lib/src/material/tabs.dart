@@ -866,6 +866,7 @@ class TabPageSelector extends StatelessWidget {
     final ColorTween selectedColor = new ColorTween(begin: Colors.transparent, end: color);
     final ColorTween previousColor = new ColorTween(begin: color, end: Colors.transparent);
     final TabController tabController = controller ?? DefaultTabController.of(context);
+    assert(tabController != null);
     final Animation<double> animation = new CurvedAnimation(
       parent: tabController.animation,
       curve: Curves.fastOutSlowIn,
@@ -874,11 +875,11 @@ class TabPageSelector extends StatelessWidget {
       animation: animation,
       builder: (BuildContext context, Widget child) {
         return new Semantics(
-          label: 'Page ${controller.index + 1} of ${controller.length}',
+          label: 'Page ${tabController.index + 1} of ${tabController.length}',
           child: new Row(
             mainAxisSize: MainAxisSize.min,
-            children: new List<Widget>.generate(controller.length, (int tabIndex) {
-              return _buildTabIndicator(tabIndex, controller, selectedColor, previousColor);
+            children: new List<Widget>.generate(tabController.length, (int tabIndex) {
+              return _buildTabIndicator(tabIndex, tabController, selectedColor, previousColor);
             }).toList(),
           ),
         );
