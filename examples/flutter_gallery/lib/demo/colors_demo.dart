@@ -36,7 +36,7 @@ final List<ColorSwatch> colorSwatches = <ColorSwatch>[
   new ColorSwatch(name: 'DEEP ORANGE', colors: Colors.deepOrange, accentColors: Colors.deepOrangeAccent, threshold: 400),
   new ColorSwatch(name: 'BROWN', colors: Colors.brown, threshold: 200),
   new ColorSwatch(name: 'GREY', colors: Colors.grey, threshold: 500),
-  new ColorSwatch(name: 'BLUE GREY', colors: Colors.blueGrey, threshold: 500)
+  new ColorSwatch(name: 'BLUE GREY', colors: Colors.blueGrey, threshold: 500),
 ];
 
 
@@ -64,9 +64,9 @@ class ColorItem extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
           new Text('$prefix$index'),
-          new Text(colorString())
-        ]
-      )
+          new Text(colorString()),
+        ],
+      ),
     );
   }
 }
@@ -85,24 +85,22 @@ class ColorSwatchTabView extends StatelessWidget {
     List<Widget> colorItems =  swatch.colors.keys.map((int index) {
       return new DefaultTextStyle(
         style: index > swatch.threshold ? whiteTextStyle : blackTextStyle,
-        child: new ColorItem(index: index, color: swatch.colors[index])
+        child: new ColorItem(index: index, color: swatch.colors[index]),
       );
-    })
-    .toList();
+    }).toList();
 
     if (swatch.accentColors != null) {
       colorItems.addAll(swatch.accentColors.keys.map((int index) {
         return new DefaultTextStyle(
           style: index > swatch.threshold ? whiteTextStyle : blackTextStyle,
-          child: new ColorItem(index: index, color: swatch.accentColors[index], prefix: 'A')
+          child: new ColorItem(index: index, color: swatch.accentColors[index], prefix: 'A'),
         );
-      })
-      .toList());
+      }).toList());
     }
 
-    return new ScrollableList(
+    return new ScrollView(
       itemExtent: kColorItemHeight,
-      children: colorItems
+      children: colorItems,
     );
   }
 }
@@ -121,7 +119,7 @@ class ColorsDemo extends StatelessWidget {
           bottom: new TabBar(
             isScrollable: true,
             tabs: colorSwatches.map((ColorSwatch swatch) => new Tab(text: swatch.name)).toList(),
-          )
+          ),
         ),
         body: new TabBarView(
           children: colorSwatches.map((ColorSwatch swatch) {
