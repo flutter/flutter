@@ -107,7 +107,7 @@ class PageStorage extends StatelessWidget {
   PageStorage({
     Key key,
     @required this.bucket,
-    this.child
+    @required this.child
   }) : super(key: key) {
     assert(bucket != null);
   }

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 import 'basic.dart';
@@ -30,7 +31,7 @@ class RawKeyboardListener extends StatefulWidget {
     Key key,
     this.focused: false,
     this.onKey,
-    this.child
+    @required this.child,
   }) : super(key: key) {
     assert(child != null);
   }
@@ -98,7 +99,5 @@ class _RawKeyboardListenerState extends State<RawKeyboardListener> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return config.child;
-  }
+  Widget build(BuildContext context) => config.child;
 }

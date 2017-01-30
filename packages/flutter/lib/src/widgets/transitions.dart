@@ -91,7 +91,7 @@ class SlideTransition extends AnimatedWidget {
     Key key,
     Animation<FractionalOffset> position,
     this.transformHitTests: true,
-    this.child
+    this.child,
   }) : super(key: key, animation: position);
 
   /// The animation that controls the position of the child.
@@ -116,7 +116,7 @@ class SlideTransition extends AnimatedWidget {
     return new FractionalTranslation(
       translation: position.value,
       transformHitTests: transformHitTests,
-      child: child
+      child: child,
     );
   }
 }
@@ -131,7 +131,7 @@ class ScaleTransition extends AnimatedWidget {
     Key key,
     Animation<double> scale,
     this.alignment: FractionalOffset.center,
-    this.child
+    this.child,
   }) : super(key: key, animation: scale);
 
   /// The animation that controls the scale of the child.
@@ -158,7 +158,7 @@ class ScaleTransition extends AnimatedWidget {
     return new Transform(
       transform: transform,
       alignment: alignment,
-      child: child
+      child: child,
     );
   }
 }
@@ -171,7 +171,7 @@ class RotationTransition extends AnimatedWidget {
   RotationTransition({
     Key key,
     Animation<double> turns,
-    this.child
+    this.child,
   }) : super(key: key, animation: turns);
 
   /// The animation that controls the rotation of the child.
@@ -190,7 +190,7 @@ class RotationTransition extends AnimatedWidget {
     return new Transform(
       transform: transform,
       alignment: FractionalOffset.center,
-      child: child
+      child: child,
     );
   }
 }
@@ -210,7 +210,7 @@ class SizeTransition extends AnimatedWidget {
     this.axis: Axis.vertical,
     Animation<double> sizeFactor,
     this.axisAlignment: 0.5,
-    this.child
+    this.child,
   }) : super(key: key, animation: sizeFactor) {
     assert(axis != null);
   }
@@ -241,7 +241,7 @@ class SizeTransition extends AnimatedWidget {
         alignment: alignment,
         heightFactor: axis == Axis.vertical ? sizeFactor.value : null,
         widthFactor: axis == Axis.horizontal ? sizeFactor.value : null,
-        child: child
+        child: child,
       )
     );
   }
@@ -258,7 +258,7 @@ class FadeTransition extends AnimatedWidget {
   FadeTransition({
     Key key,
     Animation<double> opacity,
-    this.child
+    this.child,
   }) : super(key: key, animation: opacity);
 
   /// The animation that controls the opacity of the child.
@@ -310,7 +310,7 @@ class PositionedTransition extends AnimatedWidget {
   PositionedTransition({
     Key key,
     Animation<RelativeRect> rect,
-    this.child
+    @required this.child,
   }) : super(key: key, animation: rect);
 
   /// The animation that controls the child's size and position.
@@ -326,7 +326,7 @@ class PositionedTransition extends AnimatedWidget {
       right: rect.value.right,
       bottom: rect.value.bottom,
       left: rect.value.left,
-      child: child
+      child: child,
     );
   }
 }
@@ -350,7 +350,7 @@ class RelativePositionedTransition extends AnimatedWidget {
     Key key,
     @required Animation<Rect> rect,
     @required this.size,
-    this.child
+    @required this.child,
   }) : super(key: key, animation: rect);
 
   /// The animation that controls the child's size and position.
@@ -373,7 +373,7 @@ class RelativePositionedTransition extends AnimatedWidget {
       right: offsets.right,
       bottom: offsets.bottom,
       left: offsets.left,
-      child: child
+      child: child,
     );
   }
 }
@@ -412,7 +412,7 @@ class AnimatedBuilder extends AnimatedWidget {
     Key key,
     @required Animation<Object> animation,
     @required this.builder,
-    this.child
+    this.child,
   }) : super(key: key, animation: animation) {
     assert(builder != null);
   }
