@@ -1350,6 +1350,9 @@ abstract class RenderBox extends RenderObject {
   }
   Size _size;
   @protected
+  /// Setting the size, in checked mode, triggers some analysis of the render box,
+  /// as implemented by [debugAssertDoesMeetConstraints], including calling the intrinsic
+  /// sizing methods and checking that they meet certain invariants.
   set size(Size value) {
     assert(!(debugDoingThisResize && debugDoingThisLayout));
     assert(sizedByParent || !debugDoingThisResize);
