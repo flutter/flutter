@@ -153,15 +153,13 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
   Map<int, Element> _childElements = new SplayTreeMap<int, Element>();
   Map<int, Widget> _childWidgets = new HashMap<int, Widget>();
   RenderBox _currentBeforeChild;
-  bool _debugOpenToChanges = false;
 
   @override
   void performRebuild() {
     _childWidgets.clear();
     super.performRebuild();
     _currentBeforeChild = null;
-    assert(!_debugOpenToChanges);
-    assert(() { _debugOpenToChanges = true; return true; });
+    assert(_currentlyUpdatingChildIndex == null);
     try {
       // The "toList()" below is to get a copy of the array so that we can
       // mutate _childElements within the loop. Basically we just update all the
@@ -171,10 +169,8 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
       // delegate's results until the next time we need to rebuild the whole
       // block widget.)
       for (int index in _childElements.keys.toList()) {
-        Element newChild;
-        renderObject.allowAdditionsFor(index, () {
-          newChild = updateChild(_childElements[index], _build(index), index);
-        });
+        _currentlyUpdatingChildIndex = index;
+        Element newChild = updateChild(_childElements[index], _build(index), index);
         if (newChild != null) {
           _childElements[index] = newChild;
           _currentBeforeChild = newChild.renderObject;
@@ -183,7 +179,7 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
         }
       }
     } finally {
-      assert(() { _debugOpenToChanges = false; return true; });
+      _currentlyUpdatingChildIndex = null;
     }
   }
 
@@ -198,17 +194,17 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
 
   @override
   void createChild(int index, { @required RenderBox after }) {
-    final bool insertFirst = after == null;
-    assert(!_debugOpenToChanges);
+    assert(_currentlyUpdatingChildIndex == null);
     owner.buildScope(this, () {
+      final bool insertFirst = after == null;
       assert(insertFirst || _childElements[index-1] != null);
-      assert(() { _debugOpenToChanges = true; return true; });
       _currentBeforeChild = insertFirst ? null : _childElements[index-1].renderObject;
       Element newChild;
       try {
+        _currentlyUpdatingChildIndex = index;
         newChild = updateChild(_childElements[index], _build(index), index);
       } finally {
-        assert(() { _debugOpenToChanges = false; return true; });
+        _currentlyUpdatingChildIndex = null;
       }
       if (newChild != null) {
         _childElements[index] = newChild;
@@ -229,16 +225,16 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
   @override
   void removeChild(RenderBox child) {
     final int index = renderObject.indexOf(child);
-    assert(!_debugOpenToChanges);
+    assert(_currentlyUpdatingChildIndex == null);
     assert(index >= 0);
     owner.buildScope(this, () {
       assert(_childElements.containsKey(index));
-      assert(() { _debugOpenToChanges = true; return true; });
       try {
+        _currentlyUpdatingChildIndex = index;
         final Element result = updateChild(_childElements[index], null, index);
         assert(result == null);
       } finally {
-        assert(() { _debugOpenToChanges = false; return true; });
+        _currentlyUpdatingChildIndex = null;
       }
       _childElements.remove(index);
       assert(!_childElements.containsKey(index));
@@ -261,9 +257,25 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
     );
   }
 
+  int _currentlyUpdatingChildIndex;
+
+  @override
+  bool debugAssertChildListLocked() {
+    assert(_currentlyUpdatingChildIndex == null);
+    return true;
+  }
+
+  @override
+  void didAdoptChild(RenderBox child) {
+    assert(_currentlyUpdatingChildIndex != null);
+    final SliverMultiBoxAdaptorParentData childParentData = child.parentData;
+    childParentData.index = _currentlyUpdatingChildIndex;
+  }
+
   @override
   void insertChildRenderObject(@checked RenderObject child, int slot) {
-    assert(_debugOpenToChanges);
+    assert(slot != null);
+    assert(_currentlyUpdatingChildIndex == slot);
     renderObject.insert(child, after: _currentBeforeChild);
     assert(() {
       SliverMultiBoxAdaptorParentData childParentData = child.parentData;
@@ -281,7 +293,7 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
 
   @override
   void removeChildRenderObject(@checked RenderObject child) {
-    assert(_debugOpenToChanges);
+    assert(_currentlyUpdatingChildIndex != null);
     renderObject.remove(child);
   }
 

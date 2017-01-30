@@ -22,12 +22,19 @@ class TestRenderSliverBoxChildManager extends RenderSliverBoxChildManager {
     return _renderObject;
   }
 
+  int _currentlyUpdatingChildIndex;
+
   @override
   void createChild(int index, { @required RenderBox after }) {
     assert(index >= 0);
     if (index < 0 || index >= children.length)
       return null;
-    _renderObject.insert(children[index], after: after);
+    try {
+      _currentlyUpdatingChildIndex = index;
+      _renderObject.insert(children[index], after: after);
+    } finally {
+      _currentlyUpdatingChildIndex = null;
+    }
   }
 
   @override
@@ -44,6 +51,13 @@ class TestRenderSliverBoxChildManager extends RenderSliverBoxChildManager {
   }) {
     assert(lastIndex >= firstIndex);
     return children.length * (trailingScrollOffset - leadingScrollOffset) / (lastIndex - firstIndex + 1);
+  }
+
+  @override
+  void didAdoptChild(RenderBox child) {
+    assert(_currentlyUpdatingChildIndex != null);
+    final SliverMultiBoxAdaptorParentData childParentData = child.parentData;
+    childParentData.index = _currentlyUpdatingChildIndex;
   }
 }
 

@@ -16,7 +16,7 @@ class RenderSliverBlock extends RenderSliverMultiBoxAdaptor {
 
   @override
   void performLayout() {
-    assert(debugAssertNotCurrentlyAllowingChildAdditions());
+    assert(childManager.debugAssertChildListLocked());
     double scrollOffset = constraints.scrollOffset;
     assert(scrollOffset >= 0.0);
     double remainingPaintExtent = constraints.remainingPaintExtent;
@@ -209,6 +209,6 @@ class RenderSliverBlock extends RenderSliverMultiBoxAdaptor {
       hasVisualOverflow: endScrollOffset > targetEndScrollOffset || constraints.scrollOffset > 0.0,
     );
 
-    assert(debugAssertNotCurrentlyAllowingChildAdditions());
+    assert(childManager.debugAssertChildListLocked());
   }
 }

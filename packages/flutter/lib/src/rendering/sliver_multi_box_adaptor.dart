@@ -18,17 +18,6 @@ import 'sliver.dart';
 /// spending resources on children that are not visible in the viewport. This
 /// delegate lets these objects create and remove children as well as estimate
 /// the total scroll offset extent occupied by the full child list.
-///
-/// Subclasses must override these three methods:
-///
-/// - [createChild], which must create the child for the given index, and then
-///   insert it in the given location in the child list.
-///
-/// - [removeChild], which is called when the given child is cleaned up,
-///   and which should remove the given child from the child list.
-///
-/// - [estimateScrollOffsetExtent], which should return the total extent (e.g.
-///   the height, if this is a vertical layout) of all the children.
 abstract class RenderSliverBoxChildManager {
   /// Called during layout when a new child is needed. The child should be
   /// inserted into the child list in the appropriate position, after the
@@ -78,6 +67,23 @@ abstract class RenderSliverBoxChildManager {
     double leadingScrollOffset,
     double trailingScrollOffset,
   });
+
+  /// Called during [RenderSliverMultiBoxAdaptor.adoptChild].
+  ///
+  /// Subclasses must ensure that the [SliverMultiBoxAdaptorParentData.index]
+  /// field of the child's [parentData] accurately reflects the child's index in
+  /// the child list after this function returns.
+  void didAdoptChild(RenderBox child);
+
+  /// In debug mode, asserts that this manager is not expecting any
+  /// modifications to the [RenderSliverMultiBoxAdaptor]'s child list.
+  ///
+  /// This function always returns true.
+  ///
+  /// The manager is not required to track whether it is expecting modifications
+  /// to the [RenderSliverMultiBoxAdaptor]'s child list and can simply return
+  /// true without making any assertions.
+  bool debugAssertChildListLocked() => true;
 }
 
 class SliverMultiBoxAdaptorParentData extends SliverLogicalParentData with ContainerParentDataMixin<RenderBox> {
@@ -92,7 +98,7 @@ class SliverMultiBoxAdaptorParentData extends SliverLogicalParentData with Conta
 // ///
 // /// - Children can be removed except during a layout pass if they have already
 // ///   been laid out during that layout pass.
-// /// - Children cannot be added except during a call to [allowAdditionsFor], and
+// /// - Children cannot be added except during a call to [childManager], and
 // ///   then only if there is no child correspending to that index (or the child
 // ///   child corresponding to that index was first removed).
 abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
@@ -115,32 +121,13 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
   RenderSliverBoxChildManager get childManager => _childManager;
   final RenderSliverBoxChildManager _childManager;
 
-  int _currentlyUpdatingChildIndex;
-
-  void allowAdditionsFor(int index, VoidCallback callback) {
-    assert(_currentlyUpdatingChildIndex == null);
-    assert(index != null);
-    _currentlyUpdatingChildIndex = index;
-    try {
-      callback();
-    } finally {
-      _currentlyUpdatingChildIndex = null;
-    }
-  }
-
-  @protected
-  bool debugAssertNotCurrentlyAllowingChildAdditions() {
-    assert(_currentlyUpdatingChildIndex == null);
-    return true;
-  }
-
   @override
   void adoptChild(RenderObject child) {
-    assert(_currentlyUpdatingChildIndex != null);
     super.adoptChild(child);
-    final SliverMultiBoxAdaptorParentData childParentData = child.parentData;
-    childParentData.index = _currentlyUpdatingChildIndex;
+    childManager.didAdoptChild(child);
   }
+
+  bool _debugAssertChildListLocked() => childManager.debugAssertChildListLocked();
 
   @override
   void insert(RenderBox child, { RenderBox after }) {
@@ -174,23 +161,21 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
   /// either, except for the one that is created and returned by createChild.
   @protected
   bool addInitialChild({ int index: 0, double scrollOffset: 0.0 }) {
-    assert(debugAssertNotCurrentlyAllowingChildAdditions());
+    assert(_debugAssertChildListLocked());
     assert(firstChild == null);
     bool result;
     invokeLayoutCallback<SliverConstraints>((SliverConstraints constraints) {
       assert(constraints == this.constraints);
-      allowAdditionsFor(index, () {
-        _childManager.createChild(index, after: null);
-        if (firstChild != null) {
-          assert(firstChild == lastChild);
-          assert(indexOf(firstChild) == index);
-          final SliverMultiBoxAdaptorParentData firstChildParentData = firstChild.parentData;
-          firstChildParentData.scrollOffset = scrollOffset;
-          result = true;
-        } else {
-          result = false;
-        }
-      });
+      _childManager.createChild(index, after: null);
+      if (firstChild != null) {
+        assert(firstChild == lastChild);
+        assert(indexOf(firstChild) == index);
+        final SliverMultiBoxAdaptorParentData firstChildParentData = firstChild.parentData;
+        firstChildParentData.scrollOffset = scrollOffset;
+        result = true;
+      } else {
+        result = false;
+      }
     });
     return result;
   }
@@ -211,13 +196,11 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
   RenderBox insertAndLayoutLeadingChild(BoxConstraints childConstraints, {
     bool parentUsesSize: false,
   }) {
-    assert(debugAssertNotCurrentlyAllowingChildAdditions());
+    assert(_debugAssertChildListLocked());
     final int index = indexOf(firstChild) - 1;
     invokeLayoutCallback<SliverConstraints>((SliverConstraints constraints) {
       assert(constraints == this.constraints);
-      allowAdditionsFor(index, () {
-        _childManager.createChild(index, after: null);
-      });
+      _childManager.createChild(index, after: null);
     });
     if (indexOf(firstChild) == index) {
       firstChild.layout(childConstraints, parentUsesSize: parentUsesSize);
@@ -242,14 +225,12 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
     @required RenderBox after,
     bool parentUsesSize: false,
   }) {
-    assert(debugAssertNotCurrentlyAllowingChildAdditions());
+    assert(_debugAssertChildListLocked());
     assert(after != null);
     final int index = indexOf(after) + 1;
     invokeLayoutCallback<SliverConstraints>((SliverConstraints constraints) {
       assert(constraints == this.constraints);
-      allowAdditionsFor(index, () {
-        _childManager.createChild(index, after: after);
-      });
+      _childManager.createChild(index, after: after);
     });
     final RenderBox child = childAfter(after);
     if (child != null && indexOf(child) == index) {
@@ -264,7 +245,7 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
   /// collected at the head and tail of the child list.
   @protected
   void collectGarbage(int leadingGarbage, int trailingGarbage) {
-    assert(debugAssertNotCurrentlyAllowingChildAdditions());
+    assert(_debugAssertChildListLocked());
     assert(childCount >= leadingGarbage + trailingGarbage);
     invokeLayoutCallback<SliverConstraints>((SliverConstraints constraints) {
       while (leadingGarbage > 0) {
