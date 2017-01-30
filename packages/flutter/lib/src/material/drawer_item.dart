@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
@@ -33,7 +34,7 @@ class DrawerItem extends StatelessWidget {
   const DrawerItem({
     Key key,
     this.icon: const Icon(null),
-    this.child,
+    @required this.child,
     this.onPressed,
     this.selected: false
   }) : super(key: key);

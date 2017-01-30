@@ -47,7 +47,7 @@ class Tooltip extends StatefulWidget {
     this.padding: const EdgeInsets.symmetric(horizontal: 16.0),
     this.verticalOffset: 24.0,
     this.preferBelow: true,
-    this.child
+    this.child,
   }) : super(key: key) {
     assert(message != null);
     assert(height != null);
@@ -181,7 +181,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       excludeFromSemantics: true,
       child: new Semantics(
         label: config.message,
-        child: config.child
+        child: config.child,
       )
     );
   }

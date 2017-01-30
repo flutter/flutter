@@ -237,6 +237,7 @@ class InputContainer extends StatefulWidget {
   /// Defaults to true.
   final bool showDivider;
 
+  /// The widget below this widget in the tree.
   final Widget child;
 
   @override

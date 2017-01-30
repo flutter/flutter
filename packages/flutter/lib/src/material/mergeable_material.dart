@@ -35,7 +35,7 @@ class MaterialSlice extends MergeableMaterialItem {
   /// [MergeableMaterial].
   MaterialSlice({
     @required LocalKey key,
-    this.child
+    @required this.child,
   }) : super(key) {
     assert(key != null);
   }

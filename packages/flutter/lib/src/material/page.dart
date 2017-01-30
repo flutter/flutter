@@ -20,7 +20,7 @@ class _MountainViewPageTransition extends AnimatedWidget {
   _MountainViewPageTransition({
     Key key,
     Animation<double> animation,
-    this.child
+    this.child,
   }) : super(
     key: key,
     animation: _kTween.animate(new CurvedAnimation(
