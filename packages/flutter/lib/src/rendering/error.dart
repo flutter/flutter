@@ -45,7 +45,8 @@ class RenderErrorBox extends RenderBox {
         builder.pushStyle(textStyle);
         builder.addText(
           '$message$line$message$line$message$line$message$line$message$line$message$line'
-          '$message$line$message$line$message$line$message$line$message$line$message');
+          '$message$line$message$line$message$line$message$line$message$line$message'
+        );
         _paragraph = builder.build();
       }
     } catch (e) { }
