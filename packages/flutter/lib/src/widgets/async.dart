@@ -27,10 +27,10 @@ import 'dart:async' show Future, Stream, StreamSubscription;
 /// items and errors received from the stream along with pseudo-events
 /// representing termination or change of stream. The initial summary is
 /// specified by sub-classes by overriding [initial]. The summary updates on
-/// receipt of stream data and errors are specified by overriding [onData] and
-/// [onError], respectively. If needed, the summary may be updated on stream
-/// termination by overriding [onDone]. Finally, the summary may be updated
-/// on change of stream by overriding [onConnected] and [onDisconnected].
+/// receipt of stream data and errors are specified by overriding [afterData] and
+/// [afterError], respectively. If needed, the summary may be updated on stream
+/// termination by overriding [afterDone]. Finally, the summary may be updated
+/// on change of stream by overriding [afterConnected] and [afterConnected].
 ///
 /// [T] is the type of stream events.
 /// [S] is the type of interaction summary.
@@ -45,8 +45,8 @@ abstract class StreamBuilderBase<T, S> extends StatefulWidget {
 
   /// The asynchronous computation to which this builder is currently connected,
   /// possibly `null`. When changed, the current summary is updated using
-  /// [onDisconnecting], if the previous stream was not `null`, followed by
-  /// [onConnecting], if the new stream is not `null`.
+  /// [afterDisconnecting], if the previous stream was not `null`, followed by
+  /// [afterConnecting], if the new stream is not `null`.
   final Stream<T> stream;
 
   /// Returns the initial summary of stream interaction, typically representing
