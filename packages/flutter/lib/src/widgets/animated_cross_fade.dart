@@ -45,8 +45,8 @@ class AnimatedCrossFade extends StatefulWidget {
   /// order to have finer control, e.g., creating an overlap between the fades.
   AnimatedCrossFade({
     Key key,
-    this.firstChild,
-    this.secondChild,
+    @required this.firstChild,
+    @required this.secondChild,
     this.firstCurve: Curves.linear,
     this.secondCurve: Curves.linear,
     this.sizeCurve: Curves.linear,

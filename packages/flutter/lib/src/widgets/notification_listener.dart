@@ -72,7 +72,7 @@ class NotificationListener<T extends Notification> extends StatelessWidget {
   /// Creates a widget that listens for notifications.
   NotificationListener({
     Key key,
-    this.child,
+    @required this.child,
     this.onNotification
   }) : super(key: key);
 

@@ -1071,7 +1071,7 @@ abstract class State<T extends StatefulWidget> {
 /// [ParentDataWidget].
 abstract class ProxyWidget extends Widget {
   /// Creates a widget that has exactly one child widget.
-  const ProxyWidget({ Key key, this.child }) : super(key: key);
+  const ProxyWidget({ Key key, @required this.child }) : super(key: key);
 
   /// The widget below this widget in the tree.
   final Widget child;
