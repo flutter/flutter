@@ -7,32 +7,30 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
 
 void main() {
-  testWidgets('ScrollableGrid default control', (WidgetTester tester) async {
-    await tester.pumpWidget(new Center(child: new ScrollableGrid(
-      delegate: new FixedColumnCountGridDelegate(columnCount: 1),
-    )));
+  testWidgets('ScrollGrid default control', (WidgetTester tester) async {
+    await tester.pumpWidget(new Center(
+      child: new ScrollGrid.count(
+        crossAxisCount: 1,
+      ),
+    ));
   });
 
   // Tests https://github.com/flutter/flutter/issues/5522
-  testWidgets('ScrollableGrid displays correct children with nonzero padding', (WidgetTester tester) async {
-    GlobalKey<ScrollableState> scrollableKey = new GlobalKey<ScrollableState>();
+  testWidgets('ScrollGrid displays correct children with nonzero padding', (WidgetTester tester) async {
     final EdgeInsets padding = const EdgeInsets.fromLTRB(0.0, 100.0, 0.0, 0.0);
 
     Widget testWidget = new Align(
       child: new SizedBox(
         height: 800.0,
         width: 300.0,  // forces the grid children to be 300..300
-        child: new ScrollableGrid(
-          scrollableKey: scrollableKey,
-          delegate: new FixedColumnCountGridDelegate(
-            columnCount: 1,
-            padding: padding
-          ),
+        child: new ScrollGrid.count(
+          crossAxisCount: 1,
+          padding: padding,
           children: new List<Widget>.generate(10, (int index) {
             return new Text('$index', key: new ValueKey<int>(index));
-          })
-        )
-      )
+          }).toList(),
+        ),
+      ),
     );
 
     await tester.pumpWidget(testWidget);

@@ -203,14 +203,12 @@ class GridLists {
 // START gridlists
 // Creates a scrollable grid list with images
 // loaded from the web.
-new ScrollableGrid(
-  delegate: new FixedColumnCountGridDelegate(
-    columnCount: 3,
-    tileAspectRatio: 1.0,
-    padding: const EdgeInsets.all(4.0),
-    columnSpacing: 4.0,
-    rowSpacing: 4.0
-  ),
+new ScrollGrid.count(
+  crossAxisCount: 3,
+  childAspectRatio: 1.0,
+  padding: const EdgeInsets.all(4.0),
+  mainAxisSpacing: 4.0,
+  crossAxisSpacing: 4.0,
   children: <String>[
     'https://example.com/image-0.jpg',
     'https://example.com/image-1.jpg',
@@ -224,7 +222,7 @@ new ScrollableGrid(
       ),
       child: new Image.network(url, fit: ImageFit.cover)
     );
-  })
+  }).toList(),
 );
 // END
   }
