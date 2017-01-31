@@ -50,8 +50,7 @@ bool VulkanNativeSurfaceMagma::IsValid() const {
 }
 
 SkISize VulkanNativeSurfaceMagma::GetSize() const {
-  // See comment in VulkanWindow::AcquireSurface.
-  return SkISize::Make(0, 0);
+  return SkISize::Make(2160, 1440);
 }
 
 }  // namespace vulkan
