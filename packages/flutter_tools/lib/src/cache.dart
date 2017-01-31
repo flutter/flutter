@@ -273,6 +273,10 @@ class FlutterEngine {
         ..addAll(_osxBinaryDirs)
         ..addAll(_androidBinaryDirs)
         ..addAll(_iosBinaryDirs);
+    else if (platform.isWindows)
+      binaryDirs
+        ..addAll(_windowsBinaryDirs)
+        ..addAll(_androidBinaryDirs);
 
     return binaryDirs;
   }
@@ -287,6 +291,11 @@ class FlutterEngine {
     <String>['linux-x64', 'linux-x64/artifacts.zip'],
     <String>['android-arm-profile/linux-x64', 'android-arm-profile/linux-x64.zip'],
     <String>['android-arm-release/linux-x64', 'android-arm-release/linux-x64.zip'],
+  ];
+
+  List<List<String>> get _windowsBinaryDirs => <List<String>>[
+    <String>['android-arm-profile/windows-x64', 'android-arm-profile/windows-x64.zip'],
+    <String>['android-arm-release/windows-x64', 'android-arm-release/windows-x64.zip'],
   ];
 
   List<List<String>> get _androidBinaryDirs => <List<String>>[
