@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' as ui show Paragraph;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -182,6 +184,15 @@ abstract class PaintPattern {
   /// [Canvas.drawLine] call are ignored.
   void line({ Color color, bool hasMaskFilter, PaintingStyle style });
 
+  /// Indicates that a paragraph is expected next.
+  ///
+  /// Calls are skipped until a call to [Canvas.drawParagraph] is found. Any
+  /// arguments that are passed to this method are compared to the actual
+  /// [Canvas.drawParagraph] call's argument, and any mismatches result in failure.
+  ///
+  /// If no call to [Canvas.drawParagraph] was made, then this results in failure.
+  void paragraph({ ui.Paragraph paragraph, Offset offset });
+
   /// Provides a custom matcher.
   ///
   /// Each method call after the last matched call (if any) will be passed to
@@ -267,6 +278,11 @@ class _TestRecordingCanvasPatternMatcher extends Matcher implements PaintPattern
   @override
   void line({ Color color, bool hasMaskFilter, PaintingStyle style }) {
     _predicates.add(new _LinePaintPredicate(color: color, hasMaskFilter: hasMaskFilter, style: style));
+  }
+
+  @override
+  void paragraph({ ui.Paragraph paragraph, Offset offset }) {
+    _predicates.add(new _FunctionPaintPredicate(#drawParagraph, <dynamic>[paragraph, offset]));
   }
 
   @override
