@@ -92,6 +92,7 @@ class ComplexLayoutState extends State<ComplexLayout> {
         children: <Widget>[
           new Expanded(
             child: new LazyBlock(
+              key: new Key('main-scroll'),
               delegate: new FancyItemDelegate(),
             )
           ),
