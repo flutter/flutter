@@ -595,8 +595,7 @@ Future<Null> buildAndroidWithGradle(
   String target
 }) async {
   if (platform != TargetPlatform.android_arm && buildMode != BuildMode.debug) {
-    throwToolExit(
-        'Profile and release builds are only supported on ARM targets.');
+    throwToolExit('Profile and release builds are only supported on ARM targets.');
   }
   // Validate that we can find an android sdk.
   if (androidSdk == null)

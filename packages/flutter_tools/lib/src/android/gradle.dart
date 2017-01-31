@@ -165,9 +165,8 @@ Future<String> ensureGradlew() async {
     }
 
     gradlew = locateProjectGradlew();
-    if (gradlew == null) {
+    if (gradlew == null)
       throwToolExit('Unable to build android/gradlew.');
-    }
   }
 
   return gradlew;
@@ -213,9 +212,8 @@ Future<Null> buildGradleProjectV1(String gradlew) async {
   );
   status.stop();
 
-  if (exitcode != 0) {
+  if (exitcode != 0)
     throwToolExit('Gradlew failed: $exitcode', exitCode: exitcode);
-  }
 
   File apkFile = fs.file(gradleAppOutV1);
   printStatus('Built $gradleAppOutV1 (${getSizeAsMB(apkFile.lengthSync())}).');
@@ -237,9 +235,8 @@ Future<Null> buildGradleProjectV2(String gradlew, String buildModeName) async {
   );
   status.stop();
 
-  if (exitcode != 0) {
+  if (exitcode != 0)
     throwToolExit('Gradlew failed: $exitcode', exitCode: exitcode);
-  }
 
   String apkFilename = 'app-$buildModeName.apk';
   File apkFile = fs.file('$gradleAppOutDir/$apkFilename');
