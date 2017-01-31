@@ -92,7 +92,7 @@ class ComplexLayoutState extends State<ComplexLayout> {
         children: <Widget>[
           new Expanded(
             child: new LazyBlock(
-              key: new Key('main-scroll'),
+              key: new Key('main-scroll'), // this key is used by the driver test
               delegate: new FancyItemDelegate(),
             )
           ),
