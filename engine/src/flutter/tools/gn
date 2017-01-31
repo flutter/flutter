@@ -36,6 +36,14 @@ def to_command_line(gn_args):
         return '%s="%s"' % (key, value)
     return [merge(x, y) for x, y in gn_args.iteritems()]
 
+def cpu_for_target_arch(arch):
+  if arch in ['ia32', 'arm', 'armv6', 'armv5te', 'mips',
+              'simarm', 'simarmv6', 'simarmv5te', 'simmips', 'simdbc',
+              'armsimdbc']:
+    return 'x86'
+  if arch in ['x64', 'arm64', 'simarm64', 'simdbc64', 'armsimdbc64']:
+    return 'x64'
+
 def to_gn_args(args):
     if args.simulator:
         if args.target_os == 'android':
@@ -58,8 +66,6 @@ def to_gn_args(args):
     gn_args['is_debug'] = args.unoptimized
     gn_args['android_full_debug'] = args.target_os == 'android' and args.unoptimized
     gn_args['is_clang'] = not sys.platform.startswith(('cygwin', 'win'))
-
-    ios_target_cpu = 'arm64'
 
     aot = args.runtime_mode != 'debug'
     if args.target_os == 'android':
@@ -90,6 +96,13 @@ def to_gn_args(args):
     gn_args['flutter_aot'] = aot
     if aot:
         gn_args['dart_target_arch'] = gn_args['target_cpu']
+
+    # No cross-compilation on Windows (for now).
+    if sys.platform.startswith(('cygwin', 'win')):
+      if 'target_os' in gn_args:
+        gn_args['target_os'] = 'win'
+      if 'target_cpu' in gn_args:
+        gn_args['target_cpu'] = cpu_for_target_arch(gn_args['target_cpu'])
 
     # On iOS Devices, use the Dart bytecode interpreter so we don't incur
     # snapshotting and linking costs of the precompiler during development.
