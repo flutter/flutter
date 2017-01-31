@@ -126,13 +126,13 @@ class _StreamBuilderBaseState<T, S> extends State<StreamBuilderBase<T, S>> {
 
   void _subscribe() {
     if (config.stream != null) {
-      _subscription = config.stream.listen((T event) {
+      _subscription = config.stream.listen((T data) {
         setState(() {
-          _summary = config.afterData(_summary, event);
+          _summary = config.afterData(_summary, data);
         });
-      }, onError: (Object e) {
+      }, onError: (Object error) {
         setState(() {
-          _summary = config.afterError(_summary, e);
+          _summary = config.afterError(_summary, error);
         });
       }, onDone: () {
         setState(() {
