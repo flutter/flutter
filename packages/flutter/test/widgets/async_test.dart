@@ -244,7 +244,7 @@ Future<Null> eventFiring(WidgetTester tester) async {
   await tester.pump(const Duration(milliseconds: 0));
 }
 
-class StringFold extends StreamFold<String, List<String>> {
+class StringFold extends StreamBuilderBase<String, List<String>> {
   StringFold({Key key, Stream<String> stream})
       : super(key: key, stream: stream);
 
@@ -252,21 +252,21 @@ class StringFold extends StreamFold<String, List<String>> {
   List<String> initial() => <String>[];
 
   @override
-  List<String> onConnecting(List<String> current) => current..add('conn');
+  List<String> afterConnected(List<String> current) => current..add('conn');
 
   @override
-  List<String> onData(List<String> current, String data) =>
+  List<String> afterData(List<String> current, String data) =>
       current..add('data:$data');
 
   @override
-  List<String> onError(List<String> current, dynamic error) =>
+  List<String> afterError(List<String> current, dynamic error) =>
       current..add('error:$error');
 
   @override
-  List<String> onDone(List<String> current) => current..add('done');
+  List<String> afterDone(List<String> current) => current..add('done');
 
   @override
-  List<String> onDisconnecting(List<String> current) => current..add('disc');
+  List<String> afterDisconnected(List<String> current) => current..add('disc');
 
   @override
   Widget build(BuildContext context, List<String> currentSummary) =>
