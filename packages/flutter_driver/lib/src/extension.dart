@@ -187,7 +187,7 @@ class _FlutterDriverExtension {
     }, description: 'widget with text tooltip "${arguments.text}"');
   }
 
-  Finder _createByValueKeyFinder(ByValueKey<dynamic> arguments) {
+  Finder _createByValueKeyFinder(ByValueKey arguments) {
     switch (arguments.keyValueType) {
       case 'int':
         return find.byKey(new ValueKey<int>(arguments.keyValue));
