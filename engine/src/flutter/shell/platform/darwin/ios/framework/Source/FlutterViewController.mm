@@ -271,6 +271,11 @@ static inline PointerChangeMapperPhase PointerChangePhaseFromUITouchPhase(
 }
 
 - (void)dispatchTouches:(NSSet*)touches phase:(UITouchPhase)phase {
+  // Note: we cannot rely on touch.phase, since in some cases, e.g.,
+  // handleStatusBarTouches, we synthesize touches from existing events.
+  //
+  // TODO(cbracken) consider creating out own class with the touch fields we
+  // need.
   auto eventTypePhase = PointerChangePhaseFromUITouchPhase(phase);
   const CGFloat scale = [UIScreen mainScreen].scale;
   auto packet = std::make_unique<blink::PointerDataPacket>(touches.count);
@@ -496,6 +501,34 @@ static inline PointerChangeMapperPhase PointerChangePhaseFromUITouchPhase(
 - (void)dealloc {
   [[NSNotificationCenter defaultCenter] removeObserver:self];
   [super dealloc];
+}
+
+#pragma mark - Status Bar touch event handling
+
+// Standard iOS status bar height in pixels.
+constexpr CGFloat kStandardStatusBarHeight = 20.0;
+
+- (void)handleStatusBarTouches:(UIEvent *)event {
+  // If the status bar is double-height, don't handle status bar taps. iOS
+  // should open the app associated with the status bar.
+  CGRect statusBarFrame = [UIApplication sharedApplication].statusBarFrame;
+  if (statusBarFrame.size.height != kStandardStatusBarHeight) {
+    return;
+  }
+
+  // If we detect a touch in the status bar, synthesize a fake touch begin/end.
+  for (UITouch *touch in event.allTouches) {
+    if (touch.phase == UITouchPhaseBegan && touch.tapCount > 0) {
+      CGPoint windowLoc = [touch locationInView:nil];
+      CGPoint screenLoc = [touch.window convertPoint:windowLoc toWindow:nil];
+      if (CGRectContainsPoint(statusBarFrame, screenLoc)) {
+        NSSet *statusbarTouches = [NSSet setWithObject:touch];
+        [self dispatchTouches:statusbarTouches phase:UITouchPhaseBegan];
+        [self dispatchTouches:statusbarTouches phase:UITouchPhaseEnded];
+        return;
+      }
+    }
+  }
 }
 
 #pragma mark - Status bar style
