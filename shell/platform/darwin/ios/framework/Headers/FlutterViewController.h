@@ -5,8 +5,8 @@
 #ifndef FLUTTER_FLUTTERVIEWCONTROLLER_H_
 #define FLUTTER_FLUTTERVIEWCONTROLLER_H_
 
-#include <sys/cdefs.h>
 #import <UIKit/UIKit.h>
+#include <sys/cdefs.h>
 
 #include "FlutterAsyncMessageListener.h"
 #include "FlutterDartProject.h"
@@ -24,23 +24,27 @@ FLUTTER_EXPORT
 - (void)sendString:(NSString*)message withMessageName:(NSString*)messageName;
 
 - (void)sendString:(NSString*)message
-   withMessageName:(NSString*)messageName
-          callback:(void (^)(NSString*))callback;
+    withMessageName:(NSString*)messageName
+           callback:(void (^)(NSString*))callback;
 
 - (void)addMessageListener:(NSObject<FlutterMessageListener>*)listener;
 
 - (void)removeMessageListener:(NSObject<FlutterMessageListener>*)listener;
 
-- (void)addAsyncMessageListener:(NSObject<FlutterAsyncMessageListener>*)listener;
+- (void)addAsyncMessageListener:
+    (NSObject<FlutterAsyncMessageListener>*)listener;
 
-- (void)removeAsyncMessageListener:(NSObject<FlutterAsyncMessageListener>*)listener;
+- (void)removeAsyncMessageListener:
+    (NSObject<FlutterAsyncMessageListener>*)listener;
 
 @end
 
 __BEGIN_DECLS
 
 // Initializes Flutter for this process. Need only be called once per process.
-FLUTTER_EXPORT void FlutterInit(int argc, const char* argv[]);
+FLUTTER_EXPORT void FlutterInit(int argc, const char* argv[])
+    __attribute__((deprecated("This call is no longer necessary and will be "
+                              "removed in an upcoming release.")));
 
 __END_DECLS
 

@@ -50,11 +50,22 @@ static void RedirectIOConnectionsToSyslog() {
 #endif
 }
 
+static void InitializeCommandLine() {
+  base::mac::ScopedNSAutoreleasePool pool;
+  base::CommandLine::StringVector vector;
+
+  for (NSString* arg in [NSProcessInfo processInfo].arguments) {
+    vector.emplace_back(arg.UTF8String);
+  }
+
+  base::CommandLine::Init(0, nullptr);
+  base::CommandLine& command_line = *base::CommandLine::ForCurrentProcess();
+  command_line.InitFromArgv(vector);
+}
+
 class EmbedderState {
  public:
-  EmbedderState(int argc,
-                const char* argv[],
-                std::string icu_data_path,
+  EmbedderState(std::string icu_data_path,
                 std::string application_library_path) {
 #if TARGET_OS_IPHONE
     // This calls crashes on MacOS because we haven't run Dart_Initialize yet.
@@ -64,7 +75,7 @@ class EmbedderState {
     CHECK([NSThread isMainThread])
         << "Embedder initialization must occur on the main platform thread";
 
-    base::CommandLine::Init(argc, argv);
+    InitializeCommandLine();
 
     RedirectIOConnectionsToSyslog();
 
@@ -109,16 +120,14 @@ class EmbedderState {
   FTL_DISALLOW_COPY_AND_ASSIGN(EmbedderState);
 };
 
-void PlatformMacMain(int argc,
-                     const char* argv[],
-                     std::string icu_data_path,
+void PlatformMacMain(std::string icu_data_path,
                      std::string application_library_path) {
   static std::unique_ptr<EmbedderState> g_embedder;
   static std::once_flag once_main;
 
   std::call_once(once_main, [&]() {
-    g_embedder = WTF::MakeUnique<EmbedderState>(argc, argv, icu_data_path,
-                                                application_library_path);
+    g_embedder =
+        WTF::MakeUnique<EmbedderState>(icu_data_path, application_library_path);
   });
 }
 

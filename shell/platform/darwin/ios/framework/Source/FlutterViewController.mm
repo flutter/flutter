@@ -56,11 +56,15 @@ class PlatformMessageResponseDarwin : public blink::PlatformMessageResponse {
 @end
 
 void FlutterInit(int argc, const char* argv[]) {
+  // Deprecated. To be removed.
+}
+
+static void FlutterInitShell() {
   NSBundle* bundle = [NSBundle bundleForClass:[FlutterViewController class]];
   NSString* icuDataPath = [bundle pathForResource:@"icudtl" ofType:@"dat"];
   NSString* libraryName =
       [[NSBundle mainBundle] objectForInfoDictionaryKey:@"FLTLibraryPath"];
-  shell::PlatformMacMain(argc, argv, icuDataPath.UTF8String,
+  shell::PlatformMacMain(icuDataPath.UTF8String,
                          libraryName != nil ? libraryName.UTF8String : "");
 }
 
@@ -82,6 +86,8 @@ void FlutterInit(int argc, const char* argv[]) {
 - (instancetype)initWithProject:(FlutterDartProject*)project
                         nibName:(NSString*)nibNameOrNil
                          bundle:(NSBundle*)nibBundleOrNil {
+  FlutterInitShell();
+
   self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
 
   if (self) {
@@ -111,6 +117,7 @@ void FlutterInit(int argc, const char* argv[]) {
 - (void)performCommonViewControllerInitialization {
   if (_initialized)
     return;
+
   _initialized = YES;
 
   _orientationPreferences = UIInterfaceOrientationMaskAll;
@@ -342,7 +349,7 @@ static inline PointerChangeMapperPhase PointerChangePhaseFromUITouchPhase(
 }
 
 - (bool)isWindowFullscreen {
-  UIWindow *window = self.view.window;
+  UIWindow* window = self.view.window;
   return CGRectEqualToRect(window.frame, window.screen.bounds);
 }
 
@@ -357,11 +364,12 @@ static inline PointerChangeMapperPhase PointerChangePhaseFromUITouchPhase(
     return 0.0;
   }
 
-  UIScreen *screen = self.view.window.screen;
+  UIScreen* screen = self.view.window.screen;
   CGRect statusFrame = [UIApplication sharedApplication].statusBarFrame;
   CGRect viewFrame = [self.view convertRect:self.view.bounds
                           toCoordinateSpace:screen.coordinateSpace];
-  CGFloat padding = statusFrame.origin.y + statusFrame.size.height - viewFrame.origin.y;
+  CGFloat padding =
+      statusFrame.origin.y + statusFrame.size.height - viewFrame.origin.y;
   return MAX(padding, 0.0);
 }
 
