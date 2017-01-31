@@ -545,4 +545,41 @@ void main() {
     await tester.pump(const Duration(seconds: 1)); // finish the scroll animation
   });
 
+  testWidgets('TabBar unselectedLabelColor control test', (WidgetTester tester) async {
+    TabController controller = new TabController(
+      vsync: const TestVSync(),
+      length: 2,
+    );
+
+    Color firstColor;
+    Color secondColor;
+
+    await tester.pumpWidget(
+      new Material(
+        child: new TabBar(
+          controller: controller,
+          labelColor: Colors.green[500],
+          unselectedLabelColor: Colors.blue[500],
+          tabs: <Widget>[
+            new Builder(
+              builder: (BuildContext context) {
+                firstColor = IconTheme.of(context).color;
+                return new Text('First');
+              }
+            ),
+            new Builder(
+              builder: (BuildContext context) {
+                secondColor = IconTheme.of(context).color;
+                return new Text('Second');
+              }
+            ),
+          ],
+        ),
+      ),
+    );
+
+    expect(firstColor, equals(Colors.green[500]));
+    expect(secondColor, equals(Colors.blue[500]));
+  });
+
 }

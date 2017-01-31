@@ -108,11 +108,13 @@ class _TabStyle extends AnimatedWidget {
     Animation<double> animation,
     this.selected,
     this.labelColor,
+    this.unselectedLabelColor,
     this.child
   }) : super(key: key, animation: animation);
 
   final bool selected;
   final Color labelColor;
+  final Color unselectedLabelColor;
   final Widget child;
 
   @override
@@ -120,7 +122,7 @@ class _TabStyle extends AnimatedWidget {
     final ThemeData themeData = Theme.of(context);
     final TextStyle textStyle = themeData.primaryTextTheme.body2;
     final Color selectedColor = labelColor ?? themeData.primaryTextTheme.body2.color;
-    final Color unselectedColor = selectedColor.withAlpha(0xB2); // 70% alpha
+    final Color unselectedColor = unselectedLabelColor ?? selectedColor.withAlpha(0xB2); // 70% alpha
     final Color color = selected
       ? Color.lerp(unselectedColor, selectedColor, animation.value)
       : Color.lerp(selectedColor, unselectedColor, animation.value);
@@ -325,6 +327,7 @@ class TabBar extends StatefulWidget implements AppBarBottomWidget {
     this.isScrollable: false,
     this.indicatorColor,
     this.labelColor,
+    this.unselectedLabelColor,
   }) : super(key: key) {
     assert(tabs != null && tabs.length > 1);
     assert(isScrollable != null);
@@ -350,10 +353,20 @@ class TabBar extends StatefulWidget implements AppBarBottomWidget {
   /// is null then the value of the Theme's indicatorColor property is used.
   final Color indicatorColor;
 
-  /// The color of selected tab labels. Unselected tab labels are rendered
-  /// with the same color rendered at 70% opacity. If this parameter is null then
-  /// the color of the theme's body2 text color is used.
+  /// The color of selected tab labels.
+  ///
+  /// Unselected tab labels are rendered with the same color rendered at 70%
+  /// opacity unless [unselectedLabelColor] is non-null.
+  ///
+  /// If this parameter is null then the color of the theme's body2 text color
+  /// is used.
   final Color labelColor;
+
+  /// The color of unselected tab labels.
+  ///
+  /// If this property is null, Unselected tab labels are rendered with the
+  /// [labelColor] rendered at 70% opacity.
+  final Color unselectedLabelColor;
 
   @override
   double get bottomHeight {
@@ -518,12 +531,14 @@ class _TabBarState extends State<TabBar> {
           animation: _changeAnimation,
           selected: true,
           labelColor: config.labelColor,
+          unselectedLabelColor: config.unselectedLabelColor,
           child: wrappedTabs[_currentIndex],
         );
         wrappedTabs[previousIndex] = new _TabStyle(
           animation: _changeAnimation,
           selected: false,
           labelColor: config.labelColor,
+          unselectedLabelColor: config.unselectedLabelColor,
           child: wrappedTabs[previousIndex],
         );
       } else {
@@ -531,6 +546,7 @@ class _TabBarState extends State<TabBar> {
           animation: kAlwaysCompleteAnimation,
           selected: true,
           labelColor: config.labelColor,
+          unselectedLabelColor: config.unselectedLabelColor,
           child: wrappedTabs[_currentIndex],
         );
       }
@@ -556,6 +572,7 @@ class _TabBarState extends State<TabBar> {
           animation: kAlwaysCompleteAnimation,
           selected: false,
           labelColor: config.labelColor,
+          unselectedLabelColor: config.unselectedLabelColor,
           child: new _TabLabelBar(
             onPerformLayout: _saveTabOffsets,
             children:  wrappedTabs,
