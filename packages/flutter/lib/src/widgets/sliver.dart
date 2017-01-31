@@ -10,6 +10,11 @@ import 'package:flutter/rendering.dart';
 import 'framework.dart';
 import 'basic.dart';
 
+export 'package:flutter/rendering.dart' show
+  SliverGridDelegate,
+  SliverGridDelegateWithFixedCrossAxisCount,
+  SliverGridDelegateWithMaxCrossAxisExtent;
+
 abstract class SliverChildDelegate {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
@@ -17,24 +22,23 @@ abstract class SliverChildDelegate {
 
   Widget build(BuildContext context, int index);
 
-  bool shouldRebuild(@checked SliverChildDelegate oldDelegate);
+  /// Returns an estimate of the number of children this delegate will build.
+  ///
+  /// Used to estimate the maximum scroll offset if [estimateMaxScrollOffset]
+  /// returns null.
+  ///
+  /// Return null if there are an unbounded number of children or if it would
+  /// be too difficult to estimate the number of children.
+  int get estimatedChildCount => null;
 
-  int get childCount;
-
-  double estimateScrollOffsetExtent(
+  double estimateMaxScrollOffset(
     int firstIndex,
     int lastIndex,
     double leadingScrollOffset,
     double trailingScrollOffset,
-  ) {
-    final int childCount = this.childCount;
-    if (lastIndex == childCount - 1)
-      return trailingScrollOffset;
-    final int reifiedCount = lastIndex - firstIndex + 1;
-    final double averageExtent = (trailingScrollOffset - leadingScrollOffset) / reifiedCount;
-    final int remainingCount = childCount - lastIndex - 1;
-    return trailingScrollOffset + averageExtent * remainingCount;
-  }
+  ) => null;
+
+  bool shouldRebuild(@checked SliverChildDelegate oldDelegate);
 }
 
 // ///
@@ -65,12 +69,12 @@ class SliverChildListDelegate extends SliverChildDelegate {
   }
 
   @override
+  int get estimatedChildCount => children.length;
+
+  @override
   bool shouldRebuild(@checked SliverChildListDelegate oldDelegate) {
     return children != oldDelegate.children;
   }
-
-  @override
-  int get childCount => children.length;
 }
 
 abstract class SliverMultiBoxAdaptorWidget extends RenderObjectWidget {
@@ -88,6 +92,22 @@ abstract class SliverMultiBoxAdaptorWidget extends RenderObjectWidget {
 
   @override
   RenderSliverMultiBoxAdaptor createRenderObject(BuildContext context);
+
+  double estimateMaxScrollOffset(
+    SliverConstraints constraints,
+    int firstIndex,
+    int lastIndex,
+    double leadingScrollOffset,
+    double trailingScrollOffset,
+  ) {
+    assert(lastIndex >= firstIndex);
+    return delegate.estimateMaxScrollOffset(
+      firstIndex,
+      lastIndex,
+      leadingScrollOffset,
+      trailingScrollOffset,
+    );
+  }
 
   @override
   void debugFillDescription(List<String> description) {
@@ -127,6 +147,44 @@ class SliverList extends SliverMultiBoxAdaptorWidget {
   @override
   void updateRenderObject(BuildContext context, RenderSliverList renderObject) {
     renderObject.itemExtent = itemExtent;
+  }
+}
+
+class SliverGrid extends SliverMultiBoxAdaptorWidget {
+  SliverGrid({
+    Key key,
+    @required SliverChildDelegate delegate,
+    @required this.gridDelegate,
+  }) : super(key: key, delegate: delegate);
+
+  final SliverGridDelegate gridDelegate;
+
+  @override
+  RenderSliverGrid createRenderObject(BuildContext context) {
+    final SliverMultiBoxAdaptorElement element = context;
+    return new RenderSliverGrid(childManager: element, gridDelegate: gridDelegate);
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, RenderSliverGrid renderObject) {
+    renderObject.gridDelegate = gridDelegate;
+  }
+
+  @override
+  double estimateMaxScrollOffset(
+    SliverConstraints constraints,
+    int firstIndex,
+    int lastIndex,
+    double leadingScrollOffset,
+    double trailingScrollOffset,
+  ) {
+    return super.estimateMaxScrollOffset(
+      constraints,
+      firstIndex,
+      lastIndex,
+      leadingScrollOffset,
+      trailingScrollOffset,
+    ) ?? gridDelegate.estimateMaxScrollOffset(constraints, delegate.estimatedChildCount);
   }
 }
 
@@ -241,19 +299,41 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
     });
   }
 
+  double _extrapolateMaxScrollOffset(
+    int firstIndex,
+    int lastIndex,
+    double leadingScrollOffset,
+    double trailingScrollOffset,
+  ) {
+    final int childCount = widget.delegate.estimatedChildCount;
+    if (childCount == null)
+      return double.INFINITY;
+    if (lastIndex == childCount - 1)
+      return trailingScrollOffset;
+    final int reifiedCount = lastIndex - firstIndex + 1;
+    final double averageExtent = (trailingScrollOffset - leadingScrollOffset) / reifiedCount;
+    final int remainingCount = childCount - lastIndex - 1;
+    return trailingScrollOffset + averageExtent * remainingCount;
+  }
+
   @override
-  double estimateScrollOffsetExtent({
+  double estimateMaxScrollOffset(SliverConstraints constraints, {
     int firstIndex,
     int lastIndex,
     double leadingScrollOffset,
     double trailingScrollOffset,
   }) {
-    assert(lastIndex >= firstIndex);
-    return widget.delegate.estimateScrollOffsetExtent(
+    return widget.estimateMaxScrollOffset(
+      constraints,
       firstIndex,
       lastIndex,
       leadingScrollOffset,
-      trailingScrollOffset
+      trailingScrollOffset,
+    ) ?? _extrapolateMaxScrollOffset(
+      firstIndex,
+      lastIndex,
+      leadingScrollOffset,
+      trailingScrollOffset,
     );
   }
 
