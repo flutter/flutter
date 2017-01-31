@@ -91,7 +91,7 @@ class Container extends StatelessWidget {
     BoxConstraints constraints,
     this.margin,
     this.transform,
-    this.child
+    this.child,
   }) : constraints =
         (width != null || height != null)
           ? constraints?.tighten(width: width, height: height)

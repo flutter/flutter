@@ -333,7 +333,7 @@ class _ModalScopeStatus extends InheritedWidget {
     Key key,
     this.isCurrent,
     this.route,
-    Widget child
+    @required Widget child
   }) : super(key: key, child: child) {
     assert(isCurrent != null);
     assert(route != null);
@@ -366,7 +366,7 @@ class _ModalScope extends StatefulWidget {
   _ModalScope({
     Key key,
     this.route,
-    this.page
+    @required this.page,
   }) : super(key: key);
 
   final ModalRoute<dynamic> route;

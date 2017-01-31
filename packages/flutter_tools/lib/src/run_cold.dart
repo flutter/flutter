@@ -24,7 +24,7 @@ class ColdRunner extends ResidentRunner {
     bool usesTerminalUI: true,
     this.traceStartup: false,
     this.applicationBinary,
-    bool stayResident,
+    bool stayResident: true,
   }) : super(device,
              target: target,
              debuggingOptions: debuggingOptions,

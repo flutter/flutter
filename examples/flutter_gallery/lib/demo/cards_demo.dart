@@ -21,8 +21,8 @@ final List<TravelDestination> destinations = <TravelDestination>[
     description: const <String>[
       'Number 10',
       'Whitehaven Beach',
-      'Whitsunday Island, Whitsunday Islands'
-    ]
+      'Whitsunday Island, Whitsunday Islands',
+    ],
   ),
   const TravelDestination(
     assetName: 'packages/flutter_gallery_assets/kangaroo_valley_safari.jpg',
@@ -30,8 +30,8 @@ final List<TravelDestination> destinations = <TravelDestination>[
     description: const <String>[
       '2031 Moss Vale Road',
       'Kangaroo Valley 2577',
-      'New South Wales'
-    ]
+      'New South Wales',
+    ],
   )
 ];
 
@@ -63,8 +63,8 @@ class TravelDestinationItem extends StatelessWidget {
                   new Positioned.fill(
                     child: new Image.asset(
                       destination.assetName,
-                      fit: ImageFit.cover
-                    )
+                      fit: ImageFit.cover,
+                    ),
                   ),
                   new Positioned(
                     bottom: 16.0,
@@ -78,8 +78,8 @@ class TravelDestinationItem extends StatelessWidget {
                       ),
                     ),
                   ),
-                ]
-              )
+                ],
+              ),
             ),
             // description and share/expore buttons
             new Expanded(
@@ -96,10 +96,10 @@ class TravelDestinationItem extends StatelessWidget {
                       new Text(destination.description[0]),
                       new Text(destination.description[1]),
                       new Text(destination.description[2]),
-                    ]
-                  )
-                )
-              )
+                    ],
+                  ),
+                ),
+              ),
             ),
             // share, explore buttons
             // TODO(abarth): The theme and the bar should be part of card.
@@ -109,18 +109,18 @@ class TravelDestinationItem extends StatelessWidget {
                 children: <Widget>[
                   new FlatButton(
                     child: new Text('SHARE'),
-                    onPressed: () { /* do nothing */ }
+                    onPressed: () { /* do nothing */ },
                   ),
                   new FlatButton(
                     child: new Text('EXPLORE'),
-                    onPressed: () { /* do nothing */ }
+                    onPressed: () { /* do nothing */ },
                   ),
-                ]
-              )
+                ],
+              ),
             ),
-          ]
-        )
-      )
+          ],
+        ),
+      ),
     );
   }
 }
@@ -134,7 +134,7 @@ class CardsDemo extends StatelessWidget {
       appBar: new AppBar(
         title: new Text('Travel stream')
       ),
-      body: new ScrollableList(
+      body: new ScrollView(
         itemExtent: TravelDestinationItem.height,
         padding: const EdgeInsets.only(top: 8.0, left: 8.0, right: 8.0),
         children: destinations.map((TravelDestination destination) {
@@ -142,8 +142,7 @@ class CardsDemo extends StatelessWidget {
             margin: const EdgeInsets.only(bottom: 8.0),
             child: new TravelDestinationItem(destination: destination)
           );
-        })
-        .toList()
+        }).toList()
       )
     );
   }

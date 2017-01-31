@@ -168,7 +168,7 @@ class CheckedModeBanner extends StatelessWidget {
   /// Creates a checked mode banner.
   CheckedModeBanner({
     Key key,
-    this.child
+    @required this.child
   }) : super(key: key);
 
   /// The widget to show behind the banner.

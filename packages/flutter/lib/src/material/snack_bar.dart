@@ -147,11 +147,11 @@ class SnackBar extends StatelessWidget {
   /// The [content] argument must be non-null.
   SnackBar({
     Key key,
-    this.content,
+    @required this.content,
     this.backgroundColor,
     this.action,
     this.duration: _kSnackBarDisplayDuration,
-    this.animation
+    this.animation,
   }) : super(key: key) {
     assert(content != null);
   }
@@ -203,7 +203,7 @@ class SnackBar extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: _kSingleLineVerticalPadding),
           child: new DefaultTextStyle(
             style: darkTheme.textTheme.subhead,
-            child: content
+            child: content,
           )
         )
       )

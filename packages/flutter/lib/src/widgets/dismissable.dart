@@ -73,7 +73,7 @@ class Dismissable extends StatefulWidget {
   /// according to their keys and avoids this pitfall.
   Dismissable({
     @required Key key,
-    this.child,
+    @required this.child,
     this.background,
     this.secondaryBackground,
     this.onResize,

@@ -108,7 +108,7 @@ class MaterialList extends StatelessWidget {
       onScrollEnd: onScrollEnd,
       itemExtent: kListItemExtent[type],
       padding: const EdgeInsets.symmetric(vertical: 8.0) + padding,
-      children: children
+      children: children,
     );
   }
 }

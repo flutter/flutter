@@ -375,7 +375,7 @@ class AnimatedPositioned extends ImplicitlyAnimatedWidget {
   /// The [curve] and [duration] arguments must not be null.
   AnimatedPositioned({
     Key key,
-    this.child,
+    @required this.child,
     this.left,
     this.top,
     this.right,

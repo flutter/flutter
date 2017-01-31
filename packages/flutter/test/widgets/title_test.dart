@@ -10,6 +10,7 @@ void main() {
     Widget widget = new Title(
       color: const Color(0xFF00FF00),
       title: 'Awesome app',
+      child: new Container(),
     );
     expect(widget.toString, isNot(throwsException));
   });

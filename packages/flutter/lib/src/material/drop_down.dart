@@ -29,7 +29,7 @@ class _DropdownMenuPainter extends CustomPainter {
     Color color,
     int elevation,
     this.selectedIndex,
-    Animation<double> resize
+    Animation<double> resize,
   }) : color = color,
        elevation = elevation,
        resize = resize,
@@ -55,12 +55,12 @@ class _DropdownMenuPainter extends CustomPainter {
     final double selectedItemOffset = selectedIndex * _kMenuItemHeight + _kMenuVerticalPadding.top;
     final Tween<double> top = new Tween<double>(
       begin: selectedItemOffset.clamp(0.0, size.height - _kMenuItemHeight),
-      end: 0.0
+      end: 0.0,
     );
 
     final Tween<double> bottom = new Tween<double>(
       begin: (top.begin + _kMenuItemHeight).clamp(_kMenuItemHeight, size.height),
-      end: size.height
+      end: size.height,
     );
 
     final Rect rect = new Rect.fromLTRB(0.0, top.evaluate(resize), size.width, bottom.evaluate(resize));
@@ -101,7 +101,7 @@ class _DropdownScrollConfigurationDelegate extends ScrollConfigurationDelegate {
 class _DropdownMenu<T> extends StatefulWidget {
   _DropdownMenu({
     Key key,
-    _DropdownRoute<T> route
+    _DropdownRoute<T> route,
   }) : route = route, super(key: key);
 
   final _DropdownRoute<T> route;
@@ -124,12 +124,12 @@ class _DropdownMenuState<T> extends State<_DropdownMenu<T>> {
     _fadeOpacity = new CurvedAnimation(
       parent: config.route.animation,
       curve: const Interval(0.0, 0.25),
-      reverseCurve: const Interval(0.75, 1.0)
+      reverseCurve: const Interval(0.75, 1.0),
     );
     _resize = new CurvedAnimation(
       parent: config.route.animation,
       curve: const Interval(0.25, 0.5),
-      reverseCurve: const Threshold(0.0)
+      reverseCurve: const Threshold(0.0),
     );
   }
 
@@ -160,13 +160,13 @@ class _DropdownMenuState<T> extends State<_DropdownMenu<T>> {
         child: new InkWell(
           child: new Container(
             padding: _kMenuHorizontalPadding,
-            child: route.items[itemIndex]
+            child: route.items[itemIndex],
           ),
           onTap: () => Navigator.pop(
             context,
-            new _DropdownRouteResult<T>(route.items[itemIndex].value)
-          )
-        )
+            new _DropdownRouteResult<T>(route.items[itemIndex].value),
+          ),
+        ),
       ));
     }
 
@@ -177,7 +177,7 @@ class _DropdownMenuState<T> extends State<_DropdownMenu<T>> {
           color: Theme.of(context).canvasColor,
           elevation: route.elevation,
           selectedIndex: route.selectedIndex,
-          resize: _resize
+          resize: _resize,
         ),
         child: new Material(
           type: MaterialType.transparency,
@@ -189,12 +189,12 @@ class _DropdownMenuState<T> extends State<_DropdownMenu<T>> {
                 scrollableKey: config.route.scrollableKey,
                 padding: _kMenuVerticalPadding,
                 itemExtent: _kMenuItemHeight,
-                children: children
-              )
-            )
-          )
-        )
-      )
+                children: children,
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
@@ -220,7 +220,7 @@ class _DropdownMenuRouteLayout<T> extends SingleChildLayoutDelegate {
       minWidth: width,
       maxWidth: width,
       minHeight: 0.0,
-      maxHeight: maxHeight
+      maxHeight: maxHeight,
     );
   }
 
@@ -344,7 +344,7 @@ class DropdownMenuItem<T> extends StatelessWidget {
   DropdownMenuItem({
     Key key,
     this.value,
-    this.child
+    this.child,
   }) : super(key: key) {
     assert(child != null);
   }
@@ -364,7 +364,7 @@ class DropdownMenuItem<T> extends StatelessWidget {
     return new Container(
       height: _kMenuItemHeight,
       alignment: FractionalOffset.centerLeft,
-      child: child
+      child: child,
     );
   }
 }
@@ -380,7 +380,7 @@ class DropdownButtonHideUnderline extends InheritedWidget {
   /// be given.
   DropdownButtonHideUnderline({
     Key key,
-    Widget child
+    Widget child,
   }) : super(key: key, child: child) {
     assert(child != null);
   }

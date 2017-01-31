@@ -188,7 +188,14 @@ class _FlutterDriverExtension {
   }
 
   Finder _createByValueKeyFinder(ByValueKey arguments) {
-    return find.byKey(new ValueKey<dynamic>(arguments.keyValue));
+    switch (arguments.keyValueType) {
+      case 'int':
+        return find.byKey(new ValueKey<int>(arguments.keyValue));
+      case 'String':
+        return find.byKey(new ValueKey<String>(arguments.keyValue));
+      default:
+        throw 'Unsupported ByValueKey type: ${arguments.keyValueType}';
+    }
   }
 
   Finder _createFinder(SerializableFinder finder) {

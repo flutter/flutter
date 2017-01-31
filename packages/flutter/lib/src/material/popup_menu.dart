@@ -115,7 +115,7 @@ class PopupMenuItem<T> extends PopupMenuEntry<T> {
     Key key,
     this.value,
     this.enabled: true,
-    this.child
+    @required this.child,
   }) : super(key: key);
 
   @override

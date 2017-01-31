@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
@@ -12,7 +13,7 @@ class Title extends StatelessWidget {
     Key key,
     this.title,
     this.color,
-    this.child
+    @required this.child,
   }) : super(key: key) {
     assert(color == null || color.alpha == 0xFF);
   }

@@ -24,7 +24,7 @@ class _FocusScope extends InheritedWidget {
     this.scopeFocused,
     this.focusedScope,
     this.focusedWidget,
-    Widget child
+    @required Widget child,
   }) : super(key: key, child: child) {
     assert(scopeFocused != null);
   }
@@ -113,7 +113,7 @@ class Focus extends StatefulWidget {
   Focus({
     @required GlobalKey key,
     this.initiallyFocusedScope,
-    this.child
+    @required this.child,
   }) : super(key: key) {
     assert(key != null);
   }

@@ -50,16 +50,15 @@ class ComplexLayout extends StatefulWidget {
   ComplexLayoutState createState() => new ComplexLayoutState();
 
   static ComplexLayoutState of(BuildContext context) => context.ancestorStateOfType(const TypeMatcher<ComplexLayoutState>());
-
 }
 
 class FancyItemDelegate extends LazyBlockDelegate {
   @override
   Widget buildItem(BuildContext context, int index) {
     if (index % 2 == 0)
-      return new FancyImageItem(index, key: new Key('Item $index'));
+      return new FancyImageItem(index, key: new ValueKey<int>(index));
     else
-      return new FancyGalleryItem(index, key: new Key('Item $index'));
+      return new FancyGalleryItem(index, key: new ValueKey<int>(index));
   }
 
   @override
@@ -84,7 +83,7 @@ class ComplexLayoutState extends State<ComplexLayout> {
             tooltip: 'Search',
             onPressed: () {
               print('Pressed search');
-            }
+            },
           ),
           new TopBarMenu()
         ]
@@ -93,14 +92,14 @@ class ComplexLayoutState extends State<ComplexLayout> {
         children: <Widget>[
           new Expanded(
             child: new LazyBlock(
-              key: new Key('main-scroll'),
-              delegate: new FancyItemDelegate()
+              key: new Key('main-scroll'), // this key is used by the driver test
+              delegate: new FancyItemDelegate(),
             )
           ),
-          new BottomBar()
-        ]
+          new BottomBar(),
+        ],
       ),
-      drawer: new GalleryDrawer()
+      drawer: new GalleryDrawer(),
     );
   }
 }
@@ -478,7 +477,7 @@ class ItemGalleryBox extends StatelessWidget {
               child: new TabBarView(
                 children: tabNames.map((String tabName) {
                   return new Container(
-                    key: new Key('Tab $index - $tabName'),
+                    key: new Key(tabName),
                     child: new Padding(
                       padding: new EdgeInsets.all(8.0),
                       child: new Card(
@@ -487,10 +486,10 @@ class ItemGalleryBox extends StatelessWidget {
                             new Expanded(
                               child: new Container(
                                 decoration: new BoxDecoration(
-                                  backgroundColor: Theme.of(context).primaryColor
+                                  backgroundColor: Theme.of(context).primaryColor,
                                 ),
                                 child: new Center(
-                                  child: new Text(tabName, style: Theme.of(context).textTheme.headline.copyWith(color: Colors.white))
+                                  child: new Text(tabName, style: Theme.of(context).textTheme.headline.copyWith(color: Colors.white)),
                                 )
                               )
                             ),
@@ -498,16 +497,16 @@ class ItemGalleryBox extends StatelessWidget {
                               children: <Widget>[
                                 new IconButton(
                                   icon: new Icon(Icons.share),
-                                  onPressed: () { print('Pressed share'); }
+                                  onPressed: () { print('Pressed share'); },
                                 ),
                                 new IconButton(
                                   icon: new Icon(Icons.event),
-                                  onPressed: () { print('Pressed event'); }
+                                  onPressed: () { print('Pressed event'); },
                                 ),
                                 new Expanded(
                                   child: new Padding(
                                     padding: new EdgeInsets.only(left: 8.0),
-                                    child: new Text('This is item $tabName')
+                                    child: new Text('This is item $tabName'),
                                   )
                                 )
                               ]

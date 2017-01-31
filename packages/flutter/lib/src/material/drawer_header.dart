@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'debug.dart';
@@ -35,7 +36,7 @@ class DrawerHeader extends StatelessWidget {
     this.padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
     this.duration: const Duration(milliseconds: 250),
     this.curve: Curves.fastOutSlowIn,
-    this.child
+    @required this.child,
   }) : super(key: key);
 
   /// Decoration for the main drawer header [Container]; useful for applying
@@ -61,6 +62,9 @@ class DrawerHeader extends StatelessWidget {
   final Curve curve;
 
   /// A widget to be placed inside the drawer header, inset by the [padding].
+  ///
+  /// This widget will be sized to the size of the header. To position the child
+  /// precisely, consider using an [Align] or [Center] widget.
   final Widget child;
 
   @override
