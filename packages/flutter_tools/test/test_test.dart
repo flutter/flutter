@@ -33,7 +33,7 @@ void main() {
       Cache.flutterRoot = '../..';
       return _testFile('trivial', 1, missingDependencyTests, missingDependencyTests);
     });
-  }, timeout: new Timeout(const Duration(seconds: 5)));
+  });
 }
 
 Future<Null> _testFile(String testName, int wantedExitCode, String workingDirectory, String testDirectory) async {
