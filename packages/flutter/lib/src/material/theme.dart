@@ -160,7 +160,7 @@ class AnimatedTheme extends ImplicitlyAnimatedWidget {
     this.isMaterialAppTheme: false,
     Curve curve: Curves.linear,
     Duration duration: kThemeAnimationDuration,
-    this.child
+    @required this.child,
   }) : super(key: key, curve: curve, duration: duration) {
     assert(child != null);
     assert(data != null);

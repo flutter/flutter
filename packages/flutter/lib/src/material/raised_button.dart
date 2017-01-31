@@ -132,7 +132,7 @@ class RaisedButton extends StatelessWidget {
       elevation: enabled ? elevation : disabledElevation,
       highlightElevation: enabled ? highlightElevation : disabledElevation,
       colorBrightness: colorBrightness,
-      child: child
+      child: child,
     );
   }
 }

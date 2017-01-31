@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 /// A tile in a material design grid list.
@@ -19,7 +20,7 @@ class GridTile extends StatelessWidget {
   /// Creates a grid tile.
   ///
   /// Must have a child. Does not typically have both a header and a footer.
-  GridTile({ Key key, this.header, this.footer, this.child }) : super(key: key) {
+  GridTile({ Key key, this.header, this.footer, @required this.child }) : super(key: key) {
     assert(child != null);
   }
 

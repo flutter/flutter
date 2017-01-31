@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'debug.dart';
@@ -50,8 +51,8 @@ class _AccountPictures extends StatelessWidget {
 class _AccountDetails extends StatelessWidget {
   _AccountDetails({
     Key key,
-    this.accountName,
-    this.accountEmail,
+    @required this.accountName,
+    @required this.accountEmail,
     this.onTap,
     this.isOpen,
   }) : super(key: key);
@@ -136,8 +137,8 @@ class UserAccountsDrawerHeader extends StatefulWidget {
     this.decoration,
     this.currentAccountPicture,
     this.otherAccountsPictures,
-    this.accountName,
-    this.accountEmail,
+    @required this.accountName,
+    @required this.accountEmail,
     this.onDetailsPressed
   }) : super(key: key);
 

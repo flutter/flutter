@@ -4,6 +4,7 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -34,7 +35,7 @@ class DataColumn {
   ///
   /// The [label] argument must not be null.
   const DataColumn({
-    this.label,
+    @required this.label,
     this.tooltip,
     this.numeric: false,
     this.onSort

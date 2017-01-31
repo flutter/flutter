@@ -172,7 +172,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
 class _FloatingActionButtonTransition extends StatefulWidget {
   _FloatingActionButtonTransition({
     Key key,
-    this.child
+    this.child,
   }) : super(key: key);
 
   final Widget child;
@@ -266,7 +266,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
     if (_previousAnimation.status != AnimationStatus.dismissed) {
       children.add(new ScaleTransition(
         scale: _previousAnimation,
-        child: _previousChild
+        child: _previousChild,
       ));
     }
     if (_currentAnimation.status != AnimationStatus.dismissed) {
@@ -274,7 +274,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
         scale: _currentAnimation,
         child: new RotationTransition(
           turns: _kFloatingActionButtonTurnTween.animate(_currentAnimation),
-          child: config.child
+          child: config.child,
         )
       ));
     }

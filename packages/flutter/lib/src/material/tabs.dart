@@ -109,7 +109,7 @@ class _TabStyle extends AnimatedWidget {
     this.selected,
     this.labelColor,
     this.unselectedLabelColor,
-    this.child
+    @required this.child,
   }) : super(key: key, animation: animation);
 
   final bool selected;
