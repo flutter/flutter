@@ -167,12 +167,35 @@ uint32_t VulkanDevice::GetGraphicsQueueIndex() const {
 bool VulkanDevice::GetSurfaceCapabilities(
     const VulkanSurface& surface,
     VkSurfaceCapabilitiesKHR* capabilities) const {
-  if (!surface.IsValid()) {
+  if (!surface.IsValid() || capabilities == nullptr) {
     return false;
   }
 
-  return VK_CALL_LOG_ERROR(vk.GetPhysicalDeviceSurfaceCapabilitiesKHR(
-             physical_device_, surface.Handle(), capabilities)) == VK_SUCCESS;
+  bool success =
+      VK_CALL_LOG_ERROR(vk.GetPhysicalDeviceSurfaceCapabilitiesKHR(
+          physical_device_, surface.Handle(), capabilities)) == VK_SUCCESS;
+
+  if (!success) {
+    return false;
+  }
+
+  // Check if the physical device surface capabilities are valid. If so, there
+  // is nothing more to do.
+  if (capabilities->currentExtent.width != 0xFFFFFFFF &&
+      capabilities->currentExtent.height != 0xFFFFFFFF) {
+    return true;
+  }
+
+  // Ask the native surface for its size as a fallback.
+  SkISize size = surface.GetSize();
+
+  if (size.width() == 0 || size.height() == 0) {
+    return false;
+  }
+
+  capabilities->currentExtent.width = size.width();
+  capabilities->currentExtent.height = size.height();
+  return true;
 }
 
 bool VulkanDevice::GetPhysicalDeviceFeatures(
