@@ -139,7 +139,7 @@ void main() {
   });
 
   group('find.descendant', () {
-    testWidgets('fails with a custom description in the message',
+    testWidgets('fails with a descriptive message',
         (WidgetTester tester) async {
       await tester.pumpWidget(new Row(children: [
         new Column(children: [new Text('foo')]),
@@ -148,24 +148,18 @@ void main() {
 
       TestFailure failure;
       try {
-        expect(
-            find.descendant(
+        expect(find.descendant(
                 ancestor: find.widgetWithText(Column, 'foo'),
-                descendant: find.text('bar')),
-            findsOneWidget);
+                descendant: find.text('bar')), findsOneWidget);
       } catch (e) {
         failure = e;
       }
 
       expect(failure, isNotNull);
-      expect(failure.message,
-          contains('Expected: exactly one matching node in the widget tree\n'));
       expect(
           failure.message,
           contains(
-              'Actual: ?:<zero widgets with find text "bar" in type Column with text "foo" (ignoring offstage widgets)>\n'));
-      expect(failure.message,
-          contains('Which: means none were found but one was expected\n'));
+              'Actual: ?:<zero widgets with type Column with text "foo" has descendant(s) with text "bar"'));
     });
   });
 }
