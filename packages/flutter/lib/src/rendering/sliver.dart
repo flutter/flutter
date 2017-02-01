@@ -599,6 +599,11 @@ String _debugCompareFloats(String labelA, double valueA, String labelB, double v
 // ///
 // /// The [paint] method is called with an [Offset] to the top-left corner of the
 // /// sliver, _regardless of the axis direction_.
+// ///
+// /// ### childScrollOffset
+// ///
+// /// If the subclass positions children anywhere other than at scroll offset
+// /// 0.0, you need to override [childScrollOffset]...
 abstract class RenderSliver extends RenderObject {
   // layout input
   @override
@@ -823,6 +828,11 @@ abstract class RenderSliver extends RenderObject {
   /// This is used by [RenderSliverHelpers.hitTestBoxChild]. If you do not use
   /// the [RenderSliverHelpers] mixin and do not call this method yourself, you
   /// do not need to implement this method.
+  ///
+  /// This method differs from [childScrollOffset] in that
+  /// [childMainAxisPosition] gives the distance from the leading _visible_ edge
+  /// of the sliver whereas [childScrollOffset] gives the distance from sliver's
+  /// zero scroll offset.
   @protected
   double childMainAxisPosition(@checked RenderObject child) {
     assert(() {
@@ -833,6 +843,19 @@ abstract class RenderSliver extends RenderObject {
 
   @protected
   double childCrossAxisPosition(@checked RenderObject child) => 0.0;
+
+  /// Returns the scroll offset for the leading edge of the given child.
+  ///
+  /// The `child` must be a child of this sliver.
+  ///
+  /// This method differs from [childMainAxisPosition] in that
+  /// [childMainAxisPosition] gives the distance from the leading _visible_ edge
+  /// of the sliver whereas [childScrollOffset] gives the distance from sliver's
+  /// zero scroll offset.
+  double childScrollOffset(@checked RenderObject child) {
+    assert(child.parent == this);
+    return 0.0;
+  }
 
   @override
   void applyPaintTransform(RenderObject child, Matrix4 transform) {
@@ -1068,6 +1091,19 @@ abstract class RenderSliverHelpers implements RenderSliver {
 
 typedef RenderSliver _Advancer(RenderSliver child);
 
+abstract class RenderAbstractViewport implements RenderObject {
+  static RenderAbstractViewport of(RenderObject object) {
+    while (object != null) {
+      if (object is RenderAbstractViewport)
+        return object;
+      object = object.parent;
+    }
+    return null;
+  }
+
+  double getOffsetToReveal(RenderObject descendant, double alignment);
+}
+
 // ///
 // /// See also:
 // ///
@@ -1075,7 +1111,9 @@ typedef RenderSliver _Advancer(RenderSliver child);
 // /// - [RenderBox], which explains more about the Box protocol.
 // /// - [RenderSliverToBoxAdapter], which allows a [RenderBox] object to be
 // ///   placed inside a [RenderSliver] (the opposite of this class).
-abstract class RenderViewportBase2<ParentDataClass extends ContainerParentDataMixin<RenderSliver>> extends RenderBox with ContainerRenderObjectMixin<RenderSliver, ParentDataClass> {
+abstract class RenderViewportBase2<ParentDataClass extends ContainerParentDataMixin<RenderSliver>>
+    extends RenderBox with ContainerRenderObjectMixin<RenderSliver, ParentDataClass>
+    implements RenderAbstractViewport {
   RenderViewportBase2({
     AxisDirection axisDirection: AxisDirection.down,
     @required ViewportOffset offset,
@@ -1280,6 +1318,12 @@ abstract class RenderViewportBase2<ParentDataClass extends ContainerParentDataMi
       }
     }
     return false;
+  }
+
+  @override
+  double getOffsetToReveal(RenderObject descendant, double alignment) {
+    // TODO(abath): Implement this function for sliver-based viewports.
+    return 0.0;
   }
 
   @protected

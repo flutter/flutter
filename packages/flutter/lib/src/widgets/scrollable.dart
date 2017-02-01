@@ -60,6 +60,39 @@ class Scrollable2 extends StatefulWidget {
     if (physics != null)
       description.add('physics: $physics');
   }
+
+  /// The state from the closest instance of this class that encloses the given context.
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// Scrollable2State scrollable = Scrollable2.of(context);
+  /// ```
+  static Scrollable2State of(BuildContext context) {
+    return context.ancestorStateOfType(const TypeMatcher<Scrollable2State>());
+  }
+
+  /// Scrolls the closest enclosing scrollable to make the given context visible.
+  static Future<Null> ensureVisible(BuildContext context, {
+    double alignment: 0.0,
+    Duration duration: Duration.ZERO,
+    Curve curve: Curves.ease,
+  }) {
+    final List<Future<Null>> futures = <Future<Null>>[];
+
+    Scrollable2State scrollable = Scrollable2.of(context);
+    while (scrollable != null) {
+      futures.add(scrollable.position.ensureVisible(context.findRenderObject(), alignment: alignment));
+      context = scrollable.context;
+      scrollable = Scrollable2.of(context);
+    }
+
+    if (futures.isEmpty || duration == Duration.ZERO)
+      return new Future<Null>.value();
+    if (futures.length == 1)
+      return futures.first;
+    return Future.wait<Null>(futures);
+  }
 }
 
 /// State object for a [Scrollable2] widget.

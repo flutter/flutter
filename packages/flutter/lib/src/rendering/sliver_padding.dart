@@ -281,6 +281,12 @@ class RenderSliverPadding extends RenderSliver with RenderObjectWithChildMixin<R
   }
 
   @override
+  double childScrollOffset(RenderObject child) {
+    assert(child.parent == this);
+    return beforePadding;
+  }
+
+  @override
   void applyPaintTransform(RenderObject child, Matrix4 transform) {
     assert(child != null);
     assert(child == this.child);

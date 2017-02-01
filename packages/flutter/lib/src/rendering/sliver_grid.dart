@@ -356,7 +356,7 @@ class RenderSliverGrid extends RenderSliverMultiBoxAdaptor {
         trailingScrollOffset = gridGeometry.scrollOffset;
     }
 
-    assert(offsetOf(firstChild) <= scrollOffset);
+    assert(childScrollOffset(firstChild) <= scrollOffset);
 
     if (trailingChildWithLayout == null) {
       firstChild.layout(firstChildGridGeometry.getBoxConstraints(constraints));

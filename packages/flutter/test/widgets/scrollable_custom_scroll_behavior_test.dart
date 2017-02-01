@@ -68,6 +68,15 @@ class TestScrollPosition extends ScrollPosition {
       );
     }
   }
+
+  @override
+  Future<Null> ensureVisible(RenderObject object, {
+    double alignment: 0.0,
+    Duration duration: Duration.ZERO,
+    Curve curve: Curves.ease,
+  }) {
+    return new Future<Null>.value();
+  }
 }
 
 class TestScrollPhysics extends ScrollPhysics {

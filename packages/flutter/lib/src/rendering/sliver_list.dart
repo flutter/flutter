@@ -66,7 +66,7 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
       trailingChildWithLayout ??= child;
     }
 
-    assert(offsetOf(firstChild) <= scrollOffset);
+    assert(childScrollOffset(firstChild) <= scrollOffset);
 
     if (trailingChildWithLayout == null) {
       firstChild.layout(childConstraints);
