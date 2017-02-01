@@ -274,7 +274,7 @@ String get dartBin =>
 
 Future<int> dart(List<String> args) => exec(dartBin, args);
 
-Future<dynamic> inDirectory(dynamic directory, Future<dynamic> action()) async {
+Future<T> inDirectory<T>(dynamic directory, Future<T> action()) async {
   String previousCwd = cwd;
   try {
     cd(directory);
@@ -328,11 +328,11 @@ Future<Null> getFlutter(String revision) async {
     rmTree(flutterDirectory);
   }
 
-  await inDirectory(flutterDirectory.parent, () async {
+  await inDirectory<Null>(flutterDirectory.parent, () async {
     await exec('git', <String>['clone', 'https://github.com/flutter/flutter.git']);
   });
 
-  await inDirectory(flutterDirectory, () async {
+  await inDirectory<Null>(flutterDirectory, () async {
     await exec('git', <String>['checkout', revision]);
   });
 

@@ -19,13 +19,13 @@ TaskFunction createBasicMaterialAppSizeTest() {
 
     int releaseSizeInBytes;
 
-    await inDirectory(Directory.systemTemp, () async {
+    await inDirectory<Null>(Directory.systemTemp, () async {
       await flutter('create', options: <String>[sampleAppName]);
 
       if (!(await sampleDir.exists()))
         throw 'Failed to create sample Flutter app in ${sampleDir.path}';
 
-      await inDirectory(sampleDir, () async {
+      await inDirectory<Null>(sampleDir, () async {
         await flutter('packages', options: <String>['get']);
         await flutter('build', options: <String>['clean']);
 

@@ -158,14 +158,14 @@ class _RecipeGridPageState extends State<RecipeGridPage> {
   }
 
   void showFavoritesPage(BuildContext context) {
-    Navigator.push(context, new MaterialPageRoute<Null>(
+    Navigator.push<Null>(context, new MaterialPageRoute<Null>(
       settings: const RouteSettings(name: "/pesto/favorites"),
       builder: (BuildContext context) => new PestoFavorites(),
     ));
   }
 
   void showRecipePage(BuildContext context, Recipe recipe) {
-    Navigator.push(context, new MaterialPageRoute<Null>(
+    Navigator.push<Null>(context, new MaterialPageRoute<Null>(
       settings: const RouteSettings(name: "/pesto/recipe"),
       builder: (BuildContext context) {
         return new Theme(

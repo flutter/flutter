@@ -502,7 +502,7 @@ class Navigator extends StatefulWidget {
   ///
   /// Returns a [Future] that completes to the `result` value passed to [pop]
   /// when the pushed route is popped off the navigator.
-  static Future<dynamic> push(BuildContext context, Route<dynamic> route) {
+  static Future<T> push<T>(BuildContext context, Route<T> route) {
     return Navigator.of(context).push(route);
   }
 
@@ -670,7 +670,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     super.initState();
     assert(config.observer == null || config.observer.navigator == null);
     config.observer?._navigator = this;
-    push(config.onGenerateRoute(new RouteSettings(
+    push<dynamic>(config.onGenerateRoute(new RouteSettings(
       name: config.initialRoute ?? Navigator.defaultRouteName,
       isInitialRoute: true
     )));
@@ -739,7 +739,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   /// Navigator.of(context).pushNamed('/nyc/1776');
   /// ```
   Future<dynamic> pushNamed(String name) {
-    return push(_routeNamed(name));
+    return push<dynamic>(_routeNamed(name));
   }
 
   /// Adds the given route to the navigator's history, and transitions to it.
@@ -754,7 +754,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   ///
   /// Returns a [Future] that completes to the `result` value passed to [pop]
   /// when the pushed route is popped off the navigator.
-  Future<dynamic> push(Route<dynamic> route) {
+  Future<T> push<T>(Route<T> route) {
     assert(!_debugLocked);
     assert(() { _debugLocked = true; return true; });
     assert(route != null);
