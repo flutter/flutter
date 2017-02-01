@@ -28,7 +28,7 @@ class ScrollView extends StatelessWidget {
     this.scrollDirection: Axis.vertical,
     this.initialScrollOffset: 0.0,
     this.itemExtent,
-    this.children,
+    this.children: const <Widget>[],
   }) : super(key: key);
 
   final EdgeInsets padding;
@@ -76,7 +76,7 @@ class ScrollGrid extends StatelessWidget {
     this.scrollDirection: Axis.vertical,
     this.initialScrollOffset: 0.0,
     this.gridDelegate,
-    this.children,
+    this.children: const <Widget>[],
   }) : super(key: key);
 
   ScrollGrid.count({
@@ -88,7 +88,7 @@ class ScrollGrid extends StatelessWidget {
     double mainAxisSpacing: 0.0,
     double crossAxisSpacing: 0.0,
     double childAspectRatio: 1.0,
-    this.children,
+    this.children: const <Widget>[],
   }) : gridDelegate = new SliverGridDelegateWithFixedCrossAxisCount(
     crossAxisCount: crossAxisCount,
     mainAxisSpacing: mainAxisSpacing,
@@ -105,7 +105,7 @@ class ScrollGrid extends StatelessWidget {
     double mainAxisSpacing: 0.0,
     double crossAxisSpacing: 0.0,
     double childAspectRatio: 1.0,
-    this.children,
+    this.children: const <Widget>[],
   }) : gridDelegate = new SliverGridDelegateWithMaxCrossAxisExtent(
     maxCrossAxisExtent: maxCrossAxisExtent,
     mainAxisSpacing: mainAxisSpacing,

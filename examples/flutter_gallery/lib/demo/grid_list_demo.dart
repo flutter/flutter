@@ -310,9 +310,6 @@ class GridListDemoState extends State<GridListDemo> {
     });
   }
 
-  // When the ScrollableGrid first appears we want the last row to only be
-  // partially visible, to help the user recognize that the grid is scrollable.
-  // The GridListDemoGridDelegate's tileHeightFactor is used for this.
   @override
   Widget build(BuildContext context) {
     final Orientation orientation = MediaQuery.of(context).orientation;
