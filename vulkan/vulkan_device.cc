@@ -287,11 +287,11 @@ bool VulkanDevice::ChooseSurfaceFormat(const VulkanSurface& surface,
   }
 
   const std::vector<VkFormat> desired_formats = {
-      VK_FORMAT_R8G8B8A8_SRGB,       // kSRGBA_8888_GrPixelConfig
-      VK_FORMAT_B8G8R8A8_SRGB,       // kSBGRA_8888_GrPixelConfig
-      VK_FORMAT_R16G16B16A16_SFLOAT  // kRGBA_half_GrPixelConfig
-      VK_FORMAT_R8G8B8A8_UNORM,      // kRGBA_8888_GrPixelConfig
-      VK_FORMAT_B8G8R8A8_UNORM,      // kBGRA_8888_GrPixelConfig
+      VK_FORMAT_R8G8B8A8_SRGB,        // kSRGBA_8888_GrPixelConfig
+      VK_FORMAT_B8G8R8A8_SRGB,        // kSBGRA_8888_GrPixelConfig
+      VK_FORMAT_R16G16B16A16_SFLOAT,  // kRGBA_half_GrPixelConfig
+      VK_FORMAT_R8G8B8A8_UNORM,       // kRGBA_8888_GrPixelConfig
+      VK_FORMAT_B8G8R8A8_UNORM,       // kBGRA_8888_GrPixelConfig
   };
 
   // Try to find the first supported format in the list of desired formats.
