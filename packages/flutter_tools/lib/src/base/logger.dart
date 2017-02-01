@@ -217,12 +217,14 @@ class AnsiTerminal {
 
   static const int _ENOTTY = 25;
   static const int _ENETRESET = 102;
+  static const int _ERROR_INVALID_PARAMETER = 87;
 
   /// Setting the line mode can throw for some terminals (with "Operation not
   /// supported on socket"), but the error can be safely ignored.
   static const List<int> _lineModeIgnorableErrors = const <int>[
     _ENOTTY,
     _ENETRESET,
+    _ERROR_INVALID_PARAMETER, // TODO(goderbauer): remove when https://github.com/dart-lang/sdk/issues/28599 is fixed
   ];
 
   bool supportsColor;
@@ -234,17 +236,8 @@ class AnsiTerminal {
   set singleCharMode(bool value) {
     try {
       stdin.lineMode = !value;
-    } catch (error) {
-      // TODO(tvolkert): Change this to explicitly catch `StdinException`
-      // once our analysis runs against SDK 1.22 (when `StdinException` was
-      // introduced). Doing so will allow proper dereferencing of `osError`.
-      bool ignore = false;
-      try {
-        if (_lineModeIgnorableErrors.contains(error.osError?.errorCode)) {
-          ignore = true;
-        }
-      } on NoSuchMethodError {}
-      if (!ignore)
+    } on StdinException catch (error) {
+      if (!_lineModeIgnorableErrors.contains(error.osError?.errorCode))
         rethrow;
     }
   }
