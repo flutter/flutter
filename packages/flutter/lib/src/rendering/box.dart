@@ -1762,11 +1762,18 @@ abstract class RenderBox extends RenderObject {
     transform.translate(offset.dx, offset.dy);
   }
 
-  Matrix4 _collectPaintTransform() {
+  /// Returns a matrix that maps the local coordinate system to the coordinate
+  /// system of `ancestor`.
+  ///
+  /// If `ancestor` is null, this method returns a matrix that maps from the
+  /// local coordinate system to the global coordinate system.
+  Matrix4 getTransformTo(RenderObject ancestor) {
     assert(attached);
     final List<RenderObject> renderers = <RenderObject>[];
-    for (RenderObject renderer = this; renderer != null; renderer = renderer.parent)
+    for (RenderObject renderer = this; renderer != ancestor; renderer = renderer.parent) {
+      assert(renderer != null); // Failed to find ancestor in parent chain.
       renderers.add(renderer);
+    }
     final Matrix4 transform = new Matrix4.identity();
     for (int index = renderers.length - 1; index > 0; index -= 1)
       renderers[index].applyPaintTransform(renderers[index - 1], transform);
@@ -1777,9 +1784,13 @@ abstract class RenderBox extends RenderObject {
   /// coordinate system for this box.
   ///
   /// If the transform from global coordinates to local coordinates is
-  /// degenerate, this function returns Point.origin.
-  Point globalToLocal(Point point) {
-    final Matrix4 transform = _collectPaintTransform();
+  /// degenerate, this function returns [Point.origin].
+  ///
+  /// If `ancestor` is non-null, this function converts the given point from the
+  /// coordinate system of `ancestor` (which must be an ancestor of this render
+  /// object) instead of from the global coordinate system.
+  Point globalToLocal(Point point, { RenderObject ancestor }) {
+    final Matrix4 transform = getTransformTo(ancestor);
     double det = transform.invert();
     if (det == 0.0)
       return Point.origin;
@@ -1788,8 +1799,12 @@ abstract class RenderBox extends RenderObject {
 
   /// Convert the given point from the local coordinate system for this box to
   /// the global coordinate system.
-  Point localToGlobal(Point point) {
-    return MatrixUtils.transformPoint(_collectPaintTransform(), point);
+  ///
+  /// If `ancestor` is non-null, this function converts the given point to the
+  /// coordinate system of `ancestor` (which must be an ancestor of this render
+  /// object) instead of to the global coordinate system.
+  Point localToGlobal(Point point, { RenderObject ancestor }) {
+    return MatrixUtils.transformPoint(getTransformTo(ancestor), point);
   }
 
   /// Returns a rectangle that contains all the pixels painted by this box.

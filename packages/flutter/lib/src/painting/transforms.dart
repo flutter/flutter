@@ -100,6 +100,25 @@ class MatrixUtils {
     return new Point(transformed3.x, transformed3.y);
   }
 
+  /// Returns a rect that bounds the result of applying the given matrix as a
+  /// perspective transform to the given rect.
+  ///
+  /// This function assumes the given rect is in the plane with z equals 0.0.
+  /// The transformed rect is then projected back into the plane with z equals
+  /// 0.0 before computing its bounding rect.
+  static Rect transformRect(Matrix4 transform, Rect rect) {
+    Point point1 = transformPoint(transform, rect.topLeft);
+    Point point2 = transformPoint(transform, rect.topRight);
+    Point point3 = transformPoint(transform, rect.bottomLeft);
+    Point point4 = transformPoint(transform, rect.bottomRight);
+    return new Rect.fromLTRB(
+        _min4(point1.x, point2.x, point3.x, point4.x),
+        _min4(point1.y, point2.y, point3.y, point4.y),
+        _max4(point1.x, point2.x, point3.x, point4.x),
+        _max4(point1.y, point2.y, point3.y, point4.y)
+    );
+  }
+
   static double _min4(double a, double b, double c, double d) {
     return math.min(a, math.min(b, math.min(c, d)));
   }
@@ -113,22 +132,12 @@ class MatrixUtils {
   /// This function assumes the given rect is in the plane with z equals 0.0.
   /// The transformed rect is then projected back into the plane with z equals
   /// 0.0 before computing its bounding rect.
-  static Rect inverseTransformRect(Rect rect, Matrix4 transform) {
+  static Rect inverseTransformRect(Matrix4 transform, Rect rect) {
     assert(rect != null);
     assert(transform.determinant != 0.0);
     if (isIdentity(transform))
       return rect;
     transform = new Matrix4.copy(transform)..invert();
-    Point point1 = transformPoint(transform, rect.topLeft);
-    Point point2 = transformPoint(transform, rect.topRight);
-    Point point3 = transformPoint(transform, rect.bottomLeft);
-    Point point4 = transformPoint(transform, rect.bottomRight);
-    return new Rect.fromLTRB(
-      _min4(point1.x, point2.x, point3.x, point4.x),
-      _min4(point1.y, point2.y, point3.y, point4.y),
-      _max4(point1.x, point2.x, point3.x, point4.x),
-      _max4(point1.y, point2.y, point3.y, point4.y)
-    );
+    return transformRect(transform, rect);
   }
-
 }
