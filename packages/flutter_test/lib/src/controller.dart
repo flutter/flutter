@@ -143,7 +143,7 @@ class WidgetController {
   ///
   /// * Use [firstState] if you expect to match several states but only want the first.
   /// * Use [stateList] if you expect to match several states and want all of them.
-  T state<T extends State>(Finder finder) {
+  T state<T extends State>(Finder finder) { // ignore: strong_mode_not_instantiated_bound
     TestAsyncUtils.guardSync();
     return _stateOf<T>(finder.evaluate().single, finder);
   }
@@ -155,7 +155,7 @@ class WidgetController {
   /// matching widget has no state.
   ///
   /// * Use [state] if you only expect to match one state.
-  T firstState<T extends State>(Finder finder) {
+  T firstState<T extends State>(Finder finder) { // ignore: strong_mode_not_instantiated_bound
     TestAsyncUtils.guardSync();
     return _stateOf<T>(finder.evaluate().first, finder);
   }
@@ -167,12 +167,12 @@ class WidgetController {
   ///
   /// * Use [state] if you only expect to match one state.
   /// * Use [firstState] if you expect to match several but only want the first.
-  Iterable<T> stateList<T extends State>(Finder finder) {
+  Iterable<T> stateList<T extends State>(Finder finder) { // ignore: strong_mode_not_instantiated_bound
     TestAsyncUtils.guardSync();
     return finder.evaluate().map((Element element) => _stateOf<T>(element, finder));
   }
 
-  T _stateOf<T extends State>(Element element, Finder finder) {
+  T _stateOf<T extends State>(Element element, Finder finder) { // ignore: strong_mode_not_instantiated_bound
     TestAsyncUtils.guardSync();
     if (element is StatefulElement)
       return element.state;
