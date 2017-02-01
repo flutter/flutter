@@ -14,7 +14,9 @@ class RenderSliverList extends RenderSliverMultiBoxAdaptor {
   RenderSliverList({
     @required RenderSliverBoxChildManager childManager,
     double itemExtent,
-  }) : _itemExtent = itemExtent, super(childManager: childManager);
+  }) : _itemExtent = itemExtent, super(childManager: childManager) {
+    assert(itemExtent != null);
+  }
 
   /// The main-axis extent of each item in the list.
   double get itemExtent => _itemExtent;
@@ -105,7 +107,8 @@ class RenderSliverList extends RenderSliverMultiBoxAdaptor {
     assert(indexOf(firstChild) == firstIndex);
     assert(lastIndex <= targetLastIndex);
 
-    final double estimatedTotalExtent = childManager.estimateScrollOffsetExtent(
+    final double estimatedMaxScrollOffset = childManager.estimateMaxScrollOffset(
+      constraints,
       firstIndex: firstIndex,
       lastIndex: lastIndex,
       leadingScrollOffset: leadingScrollOffset,
@@ -119,9 +122,9 @@ class RenderSliverList extends RenderSliverMultiBoxAdaptor {
     );
 
     geometry = new SliverGeometry(
-      scrollExtent: estimatedTotalExtent,
+      scrollExtent: estimatedMaxScrollOffset,
       paintExtent: paintedExtent,
-      maxPaintExtent: estimatedTotalExtent,
+      maxPaintExtent: estimatedMaxScrollOffset,
       // Conservative to avoid flickering away the clip during scroll.
       hasVisualOverflow: lastIndex >= targetLastIndex || constraints.scrollOffset > 0.0,
     );
