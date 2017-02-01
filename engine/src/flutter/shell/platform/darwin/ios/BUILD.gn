@@ -39,6 +39,8 @@ shared_library("flutter_framework_dylib") {
     "framework/Source/FlutterViewController.mm",
     "framework/Source/accessibility_bridge.h",
     "framework/Source/accessibility_bridge.mm",
+    "framework/Source/flutter_main_ios.h",
+    "framework/Source/flutter_main_ios.mm",
     "framework/Source/flutter_touch_mapper.h",
     "framework/Source/flutter_touch_mapper.mm",
     "framework/Source/platform_message_router.h",

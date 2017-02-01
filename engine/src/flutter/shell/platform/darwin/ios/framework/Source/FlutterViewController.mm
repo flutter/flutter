@@ -18,6 +18,7 @@
 #include "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformPlugin.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputDelegate.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputPlugin.h"
+#include "flutter/shell/platform/darwin/ios/framework/Source/flutter_main_ios.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/flutter_touch_mapper.h"
 #include "flutter/shell/platform/darwin/ios/platform_view_ios.h"
 #include "lib/ftl/functional/make_copyable.h"
@@ -59,15 +60,6 @@ void FlutterInit(int argc, const char* argv[]) {
   // Deprecated. To be removed.
 }
 
-static void FlutterInitShell() {
-  NSBundle* bundle = [NSBundle bundleForClass:[FlutterViewController class]];
-  NSString* icuDataPath = [bundle pathForResource:@"icudtl" ofType:@"dat"];
-  NSString* libraryName =
-      [[NSBundle mainBundle] objectForInfoDictionaryKey:@"FLTLibraryPath"];
-  shell::PlatformMacMain(icuDataPath.UTF8String,
-                         libraryName != nil ? libraryName.UTF8String : "");
-}
-
 @implementation FlutterViewController {
   base::scoped_nsprotocol<FlutterDartProject*> _dartProject;
   UIInterfaceOrientationMask _orientationPreferences;
@@ -81,13 +73,17 @@ static void FlutterInitShell() {
   BOOL _initialized;
 }
 
++ (void)initialize {
+  if (self == [FlutterViewController class]) {
+    shell::FlutterMain();
+  }
+}
+
 #pragma mark - Manage and override all designated initializers
 
 - (instancetype)initWithProject:(FlutterDartProject*)project
                         nibName:(NSString*)nibNameOrNil
                          bundle:(NSBundle*)nibBundleOrNil {
-  FlutterInitShell();
-
   self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
 
   if (self) {
@@ -508,7 +504,7 @@ static inline PointerChangeMapperPhase PointerChangePhaseFromUITouchPhase(
 // Standard iOS status bar height in pixels.
 constexpr CGFloat kStandardStatusBarHeight = 20.0;
 
-- (void)handleStatusBarTouches:(UIEvent *)event {
+- (void)handleStatusBarTouches:(UIEvent*)event {
   // If the status bar is double-height, don't handle status bar taps. iOS
   // should open the app associated with the status bar.
   CGRect statusBarFrame = [UIApplication sharedApplication].statusBarFrame;
@@ -517,12 +513,12 @@ constexpr CGFloat kStandardStatusBarHeight = 20.0;
   }
 
   // If we detect a touch in the status bar, synthesize a fake touch begin/end.
-  for (UITouch *touch in event.allTouches) {
+  for (UITouch* touch in event.allTouches) {
     if (touch.phase == UITouchPhaseBegan && touch.tapCount > 0) {
       CGPoint windowLoc = [touch locationInView:nil];
       CGPoint screenLoc = [touch.window convertPoint:windowLoc toWindow:nil];
       if (CGRectContainsPoint(statusBarFrame, screenLoc)) {
-        NSSet *statusbarTouches = [NSSet setWithObject:touch];
+        NSSet* statusbarTouches = [NSSet setWithObject:touch];
         [self dispatchTouches:statusbarTouches phase:UITouchPhaseBegan];
         [self dispatchTouches:statusbarTouches phase:UITouchPhaseEnded];
         return;
