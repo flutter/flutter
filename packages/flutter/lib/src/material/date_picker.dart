@@ -335,6 +335,8 @@ class _MonthPickerState extends State<MonthPicker> {
   @override
   void initState() {
     super.initState();
+    // Initially display the pre-selected date.
+    _currentDisplayedMonthDate = new DateTime(config.selectedDate.year, config.selectedDate.month);
     _updateCurrentDate();
   }
 
@@ -421,7 +423,9 @@ class _MonthPickerState extends State<MonthPicker> {
   }
 
   void _monthPageChanged(int monthPage) {
-    _currentDisplayedMonthDate = _addMonthsToMonthDate(config.firstDate, monthPage);
+    setState(() {
+      _currentDisplayedMonthDate = _addMonthsToMonthDate(config.firstDate, monthPage);
+    });
   }
 
   @override
