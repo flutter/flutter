@@ -45,6 +45,7 @@ class TestBehavior extends ScrollBehavior2 {
       state,
       new Tolerance(velocity: 20.0, distance: 1.0),
       oldPosition,
+      const ClampingScrollPhysics(),
     );
   }
 
@@ -52,13 +53,13 @@ class TestBehavior extends ScrollBehavior2 {
   bool shouldNotify(TestBehavior oldDelegate) => false;
 }
 
-class TestViewportScrollPosition extends AbsoluteScrollPosition
-  with ClampingAbsoluteScrollPositionMixIn {
+class TestViewportScrollPosition extends AbsoluteScrollPosition {
   TestViewportScrollPosition(
     Scrollable2State state,
     Tolerance scrollTolerances,
     ScrollPosition oldPosition,
-  ) : super(state, scrollTolerances, oldPosition);
+    ScrollPhysics physics,
+  ) : super(state, scrollTolerances, oldPosition, physics);
 
   @override
   bool applyContentDimensions(double minScrollExtent, double maxScrollExtent) {

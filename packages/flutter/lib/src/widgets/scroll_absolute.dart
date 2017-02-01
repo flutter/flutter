@@ -78,24 +78,25 @@ class ViewportScrollBehavior extends ScrollBehavior2 {
     return null;
   }
 
-  @override
-  ScrollPosition createScrollPosition(BuildContext context, Scrollable2State state, ScrollPosition oldPosition) {
-    switch (getPlatform(context)) {
+  /// The scroll physics to use for the given platform.
+  ///
+  /// Used by [createScrollPosition] to get the scroll physics for newly created
+  /// scroll positions.
+  ScrollPhysics getScrollPhysics(TargetPlatform platform) {
+    assert(platform != null);
+    switch (platform) {
       case TargetPlatform.iOS:
-        return new _CupertinoViewportScrollPosition(
-          state,
-          scrollTolerances,
-          oldPosition,
-        );
+        return const BouncingScrollPhysics();
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
-        return new _MountainViewViewportScrollPosition(
-          state,
-          scrollTolerances,
-          oldPosition,
-        );
+        return const ClampingScrollPhysics();
     }
     return null;
+  }
+
+  @override
+  ScrollPosition createScrollPosition(BuildContext context, Scrollable2State state, ScrollPosition oldPosition) {
+    return new AbsoluteScrollPosition(state, scrollTolerances, oldPosition, getScrollPhysics(getPlatform(context)));
   }
 
   @override
@@ -104,12 +105,45 @@ class ViewportScrollBehavior extends ScrollBehavior2 {
   }
 }
 
-abstract class AbsoluteScrollPosition extends ScrollPosition {
+abstract class ScrollPhysics {
+  const ScrollPhysics();
+
+  /// Used by [AbsoluteDragScrollActivity] and other user-driven activities to
+  /// convert an offset in logical pixels as provided by the [DragUpdateDetails]
+  /// into a delta to apply using [setPixels].
+  ///
+  /// This is used by some [ScrollPosition] subclasses to apply friction during
+  /// overscroll situations.
+  double applyPhysicsToUserOffset(AbsoluteScrollPosition position, double offset) => offset;
+
+  /// Determines the overscroll by applying the boundary conditions.
+  ///
+  /// Called by [AbsoluteScrollPosition.setPixels] just before the [pixels] value is updated, to
+  /// determine how much of the offset is to be clamped off and sent to
+  /// [AbsoluteScrollPosition.reportOverscroll].
+  ///
+  /// The `value` argument is guaranteed to not equal [pixels] when this is
+  /// called.
+  double applyBoundaryConditions(AbsoluteScrollPosition position, double value) => 0.0;
+
+  /// Returns a simulation for ballisitic scrolling starting from the given
+  /// position with the given velocity.
+  ///
+  /// If the result is non-null, the [ScrollPosition] will begin an
+  /// [AbsoluteBallisticScrollActivity] with the returned value. Otherwise, the
+  /// [ScrollPosition] will begin an idle activity instead.
+  Simulation createBallisticSimulation(AbsoluteScrollPosition position, double velocity) => null;
+}
+
+class AbsoluteScrollPosition extends ScrollPosition {
   AbsoluteScrollPosition(
     Scrollable2State state,
     Tolerance scrollTolerances,
     ScrollPosition oldPosition,
+    this.physics,
   ) : super(state, scrollTolerances, oldPosition);
+
+  final ScrollPhysics physics;
 
   @override
   double get pixels => _pixels;
@@ -120,15 +154,15 @@ abstract class AbsoluteScrollPosition extends ScrollPosition {
     assert(SchedulerBinding.instance.schedulerPhase.index <= SchedulerPhase.transientCallbacks.index);
     assert(activity.isScrolling);
     if (value != pixels) {
-      final double overScroll = computeOverscroll(value);
+      final double overScroll = physics.applyBoundaryConditions(this, value);
       assert(() {
         double delta = value - pixels;
         if (overScroll.abs() > delta.abs()) {
           throw new FlutterError(
-            '$runtimeType.computeOverscroll returned invalid overscroll value.\n'
+            '${physics.runtimeType}.applyBoundaryConditions returned invalid overscroll value.\n'
             'setPixels() was called to change the scroll offset from $pixels to $value.\n'
             'That is a delta of $delta units.\n'
-            'computeOverscroll() reported an overscroll of $overScroll units.\n'
+            '${physics.runtimeType}.applyBoundaryConditions reported an overscroll of $overScroll units.\n'
             'The scroll extents are $minScrollExtent .. $maxScrollExtent, and the '
             'viewport dimension is $viewportDimension.'
           );
@@ -148,15 +182,6 @@ abstract class AbsoluteScrollPosition extends ScrollPosition {
     }
     return 0.0;
   }
-
-  /// Called by [setPixels] just before the [pixels] value is updated, to
-  /// determine how much of the offset is to be clamped off and sent to
-  /// [reportOverscroll].
-  ///
-  /// The `value` argument is guaranteed to not equal [pixels] when this is
-  /// called.
-  @protected
-  double computeOverscroll(double value) => 0.0;
 
   @protected
   void reportOverscroll(double value) {
@@ -244,7 +269,7 @@ abstract class AbsoluteScrollPosition extends ScrollPosition {
 
   @override
   void beginBallisticActivity(double velocity) {
-    final Simulation simulation = createBallisticSimulation(velocity);
+    final Simulation simulation = physics.createBallisticSimulation(this, velocity);
     if (simulation != null) {
       simulation.tolerance = scrollTolerances;
       beginActivity(new AbsoluteBallisticScrollActivity(this, simulation, vsync));
@@ -322,9 +347,6 @@ abstract class AbsoluteScrollPosition extends ScrollPosition {
     beginBallisticActivity(0.0);
   }
 
-  @protected
-  Simulation createBallisticSimulation(double velocity);
-
   @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
@@ -333,23 +355,21 @@ abstract class AbsoluteScrollPosition extends ScrollPosition {
   }
 }
 
-/// Scroll position mixin for environments that allow the scroll offset to go
-/// beyond the bounds of the content, but then bounce the content back to the
-/// edge of those bounds.
+/// Scroll physics for environments that allow the scroll offset to go beyond
+/// the bounds of the content, but then bounce the content back to the edge of
+/// those bounds.
 ///
 /// This is the behavior typically seen on iOS.
-///
-/// Mixing this class into an [AbsoluteScrollPosition] subclass, and then
-/// overriding [computeOverscroll] to provide some overscroll at one edge, will
-/// allow that edge to clamp while the other edge still has the bounce effect.
 ///
 /// See also:
 ///
 /// * [ViewportScrollBehavior], which uses this to provide the iOS component of
 ///   its scroll behavior.
-/// * [ClampingAbsoluteScrollPositionMixIn], which is the equivalent mixin for
-///   Android's clamping behavior.
-abstract class BouncingAbsoluteScrollPositionMixIn implements AbsoluteScrollPosition {
+/// * [ClampingScrollPhysics], which is the analogous physics for Android's
+///   clamping behavior.
+class BouncingScrollPhysics extends ScrollPhysics {
+  const BouncingScrollPhysics();
+
   /// The multiple applied to overscroll to make it appear that scrolling past
   /// the edge of the scrollable contents is harder than scrolling the list.
   ///
@@ -358,12 +378,12 @@ abstract class BouncingAbsoluteScrollPositionMixIn implements AbsoluteScrollPosi
   double get frictionFactor => 0.5;
 
   @override
-  double applyPhysicsToUserOffset(double offset) {
+  double applyPhysicsToUserOffset(AbsoluteScrollPosition position, double offset) {
     assert(offset != 0.0);
-    assert(minScrollExtent <= maxScrollExtent);
+    assert(position.minScrollExtent <= position.maxScrollExtent);
     if (offset > 0.0)
-      return _applyFriction(pixels, minScrollExtent, maxScrollExtent, offset, frictionFactor);
-    return -_applyFriction(-pixels, -maxScrollExtent, -minScrollExtent, -offset, frictionFactor);
+      return _applyFriction(position.pixels, position.minScrollExtent, position.maxScrollExtent, offset, frictionFactor);
+    return -_applyFriction(-position.pixels, -position.maxScrollExtent, -position.minScrollExtent, -offset, frictionFactor);
   }
 
   static double _applyFriction(double start, double lowLimit, double highLimit, double delta, double gamma) {
@@ -382,30 +402,21 @@ abstract class BouncingAbsoluteScrollPositionMixIn implements AbsoluteScrollPosi
   }
 
   @override
-  Simulation createBallisticSimulation(double velocity) {
-    if (velocity.abs() >= scrollTolerances.velocity || outOfRange) {
+  Simulation createBallisticSimulation(AbsoluteScrollPosition position, double velocity) {
+    if (velocity.abs() >= position.scrollTolerances.velocity || position.outOfRange) {
       return new BouncingScrollSimulation(
-        position: pixels,
+        position: position.pixels,
         velocity: velocity,
-        leadingExtent: minScrollExtent,
-        trailingExtent: maxScrollExtent,
+        leadingExtent: position.minScrollExtent,
+        trailingExtent: position.maxScrollExtent,
       );
     }
     return null;
   }
 }
 
-class _CupertinoViewportScrollPosition extends AbsoluteScrollPosition
-  with BouncingAbsoluteScrollPositionMixIn {
-  _CupertinoViewportScrollPosition(
-    Scrollable2State state,
-    Tolerance scrollTolerances,
-    ScrollPosition oldPosition,
-  ) : super(state, scrollTolerances, oldPosition);
-}
-
-/// Scroll position mixin for environments that prevent the scroll offset from
-/// reaching beyond the bounds of the content.
+/// Scroll physics for environments that prevent the scroll offset from reaching
+/// beyond the bounds of the content.
 ///
 /// This is the behavior typically seen on Android.
 ///
@@ -413,23 +424,25 @@ class _CupertinoViewportScrollPosition extends AbsoluteScrollPosition
 ///
 /// * [ViewportScrollBehavior], which uses this to provide the Android component
 ///   of its scroll behavior.
-/// * [BouncingAbsoluteScrollPositionMixIn], which is the equivalent mixin for
-///   iOS' bouncing behavior.
+/// * [BouncingScrollPhysics], which is the analogous physics for iOS' bouncing
+///   behavior.
 /// * [GlowingOverscrollIndicator], which is used by [ViewportScrollBehavior] to
 ///   provide the glowing effect that is usually found with this clamping effect
 ///   on Android.
-abstract class ClampingAbsoluteScrollPositionMixIn implements AbsoluteScrollPosition {
+class ClampingScrollPhysics extends ScrollPhysics {
+  const ClampingScrollPhysics();
+
   @override
-  double computeOverscroll(double value) {
-    assert(value != pixels);
-    if (value < pixels && pixels <= minScrollExtent) // underscroll
-      return value - pixels;
-    if (maxScrollExtent <= pixels && pixels < value) // overscroll
-      return value - pixels;
-    if (value < minScrollExtent && minScrollExtent < pixels) // hit top edge
-      return value - minScrollExtent;
-    if (pixels < maxScrollExtent && maxScrollExtent < value) // hit bottom edge
-      return value - maxScrollExtent;
+  double applyBoundaryConditions(AbsoluteScrollPosition position, double value) {
+    assert(value != position.pixels);
+    if (value < position.pixels && position.pixels <= position.minScrollExtent) // underscroll
+      return value - position.pixels;
+    if (position.maxScrollExtent <= position.pixels && position.pixels < value) // overscroll
+      return value - position.pixels;
+    if (value < position.minScrollExtent && position.minScrollExtent < position.pixels) // hit top edge
+      return value - position.minScrollExtent;
+    if (position.pixels < position.maxScrollExtent && position.maxScrollExtent < value) // hit bottom edge
+      return value - position.maxScrollExtent;
     return 0.0;
   }
 
@@ -440,17 +453,17 @@ abstract class ClampingAbsoluteScrollPositionMixIn implements AbsoluteScrollPosi
   );
 
   @override
-  Simulation createBallisticSimulation(double velocity) {
-    if (outOfRange) {
-      if (pixels > maxScrollExtent)
-        return new ScrollSpringSimulation(_defaultScrollSpring, pixels, maxScrollExtent, math.min(0.0, velocity));
-      if (pixels < minScrollExtent)
-        return new ScrollSpringSimulation(_defaultScrollSpring, pixels, minScrollExtent, math.max(0.0, velocity));
+  Simulation createBallisticSimulation(AbsoluteScrollPosition position, double velocity) {
+    if (position.outOfRange) {
+      if (position.pixels > position.maxScrollExtent)
+        return new ScrollSpringSimulation(_defaultScrollSpring, position.pixels, position.maxScrollExtent, math.min(0.0, velocity));
+      if (position.pixels < position.minScrollExtent)
+        return new ScrollSpringSimulation(_defaultScrollSpring, position.pixels, position.minScrollExtent, math.max(0.0, velocity));
       assert(false);
     }
-    if (!atEdge && velocity.abs() >= scrollTolerances.velocity) {
+    if (!position.atEdge && velocity.abs() >= position.scrollTolerances.velocity) {
       return new ClampingScrollSimulation(
-        position: pixels,
+        position: position.pixels,
         velocity: velocity,
       );
     }
@@ -458,23 +471,17 @@ abstract class ClampingAbsoluteScrollPositionMixIn implements AbsoluteScrollPosi
   }
 }
 
-class _MountainViewViewportScrollPosition extends AbsoluteScrollPosition
-  with ClampingAbsoluteScrollPositionMixIn {
-  _MountainViewViewportScrollPosition(
-    Scrollable2State state,
-    Tolerance scrollTolerances,
-    ScrollPosition oldPosition,
-  ) : super(state, scrollTolerances, oldPosition);
-}
-
 class AbsoluteDragScrollActivity extends DragScrollActivity {
   AbsoluteDragScrollActivity(
-    ScrollPosition position,
+    AbsoluteScrollPosition position,
     DragStartDetails details,
     this.scrollTolerances,
   ) : _lastDetails = details, super(position);
 
   final Tolerance scrollTolerances;
+
+  @override
+  AbsoluteScrollPosition get position => super.position;
 
   @override
   void update(DragUpdateDetails details, { bool reverse }) {
@@ -486,7 +493,7 @@ class AbsoluteDragScrollActivity extends DragScrollActivity {
     if (reverse) // e.g. an AxisDirection.up scrollable
       offset = -offset;
     position.updateUserScrollDirection(offset > 0.0 ? ScrollDirection.forward : ScrollDirection.reverse);
-    position.setPixels(position.pixels - position.applyPhysicsToUserOffset(offset));
+    position.setPixels(position.pixels - position.physics.applyPhysicsToUserOffset(position, offset));
     // We ignore any reported overscroll returned by setPixels,
     // because it gets reported via the reportOverscroll path.
   }

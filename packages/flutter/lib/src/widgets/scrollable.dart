@@ -209,14 +209,6 @@ abstract class ScrollPosition extends ViewportOffset {
     return null;
   }
 
-  /// Used by [AbsoluteDragScrollActivity] and other user-driven activities to
-  /// convert an offset in logical pixels as provided by the [DragUpdateDetails]
-  /// into a delta to apply using [setPixels].
-  ///
-  /// This is used by some [ScrollPosition] subclasses to apply friction during
-  /// overscroll situations.
-  double applyPhysicsToUserOffset(double offset) => offset;
-
   // ///
   // /// The velocity should be in logical pixels per second.
   void beginBallisticActivity(double velocity) {
