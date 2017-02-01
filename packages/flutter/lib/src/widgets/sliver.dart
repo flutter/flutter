@@ -188,6 +188,19 @@ class SliverGrid extends SliverMultiBoxAdaptorWidget {
   }
 }
 
+class SliverFill extends SliverMultiBoxAdaptorWidget {
+  SliverFill({
+    Key key,
+    @required SliverChildDelegate delegate,
+  }) : super(key: key, delegate: delegate);
+
+  @override
+  RenderSliverFill createRenderObject(BuildContext context) {
+    final SliverMultiBoxAdaptorElement element = context;
+    return new RenderSliverFill(childManager: element);
+  }
+}
+
 class SliverMultiBoxAdaptorElement extends RenderObjectElement implements RenderSliverBoxChildManager {
   SliverMultiBoxAdaptorElement(SliverMultiBoxAdaptorWidget widget) : super(widget);
 

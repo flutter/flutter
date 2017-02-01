@@ -24,7 +24,7 @@ void main() {
     expect(find.text('0'), findsOneWidget);
     expect(find.text('1'), findsOneWidget);
     expect(find.text('2'), findsOneWidget);
-    expect(find.text('3'), findsOneWidget);
+    expect(find.text('3'), findsNothing);
     expect(find.text('4'), findsNothing);
 
     await tester.scroll(find.byType(ScrollView), const Offset(0.0, -250.0));
@@ -35,7 +35,7 @@ void main() {
     expect(find.text('2'), findsOneWidget);
     expect(find.text('3'), findsOneWidget);
     expect(find.text('4'), findsOneWidget);
-    expect(find.text('5'), findsOneWidget);
+    expect(find.text('5'), findsNothing);
     expect(find.text('6'), findsNothing);
 
     await tester.scroll(find.byType(ScrollView), const Offset(0.0, 200.0));
@@ -45,7 +45,7 @@ void main() {
     expect(find.text('1'), findsOneWidget);
     expect(find.text('2'), findsOneWidget);
     expect(find.text('3'), findsOneWidget);
-    expect(find.text('4'), findsOneWidget);
+    expect(find.text('4'), findsNothing);
     expect(find.text('5'), findsNothing);
   });
 
@@ -68,7 +68,7 @@ void main() {
       ),
     );
 
-    expect(log, equals(<int>[0, 1, 2, 3]));
+    expect(log, equals(<int>[0, 1, 2]));
     log.clear();
 
     Scrollable2State state = tester.state(find.byType(Scrollable2));
@@ -78,7 +78,7 @@ void main() {
     expect(log, isEmpty);
     await tester.pump();
 
-    expect(log, equals(<int>[10, 11, 12, 13, 14]));
+    expect(log, equals(<int>[10, 11, 12, 13]));
     log.clear();
 
     position.jumpTo(975.0);
@@ -86,7 +86,7 @@ void main() {
     expect(log, isEmpty);
     await tester.pump();
 
-    expect(log, equals(<int>[4, 5, 6, 7, 8]));
+    expect(log, equals(<int>[4, 5, 6, 7]));
     log.clear();
   });
 }
