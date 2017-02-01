@@ -43,7 +43,7 @@ class TestRenderSliverBoxChildManager extends RenderSliverBoxChildManager {
   }
 
   @override
-  double estimateMaxScrollOffset(SliverConstraints constraints, {
+  double estimateScrollOffsetExtent({
     int firstIndex,
     int lastIndex,
     double leadingScrollOffset,

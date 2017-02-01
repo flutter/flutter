@@ -132,7 +132,7 @@ abstract class RenderSliverAppBar extends RenderSliver with RenderObjectWithChil
   ///
   /// If there is no child, this should return 0.0.
   @override
-  double childMainAxisPosition(@checked RenderObject child) => super.childMainAxisPosition(child);
+  double childPosition(@checked RenderObject child) => super.childPosition(child);
 
   @override
   bool hitTestChildren(HitTestResult result, { @required double mainAxisPosition, @required double crossAxisPosition }) {
@@ -155,16 +155,16 @@ abstract class RenderSliverAppBar extends RenderSliver with RenderObjectWithChil
       assert(constraints.axisDirection != null);
       switch (applyGrowthDirectionToAxisDirection(constraints.axisDirection, constraints.growthDirection)) {
         case AxisDirection.up:
-          offset += new Offset(0.0, geometry.paintExtent - childMainAxisPosition(child) - childExtent);
+          offset += new Offset(0.0, geometry.paintExtent - childPosition(child) - childExtent);
           break;
         case AxisDirection.down:
-          offset += new Offset(0.0, childMainAxisPosition(child));
+          offset += new Offset(0.0, childPosition(child));
           break;
         case AxisDirection.left:
-          offset += new Offset(geometry.paintExtent - childMainAxisPosition(child) - childExtent, 0.0);
+          offset += new Offset(geometry.paintExtent - childPosition(child) - childExtent, 0.0);
           break;
         case AxisDirection.right:
-          offset += new Offset(childMainAxisPosition(child), 0.0);
+          offset += new Offset(childPosition(child), 0.0);
           break;
       }
       context.paintChild(child, offset);
@@ -180,7 +180,7 @@ abstract class RenderSliverAppBar extends RenderSliver with RenderObjectWithChil
       description.add('maxExtent: EXCEPTION (${e.runtimeType}) WHILE COMPUTING MAX EXTENT');
     }
     try {
-      description.add('child position: ${childMainAxisPosition(child).toStringAsFixed(1)}');
+      description.add('child position: ${childPosition(child).toStringAsFixed(1)}');
     } catch (e) {
       description.add('child position: EXCEPTION (${e.runtimeType}) WHILE COMPUTING CHILD POSITION');
     }
@@ -216,7 +216,7 @@ abstract class RenderSliverScrollingAppBar extends RenderSliverAppBar {
   }
 
   @override
-  double childMainAxisPosition(RenderBox child) {
+  double childPosition(RenderBox child) {
     assert(child == this.child);
     return _childPosition;
   }
@@ -246,7 +246,7 @@ abstract class RenderSliverPinnedAppBar extends RenderSliverAppBar {
   }
 
   @override
-  double childMainAxisPosition(RenderBox child) {
+  double childPosition(RenderBox child) {
     assert(child == this.child);
     return constraints?.overlap;
   }
@@ -298,7 +298,7 @@ abstract class RenderSliverFloatingAppBar extends RenderSliverAppBar {
   }
 
   @override
-  double childMainAxisPosition(RenderBox child) {
+  double childPosition(RenderBox child) {
     assert(child == this.child);
     return _childPosition;
   }

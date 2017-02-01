@@ -131,9 +131,9 @@ class _GridPhotoViewerState extends State<GridPhotoViewer> with SingleTickerProv
               ..translate(_offset.dx, _offset.dy)
               ..scale(_scale),
             child: new ClipRect(
-              child: new Image.asset(config.photo.assetName, fit: ImageFit.cover),
-            ),
-          ),
+              child: new Image.asset(config.photo.assetName, fit: ImageFit.cover)
+            )
+          )
         );
       }
     );
@@ -200,11 +200,11 @@ class GridDemoPhotoItem extends StatelessWidget {
               backgroundColor: Colors.black45,
               leading: new Icon(
                 icon,
-                color: Colors.white,
-              ),
-            ),
+                color: Colors.white
+              )
+            )
           ),
-          child: image,
+          child: image
         );
 
       case GridDemoTileStyle.twoLine:
@@ -217,11 +217,11 @@ class GridDemoPhotoItem extends StatelessWidget {
               subtitle: new _GridTitleText(photo.caption),
               trailing: new Icon(
                 icon,
-                color: Colors.white,
-              ),
-            ),
+                color: Colors.white
+              )
+            )
           ),
-          child: image,
+          child: image
         );
     }
     assert(tileStyle != null);
@@ -245,62 +245,62 @@ class GridListDemoState extends State<GridListDemo> {
     new Photo(
       assetName: 'packages/flutter_gallery_assets/landscape_0.jpg',
       title: 'Philippines',
-      caption: 'Batad rice terraces',
+      caption: 'Batad rice terraces'
     ),
     new Photo(
       assetName: 'packages/flutter_gallery_assets/landscape_1.jpg',
       title: 'Italy',
-      caption: 'Ceresole Reale',
+      caption: 'Ceresole Reale'
     ),
     new Photo(
       assetName: 'packages/flutter_gallery_assets/landscape_2.jpg',
       title: 'Somewhere',
-      caption: 'Beautiful mountains',
+      caption: 'Beautiful mountains'
     ),
     new Photo(
       assetName: 'packages/flutter_gallery_assets/landscape_3.jpg',
       title: 'A place',
-      caption: 'Beautiful hills',
+      caption: 'Beautiful hills'
     ),
     new Photo(
       assetName: 'packages/flutter_gallery_assets/landscape_4.jpg',
       title: 'New Zealand',
-      caption: 'View from the van',
+      caption: 'View from the van'
     ),
     new Photo(
       assetName: 'packages/flutter_gallery_assets/landscape_5.jpg',
       title: 'Autumn',
-      caption: 'The golden season',
+      caption: 'The golden season'
     ),
     new Photo(
       assetName: 'packages/flutter_gallery_assets/landscape_6.jpg',
       title: 'Germany',
-      caption: 'Englischer Garten',
+      caption: 'Englischer Garten'
     ),
     new Photo(
       assetName: 'packages/flutter_gallery_assets/landscape_7.jpg',
       title: 'A country',
-      caption: 'Grass fields',
+      caption: 'Grass fields'
     ),
     new Photo(
       assetName: 'packages/flutter_gallery_assets/landscape_8.jpg',
       title: 'Mountain country',
-      caption: 'River forest',
+      caption: 'River forest'
     ),
     new Photo(
       assetName: 'packages/flutter_gallery_assets/landscape_9.jpg',
       title: 'Alpine place',
-      caption: 'Green hills',
+      caption: 'Green hills'
     ),
     new Photo(
       assetName: 'packages/flutter_gallery_assets/landscape_10.jpg',
       title: 'Desert land',
-      caption: 'Blue skies',
+      caption: 'Blue skies'
     ),
     new Photo(
       assetName: 'packages/flutter_gallery_assets/landscape_11.jpg',
       title: 'Narnia',
-      caption: 'Rocks and rivers',
+      caption: 'Rocks and rivers'
     ),
   ];
 
@@ -325,29 +325,31 @@ class GridListDemoState extends State<GridListDemo> {
             itemBuilder: (BuildContext context) => <PopupMenuItem<GridDemoTileStyle>>[
               new PopupMenuItem<GridDemoTileStyle>(
                 value: GridDemoTileStyle.imageOnly,
-                child: new Text('Image only'),
+                child: new Text('Image only')
               ),
               new PopupMenuItem<GridDemoTileStyle>(
                 value: GridDemoTileStyle.oneLine,
-                child: new Text('One line'),
+                child: new Text('One line')
               ),
               new PopupMenuItem<GridDemoTileStyle>(
                 value: GridDemoTileStyle.twoLine,
-                child: new Text('Two line'),
-              ),
-            ],
-          ),
-        ],
+                child: new Text('Two line')
+              )
+            ]
+          )
+        ]
       ),
       body: new Column(
         children: <Widget>[
           new Expanded(
-            child: new ScrollGrid.count(
-              crossAxisCount: (orientation == Orientation.portrait) ? 2 : 3,
-              mainAxisSpacing: 4.0,
-              crossAxisSpacing: 4.0,
-              padding: const EdgeInsets.all(4.0),
-              childAspectRatio: (orientation == Orientation.portrait) ? 1.0 : 1.3,
+            child: new ScrollableGrid(
+              delegate: new FixedColumnCountGridDelegate(
+                columnCount: (orientation == Orientation.portrait) ? 2 : 3,
+                rowSpacing: 4.0,
+                columnSpacing: 4.0,
+                padding: const EdgeInsets.all(4.0),
+                tileAspectRatio: (orientation == Orientation.portrait) ? 1.0 : 1.3
+              ),
               children: photos.map((Photo photo) {
                 return new GridDemoPhotoItem(
                   photo: photo,
@@ -358,7 +360,7 @@ class GridListDemoState extends State<GridListDemo> {
                     });
                   }
                 );
-              }).toList(),
+              })
             )
           )
         ]

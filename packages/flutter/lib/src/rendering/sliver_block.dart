@@ -184,18 +184,17 @@ class RenderSliverBlock extends RenderSliverMultiBoxAdaptor {
     collectGarbage(leadingGarbage, trailingGarbage);
 
     assert(debugAssertChildListIsNonEmptyAndContiguous());
-    double estimatedMaxScrollOffset;
+    double estimatedTotalExtent;
     if (reachedEnd) {
-      estimatedMaxScrollOffset = endScrollOffset;
+      estimatedTotalExtent = endScrollOffset;
     } else {
-      estimatedMaxScrollOffset = childManager.estimateMaxScrollOffset(
-        constraints,
+      estimatedTotalExtent = childManager.estimateScrollOffsetExtent(
         firstIndex: indexOf(firstChild),
         lastIndex: indexOf(lastChild),
         leadingScrollOffset: offsetOf(firstChild),
         trailingScrollOffset: endScrollOffset,
       );
-      assert(estimatedMaxScrollOffset >= endScrollOffset - offsetOf(firstChild));
+      assert(estimatedTotalExtent >= endScrollOffset - offsetOf(firstChild));
     }
     final double paintedExtent = calculatePaintOffset(
       constraints,
@@ -203,9 +202,9 @@ class RenderSliverBlock extends RenderSliverMultiBoxAdaptor {
       to: endScrollOffset,
     );
     geometry = new SliverGeometry(
-      scrollExtent: estimatedMaxScrollOffset,
+      scrollExtent: estimatedTotalExtent,
       paintExtent: paintedExtent,
-      maxPaintExtent: estimatedMaxScrollOffset,
+      maxPaintExtent: estimatedTotalExtent,
       // Conservative to avoid flickering away the clip during scroll.
       hasVisualOverflow: endScrollOffset > targetEndScrollOffset || constraints.scrollOffset > 0.0,
     );
