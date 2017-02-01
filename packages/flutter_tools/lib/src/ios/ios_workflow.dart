@@ -38,6 +38,8 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
 
   String get iosDeployVersionText => runSync(<String>['ios-deploy', '--version']).replaceAll('\n', '');
 
+  bool get hasHomebrew => os.which('brew') != null;
+
   bool get _iosDeployIsInstalledAndMeetsVersionCheck {
     if (!hasIosDeploy)
       return false;
@@ -89,7 +91,7 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
     }
 
     // brew installed
-    if (os.which('brew') != null) {
+    if (hasHomebrew) {
       brewStatus = ValidationType.installed;
 
       if (!exitsHappy(<String>['ideviceinstaller', '-h'])) {
@@ -132,9 +134,13 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
     }
 
     return new ValidationResult(
-      xcodeStatus == brewStatus ? xcodeStatus : ValidationType.partial,
+      <ValidationType>[xcodeStatus, brewStatus].reduce(_mergeValidationTypes),
       messages,
       statusInfo: xcodeVersionInfo
     );
+  }
+
+  ValidationType _mergeValidationTypes(ValidationType t1, ValidationType t2) {
+    return t1 == t2 ? t1 : ValidationType.partial;
   }
 }
