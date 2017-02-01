@@ -53,7 +53,7 @@ void main() {
       ));
       expect(find.text('AsyncSnapshot(ConnectionState.waiting, null, null)'), findsOneWidget);
       await tester.pumpWidget(new FutureBuilder<String>(
-          key: key, future: null, builder: snapshotText
+        key: key, future: null, builder: snapshotText
       ));
       expect(find.text('AsyncSnapshot(ConnectionState.none, null, null)'), findsOneWidget);
       completer.complete('hello');
