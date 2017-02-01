@@ -139,8 +139,7 @@ void main() {
   });
 
   group('find.descendant', () {
-    testWidgets('fails with a descriptive message',
-        (WidgetTester tester) async {
+    testWidgets('fails with a descriptive message',(WidgetTester tester) async {
       await tester.pumpWidget(new Row(children: [
         new Column(children: [new Text('foo')]),
         new Text('bar')
@@ -148,8 +147,7 @@ void main() {
 
       TestFailure failure;
       try {
-        expect(find.descendant(
-                ancestor: find.widgetWithText(Column, 'foo'),
+        expect(find.descendant(ancestor: find.widgetWithText(Column, 'foo'),
                 descendant: find.text('bar')), findsOneWidget);
       } catch (e) {
         failure = e;
@@ -158,8 +156,7 @@ void main() {
       expect(failure, isNotNull);
       expect(
           failure.message,
-          contains(
-              'Actual: ?:<zero widgets with type Column with text "foo" has descendant(s) with text "bar"'));
+          contains('Actual: ?:<zero widgets with type Column with text "foo" has descendant(s) with text "bar"'));
     });
   });
 }
