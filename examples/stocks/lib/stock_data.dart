@@ -76,7 +76,7 @@ class StockDataFetcher {
       String json = response.body;
       if (json == null) {
         print("Failed to load stock data chunk ${_nextChunk - 1}");
-        return;
+        return null;
       }
       JsonDecoder decoder = new JsonDecoder();
       callback(new StockData(decoder.convert(json)));

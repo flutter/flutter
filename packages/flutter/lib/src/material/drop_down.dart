@@ -517,7 +517,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> {
       style: _textStyle,
     )).then<Null>((_DropdownRouteResult<T> newValue) {
       if (!mounted || newValue == null)
-        return;
+        return null;
       if (config.onChanged != null)
         config.onChanged(newValue.result);
     });

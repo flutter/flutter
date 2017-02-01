@@ -278,7 +278,7 @@ class IOSDevice extends Device {
 
       Future<int> launch = runCommandAndStreamOutput(launchCommand, trace: true);
 
-      List<Uri> uris = await launch.then((int result) async {
+      List<Uri> uris = await launch.then<List<Uri>>((int result) async {
         installationResult = result;
 
         if (result != 0) {

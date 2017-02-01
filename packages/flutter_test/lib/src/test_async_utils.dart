@@ -102,8 +102,10 @@ class TestAsyncUtils {
         throw new FlutterError(message.toString().trimRight());
       }
     }
-    return result.then(
-      (Null value) => completionHandler(null, null),
+    return result.then<Null>(
+      (Null value) {
+        completionHandler(null, null);
+      },
       onError: completionHandler
     );
   }
