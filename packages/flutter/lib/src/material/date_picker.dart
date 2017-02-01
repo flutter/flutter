@@ -513,7 +513,7 @@ class YearPicker extends StatefulWidget {
   }) : super(key: key) {
     assert(selectedDate != null);
     assert(onChanged != null);
-    assert(firstDate.isAfter(lastDate));
+    assert(!firstDate.isAfter(lastDate));
   }
 
   /// The currently selected date.
