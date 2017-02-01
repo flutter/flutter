@@ -154,14 +154,12 @@ void main() {
 
   testWidgets('Tap immediately following clamped overscroll', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/5709
-    GlobalKey<ScrollableState> scrollableKey = new GlobalKey<ScrollableState>();
     List<int> tapped = <int>[];
 
     await tester.pumpWidget(
       new ClampOverscrolls(
         edge: ScrollableEdge.both,
         child: new ScrollableList(
-          scrollableKey: scrollableKey,
           itemExtent: 200.0,
           children: items.map((int item) {
             return new Container(
@@ -176,8 +174,9 @@ void main() {
     );
 
     await tester.fling(find.text('0'), const Offset(0.0, 400.0), 1000.0);
-    expect(scrollableKey.currentState.scrollOffset, equals(0.0));
-    expect(scrollableKey.currentState.virtualScrollOffset, lessThan(0.0));
+    final ScrollableState scrollable = tester.state(find.byType(Scrollable));
+    expect(scrollable.scrollOffset, equals(0.0));
+    expect(scrollable.virtualScrollOffset, lessThan(0.0));
 
     await tester.tapAt(const Point(200.0, 100.0));
     expect(tapped, equals(<int>[0]));

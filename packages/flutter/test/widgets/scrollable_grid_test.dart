@@ -15,7 +15,6 @@ void main() {
 
   // Tests https://github.com/flutter/flutter/issues/5522
   testWidgets('ScrollableGrid displays correct children with nonzero padding', (WidgetTester tester) async {
-    GlobalKey<ScrollableState> scrollableKey = new GlobalKey<ScrollableState>();
     final EdgeInsets padding = const EdgeInsets.fromLTRB(0.0, 100.0, 0.0, 0.0);
 
     Widget testWidget = new Align(
@@ -23,7 +22,6 @@ void main() {
         height: 800.0,
         width: 300.0,  // forces the grid children to be 300..300
         child: new ScrollableGrid(
-          scrollableKey: scrollableKey,
           delegate: new FixedColumnCountGridDelegate(
             columnCount: 1,
             padding: padding

@@ -98,7 +98,8 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
     assert(indexOf(firstChild) == firstIndex);
     assert(lastIndex <= targetLastIndex);
 
-    final double estimatedTotalExtent = childManager.estimateScrollOffsetExtent(
+    final double estimatedMaxScrollOffset = childManager.estimateMaxScrollOffset(
+      constraints,
       firstIndex: firstIndex,
       lastIndex: lastIndex,
       leadingScrollOffset: leadingScrollOffset,
@@ -112,9 +113,9 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
     );
 
     geometry = new SliverGeometry(
-      scrollExtent: estimatedTotalExtent,
+      scrollExtent: estimatedMaxScrollOffset,
       paintExtent: paintedExtent,
-      maxPaintExtent: estimatedTotalExtent,
+      maxPaintExtent: estimatedMaxScrollOffset,
       // Conservative to avoid flickering away the clip during scroll.
       hasVisualOverflow: lastIndex >= targetLastIndex || constraints.scrollOffset > 0.0,
     );

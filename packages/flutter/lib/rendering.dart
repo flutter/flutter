@@ -47,6 +47,7 @@ export 'src/rendering/shifted_box.dart';
 export 'src/rendering/sliver.dart';
 export 'src/rendering/sliver_app_bar.dart';
 export 'src/rendering/sliver_block.dart';
+export 'src/rendering/sliver_grid.dart';
 export 'src/rendering/sliver_list.dart';
 export 'src/rendering/sliver_multi_box_adaptor.dart';
 export 'src/rendering/sliver_padding.dart';

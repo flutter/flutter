@@ -58,7 +58,7 @@ void main() {
   });
 
   testWidgets('Inherited ScrollConfiguration changed', (WidgetTester tester) async {
-    final GlobalKey scrollableKey = new GlobalKey(debugLabel: 'scrollable');
+    final GlobalKey key = new GlobalKey(debugLabel: 'scrollable');
     TestScrollConfigurationDelegate delegate;
     ExtentScrollBehavior behavior;
 
@@ -66,7 +66,7 @@ void main() {
       new ScrollConfiguration(
         delegate: new TestScrollConfigurationDelegate(true),
         child: new ScrollableViewport(
-          scrollableKey: scrollableKey,
+          key: key,
           child: new Builder(
             builder: (BuildContext context) {
               delegate = ScrollConfiguration.of(context);
@@ -89,7 +89,7 @@ void main() {
       new ScrollConfiguration(
         delegate: new TestScrollConfigurationDelegate(false),
         child: new ScrollableViewport(
-          scrollableKey: scrollableKey,
+          key: key,
           child: new Builder(
             builder: (BuildContext context) {
               delegate = ScrollConfiguration.of(context);
