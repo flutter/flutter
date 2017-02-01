@@ -5,6 +5,7 @@
 #include "flutter/vulkan/vulkan_device.h"
 
 #include <limits>
+#include <map>
 #include <vector>
 
 #include "flutter/vulkan/vulkan_proc_table.h"
@@ -273,14 +274,40 @@ bool VulkanDevice::ChooseSurfaceFormat(const VulkanSurface& surface,
     return false;
   }
 
+  std::map<VkFormat, VkSurfaceFormatKHR> supported_formats;
+
   for (uint32_t i = 0; i < format_count; i++) {
     if (GrVkFormatToPixelConfig(formats[i].format, nullptr /* dont care */)) {
-      *format = formats[i];
+      supported_formats[formats[i].format] = formats[i];
+    }
+  }
+
+  if (supported_formats.size() == 0) {
+    return false;
+  }
+
+  const std::vector<VkFormat> desired_formats = {
+      VK_FORMAT_R8G8B8A8_SRGB,       // kSRGBA_8888_GrPixelConfig
+      VK_FORMAT_B8G8R8A8_SRGB,       // kSBGRA_8888_GrPixelConfig
+      VK_FORMAT_R16G16B16A16_SFLOAT  // kRGBA_half_GrPixelConfig
+      VK_FORMAT_R8G8B8A8_UNORM,      // kRGBA_8888_GrPixelConfig
+      VK_FORMAT_B8G8R8A8_UNORM,      // kBGRA_8888_GrPixelConfig
+  };
+
+  // Try to find the first supported format in the list of desired formats.
+  for (VkFormat current_format : desired_formats) {
+    auto found = supported_formats.find(current_format);
+    if (found != supported_formats.end()) {
+      *format = found->second;
       return true;
     }
   }
 
-  return false;
+  // None of the desired formats were supported. Return the first supported
+  // format even if we don't like it all that much (it has already returned true
+  // for GrVkFormatToPixelConfig).
+  *format = supported_formats.begin()->second;
+  return true;
 }
 
 bool VulkanDevice::ChoosePresentMode(const VulkanSurface& surface,
