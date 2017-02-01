@@ -9,6 +9,7 @@
 #include "flutter/common/threads.h"
 #include "flutter/shell/common/switches.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/FlutterDartSource.h"
+#include "flutter/shell/platform/darwin/ios/framework/Source/flutter_main_ios.h"
 
 static NSURL* URLForSwitch(const char* name) {
   auto cmd = *base::CommandLine::ForCurrentProcess();
@@ -29,6 +30,12 @@ static NSURL* URLForSwitch(const char* name) {
   FlutterDartSource* _dartSource;
 
   VMType _vmTypeRequirement;
+}
+
++ (void)initialize {
+  if (self == [FlutterDartProject class]) {
+    shell::FlutterMain();
+  }
 }
 
 #pragma mark - Override base class designated initializers
