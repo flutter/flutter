@@ -184,13 +184,13 @@ class CommonFinders {
   ///
   /// Example:
   ///
-  ///     expect(tester, hasWidget(find.descedant(
+  ///     expect(tester, hasWidget(find.descendant(
   ///       ancestor: find.widgetWithText(Row, 'label_1'), descendant: find.text('value_1')));
   ///
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// nodes that are [Offstage] or that are from inactive [Route]s.
-  Finder descendant({ Finder ancestor, Finder descendant, bool skipOffstage: true }) {
-    return new _DescendantFinder(ancestor, descendant, skipOffstage: skipOffstage);
+  Finder descendant({ Finder of, Finder matching, bool skipOffstage: true }) {
+    return new _DescendantFinder(of, matching, skipOffstage: skipOffstage);
   }
 }
 
@@ -500,7 +500,6 @@ class _DescendantFinder extends Finder {
 
   @override
   Iterable<Element> get _allElements {
-    assert(ancestor.evaluate().length == 1);
-    return collectAllElementsFrom(ancestor.evaluate().single, skipOffstage: skipOffstage);
+    return ancestor.evaluate().expand((Element element) => collectAllElementsFrom(element, skipOffstage: skipOffstage)).toList();
   }
 }
