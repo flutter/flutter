@@ -4,6 +4,8 @@
 
 import 'dart:async';
 
+import 'package:pub_semver/pub_semver.dart' show Version;
+
 import '../base/io.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
@@ -29,6 +31,23 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
   bool get canLaunchDevices => xcode.isInstalledAndMeetsVersionCheck;
 
   bool get hasIDeviceId => exitsHappy(<String>['idevice_id', '-h']);
+
+  bool get hasIosDeploy => exitsHappy(<String>['ios-deploy', '-h']);
+
+  String get iosDeployMinimumVersion => '1.9.0';
+
+  String get iosDeployVersionText => runSync(<String>['ios-deploy', '--version']).replaceAll('\n', '');
+
+  bool get _iosDeployIsInstalledAndMeetsVersionCheck {
+    if (!hasIosDeploy)
+      return false;
+    try {
+      Version version = new Version.parse(iosDeployVersionText);
+      return version >= new Version.parse(iosDeployMinimumVersion);
+    } on FormatException catch (_) {
+      return false;
+    }
+  }
 
   @override
   Future<ValidationResult> validate() async {
@@ -81,10 +100,14 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
         ));
       }
 
-      if (!hasIDeviceId) {
+      // Check ios-deploy is installed at meets version requirements.
+      if (hasIosDeploy) {
+        messages.add(new ValidationMessage('ios-deploy $iosDeployVersionText'));
+      }
+      if (!hasIDeviceId || !_iosDeployIsInstalledAndMeetsVersionCheck) {
         brewStatus = ValidationType.partial;
         messages.add(new ValidationMessage.error(
-          'ios-deploy not available; this is used to deploy to connected iOS devices.\n'
+          'ios-deploy version >= $iosDeployMinimumVersion not available; this is used to deploy to connected iOS devices.\n'
           'Install via \'brew install ios-deploy\'.'
         ));
       } else {
