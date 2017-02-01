@@ -137,4 +137,35 @@ void main() {
       expect(failure.message, contains('Actual: ?:<zero widgets with $customDescription'));
     });
   });
+
+  group('find.descendant', () {
+    testWidgets('fails with a custom description in the message',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(new Row(children: [
+        new Column(children: [new Text('foo')]),
+        new Text('bar')
+      ]));
+
+      TestFailure failure;
+      try {
+        expect(
+            find.descendant(
+                ancestor: find.widgetWithText(Column, 'foo'),
+                descendant: find.text('bar')),
+            findsOneWidget);
+      } catch (e) {
+        failure = e;
+      }
+
+      expect(failure, isNotNull);
+      expect(failure.message,
+          contains('Expected: exactly one matching node in the widget tree\n'));
+      expect(
+          failure.message,
+          contains(
+              'Actual: ?:<zero widgets with find text "bar" in type Column with text "foo" (ignoring offstage widgets)>\n'));
+      expect(failure.message,
+          contains('Which: means none were found but one was expected\n'));
+    });
+  });
 }

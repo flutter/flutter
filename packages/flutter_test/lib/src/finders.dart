@@ -178,6 +178,20 @@ class CommonFinders {
   Finder byElementPredicate(ElementPredicate predicate, { String description, bool skipOffstage: true }) {
     return new _ElementPredicateFinder(predicate, description: description, skipOffstage: skipOffstage);
   }
+
+  /// Looks for widgets that match the pattern of descendant finder under the
+  /// widget tree with ancestor as the root.
+  ///
+  /// Example:
+  ///
+  ///     expect(tester, hasWidget(find.descedant(
+  ///       ancestor: find.widgetWithText(Row, 'label_1'), descendant: find.text('value_1')));
+  ///
+  /// If the `skipOffstage` argument is true (the default), then this skips
+  /// nodes that are [Offstage] or that are from inactive [Route]s.
+  Finder descendant({ Finder ancestor, Finder descendant, bool skipOffstage: true }) {
+    return new _DescendantFinder(ancestor, descendant, skipOffstage: skipOffstage);
+  }
 }
 
 /// Searches a widget tree and returns nodes that match a particular
@@ -467,5 +481,26 @@ class _ElementPredicateFinder extends MatchFinder {
   @override
   bool matches(Element candidate) {
     return predicate(candidate);
+  }
+}
+
+class _DescendantFinder extends Finder {
+  _DescendantFinder(this.ancestor, this.descendant, { bool skipOffstage: true }) : super(skipOffstage: skipOffstage);
+
+  final Finder ancestor;
+  final Finder descendant;
+
+  @override
+  String get description => 'find ${descendant.description} in ${ancestor.description}';
+
+  @override
+  Iterable<Element> apply(Iterable<Element> candidates) {
+    return candidates.where((Element element) => descendant.evaluate().contains(element));
+  }
+
+  @override
+  Iterable<Element> get _allElements {
+    assert(ancestor.evaluate().length == 1);
+    return collectAllElementsFrom(ancestor.evaluate().single, skipOffstage: skipOffstage);
   }
 }
