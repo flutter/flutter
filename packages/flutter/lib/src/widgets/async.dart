@@ -184,39 +184,36 @@ enum ConnectionState {
 class AsyncSnapshot<T> {
   /// Creates an [AsyncSnapshot] with the specified [connectionState],
   /// and optionally either [data] or [error] (but not both).
-  AsyncSnapshot(this.connectionState, this.data, this.error) {
+  AsyncSnapshot._(this.connectionState, this.data, this.error) {
     assert(connectionState != null);
     assert(data == null || error == null);
   }
 
-  /// Creates an [AsyncSnapshot] in [ConnectionState.none] with `null` data and
-  /// `error`.
-  factory AsyncSnapshot.nothing() => new AsyncSnapshot<T>(ConnectionState.none, null, null);
+  /// Creates an [AsyncSnapshot] in [ConnectionState.none] with `null` data and error.
+  AsyncSnapshot.nothing() : this._(ConnectionState.none, null, null);
 
-  /// Creates an [AsyncSnapshot] in [ConnectionState.active] with the specified
-  /// [data].
-  factory AsyncSnapshot.activeData(T data) => new AsyncSnapshot<T>(ConnectionState.active, data, null);
+  /// Creates an [AsyncSnapshot] in the specified [state] and with the specified [data].
+  AsyncSnapshot.withData(ConnectionState state, T data) : this._(state, data, null);
 
-  /// Creates an [AsyncSnapshot] in [ConnectionState.active] with the specified
-  /// [error].
-  factory AsyncSnapshot.activeError(Object error) => new AsyncSnapshot<T>(ConnectionState.active, null, error);
+  /// Creates an [AsyncSnapshot] in the specified [state] and with the specified [error].
+  AsyncSnapshot.withError(ConnectionState state, Object error) : this._(state, null, error);
 
   /// Current state of connection to the asynchronous computation.
   final ConnectionState connectionState;
 
-  /// Latest data received. Is null, if [error] is not.
+  /// Latest data received. Is `null`, if [error] is not.
   final T data;
 
-  /// Latest error object received. Is null, if [data] is not.
+  /// Latest error object received. Is `null`, if [data] is not.
   final Object error;
 
   /// Returns a snapshot like this one, but in the specified [state].
-  AsyncSnapshot<T> inState(ConnectionState state) => new AsyncSnapshot<T>(state, data, error);
+  AsyncSnapshot<T> inState(ConnectionState state) => new AsyncSnapshot<T>._(state, data, error);
 
-  /// Returns whether this snapshot contains a non-null data value.
+  /// Returns whether this snapshot contains a non-`null` data value.
   bool get hasData => data != null;
 
-  /// Returns whether this snapshot contains a non-null error value.
+  /// Returns whether this snapshot contains a non-`null` error value.
   bool get hasError => error != null;
 
   @override
@@ -279,8 +276,8 @@ typedef Widget AsyncWidgetBuilder<T>(BuildContext context, AsyncSnapshot<T> snap
 /// * `new AsyncSnapshot<int>(ConnectionState.none, 5, null)`
 /// * `new AsyncSnapshot<int>(ConnectionState.waiting, 5, null)`
 ///
-/// The latter will be produced only when the new stream is non-null. The former
-/// only when the old stream is non-null.
+/// The latter will be produced only when the new stream is non-`null`. The former
+/// only when the old stream is non-`null`.
 ///
 /// The stream may produce errors, resulting in snapshots of the form
 ///
@@ -315,10 +312,14 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
   AsyncSnapshot<T> afterConnected(AsyncSnapshot<T> current) => current.inState(ConnectionState.waiting);
 
   @override
-  AsyncSnapshot<T> afterData(AsyncSnapshot<T> current, T data) => new AsyncSnapshot<T>.activeData(data);
+  AsyncSnapshot<T> afterData(AsyncSnapshot<T> current, T data) {
+    return new AsyncSnapshot<T>.withData(ConnectionState.active, data);
+  }
 
   @override
-  AsyncSnapshot<T> afterError(AsyncSnapshot<T> current, Object error) => new AsyncSnapshot<T>.activeError(error);
+  AsyncSnapshot<T> afterError(AsyncSnapshot<T> current, Object error) {
+    return new AsyncSnapshot<T>.withError(ConnectionState.active, error);
+  }
 
   @override
   AsyncSnapshot<T> afterDone(AsyncSnapshot<T> current) => current.inState(ConnectionState.done);
@@ -361,7 +362,7 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
 /// * `new AsyncSnapshot<String>(ConnectionState.waiting, 'some data', null)`
 ///
 /// In general, the latter will be produced only when the new future is
-/// non-null. The former only when the old future is non-null.
+/// non-`null`. The former only when the old future is non-`null`.
 ///
 /// A [FutureBuilder] behaves identically to a [StreamBuilder] configured with
 /// `future?.asStream()`, except that snapshots with `ConnectionState.active`
@@ -427,13 +428,13 @@ class _FutureBuilderState<T> extends State<FutureBuilder<T>> {
       config.future.then<Null>((T data) {
         if (_activeCallbackIdentity == callbackIdentity) {
           setState(() {
-            _snapshot = new AsyncSnapshot<T>(ConnectionState.done, data, null);
+            _snapshot = new AsyncSnapshot<T>.withData(ConnectionState.done, data);
           });
         }
       }, onError: (Object error) {
         if (_activeCallbackIdentity == callbackIdentity) {
           setState(() {
-            _snapshot = new AsyncSnapshot<T>(ConnectionState.done, null, error);
+            _snapshot = new AsyncSnapshot<T>.withError(ConnectionState.done, error);
           });
         }
       });
