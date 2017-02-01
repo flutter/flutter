@@ -49,6 +49,8 @@ PlatformViewGLFW::PlatformViewGLFW()
   });
 
   valid_ = true;
+
+  PostAddToShellTask();
 }
 
 PlatformViewGLFW::~PlatformViewGLFW() {

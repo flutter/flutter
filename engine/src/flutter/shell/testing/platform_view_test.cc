@@ -12,6 +12,7 @@ namespace shell {
 PlatformViewTest::PlatformViewTest()
     : PlatformView(std::unique_ptr<Rasterizer>(new NullRasterizer())) {
   CreateEngine();
+  PostAddToShellTask();
 }
 
 PlatformViewTest::~PlatformViewTest() = default;

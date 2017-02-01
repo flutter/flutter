@@ -18,10 +18,7 @@ namespace shell {
 PlatformView::PlatformView(std::unique_ptr<Rasterizer> rasterizer)
     : rasterizer_(std::move(rasterizer)),
       size_(SkISize::Make(0, 0)),
-      weak_factory_(this) {
-  blink::Threads::UI()->PostTask(
-      [self = GetWeakPtr()] { Shell::Shared().AddPlatformView(self); });
-}
+      weak_factory_(this) {}
 
 PlatformView::~PlatformView() {
   blink::Threads::UI()->PostTask([] { Shell::Shared().PurgePlatformViews(); });
@@ -35,6 +32,13 @@ PlatformView::~PlatformView() {
 
 void PlatformView::CreateEngine() {
   engine_.reset(new Engine(this));
+}
+
+// Add this to the shell's list of PlatformVIews.
+// Subclasses should call this after the object is fully constructed.
+void PlatformView::PostAddToShellTask() {
+  blink::Threads::UI()->PostTask(
+      [self = GetWeakPtr()] { Shell::Shared().AddPlatformView(self); });
 }
 
 void PlatformView::DispatchPlatformMessage(

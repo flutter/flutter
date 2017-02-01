@@ -104,6 +104,8 @@ PlatformViewAndroid::PlatformViewAndroid()
   SetupResourceContextOnIOThread();
 
   UpdateThreadPriorities();
+
+  PostAddToShellTask();
 }
 
 PlatformViewAndroid::~PlatformViewAndroid() = default;
