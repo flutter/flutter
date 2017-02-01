@@ -97,6 +97,11 @@ enum AxisDirection {
   left,
 }
 
+/// Returns the [Axis] that contains the given [AxisDirection].
+///
+/// Specifically, returns [Axis.vertical] for [AxisDirection.up] and
+/// [AxisDirection.down] and returns [Axis.horizontal] for [AxisDirection.left]
+/// and [AxisDirection.right].
 Axis axisDirectionToAxis(AxisDirection axisDirection) {
   assert(axisDirection != null);
   switch (axisDirection) {
@@ -110,6 +115,35 @@ Axis axisDirectionToAxis(AxisDirection axisDirection) {
   return null;
 }
 
+/// Returns the opposite of the given [AxisDirection].
+///
+/// Specifically, returns [AxisDirection.up] for [AxisDirection.down] (and
+/// vice versa), as well as [AxisDirection.left] for [AxisDirection.right] (and
+/// vice versa).
+AxisDirection flipAxisDirection(AxisDirection axisDirection) {
+  assert(axisDirection != null);
+  switch (axisDirection) {
+    case AxisDirection.up:
+      return AxisDirection.down;
+    case AxisDirection.right:
+      return AxisDirection.left;
+    case AxisDirection.down:
+      return AxisDirection.up;
+    case AxisDirection.left:
+      return AxisDirection.right;
+  }
+  return null;
+}
+
+/// Flips the [AxisDirection] if the [GrowthDirection] is [GrowthDirection.reverse].
+///
+/// Specifically, returns `axisDirection` if `growthDirection` is
+/// [GrowthDirection.forward], otherwise returns [flipAxisDirection] applied to
+/// `axisDirection`.
+///
+/// This function is useful in [RenderSliver] subclasses that are given both an
+/// [AxisDirection] and a [GrowthDirection] and wish to compute the
+/// [AxisDirection] in which growth will occur.
 AxisDirection applyGrowthDirectionToAxisDirection(AxisDirection axisDirection, GrowthDirection growthDirection) {
   assert(axisDirection != null);
   assert(growthDirection != null);
@@ -117,17 +151,7 @@ AxisDirection applyGrowthDirectionToAxisDirection(AxisDirection axisDirection, G
     case GrowthDirection.forward:
       return axisDirection;
     case GrowthDirection.reverse:
-      switch (axisDirection) {
-        case AxisDirection.up:
-          return AxisDirection.down;
-        case AxisDirection.right:
-          return AxisDirection.left;
-        case AxisDirection.down:
-          return AxisDirection.up;
-        case AxisDirection.left:
-          return AxisDirection.right;
-      }
-      return null;
+      return flipAxisDirection(axisDirection);
   }
   return null;
 }

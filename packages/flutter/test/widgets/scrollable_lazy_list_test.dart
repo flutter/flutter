@@ -77,10 +77,8 @@ void main() {
       return result;
     };
 
-    GlobalKey<ScrollableState> scrollableKey = new GlobalKey<ScrollableState>();
     FlipWidget testWidget = new FlipWidget(
       left: new ScrollableLazyList(
-        scrollableKey: scrollableKey,
         itemBuilder: itemBuilder,
         itemExtent: 200.0,
         initialScrollOffset: 300.0
@@ -89,7 +87,8 @@ void main() {
     );
     Completer<Null> scrollTo(double newScrollOffset) {
       Completer<Null> completer = new Completer<Null>();
-      scrollableKey.currentState.scrollTo(newScrollOffset).whenComplete(completer.complete);
+      final ScrollableState scrollable = tester.state(find.byType(Scrollable));
+      scrollable.scrollTo(newScrollOffset).whenComplete(completer.complete);
       return completer;
     }
 
@@ -132,10 +131,8 @@ void main() {
       return result;
     };
 
-    GlobalKey<ScrollableState> scrollableKey = new GlobalKey<ScrollableState>();
     FlipWidget testWidget = new FlipWidget(
       left: new ScrollableLazyList(
-        scrollableKey: scrollableKey,
         itemBuilder: itemBuilder,
         itemExtent: 200.0,
         initialScrollOffset: 300.0,
@@ -145,7 +142,8 @@ void main() {
     );
     Completer<Null> scrollTo(double newScrollOffset) {
       Completer<Null> completer = new Completer<Null>();
-      scrollableKey.currentState.scrollTo(newScrollOffset).whenComplete(completer.complete);
+      final ScrollableState scrollable = tester.state(find.byType(Scrollable));
+      scrollable.scrollTo(newScrollOffset).whenComplete(completer.complete);
       return completer;
     }
 
@@ -183,16 +181,15 @@ void main() {
       return result;
     };
 
-    GlobalKey<ScrollableState> scrollableKey = new GlobalKey<ScrollableState>();
     Widget testWidget = new ScrollableLazyList(
-      scrollableKey: scrollableKey,
       itemBuilder: itemBuilder,
       itemExtent: 300.0,
       itemCount: 10
     );
     Completer<Null> scrollTo(double newScrollOffset) {
       Completer<Null> completer = new Completer<Null>();
-      scrollableKey.currentState.scrollTo(newScrollOffset).whenComplete(completer.complete);
+      ScrollableState scrollable = tester.state(find.byType(Scrollable));
+      scrollable.scrollTo(newScrollOffset).whenComplete(completer.complete);
       return completer;
     }
 

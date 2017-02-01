@@ -227,21 +227,20 @@ class BuildApkCommand extends BuildSubCommand {
     await super.runCommand();
 
     TargetPlatform targetPlatform = _getTargetPlatform(argResults['target-arch']);
-    if (targetPlatform != TargetPlatform.android_arm && getBuildMode() != BuildMode.debug)
+    BuildMode buildMode = getBuildMode();
+    if (targetPlatform != TargetPlatform.android_arm && buildMode != BuildMode.debug)
       throwToolExit('Profile and release builds are only supported on ARM targets.');
 
     if (isProjectUsingGradle()) {
-      if (targetPlatform != TargetPlatform.android_arm)
-        throwToolExit('Gradle builds only support ARM targets.');
       await buildAndroidWithGradle(
-        TargetPlatform.android_arm,
-        getBuildMode(),
+        targetPlatform,
+        buildMode,
         target: targetFile
       );
     } else {
       await buildAndroid(
         targetPlatform,
-        getBuildMode(),
+        buildMode,
         force: true,
         manifest: argResults['manifest'],
         resources: argResults['resources'],
@@ -595,6 +594,9 @@ Future<Null> buildAndroidWithGradle(
   bool force: false,
   String target
 }) async {
+  if (platform != TargetPlatform.android_arm && buildMode != BuildMode.debug) {
+    throwToolExit('Profile and release builds are only supported on ARM targets.');
+  }
   // Validate that we can find an android sdk.
   if (androidSdk == null)
     throwToolExit('No Android SDK found. Try setting the ANDROID_HOME environment variable.');
