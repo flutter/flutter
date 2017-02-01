@@ -282,6 +282,8 @@ PlatformViewIOS::PlatformViewIOS(CAEAGLLayer* layer)
                                                        NSUserDomainMask, YES);
   shell::Shell::Shared().tracing_controller().set_traces_base_path(
       [paths.firstObject UTF8String]);
+
+  PostAddToShellTask();
 }
 
 PlatformViewIOS::~PlatformViewIOS() = default;

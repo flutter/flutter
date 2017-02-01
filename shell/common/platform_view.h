@@ -70,6 +70,7 @@ class PlatformView {
   explicit PlatformView(std::unique_ptr<Rasterizer> rasterizer);
 
   void CreateEngine();
+  void PostAddToShellTask();
 
   void SetupResourceContextOnIOThreadPerform(
       ftl::AutoResetWaitableEvent* event);

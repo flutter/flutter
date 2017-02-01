@@ -34,6 +34,8 @@ PlatformViewMac::PlatformViewMac(NSOpenGLView* gl_view)
     shell::Shell::Shared().tracing_controller().set_traces_base_path(
         [[paths objectAtIndex:0] UTF8String]);
   }
+
+  PostAddToShellTask();
 }
 
 PlatformViewMac::~PlatformViewMac() = default;
