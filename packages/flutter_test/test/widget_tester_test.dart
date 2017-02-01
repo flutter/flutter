@@ -139,7 +139,7 @@ void main() {
   });
 
   group('find.descendant', () {
-    testWidgets('fails with a descriptive message',(WidgetTester tester) async {
+    testWidgets('fails with a descriptive message', (WidgetTester tester) async {
       await tester.pumpWidget(new Row(children: [
         new Column(children: [new Text('foo')]),
         new Text('bar')
