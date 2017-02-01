@@ -229,6 +229,9 @@ class DayPicker extends StatelessWidget {
       if (day < 1) {
         labels.add(new Container());
       } else {
+        DateTime dayToBuild = new DateTime(year, month, day);
+        bool disabled = dayToBuild.isAfter(lastDate) || dayToBuild.isBefore(firstDate);
+
         BoxDecoration decoration;
         TextStyle itemStyle = themeData.textTheme.body1;
 
@@ -239,24 +242,32 @@ class DayPicker extends StatelessWidget {
             backgroundColor: themeData.accentColor,
             shape: BoxShape.circle
           );
+        } else if (disabled) {
+          itemStyle = themeData.textTheme.body1.copyWith(color: themeData.disabledColor);
         } else if (currentDate.year == year && currentDate.month == month && currentDate.day == day) {
           // The current day gets a different text color.
           itemStyle = themeData.textTheme.body2.copyWith(color: themeData.accentColor);
         }
 
-        labels.add(new GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTap: () {
-            DateTime result = new DateTime(year, month, day);
-            onChanged(result);
-          },
-          child: new Container(
-            decoration: decoration,
-            child: new Center(
-              child: new Text(day.toString(), style: itemStyle)
-            )
+        Widget dayWidget = new Container(
+          decoration: decoration,
+          child: new Center(
+            child: new Text(day.toString(), style: itemStyle)
           )
-        ));
+        );
+
+        if (!disabled) {
+          dayWidget = new GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () {
+              DateTime result = new DateTime(year, month, day);
+              onChanged(result);
+            },
+            child: dayWidget
+          );
+        }
+
+        labels.add(dayWidget);
       }
     }
 
@@ -412,14 +423,14 @@ class _MonthPickerState extends State<MonthPicker> {
 
   /// True if the earliest allowable month is displayed.
   bool get _onFirstMonth {
-    return _currentDisplayedMonthDate != null && _currentDisplayedMonthDate.compareTo(
-        new DateTime(config.firstDate.year, config.firstDate.month)) <= 0;
+    return !_currentDisplayedMonthDate.isAfter(
+        new DateTime(config.firstDate.year, config.firstDate.month));
   }
 
   /// True if the latest allowable month is displayed.
   bool get _onLastMonth {
-    return _currentDisplayedMonthDate != null && _currentDisplayedMonthDate.compareTo(
-        new DateTime(config.lastDate.year, config.lastDate.month)) >= 0;
+    return !_currentDisplayedMonthDate.isBefore(
+        new DateTime(config.lastDate.year, config.lastDate.month));
   }
 
   void _monthPageChanged(int monthPage) {
