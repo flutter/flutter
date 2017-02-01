@@ -347,7 +347,7 @@ class PaintingContext {
       _stopRecordingIfNeeded();
       final TransformLayer transformLayer = new TransformLayer(transform: effectiveTransform);
       _appendLayer(transformLayer);
-      final Rect transformedPaintBounds = MatrixUtils.inverseTransformRect(_paintBounds, effectiveTransform);
+      final Rect transformedPaintBounds = MatrixUtils.inverseTransformRect(effectiveTransform, _paintBounds);
       final PaintingContext childContext = new PaintingContext._(transformLayer, transformedPaintBounds);
       painter(childContext, offset);
       childContext._stopRecordingIfNeeded();
@@ -565,7 +565,7 @@ class _SemanticsGeometry {
         } else {
           Matrix4 clipTransform = new Matrix4.identity();
           parent.applyPaintTransform(child, clipTransform);
-          clipRect = MatrixUtils.inverseTransformRect(clipRect, clipTransform);
+          clipRect = MatrixUtils.inverseTransformRect(clipTransform, clipRect);
         }
       }
       parent.applyPaintTransform(child, transform);
