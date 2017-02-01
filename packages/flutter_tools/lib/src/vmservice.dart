@@ -686,7 +686,7 @@ class VM extends ServiceObjectOwner {
   }
 
   FlutterView get mainView {
-    return _viewCache.values.first;
+    return _viewCache.values.isEmpty ? null : _viewCache.values.first;
   }
 }
 

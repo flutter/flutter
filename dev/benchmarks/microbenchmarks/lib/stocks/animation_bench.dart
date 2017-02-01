@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
@@ -102,6 +101,4 @@ Future<Null> main() async {
     name: 'stock_animation_subsequent_frame_average',
   );
   printer.printToStdout();
-
-  exit(0);
 }
