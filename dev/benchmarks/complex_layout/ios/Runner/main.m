@@ -6,7 +6,6 @@
 #import <Flutter/Flutter.h>
 
 int main(int argc, char * argv[]) {
-    FlutterInit(argc, (const char**)argv);
     @autoreleasepool {
         return UIApplicationMain(argc, argv, nil,
                                  NSStringFromClass([FlutterAppDelegate class]));
