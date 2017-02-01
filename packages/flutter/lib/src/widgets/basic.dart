@@ -878,7 +878,7 @@ class SizedBox extends SingleChildRenderObjectWidget {
 ///
 /// For example, if you wanted [child] to have a minimum height of 50.0 logical
 /// pixels, you could use `const BoxConstraints(minHeight: 50.0)`` as the
-/// [additionalConstraints].
+/// [constraints].
 class ConstrainedBox extends SingleChildRenderObjectWidget {
   /// Creates a widget that imposes additional constraints on its child.
   ///
