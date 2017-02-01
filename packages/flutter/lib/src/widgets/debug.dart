@@ -57,6 +57,9 @@ bool debugPrintGlobalKeyedWidgetLifecycle = false;
 /// optimize your app, see https://fuchsia.googlesource.com/sysui/+/master/docs/performance.md
 bool debugProfileBuildsEnabled = false;
 
+/// Show banners for deprecated widgets.
+bool debugHighlightDeprecatedWidgets = false;
+
 Key _firstNonUniqueKey(Iterable<Widget> widgets) {
   Set<Key> keySet = new HashSet<Key>();
   for (Widget widget in widgets) {
@@ -184,7 +187,8 @@ bool debugAssertAllWidgetVarsUnset(String reason) {
         debugPrintBuildScope ||
         debugPrintScheduleBuildForStacks ||
         debugPrintGlobalKeyedWidgetLifecycle ||
-        debugProfileBuildsEnabled) {
+        debugProfileBuildsEnabled ||
+        debugHighlightDeprecatedWidgets) {
       throw new FlutterError(reason);
     }
     return true;

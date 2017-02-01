@@ -18,7 +18,7 @@ class TestCanvas implements Canvas {
 
 void main() {
   test('A Banner with a location of topLeft paints in the top left', () {
-    BannerPainter bannerPainter = const BannerPainter(
+    BannerPainter bannerPainter = new BannerPainter(
       message:"foo",
       location: BannerLocation.topLeft
     );
@@ -44,7 +44,7 @@ void main() {
   });
 
   test('A Banner with a location of topRight paints in the top right', () {
-    BannerPainter bannerPainter = const BannerPainter(
+    BannerPainter bannerPainter = new BannerPainter(
       message:"foo",
       location: BannerLocation.topRight
     );
@@ -70,7 +70,7 @@ void main() {
   });
 
   test('A Banner with a location of bottomLeft paints in the bottom left', () {
-    BannerPainter bannerPainter = const BannerPainter(
+    BannerPainter bannerPainter = new BannerPainter(
       message:"foo",
       location: BannerLocation.bottomLeft
     );
@@ -96,7 +96,7 @@ void main() {
   });
 
   test('A Banner with a location of bottomRight paints in the bottom right', () {
-    BannerPainter bannerPainter = const BannerPainter(
+    BannerPainter bannerPainter = new BannerPainter(
       message:"foo",
       location: BannerLocation.bottomRight
     );

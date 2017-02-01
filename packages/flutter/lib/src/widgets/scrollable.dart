@@ -12,8 +12,10 @@ import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 
+import 'banner.dart';
 import 'basic.dart';
 import 'clamp_overscrolls.dart';
+import 'debug.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
 import 'notification_listener.dart';
@@ -1444,15 +1446,24 @@ class ScrollableState<T extends Scrollable> extends State<T> with SingleTickerPr
 
   @override
   Widget build(BuildContext context) {
-    return new RawGestureDetector(
+    Widget result = new RawGestureDetector(
       key: _gestureDetectorKey,
       gestures: buildGestureDetectors(),
       behavior: HitTestBehavior.opaque,
       child: new IgnorePointer(
         ignoring: _scrollUnderway,
-        child: buildContent(context)
-      )
+        child: buildContent(context),
+      ),
     );
+    if (debugHighlightDeprecatedWidgets) {
+      result = new Banner(
+        message: 'OLD',
+        color: const Color(0xFF009000),
+        location: BannerLocation.bottomRight,
+        child: result,
+      );
+    }
+    return result;
   }
 
   /// Fixes up the gesture detector to listen to the appropriate
