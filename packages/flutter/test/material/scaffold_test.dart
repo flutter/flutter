@@ -156,11 +156,12 @@ void main() {
       )
     );
 
-    expect(scrollableKey.currentState.scrollOffset, equals(500.0));
+    final ScrollableState scrollable = tester.state(find.byType(Scrollable));
+    expect(scrollable.scrollOffset, equals(500.0));
     await tester.tapAt(const Point(100.0, 10.0));
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
-    expect(scrollableKey.currentState.scrollOffset, equals(0.0));
+    expect(scrollable.scrollOffset, equals(0.0));
   });
 
   testWidgets('Tapping the status bar does not scroll to top on Android', (WidgetTester tester) async {
@@ -190,11 +191,12 @@ void main() {
       )
     );
 
-    expect(scrollableKey.currentState.scrollOffset, equals(500.0));
+    final ScrollableState scrollable = tester.state(find.byType(Scrollable));
+    expect(scrollable.scrollOffset, equals(500.0));
     await tester.tapAt(const Point(100.0, 10.0));
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
-    expect(scrollableKey.currentState.scrollOffset, equals(500.0));
+    expect(scrollable.scrollOffset, equals(500.0));
   });
 
   testWidgets('Bottom sheet cannot overlap app bar', (WidgetTester tester) async {

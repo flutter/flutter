@@ -70,12 +70,10 @@ class TestViewportScrollPosition extends AbsoluteScrollPosition
 
 void main() {
   testWidgets('Evil test of sliver features - 1', (WidgetTester tester) async {
-    final GlobalKey<Scrollable2State> scrollableKey = new GlobalKey<Scrollable2State>();
     final GlobalKey centerKey = new GlobalKey();
     await tester.pumpWidget(
       new Scrollbar2(
         child: new ScrollableViewport2(
-          key: scrollableKey,
           axisDirection: AxisDirection.down,
           center: centerKey,
           anchor: 0.25,
