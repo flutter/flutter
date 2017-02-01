@@ -282,9 +282,7 @@ class SliverConstraints extends Constraints {
   BoxConstraints asBoxConstraints({
     double minExtent: 0.0,
     double maxExtent: double.INFINITY,
-    double crossAxisExtent,
   }) {
-    crossAxisExtent ??= this.crossAxisExtent;
     switch (axis) {
       case Axis.horizontal:
         return new BoxConstraints(
@@ -817,15 +815,12 @@ abstract class RenderSliver extends RenderObject {
   /// the [RenderSliverHelpers] mixin and do not call this method yourself, you
   /// do not need to implement this method.
   @protected
-  double childMainAxisPosition(@checked RenderObject child) {
+  double childPosition(@checked RenderObject child) {
     assert(() {
       throw new FlutterError('$runtimeType does not implement childPosition.');
     });
     return 0.0;
   }
-
-  @protected
-  double childCrossAxisPosition(@checked RenderObject child) => 0.0;
 
   @override
   void applyPaintTransform(RenderObject child, Matrix4 transform) {
@@ -1003,25 +998,24 @@ abstract class RenderSliverHelpers implements RenderSliver {
   /// This function takes care of converting the position from the sliver
   /// coordinate system to the cartesian coordinate system used by [RenderBox].
   ///
-  /// This function relies on [childMainAxisPosition] to determine the position of
+  /// This function relies on [childPosition] to determine the position of
   /// child in question.
   ///
   /// Calling this for a child that is not visible is not valid.
   @protected
   bool hitTestBoxChild(HitTestResult result, RenderBox child, { @required double mainAxisPosition, @required double crossAxisPosition }) {
     final bool rightWayUp = _getRightWayUp(constraints);
-    double absolutePosition = mainAxisPosition - childMainAxisPosition(child);
-    final double absoluteCrossAxisPosition = crossAxisPosition - childCrossAxisPosition(child);
+    double absolutePosition = mainAxisPosition - childPosition(child);
     assert(constraints.axis != null);
     switch (constraints.axis) {
       case Axis.horizontal:
         if (!rightWayUp)
           absolutePosition = child.size.width - absolutePosition;
-        return child.hitTest(result, position: new Point(absolutePosition, absoluteCrossAxisPosition));
+        return child.hitTest(result, position: new Point(absolutePosition, crossAxisPosition));
       case Axis.vertical:
         if (!rightWayUp)
           absolutePosition = child.size.height - absolutePosition;
-        return child.hitTest(result, position: new Point(absoluteCrossAxisPosition, absolutePosition));
+        return child.hitTest(result, position: new Point(crossAxisPosition, absolutePosition));
     }
     return false;
   }
@@ -1029,27 +1023,25 @@ abstract class RenderSliverHelpers implements RenderSliver {
   /// Utility function for [applyPaintTransform] for use when the children are
   /// [RenderBox] widgets.
   ///
-  /// This function turns the value returned by [childMainAxisPosition] and
-  /// [childCrossAxisPosition]for the child in question into a translation that
-  /// it then applies to the given matrix.
+  /// This function turns the value returned by [childPosition] for the child in
+  /// question into a translation that it then applies to the given matrix.
   ///
   /// Calling this for a child that is not visible is not valid.
   @protected
   void applyPaintTransformForBoxChild(RenderBox child, Matrix4 transform) {
     final bool rightWayUp = _getRightWayUp(constraints);
-    double delta = childMainAxisPosition(child);
-    final double crossAxisDelta = childCrossAxisPosition(child);
+    double delta = childPosition(child);
     assert(constraints.axis != null);
     switch (constraints.axis) {
       case Axis.horizontal:
         if (!rightWayUp)
           delta = geometry.paintExtent - child.size.width - delta;
-        transform.translate(delta, crossAxisDelta);
+        transform.translate(delta, 0.0);
         break;
       case Axis.vertical:
         if (!rightWayUp)
           delta = geometry.paintExtent - child.size.height - delta;
-        transform.translate(crossAxisDelta, delta);
+        transform.translate(0.0, delta);
         break;
     }
   }
@@ -1846,7 +1838,7 @@ class RenderSliverToBoxAdapter extends RenderSliver with RenderObjectWithChildMi
   }
 
   @override
-  double childMainAxisPosition(RenderBox child) {
+  double childPosition(RenderBox child) {
     return -constraints.scrollOffset;
   }
 
