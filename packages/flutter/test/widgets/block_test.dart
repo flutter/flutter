@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 final Key blockKey = new Key('test');
@@ -120,7 +121,7 @@ void main() {
     expect(key.currentState.scrollOffset, 0.0);
   });
 
-  testWidgets('SliverBlockChildListDelegate.estimateScrollOffsetExtent hits end', (WidgetTester tester) async {
+  testWidgets('SliverBlockChildListDelegate.estimateMaxScrollOffset hits end', (WidgetTester tester) async {
     SliverChildListDelegate delegate = new SliverChildListDelegate(<Widget>[
       new Container(),
       new Container(),
@@ -129,6 +130,23 @@ void main() {
       new Container(),
     ]);
 
-    expect(delegate.estimateScrollOffsetExtent(3, 4, 25.0, 26.0), equals(26.0));
+    await tester.pumpWidget(new ScrollableViewport2(
+      slivers: <Widget>[
+        new SliverBlock(
+          delegate: delegate,
+        ),
+      ],
+    ));
+
+    final SliverMultiBoxAdaptorElement element = tester.element(find.byType(SliverBlock));
+
+    final double maxScrollOffset = element.estimateMaxScrollOffset(
+      null,
+      firstIndex: 3,
+      lastIndex: 4,
+      leadingScrollOffset: 25.0,
+      trailingScrollOffset: 26.0
+    );
+    expect(maxScrollOffset, equals(26.0));
   });
 }
