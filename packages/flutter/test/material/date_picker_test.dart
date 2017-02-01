@@ -7,6 +7,16 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/intl.dart';
 
 void main() {
+  DateTime firstDate;
+  DateTime lastDate;
+  DateTime initialDate;
+
+  setUp(() {
+    firstDate = new DateTime(2001, DateTime.JANUARY, 1);
+    lastDate = new DateTime(2031, DateTime.DECEMBER, 31);
+    initialDate = new DateTime(2016, DateTime.JANUARY, 15);
+  });
+
   testWidgets('tap-select a day', (WidgetTester tester) async {
     Key _datePickerKey = new UniqueKey();
     DateTime _selectedDate = new DateTime(2016, DateTime.JULY, 26);
@@ -131,9 +141,9 @@ void main() {
 
     Future<DateTime> date = showDatePicker(
       context: buttonContext,
-      initialDate: new DateTime(2016, DateTime.JANUARY, 15),
-      firstDate: new DateTime(2001, DateTime.JANUARY, 1),
-      lastDate: new DateTime(2031, DateTime.DECEMBER, 31),
+      initialDate: initialDate,
+      firstDate: firstDate,
+      lastDate: lastDate,
     );
 
     await tester.pumpUntilNoTransientCallbacks(const Duration(seconds: 1));
@@ -194,6 +204,57 @@ void main() {
       await tester.tap(find.text('19'));
       await tester.tap(find.text('OK'));
       expect(await date, equals(new DateTime(2005, DateTime.JANUARY, 19)));
+    });
+  });
+
+  testWidgets('Cannot select a day outside bounds', (WidgetTester tester) async {
+    initialDate = new DateTime(2017, DateTime.JANUARY, 15);
+    firstDate = initialDate;
+    lastDate = initialDate;
+    await preparePicker(tester, (Future<DateTime> date) async {
+      await tester.tap(find.text('10')); // Earlier than firstDate. Should be ignored.
+      await tester.tap(find.text('20')); // Later than lastDate. Should be ignored.
+      await tester.tap(find.text('OK'));
+      // We should still be on the inital date.
+      expect(await date, equals(initialDate));
+    });
+  });
+
+  testWidgets('Cannot selecte a month past last date', (WidgetTester tester) async {
+    initialDate = new DateTime(2017, DateTime.JANUARY, 15);
+    firstDate = initialDate;
+    lastDate = new DateTime(2017, DateTime.FEBRUARY, 20);
+    await preparePicker(tester, (Future<DateTime> date) async {
+      await tester.tap(find.byTooltip('Next month'));
+      await tester.pumpUntilNoTransientCallbacks(const Duration(seconds: 1));
+      // Shouldn't be possible to keep going into March.
+      await tester.tap(find.byTooltip('Next month'));
+      await tester.pumpUntilNoTransientCallbacks(const Duration(seconds: 1));
+      // We're still in February
+      await tester.tap(find.text('20'));
+      // Days outside bound for new month pages also disabled.
+      await tester.tap(find.text('25'));
+      await tester.tap(find.text('OK'));
+      expect(await date, equals(new DateTime(2017, DateTime.FEBRUARY, 20)));
+    });
+  });
+
+  testWidgets('Cannot selecte a month before first date', (WidgetTester tester) async {
+    initialDate = new DateTime(2017, DateTime.JANUARY, 15);
+    firstDate = new DateTime(2016, DateTime.DECEMBER, 10);
+    lastDate = initialDate;
+    await preparePicker(tester, (Future<DateTime> date) async {
+      await tester.tap(find.byTooltip('Previous month'));
+      await tester.pumpUntilNoTransientCallbacks(const Duration(seconds: 1));
+      // Shouldn't be possible to keep going into November.
+      await tester.tap(find.byTooltip('Previous month'));
+      await tester.pumpUntilNoTransientCallbacks(const Duration(seconds: 1));
+      // We're still in December
+      await tester.tap(find.text('10'));
+      // Days outside bound for new month pages also disabled.
+      await tester.tap(find.text('5'));
+      await tester.tap(find.text('OK'));
+      expect(await date, equals(new DateTime(2016, DateTime.DECEMBER, 10)));
     });
   });
 }
