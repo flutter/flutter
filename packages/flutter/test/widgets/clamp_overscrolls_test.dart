@@ -15,7 +15,7 @@ Widget buildFrame(ScrollableEdge clampedEdge) {
   return new ClampOverscrolls(
     edge: clampedEdge,
     child: new ScrollableViewport(
-      scrollableKey: new UniqueKey(),
+      key: new UniqueKey(),
       child: new SizedBox(
         height: 650.0,
         child: new Column(
