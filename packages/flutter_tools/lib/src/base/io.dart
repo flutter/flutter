@@ -59,6 +59,7 @@ export 'dart:io'
         ServerSocket,
         stderr,
         stdin,
+        StdinException,
         stdout,
         Socket,
         SocketException,
