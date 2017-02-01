@@ -170,6 +170,18 @@ SkISize VulkanSwapchain::GetSize() const {
   return SkISize::Make(extents.width, extents.height);
 }
 
+static sk_sp<SkColorSpace> SkColorSpaceFromVkFormat(VkFormat format) {
+  if (GrVkFormatIsSRGB(format, nullptr /* dont care */)) {
+    return SkColorSpace::MakeNamed(SkColorSpace::Named::kSRGB_Named);
+  }
+
+  if (format == VK_FORMAT_R16G16B16A16_SFLOAT) {
+    return SkColorSpace::MakeNamed(SkColorSpace::Named::kSRGBLinear_Named);
+  }
+
+  return nullptr;
+}
+
 sk_sp<SkSurface> VulkanSwapchain::CreateSkiaSurface(GrContext* gr_context,
                                                     VkImage image,
                                                     const SkISize& size) const {
@@ -207,7 +219,12 @@ sk_sp<SkSurface> VulkanSwapchain::CreateSkiaSurface(GrContext* gr_context,
 
   SkSurfaceProps props(SkSurfaceProps::InitType::kLegacyFontHost_InitType);
 
-  return SkSurface::MakeFromBackendRenderTarget(gr_context, desc, &props);
+  return SkSurface::MakeFromBackendRenderTarget(
+      gr_context,  // context
+      desc,        // backend render target description
+      SkColorSpaceFromVkFormat(surface_format_.format),  // colorspace
+      &props                                             // surface properties
+      );
 }
 
 bool VulkanSwapchain::CreateSwapchainImages(GrContext* skia_context) {
