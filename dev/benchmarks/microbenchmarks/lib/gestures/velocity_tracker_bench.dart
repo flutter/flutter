@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
 import 'package:flutter/gestures.dart';
 import 'data/velocity_tracker_data.dart';
 
@@ -33,5 +32,4 @@ void main() {
     name: 'velocity_tracker_iteration',
   );
   printer.printToStdout();
-  exit(0);
 }

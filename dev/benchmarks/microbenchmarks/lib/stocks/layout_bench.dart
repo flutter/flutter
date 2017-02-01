@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
@@ -46,5 +45,4 @@ Future<Null> main() async {
     name: 'stock_layout_iteration',
   );
   printer.printToStdout();
-  exit(0);
 }

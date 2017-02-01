@@ -15,6 +15,7 @@ import 'base/io.dart';
 
 import 'asset.dart';
 
+import 'base/common.dart';
 import 'base/logger.dart';
 import 'build_info.dart';
 import 'dart/dependencies.dart';
@@ -172,8 +173,15 @@ abstract class ResidentRunner {
 
     // Refresh the view list.
     await vmService.vm.refreshViews();
+    for (int i = 0; vmService.vm.mainView == null && i < 5; i++) {
+      // If the VM doesn't yet have a view, wait for one to show up.
+      printTrace('Waiting for Flutter view');
+      await new Future<Null>.delayed(new Duration(seconds: 1));
+      await vmService.vm.refreshViews();
+    }
     currentView = vmService.vm.mainView;
-    assert(currentView != null);
+    if (currentView == null)
+      throwToolExit('No Flutter view is available');
 
     // Listen for service protocol connection to close.
     vmService.done.whenComplete(() {
