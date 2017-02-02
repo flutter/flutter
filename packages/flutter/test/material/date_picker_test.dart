@@ -220,7 +220,7 @@ void main() {
     });
   });
 
-  testWidgets('Cannot selecte a month past last date', (WidgetTester tester) async {
+  testWidgets('Cannot select a month past last date', (WidgetTester tester) async {
     initialDate = new DateTime(2017, DateTime.JANUARY, 15);
     firstDate = initialDate;
     lastDate = new DateTime(2017, DateTime.FEBRUARY, 20);
@@ -239,7 +239,7 @@ void main() {
     });
   });
 
-  testWidgets('Cannot selecte a month before first date', (WidgetTester tester) async {
+  testWidgets('Cannot select a month before first date', (WidgetTester tester) async {
     initialDate = new DateTime(2017, DateTime.JANUARY, 15);
     firstDate = new DateTime(2016, DateTime.DECEMBER, 10);
     lastDate = initialDate;

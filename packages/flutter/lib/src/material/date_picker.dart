@@ -407,15 +407,13 @@ class _MonthPickerState extends State<MonthPicker> {
 
   void _handleNextMonth() {
     if (!_isDisplayingLastMonth) {
-      PageableState<PageableLazyList> state = _dayPickerListKey.currentState;
-      state?.fling(1.0);
+      _dayPickerListKey.currentState?.fling(1.0);
     }
   }
 
   void _handlePreviousMonth() {
     if (!_isDisplayingFirstMonth) {
-      PageableState<PageableLazyList> state = _dayPickerListKey.currentState;
-      state?.fling(-1.0);
+      _dayPickerListKey.currentState?.fling(-1.0);
     }
   }
 
