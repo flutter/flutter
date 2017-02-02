@@ -21,6 +21,7 @@ void main() {
     testUsingContext('Emit missing status when nothing is installed', () async {
       when(xcode.isInstalled).thenReturn(false);
       IOSWorkflowTestTarget workflow = new IOSWorkflowTestTarget()
+        ..hasPythonSixModule = false
         ..hasHomebrew = false
         ..hasIosDeploy = false;
       ValidationResult result = await workflow.validate();
@@ -52,6 +53,18 @@ void main() {
       when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
       when(xcode.eulaSigned).thenReturn(false);
       IOSWorkflowTestTarget workflow = new IOSWorkflowTestTarget();
+      ValidationResult result = await workflow.validate();
+      expect(result.type, ValidationType.partial);
+    }, overrides: <Type, Generator>{ Xcode: () => xcode });
+
+    testUsingContext('Emits partial status when python six not installed', () async {
+      when(xcode.isInstalled).thenReturn(true);
+      when(xcode.xcodeVersionText)
+          .thenReturn('Xcode 8.2.1\nBuild version 8C1002\n');
+      when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
+      when(xcode.eulaSigned).thenReturn(true);
+      IOSWorkflowTestTarget workflow = new IOSWorkflowTestTarget()
+        ..hasPythonSixModule = false;
       ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.partial);
     }, overrides: <Type, Generator>{ Xcode: () => xcode });
@@ -107,6 +120,9 @@ void main() {
 class MockXcode extends Mock implements Xcode {}
 
 class IOSWorkflowTestTarget extends IOSWorkflow {
+  @override
+  bool hasPythonSixModule = true;
+
   @override
   bool hasHomebrew = true;
 
