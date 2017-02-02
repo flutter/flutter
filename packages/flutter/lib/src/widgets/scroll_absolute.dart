@@ -94,9 +94,16 @@ class ViewportScrollBehavior extends ScrollBehavior2 {
     return null;
   }
 
+  ScrollPhysics _getEffectiveScrollPhysics(BuildContext context, ScrollPhysics physics) {
+    final ScrollPhysics defaultPhysics = getScrollPhysics(getPlatform(context));
+    if (physics != null)
+      return physics.applyTo(defaultPhysics);
+    return defaultPhysics;
+  }
+
   @override
-  ScrollPosition createScrollPosition(BuildContext context, Scrollable2State state, ScrollPosition oldPosition) {
-    return new AbsoluteScrollPosition(state, scrollTolerances, oldPosition, getScrollPhysics(getPlatform(context)));
+  ScrollPosition createScrollPosition(BuildContext context, Scrollable2State state, ScrollPosition oldPosition, ScrollPhysics physics) {
+    return new AbsoluteScrollPosition(state, scrollTolerances, oldPosition, _getEffectiveScrollPhysics(context, physics));
   }
 
   @override
@@ -107,6 +114,8 @@ class ViewportScrollBehavior extends ScrollBehavior2 {
 
 abstract class ScrollPhysics {
   const ScrollPhysics();
+
+  ScrollPhysicsProxy applyTo(ScrollPhysics parent) => this;
 
   /// Used by [AbsoluteDragScrollActivity] and other user-driven activities to
   /// convert an offset in logical pixels as provided by the [DragUpdateDetails]
@@ -133,6 +142,58 @@ abstract class ScrollPhysics {
   /// [AbsoluteBallisticScrollActivity] with the returned value. Otherwise, the
   /// [ScrollPosition] will begin an idle activity instead.
   Simulation createBallisticSimulation(AbsoluteScrollPosition position, double velocity) => null;
+
+  static final SpringDescription _kDefaultScrollSpring = new SpringDescription.withDampingRatio(
+    mass: 0.5,
+    springConstant: 100.0,
+    ratio: 1.1,
+  );
+
+  SpringDescription get scrollSpring => _kDefaultScrollSpring;
+}
+
+abstract class ScrollPhysicsProxy extends ScrollPhysics {
+  const ScrollPhysicsProxy(this.parent);
+
+  final ScrollPhysics parent;
+
+  @override
+  ScrollPhysicsProxy applyTo(ScrollPhysics parent) {
+    throw new FlutterError(
+      '$runtimeType must override applyTo.\n'
+      'The default implementation of applyTo is not appropriate for subclasses '
+      'of ScrollPhysicsProxy because they should return an instance of themselves '
+      'with their parent property replaced with the given ScrollPhysics instance.'
+    );
+  }
+
+  @override
+  double applyPhysicsToUserOffset(AbsoluteScrollPosition position, double offset) {
+    if (parent == null)
+      return super.applyPhysicsToUserOffset(position, offset);
+    return parent.applyPhysicsToUserOffset(position, offset);
+  }
+
+  @override
+  double applyBoundaryConditions(AbsoluteScrollPosition position, double value) {
+    if (parent == null)
+      return super.applyBoundaryConditions(position, value);
+    return parent.applyBoundaryConditions(position, value);
+  }
+
+  @override
+  Simulation createBallisticSimulation(AbsoluteScrollPosition position, double velocity) {
+    if (parent == null)
+      return super.createBallisticSimulation(position, velocity);
+    return parent.createBallisticSimulation(position, velocity);
+  }
+
+  @override
+  SpringDescription get scrollSpring {
+    if (parent == null)
+      return super.scrollSpring;
+    return parent.scrollSpring;
+  }
 }
 
 class AbsoluteScrollPosition extends ScrollPosition {
@@ -405,6 +466,7 @@ class BouncingScrollPhysics extends ScrollPhysics {
   Simulation createBallisticSimulation(AbsoluteScrollPosition position, double velocity) {
     if (velocity.abs() >= position.scrollTolerances.velocity || position.outOfRange) {
       return new BouncingScrollSimulation(
+        spring: scrollSpring,
         position: position.pixels,
         velocity: velocity,
         leadingExtent: position.minScrollExtent,
@@ -446,19 +508,13 @@ class ClampingScrollPhysics extends ScrollPhysics {
     return 0.0;
   }
 
-  static final SpringDescription _defaultScrollSpring = new SpringDescription.withDampingRatio(
-    mass: 0.5,
-    springConstant: 100.0,
-    ratio: 1.1,
-  );
-
   @override
   Simulation createBallisticSimulation(AbsoluteScrollPosition position, double velocity) {
     if (position.outOfRange) {
       if (position.pixels > position.maxScrollExtent)
-        return new ScrollSpringSimulation(_defaultScrollSpring, position.pixels, position.maxScrollExtent, math.min(0.0, velocity));
+        return new ScrollSpringSimulation(scrollSpring, position.pixels, position.maxScrollExtent, math.min(0.0, velocity));
       if (position.pixels < position.minScrollExtent)
-        return new ScrollSpringSimulation(_defaultScrollSpring, position.pixels, position.minScrollExtent, math.max(0.0, velocity));
+        return new ScrollSpringSimulation(scrollSpring, position.pixels, position.minScrollExtent, math.max(0.0, velocity));
       assert(false);
     }
     if (!position.atEdge && velocity.abs() >= position.scrollTolerances.velocity) {

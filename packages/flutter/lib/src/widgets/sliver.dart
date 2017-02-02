@@ -54,8 +54,6 @@ abstract class SliverChildDelegate {
 // /// demand). For example, the body of a dialog box might fit both of these
 // /// conditions.
 class SliverChildListDelegate extends SliverChildDelegate {
-  /// Abstract const constructor. This constructor enables subclasses to provide
-  /// const constructors so that they can be used in const expressions.
   const SliverChildListDelegate(this.children);
 
   final List<Widget> children;

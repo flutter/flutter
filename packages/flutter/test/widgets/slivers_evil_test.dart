@@ -42,12 +42,12 @@ class TestBehavior extends ScrollBehavior2 {
   }
 
   @override
-  ScrollPosition createScrollPosition(BuildContext context, Scrollable2State state, ScrollPosition oldPosition) {
+  ScrollPosition createScrollPosition(BuildContext context, Scrollable2State state, ScrollPosition oldPosition, ScrollPhysics physics) {
     return new TestViewportScrollPosition(
       state,
       new Tolerance(velocity: 20.0, distance: 1.0),
       oldPosition,
-      const ClampingScrollPhysics(),
+      physics,
     );
   }
 
@@ -80,6 +80,7 @@ void main() {
           axisDirection: AxisDirection.down,
           center: centerKey,
           anchor: 0.25,
+          physics: const ClampingScrollPhysics(),
           scrollBehavior: new TestBehavior(),
           slivers: <Widget>[
             new SliverToBoxAdapter(child: new Container(height: 5.0)),

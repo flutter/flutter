@@ -63,6 +63,7 @@ class TestScrollable extends StatelessWidget {
     Key key,
     this.initialScrollOffset: 0.0,
     this.axisDirection: AxisDirection.down,
+    this.physics,
     this.anchor: 0.0,
     this.center,
     this.scrollBehavior,
@@ -74,6 +75,8 @@ class TestScrollable extends StatelessWidget {
   final double initialScrollOffset;
 
   final AxisDirection axisDirection;
+
+  final ScrollPhysics physics;
 
   final double anchor;
 
@@ -90,6 +93,7 @@ class TestScrollable extends StatelessWidget {
     return new Scrollable2(
       initialScrollOffset: initialScrollOffset,
       axisDirection: axisDirection,
+      physics: physics,
       scrollBehavior: scrollBehavior,
       viewportBuilder: (BuildContext context, ViewportOffset offset) {
         return new Viewport2(
