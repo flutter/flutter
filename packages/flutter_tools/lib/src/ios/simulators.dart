@@ -43,7 +43,7 @@ class IOSSimulatorUtils {
   static IOSSimulatorUtils get instance => context[IOSSimulatorUtils];
 
   List<IOSSimulator> getAttachedDevices() {
-    if (!XCode.instance.isInstalledAndMeetsVersionCheck)
+    if (!Xcode.instance.isInstalledAndMeetsVersionCheck)
       return <IOSSimulator>[];
 
     return SimControl.instance.getConnectedDevices().map((SimDevice device) {

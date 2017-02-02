@@ -23,8 +23,8 @@ import 'xcodeproj.dart';
 const int kXcodeRequiredVersionMajor = 7;
 const int kXcodeRequiredVersionMinor = 0;
 
-class XCode {
-  XCode() {
+class Xcode {
+  Xcode() {
     _eulaSigned = false;
 
     try {
@@ -58,8 +58,8 @@ class XCode {
     }
   }
 
-  /// Returns [XCode] active in the current app context.
-  static XCode get instance => context[XCode];
+  /// Returns [Xcode] active in the current app context.
+  static Xcode get instance => context[Xcode];
 
   bool get isInstalledAndMeetsVersionCheck => isInstalled && xcodeVersionSatisfactory;
 
@@ -202,7 +202,7 @@ void diagnoseXcodeBuildFailure(XcodeBuildResult result) {
       printError('  ${plistFile.absolute.path}');
       printError('');
     }
-    printError("Try launching XCode and selecting 'Product > Build' to fix the problem:");
+    printError("Try launching Xcode and selecting 'Product > Build' to fix the problem:");
     printError("  open ios/Runner.xcodeproj");
     return;
   }
