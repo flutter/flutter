@@ -115,6 +115,34 @@ TEST(GraphemeBreak, rules) {
     EXPECT_TRUE(IsBreak("U+4E00 | U+4E00"));  // CJK ideographs
     EXPECT_TRUE(IsBreak("'a' | U+1F1FA U+1F1F8"));  // Regional indicator pair (flag)
     EXPECT_TRUE(IsBreak("U+1F1FA U+1F1F8 | 'a'"));  // Regional indicator pair (flag)
+
+    // Extended rule for emoji tag sequence.
+    EXPECT_TRUE(IsBreak("'a' | U+1F3F4 'a'"));
+    EXPECT_TRUE(IsBreak("'a' U+1F3F4 | 'a'"));
+
+    // Immediate tag_term after tag_base.
+    EXPECT_TRUE(IsBreak("'a' | U+1F3F4 U+E007F 'a'"));
+    EXPECT_FALSE(IsBreak("U+1F3F4 | U+E007F"));
+    EXPECT_TRUE(IsBreak("'a' U+1F3F4 U+E007F | 'a'"));
+
+    // Flag sequence
+    // U+1F3F4 U+E0067 U+E0062 U+E0073 U+E0063 U+E0074 U+E007F is emoji tag sequence for the flag
+    // of Scotland.
+    // U+1F3F4 is WAVING BLACK FLAG. This can be a tag_base character.
+    // U+E0067 is TAG LATIN SMALL LETTER G. This can be a part of tag_spec.
+    // U+E0062 is TAG LATIN SMALL LETTER B. This can be a part of tag_spec.
+    // U+E0073 is TAG LATIN SMALL LETTER S. This can be a part of tag_spec.
+    // U+E0063 is TAG LATIN SMALL LETTER C. This can be a part of tag_spec.
+    // U+E0074 is TAG LATIN SMALL LETTER T. This can be a part of tag_spec.
+    // U+E007F is CANCEL TAG. This is a tag_term character.
+    EXPECT_TRUE(IsBreak("'a' | U+1F3F4 U+E0067 U+E0062 U+E0073 U+E0063 U+E0074 U+E007F"));
+    EXPECT_FALSE(IsBreak("U+1F3F4 | U+E0067 U+E0062 U+E0073 U+E0063 U+E0074 U+E007F"));
+    EXPECT_FALSE(IsBreak("U+1F3F4 U+E0067 | U+E0062 U+E0073 U+E0063 U+E0074 U+E007F"));
+    EXPECT_FALSE(IsBreak("U+1F3F4 U+E0067 U+E0062 | U+E0073 U+E0063 U+E0074 U+E007F"));
+    EXPECT_FALSE(IsBreak("U+1F3F4 U+E0067 U+E0062 U+E0073 | U+E0063 U+E0074 U+E007F"));
+    EXPECT_FALSE(IsBreak("U+1F3F4 U+E0067 U+E0062 U+E0073 U+E0063 | U+E0074 U+E007F"));
+    EXPECT_FALSE(IsBreak("U+1F3F4 U+E0067 U+E0062 U+E0073 U+E0063 U+E0074 | U+E007F"));
+    EXPECT_TRUE(IsBreak("U+1F3F4 U+E0067 U+E0062 U+E0073 U+E0063 U+E0074 U+E007F | 'a'"));
 }
 
 TEST(GraphemeBreak, tailoring) {
