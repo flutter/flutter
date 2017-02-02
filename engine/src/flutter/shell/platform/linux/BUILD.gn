@@ -15,6 +15,7 @@ executable("linux") {
 
   deps = [
     "//base",
+    "//dart/runtime/bin:embedded_dart_io",
     "//flutter/common",
     "//flutter/shell/common",
     "//flutter/shell/gpu",
