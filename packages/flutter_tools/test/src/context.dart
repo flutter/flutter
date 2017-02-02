@@ -60,7 +60,7 @@ void testUsingContext(String description, dynamic testMethod(), {
       when(os.isWindows).thenReturn(false);
       return os;
     });
-    testContext.putIfAbsent(XCode, () => new XCode());
+    testContext.putIfAbsent(Xcode, () => new Xcode());
     testContext.putIfAbsent(IOSSimulatorUtils, () {
       MockIOSSimulatorUtils mock = new MockIOSSimulatorUtils();
       when(mock.getAttachedDevices()).thenReturn(<IOSSimulator>[]);

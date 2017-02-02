@@ -115,7 +115,7 @@ Future<Null> main(List<String> args) async {
     context.putIfAbsent(ToolConfiguration, () => new ToolConfiguration());
     context.putIfAbsent(Config, () => new Config());
     context.putIfAbsent(OperatingSystemUtils, () => new OperatingSystemUtils());
-    context.putIfAbsent(XCode, () => new XCode());
+    context.putIfAbsent(Xcode, () => new Xcode());
     context.putIfAbsent(IOSSimulatorUtils, () => new IOSSimulatorUtils());
     context.putIfAbsent(SimControl, () => new SimControl());
     context.putIfAbsent(Usage, () => new Usage());

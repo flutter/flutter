@@ -36,7 +36,7 @@ void main() {
       appContext.setVariable(Logger, notifyingLogger);
       appContext.setVariable(Doctor, new Doctor());
       if (platform.isMacOS)
-        appContext.setVariable(XCode, new XCode());
+        appContext.setVariable(Xcode, new Xcode());
       appContext.setVariable(DeviceManager, new MockDeviceManager());
     });
 

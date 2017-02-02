@@ -13,7 +13,7 @@ import '../base/process.dart';
 import '../doctor.dart';
 import 'mac.dart';
 
-XCode get xcode => XCode.instance;
+Xcode get xcode => Xcode.instance;
 
 class IOSWorkflow extends DoctorValidator implements Workflow {
   IOSWorkflow() : super('iOS toolchain - develop for iOS devices');
@@ -61,7 +61,7 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
     if (xcode.isInstalled) {
       xcodeStatus = ValidationType.installed;
 
-      messages.add(new ValidationMessage('XCode at ${xcode.xcodeSelectPath}'));
+      messages.add(new ValidationMessage('Xcode at ${xcode.xcodeSelectPath}'));
 
       xcodeVersionInfo = xcode.xcodeVersionText;
       if (xcodeVersionInfo.contains(','))
@@ -71,7 +71,7 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
       if (!xcode.isInstalledAndMeetsVersionCheck) {
         xcodeStatus = ValidationType.partial;
         messages.add(new ValidationMessage.error(
-          'Flutter requires a minimum XCode version of $kXcodeRequiredVersionMajor.$kXcodeRequiredVersionMinor.0.\n'
+          'Flutter requires a minimum Xcode version of $kXcodeRequiredVersionMajor.$kXcodeRequiredVersionMinor.0.\n'
           'Download the latest version or update via the Mac App Store.'
         ));
       }
@@ -79,13 +79,13 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
       if (!xcode.eulaSigned) {
         xcodeStatus = ValidationType.partial;
         messages.add(new ValidationMessage.error(
-          'XCode end user license agreement not signed; open XCode or run the command \'sudo xcodebuild -license\'.'
+          'Xcode end user license agreement not signed; open Xcode or run the command \'sudo xcodebuild -license\'.'
         ));
       }
     } else {
       xcodeStatus = ValidationType.missing;
       messages.add(new ValidationMessage.error(
-        'XCode not installed; this is necessary for iOS development.\n'
+        'Xcode not installed; this is necessary for iOS development.\n'
         'Download at https://developer.apple.com/xcode/download/.'
       ));
     }
@@ -119,7 +119,7 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
         if (result.exitCode == 0 && result.stdout.isNotEmpty && !exitsHappy(<String>['ideviceName'])) {
           brewStatus = ValidationType.partial;
           messages.add(new ValidationMessage.error(
-            'libimobiledevice is incompatible with the installed XCode version. To update, run:\n'
+            'libimobiledevice is incompatible with the installed Xcode version. To update, run:\n'
             'brew uninstall libimobiledevice\n'
             'brew install --HEAD libimobiledevice'
           ));
