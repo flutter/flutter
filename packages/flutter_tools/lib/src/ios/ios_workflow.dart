@@ -32,7 +32,7 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
 
   bool get hasIDeviceId => exitsHappy(<String>['idevice_id', '-h']);
 
-  bool get hasIosDeploy => exitsHappy(<String>['ios-deploy', '-h']);
+  bool get hasIosDeploy => exitsHappy(<String>['ios-deploy', '--version']);
 
   String get iosDeployMinimumVersion => '1.9.0';
 
