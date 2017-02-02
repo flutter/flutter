@@ -392,6 +392,7 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
 
   static Iterable<DoctorValidator> get installed {
     List<DoctorValidator> validators = <DoctorValidator>[];
+    List<String> installPaths = <String>['/Applications', path.join(homeDirPath, 'Applications')];
 
     void checkForIntelliJ(Directory dir) {
       String name = path.basename(dir.path);
@@ -404,15 +405,17 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
     }
 
     try {
-      var checkDirectories = [ '/Applications' , path.join(homeDirPath, 'Applications') ];
-      for (String checkDir in checkDirectories) {
-        for (FileSystemEntity dir in fs.directory(checkDir).listSync()) {
-          if (dir is Directory) {
-            checkForIntelliJ(dir);
-            if (!dir.path.endsWith('.app')) {
-              for (FileSystemEntity subdir in dir.listSync()) {
-                if (subdir is Directory)
-                  checkForIntelliJ(subdir);
+      Iterable<FileSystemEntity> installDirs = installPaths
+              .map((String installPath) => fs.directory(installPath).listSync())
+              .expand((List<FileSystemEntity> mappedDirs) => mappedDirs)
+              .where((FileSystemEntity mappedDir) => mappedDir is Directory);
+      for (FileSystemEntity dir in installDirs) {
+        if (dir is Directory) {
+          checkForIntelliJ(dir);
+          if (!dir.path.endsWith('.app')) {
+            for (FileSystemEntity subdir in dir.listSync()) {
+              if (subdir is Directory) {
+                checkForIntelliJ(subdir);
               }
             }
           }
