@@ -8,7 +8,7 @@ abstract class Command {
   Command({Duration timeout})
       : this.timeout = timeout ?? const Duration(seconds: 5);
 
-  Command.deserialize(Map<String, dynamic> json)
+  Command.deserialize(Map<String, String> json)
       : timeout = new Duration(milliseconds: int.parse(json['timeout']));
 
   /// The maximum amount of time to wait for the command to complete.
