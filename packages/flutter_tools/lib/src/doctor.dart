@@ -386,6 +386,7 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
 
   static final Map<String, String> _dirNameToId = <String, String>{
     'IntelliJ IDEA.app' : 'IntelliJIdea',
+    'IntelliJ IDEA Ultimate.app' : 'IntelliJIdea',
     'IntelliJ IDEA CE.app' : 'IdeaIC',
   };
 
@@ -403,13 +404,16 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
     }
 
     try {
-      for (FileSystemEntity dir in fs.directory('/Applications').listSync()) {
-        if (dir is Directory) {
-          checkForIntelliJ(dir);
-          if (!dir.path.endsWith('.app')) {
-            for (FileSystemEntity subdir in dir.listSync()) {
-              if (subdir is Directory)
-                checkForIntelliJ(subdir);
+      var checkDirectories = [ '/Applications' , path.join(homeDirPath, 'Applications') ];
+      for (String checkDir in checkDirectories) {
+        for (FileSystemEntity dir in fs.directory(checkDir).listSync()) {
+          if (dir is Directory) {
+            checkForIntelliJ(dir);
+            if (!dir.path.endsWith('.app')) {
+              for (FileSystemEntity subdir in dir.listSync()) {
+                if (subdir is Directory)
+                  checkForIntelliJ(subdir);
+              }
             }
           }
         }
