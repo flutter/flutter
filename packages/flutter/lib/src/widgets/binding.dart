@@ -89,6 +89,17 @@ abstract class WidgetsBinding extends BindingBase implements GestureBinding, Ren
         buildOwner.reassemble(renderViewElement);
       }
     );
+
+    registerBoolServiceExtension(
+      name: 'debugAllowBanner',
+      getter: () => WidgetsApp.debugAllowBannerOverride,
+      setter: (bool value) {
+        if (WidgetsApp.debugAllowBannerOverride == value)
+          return;
+        WidgetsApp.debugAllowBannerOverride = value;
+        buildOwner.reassemble(renderViewElement);
+      }
+    );
   }
 
   /// The [BuildOwner] in charge of executing the build pipeline for the

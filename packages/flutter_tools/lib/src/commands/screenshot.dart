@@ -139,7 +139,7 @@ class ScreenshotCommand extends FlutterCommand {
   }
 
   Future<Null> showOutputFileInfo(File outputFile) async {
-    int sizeKB = (await outputFile.length()) ~/ 1000;
-    printStatus('Screenshot written to ${path.relative(outputFile.path)} (${sizeKB}kb).');
+    int sizeKB = (await outputFile.length()) ~/ 1024;
+    printStatus('Screenshot written to ${path.relative(outputFile.path)} (${sizeKB}kB).');
   }
 }

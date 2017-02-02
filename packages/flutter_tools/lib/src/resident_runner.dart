@@ -7,17 +7,14 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 
-
 import 'application_package.dart';
-
+import 'asset.dart';
+import 'base/common.dart';
 import 'base/file_system.dart';
 import 'base/io.dart';
-import 'base/os.dart';
-
-import 'asset.dart';
-
-import 'base/common.dart';
 import 'base/logger.dart';
+import 'base/os.dart';
+import 'base/utils.dart';
 import 'build_info.dart';
 import 'dart/dependencies.dart';
 import 'dart/package_map.dart';
@@ -108,6 +105,24 @@ abstract class ResidentRunner {
     if (vmService != null)
       await vmService.vm.refreshViews();
     await currentView.uiIsolate.flutterToggleDebugPaintSizeEnabled();
+  }
+
+  Future<Null> _screenshot() async {
+    File outputFile = getUniqueFile(fs.currentDirectory, 'flutter', 'png');
+    try {
+      if (vmService != null)
+        await vmService.vm.refreshViews();
+      if (isRunningDebug)
+        await currentView.uiIsolate.flutterDebugAllowBanner(false);
+      if (!await device.takeScreenshot(outputFile))
+        printError('Error taking screenshot.');
+      if (isRunningDebug)
+        await currentView.uiIsolate.flutterDebugAllowBanner(true);
+      int sizeKB = (await outputFile.length()) ~/ 1024;
+      printStatus('Screenshot written to ${path.relative(outputFile.path)} (${sizeKB}kB).');
+    } catch (error) {
+      printError('Error taking screenshot: $error');
+    }
   }
 
   void registerSignalHandlers() {
@@ -212,6 +227,11 @@ abstract class ResidentRunner {
         return true;
       await _debugToggleDebugPaintSizeEnabled();
       return true;
+    } else if (lower == 's') {
+      if (!supportsServiceProtocol || !device.supportsScreenshot)
+        return true;
+      await _screenshot();
+      return true;
     } else if (lower == 'q' || character == AnsiTerminal.KEY_F10) {
       // F10, exit
       await stop();
@@ -309,9 +329,13 @@ abstract class ResidentRunner {
   void printHelp({ @required bool details });
 
   void printHelpDetails() {
-    printStatus('To dump the widget hierarchy of the app (debugDumpApp), press "w".');
-    printStatus('To dump the rendering tree of the app (debugDumpRenderTree), press "t".');
-    printStatus('To toggle the display of construction lines (debugPaintSizeEnabled), press "p".');
+    if (supportsServiceProtocol) {
+      printStatus('To dump the widget hierarchy of the app (debugDumpApp), press "w".');
+      printStatus('To dump the rendering tree of the app (debugDumpRenderTree), press "t".');
+      printStatus('To toggle the display of construction lines (debugPaintSizeEnabled), press "p".');
+    }
+    if (device.supportsScreenshot)
+      printStatus('To save a screenshot to flutter.png, press "s".');
   }
 
   /// Called when a signal has requested we exit.
