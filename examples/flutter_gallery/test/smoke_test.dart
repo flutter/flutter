@@ -38,6 +38,7 @@ Future<Null> smokeDemo(WidgetTester tester, String routeName) async {
   await tester.pump(const Duration(seconds: 1)); // Wait until the demo has opened.
 
   expect(find.text(kCaption), findsNothing);
+  await tester.pump(const Duration(seconds: 1)); // Leave the demo on the screen briefly for manual testing.
 
   // Go back
   Finder backButton = find.byTooltip('Back');
@@ -61,22 +62,12 @@ Future<Null> runSmokeTest(WidgetTester tester) async {
 
   expect(find.text(kCaption), findsOneWidget);
 
-  final List<double> scrollDeltas = new List<double>();
-  double previousY = tester.getTopRight(find.text(demoCategories[0])).y;
   for (String routeName in routeNames) {
-    final double y = tester.getTopRight(findGalleryItemByRouteName(tester, routeName)).y;
-    scrollDeltas.add(previousY - y);
-    previousY = y;
-  }
-
-  // Launch each demo and then scroll that item out of the way.
-  for (int i = 0; i < routeNames.length; i += 1) {
-    final String routeName = routeNames[i];
+    Finder finder = findGalleryItemByRouteName(tester, routeName);
+    Scrollable2.ensureVisible(tester.element(finder), alignment: 0.5);
+    await tester.pump();
+    await tester.pumpUntilNoTransientCallbacks();
     await smokeDemo(tester, routeName);
-    await tester.scroll(findGalleryItemByRouteName(tester, routeName), new Offset(0.0, scrollDeltas[i]));
-    await tester.pump(); // start the scroll
-    await tester.pump(const Duration(milliseconds: 500)); // wait for overscroll to timeout, if necessary
-    await tester.pump(const Duration(seconds: 3)); // wait for overscroll to fade away, if necessary
     tester.binding.debugAssertNoTransientCallbacks('A transient callback was still active after leaving route $routeName');
   }
 

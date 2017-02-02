@@ -86,7 +86,12 @@ class Scrollable2 extends StatefulWidget {
 
     Scrollable2State scrollable = Scrollable2.of(context);
     while (scrollable != null) {
-      futures.add(scrollable.position.ensureVisible(context.findRenderObject(), alignment: alignment));
+      futures.add(scrollable.position.ensureVisible(
+        context.findRenderObject(),
+        alignment: alignment,
+        duration: duration,
+        curve: curve,
+      ));
       context = scrollable.context;
       scrollable = Scrollable2.of(context);
     }

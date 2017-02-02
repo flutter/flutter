@@ -80,32 +80,39 @@ void main() {
   testWidgets('Drawer scrolling', (WidgetTester tester) async {
     GlobalKey<ScrollableState<Scrollable>> drawerKey =
         new GlobalKey<ScrollableState<Scrollable>>(debugLabel: 'drawer');
-    Key appBarKey = new Key('appBar');
     const double appBarHeight = 256.0;
+
+    ScrollController scrollOffset = new ScrollController();
 
     await tester.pumpWidget(
       new MaterialApp(
         home: new Scaffold(
-          appBarBehavior: AppBarBehavior.under,
-          appBar: new AppBar(
-            key: appBarKey,
-            expandedHeight: appBarHeight,
-            title: new Text('Title'),
-            flexibleSpace: new FlexibleSpaceBar(title: new Text('Title')),
-          ),
           drawer: new Drawer(
-            child: new Block(
-              scrollableKey: drawerKey,
+            key: drawerKey,
+            child: new ListView(
+              controller: scrollOffset,
               children: new List<Widget>.generate(10,
                 (int index) => new SizedBox(height: 100.0, child: new Text('D$index'))
               )
             )
           ),
-          body: new Block(
-            padding: const EdgeInsets.only(top: appBarHeight),
-            children: new List<Widget>.generate(10,
-              (int index) => new SizedBox(height: 100.0, child: new Text('B$index'))
-            ),
+          body: new CustomScrollView(
+            slivers: <Widget>[
+              new SliverAppBar(
+                pinned: true,
+                expandedHeight: appBarHeight,
+                title: new Text('Title'),
+                flexibleSpace: new FlexibleSpaceBar(title: new Text('Title')),
+              ),
+              new SliverPadding(
+                padding: const EdgeInsets.only(top: appBarHeight),
+                child: new SliverList(
+                  delegate: new SliverChildListDelegate(new List<Widget>.generate(
+                    10, (int index) => new SizedBox(height: 100.0, child: new Text('B$index')),
+                  )),
+                ),
+              ),
+            ],
           ),
         )
       )
@@ -117,86 +124,62 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
 
-    expect(drawerKey.currentState.scrollOffset, equals(0));
+    expect(scrollOffset.offset, 0.0);
 
     const double scrollDelta = 80.0;
     await tester.scroll(find.byKey(drawerKey), const Offset(0.0, -scrollDelta));
     await tester.pump();
 
-    expect(drawerKey.currentState.scrollOffset, equals(scrollDelta));
+    expect(scrollOffset.offset, scrollDelta);
 
-    RenderBox renderBox = tester.renderObject(find.byKey(appBarKey));
+    RenderBox renderBox = tester.renderObject(find.byType(AppBar));
     expect(renderBox.size.height, equals(appBarHeight));
   });
 
-  testWidgets('Tapping the status bar scrolls to top on iOS', (WidgetTester tester) async {
-    final GlobalKey<ScrollableState> scrollableKey = new GlobalKey<ScrollableState>();
-    final Key appBarKey = new UniqueKey();
-
-    await tester.pumpWidget(
-      new MaterialApp(
-        theme: new ThemeData(platform: TargetPlatform.iOS),
-        home: new MediaQuery(
-          data: const MediaQueryData(padding: const EdgeInsets.only(top: 25.0)), // status bar
-          child: new Scaffold(
-            scrollableKey: scrollableKey,
-            appBar: new AppBar(
-              key: appBarKey,
-              title: new Text('Title')
-            ),
-            body: new Block(
-              scrollableKey: scrollableKey,
-              initialScrollOffset: 500.0,
-              children: new List<Widget>.generate(20,
-                (int index) => new SizedBox(height: 100.0, child: new Text('$index'))
-              )
-            )
-          )
-        )
-      )
+  Widget _buildStatusBarTestApp(TargetPlatform platform) {
+    return new MaterialApp(
+      theme: new ThemeData(platform: platform),
+      home: new MediaQuery(
+        data: const MediaQueryData(padding: const EdgeInsets.only(top: 25.0)), // status bar
+        child: new Scaffold(
+          body: new CustomScrollView(
+            primary: true,
+            slivers: <Widget>[
+              new SliverAppBar(
+                title: new Text('Title')
+              ),
+              new SliverList(
+                delegate: new SliverChildListDelegate(new List<Widget>.generate(
+                  20, (int index) => new SizedBox(height: 100.0, child: new Text('$index')),
+                )),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
+  }
 
-    final ScrollableState scrollable = tester.state(find.byType(Scrollable));
-    expect(scrollable.scrollOffset, equals(500.0));
+  testWidgets('Tapping the status bar scrolls to top on iOS', (WidgetTester tester) async {
+    await tester.pumpWidget(_buildStatusBarTestApp(TargetPlatform.iOS));
+    final Scrollable2State scrollable = tester.state(find.byType(Scrollable2));
+    scrollable.position.jumpTo(500.0);
+    expect(scrollable.position.pixels, equals(500.0));
     await tester.tapAt(const Point(100.0, 10.0));
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
-    expect(scrollable.scrollOffset, equals(0.0));
+    expect(scrollable.position.pixels, equals(0.0));
   });
 
   testWidgets('Tapping the status bar does not scroll to top on Android', (WidgetTester tester) async {
-    final GlobalKey<ScrollableState> scrollableKey = new GlobalKey<ScrollableState>();
-    final Key appBarKey = new UniqueKey();
-
-    await tester.pumpWidget(
-      new MaterialApp(
-        theme: new ThemeData(platform: TargetPlatform.android),
-        home: new MediaQuery(
-          data: const MediaQueryData(padding: const EdgeInsets.only(top: 25.0)), // status bar
-          child: new Scaffold(
-            scrollableKey: scrollableKey,
-            appBar: new AppBar(
-              key: appBarKey,
-              title: new Text('Title')
-            ),
-            body: new Block(
-              scrollableKey: scrollableKey,
-              initialScrollOffset: 500.0,
-              children: new List<Widget>.generate(20,
-                (int index) => new SizedBox(height: 100.0, child: new Text('$index'))
-              )
-            )
-          )
-        )
-      )
-    );
-
-    final ScrollableState scrollable = tester.state(find.byType(Scrollable));
-    expect(scrollable.scrollOffset, equals(500.0));
+    await tester.pumpWidget(_buildStatusBarTestApp(TargetPlatform.android));
+    final Scrollable2State scrollable = tester.state(find.byType(Scrollable2));
+    scrollable.position.jumpTo(500.0);
+    expect(scrollable.position.pixels, equals(500.0));
     await tester.tapAt(const Point(100.0, 10.0));
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
-    expect(scrollable.scrollOffset, equals(500.0));
+    expect(scrollable.position.pixels, equals(500.0));
   });
 
   testWidgets('Bottom sheet cannot overlap app bar', (WidgetTester tester) async {

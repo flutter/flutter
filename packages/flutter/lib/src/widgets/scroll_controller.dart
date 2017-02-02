@@ -22,6 +22,14 @@ class ScrollController {
 
   final List<ScrollPosition> _positions = <ScrollPosition>[];
 
+  /// Whether any [ScrollPosition] objects have attached themselves to the
+  /// [ScrollController] using the [attach] method.
+  ///
+  /// If this is false, then members that interact with the [ScrollPosition],
+  /// such as [position], [offset], [animateTo], and [jumpTo], must not be
+  /// called.
+  bool get hasClients => _positions.isNotEmpty;
+
   ScrollPosition get position {
     assert(_positions.isNotEmpty, 'ScrollController not attached to any scroll views.');
     assert(_positions.length == 1, 'ScrollController attached to multiple scroll views.');

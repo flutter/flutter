@@ -5,8 +5,9 @@
 import 'package:flutter/rendering.dart';
 import 'package:meta/meta.dart';
 
-import 'framework.dart';
 import 'basic.dart';
+import 'framework.dart';
+import 'primary_scroll_controller.dart';
 import 'scroll_controller.dart';
 import 'scroll_physics.dart';
 import 'scroll_position.dart';
@@ -20,11 +21,16 @@ abstract class ScrollView extends StatelessWidget {
     this.scrollDirection: Axis.vertical,
     this.reverse: false,
     this.controller,
+    this.primary: false,
     this.physics,
     this.shrinkWrap: false,
   }) : super(key: key) {
     assert(reverse != null);
     assert(shrinkWrap != null);
+    assert(primary != null);
+    assert(controller == null || !primary,
+           'Primary ScrollViews obtain their ScrollController via inheritance from a PrimaryScrollController widget. '
+           'You cannot both set primary to true and pass an explicit controller.');
   }
 
   final Axis scrollDirection;
@@ -32,6 +38,8 @@ abstract class ScrollView extends StatelessWidget {
   final bool reverse;
 
   final ScrollController controller;
+
+  final bool primary;
 
   final ScrollPhysics physics;
 
@@ -58,7 +66,7 @@ abstract class ScrollView extends StatelessWidget {
     AxisDirection axisDirection = getDirection(context);
     return new Scrollable2(
       axisDirection: axisDirection,
-      controller: controller,
+      controller: controller ?? (primary ? PrimaryScrollController.of(context) : null),
       physics: physics,
       viewportBuilder: (BuildContext context, ViewportOffset offset) {
         if (shrinkWrap) {
@@ -82,6 +90,14 @@ abstract class ScrollView extends StatelessWidget {
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     description.add('$scrollDirection');
+    if (reverse)
+      description.add('reversed');
+    if (controller != null)
+      description.add('$controller');
+    if (primary)
+      description.add('using primary controller');
+    if (physics != null)
+      description.add('$physics');
     if (shrinkWrap)
       description.add('shrink-wrapping');
   }
@@ -93,6 +109,7 @@ class CustomScrollView extends ScrollView {
     Axis scrollDirection: Axis.vertical,
     bool reverse: false,
     ScrollController controller,
+    bool primary: false,
     ScrollPhysics physics,
     bool shrinkWrap: false,
     this.slivers: const <Widget>[],
@@ -101,6 +118,7 @@ class CustomScrollView extends ScrollView {
     scrollDirection: scrollDirection,
     reverse: reverse,
     controller: controller,
+    primary: primary,
     physics: physics,
     shrinkWrap: shrinkWrap,
   );
@@ -117,6 +135,7 @@ abstract class BoxScrollView extends ScrollView {
     Axis scrollDirection: Axis.vertical,
     bool reverse: false,
     ScrollController controller,
+    bool primary: false,
     ScrollPhysics physics,
     bool shrinkWrap: false,
     this.padding,
@@ -125,6 +144,7 @@ abstract class BoxScrollView extends ScrollView {
     scrollDirection: scrollDirection,
     reverse: reverse,
     controller: controller,
+    primary: primary,
     physics: physics,
     shrinkWrap: shrinkWrap,
   );
@@ -164,6 +184,7 @@ class ListView extends BoxScrollView {
     Axis scrollDirection: Axis.vertical,
     bool reverse: false,
     ScrollController controller,
+    bool primary: false,
     ScrollPhysics physics,
     bool shrinkWrap: false,
     EdgeInsets padding,
@@ -174,6 +195,7 @@ class ListView extends BoxScrollView {
     scrollDirection: scrollDirection,
     reverse: reverse,
     controller: controller,
+    primary: primary,
     physics: physics,
     shrinkWrap: shrinkWrap,
     padding: padding,
@@ -184,6 +206,7 @@ class ListView extends BoxScrollView {
     Axis scrollDirection: Axis.vertical,
     bool reverse: false,
     ScrollController controller,
+    bool primary: false,
     ScrollPhysics physics,
     bool shrinkWrap: false,
     EdgeInsets padding,
@@ -195,6 +218,7 @@ class ListView extends BoxScrollView {
     scrollDirection: scrollDirection,
     reverse: reverse,
     controller: controller,
+    primary: primary,
     physics: physics,
     shrinkWrap: shrinkWrap,
     padding: padding,
@@ -205,6 +229,7 @@ class ListView extends BoxScrollView {
     Axis scrollDirection: Axis.vertical,
     bool reverse: false,
     ScrollController controller,
+    bool primary: false,
     ScrollPhysics physics,
     bool shrinkWrap: false,
     EdgeInsets padding,
@@ -215,6 +240,7 @@ class ListView extends BoxScrollView {
     scrollDirection: scrollDirection,
     reverse: reverse,
     controller: controller,
+    primary: primary,
     physics: physics,
     shrinkWrap: shrinkWrap,
     padding: padding,
@@ -259,6 +285,7 @@ class GridView extends BoxScrollView {
     Axis scrollDirection: Axis.vertical,
     bool reverse: false,
     ScrollController controller,
+    bool primary: false,
     ScrollPhysics physics,
     bool shrinkWrap: false,
     EdgeInsets padding,
@@ -269,6 +296,7 @@ class GridView extends BoxScrollView {
     scrollDirection: scrollDirection,
     reverse: reverse,
     controller: controller,
+    primary: primary,
     physics: physics,
     shrinkWrap: shrinkWrap,
     padding: padding,
@@ -281,6 +309,7 @@ class GridView extends BoxScrollView {
     Axis scrollDirection: Axis.vertical,
     bool reverse: false,
     ScrollController controller,
+    bool primary: false,
     ScrollPhysics physics,
     bool shrinkWrap: false,
     EdgeInsets padding,
@@ -291,6 +320,7 @@ class GridView extends BoxScrollView {
     scrollDirection: scrollDirection,
     reverse: reverse,
     controller: controller,
+    primary: primary,
     physics: physics,
     shrinkWrap: shrinkWrap,
     padding: padding,
@@ -304,6 +334,7 @@ class GridView extends BoxScrollView {
     Axis scrollDirection: Axis.vertical,
     bool reverse: false,
     ScrollController controller,
+    bool primary: false,
     ScrollPhysics physics,
     bool shrinkWrap: false,
     EdgeInsets padding,
@@ -323,6 +354,7 @@ class GridView extends BoxScrollView {
     scrollDirection: scrollDirection,
     reverse: reverse,
     controller: controller,
+    primary: primary,
     physics: physics,
     shrinkWrap: shrinkWrap,
     padding: padding,
@@ -333,6 +365,7 @@ class GridView extends BoxScrollView {
     Axis scrollDirection: Axis.vertical,
     bool reverse: false,
     ScrollController controller,
+    bool primary: false,
     ScrollPhysics physics,
     bool shrinkWrap: false,
     EdgeInsets padding,
@@ -352,6 +385,7 @@ class GridView extends BoxScrollView {
     scrollDirection: scrollDirection,
     reverse: reverse,
     controller: controller,
+    primary: primary,
     physics: physics,
     shrinkWrap: shrinkWrap,
     padding: padding,

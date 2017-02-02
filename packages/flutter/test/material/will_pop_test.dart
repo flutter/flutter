@@ -13,12 +13,22 @@ class SamplePage extends StatefulWidget {
 }
 
 class SamplePageState extends State<SamplePage> {
+  ModalRoute<Null> _route;
+
+  Future<bool> _callback() async => willPopValue;
+
   @override
   void dependenciesChanged() {
     super.dependenciesChanged();
-    final ModalRoute<Null> route = ModalRoute.of(context);
-    if (route.isCurrent)
-      route.addScopedWillPopCallback(() async => willPopValue);
+    _route?.removeScopedWillPopCallback(_callback);
+    _route = ModalRoute.of(context);
+    _route?.addScopedWillPopCallback(_callback);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _route?.removeScopedWillPopCallback(_callback);
   }
 
   @override
@@ -86,6 +96,9 @@ void main() {
         ),
       ),
     );
+
+    expect(find.byTooltip('Back'), findsNothing);
+    expect(find.text('Sample Page'), findsNothing);
 
     await tester.tap(find.text('X'));
     await tester.pump();

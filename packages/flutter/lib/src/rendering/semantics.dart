@@ -473,6 +473,7 @@ class SemanticsNode extends AbstractNode {
     owner._nodes.remove(id);
     owner._detachedNodes.add(this);
     super.detach();
+    assert(owner == null);
     if (_children != null) {
       for (SemanticsNode child in _children) {
         // The list of children may be stale and may contain nodes that have
@@ -481,6 +482,10 @@ class SemanticsNode extends AbstractNode {
           child.detach();
       }
     }
+    // The other side will have forgotten this node if we ever send
+    // it again, so make sure to mark it dirty so that it'll get
+    // sent if it is resurrected.
+    _markDirty();
   }
 
   bool _dirty = false;
@@ -563,7 +568,7 @@ class SemanticsNode extends AbstractNode {
     StringBuffer buffer = new StringBuffer();
     buffer.write('$runtimeType($id');
     if (_dirty)
-      buffer.write(" (${ owner != null && owner._dirtyNodes.contains(this) ? 'dirty' : 'STALE' })");
+      buffer.write(' (${ owner != null && owner._dirtyNodes.contains(this) ? "dirty" : "STALE; owner=$owner" })');
     if (_shouldMergeAllDescendantsIntoThisNode)
       buffer.write(' (leaf merge)');
     buffer.write('; $rect');
@@ -624,19 +629,13 @@ class SemanticsOwner extends ChangeNotifier {
 
   /// Update the semantics using [ui.window.updateSemantics].
   void sendSemanticsUpdate() {
-    for (SemanticsNode oldNode in _detachedNodes) {
-      // The other side will have forgotten this node if we even send
-      // it again, so make sure to mark it dirty so that it'll get
-      // sent if it is resurrected.
-      oldNode._dirty = true;
-    }
-    _detachedNodes.clear();
     if (_dirtyNodes.isEmpty)
       return;
     List<SemanticsNode> visitedNodes = <SemanticsNode>[];
     while (_dirtyNodes.isNotEmpty) {
-      List<SemanticsNode> localDirtyNodes = _dirtyNodes.toList();
+      List<SemanticsNode> localDirtyNodes = _dirtyNodes.where((SemanticsNode node) => !_detachedNodes.contains(node)).toList();
       _dirtyNodes.clear();
+      _detachedNodes.clear();
       localDirtyNodes.sort((SemanticsNode a, SemanticsNode b) => a.depth - b.depth);
       visitedNodes.addAll(localDirtyNodes);
       for (SemanticsNode node in localDirtyNodes) {
@@ -759,4 +758,7 @@ class SemanticsOwner extends ChangeNotifier {
     SemanticsActionHandler handler = _getSemanticsActionHandlerForPosition(node, position, action);
     handler?.performAction(action);
   }
+
+  @override
+  String toString() => '$runtimeType@$hashCode';
 }

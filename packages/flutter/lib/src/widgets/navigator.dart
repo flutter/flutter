@@ -52,7 +52,7 @@ abstract class Route<T> {
   @mustCallSuper
   void install(OverlayEntry insertionPoint) { }
 
-  /// Called after install() when the route is pushed onto the navigator.
+  /// Called after [install] when the route is pushed onto the navigator.
   ///
   /// The returned value resolves when the push transition is complete.
   @protected
@@ -62,7 +62,7 @@ abstract class Route<T> {
   /// specified or if it's null, this value will be used instead.
   T get currentResult => null;
 
-  /// Called after install() when the route replaced another in the navigator.
+  /// Called after [install] when the route replaced another in the navigator.
   @protected
   @mustCallSuper
   void didReplace(Route<dynamic> oldRoute) { }
@@ -78,7 +78,7 @@ abstract class Route<T> {
   /// A request was made to pop this route. If the route can handle it
   /// internally (e.g. because it has its own stack of internal state) then
   /// return false, otherwise return true. Returning false will prevent the
-  /// default behavior of NavigatorState.pop().
+  /// default behavior of [NavigatorState.pop].
   ///
   /// When this function returns true, the navigator removes this route from
   /// the history but does not yet call [dispose]. Instead, it is the route's
@@ -89,11 +89,11 @@ abstract class Route<T> {
   @protected
   @mustCallSuper
   bool didPop(T result) {
-    _popCompleter.complete(result);
+    didComplete(result);
     return true;
   }
 
-  /// Whether calling didPop() would return false.
+  /// Whether calling [didPop] would return false.
   bool get willHandlePopInternally => false;
 
   /// The given route, which came after this one, has been popped off the
@@ -104,11 +104,29 @@ abstract class Route<T> {
 
   /// This route's next route has changed to the given new route. This is called
   /// on a route whenever the next route changes for any reason, except for
-  /// cases when didPopNext() would be called, so long as it is in the history.
-  /// nextRoute will be null if there's no next route.
+  /// cases when [didPopNext] would be called, so long as it is in the history.
+  /// `nextRoute` will be null if there's no next route.
   @protected
   @mustCallSuper
   void didChangeNext(Route<dynamic> nextRoute) { }
+
+  /// This route's previous route has changed to the given new route. This is
+  /// called on a route whenever the previous route changes for any reason, so
+  /// long as it is in the history, except for immediately after the route has
+  /// been pushed (in which wase [didPush] or [didReplace] will be called
+  /// instead). `previousRoute` will be null if there's no previous route.
+  @protected
+  @mustCallSuper
+  void didChangePrevious(Route<dynamic> previousRoute) { }
+
+  /// The route was popped or is otherwise being removed somewhat gracefully.
+  ///
+  /// This is called by [didPop] and in response to [Navigator.pushReplacement].
+  @protected
+  @mustCallSuper
+  void didComplete(T result) {
+    _popCompleter.complete(result);
+  }
 
   /// The route should remove its overlays and free any other resources.
   ///
@@ -117,7 +135,7 @@ abstract class Route<T> {
   @protected
   void dispose() {
     assert(() {
-      if (_navigator == null) {
+      if (navigator == null) {
         throw new FlutterError(
           '$runtimeType.dipose() called more than once.\n'
           'A given route cannot be disposed more than once.'
@@ -146,10 +164,22 @@ abstract class Route<T> {
     return _navigator != null && _navigator._history.last == this;
   }
 
+  /// Whether this route is the bottom-most route on the navigator.
+  ///
+  /// If this is true, then [Navigator.canPop] will return false if this route's
+  /// [willHandlePopInternally] returns false.
+  ///
+  /// If [isFirst] and [isCurrent] are both true then this is the only route on
+  /// the navigator (and [isActive] will also be true).
+  bool get isFirst {
+    return _navigator != null && _navigator._history.first == this;
+  }
+
   /// Whether this route is on the navigator.
   ///
   /// If the route is not only active, but also the current route (the top-most
-  /// route), then [isCurrent] will also be true.
+  /// route), then [isCurrent] will also be true. If it is the first route (the
+  /// bottom-most route), then [isFirst] will also be true.
   ///
   /// If a later route is entirely opaque, then the route will be active but not
   /// rendered. It is even possible for the route to be active but for the stateful
@@ -516,8 +546,8 @@ class Navigator extends StatefulWidget {
   ///   to veto a [pop] initiated by the app's back button.
   /// * [ModalRoute], which provides a `scopedWillPopCallback` that can be used
   ///   to define the route's `willPop` method.
-  static Future<bool> willPop(BuildContext context) {
-    return Navigator.of(context).willPop();
+  static Future<bool> maybePop(BuildContext context, [ dynamic result ]) {
+    return Navigator.of(context).maybePop(result);
   }
 
   /// Pop a route off the navigator that most tightly encloses the given context.
@@ -562,7 +592,8 @@ class Navigator extends StatefulWidget {
     Navigator.of(context).popUntil(predicate);
   }
 
-  /// Whether the navigator that most tightly encloses the given context can be popped.
+  /// Whether the navigator that most tightly encloses the given context can be
+  /// popped.
   ///
   /// The initial route cannot be popped off the navigator, which implies that
   /// this function returns true only if popping the navigator would not remove
@@ -809,10 +840,12 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       newRoute.install(oldRoute.overlayEntries.last);
       _history[index] = newRoute;
       newRoute.didReplace(oldRoute);
-      if (index + 1 < _history.length)
+      if (index + 1 < _history.length) {
         newRoute.didChangeNext(_history[index + 1]);
-      else
+        _history[index + 1].didChangePrevious(newRoute);
+      } else  {
         newRoute.didChangeNext(null);
+      }
       if (index > 0)
         _history[index - 1].didChangeNext(newRoute);
       oldRoute.dispose();
@@ -825,7 +858,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   /// The new route and the route below the new route (if any) are notified
   /// (see [Route.didPush] and [Route.didChangeNext]). The navigator observer
   /// is not notified about the old route. The old route is disposed (see
-  /// [Route.dispose]).
+  /// [Route.dispose]). The new route is not notified when the old route
+  /// is removed (which happens when the new route's animation completes).
   ///
   /// If a [result] is provided, it will be the return value of the old route,
   /// as if the old route had been popped.
@@ -837,7 +871,6 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     assert(oldRoute.overlayEntries.isNotEmpty);
     assert(newRoute._navigator == null);
     assert(newRoute.overlayEntries.isEmpty);
-
     setState(() {
       int index = _history.length - 1;
       assert(index >= 0);
@@ -845,12 +878,12 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       newRoute._navigator = this;
       newRoute.install(_currentOverlayEntry);
       _history[index] = newRoute;
-      newRoute.didPush().then<dynamic>((Null _) {
+      newRoute.didPush().then<Null>((Null value) {
         // The old route's exit is not animated. We're assuming that the
         // new route completely obscures the old one.
         if (mounted) {
           oldRoute
-            .._popCompleter.complete(result ?? oldRoute.currentResult)
+            ..didComplete(result ?? oldRoute.currentResult)
             ..dispose();
         }
       });
@@ -895,7 +928,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   ///
   /// The removed route is disposed (see [Route.dispose]). The route prior to
   /// the removed route, if any, is notified (see [Route.didChangeNext]). The
-  /// navigator observer is not notified.
+  /// route above the removed route, if any, is also notified (see
+  /// [Route.didChangePrevious]). The navigator observer is not notified.
   void removeRouteBelow(Route<dynamic> anchorRoute) {
     assert(!_debugLocked);
     assert(() { _debugLocked = true; return true; });
@@ -907,28 +941,36 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     assert(targetRoute.overlayEntries.isEmpty || !overlay.debugIsVisible(targetRoute.overlayEntries.last));
     setState(() {
       _history.removeAt(index);
-      Route<dynamic> newRoute = index < _history.length ? _history[index] : null;
-      if (index > 0)
-        _history[index - 1].didChangeNext(newRoute);
+      Route<dynamic> nextRoute = index < _history.length ? _history[index] : null;
+      Route<dynamic> previousRoute = index > 0 ? _history[index - 1] : null;
+      if (previousRoute != null)
+        previousRoute.didChangeNext(nextRoute);
+      if (nextRoute != null)
+        nextRoute.didChangePrevious(previousRoute);
       targetRoute.dispose();
     });
     assert(() { _debugLocked = false; return true; });
   }
 
-  /// Returns the value of the current route's `willPop` method. This method is
-  /// typically called before a user-initiated [pop]. For example on Android it's
-  /// called by the binding for the system's back button.
+  /// Tries to pop the current route, first giving the active route the chance
+  /// to veto the operation using [Route.willPop]. This method is typically
+  /// called instead of [pop] when the user uses a back button. For example on
+  /// Android it's called by the binding for the system's back button.
   ///
   /// See also:
   ///
-  /// * [Form], which provides an `onWillPop` callback that enables the form
-  ///   to veto a [pop] initiated by the app's back button.
-  /// * [ModalRoute], which has as a `willPop` method that can be defined
-  ///   by a list of [WillPopCallback]s.
-  Future<bool> willPop() async {
+  /// * [Form], which provides a [Form.onWillPop] callback that enables the form
+  ///   to veto a [maybePop] initiated by the app's back button.
+  /// * [ModalRoute], which has as a [ModalRoute.willPop] method that can be
+  ///   defined by a list of [WillPopCallback]s.
+  Future<bool> maybePop([dynamic result]) async {
     final Route<dynamic> route = _history.last;
     assert(route._navigator == this);
-    return route.willPop();
+    if (await route.willPop() && mounted) {
+      pop(result);
+      return true;
+    }
+    return false;
   }
 
   /// Removes the top route in the [Navigator]'s history.
@@ -1086,10 +1128,10 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
           initiallyFocusedScope: initialRoute.focusKey,
           child: new Overlay(
             key: _overlayKey,
-            initialEntries: initialRoute.overlayEntries
-          )
-        )
-      )
+            initialEntries: initialRoute.overlayEntries,
+          ),
+        ),
+      ),
     );
   }
 }

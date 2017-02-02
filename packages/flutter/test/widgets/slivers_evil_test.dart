@@ -16,10 +16,13 @@ class TestSliverPersistentHeaderDelegate extends SliverPersistentHeaderDelegate 
   double get maxExtent => _maxExtent;
 
   @override
-  Widget build(BuildContext context, double shrinkOffset) {
+  double get minExtent => 16.0;
+
+  @override
+  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
     return new Column(
       children: <Widget>[
-        new Container(height: 16.0),
+        new Container(height: minExtent),
         new Expanded(child: new Container()),
       ],
     );
