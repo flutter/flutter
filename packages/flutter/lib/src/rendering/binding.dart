@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:developer';
 import 'dart:ui' as ui show window;
 
 import 'package:flutter/foundation.dart';
@@ -227,7 +228,12 @@ abstract class RendererBinding extends BindingBase implements SchedulerBinding, 
   @override
   void reassembleApplication() {
     super.reassembleApplication();
-    renderView.reassemble();
+    Timeline.startSync('Dirty Render Tree');
+    try {
+      renderView.reassemble();
+    } finally {
+      Timeline.finishSync();
+    }
     handleBeginFrame(null);
   }
 

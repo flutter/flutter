@@ -1873,9 +1873,14 @@ class BuildOwner {
   ///
   /// This is expensive and should not be called except during development.
   void reassemble(Element root) {
-    assert(root._parent == null);
-    assert(root.owner == this);
-    root._reassemble();
+    Timeline.startSync('Dirty Element Tree');
+    try {
+      assert(root._parent == null);
+      assert(root.owner == this);
+      root._reassemble();
+    } finally {
+      Timeline.finishSync();
+    }
   }
 }
 
