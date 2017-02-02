@@ -537,7 +537,7 @@ class _PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
     )
     .then<Null>((T newValue) {
       if (!mounted || newValue == null)
-        return;
+        return null;
       if (config.onSelected != null)
         config.onSelected(newValue);
     });

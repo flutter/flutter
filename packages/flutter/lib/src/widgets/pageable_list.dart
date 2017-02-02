@@ -317,14 +317,14 @@ abstract class PageableState<T extends Pageable> extends ScrollableState<T> {
     final double newScrollOffset = snapScrollOffset(scrollOffset + scrollVelocity.sign)
       .clamp(snapScrollOffset(scrollOffset - 0.5), snapScrollOffset(scrollOffset + 0.5));
     return scrollTo(newScrollOffset, duration: config.duration, curve: config.curve)
-      .then(_notifyPageChanged);
+      .then<Null>(_notifyPageChanged);
   }
 
   @override
   Future<Null> fling(double scrollVelocity) {
     switch(config.itemsSnapAlignment) {
       case PageableListFlingBehavior.canFlingAcrossMultiplePages:
-        return super.fling(scrollVelocity).then(_notifyPageChanged);
+        return (super.fling(scrollVelocity)).then<Null>(_notifyPageChanged);
       case PageableListFlingBehavior.stopAtNextPage:
         return _flingToAdjacentItem(scrollVelocity);
     }
@@ -335,7 +335,7 @@ abstract class PageableState<T extends Pageable> extends ScrollableState<T> {
   @override
   Future<Null> settleScrollOffset() {
     return scrollTo(snapScrollOffset(scrollOffset), duration: config.duration, curve: config.curve)
-      .then(_notifyPageChanged);
+      .then<Null>(_notifyPageChanged);
   }
 
   void _notifyPageChanged(Null value) {
