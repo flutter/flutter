@@ -702,6 +702,17 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
     _scopeKey.currentState.removeWillPopCallback(callback);
   }
 
+  /// True if one or more [WillPopCallback] callbacks exist.
+  ///
+  /// This method is used to disable the horizontal swipe pop gesture
+  /// supported by [MaterialPageRoute] for [TargetPlatform.iOS].
+  /// If a pop might be vetoed, then the back gesture is disabled.
+  ///
+  /// See also:
+  ///
+  /// * [addScopedWillPopCallback], which adds a callback.
+  /// * [removeScopedWillPopCallback], which removes a callback.
+  @protected
   bool get hasScopedWillPopCallback {
     return _scopeKey.currentState == null || _scopeKey.currentState.willPopCallbacks.length > 0;
   }
