@@ -628,7 +628,7 @@ class _AdbLogReader extends DeviceLogReader {
     if (_timeOrigin != null) {
       final String timestamp = timeMatch.group(0);
       DateTime time = _adbTimestampToDateTime(timestamp);
-      if (time.isBefore(_timeOrigin)) {
+      if (!time.isAfter(_timeOrigin)) {
         // Ignore log messages before the origin.
         return;
       }
