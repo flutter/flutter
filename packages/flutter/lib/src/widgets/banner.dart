@@ -13,7 +13,9 @@ const double _kOffset = 40.0; // distance to bottom of banner, at a 45 degree an
 const double _kHeight = 12.0; // height of banner
 const double _kBottomOffset = _kOffset + 0.707 * _kHeight; // offset plus sqrt(2)/2 * banner height
 final Rect _kRect = new Rect.fromLTWH(-_kOffset, _kOffset - _kHeight, _kOffset * 2.0, _kHeight);
-const TextStyle _kTextStyles = const TextStyle(
+
+const Color _kColor = const Color(0xA0B71C1C);
+const TextStyle _kTextStyle = const TextStyle(
   color: const Color(0xFFFFFFFF),
   fontSize: _kHeight * 0.85,
   fontWeight: FontWeight.w900,
@@ -40,10 +42,17 @@ class BannerPainter extends CustomPainter {
   /// Creates a banner painter.
   ///
   /// The [message] and [location] arguments must not be null.
-  const BannerPainter({
+  BannerPainter({
     @required this.message,
-    @required this.location
-  });
+    @required this.location,
+    this.color: _kColor,
+    this.textStyle: _kTextStyle,
+  }) {
+    assert(message != null);
+    assert(location != null);
+    assert(color != null);
+    assert(textStyle != null);
+  }
 
   /// The message to show in the banner.
   final String message;
@@ -51,35 +60,55 @@ class BannerPainter extends CustomPainter {
   /// Where to show the banner (e.g., the upper right corder).
   final BannerLocation location;
 
-  @override
-  void paint(Canvas canvas, Size size) {
-    final Paint paintShadow = new Paint()
+  final Color color;
+
+  final TextStyle textStyle;
+
+  bool _prepared = false;
+  TextPainter _textPainter;
+  Paint _paintShadow;
+  Paint _paintBanner;
+
+  void _prepare() {
+    _paintShadow = new Paint()
       ..color = const Color(0x7F000000)
       ..maskFilter = new MaskFilter.blur(BlurStyle.normal, 4.0);
-    final Paint paintBanner = new Paint()
-      ..color = const Color(0xA0B71C1C);
-    canvas
-      ..translate(_translationX(size.width), _translationY(size.height))
-      ..rotate(_rotation)
-      ..drawRect(_kRect, paintShadow)
-      ..drawRect(_kRect, paintBanner);
-
-    final double width = _kOffset * 2.0;
-    final TextPainter textPainter = new TextPainter(
-      text: new TextSpan(style: _kTextStyles, text: message),
-      textAlign: TextAlign.center
-    )..layout(minWidth: width, maxWidth: width);
-
-    textPainter.paint(canvas, _kRect.topLeft.toOffset() + new Offset(0.0, (_kRect.height - textPainter.height) / 2.0));
+    _paintBanner = new Paint()
+      ..color = color;
+    _textPainter = new TextPainter(
+      text: new TextSpan(style: textStyle, text: message),
+      textAlign: TextAlign.center,
+    );
+    _prepared = true;
   }
 
   @override
-  bool shouldRepaint(BannerPainter oldPainter) => false;
+  void paint(Canvas canvas, Size size) {
+    if (!_prepared)
+      _prepare();
+    canvas
+      ..translate(_translationX(size.width), _translationY(size.height))
+      ..rotate(_rotation)
+      ..drawRect(_kRect, _paintShadow)
+      ..drawRect(_kRect, _paintBanner);
+    final double width = _kOffset * 2.0;
+    _textPainter.layout(minWidth: width, maxWidth: width);
+    _textPainter.paint(canvas, _kRect.topLeft.toOffset() + new Offset(0.0, (_kRect.height - _textPainter.height) / 2.0));
+  }
+
+  @override
+  bool shouldRepaint(BannerPainter oldPainter) {
+    return message != oldPainter.message
+        || location != oldPainter.location
+        || color != oldPainter.color
+        || textStyle != oldPainter.textStyle;
+  }
 
   @override
   bool hitTest(Point position) => false;
 
   double _translationX(double width) {
+    assert(location != null);
     switch (location) {
       case BannerLocation.bottomRight:
         return width - _kBottomOffset;
@@ -90,11 +119,11 @@ class BannerPainter extends CustomPainter {
       case BannerLocation.topLeft:
         return 0.0;
     }
-    assert(location != null);
     return null;
   }
 
   double _translationY(double height) {
+    assert(location != null);
     switch (location) {
       case BannerLocation.bottomRight:
       case BannerLocation.bottomLeft:
@@ -103,11 +132,11 @@ class BannerPainter extends CustomPainter {
       case BannerLocation.topLeft:
         return 0.0;
     }
-    assert(location != null);
     return null;
   }
 
   double get _rotation {
+    assert(location != null);
     switch (location) {
       case BannerLocation.bottomLeft:
       case BannerLocation.topRight:
@@ -116,7 +145,6 @@ class BannerPainter extends CustomPainter {
       case BannerLocation.topLeft:
         return -math.PI / 4.0;
     }
-    assert(location != null);
     return null;
   }
 }
@@ -136,11 +164,15 @@ class Banner extends StatelessWidget {
   Banner({
     Key key,
     this.child,
-    this.message,
-    this.location
+    @required this.message,
+    @required this.location,
+    this.color: _kColor,
+    this.textStyle: _kTextStyle,
   }) : super(key: key) {
     assert(message != null);
     assert(location != null);
+    assert(color != null);
+    assert(textStyle != null);
   }
 
   /// The widget to show behind the banner.
@@ -152,11 +184,22 @@ class Banner extends StatelessWidget {
   /// Where to show the banner (e.g., the upper right corder).
   final BannerLocation location;
 
+  /// The color of the banner.
+  final Color color;
+
+  /// The style of the text shown on the banner.
+  final TextStyle textStyle;
+
   @override
   Widget build(BuildContext context) {
     return new CustomPaint(
-      foregroundPainter: new BannerPainter(message: message, location: location),
-      child: child
+      foregroundPainter: new BannerPainter(
+        message: message,
+        location: location,
+        color: color,
+        textStyle: textStyle,
+      ),
+      child: child,
     );
   }
 }
