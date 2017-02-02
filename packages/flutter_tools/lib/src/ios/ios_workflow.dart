@@ -40,6 +40,8 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
 
   bool get hasHomebrew => os.which('brew') != null;
 
+  bool get hasPythonSixModule => exitsHappy(<String>['python', '-c', 'import six']);
+
   bool get _iosDeployIsInstalledAndMeetsVersionCheck {
     if (!hasIosDeploy)
       return false;
@@ -55,6 +57,7 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
   Future<ValidationResult> validate() async {
     List<ValidationMessage> messages = <ValidationMessage>[];
     ValidationType xcodeStatus = ValidationType.missing;
+    ValidationType pythonStatus = ValidationType.missing;
     ValidationType brewStatus = ValidationType.missing;
     String xcodeVersionInfo;
 
@@ -87,6 +90,17 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
       messages.add(new ValidationMessage.error(
         'Xcode not installed; this is necessary for iOS development.\n'
         'Download at https://developer.apple.com/xcode/download/.'
+      ));
+    }
+
+    // Python dependencies installed
+    if (hasPythonSixModule) {
+      pythonStatus = ValidationType.installed;
+    } else {
+      pythonStatus = ValidationType.missing;
+      messages.add(new ValidationMessage.error(
+        'Python installation missing module "six".\n'
+        'Install via \'pip install six\' or \'sudo easy_install six\'.'
       ));
     }
 
@@ -134,7 +148,7 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
     }
 
     return new ValidationResult(
-      <ValidationType>[xcodeStatus, brewStatus].reduce(_mergeValidationTypes),
+      <ValidationType>[xcodeStatus, pythonStatus, brewStatus].reduce(_mergeValidationTypes),
       messages,
       statusInfo: xcodeVersionInfo
     );
