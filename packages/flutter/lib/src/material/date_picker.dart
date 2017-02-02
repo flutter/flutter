@@ -353,7 +353,7 @@ class _MonthPickerState extends State<MonthPicker> {
   @override
   void didUpdateConfig(MonthPicker oldConfig) {
     if (config.selectedDate != oldConfig.selectedDate)
-      _dayPickerListKey = new GlobalKey<ScrollableState>();
+      _dayPickerListKey = new GlobalKey<PageableState<PageableLazyList>>();
       _currentDisplayedMonthDate =
           new DateTime(config.selectedDate.year, config.selectedDate.month);
   }
@@ -361,7 +361,8 @@ class _MonthPickerState extends State<MonthPicker> {
   DateTime _todayDate;
   DateTime _currentDisplayedMonthDate;
   Timer _timer;
-  GlobalKey<ScrollableState> _dayPickerListKey = new GlobalKey<ScrollableState>();
+  GlobalKey<PageableState<PageableLazyList>> _dayPickerListKey =
+      new GlobalKey<PageableState<PageableLazyList>>();
 
   void _updateCurrentDate() {
     _todayDate = new DateTime.now();
@@ -406,19 +407,15 @@ class _MonthPickerState extends State<MonthPicker> {
 
   void _handleNextMonth() {
     if (!_isDisplayingLastMonth) {
-      ScrollableState state = _dayPickerListKey.currentState;
-      double newPage = state.scrollOffset.round() + 1.0;
-      state?.scrollTo(newPage, duration: _kMonthScrollDuration);
-      _handleMonthPageChanged(newPage.toInt());
+      PageableState<PageableLazyList> state = _dayPickerListKey.currentState;
+      state?.fling(1.0);
     }
   }
 
   void _handlePreviousMonth() {
     if (!_isDisplayingFirstMonth) {
-      ScrollableState state = _dayPickerListKey.currentState;
-      double newPage = state.scrollOffset.round() - 1.0;
-      state?.scrollTo(newPage, duration: _kMonthScrollDuration);
-      _handleMonthPageChanged(newPage.toInt());
+      PageableState<PageableLazyList> state = _dayPickerListKey.currentState;
+      state?.fling(-1.0);
     }
   }
 
@@ -453,6 +450,7 @@ class _MonthPickerState extends State<MonthPicker> {
             scrollDirection: Axis.horizontal,
             itemCount: _monthDelta(config.firstDate, config.lastDate) + 1,
             itemBuilder: _buildItems,
+            duration: _kMonthScrollDuration,
             onPageChanged: _handleMonthPageChanged
           ),
           new Positioned(
