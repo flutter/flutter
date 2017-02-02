@@ -8,6 +8,7 @@
 #include "base/command_line.h"
 #include "base/logging.h"
 #include "base/message_loop/message_loop.h"
+#include "dart/runtime/bin/embedded_dart_io.h"
 #include "flutter/common/threads.h"
 #include "flutter/shell/common/shell.h"
 #include "flutter/shell/common/switches.h"
@@ -157,7 +158,10 @@ int RunInteractive() {
 
 }  // namespace
 
-int main(int argc, const char* argv[]) {
+int main(int argc, char* argv[]) {
+  dart::bin::SetExecutableName(argv[0]);
+  dart::bin::SetExecutableArguments(argc - 1, argv);
+
   base::AtExitManager exit_manager;
   base::CommandLine::Init(argc, argv);
 
