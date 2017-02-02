@@ -836,6 +836,10 @@ class Isolate extends ServiceObjectOwner {
     return state;
   }
 
+  Future<Null> flutterDebugAllowBanner(bool show) async {
+    await invokeFlutterExtensionRpcRaw('ext.flutter.debugAllowBanner', params: <String, dynamic>{ 'enabled': show });
+  }
+
   // Reload related extension methods.
   Future<Map<String, dynamic>> flutterReassemble() async {
     return await invokeFlutterExtensionRpcRaw('ext.flutter.reassemble',

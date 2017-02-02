@@ -119,6 +119,14 @@ class WidgetsApp extends StatefulWidget {
   /// Used by `showPerformanceOverlay` observatory extension.
   static bool showPerformanceOverlayOverride = false;
 
+  /// If false, prevents the debug banner from being visible.
+  ///
+  /// Used by `debugAllowBanner` observatory extension.
+  ///
+  /// This is how `flutter run` turns off the banner when you take a screen shot
+  /// with "s".
+  static bool debugAllowBannerOverride = true;
+
   @override
   _WidgetsAppState createState() => new _WidgetsAppState();
 }
@@ -231,7 +239,7 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
       );
     }
     assert(() {
-      if (config.debugShowCheckedModeBanner) {
+      if (config.debugShowCheckedModeBanner && WidgetsApp.debugAllowBannerOverride) {
         result = new CheckedModeBanner(
           child: result
         );
