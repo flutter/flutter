@@ -85,8 +85,7 @@ class ScreenshotCommand extends FlutterCommand {
   Future<Null> runScreenshot(File outputFile) async {
     outputFile ??= getUniqueFile(fs.currentDirectory, 'flutter', 'png');
     try {
-      if (!await device.takeScreenshot(outputFile))
-        throwToolExit('Screenshot failed');
+      await device.takeScreenshot(outputFile);
     } catch (error) {
       throwToolExit('Error taking screenshot: $error');
     }

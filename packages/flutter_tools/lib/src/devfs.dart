@@ -181,8 +181,10 @@ class ServiceProtocolDevFSOperations implements DevFSOperations {
 
   @override
   Future<dynamic> destroy(String fsName) async {
-    await vmService.vm.invokeRpcRaw('_deleteDevFS',
-                                    <String, dynamic> { 'fsName': fsName });
+    await vmService.vm.invokeRpcRaw(
+      '_deleteDevFS',
+      params: <String, dynamic> { 'fsName': fsName },
+    );
   }
 
   @override
@@ -195,14 +197,16 @@ class ServiceProtocolDevFSOperations implements DevFSOperations {
     }
     String fileContents = BASE64.encode(bytes);
     try {
-      return await vmService.vm.invokeRpcRaw('_writeDevFSFile',
-                                             <String, dynamic> {
-                                                'fsName': fsName,
-                                                'path': devicePath,
-                                                'fileContents': fileContents
-                                             });
-    } catch (e) {
-      printTrace('DevFS: Failed to write $devicePath: $e');
+      return await vmService.vm.invokeRpcRaw(
+        '_writeDevFSFile',
+        params: <String, dynamic> {
+          'fsName': fsName,
+          'path': devicePath,
+          'fileContents': fileContents
+        },
+      );
+    } catch (error) {
+      printTrace('DevFS: Failed to write $devicePath: $error');
     }
   }
 

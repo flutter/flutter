@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:developer';
 import 'dart:ui' as ui show window;
 
@@ -51,12 +52,13 @@ abstract class RendererBinding extends BindingBase implements SchedulerBinding, 
       // this service extension only works in checked mode
       registerBoolServiceExtension(
         name: 'debugPaint',
-        getter: () => debugPaintSizeEnabled,
+        getter: () async => debugPaintSizeEnabled,
         setter: (bool value) {
           if (debugPaintSizeEnabled == value)
-            return;
+            return new Future<Null>.value();
           debugPaintSizeEnabled = value;
           _forceRepaint();
+          return endOfFrame;
         }
       );
       return true;
@@ -64,19 +66,20 @@ abstract class RendererBinding extends BindingBase implements SchedulerBinding, 
 
     registerSignalServiceExtension(
       name: 'debugDumpRenderTree',
-      callback: debugDumpRenderTree
+      callback: () { debugDumpRenderTree(); return debugPrintDone; }
     );
 
     assert(() {
       // this service extension only works in checked mode
       registerBoolServiceExtension(
         name: 'repaintRainbow',
-        getter: () => debugRepaintRainbowEnabled,
+        getter: () async => debugRepaintRainbowEnabled,
         setter: (bool value) {
           bool repaint = debugRepaintRainbowEnabled && !value;
           debugRepaintRainbowEnabled = value;
           if (repaint)
             _forceRepaint();
+          return endOfFrame;
         }
       );
       return true;
@@ -226,8 +229,8 @@ abstract class RendererBinding extends BindingBase implements SchedulerBinding, 
   }
 
   @override
-  void reassembleApplication() {
-    super.reassembleApplication();
+  Future<Null> reassembleApplication() async {
+    await super.reassembleApplication();
     Timeline.startSync('Dirty Render Tree');
     try {
       renderView.reassemble();
@@ -235,6 +238,7 @@ abstract class RendererBinding extends BindingBase implements SchedulerBinding, 
       Timeline.finishSync();
     }
     handleBeginFrame(null);
+    await endOfFrame;
   }
 
   @override

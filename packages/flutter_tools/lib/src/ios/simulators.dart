@@ -587,7 +587,7 @@ class IOSSimulator extends Device {
   bool get supportsScreenshot => true;
 
   @override
-  Future<bool> takeScreenshot(File outputFile) async {
+  Future<Null> takeScreenshot(File outputFile) async {
     Directory desktopDir = fs.directory(path.join(homeDirPath, 'Desktop'));
 
     // 'Simulator Screen Shot Mar 25, 2016, 2.59.43 PM.png'
@@ -621,8 +621,6 @@ class IOSSimulator extends Device {
     File shot = shots.first;
     outputFile.writeAsBytesSync(shot.readAsBytesSync());
     shot.delete();
-
-    return true;
   }
 }
 

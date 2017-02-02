@@ -297,8 +297,11 @@ class MockVM implements VM {
   }
 
   @override
-  Future<Map<String, dynamic>> invokeRpcRaw(
-      String method, [Map<String, dynamic> params, Duration timeout]) async {
+  Future<Map<String, dynamic>> invokeRpcRaw(String method, {
+    Map<String, dynamic> params: const <String, dynamic>{},
+    Duration timeout,
+    bool timeoutFatal: true,
+  }) async {
     _service.messages.add('$method $params');
     return <String, dynamic>{'success': true};
   }
