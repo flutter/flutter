@@ -111,7 +111,7 @@ class AnalyzeOnce extends AnalyzeBase {
               // Analyzer package versions reached via transitive dependencies (e.g., via `test`) are ignored since they would produce
               // spurious conflicts.
               if (packageName != 'analyzer' || packagePath.startsWith('..'))
-                dependencies.add(packageName, path.normalize(path.absolute(directory.path, path.fromUri(packagePath))), dotPackagesPath);
+                dependencies.add(packageName, path.normalize(path.absolute(directory.path, packagePath)), dotPackagesPath);
             }
         });
       }
