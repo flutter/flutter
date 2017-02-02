@@ -170,12 +170,16 @@ class DayPicker extends StatelessWidget {
     @required this.selectedDate,
     @required this.currentDate,
     @required this.onChanged,
+    @required this.firstDate,
+    @required this.lastDate,
     @required this.displayedMonth
   }) : super(key: key) {
     assert(selectedDate != null);
     assert(currentDate != null);
     assert(onChanged != null);
     assert(displayedMonth != null);
+    assert(!firstDate.isAfter(lastDate));
+    assert(selectedDate.isAfter(firstDate) || selectedDate.isAtSameMomentAs(firstDate));
   }
 
   /// The currently selected date.
@@ -188,6 +192,12 @@ class DayPicker extends StatelessWidget {
 
   /// Called when the user picks a day.
   final ValueChanged<DateTime> onChanged;
+
+  /// The earliest date the user is permitted to pick.
+  final DateTime firstDate;
+
+  /// The latest date the user is permitted to pick.
+  final DateTime lastDate;
 
   /// The month whose days are displayed by this picker.
   final DateTime displayedMonth;
@@ -219,6 +229,9 @@ class DayPicker extends StatelessWidget {
       if (day < 1) {
         labels.add(new Container());
       } else {
+        final DateTime dayToBuild = new DateTime(year, month, day);
+        final bool disabled = dayToBuild.isAfter(lastDate) || dayToBuild.isBefore(firstDate);
+
         BoxDecoration decoration;
         TextStyle itemStyle = themeData.textTheme.body1;
 
@@ -229,24 +242,31 @@ class DayPicker extends StatelessWidget {
             backgroundColor: themeData.accentColor,
             shape: BoxShape.circle
           );
+        } else if (disabled) {
+          itemStyle = themeData.textTheme.body1.copyWith(color: themeData.disabledColor);
         } else if (currentDate.year == year && currentDate.month == month && currentDate.day == day) {
           // The current day gets a different text color.
           itemStyle = themeData.textTheme.body2.copyWith(color: themeData.accentColor);
         }
 
-        labels.add(new GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTap: () {
-            DateTime result = new DateTime(year, month, day);
-            onChanged(result);
-          },
-          child: new Container(
-            decoration: decoration,
-            child: new Center(
-              child: new Text(day.toString(), style: itemStyle)
-            )
+        Widget dayWidget = new Container(
+          decoration: decoration,
+          child: new Center(
+            child: new Text(day.toString(), style: itemStyle)
           )
-        ));
+        );
+
+        if (!disabled) {
+          dayWidget = new GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () {
+              onChanged(dayToBuild);
+            },
+            child: dayWidget
+          );
+        }
+
+        labels.add(dayWidget);
       }
     }
 
@@ -299,7 +319,7 @@ class MonthPicker extends StatefulWidget {
   }) : super(key: key) {
     assert(selectedDate != null);
     assert(onChanged != null);
-    assert(lastDate.isAfter(firstDate));
+    assert(!firstDate.isAfter(lastDate));
     assert(selectedDate.isAfter(firstDate) || selectedDate.isAtSameMomentAs(firstDate));
   }
 
@@ -325,23 +345,29 @@ class _MonthPickerState extends State<MonthPicker> {
   @override
   void initState() {
     super.initState();
+    // Initially display the pre-selected date.
+    _currentDisplayedMonthDate = new DateTime(config.selectedDate.year, config.selectedDate.month);
     _updateCurrentDate();
   }
 
   @override
   void didUpdateConfig(MonthPicker oldConfig) {
     if (config.selectedDate != oldConfig.selectedDate)
-      _dayPickerListKey = new GlobalKey<ScrollableState>();
+      _dayPickerListKey = new GlobalKey<PageableState<PageableLazyList>>();
+      _currentDisplayedMonthDate =
+          new DateTime(config.selectedDate.year, config.selectedDate.month);
   }
 
-  DateTime _currentDate;
+  DateTime _todayDate;
+  DateTime _currentDisplayedMonthDate;
   Timer _timer;
-  GlobalKey<ScrollableState> _dayPickerListKey = new GlobalKey<ScrollableState>();
+  GlobalKey<PageableState<PageableLazyList>> _dayPickerListKey =
+      new GlobalKey<PageableState<PageableLazyList>>();
 
   void _updateCurrentDate() {
-    _currentDate = new DateTime.now();
-    DateTime tomorrow = new DateTime(_currentDate.year, _currentDate.month, _currentDate.day + 1);
-    Duration timeUntilTomorrow = tomorrow.difference(_currentDate);
+    _todayDate = new DateTime.now();
+    DateTime tomorrow = new DateTime(_todayDate.year, _todayDate.month, _todayDate.day + 1);
+    Duration timeUntilTomorrow = tomorrow.difference(_todayDate);
     timeUntilTomorrow += const Duration(seconds: 1);  // so we don't miss it by rounding
     if (_timer != null)
       _timer.cancel();
@@ -356,30 +382,57 @@ class _MonthPickerState extends State<MonthPicker> {
     return (endDate.year - startDate.year) * 12 + endDate.month - startDate.month;
   }
 
+  /// Add months to a month truncated date.
+  DateTime _addMonthsToMonthDate(DateTime monthDate, int monthsToAdd) {
+    return new DateTime(monthDate.year + monthsToAdd ~/ 12, monthDate.month + monthsToAdd % 12);
+  }
+
   List<Widget> _buildItems(BuildContext context, int start, int count) {
     final List<Widget> result = new List<Widget>();
-    final DateTime startDate = new DateTime(config.firstDate.year + start ~/ 12, config.firstDate.month + start % 12);
+    final DateTime startMonthDate = _addMonthsToMonthDate(config.firstDate, start);
     for (int i = 0; i < count; ++i) {
-      DateTime displayedMonth = new DateTime(startDate.year + i ~/ 12, startDate.month + i % 12);
+      DateTime monthToBuild = _addMonthsToMonthDate(startMonthDate, i);
       result.add(new DayPicker(
-        key: new ValueKey<DateTime>(displayedMonth),
+        key: new ValueKey<DateTime>(monthToBuild),
         selectedDate: config.selectedDate,
-        currentDate: _currentDate,
+        currentDate: _todayDate,
         onChanged: config.onChanged,
-        displayedMonth: displayedMonth
+        firstDate: config.firstDate,
+        lastDate: config.lastDate,
+        displayedMonth: monthToBuild
       ));
     }
     return result;
   }
 
   void _handleNextMonth() {
-    ScrollableState state = _dayPickerListKey.currentState;
-    state?.scrollTo(state.scrollOffset.round() + 1.0, duration: _kMonthScrollDuration);
+    if (!_isDisplayingLastMonth) {
+      _dayPickerListKey.currentState?.fling(1.0);
+    }
   }
 
   void _handlePreviousMonth() {
-    ScrollableState state = _dayPickerListKey.currentState;
-    state?.scrollTo(state.scrollOffset.round() - 1.0, duration: _kMonthScrollDuration);
+    if (!_isDisplayingFirstMonth) {
+      _dayPickerListKey.currentState?.fling(-1.0);
+    }
+  }
+
+  /// True if the earliest allowable month is displayed.
+  bool get _isDisplayingFirstMonth {
+    return !_currentDisplayedMonthDate.isAfter(
+        new DateTime(config.firstDate.year, config.firstDate.month));
+  }
+
+  /// True if the latest allowable month is displayed.
+  bool get _isDisplayingLastMonth {
+    return !_currentDisplayedMonthDate.isBefore(
+        new DateTime(config.lastDate.year, config.lastDate.month));
+  }
+
+  void _handleMonthPageChanged(int monthPage) {
+    setState(() {
+      _currentDisplayedMonthDate = _addMonthsToMonthDate(config.firstDate, monthPage);
+    });
   }
 
   @override
@@ -394,7 +447,9 @@ class _MonthPickerState extends State<MonthPicker> {
             initialScrollOffset: _monthDelta(config.firstDate, config.selectedDate).toDouble(),
             scrollDirection: Axis.horizontal,
             itemCount: _monthDelta(config.firstDate, config.lastDate) + 1,
-            itemBuilder: _buildItems
+            itemBuilder: _buildItems,
+            duration: _kMonthScrollDuration,
+            onPageChanged: _handleMonthPageChanged
           ),
           new Positioned(
             top: 0.0,
@@ -402,7 +457,7 @@ class _MonthPickerState extends State<MonthPicker> {
             child: new IconButton(
               icon: new Icon(Icons.chevron_left),
               tooltip: 'Previous month',
-              onPressed: _handlePreviousMonth
+              onPressed: _isDisplayingFirstMonth ? null : _handlePreviousMonth
             )
           ),
           new Positioned(
@@ -411,7 +466,7 @@ class _MonthPickerState extends State<MonthPicker> {
             child: new IconButton(
               icon: new Icon(Icons.chevron_right),
               tooltip: 'Next month',
-              onPressed: _handleNextMonth
+              onPressed: _isDisplayingLastMonth ? null : _handleNextMonth
             )
           )
         ]
@@ -454,7 +509,7 @@ class YearPicker extends StatefulWidget {
   }) : super(key: key) {
     assert(selectedDate != null);
     assert(onChanged != null);
-    assert(lastDate.isAfter(firstDate));
+    assert(!firstDate.isAfter(lastDate));
   }
 
   /// The currently selected date.

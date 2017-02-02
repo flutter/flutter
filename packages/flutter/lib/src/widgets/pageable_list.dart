@@ -315,7 +315,7 @@ abstract class PageableState<T extends Pageable> extends ScrollableState<T> {
 
   Future<Null> _flingToAdjacentItem(double scrollVelocity) {
     final double newScrollOffset = snapScrollOffset(scrollOffset + scrollVelocity.sign)
-      .clamp(snapScrollOffset(scrollOffset - 0.5), snapScrollOffset(scrollOffset + 0.5));
+      .clamp(snapScrollOffset(scrollOffset - 0.50001), snapScrollOffset(scrollOffset + 0.5));
     return scrollTo(newScrollOffset, duration: config.duration, curve: config.curve)
       .then<Null>(_notifyPageChanged);
   }
