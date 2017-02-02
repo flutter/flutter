@@ -432,14 +432,12 @@ class AndroidDevice extends Device {
   bool get supportsScreenshot => true;
 
   @override
-  Future<bool> takeScreenshot(File outputFile) {
+  Future<Null> takeScreenshot(File outputFile) {
     const String remotePath = '/data/local/tmp/flutter_screenshot.png';
-
     runCheckedSync(adbCommandForDevice(<String>['shell', 'screencap', '-p', remotePath]));
     runCheckedSync(adbCommandForDevice(<String>['pull', remotePath, outputFile.path]));
     runCheckedSync(adbCommandForDevice(<String>['shell', 'rm', remotePath]));
-
-    return new Future<bool>.value(true);
+    return new Future<Null>.value();
   }
 
   @override

@@ -113,7 +113,7 @@ abstract class BindingBase {
     );
     registerSignalServiceExtension(
       name: 'frameworkPresent',
-      callback: () => null
+      callback: () => new Future<Null>.value()
     );
     assert(() { _debugServiceExtensionsRegistered = true; return true; });
   }
@@ -128,8 +128,9 @@ abstract class BindingBase {
   /// code, and to flush any caches of previously computed values, in
   /// case the new code would compute them differently.
   @mustCallSuper
-  void reassembleApplication() {
+  Future<Null> reassembleApplication() {
     FlutterError.resetErrorCount();
+    return new Future<Null>.value();
   }
 
 
@@ -141,14 +142,14 @@ abstract class BindingBase {
   @protected
   void registerSignalServiceExtension({
     @required String name,
-    @required VoidCallback callback
+    @required AsyncCallback callback
   }) {
     assert(name != null);
     assert(callback != null);
     registerServiceExtension(
       name: name,
       callback: (Map<String, String> parameters) async {
-        callback();
+        await callback();
         return <String, dynamic>{};
       }
     );
@@ -169,8 +170,8 @@ abstract class BindingBase {
   @protected
   void registerBoolServiceExtension({
     String name,
-    @required ValueGetter<bool> getter,
-    @required ValueSetter<bool> setter
+    @required AsyncValueGetter<bool> getter,
+    @required AsyncValueSetter<bool> setter
   }) {
     assert(name != null);
     assert(getter != null);
@@ -179,8 +180,8 @@ abstract class BindingBase {
       name: name,
       callback: (Map<String, String> parameters) async {
         if (parameters.containsKey('enabled'))
-          setter(parameters['enabled'] == 'true');
-        return <String, dynamic>{ 'enabled': getter() };
+          await setter(parameters['enabled'] == 'true');
+        return <String, dynamic>{ 'enabled': await getter() };
       }
     );
   }
@@ -199,8 +200,8 @@ abstract class BindingBase {
   @protected
   void registerNumericServiceExtension({
     @required String name,
-    @required ValueGetter<double> getter,
-    @required ValueSetter<double> setter
+    @required AsyncValueGetter<double> getter,
+    @required AsyncValueSetter<double> setter
   }) {
     assert(name != null);
     assert(getter != null);
@@ -209,8 +210,8 @@ abstract class BindingBase {
       name: name,
       callback: (Map<String, String> parameters) async {
         if (parameters.containsKey(name))
-          setter(double.parse(parameters[name]));
-        return <String, dynamic>{ name: getter() };
+          await setter(double.parse(parameters[name]));
+        return <String, dynamic>{ name: await getter() };
       }
     );
   }
@@ -228,8 +229,8 @@ abstract class BindingBase {
   @protected
   void registerStringServiceExtension({
     @required String name,
-    @required ValueGetter<String> getter,
-    @required ValueSetter<String> setter
+    @required AsyncValueGetter<String> getter,
+    @required AsyncValueSetter<String> setter
   }) {
     assert(name != null);
     assert(getter != null);
@@ -238,8 +239,8 @@ abstract class BindingBase {
       name: name,
       callback: (Map<String, String> parameters) async {
         if (parameters.containsKey('value'))
-          setter(parameters['value']);
-        return <String, dynamic>{ 'value': getter() };
+          await setter(parameters['value']);
+        return <String, dynamic>{ 'value': await getter() };
       }
     );
   }
@@ -300,6 +301,6 @@ abstract class BindingBase {
 }
 
 /// Terminate the Flutter application.
-void _exitApplication() {
+Future<Null> _exitApplication() async {
   exit(0);
 }

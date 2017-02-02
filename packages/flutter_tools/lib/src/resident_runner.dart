@@ -108,19 +108,34 @@ abstract class ResidentRunner {
   }
 
   Future<Null> _screenshot() async {
+    Status status = logger.startProgress('Taking screenshot...');
     File outputFile = getUniqueFile(fs.currentDirectory, 'flutter', 'png');
     try {
       if (vmService != null)
         await vmService.vm.refreshViews();
-      if (isRunningDebug)
-        await currentView.uiIsolate.flutterDebugAllowBanner(false);
-      if (!await device.takeScreenshot(outputFile))
-        printError('Error taking screenshot.');
-      if (isRunningDebug)
-        await currentView.uiIsolate.flutterDebugAllowBanner(true);
+      try {
+        if (isRunningDebug)
+          await currentView.uiIsolate.flutterDebugAllowBanner(false);
+      } catch (error) {
+        status.stop();
+        printError(error);
+      }
+      try {
+        await device.takeScreenshot(outputFile);
+      } finally {
+        try {
+          if (isRunningDebug)
+            await currentView.uiIsolate.flutterDebugAllowBanner(true);
+        } catch (error) {
+          status.stop();
+          printError(error);
+        }
+      }
       int sizeKB = (await outputFile.length()) ~/ 1024;
+      status.stop();
       printStatus('Screenshot written to ${path.relative(outputFile.path)} (${sizeKB}kB).');
     } catch (error) {
+      status.stop();
       printError('Error taking screenshot: $error');
     }
   }

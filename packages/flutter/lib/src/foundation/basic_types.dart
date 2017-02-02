@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:collection';
 
 // COMMON SIGNATURES
@@ -20,15 +21,45 @@ typedef void ValueChanged<T>(T value);
 /// For example, service extensions use this callback because they
 /// call the callback whenever the extension is called with a
 /// value, regardless of whether the given value is new or not.
+///
+/// See also:
+///  * [ValueGetter], the getter equivalent of this signature.
+///  * [AsyncValueSetter], an asynchronous version of this signature.
 typedef void ValueSetter<T>(T value);
 
 /// Signature for callbacks that are to report a value on demand.
 ///
-/// See also [ValueSetter].
+/// See also:
+///  * [ValueSetter], the setter equivalent of this signature.
+///  * [AsyncValueGetter], an asynchronous version of this signature.
 typedef T ValueGetter<T>();
 
 /// Signature for callbacks that filter an iterable.
 typedef Iterable<T> IterableFilter<T>(Iterable<T> input);
+
+/// Signature of callbacks that have no arguments and return no data, but that
+/// return a [Future] to indicate when their work is complete.
+///
+/// See also:
+///  * [VoidCallback], a synchronous version of this signature.
+///  * [AsyncValueGetter], a signature for asynchronous getters.
+///  * [AsyncValueSetter], a signature for asynchronous setters.
+typedef Future<Null> AsyncCallback();
+
+/// Signature for callbacks that report that a value has been set and return a
+/// [Future] that completes when the value has been saved.
+///
+/// See also:
+///  * [ValueSetter], a synchronous version of this signature.
+///  * [AsyncValueGetter], the getter equivalent of this signature.
+typedef Future<Null> AsyncValueSetter<T>(T value);
+
+/// Signature for callbacks that are to asynchronously report a value on demand.
+///
+/// See also:
+///  * [ValueGetter], a synchronous version of this signature.
+///  * [AsyncValueSetter], the setter equivalent of this signature.
+typedef Future<T> AsyncValueGetter<T>();
 
 
 // BITFIELD

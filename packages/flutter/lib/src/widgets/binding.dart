@@ -76,28 +76,30 @@ abstract class WidgetsBinding extends BindingBase implements GestureBinding, Ren
 
     registerSignalServiceExtension(
       name: 'debugDumpApp',
-      callback: debugDumpApp
+      callback: () { debugDumpApp(); return debugPrintDone; }
     );
 
     registerBoolServiceExtension(
       name: 'showPerformanceOverlay',
-      getter: () => WidgetsApp.showPerformanceOverlayOverride,
+      getter: () => new Future<bool>.value(WidgetsApp.showPerformanceOverlayOverride),
       setter: (bool value) {
         if (WidgetsApp.showPerformanceOverlayOverride == value)
-          return;
+          return new Future<Null>.value();
         WidgetsApp.showPerformanceOverlayOverride = value;
         buildOwner.reassemble(renderViewElement);
+        return endOfFrame;
       }
     );
 
     registerBoolServiceExtension(
       name: 'debugAllowBanner',
-      getter: () => WidgetsApp.debugAllowBannerOverride,
+      getter: () => new Future<bool>.value(WidgetsApp.debugAllowBannerOverride),
       setter: (bool value) {
         if (WidgetsApp.debugAllowBannerOverride == value)
-          return;
+          return new Future<Null>.value();
         WidgetsApp.debugAllowBannerOverride = value;
         buildOwner.reassemble(renderViewElement);
+        return endOfFrame;
       }
     );
   }
@@ -365,12 +367,12 @@ abstract class WidgetsBinding extends BindingBase implements GestureBinding, Ren
   }
 
   @override
-  void reassembleApplication() {
+  Future<Null> reassembleApplication() {
     _needToReportFirstFrame = true;
     preventThisFrameFromBeingReportedAsFirstFrame();
     if (renderViewElement != null)
       buildOwner.reassemble(renderViewElement);
-    super.reassembleApplication();
+    return super.reassembleApplication();
   }
 }
 
