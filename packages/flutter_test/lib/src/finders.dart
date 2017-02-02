@@ -26,7 +26,7 @@ class CommonFinders {
   ///
   /// Example:
   ///
-  ///     expect(tester, hasWidget(find.text('Back')));
+  ///     expect(find.text('Back'), findsOneWidget);
   ///
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// nodes that are [Offstage] or that are from inactive [Route]s.
@@ -37,7 +37,7 @@ class CommonFinders {
   ///
   /// Example:
   ///
-  ///     expect(tester, hasWidget(find.icon(Icons.chevron_left)));
+  ///     expect(find.icon(Icons.chevron_left), findsOneWidget);
   ///
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// nodes that are [Offstage] or that are from inactive [Route]s.
@@ -66,7 +66,7 @@ class CommonFinders {
   ///
   /// Example:
   ///
-  ///     expect(tester, hasWidget(find.byKey(backKey)));
+  ///     expect(find.byKey(backKey), findsOneWidget);
   ///
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// nodes that are [Offstage] or that are from inactive [Route]s.
@@ -82,7 +82,7 @@ class CommonFinders {
   ///
   /// Example:
   ///
-  ///     expect(tester, hasWidget(find.byType(IconButton)));
+  ///     expect(find.byType(IconButton), findsOneWidget);
   ///
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// nodes that are [Offstage] or that are from inactive [Route]s.
@@ -98,7 +98,7 @@ class CommonFinders {
   ///
   /// Example:
   ///
-  ///     expect(tester, hasWidget(find.byElementType(SingleChildRenderObjectElement)));
+  ///     expect(find.byElementType(SingleChildRenderObjectElement), findsOneWidget);
   ///
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// nodes that are [Offstage] or that are from inactive [Route]s.
@@ -125,10 +125,10 @@ class CommonFinders {
   ///
   /// Example:
   ///
-  ///     expect(tester, hasWidget(find.byWidgetPredicate(
+  ///     expect(find.byWidgetPredicate(
   ///       (Widget widget) => widget is Tooltip && widget.message == 'Back',
   ///       description: 'widget with tooltip "Back"',
-  ///     )));
+  ///     ), findsOneWidget);
   ///
   /// If [description] is provided, then this uses it as the description of the
   /// [Finder] and appears, for example, in the error message when the finder
@@ -145,7 +145,7 @@ class CommonFinders {
   ///
   /// Example:
   ///
-  ///     expect(tester, hasWidget(find.byTooltip('Back')));
+  ///     expect(find.byTooltip('Back'), findsOneWidget);
   ///
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// nodes that are [Offstage] or that are from inactive [Route]s.
@@ -160,13 +160,13 @@ class CommonFinders {
   ///
   /// Example:
   ///
-  ///     expect(tester, hasWidget(find.byElementPredicate(
+  ///     expect(find.byElementPredicate(
   ///       // finds elements of type SingleChildRenderObjectElement, including
   ///       // those that are actually subclasses of that type.
   ///       // (contrast with byElementType, which only returns exact matches)
   ///       (Element element) => element is SingleChildRenderObjectElement,
   ///       description: '$SingleChildRenderObjectElement element',
-  ///     )));
+  ///     ), findsOneWidget);
   ///
   /// If [description] is provided, then this uses it as the description of the
   /// [Finder] and appears, for example, in the error message when the finder
@@ -184,8 +184,8 @@ class CommonFinders {
   ///
   /// Example:
   ///
-  ///     expect(tester, hasWidget(find.descendant(
-  ///       ancestor: find.widgetWithText(Row, 'label_1'), descendant: find.text('value_1')));
+  ///     expect(find.descendant(
+  ///       ancestor: find.widgetWithText(Row, 'label_1'), descendant: find.text('value_1')), findsOneWidget);
   ///
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// nodes that are [Offstage] or that are from inactive [Route]s.
@@ -491,7 +491,7 @@ class _DescendantFinder extends Finder {
   final Finder descendant;
 
   @override
-  String get description => '${ancestor.description} has descendant(s) with ${descendant.description} ';
+  String get description => '${descendant.description} has ancestor(s) with ${ancestor.description} ';
 
   @override
   Iterable<Element> apply(Iterable<Element> candidates) {
@@ -500,6 +500,8 @@ class _DescendantFinder extends Finder {
 
   @override
   Iterable<Element> get _allElements {
-    return ancestor.evaluate().expand((Element element) => collectAllElementsFrom(element, skipOffstage: skipOffstage)).toList();
+    return ancestor.evaluate().expand(
+      (Element element) => collectAllElementsFrom(element, skipOffstage: skipOffstage)
+    ).toSet().toList();
   }
 }
