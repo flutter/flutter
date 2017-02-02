@@ -198,16 +198,33 @@ class BoxConstraints extends Constraints {
     return height.clamp(minHeight, maxHeight);
   }
 
-  /// Returns the size that both satisfies the constraints and is as close as
-  /// possible to the given size.
-  Size constrain(Size size) {
-    Size result = new Size(constrainWidth(size.width), constrainHeight(size.height));
+  Size _debugPropagateDebugSize(Size size, Size result) {
     assert(() {
       if (size is _DebugSize)
         result = new _DebugSize(result, size._owner, size._canBeUsedByParent);
       return true;
     });
     return result;
+  }
+
+  /// Returns the size that both satisfies the constraints and is as close as
+  /// possible to the given size.
+  ///
+  /// See also [constrainDimensions], which applies the same algorithm to
+  /// separately provided widths and heights.
+  Size constrain(Size size) {
+    Size result = new Size(constrainWidth(size.width), constrainHeight(size.height));
+    assert(() { result = _debugPropagateDebugSize(size, result); return true; });
+    return result;
+  }
+
+  /// Returns the size that both satisfies the constraints and is as close as
+  /// possible to the given width and height.
+  ///
+  /// When you already have a [Size], prefer [constrain], which applies the same
+  /// algorithm to a [Size] directly.
+  Size constrainDimensions(double width, double height) {
+    return new Size(constrainWidth(width), constrainHeight(height));
   }
 
   /// Returns a size that attempts to meet the following conditions, in order:
@@ -218,8 +235,11 @@ class BoxConstraints extends Constraints {
   ///  - The returned size as big as possible while still being equal to or
   ///    smaller than the given size.
   Size constrainSizeAndAttemptToPreserveAspectRatio(Size size) {
-    if (isTight)
-      return smallest;
+    if (isTight) {
+      Size result = smallest;
+      assert(() { result = _debugPropagateDebugSize(size, result); return true; });
+      return result;
+    }
 
     double width = size.width;
     double height = size.height;
@@ -247,7 +267,9 @@ class BoxConstraints extends Constraints {
       width = height * aspectRatio;
     }
 
-    return new Size(constrainWidth(width), constrainHeight(height));
+    Size result = new Size(constrainWidth(width), constrainHeight(height));
+    assert(() { result = _debugPropagateDebugSize(size, result); return true; });
+    return result;
   }
 
   /// The biggest size that satisifes the constraints.

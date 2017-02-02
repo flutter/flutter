@@ -98,3 +98,39 @@ class Viewport2Element extends MultiChildRenderObjectElement {
     }
   }
 }
+
+class ShrinkWrappingViewport extends MultiChildRenderObjectWidget {
+  ShrinkWrappingViewport({
+    Key key,
+    this.axisDirection: AxisDirection.down,
+    @required this.offset,
+    List<Widget> slivers: const <Widget>[],
+  }) : super(key: key, children: slivers) {
+    assert(offset != null);
+  }
+
+  final AxisDirection axisDirection;
+  final ViewportOffset offset;
+
+  @override
+  RenderShrinkWrappingViewport createRenderObject(BuildContext context) {
+    return new RenderShrinkWrappingViewport(
+      axisDirection: axisDirection,
+      offset: offset,
+    );
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, RenderShrinkWrappingViewport renderObject) {
+    renderObject
+      ..axisDirection = axisDirection
+      ..offset = offset;
+  }
+
+  @override
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('$axisDirection');
+    description.add('offset: $offset');
+  }
+}

@@ -303,4 +303,7 @@ void main() {
     expect(tester.getSize(find.text('3')), equals(const Size(400.0, 400.0)));
     expect(find.text('4'), findsNothing);
   });
+
+  // TODO(ianh): can you tap a grid cell that is slightly off the bottom of the screen?
+  // (try it with the flutter_gallery Grid demo)
 }

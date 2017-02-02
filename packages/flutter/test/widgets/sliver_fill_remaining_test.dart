@@ -5,6 +5,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
+import 'test_widgets.dart';
+
 void main() {
   testWidgets('SliverFillRemaining control test', (WidgetTester tester) async {
     List<Widget> children = new List<Widget>.generate(20, (int i) {
@@ -12,7 +14,7 @@ void main() {
     });
 
     await tester.pumpWidget(
-      new ScrollableViewport2(
+      new TestScrollable(
         slivers: <Widget>[
           new SliverFill(
             delegate: new SliverChildListDelegate(children),
@@ -28,7 +30,7 @@ void main() {
     expect(find.text('1'), findsNothing);
     expect(find.text('2'), findsNothing);
 
-    await tester.scroll(find.byType(ScrollableViewport2), const Offset(0.0, -700.0));
+    await tester.scroll(find.byType(Scrollable2), const Offset(0.0, -700.0));
     await tester.pump();
 
     expect(find.text('0'), findsNothing);
@@ -37,7 +39,7 @@ void main() {
     expect(find.text('3'), findsNothing);
     expect(find.text('4'), findsNothing);
 
-    await tester.scroll(find.byType(ScrollableViewport2), const Offset(0.0, 200.0));
+    await tester.scroll(find.byType(Scrollable2), const Offset(0.0, 200.0));
     await tester.pump();
 
     expect(find.text('0'), findsOneWidget);

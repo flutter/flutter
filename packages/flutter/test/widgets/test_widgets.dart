@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 final BoxDecoration kBoxDecorationA = const BoxDecoration(
@@ -55,4 +56,50 @@ class FlipWidgetState extends State<FlipWidget> {
 
 void flipStatefulWidget(WidgetTester tester) {
   tester.state<FlipWidgetState>(find.byType(FlipWidget)).flip();
+}
+
+class TestScrollable extends StatelessWidget {
+  TestScrollable({
+    Key key,
+    this.initialScrollOffset: 0.0,
+    this.axisDirection: AxisDirection.down,
+    this.anchor: 0.0,
+    this.center,
+    this.scrollBehavior,
+    this.slivers: const <Widget>[],
+  }) {
+    assert(slivers != null);
+  }
+
+  final double initialScrollOffset;
+
+  final AxisDirection axisDirection;
+
+  final double anchor;
+
+  final Key center;
+
+  final ScrollBehavior2 scrollBehavior;
+
+  final List<Widget> slivers;
+
+  Axis get axis => axisDirectionToAxis(axisDirection);
+
+  @override
+  Widget build(BuildContext context) {
+    return new Scrollable2(
+      initialScrollOffset: initialScrollOffset,
+      axisDirection: axisDirection,
+      scrollBehavior: scrollBehavior,
+      viewportBuilder: (BuildContext context, ViewportOffset offset) {
+        return new Viewport2(
+          axisDirection: axisDirection,
+          anchor: anchor,
+          offset: offset,
+          center: center,
+          slivers: slivers,
+        );
+      }
+    );
+  }
 }

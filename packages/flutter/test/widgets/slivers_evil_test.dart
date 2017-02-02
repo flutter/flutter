@@ -7,6 +7,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/material.dart';
 
+import 'test_widgets.dart';
+
 class TestSliverAppBarDelegate extends SliverAppBarDelegate {
   TestSliverAppBarDelegate(this._maxExtent);
 
@@ -74,7 +76,7 @@ void main() {
     final GlobalKey centerKey = new GlobalKey();
     await tester.pumpWidget(
       new Scrollbar2(
-        child: new ScrollableViewport2(
+        child: new TestScrollable(
           axisDirection: AxisDirection.down,
           center: centerKey,
           anchor: 0.25,
