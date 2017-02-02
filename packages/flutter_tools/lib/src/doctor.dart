@@ -386,11 +386,13 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
 
   static final Map<String, String> _dirNameToId = <String, String>{
     'IntelliJ IDEA.app' : 'IntelliJIdea',
+    'IntelliJ IDEA Ultimate.app' : 'IntelliJIdea',
     'IntelliJ IDEA CE.app' : 'IdeaIC',
   };
 
   static Iterable<DoctorValidator> get installed {
     List<DoctorValidator> validators = <DoctorValidator>[];
+    List<String> installPaths = <String>['/Applications', path.join(homeDirPath, 'Applications')];
 
     void checkForIntelliJ(Directory dir) {
       String name = path.basename(dir.path);
@@ -403,13 +405,18 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
     }
 
     try {
-      for (FileSystemEntity dir in fs.directory('/Applications').listSync()) {
+      Iterable<FileSystemEntity> installDirs = installPaths
+              .map((String installPath) => fs.directory(installPath).listSync())
+              .expand((List<FileSystemEntity> mappedDirs) => mappedDirs)
+              .where((FileSystemEntity mappedDir) => mappedDir is Directory);
+      for (FileSystemEntity dir in installDirs) {
         if (dir is Directory) {
           checkForIntelliJ(dir);
           if (!dir.path.endsWith('.app')) {
             for (FileSystemEntity subdir in dir.listSync()) {
-              if (subdir is Directory)
+              if (subdir is Directory) {
                 checkForIntelliJ(subdir);
+              }
             }
           }
         }
