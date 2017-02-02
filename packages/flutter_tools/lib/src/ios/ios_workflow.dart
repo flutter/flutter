@@ -100,7 +100,7 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
       pythonStatus = ValidationType.missing;
       messages.add(new ValidationMessage.error(
         'Python installation missing module "six".\n'
-        'Install via \'sudo easy_install six\'.'
+        'Install via \'pip install six\' or \'sudo easy_install six\'.'
       ));
     }
 
