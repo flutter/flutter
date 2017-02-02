@@ -185,7 +185,8 @@ class CommonFinders {
   /// Example:
   ///
   ///     expect(find.descendant(
-  ///       ancestor: find.widgetWithText(Row, 'label_1'), descendant: find.text('value_1')), findsOneWidget);
+  ///       of: find.widgetWithText(Row, 'label_1'), matching: find.text('value_1')
+///       ), findsOneWidget);
   ///
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// nodes that are [Offstage] or that are from inactive [Route]s.
