@@ -369,9 +369,8 @@ class IOSSimulator extends Device {
     //         We do not support WatchOS or tvOS devices.
 
     RegExp blacklist = new RegExp(r'Apple (TV|Watch)', caseSensitive: false);
-
     if (blacklist.hasMatch(name)) {
-      _supportMessage = 'Flutter does not support either the Apple TV or Watch. Choose an iPhone 5s or above.';
+      _supportMessage = 'Flutter does not support Apple TV or Apple Watch. Select an iPhone 5s or above.';
       return false;
     }
 
@@ -380,23 +379,23 @@ class IOSSimulator extends Device {
     //         targeted applications cannot be run (even though the Flutter
     //         runner on the simulator is completely different).
 
-    RegExp versionExp = new RegExp(r'iPhone ([0-9])+');
-    Match match = versionExp.firstMatch(name);
+    // Check for unsupported iPads.
+    Match iPadMatch = new RegExp(r'iPad (2|Retina)', caseSensitive: false).firstMatch(name);
+    if (iPadMatch != null) {
+      _supportMessage = 'Flutter does not yet support iPad 2 or iPad Retina. Select an iPad Air or above.';
+      return false;
+    }
 
-    // Not an iPhone. All available non-iPhone simulators are compatible.
-    if (match == null)
-      return true;
+    // Check for unsupported iPhones.
+    Match iPhoneMatch = new RegExp(r'iPhone [0-5]').firstMatch(name);
+    if (iPhoneMatch != null) {
+      if (name == 'iPhone 5s')
+        return true;
+      _supportMessage = 'Flutter does not support yet iPhone 5 or earlier. Select an iPhone 5s or above.';
+      return false;
+    }
 
-    // iPhones 6 and above are always fine.
-    if (int.parse(match.group(1)) > 5)
-      return true;
-
-    // The 's' subtype of 5 is compatible.
-    if (name.contains('iPhone 5s'))
-      return true;
-
-    _supportMessage = 'The simulator version is too old. Choose an iPhone 5s or above.';
-    return false;
+    return true;
   }
 
   String _supportMessage;
