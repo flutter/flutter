@@ -165,10 +165,13 @@ Future<XcodeBuildResult> buildXcodeProject({
   );
 
   if (result.exitCode != 0) {
+    printStatus('Failed to build iOS app');
     if (result.stderr.isNotEmpty)
-      printStatus(result.stderr);
+      printStatus('Error output from Xcode build:\n↳');
+      printStatus(result.stderr, indent: 4);
     if (result.stdout.isNotEmpty)
-      printStatus(result.stdout);
+      printStatus('Xcode\'s output:\n↳');
+      printStatus(result.stdout, indent: 4);
     return new XcodeBuildResult(false, stdout: result.stdout, stderr: result.stderr);
   } else {
     // Look for 'clean build/Release-iphoneos/Runner.app'.

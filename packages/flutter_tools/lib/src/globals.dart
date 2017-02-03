@@ -26,8 +26,19 @@ void printError(String message, [StackTrace stackTrace]) => logger.printError(me
 ///
 /// If `ansiAlternative` is provided, and the terminal supports color, that
 /// string will be printed instead of the message.
-void printStatus(String message, { bool emphasis: false, bool newline: true, String ansiAlternative }) {
-  logger.printStatus(message, emphasis: emphasis, newline: newline, ansiAlternative: ansiAlternative);
+///
+/// If `indent` is provided, each line of the message will be prepended by the specified number of
+/// whitespaces.
+void printStatus(
+  String message,
+  { bool emphasis: false, bool newline: true, String ansiAlternative, int indent }) {
+  logger.printStatus(
+    message,
+    emphasis: emphasis,
+    newline: newline,
+    ansiAlternative: ansiAlternative,
+    indent: indent
+  );
 }
 
 /// Use this for verbose tracing output. Users can turn this output on in order
