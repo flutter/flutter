@@ -361,7 +361,7 @@ class IOSSimulator extends Device {
   @override
   bool isSupported() {
     if (!p.platform.isMacOS) {
-      _supportMessage = 'Not supported on a non Mac host';
+      _supportMessage = 'iOS devices require a Mac host machine.';
       return false;
     }
 
@@ -391,7 +391,7 @@ class IOSSimulator extends Device {
     if (iPhoneMatch != null) {
       if (name == 'iPhone 5s')
         return true;
-      _supportMessage = 'Flutter does not support yet iPhone 5 or earlier. Select an iPhone 5s or above.';
+      _supportMessage = 'Flutter does not yet support iPhone 5 or earlier. Select an iPhone 5s or above.';
       return false;
     }
 
