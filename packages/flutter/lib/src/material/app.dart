@@ -214,7 +214,7 @@ class _ScrollLikeMountainViewDelegate extends ScrollConfigurationDelegate {
   bool updateShouldNotify(ScrollConfigurationDelegate old) => false;
 }
 
-class _MaterialScrollBehavior extends ViewportScrollBehavior {
+class _MaterialScrollBehavior extends ScrollBehavior2 {
   @override
   TargetPlatform getPlatform(BuildContext context) {
     return Theme.of(context).platform;
@@ -308,7 +308,7 @@ class _MaterialAppState extends State<MaterialApp> {
     );
 
     return new ScrollConfiguration2(
-      delegate: new _MaterialScrollBehavior(),
+      behavior: new _MaterialScrollBehavior(),
       child: result
     );
   }

@@ -158,7 +158,7 @@ void main() {
 
 
     Scrollable2State state = tester.state(find.byType(Scrollable2));
-    AbsoluteScrollPosition position = state.position;
+    ScrollPosition position = state.position;
     position.jumpTo(3025.0);
 
     expect(log, isEmpty);

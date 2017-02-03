@@ -32,7 +32,7 @@ double getScrollOffset(WidgetTester tester) {
 
 void resetScrollOffset(WidgetTester tester) {
   RenderViewport2 viewport = tester.renderObject(find.byType(Viewport2));
-  AbsoluteScrollPosition position = viewport.offset;
+  ScrollPosition position = viewport.offset;
   position.jumpTo(0.0);
 }
 

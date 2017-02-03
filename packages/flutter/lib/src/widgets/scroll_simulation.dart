@@ -116,7 +116,8 @@ class ClampingScrollSimulation extends Simulation {
     @required this.position,
     @required this.velocity,
     this.friction: 0.015,
-  }) {
+    Tolerance tolerance: Tolerance.defaultTolerance,
+  }) : super(tolerance: tolerance) {
     _scaledFriction = friction * _decelerationForFriction(0.84); // See mPhysicalCoeff
     _duration = _flingDuration(velocity);
     _distance = _flingDistance(velocity);
@@ -196,7 +197,9 @@ class ClampingScrollSimulation extends Simulation {
   }
 }
 
+////////////////////////////////////////////////////////////////////////////////
 // DELETE EVERYTHING BELOW THIS LINE WHEN REMOVING LEGACY SCROLLING CODE
+////////////////////////////////////////////////////////////////////////////////
 
 final SpringDescription _kScrollSpring = new SpringDescription.withDampingRatio(mass: 0.5, springConstant: 100.0, ratio: 1.1);
 final double _kDrag = 0.025;

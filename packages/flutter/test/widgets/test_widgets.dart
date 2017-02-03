@@ -65,7 +65,6 @@ class TestScrollable extends StatelessWidget {
     this.physics,
     this.anchor: 0.0,
     this.center,
-    this.scrollBehavior,
     this.slivers: const <Widget>[],
   }) {
     assert(slivers != null);
@@ -79,8 +78,6 @@ class TestScrollable extends StatelessWidget {
 
   final Key center;
 
-  final ScrollBehavior2 scrollBehavior;
-
   final List<Widget> slivers;
 
   Axis get axis => axisDirectionToAxis(axisDirection);
@@ -90,7 +87,6 @@ class TestScrollable extends StatelessWidget {
     return new Scrollable2(
       axisDirection: axisDirection,
       physics: physics,
-      scrollBehavior: scrollBehavior,
       viewportBuilder: (BuildContext context, ViewportOffset offset) {
         return new Viewport2(
           axisDirection: axisDirection,

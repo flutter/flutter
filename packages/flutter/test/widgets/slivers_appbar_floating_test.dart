@@ -37,7 +37,7 @@ void main() {
         ],
       ),
     );
-    AbsoluteScrollPosition position = tester.state<Scrollable2State>(find.byType(Scrollable2)).position;
+    ScrollPosition position = tester.state<Scrollable2State>(find.byType(Scrollable2)).position;
     final double max = bigHeight * 2.0 + new TestDelegate().maxExtent - 600.0; // 600 is the height of the test viewport
     assert(max < 10000.0);
     expect(max, 1600.0);
@@ -65,7 +65,7 @@ void main() {
         ],
       ),
     );
-    AbsoluteScrollPosition position = tester.state<Scrollable2State>(find.byType(Scrollable2)).position;
+    ScrollPosition position = tester.state<Scrollable2State>(find.byType(Scrollable2)).position;
 
     verifyPaintPosition(key1, new Offset(0.0, 0.0), true);
     verifyPaintPosition(key2, new Offset(0.0, 600.0), false);
@@ -135,7 +135,7 @@ void main() {
         ],
       ),
     );
-    AbsoluteScrollPosition position = tester.state<Scrollable2State>(find.byType(Scrollable2)).position;
+    ScrollPosition position = tester.state<Scrollable2State>(find.byType(Scrollable2)).position;
 
     verifyPaintPosition(key1, new Offset(0.0, 0.0), true);
     verifyPaintPosition(key2, new Offset(0.0, 600.0), false);
@@ -168,7 +168,7 @@ void main() {
         ],
       ),
     );
-    AbsoluteScrollPosition position = tester.state<Scrollable2State>(find.byType(Scrollable2)).position;
+    ScrollPosition position = tester.state<Scrollable2State>(find.byType(Scrollable2)).position;
 
     verifyPaintPosition(key1, new Offset(0.0, 0.0), true);
     verifyPaintPosition(key2, new Offset(0.0, 600.0), false);

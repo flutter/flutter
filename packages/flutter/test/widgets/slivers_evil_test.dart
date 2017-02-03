@@ -33,35 +33,31 @@ class TestSliverAppBarDelegate extends SliverAppBarDelegate {
 
 class TestBehavior extends ScrollBehavior2 {
   @override
-  Widget wrap(BuildContext context, Widget child, AxisDirection axisDirection) {
+  Widget buildViewportChrome(BuildContext context, Widget child, AxisDirection axisDirection) {
     return new GlowingOverscrollIndicator(
       child: child,
       axisDirection: axisDirection,
       color: const Color(0xFFFFFFFF),
     );
   }
-
-  @override
-  ScrollPosition createScrollPosition(BuildContext context, Scrollable2State state, ScrollPosition oldPosition, ScrollPhysics physics) {
-    return new TestViewportScrollPosition(
-      state,
-      new Tolerance(velocity: 20.0, distance: 1.0),
-      oldPosition,
-      physics,
-    );
-  }
-
-  @override
-  bool shouldNotify(TestBehavior oldDelegate) => false;
 }
 
-class TestViewportScrollPosition extends AbsoluteScrollPosition {
+class TestScrollPhysics extends ClampingScrollPhysics {
+  const TestScrollPhysics({ ScrollPhysics parent }) : super(parent: parent);
+
+  @override
+  TestScrollPhysics applyTo(ScrollPhysics parent) => new TestScrollPhysics(parent: parent);
+
+  @override
+  Tolerance get tolerance => new Tolerance(velocity: 20.0, distance: 1.0);
+}
+
+class TestViewportScrollPosition extends ScrollPosition {
   TestViewportScrollPosition(
-    Scrollable2State state,
-    Tolerance scrollTolerances,
-    ScrollPosition oldPosition,
     ScrollPhysics physics,
-  ) : super(state, scrollTolerances, oldPosition, physics);
+    AbstractScrollState state,
+    ScrollPosition oldPosition,
+  ) : super(physics, state, oldPosition);
 
   @override
   bool applyContentDimensions(double minScrollExtent, double maxScrollExtent) {
@@ -75,85 +71,87 @@ void main() {
   testWidgets('Evil test of sliver features - 1', (WidgetTester tester) async {
     final GlobalKey centerKey = new GlobalKey();
     await tester.pumpWidget(
-      new Scrollbar2(
-        child: new TestScrollable(
-          axisDirection: AxisDirection.down,
-          center: centerKey,
-          anchor: 0.25,
-          physics: const ClampingScrollPhysics(),
-          scrollBehavior: new TestBehavior(),
-          slivers: <Widget>[
-            new SliverToBoxAdapter(child: new Container(height: 5.0)),
-            new SliverToBoxAdapter(child: new Container(height: 520.0)),
-            new SliverToBoxAdapter(child: new Container(height: 520.0)),
-            new SliverToBoxAdapter(child: new Container(height: 520.0)),
-            new SliverAppBar(delegate: new TestSliverAppBarDelegate(150.0), pinned: true),
-            new SliverToBoxAdapter(child: new Container(height: 520.0)),
-            new SliverPadding(
-              padding: new EdgeInsets.all(50.0),
-              child: new SliverToBoxAdapter(child: new Container(height: 520.0)),
-            ),
-            new SliverToBoxAdapter(child: new Container(height: 520.0)),
-            new SliverAppBar(delegate: new TestSliverAppBarDelegate(150.0), floating: true),
-            new SliverToBoxAdapter(child: new Container(height: 520.0)),
-            new SliverToBoxAdapter(key: centerKey, child: new Container(height: 520.0)), // ------------------------ CENTER ------------------------
-            new SliverAppBar(delegate: new TestSliverAppBarDelegate(150.0), pinned: true),
-            new SliverToBoxAdapter(child: new Container(height: 520.0)),
-            new SliverToBoxAdapter(child: new Container(height: 520.0)),
-            new SliverToBoxAdapter(child: new Container(height: 520.0)),
-            new SliverPadding(
-              padding: new EdgeInsets.all(50.0),
-              child: new SliverAppBar(delegate: new TestSliverAppBarDelegate(250.0), pinned: true),
-            ),
-            new SliverToBoxAdapter(child: new Container(height: 520.0)),
-            new SliverAppBar(delegate: new TestSliverAppBarDelegate(250.0), pinned: true),
-            new SliverToBoxAdapter(child: new Container(height: 5.0)),
-            new SliverAppBar(delegate: new TestSliverAppBarDelegate(250.0), pinned: true),
-            new SliverToBoxAdapter(child: new Container(height: 5.0)),
-            new SliverAppBar(delegate: new TestSliverAppBarDelegate(250.0), pinned: true),
-                        new SliverAppBar(delegate: new TestSliverAppBarDelegate(250.0), pinned: true),
-            new SliverToBoxAdapter(child: new Container(height: 5.0)),
-            new SliverAppBar(delegate: new TestSliverAppBarDelegate(250.0), pinned: true),
-            new SliverAppBar(delegate: new TestSliverAppBarDelegate(250.0)),
-            new SliverToBoxAdapter(child: new Container(height: 520.0)),
-            new SliverAppBar(delegate: new TestSliverAppBarDelegate(150.0), floating: true),
-            new SliverToBoxAdapter(child: new Container(height: 520.0)),
-            new SliverAppBar(delegate: new TestSliverAppBarDelegate(150.0), floating: true),
-            new SliverToBoxAdapter(child: new Container(height: 5.0)),
-            new SliverBlock(
-              delegate: new SliverChildListDelegate(<Widget>[
-                new Container(height: 50.0),
-                new Container(height: 50.0),
-                new Container(height: 50.0),
-                new Container(height: 50.0),
-                new Container(height: 50.0),
-                new Container(height: 50.0),
-                new Container(height: 50.0),
-                new Container(height: 50.0),
-                new Container(height: 50.0),
-                new Container(height: 50.0),
-                new Container(height: 50.0),
-                new Container(height: 50.0),
-                new Container(height: 50.0),
-                new Container(height: 50.0),
-                new Container(height: 50.0),
-              ]),
-            ),
-            new SliverAppBar(delegate: new TestSliverAppBarDelegate(250.0)),
-            new SliverAppBar(delegate: new TestSliverAppBarDelegate(250.0)),
-            new SliverAppBar(delegate: new TestSliverAppBarDelegate(250.0)),
-            new SliverPadding(
-              padding: new EdgeInsets.symmetric(horizontal: 50.0),
-              child: new SliverToBoxAdapter(child: new Container(height: 520.0)),
-            ),
-            new SliverToBoxAdapter(child: new Container(height: 520.0)),
-            new SliverToBoxAdapter(child: new Container(height: 520.0)),
-            new SliverToBoxAdapter(child: new Container(height: 5.0)),
-          ],
+      new ScrollConfiguration2(
+        behavior: new TestBehavior(),
+        child: new Scrollbar2(
+          child: new TestScrollable(
+            axisDirection: AxisDirection.down,
+            center: centerKey,
+            anchor: 0.25,
+            physics: const TestScrollPhysics(),
+            slivers: <Widget>[
+              new SliverToBoxAdapter(child: new Container(height: 5.0)),
+              new SliverToBoxAdapter(child: new Container(height: 520.0)),
+              new SliverToBoxAdapter(child: new Container(height: 520.0)),
+              new SliverToBoxAdapter(child: new Container(height: 520.0)),
+              new SliverAppBar(delegate: new TestSliverAppBarDelegate(150.0), pinned: true),
+              new SliverToBoxAdapter(child: new Container(height: 520.0)),
+              new SliverPadding(
+                padding: new EdgeInsets.all(50.0),
+                child: new SliverToBoxAdapter(child: new Container(height: 520.0)),
+              ),
+              new SliverToBoxAdapter(child: new Container(height: 520.0)),
+              new SliverAppBar(delegate: new TestSliverAppBarDelegate(150.0), floating: true),
+              new SliverToBoxAdapter(child: new Container(height: 520.0)),
+              new SliverToBoxAdapter(key: centerKey, child: new Container(height: 520.0)), // ------------------------ CENTER ------------------------
+              new SliverAppBar(delegate: new TestSliverAppBarDelegate(150.0), pinned: true),
+              new SliverToBoxAdapter(child: new Container(height: 520.0)),
+              new SliverToBoxAdapter(child: new Container(height: 520.0)),
+              new SliverToBoxAdapter(child: new Container(height: 520.0)),
+              new SliverPadding(
+                padding: new EdgeInsets.all(50.0),
+                child: new SliverAppBar(delegate: new TestSliverAppBarDelegate(250.0), pinned: true),
+              ),
+              new SliverToBoxAdapter(child: new Container(height: 520.0)),
+              new SliverAppBar(delegate: new TestSliverAppBarDelegate(250.0), pinned: true),
+              new SliverToBoxAdapter(child: new Container(height: 5.0)),
+              new SliverAppBar(delegate: new TestSliverAppBarDelegate(250.0), pinned: true),
+              new SliverToBoxAdapter(child: new Container(height: 5.0)),
+              new SliverAppBar(delegate: new TestSliverAppBarDelegate(250.0), pinned: true),
+              new SliverAppBar(delegate: new TestSliverAppBarDelegate(250.0), pinned: true),
+              new SliverToBoxAdapter(child: new Container(height: 5.0)),
+              new SliverAppBar(delegate: new TestSliverAppBarDelegate(250.0), pinned: true),
+              new SliverAppBar(delegate: new TestSliverAppBarDelegate(250.0)),
+              new SliverToBoxAdapter(child: new Container(height: 520.0)),
+              new SliverAppBar(delegate: new TestSliverAppBarDelegate(150.0), floating: true),
+              new SliverToBoxAdapter(child: new Container(height: 520.0)),
+              new SliverAppBar(delegate: new TestSliverAppBarDelegate(150.0), floating: true),
+              new SliverToBoxAdapter(child: new Container(height: 5.0)),
+              new SliverBlock(
+                delegate: new SliverChildListDelegate(<Widget>[
+                  new Container(height: 50.0),
+                  new Container(height: 50.0),
+                  new Container(height: 50.0),
+                  new Container(height: 50.0),
+                  new Container(height: 50.0),
+                  new Container(height: 50.0),
+                  new Container(height: 50.0),
+                  new Container(height: 50.0),
+                  new Container(height: 50.0),
+                  new Container(height: 50.0),
+                  new Container(height: 50.0),
+                  new Container(height: 50.0),
+                  new Container(height: 50.0),
+                  new Container(height: 50.0),
+                  new Container(height: 50.0),
+                ]),
+              ),
+              new SliverAppBar(delegate: new TestSliverAppBarDelegate(250.0)),
+              new SliverAppBar(delegate: new TestSliverAppBarDelegate(250.0)),
+              new SliverAppBar(delegate: new TestSliverAppBarDelegate(250.0)),
+              new SliverPadding(
+                padding: new EdgeInsets.symmetric(horizontal: 50.0),
+                child: new SliverToBoxAdapter(child: new Container(height: 520.0)),
+              ),
+              new SliverToBoxAdapter(child: new Container(height: 520.0)),
+              new SliverToBoxAdapter(child: new Container(height: 520.0)),
+              new SliverToBoxAdapter(child: new Container(height: 5.0)),
+            ],
+          ),
         ),
       ),
     );
-    AbsoluteScrollPosition position = tester.state<Scrollable2State>(find.byType(Scrollable2)).position;
+    ScrollPosition position = tester.state<Scrollable2State>(find.byType(Scrollable2)).position;
 
     position.animate(to: 10000.0, curve: Curves.linear, duration: const Duration(minutes: 1));
     await tester.pump(const Duration(milliseconds: 10));

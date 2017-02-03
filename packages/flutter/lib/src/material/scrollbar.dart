@@ -180,8 +180,9 @@ class _ScrollbarPainter extends CustomPainter {
   }
 }
 
-
+////////////////////////////////////////////////////////////////////////////////
 // DELETE EVERYTHING BELOW THIS LINE WHEN REMOVING LEGACY SCROLLING CODE
+////////////////////////////////////////////////////////////////////////////////
 
 const double _kMinScrollbarThumbExtent = 18.0;
 const double _kScrollbarThumbGirth = 6.0;

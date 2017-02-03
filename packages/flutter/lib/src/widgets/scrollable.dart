@@ -23,382 +23,11 @@ import 'page_storage.dart';
 import 'scroll_behavior.dart';
 import 'scroll_configuration.dart';
 import 'scroll_notification.dart';
+import 'scroll_position.dart';
 import 'ticker_provider.dart';
 import 'viewport.dart';
 
-// TODO(abarth): Merge AbsoluteScrollPosition and ScrollPosition.
-import 'scroll_absolute.dart' show ViewportScrollBehavior, ScrollPhysics;
-
 export 'package:flutter/physics.dart' show Tolerance;
-
-// This file defines an unopinionated scrolling mechanism.
-// See scroll_absolute.dart for variants that do things by pixels.
-
-abstract class ScrollPosition extends ViewportOffset {
-  /// Create a new [ScrollPosition].
-  ///
-  /// The first argument is the [Scrollable2State] object with which this scroll
-  /// position is associated. The second provides the tolerances for activities
-  /// that use simulations and need to decide when to end them. The final
-  /// argument is the previous instance of [ScrollPosition] that was being used
-  /// by the same [Scrollable2State], if any.
-  ScrollPosition(this.state, this.scrollTolerances, ScrollPosition oldPosition) {
-    assert(state is TickerProvider);
-    assert(scrollTolerances != null);
-    if (oldPosition != null)
-      absorb(oldPosition);
-    if (activity == null)
-      beginIdleActivity();
-    assert(activity != null);
-    assert(activity.position == this);
-  }
-
-  @protected
-  final Scrollable2State state;
-
-  final Tolerance scrollTolerances;
-
-  @protected
-  TickerProvider get vsync => state;
-
-  @protected
-  ScrollActivity get activity => _activity;
-  ScrollActivity _activity;
-
-  /// Take any current applicable state from the given [ScrollPosition].
-  ///
-  /// This method is called by the constructor, instead of calling
-  /// [beginIdleActivity], if it is given an `oldPosition`. It adopts the old
-  /// position's current [activity] as its own.
-  ///
-  /// This method is destructive to the other [ScrollPosition]. The other
-  /// object must be disposed immediately after this call (in the same call
-  /// stack, before microtask resolution, by whomever called this object's
-  /// constructor).
-  ///
-  /// If the old [ScrollPosition] object is a different [runtimeType] than this
-  /// one, the [ScrollActivity.resetActivity] method is invoked on the newly
-  /// adopted [ScrollActivity].
-  ///
-  /// When overriding this method, call `super.absorb` after setting any
-  /// metrics-related or activity-related state, since this method may restart
-  /// the activity and scroll activities tend to use those metrics when being
-  /// restarted.
-  @protected
-  @mustCallSuper
-  void absorb(ScrollPosition other) {
-    assert(activity == null);
-    assert(other != this);
-    assert(other.state == state);
-    assert(other.activity != null);
-    final bool oldIgnorePointer = shouldIgnorePointer;
-    _userScrollDirection = other._userScrollDirection;
-    other.activity._position = this;
-    _activity = other.activity;
-    other._activity = null;
-    if (oldIgnorePointer != shouldIgnorePointer)
-      state._updateIgnorePointer(shouldIgnorePointer);
-    if (other.runtimeType != runtimeType)
-      activity.resetActivity();
-  }
-
-  /// Change the current [activity], disposing of the old one and
-  /// sending scroll notifications as necessary.
-  ///
-  /// If the argument is null, this method has no effect. This is convenient for
-  /// cases where the new activity is obtained from another method, and that
-  /// method might return null, since it means the caller does not have to
-  /// explictly null-check the argument.
-  void beginActivity(ScrollActivity newActivity) {
-    if (newActivity == null)
-      return;
-    assert(newActivity.position == this);
-    final bool oldIgnorePointer = shouldIgnorePointer;
-    bool wasScrolling;
-    if (activity != null) {
-      wasScrolling = activity.isScrolling;
-      if (wasScrolling && !newActivity.isScrolling)
-        dispatchNotification(activity.createScrollEndNotification(state));
-      activity.dispose();
-    } else {
-      wasScrolling = false;
-    }
-    _activity = newActivity;
-    if (oldIgnorePointer != shouldIgnorePointer)
-      state._updateIgnorePointer(shouldIgnorePointer);
-    if (!activity.isScrolling)
-      updateUserScrollDirection(ScrollDirection.idle);
-    if (!wasScrolling && activity.isScrolling)
-      dispatchNotification(activity.createScrollStartNotification(state));
-  }
-
-  @protected
-  void dispatchNotification(Notification notification) {
-    assert(state.mounted);
-    notification.dispatch(state._gestureDetectorKey.currentContext);
-  }
-
-  @override
-  void dispose() {
-    activity?.dispose(); // it will be null if it got absorbed by another ScrollPosition
-    _activity = null;
-    super.dispose();
-  }
-
-  void touched() {
-    _activity.touched();
-  }
-
-  @override
-  @mustCallSuper
-  void applyViewportDimension(double viewportDimension) {
-    state._updateGestureDetectors(canDrag);
-  }
-
-  @override
-  @mustCallSuper
-  bool applyContentDimensions(double minScrollExtent, double maxScrollExtent) {
-    state._updateGestureDetectors(canDrag);
-    return true;
-  }
-
-  /// The direction that the user most recently began scrolling in.
-  @override
-  ScrollDirection get userScrollDirection => _userScrollDirection;
-  ScrollDirection _userScrollDirection = ScrollDirection.idle;
-
-  /// Set [userScrollDirection] to the given value.
-  ///
-  /// If this changes the value, then a [UserScrollNotification] is dispatched.
-  ///
-  /// This should only be set from the current [ScrollActivity] (see [activity]).
-  void updateUserScrollDirection(ScrollDirection value) {
-    assert(value != null);
-    if (userScrollDirection == value)
-      return;
-    _userScrollDirection = value;
-    dispatchNotification(new UserScrollNotification(scrollable: state, direction: value));
-  }
-
-  @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('$activity');
-    description.add('$userScrollDirection');
-  }
-
-  bool get canDrag => false;
-
-  bool get shouldIgnorePointer => false;
-
-  @mustCallSuper
-  void postFrameCleanup() { }
-
-  void beginIdleActivity() {
-    beginActivity(new IdleScrollActivity(this));
-  }
-
-  DragScrollActivity beginDragActivity(DragStartDetails details) {
-    if (canDrag) {
-      throw new FlutterError(
-        '$runtimeType does not implement beginDragActivity but canDrag is true.\n'
-        'If a ScrollPosition class ever returns true from canDrag, then it must '
-        'implement the beginDragActivity method to handle drags.\n'
-        'The beginDragActivity method should call beginActivity, passing it a new '
-        'instance of a DragScrollActivity subclass that has been initialized with '
-        'this ScrollPosition object as its position.'
-      );
-    }
-    assert(false);
-    return null;
-  }
-
-  // ///
-  // /// The velocity should be in logical pixels per second.
-  void beginBallisticActivity(double velocity) {
-    beginIdleActivity();
-  }
-
-  // ABSTRACT METHODS
-
-  /// Update the scroll position ([pixels]) to a given pixel value.
-  ///
-  /// This should only be called by the current [ScrollActivity], either during
-  /// the transient callback phase or in response to user input.
-  ///
-  /// Returns the overscroll, if any. If the return value is 0.0, that means
-  /// that [pixels] now returns the given `value`. If the return value is
-  /// positive, then [pixels] is less than the requested `value` by the given
-  /// amount (overscroll past the max extent), and if it is negative, it is
-  /// greater than the requested `value` by the given amount (underscroll past
-  /// the min extent).
-  ///
-  /// Implementations of this method must dispatch scroll update notifications
-  /// (using [dispatchNotification] and
-  /// [ScrollActivity.createScrollUpdateNotification]) after applying the new
-  /// value (so after [pixels] changes). If the entire change is not applied,
-  /// the overscroll should be reported by subsequently also dispatching an
-  /// overscroll notification using
-  /// [ScrollActivity.createOverscrollNotification].
-  double setPixels(double value);
-
-  /// Returns a description of the [Scrollable].
-  ///
-  /// Accurately describing the metrics typicaly requires using information
-  /// provided by the viewport to the [applyViewportDimension] and
-  /// [applyContentDimensions] methods.
-  ///
-  /// The metrics do not need to be in absolute (pixel) units, but they must be
-  /// in consistent units (so that they can be compared over time or used to
-  /// drive diagrammatic user interfaces such as scrollbars).
-  ScrollableMetrics getMetrics();
-
-  // Subclasses must also implement the [pixels] getter and [correctBy].
-}
-
-/// Base class for scrolling activities like dragging, and flinging.
-abstract class ScrollActivity {
-  ScrollActivity(ScrollPosition position) {
-    _position = position;
-  }
-
-  @protected
-  ScrollPosition get position => _position;
-  ScrollPosition _position;
-
-  /// Called by the [ScrollPosition] when it has changed type (for example, when
-  /// changing from an Android-style scroll position to an iOS-style scroll
-  /// position). If this activity can differ between the two modes, then it
-  /// should tell the position to restart that activity appropriately.
-  ///
-  /// For example, [BallisticScrollActivity]'s implementation calls
-  /// [ScrollPosition.beginBallisticActivity].
-  void resetActivity() { }
-
-  Notification createScrollStartNotification(Scrollable2State scrollable) {
-    return new ScrollStartNotification(scrollable: scrollable);
-  }
-
-  Notification createScrollUpdateNotification(Scrollable2State scrollable, double scrollDelta) {
-    return new ScrollUpdateNotification(scrollable: scrollable, scrollDelta: scrollDelta);
-  }
-
-  Notification createOverscrollNotification(Scrollable2State scrollable, double overscroll) {
-    return new OverscrollNotification(scrollable: scrollable, overscroll: overscroll);
-  }
-
-  Notification createScrollEndNotification(Scrollable2State scrollable) {
-    return new ScrollEndNotification(scrollable: scrollable);
-  }
-
-  void touched() { }
-
-  void applyNewDimensions() { }
-
-  bool get shouldIgnorePointer;
-
-  bool get isScrolling;
-
-  @mustCallSuper
-  void dispose() {
-    _position = null;
-  }
-
-  @override
-  String toString() => '$runtimeType';
-}
-
-class IdleScrollActivity extends ScrollActivity {
-  IdleScrollActivity(ScrollPosition position) : super(position);
-
-  @override
-  void applyNewDimensions() {
-    position.beginBallisticActivity(0.0);
-  }
-
-  @override
-  bool get shouldIgnorePointer => false;
-
-  @override
-  bool get isScrolling => false;
-}
-
-abstract class DragScrollActivity extends ScrollActivity {
-  DragScrollActivity(ScrollPosition position) : super(position);
-
-  void update(DragUpdateDetails details, { bool reverse });
-
-  void end(DragEndDetails details, { bool reverse });
-
-  @override
-  void touched() {
-    assert(false);
-  }
-
-  @override
-  void dispose() {
-    position.state._drag = null;
-    super.dispose();
-  }
-}
-
-/// Base class for delegates that instantiate [ScrollPosition] objects.
-abstract class ScrollBehavior2 {
-  const ScrollBehavior2();
-
-  Widget wrap(BuildContext context, Widget child, AxisDirection axisDirection);
-
-  /// Returns a new instance of the ScrollPosition class that this
-  /// ScrollBehavior2 subclass creates.
-  ///
-  /// A given ScrollBehavior2 object must always return the same kind of
-  /// ScrollPosition, with the same configuration.
-  ///
-  /// The `oldPosition` argument should be passed to the `ScrollPosition`
-  /// constructor so that the new position can take over the old position's
-  /// offset and (if it's the same type) activity.
-  ///
-  /// When calling [createScrollPosition] with a non-null `oldPosition`, that
-  /// object must be disposed (via [ScrollPosition.oldPosition]) in the same
-  /// call stack. Passing a non-null `oldPosition` is a destructive operation
-  /// for that [ScrollPosition].
-  ScrollPosition createScrollPosition(BuildContext context, Scrollable2State state, ScrollPosition oldPosition, ScrollPhysics physics);
-
-  /// Whether this delegate is different than the old delegate, or would now
-  /// return meaningfully different widgets from [wrap] or a meaningfully
-  /// different [ScrollPosition] from [createScrollPosition].
-  ///
-  /// It is not necessary to return true if the return values for [wrap] and
-  /// [createScrollPosition] would only be different because of depending on the
-  /// [BuildContext] argument they are provided, as dependency checking is
-  /// handled separately.
-  bool shouldNotify(@checked ScrollBehavior2 oldDelegate);
-
-  @override
-  String toString() => '$runtimeType';
-}
-
-class ScrollConfiguration2 extends InheritedWidget {
-  const ScrollConfiguration2({
-    Key key,
-    @required this.delegate,
-    @required Widget child,
-  }) : super(key: key, child: child);
-
-  final ScrollBehavior2 delegate;
-
-  static ScrollBehavior2 of(BuildContext context) {
-    ScrollConfiguration2 configuration = context.inheritFromWidgetOfExactType(ScrollConfiguration2);
-    return configuration?.delegate;
-  }
-
-  @override
-  bool updateShouldNotify(ScrollConfiguration2 old) {
-    assert(delegate != null);
-    return delegate.runtimeType != old.delegate.runtimeType
-        || delegate.shouldNotify(old.delegate);
-  }
-}
 
 typedef Widget ViewportBuilder(BuildContext context, ViewportOffset position);
 
@@ -407,7 +36,6 @@ class Scrollable2 extends StatefulWidget {
     Key key,
     this.axisDirection: AxisDirection.down,
     this.physics,
-    this.scrollBehavior,
     @required this.viewportBuilder,
   }) : super (key: key) {
     assert(axisDirection != null);
@@ -418,14 +46,6 @@ class Scrollable2 extends StatefulWidget {
 
   final ScrollPhysics physics;
 
-  /// The delegate that creates the [ScrollPosition] and wraps the viewport
-  /// in extra widgets (e.g. for overscroll effects).
-  ///
-  /// If no scroll behavior delegate is explicitly supplied, the scroll behavior
-  /// from the nearest [ScrollConfiguration2] is used. If there is no
-  /// [ScrollConfiguration2] in scope, a new [ViewportScrollBehavior] is used.
-  final ScrollBehavior2 scrollBehavior;
-
   final ViewportBuilder viewportBuilder;
 
   Axis get axis => axisDirectionToAxis(axisDirection);
@@ -433,29 +53,12 @@ class Scrollable2 extends StatefulWidget {
   @override
   Scrollable2State createState() => new Scrollable2State();
 
-  static ScrollBehavior2 getScrollBehavior(BuildContext context) {
-    return ScrollConfiguration2.of(context)
-        ?? new ViewportScrollBehavior();
-  }
-
-  /// Whether, when this widget has been replaced by another, the scroll
-  /// behavior and scroll position need to be updated as well.
-  bool shouldUpdateScrollPosition(Scrollable2 oldWidget) {
-    return scrollBehavior.runtimeType != oldWidget.scrollBehavior.runtimeType
-        || (scrollBehavior != null && scrollBehavior.shouldNotify(oldWidget.scrollBehavior));
-  }
-
   @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     description.add('$axisDirection');
     if (physics != null)
       description.add('physics: $physics');
-    if (scrollBehavior != null) {
-      description.add('scrollBehavior: $scrollBehavior');
-    } else {
-      description.add('scrollBehavior: use inherited ScrollBehavior2');
-    }
   }
 }
 
@@ -468,24 +71,28 @@ class Scrollable2 extends StatefulWidget {
 /// [NotificationListener] to listen for [ScrollNotification2] notifications.
 ///
 /// This class is not intended to be subclassed. To specialize the behavior of a
-/// [Scrollable2], provide it with a custom [ScrollBehavior2] delegate.
-class Scrollable2State extends State<Scrollable2> with TickerProviderStateMixin {
+/// [Scrollable2], provide it with a [ScrollPhysics].
+class Scrollable2State extends State<Scrollable2> with TickerProviderStateMixin
+    implements AbstractScrollState {
   /// The controller for this [Scrollable2] widget's viewport position.
   ///
   /// To control what kind of [ScrollPosition] is created for a [Scrollable2],
-  /// provide it with a custom [ScrollBehavior2] delegate that creates the
-  /// appropriate [ScrollPosition] controller in its
-  /// [ScrollBehavior2.createScrollPosition] method.
+  /// provide it with custom [ScrollPhysics] that creates the appropriate
+  /// [ScrollPosition] controller in its [ScrollPhysics.createScrollPosition]
+  /// method.
   ScrollPosition get position => _position;
   ScrollPosition _position;
 
-  ScrollBehavior2 _scrollBehavior;
+  ScrollBehavior2 _configuration;
 
   // only call this from places that will definitely trigger a rebuild
   void _updatePosition() {
-    _scrollBehavior = config.scrollBehavior ?? Scrollable2.getScrollBehavior(context);
+    _configuration = ScrollConfiguration2.of(context);
+    ScrollPhysics physics = _configuration.getScrollPhysics(context);
+    if (config.physics != null)
+      physics = config.physics.applyTo(physics);
     final ScrollPosition oldPosition = position;
-    _position = _scrollBehavior.createScrollPosition(context, this, oldPosition, config.physics);
+    _position = physics.createScrollPosition(physics, this, oldPosition);
     assert(position != null);
     if (oldPosition != null) {
       // It's important that we not do this until after the viewport has had a
@@ -501,10 +108,19 @@ class Scrollable2State extends State<Scrollable2> with TickerProviderStateMixin 
     _updatePosition();
   }
 
+  bool _shouldUpdatePosition(Scrollable2 oldConfig) {
+    if (config.physics == oldConfig.physics)
+      return false;
+    if ((config.physics == null) != (oldConfig.physics == null))
+      return true;
+    return config.physics.runtimeType != oldConfig.physics.runtimeType
+        || config.physics.shouldUpdateScrollPosition(oldConfig.physics);
+  }
+
   @override
   void didUpdateConfig(Scrollable2 oldConfig) {
     super.didUpdateConfig(oldConfig);
-    if (config.shouldUpdateScrollPosition(oldConfig))
+    if (_shouldUpdatePosition(oldConfig))
       _updatePosition();
   }
 
@@ -527,7 +143,9 @@ class Scrollable2State extends State<Scrollable2> with TickerProviderStateMixin 
   bool _lastCanDrag;
   Axis _lastAxisDirection;
 
-  void _updateGestureDetectors(bool canDrag) {
+  @override
+  @protected
+  void setCanDrag(bool canDrag) {
     if (canDrag == _lastCanDrag && (!canDrag || config.axis == _lastAxisDirection))
       return;
     if (!canDrag) {
@@ -564,7 +182,12 @@ class Scrollable2State extends State<Scrollable2> with TickerProviderStateMixin 
       _gestureDetectorKey.currentState.replaceGestureRecognizers(_gestureRecognizers);
   }
 
-  void _updateIgnorePointer(bool value) {
+  @override
+  TickerProvider get vsync => this;
+
+  @override
+  @protected
+  void setIgnorePointer(bool value) {
     if (_shouldIgnorePointer == value)
       return;
     _shouldIgnorePointer = value;
@@ -574,6 +197,18 @@ class Scrollable2State extends State<Scrollable2> with TickerProviderStateMixin 
     }
   }
 
+  @override
+  @protected
+  void didEndDrag() {
+    _drag = null;
+  }
+
+  @override
+  @protected
+  void dispatchNotification(Notification notification) {
+    assert(mounted);
+    notification.dispatch(_gestureDetectorKey.currentContext);
+  }
 
   // TOUCH HANDLERS
 
@@ -630,7 +265,7 @@ class Scrollable2State extends State<Scrollable2> with TickerProviderStateMixin 
         child: config.viewportBuilder(context, position),
       ),
     );
-    return _scrollBehavior.wrap(context, result, config.axisDirection);
+    return _configuration.buildViewportChrome(context, result, config.axisDirection);
   }
 
   @override
@@ -640,8 +275,9 @@ class Scrollable2State extends State<Scrollable2> with TickerProviderStateMixin 
   }
 }
 
-
+////////////////////////////////////////////////////////////////////////////////
 // DELETE EVERYTHING BELOW THIS LINE WHEN REMOVING LEGACY SCROLLING CODE
+////////////////////////////////////////////////////////////////////////////////
 
 /// Identifies one or both limits of a [Scrollable] in terms of its scrollDirection.
 enum ScrollableEdge {
