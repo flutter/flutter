@@ -53,20 +53,19 @@ const int tsHeightMask = 1 << tsHeightIndex;
 const int psTextAlignIndex = 1;
 const int psFontWeightIndex = 2;
 const int psFontStyleIndex = 3;
-// index 4 reserved for LineCount
+const int psMaxLinesIndex = 4;
 const int psFontFamilyIndex = 5;
 const int psFontSizeIndex = 6;
 const int psLineHeightIndex = 7;
-const int psMaxLinesIndex = 8;
-const int psEllipsisIndex = 9;
+const int psEllipsisIndex = 8;
 
 const int psTextAlignMask = 1 << psTextAlignIndex;
 const int psFontWeightMask = 1 << psFontWeightIndex;
 const int psFontStyleMask = 1 << psFontStyleIndex;
+const int psMaxLinesMask = 1 << psMaxLinesIndex;
 const int psFontFamilyMask = 1 << psFontFamilyIndex;
 const int psFontSizeMask = 1 << psFontSizeIndex;
 const int psLineHeightMask = 1 << psLineHeightIndex;
-const int psMaxLinesMask = 1 << psMaxLinesIndex;
 const int psEllipsisMask = 1 << psEllipsisIndex;
 
 float getComputedSizeFromSpecifiedSize(float specifiedSize) {
@@ -102,7 +101,6 @@ PassRefPtr<RenderStyle> decodeParagraphStyle(
     const std::string& fontFamily,
     double fontSize,
     double lineHeight,
-    int maxLines,
     const std::string& ellipsis) {
   FTL_DCHECK(encoded.num_elements() == 5);
 
@@ -148,7 +146,7 @@ PassRefPtr<RenderStyle> decodeParagraphStyle(
     style->setLineHeight(Length(lineHeight * 100.0, Percent));
 
   if (mask & psMaxLinesMask)
-    style->setMaxLines(maxLines);
+    style->setMaxLines(encoded[psMaxLinesIndex]);
 
   if (mask & psEllipsisMask)
     style->setEllipsis(AtomicString::fromUTF8(ellipsis.c_str()));
@@ -179,7 +177,7 @@ FOR_EACH_BINDING(DART_NATIVE_CALLBACK)
 
 void ParagraphBuilder::RegisterNatives(tonic::DartLibraryNatives* natives) {
   natives->Register(
-      {{"ParagraphBuilder_constructor", ParagraphBuilder_constructor, 7, true},
+      {{"ParagraphBuilder_constructor", ParagraphBuilder_constructor, 6, true},
        FOR_EACH_BINDING(DART_REGISTER_NATIVE)});
 }
 
@@ -188,22 +186,20 @@ ftl::RefPtr<ParagraphBuilder> ParagraphBuilder::create(
     const std::string& fontFamily,
     double fontSize,
     double lineHeight,
-    int maxLines,
     const std::string& ellipsis) {
   return ftl::MakeRefCounted<ParagraphBuilder>(
-      encoded, fontFamily, fontSize, lineHeight, maxLines, ellipsis);
+      encoded, fontFamily, fontSize, lineHeight, ellipsis);
 }
 
 ParagraphBuilder::ParagraphBuilder(tonic::Int32List& encoded,
                                    const std::string& fontFamily,
                                    double fontSize,
                                    double lineHeight,
-                                   int maxLines,
                                    const std::string& ellipsis) {
   createRenderView();
 
   RefPtr<RenderStyle> paragraphStyle = decodeParagraphStyle(
-      m_renderView->style(), encoded, fontFamily, fontSize, lineHeight, maxLines, ellipsis);
+      m_renderView->style(), encoded, fontFamily, fontSize, lineHeight, ellipsis);
   encoded.Release();
 
   m_renderParagraph = new RenderParagraph();
