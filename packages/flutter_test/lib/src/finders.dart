@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 
 import 'all_elements.dart';
 
+import 'package:meta/meta.dart';
+
 /// Signature for [CommonFinders.byPredicate].
 typedef bool WidgetPredicate(Widget widget);
 
