@@ -129,8 +129,9 @@ tonic::DartErrorHandleType DartController::RunFromSource(
   Dart_Handle result = loader.LoadScript(main);
   LogIfError(result);
   tonic::DartErrorHandleType error = tonic::GetErrorHandleType(result);
-  if (SendStartMessage(Dart_RootLibrary()))
-    exit(1);
+  if (SendStartMessage(Dart_RootLibrary())) {
+    return tonic::kCompilationErrorType;
+  }
   return error;
 }
 
