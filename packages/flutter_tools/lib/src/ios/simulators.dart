@@ -361,7 +361,7 @@ class IOSSimulator extends Device {
   @override
   bool isSupported() {
     if (!p.platform.isMacOS) {
-      _supportMessage = 'Not supported on a non Mac host';
+      _supportMessage = 'iOS devices require a Mac host machine.';
       return false;
     }
 
