@@ -7,6 +7,7 @@ import 'package:file/local.dart';
 import 'package:file/memory.dart';
 import 'package:path/path.dart' as path;
 
+import 'common.dart' show throwToolExit;
 import 'context.dart';
 
 export 'package:file/file.dart';
@@ -23,10 +24,13 @@ FileSystem get fs => context == null ? _kLocalFs : context[FileSystem];
 /// Create the ancestor directories of a file path if they do not already exist.
 void ensureDirectoryExists(String filePath) {
   String dirPath = path.dirname(filePath);
-
   if (fs.isDirectorySync(dirPath))
     return;
-  fs.directory(dirPath).createSync(recursive: true);
+  try {
+    fs.directory(dirPath).createSync(recursive: true);
+  } on FileSystemException {
+    throwToolExit('Failed to create directory "$dirPath".');
+  }
 }
 
 /// Recursively copies `srcDir` to `destDir`.
