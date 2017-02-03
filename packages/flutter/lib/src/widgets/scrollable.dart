@@ -405,18 +405,14 @@ typedef Widget ViewportBuilder(BuildContext context, ViewportOffset position);
 class Scrollable2 extends StatefulWidget {
   Scrollable2({
     Key key,
-    this.initialScrollOffset: 0.0,
     this.axisDirection: AxisDirection.down,
     this.physics,
     this.scrollBehavior,
     @required this.viewportBuilder,
   }) : super (key: key) {
     assert(axisDirection != null);
-    assert(initialScrollOffset != null);
     assert(viewportBuilder != null);
   }
-
-  final double initialScrollOffset;
 
   final AxisDirection axisDirection;
 
@@ -453,8 +449,8 @@ class Scrollable2 extends StatefulWidget {
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     description.add('$axisDirection');
-    if (initialScrollOffset != 0.0)
-      description.add('initialScrollOffset: ${initialScrollOffset.toStringAsFixed(1)}');
+    if (physics != null)
+      description.add('physics: $physics');
     if (scrollBehavior != null) {
       description.add('scrollBehavior: $scrollBehavior');
     } else {

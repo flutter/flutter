@@ -20,14 +20,12 @@ class ScrollView extends StatelessWidget {
     this.scrollDirection: Axis.vertical,
     this.reverse: false,
     this.padding,
-    this.initialScrollOffset: 0.0,
     this.itemExtent,
     this.physics,
     this.shrinkWrap: false,
     this.children: const <Widget>[],
   }) : super(key: key) {
     assert(reverse != null);
-    assert(initialScrollOffset != null);
     assert(shrinkWrap != null);
   }
 
@@ -36,8 +34,6 @@ class ScrollView extends StatelessWidget {
   final bool reverse;
 
   final EdgeInsets padding;
-
-  final double initialScrollOffset;
 
   final double itemExtent;
 
@@ -80,7 +76,6 @@ class ScrollView extends StatelessWidget {
     AxisDirection axisDirection = getDirection(context);
     return new Scrollable2(
       axisDirection: axisDirection,
-      initialScrollOffset: initialScrollOffset,
       physics: physics,
       viewportBuilder: (BuildContext context, ViewportOffset offset) {
         if (shrinkWrap) {
@@ -106,8 +101,6 @@ class ScrollView extends StatelessWidget {
     description.add('$scrollDirection');
     if (padding != null)
       description.add('padding: $padding');
-    if (initialScrollOffset != 0.0)
-      description.add('initialScrollOffset: ${initialScrollOffset.toStringAsFixed(1)}');
     if (itemExtent != null)
       description.add('itemExtent: $itemExtent');
     if (shrinkWrap)
@@ -120,7 +113,6 @@ class ScrollGrid extends ScrollView {
     Key key,
     Axis scrollDirection: Axis.vertical,
     EdgeInsets padding,
-    double initialScrollOffset: 0.0,
     bool shrinkWrap: false,
     this.gridDelegate,
     List<Widget> children: const <Widget>[],
@@ -130,7 +122,6 @@ class ScrollGrid extends ScrollView {
     Key key,
     Axis scrollDirection: Axis.vertical,
     EdgeInsets padding,
-    double initialScrollOffset: 0.0,
     bool shrinkWrap: false,
     @required int crossAxisCount,
     double mainAxisSpacing: 0.0,
@@ -148,7 +139,6 @@ class ScrollGrid extends ScrollView {
     Key key,
     Axis scrollDirection: Axis.vertical,
     EdgeInsets padding,
-    double initialScrollOffset: 0.0,
     bool shrinkWrap: false,
     @required double maxCrossAxisExtent,
     double mainAxisSpacing: 0.0,

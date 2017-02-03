@@ -61,7 +61,6 @@ void flipStatefulWidget(WidgetTester tester) {
 class TestScrollable extends StatelessWidget {
   TestScrollable({
     Key key,
-    this.initialScrollOffset: 0.0,
     this.axisDirection: AxisDirection.down,
     this.physics,
     this.anchor: 0.0,
@@ -71,8 +70,6 @@ class TestScrollable extends StatelessWidget {
   }) {
     assert(slivers != null);
   }
-
-  final double initialScrollOffset;
 
   final AxisDirection axisDirection;
 
@@ -91,7 +88,6 @@ class TestScrollable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return new Scrollable2(
-      initialScrollOffset: initialScrollOffset,
       axisDirection: axisDirection,
       physics: physics,
       scrollBehavior: scrollBehavior,
