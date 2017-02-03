@@ -839,13 +839,24 @@ class _TabBarViewState extends State<TabBarView> {
 /// ancestor.
 class TabPageSelector extends StatelessWidget {
   /// Creates a compact widget that indicates which tab has been selected.
-  TabPageSelector({ Key key, this.controller }) : super(key: key);
+  TabPageSelector({
+    Key key,
+    this.controller,
+    this.emptyIndicatorFillColor: Colors.transparent,
+    this.indicatorSize: 12.0
+  }) : super(key: key);
 
   /// This widget's selection and animation state.
   ///
   /// If [TabController] is not provided, then the value of [DefaultTabController.of]
   /// will be used.
   final TabController controller;
+
+  /// The fill color for an unselected indicator. Defaults to Colors.transparent.
+  final Color emptyIndicatorFillColor;
+
+  /// The size of the indicator. Defaults to 12.0.
+  final double indicatorSize;
 
   Widget _buildTabIndicator(
     int tabIndex,
@@ -865,13 +876,14 @@ class TabPageSelector extends StatelessWidget {
     } else {
       background = tabController.index == tabIndex ? selectedColor.end : selectedColor.begin;
     }
+    Color borderColor = emptyIndicatorFillColor == Colors.transparent ? selectedColor.end : background;
     return new Container(
-      width: 12.0,
-      height: 12.0,
+      width: indicatorSize,
+      height: indicatorSize,
       margin: const EdgeInsets.all(4.0),
       decoration: new BoxDecoration(
         backgroundColor: background,
-        border: new Border.all(color: selectedColor.end),
+        border: new Border.all(color: borderColor),
         shape: BoxShape.circle
       )
     );
@@ -880,8 +892,8 @@ class TabPageSelector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Color color = Theme.of(context).accentColor;
-    final ColorTween selectedColor = new ColorTween(begin: Colors.transparent, end: color);
-    final ColorTween previousColor = new ColorTween(begin: color, end: Colors.transparent);
+    final ColorTween selectedColor = new ColorTween(begin: emptyIndicatorFillColor, end: color);
+    final ColorTween previousColor = new ColorTween(begin: color, end: emptyIndicatorFillColor);
     final TabController tabController = controller ?? DefaultTabController.of(context);
     assert(tabController != null);
     final Animation<double> animation = new CurvedAnimation(
