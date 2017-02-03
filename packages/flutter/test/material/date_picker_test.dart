@@ -10,6 +10,7 @@ void main() {
   DateTime firstDate;
   DateTime lastDate;
   DateTime initialDate;
+  SelectableDayPredicate selectableDayPredicate;
 
   setUp(() {
     firstDate = new DateTime(2001, DateTime.JANUARY, 1);
@@ -144,6 +145,7 @@ void main() {
       initialDate: initialDate,
       firstDate: firstDate,
       lastDate: lastDate,
+      selectableDayPredicate: selectableDayPredicate
     );
 
     await tester.pumpUntilNoTransientCallbacks(const Duration(seconds: 1));
@@ -255,6 +257,20 @@ void main() {
       await tester.tap(find.text('5'));
       await tester.tap(find.text('OK'));
       expect(await date, equals(new DateTime(2016, DateTime.DECEMBER, 10)));
+    });
+  });
+
+  testWidgets('Only predicate days are selectable', (WidgetTester tester) async {
+    initialDate = new DateTime(2017, DateTime.JANUARY, 16);
+    firstDate = new DateTime(2017, DateTime.JANUARY, 10);
+    lastDate = new DateTime(2017, DateTime.JANUARY, 20);
+    selectableDayPredicate = (DateTime day) => day.day.isEven;
+    await preparePicker(tester, (Future<DateTime> date) async {
+      await tester.tap(find.text('10')); // Even, works.
+      await tester.tap(find.text('13')); // Odd, doesn't work.
+      await tester.tap(find.text('17')); // Odd, doesn't work.
+      await tester.tap(find.text('OK'));
+      expect(await date, equals(new DateTime(2017, DateTime.JANUARY, 10)));
     });
   });
 }
