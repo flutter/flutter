@@ -172,7 +172,8 @@ class DayPicker extends StatelessWidget {
     @required this.onChanged,
     @required this.firstDate,
     @required this.lastDate,
-    @required this.displayedMonth
+    @required this.displayedMonth,
+    this.selectableDayPredicate
   }) : super(key: key) {
     assert(selectedDate != null);
     assert(currentDate != null);
@@ -202,6 +203,9 @@ class DayPicker extends StatelessWidget {
   /// The month whose days are displayed by this picker.
   final DateTime displayedMonth;
 
+  /// Optional user supplied predicate function to customize selectable days.
+  final SelectableDayPredicate selectableDayPredicate;
+
   List<Widget> _getDayHeaders(TextStyle headerStyle) {
     final DateFormat dateFormat = new DateFormat();
     final DateSymbols symbols = dateFormat.dateSymbols;
@@ -230,7 +234,9 @@ class DayPicker extends StatelessWidget {
         labels.add(new Container());
       } else {
         final DateTime dayToBuild = new DateTime(year, month, day);
-        final bool disabled = dayToBuild.isAfter(lastDate) || dayToBuild.isBefore(firstDate);
+        final bool disabled = dayToBuild.isAfter(lastDate)
+            || dayToBuild.isBefore(firstDate)
+            || (selectableDayPredicate != null && !selectableDayPredicate(dayToBuild));
 
         BoxDecoration decoration;
         TextStyle itemStyle = themeData.textTheme.body1;
@@ -315,7 +321,8 @@ class MonthPicker extends StatefulWidget {
     @required this.selectedDate,
     @required this.onChanged,
     @required this.firstDate,
-    @required this.lastDate
+    @required this.lastDate,
+    this.selectableDayPredicate
   }) : super(key: key) {
     assert(selectedDate != null);
     assert(onChanged != null);
@@ -336,6 +343,9 @@ class MonthPicker extends StatefulWidget {
 
   /// The latest date the user is permitted to pick.
   final DateTime lastDate;
+
+  /// Optional user supplied predicate function to customize selectable days.
+  final SelectableDayPredicate selectableDayPredicate;
 
   @override
   _MonthPickerState createState() => new _MonthPickerState();
@@ -399,7 +409,8 @@ class _MonthPickerState extends State<MonthPicker> {
         onChanged: config.onChanged,
         firstDate: config.firstDate,
         lastDate: config.lastDate,
-        displayedMonth: monthToBuild
+        displayedMonth: monthToBuild,
+        selectableDayPredicate: config.selectableDayPredicate
       ));
     }
     return result;
@@ -570,12 +581,14 @@ class _DatePickerDialog extends StatefulWidget {
     Key key,
     this.initialDate,
     this.firstDate,
-    this.lastDate
+    this.lastDate,
+    this.selectableDayPredicate
   }) : super(key: key);
 
   final DateTime initialDate;
   final DateTime firstDate;
   final DateTime lastDate;
+  final SelectableDayPredicate selectableDayPredicate;
 
   @override
   _DatePickerDialogState createState() => new _DatePickerDialogState();
@@ -631,7 +644,8 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
           selectedDate: _selectedDate,
           onChanged: _handleDayChanged,
           firstDate: config.firstDate,
-          lastDate: config.lastDate
+          lastDate: config.lastDate,
+          selectableDayPredicate: config.selectableDayPredicate
         );
       case _DatePickerMode.year:
         return new YearPicker(
@@ -717,10 +731,16 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
   }
 }
 
+typedef bool SelectableDayPredicate(DateTime day);
+
 /// Shows a dialog containing a material design date picker.
 ///
 /// The returned [Future] resolves to the date selected by the user when the
 /// user closes the dialog. If the user cancels the dialog, null is returned.
+///
+/// An optional [selectableDayPredicate] function can be passed in to customize
+/// the days to enable for selection. If provided, only the days that
+/// [selectableDayPredicate] returned true for will be selectable.
 ///
 /// See also:
 ///
@@ -730,14 +750,28 @@ Future<DateTime> showDatePicker({
   @required BuildContext context,
   @required DateTime initialDate,
   @required DateTime firstDate,
-  @required DateTime lastDate
+  @required DateTime lastDate,
+  SelectableDayPredicate selectableDayPredicate
 }) async {
+  return new Future.error('bleh');
+  if (initialDate.isBefore(firstDate))
+    return new Future<DateTime>.error(
+       new ArgumentError('initialDate must be on or after firstDate'));
+  // if (initialDate.isAfter(lastDate))
+  //   return new Future<DateTime>.error(
+  //     new ArgumentError('initialDate must be on or before lastDate'));
+  // if (firstDate.isAfter(lastDate))
+  //   return new Future<DateTime>.error(new ArgumentError('lastDate must be on or after firstDate'));
+  // if (selectableDayPredicate != null && !selectableDayPredicate(initialDate))
+  //   return new Future<DateTime>.error(
+  //     new ArgumentError('Provided initialDate must satisfy provided selectableDayPredicate'));
   return await showDialog(
     context: context,
     child: new _DatePickerDialog(
       initialDate: initialDate,
       firstDate: firstDate,
-      lastDate: lastDate
+      lastDate: lastDate,
+      selectableDayPredicate: selectableDayPredicate
     )
   );
 }
