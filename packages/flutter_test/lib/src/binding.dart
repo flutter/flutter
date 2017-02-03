@@ -86,6 +86,14 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
        RendererBinding,
        // Services binding omitted to avoid dragging in the licenses code.
        WidgetsBinding {
+
+  TestWidgetsFlutterBinding() {
+    debugPrint = debugPrintOverride;
+  }
+
+  @protected
+  DebugPrintCallback get debugPrintOverride => debugPrint;
+
   /// Creates and initializes the binding. This function is
   /// idempotent; calling it a second time will just return the
   /// previously-created instance.
@@ -399,6 +407,10 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     assert(debugAssertNoTransientCallbacks(
       'An animation is still running even after the widget tree was disposed.'
     ));
+    assert(debugAssertAllFoundationVarsUnset(
+      'The value of a foundation debug variable was changed by the test.',
+      debugPrintOverride: debugPrintOverride,
+    ));
     assert(debugAssertAllRenderVarsUnset(
       'The value of a rendering debug variable was changed by the test.'
     ));
@@ -431,13 +443,15 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
 class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   @override
   void initInstances() {
-    debugPrint = debugPrintSynchronously;
     super.initInstances();
     ui.window.onBeginFrame = null;
   }
 
   FakeAsync _fakeAsync;
   Clock _clock;
+
+  @override
+  DebugPrintCallback get debugPrintOverride => debugPrintSynchronously;
 
   @override
   test_package.Timeout get defaultTestTimeout => const test_package.Timeout(const Duration(seconds: 5));

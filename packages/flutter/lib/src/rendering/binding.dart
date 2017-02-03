@@ -57,8 +57,7 @@ abstract class RendererBinding extends BindingBase implements SchedulerBinding, 
           if (debugPaintSizeEnabled == value)
             return new Future<Null>.value();
           debugPaintSizeEnabled = value;
-          _forceRepaint();
-          return endOfFrame;
+          return _forceRepaint();
         }
       );
       return true;
@@ -78,8 +77,8 @@ abstract class RendererBinding extends BindingBase implements SchedulerBinding, 
           bool repaint = debugRepaintRainbowEnabled && !value;
           debugRepaintRainbowEnabled = value;
           if (repaint)
-            _forceRepaint();
-          return endOfFrame;
+            return _forceRepaint();
+          return new Future<Null>.value();
         }
       );
       return true;
@@ -249,13 +248,14 @@ abstract class RendererBinding extends BindingBase implements SchedulerBinding, 
     super.hitTest(result, position); // ignore: abstract_super_member_reference
   }
 
-  void _forceRepaint() {
+  Future<Null> _forceRepaint() {
     RenderObjectVisitor visitor;
     visitor = (RenderObject child) {
       child.markNeedsPaint();
       child.visitChildren(visitor);
     };
     instance?.renderView?.visitChildren(visitor);
+    return endOfFrame;
   }
 }
 
