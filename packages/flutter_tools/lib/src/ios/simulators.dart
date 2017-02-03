@@ -382,7 +382,7 @@ class IOSSimulator extends Device {
     // Check for unsupported iPads.
     Match iPadMatch = new RegExp(r'iPad (2|Retina)', caseSensitive: false).firstMatch(name);
     if (iPadMatch != null) {
-      _supportMessage = 'Flutter does not support iPad 2 or iPad Retina. Select an iPad Air or above.';
+      _supportMessage = 'Flutter does not yet support iPad 2 or iPad Retina. Select an iPad Air or above.';
       return false;
     }
 
@@ -391,7 +391,7 @@ class IOSSimulator extends Device {
     if (iPhoneMatch != null) {
       if (name == 'iPhone 5s')
         return true;
-      _supportMessage = 'Flutter does not support iPhone 5 or earlier. Select an iPhone 5s or above.';
+      _supportMessage = 'Flutter does not support yet iPhone 5 or earlier. Select an iPhone 5s or above.';
       return false;
     }
 
