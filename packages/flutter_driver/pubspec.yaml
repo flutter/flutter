@@ -23,3 +23,7 @@ dev_dependencies:
   test: 0.12.18+1
   mockito: ^1.0.0
   quiver: ^0.24.0
+
+dependency_overrides:
+  test:
+    git: git://github.com/dart-lang/test.git

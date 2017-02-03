@@ -14,6 +14,9 @@ dependencies:
   stack_trace: ^1.4.0
   vm_service_client: '0.2.2+4'
 
+dependency_overrides:
 dev_dependencies:
   # See packages/flutter_test/pubspec.yaml for why we're pinning this version.
-  test: 0.12.18+1
+  test:
+  test: 0.12.18+1  test:
+    git: git://github.com/dart-lang/test.git

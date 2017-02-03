@@ -53,3 +53,5 @@ dependency_overrides:
     path: ../../bin/cache/dart-sdk/lib/analyzer
   front_end:
     path: ../../bin/cache/dart-sdk/lib/front_end
+  test:
+    git: git://github.com/dart-lang/test.git

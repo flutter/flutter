@@ -12,3 +12,7 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
+dependency_overrides:
+  test:
+    git: git://github.com/dart-lang/test.git

@@ -9,3 +9,7 @@ dependencies:
 
   flutter:
     sdk: flutter
+
+dependency_overrides:
+  test:
+    git: git://github.com/dart-lang/test.git

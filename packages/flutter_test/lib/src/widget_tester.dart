@@ -122,7 +122,8 @@ void expect(dynamic actual, dynamic matcher, {
   dynamic formatter
 }) {
   TestAsyncUtils.guardSync();
-  test_package.expect(actual, matcher, reason: reason, verbose: verbose, formatter: formatter);
+  // XXX removed formatter.
+  test_package.expect(actual, matcher, reason: reason, verbose: verbose);
 }
 
 /// Assert that `actual` matches `matcher`.
@@ -139,7 +140,8 @@ void expectSync(dynamic actual, dynamic matcher, {
   bool verbose: false,
   dynamic formatter
 }) {
-  test_package.expect(actual, matcher, reason: reason, verbose: verbose, formatter: formatter);
+  // XXX removed formatter.
+  test_package.expect(actual, matcher, reason: reason, verbose: verbose);
 }
 
 /// Class that programmatically interacts with widgets and the test environment.
