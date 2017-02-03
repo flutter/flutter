@@ -127,7 +127,7 @@ class TabsDemo extends StatelessWidget {
         ),
         body: new TabBarView(
           children: _allPages.keys.map((_Page page) {
-            return new ScrollView(
+            return new ListView(
               padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
               itemExtent: _CardDataItem.height,
               children: _allPages[page].map((_CardData data) {

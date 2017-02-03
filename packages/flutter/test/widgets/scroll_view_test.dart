@@ -8,10 +8,10 @@ import 'package:flutter/widgets.dart';
 import 'states.dart';
 
 void main() {
-  testWidgets('ScrollView control test', (WidgetTester tester) async {
+  testWidgets('ListView control test', (WidgetTester tester) async {
     List<String> log = <String>[];
 
-    await tester.pumpWidget(new ScrollView(
+    await tester.pumpWidget(new ListView(
       children: kStates.map<Widget>((String state) {
         return new GestureDetector(
           onTap: () {
@@ -45,9 +45,9 @@ void main() {
     log.clear();
   });
 
-  testWidgets('ScrollView restart ballistic activity out of range', (WidgetTester tester) async {
-    Widget buildScrollView(int n) {
-      return new ScrollView(
+  testWidgets('ListView restart ballistic activity out of range', (WidgetTester tester) async {
+    Widget buildListView(int n) {
+      return new ListView(
         children: kStates.take(n).map<Widget>((String state) {
           return new Container(
             height: 200.0,
@@ -60,9 +60,9 @@ void main() {
       );
     }
 
-    await tester.pumpWidget(buildScrollView(30));
-    await tester.fling(find.byType(ScrollView), const Offset(0.0, -4000.0), 4000.0);
-    await tester.pumpWidget(buildScrollView(15));
+    await tester.pumpWidget(buildListView(30));
+    await tester.fling(find.byType(ListView), const Offset(0.0, -4000.0), 4000.0);
+    await tester.pumpWidget(buildListView(15));
     await tester.pump(const Duration(milliseconds: 10));
     await tester.pump(const Duration(milliseconds: 10));
     await tester.pump(const Duration(milliseconds: 10));

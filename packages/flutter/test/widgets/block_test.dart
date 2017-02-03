@@ -13,7 +13,7 @@ final Key blockKey = new Key('test');
 void main() {
   testWidgets('Cannot scroll a non-overflowing block', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new ScrollView(
+      new ListView(
         key: blockKey,
         children: <Widget>[
           new Container(
@@ -38,7 +38,7 @@ void main() {
 
   testWidgets('Can scroll an overflowing block', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new ScrollView(
+      new ListView(
         key: blockKey,
         children: <Widget>[
           new Container(

@@ -7,23 +7,23 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
 
 void main() {
-  testWidgets('ScrollGrid default control', (WidgetTester tester) async {
+  testWidgets('GridView default control', (WidgetTester tester) async {
     await tester.pumpWidget(new Center(
-      child: new ScrollGrid.count(
+      child: new GridView.count(
         crossAxisCount: 1,
       ),
     ));
   });
 
   // Tests https://github.com/flutter/flutter/issues/5522
-  testWidgets('ScrollGrid displays correct children with nonzero padding', (WidgetTester tester) async {
+  testWidgets('GridView displays correct children with nonzero padding', (WidgetTester tester) async {
     final EdgeInsets padding = const EdgeInsets.fromLTRB(0.0, 100.0, 0.0, 0.0);
 
     Widget testWidget = new Align(
       child: new SizedBox(
         height: 800.0,
         width: 300.0,  // forces the grid children to be 300..300
-        child: new ScrollGrid.count(
+        child: new GridView.count(
           crossAxisCount: 1,
           padding: padding,
           children: new List<Widget>.generate(10, (int index) {

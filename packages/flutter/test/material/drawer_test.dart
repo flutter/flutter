@@ -12,7 +12,7 @@ void main() {
     await tester.pumpWidget(
       new Scaffold(
         drawer: new Drawer(
-          child: new ScrollView(
+          child: new ListView(
             children: <Widget>[
               new DrawerHeader(
                 child: new Container(

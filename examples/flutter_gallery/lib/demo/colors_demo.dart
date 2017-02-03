@@ -98,7 +98,7 @@ class ColorSwatchTabView extends StatelessWidget {
       }).toList());
     }
 
-    return new ScrollView(
+    return new ListView(
       itemExtent: kColorItemHeight,
       children: colorItems,
     );

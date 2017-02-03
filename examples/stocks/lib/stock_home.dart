@@ -121,7 +121,7 @@ class StockHomeState extends State<StockHome> {
 
   Widget _buildDrawer(BuildContext context) {
     return new Drawer(
-      child: new ScrollView(
+      child: new ListView(
         children: <Widget>[
           new DrawerHeader(child: new Center(child: new Text('Stocks'))),
           new DrawerItem(

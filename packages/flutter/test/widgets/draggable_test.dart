@@ -312,7 +312,7 @@ void main() {
     Point firstLocation, secondLocation, thirdLocation;
 
     await tester.pumpWidget(new MaterialApp(
-      home: new ScrollView(
+      home: new ListView(
         children: <Widget>[
           new DragTarget<int>(
             builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
@@ -418,7 +418,7 @@ void main() {
     Point firstLocation, secondLocation, thirdLocation;
 
     await tester.pumpWidget(new MaterialApp(
-      home: new ScrollView(
+      home: new ListView(
         scrollDirection: Axis.horizontal,
         children: <Widget>[
           new DragTarget<int>(

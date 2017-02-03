@@ -10,13 +10,31 @@ import 'basic.dart';
 import 'framework.dart';
 import 'scrollable.dart';
 
-// ///
-// /// The viewport will shrink-wrap the child in both axes.
-// ///
-// /// See also:
-// ///  * [ScrollView], which handles multiple children in a scrolling list.
-// ///  * [ScrollGrid], which handles multiple children in a scrolling grid.
-// ///  * [Scrollable2], which handles arbitrary scrolling effects.
+
+/// A box in which a single widget can be scrolled.
+///
+/// This widget is useful when you have a single box that will normally be
+/// entirely visible, for example a clock face in a time picker, but you need to
+/// make sure it can be scrolled if the container gets too small in one axis
+/// (the scroll direction).
+///
+/// It is also useful if you need to shrink-wrap in both axes (the main
+/// scrolling direction as well as the cross axis), as one might see in a dialog
+/// or pop-up menu. In that case, you might pair the [SingleChildScrollView]
+/// with a [BlockBody] child.
+///
+/// When you have a list of children and do not require cross-axis
+/// shrink-wrapping behavior, for example a scrolling list that is always the
+/// width of the screen, consider [ListView], which is vastly more efficient
+/// that a [SingleChildScrollView] containing a [BlockBody] or [Column] with
+/// many children.
+///
+/// See also:
+///
+/// * [ListView], which handles multiple children in a scrolling list.
+/// * [GridView], which handles multiple children in a scrolling grid.
+/// * [PageView], for a scrollable that works page by page.
+/// * [Scrollable2], which handles arbitrary scrolling effects.
 class SingleChildScrollView extends StatelessWidget {
   SingleChildScrollView({
     Key key,

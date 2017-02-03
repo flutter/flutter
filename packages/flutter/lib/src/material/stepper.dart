@@ -542,7 +542,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
       );
     }
 
-    return new ScrollView(
+    return new ListView(
       shrinkWrap: true,
       children: children,
     );

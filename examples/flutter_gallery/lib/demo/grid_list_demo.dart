@@ -339,7 +339,7 @@ class GridListDemoState extends State<GridListDemo> {
       body: new Column(
         children: <Widget>[
           new Expanded(
-            child: new ScrollGrid.count(
+            child: new GridView.count(
               crossAxisCount: (orientation == Orientation.portrait) ? 2 : 3,
               mainAxisSpacing: 4.0,
               crossAxisSpacing: 4.0,

@@ -240,7 +240,7 @@ class StockSettingsState extends State<StockSettings> {
       ]);
       return true;
     });
-    return new ScrollView(
+    return new ListView(
       padding: const EdgeInsets.symmetric(vertical: 20.0),
       children: rows,
     );
