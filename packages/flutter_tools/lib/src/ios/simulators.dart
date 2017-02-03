@@ -391,7 +391,7 @@ class IOSSimulator extends Device {
     if (iPhoneMatch != null) {
       if (name == 'iPhone 5s')
         return true;
-      _supportMessage = 'Flutter does not support iPhones earlier than iPhone 5. Select an iPhone 5s or above.';
+      _supportMessage = 'Flutter does not support iPhone 5 or earlier. Select an iPhone 5s or above.';
       return false;
     }
 
