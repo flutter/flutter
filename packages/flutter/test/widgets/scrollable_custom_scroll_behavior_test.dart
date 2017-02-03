@@ -78,7 +78,7 @@ class TestScrollBehavior extends ScrollBehavior2 {
   Widget wrap(BuildContext context, Widget child, AxisDirection axisDirection) => child;
 
   @override
-  ScrollPosition createScrollPosition(BuildContext context, Scrollable2State state, ScrollPosition oldPosition) {
+  ScrollPosition createScrollPosition(BuildContext context, Scrollable2State state, ScrollPosition oldPosition, ScrollPhysics physics) {
     return new TestScrollPosition(extentMultiplier, state, ViewportScrollBehavior.defaultScrollTolerances, oldPosition);
   }
 

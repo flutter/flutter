@@ -20,12 +20,14 @@ import 'framework.dart';
 import 'gesture_detector.dart';
 import 'notification_listener.dart';
 import 'page_storage.dart';
-import 'scroll_absolute.dart' show ViewportScrollBehavior;
 import 'scroll_behavior.dart';
 import 'scroll_configuration.dart';
 import 'scroll_notification.dart';
 import 'ticker_provider.dart';
 import 'viewport.dart';
+
+// TODO(abarth): Merge AbsoluteScrollPosition and ScrollPosition.
+import 'scroll_absolute.dart' show ViewportScrollBehavior, ScrollPhysics;
 
 export 'package:flutter/physics.dart' show Tolerance;
 
@@ -360,7 +362,7 @@ abstract class ScrollBehavior2 {
   /// object must be disposed (via [ScrollPosition.oldPosition]) in the same
   /// call stack. Passing a non-null `oldPosition` is a destructive operation
   /// for that [ScrollPosition].
-  ScrollPosition createScrollPosition(BuildContext context, Scrollable2State state, ScrollPosition oldPosition);
+  ScrollPosition createScrollPosition(BuildContext context, Scrollable2State state, ScrollPosition oldPosition, ScrollPhysics physics);
 
   /// Whether this delegate is different than the old delegate, or would now
   /// return meaningfully different widgets from [wrap] or a meaningfully
@@ -405,6 +407,7 @@ class Scrollable2 extends StatefulWidget {
     Key key,
     this.initialScrollOffset: 0.0,
     this.axisDirection: AxisDirection.down,
+    this.physics,
     this.scrollBehavior,
     @required this.viewportBuilder,
   }) : super (key: key) {
@@ -416,6 +419,8 @@ class Scrollable2 extends StatefulWidget {
   final double initialScrollOffset;
 
   final AxisDirection axisDirection;
+
+  final ScrollPhysics physics;
 
   /// The delegate that creates the [ScrollPosition] and wraps the viewport
   /// in extra widgets (e.g. for overscroll effects).
@@ -484,7 +489,7 @@ class Scrollable2State extends State<Scrollable2> with TickerProviderStateMixin 
   void _updatePosition() {
     _scrollBehavior = config.scrollBehavior ?? Scrollable2.getScrollBehavior(context);
     final ScrollPosition oldPosition = position;
-    _position = _scrollBehavior.createScrollPosition(context, this, oldPosition);
+    _position = _scrollBehavior.createScrollPosition(context, this, oldPosition, config.physics);
     assert(position != null);
     if (oldPosition != null) {
       // It's important that we not do this until after the viewport has had a

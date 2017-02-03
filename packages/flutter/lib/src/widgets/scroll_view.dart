@@ -7,6 +7,8 @@ import 'package:meta/meta.dart';
 
 import 'framework.dart';
 import 'basic.dart';
+import 'page_scroll_physics.dart';
+import 'scroll_absolute.dart';
 import 'scrollable.dart';
 import 'sliver.dart';
 import 'viewport.dart';
@@ -20,6 +22,7 @@ class ScrollView extends StatelessWidget {
     this.padding,
     this.initialScrollOffset: 0.0,
     this.itemExtent,
+    this.physics,
     this.shrinkWrap: false,
     this.children: const <Widget>[],
   }) : super(key: key) {
@@ -37,6 +40,8 @@ class ScrollView extends StatelessWidget {
   final double initialScrollOffset;
 
   final double itemExtent;
+
+  final ScrollPhysics physics;
 
   final bool shrinkWrap;
 
@@ -76,6 +81,7 @@ class ScrollView extends StatelessWidget {
     return new Scrollable2(
       axisDirection: axisDirection,
       initialScrollOffset: initialScrollOffset,
+      physics: physics,
       viewportBuilder: (BuildContext context, ViewportOffset offset) {
         if (shrinkWrap) {
           return new ShrinkWrappingViewport(
@@ -164,5 +170,23 @@ class ScrollGrid extends ScrollView {
       delegate: childrenDelegate,
       gridDelegate: gridDelegate,
     );
+  }
+}
+
+class PageView extends ScrollView {
+  PageView({
+    Key key,
+    Axis scrollDirection: Axis.horizontal,
+    List<Widget> children: const <Widget>[],
+  }) : super(
+    key: key,
+    scrollDirection: scrollDirection,
+    physics: const PageScrollPhysics(),
+    children: children,
+  );
+
+  @override
+  Widget buildChildLayout(BuildContext context) {
+    return new SliverFill(delegate: childrenDelegate);
   }
 }

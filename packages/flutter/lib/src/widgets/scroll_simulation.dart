@@ -33,10 +33,10 @@ class BouncingScrollSimulation extends SimulationGroup {
     @required double velocity,
     @required double leadingExtent,
     @required double trailingExtent,
-    SpringDescription spring,
+    @required SpringDescription spring,
   }) : _leadingExtent = leadingExtent,
        _trailingExtent = trailingExtent,
-       _spring = spring ?? _defaultScrollSpring {
+       _spring = spring {
     assert(position != null);
     assert(velocity != null);
     assert(_leadingExtent != null);
@@ -49,12 +49,6 @@ class BouncingScrollSimulation extends SimulationGroup {
   final double _leadingExtent;
   final double _trailingExtent;
   final SpringDescription _spring;
-
-  static final SpringDescription _defaultScrollSpring = new SpringDescription.withDampingRatio(
-    mass: 0.5,
-    springConstant: 100.0,
-    ratio: 1.1,
-  );
 
   bool _isSpringing = false;
   Simulation _currentSimulation;
