@@ -753,18 +753,17 @@ Future<DateTime> showDatePicker({
   @required DateTime lastDate,
   SelectableDayPredicate selectableDayPredicate
 }) async {
-  return new Future.error('bleh');
   if (initialDate.isBefore(firstDate))
     return new Future<DateTime>.error(
        new ArgumentError('initialDate must be on or after firstDate'));
-  // if (initialDate.isAfter(lastDate))
-  //   return new Future<DateTime>.error(
-  //     new ArgumentError('initialDate must be on or before lastDate'));
-  // if (firstDate.isAfter(lastDate))
-  //   return new Future<DateTime>.error(new ArgumentError('lastDate must be on or after firstDate'));
-  // if (selectableDayPredicate != null && !selectableDayPredicate(initialDate))
-  //   return new Future<DateTime>.error(
-  //     new ArgumentError('Provided initialDate must satisfy provided selectableDayPredicate'));
+  if (initialDate.isAfter(lastDate))
+    return new Future<DateTime>.error(
+      new ArgumentError('initialDate must be on or before lastDate'));
+  if (firstDate.isAfter(lastDate))
+    return new Future<DateTime>.error(new ArgumentError('lastDate must be on or after firstDate'));
+  if (selectableDayPredicate != null && !selectableDayPredicate(initialDate))
+    return new Future<DateTime>.error(
+      new ArgumentError('Provided initialDate must satisfy provided selectableDayPredicate'));
   return await showDialog(
     context: context,
     child: new _DatePickerDialog(
