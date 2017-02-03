@@ -222,7 +222,8 @@ abstract class Finder {
   /// [Offstage] widgets, as well as children of inactive [Route]s.
   final bool skipOffstage;
 
-  Iterable<Element> get _allElements {
+  @protected
+  Iterable<Element> get allCandidates {
     return collectAllElementsFrom(
       WidgetsBinding.instance.renderViewElement,
       skipOffstage: skipOffstage
@@ -237,7 +238,7 @@ abstract class Finder {
   ///
   /// Calling this clears the cache from [precache].
   Iterable<Element> evaluate() {
-    final Iterable<Element> result = _cachedResult ?? apply(_allElements);
+    final Iterable<Element> result = _cachedResult ?? apply(allCandidates);
     _cachedResult = null;
     return result;
   }
@@ -249,7 +250,7 @@ abstract class Finder {
   /// If this returns true, you must call [evaluate] before you call [precache] again.
   bool precache() {
     assert(_cachedResult == null);
-    final Iterable<Element> result = apply(_allElements);
+    final Iterable<Element> result = apply(allCandidates);
     if (result.isNotEmpty) {
       _cachedResult = result;
       return true;
@@ -500,7 +501,7 @@ class _DescendantFinder extends Finder {
   }
 
   @override
-  Iterable<Element> get _allElements {
+  Iterable<Element> get allCandidates {
     return ancestor.evaluate().expand(
       (Element element) => collectAllElementsFrom(element, skipOffstage: skipOffstage)
     ).toSet().toList();
