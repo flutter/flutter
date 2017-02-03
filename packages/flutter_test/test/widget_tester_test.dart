@@ -181,7 +181,7 @@ void main() {
       expect(failure, isNotNull);
       expect(
           failure.message,
-          contains('Actual: ?:<zero widgets with text "bar" has ancestor(s) with type Column with text "foo"')
+          contains('Actual: ?:<zero widgets with text "bar" that has ancestor(s) with type Column with text "foo"')
         );
     });
   });

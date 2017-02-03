@@ -495,7 +495,7 @@ class _DescendantFinder extends Finder {
   final Finder descendant;
 
   @override
-  String get description => '${descendant.description} has ancestor(s) with ${ancestor.description} ';
+  String get description => '${descendant.description} that has ancestor(s) with ${ancestor.description} ';
 
   @override
   Iterable<Element> apply(Iterable<Element> candidates) {
