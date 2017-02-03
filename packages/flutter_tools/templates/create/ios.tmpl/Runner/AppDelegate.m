@@ -1,4 +1,3 @@
-#import <Flutter/Flutter.h>
 #include "AppDelegate.h"
 
 @implementation AppDelegate
@@ -28,18 +27,6 @@
 
 - (void)applicationWillTerminate:(UIApplication *)application {
     // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
-}
-
-- (void) touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
-  [super touchesBegan:touches withEvent:event];
-
-  // Support scroll to top on status bar tap. By default, pass status bar taps
-  // to the application's root view controller for handling in Flutter.
-  UIViewController *viewController =
-  [UIApplication sharedApplication].keyWindow.rootViewController;
-  if ([viewController isKindOfClass:[FlutterViewController class]]) {
-    [(FlutterViewController*)viewController handleStatusBarTouches:event];
-  }
 }
 
 @end
