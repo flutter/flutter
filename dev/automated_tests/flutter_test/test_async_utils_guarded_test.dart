@@ -2,8 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+class TestTestBinding extends AutomatedTestWidgetsFlutterBinding {
+  @override
+  DebugPrintCallback get debugPrintOverride => testPrint;
+  static void testPrint(String message, { int wrapWidth }) { print(message); }
+}
 
 Future<Null> guardedHelper(WidgetTester tester) {
   return TestAsyncUtils.guard(() async {
@@ -12,8 +19,8 @@ Future<Null> guardedHelper(WidgetTester tester) {
 }
 
 void main() {
+  new TestTestBinding();
   testWidgets('TestAsyncUtils - custom guarded sections', (WidgetTester tester) async {
-    debugPrint = (String message, { int wrapWidth }) { print(message); };
     await tester.pumpWidget(new Container());
     expect(find.byElementType(Container), isNotNull);
     guardedHelper(tester);

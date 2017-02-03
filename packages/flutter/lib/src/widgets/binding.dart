@@ -86,8 +86,7 @@ abstract class WidgetsBinding extends BindingBase implements GestureBinding, Ren
         if (WidgetsApp.showPerformanceOverlayOverride == value)
           return new Future<Null>.value();
         WidgetsApp.showPerformanceOverlayOverride = value;
-        buildOwner.reassemble(renderViewElement);
-        return endOfFrame;
+        return _forceRebuild();
       }
     );
 
@@ -98,10 +97,17 @@ abstract class WidgetsBinding extends BindingBase implements GestureBinding, Ren
         if (WidgetsApp.debugAllowBannerOverride == value)
           return new Future<Null>.value();
         WidgetsApp.debugAllowBannerOverride = value;
-        buildOwner.reassemble(renderViewElement);
-        return endOfFrame;
+        return _forceRebuild();
       }
     );
+  }
+
+  Future<Null> _forceRebuild() {
+    if (renderViewElement != null) {
+      buildOwner.reassemble(renderViewElement);
+      return endOfFrame;
+    }
+    return new Future<Null>.value();
   }
 
   /// The [BuildOwner] in charge of executing the build pipeline for the

@@ -19,7 +19,7 @@ import 'basic_types.dart';
 /// "type" key will be set to the string `_extensionType` to indicate
 /// that this is a return value from a service extension, and the
 /// "method" key will be set to the full name of the method.
-typedef Future<Map<String, dynamic>> ServiceExtensionCallback(Map<String, String> parameters);
+typedef Future<Map<String, String>> ServiceExtensionCallback(Map<String, String> parameters);
 
 /// Base class for mixins that provide singleton services (also known as
 /// "bindings").
@@ -56,7 +56,7 @@ abstract class BindingBase {
     initServiceExtensions();
     assert(_debugServiceExtensionsRegistered);
 
-    developer.postEvent('Flutter.FrameworkInitialization', <String, dynamic>{});
+    developer.postEvent('Flutter.FrameworkInitialization', <String, String>{});
 
     developer.Timeline.finishSync();
   }
@@ -150,7 +150,7 @@ abstract class BindingBase {
       name: name,
       callback: (Map<String, String> parameters) async {
         await callback();
-        return <String, dynamic>{};
+        return <String, String>{};
       }
     );
   }
@@ -181,7 +181,7 @@ abstract class BindingBase {
       callback: (Map<String, String> parameters) async {
         if (parameters.containsKey('enabled'))
           await setter(parameters['enabled'] == 'true');
-        return <String, dynamic>{ 'enabled': await getter() };
+        return <String, String>{ 'enabled': await getter() ? 'true' : 'false' };
       }
     );
   }
@@ -211,7 +211,7 @@ abstract class BindingBase {
       callback: (Map<String, String> parameters) async {
         if (parameters.containsKey(name))
           await setter(double.parse(parameters[name]));
-        return <String, dynamic>{ name: await getter() };
+        return <String, String>{ name: (await getter()).toString() };
       }
     );
   }
@@ -240,7 +240,7 @@ abstract class BindingBase {
       callback: (Map<String, String> parameters) async {
         if (parameters.containsKey('value'))
           await setter(parameters['value']);
-        return <String, dynamic>{ 'value': await getter() };
+        return <String, String>{ 'value': await getter() };
       }
     );
   }
@@ -267,7 +267,7 @@ abstract class BindingBase {
       assert(method == methodName);
       dynamic caughtException;
       StackTrace caughtStack;
-      Map<String, dynamic> result;
+      Map<String, String> result;
       try {
         result = await callback(parameters);
       } catch (exception, stack) {
@@ -286,10 +286,10 @@ abstract class BindingBase {
         ));
         return new developer.ServiceExtensionResponse.error(
           developer.ServiceExtensionResponse.extensionError,
-          JSON.encode(<String, dynamic>{
+          JSON.encode(<String, String>{
             'exception': caughtException.toString(),
             'stack': caughtStack.toString(),
-            'method': method
+            'method': method,
           })
         );
       }
