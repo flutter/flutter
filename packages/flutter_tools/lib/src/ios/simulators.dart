@@ -382,7 +382,7 @@ class IOSSimulator extends Device {
     // Check for unsupported iPads.
     Match iPadMatch = new RegExp(r'iPad (2|Retina)', caseSensitive: false).firstMatch(name);
     if (iPadMatch != null) {
-      _supportMessage = 'Flutter does not support iPad 2 or iPad Retina. Select an iPad Air or later.';
+      _supportMessage = 'Flutter does not support iPad 2 or iPad Retina. Select an iPad Air or above.';
       return false;
     }
 
