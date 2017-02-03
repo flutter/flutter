@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io' as io;
+
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_device.dart';
 import 'package:flutter_tools/src/base/common.dart';
@@ -298,7 +300,7 @@ void main() {
         FileSystem: () => memoryFileSystem,
       });
     });
-  });
+  }, skip: io.Platform.isWindows); // TODO(goderbauer): enable when drive command is working
 }
 
 class MockDevice extends Mock implements Device {

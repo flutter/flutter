@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io' as io;
 
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -33,7 +34,7 @@ void main() {
       Cache.flutterRoot = '../..';
       return _testFile('trivial', 1, missingDependencyTests, missingDependencyTests);
     });
-  });
+  }, skip: io.Platform.isWindows); // TODO(goderbauer): enable when sky_shell is available
 }
 
 Future<Null> _testFile(String testName, int wantedExitCode, String workingDirectory, String testDirectory) async {

@@ -35,7 +35,8 @@ typedef dynamic Generator();
 
 void testUsingContext(String description, dynamic testMethod(), {
   Timeout timeout,
-  Map<Type, Generator> overrides: const <Type, Generator>{}
+  Map<Type, Generator> overrides: const <Type, Generator>{},
+  bool skip: false,
 }) {
   test(description, () async {
     AppContext testContext = new AppContext();
@@ -69,7 +70,7 @@ void testUsingContext(String description, dynamic testMethod(), {
     testContext.putIfAbsent(SimControl, () => new MockSimControl());
     testContext.putIfAbsent(Usage, () => new MockUsage());
 
-    final String basePath = path.dirname(platform.script.path);
+    final String basePath = path.dirname(path.fromUri(platform.script));
     final String flutterRoot =
         path.normalize(path.join(basePath, '..', '..', '..'));
     try {
@@ -96,7 +97,7 @@ void testUsingContext(String description, dynamic testMethod(), {
       rethrow;
     }
 
-  }, timeout: timeout);
+  }, timeout: timeout, skip: skip);
 }
 
 class MockDeviceManager implements DeviceManager {

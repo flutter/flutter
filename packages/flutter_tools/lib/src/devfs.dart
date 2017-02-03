@@ -544,13 +544,13 @@ class DevFS {
       // This project's own package.
       final bool isProjectPackage = uri.toString() == 'lib/';
       final String directoryName =
-          isProjectPackage ? 'lib' : 'packages/$packageName';
+          isProjectPackage ? 'lib' : path.join('packages', packageName);
       // If this is the project's package, we need to pass both
       // package:<package_name> and lib/ as paths to be checked against
       // the filter because we must support both package: imports and relative
       // path imports within the project's own code.
       final String packagesDirectoryName =
-          isProjectPackage ? 'packages/$packageName' : null;
+          isProjectPackage ? path.join('packages', packageName) : null;
       Directory directory = fs.directory(uri);
       bool packageExists =
           await _scanDirectory(directory,

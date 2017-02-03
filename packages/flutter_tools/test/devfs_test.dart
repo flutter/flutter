@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io' as io;
 
 import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -19,8 +20,8 @@ import 'src/context.dart';
 import 'src/mocks.dart';
 
 void main() {
-  final String filePath = 'bar/foo.txt';
-  final String filePath2 = 'foo/bar.txt';
+  final String filePath = path.join('bar', 'foo.txt');
+  final String filePath2 = path.join('foo', 'bar.txt');
   Directory tempDir;
   String basePath;
   DevFS devFS;
@@ -82,8 +83,8 @@ void main() {
       int bytes = await devFS.update();
       devFSOperations.expectMessages(<String>[
         'writeFile test .packages',
-        'writeFile test bar/foo.txt',
-        'writeFile test packages/somepkg/somefile.txt',
+        'writeFile test ${path.join('bar', 'foo.txt')}',
+        'writeFile test ${path.join('packages', 'somepkg', 'somefile.txt')}',
       ]);
       expect(devFS.assetPathsToEvict, isEmpty);
       expect(bytes, 31);
@@ -94,7 +95,7 @@ void main() {
       file.writeAsBytesSync(<int>[1, 2, 3, 4, 5, 6, 7]);
       int bytes = await devFS.update();
       devFSOperations.expectMessages(<String>[
-        'writeFile test foo/bar.txt',
+        'writeFile test ${path.join('foo', 'bar.txt')}',
       ]);
       expect(devFS.assetPathsToEvict, isEmpty);
       expect(bytes, 7);
@@ -111,17 +112,17 @@ void main() {
       await file.writeAsBytes(<int>[1, 2, 3, 4, 5, 6]);
       bytes = await devFS.update();
       devFSOperations.expectMessages(<String>[
-        'writeFile test bar/foo.txt',
+        'writeFile test ${path.join('bar', 'foo.txt')}',
       ]);
       expect(devFS.assetPathsToEvict, isEmpty);
       expect(bytes, 6);
-    });
+    }, skip: io.Platform.isWindows); // TODO(goderbauer): enable when updateFileModificationTime is ported to Windows
     testUsingContext('delete a file from the local file system', () async {
       File file = fs.file(path.join(basePath, filePath));
       await file.delete();
       int bytes = await devFS.update();
       devFSOperations.expectMessages(<String>[
-        'deleteFile test bar/foo.txt',
+        'deleteFile test ${path.join('bar', 'foo.txt')}',
       ]);
       expect(devFS.assetPathsToEvict, isEmpty);
       expect(bytes, 0);
@@ -131,7 +132,7 @@ void main() {
       int bytes = await devFS.update();
       devFSOperations.expectMessages(<String>[
         'writeFile test .packages',
-        'writeFile test packages/newpkg/anotherfile.txt',
+        'writeFile test ${path.join('packages', 'newpkg', 'anotherfile.txt')}',
       ]);
       expect(devFS.assetPathsToEvict, isEmpty);
       expect(bytes, 51);
@@ -140,7 +141,7 @@ void main() {
       assetBundle.entries['a.txt'] = new DevFSStringContent('abc');
       int bytes = await devFS.update(bundle: assetBundle, bundleDirty: true);
       devFSOperations.expectMessages(<String>[
-        'writeFile test ${getAssetBuildDirectory()}/a.txt',
+        'writeFile test ${_inAssetBuildDirectory('a.txt')}',
       ]);
       expect(devFS.assetPathsToEvict, unorderedMatches(<String>['a.txt']));
       devFS.assetPathsToEvict.clear();
@@ -151,8 +152,8 @@ void main() {
       int bytes = await devFS.update(bundle: assetBundle, bundleDirty: true);
       // Expect entire asset bundle written because bundleDirty is true
       devFSOperations.expectMessages(<String>[
-        'writeFile test ${getAssetBuildDirectory()}/a.txt',
-        'writeFile test ${getAssetBuildDirectory()}/b.txt',
+        'writeFile test ${_inAssetBuildDirectory('a.txt')}',
+        'writeFile test ${_inAssetBuildDirectory('b.txt')}',
       ]);
       expect(devFS.assetPathsToEvict, unorderedMatches(<String>[
         'a.txt', 'b.txt']));
@@ -163,7 +164,7 @@ void main() {
       assetBundle.entries['c.txt'] = new DevFSStringContent('12');
       int bytes = await devFS.update(bundle: assetBundle);
       devFSOperations.expectMessages(<String>[
-        'writeFile test ${getAssetBuildDirectory()}/c.txt',
+        'writeFile test ${_inAssetBuildDirectory('c.txt')}',
       ]);
       expect(devFS.assetPathsToEvict, unorderedMatches(<String>[
         'c.txt']));
@@ -174,7 +175,7 @@ void main() {
       assetBundle.entries.remove('c.txt');
       int bytes = await devFS.update(bundle: assetBundle);
       devFSOperations.expectMessages(<String>[
-        'deleteFile test ${getAssetBuildDirectory()}/c.txt',
+        'deleteFile test ${_inAssetBuildDirectory('c.txt')}',
       ]);
       expect(devFS.assetPathsToEvict, unorderedMatches(<String>['c.txt']));
       devFS.assetPathsToEvict.clear();
@@ -184,8 +185,8 @@ void main() {
       assetBundle.entries.clear();
       int bytes = await devFS.update(bundle: assetBundle, bundleDirty: true);
       devFSOperations.expectMessages(<String>[
-        'deleteFile test ${getAssetBuildDirectory()}/a.txt',
-        'deleteFile test ${getAssetBuildDirectory()}/b.txt',
+        'deleteFile test ${_inAssetBuildDirectory('a.txt')}',
+        'deleteFile test ${_inAssetBuildDirectory('b.txt')}',
       ]);
       expect(devFS.assetPathsToEvict, unorderedMatches(<String>[
         'a.txt', 'b.txt'
@@ -231,8 +232,8 @@ void main() {
       int bytes = await devFS.update();
       vmService.expectMessages(<String>[
         'writeFile test .packages',
-        'writeFile test bar/foo.txt',
-        'writeFile test packages/somepkg/somefile.txt',
+        'writeFile test ${path.join('bar', 'foo.txt')}',
+        'writeFile test ${path.join('packages', 'somepkg', 'somefile.txt')}',
       ]);
       expect(devFS.assetPathsToEvict, isEmpty);
       expect(bytes, 31);
@@ -334,7 +335,10 @@ Future<Null> _createPackage(String pkgName, String pkgFileName) async {
   _packages[pkgName] = pkgTempDir;
   StringBuffer sb = new StringBuffer();
   _packages.forEach((String pkgName, Directory pkgTempDir) {
-    sb.writeln('$pkgName:${pkgTempDir.path}/$pkgName/lib');
+    Uri pkgPath = path.toUri(path.join(pkgTempDir.path, pkgName, 'lib'));
+    sb.writeln('$pkgName:$pkgPath');
   });
   fs.file(path.join(_tempDirs[0].path, '.packages')).writeAsStringSync(sb.toString());
 }
+
+String _inAssetBuildDirectory(String filename) => path.join(getAssetBuildDirectory(), filename);
