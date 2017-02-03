@@ -361,7 +361,7 @@ class IOSSimulator extends Device {
   @override
   bool isSupported() {
     if (!p.platform.isMacOS) {
-      _supportMessage = "Not supported on a non Mac host";
+      _supportMessage = 'Not supported on a non Mac host';
       return false;
     }
 
@@ -371,14 +371,14 @@ class IOSSimulator extends Device {
     RegExp blacklist = new RegExp(r'Apple (TV|Watch)', caseSensitive: false);
 
     if (blacklist.hasMatch(name)) {
-      _supportMessage = "Flutter does not support either the Apple TV or Watch. Choose an iPhone 5s or above.";
+      _supportMessage = 'Flutter does not support either the Apple TV or Watch. Choose an iPhone 5s or above.';
       return false;
     }
 
     // Step 2: Check if the device must be rejected because of its version.
-    //         There is an artitifical check on older simulators where arm64
-    //         targetted applications cannot be run (even though the
-    //         Flutter runner on the simulator is completely different).
+    //         There is an artificial check on older simulators where arm64
+    //         targeted applications cannot be run (even though the Flutter
+    //         runner on the simulator is completely different).
 
     RegExp versionExp = new RegExp(r'iPhone ([0-9])+');
     Match match = versionExp.firstMatch(name);
@@ -395,7 +395,7 @@ class IOSSimulator extends Device {
     if (name.contains('iPhone 5s'))
       return true;
 
-    _supportMessage = "The simulator version is too old. Choose an iPhone 5s or above.";
+    _supportMessage = 'The simulator version is too old. Choose an iPhone 5s or above.';
     return false;
   }
 
@@ -404,9 +404,9 @@ class IOSSimulator extends Device {
   @override
   String supportMessage() {
     if (isSupported())
-      return "Supported";
+      return 'Supported';
 
-    return _supportMessage != null ? _supportMessage : "Unknown";
+    return _supportMessage != null ? _supportMessage : 'Unknown';
   }
 
   @override
@@ -435,26 +435,26 @@ class IOSSimulator extends Device {
     }
 
     // Prepare launch arguments.
-    List<String> args = <String>["--enable-dart-profiling"];
+    List<String> args = <String>['--enable-dart-profiling'];
 
     if (!prebuiltApplication) {
       args.addAll(<String>[
-        "--flx=${path.absolute(path.join(getBuildDirectory(), 'app.flx'))}",
-        "--dart-main=${path.absolute(mainPath)}",
-        "--packages=${path.absolute('.packages')}",
+        '--flx=${path.absolute(path.join(getBuildDirectory(), 'app.flx'))}',
+        '--dart-main=${path.absolute(mainPath)}',
+        '--packages=${path.absolute('.packages')}',
       ]);
     }
 
     if (debuggingOptions.debuggingEnabled) {
       if (debuggingOptions.buildMode == BuildMode.debug)
-        args.add("--enable-checked-mode");
+        args.add('--enable-checked-mode');
       if (debuggingOptions.startPaused)
-        args.add("--start-paused");
+        args.add('--start-paused');
 
       int observatoryPort = await debuggingOptions.findBestObservatoryPort();
-      args.add("--observatory-port=$observatoryPort");
+      args.add('--observatory-port=$observatoryPort');
       int diagnosticPort = await debuggingOptions.findBestDiagnosticPort();
-      args.add("--diagnostic-port=$diagnosticPort");
+      args.add('--diagnostic-port=$diagnosticPort');
     }
 
     ProtocolDiscovery observatoryDiscovery;
