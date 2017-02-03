@@ -90,7 +90,7 @@ class OverlayGeometryApp extends StatefulWidget {
   OverlayGeometryAppState createState() => new OverlayGeometryAppState();
 }
 
-typedef void CardTapCallback(Key targetKey, Point globalPosition);
+typedef void CardTapCallback(GlobalKey targetKey, Point globalPosition);
 
 class CardBuilder extends LazyBlockDelegate {
   CardBuilder({ this.cardModels, this.onTapUp });
@@ -163,9 +163,8 @@ class OverlayGeometryAppState extends State<OverlayGeometryApp> {
     });
   }
 
-  void handleTapUp(Key t, Point globalPosition) {
+  void handleTapUp(GlobalKey target, Point globalPosition) {
     setState(() {
-      GlobalKey target = t;
       markers[MarkerType.touch] = globalPosition;
       final RenderBox box = target.currentContext.findRenderObject();
       markers[MarkerType.topLeft] = box.localToGlobal(new Point(0.0, 0.0));
