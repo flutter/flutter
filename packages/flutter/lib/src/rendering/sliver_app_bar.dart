@@ -13,6 +13,7 @@ import 'box.dart';
 import 'binding.dart';
 import 'object.dart';
 import 'sliver.dart';
+import 'viewport_offset.dart';
 
 abstract class RenderSliverAppBar extends RenderSliver with RenderObjectWithChildMixin<RenderBox>, RenderSliverHelpers {
   RenderSliverAppBar({ RenderBox child }) {
