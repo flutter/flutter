@@ -731,6 +731,9 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
   }
 }
 
+/// Signature for predicating dates for enabled date selections.
+///
+/// See [showDatePicker].
 typedef bool SelectableDayPredicate(DateTime day);
 
 /// Shows a dialog containing a material design date picker.
@@ -753,17 +756,13 @@ Future<DateTime> showDatePicker({
   @required DateTime lastDate,
   SelectableDayPredicate selectableDayPredicate
 }) async {
-  if (initialDate.isBefore(firstDate))
-    return new Future<DateTime>.error(
-       new ArgumentError('initialDate must be on or after firstDate'));
-  if (initialDate.isAfter(lastDate))
-    return new Future<DateTime>.error(
-      new ArgumentError('initialDate must be on or before lastDate'));
-  if (firstDate.isAfter(lastDate))
-    return new Future<DateTime>.error(new ArgumentError('lastDate must be on or after firstDate'));
-  if (selectableDayPredicate != null && !selectableDayPredicate(initialDate))
-    return new Future<DateTime>.error(
-      new ArgumentError('Provided initialDate must satisfy provided selectableDayPredicate'));
+  assert(!initialDate.isBefore(firstDate), 'initialDate must be on or after firstDate');
+  assert(!initialDate.isAfter(lastDate), 'initialDate must be on or before lastDate');
+  assert(!firstDate.isAfter(lastDate), 'lastDate must be on or after firstDate');
+  assert(
+    selectableDayPredicate == null || selectableDayPredicate(initialDate),
+    'Provided initialDate must satisfy provided selectableDayPredicate'
+  );
   return await showDialog(
     context: context,
     child: new _DatePickerDialog(
