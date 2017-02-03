@@ -62,8 +62,8 @@ class GlowingOverscrollIndicator extends StatefulWidget {
   /// widget.
   ///
   /// Typically a [GlowingOverscrollIndicator] is created by a
-  /// [ScrollBehavior2.wrap] method, in which case the child is usually the one
-  /// provided as an argument to that method.
+  /// [ScrollBehavior2.buildViewportChrome] method, in which case
+  /// the child is usually the one provided as an argument to that method.
   final Widget child;
 
   @override

@@ -30,6 +30,8 @@ import 'tolerance.dart';
 /// should establish a convention and use that convention consistently with all
 /// related objects.
 abstract class Simulation {
+  Simulation({ this.tolerance: Tolerance.defaultTolerance });
+
   /// The position of the object in the simulation at the given time.
   double x(double time);
 
@@ -46,7 +48,7 @@ abstract class Simulation {
   /// but once the difference from the value at a particular time and the
   /// asymptote itself could not be seen, it would be pointless to continue. The
   /// tolerance defines how to determine if the difference could not be seen.
-  Tolerance tolerance = Tolerance.defaultTolerance;
+  Tolerance tolerance;
 
   @override
   String toString() => '$runtimeType';

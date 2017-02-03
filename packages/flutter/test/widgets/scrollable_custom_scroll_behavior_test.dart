@@ -10,13 +10,13 @@ import 'test_widgets.dart';
 
 class TestScrollPosition extends ScrollPosition {
   TestScrollPosition(
-    this.extentMultiplier,
-    Scrollable2State state,
-    Tolerance scrollTolerances,
+    TestScrollPhysics physics,
+    AbstractScrollState state,
     ScrollPosition oldPosition,
-  ) : _pixels = 100.0, super(state, scrollTolerances, oldPosition);
+  ) : _pixels = 100.0, super(physics, state, oldPosition);
 
-  final double extentMultiplier;
+  @override
+  TestScrollPhysics get physics => super.physics;
 
   double _min, _viewport, _max, _pixels;
 
@@ -27,7 +27,7 @@ class TestScrollPosition extends ScrollPosition {
   double setPixels(double value) {
     double oldPixels = _pixels;
     _pixels = value;
-    dispatchNotification(activity.createScrollUpdateNotification(state, _pixels - oldPixels));
+    state.dispatchNotification(activity.createScrollUpdateNotification(state, _pixels - oldPixels));
     return 0.0;
   }
 
@@ -56,9 +56,9 @@ class TestScrollPosition extends ScrollPosition {
     double afterExtent = _max - _pixels;
     if (insideExtent > 0.0) {
       return new ScrollableMetrics(
-        extentBefore: extentMultiplier * beforeExtent / insideExtent,
-        extentInside: extentMultiplier,
-        extentAfter: extentMultiplier * afterExtent / insideExtent,
+        extentBefore: physics.extentMultiplier * beforeExtent / insideExtent,
+        extentInside: physics.extentMultiplier,
+        extentAfter: physics.extentMultiplier * afterExtent / insideExtent,
       );
     } else {
       return new ScrollableMetrics(
@@ -70,17 +70,36 @@ class TestScrollPosition extends ScrollPosition {
   }
 }
 
-class TestScrollBehavior extends ScrollBehavior2 {
-  TestScrollBehavior(this.extentMultiplier);
+class TestScrollPhysics extends ScrollPhysics {
+  const TestScrollPhysics({ ScrollPhysics parent, this.extentMultiplier }) : super(parent);
+
   final double extentMultiplier;
 
   @override
-  Widget wrap(BuildContext context, Widget child, AxisDirection axisDirection) => child;
+  TestScrollPhysics applyTo(ScrollPhysics parent) {
+    return new TestScrollPhysics(parent: parent, extentMultiplier: extentMultiplier);
+  }
 
   @override
-  ScrollPosition createScrollPosition(BuildContext context, Scrollable2State state, ScrollPosition oldPosition, ScrollPhysics physics) {
-    return new TestScrollPosition(extentMultiplier, state, ViewportScrollBehavior.defaultScrollTolerances, oldPosition);
+  ScrollPosition createScrollPosition(ScrollPhysics physics, AbstractScrollState state, ScrollPosition oldPosition) {
+    return new TestScrollPosition(physics, state, oldPosition);
   }
+}
+
+class TestScrollBehavior extends ScrollBehavior2 {
+  TestScrollBehavior(this.extentMultiplier);
+
+  final double extentMultiplier;
+
+  @override
+  ScrollPhysics getScrollPhysics(BuildContext context) {
+    return new TestScrollPhysics(
+      extentMultiplier: extentMultiplier
+    ).applyTo(super.getScrollPhysics(context));
+  }
+
+  @override
+  Widget buildViewportChrome(BuildContext context, Widget child, AxisDirection axisDirection) => child;
 
   @override
   bool shouldNotify(TestScrollBehavior oldDelegate) {
@@ -90,20 +109,24 @@ class TestScrollBehavior extends ScrollBehavior2 {
 
 void main() {
   testWidgets('Changing the scroll behavior dynamically', (WidgetTester tester) async {
-    await tester.pumpWidget(new TestScrollable(
-      scrollBehavior: new TestScrollBehavior(1.0),
-      slivers: <Widget>[
-        new SliverToBoxAdapter(child: new SizedBox(height: 2000.0)),
-      ],
+    await tester.pumpWidget(new ScrollConfiguration2(
+      behavior: new TestScrollBehavior(1.0),
+      child: new TestScrollable(
+        slivers: <Widget>[
+          new SliverToBoxAdapter(child: new SizedBox(height: 2000.0)),
+        ],
+      ),
     ));
     Scrollable2State state = tester.state(find.byType(Scrollable2));
 
     expect(state.position.getMetrics().extentInside, 1.0);
-    await tester.pumpWidget(new TestScrollable(
-      scrollBehavior: new TestScrollBehavior(2.0),
-      slivers: <Widget>[
-        new SliverToBoxAdapter(child: new SizedBox(height: 2000.0)),
-      ],
+    await tester.pumpWidget(new ScrollConfiguration2(
+      behavior: new TestScrollBehavior(2.0),
+      child: new TestScrollable(
+        slivers: <Widget>[
+          new SliverToBoxAdapter(child: new SizedBox(height: 2000.0)),
+        ],
+      ),
     ));
     expect(state.position.getMetrics().extentInside, 2.0);
   });

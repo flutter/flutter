@@ -7,8 +7,8 @@ import 'package:meta/meta.dart';
 
 import 'framework.dart';
 import 'basic.dart';
-import 'page_scroll_physics.dart';
-import 'scroll_absolute.dart';
+import 'scroll_physics.dart';
+import 'scroll_position.dart';
 import 'scrollable.dart';
 import 'sliver.dart';
 import 'viewport.dart';

@@ -204,12 +204,14 @@ void main() {
     RenderObject painter;
 
     await tester.pumpWidget(
-      new TestScrollable(
-        axisDirection: AxisDirection.left,
-        scrollBehavior: new TestScrollBehavior1(),
-        slivers: <Widget>[
-          new SliverToBoxAdapter(child: new SizedBox(height: 20.0)),
-        ],
+      new ScrollConfiguration2(
+        behavior: new TestScrollBehavior1(),
+        child: new TestScrollable(
+          axisDirection: AxisDirection.left,
+          slivers: <Widget>[
+            new SliverToBoxAdapter(child: new SizedBox(height: 20.0)),
+          ],
+        ),
       ),
     );
     painter = tester.renderObject(find.byType(CustomPaint));
@@ -219,12 +221,14 @@ void main() {
 
     await tester.pumpUntilNoTransientCallbacks(const Duration(seconds: 1));
     await tester.pumpWidget(
-      new TestScrollable(
-        axisDirection: AxisDirection.right,
-        scrollBehavior: new TestScrollBehavior2(),
-        slivers: <Widget>[
-          new SliverToBoxAdapter(child: new SizedBox(height: 20.0)),
-        ],
+      new ScrollConfiguration2(
+        behavior: new TestScrollBehavior2(),
+        child: new TestScrollable(
+          axisDirection: AxisDirection.right,
+          slivers: <Widget>[
+            new SliverToBoxAdapter(child: new SizedBox(height: 20.0)),
+          ],
+        ),
       ),
     );
     painter = tester.renderObject(find.byType(CustomPaint));
@@ -234,14 +238,14 @@ void main() {
   });
 }
 
-class TestScrollBehavior1 extends ViewportScrollBehavior {
+class TestScrollBehavior1 extends ScrollBehavior2 {
   @override
   Color getGlowColor(BuildContext context) {
     return const Color(0xFF00FF00);
   }
 }
 
-class TestScrollBehavior2 extends ViewportScrollBehavior {
+class TestScrollBehavior2 extends ScrollBehavior2 {
   @override
   Color getGlowColor(BuildContext context) {
     return const Color(0xFF0000FF);
