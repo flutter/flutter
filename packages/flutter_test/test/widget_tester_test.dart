@@ -145,7 +145,7 @@ void main() {
       ]));
 
       expect(find.descendant(
-        of:find.widgetWithText(Row, 'foo'),
+        of: find.widgetWithText(Row, 'foo'),
         matching: find.text('bar')
       ), findsOneWidget);
     });
@@ -157,7 +157,7 @@ void main() {
       ]));
 
       expect(find.descendant(
-        of:find.widgetWithText(Column, 'foo'),
+        of: find.widgetWithText(Column, 'foo'),
         matching: find.text('bar')
       ), findsNWidgets(2));
     });
