@@ -378,16 +378,15 @@ class TextStyle {
 //
 //  - Element 3: The enum index of the |fontStyle|.
 //
-//  - Element 4: The value of |lineCount|.
+//  - Element 4: The value of |maxLines|.
 //
 Int32List _encodeParagraphStyle(TextAlign textAlign,
                                 FontWeight fontWeight,
                                 FontStyle fontStyle,
-                                int lineCount,
+                                int maxLines,
                                 String fontFamily,
                                 double fontSize,
                                 double lineHeight,
-                                int maxLines,
                                 String ellipsis) {
   Int32List result = new Int32List(5);
   if (textAlign != null) {
@@ -402,9 +401,9 @@ Int32List _encodeParagraphStyle(TextAlign textAlign,
     result[0] |= 1 << 3;
     result[3] = fontStyle.index;
   }
-  if (lineCount != null) {
+  if (maxLines != null) {
     result[0] |= 1 << 4;
-    result[4] = lineCount;
+    result[4] = maxLines;
   }
   if (fontFamily != null) {
     result[0] |= 1 << 5;
@@ -418,12 +417,8 @@ Int32List _encodeParagraphStyle(TextAlign textAlign,
     result[0] |= 1 << 7;
     // Passed separately to native.
   }
-  if (maxLines != null) {
-    result[0] |= 1 << 8;
-    // Passed separately to native.
-  }
   if (ellipsis != null) {
-    result[0] |= 1 << 9;
+    result[0] |= 1 << 8;
     // Passed separately to native.
   }
   return result;
@@ -436,7 +431,7 @@ class ParagraphStyle {
   /// * `textAlign`: The alignment of the text within the lines of the paragraph.
   /// * `fontWeight`: The typeface thickness to use when painting the text (e.g., bold).
   /// * `fontStyle`: The typeface variant to use when drawing the letters (e.g., italics).
-  /// * `lineCount`: Currently not implemented.
+  /// * `maxLines`: The maximum number of lines painted.
   /// * `fontFamily`: The name of the font to use when painting the text (e.g., Roboto).
   /// * `fontSize`: The size of glyphs (in logical pixels) to use when painting the text.
   /// * `lineHeight`: The minimum height of the line boxes, as a multiple of the font size.
@@ -445,34 +440,28 @@ class ParagraphStyle {
     TextAlign textAlign,
     FontWeight fontWeight,
     FontStyle fontStyle,
-    int lineCount,
+    int maxLines,
     String fontFamily,
     double fontSize,
     double lineHeight,
-    int maxLines,
     String ellipsis
   }) : _encoded = _encodeParagraphStyle(textAlign,
                                         fontWeight,
                                         fontStyle,
-                                        lineCount,
+                                        maxLines,
                                         fontFamily,
                                         fontSize,
                                         lineHeight,
-                                        maxLines,
                                         ellipsis),
        _fontFamily = fontFamily,
        _fontSize = fontSize,
        _lineHeight = lineHeight,
-       _maxLines = maxLines,
-       _ellipsis = ellipsis {
-    assert(lineCount == null);
-  }
+       _ellipsis = ellipsis;
 
   final Int32List _encoded;
   final String _fontFamily;
   final double _fontSize;
   final double _lineHeight;
-  final int _maxLines;
   final String _ellipsis;
 
   bool operator ==(dynamic other) {
@@ -484,7 +473,6 @@ class ParagraphStyle {
     if ( _fontFamily != typedOther._fontFamily ||
         _fontSize != typedOther._fontSize ||
         _lineHeight != typedOther._lineHeight ||
-        _maxLines != typedOther._maxLines ||
         _ellipsis != typedOther._ellipsis)
      return false;
     for (int index = 0; index < _encoded.length; index += 1) {
@@ -494,19 +482,18 @@ class ParagraphStyle {
     return true;
   }
 
-  int get hashCode => hashValues(hashList(_encoded), _lineHeight, _maxLines, _ellipsis);
+  int get hashCode => hashValues(hashList(_encoded), _lineHeight, _ellipsis);
 
   String toString() {
     return 'ParagraphStyle('
              'textAlign: ${   _encoded[0] & 0x02 == 0x02 ? TextAlign.values[_encoded[1]]    : "unspecified"}, '
              'fontWeight: ${  _encoded[0] & 0x04 == 0x04 ? FontWeight.values[_encoded[2]]   : "unspecified"}, '
              'fontStyle: ${   _encoded[0] & 0x08 == 0x08 ? FontStyle.values[_encoded[3]]    : "unspecified"}, '
-             'lineCount: ${   _encoded[0] & 0x10 == 0x10 ? _encoded[4]                      : "unspecified"}, '
+             'maxLines: ${    _encoded[0] & 0x10 == 0x10 ? _encoded[4]                      : "unspecified"}, '
              'fontFamily: ${  _encoded[0] & 0x20 == 0x20 ? _fontFamily                      : "unspecified"}, '
              'fontSize: ${    _encoded[0] & 0x40 == 0x40 ? _fontSize                        : "unspecified"}, '
              'lineHeight: ${  _encoded[0] & 0x80 == 0x80 ? "${_lineHeight}x"                : "unspecified"}, '
-             'maxLines: ${    _encoded[0] & 0x100 == 0x100 ? _maxLines                      : "unspecified"}, '
-             'ellipsis: ${    _encoded[0] & 0x200 == 0x200 ? "\"$_ellipsis\""               : "unspecified"}'
+             'ellipsis: ${    _encoded[0] & 0x100 == 0x100 ? "\"$_ellipsis\""               : "unspecified"}'
            ')';
   }
 }
@@ -734,8 +721,8 @@ abstract class Paragraph extends NativeFieldWrapperClass2 {
 class ParagraphBuilder extends NativeFieldWrapperClass2 {
   /// Creates a [ParagraphBuilder] object, which is used to create a
   /// [Paragraph].
-  ParagraphBuilder(ParagraphStyle style) { _constructor(style._encoded, style._fontFamily, style._fontSize, style._lineHeight, style._maxLines, style._ellipsis); }
-  void _constructor(Int32List encoded, String fontFamily, double fontSize, double lineHeight, int maxLines, String ellipsis) native "ParagraphBuilder_constructor";
+  ParagraphBuilder(ParagraphStyle style) { _constructor(style._encoded, style._fontFamily, style._fontSize, style._lineHeight, style._ellipsis); }
+  void _constructor(Int32List encoded, String fontFamily, double fontSize, double lineHeight, String ellipsis) native "ParagraphBuilder_constructor";
 
   /// Applies the given style to the added text until [pop] is called.
   ///
