@@ -22,18 +22,14 @@ class SingleChildScrollView extends StatelessWidget {
     Key key,
     this.scrollDirection: Axis.vertical,
     this.padding,
-    this.initialScrollOffset: 0.0,
     this.child,
   }) : super(key: key) {
     assert(scrollDirection != null);
-    assert(initialScrollOffset != null);
   }
 
   final Axis scrollDirection;
 
   final EdgeInsets padding;
-
-  final double initialScrollOffset;
 
   final Widget child;
 
@@ -56,7 +52,6 @@ class SingleChildScrollView extends StatelessWidget {
       contents = new Padding(padding: padding, child: contents);
     return new Scrollable2(
       axisDirection: axisDirection,
-      initialScrollOffset: initialScrollOffset,
       viewportBuilder: (BuildContext context, ViewportOffset offset) {
         return new _SingleChildViewport(
           key: key,
