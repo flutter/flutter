@@ -40,9 +40,18 @@ class ScriptCompletionTaskObserver : public base::MessageLoop::TaskObserver {
 
   void DidProcessTask(const base::PendingTask& pending_task) override {
     shell::TestRunner& test_runner = shell::TestRunner::Shared();
-    bool live = test_runner.platform_view().engine().UIIsolateHasLivePorts();
+    shell::Engine& engine = test_runner.platform_view().engine();
+
+    if (engine.GetLoadScriptError() != tonic::kNoError) {
+      last_error_ = engine.GetLoadScriptError();
+      main_message_loop_.PostTask(FROM_HERE,
+                                  main_message_loop_.QuitWhenIdleClosure());
+      return;
+    }
+
+    bool live = engine.UIIsolateHasLivePorts();
     if (prev_live_ && !live) {
-      last_error_ = test_runner.platform_view().engine().GetUIIsolateLastError();
+      last_error_ = engine.GetUIIsolateLastError();
       main_message_loop_.PostTask(FROM_HERE,
                                   main_message_loop_.QuitWhenIdleClosure());
     }
