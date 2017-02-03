@@ -9,10 +9,18 @@
 
 #include "FlutterMacros.h"
 
-// Empty implementation of UIApplicationDelegate, for simple apps
-// that don't need to customize the application delegate.
+/**
+ * UIApplicationDelegate subclass for simple apps that want default behavior.
+ *
+ * This class provides the following behaviors:
+ *   * Status bar touches are forwarded to the key window's root view
+ *     FlutterViewController, in order to trigger scroll to top.
+ *
+ * App delegates for Flutter applications are *not* required to inherit from
+ * this class. Developers of custom app delegate classes should copy and paste
+ * code as necessary from FlutterAppDelegate.mm.
+ */
 FLUTTER_EXPORT
-__attribute__((deprecated("subclass UIResponder<UIApplicationDelegate>")))
 @interface FlutterAppDelegate : UIResponder<UIApplicationDelegate>
 
 @property(strong, nonatomic) UIWindow* window;
