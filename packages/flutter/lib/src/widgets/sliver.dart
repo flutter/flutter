@@ -209,7 +209,7 @@ class SliverGrid extends SliverMultiBoxAdaptorWidget {
       lastIndex,
       leadingScrollOffset,
       trailingScrollOffset,
-    ) ?? gridDelegate.estimateMaxScrollOffset(constraints, delegate.estimatedChildCount);
+    ) ?? gridDelegate.getLayout(constraints).estimateMaxScrollOffset(delegate.estimatedChildCount);
   }
 }
 
