@@ -106,7 +106,7 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
       trailingScrollOffset: trailingScrollOffset,
     );
 
-    final double paintedExtent = calculatePaintOffset(
+    final double paintExtent = calculatePaintOffset(
       constraints,
       from: leadingScrollOffset,
       to: trailingScrollOffset,
@@ -114,7 +114,7 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
 
     geometry = new SliverGeometry(
       scrollExtent: estimatedMaxScrollOffset,
-      paintExtent: paintedExtent,
+      paintExtent: paintExtent,
       maxPaintExtent: estimatedMaxScrollOffset,
       // Conservative to avoid flickering away the clip during scroll.
       hasVisualOverflow: lastIndex >= targetLastIndex || constraints.scrollOffset > 0.0,

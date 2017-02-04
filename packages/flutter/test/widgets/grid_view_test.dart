@@ -5,6 +5,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
+import '../rendering/mock_canvas.dart';
 import 'states.dart';
 
 void main() {
@@ -302,6 +303,29 @@ void main() {
 
     expect(tester.getSize(find.text('3')), equals(const Size(400.0, 400.0)));
     expect(find.text('4'), findsNothing);
+  });
+
+  testWidgets('One-line GridView paints', (WidgetTester tester) async {
+    const Color green = const Color(0xFF00FF00);
+
+    final Container container = new Container(
+      decoration: const BoxDecoration(
+        backgroundColor: green,
+      ),
+    );
+
+    await tester.pumpWidget(new Center(
+      child: new SizedBox(
+        height: 200.0,
+        child: new GridView.count(
+          crossAxisCount: 2,
+          children: <Widget>[ container, container, container, container ],
+        ),
+      ),
+    ));
+
+    expect(find.byType(GridView), paints..rect(color: green)..rect(color: green));
+    expect(find.byType(GridView), isNot(paints..rect(color: green)..rect(color: green)..rect(color: green)));
   });
 
   // TODO(ianh): can you tap a grid cell that is slightly off the bottom of the screen?
