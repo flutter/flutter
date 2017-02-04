@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
 import 'states.dart';
@@ -72,5 +73,39 @@ void main() {
     expect(find.text('Alabama'), findsNothing);
     expect(find.text('Alaska'), findsOneWidget);
     expect(find.text('Arizona'), findsNothing);
+  });
+
+  testWidgets('PageView does not squish when overscrolled', (WidgetTester tester) async {
+    await tester.pumpWidget(new MaterialApp(
+      theme: new ThemeData(platform: TargetPlatform.iOS),
+      home: new PageView(
+        children: new List<Widget>.generate(10, (int i) {
+          return new Container(
+            key: new ValueKey<int>(i),
+            decoration: const BoxDecoration(
+              backgroundColor: const Color(0xFF0000FF),
+            ),
+          );
+        }),
+      ),
+    ));
+
+    Size sizeOf(int i) => tester.getSize(find.byKey(new ValueKey<int>(i)));
+    double leftOf(int i) => tester.getTopLeft(find.byKey(new ValueKey<int>(i))).x;
+
+    expect(leftOf(0), equals(0.0));
+    expect(sizeOf(0), equals(const Size(800.0, 600.0)));
+
+    await tester.scroll(find.byType(PageView), const Offset(100.0, 0.0));
+    await tester.pump();
+
+    expect(leftOf(0), equals(100.0));
+    expect(sizeOf(0), equals(const Size(800.0, 600.0)));
+
+    await tester.scroll(find.byType(PageView), const Offset(-200.0, 0.0));
+    await tester.pump();
+
+    expect(leftOf(0), equals(-100.0));
+    expect(sizeOf(0), equals(const Size(800.0, 600.0)));
   });
 }

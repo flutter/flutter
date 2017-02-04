@@ -148,5 +148,5 @@ class RenderSliverFill extends RenderSliverFixedExtentBoxAdaptor {
   }) : super(childManager: childManager);
 
   @override
-  double get itemExtent => constraints.remainingPaintExtent;
+  double get itemExtent => constraints.viewportMainAxisExtent;
 }

@@ -25,6 +25,7 @@ void main() {
       overlap: 0.0,
       remainingPaintExtent: 0.0,
       crossAxisExtent: 0.0,
+      viewportMainAxisExtent: 0.0,
     );
     SliverConstraints b = a.copyWith();
     expect(a, equals(b));
@@ -41,6 +42,7 @@ void main() {
       overlap: 20.0,
       remainingPaintExtent: 30.0,
       crossAxisExtent: 40.0,
+      viewportMainAxisExtent: 30.0,
     );
     SliverConstraints d = new SliverConstraints(
       axisDirection: AxisDirection.up,
@@ -50,6 +52,7 @@ void main() {
       overlap: 20.0,
       remainingPaintExtent: 30.0,
       crossAxisExtent: 40.0,
+      viewportMainAxisExtent: 30.0,
     );
     expect(c, equals(d));
     expect(c.normalizedGrowthDirection, equals(GrowthDirection.forward));

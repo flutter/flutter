@@ -139,6 +139,7 @@ class SliverConstraints extends Constraints {
     @required this.overlap,
     @required this.remainingPaintExtent,
     @required this.crossAxisExtent,
+    @required this.viewportMainAxisExtent,
   });
 
   SliverConstraints copyWith({
@@ -149,6 +150,7 @@ class SliverConstraints extends Constraints {
     double overlap,
     double remainingPaintExtent,
     double crossAxisExtent,
+    double viewportMainAxisExtent,
   }) {
     return new SliverConstraints(
       axisDirection: axisDirection ?? this.axisDirection,
@@ -158,6 +160,7 @@ class SliverConstraints extends Constraints {
       overlap: overlap ?? this.overlap,
       remainingPaintExtent: remainingPaintExtent ?? this.remainingPaintExtent,
       crossAxisExtent: crossAxisExtent ?? this.crossAxisExtent,
+      viewportMainAxisExtent: viewportMainAxisExtent ?? this.viewportMainAxisExtent,
     );
   }
 
@@ -239,9 +242,15 @@ class SliverConstraints extends Constraints {
   /// bottom of a downwards vertical viewport.
   final double remainingPaintExtent;
 
-  /// The number of pixels in the cross-axis. For a vertical list, this is the
-  /// width of the viewport.
+  /// The number of pixels in the cross-axis.
+  ///
+  /// For a vertical list, this is the width of the sliver..
   final double crossAxisExtent;
+
+  /// The number of pixels the viewport can display in the main axis.
+  ///
+  /// For a vertical list, this is the height of the viewport.
+  final double viewportMainAxisExtent;
 
   Axis get axis => axisDirectionToAxis(axisDirection);
 
@@ -280,6 +289,7 @@ class SliverConstraints extends Constraints {
   bool get isNormalized {
     return scrollOffset >= 0.0
         && crossAxisExtent >= 0.0
+        && viewportMainAxisExtent >= 0.0
         && remainingPaintExtent >= 0.0;
   }
 
@@ -320,8 +330,10 @@ class SliverConstraints extends Constraints {
     assert(overlap != null);
     assert(remainingPaintExtent != null);
     assert(crossAxisExtent != null);
+    assert(viewportMainAxisExtent != null);
     assert(scrollOffset >= 0.0);
     assert(crossAxisExtent >= 0.0);
+    assert(viewportMainAxisExtent >= 0.0);
     assert(remainingPaintExtent >= 0.0);
     assert(isNormalized); // should be redundant with earlier checks
     return true;
@@ -340,12 +352,13 @@ class SliverConstraints extends Constraints {
            scrollOffset == typedOther.scrollOffset &&
            overlap == typedOther.overlap &&
            remainingPaintExtent == typedOther.remainingPaintExtent &&
-           crossAxisExtent == typedOther.crossAxisExtent;
+           crossAxisExtent == typedOther.crossAxisExtent &&
+           viewportMainAxisExtent == typedOther.viewportMainAxisExtent;
   }
 
   @override
   int get hashCode {
-    return hashValues(axisDirection, growthDirection, scrollOffset, overlap, remainingPaintExtent, crossAxisExtent);
+    return hashValues(axisDirection, growthDirection, scrollOffset, overlap, remainingPaintExtent, crossAxisExtent, viewportMainAxisExtent);
   }
 
   @override
@@ -357,7 +370,8 @@ class SliverConstraints extends Constraints {
              'scrollOffset: ${scrollOffset.toStringAsFixed(1)}, '
              'remainingPaintExtent: ${remainingPaintExtent.toStringAsFixed(1)}, ' +
              (overlap != 0.0 ? 'overlap: ${overlap.toStringAsFixed(1)}, ' : '') +
-             'crossAxisExtent: ${crossAxisExtent.toStringAsFixed(1)}'
+             'crossAxisExtent: ${crossAxisExtent.toStringAsFixed(1)}' +
+             'viewportMainAxisExtent: ${viewportMainAxisExtent.toStringAsFixed(1)}' +
            ')';
   }
 }
@@ -1178,6 +1192,7 @@ abstract class RenderViewportBase2<ParentDataClass extends ContainerParentDataMi
     double scrollOffset,
     double layoutOffset,
     double remainingPaintExtent,
+    double mainAxisExtent,
     double crossAxisExtent,
     GrowthDirection growthDirection,
     _Advancer advance,
@@ -1216,6 +1231,7 @@ abstract class RenderViewportBase2<ParentDataClass extends ContainerParentDataMi
         overlap: maxPaintOffset - layoutOffset,
         remainingPaintExtent: math.max(0.0, remainingPaintExtent - layoutOffset + initialLayoutOffset),
         crossAxisExtent: crossAxisExtent,
+        viewportMainAxisExtent: mainAxisExtent,
       ), parentUsesSize: true);
       // collect the child's objects
       final SliverGeometry childLayoutGeometry = child.geometry;
@@ -1624,6 +1640,7 @@ class RenderViewport2 extends RenderViewportBase2<SliverPhysicalContainerParentD
       math.max(mainAxisExtent, mainAxisExtent * anchor - correctedOffset) - mainAxisExtent,
       clampedReverseCenter,
       clampedForwardCenter,
+      mainAxisExtent,
       crossAxisExtent,
       GrowthDirection.reverse,
       childBefore,
@@ -1637,6 +1654,7 @@ class RenderViewport2 extends RenderViewportBase2<SliverPhysicalContainerParentD
       math.max(0.0, correctedOffset - mainAxisExtent * anchor),
       clampedForwardCenter,
       clampedReverseCenter,
+      mainAxisExtent,
       crossAxisExtent,
       GrowthDirection.forward,
       childAfter,
@@ -1896,6 +1914,7 @@ class RenderShrinkWrappingViewport extends RenderViewportBase2<SliverLogicalCont
       firstChild,
       math.max(0.0, correctedOffset),
       0.0,
+      mainAxisExtent,
       mainAxisExtent,
       crossAxisExtent,
       GrowthDirection.forward,
