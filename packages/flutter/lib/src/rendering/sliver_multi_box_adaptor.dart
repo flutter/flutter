@@ -268,15 +268,6 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
     return childParentData.index;
   }
 
-  /// Returns the scroll offset of the given child, as given by the
-  /// [SliverMultiBoxAdaptorParentData.scrollOffset] field of the child's [parentData].
-  double offsetOf(RenderBox child) {
-    assert(child != null);
-    final SliverMultiBoxAdaptorParentData childParentData = child.parentData;
-    assert(childParentData.scrollOffset != null);
-    return childParentData.scrollOffset;
-  }
-
   /// Returns the dimension of the given child in the main axis, as given by the
   /// child's [RenderBox.size] property. This is only valid after layout.
   @protected
@@ -305,7 +296,16 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
 
   @override
   double childMainAxisPosition(RenderBox child) {
-    return offsetOf(child) - constraints.scrollOffset;
+    return childScrollOffset(child) - constraints.scrollOffset;
+  }
+
+  @override
+  double childScrollOffset(RenderObject child) {
+    assert(child != null);
+    assert(child.parent == this);
+    final SliverMultiBoxAdaptorParentData childParentData = child.parentData;
+    assert(childParentData.scrollOffset != null);
+    return childParentData.scrollOffset;
   }
 
   @override

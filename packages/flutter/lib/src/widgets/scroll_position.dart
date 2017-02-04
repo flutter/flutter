@@ -142,6 +142,28 @@ class ScrollPosition extends ViewportOffset {
   double get pixels => _pixels;
   double _pixels = 0.0;
 
+  Future<Null> ensureVisible(RenderObject object, {
+    double alignment: 0.0,
+    Duration duration: Duration.ZERO,
+    Curve curve: Curves.ease,
+  }) {
+    assert(object.attached);
+    final RenderAbstractViewport viewport = RenderAbstractViewport.of(object);
+    assert(viewport != null);
+
+    final double to = viewport.getOffsetToReveal(object, alignment).clamp(minScrollExtent, maxScrollExtent);
+
+    if (to == pixels)
+      return new Future<Null>.value();
+
+    if (duration == Duration.ZERO) {
+      jumpTo(to);
+      return new Future<Null>.value();
+    }
+
+    return animate(to: to, duration: duration, curve: curve);
+  }
+
   /// Animates the position from its current value to the given value `to`.
   ///
   /// Any active animation is canceled. If the user is currently scrolling, that
