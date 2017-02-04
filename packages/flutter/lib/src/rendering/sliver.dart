@@ -553,21 +553,23 @@ class SliverHitTestEntry extends HitTestEntry {
 }
 
 /// Parent data structure used by parents of slivers that position their
-/// children using scroll offsets.
+/// children using layout offsets.
 ///
 /// This data structure is optimised for fast layout. It is best used by parents
 /// that expect to have many children whose relative positions don't change even
 /// when the scroll offset does.
 class SliverLogicalParentData extends ParentData {
-  /// The distance from from the zero scroll offset of the parent sliver (the
-  /// line at which its [SliverConstraints.scrollOffset] is zero) to the side of
-  /// the child closest to that offset.
+  /// The position of the child relative to the zero scroll offset.
+  ///
+  /// The number of pixels from from the zero scroll offset of the parent sliver
+  /// (the line at which its [SliverConstraints.scrollOffset] is zero) to the
+  /// side of the child closest to that offset.
   ///
   /// In a typical list, this does not change as the parent is scrolled.
-  double scrollOffset = 0.0;
+  double layoutOffset = 0.0;
 
   @override
-  String toString() => 'scrollOffset=${scrollOffset.toStringAsFixed(1)}';
+  String toString() => 'layoutOffset=${layoutOffset.toStringAsFixed(1)}';
 }
 
 class SliverLogicalContainerParentData extends SliverLogicalParentData with ContainerParentDataMixin<RenderSliver> { }
@@ -828,7 +830,7 @@ abstract class RenderSliver extends RenderObject {
   /// of the visible portion of the sliver to the bottom of the child. In both
   /// cases, this is the direction of increasing
   /// [SliverConstraints.scrollOffset] and
-  /// [SliverLogicalParentData.scrollOffset].
+  /// [SliverLogicalParentData.layoutOffset].
   ///
   /// Calling this for a child that is not visible is not valid.
   ///
@@ -1244,7 +1246,7 @@ abstract class RenderViewportBase2<ParentDataClass extends ContainerParentDataMi
         return childLayoutGeometry.scrollOffsetCorrection;
 
       // geometry
-      updateChildPaintOffset(child, layoutOffset, growthDirection);
+      updateChildLayoutOffset(child, layoutOffset, growthDirection);
       maxPaintOffset = math.max(layoutOffset + childLayoutGeometry.paintExtent, maxPaintOffset);
       scrollOffset -= childLayoutGeometry.scrollExtent;
       layoutOffset += childLayoutGeometry.layoutExtent;
@@ -1343,7 +1345,7 @@ abstract class RenderViewportBase2<ParentDataClass extends ContainerParentDataMi
   }
 
   @protected
-  Offset computeAbsolutePaintOffset(RenderSliver child, double paintOffset, GrowthDirection growthDirection) {
+  Offset computeAbsolutePaintOffset(RenderSliver child, double layoutOffset, GrowthDirection growthDirection) {
     assert(hasSize); // this is only usable once we have a size
     assert(axisDirection != null);
     assert(growthDirection != null);
@@ -1351,13 +1353,13 @@ abstract class RenderViewportBase2<ParentDataClass extends ContainerParentDataMi
     assert(child.geometry != null);
     switch (applyGrowthDirectionToAxisDirection(axisDirection, growthDirection)) {
       case AxisDirection.up:
-        return new Offset(0.0, size.height - (paintOffset + child.geometry.paintExtent));
+        return new Offset(0.0, size.height - (layoutOffset + child.geometry.paintExtent));
       case AxisDirection.right:
-        return new Offset(paintOffset, 0.0);
+        return new Offset(layoutOffset, 0.0);
       case AxisDirection.down:
-        return new Offset(0.0, paintOffset);
+        return new Offset(0.0, layoutOffset);
       case AxisDirection.left:
-        return new Offset(size.width - (paintOffset + child.geometry.paintExtent), 0.0);
+        return new Offset(size.width - (layoutOffset + child.geometry.paintExtent), 0.0);
     }
     return null;
   }
@@ -1401,7 +1403,7 @@ abstract class RenderViewportBase2<ParentDataClass extends ContainerParentDataMi
   void updateOutOfBoundsData(GrowthDirection growthDirection, SliverGeometry childLayoutGeometry);
 
   @protected
-  void updateChildPaintOffset(RenderSliver child, double paintOffset, GrowthDirection growthDirection);
+  void updateChildLayoutOffset(RenderSliver child, double layoutOffset, GrowthDirection growthDirection);
 
   @protected
   Offset paintOffsetOf(RenderSliver child);
@@ -1679,9 +1681,9 @@ class RenderViewport2 extends RenderViewportBase2<SliverPhysicalContainerParentD
   }
 
   @override
-  void updateChildPaintOffset(RenderSliver child, double paintOffset, GrowthDirection growthDirection) {
+  void updateChildLayoutOffset(RenderSliver child, double layoutOffset, GrowthDirection growthDirection) {
     final SliverPhysicalParentData childParentData = child.parentData;
-    childParentData.paintOffset = computeAbsolutePaintOffset(child, paintOffset, growthDirection);
+    childParentData.paintOffset = computeAbsolutePaintOffset(child, layoutOffset, growthDirection);
   }
 
   @override
@@ -1935,16 +1937,16 @@ class RenderShrinkWrappingViewport extends RenderViewportBase2<SliverLogicalCont
   }
 
   @override
-  void updateChildPaintOffset(RenderSliver child, double paintOffset, GrowthDirection growthDirection) {
+  void updateChildLayoutOffset(RenderSliver child, double layoutOffset, GrowthDirection growthDirection) {
     assert(growthDirection == GrowthDirection.forward);
     final SliverLogicalParentData childParentData = child.parentData;
-    childParentData.scrollOffset = paintOffset;
+    childParentData.layoutOffset = layoutOffset;
   }
 
   @override
   Offset paintOffsetOf(RenderSliver child) {
     final SliverLogicalParentData childParentData = child.parentData;
-    return computeAbsolutePaintOffset(child, childParentData.scrollOffset, GrowthDirection.forward);
+    return computeAbsolutePaintOffset(child, childParentData.layoutOffset, GrowthDirection.forward);
   }
 
   @override
@@ -1963,11 +1965,11 @@ class RenderShrinkWrappingViewport extends RenderViewportBase2<SliverLogicalCont
     switch (applyGrowthDirectionToAxisDirection(child.constraints.axisDirection, child.constraints.growthDirection)) {
       case AxisDirection.down:
       case AxisDirection.right:
-        return parentMainAxisPosition - childParentData.scrollOffset;
+        return parentMainAxisPosition - childParentData.layoutOffset;
       case AxisDirection.up:
-        return (size.height - parentMainAxisPosition) - childParentData.scrollOffset;
+        return (size.height - parentMainAxisPosition) - childParentData.layoutOffset;
       case AxisDirection.left:
-        return (size.width - parentMainAxisPosition) - childParentData.scrollOffset;
+        return (size.width - parentMainAxisPosition) - childParentData.layoutOffset;
     }
     return 0.0;
   }

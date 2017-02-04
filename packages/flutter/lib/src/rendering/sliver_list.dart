@@ -76,7 +76,7 @@ class RenderSliverList extends RenderSliverMultiBoxAdaptor {
         return;
       }
       final SliverMultiBoxAdaptorParentData childParentData = earliestUsefulChild.parentData;
-      childParentData.scrollOffset = earliestScrollOffset - paintExtentOf(firstChild);
+      childParentData.layoutOffset = earliestScrollOffset - paintExtentOf(firstChild);
       assert(earliestUsefulChild == firstChild);
       leadingChildWithLayout = earliestUsefulChild;
       trailingChildWithLayout ??= earliestUsefulChild;
@@ -136,7 +136,7 @@ class RenderSliverList extends RenderSliverMultiBoxAdaptor {
       }
       assert(child != null);
       final SliverMultiBoxAdaptorParentData childParentData = child.parentData;
-      childParentData.scrollOffset = endScrollOffset;
+      childParentData.layoutOffset = endScrollOffset;
       assert(childParentData.index == index);
       endScrollOffset = childScrollOffset(child) + paintExtentOf(child);
       return true;
