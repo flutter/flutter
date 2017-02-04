@@ -348,7 +348,7 @@ class RenderSliverGrid extends RenderSliverMultiBoxAdaptor {
       final RenderBox child = insertAndLayoutLeadingChild(
           gridGeometry.getBoxConstraints(constraints));
       final SliverGridParentData childParentData = child.parentData;
-      childParentData.scrollOffset = gridGeometry.scrollOffset;
+      childParentData.layoutOffset = gridGeometry.scrollOffset;
       childParentData.crossAxisOffset = gridGeometry.crossAxisOffset;
       assert(childParentData.index == index);
       trailingChildWithLayout ??= child;
@@ -362,7 +362,7 @@ class RenderSliverGrid extends RenderSliverMultiBoxAdaptor {
       firstChild.layout(firstChildGridGeometry.getBoxConstraints(constraints));
       final SliverGridParentData childParentData = firstChild.parentData;
       childParentData.crossAxisOffset = firstChildGridGeometry.crossAxisOffset;
-      assert(childParentData.scrollOffset ==
+      assert(childParentData.layoutOffset ==
           firstChildGridGeometry.scrollOffset);
       trailingChildWithLayout = firstChild;
     }
@@ -386,7 +386,7 @@ class RenderSliverGrid extends RenderSliverMultiBoxAdaptor {
       trailingChildWithLayout = child;
       assert(child != null);
       final SliverGridParentData childParentData = child.parentData;
-      childParentData.scrollOffset = gridGeometry.scrollOffset;
+      childParentData.layoutOffset = gridGeometry.scrollOffset;
       childParentData.crossAxisOffset = gridGeometry.crossAxisOffset;
       assert(childParentData.index == index);
       if (gridGeometry.scrollOffset > trailingScrollOffset)
