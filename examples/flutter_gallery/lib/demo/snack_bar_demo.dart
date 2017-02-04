@@ -29,7 +29,7 @@ class _SnackBarDemoState extends State<SnackBarDemo> {
   int _snackBarIndex = 1;
 
   Widget buildBody(BuildContext context) {
-    return new ScrollView(
+    return new ListView(
       padding: const EdgeInsets.all(24.0),
       children: <Widget>[
         new Text(_text1),

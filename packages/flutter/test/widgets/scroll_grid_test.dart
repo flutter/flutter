@@ -8,17 +8,17 @@ import 'package:flutter/widgets.dart';
 import 'states.dart';
 
 void main() {
-  testWidgets('Empty ScrollGrid', (WidgetTester tester) async {
-    await tester.pumpWidget(new ScrollGrid.count(
+  testWidgets('Empty GridView', (WidgetTester tester) async {
+    await tester.pumpWidget(new GridView.count(
       crossAxisCount: 4,
       children: const <Widget>[],
     ));
   });
 
-  testWidgets('ScrollGrid.count control test', (WidgetTester tester) async {
+  testWidgets('GridView.count control test', (WidgetTester tester) async {
     List<String> log = <String>[];
 
-    await tester.pumpWidget(new ScrollGrid.count(
+    await tester.pumpWidget(new GridView.count(
       crossAxisCount: 4,
       children: kStates.map((String state) {
         return new GestureDetector(
@@ -83,10 +83,10 @@ void main() {
     log.clear();
   });
 
-  testWidgets('ScrollGrid.extent control test', (WidgetTester tester) async {
+  testWidgets('GridView.extent control test', (WidgetTester tester) async {
     List<String> log = <String>[];
 
-    await tester.pumpWidget(new ScrollGrid.extent(
+    await tester.pumpWidget(new GridView.extent(
       maxCrossAxisExtent: 200.0,
       children: kStates.map((String state) {
         return new GestureDetector(
@@ -126,11 +126,11 @@ void main() {
     log.clear();
   });
 
-  testWidgets('ScrollGrid large scroll jump', (WidgetTester tester) async {
+  testWidgets('GridView large scroll jump', (WidgetTester tester) async {
     List<int> log = <int>[];
 
     await tester.pumpWidget(
-      new ScrollGrid.extent(
+      new GridView.extent(
         scrollDirection: Axis.horizontal,
         maxCrossAxisExtent: 200.0,
         childAspectRatio: 0.75,
@@ -186,11 +186,11 @@ void main() {
     log.clear();
   });
 
-  testWidgets('ScrollGrid - change crossAxisCount', (WidgetTester tester) async {
+  testWidgets('GridView - change crossAxisCount', (WidgetTester tester) async {
     List<int> log = <int>[];
 
     await tester.pumpWidget(
-      new ScrollGrid(
+      new GridView(
         gridDelegate: new SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 4,
         ),
@@ -217,7 +217,7 @@ void main() {
     log.clear();
 
     await tester.pumpWidget(
-      new ScrollGrid(
+      new GridView(
         gridDelegate: new SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
         ),
@@ -245,11 +245,11 @@ void main() {
     expect(find.text('4'), findsNothing);
   });
 
-  testWidgets('ScrollGrid - change maxChildCrossAxisExtent', (WidgetTester tester) async {
+  testWidgets('GridView - change maxChildCrossAxisExtent', (WidgetTester tester) async {
     List<int> log = <int>[];
 
     await tester.pumpWidget(
-      new ScrollGrid(
+      new GridView(
         gridDelegate: new SliverGridDelegateWithMaxCrossAxisExtent(
           maxCrossAxisExtent: 200.0,
         ),
@@ -276,7 +276,7 @@ void main() {
     log.clear();
 
     await tester.pumpWidget(
-      new ScrollGrid(
+      new GridView(
         gridDelegate: new SliverGridDelegateWithMaxCrossAxisExtent(
           maxCrossAxisExtent: 400.0,
         ),

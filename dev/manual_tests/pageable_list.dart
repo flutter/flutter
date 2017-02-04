@@ -84,7 +84,7 @@ class PageableListAppState extends State<PageableListApp> {
 
   Widget _buildDrawer() {
     return new Drawer(
-      child: new ScrollView(
+      child: new ListView(
         children: <Widget>[
           new DrawerHeader(child: new Center(child: new Text('Options'))),
           new DrawerItem(

@@ -134,7 +134,7 @@ class CardsDemo extends StatelessWidget {
       appBar: new AppBar(
         title: new Text('Travel stream')
       ),
-      body: new ScrollView(
+      body: new ListView(
         itemExtent: TravelDestinationItem.height,
         padding: const EdgeInsets.only(top: 8.0, left: 8.0, right: 8.0),
         children: destinations.map((TravelDestination destination) {

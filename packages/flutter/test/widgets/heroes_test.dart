@@ -11,7 +11,7 @@ Key thirdKey = new Key('third');
 
 final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
   '/': (BuildContext context) => new Material(
-    child: new ScrollView(
+    child: new ListView(
       children: <Widget>[
         new Container(height: 100.0, width: 100.0),
         new Card(child: new Hero(tag: 'a', child: new Container(height: 100.0, width: 100.0, key: firstKey))),
@@ -21,7 +21,7 @@ final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
     )
   ),
   '/two': (BuildContext context) => new Material(
-    child: new ScrollView(
+    child: new ListView(
       children: <Widget>[
         new Container(height: 150.0, width: 150.0),
         new Card(child: new Hero(tag: 'a', child: new Container(height: 150.0, width: 150.0, key: secondKey))),
@@ -35,7 +35,7 @@ final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
 class ThreeRoute extends MaterialPageRoute<Null> {
   ThreeRoute() : super(builder: (BuildContext context) {
     return new Material(
-      child: new ScrollView(
+      child: new ListView(
         children: <Widget>[
           new Container(height: 200.0, width: 200.0),
           new Card(child: new Hero(tag: 'a', child: new Container(height: 200.0, width: 200.0, key: thirdKey))),
@@ -168,7 +168,7 @@ void main() {
 
     await tester.pumpWidget(new MaterialApp(
       home: new Material(
-        child: new ScrollView(
+        child: new ListView(
           children: <Widget>[
             new Hero(tag: 'a', child: new Text('foo')),
             new Builder(builder: (BuildContext context) {

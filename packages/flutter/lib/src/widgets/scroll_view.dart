@@ -13,17 +13,13 @@ import 'scrollable.dart';
 import 'sliver.dart';
 import 'viewport.dart';
 
-/// A convenience widget that combines common scrolling-related widgets.
-class ScrollView extends StatelessWidget {
+abstract class ScrollView extends StatelessWidget {
   ScrollView({
     Key key,
     this.scrollDirection: Axis.vertical,
     this.reverse: false,
-    this.padding,
-    this.itemExtent,
     this.physics,
     this.shrinkWrap: false,
-    this.children: const <Widget>[],
   }) : super(key: key) {
     assert(reverse != null);
     assert(shrinkWrap != null);
@@ -33,17 +29,9 @@ class ScrollView extends StatelessWidget {
 
   final bool reverse;
 
-  final EdgeInsets padding;
-
-  final double itemExtent;
-
   final ScrollPhysics physics;
 
   final bool shrinkWrap;
-
-  final List<Widget> children;
-
-  SliverChildListDelegate get childrenDelegate => new SliverChildListDelegate(children);
 
   @protected
   AxisDirection getDirection(BuildContext context) {
@@ -58,6 +46,131 @@ class ScrollView extends StatelessWidget {
   }
 
   @protected
+  List<Widget> buildSlivers(BuildContext context);
+
+  @override
+  Widget build(BuildContext context) {
+    List<Widget> slivers = buildSlivers(context);
+    AxisDirection axisDirection = getDirection(context);
+    return new Scrollable2(
+      axisDirection: axisDirection,
+      physics: physics,
+      viewportBuilder: (BuildContext context, ViewportOffset offset) {
+        if (shrinkWrap) {
+          return new ShrinkWrappingViewport(
+            axisDirection: axisDirection,
+            offset: offset,
+            slivers: slivers,
+          );
+        } else {
+          return new Viewport2(
+            axisDirection: axisDirection,
+            offset: offset,
+            slivers: slivers,
+          );
+        }
+      }
+    );
+  }
+
+  @override
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('$scrollDirection');
+    if (shrinkWrap)
+      description.add('shrink-wrapping');
+  }
+}
+
+abstract class BoxScrollView extends ScrollView {
+  BoxScrollView({
+    Key key,
+    Axis scrollDirection: Axis.vertical,
+    bool reverse: false,
+    ScrollPhysics physics,
+    bool shrinkWrap: false,
+    this.padding,
+  }) : super(
+    key: key,
+    scrollDirection: scrollDirection,
+    reverse: reverse,
+    physics: physics,
+    shrinkWrap: shrinkWrap,
+  );
+
+  final EdgeInsets padding;
+
+  @override
+  List<Widget> buildSlivers(BuildContext context) {
+    Widget sliver = buildChildLayout(context);
+    if (padding != null)
+      sliver = new SliverPadding(padding: padding, child: sliver);
+    return <Widget>[ sliver ];
+  }
+
+  @protected
+  Widget buildChildLayout(BuildContext context);
+
+  @override
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    if (padding != null)
+      description.add('padding: $padding');
+  }
+}
+
+/// A scrollable list of boxes.
+// TODO(ianh): More documentation here.
+///
+/// See also:
+///
+/// * [SingleChildScrollView], when you need to make a single child scrollable.
+/// * [GridView], for a scrollable grid of boxes.
+/// * [PageView], for a scrollable that works page by page.
+class ListView extends BoxScrollView {
+  ListView({
+    Key key,
+    Axis scrollDirection: Axis.vertical,
+    bool reverse: false,
+    ScrollPhysics physics,
+    bool shrinkWrap: false,
+    EdgeInsets padding,
+    this.itemExtent,
+    List<Widget> children: const <Widget>[],
+  }) : childrenDelegate = new SliverChildListDelegate(children), super(
+    key: key,
+    scrollDirection: scrollDirection,
+    reverse: reverse,
+    physics: physics,
+    shrinkWrap: shrinkWrap,
+    padding: padding,
+  );
+
+  ListView.custom({
+    Key key,
+    Axis scrollDirection: Axis.vertical,
+    bool reverse: false,
+    ScrollPhysics physics,
+    bool shrinkWrap: false,
+    EdgeInsets padding,
+    this.itemExtent,
+    @required this.childrenDelegate,
+  }) : super(
+    key: key,
+    scrollDirection: scrollDirection,
+    reverse: reverse,
+    physics: physics,
+    shrinkWrap: shrinkWrap,
+    padding: padding,
+  ) {
+    assert(childrenDelegate != null);
+  }
+
+  final double itemExtent;
+
+  final SliverChildListDelegate childrenDelegate;
+
+  @override
   Widget buildChildLayout(BuildContext context) {
     if (itemExtent != null) {
       return new SliverList(
@@ -69,90 +182,120 @@ class ScrollView extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
-    Widget sliver = buildChildLayout(context);
-    if (padding != null)
-      sliver = new SliverPadding(padding: padding, child: sliver);
-    AxisDirection axisDirection = getDirection(context);
-    return new Scrollable2(
-      axisDirection: axisDirection,
-      physics: physics,
-      viewportBuilder: (BuildContext context, ViewportOffset offset) {
-        if (shrinkWrap) {
-          return new ShrinkWrappingViewport(
-            axisDirection: axisDirection,
-            offset: offset,
-            slivers: <Widget>[ sliver ],
-          );
-        } else {
-          return new Viewport2(
-            axisDirection: axisDirection,
-            offset: offset,
-            slivers: <Widget>[ sliver ],
-          );
-        }
-      }
-    );
-  }
-
-  @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
-    description.add('$scrollDirection');
-    if (padding != null)
-      description.add('padding: $padding');
     if (itemExtent != null)
       description.add('itemExtent: $itemExtent');
-    if (shrinkWrap)
-      description.add('shrink-wrapping');
   }
 }
 
-class ScrollGrid extends ScrollView {
-  ScrollGrid({
+/// A scrollable grid of boxes.
+// TODO(ianh): More documentation here.
+///
+/// See also:
+///
+/// * [SingleChildScrollView], when you need to make a single child scrollable.
+/// * [ListView], for a scrollable list of boxes.
+/// * [PageView], for a scrollable that works page by page.
+class GridView extends BoxScrollView {
+  GridView({
     Key key,
     Axis scrollDirection: Axis.vertical,
-    EdgeInsets padding,
+    bool reverse: false,
+    ScrollPhysics physics,
     bool shrinkWrap: false,
-    this.gridDelegate,
+    EdgeInsets padding,
+    @required this.gridDelegate,
     List<Widget> children: const <Widget>[],
-  }) : super(key: key, scrollDirection: scrollDirection, padding: padding, shrinkWrap: shrinkWrap, children: children);
+  }) : childrenDelegate = new SliverChildListDelegate(children), super(
+    key: key,
+    scrollDirection: scrollDirection,
+    reverse: reverse,
+    physics: physics,
+    shrinkWrap: shrinkWrap,
+    padding: padding,
+  ) {
+    assert(gridDelegate != null);
+  }
 
-  ScrollGrid.count({
+  GridView.custom({
     Key key,
     Axis scrollDirection: Axis.vertical,
-    EdgeInsets padding,
+    bool reverse: false,
+    ScrollPhysics physics,
     bool shrinkWrap: false,
+    EdgeInsets padding,
+    @required this.gridDelegate,
+    @required this.childrenDelegate,
+  }) : super(
+    key: key,
+    scrollDirection: scrollDirection,
+    reverse: reverse,
+    physics: physics,
+    shrinkWrap: shrinkWrap,
+    padding: padding,
+  ) {
+    assert(gridDelegate != null);
+    assert(childrenDelegate != null);
+  }
+
+  GridView.count({
+    Key key,
+    Axis scrollDirection: Axis.vertical,
+    bool reverse: false,
+    ScrollPhysics physics,
+    bool shrinkWrap: false,
+    EdgeInsets padding,
     @required int crossAxisCount,
     double mainAxisSpacing: 0.0,
     double crossAxisSpacing: 0.0,
     double childAspectRatio: 1.0,
     List<Widget> children: const <Widget>[],
   }) : gridDelegate = new SliverGridDelegateWithFixedCrossAxisCount(
-    crossAxisCount: crossAxisCount,
-    mainAxisSpacing: mainAxisSpacing,
-    crossAxisSpacing: crossAxisSpacing,
-    childAspectRatio: childAspectRatio,
-  ), super(key: key, scrollDirection: scrollDirection, padding: padding, shrinkWrap: shrinkWrap, children: children);
+         crossAxisCount: crossAxisCount,
+         mainAxisSpacing: mainAxisSpacing,
+         crossAxisSpacing: crossAxisSpacing,
+         childAspectRatio: childAspectRatio,
+       ),
+       childrenDelegate = new SliverChildListDelegate(children), super(
+    key: key,
+    scrollDirection: scrollDirection,
+    reverse: reverse,
+    physics: physics,
+    shrinkWrap: shrinkWrap,
+    padding: padding,
+  );
 
-  ScrollGrid.extent({
+  GridView.extent({
     Key key,
     Axis scrollDirection: Axis.vertical,
-    EdgeInsets padding,
+    bool reverse: false,
+    ScrollPhysics physics,
     bool shrinkWrap: false,
+    EdgeInsets padding,
     @required double maxCrossAxisExtent,
     double mainAxisSpacing: 0.0,
     double crossAxisSpacing: 0.0,
     double childAspectRatio: 1.0,
     List<Widget> children: const <Widget>[],
   }) : gridDelegate = new SliverGridDelegateWithMaxCrossAxisExtent(
-    maxCrossAxisExtent: maxCrossAxisExtent,
-    mainAxisSpacing: mainAxisSpacing,
-    crossAxisSpacing: crossAxisSpacing,
-    childAspectRatio: childAspectRatio,
-  ), super(key: key, scrollDirection: scrollDirection, padding: padding, shrinkWrap: shrinkWrap, children: children);
+         maxCrossAxisExtent: maxCrossAxisExtent,
+         mainAxisSpacing: mainAxisSpacing,
+         crossAxisSpacing: crossAxisSpacing,
+         childAspectRatio: childAspectRatio,
+       ),
+       childrenDelegate = new SliverChildListDelegate(children), super(
+    key: key,
+    scrollDirection: scrollDirection,
+    reverse: reverse,
+    physics: physics,
+    shrinkWrap: shrinkWrap,
+    padding: padding,
+  );
 
   final SliverGridDelegate gridDelegate;
+
+  final SliverChildListDelegate childrenDelegate;
 
   @override
   Widget buildChildLayout(BuildContext context) {
@@ -163,17 +306,52 @@ class ScrollGrid extends ScrollView {
   }
 }
 
-class PageView extends ScrollView {
+/// A scrollable list that works page by page.
+// TODO(ianh): More documentation here.
+///
+/// See also:
+///
+/// * [SingleChildScrollView], when you need to make a single child scrollable.
+/// * [ListView], for a scrollable list of boxes.
+/// * [GridView], for a scrollable grid of boxes.
+class PageView extends BoxScrollView {
   PageView({
     Key key,
     Axis scrollDirection: Axis.horizontal,
+    bool reverse: false,
+    ScrollPhysics physics: const PageScrollPhysics(),
+    bool shrinkWrap: false,
+    EdgeInsets padding,
     List<Widget> children: const <Widget>[],
+  }) : childrenDelegate = new SliverChildListDelegate(children), super(
+    key: key,
+    scrollDirection: scrollDirection,
+    reverse: reverse,
+    physics: physics,
+    shrinkWrap: shrinkWrap,
+    padding: padding,
+  );
+
+  PageView.custom({
+    Key key,
+    Axis scrollDirection: Axis.horizontal,
+    bool reverse: false,
+    ScrollPhysics physics: const PageScrollPhysics(),
+    bool shrinkWrap: false,
+    EdgeInsets padding,
+    @required this.childrenDelegate,
   }) : super(
     key: key,
     scrollDirection: scrollDirection,
-    physics: const PageScrollPhysics(),
-    children: children,
-  );
+    reverse: reverse,
+    physics: physics,
+    shrinkWrap: shrinkWrap,
+    padding: padding,
+  ) {
+    assert(childrenDelegate != null);
+  }
+
+  final SliverChildListDelegate childrenDelegate;
 
   @override
   Widget buildChildLayout(BuildContext context) {

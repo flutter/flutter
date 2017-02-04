@@ -115,7 +115,7 @@ void main() {
       (WidgetTester tester) async {
     double value = 0.0;
     await tester.pumpWidget(new Material(
-      child: new ScrollView(
+      child: new ListView(
         children: <Widget>[
           new Slider(
             value: value,
