@@ -89,29 +89,25 @@ class OnTapPage extends StatelessWidget {
   }
 }
 
+typedef void OnPushed(Route<dynamic> route, Route<dynamic> previousRoute);
+typedef void OnPopped(Route<dynamic> route, Route<dynamic> previousRoute);
+
 class TestObserver extends NavigatorObserver {
-  bool isPushed = false;
-  bool isPoped = false;
-  bool _firstRun = true;
+  OnPushed onPushed;
+  OnPopped onPopped;
 
   @override
   void didPush(Route<dynamic> route, Route<dynamic> previousRoute) {
-    if (_firstRun) {
-      _firstRun = false;
-      expect(route is PageRoute && route.settings.name == '/', isTrue);
-      expect(previousRoute, isNull);
-    } else {
-      expect(route is PageRoute && route.settings.name == '/A', isTrue);
-      expect(previousRoute is PageRoute && previousRoute.settings.name == '/', isTrue);
+    if (onPushed != null) {
+      onPushed(route, previousRoute);
     }
-    isPushed = true;
   }
 
   @override
   void didPop(Route<dynamic> route, Route<dynamic> previousRoute) {
-    expect(route is PageRoute && route.settings.name == '/A', isTrue);
-    expect(previousRoute is PageRoute && previousRoute.settings.name == '/', isTrue);
-    isPoped = true;
+    if (onPopped != null) {
+      onPopped(route, previousRoute);
+    }
   }
 }
 
@@ -286,39 +282,112 @@ void main() {
     expect(find.text('B'), findsOneWidget);
   });
 
-  testWidgets('push and pop should trigger the observers',
+  testWidgets('Push and pop should trigger the observers',
       (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
        '/': (BuildContext context) => new OnTapPage(id: '/', onTap: () { Navigator.pushNamed(context, '/A'); }),
       '/A': (BuildContext context) => new OnTapPage(id: 'A', onTap: () { Navigator.pop(context); }),
     };
-    TestObserver observer1 = new TestObserver();
-    TestObserver observer2 = new TestObserver();
+    bool isPushed = false;
+    bool isPopped = false;
+    TestObserver observer = new TestObserver()
+      ..onPushed = (Route<dynamic> route, Route<dynamic> previousRoute) {
+        // Pushes the initial route.
+        expect(route is PageRoute && route.settings.name == '/', isTrue);
+        expect(previousRoute, isNull);
+        isPushed = true;
+      }
+      ..onPopped = (Route<dynamic> route, Route<dynamic> previousRoute) {
+        isPopped = true;
+      };
 
     await tester.pumpWidget(new MaterialApp(
       routes: routes,
-      navigatorObservers: <NavigatorObserver>[observer1, observer2],
+      navigatorObservers: <NavigatorObserver>[observer],
     ));
     expect(find.text('/'), findsOneWidget);
     expect(find.text('A'), findsNothing);
+    expect(isPushed, isTrue);
+    expect(isPopped, isFalse);
+
+    isPushed = false;
+    isPopped = false;
+    observer.onPushed = (Route<dynamic> route, Route<dynamic> previousRoute) {
+      expect(route is PageRoute && route.settings.name == '/A', isTrue);
+      expect(previousRoute is PageRoute && previousRoute.settings.name == '/', isTrue);
+      isPushed = true;
+    };
 
     await tester.tap(find.text('/'));
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
     expect(find.text('/'), findsNothing);
     expect(find.text('A'), findsOneWidget);
-    expect(observer1.isPushed, isTrue);
-    expect(observer1.isPoped, isFalse);
-    expect(observer2.isPushed, isTrue);
-    expect(observer2.isPoped, isFalse);
+    expect(isPushed, isTrue);
+    expect(isPopped, isFalse);
+
+    isPushed = false;
+    isPopped = false;
+    observer.onPopped = (Route<dynamic> route, Route<dynamic> previousRoute) {
+      expect(route is PageRoute && route.settings.name == '/A', isTrue);
+      expect(previousRoute is PageRoute && previousRoute.settings.name == '/', isTrue);
+      isPopped = true;
+    };
 
     await tester.tap(find.text('A'));
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
     expect(find.text('/'), findsOneWidget);
     expect(find.text('A'), findsNothing);
-    expect(observer1.isPoped, isTrue);
-    expect(observer2.isPoped, isTrue);
+    expect(isPushed, isFalse);
+    expect(isPopped, isTrue);
+  });
+
+  testWidgets("Add and remove an observer should work", (WidgetTester tester) async {
+    final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+       '/': (BuildContext context) => new OnTapPage(id: '/', onTap: () { Navigator.pushNamed(context, '/A'); }),
+      '/A': (BuildContext context) => new OnTapPage(id: 'A', onTap: () { Navigator.pop(context); }),
+    };
+    bool isPushed = false;
+    bool isPopped = false;
+    TestObserver observer1 = new TestObserver();
+    TestObserver observer2 = new TestObserver()
+      ..onPushed = (Route<dynamic> route, Route<dynamic> previousRoute) {
+        isPushed = true;
+      }
+      ..onPopped = (Route<dynamic> route, Route<dynamic> previousRoute) {
+        isPopped = true;
+      };
+
+    await tester.pumpWidget(new MaterialApp(
+      routes: routes,
+      navigatorObservers: <NavigatorObserver>[observer1],
+    ));
+    expect(isPushed, isFalse);
+    expect(isPopped, isFalse);
+
+    await tester.pumpWidget(new MaterialApp(
+      routes: routes,
+      navigatorObservers: <NavigatorObserver>[observer1, observer2],
+    ));
+    await tester.tap(find.text('/'));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    expect(isPushed, isTrue);
+    expect(isPopped, isFalse);
+
+    isPushed = false;
+    isPopped = false;
+
+    await tester.pumpWidget(new MaterialApp(
+      routes: routes,
+      navigatorObservers: <NavigatorObserver>[observer1],
+    ));
+    await tester.tap(find.text('A'));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    expect(isPushed, isFalse);
+    expect(isPopped, isFalse);
   });
 
   testWidgets('replaceNamed', (WidgetTester tester) async {
