@@ -28,8 +28,8 @@ void ensureDirectoryExists(String filePath) {
     return;
   try {
     fs.directory(dirPath).createSync(recursive: true);
-  } on FileSystemException {
-    throwToolExit('Failed to create directory "$dirPath".');
+  } on FileSystemException catch (e) {
+    throwToolExit('Failed to create directory "$dirPath".\n$e');
   }
 }
 
