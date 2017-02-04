@@ -41,6 +41,31 @@ abstract class SliverChildDelegate {
   bool shouldRebuild(@checked SliverChildDelegate oldDelegate);
 }
 
+class SliverChildBuilderDelegate extends SliverChildDelegate {
+  const SliverChildBuilderDelegate(this.builder, { this.childCount });
+
+  final IndexedWidgetBuilder builder;
+
+  final int childCount;
+
+  @override
+  Widget build(BuildContext context, int index) {
+    assert(builder != null);
+    if (index < 0 || (childCount != null && index >= childCount))
+      return null;
+    final Widget child = builder(context, index);
+    if (child == null)
+      return null;
+    return new RepaintBoundary.wrap(child, index);
+  }
+
+  @override
+  int get estimatedChildCount => childCount;
+
+  @override
+  bool shouldRebuild(@checked SliverChildListDelegate oldDelegate) => true;
+}
+
 // ///
 // /// In general building all the widgets in advance is not efficient. It is
 // /// better to create a delegate that builds them on demand by subclassing
@@ -63,7 +88,9 @@ class SliverChildListDelegate extends SliverChildDelegate {
     assert(children != null);
     if (index < 0 || index >= children.length)
       return null;
-    return children[index];
+    final Widget child = children[index];
+    assert(child != null);
+    return new RepaintBoundary.wrap(child, index);
   }
 
   @override
@@ -253,12 +280,7 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
   }
 
   Widget _build(int index) {
-    return _childWidgets.putIfAbsent(index, () {
-      Widget child = widget.delegate.build(this, index);
-      if (child == null)
-        return null;
-      return new RepaintBoundary.wrap(child, index);
-    });
+    return _childWidgets.putIfAbsent(index, () => widget.delegate.build(this, index));
   }
 
   @override
