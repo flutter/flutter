@@ -551,7 +551,7 @@ class RecipeStep {
   final String description;
 }
 
-final List<Recipe> kPestoRecipes = <Recipe>[
+const List<Recipe> kPestoRecipes = const <Recipe>[
   const Recipe(
     name: 'Pesto Bruschetta',
     author: 'Peter Carlsson',
