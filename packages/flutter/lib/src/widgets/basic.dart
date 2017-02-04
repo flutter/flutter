@@ -1792,7 +1792,6 @@ class Positioned extends ParentDataWidget<Stack> {
 /// such as:
 ///
 ///  * [FixedColumnCountGrid] (which creates a grid with a fixed number of columns)
-///  * [MaxTileWidthGrid] (which creates a grid whose tiles have a maximum width)
 ///  * [CustomGrid] (which lets you supply your own [GridDelegate])
 abstract class GridRenderObjectWidget extends MultiChildRenderObjectWidget {
   /// Initializes fields for subclasses.
@@ -1888,53 +1887,6 @@ class FixedColumnCountGrid extends GridRenderObjectWidget {
       columnSpacing: columnSpacing,
       rowSpacing: rowSpacing,
       tileAspectRatio: tileAspectRatio,
-      padding: padding
-    );
-  }
-}
-
-/// A widget that uses a grid layout with a maximum tile width.
-///
-/// For details about the grid layout algorithm, see [MaxTileWidthGridDelegate].
-class MaxTileWidthGrid extends GridRenderObjectWidget {
-  /// Creates a grid with a maximum tile width.
-  ///
-  /// The [columnCount] argument must not be negative.
-  MaxTileWidthGrid({
-    Key key,
-    @required this.maxTileWidth,
-    this.columnSpacing: 0.0,
-    this.rowSpacing: 0.0,
-    this.tileAspectRatio: 1.0,
-    this.padding: EdgeInsets.zero,
-    List<Widget> children: const <Widget>[],
-  }) : super(key: key, children: children) {
-    assert(maxTileWidth != null && maxTileWidth >= 0.0);
-    assert(tileAspectRatio != null && tileAspectRatio > 0.0);
-  }
-
-  /// The maximum width of a tile in the grid.
-  final double maxTileWidth;
-
-  /// The ratio of the width to the height of each tile in the grid.
-  final double tileAspectRatio;
-
-  /// The horizontal distance between columns.
-  final double columnSpacing;
-
-  /// The vertical distance between rows.
-  final double rowSpacing;
-
-  /// The amount of padding to apply to each child.
-  final EdgeInsets padding;
-
-  @override
-  MaxTileWidthGridDelegate createDelegate() {
-    return new MaxTileWidthGridDelegate(
-      maxTileWidth: maxTileWidth,
-      tileAspectRatio: tileAspectRatio,
-      columnSpacing: columnSpacing,
-      rowSpacing: rowSpacing,
       padding: padding
     );
   }
