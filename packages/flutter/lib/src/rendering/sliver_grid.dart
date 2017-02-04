@@ -24,10 +24,10 @@ import 'sliver_multi_box_adaptor.dart';
 class SliverGridGeometry {
   /// Creates an object that describes the placement of a child in a [RenderSliverGrid].
   const SliverGridGeometry({
-    this.scrollOffset,
-    this.crossAxisOffset,
-    this.mainAxisExtent,
-    this.crossAxisExtent,
+    @required this.scrollOffset,
+    @required this.crossAxisOffset,
+    @required this.mainAxisExtent,
+    @required this.crossAxisExtent,
   });
 
   /// The scroll offset of the leading edge of the child relative to the leading
@@ -195,7 +195,7 @@ class SliverGridRegularTileLayout extends SliverGridLayout {
   double estimateMaxScrollOffset(int childCount) {
     if (childCount == null)
       return null;
-    final int mainAxisCount = ((childCount - 1) / crossAxisCount).floor() + 1;
+    final int mainAxisCount = ((childCount - 1) ~/ crossAxisCount) + 1;
     final double mainAxisSpacing = mainAxisStride - childMainAxisExtent;
     return mainAxisStride * mainAxisCount - mainAxisSpacing;
   }
