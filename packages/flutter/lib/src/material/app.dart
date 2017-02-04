@@ -57,6 +57,7 @@ class MaterialApp extends StatefulWidget {
     this.initialRoute,
     this.onGenerateRoute,
     this.onLocaleChanged,
+    this.navigatorObservers: const <NavigatorObserver>[],
     this.debugShowMaterialGrid: false,
     this.showPerformanceOverlay: false,
     this.checkerboardRasterCacheImages: false,
@@ -153,6 +154,9 @@ class MaterialApp extends StatefulWidget {
   /// development, and so performance in checked mode is not
   /// representative of what will happen in release mode.
   final bool debugShowCheckedModeBanner;
+
+  /// The list of observers for the [Navigator] created for this app.
+  final List<NavigatorObserver> navigatorObservers;
 
   /// Turns on a [GridPaper] overlay that paints a baseline grid
   /// Material apps:
@@ -278,7 +282,9 @@ class _MaterialAppState extends State<MaterialApp> {
         textStyle: _errorTextStyle,
         // blue[500] is the primary color of the default theme
         color: config.color ?? theme?.primaryColor ?? Colors.blue[500],
-        navigatorObserver: _heroController,
+        navigatorObservers:
+            new List<NavigatorObserver>.from(config.navigatorObservers)
+              ..add(_heroController),
         initialRoute: config.initialRoute,
         onGenerateRoute: _onGenerateRoute,
         onLocaleChanged: config.onLocaleChanged,
