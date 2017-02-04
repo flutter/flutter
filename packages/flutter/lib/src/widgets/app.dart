@@ -44,7 +44,7 @@ class WidgetsApp extends StatefulWidget {
     this.title,
     this.textStyle,
     @required this.color,
-    this.navigatorObserver,
+    this.navigatorObservers: const <NavigatorObserver>[],
     this.initialRoute,
     this.onLocaleChanged,
     this.showPerformanceOverlay: false,
@@ -111,8 +111,8 @@ class WidgetsApp extends StatefulWidget {
   /// representative of what will happen in release mode.
   final bool debugShowCheckedModeBanner;
 
-  /// The observer for the Navigator created for this app.
-  final NavigatorObserver navigatorObserver;
+  /// The list of observers for the Navigator created for this app.
+  final List<NavigatorObserver> navigatorObservers;
 
   /// If true, forces the performance overlay to be visible in all instances.
   ///
@@ -203,7 +203,7 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
             key: _navigator,
             initialRoute: config.initialRoute ?? ui.window.defaultRouteName,
             onGenerateRoute: config.onGenerateRoute,
-            observer: config.navigatorObserver
+            observers: config.navigatorObservers
           )
         )
       )

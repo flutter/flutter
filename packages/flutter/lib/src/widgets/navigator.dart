@@ -445,7 +445,7 @@ class Navigator extends StatefulWidget {
     this.initialRoute,
     @required this.onGenerateRoute,
     this.onUnknownRoute,
-    this.observer
+    this.observers: const <NavigatorObserver>[]
   }) : super(key: key) {
     assert(onGenerateRoute != null);
   }
@@ -466,8 +466,8 @@ class Navigator extends StatefulWidget {
   /// requests to push routes, such as from Android intents.
   final RouteFactory onUnknownRoute;
 
-  /// An observer for this navigator.
-  final NavigatorObserver observer;
+  /// A list of observers for this navigator.
+  final List<NavigatorObserver> observers;
 
   /// The default name for the initial route.
   static const String defaultRouteName = '/';
@@ -668,8 +668,10 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    assert(config.observer == null || config.observer.navigator == null);
-    config.observer?._navigator = this;
+    for (NavigatorObserver observer in config.observers) {
+      assert(observer.navigator == null);
+      observer._navigator = this;
+    }
     push(config.onGenerateRoute(new RouteSettings(
       name: config.initialRoute ?? Navigator.defaultRouteName,
       isInitialRoute: true
@@ -678,10 +680,12 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
 
   @override
   void didUpdateConfig(Navigator oldConfig) {
-    if (oldConfig.observer != config.observer) {
-      oldConfig.observer?._navigator = null;
-      assert(config.observer == null || config.observer.navigator == null);
-      config.observer?._navigator = this;
+    for (NavigatorObserver observer in oldConfig.observers) {
+      observer._navigator = null;
+    }
+    for (NavigatorObserver observer in config.observers) {
+      assert(observer.navigator == null);
+      observer._navigator = this;
     }
   }
 
@@ -689,7 +693,9 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   void dispose() {
     assert(!_debugLocked);
     assert(() { _debugLocked = true; return true; });
-    config.observer?._navigator = null;
+    for (NavigatorObserver observer in config.observers) {
+      observer._navigator = null;
+    }
     final List<Route<dynamic>> doomed = _poppedRoutes.toList()..addAll(_history);
     for (Route<dynamic> route in doomed)
       route.dispose();
@@ -768,7 +774,9 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       route.didChangeNext(null);
       if (oldRoute != null)
         oldRoute.didChangeNext(route);
-      config.observer?.didPush(route, oldRoute);
+      for (NavigatorObserver observer in config.observers) {
+        observer.didPush(route, oldRoute);
+      }
     });
     assert(() { _debugLocked = false; return true; });
     _cancelActivePointers();
@@ -850,7 +858,9 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       newRoute.didChangeNext(null);
       if (index > 0)
         _history[index - 1].didChangeNext(newRoute);
-      config.observer?.didPush(newRoute, oldRoute);
+      for (NavigatorObserver observer in config.observers) {
+        observer.didPush(newRoute, oldRoute);
+      }
     });
     assert(() { _debugLocked = false; return true; });
     _cancelActivePointers();
@@ -957,7 +967,9 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
           if (route._navigator != null)
             _poppedRoutes.add(route);
           _history.last.didPopNext(route);
-          config.observer?.didPop(route, _history.last);
+          for (NavigatorObserver observer in config.observers) {
+            observer.didPop(route, _history.last);
+          }
         });
       } else {
         assert(() { _debugLocked = false; return true; });
@@ -1026,13 +1038,17 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   /// Used for the iOS back gesture.
   void didStartUserGesture() {
     _userGestureInProgress = true;
-    config.observer?.didStartUserGesture();
+    for (NavigatorObserver observer in config.observers) {
+      observer.didStartUserGesture();
+    }
   }
 
   /// A user gesture is no longer controlling the navigator.
   void didStopUserGesture() {
     _userGestureInProgress = false;
-    config.observer?.didStopUserGesture();
+    for (NavigatorObserver observer in config.observers) {
+      observer.didStopUserGesture();
+    }
   }
 
   final Set<int> _activePointers = new Set<int>();
