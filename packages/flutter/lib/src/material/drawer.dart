@@ -31,7 +31,7 @@ const Duration _kBaseSettleDuration = const Duration(milliseconds: 246);
 /// the side of the screen and displays a list of items that the user can
 /// interact with.
 ///
-/// Typically, the child of the drawer is a [Block] whose first child is a
+/// Typically, the child of the drawer is a [SliverList] whose first child is a
 /// [DrawerHeader] that displays status information about the current user.
 ///
 /// The [Scaffold] automatically shows an appropriate [IconButton], and handles
@@ -67,7 +67,7 @@ class Drawer extends StatelessWidget {
 
   /// The widget below this widget in the tree.
   ///
-  /// Typically a [Block].
+  /// Typically a [SliverList].
   final Widget child;
 
   @override

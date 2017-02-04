@@ -48,8 +48,8 @@ Map<MaterialListType, double> kListItemExtent = const <MaterialListType, double>
 ///
 /// See also:
 ///
-///  * [Block], which shows heterogeneous widgets in a list and makes the list
-///    scrollable if necessary.
+///  * [SliverList], which shows heterogeneous widgets in a list and makes the
+///    list scrollable if necessary.
 ///  * [ListItem], to show content in a [MaterialList] using material design
 ///    conventions.
 ///  * [ScrollableList], on which this widget is based.

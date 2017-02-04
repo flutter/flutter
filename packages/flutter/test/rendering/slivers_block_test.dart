@@ -13,12 +13,12 @@ class TestRenderSliverBoxChildManager extends RenderSliverBoxChildManager {
     this.children,
   });
 
-  RenderSliverBlock _renderObject;
+  RenderSliverList _renderObject;
   List<RenderBox> children;
 
-  RenderSliverBlock createRenderObject() {
+  RenderSliverList createRenderObject() {
     assert(_renderObject == null);
-    _renderObject = new RenderSliverBlock(childManager: this);
+    _renderObject = new RenderSliverList(childManager: this);
     return _renderObject;
   }
 
@@ -62,7 +62,7 @@ class TestRenderSliverBoxChildManager extends RenderSliverBoxChildManager {
 }
 
 void main() {
-  test('RenderSliverBlock basic test - down', () {
+  test('RenderSliverList basic test - down', () {
     RenderObject inner;
     RenderBox a, b, c, d, e;
     TestRenderSliverBoxChildManager childManager = new TestRenderSliverBoxChildManager(
@@ -136,7 +136,7 @@ void main() {
     expect(e.attached, false);
   });
 
-  test('RenderSliverBlock basic test - up', () {
+  test('RenderSliverList basic test - up', () {
     RenderObject inner;
     RenderBox a, b, c, d, e;
     TestRenderSliverBoxChildManager childManager = new TestRenderSliverBoxChildManager(

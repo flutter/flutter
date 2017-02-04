@@ -78,7 +78,8 @@ class _TableElementRow {
 /// A widget that uses the table layout algorithm for its children.
 ///
 /// If you only have one row, the [Row] widget is more appropriate. If you only
-/// have one column, the [Block] or [Column] widgets will be more appropriate.
+/// have one column, the [SliverList] or [Column] widgets will be more
+/// appropriate.
 ///
 /// Rows size vertically based on their contents. To control the column widths,
 /// use the [columnWidths] property.

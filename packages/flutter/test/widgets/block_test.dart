@@ -134,13 +134,13 @@ void main() {
 
     await tester.pumpWidget(new TestScrollable(
       slivers: <Widget>[
-        new SliverBlock(
+        new SliverList(
           delegate: delegate,
         ),
       ],
     ));
 
-    final SliverMultiBoxAdaptorElement element = tester.element(find.byType(SliverBlock));
+    final SliverMultiBoxAdaptorElement element = tester.element(find.byType(SliverList));
 
     final double maxScrollOffset = element.estimateMaxScrollOffset(
       null,

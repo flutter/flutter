@@ -117,7 +117,7 @@ void main() {
               new SliverToBoxAdapter(child: new Container(height: 520.0)),
               new SliverAppBar(delegate: new TestSliverAppBarDelegate(150.0), floating: true),
               new SliverToBoxAdapter(child: new Container(height: 5.0)),
-              new SliverBlock(
+              new SliverList(
                 delegate: new SliverChildListDelegate(<Widget>[
                   new Container(height: 50.0),
                   new Container(height: 50.0),
