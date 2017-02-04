@@ -172,7 +172,14 @@ Future<XcodeBuildResult> buildXcodeProject({
     if (result.stdout.isNotEmpty)
       printStatus('Xcode\'s output:\n↳');
       printStatus(result.stdout, indent: 4);
-    return new XcodeBuildResult(false, stdout: result.stdout, stderr: result.stderr);
+    return new XcodeBuildResult(
+      false,
+      stdout: result.stdout,
+      stderr: result.stderr,
+      buildCommands: commands,
+      buildForDevice: buildForDevice,
+      appDirectory: app.appDirectory
+    );
   } else {
     // Look for 'clean build/Release-iphoneos/Runner.app'.
     RegExp regexp = new RegExp(r' clean (\S*\.app)$', multiLine: true);
@@ -184,7 +191,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   }
 }
 
-void diagnoseXcodeBuildFailure(XcodeBuildResult result) {
+Future<Null> diagnoseXcodeBuildFailure(XcodeBuildResult result) async {
   File plistFile = fs.file('ios/Runner/Info.plist');
   if (plistFile.existsSync()) {
     String plistContent = plistFile.readAsStringSync();
@@ -209,15 +216,57 @@ void diagnoseXcodeBuildFailure(XcodeBuildResult result) {
     printError("  open ios/Runner.xcodeproj");
     return;
   }
+  if (result.buildForDevice
+      && result.buildCommands != null
+      && result.buildCommands.contains('build')
+      && result.appDirectory != null) {
+    RunResult checkBuildSettings = await runAsync(
+      result.buildCommands..add('-showBuildSettings'),
+      workingDirectory: result.appDirectory,
+      allowReentrantFlutter: true
+    );
+    if (checkBuildSettings.exitCode == 0
+        && !checkBuildSettings.stdout?.contains('DEVELOPMENT_TEAM') == true) {
+      printError(
+        '═══════════════════════════════════════════════════════════════════════════════════');
+      printError(
+        'Building an iOS app requires a selected Development Team with a Provisioning Profile');
+      printError('Please ensure that a Development Team is selected by:');
+      printError('  1- Opening the Flutter project\'s Xcode target with');
+      printError('       open ios/Runner.xcodeproj');
+      printError("  2- Select the 'Runner' project in the navigator then the 'Runner' target");
+      printError('     in the project settings');
+      printError("  3- In the 'General' tab, make sure a 'Development Team' is selected\n");
+      printError('For more information, please visit:');
+      printError('  https://flutter.io/setup/#deploy-to-ios-devices\n');
+      printError('Or run on an iOS simulator');
+      printError(
+        '═══════════════════════════════════════════════════════════════════════════════════');
+    }
+  }
 }
 
 class XcodeBuildResult {
-  XcodeBuildResult(this.success, {this.output, this.stdout, this.stderr});
+  XcodeBuildResult(
+    this.success,
+    {
+      this.output,
+      this.stdout,
+      this.stderr,
+      this.buildCommands,
+      this.buildForDevice,
+      this.appDirectory
+    }
+  );
 
   final bool success;
   final String output;
   final String stdout;
   final String stderr;
+  /// The original list of Xcode build commands used to produce this build result.
+  final List<String> buildCommands;
+  final bool buildForDevice;
+  final String appDirectory;
 }
 
 final RegExp _xcodeVersionRegExp = new RegExp(r'Xcode (\d+)\..*');

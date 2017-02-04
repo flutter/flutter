@@ -199,7 +199,7 @@ class IOSDevice extends Device {
       XcodeBuildResult buildResult = await buildXcodeProject(app: app, mode: mode, target: mainPath, buildForDevice: true);
       if (!buildResult.success) {
         printError('Could not build the precompiled application for the device.');
-        diagnoseXcodeBuildFailure(buildResult);
+        await diagnoseXcodeBuildFailure(buildResult);
         printError('');
         return new LaunchResult.failed();
       }
