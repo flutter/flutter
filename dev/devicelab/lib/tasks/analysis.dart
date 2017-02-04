@@ -67,7 +67,7 @@ class FlutterAnalyzeBenchmark extends Benchmark {
   @override
   Future<num> run() async {
     rm(benchmarkFile);
-    await inDirectory(flutterDirectory, () async {
+    await inDirectory<Null>(flutterDirectory, () async {
       await flutter('analyze', options: <String>[
         '--flutter-repo',
         '--benchmark',
@@ -104,7 +104,7 @@ class FlutterAnalyzeAppBenchmark extends Benchmark {
   @override
   Future<num> run() async {
     rm(benchmarkFile);
-    await inDirectory(megaDir, () async {
+    await inDirectory<Null>(megaDir, () async {
       await flutter('analyze', options: <String>[
         '--watch',
         '--benchmark',

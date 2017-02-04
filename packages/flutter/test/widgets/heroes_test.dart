@@ -26,7 +26,7 @@ final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
         new Container(height: 150.0, width: 150.0),
         new Card(child: new Hero(tag: 'a', child: new Container(height: 150.0, width: 150.0, key: secondKey))),
         new Container(height: 150.0, width: 150.0),
-        new FlatButton(child: new Text('three'), onPressed: () => Navigator.push(context, new ThreeRoute())),
+        new FlatButton(child: new Text('three'), onPressed: () => Navigator.push<Null>(context, new ThreeRoute())),
       ]
     )
   ),
@@ -172,7 +172,7 @@ void main() {
           children: <Widget>[
             new Hero(tag: 'a', child: new Text('foo')),
             new Builder(builder: (BuildContext context) {
-              return new FlatButton(child: new Text('two'), onPressed: () => Navigator.push(context, route));
+              return new FlatButton(child: new Text('two'), onPressed: () => Navigator.push<Null>(context, route));
             })
           ]
         )

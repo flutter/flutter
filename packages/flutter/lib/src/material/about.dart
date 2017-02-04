@@ -181,7 +181,7 @@ void showLicensePage({
 }) {
   // TODO(ianh): remove pop once https://github.com/flutter/flutter/issues/4667 is fixed
   Navigator.pop(context);
-  Navigator.push(context, new MaterialPageRoute<Null>(
+  Navigator.push<Null>(context, new MaterialPageRoute<Null>(
     builder: (BuildContext context) => new LicensePage(
       applicationName: applicationName,
       applicationVersion: applicationVersion,

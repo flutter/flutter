@@ -82,7 +82,7 @@ void main() {
     expect(find.text('Settings'), isOnstage);
     expect(find.text('Overlay'), findsNothing);
 
-    Navigator.push(containerKey2.currentContext, new TestOverlayRoute());
+    Navigator.push<Null>(containerKey2.currentContext, new TestOverlayRoute());
 
     await tester.pump();
 
@@ -433,7 +433,7 @@ void main() {
     expect(popCount, 0);
     expect(completeCount, 0);
 
-    Navigator.push(tester.element(find.text('home')), route);
+    Navigator.push<Null>(tester.element(find.text('home')), route);
 
     expect(popCount, 0);
     expect(completeCount, 0);

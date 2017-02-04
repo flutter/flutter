@@ -110,7 +110,7 @@ void main() {
                 child: new FlatButton(
                   child: new Text('X'),
                   onPressed: () {
-                    Navigator.of(context).push(new MaterialPageRoute<Null>(
+                    Navigator.of(context).push<Null>(new MaterialPageRoute<Null>(
                       builder: (BuildContext context) {
                         return new SampleForm(
                           callback: () => new Future<bool>.value(willPopValue),
@@ -182,7 +182,7 @@ void main() {
                 child: new FlatButton(
                   child: new Text('X'),
                   onPressed: () {
-                    Navigator.of(context).push(new MaterialPageRoute<Null>(
+                    Navigator.of(context).push<Null>(new MaterialPageRoute<Null>(
                       builder: (BuildContext context) {
                         return new SampleForm(
                           callback: () => showYesNoAlert(context),
