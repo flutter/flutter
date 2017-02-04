@@ -165,13 +165,10 @@ Future<XcodeBuildResult> buildXcodeProject({
   );
 
   if (result.exitCode != 0) {
-    printStatus('Failed to build iOS app');
     if (result.stderr.isNotEmpty)
-      printStatus('Error output from Xcode build:\n↳');
-      printStatus(result.stderr, indent: 4);
+      printStatus(result.stderr);
     if (result.stdout.isNotEmpty)
-      printStatus('Xcode\'s output:\n↳');
-      printStatus(result.stdout, indent: 4);
+      printStatus(result.stdout);
     return new XcodeBuildResult(
       false,
       stdout: result.stdout,
