@@ -111,7 +111,7 @@ class WidgetsApp extends StatefulWidget {
   /// representative of what will happen in release mode.
   final bool debugShowCheckedModeBanner;
 
-  /// The list of observers for the Navigator created for this app.
+  /// The list of observers for the [Navigator] created for this app.
   final List<NavigatorObserver> navigatorObservers;
 
   /// If true, forces the performance overlay to be visible in all instances.

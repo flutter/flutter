@@ -680,12 +680,13 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
 
   @override
   void didUpdateConfig(Navigator oldConfig) {
-    for (NavigatorObserver observer in oldConfig.observers) {
-      observer._navigator = null;
-    }
-    for (NavigatorObserver observer in config.observers) {
-      assert(observer.navigator == null);
-      observer._navigator = this;
+    if (oldConfig.observers != config.observers) {
+      for (NavigatorObserver observer in oldConfig.observers)
+        observer._navigator = null;
+      for (NavigatorObserver observer in config.observers) {
+        assert(observer.navigator == null);
+        observer._navigator = this;
+      }
     }
   }
 
@@ -693,9 +694,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   void dispose() {
     assert(!_debugLocked);
     assert(() { _debugLocked = true; return true; });
-    for (NavigatorObserver observer in config.observers) {
+    for (NavigatorObserver observer in config.observers)
       observer._navigator = null;
-    }
     final List<Route<dynamic>> doomed = _poppedRoutes.toList()..addAll(_history);
     for (Route<dynamic> route in doomed)
       route.dispose();
@@ -774,9 +774,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       route.didChangeNext(null);
       if (oldRoute != null)
         oldRoute.didChangeNext(route);
-      for (NavigatorObserver observer in config.observers) {
+      for (NavigatorObserver observer in config.observers)
         observer.didPush(route, oldRoute);
-      }
     });
     assert(() { _debugLocked = false; return true; });
     _cancelActivePointers();
@@ -858,9 +857,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       newRoute.didChangeNext(null);
       if (index > 0)
         _history[index - 1].didChangeNext(newRoute);
-      for (NavigatorObserver observer in config.observers) {
+      for (NavigatorObserver observer in config.observers)
         observer.didPush(newRoute, oldRoute);
-      }
     });
     assert(() { _debugLocked = false; return true; });
     _cancelActivePointers();
@@ -967,9 +965,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
           if (route._navigator != null)
             _poppedRoutes.add(route);
           _history.last.didPopNext(route);
-          for (NavigatorObserver observer in config.observers) {
+          for (NavigatorObserver observer in config.observers)
             observer.didPop(route, _history.last);
-          }
         });
       } else {
         assert(() { _debugLocked = false; return true; });
@@ -1038,17 +1035,15 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   /// Used for the iOS back gesture.
   void didStartUserGesture() {
     _userGestureInProgress = true;
-    for (NavigatorObserver observer in config.observers) {
+    for (NavigatorObserver observer in config.observers)
       observer.didStartUserGesture();
-    }
   }
 
   /// A user gesture is no longer controlling the navigator.
   void didStopUserGesture() {
     _userGestureInProgress = false;
-    for (NavigatorObserver observer in config.observers) {
+    for (NavigatorObserver observer in config.observers)
       observer.didStopUserGesture();
-    }
   }
 
   final Set<int> _activePointers = new Set<int>();

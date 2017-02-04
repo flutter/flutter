@@ -155,7 +155,7 @@ class MaterialApp extends StatefulWidget {
   /// representative of what will happen in release mode.
   final bool debugShowCheckedModeBanner;
 
-  /// The list of observers for the Navigator created for this app.
+  /// The list of observers for the [Navigator] created for this app.
   final List<NavigatorObserver> navigatorObservers;
 
   /// Turns on a [GridPaper] overlay that paints a baseline grid
