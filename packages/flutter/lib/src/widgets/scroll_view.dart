@@ -82,6 +82,28 @@ abstract class ScrollView extends StatelessWidget {
   }
 }
 
+class CustomScrollView extends ScrollView {
+  CustomScrollView({
+    Key key,
+    Axis scrollDirection: Axis.vertical,
+    bool reverse: false,
+    ScrollPhysics physics,
+    bool shrinkWrap: false,
+    this.slivers: const <Widget>[],
+  }) : super(
+    key: key,
+    scrollDirection: scrollDirection,
+    reverse: reverse,
+    physics: physics,
+    shrinkWrap: shrinkWrap,
+  );
+
+  final List<Widget> slivers;
+
+  @override
+  List<Widget> buildSlivers(BuildContext context) => slivers;
+}
+
 abstract class BoxScrollView extends ScrollView {
   BoxScrollView({
     Key key,

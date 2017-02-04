@@ -39,9 +39,9 @@ class OrderItem extends StatelessWidget {
                 height: 248.0,
                 child: new Hero(
                   tag: product.tag,
-                  child: new Image.asset(product.imageAsset, fit: ImageFit.contain)
-                )
-              )
+                  child: new Image.asset(product.imageAsset, fit: ImageFit.contain),
+                ),
+              ),
             ),
             new SizedBox(height: 24.0),
             new Row(
@@ -52,14 +52,14 @@ class OrderItem extends StatelessWidget {
                     child: new Icon(
                       Icons.info_outline,
                       size: 24.0,
-                      color: const Color(0xFFFFE0E0)
-                    )
-                  )
+                      color: const Color(0xFFFFE0E0),
+                    ),
+                  ),
                 ),
                 new Expanded(
-                  child: new Text(product.name, style: theme.featureTitleStyle)
-                )
-              ]
+                  child: new Text(product.name, style: theme.featureTitleStyle),
+                ),
+              ],
             ),
             new Padding(
               padding: const EdgeInsets.only(left: 56.0),
@@ -75,8 +75,8 @@ class OrderItem extends StatelessWidget {
                       child: new Container(
                         decoration: new BoxDecoration(
                           border: new Border.all(
-                            color: const Color(0xFFD9D9D9)
-                          )
+                            color: const Color(0xFFD9D9D9),
+                          ),
                         ),
                         child: new DropdownButton<int>(
                           items: <int>[0, 1, 2, 3, 4, 5].map((int value) {
@@ -84,33 +84,33 @@ class OrderItem extends StatelessWidget {
                               value: value,
                               child: new Padding(
                                 padding: const EdgeInsets.only(left: 8.0),
-                                child: new Text('Quantity $value', style: theme.quantityMenuStyle)
-                              )
+                                child: new Text('Quantity $value', style: theme.quantityMenuStyle),
+                              ),
                             );
                           }).toList(),
                           value: quantity,
-                          onChanged: quantityChanged
-                        )
-                      )
-                    )
+                          onChanged: quantityChanged,
+                        ),
+                      ),
+                    ),
                   ),
                   new SizedBox(height: 16.0),
                   new SizedBox(
                     height: 24.0,
                     child: new Align(
                       alignment: FractionalOffset.bottomLeft,
-                      child: new Text(product.vendor.name, style: theme.vendorTitleStyle)
-                    )
+                      child: new Text(product.vendor.name, style: theme.vendorTitleStyle),
+                    ),
                   ),
                   new SizedBox(height: 16.0),
                   new Text(product.vendor.description, style: theme.vendorStyle),
-                  new SizedBox(height: 24.0)
-                ]
-              )
-            )
-          ]
-        )
-      )
+                  new SizedBox(height: 24.0),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -174,39 +174,47 @@ class _OrderPageState extends State<OrderPage> {
         backgroundColor: const Color(0xFF16F0F0),
         child: new Icon(
           Icons.add_shopping_cart,
-          color: Colors.black
-        )
+          color: Colors.black,
+        ),
       ),
-      body: new Block(
-        children: <Widget>[
-          new OrderItem(
-            product: config.order.product,
-            quantity: currentOrder.quantity,
-            quantityChanged: (int value) { updateOrder(quantity: value); }
+      body: new CustomScrollView(
+        slivers: <Widget>[
+          new SliverList(
+            delegate: new SliverChildListDelegate(<Widget>[
+              new OrderItem(
+                product: config.order.product,
+                quantity: currentOrder.quantity,
+                quantityChanged: (int value) { updateOrder(quantity: value); },
+              ),
+              new SizedBox(height: 24.0),
+            ]),
           ),
-          new SizedBox(height: 24.0),
-          new FixedColumnCountGrid(
-            columnCount: 2,
-            rowSpacing: 8.0,
-            columnSpacing: 8.0,
+          new SliverPadding(
             padding: const EdgeInsets.all(8.0),
-            tileAspectRatio: 160.0 / 216.0, // width/height
-            children: config.products
-              .where((Product product) => product != config.order.product)
-              .map((Product product) {
-                return new RepaintBoundary(
-                  child: new Card(
-                    elevation: 1,
-                    child: new Image.asset(
-                      product.imageAsset,
-                      fit: ImageFit.contain
-                    )
-                  )
-                );
-            }).toList()
-          )
-        ]
-      )
+            child: new SliverGrid(
+              gridDelegate: new SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                mainAxisSpacing: 8.0,
+                crossAxisSpacing: 8.0,
+                childAspectRatio: 160.0 / 216.0, // width/height
+              ),
+              delegate: new SliverChildListDelegate(
+                config.products
+                  .where((Product product) => product != config.order.product)
+                  .map((Product product) {
+                    return new Card(
+                      elevation: 1,
+                      child: new Image.asset(
+                        product.imageAsset,
+                        fit: ImageFit.contain,
+                      ),
+                    );
+                  }).toList(),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -220,7 +228,7 @@ class ShrineOrderRoute extends ShrinePageRoute<Order> {
   ShrineOrderRoute({
     this.order,
     WidgetBuilder builder,
-    RouteSettings settings: const RouteSettings()
+    RouteSettings settings: const RouteSettings(),
   }) : super(builder: builder, settings: settings) {
     assert(order != null);
   }

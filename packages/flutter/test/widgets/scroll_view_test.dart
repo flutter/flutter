@@ -72,4 +72,47 @@ void main() {
     Viewport2 viewport = tester.widget(find.byType(Viewport2));
     expect(viewport.offset.pixels, equals(2400.0));
   });
+
+  testWidgets('CustomScrollView control test', (WidgetTester tester) async {
+    List<String> log = <String>[];
+
+    await tester.pumpWidget(new CustomScrollView(
+      slivers: <Widget>[
+        new SliverList(
+          delegate: new SliverChildListDelegate(
+            kStates.map<Widget>((String state) {
+              return new GestureDetector(
+                onTap: () {
+                  log.add(state);
+                },
+                child: new Container(
+                  height: 200.0,
+                  decoration: const BoxDecoration(
+                    backgroundColor: const Color(0xFF0000FF),
+                  ),
+                  child: new Text(state),
+                ),
+              );
+            }).toList(),
+          ),
+        ),
+      ],
+    ));
+
+    await tester.tap(find.text('Alabama'));
+    expect(log, equals(<String>['Alabama']));
+    log.clear();
+
+    expect(find.text('Nevada'), findsNothing);
+
+    await tester.scroll(find.text('Alabama'), const Offset(0.0, -4000.0));
+    await tester.pump();
+
+    expect(find.text('Alabama'), findsNothing);
+    expect(tester.getCenter(find.text('Massachusetts')), equals(const Point(400.0, 100.0)));
+
+    await tester.tap(find.text('Massachusetts'));
+    expect(log, equals(<String>['Massachusetts']));
+    log.clear();
+  });
 }
