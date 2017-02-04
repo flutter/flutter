@@ -71,7 +71,8 @@ class Dialog extends StatelessWidget {
 ///
 /// If the content is too large to fit on the screen vertically, the dialog will
 /// display the title and the actions and let the content overflow. Consider
-/// using a scrolling widget, such as [Block], for [content] to avoid overflow.
+/// using a scrolling widget, such as [ScrollList], for [content] to avoid
+/// overflow.
 ///
 /// For dialogs that offer the user a choice between several options, consider
 /// using a [SimpleDialog].
@@ -113,9 +114,9 @@ class AlertDialog extends StatelessWidget {
   /// The (optional) content of the dialog is displayed in the center of the
   /// dialog in a lighter font.
   ///
-  /// Typically, this is a [Block] containing the contents of the dialog. Using
-  /// a [Block] ensures that the contents can scroll if they are too big to fit
-  /// on the display.
+  /// Typically, this is a [ScrollList] containing the contents of the dialog.
+  /// Using a [ScrollList] ensures that the contents can scroll if they are too
+  /// big to fit on the display.
   final Widget content;
 
   /// Padding around the content.
@@ -263,8 +264,8 @@ class SimpleDialog extends StatelessWidget {
   /// padding will be provided.
   final EdgeInsets titlePadding;
 
-  /// The (optional) content of the dialog is displayed in a [Block] underneath
-  /// the title.
+  /// The (optional) content of the dialog is displayed in a
+  /// [SingleChildScrollView] underneath the title.
   ///
   /// Typically a list of [SimpleDialogOption]s.
   final List<Widget> children;
@@ -305,7 +306,7 @@ class SimpleDialog extends StatelessWidget {
           child: new Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: body
+            children: body,
           )
         )
       )

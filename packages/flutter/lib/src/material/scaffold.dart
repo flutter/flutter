@@ -347,10 +347,8 @@ class Scaffold extends StatefulWidget {
   ///
   /// If you have a column of widgets that should normally fit on the screen,
   /// but may overflow and would in such cases need to scroll, consider using a
-  /// [Block] as the body of the scaffold.
-  ///
-  /// If you have a list of items, consider using a [LazyBlock],
-  /// [LazyScrollableList], or [MaterialList] as the body of the scaffold.
+  /// [ScrollList] as the body of the scaffold. This is also a good choice for
+  /// the case where your body is a scrollable list.
   final Widget body;
 
   /// A button displayed floating above [body], in the bottom right corner.

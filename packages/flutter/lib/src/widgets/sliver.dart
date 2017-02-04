@@ -44,7 +44,7 @@ abstract class SliverChildDelegate {
 // ///
 // /// In general building all the widgets in advance is not efficient. It is
 // /// better to create a delegate that builds them on demand by subclassing
-// /// [SliverBlockDelegate] directly.
+// /// [SliverChildDelegate] directly.
 // ///
 // /// This class is provided for the cases where either the list of children is
 // /// known well in advance (ideally the children are themselves compile-time
@@ -114,21 +114,21 @@ abstract class SliverMultiBoxAdaptorWidget extends RenderObjectWidget {
   }
 }
 
-class SliverBlock extends SliverMultiBoxAdaptorWidget {
-  SliverBlock({
+class SliverList extends SliverMultiBoxAdaptorWidget {
+  SliverList({
     Key key,
     @required SliverChildDelegate delegate,
   }) : super(key: key, delegate: delegate);
 
   @override
-  RenderSliverBlock createRenderObject(BuildContext context) {
+  RenderSliverList createRenderObject(BuildContext context) {
     final SliverMultiBoxAdaptorElement element = context;
-    return new RenderSliverBlock(childManager: element);
+    return new RenderSliverList(childManager: element);
   }
 }
 
-class SliverList extends SliverMultiBoxAdaptorWidget {
-  SliverList({
+class SliverFixedExtentList extends SliverMultiBoxAdaptorWidget {
+  SliverFixedExtentList({
     Key key,
     @required SliverChildDelegate delegate,
     @required this.itemExtent,
@@ -137,13 +137,13 @@ class SliverList extends SliverMultiBoxAdaptorWidget {
   final double itemExtent;
 
   @override
-  RenderSliverList createRenderObject(BuildContext context) {
+  RenderSliverFixedExtentList createRenderObject(BuildContext context) {
     final SliverMultiBoxAdaptorElement element = context;
-    return new RenderSliverList(childManager: element, itemExtent: itemExtent);
+    return new RenderSliverFixedExtentList(childManager: element, itemExtent: itemExtent);
   }
 
   @override
-  void updateRenderObject(BuildContext context, RenderSliverList renderObject) {
+  void updateRenderObject(BuildContext context, RenderSliverFixedExtentList renderObject) {
     renderObject.itemExtent = itemExtent;
   }
 }

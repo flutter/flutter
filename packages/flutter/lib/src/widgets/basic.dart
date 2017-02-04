@@ -1482,14 +1482,12 @@ class SliverPadding extends SingleChildRenderObjectWidget {
 
 /// A widget that uses the block layout algorithm for its children.
 ///
-/// This widget is rarely used directly. Instead, consider using [Block], which
-/// combines the block layout algorithm with scrolling behavior.
+/// This widget is rarely used directly. Instead, consider using [SliverList],
+/// which combines a similar layout algorithm with scrolling behavior, or
+/// [Column], which gives you more flexible control over the layout of a
+/// vertical set of boxes.
 ///
 /// For details about the block layout algorithm, see [RenderBlockBase].
-///
-/// See also:
-///
-///  * [Block], which combines block layout with scrolling.
 class BlockBody extends MultiChildRenderObjectWidget {
   /// Creates a block layout widget.
   ///
@@ -2001,7 +1999,7 @@ class GridPlacementData<DataType> extends ParentDataWidget<GridRenderObjectWidge
 /// The [Flex] widget does not scroll (and in general it is considered an error
 /// to have more children in a [Flex] than will fit in the available room). If
 /// you have some widgets and want them to be able to scroll if there is
-/// insufficient room, consider using a [Block].
+/// insufficient room, consider using a [ScrollList].
 ///
 /// If you only have one child, then rather than using [Flex], [Row], or
 /// [Column], consider using [Align] or [Center] to position the child.
@@ -2130,7 +2128,7 @@ class Flex extends MultiChildRenderObjectWidget {
 /// The [Row] widget does not scroll (and in general it is considered an error
 /// to have more children in a [Row] than will fit in the available room). If
 /// you have a line of widgets and want them to be able to scroll if there is
-/// insufficient room, consider using a [Block].
+/// insufficient room, consider using a [ScrollList].
 ///
 /// For a vertical variant, see [Column].
 ///
@@ -2201,7 +2199,7 @@ class Row extends Flex {
 /// The [Column] widget does not scroll (and in general it is considered an error
 /// to have more children in a [Column] than will fit in the available room). If
 /// you have a line of widgets and want them to be able to scroll if there is
-/// insufficient room, consider using a [Block].
+/// insufficient room, consider using a [ScrollList].
 ///
 /// For a horizontal variant, see [Row].
 ///
