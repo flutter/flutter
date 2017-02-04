@@ -177,36 +177,46 @@ class _OrderPageState extends State<OrderPage> {
           color: Colors.black
         )
       ),
-      body: new Block(
-        children: <Widget>[
-          new OrderItem(
-            product: config.order.product,
-            quantity: currentOrder.quantity,
-            quantityChanged: (int value) { updateOrder(quantity: value); }
+      body: new CustomScrollView(
+        slivers: <Widget>[
+          new SliverList(
+            delegate: new SliverChildListDelegate(<Widget>[
+              new OrderItem(
+                product: config.order.product,
+                quantity: currentOrder.quantity,
+                quantityChanged: (int value) { updateOrder(quantity: value); }
+              ),
+              new SizedBox(height: 24.0),
+            ]),
           ),
-          new SizedBox(height: 24.0),
-          new FixedColumnCountGrid(
-            columnCount: 2,
-            rowSpacing: 8.0,
-            columnSpacing: 8.0,
+          new SliverPadding(
             padding: const EdgeInsets.all(8.0),
-            tileAspectRatio: 160.0 / 216.0, // width/height
-            children: config.products
-              .where((Product product) => product != config.order.product)
-              .map((Product product) {
-                return new RepaintBoundary(
-                  child: new Card(
-                    elevation: 1,
-                    child: new Image.asset(
-                      product.imageAsset,
-                      fit: ImageFit.contain
-                    )
-                  )
-                );
-            }).toList()
-          )
-        ]
-      )
+            child: new SliverGrid(
+              gridDelegate: new SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                mainAxisSpacing: 8.0,
+                crossAxisSpacing: 8.0,
+                childAspectRatio: 160.0 / 216.0, // width/height
+              ),
+              delegate: new SliverChildListDelegate(
+                config.products
+                  .where((Product product) => product != config.order.product)
+                  .map((Product product) {
+                    return new RepaintBoundary(
+                      child: new Card(
+                        elevation: 1,
+                        child: new Image.asset(
+                          product.imageAsset,
+                          fit: ImageFit.contain,
+                        )
+                      )
+                    );
+                }).toList(),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
