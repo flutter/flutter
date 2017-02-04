@@ -89,6 +89,32 @@ class OnTapPage extends StatelessWidget {
   }
 }
 
+class TestObserver extends NavigatorObserver {
+  bool isPushed = false;
+  bool isPoped = false;
+  bool _firstRun = true;
+
+  @override
+  void didPush(Route<dynamic> route, Route<dynamic> previousRoute) {
+    if (_firstRun) {
+      _firstRun = false;
+      expect(route is PageRoute && route.settings.name == '/', isTrue);
+      expect(previousRoute, isNull);
+    } else {
+      expect(route is PageRoute && route.settings.name == '/A', isTrue);
+      expect(previousRoute is PageRoute && previousRoute.settings.name == '/', isTrue);
+    }
+    isPushed = true;
+  }
+
+  @override
+  void didPop(Route<dynamic> route, Route<dynamic> previousRoute) {
+    expect(route is PageRoute && route.settings.name == '/A', isTrue);
+    expect(previousRoute is PageRoute && previousRoute.settings.name == '/', isTrue);
+    isPoped = true;
+  }
+}
+
 void main() {
   testWidgets('Can navigator navigate to and from a stateful widget', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
@@ -258,6 +284,41 @@ void main() {
     expect(find.text('/'), findsNothing);
     expect(find.text('A'), findsNothing);
     expect(find.text('B'), findsOneWidget);
+  });
+
+  testWidgets('push and pop should trigger the observers',
+      (WidgetTester tester) async {
+    final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+       '/': (BuildContext context) => new OnTapPage(id: '/', onTap: () { Navigator.pushNamed(context, '/A'); }),
+      '/A': (BuildContext context) => new OnTapPage(id: 'A', onTap: () { Navigator.pop(context); }),
+    };
+    TestObserver observer1 = new TestObserver();
+    TestObserver observer2 = new TestObserver();
+
+    await tester.pumpWidget(new MaterialApp(
+      routes: routes,
+      navigatorObservers: <NavigatorObserver>[observer1, observer2],
+    ));
+    expect(find.text('/'), findsOneWidget);
+    expect(find.text('A'), findsNothing);
+
+    await tester.tap(find.text('/'));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.text('/'), findsNothing);
+    expect(find.text('A'), findsOneWidget);
+    expect(observer1.isPushed, isTrue);
+    expect(observer1.isPoped, isFalse);
+    expect(observer2.isPushed, isTrue);
+    expect(observer2.isPoped, isFalse);
+
+    await tester.tap(find.text('A'));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.text('/'), findsOneWidget);
+    expect(find.text('A'), findsNothing);
+    expect(observer1.isPoped, isTrue);
+    expect(observer2.isPoped, isTrue);
   });
 
   testWidgets('replaceNamed', (WidgetTester tester) async {
