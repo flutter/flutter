@@ -519,7 +519,10 @@ public class FlutterView extends SurfaceView
         }
     }
 
-    /** Return the most recent frame as a bitmap. */
+    /**
+     * Return the most recent frame as a bitmap.
+     * @return A bitmap.
+     */
     public Bitmap getBitmap() {
         return nativeGetBitmap(mNativePlatformView);
     }
@@ -741,6 +744,9 @@ public class FlutterView extends SurfaceView
      * Send a message to the Flutter application. The Flutter application can
      * register a platform message handler that will receive these messages with
      * the PlatformMessages object.
+     * @param channel Name of the channel that will receive this message.
+     * @param message Message payload.
+     * @param callback Callback that receives a reply from the application.
      */
     public void sendPlatformMessage(String channel, String message, MessageReplyCallback callback) {
         int responseId = 0;
@@ -754,6 +760,9 @@ public class FlutterView extends SurfaceView
     /**
      * Send a message to the Flutter application.  The Flutter Dart code can register a
      * host message handler that will receive these messages.
+     * @param channel Name of the channel that will receive this message.
+     * @param message Message payload.
+     * @param callback Callback that receives a reply from the application.
      */
     public void sendToFlutter(String channel, String message, MessageReplyCallback callback) {
         sendPlatformMessage(channel, message, callback);
@@ -771,6 +780,8 @@ public class FlutterView extends SurfaceView
     /**
      * Register a callback to be invoked when the Flutter application sends a message
      * to its host.
+     * @param channel Name of the channel used by the application.
+     * @param listener Called when messages arrive.
      */
     public void addOnMessageListener(String channel, OnMessageListener listener) {
         mOnMessageListeners.put(channel, listener);
@@ -779,6 +790,8 @@ public class FlutterView extends SurfaceView
     /**
      * Register a callback to be invoked when the Flutter application sends a message
      * to its host.  The reply to the message can be provided asynchronously.
+     * @param channel Name of the channel used by the application.
+     * @param listener Called when messages arrive.
      */
     public void addOnMessageListenerAsync(String channel, OnMessageListenerAsync listener) {
         mAsyncOnMessageListeners.put(channel, listener);
@@ -787,6 +800,8 @@ public class FlutterView extends SurfaceView
     public interface OnMessageListener {
         /**
          * Called when a message is received from the Flutter app.
+         * @param view The Flutter view hosting the app.
+         * @param message Message payload.
          * @return the reply to the message (can be null)
          */
         String onMessage(FlutterView view, String message);
@@ -795,6 +810,8 @@ public class FlutterView extends SurfaceView
     public interface OnMessageListenerAsync {
         /**
          * Called when a message is received from the Flutter app.
+         * @param view The Flutter view hosting the app.
+         * @param message Message payload.
          * @param response Used to send a reply back to the app.
          */
         void onMessage(FlutterView view, String message, MessageResponse response);

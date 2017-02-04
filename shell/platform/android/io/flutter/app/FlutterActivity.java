@@ -146,6 +146,7 @@ public class FlutterActivity extends Activity {
     /**
      * Returns the Flutter view used by this activity, may be null before
      * onCreate was called.
+     * @return The FlutterView.
      */
     public FlutterView getFlutterView() {
       return flutterView;

@@ -121,6 +121,7 @@ public class FlutterMain {
 
         /**
          * Set the tag associated with Flutter app log messages.
+         * @param tag Log tag.
          */
         public void setLogTag(String tag) {
             logTag = tag;
@@ -129,6 +130,7 @@ public class FlutterMain {
 
     /**
      * Starts initialization of the native system.
+     * @param applicationContext The Android application context.
      */
     public static void startInitialization(Context applicationContext) {
         startInitialization(applicationContext, new Settings());
@@ -136,6 +138,8 @@ public class FlutterMain {
 
     /**
      * Starts initialization of the native system.
+     * @param applicationContext The Android application context.
+     * @param settings Configuration settings.
      */
     public static void startInitialization(Context applicationContext, Settings settings) {
         sSettings = settings;
@@ -158,6 +162,8 @@ public class FlutterMain {
 
     /**
      * Blocks until initialization of the native system has completed.
+     * @param applicationContext The Android application context.
+     * @param args Flags sent to the Flutter runtime.
      */
     public static void ensureInitializationComplete(Context applicationContext, String[] args) {
         if (sInitialized) {
