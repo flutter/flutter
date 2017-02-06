@@ -153,31 +153,31 @@ void main() {
     );
     ScrollPosition position = tester.state<Scrollable2State>(find.byType(Scrollable2)).position;
 
-    position.animate(to: 10000.0, curve: Curves.linear, duration: const Duration(minutes: 1));
+    position.animateTo(10000.0, curve: Curves.linear, duration: const Duration(minutes: 1));
     await tester.pump(const Duration(milliseconds: 10));
     await tester.pump(const Duration(milliseconds: 10));
     await tester.pump(const Duration(milliseconds: 50));
     await tester.pumpUntilNoTransientCallbacks(const Duration(milliseconds: 122));
 
-    position.animate(to: -10000.0, curve: Curves.linear, duration: const Duration(minutes: 1));
+    position.animateTo(-10000.0, curve: Curves.linear, duration: const Duration(minutes: 1));
     await tester.pump(const Duration(milliseconds: 10));
     await tester.pump(const Duration(milliseconds: 10));
     await tester.pump(const Duration(milliseconds: 50));
     await tester.pumpUntilNoTransientCallbacks(const Duration(milliseconds: 122));
 
-    position.animate(to: 10000.0, curve: Curves.linear, duration: const Duration(minutes: 1));
+    position.animateTo(10000.0, curve: Curves.linear, duration: const Duration(minutes: 1));
     await tester.pump(const Duration(milliseconds: 10));
     await tester.pump(const Duration(milliseconds: 10));
     await tester.pump(const Duration(milliseconds: 50));
     await tester.pumpUntilNoTransientCallbacks(const Duration(milliseconds: 122));
 
-    position.animate(to: -10000.0, curve: Curves.linear, duration: const Duration(seconds: 1));
+    position.animateTo(-10000.0, curve: Curves.linear, duration: const Duration(seconds: 1));
     await tester.pump(const Duration(milliseconds: 10));
     await tester.pump(const Duration(milliseconds: 10));
     await tester.pump(const Duration(milliseconds: 50));
     await tester.pumpUntilNoTransientCallbacks(const Duration(milliseconds: 122));
 
-    position.animate(to: 10000.0, curve: Curves.linear, duration: const Duration(seconds: 1));
+    position.animateTo(10000.0, curve: Curves.linear, duration: const Duration(seconds: 1));
     await tester.pump(const Duration(milliseconds: 10));
     await tester.pump(const Duration(milliseconds: 10));
     await tester.pump(const Duration(milliseconds: 50));

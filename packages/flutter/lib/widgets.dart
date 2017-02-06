@@ -47,6 +47,7 @@ export 'src/widgets/raw_keyboard_listener.dart';
 export 'src/widgets/routes.dart';
 export 'src/widgets/scroll_behavior.dart';
 export 'src/widgets/scroll_configuration.dart';
+export 'src/widgets/scroll_controller.dart';
 export 'src/widgets/scroll_notification.dart';
 export 'src/widgets/scroll_physics.dart';
 export 'src/widgets/scroll_position.dart';
