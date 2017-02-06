@@ -79,8 +79,20 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
 // /// demand). For example, the body of a dialog box might fit both of these
 // /// conditions.
 class SliverChildListDelegate extends SliverChildDelegate {
-  const SliverChildListDelegate(this.children);
+  const SliverChildListDelegate(this.children, { this.addRepaintBoundaries: true });
 
+  /// Whether to wrap each child in a [RepaintBoundary].
+  ///
+  /// Typically, children in a scrolling container are wrapped in repaint
+  /// boundaries so that they do not need to be repainted as the list scrolls.
+  /// If the children are easy to repaint (e.g., solid color blocks or a short
+  /// snippet of text), it might be more efficient to not add a repaint boundary
+  /// and simply repaint the children during scrolling.
+  ///
+  /// Defaults to true.
+  final bool addRepaintBoundaries;
+
+  /// The widgets to display.
   final List<Widget> children;
 
   @override
@@ -90,7 +102,7 @@ class SliverChildListDelegate extends SliverChildDelegate {
       return null;
     final Widget child = children[index];
     assert(child != null);
-    return new RepaintBoundary.wrap(child, index);
+    return addRepaintBoundaries ? new RepaintBoundary.wrap(child, index) : child;
   }
 
   @override
