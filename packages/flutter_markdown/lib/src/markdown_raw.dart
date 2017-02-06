@@ -52,16 +52,16 @@ class MarkdownRaw extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new ScrollableViewport(
-      child: new Padding(
-        padding: padding,
-        child: createMarkdownBody(
-          data: data,
-          markdownStyle: markdownStyle,
-          syntaxHighlighter: syntaxHighlighter,
-          onTapLink: onTapLink
-        )
-      )
+    // TODO(abarth): We should use a ListView here and lazily build the widgets
+    // from the markdown.
+    return new SingleChildScrollView(
+      padding: padding,
+      child: createMarkdownBody(
+        data: data,
+        markdownStyle: markdownStyle,
+        syntaxHighlighter: syntaxHighlighter,
+        onTapLink: onTapLink,
+      ),
     );
   }
 
@@ -93,17 +93,17 @@ class MarkdownBodyRaw extends StatefulWidget {
   /// highlighting, but it's possible to pass in a custom [syntaxHighlighter].
   ///
   /// Typically, you may want to wrap the [MarkdownBodyRaw] widget in a
-  /// [Padding] and a [ScrollableViewport], or use the [Markdown class]
+  /// a [ScrollableViewport], or use the [Markdown class].
   ///
-  ///     new ScrollableViewport(
-  ///       child: new Padding(
-  ///         padding: new EdgeInsets.all(16.0),
-  ///         child: new MarkdownBodyRaw(
-  ///           data: markdownSource,
-  ///           markdownStyle: myStyle
-  ///         )
-  ///       )
-  ///     )
+  /// ```dart
+  /// new SingleChildScrollView(
+  ///   padding: new EdgeInsets.all(16.0),
+  ///   child: new MarkdownBodyRaw(
+  ///     data: markdownSource,
+  ///     markdownStyle: myStyle,
+  ///   ),
+  /// ),
+  /// ```
   MarkdownBodyRaw({
     this.data,
     this.markdownStyle,

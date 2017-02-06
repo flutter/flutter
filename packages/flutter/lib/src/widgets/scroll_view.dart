@@ -168,6 +168,25 @@ class ListView extends BoxScrollView {
     padding: padding,
   );
 
+  ListView.builder({
+    Key key,
+    Axis scrollDirection: Axis.vertical,
+    bool reverse: false,
+    ScrollPhysics physics,
+    bool shrinkWrap: false,
+    EdgeInsets padding,
+    this.itemExtent,
+    IndexedWidgetBuilder itemBuilder,
+    int itemCount,
+  }) : childrenDelegate = new SliverChildBuilderDelegate(itemBuilder, childCount: itemCount), super(
+    key: key,
+    scrollDirection: scrollDirection,
+    reverse: reverse,
+    physics: physics,
+    shrinkWrap: shrinkWrap,
+    padding: padding,
+  );
+
   ListView.custom({
     Key key,
     Axis scrollDirection: Axis.vertical,
@@ -190,7 +209,7 @@ class ListView extends BoxScrollView {
 
   final double itemExtent;
 
-  final SliverChildListDelegate childrenDelegate;
+  final SliverChildDelegate childrenDelegate;
 
   @override
   Widget buildChildLayout(BuildContext context) {
@@ -317,7 +336,7 @@ class GridView extends BoxScrollView {
 
   final SliverGridDelegate gridDelegate;
 
-  final SliverChildListDelegate childrenDelegate;
+  final SliverChildDelegate childrenDelegate;
 
   @override
   Widget buildChildLayout(BuildContext context) {
@@ -373,7 +392,7 @@ class PageView extends BoxScrollView {
     assert(childrenDelegate != null);
   }
 
-  final SliverChildListDelegate childrenDelegate;
+  final SliverChildDelegate childrenDelegate;
 
   @override
   Widget buildChildLayout(BuildContext context) {

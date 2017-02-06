@@ -64,15 +64,15 @@ class MarkdownBody extends MarkdownBodyRaw {
   /// by default not using syntax highlighting, but it's possible to pass in
   /// a custom [syntaxHighlighter].
   ///
-  /// Typically, you may want to wrap the [MarkdownBody] widget in a [Padding] and
-  /// a [ScrollableViewport], or use the [Markdown] class
+  /// Typically, you may want to wrap the [MarkdownBody] widget in a
+  /// [SingleChildScrollView], or use the [Markdown] class.
   ///
-  ///     new ScrollableViewport(
-  ///       child: new Padding(
-  ///         padding: new EdgeInsets.all(16.0),
-  ///         child: new Markdown(data: markdownSource)
-  ///       )
-  ///     )
+  /// ```dart
+  /// new SingleChildScrollView(
+  ///   padding: new EdgeInsets.all(16.0),
+  ///   child: new Markdown(data: markdownSource),
+  /// ),
+  /// ```
   MarkdownBody({
     String data,
     SyntaxHighlighter syntaxHighlighter,
