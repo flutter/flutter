@@ -33,8 +33,8 @@ void main() {
         axisDirection: AxisDirection.down,
         slivers: <Widget>[
           new BigSliver(key: key1 = new GlobalKey(), height: bigHeight),
-          new SliverAppBar(key: key2 = new GlobalKey(), delegate: new TestDelegate(), pinned: true),
-          new SliverAppBar(key: key3 = new GlobalKey(), delegate: new TestDelegate(), pinned: true),
+          new SliverPersistentHeader(key: key2 = new GlobalKey(), delegate: new TestDelegate(), pinned: true),
+          new SliverPersistentHeader(key: key3 = new GlobalKey(), delegate: new TestDelegate(), pinned: true),
           new BigSliver(key: key4 = new GlobalKey(), height: bigHeight),
           new BigSliver(key: key5 = new GlobalKey(), height: bigHeight),
         ],
@@ -67,8 +67,8 @@ void main() {
         axisDirection: AxisDirection.down,
         slivers: <Widget>[
           new BigSliver(key: key1 = new GlobalKey(), height: bigHeight),
-          new SliverAppBar(key: key2 = new GlobalKey(), delegate: new TestDelegate(), pinned: true),
-          new SliverAppBar(key: key3 = new GlobalKey(), delegate: new TestDelegate(), pinned: true),
+          new SliverPersistentHeader(key: key2 = new GlobalKey(), delegate: new TestDelegate(), pinned: true),
+          new SliverPersistentHeader(key: key3 = new GlobalKey(), delegate: new TestDelegate(), pinned: true),
           new BigSliver(key: key4 = new GlobalKey(), height: bigHeight),
           new BigSliver(key: key5 = new GlobalKey(), height: bigHeight),
         ],
@@ -157,8 +157,8 @@ void main() {
         axisDirection: AxisDirection.down,
         slivers: <Widget>[
           new BigSliver(key: key1 = new GlobalKey(), height: bigHeight),
-          new SliverAppBar(key: key2 = new GlobalKey(), delegate: new TestDelegate(), pinned: true),
-          new SliverAppBar(key: key3 = new GlobalKey(), delegate: new TestDelegate(), pinned: true),
+          new SliverPersistentHeader(key: key2 = new GlobalKey(), delegate: new TestDelegate(), pinned: true),
+          new SliverPersistentHeader(key: key3 = new GlobalKey(), delegate: new TestDelegate(), pinned: true),
           new BigSliver(key: key4 = new GlobalKey(), height: bigHeight),
           new BigSliver(key: key5 = new GlobalKey(), height: bigHeight),
         ],
@@ -184,7 +184,7 @@ void main() {
   });
 }
 
-class TestDelegate extends SliverAppBarDelegate {
+class TestDelegate extends SliverPersistentHeaderDelegate {
   @override
   double get maxExtent => 200.0;
 

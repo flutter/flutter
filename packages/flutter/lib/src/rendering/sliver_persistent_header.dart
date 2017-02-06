@@ -15,8 +15,8 @@ import 'object.dart';
 import 'sliver.dart';
 import 'viewport_offset.dart';
 
-abstract class RenderSliverAppBar extends RenderSliver with RenderObjectWithChildMixin<RenderBox>, RenderSliverHelpers {
-  RenderSliverAppBar({ RenderBox child }) {
+abstract class RenderSliverPersistentHeader extends RenderSliver with RenderObjectWithChildMixin<RenderBox>, RenderSliverHelpers {
+  RenderSliverPersistentHeader({ RenderBox child }) {
     this.child = child;
   }
 
@@ -76,8 +76,9 @@ abstract class RenderSliverAppBar extends RenderSliver with RenderObjectWithChil
   /// Call this whenever [updateChild] would change or mutate the child even if
   /// given the same `shrinkOffset` as the last time it was called.
   ///
-  /// This must be implemented by [RenderSliverAppBar] subclasses such that the
-  /// next layout after this call will result in [updateChild] being called.
+  /// This must be implemented by [RenderSliverPersistentHeader] subclasses such
+  /// that the next layout after this call will result in [updateChild] being
+  /// called.
   @protected
   void markNeedsUpdate() {
     markNeedsLayout();
@@ -129,7 +130,7 @@ abstract class RenderSliverAppBar extends RenderSliver with RenderObjectWithChil
   ///
   /// The argument must be the value of the [child] property.
   ///
-  /// This must be implemented by [RenderSliverAppBar] subclasses.
+  /// This must be implemented by [RenderSliverPersistentHeader] subclasses.
   ///
   /// If there is no child, this should return 0.0.
   @override
@@ -193,8 +194,8 @@ abstract class RenderSliverAppBar extends RenderSliver with RenderObjectWithChil
 /// a minimum size before continuing to scroll.
 ///
 /// This sliver makes no effort to avoid overlapping other content.
-abstract class RenderSliverScrollingAppBar extends RenderSliverAppBar {
-  RenderSliverScrollingAppBar({
+abstract class RenderSliverScrollingPersistentHeader extends RenderSliverPersistentHeader {
+  RenderSliverScrollingPersistentHeader({
     RenderBox child,
   }) : super(child: child);
 
@@ -228,8 +229,8 @@ abstract class RenderSliverScrollingAppBar extends RenderSliverAppBar {
 /// then shrinks as the viewport continues to scroll.
 ///
 /// This sliver avoids overlapping other earlier slivers where possible.
-abstract class RenderSliverPinnedAppBar extends RenderSliverAppBar {
-  RenderSliverPinnedAppBar({
+abstract class RenderSliverPinnedPersistentHeader extends RenderSliverPersistentHeader {
+  RenderSliverPinnedPersistentHeader({
     RenderBox child,
   }) : super(child: child);
 
@@ -253,8 +254,8 @@ abstract class RenderSliverPinnedAppBar extends RenderSliverAppBar {
   }
 }
 
-abstract class RenderSliverFloatingAppBar extends RenderSliverAppBar {
-  RenderSliverFloatingAppBar({
+abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersistentHeader {
+  RenderSliverFloatingPersistentHeader({
     RenderBox child,
   }) : super(child: child);
 

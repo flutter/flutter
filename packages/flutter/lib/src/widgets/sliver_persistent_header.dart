@@ -7,20 +7,20 @@ import 'package:flutter/rendering.dart';
 
 import 'framework.dart';
 
-abstract class SliverAppBarDelegate {
+abstract class SliverPersistentHeaderDelegate {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
-  const SliverAppBarDelegate();
+  const SliverPersistentHeaderDelegate();
 
   Widget build(BuildContext context, double shrinkOffset);
 
   double get maxExtent;
 
-  bool shouldRebuild(@checked SliverAppBarDelegate oldDelegate);
+  bool shouldRebuild(@checked SliverPersistentHeaderDelegate oldDelegate);
 }
 
-class SliverAppBar extends StatelessWidget {
-  SliverAppBar({
+class SliverPersistentHeader extends StatelessWidget {
+  SliverPersistentHeader({
     Key key,
     @required this.delegate,
     this.pinned: false,
@@ -32,7 +32,7 @@ class SliverAppBar extends StatelessWidget {
     assert(!pinned || !floating);
   }
 
-  final SliverAppBarDelegate delegate;
+  final SliverPersistentHeaderDelegate delegate;
 
   final bool pinned;
 
@@ -41,10 +41,10 @@ class SliverAppBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (pinned)
-      return new _SliverPinnedAppBar(delegate: delegate);
+      return new _SliverPinnedPersistentHeader(delegate: delegate);
     if (floating)
-      return new _SliverFloatingAppBar(delegate: delegate);
-    return new _SliverScrollingAppBar(delegate: delegate);
+      return new _SliverFloatingPersistentHeader(delegate: delegate);
+    return new _SliverScrollingPersistentHeader(delegate: delegate);
   }
 
   @override
@@ -62,14 +62,14 @@ class SliverAppBar extends StatelessWidget {
   }
 }
 
-class _SliverAppBarElement extends RenderObjectElement {
-  _SliverAppBarElement(_SliverAppBarRenderObjectWidget widget) : super(widget);
+class _SliverPersistentHeaderElement extends RenderObjectElement {
+  _SliverPersistentHeaderElement(_SliverPersistentHeaderRenderObjectWidget widget) : super(widget);
 
   @override
-  _SliverAppBarRenderObjectWidget get widget => super.widget;
+  _SliverPersistentHeaderRenderObjectWidget get widget => super.widget;
 
   @override
-  _RenderSliverAppBarForWidgetsMixin get renderObject => super.renderObject;
+  _RenderSliverPersistentHeaderForWidgetsMixin get renderObject => super.renderObject;
 
   @override
   void mount(Element parent, dynamic newSlot) {
@@ -84,11 +84,11 @@ class _SliverAppBarElement extends RenderObjectElement {
   }
 
   @override
-  void update(_SliverAppBarRenderObjectWidget newWidget) {
-    final _SliverAppBarRenderObjectWidget oldWidget = widget;
+  void update(_SliverPersistentHeaderRenderObjectWidget newWidget) {
+    final _SliverPersistentHeaderRenderObjectWidget oldWidget = widget;
     super.update(newWidget);
-    final SliverAppBarDelegate newDelegate = newWidget.delegate;
-    final SliverAppBarDelegate oldDelegate = oldWidget.delegate;
+    final SliverPersistentHeaderDelegate newDelegate = newWidget.delegate;
+    final SliverPersistentHeaderDelegate oldDelegate = oldWidget.delegate;
     if (newDelegate != oldDelegate &&
         (newDelegate.runtimeType != oldDelegate.runtimeType || newDelegate.shouldRebuild(oldDelegate)))
       renderObject.triggerRebuild();
@@ -134,21 +134,21 @@ class _SliverAppBarElement extends RenderObjectElement {
   }
 }
 
-abstract class _SliverAppBarRenderObjectWidget extends RenderObjectWidget {
-  _SliverAppBarRenderObjectWidget({
+abstract class _SliverPersistentHeaderRenderObjectWidget extends RenderObjectWidget {
+  _SliverPersistentHeaderRenderObjectWidget({
     Key key,
     @required this.delegate,
   }) : super(key: key) {
     assert(delegate != null);
   }
 
-  final SliverAppBarDelegate delegate;
+  final SliverPersistentHeaderDelegate delegate;
 
   @override
-  _SliverAppBarElement createElement() => new _SliverAppBarElement(this);
+  _SliverPersistentHeaderElement createElement() => new _SliverPersistentHeaderElement(this);
 
   @override
-  _RenderSliverAppBarForWidgetsMixin createRenderObject(BuildContext context);
+  _RenderSliverPersistentHeaderForWidgetsMixin createRenderObject(BuildContext context);
 
   @override
   void debugFillDescription(List<String> description) {
@@ -157,8 +157,8 @@ abstract class _SliverAppBarRenderObjectWidget extends RenderObjectWidget {
   }
 }
 
-abstract class _RenderSliverAppBarForWidgetsMixin implements RenderSliverAppBar {
-  _SliverAppBarElement _element;
+abstract class _RenderSliverPersistentHeaderForWidgetsMixin implements RenderSliverPersistentHeader {
+  _SliverPersistentHeaderElement _element;
 
   @override
   double get maxExtent => _element.widget.delegate.maxExtent;
@@ -175,54 +175,54 @@ abstract class _RenderSliverAppBarForWidgetsMixin implements RenderSliverAppBar 
   }
 }
 
-class _SliverScrollingAppBar extends _SliverAppBarRenderObjectWidget {
-  _SliverScrollingAppBar({
+class _SliverScrollingPersistentHeader extends _SliverPersistentHeaderRenderObjectWidget {
+  _SliverScrollingPersistentHeader({
     Key key,
-    @required SliverAppBarDelegate delegate,
+    @required SliverPersistentHeaderDelegate delegate,
   }) : super(key: key, delegate: delegate);
 
   @override
-  _RenderSliverAppBarForWidgetsMixin createRenderObject(BuildContext context) {
-    return new _RenderSliverScrollingAppBarForWidgets();
+  _RenderSliverPersistentHeaderForWidgetsMixin createRenderObject(BuildContext context) {
+    return new _RenderSliverScrollingPersistentHeaderForWidgets();
   }
 }
 
 // This class exists to work around https://github.com/dart-lang/sdk/issues/15101
-abstract class _RenderSliverScrollingAppBar extends RenderSliverScrollingAppBar { }
+abstract class _RenderSliverScrollingPersistentHeader extends RenderSliverScrollingPersistentHeader { }
 
-class _RenderSliverScrollingAppBarForWidgets extends _RenderSliverScrollingAppBar
-  with _RenderSliverAppBarForWidgetsMixin { }
+class _RenderSliverScrollingPersistentHeaderForWidgets extends _RenderSliverScrollingPersistentHeader
+  with _RenderSliverPersistentHeaderForWidgetsMixin { }
 
-class _SliverPinnedAppBar extends _SliverAppBarRenderObjectWidget {
-  _SliverPinnedAppBar({
+class _SliverPinnedPersistentHeader extends _SliverPersistentHeaderRenderObjectWidget {
+  _SliverPinnedPersistentHeader({
     Key key,
-    @required SliverAppBarDelegate delegate,
+    @required SliverPersistentHeaderDelegate delegate,
   }) : super(key: key, delegate: delegate);
 
   @override
-  _RenderSliverAppBarForWidgetsMixin createRenderObject(BuildContext context) {
-    return new _RenderSliverPinnedAppBarForWidgets();
+  _RenderSliverPersistentHeaderForWidgetsMixin createRenderObject(BuildContext context) {
+    return new _RenderSliverPinnedPersistentHeaderForWidgets();
   }
 }
 
 // This class exists to work around https://github.com/dart-lang/sdk/issues/15101
-abstract class _RenderSliverPinnedAppBar extends RenderSliverPinnedAppBar { }
+abstract class _RenderSliverPinnedPersistentHeader extends RenderSliverPinnedPersistentHeader { }
 
-class _RenderSliverPinnedAppBarForWidgets extends _RenderSliverPinnedAppBar with _RenderSliverAppBarForWidgetsMixin { }
+class _RenderSliverPinnedPersistentHeaderForWidgets extends _RenderSliverPinnedPersistentHeader with _RenderSliverPersistentHeaderForWidgetsMixin { }
 
-class _SliverFloatingAppBar extends _SliverAppBarRenderObjectWidget {
-  _SliverFloatingAppBar({
+class _SliverFloatingPersistentHeader extends _SliverPersistentHeaderRenderObjectWidget {
+  _SliverFloatingPersistentHeader({
     Key key,
-    @required SliverAppBarDelegate delegate,
+    @required SliverPersistentHeaderDelegate delegate,
   }) : super(key: key, delegate: delegate);
 
   @override
-  _RenderSliverAppBarForWidgetsMixin createRenderObject(BuildContext context) {
-    return new _RenderSliverFloatingAppBarForWidgets();
+  _RenderSliverPersistentHeaderForWidgetsMixin createRenderObject(BuildContext context) {
+    return new _RenderSliverFloatingPersistentHeaderForWidgets();
   }
 }
 
 // This class exists to work around https://github.com/dart-lang/sdk/issues/15101
-abstract class _RenderSliverFloatingAppBar extends RenderSliverFloatingAppBar { }
+abstract class _RenderSliverFloatingPersistentHeader extends RenderSliverFloatingPersistentHeader { }
 
-class _RenderSliverFloatingAppBarForWidgets extends _RenderSliverFloatingAppBar with _RenderSliverAppBarForWidgetsMixin { }
+class _RenderSliverFloatingPersistentHeaderForWidgets extends _RenderSliverFloatingPersistentHeader with _RenderSliverPersistentHeaderForWidgetsMixin { }

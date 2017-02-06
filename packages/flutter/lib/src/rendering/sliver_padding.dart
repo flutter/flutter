@@ -21,10 +21,10 @@ import 'sliver.dart';
 /// passed on to the child.
 ///
 /// Applying this to anything but the most mundane sliver is likely to have
-/// undesired effects. For example, wrapping a [RenderSliverPinnedAppBar] will
-/// cause the app bar to overlap earlier slivers (contrary to the normal
-/// behavior of pinned app bars), and while the app bar is pinned, the padding
-/// will scroll away.
+/// undesired effects. For example, wrapping a
+/// [RenderSliverPinnedPersistentHeader] will cause the app bar to overlap
+/// earlier slivers (contrary to the normal behavior of pinned app bars), and
+/// while the app bar is pinned, the padding will scroll away.
 class RenderSliverPadding extends RenderSliver with RenderObjectWithChildMixin<RenderSliver> {
   /// Creates a render object that insets its child in a viewport.
   ///
