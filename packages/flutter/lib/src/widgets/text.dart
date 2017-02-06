@@ -13,7 +13,7 @@ class DefaultTextStyle extends InheritedWidget {
   /// Creates a default text style for the given subtree.
   ///
   /// Consider using [DefaultTextStyle.merge] to inherit styling information
-  /// from a the current default text style for a given [BuildContext].
+  /// from the current default text style for a given [BuildContext].
   DefaultTextStyle({
     Key key,
     @required this.style,
@@ -21,7 +21,7 @@ class DefaultTextStyle extends InheritedWidget {
     this.softWrap: true,
     this.overflow: TextOverflow.clip,
     this.maxLines,
-    Widget child
+    @required Widget child,
   }) : super(key: key, child: child) {
     assert(style != null);
     assert(softWrap != null);
@@ -32,6 +32,9 @@ class DefaultTextStyle extends InheritedWidget {
   /// A const-constructible default text style that provides fallback values.
   ///
   /// Returned from [of] when the given [BuildContext] doesn't have an enclosing default text style.
+  ///
+  /// This constructor creates a [DefaultTextStyle] that lacks a [child], which
+  /// means the constructed value cannot be incorporated into the tree.
   const DefaultTextStyle.fallback()
     : style = const TextStyle(),
       textAlign = null,
@@ -53,7 +56,7 @@ class DefaultTextStyle extends InheritedWidget {
     bool softWrap,
     TextOverflow overflow,
     int maxLines,
-    Widget child
+    @required Widget child,
   }) {
     assert(context != null);
     assert(child != null);
