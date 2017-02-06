@@ -27,11 +27,12 @@ abstract class Notification {
   @protected
   @mustCallSuper
   bool visitAncestor(Element element) {
-    if (element is StatelessElement &&
-        element.widget is NotificationListener<Notification>) {
-      final NotificationListener<Notification> widget = element.widget;
-      if (widget._dispatch(this, element)) // that function checks the type dynamically
-        return false;
+    if (element is StatelessElement) {
+      StatelessWidget widget = element.widget;
+      if (widget is NotificationListener<Notification>) {
+        if (widget._dispatch(this, element)) // that function checks the type dynamically
+          return false;
+      }
     }
     return true;
   }
