@@ -41,16 +41,16 @@ void main() {
                           setState(() {
                             _selectedDate = value;
                           });
-                        }
-                      )
-                    )
-                  )
+                        },
+                      ),
+                    ),
+                  ),
                 );
-              }
-            )
-          )
-        ]
-      )
+              },
+            ),
+          ),
+        ],
+      ),
     );
 
     await tester.tapAt(const Point(50.0, 100.0));
@@ -79,7 +79,7 @@ void main() {
     expect(_selectedDate, equals(new DateTime(2016, DateTime.SEPTEMBER, 25)));
     await tester.pump(const Duration(seconds: 2));
 
-    await tester.scroll(find.byKey(_datePickerKey), const Offset(300.0, 10.0));
+    await tester.scroll(find.byKey(_datePickerKey), const Offset(300.0, 0.0));
     await tester.pump();
     await tester.pump(const Duration(seconds: 2));
     expect(_selectedDate, equals(new DateTime(2016, DateTime.SEPTEMBER, 25)));
@@ -105,17 +105,17 @@ void main() {
                           firstDate: new DateTime(0),
                           lastDate: new DateTime(9999),
                           onChanged: (DateTime value) { },
-                          selectedDate: new DateTime(2000, DateTime.JANUARY, 1)
-                        )
-                      )
-                    )
-                  )
+                          selectedDate: new DateTime(2000, DateTime.JANUARY, 1),
+                        ),
+                      ),
+                    ),
+                  ),
                 );
-              }
-            )
-          )
-        ]
-      )
+              },
+            ),
+          ),
+        ],
+      ),
     );
     await tester.pump(const Duration(seconds: 5));
   });
