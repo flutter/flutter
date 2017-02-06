@@ -101,7 +101,7 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> with Sing
     return new Scaffold(
       appBar: new AppBar(title: new Text('Progress indicators')),
       body: new Center(
-        child: new ScrollableViewport(
+        child: new SingleChildScrollView(
           child: new DefaultTextStyle(
             style: Theme.of(context).textTheme.title,
             child: new GestureDetector(

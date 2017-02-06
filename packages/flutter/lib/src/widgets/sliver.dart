@@ -63,7 +63,7 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
   int get estimatedChildCount => childCount;
 
   @override
-  bool shouldRebuild(@checked SliverChildListDelegate oldDelegate) => true;
+  bool shouldRebuild(@checked SliverChildBuilderDelegate oldDelegate) => true;
 }
 
 // ///

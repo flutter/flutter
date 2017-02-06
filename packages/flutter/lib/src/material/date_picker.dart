@@ -544,34 +544,28 @@ class YearPicker extends StatefulWidget {
 class _YearPickerState extends State<YearPicker> {
   static const double _itemExtent = 50.0;
 
-  List<Widget> _buildItems(BuildContext context, int start, int count) {
-    final ThemeData themeData = Theme.of(context);
-    final TextStyle style = themeData.textTheme.body1;
-    final List<Widget> items = new List<Widget>();
-    for (int i = start; i < start + count; i++) {
-      final int year = config.firstDate.year + i;
-      final TextStyle itemStyle = year == config.selectedDate.year ?
-        themeData.textTheme.headline.copyWith(color: themeData.accentColor) : style;
-      items.add(new InkWell(
-        key: new ValueKey<int>(year),
-        onTap: () {
-          config.onChanged(new DateTime(year, config.selectedDate.month, config.selectedDate.day));
-        },
-        child: new Center(
-          child: new Text(year.toString(), style: itemStyle)
-        )
-      ));
-    }
-    return items;
-  }
-
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
-    return new ScrollableLazyList(
+    final ThemeData themeData = Theme.of(context);
+    final TextStyle style = themeData.textTheme.body1;
+    return new ListView.builder(
       itemExtent: _itemExtent,
       itemCount: config.lastDate.year - config.firstDate.year + 1,
-      itemBuilder: _buildItems
+      itemBuilder: (BuildContext context, int index) {
+        final int year = config.firstDate.year + index;
+        final TextStyle itemStyle = year == config.selectedDate.year ?
+            themeData.textTheme.headline.copyWith(color: themeData.accentColor) : style;
+        return new InkWell(
+          key: new ValueKey<int>(year),
+          onTap: () {
+            config.onChanged(new DateTime(year, config.selectedDate.month, config.selectedDate.day));
+          },
+          child: new Center(
+            child: new Text(year.toString(), style: itemStyle),
+          ),
+        );
+      },
     );
   }
 }

@@ -17,17 +17,18 @@ class StockList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new ScrollableList(
+    return new ListView.builder(
       key: const ValueKey<String>('stock-list'),
       itemExtent: StockRow.kHeight,
-      children: stocks.map((Stock stock) {
+      itemCount: stocks.length,
+      itemBuilder: (BuildContext context, int index) {
         return new StockRow(
-          stock: stock,
+          stock: stocks[index],
           onPressed: onOpen,
           onDoubleTap: onShow,
           onLongPressed: onAction
         );
-      })
+      },
     );
   }
 }
