@@ -11,8 +11,9 @@ import 'package:meta/meta.dart';
 /// This contrasts to [GrowthDirection] in that it has a third value, [idle],
 /// for the case where no scroll is occurring.
 ///
-/// This is used by [RenderSliverFloatingAppBar] to only expand when the user is
-/// scrolling in the same direction as the detected scroll offset change.
+/// This is used by [RenderSliverFloatingPersistentHeader] to only expand when
+/// the user is scrolling in the same direction as the detected scroll offset
+/// change.
 enum ScrollDirection {
   /// No scrolling is underway.
   idle,
@@ -101,9 +102,9 @@ abstract class ViewportOffset extends ChangeNotifier {
   /// the viewport's [RenderViewport2.axisDirection].
   ///
   /// This is used by some slivers to determine how to react to a change in
-  /// scroll offset. For example, [RenderSliverFloatingAppBar] will only expand
-  /// a floating app bar when the [userScrollDirection] is in the positive
-  /// scroll offset direction.
+  /// scroll offset. For example, [RenderSliverFloatingPersistentHeader] will
+  /// only expand a floating app bar when the [userScrollDirection] is in the
+  /// positive scroll offset direction.
   ScrollDirection get userScrollDirection;
 
   @override

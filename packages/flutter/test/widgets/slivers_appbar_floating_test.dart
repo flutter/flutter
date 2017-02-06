@@ -32,7 +32,7 @@ void main() {
         axisDirection: AxisDirection.down,
         slivers: <Widget>[
           new BigSliver(height: bigHeight),
-          new SliverAppBar(delegate: new TestDelegate(), floating: true),
+          new SliverPersistentHeader(delegate: new TestDelegate(), floating: true),
           new BigSliver(height: bigHeight),
         ],
       ),
@@ -60,7 +60,7 @@ void main() {
         axisDirection: AxisDirection.down,
         slivers: <Widget>[
           new BigSliver(key: key1 = new GlobalKey(), height: bigHeight),
-          new SliverAppBar(key: key2 = new GlobalKey(), delegate: delegate, floating: true),
+          new SliverPersistentHeader(key: key2 = new GlobalKey(), delegate: delegate, floating: true),
           new BigSliver(key: key3 = new GlobalKey(), height: bigHeight),
         ],
       ),
@@ -130,7 +130,7 @@ void main() {
         axisDirection: AxisDirection.down,
         slivers: <Widget>[
           new BigSliver(key: key1 = new GlobalKey(), height: bigHeight),
-          new SliverAppBar(key: key2 = new GlobalKey(), delegate: delegate, floating: true),
+          new SliverPersistentHeader(key: key2 = new GlobalKey(), delegate: delegate, floating: true),
           new BigSliver(key: key3 = new GlobalKey(), height: bigHeight),
         ],
       ),
@@ -163,7 +163,7 @@ void main() {
         axisDirection: AxisDirection.down,
         slivers: <Widget>[
           new BigSliver(key: key1 = new GlobalKey(), height: bigHeight),
-          new SliverAppBar(key: key2 = new GlobalKey(), delegate: delegate, floating: true),
+          new SliverPersistentHeader(key: key2 = new GlobalKey(), delegate: delegate, floating: true),
           new BigSliver(key: key3 = new GlobalKey(), height: bigHeight),
         ],
       ),
@@ -190,7 +190,7 @@ void main() {
   });
 }
 
-class TestDelegate extends SliverAppBarDelegate {
+class TestDelegate extends SliverPersistentHeaderDelegate {
   @override
   double get maxExtent => 200.0;
 
