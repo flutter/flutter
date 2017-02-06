@@ -4,6 +4,8 @@
 
 import 'dart:async';
 
+import 'package:path/path.dart' as path;
+
 import '../base/common.dart';
 import '../base/os.dart';
 import '../base/process.dart';
@@ -56,9 +58,10 @@ class UpgradeCommand extends FlutterCommand {
     // if necessary.
     printStatus('');
     printStatus('Upgrading engine...');
+    String flutter = os.getExecutableName('flutter', winExtension: 'bat');
     code = await runCommandAndStreamOutput(
       <String>[
-        'bin/flutter', '--no-color', 'precache'
+        path.join(Cache.flutterRoot, 'bin', flutter), '--no-color', 'precache'
       ],
       workingDirectory: Cache.flutterRoot,
       allowReentrantFlutter: true

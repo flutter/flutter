@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io' as io;
+
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -16,7 +18,7 @@ import 'src/context.dart';
 
 void main()  {
   group('DependencyChecker', () {
-    final String basePath = path.dirname(platform.script.path);
+    final String basePath = path.dirname(path.fromUri(platform.script));
     final String dataPath = path.join(basePath, 'data', 'dart_dependencies_test');
     MemoryFileSystem testFileSystem;
 
@@ -97,5 +99,5 @@ void main()  {
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
     });
-  });
+  }, skip: io.Platform.isWindows); // TODO(goderbauer): Migrate test away from 'touch' bash command.
 }
