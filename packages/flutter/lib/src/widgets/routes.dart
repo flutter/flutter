@@ -665,10 +665,14 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// `dependenciesChanged` method:
   ///
   /// ```dart
+  /// ModalRoute<dynamic> _route;
+  ///
   /// @override
   /// void dependenciesChanged() {
   ///  super.dependenciesChanged();
-  ///  ModalRoute.of(context).addScopedWillPopCallback(askTheUserIfTheyAreSure);
+  ///  _route?.removeScopedWillPopCallback(askTheUserIfTheyAreSure);
+  ///  _route = ModalRoute.of(context);
+  ///  _route?.addScopedWillPopCallback(askTheUserIfTheyAreSure);
   /// }
   /// ```
   ///
@@ -678,6 +682,19 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// This callback runs asynchronously and it's possible that it will be called
   /// after its route has been disposed. The callback should check [mounted] before
   /// doing anything.
+  ///
+  /// A widget that adds a scopedWillPopCallback must ensure that the callback
+  /// is removed with [removeScopedWillPopCallback] by the time the widget has
+  /// been disposed. A stateful widget can do this in its dispose method
+  /// (continuing the previous example):
+  ///
+  /// ```dart
+  /// @override
+  /// void dispose() {
+  ///   _route?.removeScopedWillPopCallback(askTheUserIfTheyAreSure);
+  ///   super.dispose();
+  /// }
+  /// ```
   ///
   /// See also:
   ///
