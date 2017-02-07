@@ -230,17 +230,17 @@ Future<Null> diagnoseXcodeBuildFailure(XcodeBuildResult result) async {
       if (checkBuildSettings.exitCode == 0
           && !checkBuildSettings.stdout?.contains('DEVELOPMENT_TEAM') == true) {
         printError('''
-═══════════════════════════════════════════════════════════════════════════════════\n
-Building an iOS app requires a selected Development Team with a Provisioning Profile\n
-Please ensure that a Development Team is selected by:\n
-  1- Opening the Flutter project's Xcode target with\n
-       open ios/Runner.xcodeproj\n
-  2- Select the 'Runner' project in the navigator then the 'Runner' target\n
-     in the project settings\n
-  3- In the 'General' tab, make sure a 'Development Team' is selected\n\n
-For more information, please visit:\n
-  https://flutter.io/setup/#deploy-to-ios-devices\n\n
-Or run on an iOS simulator\n
+═══════════════════════════════════════════════════════════════════════════════════
+Building an iOS app requires a selected Development Team with a Provisioning Profile
+Please ensure that a Development Team is selected by:
+  1- Opening the Flutter project's Xcode target with
+       open ios/Runner.xcodeproj
+  2- Select the 'Runner' project in the navigator then the 'Runner' target
+     in the project settings
+  3- In the 'General' tab, make sure a 'Development Team' is selected\n
+For more information, please visit:
+  https://flutter.io/setup/#deploy-to-ios-devices\n
+Or run on an iOS simulator
 ═══════════════════════════════════════════════════════════════════════════════════''');
       }
     }
