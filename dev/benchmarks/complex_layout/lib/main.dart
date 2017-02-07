@@ -52,24 +52,6 @@ class ComplexLayout extends StatefulWidget {
   static ComplexLayoutState of(BuildContext context) => context.ancestorStateOfType(const TypeMatcher<ComplexLayoutState>());
 }
 
-class FancyItemDelegate extends LazyBlockDelegate {
-  @override
-  Widget buildItem(BuildContext context, int index) {
-    if (index % 2 == 0)
-      return new FancyImageItem(index, key: new ValueKey<int>(index));
-    else
-      return new FancyGalleryItem(index, key: new ValueKey<int>(index));
-  }
-
-  @override
-  bool shouldRebuild(FancyItemDelegate oldDelegate) => false;
-
-  @override
-  double estimateTotalExtent(int firstIndex, int lastIndex, double minOffset, double firstStartOffset, double lastEndOffset) {
-    return double.INFINITY;
-  }
-}
-
 class ComplexLayoutState extends State<ComplexLayout> {
   @override
   Widget build(BuildContext context) {
@@ -91,10 +73,15 @@ class ComplexLayoutState extends State<ComplexLayout> {
       body: new Column(
         children: <Widget>[
           new Expanded(
-            child: new LazyBlock(
+            child: new ListView.builder(
               key: new Key('main-scroll'), // this key is used by the driver test
-              delegate: new FancyItemDelegate(),
-            )
+              itemBuilder: (BuildContext context, int index) {
+                if (index % 2 == 0)
+                  return new FancyImageItem(index, key: new ValueKey<int>(index));
+                else
+                  return new FancyGalleryItem(index, key: new ValueKey<int>(index));
+              },
+            ),
           ),
           new BottomBar(),
         ],

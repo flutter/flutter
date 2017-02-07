@@ -21,8 +21,8 @@ Widget buildCard(BuildContext context, int index) {
 }
 
 Widget buildFrame() {
-  return new LazyBlock(
-    delegate: new LazyBlockBuilder(builder: buildCard)
+  return new ListView.builder(
+    itemBuilder: buildCard,
   );
 }
 
