@@ -175,7 +175,7 @@ void main() {
       expect(await location, equals(new Point<int>(3, 4)));
       expect(await outgoingMessages.take(), equals(
         '{"name":"cancel",'
-          '"args":{"eventChannel":"location-events","a":42,"b":"hello"}}'
+         '"args":{"eventChannel":"location-events","a":42,"b":"hello"}}'
       ));
       incomingMessages.add('{"status":"ok"}');
     });

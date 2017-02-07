@@ -100,15 +100,15 @@ class PlatformProtocols {
   /// The native implementation must wrap each data event in an envelope of the
   /// form
   ///
-  ///     { 'status': 'ok',
-  ///       'data': <data>
+  ///     { "status": "ok",
+  ///       "data": <data>
   ///     }
   ///
   /// Similarly, an error event must be wrapped in an envelope of the form
   ///
-  ///     { 'status': 'error',
-  ///       'message': <human-readable error message>,
-  ///       'data': <error details>
+  ///     { "status": "error",
+  ///       "message": <human-readable error message>,
+  ///       "data": <error details>
   ///     }
   ///
   /// For each successful event, the specified [decoder] is used to turn the
