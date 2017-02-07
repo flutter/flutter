@@ -10,8 +10,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
-import 'mock_text_input.dart';
-
 class MockClipboard {
   Object _clipboardData = <String, dynamic>{
     'text': null
@@ -41,7 +39,6 @@ Widget overlay(Widget child) {
 }
 
 void main() {
-  MockTextInput mockTextInput = new MockTextInput()..register();
   MockClipboard mockClipboard = new MockClipboard();
   PlatformMessages.setMockJSONMessageHandler('flutter/platform', mockClipboard.handleJSONMessage);
 
@@ -52,20 +49,6 @@ void main() {
   const String kFourLines =
     kThreeLines +
     'Fourth line won\'t display and ends at abcdef ghi. ';
-
-  void updateEditingState(TextEditingState state) {
-    mockTextInput.updateEditingState(state);
-  }
-
-  void enterText(String text) {
-    mockTextInput.enterText(text);
-  }
-
-  Future<Null> showKeyboard(WidgetTester tester) async {
-    EditableTextState editable = tester.state(find.byType(EditableText).first);
-    editable.requestKeyboard();
-    await tester.pump();
-  }
 
   // Returns the first RenderEditable.
   RenderEditable findRenderEditable(WidgetTester tester) {
@@ -101,7 +84,6 @@ void main() {
       return new Center(
         child: new Material(
           child: new Input(
-            autofocus: true,
             value: inputValue,
             key: inputKey,
             hintText: 'Placeholder',
@@ -119,7 +101,7 @@ void main() {
     Size emptyInputSize = inputBox.size;
 
     Future<Null> checkText(String testValue) async {
-      enterText(testValue);
+      await tester.enterText(find.byType(EditableText), testValue);
       await tester.idle();
 
       // Check that the onChanged event handler fired.
@@ -152,7 +134,7 @@ void main() {
     }
 
     await tester.pumpWidget(builder());
-    await showKeyboard(tester);
+    await tester.showKeyboard(find.byType(EditableText));
 
     EditableTextState editableText = tester.state(find.byType(EditableText));
 
@@ -172,9 +154,10 @@ void main() {
     }
 
     await checkCursorToggle();
+    await tester.showKeyboard(find.byType(EditableText));
 
     // Try the test again with a nonempty EditableText.
-    updateEditingState(const TextEditingState(
+    tester.testTextInput.updateEditingState(const TextEditingState(
       text: 'X',
       selectionBase: 1,
       selectionExtent: 1,
@@ -198,10 +181,10 @@ void main() {
     }
 
     await tester.pumpWidget(builder());
-    await showKeyboard(tester);
+    await tester.showKeyboard(find.byType(EditableText));
 
     const String testValue = 'ABC';
-    updateEditingState(const TextEditingState(
+    tester.testTextInput.updateEditingState(const TextEditingState(
       text: testValue,
       selectionBase: testValue.length,
       selectionExtent: testValue.length,
@@ -235,10 +218,9 @@ void main() {
     }
 
     await tester.pumpWidget(builder());
-    await showKeyboard(tester);
 
     String testValue = 'abc def ghi';
-    enterText(testValue);
+    await tester.enterText(find.byType(EditableText), testValue);
     await tester.idle();
     expect(inputValue.text, testValue);
 
@@ -283,10 +265,9 @@ void main() {
     }
 
     await tester.pumpWidget(builder());
-    await showKeyboard(tester);
 
     String testValue = 'abc def ghi';
-    enterText(testValue);
+    await tester.enterText(find.byType(EditableText), testValue);
     await tester.idle();
 
     await tester.pumpWidget(builder());
@@ -359,10 +340,9 @@ void main() {
     }
 
     await tester.pumpWidget(builder());
-    await showKeyboard(tester);
 
     String testValue = 'abc def ghi';
-    enterText(testValue);
+    await tester.enterText(find.byType(EditableText), testValue);
     await tester.idle();
     await tester.pumpWidget(builder());
 
@@ -425,10 +405,9 @@ void main() {
     }
 
     await tester.pumpWidget(builder());
-    await showKeyboard(tester);
 
     String testValue = 'abc def ghi';
-    enterText(testValue);
+    await tester.enterText(find.byType(EditableText), testValue);
     await tester.idle();
     await tester.pumpWidget(builder());
 
@@ -476,20 +455,19 @@ void main() {
     }
 
     await tester.pumpWidget(builder(3));
-    await showKeyboard(tester);
 
     RenderBox findInputBox() => tester.renderObject(find.byKey(inputKey));
 
     RenderBox inputBox = findInputBox();
     Size emptyInputSize = inputBox.size;
 
-    enterText('No wrapping here.');
+    await tester.enterText(find.byType(EditableText), 'No wrapping here.');
     await tester.idle();
     await tester.pumpWidget(builder(3));
     expect(findInputBox(), equals(inputBox));
     expect(inputBox.size, equals(emptyInputSize));
 
-    enterText(kThreeLines);
+    await tester.enterText(find.byType(EditableText), kThreeLines);
     await tester.idle();
     await tester.pumpWidget(builder(3));
     expect(findInputBox(), equals(inputBox));
@@ -498,14 +476,14 @@ void main() {
     Size threeLineInputSize = inputBox.size;
 
     // An extra line won't increase the size because we max at 3.
-    enterText(kFourLines);
+    await tester.enterText(find.byType(EditableText), kFourLines);
     await tester.idle();
     await tester.pumpWidget(builder(3));
     expect(findInputBox(), equals(inputBox));
     expect(inputBox.size, threeLineInputSize);
 
     // But now it will.
-    enterText(kFourLines);
+    await tester.enterText(find.byType(EditableText), kFourLines);
     await tester.idle();
     await tester.pumpWidget(builder(4));
     expect(findInputBox(), equals(inputBox));
@@ -539,11 +517,10 @@ void main() {
     }
 
     await tester.pumpWidget(builder());
-    await showKeyboard(tester);
 
     String testValue = kThreeLines;
     String cutValue = 'First line of stuff keeps going until abcdef ghijk. ';
-    enterText(testValue);
+    await tester.enterText(find.byType(EditableText), testValue);
     await tester.idle();
 
     await tester.pumpWidget(builder());
@@ -632,9 +609,8 @@ void main() {
     }
 
     await tester.pumpWidget(builder());
-    await showKeyboard(tester);
 
-    enterText(kFourLines);
+    await tester.enterText(find.byType(EditableText), kFourLines);
     await tester.idle();
 
     await tester.pumpWidget(builder());
@@ -718,10 +694,9 @@ void main() {
     }
 
     await tester.pumpWidget(builder());
-    await showKeyboard(tester);
 
     Future<Null> checkText(String testValue) async {
-      enterText(testValue);
+      await tester.enterText(find.byType(EditableText), testValue);
       await tester.idle();
 
       // Check that the onChanged event handler fired.
@@ -751,10 +726,9 @@ void main() {
     }
 
     await tester.pumpWidget(builder());
-    await showKeyboard(tester);
 
     Future<Null> checkText(String testValue) async {
-      enterText(testValue);
+      await tester.enterText(find.byType(EditableText), testValue);
       await tester.idle();
 
       // Check that the onChanged event handler fired.
@@ -828,5 +802,4 @@ void main() {
     expect(iconRight, equals(tester.getTopLeft(find.text('label')).x));
     expect(iconRight, equals(tester.getTopLeft(find.byType(InputField)).x));
   });
-
 }
