@@ -20,7 +20,7 @@ TestFontSelector::TestFontSelector() = default;
 TestFontSelector::~TestFontSelector() = default;
 
 PassRefPtr<FontData> TestFontSelector::getFontData(
-    const FontDescription&,
+    const FontDescription& fontDescription,
     const AtomicString& familyName) {
   if (test_font_data_ != nullptr) {
     return test_font_data_;
@@ -28,8 +28,15 @@ PassRefPtr<FontData> TestFontSelector::getFontData(
 
   auto typeface = SkTypeface::MakeFromStream(GetTestFontData().release());
 
-  FontPlatformData platform_data(typeface, "Ahem", 14.0, false, false,
-                                 FontOrientation::Horizontal, false);
+  bool syntheticBold = (fontDescription.weight() >= FontWeight600 ||
+                        fontDescription.isSyntheticBold());
+  bool syntheticItalic = (fontDescription.style() ||
+                          fontDescription.isSyntheticItalic());
+  FontPlatformData platform_data(typeface, "Ahem",
+                                 fontDescription.effectiveFontSize(),
+                                 syntheticBold, syntheticItalic,
+                                 fontDescription.orientation(),
+                                 fontDescription.useSubpixelPositioning());
 
   test_font_data_ =
       SimpleFontData::create(platform_data, CustomFontData::create());
