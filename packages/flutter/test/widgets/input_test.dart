@@ -766,6 +766,63 @@ void main() {
     checkText('Hello World');
   });
 
+  testWidgets('InputField with default hintStyle', (WidgetTester tester) async {
+    InputValue inputValue = InputValue.empty;
+    TextStyle textStyle = new TextStyle(
+      color: Colors.pink[500],
+      fontSize: 10.0,
+    );
+    ThemeData themeData = new ThemeData(
+      hintColor: Colors.blue[500],
+    );
+
+    Widget builder() {
+      return new Center(
+        child: new Theme(
+          data: themeData,
+          child: new Material(
+            child: new InputField(
+              value: inputValue,
+              hintText: 'Placeholder',
+              style: textStyle,
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(builder());
+
+    Text hintText = tester.widget(find.text('Placeholder'));
+    expect(hintText.style.color, themeData.hintColor);
+    expect(hintText.style.fontSize, textStyle.fontSize);
+  });
+
+  testWidgets('InputField with specified hintStyle', (WidgetTester tester) async {
+    InputValue inputValue = InputValue.empty;
+    TextStyle hintStyle = new TextStyle(
+      color: Colors.pink[500],
+      fontSize: 10.0,
+    );
+
+    Widget builder() {
+      return new Center(
+        child: new Material(
+          child: new InputField(
+            value: inputValue,
+            hintText: 'Placeholder',
+            hintStyle: hintStyle,
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(builder());
+
+    Text hintText = tester.widget(find.text('Placeholder'));
+    expect(hintText.style, hintStyle);
+  });
+
   testWidgets('Input label text animates', (WidgetTester tester) async {
     GlobalKey inputKey = new GlobalKey();
     GlobalKey focusKey = new GlobalKey();
