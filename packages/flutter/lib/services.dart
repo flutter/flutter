@@ -21,6 +21,7 @@ export 'src/services/image_resolution.dart';
 export 'src/services/image_stream.dart';
 export 'src/services/path_provider.dart';
 export 'src/services/platform_messages.dart';
+export 'src/services/platform_protocols.dart';
 export 'src/services/raw_keyboard.dart';
 export 'src/services/system_chrome.dart';
 export 'src/services/system_navigator.dart';
