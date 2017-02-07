@@ -15,6 +15,7 @@ import 'binding.dart';
 import 'controller.dart';
 import 'finders.dart';
 import 'test_async_utils.dart';
+import 'test_text_input.dart';
 
 export 'package:test/test.dart' hide expect;
 
@@ -398,6 +399,47 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
 
   void _endOfTestVerifications() {
     verifyTickersWereDisposed('at the end of the test');
+  }
+
+  static TestTextInput _testTextInput;
+  static EditableTextState _focusedEditable;
+
+  /// Returns the TestTextInput singleton.
+  ///
+  /// Tests that just need to add text to widgets like [Input] or [TextField]
+  /// only need to call [enterText].
+  TestTextInput get testTextInput {
+    _testTextInput ??= new TestTextInput()..register();
+    return _testTextInput;
+  }
+
+  /// Give the EditableText widget specified by [finder] the focus, as if the
+  /// popup keyboard had appeared.
+  ///
+  /// Tests that just need to add text to widgets like [Input] or [TextField]
+  /// only need to call [enterText].
+  Future<Null> showKeyboard(Finder finder) async {
+    // Lazily constructing and registering the TestTextInput singleton also
+    // sets up the message handler which must exist before the TestTextInput
+    // is focused for the first time.
+    _testTextInput ??= new TestTextInput()..register();
+
+    // TODO(hansmuller) Once find.descendant (#7789) lands replace the following
+    // RHS with state(find.descendant(finder), find.byType(EditableText)).
+    final EditableTextState editable = state(finder);
+    if (editable != _focusedEditable) {
+      _focusedEditable = editable..requestKeyboard();
+      await pump();
+    }
+    return null;
+  }
+
+  /// Give the EditableText widget specified by [finder] the focus and
+  /// enter [text] as if it been provided by the popup keyboard.
+  Future<Null> enterText(Finder finder, String text) async {
+    await showKeyboard(finder);
+    testTextInput.enterText(text);
+    return null;
   }
 }
 

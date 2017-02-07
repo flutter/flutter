@@ -6,17 +6,27 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/services.dart';
+
+import 'widget_tester.dart';
 
 const String _kTextInputClientChannel = 'flutter/textinputclient';
 
-class MockTextInput {
+/// A testing stub for the system's popup keyboard.
+///
+/// Typical app tests will not need to use this class directly.
+///
+/// See also:
+///
+/// * [WidgetTester.enterText], which uses this class to simulate keyboard input.
+/// * [WidgetTester.showKeyboard], which uses this class to simulate showing the
+///   popup keyboard and initializing its text.
+class TestTextInput {
   void register() {
     PlatformMessages.setMockJSONMessageHandler('flutter/textinput', handleJSONMessage);
   }
 
-  int client = 0;
+  int _client = 0;
   Map<String, dynamic> editingState;
 
   Future<dynamic> handleJSONMessage(dynamic message) async {
@@ -24,7 +34,7 @@ class MockTextInput {
     final List<dynamic> args= message['args'];
     switch (method) {
       case 'TextInput.setClient':
-        client = args[0];
+        _client = args[0];
         break;
       case 'TextInput.setEditingState':
         editingState = args[0];
@@ -33,10 +43,10 @@ class MockTextInput {
   }
 
   void updateEditingState(TextEditingState state) {
-    expect(client, isNonZero);
+    expect(_client, isNonZero);
     String message = JSON.encode(<String, dynamic>{
       'method': 'TextInputClient.updateEditingState',
-      'args': <dynamic>[client, state.toJSON()],
+      'args': <dynamic>[_client, state.toJSON()],
     });
     Uint8List encoded = UTF8.encoder.convert(message);
     PlatformMessages.handlePlatformMessage(
