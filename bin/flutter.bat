@@ -17,6 +17,7 @@ SETLOCAL ENABLEDELAYEDEXPANSION
 FOR %%i IN ("%~dp0..") DO SET FLUTTER_ROOT=%%~fi
 
 SET flutter_tools_dir=%FLUTTER_ROOT%\packages\flutter_tools
+SET cache_dir=%FLUTTER_ROOT%\bin\cache
 SET snapshot_path=%FLUTTER_ROOT%\bin\cache\flutter_tools.snapshot
 SET stamp_path=%FLUTTER_ROOT%\bin\cache\flutter_tools.stamp
 SET script_path=%flutter_tools_dir%\bin\flutter_tools.dart
@@ -33,13 +34,16 @@ IF NOT EXIST "%flutter_root%\.git" (
   EXIT /B
 )
 
+REM Ensure that bin/cache exists.
+IF NOT EXIST "%cache_dir%" MKDIR "%cache_dir%"
+
 REM To debug the tool, you can uncomment the following line to enable checked mode and set an observatory port:
 REM SET FLUTTER_TOOL_ARGS="--observe=65432 --checked"
 
 :acquire_lock
 2>NUL (
   REM "3" is now stderr because of "2>NUL".
-  CALL :subroutine %* 2>&3 9> "%FLUTTER_ROOT%\bin\flutter.lock" || GOTO acquire_lock
+  CALL :subroutine %* 2>&3 9> "%cache_dir%\flutter.bat.lock" || GOTO acquire_lock
 )
 GOTO :after_subroutine
 
