@@ -1,9 +1,3 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
-
-package io.flutter.gradle
-
 import java.nio.file.Path
 import java.nio.file.Paths
 
@@ -20,6 +14,17 @@ import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.bundling.Jar
+
+buildscript {
+  repositories {
+    jcenter()
+  }
+  dependencies {
+    classpath 'com.android.tools.build:gradle:2.2.3'
+  }
+}
+
+apply plugin: FlutterPlugin
 
 class FlutterPlugin implements Plugin<Project> {
     private File flutterRoot
