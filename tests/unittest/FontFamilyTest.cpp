@@ -41,6 +41,10 @@ static FontLanguage createFontLanguage(const std::string& input) {
     return FontLanguageListCache::getById(langId)[0];
 }
 
+static FontLanguage createFontLanguageWithoutICUSanitization(const std::string& input) {
+    return FontLanguage(input.c_str(), input.size());
+}
+
 TEST_F(FontLanguageTest, basicTests) {
     FontLanguage defaultLang;
     FontLanguage emptyLang("", 0);
@@ -74,19 +78,25 @@ TEST_F(FontLanguageTest, basicTests) {
 }
 
 TEST_F(FontLanguageTest, getStringTest) {
-    EXPECT_EQ("en-Latn", createFontLanguage("en").getString());
-    EXPECT_EQ("en-Latn", createFontLanguage("en-Latn").getString());
+    EXPECT_EQ("en-Latn-US", createFontLanguage("en").getString());
+    EXPECT_EQ("en-Latn-US", createFontLanguage("en-Latn").getString());
 
     // Capitalized language code or lowercased script should be normalized.
-    EXPECT_EQ("en-Latn", createFontLanguage("EN-LATN").getString());
-    EXPECT_EQ("en-Latn", createFontLanguage("EN-latn").getString());
-    EXPECT_EQ("en-Latn", createFontLanguage("en-latn").getString());
+    EXPECT_EQ("en-Latn-US", createFontLanguage("EN-LATN").getString());
+    EXPECT_EQ("en-Latn-US", createFontLanguage("EN-latn").getString());
+    EXPECT_EQ("en-Latn-US", createFontLanguage("en-latn").getString());
 
     // Invalid script should be kept.
-    EXPECT_EQ("en-Xyzt", createFontLanguage("en-xyzt").getString());
+    EXPECT_EQ("en-Xyzt-US", createFontLanguage("en-xyzt").getString());
 
-    EXPECT_EQ("en-Latn", createFontLanguage("en-Latn-US").getString());
-    EXPECT_EQ("ja-Jpan", createFontLanguage("ja").getString());
+    EXPECT_EQ("en-Latn-US", createFontLanguage("en-Latn-US").getString());
+    EXPECT_EQ("ja-Jpan-JP", createFontLanguage("ja").getString());
+    EXPECT_EQ("zh-Hant-TW", createFontLanguage("zh-TW").getString());
+    EXPECT_EQ("zh-Hant-HK", createFontLanguage("zh-HK").getString());
+    EXPECT_EQ("zh-Hant-MO", createFontLanguage("zh-MO").getString());
+    EXPECT_EQ("zh-Hans-CN", createFontLanguage("zh").getString());
+    EXPECT_EQ("zh-Hans-CN", createFontLanguage("zh-CN").getString());
+    EXPECT_EQ("zh-Hans-SG", createFontLanguage("zh-SG").getString());
     EXPECT_EQ("und", createFontLanguage("und").getString());
     EXPECT_EQ("und", createFontLanguage("UND").getString());
     EXPECT_EQ("und", createFontLanguage("Und").getString());
@@ -94,10 +104,44 @@ TEST_F(FontLanguageTest, getStringTest) {
     EXPECT_EQ("und-Zsye", createFontLanguage("Und-ZSYE").getString());
     EXPECT_EQ("und-Zsye", createFontLanguage("Und-zsye").getString());
 
-    EXPECT_EQ("de-Latn", createFontLanguage("de-1901").getString());
+    EXPECT_EQ("de-Latn-DE", createFontLanguage("de-1901").getString());
+
+    EXPECT_EQ("es-Latn-419", createFontLanguage("es-Latn-419").getString());
+
+    // Emoji subtag is dropped from getString().
+    EXPECT_EQ("es-Latn-419", createFontLanguage("es-419-u-em-emoji").getString());
+    EXPECT_EQ("es-Latn-419", createFontLanguage("es-Latn-419-u-em-emoji").getString());
 
     // This is not a necessary desired behavior, just known behavior.
-    EXPECT_EQ("en-Latn", createFontLanguage("und-Abcdefgh").getString());
+    EXPECT_EQ("en-Latn-US", createFontLanguage("und-Abcdefgh").getString());
+}
+
+TEST_F(FontLanguageTest, testReconstruction) {
+    EXPECT_EQ("en", createFontLanguageWithoutICUSanitization("en").getString());
+    EXPECT_EQ("fil", createFontLanguageWithoutICUSanitization("fil").getString());
+    EXPECT_EQ("und", createFontLanguageWithoutICUSanitization("und").getString());
+
+    EXPECT_EQ("en-Latn", createFontLanguageWithoutICUSanitization("en-Latn").getString());
+    EXPECT_EQ("fil-Taga", createFontLanguageWithoutICUSanitization("fil-Taga").getString());
+    EXPECT_EQ("und-Zsye", createFontLanguageWithoutICUSanitization("und-Zsye").getString());
+
+    EXPECT_EQ("en-US", createFontLanguageWithoutICUSanitization("en-US").getString());
+    EXPECT_EQ("fil-PH", createFontLanguageWithoutICUSanitization("fil-PH").getString());
+    EXPECT_EQ("es-419", createFontLanguageWithoutICUSanitization("es-419").getString());
+
+    EXPECT_EQ("en-Latn-US", createFontLanguageWithoutICUSanitization("en-Latn-US").getString());
+    EXPECT_EQ("fil-Taga-PH", createFontLanguageWithoutICUSanitization("fil-Taga-PH").getString());
+    EXPECT_EQ("es-Latn-419", createFontLanguageWithoutICUSanitization("es-Latn-419").getString());
+
+    // Possible minimum/maximum values.
+    EXPECT_EQ("aa", createFontLanguageWithoutICUSanitization("aa").getString());
+    EXPECT_EQ("zz", createFontLanguageWithoutICUSanitization("zz").getString());
+    EXPECT_EQ("aa-Aaaa", createFontLanguageWithoutICUSanitization("aa-Aaaa").getString());
+    EXPECT_EQ("zz-Zzzz", createFontLanguageWithoutICUSanitization("zz-Zzzz").getString());
+    EXPECT_EQ("aaa-Aaaa-AA", createFontLanguageWithoutICUSanitization("aaa-Aaaa-AA").getString());
+    EXPECT_EQ("zzz-Zzzz-ZZ", createFontLanguageWithoutICUSanitization("zzz-Zzzz-ZZ").getString());
+    EXPECT_EQ("aaa-Aaaa-000", createFontLanguageWithoutICUSanitization("aaa-Aaaa-000").getString());
+    EXPECT_EQ("zzz-Zzzz-999", createFontLanguageWithoutICUSanitization("zzz-Zzzz-999").getString());
 }
 
 TEST_F(FontLanguageTest, ScriptEqualTest) {
@@ -247,6 +291,7 @@ TEST_F(FontLanguagesTest, unsupportedLanguageTests) {
 TEST_F(FontLanguagesTest, repeatedLanguageTests) {
     FontLanguage english = createFontLanguage("en");
     FontLanguage french = createFontLanguage("fr");
+    FontLanguage canadianFrench = createFontLanguage("fr-CA");
     FontLanguage englishInLatn = createFontLanguage("en-Latn");
     ASSERT_TRUE(english == englishInLatn);
 
@@ -254,16 +299,32 @@ TEST_F(FontLanguagesTest, repeatedLanguageTests) {
     EXPECT_EQ(1u, langs.size());
     EXPECT_EQ(english, langs[0]);
 
-    // Country codes are ignored.
-    const FontLanguages& fr = createFontLanguages("fr,fr-CA,fr-FR");
+    const FontLanguages& fr = createFontLanguages("fr,fr-FR,fr-Latn-FR");
     EXPECT_EQ(1u, fr.size());
     EXPECT_EQ(french, fr[0]);
+
+    // ICU appends FR to fr. The third language is dropped which is same as the first language.
+    const FontLanguages& fr2 = createFontLanguages("fr,fr-CA,fr-FR");
+    EXPECT_EQ(2u, fr2.size());
+    EXPECT_EQ(french, fr2[0]);
+    EXPECT_EQ(canadianFrench, fr2[1]);
 
     // The order should be kept.
     const FontLanguages& langs2 = createFontLanguages("en,fr,en-Latn");
     EXPECT_EQ(2u, langs2.size());
     EXPECT_EQ(english, langs2[0]);
     EXPECT_EQ(french, langs2[1]);
+}
+
+TEST_F(FontLanguagesTest, identifierTest) {
+    EXPECT_EQ(createFontLanguage("en-Latn-US"), createFontLanguage("en-Latn-US"));
+    EXPECT_EQ(createFontLanguage("zh-Hans-CN"), createFontLanguage("zh-Hans-CN"));
+    EXPECT_EQ(createFontLanguage("en-Zsye-US"), createFontLanguage("en-Zsye-US"));
+
+    EXPECT_NE(createFontLanguage("en-Latn-US"), createFontLanguage("en-Latn-GB"));
+    EXPECT_NE(createFontLanguage("en-Latn-US"), createFontLanguage("en-Zsye-US"));
+    EXPECT_NE(createFontLanguage("es-Latn-US"), createFontLanguage("en-Latn-US"));
+    EXPECT_NE(createFontLanguage("zh-Hant-HK"), createFontLanguage("zh-Hant-TW"));
 }
 
 TEST_F(FontLanguagesTest, undEmojiTests) {
@@ -299,9 +360,11 @@ TEST_F(FontLanguagesTest, subtagEmojiTest) {
         // Strings that contain the county.
         "und-US-u-em-emoji",
         "en-US-u-em-emoji",
+        "es-419-u-em-emoji",
         "und-Latn-US-u-em-emoji",
         "en-Zsym-US-u-em-emoji",
         "en-Zsye-US-u-em-emoji",
+        "es-Zsye-419-u-em-emoji",
     };
 
     for (auto subtagEmojiString : subtagEmojiStrings) {
@@ -331,9 +394,11 @@ TEST_F(FontLanguagesTest, subtagTextTest) {
         // Strings that contain the county.
         "und-US-u-em-text",
         "en-US-u-em-text",
+        "es-419-u-em-text",
         "und-Latn-US-u-em-text",
         "en-Zsym-US-u-em-text",
         "en-Zsye-US-u-em-text",
+        "es-Zsye-419-u-em-text",
     };
 
     for (auto subtagTextString : subtagTextStrings) {
@@ -363,8 +428,10 @@ TEST_F(FontLanguagesTest, subtagDefaultTest) {
         // Strings that contain the county.
         "en-US-u-em-default",
         "en-Latn-US-u-em-default",
+        "es-Latn-419-u-em-default",
         "en-Zsym-US-u-em-default",
         "en-Zsye-US-u-em-default",
+        "es-Zsye-419-u-em-default",
     };
 
     for (auto subtagDefaultString : subtagDefaultStrings) {
