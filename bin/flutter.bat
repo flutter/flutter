@@ -36,39 +36,51 @@ IF NOT EXIST "%flutter_root%\.git" (
 REM To debug the tool, you can uncomment the following line to enable checked mode and set an observatory port:
 REM SET FLUTTER_TOOL_ARGS="--observe=65432 --checked"
 
-PUSHD "%flutter_root%"
-FOR /f %%r IN ('git rev-parse HEAD') DO SET revision=%%r
-POPD
+:acquire_lock
+2>NUL (
+  REM "3" is now stderr because of "2>NUL".
+  CALL :subroutine %* 2>&3 9> "%FLUTTER_ROOT%\bin\flutter.lock" || GOTO acquire_lock
+)
+GOTO :after_subroutine
 
-REM The following IF conditions are all linked with a logical OR. However,
-REM there is no OR operator in batch and a GOTO construct is used as replacement.
-IF NOT EXIST "%snapshot_path%" GOTO do_snapshot
-IF NOT EXIST "%stamp_path%" GOTO do_snapshot
-SET /p stamp_value=<"%stamp_path%"
-IF !stamp_value! NEQ !revision! GOTO do_snapshot
-REM Get modified timestamps
-FOR %%f IN ("%flutter_tools_dir%\pubspec.yaml") DO SET yamlt=%%~tf
-FOR %%a IN ("%flutter_tools_dir%\pubspec.lock") DO SET lockt=%%~ta
-IF !lockt! LSS !yamlt! GOTO do_snapshot
-
-GOTO after_snapshot
-
-:do_snapshot
-  MKDIR "%FLUTTER_ROOT%\bin\cache" 2> NUL
-  ECHO: > "%FLUTTER_ROOT%\bin\cache\.dartignore"
-
-  ECHO Checking Dart SDK version...
-  CALL PowerShell.exe -ExecutionPolicy Bypass -Command "& '%FLUTTER_ROOT%/bin/internal/update_dart_sdk.ps1'"
-
-  ECHO Updating flutter tool...
-  del "%flutter_tools_dir%\pubspec.lock"
-  PUSHD "%flutter_tools_dir%"
-  CALL "%pub%" get --verbosity=error --no-packages-dir
+:subroutine
+  PUSHD "%flutter_root%"
+  FOR /f %%r IN ('git rev-parse HEAD') DO SET revision=%%r
   POPD
-  CALL "%dart%" --snapshot="%snapshot_path%" --packages="%flutter_tools_dir%\.packages" "%script_path%"
-  >"%stamp_path%" ECHO %revision%
 
-:after_snapshot
+  REM The following IF conditions are all linked with a logical OR. However,
+  REM there is no OR operator in batch and a GOTO construct is used as replacement.
+  IF NOT EXIST "%snapshot_path%" GOTO do_snapshot
+  IF NOT EXIST "%stamp_path%" GOTO do_snapshot
+  SET /p stamp_value=<"%stamp_path%"
+  IF !stamp_value! NEQ !revision! GOTO do_snapshot
+  REM Get modified timestamps
+  FOR %%f IN ("%flutter_tools_dir%\pubspec.yaml") DO SET yamlt=%%~tf
+  FOR %%a IN ("%flutter_tools_dir%\pubspec.lock") DO SET lockt=%%~ta
+  IF !lockt! LSS !yamlt! GOTO do_snapshot
+
+  REM Everything is uptodate - exit subroutine
+  EXIT /B
+
+  :do_snapshot
+    MKDIR "%FLUTTER_ROOT%\bin\cache" 2> NUL
+    ECHO: > "%FLUTTER_ROOT%\bin\cache\.dartignore"
+
+    ECHO Checking Dart SDK version...
+    CALL PowerShell.exe -ExecutionPolicy Bypass -Command "& '%FLUTTER_ROOT%/bin/internal/update_dart_sdk.ps1'"
+
+    ECHO Updating flutter tool...
+    del "%flutter_tools_dir%\pubspec.lock"
+    PUSHD "%flutter_tools_dir%"
+    CALL "%pub%" get --verbosity=error --no-packages-dir
+    POPD
+    CALL "%dart%" --snapshot="%snapshot_path%" --packages="%flutter_tools_dir%\.packages" "%script_path%"
+    >"%stamp_path%" ECHO %revision%
+
+  REM Exit Subroutine
+  EXIT /B
+
+:after_subroutine
 
 CALL "%dart%" %FLUTTER_TOOL_ARGS% "%snapshot_path%" %*
 
