@@ -811,8 +811,7 @@ void Layout::doLayoutRun(const uint16_t* buf, size_t start, size_t count, size_t
                         break;
                     }
                 }
-                hb_buffer_set_language(buffer,
-                        hb_language_from_string(hbLanguage->getString().c_str(), -1));
+                hb_buffer_set_language(buffer, hbLanguage->getHbLanguage());
             }
             hb_buffer_add_utf16(buffer, buf, bufSize, srunstart + start, srunend - srunstart);
             if (ctx->paint.hyphenEdit.hasHyphen() && srunend > srunstart) {

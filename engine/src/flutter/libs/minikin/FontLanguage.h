@@ -27,6 +27,10 @@ namespace minikin {
 // Due to the limits in font fallback score calculation, we can't use anything more than 12
 // languages.
 const size_t FONT_LANGUAGES_LIMIT = 12;
+
+// The language or region code is encoded to 15 bits.
+const uint16_t INVALID_CODE = 0x7fff;
+
 class FontLanguages;
 
 // FontLanguage is a compact representation of a BCP 47 language tag. It
@@ -43,7 +47,9 @@ public:
     // Default constructor creates the unsupported language.
     FontLanguage()
             : mScript(0ul),
-            mLanguage(0ul),
+            mLanguage(INVALID_CODE),
+            mRegion(INVALID_CODE),
+            mHbLanguage(HB_LANGUAGE_INVALID),
             mSubScriptBits(0ul),
             mEmojiStyle(EMSTYLE_EMPTY) {}
 
@@ -52,15 +58,17 @@ public:
 
     bool operator==(const FontLanguage other) const {
         return !isUnsupported() && isEqualScript(other) && mLanguage == other.mLanguage &&
-                mEmojiStyle == other.mEmojiStyle;
+                mRegion == other.mRegion && mEmojiStyle == other.mEmojiStyle;
     }
 
     bool operator!=(const FontLanguage other) const {
         return !(*this == other);
     }
 
-    bool isUnsupported() const { return mLanguage == 0ul; }
+    bool isUnsupported() const { return mLanguage == INVALID_CODE; }
     EmojiStyle getEmojiStyle() const { return mEmojiStyle; }
+    hb_language_t getHbLanguage() const { return mHbLanguage; }
+
 
     bool isEqualScript(const FontLanguage& other) const;
 
@@ -76,7 +84,8 @@ public:
     int calcScoreFor(const FontLanguages& supported) const;
 
     uint64_t getIdentifier() const {
-        return (uint64_t)mScript << 32 | (uint64_t)mEmojiStyle << 24 | (uint64_t)mLanguage;
+        return ((uint64_t)mLanguage << 49) | ((uint64_t)mScript << 17) | ((uint64_t)mRegion << 2) |
+                mEmojiStyle;
     }
 
 private:
@@ -86,9 +95,16 @@ private:
     uint32_t mScript;
 
     // ISO 639-1 or ISO 639-2 compliant language code.
-    // The two or three letter language code is packed into 24 bit integer.
+    // The two- or three-letter language code is packed into a 15 bit integer.
     // mLanguage = 0 means the FontLanguage is unsupported.
-    uint32_t mLanguage;
+    uint16_t mLanguage;
+
+    // ISO 3166-1 or UN M.49 compliant region code. The two-letter or three-digit region code is
+    // packed into a 15 bit integer.
+    uint16_t mRegion;
+
+    // The language to be passed HarfBuzz shaper.
+    hb_language_t mHbLanguage;
 
     // For faster comparing, use 7 bits for specific scripts.
     static const uint8_t kBopomofoFlag = 1u;
@@ -103,6 +119,8 @@ private:
     EmojiStyle mEmojiStyle;
 
     static uint8_t scriptToSubScriptBits(uint32_t script);
+
+    static EmojiStyle resolveEmojiStyle(const char* buf, size_t length, uint32_t script);
 
     // Returns true if the provide subscript bits has the requested subscript bits.
     // Note that this function returns false if the requested subscript bits are empty.
