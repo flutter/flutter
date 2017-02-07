@@ -108,4 +108,39 @@ void main() {
     expect(controller2.offset, equals(432.0));
     expect(realOffset(), equals(controller2.offset));
   });
+
+  testWidgets('ScrollController control test', (WidgetTester tester) async {
+    ScrollController controller = new ScrollController(
+      initialScrollOffset: 209.0,
+    );
+
+    await tester.pumpWidget(new GridView.count(
+      crossAxisCount: 4,
+      controller: controller,
+      children: kStates.map<Widget>((String state) => new Text(state)).toList(),
+    ));
+
+    double realOffset() {
+      return tester.state<Scrollable2State>(find.byType(Scrollable2)).position.pixels;
+    }
+
+    expect(controller.offset, equals(209.0));
+    expect(realOffset(), equals(controller.offset));
+
+    controller.jumpTo(105.0);
+
+    await tester.pump();
+
+    expect(controller.offset, equals(105.0));
+    expect(realOffset(), equals(controller.offset));
+
+    await tester.pumpWidget(new GridView.count(
+      crossAxisCount: 2,
+      controller: controller,
+      children: kStates.map<Widget>((String state) => new Text(state)).toList(),
+    ));
+
+    expect(controller.offset, equals(105.0));
+    expect(realOffset(), equals(controller.offset));
+  });
 }

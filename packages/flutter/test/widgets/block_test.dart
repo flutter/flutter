@@ -6,8 +6,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-import 'test_widgets.dart';
-
 final Key blockKey = new Key('test');
 
 void main() {
@@ -132,7 +130,7 @@ void main() {
       new Container(),
     ]);
 
-    await tester.pumpWidget(new TestScrollable(
+    await tester.pumpWidget(new CustomScrollView(
       slivers: <Widget>[
         new SliverList(
           delegate: delegate,

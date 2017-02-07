@@ -10,6 +10,17 @@ import 'package:meta/meta.dart';
 import 'scroll_position.dart';
 
 class ScrollController {
+  ScrollController({
+    this.initialScrollOffset,
+  });
+
+  /// The initial value to use for [offset].
+  ///
+  /// If [initialScrollOffset] is non-null, new [ScrollPosition] objects that
+  /// are created and attached to this controller will have their offset
+  /// initialized to this value.
+  final double initialScrollOffset;
+
   final List<ScrollPosition> _positions = <ScrollPosition>[];
 
   double get offset {
@@ -86,5 +97,22 @@ class ScrollController {
   void detach(ScrollPosition position) {
     assert(_positions.contains(position));
     _positions.remove(position);
+  }
+
+  static ScrollPosition createDefaultScrollPosition(ScrollPhysics physics, AbstractScrollState state, ScrollPosition oldPosition) {
+    return new ScrollPosition(
+      physics: physics,
+      state: state,
+      oldPosition: oldPosition,
+    );
+  }
+
+  ScrollPosition createScrollPosition(ScrollPhysics physics, AbstractScrollState state, ScrollPosition oldPosition) {
+    return new ScrollPosition(
+      physics: physics,
+      state: state,
+      offset: initialScrollOffset,
+      oldPosition: oldPosition,
+    );
   }
 }

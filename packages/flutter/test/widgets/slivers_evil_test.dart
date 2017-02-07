@@ -7,8 +7,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/material.dart';
 
-import 'test_widgets.dart';
-
 class TestSliverPersistentHeaderDelegate extends SliverPersistentHeaderDelegate {
   TestSliverPersistentHeaderDelegate(this._maxExtent);
 
@@ -53,11 +51,11 @@ class TestScrollPhysics extends ClampingScrollPhysics {
 }
 
 class TestViewportScrollPosition extends ScrollPosition {
-  TestViewportScrollPosition(
+  TestViewportScrollPosition({
     ScrollPhysics physics,
     AbstractScrollState state,
     ScrollPosition oldPosition,
-  ) : super(physics, state, oldPosition);
+  }) : super(physics: physics, state: state, oldPosition: oldPosition);
 
   @override
   bool applyContentDimensions(double minScrollExtent, double maxScrollExtent) {
@@ -74,79 +72,85 @@ void main() {
       new ScrollConfiguration2(
         behavior: new TestBehavior(),
         child: new Scrollbar2(
-          child: new TestScrollable(
+          child: new Scrollable2(
             axisDirection: AxisDirection.down,
-            center: centerKey,
-            anchor: 0.25,
             physics: const TestScrollPhysics(),
-            slivers: <Widget>[
-              new SliverToBoxAdapter(child: new Container(height: 5.0)),
-              new SliverToBoxAdapter(child: new Container(height: 520.0)),
-              new SliverToBoxAdapter(child: new Container(height: 520.0)),
-              new SliverToBoxAdapter(child: new Container(height: 520.0)),
-              new SliverPersistentHeader(delegate: new TestSliverPersistentHeaderDelegate(150.0), pinned: true),
-              new SliverToBoxAdapter(child: new Container(height: 520.0)),
-              new SliverPadding(
-                padding: new EdgeInsets.all(50.0),
-                child: new SliverToBoxAdapter(child: new Container(height: 520.0)),
-              ),
-              new SliverToBoxAdapter(child: new Container(height: 520.0)),
-              new SliverPersistentHeader(delegate: new TestSliverPersistentHeaderDelegate(150.0), floating: true),
-              new SliverToBoxAdapter(child: new Container(height: 520.0)),
-              new SliverToBoxAdapter(key: centerKey, child: new Container(height: 520.0)), // ------------------------ CENTER ------------------------
-              new SliverPersistentHeader(delegate: new TestSliverPersistentHeaderDelegate(150.0), pinned: true),
-              new SliverToBoxAdapter(child: new Container(height: 520.0)),
-              new SliverToBoxAdapter(child: new Container(height: 520.0)),
-              new SliverToBoxAdapter(child: new Container(height: 520.0)),
-              new SliverPadding(
-                padding: new EdgeInsets.all(50.0),
-                child: new SliverPersistentHeader(delegate: new TestSliverPersistentHeaderDelegate(250.0), pinned: true),
-              ),
-              new SliverToBoxAdapter(child: new Container(height: 520.0)),
-              new SliverPersistentHeader(delegate: new TestSliverPersistentHeaderDelegate(250.0), pinned: true),
-              new SliverToBoxAdapter(child: new Container(height: 5.0)),
-              new SliverPersistentHeader(delegate: new TestSliverPersistentHeaderDelegate(250.0), pinned: true),
-              new SliverToBoxAdapter(child: new Container(height: 5.0)),
-              new SliverPersistentHeader(delegate: new TestSliverPersistentHeaderDelegate(250.0), pinned: true),
-              new SliverPersistentHeader(delegate: new TestSliverPersistentHeaderDelegate(250.0), pinned: true),
-              new SliverToBoxAdapter(child: new Container(height: 5.0)),
-              new SliverPersistentHeader(delegate: new TestSliverPersistentHeaderDelegate(250.0), pinned: true),
-              new SliverPersistentHeader(delegate: new TestSliverPersistentHeaderDelegate(250.0)),
-              new SliverToBoxAdapter(child: new Container(height: 520.0)),
-              new SliverPersistentHeader(delegate: new TestSliverPersistentHeaderDelegate(150.0), floating: true),
-              new SliverToBoxAdapter(child: new Container(height: 520.0)),
-              new SliverPersistentHeader(delegate: new TestSliverPersistentHeaderDelegate(150.0), floating: true),
-              new SliverToBoxAdapter(child: new Container(height: 5.0)),
-              new SliverList(
-                delegate: new SliverChildListDelegate(<Widget>[
-                  new Container(height: 50.0),
-                  new Container(height: 50.0),
-                  new Container(height: 50.0),
-                  new Container(height: 50.0),
-                  new Container(height: 50.0),
-                  new Container(height: 50.0),
-                  new Container(height: 50.0),
-                  new Container(height: 50.0),
-                  new Container(height: 50.0),
-                  new Container(height: 50.0),
-                  new Container(height: 50.0),
-                  new Container(height: 50.0),
-                  new Container(height: 50.0),
-                  new Container(height: 50.0),
-                  new Container(height: 50.0),
-                ]),
-              ),
-              new SliverPersistentHeader(delegate: new TestSliverPersistentHeaderDelegate(250.0)),
-              new SliverPersistentHeader(delegate: new TestSliverPersistentHeaderDelegate(250.0)),
-              new SliverPersistentHeader(delegate: new TestSliverPersistentHeaderDelegate(250.0)),
-              new SliverPadding(
-                padding: new EdgeInsets.symmetric(horizontal: 50.0),
-                child: new SliverToBoxAdapter(child: new Container(height: 520.0)),
-              ),
-              new SliverToBoxAdapter(child: new Container(height: 520.0)),
-              new SliverToBoxAdapter(child: new Container(height: 520.0)),
-              new SliverToBoxAdapter(child: new Container(height: 5.0)),
-            ],
+            viewportBuilder: (BuildContext context, ViewportOffset offset) {
+              return new Viewport2(
+                axisDirection: AxisDirection.down,
+                anchor: 0.25,
+                offset: offset,
+                center: centerKey,
+                slivers: <Widget>[
+                  new SliverToBoxAdapter(child: new Container(height: 5.0)),
+                  new SliverToBoxAdapter(child: new Container(height: 520.0)),
+                  new SliverToBoxAdapter(child: new Container(height: 520.0)),
+                  new SliverToBoxAdapter(child: new Container(height: 520.0)),
+                  new SliverPersistentHeader(delegate: new TestSliverPersistentHeaderDelegate(150.0), pinned: true),
+                  new SliverToBoxAdapter(child: new Container(height: 520.0)),
+                  new SliverPadding(
+                    padding: new EdgeInsets.all(50.0),
+                    child: new SliverToBoxAdapter(child: new Container(height: 520.0)),
+                  ),
+                  new SliverToBoxAdapter(child: new Container(height: 520.0)),
+                  new SliverPersistentHeader(delegate: new TestSliverPersistentHeaderDelegate(150.0), floating: true),
+                  new SliverToBoxAdapter(child: new Container(height: 520.0)),
+                  new SliverToBoxAdapter(key: centerKey, child: new Container(height: 520.0)), // ------------------------ CENTER ------------------------
+                  new SliverPersistentHeader(delegate: new TestSliverPersistentHeaderDelegate(150.0), pinned: true),
+                  new SliverToBoxAdapter(child: new Container(height: 520.0)),
+                  new SliverToBoxAdapter(child: new Container(height: 520.0)),
+                  new SliverToBoxAdapter(child: new Container(height: 520.0)),
+                  new SliverPadding(
+                    padding: new EdgeInsets.all(50.0),
+                    child: new SliverPersistentHeader(delegate: new TestSliverPersistentHeaderDelegate(250.0), pinned: true),
+                  ),
+                  new SliverToBoxAdapter(child: new Container(height: 520.0)),
+                  new SliverPersistentHeader(delegate: new TestSliverPersistentHeaderDelegate(250.0), pinned: true),
+                  new SliverToBoxAdapter(child: new Container(height: 5.0)),
+                  new SliverPersistentHeader(delegate: new TestSliverPersistentHeaderDelegate(250.0), pinned: true),
+                  new SliverToBoxAdapter(child: new Container(height: 5.0)),
+                  new SliverPersistentHeader(delegate: new TestSliverPersistentHeaderDelegate(250.0), pinned: true),
+                  new SliverPersistentHeader(delegate: new TestSliverPersistentHeaderDelegate(250.0), pinned: true),
+                  new SliverToBoxAdapter(child: new Container(height: 5.0)),
+                  new SliverPersistentHeader(delegate: new TestSliverPersistentHeaderDelegate(250.0), pinned: true),
+                  new SliverPersistentHeader(delegate: new TestSliverPersistentHeaderDelegate(250.0)),
+                  new SliverToBoxAdapter(child: new Container(height: 520.0)),
+                  new SliverPersistentHeader(delegate: new TestSliverPersistentHeaderDelegate(150.0), floating: true),
+                  new SliverToBoxAdapter(child: new Container(height: 520.0)),
+                  new SliverPersistentHeader(delegate: new TestSliverPersistentHeaderDelegate(150.0), floating: true),
+                  new SliverToBoxAdapter(child: new Container(height: 5.0)),
+                  new SliverList(
+                    delegate: new SliverChildListDelegate(<Widget>[
+                      new Container(height: 50.0),
+                      new Container(height: 50.0),
+                      new Container(height: 50.0),
+                      new Container(height: 50.0),
+                      new Container(height: 50.0),
+                      new Container(height: 50.0),
+                      new Container(height: 50.0),
+                      new Container(height: 50.0),
+                      new Container(height: 50.0),
+                      new Container(height: 50.0),
+                      new Container(height: 50.0),
+                      new Container(height: 50.0),
+                      new Container(height: 50.0),
+                      new Container(height: 50.0),
+                      new Container(height: 50.0),
+                    ]),
+                  ),
+                  new SliverPersistentHeader(delegate: new TestSliverPersistentHeaderDelegate(250.0)),
+                  new SliverPersistentHeader(delegate: new TestSliverPersistentHeaderDelegate(250.0)),
+                  new SliverPersistentHeader(delegate: new TestSliverPersistentHeaderDelegate(250.0)),
+                  new SliverPadding(
+                    padding: new EdgeInsets.symmetric(horizontal: 50.0),
+                    child: new SliverToBoxAdapter(child: new Container(height: 520.0)),
+                  ),
+                  new SliverToBoxAdapter(child: new Container(height: 520.0)),
+                  new SliverToBoxAdapter(child: new Container(height: 520.0)),
+                  new SliverToBoxAdapter(child: new Container(height: 5.0)),
+                ],
+              );
+            },
           ),
         ),
       ),

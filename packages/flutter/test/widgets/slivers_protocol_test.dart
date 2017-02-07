@@ -8,8 +8,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-import 'test_widgets.dart';
-
 void verifyPaintPosition(GlobalKey key, Offset ideal) {
   RenderObject target = key.currentContext.findRenderObject();
   expect(target.parent, new isInstanceOf<RenderViewport2>());
@@ -22,8 +20,7 @@ void main() {
   testWidgets('Sliver protocol', (WidgetTester tester) async {
     GlobalKey key1, key2, key3, key4, key5;
     await tester.pumpWidget(
-      new TestScrollable(
-        axisDirection: AxisDirection.down,
+      new CustomScrollView(
         slivers: <Widget>[
           new BigSliver(key: key1 = new GlobalKey()),
           new OverlappingSliver(key: key2 = new GlobalKey()),

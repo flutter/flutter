@@ -6,8 +6,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-import 'test_widgets.dart';
-
 void verifyPaintPosition(GlobalKey key, Offset ideal, bool visible) {
   RenderSliver target = key.currentContext.findRenderObject();
   expect(target.parent, new isInstanceOf<RenderViewport2>());
@@ -28,8 +26,7 @@ void main() {
   testWidgets('Sliver appbars - floating - scroll offset doesn\'t change', (WidgetTester tester) async {
     const double bigHeight = 1000.0;
     await tester.pumpWidget(
-      new TestScrollable(
-        axisDirection: AxisDirection.down,
+      new CustomScrollView(
         slivers: <Widget>[
           new BigSliver(height: bigHeight),
           new SliverPersistentHeader(delegate: new TestDelegate(), floating: true),
@@ -56,8 +53,7 @@ void main() {
     const double bigHeight = 1000.0;
     GlobalKey key1, key2, key3;
     await tester.pumpWidget(
-      new TestScrollable(
-        axisDirection: AxisDirection.down,
+      new CustomScrollView(
         slivers: <Widget>[
           new BigSliver(key: key1 = new GlobalKey(), height: bigHeight),
           new SliverPersistentHeader(key: key2 = new GlobalKey(), delegate: delegate, floating: true),
@@ -126,8 +122,7 @@ void main() {
     const double bigHeight = 1000.0;
     GlobalKey key1, key2, key3;
     await tester.pumpWidget(
-      new TestScrollable(
-        axisDirection: AxisDirection.down,
+      new CustomScrollView(
         slivers: <Widget>[
           new BigSliver(key: key1 = new GlobalKey(), height: bigHeight),
           new SliverPersistentHeader(key: key2 = new GlobalKey(), delegate: delegate, floating: true),
@@ -159,8 +154,7 @@ void main() {
     const double bigHeight = 1000.0;
     GlobalKey key1, key2, key3;
     await tester.pumpWidget(
-      new TestScrollable(
-        axisDirection: AxisDirection.down,
+      new CustomScrollView(
         slivers: <Widget>[
           new BigSliver(key: key1 = new GlobalKey(), height: bigHeight),
           new SliverPersistentHeader(key: key2 = new GlobalKey(), delegate: delegate, floating: true),

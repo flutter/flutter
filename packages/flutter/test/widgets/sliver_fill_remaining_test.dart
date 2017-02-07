@@ -5,8 +5,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
-import 'test_widgets.dart';
-
 void main() {
   testWidgets('SliverFillRemaining control test', (WidgetTester tester) async {
     List<Widget> children = new List<Widget>.generate(20, (int i) {
@@ -14,7 +12,7 @@ void main() {
     });
 
     await tester.pumpWidget(
-      new TestScrollable(
+      new CustomScrollView(
         slivers: <Widget>[
           new SliverFill(
             delegate: new SliverChildListDelegate(children),
