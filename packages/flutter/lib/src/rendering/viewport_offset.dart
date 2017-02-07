@@ -61,7 +61,15 @@ abstract class ViewportOffset extends ChangeNotifier {
   /// same layout phase. If the viewport is not configured to shrink-wrap its
   /// contents, then this will only be called when the viewport recomputes its
   /// size (i.e. when its parent lays out), and not during normal scrolling.
-  void applyViewportDimension(double viewportDimension);
+  ///
+  /// If applying the viewport dimentions changes the scroll offset, return
+  /// false. Otherwise, return true. If you return false, the [RenderViewport2]
+  /// will be laid out again with the new scroll offset. This is expensive. (The
+  /// return value is answering the question "did you accept these viewport
+  /// dimensions unconditionally?"; if the new dimensions change the
+  /// [ViewportOffset]'s actual [pixels] value, then the viewport will need to
+  /// be laid out again.)
+  bool applyViewportDimension(double viewportDimension);
 
   /// Called when the viewport's content extents are established.
   ///
@@ -130,7 +138,7 @@ class _FixedViewportOffset extends ViewportOffset {
   double get pixels => _pixels;
 
   @override
-  void applyViewportDimension(double viewportDimension) { }
+  bool applyViewportDimension(double viewportDimension) => true;
 
   @override
   bool applyContentDimensions(double minScrollExtent, double maxScrollExtent) => true;

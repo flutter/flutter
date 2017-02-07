@@ -159,8 +159,9 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
       assert(_minScrollExtent != null);
       assert(_maxScrollExtent != null);
       assert(_effectiveExtent != null);
-      offset.applyViewportDimension(_effectiveExtent);
-      if (offset.applyContentDimensions(_minScrollExtent, _maxScrollExtent))
+      final bool didAcceptViewportDimensions = offset.applyViewportDimension(_effectiveExtent);
+      final bool didAcceptContentDimensions = offset.applyContentDimensions(_minScrollExtent, _maxScrollExtent);
+      if (didAcceptViewportDimensions || didAcceptContentDimensions)
         markNeedsPaint();
     }
   }

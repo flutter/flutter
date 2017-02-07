@@ -11,23 +11,24 @@ import 'scroll_position.dart';
 
 class ScrollController {
   ScrollController({
-    this.initialScrollOffset,
+    this.initialScrollOffset: 0.0,
   });
 
   /// The initial value to use for [offset].
   ///
-  /// If [initialScrollOffset] is non-null, new [ScrollPosition] objects that
-  /// are created and attached to this controller will have their offset
-  /// initialized to this value.
+  /// New [ScrollPosition] objects that are created and attached to this
+  /// controller will have their offset initialized to this value.
   final double initialScrollOffset;
 
   final List<ScrollPosition> _positions = <ScrollPosition>[];
 
-  double get offset {
+  ScrollPosition get position {
     assert(_positions.isNotEmpty, 'ScrollController not attached to any scroll views.');
     assert(_positions.length == 1, 'ScrollController attached to multiple scroll views.');
-    return _positions.single.pixels;
+    return _positions.single;
   }
+
+  double get offset => position.pixels;
 
   /// Animates the position from its current value to the given value.
   ///
@@ -57,11 +58,7 @@ class ScrollController {
   Future<Null> animateTo(double offset, {
     @required Duration duration,
     @required Curve curve,
-  }) {
-    assert(_positions.isNotEmpty, 'ScrollController not attached to any scroll views.');
-    assert(_positions.length == 1, 'ScrollController attached to multiple scroll views.');
-    return _positions.single.animateTo(offset, duration: duration, curve: curve);
-  }
+  }) => position.animateTo(offset, duration: duration, curve: curve);
 
   /// Jumps the scroll position from its current value to the given value,
   /// without animation, and without checking if the new value is in range.
@@ -75,11 +72,7 @@ class ScrollController {
   ///
   /// Immediately after the jump, a ballistic activity is started, in case the
   /// value was out of range.
-  void jumpTo(double value) {
-    assert(_positions.isNotEmpty, 'ScrollController not attached to any scroll views.');
-    assert(_positions.length == 1, 'ScrollController attached to multiple scroll views.');
-     _positions.single.jumpTo(value);
-  }
+  void jumpTo(double value) => position.jumpTo(value);
 
   /// Register the given position with this controller.
   ///
@@ -111,7 +104,7 @@ class ScrollController {
     return new ScrollPosition(
       physics: physics,
       state: state,
-      offset: initialScrollOffset,
+      initialPixels: initialScrollOffset,
       oldPosition: oldPosition,
     );
   }

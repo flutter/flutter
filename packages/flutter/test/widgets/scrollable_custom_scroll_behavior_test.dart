@@ -22,7 +22,7 @@ class TestScrollPosition extends ScrollPosition {
   @override
   TestScrollPhysics get physics => super.physics;
 
-  double _min, _viewport, _max, _pixels;
+  double _pixels;
 
   @override
   double get pixels => _pixels;
@@ -41,34 +41,23 @@ class TestScrollPosition extends ScrollPosition {
   }
 
   @override
-  void applyViewportDimension(double viewportDimension) {
-    _viewport = viewportDimension;
-    super.applyViewportDimension(viewportDimension);
-  }
-
-  @override
-  bool applyContentDimensions(double minScrollExtent, double maxScrollExtent) {
-    _min = minScrollExtent;
-    _max = maxScrollExtent;
-    return super.applyContentDimensions(minScrollExtent, maxScrollExtent);
-  }
-
-  @override
   ScrollableMetrics getMetrics() {
-    double insideExtent = _viewport;
-    double beforeExtent = _pixels - _min;
-    double afterExtent = _max - _pixels;
+    double insideExtent = viewportDimension;
+    double beforeExtent = _pixels - minScrollExtent;
+    double afterExtent = maxScrollExtent - _pixels;
     if (insideExtent > 0.0) {
       return new ScrollableMetrics(
         extentBefore: physics.extentMultiplier * beforeExtent / insideExtent,
         extentInside: physics.extentMultiplier,
         extentAfter: physics.extentMultiplier * afterExtent / insideExtent,
+        viewportDimension: viewportDimension,
       );
     } else {
       return new ScrollableMetrics(
         extentBefore: 0.0,
         extentInside: 0.0,
         extentAfter: 0.0,
+        viewportDimension: viewportDimension,
       );
     }
   }

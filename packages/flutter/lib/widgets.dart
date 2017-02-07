@@ -39,6 +39,7 @@ export 'src/widgets/orientation_builder.dart';
 export 'src/widgets/overlay.dart';
 export 'src/widgets/overscroll_indicator.dart';
 export 'src/widgets/page_storage.dart';
+export 'src/widgets/page_view.dart';
 export 'src/widgets/pageable_list.dart';
 export 'src/widgets/pages.dart';
 export 'src/widgets/performance_overlay.dart';

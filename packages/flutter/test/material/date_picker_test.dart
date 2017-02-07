@@ -62,8 +62,7 @@ void main() {
     await tester.pump(const Duration(seconds: 2));
 
     await tester.tapAt(const Point(380.0, 20.0));
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 2));
+    await tester.pumpUntilNoTransientCallbacks(const Duration(milliseconds: 100));
     expect(_selectedDate, equals(new DateTime(2016, DateTime.JULY, 1)));
 
     await tester.tapAt(const Point(300.0, 100.0));
@@ -71,8 +70,7 @@ void main() {
     await tester.pump(const Duration(seconds: 2));
 
     await tester.scroll(find.byKey(_datePickerKey), const Offset(-300.0, 0.0));
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 2));
+    await tester.pumpUntilNoTransientCallbacks(const Duration(milliseconds: 100));
     expect(_selectedDate, equals(new DateTime(2016, DateTime.AUGUST, 5)));
 
     await tester.tapAt(const Point(45.0, 270.0));
@@ -80,14 +78,11 @@ void main() {
     await tester.pump(const Duration(seconds: 2));
 
     await tester.scroll(find.byKey(_datePickerKey), const Offset(300.0, 0.0));
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 2));
+    await tester.pumpUntilNoTransientCallbacks(const Duration(milliseconds: 100));
     expect(_selectedDate, equals(new DateTime(2016, DateTime.SEPTEMBER, 25)));
 
     await tester.tapAt(const Point(210.0, 180.0));
     expect(_selectedDate, equals(new DateTime(2016, DateTime.AUGUST, 17)));
-    await tester.pump(const Duration(seconds: 2));
-
   });
 
   testWidgets('render picker with intrinsic dimensions', (WidgetTester tester) async {

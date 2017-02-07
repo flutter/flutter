@@ -107,13 +107,12 @@ class ScrollPosition extends ViewportOffset {
   ScrollPosition({
     @required this.physics,
     @required this.state,
-    double offset: 0.0,
+    double initialPixels: 0.0,
     ScrollPosition oldPosition,
-  }) : _pixels = offset ?? 0.0 {
+  }) : _pixels = initialPixels {
     assert(physics != null);
     assert(state != null);
     assert(state.vsync != null);
-    assert(pixels != null);
     if (oldPosition != null)
       absorb(oldPosition);
     if (activity == null)
@@ -234,6 +233,7 @@ class ScrollPosition extends ViewportOffset {
       extentBefore: math.max(pixels - minScrollExtent, 0.0),
       extentInside: math.min(pixels, maxScrollExtent) - math.max(pixels, minScrollExtent) + math.min(viewportDimension, maxScrollExtent - minScrollExtent),
       extentAfter: math.max(maxScrollExtent - pixels, 0.0),
+      viewportDimension: viewportDimension,
     );
   }
 
@@ -289,6 +289,11 @@ class ScrollPosition extends ViewportOffset {
     return 0.0;
   }
 
+  @protected
+  void correctPixels(double value) {
+    _pixels = value;
+  }
+
   @override
   void correctBy(double correction) {
     _pixels += correction;
@@ -316,7 +321,7 @@ class ScrollPosition extends ViewportOffset {
   bool _didChangeViewportDimension = true;
 
   @override
-  void applyViewportDimension(double viewportDimension) {
+  bool applyViewportDimension(double viewportDimension) {
     if (_viewportDimension != viewportDimension) {
       _viewportDimension = viewportDimension;
       _didChangeViewportDimension = true;
@@ -325,6 +330,7 @@ class ScrollPosition extends ViewportOffset {
       // relies on both values being computed into applyContentDimensions.
     }
     state.setCanDrag(canDrag);
+    return true;
   }
 
   @override
