@@ -6,14 +6,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
-import 'test_widgets.dart';
-
 Future<Null> pumpTest(WidgetTester tester, TargetPlatform platform) async {
   await tester.pumpWidget(new MaterialApp(
     theme: new ThemeData(
       platform: platform,
     ),
-    home: new TestScrollable(
+    home: new CustomScrollView(
       slivers: <Widget>[
         new SliverToBoxAdapter(child: new SizedBox(height: 2000.0)),
       ],

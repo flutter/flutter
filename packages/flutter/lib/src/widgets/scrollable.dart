@@ -128,17 +128,20 @@ class Scrollable2State extends State<Scrollable2> with TickerProviderStateMixin
     ScrollPhysics physics = _configuration.getScrollPhysics(context);
     if (config.physics != null)
       physics = config.physics.applyTo(physics);
+    final ScrollController controller = config.controller;
     final ScrollPosition oldPosition = position;
     if (oldPosition != null) {
-      config.controller?.detach(oldPosition);
+      controller?.detach(oldPosition);
       // It's important that we not dispose the old position until after the
       // viewport has had a chance to unregister its listeners from the old
       // position. So, schedule a microtask to do it.
       scheduleMicrotask(oldPosition.dispose);
     }
-    _position = physics.createScrollPosition(physics, this, oldPosition);
+
+    _position = controller?.createScrollPosition(physics, this, oldPosition)
+      ?? ScrollController.createDefaultScrollPosition(physics, this, oldPosition);
     assert(position != null);
-    config.controller?.attach(position);
+    controller?.attach(position);
   }
 
   @override
@@ -148,12 +151,8 @@ class Scrollable2State extends State<Scrollable2> with TickerProviderStateMixin
   }
 
   bool _shouldUpdatePosition(Scrollable2 oldConfig) {
-    if (config.physics == oldConfig.physics)
-      return false;
-    if ((config.physics == null) != (oldConfig.physics == null))
-      return true;
-    return config.physics.runtimeType != oldConfig.physics.runtimeType
-        || config.physics.shouldUpdateScrollPosition(oldConfig.physics);
+    return config.physics?.runtimeType != oldConfig.physics?.runtimeType
+        || config.controller?.runtimeType != config.controller?.runtimeType;
   }
 
   @override

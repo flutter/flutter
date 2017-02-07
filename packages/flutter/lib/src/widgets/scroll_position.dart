@@ -39,12 +39,6 @@ abstract class ScrollPhysics {
 
   ScrollPhysics applyTo(ScrollPhysics parent);
 
-  ScrollPosition createScrollPosition(ScrollPhysics physics, AbstractScrollState state, ScrollPosition oldPosition) {
-    if (parent == null)
-      return new ScrollPosition(physics, state, oldPosition);
-    return parent.createScrollPosition(physics, state, oldPosition);
-  }
-
   /// Used by [DragScrollActivity] and other user-driven activities to
   /// convert an offset in logical pixels as provided by the [DragUpdateDetails]
   /// into a delta to apply using [setPixels].
@@ -101,18 +95,6 @@ abstract class ScrollPhysics {
 
   Tolerance get tolerance => parent?.tolerance ?? _kDefaultTolerance;
 
-  @mustCallSuper
-  bool shouldUpdateScrollPosition(@checked ScrollPhysics other) {
-    if ((parent == null) != (other.parent == null))
-      return true;
-    if (parent == null) {
-      assert(other.parent == null);
-      return false;
-    }
-    return parent.runtimeType != other.parent.runtimeType
-        || parent.shouldUpdateScrollPosition(other.parent);
-  }
-
   @override
   String toString() {
     if (parent == null)
@@ -122,10 +104,16 @@ abstract class ScrollPhysics {
 }
 
 class ScrollPosition extends ViewportOffset {
-  ScrollPosition(this.physics, this.state, ScrollPosition oldPosition) {
+  ScrollPosition({
+    @required this.physics,
+    @required this.state,
+    double offset: 0.0,
+    ScrollPosition oldPosition,
+  }) : _pixels = offset ?? 0.0 {
     assert(physics != null);
     assert(state != null);
     assert(state.vsync != null);
+    assert(pixels != null);
     if (oldPosition != null)
       absorb(oldPosition);
     if (activity == null)
@@ -140,7 +128,7 @@ class ScrollPosition extends ViewportOffset {
 
   @override
   double get pixels => _pixels;
-  double _pixels = 0.0;
+  double _pixels;
 
   Future<Null> ensureVisible(RenderObject object, {
     double alignment: 0.0,
