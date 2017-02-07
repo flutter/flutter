@@ -199,7 +199,6 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
     return null;
   }
 
-
   double get _minScrollExtent {
     assert(hasSize);
     return 0.0;
@@ -334,44 +333,43 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
   }
 
   @override
-  double getOffsetToReveal(RenderObject descendant, double alignment) {
-    if (descendant is! RenderBox)
+  double getOffsetToReveal(RenderObject target, double alignment) {
+    if (target is! RenderBox)
       return offset.pixels;
 
-    final RenderBox target = descendant;
-    final Matrix4 transform = target.getTransformTo(this);
-    final Rect bounds = MatrixUtils.transformRect(transform, target.paintBounds);
+    final RenderBox targetBox = target;
+    final Matrix4 transform = targetBox.getTransformTo(this);
+    final Rect bounds = MatrixUtils.transformRect(transform, targetBox.paintBounds);
     final Size contentSize = child.size;
 
-    double leading;
-    double trailing;
-    double viewportExtent;
+    double leadingScrollOffset;
+    double targetMainAxisExtent;
+    double mainAxisExtent;
 
     assert(axisDirection != null);
     switch (axisDirection) {
       case AxisDirection.up:
-        viewportExtent = size.height;
-        leading = contentSize.height - bounds.bottom;
-        trailing = contentSize.height - bounds.top;
+        mainAxisExtent = size.height;
+        leadingScrollOffset = contentSize.height - bounds.bottom;
+        targetMainAxisExtent = bounds.height;
         break;
       case AxisDirection.right:
-        viewportExtent = size.width;
-        leading = bounds.left;
-        trailing = bounds.right;
+        mainAxisExtent = size.width;
+        leadingScrollOffset = bounds.left;
+        targetMainAxisExtent = bounds.width;
         break;
       case AxisDirection.down:
-        viewportExtent = size.height;
-        leading = bounds.top;
-        trailing = bounds.bottom;
+        mainAxisExtent = size.height;
+        leadingScrollOffset = bounds.top;
+        targetMainAxisExtent = bounds.height;
         break;
       case AxisDirection.left:
-        viewportExtent = size.width;
-        leading = contentSize.width - bounds.right;
-        trailing = contentSize.width - bounds.left;
+        mainAxisExtent = size.width;
+        leadingScrollOffset = contentSize.width - bounds.right;
+        targetMainAxisExtent = bounds.width;
         break;
     }
 
-    final double targetExtent = trailing - leading;
-    return leading - (viewportExtent - targetExtent) * alignment;
+    return leadingScrollOffset - (mainAxisExtent - targetMainAxisExtent) * alignment;
   }
 }
