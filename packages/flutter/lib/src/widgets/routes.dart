@@ -670,8 +670,9 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// @override
   /// void dependenciesChanged() {
   ///  super.dependenciesChanged();
+  ///  _route?.removeScopedWillPopCallback(askTheUserIfTheyAreSure);
   ///  _route = ModalRoute.of(context);
-  ///  _route.addScopedWillPopCallback(askTheUserIfTheyAreSure);
+  ///  _route?.addScopedWillPopCallback(askTheUserIfTheyAreSure);
   /// }
   /// ```
   ///
@@ -690,7 +691,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// ```dart
   /// @override
   /// void dispose() {
-  ///   _route.removeScopedWillPopCallback(askTheUserIfTheyAreSure);
+  ///   _route?.removeScopedWillPopCallback(askTheUserIfTheyAreSure);
   ///   super.dispose();
   /// }
   /// ```
