@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io' show Platform;
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
@@ -125,7 +126,7 @@ void main() {
     expect(result, <String, String>{});
     expect(console, <String>[
       'RenderView\n'
-      '   debug mode enabled - linux\n'
+      '   debug mode enabled - ${Platform.operatingSystem}\n'
       '   window size: Size(800.0, 600.0) (in physical pixels)\n'
       '   device pixel ratio: 1.0 (physical pixels per logical pixel)\n'
       '   configuration: Size(800.0, 600.0) at 1.0x (in logical pixels)\n'
