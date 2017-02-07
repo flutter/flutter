@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:convert' show JSON;
 
+import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 
 import '../application_package.dart';
@@ -113,7 +114,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   updateXcodeGeneratedProperties(flutterProjectPath, mode, target);
 
   if (!_checkXcodeVersion())
-    return new XcodeBuildResult(false);
+    return new XcodeBuildResult(success: false);
 
   // Before the build, all service definitions must be updated and the dylibs
   // copied over to a location that is suitable for Xcodebuild to find them.
@@ -170,12 +171,14 @@ Future<XcodeBuildResult> buildXcodeProject({
     if (result.stdout.isNotEmpty)
       printStatus(result.stdout);
     return new XcodeBuildResult(
-      false,
+      success: false,
       stdout: result.stdout,
       stderr: result.stderr,
-      buildCommands: commands,
-      buildForDevice: buildForDevice,
-      appDirectory: app.appDirectory
+      xcodeBuildExecution: new XcodeBuildExecution(
+        commands,
+        app.appDirectory,
+        buildForPhysicalDevice: buildForDevice,
+      ),
     );
   } else {
     // Look for 'clean build/Release-iphoneos/Runner.app'.
@@ -184,7 +187,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     String outputDir;
     if (match != null)
       outputDir = path.join(app.appDirectory, match.group(1));
-    return new XcodeBuildResult(true, output: outputDir);
+    return new XcodeBuildResult(success:true, output: outputDir);
   }
 }
 
@@ -213,46 +216,45 @@ Future<Null> diagnoseXcodeBuildFailure(XcodeBuildResult result) async {
     printError("  open ios/Runner.xcodeproj");
     return;
   }
-  if (result.buildForDevice
-      && result.buildCommands != null
-      && result.buildCommands.contains('build')
-      && result.appDirectory != null) {
-    RunResult checkBuildSettings = await runAsync(
-      result.buildCommands..add('-showBuildSettings'),
-      workingDirectory: result.appDirectory,
-      allowReentrantFlutter: true
-    );
-    if (checkBuildSettings.exitCode == 0
-        && !checkBuildSettings.stdout?.contains('DEVELOPMENT_TEAM') == true) {
-      printError(
-        '═══════════════════════════════════════════════════════════════════════════════════');
-      printError(
-        'Building an iOS app requires a selected Development Team with a Provisioning Profile');
-      printError('Please ensure that a Development Team is selected by:');
-      printError('  1- Opening the Flutter project\'s Xcode target with');
-      printError('       open ios/Runner.xcodeproj');
-      printError("  2- Select the 'Runner' project in the navigator then the 'Runner' target");
-      printError('     in the project settings');
-      printError("  3- In the 'General' tab, make sure a 'Development Team' is selected\n");
-      printError('For more information, please visit:');
-      printError('  https://flutter.io/setup/#deploy-to-ios-devices\n');
-      printError('Or run on an iOS simulator');
-      printError(
-        '═══════════════════════════════════════════════════════════════════════════════════');
+  if (result.xcodeBuildExecution != null) {
+    assert(result.xcodeBuildExecution.buildForPhysicalDevice != null);
+    assert(result.xcodeBuildExecution.buildCommands != null);
+    assert(result.xcodeBuildExecution.appDirectory != null);
+    if (result.xcodeBuildExecution.buildForPhysicalDevice &&
+        result.xcodeBuildExecution.buildCommands.contains('build')) {
+      RunResult checkBuildSettings = await runAsync(
+        result.xcodeBuildExecution.buildCommands..add('-showBuildSettings'),
+        workingDirectory: result.xcodeBuildExecution.appDirectory,
+        allowReentrantFlutter: true
+      );
+      if (checkBuildSettings.exitCode == 0
+          && !checkBuildSettings.stdout?.contains('DEVELOPMENT_TEAM') == true) {
+        printError('''
+═══════════════════════════════════════════════════════════════════════════════════\n
+Building an iOS app requires a selected Development Team with a Provisioning Profile\n
+Please ensure that a Development Team is selected by:\n
+  1- Opening the Flutter project's Xcode target with\n
+       open ios/Runner.xcodeproj\n
+  2- Select the 'Runner' project in the navigator then the 'Runner' target\n
+     in the project settings\n
+  3- In the 'General' tab, make sure a 'Development Team' is selected\n\n
+For more information, please visit:\n
+  https://flutter.io/setup/#deploy-to-ios-devices\n\n
+Or run on an iOS simulator\n
+═══════════════════════════════════════════════════════════════════════════════════''');
+      }
     }
   }
 }
 
 class XcodeBuildResult {
   XcodeBuildResult(
-    this.success,
     {
+      @required this.success,
       this.output,
       this.stdout,
       this.stderr,
-      this.buildCommands,
-      this.buildForDevice,
-      this.appDirectory
+      this.xcodeBuildExecution,
     }
   );
 
@@ -260,10 +262,24 @@ class XcodeBuildResult {
   final String output;
   final String stdout;
   final String stderr;
+  /// The invocation of the build that resulted in this result instance.
+  final XcodeBuildExecution xcodeBuildExecution;
+}
+
+/// Describes an invocation of a Xcode build command.
+class XcodeBuildExecution {
+  XcodeBuildExecution(
+    this.buildCommands,
+    this.appDirectory,
+    {
+      @required this.buildForPhysicalDevice,
+    }
+  );
+
   /// The original list of Xcode build commands used to produce this build result.
   final List<String> buildCommands;
-  final bool buildForDevice;
   final String appDirectory;
+  final bool buildForPhysicalDevice;
 }
 
 final RegExp _xcodeVersionRegExp = new RegExp(r'Xcode (\d+)\..*');
