@@ -13,8 +13,8 @@ import 'constants.dart';
 /// represents the current scroll positions of the tab bar and the tar bar view.
 /// The selected tab's index can be changed with [animateTo].
 ///
-/// A stateful widget that builds a [TabBar] and/or a [TabBarView] can create
-/// create a TabController and share it directly.
+/// A stateful widget that builds a [TabBar] or a [TabBarView] can create
+/// a TabController and share it directly.
 ///
 /// ```dart
 /// class _MyDemoState extends State<MyDemo> with SingleTickerProviderStateMixin {
@@ -183,8 +183,8 @@ class _TabControllerScope extends InheritedWidget {
 
 /// The [TabController] for descendant widgets that don't specify one explicitly.
 ///
-/// DefaultTabController is an inherited widget that's used to share a
-/// TabController with a [TabBar] and/or a [TabBarView]. It's used when
+/// DefaultTabController is an inherited widget that is used to share a
+/// TabController with a [TabBar] or a [TabBarView]. It's used when
 /// sharing an explicitly created TabController isn't convenient because
 /// the tab bar widgets are created by a stateless parent widget or by
 /// different parent widgets.
