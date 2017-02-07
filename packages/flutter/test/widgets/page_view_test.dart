@@ -108,4 +108,87 @@ void main() {
     expect(leftOf(0), equals(-100.0));
     expect(sizeOf(0), equals(const Size(800.0, 600.0)));
   });
+
+  testWidgets('PageController control test', (WidgetTester tester) async {
+    PageController controller = new PageController(initialPage: 4.0);
+
+    await tester.pumpWidget(new Center(
+      child: new SizedBox(
+        width: 600.0,
+        height: 400.0,
+        child: new PageView(
+          controller: controller,
+          children: kStates.map<Widget>((String state) => new Text(state)).toList(),
+        ),
+      ),
+    ));
+
+    expect(find.text('California'), findsOneWidget);
+
+    controller.nextPage(duration: const Duration(milliseconds: 150), curve: Curves.ease);
+    await tester.pumpUntilNoTransientCallbacks(const Duration(milliseconds: 100));
+
+    expect(find.text('Colorado'), findsOneWidget);
+
+    await tester.pumpWidget(new Center(
+      child: new SizedBox(
+        width: 300.0,
+        height: 400.0,
+        child: new PageView(
+          controller: controller,
+          children: kStates.map<Widget>((String state) => new Text(state)).toList(),
+        ),
+      ),
+    ));
+
+    expect(find.text('Colorado'), findsOneWidget);
+
+    controller.previousPage(duration: const Duration(milliseconds: 150), curve: Curves.ease);
+    await tester.pumpUntilNoTransientCallbacks(const Duration(milliseconds: 100));
+
+    expect(find.text('California'), findsOneWidget);
+  });
+
+  testWidgets('PageController page stability', (WidgetTester tester) async {
+    await tester.pumpWidget(new Center(
+      child: new SizedBox(
+        width: 600.0,
+        height: 400.0,
+        child: new PageView(
+          children: kStates.map<Widget>((String state) => new Text(state)).toList(),
+        ),
+      ),
+    ));
+
+    expect(find.text('Alabama'), findsOneWidget);
+
+    await tester.scroll(find.byType(PageView), const Offset(-1250.0, 0.0));
+    await tester.pumpUntilNoTransientCallbacks(const Duration(milliseconds: 100));
+
+    expect(find.text('Arizona'), findsOneWidget);
+
+    await tester.pumpWidget(new Center(
+      child: new SizedBox(
+        width: 250.0,
+        height: 100.0,
+        child: new PageView(
+          children: kStates.map<Widget>((String state) => new Text(state)).toList(),
+        ),
+      ),
+    ));
+
+    expect(find.text('Arizona'), findsOneWidget);
+
+    await tester.pumpWidget(new Center(
+      child: new SizedBox(
+        width: 450.0,
+        height: 400.0,
+        child: new PageView(
+          children: kStates.map<Widget>((String state) => new Text(state)).toList(),
+        ),
+      ),
+    ));
+
+    expect(find.text('Arizona'), findsOneWidget);
+  });
 }

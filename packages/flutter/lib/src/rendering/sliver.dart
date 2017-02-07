@@ -1608,6 +1608,8 @@ class RenderViewport2 extends RenderViewportBase2<SliverPhysicalContainerParentD
   void performResize() {
     assert(constraints.hasBoundedHeight && constraints.hasBoundedWidth);
     size = constraints.biggest;
+    // We ignore the return value of applyViewportDimension below because we are
+    // going to go through performLayout next regardless.
     switch (axis) {
       case Axis.vertical:
         offset.applyViewportDimension(size.height);
@@ -1835,12 +1837,14 @@ class RenderViewport2 extends RenderViewportBase2<SliverPhysicalContainerParentD
         break;
     }
     assert(effectiveExtent != null);
-    offset.applyViewportDimension(effectiveExtent);
-    return offset.applyContentDimensions(
-             // when updating this, also update similar code in performLayout()
-             math.min(0.0, _minScrollExtent + effectiveExtent * anchor),
-             math.max(0.0, _maxScrollExtent - effectiveExtent * (1.0 - anchor)),
-           );
+    final bool didAcceptViewportDimension = offset.applyViewportDimension(effectiveExtent);
+    final bool didAcceptContentDimension = offset.applyContentDimensions(
+       // when updating this, also update similar code in performLayout() and
+       // performResize().
+       math.min(0.0, _minScrollExtent + effectiveExtent * anchor),
+       math.max(0.0, _maxScrollExtent - effectiveExtent * (1.0 - anchor)),
+     );
+     return didAcceptViewportDimension && didAcceptContentDimension;
   }
 
   @override
@@ -1990,9 +1994,10 @@ class RenderShrinkWrappingViewport extends RenderViewportBase2<SliverLogicalCont
             effectiveExtent = constraints.constrainWidth(_shrinkWrapExtent);
             break;
         }
-        offset.applyViewportDimension(effectiveExtent);
         // when updating this, also update similar code in rereportDimensions
-        if (offset.applyContentDimensions(0.0, math.max(0.0, _maxScrollExtent - effectiveExtent)))
+        final bool didAcceptViewportDimension = offset.applyViewportDimension(effectiveExtent);
+        final bool didAcceptContentDimension = offset.applyContentDimensions(0.0, math.max(0.0, _maxScrollExtent - effectiveExtent));
+        if (didAcceptViewportDimension && didAcceptContentDimension)
           break;
       }
     } while (true);
@@ -2103,8 +2108,9 @@ class RenderShrinkWrappingViewport extends RenderViewportBase2<SliverLogicalCont
         break;
     }
     assert(effectiveExtent != null);
-    offset.applyViewportDimension(effectiveExtent);
-    return offset.applyContentDimensions(0.0, math.max(0.0, _maxScrollExtent - effectiveExtent));
+    final bool didAcceptViewportDimension = offset.applyViewportDimension(effectiveExtent);
+    final bool didAcceptContentDimension = offset.applyContentDimensions(0.0, math.max(0.0, _maxScrollExtent - effectiveExtent));
+    return didAcceptViewportDimension && didAcceptContentDimension;
   }
 
   @override

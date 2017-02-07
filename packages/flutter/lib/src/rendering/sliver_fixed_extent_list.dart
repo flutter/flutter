@@ -66,10 +66,10 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
       trailingChildWithLayout ??= child;
     }
 
-    assert(childScrollOffset(firstChild) <= scrollOffset);
-
     if (trailingChildWithLayout == null) {
       firstChild.layout(childConstraints);
+      final SliverMultiBoxAdaptorParentData childParentData = firstChild.parentData;
+      childParentData.layoutOffset = indexToScrollOffset(firstIndex);
       trailingChildWithLayout = firstChild;
     }
 
@@ -94,6 +94,7 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
     final double leadingScrollOffset = indexToScrollOffset(firstIndex);
     final double trailingScrollOffset = indexToScrollOffset(lastIndex + 1);
 
+    assert(childScrollOffset(firstChild) <= scrollOffset);
     assert(debugAssertChildListIsNonEmptyAndContiguous());
     assert(indexOf(firstChild) == firstIndex);
     assert(lastIndex <= targetLastIndex);

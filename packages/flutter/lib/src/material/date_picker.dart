@@ -365,23 +365,24 @@ class _MonthPickerState extends State<MonthPicker> {
   void initState() {
     super.initState();
     // Initially display the pre-selected date.
+    _dayPickerController = new PageController(initialPage: _monthDelta(config.firstDate, config.selectedDate).toDouble());
     _currentDisplayedMonthDate = new DateTime(config.selectedDate.year, config.selectedDate.month);
     _updateCurrentDate();
   }
 
   @override
   void didUpdateConfig(MonthPicker oldConfig) {
-    if (config.selectedDate != oldConfig.selectedDate)
-      _dayPickerListKey = new GlobalKey<PageableState<PageableLazyList>>();
+    if (config.selectedDate != oldConfig.selectedDate) {
+      _dayPickerController = new PageController(initialPage: _monthDelta(config.firstDate, config.selectedDate).toDouble());
       _currentDisplayedMonthDate =
           new DateTime(config.selectedDate.year, config.selectedDate.month);
+    }
   }
 
   DateTime _todayDate;
   DateTime _currentDisplayedMonthDate;
   Timer _timer;
-  GlobalKey<PageableState<PageableLazyList>> _dayPickerListKey =
-      new GlobalKey<PageableState<PageableLazyList>>();
+  PageController _dayPickerController;
 
   void _updateCurrentDate() {
     _todayDate = new DateTime.now();
@@ -397,7 +398,7 @@ class _MonthPickerState extends State<MonthPicker> {
     });
   }
 
-  int _monthDelta(DateTime startDate, DateTime endDate) {
+  static int _monthDelta(DateTime startDate, DateTime endDate) {
     return (endDate.year - startDate.year) * 12 + endDate.month - startDate.month;
   }
 
@@ -406,35 +407,28 @@ class _MonthPickerState extends State<MonthPicker> {
     return new DateTime(monthDate.year + monthsToAdd ~/ 12, monthDate.month + monthsToAdd % 12);
   }
 
-  List<Widget> _buildItems(BuildContext context, int start, int count) {
-    final List<Widget> result = new List<Widget>();
-    final DateTime startMonthDate = _addMonthsToMonthDate(config.firstDate, start);
-    for (int i = 0; i < count; ++i) {
-      DateTime monthToBuild = _addMonthsToMonthDate(startMonthDate, i);
-      result.add(new DayPicker(
-        key: new ValueKey<DateTime>(monthToBuild),
-        selectedDate: config.selectedDate,
-        currentDate: _todayDate,
-        onChanged: config.onChanged,
-        firstDate: config.firstDate,
-        lastDate: config.lastDate,
-        displayedMonth: monthToBuild,
-        selectableDayPredicate: config.selectableDayPredicate,
-      ));
-    }
-    return result;
+  Widget _buildItems(BuildContext context, int index) {
+    final DateTime month = _addMonthsToMonthDate(config.firstDate, index);
+    return new DayPicker(
+      key: new ValueKey<DateTime>(month),
+      selectedDate: config.selectedDate,
+      currentDate: _todayDate,
+      onChanged: config.onChanged,
+      firstDate: config.firstDate,
+      lastDate: config.lastDate,
+      displayedMonth: month,
+      selectableDayPredicate: config.selectableDayPredicate,
+    );
   }
 
   void _handleNextMonth() {
-    if (!_isDisplayingLastMonth) {
-      _dayPickerListKey.currentState?.fling(1.0);
-    }
+    if (!_isDisplayingLastMonth)
+      _dayPickerController.nextPage(duration: _kMonthScrollDuration, curve: Curves.ease);
   }
 
   void _handlePreviousMonth() {
-    if (!_isDisplayingFirstMonth) {
-      _dayPickerListKey.currentState?.fling(-1.0);
-    }
+    if (!_isDisplayingFirstMonth)
+      _dayPickerController.previousPage(duration: _kMonthScrollDuration, curve: Curves.ease);
   }
 
   /// True if the earliest allowable month is displayed.
@@ -462,13 +456,12 @@ class _MonthPickerState extends State<MonthPicker> {
       height: _kMaxDayPickerHeight,
       child: new Stack(
         children: <Widget>[
-          new PageableLazyList(
-            key: _dayPickerListKey,
-            initialScrollOffset: _monthDelta(config.firstDate, config.selectedDate).toDouble(),
+          new PageView.builder(
+            key: new ValueKey<DateTime>(config.selectedDate),
+            controller: _dayPickerController,
             scrollDirection: Axis.horizontal,
             itemCount: _monthDelta(config.firstDate, config.lastDate) + 1,
             itemBuilder: _buildItems,
-            duration: _kMonthScrollDuration,
             onPageChanged: _handleMonthPageChanged,
           ),
           new Positioned(
