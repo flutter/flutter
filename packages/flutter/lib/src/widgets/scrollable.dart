@@ -22,6 +22,7 @@ import 'notification_listener.dart';
 import 'page_storage.dart';
 import 'scroll_behavior.dart';
 import 'scroll_configuration.dart';
+import 'scroll_controller.dart';
 import 'scroll_notification.dart';
 import 'scroll_position.dart';
 import 'ticker_provider.dart';
@@ -35,6 +36,7 @@ class Scrollable2 extends StatefulWidget {
   Scrollable2({
     Key key,
     this.axisDirection: AxisDirection.down,
+    this.controller,
     this.physics,
     @required this.viewportBuilder,
   }) : super (key: key) {
@@ -43,6 +45,8 @@ class Scrollable2 extends StatefulWidget {
   }
 
   final AxisDirection axisDirection;
+
+  final ScrollController controller;
 
   final ScrollPhysics physics;
 
@@ -125,14 +129,16 @@ class Scrollable2State extends State<Scrollable2> with TickerProviderStateMixin
     if (config.physics != null)
       physics = config.physics.applyTo(physics);
     final ScrollPosition oldPosition = position;
-    _position = physics.createScrollPosition(physics, this, oldPosition);
-    assert(position != null);
     if (oldPosition != null) {
-      // It's important that we not do this until after the viewport has had a
-      // chance to unregister its listeners from the old position. So, schedule
-      // a microtask to do it.
+      config.controller?.detach(oldPosition);
+      // It's important that we not dispose the old position until after the
+      // viewport has had a chance to unregister its listeners from the old
+      // position. So, schedule a microtask to do it.
       scheduleMicrotask(oldPosition.dispose);
     }
+    _position = physics.createScrollPosition(physics, this, oldPosition);
+    assert(position != null);
+    config.controller?.attach(position);
   }
 
   @override
@@ -153,12 +159,19 @@ class Scrollable2State extends State<Scrollable2> with TickerProviderStateMixin
   @override
   void didUpdateConfig(Scrollable2 oldConfig) {
     super.didUpdateConfig(oldConfig);
+
+    if (config.controller != oldConfig.controller) {
+      oldConfig.controller?.detach(position);
+      config.controller?.attach(position);
+    }
+
     if (_shouldUpdatePosition(oldConfig))
       _updatePosition();
   }
 
   @override
   void dispose() {
+    config.controller?.detach(position);
     position.dispose();
     super.dispose();
   }

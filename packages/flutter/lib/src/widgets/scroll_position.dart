@@ -151,20 +151,20 @@ class ScrollPosition extends ViewportOffset {
     final RenderAbstractViewport viewport = RenderAbstractViewport.of(object);
     assert(viewport != null);
 
-    final double to = viewport.getOffsetToReveal(object, alignment).clamp(minScrollExtent, maxScrollExtent);
+    final double target = viewport.getOffsetToReveal(object, alignment).clamp(minScrollExtent, maxScrollExtent);
 
-    if (to == pixels)
+    if (target == pixels)
       return new Future<Null>.value();
 
     if (duration == Duration.ZERO) {
-      jumpTo(to);
+      jumpTo(target);
       return new Future<Null>.value();
     }
 
-    return animate(to: to, duration: duration, curve: curve);
+    return animateTo(target, duration: duration, curve: curve);
   }
 
-  /// Animates the position from its current value to the given value `to`.
+  /// Animates the position from its current value to the given value.
   ///
   /// Any active animation is canceled. If the user is currently scrolling, that
   /// action is canceled.
@@ -188,11 +188,10 @@ class ScrollPosition extends ViewportOffset {
   /// position would normally bounce back).
   ///
   /// The duration must not be zero. To jump to a particular value without an
-  /// animation, use [setPixels].
+  /// animation, use [jumpTo].
   ///
   /// The animation is handled by an [DrivenScrollActivity].
-  Future<Null> animate({
-    @required double to,
+  Future<Null> animateTo(double to, {
     @required Duration duration,
     @required Curve curve,
   }) {
@@ -514,19 +513,19 @@ abstract class ScrollActivity {
   /// [ScrollPosition.beginBallisticActivity].
   void resetActivity() { }
 
-  Notification createScrollStartNotification(Scrollable2State scrollable) {
+  Notification createScrollStartNotification(AbstractScrollState scrollable) {
     return new ScrollStartNotification(scrollable: scrollable);
   }
 
-  Notification createScrollUpdateNotification(Scrollable2State scrollable, double scrollDelta) {
+  Notification createScrollUpdateNotification(AbstractScrollState scrollable, double scrollDelta) {
     return new ScrollUpdateNotification(scrollable: scrollable, scrollDelta: scrollDelta);
   }
 
-  Notification createOverscrollNotification(Scrollable2State scrollable, double overscroll) {
+  Notification createOverscrollNotification(AbstractScrollState scrollable, double overscroll) {
     return new OverscrollNotification(scrollable: scrollable, overscroll: overscroll);
   }
 
-  Notification createScrollEndNotification(Scrollable2State scrollable) {
+  Notification createScrollEndNotification(AbstractScrollState scrollable) {
     return new ScrollEndNotification(scrollable: scrollable);
   }
 
@@ -609,25 +608,25 @@ class DragScrollActivity extends ScrollActivity {
   dynamic _lastDetails;
 
   @override
-  Notification createScrollStartNotification(Scrollable2State scrollable) {
+  Notification createScrollStartNotification(AbstractScrollState scrollable) {
     assert(_lastDetails is DragStartDetails);
     return new ScrollStartNotification(scrollable: scrollable, dragDetails: _lastDetails);
   }
 
   @override
-  Notification createScrollUpdateNotification(Scrollable2State scrollable, double scrollDelta) {
+  Notification createScrollUpdateNotification(AbstractScrollState scrollable, double scrollDelta) {
     assert(_lastDetails is DragUpdateDetails);
     return new ScrollUpdateNotification(scrollable: scrollable, scrollDelta: scrollDelta, dragDetails: _lastDetails);
   }
 
   @override
-  Notification createOverscrollNotification(Scrollable2State scrollable, double overscroll) {
+  Notification createOverscrollNotification(AbstractScrollState scrollable, double overscroll) {
     assert(_lastDetails is DragUpdateDetails);
     return new OverscrollNotification(scrollable: scrollable, overscroll: overscroll, dragDetails: _lastDetails);
   }
 
   @override
-  Notification createScrollEndNotification(Scrollable2State scrollable) {
+  Notification createScrollEndNotification(AbstractScrollState scrollable) {
     assert(_lastDetails is DragEndDetails);
     return new ScrollEndNotification(scrollable: scrollable, dragDetails: _lastDetails);
   }
@@ -689,7 +688,7 @@ class BallisticScrollActivity extends ScrollActivity {
   }
 
   @override
-  Notification createOverscrollNotification(Scrollable2State scrollable, double overscroll) {
+  Notification createOverscrollNotification(AbstractScrollState scrollable, double overscroll) {
     return new OverscrollNotification(scrollable: scrollable, overscroll: overscroll, velocity: velocity);
   }
 
@@ -761,7 +760,7 @@ class DrivenScrollActivity extends ScrollActivity {
   }
 
   @override
-  Notification createOverscrollNotification(Scrollable2State scrollable, double overscroll) {
+  Notification createOverscrollNotification(AbstractScrollState scrollable, double overscroll) {
     return new OverscrollNotification(scrollable: scrollable, overscroll: overscroll, velocity: velocity);
   }
 
