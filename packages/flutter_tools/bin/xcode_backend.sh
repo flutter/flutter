@@ -141,13 +141,22 @@ LipoExecutable() {
   local all_executables=()
   for arch in $archs; do
     local output="${executable}_${arch}"
-    lipo -output "${output}" -extract "${arch}" "${executable}"
-    if [[ $? == 0 ]]; then
-      all_executables+=("${output}")
+    local lipo_info=$(lipo -info "${executable}")
+    if [[ "${lipo_info}" == "Non-fat file:"* ]]; then
+      if [[ "${lipo_info}" != *"${arch}" ]]; then
+        echo "Non-fat binary ${executable} is not ${arch}. Running lipo -info:"
+        echo "${lipo_info}"
+        exit 1
+      fi
     else
-      echo "Failed to extract ${arch} for ${executable}. Running lipo -info:"
-      lipo -info "${executable}"
-      exit 1
+      lipo -output "${output}" -extract "${arch}" "${executable}"
+      if [[ $? == 0 ]]; then
+        all_executables+=("${output}")
+      else
+        echo "Failed to extract ${arch} for ${executable}. Running lipo -info:"
+        lipo -info "${executable}"
+        exit 1
+      fi
     fi
   done
 
