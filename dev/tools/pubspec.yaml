@@ -2,5 +2,7 @@ name: dev_tools
 description: Various repository development tools for flutter.
 
 dependencies:
+  archive: ^1.0.20
   args: ^0.13.4
+  http: ^0.11.3
   path: ^1.4.0
