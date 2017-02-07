@@ -13,10 +13,47 @@ import 'constants.dart';
 /// represents the current scroll positions of the tab bar and the tar bar view.
 /// The selected tab's index can be changed with [animateTo].
 ///
-/// See also:
+/// A stateful widget that builds a [TabBar] and/or a [TabBarView] can create
+/// create a TabController and share it directly.
 ///
-/// * [DefaultTabController], which simplifies sharing a TabController with
-///   its [TabBar] and a [TabBarView] descendants.
+/// ```dart
+/// class _MyDemoState extends State<MyDemo> with SingleTickerProviderStateMixin {
+///   final List<Tab> myTabs = <Tab>[
+///     new Tab(text: 'LEFT'),
+///     new Tab(text: 'RIGHT'),
+///   ];
+///
+///   TabController _tabController;
+///
+///   @override
+///   void initState() {
+///     super.initState();
+///     _tabController = new TabController(vsync: this, length: myTabs.length);
+///   }
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return new Scaffold(
+///       appBar: new AppBar(
+///         bottom: new TabBar(
+///           controller: _tabController,
+///           tabs: myTabs,
+///         ),
+///       ),
+///       body: new TabBarView(
+///         controller: _tabController,
+///         children: myTabs.map((Tab tab) {
+///           return new Center(child: new Text(tab.text));
+///         }).toList(),
+///       ),
+///     );
+///   }
+/// }
+/// ```
+///
+/// When the [TabBar] and [TabBarView] don't have a convenient stateful
+/// ancestor, a TabController can be shared with the [DefaultTabController]
+/// inherited widget.
 class TabController extends ChangeNotifier {
   /// Creates an object that manages the state required by [TabBar] and a [TabBarView].
   TabController({ int initialIndex: 0, @required this.length, @required TickerProvider vsync })
@@ -139,6 +176,40 @@ class _TabControllerScope extends InheritedWidget {
 }
 
 /// The [TabController] for descendant widgets that don't specify one explicitly.
+///
+/// DefaultTabController is an inherited widget that's used to share a
+/// TabController with a [TabBar] and/or a [TabBarView]. It's used when
+/// sharing an explicitly created TabController isn't convenient because
+/// the tab bar widgets are created by a stateless parent widget or by
+/// different parent widgets.
+///
+/// ```dart
+/// class MyDemo extends StatelessWidget {
+///   final List<Tab> myTabs = <Tab>[
+///     new Tab(text: 'LEFT'),
+///     new Tab(text: 'RIGHT'),
+///   ];
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return new DefaultTabController(
+///       length: myTabs.length,
+///       child: new Scaffold(
+///         appBar: new AppBar(
+///           bottom: new TabBar(
+///             tabs: myTabs,
+///           ),
+///         ),
+///         body: new TabBarView(
+///           children: myTabs.map((Tab tab) {
+///             return new Center(child: new Text(tab.text));
+///           }).toList(),
+///         ),
+///       ),
+///     );
+///   }
+/// }
+/// ```
 class DefaultTabController extends StatefulWidget {
   DefaultTabController({
     Key key,
