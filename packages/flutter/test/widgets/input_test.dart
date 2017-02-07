@@ -101,7 +101,7 @@ void main() {
     Size emptyInputSize = inputBox.size;
 
     Future<Null> checkText(String testValue) async {
-      await tester.enterText(find.byType(EditableText).first, testValue);
+      await tester.enterText(find.byType(EditableText), testValue);
       await tester.idle();
 
       // Check that the onChanged event handler fired.
@@ -134,7 +134,7 @@ void main() {
     }
 
     await tester.pumpWidget(builder());
-    await tester.showKeyboard(find.byType(EditableText).first);
+    await tester.showKeyboard(find.byType(EditableText));
 
     EditableTextState editableText = tester.state(find.byType(EditableText));
 
@@ -154,7 +154,7 @@ void main() {
     }
 
     await checkCursorToggle();
-    await tester.showKeyboard(find.byType(EditableText).first);
+    await tester.showKeyboard(find.byType(EditableText));
 
     // Try the test again with a nonempty EditableText.
     tester.testTextInput.updateEditingState(const TextEditingState(
@@ -181,7 +181,7 @@ void main() {
     }
 
     await tester.pumpWidget(builder());
-    await tester.showKeyboard(find.byType(EditableText).first);
+    await tester.showKeyboard(find.byType(EditableText));
 
     const String testValue = 'ABC';
     tester.testTextInput.updateEditingState(const TextEditingState(
@@ -220,7 +220,7 @@ void main() {
     await tester.pumpWidget(builder());
 
     String testValue = 'abc def ghi';
-    await tester.enterText(find.byType(EditableText).first, testValue);
+    await tester.enterText(find.byType(EditableText), testValue);
     await tester.idle();
     expect(inputValue.text, testValue);
 
@@ -267,7 +267,7 @@ void main() {
     await tester.pumpWidget(builder());
 
     String testValue = 'abc def ghi';
-    await tester.enterText(find.byType(EditableText).first, testValue);
+    await tester.enterText(find.byType(EditableText), testValue);
     await tester.idle();
 
     await tester.pumpWidget(builder());
@@ -342,7 +342,7 @@ void main() {
     await tester.pumpWidget(builder());
 
     String testValue = 'abc def ghi';
-    await tester.enterText(find.byType(EditableText).first, testValue);
+    await tester.enterText(find.byType(EditableText), testValue);
     await tester.idle();
     await tester.pumpWidget(builder());
 
@@ -407,7 +407,7 @@ void main() {
     await tester.pumpWidget(builder());
 
     String testValue = 'abc def ghi';
-    await tester.enterText(find.byType(EditableText).first, testValue);
+    await tester.enterText(find.byType(EditableText), testValue);
     await tester.idle();
     await tester.pumpWidget(builder());
 
@@ -461,13 +461,13 @@ void main() {
     RenderBox inputBox = findInputBox();
     Size emptyInputSize = inputBox.size;
 
-    await tester.enterText(find.byType(EditableText).first, 'No wrapping here.');
+    await tester.enterText(find.byType(EditableText), 'No wrapping here.');
     await tester.idle();
     await tester.pumpWidget(builder(3));
     expect(findInputBox(), equals(inputBox));
     expect(inputBox.size, equals(emptyInputSize));
 
-    await tester.enterText(find.byType(EditableText).first, kThreeLines);
+    await tester.enterText(find.byType(EditableText), kThreeLines);
     await tester.idle();
     await tester.pumpWidget(builder(3));
     expect(findInputBox(), equals(inputBox));
@@ -476,14 +476,14 @@ void main() {
     Size threeLineInputSize = inputBox.size;
 
     // An extra line won't increase the size because we max at 3.
-    await tester.enterText(find.byType(EditableText).first, kFourLines);
+    await tester.enterText(find.byType(EditableText), kFourLines);
     await tester.idle();
     await tester.pumpWidget(builder(3));
     expect(findInputBox(), equals(inputBox));
     expect(inputBox.size, threeLineInputSize);
 
     // But now it will.
-    await tester.enterText(find.byType(EditableText).first, kFourLines);
+    await tester.enterText(find.byType(EditableText), kFourLines);
     await tester.idle();
     await tester.pumpWidget(builder(4));
     expect(findInputBox(), equals(inputBox));
@@ -520,7 +520,7 @@ void main() {
 
     String testValue = kThreeLines;
     String cutValue = 'First line of stuff keeps going until abcdef ghijk. ';
-    await tester.enterText(find.byType(EditableText).first, testValue);
+    await tester.enterText(find.byType(EditableText), testValue);
     await tester.idle();
 
     await tester.pumpWidget(builder());
@@ -610,7 +610,7 @@ void main() {
 
     await tester.pumpWidget(builder());
 
-    await tester.enterText(find.byType(EditableText).first, kFourLines);
+    await tester.enterText(find.byType(EditableText), kFourLines);
     await tester.idle();
 
     await tester.pumpWidget(builder());
@@ -696,7 +696,7 @@ void main() {
     await tester.pumpWidget(builder());
 
     Future<Null> checkText(String testValue) async {
-      await tester.enterText(find.byType(EditableText).first, testValue);
+      await tester.enterText(find.byType(EditableText), testValue);
       await tester.idle();
 
       // Check that the onChanged event handler fired.
@@ -728,7 +728,7 @@ void main() {
     await tester.pumpWidget(builder());
 
     Future<Null> checkText(String testValue) async {
-      await tester.enterText(find.byType(EditableText).first, testValue);
+      await tester.enterText(find.byType(EditableText), testValue);
       await tester.idle();
 
       // Check that the onChanged event handler fired.

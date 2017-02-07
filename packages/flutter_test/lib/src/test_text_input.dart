@@ -12,7 +12,7 @@ import 'widget_tester.dart';
 
 const String _kTextInputClientChannel = 'flutter/textinputclient';
 
-/// A testing stub for the system's popup keyboard.
+/// A testing stub for the system's onscreen keyboard.
 ///
 /// Typical app tests will not need to use this class directly.
 ///

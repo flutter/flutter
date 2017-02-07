@@ -20,6 +20,7 @@ import 'package:vector_math/vector_math_64.dart';
 
 import 'stack_manipulation.dart';
 import 'test_async_utils.dart';
+import 'test_text_input.dart';
 
 /// Phases that can be reached by [WidgetTester.pumpWidget] and
 /// [TestWidgetsFlutterBinding.pump].
@@ -125,6 +126,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
         );
       });
     };
+    _testTextInput = new TestTextInput()..register();
     super.initInstances();
   }
 
@@ -186,6 +188,20 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   }) {
     assert(source == TestBindingEventSource.test);
     super.dispatchEvent(event, result);
+  }
+
+  /// A stub for the system's onscreen keyboard. Callers must set the
+  /// [focusedEditable] before using this value.
+  TestTextInput get testTextInput => _testTextInput;
+  TestTextInput _testTextInput;
+
+  /// The current client of the onscreen keyboard. Callers must pump
+  /// an additional frame after setting this property to complete the
+  /// the focus change.
+  EditableTextState get focusedEditable => _focusedEditable;
+  EditableTextState _focusedEditable;
+  void set focusedEditable (EditableTextState editable) {
+    _focusedEditable = editable..requestKeyboard();
   }
 
   /// Returns the exception most recently caught by the Flutter framework.
