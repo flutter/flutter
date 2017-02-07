@@ -33,6 +33,9 @@ IF NOT EXIST "%flutter_root%\.git" (
   EXIT /B
 )
 
+REM To debug the tool, you can uncomment the following line to enable checked mode and set an observatory port:
+REM SET FLUTTER_TOOL_ARGS="--observe=65432 --checked"
+
 PUSHD "%flutter_root%"
 FOR /f %%r IN ('git rev-parse HEAD') DO SET revision=%%r
 POPD
@@ -67,10 +70,10 @@ GOTO after_snapshot
 
 :after_snapshot
 
-CALL "%dart%" "%snapshot_path%" %*
+CALL "%dart%" %FLUTTER_TOOL_ARGS% "%snapshot_path%" %*
 
 REM The VM exits with code 253 if the snapshot version is out-of-date.
 IF /I "%ERRORLEVEL%" EQU "253" (    
   CALL "%dart%" --snapshot="%snapshot_path%" --packages="%flutter_tools_dir%\.packages" "%script_path%"    
-  CALL "%dart%" "%snapshot_path%" %*   
+  CALL "%dart%" %FLUTTER_TOOL_ARGS% "%snapshot_path%" %*   
 )
