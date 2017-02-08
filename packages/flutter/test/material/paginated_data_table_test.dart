@@ -88,8 +88,8 @@ void main() {
       home: buildTable(source),
     ));
 
-    expect(find.text('G (0)'), findsOneWidget);
-    expect(find.text('G (1)'), findsNothing);
+    expect(find.text('Gingerbread (0)'), findsOneWidget);
+    expect(find.text('Gingerbread (1)'), findsNothing);
     expect(find.text('42'), findsNWidgets(10));
 
     source.generation = 43;
@@ -118,9 +118,9 @@ void main() {
 
     await tester.pump();
 
-    expect(find.text('G (0)'), findsNothing);
-    expect(find.text('G (1)'), findsNothing);
-    expect(find.text('G (2)'), findsOneWidget);
+    expect(find.text('Gingerbread (0)'), findsNothing);
+    expect(find.text('Gingerbread (1)'), findsNothing);
+    expect(find.text('Gingerbread (2)'), findsOneWidget);
 
     await tester.tap(find.icon(Icons.adjust));
     expect(log, <String>['action: adjust']);
@@ -147,9 +147,9 @@ void main() {
           log.add('page-changed: $rowIndex');
         },
         columns: <DataColumn>[
-          new DataColumn(label: new Text('N')),
-          new DataColumn(label: new Text('Cc'), numeric: true),
-          new DataColumn(label: new Text('Ggg')),
+          new DataColumn(label: new Text('Name')),
+          new DataColumn(label: new Text('Calories'), numeric: true),
+          new DataColumn(label: new Text('Generation')),
         ],
       )
     ));
@@ -161,9 +161,9 @@ void main() {
 
     await tester.pump();
 
-    expect(find.text('FY (0)'), findsNothing);
-    expect(find.text('E (0)'), findsOneWidget);
-    expect(find.text('G (0)'), findsNothing);
+    expect(find.text('Frozen yogurt (0)'), findsNothing);
+    expect(find.text('Eclair (0)'), findsOneWidget);
+    expect(find.text('Gingerbread (0)'), findsNothing);
 
     await tester.tap(find.icon(Icons.chevron_left));
 
@@ -172,9 +172,9 @@ void main() {
 
     await tester.pump();
 
-    expect(find.text('FY (0)'), findsOneWidget);
-    expect(find.text('E (0)'), findsNothing);
-    expect(find.text('G (0)'), findsNothing);
+    expect(find.text('Frozen yogurt (0)'), findsOneWidget);
+    expect(find.text('Eclair (0)'), findsNothing);
+    expect(find.text('Gingerbread (0)'), findsNothing);
 
     await tester.tap(find.icon(Icons.chevron_left));
 
