@@ -12,39 +12,40 @@ import 'package:flutter/foundation.dart';
 /// Protocols for platform communication, implemented on top of
 /// [PlatformMessages].
 class PlatformProtocols {
+  PlatformProtocols._();
+
   /// Returns a [Future] representing an asynchronous invocation of a named
   /// platform function with JSON-encoded arguments, results, and errors.
   ///
-  /// If specified, the optional [args] map must contain valid JSON values
+  /// If specified, the optional [arguments] map must contain valid JSON values
   /// according to [PlatformMessages.sendJSON].
   ///
-  /// The platform function must be implemented on the native side by a handler
-  /// registered for the specified [channel]. The handler should expect
+  /// The platform function must be implemented on the platform host by a
+  /// handler registered for the specified [channel]. The handler should expect
   /// invocations using envelopes of the form
   ///
   ///     { "name": <function name>,
-  ///       "args": <arguments json>
-  ///     }
+  ///       "args": <arguments json> }
   ///
-  /// If [name] is not specified, [channel] is used in its place.
+  /// The function [name] parameter is optional, and defaults to the name of the
+  /// communication [channel] which is not.
   ///
-  /// The native implementation must wrap the result of a successful invocation
-  /// in an envelope of the form
+  /// The platform implementation must wrap the result of a successful
+  /// invocation in an envelope of the form
   ///
   ///     { "status": "ok",
-  ///       "data": <result>
-  ///     }
+  ///       "data": <result> }
   ///
   /// Similarly, an error must be wrapped in an envelope of the form
   ///
   ///     { "status": "error",
   ///       "message": <human-readable error message>,
-  ///       "data": <error details>
-  ///     }
+  ///       "data": <error details> }
   ///
   /// In both cases, `data` is optional and treated as `null` when missing.
-  /// The other envelope fields are mandatory. Additional fields, if any, are
-  /// silently discarded.
+  /// The other envelope fields are mandatory, and the returned future will
+  /// complete with a [FormatException], if they are missing. Additional fields,
+  /// if any, are silently discarded.
   ///
   /// On successful invocation, the specified [decoder] is used to turn the
   /// result data into a [T] instance (or `null`), which will then complete
@@ -59,12 +60,12 @@ class PlatformProtocols {
   static Future<T> invokeJSONFunction<T>({
     @required String channel,
     String name,
-    Map<String, dynamic> args,
+    Map<String, dynamic> arguments,
     T decoder(dynamic json),
   }) async {
     final dynamic reply = await PlatformMessages.sendJSON(channel, <String, dynamic>{
       'name': name ?? channel,
-      'args': args,
+      'args': arguments,
     });
     return _interpretJSON<T>(reply, decoder);
   }
@@ -72,20 +73,21 @@ class PlatformProtocols {
   /// Creates a broadcast [Stream] for consuming a named platform stream of
   /// JSON-encoded events.
   ///
-  /// The optional [args] map must contain valid JSON values according to
-  /// [PlatformMessages.sendJSON]. If [args] is specified, it means that the
+  /// The optional [arguments] map must contain valid JSON values according to
+  /// [PlatformMessages.sendJSON]. If [arguments] is specified, it means that the
   /// stream is configurable and that multiple streams with different
-  /// configurations might need to co-exist. In that case, [args] must contain
+  /// configurations might need to co-exist. In that case, [arguments] must contain
   /// an `eventChannel` entry with a string value which will be used as the name
   /// of the channel on which events are emitted for the specified configuration.
-  /// If [args] is left unspecified, the main [channel] itself is used for events.
+  /// If [arguments] is left unspecified, the main [channel] itself is used for
+  /// events.
   ///
-  /// The platform stream must be implemented on the native side by a handler
+  /// The platform stream must be implemented on the host platform by a handler
   /// registered for the specified [channel]. That handler should expect calls
   /// to JSON functions named 'listen' and 'cancel' according to the protocol
-  /// of [invokeJSONFunction]. These functions are used to let the native side
+  /// of [invokeJSONFunction]. These functions are used to let the platform side
   /// know when the Dart stream has registered listeners, see
-  /// [StreamController.broadcast]. Both are called with [args] as arguments.
+  /// [StreamController.broadcast]. Both functions are called with [arguments].
   ///
   /// Following the semantics of broadcast streams, `listen` will be called as
   /// the first listener registers with the returned stream, and `cancel` when
@@ -97,26 +99,24 @@ class PlatformProtocols {
   /// reported through [FlutterError.reportError] as there are no listeners
   /// to receive an error event in that case.
   ///
-  /// The native implementation must wrap each data event in an envelope of the
-  /// form
+  /// The platform implementation must wrap each data event in an envelope of
+  /// the form
   ///
   ///     { "status": "ok",
-  ///       "data": <data>
-  ///     }
+  ///       "data": <data> }
   ///
   /// Similarly, an error event must be wrapped in an envelope of the form
   ///
   ///     { "status": "error",
   ///       "message": <human-readable error message>,
-  ///       "data": <error details>
-  ///     }
+  ///       "data": <error details> }
   ///
-  /// For each successful event, the specified [decoder] is used to turn the
-  /// data into a [T] instance (or `null`), which is then produced as a data
-  /// event by the returned stream. A `null` or missing decoder is treated
+  /// For each successful platform event, the specified [decoder] is used to
+  /// turn the data into a [T] instance (or `null`), which is then produced as a
+  /// data event by the returned stream. A `null` or missing decoder is treated
   /// as a constantly `null` function.
   ///
-  /// On each native error event, the returned stream will produce an error
+  /// On each platform error event, the returned stream will produce an error
   /// event with a [PlatformException] containing the error message and error
   /// details data.
   ///
@@ -125,12 +125,12 @@ class PlatformProtocols {
   /// [FormatException].
   static Stream<T> createJSONBroadcastStream<T>({
     @required String channel,
-    Map<String, dynamic> args,
+    Map<String, dynamic> arguments,
     T decoder(dynamic json),
   }) {
     assert(channel != null);
-    assert(args == null || args['eventChannel'] is String);
-    final String eventChannel = args == null ? channel : args['eventChannel'];
+    assert(arguments == null || arguments['eventChannel'] is String);
+    final String eventChannel = arguments == null ? channel : arguments['eventChannel'];
     StreamController<T> controller;
     controller = new StreamController<T>.broadcast(
       onListen: () async {
@@ -145,23 +145,29 @@ class PlatformProtocols {
           }
         );
         try {
-          await invokeJSONFunction<Null>(channel: channel, name: 'listen', args: args);
-        }
-        catch (e) {
+          await invokeJSONFunction<Null>(
+            channel: channel,
+            name: 'listen',
+            arguments: arguments,
+          );
+        } catch (e) {
           PlatformMessages.setJSONMessageHandler(eventChannel, null);
           controller.addError(e);
         }
       }, onCancel: () async {
         PlatformMessages.setJSONMessageHandler(eventChannel, null);
         try {
-          await invokeJSONFunction<Null>(channel: channel, name: 'cancel', args: args);
-        }
-        catch (exception, stack) {
+          await invokeJSONFunction<Null>(
+            channel: channel,
+            name: 'cancel',
+            arguments: arguments,
+          );
+        } catch (exception, stack) {
           FlutterError.reportError(new FlutterErrorDetails(
             exception: exception,
             stack: stack,
             library: 'services library',
-            context: 'during de-activating platform stream on channel $channel',
+            context: 'while de-activating platform stream on channel $channel',
           ));
         }
       }
@@ -174,21 +180,13 @@ class PlatformProtocols {
       final dynamic status = json['status'];
       final dynamic message = json['message'];
       final dynamic data = json['data'];
-      if (status == 'ok') {
+      if (status == 'ok')
         return decoder?.call(data);
-      }
-      else if (status is String && message is String) {
-        throw new PlatformException(
-          status: status,
-          message: message,
-          details: data,
-        );
-      }
-      else {
+      else if (status is String && message is String)
+        throw new PlatformException(status: status, message: message, details: data);
+      else
         throw new FormatException('Invalid envelope: $json');
-      }
-    }
-    else {
+    } else {
       throw new FormatException('Expected envelope Map, got $json');
     }
   }
@@ -199,7 +197,7 @@ class PlatformException implements Exception {
   PlatformException({
     @required this.status,
     @required this.message,
-    this.details
+    this.details,
   }) {
     assert(status != null);
     assert(message != null);

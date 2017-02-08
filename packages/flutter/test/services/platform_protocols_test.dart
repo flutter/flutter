@@ -19,7 +19,7 @@ void main() {
       setupMockResponse(mockResponse);
       expect(PlatformProtocols.invokeJSONFunction(
         channel: 'location',
-        decoder: decodeLocation
+        decoder: decodeLocation,
       ), throwsA(new isInstanceOf<FormatException>()));
     }
 
@@ -32,7 +32,7 @@ void main() {
       await PlatformProtocols.invokeJSONFunction<Null>(
         channel: 'someChannel',
         name: 'someName',
-        args: <String, dynamic>{'a': 2, 'b': 'hello'},
+        arguments: <String, dynamic>{'a': 2, 'b': 'hello'},
       );
       expect(request, equals('{"name":"someName","args":{"a":2,"b":"hello"}}'));
     });
@@ -120,7 +120,7 @@ void main() {
         PlatformProtocols.createJSONBroadcastStream(
           channel: 'location',
           decoder: decodeLocation,
-          args: <String, dynamic>{},
+          arguments: <String, dynamic>{},
         );
       }, throws);
     });
@@ -157,7 +157,10 @@ void main() {
       });
       final Stream<Point<int>> stream = PlatformProtocols.createJSONBroadcastStream(
         channel: 'location',
-        args: <String, dynamic>{'eventChannel': 'location-events', 'a': 42, 'b': 'hello'},
+        arguments: <String, dynamic>{
+          'eventChannel': 'location-events',
+          'a': 42, 'b': 'hello',
+        },
         decoder: decodeLocation,
       );
       final Future<Point<int>> location = stream.first;
@@ -187,8 +190,8 @@ void main() {
         return await incomingMessages.take();
       });
       final Stream<Point<int>> stream = PlatformProtocols.createJSONBroadcastStream(
-          channel: 'location',
-          decoder: decodeLocation,
+        channel: 'location',
+        decoder: decodeLocation,
       );
       final Future<Point<int>> location = stream.first;
       expect(await outgoingMessages.take(), equals('{"name":"listen","args":null}'));
@@ -231,10 +234,14 @@ class Buffer<T> {
 
   int get length => completers.length;
 
-  void add(T t) => _completer(nextOut, nextIn++).complete(t);
+  void add(T t) => _completerAt(nextIn++, nextOut).complete(t);
 
-  Future<T> take() => _completer(nextIn, nextOut++).future;
+  Future<T> take() => _completerAt(nextOut++, nextIn).future;
 
-  Completer<T> _completer(int a, int b) =>
-    (a <= b) ? (completers[b] = new Completer<T>()) : completers.remove(b);
+  Completer<T> _completerAt(int index, int otherIndex) {
+    if (otherIndex <= index)
+      return (completers[index] = new Completer<T>());
+    else
+      return completers.remove(index);
+  }
 }
