@@ -23,32 +23,33 @@ void handleOnDismissed(DismissDirection direction, int item) {
   dismissedItems.add(item);
 }
 
-Widget buildDismissableItem(int item) {
-  return new Dismissable(
-    key: new ValueKey<int>(item),
-    direction: dismissDirection,
-    onDismissed: (DismissDirection direction) { handleOnDismissed(direction, item); },
-    onResize: () { handleOnResize(item); },
-    background: background,
-    child: new Container(
-      width: itemExtent,
-      height: itemExtent,
-      child: new Text(item.toString())
-    )
-  );
-}
+Widget widgetBuilder({double startToEndThreshold}) {
+  Widget buildDismissableItem(int item) => new Dismissable(
+      key: new ValueKey<int>(item),
+      direction: dismissDirection,
+      onDismissed: (DismissDirection direction) {
+        handleOnDismissed(direction, item);
+      },
+      onResize: () {
+        handleOnResize(item);
+      },
+      background: background,
+      dismissThresholds: startToEndThreshold == null
+          ? <DismissDirection, double>{}
+          : <DismissDirection, double>{DismissDirection.startToEnd: startToEndThreshold},
+      child: new Container(
+          width: itemExtent,
+          height: itemExtent,
+          child: new Text(item.toString())));
 
-Widget widgetBuilder() {
   return new Container(
-    padding: const EdgeInsets.all(10.0),
-    child: new ScrollableList(
-      scrollDirection: scrollDirection,
-      itemExtent: itemExtent,
-      children: <int>[0, 1, 2, 3, 4].where(
-        (int i) => !dismissedItems.contains(i)
-      ).map(buildDismissableItem)
-    )
-  );
+      padding: const EdgeInsets.all(10.0),
+      child: new ScrollableList(
+          scrollDirection: scrollDirection,
+          itemExtent: itemExtent,
+          children: <int>[0, 1, 2, 3, 4]
+              .where((int i) => !dismissedItems.contains(i))
+              .map(buildDismissableItem)));
 }
 
 Future<Null> dismissElement(WidgetTester tester, Finder finder, { DismissDirection gestureDirection }) async {
@@ -58,7 +59,7 @@ Future<Null> dismissElement(WidgetTester tester, Finder finder, { DismissDirecti
 
   Point downLocation;
   Point upLocation;
-  switch(gestureDirection) {
+  switch (gestureDirection) {
     case DismissDirection.endToStart:
       // getTopRight() returns a point that's just beyond itemWidget's right
       // edge and outside the Dismissable event listener's bounds.
@@ -231,6 +232,22 @@ void main() {
     expect(dismissedItems, equals(<int>[0]));
   });
 
+  testWidgets('drag-left has no effect on dismissable with a high dismiss threshold', (WidgetTester tester) async {
+    scrollDirection = Axis.vertical;
+    dismissDirection = DismissDirection.horizontal;
+
+    await tester.pumpWidget(widgetBuilder(startToEndThreshold: 1.0));
+    expect(dismissedItems, isEmpty);
+
+    await dismissItem(tester, 0, gestureDirection: DismissDirection.startToEnd);
+    expect(find.text('0'), findsOneWidget);
+    expect(dismissedItems, isEmpty);
+
+    await dismissItem(tester, 0, gestureDirection: DismissDirection.endToStart);
+    expect(find.text('0'), findsNothing);
+    expect(dismissedItems, equals(<int>[0]));
+  });
+
   // This is a regression test for an fn2 bug where dragging a card caused an
   // assert "'!_disqualifiedFromEverAppearingAgain' is not true". The old URL
   // was https://github.com/domokit/sky_engine/issues/1068 but that issue is 404
@@ -256,7 +273,7 @@ void main() {
     await gesture.up();
   });
 
-  // This one is for a case where dssmissing a widget above a previously
+  // This one is for a case where dismissing a widget above a previously
   // dismissed widget threw an exception, which was documented at the
   // now-obsolete URL https://github.com/flutter/engine/issues/1215 (the URL
   // died in the migration to the new repo). Don't copy this test; it doesn't
