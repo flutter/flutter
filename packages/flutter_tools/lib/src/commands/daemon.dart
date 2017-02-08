@@ -690,7 +690,7 @@ class NotifyingLogger extends Logger {
   }
 
   @override
-  Status startProgress(String message, { String progressId }) {
+  Status startProgress(String message, { String progressId, bool expectedFastAction: false }) {
     printStatus(message);
     return new Status();
   }
@@ -776,7 +776,7 @@ class _AppRunLogger extends Logger {
   Status _status;
 
   @override
-  Status startProgress(String message, { String progressId }) {
+  Status startProgress(String message, { String progressId, bool expectedFastAction: false }) {
     // Ignore nested progresses; return a no-op status object.
     if (_status != null)
       return new Status();
@@ -820,7 +820,7 @@ class _AppLoggerStatus implements Status {
   final String progressId;
 
   @override
-  void stop({ bool showElapsedTime: true }) {
+  void stop() {
     logger._status = null;
     _sendFinished();
   }

@@ -9,6 +9,7 @@ import 'package:stack_trace/stack_trace.dart';
 
 import 'io.dart';
 import 'platform.dart';
+import 'utils.dart';
 
 final AnsiTerminal terminal = new AnsiTerminal();
 
@@ -38,11 +39,11 @@ abstract class Logger {
   ///
   /// [message] is the message to display to the user; [progressId] provides an ID which can be
   /// used to identify this type of progress (`hot.reload`, `hot.restart`, ...).
-  Status startProgress(String message, { String progressId });
+  Status startProgress(String message, { String progressId, bool expectedFastAction: false });
 }
 
 class Status {
-  void stop({ bool showElapsedTime: true }) { }
+  void stop() { }
   void cancel() { }
 }
 
@@ -81,13 +82,13 @@ class StdoutLogger extends Logger {
   void printTrace(String message) { }
 
   @override
-  Status startProgress(String message, { String progressId }) {
+  Status startProgress(String message, { String progressId, bool expectedFastAction: false }) {
     if (_status != null) {
       // Ignore nested progresses; return a no-op status object.
       return new Status();
     } else {
       if (supportsColor) {
-        _status = new _AnsiStatus(message, () { _status = null; });
+        _status = new _AnsiStatus(message, expectedFastAction, () { _status = null; });
         return _status;
       } else {
         printStatus(message);
@@ -124,7 +125,7 @@ class BufferLogger extends Logger {
   void printTrace(String message) => _trace.writeln(message);
 
   @override
-  Status startProgress(String message, { String progressId }) {
+  Status startProgress(String message, { String progressId, bool expectedFastAction: false }) {
     printStatus(message);
     return new Status();
   }
@@ -156,7 +157,7 @@ class VerboseLogger extends Logger {
   }
 
   @override
-  Status startProgress(String message, { String progressId }) {
+  Status startProgress(String message, { String progressId, bool expectedFastAction: false }) {
     printStatus(message);
     return new Status();
   }
@@ -249,10 +250,10 @@ class AnsiTerminal {
 }
 
 class _AnsiStatus extends Status {
-  _AnsiStatus(this.message, this.onFinish) {
+  _AnsiStatus(this.message, this.expectedFastAction, this.onFinish) {
     stopwatch = new Stopwatch()..start();
 
-    stdout.write('${message.padRight(51)}     ');
+    stdout.write('${message.padRight(52)}     ');
     stdout.write('${_progress[0]}');
 
     timer = new Timer.periodic(new Duration(milliseconds: 100), _callback);
@@ -261,6 +262,7 @@ class _AnsiStatus extends Status {
   static final List<String> _progress = <String>['-', r'\', '|', r'/', '-', r'\', '|', '/'];
 
   final String message;
+  final bool expectedFastAction;
   final _FinishCallback onFinish;
   Stopwatch stopwatch;
   Timer timer;
@@ -273,17 +275,18 @@ class _AnsiStatus extends Status {
   }
 
   @override
-  void stop({ bool showElapsedTime: true }) {
+  void stop() {
     onFinish();
 
     if (!live)
       return;
     live = false;
 
-    if (showElapsedTime) {
-      print('\b\b\b\b\b${stopwatch.elapsedMilliseconds.toString().padLeft(3)}ms');
+    if (expectedFastAction) {
+      print('\b\b\b\b\b${printWithSeparators(stopwatch.elapsedMilliseconds).toString().padLeft(3)}ms');
     } else {
-      print('\b ');
+      double seconds = stopwatch.elapsedMilliseconds / Duration.MILLISECONDS_PER_SECOND;
+      print('\b\b\b\b\b${seconds.toStringAsFixed(1).padLeft(4)}s');
     }
 
     timer.cancel();
