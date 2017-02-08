@@ -123,7 +123,7 @@ class CupertinoAlertDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     final List<Widget> children = <Widget>[];
 
-    children.add(new SizedBox(height: 20.0));
+    children.add(const SizedBox(height: 20.0));
 
     if (title != null) {
       children.add(new Padding(
@@ -150,7 +150,7 @@ class CupertinoAlertDialog extends StatelessWidget {
       ));
     }
 
-    children.add(new SizedBox(height: 20.0));
+    children.add(const SizedBox(height: 20.0));
 
     if (actions != null) {
       children.add(new _CupertinoButtonBar(
