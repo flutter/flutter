@@ -18,10 +18,10 @@ import 'sliver.dart';
 
 class PageController extends ScrollController {
   PageController({
-    this.initialPage: 0.0,
+    this.initialPage: 0,
   });
 
-  final double initialPage;
+  final int initialPage;
 
   double get page {
     final ScrollPosition position = this.position;
@@ -36,7 +36,7 @@ class PageController extends ScrollController {
     return position.animateTo(page * position.viewportDimension, duration: duration, curve: curve);
   }
 
-  void jumpToPage(double page) {
+  void jumpToPage(int page) {
     final ScrollPosition position = this.position;
     position.jumpTo(page * position.viewportDimension);
   }
@@ -64,7 +64,7 @@ class _PagePosition extends ScrollPosition {
   _PagePosition({
     ScrollPhysics physics,
     AbstractScrollState state,
-    this.initialPage: 0.0,
+    this.initialPage: 0,
     ScrollPosition oldPosition,
   }) : super(
     physics: physics,
@@ -73,14 +73,14 @@ class _PagePosition extends ScrollPosition {
     oldPosition: oldPosition,
   );
 
-  final double initialPage;
+  final int initialPage;
 
   @override
   bool applyViewportDimension(double viewportDimension) {
     final double oldViewportDimensions = this.viewportDimension;
     final bool result = super.applyViewportDimension(viewportDimension);
     final double oldPixels = pixels;
-    final double page = oldPixels == null ? initialPage : oldPixels / oldViewportDimensions;
+    final double page = oldPixels == null ? initialPage.toDouble() : oldPixels / oldViewportDimensions;
     final double newPixels = page * viewportDimension;
     if (newPixels != oldPixels) {
       correctPixels(newPixels);
@@ -186,7 +186,7 @@ class PageView extends BoxScrollView {
           final ScrollableMetrics metrics = notification.metrics;
           onPageChanged(metrics.extentBefore ~/ metrics.viewportDimension);
         }
-        return true;
+        return false;
       },
       child: scrollable,
     );

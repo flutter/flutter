@@ -110,7 +110,7 @@ void main() {
   });
 
   testWidgets('PageController control test', (WidgetTester tester) async {
-    PageController controller = new PageController(initialPage: 4.0);
+    PageController controller = new PageController(initialPage: 4);
 
     await tester.pumpWidget(new Center(
       child: new SizedBox(

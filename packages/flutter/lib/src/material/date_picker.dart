@@ -365,7 +365,7 @@ class _MonthPickerState extends State<MonthPicker> {
   void initState() {
     super.initState();
     // Initially display the pre-selected date.
-    _dayPickerController = new PageController(initialPage: _monthDelta(config.firstDate, config.selectedDate).toDouble());
+    _dayPickerController = new PageController(initialPage: _monthDelta(config.firstDate, config.selectedDate));
     _currentDisplayedMonthDate = new DateTime(config.selectedDate.year, config.selectedDate.month);
     _updateCurrentDate();
   }
@@ -373,7 +373,7 @@ class _MonthPickerState extends State<MonthPicker> {
   @override
   void didUpdateConfig(MonthPicker oldConfig) {
     if (config.selectedDate != oldConfig.selectedDate) {
-      _dayPickerController = new PageController(initialPage: _monthDelta(config.firstDate, config.selectedDate).toDouble());
+      _dayPickerController = new PageController(initialPage: _monthDelta(config.firstDate, config.selectedDate));
       _currentDisplayedMonthDate =
           new DateTime(config.selectedDate.year, config.selectedDate.month);
     }

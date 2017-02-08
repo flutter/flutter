@@ -294,8 +294,7 @@ void main() {
     // Fling to the left, switch from the 'LEFT' tab to the 'RIGHT'
     Point flingStart = tester.getCenter(find.text('LEFT CHILD'));
     await tester.flingFrom(flingStart, const Offset(-200.0, 0.0), 10000.0);
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 1)); // finish the scroll animation
+    await tester.pumpUntilNoTransientCallbacks();
     expect(controller.index, 1);
     expect(find.text('LEFT CHILD'), findsNothing);
     expect(find.text('RIGHT CHILD'), findsOneWidget);
@@ -303,8 +302,7 @@ void main() {
     // Fling to the right, switch back to the 'LEFT' tab
     flingStart = tester.getCenter(find.text('RIGHT CHILD'));
     await tester.flingFrom(flingStart, const Offset(200.0, 0.0), 10000.0);
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 1)); // finish the scroll animation
+    await tester.pumpUntilNoTransientCallbacks();
     expect(controller.index, 0);
     expect(find.text('LEFT CHILD'), findsOneWidget);
     expect(find.text('RIGHT CHILD'), findsNothing);
@@ -389,36 +387,22 @@ void main() {
       value = tabs[controller.index];
     });
 
-    // TODO(hixie) - the new scrolling framework should eliminate most of the pump
-    // calls that follow. Currently they exist to complete chains of future.then
-    // in the implementation.
-
     await tester.tap(find.text('RIGHT'));
-    await tester.pump(); // start the animation
-    await tester.pump(const Duration(milliseconds: 500));
-    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pumpUntilNoTransientCallbacks();
     expect(value, 'RIGHT');
 
     await tester.tap(find.text('LEFT'));
-    await tester.pump(); // start the animation
-    await tester.pump(const Duration(milliseconds: 500));
-    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pumpUntilNoTransientCallbacks();
     expect(value, 'LEFT');
 
     Point leftFlingStart = tester.getCenter(find.text('LEFT CHILD'));
     await tester.flingFrom(leftFlingStart, const Offset(-200.0, 0.0), 10000.0);
-    await tester.pump(); // start the animation
-    await tester.pump(const Duration(milliseconds: 500));
-    await tester.pump(const Duration(milliseconds: 500));
-    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pumpUntilNoTransientCallbacks();
     expect(value, 'RIGHT');
 
     Point rightFlingStart = tester.getCenter(find.text('RIGHT CHILD'));
     await tester.flingFrom(rightFlingStart, const Offset(200.0, 0.0), 10000.0);
-    await tester.pump(); // start the animation
-    await tester.pump(const Duration(milliseconds: 500));
-    await tester.pump(const Duration(milliseconds: 500));
-    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pumpUntilNoTransientCallbacks();
     expect(value, 'LEFT');
   });
 
