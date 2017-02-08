@@ -86,9 +86,13 @@ GOTO :after_subroutine
 :after_subroutine
 
 CALL "%dart%" %FLUTTER_TOOL_ARGS% "%snapshot_path%" %*
+SET exit_code=%ERRORLEVEL%
 
 REM The VM exits with code 253 if the snapshot version is out-of-date.
-IF /I "%ERRORLEVEL%" EQU "253" (    
-  CALL "%dart%" --snapshot="%snapshot_path%" --packages="%flutter_tools_dir%\.packages" "%script_path%"    
-  CALL "%dart%" %FLUTTER_TOOL_ARGS% "%snapshot_path%" %*   
+IF /I "%exit_code%" EQU "253" (
+  CALL "%dart%" --snapshot="%snapshot_path%" --packages="%flutter_tools_dir%\.packages" "%script_path%"
+  CALL "%dart%" %FLUTTER_TOOL_ARGS% "%snapshot_path%" %*
+  SET exit_code=%ERRORLEVEL%
 )
+
+EXIT %exit_code%
