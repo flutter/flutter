@@ -24,6 +24,7 @@ struct Settings {
   bool endless_trace_buffer = false;
   bool enable_dart_profiling = false;
   bool use_test_fonts = false;
+  bool dart_non_checked_mode = false;
   std::string aot_snapshot_path;
   std::string aot_vm_snapshot_data_filename;
   std::string aot_vm_snapshot_instr_filename;
