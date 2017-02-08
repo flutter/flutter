@@ -842,10 +842,10 @@ class Isolate extends ServiceObjectOwner {
 
   Future<Map<String, dynamic>> flutterToggleDebugPaintSizeEnabled() async {
     Map<String, dynamic> state = await invokeFlutterExtensionRpcRaw('ext.flutter.debugPaint');
-    if (state != null && state.containsKey('enabled') && state['enabled'] is bool) {
+    if (state != null && state.containsKey('enabled') && state['enabled'] is String) {
       state = await invokeFlutterExtensionRpcRaw(
         'ext.flutter.debugPaint',
-        params: <String, dynamic>{ 'enabled': !state['enabled'] },
+        params: <String, dynamic>{ 'enabled': state['enabled'] == 'true' ? 'false' : 'true' },
         timeout: const Duration(milliseconds: 150),
         timeoutFatal: false,
       );
@@ -856,7 +856,7 @@ class Isolate extends ServiceObjectOwner {
   Future<Null> flutterDebugAllowBanner(bool show) async {
     await invokeFlutterExtensionRpcRaw(
       'ext.flutter.debugAllowBanner',
-      params: <String, dynamic>{ 'enabled': show },
+      params: <String, dynamic>{ 'enabled': show ? 'true' : 'false' },
       timeout: const Duration(milliseconds: 150),
       timeoutFatal: false,
     );
