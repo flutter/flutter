@@ -4,6 +4,8 @@
 
 import 'dart:convert' show JSON;
 
+import 'package:file/file.dart';
+import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 import 'package:flutter_driver/src/common.dart';
 import 'package:flutter_driver/flutter_driver.dart';
@@ -211,19 +213,24 @@ void main() {
     });
 
     group('writeTimelineToFile', () {
+
+      Directory tempDir;
+
       setUp(() {
         useMemoryFileSystemForTesting();
+        tempDir = fs.systemTempDirectory.createTempSync('flutter_driver_test');
       });
 
       tearDown(() {
+        tempDir.deleteSync(recursive: true);
         restoreFileSystem();
       });
 
       test('writes timeline to JSON file', () async {
         await summarize(<Map<String, String>>[<String, String>{'foo': 'bar'}])
-          .writeTimelineToFile('test', destinationDirectory: '/temp');
+          .writeTimelineToFile('test', destinationDirectory: tempDir.path);
         String written =
-            await fs.file('/temp/test.timeline.json').readAsString();
+            await fs.file(path.join(tempDir.path, 'test.timeline.json')).readAsString();
         expect(written, '{"traceEvents":[{"foo":"bar"}]}');
       });
 
@@ -235,9 +242,9 @@ void main() {
           build(1000, 9000),
           build(11000, 1000),
           build(13000, 11000),
-        ]).writeSummaryToFile('test', destinationDirectory: '/temp');
+        ]).writeSummaryToFile('test', destinationDirectory: tempDir.path);
         String written =
-            await fs.file('/temp/test.timeline_summary.json').readAsString();
+            await fs.file(path.join(tempDir.path, 'test.timeline_summary.json')).readAsString();
         expect(JSON.decode(written), <String, dynamic>{
           'average_frame_build_time_millis': 7.0,
           'worst_frame_build_time_millis': 11.0,
