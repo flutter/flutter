@@ -74,9 +74,8 @@ GOTO :after_subroutine
     CALL PowerShell.exe -ExecutionPolicy Bypass -Command "& '%FLUTTER_ROOT%/bin/internal/update_dart_sdk.ps1'"
 
     ECHO Updating flutter tool...
-    del "%flutter_tools_dir%\pubspec.lock"
     PUSHD "%flutter_tools_dir%"
-    CALL "%pub%" get --verbosity=error --no-packages-dir
+    CALL "%pub%" upgrade --verbosity=error --no-packages-dir
     POPD
     CALL "%dart%" --snapshot="%snapshot_path%" --packages="%flutter_tools_dir%\.packages" "%script_path%"
     >"%stamp_path%" ECHO %revision%
