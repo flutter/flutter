@@ -122,10 +122,17 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
       }
       if (!hasIDeviceId || !_iosDeployIsInstalledAndMeetsVersionCheck) {
         brewStatus = ValidationType.partial;
-        messages.add(new ValidationMessage.error(
-          'ios-deploy version >= $iosDeployMinimumVersion not available; this is used to deploy to connected iOS devices.\n'
-          'Install via \'brew install ios-deploy\'.'
-        ));
+        if (hasIosDeploy) {
+          messages.add(new ValidationMessage.error(
+            'ios-deploy out of date: $iosDeployMinimumVersion is required.\n'
+            'Upgrade via \'brew upgrade ios-deploy\'.'
+          ));
+        } else {
+          messages.add(new ValidationMessage.error(
+            'ios-deploy not installed: $iosDeployMinimumVersion is required.\n'
+            'Install via \'brew install ios-deploy\'.'
+          ));
+        }
       } else {
         // Check for compatibility between libimobiledevice and Xcode.
         // TODO(cbracken) remove this check once libimobiledevice > 1.2.0 is released.
