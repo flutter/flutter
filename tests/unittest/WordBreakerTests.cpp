@@ -137,12 +137,60 @@ TEST_F(WordBreakerTest, emojiWithModifier) {
     breaker.setLocale(icu::Locale::getEnglish());
     breaker.setText(buf, NELEM(buf));
     EXPECT_EQ(0, breaker.current());
-    EXPECT_EQ(4, breaker.next());  // after man + type 6 fitzpatrick modifier
+    EXPECT_EQ(4, breaker.next());  // after boy + type 1-2 fitzpatrick modifier
     EXPECT_EQ(0, breaker.wordStart());
     EXPECT_EQ(4, breaker.wordEnd());
     EXPECT_EQ((ssize_t)NELEM(buf), breaker.next());  // end
     EXPECT_EQ(4, breaker.wordStart());
     EXPECT_EQ(8, breaker.wordEnd());
+}
+
+TEST_F(WordBreakerTest, flagsSequenceSingleFlag) {
+    const std::string kFlag = "U+1F3F4";
+    const std::string flags = kFlag + " " + kFlag;
+
+    const int kFlagLength = 2;
+    const size_t BUF_SIZE = kFlagLength * 2;
+
+    uint16_t buf[BUF_SIZE];
+    size_t size;
+    ParseUnicode(buf, BUF_SIZE, flags.c_str(), &size, nullptr);
+
+    WordBreaker breaker;
+    breaker.setLocale(icu::Locale::getEnglish());
+    breaker.setText(buf, size);
+    EXPECT_EQ(0, breaker.current());
+    EXPECT_EQ(kFlagLength, breaker.next());  // end of the first flag
+    EXPECT_EQ(0, breaker.wordStart());
+    EXPECT_EQ(kFlagLength, breaker.wordEnd());
+    EXPECT_EQ(static_cast<ssize_t>(size), breaker.next());
+    EXPECT_EQ(kFlagLength, breaker.wordStart());
+    EXPECT_EQ(kFlagLength * 2, breaker.wordEnd());
+}
+
+TEST_F(WordBreakerTest, flagsSequence) {
+    // U+1F3F4 U+E0067 U+E0062 U+E0073 U+E0063 U+E0074 U+E007F is emoji tag sequence for the flag
+    // of Scotland.
+    const std::string kFlagSequence = "U+1F3F4 U+E0067 U+E0062 U+E0073 U+E0063 U+E0074 U+E007F";
+    const std::string flagSequence = kFlagSequence + " " + kFlagSequence;
+
+    const int kFlagLength = 14;
+    const size_t BUF_SIZE = kFlagLength * 2;
+
+    uint16_t buf[BUF_SIZE];
+    size_t size;
+    ParseUnicode(buf, BUF_SIZE, flagSequence.c_str(), &size, nullptr);
+
+    WordBreaker breaker;
+    breaker.setLocale(icu::Locale::getEnglish());
+    breaker.setText(buf, size);
+    EXPECT_EQ(0, breaker.current());
+    EXPECT_EQ(kFlagLength, breaker.next());  // end of the first flag sequence
+    EXPECT_EQ(0, breaker.wordStart());
+    EXPECT_EQ(kFlagLength, breaker.wordEnd());
+    EXPECT_EQ(static_cast<ssize_t>(size), breaker.next());
+    EXPECT_EQ(kFlagLength, breaker.wordStart());
+    EXPECT_EQ(kFlagLength * 2, breaker.wordEnd());
 }
 
 TEST_F(WordBreakerTest, punct) {
