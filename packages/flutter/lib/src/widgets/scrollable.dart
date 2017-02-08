@@ -244,12 +244,6 @@ class Scrollable2State extends State<Scrollable2> with TickerProviderStateMixin
 
   @override
   @protected
-  void didEndDrag() {
-    _drag = null;
-  }
-
-  @override
-  @protected
   void dispatchNotification(Notification notification) {
     assert(mounted);
     notification.dispatch(_gestureDetectorKey.currentContext);
@@ -280,17 +274,24 @@ class Scrollable2State extends State<Scrollable2> with TickerProviderStateMixin
   void _handleDragStart(DragStartDetails details) {
     assert(_drag == null);
     _drag = position.beginDragActivity(details);
+    assert(_drag != null);
   }
 
   void _handleDragUpdate(DragUpdateDetails details) {
-    assert(_drag != null);
-    _drag.update(details, reverse: _reverseDirection);
+    // _drag might be null if the drag activity ended and called didEndDrag.
+    _drag?.update(details, reverse: _reverseDirection);
   }
 
   void _handleDragEnd(DragEndDetails details) {
-    assert(_drag != null);
-    _drag.end(details, reverse: _reverseDirection);
+    // _drag might be null if the drag activity ended and called didEndDrag.
+    _drag?.end(details, reverse: _reverseDirection);
     assert(_drag == null);
+  }
+
+  @override
+  @protected
+  void didEndDrag() {
+    _drag = null;
   }
 
 

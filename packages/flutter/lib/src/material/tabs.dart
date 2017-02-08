@@ -590,56 +590,6 @@ class _TabBarState extends State<TabBar> {
   }
 }
 
-class _PageableTabBarView extends PageableList {
-  _PageableTabBarView({
-    Key key,
-    List<Widget> children,
-    double initialScrollOffset: 0.0,
-  }) : super(
-    key: key,
-    scrollDirection: Axis.horizontal,
-    children: children,
-    initialScrollOffset: initialScrollOffset,
-  );
-
-  @override
-  _PageableTabBarViewState createState() => new _PageableTabBarViewState();
-}
-
-class _PageableTabBarViewState extends PageableListState<_PageableTabBarView> {
-  BoundedBehavior _boundedBehavior;
-
-  @override
-  ExtentScrollBehavior get scrollBehavior {
-    _boundedBehavior ??= new BoundedBehavior(
-      platform: platform,
-      containerExtent: 1.0,
-      contentExtent: config.children.length.toDouble(),
-    );
-    return _boundedBehavior;
-  }
-
-  @override
-  TargetPlatform get platform => Theme.of(context).platform;
-
-  @override
-  Future<Null> fling(double scrollVelocity) {
-    final double newScrollOffset = snapScrollOffset(scrollOffset + scrollVelocity.sign)
-      .clamp(snapScrollOffset(scrollOffset - 0.5), snapScrollOffset(scrollOffset + 0.5))
-      .clamp(0.0, (config.children.length - 1).toDouble());
-    return scrollTo(newScrollOffset, duration: config.duration, curve: config.curve);
-  }
-
-  @override
-  Widget buildContent(BuildContext context) {
-    return new PageViewport(
-      mainAxis: config.scrollDirection,
-      startOffset: scrollOffset,
-      children: config.children,
-    );
-  }
-}
-
 /// A pageable list that displays the widget which corresponds to the currently
 /// selected tab. Typically used in conjuction with a [TabBar].
 ///
@@ -670,10 +620,11 @@ class TabBarView extends StatefulWidget {
   _TabBarViewState createState() => new _TabBarViewState();
 }
 
-class _TabBarViewState extends State<TabBarView> {
-  final GlobalKey<ScrollableState> viewportKey = new GlobalKey<ScrollableState>();
+final PageScrollPhysics _kTabBarViewPhysics = const PageScrollPhysics().applyTo(const ClampingScrollPhysics());
 
+class _TabBarViewState extends State<TabBarView> {
   TabController _controller;
+  PageController _pageController;
   List<Widget> _children;
   double _offsetAnchor;
   double _offsetBias = 0.0;
@@ -703,6 +654,7 @@ class _TabBarViewState extends State<TabBarView> {
     super.dependenciesChanged();
     _updateTabController();
     _currentIndex = _controller?.index;
+    _pageController = new PageController(initialPage: _currentIndex ?? 0);
   }
 
   @override
@@ -736,33 +688,30 @@ class _TabBarViewState extends State<TabBarView> {
     if (!mounted)
       return new Future<Null>.value();
 
-    final ScrollableState viewport = viewportKey.currentState;
-    if (viewport.scrollOffset == _currentIndex.toDouble())
+    if (_pageController.page == _currentIndex.toDouble())
       return new Future<Null>.value();
 
     final int previousIndex = _controller.previousIndex;
     if ((_currentIndex - previousIndex).abs() == 1)
-      return viewport.scrollTo(_currentIndex.toDouble(), duration: kTabScrollDuration);
+      return _pageController.animateToPage(_currentIndex, duration: kTabScrollDuration, curve: Curves.ease);
 
     assert((_currentIndex - previousIndex).abs() > 1);
-    double initialScroll;
+    int initialPage;
     setState(() {
       _warpUnderwayCount += 1;
       _children = new List<Widget>.from(config.children, growable: false);
       if (_currentIndex > previousIndex) {
         _children[_currentIndex - 1] = _children[previousIndex];
-        initialScroll = (_currentIndex - 1).toDouble();
+        initialPage = _currentIndex - 1;
       } else {
         _children[_currentIndex + 1] = _children[previousIndex];
-        initialScroll = (_currentIndex + 1).toDouble();
+        initialPage = _currentIndex + 1;
       }
     });
 
-    await viewport.scrollTo(initialScroll);
-    if (!mounted)
-      return new Future<Null>.value();
+    _pageController.jumpToPage(initialPage);
 
-    await viewport.scrollTo(_currentIndex.toDouble(), duration: kTabScrollDuration);
+    await _pageController.animateToPage(_currentIndex, duration: kTabScrollDuration, curve: Curves.ease);
     if (!mounted)
       return new Future<Null>.value();
 
@@ -772,45 +721,38 @@ class _TabBarViewState extends State<TabBarView> {
     });
   }
 
-  // Called when the _PageableTabBarView scrolls
-  bool _handleScrollNotification(ScrollNotification notification) {
+  // Called when the PageView scrolls
+  bool _handleScrollNotification(ScrollNotification2 notification) {
     if (_warpUnderwayCount > 0)
       return false;
 
-    final ScrollableState scrollable = notification.scrollable;
-    if (scrollable.config.key != viewportKey)
+    if (notification.depth != 1)
       return false;
 
-    switch(notification.kind) {
-      case ScrollNotificationKind.started:
-        _offsetAnchor = null;
-        break;
-
-      case ScrollNotificationKind.updated:
-        if (!_controller.indexIsChanging) {
-          _offsetAnchor ??= scrollable.scrollOffset;
-          _controller.offset = (_offsetBias + scrollable.scrollOffset - _offsetAnchor).clamp(-1.0, 1.0);
-        }
-        break;
-
+    if (notification is ScrollStartNotification) {
+      _offsetAnchor = null;
+    } else if (notification is ScrollUpdateNotification) {
+      if (!_controller.indexIsChanging) {
+        _offsetAnchor ??= _pageController.page;
+        _controller.offset = (_offsetBias + _pageController.page - _offsetAnchor).clamp(-1.0, 1.0);
+      }
+    } else if (notification is ScrollEndNotification) {
       // Either the the animation that follows a fling has completed and we've landed
       // on a new tab view, or a new pointer gesture has interrupted the fling
       // animation before it has completed.
-      case ScrollNotificationKind.ended:
-        final double integralScrollOffset = scrollable.scrollOffset.floorToDouble();
-        if (integralScrollOffset == scrollable.scrollOffset) {
-          _offsetBias = 0.0;
-          // The animation duration is short since the tab indicator and this
-          // pageable list have already moved.
-          _controller.animateTo(
-            integralScrollOffset.floor(),
-            duration: const Duration(milliseconds: 30)
-          );
-        } else {
-          // The fling scroll animation was interrupted.
-          _offsetBias = _controller.offset;
-        }
-        break;
+      final double integralScrollOffset = _pageController.page.floorToDouble();
+      if (integralScrollOffset == _pageController.page) {
+        _offsetBias = 0.0;
+        // The animation duration is short since the tab indicator and this
+        // pageable list have already moved.
+        _controller.animateTo(
+          integralScrollOffset.floor(),
+          duration: const Duration(milliseconds: 30)
+        );
+      } else {
+        // The fling scroll animation was interrupted.
+        _offsetBias = _controller.offset;
+      }
     }
 
     return false;
@@ -818,12 +760,12 @@ class _TabBarViewState extends State<TabBarView> {
 
   @override
   Widget build(BuildContext context) {
-    return new NotificationListener<ScrollNotification>(
+    return new NotificationListener<ScrollNotification2>(
       onNotification: _handleScrollNotification,
-      child: new _PageableTabBarView(
-        key: viewportKey,
+      child: new PageView(
+        controller: _pageController,
+        physics: _kTabBarViewPhysics,
         children: _children,
-        initialScrollOffset: (_controller?.index ?? 0).toDouble(),
       ),
     );
   }

@@ -213,8 +213,8 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   ///
   /// Alternatively, one can check that the return value from this function
   /// matches the expected number of pumps.
-  Future<int> pumpUntilNoTransientCallbacks(
-    Duration duration, [
+  Future<int> pumpUntilNoTransientCallbacks([
+      Duration duration = const Duration(milliseconds: 100),
       EnginePhase phase = EnginePhase.sendSemanticsTree
     ]) {
     assert(duration != null);
