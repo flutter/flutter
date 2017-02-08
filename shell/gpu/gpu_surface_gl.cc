@@ -14,13 +14,12 @@
 
 namespace shell {
 
-// The limit of the number of GPU resources we hold in the GrContext's
-// GPU cache.
-static const int kMaxGaneshResourceCacheCount = 2048;
+// Default maximum number of budgeted resources in the cache.
+static const int kGrCacheMaxCount = 8192;
 
-// The limit of the bytes allocated toward GPU resources in the GrContext's
-// GPU cache.
-static const size_t kMaxGaneshResourceCacheBytes = 96 * 1024 * 1024;
+// Default maximum number of bytes of GPU memory of budgeted resources in the
+// cache.
+static const size_t kGrCacheMaxByteSize = 512 * (1 << 20);
 
 GPUSurfaceGL::GPUSurfaceGL(GPUSurfaceGLDelegate* delegate)
     : delegate_(delegate), weak_factory_(this) {}
@@ -57,8 +56,7 @@ bool GPUSurfaceGL::Setup() {
     return false;
   }
 
-  context_->setResourceCacheLimits(kMaxGaneshResourceCacheCount,
-                                   kMaxGaneshResourceCacheBytes);
+  context_->setResourceCacheLimits(kGrCacheMaxCount, kGrCacheMaxByteSize);
 
   delegate_->GLContextClearCurrent();
 
