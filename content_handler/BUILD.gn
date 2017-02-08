@@ -32,7 +32,7 @@ executable("content_handler") {
   ]
 
   deps = [
-    "//apps/modular/lib/app",
+    "//application/lib/app",
     "//apps/mozart/lib/skia:vmo",
     "//apps/mozart/services/buffers",
     "//apps/mozart/services/buffers/cpp",

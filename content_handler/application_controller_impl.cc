@@ -6,7 +6,7 @@
 
 #include <utility>
 
-#include "apps/modular/lib/app/connect.h"
+#include "application/lib/app/connect.h"
 #include "flutter/content_handler/app.h"
 #include "flutter/content_handler/runtime_holder.h"
 #include "lib/ftl/logging.h"

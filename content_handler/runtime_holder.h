@@ -9,8 +9,8 @@
 
 #include <unordered_set>
 
-#include "apps/modular/services/application/application_environment.fidl.h"
-#include "apps/modular/services/application/service_provider.fidl.h"
+#include "application/services/application_environment.fidl.h"
+#include "application/services/service_provider.fidl.h"
 #include "apps/mozart/services/input/input_connection.fidl.h"
 #include "apps/mozart/services/views/view_manager.fidl.h"
 #include "flutter/assets/unzipper_provider.h"

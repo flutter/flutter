@@ -7,9 +7,9 @@
 
 #include <memory>
 
-#include "apps/modular/services/application/application_controller.fidl.h"
-#include "apps/modular/services/application/application_runner.fidl.h"
-#include "apps/modular/services/application/service_provider.fidl.h"
+#include "application/services/application_controller.fidl.h"
+#include "application/services/application_runner.fidl.h"
+#include "application/services/service_provider.fidl.h"
 #include "apps/mozart/services/views/view_provider.fidl.h"
 #include "lib/fidl/cpp/bindings/binding.h"
 #include "lib/fidl/cpp/bindings/binding_set.h"

@@ -8,8 +8,8 @@
 #include <memory>
 #include <unordered_set>
 
-#include "apps/modular/lib/app/application_context.h"
-#include "apps/modular/services/application/application_runner.fidl.h"
+#include "application/lib/app/application_context.h"
+#include "application/services/application_runner.fidl.h"
 #include "flutter/content_handler/application_controller_impl.h"
 #include "flutter/content_handler/content_handler_thread.h"
 #include "lib/ftl/macros.h"

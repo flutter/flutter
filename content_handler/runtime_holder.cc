@@ -6,7 +6,7 @@
 
 #include <utility>
 
-#include "apps/modular/lib/app/connect.h"
+#include "application/lib/app/connect.h"
 #include "dart/runtime/include/dart_api.h"
 #include "flutter/assets/zip_asset_store.h"
 #include "flutter/common/threads.h"
