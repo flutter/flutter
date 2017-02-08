@@ -590,13 +590,13 @@ class _TabBarState extends State<TabBar> {
   }
 }
 
-/// A pageable list that displays the widget which corresponds to the currently
+/// A page view that displays the widget which corresponds to the currently
 /// selected tab. Typically used in conjuction with a [TabBar].
 ///
 /// If a [TabController] is not provided, then there must be a [DefaultTabController]
 /// ancestor.
 class TabBarView extends StatefulWidget {
-  /// Creates a pageable list with one child per tab.
+  /// Creates a page view with one child per tab.
   ///
   /// The length of [children] must be the same as the [controller]'s length.
   TabBarView({
@@ -744,7 +744,7 @@ class _TabBarViewState extends State<TabBarView> {
       if (integralScrollOffset == _pageController.page) {
         _offsetBias = 0.0;
         // The animation duration is short since the tab indicator and this
-        // pageable list have already moved.
+        // page view have already moved.
         _controller.animateTo(
           integralScrollOffset.floor(),
           duration: const Duration(milliseconds: 30)

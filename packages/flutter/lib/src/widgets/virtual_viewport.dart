@@ -287,7 +287,7 @@ class _IterableWidgetProvider extends _WidgetProvider {
 
 /// Signature of a callback that returns the sublist of widgets in the given range.
 ///
-/// Used by [PageableList.itemBuilder], [ScrollableLazyList.itemBuilder], etc.
+/// Used by [ScrollableLazyList.itemBuilder], etc.
 typedef List<Widget> ItemListBuilder(BuildContext context, int start, int count);
 
 /// A VirtualViewport that represents its children using [ItemListBuilder].
