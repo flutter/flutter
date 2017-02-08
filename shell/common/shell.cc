@@ -42,8 +42,10 @@ bool IsViewInvalid(const ftl::WeakPtr<PlatformView>& platform_view) {
   return !platform_view;
 }
 
-template <typename T> bool GetSwitchValue(const base::CommandLine& command_line,
-                                          Switch sw, T* result) {
+template <typename T>
+bool GetSwitchValue(const base::CommandLine& command_line,
+                    Switch sw,
+                    T* result) {
   auto port_string = command_line.GetSwitchValueASCII(FlagForSwitch(sw));
   std::stringstream stream(port_string);
   T value = 0;
@@ -155,6 +157,10 @@ void Shell::InitStandalone(std::string icu_data_path,
     }
   }
 
+  // Checked mode overrides.
+  settings.dart_non_checked_mode =
+      command_line.HasSwitch(FlagForSwitch(Switch::DartNonCheckedMode));
+
   settings.enable_diagnostic =
       !command_line.HasSwitch(FlagForSwitch(Switch::DisableDiagnostic));
 
@@ -185,10 +191,12 @@ void Shell::InitStandalone(std::string icu_data_path,
       FlagForSwitch(Switch::AotVmSnapshotData));
   settings.aot_vm_snapshot_instr_filename = command_line.GetSwitchValueASCII(
       FlagForSwitch(Switch::AotVmSnapshotInstructions));
-  settings.aot_isolate_snapshot_data_filename = command_line.GetSwitchValueASCII(
-      FlagForSwitch(Switch::AotIsolateSnapshotData));
-  settings.aot_isolate_snapshot_instr_filename = command_line.GetSwitchValueASCII(
-      FlagForSwitch(Switch::AotIsolateSnapshotInstructions));
+  settings.aot_isolate_snapshot_data_filename =
+      command_line.GetSwitchValueASCII(
+          FlagForSwitch(Switch::AotIsolateSnapshotData));
+  settings.aot_isolate_snapshot_instr_filename =
+      command_line.GetSwitchValueASCII(
+          FlagForSwitch(Switch::AotIsolateSnapshotInstructions));
 
   settings.temp_directory_path =
       command_line.GetSwitchValueASCII(FlagForSwitch(Switch::CacheDirPath));
@@ -205,8 +213,8 @@ void Shell::InitStandalone(std::string icu_data_path,
   }
 
   if (command_line.HasSwitch(FlagForSwitch(Switch::LogTag))) {
-    settings.log_tag = command_line.GetSwitchValueASCII(
-        FlagForSwitch(Switch::LogTag));
+    settings.log_tag =
+        command_line.GetSwitchValueASCII(FlagForSwitch(Switch::LogTag));
   }
 
   blink::Settings::Set(settings);
