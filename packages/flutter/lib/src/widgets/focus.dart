@@ -193,6 +193,7 @@ class Focus extends StatefulWidget {
     if (focusScope != null) {
       focusScope.focusState._setFocusedWidget(key);
       Scrollable.ensureVisible(focusedContext);
+      Scrollable2.ensureVisible(focusedContext);
     }
   }
 
@@ -360,6 +361,7 @@ class _FocusState extends State<Focus> {
     if (focusedContext == null)
       return;
     Scrollable.ensureVisible(focusedContext);
+    Scrollable2.ensureVisible(focusedContext);
   }
 
   @override

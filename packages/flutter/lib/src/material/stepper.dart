@@ -38,7 +38,7 @@ enum StepState {
   disabled,
   /// A step that is currently having an error. e.g. the use has submitted wrong
   /// input.
-  error
+  error,
 }
 
 /// Defines the [Stepper]'s main axis.
@@ -46,12 +46,12 @@ enum StepperType {
   /// A vertical layout of the steps with their content in-between the titles.
   vertical,
   /// A horizontal layout of the steps with their content below the titles.
-  horizontal
+  horizontal,
 }
 
 const TextStyle _kStepStyle = const TextStyle(
   fontSize: 12.0,
-  color: Colors.white
+  color: Colors.white,
 );
 final Color _kErrorLight = Colors.red[500];
 final Color _kErrorDark = Colors.red[400];
@@ -79,7 +79,7 @@ class Step {
     this.subtitle,
     @required this.content,
     this.state: StepState.indexed,
-    this.isActive: false
+    this.isActive: false,
   }) {
     assert(this.title != null);
     assert(this.content != null);
@@ -136,7 +136,7 @@ class Stepper extends StatefulWidget {
     this.currentStep: 0,
     this.onStepTapped,
     this.onStepContinue,
-    this.onStepCancel
+    this.onStepCancel,
   }) : super(key: key) {
     assert(this.steps != null);
     assert(this.type != null);
@@ -185,7 +185,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     super.initState();
     _keys = new List<GlobalKey>.generate(
       config.steps.length,
-      (int i) => new GlobalKey()
+      (int i) => new GlobalKey(),
     );
 
     for (int i = 0; i < config.steps.length; i += 1)
@@ -222,8 +222,8 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
       width: visible ? 1.0 : 0.0,
       height: 16.0,
       decoration: new BoxDecoration(
-        backgroundColor: Colors.grey[400]
-      )
+        backgroundColor: Colors.grey[400],
+      ),
     );
   }
 
@@ -236,17 +236,17 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
       case StepState.disabled:
         return new Text(
           '${index + 1}',
-          style: isDarkActive ? _kStepStyle.copyWith(color: Colors.black87) : _kStepStyle
+          style: isDarkActive ? _kStepStyle.copyWith(color: Colors.black87) : _kStepStyle,
         );
       case StepState.editing:
         return new Icon(
           Icons.edit,
-          color: isDarkActive ? _kCircleActiveDark : _kCircleActiveLight
+          color: isDarkActive ? _kCircleActiveDark : _kCircleActiveLight,
         );
       case StepState.complete:
         return new Icon(
           Icons.check,
-          color: isDarkActive ? _kCircleActiveDark : _kCircleActiveLight
+          color: isDarkActive ? _kCircleActiveDark : _kCircleActiveLight,
         );
       case StepState.error:
         return new Text('!', style: _kStepStyle);
@@ -273,12 +273,12 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
         duration: kThemeAnimationDuration,
         decoration: new BoxDecoration(
           backgroundColor: _circleColor(index),
-          shape: BoxShape.circle
+          shape: BoxShape.circle,
         ),
         child: new Center(
-          child: _buildCircleChild(index, oldState && config.steps[index].state == StepState.error)
-        )
-      )
+          child: _buildCircleChild(index, oldState && config.steps[index].state == StepState.error),
+        ),
+      ),
     );
   }
 
@@ -293,15 +293,15 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
           height: _kTriangleHeight, // Height of 24dp-long-sided equilateral triangle.
           child: new CustomPaint(
             painter: new _TrianglePainter(
-              color: _isDark() ? _kErrorDark : _kErrorLight
+              color: _isDark() ? _kErrorDark : _kErrorLight,
             ),
             child: new Align(
               alignment: const FractionalOffset(0.5, 0.9), // 0.9 looks better than the geometrical 0.66.
-              child: _buildCircleChild(index, oldState && config.steps[index].state != StepState.error)
-            )
-          )
-        )
-      )
+              child: _buildCircleChild(index, oldState && config.steps[index].state != StepState.error),
+            ),
+          ),
+        ),
+      ),
     );
   }
 
@@ -351,7 +351,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
               color: _isDark() ? themeData.backgroundColor : themeData.primaryColor,
               textColor: Colors.white,
               textTheme: ButtonTextTheme.normal,
-              child: new Text('CONTINUE')
+              child: new Text('CONTINUE'),
             ),
             new Container(
               margin: const EdgeInsets.only(left: 8.0),
@@ -359,12 +359,12 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
                 onPressed: config.onStepCancel,
                 textColor: cancelColor,
                 textTheme: ButtonTextTheme.normal,
-                child: new Text('CANCEL')
-              )
-            )
-          ]
-        )
-      )
+                child: new Text('CANCEL'),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -418,8 +418,8 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
         style: _titleStyle(index),
         duration: kThemeAnimationDuration,
         curve: Curves.fastOutSlowIn,
-        child: config.steps[index].title
-      )
+        child: config.steps[index].title,
+      ),
     ];
 
     if (config.steps[index].subtitle != null)
@@ -430,9 +430,9 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
             style: _subtitleStyle(index),
             duration: kThemeAnimationDuration,
             curve: Curves.fastOutSlowIn,
-            child: config.steps[index].subtitle
-          )
-        )
+            child: config.steps[index].subtitle,
+          ),
+        ),
       );
 
     return new Column(
@@ -481,12 +481,12 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
                 width: _isLast(index) ? 0.0 : 1.0,
                 child: new Container(
                   decoration: new BoxDecoration(
-                    backgroundColor: Colors.grey[400]
-                  )
-                )
-              )
-            )
-          )
+                    backgroundColor: Colors.grey[400],
+                  ),
+                ),
+              ),
+            ),
+          ),
         ),
         new AnimatedCrossFade(
           firstChild: new Container(height: 0.0),
@@ -494,22 +494,22 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
             margin: const EdgeInsets.only(
               left: 60.0,
               right: 24.0,
-              bottom: 24.0
+              bottom: 24.0,
             ),
             child: new Column(
               children: <Widget>[
                 config.steps[index].content,
-                _buildVerticalControls()
-              ]
-            )
+                _buildVerticalControls(),
+              ],
+            ),
           ),
           firstCurve: const Interval(0.0, 0.6, curve: Curves.fastOutSlowIn),
           secondCurve: const Interval(0.4, 1.0, curve: Curves.fastOutSlowIn),
           sizeCurve: Curves.fastOutSlowIn,
           crossFadeState: _isCurrent(index) ? CrossFadeState.showSecond : CrossFadeState.showFirst,
           duration: kThemeAnimationDuration,
-        )
-      ]
+        ),
+      ],
     );
   }
 
@@ -525,10 +525,10 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
               onTap: config.steps[i].state != StepState.disabled ? () {
                 // In the vertical case we need to scroll to the newly tapped
                 // step.
-                Scrollable.ensureVisible(
+                Scrollable2.ensureVisible(
                   _keys[i].currentContext,
                   curve: Curves.fastOutSlowIn,
-                  duration: kThemeAnimationDuration
+                  duration: kThemeAnimationDuration,
                 );
 
                 if (config.onStepTapped != null)
@@ -563,30 +563,31 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
               new Container(
                 height: 72.0,
                 child: new Center(
-                  child: _buildIcon(i)
-                )
+                  child: _buildIcon(i),
+                ),
               ),
               new Container(
                 margin: const EdgeInsets.only(left: 12.0),
-                child: _buildHeaderText(i)
-              )
-            ]
-          )
-        )
+                child: _buildHeaderText(i),
+              ),
+            ],
+          ),
+        ),
       );
 
-      if (!_isLast(i))
+      if (!_isLast(i)) {
         children.add(
           new Expanded(
             child: new Container(
               margin: const EdgeInsets.symmetric(horizontal: 8.0),
               height: 1.0,
               decoration: new BoxDecoration(
-                backgroundColor: Colors.grey[400]
-              )
-            )
-          )
+                backgroundColor: Colors.grey[400],
+              ),
+            ),
+          ),
         );
+      }
     }
 
     return new Column(
@@ -596,29 +597,25 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
           child: new Container(
             margin: const EdgeInsets.symmetric(horizontal: 24.0),
             child: new Row(
-              children: children
-            )
-          )
+              children: children,
+            ),
+          ),
         ),
         new Expanded(
-          child: new ScrollableViewport(
-            child: new Container(
-              margin: const EdgeInsets.all(24.0),
-              child: new Column(
-                children: <Widget>[
-                  new AnimatedSize(
-                    curve: Curves.fastOutSlowIn,
-                    duration: kThemeAnimationDuration,
-                    vsync: this,
-                    child: config.steps[config.currentStep].content,
-                  ),
-                  _buildVerticalControls()
-                ]
-              )
-            )
-          )
-        )
-      ]
+          child: new ListView(
+            padding: const EdgeInsets.all(24.0),
+            children: <Widget>[
+              new AnimatedSize(
+                curve: Curves.fastOutSlowIn,
+                duration: kThemeAnimationDuration,
+                vsync: this,
+                child: config.steps[config.currentStep].content,
+              ),
+              _buildVerticalControls(),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
@@ -670,12 +667,12 @@ class _TrianglePainter extends CustomPainter {
     final List<Point> points = <Point>[
       new Point(0.0, height),
       new Point(base, height),
-      new Point(halfBase, 0.0)
+      new Point(halfBase, 0.0),
     ];
 
     canvas.drawPath(
       new Path()..addPolygon(points, true),
-      new Paint()..color = color
+      new Paint()..color = color,
     );
   }
 }
