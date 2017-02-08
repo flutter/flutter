@@ -32,7 +32,7 @@ class TestDataSource extends DataTableSource {
   }
 
   @override
-  int get rowCount => 500 * kDesserts.length;
+  int get rowCount => 50 * kDesserts.length;
 
   @override
   bool get isRowCountApproximate => false;
