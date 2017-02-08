@@ -10,7 +10,7 @@ Things you will need
 
  * Linux or Mac OS X. (Windows is not yet supported.)
  * git (used for source version control).
- * An IDE. We recommend [Atom](http://dart-atom.github.io/dartlang/).
+ * An IDE. We recommend [IntelliJ](https://github.com/flutter/flutter-intellij/blob/master/README.md).
  * An ssh client (used to authenticate with GitHub).
  * Python (used by some of our tools).
  * The Android platform tools (see [Issue #55](https://github.com/flutter/flutter/issues/55)
@@ -190,6 +190,7 @@ Coveralls to [track our test coverage](https://coveralls.io/github/flutter/flutt
 You can download our current coverage data from cloud storage and visualize it
 in Atom as follows:
 
+ * Install [Atom](https://atom.io/).
  * Install the [lcov-info](https://atom.io/packages/lcov-info) package for Atom.
  * Open the `packages/flutter` folder in Atom.
  * Open a Dart file in the `lib` directory an type `Ctrl+Alt+C` to bring up the
