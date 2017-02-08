@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    >
+
+  <io.flutter.view.FlutterView
+      android:id="@+id/flutter_view"
+      android:layout_width="fill_parent"
+      android:layout_height="fill_parent"
+      />
+
+</LinearLayout>
