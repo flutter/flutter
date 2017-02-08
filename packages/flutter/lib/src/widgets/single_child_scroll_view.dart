@@ -8,8 +8,9 @@ import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
 import 'framework.dart';
+import 'scroll_controller.dart';
+import 'scroll_physics.dart';
 import 'scrollable.dart';
-
 
 /// A box in which a single widget can be scrolled.
 ///
@@ -41,6 +42,8 @@ class SingleChildScrollView extends StatelessWidget {
     this.scrollDirection: Axis.vertical,
     this.reverse: false,
     this.padding,
+    this.physics,
+    this.controller,
     this.child,
   }) : super(key: key) {
     assert(scrollDirection != null);
@@ -51,6 +54,10 @@ class SingleChildScrollView extends StatelessWidget {
   final bool reverse;
 
   final EdgeInsets padding;
+
+  final ScrollController controller;
+
+  final ScrollPhysics physics;
 
   final Widget child;
 
@@ -73,6 +80,8 @@ class SingleChildScrollView extends StatelessWidget {
       contents = new Padding(padding: padding, child: contents);
     return new Scrollable2(
       axisDirection: axisDirection,
+      controller: controller,
+      physics: physics,
       viewportBuilder: (BuildContext context, ViewportOffset offset) {
         return new _SingleChildViewport(
           key: key,
