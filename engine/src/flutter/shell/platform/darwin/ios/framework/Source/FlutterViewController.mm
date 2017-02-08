@@ -485,7 +485,7 @@ static inline PointerChangeMapperPhase PointerChangePhaseFromUITouchPhase(
   [self onLocaleUpdated:nil];
   [self onVoiceOverChanged:nil];
 
-  [super viewWillAppear:animated];
+  [super viewDidAppear:animated];
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
