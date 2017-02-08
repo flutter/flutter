@@ -54,6 +54,19 @@ String toTitleCase(String str) {
 /// Return the plural of the given word (`cat(s)`).
 String pluralize(String word, int count) => count == 1 ? word : word + 's';
 
+/// Return the value printed with commas every 3 digits.
+String printWithSeparators(int value) {
+  String str = '$value';
+
+  int index = 3;
+  while (index < str.length) {
+    str = str.substring(0, str.length - index) + ',' + str.substring(str.length - index);
+    index += 4;
+  }
+
+  return str;
+}
+
 /// Return the name of an enum item.
 String getEnumName(dynamic enumItem) {
   String name = '$enumItem';

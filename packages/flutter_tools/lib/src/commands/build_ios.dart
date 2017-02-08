@@ -65,7 +65,8 @@ class BuildIOSCommand extends BuildSubCommand {
     String logTarget = forSimulator ? 'simulator' : 'device';
 
     String typeName = path.basename(tools.getEngineArtifactsDirectory(TargetPlatform.ios, getBuildMode()).path);
-    Status status = logger.startProgress('Building $app for $logTarget ($typeName)...');
+    Status status = logger.startProgress('Building $app for $logTarget ($typeName)...',
+        expectSlowOperation: true);
     XcodeBuildResult result = await buildXcodeProject(
       app: app,
       mode: getBuildMode(),
