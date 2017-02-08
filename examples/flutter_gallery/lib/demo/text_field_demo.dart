@@ -110,7 +110,7 @@ class TextFieldDemoState extends State<TextFieldDemo> {
         key: _formKey,
         autovalidate: _autovalidate,
         onWillPop: _warnUserAboutInvalidData,
-        child: new Block(
+        child: new ListView(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
           children: <Widget>[
             new TextField(
