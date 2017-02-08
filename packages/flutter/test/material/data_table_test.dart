@@ -20,11 +20,11 @@ void main() {
         },
         columns: <DataColumn>[
           new DataColumn(
-            label: new Text('Name'),
+            label: new Text('N'),
             tooltip: 'Name',
           ),
           new DataColumn(
-            label: new Text('Calories'),
+            label: new Text('Cc'),
             tooltip: 'Calories',
             numeric: true,
             onSort: (int columnIndex, bool ascending) {
@@ -64,12 +64,12 @@ void main() {
     expect(log, <String>['select-all: true']);
     log.clear();
 
-    await tester.tap(find.text('Cupcake'));
+    await tester.tap(find.text('C'));
 
-    expect(log, <String>['row-selected: Cupcake']);
+    expect(log, <String>['row-selected: C']);
     log.clear();
 
-    await tester.tap(find.text('Calories'));
+    await tester.tap(find.text('Cc'));
 
     expect(log, <String>['column-sort: 1 true']);
     log.clear();
@@ -78,7 +78,7 @@ void main() {
       home: new Material(child: buildTable(sortColumnIndex: 1))
     ));
     await tester.pumpUntilNoTransientCallbacks(const Duration(milliseconds: 200));
-    await tester.tap(find.text('Calories'));
+    await tester.tap(find.text('Cc'));
 
     expect(log, <String>['column-sort: 1 false']);
     log.clear();
@@ -95,7 +95,7 @@ void main() {
 
     await tester.tap(find.byType(Checkbox).last);
 
-    expect(log, <String>['row-selected: KitKat']);
+    expect(log, <String>['row-selected: KK']);
     log.clear();
   });
 }
