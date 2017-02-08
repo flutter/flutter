@@ -227,8 +227,11 @@ Future<Null> diagnoseXcodeBuildFailure(XcodeBuildResult result) async {
         workingDirectory: result.xcodeBuildExecution.appDirectory,
         allowReentrantFlutter: true
       );
-      if (checkBuildSettings.exitCode == 0
-          && !checkBuildSettings.stdout?.contains('DEVELOPMENT_TEAM') == true) {
+      // Make sure the user has specified at least the DEVELOPMENT_TEAM (for automatic Xcode 8)
+      // signing or the PROVISIONING_PROFILE (for manual signing or Xcode 7).
+      if (checkBuildSettings.exitCode == 0 &&
+          !checkBuildSettings.stdout?.contains(new RegExp(r'\bDEVELOPMENT_TEAM\b')) == true &&
+          !checkBuildSettings.stdout?.contains(new RegExp(r'\bPROVISIONING_PROFILE\b')) == true) {
         printError('''
 ═══════════════════════════════════════════════════════════════════════════════════
 Building an iOS app requires a selected Development Team with a Provisioning Profile
