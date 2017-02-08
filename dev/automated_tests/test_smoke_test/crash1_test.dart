@@ -7,7 +7,7 @@ import 'dart:io' as system;
 import 'package:flutter_test/flutter_test.dart';
 
 // this is a test to make sure our tests consider engine crashes to be failures
-// see //flutter/dev/bots/test.sh
+// see //flutter/dev/bots/test.dart
 
 void main() {
   test('test smoke test -- this test should fail', () async {

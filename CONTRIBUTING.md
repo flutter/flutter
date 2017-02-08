@@ -103,7 +103,7 @@ Flutter tests use [package:flutter_test](https://github.com/flutter/flutter/tree
 
 `flutter test` runs tests inside the flutter shell.
 
-To run all the tests for the entire Flutter repository, the same way that Travis runs them, run `dev/bots/test.sh`.
+To run all the tests for the entire Flutter repository, the same way that Travis runs them, run `dart dev/bots/test.dart`.
 
 If you've built [your own flutter engine](#working-on-the-engine-and-the-framework-at-the-same-time), you can pass `--local-engine` to change what flutter shell `flutter test` uses. For example,
 if you built an engine in the `out/host_debug_unopt` directory, you can pass

@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 // this is a test to make sure our tests consider syntax errors to be failures
-// see //flutter/dev/bots/test.sh
+// see //flutter/dev/bots/test.dart
 
 The challenge: demand satisfaction
 If they apologize, no need for further action.
