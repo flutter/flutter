@@ -37,7 +37,7 @@ Future<Null> main() async {
   await _runFlutterTest(automatedTests,
       script: p.join('test_smoke_test', 'crash2_test.dart'),
       expectFailure: true,
-      printOutput: false
+      printOutput: false,
   );
   await _runFlutterTest(automatedTests,
       script: p.join('test_smoke_test', 'syntax_error_test.broken_dart'),
@@ -53,6 +53,7 @@ Future<Null> main() async {
       workingDirectory: p.join(flutterRoot, 'packages', 'flutter_driver'),
       expectFailure: true,
       printOutput: false,
+      skip: Platform.isWindows, // TODO(goderbauer): run on Windows when 'drive' command works
   );
 
   List<String> coverageFlags = <String>[];
@@ -91,9 +92,15 @@ Future<Null> _runCmd(String executable, List<String> arguments, {
     Map<String, String> environment,
     bool expectFailure: false,
     bool printOutput: true,
+    bool skip: false,
 }) async {
   String cmd = '${p.relative(executable)} ${arguments.join(' ')}';
-  print('>>> RUNNING in \x1B[34m${p.relative(workingDirectory)}\x1B[0m: \x1B[33m$cmd\x1B[0m');
+  String relativeWorkingDir = p.relative(workingDirectory);
+  if (skip) {
+    _printProgress('SKIPPING', relativeWorkingDir, cmd);
+    return null;
+  }
+  _printProgress('RUNNING', relativeWorkingDir, cmd);
 
   Process process = await Process.start(executable, arguments,
       workingDirectory: workingDirectory,
@@ -121,6 +128,7 @@ Future<Null> _runFlutterTest(String workingDirectory, {
     bool expectFailure: false,
     bool printOutput: true,
     List<String> options: const <String>[],
+    bool skip: false,
 }) {
   List<String> args = <String>['test']..addAll(options);
   if (flutterTestArgs != null)
@@ -131,6 +139,7 @@ Future<Null> _runFlutterTest(String workingDirectory, {
       workingDirectory: workingDirectory,
       expectFailure: expectFailure,
       printOutput: printOutput,
+      skip: skip || Platform.isWindows, // TODO(goderbauer): run on Windows when sky_shell is available
   );
 }
 
@@ -150,4 +159,8 @@ Future<Null> _runFlutterAnalyze(String workingDirectory, {
   return _runCmd(flutter, <String>['analyze']..addAll(options),
       workingDirectory: workingDirectory,
   );
+}
+
+void _printProgress(String action, String workingDir, String cmd) {
+  print('>>> $action in \x1B[36m$workingDir\x1B[0m: \x1B[33m$cmd\x1B[0m');
 }
