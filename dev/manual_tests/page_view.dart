@@ -9,28 +9,26 @@ class CardModel {
   int value;
   Size size;
   Color color;
-  String get label => "Card $value";
+  String get label => 'Card $value';
   Key get key => new ObjectKey(this);
 }
 
-class PageableListApp extends StatefulWidget {
+class PageViewApp extends StatefulWidget {
   @override
-  PageableListAppState createState() => new PageableListAppState();
+  PageViewAppState createState() => new PageViewAppState();
 }
 
-class PageableListAppState extends State<PageableListApp> {
+class PageViewAppState extends State<PageViewApp> {
   @override
   void initState() {
     super.initState();
-    List<Size> cardSizes = <List<double>>[
-      <double>[100.0, 300.0],
-      <double>[300.0, 100.0],
-      <double>[200.0, 400.0],
-      <double>[400.0, 400.0],
-      <double>[300.0, 400.0]
-    ]
-    .map((List<double> args) => new Size(args[0], args[1]))
-    .toList();
+    const List<Size> cardSizes = const <Size>[
+      const Size(100.0, 300.0),
+      const Size(300.0, 100.0),
+      const Size(200.0, 400.0),
+      const Size(400.0, 400.0),
+      const Size(300.0, 400.0),
+    ];
 
     cardModels = new List<CardModel>.generate(cardSizes.length, (int i) {
       Color color = Color.lerp(Colors.red[300], Colors.blue[900], i / cardSizes.length);
@@ -53,8 +51,8 @@ class PageableListAppState extends State<PageableListApp> {
         width: cardModel.size.width,
         height: cardModel.size.height,
         padding: const EdgeInsets.all(8.0),
-        child: new Center(child: new Text(cardModel.label, style: cardLabelStyle))
-      )
+        child: new Center(child: new Text(cardModel.label, style: cardLabelStyle)),
+      ),
     );
 
     BoxConstraints constraints = (scrollDirection == Axis.vertical)
@@ -64,7 +62,7 @@ class PageableListAppState extends State<PageableListApp> {
     return new Container(
       key: cardModel.key,
       constraints: constraints,
-      child: new Center(child: card)
+      child: new Center(child: card),
     );
   }
 
@@ -91,13 +89,13 @@ class PageableListAppState extends State<PageableListApp> {
             icon: new Icon(Icons.more_horiz),
             selected: scrollDirection == Axis.horizontal,
             child: new Text('Horizontal Layout'),
-            onPressed: switchScrollDirection
+            onPressed: switchScrollDirection,
           ),
           new DrawerItem(
             icon: new Icon(Icons.more_vert),
             selected: scrollDirection == Axis.vertical,
             child: new Text('Vertical Layout'),
-            onPressed: switchScrollDirection
+            onPressed: switchScrollDirection,
           ),
           new DrawerItem(
             onPressed: toggleItemsWrap,
@@ -105,21 +103,21 @@ class PageableListAppState extends State<PageableListApp> {
               children: <Widget>[
                 new Expanded(child: new Text('Scrolling wraps around')),
                 // TODO(abarth): Actually make this checkbox change this value.
-                new Checkbox(value: itemsWrap, onChanged: null)
-              ]
-            )
-          )
-        ]
-      )
+                new Checkbox(value: itemsWrap, onChanged: null),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 
   Widget _buildAppBar() {
     return new AppBar(
-      title: new Text('PageableList'),
+      title: new Text('PageView'),
       actions: <Widget>[
-        new Text(scrollDirection == Axis.horizontal ? "horizontal" : "vertical")
-      ]
+        new Text(scrollDirection == Axis.horizontal ? "horizontal" : "vertical"),
+      ],
     );
   }
 
@@ -127,7 +125,7 @@ class PageableListAppState extends State<PageableListApp> {
     return new PageView(
       children: cardModels.map(buildCard).toList(),
       // TODO(abarth): itemsWrap: itemsWrap,
-      scrollDirection: scrollDirection
+      scrollDirection: scrollDirection,
     );
   }
 
@@ -138,20 +136,20 @@ class PageableListAppState extends State<PageableListApp> {
       child: new Scaffold(
         appBar: _buildAppBar(),
         drawer: _buildDrawer(),
-        body: _buildBody(context)
-      )
+        body: _buildBody(context),
+      ),
     );
   }
 }
 
 void main() {
   runApp(new MaterialApp(
-    title: 'PageableList',
+    title: 'PageView',
     theme: new ThemeData(
       brightness: Brightness.light,
       primarySwatch: Colors.blue,
       accentColor: Colors.redAccent[200],
     ),
-    home: new PageableListApp()
+    home: new PageViewApp(),
   ));
 }
