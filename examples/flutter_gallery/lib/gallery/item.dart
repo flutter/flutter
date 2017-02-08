@@ -170,7 +170,7 @@ final List<GalleryItem> kAllGalleryItems = <GalleryItem>[
   ),
   new GalleryItem(
     title: 'Page selector',
-    subtitle: 'Pageable list with indicator',
+    subtitle: 'PageView with indicator',
     routeName: PageSelectorDemo.routeName,
     buildRoute: (BuildContext context) => new PageSelectorDemo()
   ),

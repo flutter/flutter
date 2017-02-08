@@ -1239,7 +1239,6 @@ class ScrollNotification extends Notification {
 ///
 ///  * [Block], if your single child is a [Column].
 ///  * [ScrollableList], if you have many identically-sized children.
-///  * [PageableList], if you have children that each take the entire screen.
 ///  * [ScrollableGrid], if your children are in a grid pattern.
 ///  * [LazyBlock], if you have many children of varying sizes.
 class ScrollableViewport extends StatelessWidget {
