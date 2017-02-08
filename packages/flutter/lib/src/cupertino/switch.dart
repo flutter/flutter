@@ -143,7 +143,7 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox implements SemanticsAc
         _activeColor = activeColor,
         _onChanged = onChanged,
         _vsync = vsync,
-        super(additionalConstraints: new BoxConstraints.tightFor(width: _kSwitchWidth, height: _kSwitchHeight)) {
+        super(additionalConstraints: const BoxConstraints.tightFor(width: _kSwitchWidth, height: _kSwitchHeight)) {
     assert(value != null);
     assert(activeColor != null);
     assert(vsync != null);
