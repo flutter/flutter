@@ -385,7 +385,7 @@ class TabBar extends StatefulWidget implements AppBarBottomWidget {
 }
 
 class _TabBarState extends State<TabBar> {
-  final GlobalKey<ScrollableState> viewportKey = new GlobalKey<ScrollableState>();
+  final ScrollController _scrollController = new ScrollController();
 
   TabController _controller;
   _ChangeAnimation _changeAnimation;
@@ -434,28 +434,25 @@ class _TabBarState extends State<TabBar> {
   // tabOffsets[tabOffsets.length] is the right edge of the last tab.
   int get maxTabIndex => _indicatorPainter.tabOffsets.length - 2;
 
-  double _tabCenteredScrollOffset(ScrollableState viewport, int tabIndex) {
+  double _tabCenteredScrollOffset(int tabIndex) {
     final List<double> tabOffsets = _indicatorPainter.tabOffsets;
     assert(tabOffsets != null && tabIndex >= 0 && tabIndex <= maxTabIndex);
 
-    final ExtentScrollBehavior scrollBehavior = viewport.scrollBehavior;
-    final double viewportWidth = scrollBehavior.containerExtent;
+    final ScrollPosition position = _scrollController.position;
     final double tabCenter = (tabOffsets[tabIndex] + tabOffsets[tabIndex + 1]) / 2.0;
-    return (tabCenter - viewportWidth / 2.0)
-      .clamp(scrollBehavior.minScrollOffset, scrollBehavior.maxScrollOffset);
+    return (tabCenter - position.viewportDimension / 2.0)
+      .clamp(position.minScrollExtent, position.maxScrollExtent);
   }
 
   void _scrollToCurrentIndex() {
-    final ScrollableState viewport = viewportKey.currentState;
-    final double offset = _tabCenteredScrollOffset(viewport, _currentIndex);
-    viewport.scrollTo(offset, duration: kTabScrollDuration);
+    final double offset = _tabCenteredScrollOffset(_currentIndex);
+    _scrollController.animateTo(offset, duration: kTabScrollDuration, curve: Curves.ease);
   }
 
   void _scrollToControllerValue() {
-    final ScrollableState viewport = viewportKey.currentState;
-    final double left = _currentIndex > 0 ? _tabCenteredScrollOffset(viewport, _currentIndex - 1) : null;
-    final double middle = _tabCenteredScrollOffset(viewport, _currentIndex);
-    final double right = _currentIndex < maxTabIndex ? _tabCenteredScrollOffset(viewport, _currentIndex + 1) : null;
+    final double left = _currentIndex > 0 ? _tabCenteredScrollOffset(_currentIndex - 1) : null;
+    final double middle = _tabCenteredScrollOffset(_currentIndex);
+    final double right = _currentIndex < maxTabIndex ? _tabCenteredScrollOffset(_currentIndex + 1) : null;
 
     final double index = _controller.index.toDouble();
     final double value = _controller.animation.value;
@@ -471,7 +468,7 @@ class _TabBarState extends State<TabBar> {
     else
       offset = right == null ? middle : lerpDouble(middle, right, value - index);
 
-    viewport.scrollTo(offset);
+    _scrollController.jumpTo(offset);
   }
 
   void _handleTick() {
@@ -582,10 +579,10 @@ class _TabBarState extends State<TabBar> {
     );
 
     if (config.isScrollable) {
-      tabBar = new ScrollableViewport(
-        scrollableKey: viewportKey,
+      tabBar = new SingleChildScrollView(
         scrollDirection: Axis.horizontal,
-        child: tabBar
+        controller: _scrollController,
+        child: tabBar,
       );
     }
 
