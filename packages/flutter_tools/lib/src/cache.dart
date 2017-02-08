@@ -4,8 +4,6 @@
 
 import 'dart:async';
 
-import 'package:flutter_tools/src/dart/pub.dart';
-import 'package:flutter_tools/src/dart/summary.dart';
 import 'package:path/path.dart' as path;
 
 import 'base/context.dart';
@@ -247,8 +245,6 @@ class FlutterEngine {
 
   static const String kName = 'engine';
   static const String kSkyEngine = 'sky_engine';
-  static const String kSdkBundleSpec = 'spec.sum';
-  static const String kSdkBundleStrong = 'strong.sum';
 
   final Cache cache;
 
@@ -316,18 +312,9 @@ class FlutterEngine {
     Directory pkgDir = cache.getCacheDir('pkg');
     for (String pkgName in _getPackageDirs()) {
       String pkgPath = path.join(pkgDir.path, pkgName);
-      String dotPackagesPath = path.join(pkgPath, '.packages');
       if (!fs.directory(pkgPath).existsSync())
         return false;
-      if (!fs.file(dotPackagesPath).existsSync())
-        return false;
     }
-
-    if (!fs.file(path.join(pkgDir.path, kSkyEngine, kSdkBundleSpec)).existsSync())
-      return false;
-
-    if (!fs.file(path.join(pkgDir.path, kSkyEngine, kSdkBundleStrong)).existsSync())
-      return false;
 
     Directory engineDir = cache.getArtifactDirectory(kName);
     for (List<String> toolsDir in _getBinaryDirs()) {
@@ -350,23 +337,6 @@ class FlutterEngine {
       if (dir.existsSync())
         dir.deleteSync(recursive: true);
       await _downloadItem('Downloading package $pkgName...', url + pkgName + '.zip', pkgDir);
-      await pubGet(directory: pkgPath);
-    }
-
-    Status summarySpecStatus = logger.startProgress('Building Dart SDK spec summary...');
-    try {
-      String skyEnginePath = path.join(pkgDir.path, kSkyEngine);
-      buildSkyEngineSdkSummary(skyEnginePath, kSdkBundleSpec, false);
-    } finally {
-      summarySpecStatus.stop();
-    }
-
-    Status summaryStrongStatus = logger.startProgress('Building Dart SDK strong summary...');
-    try {
-      String skyEnginePath = path.join(pkgDir.path, kSkyEngine);
-      buildSkyEngineSdkSummary(skyEnginePath, kSdkBundleStrong, true);
-    } finally {
-      summaryStrongStatus.stop();
     }
 
     Directory engineDir = cache.getArtifactDirectory(kName);
