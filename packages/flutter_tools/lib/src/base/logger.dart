@@ -39,7 +39,7 @@ abstract class Logger {
   ///
   /// [message] is the message to display to the user; [progressId] provides an ID which can be
   /// used to identify this type of progress (`hot.reload`, `hot.restart`, ...).
-  Status startProgress(String message, { String progressId, bool expectedFastAction: false });
+  Status startProgress(String message, { String progressId, bool expectSlowOperation: false });
 }
 
 class Status {
@@ -82,13 +82,13 @@ class StdoutLogger extends Logger {
   void printTrace(String message) { }
 
   @override
-  Status startProgress(String message, { String progressId, bool expectedFastAction: false }) {
+  Status startProgress(String message, { String progressId, bool expectSlowOperation: false }) {
     if (_status != null) {
       // Ignore nested progresses; return a no-op status object.
       return new Status();
     } else {
       if (supportsColor) {
-        _status = new _AnsiStatus(message, expectedFastAction, () { _status = null; });
+        _status = new _AnsiStatus(message, expectSlowOperation, () { _status = null; });
         return _status;
       } else {
         printStatus(message);
@@ -125,7 +125,7 @@ class BufferLogger extends Logger {
   void printTrace(String message) => _trace.writeln(message);
 
   @override
-  Status startProgress(String message, { String progressId, bool expectedFastAction: false }) {
+  Status startProgress(String message, { String progressId, bool expectSlowOperation: false }) {
     printStatus(message);
     return new Status();
   }
@@ -157,7 +157,7 @@ class VerboseLogger extends Logger {
   }
 
   @override
-  Status startProgress(String message, { String progressId, bool expectedFastAction: false }) {
+  Status startProgress(String message, { String progressId, bool expectSlowOperation: false }) {
     printStatus(message);
     return new Status();
   }
@@ -250,7 +250,7 @@ class AnsiTerminal {
 }
 
 class _AnsiStatus extends Status {
-  _AnsiStatus(this.message, this.expectedFastAction, this.onFinish) {
+  _AnsiStatus(this.message, this.expectSlowOperation, this.onFinish) {
     stopwatch = new Stopwatch()..start();
 
     stdout.write('${message.padRight(52)}     ');
@@ -262,7 +262,7 @@ class _AnsiStatus extends Status {
   static final List<String> _progress = <String>['-', r'\', '|', r'/', '-', r'\', '|', '/'];
 
   final String message;
-  final bool expectedFastAction;
+  final bool expectSlowOperation;
   final _FinishCallback onFinish;
   Stopwatch stopwatch;
   Timer timer;
@@ -282,11 +282,11 @@ class _AnsiStatus extends Status {
       return;
     live = false;
 
-    if (expectedFastAction) {
-      print('\b\b\b\b\b${printWithSeparators(stopwatch.elapsedMilliseconds).toString().padLeft(3)}ms');
-    } else {
+    if (expectSlowOperation) {
       double seconds = stopwatch.elapsedMilliseconds / Duration.MILLISECONDS_PER_SECOND;
       print('\b\b\b\b\b${seconds.toStringAsFixed(1).padLeft(4)}s');
+    } else {
+      print('\b\b\b\b\b${printWithSeparators(stopwatch.elapsedMilliseconds).toString().padLeft(3)}ms');
     }
 
     timer.cancel();

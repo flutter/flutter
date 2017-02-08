@@ -52,7 +52,8 @@ class BuildAotCommand extends BuildSubCommand {
       throwToolExit('Unknown platform: $targetPlatform');
 
     String typeName = path.basename(tools.getEngineArtifactsDirectory(platform, getBuildMode()).path);
-    Status status = logger.startProgress('Building AOT snapshot in ${getModeName(getBuildMode())} mode ($typeName)...');
+    Status status = logger.startProgress('Building AOT snapshot in ${getModeName(getBuildMode())} mode ($typeName)...',
+        expectSlowOperation: true);
     String outputPath = await buildAotSnapshot(
       findMainDartFile(targetFile),
       platform,

@@ -224,7 +224,7 @@ class MaterialFonts {
   }
 
   Future<Null> download() {
-    Status status = logger.startProgress('Downloading Material fonts...');
+    Status status = logger.startProgress('Downloading Material fonts...', expectSlowOperation: true);
 
     Directory fontsDir = cache.getArtifactDirectory(kName);
     if (fontsDir.existsSync())
@@ -403,7 +403,7 @@ class FlutterEngine {
   }
 
   Future<Null> _downloadItem(String message, String url, Directory dest) {
-    Status status = logger.startProgress(message);
+    Status status = logger.startProgress(message, expectSlowOperation: true);
     return Cache._downloadFileToCache(Uri.parse(url), dest, true).then<Null>((Null value) {
       status.stop();
     }).whenComplete(() {

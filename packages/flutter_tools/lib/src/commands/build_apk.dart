@@ -534,7 +534,8 @@ Future<Null> buildAndroid(
     throwToolExit('Failure building APK: unable to find components.');
 
   String typeName = path.basename(tools.getEngineArtifactsDirectory(platform, buildMode).path);
-  Status status = logger.startProgress('Building APK in ${getModeName(buildMode)} mode ($typeName)...');
+  Status status = logger.startProgress('Building APK in ${getModeName(buildMode)} mode ($typeName)...',
+      expectSlowOperation: true);
 
   if (flxPath != null && flxPath.isNotEmpty) {
     if (!fs.isFileSync(flxPath)) {

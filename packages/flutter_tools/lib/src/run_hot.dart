@@ -277,7 +277,7 @@ class HotRunner extends ResidentRunner {
       if (result != 0)
         return false;
     }
-    Status devFSStatus = logger.startProgress('Syncing files to device...', expectedFastAction: true);
+    Status devFSStatus = logger.startProgress('Syncing files to device...');
     int bytes = await _devFS.update(progressReporter: progressReporter,
                         bundle: assetBundle,
                         bundleDirty: rebuildBundle,
@@ -377,8 +377,7 @@ class HotRunner extends ResidentRunner {
   @override
   Future<OperationResult> restart({ bool fullRestart: false, bool pauseAfterRestart: false }) async {
     if (fullRestart) {
-      Status status = logger.startProgress('Performing full restart...',
-          progressId: 'hot.restart', expectedFastAction: true);
+      Status status = logger.startProgress('Performing full restart...', progressId: 'hot.restart');
       try {
         await _restartFromSources();
         status.stop();
@@ -389,8 +388,7 @@ class HotRunner extends ResidentRunner {
         rethrow;
       }
     } else {
-      Status status = logger.startProgress('Performing hot reload...',
-          progressId: 'hot.reload', expectedFastAction: true);
+      Status status = logger.startProgress('Performing hot reload...', progressId: 'hot.reload');
       try {
         OperationResult result = await _reloadSources(pause: pauseAfterRestart);
         status.stop();

@@ -151,7 +151,7 @@ Future<String> ensureGradlew() async {
         ? <String>[gradle, 'wrapper']
         : <String>[gradle, '-q', 'wrapper'];
     try {
-      Status status = logger.startProgress('Running \'gradle wrapper\'...');
+      Status status = logger.startProgress('Running \'gradle wrapper\'...', expectSlowOperation: true);
       int exitcode = await runCommandAndStreamOutput(
           command,
           workingDirectory: 'android',
@@ -204,7 +204,7 @@ Future<Null> buildGradleProject(BuildMode buildMode) async {
 
 Future<Null> buildGradleProjectV1(String gradlew) async {
   // Run 'gradlew build'.
-  Status status = logger.startProgress('Running \'gradlew build\'...');
+  Status status = logger.startProgress('Running \'gradlew build\'...', expectSlowOperation: true);
   int exitcode = await runCommandAndStreamOutput(
     <String>[fs.file(gradlew).absolute.path, 'build'],
     workingDirectory: 'android',
@@ -223,7 +223,7 @@ Future<Null> buildGradleProjectV2(String gradlew, String buildModeName) async {
   String assembleTask = "assemble${toTitleCase(buildModeName)}";
 
   // Run 'gradlew assemble<BuildMode>'.
-  Status status = logger.startProgress('Running \'gradlew $assembleTask\'...');
+  Status status = logger.startProgress('Running \'gradlew $assembleTask\'...', expectSlowOperation: true);
   String gradlewPath = fs.file(gradlew).absolute.path;
   List<String> command = logger.isVerbose
       ? <String>[gradlewPath, assembleTask]
