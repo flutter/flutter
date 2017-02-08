@@ -9,7 +9,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
 
 import '../rendering/mock_canvas.dart';
-import 'test_widgets.dart';
 
 final Matcher doesNotOverscroll = isNot(paints..circle());
 
@@ -25,7 +24,7 @@ Future<Null> slowDrag(WidgetTester tester, Point start, Offset offset) async {
 void main() {
   testWidgets('Overscroll indicator color', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new TestScrollable(
+      new CustomScrollView(
         slivers: <Widget>[
           new SliverToBoxAdapter(child: new SizedBox(height: 2000.0)),
         ],
@@ -58,7 +57,7 @@ void main() {
 
   testWidgets('Overscroll indicator changes side when you drag on the other side', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new TestScrollable(
+      new CustomScrollView(
         slivers: <Widget>[
           new SliverToBoxAdapter(child: new SizedBox(height: 2000.0)),
         ],
@@ -93,7 +92,7 @@ void main() {
 
   testWidgets('Overscroll indicator changes side when you shift sides', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new TestScrollable(
+      new CustomScrollView(
         slivers: <Widget>[
           new SliverToBoxAdapter(child: new SizedBox(height: 2000.0)),
         ],
@@ -126,8 +125,7 @@ void main() {
   group('Flipping direction of scrollable doesn\'t change overscroll behavior', () {
     testWidgets('down', (WidgetTester tester) async {
       await tester.pumpWidget(
-        new TestScrollable(
-          axisDirection: AxisDirection.down,
+        new CustomScrollView(
           slivers: <Widget>[
             new SliverToBoxAdapter(child: new SizedBox(height: 20.0)),
           ],
@@ -143,8 +141,8 @@ void main() {
 
     testWidgets('up', (WidgetTester tester) async {
       await tester.pumpWidget(
-        new TestScrollable(
-          axisDirection: AxisDirection.up,
+        new CustomScrollView(
+          reverse: true,
           slivers: <Widget>[
             new SliverToBoxAdapter(child: new SizedBox(height: 20.0)),
           ],
@@ -161,8 +159,7 @@ void main() {
 
   testWidgets('Overscroll in both directions', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new TestScrollable(
-        axisDirection: AxisDirection.down,
+      new CustomScrollView(
         slivers: <Widget>[
           new SliverToBoxAdapter(child: new SizedBox(height: 20.0)),
         ],
@@ -181,8 +178,8 @@ void main() {
 
   testWidgets('Overscroll horizontally', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new TestScrollable(
-        axisDirection: AxisDirection.right,
+      new CustomScrollView(
+        scrollDirection: Axis.horizontal,
         slivers: <Widget>[
           new SliverToBoxAdapter(child: new SizedBox(height: 20.0)),
         ],
@@ -204,12 +201,15 @@ void main() {
     RenderObject painter;
 
     await tester.pumpWidget(
-      new TestScrollable(
-        axisDirection: AxisDirection.left,
-        scrollBehavior: new TestScrollBehavior1(),
-        slivers: <Widget>[
-          new SliverToBoxAdapter(child: new SizedBox(height: 20.0)),
-        ],
+      new ScrollConfiguration2(
+        behavior: new TestScrollBehavior1(),
+        child: new CustomScrollView(
+          scrollDirection: Axis.horizontal,
+          reverse: true,
+          slivers: <Widget>[
+            new SliverToBoxAdapter(child: new SizedBox(height: 20.0)),
+          ],
+        ),
       ),
     );
     painter = tester.renderObject(find.byType(CustomPaint));
@@ -219,12 +219,14 @@ void main() {
 
     await tester.pumpUntilNoTransientCallbacks(const Duration(seconds: 1));
     await tester.pumpWidget(
-      new TestScrollable(
-        axisDirection: AxisDirection.right,
-        scrollBehavior: new TestScrollBehavior2(),
-        slivers: <Widget>[
-          new SliverToBoxAdapter(child: new SizedBox(height: 20.0)),
-        ],
+      new ScrollConfiguration2(
+        behavior: new TestScrollBehavior2(),
+        child: new CustomScrollView(
+          scrollDirection: Axis.horizontal,
+          slivers: <Widget>[
+            new SliverToBoxAdapter(child: new SizedBox(height: 20.0)),
+          ],
+        ),
       ),
     );
     painter = tester.renderObject(find.byType(CustomPaint));
@@ -234,14 +236,14 @@ void main() {
   });
 }
 
-class TestScrollBehavior1 extends ViewportScrollBehavior {
+class TestScrollBehavior1 extends ScrollBehavior2 {
   @override
   Color getGlowColor(BuildContext context) {
     return const Color(0xFF00FF00);
   }
 }
 
-class TestScrollBehavior2 extends ViewportScrollBehavior {
+class TestScrollBehavior2 extends ScrollBehavior2 {
   @override
   Color getGlowColor(BuildContext context) {
     return const Color(0xFF0000FF);

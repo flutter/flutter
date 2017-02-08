@@ -447,15 +447,14 @@ class _LicensePageState extends State<LicensePage> {
       ),
       body: new DefaultTextStyle(
         style: Theme.of(context).textTheme.caption,
-        child: new Scrollbar(
-          child: new LazyBlock(
+        child: new Scrollbar2(
+          child: new ListView(
             padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 12.0),
-            delegate: new LazyBlockChildren(
-              children: contents
-            )
-          )
-        )
-      )
+            shrinkWrap: true,
+            children: contents,
+          ),
+        ),
+      ),
     );
   }
 }

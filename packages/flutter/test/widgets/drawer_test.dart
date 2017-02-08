@@ -135,7 +135,7 @@ void main() {
             return new Scaffold(
               key: scaffoldKey,
               drawer: new Drawer(
-                child: new ScrollView(
+                child: new ListView(
                   children: <Widget>[
                     new Text('drawer'),
                     new FlatButton(

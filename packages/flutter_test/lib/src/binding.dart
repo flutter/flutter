@@ -20,6 +20,7 @@ import 'package:vector_math/vector_math_64.dart';
 
 import 'stack_manipulation.dart';
 import 'test_async_utils.dart';
+import 'test_text_input.dart';
 
 /// Phases that can be reached by [WidgetTester.pumpWidget] and
 /// [TestWidgetsFlutterBinding.pump].
@@ -86,6 +87,14 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
        RendererBinding,
        // Services binding omitted to avoid dragging in the licenses code.
        WidgetsBinding {
+
+  TestWidgetsFlutterBinding() {
+    debugPrint = debugPrintOverride;
+  }
+
+  @protected
+  DebugPrintCallback get debugPrintOverride => debugPrint;
+
   /// Creates and initializes the binding. This function is
   /// idempotent; calling it a second time will just return the
   /// previously-created instance.
@@ -117,6 +126,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
         );
       });
     };
+    _testTextInput = new TestTextInput()..register();
     super.initInstances();
   }
 
@@ -178,6 +188,20 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   }) {
     assert(source == TestBindingEventSource.test);
     super.dispatchEvent(event, result);
+  }
+
+  /// A stub for the system's onscreen keyboard. Callers must set the
+  /// [focusedEditable] before using this value.
+  TestTextInput get testTextInput => _testTextInput;
+  TestTextInput _testTextInput;
+
+  /// The current client of the onscreen keyboard. Callers must pump
+  /// an additional frame after setting this property to complete the
+  /// the focus change.
+  EditableTextState get focusedEditable => _focusedEditable;
+  EditableTextState _focusedEditable;
+  set focusedEditable (EditableTextState editable) {
+    _focusedEditable = editable..requestKeyboard();
   }
 
   /// Returns the exception most recently caught by the Flutter framework.
@@ -399,6 +423,10 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     assert(debugAssertNoTransientCallbacks(
       'An animation is still running even after the widget tree was disposed.'
     ));
+    assert(debugAssertAllFoundationVarsUnset(
+      'The value of a foundation debug variable was changed by the test.',
+      debugPrintOverride: debugPrintOverride,
+    ));
     assert(debugAssertAllRenderVarsUnset(
       'The value of a rendering debug variable was changed by the test.'
     ));
@@ -431,13 +459,15 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
 class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   @override
   void initInstances() {
-    debugPrint = debugPrintSynchronously;
     super.initInstances();
     ui.window.onBeginFrame = null;
   }
 
   FakeAsync _fakeAsync;
   Clock _clock;
+
+  @override
+  DebugPrintCallback get debugPrintOverride => debugPrintSynchronously;
 
   @override
   test_package.Timeout get defaultTestTimeout => const test_package.Timeout(const Duration(seconds: 5));

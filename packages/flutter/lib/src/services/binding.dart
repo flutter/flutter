@@ -52,8 +52,8 @@ abstract class ServicesBinding extends BindingBase {
       // out the cache of resources that have changed.
       // TODO(ianh): find a way to only evict affected images, not all images
       name: 'evict',
-      getter: () => '',
-      setter: (String value) {
+      getter: () async => '',
+      setter: (String value) async {
         rootBundle.evict(value);
         imageCache.clear();
       }

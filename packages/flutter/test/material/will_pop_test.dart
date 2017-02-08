@@ -53,6 +53,15 @@ class SampleForm extends StatelessWidget {
   }
 }
 
+// Expose the protected hasScopedWillPopCallback getter
+class TestPageRoute<T> extends MaterialPageRoute<T> {
+  TestPageRoute({ WidgetBuilder builder })
+    : super(builder: builder, maintainState: true, settings: const RouteSettings());
+
+  bool get hasCallback => super.hasScopedWillPopCallback;
+}
+
+
 void main() {
   testWidgets('ModalRoute scopedWillPopupCallback can inhibit back button', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -243,4 +252,63 @@ void main() {
     expect(find.text('Sample Form'), findsNothing);
   });
 
+  testWidgets('Route.scopedWillPop callbacks do not accumulate', (WidgetTester tester) async {
+    StateSetter contentsSetState; // call this to rebuild the route's SampleForm contents
+    bool contentsEmpty = false; // when true, don't include the SampleForm in the route
+
+    TestPageRoute<Null> route = new TestPageRoute<Null>(
+      builder: (BuildContext context) {
+        return new StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            contentsSetState = setState;
+            return contentsEmpty ? new Container() : new SampleForm(key: new UniqueKey());
+          }
+        );
+      },
+    );
+
+    Widget buildFrame() {
+      return new MaterialApp(
+        home: new Scaffold(
+          appBar: new AppBar(title: new Text('Home')),
+          body: new Builder(
+            builder: (BuildContext context) {
+              return new Center(
+                child: new FlatButton(
+                  child: new Text('X'),
+                  onPressed: () {
+                    Navigator.of(context).push(route);
+                  },
+                ),
+              );
+            },
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame());
+
+    await tester.tap(find.text('X'));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(find.text('Sample Form'), findsOneWidget);
+    expect(route.hasCallback, isTrue);
+
+    // Rebuild the route's SampleForm child an additional 3x for good measure.
+    contentsSetState(() { });
+    await tester.pump();
+    contentsSetState(() { });
+    await tester.pump();
+    contentsSetState(() { });
+    await tester.pump();
+
+    // Now build the route's contents without the sample form.
+    contentsEmpty = true;
+    contentsSetState(() { });
+    await tester.pump();
+
+    expect(route.hasCallback, isFalse);
+  });
 }

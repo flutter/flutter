@@ -1482,14 +1482,12 @@ class SliverPadding extends SingleChildRenderObjectWidget {
 
 /// A widget that uses the block layout algorithm for its children.
 ///
-/// This widget is rarely used directly. Instead, consider using [Block], which
-/// combines the block layout algorithm with scrolling behavior.
+/// This widget is rarely used directly. Instead, consider using [SliverList],
+/// which combines a similar layout algorithm with scrolling behavior, or
+/// [Column], which gives you more flexible control over the layout of a
+/// vertical set of boxes.
 ///
 /// For details about the block layout algorithm, see [RenderBlockBase].
-///
-/// See also:
-///
-///  * [Block], which combines block layout with scrolling.
 class BlockBody extends MultiChildRenderObjectWidget {
   /// Creates a block layout widget.
   ///
@@ -1786,207 +1784,6 @@ class Positioned extends ParentDataWidget<Stack> {
   }
 }
 
-/// A [MultiChildRenderObjectWidget] for use with [RenderGrid].
-///
-/// Typically not used directly. Instead, consider using one of its subclasses,
-/// such as:
-///
-///  * [FixedColumnCountGrid] (which creates a grid with a fixed number of columns)
-///  * [MaxTileWidthGrid] (which creates a grid whose tiles have a maximum width)
-///  * [CustomGrid] (which lets you supply your own [GridDelegate])
-abstract class GridRenderObjectWidget extends MultiChildRenderObjectWidget {
-  /// Initializes fields for subclasses.
-  GridRenderObjectWidget({
-    Key key,
-    List<Widget> children: const <Widget>[],
-  }) : super(key: key, children: children) {
-    _delegate = createDelegate();
-  }
-
-  GridDelegate _delegate;
-
-  /// The delegate that controls the layout of the children.
-  GridDelegate createDelegate();
-
-  @override
-  RenderGrid createRenderObject(BuildContext context) => new RenderGrid(delegate: _delegate);
-
-  @override
-  void updateRenderObject(BuildContext context, RenderGrid renderObject) {
-    renderObject.delegate = _delegate;
-  }
-}
-
-/// A widget that creates a grid using a custom [delegate].
-///
-/// For details about the grid layout algorithm, see [RenderGrid].
-///
-/// To pass data to your delegate's [GridDelegate.getChildPlacement] function,
-/// consider using [GridPlacementData].
-class CustomGrid extends GridRenderObjectWidget {
-  /// Creates a grid with a custom [delegate].
-  ///
-  /// The [delegate] argument must not be null.
-  CustomGrid({
-    Key key,
-    @required this.delegate,
-    List<Widget> children: const <Widget>[],
-  }) : super(key: key, children: children) {
-    assert(delegate != null);
-  }
-
-  /// The delegate that controls the layout of the children.
-  ///
-  /// For example, a [FixedColumnCountGridDelegate] for grids that have a fixed
-  /// number of columns or a [MaxTileWidthGridDelegate] for grids that have a
-  /// maximum tile width.
-  final GridDelegate delegate;
-
-  @override
-  GridDelegate createDelegate() => delegate;
-}
-
-/// A widget that uses a grid layout with a fixed column count.
-///
-/// For details about the grid layout algorithm, see [FixedColumnCountGridDelegate].
-class FixedColumnCountGrid extends GridRenderObjectWidget {
-  /// Creates a grid with a fixed number of columns.
-  ///
-  /// The [columnCount] argument must not be negative.
-  FixedColumnCountGrid({
-    Key key,
-    @required this.columnCount,
-    this.columnSpacing: 0.0,
-    this.rowSpacing: 0.0,
-    this.tileAspectRatio: 1.0,
-    this.padding: EdgeInsets.zero,
-    List<Widget> children: const <Widget>[],
-  }) : super(key: key, children: children) {
-    assert(columnCount != null && columnCount >= 0);
-    assert(tileAspectRatio != null && tileAspectRatio > 0.0);
-  }
-
-  /// The number of columns in the grid.
-  final int columnCount;
-
-  /// The horizontal distance between columns.
-  final double columnSpacing;
-
-  /// The vertical distance between rows.
-  final double rowSpacing;
-
-  /// The ratio of the width to the height of each tile in the grid.
-  final double tileAspectRatio;
-
-  /// The amount of padding to apply to each child.
-  final EdgeInsets padding;
-
-  @override
-  FixedColumnCountGridDelegate createDelegate() {
-    return new FixedColumnCountGridDelegate(
-      columnCount: columnCount,
-      columnSpacing: columnSpacing,
-      rowSpacing: rowSpacing,
-      tileAspectRatio: tileAspectRatio,
-      padding: padding
-    );
-  }
-}
-
-/// A widget that uses a grid layout with a maximum tile width.
-///
-/// For details about the grid layout algorithm, see [MaxTileWidthGridDelegate].
-class MaxTileWidthGrid extends GridRenderObjectWidget {
-  /// Creates a grid with a maximum tile width.
-  ///
-  /// The [columnCount] argument must not be negative.
-  MaxTileWidthGrid({
-    Key key,
-    @required this.maxTileWidth,
-    this.columnSpacing: 0.0,
-    this.rowSpacing: 0.0,
-    this.tileAspectRatio: 1.0,
-    this.padding: EdgeInsets.zero,
-    List<Widget> children: const <Widget>[],
-  }) : super(key: key, children: children) {
-    assert(maxTileWidth != null && maxTileWidth >= 0.0);
-    assert(tileAspectRatio != null && tileAspectRatio > 0.0);
-  }
-
-  /// The maximum width of a tile in the grid.
-  final double maxTileWidth;
-
-  /// The ratio of the width to the height of each tile in the grid.
-  final double tileAspectRatio;
-
-  /// The horizontal distance between columns.
-  final double columnSpacing;
-
-  /// The vertical distance between rows.
-  final double rowSpacing;
-
-  /// The amount of padding to apply to each child.
-  final EdgeInsets padding;
-
-  @override
-  MaxTileWidthGridDelegate createDelegate() {
-    return new MaxTileWidthGridDelegate(
-      maxTileWidth: maxTileWidth,
-      tileAspectRatio: tileAspectRatio,
-      columnSpacing: columnSpacing,
-      rowSpacing: rowSpacing,
-      padding: padding
-    );
-  }
-}
-
-/// A widget that controls the placement of a child in a grid.
-///
-/// The [placementData] this widget associates with the child is interpreted by
-/// the grid's [GridDelegate] in its [GridDelegate.getChildPlacement] function.
-/// During layout, the grid calls the delegate's
-/// [GridDelegate.getChildPlacement] function for each child, passing the
-/// [placementData] associated with that child as context. The return value of
-/// [GridDelegate.getChildPlacement] is then used to determine the size and
-/// position of that child within the grid.
-///
-/// A [GridPlacementData] widget must be a descendant of a
-/// [GridRenderObjectWidget], and the path from the [GridPlacementData] widget
-/// to its enclosing [GridRenderObjectWidget] must contain only
-/// [StatelessWidget]s or [StatefulWidget]s (not other kinds of widgets, like
-/// [RenderObjectWidget]s).
-class GridPlacementData<DataType> extends ParentDataWidget<GridRenderObjectWidget> {
-  /// Creates a widget that controls placement of a child in a grid.
-  ///
-  /// The [placementData] and [child] arguments are required.
-  GridPlacementData({
-    Key key,
-    @required this.placementData,
-    @required Widget child
-  }) : super(key: key, child: child);
-
-  /// Opaque data passed to the getChildPlacement method of the grid's [GridDelegate].
-  final DataType placementData;
-
-  @override
-  void applyParentData(RenderObject renderObject) {
-    assert(renderObject.parentData is GridParentData);
-    final GridParentData parentData = renderObject.parentData;
-    if (parentData.placementData != placementData) {
-      parentData.placementData = placementData;
-      AbstractNode targetParent = renderObject.parent;
-      if (targetParent is RenderObject)
-        targetParent.markNeedsLayout();
-    }
-  }
-
-  @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('placementData: $placementData');
-  }
-}
-
 /// A widget that displays its children in a one-dimensional array.
 ///
 /// The [Flex] widget allows you to control the axis along which the children are
@@ -2001,7 +1798,7 @@ class GridPlacementData<DataType> extends ParentDataWidget<GridRenderObjectWidge
 /// The [Flex] widget does not scroll (and in general it is considered an error
 /// to have more children in a [Flex] than will fit in the available room). If
 /// you have some widgets and want them to be able to scroll if there is
-/// insufficient room, consider using a [Block].
+/// insufficient room, consider using a [ScrollList].
 ///
 /// If you only have one child, then rather than using [Flex], [Row], or
 /// [Column], consider using [Align] or [Center] to position the child.
@@ -2130,7 +1927,7 @@ class Flex extends MultiChildRenderObjectWidget {
 /// The [Row] widget does not scroll (and in general it is considered an error
 /// to have more children in a [Row] than will fit in the available room). If
 /// you have a line of widgets and want them to be able to scroll if there is
-/// insufficient room, consider using a [Block].
+/// insufficient room, consider using a [ScrollList].
 ///
 /// For a vertical variant, see [Column].
 ///
@@ -2201,7 +1998,7 @@ class Row extends Flex {
 /// The [Column] widget does not scroll (and in general it is considered an error
 /// to have more children in a [Column] than will fit in the available room). If
 /// you have a line of widgets and want them to be able to scroll if there is
-/// insufficient room, consider using a [Block].
+/// insufficient room, consider using a [ScrollList].
 ///
 /// For a horizontal variant, see [Row].
 ///

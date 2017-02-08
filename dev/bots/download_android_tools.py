@@ -14,6 +14,7 @@ import shutil
 import subprocess
 import sys
 import tarfile
+import optparse
 
 # Path constants. (All of these should be absolute paths.)
 THIS_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -45,6 +46,8 @@ def VersionStampName(tools_name):
     return 'VERSION_LINUX_' + tools_name.upper()
   elif sys.platform == 'darwin':
     return 'VERSION_MACOSX_' + tools_name.upper()
+  elif sys.platform.startswith(('cygwin', 'win')):
+    return 'VERSION_WIN_' + tools_name.upper()
   else:
     raise Exception('Unsupported platform: ' + sys.platform)
 
@@ -89,9 +92,28 @@ def UpdateTools(tools_name):
   with open(os.path.join(INSTALL_DIR, version_stamp), 'w+') as f:
     f.write('%s\n' % version)
 
-def main():
-  UpdateTools('sdk')
-  UpdateTools('ndk')
+def main(argv):
+  option_parser = optparse.OptionParser()
+  option_parser.add_option('-t',
+                           '--type',
+                           help='type of the tools: sdk, ndk, or both',
+                           type='string',
+                           default='both')
+  (options, args) = option_parser.parse_args(argv)
+
+  if len(args) > 1:
+    print 'Unknown argument: ', args[1:]
+    option_parser.print_help()
+    sys.exit(1)
+
+  if not options.type in ('sdk', 'ndk', 'both'):
+    option_parser.print_help()
+    sys.exit(1)
+
+  if options.type in ('sdk', 'both'):
+    UpdateTools('sdk')
+  if options.type in ('ndk', 'both'):
+    UpdateTools('ndk')
 
 if __name__ == '__main__':
-  sys.exit(main())
+  sys.exit(main(sys.argv))

@@ -283,7 +283,7 @@ class TwoLevelList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new ScrollView(
+    return new ListView(
       padding: padding,
       shrinkWrap: true,
       children: KeyedSubtree.ensureUniqueKeysForList(children),

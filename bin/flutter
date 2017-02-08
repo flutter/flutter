@@ -72,7 +72,7 @@ fi
     "$FLUTTER_ROOT/bin/internal/update_dart_sdk.sh"
 
     echo Building flutter tool...
-    (cd "$FLUTTER_TOOLS_DIR"; rm -f pubspec.lock; "$PUB" get --verbosity=error --no-packages-dir)
+    (cd "$FLUTTER_TOOLS_DIR"; "$PUB" upgrade --verbosity=error --no-packages-dir)
     "$DART" --snapshot="$SNAPSHOT_PATH" --packages="$FLUTTER_TOOLS_DIR/.packages" "$SCRIPT_PATH"
     echo $REVISION > "$STAMP_PATH"
   fi

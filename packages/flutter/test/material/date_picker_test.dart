@@ -10,6 +10,7 @@ void main() {
   DateTime firstDate;
   DateTime lastDate;
   DateTime initialDate;
+  SelectableDayPredicate selectableDayPredicate;
 
   setUp(() {
     firstDate = new DateTime(2001, DateTime.JANUARY, 1);
@@ -40,16 +41,16 @@ void main() {
                           setState(() {
                             _selectedDate = value;
                           });
-                        }
-                      )
-                    )
-                  )
+                        },
+                      ),
+                    ),
+                  ),
                 );
-              }
-            )
-          )
-        ]
-      )
+              },
+            ),
+          ),
+        ],
+      ),
     );
 
     await tester.tapAt(const Point(50.0, 100.0));
@@ -61,8 +62,7 @@ void main() {
     await tester.pump(const Duration(seconds: 2));
 
     await tester.tapAt(const Point(380.0, 20.0));
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 2));
+    await tester.pumpUntilNoTransientCallbacks(const Duration(milliseconds: 100));
     expect(_selectedDate, equals(new DateTime(2016, DateTime.JULY, 1)));
 
     await tester.tapAt(const Point(300.0, 100.0));
@@ -70,23 +70,19 @@ void main() {
     await tester.pump(const Duration(seconds: 2));
 
     await tester.scroll(find.byKey(_datePickerKey), const Offset(-300.0, 0.0));
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 2));
+    await tester.pumpUntilNoTransientCallbacks(const Duration(milliseconds: 100));
     expect(_selectedDate, equals(new DateTime(2016, DateTime.AUGUST, 5)));
 
     await tester.tapAt(const Point(45.0, 270.0));
     expect(_selectedDate, equals(new DateTime(2016, DateTime.SEPTEMBER, 25)));
     await tester.pump(const Duration(seconds: 2));
 
-    await tester.scroll(find.byKey(_datePickerKey), const Offset(300.0, 10.0));
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 2));
+    await tester.scroll(find.byKey(_datePickerKey), const Offset(300.0, 0.0));
+    await tester.pumpUntilNoTransientCallbacks(const Duration(milliseconds: 100));
     expect(_selectedDate, equals(new DateTime(2016, DateTime.SEPTEMBER, 25)));
 
     await tester.tapAt(const Point(210.0, 180.0));
     expect(_selectedDate, equals(new DateTime(2016, DateTime.AUGUST, 17)));
-    await tester.pump(const Duration(seconds: 2));
-
   });
 
   testWidgets('render picker with intrinsic dimensions', (WidgetTester tester) async {
@@ -104,17 +100,17 @@ void main() {
                           firstDate: new DateTime(0),
                           lastDate: new DateTime(9999),
                           onChanged: (DateTime value) { },
-                          selectedDate: new DateTime(2000, DateTime.JANUARY, 1)
-                        )
-                      )
-                    )
-                  )
+                          selectedDate: new DateTime(2000, DateTime.JANUARY, 1),
+                        ),
+                      ),
+                    ),
+                  ),
                 );
-              }
-            )
-          )
-        ]
-      )
+              },
+            ),
+          ),
+        ],
+      ),
     );
     await tester.pump(const Duration(seconds: 5));
   });
@@ -144,6 +140,7 @@ void main() {
       initialDate: initialDate,
       firstDate: firstDate,
       lastDate: lastDate,
+      selectableDayPredicate: selectableDayPredicate
     );
 
     await tester.pumpUntilNoTransientCallbacks(const Duration(seconds: 1));
@@ -255,6 +252,20 @@ void main() {
       await tester.tap(find.text('5'));
       await tester.tap(find.text('OK'));
       expect(await date, equals(new DateTime(2016, DateTime.DECEMBER, 10)));
+    });
+  });
+
+  testWidgets('Only predicate days are selectable', (WidgetTester tester) async {
+    initialDate = new DateTime(2017, DateTime.JANUARY, 16);
+    firstDate = new DateTime(2017, DateTime.JANUARY, 10);
+    lastDate = new DateTime(2017, DateTime.JANUARY, 20);
+    selectableDayPredicate = (DateTime day) => day.day.isEven;
+    await preparePicker(tester, (Future<DateTime> date) async {
+      await tester.tap(find.text('10')); // Even, works.
+      await tester.tap(find.text('13')); // Odd, doesn't work.
+      await tester.tap(find.text('17')); // Odd, doesn't work.
+      await tester.tap(find.text('OK'));
+      expect(await date, equals(new DateTime(2017, DateTime.JANUARY, 10)));
     });
   });
 }

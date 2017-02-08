@@ -123,7 +123,7 @@ class CardCollectionState extends State<CardCollection> {
     return new Drawer(
       child: new IconTheme(
         data: const IconThemeData(color: Colors.black),
-        child: new ScrollView(
+        child: new ListView(
           children: <Widget>[
             new DrawerHeader(child: new Center(child: new Text('Options'))),
             buildDrawerCheckbox("Make card labels editable", _editable, _toggleEditable),

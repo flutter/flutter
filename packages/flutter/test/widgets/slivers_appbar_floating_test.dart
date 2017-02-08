@@ -6,8 +6,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-import 'test_widgets.dart';
-
 void verifyPaintPosition(GlobalKey key, Offset ideal, bool visible) {
   RenderSliver target = key.currentContext.findRenderObject();
   expect(target.parent, new isInstanceOf<RenderViewport2>());
@@ -28,23 +26,22 @@ void main() {
   testWidgets('Sliver appbars - floating - scroll offset doesn\'t change', (WidgetTester tester) async {
     const double bigHeight = 1000.0;
     await tester.pumpWidget(
-      new TestScrollable(
-        axisDirection: AxisDirection.down,
+      new CustomScrollView(
         slivers: <Widget>[
           new BigSliver(height: bigHeight),
-          new SliverAppBar(delegate: new TestDelegate(), floating: true),
+          new SliverPersistentHeader(delegate: new TestDelegate(), floating: true),
           new BigSliver(height: bigHeight),
         ],
       ),
     );
-    AbsoluteScrollPosition position = tester.state<Scrollable2State>(find.byType(Scrollable2)).position;
+    ScrollPosition position = tester.state<Scrollable2State>(find.byType(Scrollable2)).position;
     final double max = bigHeight * 2.0 + new TestDelegate().maxExtent - 600.0; // 600 is the height of the test viewport
     assert(max < 10000.0);
     expect(max, 1600.0);
     expect(position.pixels, 0.0);
     expect(position.minScrollExtent, 0.0);
     expect(position.maxScrollExtent, max);
-    position.animate(to: 10000.0, curve: Curves.linear, duration: const Duration(minutes: 1));
+    position.animateTo(10000.0, curve: Curves.linear, duration: const Duration(minutes: 1));
     await tester.pumpUntilNoTransientCallbacks(const Duration(milliseconds: 10));
     expect(position.pixels, max);
     expect(position.minScrollExtent, 0.0);
@@ -56,22 +53,21 @@ void main() {
     const double bigHeight = 1000.0;
     GlobalKey key1, key2, key3;
     await tester.pumpWidget(
-      new TestScrollable(
-        axisDirection: AxisDirection.down,
+      new CustomScrollView(
         slivers: <Widget>[
           new BigSliver(key: key1 = new GlobalKey(), height: bigHeight),
-          new SliverAppBar(key: key2 = new GlobalKey(), delegate: delegate, floating: true),
+          new SliverPersistentHeader(key: key2 = new GlobalKey(), delegate: delegate, floating: true),
           new BigSliver(key: key3 = new GlobalKey(), height: bigHeight),
         ],
       ),
     );
-    AbsoluteScrollPosition position = tester.state<Scrollable2State>(find.byType(Scrollable2)).position;
+    ScrollPosition position = tester.state<Scrollable2State>(find.byType(Scrollable2)).position;
 
     verifyPaintPosition(key1, new Offset(0.0, 0.0), true);
     verifyPaintPosition(key2, new Offset(0.0, 600.0), false);
     verifyPaintPosition(key3, new Offset(0.0, 600.0), false);
 
-    position.animate(to: bigHeight - 600.0 + delegate.maxExtent, curve: Curves.linear, duration: const Duration(minutes: 1));
+    position.animateTo(bigHeight - 600.0 + delegate.maxExtent, curve: Curves.linear, duration: const Duration(minutes: 1));
     await tester.pumpUntilNoTransientCallbacks(const Duration(milliseconds: 1000));
     verifyPaintPosition(key1, new Offset(0.0, 0.0), true);
     verifyPaintPosition(key2, new Offset(0.0, 600.0 - delegate.maxExtent), true);
@@ -79,42 +75,42 @@ void main() {
     verifyPaintPosition(key3, new Offset(0.0, 600.0), false);
 
     assert(delegate.maxExtent * 2.0 < 600.0); // make sure this fits on the test screen...
-    position.animate(to: bigHeight - 600.0 + delegate.maxExtent * 2.0, curve: Curves.linear, duration: const Duration(minutes: 1));
+    position.animateTo(bigHeight - 600.0 + delegate.maxExtent * 2.0, curve: Curves.linear, duration: const Duration(minutes: 1));
     await tester.pumpUntilNoTransientCallbacks(const Duration(milliseconds: 1000));
     verifyPaintPosition(key1, new Offset(0.0, 0.0), true);
     verifyPaintPosition(key2, new Offset(0.0, 600.0 - delegate.maxExtent * 2.0), true);
     verifyActualBoxPosition(tester, find.byType(Container), 0, new Rect.fromLTWH(0.0, 600.0 - delegate.maxExtent * 2.0, 800.0, delegate.maxExtent));
     verifyPaintPosition(key3, new Offset(0.0, 600.0 - delegate.maxExtent), true);
 
-    position.animate(to: bigHeight, curve: Curves.linear, duration: const Duration(minutes: 1));
+    position.animateTo(bigHeight, curve: Curves.linear, duration: const Duration(minutes: 1));
     await tester.pumpUntilNoTransientCallbacks(const Duration(milliseconds: 1000));
     verifyPaintPosition(key1, new Offset(0.0, 0.0), false);
     verifyPaintPosition(key2, new Offset(0.0, 0.0), true);
     verifyActualBoxPosition(tester, find.byType(Container), 0, new Rect.fromLTWH(0.0, 0.0, 800.0, delegate.maxExtent));
     verifyPaintPosition(key3, new Offset(0.0, delegate.maxExtent), true);
 
-    position.animate(to: bigHeight + delegate.maxExtent * 0.1, curve: Curves.linear, duration: const Duration(minutes: 1));
+    position.animateTo(bigHeight + delegate.maxExtent * 0.1, curve: Curves.linear, duration: const Duration(minutes: 1));
     await tester.pumpUntilNoTransientCallbacks(const Duration(milliseconds: 1000));
     verifyPaintPosition(key1, new Offset(0.0, 0.0), false);
     verifyPaintPosition(key2, new Offset(0.0, 0.0), true);
     verifyActualBoxPosition(tester, find.byType(Container), 0, new Rect.fromLTWH(0.0, 0.0, 800.0, delegate.maxExtent * 0.9));
     verifyPaintPosition(key3, new Offset(0.0, delegate.maxExtent * 0.9), true);
 
-    position.animate(to: bigHeight + delegate.maxExtent * 0.5, curve: Curves.linear, duration: const Duration(minutes: 1));
+    position.animateTo(bigHeight + delegate.maxExtent * 0.5, curve: Curves.linear, duration: const Duration(minutes: 1));
     await tester.pumpUntilNoTransientCallbacks(const Duration(milliseconds: 1000));
     verifyPaintPosition(key1, new Offset(0.0, 0.0), false);
     verifyPaintPosition(key2, new Offset(0.0, 0.0), true);
     verifyActualBoxPosition(tester, find.byType(Container), 0, new Rect.fromLTWH(0.0, 0.0, 800.0, delegate.maxExtent * 0.5));
     verifyPaintPosition(key3, new Offset(0.0, delegate.maxExtent * 0.5), true);
 
-    position.animate(to: bigHeight + delegate.maxExtent * 0.9, curve: Curves.linear, duration: const Duration(minutes: 1));
+    position.animateTo(bigHeight + delegate.maxExtent * 0.9, curve: Curves.linear, duration: const Duration(minutes: 1));
     await tester.pumpUntilNoTransientCallbacks(const Duration(milliseconds: 1000));
     verifyPaintPosition(key1, new Offset(0.0, 0.0), false);
     verifyPaintPosition(key2, new Offset(0.0, 0.0), true);
     verifyActualBoxPosition(tester, find.byType(Container), 0, new Rect.fromLTWH(0.0, -delegate.maxExtent * 0.4, 800.0, delegate.maxExtent * 0.5));
     verifyPaintPosition(key3, new Offset(0.0, delegate.maxExtent * 0.1), true);
 
-    position.animate(to: bigHeight + delegate.maxExtent * 2.0, curve: Curves.linear, duration: const Duration(minutes: 1));
+    position.animateTo(bigHeight + delegate.maxExtent * 2.0, curve: Curves.linear, duration: const Duration(minutes: 1));
     await tester.pumpUntilNoTransientCallbacks(const Duration(milliseconds: 1000));
     verifyPaintPosition(key1, new Offset(0.0, 0.0), false);
     verifyPaintPosition(key2, new Offset(0.0, 0.0), false);
@@ -126,28 +122,27 @@ void main() {
     const double bigHeight = 1000.0;
     GlobalKey key1, key2, key3;
     await tester.pumpWidget(
-      new TestScrollable(
-        axisDirection: AxisDirection.down,
+      new CustomScrollView(
         slivers: <Widget>[
           new BigSliver(key: key1 = new GlobalKey(), height: bigHeight),
-          new SliverAppBar(key: key2 = new GlobalKey(), delegate: delegate, floating: true),
+          new SliverPersistentHeader(key: key2 = new GlobalKey(), delegate: delegate, floating: true),
           new BigSliver(key: key3 = new GlobalKey(), height: bigHeight),
         ],
       ),
     );
-    AbsoluteScrollPosition position = tester.state<Scrollable2State>(find.byType(Scrollable2)).position;
+    ScrollPosition position = tester.state<Scrollable2State>(find.byType(Scrollable2)).position;
 
     verifyPaintPosition(key1, new Offset(0.0, 0.0), true);
     verifyPaintPosition(key2, new Offset(0.0, 600.0), false);
     verifyPaintPosition(key3, new Offset(0.0, 600.0), false);
 
-    position.animate(to: bigHeight + delegate.maxExtent * 2.0, curve: Curves.linear, duration: const Duration(minutes: 1));
+    position.animateTo(bigHeight + delegate.maxExtent * 2.0, curve: Curves.linear, duration: const Duration(minutes: 1));
     await tester.pumpUntilNoTransientCallbacks(const Duration(milliseconds: 1000));
     verifyPaintPosition(key1, new Offset(0.0, 0.0), false);
     verifyPaintPosition(key2, new Offset(0.0, 0.0), false);
     verifyPaintPosition(key3, new Offset(0.0, 0.0), true);
 
-    position.animate(to: bigHeight + delegate.maxExtent * 1.9, curve: Curves.linear, duration: const Duration(minutes: 1));
+    position.animateTo(bigHeight + delegate.maxExtent * 1.9, curve: Curves.linear, duration: const Duration(minutes: 1));
     await tester.pumpUntilNoTransientCallbacks(const Duration(milliseconds: 1000));
     verifyPaintPosition(key1, new Offset(0.0, 0.0), false);
     verifyPaintPosition(key2, new Offset(0.0, 0.0), false);
@@ -159,28 +154,27 @@ void main() {
     const double bigHeight = 1000.0;
     GlobalKey key1, key2, key3;
     await tester.pumpWidget(
-      new TestScrollable(
-        axisDirection: AxisDirection.down,
+      new CustomScrollView(
         slivers: <Widget>[
           new BigSliver(key: key1 = new GlobalKey(), height: bigHeight),
-          new SliverAppBar(key: key2 = new GlobalKey(), delegate: delegate, floating: true),
+          new SliverPersistentHeader(key: key2 = new GlobalKey(), delegate: delegate, floating: true),
           new BigSliver(key: key3 = new GlobalKey(), height: bigHeight),
         ],
       ),
     );
-    AbsoluteScrollPosition position = tester.state<Scrollable2State>(find.byType(Scrollable2)).position;
+    ScrollPosition position = tester.state<Scrollable2State>(find.byType(Scrollable2)).position;
 
     verifyPaintPosition(key1, new Offset(0.0, 0.0), true);
     verifyPaintPosition(key2, new Offset(0.0, 600.0), false);
     verifyPaintPosition(key3, new Offset(0.0, 600.0), false);
 
-    position.animate(to: bigHeight + delegate.maxExtent * 2.0, curve: Curves.linear, duration: const Duration(minutes: 1));
+    position.animateTo(bigHeight + delegate.maxExtent * 2.0, curve: Curves.linear, duration: const Duration(minutes: 1));
     await tester.pumpUntilNoTransientCallbacks(const Duration(milliseconds: 1000));
     verifyPaintPosition(key1, new Offset(0.0, 0.0), false);
     verifyPaintPosition(key2, new Offset(0.0, 0.0), false);
     verifyPaintPosition(key3, new Offset(0.0, 0.0), true);
 
-    position.animate(to: bigHeight + delegate.maxExtent * 1.9, curve: Curves.linear, duration: const Duration(minutes: 1));
+    position.animateTo(bigHeight + delegate.maxExtent * 1.9, curve: Curves.linear, duration: const Duration(minutes: 1));
     position.updateUserScrollDirection(ScrollDirection.forward); // ignore: INVALID_USE_OF_PROTECTED_MEMBER, since this is using a protected method for testing purposes
     await tester.pumpUntilNoTransientCallbacks(const Duration(milliseconds: 1000));
     verifyPaintPosition(key1, new Offset(0.0, 0.0), false);
@@ -190,7 +184,7 @@ void main() {
   });
 }
 
-class TestDelegate extends SliverAppBarDelegate {
+class TestDelegate extends SliverPersistentHeaderDelegate {
   @override
   double get maxExtent => 200.0;
 

@@ -195,7 +195,7 @@ void main() {
     StateMarkerState keyState = key.currentState;
     keyState.marker = "marked";
 
-    await tester.pumpWidget(new ScrollView(
+    await tester.pumpWidget(new ListView(
       itemExtent: 100.0,
       children: <Widget>[
         new Container(

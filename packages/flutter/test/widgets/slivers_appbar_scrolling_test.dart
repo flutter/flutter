@@ -6,8 +6,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-import 'test_widgets.dart';
-
 void verifyPaintPosition(GlobalKey key, Offset ideal) {
   RenderObject target = key.currentContext.findRenderObject();
   expect(target.parent, new isInstanceOf<RenderViewport2>());
@@ -20,25 +18,24 @@ void main() {
   testWidgets('Sliver appbars - scrolling', (WidgetTester tester) async {
     GlobalKey key1, key2, key3, key4, key5;
     await tester.pumpWidget(
-      new TestScrollable(
-        axisDirection: AxisDirection.down,
+      new CustomScrollView(
         slivers: <Widget>[
           new BigSliver(key: key1 = new GlobalKey()),
-          new SliverAppBar(key: key2 = new GlobalKey(), delegate: new TestDelegate()),
-          new SliverAppBar(key: key3 = new GlobalKey(), delegate: new TestDelegate()),
+          new SliverPersistentHeader(key: key2 = new GlobalKey(), delegate: new TestDelegate()),
+          new SliverPersistentHeader(key: key3 = new GlobalKey(), delegate: new TestDelegate()),
           new BigSliver(key: key4 = new GlobalKey()),
           new BigSliver(key: key5 = new GlobalKey()),
         ],
       ),
     );
-    AbsoluteScrollPosition position = tester.state<Scrollable2State>(find.byType(Scrollable2)).position;
+    ScrollPosition position = tester.state<Scrollable2State>(find.byType(Scrollable2)).position;
     final double max = RenderBigSliver.height * 3.0 + new TestDelegate().maxExtent * 2.0 - 600.0; // 600 is the height of the test viewport
     assert(max < 10000.0);
     expect(max, 1450.0);
     expect(position.pixels, 0.0);
     expect(position.minScrollExtent, 0.0);
     expect(position.maxScrollExtent, max);
-    position.animate(to: 10000.0, curve: Curves.linear, duration: const Duration(minutes: 1));
+    position.animateTo(10000.0, curve: Curves.linear, duration: const Duration(minutes: 1));
     await tester.pumpUntilNoTransientCallbacks(const Duration(milliseconds: 10));
     expect(position.pixels, max);
     expect(position.minScrollExtent, 0.0);
@@ -54,18 +51,17 @@ void main() {
     GlobalKey key = new GlobalKey();
     TestDelegate delegate = new TestDelegate();
     await tester.pumpWidget(
-      new TestScrollable(
-        axisDirection: AxisDirection.down,
+      new CustomScrollView(
         slivers: <Widget>[
           new BigSliver(),
-          new SliverAppBar(key: key, delegate: delegate),
+          new SliverPersistentHeader(key: key, delegate: delegate),
           new BigSliver(),
           new BigSliver(),
         ],
       ),
     );
-    AbsoluteScrollPosition position = tester.state<Scrollable2State>(find.byType(Scrollable2)).position;
-    position.animate(to: RenderBigSliver.height + delegate.maxExtent - 5.0, curve: Curves.linear, duration: const Duration(minutes: 1));
+    ScrollPosition position = tester.state<Scrollable2State>(find.byType(Scrollable2)).position;
+    position.animateTo(RenderBigSliver.height + delegate.maxExtent - 5.0, curve: Curves.linear, duration: const Duration(minutes: 1));
     await tester.pumpUntilNoTransientCallbacks(const Duration(milliseconds: 1000));
     RenderBox box = tester.renderObject<RenderBox>(find.byType(Container));
     Rect rect = new Rect.fromPoints(box.localToGlobal(Point.origin), box.localToGlobal(box.size.bottomRight(Point.origin)));
@@ -73,7 +69,7 @@ void main() {
   });
 }
 
-class TestDelegate extends SliverAppBarDelegate {
+class TestDelegate extends SliverPersistentHeaderDelegate {
   @override
   double get maxExtent => 200.0;
 

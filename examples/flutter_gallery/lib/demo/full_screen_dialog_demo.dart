@@ -157,7 +157,7 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
           )
         ]
       ),
-      body: new ScrollView(
+      body: new ListView(
         padding: const EdgeInsets.all(16.0),
         children: <Widget>[
           new Container(

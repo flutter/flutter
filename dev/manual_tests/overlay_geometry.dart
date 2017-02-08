@@ -90,7 +90,7 @@ class OverlayGeometryApp extends StatefulWidget {
   OverlayGeometryAppState createState() => new OverlayGeometryAppState();
 }
 
-typedef void CardTapCallback(Key targetKey, Point globalPosition);
+typedef void CardTapCallback(GlobalKey targetKey, Point globalPosition);
 
 class CardBuilder extends LazyBlockDelegate {
   CardBuilder({ this.cardModels, this.onTapUp });

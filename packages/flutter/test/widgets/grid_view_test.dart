@@ -5,20 +5,21 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
+import '../rendering/mock_canvas.dart';
 import 'states.dart';
 
 void main() {
-  testWidgets('Empty ScrollGrid', (WidgetTester tester) async {
-    await tester.pumpWidget(new ScrollGrid.count(
+  testWidgets('Empty GridView', (WidgetTester tester) async {
+    await tester.pumpWidget(new GridView.count(
       crossAxisCount: 4,
       children: const <Widget>[],
     ));
   });
 
-  testWidgets('ScrollGrid.count control test', (WidgetTester tester) async {
+  testWidgets('GridView.count control test', (WidgetTester tester) async {
     List<String> log = <String>[];
 
-    await tester.pumpWidget(new ScrollGrid.count(
+    await tester.pumpWidget(new GridView.count(
       crossAxisCount: 4,
       children: kStates.map((String state) {
         return new GestureDetector(
@@ -83,10 +84,10 @@ void main() {
     log.clear();
   });
 
-  testWidgets('ScrollGrid.extent control test', (WidgetTester tester) async {
+  testWidgets('GridView.extent control test', (WidgetTester tester) async {
     List<String> log = <String>[];
 
-    await tester.pumpWidget(new ScrollGrid.extent(
+    await tester.pumpWidget(new GridView.extent(
       maxCrossAxisExtent: 200.0,
       children: kStates.map((String state) {
         return new GestureDetector(
@@ -126,11 +127,11 @@ void main() {
     log.clear();
   });
 
-  testWidgets('ScrollGrid large scroll jump', (WidgetTester tester) async {
+  testWidgets('GridView large scroll jump', (WidgetTester tester) async {
     List<int> log = <int>[];
 
     await tester.pumpWidget(
-      new ScrollGrid.extent(
+      new GridView.extent(
         scrollDirection: Axis.horizontal,
         maxCrossAxisExtent: 200.0,
         childAspectRatio: 0.75,
@@ -158,7 +159,7 @@ void main() {
 
 
     Scrollable2State state = tester.state(find.byType(Scrollable2));
-    AbsoluteScrollPosition position = state.position;
+    ScrollPosition position = state.position;
     position.jumpTo(3025.0);
 
     expect(log, isEmpty);
@@ -186,11 +187,11 @@ void main() {
     log.clear();
   });
 
-  testWidgets('ScrollGrid - change crossAxisCount', (WidgetTester tester) async {
+  testWidgets('GridView - change crossAxisCount', (WidgetTester tester) async {
     List<int> log = <int>[];
 
     await tester.pumpWidget(
-      new ScrollGrid(
+      new GridView(
         gridDelegate: new SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 4,
         ),
@@ -217,7 +218,7 @@ void main() {
     log.clear();
 
     await tester.pumpWidget(
-      new ScrollGrid(
+      new GridView(
         gridDelegate: new SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
         ),
@@ -245,11 +246,11 @@ void main() {
     expect(find.text('4'), findsNothing);
   });
 
-  testWidgets('ScrollGrid - change maxChildCrossAxisExtent', (WidgetTester tester) async {
+  testWidgets('GridView - change maxChildCrossAxisExtent', (WidgetTester tester) async {
     List<int> log = <int>[];
 
     await tester.pumpWidget(
-      new ScrollGrid(
+      new GridView(
         gridDelegate: new SliverGridDelegateWithMaxCrossAxisExtent(
           maxCrossAxisExtent: 200.0,
         ),
@@ -276,7 +277,7 @@ void main() {
     log.clear();
 
     await tester.pumpWidget(
-      new ScrollGrid(
+      new GridView(
         gridDelegate: new SliverGridDelegateWithMaxCrossAxisExtent(
           maxCrossAxisExtent: 400.0,
         ),
@@ -302,6 +303,29 @@ void main() {
 
     expect(tester.getSize(find.text('3')), equals(const Size(400.0, 400.0)));
     expect(find.text('4'), findsNothing);
+  });
+
+  testWidgets('One-line GridView paints', (WidgetTester tester) async {
+    const Color green = const Color(0xFF00FF00);
+
+    final Container container = new Container(
+      decoration: const BoxDecoration(
+        backgroundColor: green,
+      ),
+    );
+
+    await tester.pumpWidget(new Center(
+      child: new SizedBox(
+        height: 200.0,
+        child: new GridView.count(
+          crossAxisCount: 2,
+          children: <Widget>[ container, container, container, container ],
+        ),
+      ),
+    ));
+
+    expect(find.byType(GridView), paints..rect(color: green)..rect(color: green));
+    expect(find.byType(GridView), isNot(paints..rect(color: green)..rect(color: green)..rect(color: green)));
   });
 
   // TODO(ianh): can you tap a grid cell that is slightly off the bottom of the screen?

@@ -128,75 +128,69 @@ class _DateAndTimePickerDemoState extends State<DateAndTimePickerDemo> {
   Widget build(BuildContext context) {
     return new Scaffold(
       appBar: new AppBar(title: new Text('Date and time pickers')),
-      body: new ScrollableViewport(
-        child: new Container(
+      body: new DropdownButtonHideUnderline(
+        child: new ListView(
           padding: const EdgeInsets.all(16.0),
-          alignment: FractionalOffset.topLeft,
-          child: new DropdownButtonHideUnderline(
-            child: new Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget>[
-                new TextField(
-                  labelText: 'Event name',
-                  style: Theme.of(context).textTheme.display1,
-                ),
-                new TextField(
-                  labelText: 'Location',
-                  style: Theme.of(context).textTheme.display1.copyWith(fontSize: 20.0),
-                ),
-                new _DateTimePicker(
-                  labelText: 'From',
-                  selectedDate: _fromDate,
-                  selectedTime: _fromTime,
-                  selectDate: (DateTime date) {
-                    setState(() {
-                      _fromDate = date;
-                    });
-                  },
-                  selectTime: (TimeOfDay time) {
-                    setState(() {
-                      _fromTime = time;
-                    });
-                  },
-                ),
-                new _DateTimePicker(
-                  labelText: 'To',
-                  selectedDate: _toDate,
-                  selectedTime: _toTime,
-                  selectDate: (DateTime date) {
-                    setState(() {
-                      _toDate = date;
-                    });
-                  },
-                  selectTime: (TimeOfDay time) {
-                    setState(() {
-                      _toTime = time;
-                    });
-                  },
-                ),
-                new InputContainer(
-                  labelText: 'Activity',
-                  hintText: 'Choose an activity',
-                  isEmpty: _activity == null,
-                  child: new DropdownButton<String>(
-                    value: _activity,
-                    isDense: true,
-                    onChanged: (String newValue) {
-                      setState(() {
-                        _activity = newValue;
-                      });
-                    },
-                    items: _allActivities.map((String value) {
-                      return new DropdownMenuItem<String>(
-                        value: value,
-                        child: new Text(value),
-                      );
-                    }).toList(),
-                  ),
-                ),
-              ],
+          children: <Widget>[
+            new TextField(
+              labelText: 'Event name',
+              style: Theme.of(context).textTheme.display1,
             ),
-          ),
+            new TextField(
+              labelText: 'Location',
+              style: Theme.of(context).textTheme.display1.copyWith(fontSize: 20.0),
+            ),
+            new _DateTimePicker(
+              labelText: 'From',
+              selectedDate: _fromDate,
+              selectedTime: _fromTime,
+              selectDate: (DateTime date) {
+                setState(() {
+                  _fromDate = date;
+                });
+              },
+              selectTime: (TimeOfDay time) {
+                setState(() {
+                  _fromTime = time;
+                });
+              },
+            ),
+            new _DateTimePicker(
+              labelText: 'To',
+              selectedDate: _toDate,
+              selectedTime: _toTime,
+              selectDate: (DateTime date) {
+                setState(() {
+                  _toDate = date;
+                });
+              },
+              selectTime: (TimeOfDay time) {
+                setState(() {
+                  _toTime = time;
+                });
+              },
+            ),
+            new InputContainer(
+              labelText: 'Activity',
+              hintText: 'Choose an activity',
+              isEmpty: _activity == null,
+              child: new DropdownButton<String>(
+                value: _activity,
+                isDense: true,
+                onChanged: (String newValue) {
+                  setState(() {
+                    _activity = newValue;
+                  });
+                },
+                items: _allActivities.map((String value) {
+                  return new DropdownMenuItem<String>(
+                    value: value,
+                    child: new Text(value),
+                  );
+                }).toList(),
+              ),
+            ),
+          ],
         ),
       ),
     );

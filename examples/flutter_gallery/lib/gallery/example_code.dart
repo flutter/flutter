@@ -203,7 +203,7 @@ class GridLists {
 // START gridlists
 // Creates a scrollable grid list with images
 // loaded from the web.
-new ScrollGrid.count(
+new GridView.count(
   crossAxisCount: 3,
   childAspectRatio: 1.0,
   padding: const EdgeInsets.all(4.0),

@@ -10,30 +10,47 @@ import 'basic.dart';
 import 'framework.dart';
 import 'scrollable.dart';
 
-// ///
-// /// The viewport will shrink-wrap the child in both axes.
-// ///
-// /// See also:
-// ///  * [ScrollView], which handles multiple children in a scrolling list.
-// ///  * [ScrollGrid], which handles multiple children in a scrolling grid.
-// ///  * [Scrollable2], which handles arbitrary scrolling effects.
+
+/// A box in which a single widget can be scrolled.
+///
+/// This widget is useful when you have a single box that will normally be
+/// entirely visible, for example a clock face in a time picker, but you need to
+/// make sure it can be scrolled if the container gets too small in one axis
+/// (the scroll direction).
+///
+/// It is also useful if you need to shrink-wrap in both axes (the main
+/// scrolling direction as well as the cross axis), as one might see in a dialog
+/// or pop-up menu. In that case, you might pair the [SingleChildScrollView]
+/// with a [BlockBody] child.
+///
+/// When you have a list of children and do not require cross-axis
+/// shrink-wrapping behavior, for example a scrolling list that is always the
+/// width of the screen, consider [ListView], which is vastly more efficient
+/// that a [SingleChildScrollView] containing a [BlockBody] or [Column] with
+/// many children.
+///
+/// See also:
+///
+/// * [ListView], which handles multiple children in a scrolling list.
+/// * [GridView], which handles multiple children in a scrolling grid.
+/// * [PageView], for a scrollable that works page by page.
+/// * [Scrollable2], which handles arbitrary scrolling effects.
 class SingleChildScrollView extends StatelessWidget {
   SingleChildScrollView({
     Key key,
     this.scrollDirection: Axis.vertical,
+    this.reverse: false,
     this.padding,
-    this.initialScrollOffset: 0.0,
     this.child,
   }) : super(key: key) {
     assert(scrollDirection != null);
-    assert(initialScrollOffset != null);
   }
 
   final Axis scrollDirection;
 
-  final EdgeInsets padding;
+  final bool reverse;
 
-  final double initialScrollOffset;
+  final EdgeInsets padding;
 
   final Widget child;
 
@@ -41,9 +58,9 @@ class SingleChildScrollView extends StatelessWidget {
     // TODO(abarth): Consider reading direction.
     switch (scrollDirection) {
       case Axis.horizontal:
-        return AxisDirection.right;
+        return reverse ? AxisDirection.left : AxisDirection.right;
       case Axis.vertical:
-        return AxisDirection.down;
+        return reverse ? AxisDirection.up : AxisDirection.down;
     }
     return null;
   }
@@ -56,7 +73,6 @@ class SingleChildScrollView extends StatelessWidget {
       contents = new Padding(padding: padding, child: contents);
     return new Scrollable2(
       axisDirection: axisDirection,
-      initialScrollOffset: initialScrollOffset,
       viewportBuilder: (BuildContext context, ViewportOffset offset) {
         return new _SingleChildViewport(
           key: key,
@@ -99,7 +115,7 @@ class _SingleChildViewport extends SingleChildRenderObjectWidget {
   }
 }
 
-class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMixin<RenderBox> {
+class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMixin<RenderBox> implements RenderAbstractViewport {
   _RenderSingleChildViewport({
     AxisDirection axisDirection: AxisDirection.down,
     ViewportOffset offset,
@@ -143,8 +159,9 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
       assert(_minScrollExtent != null);
       assert(_maxScrollExtent != null);
       assert(_effectiveExtent != null);
-      offset.applyViewportDimension(_effectiveExtent);
-      if (offset.applyContentDimensions(_minScrollExtent, _maxScrollExtent))
+      final bool didAcceptViewportDimensions = offset.applyViewportDimension(_effectiveExtent);
+      final bool didAcceptContentDimensions = offset.applyContentDimensions(_minScrollExtent, _maxScrollExtent);
+      if (didAcceptViewportDimensions || didAcceptContentDimensions)
         markNeedsPaint();
     }
   }
@@ -183,7 +200,6 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
     return null;
   }
 
-
   double get _minScrollExtent {
     assert(hasSize);
     return 0.0;
@@ -193,7 +209,13 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
     assert(hasSize);
     if (child == null)
       return 0.0;
-    return math.max(0.0, child.size.height - size.height);
+    switch (axis) {
+      case Axis.horizontal:
+        return math.max(0.0, child.size.width - size.width);
+      case Axis.vertical:
+        return math.max(0.0, child.size.height - size.height);
+    }
+    return null;
   }
 
   BoxConstraints _getInnerConstraints(BoxConstraints constraints) {
@@ -252,15 +274,15 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
     offset.applyContentDimensions(_minScrollExtent, _maxScrollExtent);
   }
 
-  Offset get _scrollOffsetAsOffset {
+  Offset get _paintOffset {
     assert(axisDirection != null);
     switch (axisDirection) {
       case AxisDirection.up:
-        return new Offset(0.0, _offset.pixels);
+        return new Offset(0.0, _offset.pixels - child.size.height + size.height);
       case AxisDirection.down:
         return new Offset(0.0, -_offset.pixels);
       case AxisDirection.left:
-        return new Offset(_offset.pixels, 0.0);
+        return new Offset(_offset.pixels - child.size.width + size.width, 0.0);
       case AxisDirection.right:
         return new Offset(-_offset.pixels, 0.0);
     }
@@ -275,7 +297,7 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
   @override
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
-      final Offset paintOffset = _scrollOffsetAsOffset;
+      final Offset paintOffset = _paintOffset;
 
       void paintContents(PaintingContext context, Offset offset) {
         context.paintChild(child, offset + paintOffset);
@@ -291,13 +313,13 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
 
   @override
   void applyPaintTransform(RenderBox child, Matrix4 transform) {
-    final Offset paintOffset = _scrollOffsetAsOffset;
+    final Offset paintOffset = _paintOffset;
     transform.translate(paintOffset.dx, paintOffset.dy);
   }
 
   @override
   Rect describeApproximatePaintClip(RenderObject child) {
-    if (child != null && _shouldClipAtPaintOffset(_scrollOffsetAsOffset))
+    if (child != null && _shouldClipAtPaintOffset(_paintOffset))
       return Point.origin & size;
     return null;
   }
@@ -305,9 +327,50 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
   @override
   bool hitTestChildren(HitTestResult result, { Point position }) {
     if (child != null) {
-      final Point transformed = position + -_scrollOffsetAsOffset;
+      final Point transformed = position + -_paintOffset;
       return child.hitTest(result, position: transformed);
     }
     return false;
+  }
+
+  @override
+  double getOffsetToReveal(RenderObject target, double alignment) {
+    if (target is! RenderBox)
+      return offset.pixels;
+
+    final RenderBox targetBox = target;
+    final Matrix4 transform = targetBox.getTransformTo(this);
+    final Rect bounds = MatrixUtils.transformRect(transform, targetBox.paintBounds);
+    final Size contentSize = child.size;
+
+    double leadingScrollOffset;
+    double targetMainAxisExtent;
+    double mainAxisExtent;
+
+    assert(axisDirection != null);
+    switch (axisDirection) {
+      case AxisDirection.up:
+        mainAxisExtent = size.height;
+        leadingScrollOffset = contentSize.height - bounds.bottom;
+        targetMainAxisExtent = bounds.height;
+        break;
+      case AxisDirection.right:
+        mainAxisExtent = size.width;
+        leadingScrollOffset = bounds.left;
+        targetMainAxisExtent = bounds.width;
+        break;
+      case AxisDirection.down:
+        mainAxisExtent = size.height;
+        leadingScrollOffset = bounds.top;
+        targetMainAxisExtent = bounds.height;
+        break;
+      case AxisDirection.left:
+        mainAxisExtent = size.width;
+        leadingScrollOffset = contentSize.width - bounds.right;
+        targetMainAxisExtent = bounds.width;
+        break;
+    }
+
+    return leadingScrollOffset - (mainAxisExtent - targetMainAxisExtent) * alignment;
   }
 }

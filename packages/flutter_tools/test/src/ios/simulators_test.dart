@@ -51,4 +51,38 @@ void main() {
       }
     });
   });
+
+  group('IOSSimulator.isSupported', () {
+    test('Apple TV is unsupported', () {
+      expect(new IOSSimulator('x', name: 'Apple TV').isSupported(), false);
+    });
+
+    test('Apple Watch is unsupported', () {
+      expect(new IOSSimulator('x', name: 'Apple Watch').isSupported(), false);
+    });
+
+    test('iPad 2 is unsupported', () {
+      expect(new IOSSimulator('x', name: 'iPad 2').isSupported(), false);
+    });
+
+    test('iPad Retina is unsupported', () {
+      expect(new IOSSimulator('x', name: 'iPad Retina').isSupported(), false);
+    });
+
+    test('iPhone 5 is unsupported', () {
+      expect(new IOSSimulator('x', name: 'iPhone 5').isSupported(), false);
+    });
+
+    test('iPhone 5s is supported', () {
+      expect(new IOSSimulator('x', name: 'iPhone 5s').isSupported(), true);
+    });
+
+    test('iPhone SE is supported', () {
+      expect(new IOSSimulator('x', name: 'iPhone SE').isSupported(), true);
+    });
+
+    test('iPhone 7 Plus is supported', () {
+      expect(new IOSSimulator('x', name: 'iPhone 7 Plus').isSupported(), true);
+    });
+  });
 }

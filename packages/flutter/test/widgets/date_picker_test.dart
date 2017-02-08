@@ -10,7 +10,7 @@ void main() {
     DateTime currentValue;
 
     Widget widget = new Material(
-      child: new ScrollView(
+      child: new ListView(
         children: <Widget>[
           new MonthPicker(
             selectedDate: new DateTime.utc(2015, 6, 9, 7, 12),

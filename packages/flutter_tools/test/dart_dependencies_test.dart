@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io' as io;
+
 import 'package:flutter_tools/src/dart/dependencies.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:path/path.dart' as path;
@@ -36,5 +38,5 @@ void main()  {
         expect(e.contains('unexpected token \'bad\''), isTrue);
       }
     });
-  });
+  }, skip: io.Platform.isWindows); // TODO(goderbauer): enable when sky_snapshot is available
 }

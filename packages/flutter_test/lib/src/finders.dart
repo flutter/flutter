@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 
 import 'all_elements.dart';
 
+import 'package:meta/meta.dart';
+
 /// Signature for [CommonFinders.byPredicate].
 typedef bool WidgetPredicate(Widget widget);
 
@@ -26,7 +28,7 @@ class CommonFinders {
   ///
   /// Example:
   ///
-  ///     expect(tester, hasWidget(find.text('Back')));
+  ///     expect(find.text('Back'), findsOneWidget);
   ///
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// nodes that are [Offstage] or that are from inactive [Route]s.
@@ -37,7 +39,7 @@ class CommonFinders {
   ///
   /// Example:
   ///
-  ///     expect(tester, hasWidget(find.icon(Icons.chevron_left)));
+  ///     expect(find.icon(Icons.chevron_left), findsOneWidget);
   ///
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// nodes that are [Offstage] or that are from inactive [Route]s.
@@ -66,7 +68,7 @@ class CommonFinders {
   ///
   /// Example:
   ///
-  ///     expect(tester, hasWidget(find.byKey(backKey)));
+  ///     expect(find.byKey(backKey), findsOneWidget);
   ///
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// nodes that are [Offstage] or that are from inactive [Route]s.
@@ -82,7 +84,7 @@ class CommonFinders {
   ///
   /// Example:
   ///
-  ///     expect(tester, hasWidget(find.byType(IconButton)));
+  ///     expect(find.byType(IconButton), findsOneWidget);
   ///
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// nodes that are [Offstage] or that are from inactive [Route]s.
@@ -98,7 +100,7 @@ class CommonFinders {
   ///
   /// Example:
   ///
-  ///     expect(tester, hasWidget(find.byElementType(SingleChildRenderObjectElement)));
+  ///     expect(find.byElementType(SingleChildRenderObjectElement), findsOneWidget);
   ///
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// nodes that are [Offstage] or that are from inactive [Route]s.
@@ -125,10 +127,10 @@ class CommonFinders {
   ///
   /// Example:
   ///
-  ///     expect(tester, hasWidget(find.byWidgetPredicate(
+  ///     expect(find.byWidgetPredicate(
   ///       (Widget widget) => widget is Tooltip && widget.message == 'Back',
   ///       description: 'widget with tooltip "Back"',
-  ///     )));
+  ///     ), findsOneWidget);
   ///
   /// If [description] is provided, then this uses it as the description of the
   /// [Finder] and appears, for example, in the error message when the finder
@@ -145,7 +147,7 @@ class CommonFinders {
   ///
   /// Example:
   ///
-  ///     expect(tester, hasWidget(find.byTooltip('Back')));
+  ///     expect(find.byTooltip('Back'), findsOneWidget);
   ///
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// nodes that are [Offstage] or that are from inactive [Route]s.
@@ -160,13 +162,13 @@ class CommonFinders {
   ///
   /// Example:
   ///
-  ///     expect(tester, hasWidget(find.byElementPredicate(
+  ///     expect(find.byElementPredicate(
   ///       // finds elements of type SingleChildRenderObjectElement, including
   ///       // those that are actually subclasses of that type.
   ///       // (contrast with byElementType, which only returns exact matches)
   ///       (Element element) => element is SingleChildRenderObjectElement,
   ///       description: '$SingleChildRenderObjectElement element',
-  ///     )));
+  ///     ), findsOneWidget);
   ///
   /// If [description] is provided, then this uses it as the description of the
   /// [Finder] and appears, for example, in the error message when the finder
@@ -177,6 +179,21 @@ class CommonFinders {
   /// nodes that are [Offstage] or that are from inactive [Route]s.
   Finder byElementPredicate(ElementPredicate predicate, { String description, bool skipOffstage: true }) {
     return new _ElementPredicateFinder(predicate, description: description, skipOffstage: skipOffstage);
+  }
+
+  /// Looks for widgets that match the pattern of descendant finder under the
+  /// widget tree with ancestor as the root.
+  ///
+  /// Example:
+  ///
+  ///     expect(find.descendant(
+  ///       of: find.widgetWithText(Row, 'label_1'), matching: find.text('value_1')
+///       ), findsOneWidget);
+  ///
+  /// If the `skipOffstage` argument is true (the default), then this skips
+  /// nodes that are [Offstage] or that are from inactive [Route]s.
+  Finder descendant({ Finder of, Finder matching, bool skipOffstage: true }) {
+    return new _DescendantFinder(of, matching, skipOffstage: skipOffstage);
   }
 }
 
@@ -207,7 +224,8 @@ abstract class Finder {
   /// [Offstage] widgets, as well as children of inactive [Route]s.
   final bool skipOffstage;
 
-  Iterable<Element> get _allElements {
+  @protected
+  Iterable<Element> get allCandidates {
     return collectAllElementsFrom(
       WidgetsBinding.instance.renderViewElement,
       skipOffstage: skipOffstage
@@ -222,7 +240,7 @@ abstract class Finder {
   ///
   /// Calling this clears the cache from [precache].
   Iterable<Element> evaluate() {
-    final Iterable<Element> result = _cachedResult ?? apply(_allElements);
+    final Iterable<Element> result = _cachedResult ?? apply(allCandidates);
     _cachedResult = null;
     return result;
   }
@@ -234,7 +252,7 @@ abstract class Finder {
   /// If this returns true, you must call [evaluate] before you call [precache] again.
   bool precache() {
     assert(_cachedResult == null);
-    final Iterable<Element> result = apply(_allElements);
+    final Iterable<Element> result = apply(allCandidates);
     if (result.isNotEmpty) {
       _cachedResult = result;
       return true;
@@ -467,5 +485,27 @@ class _ElementPredicateFinder extends MatchFinder {
   @override
   bool matches(Element candidate) {
     return predicate(candidate);
+  }
+}
+
+class _DescendantFinder extends Finder {
+  _DescendantFinder(this.ancestor, this.descendant, { bool skipOffstage: true }) : super(skipOffstage: skipOffstage);
+
+  final Finder ancestor;
+  final Finder descendant;
+
+  @override
+  String get description => '${descendant.description} that has ancestor(s) with ${ancestor.description} ';
+
+  @override
+  Iterable<Element> apply(Iterable<Element> candidates) {
+    return candidates.where((Element element) => descendant.evaluate().contains(element));
+  }
+
+  @override
+  Iterable<Element> get allCandidates {
+    return ancestor.evaluate().expand(
+      (Element element) => collectAllElementsFrom(element, skipOffstage: skipOffstage)
+    ).toSet().toList();
   }
 }

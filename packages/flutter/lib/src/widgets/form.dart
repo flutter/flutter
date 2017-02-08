@@ -64,27 +64,34 @@ class Form extends StatefulWidget {
 class FormState extends State<Form> {
   int _generation = 0;
   Set<FormFieldState<dynamic>> _fields = new Set<FormFieldState<dynamic>>();
+  ModalRoute<dynamic> _route;
 
   @override
   void dependenciesChanged() {
     super.dependenciesChanged();
-    final ModalRoute<dynamic> route = ModalRoute.of(context);
-    if (route != null && config.onWillPop != null) {
-      // Avoid adding our callback twice by removing it first.
-      route.removeScopedWillPopCallback(config.onWillPop);
-      route.addScopedWillPopCallback(config.onWillPop);
-    }
+    if (_route != null && config.onWillPop != null)
+      _route.removeScopedWillPopCallback(config.onWillPop);
+    _route = ModalRoute.of(context);
+    if (_route != null && config.onWillPop != null)
+      _route.addScopedWillPopCallback(config.onWillPop);
   }
 
   @override
   void didUpdateConfig(Form oldConfig) {
-    final ModalRoute<dynamic> route = ModalRoute.of(context);
-    if (config.onWillPop != oldConfig.onWillPop && route != null) {
+    assert(_route == ModalRoute.of(context));
+    if (config.onWillPop != oldConfig.onWillPop && _route != null) {
       if (oldConfig.onWillPop != null)
-        route.removeScopedWillPopCallback(oldConfig.onWillPop);
+        _route.removeScopedWillPopCallback(oldConfig.onWillPop);
       if (config.onWillPop != null)
-        route.addScopedWillPopCallback(config.onWillPop);
+        _route.addScopedWillPopCallback(config.onWillPop);
     }
+  }
+
+  @override
+  void dispose() {
+    if (_route != null && config.onWillPop != null)
+      _route.removeScopedWillPopCallback(config.onWillPop);
+    super.dispose();
   }
 
   // Called when a form field has changed. This will cause all form fields

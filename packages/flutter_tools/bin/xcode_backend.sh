@@ -121,4 +121,86 @@ BuildApp() {
   return 0
 }
 
-BuildApp
+# Returns the CFBundleExecutable for the specified framework directory.
+GetFrameworkExecutablePath() {
+  local framework_dir="$1"
+
+  local plist_path="${framework_dir}/Info.plist"
+  local executable="$(defaults read "${plist_path}" CFBundleExecutable)"
+  echo "${framework_dir}/${executable}"
+}
+
+# Destructively thins the specified executable file to include only the
+# specified architectures.
+LipoExecutable() {
+  local executable="$1"
+  shift
+  local archs="$@"
+
+  # Extract architecture-specific framework executables.
+  local all_executables=()
+  for arch in $archs; do
+    local output="${executable}_${arch}"
+    local lipo_info=$(lipo -info "${executable}")
+    if [[ "${lipo_info}" == "Non-fat file:"* ]]; then
+      if [[ "${lipo_info}" != *"${arch}" ]]; then
+        echo "Non-fat binary ${executable} is not ${arch}. Running lipo -info:"
+        echo "${lipo_info}"
+        exit 1
+      fi
+    else
+      lipo -output "${output}" -extract "${arch}" "${executable}"
+      if [[ $? == 0 ]]; then
+        all_executables+=("${output}")
+      else
+        echo "Failed to extract ${arch} for ${executable}. Running lipo -info:"
+        lipo -info "${executable}"
+        exit 1
+      fi
+    fi
+  done
+
+  # Merge desired architectures.
+  local merged="${executable}_merged"
+  lipo -output "${merged}" -create "${all_executables[@]}"
+
+  # Replace the original executable with the thinned one and clean up.
+  cp -f "${merged}" "${executable}" > /dev/null
+  rm -f "${merged}" "${all_executables[@]}"
+}
+
+# Destructively thins the specified framework to include only the specified
+# architectures.
+ThinFramework() {
+  local framework_dir="$1"
+  shift
+  local archs="$@"
+
+  local plist_path="${framework_dir}/Info.plist"
+  local executable="$(GetFrameworkExecutablePath "${framework_dir}")"
+  LipoExecutable "${executable}" "$archs"
+}
+
+ThinAppFrameworks() {
+  local app_path="${TARGET_BUILD_DIR}/${WRAPPER_NAME}"
+  local frameworks_dir="${app_path}/Frameworks"
+
+  [[ -d "$frameworks_dir" ]] || return 0
+  for framework_dir in "$(find "${app_path}" -type d -name "*.framework")"; do
+    ThinFramework "$framework_dir" "$ARCHS"
+  done
+}
+
+# Main entry point.
+
+if [[ $# == 0 ]]; then
+  # Backwards-comptibility: if no args are provided, build.
+  BuildApp
+else
+  case $1 in
+    "build")
+      BuildApp ;;
+    "thin")
+      ThinAppFrameworks ;;
+  esac
+fi

@@ -41,10 +41,35 @@ abstract class SliverChildDelegate {
   bool shouldRebuild(@checked SliverChildDelegate oldDelegate);
 }
 
+class SliverChildBuilderDelegate extends SliverChildDelegate {
+  const SliverChildBuilderDelegate(this.builder, { this.childCount });
+
+  final IndexedWidgetBuilder builder;
+
+  final int childCount;
+
+  @override
+  Widget build(BuildContext context, int index) {
+    assert(builder != null);
+    if (index < 0 || (childCount != null && index >= childCount))
+      return null;
+    final Widget child = builder(context, index);
+    if (child == null)
+      return null;
+    return new RepaintBoundary.wrap(child, index);
+  }
+
+  @override
+  int get estimatedChildCount => childCount;
+
+  @override
+  bool shouldRebuild(@checked SliverChildBuilderDelegate oldDelegate) => true;
+}
+
 // ///
 // /// In general building all the widgets in advance is not efficient. It is
 // /// better to create a delegate that builds them on demand by subclassing
-// /// [SliverBlockDelegate] directly.
+// /// [SliverChildDelegate] directly.
 // ///
 // /// This class is provided for the cases where either the list of children is
 // /// known well in advance (ideally the children are themselves compile-time
@@ -54,10 +79,20 @@ abstract class SliverChildDelegate {
 // /// demand). For example, the body of a dialog box might fit both of these
 // /// conditions.
 class SliverChildListDelegate extends SliverChildDelegate {
-  /// Abstract const constructor. This constructor enables subclasses to provide
-  /// const constructors so that they can be used in const expressions.
-  const SliverChildListDelegate(this.children);
+  const SliverChildListDelegate(this.children, { this.addRepaintBoundaries: true });
 
+  /// Whether to wrap each child in a [RepaintBoundary].
+  ///
+  /// Typically, children in a scrolling container are wrapped in repaint
+  /// boundaries so that they do not need to be repainted as the list scrolls.
+  /// If the children are easy to repaint (e.g., solid color blocks or a short
+  /// snippet of text), it might be more efficient to not add a repaint boundary
+  /// and simply repaint the children during scrolling.
+  ///
+  /// Defaults to true.
+  final bool addRepaintBoundaries;
+
+  /// The widgets to display.
   final List<Widget> children;
 
   @override
@@ -65,7 +100,9 @@ class SliverChildListDelegate extends SliverChildDelegate {
     assert(children != null);
     if (index < 0 || index >= children.length)
       return null;
-    return children[index];
+    final Widget child = children[index];
+    assert(child != null);
+    return addRepaintBoundaries ? new RepaintBoundary.wrap(child, index) : child;
   }
 
   @override
@@ -116,21 +153,21 @@ abstract class SliverMultiBoxAdaptorWidget extends RenderObjectWidget {
   }
 }
 
-class SliverBlock extends SliverMultiBoxAdaptorWidget {
-  SliverBlock({
+class SliverList extends SliverMultiBoxAdaptorWidget {
+  SliverList({
     Key key,
     @required SliverChildDelegate delegate,
   }) : super(key: key, delegate: delegate);
 
   @override
-  RenderSliverBlock createRenderObject(BuildContext context) {
+  RenderSliverList createRenderObject(BuildContext context) {
     final SliverMultiBoxAdaptorElement element = context;
-    return new RenderSliverBlock(childManager: element);
+    return new RenderSliverList(childManager: element);
   }
 }
 
-class SliverList extends SliverMultiBoxAdaptorWidget {
-  SliverList({
+class SliverFixedExtentList extends SliverMultiBoxAdaptorWidget {
+  SliverFixedExtentList({
     Key key,
     @required SliverChildDelegate delegate,
     @required this.itemExtent,
@@ -139,13 +176,13 @@ class SliverList extends SliverMultiBoxAdaptorWidget {
   final double itemExtent;
 
   @override
-  RenderSliverList createRenderObject(BuildContext context) {
+  RenderSliverFixedExtentList createRenderObject(BuildContext context) {
     final SliverMultiBoxAdaptorElement element = context;
-    return new RenderSliverList(childManager: element, itemExtent: itemExtent);
+    return new RenderSliverFixedExtentList(childManager: element, itemExtent: itemExtent);
   }
 
   @override
-  void updateRenderObject(BuildContext context, RenderSliverList renderObject) {
+  void updateRenderObject(BuildContext context, RenderSliverFixedExtentList renderObject) {
     renderObject.itemExtent = itemExtent;
   }
 }
@@ -184,7 +221,7 @@ class SliverGrid extends SliverMultiBoxAdaptorWidget {
       lastIndex,
       leadingScrollOffset,
       trailingScrollOffset,
-    ) ?? gridDelegate.estimateMaxScrollOffset(constraints, delegate.estimatedChildCount);
+    ) ?? gridDelegate.getLayout(constraints).estimateMaxScrollOffset(delegate.estimatedChildCount);
   }
 }
 
@@ -255,12 +292,7 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
   }
 
   Widget _build(int index) {
-    return _childWidgets.putIfAbsent(index, () {
-      Widget child = widget.delegate.build(this, index);
-      if (child == null)
-        return null;
-      return new RepaintBoundary.wrap(child, index);
-    });
+    return _childWidgets.putIfAbsent(index, () => widget.delegate.build(this, index));
   }
 
   @override

@@ -361,7 +361,7 @@ class IOSSimulator extends Device {
   @override
   bool isSupported() {
     if (!p.platform.isMacOS) {
-      _supportMessage = "Not supported on a non Mac host";
+      _supportMessage = 'iOS devices require a Mac host machine.';
       return false;
     }
 
@@ -369,34 +369,33 @@ class IOSSimulator extends Device {
     //         We do not support WatchOS or tvOS devices.
 
     RegExp blacklist = new RegExp(r'Apple (TV|Watch)', caseSensitive: false);
-
     if (blacklist.hasMatch(name)) {
-      _supportMessage = "Flutter does not support either the Apple TV or Watch. Choose an iPhone 5s or above.";
+      _supportMessage = 'Flutter does not support Apple TV or Apple Watch. Select an iPhone 5s or above.';
       return false;
     }
 
     // Step 2: Check if the device must be rejected because of its version.
-    //         There is an artitifical check on older simulators where arm64
-    //         targetted applications cannot be run (even though the
-    //         Flutter runner on the simulator is completely different).
+    //         There is an artificial check on older simulators where arm64
+    //         targeted applications cannot be run (even though the Flutter
+    //         runner on the simulator is completely different).
 
-    RegExp versionExp = new RegExp(r'iPhone ([0-9])+');
-    Match match = versionExp.firstMatch(name);
+    // Check for unsupported iPads.
+    Match iPadMatch = new RegExp(r'iPad (2|Retina)', caseSensitive: false).firstMatch(name);
+    if (iPadMatch != null) {
+      _supportMessage = 'Flutter does not yet support iPad 2 or iPad Retina. Select an iPad Air or above.';
+      return false;
+    }
 
-    // Not an iPhone. All available non-iPhone simulators are compatible.
-    if (match == null)
-      return true;
+    // Check for unsupported iPhones.
+    Match iPhoneMatch = new RegExp(r'iPhone [0-5]').firstMatch(name);
+    if (iPhoneMatch != null) {
+      if (name == 'iPhone 5s')
+        return true;
+      _supportMessage = 'Flutter does not yet support iPhone 5 or earlier. Select an iPhone 5s or above.';
+      return false;
+    }
 
-    // iPhones 6 and above are always fine.
-    if (int.parse(match.group(1)) > 5)
-      return true;
-
-    // The 's' subtype of 5 is compatible.
-    if (name.contains('iPhone 5s'))
-      return true;
-
-    _supportMessage = "The simulator version is too old. Choose an iPhone 5s or above.";
-    return false;
+    return true;
   }
 
   String _supportMessage;
@@ -404,9 +403,9 @@ class IOSSimulator extends Device {
   @override
   String supportMessage() {
     if (isSupported())
-      return "Supported";
+      return 'Supported';
 
-    return _supportMessage != null ? _supportMessage : "Unknown";
+    return _supportMessage != null ? _supportMessage : 'Unknown';
   }
 
   @override
@@ -435,26 +434,26 @@ class IOSSimulator extends Device {
     }
 
     // Prepare launch arguments.
-    List<String> args = <String>["--enable-dart-profiling"];
+    List<String> args = <String>['--enable-dart-profiling'];
 
     if (!prebuiltApplication) {
       args.addAll(<String>[
-        "--flx=${path.absolute(path.join(getBuildDirectory(), 'app.flx'))}",
-        "--dart-main=${path.absolute(mainPath)}",
-        "--packages=${path.absolute('.packages')}",
+        '--flx=${path.absolute(path.join(getBuildDirectory(), 'app.flx'))}',
+        '--dart-main=${path.absolute(mainPath)}',
+        '--packages=${path.absolute('.packages')}',
       ]);
     }
 
     if (debuggingOptions.debuggingEnabled) {
       if (debuggingOptions.buildMode == BuildMode.debug)
-        args.add("--enable-checked-mode");
+        args.add('--enable-checked-mode');
       if (debuggingOptions.startPaused)
-        args.add("--start-paused");
+        args.add('--start-paused');
 
       int observatoryPort = await debuggingOptions.findBestObservatoryPort();
-      args.add("--observatory-port=$observatoryPort");
+      args.add('--observatory-port=$observatoryPort');
       int diagnosticPort = await debuggingOptions.findBestDiagnosticPort();
-      args.add("--diagnostic-port=$diagnosticPort");
+      args.add('--diagnostic-port=$diagnosticPort');
     }
 
     ProtocolDiscovery observatoryDiscovery;
@@ -587,7 +586,7 @@ class IOSSimulator extends Device {
   bool get supportsScreenshot => true;
 
   @override
-  Future<bool> takeScreenshot(File outputFile) async {
+  Future<Null> takeScreenshot(File outputFile) async {
     Directory desktopDir = fs.directory(path.join(homeDirPath, 'Desktop'));
 
     // 'Simulator Screen Shot Mar 25, 2016, 2.59.43 PM.png'
@@ -621,8 +620,6 @@ class IOSSimulator extends Device {
     File shot = shots.first;
     outputFile.writeAsBytesSync(shot.readAsBytesSync());
     shot.delete();
-
-    return true;
   }
 }
 

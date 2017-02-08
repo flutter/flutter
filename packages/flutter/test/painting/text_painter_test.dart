@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io' as io;
 import 'dart:ui' as ui;
 
 import 'package:flutter/painting.dart';
@@ -26,7 +27,7 @@ void main() {
     painter.layout();
     caretOffset = painter.getOffsetForCaret(new ui.TextPosition(offset: text.length), ui.Rect.zero);
     expect(caretOffset.dx, painter.width);
-  });
+  }, skip: io.Platform.isMacOS); // TODO(goderbauer): Disabled because of https://github.com/flutter/flutter/issues/4273
 
   test("TextPainter error test", () {
     TextPainter painter = new TextPainter();

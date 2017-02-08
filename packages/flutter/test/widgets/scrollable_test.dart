@@ -6,14 +6,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
-import 'test_widgets.dart';
-
 Future<Null> pumpTest(WidgetTester tester, TargetPlatform platform) async {
   await tester.pumpWidget(new MaterialApp(
     theme: new ThemeData(
       platform: platform,
     ),
-    home: new TestScrollable(
+    home: new CustomScrollView(
       slivers: <Widget>[
         new SliverToBoxAdapter(child: new SizedBox(height: 2000.0)),
       ],
@@ -32,7 +30,7 @@ double getScrollOffset(WidgetTester tester) {
 
 void resetScrollOffset(WidgetTester tester) {
   RenderViewport2 viewport = tester.renderObject(find.byType(Viewport2));
-  AbsoluteScrollPosition position = viewport.offset;
+  ScrollPosition position = viewport.offset;
   position.jumpTo(0.0);
 }
 

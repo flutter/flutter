@@ -6,14 +6,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-import 'test_widgets.dart';
-
 final Key blockKey = new Key('test');
 
 void main() {
   testWidgets('Cannot scroll a non-overflowing block', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new ScrollView(
+      new ListView(
         key: blockKey,
         children: <Widget>[
           new Container(
@@ -38,7 +36,7 @@ void main() {
 
   testWidgets('Can scroll an overflowing block', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new ScrollView(
+      new ListView(
         key: blockKey,
         children: <Widget>[
           new Container(
@@ -132,15 +130,15 @@ void main() {
       new Container(),
     ]);
 
-    await tester.pumpWidget(new TestScrollable(
+    await tester.pumpWidget(new CustomScrollView(
       slivers: <Widget>[
-        new SliverBlock(
+        new SliverList(
           delegate: delegate,
         ),
       ],
     ));
 
-    final SliverMultiBoxAdaptorElement element = tester.element(find.byType(SliverBlock));
+    final SliverMultiBoxAdaptorElement element = tester.element(find.byType(SliverList));
 
     final double maxScrollOffset = element.estimateMaxScrollOffset(
       null,

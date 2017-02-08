@@ -15,6 +15,7 @@ import 'binding.dart';
 import 'controller.dart';
 import 'finders.dart';
 import 'test_async_utils.dart';
+import 'test_text_input.dart';
 
 export 'package:test/test.dart' hide expect;
 
@@ -398,6 +399,36 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
 
   void _endOfTestVerifications() {
     verifyTickersWereDisposed('at the end of the test');
+  }
+
+  /// Returns the TestTextInput singleton.
+  ///
+  /// Typical app tests will not need to use this value. To add text to widgets
+  /// like [Input] or [TextField], call [enterText].
+  TestTextInput get testTextInput => binding.testTextInput;
+
+  /// Give the EditableText widget specified by [finder] the focus, as if the
+  /// onscreen keyboard had appeared.
+  ///
+  /// Tests that just need to add text to widgets like [Input] or [TextField]
+  /// only need to call [enterText].
+  Future<Null> showKeyboard(Finder finder) async {
+    // TODO(hansmuller): Once find.descendant (#7789) lands replace the following
+    // RHS with state(find.descendant(finder), find.byType(EditableText)).
+    final EditableTextState editable = state(finder);
+    if (editable != binding.focusedEditable) {
+      binding.focusedEditable = editable;
+      await pump();
+    }
+    return null;
+  }
+
+  /// Give the EditableText widget specified by [finder] the focus and
+  /// enter [text] as if it been provided by the onscreen keyboard.
+  Future<Null> enterText(Finder finder, String text) async {
+    await showKeyboard(finder);
+    testTextInput.enterText(text);
+    return null;
   }
 }
 

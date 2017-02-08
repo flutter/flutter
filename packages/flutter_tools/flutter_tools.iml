@@ -7,6 +7,8 @@
       <excludeFolder url="file://$MODULE_DIR$/bin/packages" />
       <excludeFolder url="file://$MODULE_DIR$/build" />
       <excludeFolder url="file://$MODULE_DIR$/packages" />
+      <excludeFolder url="file://$MODULE_DIR$/test/data/dart_dependencies_test/changed_sdk_location/lib/packages" />
+      <excludeFolder url="file://$MODULE_DIR$/test/data/dart_dependencies_test/changed_sdk_location/packages" />
       <excludeFolder url="file://$MODULE_DIR$/test/data/dart_dependencies_test/good/.pub" />
       <excludeFolder url="file://$MODULE_DIR$/test/data/dart_dependencies_test/good/build" />
       <excludeFolder url="file://$MODULE_DIR$/test/data/dart_dependencies_test/good/lib/packages" />
@@ -20,9 +22,8 @@
       <excludeFolder url="file://$MODULE_DIR$/test/data/intellij/plugins/Dart/packages" />
       <excludeFolder url="file://$MODULE_DIR$/test/data/intellij/plugins/packages" />
       <excludeFolder url="file://$MODULE_DIR$/test/data/packages" />
-      <excludeFolder url="file://$MODULE_DIR$/test/data/process_manager/packages" />
-      <excludeFolder url="file://$MODULE_DIR$/test/data/process_manager/replay/packages" />
       <excludeFolder url="file://$MODULE_DIR$/test/packages" />
+      <excludeFolder url="file://$MODULE_DIR$/test/src/base/packages" />
       <excludeFolder url="file://$MODULE_DIR$/test/src/ios/packages" />
       <excludeFolder url="file://$MODULE_DIR$/test/src/packages" />
       <excludeFolder url="file://$MODULE_DIR$/tool/packages" />

@@ -13,6 +13,7 @@ export 'src/foundation/assertions.dart';
 export 'src/foundation/basic_types.dart';
 export 'src/foundation/binding.dart';
 export 'src/foundation/change_notifier.dart';
+export 'src/foundation/debug.dart';
 export 'src/foundation/licenses.dart';
 export 'src/foundation/observer_list.dart';
 export 'src/foundation/platform.dart';

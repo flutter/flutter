@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:convert' show JSON;
 
+import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 
 import '../application_package.dart';
@@ -113,7 +114,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   updateXcodeGeneratedProperties(flutterProjectPath, mode, target);
 
   if (!_checkXcodeVersion())
-    return new XcodeBuildResult(false);
+    return new XcodeBuildResult(success: false);
 
   // Before the build, all service definitions must be updated and the dylibs
   // copied over to a location that is suitable for Xcodebuild to find them.
@@ -174,7 +175,16 @@ Future<XcodeBuildResult> buildXcodeProject({
       printStatus('Xcode\'s output:\n↳');
       printStatus(result.stdout, indent: 4);
     }
-    return new XcodeBuildResult(false, stdout: result.stdout, stderr: result.stderr);
+    return new XcodeBuildResult(
+      success: false,
+      stdout: result.stdout,
+      stderr: result.stderr,
+      xcodeBuildExecution: new XcodeBuildExecution(
+        commands,
+        app.appDirectory,
+        buildForPhysicalDevice: buildForDevice,
+      ),
+    );
   } else {
     // Look for 'clean build/Release-iphoneos/Runner.app'.
     RegExp regexp = new RegExp(r' clean (\S*\.app)$', multiLine: true);
@@ -182,11 +192,11 @@ Future<XcodeBuildResult> buildXcodeProject({
     String outputDir;
     if (match != null)
       outputDir = path.join(app.appDirectory, match.group(1));
-    return new XcodeBuildResult(true, output: outputDir);
+    return new XcodeBuildResult(success:true, output: outputDir);
   }
 }
 
-void diagnoseXcodeBuildFailure(XcodeBuildResult result) {
+Future<Null> diagnoseXcodeBuildFailure(XcodeBuildResult result) async {
   File plistFile = fs.file('ios/Runner/Info.plist');
   if (plistFile.existsSync()) {
     String plistContent = plistFile.readAsStringSync();
@@ -211,15 +221,73 @@ void diagnoseXcodeBuildFailure(XcodeBuildResult result) {
     printError("  open ios/Runner.xcodeproj");
     return;
   }
+  if (result.xcodeBuildExecution != null) {
+    assert(result.xcodeBuildExecution.buildForPhysicalDevice != null);
+    assert(result.xcodeBuildExecution.buildCommands != null);
+    assert(result.xcodeBuildExecution.appDirectory != null);
+    if (result.xcodeBuildExecution.buildForPhysicalDevice &&
+        result.xcodeBuildExecution.buildCommands.contains('build')) {
+      RunResult checkBuildSettings = await runAsync(
+        result.xcodeBuildExecution.buildCommands..add('-showBuildSettings'),
+        workingDirectory: result.xcodeBuildExecution.appDirectory,
+        allowReentrantFlutter: true
+      );
+      // Make sure the user has specified at least the DEVELOPMENT_TEAM (for automatic Xcode 8)
+      // signing or the PROVISIONING_PROFILE (for manual signing or Xcode 7).
+      if (checkBuildSettings.exitCode == 0 &&
+          !checkBuildSettings.stdout?.contains(new RegExp(r'\bDEVELOPMENT_TEAM\b')) == true &&
+          !checkBuildSettings.stdout?.contains(new RegExp(r'\bPROVISIONING_PROFILE\b')) == true) {
+        printError('''
+═══════════════════════════════════════════════════════════════════════════════════
+Building an iOS app requires a selected Development Team with a Provisioning Profile
+Please ensure that a Development Team is selected by:
+  1- Opening the Flutter project's Xcode target with
+       open ios/Runner.xcodeproj
+  2- Select the 'Runner' project in the navigator then the 'Runner' target
+     in the project settings
+  3- In the 'General' tab, make sure a 'Development Team' is selected\n
+For more information, please visit:
+  https://flutter.io/setup/#deploy-to-ios-devices\n
+Or run on an iOS simulator
+═══════════════════════════════════════════════════════════════════════════════════''');
+      }
+    }
+  }
 }
 
 class XcodeBuildResult {
-  XcodeBuildResult(this.success, {this.output, this.stdout, this.stderr});
+  XcodeBuildResult(
+    {
+      @required this.success,
+      this.output,
+      this.stdout,
+      this.stderr,
+      this.xcodeBuildExecution,
+    }
+  );
 
   final bool success;
   final String output;
   final String stdout;
   final String stderr;
+  /// The invocation of the build that resulted in this result instance.
+  final XcodeBuildExecution xcodeBuildExecution;
+}
+
+/// Describes an invocation of a Xcode build command.
+class XcodeBuildExecution {
+  XcodeBuildExecution(
+    this.buildCommands,
+    this.appDirectory,
+    {
+      @required this.buildForPhysicalDevice,
+    }
+  );
+
+  /// The original list of Xcode build commands used to produce this build result.
+  final List<String> buildCommands;
+  final String appDirectory;
+  final bool buildForPhysicalDevice;
 }
 
 final RegExp _xcodeVersionRegExp = new RegExp(r'Xcode (\d+)\..*');

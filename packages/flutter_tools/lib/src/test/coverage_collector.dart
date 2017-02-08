@@ -40,7 +40,7 @@ class CoverageCollector {
     });
 
     printTrace('pid $pid (port $port): collecting coverage data...');
-    final Map<dynamic, dynamic> data = await collect(host.address, port, false, false);
+    final Map<String, dynamic> data = await collect(host.address, port, false, false);
     printTrace('pid $pid (port $port): ${ exitCode != null ? "process terminated prematurely with exit code $exitCode; aborting" : "collected coverage data; merging..." }');
     if (exitCode != null)
       throw new Exception('Failed to collect coverage, process terminated prematurely.');

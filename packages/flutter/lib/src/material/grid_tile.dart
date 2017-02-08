@@ -8,13 +8,13 @@ import 'package:meta/meta.dart';
 
 /// A tile in a material design grid list.
 ///
-/// A grid list is a [ScrollGrid] of tiles in a vertical and horizontal
+/// A grid list is a [GridView] of tiles in a vertical and horizontal
 /// array. Each tile typically contains some visually rich content (e.g., an
 /// image) together with a [GridTileBar] in either a [header] or a [footer].
 ///
 /// See also:
 ///
-///  * [ScrollGrid], which is a scrollable grid of tiles.
+///  * [GridView], which is a scrollable grid of tiles.
 ///  * [GridTileBar], which is typically used in either the [header] or
 ///    [footer].
 ///  * <https://material.google.com/components/grid-lists.html>

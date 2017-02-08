@@ -87,3 +87,46 @@ Support for [cross-repository
 recipes](https://github.com/luci/recipes-py/blob/master/doc/cross_repo.md) is
 in-progress.  If you view the git log of this directory, you'll see we initially
 tried, but it's not quite ready.
+
+# Android Tools
+
+Instructions to update the Android Tools version that the bots download by executing `download_android_tools.py`.
+
+## How to update Android SDK on Google Cloud Storage
+
+1. Run Android SDK Manager and update packages
+   `$ dev/bots/android_tools/sdk/tools/android update sdk`
+   Use `android.bat` on Windows.
+
+2. Choose/Update packages
+   The following packages are currently installed:
+   * Android SDK Tools
+   * Android SDK platform-tools
+   * Android SDK Build-tools 23.0.1
+   * Android 6.0 (API 23)
+     * SDK Platform 23
+   * Extras
+     * Android Support Repository
+     * Google Play services
+
+3. Run upload_android_tools.py -t sdk
+   `$ dev/bots/upload_android_tools.py -t sdk`
+
+## How to update Android NDK on Google Cloud Storage
+
+1. Download a new NDK binary (e.g. android-ndk-r10e-linux-x86_64.bin)
+2. cd dev/bots/android_tools
+   `$ cd dev/bots/android_tools`
+
+3. Remove the old ndk directory
+   `$ rm -rf ndk`
+
+4. Run the new NDK binary file
+   `$ ./android-ndk-r10e-linux-x86_64.bin`
+
+5. Rename the extracted directory to ndk
+   `$ mv android-ndk-r10e ndk`
+
+6. Run upload_android_tools.py -t ndk
+   `$ cd ../..`
+   `$ dev/bots/upload_android_tools.py -t ndk`

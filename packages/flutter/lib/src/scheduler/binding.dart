@@ -157,8 +157,8 @@ abstract class SchedulerBinding extends BindingBase {
     super.initServiceExtensions();
     registerNumericServiceExtension(
       name: 'timeDilation',
-      getter: () => timeDilation,
-      setter: (double value) {
+      getter: () async => timeDilation,
+      setter: (double value) async {
         timeDilation = value;
       }
     );
@@ -439,6 +439,30 @@ abstract class SchedulerBinding extends BindingBase {
   /// Post-frame callbacks cannot be unregistered. They are called exactly once.
   void addPostFrameCallback(FrameCallback callback) {
     _postFrameCallbacks.add(callback);
+  }
+
+  Completer<Null> _nextFrameCompleter;
+
+  /// Returns a Future that completes after the frame completes.
+  ///
+  /// If this is called between frames, a frame is immediately scheduled if
+  /// necessary. If this is called during a frame, the Future completes after
+  /// the current frame.
+  ///
+  /// If the device's screen is currently turned off, this may wait a very long
+  /// time, since frames are not scheduled while the device's screen is turned
+  /// off.
+  Future<Null> get endOfFrame {
+    if (_nextFrameCompleter == null) {
+      if (schedulerPhase == SchedulerPhase.idle)
+        scheduleFrame();
+      _nextFrameCompleter = new Completer<Null>();
+      addPostFrameCallback((Duration timeStamp) {
+        _nextFrameCompleter.complete();
+        _nextFrameCompleter = null;
+      });
+    }
+    return _nextFrameCompleter.future;
   }
 
   /// Whether this scheduler has requested that handleBeginFrame be called soon.

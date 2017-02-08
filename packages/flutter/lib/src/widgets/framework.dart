@@ -30,7 +30,7 @@ abstract class Key {
   /// Construct a [ValueKey<String>] with the given [String].
   ///
   /// This is the simplest way to create keys.
-  factory Key(String value) => new ValueKey<String>(value);
+  const factory Key(String value) = ValueKey<String>;
 
   /// Default constructor, used by subclasses.
   ///
@@ -154,7 +154,7 @@ abstract class GlobalKey<T extends State<StatefulWidget>> extends Key {
   ///
   /// The label is purely for debugging and not used for comparing the identity
   /// of the key.
-  factory GlobalKey({ String debugLabel }) => new LabeledGlobalKey<T>(debugLabel); // the label is purely for debugging purposes and is otherwise ignored
+  const factory GlobalKey({ String debugLabel }) = LabeledGlobalKey<T>._; // the label is purely for debugging purposes and is otherwise ignored
 
   /// Creates a global key without a label.
   ///
@@ -301,6 +301,9 @@ class LabeledGlobalKey<T extends State<StatefulWidget>> extends GlobalKey<T> {
   ///
   /// The label does not affect the key's identity.
   const LabeledGlobalKey(this._debugLabel) : super.constructor();
+
+  // Used for forwarding the constructor from GlobalKey.
+  const LabeledGlobalKey._({ String debugLabel }) : _debugLabel = debugLabel, super.constructor();
 
   final String _debugLabel;
 

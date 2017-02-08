@@ -26,34 +26,25 @@ class ScrollableMetrics {
     @required this.extentBefore,
     @required this.extentInside,
     @required this.extentAfter,
+    @required this.viewportDimension,
   });
 
   /// The quantity of content conceptually "above" the currently visible content
   /// of the viewport in the scrollable. This is the content above the content
   /// described by [extentInside].
-  ///
-  /// The units are in general arbitrary, and decided by the [ScrollPosition]
-  /// that generated the [ScrollableMetrics]. They will be the same units as for
-  /// [extentInside] and [extentAfter].
   final double extentBefore;
 
   /// The quantity of visible content. If [extentBefore] and [extentAfter] are
   /// non-zero, then this is typically the height of the viewport. It could be
   /// less if there is less content visible than the size of the viewport.
-  ///
-  /// The units are in general arbitrary, and decided by the [ScrollPosition]
-  /// that generated the [ScrollableMetrics]. They will be the same units as for
-  /// [extentBefore] and [extentAfter].
   final double extentInside;
 
   /// The quantity of content conceptually "below" the currently visible content
   /// of the viewport in the scrollable. This is the content below the content
   /// described by [extentInside].
-  ///
-  /// The units are in general arbitrary, and decided by the [ScrollPosition]
-  /// that generated the [ScrollableMetrics]. They will be the same units as for
-  /// [extentBefore] and [extentInside].
   final double extentAfter;
+
+  final double viewportDimension;
 
   @override
   String toString() {

@@ -137,4 +137,52 @@ void main() {
       expect(failure.message, contains('Actual: ?:<zero widgets with $customDescription'));
     });
   });
+
+  group('find.descendant', () {
+    testWidgets('finds one descendant', (WidgetTester tester) async {
+      await tester.pumpWidget(new Row(children: <Widget>[
+        new Column(children: <Text>[new Text('foo'), new Text('bar')])
+      ]));
+
+      expect(find.descendant(
+        of: find.widgetWithText(Row, 'foo'),
+        matching: find.text('bar')
+      ), findsOneWidget);
+    });
+
+    testWidgets('finds two descendants with different ancestors', (WidgetTester tester) async {
+      await tester.pumpWidget(new Row(children: <Widget>[
+        new Column(children: <Text>[new Text('foo'), new Text('bar')]),
+        new Column(children: <Text>[new Text('foo'), new Text('bar')]),
+      ]));
+
+      expect(find.descendant(
+        of: find.widgetWithText(Column, 'foo'),
+        matching: find.text('bar')
+      ), findsNWidgets(2));
+    });
+
+    testWidgets('fails with a descriptive message', (WidgetTester tester) async {
+      await tester.pumpWidget(new Row(children: <Widget>[
+        new Column(children: <Text>[new Text('foo')]),
+        new Text('bar')
+      ]));
+
+      TestFailure failure;
+      try {
+        expect(find.descendant(
+          of: find.widgetWithText(Column, 'foo'),
+          matching: find.text('bar')
+        ), findsOneWidget);
+      } catch (e) {
+        failure = e;
+      }
+
+      expect(failure, isNotNull);
+      expect(
+          failure.message,
+          contains('Actual: ?:<zero widgets with text "bar" that has ancestor(s) with type Column with text "foo"')
+        );
+    });
+  });
 }

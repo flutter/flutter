@@ -6,8 +6,29 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:test/test.dart';
 
+import '../common.dart';
+import '../context.dart';
+
 void main() {
-  group('file_system', () {
+  group('ensureDirectoryExists', () {
+    MemoryFileSystem fs;
+
+    setUp(() {
+      fs = new MemoryFileSystem();
+    });
+
+    testUsingContext('recursively creates a directory if it does not exist', () async {
+      ensureDirectoryExists('foo/bar/baz.flx');
+      expect(fs.isDirectorySync('foo/bar'), true);
+    }, overrides: <Type, Generator>{ FileSystem: () => fs } );
+
+    testUsingContext('throws tool exit on failure to create', () async {
+      fs.file('foo').createSync();
+      expect(() => ensureDirectoryExists('foo/bar.flx'), throwsToolExit());
+    }, overrides: <Type, Generator>{ FileSystem: () => fs } );
+  });
+
+  group('copyDirectorySync', () {
     /// Test file_systems.copyDirectorySync() using MemoryFileSystem.
     /// Copies between 2 instances of file systems which is also supported by copyDirectorySync().
     test('test directory copy', () async {

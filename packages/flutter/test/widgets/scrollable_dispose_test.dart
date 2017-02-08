@@ -13,11 +13,11 @@ void main() {
     for (int i = 0; i < 250; i++)
       textWidgets.add(new Text('$i'));
     await tester.pumpWidget(new FlipWidget(
-      left: new ScrollView(children: textWidgets),
+      left: new ListView(children: textWidgets),
       right: new Container()
     ));
 
-    await tester.fling(find.byType(ScrollView), const Offset(0.0, -200.0), 1000.0);
+    await tester.fling(find.byType(ListView), const Offset(0.0, -200.0), 1000.0);
     await tester.pump();
 
     tester.state<FlipWidgetState>(find.byType(FlipWidget)).flip();

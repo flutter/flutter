@@ -6,9 +6,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
 void main() {
-  testWidgets('ScrollView itemExtent control test', (WidgetTester tester) async {
+  testWidgets('ListView itemExtent control test', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new ScrollView(
+      new ListView(
         itemExtent: 200.0,
         children: new List<Widget>.generate(20, (int i) {
           return new Container(
@@ -27,7 +27,7 @@ void main() {
     expect(find.text('3'), findsNothing);
     expect(find.text('4'), findsNothing);
 
-    await tester.scroll(find.byType(ScrollView), const Offset(0.0, -250.0));
+    await tester.scroll(find.byType(ListView), const Offset(0.0, -250.0));
     await tester.pump();
 
     expect(find.text('0'), findsNothing);
@@ -38,7 +38,7 @@ void main() {
     expect(find.text('5'), findsNothing);
     expect(find.text('6'), findsNothing);
 
-    await tester.scroll(find.byType(ScrollView), const Offset(0.0, 200.0));
+    await tester.scroll(find.byType(ListView), const Offset(0.0, 200.0));
     await tester.pump();
 
     expect(find.text('0'), findsOneWidget);
@@ -49,11 +49,11 @@ void main() {
     expect(find.text('5'), findsNothing);
   });
 
-  testWidgets('ScrollView large scroll jump', (WidgetTester tester) async {
+  testWidgets('ListView large scroll jump', (WidgetTester tester) async {
     List<int> log = <int>[];
 
     await tester.pumpWidget(
-      new ScrollView(
+      new ListView(
         itemExtent: 200.0,
         children: new List<Widget>.generate(20, (int i) {
           return new Builder(
@@ -72,7 +72,7 @@ void main() {
     log.clear();
 
     Scrollable2State state = tester.state(find.byType(Scrollable2));
-    AbsoluteScrollPosition position = state.position;
+    ScrollPosition position = state.position;
     position.jumpTo(2025.0);
 
     expect(log, isEmpty);

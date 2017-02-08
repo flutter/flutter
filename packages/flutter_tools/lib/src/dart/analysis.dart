@@ -46,7 +46,9 @@ class AnalysisDriver {
 
   DriverOptions options;
 
-  String get sdkDir => options.dartSdkPath ?? cli_util.getSdkDir().path;
+  String get sdkDir {
+    return options.dartSdkPath ?? path.absolute(cli_util.getSdkDir().path);
+  }
 
   List<AnalysisErrorDescription> analyze(Iterable<File> files) {
     List<AnalysisErrorInfo> infos = _analyze(files);

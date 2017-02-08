@@ -5,6 +5,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:meta/meta.dart';
 
 import 'shrine_data.dart';
 import 'shrine_order.dart';
@@ -17,46 +19,99 @@ const double unitSize = kToolbarHeight;
 final List<Product> _products = new List<Product>.from(allProducts());
 final Map<Product, Order> _shoppingCart = <Product, Order>{};
 
+const int _childrenPerBlock = 8;
+const int _rowsPerBlock = 5;
+
+int _minIndexInRow(int rowIndex) {
+  final int blockIndex = rowIndex ~/ _rowsPerBlock;
+  return const <int>[0, 2, 4, 6, 7][rowIndex % _rowsPerBlock] + blockIndex * _childrenPerBlock;
+}
+
+int _maxIndexInRow(int rowIndex) {
+  final int blockIndex = rowIndex ~/ _rowsPerBlock;
+  return const <int>[1, 3, 5, 6, 7][rowIndex % _rowsPerBlock] + blockIndex * _childrenPerBlock;
+}
+
+int _rowAtIndex(int index) {
+  final int blockCount = index ~/ _childrenPerBlock;
+  return const <int>[0, 0, 1, 1, 2, 2, 3, 4][index - blockCount * _childrenPerBlock] + blockCount * _rowsPerBlock;
+}
+
+int _columnAtIndex(int index) {
+  return const <int>[0, 1, 0, 1, 0, 1, 0, 0][index % _childrenPerBlock];
+}
+
+int _columnSpanAtIndex(int index) {
+  return const <int>[1, 1, 1, 1, 1, 1, 2, 2][index % _childrenPerBlock];
+}
+
 // The Shrine home page arranges the product cards into two columns. The card
 // on every 4th and 5th row spans two columns.
-class ShrineGridDelegate extends GridDelegate {
-  int _rowAtIndex(int index) {
-    final int n = index ~/ 8;
-    return const <int>[0, 0, 1, 1, 2, 2, 3, 4][index - n * 8] + n * 5;
-  }
+class ShrineGridLayout extends SliverGridLayout {
+  const ShrineGridLayout({
+    @required this.rowStride,
+    @required this.columnStride,
+    @required this.tileHeight,
+    @required this.tileWidth,
+  });
 
-  int _columnAtIndex(int index) {
-    return const <int>[0, 1, 0, 1, 0, 1, 0, 0][index % 8];
-  }
+  final double rowStride;
+  final double columnStride;
+  final double tileHeight;
+  final double tileWidth;
 
-  int _columnSpanAtIndex(int index) {
-    return const <int>[1, 1, 1, 1, 1, 1, 2, 2][index % 8];
+  @override
+  int getMinChildIndexForScrollOffset(double scrollOffset) {
+    return _minIndexInRow(scrollOffset ~/ rowStride);
   }
 
   @override
-  GridSpecification getGridSpecification(BoxConstraints constraints, int childCount) {
-    assert(childCount >= 0);
-    return new GridSpecification.fromRegularTiles(
-      tileWidth: constraints.maxWidth / 2.0 - 8.0,
-      // height = ProductPriceItem + product image + VendorItem
-      tileHeight: 40.0 + 144.0 + 40.0,
-      columnCount: 2,
-      rowCount: childCount == 0 ? 0 : _rowAtIndex(childCount - 1) + 1,
-      rowSpacing: 8.0,
-      columnSpacing: 8.0
+  int getMaxChildIndexForScrollOffset(double scrollOffset) {
+    return _maxIndexInRow(scrollOffset ~/ rowStride);
+  }
+
+  @override
+  SliverGridGeometry getGeometryForChildIndex(int index) {
+    final int row = _rowAtIndex(index);
+    final int column = _columnAtIndex(index);
+    final int columnSpan = _columnSpanAtIndex(index);
+    return new SliverGridGeometry(
+      scrollOffset: row * rowStride,
+      crossAxisOffset: column * columnStride,
+      mainAxisExtent: tileHeight,
+      crossAxisExtent: tileWidth + (columnSpan - 1) * columnStride,
     );
   }
 
   @override
-  GridChildPlacement getChildPlacement(GridSpecification specification, int index, Object placementData) {
-    assert(index >= 0);
-    return new GridChildPlacement(
-      column: _columnAtIndex(index),
-      row: _rowAtIndex(index),
-      columnSpan: _columnSpanAtIndex(index),
-      rowSpan: 1
+  double estimateMaxScrollOffset(int childCount) {
+    if (childCount == null)
+      return null;
+    if (childCount == 0)
+      return 0.0;
+    final int rowCount = _rowAtIndex(childCount - 1) + 1;
+    final double rowSpacing = rowStride - tileHeight;
+    return rowStride * rowCount - rowSpacing;
+  }
+}
+
+class ShrineGridDelegate extends SliverGridDelegate {
+  static const double _kSpacing = 8.0;
+
+  @override
+  SliverGridLayout getLayout(SliverConstraints constraints) {
+    final double tileWidth = (constraints.crossAxisExtent - _kSpacing) / 2.0;
+    final double tileHeight = 40.0 + 144.0 + 40.0;
+    return new ShrineGridLayout(
+      tileWidth: tileWidth,
+      tileHeight: tileHeight,
+      rowStride: tileHeight + _kSpacing,
+      columnStride: tileWidth + _kSpacing,
     );
   }
+
+  @override
+  bool shouldRelayout(@checked SliverGridDelegate oldDelegate) => false;
 }
 
 /// Displays the Vendor's name and avatar.
@@ -77,15 +132,15 @@ class VendorItem extends StatelessWidget {
             width: 24.0,
             child: new ClipRRect(
               borderRadius: new BorderRadius.circular(12.0),
-              child: new Image.asset(vendor.avatarAsset, fit: ImageFit.cover)
-            )
+              child: new Image.asset(vendor.avatarAsset, fit: ImageFit.cover),
+            ),
           ),
           new SizedBox(width: 8.0),
           new Expanded(
-            child: new Text(vendor.name, style: ShrineTheme.of(context).vendorItemStyle)
-          )
-        ]
-      )
+            child: new Text(vendor.name, style: ShrineTheme.of(context).vendorItemStyle),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -107,7 +162,7 @@ abstract class PriceItem extends StatelessWidget {
     return new Container(
       padding: padding,
       decoration: decoration,
-      child: new Text(product.priceString, style: style)
+      child: new Text(product.priceString, style: style),
     );
   }
 }
@@ -120,7 +175,7 @@ class ProductPriceItem extends PriceItem {
     return buildItem(
       context,
       ShrineTheme.of(context).priceStyle,
-      const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0)
+      const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
     );
   }
 }
@@ -133,7 +188,7 @@ class FeaturePriceItem extends PriceItem {
     return buildItem(
       context,
       ShrineTheme.of(context).featurePriceStyle,
-      const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0)
+      const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
     );
   }
 }
@@ -180,7 +235,7 @@ class FeatureItem extends StatelessWidget {
       child: new Container(
         decoration: new BoxDecoration(
           backgroundColor: theme.cardBackgroundColor,
-          border: new Border(bottom: new BorderSide(color: theme.dividerColor))
+          border: new Border(bottom: new BorderSide(color: theme.dividerColor)),
         ),
         child: new Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -189,8 +244,8 @@ class FeatureItem extends StatelessWidget {
               height: unitSize,
               child: new Align(
                 alignment: FractionalOffset.topRight,
-                child: new FeaturePriceItem(product: product)
-              )
+                child: new FeaturePriceItem(product: product),
+              ),
             ),
             new Expanded(
               child: new CustomMultiChildLayout(
@@ -205,9 +260,9 @@ class FeatureItem extends StatelessWidget {
                         minHeight: 340.0,
                         maxHeight: 340.0,
                         alignment: FractionalOffset.topRight,
-                        child: new Image.asset(product.imageAsset, fit: ImageFit.cover)
-                      )
-                    )
+                        child: new Image.asset(product.imageAsset, fit: ImageFit.cover),
+                      ),
+                    ),
                   ),
                   new LayoutId(
                     id: FeatureLayout.right,
@@ -218,23 +273,23 @@ class FeatureItem extends StatelessWidget {
                         children: <Widget>[
                           new Padding(
                             padding: const EdgeInsets.only(top: 18.0),
-                            child: new Text(product.featureTitle, style: theme.featureTitleStyle)
+                            child: new Text(product.featureTitle, style: theme.featureTitleStyle),
                           ),
                           new Padding(
                             padding: const EdgeInsets.symmetric(vertical: 16.0),
-                            child: new Text(product.featureDescription, style: theme.featureStyle)
+                            child: new Text(product.featureDescription, style: theme.featureStyle),
                           ),
-                          new VendorItem(vendor: product.vendor)
-                        ]
-                      )
-                    )
-                  )
-                ]
-              )
-            )
-          ]
-        )
-      )
+                          new VendorItem(vendor: product.vendor),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -257,7 +312,7 @@ class ProductItem extends StatelessWidget {
             children: <Widget>[
               new Align(
                 alignment: FractionalOffset.centerRight,
-                child: new ProductPriceItem(product: product)
+                child: new ProductPriceItem(product: product),
               ),
               new Container(
                 width: 144.0,
@@ -265,21 +320,21 @@ class ProductItem extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
                 child: new Hero(
                     tag: product.tag,
-                    child: new Image.asset(product.imageAsset, fit: ImageFit.contain)
-                  )
+                    child: new Image.asset(product.imageAsset, fit: ImageFit.contain),
+                  ),
                 ),
               new Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                child: new VendorItem(vendor: product.vendor)
-              )
-            ]
+                child: new VendorItem(vendor: product.vendor),
+              ),
+            ],
           ),
           new Material(
             type: MaterialType.transparency,
-            child: new InkWell(onTap: onPressed)
+            child: new InkWell(onTap: onPressed),
           ),
-        ]
-      )
+        ],
+      ),
     );
   }
 }
@@ -293,7 +348,7 @@ class ShrineHome extends StatefulWidget {
 
 class _ShrineHomeState extends State<ShrineHome> {
   static final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>(debugLabel: 'Shrine Home');
-  static final GridDelegate gridDelegate = new ShrineGridDelegate();
+  static final ShrineGridDelegate gridDelegate = new ShrineGridDelegate();
 
   Future<Null> showOrderPage(Product product) async {
     final Order order = _shoppingCart[product] ?? new Order(product: product);
@@ -303,7 +358,7 @@ class _ShrineHomeState extends State<ShrineHome> {
         return new OrderPage(
           order: order,
           products: _products,
-          shoppingCart: _shoppingCart
+          shoppingCart: _shoppingCart,
         );
       }
     ));
@@ -319,29 +374,27 @@ class _ShrineHomeState extends State<ShrineHome> {
       scaffoldKey: scaffoldKey,
       products: _products,
       shoppingCart: _shoppingCart,
-      body: new ScrollableViewport(
-        child: new RepaintBoundary(
-          child: new Column(
-            children: <Widget>[
-              new FeatureItem(product: featured),
-              new Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: new CustomGrid(
-                  delegate: gridDelegate,
-                  children: _products.map((Product product) {
-                    return new RepaintBoundary(
-                      child: new ProductItem(
-                        product: product,
-                        onPressed: () { showOrderPage(product); }
-                      )
-                    );
-                  }).toList()
-                )
-              )
-            ]
-          )
-        )
-      )
+      body: new CustomScrollView(
+        slivers: <Widget>[
+          new SliverToBoxAdapter(
+            child: new FeatureItem(product: featured),
+          ),
+          new SliverPadding(
+            padding: const EdgeInsets.all(16.0),
+            child: new SliverGrid(
+              gridDelegate: gridDelegate,
+              delegate: new SliverChildListDelegate(
+                _products.map((Product product) {
+                  return new ProductItem(
+                    product: product,
+                    onPressed: () { showOrderPage(product); },
+                  );
+                }).toList(),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
