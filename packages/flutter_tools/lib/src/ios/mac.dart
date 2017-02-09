@@ -29,8 +29,8 @@ class Xcode {
     _eulaSigned = false;
 
     try {
-      _xcodeSelectPath = runSync(<String>['xcode-select', '--print-path']);
-      if (_xcodeSelectPath == null || _xcodeSelectPath.trim().isEmpty) {
+      _xcodeSelectPath = runSync(<String>['xcode-select', '--print-path'])?.trim();
+      if (_xcodeSelectPath == null || _xcodeSelectPath.isEmpty) {
         _isInstalled = false;
         return;
       }
