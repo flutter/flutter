@@ -23,7 +23,15 @@ class MaskFilter : public ftl::RefCountedThreadSafe<MaskFilter>,
 
  public:
   ~MaskFilter() override;
-  static ftl::RefPtr<MaskFilter> Create(unsigned style, double sigma);
+  static ftl::RefPtr<MaskFilter> CreateBlur(unsigned style, double sigma);
+
+  static ftl::RefPtr<MaskFilter> CreateShadow(double occluderHeight,
+                                              double lightPosX,
+                                              double lightPosY,
+                                              double lightPosZ,
+                                              double lightRadius,
+                                              double ambientAlpha,
+                                              double spotAlpha);
 
   const sk_sp<SkMaskFilter>& filter() { return filter_; }
 
