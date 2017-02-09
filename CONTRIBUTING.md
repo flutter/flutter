@@ -53,7 +53,7 @@ target_os = ["android"]
  * If you're on Mac, install Oracle's Java JDK, version 1.7 or later.
  * If you're on Mac, install `ant`: `brew install ant`
  * If you're planning on working on the [buildroot](https://github.com/flutter/buildroot) repository as well, and have a local checkout of that repository, run the following commands in the `src` directory to update your git remotes accordingly:
- 
+
  ```bash
  git remote rename origin upstream
  git remote add origin git@github.com:<your_name_here>/buildroot.git
@@ -80,9 +80,10 @@ Depending on the platform you choose below, you will need to replace `host_debug
 
 Run the following steps, from the `src` directory created in the steps above:
 
- * `gclient sync` to update your dependencies.
- * `./flutter/tools/gn --android --unoptimized` to prepare your build files.
- * `ninja -C out/android_debug_unopt` to actually build the Android binary.
+* `git pull upstream master` in `src/flutter` to update the Flutter Engine repo.
+* `gclient sync` to update your dependencies.
+* `./flutter/tools/gn --android --unoptimized` to prepare your build files.
+* `ninja -C out/android_debug_unopt` to actually build the Android binary.
 
 This builds a debug-enabled ("unoptimized") binary configured to run Dart in
 checked mode ("debug"). There are other versions, [discussed on the wiki](https://github.com/flutter/flutter/wiki/Flutter's-modes).
@@ -122,6 +123,7 @@ to test the engine.
 ### iOS (cross-compiling from Mac)
 
 * Make sure you have Xcode 7.3.0+ installed.
+* `git pull upstream master` in `src/flutter` to update the Flutter Engine repo.
 * `gclient sync` to update dependencies.
 * `./flutter/tools/gn --ios --unoptimized` to prepare build files.
   * For a discussion on the various flags and modes, [read this discussion](https://github.com/flutter/flutter/wiki/Flutter's-modes).
@@ -138,10 +140,11 @@ Once the artifacts are built, you can start using them in your application by fo
 
 ### Desktop (Mac and Linux), for tests
 
- * `gclient sync` to update your dependencies.
- * `./flutter/tools/gn --unoptimized` to prepare your build files.
- * `ninja -C out/host_debug_unopt` to build a desktop unoptimized binary.
- * `--unoptimized` disables C++ compiler optimizations and does not strip debug symbols. You may skip the flag and invoke `ninja -C out/host_debug` if you would rather have the native components optimized.
+* `git pull upstream master` in `src/flutter` to update the Flutter Engine repo.
+* `gclient sync` to update your dependencies.
+* `./flutter/tools/gn --unoptimized` to prepare your build files.
+* `ninja -C out/host_debug_unopt` to build a desktop unoptimized binary.
+* `--unoptimized` disables C++ compiler optimizations and does not strip debug symbols. You may skip the flag and invoke `ninja -C out/host_debug` if you would rather have the native components optimized.
 
 To run the tests, you'll also need to clone [the main Flutter repository](https://github.com/flutter/flutter).
 See [the instructions for contributing](https://github.com/flutter/flutter/blob/master/CONTRIBUTING.md)
