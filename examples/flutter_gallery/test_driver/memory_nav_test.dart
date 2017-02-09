@@ -19,7 +19,7 @@ void main() {
 
     test('navigation', () async {
       SerializableFinder menuItem = find.text('Text fields');
-      await driver.scrollIntoView(menuItem);
+      await driver.scrollIntoView(menuItem, alignment: 0.5);
       await new Future<Null>.delayed(kWaitBetweenActions);
 
       for (int i = 0; i < 15; i++) {
