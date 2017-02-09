@@ -14,9 +14,12 @@ EchoError() {
 }
 
 AssertExists() {
-  RunCommand ls $1
-  if [ $? -ne 0 ]; then
-    EchoError "The path $1 does not exist"
+  if [[ ! -e "$1" ]]; then
+    if [[ -h "$1" ]]; then
+      EchoError "The path $1 is a symlink to a path that does not exist"
+    else
+      EchoError "The path $1 does not exist"
+    fi
     exit -1
   fi
   return 0
