@@ -127,7 +127,7 @@ class Daemon {
 
     try {
       String method = request['method'];
-      if (method.indexOf('.') == -1)
+      if (!method.contains('.'))
         throw 'method not understood: $method';
 
       String prefix = method.substring(0, method.indexOf('.'));

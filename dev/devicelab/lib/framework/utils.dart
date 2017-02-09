@@ -125,9 +125,9 @@ Future<String> getDartVersion() async {
   //   Dart VM version: 1.17.0-dev.2.0 (Tue May  3 12:14:52 2016) on "macos_x64"
   // to:
   //   1.17.0-dev.2.0
-  if (version.indexOf('(') != -1)
+  if (version.contains('('))
     version = version.substring(0, version.indexOf('(')).trim();
-  if (version.indexOf(':') != -1)
+  if (version.contains(':'))
     version = version.substring(version.indexOf(':') + 1).trim();
 
   return version.replaceAll('"', "'");
