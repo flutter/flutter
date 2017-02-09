@@ -222,7 +222,7 @@ class LazyBlock extends StatelessWidget {
   }
 
   // Warning: keep the dartdoc comments that follow in sync with the copies in
-  // Scrollable, ScrollableGrid, ScrollableViewport, ScrollableList, and
+  // Scrollable, ScrollableViewport, ScrollableList, and
   // ScrollableLazyList. And see: https://github.com/dart-lang/dartdoc/issues/1161.
 
   /// The scroll offset this widget should use when first created.

@@ -375,8 +375,8 @@ typedef double SnapOffsetCallback(double scrollOffset, Size containerSize);
 /// If you have a list of widgets and want them to be able to scroll if there is
 /// insufficient room, consider using [Block].
 ///
-/// Commonly used classes that are based on Scrollable include [ScrollableList],
-/// [ScrollableGrid], and [ScrollableViewport].
+/// Commonly used classes that are based on Scrollable include [ScrollableList]
+/// and [ScrollableViewport].
 ///
 /// Widgets that subclass [Scrollable] typically use state objects that subclass
 /// [ScrollableState].
@@ -400,8 +400,8 @@ class Scrollable extends StatefulWidget {
   }
 
   // Warning: keep the dartdoc comments that follow in sync with the copies in
-  // ScrollableViewport, LazyBlock, ScrollableLazyList, ScrollableList, and
-  // ScrollableGrid. And see: https://github.com/dart-lang/dartdoc/issues/1161.
+  // ScrollableViewport and LazyBlock.
+  // And see: https://github.com/dart-lang/dartdoc/issues/1161.
 
   /// The scroll offset this widget should use when first created.
   final double initialScrollOffset;
@@ -1244,7 +1244,7 @@ class ScrollNotification extends Notification {
 ///
 ///  * [Block], if your single child is a [Column].
 ///  * [ScrollableList], if you have many identically-sized children.
-///  * [ScrollableGrid], if your children are in a grid pattern.
+///  * [GridView], if your children are in a grid pattern.
 ///  * [LazyBlock], if you have many children of varying sizes.
 class ScrollableViewport extends StatelessWidget {
   /// Creates a simple scrolling widget that has a single child.
@@ -1267,8 +1267,8 @@ class ScrollableViewport extends StatelessWidget {
   }
 
   // Warning: keep the dartdoc comments that follow in sync with the copies in
-  // Scrollable, LazyBlock, ScrollableLazyList, ScrollableList, and
-  // ScrollableGrid. And see: https://github.com/dart-lang/dartdoc/issues/1161.
+  // Scrollable, LazyBlock, ScrollableLazyList, and ScrollableList.
+  // And see: https://github.com/dart-lang/dartdoc/issues/1161.
 
   /// The scroll offset this widget should use when first created.
   final double initialScrollOffset;

@@ -55,7 +55,6 @@ export 'src/widgets/scroll_position.dart';
 export 'src/widgets/scroll_simulation.dart';
 export 'src/widgets/scroll_view.dart';
 export 'src/widgets/scrollable.dart';
-export 'src/widgets/scrollable_grid.dart';
 export 'src/widgets/scrollable_list.dart';
 export 'src/widgets/semantics_debugger.dart';
 export 'src/widgets/single_child_scroll_view.dart';
