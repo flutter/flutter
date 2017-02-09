@@ -47,6 +47,7 @@ class InputField extends StatefulWidget {
     this.keyboardType: TextInputType.text,
     this.hintText,
     this.style,
+    this.hintStyle,
     this.obscureText: false,
     this.maxLines: 1,
     this.autofocus: false,
@@ -68,6 +69,12 @@ class InputField extends StatefulWidget {
 
   /// The style to use for the text being edited.
   final TextStyle style;
+
+  /// The style to use for the hint text.
+  ///
+  /// Defaults to the specified TextStyle in style with the hintColor from
+  /// the ThemeData
+  final TextStyle hintStyle;
 
   /// Whether to hide the text being edited (e.g., for passwords).
   ///
@@ -151,7 +158,8 @@ class _InputFieldState extends State<InputField> {
     ];
 
     if (config.hintText != null && value.text.isEmpty) {
-      TextStyle hintStyle = textStyle.copyWith(color: themeData.hintColor);
+      TextStyle hintStyle = config.hintStyle ??
+        textStyle.copyWith(color: themeData.hintColor);
       stackChildren.add(
         new Positioned(
           left: 0.0,
