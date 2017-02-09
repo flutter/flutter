@@ -26,34 +26,34 @@ void handleOnDismissed(DismissDirection direction, int item) {
 Widget buildTest({ double startToEndThreshold }) {
   Widget buildDismissableItem(int item) {
     return new Dismissable(
-        key: new ValueKey<int>(item),
-        direction: dismissDirection,
-        onDismissed: (DismissDirection direction) {
-          handleOnDismissed(direction, item);
-        },
-        onResize: () {
-          handleOnResize(item);
-        },
-        background: background,
-        dismissThresholds: startToEndThreshold == null
-            ? <DismissDirection, double>{}
-            : <DismissDirection, double>{DismissDirection.startToEnd: startToEndThreshold},
-        child: new Container(
-            width: itemExtent,
-            height: itemExtent,
-            child: new Text(item.toString())
-        )
+      key: new ValueKey<int>(item),
+      direction: dismissDirection,
+      onDismissed: (DismissDirection direction) {
+        handleOnDismissed(direction, item);
+      },
+      onResize: () {
+        handleOnResize(item);
+      },
+      background: background,
+      dismissThresholds: startToEndThreshold == null
+          ? <DismissDirection, double>{}
+          : <DismissDirection, double>{DismissDirection.startToEnd: startToEndThreshold},
+      child: new Container(
+        width: itemExtent,
+        height: itemExtent,
+        child: new Text(item.toString())
+      ),
     );
   }
 
   return new Container(
       padding: const EdgeInsets.all(10.0),
       child: new ScrollableList(
-          scrollDirection: scrollDirection,
-          itemExtent: itemExtent,
-          children: <int>[0, 1, 2, 3, 4]
-              .where((int i) => !dismissedItems.contains(i))
-              .map(buildDismissableItem)
+        scrollDirection: scrollDirection,
+        itemExtent: itemExtent,
+        children: <int>[0, 1, 2, 3, 4]
+          .where((int i) => !dismissedItems.contains(i))
+          .map(buildDismissableItem),
       )
   );
 }
@@ -124,8 +124,8 @@ class Test1215DismissableWidget extends StatelessWidget {
       key: new ObjectKey(text),
       child: new AspectRatio(
         aspectRatio: 1.0,
-        child: new Text(this.text)
-      )
+        child: new Text(this.text),
+      ),
     );
   }
 }
@@ -293,10 +293,10 @@ void main() {
         child: new Column(
           children: <Widget>[
             new Test1215DismissableWidget('1'),
-            new Test1215DismissableWidget('2')
-          ]
-        )
-      )
+            new Test1215DismissableWidget('2'),
+          ],
+        ),
+      ),
     ));
     expect(find.text('1'), findsOneWidget);
     expect(find.text('2'), findsOneWidget);
