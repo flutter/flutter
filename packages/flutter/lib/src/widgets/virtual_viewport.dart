@@ -23,8 +23,7 @@ import 'framework.dart';
 ///    the amount of the thing inside the viewport that is visible from outside
 ///    the viewport).
 ///
-/// Used by [ScrollableGrid.onExtentsChanged],
-/// [ScrollableList.onExtentsChanged], etc.
+/// Used by [ScrollableList.onExtentsChanged], etc.
 typedef void ExtentsChangedCallback(double contentExtent, double containerExtent);
 
 /// An abstract widget whose children are not all materialized.

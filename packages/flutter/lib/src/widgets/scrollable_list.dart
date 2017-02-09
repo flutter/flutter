@@ -61,8 +61,8 @@ class ScrollableList extends StatelessWidget {
   }
 
   // Warning: keep the dartdoc comments that follow in sync with the copies in
-  // Scrollable, LazyBlock, ScrollableLazyList, ScrollableViewport, and
-  // ScrollableGrid. And see: https://github.com/dart-lang/dartdoc/issues/1161.
+  // Scrollable, LazyBlock, ScrollableLazyList, ScrollableViewport.
+  // And see: https://github.com/dart-lang/dartdoc/issues/1161.
 
   /// The scroll offset this widget should use when first created.
   final double initialScrollOffset;
@@ -450,8 +450,8 @@ class ScrollableLazyList extends StatelessWidget {
   }
 
   // Warning: keep the dartdoc comments that follow in sync with the copies in
-  // Scrollable, LazyBlock, ScrollableViewport, ScrollableList, and
-  // ScrollableGrid. And see: https://github.com/dart-lang/dartdoc/issues/1161.
+  // Scrollable, LazyBlock, ScrollableViewport, and ScrollableList.
+  // And see: https://github.com/dart-lang/dartdoc/issues/1161.
 
   /// The scroll offset this widget should use when first created.
   final double initialScrollOffset;

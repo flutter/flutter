@@ -55,7 +55,7 @@ Map<MaterialListType, double> kListItemExtent = const <MaterialListType, double>
 ///  * [ScrollableList], on which this widget is based.
 ///  * [TwoLevelList], for lists that have subsections that can collapse and
 ///    expand.
-///  * [ScrollableGrid]
+///  * [GridView]
 ///  * <https://material.google.com/components/lists.html>
 class MaterialList extends StatelessWidget {
   /// Creates a material list.

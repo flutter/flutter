@@ -32,7 +32,6 @@ export 'src/rendering/editable_line.dart';
 export 'src/rendering/error.dart';
 export 'src/rendering/flex.dart';
 export 'src/rendering/flow.dart';
-export 'src/rendering/grid.dart';
 export 'src/rendering/image.dart';
 export 'src/rendering/layer.dart';
 export 'src/rendering/list.dart';
