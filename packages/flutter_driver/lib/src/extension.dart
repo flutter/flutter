@@ -249,7 +249,7 @@ class _FlutterDriverExtension {
     ScrollIntoView scrollIntoViewCommand = command;
     Finder target = await _waitForElement(_createFinder(scrollIntoViewCommand.finder));
     await Scrollable.ensureVisible(target.evaluate().single, duration: const Duration(milliseconds: 100));
-    await Scrollable2.ensureVisible(target.evaluate().single, duration: const Duration(milliseconds: 100));
+    await Scrollable2.ensureVisible(target.evaluate().single, duration: const Duration(milliseconds: 100), alignment: scrollIntoViewCommand.alignment ?? 0.0);
     return new ScrollResult();
   }
 
