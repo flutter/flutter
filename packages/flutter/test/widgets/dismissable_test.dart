@@ -23,31 +23,38 @@ void handleOnDismissed(DismissDirection direction, int item) {
   dismissedItems.add(item);
 }
 
-Widget buildDismissableItem(int item) {
-  return new Dismissable(
-    key: new ValueKey<int>(item),
-    direction: dismissDirection,
-    onDismissed: (DismissDirection direction) { handleOnDismissed(direction, item); },
-    onResize: () { handleOnResize(item); },
-    background: background,
-    child: new Container(
-      width: itemExtent,
-      height: itemExtent,
-      child: new Text(item.toString())
-    )
-  );
-}
+Widget buildTest({ double startToEndThreshold }) {
+  Widget buildDismissableItem(int item) {
+    return new Dismissable(
+        key: new ValueKey<int>(item),
+        direction: dismissDirection,
+        onDismissed: (DismissDirection direction) {
+          handleOnDismissed(direction, item);
+        },
+        onResize: () {
+          handleOnResize(item);
+        },
+        background: background,
+        dismissThresholds: startToEndThreshold == null
+            ? <DismissDirection, double>{}
+            : <DismissDirection, double>{DismissDirection.startToEnd: startToEndThreshold},
+        child: new Container(
+            width: itemExtent,
+            height: itemExtent,
+            child: new Text(item.toString())
+        )
+    );
+  }
 
-Widget widgetBuilder() {
   return new Container(
-    padding: const EdgeInsets.all(10.0),
-    child: new ScrollableList(
-      scrollDirection: scrollDirection,
-      itemExtent: itemExtent,
-      children: <int>[0, 1, 2, 3, 4].where(
-        (int i) => !dismissedItems.contains(i)
-      ).map(buildDismissableItem)
-    )
+      padding: const EdgeInsets.all(10.0),
+      child: new ScrollableList(
+          scrollDirection: scrollDirection,
+          itemExtent: itemExtent,
+          children: <int>[0, 1, 2, 3, 4]
+              .where((int i) => !dismissedItems.contains(i))
+              .map(buildDismissableItem)
+      )
   );
 }
 
@@ -58,7 +65,7 @@ Future<Null> dismissElement(WidgetTester tester, Finder finder, { DismissDirecti
 
   Point downLocation;
   Point upLocation;
-  switch(gestureDirection) {
+  switch (gestureDirection) {
     case DismissDirection.endToStart:
       // getTopRight() returns a point that's just beyond itemWidget's right
       // edge and outside the Dismissable event listener's bounds.
@@ -99,11 +106,11 @@ Future<Null> dismissItem(WidgetTester tester, int item, { DismissDirection gestu
 
   await dismissElement(tester, itemFinder, gestureDirection: gestureDirection);
 
-  await tester.pumpWidget(widgetBuilder()); // start the slide
-  await tester.pumpWidget(widgetBuilder(), const Duration(seconds: 1)); // finish the slide and start shrinking...
-  await tester.pumpWidget(widgetBuilder()); // first frame of shrinking animation
-  await tester.pumpWidget(widgetBuilder(), const Duration(seconds: 1)); // finish the shrinking and call the callback...
-  await tester.pumpWidget(widgetBuilder()); // rebuild after the callback removes the entry
+  await tester.pumpWidget(buildTest()); // start the slide
+  await tester.pumpWidget(buildTest(), const Duration(seconds: 1)); // finish the slide and start shrinking...
+  await tester.pumpWidget(buildTest()); // first frame of shrinking animation
+  await tester.pumpWidget(buildTest(), const Duration(seconds: 1)); // finish the shrinking and call the callback...
+  await tester.pumpWidget(buildTest()); // rebuild after the callback removes the entry
 }
 
 class Test1215DismissableWidget extends StatelessWidget {
@@ -133,7 +140,7 @@ void main() {
     scrollDirection = Axis.vertical;
     dismissDirection = DismissDirection.horizontal;
 
-    await tester.pumpWidget(widgetBuilder());
+    await tester.pumpWidget(buildTest());
     expect(dismissedItems, isEmpty);
 
     await dismissItem(tester, 0, gestureDirection: DismissDirection.startToEnd);
@@ -151,7 +158,7 @@ void main() {
     scrollDirection = Axis.horizontal;
     dismissDirection = DismissDirection.vertical;
 
-    await tester.pumpWidget(widgetBuilder());
+    await tester.pumpWidget(buildTest());
     expect(dismissedItems, isEmpty);
 
     await dismissItem(tester, 0, gestureDirection: DismissDirection.up);
@@ -169,7 +176,7 @@ void main() {
     scrollDirection = Axis.vertical;
     dismissDirection = DismissDirection.endToStart;
 
-    await tester.pumpWidget(widgetBuilder());
+    await tester.pumpWidget(buildTest());
     expect(dismissedItems, isEmpty);
 
     await dismissItem(tester, 0, gestureDirection: DismissDirection.startToEnd);
@@ -187,7 +194,7 @@ void main() {
     scrollDirection = Axis.vertical;
     dismissDirection = DismissDirection.startToEnd;
 
-    await tester.pumpWidget(widgetBuilder());
+    await tester.pumpWidget(buildTest());
     expect(dismissedItems, isEmpty);
 
     await dismissItem(tester, 0, gestureDirection: DismissDirection.endToStart);
@@ -203,7 +210,7 @@ void main() {
     scrollDirection = Axis.horizontal;
     dismissDirection = DismissDirection.up;
 
-    await tester.pumpWidget(widgetBuilder());
+    await tester.pumpWidget(buildTest());
     expect(dismissedItems, isEmpty);
 
     await dismissItem(tester, 0, gestureDirection: DismissDirection.down);
@@ -219,7 +226,7 @@ void main() {
     scrollDirection = Axis.horizontal;
     dismissDirection = DismissDirection.down;
 
-    await tester.pumpWidget(widgetBuilder());
+    await tester.pumpWidget(buildTest());
     expect(dismissedItems, isEmpty);
 
     await dismissItem(tester, 0, gestureDirection: DismissDirection.up);
@@ -227,6 +234,22 @@ void main() {
     expect(dismissedItems, isEmpty);
 
     await dismissItem(tester, 0, gestureDirection: DismissDirection.down);
+    expect(find.text('0'), findsNothing);
+    expect(dismissedItems, equals(<int>[0]));
+  });
+
+  testWidgets('drag-left has no effect on dismissable with a high dismiss threshold', (WidgetTester tester) async {
+    scrollDirection = Axis.vertical;
+    dismissDirection = DismissDirection.horizontal;
+
+    await tester.pumpWidget(buildTest(startToEndThreshold: 1.0));
+    expect(dismissedItems, isEmpty);
+
+    await dismissItem(tester, 0, gestureDirection: DismissDirection.startToEnd);
+    expect(find.text('0'), findsOneWidget);
+    expect(dismissedItems, isEmpty);
+
+    await dismissItem(tester, 0, gestureDirection: DismissDirection.endToStart);
     expect(find.text('0'), findsNothing);
     expect(dismissedItems, equals(<int>[0]));
   });
@@ -241,22 +264,22 @@ void main() {
     scrollDirection = Axis.horizontal;
     dismissDirection = DismissDirection.down;
 
-    await tester.pumpWidget(widgetBuilder());
+    await tester.pumpWidget(buildTest());
     Point location = tester.getTopLeft(find.text('0'));
     Offset offset = const Offset(0.0, 5.0);
     TestGesture gesture = await tester.startGesture(location, pointer: 5);
     await gesture.moveBy(offset);
-    await tester.pumpWidget(widgetBuilder());
+    await tester.pumpWidget(buildTest());
     await gesture.moveBy(offset);
-    await tester.pumpWidget(widgetBuilder());
+    await tester.pumpWidget(buildTest());
     await gesture.moveBy(offset);
-    await tester.pumpWidget(widgetBuilder());
+    await tester.pumpWidget(buildTest());
     await gesture.moveBy(offset);
-    await tester.pumpWidget(widgetBuilder());
+    await tester.pumpWidget(buildTest());
     await gesture.up();
   });
 
-  // This one is for a case where dssmissing a widget above a previously
+  // This one is for a case where dismissing a widget above a previously
   // dismissed widget threw an exception, which was documented at the
   // now-obsolete URL https://github.com/flutter/engine/issues/1215 (the URL
   // died in the migration to the new repo). Don't copy this test; it doesn't
@@ -294,7 +317,7 @@ void main() {
     dismissDirection = DismissDirection.horizontal;
     background = new Text('background');
 
-    await tester.pumpWidget(widgetBuilder());
+    await tester.pumpWidget(buildTest());
     expect(dismissedItems, isEmpty);
 
     Finder itemFinder = find.text('0');

@@ -79,7 +79,8 @@ class Dismissable extends StatefulWidget {
     this.onResize,
     this.onDismissed,
     this.direction: DismissDirection.horizontal,
-    this.resizeDuration: const Duration(milliseconds: 300)
+    this.resizeDuration: const Duration(milliseconds: 300),
+    this.dismissThresholds: const <DismissDirection, double>{},
   }) : super(key: key) {
     assert(key != null);
     assert(secondaryBackground != null ? background != null : true);
@@ -112,6 +113,14 @@ class Dismissable extends StatefulWidget {
   /// If null, the widget will not contract and [onDismissed] will be called
   /// immediately after the the widget is dismissed.
   final Duration resizeDuration;
+
+  /// The offset threshold the item has to be dragged in order to be considered dismissed.
+  ///
+  /// Represented as a fraction, e.g. if it is 0.4, then the item has to be dragged at least
+  /// 40% towards one direction to be considered dismissed. Clients can define different
+  /// thresholds for each dismiss direction. This allows for use cases where item can be
+  /// dismissed to end but not to start.
+  final Map<DismissDirection, double> dismissThresholds;
 
   @override
   _DismissableState createState() => new _DismissableState();
@@ -195,6 +204,10 @@ class _DismissableState extends State<Dismissable> with TickerProviderStateMixin
     return _dragExtent > 0 ? DismissDirection.down : DismissDirection.up;
   }
 
+  double get _dismissThreshold {
+    return config.dismissThresholds[_dismissDirection] ?? _kDismissThreshold;
+  }
+
   bool get _isActive {
     return _dragUnderway || _moveController.isAnimating;
   }
@@ -262,6 +275,9 @@ class _DismissableState extends State<Dismissable> with TickerProviderStateMixin
   }
 
   bool _isFlingGesture(Velocity velocity) {
+    // Cannot fling an item if it cannot be dismissed by drag.
+    if (_dismissThreshold >= 1.0)
+      return false;
     final double vx = velocity.pixelsPerSecond.dx;
     final double vy = velocity.pixelsPerSecond.dy;
     if (_directionIsXAxis) {
@@ -299,7 +315,7 @@ class _DismissableState extends State<Dismissable> with TickerProviderStateMixin
       final double flingVelocity = _directionIsXAxis ? details.velocity.pixelsPerSecond.dx : details.velocity.pixelsPerSecond.dy;
       _dragExtent = flingVelocity.sign;
       _moveController.fling(velocity: flingVelocity.abs() * _kFlingVelocityScale);
-    } else if (_moveController.value > _kDismissThreshold) {
+    } else if (_moveController.value > _dismissThreshold) {
       _moveController.forward();
     } else {
       _moveController.reverse();
