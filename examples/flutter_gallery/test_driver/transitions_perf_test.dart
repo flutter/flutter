@@ -12,14 +12,6 @@ import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 
 // Warning: this list must be kept in sync with the value of
-// kAllGalleryItems.map((GalleryItem item) => item.category)).toList();
-final List<String> demoCategories = <String>[
-  'Demos',
-  'Components',
-  'Style'
-];
-
-// Warning: this list must be kept in sync with the value of
 // kAllGalleryItems.map((GalleryItem item) => item.title).toList();
 final List<String> demoTitles = <String>[
   // Demos
@@ -148,17 +140,12 @@ void main() {
 
     test('all demos', () async {
       Timeline timeline = await driver.traceAction(() async {
-        // Expand the demo category submenus.
-        for (String category in demoCategories.reversed) {
-          await driver.tap(find.text(category));
-          await new Future<Null>.delayed(kWaitBetweenActions);
-        }
         // Scroll each demo menu item into view, launch the demo and
         // return to the demo menu 2x.
         for(String demoTitle in demoTitles) {
           print('Testing "$demoTitle" demo');
           SerializableFinder menuItem = find.text(demoTitle);
-          await driver.scrollIntoView(menuItem);
+          await driver.scrollIntoView(menuItem, alignment: 0.5);
           await new Future<Null>.delayed(kWaitBetweenActions);
 
           for(int i = 0; i < 2; i += 1) {
