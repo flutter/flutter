@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Copyright 2016 The Chromium Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -60,11 +60,11 @@ BuildApp() {
   RunCommand mkdir -p -- "$derived_dir"
   AssertExists "$derived_dir"
 
-  RunCommand rm -f -- "${derived_dir}/Flutter.framework"
+  RunCommand rm -rf -- "${derived_dir}/Flutter.framework"
   RunCommand rm -f -- "${derived_dir}/app.dylib"
   RunCommand rm -f -- "${derived_dir}/app.flx"
-  RunCommand cp -r -- "${framework_path}/Flutter.framework ${derived_dir}"
-  RunCommand pushd "${project_path}"
+  RunCommand cp -r -- "${framework_path}/Flutter.framework" "${derived_dir}"
+  RunCommand pushd "${project_path}" > /dev/null
 
   AssertExists "${target_path}"
 
@@ -96,7 +96,7 @@ BuildApp() {
 
     RunCommand cp -f -- "${build_dir}/aot/app.dylib" "${derived_dir}/app.dylib"
   else
-    RunCommand eval "$(echo \"static const int Moo = 88;\" | xcrun clang -x c --shared -o "${derived_dir}/app.dylib" -)"
+    RunCommand eval "$(echo "static const int Moo = 88;" | xcrun clang -x c --shared -o "${derived_dir}/app.dylib" -)"
   fi
 
   local precompilation_flag=""
@@ -118,7 +118,7 @@ BuildApp() {
     exit -1
   fi
 
-  RunCommand popd
+  RunCommand popd > /dev/null
 
   echo "Project ${project_path} built and packaged successfully."
   return 0
@@ -138,11 +138,11 @@ GetFrameworkExecutablePath() {
 LipoExecutable() {
   local executable="$1"
   shift
-  local archs="$@"
+  local archs=("$@")
 
   # Extract architecture-specific framework executables.
   local all_executables=()
-  for arch in $archs; do
+  for arch in "${archs[@]}"; do
     local output="${executable}_${arch}"
     local lipo_info="$(lipo -info "${executable}")"
     if [[ "${lipo_info}" == "Non-fat file:"* ]]; then
@@ -177,11 +177,11 @@ LipoExecutable() {
 ThinFramework() {
   local framework_dir="$1"
   shift
-  local archs="$@"
+  local archs=("$@")
 
   local plist_path="${framework_dir}/Info.plist"
   local executable="$(GetFrameworkExecutablePath "${framework_dir}")"
-  LipoExecutable "${executable}" "$archs"
+  LipoExecutable "${executable}" "${archs[@]}"
 }
 
 ThinAppFrameworks() {
@@ -195,6 +195,8 @@ ThinAppFrameworks() {
 }
 
 # Main entry point.
+
+# TODO(cbracken) improve error handling, then enable set -e
 
 if [[ $# == 0 ]]; then
   # Backwards-comptibility: if no args are provided, build.
