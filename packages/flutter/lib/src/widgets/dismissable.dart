@@ -80,7 +80,7 @@ class Dismissable extends StatefulWidget {
     this.onDismissed,
     this.direction: DismissDirection.horizontal,
     this.resizeDuration: const Duration(milliseconds: 300),
-    this.dismissThresholds: const <DismissDirection, double>{}
+    this.dismissThresholds: const <DismissDirection, double>{},
   }) : super(key: key) {
     assert(key != null);
     assert(secondaryBackground != null ? background != null : true);
@@ -116,7 +116,7 @@ class Dismissable extends StatefulWidget {
 
   /// The offset threshold the item has to be dragged in order to be considered dismissed.
   ///
-  /// Represented as a percentage. I.e. if it is 0.4, then the item has to be dragged at least
+  /// Represented as a fraction, e.g. if it is 0.4, then the item has to be dragged at least
   /// 40% towards one direction to be considered dismissed. Clients can define different
   /// thresholds for each dismiss direction. This allows for use cases where item can be
   /// dismissed to end but not to start.
@@ -276,9 +276,8 @@ class _DismissableState extends State<Dismissable> with TickerProviderStateMixin
 
   bool _isFlingGesture(Velocity velocity) {
     // Cannot fling an item if it cannot be dismissed by drag.
-    if (_dismissThreshold >= 1) {
+    if (_dismissThreshold >= 1.0)
       return false;
-    }
     final double vx = velocity.pixelsPerSecond.dx;
     final double vy = velocity.pixelsPerSecond.dy;
     if (_directionIsXAxis) {
