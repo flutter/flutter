@@ -87,7 +87,7 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
       }
     } else {
       xcodeStatus = ValidationType.missing;
-      if ((xcode.xcodeSelectPath ?? '').isEmpty) {
+      if (xcode.xcodeSelectPath == null || xcode.xcodeSelectPath.isEmpty) {
         messages.add(new ValidationMessage.error(
             'Xcode not installed; this is necessary for iOS development.\n'
             'Download at https://developer.apple.com/xcode/download/.'
