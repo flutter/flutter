@@ -75,6 +75,8 @@ abstract class RenderSliverBoxChildManager {
   /// the child list after this function returns.
   void didAdoptChild(RenderBox child);
 
+  void setDidUnderflow(bool value);
+
   /// In debug mode, asserts that this manager is not expecting any
   /// modifications to the [RenderSliverMultiBoxAdaptor]'s child list.
   ///
@@ -174,6 +176,7 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
         firstChildParentData.layoutOffset = scrollOffset;
         result = true;
       } else {
+        childManager.setDidUnderflow(true);
         result = false;
       }
     });
@@ -206,6 +209,7 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
       firstChild.layout(childConstraints, parentUsesSize: parentUsesSize);
       return firstChild;
     }
+    childManager.setDidUnderflow(true);
     return null;
   }
 
@@ -238,6 +242,7 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
       child.layout(childConstraints, parentUsesSize: parentUsesSize);
       return child;
     }
+    childManager.setDidUnderflow(true);
     return null;
   }
 

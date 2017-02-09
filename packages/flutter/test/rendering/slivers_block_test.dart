@@ -59,6 +59,9 @@ class TestRenderSliverBoxChildManager extends RenderSliverBoxChildManager {
     final SliverMultiBoxAdaptorParentData childParentData = child.parentData;
     childParentData.index = _currentlyUpdatingChildIndex;
   }
+
+  @override
+  void setDidUnderflow(bool value) { }
 }
 
 void main() {

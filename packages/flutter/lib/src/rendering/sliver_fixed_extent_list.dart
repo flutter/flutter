@@ -21,6 +21,7 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
   @override
   void performLayout() {
     assert(childManager.debugAssertChildListLocked());
+    childManager.setDidUnderflow(false);
 
     final double itemExtent = this.itemExtent;
     double indexToScrollOffset(int index) => itemExtent * index;

@@ -89,4 +89,55 @@ void main() {
     expect(log, equals(<int>[4, 5, 6, 7]));
     log.clear();
   });
+
+  testWidgets('ListView can build out of underflow', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new ListView(
+        itemExtent: 100.0,
+      ),
+    );
+
+    expect(find.text('0'), findsNothing);
+    expect(find.text('1'), findsNothing);
+    expect(find.text('2'), findsNothing);
+    expect(find.text('3'), findsNothing);
+    expect(find.text('4'), findsNothing);
+    expect(find.text('5'), findsNothing);
+
+    await tester.pumpWidget(
+      new ListView(
+        itemExtent: 100.0,
+        children: new List<Widget>.generate(2, (int i) {
+          return new Container(
+            child: new Text('$i'),
+          );
+        }),
+      ),
+    );
+
+    expect(find.text('0'), findsOneWidget);
+    expect(find.text('1'), findsOneWidget);
+    expect(find.text('2'), findsNothing);
+    expect(find.text('3'), findsNothing);
+    expect(find.text('4'), findsNothing);
+    expect(find.text('5'), findsNothing);
+
+    await tester.pumpWidget(
+      new ListView(
+        itemExtent: 100.0,
+        children: new List<Widget>.generate(5, (int i) {
+          return new Container(
+            child: new Text('$i'),
+          );
+        }),
+      ),
+    );
+
+    expect(find.text('0'), findsOneWidget);
+    expect(find.text('1'), findsOneWidget);
+    expect(find.text('2'), findsOneWidget);
+    expect(find.text('3'), findsOneWidget);
+    expect(find.text('4'), findsOneWidget);
+    expect(find.text('5'), findsNothing);
+  });
 }

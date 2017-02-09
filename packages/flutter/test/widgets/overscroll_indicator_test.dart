@@ -197,6 +197,29 @@ void main() {
     expect(painter, doesNotOverscroll);
   });
 
+  testWidgets('Nested overscrolls do not throw exceptions', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new PageView(
+        children: <Widget>[
+          new ListView(
+            children: <Widget>[
+              new Container(
+                width: 2000.0,
+                height: 2000.0,
+                decoration: new BoxDecoration(
+                  backgroundColor: const Color(0xFF00FF00),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+
+    await tester.scrollAt(const Point(100.0, 100.0), const Offset(0.0, 2000.0));
+    await tester.pumpUntilNoTransientCallbacks();
+  });
+
   testWidgets('Changing settings', (WidgetTester tester) async {
     RenderObject painter;
 
