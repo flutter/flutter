@@ -154,7 +154,7 @@ abstract class GlobalKey<T extends State<StatefulWidget>> extends Key {
   ///
   /// The label is purely for debugging and not used for comparing the identity
   /// of the key.
-  const factory GlobalKey({ String debugLabel }) = LabeledGlobalKey<T>._; // the label is purely for debugging purposes and is otherwise ignored
+  factory GlobalKey({ String debugLabel }) = LabeledGlobalKey<T>._; // the label is purely for debugging purposes and is otherwise ignored
 
   /// Creates a global key without a label.
   ///
