@@ -333,7 +333,7 @@ Dart_Isolate IsolateCreateCallback(const char* script_uri,
 }
 
 Dart_Handle GetVMServiceAssetsArchiveCallback() {
-#if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_RELEASE || defined(OS_FUCHSIA)
+#if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_RELEASE
   return nullptr;
 #else   // FLUTTER_RUNTIME_MODE
   return tonic::DartConverter<tonic::Uint8List>::ToDart(
