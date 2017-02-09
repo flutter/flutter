@@ -6,7 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-final Key blockKey = new Key('test');
+final Key blockKey = const Key('test');
 
 void main() {
   testWidgets('Cannot scroll a non-overflowing block', (WidgetTester tester) async {

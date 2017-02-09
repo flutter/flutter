@@ -27,7 +27,7 @@ void main() {
   });
 
   testWidgets('Can change position data', (WidgetTester tester) async {
-    Key key = new Key('container');
+    Key key = const Key('container');
 
     await tester.pumpWidget(
       new Stack(
@@ -82,7 +82,7 @@ void main() {
   });
 
   testWidgets('Can remove parent data', (WidgetTester tester) async {
-    Key key = new Key('container');
+    Key key = const Key('container');
     Container container = new Container(key: key, width: 10.0, height: 10.0);
 
     await tester.pumpWidget(new Stack(children: <Widget>[ new Positioned(left: 10.0, child: container) ]));
@@ -110,8 +110,8 @@ void main() {
   });
 
   testWidgets('Can align non-positioned children', (WidgetTester tester) async {
-    Key child0Key = new Key('child0');
-    Key child1Key = new Key('child1');
+    Key child0Key = const Key('child0');
+    Key child1Key = const Key('child1');
 
     await tester.pumpWidget(
       new Center(
@@ -173,7 +173,7 @@ void main() {
   });
 
   testWidgets('Can hit test an IndexedStack', (WidgetTester tester) async {
-    Key key = new Key('indexedStack');
+    Key key = const Key('indexedStack');
     int itemCount = 3;
     List<int> itemsTapped;
 
@@ -197,7 +197,7 @@ void main() {
   });
 
   testWidgets('Can set width and height', (WidgetTester tester) async {
-    Key key = new Key('container');
+    Key key = const Key('container');
 
     BoxDecoration kBoxDecoration = const BoxDecoration(
       backgroundColor: const Color(0xFF00FF00)

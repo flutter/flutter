@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 
 void main() {
   testWidgets('PageStorage read and write', (WidgetTester tester) async {
-    final Key builderKey = new Key('builderKey');
+    final Key builderKey = const Key('builderKey');
     StateSetter setState;
     int storedValue = 0;
 
@@ -56,7 +56,7 @@ void main() {
       );
     }
 
-    Key key = new Key('Key one');
+    Key key = const Key('Key one');
     await tester.pumpWidget(buildWidthKey(key));
     Element builderElement = tester.element(find.byKey(key));
     expect(PageStorage.of(builderElement), isNotNull);
@@ -65,7 +65,7 @@ void main() {
 
     // New StatefulBuilder widget - different key - but the same PageStorage identifier.
 
-    key = new Key('Key two');
+    key = const Key('Key two');
     await tester.pumpWidget(buildWidthKey(key));
     builderElement = tester.element(find.byKey(key));
     expect(PageStorage.of(builderElement), isNotNull);

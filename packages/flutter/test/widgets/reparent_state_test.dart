@@ -199,7 +199,7 @@ void main() {
       itemExtent: 100.0,
       children: <Widget>[
         new Container(
-          key: new Key('container'),
+          key: const Key('container'),
           height: 100.0,
           child: new StateMarker(key: key),
         ),

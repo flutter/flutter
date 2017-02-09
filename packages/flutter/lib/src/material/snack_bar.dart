@@ -232,7 +232,7 @@ class SnackBar extends StatelessWidget {
         child: new Semantics(
           container: true,
           child: new Dismissable(
-            key: new Key('dismissable'),
+            key: const Key('dismissable'),
             direction: DismissDirection.down,
             resizeDuration: null,
             onDismissed: (DismissDirection direction) {

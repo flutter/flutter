@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Drawer control test', (WidgetTester tester) async {
-    final Key containerKey = new Key('container');
+    final Key containerKey = const Key('container');
 
     await tester.pumpWidget(
       new Scaffold(

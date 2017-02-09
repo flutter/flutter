@@ -8,10 +8,10 @@ import 'package:flutter/widgets.dart';
 
 void main() {
   testWidgets('Column with one flexible child', (WidgetTester tester) async {
-    final Key columnKey = new Key('column');
-    final Key child0Key = new Key('child0');
-    final Key child1Key = new Key('child1');
-    final Key child2Key = new Key('child2');
+    final Key columnKey = const Key('column');
+    final Key child0Key = const Key('child0');
+    final Key child1Key = const Key('child1');
+    final Key child2Key = const Key('child2');
 
     // Default is MainAxisSize.max so the Column should be as high as the test: 600.
     // Default is MainAxisAlignment.start so children so the children's
@@ -54,10 +54,10 @@ void main() {
   });
 
   testWidgets('Column with default main axis parameters', (WidgetTester tester) async {
-    final Key columnKey = new Key('column');
-    final Key child0Key = new Key('child0');
-    final Key child1Key = new Key('child1');
-    final Key child2Key = new Key('child2');
+    final Key columnKey = const Key('column');
+    final Key child0Key = const Key('child0');
+    final Key child1Key = const Key('child1');
+    final Key child2Key = const Key('child2');
 
     // Default is MainAxisSize.max so the Column should be as high as the test: 600.
     // Default is MainAxisAlignment.start so children so the children's
@@ -100,9 +100,9 @@ void main() {
   });
 
   testWidgets('Column with MainAxisAlignment.center', (WidgetTester tester) async {
-    final Key columnKey = new Key('column');
-    final Key child0Key = new Key('child0');
-    final Key child1Key = new Key('child1');
+    final Key columnKey = const Key('column');
+    final Key child0Key = const Key('child0');
+    final Key child1Key = const Key('child1');
 
     // Default is MainAxisSize.max so the Column should be as high as the test: 600.
     // The 100x100 children's top edges should be at 200, 300
@@ -138,10 +138,10 @@ void main() {
   });
 
   testWidgets('Column with MainAxisAlignment.end', (WidgetTester tester) async {
-    final Key columnKey = new Key('column');
-    final Key child0Key = new Key('child0');
-    final Key child1Key = new Key('child1');
-    final Key child2Key = new Key('child2');
+    final Key columnKey = const Key('column');
+    final Key child0Key = const Key('child0');
+    final Key child1Key = const Key('child1');
+    final Key child2Key = const Key('child2');
 
     // Default is MainAxisSize.max so the Column should be as high as the test: 600.
     // The 100x100 children's top edges should be at 300, 400, 500.
@@ -184,10 +184,10 @@ void main() {
   });
 
   testWidgets('Column with MainAxisAlignment.spaceBetween', (WidgetTester tester) async {
-    final Key columnKey = new Key('column');
-    final Key child0Key = new Key('child0');
-    final Key child1Key = new Key('child1');
-    final Key child2Key = new Key('child2');
+    final Key columnKey = const Key('column');
+    final Key child0Key = const Key('child0');
+    final Key child1Key = const Key('child1');
+    final Key child2Key = const Key('child2');
 
     // Default is MainAxisSize.max so the Column should be as high as the test: 600.
     // The 100x100 children's top edges should be at 0, 250, 500
@@ -230,11 +230,11 @@ void main() {
   });
 
   testWidgets('Column with MainAxisAlignment.spaceAround', (WidgetTester tester) async {
-    final Key columnKey = new Key('column');
-    final Key child0Key = new Key('child0');
-    final Key child1Key = new Key('child1');
-    final Key child2Key = new Key('child2');
-    final Key child3Key = new Key('child3');
+    final Key columnKey = const Key('column');
+    final Key child0Key = const Key('child0');
+    final Key child1Key = const Key('child1');
+    final Key child2Key = const Key('child2');
+    final Key child3Key = const Key('child3');
 
     // Default is MainAxisSize.max so the Column should be as high as the test: 600.
     // The 100x100 children's top edges should be at 25, 175, 325, 475
@@ -284,10 +284,10 @@ void main() {
   });
 
   testWidgets('Column with MainAxisAlignment.spaceEvenly', (WidgetTester tester) async {
-    final Key columnKey = new Key('column');
-    final Key child0Key = new Key('child0');
-    final Key child1Key = new Key('child1');
-    final Key child2Key = new Key('child2');
+    final Key columnKey = const Key('column');
+    final Key child0Key = const Key('child0');
+    final Key child1Key = const Key('child1');
+    final Key child2Key = const Key('child2');
 
     // Default is MainAxisSize.max so the Column should be as high as the test: 600.
     // The 100x20 children's top edges should be at 135, 290, 445
@@ -330,7 +330,7 @@ void main() {
   });
 
   testWidgets('Column and MainAxisSize.min', (WidgetTester tester) async {
-    final Key flexKey = new Key('flexKey');
+    final Key flexKey = const Key('flexKey');
 
     // Default is MainAxisSize.max so the Column should be as high as the test: 600.
     await tester.pumpWidget(new Center(
@@ -363,7 +363,7 @@ void main() {
   });
 
   testWidgets('Column MainAxisSize.min layout at zero size', (WidgetTester tester) async {
-    final Key childKey = new Key('childKey');
+    final Key childKey = const Key('childKey');
 
     await tester.pumpWidget(new Center(
       child: new Container(

@@ -45,7 +45,7 @@ void main() {
     expect(realOffset(), equals(controller.offset));
 
     await tester.pumpWidget(new ListView(
-      key: new Key('second'),
+      key: const Key('second'),
       controller: controller,
       children: kStates.map<Widget>((String state) {
         return new Container(
@@ -66,7 +66,7 @@ void main() {
     ScrollController controller2 = new ScrollController();
 
     await tester.pumpWidget(new ListView(
-      key: new Key('second'),
+      key: const Key('second'),
       controller: controller2,
       children: kStates.map<Widget>((String state) {
         return new Container(
@@ -84,7 +84,7 @@ void main() {
     expect(() => controller.animateTo(132.0, duration: const Duration(milliseconds: 300), curve: Curves.ease), throws);
 
     await tester.pumpWidget(new ListView(
-      key: new Key('second'),
+      key: const Key('second'),
       controller: controller2,
       physics: const BouncingScrollPhysics(),
       children: kStates.map<Widget>((String state) {

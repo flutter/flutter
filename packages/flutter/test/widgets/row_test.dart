@@ -8,10 +8,10 @@ import 'package:flutter/widgets.dart';
 
 void main() {
   testWidgets('Row with one Flexible child', (WidgetTester tester) async {
-    final Key rowKey = new Key('row');
-    final Key child0Key = new Key('child0');
-    final Key child1Key = new Key('child1');
-    final Key child2Key = new Key('child2');
+    final Key rowKey = const Key('row');
+    final Key child0Key = const Key('child0');
+    final Key child1Key = const Key('child1');
+    final Key child2Key = const Key('child2');
 
     // Default is MainAxisSize.max so the Row should be as wide as the test: 800.
     // Default is MainAxisAlignment.start so children so the children's
@@ -54,10 +54,10 @@ void main() {
   });
 
   testWidgets('Row with default main axis parameters', (WidgetTester tester) async {
-    final Key rowKey = new Key('row');
-    final Key child0Key = new Key('child0');
-    final Key child1Key = new Key('child1');
-    final Key child2Key = new Key('child2');
+    final Key rowKey = const Key('row');
+    final Key child0Key = const Key('child0');
+    final Key child1Key = const Key('child1');
+    final Key child2Key = const Key('child2');
 
     // Default is MainAxisSize.max so the Row should be as wide as the test: 800.
     // Default is MainAxisAlignment.start so children so the children's
@@ -100,9 +100,9 @@ void main() {
   });
 
   testWidgets('Row with MainAxisAlignment.center', (WidgetTester tester) async {
-    final Key rowKey = new Key('row');
-    final Key child0Key = new Key('child0');
-    final Key child1Key = new Key('child1');
+    final Key rowKey = const Key('row');
+    final Key child0Key = const Key('child0');
+    final Key child1Key = const Key('child1');
 
     // Default is MainAxisSize.max so the Row should be as wide as the test: 800.
     // The 100x100 children's left edges should be at 300, 400
@@ -138,10 +138,10 @@ void main() {
   });
 
   testWidgets('Row with MainAxisAlignment.end', (WidgetTester tester) async {
-    final Key rowKey = new Key('row');
-    final Key child0Key = new Key('child0');
-    final Key child1Key = new Key('child1');
-    final Key child2Key = new Key('child2');
+    final Key rowKey = const Key('row');
+    final Key child0Key = const Key('child0');
+    final Key child1Key = const Key('child1');
+    final Key child2Key = const Key('child2');
 
     // Default is MainAxisSize.max so the Row should be as wide as the test: 800.
     // The 100x100 children's left edges should be at 500, 600, 700.
@@ -184,10 +184,10 @@ void main() {
   });
 
   testWidgets('Row with MainAxisAlignment.spaceBetween', (WidgetTester tester) async {
-    final Key rowKey = new Key('row');
-    final Key child0Key = new Key('child0');
-    final Key child1Key = new Key('child1');
-    final Key child2Key = new Key('child2');
+    final Key rowKey = const Key('row');
+    final Key child0Key = const Key('child0');
+    final Key child1Key = const Key('child1');
+    final Key child2Key = const Key('child2');
 
     // Default is MainAxisSize.max so the Row should be as wide as the test: 800.
     // The 100x100 children's left edges should be at 0, 350, 700
@@ -230,11 +230,11 @@ void main() {
   });
 
   testWidgets('Row with MainAxisAlignment.spaceAround', (WidgetTester tester) async {
-    final Key rowKey = new Key('row');
-    final Key child0Key = new Key('child0');
-    final Key child1Key = new Key('child1');
-    final Key child2Key = new Key('child2');
-    final Key child3Key = new Key('child3');
+    final Key rowKey = const Key('row');
+    final Key child0Key = const Key('child0');
+    final Key child1Key = const Key('child1');
+    final Key child2Key = const Key('child2');
+    final Key child3Key = const Key('child3');
 
     // Default is MainAxisSize.max so the Row should be as wide as the test: 800.
     // The 100x100 children's left edges should be at 50, 250, 450, 650
@@ -284,10 +284,10 @@ void main() {
   });
 
   testWidgets('Row with MainAxisAlignment.spaceEvenly', (WidgetTester tester) async {
-    final Key rowKey = new Key('row');
-    final Key child0Key = new Key('child0');
-    final Key child1Key = new Key('child1');
-    final Key child2Key = new Key('child2');
+    final Key rowKey = const Key('row');
+    final Key child0Key = const Key('child0');
+    final Key child1Key = const Key('child1');
+    final Key child2Key = const Key('child2');
 
     // Default is MainAxisSize.max so the Row should be as wide as the test: 800.
     // The 200x100 children's left edges should be at 50, 300, 550
@@ -330,9 +330,9 @@ void main() {
   });
 
   testWidgets('Row and MainAxisSize.min', (WidgetTester tester) async {
-    final Key rowKey = new Key('rowKey');
-    final Key child0Key = new Key('child0');
-    final Key child1Key = new Key('child1');
+    final Key rowKey = const Key('rowKey');
+    final Key child0Key = const Key('child0');
+    final Key child1Key = const Key('child1');
 
     // Row with MainAxisSize.min without flexible children shrink wraps.
     // Row's width should be 250, children should be at 0, 100.
@@ -368,7 +368,7 @@ void main() {
   });
 
   testWidgets('Row MainAxisSize.min layout at zero size', (WidgetTester tester) async {
-    final Key childKey = new Key('childKey');
+    final Key childKey = const Key('childKey');
 
     await tester.pumpWidget(new Center(
       child: new Container(

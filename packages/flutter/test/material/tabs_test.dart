@@ -168,7 +168,7 @@ void main() {
 
   testWidgets('Scrollable TabBar tap centers selected tab', (WidgetTester tester) async {
     List<String> tabs = <String>['AAAAAA', 'BBBBBB', 'CCCCCC', 'DDDDDD', 'EEEEEE', 'FFFFFF', 'GGGGGG', 'HHHHHH', 'IIIIII', 'JJJJJJ', 'KKKKKK', 'LLLLLL'];
-    Key tabBarKey = new Key('TabBar');
+    Key tabBarKey = const Key('TabBar');
     await tester.pumpWidget(buildFrame(tabs: tabs, value: 'AAAAAA', isScrollable: true, tabBarKey: tabBarKey));
     TabController controller = DefaultTabController.of(tester.element(find.text('AAAAAA')));
     expect(controller, isNotNull);
@@ -189,7 +189,7 @@ void main() {
 
   testWidgets('TabBar can be scrolled independent of the selection', (WidgetTester tester) async {
     List<String> tabs = <String>['AAAA', 'BBBB', 'CCCC', 'DDDD', 'EEEE', 'FFFF', 'GGGG', 'HHHH', 'IIII', 'JJJJ', 'KKKK', 'LLLL'];
-    Key tabBarKey = new Key('TabBar');
+    Key tabBarKey = const Key('TabBar');
     await tester.pumpWidget(buildFrame(tabs: tabs, value: 'AAAA', isScrollable: true, tabBarKey: tabBarKey));
     TabController controller = DefaultTabController.of(tester.element(find.text('AAAA')));
     expect(controller, isNotNull);

@@ -47,11 +47,11 @@ void main() {
     expect(new ObjectKey(const Object()) == new ObjectKey(const Object()), isTrue); // ignore: prefer_const_constructors
     expect(new ObjectKey(new Object()) == new ObjectKey(new Object()), isFalse);
 
-    expect(new ValueKey<bool>(true), hasOneLineDescription);
+    expect(const ValueKey<bool>(true), hasOneLineDescription);
     expect(new UniqueKey(), hasOneLineDescription);
-    expect(new ObjectKey(true), hasOneLineDescription);
+    expect(const ObjectKey(true), hasOneLineDescription);
     expect(new GlobalKey(), hasOneLineDescription);
     expect(new GlobalKey(debugLabel: 'hello'), hasOneLineDescription);
-    expect(new GlobalObjectKey(true), hasOneLineDescription);
+    expect(const GlobalObjectKey(true), hasOneLineDescription);
   });
 }

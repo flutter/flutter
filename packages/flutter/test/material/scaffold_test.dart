@@ -44,7 +44,7 @@ void main() {
   testWidgets('Floating action animation', (WidgetTester tester) async {
     await tester.pumpWidget(new Scaffold(
       floatingActionButton: new FloatingActionButton(
-        key: new Key("one"),
+        key: const Key('one'),
         onPressed: null,
         child: new Text("1")
       )
@@ -54,7 +54,7 @@ void main() {
 
     await tester.pumpWidget(new Scaffold(
       floatingActionButton: new FloatingActionButton(
-        key: new Key("two"),
+        key: const Key('two'),
         onPressed: null,
         child: new Text("2")
       )
@@ -68,7 +68,7 @@ void main() {
 
     await tester.pumpWidget(new Scaffold(
       floatingActionButton: new FloatingActionButton(
-        key: new Key("one"),
+        key: const Key('one'),
         onPressed: null,
         child: new Text("1")
       )

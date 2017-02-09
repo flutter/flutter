@@ -21,13 +21,13 @@ Widget buildSingleChildScrollView(Axis scrollDirection, { bool reverse: false })
         child: new BlockBody(
           mainAxis: scrollDirection,
           children: <Widget>[
-            new Container(key: new ValueKey<int>(0), width: 200.0, height: 200.0),
-            new Container(key: new ValueKey<int>(1), width: 200.0, height: 200.0),
-            new Container(key: new ValueKey<int>(2), width: 200.0, height: 200.0),
-            new Container(key: new ValueKey<int>(3), width: 200.0, height: 200.0),
-            new Container(key: new ValueKey<int>(4), width: 200.0, height: 200.0),
-            new Container(key: new ValueKey<int>(5), width: 200.0, height: 200.0),
-            new Container(key: new ValueKey<int>(6), width: 200.0, height: 200.0),
+            new Container(key: const ValueKey<int>(0), width: 200.0, height: 200.0),
+            new Container(key: const ValueKey<int>(1), width: 200.0, height: 200.0),
+            new Container(key: const ValueKey<int>(2), width: 200.0, height: 200.0),
+            new Container(key: const ValueKey<int>(3), width: 200.0, height: 200.0),
+            new Container(key: const ValueKey<int>(4), width: 200.0, height: 200.0),
+            new Container(key: const ValueKey<int>(5), width: 200.0, height: 200.0),
+            new Container(key: const ValueKey<int>(6), width: 200.0, height: 200.0),
           ],
         ),
       ),
@@ -45,13 +45,13 @@ Widget buildListView(Axis scrollDirection, { bool reverse: false, bool shrinkWra
         reverse: reverse,
         shrinkWrap: shrinkWrap,
         children: <Widget>[
-          new Container(key: new ValueKey<int>(0), width: 200.0, height: 200.0),
-          new Container(key: new ValueKey<int>(1), width: 200.0, height: 200.0),
-          new Container(key: new ValueKey<int>(2), width: 200.0, height: 200.0),
-          new Container(key: new ValueKey<int>(3), width: 200.0, height: 200.0),
-          new Container(key: new ValueKey<int>(4), width: 200.0, height: 200.0),
-          new Container(key: new ValueKey<int>(5), width: 200.0, height: 200.0),
-          new Container(key: new ValueKey<int>(6), width: 200.0, height: 200.0),
+          new Container(key: const ValueKey<int>(0), width: 200.0, height: 200.0),
+          new Container(key: const ValueKey<int>(1), width: 200.0, height: 200.0),
+          new Container(key: const ValueKey<int>(2), width: 200.0, height: 200.0),
+          new Container(key: const ValueKey<int>(3), width: 200.0, height: 200.0),
+          new Container(key: const ValueKey<int>(4), width: 200.0, height: 200.0),
+          new Container(key: const ValueKey<int>(5), width: 200.0, height: 200.0),
+          new Container(key: const ValueKey<int>(6), width: 200.0, height: 200.0),
         ],
       ),
     ),
@@ -189,7 +189,7 @@ void main() {
                       child: new Transform(
                         transform: new Matrix4.rotationZ(math.PI),
                         child: new Container(
-                          key: new ValueKey<int>(0),
+                          key: const ValueKey<int>(0),
                           width: 100.0,
                           height: 100.0,
                           decoration: const BoxDecoration(
@@ -391,7 +391,7 @@ void main() {
             viewportBuilder: (BuildContext context, ViewportOffset offset) {
               return new Viewport2(
                 offset: offset,
-                center: new ValueKey<int>(4),
+                center: const ValueKey<int>(4),
                 slivers: <Widget>[
                   buildSliver(0),
                   buildSliver(1),
@@ -441,7 +441,7 @@ void main() {
                     child: new Transform(
                       transform: new Matrix4.rotationZ(math.PI),
                       child: new Container(
-                        key: new ValueKey<int>(0),
+                        key: const ValueKey<int>(0),
                         width: 100.0,
                         height: 100.0,
                         decoration: const BoxDecoration(
