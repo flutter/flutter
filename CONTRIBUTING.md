@@ -10,7 +10,7 @@ Things you will need
 
  * Linux or Mac OS X. (Windows is not yet supported.)
  * git (used for source version control).
- * An IDE. We recommend [IntelliJ](https://github.com/flutter/flutter-intellij/blob/master/README.md).
+ * An IDE. We recommend [IntelliJ with the Flutter plugin](https://flutter.io/intellij-ide/).
  * An ssh client (used to authenticate with GitHub).
  * Python (used by some of our tools).
  * The Android platform tools (see [Issue #55](https://github.com/flutter/flutter/issues/55)
