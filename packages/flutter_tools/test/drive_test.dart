@@ -86,7 +86,7 @@ void main() {
 
     testUsingContext('returns 1 when app fails to run', () async {
       withMockDevice();
-      appStarter = expectAsync((DriveCommand command) async => null);
+      appStarter = expectAsync1((DriveCommand command) async => null);
 
       String testApp = '/some/app/test_driver/e2e.dart';
       String testFile = '/some/app/test_driver/e2e_test.dart';
@@ -155,14 +155,14 @@ void main() {
       String testApp = '/some/app/test/e2e.dart';
       String testFile = '/some/app/test_driver/e2e_test.dart';
 
-      appStarter = expectAsync((DriveCommand command) async {
+      appStarter = expectAsync1((DriveCommand command) async {
         return new LaunchResult.succeeded();
       });
-      testRunner = expectAsync((List<String> testArgs, String observatoryUri) async {
+      testRunner = expectAsync2((List<String> testArgs, String observatoryUri) async {
         expect(testArgs, <String>[testFile]);
         return null;
       });
-      appStopper = expectAsync((DriveCommand command) async {
+      appStopper = expectAsync1((DriveCommand command) async {
         return true;
       });
 
@@ -186,13 +186,13 @@ void main() {
       String testApp = '/some/app/test/e2e.dart';
       String testFile = '/some/app/test_driver/e2e_test.dart';
 
-      appStarter = expectAsync((DriveCommand command) async {
+      appStarter = expectAsync1((DriveCommand command) async {
         return new LaunchResult.succeeded();
       });
       testRunner = (List<String> testArgs, String observatoryUri) async {
         throwToolExit(null, exitCode: 123);
       };
-      appStopper = expectAsync((DriveCommand command) async {
+      appStopper = expectAsync1((DriveCommand command) async {
         return true;
       });
 

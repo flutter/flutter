@@ -105,3 +105,7 @@ flutter:
     - family: AbrilFatface
       fonts:
         - asset: packages/flutter_gallery_assets/shrine/fonts/abrilfatface/AbrilFatface-Regular.ttf
+
+dependency_overrides:
+  test:
+    git: git://github.com/dart-lang/test.git

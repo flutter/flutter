@@ -35,7 +35,7 @@ dependencies:
   # We depend on very specific internal implementation details of the
   # 'test' package, which change between versions, so here we pin it
   # precisely.
-  test: 0.12.15+4
+  test: 0.12.18+1
 
   # Version from the vended Dart SDK as defined in `dependency_overrides`.
   analyzer: any
@@ -53,3 +53,5 @@ dependency_overrides:
     path: ../../bin/cache/dart-sdk/lib/analyzer
   front_end:
     path: ../../bin/cache/dart-sdk/lib/front_end
+  test:
+    git: git://github.com/dart-lang/test.git
