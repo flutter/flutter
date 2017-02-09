@@ -32,6 +32,10 @@ dependencies:
     buf.writeln('  $package:');
     buf.writeln('    sdk: flutter');
   }
+  buf.writeln('  platform_integration: 0.0.1');
+  buf.writeln('dependency_overrides:');
+  buf.writeln('  platform_integration:');
+  buf.writeln('    path: platform_integration');
   new File('dev/docs/pubspec.yaml').writeAsStringSync(buf.toString());
 
   // Create the library file.
@@ -66,6 +70,7 @@ dependencies:
     '--favicon=favicon.ico',
     '--use-categories'
   ];
+
 
   for (String libraryRef in libraryRefs(diskPath: true)) {
     args.add('--include-external');
@@ -134,6 +139,10 @@ void addHtmlBaseToIndex() {
   String indexContents = indexFile.readAsStringSync();
   indexContents = indexContents.replaceFirst('</title>\n',
     '</title>\n  <base href="./flutter/">\n');
+  indexContents = indexContents.replaceAll(
+    'href="Android/Android-library.html"',
+    'href="https://docs.flutter.io/javadoc/"'
+  );
   indexFile.writeAsStringSync(indexContents);
 }
 
@@ -175,6 +184,12 @@ Iterable<String> libraryRefs({ bool diskPath: false }) sync* {
        }
     }
   }
+
+  // Add a fake package for platform integration APIs.
+  if (diskPath)
+    yield 'platform_integration/lib/android.dart';
+  else
+    yield 'platform_integration/android.dart';
 }
 
 void printStream(Stream<List<int>> stream) {
