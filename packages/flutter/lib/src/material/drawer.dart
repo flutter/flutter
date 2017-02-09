@@ -25,17 +25,16 @@ const double _kEdgeDragWidth = 20.0;
 const double _kMinFlingVelocity = 365.0;
 const Duration _kBaseSettleDuration = const Duration(milliseconds: 246);
 
-/// A material design drawer.
+/// A material design panel that slides in horizontally from the edge of a
+/// [Scaffold] to show navigation links in an application.
 ///
-/// Typically used in the [Scaffold.drawer] property, a drawer slides in from
-/// the side of the screen and displays a list of items that the user can
-/// interact with.
+/// Drawers are typically used with the [Scaffold.drawer] property. The child of
+/// the drawer is usually a [ListView] whose first child is a [DrawerHeader]
+/// that displays status information about the current user.
 ///
-/// Typically, the child of the drawer is a [SliverList] whose first child is a
-/// [DrawerHeader] that displays status information about the current user.
-///
-/// The [Scaffold] automatically shows an appropriate [IconButton], and handles
-/// the edge-swipe gesture, to show the drawer.
+/// The [AppBar] automatically displays an appropriate [IconButton] to show the
+/// [Drawer] when a [Drawer] is available in the [Scaffold]. The [Scaffold]
+/// automatically handles the edge-swipe gesture to show the drawer.
 ///
 /// See also:
 ///
