@@ -258,7 +258,7 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
       performRebuild();
   }
 
-  Map<int, Element> _childElements = new SplayTreeMap<int, Element>();
+  SplayTreeMap<int, Element> _childElements = new SplayTreeMap<int, Element>();
   Map<int, Widget> _childWidgets = new HashMap<int, Widget>();
   RenderBox _currentBeforeChild;
 
@@ -269,14 +269,18 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
     _currentBeforeChild = null;
     assert(_currentlyUpdatingChildIndex == null);
     try {
-      // The "toList()" below is to get a copy of the array so that we can
-      // mutate _childElements within the loop. Basically we just update all the
-      // same indexes as we had before. If any of them mutate the tree, then
-      // this will also trigger a layout and so forth. (We won't call the
-      // delegate's build function multiple times, though, because we cache the
-      // delegate's results until the next time we need to rebuild the whole
-      // block widget.)
-      for (int index in _childElements.keys.toList()) {
+      int firstIndex = _childElements.firstKey();
+      int lastIndex = _childElements.lastKey();
+      if (_childElements.isEmpty) {
+        firstIndex = 0;
+        lastIndex = 0;
+      } else if (_didUnderflow) {
+        lastIndex += 1;
+      }
+      // We won't call the delegate's build function multiple times, because we
+      // cache the delegate's results until the next time we need to rebuild the
+      // whole widget.
+      for (int index = firstIndex; index <= lastIndex; ++index) {
         _currentlyUpdatingChildIndex = index;
         Element newChild = updateChild(_childElements[index], _build(index), index);
         if (newChild != null) {
@@ -395,6 +399,13 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
     assert(_currentlyUpdatingChildIndex != null);
     final SliverMultiBoxAdaptorParentData childParentData = child.parentData;
     childParentData.index = _currentlyUpdatingChildIndex;
+  }
+
+  bool _didUnderflow = false;
+
+  @override
+  void setDidUnderflow(bool value) {
+    _didUnderflow = value;
   }
 
   @override

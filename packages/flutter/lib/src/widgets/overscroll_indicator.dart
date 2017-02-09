@@ -108,6 +108,8 @@ class _GlowingOverscrollIndicatorState extends State<GlowingOverscrollIndicator>
   }
 
   bool _handleScrollNotification(ScrollNotification2 notification) {
+    if (notification.depth != 0)
+      return false;
     if (notification is OverscrollNotification) {
       _GlowController controller;
       if (notification.overscroll < 0.0) {
