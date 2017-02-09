@@ -8,7 +8,7 @@ Things you will need
 
  * Linux or Mac OS X. (Windows is not yet supported.)
  * git (used for source version control).
- * An IDE. We recommend [IntelliJ with the Flutter plugin](https://flutter.io/intellij-ide/).
+ * An IDE. We recommend [IntelliJ with the Flutter plugin](https://flutter.io/intellij-ide/) or Xcode.
  * An ssh client (used to authenticate with GitHub).
  * Chromium's [depot_tools](http://www.chromium.org/developers/how-tos/install-depot-tools) (make sure it's in your path). We use the `gclient` tool from depot_tools.
  * Python (used by many of our tools, including 'gclient').
@@ -74,6 +74,7 @@ dependency_overrides:
   sky_services:
     path: /path/to/flutter/engine/out/host_debug/gen/dart-pkg/sky_services
 ```
+Depending on the platform you choose below, you will need to replace `host_debug` with the appropriate directory.
 
 ### Android (cross-compiling from Mac or Linux)
 
@@ -124,6 +125,7 @@ to test the engine.
 * `gclient sync` to update dependencies.
 * `./flutter/tools/gn --ios --unoptimized` to prepare build files.
   * For a discussion on the various flags and modes, [read this discussion](https://github.com/flutter/flutter/wiki/Flutter's-modes).
+  * This also produces an Xcode project for working with the engine source code at `out/ios_debug_unopt`
 * `ninja -C out/ios_debug_unopt` to build iOS artifacts.
 
 Once the artifacts are built, you can start using them in your application by following these steps:
