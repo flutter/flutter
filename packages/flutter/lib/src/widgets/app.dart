@@ -155,9 +155,7 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
     assert(mounted);
     NavigatorState navigator = _navigator.currentState;
     assert(navigator != null);
-    if (!await navigator.willPop())
-      return true;
-    return mounted && navigator.pop();
+    return await navigator.maybePop();
   }
 
   @override

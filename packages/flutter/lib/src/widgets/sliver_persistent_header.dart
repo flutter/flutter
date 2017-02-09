@@ -12,7 +12,9 @@ abstract class SliverPersistentHeaderDelegate {
   /// const constructors so that they can be used in const expressions.
   const SliverPersistentHeaderDelegate();
 
-  Widget build(BuildContext context, double shrinkOffset);
+  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent);
+
+  double get minExtent;
 
   double get maxExtent;
 
@@ -101,9 +103,9 @@ class _SliverPersistentHeaderElement extends RenderObjectElement {
 
   Element child;
 
-  void _build(double shrinkOffset) {
+  void _build(double shrinkOffset, bool overlapsContent) {
     owner.buildScope(this, () {
-      child = updateChild(child, widget.delegate.build(this, shrinkOffset), null);
+      child = updateChild(child, widget.delegate.build(this, shrinkOffset, overlapsContent), null);
     });
   }
 
@@ -161,17 +163,20 @@ abstract class _RenderSliverPersistentHeaderForWidgetsMixin implements RenderSli
   _SliverPersistentHeaderElement _element;
 
   @override
+  double get minExtent => _element.widget.delegate.minExtent;
+
+  @override
   double get maxExtent => _element.widget.delegate.maxExtent;
 
   @override
-  void updateChild(double shrinkOffset) {
+  void updateChild(double shrinkOffset, bool overlapsContent) {
     assert(_element != null);
-    _element._build(shrinkOffset);
+    _element._build(shrinkOffset, overlapsContent);
   }
 
   @protected
   void triggerRebuild() {
-    markNeedsUpdate();
+    markNeedsLayout();
   }
 }
 

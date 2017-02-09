@@ -20,16 +20,19 @@ abstract class RenderSliverPersistentHeader extends RenderSliver with RenderObje
     this.child = child;
   }
 
+  /// The biggest that this render object can become, in the main axis direction.
+  ///
+  /// This value should not be based on the child. If it changes, call
+  /// [markNeedsLayout].
   double get maxExtent;
 
-  /// The intrinsic size of the child as of the last time the sliver was laid out.
+  /// The smallest that this render object can become, in the main axis direction.
   ///
-  /// If the render object is dirty (i.e. if [markNeedsLayout] has been called,
-  /// or if the object was newly created), then the returned value will be stale
-  /// until [layoutChild] has been called.
-  @protected
-  double get minExtent => _minExtent;
-  double _minExtent;
+  /// If this is based on the intrinsic dimensions of the child, the child
+  /// should be measured during [updateChild] and the value cached and returned
+  /// here. The [updateChild] method will automatically be invoked any time the
+  /// child changes its intrinsic dimensions.
+  double get minExtent;
 
   @protected
   double get childExtent {
@@ -46,69 +49,65 @@ abstract class RenderSliverPersistentHeader extends RenderSliver with RenderObje
     return null;
   }
 
+  bool _needsUpdateChild = true;
+  double _lastShrinkOffset = 0.0;
+  bool _lastOverlapsContent = false;
+
+  /// Update the child render object if necessary.
+  ///
+  /// Called before the first layout, any time [markNeedsLayout] is called, and
+  /// any time the scroll offset changes. The `shrinkOffset` is the difference
+  /// between the [maxExtent] and the current size. Zero means the header is
+  /// fully expanded, any greater number up to [maxExtent] means that the header
+  /// has been scrolled by that much. The `overlapsContent` argument is true if
+  /// the sliver's leading edge is beyond its normal place in the viewport
+  /// contents, and false otherwise. It may still paint beyond its normal place
+  /// if the [minExtent] after this call is greater than the amount of space that
+  /// would normally be left.
+  ///
+  /// The render object will size itself to the larger of (a) the [maxExtent]
+  /// minus the child's intrinsic height and (b) the [maxExtent] minus the
+  /// shrink offset.
+  ///
+  /// When this method is called by [layoutChild], the [child] can be set,
+  /// mutated, or replaced. (It should not be called outside [layoutChild].)
+  ///
+  /// Any time this method would mutate the child, call [markNeedsLayout].
   @protected
-  double _getChildIntrinsicExtent() {
-    if (child == null)
-      return 0.0;
-    assert(child != null);
-    assert(constraints.axis != null);
-    switch (constraints.axis) {
-      case Axis.vertical:
-        return child.getMinIntrinsicHeight(constraints.crossAxisExtent);
-      case Axis.horizontal:
-        return child.getMinIntrinsicWidth(constraints.crossAxisExtent);
-    }
-    return null;
+  void updateChild(double shrinkOffset, bool overlapsContent) { }
+
+  @override
+  void markNeedsLayout() {
+    // This is automatically called whenever the child's intrinsic dimensions
+    // change, at which point we should remeasure them during the next layout.
+    _needsUpdateChild = true;
+    super.markNeedsLayout();
   }
 
-  /// The last value that we passed to updateChild().
-  double _lastShrinkOffset;
-
-  /// Called during layout if the shrink offset has changed.
-  ///
-  /// During this callback, the [child] can be set, mutated, or replaced.
-  @protected
-  void updateChild(double shrinkOffset) { }
-
-  /// Flag the current child as stale and needing updating even if the shrink
-  /// offset has not changed.
-  ///
-  /// Call this whenever [updateChild] would change or mutate the child even if
-  /// given the same `shrinkOffset` as the last time it was called.
-  ///
-  /// This must be implemented by [RenderSliverPersistentHeader] subclasses such
-  /// that the next layout after this call will result in [updateChild] being
-  /// called.
-  @protected
-  void markNeedsUpdate() {
-    markNeedsLayout();
-    _lastShrinkOffset = null;
-  }
-
-  void layoutChild(double scrollOffset, double maxExtent) {
+  void layoutChild(double scrollOffset, double maxExtent, { bool overlapsContent: false }) {
     assert(maxExtent != null);
     final double shrinkOffset = math.min(scrollOffset, maxExtent);
-    if (shrinkOffset != _lastShrinkOffset) {
+    if (_needsUpdateChild || _lastShrinkOffset != shrinkOffset || _lastOverlapsContent != overlapsContent) {
       invokeLayoutCallback<SliverConstraints>((SliverConstraints constraints) {
         assert(constraints == this.constraints);
-        updateChild(shrinkOffset);
-        _minExtent = _getChildIntrinsicExtent();
+        updateChild(shrinkOffset, overlapsContent);
       });
       _lastShrinkOffset = shrinkOffset;
+      _lastOverlapsContent = overlapsContent;
+      _needsUpdateChild = false;
     }
-    assert(_minExtent != null);
+    assert(minExtent != null);
     assert(() {
-      if (_minExtent <= maxExtent)
+      if (minExtent <= maxExtent)
         return true;
       throw new FlutterError(
-        'The maxExtent for this $runtimeType is less than the child\'s intrinsic extent.\n'
+        'The maxExtent for this $runtimeType is less than its minExtent.\n'
         'The specified maxExtent was: ${maxExtent.toStringAsFixed(1)}\n'
-        'The child was updated with shrink offset: ${shrinkOffset.toStringAsFixed(1)}\n'
-        'The actual measured intrinsic extent of the child was: ${_minExtent.toStringAsFixed(1)}\n'
+        'The specified minExtent was: ${minExtent.toStringAsFixed(1)}\n'
       );
     });
     child?.layout(
-      constraints.asBoxConstraints(maxExtent: math.max(_minExtent, maxExtent - shrinkOffset)),
+      constraints.asBoxConstraints(maxExtent: math.max(minExtent, maxExtent - shrinkOffset)),
       parentUsesSize: true,
     );
   }
@@ -237,7 +236,7 @@ abstract class RenderSliverPinnedPersistentHeader extends RenderSliverPersistent
   @override
   void performLayout() {
     final double maxExtent = this.maxExtent;
-    layoutChild(constraints.scrollOffset + constraints.overlap, maxExtent);
+    layoutChild(constraints.scrollOffset + constraints.overlap, maxExtent, overlapsContent: constraints.overlap > 0.0);
     geometry = new SliverGeometry(
       scrollExtent: maxExtent,
       paintExtent: math.min(constraints.overlap + childExtent, constraints.remainingPaintExtent),
@@ -285,7 +284,7 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
     } else {
       _effectiveScrollOffset = constraints.scrollOffset;
     }
-    layoutChild(_effectiveScrollOffset, maxExtent);
+    layoutChild(_effectiveScrollOffset, maxExtent, overlapsContent: _effectiveScrollOffset < constraints.scrollOffset);
     final double paintExtent = maxExtent - _effectiveScrollOffset;
     final double layoutExtent = (maxExtent - constraints.scrollOffset).clamp(0.0, constraints.remainingPaintExtent);
     geometry = new SliverGeometry(

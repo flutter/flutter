@@ -41,16 +41,13 @@ class _AppBarBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // TODO(abarth): Wire up to the parallax of the FlexibleSpaceBar in a way
-    // that doesn't pop during hero transition.
-    Animation<double> effectiveAnimation = kAlwaysDismissedAnimation;
     return new AnimatedBuilder(
-      animation: effectiveAnimation,
+      animation: animation,
       builder: (BuildContext context, Widget child) {
         return new Stack(
           children: _kBackgroundLayers.map((_BackgroundLayer layer) {
             return new Positioned(
-              top: -layer.parallaxTween.evaluate(effectiveAnimation),
+              top: -layer.parallaxTween.evaluate(animation),
               left: 0.0,
               right: 0.0,
               bottom: 0.0,
@@ -107,7 +104,6 @@ class GalleryHome extends StatefulWidget {
 
 class GalleryHomeState extends State<GalleryHome> with SingleTickerProviderStateMixin {
   static final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
-  static final GlobalKey<ScrollableState> _scrollableKey = new GlobalKey<ScrollableState>();
 
   AnimationController _controller;
 
@@ -153,10 +149,8 @@ class GalleryHomeState extends State<GalleryHome> with SingleTickerProviderState
 
   @override
   Widget build(BuildContext context) {
-    final double statusBarHeight = MediaQuery.of(context).padding.top;
     Widget home = new Scaffold(
       key: _scaffoldKey,
-      scrollableKey: _scrollableKey,
       drawer: new GalleryDrawer(
         useLightTheme: config.useLightTheme,
         onThemeChanged: config.onThemeChanged,
@@ -169,27 +163,19 @@ class GalleryHomeState extends State<GalleryHome> with SingleTickerProviderState
         onPlatformChanged: config.onPlatformChanged,
         onSendFeedback: config.onSendFeedback,
       ),
-      appBar: new AppBar(
-        expandedHeight: _kFlexibleSpaceMaxHeight,
-        flexibleSpace: new FlexibleSpaceBar(
-          title: new Text('Flutter Gallery'),
-          background: new Builder(
-            builder: (BuildContext context) {
-              return new _AppBarBackground(
-                animation: _scaffoldKey.currentState.appBarAnimation
-              );
-            }
-          )
-        )
-      ),
-      appBarBehavior: AppBarBehavior.under,
-      // The block's padding just exists to occupy the space behind the flexible app bar.
-      // As the block's padded region is scrolled upwards, the app bar's height will
-      // shrink keep it above the block content's and over the padded region.
-      body: new Block(
-       scrollableKey: _scrollableKey,
-       padding: new EdgeInsets.only(top: _kFlexibleSpaceMaxHeight + statusBarHeight),
-       children: _galleryListItems()
+      body: new CustomScrollView(
+        slivers: <Widget>[
+          new SliverAppBar(
+            pinned: true,
+            expandedHeight: _kFlexibleSpaceMaxHeight,
+            flexibleSpace: new FlexibleSpaceBar(
+              title: new Text('Flutter Gallery'),
+              // TODO(abarth): Wire up to the parallax in a way that doesn't pop during hero transition.
+              background: new _AppBarBackground(animation: kAlwaysDismissedAnimation),
+            ),
+          ),
+          new SliverList(delegate: new SliverChildListDelegate(_galleryListItems())),
+        ],
       )
     );
 

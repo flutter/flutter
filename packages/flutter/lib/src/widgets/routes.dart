@@ -295,7 +295,10 @@ abstract class LocalHistoryRoute<T> extends Route<T> {
     assert(entry._owner == null);
     entry._owner = this;
     _localHistory ??= <LocalHistoryEntry>[];
+    final bool wasEmpty = _localHistory.isEmpty;
     _localHistory.add(entry);
+    if (wasEmpty)
+      changedInternalState();
   }
 
   /// Remove a local history entry from this route.
@@ -308,6 +311,8 @@ abstract class LocalHistoryRoute<T> extends Route<T> {
     _localHistory.remove(entry);
     entry._owner = null;
     entry._notifyRemoved();
+    if (_localHistory.isEmpty)
+      changedInternalState();
   }
 
   @override
@@ -317,6 +322,8 @@ abstract class LocalHistoryRoute<T> extends Route<T> {
       assert(entry._owner == this);
       entry._owner = null;
       entry._notifyRemoved();
+      if (_localHistory.isEmpty)
+        changedInternalState();
       return false;
     }
     return super.didPop(result);
@@ -326,26 +333,40 @@ abstract class LocalHistoryRoute<T> extends Route<T> {
   bool get willHandlePopInternally {
     return _localHistory != null && _localHistory.isNotEmpty;
   }
+
+  /// Called whenever the internal state of the route has changed.
+  ///
+  /// This should be called whenever [willHandlePopInternally] and [didPop]
+  /// might change the value they return. It is used by [ModalRoute], for
+  /// example, to report the new information via its inherited widget to any
+  /// children of the route.
+  @protected
+  @mustCallSuper
+  void changedInternalState() { }
 }
 
 class _ModalScopeStatus extends InheritedWidget {
   _ModalScopeStatus({
     Key key,
-    this.isCurrent,
-    this.route,
+    @required this.isCurrent,
+    @required this.canPop,
+    @required this.route,
     @required Widget child
   }) : super(key: key, child: child) {
     assert(isCurrent != null);
+    assert(canPop != null);
     assert(route != null);
     assert(child != null);
   }
 
   final bool isCurrent;
+  final bool canPop;
   final Route<dynamic> route;
 
   @override
   bool updateShouldNotify(_ModalScopeStatus old) {
     return isCurrent != old.isCurrent ||
+           canPop != old.canPop ||
            route != old.route;
   }
 
@@ -353,6 +374,8 @@ class _ModalScopeStatus extends InheritedWidget {
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     description.add('${isCurrent ? "active" : "inactive"}');
+    if (canPop)
+      description.add('can pop');
   }
 }
 
@@ -396,7 +419,6 @@ class _ModalScopeState extends State<_ModalScope> {
   void dispose() {
     config.route.animation?.removeStatusListener(_animationStatusChanged);
     config.route.forwardAnimation?.removeStatusListener(_animationStatusChanged);
-    willPopCallbacks = null;
     super.dispose();
   }
 
@@ -439,13 +461,14 @@ class _ModalScopeState extends State<_ModalScope> {
                 child: new _ModalScopeStatus(
                   route: config.route,
                   isCurrent: config.route.isCurrent,
-                  child: config.page
-                )
-              )
-            )
-          )
-        )
-      )
+                  canPop: config.route.canPop(),
+                  child: config.page,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
@@ -733,6 +756,24 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   bool get hasScopedWillPopCallback {
     return _scopeKey.currentState == null || _scopeKey.currentState.willPopCallbacks.length > 0;
   }
+
+  @override
+  void changedInternalState() {
+    super.changedInternalState();
+    setState(() { /* internal state already changed */ });
+  }
+
+  @override
+  void didChangePrevious(Route<dynamic> route) {
+    super.didChangePrevious(route);
+    setState(() { /* this might affect canPop */ });
+  }
+
+  /// Whether this route can be popped.
+  ///
+  /// When this changes, the route will rebuild, and any widgets that used
+  /// [ModalRoute.of] will be notified.
+  bool canPop() => !isFirst || willHandlePopInternally;
 
   // Internals
 

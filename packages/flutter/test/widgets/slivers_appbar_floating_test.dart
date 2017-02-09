@@ -189,8 +189,11 @@ class TestDelegate extends SliverPersistentHeaderDelegate {
   double get maxExtent => 200.0;
 
   @override
-  Widget build(BuildContext context, double shrinkOffset) {
-    return new Container(constraints: new BoxConstraints(minHeight: maxExtent / 2.0, maxHeight: maxExtent));
+  double get minExtent => 100.0;
+
+  @override
+  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+    return new Container(constraints: new BoxConstraints(minHeight: minExtent, maxHeight: maxExtent));
   }
 
   @override

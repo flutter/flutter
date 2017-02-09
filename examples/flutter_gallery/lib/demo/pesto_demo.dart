@@ -86,24 +86,27 @@ class _RecipeGridPageState extends State<RecipeGridPage> {
       data: _kTheme.copyWith(platform: Theme.of(context).platform),
       child: new Scaffold(
         key: scaffoldKey,
-        scrollableKey: config.scrollableKey,
-        appBarBehavior: AppBarBehavior.under,
-        appBar: _buildAppBar(context, statusBarHeight),
         floatingActionButton: new FloatingActionButton(
           child: new Icon(Icons.edit),
           onPressed: () {
             scaffoldKey.currentState.showSnackBar(new SnackBar(
-              content: new Text('Not supported.')
+              content: new Text('Not supported.'),
             ));
           },
         ),
-        body: _buildBody(context, statusBarHeight),
+        body: new CustomScrollView(
+          slivers: <Widget>[
+            _buildAppBar(context, statusBarHeight),
+            _buildBody(context, statusBarHeight),
+          ],
+        ),
       )
     );
   }
 
   Widget _buildAppBar(BuildContext context, double statusBarHeight) {
-    return new AppBar(
+    return new SliverAppBar(
+      pinned: true,
       expandedHeight: _kAppBarHeight,
       actions: <Widget>[
         new IconButton(
@@ -111,7 +114,7 @@ class _RecipeGridPageState extends State<RecipeGridPage> {
           tooltip: 'Search',
           onPressed: () {
             scaffoldKey.currentState.showSnackBar(new SnackBar(
-              content: new Text('Not supported.')
+              content: new Text('Not supported.'),
             ));
           },
         ),
@@ -138,22 +141,25 @@ class _RecipeGridPageState extends State<RecipeGridPage> {
   }
 
   Widget _buildBody(BuildContext context, double statusBarHeight) {
-    final EdgeInsets padding = new EdgeInsets.fromLTRB(8.0, 8.0 + _kAppBarHeight + statusBarHeight, 8.0, 8.0);
-
-    return new ScrollableGrid(
-      scrollableKey: config.scrollableKey,
-      delegate: new MaxTileWidthGridDelegate(
-        maxTileWidth: _kRecipePageMaxWidth,
-        rowSpacing: 8.0,
-        columnSpacing: 8.0,
-        padding: padding
+    final EdgeInsets padding = const EdgeInsets.all(8.0);
+    return new SliverPadding(
+      padding: padding,
+      child: new SliverGrid(
+        gridDelegate: new SliverGridDelegateWithMaxCrossAxisExtent(
+          maxCrossAxisExtent: _kRecipePageMaxWidth,
+          crossAxisSpacing: 8.0,
+          mainAxisSpacing: 8.0,
+        ),
+        delegate: new SliverChildBuilderDelegate(
+          (BuildContext context, int index) {
+            Recipe recipe = config.recipes[index];
+            return new RecipeCard(
+              recipe: recipe,
+              onTap: () { showRecipePage(context, recipe); },
+            );
+          }
+        ),
       ),
-      children: config.recipes.map((Recipe recipe) {
-        return new RecipeCard(
-          recipe: recipe,
-          onTap: () { showRecipePage(context, recipe); }
-        );
-      }),
     );
   }
 
@@ -297,84 +303,69 @@ class RecipePage extends StatefulWidget {
 
 class _RecipePageState extends State<RecipePage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
-  final GlobalKey<ScrollableState> _scrollableKey = new GlobalKey<ScrollableState>();
   final TextStyle menuItemStyle = new PestoStyle(fontSize: 15.0, color: Colors.black54, height: 24.0/15.0);
-  final Object _disableHeroTransition = new Object();
 
   double _getAppBarHeight(BuildContext context) => MediaQuery.of(context).size.height * 0.3;
 
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
-      key: _scaffoldKey,
-      scrollableKey: _scrollableKey,
-      appBarBehavior: AppBarBehavior.scroll,
-      appBar: new AppBar(
-        heroTag: _disableHeroTransition,
-        expandedHeight: _getAppBarHeight(context) - _kFabHalfSize,
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        actions: <Widget>[
-          new PopupMenuButton<String>(
-            onSelected: (String item) {},
-            itemBuilder: (BuildContext context) => <PopupMenuItem<String>>[
-              _buildMenuItem(Icons.share, 'Tweet recipe'),
-              _buildMenuItem(Icons.email, 'Email recipe'),
-              _buildMenuItem(Icons.message, 'Message recipe'),
-              _buildMenuItem(Icons.people, 'Share on Facebook'),
-            ]
-          )
-        ],
-        flexibleSpace: new FlexibleSpaceBar(
-          background: new DecoratedBox(
-            decoration: new BoxDecoration(
-              gradient: new LinearGradient(
-                begin: const FractionalOffset(0.5, 0.0),
-                end: const FractionalOffset(0.5, 0.40),
-                colors: <Color>[const Color(0x60000000), const Color(0x00000000)],
-              )
-            )
-          )
-        ),
-      ),
-      body: _buildBody(context),
-    );
-  }
-
-  // The full page content with the recipe's image behind it. This
-  // adjusts based on the size of the screen. If the recipe sheet touches
-  // the edge of the screen, use a slightly different layout.
-  Widget _buildBody(BuildContext context) {
-    final bool isFavorite = _favoriteRecipes.contains(config.recipe);
+    // The full page content with the recipe's image behind it. This
+    // adjusts based on the size of the screen. If the recipe sheet touches
+    // the edge of the screen, use a slightly different layout.
+    final double appBarHeight = _getAppBarHeight(context);
     final Size screenSize = MediaQuery.of(context).size;
     final bool fullWidth = (screenSize.width < _kRecipePageMaxWidth);
-    final double appBarHeight = _getAppBarHeight(context);
-    return new Stack(
-      children: <Widget>[
-        new Positioned(
-          top: 0.0,
-          left: 0.0,
-          right: 0.0,
-          height: appBarHeight + _kFabHalfSize,
-          child: new Hero(
-            tag: config.recipe.imagePath,
-            child: new Image.asset(
-              config.recipe.imagePath,
-              fit: fullWidth ? ImageFit.fitWidth : ImageFit.cover,
+    final bool isFavorite = _favoriteRecipes.contains(config.recipe);
+    return new Scaffold(
+      key: _scaffoldKey,
+      body: new Stack(
+        children: <Widget>[
+          new Positioned(
+            top: 0.0,
+            left: 0.0,
+            right: 0.0,
+            height: appBarHeight + _kFabHalfSize,
+            child: new Hero(
+              tag: config.recipe.imagePath,
+              child: new Image.asset(
+                config.recipe.imagePath,
+                fit: fullWidth ? ImageFit.fitWidth : ImageFit.cover,
+              ),
             ),
           ),
-        ),
-        new ClampOverscrolls(
-          edge: ScrollableEdge.both,
-          child: new ScrollableViewport(
-            scrollableKey: _scrollableKey,
-            child: new RepaintBoundary(
-              child: new Padding(
-                padding: new EdgeInsets.only(top: appBarHeight),
+          new CustomScrollView(
+            slivers: <Widget>[
+              new SliverAppBar(
+                expandedHeight: appBarHeight - _kFabHalfSize,
+                backgroundColor: Colors.transparent,
+                actions: <Widget>[
+                  new PopupMenuButton<String>(
+                    onSelected: (String item) {},
+                    itemBuilder: (BuildContext context) => <PopupMenuItem<String>>[
+                      _buildMenuItem(Icons.share, 'Tweet recipe'),
+                      _buildMenuItem(Icons.email, 'Email recipe'),
+                      _buildMenuItem(Icons.message, 'Message recipe'),
+                      _buildMenuItem(Icons.people, 'Share on Facebook'),
+                    ],
+                  ),
+                ],
+                flexibleSpace: new FlexibleSpaceBar(
+                  background: new DecoratedBox(
+                    decoration: new BoxDecoration(
+                      gradient: new LinearGradient(
+                        begin: const FractionalOffset(0.5, 0.0),
+                        end: const FractionalOffset(0.5, 0.40),
+                        colors: <Color>[const Color(0x60000000), const Color(0x00000000)],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              new SliverToBoxAdapter(
                 child: new Stack(
                   children: <Widget>[
                     new Container(
-                      padding: new EdgeInsets.only(top: _kFabHalfSize),
+                      padding: const EdgeInsets.only(top: _kFabHalfSize),
                       width: fullWidth ? null : _kRecipePageMaxWidth,
                       child: new RecipeSheet(recipe: config.recipe),
                     ),
@@ -386,12 +377,12 @@ class _RecipePageState extends State<RecipePage> {
                       ),
                     ),
                   ],
-                ),
+                )
               ),
-            ),
+            ],
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
