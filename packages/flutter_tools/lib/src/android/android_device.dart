@@ -230,7 +230,7 @@ class AndroidDevice extends Device {
     if (!_checkForSupportedAdbVersion() || !_checkForSupportedAndroidVersion())
       return false;
 
-    Status status = logger.startProgress('Installing ${apk.apkPath}...');
+    Status status = logger.startProgress('Installing ${apk.apkPath}...', expectSlowOperation: true);
     String installOut = runCheckedSync(adbCommandForDevice(<String>['install', '-r', apk.apkPath]));
     status.stop();
     RegExp failureExp = new RegExp(r'^Failure.*$', multiLine: true);

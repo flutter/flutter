@@ -277,7 +277,8 @@ class HotRunner extends ResidentRunner {
       if (result != 0)
         return false;
     }
-    Status devFSStatus = logger.startProgress('Syncing files to device...');
+    Status devFSStatus = logger.startProgress('Syncing files to device...',
+        expectSlowOperation: true);
     int bytes = await _devFS.update(progressReporter: progressReporter,
                         bundle: assetBundle,
                         bundleDirty: rebuildBundle,
